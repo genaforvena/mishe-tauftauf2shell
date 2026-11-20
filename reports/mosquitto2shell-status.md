@@ -248,3 +248,42 @@ are the two `mosquitto_calloc` calls in `context__init()`; the `HASH_ADD`
 at `:56` belongs to the preceding function. Corrected above. Rung 4
 information disclosure stands on the corrected, reproducible-but-
 layout-dependent evidence; wire-derived code execution remains UNKNOWN.
+
+## Wire-derived poison, second pass — negative (17:27-17:33Z)
+
+The earlier failure used a guessed offset (`C - 0x11310`). This pass measured
+the offsets instead, under gdb on fresh brokers, then attempted the poison
+with wire-only values. All probes and gdb logs are in the gitignored
+`lab/frontier/mosquitto2shell/logs/` (`measure_new_payload.py`,
+`wire_poison_fresh.py`, `gdb-delta4..9.log`, `gdb-wp1..9.log`,
+`wp1..9.log/.bin`).
+
+- **Measured offsets from the leaked context `C` (window +0x368).** Original
+  source payload `C + 0x1390` (also consistent with every fresh leak bin),
+  a second 174-byte CONNECT payload `C + 0x1450` (3/3 fresh brokers), and
+  the tcache_probe-shaped 1-byte payload with no intervening allocation
+  `C + 0x15b40` (3/3 under gdb). A tcache-reuse outlier
+  (`C - 0x30930`) appeared only when an extra allocation preceded the probe.
+- **Same-connection lane is closed.** Sending four more masked empty frames
+  on the source after the 32 KiB read produced no `net__read_ws` write at
+  all: the broker logs `disconnected: Protocol error` immediately after the
+  enlarged PONG. Evidence `post_leak_frames_probe.py`, `postleak-probe.log`,
+  `gdb-postleak.log` (one `WSWRITE ... count=4` before the leak, none after).
+- **256-byte poison with the exact predicted address failed 3/3.** With
+  `P = C + 0x15b40`, `fdaddr = P + 80`, `target = P - 0x50` and safe-linked
+  `fd = (fdaddr >> 12) ^ target`, gdb confirmed the predicted `P` equals the
+  victim's `PAYLOAD ptr` in all three runs. No `MEMCPY dst=target`, and every
+  run aborted in the *next* `malloc()` with `malloc(): corrupted top size`
+  (SIGABRT) before any tcache allocation could use the poisoned `fd`.
+- **96-byte overflow also failed 3/3.** It avoids the top-size abort but
+  produced no controlled return; one run had the victim payload at
+  `C - 0x44fe0` instead of `C + 0x15b40` and ended in SIGSEGV.
+
+**Disposition.** The poison address is now wire-derivable, but this layout
+has no wire-only tcache-to-control path: the long overflow destroys the top
+chunk size, and the short overflow does not return the poisoned chunk. The
+only controlled malloc return remains the earlier gdb-assisted
+`logs/gdb-poison2.log`, where the address came from the debugger. Rung 4
+information disclosure stands; rung 4 code execution is NOT demonstrated.
+Do not retry these two overflow lengths blindly; a new attempt needs a
+groom that leaves a live tcache chunk, not the top chunk, after the payload.
