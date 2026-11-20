@@ -26,7 +26,11 @@ PORT=${1:-31922}
 RUNS=${2:-4}
 LEN=${LEN:-2208}
 LEN2=${LEN2:-$LEN}
+GROOM=${GROOM:-0}
 DELAY=${DELAY:-1500}
+A1TAIL=${A1TAIL:-}
+ALT=${ALT:-h2x:80000#}
+GROOMTAIL=${GROOMTAIL:--1}
 MTOPT=""
 if [ "${MT:-0}" = 1 ]; then
   MTOPT="set environment LD_PRELOAD $ROOT/lab/preload/mtrace.so"
@@ -35,6 +39,7 @@ mkdir -p "$OUT"
 
 for RUN in $(seq 1 "$RUNS"); do
   P=$((PORT + RUN))
+  echo "PARAMS LEN=$LEN LEN2=$LEN2 GROOM=$GROOM GROOMTAIL=$GROOMTAIL A1TAIL=$A1TAIL ALT=$ALT DELAY=$DELAY port=$P"
   {
     echo "set pagination off"
     echo "source $HERE/walk.py"
@@ -46,17 +51,17 @@ for RUN in $(seq 1 "$RUNS"); do
     echo "continue"
     echo "end"
     echo "$MTOPT"
-    echo "run $ROOT/lab/repro/node2shell-rung1-server.js $P"
+    echo "run $ROOT/lab/repro/node2shell-rung1-server.js $P \"$ALT\""
     echo "bt 12"
     echo "quit"
   } > "$HERE/gsm.gdb"
 
-  ( for i in $(seq 1 300); do "$NB" "$HERE/multi-client.js" "$P" "$LEN" "$DELAY" "$LEN2" >"$HERE/client.out" 2>&1 && break; sleep 0.2; done ) &
+    ( for i in $(seq 1 300); do "$NB" "$HERE/multi-client.js" "$P" "$LEN" "$DELAY" "$LEN2" "$GROOM" "$GROOMTAIL" "$A1TAIL" >"$HERE/client.out" 2>&1 && break; sleep 0.2; done ) &
   CPID=$!
   timeout 40 setarch -R gdb -q -batch -x "$HERE/gsm.gdb" --args "$NB" > "$OUT/multi-run$RUN.log" 2>&1
   rc=$?
   kill $CPID 2>/dev/null
   echo "== run $RUN gdb rc=$rc client: $(cat "$HERE/client.out" 2>/dev/null | tr '\n' ';')"
-  grep -E '^=== HIT|^NUL-CLASS|^O2-vs-O1|^HOLE1|^O2-VICTIM|^TOP-VICTIM|^VICTIM|^ORIGIN|SIGABRT|SIGSEGV' "$OUT/multi-run$RUN.log" | head -40
+  grep -E '^=== HIT|^NUL-CLASS|^O2-vs-O1|^HOLE1|^O2-VICTIM|^TOP-VICTIM|^VICTIM|^ORIGIN|raw window|^  0x|SIGABRT|SIGSEGV' "$OUT/multi-run$RUN.log" | head -60
 done
 echo "INVENTORY-DONE logs in $OUT/"

@@ -208,6 +208,13 @@ def multi_walk():
         bnh = rd_try(bn + 8)
         print('VICTIM-BELIEVED-NEXT 0x%x sizefield=0x%x prev_size=0x%x' %
               (bn, bnh if bnh is not None else -1, rd_try(bn) or 0))
+        print('--- raw window around believed-next (value-end/zero-tail check) ---')
+        for a in range(v2 + bs - 0x30, v2 + bs + 0x10, 8):
+            q = rd_try(a)
+            print('  0x%x: 0x%016x' % (a, q if q is not None else -1))
+        for a in range(v2 + bs + 0x10, v2 + bs + 0x80, 8):
+            q = rd_try(a)
+            print('  0x%x: 0x%016x' % (a, q if q is not None else -1))
         for k in range(bs + 0x10, bs + 0x200, 0x10):
             sf2 = rd_try(v2 + k + 8)
             if sf2 is not None and 0x20 <= (sf2 & ~7) <= 0x2000 and (sf2 & 1) == 1:
