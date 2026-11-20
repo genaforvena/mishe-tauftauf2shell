@@ -552,16 +552,104 @@ shaping is lab middleware rather than request-shaped grooming, and
 (b) control-flow hijack from the overlap — not attempted here.
 
 
-## Next
+## Stage C — tcache poisoning: the second allocation returns an attacker-nominated address (observed 2026-11-20, wake 9)
 
-1. **Done this wake (2026-11-20, wake 8):** Rails exposure mapping —
-   the full Stage B overlap is now request-reachable on the second
-   vendor-claimed default stack (see Stage B over Rails). Both claimed
-   exposure paths are reproduced; witness verification of the wake-7
-   Sinatra section and this wake-8 Rails section is pending (the
-   in-process Stage B alone is witness-ESTABLISHED, tape #51).
-2. Optional, only if it serves the report: the overlap also hands us
-   W's header bytes (chosen size/prev_size forgery of a live chunk)
-   — a possible route to further pointer control worth one bounded
-   experiment at most.
+**Result: 5/5 deterministic in-process reproductions of a full glibc
+2.39 tcache poisoning driven by the same one-byte overflow, plus a
+clean no-overflow control 3/3.** The Stage B overlap does not have to
+stop at writing over a live chunk: if the slot after V holds a chunk
+that is already a *tcache member* when the marker lands, the marker's
+last 8 bytes land exactly on that chunk's safe-linked tcache `next`
+field, and the second same-class allocation returns an address the
+attacker chose. Reproduction:
+
+```
+lab/repro/ruby2shell-stageC.sh            # 5 attack + 3 control runs
+  # each run: MTRACE_FD=2 LD_PRELOAD=lab/preload/mtrace.so \
+  #   STAGEC_TRACE=<evidence>.trace \
+  #   lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  #   lab/repro/ruby2shell-stageC.rb 2><evidence>.trace
+STAGEC_CONTROL=1 ... same ...             # control: no overflow byte
+```
+
+**Geometry.** [S 0x370][V 0x430][T 0x3f0 in tcache][A 0x3f0 in
+tcache][dummy 0x360][f_host 0xfb0]. T's content carries the same fake
+next-chunk header at its user offsets 0x10..0x1f that stageB's W
+carried, so the inflated-V unsorted walk is answered identically. T
+must be tcache-eligible (0x3f0 ≤ 0x410 — W's 0x460 was not), freed
+BEFORE V (V's free would otherwise backward-consolidate T, whose
+inuse bit V's free clears), and the sweep is descending-address
+(observed in the stageB evidence), so allocation order S, V, T, A,
+dummy, f_host gives free order dummy, A, T, V, S: T at the bin head,
+count exactly 2. The marker request (1081 → chunk 0x450) returns V as
+in stageB; its bytes at offsets 1072..1079 (V+0x430..V+0x437) are
+T's `next` field, and offsets 1056..1071 are T's chunk header.
+
+**In-process address discovery.** mtrace writes every malloc line to
+fd 2 with raw `write(2)`; the harness reads its own trace file
+mid-run and parses V's and f_host's addresses from the ===ALLOC===
+segment, then splices `target ^ (T_entry >> 12)` — the exact glibc
+2.39 `PROTECT_PTR` form (`lab/src/glibc-2.39-malloc.c:329-331`;
+`tcache_get_n` :3174-3199 has no pop-time pointer validation beyond
+16-alignment). ASLR is therefore irrelevant to the demonstration.
+(`lab/src/glibc-2.39-malloc.c` is provisioning, re-fetchable:
+`curl -sS "https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=malloc/malloc.c;hb=refs/heads/release/2.39/master" -o lab/src/glibc-2.39-malloc.c`.)
+
+**Consumer reality — the lane's shape (this wake's hard lesson).**
+The first attempt crashed reproducibly inside the *allocation call*,
+not in attacker code: CRuby's `objspace_malloc_fixup` calls
+`malloc_usable_size` on EVERY `xmalloc` return
+(gc/default/default.c:8100 → :7947, gdb backtrace in evidence
+`stageC-dbg.{trace,out}`), and the pop of T died in `musable`
+dereferencing T_c+0x6d6d6d6d6d6d6d68 (T's header was 'm'-clobbered
+by the marker fill). The lane is not closed by this — it just
+constrains the design: every popped chunk needs a musable-safe
+header. Both are attacker-supplied here: T's real header is RESTORED
+through the same overlap (splice of 0x3f0|PREV_INUSE at marker
+offsets 1056..1071), and the forged target's fake chunk header is
+pre-planted in f_host's own content — fake size 0x3f1 at target-0x8
+and a fake next-chunk size word at f+0x4e8 answering musable's inuse
+check — plain Ruby string bytes, nothing more.
+
+**Observed** (`lab/build/evidence/stageC-{1..5,control-1..3}.
+{trace,out}`):
+
+- **5/5 attack runs**: adjacent mtrace pop lines `M 3e9 <T>` then
+  `M 3e9 <target>` — the second 1001-byte allocation returned the
+  forged, attacker-nominated address (f_host+0x100, inside a LIVE
+  4000-byte string), where Ruby then wrote 'z'×1000. Readback
+  through the live host string: `F-readback-hex=7a7a…` at offset
+  0x100 while offset 0 stays 'F', planted fake size intact
+  (`fake-size-hex=f103000000000000`), and the inuse-answer word at
+  f+0x4e8 shows z2's NUL on its LSB (`f-tail-hex=0003…`) — the
+  write landed at the chosen address and only there.
+- **Control 3/3** (`STAGEC_CONTROL=1`, no overflow byte): T's `next`
+  stays the honest safe-link to A, the second pop returns A's real
+  address, f_host reads back 'F' everywhere, full teardown GC runs
+  ("NO-ABORT"), rc=0. Attribution clean.
+
+Honest conditions: same lab scope as stageB (single-threaded
+in-process, plain 3.4.12 build, stock glibc 2.39, no tunables); GC is
+disabled between the frees and the readback (the poisoned state is
+not sweep-survivable by construction, and the run ends with
+`exit!`); the target is nominated rather than external — the point
+of the stage is the allocator's pointer, not the choice of victim.
+Ladder position: **rung 4, strengthened — pointer control
+demonstrated.** Stage B showed chosen bytes at chosen offsets over
+one live chunk; Stage C shows the allocator handing out an
+attacker-nominated address as a fresh allocation, which is the
+standard precondition for arbitrary write / control-flow hijack
+chains. The remaining gaps to a claimed stock-stack RCE are
+unchanged: request-shaped grooming and control-flow hijack.
+
+## Next
+1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
+   poisoning from the Stage B overlap: the second same-class
+   allocation returns an attacker-nominated address (chosen bytes
+   written there, read back through the live host string), 5/5 +
+   control 3/3. The report's optional pointer-control lane is closed.
+2. Witness verification remains the outstanding acceptance step for
+   the wake-7 Sinatra and wake-8 Rails HTTP sections (handed over
+   tape #62); the in-process Stage B alone is witness-ESTABLISHED
+   (tape #51), and stageC is in-process of the same class.
 3. PHP2Shell rungs 1-3 remain queued after Ruby2Shell rungs.
