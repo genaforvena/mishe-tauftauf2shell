@@ -31,13 +31,14 @@ containers whose host ports bind only to loopback.
 | Ruby2Shell | [report](../reports/ruby2shell-investigation.md) | `bash lab/ruby2shell/provision.sh` | Ruby build recipe in report | `lab/repro/ruby2shell-rung1.rb`, `stageA.rb`, `stageC.sh`, `stageB-http.sh` |
 | PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-apache.sh`, `build-apache-plain.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb` |
 | Node2Shell | [report](../reports/node2shell-investigation.md) | `bash lab/node2shell/provision.sh` | prebuilt binaries, no local source build | `sh lab/repro/node2shell-stageA.sh 5`; `lab/repro/node2shell-shrinkwalk/run-multi.sh` |
-| Apache2Root | [report](../reports/apache2shell-investigation.md) | `lab/src/httpd-2.4.{70,71}.tar.bz2` + `.sha256` sidecars; `nghttp2-1.64.0.tar.xz` SHA-256 `88bb94c9…dd9` | `lab/frontier/apache2root/build.sh` | `oracle.sh`, `race.sh`, `lab/apache2shell/{sweep,gdb-inspect,drive.py}` |
+| Apache2Root | [report](../reports/apache2shell-investigation.md) | `lab/src/httpd-2.4.{70,71}.tar.bz2` + `.sha256` sidecars; `nghttp2-1.64.0.tar.xz` SHA-256 `88bb94c9…dd9` | `lab/frontier/apache2root/build.sh` | `oracle.sh`, `race.sh`, `lab/apache2shell/{sweep,gdb-inspect,drive.py,alphabet-probe.py,huffman-probe.py}` |
 | Mosquitto2Shell | [report](../reports/frontier-mosquitto2shell.md), [status](../reports/mosquitto2shell-status.md) | `bash lab/frontier/mosquitto2shell/provision.sh`, `bash …/provision-cjson.sh` | `build.sh`, `build-glibc.sh` | `run.sh`, `placement.sh`, `tcache_probe.py`, `pong_leak_probe.py` |
 | Brotli2Shell | [report](../reports/frontier-brotli2shell.md) | `bash lab/frontier/brotli2shell/run.sh` fetches `poc.py` and verifies its SHA-256 | same script builds v1.2.0/v1.2.1/instrumented | same script writes `logs/` and prints digests |
 | Postgres2Shell | [report](../reports/frontier-postgres2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh 17.11` and `./run.sh 17.12`; `trigger-vg.sql` for Valgrind |
 | Dragonfly2Shell | [report](../reports/frontier-dragonfly2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh v1.40.1`, `./run.sh v1.40.2`; witness files in `lab/witness/dragonfly2shell/` |
 | FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan | same script prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt` |
 | Falkordb2Shell | [report](../reports/frontier-falkordb2shell.md), [status](../reports/falkordb2shell-status.md) | source at vulnerable parent `40780e992ecc`, fix `0b11a00b34b2` (removes Bolt/WebSocket; lab `FIXED` is a local length guard) | `cd lab/frontier/falkordb2shell && bash run.sh` builds vuln/fixed/asan | same script prints `ALL CHECKS PASS`: `payload_len=4144`, 525 OOB write operations, canary `K:K`, ASan heap-buffer-overflow (READ of size 8 at the `^=` load) |
+| Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan | driver prints `CHECKS FAILED` on stale exit-code and literal-pattern expectations: quote individual observations with the pinned digests of the sources actually run (`ws_overflow.c` `7eeb5d26…`, `run.sh` `089d7e33…`) — ASan `WRITE of size 132146` in `ws_raw_read`, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Harness only; no live process or loopback path. |
 
 ## Provisioning details
 
@@ -68,6 +69,17 @@ containers whose host ports bind only to loopback.
   an upstream patch. The FreeRADIUS rung-4 claim is harness-only (known key,
   fixed stack layout); FalkorDB does not claim rung 4 at all. Live `radiusd`
   reachability and a live `BOLT_PORT` service remain UNKNOWN.
+- **Freeswitch**: a standalone, file-only C harness under
+  `lab/frontier/freeswitch2shell/`; `run.sh` rebuilds vuln/fixed/asan and
+  writes `logs/digests.txt`. Vulnerable parent `fbac12b451a1` and fix
+  `d557ca6d29e6da4f10824dc158100906a592b91a` are pinned in the brief. The
+  driver still prints `CHECKS FAILED` because its expected exit codes and
+  literal byte patterns are stale after a source edit; the operator's
+  18:28Z throwaway-copy run quoted each observation with the digests of the
+  sources actually run. Do not read that verdict as either a pass or a
+  regression. No live FreeSWITCH process, WebSocket upgrade, real heap
+  layout or loopback path was exercised; the rung-4 grade is harness-only
+  and both config gates are off by default.
 
 ## Raw evidence policy
 
