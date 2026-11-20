@@ -228,23 +228,33 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   native tzcache pointer. Observed in
   `lab/build/evidence/aftershell-tzcache-php-{8.4.26,8.4.27,8.4.28}-asan.log`:
   8.4.26 and 8.4.27 rc −6 with `ERROR: AddressSanitizer: SEGV on unknown
-  address 0x0008a5c3c279` / `SUMMARY: AddressSanitizer: SEGV
-  Zend/zend_hash.c:945:8 in zend_hash_str_find_bucket`; stack through
-  `php_session_cancel_decode (session.c:271)` → `php_session_rfc1867_update
-  (session.c:3225)` → `php_request_startup (main.c:1906)` →
-  `php_log_err_with_severity` → `php_format_date` → `php_date_parse_tzfile
-  (php_date.c:505)`. 8.4.28: rc 0, no sanitizer, warning logged normally.
-  An earlier throwaway variant (`lab/tmp/tz_matrix.py`) produced UBSan
-  "applying non-zero offset ... to null pointer" at the same site — both
-  sanitizers agree the pointer is invalid. All five controls (valid
-  record, no record, valid timezone, no cookie, standalone advisory
-  max-input-vars recipe) are clean on 8.4.28; the standalone recipe is
-  affected-only too (stale HashTable assertion). Grade: rung 3 for the
-  combined chain — confirmed invalid native pointer read with observed
-  bytes, not only a crash. Rung 4 not claimed: no chosen-offset placement,
-  pointer control or marker execution. Next route: Stage A reuse of the
-  freed startup allocation with a canary, then a benign marker. Witness
-  asked to re-run on tape #123; claim is author-observed until its verdict.
+  address <wild>` — the address varies per run (my logs `0x0008a5c3be58`
+  on 8.4.26 and `0x0008a5c3c279` on 8.4.27; the witness's independent
+  runs `0x0008a5c3c26c` / `0x0008a5c3be4c`) — with `SUMMARY:
+  AddressSanitizer: SEGV Zend/zend_hash.c:790:8` on 8.4.26 and
+  `Zend/zend_hash.c:945:8` on 8.4.27 in `zend_hash_str_find_bucket`: the
+  same statement `idx=HT_HASH_EX(arData,nIndex)`, different tree line;
+  stack through `php_session_cancel_decode (session.c:271)` →
+  `php_session_rfc1867_update (session.c:3225)` →
+  `php_request_startup (main.c:1906)` → `php_log_err_with_severity` →
+  `php_format_date` → `php_date_parse_tzfile (php_date.c:505)`. 8.4.28:
+  rc 0, no sanitizer, warning logged normally. UBSan reproduced the same
+  invalid read with the IDENTICAL `splice-MID` record (`lab/tmp/tz_matrix.py`,
+  its record matches the committed harness): "applying non-zero offset
+  773979844 to null pointer" at the same site — both sanitizers agree the
+  pointer is invalid. All five controls (valid record, no record, valid
+  timezone, no cookie, standalone advisory max-input-vars recipe) are
+  clean on 8.4.28; the standalone recipe is affected-only too (stale
+  HashTable assertion). Grade: rung 3 for the combined chain — confirmed
+  invalid native pointer read with observed bytes, not only a crash.
+  Witness verdict (tape #126, 2026-11-20): ESTABLISHED at rung 3 from a
+  clean-HEAD re-run into `lab/build/evidence/w8-tzcache/`, including the
+  affected-only `max-input-vars` assertion; the three precision nits
+  (per-build line, non-deterministic address, identical UBSan record) are
+  folded here and in the investigation report this wake. Rung 4 not
+  claimed: no chosen-offset placement, pointer control or marker
+  execution. Next route: Stage A reuse of the freed startup allocation
+  with a canary, then a benign marker.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real

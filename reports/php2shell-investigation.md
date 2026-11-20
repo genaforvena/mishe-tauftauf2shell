@@ -39,8 +39,12 @@ the reopened lane plus a native Date-class bug reaches rung 3 — confirmed
 memory corruption.** The splice-corrupted session state can make a PRE-RINIT
 session decode emit a warning while a stale timezone-cache pointer is live;
 on the affected 8.4.26/8.4.27 ASan CGI builds the log timestamp formatter
-reads a wild pointer and ASan reports `SEGV on unknown address
-0x0008a5c3c279` at `Zend/zend_hash.c:945 in zend_hash_str_find_bucket`.
+reads a wild pointer; ASan reports `SEGV` in `zend_hash_str_find_bucket` at
+`Zend/zend_hash.c:790:8` on 8.4.26 and `Zend/zend_hash.c:945:8` on 8.4.27
+(same statement, different tree line). The faulting address is
+non-deterministic: my logs show `0x0008a5c3be58` (8.4.26) and
+`0x0008a5c3c279` (8.4.27); the witness's independent runs show
+`0x0008a5c3c26c` / `0x0008a5c3be4c` (`lab/build/evidence/w8-tzcache/`).
 The fixed 8.4.28 build logs the same warning and exits 0. Full chain,
 conditions, controls and the per-build evidence are in the dedicated
 section below. Rung 4 (chosen bytes at a chosen offset, pointer control or
@@ -52,7 +56,7 @@ benign marker execution) is still NOT claimed.
 |---|---|---|
 | Suspected vulnerability (source/advisory) | yes | Fix commit `php/php-src@3584a98bd` ("Avoid state corruption via bailout") read as spec; patch sha256-pinned at `lab/src/php-fix-3584a98bda0f2c0d367255b046798b0d3a221a19.patch` |
 | Reproducible crash / deterministic fatal | yes | `lab/repro/php2shell-rung2-oom-cgi.sh`: memory_limit=8M, three vendor POST shapes, `Allowed memory size ... exhausted` in `php_request_startup()`, exit 255 on 8.4.26-ASan |
-| Confirmed memory corruption (reopened lane + native Date cache, wake 17) | **yes (rung 3)** | `lab/repro/php2shell-rung3-tzcache.py`: affected 8.4.26/8.4.27 ASan CGI, splice-decode warning → `AddressSanitizer: SEGV` at `zend_hash.c:945 in zend_hash_str_find_bucket`, wild address `0x0008a5c3c279`; fixed 8.4.28 clean; four controls clean on every build |
+| Confirmed memory corruption (reopened lane + native Date cache, wake 17) | **yes (rung 3)** | `lab/repro/php2shell-rung3-tzcache.py`: affected 8.4.26/8.4.27 ASan CGI, splice-decode warning → `AddressSanitizer: SEGV` in `zend_hash_str_find_bucket` (`zend_hash.c:790:8` on 8.4.26, `:945:8` on 8.4.27 — same statement, different tree line); faulting address non-deterministic, e.g. `0x0008a5c3be58` / `0x0008a5c3c279` in my runs and `0x0008a5c3c26c` / `0x0008a5c3be4c` in the witness's; fixed 8.4.28 clean; controls clean on every build |
 | Demonstrated security impact (chosen bytes/pointer/marker) | **partial — rung 2 data mutation; rung 3 invalid read, no rung 4** | Attacker bytes land in the re-encoded session class-name slot on 8.4.26; the handler-switch `W::__wakeup` marker fires, but on BOTH builds (version-neutral, so not this CVE's primitive). The rung-3 memory access is a wild read, not controlled placement. |
 
 ## Producers and consumers examined (all closed)
@@ -297,18 +301,24 @@ Observed (evidence logs `lab/build/evidence/aftershell-tzcache-php-8.4.26-asan.l
 `...-8.4.27-asan.log`, `...-8.4.28-asan.log`):
 
 - 8.4.26-asan and 8.4.27-asan, `splice-mid`: rc −6,
-  `ERROR: AddressSanitizer: SEGV on unknown address 0x0008a5c3c279`,
-  `SUMMARY: AddressSanitizer: SEGV Zend/zend_hash.c:945:8 in
-  zend_hash_str_find_bucket`. Stack: `php_session_cancel_decode
-  (ext/session/session.c:271)` → `php_session_decode` →
-  `php_session_initialize` → `php_session_rfc1867_update (session.c:3225)`
-  → `rfc1867_post_handler` → `php_hash_environment` →
-  `php_request_startup (main/main.c:1906)` → `php_log_err_with_severity`
-  → `php_format_date` → `get_timezone_info` → `php_date_parse_tzfile
-  (ext/date/php_date.c:505)` → `zend_hash_str_find_bucket`. In a variant
-  with a shorter session record UBSan reported "applying non-zero offset
-  ... to null pointer" at the same `zend_hash.c:945` site — two independent
-  sanitizer manifestations of the invalid read.
+  `ERROR: AddressSanitizer: SEGV on unknown address <wild>` — the address
+  varies between runs (my logs: `0x0008a5c3be58` on 8.4.26,
+  `0x0008a5c3c279` on 8.4.27; the witness's independent runs:
+  `0x0008a5c3c26c` / `0x0008a5c3be4c`), with `SUMMARY: AddressSanitizer:
+  SEGV Zend/zend_hash.c:790:8` on 8.4.26 and `Zend/zend_hash.c:945:8` on
+  8.4.27 in `zend_hash_str_find_bucket` (the same statement
+  `idx=HT_HASH_EX(arData,nIndex)`, different tree line). Stack:
+  `php_session_cancel_decode (ext/session/session.c:271)` →
+  `php_session_decode` → `php_session_initialize` →
+  `php_session_rfc1867_update (session.c:3225)` → `rfc1867_post_handler` →
+  `php_hash_environment` → `php_request_startup (main/main.c:1906)` →
+  `php_log_err_with_severity` → `php_format_date` → `get_timezone_info` →
+  `php_date_parse_tzfile (ext/date/php_date.c:505)` →
+  `zend_hash_str_find_bucket`. A UBSan manifestation of the same invalid
+  read was reproduced with the IDENTICAL `splice-MID` record
+  (`lab/tmp/tz_matrix.py`, whose record matches line 51 of the committed
+  harness): "applying non-zero offset 773979844 to null pointer" at the
+  same site — two independent sanitizers agree the pointer is invalid.
 - 8.4.28-asan, same harness: rc 0, no sanitizer output; the file error log
   records `PHP Request Startup: Failed to decode session object. Session has
   been destroyed` normally. Patch-sensitive control, not a crash-only
