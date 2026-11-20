@@ -14,10 +14,12 @@ of the affected software:
   corruption and stale state across requests; plus the reopened lane
   CVE-2026-126714, a session-file splice that decodes as a third session.
   Both splice halves were reproduced on the pinned affected builds, and the
-  8.4.28 fix was verified in the lab. A second descendant lane,
-  CVE-2026-129481, is a session-filename use-after-free after an interrupted
-  shutdown, confirmed at rung 3 on FPM 8.4.27 with a clean fixed control;
-  no rung-4 control is claimed.
+  8.4.28 fix was verified in the lab. Two descendant lanes are at rung 3:
+  CVE-2026-129481, a session-filename use-after-free after an interrupted
+  shutdown on FPM 8.4.27, and CVE-2026-129474, a stale-argument read in
+  `debug_backtrace()` on 8.5.12 triggered by the vendor's own regression
+  case; both have clean fixed controls, and neither claims rung 4. The
+  129474 read is invisible to ASan because ZendMM pools the affected memory.
 - **Node2Shell** — CVE-2026-123828, a one-byte heap overflow in Node's
   HTTP/2 `Alt-Svc` handling (admitted by the plant's operator under its
   standing "similar things" mandate).
@@ -88,7 +90,8 @@ is called established.
 | **Freeswitch2Shell** | **Rung 4 — chosen-pointer control in the real `ws_raw_read` over loopback; marker execution still harness-only** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. Abyss `TConn`/`TSession` and `ConnRead`/`ConnWrite` remain stand-ins; no live process, WebSocket upgrade, stock heap layout or reachability. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
-(including the reopened session-splice lane and the new session-filename UAF),
+(including the reopened session-splice lane, the session-filename UAF and
+the new 8.5 stale-argument read),
 Node's path from corruption
 to control, Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
