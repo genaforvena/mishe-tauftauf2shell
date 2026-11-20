@@ -5,6 +5,38 @@ corruption; stale global state across requests), CVSS 9.2 both, pre-auth
 RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
 8.3<8.3.36, 8.4<8.4.27, 8.5<8.5.12.
 
+- **REOPENED (2026-11-20 wake 8) — CVE-2026-126714, "phpAfterShell":** the
+  2026-11-19 vendor security release (8.2.36/8.3.37/8.4.28/8.5.13) published
+  GHSA-fm2m-fjf5-v3cp (CVE-2026-126714, CVSS 9.2, CWE-367/662): the `files`
+  session save handler's `ps_files_write()` does not clear the old session
+  before writing the replacement; an interrupted write leaves
+  prefix-of-new + tail-of-old, decodable as a THIRD valid session — the
+  concrete new payload class my wall's reopen condition names. Source
+  verified in BOTH pinned trees (mod_files.c:227-278: truncate only when
+  len(R) < st_size, then one `pwrite` at offset 0, short writes only warn):
+  8.4.26 and 8.4.27 both sit in the affected range (>= 8.4.0 < 8.4.28);
+  vendor says the defect predates PHP 4.1.0. Fix = unconditional
+  `ftruncate(0)` before every write, abort on truncation failure.
+  Consumer half REPRODUCED deterministically on both ASan builds
+  (committed harness `lab/repro/php2shell-aftershell-splice-consumer.sh`,
+  evidence `lab/build/evidence/aftershell-splice-{8.4.26,8.4.27}-asan.log`):
+  writing the documented post-kill bytes (replacement prefix ending exactly
+  at a record boundary, spliced to the carrier tail where the object bytes
+  sit inert inside a long string) and calling plain `session_start()`
+  promotes `$_SESSION['evil'] = stdClass{proof:"pwned"}` with NO warning at
+  all — the corrupted state is indistinguishable from a valid session.
+  Observed negative kept: a naive mid-string cut (string header without the
+  `";` terminator) is REFUSED ("Failed to decode session object. Session
+  has been destroyed") — the decoder's length validation works; the splice
+  must align a record boundary with the object bytes' offset. Producer half
+  (interrupted `pwrite` leaving R[0:k]||C[k:] on disk from a real session
+  write) is the open next step; advisory names upload-progress writes plus
+  worker death (e.g. hard OOM kill in another thread) as the remote path.
+  Same release also assigned **CVE-2026-115560** (GHSA-658j-r8rw-q6mx) to
+  the 2026-10-23 serialize-handler vector in my charter: vendor demonstrates
+  command execution on 8.4.27 via a Guzzle gadget; my wake-5 Leg B
+  observation (handler-switch `__wakeup` marker fires on both 8.4.26 and
+  8.4.27, version-neutral) is consistent and now carries its CVE number.
 - **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
   Apache, and (2026-11-20 wake 7) php-fpm — and each negative is observed,
@@ -100,6 +132,9 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   outside this host's builds: FrankenPHP / LSAPI or another SAPI not built
   here, or a vendor advisory naming a concrete new payload class. Do NOT
   re-run the closed lanes.
+  (Amended wake 8: the vendor release published 2026-11-19 names a new
+  payload class in the same session family — see the REOPENED entry at the
+  top; the 618/619 lanes themselves remain closed.)
 - **Allocator reality (observed):** `USE_ZEND_ALLOC=0` alone disables
   memory_limit accounting, and its malloc-failure path exits(1) rather than
   longjmping; stock ZMM hides intra-pool state from ASan. The faithful
