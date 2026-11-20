@@ -122,7 +122,7 @@ stream.session.altsvc(alt, origin)               // id=0, origin non-empty
   — the engine reaps detached jobs), and is abandoned; Valgrind on
   official prebuilts delivers the same differential without any build.
 
-## Stage A — deterministic PREV_INUSE-clear and at-will abort (third wake, 2026-11-20)
+## Stage A — deterministic one-byte size-shrink and at-will abort (third wake, 2026-11-20)
 
 The 1/6 luck on stock v20.20.2 was layout luck of that EOL binary's
 startup heap. On the **officially affected prebuilt `v24.22.2`** the
@@ -137,12 +137,20 @@ allocation window is enough:
   `lab/repro/node2shell-stageA.sh` (5-run smoke: 5/5, off-class and
   fixed controls clean).
 - **Attacker-chosen length chooses the effect** (bare prebuilt, one
-  request per fresh process): every tested on-class length aborted —
-  `origin_len` 1048, 1064, 1096, 1160, 1256, 1384, 1544, 1736, 1960 →
-  **9/9 aborts**; every tested off-class length completed normally —
-  1040, 1041, 1047, 1049, 1056, 1057, 1072, 1073, 1088 → **0/9
-  aborts**. The sweep beyond 1960 was cut by the wake's tool deadline
-  — lengths 2216..14984 remain untested, UNKNOWN.
+  request per fresh process): every tested on-class length in
+  1048..1960 aborted — `origin_len` 1048, 1064, 1096, 1160, 1256,
+  1384, 1544, 1736, 1960 → **9/9 aborts**; every tested off-class
+  length completed normally — 1040, 1041, 1047, 1049, 1056, 1057,
+  1072, 1073, 1088 → **0/9 aborts**. Fourth wake completed the map
+  upward: on-class lengths 2216, 2504, 3560, 5416, 9896, 14984 →
+  **0/6 aborts — the request is served and the server stays alive**.
+  So the deterministic abort window is origin_len 1048..1960 only;
+  for larger on-class lengths the NUL still lands on a size-field LSB
+  (the placement class is size-independent), but no validator fires
+  inside the request — the victim there is either flag-only-aligned or
+  **in use at write time**, which is exactly the persistent-corruption
+  regime the rung-4 path needs. Debugger-walking a completing
+  large-length run is the open next step.
 - **Fixed control, same request shape**: prebuilt `v24.22.3`, on-class
   lengths 1048, 1064, 1096, 1256, 1544, 1960, 2504, 3560, 5416, 9896
   → **0/10 aborts**, every request completed. The deterministic
@@ -178,24 +186,63 @@ very next malloc **inside the same `session.altsvc()` call**:
 ```
 
 Observed chain on production glibc, stock official binary, one
-unauthenticated request: the NUL clears PREV_INUSE of the chunk
-following the origin buffer (0x700-size chunk there; in a different
-env the same byte landed on a 0x55100-size chunk's LSB — the victim
-varies with heap state, the placement class does not), and nghttp2's
-ALTSVC origin-copy malloc (1076 bytes) fails glibc's unsorted-bin
-validation and the process dies. Mechanism note for exploitation
-work: a NUL at the size LSB **only clears the flag bits**
-(PREV_INUSE/IS_MMAPPED/NON_MAIN_ARENA); the size magnitude is
-unchanged. Consumer lesson (nginx2root) applies: the first observable
-consumer on this host is glibc's own unsorted-bin validator, which
-converts the flag-clear into an abort — impact beyond DoS needs a
-consumer that acts on the cleared PREV_INUSE before any validator
-sees it.
+unauthenticated request: the NUL lands on the size-field LSB of the
+free chunk following the origin buffer, and nghttp2's ALTSVC
+origin-copy malloc (1076 bytes) fails glibc's unsorted-bin validation
+and the process dies.
 
-Grade: **rung 3 confirmed** (Memcheck-observed write +
-debugger-observed corrupted header + deterministic production-glibc
-abort, fixed control clean). DoS-shaped, not yet impact; rung 4
-remains open.
+### Rung 3 mechanism — corrected (fourth wake, 2026-11-20 10:25Z)
+
+The stage-A wake recorded the corruption as a flags-only
+PREV_INUSE-clear ("0x701 → 0x700"). That inference was wrong: the
+post-write sizefield alone cannot distinguish real size 0x700 (flags
+only) from 0x720 (magnitude in the low byte). gdb 15.1 with libc debug
+symbols plus the committed mtrace preload in the same inferior (three
+independent aborting runs, ASLR off) settles it:
+
+- The origin buffer O is served by **splitting a consolidated free
+  donor** (the per-request AltSvc temporaries: two origin_len+1 copies
+  and a 2049-byte buffer, plus session-cycle buffers), leaving a free
+  **split remainder R directly after O** in the unsorted bin.
+- The NUL zeroes R's size-field low **byte** — and R's real size
+  carries magnitude in that byte. Observed victims: real 0x820 →
+  believed 0x800 (sizefield 0x821→0x800), 0x910 → 0x900, 0xd20 →
+  0xd00; a further run aborted with `malloc(): invalid size (unsorted)`
+  (victim small enough that the zeroed byte collapses the size).
+  A NUL on this host's glibc is therefore a **size-magnitude shrink of
+  0x10..0xf0** — the same primitive class as Ruby2Shell's 0x53 bump,
+  not a flag clear.
+- Consequence: the next unsorted scan (the 1076-byte malloc inside
+  the same `nghttp2_submit_altsvc` call) computes R's "next chunk" at
+  `R + shrunk_size` — 0x10..0xf0 bytes **inside R's real extent** —
+  and reads zeroed sbrk slack (or 'aaaa' residue) as the next chunk's
+  size: `malloc(): invalid next size (unsorted)` at malloc.c:4081,
+  SIGABRT. Bytes observed (gdb walk, committed
+  `lab/repro/node2shell-shrinkwalk/`): victim 0x6e3ea00 sizefield 0x900,
+  real extent 0x910 with a consistent foot, chunk at 0x6e3f300 (the
+  corrupted next) reads `0x0 0x0`.
+
+So every deterministic abort so far is the unsorted-bin validator
+acting inside the same request — DoS. For impact beyond DoS the write
+must reach a chunk that is **in use** at write time (no scan sees it)
+and is freed later with the shrunken size — that produces a free chunk
+whose believed extent ends inside its real extent: the overlap
+primitive (same family as Ruby2Shell's rung-4 unsorted-bin overlap).
+The attacker steers the donor composition (and hence R's size class)
+via origin_len and request sequencing; an exact-fit 0x420 hole with an
+in-use right neighbor is the rung-4 target layout.
+
+Open sub-case, honestly recorded: in the mtrace env with the
+multi-request client harness, the on-class request **completed** 4/4
+(fresh processes, ASLR off, but with run-to-run differing heap
+placements — connection timing shifts the inventory even with ASLR
+off), while the single-shot rung-1 client aborts 10/10 bare. In the
+one fully-traced completing run the victim R had real size 0xc50,
+which by the shrink model should also have tripped the scan (believed
+0xc00, next reads 'aaaa' residue); it did not, and the believed-size
+state in completing runs was not debugger-observed. Unknowns stay
+unknown; the completing regime is real (4/4 observed) but its heap
+state at the write is not yet walked.
 
 ## Reproduction
 
