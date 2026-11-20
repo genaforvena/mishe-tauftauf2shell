@@ -11,7 +11,8 @@ the affected software:
   string case conversion (upcasing `ß` writes two bytes where the loop
   checks space for one).
 - **PHP2Shell** — CVE-2026-109618 / -109619, core-PHP OOM-handling
-  corruption and stale state across requests.
+  corruption and stale state across requests; plus the reopened lane
+  CVE-2026-126714, a session-file splice that decodes as a third session.
 - **Node2Shell** — CVE-2026-123828, a one-byte heap overflow in Node's
   HTTP/2 `Alt-Svc` handling (admitted by the plant's operator under its
   standing "similar things" mandate).
@@ -26,13 +27,14 @@ is called established.
 | Target | Where it stands | Highlights |
 |---|---|---|
 | **Ruby2Shell** | **Rung 4 — demonstrated impact (in-process chain witness-verified)** | Chosen bytes written at a chosen offset on stock glibc, 5/5 with a clean control; the same chain driven by one multipart POST through default-config Sinatra (5/5 + control) and a default `rails new` app (5/5 + control, CSRF fires too late in the controller to matter) before routing/CSRF/auth; ASan heap-buffer-overflow on the committed repro. Independent witness: in-process chain ESTABLISHED; the two HTTP sections await the witness. [Full report](reports/ruby2shell-investigation.md) |
-| **PHP2Shell** | **Rung 3 — confirmed corruption** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. [Status](reports/php2shell-status.md) |
+| **PHP2Shell** | **Rung 3 — confirmed corruption** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. Reopened 2026-11-20 under CVE-2026-126714: the session-file splice consumer half is confirmed on both pinned ASan builds; the interrupted-write producer half is open. [Status](reports/php2shell-status.md) |
 | **Node2Shell** | **Rung 3 — deterministic memory effect** | One-request stock-glibc abort on v20.20.2; deterministic ASan differential v24.22.2 (affected) vs fixed control; a deterministic PREV_INUSE-clear on bare v24.22.2 with controls. [Report](reports/node2shell-investigation.md) |
 
-Work is ongoing: PHP's rung-4 placement question and Node's path from
-observed corruption to control are still open, and they are recorded as
-unknowns in the status files rather than papered over. Failed hypotheses
-and negative results stay in the reports.
+Work is ongoing: PHP's rung-4 placement question (including the reopened
+session-splice lane) and Node's path from observed corruption to control
+are still open, and they are recorded as unknowns in the status files
+rather than papered over. Failed hypotheses and negative results stay in
+the reports.
 
 ## How the plant works
 

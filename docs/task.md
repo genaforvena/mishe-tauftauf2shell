@@ -26,6 +26,14 @@ claims, not conclusions.
   `session.upload_progress` enabled — the same family as the public
   `murrez/php2shell` framework's CVE-2026-115560 claims. PHP recommends
   `session.upload_progress.enabled = 0` pending the next bugfix release.
+- 2026-11-20 reopened lane (**CVE-2026-126714** / GHSA-fm2m-fjf5-v3cp,
+  CVSS 9.2, from the 2026-11-19 vendor release): `ps_files_write()` does
+  not clear the old session before writing the replacement; an interrupted
+  write can leave new prefix + old tail that decodes as a third session.
+  Affected 8.2<8.2.36, 8.3<8.3.37, 8.4<8.4.28, 8.5<8.5.13; both pinned
+  8.4.26 and 8.4.27 are affected. The consumer half is reproduced on both
+  ASan builds (commit 741c677); the interrupted-write producer half is
+  open. 618/619 FPM and other closed lanes stay closed.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
