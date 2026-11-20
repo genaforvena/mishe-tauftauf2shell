@@ -14,10 +14,13 @@ in default configs; a PoC is announced for 2026-11-25.
 Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
 
-**Current ladder position: rung 4 — demonstrated impact in the lab
-(2026-11-20, wake 6).** See the Stage B section for the observed
-overlap: chosen bytes over a live chunk, 5/5 deterministic, control
-clean. Open work: request-reachability (Rails/Sinatra).
+**Current ladder position: rung 4 — demonstrated impact in the lab,
+request-reachable over HTTP (2026-11-20, wake 7).** The Stage B
+overlap (wake 6: chosen bytes over a live chunk, 5/5, control clean)
+is now driven from a single HTTP POST through a default-config classic
+Sinatra stack — same geometry, same readback, same 5/5 + control.
+The sink (`Rack::MethodOverride` upcasing a multipart part that
+declares `charset=ISO-8859-1`) runs before routing, CSRF and auth.
 
 ## Provenance (2026-11-20)
 
@@ -365,16 +368,112 @@ conditions.** Chosen bytes at chosen offsets over a live chunk
 plus a header-controlled crash whose faulting offset is chosen. The
 honest conditions: single-threaded in-process script on the lab
 plain build, stock glibc 2.39, no tunables, deterministic 5/5; the
-groom needs the class drains and the adjacency chain, and
-request-reachability (Rails/Sinatra) is NOT yet shown — that mapping
-is the open work.
+groom needs the class drains and the adjacency chain. At the time of
+that wake request-reachability was open work; the next section closed
+it.
+
+## Stage B over HTTP — rung 4 request-reachable (observed 2026-11-20, wake 7)
+
+**Result: the same unsorted-bin overlap, driven by one HTTP POST
+through a default-config classic Sinatra stack, 5/5 identical with a
+clean control (3/3).** The vendor's "classic Sinatra affected by
+default" claim is now reproduced with the mechanism identified.
+
+**Sink (default middleware, no app code on the trigger path):**
+classic Sinatra mounts `Rack::MethodOverride`, whose
+`method_override` does `method.to_s.upcase` on the `_method` form
+parameter (rack 3.2.8, rack/method_override.rb:36). Rack's multipart
+parser honors a per-part `charset` on text/plain parts
+(rack/multipart/parser.rb:571-590, `tag_multipart_encoding` →
+`body.force_encoding(find_encoding(charset))`). A POST whose
+`_method` part declares `charset=ISO-8859-1` and carries `"a"` +
+0xDF×827 therefore drives the vulnerable case_map loop with fully
+attacker-controlled bytes and length, before routing, CSRF and auth.
+Query strings and urlencoded bodies do NOT reach it (Rack unescapes
+those to UTF-8; `content_charset` is ignored there); headers arrive
+binary — verified empirically with a TracePoint probe over a hostile
+request (`lab/repro/ruby2shell-case-probe.ru`, negative result
+preserved: on Sinatra 4.2.2/Rack 3.2.8/WEBrick, urlencoded/query/
+header paths never case-convert attacker bytes in a legacy encoding).
+The multipart path was identified from the Semgrep writeup's
+middleware description, then confirmed in Rack source and at runtime
+(`upcase enc=ISO-8859-1 bs=828` in the probe trace).
+
+**Reproduction** (loopback-only, plain 3.4.12 build, stock glibc 2.39,
+mtrace preload):
+
+```
+lab/repro/ruby2shell-stageB-http.sh 5 run      # 5 attack runs
+lab/repro/ruby2shell-stageB-http.sh 3 control  # no-overflow controls
+```
+
+The driver starts `lab/repro/ruby2shell-stageB-http.ru` (Sinatra
+4.2.2, rack 3.2.8, rackup 2.3.1, WEBrick 1.9.2, gems provisioned into
+the lab build and recorded on the wall), sends the multipart trigger
+POST, then reads W back over HTTP. The geometry is the in-process
+Stage B layout, groomed inside the request; the honest labels:
+
+- **Grooming is ours** (`GroomMiddleware`, mounted outside Sinatra,
+  so it runs before Rack::MethodOverride). In a real attack the
+  layout would come from request-shaped heap shaping; the lab does it
+  deterministically in-request. The middleware first forces the
+  multipart parse (`Rack::Request#POST`) so MethodOverride's later
+  `req.POST` hits the env cache — otherwise a parse allocation
+  (observed: malloc 0x210) splits unsorted V.
+- **The trigger is 100% default stack**: no app code, no framework
+  option; the upcase happens inside Rack::MethodOverride.
+- **The marker allocation and readback are ours**
+  (`MarkerMiddleware`, first user middleware — request-path position
+  immediately after MethodOverride, so its malloc(1081) is the first
+  0x450-class allocation after the upcase bins inflated V; any later
+  taker would free V and munmap-abort, since the corrupted size LSB
+  always has IS_MMAPPED set).
+
+**Observed** (`lab/build/evidence/stageB-http-{1..5,control-1..3}.
+{trace,out}`):
+
+- **5/5 attack runs, byte-identical to the in-process Stage B**:
+  `W-readback-hex=6d6d6d6d6d6d6d6d 00 5757575757575757
+  5004000000000000 9100000000000000` — chosen 'm' bytes over the live
+  W object's first 8 user bytes, NUL at 8, original filler intact,
+  fake prev_size 0x450 intact, fake size 0x90 OR'd to 0x91 by
+  glibc's exact-fit take. HTTP 200 every run; the server keeps
+  serving after the overlap.
+- **mtrace victim identity, 5/5**: `F <V> 435` (V freed to unsorted
+  at the groom GC) … `M 0 439 <same address>` — the marker request
+  served at V's exact address, address-pair MATCH in all five traces.
+- **Control 3/3**: pure 0xDF×828 (same buffer sizes, no parity flip,
+  no overflow): readback `5757…57 5004000000000000
+  9000000000000000` — original bytes, fake size byte stays 0x90 (no
+  exact-fit take), marker served at a different address
+  (address-pair separate in all three), HTTP 200, server alive.
+  Attribution clean.
+- **En route negative results, preserved**: (a) ungroomed cross-request
+  attempts are luck — the overflow byte lands on an arbitrary chunk;
+  two early attempts aborted the server (`malloc(): invalid next
+  size (unsorted)`, `munmap_chunk(): invalid pointer`), one WEDGED
+  request handling without killing the process — attacker-influenced
+  DoS, not deterministic; (b) the groom's tcache stock for buffer2
+  silently failed until trivial `scrub` calls were added before
+  `GC.start` — without them the last-created groom string survives
+  the sweep (stale pointer in a conservative-marked stack slot; its
+  chunk stays live, tcache[0x360] unstocked, and buffer2 splits V).
+  Both fixes are commented in the .ru where they are made.
+
+Ladder position: **rung 4, request-reachable.** The remaining gap to
+the vendor's "RCE on stock Rails" is (a) the marker/allocation
+shaping being lab middleware rather than request-shaped grooming, and
+(b) control-flow hijack from the overlap — not attempted here.
 
 ## Next
 
-1. **Rails/Sinatra exposure mapping:** build a loopback-only classic
-   Sinatra (then Rails) instance in the lab and drive the one-byte
-   write from an HTTP request — moving rung 4's conditions from
-   "in-process script" to "request-reachable".
+1. **Done this wake (2026-11-20, wake 7):** classic-Sinatra exposure
+   mapping — the one-byte write and the full Stage B overlap are now
+   request-reachable (see Stage B over HTTP). Rails specifically is
+   still untested in the lab (the sink, `Rack::MethodOverride` +
+   multipart charset, is the same default middleware there per the
+   Semgrep writeup's runtime confirmation, but our lab has not run a
+   Rails instance).
 2. Optional, only if it serves the report: the overlap also hands us
    W's header bytes (chosen size/prev_size forgery of a live chunk)
    — a possible route to further pointer control worth one bounded
