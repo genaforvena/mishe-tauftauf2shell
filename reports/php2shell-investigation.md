@@ -444,35 +444,38 @@ not claimed.
 
 Replay: `python3 lab/repro/php2shell-stageB-occupants.py` (loopback only;
 logs in `lab/build/evidence/stageB/`). It reuses the committed Stage A
-fieldprobe and varies the query shape, then prints the last dump of the
-stale table at the PRE-RINIT warning. The consumer computes
+fieldprobe and varies the query shape (10 cases) and the multipart field
+shape (7 cases, one extra field parsed before the upload-progress warning),
+then prints the last dump of the stale table at the PRE-RINIT warning.
+The consumer computes
 `nIndex = h | ht->nTableMask` and `((uint32_t*)arData)[(int32_t)nIndex]`;
 a chosen-address read therefore needs a real pointer at offset 16 **and**
-a zero or chosen mask at offset 12. Ten shapes (long/short values, array
-and numeric keys, a 20-digit numeric key, masks -2/-4, no query) give only
-two occupants, never that combination:
+a zero or chosen mask at offset 12. All 17 shapes give only two occupants,
+never that combination:
 
 - long query values (9–24 bytes, e.g. `XXX=ABCDEFGHIJ`): a zend_string —
   `flags=0`, `mask=0`, `arData=0x0a` (the chosen length), value bytes at
   offsets 24–32; the GDB log shows `SIGSEGV` at `zend_hash.c:945`;
-- short/nested values (e.g. `XXX[ABC]=1`, `XXX[a]=1&XXX[b]=2`, no query):
-  a genuine HashTable — `flags=0x10`, `mask=fffffffe`/`fffffffc`,
-  `arData=0x5555…` (a real bucket pointer), `nNumUsed` 1–4; no fault, rc 0.
+- short/nested query values, and ALL POST-field shapes (long values,
+  arrays, nested keys, long names, no field): a genuine HashTable —
+  `flags=0x10` or `0x00`, `mask=fffffffe`/`fffffffc`, `arData=0x5555…`
+  (a real bucket pointer), `nNumUsed` 1–4; no fault, rc 0.
 
-So query-shape grooming cannot put a chosen 64-bit address into the
-consumed pointer field: the pointer-bearing occupant always carries the
-table's valid small negative mask, which maps the huge `h` of `"UTC"`
-back into the table's own hash slots, while the mask-zero occupant always
-carries a small integer at `arData`. A chosen-address read or a write would
-need a different freed object or a second consumer; neither is established.
-This is a preserved negative for the tested input channel, not proof about
-every possible request-time 56-byte allocation.
+So neither query nor multipart-field grooming can put a chosen 64-bit
+address into the consumed pointer field: the pointer-bearing occupant
+always carries the table's valid small negative mask, which maps the huge
+`h` of `"UTC"` back into the table's own hash slots, while the mask-zero
+occupant always carries a small integer at `arData`. A chosen-address read
+or a write would need a different freed object or a second consumer;
+neither is established. This is a preserved negative for the two tested
+input channels, not proof about every possible 56-byte allocation.
 
 ## Open routes after Stage A
 
 - Extending the groom to set `arData` to a chosen address is an observed
-  negative for query-shape grooming (Stage B); other input channels remain
-  UNKNOWN. The Stage A claim is witness-ESTABLISHED (#138), no re-run owed.
+  negative for query and multipart grooming (Stage B); session data and
+  other SAPIs remain UNKNOWN. Stage A is witness-ESTABLISHED (#138).
+  no re-run owed.
 - A public disclosure of Depthfirst's withheld native decoder could supply
   the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not
