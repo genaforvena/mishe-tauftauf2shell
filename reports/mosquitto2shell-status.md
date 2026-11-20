@@ -287,3 +287,25 @@ only controlled malloc return remains the earlier gdb-assisted
 information disclosure stands; rung 4 code execution is NOT demonstrated.
 Do not retry these two overflow lengths blindly; a new attempt needs a
 groom that leaves a live tcache chunk, not the top chunk, after the payload.
+
+## Witness verdict #246 (independent replay) — ESTABLISHED
+
+The witness re-ran the corrected claim against its own build, not mine:
+it extracted HEAD `groom_leak_probe.py` (sha `9c6a6494...`) into
+`w17-mosq/`, rebuilt 2.1.2 without sanitizers (`w15-mosq` binary) and
+replayed four fresh loopback brokers on ports 27091-27094. Result: 4/4
+PONG reads of 32776 bytes with header `8a7e8000`; `scan_pointers()`
+reported 64/65/64/64 aligned heap pointers with bases `0x58..`, `0x5c..`,
+`0x5a..`, `0x5d..` — all outside the old 0x55-only scan window, so both
+the original scan defect and its fix are real. Its `.bin` files carry the
+same repeated invariants: a value at +0x2f0 seven times
+(+0x2f0/+0x1740/+0x1ba0/+0x40d0/+0x5520/+0x6970/+0x7dc0) and another at
++0x360 seven times (+0x360/+0x17b0/+0x1c10/+0x4140/+0x5590/+0x69e0/
++0x7e30). Committed-output strings: `127.0.0.1` count=6 (first two 0x460
+apart at +0x1868/+0x1cc8), `zzhZRbK+xOo=` count=1 at +0x1e18,
+`Sec-WebSocket-Key` count=0 — matching the corrected claim exactly.
+
+Verdict on the #219 fold (#224): ESTABLISHED for the wire-only,
+pre-auth 32 KiB read and live pointer disclosure. The witness agrees the
+enlargement stays layout-dependent on fresh brokers and that wire-derived
+code execution remains UNKNOWN. No new poison lane was claimed or tested.
