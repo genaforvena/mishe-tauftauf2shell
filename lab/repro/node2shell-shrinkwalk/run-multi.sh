@@ -20,7 +20,7 @@
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../../.." && pwd)
-OUT=$ROOT/lab/node2shell/tmp/w6
+OUT=${OUT:-$ROOT/lab/node2shell/tmp/w6}
 NB=${NB:-$ROOT/lab/node2shell/bin/node-v24.22.2-linux-x64/bin/node}
 PORT=${1:-31922}
 RUNS=${2:-4}
@@ -35,11 +35,15 @@ MTOPT=""
 if [ "${MT:-0}" = 1 ]; then
   MTOPT="set environment LD_PRELOAD $ROOT/lab/preload/mtrace.so"
 fi
+HEXOPT=""
+if [ -n "${ALT_HEX:-}" ]; then
+  HEXOPT="set environment ALT_HEX $ALT_HEX"
+fi
 mkdir -p "$OUT"
 
 for RUN in $(seq 1 "$RUNS"); do
   P=$((PORT + RUN))
-  echo "PARAMS LEN=$LEN LEN2=$LEN2 GROOM=$GROOM GROOMTAIL=$GROOMTAIL A1TAIL=$A1TAIL ALT=$ALT DELAY=$DELAY port=$P"
+  echo "PARAMS LEN=$LEN LEN2=$LEN2 GROOM=$GROOM GROOMTAIL=$GROOMTAIL A1TAIL=$A1TAIL ALT=$ALT ALT_HEX=${ALT_HEX:-} DELAY=$DELAY port=$P"
   {
     echo "set pagination off"
     echo "source $HERE/walk.py"
@@ -51,6 +55,7 @@ for RUN in $(seq 1 "$RUNS"); do
     echo "continue"
     echo "end"
     echo "$MTOPT"
+    echo "$HEXOPT"
     echo "run $ROOT/lab/repro/node2shell-rung1-server.js $P \"$ALT\""
     echo "bt 12"
     echo "quit"

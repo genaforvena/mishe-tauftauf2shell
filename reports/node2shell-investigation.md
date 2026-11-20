@@ -471,6 +471,55 @@ harness (`walk.py` now also prints a zero/nonzero content profile of
 the victim span). Wake-9 logs: `lab/node2shell/tmp/w6/multi-run*.log`
 (gitignored lab artifacts).
 
+
+### Rung-4 step 3 — own-NUL lane falsified; the `!prev` split gate
+identified (wake 11, 2026-11-20 16:20Z)
+
+The wake-10 "R1-origin-twin own-NUL" design was measured and **fails
+structurally**, not by bad luck. Harness additions (committed): `OUT`
+override in `run-multi.sh` (keeps one wake's logs out of another's), an
+`ALT_HEX` env path in `node2shell-rung1-server.js` for arbitrary ALTSVC
+bytes, and `FAKE-PAIR` diagnostics in `walk.py` that dump the
+`o1+0xF+len1` qword at both submit hits.
+
+- Run `LEN=2193 LEN2=1936 A1TAIL=Z` (4 boots, `w11/multi-run*.log`):
+  HIT-2 O2 sizefield `0x7a1` matched the prediction exactly; O2 landed on
+  O1's address in 2/4 boots — but in those boots O2-VICTIM's believed
+  size was `0x900`, with believed-next `0x0` (abort `invalid next size
+  (unsorted)`). In the one boot where the victim was small (believed
+  `0x100`, `w11mt/` with mtrace env), O2 was elsewhere. Algebra: when O1
+  consolidates with the adjacent free `0x890` chunk, the carve source
+  F is `0x1140`, so `X + believed = F − lowbyte ≈ 0x1100` for **every**
+  X — the required `0x8a0` is unreachable. Wall's lane closed.
+- The R1-origin tail itself is a perfect fake at HIT 1
+  (`FAKE-PAIR@HIT1 … qword=0x7a`, i.e. `[z][NUL][6 zeros]`), but at HIT 2
+  the same address reads `0x6161616161616161`. The carrier's tail bytes
+  are overwritten between requests; "its content survives free" is
+  false for the bytes that matter (`w11fp/multi-run1.log`).
+- Embedding the fake NUL inside the ALTSVC value is rejected by Node:
+  `ALT_HEX=…7a00…` gives `TypeError [ERR_INVALID_CHAR]: Invalid
+  character in alt` at `ServerHttp2Session.altsvc` (client ECONNRESET,
+  `w11alt/`). That lane is closed by the runtime, not by layout.
+
+**Corrected free(O2) gate.** The NUL clears V's PREV_INUSE bit as well
+as its size magnitude, so `free(O2)` aborts with `double free or
+corruption (!prev)` unless the in-call malloc **splits** V, which
+restores the bit via `set_head(victim, nb|PREV_INUSE)`. Reproduced wake
+9's byte-exact placement at `LEN=2212 ALT=12 LEN2=1216`
+(`w11w9/multi-run1.log`): victim believed `0x400`, believed-next
+sizefield `0xd0` — sane, so the unsorted scan passes — yet the request
+still aborts at `free(O2)`: V (`0x400`) is smaller than the in-call
+request `nb(o1+A)=0x8c0`, so it is never split. In the C1-carve
+geometry this is general: `C1 ≈ request+0x20` and heap-backed O2 forces
+`X ≥ 0x410`, hence `V = C1−X < request` always. All C1-carve fake lanes
+are therefore unable to reach the split. A splittable V needs O2 carved
+from a **larger consolidated region** (`F ≈ 0x1140`, `V ≈ 0x900 ≥
+request`), where the remaining problem is placing a sane sizefield at
+`V+believed+8` from request-1 buffer history. A 4-length groom-header
+sweep (`w11groom/`) read garbage there (`0x3a9435f3`, `0x582c…`); no
+alignment. All wakes' logs are gitignored lab artifacts under
+`lab/node2shell/tmp/w11*/`.
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):

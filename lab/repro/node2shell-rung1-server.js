@@ -22,7 +22,12 @@
 const http2 = require('http2');
 
 const port = Number(process.argv[2]) || 0;
-const alt = process.argv[3] || 'h2=":8000"';
+// Wake 11: ALT_HEX carries arbitrary ALTSVC value bytes (including NUL)
+// as hex; process.argv cannot carry NUL. Used to place an attacker-
+// controlled [odd][NUL][zeros] fake sizefield inside the frame copy.
+const alt = process.env.ALT_HEX
+  ? Buffer.from(process.env.ALT_HEX, 'hex').toString('latin1')
+  : (process.argv[3] || 'h2=":8000"');
 
 const server = http2.createServer();
 

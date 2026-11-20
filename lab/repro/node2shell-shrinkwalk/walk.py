@@ -142,9 +142,21 @@ def multi_walk():
     print('NUL-CLASS: %s' % nul_class(r8))
     if hit == 1:
         HITS['o1'] = o
+        HITS['len1'] = r8
+        fp1 = o + 0xF + r8
+        print('FAKE-PAIR@HIT1 0x%x qword=0x%x +8=0x%x +0x10=0x%x'
+              % (fp1, rd_try(fp1), rd_try(fp1 + 8), rd_try(fp1 + 0x10)))
         walk_unsorted()
         return
     o1 = HITS.get('o1', 0)
+    # wake 11: the R1-origin "own-NUL" fake pair at o1+0xF+len1
+    l1 = HITS.get('len1', 0)
+    if o1 and l1:
+        fp = o1 + 0xF + l1
+        fq = rd_try(fp)
+        v0 = o + (rd(o + 8) & ~7)
+        print('FAKE-PAIR 0x%x qword=0x%x (o1=0x%x len1=%d) V-minus-FAKE=0x%x'
+              % (fp, fq if fq is not None else -1, o1, l1, v0 - fp))
     print('O2-vs-O1: O2=0x%x O1=0x%x same=%s' % (o, o1, o == o1))
     if o == o1:
         # O2 was carved at exactly O1's old address: the "HOLE1"
