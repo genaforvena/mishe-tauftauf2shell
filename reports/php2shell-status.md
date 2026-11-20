@@ -262,6 +262,9 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   at end of `php_module_startup`, read from `php_session_cancel_decode` →
   `php_format_date` → `get_timezone_info` → `zend_hash_str_find`; 8.4.28
   clean. Evidence `lab/build/evidence/stageA/uaf-8.4.27-asan-USE_ZEND_ALLOC0.log`.
+  ASan's top frame is `_zend_is_inconsistent` (`zend_hash.c:57`), reading
+  offset 8 of the chunk — a different read from the plain build's `:945`
+  `HT_HASH_EX` deref (witness #138 nit).
   (b) On plain 8.4.27 with the same env, a query-string value reuses that
   freed chunk; GDB (`lab/repro/php2shell-stageA-fieldprobe.gdb`) captures
   the stale pointer at startup and dumps the 56 bytes at the second
@@ -273,8 +276,9 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   0x4141414141414141. Those are the exact fields consumed by
   `zend_hash_str_find_bucket`. Evidence
   `lab/build/evidence/stageA/stageA-php-8.4.27-plain-splice-mid-gdb-qs{13,14}.log`.
-  (c) Black-box: value length 0–8 → rc 0 (silent UAF); 9/10/20 → rc −11
-  SIGSEGV on 8.4.27; key name irrelevant; 8.4.28 rc 0 for all lengths;
+  (c) Black-box: value length 0–8 → rc 0 (silent UAF); 9–24 → rc −11
+  SIGSEGV on 8.4.27 (25/26/27/31/32 → rc 0; upper boundary UNKNOWN);
+  key name irrelevant; 8.4.28 rc 0 for all lengths;
   `valid-record`, `valid-timezone`, `no-cookie` controls rc 0 on 8.4.27
   with the long query. First post-startup 56-B malloc traced to
   `zend_new_array_singleton()` for `$_GET`
@@ -282,8 +286,13 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   proof scripts committed as e737acc. **Grade: rung 4, constrained** —
   chosen bytes at chosen offsets plus low-bit control of the consumed
   pointer field; NOT arbitrary-address control, no marker execution.
-  Witness re-run of the Stage A claim owed; next experiment: place a
-  genuine pointer at offset 16 and attempt a benign marker.
+  Witness controls are consistent with that backtrace but #138 did not
+  independently re-run it; the occupant's exact C type stays author-observed.
+  Witness #138 (2026-11-20) re-ran every proof.sh leg from clean HEAD into
+  `lab/build/evidence/w10-stageA/`: **ESTABLISHED at rung 4 CONSTRAINED**,
+  no repair owed, grade unchanged; its sweep fixed the 9–24 boundary and
+  the ASan frame. Next experiment: place a genuine pointer at offset 16
+  and attempt a benign marker.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
