@@ -163,7 +163,53 @@ def multi_walk():
         # O2 was carved at exactly O1's old address: the "HOLE1"
         # inventory would read O2's own live header and string content
         # (fd/bk look like stale bytes) — skip it.
-        print('O2 occupies the O1 hole — HOLE1 inventory skipped')
+        # wake 12: the O2==O1 geometry is the one where V is carved from
+        # the consolidated O1+copy donor and may be >= request (hence
+        # splittable). Dump V and the fake-field window; FAKE_PATCH env
+        # works here too via the shared path below (diagnostic only).
+        v2o = o + (rd(o + 8) & ~7)
+        v2o_sf = rd_try(v2o + 8)
+        print('O2==O1-VICTIM chunk=0x%x sizefield=0x%x'
+              % (v2o, v2o_sf if v2o_sf is not None else -1))
+        if v2o_sf is not None:
+            bso = v2o_sf & ~7
+            bno = v2o + bso
+            print('O2==O1-BELIEVED-NEXT 0x%x sizefield=0x%x prev_size=0x%x'
+                  % (bno, rd_try(bno + 8) or 0, rd_try(bno) or 0))
+            for a in range(bno - 0x20, bno + 0x30, 8):
+                q = rd_try(a)
+                print('  0x%x: 0x%016x' % (a, q if q is not None else -1))
+            # wake 12: locate the request-1 ALT marker and the origin 'z'
+            # tail inside V. Their addresses pin the consolidated donor's
+            # copy-twin boundary, so L1/L2/ALT can be tuned to put the
+            # fake window on a real chunk header (prev_size == size).
+            altpat = 0x3030303830783268  # "h2x:80000" little-endian
+            found = []
+            for a in range(v2o, min(v2o + 0x1200, v2o + bso + 0x200), 8):
+                q = rd_try(a)
+                if q is None:
+                    break
+                if q == altpat or (q & 0xffff) == 0x007a:
+                    found.append((a, q))
+            print('O2==O1-MARKERS (ALT-start / z+NUL) within V: %s'
+                  % ' '.join('0x%x=0x%x' % (a, q) for a, q in found[:12]))
+            acand = ((l1 + 8 + 15) & ~15) if l1 else 0
+            if acand:
+                for label, off in (('O1+A', acand), ('O1+A+0x10', acand + 0x10),
+                                   ('O1+A+0x20', acand + 0x20)):
+                    print('%s 0x%x sizefield=0x%x prev_size=0x%x'
+                          % (label, o + off, rd_try(o + off + 8) or 0,
+                             rd_try(o + off) or 0))
+            # wake 12: same debugger-only fake-field patch as the shared
+            # path, so the O2==O1 / V>=request geometry can be tested
+            # through the full gate chain (NOT attacker bytes).
+            fpatch = os.environ.get('FAKE_PATCH')
+            if fpatch and bno is not None:
+                gdb.parse_and_eval('*(unsigned long*)%d = %d'
+                                   % (bno + 8, int(fpatch, 0)))
+                gdb.parse_and_eval('*(unsigned long*)%d = %d' % (bno, bso))
+                print('O2==O1-FAKE-PATCH wrote sizefield=0x%x prev_size=0x%x at 0x%x (debugger)'
+                      % (int(fpatch, 0), bso, bno))
         walk_unsorted()
         return
     sf = rd_try(o1 + 8)

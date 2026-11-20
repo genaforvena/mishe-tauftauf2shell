@@ -543,6 +543,80 @@ not attacker bytes**, so they are mechanism evidence only, not rung 4.
 `walk.py` keeps these writes behind `FAKE_PATCH`/`FAKE_VSIZE` env vars
 and prints them explicitly in the log.
 
+### Rung-4 step 3 — exact glibc validator chain; the splittable O2==O1 geometry (wake 12, 2026-11-20 16:52Z)
+
+Host glibc identified as 2.39 (`ldd --version`: `Ubuntu GLIBC
+2.39-0ubuntu8.12`). The exact unsorted-scan validator chain was read
+from glibc 2.39's `malloc/malloc.c` (lines 4078-4088; fetched copy
+`lab/node2shell/tmp/glibc-2.39-malloc.c`, gitignored):
+
+1. `size <= 2*SIZE_SZ || size > system_mem` → `invalid size (unsorted)`;
+2. `chunksize_nomask(next) <= 2*SIZE_SZ || > system_mem` → `invalid next size (unsorted)`;
+3. `prev_size(next) != size` → `mismatching next->prev_size (unsorted)`;
+4. `bck->fd != victim || victim->fd != unsorted_sentinel` → `unsorted double linked list corrupted`;
+5. **`prev_inuse(next)` set → `invalid next->prev_inuse (unsorted)`**.
+
+Check 5 is the inverse of an earlier assumption: a free victim's
+believed-next must have PREV_INUSE **clear**. Empirical confirmation:
+in the O2==O1 geometry, patching the fake sizefield to `0x21` (odd)
+advanced the abort to `invalid next->prev_inuse (unsorted)`
+(`w12p/multi-run7.log`, believed-next 0x6e51090 patched to
+`prev_size=0x900, sizefield=0x21`), while wake-11's even `0x5a`/`0xd0`
+fakes passed it. The attacker's fake sizefield must therefore be an
+even value in `[0x20, system_mem]`; the three earlier "gates" become
+five conditions, all of which can be met by a real chunk header at the
+believed-next address.
+
+The O2==O1 layout (request 2's origin reuses request 1's origin
+address, ~1/4 of boots at LEN=2193/LEN2=1936) is the splittable case:
+measured `w12n/multi-run1.log` gives O1=O2 chunk 0x6e4f520 (sizefield
+0x7a1), victim V=0x6e4fcc0 free in the unsorted bin with believed size
+0x900 ≥ the in-call request's nb (~0x7b0), so an in-call malloc split
+would restore V's PREV_INUSE and let `free(O2)` pass. The fake window
+`V+0x900 = 0x6e505c0` currently holds request-1's copied-origin 'a'
+filler; a marker scan locates the copy twin's `'z'+NUL+'h2x:80'` at
+0x6e50688, i.e. 0xc8 past the fake window. Instrumentation added to
+`walk.py` (O2==O1 victim/marker/header diagnostics and a debugger-only
+FAKE_PATCH path there) preserves this for the next wake. Whether a
+length-only groom can put a real chunk header at the fake window —
+making `prev_size(next)==believed` and an even, sane sizefield arise
+from genuine heap metadata rather than injected bytes — remains
+UNKNOWN.
+
+**Full gate chain passed in the splittable geometry (debugger patch, not
+attacker bytes).** With the O2==O1 / V=0x900 layout and `FAKE_PATCH=0x20`
+(even fake sizefield, matching prev_size), 8 boots (`w12e/`): the 5
+O2==O1 runs all had V free in unsorted with believed 0x900 ≥ request;
+4 of them (runs 4, 5, 6, 8) passed every glibc validator and the process
+stayed alive — the client printed `ALTSVC-1`, `ALTSVC-2`, `DONE hits=2`.
+One (run 1) still aborted `invalid next size (unsorted)` despite all
+five visible V checks passing (unresolved variance, possibly a later
+malloc on a different unsorted chunk); the 3 non-O2==O1 boots aborted
+as before (`invalid next size` / `!prev`). This upgrades the wake-11
+mechanism claim: in the O2==O1 geometry the attacker needs only to make
+the two fake fields at `V+believed` read as a real free-chunk boundary,
+and the unsorted scan splits V, `free(O2)` succeeds, and the request
+completes holding the overlap. Whether attacker-chosen lengths can
+create that boundary without debugger writes is under test.
+
+**Natural fake-field sweep — negative.** With the O2==O1-friendly
+lengths LEN=2193/LEN2=1936 and ALT lengths swept 10, 18, 26, 34, 42,
+50, 58, 66, 74, 82, 90, 98, 106 (2 boots each, `w12as*/`), the two fake
+qwords at `V+believed` only ever read the two attacker fillers:
+`0x6161616161616161` (origin filler, believed 0x900) for ALT ≤ 42, and
+`0x3838383838383838` (ALT filler, believed 0xa00) for ALT ≥ 74. Neither
+is a sane even sizefield with a matching prev_size; the transition
+between ALT 50 and 66 moves V's believed size from 0x900 to 0xa00 as
+the donor grows, but never exposes a real chunk header at the fake
+window. Attempts to force that boundary by changing L1/ALT/LEN2
+(`w12nat/`: LEN=1916/ALT=96 → V believed only 0x100, no copy-twin
+marker inside V; `w12nat2/`: LEN2=2224/ALT=74 → 0/14 O2==O1 boots)
+also failed. The attacker-controlled bytes are present at the exact
+offset, but both HTTP/2 strings reject embedded NULs, so the required
+`[00][believed>>8][6 zero bytes]` prev_size cannot be written as string
+content. This is a preserved negative, not a retried-into-existence
+claim.
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
