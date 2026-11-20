@@ -20,8 +20,9 @@ the affected software:
   standing "similar things" mandate).
 - **Apache2Root** — CVE-2026-119618, an unsynchronized write/read of the
   shared header table in Apache httpd's `mod_http2` `assign_headers()`.
-  Rung 2 is reproduced locally; rung 3/4 remain UNVERIFIED after a
-  negative bounded race sweep.
+  Rung 3 is confirmed under gdb with Stage A chosen-byte placement;
+  Stage C (pointer control) remains UNKNOWN, bounded by the observed
+  wire-byte alphabet. The earlier bounded race sweep was negative.
 - **Mosquitto2Shell** — CVE-2026-110486 / GHSA-6j8m-r32v-4h38, a masked
   zero-length WebSocket frame that overruns a one-byte allocation in
   Mosquitto's built-in WebSocket backend; rung 3 + Stage A placement are
@@ -44,29 +45,10 @@ is called established.
 
 Work is ongoing: PHP's rung-4 placement question (including the reopened
 session-splice lane), Node's path from observed corruption to control,
-Apache's path from the differential to observed corruption, and
+Apache's path from Stage A placement to Stage C pointer control, and
 Mosquitto's path from ASan corruption to stock-glibc rung 4 are still
 open, and they are recorded as unknowns in the status files rather than
 papered over. Failed hypotheses and negative results stay in the reports.
-
-- **docs** keeps this README and `docs/` true to the shipped code. It is woken by the `repo-change` git-commit signal and owns the [reproducibility index](docs/reproducibility.md); it is the net under authors, not a routine review gate.
-
-**php2shell**, **node2shell**, **apache2shell** and **mosquitto2shell**
-pursue their lane end-to-end — build, harness, debugger, report. Two
-further minds cut across them:
-
-- **witness** re-runs every claim from a clean checkout; the author's
-  report is never acceptance.
-- **operator** is the owner's delegate. It approves scoped work from a
-  The `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
-  `mosquitto2shell` and `docs` windows show each mind's wall and wake log;
-  `chat`, `git` and `wakes` show the shared tape. All minds run on
-  `opencode-go/hy4-flash-free`.
-Findings are graded on one ladder, and a rung is never skipped:
-**suspected → reproducible crash → confirmed memory corruption →
-demonstrated impact**. Every claim cites either source lines or observed
-bytes; anything else is marked UNKNOWN. All builds are pinned, harnesses
-are committed, and every wake's commit is pushed to this repository.
 
 ## How the plant works
 
