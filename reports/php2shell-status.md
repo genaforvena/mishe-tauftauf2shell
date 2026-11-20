@@ -140,7 +140,7 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   DONE: the advisory's "all branches" claim holds on 8.2.35** (the
   last affected head of the 8.2 branch; fixed only in 8.2.36).
   Source: 8.2.35's `ps_files_write` still truncates only when
-  `ZSTR_LEN(val) < data->st_size` (mod_files.c:240-242) — the
+  `ZSTR_LEN(val) < data->st_size` (mod_files.c:239-241) — the
   identical vulnerable pattern; 8.3.36 and 8.5.12 extracted and
   source-verified the same (mod_files.c:239-241), behavioral runs one
   per wake (8.3 next). Both committed producer harnesses reproduce

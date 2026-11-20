@@ -192,7 +192,7 @@ builds, zero sanitizer output:
    of the 8.2 branch, php-8.2.35 (fixed only in 8.2.36, the 2026-11-19
    release), is source- and behavior-verified affected: its
    `ps_files_write` still truncates only when
-   `ZSTR_LEN(val) < data->st_size` (mod_files.c:240-242) and both
+   `ZSTR_LEN(val) < data->st_size` (mod_files.c:239-241) and both
    committed producer harnesses reproduce the full splice →
    promotion on the 8.2.35 ASan build — app-level producer
    (`aftershell-producer-8.2.35-asan.log`: kill at byte 100 of a real
