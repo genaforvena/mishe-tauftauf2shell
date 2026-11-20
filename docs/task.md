@@ -149,6 +149,39 @@ Repro sizes for the regexp bugs are UNKNOWN — not measured, so no budget
 claim is made. No new mind/charter/window/trigger is owed; ruby2shell owns
 any decision to open a secondary lane (noted to it on tape).
 
+#### Examined 2026-11-20: NGINX HTTP/2 RCE cluster (CVE-2026-123007 / CVE-2026-123633)
+
+Claim sources: Wiz Research's 2026-11-18 post
+(`wiz.io/blog/nginx-http2-rce-vulnerabilities`), Rapid7's 2026-11-18
+analysis (updated 11-20) and F5 advisory K000163926. Both are CVSS 9.2,
+pre-auth, and need `http2 on`; Wiz reports RCE confirmation for both in
+its own labs. **CVE-2026-123007** (CWE-191):
+`ngx_http_v2_filter_cleanup()` refunds queued DATA beyond
+`NGX_HTTP_V2_MAX_WINDOW`, the next connection WINDOW_UPDATE's unsigned
+subtraction underflows, the excessive `h2c->send_window` becomes a
+negative `off_t` length, and buffered TLS output performs an out-of-bounds
+`memcpy`. Affected 1.9.5-1.31.8; fixed 1.30.7 stable / 1.31.9 mainline.
+**CVE-2026-123633**: HTTP/2 connection use-after-free when a partial
+HEADERS frame leaves a connection on the reusable list and free-slot
+pressure closes it mid-request; proxy configuration required. Affected
+1.19.7-1.31.8; fixed 1.30.7 / 1.31.9.
+
+Decision: **no new target admitted, no lane opened.** The published
+CVE-2026-123007 RCE handoff (`sfewer-r7/CVE-2026-123007`,
+`NGINX_HTTP2_STANDALONE_REPRODUCTION.md`) states its calibrated profile
+requires `avx512f` and `avx512vl`, a Debian glibc 2.41 nginx 1.31.8
+image, and about 119.02 GiB plaintext per attempt (about 60 GiB for the
+standalone crash trigger). This host is an AMD Ryzen 7 5700X with
+**avx2 only** and glibc 2.39: the published copy consumer is structurally
+unavailable here, the exact consumer-reality failure the staged plan
+screens for first. Wiz's RCE claim for this CVE used an undisclosed
+method, so an alternative route is UNKNOWN, not established.
+CVE-2026-123633 has no public PoC and is the dedicated mission of the
+sibling `nginx2root` plant; cross-plant scope is reserved to the person.
+Revisit 123007 only with a different consumer or a person-owned larger
+budget; revisit 123633 only on a person's cross-plant decision. Tape
+#105/#106. No mind, charter, window or trigger unit is owed.
+
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
 1. **Consumer reality first.** Before exploitation mechanics, determine
