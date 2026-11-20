@@ -15,12 +15,14 @@ Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
 
 **Current ladder position: rung 4 — demonstrated impact in the lab,
-request-reachable over HTTP (2026-11-20, wake 7).** The Stage B
-overlap (wake 6: chosen bytes over a live chunk, 5/5, control clean)
-is now driven from a single HTTP POST through a default-config classic
-Sinatra stack — same geometry, same readback, same 5/5 + control.
-The sink (`Rack::MethodOverride` upcasing a multipart part that
-declares `charset=ISO-8859-1`) runs before routing, CSRF and auth.
+request-reachable over HTTP on BOTH claimed default stacks (2026-11-20,
+wake 8).** The Stage B overlap (wake 6: chosen bytes over a live chunk,
+5/5, control clean; witness verdict ESTABLISHED at rung 4, tape #51) is
+driven from a single multipart HTTP POST through a default-config
+classic Sinatra app (wake 7) and now through a default `rails new` app
+(wake 8) — same geometry, same readback, same 5/5 + control on each.
+The sink (`Rack::MethodOverride` upcasing a multipart part that declares
+`charset=ISO-8859-1`) runs before routing, CSRF and auth.
 
 ## Provenance (2026-11-20)
 
@@ -465,15 +467,99 @@ the vendor's "RCE on stock Rails" is (a) the marker/allocation
 shaping being lab middleware rather than request-shaped grooming, and
 (b) control-flow hijack from the overlap — not attempted here.
 
+## Stage B over Rails — the second default stack, same overlap (observed 2026-11-20, wake 8)
+
+**Result: the same unsorted-bin overlap, driven by one multipart HTTP
+POST through a default `rails new` app — Rails 8.1.4.1, development
+mode, no app code on the trigger path — 5/5 identical readback, control
+3/3 clean.** The vendor's "Rails exposed by default" claim is now
+reproduced in this lab, with the mechanism confirmed rather than
+inherited from the Semgrep writeup: `bin/rails middleware` on the
+generated app lists `Rack::MethodOverride` in the default stack, and
+the upcase fires inside it before any controller code runs.
+
+Provisioning (recorded on the wall per charter): `bin/gem install
+rails` (8.1.4.1, 36 gems incl. actionpack/railties) plus `bundle
+install` of the generated Gemfile, all into the 3.4.12-plain build's
+GEM_HOME; `webrick` 1.9.2 added to the Gemfile as the server handler
+for parity with the Sinatra repro (the sink is Rack middleware,
+server-independent; puma stays in the Gemfile untouched).
+
+**Reproduction** (loopback-only, plain 3.4.12 build, stock glibc 2.39,
+mtrace preload):
+
+```
+lab/repro/ruby2shell-stageB-rails.sh 5 run       # 5 attack runs
+lab/repro/ruby2shell-stageB-rails.sh 3 control   # no-overflow controls
+```
+
+The driver calls `lab/repro/ruby2shell-stageB-rails-setup.sh`, which
+provisions the gems and regenerates `lab/build/rails-stageb-app` from
+scratch each run (`rails new --minimal --skip-bundle --skip-git`), so
+the app tree is fully derived and gitignored. The setup script writes
+the same groom/marker pair as the Sinatra repro
+(`lab/repro/ruby2shell-stageB-rails-middleware.rb`, installed as
+`lib/stageb/stageb_middleware.rb`) and inserts it around the default
+`Rack::MethodOverride`: `GroomMiddleware` before it, `MarkerMiddleware`
+immediately after — the marker's malloc(1081) is therefore the first
+0x450-class allocation after the upcase bins inflated V, exactly as in
+the Sinatra run. Honest labels unchanged: the grooming and marker are
+ours (in a real attack the shaping would be request-shaped); the
+trigger path itself is 100% default stack.
+
+Rails-specific observations, all consistent with the mechanism:
+
+- **CSRF does not save Rails — it fires too late.** The trigger POST
+  is answered HTTP 422, `ActionController::InvalidAuthenticityToken`
+  ("Can't verify CSRF token authenticity" in the dev log): the forgery
+  check runs in the controller, AFTER `Rack::MethodOverride` already
+  performed the vulnerable upcase. The overflow had already happened
+  and the marker already taken V when the exception was raised; the
+  server keeps serving and `GET /mark` returns the corrupted readback.
+  (The Sinatra repro answered 200 because its CSRF protection is
+  opt-in; the 422 here is direct evidence for the claimed ordering —
+  before routing, CSRF and auth.)
+- **The request runs in a WEBrick thread, so chunks carry
+  NON_MAIN_ARENA**: mtrace reads V's free as `F <V> 435` (0x430 |
+  PREV_INUSE | NON_MAIN_ARENA) where the single-threaded in-process
+  run read 0x431. Masked chunk sizes are identical (0x430), and the
+  0x53 LSB flip works unchanged (0x435 → 0x455, binned at 0x450) —
+  the unsorted-bin lane of the glibc audit (no IS_MMAPPED check on
+  the binning path) is confirmed to ignore the flag bits.
+
+**Observed** (`lab/build/evidence/stageB-rails-{1..5,control-1..3}.
+{trace,out}`):
+
+- **5/5 attack runs, byte-identical readback to the in-process and
+  Sinatra Stage B**: `W-readback-hex=6d6d6d6d6d6d6d6d 00 5757575757575757
+  5004000000000000 9100000000000000` — chosen 'm' bytes over the live
+  W object's first 8 user bytes, NUL at 8, fake size 0x90 OR'd to 0x91
+  by the exact-fit take; server alive after.
+- **mtrace victim identity, 5/5**: `F <V> 435` … `M 0 439 <same
+  address>` — the marker request served at V's exact freed address;
+  additionally buffer1 (`M 0 368`) pops S's exact freed address in
+  every run.
+- **Control 3/3**: pure 0xDF×828 — readback `5757…57 5004000000000000
+  9000000000000000` (original bytes, fake size byte stays 0x90), the
+  marker served at a different address in all three (address-pair
+  separate), server alive. Attribution clean: the one 0x53 byte is
+  the cause of the take.
+
+Ladder position: **rung 4, request-reachable on both vendor-claimed
+default stacks.** The remaining gaps to the vendor's "RCE on stock
+Rails" are unchanged from the Sinatra section: (a) the groom/marker
+shaping is lab middleware rather than request-shaped grooming, and
+(b) control-flow hijack from the overlap — not attempted here.
+
+
 ## Next
 
-1. **Done this wake (2026-11-20, wake 7):** classic-Sinatra exposure
-   mapping — the one-byte write and the full Stage B overlap are now
-   request-reachable (see Stage B over HTTP). Rails specifically is
-   still untested in the lab (the sink, `Rack::MethodOverride` +
-   multipart charset, is the same default middleware there per the
-   Semgrep writeup's runtime confirmation, but our lab has not run a
-   Rails instance).
+1. **Done this wake (2026-11-20, wake 8):** Rails exposure mapping —
+   the full Stage B overlap is now request-reachable on the second
+   vendor-claimed default stack (see Stage B over Rails). Both claimed
+   exposure paths are reproduced; witness verification of the wake-7
+   Sinatra section and this wake-8 Rails section is pending (the
+   in-process Stage B alone is witness-ESTABLISHED, tape #51).
 2. Optional, only if it serves the report: the overlap also hands us
    W's header bytes (chosen size/prev_size forgery of a live chunk)
    — a possible route to further pointer control worth one bounded

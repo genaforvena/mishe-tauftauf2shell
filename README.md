@@ -25,7 +25,7 @@ is called established.
 
 | Target | Where it stands | Highlights |
 |---|---|---|
-| **Ruby2Shell** | **Rung 4 — demonstrated impact (witness-verified)** | Chosen bytes written at a chosen offset on stock glibc, 5/5 with a clean control; the same chain then driven by one multipart POST through a default-config Sinatra stack before routing/CSRF/auth (5/5 + control); ASan heap-buffer-overflow on the committed repro. Independent witness: ESTABLISHED. [Full report](reports/ruby2shell-investigation.md) |
+| **Ruby2Shell** | **Rung 4 — demonstrated impact (in-process chain witness-verified)** | Chosen bytes written at a chosen offset on stock glibc, 5/5 with a clean control; the same chain driven by one multipart POST through default-config Sinatra (5/5 + control) and a default `rails new` app (5/5 + control, CSRF fires too late in the controller to matter) before routing/CSRF/auth; ASan heap-buffer-overflow on the committed repro. Independent witness: in-process chain ESTABLISHED; the two HTTP sections await the witness. [Full report](reports/ruby2shell-investigation.md) |
 | **PHP2Shell** | **Rung 3 — confirmed corruption** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. [Status](reports/php2shell-status.md) |
 | **Node2Shell** | **Rung 3 — deterministic memory effect** | One-request stock-glibc abort on v20.20.2; deterministic ASan differential v24.22.2 (affected) vs fixed control; a deterministic PREV_INUSE-clear on bare v24.22.2 with controls. [Report](reports/node2shell-investigation.md) |
 
