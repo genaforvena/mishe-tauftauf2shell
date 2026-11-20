@@ -107,9 +107,11 @@ The encoded credential/TLV bytes are otherwise unchanged.
 
 Harness `lab/frontier/freeradius2shell/{run.sh,eap_fast_overflow.c}`; full
 reproduction in Reproduce. It defines the packed structs with the upstream
-sizes, copies `eap_fast_decrypt()` verbatim (logging removed, tag quirk kept),
-and calls the vulnerable branch with a crafted ticket. All inputs are local
-buffers; no listener, no off-loopback probe.
+sizes, copies the decrypt routine and tag quirk from `eap_fast_decrypt()`
+(logging, talloc and the upstream `memcmp(opaque->aad, t->a_id, 16)` AAD
+comparison removed; the harness craft sets `aad=a_id`), and calls the
+vulnerable branch with a crafted ticket. All inputs are local buffers; no
+listener, no off-loopback probe.
 
 Pinned evidence (latest run, digests in `lab/frontier/freeradius2shell/logs/digests.txt`):
 
@@ -138,13 +140,22 @@ FIXED: reject PAC is too long (length=256 cap=148)        (fixed build, rc 0)
 
 The saved return-address slot lies 200 bytes past the 152-byte destination;
 a 208-byte decrypt overwrites it with the 8 chosen marker-address bytes.
-`run.sh` checks all four conditions and prints `ALL CHECKS PASS`.
+`run.sh` asserts five checks (chosen value in `state.out`, marker string in
+`flow.out`, `flow_rc=42`, fixed-build reject string, `fixed_rc=0`) and prints
+`ALL CHECKS PASS`; the probe offset, state mode's rc 0, canary rc 134 and
+ASan no-report were observed in its output but are not asserted by that
+verdict.
 
 ASan on the same ticket produced **no report** (rc 0) — expected and honest:
 the write occurs inside un-instrumented `libcrypto`, so ASan's redzones do not
 see it. gcc's stack protector is the independent detector here, matching the
 nginx2root lesson that the right detector, not the loudest one, is the
 evidence.
+
+Witness re-run (tape #227): two replays from clean HEAD into
+`lab/build/evidence/w16-freeradius/` reproduced byte-identical digests and
+the grades above, including the offset-specific marker control. Its three
+report-only nits are folded into this brief.
 
 ## Rung ladder — honest grading
 
@@ -162,8 +173,9 @@ evidence.
 - **Rung 4 (demonstrated security impact): PASS in the harness, with stated
   conditions.** The chosen address of `verify_marker()` at the chosen stack
   offset executes the benign marker (rc 42), and the fixed build rejects the
-  trigger. Conditions: (a) faithful extracted function/struct/decrypt, not a
-  running `radiusd`; (b) the lab knows the PAC-Opaque key, so the overwritten
+  trigger. Conditions: (a) faithful extracted function/struct/decrypt with a
+  compile-time marker address and known stack layout, not a running
+  `radiusd`; (b) the lab knows the PAC-Opaque key, so the overwritten
   bytes are byte-exact chosen; a remote attacker who lacks the key controls
   the length but not the written bytes. Network reachability over RADIUS/UDP
   1812, EAP-FAST being enabled, and real-server stack layout are **claims /

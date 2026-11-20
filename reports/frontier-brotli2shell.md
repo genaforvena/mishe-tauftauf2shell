@@ -97,10 +97,12 @@ Observed (unmodified builds, one decoder state reused across two stages):
 | v1.2.0 (vulnerable) | `NEEDS_MORE_INPUT` 200000 calls, 0 output, 0.22s | SIGSEGV during stage 2 | 139 |
 | v1.2.1 (fixed) | `ERROR`, `error_code=-17`, 3 input bytes unconsumed | `ERROR`, `-17`, 127 bytes unconsumed | 0 |
 
-An ASan build of v1.2.0 on the single-shot 23 MB trigger produced **no**
-ASan report — expected, because the write stays inside the one
-`BrotliDecoderState` allocation. This is the nginx2root lesson: the tool's
-redzones cannot see an intra-object write; a source-level canary/assert is
+An ASan build of v1.2.0 on the single-shot 23 MB trigger produced **no
+ASan report**; the two-stage stream aborts on SIGSEGV in
+`__sanitizer_internal_memmove` (decode.c:2283) with no heap-buffer-overflow
+report. Neither case pinpoints the intra-object write — expected, because it
+stays inside the one `BrotliDecoderState` allocation. This is the nginx2root
+lesson: redzones cannot see an intra-object write; a source-level canary is
 the detector.
 
 Instrumented v1.2.0 (`oob-guard.patch` logs every `buffer_length >= 8` write
@@ -122,6 +124,11 @@ Stage-2 bytes 7, 15..18, 19..22 and 23..26 are exactly `08`, `ff ff ff 7f`,
 `ff ff ff 7f`, `ff ff ff 7f`; the mapping is byte-exact. Logs:
 `lab/frontier/brotli2shell/logs/{v120-2stage.out,v121-2stage.out,instr-2stage.out}`.
 
+Witness re-run (tape #217): replayed from clean HEAD into
+`lab/build/evidence/w14-brotli/` with a fresh clone; all four pinned digests
+matched and the grades above were independently established. Its two
+report-only nits are folded into this brief.
+
 ## Rung ladder — honest grading
 
 - **Rung 1 (reproducible trigger): PASS.** Deterministic version differential
@@ -135,7 +142,9 @@ Stage-2 bytes 7, 15..18, 19..22 and 23..26 are exactly `08`, `ff ff ff 7f`,
 - **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** Chosen bytes
   land at chosen offsets (indices 8..27) and set `pos`, `max_backward_distance`
   and `max_distance` to `0x7fffffff` — state control, not yet control-flow
-  hijack. No chosen pointer, no GOT overwrite, no benign marker execution.
+  hijack. No directly chosen address: the fault address is derived from the
+  attacker-written `max_*` fields. No chosen pointer, no GOT overwrite, no
+  benign marker execution.
   Public claims of code execution (Imperva on unmodified Node 24.22.0 arm64,
   exploit unreleased) and a counterclaim (`ikow/brotli2crash`, `MLEN_MAX` makes
   RCE unreachable) both remain claims to test. Network reachability via
