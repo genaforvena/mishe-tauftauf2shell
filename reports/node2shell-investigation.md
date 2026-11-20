@@ -668,6 +668,77 @@ rung 4 remains open on a NUL-capable content channel or a geometry
 where `set_foot` writes the believed size at the fake window (victim
 freed *after* corruption, not split before it).
 
+### Rung-4 step 3 — freed-after-corruption lane measured; tcache and
+### `!prev` closure (wake 14, 2026-11-20 17:51Z)
+
+Wake 13 proposed changing the *timing* so the corrupted chunk is freed
+after the NUL, letting glibc's own `set_foot` write the fake
+`prev_size`. The only second heap buffer in the vulnerable function is
+`MaybeStackBuffer<uint8_t> value(value_len)`, declared immediately
+after `origin` and destroyed before it
+(`node_http2_v24.22.2.cc:3324-3334`). With a 1200-byte printable ALT
+`value` is heap-allocated; harness extension `VALUE-WALK` dumps the
+`r9` argument at the `nghttp2_submit_altsvc` breakpoint
+(`walk.py`, `FAKE_SIZEONLY` is a debugger-only opt-in). Logs:
+`lab/node2shell/tmp/w14val2/`, `w14patch2/`, `w14ctrl/` (gitignored).
+
+**The lane is real.** In `w14patch2/multi-run1.log` request 2 has
+`origin chunk=0x6e50890 size=0x7a0`, `value chunk=0x6e51030`:
+`adjacency delta=0x0` (value starts exactly where origin ends) and
+`origin-NUL@0x6e51038 value+8=0x6e51038 match=True`. `value`'s
+sizefield reads `0x400` (real `0x4c0` for a 1200-byte value), i.e. the
+library's own terminator zeroed its low byte. `value` is still in use
+at the submit breakpoint and is destroyed after it — corruption
+precedes the free, exactly the desired timing.
+
+**Two gates move, one does not.** `FAKE_SIZEONLY=0x20` wrote a sane
+even sizefield at the fake window `value+0x400` (debugger, not
+attacker bytes). The abort was unchanged:
+`double free or corruption (!prev)` from
+`_int_free_merge_chunk (p=0x6e50890, size=1952)` at glibc 2.39
+`malloc.c:4679`, in `free(origin)` — i.e. `free(value)` itself had
+already succeeded. Reason: the believed size `0x400` is in tcache's
+size range, whose fast path does not consult the next-chunk header at
+all, so neither the forged `prev_size` nor the fake sizefield was ever
+tested. The fatal check is `!prev_inuse(nextchunk)`: `nextchunk` is
+`value`, whose sizefield low byte the NUL zeroed, so its PREV_INUSE
+bit is 0. That bit is *invariant* under this primitive — a NUL can
+only clear it — so the chunk immediately before the corrupted one can
+never be freed afterwards. Here that chunk is `origin`, freed by the
+declaration-order destructor immediately after `value`; no allocation
+or split intervenes to restore the bit (contrast wake 12, where the
+in-call malloc split the victim before `free(O2)`).
+
+**Control and reproducibility.** With the same long ALT but no patch,
+`w14ctrl` had 1/3 adjacent boots (`delta=0x0`) and `w14final` had 3/3
+(`delta=0x0`, `origin-NUL match=True`, believed `0x400`, fake window
+`'A'*8` in all three); every adjacent boot aborted at the same
+`_int_free_merge_chunk` `!prev` check, patched or not. In the two
+non-adjacent `w14ctrl` boots (`delta=-0x4a60`, `-0x48e0`), origin's NUL
+hit a non-adjacent free chunk and the abort moved to `unlink_chunk`
+(`malloc.c:1611`) — a separate negative, not a lane.
+
+**Structural read.** The two size regimes are now both closed under
+ASCII-only attacker strings: (a) a corrupted chunk at or below
+tcache's maximum never runs the next-chunk validator chain, but the
+NUL-cleared PREV_INUSE bit makes the preceding chunk's later free
+abort; (b) above tcache the chain runs, and wake 13 measured that the
+fake window needs a NUL-bearing `prev_size` and a sane even
+sizefield — neither reachable from the origin or ALT strings. No
+length-only sweep was repeated. Ladder unchanged: rung 3/3.5
+mechanism, rung 4 not demonstrated.
+
+Wake-14 value-buffer walk (long ALT; ~2 s per boot):
+
+```
+ALT_HEX=$(python3 -c "print('41'*1200)") OUT=lab/node2shell/tmp/w14 \
+  LEN=2193 LEN2=1936 VALUE_LEN=1200 \
+  sh lab/repro/node2shell-shrinkwalk/run-multi.sh <port> 3
+# VALUE-WALK 2: adjacency delta=0x0 and origin-NUL match=True identify
+# the boot where origin's NUL corrupts the adjacent value chunk;
+# FAKE_SIZEONLY=0x20 adds a debugger-only sane sizefield for contrast.
+```
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
