@@ -35,7 +35,7 @@ existed when checked (charter list and chat tape read 2026-11-20 17:40Z).
 
 ## Source-bound mechanism (read from the vulnerable parent, not inferred)
 
-`BoltRequestHandler()` (`src/bolt/bolt_api.c:691-695`) calls
+`BoltRequestHandler()` (`src/bolt/bolt_api.c:686-687`) calls
 `ws_read_frame(&current_read)` whenever the client negotiated WebSocket.
 `ws_read_frame()` (`src/bolt/ws.c`) reads the 2-byte frame header, and for
 length code `127` reads **eight attacker bytes** into `uint64_t payload_len`;
@@ -46,7 +46,7 @@ calls:
 buffer_apply_mask(*buf, masking_key, payload_len);
 ```
 
-`buffer_apply_mask()` (`src/bolt/buffer.c:397-414`) starts with
+`buffer_apply_mask()` (`src/bolt/buffer.c:391-408`) starts with
 `ASSERT(buffer_index_length(&buf) >= payload_len)` and calls
 `buffer_index_advance(&end, payload_len)`. `src/RG.h` defines
 `#define ASSERT(X)` when `RG_DEBUG` is off (it is commented out), so both
@@ -55,7 +55,7 @@ the 64-bit length is truncated; the resulting `end.chunk` drives a loop that
 calls `buffer_apply_mask_single()` on every chunk index up to `end.chunk`,
 whether or not that chunk exists.
 
-`buffer_apply_mask_single()` (`src/bolt/buffer.c:374-394`) computes
+`buffer_apply_mask_single()` (`src/bolt/buffer.c:369-388`) computes
 `payload = chunks[chunk] + offset`, builds `double_mask[4]` from the single
 4-byte key, then XORs 8-byte words with `offset_mask` across
 `BUFFER_CHUNK_SIZE - offset` bytes of each chunk (4096, from `buffer.h`).
@@ -87,8 +87,8 @@ frame payload_len=4144 mask=0x41414141 writes=525 oob_writes=525
 canary offset=104 before=0x0000000000000000 after=0x4141414141414141
 control: payload_len=8, 8 bytes supplied -> oob_writes=0, canary unchanged
 fixed:   FIXED: reject payload_len=4144 available=0 -> writes=0, oob_writes=0
-ASan:    ERROR: AddressSanitizer: heap-buffer-overflow in
-         buffer_apply_mask_single (ws_overflow.c:138), rc 1
+ASan:    ERROR: AddressSanitizer: heap-buffer-overflow, READ of size 8,
+         in buffer_apply_mask_single (ws_overflow.c:138), rc 1
 repeat:  3/3 vulnerable runs with oob_writes=525
 ```
 
@@ -100,6 +100,14 @@ the exact source line. Upstream allocates 4096 bytes per chunk, so a stock
 process would not get that ASan report — the report proves the write extent,
 not a production-sized allocation. Logs: `lab/frontier/falkordb2shell/logs/`.
 
+Two measurement caveats from the witness replay: ASan flags the 8-byte *load*
+(the read half of `^=`), not a store, at `ws_overflow.c:138`; and `525` counts
+write operations (word XORs plus trailing bytes), not bytes — the 4144-byte
+out-of-bounds extent is correct. The harness allocates `chunks[1]`, so it does
+not model an additional out-of-bounds read of the `chunks[]` array when
+`end.chunk` exceeds the allocated chunk count; whether that read occurs in a
+stock build stays UNKNOWN.
+
 ## Rung ladder — honest grading
 
 - **Rung 1 (reproducible trigger): PASS.** A 14-byte masked frame header with
@@ -110,15 +118,16 @@ not a production-sized allocation. Logs: `lab/frontier/falkordb2shell/logs/`.
   becomes the chosen `K:K` value; switching the mask to `0x41414141` changes
   the written value byte-for-byte, so the bytes are attacker-chosen.
 - **Rung 3 (confirmed memory corruption): PASS.** ASan reports a
-  heap-buffer-overflow at the XOR site with the short-chunk lab layout; the
-  source-level counter independently observes all 525 OOB writes with the
-  faithful 4096-byte layout.
+  heap-buffer-overflow (READ of size 8 at the `^=` load) at the XOR site with
+  the short-chunk lab layout; the source-level counter independently observes
+  all 525 OOB write operations with the faithful 4096-byte layout.
 - **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** The primitive
   writes a repeating 4-byte key, not a chosen 8-byte value or address. No
   pointer hijack, no chosen address, no benign marker execution. A live
   FalkorDB process with `BOLT_PORT` enabled, the handshake path, real heap
   layout and the first out-of-bounds `chunks[]` pointer remain UNKNOWN — this
-  lab exercised the extracted C functions only.
+  lab exercised the extracted C functions only; the single allocated chunk
+  also leaves an OOB `chunks[]` array read unmodelled.
 
 ## Feasibility and cheapest next step
 
