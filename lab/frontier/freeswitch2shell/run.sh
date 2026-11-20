@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+# FreeSWITCH CVE-2026-116785 harness driver.  File-only: no sockets, no network.
+set -u
+cd "$(dirname "$0")" || exit 1
+mkdir -p logs
+: > logs/summary.log
+
+log() { printf '%s\n' "$*" | tee -a logs/summary.log; }
+show() { sed 's/^/    /' "$1" | tee -a logs/summary.log; }
+
+pass=1
+record() { # record <description> <expected-rc> <name> [env VAR=... ...]
+    local desc="$1" want="$2" name="$3"; shift 3
+    local rc
+    "$@" >"logs/${name}.out" 2>"logs/${name}.err"
+    rc=$?
+    log "--- ${name}: ${desc} (rc=${rc}, expected ${want})"
+    show "logs/${name}.out"
+    if [ -s "logs/${name}.err" ]; then
+        printf '%s\n' "    [stderr]" | tee -a logs/summary.log
+        show "logs/${name}.err"
+    fi
+    if [ "$rc" -ne "$want" ]; then
+        log "FAIL: ${name} rc ${rc} != ${want}"
+        pass=0
+    fi
+    return 0
+}
+
+log "=== FreeSWITCH CVE-2026-116785 / GHSA-jj89-q47c-gh94 file-only harness ==="
+log "workspace: $(pwd)"
+
+# --- build the three variants ------------------------------------------------
+for spec in "vuln:" "fixed:-DBUILD_FIXED" "asan:-DBUILD_ASAN -fsanitize=address"; do
+    name=${spec%%:*}
+    defs=${spec#*:}
+    # shellcheck disable=SC2086
+    gcc -std=gnu11 -O0 -g -Wall -Wextra $defs -o "$name" ws_overflow.c 2>"logs/build-${name}.err"
+    rc=$?
+    if [ "$rc" -ne 0 ]; then
+        log "FAIL: build ${name} rc=${rc}"
+        show "logs/build-${name}.err"
+        pass=0
+    else
+        log "build ${name}: OK (${defs:-no extra flags})"
+    fi
+done
+if [ "$pass" -ne 1 ]; then
+    log "BUILD FAILURE - stopping"
+    exit 1
+fi
+
+# --- offsets and substitution map -------------------------------------------
+record "struct layout / substituted offsets" 0 diag ./vuln diag
+
+# --- rung 1: signed arithmetic bypass ---------------------------------------
+record "plen=-1, need=-5, rplen=4, guard passes, OOB write" 0 rung1 ./vuln rung1
+for line in 'plen=-1 need=-5 rplen=4 guard_passed=1' 'oob_writes=1478 first_oob=65536'; do
+    if grep -Fq "$line" logs/rung1.out; then
+        log "rung1 evidence found: $line"
+    else
+        log "FAIL: rung1 evidence missing: $line"
+        pass=0
+    fi
+done
+
+# --- rung 2: attacker-chosen bytes at two distinct offsets ------------------
+record "two-pattern byte-for-byte overwrite of wbuffer[0] and wbuffer[1024]" 0 rung2 ./vuln rung2
+for line in 'wbuffer[0..3]=deadbeef wbuffer[1024..1027]=cafebabe' \
+            'wbuffer[0..3]=11223344 wbuffer[1024..1027]=55667788'; do
+    if grep -Fq "$line" logs/rung2.out; then
+        log "rung2 evidence found: $line"
+    else
+        log "FAIL: rung2 evidence missing: $line"
+        pass=0
+    fi
+done
+
+# --- rung 3: ASan detection at the extraction's copy site -------------------
+ASAN_OPTIONS='detect_leaks=0:abort_on_error=0:halt_on_error=1' \
+    ./asan asan >logs/rung3-asan.out 2>&1
+rc=$?
+log "--- rung3: ASan heap-buffer-overflow at ws_raw_read copy site (rc=${rc}, expected 1)"
+show logs/rung3-asan.out
+if [ "$rc" -eq 1 ] && grep -Fq 'heap-buffer-overflow' logs/rung3-asan.out &&
+   grep -Fq 'ws_raw_read' logs/rung3-asan.out; then
+    log "rung3 evidence found: heap-buffer-overflow attributed to ws_raw_read"
+else
+    log "FAIL: rung3: ASan did not report heap-buffer-overflow at ws_raw_read (rc=${rc})"
+    pass=0
+fi
+
+# --- rung 4: wsh->ssl pointer overwrite -> chosen function pointer ----------
+./vuln rung4 >logs/rung4.out 2>logs/rung4.err
+rc=$?
+log "--- rung4: injected wsh->ssl target, verify_marker() reached (rc=${rc}, expected 42)"
+show logs/rung4.out
+if [ -s logs/rung4.err ]; then printf '%s\n' '    [stderr]' | tee -a logs/summary.log; show logs/rung4.err; fi
+if [ "$rc" -eq 42 ] && grep -Fq 'marker_called=1' logs/rung4.out; then
+    log "rung4 evidence found: marker executed with rc=42"
+else
+    log "FAIL: rung4 marker not executed (rc=${rc})"
+    pass=0
+fi
+record "rung4 control: untouched ssl leaves marker uncalled" 0 rung4ctl ./vuln rung4ctl
+
+# --- controls and fixed build ------------------------------------------------
+record "ordinary 8-byte frame: no OOB, canaries unchanged" 0 control ./vuln control
+record "FIXED build rejects oversized frame with WS_DATA_TOO_BIG" 0 fixed ./fixed fixed
+for line in 'rc=-1009 oob_writes=0 copy_calls=1' 'RESULT=PASS'; do
+    if grep -Fq "$line" logs/fixed.out; then
+        log "fixed evidence found: $line"
+    else
+        log "FAIL: fixed evidence missing: $line"
+        pass=0
+    fi
+done
+
+# --- repeatability: 5/5 identical vulnerable traces -------------------------
+for i in 1 2 3 4 5; do
+    ./vuln rung1 >"logs/repeat-${i}.out" 2>"logs/repeat-${i}.err"
+    if cmp -s logs/repeat-1.out "logs/repeat-${i}.out"; then
+        log "repeat ${i}/5: identical"
+    else
+        log "FAIL: repeat ${i}/5 differs"
+        pass=0
+    fi
+done
+
+# --- pinned digests ---------------------------------------------------------
+{
+    echo "# sha256 of harness sources (generated by run.sh)"
+    sha256sum ws_overflow.c run.sh
+} > logs/digests.txt
+log "--- pinned digests (logs/digests.txt)"
+show logs/digests.txt
+
+if [ "$pass" -eq 1 ]; then
+    log "ALL CHECKS PASS"
+else
+    log "CHECKS FAILED"
+fi
+exit $((1 - pass))

@@ -158,6 +158,42 @@ Evidence: `reports/frontier-falkordb2shell.md` (commit `b140144`). The
 dedicated `falkordb2shell` mind owns this lane; details in
 `.mishe-tauftauf/charters/falkordb2shell.md`.
 
+#### Admitted 2026-11-20 ~17:52Z: Freeswitch2Shell (CVE-2026-116785 / GHSA-jj89-q47c-gh94)
+
+Claim source: GitHub advisory GHSA-jj89-q47c-gh94 and the CVE record for
+CVE-2026-116785 (CNA GitHub, CVSS 3.1 9.1
+`AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-122/681/787). Claimed primitive:
+an unauthenticated WebSocket frame on an enabled `mod_xml_rpc` endpoint uses
+the 8-byte extended length field; `ws_read_frame()` swaps only its low 32 bits
+into signed `int plen`, so `FF FF FF FF` gives `plen=-1`, the signed guard
+passes and the unbounded `size_t` copy writes sender-chosen bytes from
+`buffer+14` across `wbuffer` into the handle's tail fields, including
+`SSL *`. Affected `<= 1.11.1`, fixed `>= 1.11.2`; upstream fix
+`d557ca6d29e6da4f10824dc158100906a592b91a` against vulnerable parent
+`fbac12b451a1` adds `ws_get_be64()` and an unsigned length guard. Both
+`mod_xml_rpc` and `enable-websocket` are off by default; where enabled the
+endpoint is HTTP/WebSocket, not SIP (the separate, earlier FreeSWITCH decline
+was the SIP-facing GHSA-f73w-xph4-pjp3). This candidate is distinct from the
+screened-out GHSA-294g-hq4w-c275, whose overflow bytes are the configured
+credential's base64 tail and not sender-chosen.
+
+Small single-file subsystem, exact vulnerable/fixed commits, no hardware gate
+and unauthenticated HTTP framing make a rung-4 attempt plausible. Operator
+reproduction 18:28Z (throwaway copy of digests-pinned sources) observed
+rungs 1/2 placement, an ASan `heap-buffer-overflow` `WRITE of size 132146` in
+`memcpy` from `ws_raw_read`, and a chosen 8-byte value at
+`offsetof(wsh_t, ssl)=131112` executing a marker with `rc=42`; in-bounds and
+fixed-build controls pass and five repeats are identical. The harness driver
+still prints `CHECKS FAILED`: its expected exit codes and literal byte
+patterns are stale after the source edit, so quote the individual
+observations with their digests, not the driver verdict. This is a harness-
+only rung 4: no live FreeSWITCH process, WebSocket upgrade, real heap layout
+or loopback network path has been tested; those stay UNKNOWN. Evidence:
+`reports/frontier-freeswitch2shell.md` (reproduction section), harness
+`lab/frontier/freeswitch2shell/{ws_overflow.c,run.sh}`. The dedicated
+`freeswitch2shell` mind owns this lane; details in
+`.mishe-tauftauf/charters/freeswitch2shell.md`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's

@@ -41,6 +41,11 @@ lab/frontier/freeradius2shell/fixed
 lab/frontier/freeradius2shell/canary
 lab/frontier/freeradius2shell/asan
 
+# Freeswitch2shell standalone harness build output (scripts stay tracked)
+lab/frontier/freeswitch2shell/vuln
+lab/frontier/freeswitch2shell/fixed
+lab/frontier/freeswitch2shell/asan
+
 # Apache2Root capacity-boundary harness runtime state (scripts stay tracked)
 lab/apache2shell/logs/
 lab/apache2shell/run/
