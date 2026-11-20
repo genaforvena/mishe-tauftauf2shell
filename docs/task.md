@@ -31,9 +31,11 @@ claims, not conclusions.
   not clear the old session before writing the replacement; an interrupted
   write can leave new prefix + old tail that decodes as a third session.
   Affected 8.2<8.2.36, 8.3<8.3.37, 8.4<8.4.28, 8.5<8.5.13; both pinned
-  8.4.26 and 8.4.27 are affected. The consumer half is reproduced on both
-  ASan builds (commit 741c677); the interrupted-write producer half is
-  open. 618/619 FPM and other closed lanes stay closed.
+  8.4.26 and 8.4.27 are affected. Both halves are reproduced on both
+  ASan builds (commits 741c677, 8440254): a real session write interrupted
+  at a syscall boundary leaves the spliced file on disk and the next
+  request promotes the object. The kill is shim-simulated (the advisory's
+  hard-OOM worker death), not a demonstrated remote trigger.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
