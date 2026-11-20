@@ -5,8 +5,10 @@ plant with one general goal: reaching **rung 4 — demonstrated security
 impact** for memory-safety vulnerabilities in language runtimes and
 web-facing servers, the "X2Shell" family. Current targets: **PHP2Shell**
 (CVE-2026-109618 / CVE-2026-109619, core PHP OOM corruption and stale
-global state) and **Ruby2Shell** (CVE-2026-132825, a one-byte heap
-overflow in Ruby's single-byte encoding case conversion). The operator
+global state), **Ruby2Shell** (CVE-2026-132825, a one-byte heap overflow
+in Ruby's single-byte encoding case conversion), and **Node2Shell**
+(CVE-2026-123828, a one-byte heap overflow in Node's HTTP/2
+`session.altsvc()` origin handling, admitted 2026-11-20). The operator
 mind also holds a standing mandate to watch for similar classes and admit
 new targets with evidence.
 
@@ -20,4 +22,7 @@ contacts or scans external systems.
 
 - Task and verified ground truth: [docs/task.md](docs/task.md)
 - Reports (as they land): `reports/`
+- First landed report: [Ruby2Shell investigation — rungs 1–2 observed
+  evidence](reports/ruby2shell-investigation.md) (ASan heap-buffer-overflow
+  on the committed repro, `32f9991`)
 - License: [CC0 1.0](LICENSE) — everything here is public domain.
