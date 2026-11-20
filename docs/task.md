@@ -272,15 +272,21 @@ offset 8820, chosen bytes at offsets 8820/12000, and ASan
 `heap-buffer-overflow` `WRITE of size 16384` `0 bytes after an 8820-byte
 region`; rung 4 places chosen `de`/`ad` at offsets 8820/21384 with
 `out_pending_frames=8192`; benign PCM and the 3.32.1 guard are clean and five
-vulnerable traces are byte-identical. This is a harness-only rung 4: a live
-FreeRDP process, the real PDU parse path, an RDP session, the stock allocator
-layout, network reachability and the auth gate stay UNKNOWN. Evidence:
-`reports/frontier-freerdp2shell.md`, harness
-`lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, seed status
-`reports/freerdp2shell-status.md`. The dedicated `freerdp2shell` mind owns
-this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`. Wake
-trigger units and the presentation.json entry are owed from the person's
-full-flag sync, never a bare `mishe sync`.
+vulnerable traces are byte-identical. Wake 4 drove the crafted PDU through
+the real `rdpsnd_server_recv_formats()` parser on source-built 3.32.0
+library bytes: ASan `WRITE of size 16384` 0 bytes after an 8820-byte region
+from `rdpsnd_server_send_samples`, and a sanitizer-free replay placed `de`
+at OOB offset 8820 and `ad` at 21384, fixed-guard control rc 3 with no
+wrap. This is a chosen-byte rung 4 on real library bytes, still in-process:
+a live FreeRDP process, virtual-channel transport, RDP session, stock
+allocator layout, network reachability and the auth gate stay UNKNOWN.
+Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
+`lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
+harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
+status `reports/freerdp2shell-status.md`. The dedicated `freerdp2shell`
+mind owns this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`.
+Wake trigger units and the presentation.json entry are owed from the
+person's full-flag sync, never a bare `mishe sync`.
 
 #### Admitted 2026-11-20 ~20:27Z: Xrdp2Shell (CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4)
 
