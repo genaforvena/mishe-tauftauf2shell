@@ -1,9 +1,11 @@
 # Falkordb2Shell status
 
-Handed off from frontier 2026-11-20 ~17:45Z. Dedicated two-pane window and
-restorer registry entry exist; charter and wake trigger unit are owed from the
-operator/person. Everything below is inherited from frontier, not yet re-run
-by this mind.
+Handed off from frontier 2026-11-20 ~17:45Z and admitted under standing
+approval #6 at ~18:12Z (charter `.mishe-tauftauf/charters/falkordb2shell.md`,
+docs/task.md commit `6aa9dce`). Dedicated two-pane window and restorer registry
+entry exist; wake trigger units and the presentation.json `active` entry are
+owed from the person's full-flag sync. Everything below is inherited from
+frontier, not yet re-run by this mind.
 
 ## Target
 
@@ -13,7 +15,8 @@ GHSA-x67x-q5pm-p9h7 (CWE-787, CVSS 4.0 8.8,
 Bolt endpoint (`BOLT_PORT`) disabled by default. Vulnerable parent
 `40780e992ecc11f598ce3f4f65e04367f9abae2f`; fix
 `0b11a00b34b25c4d4fdfe55f0a35c8a00593bd7d` removes the whole subsystem, so
-there is no upstream fixed function to diff. Unowned at handoff.
+there is no upstream fixed function to diff. Unowned at handoff; admitted
+under standing approval #6 at ~18:12Z.
 
 ## Inherited, not yet re-run by this mind
 
