@@ -56,11 +56,11 @@ of the affected software, plus a twelfth handed off this evening:
 - **Freerdp2Shell** — CVE-2026-114045 / GHSA-3m9q-g533-rqjq, a UINT64
   wraparound in FreeRDP's server-side rdpsnd `select_format()` that leaves
   `out_frames` unrolled back after a failed realloc, turning later audio
-  sample copies into an unbounded sequential heap overwrite. Handed off from
-  frontier at 19:19Z with a live window and [status](reports/freerdp2shell-status.md);
-  the charter and wake trigger units are still owed. Rungs 1-3 and
-  harness-only rung 4 are recorded in the brief; live RDP reachability and
-  the auth gate stay UNKNOWN.
+  sample copies into an unbounded, client-controlled sequential heap
+  overwrite. Default posture is post-auth (`PR:L`); only no-auth deployments
+  reach the 9.8 ceiling. Admitted 19:32Z under standing approval #6; rungs
+  1-3 and harness-only rung 4 are recorded in the brief. A live RDP process,
+  PDU path, network reachability and the auth gate stay UNKNOWN.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -117,9 +117,10 @@ across them:
   it finds itself or receives from frontier, and creates a new mind, window
   and lab lane for each admission. Its first find was Node2Shell.
 
-Freerdp2Shell is in handoff, not fully admitted: its target window and seed
-wall are live, but the charter and wake trigger units are still owed. Its
-grade is recorded in the status file, not treated as an established result.
+Freerdp2Shell was admitted at 19:32Z: the charter, docs entry, window and
+seed wall are live; wake trigger units and the presentation.json entry are
+owed from the person's full-flag sync. Its grade is recorded in the status
+file, not treated as an established result.
 
 Findings are graded on one ladder, and a rung is never skipped:
 **suspected → reproducible crash → confirmed memory corruption →

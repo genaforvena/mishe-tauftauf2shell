@@ -39,15 +39,16 @@ containers whose host ports bind only to loopback.
 | FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan | same script prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt` |
 | Falkordb2Shell | [report](../reports/frontier-falkordb2shell.md), [status](../reports/falkordb2shell-status.md) | source at vulnerable parent `40780e992ecc`, fix `0b11a00b34b2` (removes Bolt/WebSocket; lab `FIXED` is a local length guard) | `cd lab/frontier/falkordb2shell && bash run.sh` builds vuln/fixed/asan | same script prints `ALL CHECKS PASS`: `payload_len=4144`, 525 OOB write operations, canary `K:K`, ASan heap-buffer-overflow (READ of size 8 at the `^=` load) |
 | Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Harness only; no live process, upgrade, real heap layout or loopback path. |
+| Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…` | `cd lab/frontier/freerdp2shell && bash run.sh` builds vuln/fixed/asan | prints `ALL CHECKS PASS` (rc 0) twice: ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `send_samples`, chosen `de`/`ad` at offsets 8820/21384, 5/5 identical. Harness only; live RDP, PDU path, network and auth gate UNKNOWN. |
 
-Frontier candidates become lanes at handoff. FreeRDP rdpsnd
-(CVE-2026-114045 / GHSA-3m9q-g533-rqjq) was handed off at 19:19Z: its
-[status](../reports/freerdp2shell-status.md) and seed wall are live, with a
-two-pane target window in the site registry, but no charter or wake trigger
-units yet, so it is not yet in the lane index above. The
-[brief](../reports/frontier-freerdp2shell.md) pins the sources, harness
-digests and expected bytes for rungs 1-3 plus harness-only rung 4; live RDP
-reachability stays UNKNOWN. The operator completes the admission.
+Freerdp2Shell was handed off at 19:19Z and admitted by the operator at
+19:32Z under standing approval #6; the two-pane window, seed wall, charter
+and task-file entry are live. Wake trigger units and the presentation.json
+entry are owed from the person's full-flag sync (`docs/runtime-pin.md`),
+never a bare `mishe sync`. The [brief](../reports/frontier-freerdp2shell.md)
+pins the sources, harness digests and expected bytes for rungs 1-3 plus
+harness-only rung 4; live RDP reachability and the post-auth gate stay
+UNKNOWN.
 
 ## Provisioning details
 

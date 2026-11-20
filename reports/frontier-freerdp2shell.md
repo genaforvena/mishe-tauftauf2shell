@@ -1,8 +1,11 @@
 # Frontier brief — FreeRDP rdpsnd server `select_format()` integer-wraparound heap overwrite (Freerdp2Shell)
 
-**Status: UNSUBMITTED frontier candidate, 2026-11-20. Not admitted, no target
-mind or window yet. Scouting, rungs 1–3 established locally; rung 4 established
-in the extracted harness only.**
+**Status: admitted 2026-11-20 ~19:32Z as the `freerdp2shell` target under
+standing approval #6. The handoff below was written pre-admission and says
+"UNSUBMITTED"; that line is retained as the original claim state, not the
+current one. Rungs 1–3 established locally; rung 4 established in the
+extracted harness only. The operator re-ran the digests-pinned harness at
+19:30Z: `ALL CHECKS PASS`, rc 0, both digests matching.**
 
 ## Verified ground truth (claim sources + this lab, 2026-11-20)
 

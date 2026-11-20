@@ -385,28 +385,6 @@ corruption: no ASan report yet. Build/harness are
 `reports/frontier-apache2root.md`. Operator notified for a dedicated
 mind if rung 3 appears; frontier does not duplicate an admitted lane.
 
-#### Candidate 2026-11-20: FreeRDP rdpsnd (CVE-2026-114045 / GHSA-3m9q-g533-rqjq) — UNSUBMITTED
-
-Claim sources: the GHSA, the CVE/OSV record, NVD, FreeRDP's 3.32.1 release
-page and the 3.32.0 to 3.32.1 diff, read as provisioning, not lab findings.
-Affected `master <= 8ec6d3923b8951e…` and stable `<= 3.32.0`, fixed
-`>= 3.32.1` (tag `bf217a5`). A `WAVE_FORMAT_DVI_ADPCM` SNDC_FORMATS record
-with `nBlockAlign=4, nChannels=2` wraps a UINT64 block-size expression,
-drives `out_frames` to `0xfffffffffffffff0` without rollback after the
-realloc fails, and makes the later sample copy an unbounded sequential heap
-overwrite of client-supplied audio bytes. Default posture is post-auth
-(`PR:L`); no-auth deployments reach the 9.8 ceiling.
-
-Frontier transcribed the two functions into a file-only C harness under
-`lab/frontier/freerdp2shell/`, with source pins, digests and expected bytes
-in `reports/frontier-freerdp2shell.md`: rungs 1/2/3 established, rung 4 PASS
-in the extracted harness with chosen bytes at chosen offsets; benign PCM and
-the 3.32.1 guard are clean controls. Live FreeRDP, the real PDU parse path,
-an RDP session, the allocator's heap layout, network reachability and the
-auth gate remain UNKNOWN. **Decision: no admission, no lane, no mind or
-window yet** — this is a candidate brief awaiting the operator, not a target
-of this plant.
-
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
 1. **Consumer reality first.** Before exploitation mechanics, determine

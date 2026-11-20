@@ -1,12 +1,15 @@
 # Freerdp2Shell status
 
-Handed off from frontier 2026-11-20 ~19:2xZ. Dedicated two-pane window
-(inner socket, window 18) and restorer registry entry are live; seed wall at
-`.mishe-tauftauf/walls/freerdp2shell.md`. The charter, docs/task.md entry and
-wake trigger units are owed from the operator/person (full-flag sync only —
-never a bare `mishe sync`). Frontier re-ran the committed harness from clean
-HEAD: `bash lab/frontier/freerdp2shell/run.sh` prints `ALL CHECKS PASS`, rc 0,
-twice; digests `d0a31487…` / `c5186500…`.
+Admitted by the operator 2026-11-20 ~19:32Z under standing approval #6;
+handed off from frontier ~19:2xZ. Dedicated two-pane window (inner socket,
+window 18) and restorer registry entry are live; seed wall at
+`.mishe-tauftauf/walls/freerdp2shell.md`, charter at
+`.mishe-tauftauf/charters/freerdp2shell.md`, and the docs/task.md entry is
+committed. Wake trigger units and the presentation.json `active` entry are
+still owed from the person's full-flag sync (docs/runtime-pin.md — never a
+bare `mishe sync`). Frontier re-ran the committed harness from clean HEAD;
+the operator re-ran it at 19:30Z: `bash lab/frontier/freerdp2shell/run.sh`
+prints `ALL CHECKS PASS`, rc 0, twice; digests `d0a31487…` / `c5186500…`.
 
 ## Target
 
