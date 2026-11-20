@@ -1,13 +1,19 @@
 # Apache2Root investigation — CVE-2026-119618 / GHSA-34m4-m9fh-gqp5
 
-Voice: `apache2shell`. Status 2026-11-20 17:36Z: **rung 3 confirmed**
+Voice: `apache2shell`. Status 2026-11-20 18:32Z: **rung 3 confirmed**
 (reproducible differential crash + corrupted pool metadata under gdb) and
 **Stage A of rung 4 observed** (chosen header bytes at a chosen offset in the
 corrupted pointer, including all 8 bytes of the faulting allocator pointer).
 Stage C remains UNKNOWN: this build rejects NUL in h2 field values, so the
 `00` high bytes of a canonical x86-64 user pointer cannot be sent on the wire;
-binary DATA bytes did not land in the fault word. Everything below was from
-this plant's loopback lab.
+binary DATA bytes did not land in the fault word. Huffman-coded HPACK does not
+change this (18:25Z). A non-pointer-field search (18:20–18:32Z) found only
+pointer slots corrupted. Everything below was from this plant's loopback lab.
+
+**Decision 2026-11-20 18:32Z: lane closed at Stage A.** Rung 4 is NOT
+demonstrated on this host: chosen bytes at a chosen offset are proven, but
+pointer control is structurally unavailable (wire alphabet) and no scalar
+control field is reachable. The negative routes are preserved below.
 
 ## Rung 1 — suspected (source-bound, verified locally)
 
@@ -242,14 +248,76 @@ non-canonical. Disabling ASLR would not supply the missing `00` bytes. No
 canonical pointer or benign marker execution was produced; Stage C stays
 UNKNOWN, now bounded by an observed wire alphabet rather than an assumption.
 
+
+### Huffman-coded HPACK does not reopen the alphabet (18:25Z)
+
+`alphabet-probe.py` used literal HPACK string literals only, so its NUL result
+could have been an encoding artifact: HPACK Huffman coding emits a decoded
+`0x00` as the octets `ff c7`, and `00 00 7f ff 41 42 43 44` as
+`ff c7 fe 3f ff ff ff ee 86 ed eb ff`, neither containing a literal NUL.
+`huffman-probe.py` starts a private 2.4.70 and sends one request per case; it
+carries a minimal RFC 7541 Appendix B encoder for the bytes used, so no
+third-party library is needed. Observed (ports 7220/7221):
+
+| decoded value | HPACK string | result |
+|---|---|---|
+| `41 00 42` | literal | RST:1 |
+| `41 00 42` | Huffman | RST:1 |
+| `00` | Huffman | RST:1 |
+| `00 00 7f ff 41 42 43 44` | Huffman | RST:1 |
+| `0a` / `0d` / `7f` | Huffman | RST:1 each |
+| `41 42 43 44` | Huffman | 200 |
+
+nghttp2 validates the **decoded** field value; Huffman does not smuggle a
+forbidden byte past it. This was a live loophole candidate against the Stage C
+boundary and it is closed. Each case uses a fresh h2c connection because a
+malformed value also kills the connection.
+
+### Non-pointer control-field search (18:20–18:32Z) — closed
+
+The last open question was whether a *scalar* APR field (a size, index or
+count) could be the corrupted word: an ASCII value such as `0x41414141` would
+then be a large but usable integer even though it is not a valid pointer. Two
+deterministic checks answer no.
+
+1. **Fault-site census.** Decoded `apr_allocator_free` from the p7210 capture
+   and classified every faulting gdb capture on 2.4.70 (15 in total). The
+   corrupted word is always a pointer slot:
+   - `apr_allocator_free+23` (`mov 0x18(%rdi),%r11`, 13 captures): `rdi` is the
+     `apr_allocator_t *` argument and `rsi` the memnode; both are ASCII in every
+     capture. The only scalar-driven write in that function,
+     `allocator->free[index]` at +116/+133 (index from `node->index` at
+     memnode+0x10), is downstream of the faulting `0x18(%rdi)` read and is not
+     reached.
+   - `apr_pool_destroy+15/32` (p7190): `pool->child` at offset 0x70.
+   - `apr_palloc+41` (p7214): `pool->allocator` at offset 0x20, with `rsi=0x48`
+     the legitimate allocation size — the pointer is zeroed, not the size.
+   No capture faulted on an index, count or length field.
+2. **Heap layout.** The p7210 256 KiB dump around the canary (displayed
+   addresses 0x24700–0x24a00, i.e. file offsets +0x20000) is a 16-byte-stride
+   array whose slots alternate between attacker strings (`X-Pad-05/06`,
+   `AAAABBBB`/`CCCCDDDD`) and still-valid `0x7ff...` pointers; the faulting
+   `0x4444444443434343` is present in those slots. The corrupted region is
+   pool/table metadata interpreted as pointers, not a scalar array. The
+   preceding array header (displayed 0x24918–0x24938) retains plausible
+   `elt_size=24`, `nelts=0`, `nalloc=5`; no ASCII-spelled `nelts`/`nalloc` was
+   observed.
+
+Consequence: no size/index/count primitive exists here to redirect an OOB
+access; the only controllable value is a non-canonical pointer that faults at
+its first dereference. Combined with the alphabet result, Stage C has no
+reachable route in this build on this host. The lane is closed at Stage A;
+rung 4 is NOT demonstrated. Preserved as a negative, not retried.
+
 ### Why Stages B/C are not claimed
 
 Full 8-byte control of the faulting allocator-pointer slot is observed
-(p7210), so offset control is not the remaining blocker; the observed wire
-alphabet (above) is. No capture produced a canonical pointer or a benign
-marker execution, and no debugger-forced ledger state was used. Stage C stays
-UNKNOWN: the open question is an allocation layout whose useful target word is
-spelled entirely from accepted bytes, not how to place more bytes.
+(p7210), so offset control is not the remaining blocker. No capture produced a
+canonical pointer, a benign marker execution or a controlled scalar field, and
+no debugger-forced ledger state was used. The wire alphabet rejects the bytes a
+canonical pointer needs, Huffman coding does not bypass that validation, and
+every corrupted word seen is a pointer slot. Stage C is closed as UNREACHABLE
+in this build on this host, not merely UNASKED; rung 4 is not demonstrated.
 
 ## Reproduction (from a clean checkout, loopback only)
 
@@ -263,6 +331,7 @@ FILL_VALUE=Q7wX9kLm ./gdb-inspect.sh 2.4.71 <port> 78 30  # control: no fault
 FILL_VALUE_HEX=41414141424242420041424344454647 \
   ./gdb-inspect.sh 2.4.70 <port> 78 25          # NUL: no server requests
 python3 alphabet-probe.py <port>                # accepted-byte map, private instance
+python3 huffman-probe.py <port>                 # Huffman NUL: RST:1, no bypass
 BODY_CANARY_HEX=00007fff424f445943414e00000000 \
   ./gdb-inspect.sh 2.4.70 <port> 78 30          # binary DATA: no NUL in fault word
 ```
@@ -270,5 +339,6 @@ BODY_CANARY_HEX=00007fff424f445943414e00000000 \
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
 (`logs/`, `run/`) is gitignored; only scripts and this report are committed.
 
-`drive.py`, `sweep.sh`, `gdb-inspect.sh` and `alphabet-probe.py` are this
-plant's harnesses. `h2client.py` and `ref-poc.py` were fetched 2026-11-20 from `github.com/googlesky/CVE-2026-119618` (`poc/h2.py`, `poc/poc.py`) as unmodified reference inputs; claims about that repository remain claims. `race-boundary.sh` (partial, cut mid-sweep) and `sweep-asanforce.sh` (invalid, resource-shortage run) are preserved negatives, not canonical drivers.
+`drive.py`, `sweep.sh`, `gdb-inspect.sh`, `alphabet-probe.py` and
+`huffman-probe.py` are this plant's harnesses.
+`h2client.py` and `ref-poc.py` were fetched 2026-11-20 from `github.com/googlesky/CVE-2026-119618` (`poc/h2.py`, `poc/poc.py`) as unmodified reference inputs; claims about that repository remain claims. `race-boundary.sh` (partial, cut mid-sweep) and `sweep-asanforce.sh` (invalid, resource-shortage run) are preserved negatives, not canonical drivers.
