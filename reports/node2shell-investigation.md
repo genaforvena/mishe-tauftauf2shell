@@ -141,16 +141,17 @@ allocation window is enough:
   1048..1960 aborted — `origin_len` 1048, 1064, 1096, 1160, 1256,
   1384, 1544, 1736, 1960 → **9/9 aborts**; every tested off-class
   length completed normally — 1040, 1041, 1047, 1049, 1056, 1057,
-  1072, 1073, 1088 → **0/9 aborts**. Fourth wake completed the map
-  upward: on-class lengths 2216, 2504, 3560, 5416, 9896, 14984 →
-  **0/6 aborts — the request is served and the server stays alive**.
-  So the deterministic abort window is origin_len 1048..1960 only;
-  for larger on-class lengths the NUL still lands on a size-field LSB
-  (the placement class is size-independent), but no validator fires
-  inside the request — the victim there is either flag-only-aligned or
-  **in use at write time**, which is exactly the persistent-corruption
-  regime the rung-4 path needs. Debugger-walking a completing
-  large-length run is the open next step.
+  1072, 1073, 1088 → **0/9 aborts**. So in the bare single-shot
+  harness the deterministic abort window is origin_len 1048..1960.
+  Fourth wake completed the map upward: on-class lengths 2216,
+  2504, 3560, 5416, 9896, 14984 → **0/6 aborts in the bare
+  single-shot harness**. Fifth wake correction: that "completing
+  regime" is **layout-chosen, not length-chosen** — under the
+  debugger at origin 2216 the same request aborts in 5/9 fresh
+  walks (free-remainder victim, identical validator), and in the
+  other 4/9 the NUL lands on the **top chunk's sizefield** and the
+  run persists (next subsection). Length only buys the placement
+  class; the victim is whatever the layout puts after O.
 - **Fixed control, same request shape**: prebuilt `v24.22.3`, on-class
   lengths 1048, 1064, 1096, 1256, 1544, 1960, 2504, 3560, 5416, 9896
   → **0/10 aborts**, every request completed. The deterministic
@@ -238,11 +239,66 @@ multi-request client harness, the on-class request **completed** 4/4
 placements — connection timing shifts the inventory even with ASLR
 off), while the single-shot rung-1 client aborts 10/10 bare. In the
 one fully-traced completing run the victim R had real size 0xc50,
-which by the shrink model should also have tripped the scan (believed
-0xc00, next reads 'aaaa' residue); it did not, and the believed-size
-state in completing runs was not debugger-observed. Unknowns stay
-unknown; the completing regime is real (4/4 observed) but its heap
-state at the write is not yet walked.
+which by the shrink model should also have tripped the scan; it did
+not, and that mtrace-env victim remains unexplained (its believed
+size state was never debugger-walked). The bare-harness completing
+regime **is** now walked — next subsection — but that 0xc50
+observation belongs to a different env and stays open.
+
+### Rung 3.5 — completing regime walked: the victim is the top chunk (fifth wake, 2026-11-20 10:15Z)
+
+Parametrizing the committed shrinkwalk (`LEN` env, default
+authority 2208 → origin 2216 ≡ 8 mod 16) and walking fresh gdb
+processes at the same completing length settles what the bare
+harness's 0/6-aborts really was:
+
+- **5/10 walks aborted** with the free-remainder victim of the
+  corrected mechanism (believed 0x800/0x5700, next chunk read in
+  zeroed slack → `malloc(): invalid next size (unsorted)`). The
+  "no validator fires at ≥2216" reading of the bare length map was
+  an artifact: under the debugger the same length aborts half the
+  time. Whether a given run aborts is decided by **what chunk
+  follows O**, i.e. by layout, not by length.
+- **4/10 walks hit the top chunk**: O is carved from top, so the
+  NUL lands on **top's sizefield LSB**. Measured against brk
+  (glibc keeps top_end == brk): real top size 0x56910 → believed
+  0x56900 (shrink 0x10), 0x56520 → 0x56500 (0x20), 0x57b70 →
+  0x57b00 (0x70), 0x56c10 → 0x56c00 (0x10) — **persistent
+  size-magnitude shrink of a live top sizefield, no validator
+  inside the request**. One further run was **flag-only** (real
+  0x56300 == believed: the NUL cleared top's PREV_INUSE bit only).
+- **Serve proof**: the flag-only run completed end-to-end under
+  the debugger — the client received the ALTSVC echo
+  (`client: ALTSVC origin_len=2216`), the server stayed alive the
+  full observation window. A shrink-flavor run (shrink 0x10)
+  likewise served: exactly one breakpoint hit, no client retries,
+  gdb idle to timeout. The earlier fourth-wake belief that the
+  2216 regime "completes 0/6" is thus explained and upgraded:
+  those runs completed **with top's sizefield persistently
+  corrupted**.
+- **Instrumentation lesson (negative result, kept)**: the first
+  four top-victim walks were misread as clean completions; the
+  then-current walk.py walked off the believed top extent into
+  unmapped memory at brk (`gdb.MemoryError at 0x6ea8000`), which
+  killed the inferior before serving. The walk now branches on
+  `victim == top`, measures the shrink via `sbrk(0)`, and skips
+  the unsorted walk; `run.sh` captures the client's completion
+  line.
+
+Ladder read: this is persistent, debugger-observed corruption of a
+live heap structure surviving past the request (rung 3, persistent
+variant). It is not yet impact: a ≤0xf0 top-size shrink routes the
+next sysmalloc extension down the non-contiguous path (old top
+freed at believed size, ≤0xf0 leaked; no overlap), and a cleared
+PREV_INUSE on top only arms a backward-consolidation abort/
+overlap if the predecessor chunk is later freed with a controlled
+prev_size. The rung-4 path remains the **in-use allocated victim**:
+groom the heap so the chunk following O is a live allocation at
+write time (multi-request hole grooming; persistent per-connection
+allocations — e.g. HPACK dynamic-table entries — are the candidate
+right-neighbor D), so its shrunk sizefield survives to its own free
+and manufactures the believed-extent-inside-real-extent overlap
+(Ruby2Shell rung-4 family).
 
 ## Reproduction
 
@@ -261,6 +317,16 @@ controls):
 ```
 sh lab/repro/node2shell-stageA.sh 5
 # → 5/5 rc=134 on v24.22.2; off-class and v24.22.3 controls stay alive
+```
+
+Debugger walk of the victim chunk (rung 3/3.5; gdb 15.1, ASLR off,
+~1 s per aborting run, ~75 s per serving run):
+
+```
+sh lab/repro/node2shell-shrinkwalk/run.sh <port>          # LEN=2208 default: origin 2216
+LEN=1040 sh lab/repro/node2shell-shrinkwalk/run.sh <port> # origin 1048
+# abort regime → VICTIM free remainder + "invalid next size (unsorted)" bt
+# top regime   → TOP-VICTIM believed/real size + client: ALTSVC origin_len=…
 ```
 
 Deterministic Valgrind differential (rung 2; ~15 s per run):

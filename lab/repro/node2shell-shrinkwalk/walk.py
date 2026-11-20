@@ -4,6 +4,18 @@ ARENA = 0x7ffff7a04ac0
 def rd(addr):
     return int(gdb.parse_and_eval('*(unsigned long*)%d' % addr))
 
+def rd_try(addr):
+    try:
+        return int(gdb.parse_and_eval('*(unsigned long*)%d' % addr))
+    except gdb.MemoryError:
+        return None
+
+def arena_top():
+    try:
+        return int(gdb.parse_and_eval('((struct malloc_state*)%d)->top' % ARENA))
+    except Exception:
+        return 0
+
 def sysmem():
     try:
         return int(gdb.parse_and_eval('((struct malloc_state*)%d)->system_mem' % ARENA))
@@ -25,6 +37,26 @@ def walk_unsorted():
     vsz = rd(v + 8) & ~7
     print('VICTIM chunk=0x%x prev_size=0x%x sizefield=0x%x (size=0x%x)' %
           (v, rd(v), rd(v + 8), vsz))
+    # top-victim regime: the NUL landed on the top chunk's sizefield.
+    # glibc keeps top_end == brk, so real size = sbrk(0) - top; the
+    # believed extent ends INSIDE the real top. Skip the unsorted walk
+    # (reads past believed end run off brk) and measure the shrink.
+    top = arena_top()
+    if top and v == top:
+        try:
+            brk = int(gdb.parse_and_eval('(long)sbrk(0)'))
+            real = brk - top
+            print('TOP-VICTIM: top=0x%x believed_size=0x%x real_size=0x%x '
+                  'shrink=0x%x brk=0x%x' % (top, vsz, real, real - vsz, brk))
+            if real > vsz:
+                print('TOP-VICTIM: PERSISTENT SHRINK of live top sizefield — '
+                      'no validator inside the request, run may complete')
+            elif real == vsz:
+                print('TOP-VICTIM: flag-only write (no size shrink)')
+            return
+        except Exception as e:
+            print('top-victim probe fail %s' % e)
+            return
     fd = rd(v + 0x10); bk = rd(v + 0x18)
     print('V fd=0x%x bk=0x%x' % (fd, bk))
     sentinel = None
