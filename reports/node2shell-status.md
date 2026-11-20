@@ -9,22 +9,31 @@ trigger: a single HTTP/2 request with a long syntactically valid
 Admitted by the operator 2026-11-20 under standing approval #6
 (similar-things mandate; tape entry 2026-11-20T07:29:19Z).
 
-- **Rung:** 0 — suspected vulnerability. Advisory read; nothing
-  reproduced in the lab yet.
-- **Next action:** read fix commit `nodejs/node@ae9ab37d62`
-  (nodejs-private#1035) as the specification; resolve the 22.x
-  discrepancy (Snyk claims 22.x<22.23.5 but the fix is absent from the
-  v22.23.5 notable changes — check the backport before building); build
-  affected 24.x/26.x and fixed 24.22.3/26.13.1 with ASan/UBSan.
-- **Last evidence:** official Node.js November 2026 security releases
-  (nodejs.org/en/blog/vulnerability/november-2026-security-releases);
-  affected 24.x, 26.x; fixed 2026-11-11. No lab observation yet.
-- **Unknowns:** whether the app-pattern precondition (application
-  forwards `:authority` to altsvc) can be mirrored in a loopback harness
-  that still counts as a realistic consumer; consumer behavior on this
-  host's glibc. Fallback within the same release if altsvc is
-  structurally gated: CVE-2026-123874 (Http2Stream UAF via
-  respondWithFile reset) — propose separately if needed.
-
-Seeded by the operator 2026-11-20 from the admission record; the
-researcher owns this file from its next wake on.
+- **Rung:** 2/3-class observation on stock glibc (1/6, not
+  deterministic): `malloc(): mismatching next->prev_size (unsorted)`
+  abort of stock node v20.20.2 after a single loopback request with
+  `origin_len = 1048` (≡ 8 mod 16 — NUL hits the following chunk's size
+  LSB). Deterministic rung-1/2 ASan differential on affected v24.22.2
+  in flight (build detached, spans wakes).
+- **Ground truth verified from primary sources:** fix commit
+  `nodejs/node@ae9ab37d62` read as specification; vulnerable code
+  present in tags v24.22.2/v26.13.0 (also v22.23.5 and v20.20.2 via the
+  old V1 `WriteOneByte` default), absent verbatim in v24.22.3/v26.13.1.
+  Snyk's "22.x fixed in 22.23.5" contradicted by tagged source — no
+  backport in 22.23.5's `node_http2.cc` and its vendored V8 still
+  null-terminates.
+- **Next action:** when the detached ASan build of v24.22.2 completes
+  (check `lab/build/node-24.22.2-asan.DONE` / build log), run the
+  rung-1 harness against it (expect deterministic ASan
+  heap-buffer-overflow WRITE of size 1); then apply the fix diff,
+  incremental rebuild for the fixed control, and record the
+  differential in reports/node2shell-investigation.md.
+- **Last evidence:** first-wake abort log quoted in
+  reports/node2shell-investigation.md (Evidence ladder section);
+  harness lab/repro/node2shell-rung1-{server,client}.js.
+- **Unknowns:** whether the detached build survives the wake boundary
+  (checked next wake — restart from the log's last object if killed);
+  whether the stock-glibc abort class can be groomed to determinism
+  (Stage A, Ruby2Shell playbook); whether 22.x/20.x lines are worth
+  their own ASan builds (low priority — official affected lines are
+  24.x/26.x).
