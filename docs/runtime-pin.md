@@ -64,6 +64,12 @@ from a committed snapshot, never from a live checkout.
   `m2shell-.service.d/host-containment.conf` applies the trip condition,
   guard admission, slices and memory/start limits to all `m2shell-*`
   service units.
+- This plant runs in its own workload budget: `m2shell-plants.slice`
+  (MemoryHigh 3G / MemoryMax 5G / no swap / CPUQuota 200%), created by
+  the main plant's operator at the owner's request on 2026-11-20 and
+  applied to all `m2shell-*` service units through the prefix drop-in
+  `m2shell-.service.d/zzzz-own-slice.conf`. The mirrored containment
+  conf references the same slice so the two files agree.
 - The site-local verified binaries (`bin/mishe-tape`, `mishe-records`,
   `mishe-signal-*`) are byte-identical copies of the upstream plant's
   installed framer binaries, with their `*.install.json` sha256 records
