@@ -78,17 +78,28 @@ confirmed byte-for-byte. This establishes **rung 2 (reproducible
 crash)** and, per the ladder, **rung 3 (confirmed corruption)** for
 the ASan build: ASan observed the out-of-bounds store itself.
 
-## Negative control (fixed 3.4.13)
+## Negative control (fixed 3.4.13) — observed 2026-11-20
 
-Status: **in progress** (ASan build of the 3.4.13 tree building at
-report time). Expected: same script runs clean, prints
-`upcase returned, out len=42`. Will be recorded here with the actual
-observed result — clean or not — when the build lands.
+Clean. `ruby-3.4.13` tarball, identical configure flags and prefix
+convention, installed to `lab/build/ruby-3.4.13-asan`
+(`ruby 3.4.13 (2026-11-19 revision 48857d6f2e)`; affected build is
+`ruby 3.4.12 (2026-10-23 revision 366f5fdc00)`). Same script, same
+one-line invocation:
+
+```
+lab/build/ruby-3.4.13-asan/bin/ruby lab/repro/ruby2shell-rung1.rb
+```
+
+Observed: exit 0, `upcase returned, out len=42`, **zero**
+AddressSanitizer reports (full output in
+`lab/build/evidence/evidence-ruby2shell-rung1-control-3413.txt`;
+its only diagnostics are the same UBSan misalignment noise present on
+every run of these builds). The affected/fixed differential is
+observed end-to-end: identical input and build recipe, one loop bound
+in `enc/iso_8859_1.c:267` (`to < to_end` vs `to_end - to > 1`) is
+the only relevant difference.
 
 ## Consumer-reality pre-check (planning arithmetic — NOT observed)
-
-Before any grooming mechanics (nginx2root lesson), on this host's
-production glibc (2.39):
 
 - Allocation request R = 24 + (N+20) = N+44; the write runs to
   offset 24+2N−1 within the chunk.
@@ -112,8 +123,10 @@ production glibc (2.39):
 
 ## Next
 
-1. Negative control on fixed 3.4.13 (in progress).
-2. Plain-glibc (non-ASan) 3.4.12 build; observe the actual heap
+1. Plain-glibc (non-ASan) 3.4.12 build; observe the actual heap
    neighbor of the mapping_buffer and what the uniform-'S' write
-   reaches at N ≈ 40+.
-3. Stage A placement (canary) only if step 2 leaves a live path.
+   reaches at N ≈ 40+. This is the consumer-reality gate (nginx2root
+   lesson) — the entire Stage-A question lives or dies here.
+2. Stage A placement (canary) only if step 1 leaves a live path;
+   otherwise record the negative result and move to the next target
+   lane (PHP2Shell).

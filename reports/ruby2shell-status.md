@@ -18,20 +18,23 @@ byte; attacker controls buffer size via input length). Affected
   source. Repro command (one line, RC=1):
   `lab/build/ruby-3.4.12-asan/bin/ruby lab/repro/ruby2shell-rung1.rb`.
   Full reports: `lab/build/evidence/evidence-ruby2shell-rung1-*.txt`.
-- **Next action:** negative control — same script on fixed 3.4.13
-  (ASan build needed; source already confirmed fixed at
-  `lab/build/ruby-3.4.13` line 267). Then rung 3+ / consumer
-  reality: plain glibc build, observe the actual heap neighbor and
-  what the uniform-'S' payload can reach.
-- **Last evidence:** wake 3, 07:54Z: ASan report (both in-tree
-  `./ruby -I.ext/x86_64-linux` and installed prefix binary), 65-byte
-  region `[0x507000068571-1 …]` write at first byte past the end.
-  UBSan misalignment noise in ruby's own siphash/vm code is
-  unrelated build noise (also present on clean runs, RC=0).
-- **Unknowns:** negative control on 3.4.13 (expected clean); whether
-  production glibc sees any corruption at N=21 (arithmetic says no —
-  65-byte request has 7 bytes of slack, nginx2root lesson, so rung 3
-  on plain glibc needs N ≈ 40+ to reach the next chunk's size field);
+- **Next action:** consumer reality on plain glibc — build 3.4.12
+  WITHOUT sanitizers, observe the actual heap neighbor of the
+  mapping_buffer and what the uniform-'S' write reaches at N ≈ 40+
+  (arithmetic says N=21 is slack-only on production glibc). This
+  gates Stage A: a structurally inert write is a recorded negative
+  result, not a grooming problem.
+- **Last evidence:** wake 3, 07:54Z affected (RC=1, ASan report as
+  above, evidence-ruby2shell-rung1-*.txt) and 08:04Z control
+  (`evidence-ruby2shell-rung1-control-3413.txt`: RC=0, out len=42,
+  zero ASan lines; binary verified `ruby 3.4.13 (2026-11-19 revision
+  48857d6f2e)` vs affected `ruby 3.4.12 (2026-10-23 revision
+  366f5fdc00)`). UBSan misalignment noise in ruby's own siphash/vm
+  code is present on every run of these builds, clean ones included —
+  background, not findings.
+- **Unknowns:** production-glibc heap layout on this host (glibc
+  2.39) — unmeasured; whether the uniform 0x53 payload can reach and
+  usefully corrupt the next chunk's size field (partial-LSB angle);
   which Rails/Sinatra exposure the loopback harness mirrors.
 
 Owner: the researcher, from its wake 2 on (operator seeded and repaired
