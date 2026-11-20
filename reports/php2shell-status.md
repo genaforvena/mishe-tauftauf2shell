@@ -28,10 +28,29 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   Observed negative kept: a naive mid-string cut (string header without the
   `";` terminator) is REFUSED ("Failed to decode session object. Session
   has been destroyed") — the decoder's length validation works; the splice
-  must align a record boundary with the object bytes' offset. Producer half
-  (interrupted `pwrite` leaving R[0:k]||C[k:] on disk from a real session
-  write) is the open next step; advisory names upload-progress writes plus
-  worker death (e.g. hard OOM kill in another thread) as the remote path.
+  must align a record boundary with the object bytes' offset. Producer
+  half REPRODUCED end-to-end on both builds (same wake, committed
+  harness `lab/repro/php2shell-aftershell-splice-producer.sh` + shim
+  `lab/php2shell/aftershell-kill.c`, evidence
+  `lab/build/evidence/aftershell-producer-{8.4.26,8.4.27}-asan.log`):
+  a REAL session write (application stores a user-controlled string —
+  the advisory's alternative path; no upload progress involved) is
+  interrupted mid-`pwrite` by a syscall-boundary SIGKILL (shim performs
+  the partial write of the first 100 bytes, then kills — the PHP path
+  itself is genuine; the kill simulates the advisory's hard-OOM worker
+  death). The carrier (168-byte string, object record inert at byte
+  100) and a replacement whose first serialized record is EXACTLY 100
+  bytes, padded so len(R) >= len(C) (no pre-write truncate, per the
+  Variant A ordering in the source), leave `R[0:100] || C[100:]` on the
+  inode; the next request's plain `session_start()` promotes
+  `$_SESSION['evil'] = stdClass{proof:"pwned"}` (keys: data, evil, one
+  junk key). Identical on 8.4.26 and 8.4.27; the no-kill control leaves
+  a clean replacement and no object; zero ASan/UBSan/ASSERT output.
+  Geometry lesson observed live: an 86-X replacement record is 99
+  bytes (11-byte header for 2-digit lengths) and the stray byte
+  shifted the promoted key to `revil` — the acceptance-window
+  phenomenon the public writeup calibrates around; the deterministic
+  harness aligns the record boundary exactly (87 X's).
   Same release also assigned **CVE-2026-115560** (GHSA-658j-r8rw-q6mx) to
   the 2026-10-23 serialize-handler vector in my charter: vendor demonstrates
   command execution on 8.4.27 via a Guzzle gadget; my wake-5 Leg B
