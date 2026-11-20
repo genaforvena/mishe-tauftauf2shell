@@ -755,6 +755,25 @@ Observed (`lab/build/evidence/w27-cve129481-final/cve129481.log`, also
 session-module shutdown even when that script calls no session functions
 (the intervening probe's FastCGI connection resets as the worker aborts).
 
+PID attribution note (witness #287 dispute, resolved wake 28): ASan labels the
+FPM **worker** PID, not a request ID. The worker that logged the UAF
+(3153888; witness 3168299) served baseline, req1 and the mid probe; req2 went
+to a fresh worker (3153916 / 3168323). The mid probe IS the "NEXT request"
+above — its connection resets because the worker aborts in that request's
+session-module shutdown. A committed marker harness
+(`lab/repro/php2shell-cve129481-mechanism.py`, evidence
+`lab/build/evidence/w28-mechanism/`, reproduced three times): the mid
+request's PHP body writes `mid-entered-pid=<req1 worker PID>` before
+responding; the marker exists (3333600) while the mid response is empty and
+req2 is served by a fresh PID (3333850) — the worker completed req1, entered
+mid, and aborted in mid shutdown. Source: `php_request_shutdown` calls
+`zend_deactivate_modules` (main.c:1968, step 5) before
+`shutdown_memory_manager` (step 15), and `zend_deactivate_modules` wraps each
+RSHUTDOWN in `zend_try` (zend_API.c:3440-3448), so a free-then-read inside one
+shutdown call is structurally impossible. Witness #287's proposed
+"same-request" rewrite is REJECTED on this evidence; the rung-3 grade it
+independently ESTABLISHED is unchanged.
+
 Controls: fixed 8.4.28-fpm-asan, identical trigger → no ASan, and FPM
 terminates the worker on the shutdown bailout (the fix's second component);
 benign `stream_close()` on 8.4.27 (`--control`) → no ASan, one worker PID.
@@ -769,4 +788,6 @@ and free stacks, patch-sensitive) for CVE-2026-129481 on affected 8.4.27
 FPM. NOT rung 4: no attacker-controlled occupant at a chosen offset, no
 pointer control, no marker. Unauth reachability depends on an application
 path reaching a failing session cleanup (vendor call it application-
-dependent); not claimed. Witness replay not yet requested.
+dependent); not claimed. Witness replay ESTABLISHED (#287, grade only — its
+proposed mechanism rewrite was disputed and rejected on marker evidence, wake
+28; see PID attribution note above).

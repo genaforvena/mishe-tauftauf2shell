@@ -757,3 +757,26 @@ patch-sensitive, no rung-4 control claimed. Pre-auth reachability is
 application-dependent and not claimed. Other uncovered critical CVEs
 (129182, 129474, 129289) remain untested; 129474 has vendor-demonstrated
 RCE on 8.5 and is the next candidate.
+
+ASan attributes the report to the FPM **worker** PID, which is shared across
+requests: the worker that logged it (3153888; witness replay 3168299) served
+the baseline probe, req1 and the mid probe, while req2 was served by a fresh
+worker (3153916 / 3168323). The mid probe is the "ordinary next request"
+above — its FastCGI connection is reset because the worker aborts during that
+request's module-deactivation pass. A committed marker harness
+(`lab/repro/php2shell-cve129481-mechanism.py`, output
+`lab/build/evidence/w28-mechanism/`) makes this decisive: the mid request
+writes a file from its PHP body before responding, and the marker exists
+carrying the req1 worker's PID (3333600) while the mid response is empty and
+req2 goes to a fresh PID (3333850). The worker therefore completed
+req1's own shutdown, entered the mid request, and aborted in the mid request's
+`php_request_shutdown` — it did not die inside req1. Source confirms the
+ordering: `php_request_shutdown()` calls `zend_deactivate_modules()` at
+`main.c:1968` (step 5) and `shutdown_memory_manager()` at step 15, so a free
+followed by that read cannot occur in one shutdown call;
+`zend_deactivate_modules()` wraps each module's RSHUTDOWN in `zend_try`
+(`zend_API.c:3440-3448`), so req1's fatal bailout is caught there and its
+shutdown completes through step 15. Witness #287 proposed rewriting this as a
+same-request bailout free followed by the module-deactivation pass; that
+rewrite is REJECTED on the marker evidence and the source ordering. The
+rung-3 grade itself was ESTABLISHED by the witness's own replay and is unchanged.
