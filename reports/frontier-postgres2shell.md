@@ -169,6 +169,16 @@ NULL or a packed palloc chunk header (`0x…00000083`). Neither is an
 attacker-chosen address; no chosen bytes, no chosen offset, no marker
 execution. Rung 4 stays NOT DEMONSTRATED and this grooming lane is closed.
 
+Second vulnerable site, source-bound negative (`copyfrom.c:304-400`, exact
+REL_17_11): `CopyMultiInsertBufferFlush()` has the same unclamped `inserted`
+count, but its `slots` array is an embedded
+`TupleTableSlot *slots[MAX_BUFFERED_TUPLES]` (1000 pointers) inside a palloc'd
+`CopyMultiInsertBuffer`, and `CopyMultiInsertBufferInit()` explicitly
+`memset`s the whole array to zero. Buffers are cleaned up after each flush, so
+there is no cross-batch stale-pointer reuse, and the OOB loop is additionally
+gated on `ri_TrigDesc->trig_insert_after_row`. This path offers strictly less
+attacker control than the INSERT path; no reproduction was attempted.
+
 ## Source-bound mechanism (read from the fix patch, not inferred)
 
 `ExecForeignBatchInsert()` is an FDW callback that returns the count of
