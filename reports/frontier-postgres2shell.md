@@ -131,6 +131,44 @@ is not a reliable detector for the line-1268 overrun; Valgrind's V bits did
 flag the uninitialised pointer. No ASan build was needed for the
 symbolisation above.
 
+## Groom probe — attacker-extendable overrun and stale slots (gdb, 2026-11-20)
+
+The earlier "OOB slots are all zero" observation was specific to the stock
+trigger (2 rows sent ⇒ `ri_NumSlotsInitialized=2`), not an invariant. Exact
+REL_17_11 source: `ri_Slots = palloc(sizeof(TupleTableSlot *) * ri_BatchSize)`
+and `ri_PlanSlots = palloc(...)` in `es_query_cxt`
+(`nodeModifyTable.c:891-895`); `postgres_fdw.c:4206-4211` overwrites
+`*numSlots = n_rows` with the remote rule's count and returns the same
+`slots` array. `ExecClearTuple` clears slot *contents* but never nulls
+`ri_Slots[i]`, and the pointer array is kept across batches. Three bounded
+gdb replays on the PTRACE-capable 17.11 container (loopback only) tested the
+tail:
+
+| probe | batch_size / rows sent | remote rows reported | OOB slots consumed | first fault |
+|---|---|---|---|---|
+| stock (prior wake) | 10 / 2 | 6 | indices 2..5 zero (never initialized) | `i=2`, NULL |
+| full batch | 10 / 10 | 120 | indices 2..9 all **valid** slot pointers | `i=10`, NULL |
+| two batch | 10 / 10 then 2 | 10 then 13 | indices 2..9 hold **stale valid pointers from batch 1** (exact addresses match) | `i=10`, NULL |
+| matrix | 8 / 12 / 16 / 20 full batches | 96 / 144 / 192 / 240 | first OOB value `0x44a000000063` (bs=8), NULL (bs=12), `0x4aa000000083` (bs=16), NULL (bs=20) | first OOB index |
+
+`batch_size=2` with 24 reported rows also faults at `i=2`, and there
+`ri_PlanSlots` was **not** adjacent (different palloc free-list class), so
+array adjacency is not a reliable grooming assumption.
+
+Evidence: `lab/frontier/postgres2shell/logs/groom-fullbatch-expand120.log`,
+`groom-twobatch.log`, `groom-batch2-expand24.log`, and
+`groom-matrix-bs{8,12,16,20}.log`; harness `trigger-{groom,fullbatch,twobatch}.sql`,
+`gdb-groom.cmd`, `groom-probe.sh`, `matrix-probe.sh`. Fixed 17.12 replay of the
+extended triggers: `INSERT 0 10` and `INSERT 0 12`, psql rc 0, no server
+signal (`logs/trigger-{fullbatch,twobatch}-17.12.out`).
+
+**Decision:** the OOB walk is demonstrably attacker-extendable (up to 240
+reported rows observed) and can be made to consume stale, valid slot pointers
+from an earlier batch, but the first truly out-of-array pointer is either
+NULL or a packed palloc chunk header (`0x…00000083`). Neither is an
+attacker-chosen address; no chosen bytes, no chosen offset, no marker
+execution. Rung 4 stays NOT DEMONSTRATED and this grooming lane is closed.
+
 ## Source-bound mechanism (read from the fix patch, not inferred)
 
 `ExecForeignBatchInsert()` is an FDW callback that returns the count of
@@ -180,12 +218,15 @@ Do not collapse the advisory's RCE claim into a demonstrated primitive.
   1268; see the symbolised section above. The stock binary itself stays
   stripped — the names come from the matching Debian debug package, not from
   the Valgrind log.
-- **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** The OOB slots
-  read in the observed allocation are all zero; the consumed `TupleTableSlot
-  *` is NULL, not attacker-chosen. The primitive would be a 4-byte store of
-  the foreign relation's OID through a controlled slot pointer, but no such
-  pointer was observed or placed. No GOT/pointer control, no marker
-  execution. The advisory's "arbitrary code execution" remains a CLAIM.
+- **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** In the stock
+  trigger the OOB slots are all zero and the consumed `TupleTableSlot *` is
+  NULL; the bounded groom probe above extends the walk to 240 reported rows
+  and makes it consume *stale valid* slot pointers from a prior batch, but
+  the first out-of-array pointer is either NULL or a packed palloc chunk
+  header. No attacker-chosen address, chosen bytes or marker execution; the
+  primitive's 4-byte store of the foreign relation's OID was never observed
+  at a chosen address. The advisory's "arbitrary code execution" remains a
+  CLAIM.
 
 ## Feasibility and cheapest next step
 
@@ -195,17 +236,20 @@ test, stock images pullable, both endpoints loopback-able. It needs no
 hardware feature (unlike the AVX-512-blocked Java4Shell). Reachability is
 narrower than a default-on listener: the attacker must influence a foreign
 server's row-count response and hold `PR:L`. The primitive is an OOB slot
-pointer read followed by a 4-byte store through it. The observed slot tail is
-all zeros, so the practical question is whether that tail can be groomed
-with chosen pointer bytes — unproven and not achieved by the stock trigger.
+pointer read followed by a 4-byte store through it. The groom matrix shows
+the walk is attacker-extendable and the first out-of-array value is
+batch-size-steerable (NULL or a chunk header), but no SQL-only sequence
+placed a chosen pointer there in this lane. Even with a chosen pointer, the
+written value is a relation OID, so a demonstration would need an observed
+controlled write at a chosen address, not just an OOB pointer read.
 
-Next rung: the remaining question is purely a grooming question — can bytes
-of a chosen pointer value be placed into the tail of the 10-entry `ri_Slots`
-allocation before `ExecBatchInsert` reads it? The stock trigger leaves all
-eight OOB entries zero. Even with a chosen pointer, the written value is a
-relation OID, so a demonstration needs an observed controlled write at a
-chosen address, not just an OOB pointer read. Preserve the fixed-build
-differential and the zero-tail negative.
+The grooming lane is closed after this bounded matrix: the first OOB pointer
+is always allocator metadata (NULL or a chunk header), not a value the
+attacker can set from SQL. A future rung-4 attempt would need a different
+primitive (e.g. a way to place a chosen 8-byte value in the arena chunk
+immediately after `ri_Slots`), not more repetitions of this trigger. The
+fixed-build differential and all zero/NULL/chunk-header negatives are
+preserved above.
 
 ## Reproduce
 
@@ -239,6 +283,21 @@ PTRACE capability; loopback only, no host port published):
 
 The gdb command file is committed at `lab/frontier/postgres2shell/gdb.cmd`;
 the captured log above is its actual output.
+
+Groom probes (same PTRACE-capable 17.11 container, loopback only):
+
+```
+# copy trigger-groom.sql / trigger-fullbatch.sql / trigger-twobatch.sql into
+# /tmp of pg2shell-gdb as /tmp/trigger-groom.sql, then:
+docker exec pg2shell-gdb bash /tmp/groom-probe.sh
+# gdb-groom.cmd breaks at *ExecBatchInsert+120, dumps 40 pointers at i=0 and
+# logs every consumed slot. matrix-probe.sh (host side) loops batch sizes
+# 8/12/16/20 with full batches and a 12x-expanding rule.
+# Fixed-build check:
+docker cp trigger-fullbatch.sql pg2shell-17-12:/tmp/trigger-fullbatch.sql
+docker exec -e PGPASSWORD=pg2shell pg2shell-17-12 \
+  psql -U postgres -h 127.0.0.1 -p 5432 -f /tmp/trigger-fullbatch.sql
+```
 
 All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432;
 in-container 55435 for the Valgrind instance). Stock image digests are pinned
