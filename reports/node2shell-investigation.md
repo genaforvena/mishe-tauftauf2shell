@@ -122,6 +122,81 @@ stream.session.altsvc(alt, origin)               // id=0, origin non-empty
   — the engine reaps detached jobs), and is abandoned; Valgrind on
   official prebuilts delivers the same differential without any build.
 
+## Stage A — deterministic PREV_INUSE-clear and at-will abort (third wake, 2026-11-20)
+
+The 1/6 luck on stock v20.20.2 was layout luck of that EOL binary's
+startup heap. On the **officially affected prebuilt `v24.22.2`** the
+same single unauthenticated request (loopback, `authority_len = 1040`,
+`origin_len = 1048 ≡ 8 mod 16`) aborts the server **at will, on the
+first request** — no grooming needed, the binary's own per-request
+allocation window is enough:
+
+- **10/10 identical runs** (fresh process each): server SIGABRT
+  rc=134, `malloc(): invalid size (unsorted)`; client killed by
+  ECONNRESET before any response. Committed script
+  `lab/repro/node2shell-stageA.sh` (5-run smoke: 5/5, off-class and
+  fixed controls clean).
+- **Attacker-chosen length chooses the effect** (bare prebuilt, one
+  request per fresh process): every tested on-class length aborted —
+  `origin_len` 1048, 1064, 1096, 1160, 1256, 1384, 1544, 1736, 1960 →
+  **9/9 aborts**; every tested off-class length completed normally —
+  1040, 1041, 1047, 1049, 1056, 1057, 1072, 1073, 1088 → **0/9
+  aborts**. The sweep beyond 1960 was cut by the wake's tool deadline
+  — lengths 2216..14984 remain untested, UNKNOWN.
+- **Fixed control, same request shape**: prebuilt `v24.22.3`, on-class
+  lengths 1048, 1064, 1096, 1256, 1544, 1960, 2504, 3560, 5416, 9896
+  → **0/10 aborts**, every request completed. The deterministic
+  differential now holds on production glibc, not just under Memcheck.
+
+### Rung 3 — confirmed corruption, debugger-observed bytes
+
+`gdb` (15.1, ASLR off) on the bare aborting configuration
+(v24.22.2 prebuilt, breakpoint at `nghttp2_submit_altsvc` — reached
+after the OOB write, before the frame copies):
+
+```
+ORIGIN ptr=0x6e45b70 len=1048
+origin chunk hdr: 0x6e45b60:  0x0  0x421       ← exact-fit 0x420 chunk
+victim chunk at 0x6e45f80:
+  0x6e45f80:  0x6161616161616161  0x700        ← prev_size holds the
+                                                 attacker's 'aaaa' (tail
+                                                 of the origin string);
+                                                 size field NULed:
+                                                 0x701 → 0x700
+malloc(): invalid next size (unsorted)
+```
+
+Continuing hits SIGABRT with the full causal stack — the abort is the
+very next malloc **inside the same `session.altsvc()` call**:
+
+```
+#6  malloc_printerr "malloc(): invalid next size (unsorted)"
+#7  _int_malloc (main_arena, bytes=1076)
+#9  node::mem::NgLibMemoryManager<...>::MallocImpl
+#10 nghttp2_submit_altsvc ()
+#11 node::http2::Http2Session::AltSvc(...)
+```
+
+Observed chain on production glibc, stock official binary, one
+unauthenticated request: the NUL clears PREV_INUSE of the chunk
+following the origin buffer (0x700-size chunk there; in a different
+env the same byte landed on a 0x55100-size chunk's LSB — the victim
+varies with heap state, the placement class does not), and nghttp2's
+ALTSVC origin-copy malloc (1076 bytes) fails glibc's unsorted-bin
+validation and the process dies. Mechanism note for exploitation
+work: a NUL at the size LSB **only clears the flag bits**
+(PREV_INUSE/IS_MMAPPED/NON_MAIN_ARENA); the size magnitude is
+unchanged. Consumer lesson (nginx2root) applies: the first observable
+consumer on this host is glibc's own unsorted-bin validator, which
+converts the flag-clear into an abort — impact beyond DoS needs a
+consumer that acts on the cleared PREV_INUSE before any validator
+sees it.
+
+Grade: **rung 3 confirmed** (Memcheck-observed write +
+debugger-observed corrupted header + deterministic production-glibc
+abort, fixed control clean). DoS-shaped, not yet impact; rung 4
+remains open.
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
@@ -131,6 +206,14 @@ Stock-glibc abort observation (natural rate ≈2%):
 node lab/repro/node2shell-rung1-server.js 0
 # terminal 2 (port from server's LISTEN line; repeat runs for the ~2% class)
 node lab/repro/node2shell-rung1-client.js <port> 1040
+```
+
+Deterministic at-will abort (Stage A, rung 3; ~8 s for 5 runs + both
+controls):
+
+```
+sh lab/repro/node2shell-stageA.sh 5
+# → 5/5 rc=134 on v24.22.2; off-class and v24.22.3 controls stay alive
 ```
 
 Deterministic Valgrind differential (rung 2; ~15 s per run):
@@ -148,9 +231,12 @@ node lab/repro/node2shell-rung1-client.js <port> 1040
 
 Harness: `lab/repro/node2shell-rung1-server.js` (HTTP/2 server on
 127.0.0.1 forwarding `:authority` into `session.altsvc` — the advisory's
-app precondition) and `lab/repro/node2shell-rung1-client.js`
-(single request, syntactically valid long authority, waits for the
-ALTSVC frame echo proving the full path executed). Both committed.
+app precondition), `lab/repro/node2shell-rung1-client.js` (single
+request, syntactically valid long authority, waits for the ALTSVC
+frame echo proving the full path executed) and
+`lab/repro/node2shell-stageA.sh` (rung-3 runner with off-class and
+fixed-release controls; `VULN_BIN`/`FIXED_BIN` env override the node
+binaries). All committed.
 
 ## Lab provenance
 
