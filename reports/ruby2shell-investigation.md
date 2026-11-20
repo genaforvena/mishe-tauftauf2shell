@@ -99,34 +99,61 @@ observed end-to-end: identical input and build recipe, one loop bound
 in `enc/iso_8859_1.c:267` (`to < to_end` vs `to_end - to > 1`) is
 the only relevant difference.
 
-## Consumer-reality pre-check (planning arithmetic — NOT observed)
+## Consumer reality — observed 2026-11-20, mechanism CORRECTED
 
-- Allocation request R = 24 + (N+20) = N+44; the write runs to
-  offset 24+2N−1 within the chunk.
-- glibc chunk C = round16(R+8), usable C−8. At N=21, R=65, C=80,
-  usable 72: the single byte at offset 65 lands in malloc slack —
-  production glibc would NOT corrupt anything at N=21. The ASan report
-  fires because ASan sizes the allocation exactly and redzones it.
-- Reaching the NEXT chunk's size field needs 24+2N−1 ≥ C−8. At N=40:
-  R=84, C=96, write end 103 → slack 84..87, full size field 88..95,
-  bytes 96..103 into the next chunk's header. So production impact
-  needs N ≈ 40+, and the payload is UNIFORM: every overflow byte is
-  0x53 'S' (upcase) or 0x73 's' (fold) — no byte choice. A fully
-  overwritten size field 0x5353… is garbage glibc rejects on free;
-  the plausible angle is ending the write INSIDE the size field
-  (partial, LSB) by choosing N.
-- All arithmetic, no measurement: the true heap neighbor on this host
-  must be observed (plain-glibc build, next rung work) before Stage A
-  placement is designed. If the neighbor's layout makes the
-  uniform-'S' write structurally inert, this path is recorded as a
-  negative result.
+**Superseded hypothesis (wake-2 arithmetic, preserved, falsified):**
+the case-map loop was assumed to write all 2N output bytes into the
+first buffer ("write runs to offset 24+2N−1; N≈40+ overwrites the full
+next size field"). Valgrind on the plain build at N=40 showed ZERO
+invalid writes — falsified.
+
+**Corrected mechanism (verified in `string.c:7828-7851`):** when
+`case_map` stops at `to == to_end`, the caller chains a new buffer
+(`capa = remaining × buffer_count + 20`) and continues. The overflow is
+therefore **exactly ONE byte** at `space` index capa — allocation
+offset R = 24 + capa — and happens only when capa is ODD (the
+sharp-s iteration that starts at `to = to_end−1`).
+
+- **Pure sharp-s input:** capa = N+20, overflow iff N odd ≥ 21;
+  R = N+44 is then always ODD. A glibc size-field LSB needs offset
+  ≡ 8 (mod 16) — even. So the byte lands in the request's own slack
+  or the next chunk's `prev_size`, never in a size field: the pure
+  vector is structurally inert on stock glibc (valgrind: one invalid
+  write, "0 bytes after a block of size 65"; all stock sweeps clean).
+  The ASan report at N=21 is real but ASan-only, exactly as the
+  nginx2root lesson warns.
+- **Parity flip — one leading 1-byte char (`"a" + N×ß`):** the 'a'
+  makes `to` odd, so overflow requires capa = N+21 EVEN (N odd), and
+  R = N+45 is EVEN. At N ≡ 11 (mod 16) (27, 43, 59, …) R ≡ 8
+  (mod 16): the single 0x53 byte lands EXACTLY on the next glibc
+  chunk's size-field LSB. 0x53 = PREV_INUSE|IS_MMAPPED set.
+
+**Observed on stock glibc 2.39** (plain build
+`lab/build/plain/ruby-3.4.12-plain`, rev 366f5fdc00, no
+sanitizers, no tunables): valgrind confirms one invalid write at
+`iso_8859_1.c:293` "0 bytes after" blocks of size 72 (N=27) and 88
+(N=43). Fresh-process runs at N=27/43/59 abort inside glibc with
+metadata-corruption diagnostics — `corrupted size vs. prev_size`,
+`munmap_chunk(): invalid pointer`, `corrupted size vs. prev_size in
+fastbins` (N=43 aborted in 5 of 10 observed runs; layout-dependent,
+NOT deterministic — clean runs occur with the same command). glibc
+itself reporting corrupted heap metadata establishes **rung 3 on the
+production consumer**: the write demonstrably corrupts a neighboring
+chunk's size field on stock glibc, not only under ASan. Evidence:
+`lab/build/evidence/sweep-rung3-mixed.txt`,
+`lab/build/evidence/vg-rung3-*.txt`.
+
+Reproduction: `lab/repro/ruby2shell-rung3-mixed.rb` (mixed input),
+`lab/repro/ruby2shell-rung3-plain.rb` (pure input); run as
+`lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-rung3-mixed.rb 43`.
 
 ## Next
 
-1. Plain-glibc (non-ASan) 3.4.12 build; observe the actual heap
-   neighbor of the mapping_buffer and what the uniform-'S' write
-   reaches at N ≈ 40+. This is the consumer-reality gate (nginx2root
-   lesson) — the entire Stage-A question lives or dies here.
-2. Stage A placement (canary) only if step 1 leaves a live path;
-   otherwise record the negative result and move to the next target
-   lane (PHP2Shell).
+1. Stage A — placement: groom the heap so the chunk following the
+   mapping_buffer is a chosen victim (canary object), and prove the
+   0x53 byte changes it at the chosen offset. The parity-flipped
+   size-LSB write is the primitive; whether 0x53 (PREV_INUSE|IS_MMAPPED)
+   into a chosen size LSB buys anything beyond aborts is the open
+   rung-4 question.
+2. If no chosen-victim effect is achievable, record the negative
+   result and move to the next target lane (PHP2Shell).
