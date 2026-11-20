@@ -1,14 +1,15 @@
 # Apache2Root investigation — CVE-2026-119618 (no GHSA alias)
 
-Voice: `apache2shell`. Status 2026-11-20 18:32Z: **rung 3 confirmed**
-(reproducible differential crash + corrupted pool metadata under gdb) and
+Voice: `apache2shell`. Status 2026-11-20 19:12Z: **rung 3 confirmed**
+(reproducible differential crash + corrupted pool metadata under gdb),
 **Stage A of rung 4 observed** (chosen header bytes at a chosen offset in the
-corrupted pointer, including all 8 bytes of the faulting allocator pointer).
-Stage C remains UNKNOWN: this build rejects NUL in h2 field values, so the
-`00` high bytes of a canonical x86-64 user pointer cannot be sent on the wire;
-binary DATA bytes did not land in the fault word. Huffman-coded HPACK does not
-change this (18:25Z). A non-pointer-field search (18:20–18:32Z) found only
-pointer slots corrupted. Everything below was from this plant's loopback lab.
+corrupted pointer, including all 8 bytes of the faulting allocator pointer),
+and **Stage C closed UNREACHABLE**: this build rejects NUL in h2 field values,
+so the `00` high bytes of a canonical x86-64 user pointer cannot be sent on
+the wire; binary DATA bytes did not land in the fault word. Huffman-coded
+HPACK does not change this (re-verified 19:11Z with a repaired probe). A
+non-pointer-field search (18:20–18:32Z) found only pointer slots corrupted.
+Everything below was from this plant's loopback lab.
 
 Identifier correction 2026-11-20 (operator, from apache2shell's #278): the
 earlier title printed `GHSA-34m4-m9fh-gqp5`, which is Ruby2Shell's advisory
@@ -251,33 +252,45 @@ Within field values the accepted alphabet cannot spell the two leading zero
 bytes required by a canonical x86-64 user pointer (`00 00 7f ...`); `0x7f` is
 also rejected. `0x80`–`0xff` are accepted, but mixed high bytes are
 non-canonical. Disabling ASLR would not supply the missing `00` bytes. No
-canonical pointer or benign marker execution was produced; Stage C stays
-UNKNOWN, now bounded by an observed wire alphabet rather than an assumption.
+canonical pointer or benign marker execution was produced. Stage C is closed
+UNREACHABLE in this build: the wire alphabet is observed, not assumed, and no
+route found here can spell the pointer.
 
 
-### Huffman-coded HPACK does not reopen the alphabet (18:25Z)
+### Huffman-coded HPACK does not reopen the alphabet (re-run 19:11Z)
 
 `alphabet-probe.py` used literal HPACK string literals only, so its NUL result
 could have been an encoding artifact: HPACK Huffman coding emits a decoded
-`0x00` as the octets `ff c7`, and `00 00 7f ff 41 42 43 44` as
-`ff c7 fe 3f ff ff ff ee 86 ed eb ff`, neither containing a literal NUL.
-`huffman-probe.py` starts a private 2.4.70 and sends one request per case; it
-carries a minimal RFC 7541 Appendix B encoder for the bytes used, so no
-third-party library is needed. Observed (ports 7220/7221):
+`0x00` as `ff c7`, and `00 00 7f ff 41 42 43 44` as
+`ff c7 fe 3f ff ff ff 3f ff ff ee 86 ed eb ff` (RFC 7541 Appendix B gives
+0xff = `3ffffee`, 26 bits), neither containing a literal NUL.
 
-| decoded value | HPACK string | result |
+**Witness-defect finding and repair.** The witness (tape #279) showed that the
+committed `huffman-probe.py` never Huffman-coded a value: its `header_block`
+compared the already-`bytes` name with the string `"x-probe"`, so the flag was
+always false and the 18:25Z "/H" rows were literal results restated. This
+wake reproduced that byte-for-byte (`header_block(v, True) ==
+header_block(v, False)`), then fixed the comparison to `b"x-probe"`, added the
+missing 0xff codeword, asserted the 0x80 Huffman bit on the emitted value
+string, and added a preflight `self_check()` pinning `ffc7` for `00`,
+`86edebff` for `ABCD` and the 14-byte pointer prefix. The repaired committed
+probe ran a private 2.4.70 on 127.0.0.1:7230 at 19:11:54Z
+(`logs/huffman-probe-fixed-7230-1912Z.log`; one access-log line — the ASCII
+control, HTTP 200, all forbidden cases RST:1 with no server request):
+
+| decoded value | value HPACK string | result |
 |---|---|---|
-| `41 00 42` | literal | RST:1 |
-| `41 00 42` | Huffman | RST:1 |
-| `00` | Huffman | RST:1 |
-| `00 00 7f ff 41 42 43 44` | Huffman | RST:1 |
+| `41 00 42` | literal `03 41 00 42` | RST:1 |
+| `41 00 42` | Huffman `84 87 ff 17 7f` | RST:1 |
+| `00` | Huffman `82 ff c7` | RST:1 |
+| `00 00 7f ff 41 42 43 44` | Huffman `8e ff c7 fe 3f ff ff ff 3f ff ff ee 86 ed eb ff` | RST:1 |
 | `0a` / `0d` / `7f` | Huffman | RST:1 each |
-| `41 42 43 44` | Huffman | 200 |
+| `41 42 43 44` | Huffman `84 86 ed eb ff` | 200 |
 
 nghttp2 validates the **decoded** field value; Huffman does not smuggle a
 forbidden byte past it. This was a live loophole candidate against the Stage C
-boundary and it is closed. Each case uses a fresh h2c connection because a
-malformed value also kills the connection.
+boundary and it is closed on independently re-run bytes. Each case uses a
+fresh h2c connection because a malformed value also kills the connection.
 
 ### Non-pointer control-field search (18:20–18:32Z) — closed
 

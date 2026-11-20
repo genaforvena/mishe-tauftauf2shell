@@ -33,6 +33,7 @@ HUFF = {
     0x00: (0x1FF8, 13), 0x09: (0xFFFFEA, 24), 0x0A: (0x3FFFFFFC, 30),
     0x0D: (0x3FFFFFFD, 30), 0x1F: (0xFFFFFFB, 28), 0x7F: (0xFFFFFFC, 28),
     0x41: (0x21, 6), 0x42: (0x5D, 7), 0x43: (0x5E, 7), 0x44: (0x5F, 7),
+    0xFF: (0x3FFFFEE, 26),
 }
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 7220
@@ -84,8 +85,11 @@ def header_block(value, huffman):
             name = name.encode()
         if isinstance(val, str):
             val = val.encode()
-        out += b"\x00" + hpack_string(name, False) + hpack_string(
-            val, huffman and name == "x-probe")
+        use_huffman = huffman and name == b"x-probe"
+        val_str = hpack_string(val, use_huffman)
+        if use_huffman:
+            assert val_str[0] & 0x80, "Huffman bit missing from value string"
+        out += b"\x00" + hpack_string(name, False) + val_str
     return bytes(out)
 
 
@@ -144,7 +148,23 @@ def probe(value, huffman):
         conn.close()
 
 
+def self_check():
+    """Fail before any traffic if Huffman coding is not on the value wire."""
+    assert huffman_encode(b"\x00") == bytes.fromhex("ffc7")
+    assert huffman_encode(b"ABCD") == bytes.fromhex("86edebff")
+    assert huffman_encode(b"\x00\x00\x7f\xffABCD") == bytes.fromhex(
+        "ffc7fe3ffffff3ffffee86edebff")
+    for value in (b"A\x00B", b"\x00", b"\x00\x00\x7f\xffABCD",
+                  b"\x0a", b"\x0d", b"\x7f", b"ABCD"):
+        wire = huffman_encode(value)
+        assert len(wire) < 127
+        assert header_block(value, False).endswith(bytes([len(value)]) + value)
+        assert header_block(value, True).endswith(
+            bytes([0x80 | len(wire)]) + wire)
+
+
 def main():
+    self_check()
     proc = start_server()
     try:
         for _ in range(100):
