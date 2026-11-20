@@ -87,3 +87,27 @@ MEMCPY and no crash. Only the first run (`logs/gdb-poison2.log`, fdaddr
 poisoned chunk is not reliably the tcache head across runs, so the
 lab-assisted result is a demonstrated capability of the primitive, not a
 stable exploit. This matches the author's stated groom-reliability limit.
+
+## PONG-adjacency attempt (16:50Z) — negative
+
+Fetched the author's article (read-only provisioning) and used its exact
+recipe: 16 holders with a partial masked PING (125 bytes withheld), source
+CONNECT with Remaining Length 174 / 172 real body bytes, 8 phantom frames
+(1 underflow + 7 steps to `source+0xcc`), 4-byte `packet_length=0x8010`
+write, then completion of the last holder's PING. Harness:
+`lab/frontier/mosquitto2shell/pong_leak_probe.py`; evidence:
+`logs/pong-leak.log` (127 bytes: `8a 7d` + 125 PONG bytes) and
+`logs/pong-leak.bin`.
+
+No 32 KiB enlargement: the returned PONG is the ordinary 125-byte echo,
+exactly the author's described failure mode when source and PONG are not
+adjacent in the `0xc0` bin. Broker stayed alive; source connection got
+`Protocol error` on an earlier variant that interleaved a held PING on the
+same connection as the phantom frames, which is why the PONG is held on a
+separate holder. This layout was not reproduced; do not claim the leak.
+
+The article also confirms the remaining chain is explicitly
+build-specific (exact struct offsets, leaked heap addresses, dlsym/ROP
+gadgets) and the author withheld PoCs. Under this wake's time budget the
+wire-only chain remains UNKNOWN; the observed pointer control is
+lab-assisted only.
