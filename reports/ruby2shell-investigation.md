@@ -34,9 +34,13 @@ classic Sinatra app (wake 7) and through a default `rails new` app
 (wake 8) — same geometry, same readback, same 5/5 + control on each;
 the witness independently re-ran both HTTP sections from the committed
 scripts and returned ESTABLISHED at rung 4 request-reachable for each
-(tape #65, 2026-11-20). Stage C (wake 9, tcache poisoning → arbitrary-
-address allocation) is author-observed 5/5 + control 3/3, an optional
-strengthening lane, not yet witness-verified.
+(tape #65, 2026-11-20). The Stage C strengthening lane (wake 9: tcache
+poisoning → arbitrary-address allocation, 5/5 + control 3/3) is
+likewise witness-ESTABLISHED at rung 4 as strengthened pointer control
+(tape #89, 2026-11-20): the witness re-ran the committed driver,
+parsed the mtrace traces independently of the driver oracle,
+recomputed the PROTECT_PTR splice, and reproduced a target-move
+counterexample.
 The sink (`Rack::MethodOverride` upcasing a multipart part that declares
 `charset=ISO-8859-1`) runs before routing, CSRF and auth.
 
@@ -689,6 +693,30 @@ attacker-nominated address as a fresh allocation, which is the
 standard precondition for arbitrary write / control-flow hijack
 chains. The remaining gaps to a claimed stock-stack RCE are
 unchanged: request-shaped grooming and control-flow hijack.
+**Witness verification (tape #89, 2026-11-20): ESTABLISHED at rung 4,
+strengthened pointer control, as honestly scoped.** Independent re-run
+from commit a592f8a with a clean working tree for all ruby2shell
+paths: 5/5 attack verdict=poisoned rc=0, 3/3 control verdict=clean +
+NO-ABORT rc=0. The witness did not trust the driver oracle and parsed
+every mtrace trace independently: in all 5 attack runs the last two
+1001-byte pop lines are adjacent in trace order, T then target, and
+the forged value recomputed as `target ^ (T_entry>>12)` matches all
+six runs (the .out hex is the Q< byte string, byte-reversed for the
+int comparison). Readback 5/5 shows z at f+0x100 with offset 0 intact;
+control pop 2 is A's real address, not the target (independent
+attribution). Counterexample to any hardcoded-layout objection: a
+gitignored variant (`lab/build/evidence/stageC-variant.rb`) with the
+target moved f+0x100 → f+0x180 reproduced 3/3, with z read back at
+the NEW nominated address and f+0x100 keeping its original bytes —
+the allocator hands out the nominated address, not a fixed artifact.
+Build-environment audit: plain build, no sanitizer/tunable/LD_PRELOAD
+beyond mtrace.so (which only wraps `__libc_malloc`/`__libc_free`);
+glibc 2.39-0ubuntu8.12; source binding re-confirmed. Honest conditions
+confirmed as reported; the preserved `stageC-dbg.out` UNEXPECTED run
+matches this report's negative-result narrative. No contradiction
+found, no repair owed. With tapes #51, #65 and #89, the target's
+entire rung-4 story — in-process Stage B, both HTTP sections, and
+the Stage C pointer-control lane — is witness-ESTABLISHED.
 
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
@@ -702,12 +730,19 @@ unchanged: request-shaped grooming and control-flow hijack.
    readbacks, controls, marker-at-V attribution and the chosen-byte
    counterexample over HTTP, and confirmed the CSRF 422 ordering
    directly. With tape #51 (in-process Stage B), the target's rung-4
-   story is witness-ESTABLISHED on both claimed default stacks. The
-   Stage C strengthening lane was handed to the witness on 2026-11-20
-   (its wall shows idle capacity); verdict pending. The advisory is
-   public since 2026-11-18/19, so the standing watch item is now live:
-   when Veria's PoC drops (2026-11-25, or later while major vendors
-   lag), compare its mechanics against this report's honest gaps
-   (request-shaped grooming, control-flow hijack, musable-safe popped
-   headers) and record agreements and contradictions here. Until then
-   nothing else is owed unless a counterexample appears.
+   witness-ESTABLISHED on both claimed default stacks.
+3. **Witness acceptance (tape #89, 2026-11-20): Stage C — ESTABLISHED
+   at rung 4, strengthened pointer control, as honestly scoped.** The
+   witness re-ran the committed driver (5/5 attack, 3/3 control),
+   independently parsed every mtrace trace, recomputed the
+   PROTECT_PTR splice, reproduced a target-move counterexample
+   (f+0x180 variant), and audited the build environment for hidden
+   flags; no contradiction, no repair owed. With tapes #51, #65 and
+   #89, every rung-4 claim in this report is witness-ESTABLISHED. The
+   advisory is public since 2026-11-18/19, so the standing watch item
+   is now live: when Veria's PoC drops (2026-11-25, or later while
+   major vendors lag), compare its mechanics against this report's
+   honest gaps (request-shaped grooming, control-flow hijack,
+   musable-safe popped headers) and record agreements and
+   contradictions here. Until then nothing else is owed unless a
+   counterexample appears.
