@@ -196,4 +196,22 @@ def multi_walk():
         else:
             tag = 'UNKNOWN (believed-next 0x%x is content, fd/bk=0x%x/0x%x)' % (nnf, fd2, bk2)
         print('O2-VICTIM chunk=0x%x sizefield=0x%x -> %s' % (v2, v2sf, tag))
+        # wake 7: believed size is post-NUL (byte0 zeroed) — the REAL
+        # size is believed | destroyed byte0. Dump the believed-next
+        # header bytes (the fake-header groom target for a free victim)
+        # and scan the tail for the real next chunk: a 16-aligned spot
+        # holding a sane sizefield with prev_inuse=1 (it follows the
+        # in-use-or-just-NULed victim). prev_size of that candidate
+        # equals the victim's REAL size when the victim was ever freed.
+        bs = v2sf & ~7
+        bn = v2 + bs
+        bnh = rd_try(bn + 8)
+        print('VICTIM-BELIEVED-NEXT 0x%x sizefield=0x%x prev_size=0x%x' %
+              (bn, bnh if bnh is not None else -1, rd_try(bn) or 0))
+        for k in range(bs + 0x10, bs + 0x200, 0x10):
+            sf2 = rd_try(v2 + k + 8)
+            if sf2 is not None and 0x20 <= (sf2 & ~7) <= 0x2000 and (sf2 & 1) == 1:
+                print('REAL-NEXT-CAND chunk=0x%x sizefield=0x%x prev_size=0x%x -> real size 0x%x'
+                      % (v2 + k, sf2, rd_try(v2 + k) or 0, k))
+                break
     walk_unsorted()

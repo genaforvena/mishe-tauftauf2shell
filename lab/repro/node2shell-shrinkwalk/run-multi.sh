@@ -4,13 +4,18 @@
 # i.e. origin 2216 — the completing regime). Break nghttp2_submit_altsvc:
 # hit 1 = request 1 (records O1, walks), hit 2 = request 2 — multi_walk()
 # first inventories the freed O1 hole (fd/bk, abutting chunk inuse bit),
-# then walks O2. Bytes wanted: does O2 land in/abut O1's hole, and is the
-# chunk following O2 free, top, or IN-USE?
+# then walks O2. Bytes wanted: does O2 land in/abut O1's hole, and is
+# the chunk following O2 free, top, or IN-USE?
 #
 # Usage: sh lab/repro/node2shell-shrinkwalk/run-multi.sh [port] [runs]
 #   NB env override, LEN/LEN2 env overrides (authority bytes for
 #   request 1 / request 2; LEN2 defaults to LEN), DELAY env override
-#   (ms between requests, default 1500).
+#   (ms between requests, default 1500), MT=1 to load the committed
+#   mtrace preload (lab/preload/mtrace.so) into the inferior — its
+#   M/C/R/F lines then interleave with the walk markers in the gdb
+#   log, giving the malloc/free timeline between the walk hits.
+#   NB (wall): mtrace-env shifts the heap; sizes/order are the signal,
+#   not absolute addresses.
 # Loopback only; ASLR off via setarch -R.
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -22,6 +27,10 @@ RUNS=${2:-4}
 LEN=${LEN:-2208}
 LEN2=${LEN2:-$LEN}
 DELAY=${DELAY:-1500}
+MTOPT=""
+if [ "${MT:-0}" = 1 ]; then
+  MTOPT="set environment LD_PRELOAD $ROOT/lab/preload/mtrace.so"
+fi
 mkdir -p "$OUT"
 
 for RUN in $(seq 1 "$RUNS"); do
@@ -36,6 +45,7 @@ for RUN in $(seq 1 "$RUNS"); do
     echo "python multi_walk()"
     echo "continue"
     echo "end"
+    echo "$MTOPT"
     echo "run $ROOT/lab/repro/node2shell-rung1-server.js $P"
     echo "bt 12"
     echo "quit"

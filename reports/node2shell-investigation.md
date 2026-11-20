@@ -364,6 +364,83 @@ step (bytes planned): mtrace request 2's allocation sequence (sizes,
 lifetimes, and the 0xb10/0xbf0 bites) to design the donor so the bite
 lands first and O2 exact-fits what remains, abutting live memory.
 
+### Rung-4 step 2 — mtrace donor-chain map; exact-fit groom lands; the in-call free closes the in-use lane (seventh wake, 2026-11-20 10:54Z)
+
+`run-multi.sh` gained an `MT=1` mode (LD_PRELOAD the committed
+`lab/preload/mtrace.so` into the gdb inferior; M/F lines interleave
+with the walk markers — wake-4 mechanism, gdb+mtrace in one inferior).
+Raw logs gitignored under `lab/node2shell/tmp/w6/`.
+
+**Request-2 allocation timeline, measured** (LEN=2200/LEN2=2208 mtrace
+run, `multi-run2.log`): request-1 teardown frees an
+`M(authority_1+38)` chunk (2200→2238→chunk 0x8d0; the +38 scaling was
+confirmed at authority 2184→2222→0x8c0) and allocates a
+`M 0x117c` (2×2238) chunk that stays live through the abort.
+Request 2 then, in order: hd-inflate bite `M(authority_2+57)`
+(2208→2265→chunk 0x8f0) lands AT O1's old address, front-splitting the
+consolidated O1+copy donor (bite+remainder 0x8f0+0x890 = donor 0x1180,
+matching the wake-6 golden donor); nghttp2 origin-copy `M(origin_2+1)`
+(2217) is **whole-served from the 0x8d0 8be chunk** (need 0x8c0,
+0x10<MINSIZE); a second copy elsewhere; copy freed; then **O2's
+`malloc(origin_2)` reuses the copy's freed chunk** — the O2 donor is
+request-2's own nghttp2 origin copy, recycled from request-1's
+teardown chunk, not the O1-region remainder. Donor 0x8d0 → split →
+0x20 free-remainder victim → abort; donor 0x8c0 (LEN=2184) →
+whole-served → the NUL lands in O2's own-chunk slack → **completed
+2/2 with zero corruption** (negative result: whole-serving silently
+kills the write; check O2's sizefield, not just its address).
+
+**Exact-fit groom (LEN=2216, LEN2=2208, bare env)**: authority_1 2216
+→ origin 2224 (≡0 mod 16, harmless) → donor 0x8c0+0x8e0 = 0x11a0 (the
+measured +0x20-per-16 scaling), bite 0x8f0 → remainder **exactly
+0x8b0 = O2's chunk size**. Observed 2/2: `O2 == HOLE1-NEXT`
+(0x6e51630, sizefield 0x8b1, **no split, no whole-serve**), NUL on the
+following chunk at 0x6e51ee0 → sizefield **0xb00** (real size
+0xb00..0xbf0, byte0 destroyed; believed extent up to 0xf0 short).
+The layout is bimodal across runs: when request-2's hd-inflate bite
+is the grown 0xbf0 buffer instead of the fresh 0x8f0 one, the
+remainder is 0x550 and O2 goes elsewhere (free-remainder victim →
+in-call abort). Two regimes, 2/2 vs 0/2 in consecutive four-run
+batches; regime pinning is open.
+
+**Mechanism discovery — the same-call free closes the in-use lane.**
+The exact-fit run's abort backtrace is NOT the in-call malloc
+validator:
+
+```
+malloc_printerr: "double free or corruption (!prev)"
+_int_free_merge_chunk (av=main_arena, p=0x6e51630, size=2224)
+_int_free ← node::http2::Http2Session::AltSvc
+```
+
+node frees the origin buffer **inside the same C++ AltSvc call** that
+wrote the one-past NUL. The NUL zeroes the victim sizefield's byte 0 —
+which always holds PREV_INUSE — so `free(O2)`'s
+`!prev_inuse(nextchunk)` check aborts for **any** non-top successor,
+free or in-use, before any later allocation can reuse the corruption.
+This precisely explains the wake-6/3.5 result that the only completing
+regime is victim==top (the top merge is an else branch with no !prev
+check). The "in-use victim with completing request" golden layout is
+**structurally unreachable through session.altsvc's own buffer** —
+upgraded from an inventory coincidence to a mechanism-backed closure.
+
+**The remaining lane (design, bytes partially in hand):** make the
+victim a **free** chunk at NUL time whose believed-shrunk extent the
+in-call malloc **splits** — `set_head(victim, nb|PREV_INUSE)` restores
+the cleared bit, `free(O2)` passes, and the request completes holding
+an orphaned real tail ([V+believed, V+real]) behind an
+attacker-groomed fake believed-next header. Gates: the victim must be
+in unsorted/largebin at the in-call malloc, and its believed-next
+sizefield (victim tail bytes = prior request content) must pass the
+`invalid next size (unsorted)` sanity window — 'aaaa' content fails
+(0x6161… ≥ system_mem); a prior request's authority bytes can place a
+valid fake sizefield (e.g. 0x21) at exactly V+believed+8, making the
+free-chunk split survivable and the tail overlap reachable. The
+wake-6 free-victim aborts are this lane's current failure mode, not a
+closure. `walk.py` now prints `VICTIM-BELIEVED-NEXT` and scans for the
+real next chunk (REAL-NEXT-CAND) to measure victim real size and tail
+content next.
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
@@ -399,6 +476,13 @@ Two-request hole inventory (rung-4 step 1; ~10 s per aborting run,
 ```
 sh lab/repro/node2shell-shrinkwalk/run-multi.sh <port> 4
 LEN=3624 LEN2=4464 sh lab/repro/node2shell-shrinkwalk/run-multi.sh <port> 8
+LEN=2216 LEN2=2208 sh lab/repro/node2shell-shrinkwalk/run-multi.sh <port> 4
+# exact-fit regime: O2 == HOLE1-NEXT (sizefield 0x8b1, no split) and the
+# abort is "double free or corruption (!prev)" in free(O2) — see step 2;
+# bite-0xbf0 regime variant: O2 elsewhere, free-remainder victim instead
+MT=1 LEN=2200 LEN2=2208 sh lab/repro/node2shell-shrinkwalk/run-multi.sh <port> 1
+# mtrace timeline: M/F lines interleaved with the walk markers in the log
+# (donor chain: 8be chunk → nghttp2 copy → O2; sizes are HEX)
 # per run: HIT 1/HIT 2 walks, NUL-CLASS line (only ≡8 mod 16 corrupts),
 # O2-VICTIM classification (FREE(unsorted) → validator abort; top → completes)
 ```
