@@ -32,7 +32,7 @@ SRCTREE="$BUILD/php-$VERSION"
 case "$MODE" in
 asan)
     export CC=clang
-    export CFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -g -O1"
+    export CFLAGS="-fsanitize=address,undefined -fno-sanitize=function -fno-omit-frame-pointer -fno-sanitize-recover=undefined -g -O1"
     export LDFLAGS="-fsanitize=address,undefined"
     ;;
 plain)
