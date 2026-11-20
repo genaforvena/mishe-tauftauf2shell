@@ -35,6 +35,12 @@ lab/frontier/brotli2shell/*.bin
 lab/frontier/brotli2shell/*.out
 lab/frontier/brotli2shell/poc.py
 
+# Freeradius2shell standalone harness build output (scripts stay tracked)
+lab/frontier/freeradius2shell/vuln
+lab/frontier/freeradius2shell/fixed
+lab/frontier/freeradius2shell/canary
+lab/frontier/freeradius2shell/asan
+
 # Apache2Root capacity-boundary harness runtime state (scripts stay tracked)
 lab/apache2shell/logs/
 lab/apache2shell/run/
