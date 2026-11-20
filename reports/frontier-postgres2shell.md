@@ -11,21 +11,19 @@
   must make a foreign data wrapper report more inserted rows than the backend
   supplied — e.g. control a foreign server's responses, or get a remote INSERT
   rule that expands rows, and hold the local privilege to use/create the
-  foreign server (`PR:L`). Both ends are loopback-able: the upstream regression
-  test uses `SERVER loopback`.
+  foreign server (`PR:L`). Both ends are loopback-able: the reproduction uses
+  `postgres_fdw` with `SERVER loopback` on one local instance.
 - **Claim sources (read-only provisioning, treated as claims)**: PostgreSQL
   security page `postgresql.org/support/security/CVE-2026-120149/`; PostgreSQL
   18.7 release notes, item "Avoid out-of-bounds accesses in FDW batch inserts";
   fix commit `1e0a55a0fb26e13a6f0b1da87dea06957780b9e4` (full patch fetched
   from `github.com/postgres/postgres/commit/1e0a55a0f.patch`).
 
-## Verified ground truth (documents read 2026-11-20, NO local lab run yet)
+## Verified ground truth (this lab, 2026-11-20)
 
-The primary advisory, the release-note entry and the full fix patch were read
-this wake. No PostgreSQL source was built, no instance started, no bytes
-observed locally. Every rung below is therefore **NOT DEMONSTRATED in this
-lab**; the observations in this section are about *documents*, not about a
-running victim.
+Documents read: the primary advisory, the 18.7 release-note entry and the full
+fix patch (all claim sources above). No instrumented PostgreSQL build was made;
+stock images were pulled by digest and run loopback-only.
 
 Advisory text (claim): "Heap-based buffer overflow in PostgreSQL foreign
 batch inserts allows a foreign server to execute arbitrary code, via
@@ -33,9 +31,33 @@ reporting that it inserted more rows than the server supplied. postgres_fdw
 can legitimately encounter this when a rule on the remote table expands an
 INSERT into additional rows."
 
-Release note (claim): "Avoid out-of-bounds accesses in FDW batch inserts
-(Nathan Bossart)… The PostgreSQL Project thanks Sumedh Pathak and Sven Klemm
-for reporting this problem. (CVE-2026-120149)" — links commit `1e0a55a0f`.
+Stock images pulled and pinned:
+
+- `postgres:17.11` (affected) →
+  `sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f`
+- `postgres:17.12` (fixed) →
+  `sha256:b60e90042aa6b8dbecd58e224b3e36114dbf8ad754465264c2476ad58a86e45c`
+
+Harness `lab/frontier/postgres2shell/{run.sh,trigger.sql}` replays the fix's
+own regression snippet on one container: a remote table whose INSERT rule
+expands each row into three, a foreign table with `batch_size '10'`, and
+`INSERT INTO ftable VALUES (1),(2)` (two rows sent, FDW reports six). Host
+ports 55431/55432 published on 127.0.0.1 only; the foreign connection is
+in-container loopback; no external probe.
+
+| build | `INSERT` result | rule-table count | server log | psql rc |
+|---|---|---|---|---|
+| 17.11 | connection lost mid-statement | not reached | `server process (PID 91) was terminated by signal 11: Segmentation fault`, then "terminating any other active server processes" | 2 |
+| 17.12 | `INSERT 0 2` | 6 | no termination/ERROR/FATAL lines | 0 |
+
+Logs: `lab/frontier/postgres2shell/logs/{trigger-17.11.out,server-17.11.log,
+differential-17.11.meta}` and the matching `17.12` files. Reproduce with
+`./run.sh 17.11` and `./run.sh 17.12`.
+
+**Important negative preserved:** the affected build's crash is a backend
+SIGSEGV, not a silent overflow; the stock image has no sanitizer, so no report
+names `ExecBatchInsert` or `rslots[]` yet. Rung 3 is not claimed from the
+signal 11 alone.
 
 ## Source-bound mechanism (read from the fix patch, not inferred)
 
@@ -59,30 +81,29 @@ count as the length of the returned slot array:
   `CREATE RULE … DO INSTEAD INSERT … SELECT i FROM generate_series(1,3)`,
   foreign table with `batch_size '10'`, `INSERT INTO ftable VALUES (1),(2)`.
   Two rows sent, the rule reports six; fixed build clamps to two and stores
-  six rows in the rule table (`SELECT count(*)=6`). This is the patch-sensitive
-  differential to reproduce locally.
+  six rows in the rule table (`SELECT count(*)=6`). Our fixed-build run
+  reproduces exactly this: `INSERT 0 2`, count 6.
 
 **Claim discrepancy preserved, not resolved:** the advisory assigns CWE-122
 ("writes past the end of a buffer") and says "buffer overflow", but the fix
 commit message says the backend "proceeds to read past the end of the array"
 and the clamp prevents "buffer overruns in the loop below" whose body reads
 `rslots[i]`. Read vs write direction, and the exact downstream dereference of
-the out-of-bounds slot pointer, are **UNKNOWN** until the vulnerable source
-loop body and a sanitizer run are examined locally. Do not collapse the
-advisory's RCE claim into a demonstrated primitive.
+the out-of-bounds slot pointer, are **UNKNOWN** until a sanitizer/debugger run
+names the faulting instruction. Do not collapse the advisory's RCE claim into
+a demonstrated primitive.
 
-## Rung ladder — honest grading (no local evidence yet)
+## Rung ladder — honest grading
 
-- **Rung 1 (reproducible trigger): NOT DEMONSTRATED.** Planned: two loopback
-  PostgreSQL instances (foreign + local), `postgres_fdw` with the upstream
-  rule/batch_size test, INSERT of two rows on an affected build; differential
-  against a fixed build. The upstream regression test is a claim, not a local
-  observation.
-- **Rung 2 (observed state failure): NOT DEMONSTRATED.** Planned observation:
-  over-reported count (6 > 2) reaching the backend loop.
-- **Rung 3 (ASan/UBSan-confirmed corruption): NOT DEMONSTRATED.** Needs an
-  ASan-instrumented build of the affected branch; the expected report is an
-  OOB access on `rslots[]` in `ExecBatchInsert`, but no report has been seen.
+- **Rung 1 (reproducible trigger): PASS.** Deterministic stock-image
+  differential on loopback, clean affected/fixed pinning.
+- **Rung 2 (observed state failure): PASS.** The FDW's over-reported count
+  (six for two rows) reaches the backend; affected build loses the connection
+  with a backend SIGSEGV, fixed build clamps to `INSERT 0 2` with the rule
+  table at six. The version-sensitive 2-vs-6 boundary holds.
+- **Rung 3 (ASan/Valgrind-confirmed corruption): NOT DEMONSTRATED.** Stock
+  images carry no sanitizer. No report names `ExecBatchInsert`, `rslots[]` or
+  an invalid read; the signal 11 is a crash, not a memory report.
 - **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** No controlled
   slot pointer, no pointer/GOT control, no marker execution. The advisory's
   "arbitrary code execution" is a CLAIM.
@@ -91,31 +112,28 @@ advisory's RCE claim into a demonstrated primitive.
 
 Tractability **HIGH for rungs 1–3**, **MEDIUM for rung 4**: pure C core-server
 code, open source with the exact fix commit and a deterministic regression
-test, stock packages pullable, both endpoints loopback-able. It needs no
+test, stock images pullable, both endpoints loopback-able. It needs no
 hardware feature (unlike the AVX-512-blocked Java4Shell). Reachability is
 narrower than a default-on listener: the attacker must influence a foreign
-server's row-count response and hold `PR:L`, so a dedicated mind should weigh
-that against other lanes. The primitive is an OOB *read* of slot pointers with
-a subsequent dereference — attractive for rung 4 if adjacent heap memory can
-be groomed with chosen `TupleTableSlot *` values, but unproven.
+server's row-count response and hold `PR:L`. The primitive is an OOB *read* of
+slot pointers with a subsequent dereference — attractive for rung 4 if
+adjacent heap memory can be groomed with chosen `TupleTableSlot *` values, but
+unproven. Note that `rslots[]` is palloc'd, so a sanitizer may need
+MemoryContext awareness; a plain ASan build may not poison intra-arena reads.
 
-Cheapest next rung: build an affected branch (e.g. 17.11) with
-`-fsanitize=address -O0 -g`, start two loopback clusters, load
-`contrib/postgres_fdw`, replay the upstream rule test, and capture the ASan
-report naming `ExecBatchInsert` and `rslots[]`. Preserve the differential
-against 17.12. If the read direction holds, attempt to place a chosen slot
-pointer immediately after `rslots[]` before any code-execution claim.
+Cheapest next rung: on the affected build, capture a debugger backtrace at the
+SIGSEGV (or an ASan/Valgrind report) naming `ExecBatchInsert` and the
+`rslots[i]` access, then resolve read vs write and the downstream dereference.
+Preserve the fixed-build differential. Only after a controlled slot pointer is
+observed should anyone claim rung 4.
 
-## Reproduce (planned, not yet executed)
+## Reproduce
 
 ```
-# affected vs fixed: PostgreSQL 17.11 vs 17.12, both built with ASan
-# loopback clusters on distinct ports; postgres_fdw SERVER loopback
-# replay patch's contrib/postgres_fdw/sql/postgres_fdw.sql regression snippet
-#   CREATE RULE expanding one INSERT into 3 rows; batch_size '10'
-#   INSERT INTO ftable VALUES (1),(2);
-# capture backend ASan report; diff fixed build (clamps 6 -> 2)
+cd lab/frontier/postgres2shell
+./run.sh 17.11          # logs/trigger-17.11.out, server-17.11.log
+./run.sh 17.12          # logs/trigger-17.12.out, server-17.12.log
 ```
 
-All listeners must bind 127.0.0.1 only. No host package changes, no external
-probe. No lab work has been done for this candidate yet.
+All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432). Stock
+image digests are pinned above; no host package changes.
