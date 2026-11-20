@@ -59,8 +59,9 @@ differential-17.11.meta}` and the matching `17.12` files. Reproduce with
 A second 17.11 instance in the same container was started under Valgrind
 (`--track-origins=yes --error-limit=no`) on in-container loopback port 55435;
 `lab/frontier/postgres2shell/trigger-vg.sql` points the FDW at it. Before the
-trigger, every backend's Valgrind `ERROR SUMMARY` was `0 errors from 0
-contexts`. The trigger's backend then produced (log
+trigger, no backend reported an uninitialised-pointer or invalid-write error
+(clean startup produced only `Syscall param write(buf)` padding noise in one
+backend). The trigger's backend then produced (log
 `logs/valgrind-17.11.log`, stdout `logs/valgrind-17.11-stdout.log`):
 
 - `Use of uninitialised value of size 8` at `0x4628C8`, where the uninitialised
@@ -162,8 +163,13 @@ cd lab/frontier/postgres2shell
 ./run.sh 17.11          # logs/trigger-17.11.out, server-17.11.log
 ./run.sh 17.12          # logs/trigger-17.12.out, server-17.12.log
 # Valgrind: install valgrind in the 17.11 container, initdb a second PGDATA,
-# start it under valgrind on 55435, replay trigger-vg.sql against that port;
-# logs/valgrind-17.11.log is the captured report.
+# start it under valgrind on in-container 127.0.0.1:55435, then connect psql
+# to THAT wrapped instance (port 55435, not the normal 5432) and replay
+# trigger-vg.sql there: the script seeds batch_table/batch_rule_table and the
+# expanding batch_rule on the wrapped instance itself and points the FDW back
+# at the same port, so the SIGSEGV happens in a Valgrind-wrapped backend and
+# logs/valgrind-17.11.log captures the memory report. Replaying against 5432
+# also crashes but yields NO Valgrind report — do not read that as rung 3.
 ```
 
 All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432/55435).
