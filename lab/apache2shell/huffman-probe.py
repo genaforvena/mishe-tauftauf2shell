@@ -111,9 +111,12 @@ def start_server():
                    BASE / "htdocs", BASE / "htdocs"))
     env = dict(os.environ)
     env["ASAN_OPTIONS"] = "detect_leaks=0:halt_on_error=0:handle_segv=0"
+    # Own session: stop_server() killpg()s the PidFile's group, which must
+    # not be the probe's own group or the probe exits 143 with its caller.
     return subprocess.Popen([str(PREFIX / "bin/httpd"), "-f", str(CONF),
                              "-DFOREGROUND"], stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL, env=env)
+                            stderr=subprocess.DEVNULL, env=env,
+                            start_new_session=True)
 
 
 def stop_server(proc):

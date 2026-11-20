@@ -292,6 +292,13 @@ forbidden byte past it. This was a live loophole candidate against the Stage C
 boundary and it is closed on independently re-run bytes. Each case uses a
 fresh h2c connection because a malformed value also kills the connection.
 
+The witness's independent replay confirmed these rows (tape #294). Its one
+remark was that the probe exited 143 because `stop_server()`'s `killpg()`
+signalled the caller's own process group: `start_server()` now gives httpd its
+own session, and a 19:39:44Z re-run on 127.0.0.1:7231 reproduced all eight
+rows with exit 0, one access-log line (the ASCII control), no listener left
+(`logs/huffman-probe-exit0-7231-1940Z.log`). No verdict changed.
+
 ### Non-pointer control-field search (18:20–18:32Z) — closed
 
 The last open question was whether a *scalar* APR field (a size, index or
