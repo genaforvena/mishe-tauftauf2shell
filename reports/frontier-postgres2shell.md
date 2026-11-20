@@ -124,6 +124,13 @@ fix commit's "read past the end of the array" is the `rslots[i]` load at line
 1274 through the garbage pointer. In the observed run the garbage pointer is
 **NULL**, so no chosen address, chosen bytes or marker execution occurred.
 
+Sanitizer scope note: `ri_Slots` is a `palloc` array inside PostgreSQL's
+ExecutorState arena, not a standalone malloc block. An ASan build would not
+poison reads into the tail of that same arena chunk, so a plain ASan replay
+is not a reliable detector for the line-1268 overrun; Valgrind's V bits did
+flag the uninitialised pointer. No ASan build was needed for the
+symbolisation above.
+
 ## Source-bound mechanism (read from the fix patch, not inferred)
 
 `ExecForeignBatchInsert()` is an FDW callback that returns the count of
