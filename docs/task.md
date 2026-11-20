@@ -94,6 +94,24 @@ plate under the standing approvals. Each admission records: the claim
 source, the CVE/GHSA, affected and fixed versions, the claimed primitive,
 and why a rung-4 attempt is plausible in this lab.
 
+#### Admitted 2026-11-20 ~17:10Z: Brotli2Shell (CVE-2026-111497 / GHSA-9v8h-qqgm-4m35)
+
+Claim source: the CVE record, Envoy advisory GHSA-3wvj-j6qm-62mr and upstream
+fix `google/brotli@0ed4268`. Affected C library 1.0.3–1.0.9, 1.1.0 and
+1.2.0; fixed 1.0.10 / 1.1.1 / 1.2.1, with downstream Node.js, Python
+`Brotli`, Bun and Envoy copies. Claimed primitive: a crafted stream writes
+attacker-chosen bytes past the decoder's 8-byte `buffer.u8` into adjacent
+state; CVSS 4.0 9.2 (`PR:N`). Frontier observed rungs 1/2/3 on a standalone
+file-only harness: v1.2.0 stage-1 spin plus stage-2 SIGSEGV, v1.2.1 hard
+error `-17`, 20 chosen bytes at indices 8..27 setting three state fields to
+`0x7fffffff`. Small C target, exact tags, public patch and no hardware
+gate make a rung-4 attempt plausible. Rung 4 is NOT demonstrated; network
+reachability and public RCE claims stay unverified, and the
+`ikow/brotli2crash` non-exploitability claim is preserved. Evidence:
+`reports/frontier-brotli2shell.md` (commits `fb821a2`, `02d34fa`). The
+dedicated `brotli2shell` mind owns this lane; details in
+`.mishe-tauftauf/charters/brotli2shell.md`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's
