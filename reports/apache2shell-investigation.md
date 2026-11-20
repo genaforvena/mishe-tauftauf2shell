@@ -171,10 +171,14 @@ Two captures (`ABCD` at p7201, default `v` at p7204) show the *entire*
 allocator-pointer word as `0x30302d6461502d58` = "X-Pad-00": the first eight
 bytes of the canonicalised **header key**. Since `FILL_KEY` chooses that key,
 this is eight chosen ASCII bytes at a fixed offset in the corrupted pointer —
-subject to httpd's case canonicalisation, which the two key-canary attempts
-below did not get a fault to confirm. Deliberate key control
-(`FILL_KEY=QQQQQQQ` / `QQ`, ports 7202/7203) captured no fault and is preserved
-as inconclusive, not as evidence.
+subject to httpd's case canonicalisation; no deliberate key-canary run has yet
+produced a fault to confirm it. Deliberate key control is systematically
+negative at the original groom: five `FILL_KEY=QQQQQQQ` runs
+(ports 7202/7203/7205/7206/7207, 78 fillers, 30 s) each stopped after exactly
+800 requests with zero captured faults, while the default-key harness faults
+readily. Changing the key changes header allocation
+sizes and likely the APR pool layout; a chosen-key run needs its own boundary
+groom. This does not show the key bytes are uncontrollable.
 
 Fixed control: `logs/2.4.71-gdb-p7199-f78-161840.gdb.log`, same `Q7wX9kLm`
 filler: `sent=18200 responses=35394`, no SIGSEGV and no gdb fault. The
