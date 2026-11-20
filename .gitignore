@@ -15,6 +15,17 @@ lab/apache2root/run-httpd.conf
 lab/apache2root/logs/
 lab/apache2root/sess/
 
+# Frontier lab bulk: per-target source trees, installs, runtime state.
+# The build/oracle/race shell scripts under lab/frontier/<slug>/ stay tracked.
+lab/frontier/*/httpd-*/
+lab/frontier/*/nghttp2-*/
+lab/frontier/*/deps/
+lab/frontier/*/install-*/
+lab/frontier/*/logs/
+lab/frontier/*/run/
+lab/frontier/*/htdocs/
+lab/frontier/*/cgi-bin/
+
 # Build output
 target/
 __pycache__/

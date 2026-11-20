@@ -1,10 +1,13 @@
 # Frontier brief: Apache2Root — CVE-2026-119618 (mod_http2 `assign_headers`)
 
-Status: **frontier candidate, rung 0 (source-read + vendor claims only).
-No local build, no trigger, no corruption observation in this brief.**
-Written 2026-11-20 ~12:30Z by the `frontier` mind. All external material
-below is cited as a claim; the only independently verified facts are the
-patch diff and the affected-tree source lines quoted here.
+Status: **frontier candidate, rung 2 (deterministic state differential
+observed locally on two ASan builds). No heap corruption observed yet.**
+Written 2026-11-20 ~12:30Z by the `frontier` mind; local observation
+appended 2026-11-20 13:00Z. All external material below is cited as a
+claim; the independently verified facts are the patch diff, the source
+lines quoted here, and the local run in the final section.
+Written 2026-11-20 ~12:30Z by the `frontier` mind; rung-2 observation
+appended 13:00Z. All external material below is cited as a claim.
 
 ## Verified ground truth (primary sources opened 2026-11-20)
 
@@ -147,5 +150,65 @@ interleaving remain UNKNOWN until a local build is observed.
   consistent with the one-line diff; only the latter is expected.
 - No public primary PoC was located; none was probed for or fetched
   from external systems beyond the cited read-only articles.
-- No build, no ASan run, no HTTP request has been made for this
-  candidate in this plant. Everything above rung 0 is a plan.
+- A single-request probe produced no ASan report; the race/corruption
+  claim needs a concurrent workload, which is the next bounded step.
+
+## Local observation 2026-11-20 13:00Z — rung 2 confirmed
+
+Provisioning and build (all under standing approval #5, loopback only):
+`lab/src/httpd-2.4.70.tar.bz2` and `httpd-2.4.71.tar.bz2` match their
+published `.sha256` exactly (`1eefd7dc…bafc3`, `2bc5da5a…8de62`);
+`nghttp2-1.64.0.tar.xz` is provisioned likewise. The one-line diff was
+re-read from both tarballs before building (`h2_request.c:353`, 2.4.70
+uses `req->headers`, 2.4.71 uses `r->headers_in`). Reproducible driver:
+`lab/frontier/apache2root/build.sh`; harness: `oracle.sh` with CGI
+endpoint `oracle-cgi.sh`; raw logs under `lab/frontier/apache2root/logs/`.
+gcc `-fsanitize=address,undefined -O1 -g`, event MPM, mod_http2 2.0.42
+against nghttp2 1.64.0, static-PIC nghttp2, `Protocols h2c http/1.1`,
+`H2Direct on`, bind 127.0.0.1 ports 7080 / 7171.
+
+Exact input (from `oracle.sh`): `curl --http2-prior-knowledge` GET
+`http://127.0.0.1:<port>/cgi-bin/oracle` with `Content-Type: text/plain`,
+no `Content-Length`, END_STREAM on HEADERS. `oracle-cgi.sh` prints the
+CGI environment, which mod_cgi derives from `r->headers_in`
+(`server/util_script.c:219`).
+
+Observed bytes (`logs/oracle-run5.log`), both HTTP/2 200:
+
+- affected 2.4.70: `CONTENT_LENGTH=[<UNSET>]`, `CONTENT_TYPE=[text/plain]`
+- fixed 2.4.71: `CONTENT_LENGTH=[0]`, `CONTENT_TYPE=[text/plain]`
+
+Interpretation: the vulnerable build wrote `Content-Length: 0` into the
+stream table `req->headers` instead of the per-request table, so the
+request never saw it. This is a **rung-2 state failure** and confirms the
+one-line mechanism from source. It is **not** heap corruption: no ASan or
+UBSan report was produced by this single-request probe. The vendor's
+race/corruption claim remains UNVERIFIED locally. Source cross-reference
+still supports a real cross-thread hazard: c1 stores `stream->request`
+(`h2_stream.c:986`) and reads `req->headers` (`h2_stream.c:991`,
+`h2_mplx.c:487`), while the c2 worker mutates that same table in
+`assign_headers()`.
+
+Build failures preserved as negative evidence: (1) static nghttp2 built
+without `-fPIC` broke `mod_http2.la` linking with `R_X86_64_PC32 against
+stderr`; fixed by `--with-pic`. (2) A clang build compiled but every
+startup aborted with "Your application is linked against incompatible
+ASan runtimes" — static ASan in `bin/httpd` versus `libasan.so.8` in the
+DSOs (`ldd`); fixed by building both with gcc so the runtime is dynamic
+and shared.
+
+## Bounded rung-3 sweep 2026-11-20 13:01Z — no ASan report (negative)
+
+`lab/frontier/apache2root/race.sh` ran 3 rounds x 200 trigger-shaped h2c
+streams x 65 headers each against the affected 2.4.70 ASan build on
+127.0.0.1:7080, with `LogLevel http2:trace4` and
+`H2MaxSessionStreams 1000` to widen the cross-thread window. Raw output:
+`logs/race-run1.log`. All curl rounds exited 0. No `asan-2.4.70-race.*`
+report file, no `AddressSanitizer` / `runtime error` / `SEGV` / child
+crash marker in the error log. The `h2_stream(...,CLEANUP): cleanup, c2
+is running, abort` lines are ordinary stream teardown when curl closes
+the connection, not process aborts. **Rung 3 not observed** in this
+bounded sweep; that is a negative result, not evidence of safety. The
+race/corruption claim remains UNVERIFIED. A dedicated mind may revisit
+with a longer, better-instrumented interleaving; frontier does not
+duplicate the lane after handoff.

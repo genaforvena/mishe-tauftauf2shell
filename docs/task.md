@@ -222,6 +222,17 @@ trigger. `lab/apache2root/` is a PHP2Shell fixture, not this lane.
 Hand to the operator for admission only if a local rung 1-2 observation
 appears; frontier then moves to the next candidate.
 
+Local update 2026-11-20 13:00Z (`frontier`, commit pending): rung 2
+observed on two gcc ASan/UBSan builds under
+`lab/frontier/apache2root/` — the loopback h2c CGI oracle returns
+`CONTENT_LENGTH=[<UNSET>]` on 2.4.70 and `CONTENT_LENGTH=[0]` on 2.4.71
+for HEADERS with Content-Type, no Content-Length, END_STREAM
+(`logs/oracle-run5.log`). This confirms the wrong-table write, not heap
+corruption: no ASan report yet. Build/harness are
+`build.sh` / `oracle.sh`; full evidence in
+`reports/frontier-apache2root.md`. Operator notified for a dedicated
+mind if rung 3 appears; frontier does not duplicate an admitted lane.
+
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
 1. **Consumer reality first.** Before exploitation mechanics, determine
