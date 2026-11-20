@@ -1,11 +1,14 @@
 # Frontier brief — FreeSWITCH mod_xml_rpc WebSocket extended-length heap over-write (Freeswitch2Shell)
 
-**Status: admitted 2026-11-20 ~17:52Z under standing approval #6; operator
-reconciliation 18:28Z and frontier's clean re-run 19:02Z below.** Frontier was
-cut mid-wake before it pinned harness numbers; both reproduction sections are
-at the end of this file. The `freeswitch2shell` charter, docs/task.md entry and
-committed brief/status exist; wake trigger units remain the person's full-flag
-sync. The two-pane window and restorer registry entry are live.
+**Status: admitted 2026-11-20 ~17:52Z under standing approval #6; current
+grade is rungs 1/2/3 plus live rung-4 chosen-pointer control and dereference,
+independently replayed by the witness (#338).** Frontier was cut mid-wake
+before it pinned harness numbers. This brief is chronological: the sections
+through 19:45Z record intermediate states and their then-current UNKNOWNs;
+the live-process section at the end (20:29Z) and its witness replay give the
+final grade. The `freeswitch2shell` charter, docs/task.md entry and committed
+brief/status exist; wake trigger units remain the person's full-flag sync. The
+two-pane window and restorer registry entry are live.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-20)
 
@@ -122,21 +125,24 @@ unaffected.
 Tractability **HIGH**: public fix diff, small single-file subsystem, no
 hardware gate, no need to guess the written bytes. Standalone extracted
 functions give rungs 1–3; an 8-byte chosen value at a known `offsetof(wsh_t,
-ssl)` gives pointer control in the harness. The honest boundary is that
-`TSession`/`ConnRead` are replaced by a local input buffer, and a live
-FreeSWITCH process, the WebSocket upgrade path, the real heap layout and the
-reachability claim stay UNKNOWN until a loopback-only `mod_xml_rpc` build is
-driven. The configuration gate (module and `enable-websocket` off by default)
-is real and must stay prominent in any impact claim.
+ssl)` gives pointer control in the harness. At the time of this initial
+assessment the extracted harness replaced `TSession`/`ConnRead` with a local
+input buffer, so the live process, WebSocket upgrade and reachability were
+UNKNOWN. Those gaps were closed later: the positive-length section reaches
+the same field in unmodified source over loopback, and the 20:29Z section
+shows the chosen pointer dereferenced in a full FreeSWITCH process; see the
+end of this file for the current grade. The configuration gate (module and
+`enable-websocket` off by default) is real and must stay prominent in any
+impact claim.
 
-## Cheapest next step
+## Initial next step (completed)
 
-Run the committed differential (`lab/frontier/freeswitch2shell/run.sh`), then
-build a loopback-only FreeSWITCH 1.11.1 with `mod_xml_rpc` and
-`enable-websocket` enabled and drive a single `/socket` upgrade plus one
-extended-length frame on 127.0.0.1. That would move the network claim from
-UNKNOWN to evidence and show the real offset to `wsh->ssl` under the stock
-allocator.
+The committed differential (`lab/frontier/freeswitch2shell/run.sh`) was run
+from clean HEAD and prints `ALL CHECKS PASS`. A loopback-only FreeSWITCH build
+with `mod_xml_rpc` and `enable-websocket` enabled was then driven through a
+`/socket` upgrade and one extended-length frame on 127.0.0.1, moving the
+network claim from UNKNOWN to evidence; the live offset and GDB trace are in
+the 20:29Z section at the end of this file.
 
 ## What would change this assessment
 
@@ -245,10 +251,12 @@ Observed after repair, all with the digests above:
   writes; fixed build rejects with `rc=-1009 oob_writes=0 copy_calls=1`;
   five repeat rung-1 runs byte-identical.
 
-Grade: rungs 1/2/3 established, rung 4 PASS **in the extracted harness with
-the chosen value placed at a known offset**. Live process, WebSocket upgrade,
-stock heap layout and network reachability stay UNKNOWN; the opt-in
-`mod_xml_rpc` / `enable-websocket` gate remains prominent.
+Grade at that point (19:02Z): rungs 1/2/3 established, rung 4 PASS **in the
+extracted harness with the chosen value placed at a known offset**. The live
+process, WebSocket upgrade, stock heap layout and network reachability were
+still UNKNOWN then; they were closed by the positive-length and live-process
+sections below, which give the current grade. The opt-in `mod_xml_rpc` /
+`enable-websocket` gate remains prominent throughout.
 
 ## Real-source loopback check, 2026-11-20 ~19:2xZ (this wake)
 
@@ -309,12 +317,13 @@ to place the chosen value at `wsh->ssl`. Both stand-in assumptions — clamp and
 single pre-filled stream — are required for the `plen=-1` frame's byte-faithful
 copy; the next section obtains that copy from the upstream source itself.
 
-Still UNKNOWN and not attempted this wake: a full FreeSWITCH 1.11.1
-`mod_xml_rpc` + `enable-websocket` build and its `/socket` dispatch-before-auth
-path. This host lacks libtool, libedit, opus, spandsp and sndfile dev packages
-and has two cores; a full build is not a bounded change inside this 60-minute
-wake. The opt-in configuration gate stays prominent. Full-digest evidence and
-the clamped-variant isolation experiment live under
+Still UNKNOWN at that point (19:2xZ) and not attempted in that wake: a full
+FreeSWITCH 1.11.1 `mod_xml_rpc` + `enable-websocket` build and its `/socket`
+dispatch-before-auth path. This host then lacked libtool, libedit, opus,
+spandsp and sndfile dev packages and had two cores, so a full build was not a
+bounded change inside that 60-minute wake. The gap was closed at 20:29Z by the
+live-process section below. The opt-in configuration gate stays prominent.
+Full-digest evidence and the clamped-variant isolation experiment live under
 `lab/freeswitch2shell/live/`; no source outside this plant was contacted except
 the pinned upstream raw files and the advisory records.
 
@@ -359,16 +368,18 @@ All three driver checks print `PASS`:
   `ws_raw_read`.
 
 This closes the gap the previous section left open. Chosen-byte placement and
-chosen-pointer control at `wsh->ssl` are now demonstrated in the **unmodified
+chosen-pointer control at `wsh->ssl` are demonstrated in the **unmodified
 upstream function** over a real loopback TCP socket, without the harness's
 pre-filled-stream or clamp assumptions; the extracted-harness marker execution
-in the 19:02Z section remains a separate observation. Honest boundary: Abyss
-`TConn`/`TSession` types and `ConnRead`/`ConnWrite` are still stand-ins, there
-is no live FreeSWITCH process, WebSocket upgrade or stock allocator layout, and
-the opt-in `mod_xml_rpc` / `enable-websocket` gate remains prominent. The
-all-FF `plen=-1` crash and the clamped-variant negative above are preserved.
-Grade now: rungs 1/2/3 plus rung-4 chosen-pointer control in the real function
-over loopback; live-service impact remains UNKNOWN.
+in the 19:02Z section remains a separate observation. Honest boundary at that
+point (19:45Z): Abyss `TConn`/`TSession` types and `ConnRead`/`ConnWrite` were
+still stand-ins, and there was no live FreeSWITCH process, WebSocket upgrade
+or stock allocator layout. Those remaining gaps were closed by the 20:29Z
+live-process section below; the opt-in `mod_xml_rpc` / `enable-websocket` gate
+remains prominent throughout. The all-FF `plen=-1` crash and the clamped-variant
+negative above are preserved. Grade at that point: rungs 1/2/3 plus rung-4
+chosen-pointer control in the real function over loopback; live-service impact
+was still UNKNOWN.
 
 ## Live FreeSWITCH process: chosen-pointer dereference, 2026-11-20 20:29Z
 
