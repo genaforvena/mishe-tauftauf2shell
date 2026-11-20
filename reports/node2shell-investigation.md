@@ -87,16 +87,44 @@ stream.session.altsvc(alt, origin)               // id=0, origin non-empty
   corruption observed on a stock build, but not a reproducible-crystal
   rung-2 result until determinism is groomed. Version honesty: v20.20.2
   is an EOL line carrying the same code; the officially listed affected
-  lines are 24.x/26.x, which get the ASan differential below.
-- **Rung 1/2 deterministic detector — in flight**: ASan build of
-  affected `v24.22.2` (clang 18.1.3, `./configure --enable-asan
-  --without-intl --without-npm --without-corepack`, `make -j2`),
-  detached (spans wakes on this 2-core host). Then: same harness →
-  expected deterministic `heap-buffer-overflow WRITE of size 1`;
-  then apply the fix diff to the tree, incremental rebuild → fixed
-  control `v24.22.3`-equivalent, same harness, no report.
+  lines are 24.x/26.x, which get the Valgrind differential below.
+- **Rung 2 — deterministic, differential (2026-11-20, second wake)**:
+  official prebuilt binaries under Valgrind 3.22.0 (host), loopback-only,
+  same harness, one unauthenticated request, `authority_len=1040`
+  (`origin_len=1048`):
 
-## Reproduction (stock-glibc abort observation)
+  - `v24.22.2` (affected): client received the ALTSVC echo
+    (`origin_len=1048 stream=0` — full trigger path executed), and
+    Memcheck reported **`Invalid write of size 1`** with the exact
+    causal stack — **2/2 identical runs**:
+
+    ```
+    Invalid write of size 1
+      at v8::String::WriteOneByteV2(...) const
+      by node::http2::Http2Session::AltSvc(v8::FunctionCallbackInfo<v8::Value> const&)
+      by Builtins_CallApiCallbackGeneric
+    ERROR SUMMARY: 1 errors from 1 contexts
+    ```
+
+  - `v24.22.3` (fixed, same request, ALTSVC echo received):
+    `ERROR SUMMARY: 0 errors from 0 contexts` — no invalid write.
+
+  This upgrades the observation to a reproducible, deterministic
+  one-byte heap OOB write in the vulnerable function on the officially
+  affected line, with the fixed release as a clean control. Logs:
+  `lab/node2shell/tmp/vg-v24.22.2.log` (gitignored bulk; quoted here).
+  (Memcheck observes the write wherever it lands, so this rung does not
+  need the `len ≡ 8 mod 16` placement class — that matters for Stage A
+  on production glibc.)
+
+  Negative result preserved: the first wake's multi-wake ASan source
+  build was killed at the wake boundary (`make: Terminated`, SIGTERM
+  — the engine reaps detached jobs), and is abandoned; Valgrind on
+  official prebuilts delivers the same differential without any build.
+
+## Reproduction
+
+Stock-glibc abort observation (natural rate ≈2%):
 
 ```
 # terminal 1
@@ -105,18 +133,37 @@ node lab/repro/node2shell-rung1-server.js 0
 node lab/repro/node2shell-rung1-client.js <port> 1040
 ```
 
+Deterministic Valgrind differential (rung 2; ~15 s per run):
+
+```
+# official prebuilts from nodejs.org/dist — v24.22.2 (affected), v24.22.3 (fixed)
+valgrind --tool=memcheck --log-file=vg-affected.log \
+  path/to/node-v24.22.2-linux-x64/bin/node \
+  lab/repro/node2shell-rung1-server.js 0 &      # reads LISTEN <port> from stdout
+node lab/repro/node2shell-rung1-client.js <port> 1040
+# then kill the valgrind server; vg-affected.log has the Invalid write
+# of size 1 (WriteOneByteV2 <- Http2Session::AltSvc); repeating with
+# node-v24.22.3 gives ERROR SUMMARY: 0.
+```
+
 Harness: `lab/repro/node2shell-rung1-server.js` (HTTP/2 server on
 127.0.0.1 forwarding `:authority` into `session.altsvc` — the advisory's
 app precondition) and `lab/repro/node2shell-rung1-client.js`
 (single request, syntactically valid long authority, waits for the
-ALTSVC frame echo proving the full path executed).
+ALTSVC frame echo proving the full path executed). Both committed.
 
-## Lab provenance (this wake)
+## Lab provenance
 
-- Provisioning: nodejs.org dist tarball `node-v24.22.2.tar.gz` (117 MB);
+- First wake: nodejs.org source tarball `node-v24.22.2.tar.gz` (117 MB);
   `apt-get install clang` → clang 18.1.3 (08:46Z); tagged-source
-  fetches of `node_http2.cc`/`util.h`/`util-inl.h`/V8 `api.cc` from
-  raw.githubusercontent (provisioning, no probing).
-- ASan build script: `lab/build/node2shell-build-asan.sh` (lab/build is
-  gitignored bulk; the exact commands are reproduced above so a reader
-  can rebuild from a clean checkout plus the official tarball).
+  fetches from raw.githubusercontent (provisioning, no probing).
+  ASan build attempt abandoned (killed at wake boundary; see negative
+  result above).
+- Second wake (2026-11-20 08:56Z): nodejs.org prebuilt
+  `node-v24.22.2-linux-x64.tar.xz` and `node-v24.22.3-linux-x64.tar.xz`
+  (sha256 recorded below); Valgrind 3.22.0 already present on host.
+
+  ```
+  48cc0e21e048790e54c0cf5749c2725005313d652651c40b7a21feb9697aaf75  node-v24.22.2-linux-x64.tar.xz
+  4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb  node-v24.22.3-linux-x64.tar.xz
+  ```
