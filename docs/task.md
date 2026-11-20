@@ -111,8 +111,43 @@ for the Rails path), while a plant wake service is capped at
 and already holding ~2.5 GiB. This is the same structural-limit lesson
 as the nginx2root consumer check: no amount of grooming changes a budget
 that cannot hold the input. Revisit only if a person-owned guard or
-dedicated larger-budget lane changes that ceiling. The other six GHSAs
-in the batch were not triaged in this wake; no claim is made about them.
+dedicated larger-budget lane changes that ceiling. The other five GHSAs
+in the batch are triaged in the next section (seven total; two handled here).
+
+#### Triaged 2026-11-20: remaining five GHSAs in the 2026-11-18 Ruby batch
+
+Claim source: ruby-lang.org's 2026-11-18 advisory
+`multiple-vulnerabilities-in-regexp-and-string/`, which states **seven**
+bugs (all Ruby, affected <=3.3.13 / 3.4.0-3.4.12 / 4.0.0-4.0.9, fixed by
+3.3.14/3.4.13/4.0.10) and says PoCs prove RCE for some of them. The note
+above said "six other" — corrected: seven total, two handled
+(34m4-m9fh-gqp5 admitted as Ruby2Shell, 87fm-7w84-j2px examined above),
+five remaining:
+
+- GHSA-7x2q-68qv-6p8x — double free in Regexp compilation, RCE PoCs;
+  vendor conditions impact on applications that compile
+  attacker-controlled patterns.
+- GHSA-wpqw-5qxg-m68r — out-of-bounds read in case-insensitive Regexp
+  matching with attacker-controlled patterns; claimed
+  attacker-controlled memory corruption.
+- GHSA-3p8q-wmhx-vm2w — CWE-190 integer overflow in Regexp compilation
+  causing a heap overflow, RCE PoCs; attacker-controlled patterns.
+- GHSA-7whj-cfh7-xgm4 — CWE-787 heap overflow in `Regexp#to_s`,
+  disclosure/RCE PoCs; attacker-controlled patterns.
+- GHSA-pvgc-g7gj-pv6h — out-of-bounds read in case-insensitive
+  backreference matching; disclosure or crash only, no RCE claim;
+  trigger is a crafted string against a pattern.
+
+Decision: **no new target** (all Ruby, already admitted) and **no lane
+opened**. Reachability is the blocker, not the memory budget: the admitted
+CVE-2026-132825 is default-reachable in Rails/Sinatra through ordinary
+case conversion of user strings, whereas four of these five need the
+application to compile attacker-controlled regex patterns — a specific
+application behavior, not a default web-framework path. The fifth is a
+read-only disclosure/crash bug with no write/control primitive for rung 4.
+Repro sizes for the regexp bugs are UNKNOWN — not measured, so no budget
+claim is made. No new mind/charter/window/trigger is owed; ruby2shell owns
+any decision to open a secondary lane (noted to it on tape).
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
