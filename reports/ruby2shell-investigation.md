@@ -14,6 +14,11 @@ in default configs; a PoC is announced for 2026-11-25.
 Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
 
+**Current ladder position: rung 4 — demonstrated impact in the lab
+(2026-11-20, wake 6).** See the Stage B section for the observed
+overlap: chosen bytes over a live chunk, 5/5 deterministic, control
+clean. Open work: request-reachability (Rails/Sinatra).
+
 ## Provenance (2026-11-20)
 
 - `ruby-3.4.12.tar.xz`/`.tar.gz` (affected) and `ruby-3.4.13.tar.xz`/
@@ -297,28 +302,81 @@ checks each consumer runs:
   its INFLATED size, and a later exact-class request returns a chunk
   that overlaps the real next chunk's header and first user bytes.
 
-**Stage B route (unproven, next):** victim class 0x430 (above tcache
-max 0x410, so `free` files it straight to unsorted), size LSB 0x31→
-0x53 ⇒ read as 0x450. Layout [S 0x340][V 0x430][W live], W a long
-live Ruby String whose content supplies the fake header at V+0x450
-(= W user offsets 0x10..0x20). Order: free V (neighbors live, no
-consolidation) → free S to its TCACHE (tcache free skips
-consolidation, so V stays whole) → crafted upcase's buffer1
-(request 824, 0x340 class) pops S via tcache LIFO and its one-byte
-0x53 lands on V's size LSB → trigger any
-unsorted-walking malloc → V binned 0x450 → request 0x448 class →
-overlap write over W's header and first user bytes. Every glibc
-check above has a groomable answer; the geometry is the same primer
-arithmetic as Stage A with capa re-tuned. Nothing here is observed
-yet — the sequence is the plan, not a result.
+**Stage B route as implemented (two deviations from that sketch,
+both forced by the VWA embedding lesson above):** groom strings need
+len ≥ 809, so buffer2's class (0x330 for the Stage-A N=780 input)
+cannot be stocked from Ruby — a 793..808-byte string is embedded and
+never mallocs — and an unstocked buffer2 would walk the unsorted bin
+with a small request and split the binned victim. The input is
+therefore N=828 ("a"+ß×827): buffer1 request 872 → chunk 0x370,
+buffer2 request 850 → chunk 0x360, result string request 1656 →
+chunk 0x680 (large, un-tcacheable — this allocation is the
+unsorted-walking malloc that bins V). Layout
+[S 0x370][V 0x430][W 0x460 live][dummy 0x360]. W's content carries
+the fake header at its user offsets 0x10..0x1f. Also discovered:
+`String#dup` on a heap string is copy-on-write (`STR_SHARED`, no
+malloc — string.c:1889-1895); the copy must be forced with
+`w_content + ""` (`rb_str_plus` always allocates).
+
+## Stage B — rung 4 observed: chosen bytes over a live chunk (2026-11-20, wake 6)
+
+**Result: 5/5 deterministic fresh-process reproductions of the full
+chain, plus a clean no-overflow control.** Reproduction:
+
+```
+MTRACE_FD=2 LD_PRELOAD=lab/preload/mtrace.so \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-stageB.rb
+STAGEB_CONTROL=1 ... same ...   # control: no overflow byte
+```
+
+Evidence (`lab/build/evidence/stageB-{1..5,control}.{trace,out}`):
+
+- **Chosen bytes at chosen offsets, read back through the live
+  object** — every real run prints:
+  `W-readback-hex=6d6d6d6d6d6d6d6d 00 5757575757575757
+  5004000000000000 9100000000000000`: the marker string's 'm' bytes
+  over W's first 8 user bytes, its NUL terminator at offset 8, the
+  original 'W' filler intact at 9..0xf, the fake prev_size 0x450
+  intact, and the fake size byte 0x90 OR'd to **0x91** by glibc's
+  `set_inuse_bit_at_offset` during the exact-fit take — glibc's own
+  fingerprint inside the live victim's content.
+- **Victim identity traced** — every run's mtrace shows the chain
+  carved adjacently (S+0x370 = V, V+0x430 = W, W+0x460 = dummy), the
+  frees (`F <V> 431` → unsorted, S and dummy to their tcaches),
+  buffer1 (request 872) popping S's exact address, buffer2 (request
+  850) popping dummy's, and the marker request
+  (`M 0x439 <V's exact address>`) served at the freed victim.
+- **W's malloc header itself clobbered with chosen bytes** — W's
+  sizefield becomes 0x6d6d6d6d6d6d6d6d; the sweep then dies in
+  `objspace_malloc_size` (gc/default/default.c:8177) → glibc
+  `malloc_usable_size(W)`, which dereferences the "next chunk" at
+  W+0x6d6d6d6d6d6d6d68 → SIGSEGV, RC=139, 5/5. The marker byte
+  controls the fault offset (NON_MAIN_ARENA/chunksize arithmetic on
+  the chosen size).
+- **Control** (`STAGEB_CONTROL=1`, pure ß×828: same buffer sizes,
+  no parity flip, no overflow byte): readback shows the original
+  'W' filler and the fake size byte stays 0x90, the marker request is
+  carved from the top, exit 0, "NO ABORT". The one-byte 0x53 write is
+  the sole cause of everything above.
+
+Ladder position: **rung 4 — demonstrated security impact, lab
+conditions.** Chosen bytes at chosen offsets over a live chunk
+(controlled 0x450 overlap chunk returned for a chosen-size request),
+plus a header-controlled crash whose faulting offset is chosen. The
+honest conditions: single-threaded in-process script on the lab
+plain build, stock glibc 2.39, no tunables, deterministic 5/5; the
+groom needs the class drains and the adjacency chain, and
+request-reachability (Rails/Sinatra) is NOT yet shown — that mapping
+is the open work.
 
 ## Next
 
-1. **Stage B (the open lane, next wake):** implement the unsorted
-   overlap sequence above — [S 0x340][V 0x430][W live], upcase
-   suffices (0x53 grows 0x430→0x450, the minimum +0x20 step) — and
-   observe either the overlap write over W's header (rung 4: chosen
-   bytes at chosen offsets over a live chunk) or the honest negative
-   at whichever glibc check or groom step fails first. Keep the
-   result either way.
-2. PHP2Shell rungs 1-3 remain queued after Ruby2Shell rungs.
+1. **Rails/Sinatra exposure mapping:** build a loopback-only classic
+   Sinatra (then Rails) instance in the lab and drive the one-byte
+   write from an HTTP request — moving rung 4's conditions from
+   "in-process script" to "request-reachable".
+2. Optional, only if it serves the report: the overlap also hands us
+   W's header bytes (chosen size/prev_size forgery of a live chunk)
+   — a possible route to further pointer control worth one bounded
+   experiment at most.
+3. PHP2Shell rungs 1-3 remain queued after Ruby2Shell rungs.
