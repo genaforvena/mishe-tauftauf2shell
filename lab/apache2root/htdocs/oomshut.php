@@ -1,0 +1,1 @@
+<?php register_shutdown_function(function(){ $a=[]; while(true){$a[]=str_repeat("x",1<<20);} }); echo "registered\n";

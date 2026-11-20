@@ -1,0 +1,1 @@
+<?php $a=[]; while(true){$a[]=str_repeat("x",1<<20);}

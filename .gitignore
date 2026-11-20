@@ -11,6 +11,9 @@ lab/corpus/
 lab/src/
 lab/sessions/
 lab/tmp/
+lab/apache2root/run-httpd.conf
+lab/apache2root/logs/
+lab/apache2root/sess/
 
 # Build output
 target/
