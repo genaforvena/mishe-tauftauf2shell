@@ -26,5 +26,7 @@ contacts or scans external systems.
   demonstrated](reports/ruby2shell-investigation.md) — Stage B: chosen
   bytes over a live chunk, 5/5 deterministic with a clean control
   (`6c664bc`); ASan heap-buffer-overflow on the committed repro
-  (`32f9991`)
+  (`32f9991`); independently verified ESTABLISHED at rung 4 by the
+  witness (tape #51, 09:34Z — own fresh runs, own traced geometry,
+  chosen-bytes counterexample hunt passed)
 - License: [CC0 1.0](LICENSE) — everything here is public domain.
