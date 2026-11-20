@@ -298,15 +298,16 @@ choices turn the giant copy into a bounded, byte-faithful 131 KB write in
 which every byte is sender-chosen. The real Abyss `conn.h` at this parent has
 `BUFFER_SIZE 4096`, and a real `recv()` delivers at most that much. Bytes the
 real `memcpy` writes past the first ~4 KB come from heap contents, not from
-the sender. Collectively: chosen-pointer control at `wsh->ssl` remains
-demonstrated **only in the extracted harness**; the real source path shows a
-confirmed heap-corruption crash, not a controlled pointer overwrite.
+the sender. That conclusion is specific to the `FF FF FF FF` (`plen=-1`) frame
+tested in this section; it is preserved as a negative result for that input.
+The next section shows a different extended length that reaches the same field
+byte-faithfully in this same unmodified source.
 
 A control experiment (`live/ws/ws_clamped.c`) adds only the source-side clamp
 to the real source while keeping the 4096-byte chunked socket; it also fails
 to place the chosen value at `wsh->ssl`. Both stand-in assumptions — clamp and
-a single pre-filled stream — are required, so the harness's byte-faithful
-pointer control is a property of its model, not of the upstream source.
+single pre-filled stream — are required for the `plen=-1` frame's byte-faithful
+copy; the next section obtains that copy from the upstream source itself.
 
 Still UNKNOWN and not attempted this wake: a full FreeSWITCH 1.11.1
 `mod_xml_rpc` + `enable-websocket` build and its `/socket` dispatch-before-auth
@@ -316,3 +317,55 @@ wake. The opt-in configuration gate stays prominent. Full-digest evidence and
 the clamped-variant isolation experiment live under
 `lab/freeswitch2shell/live/`; no source outside this plant was contacted except
 the pinned upstream raw files and the advisory records.
+
+## Positive extended length: byte-faithful overwrite in the unmodified source, 2026-11-20 ~19:45Z
+
+The earlier real-source section tested only the advisory's `FF FF FF FF`
+frame, which makes `plen=-1` and faults in a giant `memcpy`. That negative is
+input-specific. A second crafted extended length reaches the same fields
+byte-faithfully in the **same unmodified upstream `ws.c`** over the same real
+`127.0.0.1` socket.
+
+Frame bytes 2..9 are `7F FF FF FF 00 00 00 00`. On little-endian x86-64 the
+native low word is `0xFFFFFF7F`; `ntohl` swaps it to `0x7FFFFFFF`, which narrows
+to `plen = INT_MAX` (`2147483647`). Then `need = INT_MAX - 4`, and the guard's
+signed add `(need + datalen) = 0x80000009` **overflows to a negative int**, so
+`9 >= 65536` is not what is evaluated — the guard passes. `ws_raw_read()` now
+receives a large *positive* `size_t`, takes its normal `r <= (issize_t)bytes`
+branch, copies the whole 4096-byte `recv()` chunk and calls `ConnReadInit()`;
+the loop repeats for every chunk. Every copied byte is sender-chosen, and the
+stand-in clamp is no longer needed. The fixed build's unsigned `plen64 >=
+buflen` check rejects this frame before narrowing.
+
+Reproduce with `bash lab/freeswitch2shell/live/run_pos.sh`. Pinned digests:
+upstream `ws.c` `5a07965f530296bec3840c6c8a7a29c00f34d87f76e34eacf44978ef01d84d3b`,
+`ws.h` `1990aa2bf16ed22d1c8d85cde75c6226f92449d6f1290b80b9d96f8e297f897c`,
+fixed `ws.c` `8ebbe2bce71197ac4e2cdbe2e2cc43c1b5ec3acd7275b9bb4fdbf0decf0914fe`,
+`driver_pos.c` `ed1e11048fc4c1e7ebb07513fd24271e580b3e52a4868183f037c4a747483260`.
+All three driver checks print `PASS`:
+
+- **Vulnerable, plain, chosen pointer:** `wsh->ssl = 0x4142434445464748`,
+  equal to the chosen value; `ssl_bytes=4847464544434241` at buffer-relative
+  offset 131104; `datalen`, `rplen`, `buflen` and `payload` are all overwritten
+  too. `RESULT=PASS`, process rc 0. The chosen 8 bytes came from frame offsets
+  131104..131111 on the loopback socket.
+- **Fixed build, same frame:** `rc=-1009` (`WS_DATA_TOO_BIG`), `datalen=14`,
+  `wsh->ssl=(nil)`, `ssl_bytes=0000000000000000`, no ASan report. Differential
+  holds for the new input as for the all-FF one.
+- **Vulnerable, ASan, 140000-byte payload:** `heap-buffer-overflow`,
+  `WRITE of size 4096`, at `0 bytes after a 131136-byte region`, in `memcpy`
+  from `ws_raw_read` (`ws.c:300`) via `ws_read_frame` (`ws.c:498`). These are
+  sender bytes, not heap contents: the copy is chunked and clamped by the real
+  `ws_raw_read`.
+
+This closes the gap the previous section left open. Chosen-byte placement and
+chosen-pointer control at `wsh->ssl` are now demonstrated in the **unmodified
+upstream function** over a real loopback TCP socket, without the harness's
+pre-filled-stream or clamp assumptions; the extracted-harness marker execution
+in the 19:02Z section remains a separate observation. Honest boundary: Abyss
+`TConn`/`TSession` types and `ConnRead`/`ConnWrite` are still stand-ins, there
+is no live FreeSWITCH process, WebSocket upgrade or stock allocator layout, and
+the opt-in `mod_xml_rpc` / `enable-websocket` gate remains prominent. The
+all-FF `plen=-1` crash and the clamped-variant negative above are preserved.
+Grade now: rungs 1/2/3 plus rung-4 chosen-pointer control in the real function
+over loopback; live-service impact remains UNKNOWN.

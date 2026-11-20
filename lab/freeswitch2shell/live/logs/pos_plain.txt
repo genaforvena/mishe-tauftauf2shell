@@ -1,0 +1,4 @@
+[ptr] loopback 127.0.0.1:53259 offsetof(ssl)=131112 buffer_rel=131104 sizeof(wsh_t)=131136
+[ptr] ws_read_frame rc=-1002 oc=8 wsh->ssl=0x4142434445464748 chosen=0x4142434445464748
+[dbg] datalen=1094795625 rplen=1094795625 buflen=4702111234474983745 payload_off=4702008672424861177 ssl_bytes=4847464544434241
+[ptr] RESULT=PASS (chosen value landed in wsh->ssl)

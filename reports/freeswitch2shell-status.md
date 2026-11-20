@@ -46,15 +46,24 @@ and `enable-websocket` set; both off by default, endpoint `http-port` 8080.
   `ws.h` at `fbac12b451a1`, not only the harness. Independent `offsetof` using
   the exact upstream field types on this host gives `offsetof(ssl)=131112`,
   buffer-relative 131104, `sizeof(wsh_t)=131136` — identical to the harness.
-- RESOLVED with a sharper boundary: the unmodified pinned `ws.c` was compiled
-  with Abyss type stand-ins and driven over a real 127.0.0.1 TCP socket. ASan
-  reports `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read`
-  (`ws.c:306`) via `ws_read_frame` (`ws.c:498`); the plain build aborts with
-  heap corruption (rc 134). The real source's `ws_raw_read` lacks the
-  harness's source-side clamp and delivers at most 4096 bytes per `recv()`, so
-  chosen-pointer control at `wsh->ssl` remains harness-only. Evidence and
-  digests: `lab/freeswitch2shell/live/`, raw output `logs_real_source.txt`,
-  full write-up at the end of `reports/frontier-freeswitch2shell.md`.
+- RESOLVED with an input-specific negative: the unmodified pinned `ws.c` was
+  compiled with Abyss type stand-ins and driven over a real 127.0.0.1 TCP
+  socket. With the advisory's `FF FF FF FF` frame, ASan reports
+  `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`)
+  via `ws_read_frame` (`ws.c:498`); plain build aborts rc 134. That is specific
+  to `plen=-1` and is preserved as a negative for that input.
+- RESOLVED (bigger): a different extended length, `7F FF FF FF 00 00 00 00`,
+  makes `plen=INT_MAX`; the guard's signed add overflows and passes, and
+  `ws_raw_read` takes its normal clamped branch. `bash
+  lab/freeswitch2shell/live/run_pos.sh` drives the **unmodified** upstream
+  `ws.c` over loopback: plain build places the chosen 8-byte value in
+  `wsh->ssl` (`0x4142434445464748`, `ssl_bytes=4847464544434241`,
+  `RESULT=PASS`, rc 0); fixed build rejects `rc=-1009` with `ssl=(nil)`;
+  ASan reports `heap-buffer-overflow`, `WRITE of size 4096`, `0 bytes after a
+  131136-byte region`, from `ws_raw_read` (`ws.c:300`). `driver_pos.c` digest
+  `ed1e11048fc4c1e7ebb07513fd24271e580b3e52a4868183f037c4a747483260`.
+  Chosen-pointer control is no longer harness-only; it is in the real function
+  over a real socket. Full write-up at the end of the durable brief.
 - Still UNKNOWN: full FreeSWITCH 1.11.1 `mod_xml_rpc` + `enable-websocket`
   build, its `/socket` dispatch-before-auth path, and stock allocator layout.
   Not bounded in this wake: missing libtool/libedit/opus/spandsp/sndfile dev
