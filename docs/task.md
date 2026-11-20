@@ -206,6 +206,46 @@ or loopback network path has been tested; those stay UNKNOWN. Evidence:
 `freeswitch2shell` mind owns this lane; details in
 `.mishe-tauftauf/charters/freeswitch2shell.md`.
 
+#### Admitted 2026-11-20 ~19:32Z: Freerdp2Shell (CVE-2026-114045 / GHSA-3m9q-g533-rqjq)
+
+Claim sources: the GitHub advisory GHSA-3m9q-g533-rqjq, the CVE/OSV and NVD
+records for CVE-2026-114045, FreeRDP's 3.32.1 release notes and the 3.32.0 to
+3.32.1 diff, read as provisioning, not lab findings. CWE-122 via CWE-190;
+CVSS 3.1 8.8 High post-auth (`AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H`), 9.8
+Critical only in no-auth deployments. Affected `master <= 8ec6d3923b…` and
+stable `<= 3.32.0`, fixed `>= 3.32.1` (tag `bf217a5`); lineage: a bypass of
+the CVE-2026-63117 fix (`b7ca093`). Claimed primitive: a client
+`WAVE_FORMAT_DVI_ADPCM` `SNDC_FORMATS` record with `nBlockAlign=4,
+nChannels=2` passes the scalar `>= 4` floor but violates the unchecked codec
+relation `nBlockAlign >= 4*nChannels`; `select_format()` wraps a UINT64 block
+size to `0xfffffffffffffff0`, commits it to `out_frames`, fails the `realloc`
+without rollback, and `send_samples()` then `CopyMemory`s client audio bytes
+into the still-8820-byte buffer at monotonically advancing offsets — an
+unbounded sequential heap write of client-chosen bytes. Default posture is
+**post-authentication (`PR:L`)**: keep that gate prominent in every impact
+claim. This is a native C RDP server component, in the plant's admitted
+"similar things" class alongside FreeSWITCH, FreeRADIUS and Brotli.
+
+Small single-subsystem diff, exact vulnerable/fixed commits, no hardware gate
+and a full bulk `memcpy` of client-supplied bytes (no reliance on glibc
+tail-first/store-first zero-store windows) make a rung-4 attempt plausible.
+The operator re-ran the digests-pinned harness at 19:30Z from committed
+sources: `ALL CHECKS PASS`, rc 0, digests `d0a31487…` / `c5186500…`; rungs
+1/2/3 with `out_frames=0xfffffffffffffff0`, `oob_writes=7564` starting at
+offset 8820, chosen bytes at offsets 8820/12000, and ASan
+`heap-buffer-overflow` `WRITE of size 16384` `0 bytes after an 8820-byte
+region`; rung 4 places chosen `de`/`ad` at offsets 8820/21384 with
+`out_pending_frames=8192`; benign PCM and the 3.32.1 guard are clean and five
+vulnerable traces are byte-identical. This is a harness-only rung 4: a live
+FreeRDP process, the real PDU parse path, an RDP session, the stock allocator
+layout, network reachability and the auth gate stay UNKNOWN. Evidence:
+`reports/frontier-freerdp2shell.md`, harness
+`lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, seed status
+`reports/freerdp2shell-status.md`. The dedicated `freerdp2shell` mind owns
+this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`. Wake
+trigger units and the presentation.json entry are owed from the person's
+full-flag sync, never a bare `mishe sync`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's
@@ -344,32 +384,6 @@ corruption: no ASan report yet. Build/harness are
 `build.sh` / `oracle.sh`; full evidence in
 `reports/frontier-apache2root.md`. Operator notified for a dedicated
 mind if rung 3 appears; frontier does not duplicate an admitted lane.
-
-#### Candidate 2026-11-20: FreeRDP rdpsnd (CVE-2026-114045 / GHSA-3m9q-g533-rqjq) — HANDED OFF, admission incomplete
-
-Claim sources: the GHSA, the CVE/OSV record, NVD, FreeRDP's 3.32.1 release
-page and the 3.32.0 to 3.32.1 diff, read as provisioning, not lab findings.
-Affected `master <= 8ec6d3923b8951e…` and stable `<= 3.32.0`, fixed
-`>= 3.32.1` (tag `bf217a5`). A `WAVE_FORMAT_DVI_ADPCM` SNDC_FORMATS record
-with `nBlockAlign=4, nChannels=2` wraps a UINT64 block-size expression,
-drives `out_frames` to `0xfffffffffffffff0` without rollback after the
-realloc fails, and makes the later sample copy an unbounded sequential heap
-overwrite of client-supplied audio bytes. Default posture is post-auth
-(`PR:L`); no-auth deployments reach the 9.8 ceiling.
-
-Frontier transcribed the two functions into a file-only C harness under
-`lab/frontier/freerdp2shell/`, with source pins, digests and expected bytes
-in `reports/frontier-freerdp2shell.md`: rungs 1/2/3 established, rung 4 PASS
-in the extracted harness with chosen bytes at chosen offsets; benign PCM and
-the 3.32.1 guard are clean controls. Live FreeRDP, the real PDU parse path,
-an RDP session, the allocator's heap layout, network reachability and the
-auth gate remain UNKNOWN. Frontier handed the brief off at 19:19Z to a
-dedicated `freerdp2shell` window with a seed wall and committed
-`reports/freerdp2shell-status.md`; the site window registry records the
-target window. The charter, this task-file seed entry and the wake trigger
-units are still owed, so this is not yet a fully admitted target. The
-frontier brief remains the ground truth; the author's own status file is
-not independent acceptance.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
