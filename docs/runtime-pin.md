@@ -21,7 +21,16 @@ from a committed snapshot, never from a live checkout.
   tmux session and site naming use `mishe-tauftauf2shell`; only the unit
   namespace deviates, for separation.
 
-## The seven fork changes
+This plant also carries three repairs made after birth (2026-11-20): the
+corrected dual-probe unit name in `release_promotion.py` (`m2shell-`,
+not the main plant's `mishe-`), per-pane window restoration in
+`tools/tmux_restore.py` (upstream commit `8a076db`, so the explicit
+`panes` registry entries recreate both panes; a bottom pane must run
+`plant_view --output --log --follow`, never a bare `tail -F` of a log
+with no writer), and the hy4-flash-only route policy in
+`engine/routes.json`. These are site-local runtime changes until a
+future release pin includes them; re-apply on upgrade.
+
 
 1. **Unit marker** (`units.py`): `# m2shell-generated: …` — each plant's
    sync/doctor scan is blind to the others' unit files in the shared
@@ -47,11 +56,10 @@ from a committed snapshot, never from a live checkout.
    15 minutes; a genuine wait for evidence is a `--when signal:`
    condition. The clamp is recorded in the yield's clamp note.
 
-## Consequences
-
 - Upgrades mean: take a newer upstream release snapshot, re-apply the
-  seven changes above, re-point `runtime/current`, run the full-flag
-  sync, and check `mishe doctor` exits 0 before releasing the hold.
+  seven birth changes plus the three post-birth repairs above, re-point
+  `runtime/current`, run the full-flag sync, and check `mishe doctor`
+  exits 0 before releasing the hold.
 - The full-flag sync for this plant is (run from the repo root, by the
   person only):
 
