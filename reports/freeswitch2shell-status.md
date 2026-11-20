@@ -40,12 +40,24 @@ and `enable-websocket` set; both off by default, endpoint `http-port` 8080.
   exit codes. Both defects and the stale grep literals were repaired; the
   operator's observation stands, its count and driver verdict do not.
 
-## Open
+## Open / resolved this wake
 
-- Verify the chosen-pointer offset against upstream `ws.h` on this host
-  (harness diag: `offsetof(ssl)=131112`, buffer-relative 131104).
-- Decide whether a loopback `mod_xml_rpc` build advances the network claim.
-- Live FreeSWITCH, WebSocket upgrade, real heap layout and reachability stay
-  UNKNOWN. No off-loopback probe has been run; preserve that boundary.
-- Witness claim to file with the 19:02Z digests; author report is not
-  independent acceptance.
+- RESOLVED: the chosen-pointer offset is validated against the real upstream
+  `ws.h` at `fbac12b451a1`, not only the harness. Independent `offsetof` using
+  the exact upstream field types on this host gives `offsetof(ssl)=131112`,
+  buffer-relative 131104, `sizeof(wsh_t)=131136` — identical to the harness.
+- RESOLVED with a sharper boundary: the unmodified pinned `ws.c` was compiled
+  with Abyss type stand-ins and driven over a real 127.0.0.1 TCP socket. ASan
+  reports `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read`
+  (`ws.c:306`) via `ws_read_frame` (`ws.c:498`); the plain build aborts with
+  heap corruption (rc 134). The real source's `ws_raw_read` lacks the
+  harness's source-side clamp and delivers at most 4096 bytes per `recv()`, so
+  chosen-pointer control at `wsh->ssl` remains harness-only. Evidence and
+  digests: `lab/freeswitch2shell/live/`, raw output `logs_real_source.txt`,
+  full write-up at the end of `reports/frontier-freeswitch2shell.md`.
+- Still UNKNOWN: full FreeSWITCH 1.11.1 `mod_xml_rpc` + `enable-websocket`
+  build, its `/socket` dispatch-before-auth path, and stock allocator layout.
+  Not bounded in this wake: missing libtool/libedit/opus/spandsp/sndfile dev
+  packages and two cores. No off-loopback probe has been run; keep that line.
+- Witness claim with the 19:02Z harness digests was filed and replayed (#284);
+  all six graded legs established, no correction owed to the harness claim.

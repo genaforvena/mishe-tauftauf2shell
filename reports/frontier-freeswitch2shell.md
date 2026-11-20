@@ -44,7 +44,10 @@ sync. The two-pane window and restorer registry entry are live.
   CVE record, Casco CVE mirror, upstream fix commit and diff, and raw
   `ws.c`/`ws.h` at the vulnerable parent. No exploit page, no external probe.
 
-## Source-bound mechanism (read from the vulnerable parent, not inferred)
+## Source-bound mechanism (read from the pinned vulnerable parent, not inferred)
+
+All `ws.c` line numbers below are absolute lines in the byte at
+`fbac12b451a1` (sha256 `5a07965f530296bec3840c6c8a7a29c00f34d87f76e34eacf44978ef01d84d3b`).
 
 `ws.h` defines `typedef int issize_t;` and the heap-allocated handle:
 
@@ -67,11 +70,11 @@ typedef struct wsh_s {
 } wsh_t;
 ```
 
-`ws_init()` (`ws.c:330-341`) `malloc`s `wsh_t`, zeroes it and sets
+`ws_init()` (`ws.c:334-345`) `malloc`s `wsh_t`, zeroes it and sets
 `wsh->buflen = sizeof(wsh->buffer)` = 65536.
 
-`ws_read_frame()` (`ws.c:383-537`) reads 14 bytes into `wsh->buffer` and, for
-length code `127` (`ws.c:445-459`), takes the eight length bytes at
+`ws_read_frame()` (`ws.c:387-544`) reads 14 bytes into `wsh->buffer` and, for
+length code `127` (`ws.c:449-463`), takes the eight length bytes at
 `wsh->payload` (`= &buffer[2]`) as a `uint64_t *`, advances `payload` by eight
 (to `&buffer[10]`) and assigns:
 
@@ -85,25 +88,28 @@ On little-endian x86-64 `ntohl` swaps only the low 32 bits of the native
 `plen = -1`. The two consequences are kept separate:
 
 1. **Signed guard is bypassed.** `need = plen - (datalen - need)` becomes
-   `-1 - (14 - 10) = -5`. The guard at `ws.c:485`,
+   `-1 - (14 - 10) = -5`. The guard at `ws.c:489`,
    `(need + wsh->datalen) >= (issize_t)wsh->buflen`, evaluates `9 >= 65536`
    and passes. `wsh->rplen = plen - need = 4`.
-2. **The copy is unbounded and byte-faithful.** The loop at `ws.c:493-505`
+2. **The copy is unbounded.** The loop at `ws.c:497-509`
    calls `ws_raw_read(wsh, wsh->payload + wsh->rplen, need)`. Its third
    parameter is `size_t`, so the negative `need` becomes a huge unsigned count;
    `need -= r` only makes it more negative, so the loop runs until the input is
    exhausted (`r < 1`). Every byte after the 14-byte header is copied from
    `&buffer[14]` onward with no bound check, and the trailing NUL at
-   `ws.c:521` lands at `payload + rplen`. The attacker chooses every byte at
-   every offset.
+   `ws.c:527` lands at `payload + rplen`. In the extracted harness the source
+   side is pre-filled, so every copied byte is sender-chosen; see the
+   real-source section below for the boundary on that claim.
 
 The 64 KiB `buffer` and 64 KiB `wbuffer` are followed in the same allocation
 by `buflen`, `datalen`, `wdatalen`, `payload`, `plen`, `rplen` and `ssl`.
 `offsetof(wsh_t, ssl)` is 131112 on this host, so roughly 131098 payload bytes
-place a chosen 8-byte value in `wsh->ssl`; `ws_raw_write()` (`ws.c:315-321`)
-and `ws_destroy()` (`ws.c:360-368`) dereference that pointer. This is a
-materially stronger primitive than the hands-off corruption claimed in the
-advisory: chosen bytes at chosen offsets, including pointer-sized fields.
+place a chosen 8-byte value in `wsh->ssl`; `ws_raw_write()` (`ws.c:315-332`)
+and `ws_destroy()` (`ws.c:347-373`) dereference that pointer. In the extracted
+harness this is a materially stronger primitive than the hands-off corruption
+claimed in the advisory: chosen bytes at chosen offsets, including
+pointer-sized fields. The real-source boundary is below; the opt-in
+configuration gate remains a separate condition on any impact claim.
 
 The fix decodes all eight bytes with `ws_get_be64()` into `uint64_t plen64`,
 rejects `plen64 >= wsh->buflen` with `WS_DATA_TOO_BIG` **before** narrowing to
@@ -243,3 +249,66 @@ Grade: rungs 1/2/3 established, rung 4 PASS **in the extracted harness with
 the chosen value placed at a known offset**. Live process, WebSocket upgrade,
 stock heap layout and network reachability stay UNKNOWN; the opt-in
 `mod_xml_rpc` / `enable-websocket` gate remains prominent.
+
+## Real-source loopback check, 2026-11-20 ~19:2xZ (this wake)
+
+The witness verdict above still stands for the extracted harness. This section
+adds an independently compiled check of the **unmodified upstream source** and
+sharpens the boundary on the impact claim; it does not retract any harness
+observation.
+
+Compiled `ws.c` and `ws.h` copied byte-for-byte from the pinned vulnerable
+parent (`ws.c` sha256 `5a07965f530296bec3840c6c8a7a29c00f34d87f76e34eacf44978ef01d84d3b`,
+`ws.h` sha256 `1990aa2bf16ed22d1c8d85cde75c6226f92449d6f1290b80b9d96f8e297f897c`)
+with only Abyss `TConn`/`TSession` type stand-ins and socket-backed
+`ConnRead`/`ConnWrite`, and drove a crafted extended-length frame through a
+real `127.0.0.1` TCP socket. Source and driver digests are in
+`lab/freeswitch2shell/live/`; raw output in `logs_real_source.txt`.
+
+- **Offset validated against the real struct.** An independent `offsetof`
+  program using the exact upstream field types on this host (gcc 13.3.0) gives
+  `offsetof(buffer)=8`, `offsetof(wbuffer)=65544`, `offsetof(ssl)=131112`,
+  `ssl` buffer-relative `131104`, `sizeof(wsh_t)=131136` — identical to the
+  harness stand-in. The chosen-offset arithmetic is not a harness artifact.
+- **Real source, ASan, loopback socket:** `AddressSanitizer: negative-size-param:
+  (size=-5)` in `memcpy` called from `ws_raw_read` (`ws.c:306`) via
+  `ws_read_frame` (`ws.c:498`). The source pointer is inside a 4200-byte
+  `TConn` allocation. Corruption is confirmed in the real function, though the
+  ASan report is `negative-size-param`, not the harness's 132146-byte
+  `heap-buffer-overflow`.
+- **Real source, plain build:** abort `corrupted size vs. prev_size`, rc 134 —
+  a reproducible crash, not a clean overwrite.
+
+Cause, from the pinned source: `ws_raw_read` compares `r <= (issize_t)bytes`,
+but `bytes` is `(size_t)need` with `need = -5`, so `(issize_t)bytes == -5` and
+the comparison is false for every positive `r`. The `else` branch calls
+`memcpy(..., bytes = 0xFFFFFFFFFFFFFFFB)`. The loop then computes
+`need -= (issize_t)bytes = -5 - (-5) = 0`, so the giant `memcpy` runs exactly
+once and faults or corrupts the heap.
+
+Why the harness could place chosen bytes at `wsh->ssl`: its `ws_raw_read`
+stand-in clamps `bytes` to the available source length before the comparison
+(`ws_overflow.c:163-165`), and its `ConnRead` stand-in is a no-op over a
+pre-filled in-memory stream (`ws_overflow.c:139-143`). Those two stand-in
+choices turn the giant copy into a bounded, byte-faithful 131 KB write in
+which every byte is sender-chosen. The real Abyss `conn.h` at this parent has
+`BUFFER_SIZE 4096`, and a real `recv()` delivers at most that much. Bytes the
+real `memcpy` writes past the first ~4 KB come from heap contents, not from
+the sender. Collectively: chosen-pointer control at `wsh->ssl` remains
+demonstrated **only in the extracted harness**; the real source path shows a
+confirmed heap-corruption crash, not a controlled pointer overwrite.
+
+A control experiment (`live/ws/ws_clamped.c`) adds only the source-side clamp
+to the real source while keeping the 4096-byte chunked socket; it also fails
+to place the chosen value at `wsh->ssl`. Both stand-in assumptions — clamp and
+a single pre-filled stream — are required, so the harness's byte-faithful
+pointer control is a property of its model, not of the upstream source.
+
+Still UNKNOWN and not attempted this wake: a full FreeSWITCH 1.11.1
+`mod_xml_rpc` + `enable-websocket` build and its `/socket` dispatch-before-auth
+path. This host lacks libtool, libedit, opus, spandsp and sndfile dev packages
+and has two cores; a full build is not a bounded change inside this 60-minute
+wake. The opt-in configuration gate stays prominent. Full-digest evidence and
+the clamped-variant isolation experiment live under
+`lab/freeswitch2shell/live/`; no source outside this plant was contacted except
+the pinned upstream raw files and the advisory records.
