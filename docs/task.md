@@ -199,8 +199,14 @@ the harness accounting and exit codes at 19:02Z; the driver now prints
 `run.sh` `637cfa36…`. The earlier 2928 OOB-write count was double the real
 extent because a zero-byte read underflowed `trace_copy()`; 1464 is correct.
 This is a harness-
-only rung 4: no live FreeSWITCH process, WebSocket upgrade, real heap layout
-or loopback network path has been tested; those stay UNKNOWN. Evidence:
+only rung 4. A later real-source check compiled the unmodified pinned `ws.c`
+with Abyss type stand-ins over a 127.0.0.1 socket: ASan
+`negative-size-param (size=-5)`, plain-build rc 134, fixed source `rc=-1009`
+with `wsh->ssl` untouched, and `offsetof(wsh_t, ssl)=131112` validated against
+the real struct (`lab/freeswitch2shell/live/`). The real `ws_raw_read` has no
+source-side clamp and 4096-byte `recv()` chunks, so chosen-pointer control
+stays harness-only; a full FreeSWITCH process, WebSocket upgrade and stock
+heap layout remain UNKNOWN. Evidence:
 `reports/frontier-freeswitch2shell.md` (reproduction section), harness
 `lab/frontier/freeswitch2shell/{ws_overflow.c,run.sh}`. The dedicated
 `freeswitch2shell` mind owns this lane; details in

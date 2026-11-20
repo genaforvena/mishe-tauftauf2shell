@@ -38,7 +38,7 @@ containers whose host ports bind only to loopback.
 | Dragonfly2Shell | [report](../reports/frontier-dragonfly2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh v1.40.1`, `./run.sh v1.40.2`; witness files in `lab/witness/dragonfly2shell/` |
 | FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan | same script prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt` |
 | Falkordb2Shell | [report](../reports/frontier-falkordb2shell.md), [status](../reports/falkordb2shell-status.md) | source at vulnerable parent `40780e992ecc`, fix `0b11a00b34b2` (removes Bolt/WebSocket; lab `FIXED` is a local length guard) | `cd lab/frontier/falkordb2shell && bash run.sh` builds vuln/fixed/asan | same script prints `ALL CHECKS PASS`: `payload_len=4144`, 525 OOB write operations, canary `K:K`, ASan heap-buffer-overflow (READ of size 8 at the `^=` load) |
-| Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Harness only; no live process, upgrade, real heap layout or loopback path. |
+| Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. The unmodified pinned `ws.c` is also run over a real 127.0.0.1 TCP socket by `bash lab/freeswitch2shell/live/run.sh` (Abyss type stand-ins only): ASan `negative-size-param (size=-5)`, plain build rc 134, fixed source `rc=-1009` with `wsh->ssl` untouched, offset 131112 validated against the real struct. Chosen-pointer control stays harness-only; a full process, upgrade and stock heap layout remain UNKNOWN. |
 | Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…` | `cd lab/frontier/freerdp2shell && bash run.sh` builds vuln/fixed/asan | prints `ALL CHECKS PASS` (rc 0) twice: ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `send_samples`, chosen `de`/`ad` at offsets 8820/21384, 5/5 identical. Harness only; live RDP, PDU path, network and auth gate UNKNOWN. |
 
 Freerdp2Shell was handed off at 19:19Z and admitted by the operator at
@@ -90,9 +90,18 @@ UNKNOWN.
   (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` and `run.sh`
   `637cfa36…`. Its earlier 2928 OOB-write count was double the real extent:
   a zero-byte past-the-buffer read underflowed `trace_copy()` and added 1464
-  phantom writes. No live FreeSWITCH process, WebSocket upgrade, real heap
-  layout or loopback path was exercised; the rung-4 grade is harness-only
-  and both config gates are off by default.
+  phantom writes. A separate real-source check lives under
+  `lab/freeswitch2shell/live/`: `bash run.sh` compiles the byte-for-byte
+  pinned upstream `ws.c`/`ws.h` (sha256 `5a07965f…` / `1990aa2b…`) with only
+  Abyss type stand-ins and socket-backed I/O, drives a crafted frame over
+  127.0.0.1, and prints pinned digests plus ASan `negative-size-param
+  (size=-5)`, a plain-build rc 134 abort, fixed-source `rc=-1009` with
+  `wsh->ssl` untouched, and a clamp-only isolation variant; raw output in
+  `logs_real_source.txt`. `offsetof(wsh_t, ssl)=131112` is validated against
+  the real upstream struct. The real `ws_raw_read` has no source-side clamp
+  and `recv()` delivers at most 4096 bytes, so chosen-pointer control stays
+  harness-only; no full FreeSWITCH process, WebSocket upgrade or stock heap
+  layout was exercised, and both config gates are off by default.
 
 ## Raw evidence policy
 
