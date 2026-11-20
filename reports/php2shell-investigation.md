@@ -9,29 +9,42 @@ laboratory.
 
 ## Result
 
-**Rung 2 (reproducible failure with black-box discriminators). Rung 3 is
-NOT established; rung 4 is NOT claimed.** The advisory's two preconditions
+**Original 618/619 lane: rung 2 (reproducible failure with black-box
+discriminators); rung 3 NOT established; rung 4 NOT claimed.** The advisory's two preconditions
 are reproducible on the affected 8.4.26 build under ASan/UBSan, and the
 2026-10-23 serialize-handler vector produces attacker-controlled session
 record mutation on the affected build only. However, across every
 producer and every consumer SAPI reachable in this lab, every malformed
 record and OOM shape ends in a clean warning or fatal, the persistent
 worker answers the next request on the same PID, and **no AddressSanitizer,
-UBSan or ZEND_ASSERT report has ever appeared**. No invalid-state read or
-write has been observed. **Rung 4 via this family is not reachable in this
-lab on the evidence gathered.** See `reports/php2shell-status.md` for the
-full per-lane evidence record, including all negatives.
+UBSan or ZEND_ASSERT report appeared in that lane**. No invalid-state read or
+write was observed there. The reopened 126714 lane later reached rung 3
+through a different native bug — see the wake-17 amendment below; rung 4
+remains unclaimed for every lane.
+See `reports/php2shell-status.md` for the full per-lane evidence record,
+including all negatives.
 
 Amended 2026-11-20 (wakes 8–9): the 2026-11-19 vendor release named a
 new payload class and reopened one lane, CVE-2026-126714 "phpAfterShell"
-— see the dedicated section below. It grades rung 2: a demonstrated
+— see the dedicated section below. It grades rung 2 as a demonstrated
 session-splice deserialization primitive, produced end-to-end in this
 lab by both the application-string path and the fully unauthenticated
 upload-progress path, with the vendor fix verified behaviorally on
-8.4.28. Still no memory unsafety: rung 3 is not established for it
-(the public full chain's memory bug is undisclosed). Every behavioral
-claim in the reopened lane is witness-ESTABLISHED at rung 2 (tapes
-#98/#103/#108, 2026-11-20).
+8.4.28. Its rung-2 behavioral claims are witness-ESTABLISHED (tapes
+#98/#103/#108, 2026-11-20); wake 17 adds a separate, patch-sensitive
+rung-3 observation for the combined chain below.
+
+**Amended 2026-11-20 (wake 17, operator directive #113 pushing past rung 2):
+the reopened lane plus a native Date-class bug reaches rung 3 — confirmed
+memory corruption.** The splice-corrupted session state can make a PRE-RINIT
+session decode emit a warning while a stale timezone-cache pointer is live;
+on the affected 8.4.26/8.4.27 ASan CGI builds the log timestamp formatter
+reads a wild pointer and ASan reports `SEGV on unknown address
+0x0008a5c3c279` at `Zend/zend_hash.c:945 in zend_hash_str_find_bucket`.
+The fixed 8.4.28 build logs the same warning and exits 0. Full chain,
+conditions, controls and the per-build evidence are in the dedicated
+section below. Rung 4 (chosen bytes at a chosen offset, pointer control or
+benign marker execution) is still NOT claimed.
 
 ## Evidence ladder, honestly graded
 
@@ -39,8 +52,8 @@ claim in the reopened lane is witness-ESTABLISHED at rung 2 (tapes
 |---|---|---|
 | Suspected vulnerability (source/advisory) | yes | Fix commit `php/php-src@3584a98bd` ("Avoid state corruption via bailout") read as spec; patch sha256-pinned at `lab/src/php-fix-3584a98bda0f2c0d367255b046798b0d3a221a19.patch` |
 | Reproducible crash / deterministic fatal | yes | `lab/repro/php2shell-rung2-oom-cgi.sh`: memory_limit=8M, three vendor POST shapes, `Allowed memory size ... exhausted` in `php_request_startup()`, exit 255 on 8.4.26-ASan |
-| Confirmed memory corruption | **no** | All ASan/UBSan/ZEND_DEBUG builds negative across every lane; `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1` made every request allocation a separate malloc block and was still negative |
-| Demonstrated security impact (chosen bytes/pointer/marker) | **partial, rung 2 only** | Attacker bytes land in the re-encoded session class-name slot on 8.4.26; the handler-switch `W::__wakeup` marker fires, but on BOTH builds (version-neutral, so not this CVE's primitive). No pointer control, no corrupt-state read |
+| Confirmed memory corruption (reopened lane + native Date cache, wake 17) | **yes (rung 3)** | `lab/repro/php2shell-rung3-tzcache.py`: affected 8.4.26/8.4.27 ASan CGI, splice-decode warning → `AddressSanitizer: SEGV` at `zend_hash.c:945 in zend_hash_str_find_bucket`, wild address `0x0008a5c3c279`; fixed 8.4.28 clean; four controls clean on every build |
+| Demonstrated security impact (chosen bytes/pointer/marker) | **partial — rung 2 data mutation; rung 3 invalid read, no rung 4** | Attacker bytes land in the re-encoded session class-name slot on 8.4.26; the handler-switch `W::__wakeup` marker fires, but on BOTH builds (version-neutral, so not this CVE's primitive). The rung-3 memory access is a wild read, not controlled placement. |
 
 ## Producers and consumers examined (all closed)
 
@@ -255,6 +268,65 @@ branch-coverage-complete claim holds independently. Zero
 ASan/UBSan/ZEND_ASSERT output in every independent run; no
 contradiction, no repair outstanding.
 
+## Rung 3: splice-decode warning → corrupted native timezone cache (wake 17)
+
+The operator's 2026-11-20 directive (#113) refused a stand-down at rung 2.
+Reading the pinned 8.4.27/8.4.28 trees and NEWS found two security fixes in
+the same 2026-11-19 release: GHSA-fm2m-fjf5-v3cp (CVE-2026-126714, the
+session-splice lane) and GHSA-gr4f-wgx5-jpfv (CVE-2026-129496, a
+use-after-free of the Date extension's timezone cache fixed by 8.4.28).
+Depthfirst's write-up says its withheld full chain uses a native-class
+memory-corruption primitive and mentions date/time objects among the
+audited classes; which native bug it used is UNKNOWN. The chain below is a
+demonstrated one on published material, not a claim about their decoder.
+
+Harness: `lab/repro/php2shell-rung3-tzcache.py` (PHP CGI, loopback only, no
+network). It writes a session file whose bytes are the documented
+`splice-MID` shape from `lab/repro/php2shell-aftershell-splice-consumer.sh`
+(a long `s:` record whose declared length cuts before the object bytes —
+the wrong-cut state that the witness also produced with K±16), sets
+`date.timezone=Bogus/Zone` and a file `error_log`, and sends a multipart POST
+with `PHP_SESSION_UPLOAD_PROGRESS` and a Cookie SID. The stale-pointer
+mechanism is the advisory's: a diagnostic written to a file error log
+during module startup allocates the timezone cache in temporary memory;
+the native reference survives until the Date RINIT. The corrupted session
+is decoded in `php_session_rfc1867_update()` before RINIT; the decoder's
+warning is formatted for the file log while that reference is stale.
+
+Observed (evidence logs `lab/build/evidence/aftershell-tzcache-php-8.4.26-asan.log`,
+`...-8.4.27-asan.log`, `...-8.4.28-asan.log`):
+
+- 8.4.26-asan and 8.4.27-asan, `splice-mid`: rc −6,
+  `ERROR: AddressSanitizer: SEGV on unknown address 0x0008a5c3c279`,
+  `SUMMARY: AddressSanitizer: SEGV Zend/zend_hash.c:945:8 in
+  zend_hash_str_find_bucket`. Stack: `php_session_cancel_decode
+  (ext/session/session.c:271)` → `php_session_decode` →
+  `php_session_initialize` → `php_session_rfc1867_update (session.c:3225)`
+  → `rfc1867_post_handler` → `php_hash_environment` →
+  `php_request_startup (main/main.c:1906)` → `php_log_err_with_severity`
+  → `php_format_date` → `get_timezone_info` → `php_date_parse_tzfile
+  (ext/date/php_date.c:505)` → `zend_hash_str_find_bucket`. In a variant
+  with a shorter session record UBSan reported "applying non-zero offset
+  ... to null pointer" at the same `zend_hash.c:945` site — two independent
+  sanitizer manifestations of the invalid read.
+- 8.4.28-asan, same harness: rc 0, no sanitizer output; the file error log
+  records `PHP Request Startup: Failed to decode session object. Session has
+  been destroyed` normally. Patch-sensitive control, not a crash-only
+  observation.
+- Clean controls on all three builds: `valid-record` (session file decodes),
+  `no-record`, `valid-timezone` (no startup diagnostic), `no-cookie` (no
+  session file opened). The standalone `max-input-vars` advisory recipe also
+  fails affected-only on 8.4.26/8.4.27 (`_zend_is_inconsistent` assertion on
+  the stale HashTable) and is clean on 8.4.28.
+
+Conditions to reproduce honestly: `date.timezone` invalid (or another
+startup diagnostic reaching the file error log), file-based `error_log`,
+`session.upload_progress.enabled=1`, a session id the worker accepts, and
+splice bytes that make the pre-RINIT decode warn. This is an affected-only
+invalid native pointer read, graded rung 3. The bytes at the faulting
+address are not chosen by the attacker in this experiment: Stage A
+placement and a benign marker are the missing rung-4 evidence.
+
 ## Black-box discriminators (affected-only, reproducible)
 
 - OOM fatal text: 8.4.26 `exhausted at file:0` vs 8.4.27
@@ -266,10 +338,14 @@ contradiction, no repair outstanding.
 
 These are data-integrity mutations, not memory unsafety.
 
-## What would reopen the lane
+## Next route from rung 3 (Stage A)
 
-- Any ASan/UBSan/ZEND_ASSERT output in a rung-3 harness log (all harnesses
-  verdict-scan for it).
+- Stage A placement: reuse the freed startup tzcache allocation with
+  attacker-chosen bytes and prove a canary at a chosen offset; only then
+  attempt a benign marker execution and a rung-4 claim. Missing evidence:
+  control of the stale pointer and the replacement contents.
+- A public disclosure of Depthfirst's withheld native decoder could supply
+  the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not
   covered here (coverage: vendor phpt recipes verbatim, unresolved-class
   reserved-prop collisions, C: slot, NUL-mangled, compound with OOM).

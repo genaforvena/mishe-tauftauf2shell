@@ -213,8 +213,40 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   confirmed, plus a K−16 counterexample (A_EVIL=NULL) — the
   branch-coverage-complete claim holds independently. No contradiction,
   no repair outstanding.
+  **Wake 17 (2026-11-20, 12:11Z–) — rung 3 reached on the combined chain,
+  patch-sensitive.** Operator directive #113 refused further rung-2
+  stand-down. Tree/NEWS diff of the pinned 8.4.27 and 8.4.28 builds found
+  GHSA-gr4f-wgx5-jpfv / CVE-2026-129496 (Date timezone-cache UAF, fixed in
+  the same 8.4.28 release as the splice fix), plausibly the class of
+  native-class bug Depthfirst withheld, though which bug they used stays
+  UNKNOWN. Committed harness
+  `lab/repro/php2shell-rung3-tzcache.py` writes the splice-MID session bytes
+  from the committed consumer harness (wrong cut → decode failure), starts
+  affected php-cgi with an invalid `date.timezone` and a file `error_log`,
+  and sends an unauth multipart POST with a Cookie SID and upload-progress
+  key. The PRE-RINIT decode warning formats its log timestamp from a stale
+  native tzcache pointer. Observed in
+  `lab/build/evidence/aftershell-tzcache-php-{8.4.26,8.4.27,8.4.28}-asan.log`:
+  8.4.26 and 8.4.27 rc −6 with `ERROR: AddressSanitizer: SEGV on unknown
+  address 0x0008a5c3c279` / `SUMMARY: AddressSanitizer: SEGV
+  Zend/zend_hash.c:945:8 in zend_hash_str_find_bucket`; stack through
+  `php_session_cancel_decode (session.c:271)` → `php_session_rfc1867_update
+  (session.c:3225)` → `php_request_startup (main.c:1906)` →
+  `php_log_err_with_severity` → `php_format_date` → `php_date_parse_tzfile
+  (php_date.c:505)`. 8.4.28: rc 0, no sanitizer, warning logged normally.
+  An earlier throwaway variant (`lab/tmp/tz_matrix.py`) produced UBSan
+  "applying non-zero offset ... to null pointer" at the same site — both
+  sanitizers agree the pointer is invalid. All five controls (valid
+  record, no record, valid timezone, no cookie, standalone advisory
+  max-input-vars recipe) are clean on 8.4.28; the standalone recipe is
+  affected-only too (stale HashTable assertion). Grade: rung 3 for the
+  combined chain — confirmed invalid native pointer read with observed
+  bytes, not only a crash. Rung 4 not claimed: no chosen-offset placement,
+  pointer control or marker execution. Next route: Stage A reuse of the
+  freed startup allocation with a canary, then a benign marker; ask witness
+  to re-run the committed harness before treating the claim as accepted.
 
-- **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
+- **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
   Apache, and (2026-11-20 wake 7) php-fpm — and each negative is observed,
   not assumed:
