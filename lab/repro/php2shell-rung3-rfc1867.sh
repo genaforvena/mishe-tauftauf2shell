@@ -125,6 +125,13 @@ A_case missing_cls_name 'x|O:7:"Missing":1:{s:27:"__PHP_Incomplete_Class_Name";s
 A_case missing_cls_ser  'x|O:7:"Missing":1:{s:33:"__PHP_Incomplete_Class_Serialized";s:3:"foo";}' || true
 A_case missing_cls_enum 'x|O:7:"Missing":1:{s:26:"__PHP_Incomplete_Enum_Case";s:3:"foo";}' || true
 A_case missing_ctrl     'x|O:7:"Missing":1:{s:1:"a";i:1;}' || true
+# C: payload-slot collisions: the incomplete-class bookkeeping also stores
+# the RAW C: payload (prop __PHP_Incomplete_Class_Serialized) and enum-case
+# data; feed attacker-shaped bytes through those slots and watch the
+# re-encoded record + sanitizers on both trees.
+A_case c_direct        'x|C:7:"Missing":15:{attacker bytes}' || true
+A_case c_via_reserved  'x|O:7:"Missing":1:{s:33:"__PHP_Incomplete_Class_Serialized";s:15:"attacker bytes";}' || true
+A_case c_ctrl          'x|C:7:"Missing":0:{}' || true
 
 # ============ Leg B: php_serialize write, runtime switch to php decode ============
 # Request 1: ini handler php_serialize; the upload-progress key becomes

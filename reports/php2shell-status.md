@@ -63,12 +63,15 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
     bytes", zend_smart_str.c:44). Useful as a cheap liveness/version
     marker in any black-box web-facing probe.
 - **Next action (order set by evidence):** the 2026-10-23
-  serialize-handler/upload-progress PoC lane was ported and observed this
-  wake (see the rfc1867 block above); the escalation it points at is the
-  affected tree's missing `php_rinit_session_globals()` at
-  MULTIPART_EVENT_START (the fix adds it: the rfc1867 callback runs before
-  RINIT against the PREVIOUS request's PS globals in a persistent
-  worker) — stale-`PS(id)` UAF probe on the cli-server ASan build.
+  serialize-handler/upload-progress lane is now fully observed on this
+  host (rfc1867 block items 1-6 below, plus the compound-OOM negative):
+  rung 3 was NOT established for it and the conclusion is recorded
+  (item 6). The remaining rung-3 candidate for the 618/619 family on
+  this host is the malloc-backed OOM variant flagged under allocator
+  reality: `USE_ZEND_ALLOC=0` + RLIMIT_AS forcing malloc/mmap failure
+  reaches the vulnerable longjmp per the advisory AND makes the
+  failing allocation visible to ASan (stock ZMM pools hide intra-pool
+  corruption). That is the next bounded experiment.
 - **rfc1867 upload-progress producer ported and observed (2026-11-20,
   committed harness `lab/repro/php2shell-rung3-rfc1867.sh`, evidence
   `lab/build/evidence/rung3-rfc1867-8.4.26-asan.log` /
@@ -102,11 +105,54 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
      8.4.26 and 8.4.27 — the handler-switch unserialize-injection
      primitive is version-neutral, i.e. it is NOT the CVE's own
      primitive and cannot carry a rung-4 claim for this advisory.
-     Negative preserved; do not retest.
+  5. C: payload slot (same harness, later run): `x|C:7:"Missing":0:{}`
+     is CONVERTED on 8.4.26 — "Class __PHP_Incomplete_Class has no
+     unserializer" warning, record rewritten to `x|O:7:"Missing":0:{}`
+     (format mutation, affected-only); 8.4.27 keeps it byte-identical,
+     silently. `c_via_reserved` (attacker string under the
+     `__PHP_Incomplete_Class_Serialized` prop) is refused on both.
+     Second version discriminator; still no sanitizer/ASSERT on any
+     build or shape.
+  6. Lane conclusion (2026-11-20, after vendor-spec cases +
+     unresolved-class collisions + C-slot shapes + the compound-OOM
+     negative): on this host the 2026-10-23 serialize-handler vector
+     reaches version-discriminating session-record mutation (items
+     1/2/5 — attacker bytes in the re-encoded class-name slot, C:→O:
+     conversion) plus the version-neutral handler-switch unserialize
+     injection (item 4), and tops out there. No shape produced memory
+     unsafety under ASan/UBSan/ZEND_ASSERT on any of the four builds.
+     Every malformed input reaches a clean warning or refusal — the
+     unserialize machinery validates lengths/types before any write.
+     Rung 3 is NOT established for this vector; the honest grade is
+     rung 2 with two black-box discriminators and a demonstrated
+     pre-auth data-mutation primitive.
   Mechanistic note: the 8.4.26 rewrite in (2) is the incomplete-class
   bookkeeping collision the vendor comment describes — "data that
   already carries [the reserved names] cannot be told apart from that
   bookkeeping"; the fixed tree resolves it by refusing the decode.
+- **Compound 618-OOM x rfc1867 consumer, observed negative (2026-11-20,
+  committed harness `lab/repro/php2shell-rung3-rfc1867-persist.sh`, evidence
+  `lab/build/evidence/rung3-rfc1867-persist-{8.4.26,8.4.27}-asan.log`):**
+  destruct-OOM with the session active (OOM raised while the session
+  module's rshutdown holds the last reference to $_SESSION) on one
+  persistent cli-server worker, then the pre-RINIT rfc1867 decode of
+  that same session record in request N+1 — absorbed at every step on
+  BOTH builds: same PID across all probes, fatal reported, session
+  file written (`e|O:1:"E":0:{}`), N+1 decode consumes it cleanly
+  (`sess-e:yes`, incomplete class), zero ASan/UBSan/ZEND_ASSERT (the
+  ASan builds carry ZEND_DEBUG, so asserts were live and silent).
+  Source-read why: the affected tree's own callback calls
+  `php_rinit_session(0)` at MULTIPART_EVENT_FILE_START
+  (session.c:3308), which runs `php_rinit_session_globals()` BEFORE
+  `php_session_initialize()` — the stale PS globals a bailout could
+  leave between the vars-dtor and the `status=none` assignment are
+  cleared before anything dereferences them, and
+  `php_rinit_session_globals()`'s `ZVAL_UNDEF` never dereferences the
+  stale zval. The 619-stale-globals-via-rfc1867 lane is CLOSED by
+  observation + source read; the fix's extra EVENT_START rinit and
+  `PG(modules_activated)` guard close narrower windows (deferred
+  body parse via request_parse_body, which the affected 8.4.x does
+  not expose to user code the same way).
 - **Last evidence (2026-11-20, 8.4.26-ASan lab build,
   `lab/repro/php2shell-rung2-oom-cgi.sh`, outputs
   `lab/build/evidence/rung2-cgi-*.out`):** all three vendor shapes
@@ -165,17 +211,14 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   conf, leaving prefork defaults (5 workers) — the directives are
   top-level in `lab/apache2root/conf/httpd.conf` after the MPM
   LoadModule, which is observed to give exactly one persistent child.
-- **Unknowns:** whether the affected tree's rfc1867 callback — which,
-  per the fix, runs before RINIT against the previous request's PS
-  globals in a persistent worker (no `php_rinit_session_globals()` at
-  MULTIPART_EVENT_START on 8.4.26) — yields memory unsafety (stale
-  `PS(id)` / `PS(session_status)` after a prior request's session
-  teardown); the php-cgi one-shot SAPI cannot see that state at all,
-  so the probe needs the cli-server or mod_php ASan worker. Whether any
-  reserved-prop bookkeeping collision reaches a C:/E: payload slot and
-  corrupts more than the class-name field. The pure handler-switch
-  unserialize injection is CLOSED (version-neutral, observed, negative
-  preserved).
+- **Unknowns:** whether any reserved-prop bookkeeping collision reaches
+  a C:/E: payload slot and corrupts more than the already-observed
+  class-name rewrite. The stale-globals question is CLOSED this wake:
+  observed negative on both ASan builds (compound harness), and
+  source-read closed — MULTIPART_EVENT_FILE_START's
+  `php_rinit_session(0)` clears PS globals before the callback
+  dereferences them. The pure handler-switch unserialize injection is
+  CLOSED (version-neutral, observed, negative preserved).
 
 Seeded by the operator 2026-11-20 from docs/task.md; php2shell owns this
 file.
