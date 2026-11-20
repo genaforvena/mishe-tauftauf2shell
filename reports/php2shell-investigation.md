@@ -687,8 +687,14 @@ and bind 127.0.0.1 only.
 
 Grade: **mod_php reaches the same rung 4 CONSTRAINED form as CGI** — chosen
 bytes at chosen offsets of the consumed stale HashTable, no pointer control
-and no marker executed. This is the investigator's observation; it has not
-yet had an independent witness re-run. FPM remains rung 3 only (wake 24).
+and no marker executed. Witness #258 independently replayed the harness into
+its own `lab/build/evidence/w18-apache-modphp/` (plain 8.4.27 module sha256
+`5f6e7ba9...` matched) and **ESTABLISHED** rung 3 CONFIRMED plus rung 4
+CONSTRAINED with no correction: the ASan 56-B UAF at `zend_hash.c:788`, the
+plain 8.4.27 SIGSEGV window at query lengths 9/10/16/24 (clean at 8/25/32,
+fixed 8.4.28 clean), and the fork-follow GDB child hit
+(`flags=0 mask=0 arData=0xa`, chosen bytes at +24/+32, fault at
+`zend_hash.c:945`) all reproduced. FPM remains rung 3 only (wake 24).
 Preserved failed approach: the first length sweep was invalid because GDB
 detached the prefork parent at `quit`, leaving it bound to port 18160; the
 harness now kills that parent by its unique per-case config path. The
@@ -703,8 +709,8 @@ earlier `ready=False` logs were overwritten by the valid rerun.
   (wake 22); on mod_php (wake 25) chosen bytes transfer but `arData` is a
   length, so this route still cannot yield arbitrary-address control.
   The consumer is structurally either-or on the CGI path. Stage A is
-  witness-ESTABLISHED on CGI (#138), no re-run owed; the mod_php leg awaits
-  independent verification.
+  witness-ESTABLISHED on both CGI (#138) and mod_php (#258); no re-run is
+  owed on either leg.
 - A public disclosure of Depthfirst's withheld native decoder could supply
   the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not

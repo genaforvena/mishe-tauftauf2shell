@@ -218,7 +218,7 @@ upload_max_filesize=1024
     markers = {
         'uaf': len(re.findall(r'heap-use-after-free|use-after-free', err + perr)),
         'zendhash': len(re.findall(r'zend_hash_str_find_bucket|_zend_is_inconsistent', err + perr)),
-        'sigsegv': len(re.findall(r'SIGSEGV|signal 11', err + perr)),
+        'sigsegv': len(re.findall(r'SIGSEGV|signal 11|exit signal Segmentation fault', err + perr)),
         'staletz': len(re.findall(r'php_date_parse_tzfile', err + perr)),
     }
     shutil.rmtree(d, ignore_errors=True)

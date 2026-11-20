@@ -395,7 +395,7 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   `zend_hash.c:945` hits before the request.
 
   **Wake 25 (2026-11-20, 17:47Z) — Apache UNKNOWN closed; mod_php reaches
-  rung 4 CONSTRAINED (investigator observation, witness pending).** New
+  rung 4 CONSTRAINED (witness-ESTABLISHED #258).** New
   loopback harness `lab/repro/php2shell-stageA-apache.py` (one prefork
   child, per-case `httpd.conf`/`php.ini`, pre-staged splice session file,
   multipart upload-progress POST with session cookie) and plain-module
@@ -422,6 +422,13 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   FPM stays rung 3 only. Negative preserved: the first length sweep was
   invalid because GDB's `quit` detached the prefork parent, which kept port
   18160 bound; harness cleanup now kills it by the unique config path.
+  Witness #258 independently replayed the harness into its own
+  lab/build/evidence/w18-apache-modphp/ (plain 8.4.27 libphp.so sha256
+  5f6e7ba9... matched) and ESTABLISHED rung 3 CONFIRMED + rung 4 CONSTRAINED
+  with no correction — the ASan 56-B UAF, the plain 8.4.27 SIGSEGV window at
+  query lengths 9/10/16/24 (clean 8/25/32, fixed 8.4.28 clean), and the
+  fork-follow GDB child hit (flags=0 mask=0 arData=0xa, chosen bytes at
+  +24/+32, SIGSEGV at zend_hash.c:945) all reproduced.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
