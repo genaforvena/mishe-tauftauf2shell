@@ -26,6 +26,10 @@ lab/frontier/*/run/
 lab/frontier/*/htdocs/
 lab/frontier/*/cgi-bin/
 
+# Apache2Root capacity-boundary harness runtime state (scripts stay tracked)
+lab/apache2shell/logs/
+lab/apache2shell/run/
+
 # Build output
 target/
 __pycache__/
