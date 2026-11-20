@@ -668,8 +668,7 @@ rung 4 remains open on a NUL-capable content channel or a geometry
 where `set_foot` writes the believed size at the fake window (victim
 freed *after* corruption, not split before it).
 
-### Rung-4 step 3 — freed-after-corruption lane measured; tcache and
-### `!prev` closure (wake 14, 2026-11-20 17:51Z)
+### Rung-4 step 3 — freed-after-corruption lane, tcache and `!prev` closure (wake 14, 2026-11-20 17:51Z)
 
 Wake 13 proposed changing the *timing* so the corrupted chunk is freed
 after the NUL, letting glibc's own `set_foot` write the fake
@@ -698,9 +697,14 @@ attacker bytes). The abort was unchanged:
 `_int_free_merge_chunk (p=0x6e50890, size=1952)` at glibc 2.39
 `malloc.c:4679`, in `free(origin)` — i.e. `free(value)` itself had
 already succeeded. Reason: the believed size `0x400` is in tcache's
-size range, whose fast path does not consult the next-chunk header at
-all, so neither the forged `prev_size` nor the fake sizefield was ever
-tested. The fatal check is `!prev_inuse(nextchunk)`: `nextchunk` is
+range — host glibc 2.39 has `TCACHE_MAX_BINS=64` and
+`MAX_TCACHE_SIZE = tidx2usize(63) = 0x408` (`malloc.c:293-301`), and
+`csize2tidx(0x400) = 63 < 64`, so `_int_free` takes the tcache branch
+(`malloc.c:4515-4518`) and returns at `malloc.c:4550` after
+`tcache_put`; the next-chunk header is never consulted. Neither the
+forged `prev_size` nor the fake sizefield was ever tested.
+
+The fatal check is `!prev_inuse(nextchunk)`: `nextchunk` is
 `value`, whose sizefield low byte the NUL zeroed, so its PREV_INUSE
 bit is 0. That bit is *invariant* under this primitive — a NUL can
 only clear it — so the chunk immediately before the corrupted one can
@@ -727,6 +731,25 @@ fake window needs a NUL-bearing `prev_size` and a sane even
 sizefield — neither reachable from the origin or ALT strings. No
 length-only sweep was repeated. Ladder unchanged: rung 3/3.5
 mechanism, rung 4 not demonstrated.
+
+**Witness verdict (message #247, 2026-11-20): ESTABLISHED as a negative
+closure.** The witness re-ran every wake-14 leg from clean HEAD into its
+own lab (`lab/build/evidence/w17-node/`, harness shas
+352c8279/b08def9c/41c505e8/8ce25431), same node binary, ASLR off, three
+unpatched plus two `FAKE_SIZEONLY=0x20` boots. Its adjacent unpatched
+boot reproduced the full chain (`delta=0x0`, `origin-NUL@value+8
+match=True`, sizefield `0x4c1 -> 0x400`, fake window `A*8`, `!prev`
+abort at `malloc.c:4679` in `free(origin)`); its patched adjacent boot
+wrote a sane debugger-only `0x20` sizefield and aborted unchanged at the
+same check. It source-bounded the constants independently
+(`node_http2_v24.22.2.cc:3323-3330`, `malloc.c:293-301`, `:4679`), and
+saw no attacker-reachable NUL-bearing fake metadata or restored
+PREV_INUSE. Its one correction — the tcache branch is at
+`malloc.c:4515-4518` with the return at `:4550`, not `:4513-4517` — is
+applied above. Its non-adjacent patched boot aborted at the same `!prev`
+rather than `unlink_chunk`: layout-dependent negative, not a
+contradiction. Grade unchanged: rung 3/3.5 mechanism, rung 4 not
+demonstrated.
 
 Wake-14 value-buffer walk (long ALT; ~2 s per boot):
 
