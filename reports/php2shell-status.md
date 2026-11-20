@@ -158,6 +158,24 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   has no `-r`. Tarballs for all three branch heads now sha256-pinned
   in lab/php2shell/provision.sh (8.2.35/8.3.36/8.5.12, php.net
   release JSON, verified 2026-11-20). Grade unchanged: rung 2.
+  **Wake 12 (2026-11-20, 11:34Z) — branch coverage, 8.3 branch DONE:
+  the advisory's "all branches" claim holds on 8.3.36** (the last
+  affected head of the 8.3 branch; fixed only in 8.3.37). Source
+  re-read this wake: 8.3.36's `ps_files_write` truncates only when
+  `ZSTR_LEN(val) < data->st_size` (mod_files.c:239-241) — the
+  identical vulnerable pattern. Both committed producer harnesses
+  reproduce on a fresh ASan build (`lab/build/php-8.3.36-asan`,
+  standard flags via lab/php2shell/build.sh, `PHP 8.3.36 (cli) NTS
+  DEBUG`): app-level producer
+  `aftershell-producer-8.3.36-asan.log` (kill at byte 100 of a real
+  session write → `R[0:100]||C[100:]` on disk, 210-byte file,
+  `EVIL=object(stdClass)`, control clean) and unauth rfc1867 producer
+  `aftershell-upload-8.3.36-asan.log` (K=1019, FILE_START write
+  n=1866, splice verified byte-exact — file[K:] == carrier[K:] —
+  1563-byte post-kill file, promoted stdClass, control clean), the
+  same geometry as the 8.2 lane. Zero ASan/UBSan/ZEND_ASSERT in
+  both logs. Grade unchanged: rung 2. 8.5.12 behavioral run remains
+  (last branch).
 
 - **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
