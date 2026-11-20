@@ -128,7 +128,12 @@ compiled with the 3.32.1 division guard inserted exits 3 with
 `out_frames=0x89d` and no wrap or chosen-byte write. `run.sh` now provisions
 both builds (and passes `-DWITH_FFMPEG=OFF`, `-DWITH_SWSCALE=OFF`,
 `-DCHANNEL_URBDRC=OFF`, `-DWITH_CUPS=OFF`, `-DWITH_FUSE=OFF` so a fresh host
-can configure) and checks all four PoCs; full run rc 0.
+can configure) and checks all four PoCs; full run rc 0. Clean-room check at
+23:28Z: `FREERDP_WORK=/tmp/fr-wake4-fresh bash lab/freerdp2shell-src/run.sh`
+cloned 3.32.0, built both variants from scratch and printed
+`ALL REAL-LIBRARY CHECKS PASS`, rc 0 (ASan build needed an incremental resume
+after the harness's 20-minute foreground cap; the resumed build and runner
+took 88s and 39s).
 
 ## Evidence boundary
 
