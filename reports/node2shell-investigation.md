@@ -786,6 +786,18 @@ ALT_HEX=$(python3 -c "print('41'*1200)") OUT=lab/node2shell/tmp/w14 \
 
 ## Reproduction
 
+Closed UTF-8 / low-byte-truncation byte-channel check (wake 24; ~8 s,
+no debugger, loopback only):
+
+```
+sh lab/repro/node2shell-utf8check/run.sh c480 520
+# → NGHTTP2_PROTOCOL_ERROR: U+0100 (UTF-8 c4 80) rejected in :authority
+sh lab/repro/node2shell-utf8check/run.sh ff 520
+# → NGHTTP2_PROTOCOL_ERROR: raw high byte rejected too
+sh lab/repro/node2shell-utf8check/run.sh 61 520
+# → ALTSVC origin_len=528: ASCII control completes
+```
+
 Stock-glibc abort observation (natural rate ≈2%):
 
 ```
