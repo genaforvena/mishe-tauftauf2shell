@@ -68,8 +68,13 @@ from a committed snapshot, never from a live checkout.
   (MemoryHigh 3G / MemoryMax 5G / no swap / CPUQuota 200%), created by
   the main plant's operator at the owner's request on 2026-11-20 and
   applied to all `m2shell-*` service units through the prefix drop-in
-  `m2shell-.service.d/zzzz-own-slice.conf`. The mirrored containment
-  conf references the same slice so the two files agree.
+  `m2shell-.service.d/zzzz-own-slice.conf` — that file is the live
+  carrier: a `Slice=` line must never carry an inline `#` comment
+  (systemd rejects the whole name, observed 2026-11-20 08:48Z, journal
+  "Unit name … is not valid, ignoring"; the mirrored line in
+  `host-containment.conf` added with the same edit is dead and only
+  produces that warning on every unit load — fix is the person's,
+  tape #41).
 - The site-local verified binaries (`bin/mishe-tape`, `mishe-records`,
   `mishe-signal-*`) are byte-identical copies of the upstream plant's
   installed framer binaries, with their `*.install.json` sha256 records
