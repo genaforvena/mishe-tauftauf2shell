@@ -63,3 +63,8 @@ __pycache__/
 *.pyc
 .venv/
 lab/preload/*.so
+
+# Gst2Shell primary-source layout analysis: fetched upstream bytes and probe binaries
+lab/gst2shell-src/upstream/
+lab/gst2shell-src/layout_probe
+lab/gst2shell-src/layout_probe_asan

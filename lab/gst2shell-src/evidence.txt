@@ -1,0 +1,27 @@
+=== pinned source digests (fetched under upstream/, gitignored) ===
+c04ef55545dbe8ce03178c9c3f468715a34f29e0058b5f157a8c2a2aedad85bc  upstream/audio-info.c
+3b3911b599854a0bbb2a31a4013573527aadf52ee875de7a208cc1fce3eab40a  upstream/audio-info.h
+08ae20b33b764ce0a5f9e7e0e4d2b65cb3dc85e2b5bbee373218e817b75e577b  upstream/channels.c
+0d239c5005ba2995d41a2b51b9b3d6ffe262357619d311af1ee0f0abf15eb6b4  upstream/channels.h
+b454623c35e581bc10e832acac9489d74d5a4919b1fcedaeea2ba949941a50a3  upstream/depay.c
+e4f8067a044d59a8c82b035596220389d1de9bbca93ad495a9240eb00a612fa5  upstream/depay.h
+5c281edbfe301393d6f7e621d36743f8945123732f41ab665f9933358edcb3d5  upstream/depayload.h
+ce5ace6f3aea6d1bfbd8414981e8c6aa0950bef0d98c09d2f32bd5021935f2b1  upstream/gst.h
+=== compile ===
+61366975f94ce9223841ffa98719256b9515f88621ae783e7337f1d297d9818c  layout_probe.c
+=== non-ASan: channels=1000, 64 KiB backing (zone counts) ===
+channels=1000 mode=big info_size=320 elem_tail_size=328 position_off=28
+oob_writes=936 pad_writes=1 reserved_writes=8 order_writes=2 escape_writes=925
+order_after=(nil) (sentinel 0x4141... => zeroed=1)
+first_oob_index=64 first_escape_index=75
+=== non-ASan: channels=74, 64 KiB backing (partial) ===
+channels=74 mode=big info_size=320 elem_tail_size=328 position_off=28
+oob_writes=10 pad_writes=1 reserved_writes=8 order_writes=1 escape_writes=0
+order_after=0x4141414100000000 (sentinel 0x4141... => zeroed=0)
+first_oob_index=64 first_escape_index=75
+=== ASan: channels=1000, exact 328-byte element-tail allocation ===
+asan exit=1
+==1811103==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x513000000188 at pc 0x5778c178e357 bp 0x7ffd7301fa60 sp 0x7ffd7301fa50
+WRITE of size 4 at 0x513000000188 thread T0
+0x513000000188 is located 0 bytes after 328-byte region [0x513000000040,0x513000000188)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/layout_probe.c:84 in vuln_create_default
