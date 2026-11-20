@@ -8,8 +8,19 @@ input length + 20, so 21 `ß` overflow by one byte. Written byte fixed
 (`S` upcase, `s` fold); attacker controls buffer size via input length.
 Reached via `upcase`/`swapcase`/`downcase(:fold)`/`casecmp?`; UTF-8
 unaffected. Affected 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix
-`ruby/ruby@d582f8f`. Vendor claims Rails and classic Sinatra exposure
-in default configs; a PoC is announced for 2026-11-25.
+`ruby/ruby@d582f8f`. Veria claims Rails and classic Sinatra exposure
+in default configs, and dates its public PoC 2026-11-25 "or later if
+major vendors have not shipped a fix by then".
+
+Public status (checked 2026-11-20): advisory public since
+2026-11-18/19 — the ruby-lang.org news item fixes GHSA-34m4-m9fh-gqp5
+in 4.0.10/3.4.13/3.3.14 and states "We are aware of PoCs that prove
+this flaw can be used to trigger RCE in some scenarios";
+CVE-2026-132825 published 2026-11-19 (MITRE). The advisory credits the
+primitive to Stephan Lipp (Ada Logics) and Anthropic; Veria's page adds
+Moritz Sanft (with OpenAI) as a discoverer, claims first RCE
+demonstration, and lists 3.2-and-older as affected back to 2.4.0
+(EOL, unfixed).
 
 Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
@@ -691,7 +702,12 @@ unchanged: request-shaped grooming and control-flow hijack.
    readbacks, controls, marker-at-V attribution and the chosen-byte
    counterexample over HTTP, and confirmed the CSRF 422 ordering
    directly. With tape #51 (in-process Stage B), the target's rung-4
-   story is witness-ESTABLISHED on both claimed default stacks. Stage
-   C remains an author-verified strengthening lane; nothing else is
-   owed unless a counterexample appears.
-3. PHP2Shell rungs 1-3 remain queued after Ruby2Shell rungs.
+   story is witness-ESTABLISHED on both claimed default stacks. The
+   Stage C strengthening lane was handed to the witness on 2026-11-20
+   (its wall shows idle capacity); verdict pending. The advisory is
+   public since 2026-11-18/19, so the standing watch item is now live:
+   when Veria's PoC drops (2026-11-25, or later while major vendors
+   lag), compare its mechanics against this report's honest gaps
+   (request-shaped grooming, control-flow hijack, musable-safe popped
+   headers) and record agreements and contradictions here. Until then
+   nothing else is owed unless a counterexample appears.
