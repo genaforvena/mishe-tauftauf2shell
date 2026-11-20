@@ -529,13 +529,65 @@ shutdown. Logs: `lab/build/evidence/stageB/shutdown-uaf/stageA-php-8.4.{27,28}-a
 Grade unchanged; the "second consumer is an indirect call" upgrade
 condition is now a source-backed negative for this CGI path.
 
+## Stage A on FPM: corruption confirmed, byte placement not transferred (wake 22)
+
+The wake-21 "other SAPIs UNKNOWN" narrowed for FPM. New harnesses:
+`lab/repro/php2shell-stageA-fpm.sh` (single FastCGI request) and
+`lab/repro/php2shell-stageA-fpm-sweep.py` (query-length sweep); both are
+loopback-only and reuse `php2shell-fpm-client.py`.
+
+**Trigger-setting lesson.** FPM applies `php_admin_value[date.timezone]` and
+`php_admin_value[error_log]` too late to emit the startup diagnostic that
+allocates the 56-B tzcache: the first attempt produced only the decode
+warning and no fault. Passing `date.timezone=Bogus/Zone`, `error_log=<file>`
+and `log_errors=1` as php-fpm `-d` flags (as the CGI groomer does) makes the
+"PHP Startup: Invalid date.timezone value" warning appear and the UAF fire.
+
+**Observed, 8.4.27, affected build.** With the startup diagnostic, a
+splice-MID session record, an upload-progress multipart POST and a query
+string:
+- `php-8.4.27-fpm-asan`: every request aborts (`SIGABRT`, child respawn) with
+  `AddressSanitizer: heap-use-after-free` at
+  `Zend/zend_hash.c:57:7 in _zend_is_inconsistent`. Evidence:
+  `lab/build/evidence/stageA-fpm/stageA-fpm-8.4.27-fpm-asan.log`.
+- `php-8.4.27-fpm-plain` (ZEND_DEBUG): SIGABRT, worker stderr
+  `zend_hash.c(2920): ht=… is already destroyed` and
+  `_zend_is_inconsistent: Assertion '0' failed`.
+- `php-8.4.27-fpm-nodebug` (no ZEND_DEBUG): SIGSEGV, worker dies.
+  Sweeps cover query-value lengths 0, 4, 8, 9, 10, 14, 24, 25, 32; every
+  one faults on the plain builds. Evidence:
+  `lab/build/evidence/stageA-fpm/sweep-*.log` and
+  `lab/build/evidence/stageA-fpm-nodebug/sweep-*.log`.
+
+**Controls.** `date.timezone=UTC` (valid) and no session cookie serve
+normally on all three builds. `php-8.4.28-fpm-asan` with the identical
+config emits the startup and decode warnings, serves every request, and
+reports zero sanitizer output
+(`lab/build/evidence/stageA-fpm-fixed/stageA-fpm-8.4.28-fpm-asan.log`).
+Patch sensitivity holds on FPM.
+
+**Interpretation / grade.** The first consumer (the stale-tzcache read) is
+now confirmed memory corruption on FPM across three build flavors, not just
+suspected. But the CGI-specific Stage A property — attacker-chosen bytes at
+chosen offsets via query-string grooming — does NOT transfer: the fault is
+query-length-independent (including length zero), and the debug build shows
+the stale table read in an "already destroyed" state, not a benign reused
+HashTable. No chosen-byte placement, pointer control or marker is claimed on
+FPM; whether a 56-B occupant with pointer at offset 16 and mask=0 exists
+there remains UNKNOWN (no GDB field inspection on an FPM worker), and the
+indirect-call route is closed on every SAPI by core RINIT ordering (wake 21).
+Grade unchanged: rung 4 CONSTRAINED (CGI, witness #138); FPM adds a
+deterministic crash at rung 3, not a rung-4 upgrade. Apache remains UNKNOWN.
+
 ## Open routes after Stage A
 
 - Extending the groom to set `arData` to a chosen address is an observed
   negative for query and multipart grooming (Stage B) and for session data
-  (Stage B extension); other SAPIs remain UNKNOWN. The consumer is
-  structurally either-or, so this route cannot yield arbitrary-address
-  control. Stage A is witness-ESTABLISHED (#138), no re-run owed.
+  (Stage B extension). On FPM the corruption path is confirmed but byte
+  placement is not established and the fault is query-length-independent
+  (wake 22); Apache remains UNKNOWN. The consumer is structurally either-or
+  on the CGI path, so this route cannot yield arbitrary-address control.
+  Stage A is witness-ESTABLISHED (#138), no re-run owed.
 - A public disclosure of Depthfirst's withheld native decoder could supply
   the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not

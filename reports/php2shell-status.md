@@ -338,6 +338,33 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   makes the groomer unnecessary for ASan detection); 8.4.28-asan and
   8.4.27-asan valid-record rc 0, no report. Grade unchanged; no route to
   an indirect call through this freed object on this CGI path.
+  **Wake 22 (2026-11-20, 16:18Z) — FPM Stage A: corruption confirmed, byte
+  placement NOT transferred.** New loopback harnesses
+  `lab/repro/php2shell-stageA-fpm.sh` and
+  `lab/repro/php2shell-stageA-fpm-sweep.py`. Trigger-setting lesson: FPM's
+  `php_admin_value[date.timezone]` is applied too late to emit the
+  tzcache-allocating startup diagnostic; `-d date.timezone=Bogus/Zone`,
+  `-d error_log=<file>` and `-d log_errors=1` are required. With those flags
+  plus the splice-MID record, upload-progress multipart POST and query
+  string, `php-8.4.27-fpm-asan` aborts every request with
+  `AddressSanitizer: heap-use-after-free` at
+  `zend_hash.c:57:7 in _zend_is_inconsistent`
+  (`lab/build/evidence/stageA-fpm/stageA-fpm-8.4.27-fpm-asan.log`).
+  Plain 8.4.27 FPM builds fault on all query-value lengths 0/4/8/9/10/14/
+  24/25/32: the ZEND_DEBUG build aborts with `ht=… is already destroyed`
+  and `_zend_is_inconsistent: Assertion '0' failed`, the non-debug build
+  SIGSEGVs (`lab/build/evidence/stageA-fpm/sweep-*.log`,
+  `lab/build/evidence/stageA-fpm-nodebug/sweep-*.log`). Valid timezone and
+  no-cookie controls are clean; `php-8.4.28-fpm-asan` with the identical
+  config fires both warnings, serves every request and reports zero
+  sanitizer output (`lab/build/evidence/stageA-fpm-fixed/…`), so the fix
+  holds on FPM. The first consumer is therefore confirmed corruption on
+  FPM, but the query-length-independent fault means CGI's chosen-byte
+  placement does NOT transfer; no occupant GDB inspection was done on an
+  FPM worker, so pointer-at-+16/mask=0 remains UNKNOWN there, and the
+  indirect-call route is closed everywhere (wake 21). Grade unchanged:
+  rung 4 CONSTRAINED (witness #138); FPM adds a rung-3 deterministic crash.
+  Apache remains UNKNOWN.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
