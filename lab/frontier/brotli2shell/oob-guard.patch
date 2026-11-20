@@ -1,0 +1,41 @@
+--- a/c/dec/decode.c
++++ b/c/dec/decode.c
+@@ -4,6 +4,8 @@
+    See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
+ */
+ 
++#include <stdio.h>
++static long g_oob_logs = 0;
+ #include <brotli/decode.h>
+ 
+ #include "../common/constants.h"
+@@ -2446,6 +2448,14 @@
+                input stream. */
+             result = BROTLI_DECODER_SUCCESS;
+             BROTLI_DCHECK(s->buffer_length < 8);
++            if (s->buffer_length >= 8) {
++              if (g_oob_logs++ < 256) {
++                fprintf(stderr,
++                        "OOB site1 idx=%ld byte=0x%02x buflen_before=%ld\n",
++                        (long)s->buffer_length, (unsigned)**next_in,
++                        (long)s->buffer_length);
++              }
++            }
+             s->buffer.u8[s->buffer_length] = **next_in;
+             s->buffer_length++;
+             BrotliBitReaderSetInput(br, &s->buffer.u8[0], s->buffer_length);
+@@ -2461,6 +2471,14 @@
+           *next_in = br->next_in;
+           *available_in = BrotliBitReaderGetAvailIn(br);
+           while (*available_in) {
++            if (s->buffer_length >= 8) {
++              if (g_oob_logs++ < 256) {
++                fprintf(stderr,
++                        "OOB site2 idx=%ld byte=0x%02x buflen_before=%ld\n",
++                        (long)s->buffer_length, (unsigned)**next_in,
++                        (long)s->buffer_length);
++              }
++            }
+             s->buffer.u8[s->buffer_length] = **next_in;
+             s->buffer_length++;
+             (*next_in)++;

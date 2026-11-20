@@ -26,6 +26,14 @@ lab/frontier/*/run/
 lab/frontier/*/htdocs/
 lab/frontier/*/cgi-bin/
 
+# Brotli2shell bulk: upstream clone, instrumented copy, build output, corpora
+lab/frontier/brotli2shell/brotli-src/
+lab/frontier/brotli2shell/brotli-instr/
+lab/frontier/brotli2shell/build-*/
+lab/frontier/brotli2shell/*.br
+lab/frontier/brotli2shell/*.bin
+lab/frontier/brotli2shell/*.out
+
 # Apache2Root capacity-boundary harness runtime state (scripts stay tracked)
 lab/apache2shell/logs/
 lab/apache2shell/run/
