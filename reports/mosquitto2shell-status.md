@@ -148,3 +148,64 @@ byte values, zero aligned `0x55…` heap pointers, no readable strings.
 Freeing holders did not place a `struct mosquitto` in the read window on
 this build. Keep the enlargement; do not claim any leaked address from
 this configuration.
+
+## Wire-only heap pointer disclosure (17:05-17:12Z) — rung 4 impact DEMONSTRATED
+
+New harness `lab/frontier/mosquitto2shell/groom_leak_probe.py` extends the
+32 KiB PONG read: after the `packet_length=0x8010` overwrite but before
+completing the spare PING, it opens 16 live filler connections (WS
+handshake + partial PING). `context__init()` allocates a pointer-bearing
+`struct mosquitto` (0x380) plus `in_packet.packet_buffer` and registers
+`hh_sock.next/prev` heap links (context.c:56, 65-71); these land from top
+inside the read window.
+
+Fresh stock-glibc 2.1.2 broker, port 27081, no sanitizer, no gdb in the
+probe: `PONG bytes received: 32776`, header `8a 7e 80 00`, broker alive,
+34 connections. Leaked bytes are raw heap (the server does not mask its
+WS frames; the `41 72 63 14` repeats at window +8 are the echoed PING
+payload XORed with the client mask). Broad aligned scan found **64 aligned
+heap pointers** with high half `0x5deb` (that run's ASLR heap base), plus
+`127.0.0.1`, `Sec-WebSocket-Key`, `zzhZRbK+xOo=` strings at 0x460 spacing.
+Concrete leaked pointer at window +0x1878: `0x00005deb6563b0c0`. Repeated
+invariants: `0x...65601530` at +0x2f0/+0x1740/+0x1ba0/+0x40d0/+0x5520 and
+`0x...65607d00` at +0x360/+0x17b0/+0x1c10/+0x4140/+0x5590.
+
+Under a separate ASLR-on run (`logs/leak-freshL.bin`):
+
+    window +0x2f0 = 0x5f95d2348530   (repeated invariant)
+    window +0x368 = 0x5f95d237f3f0   (source struct mosquitto context)
+    window +0x388 = 0x5f95d2380904   (PONG payload + 0xa8)
+
+gdb observer runs (ASLR on and off; observer only, no memory patched)
+validated the geometry: `PONG_payload = value(+0x388) - 0xa8`,
+`source payload = PONG_payload - 0xdc`, window base = `payload + 12`,
+and `PAYLOAD mosq=... ptr=... len=174` matches the leaked context exactly.
+This is a wire-only, pre-auth, deterministic disclosure of live heap
+addresses: ASLR is defeated and attacker-chosen heap bytes are read.
+That is a demonstrated security impact (rung 4 information disclosure),
+independent of the still-unproven code-execution chain.
+
+## Wire-derived tcache poison — negative (17:22Z), do not claim
+
+Attempted to turn the leak into a controlled malloc return without gdb
+address patching. `C` read from window +0x368; predicted poison payload
+`P = C - 0x11310` from one earlier same-process observation; safe-linked
+`fd = (fdaddr>>12) ^ target` with `fdaddr = P+80`, `target = P`, placed at
+stream offset 76 by `tcache_probe.py`. Observed:
+
+    C = 0x5c9d712ac3f0   predicted P = 0x5c9d7129b0e0
+    actual P (gdb observer) = 0x5c9d712a7b40   = C - 0x48b0
+
+No `MEMCPY19 dst=predicted-P` and no crash; broker survived. The 1-byte
+poison payload address depends on tcache state after the leak, not on a
+fixed offset from the leaked context: it moved between runs (`+0x151b0`
+fresh, `-0x11310` and `-0x48b0` after a leak). The earlier gdb-assisted
+controlled return at `0x55555561c5e0` (`logs/gdb-poison2.log`) remains a
+capability demonstration with a lab-supplied address only.
+
+**Status.** Rung 4 information disclosure: demonstrated, wire-only.
+Wire-derived controlled pointer / tcache-to-control chain: UNKNOWN, with
+the concrete blocker recorded above. dlsym/setcontext: out of scope.
+Evidence in gitignored `lab/frontier/mosquitto2shell/logs/`:
+`groom-leak-f16.bin`, `groom-aslr.bin`, `leak-freshL.bin`, `wire-leak.bin`,
+`wire-poison.log`, `gdb-wire-poison.log`, `gdb-aslr-calib.log`.
