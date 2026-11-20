@@ -107,6 +107,21 @@ host-level units (workload slices, memory limits) — that is host
 administration, not this plant's business, and it may produce unit drift
 here (see below).
 
+## Presentation: one window per target
+
+The plant's inner tmux session shows **target windows**, not role windows:
+`ruby2shell`, `php2shell`, and one window for every target the operator
+admits under the similar-things mandate — created by the operator itself
+at admission time, with the standard layout. A target window has two
+panes: the top tails the target's status file
+`reports/<target>-status.md`, the bottom follows the chat tape filtered
+for the target name. The researcher maintains each active target's status
+file every wake (current rung, next action, last evidence with where to
+look, honest unknowns) — the window is only as truthful as that file.
+The `chat`, `git` and `wakes` shared windows stay. The creation command
+is recorded in the operator's charter so an admitted target always gets
+its window without the person.
+
 ## Unit drift and sync discipline
 
 The doctor may report "drift from generated content (run `mishe sync` to
