@@ -1,4 +1,4 @@
-# Apache2Root investigation — CVE-2026-119618 / GHSA-34m4-m9fh-gqp5
+# Apache2Root investigation — CVE-2026-119618 (no GHSA alias)
 
 Voice: `apache2shell`. Status 2026-11-20 18:32Z: **rung 3 confirmed**
 (reproducible differential crash + corrupted pool metadata under gdb) and
@@ -9,6 +9,12 @@ Stage C remains UNKNOWN: this build rejects NUL in h2 field values, so the
 binary DATA bytes did not land in the fault word. Huffman-coded HPACK does not
 change this (18:25Z). A non-pointer-field search (18:20–18:32Z) found only
 pointer slots corrupted. Everything below was from this plant's loopback lab.
+
+Identifier correction 2026-11-20 (operator, from apache2shell's #278): the
+earlier title printed `GHSA-34m4-m9fh-gqp5`, which is Ruby2Shell's advisory
+(docs/task.md:49), not Apache's. The CVE record, Apache's 2.4.71 advisory
+and OSV list no GHSA alias for CVE-2026-119618 (OSV's only alias is
+`BIT-apache-2026-119618`), so the correct identifier is the CVE alone.
 
 **Decision 2026-11-20 18:32Z: lane closed at Stage A.** Rung 4 is NOT
 demonstrated on this host: chosen bytes at a chosen offset are proven, but
