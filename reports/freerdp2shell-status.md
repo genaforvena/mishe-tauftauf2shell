@@ -98,14 +98,47 @@ The real parser admits the inconsistent format (only the scalar
 parsed struct. This is still in-process injection of a PDU into the real
 parser — no virtual-channel transport, RDP session or auth gate.
 
+## Chosen-byte rung 4 on real bytes (wake 4, 2026-11-20 23:01Z)
+
+`PocRdpsndChosenBytes.c` compiles the real 3.32.0 `rdpsnd_main.c` into the
+test translation unit, feeds a crafted `SNDC_FORMATS` PDU through the real
+`rdpsnd_server_recv_formats()` parser, selects benign PCM then the malicious
+ADPCM format, and makes two `SendSamples` calls with distinguishable client
+buffers. It is built **without** sanitizers: ASan aborts on the first OOB
+write and cannot observe the second call. A scratch plain build of the same
+source is used; the ASan results above remain the corruption evidence.
+
+Captured in `lab/freerdp2shell-src/chosen_bytes_real_library.txt`:
+
+```
+recv_formats rc=0 nformats=2
+parsed[1]: tag=17 channels=2 blockalign=4 cbsize=2
+SelectFormat rc=12 out_frames=0xfffffffffffffff0 out_buffer_size=8820
+readback offset 8819  = 11 (last in-bounds byte)
+readback offset 8820  = de (client marker, call 1, first OOB byte)
+readback offset 16384 = 22 (call 2 start)
+readback offset 21384 = ad (client marker, call 2)
+out_pending_frames=8192 out_frames=0xfffffffffffffff0 (never reached)
+[rung4] RESULT=PASS
+```
+
+The process exits 0 via `_exit()` after flushing: normal teardown frees the
+deliberately corrupted heap and faults. Fixed-source control: the same PoC
+compiled with the 3.32.1 division guard inserted exits 3 with
+`out_frames=0x89d` and no wrap or chosen-byte write. `run.sh` now provisions
+both builds (and passes `-DWITH_FFMPEG=OFF`, `-DWITH_SWSCALE=OFF`,
+`-DCHANNEL_URBDRC=OFF`, `-DWITH_CUPS=OFF`, `-DWITH_FUSE=OFF` so a fresh host
+can configure) and checks all four PoCs; full run rc 0.
+
 ## Evidence boundary
 
-Rungs 1/2/3 established; rung 4 PASS with chosen bytes at chosen offsets
-**only in the extracted harness**. Rung 3 is confirmed both on the real
-library and through the real SNDC_FORMATS parser source, but both PoCs write
-0x41 filler, so chosen-byte rung 4 on real bytes stays UNKNOWN. Live FreeRDP
-process, virtual-channel transport, RDP session, stock allocator layout,
-network reachability and the auth gate remain UNKNOWN. No off-loopback probe.
+Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
+offsets **on real library bytes through the real SNDC_FORMATS parser**, but
+still in-process. The write is sequential and unbounded; no pointer control
+or specific heap object is targeted. Live FreeRDP process, virtual-channel
+transport, RDP session, stock allocator layout, network reachability and the
+auth gate remain UNKNOWN. No off-loopback probe. Default posture is
+post-auth (PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay

