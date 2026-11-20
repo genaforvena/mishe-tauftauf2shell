@@ -11,6 +11,17 @@
    "resolver": "operator",
    "replaces": [],
    "covers": "a wake left open (started/unknown) longer than 30 minutes"
+  },
+  {
+   "name": "repo-change",
+   "builtin": true,
+   "every": 900,
+   "timeout": 120,
+   "max_age": 21600,
+   "resolver": "docs",
+   "signal": {"subscribers": ["docs"], "wake_on": "change"},
+   "replaces": [],
+   "covers": "git commit changes to the checkout: the producer observes HEAD, writes signals/repo-change.detail and wakes only docs on a new commit. Missing git or unreadable HEAD is UNKNOWN, never GREEN."
   }
  ],
  "retired": [],

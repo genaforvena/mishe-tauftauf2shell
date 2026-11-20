@@ -29,6 +29,10 @@
 #   0xDF*828 — same buffers, no parity flip, NO overflow.
 #
 # Loopback only: bind 127.0.0.1.
+gem 'sinatra', '4.2.2'
+gem 'rack', '3.2.8'
+gem 'rackup', '2.3.1'
+gem 'webrick', '1.9.2'
 require 'sinatra'
 
 $w_live = nil

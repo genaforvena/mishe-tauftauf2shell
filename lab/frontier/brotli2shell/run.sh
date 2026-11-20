@@ -17,8 +17,8 @@ V120='028fb5a23661f123017c060daa546b55cf4bde29'
 V121='db24a98aed38a16de78cc05ca15cdd8dc2a0d92d'
 
 echo "== provisioning =="
-if [ ! -f poc.py ]; then curl -sS --max-time 30 -o poc.py "$POC_URL"; fi
-echo "$(sha256sum poc.py)  expected $POC_SHA"
+if [ ! -f poc.py ]; then curl -fsSL --retry 2 --max-time 60 -o poc.py "$POC_URL"; fi
+echo "$POC_SHA  poc.py" | sha256sum -c - || { echo "poc.py hash mismatch" >&2; exit 2; }
 if [ ! -d brotli-src/.git ]; then
   git clone --quiet https://github.com/google/brotli.git brotli-src
 fi

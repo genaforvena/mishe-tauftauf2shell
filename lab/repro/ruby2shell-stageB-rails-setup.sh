@@ -28,7 +28,10 @@ APP="$ROOT/lab/build/rails-stageb-app"
 MW="$ROOT/lab/repro/ruby2shell-stageB-rails-middleware.rb"
 export PATH="$RBUILD/bin:$PATH"
 
-"$GEM" install rails --no-document >/dev/null   # idempotent (already provisioned)
+# Pinned to the versions reported in ruby2shell-investigation.md so the
+# byte-for-byte readback remains reproducible on a clean checkout.
+"$GEM" install rails -v 8.1.4.1 --no-document >/dev/null
+"$GEM" install rack -v 3.2.8 rackup -v 2.3.1 webrick -v 1.9.2 --no-document >/dev/null
 "$GEM" list --local | grep -E '^(rails|actionpack|railties|webrick) '
 
 mkdir -p "$ROOT/lab/build"
