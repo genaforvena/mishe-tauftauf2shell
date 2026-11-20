@@ -393,15 +393,18 @@ kills the write; check O2's sizefield, not just its address).
 **Exact-fit groom (LEN=2216, LEN2=2208, bare env)**: authority_1 2216
 → origin 2224 (≡0 mod 16, harmless) → donor 0x8c0+0x8e0 = 0x11a0 (the
 measured +0x20-per-16 scaling), bite 0x8f0 → remainder **exactly
-0x8b0 = O2's chunk size**. Observed 2/2: `O2 == HOLE1-NEXT`
-(0x6e51630, sizefield 0x8b1, **no split, no whole-serve**), NUL on the
-following chunk at 0x6e51ee0 → sizefield **0xb00** (real size
-0xb00..0xbf0, byte0 destroyed; believed extent up to 0xf0 short).
-The layout is bimodal across runs: when request-2's hd-inflate bite
-is the grown 0xbf0 buffer instead of the fresh 0x8f0 one, the
-remainder is 0x550 and O2 goes elsewhere (free-remainder victim →
-in-call abort). Two regimes, 2/2 vs 0/2 in consecutive four-run
-batches; regime pinning is open.
+0x8b0 = O2's chunk size**. Observed in the fresh-0x8f0-bite regime:
+`O2 == HOLE1-NEXT` (0x6e51630, sizefield 0x8b1, **no split, no
+whole-serve**), NUL on the following chunk at 0x6e51ee0 → sizefield
+**0xb00** — and the new REAL-NEXT-CAND scan pins the real size: the
+real next chunk at V+0xbf0 holds sizefield 0xbf1, so the victim is the
+**in-use golden 0xbf0 chunk: real 0xbf0 → believed 0xb00, shrink
+exactly 0xf0**. The layout is bimodal per boot: when request-2's
+hd-inflate bite is the grown 0xbf0 buffer instead of the fresh 0x8f0
+one, the remainder is 0x550 and O2 goes elsewhere (free-remainder
+victim → in-call abort). Batch results A/A, B/B, A/A (DELAY 300/4000
+did not switch it); repeat runs until the walk prints
+`O2 == HOLE1-NEXT`.
 
 **Mechanism discovery — the same-call free closes the in-use lane.**
 The exact-fit run's abort backtrace is NOT the in-call malloc
