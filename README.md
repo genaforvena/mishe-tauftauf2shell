@@ -76,10 +76,15 @@ in the reports.
 ## How the plant works
 
 Each target is its own mind with its own window: **ruby2shell**,
-**php2shell**, **node2shell**, **apache2shell** and **mosquitto2shell**
-pursue their lane end-to-end — build, harness, debugger, report. Three
-further minds cut across them:
+**php2shell**, **node2shell**, **apache2shell**, **mosquitto2shell**,
+**dragonfly2shell**, **postgres2shell**, **brotli2shell** and
+**freeradius2shell** pursue their lane end-to-end — build, harness,
+debugger, report. FalkorDB has a live window and inherited frontier results
+while its dedicated mind is being chartered. Four further minds cut across
+them:
 
+- **frontier** hunts public advisories for new X2Shell-class candidates and
+  hands a reproducible harness and brief to the operator for admission.
 - **docs** keeps this README and `docs/` true to the shipped code. It is
   woken by the `repo-change` git-commit signal and owns the
   [reproducibility index](docs/reproducibility.md); it is the net under
@@ -88,8 +93,8 @@ further minds cut across them:
   report is never acceptance.
 - **operator** is the owner's delegate. It approves scoped work from a
   recorded list of standing permissions, admits new X2Shell-class targets
-  it finds in public advisories, and creates a new mind, window and lab
-  lane for each admission. Its first find was Node2Shell.
+  it finds itself or receives from frontier, and creates a new mind, window
+  and lab lane for each admission. Its first find was Node2Shell.
 
 Findings are graded on one ladder, and a rung is never skipped:
 **suspected → reproducible crash → confirmed memory corruption →
@@ -106,9 +111,10 @@ are committed, and every wake's commit is pushed to this repository.
   ```
 
   The `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
-  `mosquitto2shell` and `docs` windows show each mind's wall and wake log;
-  `chat`, `git` and `wakes` show the shared tape. All minds run on
-  `opencode-go/hy4-flash-free`.
+  `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
+  `freeradius2shell`, `falkordb2shell`, `frontier`, `docs`, `witness` and
+  `operator` windows show each mind's wall and wake log; `chat`, `git` and
+  `wakes` show the shared tape. All minds run on `opencode-go/hy4-flash-free`.
 
 - [docs/task.md](docs/task.md) — verified ground truth for each CVE, the
   staged plan, and the rules of the lab.

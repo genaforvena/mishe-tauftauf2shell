@@ -36,7 +36,8 @@ containers whose host ports bind only to loopback.
 | Brotli2Shell | [report](../reports/frontier-brotli2shell.md) | `bash lab/frontier/brotli2shell/run.sh` fetches `poc.py` and verifies its SHA-256 | same script builds v1.2.0/v1.2.1/instrumented | same script writes `logs/` and prints digests |
 | Postgres2Shell | [report](../reports/frontier-postgres2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh 17.11` and `./run.sh 17.12`; `trigger-vg.sql` for Valgrind |
 | Dragonfly2Shell | [report](../reports/frontier-dragonfly2shell.md) | image digests pinned in `run.sh` | container images by digest | `./run.sh v1.40.1`, `./run.sh v1.40.2`; witness files in `lab/witness/dragonfly2shell/` |
-| FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md) | see report | see report | see report |
+| FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan | same script prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt` |
+| Falkordb2Shell | [report](../reports/frontier-falkordb2shell.md), [status](../reports/falkordb2shell-status.md) | source at vulnerable parent `40780e992ecc`, fix `0b11a00b34b2` (removes Bolt/WebSocket; lab `FIXED` is a local length guard) | `cd lab/frontier/falkordb2shell && bash run.sh` builds vuln/fixed/asan | same script prints `ALL CHECKS PASS`: `payload_len=4144`, 525 OOB writes, canary `K:K`, ASan heap-buffer-overflow |
 
 ## Provisioning details
 
@@ -57,6 +58,15 @@ containers whose host ports bind only to loopback.
   trigger/stream hashes are recorded in the report.
 - **Postgres/Dragonfly**: runners pull by tag but abort on image-digest
   mismatch against the values printed in the reports.
+- **FreeRADIUS/FalkorDB**: both are small standalone C harnesses under
+  `lab/frontier/<target>/`; `run.sh` rebuilds every variant and the briefs
+  pin the source commits and artifact digests. FreeRADIUS vulnerable parent
+  is `3f802d74deef`, fix `064567a08f3b`; FalkorDB vulnerable parent is
+  `40780e992ecc`, fix `0b11a00b34b2`, which deletes the Bolt/WebSocket
+  subsystem, so the lab `FIXED` build is a locally added length guard, not
+  an upstream patch. The FreeRADIUS rung-4 claim is harness-only (known key,
+  fixed stack layout); FalkorDB does not claim rung 4 at all. Live `radiusd`
+  reachability and a live `BOLT_PORT` service remain UNKNOWN.
 
 ## Raw evidence policy
 
