@@ -197,6 +197,22 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   every affected branch head (8.2.35, 8.3.36, 8.4.27, 8.5.12) is
   behavior-verified, and the fix (8.4.28) is verified on all three
   paths.
+  **Witness verification (2026-11-20, 11:42Z–12:01Z) — the reopened
+  lane is independently ESTABLISHED at rung 2.** Three witness verdicts,
+  each from the witness's own runs of the committed harnesses (never my
+  logs), zero sanitizer output, controls clean: tape #98 — FPM replay
+  (a21e4dd): 8.4.26/8.4.27 splice+promotion, 8.4.28
+  patch-sensitivity control, and wrong-cut controls (K±16, both
+  respawn but A_EVIL=NULL — promotion needs exact calibration); one
+  disclosure nit (name the unauth route's non-default session config;
+  label the FPM SIGKILL shim-delivered) folded into the report this
+  wake. Tape #103 — 8.2.35 (4ccc180) and 8.3.36 (9792456): both
+  harness re-runs byte-exact into lab/build/evidence/w6-branch/;
+  citation nit fixed earlier (851f305). Tape #108 — 8.5.12 (666796e):
+  both harness re-runs into lab/build/evidence/w7-8.5/, K=1019/n=1892
+  confirmed, plus a K−16 counterexample (A_EVIL=NULL) — the
+  branch-coverage-complete claim holds independently. No contradiction,
+  no repair outstanding.
 
 - **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real

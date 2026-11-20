@@ -29,7 +29,9 @@ session-splice deserialization primitive, produced end-to-end in this
 lab by both the application-string path and the fully unauthenticated
 upload-progress path, with the vendor fix verified behaviorally on
 8.4.28. Still no memory unsafety: rung 3 is not established for it
-(the public full chain's memory bug is undisclosed).
+(the public full chain's memory bug is undisclosed). Every behavioral
+claim in the reopened lane is witness-ESTABLISHED at rung 2 (tapes
+#98/#103/#108, 2026-11-20).
 
 ## Evidence ladder, honestly graded
 
@@ -151,8 +153,14 @@ builds, zero sanitizer output:
    replacement are both written by the multipart upload-progress
    callback pre-RINIT (`php_session_rfc1867_update` →
    `php_session_flush(1)` → `ps_files_write`, session.c:3175-3207) —
-   no application session code at all; any pre-auth POST with a
-   session id and a file part reaches it. Geometry: three progress
+   no application session code at all; any pre-auth POST carrying a
+   session id and a file part reaches it, under the non-default
+   session config the harness sets (`session.use_strict_mode=0`,
+   `use_cookies=0`, `use_only_cookies=0`,
+   `upload_progress.cleanup=0` — with the compile default
+   `use_strict_mode=1` the FILE_START write shrinks to 1019 bytes,
+   below the carrier, and the splice cannot be calibrated; witness
+   observation, tape #98). Geometry: three progress
    keys (`carr`, `objk`, `tail`); the OBJ bytes ride inert inside
    `objk`'s serialized filename; the replacement updates only `carr`,
    so the kill at K = len(carr-new) splices
@@ -176,7 +184,11 @@ builds, zero sanitizer output:
    `lab/repro/php2shell-aftershell-splice-upload-fpm.sh`): the same
    unauth upload-progress splice, but the process that dies
    mid-FILE_START-pwrite is a real php-fpm worker child —
-   fpm-error.log: "child NNN exited on signal 9 (SIGKILL)"; the
+   fpm-error.log: "child NNN exited on signal 9 (SIGKILL)" — the
+   SIGKILL is delivered by the committed LD_PRELOAD kill shim at
+   the pwrite boundary: the worker, the interrupted write and the
+   respawn are real, but the death is simulated, not an OOM kill
+   (witness disclosure nit, tape #98); the
    master respawns a new child, and that RESPAWNED worker's plain
    session_start() promotes the stdClass (the consumer echoes its
    own pid, which is the respawned child's). The kill is armed for
@@ -228,6 +240,20 @@ builds, zero sanitizer output:
    ASan/UBSan/ZEND_ASSERT in both logs. With this, every affected
    branch head (8.2.35, 8.3.36, 8.4.27, 8.5.12) is behavior-verified
    and branch coverage is complete.
+
+**Witness acceptance (2026-11-20, tapes #98, #103, #108):** every
+behavioral claim in this reopened lane is independently ESTABLISHED at
+rung 2 by the witness's own re-runs of the committed harnesses (never
+my logs): the FPM replay on 8.4.26/8.4.27 with its own 8.4.28
+patch-sensitivity control and wrong-cut controls (K±16 do not promote
+— promotion needs exact calibration, not any partial write; tape #98);
+the 8.2.35 and 8.3.36 branch coverage, byte-exact, into
+`lab/build/evidence/w6-branch/` (tape #103; its 8.2.35 citation nit is
+repaired, commit 851f305); and the 8.5.12 branch coverage with a
+K−16 counterexample (`A_EVIL=NULL`, tape #108) — the
+branch-coverage-complete claim holds independently. Zero
+ASan/UBSan/ZEND_ASSERT output in every independent run; no
+contradiction, no repair outstanding.
 
 ## Black-box discriminators (affected-only, reproducible)
 
