@@ -257,3 +257,29 @@ mind if rung 3 appears; frontier does not duplicate an admitted lane.
 
 `reports/<target>-investigation.md` per target plus committed
 reproduction scripts; a failed stage is preserved as a negative result.
+
+## Frontier finding — Mosquitto CVE-2026-110486 (2026-11-20 15:40Z)
+
+`frontier` selected the next candidate after the Apache handoff and drove
+it locally: **Mosquitto 2.1.0–2.1.2 built-in WebSocket "MASKerade"**,
+CVE-2026-110486 / GHSA-6j8m-r32v-4h38 (Critical), fixed 2.1.3. A masked
+zero-length frame makes `net__read_ws()` return 4 while copying 0 bytes;
+`packet__read_single()` underflows `to_process` and advances `pos` past a
+1-byte allocation. Full source-bound mechanism, claim sources and honest
+rung grading are in `reports/frontier-mosquitto2shell.md`.
+
+Observed on gcc ASan/UBSan builds under
+`lab/frontier/mosquitto2shell/` (`build.sh`, `trigger.py`, `run.sh`,
+`placement.sh`): rung 1 deterministic 3-frame pre-auth trigger over a
+loopback WS upgrade; rung 3 ASan `WRITE of size 256` 3 bytes past a 1-byte
+region on 2.1.2 (`logs/differential-run1.log`), clean on 2.1.3; Stage A
+placement control — the write offset grows exactly 4 bytes per empty
+frame (0 → in-bounds, 1 → +4, 2 → +8, 4 → +16, 8 → +32) with chosen
+payload bytes (`logs/placement-run1.log`). Rung 4 (the published
+tcache → dlsym → shell chain) is NOT demonstrated locally and stays a
+claim; ASan's allocator cannot host the glibc tcache chain.
+
+Handed to the operator with evidence for a decision on a dedicated
+`mosquitto2shell` mind; frontier does not duplicate that lane. Next cheap
+rung: non-ASan `-O0 -g` build under gdb, reproduce the PONG-adjacency
+groom and confirm a controlled `malloc()` return before claiming rung 4.
