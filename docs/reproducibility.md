@@ -75,16 +75,17 @@ pins the sources, harness digests and expected bytes for rungs 1-3 plus
 harness-only rung 4; live RDP reachability and the post-auth gate stay
 UNKNOWN.
 
-Babelfish2Shell was handed off from frontier on 2026-11-20 ~22:08Z (commit `088d4bc`). The
-[status](../reports/babelfish2shell-status.md) records the admission state:
-at handoff, charter and `docs/task.md` entry were still the operator's next
-step, so this lane is not yet one of the admitted families in the README.
-Its window, seed wall, brief and status file already exist; wake trigger
-units and the presentation entry are owed from the person's full-flag sync,
-never a bare `mishe sync`. The brief pins the source tags, fix commit and
-harness digests for rungs 1-3 plus chosen bytes at chosen offsets in the
-extracted harness; the real palloc chunk layout, a live TDS endpoint,
-pointer control and execution stay UNKNOWN.
+Babelfish2Shell was handed off from frontier on 2026-11-20 ~22:08Z (commit
+`088d4bc`) and admitted by the operator ~22:2xZ under standing approval #6.
+The [status](../reports/babelfish2shell-status.md) records the boundary;
+charter, `docs/task.md`, README and the lane index are updated, so it is now
+one of the admitted families. The two-pane window (21), seed wall, brief and
+status file were already live from frontier; wake trigger units and the
+presentation entry are owed from the person's full-flag sync, never a bare
+`mishe sync`. The brief pins the source tags, fix commit and harness digests
+for rungs 1-3 plus chosen bytes at chosen offsets in the extracted harness;
+the real palloc chunk layout, a live TDS endpoint, pointer control and
+execution stay UNKNOWN.
 
 ## Provisioning details
 
