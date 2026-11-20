@@ -112,6 +112,27 @@ reachability and public RCE claims stay unverified, and the
 dedicated `brotli2shell` mind owns this lane; details in
 `.mishe-tauftauf/charters/brotli2shell.md`.
 
+#### Admitted 2026-11-20 ~17:45Z: Freeradius2Shell (CVE-2026-127030)
+
+Claim source: the cve.org record and Red Hat CVE page for CVE-2026-127030
+(CNA Red Hat, published 2026-11-12, CVSS 3.1 7.5 `AV:N/AC:L/PR:N/UI:N/A:H`,
+CWE-787) plus upstream fix `064567a08f3b` against vulnerable parent
+`3f802d74deef`. Affected RHEL 10/9/8/7 per Red Hat; the exact fixed release
+tag is UNKNOWN — the fix commit is the version boundary. Claimed primitive:
+a remote unauthenticated oversized EAP-FAST SessionTicket drives
+`hdr.length`-sized AES-GCM decrypt bytes into a 152-byte stack struct before
+tag verification, overwriting the saved return address. Frontier observed
+rungs 1/2/3 and a harness-only rung 4 on a standalone file-only harness:
+chosen `0x4242…` at the saved-RIP slot, canary abort rc 134, chosen marker
+executes rc 42, fixed build rejects `PAC is too long` rc 0; ASan is honestly
+blind because the write occurs inside libcrypto. Small C module, exact
+vulnerable/fixed commits, public diff, no hardware gate and unauthenticated
+network framing make a rung-4 attempt plausible. Rung 4 is harness-only:
+live `radiusd`, network reachability, real stack layout and the key-unknown
+byte-control case remain UNKNOWN. Evidence: `reports/frontier-freeradius2shell.md`
+(commit `2d708ec`, witness replay tape #227). The dedicated `freeradius2shell`
+mind owns this lane; details in `.mishe-tauftauf/charters/freeradius2shell.md`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's
