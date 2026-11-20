@@ -368,6 +368,51 @@ details in `.mishe-tauftauf/charters/gst2shell.md`. Wake trigger units and
 the presentation.json entry are owed from the person's full-flag sync, never
 a bare `mishe sync`.
 
+#### Admitted 2026-11-20 ~22:2xZ: Babelfish2Shell (CVE-2026-119923 / GHSA-vq28-vgj3-r26w)
+
+Claim sources: CVE-2026-119923 / GHSA-vq28-vgj3-r26w / AWS bulletin
+2026-166-AWS, the AWS/GHSA/NVD advisories, and the fix commit
+`ab820bddaffa540af82f2f689c3e535f82f14d89` (backports
+`66fe10002e37`/5.6, `f0b8bd54aad1`/6.1) against vulnerable tag
+`BABEL_4_8_0`, fixed tag `BABEL_4_10_0`, read as provisioning, not lab
+findings. CWE-122, CVSS 3.1 **9.8 Critical**
+(`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`), CVSS 4.0 9.3 — a remote
+unauthenticated crafted prelogin packet to the TDS port (default 1433); the
+claimed RCE is a claim, not a demonstration. Claimed primitive:
+`tdslogin.c:342-363` `ParsePreLoginRequest` reads an unbounded 16-bit
+network-order `length`; `initStringInfo` allocates exactly 1024 bytes;
+`tdslogin.c:377-383` calls `TdsGetbytes(prev->val.data, prev->length)` and
+`tdscomm.c:634-659` `memcpy`s `length` sender bytes verbatim into that
+buffer with no resize — both copy count and written bytes are
+attacker-controlled. The fix rejects `length > 4096` and calls
+`enlargeStringInfo` before the copy.
+
+An exact vulnerable/fixed tag pair, a pure missing-bounds-check, no hardware
+gate or credentials for rungs 1–3 and a pre-auth vector make a rung-4
+attempt plausible; unlike Gst2Shell's constant zero-fill, the OOB bytes are
+sender-chosen. Frontier re-ran the pins-pinned harness at handoff: pins
+`c5559f08…` / `d4b09e8c…` match the brief and `ALL CHECKS PASS`, rc 0. Rung 1
+`length=4096 si_capacity=1024 oob_writes=3072 first_oob=1024
+last_oob=4095`; rung 2 lengths 1050/1150/2100 clobber neither/first/both
+neighbour stamps; rung 3 ASan `WRITE of size 4096`, `0 bytes after
+1024-byte region` in `wire_getbytes`; rung 4 sender bytes `de ad be ef ca fe
+ba be` and `41 42 43 44` land byte-exact at OOB offsets 1100/2000; the fixed
+control gives `rc=0 oob_writes=0`, clean under ASan, and 5/5 traces are
+byte-identical. Rungs 1/2/3 are established only in the extracted harness;
+rung 4 shows chosen bytes at chosen offsets there, **not** in a live
+process. No real Babelfish/PostgreSQL process, TDS endpoint, `palloc`/heap
+layout, real neighbouring object, pointer control or marker execution was
+observed — the consumer-reality check is still owed. Distinct from the
+`postgres2shell` FDW lane and CVE-2026-119924. Evidence:
+`reports/frontier-babelfish2shell.md`, harness
+`lab/frontier/babelfish2shell/{prelogin_overflow.c,run.sh}` with raw sources
+and `PROVENANCE.md` under `src/`, seed status
+`reports/babelfish2shell-status.md`. The dedicated `babelfish2shell` mind
+owns this lane; details in `.mishe-tauftauf/charters/babelfish2shell.md`. The
+two-pane window (inner socket, window 21), registry entry and seed wall are
+already live from frontier; wake trigger units and the presentation.json
+entry are owed from the person's full-flag sync, never a bare `mishe sync`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's
