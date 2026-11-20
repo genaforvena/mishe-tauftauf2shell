@@ -1,11 +1,11 @@
 # Frontier brief — FreeSWITCH mod_xml_rpc WebSocket extended-length heap over-write (Freeswitch2Shell)
 
 **Status: admitted 2026-11-20 ~17:52Z under standing approval #6; operator
-reconciliation 18:28Z below.** Frontier was cut mid-wake before it pinned
-harness numbers: the old "being exercised / numbers appended" placeholder is
-replaced by the reproduction section at the end of this file. A dedicated
-`freeswitch2shell` charter and wake trigger unit are still owed; the two-pane
-window and restorer registry entry already exist.
+reconciliation 18:28Z and frontier's clean re-run 19:02Z below.** Frontier was
+cut mid-wake before it pinned harness numbers; both reproduction sections are
+at the end of this file. The `freeswitch2shell` charter, docs/task.md entry and
+committed brief/status exist; wake trigger units remain the person's full-flag
+sync. The two-pane window and restorer registry entry are live.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-20)
 
@@ -176,9 +176,70 @@ logs remain untouched for comparison.
   with `rc=-1009`, `oob_writes=0`; five repeat vulnerable runs are
   byte-identical.
 
-Overall the driver prints `CHECKS FAILED` only because of the stale exit-code
-and literal-pattern expectations above, not because a security observation
-regressed. Update `run.sh` against the current source before quoting
-`ALL CHECKS PASS`; until then quote each observation with the digests above.
-No live FreeSWITCH process, WebSocket upgrade or loopback network path was
-tested by this reproduction.
+At that time the driver printed `CHECKS FAILED` only because of stale
+exit-code and literal-pattern expectations, not because a security observation
+regressed. Those expectations and two genuine accounting/exit-code defects in
+the C harness were repaired at 19:02Z; the next section supersedes this one for
+current numbers. No live FreeSWITCH process, WebSocket upgrade or loopback
+network path was tested by this reproduction.
+
+## Frontier re-run and harness repair, 2026-11-20 19:02Z
+
+Re-ran `bash lab/frontier/freeswitch2shell/run.sh` from clean HEAD. It now
+prints `ALL CHECKS PASS` with driver rc 0, twice in a row. Pinned source
+digests for this run (replacing the 18:28Z pins in the operator section above,
+which remain a truthful record of what that run executed):
+
+```
+75433b5dcc26a4a445bd6191c5c7f345d090810d8554d3d866062c7d359075e0  ws_overflow.c
+637cfa361ca1fe491c455b5595adf6880b01249300f67ac2c470469e7cfa5965  run.sh
+```
+
+The repair was not cosmetic. Instrumenting a throwaway copy in `/tmp/fs-debug`
+showed two harness defects that inflated or inverted the recorded evidence:
+
+1. `trace_copy()` (ws_overflow.c:115-133) computed `out = 0 - (size_t)(end - d)`
+   for the third `ws_raw_read()` call, which requests zero bytes at an offset
+   past the buffer. That `size_t` underflow added 1464 phantom writes, so the
+   operator's `oob_writes=2928` was exactly double the real extent. Adding an
+   `n == 0` guard fixed it. Observed trace before the fix:
+   `dest_off=0 n=14`, `dest_off=14 n=66986`, `dest_off=67000 n=0 oob_before=1464`
+   -> final `2928`. The overwritten byte range `65536..66999` (1464 bytes) was
+   always real; only the count was double.
+2. `mode_rung2()` ANDed its subtests' *exit codes* (0 = success) and then
+   returned `ok ? 0 : 1`, so it exited 1 precisely when both patterns landed.
+   Fixed by comparing each subtest result to 0. Confirmed before the fix:
+   `./vuln rung2; echo $?` -> 1 while both subtests printed `RESULT=PASS`.
+
+The remaining stale values were corrected in the same change: rung1's internal
+expectation of `first_raw_requested=2^64-5` (the first read is the 14-byte
+header, so 14 is correct) and `first_raw_bytes_used`; and `run.sh`'s grep
+literals (`oob_writes=1478`, `deadbeef`/`cafebabe`, `11223344`/`55667788`)
+against the source's actual two patterns.
+
+Observed after repair, all with the digests above:
+
+- Rung 1: `plen=-1 need=-5 datalen=14 rplen=4 guard_passed=1 close_reason=1002
+  rc=-1002` (that `rc` is the WebSocket close code returned by
+  `ws_read_frame`, not the process exit); `first_raw_requested=14
+  first_raw_used=14 raw_calls=3 copy_calls=3 oob_writes=1464 first_oob=65536
+  last_oob=66999`; C harness `RESULT=PASS`, process rc 0.
+- Rung 2: pattern A writes `dedfe0e1` / `cacbcccd`, pattern B writes
+  `11121314` / `55565758` at `wbuffer[0..3]` and `wbuffer[1024..1027]`; both
+  subtests `RESULT=PASS`, process rc 0. Chosen bytes at chosen offsets.
+- Rung 3: ASan `heap-buffer-overflow`, `WRITE of size 132146`, `0 bytes after
+  a 131136-byte region`, in `memcpy` from `ws_raw_read`
+  (ws_overflow.c:198) via `ws_read_frame` (:416); rc 1. Corruption confirmed.
+- Rung 4: `offsetof(wsh_t, ssl)=131112`, buffer-relative input index 131104;
+  `ssl before=(nil) after=0x5b3b027ff6fd` equal to the chosen target,
+  `marker_called=1`, process rc 42. Untouched-`ssl` control leaves the marker
+  uncalled (rc 1). Chosen-pointer control and benign marker execution are
+  demonstrated in the extracted harness only.
+- Controls: ordinary 8-byte frame leaves canaries unchanged with zero OOB
+  writes; fixed build rejects with `rc=-1009 oob_writes=0 copy_calls=1`;
+  five repeat rung-1 runs byte-identical.
+
+Grade: rungs 1/2/3 established, rung 4 PASS **in the extracted harness with
+the chosen value placed at a known offset**. Live process, WebSocket upgrade,
+stock heap layout and network reachability stay UNKNOWN; the opt-in
+`mod_xml_rpc` / `enable-websocket` gate remains prominent.

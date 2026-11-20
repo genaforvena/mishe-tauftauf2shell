@@ -55,7 +55,8 @@ record "struct layout / substituted offsets" 0 diag ./vuln diag
 
 # --- rung 1: signed arithmetic bypass ---------------------------------------
 record "plen=-1, need=-5, rplen=4, guard passes, OOB write" 0 rung1 ./vuln rung1
-for line in 'plen=-1 need=-5 rplen=4 guard_passed=1' 'oob_writes=1478 first_oob=65536'; do
+for line in 'plen=-1 need=-5 rplen=4 guard_passed=1' 'oob_writes=1464 first_oob=65536' \
+            '[rung1] RESULT=PASS'; do
     if grep -Fq "$line" logs/rung1.out; then
         log "rung1 evidence found: $line"
     else
@@ -66,8 +67,8 @@ done
 
 # --- rung 2: attacker-chosen bytes at two distinct offsets ------------------
 record "two-pattern byte-for-byte overwrite of wbuffer[0] and wbuffer[1024]" 0 rung2 ./vuln rung2
-for line in 'wbuffer[0..3]=deadbeef wbuffer[1024..1027]=cafebabe' \
-            'wbuffer[0..3]=11223344 wbuffer[1024..1027]=55667788'; do
+for line in 'wbuffer[0..3]=dedfe0e1 wbuffer[1024..1027]=cacbcccd' \
+            'wbuffer[0..3]=11121314 wbuffer[1024..1027]=55565758'; do
     if grep -Fq "$line" logs/rung2.out; then
         log "rung2 evidence found: $line"
     else

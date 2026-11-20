@@ -118,6 +118,7 @@ static void trace_copy(wsh_t *wsh, void *dest, size_t n)
 	char *end = wsh->buffer + sizeof(wsh->buffer);
 
 	tr.copy_calls++;
+	if (n == 0) return; /* no bytes copied; avoid size_t underflow below */
 	if (d >= end && n > 0) {
 		size_t off = (size_t)(d - wsh->buffer);
 		tr.oob_writes += n;
@@ -565,15 +566,15 @@ static int mode_rung1(void)
 	rc = ws_read_frame(wsh, &oc, &data);
 	print_arith("rung1", rc);
 	printf("[rung1] expected plen=-1 need=-5 rplen=4 guard_passed=1 first_raw_requested=%zu oob_writes=%zu first_oob=65536\n",
-	       (size_t)-5, len - WBUFFER_INPUT_INDEX);
+	       (size_t)FIRST_PAYLOAD_INPUT_INDEX, len - WBUFFER_INPUT_INDEX);
 	if (tr.plen != -1) ok = 0;
 	if (tr.need != -5) ok = 0;
 	if (tr.rplen != 4) ok = 0;
 	if (!tr.guard_passed) ok = 0;
 	if (tr.first_oob_offset != WS_BUFFER_SIZE) ok = 0;
 	if (tr.oob_writes != (unsigned long)(len - WBUFFER_INPUT_INDEX)) ok = 0;
-	if (tr.first_raw_bytes_requested != (size_t)-5) ok = 0;
-	if (tr.first_raw_bytes_used != len - FIRST_PAYLOAD_INPUT_INDEX) ok = 0;
+	if (tr.first_raw_bytes_requested != (size_t)FIRST_PAYLOAD_INPUT_INDEX) ok = 0;
+	if (tr.first_raw_bytes_used != (size_t)FIRST_PAYLOAD_INPUT_INDEX) ok = 0;
 	printf("[rung1] RESULT=%s\n", ok ? "PASS" : "FAIL");
 	free_wsh(wsh);
 	free(in);
@@ -610,8 +611,8 @@ static int rung2_one(unsigned char a, unsigned char b, const char *tag)
 static int mode_rung2(void)
 {
 	int ok = 1;
-	ok &= rung2_one(0xde, 0xca, "rung2-A");
-	ok &= rung2_one(0x11, 0x55, "rung2-B");
+	ok &= (rung2_one(0xde, 0xca, "rung2-A") == 0);
+	ok &= (rung2_one(0x11, 0x55, "rung2-B") == 0);
 	return ok ? 0 : 1;
 }
 
