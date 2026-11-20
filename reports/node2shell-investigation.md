@@ -300,6 +300,70 @@ right-neighbor D), so its shrunk sizefield survives to its own free
 and manufactures the believed-extent-inside-real-extent overlap
 (Ruby2Shell rung-4 family).
 
+### Rung-4 step 1 — multi-request hole inventory; harmless-residue classes confirmed (sixth wake, 2026-11-20 10:33Z)
+
+Committed harness additions (`lab/repro/node2shell-shrinkwalk/`):
+`multi-client.js` (two requests on ONE http2 session, LEN/LEN2
+parametrization), `run-multi.sh`, and `multi_walk()` in `walk.py`
+(hit 1 records O1; hit 2 inventories the freed O1 hole, classifies
+O2's victim — a free-unsorted victim is tagged by fd==bk==arena
+sentinel; IN-USE is only claimed when the believed-next address holds
+a sane chunk header, after content-as-header misreads bit us).
+Loopback only, ASLR off, fresh gdb process per run. Raw logs
+gitignored under `lab/node2shell/tmp/w6/`.
+
+**Byte-level confirmation of the residue classes** (previously a
+source-read prediction): at `origin_len = 3632 ≡ 0 (mod 16)` the
+walk shows the following chunk's **prev_size low byte NULed while its
+sizefield stays intact** — 4/4 walks `prev_size 0x6d43000 /
+0x6d42500 / 0x0 / 0x6e54000, sizefield 0x11c1` — and the request
+**completed 6/6** (top or free chunk after O alike): the write lands
+on `o+0x10+len`, which for `len ≡ 0 (mod 16)` is the next chunk's
+prev_size (unused while the predecessor is in use, rewritten by
+free()'s set_foot), and for `len ≡ 9..15 (mod 16)` never leaves the
+origin allocation. `walk.py` now prints `NUL-CLASS` per hit, derived
+from `len`: only `origin_len ≡ 8 (mod 16)` is corrupting. This also
+retro-explains the off-class 0/9-abort map of stage A.
+
+**Inventory result (honest negative for the in-use victim)**: in the
+same-session two-request flow the chunk following request 2's O2 is
+**always a free unsorted remainder**, never an in-use allocation:
+
+- LEN=2208 both requests (4 completing-then-hit-2 runs): O2 lands at
+  O1's old address (the freed region re-serves as donor), and the
+  following chunk is a free unsorted remainder with real size 0x810 →
+  believed 0x800 (`sizefield 0x811→0x800`, fd=bk=sentinel) → the
+  in-call `malloc(origin+28)` validator aborts
+  (`invalid next size (unsorted)`). One layout variant left the donor
+  unsplit (0x1180 = O1 0x8b0 + copy 0x8d0) with an **in-use 0xbf0
+  chunk right after it** — the golden adjacency exists in this
+  pipeline — but O2 (0x8b0) front-splits the donor instead of
+  exact-fitting it.
+- A second flavor: a small free unsorted victim whose whole
+  sizefield was ≤0xff (`sizefield 0x0` post-write) →
+  `malloc(): invalid size (unsorted)`, same call site. Both validator
+  flavors now observed at hit 2.
+- Exact-fit attempts (LEN2 sized so O2's chunk equals the observed
+  donor: authority 4464 → origin 4472 → chunk 0x1180, and donor
+  0x10c0 variant): request 2's own header-block decode **consumes the
+  donor first** — a 0xb10 in-use chunk (nghttp2 hd-inflate storage)
+  sits at O1's old address at hit 2, O2 comes from elsewhere, and
+  the victim is again a free remainder (believed 0xe00, real 0xe10).
+  In the 4472 runs the donor-minus-O2 gap is a constant 0xe10 —
+  request 2's decode buffers and O2 share the same free region, so a
+  length-only sweep cannot produce an exact fit.
+
+Structural lesson: `malloc` front-splits O2 from whatever free donor
+it finds, so the NUL victim is that donor's remainder unless O2
+exact-fits; and request 2's own decode allocations bite the groomed
+donor before the ALTSVC call. **Both validator flavors prove any
+FREE victim aborts inside the same request** — the completing regimes
+are exactly victim==top (shrunk or flag-only). The rung-4 condition
+remains: an in-use chunk must directly follow an exact-fit O2. Next
+step (bytes planned): mtrace request 2's allocation sequence (sizes,
+lifetimes, and the 0xb10/0xbf0 bites) to design the donor so the bite
+lands first and O2 exact-fits what remains, abutting live memory.
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
@@ -327,6 +391,16 @@ sh lab/repro/node2shell-shrinkwalk/run.sh <port>          # LEN=2208 default: or
 LEN=1040 sh lab/repro/node2shell-shrinkwalk/run.sh <port> # origin 1048
 # abort regime → VICTIM free remainder + "invalid next size (unsorted)" bt
 # top regime   → TOP-VICTIM believed/real size + client: ALTSVC origin_len=…
+```
+
+Two-request hole inventory (rung-4 step 1; ~10 s per aborting run,
+~40 s per run where request 2 completes):
+
+```
+sh lab/repro/node2shell-shrinkwalk/run-multi.sh <port> 4
+LEN=3624 LEN2=4464 sh lab/repro/node2shell-shrinkwalk/run-multi.sh <port> 8
+# per run: HIT 1/HIT 2 walks, NUL-CLASS line (only ≡8 mod 16 corrupts),
+# O2-VICTIM classification (FREE(unsorted) → validator abort; top → completes)
 ```
 
 Deterministic Valgrind differential (rung 2; ~15 s per run):
