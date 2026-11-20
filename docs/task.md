@@ -1,13 +1,23 @@
-# Research task: reach rung 4 for the X2Shell family
+# Research task: investigate how far rung 4 goes
 
 General goal: for memory-safety vulnerabilities in language runtimes and
 web-facing servers — the "X2Shell" class — reproduce the failures in a
-local, isolated laboratory and drive each one as far up the evidence
-ladder as the lab honestly allows, targeting **rung 4 (demonstrated
+local, isolated laboratory and investigate how far **rung 4 (demonstrated
 security impact: chosen bytes at chosen offsets, pointer control, benign
-marker execution, per-build labeled)**. Preserve failed hypotheses and
-contradictory results; treat unknowns as unknowns; never contact external
-systems or scan public infrastructure; publish reproducible reports.
+marker execution, per-build labeled)** can be pushed for each target.
+
+Rungs are not boxes to touch. They are a depth investigation: each rung
+states what evidence is strong enough to support, and the lane records the
+exact boundary where the evidence stops. A negative result, a harness-only
+grade, or an UNKNOWN is part of the answer — it says how far rung 4 goes
+on that build, not that the lane failed. Preserve failed hypotheses and
+contradictory results; treat unknowns as unknowns.
+
+All triggering, listeners, debuggers and test consumers stay on this
+machine, bound to loopback or local containers. Never contact external
+systems or scan public infrastructure. Read-only provisioning from official
+source homes and public advisories is the sole exception, and it never
+sends a trigger off this machine. Publish reproducible reports.
 
 ## Targets (verified ground truth, 2026-11-20)
 
@@ -268,7 +278,7 @@ this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`. Wake
 trigger units and the presentation.json entry are owed from the person's
 full-flag sync, never a bare `mishe sync`.
 
-#### Admitted 2026-11-20 ~20:3xZ: Xrdp2Shell (CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4)
+#### Admitted 2026-11-20 ~20:27Z: Xrdp2Shell (CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4)
 
 Claim sources: the GitHub advisory GHSA-hh7r-2rmq-q4g4, the CVE/OSV/NVD
 records for CVE-2026-44178, xrdp's v0.10.6.1 release notes and the
@@ -452,6 +462,10 @@ mind if rung 3 appears; frontier does not duplicate an admitted lane.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
+These stages are successive depth probes, not checkboxes. Stop at the first
+observed limit and document it; a lane that reaches Stage C on one build
+and only Stage A on another reports both boundaries separately.
+
 1. **Consumer reality first.** Before exploitation mechanics, determine
    the consumer's behavior on this host's hardware and glibc (for
    memcpy-style consumers: dispatch order, store-first vs tail-first,
@@ -473,7 +487,8 @@ mind if rung 3 appears; frontier does not duplicate an admitted lane.
 ## Deliverable
 
 `reports/<target>-investigation.md` per target plus committed
-reproduction scripts; a failed stage is preserved as a negative result.
+reproduction scripts; a failed stage is preserved as a negative result
+and per-build boundaries are part of the deliverable.
 
 ## Frontier finding — Mosquitto CVE-2026-110486 (2026-11-20 15:40Z)
 

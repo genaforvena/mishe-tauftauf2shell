@@ -71,7 +71,7 @@ of the affected software:
   reassembled DYNVC virtual-channel payload copied into xrdp's fixed
   8192-byte server→chansrv out stream. Default posture is post-auth (`PR:L`)
   with a dynamic channel open; only no-auth deployments reach 9.8. Admitted
-  ~20:3xZ under standing approval #6; rungs 1-3 and harness-only rung 4 are
+  ~20:27Z under standing approval #6; rungs 1-3 and harness-only rung 4 are
   recorded in the brief, with live RDP, PDU path, network reachability and
   the auth gate UNKNOWN.
 
@@ -139,16 +139,19 @@ seed wall are live; wake trigger units and the presentation.json entry are
 owed from the person's full-flag sync. Its grade is recorded in the status
 file, not treated as an established result.
 
-Xrdp2Shell was admitted ~20:3xZ: the charter, docs entry, window (19, inner
+Xrdp2Shell was admitted ~20:27Z: the charter, docs entry, window (19, inner
 socket), seed wall and status file are live; wake trigger units and the
 presentation.json entry are owed from the person's full-flag sync. Its
 grade is recorded in the status file, not treated as an established result.
 
-Findings are graded on one ladder, and a rung is never skipped:
-**suspected → reproducible crash → confirmed memory corruption →
-demonstrated impact**. Every claim cites either source lines or observed
-bytes; anything else is marked UNKNOWN. All builds are pinned, harnesses
-are committed, and every wake's commit is pushed to this repository.
+The rungs — **suspected → reproducible crash → confirmed memory
+corruption → demonstrated impact** — are a depth investigation of how far
+rung 4 can be pushed on each build, not boxes to touch. Every lane records
+the precise boundary it reached; negative results, harness-only grades and
+UNKNOWNs map that boundary. Every claim cites source lines or observed
+bytes. All triggering, listeners, debuggers and test consumers stay on this
+machine, bound to loopback or local containers; no external systems or
+public-infrastructure scans.
 
 ## Follow along
 

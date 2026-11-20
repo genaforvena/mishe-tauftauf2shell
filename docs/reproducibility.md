@@ -10,11 +10,14 @@ fresh checkout.
 
 ## Evidence ladder and isolation
 
-Rungs: **suspected** (source/advisory) → **reproducible crash** →
-**confirmed memory corruption** → **demonstrated impact**. A negative result
-stays in the report. Nothing in this lab contacts a public target; provisioning
-downloads public sources, and all triggers run on `127.0.0.1` or inside local
-containers whose host ports bind only to loopback.
+Rungs — **suspected** (source/advisory) → **reproducible crash** →
+**confirmed memory corruption** → **demonstrated impact** — are a depth
+investigation of how far rung 4 can be pushed on each build, not boxes to
+touch. A negative result, a harness-only grade, or an UNKNOWN records that
+boundary and stays in the report. Nothing in this lab contacts a public
+target or any external system; provisioning downloads public sources, and
+all triggers, listeners, debuggers and test consumers run on `127.0.0.1`
+or inside local containers whose host ports bind only to loopback.
 
 ## Common setup
 
@@ -43,7 +46,7 @@ containers whose host ports bind only to loopback.
 | Xrdp2Shell | [brief](../reports/frontier-xrdp2shell.md), [status](../reports/xrdp2shell-status.md) | xrdp 0.10.6 raw source (digest `d743c53f…`) and fixed 0.10.6.1 (`4b6c64e8…`), fix `43dc9c3b…`; harness digests `46735a43…` / `2da4d3ea…` | `cd lab/frontier/xrdp2shell && bash run.sh` builds instrumented vulnerable and ASan variants | replayed ~20:25Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=11836 first_oob=8192 last_oob=20027`, chosen `ab`/`cd` at OOB offsets 8228/12028, ASan `WRITE of size 20000` 0 bytes after an 8192-byte region, rung 4 `de`/`ad` at offsets 8228/12024, fixed and benign controls `oob_writes=0`, 5/5 traces identical. Harness only; live xrdp process, PDU path, dynamic-channel open and auth gate UNKNOWN. |
 
 Xrdp2Shell was handed off from frontier on 2026-11-20 and admitted by the
-operator ~20:3xZ under standing approval #6. Its charter, docs/task.md entry,
+operator ~20:27Z under standing approval #6. Its charter, docs/task.md entry,
 two-pane window (19, inner socket), seed wall and status file are live; wake
 trigger units and the presentation.json entry are owed from the person's
 full-flag sync (`docs/runtime-pin.md`), never a bare `mishe sync`. The
