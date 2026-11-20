@@ -5,41 +5,59 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
-- **Rung:** 0 → **3 on the production consumer** (researcher wake 3,
-  2026-11-20). ASan builds: affected 3.4.12 repro (WRITE size 1 at
-  `iso_8859_1.c:293`, 65-byte region at `string.c:7834`, one byte
-  past end, RC=1); fixed 3.4.13 clean (RC=0, len=42, zero ASan).
-  Repro command (one line, RC=1):
-  `lab/build/ruby-3.4.12-asan/bin/ruby lab/repro/ruby2shell-rung1.rb`.
-  Full reports: `lab/build/evidence/evidence-ruby2shell-rung1-*.txt`.
+- **Rung:** 3 → **3+ (Stage A: chosen-victim deterministic corruption
+  on the production consumer)** (researcher wake 4, 2026-11-20,
+  08:21-08:55Z). Rungs 1-3 unchanged (ASan repro + 3.4.13 negative
+  control + stock-glibc aborts; see `reports/ruby2shell-investigation.md`
+  and history below). NEW this wake:
 
-  Plain-glibc consumer reality (08:12-08:18Z, plain build
-  `lab/build/plain/ruby-3.4.12-plain`, stock glibc 2.39, no
-  tunables): the overflow is exactly ONE byte (buffer chaining,
-  `string.c:7828-7851`) at allocation offset R=24+capa. Pure `ß`
-  input: R always odd → structurally inert on stock glibc (valgrind
-  confirms the write; stock runs clean). Parity flip — one leading
-  `'a'` + N `ß`: at N ≡ 11 (mod 16) the 0x53 byte lands exactly on
-  the NEXT chunk's size-field LSB; observed fresh-process glibc
-  aborts (`corrupted size vs. prev_size`, `munmap_chunk(): invalid
-  pointer`) at N=27/43/59 — layout-probabilistic (N=43: 5 aborts of
-  10 runs), NOT deterministic. glibc itself reporting corrupted
-  metadata = rung 3 on the production consumer. Evidence:
-  `lab/build/evidence/sweep-rung3-mixed.txt`, `vg-rung3-*.txt`;
-  scripts `lab/repro/ruby2shell-rung3-mixed.rb` / `-plain.rb`.
-  Full write-up: `reports/ruby2shell-investigation.md`.
-- **Next action:** Stage A placement — groom the heap so the chunk
-  after the mapping_buffer is a chosen canary victim; prove the 0x53
-  (PREV_INUSE|IS_MMAPPED) size-LSB write changes it at the chosen
-  offset. The wake-2 "N≈40+ full size-field overwrite" arithmetic is
-  SUPERSEDED (falsified by valgrind at N=40: zero invalid writes).
-- **Last evidence:** as above, plus valgrind on the plain build: one
-  invalid write at `iso_8859_1.c:293` via `string.c:7839`, "0 bytes
-  after" 65/72/88-byte blocks (pure N=21, mixed N=27/43).
-- **Unknowns:** abort frequency vs heap layout (ASLR/env) — observed
-  5/10 at N=43, unexplained variance; whether 0x53-into-chosen-size-LSB
-  buys a rung-4 effect (canary) or is abort-only; which
-  Rails/Sinatra exposure the loopback harness mirrors.
+  Stage A OBSERVED: the one-byte 0x53 write now hits a chunk WE place,
+  at the chosen offset (its glibc size-field LSB), deterministically —
+  13/13 aborts (8 traced + 5 untraced runs, fresh processes, stock
+  glibc 2.39, no tunables, no ASLR-off):
+  `lab/repro/ruby2shell-stageA.rb` → `munmap_chunk(): invalid pointer`
+  every run. Mechanism: a pure-`ß` *primer* upcase (780 chars) fills
+  its first mapping buffer to exactly capa (no overflow) and chains an
+  ADJACENT buffer2' (traced: buffer2' = buffer1' + 0x340), both freed
+  to tcache; the *real* mixed upcase ('a' + 779 `ß`, N ≡ 11 mod 16)
+  pops buffer1' via tcache LIFO, the overflow byte 0x53 lands on
+  buffer2''s size LSB while it is still a tcache entry (tcache_get
+  does not check size fields), the same chunk is then popped as the
+  real buffer2, and its free aborts. mtrace free-hook proof:
+  `F ... buffer2-chunk 331` (clean, primer) → `F ... SAME ADDRESS 353`
+  (corrupted, real upcase) → abort — one such pair per run, 8/8.
+  Deterministic, no GC/luck involved; heap holes drained first
+  (512+512 live strings of the two chunk classes) so the primer
+  buffers come from the top chunk.
+
+  Tooling: `lab/preload/mtrace.c` — synthetic LD_PRELOAD
+  malloc/free tracer (approved standing mechanic), logs every
+  malloc/calloc/realloc/free plus the glibc size field at free time;
+  it captured the corrupted size LSB before glibc's own check aborted.
+  Key evidence: `lab/build/evidence/stageA4b-*.trace` (8 runs),
+  `stageA4-plain-*.err` (5 untraced runs), plus the failed-variant
+  traces `stageA-n27-*.trace`, `stageA3-*.trace` preserved as negative
+  results (string-embedding discovery: Ruby 3.4 embeds strings up to
+  ~800 bytes in VWA slots, so groom strings must have len ≥ 809 to
+  malloc; `embedprobe*.trace`).
+
+- **Next action:** Stage B/C — move past abort-only. The overflow byte
+  is fixed 0x53 (IS_MMAPPED set): a freed victim always aborts, so
+  impact must come from (a) a victim that is never freed but whose
+  corrupted size (0x330→0x350 class confusion) breaks a later
+  consolidation/split into overlapping chunks, (b) another of the 14
+  patched encodings whose case-map second byte differs from 0x53, or
+  (c) honestly recording the negative result. Determine consumer
+  behavior first (nginx2root lesson).
+- **Last evidence:** as above (wake 3 evidence unchanged:
+  `sweep-rung3-mixed.txt`, `vg-rung3-*.txt`); this wake:
+  `lab/build/evidence/stageA4b-1.trace` lines around the primer/real
+  upcases show `M 338 <p>` / `M 324 <p+0x340>` / frees `341`,`331`,
+  then real `M 338 <p>` / `M 322 <p+0x340>` / frees `341`,`353`.
+- **Unknowns:** whether any size class or bin path turns the
+  0x53-LSB corruption into an overlap (next wake); whether the
+  abort-only outcome is structural on this consumer; Rails/Sinatra
+  exposure mapping still open (unstarted).
 
 Owner: the researcher, from its wake 2 on (operator seeded and repaired
 this file on 2026-11-20 after a write race; facts above are sourced to

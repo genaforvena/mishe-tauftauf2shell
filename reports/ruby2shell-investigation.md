@@ -147,13 +147,97 @@ Reproduction: `lab/repro/ruby2shell-rung3-mixed.rb` (mixed input),
 `lab/repro/ruby2shell-rung3-plain.rb` (pure input); run as
 `lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-rung3-mixed.rb 43`.
 
+## Stage A — chosen-victim deterministic corruption (observed 2026-11-20, wake 4)
+
+**Result: 13/13 deterministic aborts** (8 traced + 5 untraced fresh
+processes, stock glibc 2.39, no tunables, no ASLR-off). The one-byte
+0x53 write now lands on a chunk whose identity and position the
+repro script determines — no layout luck, no GC timing. Reproduction:
+
+```
+lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-stageA.rb
+```
+
+The script's design (geometry all verified in the affected tree and
+by trace):
+
+1. **Drain:** 512+512 live strings of the two involved chunk classes
+   exhaust every recycled tcache/smallbin hole, so subsequent
+   allocations carve from the top chunk. (Discovered en route: Ruby
+   3.4 embeds strings up to ~800 bytes in VWA slots — a groom string
+   must have `len ≥ 809` to reach `malloc` at all; shorter "canary"
+   strings never leave the object heap. Evidence:
+   `lab/build/evidence/embedprobe*.trace`.)
+2. **Primer** — pure `ß`×780: `capa = 780+20 = 800` → request 824
+   (0x340 chunk); `case_map` advances `to` by 2 per char and stops
+   with `to == to_end == 800` exactly — NO overflow (both writes of
+   the 400th pair land at 798, 799). Source remains → chained
+   buffer2′: `capa = 380×2+20 = 780` → request 804 (0x330 chunk),
+   allocated immediately after buffer1′ — traced adjacent
+   (buffer2′ = buffer1′ + 0x340). Both freed into their tcaches.
+3. **Real** — `"a" + ß×779` (N=779 ≡ 11 mod 16): buffer1 request is
+   again 824 → tcache LIFO pops buffer1′. `'A'` + 399 pairs fill
+   `to = 799`; the 400th pair writes 'S' at `space[799]` and 'S' at
+   `space[800]` — ONE byte 0x53 at request offset 824 ≡ 8 (mod 16),
+   i.e. **exactly on buffer2′'s size-field LSB while it is still a
+   tcache entry** (0x331 → 0x353: size 0x350, PREV_INUSE|IS_MMAPPED).
+4. glibc's `tcache_get` does not read the size field, so the next
+   `malloc(802)` pops the corrupted chunk as the real buffer2; at
+   `mapping_buffer_free`, `free()` sees IS_MMAPPED →
+   `munmap_chunk(): invalid pointer`.
+
+**Direct byte-level proof** (`lab/build/evidence/stageA4b-1.trace`,
+same shape in all 8 traced runs; the mtrace free-hook reads the size
+field before glibc's own check runs):
+
+```
+M 0 338 56f4d1ecc000 0      <- primer buffer1'
+M 0 324 56f4d1ecc340 0      <- primer buffer2' (adjacent: +0x340)
+F 0 56f4d1ecc000 341 0      <- primer frees clean
+F 0 56f4d1ecc340 331 0
+M 0 338 56f4d1ecc000 0      <- real buffer1 = primer buffer1' (tcache LIFO)
+M 0 322 56f4d1ecc340 0      <- real buffer2 = the corrupted chunk
+F 0 56f4d1ecc000 341 0
+F 0 56f4d1ecc340 353 0      <- SAME address, size LSB now 0x53
+munmap_chunk(): invalid pointer
+```
+
+0x331 → 0x353 between the two frees of the same address is the
+one-byte write, observed at the chosen chunk and chosen offset.
+
+Failed variants (negative results, preserved): marker-only tracing
+showed the natural aborts are luck — buffer1 lands in a recycled hole
+whose neighbor is an arbitrary live chunk (`stageA-n27-*.trace`);
+user-string canary grooming failed twice — Ruby's VWA embedding keeps
+short strings off the malloc heap, and same-class tcache interference
+made GC-based placement probabilistic (`stageA3-*.trace`, 3/8). The
+primer design removed both failure modes by letting the vulnerable
+code place its own victim deterministically.
+
+Tooling: `lab/preload/mtrace.c` — synthetic LD_PRELOAD malloc/free
+tracer (approved standing mechanic), hooks `malloc/calloc/realloc/
+free` via `__libc_*`, logs each allocation and the glibc size field
+at free time.
+
+**What this establishes and what it does not:** we control WHICH
+chunk's size LSB receives the fixed byte 0x53, deterministically, on
+the production consumer — rung 3+ (chosen-victim metadata corruption,
+deterministic abort = attacker-controlled DoS). Rung 4 still needs an
+effect beyond abort: 0x53 sets IS_MMAPPED, so any *freed* victim takes
+the munmap path; impact would have to come from a victim that stays
+allocated while its corrupted size (0x330-class reported as 0x350)
+misleads a later consolidation or split into overlapping chunks, or
+from a different byte value via one of the other 13 patched
+encodings. Unproven — see Next.
+
 ## Next
 
-1. Stage A — placement: groom the heap so the chunk following the
-   mapping_buffer is a chosen victim (canary object), and prove the
-   0x53 byte changes it at the chosen offset. The parity-flipped
-   size-LSB write is the primitive; whether 0x53 (PREV_INUSE|IS_MMAPPED)
-   into a chosen size LSB buys anything beyond aborts is the open
-   rung-4 question.
-2. If no chosen-victim effect is achievable, record the negative
-   result and move to the next target lane (PHP2Shell).
+1. Stage B/C — past abort-only: (a) choose N so the victim chunk is
+   one Ruby never frees, then force a consolidation/split around its
+   corrupted size to seek an overlap; (b) audit the other 13 patched
+   encodings for a two-byte case mapping whose second byte differs
+   from 0x53 (a controllable LSB value would reopen classic
+   size-field attacks); (c) if both fail, record the honest negative
+   result — deterministic chosen-chunk DoS is the ceiling on this
+   consumer for this primitive.
+2. PHP2Shell rungs 1-3 remain queued after Ruby2Shell rungs.
