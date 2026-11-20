@@ -292,7 +292,21 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   `lab/build/evidence/w10-stageA/`: **ESTABLISHED at rung 4 CONSTRAINED**,
   no repair owed, grade unchanged; its sweep fixed the 9–24 boundary and
   the ASan frame. Next experiment: place a genuine pointer at offset 16
-  and attempt a benign marker.
+  and attempt a benign marker (outcome below).
+  **Wake 19 (2026-11-20, 13:00Z) — Stage B pointer-placement NEGATIVE.**
+  Committed `lab/repro/php2shell-stageB-occupants.py` varies the query
+  shape under the Stage A GDB fieldprobe (10 shapes; logs in
+  `lab/build/evidence/stageB/occupant-*.log`). The stale chunk at the
+  PRE-RINIT warning is either a zend_string (`flags=0`, `mask=0`,
+  `arData=0xa` = chosen value length, value bytes at offsets 24–32,
+  SIGSEGV at `zend_hash.c:945`) for long values, or a genuine HashTable
+  (`flags=0x10`, `mask=fffffffe`/`fffffffc`, real `arData=0x5555…`,
+  `nNumUsed` 1–4, no fault) for short/nested values and no query.
+  Because the consumer reads `((uint32_t*)arData)[(int32_t)(h|mask)]`,
+  a chosen-address read needs a real pointer at offset 16 AND mask=0;
+  no tested shape gives both (the pointer-bearing occupant always has the
+  table's valid small negative mask). Grade unchanged: rung 4 CONSTRAINED;
+  pointer control and marker remain unclaimed, other input channels UNKNOWN.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real

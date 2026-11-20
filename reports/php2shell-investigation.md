@@ -432,19 +432,47 @@ the consumed pointer field (`arData` equals the chosen value length). NOT
 claimed: an arbitrary 64-bit address, `nTableMask` control, a benign marker
 execution, or a gadget chain — the consumed read address is
 `chosen_length + hash("UTC")*4`, so this is a constrained pointer primitive,
-not an arbitrary write. Whether a longer/repeated groom could place a full
-pointer is UNKNOWN and is the next experiment, not a claim.
+not an arbitrary write. Query-shape pointer placement is an observed
+negative (Stage B below); other input channels remain UNKNOWN.
 
 No benign marker is available through THIS consumer: the stale access is a
 data dereference (`HT_HASH_EX(arData,nIndex)`), not an indirect call, so a
 marker would need a different consumer of the same freed object — UNKNOWN,
 not claimed.
 
+## Stage B: pointer-placement attempt on the same freed chunk (wake 19)
+
+Replay: `python3 lab/repro/php2shell-stageB-occupants.py` (loopback only;
+logs in `lab/build/evidence/stageB/`). It reuses the committed Stage A
+fieldprobe and varies the query shape, then prints the last dump of the
+stale table at the PRE-RINIT warning. The consumer computes
+`nIndex = h | ht->nTableMask` and `((uint32_t*)arData)[(int32_t)nIndex]`;
+a chosen-address read therefore needs a real pointer at offset 16 **and**
+a zero or chosen mask at offset 12. Ten shapes (long/short values, array
+and numeric keys, a 20-digit numeric key, masks -2/-4, no query) give only
+two occupants, never that combination:
+
+- long query values (9–24 bytes, e.g. `XXX=ABCDEFGHIJ`): a zend_string —
+  `flags=0`, `mask=0`, `arData=0x0a` (the chosen length), value bytes at
+  offsets 24–32; the GDB log shows `SIGSEGV` at `zend_hash.c:945`;
+- short/nested values (e.g. `XXX[ABC]=1`, `XXX[a]=1&XXX[b]=2`, no query):
+  a genuine HashTable — `flags=0x10`, `mask=fffffffe`/`fffffffc`,
+  `arData=0x5555…` (a real bucket pointer), `nNumUsed` 1–4; no fault, rc 0.
+
+So query-shape grooming cannot put a chosen 64-bit address into the
+consumed pointer field: the pointer-bearing occupant always carries the
+table's valid small negative mask, which maps the huge `h` of `"UTC"`
+back into the table's own hash slots, while the mask-zero occupant always
+carries a small integer at `arData`. A chosen-address read or a write would
+need a different freed object or a second consumer; neither is established.
+This is a preserved negative for the tested input channel, not proof about
+every possible request-time 56-byte allocation.
+
 ## Open routes after Stage A
 
-- Extend the groom to set `arData` to a chosen *address* (needs a 56-byte
-  allocation whose offset-16 field is a genuine pointer) and try a benign
-  marker; the Stage A claim itself is witness-ESTABLISHED (#138), no re-run owed.
+- Extending the groom to set `arData` to a chosen address is an observed
+  negative for query-shape grooming (Stage B); other input channels remain
+  UNKNOWN. The Stage A claim is witness-ESTABLISHED (#138), no re-run owed.
 - A public disclosure of Depthfirst's withheld native decoder could supply
   the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not
