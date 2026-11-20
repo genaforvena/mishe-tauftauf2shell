@@ -22,8 +22,8 @@
 ## Verified ground truth (this lab, 2026-11-20)
 
 Documents read: the primary advisory, the 18.7 release-note entry and the full
-fix patch (all claim sources above). No instrumented PostgreSQL build was made;
-stock images were pulled by digest and run loopback-only.
+fix patch (all claim sources above). Stock images were pulled by digest and
+run loopback-only; no instrumented build was made.
 
 Advisory text (claim): "Heap-based buffer overflow in PostgreSQL foreign
 batch inserts allows a foreign server to execute arbitrary code, via
@@ -54,10 +54,37 @@ Logs: `lab/frontier/postgres2shell/logs/{trigger-17.11.out,server-17.11.log,
 differential-17.11.meta}` and the matching `17.12` files. Reproduce with
 `./run.sh 17.11` and `./run.sh 17.12`.
 
-**Important negative preserved:** the affected build's crash is a backend
-SIGSEGV, not a silent overflow; the stock image has no sanitizer, so no report
-names `ExecBatchInsert` or `rslots[]` yet. Rung 3 is not claimed from the
-signal 11 alone.
+## Valgrind observation on the stock affected binary (rung 3)
+
+A second 17.11 instance in the same container was started under Valgrind
+(`--track-origins=yes --error-limit=no`) on in-container loopback port 55435;
+`lab/frontier/postgres2shell/trigger-vg.sql` points the FDW at it. Before the
+trigger, every backend's Valgrind `ERROR SUMMARY` was `0 errors from 0
+contexts`. The trigger's backend then produced (log
+`logs/valgrind-17.11.log`, stdout `logs/valgrind-17.11-stdout.log`):
+
+- `Use of uninitialised value of size 8` at `0x4628C8`, where the uninitialised
+  value "was created by a heap allocation … `pstrdup` …
+  `postgres_fdw.so` … `ExecInitModifyTable`" — i.e. an 8-byte pointer from a
+  foreign-server allocation is being consumed as data.
+- `Invalid write of size 4` at the **same** `0x4628C8`, `Address 0x38 is not
+  stack'd, malloc'd or (recently) free'd`, then `Process terminating with
+  default action of signal 11 (SIGSEGV): Access not within mapped region at
+  address 0x38`. Stack: `0x4628C8 -> 0x462A4A -> 0x4661E5 ->
+  standard_ExecutorRun -> PortalRun -> PostgresMain -> BackendMain`.
+- `ERROR SUMMARY: 48 errors from 4 contexts` for that backend; the other two
+  contexts are `Syscall param write/pwrite64(buf) points to uninitialised
+  byte(s)` (ordinary PostgreSQL buffer-padding noise, not claimed as this bug).
+
+This is a Valgrind memory report, not just a crash: an uninitialised 8-byte
+heap value from the FDW is used as a pointer and a 4-byte write faults at
+`0x38`, consistent with the over-reported count walking `rslots[]` past its
+`numSlots` entries and dereferencing a garbage slot pointer. **Limits:** the
+stock binary is stripped, so the report shows `???` for `0x4628C8` and never
+names `ExecBatchInsert` or `rslots[]`; the source-line attribution comes from
+the fix diff plus the origin/stack correlation, not from a symbolised report.
+The uninitialised value in this run was *not attacker-chosen*; no pointer or
+marker control was exercised.
 
 ## Source-bound mechanism (read from the fix patch, not inferred)
 
@@ -84,14 +111,13 @@ count as the length of the returned slot array:
   six rows in the rule table (`SELECT count(*)=6`). Our fixed-build run
   reproduces exactly this: `INSERT 0 2`, count 6.
 
-**Claim discrepancy preserved, not resolved:** the advisory assigns CWE-122
-("writes past the end of a buffer") and says "buffer overflow", but the fix
-commit message says the backend "proceeds to read past the end of the array"
-and the clamp prevents "buffer overruns in the loop below" whose body reads
-`rslots[i]`. Read vs write direction, and the exact downstream dereference of
-the out-of-bounds slot pointer, are **UNKNOWN** until a sanitizer/debugger run
-names the faulting instruction. Do not collapse the advisory's RCE claim into
-a demonstrated primitive.
+**Claim direction, refined by the Valgrind run:** the advisory assigns CWE-122
+("writes past the end of a buffer") while the fix commit says the backend
+"proceeds to read past the end of the array". The Valgrind report shows both an
+uninitialised 8-byte *read* consumed as a pointer and an *invalid write* at
+`0x38` through it. The precise source statement that reads `rslots[i]` is still
+attributed from the fix diff, not a symbolised report — keep this distinction.
+Do not collapse the advisory's RCE claim into a demonstrated primitive.
 
 ## Rung ladder — honest grading
 
@@ -101,12 +127,16 @@ a demonstrated primitive.
   (six for two rows) reaches the backend; affected build loses the connection
   with a backend SIGSEGV, fixed build clamps to `INSERT 0 2` with the rule
   table at six. The version-sensitive 2-vs-6 boundary holds.
-- **Rung 3 (ASan/Valgrind-confirmed corruption): NOT DEMONSTRATED.** Stock
-  images carry no sanitizer. No report names `ExecBatchInsert`, `rslots[]` or
-  an invalid read; the signal 11 is a crash, not a memory report.
-- **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** No controlled
-  slot pointer, no pointer/GOT control, no marker execution. The advisory's
-  "arbitrary code execution" is a CLAIM.
+- **Rung 3 (memory report): PASS on the stock affected binary, with limits.**
+  Valgrind reports an uninitialised 8-byte FDW-heap value used as a pointer and
+  an `Invalid write of size 4` at `0x38` followed by SIGSEGV, triggered by the
+  INSERT and absent before it. Symbol names for the faulting function and
+  `rslots[]` are unavailable on the stripped stock binary; attribution to the
+  fix diff is correlation plus origin/stack evidence, not a symbolised report.
+- **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** The pointer
+  consumed in the Valgrind run was uninitialised heap data, not chosen by the
+  attacker; no controlled slot pointer, no GOT/pointer control, no marker
+  execution. The advisory's "arbitrary code execution" is a CLAIM.
 
 ## Feasibility and cheapest next step
 
@@ -115,17 +145,15 @@ code, open source with the exact fix commit and a deterministic regression
 test, stock images pullable, both endpoints loopback-able. It needs no
 hardware feature (unlike the AVX-512-blocked Java4Shell). Reachability is
 narrower than a default-on listener: the attacker must influence a foreign
-server's row-count response and hold `PR:L`. The primitive is an OOB *read* of
-slot pointers with a subsequent dereference — attractive for rung 4 if
-adjacent heap memory can be groomed with chosen `TupleTableSlot *` values, but
-unproven. Note that `rslots[]` is palloc'd, so a sanitizer may need
-MemoryContext awareness; a plain ASan build may not poison intra-arena reads.
+server's row-count response and hold `PR:L`. The primitive is an OOB slot
+pointer read followed by a dereference/write (observed here at `0x38`) —
+attractive for rung 4 if adjacent heap memory can be groomed with chosen
+`TupleTableSlot *` values, but unproven.
 
-Cheapest next rung: on the affected build, capture a debugger backtrace at the
-SIGSEGV (or an ASan/Valgrind report) naming `ExecBatchInsert` and the
-`rslots[i]` access, then resolve read vs write and the downstream dereference.
-Preserve the fixed-build differential. Only after a controlled slot pointer is
-observed should anyone claim rung 4.
+Cheapest next rung: on an unstripped/ASan build, symbolise `0x4628C8` and name
+`ExecBatchInsert`/`rslots[]`, then attempt to place a chosen slot pointer in
+the OOB slot. Preserve the fixed-build differential. Only after a controlled
+slot pointer is observed should anyone claim rung 4.
 
 ## Reproduce
 
@@ -133,7 +161,10 @@ observed should anyone claim rung 4.
 cd lab/frontier/postgres2shell
 ./run.sh 17.11          # logs/trigger-17.11.out, server-17.11.log
 ./run.sh 17.12          # logs/trigger-17.12.out, server-17.12.log
+# Valgrind: install valgrind in the 17.11 container, initdb a second PGDATA,
+# start it under valgrind on 55435, replay trigger-vg.sql against that port;
+# logs/valgrind-17.11.log is the captured report.
 ```
 
-All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432). Stock
-image digests are pinned above; no host package changes.
+All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432/55435).
+Stock image digests are pinned above; no host package changes.
