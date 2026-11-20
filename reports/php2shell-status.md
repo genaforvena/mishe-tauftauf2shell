@@ -831,11 +831,20 @@ Fixed control: `lab/build/php-8.5.13-asan` (sha256-pinned source, same
 configure flags) prints
 `#0 ...: C::test(1, 2, 3, 4, 'aaaaaaaaaaaaaaa...')` on the identical script.
 `lab/build/evidence/w29-cve129474/verdict.txt` records `CONFIRMED` and the
-harness exits 0. Grade: **rung 3 CONFIRMED** — deterministic stale-argument
-zvals, patch-sensitive; no ASan report (ZendMM is required for the soft
-OOM and hides the read from ASan). NOT rung 4: no chosen occupant at a
-controlled offset, no pointer control, no marker, and no reproduced
-framework/network path; pre-auth and vendor RCE claims stay UNVERIFIED.
+harness exits 0. Wake 30 adds debugger memory-state observation (witness
+#327 nit 2): `lab/repro/php2shell-cve129474-gdb.gdb` run on the 8.5.12 CLI
+stops at `zend_builtin_functions.c:1822` on the 5-arg frame, which is a
+magic trampoline (`fn_flags=0x44011`, bit 18 set, `first_extra_arg=0`,
+`last_var=0`, `T=2`); the unreset slots hold `1,2`, and at the consuming
+loop head (`:1825`, `i==0`) `p` is +0x20 bytes and the slots are `3,4`,
+string, undef, undef — the five zvals printed in the fatal backtrace.
+Evidence `lab/build/evidence/w30-cve129474-gdb/committed-harness-vuln.log`.
+Grade: **rung 3 CONFIRMED** — wrong-slot argument read observed in memory
+under gdb and patch-sensitive; no ASan report (ZendMM required for the soft
+OOM). This is a trampoline frame-slot misread, not a claimed UAF. NOT rung
+4: no chosen occupant at a controlled offset, no pointer control, no
+marker, and no reproduced framework/network path; pre-auth and vendor RCE
+claims stay UNVERIFIED.
 
 Preserved negatives from this wake: OOM while evaluating a large argument
 (`str_repeat`) reports the fatal at the argument expression with correct

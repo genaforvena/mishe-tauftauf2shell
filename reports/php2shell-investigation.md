@@ -754,9 +754,8 @@ terminates the worker on the bailout; a benign `stream_close()` control on
 variants are preserved as negatives in the status ledger. Grade: **rung 3
 CONFIRMED** for this lane on 8.4.27 FPM — confirmed memory corruption,
 patch-sensitive, no rung-4 control claimed. Pre-auth reachability is
-application-dependent and not claimed. Other uncovered critical CVEs
-(129182, 129474, 129289) remain untested; 129474 has vendor-demonstrated
-RCE on 8.5 and is the next candidate.
+application-dependent and not claimed. CVE-2026-129474 was later tested at
+rung 3 in wakes 29–30 (section below); 129182 and 129289 remain untested.
 
 ASan attributes the report to the FPM **worker** PID, which is shared across
 requests: the worker that logged it (3153888; witness replay 3168299) served
@@ -818,9 +817,9 @@ On affected `php-8.5.12-asan` with `fatal_error_backtraces=1`,
 `lab/build/evidence/w29-cve129474/vulnerable.log`) prints:
 
 ```
-Fatal error: Allowed memory size of 4194304 bytes exhausted at .../zend_string.h:169 (tried to allocate 2101248 bytes) in .../ghsa-8mjj-2r7p-4hg2.php on line 9
+Fatal error: Allowed memory size of 4194304 bytes exhausted at .../zend_string.h:169 (tried to allocate 2101248 bytes) in .../ghsa-8mjj-2r7p-4hg2.php on line 8
 Stack trace:
-#0 .../ghsa-8mjj-2r7p-4hg2.php(9): C::test(3, 4, 'aaaaaaaaaaaaaaa...', NULL, NULL)
+#0 .../ghsa-8mjj-2r7p-4hg2.php(8): C::test(3, 4, 'aaaaaaaaaaaaaaa...', NULL, NULL)
 #1 {main}
 ```
 
@@ -837,8 +836,23 @@ sha256-pinned source) produces
 `#0 ...: C::test(1, 2, 3, 4, 'aaaaaaaaaaaaaaa...')` on the identical input.
 Both runs and the verdict are in `lab/build/evidence/w29-cve129474/`
 (`verdict.txt: CONFIRMED`); the harness prints the two frames and exits 0.
-Grade: **rung 3 CONFIRMED** — a deterministic stale-argument read, observed
-as wrong zvals and patch-sensitive, but with no ASan report (ZendMM pools
-the freed memory and the soft OOM requires ZendMM). **Not rung 4**: no
-attacker-chosen occupant at a controlled offset, no pointer control, no
-marker execution, and no reproduced network-facing framework path.
+Wake 30 adds instrument-observed memory state (witness #327 nit 2).
+`lab/repro/php2shell-cve129474-gdb.gdb` breaks in the 8.5.12 vulnerable CLI
+at `zend_builtin_functions.c:1822` — the pointer reset applied to every
+`ZEND_USER_FUNCTION` frame — and at the consuming loop head at `:1825`.
+The first stop shows the 5-argument `C::test` frame has `fn_flags=0x44011`
+with `ZEND_ACC_CALL_VIA_TRAMPOLINE` (`1<<18`) set, `first_extra_arg=0`,
+`last_var=0`, `T=2`, and the unreset `p` slots holding type 4 (long) `1`
+and `2`. After the reset `p` has advanced by two zvals (0x20 bytes) and the
+slots actually consumed are `3`, `4`, type 6 (string), type 0 (undef),
+type 0 (undef) — exactly the five zvals the fatal backtrace prints.
+Evidence: `lab/build/evidence/w30-cve129474-gdb/committed-harness-vuln.log`.
+The wrong-slot read is therefore observed in memory under a debugger, not
+only inferred from output and the patch diff; it is a wrong frame-slot
+argument read on a magic trampoline, not a claimed freed-memory UAF.
+Grade: **rung 3 CONFIRMED** — a deterministic stale-argument read observed
+both in the fatal backtrace and as wrong frame slots under gdb, and
+patch-sensitive; still no ASan report (ZendMM pools the memory and the soft
+OOM requires ZendMM). **Not rung 4**: no attacker-chosen occupant at a
+controlled offset, no pointer control, no marker execution, and no
+reproduced network-facing framework path.
