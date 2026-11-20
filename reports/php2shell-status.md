@@ -110,6 +110,32 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   decoder refusal — caught by the splice-check, not guessed at.
   Grade unchanged: rung 2 — the unauth splice→deserialization
   primitive is now fully demonstrated, still no memory unsafety.
+  **Wake 10 (2026-11-20, 11:10Z) — FPM replay observed: the last SAPI
+  gap for this primitive closed** (harness
+  `lab/repro/php2shell-aftershell-splice-upload-fpm.sh`, evidence
+  `lab/build/evidence/aftershell-upload-fpm-{8.4.26,8.4.27,8.4.28}-fpm-asan.log`):
+  same unauth upload-progress geometry, but the process that dies
+  mid-FILE_START-pwrite is a REAL php-fpm worker child and the master
+  respawns it — fpm-error.log records "child ... exited on signal 9
+  (SIGKILL)", and the RESPAWNED child (different pid) serves the
+  consumer request and promotes `$_SESSION['evil']` =
+  stdClass{proof:"pwned"} with no warning (the consumer echoes its
+  own pid — the responder IS the respawned worker). Calibration
+  K = len(carrnew) = 1019, FILE_START write n = 1892 — identical to
+  the CGI lane; splice verified byte-exact (file[K:] == carrier[K:]).
+  Two-phase FPM master (calibration+carrier phase, then armed-kill
+  phase; session state lives in the save_path so the restart loses
+  nothing); the kill is gated per-request by the shim's new OPTIONAL
+  AFTERSHELL_KILL_ARM file so exactly ONE request dies — CGI
+  harnesses unchanged (no ARM env -> armed unconditionally, as
+  before). 8.4.28-fpm-asan built via lab/php2shell/build-fpm.sh
+  (now accepts 8.4.28): the same kill still respawns the worker,
+  but ftruncate runs first — 1019-byte file, carrier tail GONE, and
+  the respawned consumer sees only `upload_progress_carr`: the
+  vendor fix holds on FPM too. Zero ASan/UBSan/ZEND_ASSERT on all
+  three builds; no-kill controls clean. Grade unchanged: rung 2 —
+  the unauth splice→deserialization primitive is now demonstrated
+  end-to-end on php-cgi AND php-fpm.
 
 - **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real

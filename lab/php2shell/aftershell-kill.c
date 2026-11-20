@@ -13,6 +13,11 @@
  * simulated.
  *
  * Gated on the AFTERSHELL_KILL_AT env var; fires at most once per process.
+ * An optional AFTERSHELL_KILL_ARM=<path> makes the kill conditional on that
+ * file existing at call time — for long-lived multi-request workers (FPM)
+ * where the interrupt must fire in one chosen request only, not the first
+ * write the process ever performs. Unset → armed unconditionally, which is
+ * the original per-process behavior of the CGI harnesses.
  *
  * Calibration mode (measurement only, no kill): with AFTERSHELL_LOG_ONLY=1
  * and AFTERSHELL_LOG_FILE=<path>, every pwrite(fd, buf, n, 0) is dumped to
@@ -55,7 +60,9 @@ ssize_t pwrite(int fd, const void *buf, size_t n, off_t off)
         dump_buffer(buf, n);
     }
     const char *k = getenv("AFTERSHELL_KILL_AT");
-    if (!fired && k && off == 0) {
+    const char *arm = getenv("AFTERSHELL_KILL_ARM");
+    if (!fired && k && off == 0
+        && (!arm || access(arm, F_OK) == 0)) {
         size_t cut = (size_t) atol(k);
         if (cut > 0 && n > cut) {
             fired = 1;

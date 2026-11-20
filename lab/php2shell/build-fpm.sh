@@ -2,8 +2,7 @@
 # php2shell — build the FPM SAPI with the same ASan+UBSan flags as the cli/cgi
 # lab builds, for the FPM lane prescribed in owner DM #64.
 #
-# Usage: bash lab/php2shell/build-fpm.sh [8.4.26|8.4.27|all]
-#   Builds lab/build/php-<version>-fpm-asan from the pristine pinned source at
+# Usage: bash lab/php2shell/build-fpm.sh [8.4.26|8.4.27|8.4.28|all]
 #   lab/build/php-<version>. Produces sapi/fpm/php-fpm. Idempotent.
 #
 # Evidence notes (same as build.sh):
@@ -48,7 +47,7 @@ build_one() {
 }
 
 case "${1:-all}" in
-    8.4.26|8.4.27) build_one "$1" ;;
-    all) build_one 8.4.26; build_one 8.4.27 ;;
-    *) echo "usage: $0 [8.4.26|8.4.27|all]"; exit 1 ;;
+    8.4.26|8.4.27|8.4.28) build_one "$1" ;;
+    all) build_one 8.4.26; build_one 8.4.27; build_one 8.4.28 ;;
+    *) echo "usage: $0 [8.4.26|8.4.27|8.4.28|all]"; exit 1 ;;
 esac

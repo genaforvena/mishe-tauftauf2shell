@@ -124,7 +124,7 @@ Observed, both builds, ZEND_DEBUG asserts live:
 4. ZERO ASan/UBSan/ZEND_ASSERT output on either build for every probe.
    FPM lane CLOSED at rung 2; no rung-3 signal.
 
-## Reopened lane: CVE-2026-126714 "phpAfterShell" (wakes 8–9, 2026-11-20)
+## Reopened lane: CVE-2026-126714 "phpAfterShell" (wakes 8–10, 2026-11-20)
 
 The 2026-11-19 vendor release (8.2.36/8.3.37/8.4.28/8.5.13) named a new
 payload class in the same session family (GHSA-fm2m-fjf5-v3cp): the
@@ -172,6 +172,22 @@ zero sanitizer output:
    unauthenticated producer
    (`aftershell-upload-8.4.28-asan.log`,
    `aftershell-producer-8.4.28-asan.log`).
+5. **FPM replay** (wake 10,
+   `lab/repro/php2shell-aftershell-splice-upload-fpm.sh`): the same
+   unauth upload-progress splice, but the process that dies
+   mid-FILE_START-pwrite is a real php-fpm worker child —
+   fpm-error.log: "child NNN exited on signal 9 (SIGKILL)"; the
+   master respawns a new child, and that RESPAWNED worker's plain
+   session_start() promotes the stdClass (the consumer echoes its
+   own pid, which is the respawned child's). The kill is armed for
+   exactly one request via the shim's optional AFTERSHELL_KILL_ARM
+   gate file (CGI harnesses unaffected); calibration matches the
+   CGI lane exactly (K=1019, n=1892). Evidence:
+   `lab/build/evidence/aftershell-upload-fpm-{8.4.26,8.4.27}-fpm-asan.log`.
+   On 8.4.28-fpm-asan the same kill respawns cleanly but leaves the
+   ftruncate-first file (1019 bytes, carrier tail gone) and the
+   respawned consumer sees only `upload_progress_carr`
+   (`aftershell-upload-fpm-8.4.28-fpm-asan.log`).
 
 ## Black-box discriminators (affected-only, reproducible)
 
