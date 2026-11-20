@@ -21,15 +21,18 @@ from a committed snapshot, never from a live checkout.
   tmux session and site naming use `mishe-tauftauf2shell`; only the unit
   namespace deviates, for separation.
 
-This plant also carries three repairs made after birth (2026-11-20): the
+This plant also carries five repairs made after birth (2026-11-20): the
 corrected dual-probe unit name in `release_promotion.py` (`m2shell-`,
 not the main plant's `mishe-`), per-pane window restoration in
 `tools/tmux_restore.py` (upstream commit `8a076db`, so the explicit
 `panes` registry entries recreate both panes; a bottom pane must run
 `plant_view --output --log --follow`, never a bare `tail -F` of a log
-with no writer), and the hy4-flash-only route policy in
-`engine/routes.json`. These are site-local runtime changes until a
-future release pin includes them; re-apply on upgrade.
+with no writer), the hy4-flash-only route policy in
+`engine/routes.json`, a `docs` role whose hy4-flash window is subscribed
+only to `repo-change`, and a bounded `repo_change` builtin in the pinned
+`producers.py` that observes git HEAD (`signals/repo-change.detail`) and
+registers docs as the sole subscriber. These are site-local runtime
+changes until a future release pin includes them; re-apply on upgrade.
 
 
 1. **Unit marker** (`units.py`): `# m2shell-generated: …` — each plant's
