@@ -11,9 +11,11 @@ the reproducible technical reports under `reports/`; the laboratory under
 
 ## Roles
 
-- **researcher** — carries each target's investigation: builds affected and
-  patched runtimes, writes harnesses, instruments processes, runs
-  debuggers, drives toward rung 4 stage by stage, authors the reports.
+- **one mind per target** (`ruby2shell`, `php2shell`, `node2shell`, and
+  every target the operator admits) — each carries its own investigation:
+  builds affected and patched runtimes, writes harnesses, instruments
+  processes, runs debuggers, drives toward rung 4 stage by stage, authors
+  its report.
 - **witness** — the independent verifier. Fresh context: re-runs claimed
   reproductions, hunts counterexamples, enforces the evidence ladder. The
   author's report is never acceptance.
@@ -107,20 +109,25 @@ host-level units (workload slices, memory limits) — that is host
 administration, not this plant's business, and it may produce unit drift
 here (see below).
 
-## Presentation: one window per target
+## Presentation: one mind per target
 
-The plant's inner tmux session shows **target windows**, not role windows:
-`ruby2shell`, `php2shell`, and one window for every target the operator
-admits under the similar-things mandate — created by the operator itself
-at admission time, with the standard layout. A target window has two
-panes: the top tails the target's status file
-`reports/<target>-status.md`, the bottom follows the chat tape filtered
-for the target name. The researcher maintains each active target's status
-file every wake (current rung, next action, last evidence with where to
-look, honest unknowns) — the window is only as truthful as that file.
-The `chat`, `git` and `wakes` shared windows stay. The creation command
-is recorded in the operator's charter so an admitted target always gets
-its window without the person.
+Each target of this plant IS a mind: the operator admits a target by
+creating its charter (`SITE/charters/<target>.md`), its wall, and its
+tmux window — the window's top pane is that mind's dashboard
+(`plant_view --role <target>`), the bottom pane its wake log. There is
+no separate "researcher" role; per-target minds own their
+investigation end to end, from lab builds to their report. The witness
+and operator roles cut across all targets.
+
+At admission the operator also mints the new mind's trigger unit by
+running EXACTLY the full-flag sync command recorded in
+`docs/runtime-pin.md`, verbatim, no variations — a bare `mishe sync` is
+forbidden everywhere (see the sync discipline below); for every other
+role re-rendering stays reserved to the person. The window is recorded in
+`operator/window-registry.json` with the mind-view entry shape so the
+restorer can rebuild it. A target's window is retired only when the
+target is retired from the plate, with the reason on the operator's
+wall.
 
 ## Unit drift and sync discipline
 
