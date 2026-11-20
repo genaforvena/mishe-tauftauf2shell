@@ -321,6 +321,49 @@ lane; details in `.mishe-tauftauf/charters/xrdp2shell.md`. Wake trigger units
 and the presentation.json entry are owed from the person's full-flag sync,
 never a bare `mishe sync`.
 
+#### Admitted 2026-11-20 ~20:5xZ: Gst2Shell (CVE-2026-111183 / GHSA-62fg-53h6-6f68)
+
+Claim sources: GHSA-62fg-53h6-6f68 / CVE-2026-111183 / ZDI-26-775
+("GStreamer rtpL16depay Heap-based Buffer Overflow Remote Code Execution",
+2026-10-15), the NVD/GHSA and ZDI advisories, and the fix commit
+`80c184b4c5ee8ba28b2540ba58f40b8d44b61622` (2026-10-08) against vulnerable
+parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, read as provisioning, not
+lab findings. CWE-122, CVSS 3.0 **9.8 Critical**
+(`AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`) — pre-auth by the vector, but the
+concrete reaching path (an RTP/RTSP pipeline accepting far-end caps) is
+UNKNOWN and the claimed RCE is a claim, not a demonstration. Claimed
+primitive: caps `encoding-params` is parsed into `channels` with no upper
+bound (`gstrtpL16depay.c:181-189`), stored in the heap-embedded
+`GstAudioInfo`; for `channels > 8` no channel order exists, so
+`:201-216` calls `gst_rtp_channels_create_default (channels, info->position)`,
+whose loop at `gstrtpchannels.c:301-310` writes
+`GST_AUDIO_CHANNEL_POSITION_NONE` to `posn[0..channels-1]` with no bound.
+`info->position` holds 64 elements, so `channels=1000` writes 936 elements /
+3744 bytes out of bounds. The fix adds `gsize n_posn = G_N_ELEMENTS
+(info->position)` and clamps with `channels = MIN (channels, n_posn)`.
+
+An exact vulnerable/fixed commit pair, a pure length-check omission in one
+small C function with a three-line fix, no hardware gate and a pre-auth
+vector make a rung-4 attempt plausible. The operator re-ran the digests-pinned
+harness at 20:47Z from committed sources: digests `3d2b8e06…` / `7dde5da7…`
+match, `ALL CHECKS PASS`, rc 0. Rung 1 `channels=1000 position_capacity=64
+oob_writes=936 first_oob=256 last_oob=3999` with 3744 counted zeroed OOB
+bytes; rung 2 a caps value of 200 clobbers OOB offset 768 but not 1792, a
+value of 1000 clobbers both; rung 3 ASan `heap-buffer-overflow`, `WRITE of
+size 4`, 0 bytes after a 256-byte region in `vuln_create_default`; the
+`MIN`-clamped fixed control gives `oob_writes=0` and 5/5 traces are
+byte-identical. **Rung 4 is NOT DEMONSTRATED**: a `deadbeeftest` stamp reads
+back all zeroes — the attacker controls the count and offsets of a constant
+`NONE(0)` zero-fill, not the bytes written. A real GStreamer process, real
+SDP/RTSP caps negotiation, actual allocator neighbours, any pre-auth
+reachability and code execution stay UNKNOWN. Evidence:
+`reports/frontier-gst2shell.md`, harness
+`lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
+`reports/gst2shell-status.md`. The dedicated `gst2shell` mind owns this lane;
+details in `.mishe-tauftauf/charters/gst2shell.md`. Wake trigger units and
+the presentation.json entry are owed from the person's full-flag sync, never
+a bare `mishe sync`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's

@@ -44,6 +44,7 @@ or inside local containers whose host ports bind only to loopback.
 | Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan; `bash lab/freeswitch2shell/live/run.sh` and `bash lab/freeswitch2shell/live/run_pos.sh` build the unmodified source over loopback | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Real-source `run.sh` (`FF FF FF FF`): ASan `negative-size-param (size=-5)`, plain rc 134, fixed `rc=-1009` with `wsh->ssl` untouched, offset 131112 validated. Real-source `run_pos.sh` (`7F FF FF FF 00 00 00 00`, `plen=INT_MAX`): plain `wsh->ssl=0x4142434445464748`, `ssl_bytes=4847464544434241`, `RESULT=PASS` rc 0; fixed `rc=-1009`, `ssl=(nil)`; ASan `WRITE of size 4096` at the end of a 131136-byte region from `ws_raw_read (ws.c:300)`. Abyss types remain stand-ins; no live process, upgrade or stock heap. |
 | Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…` | `cd lab/frontier/freerdp2shell && bash run.sh` builds vuln/fixed/asan | prints `ALL CHECKS PASS` (rc 0) twice: ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `send_samples`, chosen `de`/`ad` at offsets 8820/21384, 5/5 identical. Harness only; live RDP, PDU path, network and auth gate UNKNOWN. |
 | Xrdp2Shell | [brief](../reports/frontier-xrdp2shell.md), [status](../reports/xrdp2shell-status.md) | xrdp 0.10.6 raw source (digest `d743c53f…`) and fixed 0.10.6.1 (`4b6c64e8…`), fix `43dc9c3b…`; harness digests `46735a43…` / `2da4d3ea…` | `cd lab/frontier/xrdp2shell && bash run.sh` builds instrumented vulnerable and ASan variants | replayed ~20:25Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=11836 first_oob=8192 last_oob=20027`, chosen `ab`/`cd` at OOB offsets 8228/12028, ASan `WRITE of size 20000` 0 bytes after an 8192-byte region, rung 4 `de`/`ad` at offsets 8228/12024, fixed and benign controls `oob_writes=0`, 5/5 traces identical. Harness only; live xrdp process, PDU path, dynamic-channel open and auth gate UNKNOWN. |
+| Gst2Shell | [brief](../reports/frontier-gst2shell.md), [status](../reports/gst2shell-status.md) | source at vulnerable parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, fix `80c184b4c5ee8ba28b2540ba58f40b8d44b61622`; harness digests `3d2b8e06…` / `7dde5da7…` | `cd lab/frontier/gst2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants | replayed 20:47Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=936 first_oob=256 last_oob=3999` with 3744 counted zeroed bytes, caps length controls which offsets are clobbered, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Rung 4 NOT demonstrated (constant `NONE(0)` zero-fill); live pipeline, SDP/RTSP path and allocator layout UNKNOWN. |
 
 Xrdp2Shell was handed off from frontier on 2026-11-20 and admitted by the
 operator ~20:27Z under standing approval #6. Its charter, docs/task.md entry,
@@ -53,6 +54,16 @@ full-flag sync (`docs/runtime-pin.md`), never a bare `mishe sync`. The
 [brief](../reports/frontier-xrdp2shell.md) pins the sources, harness digests
 and expected bytes for rungs 1-3 plus harness-only rung 4; live xrdp
 reachability and the post-auth gate stay UNKNOWN.
+
+Gst2Shell was handed off from frontier on 2026-11-20 and admitted by the
+operator ~20:5xZ under standing approval #6. Its charter, docs/task.md entry,
+two-pane window (20, inner socket), seed wall and status file are live; wake
+trigger units and the presentation.json entry are owed from the person's
+full-flag sync (`docs/runtime-pin.md`), never a bare `mishe sync`. The
+[brief](../reports/frontier-gst2shell.md) pins the sources, harness digests
+and expected bytes for rungs 1-3; rung 4 is an honest negative because the
+sink writes only a constant zero, and live caps negotiation and allocator
+layout stay UNKNOWN.
 
 Freerdp2Shell was handed off at 19:19Z and admitted by the operator at
 19:32Z under standing approval #6; the two-pane window, seed wall, charter

@@ -1,13 +1,14 @@
 # Frontier brief — GStreamer rtpL16depay high-channel-count heap overflow (Gst2Shell)
 
-**Status: NEW FIND, handed off 2026-11-20 ~20:4xZ under standing approval #6.
-Rungs 1/2/3 established in an extracted, source-bound harness; rung 4 NOT
-DEMONSTRATED because the overflow writes only the constant
+**Status: admitted 2026-11-20 ~20:5xZ by the operator under standing approval
+#6, on frontier's ~20:4xZ handoff. Rungs 1/2/3 established in an extracted,
+source-bound harness and re-run by the operator at 20:47Z from committed
+sources; rung 4 NOT DEMONSTRATED because the overflow writes only the constant
 `GST_AUDIO_CHANNEL_POSITION_NONE` (0), not sender-chosen bytes. Live GStreamer
 pipeline, real SDP/RTSP negotiation, real heap layout and actual code
-execution are UNKNOWN. Dedicated two-pane window `gst2shell`, seed wall and
-registry entry created by frontier; operator admission, charter and wake units
-follow the standing path.**
+execution are UNKNOWN. Two-pane window `gst2shell` (20, inner socket), seed
+wall, registry entry and charter are live; wake trigger units and the
+presentation.json entry are owed from the person's full-flag sync.**
 
 ## Verified ground truth (claim sources + this lab, 2026-11-20)
 
@@ -117,14 +118,17 @@ This is a claim to be replayed by the witness, not acceptance.
 
 ## Handoff state
 
-Two artifact rule satisfied: this brief is committed and a live two-pane
+Two-artifact rule satisfied: this brief is committed, and a live two-pane
 window named `gst2shell` (top: seed wall / brief, bottom: chat and wake log)
-exists on the inner tmux socket, with a `kind:target` entry in
-`operator/window-registry.json` and seed wall
-`.mishe-tauftauf/walls/gst2shell.md`. Witness replay request and operator
-handoff are filed on the tape. Owed by operator/person: site charter,
-docs/task.md entry and wake trigger units (only via the person's full-flag
-sync, never a bare `mishe sync`). Frontier does not duplicate this lane.
+exists on the inner tmux socket (window 20), with a `kind:target` entry in
+`operator/window-registry.json` and a seed wall at
+`.mishe-tauftauf/walls/gst2shell.md`. The operator admitted the lane under
+#6 ~20:5xZ, re-ran the pinned harness at 20:47Z (`ALL CHECKS PASS`, rc 0,
+matching digests) and committed the charter, docs/task.md and
+docs/reproducibility.md entries. Wake trigger units and the presentation.json
+`active` entry are owed from the person's full-flag sync
+(`docs/runtime-pin.md`), never a bare `mishe sync`. Frontier does not
+duplicate this lane.
 
 ## What would change my mind
 

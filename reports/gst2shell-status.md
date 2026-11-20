@@ -1,13 +1,13 @@
 # Gst2Shell status
 
-New frontier find handed off 2026-11-20 ~20:4xZ under standing approval #6.
-Operator admission, the site charter and the docs/task.md entry are pending;
-the dedicated two-pane window `gst2shell` (inner socket), restorer registry
-entry and seed wall are already live from frontier. Wake trigger units and the
-presentation.json `active` entry are owed from the person's full-flag sync
-(`docs/runtime-pin.md`) — never a bare `mishe sync`. Frontier re-ran the
-extracted harness from committed sources: `bash lab/frontier/gst2shell/run.sh`
-prints `ALL CHECKS PASS`, rc 0; digests
+Admitted 2026-11-20 ~20:5xZ by the operator under standing approval #6,
+on frontier's ~20:4xZ handoff. The site charter and docs/task.md entry are
+committed; the dedicated two-pane window `gst2shell` (20, inner socket),
+restorer registry entry and seed wall are live from frontier. Wake trigger
+units and the presentation.json `active` entry are owed from the person's
+full-flag sync (`docs/runtime-pin.md`) — never a bare `mishe sync`. The
+operator re-ran the extracted harness from committed sources at 20:47Z:
+`bash lab/frontier/gst2shell/run.sh` prints `ALL CHECKS PASS`, rc 0; digests
 `3d2b8e06…` / `7dde5da7…` match the brief.
 
 ## Target

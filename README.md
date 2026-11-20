@@ -97,6 +97,7 @@ is called established.
 | **Freeswitch2Shell** | **Rung 4 — chosen-pointer control in the real `ws_raw_read` over loopback; marker execution still harness-only** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. Abyss `TConn`/`TSession` and `ConnRead`/`ConnWrite` remain stand-ins; no live process, WebSocket upgrade, stock heap layout or reachability. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
 
 | **Xrdp2Shell** | **Rung 3 — confirmed corruption; harness-only rung 4** | A 28-byte data-first header plus 20000 client bytes writes `oob_writes=11836` from offset 8192; chosen `ab`/`cd` land at OOB offsets 8228/12028, ASan reports `WRITE of size 20000` 0 bytes after the 8192-byte region, and rung 4 places `de`/`ad` at offsets 8228/12024 across two messages. Exact-size 0.10.6.1 and benign controls are clean, 5/5 traces identical. Live xrdp process, real DYNVC PDU path and the post-auth gate are UNKNOWN. [Status](reports/xrdp2shell-status.md) |
+| **Gst2Shell** | **Rung 3 — confirmed corruption in an extracted harness; rung 4 honest negative** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, 3744 counted zeroed OOB bytes, with the caps value choosing which offsets are clobbered; ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Rung 4 is NOT demonstrated — the sink writes only constant `NONE(0)`, so the attacker controls the length and offsets, not the bytes. Live GStreamer, SDP/RTSP caps path and allocator layout UNKNOWN. [Status](reports/gst2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF and
@@ -105,7 +106,7 @@ Node's path from corruption
 to control, Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
 index 27, FreeRADIUS's live `radiusd` replay, FalkorDB's four-byte-repeating
-mask, Freeswitch's full live `mod_xml_rpc` process replay (real-source loopback checks now include positive-length chosen-pointer placement), and Xrdp's live loopback DYNVC PDU path and auth gate are still open. Apache's
+mask, Freeswitch's full live `mod_xml_rpc` process replay (real-source loopback checks now include positive-length chosen-pointer placement), Xrdp's live loopback DYNVC PDU path and auth gate, and GStreamer's live caps path plus any useful zeroing effect are still open. Apache's
 Stage C route was closed as unreachable in this build on this host and is
 preserved as a negative. Each open question is recorded as an UNKNOWN in its
 status file rather than papered over. Failed hypotheses and negative results
@@ -117,8 +118,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **php2shell**, **node2shell**, **apache2shell**, **mosquitto2shell**,
 **dragonfly2shell**, **postgres2shell**, **brotli2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
-**freerdp2shell** and **xrdp2shell** pursue their lane end-to-end — build,
-harness, debugger, report. Four further minds cut
+**freerdp2shell**, **xrdp2shell** and **gst2shell** pursue their lane
+end-to-end — build, harness, debugger, report. Four further minds cut
 across them:
 
 - **frontier** hunts public advisories for new X2Shell-class candidates and
@@ -164,7 +165,7 @@ public-infrastructure scans.
   The `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
   `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
-  `xrdp2shell` and `frontier`,
+  `xrdp2shell`, `gst2shell` and `frontier`,
   `docs`, `witness` and `operator` windows show each mind's wall and wake log;
   `chat`, `git` and `wakes` show the shared tape. All minds run on
   `opencode-go/hy4-flash-free`.
