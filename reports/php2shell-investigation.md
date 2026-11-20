@@ -432,8 +432,9 @@ the consumed pointer field (`arData` equals the chosen value length). NOT
 claimed: an arbitrary 64-bit address, `nTableMask` control, a benign marker
 execution, or a gadget chain — the consumed read address is
 `chosen_length + hash("UTC")*4`, so this is a constrained pointer primitive,
-not an arbitrary write. Query-shape pointer placement is an observed
-negative (Stage B below); other input channels remain UNKNOWN.
+not an arbitrary write. Pointer placement is an observed negative for query
+and multipart grooming (Stage B) and session data (Stage B extension);
+other SAPIs remain UNKNOWN.
 
 No benign marker is available through THIS consumer: the stale access is a
 data dereference (`HT_HASH_EX(arData,nIndex)`), not an indirect call, so a
@@ -470,12 +471,71 @@ or a write would need a different freed object or a second consumer;
 neither is established. This is a preserved negative for the two tested
 input channels, not proof about every possible 56-byte allocation.
 
+## Stage B extension: session-data channel (wake 20)
+
+Replay: `python3 lab/repro/php2shell-stageB-session-channel.py` (loopback only;
+logs in `lab/build/evidence/stageB/sessgroom-*.log`). It reuses the committed
+Stage A fieldprobe but sends no query string, removing the Stage A
+query-value groomer. Seven malformed
+php-serialize session records try a `stdClass` object and long strings before
+and after the failing `s:64:"AA"` declaration. Every leg emits "Failed to
+decode session object" (so the warning path really runs), yet the stale chunk
+at the warning is always a genuine one-element HashTable —
+`flags=0x10`, `mask=fffffffe`, real `arData=0x5555…`, `nNumUsed=1` — with
+rc 0 and no fault. No session-derived object or string claims the chunk at
+the warning: it always holds a genuine HashTable (allocator UNKNOWN).
+
+Together with Stage B this establishes a **structural either-or** at this
+consumer: the occupant with `mask=0` always carries a small integer (a value
+length) at `arData`, and the occupant with a real pointer at `arData` always
+carries the table's valid negative mask, which folds `h` back into the
+table's own hash slots. Full arbitrary-address control through this freed
+object is therefore blocked by the observed consumer/allocator pairing on
+this CGI path, not merely by an ungroomed heap — the same class of
+structural block recorded for the sibling nginx2root plant. Grade remains
+rung 4 CONSTRAINED: chosen bytes at chosen offsets and low-bit control of
+the consumed pointer. Other SAPIs (FPM, Apache) remain UNKNOWN; no marker
+or arbitrary address is claimed. This is a preserved negative, not a
+retried hypothesis.
+
+## Second consumer: indirect-call route closed (wake 21)
+
+that is an indirect call. Beyond the observed read, `ext/date/php_date.c`
+has two other operation sites on `DATEG(tzcache)`: `zend_hash_str_add_ptr`
+(php_date.c:511, a write of a valid `timelib_tzinfo*` into the found table), and
+`ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)` (php_date.c:428-433), which calls
+`zend_hash_destroy()` — walking buckets and invoking the stored
+`pDestructor` (`_php_date_tzinfo_dtor`) — then `FREE_HASHTABLE()`. That
+destructor slot is at HashTable offset 24, where the Stage A groomscript
+places attacker bytes, so it looked like a route to a chosen indirect call.
+
+It is unreachable on this path. `PHP_RINIT_FUNCTION(date)`
+(php_date.c:404-412) sets `DATEG(tzcache) = NULL` on every request. The
+observed UAF read happens in `php_hash_environment()` at
+`main/main.c:1906`, BEFORE `zend_activate_modules()` at `main.c:1907` runs
+RINIT; request shutdown then calls `zend_post_deactivate_modules()` at
+`main.c:2000`, which sees the NULL pointer and never enters
+`zend_hash_destroy()`. The only other consumer, the add at php_date.c:511,
+writes a fixed native pointer, not a chosen address.
+
+Controls (plain 8.4.27 query groomer and the committed ASan/UAF harness):
+8.4.27-asan splice-MID with ZERO query string still aborts rc −6 with the
+SAME `heap-use-after-free` (`_zend_is_inconsistent`, zend_hash.c:57, 8 bytes
+into the 56-byte region) — under ASan the freed block is quarantined, so the
+groomer is needed for the plain build's chosen-byte placement, not for
+sanitizer detection. 8.4.28-asan splice-MID rc 0; 8.4.27-asan valid-record
+rc 0 with no ASan report, consistent with RINIT nulling the pointer before
+shutdown. Logs: `lab/build/evidence/stageB/shutdown-uaf/stageA-php-8.4.{27,28}-asan-{splice-mid,valid-record}-plain-qs0.log`.
+Grade unchanged; the "second consumer is an indirect call" upgrade
+condition is now a source-backed negative for this CGI path.
+
 ## Open routes after Stage A
 
 - Extending the groom to set `arData` to a chosen address is an observed
-  negative for query and multipart grooming (Stage B); session data and
-  other SAPIs remain UNKNOWN. Stage A is witness-ESTABLISHED (#138).
-  no re-run owed.
+  negative for query and multipart grooming (Stage B) and for session data
+  (Stage B extension); other SAPIs remain UNKNOWN. The consumer is
+  structurally either-or, so this route cannot yield arbitrary-address
+  control. Stage A is witness-ESTABLISHED (#138), no re-run owed.
 - A public disclosure of Depthfirst's withheld native decoder could supply
   the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not

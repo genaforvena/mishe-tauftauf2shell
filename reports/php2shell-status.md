@@ -308,7 +308,36 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   a real pointer at offset 16 AND mask=0; no tested shape gives both
   (the pointer-bearing occupant always has the table's valid small
   negative mask). Grade unchanged: rung 4 CONSTRAINED; pointer control
-  and marker remain unclaimed; session data and other SAPIs UNKNOWN.
+  and marker remain unclaimed; other SAPIs UNKNOWN (session data: wake 20).
+  **Wake 20 (2026-11-20, 15:05Z) — Stage B session-data channel NEGATIVE.**
+  Committed `lab/repro/php2shell-stageB-session-channel.py` replays seven
+  malformed php-serialize session records (bare failing string, stdClass
+  object before/after it, 10- and 24-byte string properties) under the Stage A
+  GDB fieldprobe with no query string, so session decode is the only
+  request-time allocator before the PRE-RINIT warning. Logs
+  `lab/build/evidence/stageB/sessgroom-*.log`: every leg emits "Failed to
+  decode session object" (warning path runs), stale chunk is always a real
+  one-element HashTable (`flags=0x10`, `mask=fffffffe`, real `arData`,
+  `nNumUsed=1`), rc 0, no fault. No session-derived object/string claims the
+  chunk. Together with Stage B this is a structural either-or at the
+  consumer: mask=0 ⇒ small integer at arData; real pointer ⇒ valid negative
+  mask. Grade unchanged (rung 4 CONSTRAINED, witness #138); other SAPIs
+  UNKNOWN; no arbitrary address or marker claimed.
+  **Wake 21 (2026-11-20, 16:05Z) — second-consumer route NEGATIVE.** The
+  only other tzcache consumers in `ext/date/php_date.c` are the add at
+  :511 (writes a fixed native pointer) and
+  `ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)` (:428-433) →
+  `zend_hash_destroy()` → stored `pDestructor` (attacker-byte slot at
+  offset 24). Unreachable: `PHP_RINIT_FUNCTION(date)` (:404-412) NULLs
+  `DATEG(tzcache)`; the UAF read is in `php_hash_environment()` at
+  `main.c:1906`, before `zend_activate_modules()` at :1907 runs RINIT,
+  and shutdown's `zend_post_deactivate_modules()` (`main.c:2000`) sees
+  NULL. ASan controls in
+  `lab/build/evidence/stageB/shutdown-uaf/`: 8.4.27-asan splice-MID with
+  zero query string rc −6 (same `_zend_is_inconsistent` UAF — quarantine
+  makes the groomer unnecessary for ASan detection); 8.4.28-asan and
+  8.4.27-asan valid-record rc 0, no report. Grade unchanged; no route to
+  an indirect call through this freed object on this CGI path.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
