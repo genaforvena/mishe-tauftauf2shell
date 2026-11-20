@@ -418,6 +418,11 @@ execution, or a gadget chain — the consumed read address is
 not an arbitrary write. Whether a longer/repeated groom could place a full
 pointer is UNKNOWN and is the next experiment, not a claim.
 
+No benign marker is available through THIS consumer: the stale access is a
+data dereference (`HT_HASH_EX(arData,nIndex)`), not an indirect call, so a
+marker would need a different consumer of the same freed object — UNKNOWN,
+not claimed.
+
 ## Open routes after Stage A
 
 - Extend the groom to set `arData` to a chosen *address* (needs a 56-byte
