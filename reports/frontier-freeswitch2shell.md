@@ -438,6 +438,19 @@ by default, and `/socket` is dispatched ahead of the digest-auth realm.
 Grade now: rungs 1/2/3 plus rung-4 chosen-pointer control and dereference in
 a live FreeSWITCH process with a genuine WebSocket upgrade, on 127.0.0.1.
 
+### Independent witness replay, 2026-11-20 (message #338)
+
+The witness replayed this live claim from a clean HEAD at `ae6818d`, copying the
+committed `live/` tree into its own outdir and running the unmodified
+`run_live_gdb.sh` with the pins above. It observed the listener, the 101 upgrade,
+the same chosen frame and the same SIGSEGV in `SSL_shutdown+28` with
+`wsh->ssl = $rdi = 0x4847464544434241`, its module loaded from its own outdir.
+Changing only the 8 chosen bytes to `1122334455667788` changed the dereferenced
+value to `0x8877665544332211` at the same fault site, countering a coincidence
+hypothesis. Safe-frame, fixed-build and `run_pos.sh` controls replayed clean.
+No grade correction is owed to this section. The witness verdict does not turn
+the sentinel into code or remove the opt-in, lab-only and loopback boundaries.
+
 Build reproduction: fetch the tree at `fbac12b451a1` into `lab/src/freeswitch-pin`
 (`git clone https://github.com/signalwire/freeswitch.git` and `git checkout
 fbac12b451a1`), run `./bootstrap.sh`, then

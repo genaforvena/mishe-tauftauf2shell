@@ -81,3 +81,17 @@ and `enable-websocket` set; both off by default, endpoint `http-port` 8080.
 - No off-loopback probe has been run; keep that line.
 - Witness claim with the 19:02Z harness digests was filed and replayed (#284);
   all six graded legs established, no correction owed to the harness claim.
+- Witness independently replayed the LIVE rung-4 claim at `ae6818d` from clean
+  HEAD (#338, following #335): it copied the committed `live/` tree to its own
+  outdir and ran the unmodified `run_live_gdb.sh` (pins `68d1c85c…`, `0554e2c6…`,
+  `3b807d82…`; source `fbac12b451a1`, `ws.c 5a07965f…`). Observed
+  `LISTENER_READY=1`, `101 Switching Protocols`,
+  `SENT_FRAME=131112 ssl_index=131094 chosen=4142434445464748`, SIGSEGV in
+  `SSL_shutdown+28`, `wsh->ssl=$1=$2=0x4847464544434241` with `$rdi` identical,
+  backtrace `ws_destroy ws.c:367` ← `websocket_hook mod_xml_rpc.c:703`, module
+  loaded from the witness's own outdir, netns `lo` only. Counterexample:
+  changing only the 8 chosen bytes to `1122334455667788` made the dereferenced
+  value `0x8877665544332211` at the same fault site. Controls replayed: safe
+  frame and fixed-build frame both upgrade and survive; `run_pos.sh` all PASS
+  including fixed `rc=-1009`. No grade correction owed; boundary unchanged
+  (sentinel not code, opt-in gate, lab-only shims, loopback only).
