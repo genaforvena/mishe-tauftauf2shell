@@ -1,0 +1,2023 @@
+From ab820bddaffa540af82f2f689c3e535f82f14d89 Mon Sep 17 00:00:00 2001
+From: Harsh Dubey <100467917+harshdubey166@users.noreply.github.com>
+Date: Wed, 26 Aug 2026 11:07:39 +0530
+Subject: [PATCH] [OSS-ONLY] Minor fixes and improvements in TDS and PL/tsql
+ handling (#4955)
+
+Minor fixes and improvements in TDS and PL/tsql handling
+
+Authored by : harshdu@amazon.com
+Signed-off by : harshdu@amazon.com
+---
+ contrib/babelfishpg_tds/src/backend/tds/tds.c |   4 +
+ .../src/backend/tds/tdsbulkload.c             |  16 +
+ .../src/backend/tds/tdslogin.c                |  52 +++-
+ .../babelfishpg_tds/src/backend/tds/tdsrpc.c  |  79 +++--
+ .../src/backend/tds/tdssecure.c               |   5 +
+ .../src/backend/tds/tdstypeio.c               |  18 +-
+ .../babelfishpg_tds/src/include/tds_request.h |  47 +++
+ contrib/babelfishpg_tsql/src/dbcmds.c         |  93 +++---
+ contrib/babelfishpg_tsql/src/guc.c            |  10 +-
+ contrib/babelfishpg_tsql/src/pl_handler.c     |   2 +-
+ contrib/babelfishpg_tsql/src/procedures.c     |   6 +-
+ contrib/babelfishpg_tsql/src/session.c        |   7 +-
+ test/JDBC/expected/BABEL-3613-vu-verify.out   |  39 ---
+ test/JDBC/expected/TestTvpQuoting.out         |  67 +++++
+ .../expected/alter-procedure-vu-verify.out    |  15 +
+ test/JDBC/expected/babelfish_set_role.out     | 273 ++++++++++++++++++
+ ...ownership_restrictions_from_pg_su_user.out |  50 ++++
+ test/JDBC/input/BABEL-3613-vu-verify.sql      |  16 -
+ .../input/alter/alter-procedure-vu-verify.sql |  12 +-
+ test/JDBC/input/babelfish_set_role.mix        | 141 +++++++++
+ test/JDBC/input/datatypes/TestTvpQuoting.sql  |  37 +++
+ ...ownership_restrictions_from_pg_su_user.mix |  30 ++
+ 22 files changed, 888 insertions(+), 131 deletions(-)
+ create mode 100644 test/JDBC/expected/TestTvpQuoting.out
+ create mode 100644 test/JDBC/expected/babelfish_set_role.out
+ create mode 100644 test/JDBC/input/babelfish_set_role.mix
+ create mode 100644 test/JDBC/input/datatypes/TestTvpQuoting.sql
+
+diff --git a/contrib/babelfishpg_tds/src/backend/tds/tds.c b/contrib/babelfishpg_tds/src/backend/tds/tds.c
+index 4f00969208a..a345d7c7224 100644
+--- a/contrib/babelfishpg_tds/src/backend/tds/tds.c
++++ b/contrib/babelfishpg_tds/src/backend/tds/tds.c
+@@ -1089,6 +1089,10 @@ set_tds_context_info(bytea *context_info)
+ 	PGSTAT_BEGIN_WRITE_ACTIVITY(vtdsentry);
+ 
+ 	len = VARSIZE(context_info) - VARHDRSZ;
++	if (len > CONTEXTINFOLEN)
++		ereport(ERROR,
++				(errcode(ERRCODE_STRING_DATA_LENGTH_MISMATCH),
++				 errmsg("context_info exceeds maximum length of %d bytes", CONTEXTINFOLEN)));
+ 	data = VARDATA(context_info);
+ 	memset(vtdsentry->st_context_info, 0, CONTEXTINFOLEN);
+ 	memcpy(vtdsentry->st_context_info, data, len);
+diff --git a/contrib/babelfishpg_tds/src/backend/tds/tdsbulkload.c b/contrib/babelfishpg_tds/src/backend/tds/tdsbulkload.c
+index e61ea46fc43..5b8cba0ec0b 100644
+--- a/contrib/babelfishpg_tds/src/backend/tds/tdsbulkload.c
++++ b/contrib/babelfishpg_tds/src/backend/tds/tdsbulkload.c
+@@ -45,6 +45,9 @@ uint64_t	volatile bcpOffset = 0;
+ #define BINARY_COLUMNMETADATA_LEN			sizeof(uint16)
+ #define SQL_VARIANT_COLUMNMETADATA_LEN		sizeof(uint32_t)
+ 
++/* Upper bound on the number of columns accepted in a bulk load request. */
++#define MAX_BULK_LOAD_COLUMNS				30000
++
+ 
+ /* Check if retStatus Not OK. */
+ #define CheckPLPStatusNotOK(temp, retStatus, colNum) \
+@@ -248,6 +251,9 @@ GetBulkLoadRequest(StringInfo message)
+ 	request->reqType = TDS_REQUEST_BULK_LOAD;
+ 
+ 	TdsResetBcpOffset();
++
++	/* Buffer the COLMETADATA token byte before reading it. */
++	CheckMessageHasEnoughBytesToReadColMetadata(&message, sizeof(uint8_t));
+ 	if (unlikely((uint8_t) message->data[bcpOffset] != TDS_TOKEN_COLMETADATA))
+ 		ereport(ERROR,
+ 				(errcode(ERRCODE_PROTOCOL_VIOLATION),
+@@ -256,7 +262,17 @@ GetBulkLoadRequest(StringInfo message)
+ 
+ 	bcpOffset++;
+ 
++	/* Buffer the column count bytes before reading them. */
++	CheckMessageHasEnoughBytesToReadColMetadata(&message, sizeof(uint16));
+ 	memcpy(&colCount, &message->data[bcpOffset], sizeof(uint16));
++
++	/* Validate colCount before using it as an allocation size. */
++	if (unlikely(colCount == 0 || colCount > MAX_BULK_LOAD_COLUMNS))
++		ereport(ERROR,
++				(errcode(ERRCODE_PROTOCOL_VIOLATION),
++				 errmsg("The incoming tabular data stream (TDS) Bulk Load Request (BulkLoadBCP) protocol stream is incorrect. "
++						"column count %u is invalid.", colCount)));
++
+ 	colmetadata = palloc0(colCount * sizeof(BulkLoadColMetaData));
+ 	request->colCount = colCount;
+ 	request->colMetaData = colmetadata;
+diff --git a/contrib/babelfishpg_tds/src/backend/tds/tdslogin.c b/contrib/babelfishpg_tds/src/backend/tds/tdslogin.c
+index 6f69485ef8b..2f0bf851272 100644
+--- a/contrib/babelfishpg_tds/src/backend/tds/tdslogin.c
++++ b/contrib/babelfishpg_tds/src/backend/tds/tdslogin.c
+@@ -350,6 +350,13 @@ ParsePreLoginRequest()
+ 			temp->length = 0;
+ 			temp->next = NULL;
+ 			initStringInfo(&temp->val);
++			if (prev == NULL)
++			{
++				ereport(FATAL, (errcode(ERRCODE_PROTOCOL_VIOLATION),
++								errmsg("Prelogin request contained no options")));
++				return STATUS_ERROR;	/* unreachable, satisfies static analysis */
++			}
++
+ 			prev->next = temp;
+ 			prev = prev->next;
+ 			break;
+@@ -360,6 +367,14 @@ ParsePreLoginRequest()
+ 		if (TdsGetbytes((char *) &data16, sizeof(data16)))
+ 			return STATUS_ERROR;
+ 		temp->length = pg_ntoh16(data16);
++
++		/* Reject prelogin option lengths that exceed the prelogin packet size. */
++		if (temp->length > TDS_DEFAULT_INIT_PACKET_SIZE)
++			ereport(FATAL,
++					(errcode(ERRCODE_PROTOCOL_VIOLATION),
++					 errmsg("invalid prelogin option length: %u",
++							temp->length)));
++
+ 		initStringInfo(&temp->val);
+ 
+ 		temp->next = NULL;
+@@ -377,8 +392,17 @@ ParsePreLoginRequest()
+ 	prev = TdsPreLoginRequest;
+ 	while (prev->next != NULL)
+ 	{
+-		if (TdsGetbytes(prev->val.data, prev->length))
+-			return STATUS_ERROR;
++
++		/* Resize the buffer for this token's data and maintain StringInfo invariants. */
++		resetStringInfo(&prev->val);
++		if (prev->length > 0)
++		{
++			enlargeStringInfo(&prev->val, prev->length);
++			if (TdsGetbytes(prev->val.data, prev->length))
++				return STATUS_ERROR;
++			prev->val.len = prev->length;
++			prev->val.data[prev->val.len] = '\0';
++		}
+ 		prev = prev->next;
+ 	}
+ 	if (!TdsCheckMessageType(TDS_PRELOGIN))
+@@ -480,6 +504,11 @@ SetPreLoginResponseVal(Port *port, uint8_t token, StringInfo val,
+ 			 * encryption if req = TDS_ENCRYPT_OFF or else TDS_ENCRYPT_OFF No
+ 			 * SSL support - when disabled or on Unix sockets
+ 			 */
++			if (reqVal->len < 1)
++				ereport(FATAL,
++					(errcode(ERRCODE_PROTOCOL_VIOLATION),
++					 errmsg("invalid prelogin ENCRYPTION option length: %d",
++						reqVal->len)));
+ 			if (loadSsl && port->laddr.addr.ss_family != AF_UNIX)
+ 			{
+ 				if ((reqVal->data[0] == TDS_ENCRYPT_ON) ||
+@@ -812,6 +841,13 @@ FetchLoginRequest(LoginRequest request)
+ 
+ 		if (length > 0)
+ 		{
++			if (offset < read)
++			{
++				pfree(temp_utf8.data);
++				pfree(buf.data);
++				return STATUS_ERROR;
++			}
++
+ 			/* Skip bytes till the offset */
+ 			if (TdsDiscardbytes(offset - read))
+ 			{
+@@ -850,6 +886,13 @@ FetchLoginRequest(LoginRequest request)
+ 			/* Since, it has UTF-16 format */
+ 			length *= 2;
+ 
++			if ((read + length) > request->length)
++			{
++				pfree(temp_utf8.data);
++				pfree(buf.data);
++				return STATUS_ERROR;
++			}
++
+ 			resetStringInfo(&buf);
+ 			enlargeStringInfo(&buf, length);
+ 
+@@ -954,6 +997,8 @@ FetchLoginRequest(LoginRequest request)
+ 						 errmsg("large SSPI is not supported yet")));
+ 			}
+ 
++			if (offset < read)
++				return STATUS_ERROR;
+ 
+ 			/* Skip bytes till the offset */
+ 			if (TdsDiscardbytes(offset - read))
+@@ -965,6 +1010,9 @@ FetchLoginRequest(LoginRequest request)
+ 
+ 			read = offset;
+ 
++			if ((read + request->sspiLen) > request->length)
++				return STATUS_ERROR;
++
+ 			request->sspi = palloc(request->sspiLen);
+ 
+ 			if (TdsGetbytes(request->sspi, request->sspiLen))
+diff --git a/contrib/babelfishpg_tds/src/backend/tds/tdsrpc.c b/contrib/babelfishpg_tds/src/backend/tds/tdsrpc.c
+index 3b0cbe00aa5..61be82a5975 100644
+--- a/contrib/babelfishpg_tds/src/backend/tds/tdsrpc.c
++++ b/contrib/babelfishpg_tds/src/backend/tds/tdsrpc.c
+@@ -1281,6 +1281,8 @@ ReadPlp(ParameterToken temp, StringInfo message, uint64_t *mainOffset)
+ 	unsigned long lenCheck = 0;
+ 	uint64_t	offset = *mainOffset;
+ 
++	if (offset + sizeof(plpTok) > message->len)
++		return STATUS_ERROR;
+ 	memcpy(&plpTok, &message->data[offset], sizeof(plpTok));
+ 	offset += sizeof(plpTok);
+ 	temp->plp = NULL;
+@@ -1370,6 +1372,8 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 		 * following parameters for the next RPC packet in the Batch.
+ 		 * BatchFlag is '0xFF' For TDS versions more than or equal to 7.2 and
+ 		 * '0x80' for Versions lower than or equal to TDS 7.1
++		 *
++		 * Note: offset < message->len is guaranteed by the while loop condition.
+ 		 */
+ 		if ((uint8_t) message->data[offset] == GetRpcBatchSeparator(GetClientTDSVersion()))
+ 		{
+@@ -1385,6 +1389,8 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 		}
+ 
+ 		temp = palloc0(sizeof(ParameterTokenData));
++
++		CheckMessageBounds(offset, 1, message->len);
+ 		len = message->data[offset++];
+ 
+ 		/*
+@@ -1396,6 +1402,8 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 
+ 		if (len > 0)
+ 		{
++			CheckMessageBounds(offset, (uint64_t) 2 * len, message->len);
++
+ 			/*
+ 			 * FIXME: parameter name is in UTF-16 format.  Fix this
+ 			 * separately.
+@@ -1405,6 +1413,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 			len = 0;
+ 		}
+ 
++		CheckMessageBounds(offset, sizeof(temp->flags), message->len);
+ 		memcpy(&temp->flags, &message->data[offset], sizeof(temp->flags));
+ 		offset += sizeof(temp->flags);
+ 
+@@ -1426,6 +1435,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 			lockForFaultInjection = false;
+ 		}
+ #endif
++		CheckMessageBounds(offset, 1, message->len);
+ 		tdsType = message->data[offset++];
+ 
+ 		temp->type = tdsType;
+@@ -1443,11 +1453,13 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 								(errcode(ERRCODE_PROTOCOL_VIOLATION),
+ 								 errmsg("Invalid parameter %d (\"%s\"): Data type 0x%02X is a deprecated large object, or LOB, but is marked as output parameter. "
+ 										"Deprecated types are not supported as output parameters. Use current large object types instead.",
++					/* Bounds validated inside GetSetColMetadataForTextType */
+ 										paramOrdinal, temp->paramMeta.colName.data, tdsType)));
+ 					retStatus = GetSetColMetadataForTextType(temp, message, tdsType, &offset);
+ 					if (retStatus != STATUS_OK)
+ 						return retStatus;
+ 
++					CheckMessageBounds(offset, sizeof(temp->len), message->len);
+ 					memcpy(&temp->len, &message->data[offset], sizeof(temp->len));
+ 
+ 					/* for Null values, Len field is set to -1(0xFFFFFFFF) */
+@@ -1461,6 +1473,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 
+ 					offset += sizeof(temp->len);
+ 					temp->dataOffset = offset;
++					CheckMessageBounds(offset, temp->len, message->len);
+ 					offset += temp->len;
+ 				}
+ 				break;
+@@ -1476,6 +1489,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 										paramOrdinal, temp->paramMeta.colName.data, tdsType)));
+ 					SetColMetadataForImageType(&temp->paramMeta, tdsType);
+ 
++					CheckMessageBounds(offset, sizeof(temp->len), message->len);
+ 					memcpy(&temp->len, &message->data[offset], sizeof(temp->len));
+ 
+ 					/*
+@@ -1500,9 +1514,11 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					 * Skipping two sequence of 4 Bytes, each sequence
+ 					 * containing actual image file length
+ 					 */
++					CheckMessageBounds(offset, 2 * sizeof(temp->len), message->len);
+ 					offset += 2 * sizeof(temp->len);
+ 
+ 					temp->dataOffset = offset;
++					CheckMessageBounds(offset, temp->len, message->len);
+ 					offset += temp->len;
+ 				}
+ 				break;
+@@ -1511,6 +1527,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 			case TDS_TYPE_VARCHAR:
+ 			case TDS_TYPE_NVARCHAR:
+ 				{
++					/* Bounds validated inside GetSetColMetadataForCharType */
+ 					retStatus = GetSetColMetadataForCharType(temp, message, tdsType, &offset);
+ 					if (retStatus != STATUS_OK)
+ 						return retStatus;
+@@ -1521,6 +1538,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					 */
+ 					if (temp->maxLen == 0xFFFF)
+ 					{
++						/* Bounds validated inside ReadPlp via CheckMessageBounds */
+ 						retStatus = ReadPlp(temp, message, &offset);
+ 						CheckPLPStatusNotOK(temp, retStatus);
+ 					}
+@@ -1571,8 +1589,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 			case TDS_TYPE_DATETIMEN:
+ 			case TDS_TYPE_UNIQUEIDENTIFIER:
+ 				{
+-					if ((offset + 2) > message->len)
+-						return STATUS_ERROR;
++					CheckMessageBounds(offset, 2, message->len);
+ 					temp->maxLen = message->data[offset++];
+ 
+ 					/*
+@@ -1586,8 +1603,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					CheckForInvalidLength(temp);
+ 
+ 					temp->dataOffset = offset;
+-					if (offset + temp->len > message->len)
+-						return STATUS_ERROR;
++					CheckMessageBounds(offset, temp->len, message->len);
+ 					offset += temp->len;
+ 
+ 					SetColMetadataForFixedType(&temp->paramMeta, tdsType, temp->maxLen);
+@@ -1599,7 +1615,8 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 
+ 					/*
+ 					 * Sets the col metadata and also the corresponding row
+-					 * data.
++					 * data.  SetColMetadataForTvp validates bounds via
++					 * CheckMessageBounds before each read from message.
+ 					 */
+ 					SetColMetadataForTvp(temp, message, &offset, request->name.data);
+ 				}
+@@ -1609,6 +1626,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 				{
+ 					uint16		len;
+ 
++					CheckMessageBounds(offset, sizeof(len), message->len);
+ 					memcpy(&len, &message->data[offset], sizeof(len));
+ 					offset += sizeof(len);
+ 					temp->maxLen = len;
+@@ -1622,11 +1640,13 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					 */
+ 					if (temp->maxLen == 0xffff)
+ 					{
++						/* Bounds validated inside ReadPlp via CheckMessageBounds */
+ 						retStatus = ReadPlp(temp, message, &offset);
+ 						CheckPLPStatusNotOK(temp, retStatus);
+ 					}
+ 					else
+ 					{
++						CheckMessageBounds(offset, sizeof(len), message->len);
+ 						memcpy(&len, &message->data[offset], sizeof(len));
+ 						offset += sizeof(len);
+ 						temp->len = len;
+@@ -1645,16 +1665,14 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 						CheckForInvalidLength(temp);
+ 
+ 						temp->dataOffset = offset;
+-						if (offset + temp->len > message->len)
+-							return STATUS_ERROR;
++						CheckMessageBounds(offset, temp->len, message->len);
+ 						offset += temp->len;
+ 					}
+ 				}
+ 				break;
+ 			case TDS_TYPE_DATE:
+ 				{
+-					if ((offset + 1) > message->len)
+-						return STATUS_ERROR;
++					CheckMessageBounds(offset, 1, message->len);
+ 
+ 					temp->len = message->data[offset++];
+ 					temp->maxLen = 3;
+@@ -1665,8 +1683,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					CheckForInvalidLength(temp);
+ 
+ 					temp->dataOffset = offset;
+-					if (offset + temp->len > message->len)
+-						return STATUS_ERROR;
++					CheckMessageBounds(offset, temp->len, message->len);
+ 					offset += temp->len;
+ 
+ 					SetColMetadataForDateType(&temp->paramMeta, tdsType);
+@@ -1676,7 +1693,10 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 			case TDS_TYPE_DATETIME2:
+ 			case TDS_TYPE_DATETIMEOFFSET:
+ 				{
+-					uint8_t		scale = message->data[offset++];
++					uint8_t		scale;
++
++					CheckMessageBounds(offset, 2, message->len);
++					scale = message->data[offset++];
+ 
+ 					temp->len = message->data[offset++];
+ 
+@@ -1693,8 +1713,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					CheckForInvalidLength(temp);
+ 
+ 					temp->dataOffset = offset;
+-					if ((offset + temp->len) > message->len)
+-						return STATUS_ERROR;
++					CheckMessageBounds(offset, temp->len, message->len);
+ 					offset += temp->len;
+ 
+ 					SetColMetadataForTimeType(&temp->paramMeta, tdsType, scale);
+@@ -1706,6 +1725,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					uint8_t		scale;
+ 					uint8_t		precision;
+ 
++					CheckMessageBounds(offset, 4, message->len);
+ 					temp->maxLen = message->data[offset++];
+ 
+ 					precision = message->data[offset++];
+@@ -1734,8 +1754,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 
+ 					temp->dataOffset = offset;
+ 
+-					if ((offset + temp->len) > message->len)
+-						return STATUS_ERROR;
++					CheckMessageBounds(offset, temp->len, message->len);
+ 
+ 					/*
+ 					 * XXX: We do not support DECIMAL so internally we store
+@@ -1751,7 +1770,9 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 				break;
+ 			case TDS_TYPE_XML:
+ 				{
++					CheckMessageBounds(offset, 1, message->len);
+ 					temp->maxLen = message->data[offset++];
++					/* Bounds validated inside ReadPlp via CheckMessageBounds */
+ 					retStatus = ReadPlp(temp, message, &offset);
+ 					CheckPLPStatusNotOK(temp, retStatus);
+ 				}
+@@ -1764,15 +1785,18 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 
+ 					initStringInfo(&typeName);
+ 
++					CheckMessageBounds(offset, sizeof(len), message->len);
+ 					memcpy(&len, &message->data[offset], sizeof(len));
+ 					offset += sizeof(len);
+ 
+ 					temp->maxLen = len;
+ 
+ 					/* Read the type name for the given CLR-UDT */
++					CheckMessageBounds(offset, sizeof(typenamelen), message->len);
+ 					memcpy(&typenamelen, &message->data[offset], sizeof(typenamelen));
+ 					offset += sizeof(typenamelen);
+ 
++					CheckMessageBounds(offset, (uint64_t) 2 * typenamelen, message->len);
+ 					TdsUTF16toUTF8StringInfo(&typeName, &(message->data[offset]), 2*typenamelen);
+ 					offset += 2*typenamelen;
+ 
+@@ -1799,6 +1823,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 					}
+ 
+ 					resetStringInfo(&typeName);
++					/* Bounds validated inside ReadPlp via CheckMessageBounds */
+ 					retStatus = ReadPlp(temp, message, &offset);
+ 					CheckPLPStatusNotOK(temp, retStatus);
+ 				}
+@@ -1841,6 +1866,7 @@ ReadParameters(TDSRequestSP request, uint64_t offset, StringInfo message, int *p
+ 	 * Flush phase in TdsSocketBackend.
+ 	 */
+ 	request->batchSeparatorOffset = message->len;
++	request->messageLen = message->len;
+ 	return STATUS_OK;
+ }
+ 
+@@ -1872,6 +1898,7 @@ GetSPCursorHandleParameter(TDSRequestSP request)
+ 				Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 					   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++				CheckMessageBounds(token->dataOffset, sizeof(uint32), request->messageLen);
+ 				memcpy(&request->cursorHandle, &request->messageData[token->dataOffset],
+ 					   sizeof(uint32));
+ 
+@@ -1938,6 +1965,7 @@ GetSPCursorPreparedHandleParameter(TDSRequestSP request)
+ 				Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 					   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++				CheckMessageBounds(token->dataOffset, sizeof(uint32), request->messageLen);
+ 				memcpy(&request->cursorPreparedHandle, &request->messageData[token->dataOffset],
+ 					   sizeof(uint32));
+ 
+@@ -1990,6 +2018,7 @@ GetSPHandleParameter(TDSRequestSP request)
+ 				Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 					   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++				CheckMessageBounds(token->dataOffset, sizeof(uint32), request->messageLen);
+ 				memcpy(&request->handle, &request->messageData[token->dataOffset],
+ 					   sizeof(uint32));
+ 
+@@ -2186,6 +2215,7 @@ FetchCursorOptions(TDSRequestSP req)
+ 	Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 		   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++	CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 	memcpy(&req->scrollopt, &req->messageData[token->dataOffset],
+ 		   sizeof(uint32));
+ 
+@@ -2196,6 +2226,7 @@ FetchCursorOptions(TDSRequestSP req)
+ 	Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 		   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++	CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 	memcpy(&req->ccopt, &req->messageData[token->dataOffset],
+ 		   sizeof(uint32));
+ 
+@@ -2523,6 +2554,7 @@ FetchAndValidateCursorFetchOptions(TDSRequestSP req, int *fetchType,
+ 	Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 		   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++	CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 	memcpy(fetchType, &req->messageData[token->dataOffset], sizeof(uint32));
+ 
+ 	switch (*fetchType)
+@@ -2563,6 +2595,7 @@ FetchAndValidateCursorFetchOptions(TDSRequestSP req, int *fetchType,
+ 		Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 			   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++		CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 		memcpy(rownum, &req->messageData[token->dataOffset], sizeof(uint32));
+ 
+ 		/*
+@@ -2587,6 +2620,7 @@ FetchAndValidateCursorFetchOptions(TDSRequestSP req, int *fetchType,
+ 		Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 			   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++		CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 		memcpy(howMany, &req->messageData[token->dataOffset], sizeof(uint32));
+ 
+ 		/*
+@@ -2768,6 +2802,7 @@ HandleSPCursorOptionRequest(TDSRequestSP req)
+ 		Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 			   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++		CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 		memcpy(&code, &req->messageData[token->dataOffset], sizeof(uint32));
+ 	}
+ 
+@@ -2779,6 +2814,7 @@ HandleSPCursorOptionRequest(TDSRequestSP req)
+ 		Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 			   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++		CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 		memcpy(&value, &req->messageData[token->dataOffset], sizeof(uint32));
+ 	}
+ 
+@@ -2836,6 +2872,7 @@ HandleSPCursorRequest(TDSRequestSP req)
+ 		Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 			   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++		CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 		memcpy(&optype, &req->messageData[token->dataOffset], sizeof(uint32));
+ 	}
+ 
+@@ -2847,6 +2884,7 @@ HandleSPCursorRequest(TDSRequestSP req)
+ 		Assert(token->paramMeta.metaLen == sizeof(token->paramMeta.metaEntry.type1) &&
+ 			   token->paramMeta.metaEntry.type1.tdsTypeId == TDS_TYPE_INTEGER);
+ 
++		CheckMessageBounds(token->dataOffset, sizeof(uint32), req->messageLen);
+ 		memcpy(&rownum, &req->messageData[token->dataOffset], sizeof(uint32));
+ 	}
+ 
+@@ -2925,6 +2963,7 @@ GetRPCRequest(StringInfo message)
+ 		request = palloc0(sizeof(TDSRequestSPData));
+ 
+ 	request->reqType = TDS_REQUEST_SP_NUMBER;
++	CheckMessageBounds(offset, sizeof(len), message->len);
+ 	memcpy(&len, &(message->data[offset]), sizeof(len));
+ 
+ 	/*
+@@ -2940,12 +2979,14 @@ GetRPCRequest(StringInfo message)
+ 	 */
+ 	if (len != 0xffff)
+ 	{
++		CheckMessageBounds(offset, (uint64_t) 2 * len, message->len);
+ 		TdsUTF16toUTF8StringInfo(&request->name, &(message->data[offset]), 2 * len);
+ 		offset += 2 * len;
+ 		request->spType = SP_CUSTOMTYPE;
+ 	}
+ 	else
+ 	{
++		CheckMessageBounds(offset, sizeof(request->spType), message->len);
+ 		memcpy(&request->spType, &(message->data[offset]), sizeof(request->spType));
+ 		offset += sizeof(request->spType);
+ 	}
+@@ -2953,6 +2994,7 @@ GetRPCRequest(StringInfo message)
+ 	request->isStoredProcedure = false;
+ 	request->metaDataParameterValue = makeStringInfo();
+ 
++	CheckMessageBounds(offset, sizeof(request->spFlags), message->len);
+ 	memcpy(&request->spFlags, &(message->data[offset]), sizeof(request->spFlags));
+ 	offset += sizeof(request->spFlags);
+ 
+@@ -2963,8 +3005,9 @@ GetRPCRequest(StringInfo message)
+ 	request->messageData = message->data;
+ 
+ 	if (ReadParameters(request, offset, message, &parameterCount) != STATUS_OK)
+-		elog(FATAL, "corrupted TDS_RPC message - "
+-			 "offset beyond the message length");
++		ereport(ERROR,
++				(errcode(ERRCODE_PROTOCOL_VIOLATION),
++				 errmsg("The incoming tabular data stream (TDS) remote procedure call (RPC) protocol stream is incorrect.")));
+ 	/* Initialise */
+ 	InitialiseParameterToken(request);
+ 
+diff --git a/contrib/babelfishpg_tds/src/backend/tds/tdssecure.c b/contrib/babelfishpg_tds/src/backend/tds/tdssecure.c
+index 74294cffc45..50aedb02572 100644
+--- a/contrib/babelfishpg_tds/src/backend/tds/tdssecure.c
++++ b/contrib/babelfishpg_tds/src/backend/tds/tdssecure.c
+@@ -148,6 +148,11 @@ SslHandShakeRead(BIO * h, char *buf, int size)
+ 	if (pkt_bytes_read + size > pkt_data.header.length)
+ 	{
+ 		TDS_DEBUG(TDS_DEBUG1, "SSL packet expand more than one TDS packet");
++
++		/* Validate header length to prevent integer underflow */
++		if (pkt_data.header.length < TDS_PACKET_HEADER_SIZE)
++			return -1;
++
+ 		size = pkt_data.header.length - pkt_bytes_read;
+ 	}
+ 
+diff --git a/contrib/babelfishpg_tds/src/backend/tds/tdstypeio.c b/contrib/babelfishpg_tds/src/backend/tds/tdstypeio.c
+index a80de264dec..45319e8d00b 100644
+--- a/contrib/babelfishpg_tds/src/backend/tds/tdstypeio.c
++++ b/contrib/babelfishpg_tds/src/backend/tds/tdstypeio.c
+@@ -2381,7 +2381,8 @@ FetchTvpTypeOid(const ParameterToken token, char *tvpName)
+ 		elog(ERROR, "SPI_connect() failed in TDS Listener "
+ 			 "with return code %d", rc);
+ 
+-	query = psprintf("SELECT '%s'::regtype::oid", tvpName);
++	/* Pass tvpName as a SQL string literal to the regtype cast. */
++	query = psprintf("SELECT %s::regtype::oid", quote_literal_cstr(tvpName));
+ 
+ 	rc = SPI_execute(query, false, 1);
+ 	if (rc != SPI_OK_SELECT)
+@@ -2434,7 +2435,7 @@ TdsRecvTypeTable(const char *message, const ParameterToken token)
+ 		char	   *logical_schema = downcase_truncate_identifier(token->tvpInfo->tvpTypeSchemaName,
+ 																  strlen(token->tvpInfo->tvpTypeSchemaName), true);
+ 		char	   *physical_schema = pltsql_plugin_handler_ptr->get_physical_schema_name(db_name, logical_schema);
+-		char	   *tempStr = psprintf("%s.%s", physical_schema, tvpTypeName);
++		char	   *tempStr = quote_qualified_identifier(physical_schema, tvpTypeName);
+ 
+ 		pfree(tvpTypeName);
+ 		tvpTypeName = tempStr;
+@@ -2443,6 +2444,13 @@ TdsRecvTypeTable(const char *message, const ParameterToken token)
+ 		pfree(physical_schema);
+ 		pfree(db_name);
+ 	}
++	else
++	{
++		char	   *tempStr = pstrdup(quote_identifier(tvpTypeName));
++
++		pfree(tvpTypeName);
++		tvpTypeName = tempStr;
++	}
+ 
+ 	/* Setting a unique name for TVP temp table. */
+ 	tableName = psprintf("%s_TDS_TVP_TEMP_TABLE_%d", token->tvpInfo->tableName, rand());
+@@ -2474,8 +2482,9 @@ TdsRecvTypeTable(const char *message, const ParameterToken token)
+ 	if (token->paramMeta.pgTypeOid == InvalidOid)
+ 		FetchTvpTypeOid(token, tvpTypeName);
+ 
++	/* Quote finalTableName locally to preserve its unquoted persisted form. */
+ 	query = psprintf("CREATE TEMPORARY TABLE IF NOT EXISTS %s (like %s including all)",
+-					 finalTableName, tvpTypeName);
++					 quote_identifier(finalTableName), tvpTypeName);
+ 	pfree(tvpTypeName);
+ 
+ 
+@@ -2615,7 +2624,8 @@ TdsRecvTypeTable(const char *message, const ParameterToken token)
+ 		{
+ 			query[1] = ' ';		/* Convert the first ',' into a blank space. */
+ 
+-			src = psprintf("Insert into %s values %s", finalTableName, query);
++			src = psprintf("Insert into %s values %s",
++						   quote_identifier(finalTableName), query);
+ 			if ((rc = SPI_connect()) < 0)
+ 				elog(ERROR, "SPI_connect() failed in TDS Listener "
+ 					 "with return code %d", rc);
+diff --git a/contrib/babelfishpg_tds/src/include/tds_request.h b/contrib/babelfishpg_tds/src/include/tds_request.h
+index ec2b4a240c6..2cab3b384ae 100644
+--- a/contrib/babelfishpg_tds/src/include/tds_request.h
++++ b/contrib/babelfishpg_tds/src/include/tds_request.h
+@@ -270,6 +270,18 @@ typedef TDSRequestData *TDSRequest;
+ #define TVP_COLUMN_ORDERING_TOKEN		0x11
+ #define TVP_END_TOKEN				0x00
+ 
++/* Check if offset + size exceeds the given length limit */
++#define CheckMessageBounds(offset, size, msgLen) \
++do \
++{ \
++	if ((uint64_t)(offset) + (uint64_t)(size) > (uint64_t)(msgLen)) \
++	{ \
++		ereport(ERROR, \
++				(errcode(ERRCODE_PROTOCOL_VIOLATION), \
++				 errmsg("The incoming tabular data stream (TDS) remote procedure call (RPC) protocol stream is incorrect."))); \
++	} \
++} while(0)
++
+ static inline void
+ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ {
+@@ -279,6 +291,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 	int			retStatus = 0;
+ 
+ 	temp->tvpInfo->rowCount = 0;
++	CheckMessageBounds(*offset, 1, message->len);
+ 	while (messageData[*offset] == TVP_ROW_TOKEN)	/* Loop over each row. */
+ 	{
+ 		int			i = 0;		/* Current Column Number. */
+@@ -317,6 +330,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 				case TDS_TYPE_MONEYN:
+ 				case TDS_TYPE_UNIQUEIDENTIFIER:
+ 					{
++						CheckMessageBounds(*offset, 1, message->len);
+ 						rowData->columnValues[i].len = messageData[(*offset)++];
+ 						if (rowData->columnValues[i].len == 0)	/* null */
+ 						{
+@@ -330,6 +344,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 									 errmsg("The incoming tabular data stream (TDS) remote procedure call (RPC) protocol stream is incorrect. "
+ 											"Table-valued parameter %d (\"%s\"), row %d, column %d: Data type 0x%02X has an invalid data length or metadata length.",
+ 											temp->paramOrdinal + 1, temp->paramMeta.colName.data, temp->tvpInfo->rowCount, i + 1, colmetadata[i].columnTdsType)));
++						CheckMessageBounds(*offset, rowData->columnValues[i].len, message->len);
+ 						memcpy(rowData->columnValues[i].data, &messageData[*offset], rowData->columnValues[i].len);
+ 						*offset += rowData->columnValues[i].len;
+ 					}
+@@ -359,6 +374,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 											"Table-valued parameter %d (\"%s\"): row %d, column %d: The supplied value is not a valid instance of data type Numeric/Decimal. "
+ 											"Check the source data for invalid values. An example of an invalid value is data of numeric type with scale greater than precision.",
+ 											temp->paramOrdinal + 1, temp->paramMeta.colName.data, temp->tvpInfo->rowCount, i + 1)));
++						CheckMessageBounds(*offset, 1, message->len);
+ 						rowData->columnValues[i].len = messageData[(*offset)++];
+ 						if (rowData->columnValues[i].len == 0)	/* null */
+ 						{
+@@ -373,6 +389,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 											"Table-valued parameter %d (\"%s\"), row %d, column %d: Data type 0x%02X has an invalid data length or metadata length.",
+ 											temp->paramOrdinal + 1, temp->paramMeta.colName.data, temp->tvpInfo->rowCount, i + 1, colmetadata[i].columnTdsType)));
+ 
++						CheckMessageBounds(*offset, rowData->columnValues[i].len, message->len);
+ 						memcpy(rowData->columnValues[i].data, &messageData[*offset], rowData->columnValues[i].len);
+ 						*offset += rowData->columnValues[i].len;
+ 					}
+@@ -387,6 +404,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 					{
+ 						if (colmetadata[i].maxLen != 0xffff)
+ 						{
++							CheckMessageBounds(*offset, sizeof(short), message->len);
+ 							memcpy(&rowData->columnValues[i].len, &messageData[*offset], sizeof(short));
+ 							*offset += sizeof(short);
+ 							rowData->columnValues[i].maxlen = colmetadata[i].maxLen;
+@@ -401,6 +419,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 													"Table-valued parameter %d (\"%s\"), row %d, column %d: Data type 0x%02X has an invalid data length or metadata length.",
+ 													temp->paramOrdinal + 1, temp->paramMeta.colName.data, temp->tvpInfo->rowCount, i + 1, colmetadata[i].columnTdsType)));
+ 								value = palloc(rowData->columnValues[i].len);
++								CheckMessageBounds(*offset, rowData->columnValues[i].len, message->len);
+ 								memcpy(value, &messageData[*offset], rowData->columnValues[i].len);
+ 								rowData->columnValues[i].data = value;
+ 								*offset += rowData->columnValues[i].len;
+@@ -441,6 +460,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 					break;
+ 				case TDS_TYPE_SQLVARIANT:
+ 					{
++						CheckMessageBounds(*offset, sizeof(uint32_t), message->len);
+ 						memcpy(&rowData->columnValues[i].len, &messageData[*offset], sizeof(uint32_t));
+ 						*offset += sizeof(uint32_t);
+ 
+@@ -464,6 +484,7 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 						if (rowData->columnValues[i].len > rowData->columnValues[i].maxlen)
+ 							enlargeStringInfo(&rowData->columnValues[i], rowData->columnValues[i].len);
+ 
++						CheckMessageBounds(*offset, rowData->columnValues[i].len, message->len);
+ 						memcpy(rowData->columnValues[i].data, &messageData[*offset], rowData->columnValues[i].len);
+ 						*offset += rowData->columnValues[i].len;
+ 					}
+@@ -471,7 +492,9 @@ SetTvpRowData(ParameterToken temp, const StringInfo message, uint64_t *offset)
+ 			}
+ 			i++;
+ 		}
++		CheckMessageBounds(*offset, 1, message->len);
+ 	}
++	CheckMessageBounds(*offset, 1, message->len);
+ 	if (messageData[*offset] != TVP_END_TOKEN)
+ 		ereport(ERROR,
+ 				(errcode(ERRCODE_PROTOCOL_VIOLATION),
+@@ -497,6 +520,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 	/* Database-Name.Schema-Name.TableType-Name */
+ 	for (; i < 3; i++)
+ 	{
++		CheckMessageBounds(*offset, 1, message->len);
+ 		len = messageData[(*offset)++];
+ 		if (len != 0)
+ 		{
+@@ -511,6 +535,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 								temp->paramOrdinal + 1, temp->paramMeta.colName.data, 1, 1, temp->type)));
+ 			initStringInfo(tempStringInfo);
+ 
++			CheckMessageBounds(*offset, (uint64_t) len * 2, message->len);
+ 			tempString = palloc0(len * 2);
+ 			memcpy(tempString, &messageData[*offset], len * 2);
+ 			TdsUTF16toUTF8StringInfo(tempStringInfo, tempString, len * 2);
+@@ -551,6 +576,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 
+ 	i = 0;
+ 
++	CheckMessageBounds(*offset, sizeof(uint16), message->len);
+ 	memcpy(&isTvpNull, &messageData[*offset], sizeof(uint16));
+ 	if (isTvpNull != TVP_NULL_TOKEN)
+ 	{
+@@ -559,6 +585,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 		 */
+ 		TvpColMetaData *colmetadata;
+ 
++		CheckMessageBounds(*offset, sizeof(uint16), message->len);
+ 		memcpy(&colCount, &messageData[*offset], sizeof(uint16));
+ 		colmetadata = palloc0(colCount * sizeof(TvpColMetaData));
+ 		temp->tvpInfo->colCount = colCount;
+@@ -580,10 +607,12 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 			memcpy(&colmetadata[i].userType, &messageData[*offset], sizeof(uint32_t));
+ 			*offset += sizeof(uint32_t);
+ 			/* Flags */
++			CheckMessageBounds(*offset, sizeof(uint32), message->len);
+ 			memcpy(&colmetadata[i].flags, &messageData[*offset], sizeof(uint32));
+ 			*offset += sizeof(uint16);
+ 
+ 			/* TYPE_INFO */
++			CheckMessageBounds(*offset, 1, message->len);
+ 			colmetadata[i].columnTdsType = messageData[(*offset)++];
+ 			switch (colmetadata[i].columnTdsType)
+ 			{
+@@ -593,12 +622,16 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 				case TDS_TYPE_MONEYN:
+ 				case TDS_TYPE_DATETIMEN:
+ 				case TDS_TYPE_UNIQUEIDENTIFIER:
++					CheckMessageBounds(*offset, 1, message->len);
+ 					colmetadata[i].maxLen = messageData[(*offset)++];
+ 					break;
+ 				case TDS_TYPE_DECIMALN:
+ 				case TDS_TYPE_NUMERICN:
++					CheckMessageBounds(*offset, 1, message->len);
+ 					colmetadata[i].maxLen = messageData[(*offset)++];
++					CheckMessageBounds(*offset, 1, message->len);
+ 					colmetadata[i].precision = messageData[(*offset)++];
++					CheckMessageBounds(*offset, 1, message->len);
+ 					colmetadata[i].scale = messageData[(*offset)++];
+ 					break;
+ 				case TDS_TYPE_CHAR:
+@@ -606,28 +639,34 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 				case TDS_TYPE_NCHAR:
+ 				case TDS_TYPE_NVARCHAR:
+ 					{
++						CheckMessageBounds(*offset, sizeof(uint16), message->len);
+ 						memcpy(&colmetadata[i].maxLen, &messageData[*offset], sizeof(uint16));
+ 						*offset += sizeof(uint16);
+ 
++						CheckMessageBounds(*offset, sizeof(uint32_t), message->len);
+ 						memcpy(&collation, &messageData[*offset], sizeof(uint32_t));
+ 						*offset += sizeof(uint32_t);
++						CheckMessageBounds(*offset, 1, message->len);
+ 						colmetadata[i].sortId = messageData[(*offset)++];
+ 						colmetadata[i].encoding = TdsGetEncoding(collation);
+ 					}
+ 					break;
+ 				case TDS_TYPE_XML:
+ 					{
++						CheckMessageBounds(*offset, 1, message->len);
+ 						colmetadata[i].maxLen = messageData[(*offset)++];
+ 					}
+ 					break;
+ 				case TDS_TYPE_DATETIME2:
+ 					{
++						CheckMessageBounds(*offset, 1, message->len);
+ 						colmetadata[i].scale = messageData[(*offset)++];
+ 						colmetadata[i].maxLen = 8;
+ 					}
+ 					break;
+ 				case TDS_TYPE_TIME:
+ 					{
++						CheckMessageBounds(*offset, 1, message->len);
+ 						colmetadata[i].scale = messageData[(*offset)++];
+ 						colmetadata[i].maxLen = 5;
+ 					}
+@@ -637,6 +676,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 					{
+ 						uint16		plp;
+ 
++						CheckMessageBounds(*offset, sizeof(uint16), message->len);
+ 						memcpy(&plp, &messageData[*offset], sizeof(uint16));
+ 						*offset += sizeof(uint16);
+ 						colmetadata[i].maxLen = plp;
+@@ -646,10 +686,12 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 					colmetadata[i].maxLen = 3;
+ 					break;
+ 				case TDS_TYPE_SQLVARIANT:
++					CheckMessageBounds(*offset, sizeof(uint32_t), message->len);
+ 					memcpy(&colmetadata[i].maxLen, &messageData[*offset], sizeof(uint32_t));
+ 					*offset += sizeof(uint32_t);
+ 					break;
+ 				case TDS_TYPE_CLRUDT:
++					CheckMessageBounds(*offset, 1, message->len);
+ 					colmetadata[i].maxLen = messageData[(*offset)++];
+ 					break;
+ 				default:
+@@ -660,6 +702,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 									temp->paramOrdinal + 1, temp->paramMeta.colName.data, 1, i + 1, colmetadata[i].columnTdsType)));
+ 			}
+ 
++			CheckMessageBounds(*offset, 1, message->len);
+ 			if ((colmetadata[i].flags & TDS_COLMETA_COMPUTED) && ((messageData[*offset] == TVP_ORDER_UNIQUE_TOKEN) ||
+ 																  (messageData[*offset] == TVP_COLUMN_ORDERING_TOKEN)))
+ 				ereport(ERROR,
+@@ -668,6 +711,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 								"The specified column is computed or default and has ordering or uniqueness set. Ordering and uniqueness "
+ 								"can only be set on columns that have client supplied data.",
+ 								temp->paramOrdinal + 1, temp->paramMeta.colName.data, 1, i + 1, colmetadata[i].columnTdsType)));
++			CheckMessageBounds(*offset, 1, message->len);
+ 			if (messageData[*offset] != TVP_END_TOKEN)
+ 				ereport(ERROR,
+ 						(errcode(ERRCODE_PROTOCOL_VIOLATION),
+@@ -682,12 +726,14 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 													 * metadata in paramtoken. */
+ 
+ 		/* TODO Optional Metadata token:- [TVP_ORDER_UNIQUE] */
++		CheckMessageBounds(*offset, 1, message->len);
+ 		if (messageData[*offset] == TVP_ORDER_UNIQUE_TOKEN)
+ 			ereport(ERROR,
+ 					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+ 					 errmsg("Order unique token for TVP is not currently supported in Babelfish")));
+ 
+ 		/* TODO Optional Metadata token:- [TVP_COLUMN_ORDERING_TOKEN] */
++		CheckMessageBounds(*offset, 1, message->len);
+ 		if (messageData[*offset] == TVP_COLUMN_ORDERING_TOKEN)
+ 			ereport(ERROR,
+ 					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+@@ -698,6 +744,7 @@ SetColMetadataForTvp(ParameterToken temp, const StringInfo message, uint64_t *of
+ 		temp->isNull = true;	/* If TVP is NULL. */
+ 		(*offset) += 2;
+ 	}
++	CheckMessageBounds(*offset, 1, message->len);
+ 	if (messageData[*offset] != TVP_END_TOKEN)
+ 		ereport(ERROR,
+ 				(errcode(ERRCODE_PROTOCOL_VIOLATION),
+diff --git a/contrib/babelfishpg_tsql/src/dbcmds.c b/contrib/babelfishpg_tsql/src/dbcmds.c
+index ff4d9bbb189..0d184f92469 100644
+--- a/contrib/babelfishpg_tsql/src/dbcmds.c
++++ b/contrib/babelfishpg_tsql/src/dbcmds.c
+@@ -510,35 +510,42 @@ getAvailDbid(void)
+ int16
+ getDbidForLogicalDbRestore(Oid relid)
+ {
+-	const char *prev_current_user;
+-	int16		dbid;
++	int16		dbid = InvalidDbid;
++	Oid 		save_userid;
++	int 		save_sec_context;
+ 
+ 	/* Get new DB ID. Need sysadmin to do that. */
+-	prev_current_user = GetUserNameFromId(GetUserId(), false);
+-	bbf_set_current_user("sysadmin");
++	GetUserIdAndSecContext(&save_userid, &save_sec_context);
++	SetUserIdAndSecContext(get_sysadmin_oid(), save_sec_context | SECURITY_LOCAL_USERID_CHANGE);
+ 
+-	/*
+-	 * For sysdatabases table we need to generate new dbid for the database we
+-	 * are currently restoring.
+-	 */
+-	if (relid == sysdatabases_oid)
++	PG_TRY();
+ 	{
+-		if ((dbid = getAvailDbid()) == InvalidDbid)
+-			ereport(ERROR,
+-					(errcode(ERRCODE_INVALID_DATABASE_DEFINITION),
+-					 errmsg("cannot find an available ID for new database.")));
+-	}
+-
+-	/*
+-	 * For all the other catalog tables which contain dbid column, get dbid
+-	 * using current value of the babelfish_db_seq sequence. It is ok to fetch
+-	 * current value of the sequence here since we already have generated new
+-	 * dbid while inserting into sysdatabases catalog.
+-	 */
+-	else
+-		dbid = DirectFunctionCall1(currval_oid, get_sys_babelfish_db_seq_oid());
++		/*
++		* For sysdatabases table we need to generate new dbid for the database we
++		* are currently restoring.
++		*/
++		if (relid == sysdatabases_oid)
++		{
++			if ((dbid = getAvailDbid()) == InvalidDbid)
++				ereport(ERROR,
++						(errcode(ERRCODE_INVALID_DATABASE_DEFINITION),
++						errmsg("cannot find an available ID for new database.")));
++		}
+ 
+-	bbf_set_current_user(prev_current_user);
++		/*
++		* For all the other catalog tables which contain dbid column, get dbid
++		* using current value of the babelfish_db_seq sequence. It is ok to fetch
++		* current value of the sequence here since we already have generated new
++		* dbid while inserting into sysdatabases catalog.
++		*/
++		else
++			dbid = DirectFunctionCall1(currval_oid, get_sys_babelfish_db_seq_oid());
++	}
++	PG_FINALLY();
++	{
++		SetUserIdAndSecContext(save_userid, save_sec_context);
++	}
++	PG_END_TRY();
+ 
+ 	return dbid;
+ }
+@@ -546,8 +553,9 @@ getDbidForLogicalDbRestore(Oid relid)
+ static Oid
+ do_create_bbf_db(ParseState *pstate, const char *dbname, List *options, const char *owner)
+ {
+-	int16		dbid;
+-	const char *prev_current_user;
++	int16		dbid = InvalidDbid;
++	Oid 		save_userid;
++	int 		save_sec_context;
+ 
+ 	if (DbidIsValid(get_db_id(dbname)))
+ 		ereport(ERROR,
+@@ -556,13 +564,21 @@ do_create_bbf_db(ParseState *pstate, const char *dbname, List *options, const ch
+ 						dbname)));
+ 
+ 	/* Get new DB ID. Need sysadmin to do that. */
+-	prev_current_user = GetUserNameFromId(GetUserId(), false);
+-	bbf_set_current_user("sysadmin");
+-	if ((dbid = getAvailDbid()) == InvalidDbid)
+-		ereport(ERROR,
+-				(errcode(ERRCODE_INVALID_DATABASE_DEFINITION),
+-				 errmsg("cannot find an available ID for database \"%s\"", dbname)));
+-	bbf_set_current_user(prev_current_user);
++	GetUserIdAndSecContext(&save_userid, &save_sec_context);
++	SetUserIdAndSecContext(get_sysadmin_oid(), save_sec_context | SECURITY_LOCAL_USERID_CHANGE);
++
++	PG_TRY();
++	{
++		if ((dbid = getAvailDbid()) == InvalidDbid)
++			ereport(ERROR,
++					(errcode(ERRCODE_INVALID_DATABASE_DEFINITION),
++					 errmsg("cannot find an available ID for database \"%s\"", dbname)));
++	}
++	PG_FINALLY();
++	{
++		SetUserIdAndSecContext(save_userid, save_sec_context);
++	}
++	PG_END_TRY();
+ 
+ 	create_bbf_db_internal(pstate, dbname, options, owner, dbid);
+ 
+@@ -794,11 +810,12 @@ drop_bbf_db(const char *dbname, bool missing_ok, bool force_drop)
+ 	List               *db_users_list;
+ 	List               *parsetree_list;
+ 	ListCell           *parsetree_item;
+-	const char         *prev_current_user;
+ 	int                save_sec_context;
+ 	bool               is_set_userid = false;
+ 	Oid                save_userid;
+ 	Oid                prev_session_user_id;
++	Oid				   parent_save_userid;
++	int 			   parent_save_sec_context;
+ 
+ 	if (IS_BBF_BUILT_IN_DB(dbname))
+ 	{
+@@ -843,9 +860,9 @@ drop_bbf_db(const char *dbname, bool missing_ok, bool force_drop)
+ 
+ 	/* Set current user to session user for dropping permissions */
+ 	prev_session_user_id = GetSessionUserId();
+-	prev_current_user = GetUserNameFromId(GetUserId(), false);
+ 
+-	bbf_set_current_user("sysadmin");
++	GetUserIdAndSecContext(&parent_save_userid, &parent_save_sec_context);
++	SetUserIdAndSecContext(get_sysadmin_oid(), parent_save_sec_context | SECURITY_LOCAL_USERID_CHANGE);
+ 
+ 	PG_TRY();
+ 	{
+@@ -956,7 +973,7 @@ drop_bbf_db(const char *dbname, bool missing_ok, bool force_drop)
+ 			SetUserIdAndSecContext(save_userid, save_sec_context);
+ 
+ 		/* Clean up. Restore previous state. */
+-		bbf_set_current_user(prev_current_user);
++		SetUserIdAndSecContext(parent_save_userid, parent_save_sec_context);
+ 		UnlockLogicalDatabaseForSession(dbid, ExclusiveLock, false);
+ 		PG_RE_THROW();
+ 	}
+@@ -965,7 +982,7 @@ drop_bbf_db(const char *dbname, bool missing_ok, bool force_drop)
+ 	pfree(dbo_role);
+ 
+ 	/* Set current user back to previous user */
+-	bbf_set_current_user(prev_current_user);
++	SetUserIdAndSecContext(parent_save_userid, parent_save_sec_context);
+ }
+ 
+ PG_FUNCTION_INFO_V1(create_builtin_dbs);
+diff --git a/contrib/babelfishpg_tsql/src/guc.c b/contrib/babelfishpg_tsql/src/guc.c
+index 6750280eb32..c91a3ebc562 100644
+--- a/contrib/babelfishpg_tsql/src/guc.c
++++ b/contrib/babelfishpg_tsql/src/guc.c
+@@ -1124,7 +1124,7 @@ define_custom_variables(void)
+ 							 NULL,
+ 							 &pltsql_enable_create_alter_view_from_pg,
+ 							 false,
+-							 PGC_USERSET,
++							 PGC_SUSET,
+ 							 GUC_NOT_IN_SAMPLE | GUC_DISALLOW_IN_FILE | GUC_DISALLOW_IN_AUTO_FILE,
+ 							 NULL, NULL, NULL);
+ 	/*
+@@ -1135,7 +1135,7 @@ define_custom_variables(void)
+ 							 NULL,
+ 							 &pltsql_enable_alter_owner_from_pg,
+ 							 false,
+-							 PGC_USERSET,
++							 PGC_SUSET,
+ 							 GUC_NOT_IN_SAMPLE | GUC_DISALLOW_IN_FILE | GUC_DISALLOW_IN_AUTO_FILE,
+ 							 NULL, NULL, NULL);
+ 
+@@ -1145,7 +1145,7 @@ define_custom_variables(void)
+ 							 NULL,
+ 							 &babelfish_dump_restore,
+ 							 false,
+-							 PGC_USERSET,
++							 PGC_SUSET,
+ 							 GUC_NOT_IN_SAMPLE | GUC_DISALLOW_IN_FILE | GUC_DISALLOW_IN_AUTO_FILE,
+ 							 NULL, NULL, NULL);
+ 
+@@ -1154,7 +1154,7 @@ define_custom_variables(void)
+ 							 NULL,
+ 							 &restore_tsql_tabletype,
+ 							 false,
+-							 PGC_USERSET,
++							 PGC_SUSET,
+ 							 GUC_NOT_IN_SAMPLE | GUC_DISALLOW_IN_FILE | GUC_DISALLOW_IN_AUTO_FILE,
+ 							 NULL, NULL, NULL);
+ 
+@@ -1163,7 +1163,7 @@ define_custom_variables(void)
+ 							   NULL,
+ 							   &babelfish_dump_restore_min_oid,
+ 							   NULL,
+-							   PGC_USERSET,
++							   PGC_SUSET,
+ 							   GUC_NOT_IN_SAMPLE | GUC_DISALLOW_IN_FILE | GUC_DISALLOW_IN_AUTO_FILE,
+ 							   check_babelfish_dump_restore_min_oid, NULL, NULL);
+ 
+diff --git a/contrib/babelfishpg_tsql/src/pl_handler.c b/contrib/babelfishpg_tsql/src/pl_handler.c
+index 5f45b0529a8..15d74f9c4a5 100644
+--- a/contrib/babelfishpg_tsql/src/pl_handler.c
++++ b/contrib/babelfishpg_tsql/src/pl_handler.c
+@@ -5506,7 +5506,7 @@ pltsql_proc_get_oid_proname_proacl(AlterFunctionStmt *stmt, ParseState *pstate,
+ 	if ((spi_rc = SPI_connect()) != SPI_OK_CONNECT)
+ 		elog(ERROR, "SPI_connect() failed in pltsql_proc_get_oid_proname_proacl with return code %d", spi_rc);
+ 
+-	query = psprintf("SELECT oid, proacl FROM pg_catalog.pg_proc WHERE proname = '%s' AND pronamespace = %d", funcname, schemaOid);
++	query = psprintf("SELECT oid, proacl FROM pg_catalog.pg_proc WHERE proname = %s AND pronamespace = %d", quote_literal_cstr(funcname), schemaOid);
+ 	SPI_execute(query, true, 0);
+ 
+ 	if (SPI_processed > 1)
+diff --git a/contrib/babelfishpg_tsql/src/procedures.c b/contrib/babelfishpg_tsql/src/procedures.c
+index aaf4790ec6e..65f476b2c17 100644
+--- a/contrib/babelfishpg_tsql/src/procedures.c
++++ b/contrib/babelfishpg_tsql/src/procedures.c
+@@ -452,8 +452,10 @@ sp_describe_first_result_set_internal(PG_FUNCTION_ARGS)
+ 			if (!result.success)
+ 				report_antlr_error(result);
+ 
+-			/* Skip if NULL query was passed. */
+-			if (pltsql_parse_result->body)
++			/* Skip if NULL query was passed or the batch shape is unexpected. */
++			if (pltsql_parse_result->body &&
++				list_length(pltsql_parse_result->body) >= 2 &&
++				((PLtsql_stmt *) lsecond(pltsql_parse_result->body))->cmd_type == PLTSQL_STMT_EXECSQL)
+ 			{
+ 				PLtsql_expr *sqlstmt = ((PLtsql_stmt_execsql *) lsecond(pltsql_parse_result->body))->sqlstmt;
+ 				if (sqlstmt)
+diff --git a/contrib/babelfishpg_tsql/src/session.c b/contrib/babelfishpg_tsql/src/session.c
+index 1efa868c485..2d6fdbcde7e 100644
+--- a/contrib/babelfishpg_tsql/src/session.c
++++ b/contrib/babelfishpg_tsql/src/session.c
+@@ -125,11 +125,8 @@ set_cur_db(int16 id, const char *name)
+ void
+ bbf_set_current_user(const char *user_name)
+ {
+-	Oid			userid;
+-
+-	userid = get_role_oid(user_name, false);
+-	SetConfigOption("role", user_name, PGC_SUSET, PGC_S_DATABASE_USER);
+-	SetCurrentRoleId(userid, false);
++	set_config_option("role", user_name, PGC_SUSET, PGC_S_DATABASE_USER,
++					  GUC_ACTION_SET, true, ERROR, false);
+ }
+ 
+ /*
+diff --git a/test/JDBC/expected/BABEL-3613-vu-verify.out b/test/JDBC/expected/BABEL-3613-vu-verify.out
+index 2bd175f29cd..c5d9fca6b60 100644
+--- a/test/JDBC/expected/BABEL-3613-vu-verify.out
++++ b/test/JDBC/expected/BABEL-3613-vu-verify.out
+@@ -9,45 +9,6 @@ text
+ ~~END~~
+ 
+ 
+--- wrong value
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 'wrong value', false);
+-go
+-~~START~~
+-text
+-~~ERROR (Code: 33557097)~~
+-
+-~~ERROR (Message: invalid value for parameter "babelfishpg_tsql.dump_restore_min_oid": "wrong value")~~
+-
+-
+--- invalid OID
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 0, false);
+-go
+-~~START~~
+-text
+-~~ERROR (Code: 33557097)~~
+-
+-~~ERROR (Message: invalid value for parameter "babelfishpg_tsql.dump_restore_min_oid": "0")~~
+-
+-
+--- uint32 max should be allowed
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 4294967295, false);
+-go
+-~~START~~
+-text
+-4294967295
+-~~END~~
+-
+-
+--- out of range
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 4294967296, false);
+-go
+-~~START~~
+-text
+-~~ERROR (Code: 33557097)~~
+-
+-~~ERROR (Message: invalid value for parameter "babelfishpg_tsql.dump_restore_min_oid": "4294967296")~~
+-
+-
+ -- There should not have any duplicated object_ids
+ select object_id, name, schema_id, type_desc from sys.all_objects
+ where 
+diff --git a/test/JDBC/expected/TestTvpQuoting.out b/test/JDBC/expected/TestTvpQuoting.out
+new file mode 100644
+index 00000000000..f8d0296c8d4
+--- /dev/null
++++ b/test/JDBC/expected/TestTvpQuoting.out
+@@ -0,0 +1,67 @@
++-- Quoting of TVP type / schema names in sp_executesql
++create schema babel_6481_s
++go
++create type babel_6481_s.placing as table (a int)
++go
++create type babel_6481_s.babel_6481_t as table (a int)
++go
++-- Scenario 1: schema-qualified TVP using a reserved keyword as type name
++declare @v1 babel_6481_s.placing
++insert into @v1 values (10)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.placing readonly', @x = @v1
++go
++~~ROW COUNT: 1~~
++
++~~START~~
++int
++10
++~~END~~
++
++-- Scenario 2: schema-qualified TVP with non-reserved names
++declare @v2 babel_6481_s.babel_6481_t
++insert into @v2 values (20)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.babel_6481_t readonly', @x = @v2
++go
++~~ROW COUNT: 1~~
++
++~~START~~
++int
++20
++~~END~~
++
++-- Scenario 3: multi-row schema-qualified reserved-keyword TVP
++declare @v3 babel_6481_s.placing
++insert into @v3 values (100), (200), (300)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.placing readonly', @x = @v3
++go
++~~ROW COUNT: 3~~
++
++~~START~~
++int
++100
++200
++300
++~~END~~
++
++-- Scenario 4: re-run scenario 1 in the same session
++declare @v4 babel_6481_s.placing
++insert into @v4 values (40)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.placing readonly', @x = @v4
++go
++~~ROW COUNT: 1~~
++
++~~START~~
++int
++40
++~~END~~
++
++drop type babel_6481_s.placing
++go
++drop type babel_6481_s.babel_6481_t
++go
++drop schema babel_6481_s
++go
+diff --git a/test/JDBC/expected/alter-procedure-vu-verify.out b/test/JDBC/expected/alter-procedure-vu-verify.out
+index 47da48eea85..86c80096d96 100644
+--- a/test/JDBC/expected/alter-procedure-vu-verify.out
++++ b/test/JDBC/expected/alter-procedure-vu-verify.out
+@@ -366,3 +366,18 @@ nvarchar#!#nvarchar#!#nvarchar
+ alter_proc_p4#!#SQL#!#-- Test Case: confirm information_schema.routines is updated properly with comments<newline>CREATE <newline>-- test comment 1<newline>procedure alter_proc_p4 as select 4<newline>
+ ~~END~~
+ 
++
++-- BABEL-6496: Verify ALTER PROCEDURE works with quote_literal_cstr fix
++CREATE PROCEDURE [babel_6496_test'proc] AS SELECT 1;
++GO
++ALTER PROCEDURE [babel_6496_test'proc] AS SELECT 2;
++GO
++EXEC [babel_6496_test'proc];
++GO
++~~START~~
++int
++2
++~~END~~
++
++DROP PROCEDURE [babel_6496_test'proc];
++GO
+diff --git a/test/JDBC/expected/babelfish_set_role.out b/test/JDBC/expected/babelfish_set_role.out
+new file mode 100644
+index 00000000000..af1cdc0c93e
+--- /dev/null
++++ b/test/JDBC/expected/babelfish_set_role.out
+@@ -0,0 +1,273 @@
++-- tsql
++-- Setup
++-- Create a login from tsql endpoint
++create login lgn_6312 with password='12345678';
++go
++
++create user usr_6312 for login lgn_6312;
++go
++
++-- psql
++-- create a role without any privilege from psql endpoint
++create role rl_6312 with login password '12345678';
++go
++
++-- tsql user=lgn_6312 password=12345678
++-- CASE 1 - Test tsql login
++-- CASE 1.1 - Test from tsql endpoint
++select sys.babelfish_set_role('jdbc_user');
++go
++~~START~~
++int
++~~ERROR (Code: 33557097)~~
++
++~~ERROR (Message: permission denied to set role "jdbc_user")~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 33557097)~~
++
++~~ERROR (Message: permission denied for table pg_authid)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 33557097)~~
++
++~~ERROR (Message: permission denied for table pg_authid)~~
++
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('lgn_6312');
++go
++~~START~~
++int
++1
++~~END~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 33557097)~~
++
++~~ERROR (Message: permission denied for table pg_authid)~~
++
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('master_usr_6312');
++go
++~~START~~
++int
++1
++~~END~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 33557097)~~
++
++~~ERROR (Message: permission denied for table pg_authid)~~
++
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('rl_6312');
++go
++~~START~~
++int
++~~ERROR (Code: 33557097)~~
++
++~~ERROR (Message: permission denied to set role "rl_6312")~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 33557097)~~
++
++~~ERROR (Message: permission denied for table pg_authid)~~
++
++
++-- psql user=lgn_6312 password=12345678
++-- CASE 1.2 - Test from psql endpoint
++select sys.babelfish_set_role('jdbc_user');
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set role "jdbc_user"
++    Server SQLState: 42501)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('lgn_6312');
++go
++~~START~~
++int4
++1
++~~END~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('master_usr_6312');
++go
++~~START~~
++int4
++1
++~~END~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('rl_6312');
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set role "rl_6312"
++    Server SQLState: 42501)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- psql user=rl_6312 password=12345678
++-- CASE 2 - Test for psql role, from psql endpoint
++select sys.babelfish_set_role('jdbc_user');
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set role "jdbc_user"
++    Server SQLState: 42501)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('lgn_6312');
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set role "lgn_6312"
++    Server SQLState: 42501)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('master_usr_6312');
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set role "master_usr_6312"
++    Server SQLState: 42501)~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('rl_6312');
++go
++~~START~~
++int4
++1
++~~END~~
++
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied for table pg_authid
++    Server SQLState: 42501)~~
++
++
++-- terminate-tsql-conn user=lgn_6312 password=12345678
++-- terminate-psql-conn user=lgn_6312 password=12345678
++-- terminate-psql-conn user=rl_6312 password=12345678
++
++-- psql
++-- Cleanup
++drop role rl_6312;
++go
++
++-- tsql
++drop user usr_6312;
++go
++
++drop login lgn_6312;
++go
+diff --git a/test/JDBC/expected/ownership_restrictions_from_pg_su_user.out b/test/JDBC/expected/ownership_restrictions_from_pg_su_user.out
+index a1f9ab9696a..ce2a6809b99 100644
+--- a/test/JDBC/expected/ownership_restrictions_from_pg_su_user.out
++++ b/test/JDBC/expected/ownership_restrictions_from_pg_su_user.out
+@@ -18,6 +18,13 @@ go
+ CREATE USER ownership_restrictions_from_pg_test_su_user WITH SUPERUSER LOGIN PASSWORD '12345678';
+ GO
+ 
++-- rds_superuser can SET these GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++GO
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++GO
++
+ -- psql user=ownership_restrictions_from_pg_login1 password=12345678
+ -- If tsql login connected through psql Alter ROLE of an bbf created logins/user/roles for password,
+ -- connection limit and valid until should be working fine
+@@ -70,6 +77,23 @@ GO
+     Server SQLState: 42501)~~
+ 
+ 
++-- The tsql login via psql is denied SET on these GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++GO
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set parameter "babelfishpg_tsql.enable_create_alter_view_from_pg"
++    Server SQLState: 42501)~~
++
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++GO
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set parameter "babelfishpg_tsql.enable_alter_owner_from_pg"
++    Server SQLState: 42501)~~
++
++
+ -- psql user=ownership_restrictions_from_pg_test_user password=12345678
+ -- For plain psql user Alter ROLE of an bbf created logins/user/roles for password,
+ -- connection limit and valid until should be working fine
+@@ -122,6 +146,23 @@ GO
+     Server SQLState: 42501)~~
+ 
+ 
++-- plain non-superuser psql user is denied SET on these GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++GO
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set parameter "babelfishpg_tsql.enable_create_alter_view_from_pg"
++    Server SQLState: 42501)~~
++
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++GO
++~~ERROR (Code: 0)~~
++
++~~ERROR (Message: ERROR: permission denied to set parameter "babelfishpg_tsql.enable_alter_owner_from_pg"
++    Server SQLState: 42501)~~
++
++
+ -- psql user=ownership_restrictions_from_pg_test_su_user password=12345678
+ -- Altering of babelfish created logins/roles should suceeded for superuser
+ ALTER ROLE ownership_restrictions_from_pg_login1 VALID UNTIL 'infinity';
+@@ -130,6 +171,15 @@ GO
+ ALTER ROLE master_ownership_restrictions_from_pg_role1 WITH NOCREATEDB CONNECTION LIMIT 1  password '12345678';
+ GO
+ 
++-- SUPERUSER can still SET and RESET both GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++RESET babelfishpg_tsql.enable_create_alter_view_from_pg;
++GO
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++RESET babelfishpg_tsql.enable_alter_owner_from_pg;
++GO
++
+ -- psql
+ -- Dropping login from psql port should fail for superuser
+ DROP ROLE ownership_restrictions_from_pg_login1;
+diff --git a/test/JDBC/input/BABEL-3613-vu-verify.sql b/test/JDBC/input/BABEL-3613-vu-verify.sql
+index da1a4a1fd74..ed710af22b9 100644
+--- a/test/JDBC/input/BABEL-3613-vu-verify.sql
++++ b/test/JDBC/input/BABEL-3613-vu-verify.sql
+@@ -5,22 +5,6 @@ GO
+ select current_setting('babelfishpg_tsql.dump_restore_min_oid');
+ go
+ 
+--- wrong value
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 'wrong value', false);
+-go
+-
+--- invalid OID
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 0, false);
+-go
+-
+--- uint32 max should be allowed
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 4294967295, false);
+-go
+-
+--- out of range
+-select set_config('babelfishpg_tsql.dump_restore_min_oid', 4294967296, false);
+-go
+-
+ -- There should not have any duplicated object_ids
+ select object_id, name, schema_id, type_desc from sys.all_objects
+ where 
+diff --git a/test/JDBC/input/alter/alter-procedure-vu-verify.sql b/test/JDBC/input/alter/alter-procedure-vu-verify.sql
+index 64277e060a0..9c1525aa9ce 100644
+--- a/test/JDBC/input/alter/alter-procedure-vu-verify.sql
++++ b/test/JDBC/input/alter/alter-procedure-vu-verify.sql
+@@ -214,4 +214,14 @@ exec alter_proc_p5 @dateParam = '2000-01-01'
+ go
+ 
+ select ROUTINE_NAME, ROUTINE_BODY, ROUTINE_DEFINITION from information_schema.routines where SPECIFIC_NAME LIKE 'alter_proc_p4';
+-go
+\ No newline at end of file
++go
++
++-- BABEL-6496: Verify ALTER PROCEDURE works with quote_literal_cstr fix
++CREATE PROCEDURE [babel_6496_test'proc] AS SELECT 1;
++GO
++ALTER PROCEDURE [babel_6496_test'proc] AS SELECT 2;
++GO
++EXEC [babel_6496_test'proc];
++GO
++DROP PROCEDURE [babel_6496_test'proc];
++GO
+diff --git a/test/JDBC/input/babelfish_set_role.mix b/test/JDBC/input/babelfish_set_role.mix
+new file mode 100644
+index 00000000000..f4d3c4fa92b
+--- /dev/null
++++ b/test/JDBC/input/babelfish_set_role.mix
+@@ -0,0 +1,141 @@
++-- Setup
++-- Create a login from tsql endpoint
++-- tsql
++create login lgn_6312 with password='12345678';
++go
++
++create user usr_6312 for login lgn_6312;
++go
++
++-- create a role without any privilege from psql endpoint
++-- psql
++create role rl_6312 with login password '12345678';
++go
++
++-- CASE 1 - Test tsql login
++-- CASE 1.1 - Test from tsql endpoint
++-- tsql user=lgn_6312 password=12345678
++select sys.babelfish_set_role('jdbc_user');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('lgn_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('master_usr_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('rl_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- CASE 1.2 - Test from psql endpoint
++-- psql user=lgn_6312 password=12345678
++select sys.babelfish_set_role('jdbc_user');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('lgn_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('master_usr_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('rl_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- CASE 2 - Test for psql role, from psql endpoint
++-- psql user=rl_6312 password=12345678
++select sys.babelfish_set_role('jdbc_user');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('lgn_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should not work since session role does not have permissions to set this role
++select sys.babelfish_set_role('master_usr_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- should work since session role has permissions to set this role
++select sys.babelfish_set_role('rl_6312');
++go
++
++-- Check for superuser privileges, should throw permission denied
++select count(*) from pg_authid;
++go
++
++-- terminate-tsql-conn user=lgn_6312 password=12345678
++-- terminate-psql-conn user=lgn_6312 password=12345678
++-- terminate-psql-conn user=rl_6312 password=12345678
++
++-- Cleanup
++-- psql
++drop role rl_6312;
++go
++
++-- tsql
++drop user usr_6312;
++go
++
++drop login lgn_6312;
++go
+diff --git a/test/JDBC/input/datatypes/TestTvpQuoting.sql b/test/JDBC/input/datatypes/TestTvpQuoting.sql
+new file mode 100644
+index 00000000000..bf9387eeac3
+--- /dev/null
++++ b/test/JDBC/input/datatypes/TestTvpQuoting.sql
+@@ -0,0 +1,37 @@
++-- Quoting of TVP type / schema names in sp_executesql
++create schema babel_6481_s
++go
++create type babel_6481_s.placing as table (a int)
++go
++create type babel_6481_s.babel_6481_t as table (a int)
++go
++-- Scenario 1: schema-qualified TVP using a reserved keyword as type name
++declare @v1 babel_6481_s.placing
++insert into @v1 values (10)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.placing readonly', @x = @v1
++go
++-- Scenario 2: schema-qualified TVP with non-reserved names
++declare @v2 babel_6481_s.babel_6481_t
++insert into @v2 values (20)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.babel_6481_t readonly', @x = @v2
++go
++-- Scenario 3: multi-row schema-qualified reserved-keyword TVP
++declare @v3 babel_6481_s.placing
++insert into @v3 values (100), (200), (300)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.placing readonly', @x = @v3
++go
++-- Scenario 4: re-run scenario 1 in the same session
++declare @v4 babel_6481_s.placing
++insert into @v4 values (40)
++exec sp_executesql N'select a from @x order by a',
++                   N'@x babel_6481_s.placing readonly', @x = @v4
++go
++drop type babel_6481_s.placing
++go
++drop type babel_6481_s.babel_6481_t
++go
++drop schema babel_6481_s
++go
+diff --git a/test/JDBC/input/ownership_restrictions_from_pg_su_user.mix b/test/JDBC/input/ownership_restrictions_from_pg_su_user.mix
+index 035ca64154f..22c3e3dee14 100644
+--- a/test/JDBC/input/ownership_restrictions_from_pg_su_user.mix
++++ b/test/JDBC/input/ownership_restrictions_from_pg_su_user.mix
+@@ -18,6 +18,13 @@ go
+ CREATE USER ownership_restrictions_from_pg_test_su_user WITH SUPERUSER LOGIN PASSWORD '12345678';
+ GO
+ 
++-- rds_superuser can SET these GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++GO
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++GO
++
+ -- psql user=ownership_restrictions_from_pg_login1 password=12345678
+ -- If tsql login connected through psql Alter ROLE of an bbf created logins/user/roles for password,
+ -- connection limit and valid until should be working fine
+@@ -40,6 +47,13 @@ GO
+ ALTER ROLE ownership_restrictions_from_pg_login1 IN DATABASE babelfish_db set babelfishpg_tsql.ownership_restrictions_from_pg_test_variable = 101;
+ GO
+ 
++-- The tsql login via psql is denied SET on these GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++GO
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++GO
++
+ -- psql user=ownership_restrictions_from_pg_test_user password=12345678
+ -- For plain psql user Alter ROLE of an bbf created logins/user/roles for password,
+ -- connection limit and valid until should be working fine
+@@ -62,6 +76,13 @@ GO
+ ALTER ROLE ownership_restrictions_from_pg_login1 IN DATABASE babelfish_db set babelfishpg_tsql.ownership_restrictions_from_pg_test_variable = 101;
+ GO
+ 
++-- plain non-superuser psql user is denied SET on these GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++GO
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++GO
++
+ -- psql user=ownership_restrictions_from_pg_test_su_user password=12345678
+ -- Altering of babelfish created logins/roles should suceeded for superuser
+ ALTER ROLE ownership_restrictions_from_pg_login1 VALID UNTIL 'infinity';
+@@ -70,6 +91,15 @@ GO
+ ALTER ROLE master_ownership_restrictions_from_pg_role1 WITH NOCREATEDB CONNECTION LIMIT 1  password '12345678';
+ GO
+ 
++-- SUPERUSER can still SET and RESET both GUCs
++SET babelfishpg_tsql.enable_create_alter_view_from_pg = true;
++RESET babelfishpg_tsql.enable_create_alter_view_from_pg;
++GO
++
++SET babelfishpg_tsql.enable_alter_owner_from_pg = true;
++RESET babelfishpg_tsql.enable_alter_owner_from_pg;
++GO
++
+ -- psql
+ -- Dropping login from psql port should fail for superuser
+ DROP ROLE ownership_restrictions_from_pg_login1;
