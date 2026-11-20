@@ -1,3 +1,4 @@
+import os
 import gdb
 ARENA = 0x7ffff7a04ac0
 
@@ -193,6 +194,12 @@ def multi_walk():
     vsz2 = rd(o + 8) & ~7
     v2 = o + vsz2
     v2sf = rd_try(v2 + 8)
+    fv = os.environ.get('FAKE_VSIZE')
+    if fv and v2sf is not None:
+        gdb.parse_and_eval('*(unsigned long*)%d = %d'
+                           % (v2 + 8, int(fv, 0)))
+        v2sf = rd_try(v2 + 8)
+        print('FAKE-VSIZE (debugger) set V sizefield to 0x%x' % v2sf)
     if v2sf is not None:
         fd2 = rd_try(v2 + 0x10); bk2 = rd_try(v2 + 0x18)
         nn = v2 + (v2sf & ~7)
@@ -220,6 +227,20 @@ def multi_walk():
         bnh = rd_try(bn + 8)
         print('VICTIM-BELIEVED-NEXT 0x%x sizefield=0x%x prev_size=0x%x' %
               (bn, bnh if bnh is not None else -1, rd_try(bn) or 0))
+        # Wake 11 DIAGNOSTIC ONLY: FAKE_PATCH writes a chosen qword into
+        # the believed-next sizefield via gdb. This is a debugger
+        # intervention, NOT attacker-controlled bytes — used solely to
+        # test whether a sane fake-next is the last gate to a split.
+        patch = os.environ.get('FAKE_PATCH')
+        if patch:
+            gdb.parse_and_eval('*(unsigned long*)%d = %d'
+                               % (bn + 8, int(patch, 0)))
+            print('FAKE-PATCH (debugger) wrote 0x%x at 0x%x'
+                  % (int(patch, 0), bn + 8))
+            # glibc's unsorted scan also checks prev_size(next)==believed.
+            gdb.parse_and_eval('*(unsigned long*)%d = %d' % (bn, bs))
+            print('FAKE-PATCH (debugger) wrote prev_size=0x%x at 0x%x'
+                  % (bs, bn))
         print('--- raw window around believed-next (value-end/zero-tail check) ---')
         for a in range(v2 + bs - 0x30, v2 + bs + 0x10, 8):
             q = rd_try(a)

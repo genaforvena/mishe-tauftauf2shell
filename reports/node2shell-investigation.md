@@ -520,6 +520,26 @@ sweep (`w11groom/`) read garbage there (`0x3a9435f3`, `0x582c…`); no
 alignment. All wakes' logs are gitignored lab artifacts under
 `lab/node2shell/tmp/w11*/`.
 
+
+**Second fake field, and debugger validation of the full gate chain.**
+Patching only the believed-next sizefield to `0x5a` advanced the abort
+from `invalid next size (unsorted)` to `malloc(): mismatching
+next->prev_size (unsorted)` (`w11patch2/multi-run2.log`): glibc also
+requires `prev_size(next) == believed`. With both fields written
+(`prev_size=0x900`, `sizefield=0x5a`) the abort advanced once more to
+`double free or corruption (!prev)` at `free(O2)`
+(`w11patch3/multi-run1.log`) — exactly the split gate above. Finally,
+with V's sizefield forced to `0x900` (≥ request, via the opt-in
+`FAKE_VSIZE` diagnostic) *and* both fake fields written, glibc's malloc
+validators were passed: `w11full/multi-run1.log` dies later with
+`SIGSEGV in nghttp2_map_find` under `nghttp2_submit_altsvc`, and run 2
+times out without a malloc abort. This confirms the three gates
+(sane sizefield, matching prev_size, splittable V) but the injected
+overlap breaks live nghttp2 state; these are **debugger interventions,
+not attacker bytes**, so they are mechanism evidence only, not rung 4.
+`walk.py` keeps these writes behind `FAKE_PATCH`/`FAKE_VSIZE` env vars
+and prints them explicitly in the log.
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
