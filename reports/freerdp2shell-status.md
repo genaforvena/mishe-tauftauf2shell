@@ -19,16 +19,18 @@ bypass of the CVE-2026-63117 fix (`b7ca093`). Default posture is
 post-authentication (PR:L); only no-auth RDP deployments reach 9.8.
 
 ## Mechanism and reproduction
+Line numbers for `rdpsnd_main.c` below are raw-file lines at the named tag
+(the earlier reader-displayed numbers were +6).
 
-- Parse-time check (`rdpsnd_main.c:258-265`, 3.32.0) enforces only
+- Parse-time check (`rdpsnd_main.c:252-259`, 3.32.0) enforces only
   `nBlockAlign >= 4` for DVI_ADPCM, never `nBlockAlign >= 4*nChannels`, so a
   client sends `nBlockAlign=4, nChannels=2` in an `SNDC_FORMATS` record.
-- `select_format()` (3.32.0, :415-423) computes
+- `select_format()` (3.32.0, :409-418) computes
   `bs = 4ULL*(4 - 4ULL*2) = 0xFFFFFFFFFFFFFFF0`, all `WINPR_ASSERT`s pass,
   `out_frames` becomes that wrapped value, `out_buffer_size` wraps to
   `0xFFFFFFFFFFFFFFC0`, `realloc` fails, and `out_frames` is **not rolled back**
-  (:452-457).
-- `send_samples()` (:771-781) then `CopyMemory`s client sample bytes into the
+  (:446-451).
+- `send_samples()` (:765-785) then `CopyMemory`s client sample bytes into the
   still-8820-byte `out_buffer`; `out_pending_frames` never reaches the huge
   `out_frames`, so successive calls append at monotonically advancing offsets
   — an unbounded, sequential, attacker-controlled heap write.

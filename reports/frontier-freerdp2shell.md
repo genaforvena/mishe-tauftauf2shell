@@ -40,14 +40,18 @@ in the extracted harness only.**
   provisioning only; no external probe.
 
 ## Source-bound mechanism (read from the 3.32.0 → 3.32.1 diff, not inferred)
+*(All `rdpsnd_main.c` line numbers below are raw-file lines at the named tag,
+from provisioning the raw source. The reader that produced an earlier draft
+prepended six header lines, so its displayed numbers were +6; they are
+corrected here.)*
 
-At parse time, `rdpsnd_server_recv_formats()` (`rdpsnd_main.c:258-265`, 3.32.0)
+At parse time, `rdpsnd_server_recv_formats()` (`rdpsnd_main.c:252-259`, 3.32.0)
 rejects `nChannels == 0` / `nBlockAlign == 0` and applies only a scalar floor
 per codec: DVI_ADPCM needs `nBlockAlign >= 4`. It never checks the codec's
 consistency relation `nBlockAlign >= 4 * nChannels`. A client therefore places
 `nBlockAlign=4, nChannels=2` in an `SNDC_FORMATS` record and passes.
 
-`rdpsnd_server_select_format()` (3.32.0, lines 415-423):
+`rdpsnd_server_select_format()` (3.32.0, lines 409-418):
 
 ```c
 case WAVE_FORMAT_DVI_ADPCM:
@@ -61,14 +65,14 @@ case WAVE_FORMAT_DVI_ADPCM:
         context->priv->out_frames = bs;       /* = 0xFFFFFFFFFFFFFFF0 */
 ```
 
-`out_frames` is committed at line 406 and mutated here **before** any
-allocation. Line 446 computes `out_buffer_size = out_frames *
+`out_frames` is committed at line 400 and mutated here **before** any
+allocation. Line 440 computes `out_buffer_size = out_frames *
 src_bytes_per_frame` = `0xFFFFFFFFFFFFFFF0 * 4` = `0xFFFFFFFFFFFFFFC0`. The
-`realloc` at line 450 fails for that size; line 452-457 returns
-`CHANNEL_RC_NO_MEMORY` but **does not roll `out_frames` back**. Integrators
+`realloc` at line 444 fails for that size; lines 446-451 return
+`CHANNEL_RC_NO_MEMORY` but **do not roll `out_frames` back**. Integrators
 (`shadow_rdpsnd.c`, `mf_rdpsnd.c`, `wf_rdpsnd.c`) log a warning and continue.
 
-The sink, `rdpsnd_server_send_samples()` (3.32.0, lines 771-781):
+The sink, `rdpsnd_server_send_samples()` (3.32.0, lines 765-785):
 
 ```c
 while (nframes > 0) {
@@ -88,14 +92,14 @@ number of frames sent before a call) the destination offset are attacker
 influenced.
 
 The real 3.32.1 fix replaces the assertions with an overflow-safe division
-guard (`rdpsnd_main.c:415-418`):
+guard (`rdpsnd_main.c:409-412`):
 
 ```c
 if (format->nBlockAlign / 4ull < format->nChannels) goto out;  /* 4/4=1 < 2 -> reject */
 if (format->nChannels == 0) goto out;
 ```
 
-and the analogous `/ 7` guard for ADPCM (`:435-438`). Note the upstream fix
+and the analogous `/ 7` guard for ADPCM (`:429-432`). Note the upstream fix
 does **not** adopt the advisory's "commit state only after allocation succeeds"
 layer; with the guard in place the hostile size is simply unreachable.
 
