@@ -7,7 +7,11 @@
 #                        via bailout", which fixes BOTH 618/619 CVEs)
 # Fixed2:    PHP 8.4.28  (2026-11-19 security release; fixes CVE-2026-126714
 #                        session-splice and CVE-2026-115560 serialize-mismatch)
-#
+# BranchCover: last AFFECTED heads of the other branches for CVE-2026-126714
+# (fixed only in the 2026-11-19 release 8.2.36/8.3.37/8.4.28/8.5.13):
+#   8.2.35 / 8.3.36 / 8.5.12 — splice harnesses run per branch, one per wake.
+# Branch-head sha256 values verified against
+# https://www.php.net/releases/index.php?json on 2026-11-20.
 # sha256 values are the official ones published by php.net (verified against
 # https://www.php.net/releases/index.php?json&version=8.4.x on 2026-11-20).
 # Re-fetch that JSON to cross-check if php.net ever publishes a correction.
@@ -24,7 +28,12 @@ FIXED2=8.4.28
 SHA_AFFECTED=32a2de53862ad44ed4a5005244ce4f1b50c271e74dced215449a4443b40569f1
 SHA_FIXED=dcf93923b0e38e0d5252b25b796520b5a47761a08b3488b6d0b5d1115764d3f0
 SHA_FIXED2=0c8ec360e5dd8154f270b2fd50cd44ecc824e6ee39c85f911312b80d4daecd72
-
+BRANCH1=8.2.35
+BRANCH2=8.3.36
+BRANCH3=8.5.12
+SHA_BRANCH1=5737b98601fe5ab1b8c5db0c82ed3158acb9283ed3081ffe2faffb9ac81455e6
+SHA_BRANCH2=dd54693aa334c5c4d72e9aee96b082c2473750a18a6c1d105789c93a3b1692fd
+SHA_BRANCH3=08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209
 # Fix commit (master); parent 512c04e39f674dbf4133b8fbbd381cd8c2df6836.
 FIX_COMMIT=3584a98bda0f2c0d367255b046798b0d3a221a19
 # sha256 of the reconstructed per-file patch (lab/src/php-fix-3584a98.patch,
@@ -45,7 +54,11 @@ fetch_tarball "$AFFECTED" "$SHA_AFFECTED"
 fetch_tarball "$FIXED" "$SHA_FIXED"
 fetch_tarball "$FIXED2" "$SHA_FIXED2"
 
-for v in "$AFFECTED" "$FIXED" "$FIXED2"; do
+fetch_tarball "$BRANCH1" "$SHA_BRANCH1"
+fetch_tarball "$BRANCH2" "$SHA_BRANCH2"
+fetch_tarball "$BRANCH3" "$SHA_BRANCH3"
+
+for v in "$AFFECTED" "$FIXED" "$FIXED2" "$BRANCH1" "$BRANCH2" "$BRANCH3"; do
     if [ ! -d "$BUILD/php-$v" ]; then
         echo "extracting php-$v into lab/build/"
         tar -C "$BUILD" -xf "$SRC/php-$v.tar.xz"
@@ -76,5 +89,7 @@ open(sys.argv[2], 'w').write(''.join(out))
 EOF
 fi
 echo "$SHA_PATCH  $p" | sha256sum -c -
+
+echo "provisioned branch heads: $BRANCH1 $BRANCH2 $BRANCH3 (CVE-2026-126714 affected)"
 
 echo "provisioned: php-$AFFECTED (affected), php-$FIXED (fixed 618/619), php-$FIXED2 (fixed 126714/115560), fix patch $FIX_COMMIT"

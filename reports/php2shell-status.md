@@ -136,6 +136,28 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   three builds; no-kill controls clean. Grade unchanged: rung 2 —
   the unauth splice→deserialization primitive is now demonstrated
   end-to-end on php-cgi AND php-fpm.
+  **Wake 11 (2026-11-20, 11:22Z) — branch coverage started, 8.2 branch
+  DONE: the advisory's "all branches" claim holds on 8.2.35** (the
+  last affected head of the 8.2 branch; fixed only in 8.2.36).
+  Source: 8.2.35's `ps_files_write` still truncates only when
+  `ZSTR_LEN(val) < data->st_size` (mod_files.c:240-242) — the
+  identical vulnerable pattern; 8.3.36 and 8.5.12 extracted and
+  source-verified the same (mod_files.c:239-241), behavioral runs one
+  per wake (8.3 next). Both committed producer harnesses reproduce
+  on the 8.2.35 ASan build (`lab/build/php-8.2.35-asan`, built via
+  the standard flags by lab/php2shell/build.sh, `PHP 8.2.35 (cli)
+  DEBUG`): app-level producer
+  `aftershell-producer-8.2.35-asan.log` (kill at byte 100 of a real
+  session write → `R[0:100]||C[100:]` on disk, 210-byte file,
+  `EVIL=object(stdClass)`, control clean) and unauth rfc1867
+  producer `aftershell-upload-8.2.35-asan.log` (K=1019, FILE_START
+  write n=1866 — slightly smaller than 8.4's 1892, same geometry,
+  splice on disk, promoted stdClass, control clean). Zero
+  ASan/UBSan/ZEND_ASSERT in both logs. Portability note kept: the
+  app-level harness must be given the CLI binary — 8.2's CGI SAPI
+  has no `-r`. Tarballs for all three branch heads now sha256-pinned
+  in lab/php2shell/provision.sh (8.2.35/8.3.36/8.5.12, php.net
+  release JSON, verified 2026-11-20). Grade unchanged: rung 2.
 
 - **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real

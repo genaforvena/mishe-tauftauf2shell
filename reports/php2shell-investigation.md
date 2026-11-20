@@ -124,7 +124,7 @@ Observed, both builds, ZEND_DEBUG asserts live:
 4. ZERO ASan/UBSan/ZEND_ASSERT output on either build for every probe.
    FPM lane CLOSED at rung 2; no rung-3 signal.
 
-## Reopened lane: CVE-2026-126714 "phpAfterShell" (wakes 8–10, 2026-11-20)
+## Reopened lane: CVE-2026-126714 "phpAfterShell" (wakes 8–11, 2026-11-20)
 
 The 2026-11-19 vendor release (8.2.36/8.3.37/8.4.28/8.5.13) named a new
 payload class in the same session family (GHSA-fm2m-fjf5-v3cp): the
@@ -188,6 +188,24 @@ zero sanitizer output:
    ftruncate-first file (1019 bytes, carrier tail gone) and the
    respawned consumer sees only `upload_progress_carr`
    (`aftershell-upload-fpm-8.4.28-fpm-asan.log`).
+6. **Branch coverage, 8.2 branch** (wake 11): the last affected head
+   of the 8.2 branch, php-8.2.35 (fixed only in 8.2.36, the 2026-11-19
+   release), is source- and behavior-verified affected: its
+   `ps_files_write` still truncates only when
+   `ZSTR_LEN(val) < data->st_size` (mod_files.c:240-242) and both
+   committed producer harnesses reproduce the full splice →
+   promotion on the 8.2.35 ASan build — app-level producer
+   (`aftershell-producer-8.2.35-asan.log`: kill at byte 100 of a real
+   session write, `R[0:100]||C[100:]` on disk, `EVIL=object(stdClass)`,
+   control clean) and the unauthenticated rfc1867 producer
+   (`aftershell-upload-8.2.35-asan.log`: same calibrated geometry as
+   the 8.4 lane, K=1019, n=1866, splice on disk, promoted stdClass,
+   control clean) — zero ASan/UBSan/ZEND_ASSERT output in both logs.
+   Portability note: the app-level harness needs the CLI binary
+   (`php -r`); 8.2's CGI SAPI has no `-r`. 8.3.36 and 8.5.12
+   sources carry the identical conditional-truncate pattern
+   (mod_files.c:239-241, source-verified); their behavioral runs are
+   one branch per wake, 8.3 next.
 
 ## Black-box discriminators (affected-only, reproducible)
 
