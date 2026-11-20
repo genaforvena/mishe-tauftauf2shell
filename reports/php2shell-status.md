@@ -5,9 +5,10 @@ corruption; stale global state across requests), CVSS 9.2 both, pre-auth
 RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
 8.3<8.3.36, 8.4<8.4.27, 8.5<8.5.12.
 
-- **Rung:** 2. Trigger deterministic (rung 1); the consumer
-  hunt has now covered every SAPI cheaply reachable, including mod_php
-  under real Apache, and each negative is observed, not assumed:
+- **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
+  every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
+  Apache, and (2026-11-20 wake 7) php-fpm — and each negative is observed,
+  not assumed:
   - **SAPI source reads (affected 8.4.26 tree):** php-cgi one-shot AND
     fastcgi-mode NEVER consume a failed startup — on `php_request_startup()`
     FAILURE, cgi_main.c:2464-2471 does `fcgi_finish_request` +
@@ -43,8 +44,34 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
     all consumed with zero ASan/UBSan/assert output; the stale handler
     was NOT invoked in N+1, reproducing the init_executor source-read
     claim on the real consumer. Negative preserved — the OOM-only
-    producer is dead on mod_php too; the remaining lane is the
-    serialize-handler/upload-progress PoC port.
+    producer is dead on mod_php too.
+  - **Observed php-fpm (2026-11-20 wake 7, owner DM #64; committed harnesses
+    `lab/php2shell/build-fpm.sh`, `lab/repro/php2shell-fpm-client.py`,
+    `lab/repro/php2shell-rung3-fpm.sh`; evidence
+    `lab/build/evidence/rung3-fpm-{8.4.26,8.4.27}-fpm-asan.log`):** both
+    pinned trees built with the same clang ASan+UBSan + `--enable-debug`
+    flags plus `--enable-fpm` (`php-<v>-fpm-asan/sapi/fpm/php-fpm`, "NTS
+    DEBUG"). A loopback-only 127.0.0.1 listener, `pm=static`,
+    `pm.max_children=1`, `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1`,
+    memory_limit=8M was driven directly over FastCGI (no nginx/cgi-fcgi on
+    this host). One worker child answered every probe (e.g. master
+    521411 / child 521427 on 8.4.26); runtime and shutdown-function OOM
+    each reported the fatal and the SAME child answered afterwards. All
+    seven rfc1867/upload-progress record shapes gave the same
+    version-discriminating results as the other SAPIs: 8.4.26 rewrites
+    `x|O:7:"Missing":1:{s:27:"__PHP_Incomplete_Class_Name";s:3:"foo";}`
+    to `x|O:3:"foo":0:{}` and converts `x|C:7:"Missing":0:{}` to
+    `x|O:7:"Missing":0:{}` with a warning; 8.4.27 refuses/destroys the
+    first and keeps the second byte-identical. The OOM fatal again
+    discriminates (`file:0` on 8.4.26 vs `zend_alloc.c:3293` on 8.4.27).
+    The handler-switch injection marker fires on BOTH builds when the
+    handler is set at request startup (PS(mod) is chosen at RINIT; an
+    in-script `ini_set` is too late) — version-neutral, not this CVE's
+    primitive. ZERO ASan/UBSan/ZEND_ASSERT output on either build for
+    every probe. FPM lane CLOSED at rung 2; no rung-3 signal.
+    Harness lessons: FPM's INI parser rejects `=` inside an `env[...]`
+    value and rejects `#` comments (use `;`), so sanitizer options must
+    be exported by the launching shell and inherited via `clear_env=no`.
 
   - **Cross-request 619 consumer dead on these SAPIs, source-read:** in
     php_request_startup(), `zend_activate()`/init_executor runs BEFORE
@@ -62,13 +89,17 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
     reports the 8KB safe-point allocation ("tried to allocate 8192
     bytes", zend_smart_str.c:44). Useful as a cheap liveness/version
     marker in any black-box web-facing probe.
-- **Next action:** every producer/consumer lane reachable in this lab is now
-  observed and closed. The malloc-backed OOM lane — the last rung-3 candidate
-  — was run on 2026-11-20 (wake 6) and is negative, including the release
-  fast-shutdown consumer (malloc-backed OOM item below). Rung stays **2**;
-  no rung-3 claim. What remains is outside this host's builds: FPM /
-  FrankenPHP / LSAPI consumers named in the advisory, or a vendor update
-  naming a new payload class.
+- **Conclusion / next action (2026-11-20 wake 7):** every producer/consumer
+  lane reachable in this lab is now observed and closed, including the last
+  unbuilt SAPI, php-fpm. Rung stays **2** — no rung-3 claim, and therefore
+  no rung-4 claim. **Rung 4 via the PHP2Shell family is not reachable in
+  this lab on the evidence gathered: every malformed session record and
+  OOM shape reaches a clean warning/fatal with sanitizer-visible memory,
+  the same persistent worker answers afterwards, and no invalid-state read
+  or write has been observed in any consumer.** What remains is genuinely
+  outside this host's builds: FrankenPHP / LSAPI or another SAPI not built
+  here, or a vendor advisory naming a concrete new payload class. Do NOT
+  re-run the closed lanes.
 - **Allocator reality (observed):** `USE_ZEND_ALLOC=0` alone disables
   memory_limit accounting, and its malloc-failure path exits(1) rather than
   longjmping; stock ZMM hides intra-pool state from ASan. The faithful
@@ -115,10 +146,12 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
     rung 3 is NOT claimed.
 - **Unknowns:** whether any reserved-prop bookkeeping collision reaches a
   C:/E: payload slot beyond the observed class-name rewrite (serialize lane
-  closed at rung 2); whether FPM / FrankenPHP / LSAPI — SAPIs not built in
-  this lab — consume the invalid state as the advisory claims. On this host
-  the stale-globals, handler-switch, rfc1867 and malloc-backed OOM lanes are
-  all CLOSED by observation; negative results are preserved above.
+  closed at rung 2); whether FrankenPHP / LSAPI or another SAPI not built
+  here consume the invalid state as the advisory claims. php-fpm is NO
+  LONGER unknown: it was built and driven on loopback in wake 7 (FPM item
+  above). On this host the stale-globals, handler-switch, rfc1867 and
+  malloc-backed OOM lanes are all CLOSED by observation, including the FPM
+  replay; negative results are preserved above.
 - **rfc1867 upload-progress producer ported and observed (2026-11-20,
   committed harness `lab/repro/php2shell-rung3-rfc1867.sh`, evidence
   `lab/build/evidence/rung3-rfc1867-8.4.26-asan.log` /
@@ -238,8 +271,10 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   `function` check aborts on benign PHP prototype mismatches in
   zend_ini_parser/zend_API globals ctors — observed, then excluded),
   `--enable-debug --enable-session --enable-cgi --disable-phpdbg`,
-  source tree copied to `lab/build/php-<v>-<mode>`. 8.4.26-ASan built
-  and smoked; 8.4.27-ASan negative control in flight.
+  source tree copied to `lab/build/php-<v>-<mode>`. Both ASan variants are
+  built and smoked; the FPM variants follow the same flags in
+  `lab/build/php-<v>-fpm-asan` via `lab/php2shell/build-fpm.sh`
+  (`--enable-fpm` instead of `--enable-cgi`).
   A separate apache2handler module build exists:
   `lab/build/php-8.4.26-apache-asan/.libs/libphp.so` — same sanitizer
   flags but NO `--enable-debug`, `--disable-all --enable-session
