@@ -35,7 +35,12 @@ claims, not conclusions.
   ASan builds (commits 741c677, 8440254): a real session write interrupted
   at a syscall boundary leaves the spliced file on disk and the next
   request promotes the object. The kill is shim-simulated (the advisory's
-  hard-OOM worker death), not a demonstrated remote trigger.
+  hard-OOM worker death), not a demonstrated remote trigger. Fix VERIFIED
+  on 8.4.28 (pinned in `lab/php2shell/provision.sh`, commits ab3ee16 and
+  02bd370): unconditional `ftruncate(0)` first leaves the same interrupted
+  write as a 100-byte new prefix with no object promoted
+  (`aftershell-producer-8.4.28-asan.log`). Hand-assembled splice bytes still
+  decode on 8.4.28, but a fixed handler cannot produce them.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
