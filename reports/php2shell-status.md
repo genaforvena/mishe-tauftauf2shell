@@ -62,16 +62,63 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
     reports the 8KB safe-point allocation ("tried to allocate 8192
     bytes", zend_smart_str.c:44). Useful as a cheap liveness/version
     marker in any black-box web-facing probe.
-- **Next action (order set by evidence):** the 2026-10-23
-  serialize-handler/upload-progress lane is now fully observed on this
-  host (rfc1867 block items 1-6 below, plus the compound-OOM negative):
-  rung 3 was NOT established for it and the conclusion is recorded
-  (item 6). The remaining rung-3 candidate for the 618/619 family on
-  this host is the malloc-backed OOM variant flagged under allocator
-  reality: `USE_ZEND_ALLOC=0` + RLIMIT_AS forcing malloc/mmap failure
-  reaches the vulnerable longjmp per the advisory AND makes the
-  failing allocation visible to ASan (stock ZMM pools hide intra-pool
-  corruption). That is the next bounded experiment.
+- **Next action:** every producer/consumer lane reachable in this lab is now
+  observed and closed. The malloc-backed OOM lane — the last rung-3 candidate
+  — was run on 2026-11-20 (wake 6) and is negative, including the release
+  fast-shutdown consumer (malloc-backed OOM item below). Rung stays **2**;
+  no rung-3 claim. What remains is outside this host's builds: FPM /
+  FrankenPHP / LSAPI consumers named in the advisory, or a vendor update
+  naming a new payload class.
+- **Allocator reality (observed):** `USE_ZEND_ALLOC=0` alone disables
+  memory_limit accounting, and its malloc-failure path exits(1) rather than
+  longjmping; stock ZMM hides intra-pool state from ASan. The faithful
+  malloc-backed variant is `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1`, run and
+  closed below.
+- **Malloc-backed OOM (last rung-3 candidate) — observed negative, lane CLOSED
+  (2026-11-20 wake 6, committed harness
+  `lab/repro/php2shell-rung3-malloc-oom.sh`; evidence
+  `lab/build/evidence/rung3-malloc-oom-{8.4.26,8.4.27}-asan.log`,
+  `rung3-malloc-oom-cgi-{8.4.26,8.4.27}-asan-{one,many,mixed}.log`, plus
+  reruns of the compound rfc1867 and mod_php harnesses under
+  `lab/build/evidence/malloctracked/`):**
+  - Source read before testing: plain `USE_ZEND_ALLOC=0` selects
+    `__zend_malloc`, whose failure path is `zend_out_of_memory()` =
+    `fprintf("Out of memory"); exit(1)` (8.4.26 zend_alloc.c:3292-3299,
+    2930-2934) — NOT the vulnerable longjmp. A pre-exec RLIMIT_AS also kills
+    ASan at startup (`ReserveShadowMemoryRange failed`, rc=134, observed at
+    256M/1G/4G ceilings), so the advisory's RLIMIT recipe cannot be combined
+    with sanitizer visibility here. `USE_TRACKED_ALLOC=1` supplies the
+    faithful condition: real malloc blocks + `tracked_check_limit` →
+    `zend_mm_safe_error` → longjmp (zend_alloc.c:2952-2965, 401-426).
+  - Observed on both ASan builds (ZEND_DEBUG, asserts live) with
+    `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1`,
+    `ASAN_OPTIONS=detect_leaks=0:abort_on_error=1:allocator_may_return_null=1`,
+    `UBSAN_OPTIONS=halt_on_error=1`, memory_limit=8M: all three vendor
+    parse shapes on php-cgi reach the OOM fatal (exit 255); on a persistent
+    cli-server, startup-parse OOM, runtime OOM and shutdown-function OOM each
+    report the fatal and the SAME PID answers afterwards; zero ASan/UBSan/
+    assert output in every log. Compound session-OOM × rfc1867 under the
+    tracked allocator: worker survives, no sanitizer, `sess-e:yes` on 8.4.26
+    vs `no` on 8.4.27 (known discriminator, no memory unsafety). mod_php
+    release fast-shutdown (ASan+UBSan, no ZEND_DEBUG) under the tracked
+    allocator: all four shapes consumed, same Apache child, no sanitizer,
+    stale handler not invoked.
+  - Bonus version fingerprint in this lane: 8.4.26 prints
+    "Allowed memory size ... exhausted at file:0"; 8.4.27 prints the real
+    `Zend/zend_alloc.c:3293` — the fix added ZEND_FILE_LINE propagation to
+    `tracked_check_limit`. A black-box discriminator, not a corruption
+    primitive.
+  - Conclusion: the advisory's "underlying allocation failure still reaches
+    longjmp" precondition IS reproducible here, but even with every request
+    allocation sanitizer-visible, no invalid-state read or write occurs in
+    any consumer reachable on this host. The 618/619 family stays at rung 2;
+    rung 3 is NOT claimed.
+- **Unknowns:** whether any reserved-prop bookkeeping collision reaches a
+  C:/E: payload slot beyond the observed class-name rewrite (serialize lane
+  closed at rung 2); whether FPM / FrankenPHP / LSAPI — SAPIs not built in
+  this lab — consume the invalid state as the advisory claims. On this host
+  the stale-globals, handler-switch, rfc1867 and malloc-backed OOM lanes are
+  all CLOSED by observation; negative results are preserved above.
 - **rfc1867 upload-progress producer ported and observed (2026-11-20,
   committed harness `lab/repro/php2shell-rung3-rfc1867.sh`, evidence
   `lab/build/evidence/rung3-rfc1867-8.4.26-asan.log` /
@@ -166,13 +213,6 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   on startup FAILURE and never `php_request_shutdown()` — the invalid
   state is created but not consumed in this SAPI. Negative result
   preserved, not retried.
-- **Allocator reality (observed):** `USE_ZEND_ALLOC=0` disables
-  memory_limit accounting entirely — no OOM, exit 0, request completes.
-  So the OOM trigger requires the stock ZEND allocator, where ASan
-  cannot observe intra-pool state. A malloc-backed OOM variant
-  (USE_ZEND_ALLOC=0 + RLIMIT_AS forcing malloc/mmap failure — which per
-  the advisory also reaches the vulnerable longjmp) is the follow-up that
-  would give ASan visibility.
 - **Provisioning pinned (committed):** `lab/php2shell/provision.sh` —
   tarballs verified against php.net sha256 (8.4.26 affected / 8.4.27
   fixed; 8.4.28 released 2026-11-19 but the CVE fix remains 8.4.27 per
@@ -211,14 +251,6 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   conf, leaving prefork defaults (5 workers) — the directives are
   top-level in `lab/apache2root/conf/httpd.conf` after the MPM
   LoadModule, which is observed to give exactly one persistent child.
-- **Unknowns:** whether any reserved-prop bookkeeping collision reaches
-  a C:/E: payload slot and corrupts more than the already-observed
-  class-name rewrite. The stale-globals question is CLOSED this wake:
-  observed negative on both ASan builds (compound harness), and
-  source-read closed — MULTIPART_EVENT_FILE_START's
-  `php_rinit_session(0)` clears PS globals before the callback
-  dereferences them. The pure handler-switch unserialize injection is
-  CLOSED (version-neutral, observed, negative preserved).
 
 Seeded by the operator 2026-11-20 from docs/task.md; php2shell owns this
 file.
