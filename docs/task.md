@@ -50,6 +50,26 @@ claims, not conclusions.
   Classic one-byte-off exploitation (heap grooming to an adjacent
   length/size field or pointer's low byte) applies directly.
 
+### Node2Shell — CVE-2026-123828 (admitted 2026-11-20, standing approval #6)
+
+- **One-byte heap overflow** in Node.js HTTP/2 `session.altsvc()`
+  (`src/node_http2.cc`): the buffer is sized to the origin length and
+  the null terminator is written one byte past its end. Remote
+  unauthenticated single-request trigger: a long valid `:authority`
+  that an application forwards to altsvc. Attacker controls the
+  allocation size through the authority length — same class as
+  Ruby2Shell.
+- Affected 24.x, 26.x per the official advisory; fixed 24.22.3 /
+  26.13.1 (2026-11-11); fix commit `nodejs/node@ae9ab37d62`
+  (nodejs-private#1035). Snyk also claims 22.x<22.23.5, but the fix
+  is absent from the 22.23.5 release notes — backport unverified;
+  check the 22.x source before building it.
+- Rung-4 angle: attacker-chosen allocation size and pre-overflow
+  content; Node ASan/UBSan source builds fit this lab. Fallback
+  candidate in the same release if altsvc is structurally gated:
+  CVE-2026-123874 (Http2Stream use-after-free via respondWithFile
+  reset, unauthenticated).
+
 ### Similar things (operator's standing mandate)
 
 The operator actively watches for new X2Shell-class public claims and
