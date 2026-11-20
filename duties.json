@@ -22,6 +22,30 @@
    "signal": {"subscribers": ["docs"], "wake_on": "change"},
    "replaces": [],
    "covers": "git commit changes to the checkout: the producer observes HEAD, writes signals/repo-change.detail and wakes only docs on a new commit. Missing git or unreadable HEAD is UNKNOWN, never GREEN."
+  },
+  {
+   "name": "readme-lint",
+   "every": 900,
+   "timeout": 60,
+   "max_age": 1800,
+   "resolver": "docs",
+   "red_codes": [2],
+   "unknown_codes": [],
+   "command": ["{python}", "{repo}/tools/check-readme.py", "{repo}"],
+   "replaces": [],
+   "covers": "README structure and achievement table: RED with exact line-level reasons when a table row is orphaned, a row has the wrong cell count, a required heading is duplicated/missing, or a report link is missing. The docs mind owns the repair; GREEN means the reader book still parses."
+  },
+  {
+   "name": "omp-only",
+   "every": 300,
+   "timeout": 60,
+   "max_age": 900,
+   "resolver": "operator",
+   "red_codes": [2],
+   "unknown_codes": [],
+   "command": ["{python}", "{repo}/tools/check-omp-only.py", "{home}", "{repo}"],
+   "replaces": [],
+   "covers": "Plant-scoped hard engine policy: every declared role must have exactly one hy4-flash route under engine omp; any claude/codex/qwen route, missing route, legacy engine file, or generated unit naming a forbidden engine is RED and wakes operator. The pinned runtime also raises on forbidden construction."
   }
  ],
  "retired": [],
