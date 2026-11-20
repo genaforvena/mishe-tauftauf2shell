@@ -617,6 +617,57 @@ offset, but both HTTP/2 strings reject embedded NULs, so the required
 content. This is a preserved negative, not a retried-into-existence
 claim.
 
+### Rung-4 step 3 — LEN2 sweep and NUL-channel closure (wake 13, 2026-11-20 17:30Z)
+
+**LEN2 sweep — negative.** Wake 12 swept the ALTSVC value length; this
+wake swept the other length axis with the O2==O1-friendly first
+request fixed at `LEN=2193` (origin 2201). `LEN2 ∈ {1872, 1904, 1920,
+1936, 1952, 1968, 1984, 2000, 2032, 2064}`, 5 fresh gdb boots each,
+logs `lab/node2shell/tmp/w13s*/` (gitignored). Every boot that reached
+the O2==O1 geometry (`same=True`: 1/5, 1/5, 2/5, 3/5, 3/5, 1/5, 2/5,
+2/5, 2/5, 0/5 respectively) showed the same two fake-window qwords:
+`prev_size=0x6161616161616161 sizefield=0x6161616161616161`
+(origin `'a'` filler) at `V+believed`, and a believed size of `0x900`
+for all `LEN2 ≥ 1904`. The single exception, `LEN2=1872`, moved the
+fake window onto the origin-tail boundary:
+`prev_size=0x6161616161616161`,
+`sizefield=0x30383a7832680061` (bytes `61 00 68 32 78 3a 38 30`,
+i.e. last origin byte, NUL, then ALT text). Its low byte `0x61` is odd
+and the six upper bytes are ASCII, so `chunksize_nomask ≫ system_mem`:
+`malloc(): invalid next size (unsorted)` still fires. `LEN2=2064`
+produced no O2==O1 boots. The in-call malloc request grows with LEN2
+(`bytes = LEN2+36`: 1940 at 1904, 2036 at 2000) but the victim stays
+`0x900`, so no exact-fit escape appeared either. No natural chunk
+header lands at the fake window on this axis.
+
+**Both attacker string channels cannot carry NUL — re-tested
+directly, not taken from the prior wall.** With the committed server
+(`ALT_HEX` feeds a latin1 ALTSVC value), `ALT_HEX=61006832`
+(`a NUL h 2`) makes `session.altsvc()` throw
+`TypeError [ERR_INVALID_CHAR]: Invalid character in alt` before the
+request completes (client `ECONNRESET`). A client request whose
+`:authority` contains `\0` is rejected by nghttp2 with
+`NGHTTP2_PROTOCOL_ERROR` before any ALTSVC call. So neither the ALT
+value nor the origin can place the required
+`[00][believed>>8][00×6]` fake `prev_size` qword; the only NUL at that
+offset is the library's own terminator, at the origin/data boundary.
+
+**Measured overlap window.** In the `LEN2=1872` boot
+(`w13s1872/multi-run5.log`), V is at `0x6e4f100` with believed size
+`0xa00`; the real next-chunk boundary is at `0x6e4f100+0xa10 =
+0x6e4fb10`, whose header reads `prev_size=0xa10 sizefield=0xbf0`
+(even, sane). The fake boundary at `V+0xa00 = 0x6e4fb00` lies `0x10`
+inside V's real extent and holds `'a'*8` plus the origin-tail marker.
+This is the believed-extent-inside-real-extent overlap, byte-measured,
+but it cannot be consumed while the fake header is unforgeable with
+attacker bytes.
+
+Ladder read unchanged: rung 3/3.5 mechanism plus a debugger-only
+demonstration that all five glibc gates pass with a synthetic header;
+rung 4 remains open on a NUL-capable content channel or a geometry
+where `set_foot` writes the believed size at the fake window (victim
+freed *after* corruption, not split before it).
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
