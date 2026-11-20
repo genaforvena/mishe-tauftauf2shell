@@ -1,0 +1,17 @@
+# Mishe site home: local plant state, never committed
+.mishe-tauftauf/
+
+# Laboratory bulk: source trees, builds, corpora, runtime state
+lab/php-src/
+lab/ruby-src/
+lab/nginx-src/
+lab/build/
+lab/corpus/
+lab/sessions/
+lab/tmp/
+
+# Build output
+target/
+__pycache__/
+*.pyc
+.venv/
