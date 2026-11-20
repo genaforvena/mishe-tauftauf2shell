@@ -198,15 +198,21 @@ the harness accounting and exit codes at 19:02Z; the driver now prints
 `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` and
 `run.sh` `637cfa36…`. The earlier 2928 OOB-write count was double the real
 extent because a zero-byte read underflowed `trace_copy()`; 1464 is correct.
-This is a harness-
-only rung 4. A later real-source check compiled the unmodified pinned `ws.c`
-with Abyss type stand-ins over a 127.0.0.1 socket: ASan
-`negative-size-param (size=-5)`, plain-build rc 134, fixed source `rc=-1009`
-with `wsh->ssl` untouched, and `offsetof(wsh_t, ssl)=131112` validated against
-the real struct (`lab/freeswitch2shell/live/`). The real `ws_raw_read` has no
-source-side clamp and 4096-byte `recv()` chunks, so chosen-pointer control
-stays harness-only; a full FreeSWITCH process, WebSocket upgrade and stock
-heap layout remain UNKNOWN. Evidence:
+This is a harness-only rung 4 for marker execution. Two real-source checks
+compiled the unmodified pinned `ws.c` with Abyss type stand-ins over a
+127.0.0.1 socket (`lab/freeswitch2shell/live/`). With the advisory's
+`FF FF FF FF` frame (`plen=-1`) ASan reports `negative-size-param (size=-5)`,
+the plain build aborts rc 134 and the fixed source returns `rc=-1009` with
+`wsh->ssl` untouched. `bash lab/freeswitch2shell/live/run_pos.sh` adds a
+positive length, `7F FF FF FF 00 00 00 00` (`plen=INT_MAX`): the guard's
+signed add overflows, the real `ws_raw_read` copies sender bytes verbatim,
+and the plain build writes `0x4142434445464748` to `wsh->ssl`
+(`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0); fixed `rc=-1009` with
+`ssl=(nil)` and ASan `WRITE of size 4096` at the end of a 131136-byte region.
+Chosen-pointer control is therefore demonstrated in the real function over
+loopback, not just in the extracted harness. A full FreeSWITCH process,
+WebSocket upgrade, stock heap layout and reachability remain UNKNOWN:
+Evidence:
 `reports/frontier-freeswitch2shell.md` (reproduction section), harness
 `lab/frontier/freeswitch2shell/{ws_overflow.c,run.sh}`. The dedicated
 `freeswitch2shell` mind owns this lane; details in

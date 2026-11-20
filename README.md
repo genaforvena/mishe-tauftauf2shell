@@ -52,9 +52,11 @@ of the affected software:
   extended-length frame in the opt-in `mod_xml_rpc` endpoint whose truncated
   signed length passes the guard and overflows the handle. The unmodified
   pinned `ws.c` was also driven over a real 127.0.0.1 socket (with Abyss type
-  stand-ins): ASan confirms corruption and the fixed build rejects the frame.
-  Chosen pointer control and marker execution stay harness-only; a full live
-  process, upgrade, stock heap layout and reachability stay UNKNOWN.
+  stand-ins): the advisory's `FF FF FF FF` frame faults under ASan, while
+  `7F FF FF FF 00 00 00 00` yields `plen=INT_MAX` and writes a chosen 8-byte
+  value into `wsh->ssl` in that real function. The fixed build rejects both;
+  marker execution stays harness-only, and a full live process, upgrade,
+  stock heap layout and reachability stay UNKNOWN.
 - **Freerdp2Shell** — CVE-2026-114045 / GHSA-3m9q-g533-rqjq, a UINT64
   wraparound in FreeRDP's server-side rdpsnd `select_format()` that leaves
   `out_frames` unrolled back after a failed realloc, turning later audio
@@ -83,7 +85,7 @@ is called established.
 | **Brotli2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | Pinned two-stage stream drives 20 attacker-chosen bytes past an 8-byte decoder buffer into named state fields; fixed build rejects with `ERROR -17`. Rung 4 is NOT demonstrated; network reachability is a claim. [Status](reports/brotli2shell-status.md) |
 | **Freeradius2Shell** | **Rung 4 — demonstrated impact in a standalone harness** | A crafted EAP-FAST ticket writes 208 bytes into a 152-byte stack structure and executes a chosen `verify_marker()` address at rc 42; fixed build rejects the same ticket. Live `radiusd` reachability and key-unknown byte control remain UNKNOWN. [Status](reports/freeradius2shell-status.md) |
 | **Falkordb2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | A masked zero-payload extended-length frame drives 525 out-of-bounds write operations (word XORs plus trailing bytes); chosen mask bytes overwrite a canary at chunk offset 104. ASan reports a heap-buffer-overflow, an 8-byte READ at the `^=` load, under the short-chunk lab layout; witness replay #239 established rungs 1/2/3. Rung 4 is NOT demonstrated because the mask repeats every four bytes. [Status](reports/falkordb2shell-status.md) |
-| **Freeswitch2Shell** | **Rung 4 — chosen-pointer control in a harness-only extraction; rung 3 also confirmed on real source over loopback** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. The unmodified pinned `ws.c` (Abyss type stand-ins only) was then driven over a real 127.0.0.1 TCP socket: ASan reports `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`), the plain build aborts rc 134, and the fixed source rejects with `rc=-1009` and `wsh->ssl` untouched; the 131112 offset is validated against the real upstream struct. The real `ws_raw_read` lacks the harness's source-side clamp and `recv()` delivers at most 4096 bytes, so chosen-pointer control stays harness-only; a full process, WebSocket upgrade, stock heap layout and reachability remain UNKNOWN, and both config gates are off by default. The repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` and `run.sh` `637cfa36…`; its earlier 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
+| **Freeswitch2Shell** | **Rung 4 — chosen-pointer control in the real `ws_raw_read` over loopback; marker execution still harness-only** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. Abyss `TConn`/`TSession` and `ConnRead`/`ConnWrite` remain stand-ins; no live process, WebSocket upgrade, stock heap layout or reachability. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane and the new session-filename UAF),
@@ -91,7 +93,7 @@ Node's path from corruption
 to control, Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
 index 27, FreeRADIUS's live `radiusd` replay, FalkorDB's four-byte-repeating
-mask, and Freeswitch's full live `mod_xml_rpc` process replay (a real-source loopback check now exists) are still open. Apache's
+mask, and Freeswitch's full live `mod_xml_rpc` process replay (real-source loopback checks now include positive-length chosen-pointer placement) are still open. Apache's
 Stage C route was closed as unreachable in this build on this host and is
 preserved as a negative. Each open question is recorded as an UNKNOWN in its
 status file rather than papered over. Failed hypotheses and negative results
