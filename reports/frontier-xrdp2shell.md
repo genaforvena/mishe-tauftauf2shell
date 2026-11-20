@@ -1,10 +1,11 @@
 # Frontier brief — xrdp virtual-channel-to-chansrv fixed-buffer heap overflow (Xrdp2Shell)
 
-**Status: frontier candidate, 2026-11-20. Rungs 1–3 established locally,
-rung 4 PASS in the extracted harness only. Live process, PDU path and auth
-gate UNKNOWN. Two handoff artifacts exist: this brief and live two-pane
-window 19 (`xrdp2shell`, inner socket); site admission remains the
-operator's call.**
+**Status: admitted X2Shell target under standing approval #6, ~20:3xZ
+2026-11-20. Rungs 1–3 established locally, rung 4 PASS in the extracted
+harness only. Live process, PDU path, dynamic-channel open and auth gate
+UNKNOWN. Dedicated two-pane window 19 (`xrdp2shell`, inner socket), seed
+wall, charter and docs/task.md entry are live; wake trigger units and the
+presentation.json entry are owed from the person's full-flag sync.**
 
 ## Verified ground truth (claim sources + this lab, 2026-11-20)
 
@@ -98,8 +99,8 @@ consecutive runs:
 
 - **Rung 1 (reproducible trigger + state failure)**: 28-byte header plus
   20000 client bytes gives `oob_writes=11836 first_oob=8192 last_oob=20027`.
-  The static path with its 26-byte header gives `oob_writes=11834
-  first_oob=8192 last_oob=20025`.
+  The static path with its 26-byte header gives `oob_writes=11834`
+  and `first_oob=8192 last_oob=20025`.
 - **Rung 2 (chosen bytes at chosen offsets)**: client bytes `ab` and `cd`
   land verbatim at OOB stream offsets 8228 and 12028.
 - **Rung 3 (ASan-confirmed corruption)**: `heap-buffer-overflow`,
@@ -120,8 +121,6 @@ DRDYNVC PDU parse and reassembly path, dynamic-channel open, stock allocator
 layout, network reachability and the authentication gate remain UNKNOWN.
 The harness deliberately leaks the corrupted buffers at exit: freeing them
 corrupts allocator metadata, and no graded observation depends on the free.
-
-- **Rung 1 (reproducible trigger + overflow)**: 28-byte header plus
 
 Tractability **HIGH for chosen bytes, UNKNOWN for pointer control**. Public
 fix diff, single-file subsystem, no hardware gate, no need to guess the
@@ -155,6 +154,7 @@ the auth gate from UNKNOWN to evidence. No external system is contacted.
   result intact.
 - A chosen pointer/heaped object in the real chansrv transport layout would
   promote rung 4 from chosen bytes to pointer control.
-- Site admission, charter and wake trigger units remain the operator's and
-  the person's call; the target window already exists. This brief does not
-  duplicate an existing lane.
+- Wake trigger units and the presentation.json `active` entry remain owed
+  from the person's full-flag sync in `docs/runtime-pin.md`; never a bare
+  `mishe sync`. Site admission, charter, docs entry and the target window
+  are in place; this brief does not duplicate an existing lane.

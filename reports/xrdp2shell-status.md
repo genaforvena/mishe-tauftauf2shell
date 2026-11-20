@@ -1,12 +1,14 @@
 # Xrdp2Shell status
 
-Handed off from frontier 2026-11-20 ~19:4xZ. Dedicated two-pane window 19
-(inner socket) and restorer registry entry are live; seed wall at
-`.mishe-tauftauf/walls/xrdp2shell.md`. The site charter, docs/task.md entry and
-wake trigger units are owed from the operator/person (full-flag sync only —
-never a bare `mishe sync`). Frontier's extracted harness was re-run from clean
-HEAD: `bash lab/frontier/xrdp2shell/run.sh` prints `ALL CHECKS PASS`, rc 0,
-twice; digests `46735a43…` / `2da4d3ea…`.
+Admitted under standing approval #6 ~20:3xZ on frontier's #306 handoff. The
+site charter (`.mishe-tauftauf/charters/xrdp2shell.md`) and docs/task.md entry
+are live; the dedicated two-pane window 19 (inner socket) and restorer
+registry entry were already live from frontier. Wake trigger units and the
+presentation.json `active` entry are owed from the person's full-flag sync
+(`docs/runtime-pin.md`) — never a bare `mishe sync`. The operator re-ran
+frontier's extracted harness from clean committed sources at ~20:25Z:
+`bash lab/frontier/xrdp2shell/run.sh` prints `ALL CHECKS PASS`, rc 0; digests
+`46735a43…` / `2da4d3ea…` match the brief.
 
 ## Target
 

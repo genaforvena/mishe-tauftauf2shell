@@ -259,6 +259,49 @@ this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`. Wake
 trigger units and the presentation.json entry are owed from the person's
 full-flag sync, never a bare `mishe sync`.
 
+#### Admitted 2026-11-20 ~20:3xZ: Xrdp2Shell (CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4)
+
+Claim sources: the GitHub advisory GHSA-hh7r-2rmq-q4g4, the CVE/OSV/NVD
+records for CVE-2026-44178, xrdp's v0.10.6.1 release notes and the
+`v0.10.6...v0.10.6.1` diff, read as provisioning, not lab findings. CWE-122;
+CVSS 3.1 8.8 High post-auth (`AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H`), 9.8
+Critical only in no-auth deployments. Affected `< 0.10.6.1`; fixed in
+`0.10.6.1` (tag `v0.10.6.1`, fix commit
+`43dc9c3b71e5e46733d70ec0239c482ee264cd9f`). Claimed primitive: an
+authenticated client's reassembled DYNVC virtual-channel message exceeds the
+fixed 8192-byte xrdp→chansrv out stream; all three writers ask
+`trans_get_out_s(trans, 8192)` on an exactly-8192-byte stream, `init_stream`
+keeps that buffer, and `out_uint8a` is a plain `g_memcpy` with a bounds check
+gated behind `USE_DEVEL_STREAMCHECK`, absent in ordinary builds. The client
+controls the length (`drdynvc_process_data_first()` checks only
+`total_bytes >= 1590 && bytes <= total_bytes`; DYNVC reassembly stages a
+client-sized stream), so a multi-chunk message drives the copy far past the
+8164/8168/8166-byte thresholds. Default posture is **post-authentication
+(`PR:L`) with a dynamic channel open**: keep that gate prominent in every
+impact claim. Native C RDP server component, in the admitted "similar things"
+class alongside FreeRDP, FreeSWITCH, FreeRADIUS and Brotli.
+
+Exact vulnerable/fixed tags, a public single-file subsystem diff, no hardware
+gate and a full bulk `memcpy` of client-supplied bytes (no reliance on glibc
+tail-first/store-first zero-store windows) make a rung-4 attempt plausible.
+The operator re-ran the digests-pinned harness at ~20:25Z from committed
+sources: `ALL CHECKS PASS`, rc 0, digests `46735a43…` / `2da4d3ea…`; rung 1
+28+20000 bytes gives `oob_writes=11836 first_oob=8192 last_oob=20027`
+(static 26-byte path 11834), rung 2 chosen `ab`/`cd` at OOB offsets
+8228/12028, rung 3 ASan `heap-buffer-overflow` `WRITE of size 20000` 0 bytes
+after the 8192-byte region via `do_copy` -> `drdynvc_data_first`, rung 4
+`de`/`ad` at OOB offsets 8228/12024 across two messages; exact-size 0.10.6.1
+and benign controls show `oob_writes=0` and 5/5 traces are byte-identical.
+This is a harness-only rung 4: a live xrdp process, real DRDYNVC PDU
+parse/reassembly, dynamic-channel open, stock allocator layout, network
+reachability and the auth gate stay UNKNOWN. Evidence:
+`reports/frontier-xrdp2shell.md`, harness
+`lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`, seed status
+`reports/xrdp2shell-status.md`. The dedicated `xrdp2shell` mind owns this
+lane; details in `.mishe-tauftauf/charters/xrdp2shell.md`. Wake trigger units
+and the presentation.json entry are owed from the person's full-flag sync,
+never a bare `mishe sync`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's

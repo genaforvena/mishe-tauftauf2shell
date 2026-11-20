@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies twelve admitted vulnerability families in local, isolated copies
+It studies thirteen admitted vulnerability families in local, isolated copies
 of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -67,6 +67,13 @@ of the affected software:
   reach the 9.8 ceiling. Admitted 19:32Z under standing approval #6; rungs
   1-3 and harness-only rung 4 are recorded in the brief. A live RDP process,
   PDU path, network reachability and the auth gate stay UNKNOWN.
+- **Xrdp2Shell** — CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4, a client-controlled
+  reassembled DYNVC virtual-channel payload copied into xrdp's fixed
+  8192-byte server→chansrv out stream. Default posture is post-auth (`PR:L`)
+  with a dynamic channel open; only no-auth deployments reach 9.8. Admitted
+  ~20:3xZ under standing approval #6; rungs 1-3 and harness-only rung 4 are
+  recorded in the brief, with live RDP, PDU path, network reachability and
+  the auth gate UNKNOWN.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -89,6 +96,8 @@ is called established.
 | **Falkordb2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | A masked zero-payload extended-length frame drives 525 out-of-bounds write operations (word XORs plus trailing bytes); chosen mask bytes overwrite a canary at chunk offset 104. ASan reports a heap-buffer-overflow, an 8-byte READ at the `^=` load, under the short-chunk lab layout; witness replay #239 established rungs 1/2/3. Rung 4 is NOT demonstrated because the mask repeats every four bytes. [Status](reports/falkordb2shell-status.md) |
 | **Freeswitch2Shell** | **Rung 4 — chosen-pointer control in the real `ws_raw_read` over loopback; marker execution still harness-only** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. Abyss `TConn`/`TSession` and `ConnRead`/`ConnWrite` remain stand-ins; no live process, WebSocket upgrade, stock heap layout or reachability. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
 
+| **Xrdp2Shell** | **Rung 3 — confirmed corruption; harness-only rung 4** | A 28-byte data-first header plus 20000 client bytes writes `oob_writes=11836` from offset 8192; chosen `ab`/`cd` land at OOB offsets 8228/12028, ASan reports `WRITE of size 20000` 0 bytes after the 8192-byte region, and rung 4 places `de`/`ad` at offsets 8228/12024 across two messages. Exact-size 0.10.6.1 and benign controls are clean, 5/5 traces identical. Live xrdp process, real DYNVC PDU path and the post-auth gate are UNKNOWN. [Status](reports/xrdp2shell-status.md) |
+
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF and
 the new 8.5 stale-argument read),
@@ -96,7 +105,7 @@ Node's path from corruption
 to control, Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
 index 27, FreeRADIUS's live `radiusd` replay, FalkorDB's four-byte-repeating
-mask, and Freeswitch's full live `mod_xml_rpc` process replay (real-source loopback checks now include positive-length chosen-pointer placement) are still open. Apache's
+mask, Freeswitch's full live `mod_xml_rpc` process replay (real-source loopback checks now include positive-length chosen-pointer placement), and Xrdp's live loopback DYNVC PDU path and auth gate are still open. Apache's
 Stage C route was closed as unreachable in this build on this host and is
 preserved as a negative. Each open question is recorded as an UNKNOWN in its
 status file rather than papered over. Failed hypotheses and negative results
@@ -107,8 +116,9 @@ stay in the reports.
 Each target is its own mind with its own window: **ruby2shell**,
 **php2shell**, **node2shell**, **apache2shell**, **mosquitto2shell**,
 **dragonfly2shell**, **postgres2shell**, **brotli2shell**,
-**freeradius2shell**, **falkordb2shell** and **freeswitch2shell** pursue their
-lane end-to-end — build, harness, debugger, report. Four further minds cut
+**freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
+**freerdp2shell** and **xrdp2shell** pursue their lane end-to-end — build,
+harness, debugger, report. Four further minds cut
 across them:
 
 - **frontier** hunts public advisories for new X2Shell-class candidates and
@@ -129,6 +139,11 @@ seed wall are live; wake trigger units and the presentation.json entry are
 owed from the person's full-flag sync. Its grade is recorded in the status
 file, not treated as an established result.
 
+Xrdp2Shell was admitted ~20:3xZ: the charter, docs entry, window (19, inner
+socket), seed wall and status file are live; wake trigger units and the
+presentation.json entry are owed from the person's full-flag sync. Its
+grade is recorded in the status file, not treated as an established result.
+
 Findings are graded on one ladder, and a rung is never skipped:
 **suspected → reproducible crash → confirmed memory corruption →
 demonstrated impact**. Every claim cites either source lines or observed
@@ -146,7 +161,7 @@ are committed, and every wake's commit is pushed to this repository.
   The `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
   `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
-  `frontier`,
+  `xrdp2shell` and `frontier`,
   `docs`, `witness` and `operator` windows show each mind's wall and wake log;
   `chat`, `git` and `wakes` show the shared tape. All minds run on
   `opencode-go/hy4-flash-free`.
