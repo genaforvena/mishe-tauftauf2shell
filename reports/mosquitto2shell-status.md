@@ -28,3 +28,51 @@ Dedicated mind, two-pane window, wake trigger and hy4-flash route are live.
   confirm a controlled `malloc()` return before any chain attempt.
 - All traffic stays on loopback ports 27080–27082. Preserve negatives and
   label every rung by the build that produced it.
+
+## Stock-glibc Stage B observation (2026-11-20 16:32–16:40Z, this mind)
+
+New harness: `lab/frontier/mosquitto2shell/build-glibc.sh` (2.1.2, no
+sanitizer, `-O0 -g`, stock cJSON built locally into
+`deps/cjson-stock-prefix`; `ldd` shows no libasan/libubsan),
+`tcache_probe.py` (wire placement of an arbitrary 8-byte value at a chosen
+overflow offset) and `gdb-tcache.cmd` (lab-assisted safe-link computation).
+All traffic loopback 27080/27081. Raw evidence in the ignored
+`lab/frontier/mosquitto2shell/logs/gdb-2.1.2-glibc.log`,
+`gdb-malloc-27081.log`, `gdb-poison.log` and `gdb-poison2.log`.
+
+- **Rung 3 reproduced locally on stock glibc.** gdb at
+  `packet_mosq.c:588`: `payload=0x55555561c5d0 pos=0 to_process=1`, then
+  `pos=4 to_process=4294967293` (underflow). At `net_ws.c:305` the write is
+  `buf=payload+4 count=256`; after it `pos=260` and the payload region plus
+  the following chunks are the chosen fill byte. The broker does not abort
+  on stock glibc: the corruption is silent until the heap is exercised.
+- **Live tcache adjacency confirmed.** At `payload-16` the 1-byte allocation
+  is a `0x21` chunk; the next two chunks are `0x31` tcache entries with
+  safe-linked `fd` and non-zero tcache `key`. Their `fd`/`key` fields lie at
+  `payload+32`/`+40` and `payload+80`/`+88`, inside the 256-byte stream.
+- **Wire placement confirmed.** With `--fd-offset 76 --fd-value
+  cc93340050550000`, the post-write dump shows exactly
+  `0x00005550003493cc` at `payload+0x50` — an attacker-chosen 8-byte value
+  at a chosen offset in the live tcache head's `fd` on stock glibc.
+- **Controlled malloc return, lab-assisted (not wire-only).** With the
+  safe-linked fd computed at runtime under gdb
+  (`fd=0x5550003493fc` for `fdaddr=0x55555561c630`,
+  `target=0x55555561c5e0`), the trace shows
+  `MEMCPY dst=0x55555561c5e0 src=0x5555555d80d3 len=19`: a `malloc()` of
+  the poisoned 0x30 bin returned the chosen address and the broker wrote
+  the 19-byte `$SYS/broker/uptime` string there. A later `SIGSEGV` in
+  `musable (malloc.c:5243)` follows because the returned chunk's size field
+  was also overwritten by the same stream. This is pointer control in the
+  lab build, but the encoded fd came from **debugger-known heap
+  addresses**, not a leak obtained over the wire.
+
+## Open after this observation
+
+- Rung 4 wire-only is still **UNKNOWN**. The published chain needs a
+  PIE/heap leak to compute the safe-linked fd and a stable PONG-adjacency
+  groom (174-byte CONNECT source, 125-byte held PING, `0xc0` bin); the
+  write-up is not in the repo and that recipe was not reproduced here.
+- Heap addresses under gdb were not stable across runs
+  (`0x55555561c5d0` vs `0x555555600f60`), so a hardcoded wire value does
+  not reliably poison the bin; a real leak or a layout-stable groom is
+  required. Preserve this as a negative, not a retry into existence.
