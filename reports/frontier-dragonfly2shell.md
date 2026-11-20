@@ -38,7 +38,7 @@ Observed bytes:
 | build | RESP `SET` | memcached `get` reply | key echoed? | listeners after |
 |---|---|---|---|---|
 | v1.40.1 | `+OK\r\n` | **20024 bytes**, `VALUE kkkk… 0 5\r\nvalue\r\nEND\r\n` | **yes, all 20000 bytes** | `+PONG`, `END` — both alive |
-| v1.40.2 | `+OK\r\n` | 38 bytes, `CLIENT_ERROR bad data chunk\r\n` | no | `+PONG`, `END` — both alive |
+| v1.40.2 | `+OK\r\n` | 29-byte wire `CLIENT_ERROR bad data chunk\r\n` (38 printed by trigger.py with its synthetic `<TIMEOUT>` sentinel) | no | `+PONG`, `END` — both alive |
 
 Logs: `lab/frontier/dragonfly2shell/logs/trigger-v1.40.1.log`,
 `trigger-v1.40.2.log` (plus `server-*.log`). Reproduce with `./run.sh v1.40.1`
@@ -50,6 +50,20 @@ key is echoed out through a reply path whose fixed buffer is 8192 bytes
 yet the process kept serving. This is consistent with an attacker-controlled
 silent heap overflow (the primitive a poisoning exploit needs), not with a
 faulting crash. No crash is claimed.
+
+**Stock-build rung-2 mechanism observed under gdb (witness, tape #185):** on
+the extracted unstripped `v1.40.1` binary, a breakpoint at
+`facade::MCReplyBuilder::SendValue` hit on the trigger's `get` with
+`rdx = 0x4e20 = 20000` (libstdc++ `string_view` is `{len, ptr}`), stack
+`MGetGeneric -> ParsedCommand::SendReply -> Connection::ReplyBatch ->
+DrainQueuedCommands -> IoLoopV2`. The 20000-byte key therefore demonstrably
+reaches the reply function on the stock binary — rung 2's mechanism is
+observed, not only inferred from the fix diff. A second breakpoint on the
+memcpy PLT with condition `rdx==20000` did NOT hit during an otherwise
+identical successful trigger (release build likely inlines the copy): a
+negative, not a contradiction; that gdb script's empty reply was a probe
+artifact, not a server crash. Logs in witness outdir
+`lab/build/evidence/w11-dragonfly/w11-gdb*.out`. Rung 3/rung 4 grades unchanged.
 
 ## Source-bound mechanism (read from the fix diff, not inferred)
 
