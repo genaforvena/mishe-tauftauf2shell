@@ -278,6 +278,10 @@ real `127.0.0.1` TCP socket. Source and driver digests are in
   `heap-buffer-overflow`.
 - **Real source, plain build:** abort `corrupted size vs. prev_size`, rc 134 —
   a reproducible crash, not a clean overwrite.
+- **Fixed source, real loopback socket:** `ws.c` at fix commit `d557ca6d`
+  (sha256 `8ebbe2bce71197ac4e2cdbe2e2cc43c1b5ec3acd7275b9bb4fdbf0decf0914fe`)
+  rejects the same frame with `rc=-1009` (`WS_DATA_TOO_BIG`), `datalen=14`,
+  no ASan report and `wsh->ssl` untouched. The real-source differential holds.
 
 Cause, from the pinned source: `ws_raw_read` compares `r <= (issize_t)bytes`,
 but `bytes` is `(size_t)need` with `need = -5`, so `(issize_t)bytes == -5` and
