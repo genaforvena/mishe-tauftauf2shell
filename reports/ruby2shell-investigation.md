@@ -19,8 +19,13 @@ request-reachable over HTTP on BOTH claimed default stacks (2026-11-20,
 wake 8).** The Stage B overlap (wake 6: chosen bytes over a live chunk,
 5/5, control clean; witness verdict ESTABLISHED at rung 4, tape #51) is
 driven from a single multipart HTTP POST through a default-config
-classic Sinatra app (wake 7) and now through a default `rails new` app
-(wake 8) — same geometry, same readback, same 5/5 + control on each.
+classic Sinatra app (wake 7) and through a default `rails new` app
+(wake 8) — same geometry, same readback, same 5/5 + control on each;
+the witness independently re-ran both HTTP sections from the committed
+scripts and returned ESTABLISHED at rung 4 request-reachable for each
+(tape #65, 2026-11-20). Stage C (wake 9, tcache poisoning → arbitrary-
+address allocation) is author-observed 5/5 + control 3/3, an optional
+strengthening lane, not yet witness-verified.
 The sink (`Rack::MethodOverride` upcasing a multipart part that declares
 `charset=ISO-8859-1`) runs before routing, CSRF and auth.
 
@@ -462,6 +467,19 @@ Stage B layout, groomed inside the request; the honest labels:
   chunk stays live, tcache[0x360] unstocked, and buffer2 splits V).
   Both fixes are commented in the .ru where they are made.
 
+**Witness verification (tape #65, 2026-11-20): ESTABLISHED at rung 4,
+request-reachable.** Independent re-run from the committed scripts
+(7583de5): 5/5 attack HTTP 200 with readback byte-identical to the
+report; control 3/3 clean (original bytes, fake-size 0x90 intact). The
+witness's own mtrace parse shows the marker malloc(0x439) served at
+V's exact freed address in all 5 attack runs and at a different
+address in all 3 controls, and buffer1 0x368 popping S in all 5 —
+independent attribution of the overlap. A chosen-byte counterexample
+was also reproduced over HTTP: with the marker swapped to
+(0x5A,0x41)*540 in a gitignored app copy, the readback showed
+`5a415a415a415a41` at W user 0..7 — the overlapped bytes are
+attacker-chosen, not a fixed artifact of the default marker.
+
 Ladder position: **rung 4, request-reachable.** The remaining gap to
 the vendor's "RCE on stock Rails" is (a) the marker/allocation
 shaping being lab middleware rather than request-shaped grooming, and
@@ -550,6 +568,25 @@ default stacks.** The remaining gaps to the vendor's "RCE on stock
 Rails" are unchanged from the Sinatra section: (a) the groom/marker
 shaping is lab middleware rather than request-shaped grooming, and
 (b) control-flow hijack from the overlap — not attempted here.
+
+**Witness verification (tape #65, 2026-11-20): ESTABLISHED at rung 4,
+request-reachable.** Independent re-run from the committed scripts
+(d8e9108): 5/5 identical readback, control 3/3 clean, marker-at-V 5/5
+vs different-address 0/3 in the witness's own mtrace parse. Rails
+facts confirmed directly on the regenerated app (Rails 8.1.4.1):
+`bin/rails middleware` order Groom < Rack::MethodOverride < Marker,
+and the sink source in the installed gems (rack 3.2.8
+`method_override.rb:36` upcase; multipart parser.rb:588
+body.force_encoding). **CSRF ordering confirmed directly**: the
+trigger POST answered 422 `ActionController::InvalidAuthenticityToken`
+in all five runs, yet `GET /mark` returned the corrupted readback and
+the server kept serving — the overflow predates the forgery check.
+Hidden-flags audit clean: plain-build CFLAGS stock (-O3, no
+sanitizers), no tunables/malloc env in the drivers beyond the
+LD_PRELOAD mtrace. One immaterial nit, fixed this wake: the driver's
+control comment claimed "same buffer sizes", but the control run's
+buffer2 request is 852 (0x354) vs the attack's 850 — no effect on
+attribution; the comments now claim only "same input length".
 
 
 ## Stage C — tcache poisoning: the second allocation returns an attacker-nominated address (observed 2026-11-20, wake 9)
@@ -648,8 +685,13 @@ unchanged: request-shaped grooming and control-flow hijack.
    allocation returns an attacker-nominated address (chosen bytes
    written there, read back through the live host string), 5/5 +
    control 3/3. The report's optional pointer-control lane is closed.
-2. Witness verification remains the outstanding acceptance step for
-   the wake-7 Sinatra and wake-8 Rails HTTP sections (handed over
-   tape #62); the in-process Stage B alone is witness-ESTABLISHED
-   (tape #51), and stageC is in-process of the same class.
+2. **Witness acceptance (tape #65, 2026-11-20): both HTTP sections —
+   Sinatra and Rails — ESTABLISHED at rung 4 request-reachable.** The
+   witness independently re-ran the committed scripts, confirmed the
+   readbacks, controls, marker-at-V attribution and the chosen-byte
+   counterexample over HTTP, and confirmed the CSRF 422 ordering
+   directly. With tape #51 (in-process Stage B), the target's rung-4
+   story is witness-ESTABLISHED on both claimed default stacks. Stage
+   C remains an author-verified strengthening lane; nothing else is
+   owed unless a counterexample appears.
 3. PHP2Shell rungs 1-3 remain queued after Ruby2Shell rungs.

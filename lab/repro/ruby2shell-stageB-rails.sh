@@ -12,8 +12,9 @@
 #    onto V's size LSB while V is in unsorted; the result alloc walks
 #    unsorted and bins V at 0x450. MarkerMiddleware (immediately after
 #    MethodOverride) allocates "m"*1080 -> exact-fit take of V.
-#    CONTROL mode sends pure 0xDF*828 instead (same buffer sizes, no
-#    parity flip, NO overflow).
+#    CONTROL mode sends pure 0xDF*828 instead (same input length, no
+#    parity flip, NO overflow; its upcase buffer2 request is 2 bytes
+#    larger — immaterial, no byte is written past any buffer).
 # 4. GET /mark — readback over the live W object.
 #
 # Evidence lands in lab/build/evidence/stageB-rails-{1..N,control-N}.{trace,out}

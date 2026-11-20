@@ -25,7 +25,8 @@
 #   ActionDispatch::RequestId and everything else), so "m"*1080
 #   (chunk 0x450, exact fit) takes V -> overlaps the live W object.
 #   CONTROL (STAGEB_CONTROL=1 at server launch): the driver sends pure
-#   0xDF*828 — same buffers, no parity flip, NO overflow.
+#   0xDF*828 — same input length, no parity flip, NO overflow (the
+#   control's buffer2 request is 2 bytes larger; immaterial).
 #
 # GroomMiddleware forces the multipart parse FIRST (Rack::Request#POST,
 # cached in env): a parse allocation would otherwise split unsorted V

@@ -9,8 +9,9 @@
 #    upcased by the DEFAULT middleware (Rack::MethodOverride) -> one
 #    0x53 byte onto V's size LSB while V is in unsorted; result alloc
 #    walks unsorted and bins V at 0x450.
-#    CONTROL mode sends pure 0xDF*828 instead (same buffer sizes, no
-#    parity flip, NO overflow).
+#    CONTROL mode sends pure 0xDF*828 instead (same input length, no
+#    parity flip, NO overflow; its upcase buffer2 request is 2 bytes
+#    larger — immaterial, no byte is written past any buffer).
 # 3. GET /mark — 0x450 marker alloc pops V, overlaps W; readback over
 #    the live object.
 #
