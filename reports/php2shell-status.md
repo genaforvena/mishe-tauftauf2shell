@@ -243,8 +243,8 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   combined chain — confirmed invalid native pointer read with observed
   bytes, not only a crash. Rung 4 not claimed: no chosen-offset placement,
   pointer control or marker execution. Next route: Stage A reuse of the
-  freed startup allocation with a canary, then a benign marker; ask witness
-  to re-run the committed harness before treating the claim as accepted.
+  freed startup allocation with a canary, then a benign marker. Witness
+  asked to re-run on tape #123; claim is author-observed until its verdict.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
