@@ -33,6 +33,7 @@ lab/frontier/brotli2shell/build-*/
 lab/frontier/brotli2shell/*.br
 lab/frontier/brotli2shell/*.bin
 lab/frontier/brotli2shell/*.out
+lab/frontier/brotli2shell/poc.py
 
 # Apache2Root capacity-boundary harness runtime state (scripts stay tracked)
 lab/apache2shell/logs/
