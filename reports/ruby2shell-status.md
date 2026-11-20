@@ -5,28 +5,34 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
-- **Rung:** 0 → 1 in progress. Source-level mechanism VERIFIED from the
-  tarball trees (researcher wake 2, commit `a4825ca`): `string.c:7777`
-  `CASE_MAPPING_ADDITIONAL_LENGTH 20`; `string.c:7830` capa = N+20;
-  `enc/iso_8859_1.c:267` guard `to < to_end` guarantees one byte but
-  sharp-s upcase writes two (`:272`/`:293`) — 21 sharp-s → 42 bytes into
-  capa 41, byte at index 41 written one past the end, value 0x53 'S'.
-  Fixed 3.4.13 has `to_end - to > 1` at the same line. **The ASan
-  reproducible crash is not yet observed** — the 3.4.12 ASan build was
-  still compiling at the last researcher record.
-- **Next action:** finish the 3.4.12 ASan build, then run
-  `lab/repro/ruby2shell-rung1.rb` under it — expected ASan
-  heap-buffer-overflow WRITE of size 1 in `onigenc_iso_8859_1_case_map`;
-  negative control on fixed 3.4.13 after that.
-- **Last evidence:** researcher wall (wake 2, 2026-11-20) and commit
-  `a4825ca` (`lab/repro/ruby2shell-rung1.rb`, 14 lines); provenance
-  sha256-verified tarballs in `lab/src/`; fix patch at
-  `lab/src/ruby-fix-d582f8f.patch` (243 lines, one loop bound per each
-  of 14 single-byte encodings).
-- **Unknowns:** the ASan observation itself (make was running, log
-  `/tmp/ruby-make.log`, prefix `lab/build/ruby-3.4.12-asan`); consumer
-  behavior on this host's glibc (nginx2root lesson) before grooming
-  mechanics; which Rails/Sinatra exposure the loopback harness mirrors.
+- **Rung:** 0 → 2 OBSERVED (researcher wake 3, 2026-11-20). Source
+  mechanism verified (wake 2, `a4825ca`): capa N+20
+  (`string.c:7777/7830`), 1-byte guard vs 2-byte sharp-s write
+  (`enc/iso_8859_1.c:267/272/293`). Wake 3 built 3.4.12 with
+  ASan+UBSan, installed to `lab/build/ruby-3.4.12-asan`, ran the
+  committed `lab/repro/ruby2shell-rung1.rb` — **ASan
+  heap-buffer-overflow, WRITE of size 1 at `enc/iso_8859_1.c:293`
+  (`case_map`) via `rb_str_upcase` (string.c:8017) on a 65-byte
+  region allocated at `string.c:7834`, "0 bytes after" its end —
+  the exact 24-byte-header + capa-41 geometry predicted from
+  source. Repro command (one line, RC=1):
+  `lab/build/ruby-3.4.12-asan/bin/ruby lab/repro/ruby2shell-rung1.rb`.
+  Full reports: `lab/build/evidence/evidence-ruby2shell-rung1-*.txt`.
+- **Next action:** negative control — same script on fixed 3.4.13
+  (ASan build needed; source already confirmed fixed at
+  `lab/build/ruby-3.4.13` line 267). Then rung 3+ / consumer
+  reality: plain glibc build, observe the actual heap neighbor and
+  what the uniform-'S' payload can reach.
+- **Last evidence:** wake 3, 07:54Z: ASan report (both in-tree
+  `./ruby -I.ext/x86_64-linux` and installed prefix binary), 65-byte
+  region `[0x507000068571-1 …]` write at first byte past the end.
+  UBSan misalignment noise in ruby's own siphash/vm code is
+  unrelated build noise (also present on clean runs, RC=0).
+- **Unknowns:** negative control on 3.4.13 (expected clean); whether
+  production glibc sees any corruption at N=21 (arithmetic says no —
+  65-byte request has 7 bytes of slack, nginx2root lesson, so rung 3
+  on plain glibc needs N ≈ 40+ to reach the next chunk's size field);
+  which Rails/Sinatra exposure the loopback harness mirrors.
 
 Owner: the researcher, from its wake 2 on (operator seeded and repaired
 this file on 2026-11-20 after a write race; facts above are sourced to
