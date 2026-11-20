@@ -48,7 +48,22 @@ non-deterministic: my logs show `0x0008a5c3be58` (8.4.26) and
 The fixed 8.4.28 build logs the same warning and exits 0. Full chain,
 conditions, controls and the per-build evidence are in the dedicated
 section below. Rung 4 (chosen bytes at a chosen offset, pointer control or
-benign marker execution) is still NOT claimed.
+benign marker execution) was still NOT claimed there.
+
+**Amended 2026-11-20 (wake 18): Stage A reached a CONSTRAINED rung-4 form.**
+With `USE_ZEND_ALLOC=0`, the stale timezone cache is a textbook ASan
+heap-use-after-free (56-byte region allocated in `php_date_parse_tzfile()` at
+`php_date.c:501` from the startup `date.timezone` diagnostic, freed by
+`tracked_free_all()` → `shutdown_memory_manager()` at the end of
+`php_module_startup()`, read again from the PRE-RINIT decode warning).
+On the plain 8.4.27 build a query-string value makes a request-lifetime
+allocation reuse that freed chunk: GDB dumps prove the attacker's value
+length and bytes land at HashTable offsets 16, 24, 28 and 32 — the exact
+fields `zend_hash_str_find_bucket()` reads. Query values of length ≥ 9 turn
+the affected build's silent UAF into SIGSEGV; identical input on the fixed
+8.4.28 build exits 0. Grade: rung 4 in the limited sense of chosen bytes at
+chosen offsets plus control of the consumed pointer field's low bits; NOT
+arbitrary-address control, no marker executed. Full evidence below.
 
 ## Evidence ladder, honestly graded
 
@@ -56,8 +71,8 @@ benign marker execution) is still NOT claimed.
 |---|---|---|
 | Suspected vulnerability (source/advisory) | yes | Fix commit `php/php-src@3584a98bd` ("Avoid state corruption via bailout") read as spec; patch sha256-pinned at `lab/src/php-fix-3584a98bda0f2c0d367255b046798b0d3a221a19.patch` |
 | Reproducible crash / deterministic fatal | yes | `lab/repro/php2shell-rung2-oom-cgi.sh`: memory_limit=8M, three vendor POST shapes, `Allowed memory size ... exhausted` in `php_request_startup()`, exit 255 on 8.4.26-ASan |
-| Confirmed memory corruption (reopened lane + native Date cache, wake 17) | **yes (rung 3)** | `lab/repro/php2shell-rung3-tzcache.py`: affected 8.4.26/8.4.27 ASan CGI, splice-decode warning → `AddressSanitizer: SEGV` in `zend_hash_str_find_bucket` (`zend_hash.c:790:8` on 8.4.26, `:945:8` on 8.4.27 — same statement, different tree line); faulting address non-deterministic, e.g. `0x0008a5c3be58` / `0x0008a5c3c279` in my runs and `0x0008a5c3c26c` / `0x0008a5c3be4c` in the witness's; fixed 8.4.28 clean; controls clean on every build |
-| Demonstrated security impact (chosen bytes/pointer/marker) | **partial — rung 2 data mutation; rung 3 invalid read, no rung 4** | Attacker bytes land in the re-encoded session class-name slot on 8.4.26; the handler-switch `W::__wakeup` marker fires, but on BOTH builds (version-neutral, so not this CVE's primitive). The rung-3 memory access is a wild read, not controlled placement. |
+| Confirmed memory corruption (reopened lane + native Date cache, wakes 17–18) | **yes (rung 3)** | `lab/repro/php2shell-rung3-tzcache.py`: affected 8.4.26/8.4.27 ASan CGI, splice-decode warning → `AddressSanitizer: SEGV` in `zend_hash_str_find_bucket` (`zend_hash.c:790:8` on 8.4.26, `:945:8` on 8.4.27 — same statement, different tree line); faulting address non-deterministic, e.g. `0x0008a5c3be58` / `0x0008a5c3c279` in my runs and `0x0008a5c3c26c` / `0x0008a5c3be4c` in the witness's; with `USE_ZEND_ALLOC=0` ASan instead reports a 56-byte `heap-use-after-free` with allocation/free stacks (`lab/build/evidence/stageA/uaf-8.4.27-asan-USE_ZEND_ALLOC0.log`); fixed 8.4.28 clean; controls clean on every build |
+| Demonstrated security impact (chosen bytes/pointer/marker) | **yes, CONSTRAINED rung 4 (wake 18)** — plus version-neutral rung-2 data mutation | `lab/repro/php2shell-stageA-groom.py`: on plain 8.4.27 with `USE_ZEND_ALLOC=0`, a query-string value reuses the freed startup tzcache chunk; GDB shows the value length at HashTable `arData` (offset 16) and the value bytes at offsets 24–32 — precisely the fields `zend_hash_str_find_bucket()` consumes. rc −11 for value length ≥ 9 on 8.4.27, rc 0 on 8.4.28 and for all three controls. Limit: `arData` is a small chosen integer (length), not an arbitrary address; no marker executed. |
 
 ## Producers and consumers examined (all closed)
 
@@ -333,9 +348,8 @@ Conditions to reproduce honestly: `date.timezone` invalid (or another
 startup diagnostic reaching the file error log), file-based `error_log`,
 `session.upload_progress.enabled=1`, a session id the worker accepts, and
 splice bytes that make the pre-RINIT decode warn. This is an affected-only
-invalid native pointer read, graded rung 3. The bytes at the faulting
-address are not chosen by the attacker in this experiment: Stage A
-placement and a benign marker are the missing rung-4 evidence.
+invalid native pointer read, graded rung 3 as run here. Wake 18's Stage A
+below adds attacker-chosen bytes at chosen offsets to the same chain.
 
 ## Black-box discriminators (affected-only, reproducible)
 
@@ -348,18 +362,73 @@ placement and a benign marker are the missing rung-4 evidence.
 
 These are data-integrity mutations, not memory unsafety.
 
-## Next route from rung 3 (Stage A)
+## Stage A: attacker bytes in the freed startup HashTable (wake 18)
 
-- Stage A placement: reuse the freed startup tzcache allocation with
-  attacker-chosen bytes and prove a canary at a chosen offset; only then
-  attempt a benign marker execution and a rung-4 claim. Missing evidence:
-  control of the stale pointer and the replacement contents.
+Replay: `bash lab/repro/php2shell-stageA-proof.sh` (loopback only; logs in
+`lab/build/evidence/stageA/`). It drives the same splice-MID warning as the
+rung-3 harness with an added `QUERY_STRING` and
+`USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1` so `emalloc` is libc `malloc` and the
+freed startup chunk can actually be reused.
+
+1. **Exact UAF identity (ASan).** With the same env, 8.4.27-asan no longer
+   reports a wild-address SEGV but a `heap-use-after-free`: READ of size 4 at
+   offset 8 of a 56-byte region; allocated at `php_date_parse_tzfile()`
+   (`ext/date/php_date.c:501`) from `OnUpdate_date_timezone()` during
+   `zm_startup_date()`; freed by `tracked_free_all()` →
+   `shutdown_memory_manager()` at the end of `php_module_startup()`; read
+   from `php_session_cancel_decode()` → `php_format_date()` →
+   `get_timezone_info()` → `zend_hash_str_find()`. Evidence:
+   `lab/build/evidence/stageA/uaf-8.4.27-asan-USE_ZEND_ALLOC0.log`. 8.4.28
+   is clean. This removes any ambiguity about which object and which free
+   the rung-3 read concerns.
+2. **Reuse path.** A GDB watchpoint on the stale pointer's `arData` field and
+   a conditional `malloc(56)` backtrace show the first post-startup 56-byte
+   allocation is `zend_new_array_singleton()` from `php_default_treat_data()`
+   for `$_GET` (`lab/build/evidence/stageA/malloc56-backtrace-8.4.27-plain.log`);
+   at the request-time warning the same address holds a request-lifetime
+   object carrying the query-string value.
+3. **Chosen bytes at chosen offsets.** With `QUERY_STRING=XXX=ABCDEFGHIJ`
+   (value length 10), `lab/repro/php2shell-stageA-fieldprobe.gdb` captures
+   `DATEG(tzcache)` at its startup use and dumps the 56 bytes at every
+   `zend_hash.c:945` hit on that same pointer. First hit: the live startup
+   table (`flags=8`, `nTableMask=-2`, valid `arData`, zero elements). Second
+   hit, during the PRE-RINIT decode warning: `flags=0`, `nTableMask=0`,
+   `arData=0x0a` (the value LENGTH), `nNumUsed=0x44434241` (`"ABCD"`),
+   `nNumOfElements=0x48474645` (`"EFGH"`), next word `0x4847464544434241`
+   (`"ABCDEFGH"`), then `"IJ\0…"`. With `XXX=AAAAAAAAA` (length 9) the same
+   fields read `arData=0x9`, `0x41414141`, `0x41414141`, `0x4141414141414141`.
+   These are the exact fields `zend_hash_str_find_bucket()` consumes
+   (`arData` as the pointer for `HT_HASH_EX`, and the counters). Evidence:
+   `stageA-php-8.4.27-plain-splice-mid-gdb-qs{14,13}.log`.
+4. **Black-box, patch-sensitive.** On plain 8.4.27, no query string or a
+   value of length ≤ 8 gives rc 0 (the UAF is silent: the stale chunk aliases
+   a benign, valid-looking HashTable); length 9, 10 or 20 gives rc −11
+   SIGSEGV. The key name is irrelevant (`XXX` behaves like `UTC`), so the
+   control is the value's length/content, not a special key. Fixed 8.4.28
+   exits 0 for every length. Controls on 8.4.27 with the long query string —
+   `valid-record`, `valid-timezone`, `no-cookie` — all exit 0, so both the
+   startup diagnostic and the PRE-RINIT warning are still required.
+
+Grade: **rung 4, constrained**. The attacker chooses bytes at chosen offsets
+inside the live struct the consumer dereferences and controls the low bits of
+the consumed pointer field (`arData` equals the chosen value length). NOT
+claimed: an arbitrary 64-bit address, `nTableMask` control, a benign marker
+execution, or a gadget chain — the consumed read address is
+`chosen_length + hash("UTC")*4`, so this is a constrained pointer primitive,
+not an arbitrary write. Whether a longer/repeated groom could place a full
+pointer is UNKNOWN and is the next experiment, not a claim.
+
+## Open routes after Stage A
+
+- Extend the groom to set `arData` to a chosen *address* (needs a 56-byte
+  allocation whose offset-16 field is a genuine pointer) and try a benign
+  marker; witness re-run of the Stage A claim is owed.
 - A public disclosure of Depthfirst's withheld native decoder could supply
   the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not
   covered here (coverage: vendor phpt recipes verbatim, unresolved-class
   reserved-prop collisions, C: slot, NUL-mangled, compound with OOM).
-- A admissible SAPI not built here (FrankenPHP / LSAPI) or corrected
+- An admissible SAPI not built here (FrankenPHP / LSAPI) or corrected
   upstream release checksums requiring re-provisioning.
 
 Negative results and failed hypotheses are preserved in

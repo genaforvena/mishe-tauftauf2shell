@@ -251,10 +251,39 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   clean-HEAD re-run into `lab/build/evidence/w8-tzcache/`, including the
   affected-only `max-input-vars` assertion; the three precision nits
   (per-build line, non-deterministic address, identical UBSan record) are
-  folded here and in the investigation report this wake. Rung 4 not
-  claimed: no chosen-offset placement, pointer control or marker
-  execution. Next route: Stage A reuse of the freed startup allocation
-  with a canary, then a benign marker.
+  folded here and in the investigation report (commit d500a9d).
+  **Wake 18 (2026-11-20, 12:27Z–) — Stage A: constrained rung 4 on the
+  combined chain.** Witness #126's three precision nits folded (commit
+  d500a9d). Replay: `bash lab/repro/php2shell-stageA-proof.sh`.
+  (a) With `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1`, 8.4.27-asan reports a
+  textbook 56-byte `heap-use-after-free` instead of a wild-address SEGV:
+  allocated `php_date_parse_tzfile:501` via `OnUpdate_date_timezone` in
+  `zm_startup_date`, freed by `tracked_free_all` → `shutdown_memory_manager`
+  at end of `php_module_startup`, read from `php_session_cancel_decode` →
+  `php_format_date` → `get_timezone_info` → `zend_hash_str_find`; 8.4.28
+  clean. Evidence `lab/build/evidence/stageA/uaf-8.4.27-asan-USE_ZEND_ALLOC0.log`.
+  (b) On plain 8.4.27 with the same env, a query-string value reuses that
+  freed chunk; GDB (`lab/repro/php2shell-stageA-fieldprobe.gdb`) captures
+  the stale pointer at startup and dumps the 56 bytes at the second
+  `zend_hash.c:945` access: with `XXX=ABCDEFGHIJ`, HashTable `arData`
+  (offset 16) = 0x0a = value length, `nNumUsed` (offset 24) = 0x44434241
+  ("ABCD"), `nNumOfElements` (offset 28) = 0x48474645 ("EFGH"), next word
+  0x4847464544434241 ("ABCDEFGH"), then "IJ\0…"; with `XXX=AAAAAAAAA`
+  (9) the same fields are 0x9 / 0x41414141 / 0x41414141 /
+  0x4141414141414141. Those are the exact fields consumed by
+  `zend_hash_str_find_bucket`. Evidence
+  `lab/build/evidence/stageA/stageA-php-8.4.27-plain-splice-mid-gdb-qs{13,14}.log`.
+  (c) Black-box: value length 0–8 → rc 0 (silent UAF); 9/10/20 → rc −11
+  SIGSEGV on 8.4.27; key name irrelevant; 8.4.28 rc 0 for all lengths;
+  `valid-record`, `valid-timezone`, `no-cookie` controls rc 0 on 8.4.27
+  with the long query. First post-startup 56-B malloc traced to
+  `zend_new_array_singleton()` for `$_GET`
+  (`stageA/malloc56-backtrace-8.4.27-plain.log`). Harness, fieldprobe and
+  proof scripts committed as e737acc. **Grade: rung 4, constrained** —
+  chosen bytes at chosen offsets plus low-bit control of the consumed
+  pointer field; NOT arbitrary-address control, no marker execution.
+  Witness re-run of the Stage A claim owed; next experiment: place a
+  genuine pointer at offset 16 and attempt a benign marker.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
