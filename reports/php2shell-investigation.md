@@ -22,6 +22,15 @@ write has been observed. **Rung 4 via this family is not reachable in this
 lab on the evidence gathered.** See `reports/php2shell-status.md` for the
 full per-lane evidence record, including all negatives.
 
+Amended 2026-11-20 (wakes 8–9): the 2026-11-19 vendor release named a
+new payload class and reopened one lane, CVE-2026-126714 "phpAfterShell"
+— see the dedicated section below. It grades rung 2: a demonstrated
+session-splice deserialization primitive, produced end-to-end in this
+lab by both the application-string path and the fully unauthenticated
+upload-progress path, with the vendor fix verified behaviorally on
+8.4.28. Still no memory unsafety: rung 3 is not established for it
+(the public full chain's memory bug is undisclosed).
+
 ## Evidence ladder, honestly graded
 
 | Stage | Grade | Evidence |
@@ -114,6 +123,55 @@ Observed, both builds, ZEND_DEBUG asserts live:
    primitive.
 4. ZERO ASan/UBSan/ZEND_ASSERT output on either build for every probe.
    FPM lane CLOSED at rung 2; no rung-3 signal.
+
+## Reopened lane: CVE-2026-126714 "phpAfterShell" (wakes 8–9, 2026-11-20)
+
+The 2026-11-19 vendor release (8.2.36/8.3.37/8.4.28/8.5.13) named a new
+payload class in the same session family (GHSA-fm2m-fjf5-v3cp): the
+`files` handler's `ps_files_write()` does not clear the old session
+before writing the replacement (defect since PHP 4.1.0), so a worker
+death mid-write leaves prefix-of-new + tail-of-old on the inode — a
+THIRD valid session. Graded rung 2: a splice/deserialization primitive,
+not observed memory unsafety; the public full chain's native-class
+memory bug is undisclosed. Four observations, all on the ASan builds,
+zero sanitizer output:
+
+1. **Consumer** (`lab/repro/php2shell-aftershell-splice-consumer.sh`):
+   the documented post-kill bytes decode with NO warning; naive
+   mid-string cuts are refused (decoder length validation works).
+2. **App-level producer**
+   (`lab/repro/php2shell-aftershell-splice-producer.sh`, kill shim
+   `lab/php2shell/aftershell-kill.c`): a real session write storing a
+   user-controlled string, interrupted at the syscall boundary, leaves
+   the splice; the next request promotes `$_SESSION['evil']` =
+   stdClass. Requires application code that stores attacker strings in
+   the session (the advisory's alternative path).
+3. **Unauthenticated rfc1867 producer** (wake 9,
+   `lab/repro/php2shell-aftershell-splice-upload.sh`): carrier AND
+   replacement are both written by the multipart upload-progress
+   callback pre-RINIT (`php_session_rfc1867_update` →
+   `php_session_flush(1)` → `ps_files_write`, session.c:3175-3207) —
+   no application session code at all; any pre-auth POST with a
+   session id and a file part reaches it. Geometry: three progress
+   keys (`carr`, `objk`, `tail`); the OBJ bytes ride inert inside
+   `objk`'s serialized filename; the replacement updates only `carr`,
+   so the kill at K = len(carr-new) splices
+   `carrnew || OBJ || ... || tailrec`, and the `tail` record's `|`
+   gives the promoted stream a clean EOF. Alignment is calibrated, not
+   hand-computed (AFTERSHELL_LOG_ONLY dumps the pwrite buffers; PAD
+   is adjusted until the OBJ offset equals K). Evidence:
+   `lab/build/evidence/aftershell-upload-{8.4.26,8.4.27}-asan.log`:
+   promoted stdClass, no-kill control clean, on both affected builds.
+   Lesson kept: the first design (OBJ inside the REPLACED record) is
+   impossible — the carrier would always extend past the cut, forcing
+   the pre-write truncate (Variant A) and killing the splice; the OBJ
+   must live in a RETAINED record.
+4. **Fix verified** (8.4.28, mod_files.c:239-242 `ftruncate(0)` before
+   every write): the same kill leaves only the new prefix (1019 bytes,
+   carrier tail gone) and no object, for both the app-level and the
+   unauthenticated producer
+   (`aftershell-upload-8.4.28-asan.log`,
+   `aftershell-producer-8.4.28-asan.log`).
 
 ## Black-box discriminators (affected-only, reproducible)
 

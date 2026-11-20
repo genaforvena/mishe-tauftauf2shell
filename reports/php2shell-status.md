@@ -72,6 +72,45 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   command execution on 8.4.27 via a Guzzle gadget; my wake-5 Leg B
   observation (handler-switch `__wakeup` marker fires on both 8.4.26 and
   8.4.27, version-neutral) is consistent and now carries its CVE number.
+  **Wake 9 (2026-11-20, 10:50Z) — UNAUTHENTICATED rfc1867 producer
+  variant observed** (harness
+  `lab/repro/php2shell-aftershell-splice-upload.sh`, evidence
+  `lab/build/evidence/aftershell-upload-{8.4.26,8.4.27,8.4.28}-asan.log`):
+  carrier AND replacement both written by the multipart upload-progress
+  callback pre-RINIT (session.c:3175-3207
+  `php_session_rfc1867_update` → `php_session_flush(1)` →
+  `ps_files_write`, the vulnerable pwrite) — no application session
+  code at all, matching the advisory's unauth remote path. Geometry:
+  session C built from three progress keys (`carr`, `objk`, `tail`)
+  via three multipart POSTs; the splice OBJ
+  (`evil|O:8:"stdClass":1:{s:5:"proof";s:5:"pwned";}`) rides inert
+  inside `objk`'s serialized FILENAME (multipart quote-unescape
+  verified, rfc1867.c:488-504); the replacement POST updates only
+  `carr`, so R = carrnew || objk || tail byte-identically and the kill
+  at K = len(carrnew) (first FILE_START pwrite) leaves
+  carrnew || OBJ || ... || tailrec, which plain session_start()
+  decodes with keys: carr, **evil (promoted stdClass, no warning)**,
+  one junk key (32 B's + objk's fixed suffix + `upload_progress_tail`
+  — the tail record's `|` gives the clean EOF the decoder demands,
+  session.c:1121-1145), value = tail's array. PROMOTION OBSERVED on
+  both 8.4.26 and 8.4.27 ASan builds, splice verified on disk byte
+  for byte (file[K:] == carrier[K:]), no-kill control clean, ZERO
+  ASan/UBSan/ZEND_ASSERT. Fix verified: on 8.4.28 the same kill
+  leaves a 1019-byte file (ftruncate ran first, carrier tail GONE)
+  and the consumer sees only `upload_progress_carr`, no object.
+  Alignment is calibrated, not hand-computed: the shim's new
+  AFTERSHELL_LOG_ONLY mode dumps the real pwrite buffers; PAD inside
+  objk's filename is adjusted until the OBJ offset equals K.
+  Observed lessons kept: (1) first design (OBJ inside the REPLACED
+  record) is impossible — the carrier always extends past the cut, so
+  len(R) < len(C) forces the pre-write truncate and the splice dies;
+  the OBJ must live in a RETAINED record; (2) dump-offset vs
+  buffer-offset measurement bug (the `=== pwrite n= ===` marker line)
+  shifted K by 22 bytes into the objk key and produced a clean
+  decoder refusal — caught by the splice-check, not guessed at.
+  Grade unchanged: rung 2 — the unauth splice→deserialization
+  primitive is now fully demonstrated, still no memory unsafety.
+
 - **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
   Apache, and (2026-11-20 wake 7) php-fpm — and each negative is observed,

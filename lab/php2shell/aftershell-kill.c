@@ -12,8 +12,13 @@
  * write + lock release on death) is fully genuine; only the kill is
  * simulated.
  *
- * Build: cc -shared -fPIC -O2 -o lab/preload/aftershell-kill.so lab/php2shell/aftershell-kill.c
  * Gated on the AFTERSHELL_KILL_AT env var; fires at most once per process.
+ *
+ * Calibration mode (measurement only, no kill): with AFTERSHELL_LOG_ONLY=1
+ * and AFTERSHELL_LOG_FILE=<path>, every pwrite(fd, buf, n, 0) is dumped to
+ * that file as "=== pwrite n=<len> ===" + raw bytes, so a harness can read
+ * back the exact buffer PHP's session write produced and pick the cut
+ * offset K before doing the real kill run.
  */
 
 #define _GNU_SOURCE
@@ -21,16 +26,33 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stddef.h>
 
 static ssize_t (*real_pwrite)(int, const void *, size_t, off_t);
 static int fired = 0;
+
+static void dump_buffer(const void *buf, size_t n)
+{
+    const char *path = getenv("AFTERSHELL_LOG_FILE");
+    FILE *f;
+    if (!path) return;
+    f = fopen(path, "ab");
+    if (!f) return;
+    fprintf(f, "=== pwrite n=%zu ===\n", n);
+    fwrite(buf, 1, n, f);
+    fputc('\n', f);
+    fclose(f);
+}
 
 ssize_t pwrite(int fd, const void *buf, size_t n, off_t off)
 {
     if (!real_pwrite) {
         real_pwrite = (ssize_t (*)(int, const void *, size_t, off_t))
             dlsym(RTLD_NEXT, "pwrite");
+    }
+    if (getenv("AFTERSHELL_LOG_ONLY") && off == 0) {
+        dump_buffer(buf, n);
     }
     const char *k = getenv("AFTERSHELL_KILL_AT");
     if (!fired && k && off == 0) {
