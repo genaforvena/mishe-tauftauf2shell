@@ -12,7 +12,7 @@ unaffected. Affected 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix
 in default configs, and dates its public PoC 2026-11-25 "or later if
 major vendors have not shipped a fix by then".
 
-Public status (checked 2026-11-20): advisory public since
+Public status (checked 2026-11-20 12:08Z): advisory public since
 2026-11-18/19 — the ruby-lang.org news item fixes GHSA-34m4-m9fh-gqp5
 in 4.0.10/3.4.13/3.3.14 and states "We are aware of PoCs that prove
 this flaw can be used to trigger RCE in some scenarios";
@@ -21,6 +21,23 @@ primitive to Stephan Lipp (Ada Logics) and Anthropic; Veria's page adds
 Moritz Sanft (with OpenAI) as a discoverer, claims first RCE
 demonstration, and lists 3.2-and-older as affected back to 2.4.0
 (EOL, unfixed).
+Disclosure landscape re-check (2026-11-20 12:08Z; Veria page stamp
+"Updated 20 November 2026 at 11:58 UTC", i.e. after the 11:55Z
+check): PoC still unpublished, still dated 2026-11-25. Two additions,
+both recorded as vendor claims, not lab findings: (1) a
+self-hosted-software table — GitHub Enterprise Server 3.22.5 and
+earlier listed **Vulnerable with no fixed release**; Chatwoot 4.20.1,
+GitLab 19.6.1/19.5.8/19.4.10, Mastodon 4.7.6/4.6.12/4.5.22/4.4.29,
+OpenProject 17.9.8/17.8.3 and the Discourse base image
+2.0.20261119-0203 listed as vendor-patched. (2) A "Primitive" section
+naming the overflow byte `S` (0x53, upcase) / `s` (0x73, case-fold)
+and stating that copying the result out of the buffer reads one byte
+out of bounds. The byte alphabet **agrees exactly** with this report's
+independently measured Stage A′ alphabet {0x53, 0x73} — an external
+confirmation of our source audit, not new information for it. The
+copy-out OOB read is a claim we have NOT separately reproduced: our
+rungs exercise the write and read back through a corrupted live
+neighbor chunk, not through the case-map result copy.
 
 Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
