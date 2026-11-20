@@ -111,3 +111,30 @@ build-specific (exact struct offsets, leaked heap addresses, dlsym/ROP
 gadgets) and the author withheld PoCs. Under this wake's time budget the
 wire-only chain remains UNKNOWN; the observed pointer control is
 lab-assisted only.
+
+## PONG enlargement ACHIEVED (16:46Z) — pre-auth 32 KiB heap read
+
+The earlier negative was an ordering error, not a dead lane. Adding one
+pre-existing connection (`spare`, handshake only) and sending its PING
+header **after** the source's 174-byte CONNECT body allocation makes the
+`0xc0` PONG adjacent to the source buffer. The source's 8 phantom frames
+then reach `source+0xcc`, the 4-byte `packet_length=0x8010` write lands in
+the PONG, and completing the spare's PING yields:
+
+    PONG bytes received: 32776
+    frame header: 8a 7e 80 00       (WS PONG, 16-bit length 0x8000)
+
+Reproduced twice consecutively on the stock-glibc 2.1.2 build, broker
+alive both times. Evidence: `logs/pong-leak.log`, `logs/pong-leak.bin`
+(overwritten by the second run), and the allocation diagnostic
+`logs/gdb-groom.log`: with the original ordering the last PONG was
+`0x...2efa0` and the source payload `0x...303f0` (gap ~0x1450); the spare
+ordering removes that gap. This is a deterministic **pre-auth 32 KiB
+out-of-bounds heap read**, entirely over the wire: no sanitizer, no gdb
+assistance, no credentials. Rung 4's first chain stage is now local fact.
+
+Caveat: the leaked bytes in this run are mostly zeros — the adjacent
+PONG came from fresh zeroed top-of-heap, so no `struct mosquitto` or heap
+pointers are present yet. The article's next step (scan the 32 KiB for a
+freed client context, derive `listener`, then safe-link a tcache fd) is
+still UNKNOWN here. Do not claim a leak of live pointers from this sample.
