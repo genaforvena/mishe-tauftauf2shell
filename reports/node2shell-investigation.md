@@ -652,6 +652,28 @@ value nor the origin can place the required
 `[00][believed>>8][00×6]` fake `prev_size` qword; the only NUL at that
 offset is the library's own terminator, at the origin/data boundary.
 
+**UTF-8 low-byte-truncation channel — tested and closed (wake 24).**
+The "ASCII-only" reading above had not tested the one plausible bypass:
+`WriteOneByteV2` emits the low byte of each UTF-16 code unit, so a
+codepoint U+0100 would truncate to `0x00` and would pass any validator
+that only rejected a raw U+0000. Tested on the vulnerable prebuilt
+v24.22.2 with the committed loopback harness; all logs
+`lab/node2shell/tmp/w24utf8/` (gitignored):
+
+- ALT value as UTF-8 `c4 80` (U+0100), passed via `process.argv` so
+  Node decodes it to that codepoint: `TypeError [ERR_INVALID_CHAR]:
+  Invalid character in alt`, client `ECONNRESET`. Boundary sweep:
+  `0x20`, `0x80`, `0xff` accepted; `0x7f` rejected. Allowed set is
+  `\x20-\x7e\x80-\xff`, whose members all have a nonzero low byte —
+  so truncation cannot manufacture a NUL from `alt`.
+- `:authority` as UTF-8 `c4 80` (U+0100, 520 code units): server
+  `NGHTTP2_PROTOCOL_ERROR` on the stream. Latin-1 `c3 bf` (U+00FF)
+  and a raw `ff` authority byte are rejected identically; ASCII `61`
+  is accepted. The origin buffer's network channel is ASCII-only.
+
+Preserved negative. Rung 4 stays not demonstrated; no binary-capable
+heap-byte channel exists in this attacker model.
+
 **Measured overlap window.** In the `LEN2=1872` boot
 (`w13s1872/multi-run5.log`), V is at `0x6e4f100` with believed size
 `0xa00`; the real next-chunk boundary is at `0x6e4f100+0xa10 =
