@@ -87,6 +87,43 @@ the fix diff plus the origin/stack correlation, not from a symbolised report.
 The uninitialised value in this run was *not attacker-chosen*; no pointer or
 marker control was exercised.
 
+## Symbolised fault and the OOB slot bytes (gdb, 2026-11-20)
+
+Installed the exact-build debug symbols in the lab container
+(`postgresql-17-dbgsym=17.11-1.pgdg13+2`) and replayed the same trigger under
+gdb on a second 17.11 instance (in-container loopback only, no host port).
+This upgrades rung 3 from a correlation to a named instruction and source
+line, and answers the read-vs-write question directly.
+
+- `info address ExecBatchInsert` = `0x35a840`; line 1274 starts at
+  `0x35a8b8`; the faulting instruction is `0x35a8c8 <ExecBatchInsert+136>:
+  mov %ecx,0x38(%rbx)`. The Valgrind IP `0x4628C8` is that same file offset
+  plus the Valgrind client load base `0x108000` — exact match.
+- Line 1268 (`slot = rslots[i]`) compiles to `mov (%r14,%r12,8),%rbx` at
+  `0x35a8b4`; line 1274 (`slot->tts_tableOid = ...`) compiles to the 4-byte
+  store above. `tts_tableOid` is at offset `0x38` in `TupleTableSlot`
+  (checked against the 17.11 `tuptable.h` layout), so the reported
+  `Invalid write of size 4 ... Address 0x38` is a NULL slot base plus the
+  field offset, not a write at absolute address 0x38 of an array.
+- Live break at the loop head showed `numInserted=6`, `numSlots=2`,
+  `rslots=0x61a0495da580`. `slots[0]=0x...a7a0`, `slots[1]=0x...aae0` are
+  valid; **indices 2..9 are all zero**. `postgres_fdw` returns the very same
+  `slots` array (`execute_foreign_modify()` returns `slots` and overwrites
+  `*numSlots = n_rows`), so the overrun walks uninitialised entries *inside*
+  the 10-pointer `ri_Slots` allocation. At `i=2` gdb read `slot=(nil)` and
+  stopped at SIGSEGV on line 1274. Backtrace:
+  `ExecBatchInsert -> ExecPendingInserts -> ExecModifyTable ->
+  standard_ExecutorRun`. Logs:
+  `lab/frontier/postgres2shell/logs/gdb-17.11-symbolised.log` (sha256
+  `feb388a194deeaef31391cc69f925aae9736d94e1f6957790a1337abe114d670`) and
+  `gdb-17.11-psql.out` (`fe3af636ac2875411c1c48d813a4a849932c389d6892560ffead1ed11b2d8fbf`).
+
+Both claim directions are therefore correct about different statements: the
+fix commit's "read past the end of the array" is the `rslots[i]` load at line
+1268; the advisory's 4-byte heap write is the `tts_tableOid` store at line
+1274 through the garbage pointer. In the observed run the garbage pointer is
+**NULL**, so no chosen address, chosen bytes or marker execution occurred.
+
 ## Source-bound mechanism (read from the fix patch, not inferred)
 
 `ExecForeignBatchInsert()` is an FDW callback that returns the count of
@@ -128,16 +165,20 @@ Do not collapse the advisory's RCE claim into a demonstrated primitive.
   (six for two rows) reaches the backend; affected build loses the connection
   with a backend SIGSEGV, fixed build clamps to `INSERT 0 2` with the rule
   table at six. The version-sensitive 2-vs-6 boundary holds.
-- **Rung 3 (memory report): PASS on the stock affected binary, with limits.**
-  Valgrind reports an uninitialised 8-byte FDW-heap value used as a pointer and
-  an `Invalid write of size 4` at `0x38` followed by SIGSEGV, triggered by the
-  INSERT and absent before it. Symbol names for the faulting function and
-  `rslots[]` are unavailable on the stripped stock binary; attribution to the
-  fix diff is correlation plus origin/stack evidence, not a symbolised report.
-- **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** The pointer
-  consumed in the Valgrind run was uninitialised heap data, not chosen by the
-  attacker; no controlled slot pointer, no GOT/pointer control, no marker
-  execution. The advisory's "arbitrary code execution" is a CLAIM.
+- **Rung 3 (memory report): PASS, now symbolised.** The Valgrind report shows
+  the uninitialised 8-byte FDW-heap value used as a pointer and the invalid
+  4-byte write at `0x38` followed by SIGSEGV, triggered by the INSERT and
+  absent before it. Exact-build symbols and a live gdb replay name the fault
+  `ExecBatchInsert+136`, `nodeModifyTable.c:1274`, with the OOB read at line
+  1268; see the symbolised section above. The stock binary itself stays
+  stripped — the names come from the matching Debian debug package, not from
+  the Valgrind log.
+- **Rung 4 (demonstrated security impact): NOT DEMONSTRATED.** The OOB slots
+  read in the observed allocation are all zero; the consumed `TupleTableSlot
+  *` is NULL, not attacker-chosen. The primitive would be a 4-byte store of
+  the foreign relation's OID through a controlled slot pointer, but no such
+  pointer was observed or placed. No GOT/pointer control, no marker
+  execution. The advisory's "arbitrary code execution" remains a CLAIM.
 
 ## Feasibility and cheapest next step
 
@@ -147,14 +188,17 @@ test, stock images pullable, both endpoints loopback-able. It needs no
 hardware feature (unlike the AVX-512-blocked Java4Shell). Reachability is
 narrower than a default-on listener: the attacker must influence a foreign
 server's row-count response and hold `PR:L`. The primitive is an OOB slot
-pointer read followed by a dereference/write (observed here at `0x38`) —
-attractive for rung 4 if adjacent heap memory can be groomed with chosen
-`TupleTableSlot *` values, but unproven.
+pointer read followed by a 4-byte store through it. The observed slot tail is
+all zeros, so the practical question is whether that tail can be groomed
+with chosen pointer bytes — unproven and not achieved by the stock trigger.
 
-Cheapest next rung: on an unstripped/ASan build, symbolise `0x4628C8` and name
-`ExecBatchInsert`/`rslots[]`, then attempt to place a chosen slot pointer in
-the OOB slot. Preserve the fixed-build differential. Only after a controlled
-slot pointer is observed should anyone claim rung 4.
+Next rung: the remaining question is purely a grooming question — can bytes
+of a chosen pointer value be placed into the tail of the 10-entry `ri_Slots`
+allocation before `ExecBatchInsert` reads it? The stock trigger leaves all
+eight OOB entries zero. Even with a chosen pointer, the written value is a
+relation OID, so a demonstration needs an observed controlled write at a
+chosen address, not just an OOB pointer read. Preserve the fixed-build
+differential and the zero-tail negative.
 
 ## Reproduce
 
@@ -172,5 +216,23 @@ cd lab/frontier/postgres2shell
 # also crashes but yields NO Valgrind report — do not read that as rung 3.
 ```
 
-All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432/55435).
-Stock image digests are pinned above; no host package changes.
+Symbolised replay (needs the matching `postgresql-17-dbgsym` and gdb with
+PTRACE capability; loopback only, no host port published):
+
+```
+# new 17.11 container with --cap-add=SYS_PTRACE, listen_addresses=127.0.0.1,
+# gdb + postgresql-17-dbgsym=17.11-1.pgdg13+2 installed; copy /usr/lib/debug
+# from the original lab container if the PGDG repo is unavailable.
+# Hold a psql session open on a FIFO, note SELECT pg_backend_pid();
+# attach: gdb -q -batch -p <backend-pid> -x pg2shell-gdb.cmd
+# (breakpoint *ExecBatchInsert+120 dumps rslots[] and each slot pointer)
+# then send trigger.sql's FDW setup and INSERT through the FIFO.
+# Evidence: logs/gdb-17.11-symbolised.log, logs/gdb-17.11-psql.out
+```
+
+The gdb command file is committed at `lab/frontier/postgres2shell/gdb.cmd`;
+the captured log above is its actual output.
+
+All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432;
+in-container 55435 for the Valgrind instance). Stock image digests are pinned
+above; no host package changes.
