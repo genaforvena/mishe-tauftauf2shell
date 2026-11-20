@@ -41,6 +41,16 @@ claims, not conclusions.
   write as a 100-byte new prefix with no object promoted
   (`aftershell-producer-8.4.28-asan.log`). Hand-assembled splice bytes still
   decode on 8.4.28, but a fixed handler cannot produce them.
+- 2026-11-20 new descendant lane (**CVE-2026-129481** /
+  GHSA-g3vh-838c-65v7): an incomplete fix for 109619. A fatal in a user
+  stream wrapper's `stream_close()` interrupts session shutdown, leaving
+  the recorded script-filename pointer live into the next request on the
+  same FPM worker. Affected 8.4.27-fpm-asan; no ASan on fixed 8.4.28 or on
+  a benign-close control. `lab/repro/php2shell-cve129481-fpm.py` observes an
+  ASan 4-byte use-after-free read at
+  `php_session_cleanup_filename (session.c:128)`. Rung 3 CONFIRMED, no
+  rung 4 and no pre-auth reachability claim. The other uncovered 9.2 CVEs
+  (129182, 129474, 129289) remain untested.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
@@ -183,10 +193,12 @@ reproduction 18:28Z (throwaway copy of digests-pinned sources) observed
 rungs 1/2 placement, an ASan `heap-buffer-overflow` `WRITE of size 132146` in
 `memcpy` from `ws_raw_read`, and a chosen 8-byte value at
 `offsetof(wsh_t, ssl)=131112` executing a marker with `rc=42`; in-bounds and
-fixed-build controls pass and five repeats are identical. The harness driver
-still prints `CHECKS FAILED`: its expected exit codes and literal byte
-patterns are stale after the source edit, so quote the individual
-observations with their digests, not the driver verdict. This is a harness-
+fixed-build controls pass and five repeats are identical. Frontier repaired
+the harness accounting and exit codes at 19:02Z; the driver now prints
+`ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` and
+`run.sh` `637cfa36…`. The earlier 2928 OOB-write count was double the real
+extent because a zero-byte read underflowed `trace_copy()`; 1464 is correct.
+This is a harness-
 only rung 4: no live FreeSWITCH process, WebSocket upgrade, real heap layout
 or loopback network path has been tested; those stay UNKNOWN. Evidence:
 `reports/frontier-freeswitch2shell.md` (reproduction section), harness
@@ -332,6 +344,28 @@ corruption: no ASan report yet. Build/harness are
 `build.sh` / `oracle.sh`; full evidence in
 `reports/frontier-apache2root.md`. Operator notified for a dedicated
 mind if rung 3 appears; frontier does not duplicate an admitted lane.
+
+#### Candidate 2026-11-20: FreeRDP rdpsnd (CVE-2026-114045 / GHSA-3m9q-g533-rqjq) — UNSUBMITTED
+
+Claim sources: the GHSA, the CVE/OSV record, NVD, FreeRDP's 3.32.1 release
+page and the 3.32.0 to 3.32.1 diff, read as provisioning, not lab findings.
+Affected `master <= 8ec6d3923b8951e…` and stable `<= 3.32.0`, fixed
+`>= 3.32.1` (tag `bf217a5`). A `WAVE_FORMAT_DVI_ADPCM` SNDC_FORMATS record
+with `nBlockAlign=4, nChannels=2` wraps a UINT64 block-size expression,
+drives `out_frames` to `0xfffffffffffffff0` without rollback after the
+realloc fails, and makes the later sample copy an unbounded sequential heap
+overwrite of client-supplied audio bytes. Default posture is post-auth
+(`PR:L`); no-auth deployments reach the 9.8 ceiling.
+
+Frontier transcribed the two functions into a file-only C harness under
+`lab/frontier/freerdp2shell/`, with source pins, digests and expected bytes
+in `reports/frontier-freerdp2shell.md`: rungs 1/2/3 established, rung 4 PASS
+in the extracted harness with chosen bytes at chosen offsets; benign PCM and
+the 3.32.1 guard are clean controls. Live FreeRDP, the real PDU parse path,
+an RDP session, the allocator's heap layout, network reachability and the
+auth gate remain UNKNOWN. **Decision: no admission, no lane, no mind or
+window yet** — this is a candidate brief awaiting the operator, not a target
+of this plant.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
