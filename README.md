@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies thirteen admitted vulnerability families in local, isolated copies
+It studies fourteen admitted vulnerability families in local, isolated copies
 of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -20,6 +20,9 @@ of the affected software:
   `debug_backtrace()` on 8.5.12 triggered by the vendor's own regression
   case; both have clean fixed controls, and neither claims rung 4. The
   129474 read is invisible to ASan because ZendMM pools the affected memory.
+  CVE-2026-129182, a backtrace-global repopulation UAF on 8.5, has a bounded
+  loopback FPM harness; the debug ASan build preserves a negative and the
+  release-ASan replay is still owed, so its grade is UNKNOWN.
 - **Node2Shell** — CVE-2026-123828, a one-byte heap overflow in Node's
   HTTP/2 `Alt-Svc` handling (admitted by the plant's operator under its
   standing "similar things" mandate).
@@ -56,9 +59,13 @@ of the affected software:
   pinned `ws.c` was also driven over a real 127.0.0.1 socket (with Abyss type
   stand-ins): the advisory's `FF FF FF FF` frame faults under ASan, while
   `7F FF FF FF 00 00 00 00` yields `plen=INT_MAX` and writes a chosen 8-byte
-  value into `wsh->ssl` in that real function. The fixed build rejects both;
-  marker execution stays harness-only, and a full live process, upgrade,
-  stock heap layout and reachability stay UNKNOWN.
+  value into `wsh->ssl` in that real function. The fixed build rejects both.
+  A full vulnerable FreeSWITCH then ran on 127.0.0.1 in a private netns with
+  `mod_xml_rpc` + `enable-websocket`: a real WebSocket `101` upgrade delivered
+  the frame and GDB caught the chosen value dereferenced in `SSL_shutdown`
+  (witness-replayed #338 with different bytes at the same fault site). Fixed and
+  in-bounds controls survive. The sentinel is not code; stock heap layout,
+  external reachability and the opt-in config gate stay in the claim.
 - **Freerdp2Shell** — CVE-2026-114045 / GHSA-3m9q-g533-rqjq, a UINT64
   wraparound in FreeRDP's server-side rdpsnd `select_format()` that leaves
   `out_frames` unrolled back after a failed realloc, turning later audio
@@ -74,6 +81,14 @@ of the affected software:
   ~20:27Z under standing approval #6; rungs 1-3 and harness-only rung 4 are
   recorded in the brief, with live RDP, PDU path, network reachability and
   the auth gate UNKNOWN.
+- **Gst2Shell** — CVE-2026-111183 / GHSA-62fg-53h6-6f68, a high
+  `channels` value in GStreamer's rtpL16depay caps that over-writes the fixed
+  64-entry `GstAudioInfo.position` array. Rungs 1-3 are reproduced in an
+  extracted harness (`oob_writes=936`, caps length chooses the clobbered
+  offsets, ASan `WRITE of size 4`, clean fixed control); rung 4 is an honest
+  negative because the sink writes only constant `NONE(0)`, so the bytes are
+  not attacker-controlled. Admitted ~20:52Z under standing approval #6; live
+  caps/RTSP path and allocator layout stay UNKNOWN.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -94,19 +109,19 @@ is called established.
 | **Brotli2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | Pinned two-stage stream drives 20 attacker-chosen bytes past an 8-byte decoder buffer into named state fields; fixed build rejects with `ERROR -17`. Rung 4 is NOT demonstrated; network reachability is a claim. [Status](reports/brotli2shell-status.md) |
 | **Freeradius2Shell** | **Rung 4 — demonstrated impact in a standalone harness** | A crafted EAP-FAST ticket writes 208 bytes into a 152-byte stack structure and executes a chosen `verify_marker()` address at rc 42; fixed build rejects the same ticket. Live `radiusd` reachability and key-unknown byte control remain UNKNOWN. [Status](reports/freeradius2shell-status.md) |
 | **Falkordb2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | A masked zero-payload extended-length frame drives 525 out-of-bounds write operations (word XORs plus trailing bytes); chosen mask bytes overwrite a canary at chunk offset 104. ASan reports a heap-buffer-overflow, an 8-byte READ at the `^=` load, under the short-chunk lab layout; witness replay #239 established rungs 1/2/3. Rung 4 is NOT demonstrated because the mask repeats every four bytes. [Status](reports/falkordb2shell-status.md) |
-| **Freeswitch2Shell** | **Rung 4 — chosen-pointer control in the real `ws_raw_read` over loopback; marker execution still harness-only** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. Abyss `TConn`/`TSession` and `ConnRead`/`ConnWrite` remain stand-ins; no live process, WebSocket upgrade, stock heap layout or reachability. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
+| **Freeswitch2Shell** | **Rung 4 — chosen-pointer dereference in a live FreeSWITCH process over loopback; sentinel is a value, not code** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with `mod_xml_rpc` + `enable-websocket`: a real WebSocket `101` upgrade delivered the frame and GDB caught the chosen `wsh->ssl` value dereferenced in `SSL_shutdown` from `ws_destroy (ws.c:367)` ← `websocket_hook (mod_xml_rpc.c:703)`; witness replay #338 changed only the 8 chosen bytes and saw the new value at the same fault site. Fixed and in-bounds controls survive. Stock heap layout, external reachability and the opt-in config gate stay in the claim; the sentinel is not executable code. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
 
 | **Xrdp2Shell** | **Rung 3 — confirmed corruption; harness-only rung 4** | A 28-byte data-first header plus 20000 client bytes writes `oob_writes=11836` from offset 8192; chosen `ab`/`cd` land at OOB offsets 8228/12028, ASan reports `WRITE of size 20000` 0 bytes after the 8192-byte region, and rung 4 places `de`/`ad` at offsets 8228/12024 across two messages. Exact-size 0.10.6.1 and benign controls are clean, 5/5 traces identical. Live xrdp process, real DYNVC PDU path and the post-auth gate are UNKNOWN. [Status](reports/xrdp2shell-status.md) |
 | **Gst2Shell** | **Rung 3 — confirmed corruption in an extracted harness; rung 4 honest negative** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, 3744 counted zeroed OOB bytes, with the caps value choosing which offsets are clobbered; ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Rung 4 is NOT demonstrated — the sink writes only constant `NONE(0)`, so the attacker controls the length and offsets, not the bytes. Live GStreamer, SDP/RTSP caps path and allocator layout UNKNOWN. [Status](reports/gst2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
-(including the reopened session-splice lane, the session-filename UAF and
-the new 8.5 stale-argument read),
+(including the reopened session-splice lane, the session-filename UAF, the
+new 8.5 stale-argument read and 129182's release-ASan replay),
 Node's path from corruption
 to control, Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
 index 27, FreeRADIUS's live `radiusd` replay, FalkorDB's four-byte-repeating
-mask, Freeswitch's full live `mod_xml_rpc` process replay (real-source loopback checks now include positive-length chosen-pointer placement), Xrdp's live loopback DYNVC PDU path and auth gate, and GStreamer's live caps path plus any useful zeroing effect are still open. Apache's
+mask, Freeswitch's stock heap layout and any executable sentinel, Xrdp's live loopback DYNVC PDU path and auth gate, and GStreamer's live caps path plus any useful zeroing effect are still open. Apache's
 Stage C route was closed as unreachable in this build on this host and is
 preserved as a negative. Each open question is recorded as an UNKNOWN in its
 status file rather than papered over. Failed hypotheses and negative results
@@ -141,6 +156,11 @@ owed from the person's full-flag sync. Its grade is recorded in the status
 file, not treated as an established result.
 
 Xrdp2Shell was admitted ~20:27Z: the charter, docs entry, window (19, inner
+socket), seed wall and status file are live; wake trigger units and the
+presentation.json entry are owed from the person's full-flag sync. Its
+grade is recorded in the status file, not treated as an established result.
+
+Gst2Shell was admitted ~20:52Z: the charter, docs entry, window (20, inner
 socket), seed wall and status file are live; wake trigger units and the
 presentation.json entry are owed from the person's full-flag sync. Its
 grade is recorded in the status file, not treated as an established result.

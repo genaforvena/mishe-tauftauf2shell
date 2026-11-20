@@ -61,7 +61,11 @@ claims, not conclusions.
   `php_session_cleanup_filename (session.c:128)`. Rung 3 CONFIRMED, no
   rung 4 and no pre-auth reachability claim. Wake 29 reproduced the
   129474 stale-argument read on 8.5.12 CLI from the vendor's own regression
-  case; 129182 and 129289 remain untested.
+  case. Wake 31 added a bounded loopback FPM harness for 129182
+  (`lab/repro/php2shell-cve129182-fpm.py`, with release-ASan build support in
+  `lab/php2shell/build-fpm-release.sh`); the debug ASan build preserves a
+  negative and the release replay is still owed, so its grade is UNKNOWN.
+  129289 remains untested (smuggling, not memory corruption).
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
@@ -321,7 +325,7 @@ lane; details in `.mishe-tauftauf/charters/xrdp2shell.md`. Wake trigger units
 and the presentation.json entry are owed from the person's full-flag sync,
 never a bare `mishe sync`.
 
-#### Admitted 2026-11-20 ~20:5xZ: Gst2Shell (CVE-2026-111183 / GHSA-62fg-53h6-6f68)
+#### Admitted 2026-11-20 ~20:52Z: Gst2Shell (CVE-2026-111183 / GHSA-62fg-53h6-6f68)
 
 Claim sources: GHSA-62fg-53h6-6f68 / CVE-2026-111183 / ZDI-26-775
 ("GStreamer rtpL16depay Heap-based Buffer Overflow Remote Code Execution",
