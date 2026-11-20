@@ -53,7 +53,7 @@ is called established.
 | Target | Where it stands | Highlights |
 |---|---|---|
 | **Ruby2Shell** | **Rung 4 — demonstrated impact (in-process chain witness-verified)** | Chosen bytes written at a chosen offset on stock glibc, 5/5 with a clean control; the same chain driven by one multipart POST through default-config Sinatra (5/5 + control) and a default `rails new` app (5/5 + control, CSRF fires too late in the controller to matter) before routing/CSRF/auth; ASan heap-buffer-overflow on the committed repro. Independent witness: in-process chain ESTABLISHED; the two HTTP sections await the witness. [Full report](reports/ruby2shell-investigation.md) |
-| **PHP2Shell** | **Rung 3 — confirmed corruption** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. Reopened 2026-11-20 under CVE-2026-126714: both splice halves reproduced on both pinned ASan builds — an interrupted real session write leaves a replacement prefix plus carrier tail on disk and the next request promotes the object; the kill is shim-simulated, not a remote trigger. The 8.4.28 fix was verified in the lab: under the same kill the write leaves only a truncated new prefix and no promoted object. [Status](reports/php2shell-status.md) |
+| **PHP2Shell** | **Rung 4 — constrained placement (CGI witness-established; mod_php witness pending)** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. Reopened 2026-11-20 under CVE-2026-126714: both splice halves reproduced on both pinned ASan builds — an interrupted real session write leaves a replacement prefix plus carrier tail on disk and the next request promotes the object; the kill is shim-simulated, not a remote trigger. The 8.4.28 fix was verified in the lab: under the same kill the write leaves only a truncated new prefix and no promoted object. A separate Stage A chain writes chosen bytes at chosen offsets of the consumed stale HashTable: witness #138 ESTABLISHED the constrained rung-4 form on CGI, and wake 25 observes the same form on mod_php under Apache (witness pending); `arData` is only a length, so there is no pointer control or marker execution, and FPM stays rung 3. [Status](reports/php2shell-status.md) |
 | **Apache2Root** | **Rung 3 — confirmed corruption with Stage A placement** | Differential child SIGSEGV on affected 2.4.70 and clean fixed control under gdb, with chosen-byte placement at a capacity boundary; the earlier bounded ASan sweep was negative and is preserved. [Report](reports/apache2shell-investigation.md) |
 | **Mosquitto2Shell** | **Rung 3 — confirmed corruption** | ASan `WRITE of size 256`, 3 bytes after a 1-byte region, via `net__read_ws (net_ws.c:305)` on affected 2.1.0-2.1.2; clean close on fixed 2.1.3; Stage A places 4N chosen bytes at a chosen offset. Stock-glibc tcache/rung 4 remains UNVERIFIED. [Brief](reports/frontier-mosquitto2shell.md) |
 | **Node2Shell** | **Rung 3 — deterministic memory effect** | One-request stock-glibc abort on v20.20.2; deterministic ASan differential v24.22.2 (affected) vs fixed control; a deterministic PREV_INUSE-clear on bare v24.22.2 with controls. [Report](reports/node2shell-investigation.md) |
@@ -63,25 +63,23 @@ is called established.
 | **Freeradius2Shell** | **Rung 4 — demonstrated impact in a standalone harness** | A crafted EAP-FAST ticket writes 208 bytes into a 152-byte stack structure and executes a chosen `verify_marker()` address at rc 42; fixed build rejects the same ticket. Live `radiusd` reachability and key-unknown byte control remain UNKNOWN. [Status](reports/freeradius2shell-status.md) |
 | **Falkordb2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | A masked zero-payload extended-length frame drives 525 out-of-bounds write operations (word XORs plus trailing bytes); chosen mask bytes overwrite a canary at chunk offset 104. ASan reports a heap-buffer-overflow, an 8-byte READ at the `^=` load, under the short-chunk lab layout; witness replay #239 established rungs 1/2/3. Rung 4 is NOT demonstrated because the mask repeats every four bytes. [Status](reports/falkordb2shell-status.md) |
 
-Work is ongoing: PHP's rung-4 placement question (including the reopened
-session-splice lane), Node's path from corruption to control, Apache's
-path from Stage A placement to Stage C pointer control, Mosquitto's
-stock-glibc rung-4 question, Dragonfly's stock rung-3/4 gap, Postgres's
-wrong `PR:L` pointer identity, Brotli's pointer fields beyond index 27,
-FreeRADIUS's live `radiusd` replay, and FalkorDB's four-byte-repeating
-mask are still open. Each is recorded as an UNKNOWN in its status file
-rather than papered over. Failed hypotheses and negative results stay
+Work is ongoing: PHP's path from constrained placement to pointer control
+(including the reopened session-splice lane), Node's path from corruption
+to control, Apache's path from Stage A placement to Stage C pointer control,
+Mosquitto's stock-glibc rung-4 question, Dragonfly's stock rung-3/4 gap,
+Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
+index 27, FreeRADIUS's live `radiusd` replay, and FalkorDB's four-byte-
+repeating mask are still open. Each is recorded as an UNKNOWN in its status
+file rather than papered over. Failed hypotheses and negative results stay
 in the reports.
 
 ## How the plant works
 
 Each target is its own mind with its own window: **ruby2shell**,
 **php2shell**, **node2shell**, **apache2shell**, **mosquitto2shell**,
-**dragonfly2shell**, **postgres2shell**, **brotli2shell** and
-**freeradius2shell** pursue their lane end-to-end — build, harness,
-debugger, report. FalkorDB has a live window and inherited frontier results
-while its dedicated mind is being chartered. Four further minds cut across
-them:
+**dragonfly2shell**, **postgres2shell**, **brotli2shell**,
+**freeradius2shell** and **falkordb2shell** pursue their lane end-to-end —
+build, harness, debugger, report. Four further minds cut across them:
 
 - **frontier** hunts public advisories for new X2Shell-class candidates and
   hands a reproducible harness and brief to the operator for admission.

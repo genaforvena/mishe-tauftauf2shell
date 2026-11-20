@@ -29,7 +29,7 @@ containers whose host ports bind only to loopback.
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
 | Ruby2Shell | [report](../reports/ruby2shell-investigation.md) | `bash lab/ruby2shell/provision.sh` | Ruby build recipe in report | `lab/repro/ruby2shell-rung1.rb`, `stageA.rb`, `stageC.sh`, `stageB-http.sh` |
-| PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-apache.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb` |
+| PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-apache.sh`, `build-apache-plain.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb` |
 | Node2Shell | [report](../reports/node2shell-investigation.md) | `bash lab/node2shell/provision.sh` | prebuilt binaries, no local source build | `sh lab/repro/node2shell-stageA.sh 5`; `lab/repro/node2shell-shrinkwalk/run-multi.sh` |
 | Apache2Root | [report](../reports/apache2shell-investigation.md) | `lab/src/httpd-2.4.{70,71}.tar.bz2` + `.sha256` sidecars; `nghttp2-1.64.0.tar.xz` SHA-256 `88bb94c9…dd9` | `lab/frontier/apache2root/build.sh` | `oracle.sh`, `race.sh`, `lab/apache2shell/{sweep,gdb-inspect,drive.py}` |
 | Mosquitto2Shell | [report](../reports/frontier-mosquitto2shell.md), [status](../reports/mosquitto2shell-status.md) | `bash lab/frontier/mosquitto2shell/provision.sh`, `bash …/provision-cjson.sh` | `build.sh`, `build-glibc.sh` | `run.sh`, `placement.sh`, `tcache_probe.py`, `pong_leak_probe.py` |
@@ -50,7 +50,8 @@ containers whose host ports bind only to loopback.
   `lab/repro/ruby2shell-stageB-{http.ru,rails-setup.sh}`.
 - **PHP sources**: `lab/php2shell/provision.sh` pins all PHP tarballs and the
   fix patch. `build-apache.sh` reconstructs the mod_php DSO recipe that was
-  previously only in prose.
+  previously only in prose; `build-apache-plain.sh` builds the unsanitized
+  `-g -O0` module used by the black-box and GDB Apache replay.
 - **Mosquitto**: no published SHA-256 sidecar exists at the vendor path;
   `provision.sh` pins the exact local tarballs with hashes recorded from the
   audited files. cJSON 1.7.17 is pinned by `provision-cjson.sh`.
