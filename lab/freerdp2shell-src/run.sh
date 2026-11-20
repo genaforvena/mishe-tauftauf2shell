@@ -7,10 +7,12 @@
 # sanitizers (the chosen-byte PoC must survive two OOB writes), compiles the
 # PoCs and controls, and checks the observed output.
 #
-# IN-PROCESS: no virtual-channel transport, RDP session or auth gate. The
-# PocRdpsndWire and PocRdpsndChosenBytes cases do drive the real
-# rdpsnd_server_recv_formats() parser with a crafted SNDC_FORMATS PDU. Only
-# loopback-local, source-built code is used; no external probes.
+# IN-PROCESS: no live RDP session, channel transport or auth gate. The
+# PocRdpsndWire and PocRdpsndChosenBytes cases drive the real
+# rdpsnd_server_recv_formats() parser with a crafted SNDC_FORMATS PDU;
+# PocRdpsndChannelDispatch additionally drives the real exported
+# rdpsnd_server_handle_messages() framing/dispatcher with a stub WTS read
+# callback. Only loopback-local, source-built code is used; no external probes.
 set -eu
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -111,8 +113,54 @@ grep -q 'readback offset 21384 = ad' "$WORK/chosen.out" || \
     fail 'chosen-byte PoC: marker 2'
 grep -q '\[rung4\] RESULT=PASS' "$WORK/chosen.out" || fail 'chosen-byte PoC: result'
 
+# Real exported channel dispatcher: a fully framed SNDC_FORMATS PDU is read in
+# 20-byte chunks through a stub WTS callback, reassembled by the real
+# rdpsnd_server_handle_messages() and dispatched to the real parser. The WTS
+# read callback is a stub; no RDP session, network path or auth gate.
+compile "$HERE/PocRdpsndChannelDispatch.c" \
+    "$WORK/PocRdpsndChannelDispatchAsan" || fail 'dispatch PoC ASan compile'
+ASAN_OPTIONS="$ASAN" timeout 60 "$WORK/PocRdpsndChannelDispatchAsan" \
+    > "$WORK/dispatch_asan.out" 2>&1 || true
+grep -q 'handle_header rc=0 handle_body rc=0 reads=4 msgType=7 nformats=2' \
+    "$WORK/dispatch_asan.out" || fail 'dispatch ASan: header/body framing'
+grep -q 'parsed\[1\]: tag=17 channels=2 blockalign=4 cbsize=2' \
+    "$WORK/dispatch_asan.out" || fail 'dispatch ASan: parsed record'
+grep -q 'ERROR: AddressSanitizer: heap-buffer-overflow' "$WORK/dispatch_asan.out" ||
+    fail 'dispatch ASan: no overflow'
+grep -q 'WRITE of size 16384' "$WORK/dispatch_asan.out" ||
+    fail 'dispatch ASan: wrong write size'
+grep -q '0 bytes after 8820-byte region' "$WORK/dispatch_asan.out" ||
+    fail 'dispatch ASan: wrong region size'
+grep -q 'rdpsnd_server_send_samples' "$WORK/dispatch_asan.out" ||
+    fail 'dispatch ASan: wrong write frame'
+
+compile_plain "$HERE/PocRdpsndChannelDispatch.c" \
+    "$WORK/PocRdpsndChannelDispatch" || fail 'dispatch PoC plain compile'
+timeout 60 "$WORK/PocRdpsndChannelDispatch" > "$WORK/dispatch_chosen.out" 2>&1 ||
+    fail 'dispatch chosen-byte PoC failed'
+grep -q 'handle_header rc=0 handle_body rc=0 reads=4 msgType=7 nformats=2' \
+    "$WORK/dispatch_chosen.out" || fail 'dispatch chosen: framing'
+grep -q 'readback offset 8819=11 offset 8820=de offset 21384=ad' \
+    "$WORK/dispatch_chosen.out" || fail 'dispatch chosen: markers'
+grep -q 'out_pending_frames=8192 out_frames=0xfffffffffffffff0' \
+    "$WORK/dispatch_chosen.out" || fail 'dispatch chosen: wrapped state'
+grep -q '\[dispatch\] chosen RESULT=PASS' "$WORK/dispatch_chosen.out" ||
+    fail 'dispatch chosen: result'
+
+timeout 60 "$WORK/PocRdpsndChannelDispatch" benign > "$WORK/dispatch_benign.out" 2>&1 ||
+    fail 'dispatch benign control failed'
+grep -q 'handle_header rc=0 handle_body rc=0 reads=3 msgType=7 nformats=1' \
+    "$WORK/dispatch_benign.out" || fail 'dispatch benign: framing'
+grep -q 'out_frames=0x000000000000089d' "$WORK/dispatch_benign.out" ||
+    fail 'dispatch benign: wrapped state unexpectedly'
+grep -q '\[dispatch\] benign RESULT=PASS' "$WORK/dispatch_benign.out" ||
+    fail 'dispatch benign: result'
+
 echo 'ALL REAL-LIBRARY CHECKS PASS'
 echo "vulnerable: $WORK/poc.out"
 echo "control:    $WORK/pcm.out"
 echo "wire:       $WORK/wire.out"
 echo "chosen:     $WORK/chosen.out"
+echo "dispatch asan:   $WORK/dispatch_asan.out"
+echo "dispatch chosen: $WORK/dispatch_chosen.out"
+echo "dispatch benign: $WORK/dispatch_benign.out"

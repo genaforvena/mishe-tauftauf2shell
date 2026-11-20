@@ -135,15 +135,49 @@ cloned 3.32.0, built both variants from scratch and printed
 after the harness's 20-minute foreground cap; the resumed build and runner
 took 88s and 39s).
 
+## Real channel message dispatch (wake 5, 2026-11-20 23:50Z)
+
+`PocRdpsndChannelDispatch.c` goes one layer above the direct-parser PoCs. It
+registers a WTS API table whose `pVirtualChannelRead` serves a scripted
+in-memory byte stream in 20-byte chunks, frames a complete `SNDC_FORMATS` PDU
+(4-byte `msgType`/`bPad`/`bodySize` header plus body) and calls the real
+exported `rdpsnd_server_handle_messages()` (`rdpsnd_main.c:1204-1298`). The
+real dispatcher reassembles the body across reads, demultiplexes `msgType=7`
+at :1274 and invokes the real `rdpsnd_server_recv_formats()`.
+
+Captured in `lab/freerdp2shell-src/dispatch_chosen.txt`:
+
+```
+handle_header rc=0 handle_body rc=0 reads=4 msgType=7 nformats=2
+parsed[1]: tag=17 channels=2 blockalign=4 cbsize=2
+SelectFormat rc=12 out_frames=0xfffffffffffffff0 out_buffer_size=8820
+readback offset 8819=11 offset 8820=de offset 21384=ad
+out_pending_frames=8192 out_frames=0xfffffffffffffff0
+[dispatch] chosen RESULT=PASS
+```
+
+The ASan build of the same PoC (`dispatch_asan.txt`) reports `WRITE of size
+16384`, `0 bytes after 8820-byte region`, frame
+`rdpsnd_server_send_samples rdpsnd_main.c:770`. A benign one-record PDU
+through the same dispatcher (`dispatch_benign.txt`) yields
+`out_frames=0x89d` and no chosen-byte write. `run.sh` now checks all three;
+`bash lab/freerdp2shell-src/run.sh` prints `ALL REAL-LIBRARY CHECKS PASS`,
+rc 0.
+
+The WTS read callback is a stub: this is not a live RDP session, virtual
+channel transport, network path or auth gate. PDU framing and server message
+dispatch are now evidenced; those remaining layers are still UNKNOWN.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
-offsets **on real library bytes through the real SNDC_FORMATS parser**, but
-still in-process. The write is sequential and unbounded; no pointer control
-or specific heap object is targeted. Live FreeRDP process, virtual-channel
-transport, RDP session, stock allocator layout, network reachability and the
-auth gate remain UNKNOWN. No off-loopback probe. Default posture is
-post-auth (PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
+offsets **on real library bytes through the real SNDC_FORMATS parser and the
+real `rdpsnd_server_handle_messages()` dispatcher**, but still in-process with
+a stubbed WTS read callback. The write is sequential and unbounded; no pointer
+control or specific heap object is targeted. Live FreeRDP process, real
+virtual-channel transport, RDP session, stock allocator layout, network
+reachability and the auth gate remain UNKNOWN. No off-loopback probe. Default
+posture is post-auth (PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay

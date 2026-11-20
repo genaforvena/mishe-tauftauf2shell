@@ -1,0 +1,7 @@
+handle_header rc=0 handle_body rc=0 reads=4 msgType=7 nformats=2
+parsed[1]: tag=17 channels=2 blockalign=4 cbsize=2
+[23:51:43:634] [2667335:0028b347] [ERROR][com.freerdp.api] - [rdpsnd_server_select_format]: realloc failed!
+SelectFormat rc=12 out_frames=0xfffffffffffffff0 out_buffer_size=8820
+readback offset 8819=11 offset 8820=de offset 21384=ad
+out_pending_frames=8192 out_frames=0xfffffffffffffff0
+[dispatch] chosen RESULT=PASS
