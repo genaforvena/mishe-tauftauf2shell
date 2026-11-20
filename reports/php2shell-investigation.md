@@ -722,3 +722,38 @@ earlier `ready=False` logs were overwritten by the valid rerun.
 Negative results and failed hypotheses are preserved in
 `reports/php2shell-status.md`; no closed lane has been retried into
 existence.
+
+## New descendant lane: CVE-2026-129481 (wake 27, 2026-11-20)
+
+The 2026-11-19 release carried seven critical 9.2 CVEs; four were not
+covered anywhere in this plant. CVE-2026-129481 (GHSA-g3vh-838c-65v7) is an
+incomplete fix for CVE-2026-109619, this target's original bug: when a fatal
+error interrupts session shutdown before the recorded script filename is
+released, the stale pointer survives into the next request on the same
+worker. This is a separate vulnerability from the closed rung-2 619 lane —
+the earlier consumer matrix never exercised a failing session-cleanup
+callback — so it is recorded as a new lane, not a reopening of 619.
+
+`lab/repro/php2shell-cve129481-fpm.py` drives one static FPM child over
+loopback FastCGI. Request 1 starts a session, stores a stream whose user
+wrapper's `stream_close()` raises an uncaught Error, and unsets `$_SESSION`
+so the session globals hold the last array reference. The fatal must fire
+in the FINAL RSHUTDOWN's `zval_ptr_dtor` — not in `session_destroy()` — so
+the bailout skips `php_session_cleanup_filename()` with no second pass.
+
+On affected 8.4.27-fpm-asan (`lab/build/evidence/w27-cve129481-final/`)
+ASan reports a 4-byte READ of a freed 64-byte region:
+`zend_string_release (zend_string.h:426)` ← `php_session_cleanup_filename
+(session.c:128)` ← `php_rshutdown_session_globals (session.c:163)` ←
+`zm_deactivate_session (session.c:2979)`. The region was freed at the end
+of the prior request by `tracked_free_all → shutdown_memory_manager`. An
+ordinary next-request script (no session calls) reaches it via session
+module shutdown, aborting that worker. Fixed 8.4.28 shows no ASan and
+terminates the worker on the bailout; a benign `stream_close()` control on
+8.4.27 shows no ASan and keeps the worker alive. Two earlier trigger
+variants are preserved as negatives in the status ledger. Grade: **rung 3
+CONFIRMED** for this lane on 8.4.27 FPM — confirmed memory corruption,
+patch-sensitive, no rung-4 control claimed. Pre-auth reachability is
+application-dependent and not claimed. Other uncovered critical CVEs
+(129182, 129474, 129289) remain untested; 129474 has vendor-demonstrated
+RCE on 8.5 and is the next candidate.

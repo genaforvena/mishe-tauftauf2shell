@@ -717,3 +717,56 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
 
 Seeded by the operator 2026-11-20 from docs/task.md; php2shell owns this
 file.
+
+## Wake 27 (2026-11-20) — new descendant lane: CVE-2026-129481, rung 3
+
+An advisory-fetch provisioning check found that the 2026-11-19 release
+carried SEVEN critical 9.2 CVEs, not only 115560/126714. Four were
+uncovered anywhere in this plant: **CVE-2026-129481** (session-filename
+UAF), CVE-2026-129182 (backtrace-global repopulation UAF, 8.5 only),
+CVE-2026-129474 (magic-method backtrace UAF, 8.5 only, vendor-demonstrated
+RCE), CVE-2026-129289 (FPM request smuggling via unread php://input — RCE
+but NOT memory corruption, outside this ladder). 129481 and 129182 are
+incomplete fixes for CVE-2026-109619, this target's original bug;
+CVE-2026-129496 (Date cache) was already in both reports as the native bug.
+Only 129481 was tested this wake (one bounded experiment).
+
+Replay: `python3 lab/repro/php2shell-cve129481-fpm.py
+lab/build/php-8.4.27-fpm-asan/sapi/fpm/php-fpm <outdir> <port>`
+(`--control` for the benign-close control). Loopback only, one static FPM
+child, `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1`, OPcache not compiled in.
+Request 1 starts a session, stores a stream whose user wrapper's
+`stream_close()` raises a fatal, and calls `unset($_SESSION)` so the
+session globals hold the last array reference; the fatal must fire in the
+FINAL RSHUTDOWN `zval_ptr_dtor` so the bailout skips
+`php_session_cleanup_filename()` (session.c:163).
+
+Observed (`lab/build/evidence/w27-cve129481-final/cve129481.log`, also
+`w27-cve129481-rshutdown/`): ASan `heap-use-after-free`, READ of size 4 at
+`0x506000019044`, 4 bytes into a 64-byte region. Read stack:
+`zend_string_release (zend_string.h:426)` ←
+`php_session_cleanup_filename (session.c:128)` ←
+`php_rshutdown_session_globals (session.c:163)` ←
+`zm_deactivate_session (session.c:2979)` ← `zend_deactivate_modules` ←
+`php_request_shutdown (main.c:1968)`. Free stack: `free` ← `tracked_free_all
+(zend_alloc.c:3367)` ← `zend_mm_shutdown` ← `shutdown_memory_manager
+(zend_alloc.c:3231)` at the end of the previous request. The stale
+`PS(session_started_filename)` is released by the NEXT request's ordinary
+session-module shutdown even when that script calls no session functions
+(the intervening probe's FastCGI connection resets as the worker aborts).
+
+Controls: fixed 8.4.28-fpm-asan, identical trigger → no ASan, and FPM
+terminates the worker on the shutdown bailout (the fix's second component);
+benign `stream_close()` on 8.4.27 (`--control`) → no ASan, one worker PID.
+Preserved negatives: closing the stream during general symbol-table teardown
+gives a clean run (`w27-cve129481/`) because `cleanup_filename()` runs first;
+calling `session_destroy()` in user code also gives a clean run
+(`w27-cve129481-destroy/`) because RSHUTDOWN runs a second pass that clears
+the field. These are timing constraints, not guessed-away failures.
+
+Grade: **rung 3 CONFIRMED** (observed stale-pointer release with allocation
+and free stacks, patch-sensitive) for CVE-2026-129481 on affected 8.4.27
+FPM. NOT rung 4: no attacker-controlled occupant at a chosen offset, no
+pointer control, no marker. Unauth reachability depends on an application
+path reaching a failing session cleanup (vendor call it application-
+dependent); not claimed. Witness replay not yet requested.
