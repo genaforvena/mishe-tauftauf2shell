@@ -174,8 +174,29 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   n=1866, splice verified byte-exact — file[K:] == carrier[K:] —
   1563-byte post-kill file, promoted stdClass, control clean), the
   same geometry as the 8.2 lane. Zero ASan/UBSan/ZEND_ASSERT in
-  both logs. Grade unchanged: rung 2. 8.5.12 behavioral run remains
-  (last branch).
+  both logs. Grade unchanged: rung 2.
+  **Wake 13 (2026-11-20, 11:43Z) — branch coverage COMPLETE, 8.5
+  branch DONE: the advisory's "all branches" claim holds on 8.5.12**
+  (the last affected head of the 8.5 branch; fixed only in 8.5.13).
+  Source re-read: 8.5.12's `ps_files_write` truncates only when
+  `ZSTR_LEN(val) < data->st_size` (mod_files.c:240-241) — the
+  identical vulnerable pattern. Both committed producer harnesses
+  reproduce on a fresh ASan build (`lab/build/php-8.5.12-asan`,
+  standard flags via lab/php2shell/build.sh, `PHP 8.5.12 (cli) NTS
+  DEBUG`; the 8.5 tree builds lexbor/uriparser even `--disable-all`,
+  so first build exceeded 10 min on this 2-core box — an interrupted
+  `make` resumes cleanly): app-level producer
+  `aftershell-producer-8.5.12-asan.log` (kill at byte 100 of a real
+  session write → `R[0:100]||C[100:]` on disk, 210-byte file,
+  `EVIL=object(stdClass)`, control clean) and unauth rfc1867
+  producer `aftershell-upload-8.5.12-asan.log` (K=1019, FILE_START
+  write n=1892 — 8.5's record layout matches the 8.4 lane's 1892,
+  not 8.2/8.3's 1866; 1589-byte carrier, splice verified byte-exact,
+  promoted stdClass, control clean). Zero ASan/UBSan/ZEND_ASSERT in
+  both logs. Grade unchanged: rung 2. Branch coverage now COMPLETE:
+  every affected branch head (8.2.35, 8.3.36, 8.4.27, 8.5.12) is
+  behavior-verified, and the fix (8.4.28) is verified on all three
+  paths.
 
 - **Rung:** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real

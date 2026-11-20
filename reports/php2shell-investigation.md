@@ -124,7 +124,7 @@ Observed, both builds, ZEND_DEBUG asserts live:
 4. ZERO ASan/UBSan/ZEND_ASSERT output on either build for every probe.
    FPM lane CLOSED at rung 2; no rung-3 signal.
 
-## Reopened lane: CVE-2026-126714 "phpAfterShell" (wakes 8–12, 2026-11-20)
+## Reopened lane: CVE-2026-126714 "phpAfterShell" (wakes 8–13, 2026-11-20)
 
 The 2026-11-19 vendor release (8.2.36/8.3.37/8.4.28/8.5.13) named a new
 payload class in the same session family (GHSA-fm2m-fjf5-v3cp): the
@@ -133,8 +133,8 @@ before writing the replacement (defect since PHP 4.1.0), so a worker
 death mid-write leaves prefix-of-new + tail-of-old on the inode — a
 THIRD valid session. Graded rung 2: a splice/deserialization primitive,
 not observed memory unsafety; the public full chain's native-class
-memory bug is undisclosed. Four observations, all on the ASan builds,
-zero sanitizer output:
+memory bug is undisclosed. Eight observations below, all on the ASan
+builds, zero sanitizer output:
 
 1. **Consumer** (`lab/repro/php2shell-aftershell-splice-consumer.sh`):
    the documented post-kill bytes decode with NO warning; naive
@@ -212,10 +212,22 @@ zero sanitizer output:
    and the unauthenticated rfc1867 producer
    (`aftershell-upload-8.3.36-asan.log`: same geometry as the 8.2 lane,
    K=1019, n=1866, splice verified byte-exact, promoted stdClass,
-   control clean) — zero ASan/UBSan/ZEND_ASSERT in both logs. 8.5.12
-   source carries the identical conditional-truncate pattern
-   (mod_files.c:239-241, source-verified); its behavioral run is the
-   last remaining branch.
+   control clean) — zero ASan/UBSan/ZEND_ASSERT in both logs.
+8. **Branch coverage, 8.5 branch** (wake 13): the last affected head of
+   the 8.5 branch, php-8.5.12 (fixed only in 8.5.13), is behavior-verified
+   affected: source still truncates only when
+   `ZSTR_LEN(val) < data->st_size` (mod_files.c:240-241), and both
+   producer harnesses reproduce on `lab/build/php-8.5.12-asan` —
+   app-level producer (`aftershell-producer-8.5.12-asan.log`: kill at
+   byte 100, `R[0:100]||C[100:]` on disk, 210-byte file,
+   `EVIL=object(stdClass)`, control clean) and the unauthenticated
+   rfc1867 producer (`aftershell-upload-8.5.12-asan.log`: K=1019,
+   FILE_START write n=1892 — 8.5's record layout matches the 8.4
+   lane, not 8.2/8.3's 1866; 1589-byte carrier, splice verified
+   byte-exact, promoted stdClass, control clean) — zero
+   ASan/UBSan/ZEND_ASSERT in both logs. With this, every affected
+   branch head (8.2.35, 8.3.36, 8.4.27, 8.5.12) is behavior-verified
+   and branch coverage is complete.
 
 ## Black-box discriminators (affected-only, reproducible)
 
