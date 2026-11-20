@@ -64,9 +64,20 @@ and `enable-websocket` set; both off by default, endpoint `http-port` 8080.
   `ed1e11048fc4c1e7ebb07513fd24271e580b3e52a4868183f037c4a747483260`.
   Chosen-pointer control is no longer harness-only; it is in the real function
   over a real socket. Full write-up at the end of the durable brief.
-- Still UNKNOWN: full FreeSWITCH 1.11.1 `mod_xml_rpc` + `enable-websocket`
-  build, its `/socket` dispatch-before-auth path, and stock allocator layout.
-  Not bounded in this wake: missing libtool/libedit/opus/spandsp/sndfile dev
-  packages and two cores. No off-loopback probe has been run; keep that line.
+- RESOLVED in wake 4 (20:29Z): full vulnerable FreeSWITCH built and run live
+  in a private `unshare -n` netns (only `lo`); `mod_xml_rpc` +
+  `enable-websocket` listened on `127.0.0.1:18080`. `live_client.py` completed
+  a real WebSocket upgrade (`101 Switching Protocols`) and sent the
+  unmasked extended-127 frame. Under GDB the process faulted in
+  `SSL_shutdown+28` from `ws_destroy (ws.c:367)` ← `websocket_hook
+  (mod_xml_rpc.c:703)` with `wsh->ssl`, the value at struct offset 131112 and
+  `$rdi` all equal to the chosen `0x4847464544434241`. Fixed-source control
+  survives the same frame; a 4-byte in-bounds frame on the vulnerable build
+  also survives. Evidence in `lab/freeswitch2shell/live/logs/live_gdb/`,
+  `live_fixed/` and `live_safe/`; scripts `run_live_gdb.sh` and `run_live.sh`.
+  Build-only compatibility shims (srtp off, sofia-sip 1.12 flags and enum
+  defines, spandsp link) do not touch `ws.c`. The sentinel is not executable
+  code; the opt-in gate and 127.0.0.1-only scope stay in every claim.
+- No off-loopback probe has been run; keep that line.
 - Witness claim with the 19:02Z harness digests was filed and replayed (#284);
   all six graded legs established, no correction owed to the harness claim.

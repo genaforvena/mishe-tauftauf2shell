@@ -46,6 +46,13 @@ lab/frontier/freeswitch2shell/vuln
 lab/frontier/freeswitch2shell/fixed
 lab/frontier/freeswitch2shell/asan
 
+# Freeswitch2shell live build output (scripts and evidence stay tracked)
+lab/freeswitch2shell/live/run/install/
+lab/freeswitch2shell/live/run/log/
+lab/freeswitch2shell/live/run/run/
+lab/freeswitch2shell/live/run/db/
+lab/freeswitch2shell/live/live_pos_*
+
 # Apache2Root capacity-boundary harness runtime state (scripts stay tracked)
 lab/apache2shell/logs/
 lab/apache2shell/run/

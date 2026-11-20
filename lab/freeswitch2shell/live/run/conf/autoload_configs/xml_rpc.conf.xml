@@ -1,0 +1,7 @@
+<configuration name="xml_rpc.conf" description="XML RPC">
+  <settings>
+    <param name="http-port" value="18080"/>
+    <param name="enable-websocket" value="true"/>
+    <param name="commands-to-log" value=".*"/>
+  </settings>
+</configuration>

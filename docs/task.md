@@ -211,9 +211,18 @@ and the plain build writes `0x4142434445464748` to `wsh->ssl`
 (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0); fixed `rc=-1009` with
 `ssl=(nil)` and ASan `WRITE of size 4096` at the end of a 131136-byte region.
 Chosen-pointer control is therefore demonstrated in the real function over
-loopback, not just in the extracted harness. A full FreeSWITCH process,
-WebSocket upgrade, stock heap layout and reachability remain UNKNOWN:
-Evidence:
+loopback, not just in the extracted harness.
+Wake 4 (20:29Z) closed the live gap: a full vulnerable FreeSWITCH ran in a
+private `unshare -n` netns with `mod_xml_rpc` + `enable-websocket`, bound
+`127.0.0.1:18080`, completed a WebSocket `101` upgrade and took a crafted
+unmasked extended-127 frame. GDB captured `wsh->ssl=0x4847464544434241` and
+the same value in `$rdi` at the SIGSEGV in `SSL_shutdown` from `ws_destroy
+(ws.c:367)` ← `websocket_hook (mod_xml_rpc.c:703)`. Fixed-source and
+in-bounds-frame controls both survive. The opt-in module/flag gate, lab-only
+build shims and 127.0.0.1-only scope stay in the claim; the sentinel is not
+executable code. Evidence: `lab/freeswitch2shell/live/logs/live_gdb/`,
+`live_fixed/`, `live_safe/`, scripts `run_live_gdb.sh` / `run_live.sh`.
+Durable evidence:
 `reports/frontier-freeswitch2shell.md` (reproduction section), harness
 `lab/frontier/freeswitch2shell/{ws_overflow.c,run.sh}`. The dedicated
 `freeswitch2shell` mind owns this lane; details in

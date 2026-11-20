@@ -369,3 +369,86 @@ the opt-in `mod_xml_rpc` / `enable-websocket` gate remains prominent. The
 all-FF `plen=-1` crash and the clamped-variant negative above are preserved.
 Grade now: rungs 1/2/3 plus rung-4 chosen-pointer control in the real function
 over loopback; live-service impact remains UNKNOWN.
+
+## Live FreeSWITCH process: chosen-pointer dereference, 2026-11-20 20:29Z
+
+The remaining gap in the previous section is now closed. A full FreeSWITCH
+1.11.2-dev build at the vulnerable parent `fbac12b451a146fdac5104d25d337145be989e84`
+was built, installed and run as a live service, with `mod_xml_rpc` loaded,
+`enable-websocket=true`, `http-port=18080`, and `mod_console` as the only other
+module. The process ran inside `sudo unshare -n` (a private network namespace
+whose only interface is `lo`, brought up explicitly), so even though Abyss
+binds `INADDR_ANY` the observed listener was
+`LISTEN 127.0.0.1:18080` (`ss -ltn`, `logs/live_gdb/listen.txt`). No
+off-loopback probe was made.
+
+The installed module contains the unmodified pinned vulnerable `ws.c`
+(sha256 `5a07965f530296bec3840c6c8a7a29c00f34d87f76e34eacf44978ef01d84d3b`).
+`live_client.py` completes `GET /socket` with the WebSocket upgrade headers,
+receives `HTTP/1.1 101 Switching Protocols`, then sends one unmasked
+extended-127 frame: `81 7F 7F FF FF FF 00 00 00 00` followed by a 131102-byte
+payload whose bytes 131094..131101 are `41 42 43 44 45 46 47 48`. Under GDB
+the live process faulted with SIGSEGV in `SSL_shutdown+28`; the stack is
+`ws_destroy (ws.c:367)` ← `websocket_hook (mod_xml_rpc.c:703)`. At the fault:
+
+- `wsh->ssl = 0x4847464544434241` (the chosen bytes, little-endian);
+- the same value read back at `offsetof(wsh_t, ssl) = 131112`;
+- `$rdi = 0x4847464544434241`, the argument passed to `SSL_shutdown`.
+
+The client saw the connection reset. Raw trace and controls:
+`lab/freeswitch2shell/live/logs/live_gdb/{gdb.txt,client.txt,listen.txt,netns.txt}`.
+Reproduce with `bash lab/freeswitch2shell/live/run_live_gdb.sh`; the plain
+driver is `bash lab/freeswitch2shell/live/run_live.sh`. Pinned digests:
+`live_client.py` `68d1c85ce8cec603cbc387611c4efc421bb0d9eeb5a72f356a3ea60e81341854`,
+`run_live.sh` `3b807d82a3c71deceab582a8100c6fa3aa367f7a15a9935b99d4dcf1f7638206`,
+`run_live_gdb.sh` `0554e2c6ae4429a717ed0382a15a738ad8e1d5e7298e2628685d5f96fa5ad57e`.
+
+Controls on the same build, same upgrade and same netns:
+
+- **Fixed source** (`ws.c` at `d557ca6d`, sha256
+  `8ebbe2bce71197ac4e2cdbe2e2cc43c1b5ec3acd7275b9bb4fdbf0decf0914fe`): the
+  same 131112-byte frame gets the 101 upgrade but the server stays alive;
+  exit 137 is our deliberate TERM, not a fault. Evidence in
+  `logs/live_fixed/`.
+- **In-bounds safe frame** on the vulnerable build (`81 04 "ping"`): 101
+  upgrade, server stays alive, client times out waiting for a tail. Evidence
+  in `logs/live_safe/`.
+- **Temporary instrumented diagnostic** (prints added, source restored and
+  rebuilt clean before the GDB run above): `guard plen=2147483647
+  need=2147483643 datalen=14 buflen=65536 payloadoff=10`, followed by the
+  chunked `ws_raw_read` copies. An earlier over-long payload advanced the
+  write past `ssl` and set `wsh->handshake = 0x41414141`, which is why the
+  final client stops at byte 131101.
+
+Two client bugs were found and fixed on the way, both recorded so the frame
+is not reused wrongly: `0xFE` is extended-**126** with the mask bit set, not
+127; and setting the mask bit would make the unmask loop run about two billion
+iterations, destroying the chosen pointer before the dereference. The
+chosen-byte payload index is 131094, not 131104: the initial 14-byte header
+read consumes payload[0..3] and the copy then lands at `buffer+10+i`.
+
+Bounding honesty: the build needed lab-only compatibility work that does not
+touch the vulnerable file — `--disable-srtp`, distro sofia-sip 1.12 include
+and link flags in the generated Makefile, six missing 1.13 enum defines in
+`switch_core_media.c`, and wake 3's configure.ac bypass of the spandsp and
+sofia-sip version errors. The chosen value is a sentinel, not executable
+code; the demonstration is control of a dereferenced pointer, not a shell.
+The deployment gate stays real: `mod_xml_rpc` and `enable-websocket` are off
+by default, and `/socket` is dispatched ahead of the digest-auth realm.
+Grade now: rungs 1/2/3 plus rung-4 chosen-pointer control and dereference in
+a live FreeSWITCH process with a genuine WebSocket upgrade, on 127.0.0.1.
+
+Build reproduction: fetch the tree at `fbac12b451a1` into `lab/src/freeswitch-pin`
+(`git clone https://github.com/signalwire/freeswitch.git` and `git checkout
+fbac12b451a1`), run `./bootstrap.sh`, then
+`./configure --prefix=$PWD/../../freeswitch2shell/live/run/install --disable-fhs
+--disable-srtp` and `make -j2 && make install`. The bundled srtp is skipped;
+the distro sofia-sip 1.12 needs three generated-Makefile settings
+(`SOFIA_SIP_CFLAGS=-I/usr/include/sofia-sip-1.12`, `SOFIA_SIP_LIBS=-lsofia-sip-ua`,
+`SPANDSP_LIBS=-lspandsp`) and six 1.13 enum defines in
+`src/switch_core_media.c` (`sdp_bw_tias`, `sdp_media_text`, `sdp_proto_msrp`,
+`sdp_proto_msrps`, `sdp_proto_extended_rtp`, `sdp_proto_extended_srtp`). Wake
+3 also relaxed two `AC_MSG_ERROR` version checks in `configure.ac` to
+`AC_MSG_RESULT` for the lab. None of these touch `ws.c`; its digest after the
+build is the pinned `5a07965f…`. The built install tree and source tree are
+gitignored; `lab/freeswitch2shell/live/run/conf/` holds the loopback config.
