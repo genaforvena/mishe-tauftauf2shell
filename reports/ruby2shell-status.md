@@ -41,23 +41,30 @@ byte; attacker controls buffer size via input length). Affected
   ~800 bytes in VWA slots, so groom strings must have len ≥ 809 to
   malloc; `embedprobe*.trace`).
 
-- **Next action:** Stage B/C — move past abort-only. The overflow byte
-  is fixed 0x53 (IS_MMAPPED set): a freed victim always aborts, so
-  impact must come from (a) a victim that is never freed but whose
-  corrupted size (0x330→0x350 class confusion) breaks a later
-  consolidation/split into overlapping chunks, (b) another of the 14
-  patched encodings whose case-map second byte differs from 0x53, or
-  (c) honestly recording the negative result. Determine consumer
-  behavior first (nginx2root lesson).
-- **Last evidence:** as above (wake 3 evidence unchanged:
-  `sweep-rung3-mixed.txt`, `vg-rung3-*.txt`); this wake:
-  `lab/build/evidence/stageA4b-1.trace` lines around the primer/real
-  upcases show `M 338 <p>` / `M 324 <p+0x340>` / frees `341`,`331`,
-  then real `M 338 <p>` / `M 322 <p+0x340>` / frees `341`,`353`.
-- **Unknowns:** whether any size class or bin path turns the
-  0x53-LSB corruption into an overlap (next wake); whether the
-  abort-only outcome is structural on this consumer; Rails/Sinatra
-  exposure mapping still open (unstarted).
+- **Next action (wake 5, 2026-11-20):** Stage B — the unsorted-bin
+  overlap route. Byte alphabet resolved: exactly {0x53, 0x73} across
+  all 14 patched encodings (no attacker-chosen value; `capitalize`
+  structurally inert — titlecase expands only the first char). Fold
+  value OBSERVED: `downcase(:fold)` lands 0x73 with the same Stage A
+  geometry, 5/5 aborts, mtrace size LSB 0x373
+  (`lab/repro/ruby2shell-stageA-fold.rb`,
+  `lab/build/evidence/stageA-fold-*`). Consumer audit (glibc 2.39
+  `malloc.c`, fetched from sourceware release/2.39/master): free/
+  realloc CLOSED (IS_MMAPPED abort); fastbin consolidation CLOSED
+  (`fastbin_index` check forces class-preserving pairs 0x51→0x53,
+  0x71→0x73 which change only flags, laundered by `set_head`);
+  unsorted-bin loop OPEN — no IS_MMAPPED check, five groomable
+  checks (fake next-size/prev_size from a live neighbor string's
+  content). Plan: [S 0x340][V 0x430][W live] → 0x53 grows V's size
+  0x431→0x453 → V binned 0x450 → 0x448-class request returns a
+  chunk overlapping W's header and first user bytes.
+- **Last evidence:** wake 5: `stageA-fold-1.trace` (`F ... 331` →
+  `F ... 373` same address → abort), 4 fresh-process fold aborts,
+  ASan fold probe RC=1 at `iso_8859_1.c:293` + fixed-build RC=0;
+  wake 4 evidence unchanged below.
+- **Unknowns:** whether the unsorted-bin groom survives Ruby's GC
+  and buffer chaining in practice (next wake implements it);
+  Rails/Sinatra exposure mapping still open (unstarted).
 
 Owner: the researcher, from its wake 2 on (operator seeded and repaired
 this file on 2026-11-20 after a write race; facts above are sourced to

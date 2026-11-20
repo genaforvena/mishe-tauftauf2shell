@@ -230,14 +230,95 @@ misleads a later consolidation or split into overlapping chunks, or
 from a different byte value via one of the other 13 patched
 encodings. Unproven — see Next.
 
+## Stage A′ — byte alphabet audited: exactly {0x53, 0x73}; fold value observed (2026-11-20, wake 5)
+
+The prior Next item (b) — hunt another patched encoding for a
+two-byte mapping with a different second byte — is **resolved as a
+qualified negative**: there is no attacker-chosen byte value, but there
+IS a second fixed byte the Stage A geometry accepts unchanged.
+
+**Source audit (all 14 encodings, affected tree):** every patched
+`case_map` (`iso_8859_1/2/3/4/9/10/13/14/15/16`, `windows_1250/1252/
+1254/1257`) contains the identical SHARP_s branch and exactly three
+`*to++` writes: first byte `'S'` (upcase) or `'s'` (fold), second byte
+`code` = `'S'` (upcase), `'s'` (titlecase/`capitalize`), or `'s'`
+(fold). No other two-byte mapping exists in any of the 14 files. The
+overflow byte alphabet is therefore exactly **{0x53 ('S'), 0x73
+('s')}**, both ≡ 3 (mod 16), both setting PREV_INUSE|IS_MMAPPED, both
+clearing bit 2 (NON_MAIN_ARENA).
+
+**Fold observed, not just read** — the second entry point lands the
+same one-byte write with 0x73 on the production consumer. Same Stage A
+geometry, operation `downcase(:fold)`:
+
+```
+lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-stageA-fold.rb
+```
+
+Observed 5/5 fresh-process aborts (`munmap_chunk(): invalid pointer`,
+1 traced + 4 untraced); the mtrace free-hook reads the chosen
+victim's size LSB as **0x373** (vs 0x353 for upcase) at the same
+address freed as 0x331 in the primer —
+`lab/build/evidence/stageA-fold-1.trace`, `stageA-fold-*.out`.
+ASan probe: 21 `ß` + `downcase(:fold)` reproduces the identical
+one-byte `heap-buffer-overflow` at `iso_8859_1.c:293` (RC=1); the
+fixed 3.4.13 build runs it clean (RC=0). **Negative result
+preserved:** `capitalize` is structurally inert — titlecase writes
+the two-byte pair only for the FIRST source character, then switches
+to identity-downcase (`iso_8859_1.c:294-295`), so 21 `ß` produce 22
+bytes into capa 41 and no probe overflow is possible for any N.
+
+## Consumer audit for a size-changed victim (glibc 2.39 source, read 2026-11-20)
+
+Fetched `malloc/malloc.c` from the glibc `release/2.39/master` branch
+(sourceware.org) and read the actual consumers of a corrupted size
+LSB, per the plant's consumer-reality lesson. Findings, with the
+checks each consumer runs:
+
+- **`free` / `realloc` on the corrupted chunk:** reads IS_MMAPPED
+  first → `munmap_chunk` path → abort. CLOSED for both byte values.
+- **`malloc_consolidate` on a fastbin victim:** 2.39 checks
+  `fastbin_index(chunksize(p)) == bin index` (`"malloc_consolidate():
+  invalid chunk size"`). A byte that passes must keep the size class:
+  orig LSB 0x51→0x53 or 0x71→0x73. Those change ONLY the flag bits;
+  `malloc_consolidate` ignores IS_MMAPPED and `set_head(p, size |
+  PREV_INUSE)` launders the flags on unsorted insertion. CLOSED —
+  the observed `corrupted size vs. prev_size in fastbins` aborts of
+  the rung-3 sweep were the mismatch cases dying at this check.
+- **Unsorted-bin processing in `_int_malloc` (the open lane):** the
+  loop checks, for victim V with corrupted size S:
+  (1) `S <= 16 || S > system_mem`; (2) the "next chunk" at V+S has a
+  sane raw size; (3) `prev_size(V+S) == S`; (4) V's bin links are
+  real; (5) `prev_inuse(V+S)` is CLEAR. **No IS_MMAPPED check
+  anywhere in this loop** — `chunksize()` masks the flags off and
+  binning/allocation rewrites the header. If the bytes at V+S+8
+  (fake size, prev_inuse clear) and V+S (fake prev_size = S) are
+  attacker-controlled memory, all five checks pass, V is binned at
+  its INFLATED size, and a later exact-class request returns a chunk
+  that overlaps the real next chunk's header and first user bytes.
+
+**Stage B route (unproven, next):** victim class 0x430 (above tcache
+max 0x410, so `free` files it straight to unsorted), size LSB 0x31→
+0x53 ⇒ read as 0x450. Layout [S 0x340][V 0x430][W live], W a long
+live Ruby String whose content supplies the fake header at V+0x450
+(= W user offsets 0x10..0x20). Order: free V (neighbors live, no
+consolidation) → free S to its TCACHE (tcache free skips
+consolidation, so V stays whole) → crafted upcase's buffer1
+(request 824, 0x340 class) pops S via tcache LIFO and its one-byte
+0x53 lands on V's size LSB → trigger any
+unsorted-walking malloc → V binned 0x450 → request 0x448 class →
+overlap write over W's header and first user bytes. Every glibc
+check above has a groomable answer; the geometry is the same primer
+arithmetic as Stage A with capa re-tuned. Nothing here is observed
+yet — the sequence is the plan, not a result.
+
 ## Next
 
-1. Stage B/C — past abort-only: (a) choose N so the victim chunk is
-   one Ruby never frees, then force a consolidation/split around its
-   corrupted size to seek an overlap; (b) audit the other 13 patched
-   encodings for a two-byte case mapping whose second byte differs
-   from 0x53 (a controllable LSB value would reopen classic
-   size-field attacks); (c) if both fail, record the honest negative
-   result — deterministic chosen-chunk DoS is the ceiling on this
-   consumer for this primitive.
+1. **Stage B (the open lane, next wake):** implement the unsorted
+   overlap sequence above — [S 0x340][V 0x430][W live], upcase
+   suffices (0x53 grows 0x430→0x450, the minimum +0x20 step) — and
+   observe either the overlap write over W's header (rung 4: chosen
+   bytes at chosen offsets over a live chunk) or the honest negative
+   at whichever glibc check or groom step fails first. Keep the
+   result either way.
 2. PHP2Shell rungs 1-3 remain queued after Ruby2Shell rungs.
