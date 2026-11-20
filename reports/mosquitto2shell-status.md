@@ -76,3 +76,14 @@ All traffic loopback 27080/27081. Raw evidence in the ignored
   (`0x55555561c5d0` vs `0x555555600f60`), so a hardcoded wire value does
   not reliably poison the bin; a real leak or a layout-stable groom is
   required. Preserve this as a negative, not a retry into existence.
+
+### Reproducibility negative (16:43Z)
+
+A clean re-run of the committed harness (same binary, same wire probe,
+`logs/gdb-tcache-verify.log`) produced `PATCH fdaddr=0x55555561c620
+target=0x55555561c5d0 enc=0x5550003493cc` but **no** controlled-return
+MEMCPY and no crash. Only the first run (`logs/gdb-poison2.log`, fdaddr
+`0x...c630`, target `0x...c5e0`) showed the chosen-address write. The
+poisoned chunk is not reliably the tcache head across runs, so the
+lab-assisted result is a demonstrated capability of the primitive, not a
+stable exploit. This matches the author's stated groom-reliability limit.
