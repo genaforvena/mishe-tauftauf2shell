@@ -62,15 +62,51 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
     reports the 8KB safe-point allocation ("tried to allocate 8192
     bytes", zend_smart_str.c:44). Useful as a cheap liveness/version
     marker in any black-box web-facing probe.
-- **Next action (order set by evidence):** both cheap consumer lanes
-  (cli-server, mod_php) are now observed negatives, so the remaining
-  producer is the circulating 2026-10-23
-  serialize-handler/upload-progress PoC against the 8.4.26 builds: its
-  producer is RSHUTDOWN-time session decode (php_binary/php_serialize
-  handler switch + session.upload_progress multipart), a window none of
-  the rung-2 shapes touched. Lab php.ini knobs for it are pre-staged in
-  `lab/apache2root/conf/php.ini` (session.save_path,
-  session.upload_progress.enabled=1).
+- **Next action (order set by evidence):** the 2026-10-23
+  serialize-handler/upload-progress PoC lane was ported and observed this
+  wake (see the rfc1867 block above); the escalation it points at is the
+  affected tree's missing `php_rinit_session_globals()` at
+  MULTIPART_EVENT_START (the fix adds it: the rfc1867 callback runs before
+  RINIT against the PREVIOUS request's PS globals in a persistent
+  worker) — stale-`PS(id)` UAF probe on the cli-server ASan build.
+- **rfc1867 upload-progress producer ported and observed (2026-11-20,
+  committed harness `lab/repro/php2shell-rung3-rfc1867.sh`, evidence
+  `lab/build/evidence/rung3-rfc1867-8.4.26-asan.log` /
+  `-8.4.27-asan.log`):** spec taken from the fix commit's own new
+  regression tests (`rfc1867_no_user_code.phpt`,
+  `rfc1867_incomplete_class_reserved_props.phpt`) — crafted session
+  record on disk + multipart POST, decoded by the rfc1867 handler
+  before RINIT. Version-discriminating behaviors, all on ASan builds,
+  zero sanitizer/ASSERT output on either tree:
+  1. 8.4.26 runs real class machinery in the pre-RINIT decode
+     (`Warning: Class 'Suit' not found`, `Class __PHP_Incomplete_Class
+     has no unserializer`, then session destroyed); 8.4.27 decodes the
+     same record silently, incomplete-classes-only, record kept
+     unchanged (vendor's own EXPECT).
+  2. Reserved-prop records (`__PHP_Incomplete_Class_Name` etc. on
+     stdClass, nested, unresolved-class variants): 8.4.27 refuses
+     exactly the vendor-marked cases ("Session has been destroyed");
+     8.4.26 passes them through untouched — and the unresolved-class
+     case `x|O:7:"Missing":1:{s:27:"__PHP_Incomplete_Class_Name";s:3:"foo";}`
+     is REWRITTEN on 8.4.26 to `x|O:3:"foo":0:{}`: the attacker's value
+     displaces the incomplete-class name bookkeeping and lands in the
+     re-encoded record's class-name slot. Attacker-controlled session
+     record mutation, affected-only — the sharpest black-box
+     discriminator so far, but a data-integrity corruption, not yet
+     observed memory unsafety (no ASan/UBSan).
+  3. `mangled` (NUL-mangled reserved prop) and `corrupt` behave
+     identically on both trees (kept / refused) — not discriminators.
+  4. Leg B (the circulating PoC's ini handler php_serialize + runtime
+     `ini_set('session.serialize_handler','php')` + session_start
+     decode): attacker-controlled `W::__wakeup` marker FIRES on BOTH
+     8.4.26 and 8.4.27 — the handler-switch unserialize-injection
+     primitive is version-neutral, i.e. it is NOT the CVE's own
+     primitive and cannot carry a rung-4 claim for this advisory.
+     Negative preserved; do not retest.
+  Mechanistic note: the 8.4.26 rewrite in (2) is the incomplete-class
+  bookkeeping collision the vendor comment describes — "data that
+  already carries [the reserved names] cannot be told apart from that
+  bookkeeping"; the fixed tree resolves it by refusing the decode.
 - **Last evidence (2026-11-20, 8.4.26-ASan lab build,
   `lab/repro/php2shell-rung2-oom-cgi.sh`, outputs
   `lab/build/evidence/rung2-cgi-*.out`):** all three vendor shapes
@@ -129,10 +165,17 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   conf, leaving prefork defaults (5 workers) — the directives are
   top-level in `lab/apache2root/conf/httpd.conf` after the MPM
   LoadModule, which is observed to give exactly one persistent child.
-- **Unknowns:** whether the circulating
-  serialize-handler/upload-progress PoC works against a stock affected
-  build at all; consumer behavior on this host's glibc for the
-  corrupted shutdown path.
+- **Unknowns:** whether the affected tree's rfc1867 callback — which,
+  per the fix, runs before RINIT against the previous request's PS
+  globals in a persistent worker (no `php_rinit_session_globals()` at
+  MULTIPART_EVENT_START on 8.4.26) — yields memory unsafety (stale
+  `PS(id)` / `PS(session_status)` after a prior request's session
+  teardown); the php-cgi one-shot SAPI cannot see that state at all,
+  so the probe needs the cli-server or mod_php ASan worker. Whether any
+  reserved-prop bookkeeping collision reaches a C:/E: payload slot and
+  corrupts more than the class-name field. The pure handler-switch
+  unserialize injection is CLOSED (version-neutral, observed, negative
+  preserved).
 
 Seeded by the operator 2026-11-20 from docs/task.md; php2shell owns this
 file.
