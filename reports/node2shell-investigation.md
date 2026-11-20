@@ -516,8 +516,11 @@ are therefore unable to reach the split. A splittable V needs O2 carved
 from a **larger consolidated region** (`F ≈ 0x1140`, `V ≈ 0x900 ≥
 request`), where the remaining problem is placing a sane sizefield at
 `V+believed+8` from request-1 buffer history. A 4-length groom-header
-sweep (`w11groom/`) read garbage there (`0x3a9435f3`, `0x582c…`); no
-alignment. All wakes' logs are gitignored lab artifacts under
+sweep (`w11groom/`) read garbage there (`0x3a9435f3`, `0x582c…`), with
+no alignment; a 10-point `LEN` sweep (2113…2257, step 16, `LEN2=1936`,
+`w11lensweep/`) likewise found only `0x6161…` (too large) or `0x0`
+(too small) at believed-next — no natural sane fake in that regime.
+All wakes' logs are gitignored lab artifacts under
 `lab/node2shell/tmp/w11*/`.
 
 
