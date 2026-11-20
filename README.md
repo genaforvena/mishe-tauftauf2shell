@@ -4,8 +4,8 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies eleven admitted vulnerability families in local, isolated copies
-of the affected software, plus a twelfth handed off this evening:
+It studies twelve admitted vulnerability families in local, isolated copies
+of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
   string case conversion (upcasing `ß` writes two bytes where the loop
