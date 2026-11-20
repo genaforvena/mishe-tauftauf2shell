@@ -599,6 +599,50 @@ Witness #208 independently replayed both committed harnesses from clean HEAD
 and ESTABLISHED the FPM rung-3 corruption with grade unchanged (evidence in
 `lab/build/evidence/w13-fpm*/`); its three precision nits above are folded.
 
+## Wake 24: FPM occupant fieldprobe — structural bits present, no attacker control
+
+The wake-22 report left "does an FPM occupant have a pointer at +16 and
+mask=0" as UNKNOWN. New loopback harness
+`lab/repro/php2shell-stageA-fpm-fieldprobe.py` runs the plain 8.4.27 FPM
+worker under GDB with `set follow-fork-mode child`, breaks at
+`php_date.c:505` and dumps `date_globals.tzcache` on every hit while the
+committed FastCGI client sends the Stage A splice request. Logs:
+`lab/build/evidence/w24-fpm-fieldprobe3/fieldprobe-{long10,nested,none}.log`.
+
+Two hits are observed. Hit 1 (child init) is the live startup table:
+`tc=0x5555560e6770 flags=00000008 mask=fffffffe arData=0x555555d01550
+nNumUsed=0`. Hit 2 (the request-time PRE-RINIT decode warning, on the same
+pointer) is the freed chunk's occupant:
+
+```
+STALE n=2 tc=0x5555560e6770 flags=00000002 mask=00000000
+         arData=0x5555561801f0 nNumUsed=00000140 nNumOfEl=00005555
+0x5555560e6770: 0x0000555556191cd0 0x0000000000000002
+0x5555560e6780: 0x00005555561801f0 0x0000555500000140
+0x5555560e6790: 0x0000000000000000 0x00007fff00000000
+0x5555560e67a0: 0x0000780071657266
+```
+
+So the literal Stage B precondition — a real pointer at offset 16 and
+mask=0 at offset 12 — **does** exist on FPM, unlike the CGI occupant types.
+But it is not a rung-4 upgrade: the hit-2 bytes are identical for query
+`XXX=ABCDEFGHIJ`, `XXX=0__ABCDEFGHIJ` and no query at all, so the occupant is
+a fixed request-lifetime object, not attacker-groomed. The final word
+contains ASCII `freq\0x\0x`, consistent with an ini/bucket key. Moreover
+flags=0x02 at +8 (refcount 0) makes `zend_hash_str_find()` report
+`ht=0x5555560e6770 is already destroyed` at `zend_hash.c:2920` and abort at
+the `zend_hash.c:74` `_zend_is_inconsistent` assertion before the consumer
+can use `arData`; no chosen-address read occurs. The worker stderr in the
+same log carries both messages. Grade unchanged: rung 4 CONSTRAINED on CGI
+only, FPM confirmed corruption at rung 3, Apache UNKNOWN.
+
+Two failed harness approaches are preserved, not retried: attaching GDB from
+a sibling process is denied by Yama `ptrace_scope` (the attach log shows
+`ptrace: Inappropriate ioctl for device`, while the un-debugged worker still
+aborts at `zend_hash.c:74`); and the first fork-follow script auto-quit on
+four startup `zend_hash.c:945` hits before the client connected, so its
+dump was the child-init table, not the stale request-time occupant.
+
 ## Open routes after Stage A
 
 - Extending the groom to set `arData` to a chosen address is an observed

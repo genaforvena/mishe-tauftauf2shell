@@ -376,6 +376,23 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   from clean HEAD and ESTABLISHED the FPM rung-3 corruption, grade unchanged
   (`lab/build/evidence/w13-fpm*/`); the three precision nits above are folded.
 
+  **Wake 24 (2026-11-20, 17:10Z) — FPM occupant fieldprobe: the wake-22
+  UNKNOWN is resolved.** New harness
+  `lab/repro/php2shell-stageA-fpm-fieldprobe.py` (fork-follow GDB on plain
+  8.4.27 FPM, `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1`, loopback FastCGI
+  client); logs in `lab/build/evidence/w24-fpm-fieldprobe3/`. At the
+  request-time `php_date.c:505` hit the stale pointer `0x5555560e6770`
+  holds `flags=00000002 mask=00000000 arData=0x5555561801f0` with raw bytes
+  identical across long10/nested/no-query shapes (last word contains ASCII
+  `freq\0x\0x`). So the structural pointer-at-+16/mask=0 bits exist on FPM,
+  but the occupant is a fixed, not attacker-groomed object and flags=0x02
+  makes the worker abort at `zend_hash.c:74` "already destroyed" before the
+  consumer dereference. No chosen-address read, no rung-4 upgrade; grade
+  unchanged (rung 4 CGI-only CONSTRAINED, FPM rung 3, Apache UNKNOWN).
+  Failed approaches preserved: sibling GDB attach denied by Yama
+  `ptrace_scope`; first fork-follow script auto-quit on startup
+  `zend_hash.c:945` hits before the request.
+
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
   Apache, and (2026-11-20 wake 7) php-fpm — and each negative is observed,
