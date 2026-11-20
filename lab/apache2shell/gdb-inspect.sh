@@ -29,6 +29,12 @@ MODS="authn_core authz_core authz_host unixd mime log_config logio headers dir a
   echo "Protocols h2c http/1.1"
   echo "H2Direct on"
   echo "H2MaxSessionStreams 400"
+  echo "StartServers 1"
+  echo "ServerLimit 1"
+  echo "ThreadsPerChild 64"
+  echo "MinSpareThreads 1"
+  echo "MaxSpareThreads 64"
+  echo "MaxRequestWorkers 64"
   echo "DocumentRoot \"$BASE/htdocs\""
   echo "<Directory \"$BASE/htdocs\">"; echo "    Require all granted"; echo "</Directory>"
   echo "ScriptAlias /cgi-bin/ \"$BASE/cgi-bin/\""
@@ -44,11 +50,14 @@ gdb -q -batch \
   -ex 'set follow-fork-mode child' \
   -ex 'set detach-on-fork on' \
   -ex 'handle SIGSEGV stop print nopass' \
+  -ex 'handle SIGPIPE nostop noprint pass' \
   -ex 'handle SIGBUS stop print nopass' \
   -ex 'run -f '"$CONF"' -DFOREGROUND' \
   -ex 'printf "\n===== FAULT BACKTRACE =====\n"' \
   -ex 'bt 40' \
   -ex 'frame 0' \
+  -ex "dump binary memory $HERE/logs/$TAG.mem.bin (\$rax-0x20000) (\$rax+0x20000)" \
+  -ex "dump binary memory $HERE/logs/$TAG.stack.bin (\$rsp-0x4000) (\$rsp+0x4000)" \
   -ex 'printf "\n===== REGS ALL =====\n"' \
   -ex 'info registers' \
   -ex 'printf "\n===== DISASM AROUND RIP =====\n"' \
