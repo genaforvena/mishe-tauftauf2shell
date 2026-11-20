@@ -344,18 +344,26 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   `lab/repro/php2shell-stageA-fpm-sweep.py`. Trigger-setting lesson: FPM's
   `php_admin_value[date.timezone]` is applied too late to emit the
   tzcache-allocating startup diagnostic; `-d date.timezone=Bogus/Zone`,
-  `-d error_log=<file>` and `-d log_errors=1` are required. With those flags
-  plus the splice-MID record, upload-progress multipart POST and query
-  string, `php-8.4.27-fpm-asan` aborts every request with
-  `AddressSanitizer: heap-use-after-free` at
-  `zend_hash.c:57:7 in _zend_is_inconsistent`
-  (`lab/build/evidence/stageA-fpm/stageA-fpm-8.4.27-fpm-asan.log`).
+  `-d error_log=<file>` and `-d log_errors=1` are required. Once `-d` supplies
+  the invalid zone, `php_admin_value` is not inert: at child init FPM re-reads
+  the stale tzcache via `fpm_php_apply_defines_ex` →
+  `OnUpdate_date_timezone` → `php_date_parse_tzfile:505` (witness #208).
+  The cited single-shot ASan log therefore faults at CHILD INIT with
+  `baseline_rc=2`, not during a served request; the request-time chain
+  (`php_session_cancel_decode:271` → `php_format_date` →
+  `php_date_parse_tzfile:505`) is established in the sweep config, e.g.
+  `lab/build/evidence/w13-fpm-asan-sweep/{sweep-qs0,sweep-qs10}.log`.
+  Both configs give `AddressSanitizer: heap-use-after-free` at
+  `zend_hash.c:57:7 in _zend_is_inconsistent`.
   Plain 8.4.27 FPM builds fault on all query-value lengths 0/4/8/9/10/14/
   24/25/32: the ZEND_DEBUG build aborts with `ht=… is already destroyed`
   and `_zend_is_inconsistent: Assertion '0' failed`, the non-debug build
   SIGSEGVs (`lab/build/evidence/stageA-fpm/sweep-*.log`,
   `lab/build/evidence/stageA-fpm-nodebug/sweep-*.log`). Valid timezone and
-  no-cookie controls are clean; `php-8.4.28-fpm-asan` with the identical
+  no-cookie controls are clean in the sweep config only
+  (`lab/build/evidence/w13-fpm-asan-sweep/{sweep-validtz,sweep-nocookie}.log`);
+  the single-shot config's affected ASan/debug baseline no-cookie times out
+  (`rc 2`). `php-8.4.28-fpm-asan` with the identical
   config fires both warnings, serves every request and reports zero
   sanitizer output (`lab/build/evidence/stageA-fpm-fixed/…`), so the fix
   holds on FPM. The first consumer is therefore confirmed corruption on
@@ -364,7 +372,9 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   FPM worker, so pointer-at-+16/mask=0 remains UNKNOWN there, and the
   indirect-call route is closed everywhere (wake 21). Grade unchanged:
   rung 4 CONSTRAINED (witness #138); FPM adds a rung-3 deterministic crash.
-  Apache remains UNKNOWN.
+  Apache remains UNKNOWN. Witness #208 independently re-ran both harnesses
+  from clean HEAD and ESTABLISHED the FPM rung-3 corruption, grade unchanged
+  (`lab/build/evidence/w13-fpm*/`); the three precision nits above are folded.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real

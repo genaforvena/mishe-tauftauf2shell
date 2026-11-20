@@ -542,14 +542,27 @@ allocates the 56-B tzcache: the first attempt produced only the decode
 warning and no fault. Passing `date.timezone=Bogus/Zone`, `error_log=<file>`
 and `log_errors=1` as php-fpm `-d` flags (as the CGI groomer does) makes the
 "PHP Startup: Invalid date.timezone value" warning appear and the UAF fire.
+`php_admin_value` is not inert once `-d` supplied the invalid zone: the
+single-shot config re-applies it at child init (`fpm_child_init` →
+`fpm_php_init_child` → `fpm_php_apply_defines_ex` →
+`OnUpdate_date_timezone` → `php_date_parse_tzfile:505`) and re-reads the
+stale tzcache there (witness #208).
 
 **Observed, 8.4.27, affected build.** With the startup diagnostic, a
 splice-MID session record, an upload-progress multipart POST and a query
 string:
-- `php-8.4.27-fpm-asan`: every request aborts (`SIGABRT`, child respawn) with
-  `AddressSanitizer: heap-use-after-free` at
-  `Zend/zend_hash.c:57:7 in _zend_is_inconsistent`. Evidence:
-  `lab/build/evidence/stageA-fpm/stageA-fpm-8.4.27-fpm-asan.log`.
+- `php-8.4.27-fpm-asan`: the single-shot config aborts at CHILD INIT, before
+  a request is served (`baseline_rc=2`, line 47 of
+  `lab/build/evidence/stageA-fpm/stageA-fpm-8.4.27-fpm-asan.log`); the stack is
+  `fpm_child_init` → `fpm_php_init_child` → `fpm_php_apply_defines_ex` →
+  `OnUpdate_date_timezone` → `php_date_parse_tzfile:505` →
+  `_zend_is_inconsistent` (`zend_hash.c:57:7`). In the sweep config (no
+  `php_admin_value[date.timezone]`) the same UAF fires at REQUEST time from
+  `php_session_cancel_decode (session.c:271)` → `php_log_err` →
+  `php_format_date` → `get_timezone_info` → `php_date_parse_tzfile:505`.
+  Witness re-run: `lab/build/evidence/w13-fpm-asan-sweep/sweep-qs0.log`,
+  `sweep-qs10.log`; full child-init stack in
+  `lab/build/evidence/w13-fpm-asan/fpm-error-8.4.27-fpm-asan.log`.
 - `php-8.4.27-fpm-plain` (ZEND_DEBUG): SIGABRT, worker stderr
   `zend_hash.c(2920): ht=… is already destroyed` and
   `_zend_is_inconsistent: Assertion '0' failed`.
@@ -559,10 +572,14 @@ string:
   `lab/build/evidence/stageA-fpm/sweep-*.log` and
   `lab/build/evidence/stageA-fpm-nodebug/sweep-*.log`.
 
-**Controls.** `date.timezone=UTC` (valid) and no session cookie serve
-normally on all three builds. `php-8.4.28-fpm-asan` with the identical
-config emits the startup and decode warnings, serves every request, and
-reports zero sanitizer output
+**Controls.** In the sweep config (no `php_admin_value[date.timezone]`),
+`date.timezone=UTC` (valid) and no session cookie serve normally with zero
+sanitizer output (`lab/build/evidence/w13-fpm-asan-sweep/sweep-validtz.log`,
+`sweep-nocookie.log`; witness re-run). That control does NOT hold for the
+single-shot config: affected ASan and debug baseline no-cookie requests time
+out (`rc 2`). `php-8.4.28-fpm-asan` with the identical config emits the
+startup and decode warnings, serves every request, and reports zero
+sanitizer output
 (`lab/build/evidence/stageA-fpm-fixed/stageA-fpm-8.4.28-fpm-asan.log`).
 Patch sensitivity holds on FPM.
 
@@ -578,6 +595,9 @@ there remains UNKNOWN (no GDB field inspection on an FPM worker), and the
 indirect-call route is closed on every SAPI by core RINIT ordering (wake 21).
 Grade unchanged: rung 4 CONSTRAINED (CGI, witness #138); FPM adds a
 deterministic crash at rung 3, not a rung-4 upgrade. Apache remains UNKNOWN.
+Witness #208 independently replayed both committed harnesses from clean HEAD
+and ESTABLISHED the FPM rung-3 corruption with grade unchanged (evidence in
+`lab/build/evidence/w13-fpm*/`); its three precision nits above are folded.
 
 ## Open routes after Stage A
 
