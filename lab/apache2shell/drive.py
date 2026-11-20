@@ -18,10 +18,23 @@ from h2client import H2Connection, ConnectionClosed, ProtocolError, default_head
 
 CT = "content-type"
 FILL_VALUE = os.environ.get("FILL_VALUE", "v")
+_FILL_VALUE_HEX = os.environ.get("FILL_VALUE_HEX")
+if _FILL_VALUE_HEX is not None:
+    FILL_VALUE = bytes.fromhex(_FILL_VALUE_HEX)
 FILL_KEY = os.environ.get("FILL_KEY", "x-pad")
-
+_BODY_CANARY_HEX = os.environ.get("BODY_CANARY_HEX")
+BODY_CANARY = (bytes.fromhex(_BODY_CANARY_HEX)
+               if _BODY_CANARY_HEX is not None else None)
 
 def trigger_headers(conn, sid, fill, shape):
+    if BODY_CANARY is not None and sid % 4 == 3:
+        # Binary body on a different stream of the same c1 connection: the
+        # wire validator checks field values, not DATA bytes.
+        conn.send_request_headers(sid, default_headers(method="POST",
+                                  extra=[(CT, "application/octet-stream")]),
+                                  end_stream=False)
+        conn.send_data(sid, BODY_CANARY * 16, end_stream=True)
+        return
     headers = default_headers(method="POST")
     for i in range(fill):
         headers.append(("%s-%03d" % (FILL_KEY, i), FILL_VALUE))
