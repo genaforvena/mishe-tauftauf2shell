@@ -22,7 +22,9 @@ contacts or scans external systems.
 
 - Task and verified ground truth: [docs/task.md](docs/task.md)
 - Reports (as they land): `reports/`
-- First landed report: [Ruby2Shell investigation — rungs 1–2 observed
-  evidence](reports/ruby2shell-investigation.md) (ASan heap-buffer-overflow
-  on the committed repro, `32f9991`)
+- First landed report: [Ruby2Shell investigation — rung 4
+  demonstrated](reports/ruby2shell-investigation.md) — Stage B: chosen
+  bytes over a live chunk, 5/5 deterministic with a clean control
+  (`6c664bc`); ASan heap-buffer-overflow on the committed repro
+  (`32f9991`)
 - License: [CC0 1.0](LICENSE) — everything here is public domain.
