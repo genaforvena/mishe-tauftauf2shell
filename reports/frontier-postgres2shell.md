@@ -137,7 +137,7 @@ The earlier "OOB slots are all zero" observation was specific to the stock
 trigger (2 rows sent ⇒ `ri_NumSlotsInitialized=2`), not an invariant. Exact
 REL_17_11 source: `ri_Slots = palloc(sizeof(TupleTableSlot *) * ri_BatchSize)`
 and `ri_PlanSlots = palloc(...)` in `es_query_cxt`
-(`nodeModifyTable.c:891-895`); `postgres_fdw.c:4206-4211` overwrites
+(`nodeModifyTable.c:891-896`); `postgres_fdw.c:4206-4211` overwrites
 `*numSlots = n_rows` with the remote rule's count and returns the same
 `slots` array. `ExecClearTuple` clears slot *contents* but never nulls
 `ri_Slots[i]`, and the pointer array is kept across batches. Three bounded
