@@ -75,14 +75,37 @@ in an unrelated `Stream_ResetPosition` assert because the in-process harness
 has no channel. The vulnerable library was restored and the wrap reproduced
 again, confirming the guard was the discriminator.
 
+## Real SNDC_FORMATS parse path (wake 3, 22:46Z)
+
+`PocRdpsndWire.c` compiles the real 3.32.0 `rdpsnd_main.c` source into the
+test translation unit so the static `rdpsnd_server_recv_formats()` parser is
+the real code, and feeds it a crafted 20-byte `SNDC_FORMATS` header followed
+by two `audio_format_write()` records (benign PCM, then DVI_ADPCM
+`nChannels=2, nBlockAlign=4, cbSize=2`). Captured in
+`lab/freerdp2shell-src/wire_parse_asan.txt`:
+
+```
+recv_formats rc=0 nformats=2
+parsed[1]: tag=17 channels=2 blockalign=4 cbsize=2
+SelectFormat rc=12 out_frames=0xfffffffffffffff0
+ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 16384 ... 0 bytes after an 8820-byte region
+  rdpsnd_server_send_samples rdpsnd_main.c:770
+```
+
+The real parser admits the inconsistent format (only the scalar
+`nBlockAlign >= 4` floor applies), and the wrap plus overwrite follow on the
+parsed struct. This is still in-process injection of a PDU into the real
+parser — no virtual-channel transport, RDP session or auth gate.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with chosen bytes at chosen offsets
-**only in the extracted harness**. Rung 3 is now also confirmed on the real
-3.32.0 library, but that PoC writes 0x41 filler, so real-library rung 4
-remains UNKNOWN. Live FreeRDP process, real `SNDC_FORMATS` PDU parse path,
-RDP session, stock allocator layout, network reachability and the auth gate
-remain UNKNOWN. No off-loopback probe.
+**only in the extracted harness**. Rung 3 is confirmed both on the real
+library and through the real SNDC_FORMATS parser source, but both PoCs write
+0x41 filler, so chosen-byte rung 4 on real bytes stays UNKNOWN. Live FreeRDP
+process, virtual-channel transport, RDP session, stock allocator layout,
+network reachability and the auth gate remain UNKNOWN. No off-loopback probe.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay

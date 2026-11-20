@@ -45,6 +45,7 @@ compile() { # src out
         -Wno-deprecated-declarations \
         -I"$SRC/winpr/include" -I"$BUILD/winpr/include" -I"$BUILD" \
         -I"$BUILD/include" -I"$SRC/include" -I"$SRC/channels/rdpsnd/server" \
+        -I"$SRC/channels/rdpsnd/common" \
         "$1" -o "$2" \
         -L"$BUILD/libfreerdp" -L"$BUILD/winpr/libwinpr" -L"$BUILD/server/common" \
         -Wl,-rpath,"$BUILD/libfreerdp:$BUILD/winpr/libwinpr:$BUILD/server/common" \
@@ -67,6 +68,14 @@ grep -q 'rdpsnd_server_send_samples' "$WORK/poc.out" || fail 'wrong write frame'
 ASAN_OPTIONS="$ASAN" timeout 60 "$WORK/PocPcmControl" > "$WORK/pcm.out" 2>&1
 grep -q 'PCM control SendSamples done' "$WORK/pcm.out" || fail 'PCM control did not finish'
 if grep -q 'AddressSanitizer' "$WORK/pcm.out"; then fail 'PCM control hit ASan'; fi
+
+# Real SNDC_FORMATS parse path: the parser admits the malicious record.
+compile "$HERE/PocRdpsndWire.c" "$WORK/PocRdpsndWire" || fail 'wire PoC compile'
+ASAN_OPTIONS="$ASAN" timeout 60 "$WORK/PocRdpsndWire" > "$WORK/wire.out" 2>&1 || true
+grep -q 'recv_formats rc=0 nformats=2' "$WORK/wire.out" || fail 'wire parse rejected the PDUs'
+grep -q 'parsed\[1\]: tag=17 channels=2 blockalign=4 cbsize=2' "$WORK/wire.out" || fail 'parsed record mismatch'
+grep -q 'out_frames=0xfffffffffffffff0' "$WORK/wire.out" || fail 'wire path did not wrap'
+grep -q 'ERROR: AddressSanitizer: heap-buffer-overflow' "$WORK/wire.out" || fail 'wire path no ASan overflow'
 
 echo 'ALL REAL-LIBRARY CHECKS PASS'
 echo "vulnerable: $WORK/poc.out"
