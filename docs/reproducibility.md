@@ -45,6 +45,7 @@ or inside local containers whose host ports bind only to loopback.
 | Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…` | `cd lab/frontier/freerdp2shell && bash run.sh` builds vuln/fixed/asan | prints `ALL CHECKS PASS` (rc 0) twice: ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `send_samples`, chosen `de`/`ad` at offsets 8820/21384, 5/5 identical. Harness only; live RDP, PDU path, network and auth gate UNKNOWN. |
 | Xrdp2Shell | [brief](../reports/frontier-xrdp2shell.md), [status](../reports/xrdp2shell-status.md) | xrdp 0.10.6 raw source (digest `d743c53f…`) and fixed 0.10.6.1 (`4b6c64e8…`), fix `43dc9c3b…`; harness digests `46735a43…` / `2da4d3ea…` | `cd lab/frontier/xrdp2shell && bash run.sh` builds instrumented vulnerable and ASan variants | replayed ~20:25Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=11836 first_oob=8192 last_oob=20027`, chosen `ab`/`cd` at OOB offsets 8228/12028, ASan `WRITE of size 20000` 0 bytes after an 8192-byte region, rung 4 `de`/`ad` at offsets 8228/12024, fixed and benign controls `oob_writes=0`, 5/5 traces identical. Harness only; live xrdp process, PDU path, dynamic-channel open and auth gate UNKNOWN. |
 | Gst2Shell | [brief](../reports/frontier-gst2shell.md), [status](../reports/gst2shell-status.md) | source at vulnerable parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, fix `80c184b4c5ee8ba28b2540ba58f40b8d44b61622`; harness digests `3d2b8e06…` / `7dde5da7…` | `cd lab/frontier/gst2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants | replayed 20:47Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=936 first_oob=256 last_oob=3999` with 3744 counted zeroed bytes, caps length controls which offsets are clobbered, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Rung 4 NOT demonstrated (constant `NONE(0)` zero-fill); live pipeline, SDP/RTSP path and allocator layout UNKNOWN. |
+| Babelfish2Shell (frontier handoff) | [brief](../reports/frontier-babelfish2shell.md), [status](../reports/babelfish2shell-status.md) | raw sources at tags `BABEL_4_8_0` / `BABEL_4_10_0`, fix `ab820bddaffa540af82f2f689c3e535f82f14d89`, harness digests in `PROVENANCE.md` | `cd lab/frontier/babelfish2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants | replayed 2026-11-20 from committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `token=0x02 length=4096 si_capacity=1024 oob_writes=3072 first_oob=1024 last_oob=4095`, rung 2 length 1050/1150/2100 clobbers neither/first/both stamps, rung 3 ASan `WRITE of size 4096` 0 bytes after a 1024-byte region in `wire_getbytes`, rung 4 `de ad be ef ca fe ba be` at offset 1100 and `41 42 43 44` at 2000, fixed control `rc=0 oob_writes=0`, 5/5 `sha256=e216eeec…`. Harness only: real palloc layout, live TDS process, pointer control and execution UNKNOWN. |
 
 Xrdp2Shell was handed off from frontier on 2026-11-20 and admitted by the
 operator ~20:27Z under standing approval #6. Its charter, docs/task.md entry,
@@ -73,6 +74,17 @@ never a bare `mishe sync`. The [brief](../reports/frontier-freerdp2shell.md)
 pins the sources, harness digests and expected bytes for rungs 1-3 plus
 harness-only rung 4; live RDP reachability and the post-auth gate stay
 UNKNOWN.
+
+Babelfish2Shell was handed off from frontier on 2026-11-20 ~22:1xZ. The
+[status](../reports/babelfish2shell-status.md) records the admission state:
+at handoff, charter and `docs/task.md` entry were still the operator's next
+step, so this lane is not yet one of the admitted families in the README.
+Its window, seed wall, brief and status file already exist; wake trigger
+units and the presentation entry are owed from the person's full-flag sync,
+never a bare `mishe sync`. The brief pins the source tags, fix commit and
+harness digests for rungs 1-3 plus chosen bytes at chosen offsets in the
+extracted harness; the real palloc chunk layout, a live TDS endpoint,
+pointer control and execution stay UNKNOWN.
 
 ## Provisioning details
 
