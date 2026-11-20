@@ -182,6 +182,46 @@ Revisit 123007 only with a different consumer or a person-owned larger
 budget; revisit 123633 only on a person's cross-plant decision. Tape
 #105/#106. No mind, charter, window or trigger unit is owed.
 
+#### Scanned 2026-11-20: Java4Shell (CVE-2026-114938) — screened out here
+
+Claim sources: JFrog and Wiz (both 2026-11-17), CCB Belgium. OpenJDK's
+x86-64 AVX-512 VBMI Base64 decoder intrinsic underflows its tail mask on
+input such as 64 `A`s plus `=` (JDK 17): `(len/4)*3 - padding` wraps to
+-1, `BZHI` reads 255, and a 64-byte masked store starts at offset 48 of
+a 50-byte output array, writing ~62 bytes past it. Affected 17.0.6
+through 17.0.21.0.3, 21 through 21.0.13.0.3, 25 through 25.0.5.0.3,
+27 through 27.0.1.0.3 (and the Java 8 Enterprise Performance Pack);
+fixed 17.0.21.1 / 21.0.13.1 / 25.0.5.1 / 27.0.1.1. Claims of pre-auth
+RCE in default-configured Keycloak, Jira, Confluence, Artifactory,
+Jenkins and PingFederate are vendor/researcher claims, not lab findings.
+**Decision: no admission, no lane.** All four flags `avx512f`,
+`avx512bw`, `avx512vbmi`, `bmi2` are required; observed 2026-11-20
+12:19Z that this host's Ryzen 7 5700X (Zen 3) exposes **zero** avx512
+flags, so the vulnerable assembly path cannot run here. Same
+structural-consumer screen that ruled out nginx CVE-2026-123007.
+Revisit only on a person-owned AVX-512-capable lane.
+
+#### Frontier brief 2026-11-20: Apache2Root (CVE-2026-119618)
+
+Claim sources: Apache's 2.4.71 advisory (released 2026-11-11), the CVE
+record (CWE-362) and Red Hat's CVE page. Unauthenticated heap
+corruption/RCE claim in mod_http2's `assign_headers()` when HTTP/2 is
+negotiated (`h2`/`h2c`); affects httpd 2.4.55-2.4.70 and mod_h2
+2.0.8-2.0.42, fixed in 2.4.71. The one-line fix
+`apache/httpd@824beab` changes `apr_table_setn(req->headers,
+"Content-Length", "0")` to `apr_table_setn(r->headers_in, ...)`, i.e.
+the buggy path mutates the shared stream table after cloning it into
+the request. Red Hat reports a reliable exploit against a default
+event-MPM server; Wiz and CSA could not locate that primary research,
+and CVE.org scores `AC:H` against Red Hat's `AC:L` — reliability stays
+UNVERIFIED. No CPU blocker on this host, so this is the top tractability
+candidate. Full source-bound mechanism, unknowns and the cheapest
+loopback h2c experiment are in `reports/frontier-apache2root.md`.
+**No mind/charter/window owed yet**: rung 0 only, no local build or
+trigger. `lab/apache2root/` is a PHP2Shell fixture, not this lane.
+Hand to the operator for admission only if a local rung 1-2 observation
+appears; frontier then moves to the next candidate.
+
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
 1. **Consumer reality first.** Before exploitation mechanics, determine
