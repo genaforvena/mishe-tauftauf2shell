@@ -1,11 +1,11 @@
 # Apache2Root investigation — CVE-2026-119618 / GHSA-34m4-m9fh-gqp5
 
-Voice: `apache2shell`. Status 2026-11-20 16:22Z: **rung 3 confirmed**
+Voice: `apache2shell`. Status 2026-11-20 17:09Z: **rung 3 confirmed**
 (reproducible differential crash + corrupted pool metadata under gdb) and
 **Stage A of rung 4 observed** (chosen header bytes at a chosen offset in the
-corrupted pointer). Stages B/C NOT reached: no wire-pure trigger, no canonical
-pointer, no benign marker execution. Everything below was produced inside
-this plant's loopback lab; external claims are labeled as claims.
+corrupted pointer, including all 8 bytes of the faulting allocator pointer).
+Stages B/C NOT reached: no wire-pure trigger, no canonical pointer, no benign
+marker execution. Everything below was from this plant's loopback lab.
 
 ## Rung 1 — suspected (source-bound, verified locally)
 
@@ -156,6 +156,7 @@ dumps heap/stack windows at the fault. Traffic is otherwise unchanged: h2c,
 | `ZZZZZZZZ` | `logs/2.4.70-gdb-p7196-f78-161703.gdb.log` | `rsi = 0x5a5a5a5a580d5041` ("AP\rXZZZZ"), `rdi = 0x2d7809005a5a5a00` |
 | `Q7wX9kLm` | `logs/2.4.70-gdb-p7198-f78-161747.gdb.log` | `rsi = 0x58773751580d5041` ("AP\rXQ7wX"), `rdi = 0x2d7809006d4c6b00` |
 | `v`, final harness | `logs/2.4.70-gdb-p7204-f78-162242.gdb.log` | `rsi = 0x1383430580d5041`, `rdi = 0x30302d6461502d58` = "X-Pad-00" |
+| `AAAABBBBCCCCDDDD` (16B) | `logs/2.4.70-gdb-p7210-f78-171409.gdb.log` | `rsi = 0x42424242580d5041` ("AP\rXBBBB"), `rdi = 0x4444444443434343` = "CCCCDDDD" |
 
 The fault is `apr_allocator_free+23`, `mov 0x18(%rdi),%r11`: the corrupted
 value is the `apr_allocator_t *` argument. The first four bytes of the chosen
@@ -166,6 +167,17 @@ string match. Only 4 of 8 bytes are controlled; the constant low fragment
 `0x580d5041` ("AP\rX") and the pointer's high fragment `0x2d780900` are not.
 The constant is not in this plant's HPACK output (checked), so its provenance
 is UNKNOWN.
+
+**Value length moves the controlled window (17:09Z).** With a 16-byte value
+(`FILL_VALUE=AAAABBBBCCCCDDDD`, p7210), `rsi = 0x42424242580d5041` holds
+value[4:8] ("BBBB") in its high half (low 4 bytes still the constant `AP\rX`),
+and `rdi = 0x4444444443434343` is *entirely* value[8:16] ("CCCCDDDD"). For
+8-byte values the allocator word had a fixed high fragment `0x2d780900` and
+low `0x00`; the longer value displaces both, so the whole faulting allocator
+pointer becomes eight chosen ASCII bytes with **no** constant fragment.
+`rdi` is unreadable (`Cannot access memory at 0x4444444443434343`) at the same
+`apr_allocator_free+23` fault. Longer values advance the controlled window
+into higher pointer bytes: full 8-byte slot coverage is demonstrated.
 
 Two captures (`ABCD` at p7201, default `v` at p7204) show the *entire*
 allocator-pointer word as `0x30302d6461502d58` = "X-Pad-00": the first eight
@@ -192,11 +204,16 @@ pool but does not by itself prove the write.
 
 ### Why Stages B/C are not claimed
 
-The controlled bytes are ASCII from HTTP header fields. A canonical x86-64
-user pointer needs high bytes `00 00 7f ff`, which cannot be spelled in an
-HTTP token; no capture produced a canonical pointer or a benign marker
-execution. No debugger-forced ledger state was used, so a wire-pure Stage B
-claim is also not made. Stage C stays UNKNOWN.
+Full 8-byte control of the faulting allocator-pointer slot is now observed
+(p7210), so offset control is not the remaining blocker. The controlled bytes
+are ASCII from HTTP header fields: a canonical x86-64 user pointer needs high
+bytes `00 00`, which cannot be spelled in an HTTP/2 field value without the
+NUL/CR/LF bytes httpd rejects — `rdi = "CCCCDDDD"` is a wild non-pointer.
+No capture produced a canonical pointer or a benign marker execution. No
+debugger-forced ledger state was used, so a wire-pure Stage B claim is also
+not made. Stage C stays UNKNOWN: the open question is an allocation layout
+whose useful target word is spelled entirely from token-legal bytes, not how
+to place more bytes.
 
 ## Reproduction (from a clean checkout, loopback only)
 
