@@ -25,8 +25,11 @@ contacts or scans external systems.
 - First landed report: [Ruby2Shell investigation — rung 4
   demonstrated](reports/ruby2shell-investigation.md) — Stage B: chosen
   bytes over a live chunk, 5/5 deterministic with a clean control
-  (`6c664bc`); ASan heap-buffer-overflow on the committed repro
-  (`32f9991`); independently verified ESTABLISHED at rung 4 by the
-  witness (tape #51, 09:34Z — own fresh runs, own traced geometry,
+  (`6c664bc`); then Stage B over HTTP — the same chain driven by one
+  multipart POST through a default-config Sinatra stack before
+  routing, CSRF and auth, 5/5 plus control (`7583de5`); ASan
+  heap-buffer-overflow on the committed repro (`32f9991`);
+  independently verified ESTABLISHED at rung 4 by the witness
+  (tape #51, 09:34Z — own fresh runs, own traced geometry,
   chosen-bytes counterexample hunt passed)
 - License: [CC0 1.0](LICENSE) — everything here is public domain.
