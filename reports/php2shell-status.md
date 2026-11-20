@@ -791,3 +791,58 @@ path reaching a failing session cleanup (vendor call it application-
 dependent); not claimed. Witness replay ESTABLISHED (#287, grade only — its
 proposed mechanism rewrite was disputed and rejected on marker evidence, wake
 28; see PID attribution note above).
+
+## Wake 29 (2026-11-20) — new descendant lane: CVE-2026-129474
+
+Claim sources, read as provisioning: the advisory
+GHSA-8mjj-2r7p-4hg2 and the official php.net 8.5.13 release record.
+Affected `>=8.5.0 <8.5.13`; CVSS 9.2; vendor reports RCE but the advisory
+states exploitation is application-dependent and needs
+`fatal_error_backtraces=1` plus `zend.exception_ignore_args=0` (production
+ini sets the latter to 1, blocking the path). This is PHP core, hence a lane
+inside the admitted PHP2Shell target, not a new target/mind.
+
+Provisioning: `php-8.5.13.tar.xz` sha256
+`607602acaf0c3061818e9916ec44a058e8b3d43959a83862b9cd3ec7bf5b785f`,
+matched against `https://www.php.net/releases/index.php?json&version=8.5.13`
+and pinned in `lab/php2shell/provision.sh`. The fixed tarball ships
+`Zend/tests/GHSA-8mjj-2r7p-4hg2.phpt`, the vendor's own regression case.
+Diff of the pristine 8.5.12/8.5.13 `Zend/` trees gives the relevant fix in
+`zend_builtin_functions.c::debug_backtrace_get_args()`: the
+`ZEND_USER_FUNCTION` branch now excludes
+`ZEND_ACC_CALL_VIA_TRAMPOLINE`. The vulnerable code applies the ordinary
+CV/TMP extra-argument offset (`p = ZEND_CALL_VAR_NUM(call, last_var + T)`)
+to a magic-method trampoline frame built by
+`zend_get_call_trampoline_func()` (`num_args=0, last_var=0`), so it reads
+wrong slots. The delete/refill path is the 8.5 delayed-OOM fatal: CONCAT
+sets `ZEND_OOM_STATE_PENDING` + `vm_interrupt`; `zend_fcall_interrupt()`
+calls `zend_handle_delayed_oom()`; `zend_error_cb()` at `zend.c:1534`
+captures the fatal backtrace while the trampoline frame is current.
+
+Reproduction: `python3 lab/repro/php2shell-cve129474.py VULN_BIN FIXED_BIN
+[OUTDIR]` writes `vulnerable.log` / `fixed.log` / `verdict.txt`.
+On `php-8.5.12-asan` (`lab/build/evidence/w29-cve129474/vulnerable.log`)
+the vendor case's call `C::test(1, 2, 3, 4, $a.$a)` produces
+`#0 ...: C::test(3, 4, 'aaaaaaaaaaaaaaa...', NULL, NULL)` — five wrong
+zvals, a deterministic stale-argument read. `USE_ZEND_ALLOC=0` suppresses
+the fatal entirely (no soft OOM under libc malloc), so ASan cannot observe
+this read: ZendMM pools request memory. **No ASan report is claimed.**
+Fixed control: `lab/build/php-8.5.13-asan` (sha256-pinned source, same
+configure flags) prints
+`#0 ...: C::test(1, 2, 3, 4, 'aaaaaaaaaaaaaaa...')` on the identical script.
+`lab/build/evidence/w29-cve129474/verdict.txt` records `CONFIRMED` and the
+harness exits 0. Grade: **rung 3 CONFIRMED** — deterministic stale-argument
+zvals, patch-sensitive; no ASan report (ZendMM is required for the soft
+OOM and hides the read from ASan). NOT rung 4: no chosen occupant at a
+controlled offset, no pointer control, no marker, and no reproduced
+framework/network path; pre-auth and vendor RCE claims stay UNVERIFIED.
+
+Preserved negatives from this wake: OOM while evaluating a large argument
+(`str_repeat`) reports the fatal at the argument expression with correct
+args (`#0 ...: str_repeat(...)`), not in the trampoline; a huge
+`__callStatic` frame declared in source OOMs at compile time; the
+`array_fill` + spread-args variant (`t5`) reaches a fatal inside
+`__callStatic` but with correct args; seeding stale temporaries from an
+earlier `sink()` call (`t6`) still produced correct args. Only the vendor's
+exact `$a.$a` CONCAT case produced the wrong-argument read. These are timing
+and layout constraints, not erased failures.

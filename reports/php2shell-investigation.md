@@ -780,3 +780,65 @@ shutdown completes through step 15. Witness #287 proposed rewriting this as a
 same-request bailout free followed by the module-deactivation pass; that
 rewrite is REJECTED on the marker evidence and the source ordering. The
 rung-3 grade itself was ESTABLISHED by the witness's own replay and is unchanged.
+
+## New descendant lane: CVE-2026-129474 (wake 29, 2026-11-20)
+
+The 2026-11-19 release also carried CVE-2026-129474 /
+GHSA-8mjj-2r7p-4hg2 (magic-method backtrace UAF, 8.5 only, vendor RCE
+claim). Advisory read as provisioning, not accepted fact: the attack needs
+`fatal_error_backtraces=1` (default on 8.5) and
+`zend.exception_ignore_args=0` (the production ini sets 1, which blocks the
+path), with a fatal error reported while a `__call`/`__callStatic` trampoline
+frame is current. Affected `>=8.5.0 <8.5.13`.
+
+The fixed tarball `php-8.5.13.tar.xz` (sha256
+`607602acaf0c3061818e9916ec44a058e8b3d43959a83862b9cd3ec7bf5b785f`,
+cross-checked against php.net's version JSON) contains the vendor's own
+regression case, `Zend/tests/GHSA-8mjj-2r7p-4hg2.phpt`. Diffing the pristine
+8.5.12 and 8.5.13 `Zend/` trees isolates the fix at
+`zend_builtin_functions.c:1737`, in `debug_backtrace_get_args()`:
+
+```diff
+- if (call->func->type == ZEND_USER_FUNCTION) {
++ /* Extra args are moved after CVs and TMPs in user functions, except
++  * for trampoline frames (see i_init_func_execute_data()).
++  */
++ if (call->func->type == ZEND_USER_FUNCTION
++  && !(call->func->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+```
+
+The vulnerable path applies the ordinary user-function extra-argument offset
+to a magic-method trampoline frame, whose args are laid out differently, and
+therefore reads stale zvals from the wrong slots.
+
+`lab/repro/php2shell-cve129474.py` runs the vendor case verbatim on two CLIs.
+On affected `php-8.5.12-asan` with `fatal_error_backtraces=1`,
+`zend.exception_ignore_args=0`, `memory_limit=4M`, the soft OOM in the
+`$a.$a` CONCAT is handled at DO_FCALL and the fatal backtrace (evidence
+`lab/build/evidence/w29-cve129474/vulnerable.log`) prints:
+
+```
+Fatal error: Allowed memory size of 4194304 bytes exhausted at .../zend_string.h:169 (tried to allocate 2101248 bytes) in .../ghsa-8mjj-2r7p-4hg2.php on line 9
+Stack trace:
+#0 .../ghsa-8mjj-2r7p-4hg2.php(9): C::test(3, 4, 'aaaaaaaaaaaaaaa...', NULL, NULL)
+#1 {main}
+```
+
+The call was `C::test(1, 2, 3, 4, $a.$a)`; the backtrace reports five
+*different* zvals — a deterministic stale-argument read, not an ordinary
+resource-limit message. With `USE_ZEND_ALLOC=0` no fatal occurs at all (the
+soft OOM needs ZendMM), so ASan cannot see this read: ZendMM pools request
+memory. No ASan report is claimed. This is a CLI demonstration; the vendor's
+network-facing path (framework magic method plus a crafted request) is not
+reproduced here, and no pre-auth, pointer-control or marker-execution claim
+is made.
+The fixed-control build `lab/build/php-8.5.13-asan` (same configure flags,
+sha256-pinned source) produces
+`#0 ...: C::test(1, 2, 3, 4, 'aaaaaaaaaaaaaaa...')` on the identical input.
+Both runs and the verdict are in `lab/build/evidence/w29-cve129474/`
+(`verdict.txt: CONFIRMED`); the harness prints the two frames and exits 0.
+Grade: **rung 3 CONFIRMED** — a deterministic stale-argument read, observed
+as wrong zvals and patch-sensitive, but with no ASan report (ZendMM pools
+the freed memory and the soft OOM requires ZendMM). **Not rung 4**: no
+attacker-chosen occupant at a controlled offset, no pointer control, no
+marker execution, and no reproduced network-facing framework path.

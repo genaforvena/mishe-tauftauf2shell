@@ -49,8 +49,9 @@ claims, not conclusions.
   a benign-close control. `lab/repro/php2shell-cve129481-fpm.py` observes an
   ASan 4-byte use-after-free read at
   `php_session_cleanup_filename (session.c:128)`. Rung 3 CONFIRMED, no
-  rung 4 and no pre-auth reachability claim. The other uncovered 9.2 CVEs
-  (129182, 129474, 129289) remain untested.
+  rung 4 and no pre-auth reachability claim. Wake 29 reproduced the
+  129474 stale-argument read on 8.5.12 CLI from the vendor's own regression
+  case; 129182 and 129289 remain untested.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
