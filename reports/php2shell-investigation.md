@@ -643,15 +643,68 @@ aborts at `zend_hash.c:74`); and the first fork-follow script auto-quit on
 four startup `zend_hash.c:945` hits before the client connected, so its
 dump was the child-init table, not the stale request-time occupant.
 
+
+## Wake 25: Stage A on mod_php — Apache UNKNOWN closed, rung 4 CONSTRAINED
+
+Wake 24 left Apache as the only SAPI with neither the rung-3 corruption nor
+the occupant question tested. New loopback-only harness
+`lab/repro/php2shell-stageA-apache.py` starts one prefork child with a
+per-case `httpd.conf`/`php.ini`, pre-stages the spliced session file, and
+sends the multipart upload-progress POST with the session cookie; the plain
+module is built by `lab/php2shell/build-apache-plain.sh` (no sanitizer,
+`-g -O0`, `apxs2`). All cases use `USE_ZEND_ALLOC=0 USE_TRACKED_ALLOC=1`
+and bind 127.0.0.1 only.
+
+1. **Rung 3, ASan 8.4.26 mod_php.** `lab/build/evidence/w25-apache-asan/apache-splice.log`
+   is a textbook 56-byte `heap-use-after-free` read in
+   `zend_hash_str_find_bucket` (`zend_hash.c:788`) via
+   `php_date_parse_tzfile:505 ← get_timezone_info ← php_format_date ←
+   php_log_err_with_severity ← php_session_cancel_decode:271` during
+   `php_request_startup → rfc1867_post_handler`. Allocation is
+   `php_date_parse_tzfile:501` from `OnUpdate_date_timezone` in
+   `zm_startup_date`; the free is
+   `tracked_free_all → zend_mm_shutdown → php_module_startup:2401` from
+   `php_apache_server_startup` (parent post_config, inherited by the
+   prefork child). No-cookie and valid-timezone controls are clean
+   (274/210 response bytes, zero sanitizer markers).
+2. **Black-box, plain 8.4.27 mod_php.** With a query value of length 9, 10,
+   16 or 24 the child dies with `exit signal Segmentation fault (11)`
+   (`lab/build/evidence/w25-apache-{len9,len10,len16,len24}/`), matching
+   CGI's 9–24 window; length 8, 25 and 32 answer normally, and the
+   no-cookie/valid-timezone controls answer normally. The fixed 8.4.28
+   plain module built the same way answers the identical splice with a
+   274-byte response and no signal (`lab/build/evidence/w25-apache-fixed/`).
+3. **Chosen bytes, plain 8.4.27 mod_php under GDB.** Fork-follow GDB with a
+   pending `php_date.c:505` breakpoint gives two hits: the parent startup
+   table (`flags=00000008 mask=fffffffe`, real `arData`) and the child's
+   request-time stale read. The child hit is
+   `flags=00000000 mask=00000000 arData=0x000000000000000a` with raw bytes
+   `0x4847464544434241 0x0000000000004a49` at offsets 24/32 for query
+   `XXX=ABCDEFGHIJ`, and `0x5a5a5a5a` at both offsets for
+   `XXX=ZZZZZZZZZZ` (`lab/build/evidence/w25-apache-gdb{,-z}/apache-splice.log`).
+   `arData` is the value length, not an address; the process faults at
+   `zend_hash.c:945` in `zend_hash_str_find_bucket`.
+
+Grade: **mod_php reaches the same rung 4 CONSTRAINED form as CGI** — chosen
+bytes at chosen offsets of the consumed stale HashTable, no pointer control
+and no marker executed. This is the investigator's observation; it has not
+yet had an independent witness re-run. FPM remains rung 3 only (wake 24).
+Preserved failed approach: the first length sweep was invalid because GDB
+detached the prefork parent at `quit`, leaving it bound to port 18160; the
+harness now kills that parent by its unique per-case config path. The
+earlier `ready=False` logs were overwritten by the valid rerun.
+
 ## Open routes after Stage A
 
 - Extending the groom to set `arData` to a chosen address is an observed
   negative for query and multipart grooming (Stage B) and for session data
   (Stage B extension). On FPM the corruption path is confirmed but byte
   placement is not established and the fault is query-length-independent
-  (wake 22); Apache remains UNKNOWN. The consumer is structurally either-or
-  on the CGI path, so this route cannot yield arbitrary-address control.
-  Stage A is witness-ESTABLISHED (#138), no re-run owed.
+  (wake 22); on mod_php (wake 25) chosen bytes transfer but `arData` is a
+  length, so this route still cannot yield arbitrary-address control.
+  The consumer is structurally either-or on the CGI path. Stage A is
+  witness-ESTABLISHED on CGI (#138), no re-run owed; the mod_php leg awaits
+  independent verification.
 - A public disclosure of Depthfirst's withheld native decoder could supply
   the exact gadget instead of this independently found Date-cache route.
 - A vendor advisory naming a concrete serialize-handler payload class not

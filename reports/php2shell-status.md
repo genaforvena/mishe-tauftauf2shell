@@ -372,7 +372,8 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   FPM worker, so pointer-at-+16/mask=0 remains UNKNOWN there, and the
   indirect-call route is closed everywhere (wake 21). Grade unchanged:
   rung 4 CONSTRAINED (witness #138); FPM adds a rung-3 deterministic crash.
-  Apache remains UNKNOWN. Witness #208 independently re-ran both harnesses
+  Apache was still UNKNOWN at that point (superseded by wake 25 below).
+  Witness #208 independently re-ran both harnesses
   from clean HEAD and ESTABLISHED the FPM rung-3 corruption, grade unchanged
   (`lab/build/evidence/w13-fpm*/`); the three precision nits above are folded.
 
@@ -392,6 +393,35 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   Failed approaches preserved: sibling GDB attach denied by Yama
   `ptrace_scope`; first fork-follow script auto-quit on startup
   `zend_hash.c:945` hits before the request.
+
+  **Wake 25 (2026-11-20, 17:47Z) — Apache UNKNOWN closed; mod_php reaches
+  rung 4 CONSTRAINED (investigator observation, witness pending).** New
+  loopback harness `lab/repro/php2shell-stageA-apache.py` (one prefork
+  child, per-case `httpd.conf`/`php.ini`, pre-staged splice session file,
+  multipart upload-progress POST with session cookie) and plain-module
+  builder `lab/php2shell/build-apache-plain.sh`. (1) ASan 8.4.26 mod_php:
+  `lab/build/evidence/w25-apache-asan/apache-splice.log` reports a 56-B
+  `heap-use-after-free` read at `zend_hash.c:788` from
+  `php_session_cancel_decode:271 → php_format_date → php_date_parse_tzfile:505`;
+  alloc at `php_date.c:501` in `zm_startup_date`, free by
+  `tracked_free_all → zend_mm_shutdown → php_module_startup:2401` in
+  `php_apache_server_startup`. nocookie/validtz controls clean. (2) Plain
+  8.4.27 mod_php: query value lengths 9, 10, 16 and 24 give
+  `exit signal Segmentation fault (11)`; 8, 25, 32 and both controls are
+  clean; plain 8.4.28 answers the same splice clean
+  (`lab/build/evidence/w25-apache-fixed/`). (3) Fork-follow GDB on plain
+  8.4.27 at `php_date.c:505`: parent startup hit has real table
+  (`mask=fffffffe`); child request-time hit has `flags=0 mask=0 arData=0xa`
+  and raw bytes `0x4847464544434241 0x0000000000004a49` for query
+  `XXX=ABCDEFGHIJ`, `0x5a5a5a5a` at both offsets for `XXX=ZZZZZZZZZZ`;
+  SIGSEGV at `zend_hash.c:945` (`lab/build/evidence/w25-apache-gdb/`,
+  `lab/build/evidence/w25-apache-gdb-z/`).
+  `arData` is the value length, not an address — chosen bytes at chosen
+  offsets, no pointer control, no marker. Grade: rung 3 CONFIRMED and rung 4
+  CONSTRAINED on mod_php, same limit as the witness-ESTABLISHED CGI leg;
+  FPM stays rung 3 only. Negative preserved: the first length sweep was
+  invalid because GDB's `quit` detached the prefork parent, which kept port
+  18160 bound; harness cleanup now kills it by the unique config path.
 
 - **Rung (original 618/619 lane, closed):** 2. Trigger deterministic (rung 1); the consumer hunt now covers
   every SAPI reachable in this lab — cli-server, php-cgi, mod_php under real
