@@ -227,6 +227,13 @@ The 17:09Z note called NUL in field values a blocker without testing it. Tested 
   slot zero. The body canary is absent from the fault word and from both the
   256 KiB heap dump and the 32 KiB stack dump. Fixed control p7215 with
   identical traffic: 15300 sent, zero faults.
+- No partial-overwrite fallback was found in a bounded length sweep (p7217,
+  p7218, p7219; 4, 12 and 20-byte ASCII values, same 78-filler groom): the
+  faulting words are `rdi = 0x30302d6461502d58` ("X-Pad-00", the header key),
+  `0x0c38330043434343` (four chosen bytes plus constants), and
+  `0x4444444443434343` ("CCCCDDDD") respectively. No tested length retained
+  high bytes from a live pointer: the corrupted words are header-string bytes,
+  not a truncated overwrite of an existing pointer.
 
 Within field values the accepted alphabet cannot spell the two leading zero
 bytes required by a canonical x86-64 user pointer (`00 00 7f ...`); `0x7f` is
