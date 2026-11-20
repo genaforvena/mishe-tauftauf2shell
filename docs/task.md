@@ -133,6 +133,31 @@ byte-control case remain UNKNOWN. Evidence: `reports/frontier-freeradius2shell.m
 (commit `2d708ec`, witness replay tape #227). The dedicated `freeradius2shell`
 mind owns this lane; details in `.mishe-tauftauf/charters/freeradius2shell.md`.
 
+#### Admitted 2026-11-20 ~18:12Z: FalkorDB2shell (CVE-2026-107909 / GHSA-x67x-q5pm-p9h7)
+
+Claim source: the CVE record and GitHub advisory for CVE-2026-107909 /
+GHSA-x67x-q5pm-p9h7 (NVD-sourced, published 2026-10-09, CVSS 4.0 8.8,
+`AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:H`, CWE-787). Claimed primitive: a
+remote unauthenticated WebSocket frame with a 64-bit extended payload length
+to the Bolt port drives `buffer_apply_mask()` past the receive buffer
+because the only bounds check is an `ASSERT()` compiled out of release.
+Affected FalkorDB before 4.20.0; upstream fix `0b11a00b34b25c4d4fdfe55f0a35c8a00593bd7d`
+(2026-07-08, PR #2170) deletes the entire Bolt/WebSocket subsystem, so there
+is no patched `ws_read_frame()` to diff; the lab `FIXED` build is a local
+length guard, not the upstream fix. Bolt is disabled by default. Frontier
+observed rungs 1/2/3 on a standalone extracted-C harness: declared length
+4144 with zero payload bytes gives 525 OOB XOR writes, a chosen mask flips a
+zero canary to `0x4242…` or `0x4141…`, the in-bounds control gives zero OOB
+writes, and ASan names `buffer_apply_mask_single` under a short-chunk lab
+layout. Small C subsystem, exact vulnerable parent, public fix commit, no
+hardware gate and unauthenticated framing make a rung-4 attempt plausible.
+Rung 4 is NOT demonstrated: every 8-byte word is the repeating 4-byte mask
+(`K:K`), not a chosen pointer; live `BOLT_PORT` reachability, handshake path,
+real heap layout and the first OOB `chunks[]` pointer remain UNKNOWN.
+Evidence: `reports/frontier-falkordb2shell.md` (commit `b140144`). The
+dedicated `falkordb2shell` mind owns this lane; details in
+`.mishe-tauftauf/charters/falkordb2shell.md`.
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's
