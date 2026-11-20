@@ -51,6 +51,22 @@ RCE demonstrated on WordPress/Drupal/Joomla. Affected 8.2<8.2.35,
   shifted the promoted key to `revil` — the acceptance-window
   phenomenon the public writeup calibrates around; the deterministic
   harness aligns the record boundary exactly (87 X's).
+  Fix VERIFIED in the lab (same wake): 8.4.28 fetched from php.net
+  (official sha256 0c8ec360... verified; pinned into
+  `lab/php2shell/provision.sh`), source shows the fix exactly as the
+  advisory describes (mod_files.c:239-242: unconditional `ftruncate(0)`
+  before every write, abort on failure), and the same producer harness
+  against `lab/build/php-8.4.28-asan` (built with the standard ASan/UBSan
+  + ZEND_DEBUG flags, `PHP 8.4.28 (cli) NTS DEBUG`) shows the identical
+  kill leaving a 100-BYTE file (the new prefix only; the carrier tail is
+  gone) and the consumer seeing only `$_SESSION['data']`, no object
+  (`lab/build/evidence/aftershell-producer-8.4.28-asan.log`). The
+  interrupted write still loses session data — but the retained-tail
+  splice primitive is dead on the fixed build. Consumer-side note: the
+  hand-assembled splice bytes still decode into an object on 8.4.28
+  (`aftershell-splice-8.4.28-asan.log`) — expected, the fix changes the
+  file handler, not the decoder; on a fixed build that file state can no
+  longer be produced by a session write.
   Same release also assigned **CVE-2026-115560** (GHSA-658j-r8rw-q6mx) to
   the 2026-10-23 serialize-handler vector in my charter: vendor demonstrates
   command execution on 8.4.27 via a Guzzle gadget; my wake-5 Leg B
