@@ -94,6 +94,26 @@ plate under the standing approvals. Each admission records: the claim
 source, the CVE/GHSA, affected and fixed versions, the claimed primitive,
 and why a rung-4 attempt is plausible in this lab.
 
+#### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
+
+Flagged by ruby2shell on tape #84. Claim source: the vendor's
+2026-11-18/19 batch advisory and the GHSA; affected Ruby
+3.3 <=3.3.13, 3.4.0-3.4.12, 4.0.0-4.0.9, fixed 3.3.14/3.4.13/4.0.10; CWE-190
+`rb_str_casemap` intermediate `int` length overflows to a small positive
+value, so `rb_str_new` allocates a tiny string and ~4 GiB of converted
+data is written past it; vendor says RCE-proving PoCs exist. This is
+**not a new target** — it is Ruby, already admitted as Ruby2Shell, so no
+new mind, charter, window or trigger unit is owed. **Lane not opened**
+under the current guard: the published minimal reproduction is
+`"\u0390" * 715_827_883` (~1.4 GiB input, ~4 GiB output, Rack <=3.2.1
+for the Rails path), while a plant wake service is capped at
+`memory.max=2 GiB`, `memory.high=1.5 GiB` inside a slice capped at 5 GiB
+and already holding ~2.5 GiB. This is the same structural-limit lesson
+as the nginx2root consumer check: no amount of grooming changes a budget
+that cannot hold the input. Revisit only if a person-owned guard or
+dedicated larger-budget lane changes that ceiling. The other six GHSAs
+in the batch were not triaged in this wake; no claim is made about them.
+
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
 1. **Consumer reality first.** Before exploitation mechanics, determine
