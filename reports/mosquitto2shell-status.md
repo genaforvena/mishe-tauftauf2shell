@@ -138,3 +138,13 @@ PONG came from fresh zeroed top-of-heap, so no `struct mosquitto` or heap
 pointers are present yet. The article's next step (scan the 32 KiB for a
 freed client context, derive `listener`, then safe-link a tcache fd) is
 still UNKNOWN here. Do not claim a leak of live pointers from this sample.
+
+### Stale-window attempt (16:50Z) — negative
+
+`pong_leak_probe.py --groom-close 8` (close eight holders before the
+source/PONG pair) still produced the 32 KiB PONG (`8a 7e 80 00`, broker
+alive), but the leaked window remains almost entirely zeros: 17 unique
+byte values, zero aligned `0x55…` heap pointers, no readable strings.
+Freeing holders did not place a `struct mosquitto` in the read window on
+this build. Keep the enlargement; do not claim any leaked address from
+this configuration.

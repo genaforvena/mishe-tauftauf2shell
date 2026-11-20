@@ -51,6 +51,8 @@ def main():
     ap.add_argument("--port", type=int, default=27080)
     ap.add_argument("--holders", type=int, default=16)
     ap.add_argument("--delay", type=float, default=0.15)
+    ap.add_argument("--groom-close", type=int, default=0,
+                    help="close this many holders before source/PONG allocation")
     a = ap.parse_args()
 
     holders = []
@@ -58,6 +60,11 @@ def main():
         s = connect(a.port)
         s.sendall(b"\x89\xfd" + MASK)  # masked PING, len 125, payload withheld
         holders.append(s)
+    if a.groom_close:
+        for s in holders[:a.groom_close]:
+            s.close()
+        holders = holders[a.groom_close:]
+        time.sleep(a.delay)
     print("holders with partial PING:", len(holders))
     # A pre-existing connection whose 0xc0 PONG can be allocated immediately
     # after the source payload, so the two chunks are adjacent from top.
