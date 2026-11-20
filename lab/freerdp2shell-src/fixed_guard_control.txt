@@ -1,0 +1,14 @@
+SelectFormat rc=0  out_frames=0x000000000000089d
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_int_assert]: ((_s)) [/tmp/fr-wake2/src3320/winpr/include/winpr/stream.h:Stream_ResetPosition:1378]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 0: address=0x75a26ed5ddf2 dli_fname=/tmp/fr-wake2/build3320/winpr/libwinpr/libwinpr3.so.3 [0x75a26ea00000], dli_sname=(null) [(nil)]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 1: address=0x75a26ed5e099 dli_fname=/tmp/fr-wake2/build3320/winpr/libwinpr/libwinpr3.so.3 [0x75a26ea00000], dli_sname=winpr_backtrace [0x75a26ed5e08c]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 2: address=0x75a26ed5e1d6 dli_fname=/tmp/fr-wake2/build3320/winpr/libwinpr/libwinpr3.so.3 [0x75a26ea00000], dli_sname=winpr_log_backtrace_ex [0x75a26ed5e09b]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 3: address=0x75a26ee25a81 dli_fname=/tmp/fr-wake2/build3320/winpr/libwinpr/libwinpr3.so.3 [0x75a26ea00000], dli_sname=winpr_int_assert [0x75a26ee25a2e]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 4: address=0x75a26e756d3b dli_fname=/tmp/fr-wake2/build3320/server/common/libfreerdp-server3.so.3 [0x75a26e600000], dli_sname=(null) [(nil)]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 5: address=0x75a26e7655a1 dli_fname=/tmp/fr-wake2/build3320/server/common/libfreerdp-server3.so.3 [0x75a26e600000], dli_sname=(null) [(nil)]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 6: address=0x75a26e7671a8 dli_fname=/tmp/fr-wake2/build3320/server/common/libfreerdp-server3.so.3 [0x75a26e600000], dli_sname=(null) [(nil)]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 7: address=0x55dc91ef9e39 dli_fname=./PocRdpsndOverflow_gcc [0x55dc91ef6000], dli_sname=(null) [(nil)]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 8: address=0x75a26da2a1ca dli_fname=/lib/x86_64-linux-gnu/libc.so.6 [0x75a26da00000], dli_sname=(null) [(nil)]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 9: address=0x75a26da2a28b dli_fname=/lib/x86_64-linux-gnu/libc.so.6 [0x75a26da00000], dli_sname=__libc_start_main [0x75a26da2a200]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 10: address=0x55dc91ef93a5 dli_fname=./PocRdpsndOverflow_gcc [0x55dc91ef6000], dli_sname=(null) [(nil)]
+[22:43:35:195] [2012655:001eb5ef] [FATAL][com.freerdp.winpr.assert] - [winpr_log_backtrace_ex]: 11: address=(nil), unresolvable

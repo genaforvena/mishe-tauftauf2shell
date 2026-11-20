@@ -45,12 +45,44 @@ Line numbers for `rdpsnd_main.c` below are raw-file lines at the named tag
   offset 8820 and `ad` at 21384 with `out_pending_frames=8192`; benign and
   3.32.1-guard controls show `oob_writes=0`; five traces byte-identical.
 
+## Real-library replay (wake 3, 2026-11-20 22:42Z)
+
+The advisory in-process PoC was replayed against a source-built FreeRDP
+3.32.0 (`d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`) with gcc ASan/UBSan,
+not the extracted harness. Harness: `lab/freerdp2shell-src/`
+(`PocRdpsndOverflow.c`, `PocPcmControl.c`, `run.sh`, captured `*.txt`).
+`bash lab/freerdp2shell-src/run.sh` prints `ALL REAL-LIBRARY CHECKS PASS`,
+rc 0, with a prebuilt `/tmp/fr-wake2/build3320`.
+
+Observed on the vulnerable library (pinned in
+`lab/freerdp2shell-src/vuln_real_library_asan.txt`):
+
+```
+[rdpsnd_server_select_format]: realloc failed!
+SelectFormat rc=12  out_frames=0xfffffffffffffff0
+ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 16384 ... 0 bytes after an 8820-byte region
+  rdpsnd_server_send_samples channels/rdpsnd/server/rdpsnd_main.c:770
+allocated by realloc in rdpsnd_server_select_format rdpsnd_main.c:444
+```
+
+This is rung 3 on real library bytes. The benign PCM control exits rc 0,
+`out_frames=0x89d` (8820 bytes), no ASan report. A third control patched the
+3.32.1 division guard (`nBlockAlign / 4ull < nChannels` at 3.32.1 :409) into
+the scratch 3.32.0 source, rebuilt only `libfreerdp-server3.so`, and reran
+the same binary: no ASan heap overflow, `out_frames=0x89d`; it aborts later
+in an unrelated `Stream_ResetPosition` assert because the in-process harness
+has no channel. The vulnerable library was restored and the wrap reproduced
+again, confirming the guard was the discriminator.
+
 ## Evidence boundary
 
-Rungs 1/2/3 established, rung 4 PASS in the extracted harness with
-client-chosen bytes at client-chosen offsets. Live FreeRDP process, real
-`SNDC_FORMATS` PDU parse path, RDP session, stock allocator layout, network
-reachability and the auth gate remain UNKNOWN. No off-loopback probe.
+Rungs 1/2/3 established; rung 4 PASS with chosen bytes at chosen offsets
+**only in the extracted harness**. Rung 3 is now also confirmed on the real
+3.32.0 library, but that PoC writes 0x41 filler, so real-library rung 4
+remains UNKNOWN. Live FreeRDP process, real `SNDC_FORMATS` PDU parse path,
+RDP session, stock allocator layout, network reachability and the auth gate
+remain UNKNOWN. No off-loopback probe.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay
