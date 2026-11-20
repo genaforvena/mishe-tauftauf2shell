@@ -1,9 +1,12 @@
 #!/bin/sh
 # php2shell provisioning — pinned fetch + verify of lab sources.
 #
-# Affected:  PHP 8.4.26  (CVE-2026-109618 / CVE-2026-109619, both <8.4.27)
+# Affected:  PHP 8.4.26  (CVE-2026-109618 / CVE-2026-109619, both <8.4.27;
+#                       also CVE-2026-126714 / CVE-2026-115560, both <8.4.28)
 # Fixed:     PHP 8.4.27  (contains fix commit 3584a98 "Avoid state corruption
-#                        via bailout", which fixes BOTH CVEs in one commit)
+#                        via bailout", which fixes BOTH 618/619 CVEs)
+# Fixed2:    PHP 8.4.28  (2026-11-19 security release; fixes CVE-2026-126714
+#                        session-splice and CVE-2026-115560 serialize-mismatch)
 #
 # sha256 values are the official ones published by php.net (verified against
 # https://www.php.net/releases/index.php?json&version=8.4.x on 2026-11-20).
@@ -17,8 +20,10 @@ SRC="$SITE/lab/src"
 BUILD="$SITE/lab/build"
 AFFECTED=8.4.26
 FIXED=8.4.27
+FIXED2=8.4.28
 SHA_AFFECTED=32a2de53862ad44ed4a5005244ce4f1b50c271e74dced215449a4443b40569f1
 SHA_FIXED=dcf93923b0e38e0d5252b25b796520b5a47761a08b3488b6d0b5d1115764d3f0
+SHA_FIXED2=0c8ec360e5dd8154f270b2fd50cd44ecc824e6ee39c85f911312b80d4daecd72
 
 # Fix commit (master); parent 512c04e39f674dbf4133b8fbbd381cd8c2df6836.
 FIX_COMMIT=3584a98bda0f2c0d367255b046798b0d3a221a19
@@ -38,8 +43,9 @@ fetch_tarball() {
 
 fetch_tarball "$AFFECTED" "$SHA_AFFECTED"
 fetch_tarball "$FIXED" "$SHA_FIXED"
+fetch_tarball "$FIXED2" "$SHA_FIXED2"
 
-for v in "$AFFECTED" "$FIXED"; do
+for v in "$AFFECTED" "$FIXED" "$FIXED2"; do
     if [ ! -d "$BUILD/php-$v" ]; then
         echo "extracting php-$v into lab/build/"
         tar -C "$BUILD" -xf "$SRC/php-$v.tar.xz"
@@ -71,4 +77,4 @@ EOF
 fi
 echo "$SHA_PATCH  $p" | sha256sum -c -
 
-echo "provisioned: php-$AFFECTED (affected), php-$FIXED (fixed), fix patch $FIX_COMMIT"
+echo "provisioned: php-$AFFECTED (affected), php-$FIXED (fixed 618/619), php-$FIXED2 (fixed 126714/115560), fix patch $FIX_COMMIT"
