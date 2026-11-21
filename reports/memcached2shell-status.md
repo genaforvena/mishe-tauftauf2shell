@@ -111,6 +111,16 @@ accepted. Full daemon evidence: `reports/memcached2shell-daemon-asan.md`.
   the pointer-victim overwrite stays conditional on allocator state. No
   replay owed.
 
+- Ninth wake (source/record checks only, grade unchanged): the original
+  researcher's disclosure, LP#2161693 and openSUSE-SU-2026:21872-1 name no
+  CVE/GHSA for this crawler bug; CVE-2026-90698 is a different
+  `proto_text.c` mcmc-Tokenizer defect. Re-reading pinned `:452-505`, the
+  EAGAIN `sent += -1` underflow exits the write loop before any huge length
+  reaches `write()`, so no info-disclosure limb follows. Re-reading pinned
+  `:282-371`, all metadump output is uriencoded key bytes, decimal integers
+  or ASCII literals, so no canonical pointer can be emitted. No new probe,
+  no replay owed.
+
 Next: the remaining grade-moving result is a control-flow diversion or a
 canonical crafted value demonstrably used through the corrupted field.
 #784 owed no further replay; the seventh-wake no-debugger capture went to the

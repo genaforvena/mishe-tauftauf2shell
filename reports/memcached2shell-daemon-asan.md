@@ -598,5 +598,41 @@ overflow-dependent daemon SIGSEGV at a source-bound site without moving the
 grade, and makes no address-control, control-flow diversion or execution
 claim.
 
+## Ninth wake (11:0xZ): provenance and source-bound checks, grade unchanged
+
+No new probe was run. Three open claims were checked against pinned source and
+public records; all three are preserved as negative or narrowing findings.
+
+- **CVE/GHSA remains UNKNOWN, not a proven negative.** The original
+  researcher's public disclosure
+  (`https://github.com/dinosn/memcached-security-2026/blob/master/DISCLOSURE.md`,
+  read 2026-11-21) records private reporting on 2026-07-06, maintainer
+  confirmation and fixes on 2026-07-07, and release in 1.6.44, with **no CVE
+  or GHSA identifier** for either finding. Ubuntu LP#2161693 (read same time)
+  also names no CVE and records a reviewer asking why a CVE fix was going
+  through the SRU process; openSUSE-SU-2026:21872-1 cites only bsc#1270716.
+  A search did surface CVE-2026-90698, but it is a **different** memcached
+  defect (mcmc Tokenizer, `proto_text.c try_read_command_asciiauth`
+  out-of-bounds, published 2026-09-14), not this crawler path. No identifier
+  for this bug was found; that stays UNKNOWN as before.
+- **The second defect at pinned `:499` is an accounting bug, not an OOB read.**
+  Re-reading `lru_crawler_write()` in `pins/crawler.c.vuln` (`:452-505`):
+  `sent` is `unsigned int`; an EAGAIN `total == -1` added unconditionally
+  decrements `sent` (or wraps it to `UINT_MAX` when `sent == 0`), so the
+  `while (sent < data_size)` loop exits and `c->bufused = 0` runs. The huge
+  `data_size - sent` value is never passed to `write()` because the loop
+  condition fails first. No information-disclosure limb follows from this
+  defect in the pinned code; rung 2 stays the false-success accounting
+  observation already recorded in `reports/frontier-memcached2shell.md`.
+- **Chosen-address barrier re-confirmed from pinned `:282-371`.** Every byte
+  emitted by `crawler_metadump_eval()` is either `uriencode_p()` output on
+  the key, decimal `itoa_*` output, or an ASCII literal (`key=`,
+  `fetch=no `, spaces, `\n`). No NUL or other non-ASCII byte can appear, so
+  a canonical x86-64 pointer (upper bytes zero) cannot be assembled in the
+  overflow stream. This is why the accepted impact is a non-canonical
+  pointer dereference (DoS), not address control.
+
+Grade unchanged at #751/#784; no witness replay owed.
+
 
 
