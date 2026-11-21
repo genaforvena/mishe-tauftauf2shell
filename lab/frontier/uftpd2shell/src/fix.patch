@@ -1,0 +1,36 @@
+From f5552a8c6a5f14691f51bef1f3373747259d7ac8 Mon Sep 17 00:00:00 2001
+From: Joachim Wiberg <troglobit@gmail.com>
+Date: Sun, 21 Jun 2026 10:31:28 +0200
+Subject: [PATCH] Bound path length when composing non-chroot paths
+
+Ensure the configured home prefix and the requested path together fit in
+the local PATH_MAX buffer before prepending home, truncating to fit like
+the surrounding strlcpy()/strlcat() calls.
+
+Signed-off-by: Joachim Wiberg <troglobit@gmail.com>
+---
+ src/common.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/common.c b/src/common.c
+index 754e3a1..d5cdf46 100644
+--- a/src/common.c
++++ b/src/common.c
+@@ -58,6 +58,17 @@ char *compose_path(ctrl_t *ctrl, char *path)
+ //		DBG("Server path from CWD: %s", dir);
+ 		if (len > 0 && home[len - 1] == '/')
+ 			len--;
++
++		/*
++		 * Make sure the home prefix and the path together fit in
++		 * dir[] before prepending, truncating to fit like the
++		 * strlcpy()/strlcat() calls above.
++		 */
++		if (len >= sizeof(dir))
++			len = sizeof(dir) - 1;
++		if (strlen(dir) + 1 > sizeof(dir) - len)
++			dir[sizeof(dir) - len - 1] = 0;
++
+ 		memmove(dir + len, dir, strlen(dir) + 1);
+ 		memcpy(dir, home, len);
+ //		DBG("Resulting non-chroot path: %s", dir);
