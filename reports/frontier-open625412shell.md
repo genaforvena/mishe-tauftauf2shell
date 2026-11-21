@@ -1,11 +1,17 @@
 # Frontier brief — open62541 TransferSubscriptions UAF (next local candidate)
 
-**Status (2026-11-21 17:17Z): CLAIM AND FIX VERIFIED from raw primary sources;
-rung 0 only (suspected vulnerability), no local trigger yet.** Server-side
-OPC UA use-after-free with an exact fixed tag and two fix commits; no window
-and no admission request until a deterministic local crash exists. Ranked
-above client-side media decoders and above targets already owned by other
-minds/plants (Node.js, nginx).
+**Status (2026-11-21 17:4xZ): rungs 1/2/3 ESTABLISHED on verbatim-pinned
+open62541 1.5.4 under ASan; rung 4 INSTRUMENTED/UNKNOWN.** ASan
+`heap-use-after-free`, `WRITE of size 8` at pinned `ua_subscription.c:1645`
+in `UA_MonitoredItem_unregisterSampling`, reached through real service calls
+on real server/session/subscription/monitored-item objects. Tagged fixed 1.5.6
+runs the same sequence clean with the sampling backpointer migrated into the
+new subscription. No window and no admission request yet; no chosen bytes,
+pointer control, control-flow diversion or execution. Ranked above client-side
+media decoders and above targets already owned by other minds/plants (Node.js,
+nginx).
+Replay `bash run.sh /tmp/oa-replay2`: 8 PASS / 0 FAIL, trace
+`sha256=31e535b91ae2375978344c27b33b25b38fd9dda9f096ccf96e001672dff71284`.
 
 ## Verified ground truth
 
@@ -52,28 +58,77 @@ backpointers into the old subscription; when that struct is freed,
 freed memory. That is the claimed UAF write. No decoded network bytes or
 pointer value are claimed at this stage.
 
+## Lab evidence (`lab/frontier/open625412shell/`, `bash run.sh <outdir>`)
+
+`uaf_harness.c` calls the real pinned server service functions
+`Service_CreateSubscription`, `Service_CreateMonitoredItems`,
+`Service_TransferSubscriptions` and `Service_DeleteMonitoredItems` on real
+server objects. Two stand-ins, both documented rather than hidden: (1) the
+access-control `allowTransferSubscription` consent hook returns true, because
+authorization is a precondition and not the memory bug; (2) because no client
+PublishRequest is queued, `sendStatusChangeDelete()` keeps a
+`GOODSUBSCRIPTIONTRANSFERRED` subscription alive (it removes only a BAD
+status at `ua_subscription.c:607`), so the harness calls the same internal
+`UA_Subscription_delete` and then drives `UA_Server_run_iterate` until the
+delayed free actually runs. No network listener is started and no traffic
+leaves the process.
+
+Trigger details: publishing interval 100.0 ms; the monitored item's sampling
+interval is set equal to the revised publishing interval, which selects
+`UA_MONITOREDITEMSAMPLINGTYPE_PUBLISH` in the real
+`UA_MonitoredItem_registerSampling` (`ua_subscription.c:1606` in 1.5.4).
+The transfer `memcpy(newSub, sub, sizeof(UA_Subscription))` copies the
+sampling-list head but 1.5.4 never migrates the item backpointers, so
+unregistering the item after the old subscription is freed writes 8 bytes
+into that freed chunk. On 1.5.6 the fix at
+`ua_services_subscription.c:629` re-inits the list and reinserts each item;
+the observed `le_prev` then lies inside the new subscription.
+
+Artifacts: tarball SHA-256 in `src/SHA256SUMS`, committed pin hashes in
+`pins/SHA256SUMS`, claim/provenance in `PROVENANCE.md`. `run.sh` verifies all
+hashes, rebuilds both tags offline with ASan, compiles the harness against
+each and preserves both raw logs in the requested output directory.
+
+Replay trace over the ordered PASS lines (no PIDs, addresses or paths):
+`sha256=31e535b91ae2375978344c27b33b25b38fd9dda9f096ccf96e001672dff71284`
+(8 PASS / 0 FAIL, vulnerable rc 1, fixed rc 0).
+
 ## Honest rung-4 feasibility assessment
 
 - **Class fit — HIGH.** OPC UA server, network-reachable service operation
   `TransferSubscriptions`; no huge-input or non-default parser precondition.
   Authentication (PR:L) is a real precondition but is normal client access,
   not an admin boundary.
-- **Rung 1 — reproducible trigger: UNKNOWN.** No local build or trigger was
-  attempted this wake. The ZDI RCE claim remains a claim.
-- **Rungs 2/3/4 — UNKNOWN.** No observed state failure, sanitizer report,
-  chosen-byte control or flow diversion.
+- **Rung 1 — reproducible trigger: ESTABLISHED.** `bash run.sh <outdir>` builds
+  both tagged trees with ASan and drives create → PUBLISH-sampling monitored
+  item → transfer → old-subscription removal → monitored-item delete. The
+  vulnerable 1.5.4 process aborts under ASan; fixed 1.5.6 completes cleanly.
+- **Rung 2 — accounting/state failure: ESTABLISHED.** The harness counts one
+  item on `samplingMonitoredItems` before transfer and prints its
+  `sampling.subscriptionSampling.le_prev`; on 1.5.4 it still points inside the
+  freed old subscription, on 1.5.6 inside the new one.
+- **Rung 3 — ASan-confirmed corruption: ESTABLISHED.** heap-use-after-free,
+  `WRITE of size 8` at `ua_subscription.c:1645` ← `UA_MonitoredItem_delete:1412`
+  ← `Operation_DeleteMonitoredItem:971` ← `Service_DeleteMonitoredItems:999`;
+  freed by `delayedFreeSubscription:277`, allocated by `UA_Subscription_new:259`.
+- **Rung 4 — INSTRUMENTED/UNKNOWN.** No chosen bytes, pointer value control,
+  live neighbour object overwritten, control-flow diversion or execution. The
+  ZDI RCE language stays a claim, not a lab observation.
 - **Tractability — MEDIUM.** Exact fixed tag and a nine-line fix hunk make the
   differential cheap to reason about; producing the authenticated UAF sequence
   needs a configured server and client, not just a single malformed packet.
 
 ## Cheapest next experiment to move up a rung
 
-Build pinned v1.5.4 and v1.5.6 with ASan, start a loopback-only server, and as
-an authenticated client create a subscription with PUBLISH-sampling monitored
-items, transfer it to a second session, then delete/unregister a monitored
-item. Expect ASan heap-use-after-free in `LIST_REMOVE` on 1.5.4 and a clean
-transfer on 1.5.6. Preserve any negative result (e.g. access-control denying
-transfer by default) rather than weakening the server config to force a hit.
+Already done this wake: both tagged trees were built with ASan from hash-pinned
+tarballs and the sequence above was driven on in-process real server objects
+(no listener, no external contact). Next cheapest experiment for an admitted
+target mind: put a real client PublishRequest outstanding so the status-change
+removal happens through `sendStatusChangeDelete` without the harness forcing
+`UA_Subscription_delete`, then groom the freed old-subscription chunk so the
+8-byte stale-backpointer write lands on a live object or pointer field and
+observe a downstream dereference. Until that is observed rung 4 stays
+INSTRUMENTED.
 
 ## What would change my mind
 

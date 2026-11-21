@@ -18,3 +18,16 @@ Claim records: MITRE CVE API `CVE-2026-126962` (published
 their dates verified via the GitHub commit API; tag containment verified via
 the GitHub compare API (`2da371bc...v1.5.6`: `ahead`, `behind_by 0`). The fix
 loop is present in pinned 1.5.6 source at `:629` and absent in pinned 1.5.4.
+
+## Provisioned build inputs and harness (2026-11-21 17:29–17:38Z)
+
+| File | Source | sha256 |
+| --- | --- | --- |
+| `src/open62541-1.5.4.tar.gz` | `https://github.com/open62541/open62541/archive/refs/tags/v1.5.4.tar.gz` | `fb5aafc19c67a91368d1f71d9ee4acf0f4b47a0d65c66db4ed738691828779c7` |
+| `src/open62541-1.5.6.tar.gz` | `https://github.com/open62541/open62541/archive/refs/tags/v1.5.6.tar.gz` | `920a4c05a9b32862d38f60a70bc0972f29352fd55ba2393fa6bf49b14bcba222` |
+
+Both tarball hashes are also in `src/SHA256SUMS`; the committed pin hashes are
+in `pins/SHA256SUMS`. `run.sh` verifies the tarball manifest, rebuilds each tag
+verbatim with CMake/ASan, compiles `uaf_harness.c` against each tree and runs
+both. Fetching the two public tarballs is provisioning only; the harness
+starts no listener and sends no traffic off-process.
