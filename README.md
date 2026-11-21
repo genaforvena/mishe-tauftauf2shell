@@ -106,6 +106,16 @@ of the affected software:
   1100/2000) are recorded in the brief; no live Babelfish process, `palloc`
   layout or real neighbour was observed.
 
+- **Bzfs2Shell** — CVE-2026-130849 / GHSA-9q5f-g948-c95m, a 1024-byte TCP
+  body on the unauthenticated player socket writes four chosen bytes past
+  `tcpmsg[1024]` into `int tcplen`, leaving a negative read offset that
+  steers the next `recv()` before the buffer. C++ game server admitted
+  ~00:5xZ under standing approval #6 as an X2Shell-class extension (scope
+  judgment recorded in the charter). CVSS 4.0 9.3, CWE-122, PR:N;
+  affected <2.4.32, fixed 2.4.32. Rungs 1-3 and harness-only chosen-value
+  rung 4 are recorded in the brief; no live bzfs, real layout or execution
+  was observed.
+
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
 `127.0.0.1`, and a separate mind re-runs every claimed result before it
@@ -130,6 +140,7 @@ is called established.
 | **Xrdp2Shell** | **Rung 3 — confirmed corruption; harness-only rung 4** | A 28-byte data-first header plus 20000 client bytes writes `oob_writes=11836` from offset 8192; chosen `ab`/`cd` land at OOB offsets 8228/12028, ASan reports `WRITE of size 20000` 0 bytes after the 8192-byte region, and rung 4 places `de`/`ad` at offsets 8228/12024 across two messages. Exact-size 0.10.6.1 and benign controls are clean, 5/5 traces identical. Live xrdp process, real DYNVC PDU path and the post-auth gate are UNKNOWN. [Status](reports/xrdp2shell-status.md) |
 | **Gst2Shell** | **Rung 3 — confirmed corruption in an extracted harness; rung 4 honest negative** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, 3744 counted zeroed OOB bytes, with the caps value choosing which offsets are clobbered; ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Rung 4 is NOT demonstrated — the sink writes only constant `NONE(0)`, so the attacker controls the length and offsets, not the bytes. Live GStreamer, SDP/RTSP caps path and allocator layout UNKNOWN. [Status](reports/gst2shell-status.md) |
 | **Babelfish2Shell** | **Rungs 1-3 in an extracted harness; harness-only chosen-byte rung 4** | An unbounded 16-bit prelogin `length=4096` copied into a 1024-byte `StringInfo`: `oob_writes=3072 first_oob=1024 last_oob=4095`; lengths 1050/1150/2100 clobber neither/first/both neighbour stamps; ASan `WRITE of size 4096` 0 bytes after a 1024-byte region in `wire_getbytes`; chosen `de ad be ef ca fe ba be` / `41 42 43 44` land byte-exact at OOB offsets 1100/2000; fixed control `rc=0 oob_writes=0`, clean under ASan, 5/5 identical. No live TDS endpoint, `palloc` layout, real neighbour or control-flow effect observed. [Status](reports/babelfish2shell-status.md) |
+| **Bzfs2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A 1024-byte body writes four sender-chosen bytes past `tcpmsg[1024]` into adjacent `tcplen`: rung 1 `tcplen=-1024` with chosen tail at `tcpmsg+1024`; rung 2 destination 936 bytes before the object, next length 1028; rung 3 ASan `heap-buffer-overflow` `WRITE of size 64` via `recv` → `traced_recv` → `receive_msg`; rung 4 `DEADBEEFCAFEBABE`/`0123456789ABCDEF` read back byte-exact from chosen preceding harness members; fixed controls reject at the first bound, ASan-clean, 5/5 identical. No live bzfs, player socket, real `NetHandler` layout, allocator neighbour or execution. [Status](reports/bzfs2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -143,6 +154,9 @@ Stage C route was closed as unreachable in this build on this host and is
 preserved as a negative. Each open question is recorded as an UNKNOWN in its
 status file rather than papered over. Failed hypotheses and negative results
 stay in the reports.
+Bzfs2Shell's live `bzfs` reachability, real `NetHandler` object layout and
+witness replay are open; its status file records the harness-only rung-4
+boundary without claiming a live result.
 
 ## How the plant works
 
@@ -150,8 +164,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **php2shell**, **node2shell**, **apache2shell**, **mosquitto2shell**,
 **dragonfly2shell**, **postgres2shell**, **brotli2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
-**freerdp2shell**, **xrdp2shell**, **gst2shell** and **babelfish2shell**
-pursue their lane end-to-end — build, harness, debugger, report. Four
+**freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell** and
+**bzfs2shell** pursue their lane end-to-end — build, harness, debugger, report. Four
 further minds cut
 across them:
 
@@ -188,6 +202,14 @@ inner socket), seed wall and status file are live from frontier's handoff;
 wake trigger units and the presentation.json entry are owed from the
 person's full-flag sync. Its harness-only grade is recorded in the status
 file, not treated as an established live result.
+Bzfs2Shell was admitted ~00:5xZ: the charter, docs entry, window (22, inner
+socket), seed wall and status file are live from frontier's handoff; wake
+trigger units and the presentation.json entry are owed from the person's
+full-flag sync. It is a C++ game server admitted as an X2Shell-class
+extension by recorded judgment, and its harness-only grade is recorded in
+the status file, not treated as a live result. Frontier also reported the
+earlier mapserver2shell window absent from the restarted inner tmux server;
+the restorer rebuilds it, and no duplicate lane was opened.
 
 The rungs — **suspected → reproducible crash → confirmed memory
 corruption → demonstrated impact** — are a depth investigation of how far
@@ -209,7 +231,7 @@ public-infrastructure scans.
   The `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
   `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
-  `xrdp2shell`, `gst2shell`, `babelfish2shell` and `frontier`,
+  `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell` and `frontier`,
   `docs`, `witness` and `operator` windows show each mind's wall and wake log;
   `chat`, `git` and `wakes` show the shared tape. All minds run on
   `opencode-go/hy4-flash-free`.

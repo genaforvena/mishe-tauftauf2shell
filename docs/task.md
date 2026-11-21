@@ -431,6 +431,56 @@ two-pane window (inner socket, window 21), registry entry and seed wall are
 already live from frontier; wake trigger units and the presentation.json
 entry are owed from the person's full-flag sync, never a bare `mishe sync`.
 
+#### Admitted 2026-11-21 ~00:5xZ: Bzfs2Shell (CVE-2026-130849 / GHSA-9q5f-g948-c95m)
+
+Claim sources: CVE-2026-130849 / GHSA-9q5f-g948-c95m / EUVD-2026-127253 (CNA
+VulnCheck, published 2026-11-17), "BZFlag bzfs before 2.4.32 Heap
+Out-of-Bounds Write via NetHandler::tcpReceive()", CWE-122, CVSS 4.0 **9.3
+Critical** (`CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/...`), read as
+provisioning, not lab findings. Affected `< 2.4.32` (including v2.4.30), fixed
+`2.4.32`; fix commit `8e501d685aef549090b363260979a4eb93484ea1` (OSV also
+resolves the tag to `f11f05485d7406c78159aac00ace3c58b4b17ec2`), vulnerable
+tag `v2.4.30`. Claimed primitive: a TCP body length of exactly 1024 passes a
+guard that rejects only `len > MaxPacketLen`, so `recv(fd, tcpmsg + 4, 1024)`
+writes four body bytes past `tcpmsg[1024]` into the adjacent `int tcplen`;
+choosing those bytes negative leaves `tcplen` below zero after `tcplen +=
+size`, so the next `receive()` writes chosen bytes before the object. The fix
+bounds the body to `MaxPacketLen - 4` and rejects a bad offset or length
+before `recv`.
+
+Scope: `bzfs` is a dedicated C++ game server, not a language runtime or HTTP
+server; it is admitted as an X2Shell-class extension under the same precedent
+that admitted FreeRADIUS, Brotli and FalkorDB — a pre-auth network-reachable
+heap OOB write with sender-chosen bytes, exact tags and an advisory RCE claim.
+The judgment is recorded, not buried; revisit this lane first if the class is
+later narrowed. Distinct from every other admitted lane.
+
+One off-by-header bound in one function, a 13-line fix diff, a one-packet-pair
+unauthenticated trigger and OOB bytes that are the tail of the attacker's own
+body make a rung-4 attempt plausible. Frontier re-ran the digests-pinned
+harness at handoff: `bash lab/frontier/bzfs2shell/run.sh out` printed `ALL
+CHECKS PASS`, rc 0; pins `1a16963f…` / `f2686d5b…`. Rung 1 `tcplen=-1024` with
+the chosen tail at `tcpmsg+1024`; rung 2 destination 936 bytes before the
+object, next length 1028; rung 3 ASan `heap-buffer-overflow`, `WRITE of size
+64`, `recv` → `traced_recv` → `receive_msg`; rung 4 `DEADBEEFCAFEBABE` and
+`0123456789ABCDEF` read back byte-exact from chosen preceding members; fixed
+controls reject at the first bound and are ASan-clean, five runs byte-identical
+(`sha256=cea3b92e…`). Rungs 1/2/3 are established only in the extracted
+harness; rung 4 is INSTRUMENTED CHOSEN-VALUE CONTROL — a real syscall writes
+chosen bytes at a chosen harness member offset, but the prefix stand-in is not
+the stock `NetHandler` layout. No live `bzfs` process, player socket, real
+object layout, allocator neighbour, function pointer or execution was
+observed; the advisory's RCE claim is untested here, and the consumer-reality
+check is owed before any stock-build rung-4 claim. Evidence:
+`reports/frontier-bzfs2shell.md`, harness `lab/frontier/bzfs2shell/` with
+`PROVENANCE.md`, seed status `reports/bzfs2shell-status.md`. The dedicated
+`bzfs2shell` mind owns this lane; details in
+`.mishe-tauftauf/charters/bzfs2shell.md`. The two-pane window (inner socket,
+window 22), registry entry and seed wall are already live from frontier; wake
+trigger units and the presentation.json entry are owed from the person's
+full-flag sync, never a bare `mishe sync`. Witness replay was requested
+separately (#429).
+
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
 Flagged by ruby2shell on tape #84. Claim source: the vendor's
