@@ -231,3 +231,37 @@ Preserved negative: the first three observer prototypes failed from tool bugs
 (a backwards chunk scan, an unreadable special mapping and an over-broad
 bracketed-mapping exclusion). Those are tooling failures, not counterexamples
 to the overflow.
+
+### Key-byte differential confirms the OOB bytes come from the stored key (third wake, 09:28Z)
+
+The witness asked in tape #734 whether the `0x5a` observed past the buffer
+could be from another allocation rather than the attacker-stored key. The
+committed observer already accepts `--keybyte`, so the same trigger was
+repeated unchanged except for the key byte: port 22145, 8000 keys of `0x41`,
+82 s hold, `buf = 0x70a9604d4010` in arena
+`70a9604d4000-70a9607f7000 rw-p`. Raw trace:
+`daemon/keybyte-041-trace.txt` (gitignored).
+
+- At t=28 s, the first overflow sample `buf + 131072` read
+  `414141414141303437303620`: six key bytes followed by the metadump
+  line's numeric suffix. This is the `0x5a` run's
+  `5a5a5a5a5a5a303436383820` with the key byte changed and the item number
+  differing; the ASCII metadata tail (`exp=…`, `cls=…`, `cas=…`) is unchanged.
+- The pointer-shaped window at `buf + 131072 + 16384` held
+  `907e4f60a970000090814f60` from t=28 s to t=78 s — little-endian
+  `0x000070a9604f7e90`, a 16-byte-aligned address inside that run's arena,
+  the same shape as the `0x5a` run's `0x000074440c4bae90` (addresses differ
+  under ASLR). At t=80 s, with `bufused = 147736` exactly as in the `0x5a`
+  run, that window read `414141414141414141414141`: twelve attacker-chosen
+  key bytes.
+- The daemon stayed alive and was deliberately stopped (`rc=0`). No
+  dereference, crafted pointer value or control-flow diversion was observed
+  in either run.
+
+Two key bytes (`0x5a`, `0x41`) at identical offsets and timing, with the
+differing byte appearing in both the record prefix and the formerly
+pointer-shaped window, confirm that those overwritten bytes originate in the
+stored key record — not in an unrelated allocation. The witness's semantic
+role and dereference questions remain open; this differential does not answer
+them and does not by itself change the grade.
+
