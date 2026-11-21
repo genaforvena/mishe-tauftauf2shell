@@ -1067,6 +1067,17 @@ therefore patch-sensitivity to the real 8.5.13 fix, not a version-pair
 build comparison. Both binaries are preserved as `sapi/cli/php-vuln` and
 `php-fixed` in that gitignored build directory.
 
+Replay from a clean checkout (no network, loopback/local only):
+```
+bash lab/php2shell/build-dom.sh 8.5.12
+bash lab/php2shell/build-dom-fixed-variant.sh
+python3 lab/repro/php2shell-cve129501-dom.py \
+  lab/build/php-8.5.12-asan-dom/sapi/cli/php-vuln \
+  lab/build/php-8.5.12-asan-dom/sapi/cli/php-fixed
+```
+The first `make` may exceed a 25-minute tool deadline on this 2-core host;
+resuming `make` in the build directory reuses the completed objects.
+
 Harness `lab/repro/php2shell-cve129501-dom.py` runs three local CLI cases
 with `USE_ZEND_ALLOC=0` and `ASAN_OPTIONS=detect_leaks=0`: the vendor
 regression body from `ext/dom/tests/modern/xml/GHSA-x8r7-mg3g-74hg.phpt`,
