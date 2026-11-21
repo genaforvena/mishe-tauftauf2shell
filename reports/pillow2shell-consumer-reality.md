@@ -8,13 +8,15 @@ stack from `null_convert` through `jpeg_read_scanlines` to pinned
 `JpegDecode.c:252`. W2 adds a plain non-ASan build where the chosen `0x5a`
 overwrites the next malloc chunk's size field and two live heap chunks, then
 5/5 runs end in SIGSEGV inside `PyGC_Collect()` at Python finalization, with
-`MALLOC_CHECK_=3` reporting `corrupted double-linked list`. No pointer or PC
-control, control-flow diversion, code execution or socket/server was observed;
-those stay UNKNOWN. This extends the frontier harness result in
-`reports/frontier-pillow2shell.md`. Witness replay #898/#900 returned
-ESTABLISHED AS CLAIMED at this labeled grade; the witness's own rebuild matched
-the stores and the fixed-build control. Author/operator replays are not
-independent acceptance.**
+`MALLOC_CHECK_=3` reporting `corrupted double-linked list`. W3 identifies one
+crossed chunk as a live CPython `PyUnicodeObject` and observes its `ob_type`
+pointer field replaced by the coefficient-chosen byte pattern. No chosen valid
+pointer value, PC control, control-flow diversion, code execution or
+socket/server was observed; those stay UNKNOWN. This extends the frontier
+harness result in `reports/frontier-pillow2shell.md`. Witness replay #898/#900
+returned ESTABLISHED AS CLAIMED at the W1 labeled grade; the witness's own
+rebuild matched the stores and the fixed-build control. Author/operator replays
+are not independent acceptance. W3 is new author evidence, not replayed.**
 
 ## Repro (loopback-free local process; no network probe)
 
@@ -156,6 +158,35 @@ same file opens, then `.load()` raises `OSError: broken data stream when
 reading image file` and exits rc 1 without a crash
 (`plain_v13_fixed_control.log`).
 
+## W3 — chosen bytes overwrite a live CPython object's type pointer (2026-11-21)
+
+The W2 plain build is deterministic enough under gdb that the 128-byte tile
+buffer lands at a known brk address. At `ImagingJpegDecode` entry
+(`JpegDecode.c:132`, `lab/pillow2shell/glibc_pyobject_type_v12.log`):
+`buffer=0xd32bb0`, `bytes=128`. The 992-byte chunk at `buffer+176` holds a
+live CPython string object: its first words are `ob_refcnt=2` and
+`ob_type=0xa472c0`, and gdb resolves `&PyUnicode_Type = 0xa472c0`
+(`&PyCode_Type` is `0xa2d260`, so this is not a code object in this layout).
+
+A hardware watchpoint on the last byte of that `ob_type` word
+(`buffer+191`) fires with `Old value = 0 '\000'`, `New value = 90 'Z'` from
+`libjpeg.so.8`, stack `jpeg_read_scanlines` -> `ImagingJpegDecode
+src/libImaging/JpegDecode.c:252`. After the row:
+`x/4gx buffer+176` reads `0x5a5a5a5a5a5a5a5a5a` for both `ob_refcnt` and
+`ob_type`. So the chosen decoded byte reaches and replaces a live Python
+object's pointer-typed field, not just allocator metadata. The value is the
+repeated chosen byte `0x5a`, **not an attacker-chosen valid address**: no
+valid-pointer value, dereference of the corrupted object, PC or control-flow
+diversion, or execution was observed. Do not upgrade the rung-4 label on this
+basis.
+
+A separate LD_PRELOAD allocator trace (`lab/pillow2shell/glibc_pyobject_alloc_stack.log`,
+layout shifted by the interposer) shows the same class of neighbour can be an
+interpreter object: the chunk immediately after the 128-byte tile `calloc`
+was a 920-byte `PyObject_Malloc` from `_PyObject_NewVar` / `_PyCode_New`.
+That trace is supporting only; the `PyUnicode_Type` identification above is
+the direct observation in the unmodified plain run.
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).
@@ -171,10 +202,11 @@ reading image file` and exits rc 1 without a crash
   buffers, byte value chosen through JPEG coefficients (`0xa5` in -> `0x5a`
   out). W2: next malloc chunk size field `0x21 -> 0x5a5a5a5a5a5a5a5a`, two
   live chunks overwritten, 5/5 SIGSEGV in `PyGC_Collect()` at finalization,
-  glibc `corrupted double-linked list` under `MALLOC_CHECK_=3`. Not
-  demonstrated: control of a pointer value, PC or control flow, code
-  execution, or the advisory's non-PIE `system@plt` chain. Do not upgrade the
-  label beyond this.
+  glibc `corrupted double-linked list` under `MALLOC_CHECK_=3`. W3: the
+  coefficient-chosen `0x5a` replaces `ob_refcnt` and `ob_type` of a live
+  `PyUnicodeObject` at `buffer+176`. Not demonstrated: control of a valid
+  pointer value, PC or control flow, code execution, or the advisory's
+  non-PIE `system@plt` chain. Do not upgrade the label beyond this.
 
 ## Boundaries and open work
 
@@ -182,11 +214,15 @@ All work was local; no socket, server, external probe or other plant was
 touched. The real FPX front end, OLE2 parser, Pillow build, Python process and
 host libjpeg are now all exercised. W2 resolves the W1 open question: the
 bytes reach live glibc heap chunks and their metadata, not only slack, and
-the corrupted heap deterministically aborts the process. Still UNKNOWN: which
-specific Python object (if any) owns the crossed chunks; whether the write can
-be steered into a chosen adjacent `bytes` object; any pointer value or marker;
-control-flow diversion or execution; and the advisory's ASLR-disabled non-PIE
-`system@plt` chain. A pointer or marker claim still waits for direct
-observation of a controlled pointer. Witness replay of W1 (#898) and W2
-returned ESTABLISHED AS CLAIMED at the report's labeled rung-4 grade; no
-pointer, object-neighbour, control-flow or execution claim was verified.
+the corrupted heap deterministically aborts the process. W3 resolves one
+owner question: in the unmodified plain gdb run, the crossed chunk at
+`buffer+176` is a live CPython `PyUnicodeObject`, and its `ob_type` pointer
+field is overwritten by the chosen byte. Still UNKNOWN: which object (if any)
+owns the 32-byte chunk at `buffer+144`; whether the write can be steered into
+a chosen adjacent `bytes` object; whether an arbitrary chosen address can be
+placed in `ob_type`; any dereference of the corrupted object, PC or control
+flow diversion, or execution; and the advisory's ASLR-disabled non-PIE
+`system@plt` chain. A valid-pointer or marker claim still waits for direct
+observation of a chosen address reaching an object field. Witness replay of
+W1 (#898/#900) returned ESTABLISHED AS CLAIMED at the report's labeled
+rung-4 grade; W3 is new author evidence and has not been replayed.

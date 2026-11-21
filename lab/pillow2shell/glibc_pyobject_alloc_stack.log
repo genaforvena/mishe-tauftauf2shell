@@ -1,0 +1,27 @@
+R 1376 0x390b1670
+M 536 0x390d5d00
+R 1600 0x390d5f20
+M 544 0x390a7c80
+R 1856 0x390d5f20
+R 2144 0x390d5f20
+M 759 0x390b1be0
+M 920 0x390b1670
+STACK 920 0x390b1670
+/tmp/pw2-w3/alloclog.so(malloc+0x35)[0x7e92e71df4ea]
+python3(PyObject_Malloc+0x117)[0x586e17]
+python3(_PyObject_NewVar+0x31)[0x584941]
+python3(_PyCode_New+0x4f0)[0x54db40]
+python3[0x6031ed]
+python3[0x602df1]
+python3[0x603053]
+.
+C 128 0x390b15c0
+STACK 128 0x390b15c0
+/tmp/pw2-w3/alloclog.so(calloc+0x45)[0x7e92e71df535]
+/tmp/pw2-w2/v12plain/PIL/_imaging.cpython-312-x86_64-linux-gnu.so(+0x18121)[0x7e92e6633121]
+python3[0x55099c]
+python3(PyObject_Vectorcall+0x35)[0x5499b5]
+python3(_PyEval_EvalFrameDefault+0xadf)[0x5d710f]
+python3(PyEval_EvalCode+0x15b)[0x5d55eb]
+python3(PyRun_StringFlags+0xd3)[0x608733]
+.

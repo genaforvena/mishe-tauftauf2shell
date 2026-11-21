@@ -37,8 +37,8 @@ PYTHONPATH=/tmp/pw2-w1/v12 LD_PRELOAD=$(gcc -print-file-name=libasan.so) \
 ```
 
 ASan alone stays silent because the host `libjpeg.so.8` is uninstrumented;
-the gdb logs are the corruption detector. No pointer, object neighbour or
-control-flow claim is made here.
+the gdb logs are the corruption detector. This W1 section makes no
+object-neighbour or pointer claim; the W3 section below does.
 
 Case-file SHA-256 (regeneration of `case64.fpx` is byte-identical):
 
@@ -119,5 +119,31 @@ PYTHONPATH=/tmp/pw2-w2/v12plain python3 -c \
   'from PIL import Image; Image.open("case64.fpx").load()'
 ```
 
-No pointer, PC or marker control was observed; rung 4 stays at chosen bytes
-plus live heap-metadata corruption and deterministic abort.
+W2 established chosen bytes plus live heap-metadata corruption and a
+deterministic abort; W3 below adds a real Python object's pointer field.
+No valid-pointer value, PC, marker or control-flow diversion was observed.
+
+## W3 — CPython object field overwrite (2026-11-21)
+
+- `glibc_pyobject_type_v12.log` — in the unmodified plain build, the 992-byte
+  chunk at `buffer+176` has `ob_refcnt=2` and `ob_type = &PyUnicode_Type` at
+  `ImagingJpegDecode` entry. A hardware watchpoint on `buffer+191` (last byte
+  of `ob_type`) catches `0x00 -> 90 'Z'` from `libjpeg.so.8` through pinned
+  `JpegDecode.c:252`; after the row both words read `0x5a5a...`. Chosen bytes
+  replace a live Python object's pointer-typed field; the value is the
+  repeated byte, not a chosen valid address.
+- `glibc_pyobject_alloc_stack.log` — separate LD_PRELOAD allocator trace with
+  shifted layout: the neighbour chunk came from `PyObject_Malloc` /
+  `_PyObject_NewVar` / `_PyCode_New`. Supporting only; the `PyUnicode_Type`
+  identification above is the direct observation.
+
+Reproduce the direct observation with the plain build and `case64.fpx`:
+
+```
+PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch \
+  -ex 'set breakpoint pending on' -ex 'break ImagingJpegDecode' -ex 'run' \
+  -ex 'set $b=(unsigned char*)state->buffer' -ex 'p &PyUnicode_Type' \
+  -ex 'x/4gx $b+176' -ex 'watch *(unsigned char*)($b+191)' -ex 'continue' \
+  -ex 'printf "TYPE=%lx\n",*(unsigned long*)($b+184)' -ex 'x/4gx $b+176' \
+  --args python3 -c 'from PIL import Image; Image.open("case64.fpx").load()'
+```

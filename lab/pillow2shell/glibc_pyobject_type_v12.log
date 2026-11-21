@@ -1,0 +1,27 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0xc24fa0, state=0x7ffff77f7d10, buf=0xdb3c50 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+BUF=0xd32bb0 STR_OBJ=0xd32c60 TYPE_ADDR=0xd32c68
+$1 = (<data variable, no debug info> *) 0xa2d260 <PyCode_Type>
+$2 = (PyTypeObject *) 0xa472c0 <PyUnicode_Type>
+0xd32c60:	0x0000000000000002	0x0000000000a472c0
+0xd32c70:	0x0000000000000243	0xffffffffffffffff
+Hardware watchpoint 2: *(unsigned char*)($b+191)
+
+Hardware watchpoint 2: *(unsigned char*)($b+191)
+
+Old value = 0 '\000'
+New value = 90 'Z'
+0x00007ffff7333fb1 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+LAST_BYTE pc=0x7ffff7333fb1 TYPE=5a5a5a5a5a5a5a5a
+0xd32c60:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0xd32c70:	0x0000000000000243	0xffffffffffffffff
+#0  0x00007ffff7333fb1 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#1  0x00007ffff73478e4 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#2  0x00007ffff733d577 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#3  0x00007ffff7338966 in jpeg_read_scanlines () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#4  0x00007ffff746377a in ImagingJpegDecode (im=0xc24fa0, state=0x7ffff77f7d10, buf=0xdb3c50 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:252
