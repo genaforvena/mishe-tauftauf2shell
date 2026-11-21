@@ -50,7 +50,7 @@ verbatim under `#line`, and aborts on drift. `./run.sh` builds ASan and plain
 drivers and writes a normalized trace (ASan pid/address/path text excluded).
 Full command: `cd lab/frontier/kermit2shell && ./run.sh out`.
 Latest: **18 PASS / 0 FAIL**, trace
-`sha256=0de1067bc8745bd7641cd66b9aed578151ca3915357bac59a637b25e51706622`.
+`sha256=f74a088605aba49a48108705fafe151d61d283c04e248836a81f6ca8e4978cc5`.
 
 - **Rung 1 — reproducible trigger.** Vulnerable tight build, 98 repeat
   triplets × 94 = 9212 decoded chars into an exact `MAXRP+1 = 9025`-byte

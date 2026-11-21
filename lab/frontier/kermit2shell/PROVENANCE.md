@@ -28,5 +28,5 @@ Buffer facts pinned: `ckcker.h.vuln:365-367` `#define MAXRP 9024`;
 repeat count `rpt = xunchar(*xdbuf++)`, `for (; rpt > 0; rpt--) fn(a)`.
 
 Reproduction: `cd lab/frontier/kermit2shell && ./run.sh out`. Latest:
-**18 PASS / 0 FAIL**, trace `sha256=0de1067bc8745bd7641cd66b9aed578151ca3915357bac59a637b25e51706622`.
+**18 PASS / 0 FAIL**, trace `sha256=f74a088605aba49a48108705fafe151d61d283c04e248836a81f6ca8e4978cc5`.
 `out/` is gitignored; generated drivers are reproducible from pins.
