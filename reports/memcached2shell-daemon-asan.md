@@ -629,7 +629,12 @@ public records; all three are preserved as negative or narrowing findings.
   the key, decimal `itoa_*` output, or an ASCII literal (`key=`,
   `fetch=no `, spaces, `\n`). No NUL or other non-ASCII byte can appear, so
   a canonical x86-64 pointer (upper bytes zero) cannot be assembled in the
-  overflow stream. This is why the accepted impact is a non-canonical
+  overflow stream. Verified against local bytes: `daemon/parent-plain/util.c`
+  and `daemon/fixed-plain/util.c` are byte-identical (sha256
+  `c4c9681195f6313f6c2691d53a89ed66e1a754830f1558c8543064b7a75068a2`),
+  pass literal only `isalnum()` plus `-._~`, and render every other byte via
+  `snprintf("%%%02hhX", …)` as three ASCII characters.
+  This is why the accepted impact is a non-canonical
   pointer dereference (DoS), not address control.
 
 Grade unchanged at #751/#784; no witness replay owed.
