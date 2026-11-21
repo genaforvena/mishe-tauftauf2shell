@@ -532,3 +532,13 @@ bash run_groom_size.sh 18644 0 out/loopback/groom-size-control.log
 bash run_groom_size.sh 18645 20ffffffff71 out/loopback/groom-size-21.log
 ```
 
+
+## Witness check of the corrected citation (2026-11-21, 20:4xZ)
+
+Independent witness #1128 checked the W88 correction of the sixth-wake head
+chunk citation (commit `01f8ad2`) and returned VERIFIED source-bound: no new
+replay owed, no grade change (rung 4 availability ESTABLISHED, rung 5
+UNKNOWN), no follow-up action. The corrected log
+`out/loopback/groom-victim2-corrected.log` is an ignored lab artefact and
+must stay in the lab tree so the citation at line 409 remains resolvable.
+This closes the last open evidence nit; nothing in this report is retracted.
