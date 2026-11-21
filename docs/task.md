@@ -3677,8 +3677,12 @@ counterexamples making the TLM/SOT mismatch causal (full evidence #957,
 verdict #958). Rungs 1/2/3 ESTABLISHED on the real pinned `opj_decompress`;
 rung 4 INSTRUMENTED: two chosen 64-bit stream offsets byte-exact at the
 TPsot-derived +32/+40 offsets in staged adjacent heap (PoC 157/159;
-pad-tuned 541/543). No JPEG 2000 application, listener, real heap neighbour,
-pointer, control-flow diversion or execution — all UNKNOWN.
+At admission no JPEG 2000 application, listener, real heap neighbour, pointer,
+control-flow diversion or execution was shown — all UNKNOWN. Later commits
+`cad1baf`/`4df17d7` found a live Python object exactly on the TPsot=1
+destination and wrote an exact chosen static pointer (`&PyLong_Type`) into its
+`ob_type` with ASLR on (4 PASS / 0 FAIL, trace `769e135e…`); no indirect call
+followed, so rung 4 stays PARTIAL.
 
 The two-pane `openjpeg2shell` window (inner socket, index 60), seed wall and
 registry entry 62 were pre-created by frontier and are already live; do not
@@ -3746,8 +3750,12 @@ allocation via `CheckAvailableSize :2588` ← `GrowOutputBuffer internal.c:11415
 `msgSz=2048`, write return 0, ASan-clean. Rungs 1/2/3 ESTABLISHED on the
 verbatim pinned source; rung 4 INSTRUMENTED — chosen epoch
 `0xc0ffee1122334455` and seq patterns at offsets 31/47/63/159 in staged
-non-ASan heap. No DTLS socket, listener, handshake record path, live
-neighbour, pointer, control-flow diversion or execution — all UNKNOWN.
+heap. At admission no DTLS socket, listener, handshake record path, live
+neighbour, pointer, control-flow diversion or execution — all UNKNOWN at
+admission. Later `8636e5d` drove 4097 paced loopback fragments through the
+real `Dtls13RecordRecvd` to `ack_count=4097` with ASan `WRITE of size 8` at
+`c64toa`; `fde4360` preserved the failed peer-set variant (peak 3991/3983).
+No live neighbour, pointer control or execution.
 
 The two-pane `wolfssl2shell` window (inner socket, index 61), seed wall and
 registry entry 63 were pre-created by frontier and are already live; do not
@@ -3847,22 +3855,26 @@ real network-facing C listener and deterministic trigger, but a bounded
 string append, not a pointer write; the RCE claim is unverified.
 
 Rungs 1/2/3 ESTABLISHED at the labeled sink/accounting/ASan grades; rung 4
-stays INSTRUMENTED — no chosen pointer, natural live neighbour, control-flow
-diversion or execution. Wake 1 later measured chosen query bytes in a live
-adjacent canary, but only in an instrumented copy. Witness #1050 first
-recorded it UNKNOWN-WITH-MISSING-EVIDENCE because the scripts were untracked;
-commit `b9bd4ee` supplies `run-rung4.sh` and raw logs (19 PASS / 0 FAIL, trace
-`6678d7a9…e0be3d2`), so the replay input is durable but no independent verdict
-has landed yet. Preserved negatives: public PoC returns 404 in the
+stays INSTRUMENTED — no chosen pointer, control-flow diversion or execution.
+Wake 1 measured chosen query bytes in a live adjacent canary in an
+instrumented copy. Later unmodified-build measurements (`f6c542a` natural
+adjacency, `cb75a02` chosen-byte overwrite of a live heap header) supersede
+the earlier instrumented-only and availability-only ceilings. Witness #1050
+first recorded it UNKNOWN-WITH-MISSING-EVIDENCE because the scripts were
+untracked; commit `b9bd4ee` supplies `run-rung4.sh` and raw logs (19 PASS /
+0 FAIL, trace `6678d7a9…e0be3d2`), so the replay input is durable but no
+independent verdict has landed yet. Preserved negatives: public PoC returns 404 in the
 test document root, long query with short path returns clean 301, short
 slash run is a clean control. The two-pane window, seed wall and registry
 entry were pre-created by frontier and were not recreated or edited. The
 operator created the 58th `engine/routes.json` entry and this mind's wake
 trigger units with the pinned full-flag sync from `docs/runtime-pin.md`;
-never run a bare `mishe sync`. The wake-1 chosen-byte neighbour is now
-durably replayable (`bash lab/frontier/civetweb2shell/run-rung4.sh <outdir>`);
-the canary is instrumentation, not natural adjacency, and no pointer,
-control-flow diversion or code execution was observed.
+never run a bare `mishe sync`. The wake-1 chosen-byte neighbour is durably
+replayable (`bash lab/frontier/civetweb2shell/run-rung4.sh <outdir>`); its
+canary was instrumentation. Natural adjacency and a chosen-byte overwrite of
+live heap metadata were later measured in the unmodified build
+(`f6c542a`, `cb75a02`). No chosen pointer, control-flow diversion or code
+execution was observed.
 
 #### Admitted 2026-11-21 ~17:5xZ: Open625412Shell / open625412shell (CVE-2026-126962 / GHSA-x8hf-mwqg-74x6 / ZDI-26-990)
 
@@ -3898,8 +3910,12 @@ freed chunk and observing a downstream dereference is a claim, not an
 observation.
 
 Rungs 1/2/3 ESTABLISHED at the labeled service/accounting/ASan grades; rung 4
-INSTRUMENTED/UNKNOWN — no chosen bytes, pointer control, live neighbour
-overwrite, control-flow diversion or execution. Two documented stand-ins: the
+INSTRUMENTED. Live-neighbour and non-NULL pointer overwrites were later
+observed (`17de7c0`, `f167900`): the stale write lands on byte 200 of a live
+replacement subscription whose head changes `0x514000000840` →
+`0x514000000440`, an item owned by the still-live transferred subscription.
+The values come from created objects, not attacker-chosen bytes; no diversion
+or execution. Two documented stand-ins: the
 `allowTransferSubscription` consent hook returns true (authorization is a
 precondition, not the bug) and the harness calls the same internal
 `UA_Subscription_delete` the status-change path uses before driving the event
@@ -3949,9 +3965,11 @@ Caveats kept honest: DoQ is beta and non-default, the write and RIP control
 depend on jemalloc size classes and gnutls version, ASLR-on exploitability
 needs an unknown information leak, and the PoC was not fetched or run.
 
-No rung is established: no build, no bytes, no trigger, no chosen bytes and no
-pointer control. The operator created the 60th `engine/routes.json` entry, this
-mind's wake trigger units with the pinned full-flag sync from
+At admission no rung was established; commit `bebef9b` later reached rung 3 on
+pinned 6.4.0 (ASan `WRITE of size 1198` at `quic_conn.c:124` past a 5762-byte
+realloc, fixed 6.4.1 rejecting frame 2 cleanly), with rung 4 UNKNOWN. The
+operator created the 60th `engine/routes.json` entry and this mind's wake
+trigger units with the pinned full-flag sync from
 `docs/runtime-pin.md`, a seed wall and the two-pane window (inner socket index
 65). Never run a bare `mishe sync`. This makes 56 admitted target minds in the
 README table; an independent witness replay is owed once a harness exists.
