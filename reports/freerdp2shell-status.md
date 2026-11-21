@@ -277,6 +277,11 @@ with the server-format-table condition explicit. Still UNKNOWN: live process,
 real channel/network transport, RDP session, auth gate and stock heap layout.
 The queue is fed in-process; only the WTS reader and activation logic are
 real FreeRDP code. `bash lab/freerdp2shell-src/run.sh` rc 0 with the new checks.
+The channel handle is a layout-compatible stand-in for `rdpPeerChannel` (the
+real reader dereferences only its `queue` member), and the activation callback
+reproduces shadow's static `rdpsnd_activated()` loop because that function is
+not exported; both call real FreeRDP functions.
+
 
 ## Evidence boundary
 
