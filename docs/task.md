@@ -1845,6 +1845,63 @@ INSTRUMENTED — no valid address, write-what-where or execution. The full
 daemon is UNKNOWN and blocked here by absent libfds/lz4-dev/rst2man. See
 `lab/ipfixcol2shell-live/RESULTS.md` and the status report.
 
+#### Admitted 2026-11-21 ~09:2xZ: Srs2Shell (GHSA-qr8h-p53p-x564, no CVE at fetch)
+
+Frontier handed this find over on tape #716 after committing `24db73a`
+(brief and harness) and `770669f` (replay record). Claim source: GitHub
+Advisory `GHSA-qr8h-p53p-x564` (no CVE assigned at fetch), published
+2026-10-30T14:14:41Z, HIGH 8.2, "RTC: Crash and heap overflow from a
+malformed RTCP packet", pinned in `lab/frontier/srs2shell/PROVENANCE.md`.
+Affected `srs >=4.0,<6.0.194`, `>=7.0,<7.0.214`, `>=8.0,<8.0.73`; patched
+`6.0.194`, `7.0.214`, `8.0.73`. Only WebRTC-enabled servers are affected and
+no authentication is needed without `on_play`/`on_publish` callbacks — a
+claim, not reproduced here. Fix `ab03c94b0744ab392320253ad1767b21b6c82a59`
+adds `length < 1`, `length < 2` and a `payload_len_ > kRtcpPacketSize` guard.
+
+One attacker-controlled RTCP packet's 16-bit `length` drives a copy into the
+fixed `payload_[1500]` array. `decode_header`
+(`srs_kernel_rtc_rtcp.cpp:53-70`) checks only `length * 4 <= buffer->left()`,
+never rejects `length == 0` and never caps the length for the array.
+`SrsRtcpCommon::decode` (`:84-98`) and `SrsRtcpTWCC::decode` (`:802-844`)
+compute `payload_len_ = (length + 1) * 4 - sizeof(SrsRtcpHeader) - 4` and
+pass it to `buffer->read_bytes()`; pinned `srs_kernel_buffer.cpp:242-249`
+calls `memcpy(data, p_, size)` after `srs_assert(require(size))`, checking only
+that the source datagram has enough bytes. `length = 0` gives `payload_len_ =
+-4` and an assert abort; `length = 400` gives a 1596-byte copy 96 bytes past
+the array, 76 past the object.
+
+Rungs 1/2/3 on verbatim pinned upstream ranges under `#line`: parent
+`length = 0` aborts at pinned `srs_kernel_buffer.cpp:244`; a 1604-byte
+datagram declaring 1596 payload bytes passes the parent's upper-bound check;
+ASan reports `heap-buffer-overflow`, `WRITE of size 1596` at pinned
+`srs_kernel_buffer.cpp:246`, decode frame `srs_kernel_rtc_rtcp.cpp:95`, 0
+bytes after a 1536-byte region, with TWCC reproducing the write and fixed
+BYE/TWCC plus benign `length = 2` clean. Rung 4 is INSTRUMENTED only: in a
+64 KiB zeroed collaborator chosen `0x5a` appears at 96 offsets past the
+payload-array end (20 in the object tail, 76 past the object), `0x41`
+reproduces the same count, a benign run writes none, and a guard-mapped
+object faults on the byte past the object (exit 77). No pointer, return
+address, heap-metadata field, function pointer or control-flow diversion was
+observed or attempted; collaborator and guard page are instrumentation.
+
+Admitted by the operator ~09:2xZ under standing approval #6: the two-pane
+window (42, inner socket), registry entry and seed wall were live and
+capture-verified 08:53Z. Operator replay ~09:1xZ from two clean `git archive
+24db73a lab/frontier/srs2shell` extractions into separate absolute
+directories: 14 PASS / 0 FAIL both times, raw trace
+`sha256=77b6d5500dea19d3c3a8de713d7a37834a3241a62e6a7239d398661e5fea1965`
+byte-identical between directories, to the working-tree replay and to the
+brief. Witness replay was requested separately; no verdict in hand at
+admission. Wake trigger units and presentation stay owed from the person's
+full-flag sync, never a bare `mishe sync`. Cheapest next rung: build the
+pinned parent SRS with ASan, enable WebRTC on loopback, open a WHEP/WHIP
+session, send one SRTP-protected BYE/TWCC packet with `length = 400` and a
+chosen fill byte, and capture the daemon ASan frame plus the real heap layout;
+repeat on the fixed version. If the real allocator faults before chosen bytes
+persist, preserve the negative and cap at rung 3. Evidence:
+`reports/frontier-srs2shell.md`, status `reports/srs2shell-status.md` and the
+pins in `lab/frontier/srs2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
