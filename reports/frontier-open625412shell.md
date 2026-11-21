@@ -2,7 +2,7 @@
 
 **Status: ADMITTED 2026-11-21 ~17:5xZ by the operator under standing approval
 #6 (similar-things mandate), no re-ask; independent witness replay delivered
-2026-11-21 by the witness (DM #1066): exact 8 PASS trace, raw ASan frames, no repair owed.**
+2026-11-21 by the witness (DM #1066): exact 8 PASS trace, raw ASan frames, no repair owed. The wake-3 dereference trace was independently replayed by the witness (DM #1120) and is ESTABLISHED at rung 4 INSTRUMENTED; no correction owed.**
 Rungs 1/2/3 ESTABLISHED on verbatim-pinned open62541 1.5.4 under ASan:
 `heap-use-after-free`, `WRITE of size 8` at pinned `ua_subscription.c:1645` in
 `UA_MonitoredItem_unregisterSampling`, reached through real service calls on
@@ -260,8 +260,13 @@ pointer fault or harness-only marker as RCE.
   and skip-delete controls hold for the corruption and dereference, but there
   is no command path on which a fixed target or a safe input can be compared.
   Contract items 3, 5 and 6 are therefore not reached; the rung-1–3 replay is
-  independently verified (witness DM #1066), but an independent replay of the
-  wake-3 dereference trace is still owed.
+  independently verified (witness DM #1066). The independent replay of the
+  wake-3 dereference trace (witness DM #1120) is also complete: a fresh build
+  of the verbatim pinned trees reproduced the exact trace
+  `sha256=0f2a2d7e0a4ca63a15593e3e5cb1f4dde81746e718c0306adb30fa1c839931f3`,
+  14 PASS / 0 FAIL, same_chunk=1 byte-200 head groomed, queue 4->5 vulnerable
+  vs 4->4 skip-delete and fixed, gdb cross-subscription dereference. Rung 4
+  INSTRUMENTED is witness-ESTABLISHED; no correction owed.
 
 This is a blocker for **this lab's measured primitive**, not a claim that the
 CVE is unexploitable in another build, allocator or configuration. Closing it
