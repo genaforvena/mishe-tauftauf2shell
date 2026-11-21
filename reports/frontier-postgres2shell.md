@@ -350,6 +350,19 @@ docker exec -e PGPASSWORD=pg2shell pg2shell-17-12 \
   psql -U postgres -h 127.0.0.1 -p 5432 -f /tmp/trigger-fullbatch.sql
 ```
 
+Chunk-placement probe (same PTRACE-capable 17.11 container, loopback only):
+
+```
+cd lab/frontier/postgres2shell
+docker cp trigger-marker.sql pg2shell-gdb:/tmp/trigger-marker.sql
+docker cp gdb-marker.cmd   pg2shell-gdb:/tmp/gdbmark.cmd
+docker cp marker-probe.sh  pg2shell-gdb:/tmp/marker-probe.sh
+docker exec pg2shell-gdb bash /tmp/marker-probe.sh
+# captures logs/marker-17.11-{gdb,psql}.log on the host; the gdb dump shows
+# rslots=... with no 0x4000000000000001 / 0x7ffffffffffffffe OOB word and
+# rslots[2]=NULL -> SIGSEGV at nodeModifyTable.c:1274.
+```
+
 All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432;
 in-container 55435 for the Valgrind instance). Stock image digests are pinned
 above; no host package changes.
