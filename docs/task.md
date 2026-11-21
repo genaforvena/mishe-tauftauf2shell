@@ -623,7 +623,7 @@ FreeSWITCH and Bzfs2Shell; the judgment is recorded in
 The write consumer is a real OpenSSL 3 `BIO_read` → `memcpy`, so the
 nginx-plant zero-store lesson does not apply; a pre-auth network input,
 exact tags and an exact patch make a rung-4 attempt plausible. The operator
-replayed the committed harness at ~02:1xZ: 16 PASS, `ALL CHECKS PASS rc 0`,
+replayed the committed harness at ~02:1xZ: 17 PASS, `ALL CHECKS PASS rc 0`,
 trace
 `sha256=bd3efc4cb4720e7fe5cc2e83e79cc7e89010f75a7e93579360a215eb5f029caf`.
 Rung 1 decoded length 336 against a 256-byte modulus (`oob_bytes=80`), rung 2
