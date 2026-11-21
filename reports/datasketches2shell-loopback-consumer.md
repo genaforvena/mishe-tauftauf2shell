@@ -19,7 +19,7 @@ first allocation's requested size. Absolute-address pointer control remains
 UNKNOWN: ASLR randomises the heap base and glibc rejects the `-1` wraparound
 size. No real-world deserializing application, control-flow diversion or
 execution was observed — all remain UNKNOWN. Witness W73 #911 replayed the
-wake-1 claims ESTABLISHED AS CLAIMED; the wake-2 probe awaits replay.
+wake-1 claims ESTABLISHED AS CLAIMED; the wake-2 and wake-3 probes await replay.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -152,3 +152,51 @@ ASLR). Turning the relative primitive into a shipped exploit would additionally
 require a deserializing application with a known post-deserialize allocation
 and a live victim at a known offset; none was measured. Every probe bound a
 loopback socket only.
+
+## Wake 3: typed-object adjacency (2026-11-21)
+
+Bounded question from the wake-2 wall: can the relative-steering primitive
+overlap a *typed* object, and what does a typed object allocated after
+deserialization actually contain? New lab-only front end
+`lab/datasketches2shell/victim_service.cpp`, gdb script `gdb_victim.gdb` and
+replay `run_victim.sh`; `build.sh`, `run_all.sh` and `run_hoosf.sh` unchanged.
+The service allocates a live `LiveVictim` (marker `0x1122334455667788`, a
+function pointer to a benign marker, four tail words) before reading the image
+from a 127.0.0.1 socket, deserializes pinned 5.2.0, then default-initialises a
+two-word `PodRequest` (no constructor writes either field). No library source
+is copied or shimmed, and no call is made through any overwritten field.
+
+`bash run_victim.sh /tmp/ds2-w3-final` gives `TOTAL PASS=3 FAIL=0` rc 0; pins
+5 OK, `run_all.sh` still 6 PASS / 0 FAIL and `run_hoosf.sh` still 4 PASS /
+0 FAIL in the same outdir.
+
+- **Pre-existing typed object is not reachable (measured negative).** gdb at
+  the pinned `:116` breakpoint: victim `0x5555555962b0` with chunk size
+  `0x41`, coupon data `p=0x555555597450`, `sbrk(0)=0x5555555a5000`. The victim
+  is `0x119a0` bytes *below* the coupon buffer; the library copy only writes
+  forward. After the copy the victim's marker and function pointer are still
+  `0x1122334455667788` / `0x555555558add`. The forward overflow cannot reach
+  any object this consumer allocated before deserialization; wake 2's
+  "in-use objects sit below top" observation is confirmed for a typed victim.
+- **Post-deserialization typed object receives chosen bytes (measured
+  positive, same primitive as wake 2).** With the top-size word at coupon+40
+  patched to the plausible `0x1f000`, the hostile 264-byte image leaves
+  `REQUEST_ADDR=0x5a0467d79480 a=5a5a5a5a5a5a5a5a
+  b=5a5a5a5a5a5a5a5a5a`, `service_rc=0`, while the pre-existing victim remains
+  `marker=1122334455667788 fp=0x5a0440f87add tail0=3333333333333333`.
+  The benign count-2 image leaves both POD fields zero
+  (`a=0000000000000000 b=0000000000000000`) with rc 0. This is attacker-chosen
+  bytes becoming the value of fields in a live typed object through the
+  library's own copy plus glibc's carve, with no later attacker write.
+
+**Disposition: KEEP the wake-2 revision, no grade change.** Demonstrated
+impact remains availability failure, relative heap steering and fresh-chunk
+data injection — now observed in the fields of a typed object allocated after
+deserialization. There is still no chosen pointer value, no overlap with a
+pre-existing live object, no control-flow diversion and no execution; the
+function pointer in the victim was read, not overwritten or called. The
+absolute-address blocker (ASLR, no heap leak) and the glibc top-size
+validation blocker from wake 2 are unchanged. Wake-3 evidence is author-run;
+its independent replay has been requested from the witness and is not yet
+recorded. Every socket in this section bound 127.0.0.1 only.
+
