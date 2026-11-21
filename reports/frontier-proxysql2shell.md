@@ -71,6 +71,11 @@ Working-tree replay, 2026-11-21: **53 PASS / 0 FAIL**, trace
 `sha256=936fa128f01f1dd123b59b4b941310654d68cd5985449768b0d9ba51a8e77884`
 (two consecutive replays byte-identical).
 
+Two clean `git archive HEAD` replays at commit `d6279cf`, extracted to
+separate absolute directories, each gave **53 PASS / 0 FAIL** and raw trace
+`sha256=936fa128f01f1dd123b59b4b941310654d68cd5985449768b0d9ba51a8e77884`,
+byte-identical to each other, to the working-tree trace and to this brief.
+
 - Rung 1 — deterministic trigger: a 100-byte packet leaves the bytes past the
   queue untouched (`UNTOUCHED=1`) in both protocols. MySQL declared 65535 is
   used as the second `recv()` length at the pinned `:665`; PostgreSQL

@@ -95,3 +95,6 @@ on each replay.
 - First plain build freed a heap corrupted by the chosen write and segfaulted
   before printing; the guard mapping above replaced it. Benign and fixed
   controls were re-run after each repair, not only the chosen case.
+
+`run.sh` writes `out/trace.sha256` over the finished `out/trace.txt`; the
+quoted hash is the raw file hash, with no self-referential line inside it.
