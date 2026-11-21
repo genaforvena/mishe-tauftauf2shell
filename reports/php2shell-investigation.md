@@ -952,15 +952,30 @@ environment block, which the sanitizer does not redzone; the evidence is the
 byte-level GDB observation and the affected/fixed output difference, not a
 sanitizer report. Conditions needed: `cgi.fix_pathinfo=1`, a SCRIPT_FILENAME
 whose last component is not a regular file, a PATH_INFO shorter than the
-stripped suffix, and a preceding environment string to read from. The harness
-supplies those environment variables directly, as a CGI web server would;
-whether a remote HTTP request can set both on the tested deployment is
-UNKNOWN. Grade: **rung 3 CONFIRMED** for the new lane — observed OOB write and
-attacker-offset OOB read with a server-visible leak of neighbouring bytes.
-No arbitrary-address or chosen-byte write, pointer control, marker execution,
-pre-auth reachability or RCE is claimed; no prior lane's grade changes.
+stripped suffix, and a preceding environment string to read from. The first
+harness supplies those variables directly, as a CGI web server would. Grade:
+**rung 3 CONFIRMED** for the new lane — observed OOB write and attacker-offset
+OOB read with a server-visible leak of neighbouring bytes. No arbitrary-address
+or chosen-byte write, pointer control, marker execution, pre-auth reachability
+or RCE is claimed; no prior lane's grade changes.
 
-Next bounded experiment for this lane: replay the shapes through a real
-loopback FastCGI server (`has_env=1`, `FCGI_PUTENV`) to see whether PATH_INFO
-and SCRIPT_FILENAME can be supplied as FastCGI params from a request, which
-would establish the remote-input condition rather than leave it UNKNOWN.
+The remote-input question was then advanced: committed harness
+`lab/repro/php2shell-cve129538-fcgi.py` starts each pinned php-cgi as a
+FastCGI responder on 127.0.0.1 and sends the same shape as FCGI_PARAMS through
+the existing minimal client (`has_env=1`, `FCGI_GETENV`/`FCGI_PUTENV`), so
+PATH_INFO and SCRIPT_FILENAME arrive with the request rather than in the
+process environment. Evidence `lab/build/evidence/w48-cve129538/fcgi-committed/verdict.txt`:
+`VERDICT: CONFIRMED` (three/three checks). Short suffix yields `"/x"` on all
+three builds; long suffix yields `PATH_INFO=".0.1"`, `ORIG_PATH_INFO="/x"` on
+both 8.4.27-asan and 8.5.12-asan, but `"/x"`/`NULL` on 8.5.13-asan. The
+corrupted value is again a slice of an adjacent FastCGI-side string. This
+establishes the input channel at the FastCGI protocol level; whether a given
+web server lets an HTTP request set both params (and therefore whether the
+primitive is remotely reachable on a real deployment) stays UNKNOWN — no web
+server was used. ASan remains silent because the neighbouring strings are
+inside the request's allocations; no sanitizer report is claimed. Rung 3
+CONFIRMED unchanged. Next bounded experiment: determine whether the two-byte
+leak can be steered into a larger, attacker-chosen adjacent value under a
+FastCGI param ordering sweep, and whether the popcount of leaked bytes is
+useful beyond the lab demonstration; otherwise the lane is at its natural
+stop for this plant.

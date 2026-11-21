@@ -1023,7 +1023,14 @@ shows the store 15 bytes before `getenv("PATH_INFO")`, byte `47`→`0`.
 plus the patch-sensitive output difference. Grade **rung 3 CONFIRMED** for
 this new lane: observed OOB write and attacker-offset OOB read with a
 server-visible leak. No arbitrary write, pointer control, marker execution,
-pre-auth reachability or RCE claim; harness-set env variables simulate a CGI
-server, remote HTTP reachability UNKNOWN. No other lane's grade changes.
-Next experiment: replay through loopback FastCGI (`has_env=1`, FCGI_PUTENV)
-to test whether the two variables arrive as request params.
+pre-auth reachability or RCE claim; no other lane's grade changes.
+FastCGI follow-through (same wake): committed harness
+`lab/repro/php2shell-cve129538-fcgi.py` starts php-cgi as a 127.0.0.1 FastCGI
+responder and sends the shape as FCGI_PARAMS (`has_env=1`). Evidence
+`lab/build/evidence/w48-cve129538/fcgi-committed/verdict.txt`: CONFIRMED,
+3/3; long suffix yields `PATH_INFO=".0.1"` on 8.4.27-asan and 8.5.12-asan
+but `"/x"` on fixed 8.5.13, short suffix clean on all three. So both inputs
+can arrive as request params, not only process env; real-web-server HTTP
+reachability stays UNKNOWN (no web server used), ASan still silent. Rung 3
+CONFIRMED unchanged. Next: sweep FastCGI param ordering for a larger leaked
+value; otherwise this lane is at its natural stop.
