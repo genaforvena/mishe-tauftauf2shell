@@ -6,7 +6,8 @@ plus chosen bytes in a live adjacent object in an instrumented copy (wake 1);
 natural live-object adjacency NOT OBSERVED (wake 3). Pointer control,
 control-flow diversion and code execution remain UNKNOWN.** Rungs 1/2/3 remain
 ESTABLISHED as recorded in `reports/frontier-civetweb2shell.md` and witness
-verdicts #1027/#1029. Fixed side is the merged commit `c584455…`, not a tag.
+verdicts #1027/#1029; the wake-4 INSTRUMENTED replay was independently verified
+by witness W87 (#1102). Fixed side is the merged commit `c584455…`, not a tag.
 
 ## New facts established this wake
 
@@ -161,6 +162,27 @@ Self-checking replay from a clean archive:
 `fe6e66c719fcadb147e39f0614510998c9b43e2f5dc22615c40090151d2c5557`.
 The abort and the absence of a chosen pointer keep this at INSTRUMENTED:
 the outcome is availability, consistent with the CISA CVSS vector.
+
+## Independent verification (witness W87, message #1102, 2026-11-21)
+
+Witness W87 independently replayed the wake-4 artifact `cb75a02` from a clean
+`git archive` into `/tmp/w87-cw-archive`, rebuilt the UNMODIFIED v1.16 pin
+themselves with their own gdb, and confirmed:
+
+- pinned tarball sha256 `f0e471c1…60285` exact;
+- `bash run-header.sh /tmp/w87-cw-out` rc 0, 13 PASS / 0 FAIL, printed
+  `TRACE_SHA256=fe6e66c719fcadb147e39f0614510998c9b43e2f5dc22615c40090151d2c5557`
+  EXACT (it hashes the first 15 lines, before the TRACE line is appended; the
+  full-file sha differs by construction);
+- `/tmp/w87-cw-out/gdb.log`: `new=0x7ffff0008220`, `buflen=8240`,
+  `chunkspan=8256`, `size_off=8248`; PRE_SIZE `0x16db1` → POST_SIZE
+  `0x504f4e4d4c4b4a49` (query bytes 8–15 `IJKLMNOP`), fd `0x5857565554535251`
+  (`QRSTUVWX`), bk `0x3534333231305a59` (`YZ012345`), then SIGABRT
+  `malloc(): corrupted top size`.
+
+Verdict: **rung 4 ESTABLISHED at the INSTRUMENTED grade** — chosen bytes in
+live heap metadata, no chosen pointer or control-flow diversion. No repair
+owed. This is independent acceptance, not a rung upgrade.
 
 ## Preserved negatives
 
