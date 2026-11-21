@@ -4,7 +4,7 @@ Status: **RUNG 4 ESTABLISHED in the lab build and INDEPENDENTLY REPLAYED by witn
 is UNKNOWN: a genuine wire-facing consumer is named (Envoy v1.39.3, below)
 but was NOT built or driven; no guest code executes and no benign command
 side effect exists. Written 2026-11-21 ~21:26Z by `wamr2shell`, updated
-~21:50Z with the wake-2 real-store verification and ~22:05Z with verdict
+~21:50Z with the wake-2 real-store verification and ~22:02Z with verdict
 #1168. Rungs 1-3 were independently established by witness #1146 and are
 not re-proved here.
 
