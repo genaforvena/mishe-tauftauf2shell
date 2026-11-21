@@ -4144,3 +4144,42 @@ admitted target minds in the README table. Never run a bare `mishe sync`. The
 bounded first experiment is a Linux ASan build of the pinned 2.0.83.Final
 `openssl-dynamic` library plus the advisory's four-step JNI harness, with a
 2.0.84.Final fixed control; a witness replay is owed once a harness exists.
+
+#### Admitted 2026-11-21 ~21:03Z: WAMR2Shell / wamr2shell (CVE-2026-54912)
+
+Frontier's newest ranking (commit `7dff88c`, 20:58:18Z,
+`reports/frontier-wamr2shell.md`) put this candidate at #1, ahead of Perl
+CVE-2026-15534 at #2. The operator admitted it under standing approval #6,
+no re-ask, with no separate DM required. Operator pin check 21:06Z:
+`sha256sum -c SHA256SUMS` 5/5 OK in `lab/frontier/wamr2shell/src`
+(self-computed digests; raw upstream files and auto-generated commit patches
+carry no published sidecar). All five admission elements are in
+`.mishe-tauftauf/charters/wamr2shell.md`: **claim source** — maintainer
+advisory GHSA-jjv3-x3jf-cg49, CVE record CVE-2026-54912 and OSV, all read by
+frontier; secondary aggregators are not relied on for bytes. **Identifier** —
+CVE-2026-54912 / GHSA-jjv3-x3jf-cg49, CWE-787. **Affected/fixed pin** —
+affected `<=2.4.4`, fixed `2.4.5`, `WAMR_BUILD_FAST_INTERP=1` affected
+configuration; fix commit `b1353b5e8983047ff68829c99abf1355d5f389cf`;
+pinned vulnerable/fixed `wasm_loader.c`, patch and upstream regression
+`.wasm`/`.wat` with digests in the charter. **Primitive** — Pass 1 sizes
+`p_code_compiled` once (`WAMR-2.4.4-wasm_loader.c:9329-9332`); between passes
+the const arrays are sorted and deduped, so Pass 2 emits table references and
+`reserve_block_ret()` copy operands Pass 1 never counted, writing past the
+buffer. Fix `b1353b5e` aligns the decision across passes and raises the dedup
+threshold to `FAST_INTERP_CONST_DEDUP_SCAN_MAX 32`. Published consequence is
+an ASan `WRITE of size 2` during `wasm_runtime_load`, before guest execution.
+**Rung-4 plausibility** — the overflow stream carries attacker-selected
+constant immediates, so chosen-byte placement is plausible but unmeasured;
+wire reachability is UNKNOWN because WAMR has no in-tree listener and no
+consumer is named. No RCE wording.
+
+At admission no plant rung was established: no plant build, bytes or traffic.
+The operator created the 64th `engine/routes.json` entry, this mind's wake
+trigger units with the pinned full-flag sync from `docs/runtime-pin.md` (3
+units written, 0 removed, wake path enabled+active), a seed wall, the charter
+and the two-pane window (inner socket index 69). This makes 60 admitted
+target minds in the README table. Never run a bare `mishe sync`. The bounded
+first experiment is an ASan build of pinned 2.4.4 and 2.4.5 with
+`-DWAMR_BUILD_FAST_INTERP=1`, replaying the exact upstream `.wasm` with a
+clean fixed control, then measuring chosen-immediate byte placement;
+a witness replay is owed once the harness exists.
