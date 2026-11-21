@@ -6,8 +6,9 @@ running the **real pinned WarehousePG 7.6.1 `gpfdist.c`**. Attacker-chosen
 8-byte values — including `0x4141414141414141`, the harness's exact value —
 are written byte-for-byte into real APR-pool neighbours (the pstrdup'd session
 path string) at chosen offsets; a deeper index overwrites a live APR hash pool
-pointer with `0x1` (item 7). A symbolised ASan SEGV report fires at the real
-`gpfdist.c:1988` frame for a large hostile index. The fixed 7.6.2 source
+pointer with `0x1`, and a matched-layout variant writes a header-supplied
+64-bit value into that pointer (item 7). A symbolised ASan SEGV report fires
+at the real `gpfdist.c:1988` frame for a large hostile index. The fixed 7.6.2 source
 rejects the same requests. Witness W65 accepted the earlier live limb as
 claimed (chat tape #859); the pointer extension is new and awaiting replay.
 This report is evidence, not independent acceptance.
@@ -119,6 +120,20 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
    `gdb_pointer_chosen.gdb`). Whether an arbitrary pointer value can be
    written at a reachable pointer-valued neighbour stays UNKNOWN.
 
+   With the path length matched to that layout (17-character
+   `out_pointer_18124`), the same HTTP oracle wrote a **header-supplied 64-bit
+   value** into the pointer: before a chosen write, `:3517` reported the
+   expected value `140737344561193` (`0x7ffff76de029`, the existing pool
+   pointer plus one). A request with `X-GP-SEQ:140737344561193` returned 200;
+   at `:3677` gdb read `requests[0]` before as `0x00007ffff76de028` and after
+   as `0x00007ffff76de029` (bytes `28 e0 6d f7 ff 7f 00 00` →
+   `29 e0 6d f7 ff 7f 00 00`), and a fresh oracle reported
+   `140737344561194`. ASan stayed clean
+   (`evidence/gdb_pointer_chosen_value.txt`,
+   `evidence/http_oracle_pointer_chosen.txt`). The value is not arbitrary:
+   `:3502` requires `value = old_slot + 1`, so the increment is
+   attacker-supplied but bounded by the pre-existing pointer.
+
 ## Rung assessment
 
 - Rungs 1/2/3: ESTABLISHED in the extracted harness (frontier, independently
@@ -134,6 +149,9 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
   (`evidence/gdb_pointer_index28.txt`). This is pointer corruption in a
   real-source/shimmed-dependency loopback build, NOT control-flow diversion
   or execution.
+  A matched-layout variant also wrote a header-supplied 64-bit value
+  (`0x7ffff76de029`) byte-for-byte into that pointer, constrained to the old
+  pointer plus one (`evidence/gdb_pointer_chosen_value.txt`).
 
 
 ## Preserved negatives and limits
@@ -173,6 +191,8 @@ bash lab/gpfdist2shell-live/probe_deep.sh ./gpfdist_v761_asan 18116 15 \
 #   from probe_chosen.sh to 127.0.0.1:18097)
 bash lab/gpfdist2shell-live/probe_pointer.sh 18121 28
 # produces evidence/gdb_pointer_index28.txt-equivalent gdb transcript
+bash lab/gpfdist2shell-live/probe_pointer_chosen.sh
+# 17-char out_pointer_18124 path; writes the oracle value into requests[0]
 ```
 
 All inputs are local header values from the vendor regression test and the

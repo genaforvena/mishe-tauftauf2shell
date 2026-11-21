@@ -5,8 +5,8 @@
 # value into the session->requests hash pool pointer.
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
-PORT=18122
-OUT="$HERE/out_pointer_chosen_$PORT"; rm -rf "$OUT"; mkdir -p "$OUT/data"
+PORT=18124
+OUT="$HERE/out_pointer_$PORT"; rm -rf "$OUT"; mkdir -p "$OUT/data"
 printf 'row1\n' > "$OUT/data/out.txt"
 : > "$OUT/server.log"
 export ASAN_OPTIONS='detect_leaks=0:abort_on_error=0'

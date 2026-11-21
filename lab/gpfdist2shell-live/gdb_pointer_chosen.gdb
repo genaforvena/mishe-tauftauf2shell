@@ -1,7 +1,8 @@
-# Same calibrated target as gdb_pointer.gdb, port 18122.
+# Same calibrated target as gdb_pointer.gdb, port 18124 and a 17-char
+# data-directory name so the allocation layout matches the pointer run.
 set pagination off
 set confirm off
-set args -b 127.0.0.1 -p 18122 -d /home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_pointer_chosen_18122/data -l /home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_pointer_chosen_18122/server.log
+set args -b 127.0.0.1 -p 18124 -d /home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_pointer_18124/data -l /home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_pointer_18124/server.log
 break gpfdist_v7.6.1.c:3677
 commands
 silent
