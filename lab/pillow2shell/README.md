@@ -62,6 +62,30 @@ In-library ASan evidence (ASan-instrumented libjpeg-turbo 2.1.5.1, `WITH_SIMD=0`
   build records with `JPEG_ROOT=/tmp/pw2-w1/jpegasan` and the instrumented
   libjpeg prefix.
 
+Rebuild the in-library ASan case (instrumented libjpeg). `_imaging.so` has no
+RUNPATH, so bare `ldd` can show the system `libjpeg.so.62` even with
+`JPEG_ROOT`. Export `LD_LIBRARY_PATH` both when checking the loader and when
+running the case; the witness needed the same export on its own rebuild:
+
+```
+cmake -S <libjpeg-turbo-2.1.5.1> -B /tmp/pw2-w1/jpeg-build \
+  -DCMAKE_INSTALL_PREFIX=/tmp/pw2-w1/jpegasan -DWITH_SIMD=0 \
+  -DCMAKE_C_FLAGS="-fsanitize=address -fno-omit-frame-pointer -g -O1"
+cmake --build /tmp/pw2-w1/jpeg-build --target install
+CFLAGS="-fsanitize=address -fno-omit-frame-pointer -g -O1" \
+LDFLAGS="-fsanitize=address" JPEG_ROOT=/tmp/pw2-w1/jpegasan \
+  python3 -m pip install --no-binary :all: --no-deps \
+  --target /tmp/pw2-w1/v12ja /tmp/pw2-dl/pillow-12.2.0.tar.gz
+LD_LIBRARY_PATH=/tmp/pw2-w1/jpegasan/lib ldd /tmp/pw2-w1/v12ja/PIL/_imaging*.so
+LD_LIBRARY_PATH=/tmp/pw2-w1/jpegasan/lib PYTHONPATH=/tmp/pw2-w1/v12ja \
+  LD_PRELOAD=$(gcc -print-file-name=libasan.so) ASAN_OPTIONS=detect_leaks=0 \
+  python3 -c 'from PIL import Image; Image.open("case64.fpx").load()'
+```
+
+Use `/tmp/pw2-w1/libjpeg-turbo-2.1.5.1` source layout if following W1's paths;
+`CMAKE_INSTALL_LIBDIR=lib` in `jpeg-cmake.log` confirms the exported `lib`
+directory name.
+
 ## W2 — plain glibc heap evidence (2026-11-21)
 
 A plain, no-sanitizer Pillow 12.2.0 build (`/tmp/pw2-w2/v12plain`, links host

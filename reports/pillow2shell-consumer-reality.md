@@ -11,7 +11,10 @@ overwrites the next malloc chunk's size field and two live heap chunks, then
 `MALLOC_CHECK_=3` reporting `corrupted double-linked list`. No pointer or PC
 control, control-flow diversion, code execution or socket/server was observed;
 those stay UNKNOWN. This extends the frontier harness result in
-`reports/frontier-pillow2shell.md`. Witness replay requests remain open.**
+`reports/frontier-pillow2shell.md`. Witness replay #898/#900 returned
+ESTABLISHED AS CLAIMED at this labeled grade; the witness's own rebuild matched
+the stores and the fixed-build control. Author/operator replays are not
+independent acceptance.**
 
 ## Repro (loopback-free local process; no network probe)
 
@@ -85,8 +88,14 @@ Everything durable is under `lab/pillow2shell/`. The volatile build tree was
 To remove the "ASan cannot see libjpeg" limitation, libjpeg-turbo 2.1.5.1
 was fetched as provisioning, built from source with `WITH_SIMD=0` and
 `-fsanitize=address -fno-omit-frame-pointer -g -O1`, and both Pillow tags were
-rebuilt with `JPEG_ROOT` pointing at that prefix. `ldd _imaging.so` shows the
-ASan `libjpeg.so.62` from that prefix. On the byte-identical `case64.fpx`:
+rebuilt with `JPEG_ROOT=/tmp/pw2-w1/jpegasan` pointing at that prefix. The
+built `_imaging.so` has no RUNPATH, so bare `ldd` can resolve the system
+`libjpeg.so.62` despite `JPEG_ROOT`. Verify with
+`LD_LIBRARY_PATH=/tmp/pw2-w1/jpegasan/lib ldd PIL/_imaging*.so` and use the
+same export at run time:
+`LD_LIBRARY_PATH=/tmp/pw2-w1/jpegasan/lib PYTHONPATH=/tmp/pw2-w1/v12ja LD_PRELOAD=$(gcc -print-file-name=libasan.so) ASAN_OPTIONS=detect_leaks=0 python3 -c 'from PIL import Image; Image.open("case64.fpx").load()'`.
+The witness hit the same loader gap on its independent rebuild and used the
+analogous `/tmp/w73-pw2/jpegasan/lib` export. On the byte-identical `case64.fpx`:
 
 - v12 (`lab/pillow2shell/asan_libjpeg_v12.log`):
   `ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size 1` at
@@ -178,5 +187,6 @@ specific Python object (if any) owns the crossed chunks; whether the write can
 be steered into a chosen adjacent `bytes` object; any pointer value or marker;
 control-flow diversion or execution; and the advisory's ASLR-disabled non-PIE
 `system@plt` chain. A pointer or marker claim still waits for direct
-observation of a controlled pointer. Witness replay of W1 (#898) and W2 is
-requested and not yet returned.
+observation of a controlled pointer. Witness replay of W1 (#898) and W2
+returned ESTABLISHED AS CLAIMED at the report's labeled rung-4 grade; no
+pointer, object-neighbour, control-flow or execution claim was verified.
