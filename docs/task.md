@@ -1426,6 +1426,60 @@ full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/unbound2shell-status.md` and the pinned hashes in
 `lab/frontier/unbound2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~07:1xZ: Janus2Shell (GHSA-8qwr-6p52-4vj9)
+
+Claim source: maintainer advisory
+<https://github.com/meetecho/janus-gateway/security/advisories/GHSA-8qwr-6p52-4vj9>,
+published 2026-10-12, "No known CVE", reporter AdamKorcz (Anthropic / Ada
+Logics). CVSS 3.1 7.5 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`, availability
+only as claimed; CWE-121 stack buffer overflow. Affected `<=1.4.2` and
+`<=0.16.2`; fixed `1.4.3` and `0.16.3`; fix commits
+`e55e2915a2801f18495c7f0d049af9274dd70065` (1.4.x) and
+`c31cad9768368b996aa68753df1656fe4f30af7e` (0.16.x), each adding the same
+five-line `len >= sizeof(prebuffer)` guard at two parsed-header sites.
+
+Claimed primitive: at tag `v1.4.2`, `src/plugins/janus_recordplay.c:664`
+declares `char prebuffer[1500]`. `janus_recordplay_parse_codec()` (`:701-714`)
+and `janus_recordplay_get_frames()` (`:2603-2617`) read an unchecked 16-bit
+big-endian length from a `.mjr` header, `fread` that many bytes into
+`prebuffer` (`:707`, `:2610`) and write `prebuffer[len] = '\0'` (`:714`,
+`:2617`). The advisory's unauthenticated client records an ~1900-byte
+`a=fmtp`, producing a 1986-byte info header; a later play or startup rescan
+crash-loops the daemon. Recording reachability and the HTTP-to-`.mjr` chain
+stay claims.
+
+Frontier's harness (`lab/frontier/janus2shell/run.sh`) executes the verbatim
+pinned blocks from `v1.4.2` (`:669-670`, `:701-714`) and the guarded `v1.4.3`
+block under `#line` directives with stub collaborators and a synthetic
+in-memory `.mjr`: rung 1 1986 bytes into `prebuffer[1500]` (`overflow=486`)
+with a benign 100-byte control; rung 2 vulnerable accepts and fixed rejects
+with `Info header too big (1986 bytes)`; rung 3 ASan `stack-buffer-overflow`,
+`WRITE of size 1986` at pinned `:707`; rung 4 reads 16 chosen bytes back
+byte-exact past the array, overwrites the adjacent local `len`, and a
+host-default-stack-protector control aborts with `stack smashing detected`.
+Rung 4 is INSTRUMENTED only — no pointer, saved return address, marker,
+live Janus process, HTTP/SDP path, real `.mjr`, shipping flags or real stack
+layout exercised. Victim builds use `-fno-stack-protector`, so the canary
+abort proves control-data adjacency only in that compiled frame.
+
+Admitted by the operator ~07:1xZ under standing approval #6 on handoff #632:
+the two-pane window (36, inner socket), registry entry and seed wall were
+live from frontier and capture-verified at 07:00:48Z. Operator replay ~07:09Z
+from two clean `git archive HEAD` (dc1a4e1) extractions into separate
+absolute output directories: 29 PASS / 0 FAIL and `ALL CHECKS PASSED rc 0`
+both times, byte-identical trace
+`sha256=c8568d26b07cac408da640b7e6d8347d1c43db3119274fafbfb73f3e41f9a21f`.
+Witness replay was requested in parallel; no verdict at admission. Cheapest
+next rung: build stock `v1.4.2` on 127.0.0.1 with Record&Play enabled, create
+the recording through the documented HTTP API with an ~1900-byte `a=fmtp`,
+request playback under ASan and under a debugger watching the saved return
+address, capture wire bytes, `.mjr` header, real ASan frame and post-write
+stack state, and repeat with `v1.4.3`. Wake trigger units and the
+presentation entry are owed from the person's full-flag sync, never a bare
+`mishe sync`. Evidence: `reports/frontier-janus2shell.md`, seed status
+`reports/janus2shell-status.md` and the pinned hashes in
+`lab/frontier/janus2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`

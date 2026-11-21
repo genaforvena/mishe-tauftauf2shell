@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies twenty-seven admitted vulnerability families in local, isolated
+It studies twenty-eight admitted vulnerability families in local, isolated
 copies of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -509,6 +509,15 @@ copies of the affected software:
   run on verbatim pinned upstream lines, rung 4 is instrumented
   chosen-byte control only.
 
+- **Janus2Shell** — GHSA-8qwr-6p52-4vj9 (2026-10-12, "No known CVE"), an
+  unauthenticated client's ~1900-byte `a=fmtp` produces a 1986-byte `.mjr`
+  info header; a later play or startup rescan `fread`s that length into a
+  1500-byte stack `prebuffer` and writes `prebuffer[len] = '\0'` at pinned
+  `janus_recordplay.c:707`. Advisory CVSS 3.1 7.5, availability-only;
+  affected `<=1.4.2` / `<=0.16.2`, fixed `1.4.3` / `0.16.3`. Admitted
+  ~07:1xZ under standing approval #6; rungs 1-3 run on verbatim pinned
+  upstream lines, rung 4 is instrumented chosen-byte control only.
+
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
 `127.0.0.1`, and a separate mind re-runs every claimed result before it
@@ -545,6 +554,7 @@ is called established.
 | **Iondtn2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 18 rendered AMP values of 80 bytes append 1458 bytes into a 1024-byte `STAKE(1024)` heap region at pinned `nm/mgr/nm_mgr_print.c:557`: the first byte past the allocation changes, ASan reports `heap-buffer-overflow` `WRITE of size 81` in `ui_str_from_ac` at pinned line 557, and token `ION2SHL!` reads back byte-exact at chosen write offsets 1024/1088/1152/1280/1408. Fix `4b158b6` uses `istrlen()`/`istrcat()` capacity checks and returns NULL; the neighbour is clean. No live `nm_mgr`, socket, UDP CLA/AMP payload, UI, useful pointer or execution; both advisories claim availability only, and the GHSA "No known CVE" vs VulnCheck CVE assignment conflict is preserved. [Status](reports/iondtn2shell-status.md) |
 | **Opensips2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 299-byte JID `from` drives `ENC_SIP_URI()`'s unbounded `sprintf` to write 304 bytes into `buf_from[256]` — 48 attacker-chosen bytes past the array, with `stored_len=14` when a `/` is present at offset 10; ASan reports `stack-buffer-overflow` `WRITE of size 304` at pinned `xmpp.c:285`, and 16 chosen bytes at `buf_from+256` read back byte-exact in the no-canary lab frame. Fix `ec24165b` bounds the helper with `snprintf`, enlarges the buffer and gates inbound `<message/>` on dialback. No live OpenSIPS receiver, socket, XMPP stanza, shipping stack layout, canary/ASLR/NX measurement, pointer control or execution; `backend=server` is a configuration gate and RCE stays an advisory claim. [Status](reports/opensips2shell-status.md) |
 | **Unbound2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | `dname_len=255` plus `rdata_len=65535` writes 65788 bytes into the 65552-byte `env->scratch_buffer` (`overflow=236`) in pinned `val_sigcrypt.c:293-317`; ASan reports `heap-buffer-overflow` `WRITE of size 65533` at pinned `sldns/sbuffer.h:436` from `val_sigcrypt.c:311`, and 16 chosen RDATA bytes read back byte-exact past the allocation in the lab frame. Both fixed pins (`8c2e0fd6cc5b`, `1.26.1`) reject the same input with `GUARD_REJECTED=1`. No live resolver, DNSKEY wire bytes, compression-pointer route, DNSSEC config, shipping flags, pointer control or execution; advisory RCE remains a claim. [Status](reports/unbound2shell-status.md) |
+| **Janus2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 1986-byte `.mjr` info header freads into `char prebuffer[1500]` (`overflow=486`) at pinned `janus_recordplay.c:707`; the vulnerable build accepts it, the `v1.4.3` guard rejects with `Info header too big (1986 bytes)`, ASan reports `stack-buffer-overflow` `WRITE of size 1986`, and 16 chosen bytes read back byte-exact past the array with the adjacent local overwritten and a canary control abort. No live Janus, HTTP/SDP path, real `.mjr`, shipping flags, pointer control or execution; availability-only as claimed. [Status](reports/janus2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -594,7 +604,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell**,
 **accelppp2shell**, **indiserver2shell**, **shairport2shell**,
 **asterisk2shell**, **netatalk2shell**, **iondtn2shell**,
-**unbound2shell** and **opensips2shell** pursue their lane end-to-end — build,
+**unbound2shell**, **opensips2shell** and **janus2shell** pursue their
+lane end-to-end — build,
 harness, debugger, report. Four
 further minds cut
 across them:
@@ -686,8 +697,8 @@ self-scheduling it.
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
   `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
   `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell`,
-  `indiserver2shell`, `shairport2shell`, `asterisk2shell`, `netatalk2shell`,
-  `iondtn2shell`, `unbound2shell` and `opensips2shell` windows show each
+  `iondtn2shell`, `unbound2shell`, `opensips2shell` and `janus2shell` windows
+  show each
   mind's wall and wake
   log; `frontier`, `docs`, `witness` and `operator`
   show the cross-cutting minds' walls. `chat`, `git` and `wakes` show the
