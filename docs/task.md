@@ -3189,9 +3189,16 @@ malloc chunk size field (`0x21 → 0x5a5a5a5a5a5a5a5a5a`) and two live chunks
 (`buffer+144`, `+176`); 5/5 runs exit rc 139 (SIGSEGV in `PyGC_Collect()`),
 `MALLOC_CHECK_=3` reports `corrupted double-linked list`, and plain 13.0.0
 raises `OSError` rc 1. Detail in
-`reports/pillow2shell-consumer-reality.md`. The specific owning Python object,
-any pointer/PC value, control-flow diversion and execution remain UNKNOWN;
-grade stays ◐, and witness #898 plus the W2 replay are requested, not returned.
+`reports/pillow2shell-consumer-reality.md`. Witnesses #898/#900 returned
+ESTABLISHED AS CLAIMED at the W1 labeled grade; W3 (commits `f663a08` /
+`558d2e4`) documents the `LD_LIBRARY_PATH` export the ASan libjpeg replay
+needs (the built `_imaging.so` has no RUNPATH) and identifies the `buffer+176`
+chunk in the unmodified plain gdb run as a live CPython `PyUnicodeObject`
+whose `ob_type` is overwritten with the chosen `0x5a` byte via pinned
+`JpegDecode.c:252` — a chosen byte pattern, not a valid address. W3 is new
+author evidence, not replayed. No dereference, valid pointer/PC value,
+control-flow diversion or execution; which object owns the 32-byte chunk at
+`buffer+144` stays UNKNOWN; grade stays ◐.
 
 #### Admitted 2026-11-21 ~12:56Z: DataSketches2Shell / datasketches2shell (CVE-2026-103501 / GHSA-w656-xfm5-jqjh)
 
@@ -3255,6 +3262,16 @@ deserves a second harness because its copy path differs. Which applications
 deserialize untrusted HLL images and whether their allocator leaves a useful
 adjacent victim stay UNKNOWN until measured; a measured front-end, allocator
 or wire blocker is a valid negative to preserve.
+
+Post-admission loopback service (commit `b95653e`): the 264-byte count-64
+image reaches public `hll_sketch::deserialize` inside a real process; plain
+5.2.0 overwrites the live top chunk size at coupon+40 (`0xdbd1 → 0x5a5a…`) and
+the next 512-byte malloc aborts `malloc(): corrupted top size`. Wake 2 patches
+that word to `0x1f000`: a following `malloc(0x1000)` returns a fresh chunk
+whose first bytes are the chosen `0x5a`, and the next chunk shifts with the
+first size — relative steering only; ASLR moves absolute addresses and glibc
+rejects `-1`, so no absolute pointer control. W73 (#911) replayed the wake-1
+claims ESTABLISHED AS CLAIMED; wake 2 awaits replay. Grade ◐ unchanged.
 
 #### Admitted 2026-11-21 ~13:20Z: RabbitMQC2Shell / rabbitmqc2shell (CVE-2026-61547 / GHSA-hfjv-vcp3-39wh)
 
@@ -3326,6 +3343,20 @@ past-end bytes and inspect the real heap neighbour. Which applications
 forward attacker-sized bodies and whether their allocator leaves a useful
 adjacent victim stay UNKNOWN until measured; a measured front-end, socket or
 allocator blocker is a valid negative to preserve.
+
+Post-admission socket-fed service (commit `974a3ae`): a local `AF_UNIX` client
+feeds the oversized body to plain pinned 0.16.0 in a separate service process.
+ASan reports the library-allocator `WRITE of size 200000` at
+`amqp_connection.c:467`; under gdb the live neighbour at `outbound+65552` is
+`state->socket` (vtable `<amqp_tcp_socket_class>`) and chosen bytes replace its
+`klass` pointer. With a reusable 200000-byte receive buffer and a 65600-byte
+body carrying a fake vtable plus the body address, the library's own path at
+`amqp_socket.c:92` calls a benign `marker_send` (`MARKER: controlled vtable
+call reached`, rc 0); fixed 0.17.0 returns `AMQP_STATUS_BAD_AMQP_DATA`.
+Conditions: synthetic local service, lab-only address file (simulated
+disclosure), benign marker — not a shipped-product exploit. 8 PASS / 0 FAIL;
+no real messaging application, remote listener or address-disclosure
+primitive. Service probe awaits replay; grade ◐ unchanged.
 
 #### 2026-11-21 ~13:20Z operator disposition of witness W72 / #895 (Libwebsockets2Shell)
 
