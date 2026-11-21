@@ -26,7 +26,9 @@ attacker-chosen code was observed — all remain UNKNOWN. Witness W73 #911
 replayed the wake-1 claims ESTABLISHED AS CLAIMED; witness W74 replayed the
 wake-2 (#922) and wake-3 (#929) claims from clean git archives of `b95653e`
 and `e6e8b86`, also ESTABLISHED AS CLAIMED at their labeled grades (6+4 PASS
-and 3 PASS rc 0, five pins OK). Wake 4 is author-run with replay requested.
+and 3 PASS rc 0, five pins OK). Witness W75 replayed wake 4 (#951) from a clean
+git archive of `fa551e9`, ESTABLISHED AS CLAIMED at the lab-build-only grade
+(4 PASS rc 0, five pins OK).
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -283,6 +285,21 @@ diversion to a different benign marker, with a clean benign control. The
 advance is conditional on consumer-side grooming and a non-PIE image carrying
 a stable address. Absolute pointer control without those conditions, real
 application reachability, and execution of attacker-chosen code remain
-UNKNOWN. Author-run; independent replay has been requested from the witness.
-Every socket in this section bound 127.0.0.1 only.
+UNKNOWN. Witness W75 independently replayed commit `fa551e9` from a clean git
+archive into `/tmp/w75-ds4` (the archive must include
+`lab/frontier/datasketches2shell`, which `build.sh` needs for the five pins):
+`build.sh` verified five pins, `run_groom.sh` 4 PASS / 0 FAIL rc 0 and
+`run_all.sh` 6 PASS / 0 FAIL. gdb at pinned `:116` showed p=G=0x442320,
+V=p+48, victim chunk `0x41` before and after, callback `0x403b4a` ->
+`0x403b84` with chosen magic and refcount; the plain hostile image reached
+`BENIGN_MARKER3_EXECUTED` with `m3=3333333333333333`, the benign count-2
+control reached the original marker; 5/5 fresh archives were identical.
+Two witness counterexamples were checked and the claim held: re-patching the
+same image's callback bytes back to marker2 `0x403b4a` while keeping the chosen
+magic/refcount executed marker2 with `m2=2222222222222222`, so the pointer is
+image-carried rather than a fixed consequence of grooming; and gdb at
+main+1068 showed `call *%rax` with `rax=0x403b84`, a genuine indirect call
+through the written field with no re-store in `groom_service.cpp`. Grade:
+ESTABLISHED AS CLAIMED at the lab-build-only grade, with the bounds above
+retained. Every socket in this section bound 127.0.0.1 only.
 
