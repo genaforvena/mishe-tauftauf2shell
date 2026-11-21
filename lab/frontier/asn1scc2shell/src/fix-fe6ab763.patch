@@ -1,0 +1,194 @@
+From fe6ab763bc60d8a2def4104c15414809b45fffd9 Mon Sep 17 00:00:00 2001
+From: George Mamais <gmamais@gmail.com>
+Date: Sun, 15 Mar 2026 14:06:48 +0200
+Subject: [PATCH] Fix 4 security vulnerabilities in C runtime (CVE-DRAFT-1..4)
+ All reported by Lorenzo Bracciale (U. Rome, Tor Vergata) against v4.6.0.17.
+
+---
+ StgC/uper_c.stg                |  1 +
+ asn1crt/asn1crt_encoding.c     | 10 ++++++++++
+ asn1crt/asn1crt_encoding_acn.c | 16 +++++++++++-----
+ asn1crt/asn1crt_encoding_xer.c | 34 +++++++++++++++++++++++++---------
+ 4 files changed, 47 insertions(+), 14 deletions(-)
+
+diff --git a/StgC/uper_c.stg b/StgC/uper_c.stg
+index 72fbacfa4..00905b095 100644
+--- a/StgC/uper_c.stg
++++ b/StgC/uper_c.stg
+@@ -125,6 +125,7 @@ InternalItem_string_with_alpha_decode(p, sErrCode,  td/*:FE_StringTypeDefinition
+ asn1SccSint charIndex = 0;
+ ret = BitStream_DecodeConstraintWholeNumber(pBitStrm, &charIndex, 0, <nLastItemIndex>);
+ *pErrCode = ret ? 0 : <sErrCode>;
++if (ret && (charIndex < 0 || charIndex > <nLastItemIndex>)) { ret = FALSE; *pErrCode = <sErrCode>; }
+ <p>[<i>] = ret ? allowedCharSet[charIndex] : '\0' ;
+ >>
+ 
+diff --git a/asn1crt/asn1crt_encoding.c b/asn1crt/asn1crt_encoding.c
+index 3668ee6e3..e350ec76c 100644
+--- a/asn1crt/asn1crt_encoding.c
++++ b/asn1crt/asn1crt_encoding.c
+@@ -818,6 +818,8 @@ flag BitStream_DecodeConstraintWholeNumber(BitStream* pBitStrm, asn1SccSint* v,
+ 
+ 	if (BitStream_DecodeNonNegativeInteger(pBitStrm, &uv, nRangeBits))
+ 	{
++		if (uv > range)
++			return FALSE;
+ 		*v = ((asn1SccSint)uv) + min;
+ 		return TRUE;
+ 	}
+@@ -902,6 +904,8 @@ flag BitStream_DecodeConstraintPosWholeNumber(BitStream* pBitStrm, asn1SccUint*
+ 
+ 	if (BitStream_DecodeNonNegativeInteger(pBitStrm, &uv, nRangeBits))
+ 	{
++		if (uv > range)
++			return FALSE;
+ 		*v = uv + min;
+ 		return TRUE;
+ 	}
+@@ -945,6 +949,8 @@ flag BitStream_DecodeSemiConstraintWholeNumber(BitStream* pBitStrm, asn1SccSint*
+ 	*v = 0;
+ 	if (!BitStream_DecodeConstraintWholeNumber(pBitStrm, &nBytes, 0, 255))
+ 		return FALSE;
++	if (nBytes > WORD_SIZE)
++		return FALSE;
+ 	for (i = 0; i<nBytes; i++) {
+ 		byte b = 0;
+ 		if (!BitStream_ReadByte(pBitStrm, &b))
+@@ -962,6 +968,8 @@ flag BitStream_DecodeSemiConstraintPosWholeNumber(BitStream* pBitStrm, asn1SccUi
+ 	*v = 0;
+ 	if (!BitStream_DecodeConstraintWholeNumber(pBitStrm, &nBytes, 0, 255))
+ 		return FALSE;
++	if (nBytes > WORD_SIZE)
++		return FALSE;
+ 	for (i = 0; i<nBytes; i++) {
+ 		byte b = 0;
+ 		if (!BitStream_ReadByte(pBitStrm, &b))
+@@ -999,6 +1007,8 @@ flag BitStream_DecodeUnConstraintWholeNumber(BitStream* pBitStrm, asn1SccSint* v
+ 
+ 	if (!BitStream_DecodeConstraintWholeNumber(pBitStrm, &nBytes, 0, 255))
+ 		return FALSE;
++	if (nBytes > WORD_SIZE)
++		return FALSE;
+ 
+ 	valIsNegative = BitStream_PeekBit(pBitStrm);
+ 
+diff --git a/asn1crt/asn1crt_encoding_acn.c b/asn1crt/asn1crt_encoding_acn.c
+index 36b318ce5..4eaf6e92b 100644
+--- a/asn1crt/asn1crt_encoding_acn.c
++++ b/asn1crt/asn1crt_encoding_acn.c
+@@ -302,6 +302,8 @@ flag Acn_Dec_Int_PositiveInteger_VarSize_LengthEmbedded(BitStream* pBitStrm, asn
+ 	asn1SccUint v = 0;
+ 	if (!BitStream_ReadByte(pBitStrm, &nBytes))
+ 		return FALSE;
++	if (nBytes > WORD_SIZE)
++		return FALSE;
+ 	for (i = 0; i<nBytes; i++) {
+ 		byte b = 0;
+ 		if (!BitStream_ReadByte(pBitStrm, &b))
+@@ -498,6 +500,8 @@ flag Acn_Dec_Int_TwosComplement_VarSize_LengthEmbedded(BitStream* pBitStrm, asn1
+ 	flag isNegative = 0;
+ 	if (!BitStream_ReadByte(pBitStrm, &nBytes))
+ 		return FALSE;
++	if (nBytes > WORD_SIZE)
++		return FALSE;
+ 	for (i = 0; i<nBytes; i++) {
+ 		byte b = 0;
+ 		if (!BitStream_ReadByte(pBitStrm, &b))
+@@ -598,11 +602,11 @@ void Acn_Enc_Int_BCD_VarSize_LengthEmbedded(BitStream* pBitStrm, asn1SccUint int
+ flag Acn_Dec_Int_BCD_VarSize_LengthEmbedded(BitStream* pBitStrm, asn1SccUint* pIntVal)
+ {
+ 	byte nNibbles = 0;
+-	if (BitStream_ReadByte(pBitStrm, &nNibbles))
+-		return Acn_Dec_Int_BCD_ConstSize(pBitStrm, pIntVal, nNibbles);
+-
+-	return FALSE;
+-
++	if (!BitStream_ReadByte(pBitStrm, &nNibbles))
++		return FALSE;
++	if (nNibbles > 2 * WORD_SIZE)
++		return FALSE;
++	return Acn_Dec_Int_BCD_ConstSize(pBitStrm, pIntVal, nNibbles);
+ }
+ 
+ 
+@@ -1373,6 +1377,8 @@ static flag Acn_Dec_String_CharIndex_private(BitStream* pBitStrm,
+ 		asn1SccSint charIndex = 0;
+ 		if (!BitStream_DecodeConstraintWholeNumber(pBitStrm, &charIndex, 0, charSetSize - 1))
+ 			return FALSE;
++		if (charIndex < 0 || charIndex >= charSetSize)
++			return FALSE;
+ 		strVal[i] = allowedCharSet[charIndex];
+ 		i++;
+ 	}
+diff --git a/asn1crt/asn1crt_encoding_xer.c b/asn1crt/asn1crt_encoding_xer.c
+index b33b6174a..74337e535 100644
+--- a/asn1crt/asn1crt_encoding_xer.c
++++ b/asn1crt/asn1crt_encoding_xer.c
+@@ -131,31 +131,44 @@ Token NT(ByteStream* pByteStrm) {
+ 	Token ret;
+ 	char spChrs[] = { '<', '>', '/', '=', '"', 0 };
+ 	char *tmp;
++	size_t written = 0;
+ 	memset(&ret, 0x0, sizeof(Token));
+ 
+-	while (isspace(pByteStrm->buf[pByteStrm->currentByte]))
++	while (pByteStrm->currentByte < pByteStrm->count && isspace(pByteStrm->buf[pByteStrm->currentByte]))
+ 		pByteStrm->currentByte++;
+ 
+-	if ((pByteStrm->buf[pByteStrm->currentByte] == '<') && (pByteStrm->buf[pByteStrm->currentByte + 1] == '?')) {
++	if (pByteStrm->currentByte >= pByteStrm->count)
++		return ret;
++
++	if (pByteStrm->currentByte + 1 < pByteStrm->count &&
++		(pByteStrm->buf[pByteStrm->currentByte] == '<') && (pByteStrm->buf[pByteStrm->currentByte + 1] == '?')) {
+ 		pByteStrm->currentByte++;
+-		while (!((pByteStrm->buf[pByteStrm->currentByte - 1] == '?') && (pByteStrm->buf[pByteStrm->currentByte] == '>')))
++		while (pByteStrm->currentByte < pByteStrm->count &&
++			!((pByteStrm->buf[pByteStrm->currentByte - 1] == '?') && (pByteStrm->buf[pByteStrm->currentByte] == '>')))
+ 			pByteStrm->currentByte++;
+ 		pByteStrm->currentByte++;
+-		while (isspace(pByteStrm->buf[pByteStrm->currentByte]))
++		while (pByteStrm->currentByte < pByteStrm->count && isspace(pByteStrm->buf[pByteStrm->currentByte]))
+ 			pByteStrm->currentByte++;
+ 	}
+ 
+-	if ((pByteStrm->buf[pByteStrm->currentByte] == '<') && (pByteStrm->buf[pByteStrm->currentByte + 1] == '!') && (pByteStrm->buf[pByteStrm->currentByte + 2] == '-') && (pByteStrm->buf[pByteStrm->currentByte + 3] == '-')) {
++	if (pByteStrm->currentByte >= pByteStrm->count)
++		return ret;
++
++	if (pByteStrm->currentByte + 3 < pByteStrm->count &&
++		(pByteStrm->buf[pByteStrm->currentByte] == '<') && (pByteStrm->buf[pByteStrm->currentByte + 1] == '!') && (pByteStrm->buf[pByteStrm->currentByte + 2] == '-') && (pByteStrm->buf[pByteStrm->currentByte + 3] == '-')) {
+ 		pByteStrm->currentByte++;
+ 		pByteStrm->currentByte++;
+-		while (!((pByteStrm->buf[pByteStrm->currentByte - 2] == '-') && (pByteStrm->buf[pByteStrm->currentByte - 1] == '-') && (pByteStrm->buf[pByteStrm->currentByte] == '>')))
++		while (pByteStrm->currentByte < pByteStrm->count &&
++			!((pByteStrm->buf[pByteStrm->currentByte - 2] == '-') && (pByteStrm->buf[pByteStrm->currentByte - 1] == '-') && (pByteStrm->buf[pByteStrm->currentByte] == '>')))
+ 			pByteStrm->currentByte++;
+ 		pByteStrm->currentByte++;
+-		while (isspace(pByteStrm->buf[pByteStrm->currentByte]))
++		while (pByteStrm->currentByte < pByteStrm->count && isspace(pByteStrm->buf[pByteStrm->currentByte]))
+ 			pByteStrm->currentByte++;
+ 	}
+ 
+-	//if (pByteStrm->buf[pByteStrm->currentByte] =
++	if (pByteStrm->currentByte >= pByteStrm->count)
++		return ret;
++
+ 	tmp = strchr(spChrs, pByteStrm->buf[pByteStrm->currentByte]);
+ 	if (tmp != NULL) {
+ 		ret.TokenID = pByteStrm->buf[pByteStrm->currentByte];
+@@ -165,10 +178,13 @@ Token NT(ByteStream* pByteStrm) {
+ 	}
+ 
+ 	tmp = &ret.Value[0];
+-	while (isPartOfID((char)pByteStrm->buf[pByteStrm->currentByte])) {
++	while (pByteStrm->currentByte < pByteStrm->count &&
++		isPartOfID((char)pByteStrm->buf[pByteStrm->currentByte]) &&
++		written < sizeof(ret.Value) - 1) {
+ 		ret.TokenID = WORD_ID;
+ 		*tmp = (char)pByteStrm->buf[pByteStrm->currentByte];
+ 		tmp++;
++		written++;
+ 		pByteStrm->currentByte++;
+ 	}
+ 
