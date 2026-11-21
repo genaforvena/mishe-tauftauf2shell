@@ -139,7 +139,7 @@ containers whose host ports bind only to loopback.
 - **CivetWeb2Shell structural bound on the unmodified build (commit `575302d`)**: `mg_snprintf` (`civetweb.c:3716-3732`) fills `new_path` to `buflen-1`; with query length `q` the last overflowing byte lands at index `8195+2q`, while the only adjacent neighbour `uri_encoded` (allocated at `:3631`, freed at `:3734` before the appends) ends near `35224+4q`. The overflow envelope grows at half that rate and never reaches the neighbour for `q=1,46,200,10000`; wake-3 tracing shows `new_path` comes from top, so the neighbour is deterministically adjacent but already free at write time. Reaching a live object needs the wake-1 allocation-order instrumentation, hence INSTRUMENTED rung 4, consistent with witness #1102 and the availability-only CVSS vector.
 - **RabbitMQC2Shell complete caller enumeration and external search NEGATIVE (commit `4ca0160`)**: every in-tree `amqp_send_frame` call in pinned v0.16.0 is safe — `amqp_api.c:217` fixed header, `:242` body clamped by `frame_max-(HEADER_SIZE+FOOTER_SIZE)` at `:167-168/:233-238`, `amqp_socket.c:773` fixed-size heartbeat, `:996` bounded table-encoded method. The only sinks are `amqp_connection.c:531`/`:548`; the overflow needs an external caller passing `body.len > buffer.len-14` directly, as the harness and synthetic socket service do. Three bounded web searches found only advisories, docs and a 2011 discussion of the different `amqp_send_frame_to` API — no named frame-level consumer. Search negative, not proof none exists; external direct callers stay UNKNOWN and the real-proxy rung-5 route stays UNPROVEN. No off-loopback probe was made.
 - **OpenJpeg2Shell W92 both-branch NIT replay and caller boundary (commits
-  `091488e`, `6b8fe7c`, `10e6d35`)**: `bash lab/frontier/openjpeg2shell/chosen-call.sh <outdir>`
+  `091488e`, `6b8fe7c`, `10e6d35`, `0945780`)**: `bash lab/frontier/openjpeg2shell/chosen-call.sh <outdir>`
   now accepts either documented plain-consumer result and records it as
   `PLAIN_OUTCOME`. The checkout replay gives 7 PASS / 0 FAIL with
   `corrupted size vs. prev_size` at object `0xd160d0` (invariant trace
@@ -150,6 +150,14 @@ containers whose host ports bind only to loopback.
   witness W92's observation-only backtrace resolves only `Py_FinalizeEx`, so
   the intermediate caller is UNKNOWN. W92 ESTABLISHED both rung-4 limbs at
   their labelled scope with no grade change; the plant cell stays `◐`.
+  The brief's older "remaining gap: pointer-value control, control-flow
+  diversion" paragraph was superseded by the measured chosen-type call and
+  GOT-target limbs (`0945780`). Control-flow diversion to a chosen existing
+  deallocator or a fixed GOT slot is demonstrated; only an attacker-chosen
+  argument, chosen-code execution, a web-facing listener and arbitrary-address
+  dereference stay UNKNOWN. The dereference that was observed is of a fixed
+  GOT slot in the known non-PIE interpreter, derived from its own relocation
+  table.
 - **Exim2Shell wake-4 stock-build cap and ASan-only chosen byte (commits
   `5d67af7`, `d4e5d9d`)**: start the instrumented non-ASan 4.99.2 build in
   the gitignored `lab/frontier/exim2shell/src/exim-4.99.2-plain/` tree on
@@ -184,7 +192,7 @@ containers whose host ports bind only to loopback.
   and raw logs (`callerstore-v1.out` `dc126e66…`, `passive-v1.out`
   `9899fc54…`) are gitignored and regenerate from the committed patches.
 - **Apache2Root CVE-2026-119618 rung 1 local result, rungs 2/3 NEGATIVE
-  (commit `432d053`)**: full pins, build flags and logs are in
+  (commits `432d053`, `e8b106c`)**: full pins, build flags and logs are in
   `lab/frontier/apache2shell/OUTCOME.md`; drivers
   `lab/frontier/apache2shell/repro-h2c.sh` and `repro-h2c-mux.py` drive only
   127.0.0.1 ports 18080–18082. Expect 76 custom headers plus
@@ -193,8 +201,12 @@ containers whose host ports bind only to loopback.
   and 2000/2000), with the 2.4.71 fixed-path marker on the matched control.
   No ASan report across 2000+ full-table writes; one 2000-stream child
   SIGSEGV was not repeated in a repeat burst or the matched 300-stream run,
-  so rung 2 stays UNKNOWN. The written value is the fixed string "0":
-  no chosen byte, pointer control or RCE. This is an adjacent lane of the
+  so rung 2 stays UNKNOWN **on that ASan-APR build**. The plant's rung 3 is
+  graded on uninstrumented system libapr, where differential child SEGVs
+  (3 vs 0 at `LogLevel info`) and a corrupted `pool->child` under gdb were
+  observed; `e8b106c` preserves frontier's negative as build-bound
+  contradictory evidence, not a refutation. The written value is the fixed
+  string "0": no chosen byte, pointer control or RCE. This is an adjacent lane of the
   already-admitted `apache2shell` target, not a new admission; the brief's
   "(unadmitted)" label is stale. Driver scripts and `OUTCOME.md` are
   tracked, build trees and `out-*` logs are gitignored.

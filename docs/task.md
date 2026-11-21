@@ -4271,14 +4271,21 @@ an ASan 5.45.1 build, deriving a 15-WHILEM pattern for the 286331153-byte
 subject and replaying on a 5.45.2 control before any chosen-byte claim; a
 witness replay is owed once the harness exists.
 
-#### 2026-11-21 ~21:5xZ boundary reconciliation (commits `091488e`…`432d053`)
+#### 2026-11-21 ~21:5xZ boundary reconciliation (commits `091488e`…`e8b106c`)
 Four lanes changed evidence without changing their README grade cells:
-- OpenJpeg (`091488e`, `6b8fe7c`, `10e6d35`): witness W92's two rung-4 limbs
+- OpenJpeg (`091488e`, `6b8fe7c`, `10e6d35`, `0945780`): witness W92's two rung-4 limbs
   are ESTABLISHED at their labeled scope; the one non-grade-changing
   `LOAD_OK` harness check was repaired and both plain outcomes replayed
   (checkout abort, clean-archive `PLAIN_OUTCOME LOAD_OK`, trace `25542f54…`).
   The intermediate finalization caller stays UNKNOWN (`PyGC_Collect` in the
   author's trace, `Py_FinalizeEx` in the witness's). Cell stays `◐`.
+  Commit `0945780` supersedes the brief's older remaining-gap paragraph:
+  pointer-value control and control-flow diversion to a chosen existing
+  deallocator / fixed GOT slot are measured rung-4 results, and the chosen
+  static pointer is genuinely dereferenced by `_Py_Dealloc`. An
+  attacker-chosen argument, chosen-code execution, a web-facing listener and
+  arbitrary-address dereference stay UNKNOWN; the observed dereference is of
+  a fixed GOT slot in the known non-PIE interpreter.
 - Exim (`5d67af7`, `d4e5d9d`): stock non-ASan 4.99.2 reaches the header-parser
   call site but its first post-free read returns `-1250` and ends the
   connection; the instrumented ASan build reaches a chosen `0x51` at
@@ -4290,11 +4297,15 @@ Four lanes changed evidence without changing their README grade cells:
   `caller-store.patch` show `in == mem` at +11/+29/+47/+65 from the emitter's
   own store and end in glibc `double free or corruption (out)`. Values chosen,
   addresses not; no witness replay and no R5.
-- Apache2Root CVE-2026-119618 (`432d053`): the already-admitted apache2shell
-  target reached a locally reproducible wrong-pool trigger (rung 1) on pinned
-  2.4.70 with 0 ASan reports over 2000+ writes and one unrepeated child
-  SIGSEGV; rungs 2/3 UNKNOWN, no chosen bytes. The brief's "(unadmitted)"
-  label is stale. Full details and commands are in `docs/reproducibility.md`.
+- Apache2Root CVE-2026-119618 (`432d053`, `e8b106c`): the already-admitted
+  apache2shell target reached a locally reproducible wrong-pool trigger
+  (rung 1) on pinned 2.4.70 with ASan APR; 0 ASan reports over 2000+ writes
+  and one unrepeated child SIGSEGV leave rungs 2/3 UNKNOWN on that build.
+  The plant's rung 3 stands on uninstrumented system libapr (3-vs-0 child
+  SEGVs, corrupted `pool->child` under gdb); `e8b106c` preserves frontier's
+  negative as build-bound contradictory evidence, not a refutation. No
+  chosen bytes. The brief's "(unadmitted)" label is stale. Full details and
+  commands are in `docs/reproducibility.md`.
 Peer `4f2deae` admitted Perl2Shell (65th role, 61st target); its own docs
 commit is the source of truth for that admission. The README's duplicate,
 truncated family paragraph left by `cfe19a4` was deleted this wake; the full
