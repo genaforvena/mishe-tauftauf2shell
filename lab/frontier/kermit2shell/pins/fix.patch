@@ -1,0 +1,168 @@
+From 37e54720779237897bc6887efac42fe138817897 Mon Sep 17 00:00:00 2001
+From: John Goerzen <jgoerzen@complete.org>
+Date: Sun, 25 Oct 2026 16:00:04 -0500
+Subject: [PATCH] Bound the server command buffer in putsrv()
+
+putsrv() stores each decoded character of a server command, GET
+command or incoming file name in srvcmd.  It did not check the
+length.  srvcmd holds about one receive packet, and repeat counts let
+a packet decode to many more characters than it carries.
+
+putsrv() now refuses characters past srvcmdlen.  The <serve>G and
+<serve>C states send an error packet, sgetinit() refuses the GET, and
+rcvfil() refuses the file with "File name too long".  Builds without
+DYNAMIC set srvcmdlen to the size of srvcmdbuf[] instead of 0.
+
+This bug was present in the oldest extant version of C-Kermit, version
+3.0 of 1984.
+---
+ ckcfns.c             | 11 ++++++++++-
+ ckcmai.c             |  2 +-
+ ckcpro.w             | 19 ++++++++++++++-----
+ doc/changelog.md     |  5 +++++
+ tests/test_remote.py | 28 ++++++++++++++++++++++++++++
+ 5 files changed, 58 insertions(+), 7 deletions(-)
+
+diff --git a/ckcfns.c b/ckcfns.c
+index f946a87..a088665 100644
+--- a/ckcfns.c
++++ b/ckcfns.c
+@@ -458,6 +458,12 @@ putsrv(char c)
+ putsrv(c) register char c;
+ #endif /* CK_ANSIC */
+ /* putsrv */ {
++/*
++  srvcmd holds srvcmdlen characters and a NUL.  Repeat counts can make
++  a packet decode to more than that, so refuse the rest.
++*/
++    if (srvptr - srvcmd >= srvcmdlen)
++      return(-1);
+     *srvptr++ = c;
+     *srvptr = '\0';             /* Make sure buffer is null-terminated */
+     return(0);
+@@ -3612,7 +3618,10 @@ rcvfil(n) char *n;
+ #endif /* UNICODE */
+ 
+     debug(F110,"rcvfil rdatap",rdatap,0);
+-    decode(rdatap,putsrv,0);            /* Don't xlate charsets. */
++    if (decode(rdatap,putsrv,0) < 0) {  /* Don't xlate charsets. */
++        rf_err = "File name too long";
++        return(0);
++    }
+ #ifdef CALIBRATE
+     calibrate = csave;
+     if (dest == DEST_N) {
+diff --git a/ckcmai.c b/ckcmai.c
+index ae7f10d..7fc6ade 100644
+--- a/ckcmai.c
++++ b/ckcmai.c
+@@ -993,7 +993,7 @@ CHAR *epktmsg = pktmsgbuf;
+ #ifdef DYNAMIC
+ int srvcmdlen = MAXRP;
+ #else
+-int srvcmdlen = 0;
++int srvcmdlen = MAXRP+3;                /* srvcmdbuf[] less the NUL */
+ #endif /* DYNAMIC */
+ 
+ CHAR
+diff --git a/ckcpro.w b/ckcpro.w
+index 5525a24..5a8c5a4 100644
+--- a/ckcpro.w
++++ b/ckcpro.w
+@@ -764,10 +764,13 @@ a {
+ <serve>G {                              /* Generic server command */
+ #ifndef NOSERVER
+     srvptr = srvcmd;                    /* Point to command buffer */
+-    decode(rdatap,putsrv,0);            /* Decode packet data into it */
++    wx = decode(rdatap,putsrv,0);       /* Decode packet data into it */
+     putsrv(NUL);                        /* Insert a couple nulls */
+     putsrv(NUL);                        /* for termination */
+-    if (srvcmd[0]) {
++    if (wx < 0) {
++        errpkt((CHAR *)"Server command too long");
++        RESUME;
++    } else if (srvcmd[0]) {
+         sstate = srvcmd[0];             /* Set requested start state */
+         if (x_login && !x_logged &&     /* Login required? */
+             /* Login, Logout, and Help are allowed when not logged in */
+@@ -805,11 +808,14 @@ a {
+         RESUME;
+     } else {
+         srvptr = srvcmd;                /* Point to command buffer */
+-        decode(rdatap,putsrv,0);        /* Decode command packet into it */
++        wx = decode(rdatap,putsrv,0);   /* Decode command packet into it */
+         putsrv(NUL);                    /* Null-terminate */
+         nakstate = 0;                   /* Now sending, not receiving */
+         binary = XYFT_T;                /* Switch to text mode */
+-        if (syscmd((char *)srvcmd,"")) { /* Try to execute the command */
++        if (wx < 0) {
++            errpkt((CHAR *)"Host command too long");
++            RESUME;
++        } else if (syscmd((char *)srvcmd,"")) { /* Try to run it */
+             what = W_REMO;              /* Doing a REMOTE command. */
+ #ifdef STREAMING
+             if (!streaming)
+@@ -3673,7 +3679,10 @@ sgetinit(rg,xget) int rg, xget;
+ 
+     fs = (char *)srvcmd;
+     srvptr = srvcmd;                    /* Point to server command buffer */
+-    decode(rdatap,putsrv,0);            /* Decode the GET command into it */
++    if (decode(rdatap,putsrv,0) < 0) {  /* Decode the GET command into it */
++        errpkt((CHAR *)"GET command too long");
++        return(-1);
++    }
+     /* Accept multiple filespecs */
+     cmarg2 = "";                        /* Don't use cmarg2 */
+     cmarg = "";                         /* Don't use cmarg */
+diff --git a/doc/changelog.md b/doc/changelog.md
+index 0177088..5b35544 100644
+--- a/doc/changelog.md
++++ b/doc/changelog.md
+@@ -61,6 +61,11 @@ COMPATIBILITY`.
+   command buffer is refused instead of overflowing it.  Bug dates from C-Kermit
+   4C(057) of 1985.
+ 
++- [4] A Kermit server or receiver now refuses a server command, GET command, or
++  file name that decodes to more than its command buffer holds.  Before, repeat
++  counts could make such a packet write past the buffer.  This bug was present
++  in the oldest extant version of C-Kermit, version 3.0 of 1984.
++
+ - [6] With HOST disabled, a Kermit server still ran shell commands for
+   REMOTE QUERY.  `remote query kermit command(...)` called `\fcommand()`,
+   and `\fexecute()` could reach RUN.  The query now runs with PUSH refused
+diff --git a/tests/test_remote.py b/tests/test_remote.py
+index ac5d2a3..075d8a1 100644
+--- a/tests/test_remote.py
++++ b/tests/test_remote.py
+@@ -554,3 +554,31 @@ def test_remote_query_still_answers(tmp_path, wermit_loopback):
+         tmp_path, server_setup_cmds="disable host",
+         client_commands="remote query kermit program, echo Q=\\v(query)")
+     assert "Q=C-Kermit" in result.stdout, result.stdout
++
++
++
++def test_remote_assign_long_value_reaches_server(tmp_path,
++                                                 wermit_loopback):
++    """Verify a long REMOTE ASSIGN value reaches the server intact.
++
++    The command decodes into the server's command buffer, which holds
++    about one receive packet.  A 2000-character value fits in a long
++    packet and must arrive whole.  The server's script writes its
++    length after FINISH.
++    """
++    value = "v" * 1990 + "END"
++    setup = "\n".join([
++        "set receive packet-length 4000",
++        "server",
++        "fopen /write \\%c result.txt",
++        "fwrite /line \\%c \\flength(\\m(longvar))",
++        "fclose \\%c",
++        "exit"])
++    result = wermit_loopback(
++        tmp_path, server_setup_cmds=setup,
++        client_commands=(
++            "set send packet-length 4000, "
++            f"remote assign longvar {value}, finish, pause 2"))
++    out = tmp_path / "result.txt"
++    assert out.exists(), result.stdout[-500:]
++    assert out.read_text().strip() == "1993", out.read_text()
