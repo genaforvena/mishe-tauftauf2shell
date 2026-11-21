@@ -150,8 +150,8 @@ Local process only; no network target.
 - gdb at N=1000: fault inside `libgstrtp.so` during `gst_pad_set_caps`,
   reached via `gst_pad_send_event`; the faulting instruction dereferences
   `rax = 0xfffffffdfffffffd` — exactly the `NONE = -3` pattern in both halves
-  of a pointer. The library is stripped, so the exact field/object is not
-  symbolicated; the ASan harness above isolates the `order`-pointer mechanism.
+  of a pointer. **Symbolicated 2026-11-21 ~01:43Z (see next section):** the
+  field is `GstPad->g_class` of the adjacent srcpad GObject, not `order`.
 - gdb at N=86: fault in glibc `arena_for_chunk` / `__libc_free` — heap
   metadata corruption from the escaping writes, a second distinct failure
   mode.
@@ -161,22 +161,78 @@ a single far-end caps field deterministically faults the shipping element. It
 is still count-controlled corruption with a fixed `-3` write pattern, not
 chosen bytes and not code execution.
 
+
+## Shipping-plugin fault symbolicated (2026-11-21 ~01:43Z)
+
+Used gdb debuginfod (`DEBUGINFOD_URLS=https://debuginfod.ubuntu.com`, a
+read-only debug-info fetch; no apt/system change) on the shipping `N=1000`
+fault. Evidence: `lab/gst2shell-src/gdb_symbolicated_1000.txt`. The fault is
+at `gst_rtp_L16_depay_setcaps+480` (file offset `0x4c410` in `libgstrtp.so`,
+source `gstrtpL16depay.c:219`); frame #0 is the inlined `gst_pad_set_caps` at
+`gstcompat.h:53`, `g_return_val_if_fail (GST_IS_PAD (pad), FALSE)`. Raw
+disassembly pins the pointer:
+
+```
+mov 0x110(%rbx),%rbx     ; rbx = depayload->srcpad = 0x5555556794d0
+call gst_pad_get_type@plt ; rsi = GST_TYPE_PAD
+mov (%rbx),%rax          ; rax = srcpad->g_class = 0xfffffffdfffffffd
+test %rax,%rax
+cmp (%rax),%rsi          ; FAULT
+```
+
+So the two NONE writes corrupt `g_class` **in a separate real GstPad GObject**
+that is heap-adjacent to the depay element. Benign control N=8: the same
+srcpad has valid `g_class=0x555555562fa0`, rc 0. N=86 faults in glibc heap
+metadata instead — a different escaping-write offset. This supersedes the
+earlier "field is UNKNOWN / ASan harness isolates the order mechanism"
+statement: `order` at `info+320` is also corrupted but only dereferenced in
+`process()`, which this caps-only path does not reach before set_caps faults.
+Both effects come from the same unbounded `posn[i]=NONE` loop; neither is
+chosen-byte control.
+
+## Far-end SDP caps chain (2026-11-21 ~01:46Z)
+
+Local-only harness `lab/gst2shell-src/sdp_caps.c` (driver `run_sdp.sh`,
+digest `6ba2e707…c4f`, full output `sdp_evidence.txt`) synthesizes an SDP
+offer with `a=rtpmap:96 L16/44100/N`, parses it with GStreamer's own
+`gst_sdp_message_new_from_text` + `gst_sdp_media_get_caps_from_media`, then
+feeds the resulting caps to the shipping `rtpL16depay`. No network is used.
+
+- GStreamer's SDP parser maps the rtpmap channel count verbatim: N=2, 8, 64,
+  74, 86, 1000 each produce `encoding-params=(string)N` in the caps.
+- This standalone API names the structure `application/x-unknown`; the
+  harness renames only that structure name to `application/x-rtp`, which is
+  what a real `rtspsrc`/`sdpdemux` emits. That modelling step is explicit in
+  the harness and is the one non-automatic part of the chain.
+- With the corrected name: N=2/8/64/74 `set_caps=1`, rc 0; N=86 and N=1000
+  SIGSEGV (rc 139) with the identical symbolicated fault
+  (`gst_rtp_L16_depay_setcaps+480`, `mov (%rbx),%rax`,
+  `rax=0xfffffffdfffffffd`, `cmp (%rax),%rsi`).
+
+This closes the caps-delivery gap from SDP text to the vulnerable field on
+this host. Whether a particular remote service accepts
+attacker-supplied SDP pre-auth is application-dependent and stays UNKNOWN —
+no external service was probed.
+
 ## Evidence boundary
 
 Rungs 1/2/3 remain established in the extracted harness and were replayed
-again. A distinct **rung-4 effect** is now demonstrated twice: in a live
+again. A distinct **rung-4 effect** is now demonstrated three ways: in a live
 GStreamer-typed ASan harness (count-controlled `order` corruption to a wild
-pointer and a deterministic dereference) and in the **shipping `rtpL16depay`
-plugin** (single caps field, deterministic SIGSEGV, two distinct fault modes).
-This is control of effect by channel count, not byte control — the written
-pattern is the fixed `NONE = -3`, and the pointer value is not
-attacker-chosen. Strong rung-4 (chosen bytes at chosen offsets, arbitrary
-pointer control, benign marker execution) remains **NOT DEMONSTRATED**, as
-does any RCE claim. The earlier "zeroing `order` is harmless" negative is
-preserved as a superseded harness assumption, not erased. Still UNKNOWN:
-real SDP/RTSP caps delivery and pre-auth reachability, the exact stripped
-library field dereferenced at N=1000, and any consequence beyond the fault.
-All testing stayed on local builds. Author report is not acceptance; witness
+pointer and a deterministic dereference), in the **shipping `rtpL16depay`
+plugin** (single caps field, deterministic SIGSEGV, two distinct fault modes),
+and from **SDP text to the vulnerable field** through GStreamer's own SDP
+parser. The N=1000 shipping fault is symbolicated to `srcpad->g_class` in a
+heap-adjacent GstPad GObject — cross-object pointer corruption with a fixed
+`NONE = -3` value, not attacker-chosen bytes. This is control of effect by
+channel count, not byte control; the pointer value is not attacker-chosen.
+Strong rung-4 (chosen bytes at chosen offsets, arbitrary pointer control,
+benign marker execution) remains **NOT DEMONSTRATED**, as does any RCE claim.
+The earlier "zeroing `order` is harmless" negative is preserved as a
+superseded harness assumption, not erased. Still UNKNOWN: whether a specific
+remote service accepts attacker-supplied SDP pre-auth (application-dependent;
+no external probe was made), and any consequence beyond the deterministic
+fault. All testing stayed local. Author report is not acceptance; witness
 owns replay.
 
 ## Next owner / action
@@ -185,15 +241,17 @@ Operator: wake trigger units and presentation `active` entry still owed from
 the person's full-flag sync (`docs/runtime-pin.md`) — never a bare `mishe
 sync`.
 
-gst2shell mind: next bounded step is to symbolicate the shipping-plugin fault
-with the matching `gstreamer1.0-plugins-good-dbgsym` (or map the libgstrtp.so
-offset) and determine whether the N=1000 dereference is the `order` pointer or
-an adjacent heap object; the harness already isolates the former as a causal
-mechanism. Keep the benign, fixed and ASan controls. Witness: replay
-`lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`,
-`lab/gst2shell-src/run_live.sh` and `lab/gst2shell-src/run_real.sh`. Would
-change my mind: a caps clamp at <=64 in primary sources (checked: none), a
-failed replay or lost control, a real pipeline that cannot deliver
-`encoding-params`, or evidence that the corrupted pointer value is
-content-controllable (which would need a fresh, honestly labelled rung-4
-claim).
+gst2shell mind: symbolication and the local SDP→caps chain are DONE. Next
+bounded step is to check whether an application-local far-end SDP ingestion
+path (an RTSP record/ANNOUNCE service or a SIP-style offer built from this
+plant's own loopback sources) can be instantiated in the lab without external
+probing; if not, record the blocker and leave pre-auth reachability UNKNOWN.
+Keep the benign, fixed and ASan controls and the SDP structure-name modelling
+caveat. Witness: replay `lab/frontier/gst2shell/run.sh`,
+`lab/gst2shell-src/run.sh`, `lab/gst2shell-src/run_live.sh`,
+`lab/gst2shell-src/run_real.sh`, `lab/gst2shell-src/run_sdp.sh` and the gdb
+debuginfod symbolication. Would change my mind: a caps clamp at <=64 in
+primary sources (checked: none), a failed replay or lost control, a real
+pipeline that cannot deliver `encoding-params`, or evidence that the
+corrupted pointer value is content-controllable (which would need a fresh,
+honestly labelled rung-4 claim).

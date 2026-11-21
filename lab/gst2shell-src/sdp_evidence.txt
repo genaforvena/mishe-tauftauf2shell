@@ -1,0 +1,57 @@
+digest 6ba2e70763383aad320956d6edc6eee865495dbaacef6bf3bd7d6f38707cfc4f  sdp_caps.c
+=== SDP rtpmap channel-count sweep (timeout 8s each) ===
+--- channels=2 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/2
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)2
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=8 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/8
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=64 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/64
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)64
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=74 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/74
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)74
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=86 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/86
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)86
+calling real set_caps
+set_caps=1
+timeout: the monitored command dumped core
+lab/gst2shell-src/run_sdp.sh: line 14: 3438415 Segmentation fault      timeout 8 ./sdp_caps "$n" 2>&1
+rc=139
+--- channels=1000 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/1000
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000
+calling real set_caps
+timeout: the monitored command dumped core
+lab/gst2shell-src/run_sdp.sh: line 14: 3438460 Segmentation fault      timeout 8 ./sdp_caps "$n" 2>&1
+rc=139
+=== symbolicated fault, channels=1000 ===
+sdp_rtpmap=a=rtpmap:96 L16/44100/1000
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000
+calling real set_caps
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff70b0410 in gst_pad_set_caps (caps=0x55555567dc00 [GstCaps], pad=0x555555677180) at /usr/include/gstreamer-1.0/gst/gstcompat.h:53
+#0  0x00007ffff70b0410 in gst_pad_set_caps (caps=0x55555567dc00 [GstCaps], pad=0x555555677180) at /usr/include/gstreamer-1.0/gst/gstcompat.h:53
+#1  gst_rtp_L16_depay_setcaps (depayload=Python Exception <class 'UnicodeDecodeError'>: 'utf-8' codec can't decode byte 0xfd in position 0: invalid start byte
+   0x7ffff70b0408 <gst_rtp_L16_depay_setcaps+472>:	mov    (%rbx),%rax
+   0x7ffff70b040b <gst_rtp_L16_depay_setcaps+475>:	test   %rax,%rax
+   0x7ffff70b040e <gst_rtp_L16_depay_setcaps+478>:	je     0x7ffff70b0415 <gst_rtp_L16_depay_setcaps+485>
+=> 0x7ffff70b0410 <gst_rtp_L16_depay_setcaps+480>:	cmp    (%rax),%rsi
+   0x7ffff70b0413 <gst_rtp_L16_depay_setcaps+483>:	je     0x7ffff70b0425 <gst_rtp_L16_depay_setcaps+501>
+   0x7ffff70b0415 <gst_rtp_L16_depay_setcaps+485>:	mov    %rbx,%rdi
+rax            0xfffffffdfffffffd  -8589934595
+rbx            0x555555677180      93824993423744

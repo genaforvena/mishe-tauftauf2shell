@@ -1,0 +1,27 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, payload=(int)96
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff769b410 in gst_pad_set_caps (caps=0x55555567fff0 [GstCaps], pad=0x5555556794d0) at /usr/include/gstreamer-1.0/gst/gstcompat.h:53
+53	  g_return_val_if_fail (GST_IS_PAD (pad), FALSE);
+#0  0x00007ffff769b410 in gst_pad_set_caps (caps=0x55555567fff0 [GstCaps], pad=0x5555556794d0) at /usr/include/gstreamer-1.0/gst/gstcompat.h:53
+#1  gst_rtp_L16_depay_setcaps (depayload=Python Exception <class 'UnicodeDecodeError'>: 'utf-8' codec can't decode byte 0xfd in position 0: invalid start byte
+, caps=<optimized out>) at ../gst/rtp/gstrtpL16depay.c:219
+#2  0x00007ffff740bded in ??? () at /lib/x86_64-linux-gnu/libgstrtp-1.0.so.0
+#3  0x00007ffff7ef107d in ??? () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#4  0x00007ffff7ef533f in gst_pad_send_event () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#5  0x00005555555555e9 in gst_pad_set_caps (pad=0x555555679160, caps=0x55555567ffa0 [GstCaps]) at /usr/include/gstreamer-1.0/gst/gstcompat.h:61
+#6  0x000055555555579b in main (argc=2, argv=0x7fffffffe268) at real_plugin.c:44
+Line 53 of "/usr/include/gstreamer-1.0/gst/gstcompat.h" starts at address 0x7ffff769b3fc <gst_rtp_L16_depay_setcaps+460> and ends at 0x7ffff769b425 <gst_rtp_L16_depay_setcaps+501>.
+Dump of assembler code from 0x7ffff769b3e8 to 0x7ffff769b41c:
+Downloading source file /usr/src/gst-plugins-good1.0-1.24.2-1ubuntu1.8/obj-x86_64-linux-gnu/../gst/rtp/gstrtpL16depay.c...
+warning: 218	../gst/rtp/gstrtpL16depay.c: No such file or directory
+   0x00007ffff769b3f4 <gst_rtp_L16_depay_setcaps+452>:	mov    %rax,%r12
+
+219	in ../gst/rtp/gstrtpL16depay.c
+   0x00007ffff769b3ed <gst_rtp_L16_depay_setcaps+445>:	mov    0x110(%rbx),%rbx
+
+End of assembler dump.
+rax            0xfffffffdfffffffd  -8589934595
+rsi            0x555555562e80      93824992292480
