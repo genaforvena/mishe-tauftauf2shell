@@ -1169,3 +1169,48 @@ allocation between the two frees was identified. No tcache poisoning, chosen
 byte write or pointer control is reachable from this prefix, so rung 4 stays
 closed for this lane. Revisit only with a different owned-prefix source.
 
+
+### Wake 52 (continued) — new adjacent lane CVE-2026-129291 (FPM epoll UAF): fix-sensitive rung-2 fault
+
+8.5.13 NEWS names one unexamined GHSA in the same FPM subsystem:
+`GHSA-jm4m-qfqx-967m` / CVE-2026-129291, "PHP-FPM epoll use-after-free can
+lead to local privilege escalation". The exact 8.4.27 → 8.4.28
+`sapi/fpm/fpm/fpm_children.c` diff is one small change: before closing a dead
+worker's stdout/stderr fd the master must call `fpm_event_del()` on the
+corresponding event (when in the event loop) and set the fd to `-1`; without
+it the event stays registered after the fd is closed and the child is freed.
+
+The 8.5.13 tree adds a self-contained regression test,
+`sapi/fpm/tests/ghsa-g3vh-838c-65v7.phpt`, embedded verbatim in the committed
+harness `lab/repro/php2shell-cve129291-fpm.py`. It drives a loopback
+Unix-socket FPM master, kills a worker with a fatal error during session
+shutdown after `fastcgi_finish_request()`, and asserts the master logged the
+exit, started a replacement and returned a different PID (`bool(true)`).
+
+Replay from a clean checkout (FPM ASan builds already provisioned):
+```
+python3 lab/repro/php2shell-cve129291-fpm.py \
+  lab/build/php-8.4.27-fpm-asan lab/build/php-8.4.28-fpm-asan
+```
+Raw logs and `verdict.txt` are in gitignored `lab/build/evidence/w52-129291-fpm/`.
+Result `CONFIRMED` on the same-branch pair: affected 8.4.27 = FAIL
+(`bool(false)`, no child-exit warning, no replacement, one broken request),
+fixed 8.4.28 = PASS (`bool(true)`). The 8.5.12 FPM ASan build also FAILs.
+
+Important limit — the test does NOT isolate the epoll hunk. Swapping only the
+8.5.13 `fpm_children.c` into the 8.5.12 FPM build left the test FAILing; so
+did additionally swapping the 8.5.13 `zend_builtin_functions.c` (CVE-2026-129182
+backtrace fix). The test therefore depends on more than one 8.5.13 change,
+and the 8.4.27/8.4.28 pair, while same-branch, cannot attribute the flip to
+the epoll hunk alone. No ASan/UBSan report was produced by either failing
+run; the observed fault is functional (worker not terminated/replaced).
+
+Grade: **rung 2 reproducible, fix-sensitive fault** for this lane; no
+confirmed memory corruption, no pointer control, chosen byte, marker, local
+privilege-escalation demonstration or web path. This does not change any
+existing lane's grade. Named next experiment if reopened: build a full
+8.5.13 FPM ASan binary and run the same phpt for a true same-branch version
+pair, or break at `fpm_child_free`/`fpm_event_del` under GDB on the affected
+master to observe the stale event after the worker's fd is closed. Do NOT
+repeat the single- or dual-TU 8.5.12 swaps — both are recorded negatives.
+
