@@ -8,10 +8,11 @@ Rungs 1/2/3 ESTABLISHED on verbatim-pinned open62541 1.5.4 under ASan:
 `UA_MonitoredItem_unregisterSampling`, reached through real service calls on
 real server/session/subscription/monitored-item objects. Tagged fixed 1.5.6
 runs the same sequence clean with the sampling backpointer migrated into the
-new subscription. A follow-up grooming probe (below) observed the stale write
-landing on a live replacement object at the fixed offset, but rung 4 stays
-INSTRUMENTED: no chosen bytes, pointer control, control-flow diversion or
-execution. The dedicated
+new subscription. The wake-2 grooming probe observed the stale write landing on
+a live replacement object at byte 200; the wake-3 dereference probe then
+observed the server's real sampling loop deterministically dereferencing that
+attacker-influenced pointer. Rung 4 stays INSTRUMENTED: no chosen bytes,
+attacker-chosen control-flow diversion or execution. The dedicated
 two-pane window (inner socket index 64), seed wall and registry entry were
 pre-created by frontier before admission. Operator admission replay ~17:49Z:
 4/4 committed pins OK, 8 PASS / 0 FAIL rc 0, exact trace below. Replay
@@ -116,13 +117,17 @@ Replay trace over the ordered PASS lines (no PIDs, addresses or paths):
   `WRITE of size 8` at `ua_subscription.c:1645` ← `UA_MonitoredItem_delete:1412`
   ← `Operation_DeleteMonitoredItem:971` ← `Service_DeleteMonitoredItems:999`;
   freed by `delayedFreeSubscription:277`, allocated by `UA_Subscription_new:259`.
-- **Rung 4 — INSTRUMENTED, live non-NULL pointer overwrite observed.** Two
-  probes below show the stale write landing on a live replacement subscription
-  at byte 200: with one item the head is zeroed, with two items it is replaced
-  by a live pointer to a monitored item owned by a different subscription.
-  The written values come from created objects, not attacker-chosen bytes; no
-  control-flow diversion, chosen-byte control or execution was observed. The
-  ZDI RCE language stays a claim, not a lab observation.
+- **Rung 4 — INSTRUMENTED, live pointer overwrite plus downstream dereference
+  observed.** The wake-2 probes show the stale write landing on a live
+  replacement subscription at byte 200: with one item the head is zeroed, with
+  two items it is replaced by a live pointer to a monitored item owned by a
+  different subscription. The wake-3 probe shows the server's real
+  `sampleAndPublishCallback` dereferencing that groomed pointer and enqueuing a
+  notification from it, deterministically, with clean skip-delete and fixed
+  1.5.6 controls. The written value is a live object pointer selected by the
+  create/transfer/delete sequence, not attacker-chosen bytes; no chosen-value
+  control, diversion to attacker-chosen code or execution was observed. The ZDI
+  RCE language stays a claim, not a lab observation.
 - **Tractability — MEDIUM.** Exact fixed tag and a nine-line fix hunk make the
   differential cheap to reason about; producing the authenticated UAF sequence
   needs a configured server and client, not just a single malformed packet.
@@ -185,6 +190,50 @@ already performs; it only adds response delivery. That proposed next step is
 recorded as a negative result, not an owed experiment. The remaining rung-4
 question is a configuration where the stale write stores attacker-chosen bytes
 (or a pointer whose downstream dereference changes control flow) in a live object.
+
+## Downstream dereference probe (open625412shell wake 3)
+
+`lab/frontier/open625412shell/deref_harness.c` and `deref.sh` extend the two-item
+groom with one client-configured parameter (`requestedParameters.queueSize = 10`,
+an ordinary OPC UA client setting that only prevents an unrelated queue-overflow
+assertion from preempting the observation) and one lab isolation step
+(`Subscription_setState(transferredSub, UA_SUBSCRIPTIONSTATE_REMOVING)` stops the
+transferred subscription's sampling callback so only the replacement's callback
+runs). No library source is patched; the sink, event loop and both builds are
+the verbatim pinned trees.
+
+`bash run.sh <outdir> && bash deref.sh <outdir>`: 14 PASS / 0 FAIL, rc 0, trace
+`sha256=0f2a2d7e0a4ca63a15593e3e5cb1f4dde81746e718c0306adb30fa1c839931f3`.
+On 1.5.4 with `quarantine_size_mb=0` the freed chunk is reclaimed
+(`same_chunk=1`); the stale write sets the replacement's byte-200 head to the
+groomed pointer `0x514000000440`, whose owner is the still-live transferred
+subscription. With the transferred callback stopped, the replacement's real
+`sampleAndPublishCallback` samples the groomed item: its current queue length
+rises 4 -> 5 across the paced sampling loop. Skip-delete and fixed 1.5.6 keep
+the replacement's own item at the head and the groomed queue at 4 -> 4.
+
+gdb on the same vulnerable binary (conditional breakpoint
+`ua_subscription.c:1017 if sub->subscriptionId == 2`) gives frame 0
+`sampleAndPublishCallback (sub=0x51300004d040)` calling
+`UA_MonitoredItem_sample(server, mon=0x514000000440)`, with
+`mon->subscription=0x51300004d200` (a different subscription), under the real
+timer/event-loop frames (`processEntryCallback` -> `UA_Timer_process`). The
+attacker-influenced pointer is therefore dereferenced by the server's own
+sampling loop, not merely read back by the harness.
+
+**Conditions and limits.** ASan quarantine is disabled for same-chunk recycling;
+the consent hook and internal-delete stand-ins from earlier wakes remain; the
+queue-size setting and callback isolation are lab conditions documented above.
+The written value is a live monitored-item pointer whose selection follows the
+client's create/transfer/delete ordering, not arbitrary bytes. No chosen-value
+control, diversion to attacker-chosen code or execution was observed; rung 4
+remains INSTRUMENTED. Raw logs:
+`<outdir>/deref/{vuln,control,fixed,gdb-deref}.log`.
+Also recorded, not claimed as pointer control: with the default queue size of 1
+and sampling enabled, the two-item build aborts deterministically 5/5 at
+`UA_MonitoredItem_ensureQueueSpace:1490` on the separately deleted item
+`0x514000000640`, while skip-delete and fixed 1.5.6 survive 3/3 each; that
+assertion is an availability observation, not control-flow control.
 
 ## What would change my mind
 
