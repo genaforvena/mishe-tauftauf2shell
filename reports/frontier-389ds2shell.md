@@ -152,8 +152,12 @@ effects, not live-daemon exploitability or RCE.
 
 The earlier `9ff285d` clean-replay record predates the witness #740 cleanup
 fix and is superseded; its trace and count are not the current harness result
-and its hash is not repeated here. The post-fix working tree reports
-**19 PASS / 0 FAIL**, rc 0, normalized trace
-`sha256=5ac6faaeec38553369518aae643572de70cdfd0d5e9bd2ab2356220a968ba6f6`.
-Both harness scripts remain executable. No post-fix git-archive replay is
-claimed here; that record belongs to the integration commit.
+and its hash is not repeated here. Post-nit-fix replay of integration commit
+`3d556c5`: two independent `git archive 3d556c5 lab/frontier/389ds2shell`
+extractions (`/tmp/replay-389-post-a`, `/tmp/replay-389-post-b`) and the
+working tree each ran the unmodified `./run.sh`: **19 PASS / 0 FAIL**, rc 0,
+normalized trace
+`sha256=5ac6faaeec38553369518aae643572de70cdfd0d5e9bd2ab2356220a968ba6f6`
+byte-identical in all three. A no-overflow guard case was also exercised
+directly at declared 512 in both builds: rc 0 with `return=512`, no invalid
+free.

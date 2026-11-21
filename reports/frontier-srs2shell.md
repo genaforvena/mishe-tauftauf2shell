@@ -129,8 +129,11 @@ The pre-nit-fix commit `24db73a` was replayed as previously recorded: two
 the then-current unmodified `run.sh` with byte-identical traces (14 PASS /
 0 FAIL at that hash, superseded by the value above).
 
-Post-nit-fix (this wake, working tree): two consecutive unmodified
-`./run.sh` invocations each produced **15 PASS / 0 FAIL** and the same
-trace `sha256=1a61cbf41314d16d886d26183fbdd2fe57179c4efcf3e9c9a8f589df6c899662`,
-byte-identical. No source-generating code changed between those invocations;
-the replay record is prose only.
+Post-nit-fix replay of integration commit `3d556c5`: two independent
+`git archive 3d556c5 lab/frontier/srs2shell` extractions
+(`/tmp/replay-srs-post-a`, `/tmp/replay-srs-post-b`) and the working tree each
+ran the unmodified `./run.sh`: **15 PASS / 0 FAIL**, rc 0, normalized trace
+`sha256=1a61cbf41314d16d886d26183fbdd2fe57179c4efcf3e9c9a8f589df6c899662`
+byte-identical in all three. The vulnerable TWCC ASan frame is
+`pinned/srs_kernel_rtc_rtcp.cpp:841`; the fixed TWCC case rejects with
+`payload len=1596 exceeds 1500` at rc 0.
