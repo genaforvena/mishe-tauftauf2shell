@@ -1,0 +1,102 @@
+{
+  "url": "https://api.github.com/repos/uclouvain/openjpeg/issues/1620",
+  "repository_url": "https://api.github.com/repos/uclouvain/openjpeg",
+  "labels_url": "https://api.github.com/repos/uclouvain/openjpeg/issues/1620/labels{/name}",
+  "comments_url": "https://api.github.com/repos/uclouvain/openjpeg/issues/1620/comments",
+  "events_url": "https://api.github.com/repos/uclouvain/openjpeg/issues/1620/events",
+  "html_url": "https://github.com/uclouvain/openjpeg/issues/1620",
+  "id": 3835558466,
+  "node_id": "I_kwDOAdZv-c7knfpC",
+  "number": 1620,
+  "title": "Heap buffer overlfow in opj_j2k_read_sod",
+  "user": {
+    "login": "soiax",
+    "id": 5368319,
+    "node_id": "MDQ6VXNlcjUzNjgzMTk=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/5368319?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/soiax",
+    "html_url": "https://github.com/soiax",
+    "followers_url": "https://api.github.com/users/soiax/followers",
+    "following_url": "https://api.github.com/users/soiax/following{/other_user}",
+    "gists_url": "https://api.github.com/users/soiax/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/soiax/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/soiax/subscriptions",
+    "organizations_url": "https://api.github.com/users/soiax/orgs",
+    "repos_url": "https://api.github.com/users/soiax/repos",
+    "events_url": "https://api.github.com/users/soiax/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/soiax/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "labels": [
+
+  ],
+  "state": "closed",
+  "locked": false,
+  "assignees": [
+
+  ],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-01-20T21:36:49Z",
+  "updated_at": "2026-02-10T21:02:48Z",
+  "closed_at": "2026-02-10T21:02:48Z",
+  "assignee": null,
+  "author_association": "NONE",
+  "issue_field_values": [
+
+  ],
+  "type": null,
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+    "total": 0,
+    "completed": 0,
+    "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+    "blocked_by": 0,
+    "total_blocked_by": 0,
+    "blocking": 0,
+    "total_blocking": 0
+  },
+  "body": "Hi,\n\nThe vulnerability stems from a mismatch between:\n\n1. The tp_index array size, which is allocated based on TLM (Tile Length Marker) entries\n2. The current_tpsno value, which is set from SOT (Start Of Tile-part) marker's TPsot field\n\nWhen a maliciously crafted file provides inconsistent TLM and SOT data, the decoder can write beyond the allocated tp_index buffer. \n\n\nIn opj_j2k_read_sod() (lines 5083-5090), the current_tpsno value is used to index tp_index without any bounds check:\n\n```\n\n// Lines 5083-5090: VULNERABLE - No bounds check before array access\nOPJ_UINT32 l_current_tile_part =\n    l_cstr_index->tile_index[p_j2k->m_current_tile_number].current_tpsno;\nl_cstr_index->tile_index[p_j2k->m_current_tile_number].tp_index[l_current_tile_part].end_header\n    =\n        l_current_pos;\nl_cstr_index->tile_index[p_j2k->m_current_tile_number].tp_index[l_current_tile_part].end_pos\n    =\n        l_current_pos + p_j2k->m_specific_param.m_decoder.m_sot_length + 2;\n```\n\n\nSimilar bug was fixed in https://github.com/uclouvain/openjpeg/pull/1565/files with a bounds check:\n\n\n```\n     if (cstr_index->tile_index[tileno].tp_index &&\n                l_current_tile_part < cstr_index->tile_index[tileno].nb_tps) {\n```\n\nASAN log of ./opj_decompress:  \n```\n\n==967857==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x603000000030 at pc 0x000000542219 bp 0x7ffebf1782a0 sp 0x7ffebf178298\nWRITE of size 8 at 0x603000000030 thread T0\n    #0 0x542218 in opj_j2k_read_sod /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:5124:13\n    #1 0x53cf57 in opj_j2k_read_tile_header /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:9956:19\n    #2 0x57e82f in opj_j2k_decode_tiles /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:12123:19\n    #3 0x5392cf in opj_j2k_exec /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:9225:33\n    #4 0x5506b5 in opj_j2k_decode /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:12470:11\n    #5 0x51ebf7 in opj_decode /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/openjpeg.c:526:16\n    #6 0x4cca42 in main /mnt/f/fuzz/openjpeg-master/src/bin/jp2/opj_decompress.c:1582:19\n    #7 0x7c5f6f757082 in __libc_start_main /build/glibc-B3wQXB/glibc-2.31/csu/../csu/libc-start.c:308:16\n    #8 0x41c43d in _start (/mnt/f/fuzz/openjpeg-master/opj_decompress_asan+0x41c43d)\n\n0x603000000030 is located 8 bytes to the right of 24-byte region [0x603000000010,0x603000000028)\nallocated by thread T0 here:\n    #0 0x496622 in calloc (/mnt/f/fuzz/openjpeg-master/opj_decompress_asan+0x496622)\n    #1 0x521936 in opj_calloc /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/opj_malloc.c:208:11\n    #2 0x55fcb2 in opj_j2k_build_tp_index_from_tlm /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:8983:57\n    #3 0x55ad7c in opj_j2k_read_header_procedure /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:9196:5\n    #4 0x5392cf in opj_j2k_exec /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:9225:33\n    #5 0x538e1c in opj_j2k_read_header /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:8570:11\n    #6 0x51e90c in opj_read_header /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/openjpeg.c:475:16\n    #7 0x4cc134 in main /mnt/f/fuzz/openjpeg-master/src/bin/jp2/opj_decompress.c:1520:15\n    #8 0x7c5f6f757082 in __libc_start_main /build/glibc-B3wQXB/glibc-2.31/csu/../csu/libc-start.c:308:16\n\nSUMMARY: AddressSanitizer: heap-buffer-overflow /mnt/f/fuzz/openjpeg-master/src/lib/openjp2/j2k.c:5124:13 in opj_j2k_read_sod\nShadow bytes around the buggy address:\n  0x0c067fff7fb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x0c067fff7fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x0c067fff7fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x0c067fff7fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x0c067fff7ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n=>0x0c067fff8000: fa fa 00 00 00 fa[fa]fa 00 00 00 fa fa fa fa fa\n  0x0c067fff8010: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x0c067fff8020: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x0c067fff8030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x0c067fff8040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\n  0x0c067fff8050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\nShadow byte legend (one shadow byte represents 8 application bytes):\n  Addressable:           00\n  Partially addressable: 01 02 03 04 05 06 07\n  Heap left redzone:       fa\n  Freed heap region:       fd\n  Stack left redzone:      f1\n  Stack mid redzone:       f2\n  Stack right redzone:     f3\n  Stack after return:      f5\n  Stack use after scope:   f8\n  Global redzone:          f9\n  Global init order:       f6\n  Poisoned by user:        f7\n  Container overflow:      fc\n  Array cookie:            ac\n  Intra object redzone:    bb\n  ASan internal:           fe\n  Left alloca redzone:     ca\n  Right alloca redzone:    cb\n  Shadow gap:              cc\n==967857==ABORTING\n```\n\nUploaded poc is not a ZIP, just rename it to .j2k. Github doesn't allow that extension.\n\n\n[poc.zip](https://github.com/user-attachments/files/24751832/poc.zip)",
+  "closed_by": {
+    "login": "rouault",
+    "id": 1192433,
+    "node_id": "MDQ6VXNlcjExOTI0MzM=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1192433?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/rouault",
+    "html_url": "https://github.com/rouault",
+    "followers_url": "https://api.github.com/users/rouault/followers",
+    "following_url": "https://api.github.com/users/rouault/following{/other_user}",
+    "gists_url": "https://api.github.com/users/rouault/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/rouault/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/rouault/subscriptions",
+    "organizations_url": "https://api.github.com/users/rouault/orgs",
+    "repos_url": "https://api.github.com/users/rouault/repos",
+    "events_url": "https://api.github.com/users/rouault/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/rouault/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "reactions": {
+    "url": "https://api.github.com/repos/uclouvain/openjpeg/issues/1620/reactions",
+    "total_count": 0,
+    "+1": 0,
+    "-1": 0,
+    "laugh": 0,
+    "hooray": 0,
+    "confused": 0,
+    "heart": 0,
+    "rocket": 0,
+    "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/uclouvain/openjpeg/issues/1620/timeline",
+  "performed_via_github_app": null,
+  "state_reason": "completed",
+  "pinned_comment": null
+}

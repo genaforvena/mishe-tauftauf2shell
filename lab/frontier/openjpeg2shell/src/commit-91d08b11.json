@@ -1,0 +1,101 @@
+{
+  "sha": "91d08b11a72764f6d199f32fa0c1b1abd4edc2ad",
+  "node_id": "C_kwDOAdZv-doAKDkxZDA4YjExYTcyNzY0ZjZkMTk5ZjMyZmEwYzFiMWFiZDRlZGMyYWQ",
+  "commit": {
+    "author": {
+      "name": "PGZXB",
+      "email": "pgzxb@qq.com",
+      "date": "2026-02-10T17:09:30Z"
+    },
+    "committer": {
+      "name": "PGZXB",
+      "email": "pgzxb@qq.com",
+      "date": "2026-02-10T17:09:30Z"
+    },
+    "message": "Fix heap buffer overlfow in opj_j2k_read_sod",
+    "tree": {
+      "sha": "c44b24c0299d05989e05f45453eaeeec50095b5e",
+      "url": "https://api.github.com/repos/uclouvain/openjpeg/git/trees/c44b24c0299d05989e05f45453eaeeec50095b5e"
+    },
+    "url": "https://api.github.com/repos/uclouvain/openjpeg/git/commits/91d08b11a72764f6d199f32fa0c1b1abd4edc2ad",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "url": "https://api.github.com/repos/uclouvain/openjpeg/commits/91d08b11a72764f6d199f32fa0c1b1abd4edc2ad",
+  "html_url": "https://github.com/uclouvain/openjpeg/commit/91d08b11a72764f6d199f32fa0c1b1abd4edc2ad",
+  "comments_url": "https://api.github.com/repos/uclouvain/openjpeg/commits/91d08b11a72764f6d199f32fa0c1b1abd4edc2ad/comments",
+  "author": {
+    "login": "PGZXB",
+    "id": 52557189,
+    "node_id": "MDQ6VXNlcjUyNTU3MTg5",
+    "avatar_url": "https://avatars.githubusercontent.com/u/52557189?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/PGZXB",
+    "html_url": "https://github.com/PGZXB",
+    "followers_url": "https://api.github.com/users/PGZXB/followers",
+    "following_url": "https://api.github.com/users/PGZXB/following{/other_user}",
+    "gists_url": "https://api.github.com/users/PGZXB/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/PGZXB/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/PGZXB/subscriptions",
+    "organizations_url": "https://api.github.com/users/PGZXB/orgs",
+    "repos_url": "https://api.github.com/users/PGZXB/repos",
+    "events_url": "https://api.github.com/users/PGZXB/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/PGZXB/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "PGZXB",
+    "id": 52557189,
+    "node_id": "MDQ6VXNlcjUyNTU3MTg5",
+    "avatar_url": "https://avatars.githubusercontent.com/u/52557189?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/PGZXB",
+    "html_url": "https://github.com/PGZXB",
+    "followers_url": "https://api.github.com/users/PGZXB/followers",
+    "following_url": "https://api.github.com/users/PGZXB/following{/other_user}",
+    "gists_url": "https://api.github.com/users/PGZXB/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/PGZXB/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/PGZXB/subscriptions",
+    "organizations_url": "https://api.github.com/users/PGZXB/orgs",
+    "repos_url": "https://api.github.com/users/PGZXB/repos",
+    "events_url": "https://api.github.com/users/PGZXB/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/PGZXB/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "8ac526236416b9c28f73d4684cf9e8a66f1d134e",
+      "url": "https://api.github.com/repos/uclouvain/openjpeg/commits/8ac526236416b9c28f73d4684cf9e8a66f1d134e",
+      "html_url": "https://github.com/uclouvain/openjpeg/commit/8ac526236416b9c28f73d4684cf9e8a66f1d134e"
+    }
+  ],
+  "stats": {
+    "total": 14,
+    "additions": 8,
+    "deletions": 6
+  },
+  "files": [
+    {
+      "sha": "ad76aca7da90dc9ddd8e106918d15ad4d6b57210",
+      "filename": "src/lib/openjp2/j2k.c",
+      "status": "modified",
+      "additions": 8,
+      "deletions": 6,
+      "changes": 14,
+      "blob_url": "https://github.com/uclouvain/openjpeg/blob/91d08b11a72764f6d199f32fa0c1b1abd4edc2ad/src%2Flib%2Fopenjp2%2Fj2k.c",
+      "raw_url": "https://github.com/uclouvain/openjpeg/raw/91d08b11a72764f6d199f32fa0c1b1abd4edc2ad/src%2Flib%2Fopenjp2%2Fj2k.c",
+      "contents_url": "https://api.github.com/repos/uclouvain/openjpeg/contents/src%2Flib%2Fopenjp2%2Fj2k.c?ref=91d08b11a72764f6d199f32fa0c1b1abd4edc2ad",
+      "patch": "@@ -5082,12 +5082,14 @@ static OPJ_BOOL opj_j2k_read_sod(opj_j2k_t *p_j2k,\n \n         OPJ_UINT32 l_current_tile_part =\n             l_cstr_index->tile_index[p_j2k->m_current_tile_number].current_tpsno;\n-        l_cstr_index->tile_index[p_j2k->m_current_tile_number].tp_index[l_current_tile_part].end_header\n-            =\n-                l_current_pos;\n-        l_cstr_index->tile_index[p_j2k->m_current_tile_number].tp_index[l_current_tile_part].end_pos\n-            =\n-                l_current_pos + p_j2k->m_specific_param.m_decoder.m_sot_length + 2;\n+        if (l_cstr_index->tile_index[p_j2k->m_current_tile_number].tp_index &&\n+                l_current_tile_part <\n+                l_cstr_index->tile_index[p_j2k->m_current_tile_number].nb_tps) {\n+            l_cstr_index->tile_index[p_j2k->m_current_tile_number].tp_index[l_current_tile_part].end_header\n+                = l_current_pos;\n+            l_cstr_index->tile_index[p_j2k->m_current_tile_number].tp_index[l_current_tile_part].end_pos\n+                = l_current_pos + p_j2k->m_specific_param.m_decoder.m_sot_length + 2;\n+        }\n \n         if (OPJ_FALSE == opj_j2k_add_tlmarker(p_j2k->m_current_tile_number,\n                                               l_cstr_index,"
+    }
+  ]
+}

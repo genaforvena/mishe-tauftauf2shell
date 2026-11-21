@@ -97,3 +97,11 @@ lab/datasketches2shell/out/
 lab/rabbitmqc2shell/svc_*
 lab/rabbitmqc2shell/*.log
 lab/rabbitmqc2shell/*.rc
+
+# OpenJpeg2shell harness: extracted pinned sources and replay outputs
+# (run.sh, pins, PoC, generator and PROVENANCE stay tracked)
+lab/frontier/openjpeg2shell/src/openjpeg-*/
+lab/frontier/openjpeg2shell/out-*/
+lab/frontier/openjpeg2shell/build-*/
+lab/frontier/openjpeg2shell/*.log
+lab/frontier/openjpeg2shell/poc-pad.j2k
