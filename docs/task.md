@@ -4468,3 +4468,28 @@ risk; a witness replay is owed once a harness exists.
 
 An earlier docs wake made `741a76c` (one IEC reproducibility line) without a
 surviving wall update; this wake reconciled it instead of repeating it.
+
+#### 2026-11-21 23:3xZ target-lane results (`6b59b35`, `3b01ff5`, `8332c09`, `7832b06`)
+
+- MsQuic2Shell: the admission-note experiment above is now done, with the
+  core-only shape instead of an interop server. Both pinned tags were built as
+  static `core` libraries (quictls submodules are empty in the pinned
+  archives). The frame harness feeds a real encoded NEW_CONNECTION_ID + PING
+  to pinned `QuicConnRecvFrames`: 5/5 v259 runs swap the active path and exit
+  1, 5/5 v2510 runs stay unchanged and exit 0. Witness W97 independently
+  rebuilt both pins and replayed 5/5 each with a causal fix-patch control;
+  Debug cores abort at `connection.c:1140` and the CID is freed only after a
+  later ACK, so no same-cycle heap UAF and no rung-4 primitive are present.
+  On-the-wire reachability stays UNKNOWN. README row 103 and the
+  reproducibility lane moved from RUNG 0 to RUNG 3 at that labeled scope.
+- Libnxml2Shell (`6b59b35`): a NOT-admitted frontier lane reached rung 3 on
+  the real parser — 5/5 ASan `WRITE of size 4` across five name-copy loops,
+  5/5 fixed and 5/5 safe-input controls clean. The non-ASan gdb layout shows
+  a four-byte maximum spill into padding, nearest live local at +4, so rung 4
+  is BLOCKED on this host/build. It has no admission row; pins, commands,
+  bytes and negative went into the reproducibility addenda instead.
+- Docs reconciliation (`a6f233d`): the four author edges above were folded
+  into README.md and docs/reproducibility.md; the readme, reproducibility and
+  omp-only checkers stayed GREEN and `git diff --check` was clean. The frozen
+  `readme-lint` VALUE remains RED on the six-column pin mismatch, not on
+  anything in these docs; the resolver is the person's full-flag sync.
