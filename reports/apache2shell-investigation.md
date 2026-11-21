@@ -874,6 +874,80 @@ cd lab/apache2shell
 L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 python3 l8-lane.py 20
 ```
 
+### Adjacent lane L9 — mod_auth_digest shared client-entry UAF / auth-state corruption (06:55–07:10Z 21 Nov) — rung 2, no confirmed corruption
+
+**Premise check.** The wake dossier named CVE-2026-73637 for this lane. No
+primary advisory was found and `CHANGES` of 2.4.69 has no CVE entry for the
+change: it reads "mod_auth_digest.c: Drop RFC 2069 support; rewrite shared
+memory handling and client nonce handling; 'authdigest-opaque' mutex is now
+longer needed" (line 18). The CVE number is UNVERIFIED; the code-level defect
+below is local evidence and does not depend on it.
+
+**Source-bound hazard (rung 1).** In 2.4.68 `get_client()` (`mod_auth_digest.c:
+~780`) returns a `client_entry*` pointing into the APR RMM shared-memory
+segment and stores it as `resp->client`. That pointer is then used with no
+lock: `nonce_count++` in `init_digest_request` (~1097), `memcpy(last_nonce,
+nonce, NONCE_LEN+1)` in `note_digest_auth_failure` (~1243) and `add_auth_info`
+(~1885), and `memcmp(last_nonce, nonce, NONCE_LEN)` in `check_nonce` (~1468).
+Meanwhile `add_client()` calls `gc()` (~813) on allocation failure, and `gc()`
+calls `rmm_free()` on entries in the same segment on behalf of any child
+process. The fix in 2.4.69 removes `resp->client` entirely, adds
+`find_client()`/`client_exists()`/`client_update_nonce()` that re-look-up the
+entry under `client_lock`, and replaces the 53-byte `last_nonce` array with
+`apr_time_t last_nonce_time`; the new `find_client()` comment explicitly says
+the entry "can [be] free[d] at any time on behalf of another process".
+
+**Deterministic rung-2 oracle (`l9-lane.py`).** Both ASan installs under
+`lab/apache2shell/l3/` load `modules/mod_auth_digest.so`. Config: loopback,
+`AuthType Digest`, `AuthDigestProvider file`, `AuthDigestNcCheck On`,
+`AuthDigestNonceLifetime 0`, `AuthDigestShmemSize 512`, event MPM. `rounds=6`:
+
+| build | clean challenge→auth 200 | unauthenticated request quoting the victim's opaque, then victim auth 200 |
+|---|---|---|
+| 2.4.68 | 6/6 | **0/6** (all 401) |
+| 2.4.69 | 6/6 | **6/6** |
+
+The 2.4.68 challenge path for an existing client resets
+`resp->client->nonce_count = 0` and overwrites `last_nonce` with a freshly
+generated nonce (`mod_auth_digest.c:1229,1243`), so a request that never
+authenticates invalidates the nonce a legitimate client is holding. 2.4.69's
+`note_digest_auth_failure` deliberately leaves that state alone; the observed
+behavior matches the fix comment exactly. This is reproducible auth-state
+corruption (authentication DoS), graded **rung 2**.
+
+**Corruption search — negatives preserved.** `L9_SHMEM=4096 L9_CHURN=4
+L9_VICTIMS=4 python3 l9-lane.py 15`: 2.4.68 had 1523 `gc'd N client entries`
+events and 4529/4529 victim requests returned 200; 2.4.69 had 825 gc events
+and 6616/6616 victims returned 200. No ASan use-after-free, double-free or
+overflow report, no child fault, and no chosen byte from the spoofed
+`opaque`/`nonce`/`cnonce` headers was observed in any corrupted state. An
+earlier tiny-shmem run (`512`, 16 churners, 8 victims, 10 s) produced 18481
+(2.4.68) / 12224 (2.4.69) gc events and 0/3080 / 0/4070 victim 200s: entries
+were gc'd before the victim could authenticate, on both builds, so that run
+is a starvation artifact, not a corruption signal. ASan does not instrument
+APR RMM shared memory, so a silent UAF cannot be excluded, but it is not
+demonstrated here.
+
+**Failed causal backport (negative).** Deleting the two state-mutating lines
+from pristine 2.4.68 and rebuilding `mod_auth_digest.so` broke the clean case
+as well (`last_nonce` is then never populated for a new client and
+`nonce_count` is no longer reset per challenge), so that is not a faithful
+minimal version of the 2.4.69 rewrite. The attempt was reverted: source
+SHA256 `13056f73…` and installed `mod_auth_digest.so` SHA256 `a0a553a4…`
+match the pre-experiment bytes.
+
+**L9 is graded rung 2**, with a source-bound UAF at rung 1. No confirmed
+memory corruption, no chosen bytes at a chosen offset, no pointer control —
+rung 4 is not reached. The Digest `opaque` is a hex-parsed integer key and
+`last_nonce` bytes are SHA1/base64-derived, so this is not the binary-capable
+field-value channel the main lane required. Close L9; do not retry its
+trigger, its churn settings or that backport.
+
+```
+cd lab/apache2shell
+L9_CHURN=0 L9_VICTIMS=0 python3 l9-lane.py 1   # 6/6 vs 0/6 oracle
+```
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -906,6 +980,7 @@ python3 l6-lane.py 2.4.68 2.4.69               # L6: UBSan index-8 vs clean cont
 python3 l7-lane.py 2.4.67 2.4.68               # L7: state-dir PROPFIND 207 vs 403
 L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 \
   python3 l8-lane.py 20                         # L8: EMFILE trigger, no confirmed UAF
+L9_CHURN=0 L9_VICTIMS=0 python3 l9-lane.py 1    # L9: 6/6 vs 0/6 auth-state oracle
 ```
 
 
