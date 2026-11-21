@@ -1154,3 +1154,34 @@ control, chosen byte, marker, LPE demo or web path. No other lane's grade
 changes. Next experiment if reopened: full 8.5.13 FPM ASan build for a true
 version pair, or GDB at `fpm_child_free`/`fpm_event_del` on the affected
 master; do NOT repeat the single- or dual-TU swaps (both negatives).
+
+
+## Wake 53 (2026-11-21, 05:23–05:36Z) — standalone CVE-2026-129496, rung 3 CONFIRMED
+GHSA-gr4f-wgx5-jpfv was already used in wake 17's combined splice chain;
+wake 53 isolates it as its own lane using the advisory's simpler
+startup-diagnostic recipe (invalid `date.timezone` + `max_input_vars=1` + file
+`error_log`, no session corruption and no third-party extension).
+Exact fix: `main/main.c` error-log timestamp uses
+`php_format_date(..., PG(modules_activated) && EG(active))`;
+`ext/date/php_date.c` also moves `php_date_global_timezone_db` init before
+`REGISTER_INI_ENTRIES`. New committed harness
+`lab/repro/php2shell-cve129496-tzcache.py`; evidence
+`lab/build/evidence/w53-129496/verdict.txt` = CONFIRMED.
+Affected `php-8.5.12-fpm-release-asan/sapi/cgi/php-cgi-vuln`: rc=1, ASan SEGV
+read in `__strlen_avx2`, stack `php_default_treat_data` (php_variables.c:583)
+→ `php_error_docref` → `php_log_err_with_severity` (main.c:991) →
+`php_format_date` (php_date.c:894) → `timelib_unixtime2local` →
+`timelib_get_time_zone_info` (parse_tz.c:908) → `_estrdup` → strlen on stale
+tzcache. Fixed `php-cgi-fixed` = same build with ONLY the upstream one-line
+main.c guard rebuilt: rc=0, correct output, no ASan. Controls without the
+invalid timezone clean on both. Cross-branch: plain 8.4.27 rc=139 vs plain
+8.4.28 rc=0; 8.4.28 carries the same guard.
+Conditions/negatives: default ZendMM required — `USE_ZEND_ALLOC=0` leaves both
+clean; debug ASan CLI builds clean; release-ASan needed. Local zend_test
+`warn_on_startup` phpt reproduced vendor output but stayed clean on debug
+ASan. Grade rung 3 CONFIRMED for this lane only: observed invalid read of
+freed tzcache with symbolized consumer path and fix-sensitive comparison.
+No chosen bytes/pointer control/marker/pre-auth HTTP/FPM/Apache LPE demo;
+rung 4 closed. Next: stale-reference inheritance on loopback FPM/mod_php,
+then a chosen-byte occupant; or full 8.5.13 release-ASan CGI version pair.
+Do NOT repeat the debug-ASan runs.

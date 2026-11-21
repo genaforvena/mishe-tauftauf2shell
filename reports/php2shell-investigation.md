@@ -1214,3 +1214,87 @@ pair, or break at `fpm_child_free`/`fpm_event_del` under GDB on the affected
 master to observe the stale event after the worker's fd is closed. Do NOT
 repeat the single- or dual-TU 8.5.12 swaps — both are recorded negatives.
 
+
+
+### Wake 53 (2026-11-21) — standalone CVE-2026-129496: stale tzcache read, rung 3 CONFIRMED
+
+Wake 17 already used this same GHSA (`GHSA-gr4f-wgx5-jpfv`, CVE-2026-129496)
+as the native-class bug in the *combined* splice chain: a corrupted session
+record produced a PRE-RINIT decode warning that formatted its log timestamp
+from a stale native timezone-cache pointer. Wake 53 isolates the Date bug as
+its own lane, without the splice chain, using the advisory's own simpler
+startup-diagnostic recipe. That distinction matters: the rung-3 evidence below
+needs no session corruption and reproduces on the newest affected head.
+
+The advisory states the necessary sequence precisely. PHP formats file-based
+error-log timestamps with `php_format_date(..., localtime=1)`. A diagnostic
+written through PHP's **file** `error_log` during module startup allocates the
+timezone cache in temporary startup memory; that memory is released at the
+end of startup while `DATEG(tzcache)` still points at it until the date
+extension's request init. A later early-request diagnostic — the
+`max_input_vars` warning is the advisory's example — then reads or modifies
+the freed hash table. The advisory names an invalid `date.timezone` value as
+a confirmed startup diagnostic, so no third-party extension is needed.
+
+The exact 8.5.12 → 8.5.13 fix has two parts: the error-log timestamp in
+`main/main.c` is formatted with
+`php_format_date("d-M-Y H:i:s e", 13, error_time, PG(modules_activated) && EG(active))`
+(UTC outside a fully initialized active request), and `ext/date/php_date.c`
+moves `php_date_global_timezone_db` initialization ahead of
+`REGISTER_INI_ENTRIES()`.
+
+Committed harness `lab/repro/php2shell-cve129496-tzcache.py` invokes php-cgi
+directly with CGI environment variables (no listener, loopbackless) and the
+INI triplet `date.timezone=Not/AZone`, `max_input_vars=1` and a file
+`error_log`. Replay:
+```
+python3 lab/repro/php2shell-cve129496-tzcache.py \
+  lab/build/php-8.5.12-fpm-release-asan/sapi/cgi/php-cgi-vuln \
+  lab/build/php-8.5.12-fpm-release-asan/sapi/cgi/php-cgi-fixed
+```
+The fixed binary is the **release**-ASan 8.5.12 php-cgi with only the
+upstream one-line `main.c` guard applied and `main.lo`/`php-cgi` rebuilt;
+the affected binary is preserved beforehand as `php-cgi-vuln`. This is
+patch-sensitive evidence, not a full 8.5.13 version pair. Raw logs and
+`verdict.txt` are in gitignored `lab/build/evidence/w53-129496/`.
+
+Observed (`verdict = CONFIRMED`):
+
+- Affected 8.5.12 release-ASan CGI: rc=1, `ERROR: AddressSanitizer: SEGV on
+  unknown address`, a READ in `__strlen_avx2`. The symbolized stack is
+  `php_default_treat_data` (`main/php_variables.c:583`, the max-input-vars
+  warning) → `php_error_docref` → `php_log_err_with_severity`
+  (`main/main.c:991`) → `php_format_date` (`ext/date/php_date.c:894`) →
+  `timelib_unixtime2local` → `timelib_get_time_zone_info`
+  (`ext/date/lib/parse_tz.c:908`) → `_estrdup` → `strlen` on the stale cache.
+  The startup warning is present in the error log before the crash.
+- Fixed variant: rc=0, `Hello world` and the warnings logged normally, zero
+  ASan output. Removing the invalid timezone (control) leaves both binaries
+  at rc=0 with no ASan output.
+- Cross-branch: plain 8.4.27 CGI rc=139 (SIGSEGV) with the same trigger;
+  plain 8.4.28 CGI rc=0. 8.4.28's `main.c:921` carries the same guard,
+  8.4.27's `main.c:928` does not.
+
+Conditions and recorded negatives. The crash requires **default ZendMM**:
+with `USE_ZEND_ALLOC=0` both affected and fixed binaries are clean, because
+the startup-memory free that leaves the stale reference does not occur in
+that mode. The debug ASan CLI builds (`php-8.5.12-asan`, `php-8.5.13-asan`)
+are also clean; the release-ASan build is required. A locally built
+`zend_test` with the vendor test's `warn_on_startup` INI setter reproduced
+the vendor phpt output byte-for-byte but stayed clean on the debug build, so
+the simpler invalid-timezone diagnostic is canonical here.
+
+Grade: **rung 3 CONFIRMED** for this standalone lane — an ASan-observed
+invalid read of freed timezone-cache memory with a symbolized consumer path
+and a fix-sensitive comparison. No chosen-byte write, pointer control,
+benign-marker execution, pre-auth HTTP demonstration or FPM/Apache LPE
+demonstration was produced on this host, so rung 4 stays closed for this
+lane. No other lane's grade changes; the witness-verified combined-chain
+rung-3/rung-4 results from wakes 17–18 are unchanged.
+
+Next experiment if reopened: replay the stale-reference inheritance on a
+loopback FPM or mod_php worker (the advisory reports a worker crash at the
+default `max_input_vars` with ordinary nginx header limits), then attempt a
+chosen-byte occupant for rung 4; or build a full 8.5.13 release-ASan CGI for
+a true version pair. Do NOT repeat the debug-ASan runs — both are recorded
+negatives.
