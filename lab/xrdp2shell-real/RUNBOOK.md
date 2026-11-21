@@ -4,6 +4,18 @@ Companion to `reports/xrdp2shell-status.md`. These drivers exercise the real
 compiled xrdp 0.10.6 libraries; they do not reimplement the vulnerable
 function. The extracted-model harness lives in `lab/frontier/xrdp2shell/`.
 
+## One-command clean-room replay
+
+    bash lab/xrdp2shell-real/verify_cleanroom.sh
+
+Rebuilds both ASan and plain xrdp 0.10.6 library trees from a fresh copy of
+the pinned source, rebuilds all three committed drivers and re-runs every
+gate below. `XRDP_CLEANROOM_WORK` overrides the scratch directory and
+`XRDP_CLEANROOM_SRC` the source tree. Exit 0 iff every assertion passes.
+This closes the W33 replay limitation (that replay used the pre-existing
+build tree); source provisioning is separate — the script copies an existing
+tree and records its git commit rather than cloning.
+
 ## Provisions
 
 xrdp source tree with `configure.ac` `AC_INIT([xrdp], [0.10.6], ...)`.
