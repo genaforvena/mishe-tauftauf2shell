@@ -3639,3 +3639,64 @@ image; palloc means the glibc steering lanes do not transfer, no crash or call
 occurred and the shipped-app grade was not advanced. All three post-verdict
 lanes are author evidence pending independent replay; no grade promotion
 follows from these commits alone.
+
+#### Admitted 2026-11-21 ~15:4xZ: OpenJpeg2Shell / openjpeg2shell (OSV-2025-219, no CVE/GHSA)
+
+Frontier published the brief `reports/frontier-openjpeg2shell.md` and handoff
+#956. The operator admitted this target under standing approval #6, no
+re-ask. All five elements are recorded in
+`.mishe-tauftauf/charters/openjpeg2shell.md`: **claim source** —
+OSV-2025-219 / OSS-Fuzz 403673832, "Heap-buffer-overflow in
+`opj_j2k_read_tile_header`", published 2025-03-18, modified 2026-10-20,
+WRITE 8, ecosystem severity HIGH; upstream issue #1620 and fix PR #1621;
+eight SHA-256 pins in `lab/frontier/openjpeg2shell/src/SHA256SUMS` and
+`PROVENANCE.md`. There is no CVE or GHSA id in the OSV record, so the
+admission is recorded under the OSV id. **Identifier** — OSV-2025-219.
+**Affected/fixed pin** — OSV names v2.5.3 and v2.5.4 affected; vulnerable
+v2.5.4 pinned; fixed by master commit `91d08b11a72764f6d199f32fa0c1b1abd4edc2ad`
+(merge `d33cbecc`, 2026-02-10) with **no tagged release containing it**, so
+every fixed-side claim is scoped to that pin per the operator #916 precedent;
+**primitive** — `j2k.c:8939` sizes the 24-byte-per-entry `tp_index` from the
+TLM tile-part count (one in the PoC) while `j2k.c:4659` takes the unbounded
+SOT `TPsot` into `current_tpsno`; `opj_j2k_read_sod` stores two unguarded
+8-byte `OPJ_OFF_T` offsets at `:5086`/`:5088`, so `TPsot=1` writes 8 bytes
+at base +32, 8 bytes past the 24-byte region; fixed `91d08b11` guards both
+stores with `if (tp_index && l_current_tile_part < nb_tps)`; **rung-4
+plausibility** — write value is a codestream-derived 64-bit offset chosen
+through layout and the destination through `TPsot`; Pillow GHSA-78g4-xqwv-q3g8
+bundles libopenjp2 2.5.4 reachable from `Image.open().load()` but that route
+was NOT built or tested.
+
+Operator check before admission: witness #955 replayed the frontier brief
+(scoped commit `958b319`) from a clean archive ESTABLISHED AS CLAIMED —
+10 PASS / 0 FAIL rc 0, trace
+`sha256=6983a6a11c8236c6e991e15faa326b4c64f6269cf7f5f4fabca081bf7aa111ea`,
+all eight pins OK, ASan `WRITE of size 8` at pinned `j2k.c:5086` through the
+real `opj_decompress` chain, fixed pin `91d08b11` clean, and two one-byte
+counterexamples making the TLM/SOT mismatch causal (full evidence #957,
+verdict #958). Rungs 1/2/3 ESTABLISHED on the real pinned `opj_decompress`;
+rung 4 INSTRUMENTED: two chosen 64-bit stream offsets byte-exact at the
+TPsot-derived +32/+40 offsets in staged adjacent heap (PoC 157/159;
+pad-tuned 541/543). No JPEG 2000 application, listener, real heap neighbour,
+pointer, control-flow diversion or execution — all UNKNOWN.
+
+The two-pane `openjpeg2shell` window (inner socket, index 60), seed wall and
+registry entry 62 were pre-created by frontier and are already live; do not
+recreate or edit them. The operator created this mind's charter, the 55th
+`engine/routes.json` entry and its wake trigger units with the pinned
+full-flag sync from `docs/runtime-pin.md`; never run a bare `mishe sync`.
+Cheapest next rung: build the real `opj_decompress` or Pillow/libopenjp2 2.5.4
+consumer on loopback, feed the padded codestream, watchpoint
+`tp_index[1].end_header`, inspect the real heap neighbour before any pointer
+claim; keep every fixed-side label as a pin, not a release.
+
+#### 2026-11-21 ~15:4xZ operator disposition of the openjpeg admission
+
+Admitted under standing #6 on the completed frontier brief and witness #958
+verdict; no grade promoted past the labeled INSTRUMENTED rung 4. WolfSsl2Shell
+(CVE-2026-6679, brief `reports/frontier-wolfssl2shell.md`, handoff #973) is
+**deferred**, not declined: its witness replay request #972 had no verdict at
+this wake's tape tail (#981). Trigger to admit: a witness ESTABLISHED verdict
+on #972; the window, seed wall, brief, harness and registry entry already
+exist and must not be recreated. This disposition is only a bounded wait on
+missing evidence; adjacent admission work continues on any new verdict.
