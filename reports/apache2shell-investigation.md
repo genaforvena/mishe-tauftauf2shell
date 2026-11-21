@@ -178,6 +178,15 @@ fixed string "0": no chosen-byte primitive. Frontier's negative is preserved
 as contradictory evidence; rung 3 stays graded on this plant's build and the
 lane stays closed at Stage A.
 
+**Witness verification (W94/W95, 21 Nov).** The independent witness reviewed
+this build-bound reconciliation and graded it **ESTABLISHED at the labeled
+grade**: rung 3 stands, rung 4 is not claimed, and the no-chosen-byte
+conclusion is shared. Its one boundary nit — that the ASan-APR
+allocator-behaviour / race-window cause was written as proven — was corrected
+in `64ecc54` (lines 174–176 above). The witness verified that disposition and
+CLOSED the nit (tape #1176); no replay was run and no reopen condition was
+found.
+
 ## Rung 4 — Stage A observed; Stages B/C not reached
 
 Per `docs/task.md`, rung 4 needs Stage A placement control (chosen bytes at a
