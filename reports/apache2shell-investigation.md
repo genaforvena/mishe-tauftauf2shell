@@ -345,6 +345,45 @@ canonical pointer needs, Huffman coding does not bypass that validation, and
 every corrupted word seen is a pointer slot. Stage C is closed as UNREACHABLE
 in this build on this host, not merely UNASKED; rung 4 is not demonstrated.
 
+### Adjacent lane L1 — `H2PushDiarySize 0` NULL deref (03:00Z 21 Nov) — rung 2 only
+
+Standing approval #7 permits adjacent same-subsystem lanes when rung 4 is
+closed on the tested build. This is named lane L1, not a reopen of
+CVE-2026-119618. httpd 2.4.71's `CHANGES` records "Fix a crash creating an
+HTTP/2 session with `H2PushDiarySize 0` and debug logging enabled"; the
+2.4.70→2.4.71 `modules/http2/` diff shows the one-line guard at
+`h2_session.c:1068-1069` (`session->push_diary ? ... : 0`) and the removal of
+the unused push-diary Golomb encoder in `h2_push.c`. Source check:
+`h2_push_diary_create(pool, 0)` returns NULL because `diary_create()` only
+allocates when `N > 0` (`h2_push.c:549-555`), and `h2_session_create()` reads
+`session->push_diary->dtype` under `APLOGcdebug(c)`.
+
+`lab/apache2shell/pushdiary-lane.py` starts each ASan build with `-X`,
+`LogLevel debug`, `H2PushDiarySize 0` on loopback ports 7270/7271 and sends
+one h2c request. Evidence in `lab/apache2shell/logs/pushdiary-lane-0300Z.log`,
+`pushdiary-2.4.70-error.log`, `pushdiary-2.4.71-error.log`:
+
+- 2.4.70: handshake fails (`ConnectionClosed`), server rc=1. UBSan:
+  `h2_session.c:1057:9: runtime error: member access within null pointer of
+  type 'struct h2_push_diary'`. ASan: `SEGV on unknown address
+  0x00000000000c`, `READ memory access`, `#0 h2_session_create
+  httpd-2.4.70/modules/http2/h2_session.c:1057`, reached from
+  `h2_c1_setup` ← `h2_c1_hook_process_connection` ← `ap_run_process_connection`.
+  Address `0xc` is a fixed struct-field offset from NULL; no attacker byte is
+  involved. The `:1057` in the compiled build differs from `:1068` in the
+  checked-out source (line drift between build and tree); the frame function
+  and UBSan struct type are unambiguous.
+- 2.4.71 control: one request → response frame received, server rc=0, no
+  ASan/UBSan report; debug log shows normal h2 session setup and cleanup.
+
+Grade: reproducible crash (rung 2) with a sanitizer-confirmed NULL read;
+not confirmed attacker-controlled corruption and not demonstrated impact.
+Rung 4 stays NOT demonstrated. The fault is a fixed-offset read from NULL
+that requires operator-set config (`H2PushDiarySize 0`, debug logging), so
+there is no chosen-byte, chosen-offset or scalar-steering primitive and no
+route to rung 4 on this lane. Main-lane closure at Stage A is unchanged:
+this is a NULL dereference, not a binary-capable primitive.
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -360,6 +399,7 @@ python3 alphabet-probe.py <port>                # accepted-byte map, private ins
 python3 huffman-probe.py <port>                 # Huffman NUL: RST:1, no bypass
 BODY_CANARY_HEX=00007fff424f445943414e00000000 \
   ./gdb-inspect.sh 2.4.70 <port> 78 30          # binary DATA: no NUL in fault word
+python3 pushdiary-lane.py                       # adjacent lane L1: 2.4.70 SEGV, 2.4.71 OK
 ```
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
