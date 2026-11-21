@@ -3,9 +3,15 @@
 **Status: admitted 2026-11-20 ~19:32Z as the `freerdp2shell` target under
 standing approval #6. The handoff below was written pre-admission and says
 "UNSUBMITTED"; that line is retained as the original claim state, not the
-current one. Rungs 1–3 established locally; rung 4 established in the
-extracted harness only. The operator re-ran the digests-pinned harness at
-19:30Z: `ALL CHECKS PASS`, rc 0, both digests matching.**
+current one. The operator re-ran the digests-pinned harness at 19:30Z:
+`ALL CHECKS PASS`, rc 0, both digests matching. Current state (2026-11-21):
+rungs 1-3 established and rung 4 PASS, including a live loopback RDP session
+with the wrap and heap overwrite in the server process and a controlled
+pointer dereference. Witness verdicts #532 and #602 are ESTABLISHED. The
+authoritative, continuously updated account is
+`reports/freerdp2shell-status.md`. The file-only reproduction and its pinned
+digests below are retained unchanged from admission; the grade, work status
+and open questions below were updated on 2026-11-21 to match that account.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-20)
 
@@ -88,11 +94,15 @@ while (nframes > 0) {
 
 Because `out_frames` is now near `UINT64_MAX`, `out_pending_frames` never
 reaches it, the PDU is never flushed, and every call appends at a monotonically
-advancing offset with **client-chosen `buf` bytes** — an unbounded sequential
-heap overwrite, not a single bounded overflow. The `buf` argument is the audio
-sample data supplied by the client/audio source, so both the bytes and (via the
-number of frames sent before a call) the destination offset are attacker
-influenced.
+advancing offset — an unbounded sequential heap overwrite, not a single
+bounded overflow. The copied `buf` bytes and the copy stride come from the
+server's own audio-capture source (`src_format->wBitsPerSample/8 * nChannels`),
+not from the client: wake 17 traced this in pinned 3.32.0
+(`rdpsnd_main.c:383-385,770-773`; `src_format` is set from the server's own
+formats). The client chooses the wrap-triggering format record and, via the
+`SNDC_FORMATS` record count, the offset of an adjacent heap object (wake 18);
+it does NOT choose the bytes written in a stock build. The lab's chosen-byte
+rung-4 calls use synthetic playback as a stand-in for server capture.
 
 The real 3.32.1 fix replaces the assertions with an overflow-safe division
 guard (`rdpsnd_main.c:409-412`):
@@ -140,45 +150,71 @@ c5186500d60c173ba948f6b0a8633927d0c57749014d52e5f2ecf79fd8e9c5c8  run.sh
   with `rc2=1 out_frames=2205 realloc_failed=0 oob_writes=0`; five vulnerable
   rung-1 traces byte-identical.
 
-Grade: rungs 1/2/3 established, rung 4 **PASS in the extracted harness with
-client-chosen bytes at client-chosen offsets**. Live FreeRDP process, the real
-`SNDC_FORMATS` PDU parse path, an RDP session, the allocator's real heap layout,
-network reachability and the auth gate stay UNKNOWN.
+Grade at admission: rungs 1/2/3 established, rung 4 PASS in the extracted
+harness with lab-chosen bytes at lab-chosen offsets. Current grade, after
+wakes 3-18: rung 4 PASS on real library bytes through the real `SNDC_FORMATS`
+parser, dispatcher, WTS reader and shadow activation logic, plus a live
+127.0.0.1 server session with an ASan `WRITE of size 16384` at offset 8820 and
+a stock-allocator 7564-byte chosen-value overwrite. Heap layout, a
+pointer-bearing target object, its client-controlled offset and a
+chosen-pointer dereference are OBSERVED in that live build; the written bytes
+are lab-supplied, the format table is subsystem-supplied, the dereference
+needs a client-side delay and `WLOG_FILTER`, and the default posture is
+post-auth (PR:L). Full evidence and boundaries:
+`reports/freerdp2shell-status.md`; witness verdicts #532 and #602 ESTABLISHED
+with no corrections.
 
-## Rung-4 feasibility assessment
+## Rung-4 feasibility assessment (at admission; see current grade above)
 
-Tractability **HIGH**. Public fix diff, small single-file subsystem, no hardware
-gate, no need to guess the copied bytes: `buf` is client audio data and the copy
-is a full bulk `memcpy`, so "chosen bytes at chosen offsets" holds directly
-without depending on glibc `memcpy` tail-first/store-first partial-overwrite
-windows (the caveat that killed rung 4 through other memcpy consumers). Pointer
-control in the real channel layout is a separate, harder question — the write
-is sequential so reaching a specific heap object needs grooming, and no
-convenient adjacent pointer-sized field is obvious from the source alone.
+Tractability **HIGH**. Public fix diff, small single-subsystem change, no
+hardware gate, and a full bulk `memcpy` rather than a byte-at-a-time consumer:
+the deterministic chosen-value write does not depend on glibc `memcpy`
+tail-first/store-first partial-overwrite windows (the caveat that killed rung
+4 through other memcpy consumers). At admission, byte identity was assumed
+because `buf` was read as client audio data; wake 17 corrected that: in the
+pinned 3.32.0 source the bytes and stride come from the server's own capture,
+so remote byte choice is NOT established and every "chosen bytes" rung-4 claim
+is explicitly lab-synthetic. Pointer control and object placement were also
+open then; wakes 12-14 and 18 observed a chosen-pointer-value dereference in
+the identified wLog object and client-controlled placement of that object by
+32 bytes per extra format record.
 
 Reachability caveat that must stay prominent: default posture is
-post-authentication (PR:L); only no-auth RDP deployments reach 9.8. Even so,
-the primitive is stronger and more directly attacker-controlled than the
-opt-in-gate FreeSWITCH lane.
+post-authentication (PR:L); only no-auth RDP deployments reach 9.8. The live
+loopback evidence uses a no-auth server and a subsystem-supplied wrap-capable
+format table; neither the default format list nor a production deployment was
+shown to reach the sink.
 
-## Cheapest next step
+## Work completed after admission (was "Cheapest next step")
 
-Build FreeRDP 3.32.0 with `-DWITH_SERVER=ON -DWITH_CHANNELS=ON
--DBUILD_TESTING=OFF -DWITH_CLIENT=OFF` under ASan/UBSan, compile the advisory's
-`PocRdpsndOverflow.c` against the built libs, and run it with
-`ASAN_OPTIONS=detect_leaks=0:allocator_may_return_null=1` to move from the
-extracted harness to the real library (still file-only). Then feed the same two
-`SNDC_FORMATS` PDUs into a loopback-only (127.0.0.1) FreeRDP `shadow` server to
-move PDU-parse reachability and the auth gate from UNKNOWN to evidence. No
-external system is probed.
+The admission plan was executed and exceeded: source-built 3.32.0 with server
+channels under ASan and a plain build, the advisory PoC against the real
+library (wakes 3-6), a real loopback shadow server for transport and the auth
+gate (wake 7), a full MCS/attach/channel-join RDP session with PDUs on the wire
+and a live ASan `WRITE of size 16384` (wake 8), a stock-allocator chosen-byte
+overwrite (wake 9), a one-command witness replay (wake 10, independently
+accepted W31 #532), stock heap layout and pointer control (wakes 12-14), the
+FFmpeg format gate (wake 16, witness #602), the real-audio-source trace
+(wake 17) and client-controlled grooming (wake 18). Commands and digests are
+in `docs/reproducibility.md` and `reports/freerdp2shell-status.md`. No
+external system was probed; all servers bound 127.0.0.1 only.
 
-## What would change this assessment
+## What remains open
 
-- A fixed 3.32.1 build still producing the overflow, or a primary source
-  showing the sample buffer is not client-controlled, breaks the differential.
-- A live build closing the channel before `SendSamples` would reduce the
-  network claim to UNKNOWN while leaving the extracted result intact.
-- A chosen function-pointer target in the real channel heap layout would
-  promote rung 4 from chosen-bytes to pointer control.
-- Admission is the operator's call; this brief does not create a target mind or
-  window. Nothing here duplicates an existing lane.
+- A primary source or live trace showing the copied bytes and stride are
+  influenced by the remote client would turn the lab-chosen-byte rung 4 into
+  remote byte control. Wake 17's source reading is NEGATIVE for that in the
+  pinned 3.32.0 tree; deployment-specific audio capture stays UNKNOWN and is
+  not measurable in this lab.
+- A stock-format-list route to a wrap-capable tag would remove the
+  subsystem-supplied-table condition. Wake 6 measured the FFmpeg-off list as
+  PCM only and wake 16 measured an experimental FFmpeg build exposing tag 2;
+  neither is a stock deployment.
+- A post-write dereference without the scratch client delay would strengthen
+  the pointer-control claim. Wake 14 observed the real quality-mode log path
+  but needed the delay; wake 15 recorded the unaided NEGATIVE.
+- Default-posture (post-auth, PR:L) live impact over a non-loopback RDP client
+  is not claimed; only the loopback session and the no-auth gate behavior were
+  observed.
+- The admission-status note above supersedes the pre-admission handoff
+  questions; nothing here creates a target mind or window.
