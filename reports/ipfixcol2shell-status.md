@@ -71,6 +71,11 @@ the host's real liblz4 and stock glibc; `sh run.sh` = 9 PASS / 0 FAIL, trace
 (byte-identical in three runs). Full detail and preserved negatives in
 `lab/ipfixcol2shell-live/RESULTS.md`.
 
+Clean-archive replay at `74b83ab`: two `git archive HEAD` extractions into
+`/tmp/ipx-live-a` and `/tmp/ipx-live-b` plus the working tree, each fetching
+its own pinned tarballs: 9 PASS / 0 FAIL and byte-identical traces in all
+three.
+
 - Rung 3 holds on the loopback path: ASan `WRITE of size 65000`, 0 bytes after
   a 24-byte region, allocation at real `Lz4Decoder.cpp:184`, write at `:145`;
   fixed rejects at both ASan and plain, benign 24-byte IPFIX message decodes

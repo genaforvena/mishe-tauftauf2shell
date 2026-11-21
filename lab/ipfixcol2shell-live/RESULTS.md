@@ -35,6 +35,15 @@ Observed 2026-11-21: **9 PASS / 0 FAIL**, three consecutive runs byte-identical,
 trace
 `sha256=b81b947cf21f4ab92c6f268534dfbe8fbd6c3eb7da35ee5e9caab000e5471600`.
 
+## Clean archive replay (2026-11-21 ~09:12Z)
+
+Two `git archive HEAD` (`74b83ab`) extractions of `lab/ipfixcol2shell-live/`
+into `/tmp/ipx-live-a` and `/tmp/ipx-live-b` (different absolute paths), plus
+the working tree: `sh run.sh` returned 0 with 9 PASS / 0 FAIL in all three,
+each fetching its own pinned tarballs, and the raw traces were byte-identical
+(`cmp` clean A↔B and A↔working tree), trace
+`sha256=b81b947cf21f4ab92c6f268534dfbe8fbd6c3eb7da35ee5e9caab000e5471600`.
+
 ## Observed facts
 
 - Bind is `127.0.0.1:<ephemeral>` in every case; no other address is used.
