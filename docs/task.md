@@ -3700,3 +3700,70 @@ this wake's tape tail (#981). Trigger to admit: a witness ESTABLISHED verdict
 on #972; the window, seed wall, brief, harness and registry entry already
 exist and must not be recreated. This disposition is only a bounded wait on
 missing evidence; adjacent admission work continues on any new verdict.
+
+#### Admitted 2026-11-21 ~15:5xZ: WolfSsl2Shell / wolfssl2shell (CVE-2026-6679 / GHSA-c9q2-5c67-xg9p)
+
+The prior wake's WolfSsl2Shell deferral was a bounded wait on one missing
+verdict, not a decline. Frontier's brief `reports/frontier-wolfssl2shell.md`
+and handoff #973 carried all five elements; witness #985 at 15:48:06Z
+answered replay request #972 ESTABLISHED AS CLAIMED at the labeled grades
+(restated to the operator in #992 and by frontier in #993). The operator
+admitted this target under standing approval #6, no re-ask. All five elements
+are recorded in `.mishe-tauftauf/charters/wolfssl2shell.md`: **claim source**
+— CVE-2026-6679, CNA wolfSSL Inc., published/updated 2026-06-25, "DTLS 1.3
+ACK serialization heap buffer overflow via integer truncation", CWE-190/
+197/787, CVSS 4.0 8.8 HIGH, vector
+`AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:H/SC:N/SI:N/SA:N`, credit Nicholas
+Carlini; CVE record, cveawg API, GHSA-c9q2-5c67-xg9p and the vendor table;
+fix PR `wolfSSL/wolfssl#10116`; four SHA-256 pins for both tagged tarballs,
+the PR diff and the CVE JSON in `lab/frontier/wolfssl2shell/src/SHA256SUMS`
+and `PROVENANCE.md`. CVE-2026-5264 is a different ACK-processing bug — keep
+them separate. **Identifier** — CVE-2026-6679 / GHSA-c9q2-5c67-xg9p.
+**Affected/fixed pin** — wolfSSL 5.4.0–5.9.0 affected; vulnerable
+`v5.9.0-stable` pinned; fixed in the **tagged release `v5.9.1-stable`**, with
+`DTLS13_ACK_MAX_RECORDS 128` in `internal.h:5852-5859`, the insert cap at
+`dtls13.c:742` and the `recordsCount > 128` / `written + 16 > msgSz` checks at
+`:2618`/`:2653` — stronger than PR 10116's 512 cap, no unmerged-pin caveat.
+**Primitive** — pinned `dtls13.c:2537` `Dtls13GetAckListLength` truncates
+`16 * numberElements` to a `word16` at `:2550`; 4097 records declare 16 bytes,
+so `Dtls13WriteAckMessage` (`:2554`) sizes a 31-byte region via
+`CheckAvailableSize` (`:2588`) then writes 16 bytes per record with `c64toa`
+of sender-chosen epoch/seq at `:2604`/`:2606` (sink `misc.c:1010`).
+`Dtls13RtxAddAck` (`:723`) is called from `Dtls13RecordRecvd` (`:1547`) for
+every received handshake record before peer authentication — the pinned
+remote-reach claim, NOT driven by the harness. **Rung-4 plausibility** —
+pre-auth network-facing DTLS 1.3 with a structured 16-byte-per-record
+sender-chosen write; the live path and a live victim object remain to be
+shown, so this is a plausibility claim, not a built consumer.
+
+Operator check: witness #985 replayed scoped commit `fdc7e80` from a clean
+git archive — 4/4 pins OK, `run.sh` 13 PASS / 0 FAIL rc 0, trace
+`sha256=fb6831dc85fe7afeaaf688ac519a49bccde954a03159211fb256247c1c7ac05d`,
+`chosen_readback.sh` 6 PASS / 0 FAIL. ASan `WRITE of size 8` 0 bytes after a
+31-byte region in `c64toa misc.c:1010` ← `Dtls13WriteAckMessage dtls13.c:2604`,
+allocation via `CheckAvailableSize :2588` ← `GrowOutputBuffer internal.c:11415`;
+`word16_length=16` against exact 65552. Fixed tagged v5.9.1: 128 cap,
+`msgSz=2048`, write return 0, ASan-clean. Rungs 1/2/3 ESTABLISHED on the
+verbatim pinned source; rung 4 INSTRUMENTED — chosen epoch
+`0xc0ffee1122334455` and seq patterns at offsets 31/47/63/159 in staged
+non-ASan heap. No DTLS socket, listener, handshake record path, live
+neighbour, pointer, control-flow diversion or execution — all UNKNOWN.
+
+The two-pane `wolfssl2shell` window (inner socket, index 61), seed wall and
+registry entry 63 were pre-created by frontier and are already live; do not
+recreate or edit them. The operator created this mind's charter, the 56th
+`engine/routes.json` entry and its wake trigger units with the pinned
+full-flag sync from `docs/runtime-pin.md`; never run a bare `mishe sync`.
+Cheapest next rung: real loopback DTLS 1.3 server, >4096 distinct handshake
+record numbers from a loopback UDP sender, gdb watch on `Dtls13RecordRecvd`
+filling `seenRecords` to the wrap point, then inspect the overwritten region
+for a live object or pointer before any pointer claim.
+
+#### 2026-11-21 ~15:5xZ operator disposition of the wolfssl admission
+
+Admitted under standing #6 at the labeled rung-4 INSTRUMENTED grade on
+witness #985/#992; no grade promoted past it. The stale deferral note above
+is historical and resolved by this verdict. Other peer verdicts in #992
+(IEC R4, asn1scc Results 4/5) and the Pillow W5 recipe repair/negative
+control are already-admitted targets at labeled grades; docs owns their index
+rows. No new advisory claim in the current dossier or tape.

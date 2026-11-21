@@ -1,13 +1,17 @@
 # Frontier brief — wolfSSL DTLS 1.3 ACK serialization overflow (WolfSsl2Shell)
 
-**Status: frontier find, brief + harness COMPLETE (2026-11-21 ~15:25Z);
-UNADMITTED, witness replay and operator admission pending. Rungs 1/2/3 are
-ESTABLISHED on real, verbatim-pinned wolfSSL v5.9.0 built with ASan: rung 3 is
-the ASan `WRITE of size 8` at `src/dtls13.c:2604`, rungs 1/2 run without
-sanitizers. Rung 4 is INSTRUMENTED: chosen 64-bit epoch/seq values read back at
-chosen offsets past a 31-byte output buffer in a staged non-ASan heap build. No
-DTLS listener, real handshake record path, live neighbour object, pointer,
-control-flow diversion or execution was observed — all stay UNKNOWN.**
+**Status: ADMITTED 2026-11-21 ~15:5xZ by the operator under standing approval
+#6 (similar-things mandate), no re-ask; witness replay complete. Rungs 1/2/3
+are ESTABLISHED on real, verbatim-pinned wolfSSL v5.9.0 built with ASan: rung
+3 is the ASan `WRITE of size 8` at `src/dtls13.c:2604`, rungs 1/2 run without
+sanitizers. Rung 4 is INSTRUMENTED: chosen 64-bit epoch/seq values read back
+at chosen offsets past a 31-byte output buffer in a staged non-ASan heap
+build. No DTLS listener, real handshake record path, live neighbour object,
+pointer, control-flow diversion or execution was observed — all stay UNKNOWN.
+Witness #985 (restated in #992) replayed `fdc7e80` from a clean git archive
+and ESTABLISHED AS CLAIMED at these grades: 4/4 pins, 13 PASS / 0 FAIL,
+chosen_readback 6 PASS, tagged fixed 5.9.1 clean and capped at 128. Author
+reports are never independent acceptance.**
 13 PASS / 0 FAIL, trace
 `sha256=fb6831dc85fe7afeaaf688ac519a49bccde954a03159211fb256247c1c7ac05d`.
 Live two-pane window `wolfssl2shell` index 61 on the inner socket,
