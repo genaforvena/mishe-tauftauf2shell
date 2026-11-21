@@ -237,3 +237,26 @@ Grade: rung 1 corrected once more — the unsanitized WRITE is reachable from a
 real CRAM file when the file-derived codec index lands on a NULL OOB slot.
 Rung 4 is still INSTRUMENTED: no chosen pointer value, no groomed neighbour
 field with a known consumer, no control-flow diversion, no execution.
+
+## 7. The overwritten neighbour is the slice's live CIGAR array (17:44Z)
+
+`tracemalloc.c` is a small LD_PRELOAD malloc/calloc/realloc logger (caller via
+`__builtin_return_address(0)`). Run against the same `crafted2.cram` with a
+breakpoint at `:1388`, it recorded:
+
+```
+DEST 0x5555556de5e0 BASE 0x5555556dd5d0        # DEST = base+4112
+malloc-trace.txt: M 4096 0x5555556de5e0 0x5555555e8cc9
+gdb info proc mappings: executable base 0x555555554000
+caller offset 0x94cc9 -> addr2line: cram_read_slice cram/cram_io.c:4634
+```
+
+`cram_io.c:4633-4634` allocates `s->cigar = malloc(s->cigar_alloc *
+sizeof(*s->cigar))` with `cigar_alloc = 1024` uint32_t = 4096 bytes, immediately
+after the `calloc(512, ...)` at `:4620`. So the OOB pointer store at index 514
+lands exactly on `s->cigar[0]` and `s->cigar[1]` of the *same live cram_slice*,
+overwriting their 32-bit values with the low/high halves of a heap pointer.
+This is a consumed decoder field, not padding — the consumer-reality test has
+a live neighbour. The written value is still the allocator's choice, not a
+file-chosen pointer; no control-flow diversion or benign marker was executed.
+Rung 4 stays INSTRUMENTED.

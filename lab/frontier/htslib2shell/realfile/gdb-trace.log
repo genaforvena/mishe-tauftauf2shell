@@ -1,0 +1,62 @@
+Breakpoint 1 at 0x10dccd: file cram/cram_codecs.c, line 1388.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+@HD	VN:1.6	SO:coordinate
+@SQ	SN:chr1	LN:1000
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+
+Breakpoint 1, cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1388
+1388	    b = slice->block_by_id[512 + c->codec_id] = cram_new_block(0, 0);
+DEST 0x5555556de5e0 BASE 0x5555556dd5d0
+process 1428511
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555558000     0x4000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-plain
+      0x555555558000     0x55555566a000   0x112000     0x4000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-plain
+      0x55555566a000     0x55555568c000    0x22000   0x116000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-plain
+      0x55555568c000     0x55555568d000     0x1000   0x138000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-plain
+      0x55555568d000     0x555555692000     0x5000   0x139000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-plain
+      0x555555692000     0x555555693000     0x1000        0x0  rw-p   
+      0x555555693000     0x5555556f7000    0x64000        0x0  rw-p   [heap]
+      0x7ffff7c00000     0x7ffff7c28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c28000     0x7ffff7db1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7db1000     0x7ffff7e00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e00000     0x7ffff7e04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e04000     0x7ffff7e06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e06000     0x7ffff7e13000     0xd000        0x0  rw-p   
+      0x7ffff7e8a000     0x7ffff7e8e000     0x4000        0x0  rw-p   
+      0x7ffff7e8e000     0x7ffff7e9e000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7e9e000     0x7ffff7f1d000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f1d000     0x7ffff7f75000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f75000     0x7ffff7f76000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f76000     0x7ffff7f77000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f77000     0x7ffff7f79000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f79000     0x7ffff7f8b000    0x12000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f8b000     0x7ffff7f91000     0x6000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f91000     0x7ffff7f92000     0x1000    0x1a000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f92000     0x7ffff7f93000     0x1000    0x1b000  rw-p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f93000     0x7ffff7f94000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libdeflate.so.0
+      0x7ffff7f94000     0x7ffff7fa0000     0xc000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/libdeflate.so.0
+      0x7ffff7fa0000     0x7ffff7fa4000     0x4000     0xd000  r--p   /usr/lib/x86_64-linux-gnu/libdeflate.so.0
+      0x7ffff7fa4000     0x7ffff7fa5000     0x1000    0x11000  r--p   /usr/lib/x86_64-linux-gnu/libdeflate.so.0
+      0x7ffff7fa5000     0x7ffff7fa6000     0x1000    0x12000  rw-p   /usr/lib/x86_64-linux-gnu/libdeflate.so.0
+      0x7ffff7fb8000     0x7ffff7fb9000     0x1000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/tracemalloc.so
+      0x7ffff7fb9000     0x7ffff7fba000     0x1000     0x1000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/tracemalloc.so
+      0x7ffff7fba000     0x7ffff7fbb000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/tracemalloc.so
+      0x7ffff7fbb000     0x7ffff7fbc000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/tracemalloc.so
+      0x7ffff7fbc000     0x7ffff7fbd000     0x1000     0x3000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/tracemalloc.so
+      0x7ffff7fbd000     0x7ffff7fbf000     0x2000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+#0  cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1388
+#1  0x0000555555661e82 in cram_xpack_decode_char (slice=0x5555556dd130, c=0x5555556d0820, in=0x5555556dd2d0, out=0x5555556dfdd0 "", out_size=0x7fffffffd7e4) at cram/cram_codecs.c:1416
