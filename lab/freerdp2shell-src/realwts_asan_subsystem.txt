@@ -1,0 +1,23 @@
+server format source: harness-supplied subsystem table
+real server formats: 1 2
+[activate] shadow selected client format 0 rc=0
+WARNING: AddressSanitizer failed to allocate 0xfffffffffffffff0 bytes
+[ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
+[activate] shadow selected client format 0 rc=12
+real-WTS reads rc=0,0,0,0 selected=0 nformats=1 tag=2 ch=2 align=8
+out_buffer_size after PDU1=8820 final out_frames=0xfffffffffffffffc out_buffer_size=8820
+==...==ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 16384 at 0x525000002374 thread T0
+    #0 memcpy sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 rdpsnd_server_send_samples /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:770
+    #3 main lab/freerdp2shell-src/PocRdpsndRealWts.c:260
+0x525000002374 is located 0 bytes after 8820-byte region [0x525000000100,0x525000002374)
+allocated by thread T0 here:
+    #0 realloc asan_malloc_linux.cpp:85
+    #1 rdpsnd_server_select_format rdpsnd_main.c:444
+    #2 shadow_activated lab/freerdp2shell-src/PocRdpsndRealWts.c:146
+    #3 rdpsnd_server_handle_messages rdpsnd_main.c:1278
+    #4 main lab/freerdp2shell-src/PocRdpsndRealWts.c:222
+SUMMARY: AddressSanitizer: heap-buffer-overflow in memcpy
+==...==ABORTING

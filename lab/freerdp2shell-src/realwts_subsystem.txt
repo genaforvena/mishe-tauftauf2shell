@@ -1,0 +1,9 @@
+server format source: harness-supplied subsystem table
+real server formats: 1 2
+[activate] shadow selected client format 0 rc=0
+[ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
+[activate] shadow selected client format 0 rc=12
+real-WTS reads rc=0,0,0,0 selected=0 nformats=1 tag=2 ch=2 align=8
+out_buffer_size after PDU1=8820 final out_frames=0xfffffffffffffffc out_buffer_size=8820
+readback offset 8819=11 offset 8820=de offset 21384=ad out_pending_frames=8192
+[realwts] mode=subsystem chosen RESULT=PASS

@@ -1,0 +1,26 @@
+## dvi mode: advisory's DVI_ADPCM record, real default server format list
+server format source: real server_rdpsnd_get_formats()
+real server formats: 1
+[activate] shadow selected client format 0 rc=0
+[activate] no compatible server format
+real-WTS reads rc=0,0,0,0 selected=0 nformats=1 tag=17 ch=2 align=4
+out_buffer_size after PDU1=8820 final out_frames=0x000000000000089d out_buffer_size=8820
+[realwts] mode=dvi chosen RESULT=FAIL
+
+## adpcm mode: tag 2 blockalign 8, real default server format list
+server format source: real server_rdpsnd_get_formats()
+real server formats: 1
+[activate] shadow selected client format 0 rc=0
+[activate] no compatible server format
+real-WTS reads rc=0,0,0,0 selected=0 nformats=1 tag=2 ch=2 align=8
+out_buffer_size after PDU1=8820 final out_frames=0x000000000000089d out_buffer_size=8820
+[realwts] mode=adpcm chosen RESULT=FAIL
+
+## benign mode: two PCM records, real default server format list
+server format source: real server_rdpsnd_get_formats()
+real server formats: 1
+[activate] shadow selected client format 0 rc=0
+[activate] shadow selected client format 0 rc=0
+real-WTS reads rc=0,0,0,0 selected=0 nformats=1 tag=1 ch=2 align=4
+out_buffer_size after PDU1=8820 final out_frames=0x000000000000089d out_buffer_size=8820
+[realwts] mode=benign benign RESULT=PASS

@@ -184,6 +184,12 @@ DVI_ADPCM PoC is a library-level path, not one the stock shadow server can
 select by default. The report's earlier implication that the DVI record is
 shadow-reachable was wrong.
 
+CORRECTION (wake 6, 2026-11-21 00:30Z): the claim in the next paragraphs that
+the default ADPCM server record makes the variant selectable by the stock
+shadow server was wrong. The list is filtered through
+`freerdp_dsp_supports_format()` before shadow sees it; in this build only PCM
+survives. See "Real WTS reader and the codec gate" below.
+
 The same list does include `WAVE_FORMAT_ADPCM` (0x02). Its server record has
 `nBlockAlign=4`, which the compatibility check does not compare, so a client
 record with `nChannels=2, nSamplesPerSec=44100, wBitsPerSample=16,
@@ -209,19 +215,84 @@ The WTS read callback remains a stub, so this is still not a live shadow
 session, real channel transport or auth gate; it does remove the
 "server must offer DVI_ADPCM" precondition for this variant.
 
+## Real WTS reader and the codec gate (wake 6, 2026-11-21 00:31Z)
+
+`PocRdpsndRealWts.c` replaces the stub WTS read callback with the real
+FreeRDP WTS function table (`FreeRDP_InitWtsApi()` at
+`libfreerdp/core/channels.c:293`), whose `pVirtualChannelRead` is libfreerdp's
+`FreeRDP_WTSVirtualChannelRead()` (`core/server.c:1702-1747`). Framed
+`SNDC_FORMATS` PDUs are posted into a real `wMessageQueue` as
+`wtsChannelMessage` records, the shape libfreerdp's own
+`wts_queue_receive_data()` uses. The real exported
+`rdpsnd_server_handle_messages()` reads them through that real reader.
+There is no manual `SelectFormat()` call: the shadow server's `Activated`
+callback logic (`shadow_rdpsnd.c:35-53`, using the real
+`audio_format_compatible()`) selects the format after each PDU. Two PDUs are
+used: benign PCM first (allocates the 8820-byte buffer), malicious record
+second.
+
+**Codec-gating precondition, measured.** `server_rdpsnd_get_formats()`
+(`server/common/server.c:125-165`) filters its static array through
+`freerdp_dsp_supports_format()` (`libfreerdp/codec/dsp.c:1512+`). In the
+harness build (`WITH_FFMPEG=OFF`, `WITH_DSP_EXPERIMENTAL` off) the result is
+PCM only. Real activation therefore rejects both wrap-capable records:
+`realwts_controls.txt` shows `real server formats: 1`,
+`[activate] no compatible server format`, `out_frames=0x89d`, RESULT=FAIL for
+both the DVI (tag 17, blockalign 4) and ADPCM (tag 2, blockalign 8) client
+records. The benign two-PCM control passes. `-DWITH_DSP_EXPERIMENTAL=ON` does
+not change this: `libfreerdp/codec/CMakeLists.txt:164-167` only emits a
+warning and dsp.c tests the C macro, which the cmake option never defines;
+even with `-DCMAKE_C_FLAGS=-DWITH_DSP_EXPERIMENTAL` the rdpsnd default array
+contains no DVI_ADPCM and explicitly rejects ADPCM, so the list stays PCM
+only. An FFmpeg-enabled build maps both tags to ADPCM codecs and would offer
+ADPCM, but FFmpeg development libraries are not installed here, so that
+configuration remains UNVERIFIED. No in-tree shadow subsystem supplies
+`subsystem->rdpsndFormats`, so the stock shadow server selects only PCM in
+the builds tested here.
+
+**Positive through the real path when the tag is offered.** The `subsystem`
+mode supplies an ADPCM server record through the same
+`subsystem->rdpsndFormats` field shadow uses, then re-runs the unchanged real
+reader, dispatcher, activation, parser and select/send code.
+`realwts_subsystem.txt`:
+
+```
+server format source: harness-supplied subsystem table
+real server formats: 1 2
+[activate] shadow selected client format 0 rc=0
+[activate] shadow selected client format 0 rc=12
+real-WTS reads rc=0,0,0,0 selected=0 nformats=1 tag=2 ch=2 align=8
+out_buffer_size after PDU1=8820 final out_frames=0xfffffffffffffffc out_buffer_size=8820
+readback offset 8819=11 offset 8820=de offset 21384=ad out_pending_frames=8192
+[realwts] mode=subsystem chosen RESULT=PASS
+```
+
+`realwts_asan_subsystem.txt` shows the same state with `WRITE of size 16384`,
+`0 bytes after 8820-byte region`, and an allocation stack that runs
+`rdpsnd_server_handle_messages` → `shadow_activated` →
+`rdpsnd_server_select_format` (failed `realloc`) plus a write stack through
+`rdpsnd_server_send_samples rdpsnd_main.c:770`. This is rung 4 through the
+real WTS reader, real dispatcher, real activation callback and real parser,
+with the server-format-table condition explicit. Still UNKNOWN: live process,
+real channel/network transport, RDP session, auth gate and stock heap layout.
+The queue is fed in-process; only the WTS reader and activation logic are
+real FreeRDP code. `bash lab/freerdp2shell-src/run.sh` rc 0 with the new checks.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
-offsets **on real library bytes through the real SNDC_FORMATS parser and the
-real `rdpsnd_server_handle_messages()` dispatcher**, for both DVI_ADPCM and
-the shadow-compatible WAVE_FORMAT_ADPCM variant, but still in-process with a
-stubbed WTS read callback. The write is sequential and unbounded; no pointer
-control or specific heap object is targeted. The stock shadow server's
-`Activated` callback cannot select DVI_ADPCM by default; the ADPCM variant
-does not have that precondition. Live FreeRDP process, real virtual-channel
-transport, RDP session, stock allocator layout, network reachability and the
-auth gate remain UNKNOWN. No off-loopback probe. Default posture is post-auth
-(PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
+offsets **on real library bytes through the real SNDC_FORMATS parser, the real
+`rdpsnd_server_handle_messages()` dispatcher, the real WTS virtual-channel
+reader and the real shadow activation logic**, but still in-process with the
+channel queue fed directly and a harness-supplied server format table. The
+write is sequential and unbounded; no pointer control or specific heap object
+is targeted. In the FFmpeg-off builds tested, the stock shadow server's
+`Activated` callback selects only PCM and rejects both wrap-capable tags, so
+the exploit needs a server format table that offers one (subsystem-supplied,
+or an FFmpeg-enabled build, UNVERIFIED here). Live FreeRDP process, real
+virtual-channel transport, RDP session, stock allocator layout, network
+reachability and the auth gate remain UNKNOWN. No off-loopback probe. Default
+posture is post-auth (PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay
