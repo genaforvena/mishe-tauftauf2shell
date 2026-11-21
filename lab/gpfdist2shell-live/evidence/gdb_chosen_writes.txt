@@ -1,0 +1,37 @@
+Breakpoint 1 at 0x18cde: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c, line 3677.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+2026-11-21 11:43:48 1800330 INFO Before opening listening sockets - following listening sockets are available:
+2026-11-21 11:43:48 1800330 INFO IPV4 socket: 127.0.0.1:18097
+2026-11-21 11:43:48 1800330 INFO Trying to open listening socket:
+2026-11-21 11:43:48 1800330 INFO IPV4 socket: 127.0.0.1:18097
+2026-11-21 11:43:48 1800330 INFO Opening listening socket succeeded
+Serving HTTP on port 18097, directory /home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gdbchain3/data
+
+=== STORE HIT segid=0 seq=1 ===
+seq_segs=0x7ffff76de1a8 active_segids=0x7ffff76de1a0 path=0x7ffff76de1c0
+bytes at seq_segs+24 (== path[0..7]):
+0x7ffff76de1c0:	0x2f	0x68	0x6f	0x6d	0x65	0x2f	0x6d	0x65
+path string:
+0x7ffff76de1c0:	"/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gdbchain3/data/out.txt"
+
+=== STORE HIT segid=3 seq=1 ===
+seq_segs=0x7ffff76de1a8 active_segids=0x7ffff76de1a0 path=0x7ffff76de1c0
+bytes at seq_segs+24 (== path[0..7]):
+0x7ffff76de1c0:	0x2f	0x68	0x6f	0x6d	0x65	0x2f	0x6d	0x65
+path string:
+0x7ffff76de1c0:	"/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gdbchain3/data/out.txt"
+
+=== STORE HIT segid=3 seq=2 ===
+seq_segs=0x7ffff76de1a8 active_segids=0x7ffff76de1a0 path=0x7ffff76de1c0
+bytes at seq_segs+24 (== path[0..7]):
+0x7ffff76de1c0:	0x01	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+path string:
+0x7ffff76de1c0:	"\001"
+
+=== STORE HIT segid=3 seq=3 ===
+seq_segs=0x7ffff76de1a8 active_segids=0x7ffff76de1a0 path=0x7ffff76de1c0
+bytes at seq_segs+24 (== path[0..7]):
+0x7ffff76de1c0:	0x02	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+path string:
+0x7ffff76de1c0:	"\002"

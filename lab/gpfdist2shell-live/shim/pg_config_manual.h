@@ -1,0 +1,3 @@
+#ifndef SHIM_PG_CONFIG_MANUAL_H
+#define SHIM_PG_CONFIG_MANUAL_H
+#endif

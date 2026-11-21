@@ -1,0 +1,17 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1813383==ERROR: AddressSanitizer: SEGV on unknown address 0x782b81e381a0 (pc 0x611cfe7502fc bp 0x7fffce240350 sp 0x7fffce23fd50 T0)
+==1813383==The signal is caused by a WRITE memory access.
+    #0 0x611cfe7502fc in session_attach /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c:1988
+    #1 0x611cfe752ae8 in do_read_request /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c:2460
+    #2 0x7829a529da2f  (/lib/x86_64-linux-gnu/libevent-2.1.so.7+0x20a2f) (BuildId: 48df21d91c3ecd4b1b72b74632d5076e0ea03486)
+    #3 0x7829a529f46e in event_base_loop (/lib/x86_64-linux-gnu/libevent-2.1.so.7+0x2246e) (BuildId: 48df21d91c3ecd4b1b72b74632d5076e0ea03486)
+    #4 0x611cfe75bc47 in gpfdist_run /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c:4240
+    #5 0x611cfe75bc90 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c:4249
+    #6 0x7829a462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7829a462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x611cfe749f24 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/gpfdist_v761_asan+0x9f24) (BuildId: 9e5dbddc0ba8d25d78ec5b29578bfd0f4d6602d0)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c:1988 in session_attach
+==1813383==ABORTING

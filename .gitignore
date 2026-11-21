@@ -82,3 +82,9 @@ lab/gst2shell-src/family_rc_*.txt
 
 # Freerdp2Shell live witness-replay output (driver scripts and evidence stay tracked)
 lab/freerdp2shell-src/verify-live-out/
+
+# Gpfdist2shell live: fetched upstream, binaries and probe runtime state.
+# Build scripts, shims and the evidence/ transcript set stay tracked.
+lab/gpfdist2shell-live/upstream/
+lab/gpfdist2shell-live/gpfdist_v*_asan
+lab/gpfdist2shell-live/out_*/

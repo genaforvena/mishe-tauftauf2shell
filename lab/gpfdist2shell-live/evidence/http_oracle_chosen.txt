@@ -1,0 +1,20 @@
+# 7.6.1 chosen-value chain (fresh XID, named session)
+req1 id=0 seq=1 http=200 rc=0
+req2 id=3 seq=1 http=200 rc=0
+req3 id=3 seq=2 http=200 rc=0
+req4 id=3 seq=3 http=200 rc=0
+--- key log lines ---
+2026-11-21 11:45:30 1824785 WARN [0:1:0:8] HTTP ERROR: 127.0.0.1 - 400 invalid request
+--- asan files ---
+
+# 7.6.2 same chain
+req1 id=0 seq=1 http=200 rc=0
+req2 id=3 seq=1 http=400 rc=0
+req3 id=3 seq=2 http=400 rc=0
+req4 id=3 seq=3 http=400 rc=0
+--- key log lines ---
+2026-11-21 11:45:30 1824814 WARN [0:1:0:8] HTTP ERROR: 127.0.0.1 - 400 invalid request
+2026-11-21 11:45:30 1824814 WARN [0:3:3:8] HTTP ERROR: 127.0.0.1 - 400 bad request, invalid segment id or count
+2026-11-21 11:45:30 1824814 WARN [0:4:3:8] HTTP ERROR: 127.0.0.1 - 400 bad request, invalid segment id or count
+2026-11-21 11:45:30 1824814 WARN [0:5:3:8] HTTP ERROR: 127.0.0.1 - 400 bad request, invalid segment id or count
+--- asan files ---

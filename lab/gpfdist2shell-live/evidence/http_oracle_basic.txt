@@ -1,0 +1,56 @@
+# 7.6.1 basic hostile headers
+SERVER_PID=1824854 PORT=18102
+CASE active_get http=200 curlrc=0
+CASE seq_post http=400 curlrc=0
+--- server.log ---
+2026-11-21 11:45:31 1824854 WARN last is NULL
+2026-11-21 11:45:31 1824854 INFO [0:1:0:8] reject invalid request from 127.0.0.1
+2026-11-21 11:45:31 1824854 WARN [0:1:0:8] HTTP ERROR: 127.0.0.1 - 400 invalid request
+
+2026-11-21 11:45:31 1824854 INFO [0:1:0:8] failed to shutdown socket, errno: 107, msg: Transport endpoint is not connected
+2026-11-21 11:45:31 1824854 INFO [0:1:0:8] 127.0.0.1 requests (none)
+2026-11-21 11:45:31 1824854 INFO [0:1:0:8] got a request at port 34648:
+
+2026-11-21 11:45:31 1824854 INFO [0:1:0:8] request headers:
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] 127.0.0.1 requests /data.txt
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] got a request at port 34656:
+ GET /data.txt HTTP/1.1
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] request headers:
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] Host:127.0.0.1:18102
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] User-Agent:curl/8.5.0
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] Accept:*/*
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] X-GP-PROTO:1
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] X-GP-SEGMENT-COUNT:1
+2026-11-21 11:45:31 1824854 INFO [0:2:0:8] X-GP-SEGMENT-ID:3
+2026-11-21 11:45:31 1824854 INFO remove sessions
+2026-11-21 11:45:31 1824854 INFO [0:2:3:8] new session trying to open the data stream
+2026-11-21 11:45:31 1824854 INFO [0:2:3:8] new session successfully opened the data stream
+2026-11-21 11:45:31 1824854 INFO [0:2:3:8] new session (1): (/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gpfdist_v761_asan_both/data/data.txt, auto-tid.0)
+2026-11-21 11:45:31 1824854 INFO [0:2:3:8] joined session (/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gpfdist_v761_asan_both/data/data.txt, auto-tid.0)
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] 127.0.0.1 GET /data.txt - OK
+2026-11-21 11:45:31 1824854 INFO session_get_block: end session due to EOF
+2026-11-21 11:45:31 1824854 INFO session end. id = 1, is_error = 0, error = 0
+2026-11-21 11:45:31 1824854 INFO close fstream
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] sent EOF: succeed
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] request end
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] detach segment request from session
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] session has finished all segment requests
+2026-11-21 11:45:31 1824854 INFO free session auto-tid.0:/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gpfdist_v761_asan_both/data/data.txt
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] successfully shutdown socket
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] peer closed after gpfdist shutdown
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] unsent bytes: 0 (-1 means not supported)
+2026-11-21 11:45:31 1824854 INFO [1:2:3:8] successfully closed socket
+2026-11-21 11:45:31 1824854 INFO remove sessions
+2026-11-21 11:45:31 1824854 INFO [2:3:3:8] got an out of order request, sequence number is 4702111234474983745, expected sequence number is 7308549882966403120
+2026-11-21 11:45:31 1824854 WARN [2:3:3:8] HTTP ERROR: 127.0.0.1 - 400 invalid request due to wrong sequence number
+
+2026-11-21 11:45:31 1824854 WARN [2:3:3:8] got an out of order request
+2026-11-21 11:45:31 1824854 INFO free session auto-tid.1:/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gpfdist_v761_asan_both/data/out.txt
+2026-11-21 11:45:32 1824854 WARN signal 15 received. gpfdist exits
+2026-11-21 11:45:32 1824854 INFO ---------------------------------------
+2026-11-21 11:45:32 1824854 INFO STATUS: total session(s) 0
+session: [
+]
+2026-11-21 11:45:32 1824854 INFO ---------------------------------------
+--- asan files ---
+ls: cannot access '/home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_gpfdist_v761_asan_both/asan*': No such file or directory
