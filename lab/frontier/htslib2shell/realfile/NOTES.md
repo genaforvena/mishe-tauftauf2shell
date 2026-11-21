@@ -298,7 +298,7 @@ fails with `Failure to decode slice`. Do not reuse this file.
 The base file's FN series is `E_CONST_INT(20)` (enc 44, one param byte `0x14`).
 `inject4.c` rewrites that byte to `0` with htslib's own writers, so the feature
 loop is skipped and the *only* QS decode is the quality-phase call at
-`cram_decode.c:1833`, after CIGAR generation at `:1805–1815`.
+`cram_decode.c:1833`, after CIGAR generation at `:1805–1813`.
 
 gdb on plain `crafted4.cram` (`crafted4.gdb-postcigar.log`):
 
@@ -313,7 +313,7 @@ Program received signal SIGSEGV ... cram_codecs.c:1422 memcpy(out, b->data + b->
 #1  cram_decode_seq ...:1833
 ```
 
-`slot=0xa0` is the legitimate `10M` CIGAR operation written at `:1815` into
+`slot=0xa0` is the legitimate `10M` CIGAR operation written at `:1813` into
 `s->cigar[0]`, i.e. the very OOB slot. `if (b) return 0;` at `:1379` takes the
 early-out: **no OOB write**. Decode then segfaults at `:1422` on `b=0xa0`
 (`crafted4.plain.err`, rc 139). This is the decisive ceiling: the OOB slot
@@ -348,10 +348,11 @@ Observed consequences:
 * `crafted6.cram` (codec_id 568, index 1080 = `s->base_blk->data`, NULL):
   `crafted6.gdb-nullslot.log` shows the guard passes and `:1388` executes;
   stepping over the assignment changes the slot from NULL to
-  `0x5555556e76f0`. Plain decode then exits **rc 0 with correct SAM output**
-  (`crafted6.view.sam`). This is a *silent* OOB pointer store into a live
-  slice field — no crash, no ASan on the plain build. `base_blk` is not read
-  by `cram_decode.c` (grep confirms zero uses), so no consumer.
+  `0x5555556e76f0`. Plain decode then exits **rc 0 with SAM output matching
+  the recorded `crafted6.view.sam`** (quality bytes `0x21`, not the base file's
+  `III/FFF`: XPACK substitution is by design). This is a *silent* OOB pointer
+  store into a live slice field — no crash, no ASan on the plain build. `base_blk`
+  is not read by `cram_decode.c` (grep confirms zero uses), so no consumer.
 * `crafted7.cram` (codec_id 556, index 1068 = `s->aux_blk->data`, NULL):
   `crafted7.gdb-aux.log` confirms `aux_blk->data` changes from NULL to the
   fresh `cram_block *`. `aux_blk` *is* consumed (`BLOCK_APPEND`, `bam_set1`

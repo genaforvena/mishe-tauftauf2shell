@@ -31,7 +31,7 @@ rebuilding `crafted4.cram` from the committed `inject4.c` against the pinned
 
 ## Result 2 — NEGATIVE: QS only at `:1833` suppresses the write (`inject4.c`)
 
-The base file's FN series is `E_CONST_INT(20)` (enc 44, param byte `0x14`). `inject4.c` rewrites that byte to `0`, skipping the per-base feature loop; the only QS decode is then the quality-phase call at `cram_decode.c:1833`, *after* CIGAR generation at `:1805–1815`.
+The base file's FN series is `E_CONST_INT(20)` (enc 44, param byte `0x14`). `inject4.c` rewrites that byte to `0`, skipping the per-base feature loop; the only QS decode is then the quality-phase call at `cram_decode.c:1833`, *after* CIGAR generation at `:1805–1813`.
 
 gdb on plain `crafted4.cram` (`crafted4.gdb-postcigar.log`):
 
@@ -44,7 +44,7 @@ Program received signal SIGSEGV ... cram_codecs.c:1422 memcpy(...)
 #1  cram_decode_seq ...:1833
 ```
 
-`slot=0xa0` is the legitimate `10M` CIGAR op written at `:1815` into `s->cigar[0]` — the very OOB slot. `if (b) return 0;` at `:1379` takes the early-out: **no OOB write**. Decode then faults at `:1422` on `b=0xa0` (rc 139, `crafted4.plain.err`).
+`slot=0xa0` is the legitimate `10M` CIGAR op written at `:1813` into `s->cigar[0]` — the very OOB slot. `if (b) return 0;` at `:1379` takes the early-out: **no OOB write**. Decode then faults at `:1422` on `b=0xa0` (rc 139, `crafted4.plain.err`).
 
 This is the structural ceiling. Decode early (wake 2's `crafted2.cram`, `:1616`): the write fires, but CIGAR generation clobbers the pointer halves. Decode late (`crafted4.cram`, `:1833`): the CIGAR value occupies the slot and suppresses the write. The OOB slot aliases the CIGAR array, whose generation always precedes the only post-generation QS decode.
 
@@ -66,7 +66,7 @@ gdb heap map (`crafted5`, index = (addr − `slice->block_by_id`)/8):
 
 Observed:
 
-* `crafted6` (index 1080 = `s->base_blk->data`, NULL): `crafted6.gdb-nullslot.log` shows the guard pass and `:1388` execute; stepping over the assignment changes the slot NULL → `0x...6e76f0`. Plain decode then exits **rc 0 with byte-correct SAM** (`crafted6.view.sam`). A silent OOB pointer store into a live slice field, no crash. `base_blk` has zero uses in `cram_decode.c`, so no consumer.
+* `crafted6` (index 1080 = `s->base_blk->data`, NULL): `crafted6.gdb-nullslot.log` shows the guard pass and `:1388` execute; stepping over the assignment changes the slot NULL → `0x...6e76f0`. Plain decode then exits rc 0 with SAM matching the recorded `crafted6.view.sam` (quality bytes `0x21`, not the base file's `III/FFF`: XPACK substitution is by design). A silent OOB pointer store into a live slice field, no crash. `base_blk` has zero uses in `cram_decode.c`, so no consumer.
 * `crafted7` (index 1068 = `s->aux_blk->data`, NULL): `crafted7.gdb-aux.log` confirms the field changes to the fresh `cram_block *`. `aux_blk` *is* consumed (`BLOCK_APPEND`, `bam_set1` at `:3183`), but the untagged file writes no aux bytes, so decode still exits rc 0 with correct output.
 * `crafted8`: same index on a tagged file (`tiny2.sam` / `base2.cram`, reads carry `XX:i:`). Tag decoding makes `aux_blk->data` non-NULL before the first QS decode, so the guard suppresses the write.
 * ASan on crafted6/7 reports `SEGV on unknown address`, not a heap-overflow diagnostic: the high index leaves ASan's allocator region entirely. Rung 3 ASan evidence remains the codec_id 1/2 files from wakes 1–2.
