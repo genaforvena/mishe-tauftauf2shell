@@ -34,10 +34,11 @@ naming the overflow byte `S` (0x53, upcase) / `s` (0x73, case-fold)
 and stating that copying the result out of the buffer reads one byte
 out of bounds. The byte alphabet **agrees exactly** with this report's
 independently measured Stage A′ alphabet {0x53, 0x73} — an external
-confirmation of our source audit, not new information for it. The
-copy-out OOB read is a claim we have NOT separately reproduced: our
-rungs exercise the write and read back through a corrupted live
-neighbor chunk, not through the case-map result copy.
+confirmation of our source audit, not new information for it.
+The copy-out OOB read is now **separately reproduced** under valgrind on
+the affected plain build (see "Copy-out OOB read" below): a distinct
+observed invalid access, but not a new impact grade — the byte read is
+the same 0x53/0x73 the overflow wrote and the returned string is correct.
 
 Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
@@ -145,6 +146,65 @@ every run of these builds). The affected/fixed differential is
 observed end-to-end: identical input and build recipe, one loop bound
 in `enc/iso_8859_1.c:267` (`to < to_end` vs `to_end - to > 1`) is
 the only relevant difference.
+
+## Copy-out OOB read — reproduced under valgrind (observed 2026-11-21)
+
+Veria's Primitive section claims that copying the case-mapped result out
+of the buffer reads one byte out of bounds. This is now **separately
+reproduced** on the affected plain build; it is a second observed invalid
+access, not Stage C and not a new ladder grade.
+
+Source reason: `case_map` returns `to - to_start`
+(`enc/iso_8859_1.c:298`), which includes the OOB byte because the last
+sharp-s pair writes at `space[capa-1]` and `space[capa]`. `rb_str_casemap`
+then copies `current_buffer->used` bytes — `rb_str_new(space,
+target_length)` at `string.c:7857` when one buffer suffices, or
+`memcpy(..., used)` at `string.c:7866` when buffers chain. For 21 `ß`
+(capa 41, 42 output bytes) the single-buffer path reads 42 bytes from a
+41-byte `xmalloc`.
+
+Observation (plain affected build
+`lab/build/plain/ruby-3.4.12-plain/bin/ruby`, stock glibc 2.39, valgrind
+memcheck; gitignored evidence `lab/build/evidence/vg-copyout-N21.txt`,
+N=20 control `lab/build/evidence/vg-copyout-N20.txt`):
+
+Reproduce (plain affected build; the `21` → `20` swap is the clean
+control):
+
+```
+valgrind --error-limit=no \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  -e 's="\xDF".b*21; s.force_encoding(Encoding::ISO_8859_1); p s.upcase.bytesize'
+```
+
+```
+Invalid write of size 1
+   at case_map (iso_8859_1.c:293)
+   by rb_str_casemap (string.c:7839)
+ Address 0x2190c061 is 0 bytes after a block of size 65 alloc'd
+Invalid read of size 2
+   at memmove
+   by rb_str_casemap (string.c:7857)   [via rb_str_new:1059]
+ Address 0x2190c060 is 64 bytes inside a block of size 65 alloc'd
+outlen=42 last=0x53
+```
+
+The 2-byte `memmove` starts at the last valid byte of the 65-byte
+allocation (24-byte `mapping_buffer` header + capa 41), so exactly its
+second byte is past the end: the one-byte copy-out OOB read, at the same
+address the overflow just wrote. N=20 (capa 40, 40 output bytes) shows
+**no** invalid write or read at `case_map`/`rb_str_casemap` and
+`outlen=40`: clean. The multi-buffer `string.c:7866` form of the same
+over-read is also visible in the earlier rung-3 evidence
+`lab/build/evidence/vg-ruby2shell-rung3-mixed.rb-27.txt:6261-6294`
+(`Invalid read of size 1`, same "0 bytes after a block of size 72"
+address as the write).
+
+**Limits — why this does not raise the ladder.** The byte read back is
+the same fixed 0x53 ('S') the overflow wrote, and the returned string is
+42 correct bytes; the public API shows no corruption. This is a distinct
+observed OOB access (rung 3 class), not an information leak and not
+rung 4.
 
 ## Consumer reality — observed 2026-11-20, mechanism CORRECTED
 
