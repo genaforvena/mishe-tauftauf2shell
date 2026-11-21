@@ -3615,3 +3615,27 @@ bypass is harness-specific with rung 4 UNKNOWN; DataSketches has relative
 steering only; RabbitMQC address disclosure is simulated by a lab file; Pillow
 W4 is a type-confusion fault, not chosen-code execution. No admission opens or
 withdraws on these verdicts; rung 4 stays ◐ (— for IEC) at every target.
+
+#### 2026-11-21 ~15:2xZ post-verdict evidence (author-only, replay requested)
+
+The W74/W75 verdicts above remain accurate for the builds they replayed, but
+three later lanes move the current boundary recorded in README and the
+reproducibility index. Iec61850 (`cff0e31`, `fcc32d8`, `b481737`) staged chosen
+bytes into `CotpConnection->socket` and `socketExtensionBuffer` of the real
+unsanitized server: `r4_pointer.sh` reports 11 PASS / 0 FAIL, the loopback
+client receives ASCII `IEC61850-R4!` and live code bytes under gdb with ASLR
+disabled, and both cases SIGABRT after the send. A conforming
+`poc/exploit_client.c` fails to connect on fixed v1.6.2, so the earlier
+raw-client AARE-reuse bypass stays harness-specific rather than fix failure.
+Asn1scc (`ab30ea2`, `240da9e`, `2de7032`) consumed chosen next-chunk size bytes
+into an overlapping allocation that changes a live generated object's fields
+(W78 #967 replayed the semantic claim, flagging the ad-hoc digest recipe as a
+NIT), then a wire-chosen callback pointer in a `-no-pie` lab `Session` layout
+reached `marker()`; no real ASN.1 application, arbitrary-address write or ASLR
+defeat, and Result 4 awaits replay. DataSketches (`cc9ba4d`, `aa9ebe8`) measured
+the pinned write in the shipped PostgreSQL extension's client-`bytea`
+deserialization on a loopback PG 16.4, with fixed 5.3.0 rejecting the same
+image; palloc means the glibc steering lanes do not transfer, no crash or call
+occurred and the shipped-app grade was not advanced. All three post-verdict
+lanes are author evidence pending independent replay; no grade promotion
+follows from these commits alone.
