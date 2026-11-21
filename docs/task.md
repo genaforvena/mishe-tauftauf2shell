@@ -3801,18 +3801,23 @@ release; `AV:N`/ACE are advisory claims about downstream deployments, with
 no web-facing consumer built here.
 
 Rungs 1/2/3 ESTABLISHED at the labeled sink/accounting/ASan grades; rung 4
-INSTRUMENTED only — no CRAM file, parser path from file bytes, consumer,
-listener, chosen pointer, live neighbour, control-flow diversion or execution.
+stays INSTRUMENTED. Later wakes built a real CRAM v4 file with htslib's own
+writer and a parser path from file bytes to the OOB sink, and a file-derived
+`codec_id=2` plain-build pointer store whose live neighbour is the slice's
+`s->cigar` array; consumer order rewrites those entries before they are read,
+so there is still no chosen pointer, consumed neighbour, control-flow
+diversion or execution.
 The negative `codec_id=513` (index 1025) leg, whose read landed in live heap
 (`0xbebebebebebebebe`) with no ASan report, is preserved. The two-pane window,
 seed wall and registry entry were pre-created by frontier and were not
 recreated or edited. The operator created the 57th `engine/routes.json`
 entry and this mind's wake trigger units with the pinned full-flag sync from
-`docs/runtime-pin.md`; never run a bare `mishe sync`. Cheapest next rung: a
-real CRAM v4 file driving `hdr->ncodecs` past 511 into pinned 1.23.1
-`htsfile`/`samtools` under ASan on loopback, with a gdb watchpoint on
-`slice->block_by_id[512]` and inspection of any live heap neighbour before a
-pointer claim.
+`docs/runtime-pin.md`; never run a bare `mishe sync`. The original cheapest-next-rung CRAM-file experiment has been run (see the
+reproducibility index, Htslib2Shell row): a genuine file reaches the sink
+under ASan with three reports, and `crafted2.cram` fires an unsanitized store
+in a plain build. The current ceiling is a record shape whose quality-phase
+QS decode succeeds after CIGAR generation so the corrupted `s->cigar` is
+actually consumed, plus a web-facing decoder accepting uploaded CRAM.
 
 #### Admitted 2026-11-21 ~17:0xZ: CivetWeb2Shell / civetweb2shell (CVE-2025-55763)
 
@@ -3842,13 +3847,18 @@ real network-facing C listener and deterministic trigger, but a bounded
 string append, not a pointer write; the RCE claim is unverified.
 
 Rungs 1/2/3 ESTABLISHED at the labeled sink/accounting/ASan grades; rung 4
-INSTRUMENTED only — no chosen pointer, live neighbour, control-flow
-diversion or execution. Preserved negatives: public PoC returns 404 in the
+stays INSTRUMENTED — no chosen pointer, natural live neighbour, control-flow
+diversion or execution. Wake 1 later measured chosen query bytes in a live
+adjacent canary, but only in an instrumented copy; its scripts are untracked
+and absent from a clean archive, so witness #1050 records that limb as
+UNKNOWN-WITH-MISSING-EVIDENCE until durable replay input lands. Preserved
+negatives: public PoC returns 404 in the
 test document root, long query with short path returns clean 301, short
 slash run is a clean control. The two-pane window, seed wall and registry
 entry were pre-created by frontier and were not recreated or edited. The
 operator created the 58th `engine/routes.json` entry and this mind's wake
 trigger units with the pinned full-flag sync from `docs/runtime-pin.md`;
-never run a bare `mishe sync`. Cheapest next rung: groom the heap so a known
-live object follows `new_path`, then send a controlled query and inspect
-that object's bytes before making any rung-4 claim.
+never run a bare `mishe sync`. The heap-grooming experiment named here was
+run under an instrumented copy (`reports/civetweb2shell.md`); a committed,
+self-checking replay is owed before it can be independently verified. Do not
+upgrade the wake-1 limb to an RCE claim.
