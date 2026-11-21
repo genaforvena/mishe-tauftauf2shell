@@ -59,6 +59,13 @@ likewise witness-ESTABLISHED at rung 4 as strengthened pointer control
 parsed the mtrace traces independently of the driver oracle,
 recomputed the PROTECT_PTR splice, and reproduced a target-move
 counterexample.
+The 2026-11-21 HTTP depth experiment carried this pointer-control chain
+onto the Sinatra request thread (3/3 attacks, 2/2 controls): the
+attacker-nominated address was handed out and its 'z' bytes were read
+back through the live HTTP consumer, with the process aborting
+afterwards in WEBrick worker-thread teardown (see "Stage C over HTTP"
+below). No ladder grade change: the lane was already ESTABLISHED at
+rung 4.
 The sink (`Rack::MethodOverride` upcasing a multipart part that declares
 `charset=ISO-8859-1`) runs before routing, CSRF and auth.
 
@@ -795,6 +802,93 @@ found, no repair owed. With tapes #51, #65 and #89, the target's
 entire rung-4 story — in-process Stage B, both HTTP sections, and
 the Stage C pointer-control lane — is witness-ESTABLISHED.
 
+## Stage C over HTTP — request-thread depth and the teardown boundary (observed 2026-11-21)
+
+**Result: the full Stage C pointer-control chain now runs on the
+Sinatra request thread, not only in-process.** 3/3 attacks returned
+HTTP 200 with `verdict=poisoned` and 16 'z' bytes read back through
+the live `f_host` string at the attacker-nominated address; 2/2
+controls stayed clean (`verdict=clean`, `NO-ABORT`, no pop at the
+target). The process then aborted in the WEBrick worker thread's
+glibc tcache teardown, *after* the readback had already been
+delivered in the trigger response. This answers the consumer-reality
+question left open by the in-process lane: both popped 0x3f0 chunks
+can carry `malloc_usable_size`-safe headers on the HTTP thread, so
+the earlier in-process failure (a crash inside `rb_gc_impl_malloc`
+with an `m`-clobbered T header) was a repair issue, not an HTTP
+limitation. No ladder grade change: the lane was already
+witness-ESTABLISHED at rung 4.
+
+Reproduction (loopback only, plain affected 3.4.12 build, stock glibc
+2.39-0ubuntu8.12, mtrace.so preload; gem versions as in the Sinatra
+Stage B section). Committed scripts:
+
+```
+lab/repro/ruby2shell-stageC-http.sh 3 2
+  # each run: STAGEC_HTTP_TRACE=<abs trace> MTRACE_FD=2 \
+  #   LD_PRELOAD=lab/preload/mtrace.so \
+  #   lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  #   lab/repro/ruby2shell-stageC-http.ru
+  # CONTROL runs set STAGEC_HTTP_CONTROL=1 (pure 0xDF*828, no flip)
+```
+
+`GroomMiddleware` (mounted outside Sinatra) force-parses the multipart
+body, drains the five chunk classes, allocates `[S 0x370][V 0x430]
+[T 0x3f0][A 0x3f0][dummy][f_host]`, then parses the live mtrace trace
+at an `===ALLOC===` marker for V's and f_host's addresses and
+computes `forged = target ^ (T_entry >> 12)` inside the same request.
+The default `Rack::MethodOverride` upcase supplies the one 0x53 byte
+onto V's size LSB; `MarkerMiddleware` (first after MethodOverride)
+takes inflated V with `"m"*1080`, splices `forged` over T's tcache
+`next` and repairs T's chunk header, then pops tcache[0x3f0] twice.
+GC is disabled between the free sweep and the readback, as in the
+in-process lane; the readback is returned in the trigger response so
+it is observed before thread teardown.
+
+Observed in the gitignored evidence
+`lab/build/evidence/stageC-http-{1,2,3,control-1,control-2}.{trace,out}`
+and `stageC-http-driver-summary.txt`:
+
+- **3/3 attacks**: trigger response contains
+  `verdict=poisoned F-readback-hex=7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a
+  f-pre=4646464646464646 fake-size=f103000000000000` — chosen bytes
+  at the nominated offset, the untouched anchor still 'F' and the
+  planted fake size intact. Each trace has the last two 1001-byte
+  pops adjacent (`M 3e9 <T>` then `M 3e9 <target>`, e.g. lines
+  1084001–1084002 of `stageC-http-1.trace`, second pop
+  `0x7e3b082d6e90`). Independently recomputing
+  `target ^ (T_entry>>12)` from each trace's `V-addr`/`T-entry`
+  matched all three logged `forged-hex` values exactly.
+- **2/2 controls**: `F-readback-hex=46…` (original bytes),
+  `verdict=clean`, `NO-ABORT`, no pop at the nominated address, and
+  the server still answers `GET /mark`.
+- **Post-request boundary**: all three attacks then print
+  `corrupted size vs. prev_size` in the trace and the server stops
+  answering. A gdb replay (`lab/build/evidence/stageC-http-gdb2.txt`,
+  breakpoint on `abort`) put the failure in the worker thread's
+  teardown, not the request path:
+  `#2 malloc_printerr("corrupted size vs. prev_size") (malloc.c:5775)`
+  → `#3 unlink_chunk (malloc.c:1611)` →
+  `#4 _int_free_create_chunk (malloc.c:4721, nextsize=0x450)` →
+  `#7 __GI___libc_free (malloc.c:3398)` →
+  `#8 tcache_thread_shutdown (malloc.c:3234)` →
+  `#9 __malloc_arena_thread_freeres (arena.c:897)`. The surviving
+  corrupted V size LSB (0x453) and the z-clobbered fake next chunk
+  make a clean free impossible in this layout, so the process does
+  not survive the attacked request. This closes the HTTP Stage C
+  route with bytes at exactly that boundary; there is no claim of
+  persistence or a surviving stock-process foothold.
+
+Honest scope unchanged: grooming and marker are ours, the target is
+nominated inside attacker-controlled string content, the trigger is
+default Rack/Sinatra middleware before routing, CSRF and auth, GC is
+disabled between frees and readback, and no control-flow hijack is
+attempted. A separate gdb-instrumented replay
+(`stageC-http-gdb3.{trace,out}`) came back `verdict=UNEXPECTED` (no z
+at f+0x100): the debugger perturbs this request-thread heap layout.
+It is preserved as a negative result and is not counted among the
+three untraced successful runs.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -823,3 +917,12 @@ the Stage C pointer-control lane — is witness-ESTABLISHED.
    musable-safe popped headers) and record agreements and
    contradictions here. Until then nothing else is owed unless a
    counterexample appears.
+4. **Done this wake (2026-11-21): HTTP Stage C depth — CLOSED with
+   bytes.** The request-thread chain (musable-safe headers, poisoned
+   pops, readback at the nominated address in the HTTP response) is
+   observed 3/3 with clean controls 2/2; the process aborts in glibc
+   worker-thread tcache teardown after the readback (exact gdb frames
+   in the new section above). No grade change and no repair owed:
+   rung 4 remains witness-ESTABLISHED. With the copy-out lane also
+   closed (commit 7c6dfac), no investigation lane is open; wait for
+   the Veria PoC signal or the 2026-11-25 dated trigger.
