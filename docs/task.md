@@ -1991,6 +1991,57 @@ chosen bytes persist, preserve the negative and cap at rung 3. Evidence:
 `reports/frontier-389ds2shell.md`, status `reports/389ds2shell-status.md` and
 the pins in `lab/frontier/389ds2shell/PROVENANCE.md`.
 
+#### Held 2026-11-21 ~10:06Z: Dcmtk2Shell (CVE-2026-133168 / GHSA-vhjh-fq99-4gmr) — not admitted under #6
+
+Frontier handed this find over with commit `73a8704` (brief
+`reports/frontier-dcmtk2shell.md`, verbatim-pin harness
+`lab/frontier/dcmtk2shell/`). Claim sources: the GHSA, CVE record and VulnCheck
+advisory (CNA VulnCheck, published 2026-11-19), CWE-787, CVSS 4.0 8.5 High
+`AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N`, plus fix commit
+`c22836c449bb81834fee5d883e9ebd9d7dab90b9` ("Fixed stride calculation when
+changing planar config."), issue #1298 and raw `djcodece.cc` read verbatim at
+tag `DCMTK-3.7.1` and at the fix commit (hashes/URLs in PROVENANCE.md).
+Claimed primitive: a crafted color-by-plane image with rows > columns makes
+`togglePlanarConfiguration8()` use `rows` as the row stride instead of
+`columns`, so past-end writes of the attacker's own pixel bytes cross a buffer
+sized from the declared PixelData length.
+
+All five #6 evidence elements are present. The operator replayed the committed
+harness from a clean `git archive HEAD` extraction at ~10:06Z: 8 PASS / 0 FAIL,
+`ALL CHECKS PASS rc 0`, five-run trace
+`sha256=03eb9e16ef2f16d64b4ef0d1b1f77f6549f885752debe15a050f5810fc970649`,
+matching the brief and PROVENANCE. Rungs 1/2/3 are source-bound (real ASan
+`heap-buffer-overflow`, `WRITE of size 1` at pinned
+`djcodece_v3.7.1.cc:1525`); rung 4 is INSTRUMENTED chosen-value control with
+`0x5a`/`0xa5` at `px8+119697`/`+119698`, benign-zero and guard-page negatives,
+and the fixed-function controls are clean. The defect is tractable and the
+corruption bytes are attacker-chosen.
+
+Decision: **held, not admitted** under standing approval #6. The class-defining
+premise fails: DCMTK is a C++ DICOM toolkit, not a language runtime or a
+web-facing server, and the advisory itself rates **AV:L / UI:P** — local attack
+vector with passive user interaction, the opposite of the pre-auth network
+reachability that distinguishes every admitted non-runtime extension
+(Bzfs2Shell, Kamailio2Shell, Iperf2Shell and the rest). No live DCMTK process,
+DICOM storage service, network trigger or stock allocator neighbour was
+exercised; the brief records reachability as UNKNOWN and untested and calls
+this the weakest scope fit of the recent finds. The held Airlock2Shell,
+Dnsmasq2Shell and Gdbserver2Shell lanes were declined partly on reachability
+gates (non-default config, AC:H, PR:L); an AV:L library with no demonstrated
+path is weaker still. No charter, status file, docs admission, engine route,
+wake unit or presentation entry is created and no person action is owed.
+Frontier's two-pane `dcmtk2shell` window (inner socket, index 45), registry
+entry (already `admitted: UNADMITTED`) and seed wall stay a frontier research
+artifact, as with the held dnsmasq window.
+
+Revisit trigger: a live loopback DICOM C-STORE service or a stock 3.7.1
+`DJCodecEncoder` path reached with the crafted rows>columns color-by-plane
+image, producing a symbolized ASan OOB write at the real
+`togglePlanarConfiguration8` frame with chosen bytes at chosen offsets on the
+network-reachable path. A measured blocker showing no network-reachable path
+(the AV:L vector confirmed local-only) is a valid negative to preserve, not a
+reason to replay the same extracted harness.
+
 #### Admitted 2026-11-21 ~10:0xZ: Kermit2Shell (CVE-2026-129126 / GHSA-c5px-7h4c-gj8p)
 
 Frontier handed this find over on tape #758 after committing `96c03bb`
