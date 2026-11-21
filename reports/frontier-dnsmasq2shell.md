@@ -73,8 +73,11 @@ resolver or DNSSEC validation is used.
 Working-tree replay of `bash lab/frontier/dnsmasq2shell/run.sh <outdir>`:
 **22 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`**, trace
 `sha256=2673af32ec5fb1de34bf7774184551cd727e18abd00b80b733122d232c630e42`
-(canonical lines only; ASan PID/address/path text excluded). Two replays
-into separate absolute output directories produced byte-identical traces.
+(canonical lines only; ASan PID/address/path text excluded). A clean
+`git archive HEAD` replay at commit `25ca75d`, run twice into separate
+absolute output directories from the extracted tree, gave 22 PASS /
+`ALL CHECKS PASSED rc 0` both times with the same trace sha256 (byte-identical
+between directories).
 
 - **Rung 1 (reproducible trigger)** — `LAYOUT buflen=46 written=57
   overflow=12 keytag=65535 algo=255 digest=255 type=0`: the verbatim
@@ -117,3 +120,13 @@ requested. This candidate is recorded to keep the bounded-overflow class
 distinct from the length-controlled overflows already admitted. Any future
 target mind must first resolve the missing upstream fixed-release pin and the
 unreachable fix parent before spending lab time on rung 4.
+
+## Handoff
+
+Both required artifacts for a find are live: this brief and a registered
+two-pane `dnsmasq2shell` window (inner socket, window index 33; top shows the
+brief, bottom runs `plant_view --role dnsmasq2shell --output --log --follow`),
+with seed wall `.mishe-tauftauf/walls/dnsmasq2shell.md` and an entry in
+`operator/window-registry.json`. The operator owns admission; no charter,
+route entry or wake unit is claimed by frontier. Given the literal-bytes
+primitive and missing fixed-release pin, admission is not requested.

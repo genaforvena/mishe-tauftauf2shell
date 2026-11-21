@@ -648,6 +648,73 @@ RW_VARIANT=lau RW_HEADER=none ./rw-lane.py 2.4.68                # control: 0
 python3 rw-gdb.py                                               # backtrace
 ```
 
+### Adjacent lane L5 — CVE-2026-56449 mod_proxy_html `dump_content` OOB write (05:34–05:48Z 21 Nov) — rung 3 confirmed
+
+Source facts, re-verified from the local tarballs: `2.4.70/CHANGES:144-149`
+lists CVE-2026-56449 as an out-of-bounds write in `mod_proxy_html` with
+crafted HTTP response bodies, affecting 2.4.0–2.4.68. The entire code fix
+between 2.4.68 and 2.4.69 in `modules/filters/mod_proxy_html.c` is the
+removal of one call, `dump_content(ctx)`, from `pcomment()` (2.4.68 line 312).
+
+`build-l5.sh` builds ASan/UBSan httpd 2.4.68 (affected) and 2.4.69 (control)
+with `--enable-proxy-html` against the host libxml2 2.9.14. `l5-lane.py` has
+two modes. The canonical one (`L5_PROXY=yes`) starts a loopback-only Python
+backend that supplies the crafted response body, reverse-proxies it through
+the lab httpd on 127.0.0.1, and counts child deaths and ASan reports. The
+other mode forces the output filter on a local file with `PROXY_HTML_FORCE`;
+it produced the same fault and is kept as the cheaper diagnostic driver.
+
+Causal chain, observed rather than inferred: `pstartElement` writes the last
+attribute value into `ctx->vb` and then resets only `ctx->vb.strlen = 0`
+(2.4.68 `mod_proxy_html.c:617`), leaving the value in `buf`. With
+`ProxyHTMLExtended Off`, a following HTML comment reaches `pcomment()`,
+which calls `dump_content()` on that stale buffer. gdb breakpoints in
+`logs/l5-gdb-trace.txt` show at the first hit: caller `pcomment` at line 312,
+`ctx->vb.strlen = 0`, `ctx->vb.buf = "AAAAAAAAAA"`, and the map
+`AAAA -> BBBB` with `flags = 3` (M_HTML|M_EVENTS; default M_CDATA present).
+The string-literal branch then computes
+`len + 1 - s_from - match = 0 + 1 - 4 - 0 = -3` as a `size_t` and passes it
+to `memmove` at line 272. Note the `c` map flag is an *exclude* flag
+(`XREGFLAG` clears M_CDATA), so a `c`-flagged rule is a valid negative
+control, not the trigger.
+
+Canonical differential, `L5_PROXY=yes`, body
+`<p title="AAAAAAAAAA">x</p><!--trigger-->`, four requests per build:
+2.4.68 showed 4/4 child `SIGSEGV (11)` and four `AddressSanitizer` reports;
+2.4.69 showed 0/4 and none. The report is
+`ERROR: AddressSanitizer: negative-size-param: (size=-3)` at
+`mod_proxy_html.c:272`, called from `pcomment` at line 312, through
+`htmlParseChunk` and `proxy_html_filter` at line 982. Logs:
+`logs/l5-smoke-2.4.68-proxy.txt` and `logs/l5-smoke-2.4.69-proxy.txt`.
+Specificity controls on 2.4.68 (three requests each) were all clean:
+`ProxyHTMLExtended On` (fix path, no call from `pcomment`), a `c`-flagged map
+(no M_CDATA), and a body with no attribute (no stale value).
+
+Causal check: applying the exact 2.4.69 one-line fix to the 2.4.68 source and
+rebuilding only `mod_proxy_html.so` gave 0/6 ASan reports and six normal
+responses. Restoring the pristine source and module byte-for-byte (SHA256
+`53b2e5a9…` and `856a7e72…`) restored 6/6 reports and child faults. The fault
+is caused by the removed call, not by another 2.4.68/2.4.69 difference.
+
+Rung-4 boundary: the underflow magnitude follows the offset of the stale
+string (`L5_ATTR=XXAAAAAAAAAA` gives `size=-5` instead of `-3`), but the size
+stays negative; ASan's interceptor aborts before any write, and the write
+target and source remain inside the same varbuf. No chosen bytes at a
+meaningful offset, no pointer control and no marker execution was obtained.
+**L5 closes at rung 3 (ASan-confirmed invalid write) with a rung-2
+reproducible crash on the genuine proxy path; rung 4 is not demonstrated.**
+The main-lane closure and do-not-retry list are unchanged.
+
+```
+cd lab/apache2shell
+./build-l5.sh                                   # both ASan builds, one-time
+ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy \
+  ./l5-lane.py 2.4.68 2.4.69                    # 4/4 child SEGV vs 0/4
+L5_PROXY=yes L5_EXT=yes L5_N=3 L5_SUFFIX=exton ./l5-lane.py 2.4.68  # control
+L5_PROXY=yes L5_FLAGS=c L5_N=3 L5_SUFFIX=nocdata ./l5-lane.py 2.4.68 # control
+./l5-gdb.py                                     # breakpoint + stale buf state
+```
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -671,6 +738,10 @@ ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_er
   python3 l3-lane.py 10 8 20                    # L3: 2.4.68 wild jump, 2.4.69 clean
 L3_BODY_BYTE=5a L3_VERSIONS=2.4.68 \
   python3 l3-lane.py 10 8 20                    # body canary: PC still data-like
+RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69  # L4: 12/12 vs 0/12
+bash build-l5.sh                                # ASan builds with mod_proxy_html
+ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy \
+  ./l5-lane.py 2.4.68 2.4.69                    # L5: 4/4 child SEGV vs 0/4
 ```
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
