@@ -1,0 +1,101 @@
+{
+  "sha": "fd5cb168efb4b864d33f655174711b2779cef502",
+  "node_id": "C_kwDOCQQ4gtoAKGZkNWNiMTY4ZWZiNGI4NjRkMzNmNjU1MTc0NzExYjI3NzljZWY1MDI",
+  "commit": {
+    "author": {
+      "name": "Michal Sedlak",
+      "email": "sedlakm@cesnet.cz",
+      "date": "2026-10-14T12:13:03Z"
+    },
+    "committer": {
+      "name": "Michal Sedlak",
+      "email": "sedlakm@cesnet.cz",
+      "date": "2026-10-14T12:52:35Z"
+    },
+    "message": "TCP input: fix possible buffer overflow in Lz4 decoder",
+    "tree": {
+      "sha": "e56b2c259896a0b9e7a1f044beca8bef57d9a61f",
+      "url": "https://api.github.com/repos/CESNET/ipfixcol2/git/trees/e56b2c259896a0b9e7a1f044beca8bef57d9a61f"
+    },
+    "url": "https://api.github.com/repos/CESNET/ipfixcol2/git/commits/fd5cb168efb4b864d33f655174711b2779cef502",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "url": "https://api.github.com/repos/CESNET/ipfixcol2/commits/fd5cb168efb4b864d33f655174711b2779cef502",
+  "html_url": "https://github.com/CESNET/ipfixcol2/commit/fd5cb168efb4b864d33f655174711b2779cef502",
+  "comments_url": "https://api.github.com/repos/CESNET/ipfixcol2/commits/fd5cb168efb4b864d33f655174711b2779cef502/comments",
+  "author": {
+    "login": "sedmicha",
+    "id": 6755995,
+    "node_id": "MDQ6VXNlcjY3NTU5OTU=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/6755995?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/sedmicha",
+    "html_url": "https://github.com/sedmicha",
+    "followers_url": "https://api.github.com/users/sedmicha/followers",
+    "following_url": "https://api.github.com/users/sedmicha/following{/other_user}",
+    "gists_url": "https://api.github.com/users/sedmicha/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/sedmicha/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/sedmicha/subscriptions",
+    "organizations_url": "https://api.github.com/users/sedmicha/orgs",
+    "repos_url": "https://api.github.com/users/sedmicha/repos",
+    "events_url": "https://api.github.com/users/sedmicha/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/sedmicha/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "sedmicha",
+    "id": 6755995,
+    "node_id": "MDQ6VXNlcjY3NTU5OTU=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/6755995?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/sedmicha",
+    "html_url": "https://github.com/sedmicha",
+    "followers_url": "https://api.github.com/users/sedmicha/followers",
+    "following_url": "https://api.github.com/users/sedmicha/following{/other_user}",
+    "gists_url": "https://api.github.com/users/sedmicha/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/sedmicha/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/sedmicha/subscriptions",
+    "organizations_url": "https://api.github.com/users/sedmicha/orgs",
+    "repos_url": "https://api.github.com/users/sedmicha/repos",
+    "events_url": "https://api.github.com/users/sedmicha/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/sedmicha/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "1a199033eff847941353c5c039cb806a9ad8aa6f",
+      "url": "https://api.github.com/repos/CESNET/ipfixcol2/commits/1a199033eff847941353c5c039cb806a9ad8aa6f",
+      "html_url": "https://github.com/CESNET/ipfixcol2/commit/1a199033eff847941353c5c039cb806a9ad8aa6f"
+    }
+  ],
+  "stats": {
+    "total": 4,
+    "additions": 4,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "7024396d2a548082e292464774d0ba8c894798cd",
+      "filename": "src/plugins/input/tcp/src/Lz4Decoder.cpp",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/CESNET/ipfixcol2/blob/fd5cb168efb4b864d33f655174711b2779cef502/src%2Fplugins%2Finput%2Ftcp%2Fsrc%2FLz4Decoder.cpp",
+      "raw_url": "https://github.com/CESNET/ipfixcol2/raw/fd5cb168efb4b864d33f655174711b2779cef502/src%2Fplugins%2Finput%2Ftcp%2Fsrc%2FLz4Decoder.cpp",
+      "contents_url": "https://api.github.com/repos/CESNET/ipfixcol2/contents/src%2Fplugins%2Finput%2Ftcp%2Fsrc%2FLz4Decoder.cpp?ref=fd5cb168efb4b864d33f655174711b2779cef502",
+      "patch": "@@ -148,6 +148,10 @@ void Lz4Decoder::decompress() {\n         m_decompressed_pos = 0;\n     }\n \n+    if (m_decompressed_size > m_decompressed.size() - m_decompressed_pos) {\n+        throw std::runtime_error(\"LZ4 Decoder: invalid decompressed size\");\n+    }\n+\n     int res = LZ4_decompress_safe_continue(\n         m_decoder.get(),\n         reinterpret_cast<char *>(m_compressed.data()),"
+    }
+  ]
+}
