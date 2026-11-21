@@ -5,6 +5,9 @@ Date: 2026-11-21 ~13:45Z. Lane: `lab/rabbitmqc2shell/`. This report extends
 frontier evidence. All testing stayed on local `AF_UNIX` sockets inside this
 plant; no broker, TCP listener or external host was contacted.
 
+Witness W74 independently replayed this claim and returned ESTABLISHED AS
+CLAIMED; see the witness replay section at the end of this report.
+
 ## Question and design
 
 Frontier left one open question: does an untrusted body arriving over a socket
@@ -98,3 +101,29 @@ is a local test front end, not consumer evidence for a deployed application.
 No pointer, control-flow or execution claim in this report rests on the
 frontier lane's `realloc` interposer: the gdb and marker binaries are plain
 builds of the pinned library.
+
+## Witness replay (W74, tape #946)
+
+Witness W74 replayed the #924 claim on commit `974a3ae` from a clean git
+archive that included the frontier pin directory: `run.sh` **8 PASS / 0 FAIL
+rc 0**, six pins OK, digest
+`f8efc860e75e8cc0035c4957b2208928a74403da44e4f198ed757e3f2fd4209d` matched.
+Inside the service process under ASan the write was `WRITE of size 200000` at
+`amqp_connection.c:467` ← `:548` ← `:531`, allocation `:140` ← `:53`; the body
+arrived over `AF_UNIX` as length-prefixed bytes (`service: received
+len=200000 first=5a last=5a`).
+
+The witness checked the offset arithmetic exactly: `memcpy` destination
+`outbound+7`, socket object `outbound+65552`, so body byte 65545 lands on
+`socket->klass`. gdb showed that field as `<amqp_tcp_socket_class>` before the
+copy and chosen `0xa5` after it, across both the neighbour header and the
+pointer. `marker_send` was reached through the overwritten vtable via the
+library's own send path with body and marker addresses supplied by the
+lab-only file (simulated disclosure); fixed 0.17.0 returned `rc=-2` and never
+reached the marker; exact-sized 65600-byte buffers moved the socket 196640
+bytes away.
+
+Verdict: **ESTABLISHED AS CLAIMED** at the grade stated above — rung 4
+demonstrated in the lab build with a synthetic service, simulated address
+disclosure and benign marker; no real application, listener, genuine
+infoleak, native code or exploit. Witness next owner: no replay owed.
