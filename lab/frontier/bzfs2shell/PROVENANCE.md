@@ -47,18 +47,29 @@ All sockets are in-process `AF_UNIX` socketpairs.
 
 ## Source-bound mapping
 
-- `src/Protocol_v2.4.30.h:52-53` — `MaxPacketLen = 1024`.
+- `src/Protocol_v2.4.30.h:46-47` — `MaxPacketLen = 1024`.
 - `src/NetHandler_v2.4.30.h` — `char tcpmsg[MaxPacketLen]; int tcplen;` adjacent
   input members; `receive(size_t, bool*)` public.
-- `src/NetHandler_v2.4.30.cxx:571-623` — `tcpReceive()`: `receive(4)`,
-  `len > MaxPacketLen` at 587, `receive(4 + len)` at 594, `tcplen = 0` at 602.
-- `src/NetHandler_v2.4.30.cxx:625-669` — `receive()`:
-  `recv(fd, tcpmsg + tcplen, length - tcplen, 0)` at 636, `tcplen += size` at 639.
+- `src/NetHandler_v2.4.30.cxx:565-617` — `tcpReceive()`: `receive(4)`,
+  `len > MaxPacketLen` at 581, `receive(4 + len)` at 588, `tcplen = 0` at 596.
+- `src/NetHandler_v2.4.30.cxx:619-663` — `receive()`:
+  `recv(fd, tcpmsg + tcplen, length - tcplen, 0)` at 630, `tcplen += size` at 633.
 - `src/fix_8e501d6.patch` — hunk 1 changes the bound to `MaxPacketLen - 4`;
   hunk 2 rejects `tcplen < 0`, `tcplen > sizeof(tcpmsg)` and
   `length > sizeof(tcpmsg)` before the `recv`.
-- `src/NetHandler_v2.4.32.cxx:590,644` — both hunks present in the fixed tag.
+- `src/NetHandler_v2.4.32.cxx:584,638` — both hunks present in the fixed tag.
 
 The harness mirrors those lines with a deterministic stand-in prefix for the
 opaque `Address`/`std::string` members. It is an extracted, source-bound model,
 not a compiled stock `bzfs` process. No live server was started.
+
+Witness verdict #761 (2026-11-21) independently replayed the digest-pinned
+harness from a clean `git archive` of HEAD: 20 PASS / 0 FAIL, rc 0, five-run
+digest byte-equal to the brief, all pins hash-matching this file. The only nit
+was that every source-line citation in the brief, seed status and this file was
+six lines too high; the corrected numbers above were re-read from the verbatim
+pinned files (v2.4.30 `NetHandler.cxx` function ranges 565-617 and 619-663;
+key lines 568/581/588/596/630/633; v2.4.32 584/638; `Protocol.h` 47). The
+digest-pinned harness bytes were left
+unchanged, including their stale comment-only line numbers, so the
+witness-verified C pin `1a16963f…` and runner pin `f2686d5b…` remain valid.

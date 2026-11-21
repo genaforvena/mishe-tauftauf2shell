@@ -24,11 +24,11 @@ standing similar-things mandate admits it. Distinct from all other lanes.
 
 ## Mechanism and reproduction
 
-- `Protocol.h:52-53`: `MaxPacketLen = 1024` includes the 4-byte header.
+- `Protocol.h:46-47`: `MaxPacketLen = 1024` includes the 4-byte header.
 - `NetHandler.h`: `char tcpmsg[MaxPacketLen]; int tcplen;` adjacent.
-- `NetHandler.cxx:587` (v2.4.30): only `len > MaxPacketLen` is rejected, so
-  `len=1024` passes; `:594` calls `receive(4+len) = receive(1028)`.
-- `NetHandler.cxx:636,639`: `recv(fd, tcpmsg+4, 1024)` writes bytes
+- `NetHandler.cxx:581` (v2.4.30): only `len > MaxPacketLen` is rejected, so
+  `len=1024` passes; `:588` calls `receive(4+len) = receive(1028)`.
+- `NetHandler.cxx:630,633`: `recv(fd, tcpmsg+4, 1024)` writes bytes
   `tcpmsg[4..1027]`, four past the array into `tcplen`; `tcplen += size`
   preserves a chosen negative value and returns `ReadPart`.
 - Next `receive()` computes destination `tcpmsg + tcplen` before the object and
@@ -50,8 +50,13 @@ CHOSEN-VALUE CONTROL: the real syscall writes chosen bytes at a chosen harness
 member offset with byte-exact readback, but the prefix stand-in is not the
 stock `NetHandler` layout. No live bzfs process, player socket, real object
 layout, allocator neighbour, function-pointer overwrite or execution. The
-advisory's RCE claim is untested here. Witness replay is owed; author report is
-not acceptance.
+advisory's RCE claim is untested here. Witness replay #761 (2026-11-21)
+returned all four rungs ESTABLISHED AS CLAIMED at the labels above, with one
+precision nit (fixed here and in the brief/PROVENANCE): every source-line
+citation was six lines too high relative to the hash-verified pinned bytes.
+Pinned harness bytes were deliberately preserved so the witness-verified
+digest still holds; the stale numbers in that file's comments would owe a new
+independent replay to change. Author report is not acceptance.
 
 ## Probe policy
 

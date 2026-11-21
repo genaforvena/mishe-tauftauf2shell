@@ -58,33 +58,33 @@ brief does not pre-empt it.
 
 Line numbers are from `v2.4.30` unless marked fixed.
 
-1. `include/Protocol.h:52-53` — `MaxPacketLen = 1024`, described as the maximum
+1. `include/Protocol.h:46-47` — `MaxPacketLen = 1024`, described as the maximum
    message size **including** the 4-byte header.
 2. `include/NetHandler.h` — the input members are adjacent:
    `char tcpmsg[MaxPacketLen]; int tcplen;`. `tcplen` is the read offset into
    `tcpmsg`, held as a signed `int`.
-3. `src/game/NetHandler.cxx:571-579` — `tcpReceive()` first reads the 4-byte
+3. `src/game/NetHandler.cxx:565-573` — `tcpReceive()` first reads the 4-byte
    header with `receive(4)`, leaving `tcplen = 4`.
-4. `NetHandler.cxx:582-592` — it unpacks the big-endian 16-bit payload `len`
+4. `NetHandler.cxx:576-586` — it unpacks the big-endian 16-bit payload `len`
    and rejects only `len > MaxPacketLen`. `len == 1024` therefore passes even
    though the header is already in the same 1024-byte buffer.
-5. `NetHandler.cxx:594` — `receive(4 + (int)len)` asks for 1028 total bytes.
-6. `NetHandler.cxx:635-639` — `receive()` calls
+5. `NetHandler.cxx:588` — `receive(4 + (int)len)` asks for 1028 total bytes.
+6. `NetHandler.cxx:629-633` — `receive()` calls
    `recv(fd, tcpmsg + tcplen, length - tcplen, 0)`; with `tcplen = 4` that is
    `recv(fd, tcpmsg + 4, 1024)`. The 1024 body bytes occupy `tcpmsg[4..1027]`:
    **four bytes past the array, landing on the adjacent `tcplen` member**.
    Those four bytes are the tail of the attacker's body, so they are chosen.
-7. `NetHandler.cxx:639` — after the `recv`, `tcplen += size` reads the just
+7. `NetHandler.cxx:633` — after the `recv`, `tcplen += size` reads the just
    clobbered value and adds 1024. Choosing a negative four-byte value leaves a
    negative `tcplen`; the function returns `ReadPart` rather than `ReadAll`, so
-   the corrupted offset is not reset by `tcplen = 0` at line 602.
+   the corrupted offset is not reset by `tcplen = 0` at line 596.
 8. On the next `tcpReceive()`/`receive()` for that player,
    `tcpmsg + tcplen` is the `recv` **destination** and `4 - tcplen` the length:
    attacker bytes are written before `tcpmsg`, into the preceding members of
    the same heap-allocated `NetHandler` object (`ares`, `info`, `uaddr`,
    `playerIndex`, `fd`, `peer`, `dotNotation`, …). The advisory's claim of
    server control follows from that member overwrite but was not demonstrated.
-9. **Fix** (`8e501d6`, present at `v2.4.32:590` and `:644`): hunk 1 bounds the
+9. **Fix** (`8e501d6`, present at `v2.4.32:584` and `:638`): hunk 1 bounds the
    payload to `len > MaxPacketLen - 4`, so `len == 1024` is rejected as
    `ReadHuge` before any body read; hunk 2 rejects `tcplen < 0`,
    `tcplen > sizeof(tcpmsg)` and `length > sizeof(tcpmsg)` before the `recv`,
@@ -134,7 +134,11 @@ From committed HEAD, `bash lab/frontier/bzfs2shell/run.sh out` printed
 **Grade**: rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4
 INSTRUMENTED chosen-value control only. No live bzfs process, real player
 socket, stock object layout, neighbouring heap object, function-pointer
-overwrite, execution, witness replay or independent acceptance.
+overwrite or execution. Witness replay #761 (2026-11-21) returned all four
+rungs ESTABLISHED AS CLAIMED at the labels above; it carried one precision nit
+(fixed here): every NetHandler.cxx and Protocol.h source-line citation was six
+lines too high relative to the hash-verified pinned bytes. Pinned harness bytes
+were left untouched so the witness-verified digest still holds.
 
 ## Cheapest next experiments to move up a rung
 
@@ -154,3 +158,24 @@ overwrite, execution, witness replay or independent acceptance.
 From a clean checkout of the committed HEAD, run
 `bash lab/frontier/bzfs2shell/run.sh <your-outdir>` and compare digests and the
 four rung observations above. Do not accept this author report as verdict.
+
+## Witness verdict #761 (2026-11-21)
+
+Independent replay from a clean `git archive` of HEAD: 20 PASS / 0 FAIL, rc 0,
+five-run digest
+`sha256=cea3b92e3455454ea45ef79232cb49b9e70132134fb8bb6245e5c1ea644ecc89`
+byte-equal to this brief; C pin `1a16963f…`, runner pin `f2686d5b…`, all five
+pinned upstream artifacts hash-matching PROVENANCE. The witness re-read the
+verbatim pinned source: `receive(4)` at 568, `len > MaxPacketLen` at 581,
+`receive(4 + len)` at 588, `tcplen = 0` at 596, `recv` at 630, `tcplen += size`
+at 633 in v2.4.30; fixed hunks at 584 and 638 in v2.4.32; `Protocol.h`
+`MaxPacketLen = 1024` at 47. VERDICT: rungs 1/2/3 ESTABLISHED AS CLAIMED; rung
+4 ESTABLISHED AS CLAIMED at INSTRUMENTED chosen-value control, exactly as
+labeled. Conditions preserved by the witness: AF_UNIX socketpair with all 1028
+bytes queued, deterministic stand-in prefix, no live bzfs process; stock layout
+and any execution claim stay UNKNOWN. The line-number citations in this brief,
+the seed status and PROVENANCE are corrected to the pinned bytes. The same
+stale numbers remain as comments inside the digest-pinned
+`tcp_len_overflow.cpp`; those bytes are deliberately preserved so the
+witness-verified pin `1a16963f…` stays valid, and changing them would owe a new
+independent replay.
