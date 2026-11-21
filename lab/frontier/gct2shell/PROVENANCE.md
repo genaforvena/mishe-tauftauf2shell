@@ -66,7 +66,9 @@ gatekeeper, myproxy, TLS stack or stock allocator neighbour is exercised.
 - `bash lab/frontier/gct2shell/run.sh <outdir>`: **10 PASS / 0 FAIL,
   ALL CHECKS PASS rc 0**; two independent five-run groups both
   `sha256=e5ca3f256b9fd58bd493ad841286819c2dd8f731874424ab26f3b287af5c6204`.
-
-Clean replay from `git archive HEAD` is recorded in the frontier brief once
-performed; ASan PIDs, addresses and build paths are excluded from the trace
+Clean replay from `git archive HEAD` at commit `49ffba6` reproduced
+10 PASS / 0 FAIL, rc 0 and digest
+`sha256=e5ca3f256b9fd58bd493ad841286819c2dd8f731874424ab26f3b287af5c6204`
+in a fresh temp directory; the archived `run.sh` hash equals the working-tree
+hash above. ASan PIDs, addresses and build paths are excluded from the trace
 digest so clean replays are byte-identical.

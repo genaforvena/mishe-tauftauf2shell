@@ -105,6 +105,10 @@ verbatim under `#line`; the generator aborts on drift. From committed HEAD,
 - **Determinism**: two independent five-run groups hash identically; ASan
   PID/address/path text is excluded from the digest.
 
+The same result was replayed from a clean `git archive HEAD` extraction at
+commit `49ffba6`: 10 PASS / 0 FAIL, rc 0, identical trace digest; the
+archived `run.sh` hash equals the working-tree hash.
+
 **Grade**: rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4 is
 INSTRUMENTED chosen-byte control at a chosen offset, not a live GSI
 demonstration. No listener, handshake through real GSSAPI, stock neighbour,
