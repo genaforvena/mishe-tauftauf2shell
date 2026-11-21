@@ -259,10 +259,17 @@ the grooming sweep showed padding also chooses which allocator path fires.
 The Pillow check adds reachability from a shipped image library but not a new
 primitive: the written value stays a bounded stream offset. Hardware
 watchpoints were unavailable in this container; equivalent evidence came from
-sink breakpoints and direct heap readback. Remaining gap: pointer-value
-control, control-flow diversion, execution and a web-facing listener remain
-UNKNOWN. No chosen-address pointer dereference was observed, and none appears
-reachable from a bounded stream-offset write with the heap layouts seen here.
+sink breakpoints and direct heap readback. This paragraph's remaining-gap
+assessment was written before the later sections superseded it: pointer-value
+control and control-flow diversion are now measured rung-4 results (sections
+"Live ob_type takeover in the Pillow consumer", "Natural call through a chosen
+ob_type" and "Chosen imported-function target through the system GOT"), and
+the chosen static pointer is genuinely dereferenced by `_Py_Dealloc`. What
+remains UNKNOWN is an attacker-chosen *argument*, execution of chosen code, a
+web-facing listener and any arbitrary-address dereference: the GOT slot is a
+fixed location in the known non-PIE interpreter, and write values stay bounded
+codestream file positions, so no command string or chosen pointer can be
+encoded at a realistic file size.
 
 ## Transferability check: the Pillow W9 chosen-deallocator call does not transfer (2026-11-21 ~17:25Z)
 
@@ -574,6 +581,9 @@ values are codestream file positions — bounded integers, not arbitrary byte
 strings — so an eight-character command cannot be encoded into one at a
 realistic file size. No chosen argument, command, shell, listener, external
 probe, chosen-address dereference or attacker-created code was observed.
+Here "chosen-address dereference" means an attacker-selected arbitrary
+address; the dereference that was observed is of a fixed GOT slot in the
+known non-PIE interpreter, derived from its own relocation table.
 
 Non-PIE note: this is not only a debug artifact. The installed
 `/usr/bin/python3.12` is ELF `EXEC` (`readelf -h` `Type: EXEC`, LOAD at
