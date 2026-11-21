@@ -26,6 +26,14 @@ measured the same pinned write inside it under both stock and assertion
 builds, and observed no failure there. ASLR-resistant pointer control and
 execution of attacker-chosen code remain UNKNOWN.
 
+Wake 8 adds a second real-consumer measurement: the upstream DataSketches
+Python 5.2.0 binding, compiled verbatim into a CPython extension against the
+pinned 5.2.0 headers, uses glibc `operator new` for the coupon vector. There a
+count-18 image corrupts adjacent glibc chunk metadata and the process aborts
+at interpreter shutdown with `corrupted size vs. prev_size`; fixed 5.3.0
+rejects the same image. No pointer value, control-flow diversion or
+attacker-chosen code was observed there either.
+
 Witness W73 (#911) replayed the wake-1 claims ESTABLISHED AS CLAIMED; witness
 W74 replayed the wake-2 (#922) and wake-3 (#929) claims from clean git archives
 of `b95653e` and `e6e8b86`, also ESTABLISHED AS CLAIMED at their labeled grades
@@ -35,6 +43,8 @@ lab-build-only grade (4 PASS rc 0, five pins OK). The witness verdict on wake 6
 (#970) replayed `cc9ba4d` + `aa9ebe8` from a clean archive and also found
 ESTABLISHED AS CLAIMED at the bounded-negative, real-consumer grade; see the
 final section for its evidence and the two NITs it raised.
+Wake 8 has no independent replay yet; its grade is author-observed only until
+a witness checks it.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -410,3 +420,65 @@ lab absolute paths. For a clean-archive gdb replay set `DS2_PG_HOME` to the
 archive's `lab/datasketches2shell-pg` directory before sourcing the script;
 it supplies both the header directory and `PGDATA`.
 
+
+## Wake 8: a glibc-allocator Python consumer, measured (2026-11-21)
+
+Bounded question: wake 6's PostgreSQL consumer uses `palloc`, so the glibc
+metadata overwrite and tcache grooming of wakes 1-4 need not transfer. Does
+the pinned write corrupt an ordinary glibc-allocator consumer built from a
+shipped binding? Apache DataSketches Python 5.2.0 exposes
+`hll_sketch.deserialize(bytes)` through the upstream wrapper source
+`src/hll_wrapper.cpp:100`; its coupon vector is a `std::vector<uint32_t>` via
+`std::allocator`, hence glibc `operator new`.
+
+`lab/datasketches2shell-py/` compiles that unmodified upstream wrapper against
+the already-pinned verbatim 5.2.0 headers with `nanobind`; only the module
+entry point is reduced to `init_hll` because the other upstream sketch
+wrappers are irrelevant to this call. Fixed 5.3.0 headers and an ASan build
+are separate modules built from the same wrapper. Two new artifacts are
+pinned in that directory (`datasketches-python-5.2.0.tar.gz`,
+`nanobind-3.1.0-py3-none-any.whl`; hashes in `PROVENANCE.md`). The image is
+the library's genuine 16-byte `serialize_compact()` seed with only wire byte 6
+and the payload changed. Every probe is a local Python call: no socket, no
+external target, no off-loopback traffic.
+
+`bash lab/datasketches2shell-py/run.sh /tmp/ds2-py-w8` gave **`TOTAL PASS=9
+FAIL=0` rc 0**, with 5/5 library pins and 2/2 new pins verified:
+
+- benign count 2 and count 8 images: rc 0, estimates
+  `2.0000000049670539` and `8.0000001390775086`;
+- count 18 (copy of 72 bytes), count 64 (256 bytes) and count 255 (1020
+  bytes): the estimate is printed normally, then the process dies in
+  interpreter shutdown — rc 134 with `corrupted size vs. prev_size` for
+  counts 18 and 64, rc 139 for count 255;
+- fixed 5.3.0: benign still returns `2.0000000049670539`, while count 64
+  raises `ValueError: Attempt to deserialize invalid CouponList with
+  couponCount >= capacity. Found couponCount: 64, capacity: 8` before the
+  copy and the process exits 1 cleanly;
+- ASan on count 18: `WRITE of size 72` 0 bytes after the 32-byte coupon
+  region, with frames `CouponList-internal.hpp:116` ->
+  `HllSketchImplFactory.hpp:101` -> `HllSketch-internal.hpp:63` ->
+  `hll_wrapper.cpp:100` -> nanobind -> `PyObject_Vectorcall`;
+- gdb on count 18: breakpoint at pinned `CouponList-internal.hpp:116`,
+  `couponCount=18`, `p=0xbad6f0`. At `p+32`/`p+40` the words go from
+  `0x79`/`0x21` (live glibc chunk metadata) to `0x5a5a5a5a5a5a5a5a` after
+  the library's own `memcpy`; the backtrace reaches `hll_wrapper.cpp:100`.
+  Continuing, the estimate prints and the process aborts with
+  `munmap_chunk(): invalid pointer` in `__libc_free(mem=0xbad720)` =
+  `p+48`, from `_PyPathConfig_ClearGlobal` during finalisation.
+
+The gdb observation ties the corrupt chunk to the pinned write, and the
+5.3.0 control ties the failure to that write rather than to the Python
+runtime: the same wrapper and image only fail when the vulnerable 5.2.0
+headers perform the copy.
+
+**Disposition: KEEP the real-consumer grade, extend its impact to an
+availability failure under glibc, no grade upgrade.** This is an upstream
+binding source compiled into a local extension, not an installed wheel or an
+application accepting untrusted images over a network, and the input is a
+local `bytes` object rather than a socket payload. No chosen pointer value,
+leak, natural call-through or execution of attacker-chosen code was seen;
+the abort occurs during interpreter teardown, after the estimate returned.
+The earlier palloc negative stands. Wake 8 is author evidence only until a
+witness replays it from a clean archive including
+`lab/datasketches2shell-py/src` and `lab/frontier/datasketches2shell/src`.
