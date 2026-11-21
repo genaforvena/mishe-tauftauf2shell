@@ -215,3 +215,53 @@ frame-level consumer was identified. This is a search negative, not proof none
 exists: GitHub code search across all forks and closed deployments was not
 available here, and no external system was probed. The rung-5 path through a
 real frame-level proxy stays plausible but UNPROVEN.
+
+## Allocator placement decides the rung-4 path (2026-11-21 ~22:40Z)
+
+An earlier section recorded a boundary condition: the minimal 65600-byte
+overflow reaches `socket->klass` only with a 200000-byte reusable receive
+buffer; an exact-sized 65600-byte body moved the socket 196640 bytes away.
+This wake replaced "allocation pattern" with the measured cause on this host
+(glibc 2.39, Ubuntu 24.04, x86-64) and ran a matched-pair causal test with no
+library or harness source changes.
+
+Cause: glibc's default `M_MMAP_THRESHOLD` is 131072, so `malloc(200000)` is
+served by `mmap` and does not consume the brk heap. The connection's own
+allocations then keep the layout in which the 32-byte `amqp_socket_t` object
+sits at `outbound+65552` and body byte 65545 lands on `socket->klass`. A
+`malloc(65600)` is served by brk and shifts that layout.
+
+Standalone confirmation (throwaway `/tmp/rmq2-mmap-test/where.c`):
+`malloc(200000)` landed at `0x7edecfbd7010` against
+`sbrk(0)=0x55ae2c3a8000` (mmap region); with
+`MALLOC_MMAP_THRESHOLD_=300000` the same allocation landed at
+`0x55fb868ee2a0`, 331104 bytes below `sbrk(0)` (brk heap).
+
+Matched-pair gdb measurement on the unmodified `svc_reuse` binary, identical
+65600-byte body and chosen bytes, breakpoint at the library `memcpy` pinned
+`amqp_connection.c:467`:
+
+| env | `memcpy` source | `socket - outbound` | observed outcome |
+|---|---|---|---|
+| default | `0x7ffff7f76010` (mmap) | 65552 | chosen bytes land on the live `socket->klass`; marker reached, service rc 0 |
+| `MALLOC_MMAP_THRESHOLD_=300000` | `0x5555555712a0` (brk) | 196640 | no vtable hit; `amqp_send_frame rc=-9`, `free(): invalid next size (normal)`, abort |
+
+In both runs `socket->klass` before the copy was `0x55555556fbe0`
+(`amqp_tcp_socket_class`); only its placement relative to the outbound buffer
+changed. The default-arm marker result repeated across three runs. Fixed
+v0.17.0 under forced brk returned `rc=-2` (`AMQP_STATUS_BAD_AMQP_DATA`) with
+no corruption and no marker. The paired roundtrip is committed as
+`lab/rabbitmqc2shell/run_mmap_threshold.sh` (2 PASS / 0 FAIL against the
+existing `svc_reuse` build); the throwaway gdb script `gdb_brk.cmd`, allocator
+probe `where.c` and raw logs `default-gdb.log`, `brk-gdb.log` and
+`fixed-brk.log` live in `/tmp/rmq2-mmap-test/` (gitignored).
+
+Interpretation. The rung-4 vtable path is conditional on the oversized
+receive buffer being mmap-backed, the glibc default for allocations above
+128 KiB. That is a realistic but not universal service pattern. With the same
+vulnerability and the same small overflow but a brk-backed body, the observed
+effect is ordinary heap-metadata corruption and an abort, not pointer
+control. This is a measured consumer-side boundary, preserved as a condition
+of the rung-4 result; it changes neither the grade nor the witness-verified
+claim. No real application, listener or infoleak was involved, and the
+addresses still come from the lab-only file.
