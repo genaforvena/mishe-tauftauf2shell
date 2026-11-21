@@ -473,6 +473,7 @@ separate path that preserves a small `ob_refcnt` while writing `ob_type`.
 `bash lab/frontier/openjpeg2shell/chosen-call.sh <outdir>` → **7 PASS / 0
 FAIL**, trace
 `sha256=ab46a561e9b9f4aefeb0fd9ec52810cd36cd2c07dfaee627477de96e4e56afaf`.
+
 This closes the remaining gap from the preceding two sections: a natural
 finalization call through an `ob_type` value chosen by the codestream, with
 ASLR on. Everything is a local Pillow process; the debug `-g -O0` lib is needed
@@ -510,6 +511,11 @@ codestream filename until the required gap object appears before asserting
 the chain. Fixed-side claims remain scoped to master pin `91d08b11`, not a
 release. Rung 4 is now demonstrated at the control-flow boundary in this lab
 build; rung 5 stays UNKNOWN.
+
+Clean `git archive` replay of `a351c20`: **7 PASS / 0 FAIL** with a different
+calibrated filename and object address, trace
+`sha256=db68ebea547696bd39e97d2648ed9fced6d32d5eef88ae880fd29cd1f893334f`.
+Witness replay is still required for acceptance.
 
 ## Scope and boundaries
 
