@@ -3242,3 +3242,73 @@ deserves a second harness because its copy path differs. Which applications
 deserialize untrusted HLL images and whether their allocator leaves a useful
 adjacent victim stay UNKNOWN until measured; a measured front-end, allocator
 or wire blocker is a valid negative to preserve.
+
+#### Admitted 2026-11-21 ~13:20Z: RabbitMQC2Shell / rabbitmqc2shell (CVE-2026-61547 / GHSA-hfjv-vcp3-39wh)
+
+Frontier published the brief `reports/frontier-rabbitmqc2shell.md` and the
+real-library harness in commits `f773017` and `b8c2439`. All five elements of
+standing approval #6 are recorded: **claim source** — CVE JSON and GHSA HTML
+pinned in `lab/frontier/rabbitmqc2shell/src/`, CNA GitHub, Inc.
+(`GitHub_M`), CVE published 2026-11-10T16:21:17.565Z and updated
+2026-11-14T02:52:12.997Z, GHSA says published Jul 2, 2026, CWE-787, CNA CVSS
+3.0 `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H` = 9.8 CRITICAL; all six SHA-256
+pins and URLs in `lab/frontier/rabbitmqc2shell/PROVENANCE.md`; **identifier**
+— CVE-2026-61547 / GHSA-hfjv-vcp3-39wh; **affected/fixed versions** — CVE
+`< 0.17.0`, GHSA `<= 0.16.0`, fixed in released `0.17.0` by commit
+`b09271180621248dc810f4e48e5adabff35ecee1` (PR #892); both full tarballs and
+the fix diff are pinned, so the fixed side is a released build, not a
+harness-applied patch; **primitive** — at tag `0.16.0`,
+`amqp_connection.c:22/53/140` allocates a 65536-byte outbound frame buffer,
+`:454` `amqp_frame_to_bytes()` receives it as a capacity but `:467` copies
+`body->len` caller bytes with no capacity check, then `:521-522` store length
+and frame end with the same unchecked offset; the public path is `:531`
+`amqp_send_frame()` → `:548` `amqp_send_frame_inner()` → `:454`, and the
+advisory's five-line ASan trace matches the pinned bytes; fixed 0.17.0
+`:467-473` rejects `body->len > buffer.len - 14` with
+`AMQP_STATUS_BAD_AMQP_DATA` before the surviving `memcpy` at `:475`, with a
+vendor regression test `tests/test_send_frame.c`; **rung-4 plausibility** —
+an application republishing an untrusted message body is a plausible trust
+boundary and both copied length and content are caller-chosen through an
+exported API. No such application was run; that consumer remains UNKNOWN.
+
+Operator verification before admission: `sha256sum -c src/SHA256SUMS`
+matched all six pins when run inside `src/` (the manifest names bare files;
+from the lane root all six falsely FAILED), and a clean
+`git archive b8c2439 lab/frontier/rabbitmqc2shell` extraction into
+`/tmp/rmq2-op-verify` replayed `bash run.sh /tmp/rmq2-op-out` with **10 PASS /
+0 FAIL rc 0**, both five-run groups
+`sha256=239e11fea9854f993b4d90adae7efa9b1b481013688daeeaa5d524cd02ffeee8`.
+ASan `WRITE of size 200000` at pinned `amqp_connection.c:467` via
+`amqp_send_frame_inner:548` ← `amqp_send_frame:531` into the 65536-byte region
+allocated at `:140`; a 1000000-byte body writes 934464 bytes past.
+Unsanitized 200000-byte body faults rc 139, chosen `0x5a`/`0xa5` read back
+byte-exact at +65536/+65552/+65584/+65600/+65792/+66048/+67584/+69632, a
+`PROT_NONE` guard faults at the first past-end store, fixed 0.17.0 returns
+`rc=-2` before copying and benign bodies are ASan-clean on both builds.
+Rungs 1/2/3 ESTABLISHED; rung 4 INSTRUMENTED chosen bytes past the real
+outbound buffer through the library's own `memcpy` and exported entry point.
+The ASan rung uses the library's own allocator; chosen-byte readback and the
+guard page use a link-time `realloc` interposer that changes the landing
+site, never the code writing the bytes. A local `AF_UNIX` socketpair shut
+down for writing lets the post-copy send fail without a broker. No messaging
+application, broker, network listener, real heap neighbour, pointer,
+control-flow diversion or execution was observed — all UNKNOWN. Witness
+replay was requested on tape #896 and no verdict had returned at admission;
+the operator replay is not independent acceptance.
+
+Admitted under #6, no re-ask. The two-pane `rabbitmqc2shell` window (inner
+socket, index 56), seed wall and registry entry 58 were pre-created by
+frontier and are already live; do not recreate or edit them. The operator
+created this mind's charter, the 51st `engine/routes.json` entry and its wake
+trigger units with the pinned full-flag sync from `docs/runtime-pin.md`
+(`written 3, removed 0`, rc 0, SHA
+`0d686bbad55c849e88334da64efff9da88ad528a` from the live pointer); never run
+a bare `mishe sync`. Cheapest next rung: write a loopback-only service that
+reads a length-prefixed message body from a local socket and calls
+`amqp_send_frame()` on a pinned `0.16.0` connection; send the 200000-byte
+chosen-value body under ASan and gdb, expect the symbolised WRITE at
+`amqp_connection.c:467` inside the service process, then freeze the first
+past-end bytes and inspect the real heap neighbour. Which applications
+forward attacker-sized bodies and whether their allocator leaves a useful
+adjacent victim stay UNKNOWN until measured; a measured front-end, socket or
+allocator blocker is a valid negative to preserve.
