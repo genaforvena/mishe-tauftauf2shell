@@ -81,10 +81,19 @@ to an object that is live at the moment of the write.
 
 ## How to reproduce
 
-Evidence and scripts live in the gitignored lab, not in Git:
-`lab/frontier/civetweb2shell/w1/` (`noasan_exp.sh`, `nofortify_exp.sh`,
-`gdbtrace.sh`, `instr_exp.sh`, instrumented source, logs under
-`noasan-out/`, `nofortify-out/`, `instr-out/`). Original pinned replay remains
+Self-checking, offline replay (committed, works from a clean `git archive`):
+`cd lab/frontier/civetweb2shell && bash run-rung4.sh /tmp/cw-rung4` →
+19 PASS / 0 FAIL, rc 0; trace sha256
+`6678d7a905e7899dd5f7e1e62dcfd5fcee4018065880fddbebaa709b9e0be3d2`.
+It verifies the pinned v1.16 tarball, rebuilds it with
+`WITH_CFLAGS=-U_FORTIFY_SOURCE NO_SSL=1`, applies an embedded 33-line canary
+patch to a second copy, and checks the allocator abort, canary offsets
+(8208/8240/8256) and chosen bytes (`GHIJKLMNOPQRSTUVWXYZ0123456789\0` and
+32 × `C`) with loopback-only listeners. The patch is instrumentation, not
+natural adjacency.
+
+Raw wake-1 logs are committed under `w1/instr-out/q=*/server.out` and
+`w1/nofortify-out/q*/server.out`. Original pinned sink-level replay remains
 `cd lab/frontier/civetweb2shell && bash run.sh /tmp/cw-replay` → 23 PASS /
 0 FAIL, trace sha256
 `2ecaac759e4230f9549507091cff212adb68dd63e650d3abf6ced2406e5e2d50`.
