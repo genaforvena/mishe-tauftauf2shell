@@ -658,6 +658,45 @@ pointer-bearing chunk or the chosen-pointer dereference in the lab build; it
 narrows the claim about who supplies the written bytes. Source-only finding —
 no new live session, no over-the-wire test, no probe off loopback.
 
+## Client-controlled grooming of the target object (wake 18, 2026-11-21 06:22Z)
+
+The last lab-level UNKNOWN — whether the pointer-bearing object found after
+the fact in wake 13 can be positioned by the client — is CLOSED OBSERVED in
+the live stock-allocator build. Full evidence:
+`lab/freerdp2shell-src/grooming_format_count_stock.txt`, raw logs in
+`verify-live-out/wake18/`.
+
+The client's second `SNDC_FORMATS` PDU controls `num_client_formats`, which
+sizes the server's `client_formats` allocation
+(`audio_formats_new()` = `calloc(count, sizeof(AUDIO_FORMAT))`,
+`libfreerdp/codec/audio.c:262-265`). That array is the heap chunk immediately
+after `out_buffer`; adding N benign PCM records **after** the malicious
+ADPCM record (which stays at index 0, so the wrap still happens) grows it by
+32 bytes per record and shifts every following chunk by the same amount.
+Measured wLog chunk-header offsets for N = 0/1/7/31/240 extra records:
+8864 / 8896 / 9088 / 9856 / 16544, i.e. `8864 + 32*N`; the identified
+`Names` field is at `8904 + 32*N`. All runs still logged the wrap and
+`WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00`.
+
+With N=1 and the wake-14 natural quality-mode log path, marker bytes placed
+at the shifted `Names` field (offset 8936) made the live server fault in
+`WLog_GetFilterLogLevel` with `rax=0x4141414141414141`; the same run with the
+marker 16 bytes too far (8952) gave `rax=0xdededededededede`, confirming the
+faulting pointer is read from exactly the groomed offset. With N=240 the
+target moved past the end of the 16384-byte write (`Names` at 16584), and the
+natural log path no longer faulted — only the familiar glibc abort at
+teardown. This is bidirectional, client-controlled placement of a specific
+pointer-bearing object relative to the overwrite.
+
+Honest boundary: the client controls the OFFSET, not the written BYTES.
+Wake 17 established that the copied bytes and stride come from the server's
+audio capture; the 0x41/0xDE markers are the lab's synthetic playback source.
+The log trigger still needs the scratch client delay and `WLOG_FILTER`, the
+format table is lab subsystem-supplied, the session is post-auth and
+loopback-only, and the committed replay patches/digests were not changed.
+Scratch sources were restored and rebuilt. This is scratch observation in the
+live stock build, not independent witness acceptance.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with lab-chosen bytes at chosen OOB
@@ -682,8 +721,14 @@ log injection: FreeRDP's own `SNDC_QUALITYMODE` receive path logs on that TAG
 after the write (scratch client-side timing delay needed). Wake 15 confirmed
 that delay is necessary: without it no client PDU reaches the server after the
 copy and there is no post-write dereference
-(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`). Grooming of a chosen
-target object remains UNKNOWN.
+(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`). Wake 18 then CLOSED
+the grooming question: the client's format-record count sizes the
+`client_formats` chunk directly after `out_buffer`, shifting the identified
+wLog object by exactly 32 bytes per extra record; the natural post-write log
+dereferences the shifted `Names` field with a chosen pointer value, and
+shifting the object past the write suppresses that fault
+(`lab/freerdp2shell-src/grooming_format_count_stock.txt`). Offset control is
+therefore OBSERVED; byte control remains bounded by wake 17.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
 (subsystem-supplied, demonstrated). Wake 16 closed the FFmpeg alternative:
@@ -717,7 +762,12 @@ witness verdict #602 (ESTABLISHED, no replay owed). Wake 17 traced the real
 audio source in pinned 3.32.0: the copied bytes and copy stride come from the
 server's platform audio capture, not the client, so remote byte choice is not
 established in a stock deployment (deployment-specific influence stays
-UNKNOWN). Grooming of a specific target object remains UNKNOWN. The
+UNKNOWN). Wake 18 demonstrated client-controlled grooming of that target
+object in the live stock allocator (32 bytes per extra format record), with a
+controlled dereference at the groomed offset and an out-of-write negative;
+the client controls the offset, not the written bytes. The
 FFmpeg-build UNKNOWN is CLOSED (default build NEGATIVE, experimental build
 OBSERVED for tag 2); the real-audio-source question is CLOSED at the source
-level as described above.
+level as described above. No lab-level UNKNOWN remains: only the
+deployment-specific question of whether an attacker can influence the
+server's captured audio content stays open and is not measurable here.
