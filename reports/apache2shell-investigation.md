@@ -548,6 +548,94 @@ no reopen condition.** The main-lane Stage A closure and do-not-retry list are
 unchanged.
 
 
+### Adjacent lane L4 — CVE-2026-56154 mod_rewrite `%{LA-U:HTTP:...}` Vary UAF (05:11–05:16Z 21 Nov) — rung 3 confirmed
+
+Claim verified in local source: `lab/frontier/apache2root/httpd-2.4.70/CHANGES:151-157`
+names CVE-2026-56154, "mod_rewrite use-after-free via `%{LA-U:HTTP:...}`",
+affecting 2.4.0 through 2.4.68, credited to Nebula Security; fixed in 2.4.69.
+The 2.4.68→2.4.69 diff (`modules/mappers/mod_rewrite.c:2018,2053`) adds the
+same two lines after each lookahead:
+
+```
+                    result = apr_pstrdup(r->pool, lookup_variable(var+5, ctx));
+                    ctx->r = r;
++                   if (ctx->vary_this) {
++                       ctx->vary_this = apr_pstrdup(r->pool, ctx->vary_this);
++                   }
+                    ap_destroy_sub_req(rr);
+```
+
+Causal chain, all read from the pinned 2.4.68 tree. `lookup_variable()` with
+`var[4]==':'` and `var` beginning `LA-U` calls `ap_sub_req_lookup_uri(path, r,
+NULL)`, sets `ctx->r = rr`, and evaluates `HTTP:X-Test` against the subrequest.
+`make_sub_request()` (`server/request.c:2015`) creates `rr` in a new child pool;
+`ap_set_sub_req_protocol()` (`server/protocol.c:1667`) copies the parent's
+`headers_in` into that pool. `lookup_header()` (`mod_rewrite.c:1937-1950`)
+allocates `ctx->vary_this` with `apr_pstrdup(ctx->r->pool, name)` — in the
+**subrequest's** pool. `ap_destroy_sub_req()` (`server/request.c:2547`) then
+calls `apr_pool_destroy(rr->pool)`. Back in `apply_rewrite_list()`,
+`ctx->vary_this` is assigned to `ctx->vary` (`mod_rewrite.c:4470-4475`), and
+`apr_table_merge(r->headers_out, "Vary", ctx->vary)` at `mod_rewrite.c:4701`
+dereferences the stale pointer. The fix duplicates the string into the parent
+request pool before the destroy.
+
+Driver `lab/apache2shell/rw-lane.py` runs the existing L3 2.4.68/2.4.69 ASan
+builds with `mod_rewrite.so` loaded, `LogLevel info rewrite:trace5`, and
+`MaxMemFree 1`. The last directive matters: `APR_ALLOCATOR_MAX_FREE_UNLIMITED`
+is 0, so `MaxMemFree 0` is the default (unlimited) and hides the fault; a
+1 KB cap makes APR return the destroyed subrequest pool's blocks to malloc.
+Config: `RewriteCond %{LA-U:HTTP:X-Test} ^yes$` plus
+`RewriteRule ^/index\.html$ - [L]`; the client sends `GET /index.html` with
+`X-Test: yes`. Logs `logs/rw-smoke-2.4.{68,69}-{lau,plain}-{yes,none}.txt`.
+
+| 21 Nov, 12 requests each | 2.4.68 child SIGSEGV | 2.4.69 child SIGSEGV |
+|---|---|---|
+| LA-U lookahead + header present (test) | **12 / 12** | **0 / 12** |
+| plain `%{HTTP:X-Test}` + header present (no subrequest) | 0 / 12 | 0 / 12 |
+| LA-U + header absent (condition cannot match) | 0 / 12 | 0 / 12 |
+
+The rewrite trace confirms the path in every test request:
+`lookahead: path=/index.html var=HTTP:X-Test -> val=yes` followed by
+`RewriteCond: input='yes' pattern='^yes$' => matched`. In both controls the
+lookahead path is not taken and every request returns 404 without a crash.
+The crash is deterministic per request and isolated to the lookahead plus
+header combination present only in the affected build.
+
+`rw-gdb.py` runs 2.4.68 as `httpd -X` under gdb with
+`ASAN_OPTIONS=detect_leaks=0:handle_segv=0` (`logs/rw-gdb-bt.txt`):
+
+```
+Thread 3 "httpd" received signal SIGSEGV, Segmentation fault.
+#0  __strlen_avx2 () at ../sysdeps/x86_64/multiarch/strlen-avx2.S:76
+#1  ___interceptor_strlen (s=0x7ffff6a8f088 <error: Cannot access memory at address 0x7ffff6a8f088>)
+#2  apr_pstrdup () from /lib/x86_64-linux-gnu/libapr-1.so.0
+#3  apr_table_merge () from /lib/x86_64-linux-gnu/libapr-1.so.0
+#4  apply_rewrite_list (...) at mod_rewrite.c:4701
+#5  hook_uri2file (...) at mod_rewrite.c:5021
+rdi = rsi = 0x7ffff6a8f088   (unmapped)
+```
+
+Frame 4 is the exact Vary merge named by the source diff; the faulting
+`strlen()` argument is the dangling `ctx->vary`. This is **rung 3 confirmed
+memory corruption** (debugger-inspected dereference of freed memory), not just
+a crash. ASan prints no `heap-use-after-free`: the dereference happens inside
+uninstrumented system libapr, the same detector gap recorded for the main lane
+and L2 — absence of an ASan report is not absence of corruption. No chosen
+bytes, chosen offset, pointer control or marker execution was obtained: the
+stale value is the fixed header name `X-Test`, and the crash is an immediate
+fault on unmapped memory. **L4 closes at rung 3; rung 4 is not demonstrated.**
+The main-lane Stage A closure and do-not-retry list are unchanged.
+
+Reproduction:
+
+```
+cd lab/apache2shell
+RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69  # 12/12 vs 0/12
+RW_VARIANT=plain RW_HEADER=yes ./rw-lane.py 2.4.68               # control: 0
+RW_VARIANT=lau RW_HEADER=none ./rw-lane.py 2.4.68                # control: 0
+python3 rw-gdb.py                                               # backtrace
+```
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
