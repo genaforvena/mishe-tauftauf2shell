@@ -12,7 +12,8 @@ new subscription. The wake-2 grooming probe observed the stale write landing on
 a live replacement object at byte 200; the wake-3 dereference probe then
 observed the server's real sampling loop deterministically dereferencing that
 attacker-influenced pointer. Rung 4 stays INSTRUMENTED: no chosen bytes,
-attacker-chosen control-flow diversion or execution. The dedicated
+attacker-chosen control-flow diversion or execution. Rung 5 is not attempted:
+the measured structural blocker is recorded below. The dedicated
 two-pane window (inner socket index 64), seed wall and registry entry were
 pre-created by frontier before admission. Operator admission replay ~17:49Z:
 4/4 committed pins OK, 8 PASS / 0 FAIL rc 0, exact trace below. Replay
@@ -234,6 +235,41 @@ and sampling enabled, the two-item build aborts deterministically 5/5 at
 `UA_MonitoredItem_ensureQueueSpace:1490` on the separately deleted item
 `0x514000000640`, while skip-delete and fixed 1.5.6 survive 3/3 each; that
 assertion is an availability observation, not control-flow control.
+
+## Rung 5 — measured structural blocker (open625412shell wake 4, 2026-11-21)
+
+The owner's 2026-11-21 rung-5 goal (`docs/rce.md`, commit `4217b0c`) is not
+attempted here: this build's measured rung-4 primitive leaves no credible
+bounded path to command execution, and the plant rule forbids relabeling a
+pointer fault or harness-only marker as RCE.
+
+- **Contract item 1 (real target and wire input) — not met.** The harness calls
+  the pinned server's real service functions on real objects but starts no
+  listener and accepts no wire input. It also carries two documented stand-ins:
+  a permissive `allowTransferSubscription` consent hook and an internal
+  `UA_Subscription_delete` call in place of a queued PublishRequest response.
+  An extracted harness with direct service calls is explicitly rung-4
+  mechanics under `docs/rce.md`, not a live target.
+- **Contract item 2 (chosen command execution) — not met.** Across the UAF,
+  groom and deref probes the only written value observed at byte 200 was a live
+  monitored-item pointer selected by create/transfer/delete ordering
+  (`0x514000000440` in the two-item build), never attacker-chosen bytes. The
+  downstream effect was a server-loop dereference and one extra queued
+  notification, not execution of a lab-chosen benign command or marker.
+- **Contract item 4 (differential controls) — partial.** Vulnerable-vs-fixed
+  and skip-delete controls hold for the corruption and dereference, but there
+  is no command path on which a fixed target or a safe input can be compared.
+  Contract items 3, 5 and 6 are therefore not reached; the rung-1–3 replay is
+  independently verified (witness DM #1066), but an independent replay of the
+  wake-3 dereference trace is still owed.
+
+This is a blocker for **this lab's measured primitive**, not a claim that the
+CVE is unexploitable in another build, allocator or configuration. Closing it
+would require a loopback listener with an authenticated client, removal of both
+stand-ins from the triggering path, an attacker-chosen write value and a
+dispatch target for a benign command — a new chain, not a bounded extension of
+the observed stale-backpointer dereference. Rung 4 stays INSTRUMENTED and the
+ZDI/MITRE RCE language stays an unverified claim.
 
 ## What would change my mind
 
