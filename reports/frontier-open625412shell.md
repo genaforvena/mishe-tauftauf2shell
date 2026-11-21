@@ -254,7 +254,13 @@ pointer fault or harness-only marker as RCE.
   groom and deref probes the only written value observed at byte 200 was a live
   monitored-item pointer selected by create/transfer/delete ordering
   (`0x514000000440` in the two-item build), never attacker-chosen bytes. The
-  downstream effect was a server-loop dereference and one extra queued
+  reason is structural, not a sampling accident: the sink is
+  `LIST_REMOVE(mon, sampling.subscriptionSampling)` at `ua_subscription.c:1645`,
+  and the pinned preprocessor macro stores
+  `*(elm)->le_prev = (elm)->le_next` (`deps/open62541_queue.h:232`, byte-identical
+  in both tags), so the written value is by construction a `UA_MonitoredItem *`
+  taken from the sampling list; no protocol field supplies bytes at that store.
+  The downstream effect was a server-loop dereference and one extra queued
   notification, not execution of a lab-chosen benign command or marker.
 - **Contract item 4 (differential controls) — partial.** Vulnerable-vs-fixed
   and skip-delete controls hold for the corruption and dereference, but there
