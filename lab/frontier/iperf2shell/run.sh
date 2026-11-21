@@ -8,7 +8,7 @@ set -u
 here=$(cd "$(dirname "$0")" && pwd)
 out=${1:-out}
 mkdir -p "$out"
-
+out=$(cd "$out" && pwd)
 fail=0
 pass() { printf 'PASS %s\n' "$1"; }
 bad()  { printf 'FAIL %s\n' "$1"; fail=1; }

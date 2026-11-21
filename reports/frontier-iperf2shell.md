@@ -94,7 +94,7 @@ bytes, and calls `decrypt_rsa_message()`. Clean replay from committed HEAD:
 
 ```
 bash lab/frontier/iperf2shell/run.sh <outdir>
--> 16 PASS lines, ALL CHECKS PASS rc 0
+-> 17 PASS lines, ALL CHECKS PASS rc 0
    sha256=bd3efc4cb4720e7fe5cc2e83e79cc7e89010f75a7e93579360a215eb5f029caf
 ```
 
