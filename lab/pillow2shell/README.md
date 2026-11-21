@@ -434,8 +434,8 @@ clean positive on this host; both are preserved as negatives. Grade stays ◐.
 The neighbour at `state->buffer+176` is a live `str` (`ob_refcnt=2`,
 `ob_type=&PyUnicode_Type` = `0xa472c0`, `tp_name="str"`) but its identity is
 invocation-dependent. Under gdb with its default ASLR-off and the exact W9
-`-c` command it is the 579-byte `typing._should_unflatten_callable_args.__doc__`
-; with `set disable-randomization off` and a script-file command it is the
+`-c` command it is the 579-byte `typing._should_unflatten_callable_args.__doc__`;
+with `set disable-randomization off` and a script-file command it is the
 1171-byte `tempfile.NamedTemporaryFile.__doc__`. Three Python-level readback
 attempts failed:
 
