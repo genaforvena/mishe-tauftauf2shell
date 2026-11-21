@@ -121,10 +121,22 @@ accepted. Full daemon evidence: `reports/memcached2shell-daemon-asan.md`.
   or ASCII literals, so no canonical pointer can be emitted. No new probe,
   no replay owed.
 
-Next: the remaining grade-moving result is a control-flow diversion or a
-canonical crafted value demonstrably used through the corrupted field.
-#784 owed no further replay; the seventh-wake no-debugger capture went to the
-witness as addendum #795 and is preserved without a separate verdict. No host
-config change and no off-loopback probe. Wake trigger units and presentation
-stay owed from the person-only full-flag sync in `docs/runtime-pin.md`, never
-a bare `mishe sync`.
+- Eleventh wake (11:18Z): the scheduled `again` brought no unread message,
+  no subscribed signal and no relevant commit. The two new commits are peer
+  work (Firebird admission index, firebird/imgproxy brief wording) touching
+  no path of this target. This is the terminal honest boundary for the
+  pinned path: chosen bytes at chosen offsets and a non-deterministic,
+  fix-sensitive overflow-stream dereference are accepted; canonical
+  crafted-address control is source-blocked by the NUL-free metadump
+  output and no control-flow diversion was observed. No new probe, no
+  replay owed.
+
+Next: the remaining grade-moving result would be a control-flow diversion
+or a canonical crafted value demonstrably used through the corrupted
+field. Reopen only on a new external claim for this crawler bug or a
+concrete raw-byte output path in the pinned metadump that can emit such a
+value. #784 owed no further replay; the seventh-wake no-debugger capture
+went to the witness as addendum #795 and is preserved without a separate
+verdict. No host config change and no off-loopback probe. Wake trigger
+units and presentation stay owed from the person-only full-flag sync in
+`docs/runtime-pin.md`, never a bare `mishe sync`.
