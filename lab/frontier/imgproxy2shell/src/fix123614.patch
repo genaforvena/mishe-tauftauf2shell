@@ -1,0 +1,214 @@
+From a821b6a4cb07a1bf2bb9077431d1c1e734d79917 Mon Sep 17 00:00:00 2001
+From: DarthSim <darthsim@gmail.com>
+Date: Thu, 24 Sep 2026 17:27:35 +0300
+Subject: [PATCH] Fix segfaults during invalid ICO load
+
+---
+ CHANGELOG.md          |   4 ++++
+ testdata/ico-bad1.ico | Bin 0 -> 62 bytes
+ testdata/ico-bad2.ico | Bin 0 -> 23 bytes
+ testdata/ico-bad3.ico | Bin 0 -> 86 bytes
+ vips/icoload.c        |  34 +++++++++++++++++++++++++++++++---
+ vips/icoload_test.go  |  38 ++++++++++++++++++++++++++++++++++++++
+ vips/vips_test.go     |  22 ++++++++++++++++++++++
+ 7 files changed, 95 insertions(+), 3 deletions(-)
+ create mode 100644 testdata/ico-bad1.ico
+ create mode 100644 testdata/ico-bad2.ico
+ create mode 100644 testdata/ico-bad3.ico
+ create mode 100644 vips/icoload_test.go
+ create mode 100644 vips/vips_test.go
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 96645139c6..8b4a59e99a 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1,5 +1,9 @@
+ # Changelog
+ 
++## [4.0.16] - TBA
++### Fix
++- Fixed several vulnerabilities in ICO image loader.
++
+ ## [4.0.15] - 2026-09-14
+ ### Changed
+ - Updated dependencies.
+diff --git a/testdata/ico-bad1.ico b/testdata/ico-bad1.ico
+new file mode 100644
+index 0000000000000000000000000000000000000000..28f7b869424a9b8451c2a84b0c26f18c7d15af5f
+GIT binary patch
+literal 62
+acmZQzU<5(|0R|wcz>vYf@Joz=cmM!VQUSaG
+
+literal 0
+HcmV?d00001
+
+diff --git a/testdata/ico-bad2.ico b/testdata/ico-bad2.ico
+new file mode 100644
+index 0000000000000000000000000000000000000000..779c65f76f82f9fead36d51d4eabc250d4abb33d
+GIT binary patch
+literal 23
+YcmZQzU<5(|0R|wc0K^OoVnDnK00i9u1poj5
+
+literal 0
+HcmV?d00001
+
+diff --git a/testdata/ico-bad3.ico b/testdata/ico-bad3.ico
+new file mode 100644
+index 0000000000000000000000000000000000000000..3ac2dd7c7c3e4d3d0b883409b15977762016eb7a
+GIT binary patch
+literal 86
+ccmZQzU<5%%1|X@x@b&-y|6&Xb42~2605@V3ZU6uP
+
+literal 0
+HcmV?d00001
+
+diff --git a/vips/icoload.c b/vips/icoload.c
+index bf4888c367..1a78fa9603 100644
+--- a/vips/icoload.c
++++ b/vips/icoload.c
+@@ -8,6 +8,14 @@
+ #include <stdint.h>
+ #include <stdbool.h>
+ 
++// Maximum size of an ICO entry data block.
++// Maximum image size in ICO is 256x256 pixels,
++// which gives a maximum of 256 * 256 * 4 bytes for raw RGBA data.
++// 10 MB should be enough for any ICO entry data block,
++// even if an embedded PNG contains metadata.
++// Data blocks larger than this should be considered malicious.
++#define MAX_ICO_ENTRY_DATA_SIZE 10 * 1024 * 1024
++
+ /**
+  * ICO ForeignLoad VIPS class implementation (generic)
+  */
+@@ -153,13 +161,26 @@ vips_foreign_load_ico_header(VipsForeignLoad *load)
+   // ICO files are usually small, and we can read them into memory without any issues.
+   uint32_t data_size = GUINT32_FROM_LE(largest_image_header.data_size);
+ 
++  // Check if the data size exceeds the maximum allowed ICO entry data size.
++  if (data_size > MAX_ICO_ENTRY_DATA_SIZE) {
++    vips_error("vips_foreign_load_ico_header", "ICO image data is too large");
++    return -1;
++  }
++
+   // BMP file explicitly excludes BITMAPFILEHEADER, so we need to add it manually. We reserve
+   // space for it at the beginning of the data buffer.
+-  VipsPel *data = (VipsPel *) VIPS_MALLOC(NULL, data_size + BMP_FILE_HEADER_LEN);
++  uint32_t full_data_size = data_size + BMP_FILE_HEADER_LEN;
++  VipsPel *data = (VipsPel *) VIPS_MALLOC(NULL, full_data_size);
++  if (!data) {
++    vips_error("vips_foreign_load_ico_header", "unable to allocate memory for ICO image data");
++    return -1;
++  }
++
+   void *actual_data = data + BMP_FILE_HEADER_LEN;
+ 
+   if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+     vips_error("vips_foreign_load_ico_header", "unable to read ICO image data from the source");
++    VIPS_FREE(data);
+     return -1;
+   }
+ 
+@@ -183,6 +204,13 @@ vips_foreign_load_ico_header(VipsForeignLoad *load)
+     // According to ICO file format, it explicitly excludes BITMAPFILEHEADER (why???),
+     // hence, we need to restore it to make bmp loader work.
+ 
++    // Ensure the data buffer is large enough to contain the BMP header.
++    if (full_data_size < BMP_BITMAP_INFO_HEADER_LEN) {
++      vips_error("vips_foreign_load_ico_header", "ICO image data is too small to contain a valid BMP header");
++      VIPS_FREE(data);
++      return -1;
++    }
++
+     // Read num_colors and bpp from the BITMAPINFOHEADER
+     uint32_t num_colors = GUINT32_FROM_LE(*(uint32_t *) (actual_data + 32));
+     uint16_t bpp = GUINT16_FROM_LE(*(uint16_t *) (actual_data + 14));
+@@ -208,14 +236,14 @@ vips_foreign_load_ico_header(VipsForeignLoad *load)
+     data[1] = 'M';
+ 
+     // Size of the BMP file (data size + BMP file header length)
+-    (*(uint32_t *) (data + 2)) = GUINT32_TO_LE(data_size + BMP_FILE_HEADER_LEN);
++    (*(uint32_t *) (data + 2)) = GUINT32_TO_LE(full_data_size);
+     (*(uint32_t *) (data + 6)) = 0;                          // reserved
+     (*(uint32_t *) (data + 10)) = GUINT32_TO_LE(pix_offset); // offset to the pixel data
+     (*(int32_t *) (actual_data + 8)) = GINT32_TO_LE(height); // height
+ 
+     if (
+         vips_bmpload_buffer(
+-            data, data_size + BMP_FILE_HEADER_LEN,
++            data, full_data_size,
+             &ico->internal[0],
+             "access", VIPS_ACCESS_SEQUENTIAL,
+             NULL) < 0) {
+diff --git a/vips/icoload_test.go b/vips/icoload_test.go
+new file mode 100644
+index 0000000000..3a36be5ce6
+--- /dev/null
++++ b/vips/icoload_test.go
+@@ -0,0 +1,38 @@
++package vips_test
++
++import (
++	"testing"
++
++	"github.com/imgproxy/imgproxy/v4/imagedata"
++	"github.com/imgproxy/imgproxy/v4/imagetype"
++	"github.com/imgproxy/imgproxy/v4/testutil"
++	"github.com/imgproxy/imgproxy/v4/vips"
++	"github.com/stretchr/testify/require"
++)
++
++func TestIcoLoadInvalid(t *testing.T) {
++	testData := testutil.NewTestDataProvider(func() *testing.T { return t })
++
++	testCases := []struct {
++		filename string
++		errStr   string
++	}{
++		{"ico-bad1.ico", "ICO image data is too large"},
++		{"ico-bad2.ico", "ICO image data is too small"},
++		{"ico-bad3.ico", "ICO image data is too large"},
++	}
++
++	for _, tc := range testCases {
++		t.Run(tc.filename, func(t *testing.T) {
++			data := testData.Read(tc.filename)
++			id := imagedata.NewFromBytesWithFormat(imagetype.ICO, data)
++			defer id.Close()
++
++			img := new(vips.Image)
++			defer img.Clear()
++
++			err := img.Load(id, 1.0, 0, 1)
++			require.ErrorContains(t, err, tc.errStr)
++		})
++	}
++}
+diff --git a/vips/vips_test.go b/vips/vips_test.go
+new file mode 100644
+index 0000000000..7a487e62d6
+--- /dev/null
++++ b/vips/vips_test.go
+@@ -0,0 +1,22 @@
++package vips_test
++
++import (
++	"os"
++	"testing"
++
++	"github.com/imgproxy/imgproxy/v4/vips"
++)
++
++func TestMain(m *testing.M) {
++	cfg := vips.NewDefaultConfig()
++	err := vips.Init(&cfg)
++	if err != nil {
++		panic(err)
++	}
++
++	r := m.Run()
++
++	vips.Shutdown()
++
++	os.Exit(r)
++}
