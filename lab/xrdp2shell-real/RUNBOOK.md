@@ -39,10 +39,18 @@ poisons the adjacent chunk. Its exact configure line was:
   `trans_get_out_s` / `out_uint8a`.
 
       cc -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer \
-        -I$SRC/libxrdp -I$SRC/common -I$SRC/include -I$B \
+        -include config_ac.h -I$B -I$SRC/libxrdp -I$SRC/common -I$SRC/include \
         real_drdynvc_driver.c $B/libxrdp/.libs/libxrdp.a \
         $B/common/.libs/libcommon.a -lssl -lcrypto -lpthread -ldl -lm \
         -o real_drdynvc_driver
+
+  `-include config_ac.h` and putting `-I$B` first are both required for this
+  driver: without them `common/log.h` and `common/parse.h` raise
+  `#error config_ac.h not visible`, and `common/arch.h` conflicts on
+  `int64_t` against the host `<stdint.h>`. Verified 2026-11-21: the old
+  order failed rc 1 with those errors; this order compiles clean (rc 0)
+  and the binary runs 8164/8164 clean (`callback_calls=1 bytes_seen=8164`).
+  Witness W33 hit the same failure and applied the same fix on replay.
 
   where `$SRC` is the source tree and `$B` the ASan build dir. Arguments:
   `[fixed] [payload_len] [declared_total_bytes]`, default 20000/20000.

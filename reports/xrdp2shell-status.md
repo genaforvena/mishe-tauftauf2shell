@@ -121,6 +121,30 @@ in-process driver: no live socket, no completed logon, no chansrv, and the
 `drdynvcs[1].data_first` callback is installed directly rather than by a
 negotiated dynamic-channel open. Those remain UNKNOWN.
 
+## Witness replay (W33, 2026-11-21)
+
+Tape message #557: both claims ESTABLISHED as claimed on replay — `ffa1bb9`
+(wire-PDU) and `ab93fcc` (real compiled code). The witness used the clean-HEAD
+committed drivers (digests `51fd6324…` wire, `a05ba8ac…` real) from its ignored
+`lab/build/evidence/w33-witness-xrdp-wire`, compiled against the **existing**
+`lab/build/xrdp2shell-live` ASan/plain build tree (xrdp 0.10.6) — not a
+clean-room rebuild, which is the disclosed replay limit. Wire driver: 8191 →
+ASan `WRITE of size 8191` 0 bytes past the 8192-byte `trans_create` region,
+through `drdynvc_process_data_first` (`xrdp_channel.c:490`) → `xrdp_rdp_recv`
+(`xrdp_rdp.c:512`), 3/3 repeat; 8164 → `callback_calls=1 bytes_seen=8164`,
+rc 0; 20000 → `rv=1 callback_calls=0` (MCS 16K reject, stated negative holds).
+Real driver: 8164 clean, 8165 and 20000 OOB; chosen-byte reader `CANARY
+delta=8208 k1=84 k2=484`, `CHOSEN_BYTES m1=PASS m2=PASS`. The witness policed
+the limits: in-process drivers, no socket/logon/chansrv/negotiated dynamic
+channel, no pointer control, UBSan misalignment a build artifact, post-auth
+PR:L intrinsic. No grade change.
+
+Build nit from the same replay, now fixed: `real_drdynvc_driver.c` as committed
+failed the documented RUNBOOK compile on this host (`config_ac.h` not visible
+in `log.h`/`parse.h`, plus an `int64_t` conflict). The RUNBOOK now specifies
+`-include config_ac.h` with `-I$B` first for that driver; re-verified here
+(old order rc 1, fixed order rc 0, binary runs 8164 clean).
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS both in the extracted harness and in
@@ -136,8 +160,9 @@ session, the PyRDP checkout in the plant supplies wire codecs but no client
 (and no client-side NLA), and creating a host account is out of lab scope.
 The post-auth (PR:L) precondition is intrinsic to the CVE, not a lab
 artifact. No off-loopback probe. Author report is not independent
-acceptance; witness replay of `ab93fcc` is still owed.
+acceptance; the independent W33 replay above ESTABLISHED `ab93fcc` and
+`ffa1bb9` as claimed, within its disclosed non-clean-room, in-process limits.
 
 Brief: `reports/frontier-xrdp2shell.md`; harness:
-`lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`. Witness replay requested;
-author report is not acceptance.
+`lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`. Witness replay completed;
+the author report is not acceptance in its own right.
