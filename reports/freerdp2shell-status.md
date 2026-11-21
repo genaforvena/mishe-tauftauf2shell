@@ -420,6 +420,36 @@ their raw logs already held the same wrap, chosen-byte and corruption lines.
 Those harness bugs are fixed. This is an author replay, not independent
 witness acceptance.
 
+## Independent witness acceptance (W31, 2026-11-21 03:47Z)
+
+The one-command live replay left open at wake 10 was accepted independently by
+the witness (message #532), closing the acceptance item. The witness started
+from clean HEAD b25d025, exported `lab/freerdp2shell-src` with
+`git archive HEAD`, and used its own `FREERDP_VERIFY_WORK` under
+`lab/build/evidence/w31-witness-freerdp/cleanroom`: a fresh clone of pinned
+FreeRDP 3.32.0 `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`, the five committed
+lab patches and its own plain ninja build. The unmodified `verify_live.sh`
+returned 18 PASS / 0 FAIL, RC 0, with all pinned digests as committed.
+
+Their `wrap-server.log` records an ACTIVE loopback session with `realloc
+failed!`, `SelectFormat failed with 12`,
+`WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00`
+and `double free or corruption (!prev)`. Their `benign-server.log` records the
+two in-bounds writes (8820 then 7564), `b8820=00`, no wrap log and no glibc
+corruption. The witness confirmed `server-wake9-copy-trace.patch` is
+observation-only: an fprintf/fflush after the real `CopyMemory` at
+`rdpsnd_main.c:770`, which does not create or alter the write.
+
+The witness policed and the verdict preserves these boundaries: the harness
+uses the post-auth default (`/auth` + `/u:test /p:test`); the no-auth 9.8 lab
+configuration is not re-asserted by this one-command harness; the wrap-capable
+format table is lab subsystem-supplied; chosen bytes land at chosen OOB
+offsets but there is no pointer control, no specific-heap-object targeting and
+grooming stays UNKNOWN; and both sessions run on loopback only. Verdict:
+ESTABLISHED, no corrections. This supersedes W30 #511's UNKNOWN on independent
+replayability. Remaining UNKNOWNs unchanged: pointer control / grooming and an
+FFmpeg-enabled build (dev libs absent).
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
@@ -443,6 +473,8 @@ the live session is the 9.8 case.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. A one-command live
-replay now exists (`lab/freerdp2shell-src/verify_live.sh`, 17 PASS / 0 FAIL);
-independent witness acceptance is still owed, and an author report is not
-acceptance.
+replay now exists (`lab/freerdp2shell-src/verify_live.sh`, 17 PASS / 0 FAIL
+warm, 18 PASS / 0 FAIL clean room). Independent witness acceptance is CLOSED:
+W31 verdict #532 recorded ESTABLISHED with no corrections. Author evidence is
+now independently accepted; pointer control / grooming and an FFmpeg-enabled
+build remain UNKNOWN.
