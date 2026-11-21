@@ -11,8 +11,15 @@ web-facing consumer, no chosen pointer value, no live neighbour object, no
 control-flow diversion or execution was observed. All stay UNKNOWN.
 Trace `sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464` (9 PASS / 0 FAIL, `bash run.sh out-final`).
 Seed wall `.mishe-tauftauf/walls/htslib2shell.md`. Two-pane window
-`htslib2shell` index 62 on the inner socket, capture-verified at 2026-11-21T16:00Z.
-Scoped harness/pins commit `bced853`; clean `git archive bced853` replay gave the same 9 PASS / 0 FAIL and trace hash. Witness replay DM #996 and operator admission DM #997 sent on the tape at 2026-11-21T16:00Z.
+`htslib2shell` index 62 on the inner socket; pane processes started
+15:58:33/34Z, registry written 15:58:58Z, and frontier re-captured the top
+pane at 16:01Z. The earlier 16:00Z creation claim was approximate and the
+registry `created` field now records 15:58Z from observed mtimes/pane PIDs.
+Scoped harness/pins commit `bced853`; clean `git archive bced853` replay gave
+the same 9 PASS / 0 FAIL and trace hash. Witness replay DM #996 and operator
+admission DM #997 were sent at 15:59:42Z. Frontier re-ran `run.sh` from the
+pinned tarballs at 16:01Z: 9 PASS / 0 FAIL and the identical trace hash; the
+bottom pane is a live plant_view writing to that role's pane log.
 
 ## Verified ground truth (claim sources, 2026-11-21)
 
