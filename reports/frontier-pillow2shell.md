@@ -28,6 +28,9 @@ claim to reproduce, not a result obtained here.
   sources <https://cve.org/CVERecord?id=CVE-2026-112398>,
   <https://github.com/advisories/GHSA-5x8w-8jj5-q52h>,
   <https://osv.dev/vulnerability/CVE-2026-112398>.
+  The GHSA HTML pin is a snapshot, not reproducible byte-for-byte on re-fetch
+  (dynamic metadata IDs change; advisory text semantically identical); see
+  `lab/frontier/pillow2shell/PROVENANCE.md`.
 - **Affected/fixed**: CVE says `< 13.0.0`, GHSA says `<= 12.3.0`; raw tag
   `12.2.0` was verified vulnerable here and raw tag `13.0.0` carries the
   guard. Fix commit `242a059aedc1935097d9aa1dc3f099750467ba75` ("Reject JPEG
@@ -38,7 +41,7 @@ claim to reproduce, not a result obtained here.
   `13.0.0` (fixed), `src/decode.c` and `src/PIL/FpxImagePlugin.py` at `12.2.0`,
   plus the patch, CVE JSON and GHSA page — seven SHA-256 pins in
   `lab/frontier/pillow2shell/PROVENANCE.md`, re-verified by `gen_driver.py` on
-  every run (exit 2 on drift).
+  every run (pin drift: `gen_driver.py` exits 1, `run.sh` exits 2).
 - **This lab**: extracted C driver with fault statements copied byte-for-byte
   under `#line`; real libjpeg decodes a 4-component CMYK JPEG, a local row-copy
   shim hands that row to the pinned `jpeg_read_scanlines` call. 10 PASS /
@@ -51,14 +54,16 @@ claim to reproduce, not a result obtained here.
 Line numbers are from raw pinned bytes, tag `12.2.0` unless marked fixed.
 
 1. `FpxImagePlugin.py:25/30` maps the attacker's FPX image-contents colour IDs
-   to rawmode `"LA"` (2 bytes/pixel); `:109` selects that mode and `:197`
-   leaves `jpegmode=None` when the ID is unrecognised.
+   to rawmode `"LA"` (2 bytes/pixel); the operative assignment is `:113`
+   (`self._mode, self.rawmode = MODES[colors]`) and `:201` leaves
+   `jpegmode=None` when the ID is unrecognised.
 2. `decode.c:223` computes `state->bytes = (state->bits * state->xsize + 7)/8`
    from the tile extents and rawmode, and `:226` allocates exactly that many
    bytes. For a 32-pixel tile and `"LA"`, `state->bytes = 64`.
-3. `JpegDecode.c:220-221` then sets both `jpeg_color_space` and
-   `out_color_space` to `JCS_UNKNOWN` for the unrecognised jpegmode/rawmode,
-   disabling decoder conversions. A 4-component JPEG (CMYK in the harness)
+3. The rawmode fallback block `JpegDecode.c:209-222` ends at `:220-221`,
+   where both `jpeg_color_space` and `out_color_space` are set to
+   `JCS_UNKNOWN` for the unrecognised jpegmode/rawmode, disabling decoder
+   conversions. A 4-component JPEG (CMYK in the harness)
    survives as four output components; `jpeg_start_decompress` at `:240`
    accepts it.
 4. `:252` calls `jpeg_read_scanlines(&context->cinfo, &state->buffer, 1)`

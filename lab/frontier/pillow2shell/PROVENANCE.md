@@ -2,7 +2,8 @@
 
 All sources were fetched read-only as provisioning on 2026-11-21 ~12:30Z;
 nothing was sent to any external host. `gen_driver.py` re-verifies every hash
-on each run and exits 2 on drift. Raw bytes, not HTML-rendered readers, are
+on each run; on drift it exits 1 (`sys.exit(str)` at `:28`) and `run.sh`
+exits 2 (`:23`). Raw bytes, not HTML-rendered readers, are
 authoritative for line numbers.
 
 | Pin | SHA-256 | Source |
@@ -18,6 +19,11 @@ authoritative for line numbers.
 Cross-checks: OSV <https://osv.dev/vulnerability/CVE-2026-112398>; upstream
 advisory <https://github.com/python-pillow/Pillow/security/advisories/GHSA-5x8w-8jj5-q52h>;
 fix release <https://github.com/python-pillow/Pillow/releases/tag/13.0.0>.
+The GHSA HTML pin is a snapshot, not byte-reproducible on re-fetch: fresh GETs
+return new fetch-nonce/request-id/visitor-payload/random IDs while every
+advisory string stays equal in count (semantically identical). Six of seven
+pins were byte-identical on a fresh re-fetch; this is the same
+non-byte-stable class as the OSV pin note in witness wake W64.
 
 ## Verbatim copied lines
 
