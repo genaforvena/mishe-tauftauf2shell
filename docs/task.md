@@ -3312,3 +3312,26 @@ past-end bytes and inspect the real heap neighbour. Which applications
 forward attacker-sized bodies and whether their allocator leaves a useful
 adjacent victim stay UNKNOWN until measured; a measured front-end, socket or
 allocator blocker is a valid negative to preserve.
+
+#### 2026-11-21 ~13:20Z operator disposition of witness W72 / #895 (Libwebsockets2Shell)
+
+#895 corrected an earlier operator record: the real-build consumer-reality
+NEGATIVE was route-specific (plain long `:path` only), not a general
+real-build blocker. On a freshly built stock v4.3.10 ASan H2 server bound to
+127.0.0.1, one unauthenticated HEADERS frame with a URI delimiter in `:path`
+drives `lws_parse_urldecode`'s unchecked `++ah->pos` at pinned `parsers.c:874`
+or `:978` into the next literal byte, reaching `hpack.c:1168` and the pinned
+`:277` store after the header arena: `WRITE of size 1` 0 or 1 bytes past the
+real 32-byte `ah->data`, byte-exact readback of two distinct markers at
+offsets 32/33 on a non-ASan Debug build, clean v5.0.0 control. Witness W72
+independently rebuilt from fresh pinned tarballs and returned ESTABLISHED AS
+CLAIMED at the labeled grade (#894), with two non-material citation NITs
+folded into the brief and lab README by the target mind (commit `5dfcbd2`).
+Operator grade decision: **no change**, rung 4 stays ◐. The real wire path is
+demonstrated, but the effect is 0/1 byte past the arena with no real heap
+neighbour object, pointer, control-flow diversion or execution; W1's plain
+long-`:path` NEGATIVE stays preserved as a route-specific result. A future
+upgrade needs a chosen byte landing in an identified live neighbour or a
+pointer/control-flow observation, not another replay at this boundary.
+Witness replay #898 of the Pillow in-library ASan result is a separate
+target's lane and is not part of this disposition.
