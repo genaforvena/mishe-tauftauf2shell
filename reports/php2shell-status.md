@@ -1119,11 +1119,17 @@ pair (no new build, default ZendMM). Gitignored evidence
   orphaned; fixed `int(3)` with both comments, matching vendor EXPECT.
 - No ASan/UBSan report, rc=0 both binaries: hunk 2 corrupts DOM tree state,
   not allocator memory, on these inputs.
-Negative probe (throwaway, gitignored): keeping a reference to the orphaned
+Negative probes (throwaway, gitignored): keeping a reference to the orphaned
 comment, `removeChild()` and `gc_collect_cycles()` under `USE_ZEND_ALLOC=0`
-gave no ASan report; libxml tolerates the inconsistent list. Fixed keeps 2
-children where affected keeps 1. No UAF/invalid deref reached.
+gave no ASan report; libxml tolerates the inconsistent list. A retained
+original child also kept a valid `parentNode` after dropping the document.
+Fixed keeps 2 children where affected keeps 1. No UAF/invalid deref reached.
 Grade unchanged: rung 3 CONFIRMED for 129501 comes from wake 51's hunk-1
 double free; hunk 2 is a confirmed DOM-state fault patch-sensitive to the
-exact 8.5.13 source and adds no rung-3/4 claim. tcache escalation deferred
-(no ASan `replace_malloc=0` flag, 2-core host).
+exact 8.5.13 source and adds no rung-3/4 claim. tcache escalation CLOSED
+NEGATIVE: the only owned prefix is `dom_xml_generate_a_prefix` (`"ns"+%u`,
+max 13-byte request = glibc 0x20 bin); a PHP `zend_string` is >=32 bytes
+(0x30/ZendMM 32-class) and all other `dom_xml_ns_prefix_map_add` callers pass
+`prefix_owned=false`. No controlled-size PHP string can be interposed in that
+bin; no plain DOM build needed. Revisit only with a different owned-prefix
+source.

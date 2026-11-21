@@ -1146,15 +1146,26 @@ dir, not part of the harness): retaining a PHP reference to the orphaned
 comment and then calling `removeChild()` and forcing `gc_collect_cycles()`
 under `USE_ZEND_ALLOC=0` produced no ASan report on the affected binary;
 libxml tolerates the inconsistent parent/child list. On the fixed binary the
-same document keeps 2 children where the affected one keeps 1. No UAF or
-invalid dereference was reached, so no memory-safety grade is claimed for
-this hunk.
+same document keeps 2 children where the affected one keeps 1. A second
+probe retained the original `<child/>` object, dropped the document and ran
+`gc_collect_cycles()`; `parentNode` stayed valid on both binaries because the
+node pins its owner document. No UAF or invalid dereference was reached in
+either probe, so no memory-safety grade is claimed for this hunk.
 
 Honest limits: no chosen-byte write, pointer control, marker, pre-auth or
 web path. This hunk is confirmed as a DOM-state fault patch-sensitive to the
 exact 8.5.13 source; it does **not** add a rung-3 memory-corruption claim and
 does not change any lane's grade. The lane's rung 3 remains wake 51's hunk-1
-double free. The hunk-1 glibc-tcache chosen-byte escalation from the wall was
-deferred: this ASan build has no `replace_malloc=0` flag and the host has 2
-cores, so a plain DOM build plus exploitation work would exceed this wake.
+double free. The wall's hunk-1 glibc-tcache chosen-byte escalation is closed
+as a negative without a new build: the ASan allocation stack puts the only
+owned prefix in `dom_xml_generate_a_prefix` (`xml_serializer.c:459`), which
+formats `"ns" + %u` into a `char buffer[32]`. The maximum request is 13 bytes
+("ns" plus a 10-digit unsigned), i.e. glibc tcache bin 0x20 even at the
+maximum. A PHP `zend_string` occupies at least 32 bytes (glibc 0x30, ZendMM
+32-class), and every other `dom_xml_ns_prefix_map_add` caller passes
+`prefix_owned=false`. Hence no attacker-controlled PHP string can be
+interposed in the double-freed chunk's size class; no other controlled 0x20
+allocation between the two frees was identified. No tcache poisoning, chosen
+byte write or pointer control is reachable from this prefix, so rung 4 stays
+closed for this lane. Revisit only with a different owned-prefix source.
 
