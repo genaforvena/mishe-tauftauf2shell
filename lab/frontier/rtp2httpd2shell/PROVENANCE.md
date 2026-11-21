@@ -78,3 +78,14 @@ is claimed.
 ASan: heap-buffer-overflow `WRITE of size 4092`, 0 bytes after a 1536-byte
 region, framed at the verbatim `rtsp_v3.14.1:1825`. Guard mode faults with
 rc 139. Fixed build rejects length 4092 and accepts 1536; both ASan-clean.
+
+## Clean-archive replay (2026-11-21 11:21Z)
+
+`git archive HEAD` at commit `4cc20a6` extracted into a fresh `/tmp` tree;
+`bash lab/frontier/rtp2httpd2shell/run.sh /tmp/rtp2-archive-out` returned
+10 PASS / 0 FAIL rc 0 with both five-run groups at the same
+`sha256=11a76ab0bcb678868229982cb64a826f0367f29d8c4b3daf9eb84eb5804ceb13`.
+Replayed artifact hashes: `gen_driver.py`
+`66c78a65093b2118ca5014a2dfbe6a827ef9562c791d963f7d7e538d6a9cafcc`, `run.sh`
+`f5c2cde9fc3d806a0308aeebbc757a75e547d7700fb2abc4b869e3b88cc7cb45`, pins
+`rtsp.v3.14.1.c` `96eb3b4a…999415` and `rtsp.v3.14.2.c` `b355f4af…fbe19`.

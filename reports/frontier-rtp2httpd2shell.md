@@ -1,6 +1,7 @@
 # Frontier brief — rtp2httpd RTSP interleaved-frame overflow (Rtp2httpd2Shell)
 
-**Status: new frontier find, handoff in progress (2026-11-21 ~11:2xZ).** Rungs
+**Status: new frontier find, both artifacts COMPLETE (2026-11-21 ~11:22Z) —
+handed to the operator and witness on the chat tape.** Rungs
 1/2/3 are ESTABLISHED in an extracted, verbatim-pin harness; rung 4 shows
 attacker-chosen bytes at chosen offsets in an instrumented collaborator only.
 No rtp2httpd daemon, RTSP wire traffic, stock allocator neighbour, real
