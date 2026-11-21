@@ -1,11 +1,15 @@
-# Frontier brief — hnswlib HNSW index loader capacity/count mismatch (queued candidate eleven)
+# Frontier brief — hnswlib HNSW index loader mismatch (HnswLib2Shell)
 
-**Status: CANDIDATE BRIEF ONLY — harness NOT built, NO window, NO witness
-request, NO operator admission request.** Written 2026-11-21 ~13:11Z from
-read-only provisioning. The next frontier wake should decide whether to build
-it; the missing release-grade fixed side is the main reason it was ranked below
-RabbitMQC2Shell this wake. All line numbers below were checked against raw
-pinned bytes, not rendered readers.
+**Status: new frontier find, brief + harness COMPLETE (2026-11-21 ~13:14Z) —
+pending independent witness replay and operator admission.** Rungs 1/2/3 are
+ESTABLISHED on the real, verbatim-pinned v0.9.0 library: rung 3 is the ASan
+report, rungs 1/2 run unsanitized. Rung 4 shows attacker-chosen bytes at chosen
+offsets past the 256-byte level0 buffer through the library's own
+`std::istream::read`, reached by the ordinary `HierarchicalNSW(space, path)`
+load constructor. The fixed side is an **UNMERGED PR head** (PR #677, commit
+`280cb597…`), not a released version — label it that way in every claim. No
+index-loading application, network listener, real heap neighbour object,
+pointer, control-flow diversion or execution was observed — all UNKNOWN.
 
 ## Verified ground truth (claim sources + raw pins)
 
@@ -65,31 +69,60 @@ sink at `:707-708`, `:755`, `:758` (21 lines early). Those are `writeBinaryPOD`
 and the link-list walk in the pinned bytes. The operative lines in raw
 `d9b3608` are `:728`, `:729`, `:776` and `:779` as above. Raw pins win.
 
+## Lab evidence
+
+`cd lab/frontier/hnswlib && bash run.sh <outdir>`:
+
+- 9 PASS / 0 FAIL, exit 0. Two independent five-run groups both
+  `sha256=26adac439ba80f57699e7544327fefc4dfa3bc667e13d1ba463d134d36fab3d7`.
+- Rung 1: an unsanitized load of the crafted index aborts on heap corruption.
+- Rung 2: the file's `cur_element_count` (512) drives the level0 read into an
+  allocation sized from the stored capacity (2 × 128 = 256 bytes).
+- Rung 3 (ASan): `heap-buffer-overflow`, `WRITE of size 65472`, 0 bytes after a
+  256-byte region, frames `hnswalg.h:779` ← `:776` ← `:85`.
+- Rung 4 (INSTRUMENTED chosen-byte control): with the level0 buffer placed in
+  page-aligned memory by the harness allocator, `0x5a` and `0xa5` each read
+  back at offsets +0/+32/+64/+128/+256/+512/+1024/+4096 from that 256-byte
+  destination after the library's own `std::istream::read`.
+- Negative controls: the PR-head guard throws `Index seems to be corrupted or
+  unsupported` with no ASan report; an index with a capacity that fits loads
+  clean on both builds.
+
+**Harness boundary, stated plainly**: the ASan rung uses the library's own
+`malloc` and reports the upstream read directly — no shim performs the write.
+For chosen-byte observation a link-time `malloc` interposer relocates the
+library's real level0 buffer into readable page-aligned memory; that changes
+placement, never the library code that writes. A signal handler prints the
+retained bytes when the loader's *downstream* unchecked link-list loops corrupt
+the heap; those loops are a consequence, not the measured primitive. No guard
+page proof was obtained for this find. Determinism lines carry no addresses,
+paths or PIDs.
+
 ## Rung-4 feasibility assessment
 
 Primitive quality is high: a file-deserialization count drives a bulk heap
 write with attacker-chosen length *and* content, through an ordinary public
 load path (`HierarchicalNSW<float>(&space, "index.bin")`, and the Python
 `Index.load()` binding). No auth, no network service, no non-default option.
-The blockers are (a) no released fixed version, so the fixed-side negative must
-be a PR-head build and labeled accordingly, and (b) the consumer question:
+The blockers are (a) no released fixed version — the fixed-side negative is a
+PR-head build and must stay labeled as such, and (b) the consumer question:
 which applications load untrusted index files, their allocator and heap
 layout, and whether chosen bytes can reach an object header or pointer. None
 of that was measured here — all UNKNOWN.
 
-**Cheapest local experiment**: save a normal index with the pinned library
-(e.g. 512 points, 21 float dims, M=4), patch the 8-byte `max_elements_` field
-at file offset 8 down to a small value, load the file under ASan with
-`max_elements_i = 0`, and expect `WRITE of size C*S` past an `M*S` region from
-`hnswalg.h:779`. Then compile the PR-head header with the five-line guard and
-confirm the same file throws `Index seems to be corrupted or unsupported`
-before the allocation. Because this path is a serialization *reader* rather
-than a network parser, a rung-4 push would additionally need a real
-index-loading service on loopback and a heap-neighbour inspection.
+**Cheapest rung-raising experiment**: write a loopback-only service that
+accepts an index file from a local socket and calls the pinned v0.9.0 load
+constructor under ASan and gdb. Send the crafted 5a index; confirm the WRITE at
+`hnswalg.h:779` inside the service process, freeze the first past-end bytes and
+inspect the real heap neighbour under gdb before any pointer claim. A second
+harness should cover the Spotify Voyager path, whose header layout differs.
+This belongs to a dedicated target mind after admission, not this
+extracted-driver lane.
 
 ## Scope and boundaries
 
-Read-only provisioning only; no harness was built, no process was run, no
-window was created, no witness or operator DM was sent for this candidate.
-No other plant, node or external system was touched. This brief does not claim
-any rung: every observation here is from a pinned advisory or raw source.
+Read-only provisioning of advisories and source; all process runs stay local
+with no network, broker or external probe. Harness stand-ins and copied ranges
+are enumerated in `PROVENANCE.md`. No other plant, node or external system was
+touched. The unmerged fixed side and the UNKNOWN consumer are the two explicit
+limits on this claim.
