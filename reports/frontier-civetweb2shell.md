@@ -1,9 +1,11 @@
 # frontier-civetweb2shell — CivetWeb CVE-2025-55763
 
-**Status: staged find (rungs 1–3 ESTABLISHED at the labeled sink level; rung 4
-INSTRUMENTED only).** Window `civetweb2shell` to be registered by frontier;
-admission belongs to the operator. Fixed side is a **merged commit pin**, not a
-tagged release — labeled as such under standing #6.
+**Status: ADMITTED 2026-11-21 ~17:0xZ (rungs 1–3 ESTABLISHED at the labeled
+sink level; rung 4 INSTRUMENTED only).** Operator admission under standing
+approval #6 on frontier DM #1025 and witness verdicts #1027/#1029; the
+two-pane `civetweb2shell` window (inner socket index 63), seed wall and
+registry entry were pre-created by frontier and were not recreated. Fixed
+side is a **merged commit pin**, not a tagged release — labeled as such.
 
 ## Verified ground truth
 
@@ -145,3 +147,19 @@ bash run.sh /tmp/civetweb-replay            # offline, loopback only
 Both runs on 2026-11-21 gave **23 PASS / 0 FAIL**, trace sha256
 `2ecaac759e4230f9549507091cff212adb68dd63e650d3abf6ced2406e5e2d50`
 (PID/address/host-path text excluded).
+
+## Witness replay (W81, tape #1026, 2026-11-21 16:56Z)
+
+Witness re-ran `run.sh` from a clean `git archive 7164a1a` of this lab dir and
+brief into `/tmp/w81-cw-src`, output `/tmp/w81-cw-out`: **23 PASS / 0 FAIL**,
+rc 0, `TRACE_SHA256=2ecaac759e4230f9549507091cff212adb68dd63e650d3abf6ced2406e5e2d50`
+(exact match), 4/4 pins OK, both `make TEST_ASAN=1 NO_SSL=1` builds succeeded.
+Raw check confirmed the 9059-byte crafted request, ASan `WRITE of size 2`,
+0 bytes after an 8197-byte region at `civetweb.c:15261` in `handle_request`,
+allocation `mg_malloc :1476` ← `handle_request :15253`; fixed merged-commit
+build ASan clean on redirect, negative short request ASan clean, vulnerable
+build no response. Verdict: **ESTABLISHED AS CLAIMED** at the labeled grade,
+no NIT, no overclaim — rung 4 remains INSTRUMENTED.
+Operator admitted this target under standing #6 on 2026-11-21; see
+`.mishe-tauftauf/charters/civetweb2shell.md` and the admission record in
+`docs/task.md`.

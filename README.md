@@ -84,10 +84,11 @@ independent replay at that scope. Author reports are never acceptance.
 | **OpenJpeg2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a TLM-declared one-entry 24-byte `tp_index` meets an unbounded SOT `TPsot=1`; pinned `opj_j2k_read_sod` (`j2k.c:5086/:5088`, OpenJPEG 2.5.4) stores two 8-byte codestream offsets at allocation base +32/+40, 8/16 bytes past the region. ASan `WRITE of size 8` at `j2k.c:5086` through the real `opj_decompress` chain; fixed master pin `91d08b11` (no tagged release) guards both stores and is clean. Rung 4 INSTRUMENTED: chosen 64-bit stream offsets byte-exact at +32/+40 in staged heap (PoC 157/159, pad-tuned 541/543). No JPEG 2000 application, listener, live heap neighbour, pointer, control flow or execution. Witness #955/#958 ESTABLISHED AS CLAIMED at labeled grades. [Brief](reports/frontier-openjpeg2shell.md) |
 | **WolfSsl2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a `word16` truncation in pinned `Dtls13GetAckListLength` (`dtls13.c:2550`, wolfSSL v5.9.0) declares 16 bytes for 4097 ACK record numbers (exact 65552); `Dtls13WriteAckMessage` sizes a 31-byte region via `CheckAvailableSize` then emits 16 bytes per record with `c64toa` of sender-chosen epoch/seq at `:2604`/`:2606` (ASan `WRITE of size 8` in `misc.c:1010`). Tagged fixed v5.9.1 caps records at 128 and is clean. Rung 4 INSTRUMENTED: chosen epoch `0xc0ffee1122334455` and seq patterns read back byte-exact at offsets 31/47/63/159 in staged non-ASan heap. No DTLS socket, listener, handshake record path, live neighbour, pointer, control flow or execution. CVE-2026-6679 / GHSA-c9q2-5c67-xg9p, pre-auth network claim; witness #985 ESTABLISHED AS CLAIMED at the labeled grades. [Brief](reports/frontier-wolfssl2shell.md) |
 | **Htslib2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a CRAM v4 compression header drives `hdr->ncodecs` past 511, so pinned `cram_codecs.c:1378` reads and `:1388` writes `slice->block_by_id[512 + codec_id]` (HTSlib 1.23.1, `codec_id=1` → index 513 into a 512-slot array allocated at `cram_io.c:4620`); ASan `READ`/`WRITE of size 8` 8 bytes after a 4096-byte region, fixed tagged 1.24 removes XPACK/XRLE and rejects codec 51. Rung 4 INSTRUMENTED only: no CRAM file, parser path from file bytes, consumer, listener, chosen pointer, live neighbour, control flow or execution; the index-1025 live-heap negative is preserved. CVE-2026-62257 / GHSA-6q7c-m967-9v37; 10 pins, 9 PASS / 0 FAIL, trace `40f59924…8c04f464`; witness #1008 ESTABLISHED AS CLAIMED at labeled grades. [Brief](reports/frontier-htslib2shell.md) |
+| **CivetWeb2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a 9059-byte request (`GET /` + 9000 `/` + `d?q=1`) against pinned CivetWeb v1.16 collapses through `remove_dot_segments` to the real directory `/d` while the raw 9002-byte path fills an 8197-byte `mg_malloc` allocation sized at `civetweb.c:15247–15253`, so the redirect `strcat` at `:15261` writes `?\0` 0 bytes past the region. ASan `WRITE of size 2` in `handle_request` through the real 127.0.0.1 listener; fixed **merged commit** `c584455` (not a tagged release) is ASan clean and returns 301. Rung 4 INSTRUMENTED only: no chosen pointer, live neighbour, control-flow diversion or execution; published RCE claim unverified and CISA's vector is availability-only. CVE-2025-55763; 4 pins, 23 PASS / 0 FAIL, trace `2ecaac75…e2d50`; witness #1027/#1029 ESTABLISHED AS CLAIMED at labeled grades. [Brief](reports/frontier-civetweb2shell.md). |
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 53 target
+Each admitted family is its own mind with its own tmux window: 54 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -101,7 +102,7 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `rtp2httpd2shell`, `zephyr2shell`, `zenohpico2shell`, `libwebsockets2shell`,
 `pillow2shell`, `datasketches2shell`, `rabbitmqc2shell`, `hnswlib2shell`,
 `asn1scc2shell`, `iec618502shell`, `openjpeg2shell`,
-`wolfssl2shell` and `htslib2shell`. Each builds
+`wolfssl2shell`, `htslib2shell` and `civetweb2shell`. Each builds
 affected and fixed versions locally, writes harnesses, drives toward rung 4
 and authors its report under `reports/`.
 

@@ -3813,3 +3813,42 @@ real CRAM v4 file driving `hdr->ncodecs` past 511 into pinned 1.23.1
 `htsfile`/`samtools` under ASan on loopback, with a gdb watchpoint on
 `slice->block_by_id[512]` and inspection of any live heap neighbour before a
 pointer claim.
+
+#### Admitted 2026-11-21 ~17:0xZ: CivetWeb2Shell / civetweb2shell (CVE-2025-55763)
+
+Frontier's admission request #1025 carried brief
+`reports/frontier-civetweb2shell.md`, harness `lab/frontier/civetweb2shell`
+(commit `7164a1a`, four pins, 23 PASS / 0 FAIL, trace
+`2ecaac759e4230f9549507091cff212adb68dd63e650d3abf6ced2406e5e2d50`,
+reproduced twice), a seed wall and an already-live two-pane window (inner
+socket index 63). Witness verdicts #1027/#1029 replayed a clean
+`git archive 7164a1a` with an offline rebuild: 4/4 pins, 23 PASS / 0 FAIL
+rc 0, exact trace match, ASan `WRITE of size 2` at `civetweb.c:15261` in
+`handle_request` reached through the real listener, 0 bytes after an
+8197-byte region, fixed merged commit `c584455` build ASan clean with 301.
+The operator admitted this target under standing approval #6, no re-ask.
+All five elements are in `.mishe-tauftauf/charters/civetweb2shell.md`:
+**claim source** — CVE-2025-55763, MITRE record published 2025-08-29,
+CISA-ADP CVSS 3.1 7.5 HIGH with an availability-only vector, public
+`krispybyte` PoC, four SHA-256 pins in
+`lab/frontier/civetweb2shell/src/SHA256SUMS`. **Identifier** —
+CVE-2025-55763. **Affected/fixed pin** — affected 1.14–1.16, vulnerable
+tagged v1.16, fixed only as merged commit `c584455`
+(`civetweb/civetweb#1347`); no tagged fixed release is claimed. **Primitive**
+— raw 9002-byte request path survives `remove_dot_segments` cleaning to `/d`
+and fills the 8197-byte redirect buffer allocated at `civetweb.c:15253`, so
+`:15261` stores `?\0` 0 bytes past the region. **Rung-4 plausibility** — a
+real network-facing C listener and deterministic trigger, but a bounded
+string append, not a pointer write; the RCE claim is unverified.
+
+Rungs 1/2/3 ESTABLISHED at the labeled sink/accounting/ASan grades; rung 4
+INSTRUMENTED only — no chosen pointer, live neighbour, control-flow
+diversion or execution. Preserved negatives: public PoC returns 404 in the
+test document root, long query with short path returns clean 301, short
+slash run is a clean control. The two-pane window, seed wall and registry
+entry were pre-created by frontier and were not recreated or edited. The
+operator created the 58th `engine/routes.json` entry and this mind's wake
+trigger units with the pinned full-flag sync from `docs/runtime-pin.md`;
+never run a bare `mishe sync`. Cheapest next rung: groom the heap so a known
+live object follows `new_path`, then send a controlled query and inspect
+that object's bytes before making any rung-4 claim.
