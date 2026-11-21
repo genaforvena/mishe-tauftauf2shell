@@ -1,13 +1,15 @@
 # Frontier brief — libwebsockets HTTP/2 HPACK path OOB write (Libwebsockets2Shell)
 
-**Status: new frontier find, brief + harness COMPLETE (2026-11-21 ~12:20Z) —
-pending independent witness replay and operator admission.** Rungs 1/2/3 are
-ESTABLISHED in an extracted, verbatim-pin harness; rung 4 shows
-attacker-chosen wire-derived bytes at chosen offsets just past a bounded
-header arena in an instrumented collaborator only. No HPACK frame, HTTP/2
-server, socket, real heap neighbour, pointer, control-flow diversion or
-execution was observed — all stay UNKNOWN. The advisory's "execute arbitrary
-code" is a claim to reproduce, not a result obtained here.
+**Status: brief + harness COMPLETE, admitted by the operator 2026-11-21
+12:25Z; witness W68 verdict ESTABLISHED AS CLAIMED at the labeled grade.**
+Rungs 1/2/3 ESTABLISHED in an extracted, verbatim-pin harness; rung 4 shows
+attacker-chosen bytes at chosen offsets just past a bounded header arena in an
+instrumented collaborator only. A loopback real-build check (below) shows the
+claimed long-`:path` route does **not** reach the past-end store in v4.3.10:
+the real caller stops at the boundary. No real heap neighbour, pointer,
+control-flow diversion or execution was observed — all stay UNKNOWN. The
+advisory's "execute arbitrary code" is a claim to reproduce, not a result
+obtained here.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -36,7 +38,8 @@ code" is a claim to reproduce, not a result obtained here.
 - **Raw sources**: `lib/roles/h2/hpack.c` at `v4.3.10` (affected) and `v5.0.0`
   (fixed), plus the patch, CVE JSON and ZDI page — five SHA-256 pins listed in
   `lab/frontier/libwebsockets2shell/PROVENANCE.md`, re-verified by
-  `gen_driver.py` on every run (exit 2 on drift). The rendered URL reader
+  `gen_driver.py` on every run (exits 1 on pin drift via `sys.exit(str)` at
+  `gen_driver.py:29`). The rendered URL reader
   placed the function at `:279-287`; raw pinned bytes and the patch hunk
   (`@@ -274,6 +274,9 @@`) put it at `:273-281`. Raw bytes are authoritative.
 - **This lab**: extracted C driver whose fault statements are byte-for-byte
@@ -53,18 +56,24 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
    the attacker-supplied HPACK `:path` value (optionally Huffman-decoded
    earlier in the same function).
 2. `:1168` calls `lws_frag_append(wsi, c1)` and returns on a nonzero result.
-   The chosen value therefore reaches the store in the very next step.
+   Raw `:280` returns true once `pos >= max_http_header_data`, so this real
+   caller stops when the arena fills: it cannot supply a chosen byte at
+   `pos == limit`. The harness hand-stages that precondition
+   (`gen_driver.py:106`, chain mode `:122`); real-path reachability of a
+   chosen-byte OOB stays UNKNOWN.
 3. `:273-281` is `lws_frag_append`: `:275` fetches `wsi->http.ah`; `:277`
    executes `ah->data[ah->pos++] = (char)c` with no prior bound check;
    `:280` tests `pos >= max_http_header_data` only **after** the store. The
-   context setting `max_http_header_data` bounds the allocated
-   `allocated_headers.data`, so a long decoded `:path` drives `pos` to the
-   allocation end and the next byte lands one past it.
-4. Because the caller returns immediately when `:280` becomes true, the
-   reachable primitive in this path is a **single chosen byte** just past the
-   arena. A possible terminating NUL from `lws_frag_end` (`:283-295`, which
-   calls `lws_frag_append(wsi, 0)` at `:289`) was not exercised and stays
-   UNKNOWN.
+   context setting `max_http_header_data` bounds the separately malloc'd
+   `allocated_headers.data`, so a staged `pos == limit` puts the next stored
+   byte one past that arena. The post-write check is the consumer detail
+   that blocks the naive long-`:path` route.
+4. All three real call sites (`:286`, `:744`, `:1168`) check the return, so
+   the reachable primitive on the real path is UNKNOWN, not an observed
+   chosen byte. A possible terminating NUL from `lws_frag_end` — raw v4.3.10
+   `:283-294`, calling `lws_frag_append(wsi, 0)` at `:286` (`:289` is a
+   comment) — was not exercised and stays UNKNOWN. The `:283-295` / `:289`
+   call-site numbering belongs to v5.0.0 (`:286-297` / `:289`), not v4.3.10.
 5. Fixed `v5.0.0:277-278` rejects `pos >= max_http_header_data` before the
    store; `:280` is the same assignment. The fix patch adds exactly that
    two-line guard plus a blank line and nothing else.
@@ -90,38 +99,73 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
   (limits 16/32/48), plus an independent `0xa5` run giving `oob0=a5` — the
   value is selected by the harness, not a fixed marker or adjacent heap word.
 - Guard page: the first past-end store faults SIGSEGV (rc 139).
-- Fixed `v5.0.0`: hostile `collab` returns `rv=1 pos=16 oob0=00` (no store,
-  sentinel-region byte intact); benign `inbounds` writes `last=41` normally.
-  Vulnerable benign, fixed hostile and fixed benign ASan runs are all clean —
-  counterexamples against an oracle that flags every input.
+- Fixed `v5.0.0`: hostile `collab` returns `rv=1 pos=16 oob0=00` (no store;
+  `00` is uninitialized past-end heap, not an installed sentinel); benign
+  `inbounds` writes `last=41` normally. Vulnerable benign, fixed hostile and
+  fixed benign ASan runs are all clean — counterexamples against an oracle
+  that flags every input.
+- The harness's 16/32/48 are logical limits; ASan/guard confirm a real
+  boundary at exact 16 and 24, not necessarily malloc chunk edges at every
+  limit. Since `0xa5` is also the `malloc` fill value, the `0x5a` runs carry
+  the chosen-value proof.
 
 ## Rung-4 feasibility assessment
 
-The primitive is a chosen-byte write: an unauthenticated HPACK-decoded `:path`
-byte supplies both value and arrival, and the landmark is a bounded
-`allocated_headers.data` arena. In the lab the **chosen byte lands at chosen
-offsets** past that arena (rung 4 INSTRUMENTED). Beyond that nothing is
-established: the harness allocates the arena alone in `exact`, `collab` or
-guard-page layouts, so no real chunk metadata, adjacent object, pointer or
-function pointer was overwritten; no control flow was diverted; no marker
-executed. The caller's early return limits this path to one past-end byte;
-whether libwebsockets' header-arena allocator places a live pointer in the
-following byte is UNKNOWN. Whether a stock v4.3.10 server reaches this decoder
-over an unauthenticated HTTP/2 connection is an advisory claim, not an
-observed local path.
+The harness primitive is a chosen-byte write at chosen offsets past a bounded
+arena (rung 4 INSTRUMENTED). It is not a real-path demonstration: the harness
+hand-stages `pos == limit`, allocates the arena alone, and observes neither a
+real chunk neighbour nor a pointer nor diverted control flow. The real
+consumer check below shows the naive long-`:path` route stops at the boundary.
 
-**Cheapest rung-raising experiment**: build libwebsockets at tag `v4.3.10`
-with `LWS_ROLE_H2` and ASan, set `max_http_header_data` to 32, start a server
-bound only to 127.0.0.1, and send one HEADERS frame whose decoded `:path`
-exceeds 32 bytes; expect the `WRITE of size 1` at pinned `:277`. Then freeze
-the first past-end byte with a chosen marker and inspect the adjacent
-allocation under gdb before claiming pointer control. That work belongs to a
-dedicated target mind after admission, not this extracted-driver lane.
+## Real-build consumer-reality check (2026-11-21, W1, NEGATIVE)
+
+Full source trees were fetched from the pinned tags under
+`lab/libwebsockets2shell-src/` (provisioning; never a network probe).
+`v4.3.10` was built with `LWS_WITH_ASAN=ON`, ASan+UBSan, Debug and HTTP/2;
+TLS was compiled in because `LWS_SERVER_OPTION_H2_PRIOR_KNOWLEDGE` switches
+roles through `lws_role_call_alpn_negotiated`, which compiles out under
+`LWS_WITH_SSL=OFF`. `max_http_header_data` was 32. A minimal server
+(`lab/libwebsockets2shell/h2server.c`) binds only 127.0.0.1;
+`lab/libwebsockets2shell/h2client.py` sends the HTTP/2 preface, an empty
+SETTINGS frame and one HEADERS frame whose HPACK literal `:path` (static
+index 5) decodes to 65, 201 or 8..200 bytes. Both built `hpack.c` files
+hash to the pins in `PROVENANCE.md`.
+
+Observed on v4.3.10 (raw logs in `lab/libwebsockets2shell/evidence/`):
+
+- `http/2 prior knowledge`, `http2: ... established` — the real H2 path ran;
+- `lws_hpack_interpret: frag app fail`, `lws_h2_parser: hpack failed`,
+  connection closed — the real caller returned at the boundary;
+- **no hpack-related ASan report** at any length, including 201 bytes and
+  the terminating-NUL limb;
+- a gdb breakpoint at raw `hpack.c:277` logged 253 actual stores over nine
+  path lengths (8/16/30/31/32/33/64/100/200): every store had `max=32` and
+  `pos` in 0..31, including NUL stores at `pos=9,13,18,28,31,...`. No call
+  entered the store at `pos >= 32`.
+- Source audit of the full v4.3.10 tree: `:277` is the only mutation of
+  `ah->pos` in H2, all three call sites (`:286`, `:744`, `:1168`) check the
+  post-write return, and `_lws_create_ah` allocates `ah->data` as a separate
+  `lws_malloc(data_size)` (`parsers.c:50`) — no live pointer sits inline
+  after the arena.
+
+v5.0.0 control (`h2server5r`, recoverable ASan): same `frag app fail` /
+`hpack failed`, no hpack ASan. Its startup alone reports an unrelated
+`stack-buffer-overflow` in `lws_sa46_parse_numeric_address`
+(`network.c:947`) during bind, before any connection;
+`-fsanitize-recover=address` kept the control running. That finding is not
+CVE-2026-19773.
+
+**Disposition**: for the claimed HPACK `:path` route in a stock v4.3.10
+server, a chosen-byte one-past-end write was NOT observed; the post-write
+check at `:280` and the caller return close it. Rung 4 real-path stays
+UNKNOWN/negative for this route and the harness's INSTRUMENTED grade is
+unchanged. Pointer control, control-flow diversion and the advisory's RCE
+remain undemonstrated. Other possible routes were not exercised and stay
+UNKNOWN.
 
 ## Scope and boundaries
 
-Loopback-only local process drivers; no HPACK frame, HTTP/2 connection or
-external probe. No libwebsockets source tree was built or run, no socket was
-opened, no stock allocator neighbour, real frame, transport, pointer or
+Loopback-only local process drivers and a loopback server; no external
+probe. Every socket was 127.0.0.1. No real heap neighbour, pointer or
 execution claim. Sources were fetched read-only as provisioning. Harness
 stand-ins and the exact copied ranges are enumerated in `PROVENANCE.md`.

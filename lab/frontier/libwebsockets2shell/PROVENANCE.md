@@ -19,16 +19,22 @@ The rendered URL reader reports the `lws_frag_append` function at `:279-287`
 the brief and generator come from the raw bytes and the fix patch hunk
 (`@@ -274,6 +274,9 @@`), not from the rendered reader.
 
-## Source-bound statements copied verbatim by `gen_driver.py`
+## Verbatim pin ranges and the hand-written caller shape
 
-- Affected v4.3.10 `hpack.c:273-281`: `:275` obtains `wsi->http.ah`; `:277`
-  writes `ah->data[ah->pos++] = (char)c` with no prior bound; `:280` checks
-  the bound only **after** the write. Caller `:1148-1168`: `:1151`
+- Affected v4.3.10 `hpack.c:273-281` is copied verbatim: `:275` obtains
+  `wsi->http.ah`; `:277` writes `ah->data[ah->pos++] = (char)c` with no prior
+  bound; `:280` checks the bound only **after** the write. Fixed v5.0.0
+  `hpack.c:273-284` is copied verbatim: `:277-278` rejects
+  `ah->pos >= max_http_header_data` before any write; `:280` is the store.
+- Caller `v4.3.10:1148-1172` is **hand-written**, not copied: `:1151`
   `lws_parse_urldecode(wsi, &c1)` supplies an attacker-chosen byte for a
-  `:path` header and `:1168` calls `lws_frag_append(wsi, c1)`, returning on a
-  nonzero result — so the real caller stops after the first past-end byte.
-- Fixed v5.0.0 `hpack.c:273-284`: `:277-278` rejects `ah->pos >=
-  max_http_header_data` before any write; `:280` is the same store.
+  `:path` header; `:1168` calls `lws_frag_append(wsi, c1)` and `:1172`
+  returns on a nonzero result. Raw `:280` returns true at `pos == limit`,
+  so the real caller cannot supply a chosen byte at that point. All three
+  real call sites (`:286`, `:744`, `:1168`) check the return; `:277` is the
+  only `pos` mutation. The harness hand-stages `pos == limit`
+  (`gen_driver.py:106`, chain mode `:122`). Real-path reachability of a
+  chosen-byte OOB remains UNKNOWN.
 - The upstream fix patch adds exactly those three guard lines.
 
 ## Harness stand-ins, all outside the copied statements

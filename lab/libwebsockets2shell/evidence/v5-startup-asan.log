@@ -1,0 +1,130 @@
+[2026/11/21 12:35:41:7615] D: _realloc: size 8760: context
+[2026/11/21 12:35:41:7618] N: lws_create_context: LWS: 5.0.0-7f3c703, OpenSSL 3.0.13 30 Jan 2024, NET CLI SRV H1 H2 SS-JSON-POL ConMon IPV6-on
+[2026/11/21 12:35:41:7618] I: lws_create_context: Event loop: poll
+[2026/11/21 12:35:41:7618] D: _realloc: size 72: lws_smd_register
+[2026/11/21 12:35:41:7618] I: lws_smd_register: peer 0x507000000090 (count 1) registered
+[2026/11/21 12:35:41:7618] D: _realloc: size 8388608: fds table
+[2026/11/21 12:35:41:7664] I: lws_create_context: ctx:  6960B (2864 ctx + pt(1 thr x 4096)), pt-fds: 1048576
+[2026/11/21 12:35:41:7664] I: lws_create_context:  http: ah_data: 32, ah: 904, max count 4
+[2026/11/21 12:35:41:7664] D: _realloc: size 8388608: lws_lookup
+[2026/11/21 12:35:41:7709] I: lws_plat_init:  mem: platform fd map: 8388608 B
+[2026/11/21 12:35:41:7709] D: _realloc: size 1800: __lws_wsi_create_with_role
+[2026/11/21 12:35:41:7709] D: : lws_role_transition: wsistate 0x200, ops pipe
+[2026/11/21 12:35:41:7709] I: __lws_lc_tag:  ++ [wsi|0|pipe] (1)
+[2026/11/21 12:35:41:7709] D: [wsi|0|pipe]: __insert_wsi_socket_into_fds: tsi=0, sock=4, pos-in-fds=0
+[2026/11/21 12:35:41:7709] I: rops_pt_init_destroy_netlink: creating netlink skt
+[2026/11/21 12:35:41:7710] D: _realloc: size 1800: __lws_wsi_create_with_role
+[2026/11/21 12:35:41:7710] D: : lws_role_transition: wsistate 0x200, ops netlink
+[2026/11/21 12:35:41:7710] I: __lws_lc_tag:  ++ [vh|0|netlink] (1)
+[2026/11/21 12:35:41:7710] D: [vh|0|netlink]: __insert_wsi_socket_into_fds: tsi=0, sock=6, pos-in-fds=1
+[2026/11/21 12:35:41:7710] D: rops_pt_init_destroy_netlink: starting netlink coldplug wait
+[2026/11/21 12:35:41:7710] I: lws_context_init_ssl_library:  SSL disabled: no LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT
+[2026/11/21 12:35:41:7710] I: lws_server_get_canonical_hostname:  canonical_hostname = mesh-home
+[2026/11/21 12:35:41:7710] D: _realloc: size 1119: lws_create_vhost
+[2026/11/21 12:35:41:7711] I: __lws_lc_tag:  ++ [vh|1|system||-1] (2)
+[2026/11/21 12:35:41:7711] D: _realloc: size 392: vh plugin table
+[2026/11/21 12:35:41:7711] D: _realloc: size 144: same vh list
+[2026/11/21 12:35:41:7711] I: [vh|1|system||-1]: lws_create_vhost: Creating Vhost 'system' (serving disabled), 6 protocols, IPv6 on
+[2026/11/21 12:35:41:7712] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-stdin
+[2026/11/21 12:35:41:7712] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-stdin
+[2026/11/21 12:35:41:7712] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-dir-notify
+[2026/11/21 12:35:41:7712] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-dir-notify
+[2026/11/21 12:35:41:7712] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-secstream-h1
+[2026/11/21 12:35:41:7712] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-secstream-h1
+[2026/11/21 12:35:41:7712] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-secstream-h2
+[2026/11/21 12:35:41:7712] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-secstream-h2
+[2026/11/21 12:35:41:7712] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-secstream-raw
+[2026/11/21 12:35:41:7712] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-secstream-raw
+[2026/11/21 12:35:41:7712] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-async-ipc
+[2026/11/21 12:35:41:7712] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-async-ipc
+[2026/11/21 12:35:41:7712] D: _realloc: size 1120: lws_create_vhost
+[2026/11/21 12:35:41:7712] I: __lws_lc_tag:  ++ [vh|2|default|127.0.0.1|127.0.0.1|18785] (3)
+[2026/11/21 12:35:41:7712] D: _realloc: size 336: vh plugin table
+[2026/11/21 12:35:41:7713] D: _realloc: size 120: same vh list
+[2026/11/21 12:35:41:7713] I: [vh|2|default|127.0.0.1|127.0.0.1|18785]: lws_create_vhost: Creating Vhost 'default' port 18785, 5 protocols, IPv6 on
+[2026/11/21 12:35:41:7713] I: _lws_vhost_init_server_af: af 2
+[2026/11/21 12:35:41:7717] D:  interface lo vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface enp42s0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface wlxbcec43434a22 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface docker0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface veth31b3f3e vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface veth8fe685a vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface veth5acedf0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface lo vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface enp42s0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:35:41:7717] D:  interface tailscale0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface docker0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface lo vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface enp42s0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface tailscale0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface docker0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface veth31b3f3e vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface veth8fe685a vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:35:41:7718] D:  interface veth5acedf0 vs 127.0.0.1 (fam 10) ipv6 0
+=================================================================
+==2878200==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7e839c300070 at pc 0x7e839f6fa97d bp 0x7ffdf3bcabd0 sp 0x7ffdf3bca378
+WRITE of size 28 at 0x7e839c300070 thread T0
+    #0 0x7e839f6fa97c in memset ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87
+    #1 0x5c6e693bc84b in lws_sa46_parse_numeric_address /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:947
+    #2 0x5c6e694e323a in lws_interface_to_sa /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/plat/unix/unix-sockets.c:451
+    #3 0x5c6e693b7513 in interface_to_sa /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:96
+    #4 0x5c6e693b8dce in lws_socket_bind /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:396
+    #5 0x5c6e69433e44 in _lws_vhost_init_server_af /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/roles/http/server/server.c:137
+    #6 0x5c6e69437e19 in _lws_vhost_init_server /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/roles/http/server/server.c:581
+    #7 0x5c6e693cd15f in lws_create_vhost /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/vhost.c:1238
+    #8 0x5c6e6936ac7b in lws_create_context /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core/context.c:1578
+    #9 0x5c6e69363264 in main ../h2server.c:65
+    #10 0x7e839e42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x7e839e42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x5c6e69362c64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/h2server5+0x52c64) (BuildId: 4edcc1648101fae219aa0c1a834195458932a170)
+
+Address 0x7e839c300070 is located in stack of thread T0 at offset 112 in frame
+    #0 0x5c6e693b86d2 in lws_socket_bind /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:293
+
+  This frame has 11 object(s):
+    [48, 52) 'len' (line 304)
+    [64, 68) 'uid' (line 467)
+    [80, 84) 'gid' (line 468)
+    [96, 112) 'serv_addr4' (line 301)
+    [128, 156) 'serv_addr6' (line 298) <== Memory access at offset 112 partially underflows this variable
+    [192, 302) 'serv_unix' (line 295)
+    [336, 464) 'sin' (line 310)
+    [496, 512) 't16' (line 437)
+    [528, 544) 't16' (line 448)
+    [560, 576) 't16' (line 503)
+    [592, 664) 'buf' (line 528)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87 in memset
+Shadow bytes around the buggy address:
+  0x7e839c2ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7e839c2ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7e839c2ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7e839c2fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7e839c2fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7e839c300000: f1 f1 f1 f1 f1 f1 04 f2 04 f2 04 f2 00 00[f2]f2
+  0x7e839c300080: 00 00 00 04 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x7e839c300100: 00 00 00 00 00 06 f2 f2 f2 f2 00 00 00 00 00 00
+  0x7e839c300180: 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2 00 00
+  0x7e839c300200: f2 f2 00 00 f2 f2 00 00 f2 f2 00 00 00 00 00 00
+  0x7e839c300280: 00 00 00 f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2878200==ABORTING

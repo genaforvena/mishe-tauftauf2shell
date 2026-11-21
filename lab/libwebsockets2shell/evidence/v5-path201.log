@@ -1,0 +1,1072 @@
+[2026/11/21 12:36:43:6604] D: _realloc: size 8760: context
+[2026/11/21 12:36:43:6607] N: lws_create_context: LWS: 5.0.0-d72ad24, OpenSSL 3.0.13 30 Jan 2024, NET CLI SRV H1 H2 SS-JSON-POL ConMon IPV6-on
+[2026/11/21 12:36:43:6607] I: lws_create_context: Event loop: poll
+[2026/11/21 12:36:43:6607] D: _realloc: size 72: lws_smd_register
+[2026/11/21 12:36:43:6607] I: lws_smd_register: peer 0x507000000090 (count 1) registered
+[2026/11/21 12:36:43:6607] D: _realloc: size 8388608: fds table
+[2026/11/21 12:36:43:6655] I: lws_create_context: ctx:  6960B (2864 ctx + pt(1 thr x 4096)), pt-fds: 1048576
+[2026/11/21 12:36:43:6655] I: lws_create_context:  http: ah_data: 32, ah: 904, max count 4
+[2026/11/21 12:36:43:6655] D: _realloc: size 8388608: lws_lookup
+[2026/11/21 12:36:43:6704] I: lws_plat_init:  mem: platform fd map: 8388608 B
+[2026/11/21 12:36:43:6704] D: _realloc: size 1800: __lws_wsi_create_with_role
+[2026/11/21 12:36:43:6704] D: : lws_role_transition: wsistate 0x200, ops pipe
+[2026/11/21 12:36:43:6704] I: __lws_lc_tag:  ++ [wsi|0|pipe] (1)
+[2026/11/21 12:36:43:6705] D: [wsi|0|pipe]: __insert_wsi_socket_into_fds: tsi=0, sock=4, pos-in-fds=0
+[2026/11/21 12:36:43:6705] I: rops_pt_init_destroy_netlink: creating netlink skt
+[2026/11/21 12:36:43:6705] D: _realloc: size 1800: __lws_wsi_create_with_role
+[2026/11/21 12:36:43:6705] D: : lws_role_transition: wsistate 0x200, ops netlink
+[2026/11/21 12:36:43:6705] I: __lws_lc_tag:  ++ [vh|0|netlink] (1)
+[2026/11/21 12:36:43:6705] D: [vh|0|netlink]: __insert_wsi_socket_into_fds: tsi=0, sock=6, pos-in-fds=1
+[2026/11/21 12:36:43:6705] D: rops_pt_init_destroy_netlink: starting netlink coldplug wait
+[2026/11/21 12:36:43:6705] I: lws_context_init_ssl_library:  SSL disabled: no LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT
+[2026/11/21 12:36:43:6705] I: lws_server_get_canonical_hostname:  canonical_hostname = mesh-home
+[2026/11/21 12:36:43:6705] D: _realloc: size 1119: lws_create_vhost
+[2026/11/21 12:36:43:6706] I: __lws_lc_tag:  ++ [vh|1|system||-1] (2)
+[2026/11/21 12:36:43:6706] D: _realloc: size 392: vh plugin table
+[2026/11/21 12:36:43:6706] D: _realloc: size 144: same vh list
+[2026/11/21 12:36:43:6707] I: [vh|1|system||-1]: lws_create_vhost: Creating Vhost 'system' (serving disabled), 6 protocols, IPv6 on
+[2026/11/21 12:36:43:6707] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-stdin
+[2026/11/21 12:36:43:6707] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-stdin
+[2026/11/21 12:36:43:6707] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-dir-notify
+[2026/11/21 12:36:43:6707] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-dir-notify
+[2026/11/21 12:36:43:6707] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-secstream-h1
+[2026/11/21 12:36:43:6707] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-secstream-h1
+[2026/11/21 12:36:43:6707] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-secstream-h2
+[2026/11/21 12:36:43:6707] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-secstream-h2
+[2026/11/21 12:36:43:6707] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-secstream-raw
+[2026/11/21 12:36:43:6707] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-secstream-raw
+[2026/11/21 12:36:43:6707] D: [vh|1|system||-1]: lws_protocol_init_vhost: not instantiating lws-async-ipc
+[2026/11/21 12:36:43:6708] I: [vh|1|system||-1]: lws_protocol_init_vhost: init system.lws-async-ipc
+[2026/11/21 12:36:43:6708] D: _realloc: size 1120: lws_create_vhost
+[2026/11/21 12:36:43:6708] I: __lws_lc_tag:  ++ [vh|2|default|127.0.0.1|127.0.0.1|18786] (3)
+[2026/11/21 12:36:43:6708] D: _realloc: size 336: vh plugin table
+[2026/11/21 12:36:43:6708] D: _realloc: size 120: same vh list
+[2026/11/21 12:36:43:6708] I: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_create_vhost: Creating Vhost 'default' port 18786, 5 protocols, IPv6 on
+[2026/11/21 12:36:43:6709] I: _lws_vhost_init_server_af: af 2
+[2026/11/21 12:36:43:6713] D:  interface lo vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface enp42s0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface wlxbcec43434a22 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface docker0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface veth31b3f3e vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface veth8fe685a vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface veth5acedf0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface lo vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface enp42s0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface tailscale0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface docker0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface lo vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface enp42s0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:6713] D:  interface tailscale0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:6714] D:  interface docker0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:6714] D:  interface veth31b3f3e vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:6714] D:  interface veth8fe685a vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:6714] D:  interface veth5acedf0 vs 127.0.0.1 (fam 10) ipv6 0
+=================================================================
+==2906180==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x746e15100070 at pc 0x746e184fa97d bp 0x7ffe0169e400 sp 0x7ffe0169dba8
+WRITE of size 28 at 0x746e15100070 thread T0
+    #0 0x746e184fa97c in memset ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87
+    #1 0x63770466fdaf in lws_sa46_parse_numeric_address /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:947
+    #2 0x637704796ed5 in lws_interface_to_sa /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/plat/unix/unix-sockets.c:451
+    #3 0x63770466aa1d in interface_to_sa /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:96
+    #4 0x63770466c2ef in lws_socket_bind /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:396
+    #5 0x6377046e76c1 in _lws_vhost_init_server_af /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/roles/http/server/server.c:137
+    #6 0x6377046eb695 in _lws_vhost_init_server /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/roles/http/server/server.c:581
+    #7 0x637704680748 in lws_create_vhost /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/vhost.c:1238
+    #8 0x63770461dcc1 in lws_create_context /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core/context.c:1578
+    #9 0x637704616264 in main ../h2server.c:65
+    #10 0x746e1722a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x746e1722a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x637704615c64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/h2server5r+0x52c64) (BuildId: d384fc8d2c2e15749565b685820deffd18cf2407)
+
+Address 0x746e15100070 is located in stack of thread T0 at offset 112 in frame
+    #0 0x63770466bbf1 in lws_socket_bind /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:293
+
+  This frame has 11 object(s):
+    [48, 52) 'len' (line 304)
+    [64, 68) 'uid' (line 467)
+    [80, 84) 'gid' (line 468)
+    [96, 112) 'serv_addr4' (line 301)
+    [128, 156) 'serv_addr6' (line 298) <== Memory access at offset 112 partially underflows this variable
+    [192, 302) 'serv_unix' (line 295)
+    [336, 464) 'sin' (line 310)
+    [496, 512) 't16' (line 437)
+    [528, 544) 't16' (line 448)
+    [560, 576) 't16' (line 503)
+    [592, 664) 'buf' (line 528)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87 in memset
+Shadow bytes around the buggy address:
+  0x746e150ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x746e150ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x746e150ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x746e150fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x746e150fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x746e15100000: f1 f1 f1 f1 f1 f1 04 f2 04 f2 04 f2 00 00[f2]f2
+  0x746e15100080: 00 00 00 04 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x746e15100100: 00 00 00 00 00 06 f2 f2 f2 f2 00 00 00 00 00 00
+  0x746e15100180: 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2 00 00
+  0x746e15100200: f2 f2 00 00 f2 f2 00 00 f2 f2 00 00 00 00 00 00
+  0x746e15100280: 00 00 00 f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+[2026/11/21 12:36:43:7700] D: initial if check says 0
+[2026/11/21 12:36:43:7704] D:  interface lo vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface enp42s0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface wlxbcec43434a22 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface docker0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface veth31b3f3e vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface veth8fe685a vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface veth5acedf0 vs 127.0.0.1 (fam 17) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface lo vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface enp42s0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface tailscale0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface docker0 vs 127.0.0.1 (fam 2) ipv6 0
+[2026/11/21 12:36:43:7704] D:  interface lo vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:7705] D:  interface enp42s0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:7705] D:  interface tailscale0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:7705] D:  interface docker0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:7705] D:  interface veth31b3f3e vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:7705] D:  interface veth8fe685a vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:7705] D:  interface veth5acedf0 vs 127.0.0.1 (fam 10) ipv6 0
+[2026/11/21 12:36:43:7705] W: [null wsi]: lws_socket_bind: setsockopt bind to device 127.0.0.1 error fd 7 (19)
+[2026/11/21 12:36:43:7705] I: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_socket_bind: source ads 127.0.0.1
+[2026/11/21 12:36:43:7705] D: _realloc: size 1800: __lws_wsi_create_with_role
+[2026/11/21 12:36:43:7705] D: : lws_role_transition: wsistate 0x200, ops listen
+[2026/11/21 12:36:43:7705] D: _lws_vhost_init_server_af: lws_socket_bind says 18786
+[2026/11/21 12:36:43:7706] D: : lws_vhost_bind_wsi: vh default: wsi listen/http-only, count_bound_wsi 1
+[2026/11/21 12:36:43:7706] D: : __insert_wsi_socket_into_fds: tsi=0, sock=7, pos-in-fds=2
+[2026/11/21 12:36:43:7706] I: __lws_lc_tag:  ++ [wsi|1|listen|default|127.0.0.1|18786] (2)
+[2026/11/21 12:36:43:7706] I:  Listening on 127.0.0.1:18786
+[2026/11/21 12:36:43:7706] D: _realloc: size 192: lws_cache_heap_create
+[2026/11/21 12:36:43:7707] I: lws_create_context:  mem: per-conn:         1800 bytes + protocol rx buf
+[2026/11/21 12:36:43:7707] D: _lws_state_transition: system: changed 1 'CONTEXT_CREATED' -> 2 'PRE_PRIV_DROP'
+[2026/11/21 12:36:43:7707] I: lws_plat_drop_app_privileges: not changing group
+[2026/11/21 12:36:43:7707] I: lws_plat_drop_app_privileges: not changing user
+[2026/11/21 12:36:43:7707] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7707] N: server: listening 127.0.0.1:18786, max_http_header_data=32
+[2026/11/21 12:36:43:7707] D: _lws_state_transition: system: changed 2 'PRE_PRIV_DROP' -> 3 'INITIALIZED'
+[2026/11/21 12:36:43:7707] D: _lws_state_transition: system: changed 3 'INITIALIZED' -> 4 'COLLECTING_STDIN'
+[2026/11/21 12:36:43:7707] I: lws_state_notify_protocol_init: waiting for netlink coldplug
+[2026/11/21 12:36:43:7707] I: _report: system: prot_init: rejected 'COLLECTING_STDIN' -> 'IFACE_COLDPLUG'
+[2026/11/21 12:36:43:7707] I: lws_state_transition_steps: PRE_PRIV_DROP -> COLLECTING_STDIN
+[2026/11/21 12:36:43:7708] I: lws_protocol_init: 
+[2026/11/21 12:36:43:7708] D: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: not instantiating http-only
+[2026/11/21 12:36:43:7708] I: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: init default.http-only
+[2026/11/21 12:36:43:7708] D: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: not instantiating lws-secstream-h1
+[2026/11/21 12:36:43:7708] I: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: init default.lws-secstream-h1
+[2026/11/21 12:36:43:7708] D: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: not instantiating lws-secstream-h2
+[2026/11/21 12:36:43:7708] I: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: init default.lws-secstream-h2
+[2026/11/21 12:36:43:7708] D: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: not instantiating lws-secstream-raw
+[2026/11/21 12:36:43:7708] I: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: init default.lws-secstream-raw
+[2026/11/21 12:36:43:7708] D: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: not instantiating lws-async-ipc
+[2026/11/21 12:36:43:7708] I: [vh|2|default|127.0.0.1|127.0.0.1|18786]: lws_protocol_init_vhost: init default.lws-async-ipc
+[2026/11/21 12:36:43:7709] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7709] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7709] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7709] D: rops_handle_POLLIN_netlink: RTA_DST: 100.73.170.56/32
+[2026/11/21 12:36:43:7709] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7710] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7710] I: _lws_routing_entry_dump:  dst: 100.73.170.56/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7710] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7710] D: rops_handle_POLLIN_netlink: route list size 1
+[2026/11/21 12:36:43:7710] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7710] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7710] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7710] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7710] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7710] D: rops_handle_POLLIN_netlink: RTA_DST: 100.80.9.2/32
+[2026/11/21 12:36:43:7710] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7710] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7710] I: _lws_routing_entry_dump:  dst: 100.80.9.2/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7710] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7710] D: rops_handle_POLLIN_netlink: route list size 2
+[2026/11/21 12:36:43:7711] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7711] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7711] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7711] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7711] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7711] D: rops_handle_POLLIN_netlink: RTA_DST: 100.90.21.12/32
+[2026/11/21 12:36:43:7711] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7711] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7711] I: _lws_routing_entry_dump:  dst: 100.90.21.12/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7711] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7711] D: rops_handle_POLLIN_netlink: route list size 3
+[2026/11/21 12:36:43:7711] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7711] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7711] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7711] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7711] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7711] D: rops_handle_POLLIN_netlink: RTA_DST: 100.100.100.100/32
+[2026/11/21 12:36:43:7711] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7711] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7712] I: _lws_routing_entry_dump:  dst: 100.100.100.100/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7712] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7712] D: rops_handle_POLLIN_netlink: route list size 4
+[2026/11/21 12:36:43:7712] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7712] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7712] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7712] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7712] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7712] D: rops_handle_POLLIN_netlink: RTA_DST: 100.101.212.106/32
+[2026/11/21 12:36:43:7712] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7712] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7712] I: _lws_routing_entry_dump:  dst: 100.101.212.106/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7712] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7712] D: rops_handle_POLLIN_netlink: route list size 5
+[2026/11/21 12:36:43:7712] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7712] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7712] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7712] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: RTA_DST: 100.101.237.87/32
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7713] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7713] I: _lws_routing_entry_dump:  dst: 100.101.237.87/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7713] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: route list size 6
+[2026/11/21 12:36:43:7713] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7713] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7713] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7713] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: RTA_DST: 100.103.99.16/32
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7713] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7713] I: _lws_routing_entry_dump:  dst: 100.103.99.16/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7713] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7713] D: rops_handle_POLLIN_netlink: route list size 7
+[2026/11/21 12:36:43:7713] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7714] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7714] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7714] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7714] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7714] D: rops_handle_POLLIN_netlink: RTA_DST: 100.107.198.111/32
+[2026/11/21 12:36:43:7714] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7714] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7714] I: _lws_routing_entry_dump:  dst: 100.107.198.111/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7714] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7714] D: rops_handle_POLLIN_netlink: route list size 8
+[2026/11/21 12:36:43:7714] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7714] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7714] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7714] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7714] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7714] D: rops_handle_POLLIN_netlink: RTA_DST: 100.114.16.97/32
+[2026/11/21 12:36:43:7714] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7714] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7715] I: _lws_routing_entry_dump:  dst: 100.114.16.97/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7715] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7715] D: rops_handle_POLLIN_netlink: route list size 9
+[2026/11/21 12:36:43:7715] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7715] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7715] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7715] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7715] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7715] D: rops_handle_POLLIN_netlink: RTA_DST: 100.116.125.102/32
+[2026/11/21 12:36:43:7715] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7715] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7715] I: _lws_routing_entry_dump:  dst: 100.116.125.102/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7715] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7715] D: rops_handle_POLLIN_netlink: route list size 10
+[2026/11/21 12:36:43:7715] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7715] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7715] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7715] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7715] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7716] D: rops_handle_POLLIN_netlink: RTA_DST: 100.121.88.110/32
+[2026/11/21 12:36:43:7716] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7716] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7716] I: _lws_routing_entry_dump:  dst: 100.121.88.110/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7716] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7716] D: rops_handle_POLLIN_netlink: route list size 11
+[2026/11/21 12:36:43:7716] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7716] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7716] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7716] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7716] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7716] D: rops_handle_POLLIN_netlink: RTA_DST: 100.125.157.75/32
+[2026/11/21 12:36:43:7716] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7716] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7716] I: _lws_routing_entry_dump:  dst: 100.125.157.75/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7716] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7716] D: rops_handle_POLLIN_netlink: route list size 12
+[2026/11/21 12:36:43:7716] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7717] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7717] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7717] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7717] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7717] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 100
+[2026/11/21 12:36:43:7717] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 192.168.8.197/0
+[2026/11/21 12:36:43:7717] D: rops_handle_POLLIN_netlink: RTA_GATEWAY: 192.168.8.1
+[2026/11/21 12:36:43:7717] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7717] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 2)
+[2026/11/21 12:36:43:7717] I: _lws_routing_entry_dump:  src: 192.168.8.197/0, gw: 192.168.8.1,  ifidx: 2, pri: 100, proto: 16
+[2026/11/21 12:36:43:7717] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7717] D: rops_handle_POLLIN_netlink: route list size 13
+[2026/11/21 12:36:43:7717] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7717] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7717] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7717] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_DST: 172.17.0.0/16
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 172.17.0.1/0
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 5
+[2026/11/21 12:36:43:7718] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 5)
+[2026/11/21 12:36:43:7718] I: _lws_routing_entry_dump:  dst: 172.17.0.0/16, src: 172.17.0.1/0,  ifidx: 5, pri: -1, proto: 2
+[2026/11/21 12:36:43:7718] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: route list size 14
+[2026/11/21 12:36:43:7718] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7718] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7718] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7718] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_DST: 192.168.8.0/24
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 100
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 192.168.8.197/0
+[2026/11/21 12:36:43:7718] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7718] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 2)
+[2026/11/21 12:36:43:7718] I: _lws_routing_entry_dump:  dst: 192.168.8.0/24, src: 192.168.8.197/0,  ifidx: 2, pri: 100, proto: 2
+[2026/11/21 12:36:43:7719] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7719] D: rops_handle_POLLIN_netlink: route list size 15
+[2026/11/21 12:36:43:7719] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7719] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7719] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7719] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7719] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7719] D: rops_handle_POLLIN_netlink: RTA_DST: 192.168.8.1/32
+[2026/11/21 12:36:43:7719] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 100
+[2026/11/21 12:36:43:7719] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 192.168.8.197/0
+[2026/11/21 12:36:43:7719] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7719] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 2)
+[2026/11/21 12:36:43:7719] I: _lws_routing_entry_dump:  dst: 192.168.8.1/32, src: 192.168.8.197/0,  ifidx: 2, pri: 100, proto: 16
+[2026/11/21 12:36:43:7719] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7719] D: rops_handle_POLLIN_netlink: route list size 16
+[2026/11/21 12:36:43:7720] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7720] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7720] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7720] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7720] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7720] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7720] D: rops_handle_POLLIN_netlink: RTA_DST: 100.81.222.19/32
+[2026/11/21 12:36:43:7720] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 100.81.222.19/0
+[2026/11/21 12:36:43:7720] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7720] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7720] I: _lws_routing_entry_dump:  dst: 100.81.222.19/32, src: 100.81.222.19/0,  ifidx: 4, pri: -1, proto: 2
+[2026/11/21 12:36:43:7720] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7720] D: rops_handle_POLLIN_netlink: route list size 17
+[2026/11/21 12:36:43:7720] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7720] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7720] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7720] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7720] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: RTA_DST: 127.0.0.0/8
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 127.0.0.1/0
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 1
+[2026/11/21 12:36:43:7721] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 1)
+[2026/11/21 12:36:43:7721] I: _lws_routing_entry_dump:  dst: 127.0.0.0/8, src: 127.0.0.1/0,  ifidx: 1, pri: -1, proto: 2
+[2026/11/21 12:36:43:7721] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: route list size 18
+[2026/11/21 12:36:43:7721] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7721] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7721] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7721] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: RTA_DST: 127.0.0.1/32
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 127.0.0.1/0
+[2026/11/21 12:36:43:7721] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 1
+[2026/11/21 12:36:43:7721] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 1)
+[2026/11/21 12:36:43:7721] I: _lws_routing_entry_dump:  dst: 127.0.0.1/32, src: 127.0.0.1/0,  ifidx: 1, pri: -1, proto: 2
+[2026/11/21 12:36:43:7722] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: route list size 19
+[2026/11/21 12:36:43:7722] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7722] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7722] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7722] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: RTA_DST: 127.255.255.255/32
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 127.0.0.1/0
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 1
+[2026/11/21 12:36:43:7722] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (broadcast)
+[2026/11/21 12:36:43:7722] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7722] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: RTA_DST: 172.17.0.1/32
+[2026/11/21 12:36:43:7722] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 172.17.0.1/0
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 5
+[2026/11/21 12:36:43:7723] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 5)
+[2026/11/21 12:36:43:7723] I: _lws_routing_entry_dump:  dst: 172.17.0.1/32, src: 172.17.0.1/0,  ifidx: 5, pri: -1, proto: 2
+[2026/11/21 12:36:43:7723] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: route list size 20
+[2026/11/21 12:36:43:7723] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7723] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7723] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7723] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: RTA_DST: 172.17.255.255/32
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 172.17.0.1/0
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 5
+[2026/11/21 12:36:43:7723] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (broadcast)
+[2026/11/21 12:36:43:7723] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7723] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7723] D: rops_handle_POLLIN_netlink: RTA_DST: 192.168.8.197/32
+[2026/11/21 12:36:43:7724] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 192.168.8.197/0
+[2026/11/21 12:36:43:7724] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7724] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 2)
+[2026/11/21 12:36:43:7724] I: _lws_routing_entry_dump:  dst: 192.168.8.197/32, src: 192.168.8.197/0,  ifidx: 2, pri: -1, proto: 2
+[2026/11/21 12:36:43:7724] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7724] D: rops_handle_POLLIN_netlink: route list size 21
+[2026/11/21 12:36:43:7724] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7724] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7724] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7724] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7724] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7724] D: rops_handle_POLLIN_netlink: RTA_DST: 192.168.8.255/32
+[2026/11/21 12:36:43:7724] D: rops_handle_POLLIN_netlink: RTA_PREFSRC: 192.168.8.197/0
+[2026/11/21 12:36:43:7724] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7724] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (broadcast)
+[2026/11/21 12:36:43:7724] D: _realloc: size 108: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7725] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7725] I: _lws_routing_table_dump: 
+[2026/11/21 12:36:43:7725] I: _lws_routing_entry_dump:  dst: 100.73.170.56/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7725] I: _lws_routing_entry_dump:  dst: 100.80.9.2/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7725] I: _lws_routing_entry_dump:  dst: 100.90.21.12/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7725] I: _lws_routing_entry_dump:  dst: 100.100.100.100/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7725] I: _lws_routing_entry_dump:  dst: 100.101.212.106/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7725] I: _lws_routing_entry_dump:  dst: 100.101.237.87/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 100.103.99.16/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 100.107.198.111/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 100.114.16.97/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 100.116.125.102/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 100.121.88.110/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 100.125.157.75/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  src: 192.168.8.197/0, gw: 192.168.8.1,  ifidx: 2, pri: 100, proto: 16
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 172.17.0.0/16, src: 172.17.0.1/0,  ifidx: 5, pri: -1, proto: 2
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 192.168.8.0/24, src: 192.168.8.197/0,  ifidx: 2, pri: 100, proto: 2
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 192.168.8.1/32, src: 192.168.8.197/0,  ifidx: 2, pri: 100, proto: 16
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 100.81.222.19/32, src: 100.81.222.19/0,  ifidx: 4, pri: -1, proto: 2
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 127.0.0.0/8, src: 127.0.0.1/0,  ifidx: 1, pri: -1, proto: 2
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 127.0.0.1/32, src: 127.0.0.1/0,  ifidx: 1, pri: -1, proto: 2
+[2026/11/21 12:36:43:7726] I: _lws_routing_entry_dump:  dst: 172.17.0.1/32, src: 172.17.0.1/0,  ifidx: 5, pri: -1, proto: 2
+[2026/11/21 12:36:43:7727] I: _lws_routing_entry_dump:  dst: 192.168.8.197/32, src: 192.168.8.197/0,  ifidx: 2, pri: -1, proto: 2
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_destroy: destroy msg 0x507000000100
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_destroy: destroy msg 0x507000000170
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_destroy: destroy msg 0x5070000001e0
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_destroy: destroy msg 0x507000000250
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_destroy: destroy msg 0x5070000002c0
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_destroy: destroy msg 0x507000000330
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7727] I: _lws_smd_msg_destroy: destroy msg 0x5070000003a0
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x507000000410
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x507000000480
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x5070000004f0
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x507000000560
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x5070000005d0
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x507000000640
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x5070000006b0
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x507000000720
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_destroy: destroy msg 0x507000000790
+[2026/11/21 12:36:43:7728] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_destroy: destroy msg 0x507000000800
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_destroy: destroy msg 0x507000000870
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_destroy: destroy msg 0x5070000008e0
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_destroy: destroy msg 0x507000000950
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_destroy: destroy msg 0x5070000009c0
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 42, to peer 0x507000000090
+[2026/11/21 12:36:43:7729] I: lws_ss_create: unknown stream type captive_portal_detect
+[2026/11/21 12:36:43:7729] I: lws_ss_sys_cpd: Create stream failed (policy?)
+[2026/11/21 12:36:43:7729] I: _lws_smd_msg_destroy: destroy msg 0x50b000000040
+[2026/11/21 12:36:43:7730] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7730] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7730] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7730] D: rops_handle_POLLIN_netlink: RTA_DST: fd7a:115c:a1e0::53/128
+[2026/11/21 12:36:43:7730] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 1024
+[2026/11/21 12:36:43:7730] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7730] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7730] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7730] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7730] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::53/128,  ifidx: 4, pri: 1024, proto: 3
+[2026/11/21 12:36:43:7730] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: route list size 22
+[2026/11/21 12:36:43:7731] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7731] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7731] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7731] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: RTA_DST: fd7a:115c:a1e0::/48
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 1024
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7731] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7731] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::/48,  ifidx: 4, pri: 1024, proto: 3
+[2026/11/21 12:36:43:7731] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7731] D: rops_handle_POLLIN_netlink: route list size 23
+[2026/11/21 12:36:43:7731] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7731] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7732] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7732] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_DST: fd7a:115c:a1e0::593b:de14/128
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7732] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7732] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::593b:de14/128,  ifidx: 4, pri: 256, proto: 2
+[2026/11/21 12:36:43:7732] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: route list size 24
+[2026/11/21 12:36:43:7732] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7732] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7732] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7732] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7732] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/64
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7733] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 2)
+[2026/11/21 12:36:43:7733] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 2, pri: 256, proto: 2
+[2026/11/21 12:36:43:7733] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: route list size 25
+[2026/11/21 12:36:43:7733] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7733] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7733] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7733] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/64
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7733] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7733] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7734] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 4, pri: 256, proto: 2
+[2026/11/21 12:36:43:7734] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: route list size 26
+[2026/11/21 12:36:43:7734] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7734] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7734] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7734] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/64
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 5
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7734] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 5)
+[2026/11/21 12:36:43:7734] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 5, pri: 256, proto: 2
+[2026/11/21 12:36:43:7734] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7734] D: rops_handle_POLLIN_netlink: route list size 27
+[2026/11/21 12:36:43:7734] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7735] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7735] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7735] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/64
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 24
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7735] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 24)
+[2026/11/21 12:36:43:7735] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 24, pri: 256, proto: 2
+[2026/11/21 12:36:43:7735] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: route list size 28
+[2026/11/21 12:36:43:7735] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7735] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7735] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7735] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7735] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/64
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 25
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7736] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 25)
+[2026/11/21 12:36:43:7736] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 25, pri: 256, proto: 2
+[2026/11/21 12:36:43:7736] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: route list size 29
+[2026/11/21 12:36:43:7736] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7736] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7736] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7736] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/64
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 34
+[2026/11/21 12:36:43:7736] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7737] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 34)
+[2026/11/21 12:36:43:7737] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 34, pri: 256, proto: 2
+[2026/11/21 12:36:43:7737] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: route list size 30
+[2026/11/21 12:36:43:7737] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7737] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7737] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7737] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: RTA_DST: ::1/128
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 1
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7737] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7737] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 1)
+[2026/11/21 12:36:43:7737] I: _lws_routing_entry_dump:  dst: ::1/128, src: ::1/0,  ifidx: 1, pri: 0, proto: 2
+[2026/11/21 12:36:43:7737] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: route list size 31
+[2026/11/21 12:36:43:7738] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7738] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7738] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7738] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: RTA_DST: fd7a:115c:a1e0::593b:de14/128
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7738] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7738] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::593b:de14/128, src: fd7a:115c:a1e0::593b:de14/0,  ifidx: 4, pri: 0, proto: 2
+[2026/11/21 12:36:43:7738] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7738] D: rops_handle_POLLIN_netlink: route list size 32
+[2026/11/21 12:36:43:7739] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7739] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7739] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7739] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/128
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7739] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (anycast)
+[2026/11/21 12:36:43:7739] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7739] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/128
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7739] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (anycast)
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/128
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 5
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (anycast)
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/128
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 24
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7740] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (anycast)
+[2026/11/21 12:36:43:7740] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7741] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/128
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 25
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7741] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (anycast)
+[2026/11/21 12:36:43:7741] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7741] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::/128
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 34
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7741] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (anycast)
+[2026/11/21 12:36:43:7741] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7741] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7741] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::3435:1bff:fee5:80f2/128
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 5
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7742] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 5)
+[2026/11/21 12:36:43:7742] I: _lws_routing_entry_dump:  dst: fe80::3435:1bff:fee5:80f2/128, src: fe80::3435:1bff:fee5:80f2/0,  ifidx: 5, pri: 0, proto: 2
+[2026/11/21 12:36:43:7742] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: route list size 33
+[2026/11/21 12:36:43:7742] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7742] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7742] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7742] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::365a:60ff:fe7c:1021/128
+[2026/11/21 12:36:43:7742] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7743] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 2)
+[2026/11/21 12:36:43:7743] I: _lws_routing_entry_dump:  dst: fe80::365a:60ff:fe7c:1021/128, src: fe80::365a:60ff:fe7c:1021/0,  ifidx: 2, pri: 0, proto: 2
+[2026/11/21 12:36:43:7743] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: route list size 34
+[2026/11/21 12:36:43:7743] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7743] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7743] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7743] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::9cc5:a4ff:fed4:55b6/128
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 34
+[2026/11/21 12:36:43:7743] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7744] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 34)
+[2026/11/21 12:36:43:7744] I: _lws_routing_entry_dump:  dst: fe80::9cc5:a4ff:fed4:55b6/128, src: fe80::9cc5:a4ff:fed4:55b6/0,  ifidx: 34, pri: 0, proto: 2
+[2026/11/21 12:36:43:7744] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: route list size 35
+[2026/11/21 12:36:43:7744] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7744] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7744] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7744] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::e015:2dff:fe0d:eb6/128
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 25
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7744] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7745] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 25)
+[2026/11/21 12:36:43:7745] I: _lws_routing_entry_dump:  dst: fe80::e015:2dff:fe0d:eb6/128, src: fe80::e015:2dff:fe0d:eb6/0,  ifidx: 25, pri: 0, proto: 2
+[2026/11/21 12:36:43:7745] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: route list size 36
+[2026/11/21 12:36:43:7745] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7745] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7745] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7745] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::e01f:e8ff:fe6a:3ce5/128
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 24
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7745] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7745] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 24)
+[2026/11/21 12:36:43:7745] I: _lws_routing_entry_dump:  dst: fe80::e01f:e8ff:fe6a:3ce5/128, src: fe80::e01f:e8ff:fe6a:3ce5/0,  ifidx: 24, pri: 0, proto: 2
+[2026/11/21 12:36:43:7746] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: route list size 37
+[2026/11/21 12:36:43:7746] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7746] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7746] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7746] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: Local addr: RTA_DST -> added to RTA_SRC
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: RTA_DST: fe80::ee6d:c241:e80d:377f/128
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 0
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7746] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7746] I: rops_handle_POLLIN_netlink: NEWROUTE: ACCEPTED (if_idx 4)
+[2026/11/21 12:36:43:7746] I: _lws_routing_entry_dump:  dst: fe80::ee6d:c241:e80d:377f/128, src: fe80::ee6d:c241:e80d:377f/0,  ifidx: 4, pri: 0, proto: 2
+[2026/11/21 12:36:43:7746] D: _realloc: size 144: rops_handle_POLLIN_netlink
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: route list size 38
+[2026/11/21 12:36:43:7747] D: _realloc: size 79: lws_smd_msg_alloc
+[2026/11/21 12:36:43:7747] D: lws_cancel_service: 
+[2026/11/21 12:36:43:7747] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7747] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_DST: ff00::/8
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 2
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7747] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (multicast)
+[2026/11/21 12:36:43:7747] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7747] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_DST: ff00::/8
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 4
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7747] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (multicast)
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_DST: ff00::/8
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 5
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (multicast)
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_DST: ff00::/8
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 24
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7748] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (multicast)
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7748] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_DST: ff00::/8
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 25
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7749] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (multicast)
+[2026/11/21 12:36:43:7749] I: rops_handle_POLLIN_netlink: RTM 24
+[2026/11/21 12:36:43:7749] I: rops_handle_POLLIN_netlink: NEWROUTE
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_TABLE (not handled)
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_DST: ff00::/8
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_PRIORITY: 256
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_IIF/RTA_OIF: 34
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_CACHEINFO (not handled)
+[2026/11/21 12:36:43:7749] D: rops_handle_POLLIN_netlink: RTA_PREF (not handled)
+[2026/11/21 12:36:43:7749] I: rops_handle_POLLIN_netlink: NEWROUTE: IGNORED (multicast)
+[2026/11/21 12:36:43:7749] I: _lws_routing_table_dump: 
+[2026/11/21 12:36:43:7749] I: _lws_routing_entry_dump:  dst: 100.73.170.56/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.80.9.2/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.90.21.12/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.100.100.100/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.101.212.106/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.101.237.87/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.103.99.16/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.107.198.111/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.114.16.97/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.116.125.102/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.121.88.110/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 100.125.157.75/32,  ifidx: 4, pri: -1, proto: 3
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  src: 192.168.8.197/0, gw: 192.168.8.1,  ifidx: 2, pri: 100, proto: 16
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 172.17.0.0/16, src: 172.17.0.1/0,  ifidx: 5, pri: -1, proto: 2
+[2026/11/21 12:36:43:7750] I: _lws_routing_entry_dump:  dst: 192.168.8.0/24, src: 192.168.8.197/0,  ifidx: 2, pri: 100, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: 192.168.8.1/32, src: 192.168.8.197/0,  ifidx: 2, pri: 100, proto: 16
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: 100.81.222.19/32, src: 100.81.222.19/0,  ifidx: 4, pri: -1, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: 127.0.0.0/8, src: 127.0.0.1/0,  ifidx: 1, pri: -1, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: 127.0.0.1/32, src: 127.0.0.1/0,  ifidx: 1, pri: -1, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: 172.17.0.1/32, src: 172.17.0.1/0,  ifidx: 5, pri: -1, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: 192.168.8.197/32, src: 192.168.8.197/0,  ifidx: 2, pri: -1, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::53/128,  ifidx: 4, pri: 1024, proto: 3
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::/48,  ifidx: 4, pri: 1024, proto: 3
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::593b:de14/128,  ifidx: 4, pri: 256, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 2, pri: 256, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 4, pri: 256, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 5, pri: 256, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 24, pri: 256, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 25, pri: 256, proto: 2
+[2026/11/21 12:36:43:7751] I: _lws_routing_entry_dump:  dst: fe80::/64,  ifidx: 34, pri: 256, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: ::1/128, src: ::1/0,  ifidx: 1, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: fd7a:115c:a1e0::593b:de14/128, src: fd7a:115c:a1e0::593b:de14/0,  ifidx: 4, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: fe80::3435:1bff:fee5:80f2/128, src: fe80::3435:1bff:fee5:80f2/0,  ifidx: 5, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: fe80::365a:60ff:fe7c:1021/128, src: fe80::365a:60ff:fe7c:1021/0,  ifidx: 2, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: fe80::9cc5:a4ff:fed4:55b6/128, src: fe80::9cc5:a4ff:fed4:55b6/0,  ifidx: 34, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: fe80::e015:2dff:fe0d:eb6/128, src: fe80::e015:2dff:fe0d:eb6/0,  ifidx: 25, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: fe80::e01f:e8ff:fe6a:3ce5/128, src: fe80::e01f:e8ff:fe6a:3ce5/0,  ifidx: 24, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_routing_entry_dump:  dst: fe80::ee6d:c241:e80d:377f/128, src: fe80::ee6d:c241:e80d:377f/0,  ifidx: 4, pri: 0, proto: 2
+[2026/11/21 12:36:43:7752] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7752] I: _lws_smd_msg_destroy: destroy msg 0x507000000a30
+[2026/11/21 12:36:43:7752] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000aa0
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000b10
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000b80
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000bf0
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000c60
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000cd0
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000d40
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000db0
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000e20
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7753] I: _lws_smd_msg_destroy: destroy msg 0x507000000e90
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_destroy: destroy msg 0x507000000f00
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_destroy: destroy msg 0x507000000f70
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_destroy: destroy msg 0x507000000fe0
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_destroy: destroy msg 0x507000001050
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_destroy: destroy msg 0x5070000010c0
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_deliver_peer: deliver cl 0x4, len 13, to peer 0x507000000090
+[2026/11/21 12:36:43:7754] I: _lws_smd_msg_destroy: destroy msg 0x507000001130
+[2026/11/21 12:36:43:7755] I: rops_handle_POLLIN_netlink: RTM 3
+[2026/11/21 12:36:43:7755] I: rops_handle_POLLIN_netlink: *** Unknown RTM_3
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 4 'COLLECTING_STDIN' -> 5 'IFACE_COLDPLUG'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 5 'IFACE_COLDPLUG' -> 6 'DHCP'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 6 'DHCP' -> 7 'CPD_PRE_TIME'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 7 'CPD_PRE_TIME' -> 8 'TIME_VALID'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 8 'TIME_VALID' -> 9 'CPD_POST_TIME'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 9 'CPD_POST_TIME' -> 10 'POLICY_VALID'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 10 'POLICY_VALID' -> 11 'REGISTERED'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 11 'REGISTERED' -> 12 'AUTH1'
+[2026/11/21 12:36:43:8755] D: _lws_state_transition: system: changed 12 'AUTH1' -> 13 'AUTH2'
+[2026/11/21 12:36:43:8756] D: _lws_state_transition: system: changed 13 'AUTH2' -> 14 'ONE_TIME_UPDATES'
+[2026/11/21 12:36:43:8756] D: _lws_state_transition: system: changed 14 'ONE_TIME_UPDATES' -> 15 'OPERATIONAL'
+[2026/11/21 12:36:43:8756] I: lws_state_transition_steps: COLLECTING_STDIN -> OPERATIONAL
+[2026/11/21 12:36:47:6722] D: accepted new conn port 41692 on fd=8
+[2026/11/21 12:36:47:6722] D: lws_get_idlest_tsi: 3 1048575
+[2026/11/21 12:36:47:6722] D: _realloc: size 1800: __lws_wsi_create_with_role
+[2026/11/21 12:36:47:6722] D: : lws_role_transition: wsistate 0x200, ops (unset)
+[2026/11/21 12:36:47:6722] I: __lws_lc_tag:  ++ [wsisrv|0|default|(null)] (1)
+[2026/11/21 12:36:47:6723] D: [wsisrv|0|default|(null)]: lws_create_new_server_wsi: joining vh default, tsi 0
+[2026/11/21 12:36:47:6723] D: [wsisrv|0|default|(null)]: lws_vhost_bind_wsi: vh default: wsi none/none, count_bound_wsi 2
+[2026/11/21 12:36:47:6723] D: [wsisrv|0|default|(null)]: lwsi_set_state: lwsi_set_state 0x20000200 -> 0x20000200
+[2026/11/21 12:36:47:6723] I: http/2 prior knowledge
+[2026/11/21 12:36:47:6723] I: [wsisrv|0|default|(null)]: lws_role_call_alpn_negotiated: 'h2'
+[2026/11/21 12:36:47:6723] D: rops_alpn_negotiated_h2: client 0
+[2026/11/21 12:36:47:6723] D: [wsisrv|0|default|(null)]: lws_role_transition: wsistate 0x2000020c, ops h2
+[2026/11/21 12:36:47:6723] D: _realloc: size 256: h2n
+[2026/11/21 12:36:47:6723] I: lws_hpack_dynamic_size: from 0 to 65536, lim 65536
+[2026/11/21 12:36:47:6724] D: _realloc: size 131088: dynamic table entries
+[2026/11/21 12:36:47:6724] I: rops_alpn_negotiated_h2: [wsisrv|0|default|(null)]: configured for h2
+[2026/11/21 12:36:47:6724] D: [wsisrv|0|default|(null)]: __lws_set_timeout: 15 secs, reason 3
+[2026/11/21 12:36:47:6725] D: [wsisrv|0|default|(null)|127.0.0.1]: __insert_wsi_socket_into_fds: tsi=0, sock=8, pos-in-fds=3
+[2026/11/21 12:36:47:6725] I: lws_header_table_attach: [wsisrv|0|default|(null)|127.0.0.1]: ah (nil) (tsi 0, count = 0) in
+[2026/11/21 12:36:47:6725] D: _realloc: size 904: ah struct
+[2026/11/21 12:36:47:6725] D: _realloc: size 32: ah data
+[2026/11/21 12:36:47:6725] I: _lws_create_ah: created ah 0x519000000a80 (size 32): pool length 1
+[2026/11/21 12:36:47:6725] I: lws_header_table_attach: did attach wsi [wsisrv|0|default|(null)|127.0.0.1]: ah 0x519000000a80: count 1 (on exit)
+[2026/11/21 12:36:47:6725] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_set_timeout: 10 secs, reason 25
+[2026/11/21 12:36:47:6725] D: Attached ah immediately
+[2026/11/21 12:36:47:6725] I: [wsisrv|0|default|(null)|127.0.0.1]: lws_adopt_descriptor_vhost2: vhost [vh|2|default|127.0.0.1|127.0.0.1|18786]
+[2026/11/21 12:36:47:6726] I: rops_handle_POLLIN_h2: [wsisrv|0|default|(null)|127.0.0.1] wsistate 0x2000020c, events 1, revents 1, pollout 0
+[2026/11/21 12:36:47:6726] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_set_timeout: 15 secs, reason 25
+[2026/11/21 12:36:47:6726] I: http2: [wsisrv|0|default|(null)|127.0.0.1]: established
+[2026/11/21 12:36:47:6726] D: [wsisrv|0|default|(null)|127.0.0.1]: lwsi_set_state: lwsi_set_state 0x2000020c -> 0x2000030d
+[2026/11/21 12:36:47:6726] I: [wsisrv|0|default|(null)|127.0.0.1]: _lws_validity_confirmed_role: setting validity timer 40s (hup 0)
+[2026/11/21 12:36:47:6726] D: _realloc: size 56: pps
+[2026/11/21 12:36:47:6726] D: [wsisrv|0|default|(null)|127.0.0.1]: lws_wsi_mux_mark_parents_needing_writeable: sid 0, pending writable
+[2026/11/21 12:36:47:6726] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_set_timeout: 5 secs, reason 15
+[2026/11/21 12:36:47:6726] D: [wsisrv|0|default|(null)|127.0.0.1] ([wsisrv|0|default|(null)|127.0.0.1]): fr hdr: typ 0x4, fla 0x0, sid 0x0, len 0x0
+[2026/11/21 12:36:47:6726] I: lws_h2_parse_frame_header: [wsisrv|0|default|(null)|127.0.0.1], State: LWS_H2S_IDLE, received cmd 4
+[2026/11/21 12:36:47:6726] I: LWS_H2_FRAME_TYPE_SETTINGS complete frame
+[2026/11/21 12:36:47:6726] D: _realloc: size 56: pps
+[2026/11/21 12:36:47:6726] D: already pending writable
+[2026/11/21 12:36:47:6726] D: [wsisrv|0|default|(null)|127.0.0.1]: lws_wsi_mux_mark_parents_needing_writeable: sid 0, pending writable
+[2026/11/21 12:36:47:6727] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_set_timeout: 5 secs, reason 15
+[2026/11/21 12:36:47:6727] D: [wsisrv|0|default|(null)|127.0.0.1] ([null wsi]): fr hdr: typ 0x1, fla 0x5, sid 0x1, len 0xd9
+[2026/11/21 12:36:47:6727] I: HEADERS: frame header: sid = 1
+[2026/11/21 12:36:47:6727] D: _realloc: size 1800: __lws_wsi_create_with_role
+[2026/11/21 12:36:47:6727] D: : lws_role_transition: wsistate 0x200, ops (unset)
+[2026/11/21 12:36:47:6727] I: __lws_lc_tag:  ++ [mux|0|default|h2_sid1_(wsisrv|0|default)] (1)
+[2026/11/21 12:36:47:6727] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lws_create_new_server_wsi: joining vh default, tsi 0
+[2026/11/21 12:36:47:6727] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lws_vhost_bind_wsi: vh default: wsi none/none, count_bound_wsi 3
+[2026/11/21 12:36:47:6727] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lwsi_set_state: lwsi_set_state 0x20000200 -> 0x20000200
+[2026/11/21 12:36:47:6727] I: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lws_wsi_mux_insert: par [wsisrv|0|default|(null)|127.0.0.1]: assign sid 1 (curr 0)
+[2026/11/21 12:36:47:6727] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lwsi_set_state: lwsi_set_state 0x20000200 -> 0x20000119
+[2026/11/21 12:36:47:6727] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lwsi_set_role: state 0x20000119
+[2026/11/21 12:36:47:6727] I: [wsisrv|0|default|(null)|127.0.0.1]: _lws_validity_confirmed_role: setting validity timer 40s (hup 0)
+[2026/11/21 12:36:47:6727] I: __lws_wsi_server_new: [wsisrv|0|default|(null)|127.0.0.1] new ch [mux|0|default|h2_sid1_(wsisrv|0|default)], sid 1, usersp=(nil)
+[2026/11/21 12:36:47:6727] I: lws_wsi_txc_describe: 0x51c000002218: __lws_wsi_server_new: sid 1: peer-to-us: 0, us-to-peer: 65535
+[2026/11/21 12:36:47:6727] I: lws_wsi_txc_describe: 0x51c000001a18: __lws_wsi_server_new: sid 0: peer-to-us: 0, us-to-peer: 65535
+[2026/11/21 12:36:47:6727] I: lws_h2_update_peer_txcredit: sid 1: bump 262144 -> 262144
+[2026/11/21 12:36:47:6727] D: _realloc: size 56: pps
+[2026/11/21 12:36:47:6727] I: lws_wsi_txc_describe: 0x51c000002218: lws_h2_update_peer_txcredit: sid 1: peer-to-us: 262144, us-to-peer: 65535
+[2026/11/21 12:36:47:6727] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lws_wsi_mux_mark_parents_needing_writeable: sid 1, pending writable
+[2026/11/21 12:36:47:6728] D: [wsisrv|0|default|(null)|127.0.0.1]: lws_wsi_mux_mark_parents_needing_writeable: sid 0, pending writable
+[2026/11/21 12:36:47:6728] D: _realloc: size 56: pps
+[2026/11/21 12:36:47:6728] I: lws_wsi_txc_describe: 0x51c000001a18: lws_h2_update_peer_txcredit: sid 0: peer-to-us: 262144, us-to-peer: 65535
+[2026/11/21 12:36:47:6728] D: already pending writable
+[2026/11/21 12:36:47:6728] D: [wsisrv|0|default|(null)|127.0.0.1]: lws_wsi_mux_mark_parents_needing_writeable: sid 0, pending writable
+[2026/11/21 12:36:47:6728] I: lws_header_table_attach: [mux|0|default|h2_sid1_(wsisrv|0|default)]: ah (nil) (tsi 0, count = 1) in
+[2026/11/21 12:36:47:6728] D: _realloc: size 904: ah struct
+[2026/11/21 12:36:47:6728] D: _realloc: size 32: ah data
+[2026/11/21 12:36:47:6728] I: _lws_create_ah: created ah 0x519000000f80 (size 32): pool length 2
+[2026/11/21 12:36:47:6728] I: lws_header_table_attach: did attach wsi [mux|0|default|h2_sid1_(wsisrv|0|default)]: ah 0x519000000f80: count 2 (on exit)
+[2026/11/21 12:36:47:6728] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: __lws_set_timeout: 10 secs, reason 25
+[2026/11/21 12:36:47:6728] D: lws_h2_parse_frame_header: hdr END_STREAM = 1
+[2026/11/21 12:36:47:6728] I: lws_h2_parse_frame_header: [mux|0|default|h2_sid1_(wsisrv|0|default)]: END_HEADERS 1
+[2026/11/21 12:36:47:6728] D: END_HEADERS 1
+[2026/11/21 12:36:47:6729] N: lws_hpack_interpret: frag app fail
+[2026/11/21 12:36:47:6729] I: lws_h2_parser: hpack failed
+[2026/11/21 12:36:47:6729] D: lws_read_h2: http2_parser bail: 1
+[2026/11/21 12:36:47:6729] I: [wsisrv|0|default|(null)|127.0.0.1]: __lws_close_free_wsi: caller: lws_read_h2 bail
+[2026/11/21 12:36:47:6729] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_close_free_wsi: real just_kill_connection A: (sockfd 8)
+[2026/11/21 12:36:47:6729] I:  [wsisrv|0|default|(null)|127.0.0.1], his parent [null wsi]: siblings:
+[2026/11/21 12:36:47:6729] I: closing [wsisrv|0|default|(null)|127.0.0.1]: parent [null wsi]
+[2026/11/21 12:36:47:6729] I:  parent [wsisrv|0|default|(null)|127.0.0.1]: closing children: list:
+[2026/11/21 12:36:47:6729] I: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lws_wsi_mux_close_children:    closing child
+[2026/11/21 12:36:47:6729] I: [mux|0|default|h2_sid1_(wsisrv|0|default)]: __lws_close_free_wsi: caller: mux child recurse
+[2026/11/21 12:36:47:6729] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: __lws_close_free_wsi: real just_kill_connection A: (sockfd -1)
+[2026/11/21 12:36:47:6729] I:  [mux|0|default|h2_sid1_(wsisrv|0|default)], his parent [wsisrv|0|default|(null)|127.0.0.1]: siblings:
+[2026/11/21 12:36:47:6729] I: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lws_wsi_mux_dump_children:    \---- child h2 [mux|0|default|h2_sid1_(wsisrv|0|default)]
+[2026/11/21 12:36:47:6729] I: closing [mux|0|default|h2_sid1_(wsisrv|0|default)]: parent [wsisrv|0|default|(null)|127.0.0.1]
+[2026/11/21 12:36:47:6729] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lws_wsi_mux_sibling_disconnect:  disentangled from sibling [null wsi]
+[2026/11/21 12:36:47:6729] I: [mux|0|default|h2_sid1_(wsisrv|0|default)]: __lws_close_free_wsi: real just_kill_connection: sockfd -1
+[2026/11/21 12:36:47:6729] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: lwsi_set_state: lwsi_set_state 0x20000119 -> 0x20000020
+[2026/11/21 12:36:47:6729] I: [mux|0|default|h2_sid1_(wsisrv|0|default)]: __lws_close_free_wsi: cce=1
+[2026/11/21 12:36:47:6729] I: rops_destroy_role_h2: [mux|0|default|h2_sid1_(wsisrv|0|default)]: ah det due to close
+[2026/11/21 12:36:47:6729] I: __lws_header_table_detach: [mux|0|default|h2_sid1_(wsisrv|0|default)]: ah 0x519000000f80 (tsi=0, count = 2)
+[2026/11/21 12:36:47:6729] I: __lws_header_table_detach: nobody usable waiting
+[2026/11/21 12:36:47:6730] I: _lws_destroy_ah: freed ah 0x519000000f80 : pool length 1
+[2026/11/21 12:36:47:6730] I: __lws_header_table_detach: [mux|0|default|h2_sid1_(wsisrv|0|default)]: ah 0x519000000f80 (tsi=0, count = 1)
+[2026/11/21 12:36:47:6730] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: __lws_vhost_unbind_wsi: vh default: count_bound_wsi 2
+[2026/11/21 12:36:47:6730] D: [mux|0|default|h2_sid1_(wsisrv|0|default)]: __lws_free_wsi: tsi fds count 4
+[2026/11/21 12:36:47:6730] I: __lws_lc_untag:  -- [mux|0|default|h2_sid1_(wsisrv|0|default)] (0) 293μs
+[2026/11/21 12:36:47:6730] I: __lws_close_free_wsi: shutdown conn: [wsisrv|0|default|(null)|127.0.0.1] (sk 8, state 0x30d)
+[2026/11/21 12:36:47:6730] I: [wsisrv|0|default|(null)|127.0.0.1]: __lws_close_free_wsi: real just_kill_connection: sockfd 8
+[2026/11/21 12:36:47:6730] D: [wsisrv|0|default|(null)|127.0.0.1]: lwsi_set_state: lwsi_set_state 0x2000030d -> 0x20000020
+[2026/11/21 12:36:47:6730] I: [wsisrv|0|default|(null)|127.0.0.1]: __lws_close_free_wsi: cce=0
+[2026/11/21 12:36:47:6730] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_close_free_wsi_final: fd 8
+[2026/11/21 12:36:47:6746] I: rops_destroy_role_h2: [wsisrv|0|default|(null)|127.0.0.1]: ah det due to close
+[2026/11/21 12:36:47:6746] I: __lws_header_table_detach: [wsisrv|0|default|(null)|127.0.0.1]: ah 0x519000000a80 (tsi=0, count = 1)
+[2026/11/21 12:36:47:6746] I: __lws_header_table_detach: nobody usable waiting
+[2026/11/21 12:36:47:6746] I: _lws_destroy_ah: freed ah 0x519000000a80 : pool length 0
+[2026/11/21 12:36:47:6746] I: __lws_header_table_detach: [wsisrv|0|default|(null)|127.0.0.1]: ah 0x519000000a80 (tsi=0, count = 0)
+[2026/11/21 12:36:47:6746] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_vhost_unbind_wsi: vh default: count_bound_wsi 1
+[2026/11/21 12:36:47:6746] D: [wsisrv|0|default|(null)|127.0.0.1]: __lws_free_wsi: tsi fds count 3
+[2026/11/21 12:36:47:6747] I: __lws_lc_untag:  -- [wsisrv|0|default|(null)|127.0.0.1] (0) 2.403ms
