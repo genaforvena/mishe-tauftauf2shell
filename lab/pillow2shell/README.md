@@ -518,3 +518,59 @@ decode entry was also tried; a later `malloc(1943)` in
 write, so it gives no attack-path claim. No chosen command, no arbitrary
 static-slot write. W12's structural blocker stands; grade ◐ and all rung
 claims are unchanged. This is a negative assessment — no witness replay owed.
+
+## W14 — finalizer-slot argument and current replay drift (2026-11-21, negative)
+
+W12's "rdi's first byte is always NUL" was measured at the *`tp_dealloc`*
+site. The one structural question it left open is whether the GC finalizer
+path differs. Two bounded probes, both negative; no grade change.
+
+**Refcnt differential (measured, not asserted).** `w14/finalizer_arg2.py`
+prints `sys.getrefcount(self)` from `__del__`: `3` on the refcount path
+(`del a`) and `4` on the GC path (cycle + `gc.collect()`). CPython INCREFs an
+object before invoking its finalizer from `finalize_garbage`, so the word at
+`rdi+0` is nonzero there. W12's NUL observation therefore does not generalize
+to every finalization slot. This does not open a command lane: `rdi+0..7` is
+the object's `ob_refcnt` (8 bytes, at most 7 command chars), and the GC's
+INCREF changes its low byte.
+
+**Slot offsets and addresses in this plain non-PIE build.** `tp_dealloc` at
+`PyTypeObject+48` (`PyCode_Type` slot `0x54e700`); `tp_finalize` at `+392`
+(a heap type with `__del__` holds `slot_tp_finalize=0x5a38e0` there, `str`,
+`int` and `NoneType` hold 0); `subtype_dealloc=0x59efb0`,
+`PyObject_CallFinalizerFromDealloc=0x585c40`, `system@plt=0x4206c0`,
+`_PyObject_Dump` marker `0x45e6e6`.
+
+**Probe A — heap fake type** (`w14/finalizer_slot.gdb`, and the
+PyCode_Type-image variant `w14/finalizer_slot2.gdb`): stage a 416-byte type image
+at `buffer+736` with `tp_dealloc=0x585c40`, `tp_finalize=0x45e6e6`, and point
+the OOB-written `ob_type` there. Both runs print `LOAD_OK`, then SIGSEGV at
+`0x61cb5a` (`mov (%rsi),%r8` in GC list handling) from `PyGC_Collect()` under
+`Py_FinalizeEx()`; the marker is never reached.
+
+**Probe B — static-slot patch** (`w14/static_finalizer.gdb`): patch
+`PyCode_Type.tp_dealloc=0x585c40` and `tp_finalize=0x45e6e6`, replay
+`case_min.fpx`. SIGSEGV in `unlink_chunk (malloc.c:1616)` from `_dealloc
+(decode.c:111)` freeing the corrupted tile buffer, before the marker. No
+chosen finalizer call in either probe. Rung-5 stays BLOCKED; grade ◐.
+
+**Current replay-environment drift (preserved negative).** Under this wake's
+harness environment, `PILLOW_BUILD=/tmp/pw2-w9/v12plain ./replay_min.sh`
+reports `TOTAL PASS=6 FAIL=2`: `w9_marker` reads `TYPE=7ffff754c4b0`
+(mmap/stack pointer) instead of `a472c0` and never hits `0x54e700`;
+`w9_watch` records `AFTER_TYPE=e` because GC at `0x61cb52` overwrites the
+chosen byte. Five runs gave five distinct non-static neighbour types, no hit.
+With `env -i` the neighbour is consistently `a2bee0 = &PyBytes_Type`
+(identified with `ctypes.id(bytes)`), and a clean-env replay reached the
+chosen `HIT pc=0x54e700 rdi=buffer+176` with 7 PASS / 1 FAIL — the only miss
+was the cosmetic `Py_FinalizeEx ()` backtrace symbol (frame `#7 0x6bd1b9`).
+Unsetting `PYTHONUNBUFFERED` alone produced `a2d260 = &PyCode_Type`.
+The underlying primitive is intact: a fresh ASan run of `case64.fpx` still
+reports `WRITE of size 1`, 0 bytes after the 128-byte region, stack
+`null_convert -> ... -> ImagingJpegDecode JpegDecode.c:252`, allocation from
+`_setimage decode.c:226`. The W9 replay's neighbour-object precondition is
+therefore environment/layout contingent on this host at 2026-11-21 23:20Z;
+the historical HIT remains witnessed (#1048) at grade ◐. This is a current
+negative to preserve, not a refutation and not a claim change; no witness
+replay is owed.
+

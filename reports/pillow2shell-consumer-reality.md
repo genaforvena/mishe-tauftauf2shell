@@ -574,3 +574,50 @@ would be, but this input path cannot place a free chunk there without a
 debugger or a new primitive. No chosen command, no arbitrary write, no grade
 change. Rung-5 stays BLOCKED at the W12 structural condition; negative
 assessment, no witness replay owed.
+
+## W14 — finalizer-slot argument and current replay drift (2026-11-21, negative)
+
+W12 measured a NUL first argument at the forged `PyCode_Type.tp_dealloc` call
+and concluded this call site cannot carry a command. The question left open
+was whether the same holds for CPython's GC finalizer path, a different slot.
+It was probed and preserved as a negative; no rung claim changes.
+
+A direct CPython measurement (`lab/pillow2shell/w14/finalizer_arg2.py`) gives
+`sys.getrefcount(self)=3` inside `__del__` on the refcount path and `4` on
+the cycle + `gc.collect()` path: CPython INCREFs before calling `tp_finalize`
+from `finalize_garbage`, so the object's word at `rdi+0` is nonzero there.
+W12's "always NUL" is narrower than stated. It still cannot carry a command:
+`rdi+0..7` is `ob_refcnt` (at most seven command characters before the NUL),
+and the GC INCREF changes its low byte. Slot offsets in this plain non-PIE
+build: `tp_dealloc` at `PyTypeObject+48` (`0x54e700` for `PyCode_Type`),
+`tp_finalize` at `+392` (`slot_tp_finalize=0x5a38e0` for a type with
+`__del__`; 0 for `str`, `int`, `NoneType`), `PyObject_CallFinalizerFromDealloc
+=0x585c40`, `system@plt=0x4206c0`, marker `_PyObject_Dump=0x45e6e6`.
+
+Two probes tried to reach a finalizer slot from the OOB-forged type. A
+416-byte type image staged at `buffer+736` with `tp_dealloc=0x585c40` and
+`tp_finalize=0x45e6e6`, pointed to by the image-written `ob_type`, printed
+`LOAD_OK` then crashed at `0x61cb5a` in GC list handling from
+`PyGC_Collect()` (`lab/pillow2shell/w14/finalizer_slot.gdb`, and the
+never reaching the marker. Patching the static `PyCode_Type` slots directly
+(`lab/pillow2shell/w14/static_finalizer.gdb`) crashed in `unlink_chunk (malloc.c:1616)` from
+`_dealloc (decode.c:111)` freeing the corrupted tile buffer, also before the
+marker. No chosen command, no reachable finalizer call, no arbitrary write.
+Rung-5 remains BLOCKED at W12's structural condition plus this one; grade ◐.
+
+Separately, a current-host replay drift is preserved. Under the wake harness
+environment, `replay_min.sh` reports 6 PASS / 2 FAIL: the neighbour object at
+`buffer+176` no longer has `ob_type=&PyUnicode_Type` (`a472c0`) at decoder
+entry, so the chosen `0xa2d260` write does not land on a live type and the
+chosen call is not observed; the watch run shows GC at `0x61cb52` overwriting
+the chosen byte. Under `env -i` the neighbour is a `bytes` object
+(`0xa2bee0 = &PyBytes_Type`) and one replay reached the chosen
+`HIT pc=0x54e700 rdi=buffer+176` with 7 PASS / 1 FAIL, the lone miss being a
+cosmetic backtrace-symbol difference. Unsetting `PYTHONUNBUFFERED` alone makes
+the neighbour a code object (`0xa2d260`). The underlying OOB write still
+reproduces exactly under ASan (`WRITE of size 1`, 0 bytes after the 128-byte
+tile buffer, `ImagingJpegDecode JpegDecode.c:252`). The W9 replay precondition
+is thus layout/environment contingent on this host at 2026-11-21 23:20Z. The
+historical HIT was independently witnessed (#1048) at grade ◐; this is a
+current negative, not a refutation. No witness replay owed for a negative.
+
