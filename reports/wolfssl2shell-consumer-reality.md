@@ -403,18 +403,31 @@ is not attacker-chosen in this route: sending epoch `0x4242` kept
 
 Observed:
 
-1. Gdb at `dtls13.c:2613` after the write (plain build, port 18632,
-   `groom-victim2.gdb`, `out/loopback/groom-victim2.log`): `output=0x55555562a930`,
-   `ackMessage=0x55555563a94f`, `seenRecords=0x55555562b240`. The live head
-   node's glibc chunk size field at `0x55555562b238` reads
-   `0x0078000000000000` (originally `0x21`), and its `next` pointer at
-   `0x55555562b250` reads `0x0000000000000000` (originally the address of
-   the next node). Neighbouring node chunk headers carry the same
-   sender-derived pattern. The write cursor reaches these live fields with
-   the full symbolized frame chain
+1. Gdb at `dtls13.c:2613` after the write (plain build, `groom-victim2.gdb`
+   running `18633 60 1 1 64`): `output=0x55555562a930`,
+   `ackMessage=0x55555563a94f`, `seenRecords=0x55555562b240`. The corrected
+   dump (`out/loopback/groom-victim2-corrected.log`) shows the live head
+   node's glibc chunk header: `prev_size` at `0x55555562b230` is
+   `0x0000000000000000` and its size field at `0x55555562b238` is
+   `0x008f000000000000` (originally `0x21`). Its `next` pointer at
+   `0x55555562b250` is `0x0000000000000000` (originally the address of the
+   next node). Neighbouring node size fields carry the same sender-derived
+   pattern (`0x0090000000000000` at `0x55555562b248`, `0x0091000000000000`
+   at `0x55555562b258`, and so on). The write cursor reaches these live
+   fields with the full symbolized frame chain
    `Dtls13WriteAckMessage dtls13.c:2613` ← `SendDtls13Ack :2899` ←
    `Dtls13RtxTimeout :2748` ← `wolfSSLReceive internal.c:11132` ←
    `wolfSSL_accept_TLSv13 tls13.c:14783`.
+   Correction from witness replay #1104: the earlier dump in
+   `out/loopback/groom-victim2.log` reported `0x0078000000000000` at
+   `0x55555562b238`. That byte came from an unrelated slab region at
+   `0x55555562b0c8`, not from the head node: the old expression
+   `x/8gx ssl->dtls13Rtx.seenRecords - 16` was interpreted as a display
+   offset from `head` rather than byte arithmetic on `head`. The script now
+   uses `x/8gx ((char*)ssl->dtls13Rtx.seenRecords - 16)` and prints the
+   head's `prev_size`/`size` directly; the old log is retained as the
+   original observation. This is a citation correction only: the overwrite,
+   sender-chosen bytes and abort below are unchanged.
 2. Without gdb, the same live server aborts: `out/loopback/groom-plain-crash.log`
    shows 4097 ACK records then `double free or corruption (out)`, server
    exit code 134 (SIGABRT). Under gdb (`groom_abort.gdb`,
