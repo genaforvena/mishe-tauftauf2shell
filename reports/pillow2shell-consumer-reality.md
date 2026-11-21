@@ -400,6 +400,46 @@ host-derived brk address staged by the image; gdb disables ASLR for the
 inferior, the host has `randomize_va_space=2`, and no leak, PIE bypass,
 injected code or chosen code is demonstrated. Grade stays ◐.
 
+## W9 — minimal OOB write reaches a chosen static deallocator with ASLR on (2026-11-21)
+
+The W5-W7 forged-type chain needs a heap address baked into the FPX image;
+its replay therefore relies on gdb disabling ASLR for the inferior. That
+condition is real, not cosmetic: five plain Python runs print five distinct
+`[heap]` bases (`0dc82000`, `2725f000`, `2084a000`, `0583b000`, `2d1ba000`),
+and three ASLR-on gdb runs show the two live pointer words at `buffer+144`
+and `buffer+152` changing on every run while the header words stay fixed.
+Those two words lie between the tile buffer and the live `PyUnicodeObject`,
+so a 188-byte-or-wider row cannot restore them with constants.
+
+A narrower input removes the need for a heap address. A 64x1 tile and a
+47-wide CMYK JPEG produce ONE 188-byte scanline into the 128-byte tile
+buffer — 60 bytes past the end. `pattern_min.hex` preserves the fixed heap
+header words (`+128=0`, `+136=0x21`, `+160=0x20`, `+168=0x280`, `+176=2`),
+accepts `0x5a` in the two varying pointer words, and writes `60 d2 a2` at
+`+184..+186` — the low three bytes of the static `&PyCode_Type` (`0xa2d260`);
+the untouched high bytes remain zero. `case_min.fpx` SHA-256
+`d0eb87b9dd6ce922ef97bf4007766384491b228a19d81dcf8cce045337b46722`;
+the control differs only in those three bytes (original `c0 72 a4`).
+
+With `set disable-randomization off` (host ASLR ON for the inferior),
+`min_chosen_call.gdb` breaks on `ImagingJpegDecode`, reads the runtime value
+of `PyCode_Type.tp_dealloc` (`0x54e700`), sets a conditional breakpoint on it
+and stages no memory. 3/3 runs: `LOAD_OK`, then `HIT pc=0x54e700` with
+`rdi = buffer+176`, backtrace `#7 Py_FinalizeEx ()`. 3/3 controls never hit
+that address. A hardware watchpoint (`min_chosen_watch.gdb`) shows the chosen
+byte arriving from `jpeg_read_scanlines` through pinned `JpegDecode.c:252`.
+`replay_min.sh` checks the four digests, both calls, the watchpoint and heap
+variance: `TOTAL PASS=8 FAIL=0`, rc 0.
+
+This is a chosen indirect call to an EXISTING static type's deallocator,
+reached naturally with ASLR active, from a single 60-byte past-end write,
+with no debugger staging and no image-baked heap address. It is still not
+chosen-code execution, an arbitrary chosen address, a ROP chain, PC control,
+an ASLR leak or a PIE bypass: the target is selected from the binary's type
+objects, gdb only observes, and no bytes are written to static memory. Grade
+◐ unchanged. The witness replay of W5-W7 (#1021) closed all earlier pending
+requests at this grade; W9 replay is now owed.
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).
@@ -410,22 +450,27 @@ injected code or chosen code is demonstrated. Grade stays ◐.
   `heap-buffer-overflow` WRITE with a stack through `jpeg_read_scanlines` to
   pinned `JpegDecode.c:252`.
 - Rung 4 (demonstrated security impact): **CHOSEN BYTES AT CHOSEN OFFSETS IN
-  THE LIVE PROCESS, WITH LIVE GLIBC HEAP METADATA CORRUPTION, A DETERMINISTIC
-  PROCESS ABORT, AND A CHOSEN VALID POINTER VALUE IN A LIVE OBJECT'S TYPE
-  FIELD WHOSE ISOLATED PRESENCE CAUSES A DETERMINISTIC FAULT**. W1: +32 and
-  +200 past 32- and 128-byte tile buffers, byte value chosen through JPEG
-  coefficients (`0xa5` in -> `0x5a` out). W2: next malloc chunk size field
+  THE LIVE PROCESS, LIVE GLIBC HEAP METADATA CORRUPTION, A DETERMINISTIC
+  PROCESS ABORT, A CHOSEN VALID POINTER IN A LIVE OBJECT'S TYPE FIELD, AND A
+  CHOSEN INDIRECT CALL REACHED BY NATURAL FINALIZATION**. W1: +32 and +200
+  past 32- and 128-byte tile buffers, byte value chosen through JPEG
+  coefficients (`0xa5` in -> `0x5a` out). W2: next malloc chunk size
   `0x21 -> 0x5a5a5a5a5a5a5a5a`, two live chunks overwritten, 5/5 SIGSEGV in
-  `PyGC_Collect()` at finalization, glibc `corrupted double-linked list` under
+  `PyGC_Collect()`, glibc `corrupted double-linked list` under
   `MALLOC_CHECK_=3`. W3: the coefficient-chosen `0x5a` replaces `ob_refcnt`
-  and `ob_type` of a live `PyUnicodeObject` at `buffer+176`. W4: distinct
-  chosen bytes at distinct offsets, chosen valid `0xa2d260` in `ob_type`
-  written from `libjpeg.so.8` at pinned `JpegDecode.c:252`, and a causal
-  differential (all other bytes restored -> clean exit; only the pointer
-  re-applied -> SIGSEGV in `Py_FinalizeEx()`). Not demonstrated: execution
-  of chosen code, a benign marker, PC or arbitrary control-flow diversion,
-  or the advisory's non-PIE `system@plt` chain. Do not upgrade the label
-  beyond this.
+  and `ob_type` of a live `PyUnicodeObject` at `buffer+176`. W4: chosen
+  `0xa2d260` in `ob_type` from `libjpeg.so.8` at pinned `JpegDecode.c:252`,
+  with a full-span-restore causal differential. W5-W7: a forged type staged
+  from the image carries attacker-chosen `tp_dealloc=0x45e6e6`; the slot is
+  reached from natural `Py_FinalizeEx()` with a negative slot control, but
+  this needs a baked brk address and gdb-disabled ASLR. W9: a single 188-byte
+  row (60 bytes past-end) writes the static `&PyCode_Type` into `ob_type` and
+  natural finalization reaches the runtime-read `PyCode_Type.tp_dealloc`
+  (`0x54e700`) with the corrupted object in `rdi`, 3/3 with ASLR ON and a
+  3/3 no-hit control. Not demonstrated: execution of chosen code, an
+  arbitrary chosen address, ROP, PC control, ASLR leak or PIE bypass, and the
+  advisory's non-PIE `system@plt` chain. Grade ◐ (instrumented chosen target,
+  not chosen code) — do not upgrade this label.
 
 ## Boundaries and open work
 
@@ -436,13 +481,13 @@ bytes reach live glibc heap chunks and their metadata, not only slack, and
 the corrupted heap deterministically aborts the process. W3 identified the
 crossed chunk at `buffer+176` as a live CPython `PyUnicodeObject`; W4 put a
 chosen valid pointer in its `ob_type` and isolated that one field as the
-cause of a fault when every other overwritten byte is restored. Still
-UNKNOWN: which object owns the 32-byte chunk at `buffer+144`; a chosen
-adjacent `bytes` object; whether a *forged* type object with attacker-chosen
-function pointers can be placed at a known address and called (no address
-disclosure was observed); PC control, chosen-code execution or the advisory's
-ASLR-disabled non-PIE `system@plt` chain. Witness replay of W1 (#898/#900)
-returned ESTABLISHED AS CLAIMED at the report's labeled rung-4 grade; W3
-(#926) and W4 were replayed in W74 (#947) from the witness's own pinned
-builds and also returned ESTABLISHED AS CLAIMED at the labeled grade, with
-W4 explicitly a type-confusion fault and the grade unchanged.
+cause of a fault when every other overwritten byte is restored. W5-W7 added
+an image-supplied forged type and an observed chosen slot call; W9 removed
+the heap-address staging for the static-target lane. Still UNKNOWN: the exact
+owner of the 32-byte chunk at `buffer+144` (W9 shows its two pointer words
+can be clobbered without blocking the chosen call); an ASLR-resilient forged
+type at a chosen heap address; a static type whose deallocator gives useful
+primitives with the corrupted object; PC control, chosen-code execution or
+the advisory's non-PIE `system@plt` chain. Witness replay of W1 (#898/#900),
+W3/W4 (#947) and the consolidated W5-W7 forged-type chain (#1021) all
+returned ESTABLISHED AS CLAIMED at the labeled grade ◐. W9 replay is owed.

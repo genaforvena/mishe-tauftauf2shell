@@ -365,3 +365,54 @@ FAKE48=45e6e6 MATCH=1`, `HIT pc=0x45e6e6`, `#7 Py_FinalizeEx`; control
 No grade change. gdb's default `disable-randomization on` fixes the inferior
 brk address; the host has `randomize_va_space=2`, and no ASLR/PIE bypass,
 leak, injected code or chosen code is claimed.
+
+## W9 — 60-byte OOB write, ASLR-on chosen deallocator call (2026-11-21)
+
+Measured blocker first: five plain (no-gdb) runs print distinct `[heap]` bases
+from `/proc/self/maps` (`w9_aslr_heap.log`), and three ASLR-on runs under gdb
+show the two live pointer words the old 8-row write crossed changing on every
+run (`buffer+144` heap pointer, `buffer+152` stack pointer; static fields such
+as `0x21`, `0x20`, `0x280` and `&PyUnicode_Type` stay fixed). A static FPX file
+cannot bake those changing values, so the W5-W7 heap-address cases need
+gdb-disabled ASLR — as recorded — and are not file-only exploits.
+
+W9 removes that need for the *chosen static call target* lane. A 64x1 tile
+with a 47-wide, 4-component JPEG gives ONE 188-byte scanline into the
+128-byte tile buffer: only 60 bytes past the end. `pattern_min.hex` preserves
+the static heap header words (`+128=0`, `+136=0x21`, `+160=0x20`, `+168=0x280`,
+`+176=2`), lets the two varying pointer words be clobbered with `0x5a`, and
+sets the low four bytes of `ob_type` at `buffer+184` to `0xa2d260`
+(`&PyCode_Type`, static in this non-PIE build). The high four bytes are not
+written and stay zero. `case_min.fpx` SHA-256
+`d0eb87b9dd6ce922ef97bf4007766384491b228a19d81dcf8cce045337b46722`;
+`case_min_ctrl.fpx` SHA-256
+`83c4758b1ca498b0c12171dc43bd31d8fdc33b374047be532898f70851a79d06` differs
+only in bytes 184-186 (`c0 72 a4` = the original `&PyUnicode_Type`).
+
+`min_chosen_watch.gdb` puts a hardware watchpoint on `buffer+184`: the chosen
+byte is written from `libjpeg.so.8` -> `jpeg_read_scanlines` ->
+`ImagingJpegDecode` at pinned `JpegDecode.c:252`; `AFTER_TYPE=a2d260`.
+`min_chosen_call.gdb` leaves ASLR ON (`set disable-randomization off`), sets
+a conditional breakpoint on the *runtime-read* `PyCode_Type.tp_dealloc` slot
+(`0x54e700`) and never stages memory:
+
+```
+PILLOW_BUILD=/path/to/plain-pillow-12.2.0 gdb -q -batch \
+  -x min_chosen_call.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_min.fpx").load(); print("LOAD_OK")'
+```
+
+3/3: `LOAD_OK`, then `HIT pc=0x54e700 rdi=<buffer+176>`, backtrace
+`#7 Py_FinalizeEx ()`. The control never hits `0x54e700`. No fake type, no
+heap-address calibration, no heap restore: the only addresses in the file are
+static. `replay_min.sh` checks all of this with ASLR on:
+
+```
+PILLOW_BUILD=/path/to/plain-pillow-12.2.0 ./replay_min.sh /tmp/pw2-w9-replay
+./replay_min.sh --build /tmp/pw2-dl/pillow-12.2.0.tar.gz /tmp/pw2-w9-replay
+```
+
+Latest run: `TOTAL PASS=8 FAIL=0`. Limit: the chosen target is an EXISTING
+static type's deallocator, not an arbitrary chosen address; no injected code,
+ROP, PC write, ASLR bypass or address disclosure. gdb observes; the transfer
+itself is the interpreter's natural finalization. Grade ◐ unchanged.

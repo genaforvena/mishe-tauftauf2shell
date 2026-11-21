@@ -1,0 +1,26 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0x68421e0, state=0x7286819ffd10, buf=0x68bd740 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+BUF=0x6951720 OBJ=0x69517d0 SLOT=54e700 TYPE=a472c0
+Breakpoint 2 at 0x54e700
+LOAD_OK
+
+Program received signal SIGSEGV, Segmentation fault.
+unlink_chunk (p=p@entry=0x69517a0, av=0x728681c04ac0 <main_arena>) at ./malloc/malloc.c:1616
+warning: 1616	./malloc/malloc.c: No such file or directory
+HIT pc=0x728681aa9bb7 rdi=0x69517a0 OBJ=0x69517d0
+#0  unlink_chunk (p=p@entry=0x69517a0, av=0x728681c04ac0 <main_arena>) at ./malloc/malloc.c:1616
+#1  0x0000728681aab0e5 in _int_free_merge_chunk (av=0x728681c04ac0 <main_arena>, p=0x69517a0, size=672) at ./malloc/malloc.c:4696
+#2  0x0000728681aade8e in __GI___libc_free (mem=0x69517d0) at ./malloc/malloc.c:3398
+#3  0x00000000005887cf in PyObject_Free ()
+#4  0x00000000005917c2 in ?? ()
+#5  0x000000000054e77f in ?? ()
+#6  0x0000000000559fb8 in ?? ()
+#7  0x000000000057a3ee in ?? ()
+
+Program terminated with signal SIGSEGV, Segmentation fault.
+The program no longer exists.

@@ -1,0 +1,24 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0x326a180, state=0x7a643e3ffd10, buf=0x32e56e0 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+BUF=0x33796c0 OBJ=0x3379770 SLOT=54e700 TYPE=a472c0
+Breakpoint 2 at 0x54e700
+LOAD_OK
+
+Breakpoint 2, 0x000000000054e700 in ?? ()
+HIT pc=0x54e700 rdi=0x3379770 OBJ=0x3379770
+#0  0x000000000054e700 in ?? ()
+#1  0x00000000005917c2 in ?? ()
+#2  0x000000000054e77f in ?? ()
+#3  0x0000000000559fb8 in ?? ()
+#4  0x000000000057a3ee in ?? ()
+#5  0x000000000061d30d in ?? ()
+#6  0x00000000006bd1b9 in ?? ()
+#7  0x00000000006b11ed in Py_FinalizeEx ()
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000447239 in ?? ()
