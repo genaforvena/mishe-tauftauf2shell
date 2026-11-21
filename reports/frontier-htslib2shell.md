@@ -99,10 +99,11 @@ from the pinned tarballs with no network access.
   address "8 bytes after 4096-byte region". A third read at `:1450` follows.
   Recovered-mode ASan (`-fsanitize-recover=address`, `halt_on_error=0`) let
   the OOB write execute after the OOB read, matching the advisory's
-  read-then-write sequence. Logs: `out-final/asan.log`.
+  read-then-write sequence. Committed log: `out-asan.log` (the local
+  `out-final/asan.log` re-run matches).
 - **Fixed side** — same harness on tagged 1.24: codec 51 is rejected,
   `Unimplemented codec of type ?`, no codec allocation, clean shell exit.
-  Log: `out-final/fixed.log`.
+  Committed log: `out-fixed.log` (local `out-final/fixed.log` matches).
 - **Stand-ins (honest)** — the 512-pointer array is allocated with the exact
   pinned `calloc(512, sizeof(...))` shape, but in the harness rather than
   inside `cram_read_slice`; `hdr->ncodecs` is set directly; the 7 XPACK
