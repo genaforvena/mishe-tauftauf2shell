@@ -69,8 +69,8 @@ UNKNOWN.
 
 12 PASS / 0 FAIL rc 0; two independent five-run groups both
 `sha256=e39fec33622f9f10b63c2b0b804fcfa7072ac7b6498d63c2801ec3bd24b7bcd6`.
-Clean `git archive` replay recorded in the harness provenance/wall below once
-committed.
+Clean `git archive 821647e lab/frontier/asn1scc2shell` replay into a fresh
+`/tmp` directory gave the same 12 PASS / 0 FAIL rc 0 and the same digest.
 
 - Rung 1: pinned 4.6.0.17 runtime called directly with the hostile 3-bit field
   returns `rt=1 decoded=7` against a declared range 0..5.

@@ -1,9 +1,10 @@
 # Frontier brief — hnswlib HNSW index loader mismatch (HnswLib2Shell)
 
-**Status: HELD by operator (tape #906/#908, ~13:22Z): no released fixed version;
-the fixed side is an unmerged PR head and approval #6 requires both versions.**
-Independent witness replay #901 is still pending. Rungs 1/2/3 are
-ESTABLISHED on the real, verbatim-pinned v0.9.0 library: rung 3 is the ASan
+**Status: ADMITTED under standing approval #6 (operator, tape #916, ~13:35Z);
+the earlier ~13:22Z hold (#906/#908) was withdrawn because #6 requires a fixed
+pin, not a released version.** Witness W73 (#913) returned ESTABLISHED AS
+CLAIMED at the labeled grade. Rungs 1/2/3 are ESTABLISHED on the real,
+verbatim-pinned v0.9.0 library: rung 3 is the ASan
 report, rungs 1/2 run unsanitized. Rung 4 shows attacker-chosen bytes at chosen
 offsets past the 256-byte level0 buffer through the library's own
 `std::istream::read`, reached by the ordinary `HierarchicalNSW(space, path)`

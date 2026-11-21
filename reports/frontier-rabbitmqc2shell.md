@@ -1,8 +1,8 @@
 # Frontier brief — rabbitmq-c AMQP BODY frame overflow (RabbitMQC2Shell)
 
 **Status: ADMITTED under standing approval #6 (operator, tape #903, ~13:20Z).**
-Independent witness replay #896 is still pending. Rungs 1/2/3 are
-ESTABLISHED on the real, verbatim-pinned upstream library: rung 3 is the ASan
+Witness W73 (#914) returned ESTABLISHED AS CLAIMED at the labeled grade.
+Rungs 1/2/3 are ESTABLISHED on the real, verbatim-pinned library: rung 3 is the ASan
 report, rungs 1/2 run unsanitized. Rung 4 shows attacker-chosen bytes at chosen
 offsets past the 65536-byte outbound frame buffer through the library's own
 `memcpy`, reached through the exported `amqp_send_frame()` API. No messaging
