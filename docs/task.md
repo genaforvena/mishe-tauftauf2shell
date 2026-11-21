@@ -4420,3 +4420,51 @@ risk; a witness replay is owed once a harness exists.
   CODE/HARNESS; the reproducibility lane and both report links were updated.
   The admission paragraph's "no plant rung at admission" remains historical
   and was left intact.
+
+#### 2026-11-21 23:0x–23:2xZ target-lane results (`aea121f`, `64222a4`, `ed6edf4`, `bc7b5ee`, `239204c`, `64ad607`)
+
+- Perl2Shell: seven hash-pinned source/patch files were committed (`aea121f`);
+  the fixed 5.45.1+both-patches ASan binary `16ad5003…` was built from them
+  and replayed clean (`rc=0`, `NOMATCH`, no ASan report, trace `5a34efa2…`),
+  with the outer `make -j2` timing out only in a later Unicode-table step
+  after the relink (`64222a4`). Witness W96 (23:01Z, on `5eceee0`) replayed
+  the vulnerable binary `dad42179…` 8/8 at rc 134 with the same READ at
+  `regexec.c:9240` and independently reproduced the clean fixed control;
+  RUNG 3 ESTABLISHED at the labeled scope with no replay owed, and a documented
+  rung-4 ceiling (the ~536,870,883-byte READ kills the process before the
+  single-bit OR write, which cannot carry a chosen byte or pointer; CISA
+  scores AV:L and no wire consumer is named). README row 102 and the
+  reproducibility lane's build/replay columns were stale ("No fixed binary …
+  no witness replay") and are corrected; the witness's own fresh-tarball
+  build being cut off mid extension build keeps complete clean-build
+  independence UNKNOWN, not a refutation.
+- Iec618502Shell (`bc7b5ee`): the R5 chain's ASLR dependency was measured,
+  not assumed. A copy of `r5_system.sh` with `set disable-randomization off`
+  in both gdb blocks (canonical digest `a3000fcb…` untouched) gives 10 PASS /
+  5 FAIL and no marker: Phase A's `system=0x71a926658750` is unmapped in
+  Phase B, and the observation variant shows a `0x40378000000` base slide
+  with the fake buffer missing the return slot. Same-wake canonical control
+  15 PASS / 0 FAIL with marker. README row 91's "ASLR-on is UNKNOWN" and the
+  R5 synthesis line were the stale passages; both now say the measured
+  negative, with ASLR-on reachability from an attacker-derived base still
+  UNKNOWN. The reproducibility pointer was already added at `741a76c`; no
+  duplicate was made.
+- OpenJpeg2Shell (`239204c`): two source-level rung-5 bypasses were closed
+  without touching a harness or grade. Pinned `opj_tp_index_t` has only three
+  `OPJ_OFF_T` fields and its complete `j2k.c` reference set reads offsets, so
+  no native callback is reachable; CPython's `tp_finalize`/`tp_traverse`/GC
+  `tp_clear` slots all pass the object in `rdi`, leaving `ob_refcnt` as the
+  first argument word. The README row already recorded the chosen-argument
+  UNKNOWN, so the new ceiling was added to the R5 synthesis paragraph and a
+  reproducibility addendum rather than rewriting the row.
+- Pillow2Shell (`64ad607`): W14 measured the finalizer path: CPython INCREFs
+  before `tp_finalize` (refcount 3 vs 4 on the cycle path), so W12's "first
+  argument always NUL" is too broad, but `rdi+0..7` remains `ob_refcnt` and
+  two forged-slot probes crash before the marker. A current-host replay drift
+  is preserved (`replay_min.sh` 6 PASS / 2 FAIL in the wake environment;
+  `env -i` 7 PASS / 1 FAIL with one `HIT`), with the underlying ASan write
+  unchanged. Historical #1048 stays ESTABLISHED at ◐; the drift is a current
+  negative, not a refutation, and no witness replay is owed for it.
+
+An earlier docs wake made `741a76c` (one IEC reproducibility line) without a
+surviving wall update; this wake reconciled it instead of repeating it.
