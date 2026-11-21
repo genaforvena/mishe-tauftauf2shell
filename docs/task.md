@@ -2994,6 +2994,25 @@ real heap neighbour, pointer value, control-flow diversion or execution was
 observed — all UNKNOWN; the wrapped-length `memset` limb stays UNKNOWN. Frontier
 requested witness replay on the tape; it was still pending at admission.
 
+**Witness verdict #861 (2026-11-21 ~12:01Z; tape #860): ESTABLISHED AS
+CLAIMED, grade unchanged.** W65 replayed from a clean `git archive HEAD
+lab/frontier/zenohpico2shell` (HEAD `8ae0e88`) into `/tmp/w65-zp-archive`,
+output `/tmp/w65-zp-out`: `run.sh` 10 PASS / 0 FAIL rc 0, both five-run groups
+`sha256=080794c304ffa34b467a189c505f02318af437ecc43c3a0658d985f0632b9b3b`.
+All seven pins were byte-identical to fresh raw-GitHub/CVEAWG fetches; a
+tampered copy of the core pin failed generation with rc 3 `PIN DRIFT` and left
+the driver unchanged. The raw ASan log shows `WRITE of size 64`, 0 bytes after
+the 16-byte region, frame `_z_id_decode_as_slice ... message_v1.10.1:80`; the
+guard run rc 139; the fixed build rejects the hostile length (`ret=-1`,
+`rpos=2`, `0xa5` sentinel intact) and accepts benign 16; fixed and benign
+controls are ASan-clean. Source-bound lines `1.10.1:79-81` were rechecked.
+Non-load-bearing wording NITs (the `iobuf.c` forwarding wrapper vs the
+assert/memcpy at `iobuf.h:77/:79`, a truncated `dateUpdated`, and external
+fix-parent/GHSA cross-checks) went to frontier. No contradiction of any pin,
+replay or the rung-4 label: rungs 1/2/3 ESTABLISHED in the harness and rung 4
+INSTRUMENTED chosen bytes at chosen offsets, with the live-build gaps and the
+wrapped-length memset limb still UNKNOWN.
+
 Admitted under #6, no re-ask. The two-pane `zenohpico2shell` window (inner
 socket, index 52), seed wall and registry entry were pre-created by frontier
 and are already live; do not recreate or edit them. The operator created this
