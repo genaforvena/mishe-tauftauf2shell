@@ -3,11 +3,12 @@
 **Status 2026-11-21:** rung 3 (confirmed memory corruption) reached on a
 loopback-only ASan build of the hash-pinned vulnerable tag, with independent
 witness replay **ESTABLISHED in full** (wake 5). The fixed tag handles
-identical bytes cleanly. Rung 4 (demonstrated security impact: chosen-byte /
-pointer control in a live neighbour) remains **UNKNOWN**. Wakes 3–4 wrote
-chosen bytes into two comparator fields of what wake 6 identified as a stale
-Initial pktns; wake 6 steered the write into a live gnutls session but
-observed no control flow.
+identical bytes cleanly. Rung 4 (demonstrated security impact) reached in the
+author's loopback lab this wake: with a stalled-Initial groom, attacker-chosen
+bytes reach a chosen argument value at a `gnutls_deinit()` dereference on
+connection teardown, with two distinct marker values. Witness replay is owed
+before rung 4 is called ESTABLISHED. Rung 5 (remote command execution) remains
+UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -100,17 +101,19 @@ At F6, `free = 1200 >= datalen = 1200`, so the `realloc` branch is skipped;
 3. Confirmed memory corruption — **yes**: ASan reports `WRITE of size 1198`
    at `quic_conn.c:124` past a 5762-byte `realloc` at `quic_conn.c:103`, with
    per-frame drift measured.
-4. Demonstrated security impact — **UNKNOWN**, but partially approached: wakes
-   3–4 observed a deterministic chosen-byte overwrite
-   (`0x4141414141414141`) of two function-pointer fields — the `gap` and
-   `acktr.ents` comparators of an adjacent, wake-6-identified stale Initial
-   `ngtcp2_pktns` — with no call through either. Wake 6 groomed the neighbour
-   into the attacker's live gnutls session, still with no observed control
-   flow. No RIP/RDI control or marker execution was observed.
-   The published claims (five jemalloc size classes, ~814-byte
-   write into a libgnutls handler, `system()` with ASLR off) are from the
-   researcher's report and were not reproduced. Stock-build (ASLR on)
-   exploitability remains UNKNOWN; an information leak would be needed.
+4. Demonstrated security impact — **reached in the author's lab (witness
+   replay owed)**. Wakes 3–4 overwrote two comparator fields of a stale
+   Initial pktns; wake 6 identified that staleness, groomed the +6144
+   neighbour into the attacker's live gnutls session and swept candidate
+   pointer fields. At `slot1+0x100` and `+0x110` the chosen word reaches RSI
+   at a dereference in `gnutls_deinit()` during connection teardown, and a
+   different marker produces the same crash with the different RSI value.
+   Conditions: jemalloc/debug build, stalled-Initial groom, gdb-disabled
+   ASLR. No RIP control, no benign marker execution and no command execution.
+   The published claims (five jemalloc size classes, ~814-byte write into a
+   libgnutls handler, `system()` with ASLR off) were not reproduced.
+   Stock-build (ASLR-on) exploitability and any information leak remain
+   UNKNOWN.
 
 ## Witness replay — completed 2026-11-21 (wake 5)
 
@@ -411,6 +414,56 @@ field of gnutls 3.8.3 that is dereferenced after the overwrite, then drive it.
 The stale-pktns path of wakes 3–5 is closed as a rung-4 route. Stock
 (ASLR-on) exploitability and any information leak remain UNKNOWN. All runs
 loopback-only under gdb; host ASLR sysctl untouched.
+
+## Rung-4 chosen-value control in live gnutls teardown (wake 6, ~20:3x–20:4xZ)
+
+The wake-6 disposition above is superseded by one more bounded experiment:
+the live gnutls session has a field whose chosen value reaches a dereference
+in `gnutls_deinit()`. `harness/crash-watch.gdb` runs the inferior with no
+breakpoints; `harness/run_gnutls_sweep.sh` places an 8-byte marker at a
+specified `slot1` offset using the stalled-Initial groom and F6, then closes
+the connection. `harness/ksl_stalled.py` takes the offset and marker value
+as arguments (F6 body: 384 `AA` bytes, zero elsewhere, one chosen word).
+
+`harness/gnutls-sweep.txt` (F6 fired for every offset):
+
+```
+offset 0x10, 0x18, 0xd8, 0x178: no stop (kresd alive)
+offset 0xf8:  STOP rip=0x7ffff7bf87d2, rdi=0, rsi=0,
+              #1 gnutls_deinit -> quic_conn.c:884   (NULL deref)
+offset 0x100: STOP rip=0x7ffff7bf0690, rsi=0x4141414141414141,
+              #1 gnutls_deinit -> quic_conn.c:884
+offset 0x110: STOP rip=0x7ffff7bf0690, rsi=0x4141414141414141,
+              #1 gnutls_deinit -> quic_conn.c:884
+```
+
+Varied-value control at `+0x100` (`harness/gnutls-control-0x100.log`): the
+same `rip=0x7ffff7bf0690` and `#1 gnutls_deinit`, but
+`rsi=0x4242424242424242`. The value in the faulting call's second argument
+tracks the bytes supplied in the F6 body, so this is chosen-byte control of a
+live argument at a downstream dereference, not an unrelated crash. RDI is an
+uncontrolled heap address; RIP stays inside libgnutls, and no command ran.
+
+Full backtrace for `+0x100`:
+`gnutls_deinit` → `pl_quic_conn_sess_deinit` (`quic_conn.c:884`) →
+`session2_free` (`session2.c:940`) → `pl_quic_conn_event_unwrap(CLOSE)`
+(`quic_conn.c:922`) → `kr_quic_table_sweep` (`quic_demux.c:188`).
+
+### Conditions and ladder disposition
+- Build: hash-pinned 6.4.0, jemalloc, `--buildtype=debug`; one loopback
+  stalled-Initial connection grooms the +6144 neighbour into the attacking
+  connection's live gnutls session (`tls_native_handle == slot1`).
+- gdb disables ASLR for its inferior; host `kernel.randomize_va_space`
+  untouched. gnutls 3.8.3 on this host.
+- **Rung 4 (demonstrated security impact) reached in the author's lab**:
+  attacker-chosen bytes at a chosen offset in a live object reach a chosen
+  value in the argument register of a dereference during connection teardown,
+  with two distinct marker values and a deterministic backtrace. Honest
+  boundary: this is chosen-value/argument control with a crash, **not** RIP
+  control, benign marker execution or remote code execution. Independent
+  witness replay is owed before calling rung 4 ESTABLISHED.
+- Rung 5 remains UNKNOWN: no command execution, no fixed-vs-vulnerable
+  stock-build (ASLR-on) claim, no information leak.
 
 ## Boundaries
 

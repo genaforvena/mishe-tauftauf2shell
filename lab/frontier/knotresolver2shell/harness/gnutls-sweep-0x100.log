@@ -1,0 +1,25 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7bf0690 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+STOP: rip=0x7ffff7bf0690
+rip            0x7ffff7bf0690      0x7ffff7bf0690
+rdi            0x7ffff681e960      140737329097056
+rsi            0x4141414141414141  4702111234474983745
+#0  0x00007ffff7bf0690 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+#1  0x00007ffff7bf94fd in gnutls_deinit () from /lib/x86_64-linux-gnu/libgnutls.so.30
+#2  0x0000555555598832 in pl_quic_conn_sess_deinit (session=0x7ffff68bb900, sess_data=0x7ffff68bbb00) at ../daemon/quic_conn.c:884
+#3  0x000055555557f13e in session2_free (s=0x7ffff68bb900) at ../daemon/session2.c:940
+#4  0x000055555557c104 in session2_dec_refs (s=0x7ffff68bb900) at ../daemon/session2.h:964
+#5  0x000055555559898e in pl_quic_conn_event_unwrap (event=PROTOLAYER_EVENT_CLOSE, baton=0x7fffffff8630, session=0x7ffff68bb900, sess_data=0x7ffff68bbb00) at ../daemon/quic_conn.c:922
+#6  0x0000555555580553 in session2_event_unwrap (s=0x7ffff68bb900, start_ix=0, event=PROTOLAYER_EVENT_CLOSE, baton=0x0) at ../daemon/session2.c:1351
+#7  0x00005555555805ed in session2_event (s=0x7ffff68bb900, event=PROTOLAYER_EVENT_CLOSE, baton=0x0) at ../daemon/session2.c:1381
+#8  0x0000555555593edd in session2_close (s=0x7ffff68bb900) at ../daemon/session2.h:1168
+#9  0x0000555555595831 in pl_quic_demux_event_unwrap (event=PROTOLAYER_EVENT_DISCONNECT, baton=0x7fffffff8740, session=0x7ffff688c000, sess_data=0x7ffff688c1c0) at ../daemon/quic_demux.c:571
+#10 0x0000555555580553 in session2_event_unwrap (s=0x7ffff688c000, start_ix=0, event=PROTOLAYER_EVENT_DISCONNECT, baton=0x7ffff68bbb00) at ../daemon/session2.c:1351
+#11 0x00005555555805ed in session2_event (s=0x7ffff688c000, event=PROTOLAYER_EVENT_DISCONNECT, baton=0x7ffff68bbb00) at ../daemon/session2.c:1381
+#12 0x00005555555945c0 in kr_quic_table_sweep (table=0x7ffff68ca7c0, ctx=0x7ffff6884b40) at ../daemon/quic_demux.c:188
+#13 0x0000555555595012 in pl_quic_demux_unwrap (sess_data=0x7ffff688c1c0, iter_data=0x0, ctx=0x7ffff6884b40) at ../daemon/quic_demux.c:377

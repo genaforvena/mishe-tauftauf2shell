@@ -1,0 +1,174 @@
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+Exception ignored in: <function StreamWriter.__del__ at 0x71b15c805e40>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] trailing DNS query on stream 4
+[driver] done
+=== offset 0x10 ===
+no stop (kresd alive)
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+Exception ignored in: <function StreamWriter.__del__ at 0x7b20ddf09e40>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] trailing DNS query on stream 4
+[driver] done
+=== offset 0x18 ===
+no stop (kresd alive)
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+Exception ignored in: <function StreamWriter.__del__ at 0x71011d405e40>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] trailing DNS query on stream 4
+[driver] done
+=== offset 0xd8 ===
+no stop (kresd alive)
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+Exception ignored in: <function StreamWriter.__del__ at 0x7966dc909e40>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] trailing DNS query on stream 4
+[driver] done
+=== offset 0xf8 ===
+STOP: rip=0x7ffff7bf87d2
+rip            0x7ffff7bf87d2      0x7ffff7bf87d2
+rdi            0x0                 0
+rsi            0x0                 0
+#0  0x00007ffff7bf87d2 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+Exception ignored in: <function StreamWriter.__del__ at 0x702359f0de40>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] trailing DNS query on stream 4
+[driver] done
+=== offset 0x100 ===
+STOP: rip=0x7ffff7bf0690
+rip            0x7ffff7bf0690      0x7ffff7bf0690
+rdi            0x7ffff681e960      140737329097056
+rsi            0x4141414141414141  4702111234474983745
+#0  0x00007ffff7bf0690 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+Exception ignored in: <function StreamWriter.__del__ at 0x73ce8e809e40>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] trailing DNS query on stream 4
+[driver] done
+=== offset 0x110 ===
+STOP: rip=0x7ffff7bf0690
+rip            0x7ffff7bf0690      0x7ffff7bf0690
+rdi            0x7ffff681ec60      140737329097824
+rsi            0x4141414141414141  4702111234474983745
+#0  0x00007ffff7bf0690 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+Exception ignored in: <function StreamWriter.__del__ at 0x7387e9f0de40>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] trailing DNS query on stream 4
+[driver] done
+=== offset 0x178 ===
+no stop (kresd alive)
+=== summary ===

