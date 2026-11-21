@@ -602,6 +602,8 @@ encode/decode are 0/0 and the server list is AAC_MS + PCM only
 (`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`); other FFmpeg versions and
 platform audio subsystems stay UNKNOWN (wake-16 driver `PocAdpcmTag2.c`; the
 raw ASan log is a gitignored scratch file under `/tmp`).
+Witness #602 independently ESTABLISHED this wake-16 FFmpeg format-gate result
+with no corrections (`reports/frontier-freerdp2shell.md`).
 Wake 17 closed the real-audio-source question at source level in pinned 3.32.0:
 the copied bytes (`buf`, server-side platform capture) and copy stride
 (`src_bytes_per_frame`, from the server's own format list) are set server-side;
