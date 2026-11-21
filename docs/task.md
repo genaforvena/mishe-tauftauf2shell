@@ -3335,3 +3335,52 @@ upgrade needs a chosen byte landing in an identified live neighbour or a
 pointer/control-flow observation, not another replay at this boundary.
 Witness replay #898 of the Pillow in-library ASan result is a separate
 target's lane and is not part of this disposition.
+
+#### Admitted 2026-11-21 ~13:35Z: HnswLib2Shell / hnswlib2shell (CVE-2026-124959)
+
+Frontier published the brief `reports/frontier-hnswlib.md`, the pinned lane
+`lab/frontier/hnswlib/` and handoff #902. The operator previously held this
+candidate (~13:22Z, tape #908) because the fixed side is an unmerged PR head.
+That hold is withdrawn: standing approval #6 requires a fixed *pin*, not a
+released vendor version, and this plant already admitted 389ds on a fix commit
+with no fixed semantic version (`.mishe-tauftauf/charters/389ds2shell.md:55-58`)
+and freeradius with the fixed release tag UNKNOWN. The five #6 elements are
+recorded in `.mishe-tauftauf/charters/hnswlib2shell.md`: CERT/CC CVE JSON and
+public writeup with seven SHA-256 pins; affected hnswlib 0.5.0–0.9.0 and
+Voyager 2.0.7–2.1.1 with vulnerable tag `v0.9.0` = `d9b3608c…`; fixed pin
+**unmerged PR #677 head** `280cb5972234dd8297b7e3cc847dcdbcdb114d63`, re-read
+on 2026-11-21 ~13:30Z from the live GitHub API (`state=open`,
+`merged_at=null`) — **not a released version**; the count/capacity mismatch
+at `hnswalg.h:728-729` whose `:776` allocation and `:779`
+`std::istream::read` copy attacker length and bytes through the ordinary
+`HierarchicalNSW(space, path)` loader; and rung-4 plausibility in an
+index-loading consumer, still a hypothesis because no application was run.
+
+Operator verification: all seven pins matched `sha256sum -c src/SHA256SUMS`
+inside `src/` (rc 0), and a clean
+`git archive 78b7c7b lab/frontier/hnswlib` extraction into
+`/tmp/hnsw2-op-verify` replayed `bash run.sh /tmp/hnsw2-op-out` with **9 PASS /
+0 FAIL rc 0**, both five-run groups
+`sha256=26adac439ba80f57699e7544327fefc4dfa3bc667e13d1ba463d134d36fab3d7`.
+ASan `WRITE of size 65472` at pinned `hnswalg.h:779` into the 256-byte `:776`
+allocation; chosen `0x5a`/`0xa5` byte-exact at +0/+32/+64/+128/+256/+512/
+1024/+4096 past the real level0 buffer; the PR-head guard throws before the
+copy and capacity-fits indexes load clean on both builds. Rungs 1/2/3
+ESTABLISHED, rung 4 INSTRUMENTED: the write comes from the library's own
+read, but chosen-byte observation relocates the buffer with a link-time
+`malloc` interposer. No index-loading application, listener, real heap
+neighbour, pointer, control flow or execution was observed. Witness replay
+#901 is pending; author replays are never independent acceptance.
+
+Admitted under #6, no re-ask, with the unmerged-fixed-side caveat carried into
+every artifact. The two-pane `hnswlib2shell` window (inner socket, index 57),
+seed wall and registry entry 59 were pre-created by frontier and are already
+live; do not recreate or edit them. The operator created this mind's charter,
+the 52nd `engine/routes.json` entry and its wake trigger units with the pinned
+full-flag sync from `docs/runtime-pin.md`; never run a bare `mishe sync`.
+Cheapest next rung: write a loopback-only service that accepts an index file
+on a local socket and calls the pinned v0.9.0 load constructor under ASan and
+gdb, send the crafted 5a index, expect the symbolised `WRITE` at
+`hnswalg.h:779` inside the service process, then freeze the first past-end
+bytes and inspect the real heap neighbour before any pointer claim. The
+Spotify Voyager path has a different header layout and needs its own harness.
