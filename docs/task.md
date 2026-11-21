@@ -2104,6 +2104,45 @@ Evidence: `reports/frontier-kermit2shell.md`,
 `reports/kermit2shell-status.md` and the pins in
 `lab/frontier/kermit2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~10:29Z: GpfD2Shell / gpfdist2shell (CVE-2026-122042, no GHSA found)
+
+Frontier handed this find over in `reports/frontier-gpfdist2shell.md`
+(commit `a7d5884`, now pushed). All five standing-approval #6 elements are
+present: **claim source** — EDB security advisory (first published
+2026-11-18), NVD CVE record, WarehousePG PRs #370/#371 and both fix diffs,
+with URLs and SHA-256 pins in `lab/frontier/gpfdist2shell/PROVENANCE.md`;
+**identifier** — CVE-2026-122042, no GHSA found; **affected/fixed versions**
+— WarehousePG 6.27.1–6.27.7 and 7.2.1–7.6.1, fixed 6.27.8 / 7.6.2, fix
+`6fbb42ed6480bf3534c0a49e5f251dff468e8469` (2026-10-30); **primitive** —
+`X-GP-SEGMENT-COUNT` sizes and `X-GP-SEGMENT-ID` indexes the same two arrays
+with no check, so a single unauthenticated HTTP request writes a chosen
+4-byte `active_segids` value and a chosen 64-bit `X-GP-SEQ` value at a chosen
+index; pinned writes at `gpfdist_v7.6.1.c:1988` and `:3677`; **rung-4
+plausibility** — gpfdist is an HTTP file server, unauthenticated by default
+(`PR:N`, internal-network deployment is a constraint, not an auth control),
+and the vector advisory rates `AV:A/AC:L/PR:N/UI:N/VA:H` with availability
+impact only. This is a closer runtime/web-server class fit than the held
+DCMTK toolkit.
+
+Operator replay at 10:28Z from a clean `git archive HEAD` extraction of
+`a7d5884` into `/tmp/gpf-verify.*`: 13 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`,
+chosen `0x41` bytes read back at `seq+24`, guard-page fault, 7.6.2 guards
+reject the same request, two independent five-run groups both
+`sha256=4f8bf8b7c6de06df7ce370b3570babe8df25112b9d2380c9836852864a8048c4`.
+Rungs 1/2/3 ESTABLISHED in the verbatim-pin extracted harness; rung 4 is
+INSTRUMENTED chosen bytes at chosen offsets in an mmap collaborator only.
+No stock build, live listener, real APR pool neighbour, pointer overwrite,
+control-flow diversion or execution was observed — all UNKNOWN, no claim.
+
+Admitted under the standing similar-things mandate; no re-ask. The
+two-pane `gpfdist2shell` window was pre-created by frontier and is already
+registered; wake trigger units and the presentation entry stay owed from
+the person's full-flag sync in `docs/runtime-pin.md`, never a bare
+`mishe sync`. Cheapest next rung: build the pinned 7.6.1 `gpfdist` with ASan,
+start a loopback listener and send the hostile header trio to reach the real
+`session_attach()` / `OPEN_SEQ` stores, then repeat at 7.6.2. A measured
+header-length, APR or allocator blocker is a valid negative to preserve.
+
 #### Held 2026-11-21 ~09:47Z: Airlock2Shell (CVE-2026-19707 / GHSA-3c49-2p63-245g) — not admitted under #6
 
 Operator advisory watch; no handoff and no lab work. Claim sources: InfoGuard
