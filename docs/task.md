@@ -4015,3 +4015,41 @@ admitted target minds in the README table. Never run a bare `mishe sync`. The
 bounded first experiment is an ASan build of the pinned 10.1.3 / 10.1.4
 MIMEScanner unit tests replaying the fix's two-fragment input; a witness replay
 is owed once a harness exists.
+
+#### Admitted 2026-11-21 ~19:5xZ: Exim2Shell / exim2shell (CVE-2026-45185)
+
+Frontier's DM #1092 carried brief `reports/frontier-exim2shell.md` (commit
+`1bbfaef`), two hash-pinned release tarballs and the raw fix hunk in
+`lab/frontier/exim2shell/src/SHA256SUMS`. The operator admitted this target
+under standing approval #6, no re-ask. Operator pin check 19:44Z:
+`sha256sum -c SHA256SUMS` 2/2 OK (self-computed digests, no published sidecar).
+All five elements are in `.mishe-tauftauf/charters/exim2shell.md`: **claim
+source** — vendor advisory `EXIM-Security-2026-05-01.1.txt` (announced
+2026-05-12, reporter federic.kirschbaum@xbow.com), MITRE CVE record (CNA MITRE,
+2026-05-12, CWE-416, CVSS 9.8 `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`), XBOW
+blog as a claim (oss-security /2026/05/12/4 body not retrieved). **Identifier**
+— CVE-2026-45185 (no GHSA cited). **Affected/fixed pin** — affected 4.97 through
+4.99.2, fixed 4.99.3; vulnerable tarball
+`e9e33c8cde9dddc117eaab40ae529ed703537b14e1257a06b98460738f75da84`, fixed
+`714efe07930ec902224c62c86d446a85b1ee341abdd6c76699949d4de2b52524`; fix is
+`tls_close(NULL, TLS_NO_SHUTDOWN)` → `tls_close_notify()` at `tls-gnu.c:639`
+plus `smtp_rcv_cleartext()` and bdat pop/re-push in `smtp_in.c:984+`. Exact
+fix commit ID UNKNOWN — tarballs only. **Primitive** — a GnuTLS `close_notify`
+mid-BDAT frees the 4096-byte `xfer_buffer` while the bdat receive layer is
+still installed; the next cleartext byte reaches stale `tls_ungetc()` and
+stores one fixed `0x0A` at `xfer_buffer[--lwm]`. XBOW's ASLR-off/non-PIE RCE
+escalation is a labeled claim; the real build yielded a stack leak.
+**Rung-4 plausibility** — pre-auth SMTP path, one-byte write into freed heap
+metadata, byte-pinned fixed side; attacker controls the position, not the byte.
+Ranked above ATS: a public escalation narrative exists. Honest ceiling: ASan
+write confirmation first, then a benign marker at a chosen allocator offset;
+measure the host's actual allocator state before grooming (nginx2root lesson).
+
+At admission no rung was established: no build, no bytes, no traffic. The
+operator created the 62nd `engine/routes.json` entry, this mind's wake trigger
+units with the pinned full-flag sync from `docs/runtime-pin.md`, a seed wall,
+the charter and the two-pane window (inner socket index 67). This makes 58
+admitted target minds in the README table. Never run a bare `mishe sync`. The
+bounded first experiment is a `USE_GNUTLS=yes` ASan build of 4.99.2 driving
+STARTTLS → short BDAT → close_notify → one cleartext byte on loopback, with a
+4.99.3 control; a witness replay is owed once a harness exists.
