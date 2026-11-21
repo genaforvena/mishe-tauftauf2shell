@@ -1,0 +1,63 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff49ff6c0 (LWP 3583126)]
+[New Thread 0x7ffff3cd66c0 (LWP 3583295)]
+[New Thread 0x7ffff34d56c0 (LWP 3583296)]
+[New Thread 0x7ffff2cd46c0 (LWP 3583297)]
+[New Thread 0x7ffff24d36c0 (LWP 3583299)]
+[New Thread 0x7ffff1cd26c0 (LWP 3583304)]
+[Thread 0x7ffff1cd26c0 (LWP 3583304) exited]
+[Thread 0x7ffff24d36c0 (LWP 3583299) exited]
+
+Thread 4 "freerdp-shadow-" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffff34d56c0 (LWP 3583296)]
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+warning: 660	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+  Id   Target Id                                             Frame 
+  1    Thread 0x7ffff7a13740 (LWP 3583123) "freerdp-shadow-" 0x00007ffff791b75d in __GI___poll (fds=0x7fffffffd418, nfds=1, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+  2    Thread 0x7ffff49ff6c0 (LWP 3583126) "freerdp-shadow-" 0x00007ffff791b75d in __GI___poll (fds=0x7ffff49fe8b8, nfds=2, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+  3    Thread 0x7ffff3cd66c0 (LWP 3583295) "freerdp-shadow-" 0x00007ffff791b75d in __GI___poll (fds=0x7ffff3cd5a98, nfds=2, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+* 4    Thread 0x7ffff34d56c0 (LWP 3583296) "freerdp-shadow-" __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+  5    Thread 0x7ffff2cd46c0 (LWP 3583297) "freerdp-shadow-" 0x00007ffff791b75d in __GI___poll (fds=0x7ffff2cd3ab8, nfds=2, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+
+Thread 5 (Thread 0x7ffff2cd46c0 (LWP 3583297) "freerdp-shadow-"):
+#0  0x00007ffff791b75d in __GI___poll (fds=0x7ffff2cd3ab8, nfds=2, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007ffff7b002c1 in pollset_poll () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#2  0x00007ffff7b015be in WaitForMultipleObjectsEx () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#3  0x00007ffff7f3071b in rdpsnd_server_thread () from /tmp/fr-wake7-shadow-build/server/common/libfreerdp-server3.so.3
+#4  0x00007ffff7b43566 in thread_launcher () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#5  0x00007ffff789cb64 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7929e8c in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 4 (Thread 0x7ffff34d56c0 (LWP 3583296) "freerdp-shadow-"):
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+#1  0x00007ffff7f2f5a2 in rdpsnd_server_send_samples () from /tmp/fr-wake7-shadow-build/server/common/libfreerdp-server3.so.3
+#2  0x00007ffff7fa2439 in shadow_client_subsystem_process_message () from /tmp/fr-wake7-shadow-build/server/shadow/libfreerdp-shadow3.so.3
+#3  0x00007ffff7fa934b in shadow_client_thread () from /tmp/fr-wake7-shadow-build/server/shadow/libfreerdp-shadow3.so.3
+#4  0x00007ffff7b43566 in thread_launcher () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#5  0x00007ffff789cb64 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7929e8c in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 3 (Thread 0x7ffff3cd66c0 (LWP 3583295) "freerdp-shadow-"):
+#0  0x00007ffff791b75d in __GI___poll (fds=0x7ffff3cd5a98, nfds=2, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007ffff7b002c1 in pollset_poll () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#2  0x00007ffff7b015be in WaitForMultipleObjectsEx () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#3  0x00007ffff7dbc6ba in timer_thread () from /tmp/fr-wake7-shadow-build/libfreerdp/libfreerdp3.so.3
+#4  0x00007ffff7b43566 in thread_launcher () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#5  0x00007ffff789cb64 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7929e8c in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 2 (Thread 0x7ffff49ff6c0 (LWP 3583126) "freerdp-shadow-"):
+#0  0x00007ffff791b75d in __GI___poll (fds=0x7ffff49fe8b8, nfds=2, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007ffff7b002c1 in pollset_poll () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#2  0x00007ffff7b015be in WaitForMultipleObjectsEx () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#3  0x00007ffff7fa7c11 in shadow_server_thread () from /tmp/fr-wake7-shadow-build/server/shadow/libfreerdp-shadow3.so.3
+#4  0x00007ffff7b43566 in thread_launcher () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#5  0x00007ffff789cb64 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#6  0x00007ffff7929e8c in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Thread 1 (Thread 0x7ffff7a13740 (LWP 3583123) "freerdp-shadow-"):
+#0  0x00007ffff791b75d in __GI___poll (fds=0x7fffffffd418, nfds=1, timeout=-1) at ../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007ffff7b002c1 in pollset_poll () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#2  0x00007ffff7b00d81 in WaitForSingleObjectEx () from /tmp/fr-wake7-shadow-build/winpr/libwinpr/libwinpr3.so.3
+#3  0x0000555555556611 in main ()

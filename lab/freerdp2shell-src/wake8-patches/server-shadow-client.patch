@@ -1,0 +1,66 @@
+--- /tmp/fr-wake6-fresh/src3320/server/shadow/shadow_client.c	2026-11-21 00:34:22.442661387 +0000
++++ /tmp/fr-wake2/src3320/server/shadow/shadow_client.c	2026-11-21 02:12:51.631267713 +0000
+@@ -33,6 +33,7 @@
+ #include <freerdp/log.h>
+ #include <freerdp/utils/gfx.h>
+ #include <freerdp/channels/drdynvc.h>
++#include <freerdp/codec/audio.h>
+ 
+ #include "shadow.h"
+ 
+@@ -520,6 +521,45 @@
+ 	return rc;
+ }
+ 
++/* Wake-8 lab-only synthetic audio playback event. Posts a real
++ * SHADOW_MSG_OUT_AUDIO_OUT_SAMPLES through the normal shadow message path so
++ * the real rdpsnd_server_send_samples() CopyMemory runs in the live process. */
++BOOL shadow_client_post_msg(rdpShadowClient* client, void* context, UINT32 type,
++                            SHADOW_MSG_OUT* msg, void* lParam);
++
++static void wake8_audio_free(UINT32 id, SHADOW_MSG_OUT* msg)
++{
++	(void)id;
++	free(msg);
++}
++
++static DWORD WINAPI wake8_audio_thread(LPVOID arg)
++{
++	rdpShadowClient* client = (rdpShadowClient*)arg;
++	WLog_INFO(TAG, "wake8 audio thread started");
++	Sleep(1200);
++	SHADOW_MSG_OUT_AUDIO_OUT_SAMPLES* m = calloc(1, sizeof(*m));
++	AUDIO_FORMAT* fmt = calloc(1, sizeof(*fmt));
++	BYTE* data = malloc(16384);
++	if (!m || !fmt || !data)
++		return 1;
++	fmt->wFormatTag = WAVE_FORMAT_PCM;
++	fmt->nChannels = 2;
++	fmt->nSamplesPerSec = 44100;
++	fmt->nAvgBytesPerSec = 176400;
++	fmt->nBlockAlign = 4;
++	fmt->wBitsPerSample = 16;
++	memset(data, 0xDE, 16384);
++	m->common.Free = wake8_audio_free;
++	m->audio_format = fmt;
++	m->buf = data;
++	m->nFrames = 4096;
++	m->wTimestamp = 0;
++	WLog_INFO(TAG, "wake8 injecting synthetic audio playback");
++	shadow_client_post_msg(client, NULL, SHADOW_MSG_OUT_AUDIO_OUT_SAMPLES_ID,
++	                       (SHADOW_MSG_OUT*)m, NULL);
++	return 0;
++}
+ WINPR_ATTR_NODISCARD
+ static BOOL shadow_client_post_connect(freerdp_peer* peer)
+ {
+@@ -567,6 +607,9 @@
+ 
+ 	if (shadow_client_channels_post_connect(client) != CHANNEL_RC_OK)
+ 		return FALSE;
++	HANDLE wake8Thread = CreateThread(NULL, 0, wake8_audio_thread, client, 0, NULL);
++	if (wake8Thread)
++		CloseHandle(wake8Thread);
+ 
+ 	shadow_client_mark_invalid(client, 0, nullptr);
+ 	authStatus = -1;

