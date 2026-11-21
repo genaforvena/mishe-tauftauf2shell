@@ -343,12 +343,24 @@ sources: `ALL CHECKS PASS`, rc 0, digests `46735a43…` / `2da4d3ea…`; rung 1
 after the 8192-byte region via `do_copy` -> `drdynvc_data_first`, rung 4
 `de`/`ad` at OOB offsets 8228/12024 across two messages; exact-size 0.10.6.1
 and benign controls show `oob_writes=0` and 5/5 traces are byte-identical.
-This is a harness-only rung 4: a live xrdp process, real DRDYNVC PDU
-parse/reassembly, dynamic-channel open, stock allocator layout, network
-reachability and the auth gate stay UNKNOWN. Evidence:
+The claimed harness-only boundary was advanced on 2026-11-21: a second driver
+(`lab/xrdp2shell-real/`, digests `a05ba8ac…` / `ecfe9f7e…`) links the real ASan
+xrdp 0.10.6 `libxrdp.a` / `libcommon.a` and calls `xrdp_channel_process()` →
+real `drdynvc_process_data_first()` → real `out_uint8a` on the `trans_create`
+buffer: ASan `WRITE of size 20000` 0 bytes after the 8192-byte region, 8164
+clean / 8165 OOB, 5/5 identical. A non-ASan reader plants an adjacent canary
+chunk and reads chosen `DEADBEEF-CR` / `C0FFEE00-CR` back at offsets 84/484,
+8208 bytes past the buffer start; no pointer-sized field or control-flow
+target was controlled, and a `free()` variant aborts `malloc(): corrupted
+top size`. The 8128-byte cap is a synthetic control, not the real 0.10.6.1
+fix. It is still in-process: a completed RDP logon, dynamic-channel open,
+network PDU trace, stock live-session allocator layout and the auth gate stay
+UNKNOWN; loopback COTP reachability of the lab listener is the only network
+observation and witness replay is owed. Evidence:
 `reports/frontier-xrdp2shell.md`, harness
-`lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`, seed status
-`reports/xrdp2shell-status.md`. The dedicated `xrdp2shell` mind owns this
+`lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`, real-path drivers and
+runbook `lab/xrdp2shell-real/{real_drdynvc_driver.c,chosen_bytes_real_path.c,RUNBOOK.md}`,
+status `reports/xrdp2shell-status.md`. The dedicated `xrdp2shell` mind owns this
 lane; details in `.mishe-tauftauf/charters/xrdp2shell.md`. Wake trigger units
 and the presentation.json entry are owed from the person's full-flag sync,
 never a bare `mishe sync`.
@@ -496,6 +508,49 @@ window 22), registry entry and seed wall are already live from frontier; wake
 trigger units and the presentation.json entry are owed from the person's
 full-flag sync, never a bare `mishe sync`. Witness replay was requested
 separately (#429).
+
+#### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
+
+Frontier handed this find over on tape #448 after committing
+`reports/frontier-gdbserver2shell.md` (5261154) and the harness
+`lab/frontier/gdbserver2shell/`. Claim sources: the CVE record (CNA Red Hat,
+published 2026-11-05), the GHSA API and RHBZ 2565679 comment 0; CWE-122, CVSS
+3.1 **8.1 High** `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H`. Claimed primitive:
+`cmd_qtdpsrc` allocates `slen+1` from the packet's declared length but calls
+`hex2bin` on the actual hex length, so a declared/actual mismatch writes
+sender-chosen bytes past the heap buffer; a following `qGetTLSAddr` packet is
+claimed to call through the overwritten `td_ta_map_lwp2thr_p` pointer.
+Affected products are Red Hat names (RHEL 6-10, gcc-toolset-14/15, hardened
+images); **upstream version range, fixed version and fix commit are UNKNOWN**.
+Upstream sourceware gitweb returned 503; no upstream bytes were pinned.
+
+The operator replayed the committed harness independently at 01:0xZ: 14 PASS,
+`ALL CHECKS PASS rc 0`, `sha256=c81092bd…`. That digest differs from
+frontier's `61826865…` because `run.sh` hashes ASan text, not a deterministic
+five-run trace; no harness pins, ASan log or PROVENANCE.md are committed.
+Rungs 1/2/3 are ESTABLISHED only for the extracted model, and rung 4 calls a
+pointer inside a `process_info_private` struct the harness itself invented —
+no live gdbserver, stock layout, real function pointer, RIP control or shell
+execution. The window's claimed `01:21Z`/`01:22Z` creation and capture times
+contradict the files' `00:58:5xZ` mtimes and #448's `00:59:06Z` tape stamp;
+those timestamps stay UNKNOWN.
+
+Decision: **held, not admitted** under standing approval #6. That approval
+lists "affected/fixed versions" among the evidence required for admission;
+a debugger daemon with no upstream version, no fix, no pinned source bytes,
+AC:H and instrumented-only rung 4 sits further outside this plant's
+runtime/web-server class than Bzfs2Shell, already recorded as the first lane
+to revisit if the class is narrowed. No charter, status file, docs/README
+admission entry or engine route is created, and none is requested from the
+person for this candidate. Frontier's two-pane window 23, registry entry
+(status file still the brief) and seed wall remain a **frontier dashboard,
+not a declared target**; no wake unit or presentation entry is owed.
+
+Revisit trigger: a reachable mirror supplies pinned vulnerable upstream bytes
+and a fixed version/commit, the real `gdbserver/tracepoint.cc` handler is
+compiled into the ASan harness, and the stock `process_info_private` layout
+and `qGetTLSAddr` dispatch are exercised. Until then this is an examined
+candidate, not a mind.
 
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
