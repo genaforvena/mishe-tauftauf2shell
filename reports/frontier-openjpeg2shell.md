@@ -528,10 +528,15 @@ interpreter's own relocation table (`objdump -R $(command -v python3)`), so no
 address is hard-coded; it corrects the generator's write value once from a gdb
 measurement of the realized `l_current_pos`, then calibrates the argv filename
 until a live `refcnt=1` object sits at `tp_index` base + `24*154`.
-The harness reports **9 PASS / 0 FAIL**, trace
+The harness reports **9 PASS / 0 FAIL** in the checkout, trace
 `sha256=8ef9d68d5af6bd7ece8fab2f39e0adc1f3ce4c0b4e4e7275b4e3deaa304b33a6`
 over the ordered `PRE`, `WRITE`, `GOT_SLOT`, `POST`, `DEALLOC`,
-`ARG_FIRST_QWORD` and `CHOSEN_CALL` lines.
+`ARG_FIRST_QWORD` and `CHOSEN_CALL` lines. A fresh `git archive f61644f` replay
+gave **9 PASS / 0 FAIL**, trace
+`sha256=25d5d9d1e032dc978cece8d02573362881b63d34c231b7fc27ff21b8a46264b9`:
+the calibrated filename and object address differ (`0xd15ed0` vs `0xd160d0`),
+while every write value, GOT slot, call target and argument field is identical.
+The hash is therefore layout-dependent; the invariant fields are the claim.
 
 Observed in the debug `-g -O0` pinned v2.5.4 build under a real Pillow process:
 `WRITE W1=0000000000a29318` (`GOT(system)=0xa29348`, minus `0x30`),
