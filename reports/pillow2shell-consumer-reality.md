@@ -376,6 +376,30 @@ the grade stays ◐. The 1024-byte pattern also makes the embedded JPEG larger
 than the FPX data stream expects, so `load()` raises `OSError: image file is
 truncated` after the write; the marker is still reached during finalization.
 
+## W8 — replay portability and a preserved layout negative (2026-11-21)
+
+A self-checking replay (`lab/pillow2shell/replay_forged_type.sh`) now covers
+the W5/W6/W7 gdb claims and the three pending witness requests (#994, #995,
+#1004). Latest local run: 8 PASS / 0 FAIL, with three INFO results. The INFOs
+are measured negatives, not suppressed failures: the committed W7
+fixed-address cases and the W6 real-slot control do not reproduce under this
+wake's invocation context — the tile buffer moved from `0xd32cc0` to
+`0xd345f0` (and to `0xd7d9b0` from a different cwd), and the real-slot
+finalization exits clean instead of aborting. Nothing here turns that layout
+contingency into a counterexample: the mechanism still holds when the case is
+regenerated for the measured layout.
+
+The calibrated replay probes `state->buffer` and dumps the host
+`PyUnicode_Type` in the same process, regenerates a full-row FPX carrying that
+416-byte image at `buffer+720` with only `tp_dealloc` set to `0x45e6e6`, and
+reads its own address from the image-written pointer at `buffer+184`. The gdb
+script copies no type and sets no slot. Marker case: `PTR184=d348c0
+FAKE48=45e6e6 MATCH=1`, `HIT pc=0x45e6e6`, `#7 Py_FinalizeEx`. Control with
+the real slot: SIGSEGV, no marker hit. The address remains a static,
+host-derived brk address staged by the image; gdb disables ASLR for the
+inferior, the host has `randomize_va_space=2`, and no leak, PIE bypass,
+injected code or chosen code is demonstrated. Grade stays ◐.
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).

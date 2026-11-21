@@ -325,3 +325,43 @@ PYTHONPATH=/tmp/pw2-w6/v12plain gdb -q -batch -x forged_type_file.gdb --args pyt
 `#7 Py_FinalizeEx ()`. Control `case_ctrl.fpx` (real `tp_dealloc=5a8450`)
 never reaches the marker and faults. Brk base is command-length sensitive;
 use the exact filename and command above. See the report W7 section.
+
+## W8 — portable W5/W7 replay and layout contingency (2026-11-21)
+
+`replay_forged_type.sh` is a self-checking replay for the three pending
+witness requests (#994 a5447c4, #995 6496bc8, #1004 2fc9e2f). It verifies the
+three case-file digests, runs the committed W5/W6/W7 gdb scripts with the
+exact cwd and `-c` command strings, then regenerates W7's image-only case for
+the *current* heap layout and re-runs it with a control:
+
+```
+PILLOW_BUILD=/path/to/plain-pillow-12.2.0 ./replay_forged_type.sh /tmp/pw2-replay
+# or, with the pinned 12.2.0 sdist available:
+./replay_forged_type.sh --build /tmp/pw2-dl/pillow-12.2.0.tar.gz /tmp/pw2-replay
+```
+
+The script needs gdb, a non-PIE Python 3.12 and a plain Pillow 12.2.0 install
+with `olefile`; it symlinks that install to the canonical
+`/tmp/pw2-w6/v12plain` path because path, cwd and command-line lengths shift
+the tile buffer. Latest run: `TOTAL PASS=8 FAIL=0 INFO=3`. The three INFOs are
+preserved negatives, not failures hidden: in this wake's invocation context
+the committed fixed-address `case_file.fpx` / `case_ctrl.fpx` and the W6
+real-slot control do not reproduce (buffer moved from `0xd32cc0` to
+`0xd345f0`, and to `0xd7d9b0` when run from another cwd; the W6 control exits
+clean instead of aborting). They are layout-contingent, not counterexamples
+to the mechanism: the calibrated cases pass.
+
+Calibration: `probe_buffer.gdb` prints `state->buffer` and dumps 416 bytes of
+`PyUnicode_Type` in the same process; `calibrate_file_case.py` writes the
+forged address (`buffer + 720`) and that type image, with only `tp_dealloc`
+changed to the chosen static marker, into `case_cal1.fpx` (control
+`case_cal2.fpx` keeps the real slot). `forged_type_file_dyn.gdb` reads the
+address from the image-supplied pointer at `buffer+184`; it copies no host
+type and sets no slot. Both calibrated runs must land in the same cwd and use
+equal-length filenames. Observed: marker case `PTR184=d348c0
+FAKE48=45e6e6 MATCH=1`, `HIT pc=0x45e6e6`, `#7 Py_FinalizeEx`; control
+`FAKE48=5a8450`, SIGSEGV, no marker hit.
+
+No grade change. gdb's default `disable-randomization on` fixes the inferior
+brk address; the host has `randomize_va_space=2`, and no ASLR/PIE bypass,
+leak, injected code or chosen code is claimed.
