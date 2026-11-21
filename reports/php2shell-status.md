@@ -1032,5 +1032,10 @@ responder and sends the shape as FCGI_PARAMS (`has_env=1`). Evidence
 but `"/x"` on fixed 8.5.13, short suffix clean on all three. So both inputs
 can arrive as request params, not only process env; real-web-server HTTP
 reachability stays UNKNOWN (no web server used), ASan still silent. Rung 3
-CONFIRMED unchanged. Next: sweep FastCGI param ordering for a larger leaked
-value; otherwise this lane is at its natural stop.
+CONFIRMED unchanged. Steering leg added to the same harness (suffix 20,
+SECRET param before/after PATH_INFO): 8.5.12 leaks `"23456789"` /
+`"27.0.0.1"` respectively, fixed 8.5.13 `"/x"` both. Evidence
+`lab/build/evidence/w48-cve129538/fcgi-steered/verdict.txt`: CONFIRMED, 5/5.
+Attacker chooses offset (suffix length) and adjacent value (param order);
+leak destination `$_SERVER['PATH_INFO']`. Lane at natural stop: no chosen-byte
+write, pointer control or marker execution; HTTP-to-FastCGI mapping UNKNOWN.

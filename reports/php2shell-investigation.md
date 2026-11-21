@@ -974,8 +974,14 @@ web server lets an HTTP request set both params (and therefore whether the
 primitive is remotely reachable on a real deployment) stays UNKNOWN — no web
 server was used. ASan remains silent because the neighbouring strings are
 inside the request's allocations; no sanitizer report is claimed. Rung 3
-CONFIRMED unchanged. Next bounded experiment: determine whether the two-byte
-leak can be steered into a larger, attacker-chosen adjacent value under a
-FastCGI param ordering sweep, and whether the popcount of leaked bytes is
-useful beyond the lab demonstration; otherwise the lane is at its natural
-stop for this plant.
+CONFIRMED unchanged. A follow-up steering leg was added to the same harness
+(suffix length 20, `SECRET=TOPSECRET0123456789` before or after PATH_INFO in
+FCGI_PARAMS). On 8.5.12 the leaked value follows the parameter order:
+`"23456789"` when SECRET precedes PATH_INFO, `"27.0.0.1"` when it follows;
+8.5.13 returns `"/x"` in both orders. Evidence
+`lab/build/evidence/w48-cve129538/fcgi-steered/verdict.txt`: `CONFIRMED`,
+five/five checks. So the attacker chooses the offset (suffix length) and the
+adjacent value (param order); the leaked bytes are server-side memory, and
+the destination is `$_SERVER['PATH_INFO']`. That is the natural stop for this
+lane: no chosen-byte write, pointer control or marker execution is reachable,
+and the HTTP-to-FastCGI input mapping stays UNKNOWN without a web server.
