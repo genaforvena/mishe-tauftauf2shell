@@ -363,6 +363,35 @@ client-chosen. Conditions are lab-explicit: no-auth server, subsystem-
 supplied ADPCM table, ASan build and a synthetic playback event (the Sample
 subsystem has no audio source).
 
+## Stock-allocator live heap overwrite (wake 9, 02:55Z)
+
+The remaining `[ ] stock-allocator / non-ASan live heap layout` item is now
+evidence. Full detail: `lab/freerdp2shell-src/live_session_stock.txt`. The
+plain (no sanitizer) FreeRDP 3.32.0 shadow server was rebuilt from the same
+committed wake-8 patches plus a lab-only fprintf after the `CopyMemory` in
+`rdpsnd_server_send_samples` (`rdpsnd_main.c:772`). On a loopback ACTIVE RDP
+session with the wVersion=1 two-PDU client, the live server logged
+`realloc failed!` / `SelectFormat failed with 12` and then:
+
+  WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00
+
+That is 16384 client-chosen 0xDE bytes copied into the 8820-byte buffer left
+by the failed realloc: 7564 bytes past its end, first OOB byte at offset 8820
+holding a chosen byte. The stock allocator did not fault at the write; the
+ACTIVE session continued. On client teardown glibc reported
+`double free or corruption (!prev)`, direct evidence that the chosen-byte
+overwrite corrupted adjacent heap chunk metadata in the real heap. Wake 8's
+ASan address is the same access: base `0x52500000f100` + 8820 =
+`0x525000011374`, the reported first-OOB byte of a 16384-byte write from
+offset 0.
+
+A benign-only control in the same plain build (same synthetic playback, no
+malicious second PDU) produced `cframesize=8820` then `7564`, both in bounds,
+offset 8820 untouched (`b8820=00`), no wrap log and no glibc corruption. The
+OOB write and the heap corruption are therefore caused by the wrap, not by
+the playback frame count. The vulnerable source was restored and rebuilt
+after the control.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
@@ -371,8 +400,11 @@ offsets **on real library bytes through the real SNDC_FORMATS parser, the real
 reader and the real shadow activation logic**, in-process; wake 8 additionally
 demonstrates MCS/channel join, an ACTIVE RDP session, rdpsnd PDUs over the wire
 and an ASan `heap-buffer-overflow` in the LIVE server process (chosen 0xDE at
-offset 8820). The write is sequential and unbounded; no pointer control or
-specific heap object is targeted, and stock-allocator layout stays UNKNOWN.
+offset 8820). Wake 9 repeats the live chosen-byte overwrite under the stock
+glibc allocator (no sanitizer): 7564 OOB bytes at offsets 8820..16383, no
+fault at the write, and glibc `double free or corruption (!prev)` on teardown.
+The write is sequential and unbounded; no pointer control or specific heap
+object is targeted, and grooming a specific object stays UNKNOWN.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
 (subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).

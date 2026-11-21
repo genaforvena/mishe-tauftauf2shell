@@ -1,0 +1,97 @@
+FreeRDP wake 9 (2026-11-21 02:24-02:56Z): stock-allocator (non-ASan)
+live rdpsnd heap overwrite, chosen bytes at chosen offsets
+=====================================================================
+
+All observations below are from source-built FreeRDP 3.32.0 processes on
+this host bound to 127.0.0.1 only. No off-loopback probe. This wake answers
+the remaining plate item "[ ] stock-allocator / non-ASan live heap layout":
+the wrap-induced chosen-byte overwrite is demonstrated in a live RDP server
+under the stock glibc allocator, without ASan, and its heap corruption is
+observed by glibc itself on free.
+
+Build and source
+----------------
+Scratch source:      /tmp/fr-wake2/src3320 (committed wake8-patches applied)
+Plain build tree:    /tmp/fr-wake7-shadow-build (no ASan, no sanitizer)
+Wake-9 instrumentation (lab only, not committed): a fprintf(stderr) inserted
+immediately after the CopyMemory in rdpsnd_server_send_samples
+(channels/rdpsnd/server/rdpsnd_main.c:772) printing the destination offset,
+copy size, and byte values at offsets 0, last, 8820 and 21384.
+
+Rebuild command (incremental, both times):
+  cd /tmp/fr-wake7-shadow-build && ninja freerdp-shadow-cli sfreerdp
+  (vulnerable: 9 edges; control: as required; restore: 5 edges)
+
+Vulnerable run
+--------------
+Server (loopback, no-auth lab posture as in wake 8):
+  LD_LIBRARY_PATH=<all build lib dirs> \
+  ./server/shadow/cli/freerdp-shadow-cli \
+    /bind-address:127.0.0.1 /port:13910 -auth /log-level:DEBUG
+Client (loopback, headless Sample client, wVersion=1 two-PDU patch):
+  ./client/Sample/sfreerdp /v:127.0.0.1:13910 /sec:rdp \
+    /u:test /p:test /sound /log-level:DEBUG
+
+Exact server log lines (/tmp/fr-wake9-shadow.log):
+  [rdpsnd_server_select_format]: realloc failed!
+  [rdpsnd_activated]: SelectFormat failed with 12
+  [wake8_audio_thread]: wake8WAKE9_COPY dst_off=0 cframesize=16384
+                        b0=de blast=de b8820=de b21384=00
+  (on client disconnect, ERRINFO_LOGOFF_BY_USER)
+  [shadow_client_thread]: Failed to check FreeRDP file descriptor
+  double free or corruption (!prev)
+
+Interpretation:
+- The integer wrap (failed realloc, unrolled-back out_frames=0xfffffffffffffff0)
+  makes cframes = MIN(nframes=4096, huge) = 4096, so the whole playback is a
+  single CopyMemory of 4096 * 4 = 16384 chosen 0xDE bytes at out_buffer+0.
+- out_buffer is the original 8820-byte allocation from PDU 1 (the realloc
+  failed). Bytes at offsets 8820..16383 are OUT OF BOUNDS: 7564 bytes of
+  client-chosen data written past the allocation. b8820=de is the first OOB
+  byte, exactly the chosen marker. b21384=00 because offset 21384 is beyond
+  this 16384-byte copy (it is reached only with a second playback event).
+- The stock allocator did NOT fault at the write. The server kept serving the
+  ACTIVE session. On teardown, glibc's allocator detected
+  "double free or corruption (!prev)" -- direct evidence that the chosen-byte
+  overwrite corrupted adjacent heap chunk metadata in the real heap, not
+  merely an ASan-visible condition.
+
+Consistency with wake 8's ASan report (live_session_wrap.txt, section 4):
+  ASan: WRITE of size 16384 at 0x525000011374, "0 bytes after an 8820-byte
+  region [0x52500000f100,0x525000011374)".
+  0x52500000f100 + 8820 (0x2274) = 0x525000011374. ASan reported the FIRST
+  out-of-bounds byte of a write that started at out_buffer+0 -- the same
+  dst_off=0, cframesize=16384, first-OOB-byte-at-8820 observed here.
+
+Control (benign only, same plain build)
+---------------------------------------
+The client patch was temporarily given an early `return rc;` after its first
+benign PCM SNDC_FORMATS PDU, so no malicious second PDU was sent. The same
+synthetic playback event still fired. Rebuilt sfreerdp, fresh loopback port
+13911, otherwise identical commands.
+
+Exact server log lines (/tmp/fr-wake9-control-shadow.log):
+  WAKE9_COPY dst_off=0 cframesize=8820 b0=de blast=de b8820=00 b21384=00
+  WAKE9_COPY dst_off=0 cframesize=7564 b0=de blast=de b8820=00 b21384=00
+No "realloc failed!", no "SelectFormat failed", no glibc corruption message.
+
+Interpretation: in the unwrapped case out_frames stays 8820, so
+rdpsnd_server_send_samples splits the same 4096-frame playback into an
+in-bounds 8820-byte write, a send_audio_pdu that resets out_pending_frames
+(rdpsnd_main.c:716), and a 7564-byte write -- both inside the buffer, both
+leaving offset 8820 untouched. The OOB write and the heap corruption are
+therefore CAUSED BY THE WRAP, not by the synthetic frame count.
+
+The vulnerable client source was restored from backup and sfreerdp rebuilt
+after the control; `grep -c 'WAKE9 CONTROL'` on the source is 0.
+
+Honest boundary
+---------------
+Still lab-provided conditions: `-auth` (the CVSS 9.8 no-auth posture; default
+post-auth is PR:L / 8.8), a subsystem-supplied ADPCM format table (the same
+explicit condition as wake 6/8), and a synthetic audio playback event (the
+Sample subsystem has no audio source). The write is sequential and unbounded,
+so pointer control / grooming a specific heap object is still UNKNOWN; only
+the chosen bytes at offsets 8820..16383 are pinned. An FFmpeg-enabled build
+remains UNVERIFIED (dev libs absent on this host). Author evidence is not
+independent acceptance; witness replay is still owed.
