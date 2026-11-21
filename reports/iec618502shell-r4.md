@@ -36,6 +36,9 @@ replay into `/tmp/iec61850-r4-clean` reproduced all six checks and `rc 0`.
 Clean `git archive fcc32d8 lab/frontier/libiec61850 reports/iec618502shell-r4.md`
 replay into `/tmp/iec61850-r4-ptr-clean` reproduced all eleven pointer checks
 and `rc 0`.
+Clean `git archive 167e5db lab/frontier/libiec61850 reports/iec618502shell-r4.md`
+replay into `/tmp/iec61850-r4-ctl-clean` reproduced all twelve control checks
+and `rc 0`; evidence in `/tmp/iec61850-r4-ctl-clean-out/b.gdb.log`.
 Evidence lives in the chosen output directory:
 `stage.client.log` (ObtainFile transfer), `stage.server.log`,
 `chosen.gdb.log` (live heap bytes), `chosen.client.log`, `conf-*.client.log`
