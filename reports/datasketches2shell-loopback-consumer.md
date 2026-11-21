@@ -543,3 +543,11 @@ count-64 image, so a separate past-end *read* through the corrupted
 `couponCount_` is neither exercised nor claimed here. No probe left the lab.
 This is author evidence only until a witness replays it.
 
+**Clean-archive author replay (not a witness verdict).** `git archive 77a6bc6
+lab/datasketches2shell-stream lab/frontier/datasketches2shell` into
+`/tmp/ds2-w9-archive` and running that copy's `run.sh /tmp/ds2-w9-archive-out`
+gave 10 PASS / 0 FAIL rc 0 with 5/5 pins OK and the same
+`sha256=cbf2776389037adaf90d5851a3f55b444b675798b8c8dfdd93809a22f9c25066`
+for both five-run groups. No path outside the archive was read. This remains
+author evidence until an independent replay.
+
