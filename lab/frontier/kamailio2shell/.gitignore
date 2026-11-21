@@ -1,0 +1,6 @@
+out/
+verify-out/
+*.o
+vuln
+asan
+fixed
