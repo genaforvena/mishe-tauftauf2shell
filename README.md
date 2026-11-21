@@ -108,6 +108,9 @@ ASLR-on reachability is UNKNOWN. Iec61850 has an author-observed R5 limb
 marker) whose independent witness replay is still owed, so its R5 cell stays
 `—`. Recipes, expected bytes and gitignored-log policy are in
 `docs/reproducibility.md`; the contract and lane status are in `docs/rce.md`.
+Pillow2Shell's R5 is a measured structural blocker (`7a7082e`): the natural
+deallocator argument begins with NUL and the overwrite crosses live chunks, so
+a new primitive is needed; no witness replay is owed.
 
 ## How the plant works
 
