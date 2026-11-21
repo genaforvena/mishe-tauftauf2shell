@@ -47,12 +47,12 @@ int main(int argc, char **argv)
         if (region == MAP_FAILED) { printf("mmap_failed=1\n"); return 2; }
         if (mprotect(region + ps, (size_t)ps, PROT_NONE) != 0) { printf("mprotect_failed=1\n"); return 2; }
         object_mem = region + ps - sizeof(SrsRtcpCommon);
-        obj = new (object_mem) SrsRtcpCommon();
+        obj = twcc ? new (object_mem) SrsRtcpTWCC() : new (object_mem) SrsRtcpCommon();
     } else if (collab) {
         object_mem = (char *)calloc(65536, 1);
-        obj = new (object_mem) SrsRtcpCommon();
+        obj = twcc ? new (object_mem) SrsRtcpTWCC() : new (object_mem) SrsRtcpCommon();
     } else {
-        obj = new SrsRtcpCommon();
+        obj = twcc ? (SrsRtcpCommon *)new SrsRtcpTWCC() : new SrsRtcpCommon();
     }
 
     SrsBuffer buffer((char *)wire, nb_bytes);
@@ -62,7 +62,9 @@ int main(int argc, char **argv)
     printf("wire_bytes=%d\n", nb_bytes);
     printf("fill=%02x\n", fill);
 
-    srs_error_t err = twcc ? ((SrsRtcpTWCC *)obj)->decode(&buffer) : obj->decode(&buffer);
+    // In twcc mode obj is a real SrsRtcpTWCC, so virtual dispatch reaches the
+    // pinned SrsRtcpTWCC::decode rather than SrsRtcpCommon::decode.
+    srs_error_t err = obj->decode(&buffer);
 
     if (err) printf("err=%s\n", err); else printf("err=none\n");
     if (collab) {

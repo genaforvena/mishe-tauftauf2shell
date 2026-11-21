@@ -14,8 +14,8 @@ the harness opens no socket and starts no daemon.
 | `pins/fix.json` | `6b251fb60bac1b12c119a46141177c6ec7f6da48be77ed1d047d0483635bb00e` | GitHub commit API |
 | `pins/sasl_io.c.e63592d5e6b0` | `9cea2e7bf22b1d8cd1296378c1416c63fdede17e4966466d2fd33e19318d84f3` | vulnerable parent, 30489 bytes |
 | `pins/sasl_io.c.f15ffd63e2bd` | `f82aa846fbd2c6f07315e73a862042621184e8df1667b29f07db3be2333ea38b` | fixed commit, 31934 bytes |
-| `gen_driver.py` | `ea857a0f8bcaa44d1b70f7c102f07663a46c4a90c52c3ecf70668204ff325b65` | generator; verified dynamically by `run.sh` |
-| `run.sh` | `bb3b1f505eddaffae7ed06e479878845851f5e76cfedd54e98c88e68f3bbdcc4` | runner at the recorded result |
+| `gen_driver.py` | `7ad76f95771c684f5d3752ae0cc55fec198e3700c68e3d3d355b04085063527c` | generator; verified dynamically by `run.sh` |
+| `run.sh` | `efbaa8b2a59f2e5a15d63e80bdcf4bffd3bba673557d5dfd1e5e497e420060f7` | runner at the recorded result |
 
 Git pins: fix `f15ffd63e2bd70b3244881424ef903f17f7f0394` (committer
 `2026-08-13T16:53:25Z`, "Issue 7658 - Heap Buffer Overflow in sasl_io_recv()
@@ -64,6 +64,9 @@ scaffold.
   copy crosses it; the SIGSEGV handler writes `guard_fault=1` and exits 77.
   Neither construct is an upstream allocator property.
 - Cleanup frees allocations so LeakSanitizer does not mask the ASan result.
+  A harness-owned `buf_is_heap` flag (set only after the ASan/benign
+  `malloc`) gates `free(buf)`; collab and guard use an mmap base or an
+  interior pointer, released with `munmap(mapping, mapsz)` instead.
 
 ## Repairs during construction (kept as evidence)
 
@@ -78,12 +81,21 @@ scaffold.
    while ASan prints `after 512-byte region`; corrected.
 4. Compile warnings about the ignored `write()` return in the signal handler
    are harmless and remain visible on stderr.
+5. Witness #740: unconditional `free(buf)` in the generated cleanup hit an
+   mmap base (collab, rc=139) and a guard interior pointer (no-overflow guard,
+   rc=134, `free(): invalid pointer`). Added the harness-owned heap flag so
+   only malloc-backed buffers are freed; printed chosen-byte counts were
+   unaffected because they are emitted before cleanup.
 
 ## Result
 
-`cd lab/frontier/389ds2shell && ./run.sh`: **14 PASS / 0 FAIL**, rc 0, normalized
-trace `sha256=04e394a69a8508ab127ab206f713b87e8f590f799eb09d9ab130c63c5428cceb`.
+`cd lab/frontier/389ds2shell && ./run.sh`: **19 PASS / 0 FAIL**, rc 0, normalized
+trace `sha256=5ac6faaeec38553369518aae643572de70cdfd0d5e9bd2ab2356220a968ba6f6`.
 The ASan frame is `sasl_io_recv pins/sasl_io.c.vuln:456`, `WRITE of size 9000`,
 `0 bytes after 512-byte region`; declared 511/512 are clean and 513 faults;
 chosen bytes 0x5a/0x41 occupy offsets 0-8487 past the 512-byte boundary in the
 collaborator, benign and fixed builds write none, guard page faults at exit 77.
+The added checks assert rc=0 for `vuln_collab_5a`, `vuln_collab_41`,
+`vuln_collab_benign` and `fixed_collab`, and rc=77 for the guard fault case.
+The overflow write and chosen-byte offsets are unchanged from the pre-fix
+run; only cleanup and exit-status hygiene changed.

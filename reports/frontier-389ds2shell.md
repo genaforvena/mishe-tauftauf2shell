@@ -1,6 +1,10 @@
 # Frontier brief — 389ds2Shell (389 Directory Server, CVE-2026-11610 / GHSA-2g8g-f92j-g4gq)
 
-Status: **frontier find, NOT admitted**. Brief written 2026-11-21T09:09Z.
+Status: **frontier find, ADMITTED by operator under standing approval #6**
+(commit `9d75b45`, dedicated mind `389ds2shell`). Brief written
+2026-11-21T09:09Z; witness verdict #740 ESTABLISHED AS CLAIMED, grade
+unchanged (precision nit fixed this wake).
+
 Harness: `lab/frontier/389ds2shell/`; `PROVENANCE.md` carries every pin, hash,
 verbatim range and repair. The operator owns admission; this brief never
 activates a target mind by itself.
@@ -79,8 +83,20 @@ trace. The generator aborts on any pin drift. No socket, daemon, SASL library
 or network is used; the "wire" length is a local variable. Full command:
 `cd lab/frontier/389ds2shell && ./run.sh`.
 
-Latest run: **14 PASS / 0 FAIL**, rc 0, trace
-`sha256=04e394a69a8508ab127ab206f713b87e8f590f799eb09d9ab130c63c5428cceb`.
+Latest run: **19 PASS / 0 FAIL**, rc 0, trace
+`sha256=5ac6faaeec38553369518aae643572de70cdfd0d5e9bd2ab2356220a968ba6f6`.
+
+Witness #740 (precision nit; grade unchanged): before this fix the generated
+`CLEANUP()` called `free(buf)` unconditionally, so collab cases (mmap base)
+died rc=139 and a no-overflow guard case (interior pointer) died rc=134 with
+`free(): invalid pointer`. The printed chosen-byte counts stand because they
+are emitted before cleanup. The cleanup now uses a harness-owned heap flag:
+only the malloc-backed ASan/benign caller buffer is freed, mapped regions are
+`munmap`ed, and every other allocation is freed once per mode. `run.sh` now
+asserts rc=0 for `vuln_collab_5a`, `vuln_collab_41`,
+`vuln_collab_benign` and `fixed_collab`, plus rc=77 for the guard fault case.
+Observed before and after: the overflow write, pinned ASan frame and chosen
+bytes are unchanged; only cleanup and exit-status hygiene changed.
 
 - **Rung 1 — reproducible trigger.** Vulnerable build, declared 9000,
   caller 512: deterministic ASan abort. Benign 512 and the fixed build at
@@ -132,12 +148,12 @@ All advisory, version and reachability claims are reproduced from public
 sources; this brief proves the pinned code paths and their local memory
 effects, not live-daemon exploitability or RCE.
 
-## Clean replay (2026-11-21T09:10Z)
+## Replay status (2026-11-21)
 
-Committed as `9ff285d`. Two `git archive HEAD lab/frontier/389ds2shell`
-extractions into `/tmp/replay-389-a` and `/tmp/replay-389-b`, plus the working
-tree, each ran the unmodified `./run.sh`: **14 PASS / 0 FAIL**, rc 0, raw trace
-`sha256=04e394a69a8508ab127ab206f713b87e8f590f799eb09d9ab130c63c5428cceb`
-byte-identical in all three. Both scripts are committed mode `100755`. No
-source-generating code changed after the commit; this replay record is prose
-only.
+The earlier `9ff285d` clean-replay record predates the witness #740 cleanup
+fix and is superseded; its trace and count are not the current harness result
+and its hash is not repeated here. The post-fix working tree reports
+**19 PASS / 0 FAIL**, rc 0, normalized trace
+`sha256=5ac6faaeec38553369518aae643572de70cdfd0d5e9bd2ab2356220a968ba6f6`.
+Both harness scripts remain executable. No post-fix git-archive replay is
+claimed here; that record belongs to the integration commit.

@@ -37,7 +37,7 @@ cf7a415951a785b352184131071f230e32c49550ff58e848bdfb13f7a91f00ba  pins/srs_kerne
 645ef6d22a215271daa109eaad6eb0862e7020a84eecf1561410721903a2ffb1  pins/srs_kernel_error.hpp
 66d0b09d4987efdeb4c410af144ec7f7d992ec99211219839f2a81960e89997f  pins/srs_kernel_error.cpp
 b21f73ac38046051167466b47a597e9efdae49f1519ca2f885495c0d9963b468  driver_pre.cpp
-06353a70cea375afff1ce7e847b532da0721a4463b537767335e84e3dabbf2b9  driver_post.cpp
+de91fb7073581e205983c6daa800b3060551c72f2c4a0049e7d62886fe0e4c78  driver_post.cpp
 f67fb44947f8e135b4310f81804189ca237d385295801dca0b98da3cb19e66fc  gen_driver.py
 EOF
 sha256sum -c out/pins.expected > /dev/null 2>&1
@@ -70,6 +70,7 @@ run_case vuln_bye_asan out/vuln_asan bye
 run_case fixed_bye_asan out/fixed_asan bye
 run_case vuln_benign_asan out/vuln_asan benign
 run_case vuln_twcc_asan out/vuln_asan twcc
+run_case fixed_twcc_asan out/fixed_asan twcc
 if [ "$(val out/vuln_bye_asan.log declared_payload)" = 1596 ] &&
    [ "$(val out/vuln_bye_asan.log wire_bytes)" = 1604 ]; then c=0; else c=1; fi
 check $c rung2_declared_length_exceeds_buffer
@@ -85,8 +86,13 @@ if [ "$(cat out/vuln_benign_asan.rc)" = 0 ] &&
    ! present out/vuln_benign_asan.log 'ERROR: AddressSanitizer'; then c=0; else c=1; fi
 check $c rung3_benign_clean
 if present out/vuln_twcc_asan.log 'ERROR: AddressSanitizer: heap-buffer-overflow' &&
-   present out/vuln_twcc_asan.log 'WRITE of size 1596'; then c=0; else c=1; fi
+   present out/vuln_twcc_asan.log 'WRITE of size 1596' &&
+   present out/vuln_twcc_asan.log 'pinned/srs_kernel_rtc_rtcp.cpp:841'; then c=0; else c=1; fi
 check $c rung3_asan_twcc_overflow
+if [ "$(cat out/fixed_twcc_asan.rc)" = 0 ] &&
+   present out/fixed_twcc_asan.log 'payload len=1596 exceeds 1500' &&
+   ! present out/fixed_twcc_asan.log 'ERROR: AddressSanitizer'; then c=0; else c=1; fi
+check $c rung3_fixed_twcc_rejects
 
 # --- rung 4: chosen bytes in a collaborator, guard-page negative ------------
 run_case vuln_collab_5a out/vuln_plain collab 5a

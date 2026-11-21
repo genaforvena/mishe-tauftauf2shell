@@ -1,6 +1,10 @@
 # Frontier brief — Srs2Shell (Simple Realtime Server, GHSA-qr8h-p53p-x564)
 
-Status: **frontier find, NOT admitted**. Brief written 2026-11-21T08:53Z.
+Status: **frontier find, ADMITTED by operator under standing approval #6**
+(commit `2833514`, dedicated mind `srs2shell`). Brief written
+2026-11-21T08:53Z; witness verdict #725 ESTABLISHED AS CLAIMED, grade
+unchanged (precision nit fixed this wake).
+
 Harness: `lab/frontier/srs2shell/`; `PROVENANCE.md` carries every pin, hash,
 verbatim range and repair. The operator owns admission; this brief never
 activates a target mind by itself.
@@ -65,8 +69,8 @@ a deterministic trace. It uses no socket, daemon, ICE/DTLS/SRTP or network;
 the RTCP datagram is a local byte array. Full command:
 `cd lab/frontier/srs2shell && ./run.sh`.
 
-Latest run: **14 PASS / 0 FAIL**, trace
-`sha256=77b6d5500dea19d3c3a8de713d7a37834a3241a62e6a7239d398661e5fea1965`.
+Latest run: **15 PASS / 0 FAIL**, trace
+`sha256=1a61cbf41314d16d886d26183fbdd2fe57179c4efcf3e9c9a8f589df6c899662`.
 
 - **Rung 1 — reproducible trigger.** Parent, BYE with `length = 0`:
   exit 134 with `srs_assert failed: require(size)` in pinned
@@ -76,9 +80,14 @@ Latest run: **14 PASS / 0 FAIL**, trace
   (1596) exceeds the fixed 1500-byte array.
 - **Rung 3 — ASan-confirmed corruption.** Parent BYE ASan:
   `heap-buffer-overflow`, `WRITE of size 1596`, `pinned/srs_kernel_buffer.cpp:246`,
-  decode frame `pinned/srs_kernel_rtc_rtcp.cpp:95`, `0 bytes after 1536-byte
-  region`. TWCC reproduces the same write. Fixed BYE/TWCC and benign
-  `length = 2` are clean.
+  decode frame `SrsRtcpCommon::decode` at `pinned/srs_kernel_rtc_rtcp.cpp:95`,
+  `0 bytes after 1536-byte region`. Parent TWCC now constructs a real
+  `SrsRtcpTWCC`, so its write frame is `SrsRtcpTWCC::decode` at
+  `pinned/srs_kernel_rtc_rtcp.cpp:841` (pinned range `:802-844`); it is the
+  same 1596-byte write. Fixed BYE (`SrsRtcpCommon::decode`, `:89-106`) and
+  fixed TWCC (`SrsRtcpTWCC::decode`, `:811-856`) both reject before the copy
+  with `payload len=1596 exceeds 1500` and `rc=0`, no ASan report; benign
+  `length = 2` is clean.
 - **Rung 4 — INSTRUMENTED, honestly split.** With the decoder object placed
   in a 64 KiB zeroed collaborator, chosen `0x5a` appears at 96 offsets from
   the payload-array end (20 in the object tail, 76 past the object); `0x41`
@@ -112,11 +121,16 @@ All advisory and reachability claims are reproduced from public sources;
 this brief proves the pinned code paths and their local memory effects, not
 live-daemon exploitability or RCE.
 
-## Clean replay (2026-11-21T08:53Z)
+## Clean replay (2026-11-21T08:53Z; post-nit-fix addendum below)
 
-Committed as `24db73a`. Two `git archive 24db73a lab/frontier/srs2shell`
-extractions into `/tmp/replay-srs-a` and `/tmp/replay-srs-b`, plus the
-working tree, each ran the unmodified `run.sh`: 14 PASS / 0 FAIL and raw
-trace `sha256=77b6d5500dea19d3c3a8de713d7a37834a3241a62e6a7239d398661e5fea1965`
-byte-identical in all three. No source-generating code changed after the
-commit; the replay record is prose only.
+The pre-nit-fix commit `24db73a` was replayed as previously recorded: two
+`git archive 24db73a lab/frontier/srs2shell` extractions into
+`/tmp/replay-srs-a` and `/tmp/replay-srs-b`, plus the working tree, each ran
+the then-current unmodified `run.sh` with byte-identical traces (14 PASS /
+0 FAIL at that hash, superseded by the value above).
+
+Post-nit-fix (this wake, working tree): two consecutive unmodified
+`./run.sh` invocations each produced **15 PASS / 0 FAIL** and the same
+trace `sha256=1a61cbf41314d16d886d26183fbdd2fe57179c4efcf3e9c9a8f589df6c899662`,
+byte-identical. No source-generating code changed between those invocations;
+the replay record is prose only.

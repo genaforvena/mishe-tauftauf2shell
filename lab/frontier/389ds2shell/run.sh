@@ -102,6 +102,18 @@ if [ "$(cat out/vuln_guard.rc)" = 77 ] &&
    present out/vuln_guard.log 'guard_fault=1'; then c=0; else c=1; fi
 check $c rung4_guard_page_fault
 
+# --- rung 4 cleanup hygiene: normal exits clean, guard fault exits 77 -----
+if [ "$(cat out/vuln_collab_5a.rc)" = 0 ]; then c=0; else c=1; fi
+check $c rung4_collab_5a_exit0
+if [ "$(cat out/vuln_collab_41.rc)" = 0 ]; then c=0; else c=1; fi
+check $c rung4_collab_41_exit0
+if [ "$(cat out/vuln_collab_benign.rc)" = 0 ]; then c=0; else c=1; fi
+check $c rung4_collab_benign_exit0
+if [ "$(cat out/fixed_collab.rc)" = 0 ]; then c=0; else c=1; fi
+check $c rung4_fixed_collab_exit0
+if [ "$(cat out/vuln_guard.rc)" = 77 ]; then c=0; else c=1; fi
+check $c rung4_guard_fault_exit77
+
 # --- normalized trace -----------------------------------------------------
 printf 'asan_write=%s\n' "$(grep -m1 -o 'WRITE of size [0-9]*' out/vuln_overflow_asan.log)" >> "$trace"
 printf 'asan_frame=%s\n' "$(grep -m1 -o 'pins/sasl_io.c.vuln:[0-9]*' out/vuln_overflow_asan.log)" >> "$trace"

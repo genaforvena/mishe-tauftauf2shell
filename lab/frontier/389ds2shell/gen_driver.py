@@ -126,7 +126,7 @@ static void guard_sigsegv(int sig)
     _exit(77);
 }
 #define CLEANUP() do { \
-    free(buf); \
+    if (buf_is_heap) free(buf); \
     if (mapping != MAP_FAILED) munmap(mapping, mapsz); \
     free(sp->encrypted_buffer); \
     free(sp->conn); \
@@ -208,6 +208,7 @@ int main(int argc, char **argv)
     sasl_io_private *sp = make_sp();
     PRFileDesc fd = { sp };
     void *buf = NULL;
+    bool buf_is_heap = false;  /* harness-owned: only malloc backends are freeable */
     void *mapping = MAP_FAILED;
     size_t mapsz = MAPSZ;
     PRInt32 got = 0;
@@ -219,6 +220,7 @@ int main(int argc, char **argv)
     if (!strcmp(mode, "asan") || !strcmp(mode, "benign")) {
         buf = malloc(CALLER_LEN);
         if (!buf) return 2;
+        buf_is_heap = true;
         if (!strcmp(mode, "benign")) g_declared = CALLER_LEN;
         fprintf(stderr, "declared_count=%u caller_len=%d overflow=%u\n",
                 g_declared, CALLER_LEN,

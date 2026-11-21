@@ -60,9 +60,15 @@ requirement aborts the process. The harness macro aborts equivalently.
 - `driver_post.cpp`: plaintext datagram construction (BYE `81 cb <length>
   00 00 00 01` + chosen payload; TWCC `8f cd …`), heap / 64 KiB zeroed
   collaborator / guard-page placements of the decoder object, and the mode
-  table. The guard mapping puts the object end at a `PROT_NONE` page so the
-  first write past the object faults; the collaborator keeps the write inside
-  a large zeroed allocation so chosen bytes can be inspected.
+  table. In `twcc` mode it constructs a real `SrsRtcpTWCC` and dispatches
+  `decode` virtually, so the pinned `SrsRtcpTWCC::decode` runs instead of
+  `SrsRtcpCommon::decode`. The harness class derives from `SrsRtcpCommon`
+  with no added data members, so `SrsRtcpCommon::payload_offset()`, the
+  object size and the guard object-end placement stay valid; non-TWCC modes
+  keep the plain `SrsRtcpCommon` allocation. The guard mapping puts the
+  object end at a `PROT_NONE` page so the first write past the object
+  faults; the collaborator keeps the write inside a large zeroed allocation
+  so chosen bytes can be inspected.
 - `gen_driver.py`: verbatim-range extractor. `run.sh`: hash gate, builds,
   scenarios, trace and sha256.
 
@@ -79,12 +85,21 @@ requirement aborts the process. The harness macro aborts equivalently.
    (datagram 1604 bytes). All checks were corrected to observed bytes.
 5. ASan scenarios lost their pre-decode `printf` fields to stdout buffering;
    `setbuf(stdout, NULL)` makes them survive an abort.
+6. Witness nit #725: `twcc` mode previously cast an `SrsRtcpCommon*` to
+   `SrsRtcpTWCC*`; since `decode` is virtual, dispatch stayed in
+   `SrsRtcpCommon::decode:95` and the pinned TWCC decoder never ran. The
+   driver now constructs a real `SrsRtcpTWCC` in twcc mode, `run.sh` asserts
+   the pinned TWCC frame (`pinned/srs_kernel_rtc_rtcp.cpp:841`) for the
+   vulnerable case, and a new `fixed_twcc` case asserts the pinned guard
+   (`payload len=1596 exceeds 1500`), `rc=0` and no ASan report. The
+   harness-owned `driver_post.cpp` self-hash in the `pins_sha256` gate was
+   updated; all upstream pin hashes are unchanged.
 
 ## Result
 
 `./run.sh` builds four binaries and runs eleven scenarios, then writes
-`out/trace.txt` and `out/trace.sha256`. Latest: **14 PASS / 0 FAIL**, trace
-`sha256=77b6d5500dea19d3c3a8de713d7a37834a3241a62e6a7239d398661e5fea1965`.
+`out/trace.txt` and `out/trace.sha256`. Latest: **15 PASS / 0 FAIL**, trace
+`sha256=1a61cbf41314d16d886d26183fbdd2fe57179c4efcf3e9c9a8f589df6c899662`.
 Generated drivers, binaries and logs are gitignored.
 
 Rung 1: parent `length=0` computes `payload_len_ = -4`, `read_bytes` aborts
@@ -92,9 +107,13 @@ on the pinned `require(size)` assertion; fixed rejects with an error.
 Rung 2: the header check only compares `length * 4` with bytes left, so a
 1604-byte datagram declaring 1596 payload bytes passes.
 Rung 3: parent ASan reports `WRITE of size 1596`, `pinned/srs_kernel_buffer.cpp:246`
-(`memcpy`), decode frame `pinned/srs_kernel_rtc_rtcp.cpp:95`, `0 bytes after
-1536-byte region`. Both fixed paths (BYE and TWCC) reject before the copy;
-benign length 2 is clean.
+(`memcpy`), `0 bytes after 1536-byte region`. The BYE datagram dispatches to
+`SrsRtcpCommon::decode` (frame `pinned/srs_kernel_rtc_rtcp.cpp:95`); the TWCC
+datagram dispatches to the pinned `SrsRtcpTWCC::decode` (frame
+`pinned/srs_kernel_rtc_rtcp.cpp:841`, verbatim range `:802-844`). Both fixed
+paths reject before the copy: BYE via `SrsRtcpCommon::decode` (`:89-106`) and
+TWCC via the pinned `SrsRtcpTWCC::decode` (`:811-856`), each with
+`payload len=1596 exceeds 1500` and `rc=0`; benign length 2 is clean.
 Rung 4 is **INSTRUMENTED only**: with the object placed in a 64 KiB zeroed
 collaborator, chosen `0x5a` (and differentially `0x41`) appears at 96 offsets
 starting at the payload-array end (20 bytes of object tail plus 76 past the
