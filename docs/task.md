@@ -1978,6 +1978,64 @@ chosen bytes persist, preserve the negative and cap at rung 3. Evidence:
 `reports/frontier-389ds2shell.md`, status `reports/389ds2shell-status.md` and
 the pins in `lab/frontier/389ds2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~10:0xZ: Kermit2Shell (CVE-2026-129126 / GHSA-c5px-7h4c-gj8p)
+
+Frontier handed this find over on tape #758 after committing `96c03bb`
+(brief and harness), `ddbcb5e` (ASan PID normalization), `59cfe1f` (replay
+hash) and `782fb64` (docs index). Claim sources: CVE record
+`CVE-2026-129126` (CNA VulnCheck, published 2026-11-13, updated
+2026-11-16, CVSS 4.0 9.2, CWE-122, pin `6c43f2b7…`) and GitHub Advisory
+`GHSA-c5px-7h4c-gj8p` (pin `96477695…`). Affected: C-Kermit before
+v11.1.515; pinned vulnerable tag `v11.0.514`, fixed tag `v11.1.515`, fix
+commit `37e54720779237897bc6887efac42fe138817897` (pin `2f25c8d7…`) adding
+the `srvptr - srvcmd >= srvcmdlen` guard in `putsrv()`. All pins and URLs
+are in `lab/frontier/kermit2shell/PROVENANCE.md`.
+
+Claimed primitive: Kermit repeat-count compression in `decode()` feeds
+`putsrv()` more characters than `srvcmd` holds, writing attacker-chosen
+bytes past the heap buffer in a pre-auth network-facing server or receiver.
+Pinned bytes: unbounded `*srvptr++ = c` and `*srvptr = '\0'` at
+`ckcfns.c.vuln:461-462`, `MAXRP 9024` (`ckcker.h.vuln:366`) and
+`srvcmdbuf[MAXRP+4]` (`ckcmai.c.vuln:1003`). Verbatim pinned ranges under
+`#line` in a synthetic frame give 9212 decoded characters into an exact
+9025-byte buffer: ASan `WRITE of size 1` at `pins/ckcfns.c.vuln:461`, 0
+bytes after the region; exactly 9024 is clean and 9118 faults; fixed build
+returns `decode_rc=-1 first_reject=9024 oob=0`. Rung 4 INSTRUMENTED only:
+chosen `0x5a`/`0x41` read back at offsets 9024–9151 (128 bytes) in a 1 MiB
+zeroed collaborator, benign decode writes zeros, guard page faults; bytes
+9152–9211 are inferred from `emitted=9212`, not observed (witness nit).
+No pointer, control-flow or execution claim.
+
+Admitted by the operator ~10:0xZ under standing approval #6: operator
+replay from two clean `git archive HEAD lab/frontier/kermit2shell`
+extractions at `782fb64` into separate absolute directories: 18 PASS /
+0 FAIL both, normalized trace
+`sha256=f74a088605aba49a48108705fafe151d61d283c04e248836a81f6ca8e4978cc5`
+byte-identical between directories, to the working tree, brief and
+PROVENANCE. Handoff #758 quoted `0de1067b…`, the pre-normalization value
+superseded by `59cfe1f`, not a contradiction. Witness #763 (09:52Z) had
+already independently replayed `96c03bb`: rungs 1/2/3 ESTABLISHED and rung 4
+ESTABLISHED AS CLAIMED at INSTRUMENTED; no replay owed. Two grade-unaffected
+nits are preserved in `reports/kermit2shell-status.md`: the generic repeat
+branch is `ckcfns.c.vuln:1479`/`:1486`, not the putfil-only `:1420`, and the
+observed readback is 128 bytes, not 188. Window 44 was pre-created by
+frontier and is registered; wake trigger units and presentation stay owed
+from the person's full-flag sync, never a bare `mishe sync`.
+
+Caveats recorded at admission: no built `wermit`, no live server; real
+packet-length limits, `xunchar()` constraints, DYNAMIC vs static `srvcmd`
+allocation and live-daemon reachability are UNKNOWN. Admission rests on the
+five #6 elements (pinned claim, affected/fixed pins, attacker-controlled
+heap write, rung-4 plausibility, byte-controlled corruption); it does not
+lower the bar for future targets. Cheapest next rung: build `v11.0.514`
+`wermit` with ASan, start a loopback server, send a repeat-compressed
+server-command packet with `set send packet-length 4000`, capture the
+daemon ASan frame at `putsrv`, then repeat at `v11.1.515`. A measured
+packet, decoder or allocator blocker is a valid negative to preserve.
+Evidence: `reports/frontier-kermit2shell.md`,
+`reports/kermit2shell-status.md` and the pins in
+`lab/frontier/kermit2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~09:47Z: Airlock2Shell (CVE-2026-19707 / GHSA-3c49-2p63-245g) — not admitted under #6
 
 Operator advisory watch; no handoff and no lab work. Claim sources: InfoGuard
