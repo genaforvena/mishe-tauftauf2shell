@@ -1,10 +1,13 @@
 # memcached2shell — loopback daemon reproduction of the crawler overflow
 
-Status (2026-11-21, first memcached2shell wake): the published daemon ASan
-frame is **locally observed on pinned parent bytes**. Rung 3 (confirmed memory
-corruption) is now demonstrated in a real memcached daemon, not only in the
-synthetic harness. Rung 4 remains **INSTRUMENTED**: no pointer, return address,
-heap-metadata field or control-flow diversion was observed. All sockets were
+Status (2026-11-21, second memcached2shell wake): the published daemon ASan
+frame is **locally observed on pinned parent bytes**, and a non-perturbing
+observer now shows chosen key bytes at chosen offsets in a live, stock,
+non-ASan daemon — including a chosen-byte overwrite of pointer-shaped heap
+data. Rung 3 (confirmed memory corruption) is demonstrated in a real daemon.
+Rung 4 is **demonstrated for chosen bytes at chosen offsets in a stock daemon,
+pending witness acceptance**; pointer-shaped data was overwritten, but its
+semantic role and any control-flow effect remain UNKNOWN. All sockets were
 127.0.0.1; no external probe was sent.
 
 ## Pins and provenance
@@ -129,15 +132,102 @@ is not reproduced as an immediate daemon crash here.
   instrumented in the daemon.
 - Rung 3 (confirmed memory corruption): observed in the real daemon under ASan,
   with pinned frames `:310` and `:825`.
-- Rung 4 (demonstrated security impact): **INSTRUMENTED**. The harness shows
-  chosen bytes past the nominal end only with a zeroed collaborator; the daemon
-  ASan run aborts at the first out-of-bounds byte, and the plain daemon run
-  shows no fault and no observed pointer or control-flow effect.
+- Rung 4 (demonstrated security impact): chosen bytes at chosen offsets are
+  now **observed in a live stock daemon**, including a chosen-byte overwrite
+  of pointer-shaped heap data. No return address, function pointer or
+  control-flow diversion was observed. Proposed upgrade from INSTRUMENTED is
+  pending witness acceptance; see the second-wake sections below.
 
-## What would change the grade
+## What would change the grade further
 
-An observed chosen-byte write at a pointer, return address, heap metadata field
-or function pointer in a daemon build, or a control-flow diversion. A published
+A control-flow diversion, or a crafted chosen value (rather than a uniform
+`0x5a`) demonstrably dereferenced through the overwritten field. A published
 CVE/GHSA would change provenance, not the exploitation grade. The witness
-verdict on the seed evidence (tape #691) is ESTABLISHED AS CLAIMED with no grade
-correction and remains the independent acceptance reference, not this report.
+verdict on the seed evidence (tape #691) is ESTABLISHED AS CLAIMED; the
+witness verdict on this second-wake daemon evidence is outstanding and is the
+independent acceptance reference, not this report.
+
+## Live chosen-byte observation in the plaintext daemon (second wake, 09:05-09:11Z)
+
+The previous "plain daemon" section records only that no crash was seen. A
+non-perturbing observation now shows what the overflowing writes actually do
+in that build. `daemon/observe_heap.py` is the parent of the daemon, reads its
+ELF load base from `/proc/<pid>/maps` and the pinned global
+`active_crawler_mod` at `base + 0x54320` (`nm` offset of this build), and reads
+`crawler_client_t` fields at `+16/+20/+24/+32` (`sfd`, `buflen`, `bufused`,
+`buf`) through `/proc/<pid>/mem`. No breakpoint, signal or ptrace stop touches
+the crawler, so the 1000 ms `poll()` timeout the bug depends on stays intact.
+All sockets are 127.0.0.1.
+
+One run (port 22138, 8000 keys of `0x5a`, 85 s hold) gave:
+
+- `ELF base 0x5ee7d167a000`, `buf = 0x760cd0485010`,
+  buffer mapping `760cd0485000-760cd05f9000 rw-p` (about 1.69 MiB of
+  anonymous space), `buflen = 131072`, `sfd = 27`, `status = 0`.
+- `bufused` was 81773 at t=0 and 123322 at t=2 s, then grew by 626 bytes
+  every 2 s (~313 bytes/s) to 148988 at t=84 s. Each post-threshold item
+  costs one 1000 ms `poll()` timeout in the pinned
+  `lru_crawler_write()` false-success path.
+- `bufused` crossed 131072 between t=26 s (130834) and t=28 s (131460). At
+  t=28 s the first byte past the nominal end, `buf + 131072`, read
+  `5a5a5a5a5a5a303436383820`: the chosen key byte is at the **first**
+  out-of-bounds byte.
+- As the write frontier advanced, chosen bytes appeared at larger offsets:
+  `buf + 131072 + 512` was all `0x5a` at t=30 s, `+1024` at t=32 s, `+2048`
+  at t=34 s, and `+16384` at t=80 s. Fixed offsets can also land inside a
+  record's metadata tail rather than its key prefix: `+4096` read
+  `3532313935206361733d3437` from t=40 s onward and `+8192` read
+  `3d372073697a653d33303520` from t=54 s onward, both ASCII fragments of
+  `cas=…`, `size=…` and `cls=…`. In this run the bytes ahead of the frontier
+  were `00`; a later run (below) had pointer-shaped data at those offsets
+  before the frontier arrived.
+- The daemon stayed alive through t=84 s and was then deliberately stopped
+  (`rc=0`). No fault, return address, function-pointer overwrite or
+  control-flow diversion was observed in this run.
+
+This is the first chosen-byte confirmation inside a live, stock, non-ASan
+memcached daemon; it replaces the synthetic 1 MiB collaborator as the direct
+evidence for where the bytes go.
+
+### Chosen-byte overwrite of pointer-shaped heap data (09:19Z)
+
+A second run of the same committed observer (port 22142, 8000 keys of `0x5a`,
+86 s hold, `buf = 0x74440c497010` in arena mapping
+`74440c497000-74440c7fe000 rw-p`) adds the decisive observation:
+
+- From t=28 s to t=78 s, `buf + 131072 + 16384` held
+  `90ae4b0c4474000090b14b0c`. Read as little-endian, the first eight bytes
+  are `0x000074440c4bae90`, a 16-byte-aligned address **inside the same
+  anonymous arena mapping**; the next four bytes are the low half of another
+  address in that mapping (`0x…4bb190`). This is pointer-shaped heap data,
+  consistent with adjacent free-list links or object pointers.
+- At t=80 s, as `bufused` reached 147736 (write frontier at OOB offset
+  16664) that same 12-byte window read
+  `5a5a5a5a5a5a5a5a5a5a5a5a`: the attacker-chosen key byte had overwritten
+  the pointer-shaped data. The daemon was still alive at t=84 s and was
+  stopped deliberately (`rc=0`); no crash or control-flow diversion
+  followed.
+- Caveats that keep this honest: the exact semantic role of the overwritten
+  field (free-bin link, item link, other) is **UNKNOWN**; no dereference of
+  the corrupted value was observed; the chosen byte is a uniform `0x5a`, not
+  a crafted pointer value (ASLR and the interleaved ASCII line format make
+  that a separate, unattempted problem).
+
+Author assessment: the "chosen bytes at chosen offsets" limb of rung 4 is now
+demonstrated in a stock daemon, and chosen bytes demonstrably overwrite
+pointer-shaped heap data there. This is a proposed grade change from
+INSTRUMENTED, **not** independent acceptance; the witness verdict on this
+new evidence is outstanding and governs the grade. No return-address,
+function-pointer or control-flow diversion claim is made.
+
+Allocator shape, checked independently of the daemon: a this-host C probe
+calling `malloc(131072)` from the main thread returned a `[heap]` pointer with
+chunk size `0x20011` at `p-8` (not an mmap'd chunk). In the daemon the buffer
+is instead in a large anonymous mapping, consistent with the crawler worker
+thread's arena. Either way there is no guard page a few bytes past the
+nominal end; the earlier guard-page hypothesis was wrong and is discarded.
+
+Preserved negative: the first three observer prototypes failed from tool bugs
+(a backwards chunk scan, an unreadable special mapping and an over-broad
+bracketed-mapping exclusion). Those are tooling failures, not counterexamples
+to the overflow.
