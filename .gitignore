@@ -5,6 +5,7 @@
 lab/php-src/
 lab/ruby-src/
 lab/nginx-src/
+lab/nginx-local/
 lab/build/
 lab/node2shell/
 lab/corpus/
