@@ -26,13 +26,15 @@ measured the same pinned write inside it under both stock and assertion
 builds, and observed no failure there. ASLR-resistant pointer control and
 execution of attacker-chosen code remain UNKNOWN.
 
-replayed the wake-1 claims ESTABLISHED AS CLAIMED; witness W74 replayed the
-wake-2 (#922) and wake-3 (#929) claims from clean git archives of `b95653e`
-and `e6e8b86`, also ESTABLISHED AS CLAIMED at their labeled grades (6+4 PASS
-and 3 PASS rc 0, five pins OK). Witness W75 replayed wake 4 (#951) from a clean
-git archive of `fa551e9`, ESTABLISHED AS CLAIMED at the lab-build-only grade
-(4 PASS rc 0, five pins OK). Wake 6 is new and awaits independent replay; see
-the final section for its bounded, loopback-only negative result.
+Witness W73 (#911) replayed the wake-1 claims ESTABLISHED AS CLAIMED; witness
+W74 replayed the wake-2 (#922) and wake-3 (#929) claims from clean git archives
+of `b95653e` and `e6e8b86`, also ESTABLISHED AS CLAIMED at their labeled grades
+(6+4 PASS and 3 PASS rc 0, five pins OK). Witness W75 replayed wake 4 (#951)
+from a clean git archive of `fa551e9`, ESTABLISHED AS CLAIMED at the
+lab-build-only grade (4 PASS rc 0, five pins OK). The witness verdict on wake 6
+(#970) replayed `cc9ba4d` + `aa9ebe8` from a clean archive and also found
+ESTABLISHED AS CLAIMED at the bounded-negative, real-consumer grade; see the
+final section for its evidence and the two NITs it raised.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -312,11 +314,12 @@ retained. Every socket in this section bound 127.0.0.1 only.
 
 The previously UNKNOWN question "which applications deserialize untrusted
 HLL images" now has one concrete, shipped answer: the Apache DataSketches
-PostgreSQL extension. In the pinned extension source at commit
-`56d871276d32a1235041b553559143a9697f8906`,
-`src/hll_sketch_pg_functions.c:176` and `:353` call `hll_sketch_deserialize`
-on a client-supplied `bytea`, as does `pg_hll_sketch_get_estimate` (around
-`:370`); `sql/datasketches_hll_sketch.sql` defines
+PostgreSQL extension.
+In the pinned extension source (commit `56d871276d32a1235041b553559143a9697f8906`,
+`src/hll_sketch_pg_functions.c` sha256 `710709d1f62e5979e77799222128e4630f62f5046bdd20ae14e323d9bc99ea7b`),
+`hll_sketch_deserialize` is called on client-supplied `bytea` at `:161`, `:338`,
+`:350`, `:369`, `:385`, `:412` and `:418`; `pg_hll_sketch_get_estimate` starts
+at `:345` and deserializes at `:350`. `sql/datasketches_hll_sketch.sql` defines
 `hll_sketch_in(cstring)` and `CREATE CAST (bytea as hll_sketch)`, so a base64
 client literal is a deserialization input. The extension instantiates
 `hll_sketch_alloc<palloc_allocator<char>>` (`src/allocator.h`), i.e. its
@@ -374,5 +377,36 @@ the pinned write occurs there, but with no observed impact beyond chosen
 bytes in allocator slack. Real applications with a glibc allocator, a live
 victim at a known offset, an address leak and natural call-through remain
 UNKNOWN. Every socket in this section bound 127.0.0.1 only; no probe left the
-loopback host. This wake's claims are new and await independent replay.
+loopback host.
+
+**Witness replay (#970): ESTABLISHED AS CLAIMED at the bounded-negative,
+real-consumer grade.** The witness replayed `cc9ba4d` + `aa9ebe8` from a clean
+git archive of `aa9ebe8` containing `lab/datasketches2shell-pg` and
+`lab/frontier/datasketches2shell`, copying in the two pinned gitignored
+PostgreSQL tarballs: 2/2 PG pins and 5/5 library pins verified. Its own fresh
+PostgreSQL 16.4 plus verbatim extension HLL build against pinned 5.2.0 gave
+`run.sh` rc 0, benign `2.000000004967054`, c18 `18.00000075995926`, c64
+`64.00001001358214`, c255 `255.00016085815176`, with the server alive. gdb on
+a single-user backend hit pinned `CouponList-internal.hpp:116` with `count=64`,
+`p=0x5555562d7060`, words at `p+32`/`p+40` going `0` ->
+`0x5a5a5a5a5a5a5a5a`, and backtrace `newList:119` <-
+`HllSketchImplFactory.hpp:101` <- `HllSketch-internal.hpp:63` <-
+`hll_sketch_c_adapter.cpp:119` <- `pg_hll_sketch_get_estimate` at
+`hll_sketch_pg_functions.c:350`. Its counterexample held: changing only the
+wire payload byte to `0x3c` changed both words to `0x3c3c3c3c3c3c3c3c`, so the
+bytes are wire-carried, not a gdb artifact. A rebuilt 5.3.0 rejected c18/c64/
+c255 with `couponCount >= capacity. Found couponCount: 64, capacity: 8` while
+benign still returned `2.000000004967054`; 5.2.0 was restored and all four
+estimates reconfirmed. An independent `--enable-cassert` build gave the same
+four estimates, no warning or error in the server log, and gdb sentinel words
+at `p+32`/`p+40` going `0x7f7f7f7f7f7f7f7f` -> `0x5a5a5a5a5a5a5a5a`. No crash,
+abort, pointer value, diverted call or shipped-app impact was observed or
+claimed.
+
+Two witness NITs are fixed here: the deserialization call-site citations now
+name the verified lines in the pinned `hll_sketch_pg_functions.c` (sha
+`710709d1...`), and `lab/datasketches2shell-pg/gdb_pg.gdb` no longer hardcodes
+lab absolute paths. For a clean-archive gdb replay set `DS2_PG_HOME` to the
+archive's `lab/datasketches2shell-pg` directory before sourcing the script;
+it supplies both the header directory and `PGDATA`.
 
