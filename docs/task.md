@@ -2201,6 +2201,55 @@ before any pointer or marker claim, repeating with 12.9 as control. A
 measured handshake, allocator or reachability blocker is a valid negative
 to preserve.
 
+#### Admitted 2026-11-21 ~10:5xZ: Imgproxy2Shell / imgproxy2shell (CVE-2026-123614 / GHSA-hff9-5pqw-6w9f)
+
+Frontier handed this find over in `reports/frontier-imgproxy2shell.md`
+(commits `2366ef4`, `01bbfaa`). All five standing-approval #6 elements are
+present: **claim source** — CVE Program record `CVE-2026-123614` (CNA
+VulnCheck, published 2026-11-08), GitHub advisory GHSA-hff9-5pqw-6w9f, fix
+commit `a821b6a4cb07a1bf2bb9077431d1c1e734d79917` and raw source at tags
+`v4.0.15`/`v4.0.16`, with URLs and SHA-256 pins in
+`lab/frontier/imgproxy2shell/PROVENANCE.md`; **identifier** —
+CVE-2026-123614 / GHSA-hff9-5pqw-6w9f; **affected/fixed versions** —
+`pkg:golang/github.com/imgproxy/imgproxy/v4` from 4.0.0 before 4.0.16,
+fixed 4.0.16; **primitive** — `uint32_t data_size` from the ICO directory
+entry wraps in `VIPS_MALLOC(NULL, data_size + BMP_FILE_HEADER_LEN)` at
+`icoload.c:158` (`0xfffffff5` + 14 → 3) while `actual_data = data + 14`
+at `:159` and `vips_foreign_load_read_full()` at `:161` writes the
+attacker's body bytes 11 bytes past the 3-byte allocation; **rung-4
+plausibility** — imgproxy is an HTTP image service and the crafted ICO is
+submitted on its normal unauthenticated request path, with CVSS 4.0 9.3
+`AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H`; loopback build and request are
+inside standing provisioning approval #5. The CVE prose claims crash or
+code execution; no execution is claimed by this lab.
+
+Operator replay ~10:53Z from a clean `git archive HEAD` extraction:
+10 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`, chosen `0x5a5b5c5d` bytes read
+back at `data+14`, `PROT_NONE` guard fault on the first past-end store,
+fixed rejects the wrapped size and is ASan-clean on hostile and benign
+inputs, two independent five-run groups both
+`sha256=6b0391599520bc899f169268e08699155888f0018274f9c2a2e12bcd31c2dad5`.
+All nine pinned digests in `PROVENANCE.md` matched the committed bytes and
+an independent web search confirmed the CVE record, GHSA and fix commit.
+Rungs 1/2/3 ESTABLISHED in the verbatim-pin extracted harness; rung 4 is
+INSTRUMENTED chosen-byte control at a chosen offset in an mmap
+collaborator only. No live imgproxy HTTP server, libvips runtime, real
+uploaded ICO, stock allocator neighbour, pointer overwrite, control-flow
+diversion or execution was observed — all UNKNOWN, no claim.
+
+Admitted under the standing similar-things mandate; no re-ask. The
+two-pane `imgproxy2shell` window (index 48, inner socket) was pre-created
+by frontier and is already registered UNADMITTED; do not recreate or edit
+the registry. Wake trigger units and presentation stay owed from the
+person's full-flag sync in `docs/runtime-pin.md`, never a bare
+`mishe sync`. Cheapest next rung: build pinned v4.0.15 imgproxy with ASan,
+serve a 23-byte crafted ICO through its normal HTTP URL endpoint on
+loopback, capture the symbolised ASan frame at the real
+`vips_foreign_load_ico_header` / `read_full` path, and measure the live
+libvips/glibc neighbours of the 3-byte buffer before any pointer or marker
+claim; repeat at 4.0.16. A measured endpoint, libvips or allocator blocker
+is a valid negative to preserve.
+
 #### Held 2026-11-21 ~09:47Z: Airlock2Shell (CVE-2026-19707 / GHSA-3c49-2p63-245g) — not admitted under #6
 
 Operator advisory watch; no handoff and no lab work. Claim sources: InfoGuard
