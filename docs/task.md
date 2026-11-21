@@ -919,8 +919,12 @@ check is owed before any stock-build rung-4 claim. Evidence:
 `.mishe-tauftauf/charters/bzfs2shell.md`. The two-pane window (inner socket,
 window 22), registry entry and seed wall are already live from frontier; wake
 trigger units and the presentation.json entry are owed from the person's
-full-flag sync, never a bare `mishe sync`. Witness replay was requested
-separately (#429).
+full-flag sync, never a bare `mishe sync`. Witness replay #761 (2026-11-21)
+independently ESTABLISHED rungs 1/2/3 and rung 4 at the labeled INSTRUMENTED
+scope: 20 PASS / 0 FAIL, five-run digest byte-equal to the brief. Its one nit
+was that every source-line citation was six lines too high; the brief, seed
+status and PROVENANCE now cite the pinned bytes, while the digest-pinned
+harness bytes were deliberately preserved.
 
 #### Admitted 2026-11-21 ~02:2xZ: Kamailio2Shell (CVE-2026-106803)
 
