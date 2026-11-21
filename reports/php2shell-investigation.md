@@ -19,8 +19,10 @@ record and OOM shape ends in a clean warning or fatal, the persistent
 worker answers the next request on the same PID, and **no AddressSanitizer,
 UBSan or ZEND_ASSERT report appeared in that lane**. No invalid-state read or
 write was observed there. The reopened 126714 lane later reached rung 3
-through a different native bug — see the wake-17 amendment below; rung 4
-remains unclaimed for every lane.
+through a different native bug — see the wake-17 amendment below. The DOM
+reflected-attribute lane later reached **rung 4 (chosen-pointer control)** on a
+local non-ASan CLI under stated conditions — see wake 56; that claim does not
+extend to any SAPI or pre-auth path.
 See `reports/php2shell-status.md` for the full per-lane evidence record,
 including all negatives.
 
