@@ -122,9 +122,11 @@ immediate is emitted after the cursor passes the end. Appending real
   instrumented build and corroborated by a real ASan `WRITE of size 8` in the
   inline-immediate emitter; fixed-version control clean. Not a pointer-control
   primitive of attacker-chosen addresses, not code execution.
-- **Rung 5**: UNKNOWN. No wire-facing consumer named or driven; load aborts
-  before guest execution; no benign command side effect, no ASLR/heap-shape
-  escalation. The advisory's `AV:N` vector is still a reporter's model.
+- **Rung 5**: UNKNOWN. A genuine wire-facing consumer is now named (Envoy
+  v1.39.3 with `envoy.wasm.runtime.wamr`, below) but was NOT built or driven;
+  load aborts before guest execution; no benign command side effect, no
+  ASLR/heap-shape escalation. The advisory's `AV:N` vector is still a
+  reporter's model.
 - **Witness replay owed**: independent rebuild of the two variants, the
   2.4.4/2.4.5 controls and a byte comparison of the `WAMR_OOB tag=const` lines.
   This report is an author claim, not acceptance.
@@ -134,3 +136,34 @@ chosen immediates; eight appended `i64.const` pairs with `0xDEAD...`-style
 values above the signed 64-bit LEB range were rejected by the loader
 (`integer too large`) and were regenerated with in-range values; six
 `i32.const 0`/`drop` padding pairs did not move the four OOB offsets.
+
+## Addendum: named consumer, NOT built and NOT driven (2026-11-21 ~21:29Z)
+
+A read-only consumer survey by this wake names **Envoy v1.39.3** as a genuine
+network-to-loader path on the exact affected pin. Source evidence at that tag:
+`bazel/repository_locations.bzl:527-532` pins `WAMR-2.4.4`;
+`bazel/foreign_cc/BUILD:439-440` sets `WAMR_BUILD_FAST_INTERP=1`;
+`api/envoy/extensions/wasm/v3/wasm.proto:97-100` says the WAMR runtime is not
+in the official build, while `:110-111` makes `VmConfig.code` an
+`AsyncDataSource`; `source/extensions/common/wasm/wasm.cc:317/322` detects a
+remote URI, `:444-465` fetches bytes, `:419-441` `fetch_callback(code)` calls
+`complete_cb(code)`, and `:400-404` calls `proxy_wasm::createWasm(...)`. The
+pinned proxy-wasm-cpp-host `f2db56af...` `src/wamr/wamr.cc:144-163` passes those
+bytes to `wasm_module_new()`, and WAMR 2.4.4
+`core/iwasm/common/wasm_c_api.c:2360/2389` reaches `wasm_runtime_load()`.
+Traffic Server and Fluent Bit use WAMR but load from local config files;
+mod_wasm and NGINX Unit do not use WAMR. Local `iwasm` and WAMR samples are
+synthetic harnesses, never rung 5.
+
+Feasibility checked on this host, read-only and time-boxed: `envoy`, `bazel`
+and `bazelisk` are absent; no apt package provides them; the Docker daemon is
+reachable (29.1.3) but its images are postgres/temurin/python/dragonfly only,
+with no WAMR-enabled Envoy image or local tarball. A WAMR-enabled Envoy needs
+a full Bazel/hermetic-toolchain source build, infeasible in this wake's
+budget. Therefore the consumer is **named but NOT built, NOT driven**; rung 5
+stays UNKNOWN. If a WAMR-enabled Envoy is later supplied, the minimal genuine
+drive is a 127.0.0.1 HTTP server serving `const_table_overflow.wasm` (or the
+chosen-immediate variant), a bootstrap with `runtime:
+envoy.wasm.runtime.wamr` and `code.remote.http_uri` pointing at it, ASan on
+the Envoy process, plus vulnerable/fixed/safe-input controls and witness
+replay. A socket wrapper around `iwasm` would remain synthetic.
