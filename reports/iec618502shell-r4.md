@@ -251,6 +251,59 @@ return slot while the TPKT header corrupted the upper half of saved RBP, so a
 This probe is AUTHOR-ONLY until independently replayed; the three earlier
 probes remain witness-verified.
 
+## Bounded rung-5 experiment: real libc `system` from wire input (wake 7, 2026-11-21 ~19:56Z)
+
+Owner standing #8 (`docs/rce.md`) activated rung 5 as an additive per-build
+goal. `bash lab/frontier/libiec61850/r5_system.sh <abs-outdir>` reuses the
+witness-verified r4_real chain but replaces the real `write` call with real
+libc `system` on a command string that the pinned ObtainFile path stages on
+the same stock server. Clean-archive replay to `/tmp/iec-r5-clean`: **15 PASS /
+0 FAIL, rc 0, 6/6 pins OK**, all traffic 127.0.0.1, no `LD_PRELOAD`, no ASLR
+change, no external probe.
+
+Mechanism and exact bytes. Phase A stages a 120000-byte ramp, then gdb at
+`mms_file_service.c:872` measures this run's live values (ASLR disabled):
+`base=0x7ffff0010ae0`, `RETSLOT=0x7ffff7bfec88`, fd 4, libc base
+`0x7ffff7c00000`, `write=0x7ffff7d1c7f0`, `exit=0x7ffff7c47ba0`,
+`system=0x7ffff7c58750` (static offset `0x58750` confirmed with `nm -D`).
+Phase B stages a 120000-byte snapshot whose fake `CotpConnection->readBuffer`
+is `0x7ffff002a508` with `buffer = RETSLOT-4 = 0x7ffff7bfec84`. A second
+100-byte loopback TPKT frame carries the 40-byte chain (sha256
+`d3b2a7fc78234a64845b17d6d08af0ed935d7f28ea97fdc2821627b52c45f040`):
+`pop rdi; ret` (`libc+0x10f84b`), command address `0x7ffff002aaf0`, bare `ret`
+(`libc+0x10f84c`, ABI alignment), real `system`, real `exit`. The command
+string lives in the staged file at that measured heap address; `cmd_hex` is
+`7072696e74662052355f4945435f4d41524b45525f3439303335203e202f686f6d65...`
+and reads `printf R5_IEC_MARKER_49035 > <plant>/lab/frontier/libiec61850/r5_marker.txt`.
+Staged-file sha256 on the clean replay was
+`c47d2ac6c24cfa713212878eef633eac9f782d6dbcf92b8f916f1b63f8abd126`; it
+includes live heap bytes, so it need not match across runs.
+
+Observation: gdb at real `system` logged
+`SYSTEM hit rip=0x7ffff7c58750 rdi=0x7ffff002aaf0 str=printf R5_IEC_MARKER_49035 > ...`,
+the target process created `r5_marker.txt` containing exactly
+`R5_IEC_MARKER_49035` (18 bytes, sha256
+`697191af345051bfaa3f398d462fa905af4491498aa8865f1eb239db0e55b5f4`), and the
+inferior exited with code 02, no SIGSEGV. The marker is copied to
+`<outdir>/marker.txt` before the controls remove it. gdb supplies addresses
+only; every executed chain word and the command string arrived over loopback.
+
+Controls: (1) the same 100-byte chain frame against the same vulnerable build
+with a benign staged file leaves the marker absent — that control process
+faults after the frame, preserved as a negative; (2) released v1.6.2 with the
+pinned conforming `exploit_client.c` stops at the AARE failure and leaves the
+marker absent. The vulnerable positive was observed in two independent runs
+(author repeat and clean replay) with different staged-file digests.
+
+Status: **AUTHOR-OBSERVED rung-5 limb, pending independent witness replay**;
+not ESTABLISHED. Conditions remain ASLR disabled, measured host offsets, a
+lab-constructed chain and a lab-chosen command; no attacker-supplied code,
+ASLR defeat, persistence, credential or off-loopback action. The rung-4 grade
+and its witness verdicts are unchanged. A first author attempt failed because
+gdb tried to insert the absolute `system` breakpoint before libc loaded; the
+harness now installs it after `start`, and that failed run is preserved in
+`/tmp/iec-r5-final-console.txt`.
+
 ## Grade and limits
 
 - Rungs 1/2/3 stay ESTABLISHED (frontier brief, independently replayed by W74).
@@ -286,3 +339,8 @@ probes remain witness-verified.
   it, so the diversion is wire-controlled and not a hardcoded marker. The new
   `r4_real.sh` is AUTHOR-ONLY and awaits independent replay; the other three
   probes have been independently replayed.
+- Rung 5 (additive, owner standing #8): AUTHOR-OBSERVED only — the wire-supplied
+  chain calls real libc `system` in the live server and creates a lab marker,
+  with fixed and safe-input controls, in `r5_system.sh` (clean replay 15 PASS /
+  0 FAIL). Independent witness replay is still owed before any ESTABLISHED R5
+  claim; rung 4 above is unchanged.
