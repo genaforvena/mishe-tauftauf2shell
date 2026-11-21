@@ -215,6 +215,34 @@ claims, not conclusions.
   control, marker, pre-auth HTTP or FPM/Apache LPE demo, so rung 4 is closed.
   Gitignored evidence `lab/build/evidence/w53-129496/` (`verdict.txt`); do
   NOT repeat the debug-ASan runs.
+- 2026-11-21 wake 55 adjacent DOM lane (no CVE/GHSA id): 8.5.13 NEWS ~line 80
+  records "Fixed a use-after-free when reflected attribute setters replace an
+  attribute whose child still has a live wrapper", with vendor regression
+  `ext/dom/tests/reflected_attribute_write_live_child.phpt`. Mechanism:
+  `dom_element_reflected_attribute_write (ext/dom/element.c:160)` and the
+  DOMTokenList setters (`token_list.c:197/:437`) call `xmlSetNsProp()`
+  directly, freeing the old attribute's child text node while a PHP wrapper
+  (`$text = $element->getAttributeNode('class')->firstChild`) stays live, so
+  `$text->parentNode` and `$text->textContent` dereference freed memory. The
+  8.5.13 fix adds `dom_set_attribute_value()` (`php_dom.c:2348`, declared
+  `php_dom.h:118`) with `node_list_unlink(existing->children)` before
+  `xmlSetNsProp()`, routing all four setters through it. No new full build:
+  the A side is the wake-51 dom-enabled 8.5.12 ASan CLI tree relinked with
+  only the 8.5.13 `xml_serializer.c` (wake 51's `php-fixed`); the B side is
+  that tree plus the committed four-file patch
+  (`lab/php2shell/dom-reflected-attribute-fix.patch`, `php-fixed-domattr`).
+  `lab/repro/php2shell-dom-reflected-attr.py` runs the five vendor shapes plus
+  a no-replacement control: 5/5 ASAN_UAF on A / CLEAN on B, control
+  CLEAN/CLEAN, fixed output byte-exact against vendor EXPECT, `verdict.txt`
+  CONFIRMED under gitignored `lab/build/evidence/w55-domattr/`. ASan reports a
+  heap-use-after-free READ of 8 at `dom_node_parent_get (node.c:247)`, freed
+  by `xmlFreeNodeList ← xmlSetNsProp ← dom_element_reflected_attribute_write`.
+  Grade rung 3 CONFIRMED for this lane only; overall PHP rung 4 unchanged:
+  local CLI with a userland wrapper, no SAPI, pre-auth HTTP, chosen bytes,
+  pointer control, marker or exploitability claim. Next if reopened: a
+  chosen-byte occupant of the freed `xmlNode` child with a dereferencing
+  accessor, or a DOM-consuming HTTP app reaching a reflected setter; do NOT
+  repeat the same A/B.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
@@ -671,6 +699,15 @@ top size`. The 8128-byte cap is a synthetic control, not the real 0.10.6.1
   (`lab/xrdp2shell-real/verify_cleanroom.sh`, transcript
   `cleanroom-replay.txt`): fresh ASan and plain xrdp 0.10.6 library builds,
   all three drivers rebuilt from unchanged digests, 15/15 assertions pass.
+  Witness W41 (#617) independently ESTABLISHED this clean-room claim:
+  `verify_cleanroom.sh` ran twice from fresh 0.10.6 source (`440a5381…`) in
+  separate work dirs, rebuilding ASan and plain libraries and all three
+  drivers from unchanged digests; both runs gave 15/15 passes, rc 0 and
+  byte-identical gate traces, closing W33's build-tree limit. Fresh `.a`
+  digests differ between builds because static archives embed member
+  timestamps and paths; the gate results, not archive hashes, are the
+  reproducing evidence. W41 covers only the xrdp claims, not the unrelated
+  FREERDP #564 pointer deref; the in-process boundary stays unchanged.
   On this host the committed `real_drdynvc_driver.c` needs
   `-include config_ac.h` and an earlier `-I`; the RUNBOOK correction is
   recorded there. The in-process boundary is unchanged: no socket, logon,
@@ -762,6 +799,19 @@ replays, not independent acceptance. Witness W33 (#552) re-ran the
 unmodified `VERIFY_VALGRIND=1` replay from clean HEAD 2a78ee6: 43 PASS /
 0 FAIL, rc 0, REPAIR ESTABLISHED and the 42/1 contradiction closed.
 Chosen-byte rung 4 stays NOT DEMONSTRATED.
+  A source-level data-flow pass records why strong rung 4 is unreachable
+  through this primitive: the OOB loop has one store, the compile-time
+  constant `GST_AUDIO_CHANNEL_POSITION_NONE = -3`
+  (`upstream/channels.c:308-309`), so the attacker chooses store count and
+  offsets but never stored bytes. `depay.c:203-207`'s `memcpy` from
+  `order->pos` is guarded by `if (order)`, and `get_by_order` matches only the
+  static 1..8 table (`channels.c:242-244`), so for channels>8 it never runs;
+  `depay.c:264-269`'s reorder is guarded by `order &&` and becomes true at
+  high counts only through the fixed `-3` corruption of `order` itself.
+  `depay.c:218-219` reads `position[0..channels-1]` after the loop has
+  written NONE to each, so no adjacent content leaks into emitted caps.
+  Chosen bytes or an arbitrary pointer need a different sink; no harness or
+  grade changed.
 Evidence:
 `reports/frontier-gst2shell.md`, harness
 `lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
@@ -1755,6 +1805,31 @@ pointer, memory corruption or deterministic fault: rung 2 only, rung 4
 unreachable for this bug class. Reproduce with
 `cd lab/apache2shell && python3 l7-lane.py 2.4.67 2.4.68`. The main lane is
 unchanged.
+
+Adjacent lane L8 (CVE-2026-48913, `mod_http2` use-after-free on file-handle
+exhaustion) is an eighth same-subsystem lane, graded rung 1/2: a
+source-bound suspected UAF with a reachable deterministic trigger but no
+confirmed corruption. `httpd-2.4.71/CHANGES` records the bug for 2.4.55–2.4.67
+and the fix in 2.4.68. The 2.4.67 (mod_http2 2.0.39) → 2.4.68 (2.0.42)
+`h2_mplx.c` diff moves the `h2_beam_on_send/on_received/on_consumed`
+registrations on `stream->input` to after `apr_file_pipe_create_pools()`
+succeeds; on EMFILE, `s_next_c2()` destroys `c2` through
+`apr_pool_destroy(c2->pool)` while the stale callbacks still point at it.
+`l8-lane.py` runs each ASan install on loopback with `RLIMIT_NOFILE=48`,
+10 h2c connections and 80 POST-with-body streams each; both builds log
+hundreds of `(24)Too many open files ... AH10309 ... error create input write
+pipe` entries, but no pristine run produced an ASan use-after-free, double
+free, chosen-byte write or deterministic child fault — only exit
+LeakSanitizer noise and Apache's SIGSEGV handler masking pool-internal
+faults. Three confirmation attempts are preserved as negatives, not upgrades:
+freed-address tracking also hit the fixed build because APR recycles `c2`
+addresses; a poison field first hit an ABI mismatch from a partial rebuild
+and then reported zero hits; allocation-aware freed/live tracking made
+`h2_beam_send`'s `beam->from == from` assertion abort children only as an
+instrumentation timing artifact. All source and module bytes were restored
+(SHA256 `624f0c32…` source, `e657da06…` module). No chosen bytes, pointer
+control or rung-4 path; do not retry this trigger or those three variants.
+Reproduce with `cd lab/apache2shell && L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 python3 l8-lane.py 20`.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
