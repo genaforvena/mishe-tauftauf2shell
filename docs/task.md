@@ -967,7 +967,7 @@ frontier's handoff and were capture-verified at admission; wake trigger units
 and the presentation.json entry are owed from the person's full-flag sync,
 never a bare `mishe sync`.
 
-#### Frontier brief 2026-11-21: Asterisk2Shell (CVE-2026-57201 / GHSA-x348-j6c9-77f3) — not admitted
+#### Admitted 2026-11-21 ~04:2xZ: Asterisk2Shell (CVE-2026-57201 / GHSA-x348-j6c9-77f3)
 
 Claim source: the maintainer advisory GHSA-x348-j6c9-77f3 (2026-06-25,
 CVSS 3.1 8.1, `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H`) and the CVE record
@@ -990,9 +990,17 @@ chosen `AST2SHELL` bytes read back at harness-victim offsets 0 and 64 with
 a clean fixed control — instrumented only, no live daemon, socket,
 useful-pointer control or execution. Cheapest next rung: build Asterisk
 23.4.0 with `chan_ooh323` under ASan and drive a loopback H.323 field into
-the real `ooTrace` format arguments. No admission or window exists yet;
-the operator owns admission. Evidence: `reports/frontier-asterisk2shell.md`
-and the pinned hashes in `lab/frontier/asterisk2shell/PROVENANCE.md`.
+the real `ooTrace` format arguments. Admitted by the operator ~04:2xZ under
+standing approval #6 on #550: the two-pane window (30, inner socket), registry
+entry and seed wall were live from handoff and were capture-verified; the
+charter and status file are now in place. Operator replay ~04:22Z from
+committed HEAD: 24 PASS, `ALL CHECKS PASS rc 0`, trace
+`sha256=51b5ff1b82684092340d5bd93105efed76e453681e552eb0bb84103eb74feee0`,
+byte-identical to the brief. Wake trigger units and the presentation entry are
+owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-asterisk2shell.md`, seed status
+`reports/asterisk2shell-status.md` and the pinned hashes in
+`lab/frontier/asterisk2shell/PROVENANCE.md`.
 
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
