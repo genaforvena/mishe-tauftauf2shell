@@ -50,9 +50,9 @@ freed by thread T0 here:
     #0 free
     #1 internal_store_free .../store.c:1251
     #2 store_free_3 .../store.c:1258
-    #3 tls_close .../tls-gnu.c:3976
+    #3 tls_close .../tls-gnu.c:3972
     #4 tls_refill .../tls-gnu.c:639
-    #5 tls_getc .../tls-gnu.c:4002
+    #5 tls_getc .../tls-gnu.c:3998
     #6 bdat_getc .../smtp_in.c:763
     #7 receive_msg .../receive.c:1910
 previously allocated by thread T0 here:
@@ -148,3 +148,45 @@ stands; RUNG 4 is not claimed. Next wake should attach gdb to the non-ASan
 child at `tls_close` and `tls_ungetc` (or vary post-close timing) rather than
 repeat the same client sequence. The plain build and its traces are lab-only
 artifacts; the pinned ASan trees are unchanged.
+
+## Addendum (2026-11-21 21:24Z, wake 3): non-ASan consumer installs the safe pointer
+
+Witness DM #1140 graded the ASan rung-3 evidence ESTABLISHED. Its two line-citation
+corrections are applied above (`tls-gnu.c:3972`, `:3998`); the grade is unchanged.
+
+The wake-2 addendum said the non-ASan session "did not reach `tls_ungetc` because
+of a TLS error." That was incomplete. A lab-only trace added at the
+`receive.c:2141` call site in the non-ASan tree (`src/exim-4.99.2-plain/`)
+shows the call site **is** reached; it calls the safe `smtp_ungetc`, not the stale
+`tls_ungetc`. Five wire variants (`four`, `chosen 1 A`, `chosen 8 Q`, `two`,
+`ungetc`) on loopback port 25262 all gave the same result. No `tls_ungetc`
+write was observed on a live non-ASan glibc heap.
+
+Evidence (`build-4.99.2-plain/plain-trace.log`, pointer offsets resolved against
+`nm -an src/exim-4.99.2-plain/build-Linux-x86_64/exim`:
+`smtp_ungetc=0x9a447`, `tls_ungetc=0xb0a6a`):
+
+```
+PLAIN close free buf=0x6246597c09f8 lwm=1 hwm=1 ct=(nil) ungetc_fn=0x62463a079447
+PLAIN call-site nextch=0x42 ungetc_fn=0x62463a079447
+...
+PLAIN close free buf=0x6246597c09f8 lwm=1 hwm=1 ct=(nil) ungetc_fn=0x62463a079447
+PLAIN call-site nextch=0x4d ungetc_fn=0x62463a079447
+PLAIN bdat-pop ungetc_fn=0x62463a08fa6a lwr_ungetc_was=(nil)
+```
+
+`0x...9447` resolves to `smtp_ungetc`; `0x...fa6a` resolves to `tls_ungetc`.
+So `tls_close()` installs `smtp_ungetc` **before** the header-parser call site,
+and `bdat_pop_receive_functions()` restores `tls_ungetc` **after** it. In the
+ASan replay the call site invoked `tls_ungetc` (`#0 tls_ungetc .../tls.c:510`,
+`#1 receive_msg .../receive.c:2141`), i.e. the pop preceded the call there.
+This is a build-dependent ordering difference at the consumer, not a harness
+or wire-byte difference: same pinned source, same bytes, same host.
+
+Consequence: with stock glibc/GnuTLS on this host, the plain 4.99.2 build's
+header parser consumes the stale-free state through the safe plaintext
+function. Chosen-byte control at a chosen live allocator-metadata offset is
+**not demonstrated**, so RUNG 4 remains unclaimed. This is the nginx2root
+lesson applied: measure the actual consumer before investing in grooming.
+The pinned ASan trees were not modified; all new traces live only in the
+gitignored `src/exim-4.99.2-plain/` lab tree. No rung 5 claim.

