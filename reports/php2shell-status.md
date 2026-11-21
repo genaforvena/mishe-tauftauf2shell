@@ -1101,3 +1101,29 @@ Committed harness `lab/repro/php2shell-cve129501-dom.py`; evidence in gitignored
   claim under ZendMM. Fix hunk 2's stream-wrapper path NOT tested.
 Honest limits: no chosen-byte write, pointer control, marker, pre-auth or web
 reachability. Grade **rung 3 CONFIRMED** for this lane only; no other lane changed.
+
+
+## Wake 52 (2026-11-21 04:52–) — 129501 hunk #2 stream-wrapper mutation CONFIRMED (DOM-state, no grade change)
+Bounded experiment chosen over the costly plain-DOM tcache build: the 8.5.13
+tree has two regression tests absent from 8.5.12 for the untested second hunk
+of the exact fix — `ext/dom/tests/modern/xml/serialize_document_write_failure.phpt`
+and `serialize_document_write_mutation.phpt`. Committed harness
+`lab/repro/php2shell-cve129501-dom-hunk2.py` embeds both --FILE--/--EXPECT--
+bodies and runs them against wake 51's preserved `php-vuln` / `php-fixed`
+pair (no new build, default ZendMM). Gitignored evidence
+`lab/build/evidence/w52-129501-hunk2/verdict.txt` = CONFIRMED:
+- `failure`: affected `bool(false)`, documentElement `NULL`, `int(0)` children,
+  declaration-only output (TRY bailout never restores children); fixed matches
+  vendor EXPECT (`string(4) "root"`, `int(1)`, full document).
+- `mutation`: affected `int(1)` children, both injected and after comments
+  orphaned; fixed `int(3)` with both comments, matching vendor EXPECT.
+- No ASan/UBSan report, rc=0 both binaries: hunk 2 corrupts DOM tree state,
+  not allocator memory, on these inputs.
+Negative probe (throwaway, gitignored): keeping a reference to the orphaned
+comment, `removeChild()` and `gc_collect_cycles()` under `USE_ZEND_ALLOC=0`
+gave no ASan report; libxml tolerates the inconsistent list. Fixed keeps 2
+children where affected keeps 1. No UAF/invalid deref reached.
+Grade unchanged: rung 3 CONFIRMED for 129501 comes from wake 51's hunk-1
+double free; hunk 2 is a confirmed DOM-state fault patch-sensitive to the
+exact 8.5.13 source and adds no rung-3/4 claim. tcache escalation deferred
+(no ASan `replace_malloc=0` flag, 2-core host).

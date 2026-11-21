@@ -1100,10 +1100,61 @@ and a clean single-namespace control. Raw logs and
   free. No ASan claim is made for the default allocator, and no claim that
   the underlying double free is absent there.
 
-This repro exercises fix hunk 1 only; the stream-wrapper bailout path of
-hunk 2 was not tested. Grade **rung 3 CONFIRMED** for this lane: an observed
+This repro exercises fix hunk 1 only; wake 52 below covers hunk 2. Grade
+**rung 3 CONFIRMED** for this lane: an observed
 double free in the affected serializer source, patch-sensitive to the real
 fixed source. No chosen-byte write, pointer control, benign marker,
 pre-auth reachability or web-server path was demonstrated, so rung 4 is
 not claimed and no other lane's grade changes.
+
+
+### Wake 52 — 129501 fix hunk #2: stream-wrapper document mutation CONFIRMED (DOM-state fault, no new rung)
+
+Wake 51 left the second half of the exact two-hunk fix untested. The 8.5.13
+tree contains two regression tests absent from 8.5.12 that target it:
+`ext/dom/tests/modern/xml/serialize_document_write_failure.phpt` and
+`serialize_document_write_mutation.phpt`. Both --FILE-- bodies and --EXPECT--
+outputs are embedded verbatim in the committed harness
+`lab/repro/php2shell-cve129501-dom-hunk2.py`, which runs them against the same
+preserved `php-vuln` / `php-fixed` pair from wake 51 (no new build; default
+ZendMM, LSan off). Raw output and `verdict.txt` are in gitignored
+`lab/build/evidence/w52-129501-hunk2/`.
+
+Replay from a clean checkout after the wake 51 build steps:
+```
+python3 lab/repro/php2shell-cve129501-dom-hunk2.py \
+  lab/build/php-8.5.12-asan-dom/sapi/cli/php-vuln \
+  lab/build/php-8.5.12-asan-dom/sapi/cli/php-fixed
+```
+
+Result `CONFIRMED` on both cases:
+- `failure`: `stream_write()` returns false, so `TRY` bails before the stale
+  pointer is restored. Affected: `bool(false)`, `NULL` documentElement,
+  `int(0)` children, declaration-only output — the real document has lost
+  every child. Fixed: `bool(false)`, `string(4) "root"`, `int(1)`, full
+  `<root><child/></root>` output, matching the vendor `--EXPECT--`.
+- `mutation`: `stream_write()` appends a comment mid-save while the real
+  document's children were NULLed. Affected: `int(1)` children and output
+  `<root><child/></root>` — both the injected comment and the later
+  `<!--after-->` comment are orphaned. Fixed: `int(3)` and both comments in
+  the output, matching the vendor `--EXPECT--`.
+- Both cases exit 0 on both binaries with no ASan/UBSan report: this hunk
+  corrupts DOM tree state, not allocator memory, in these inputs.
+
+Bounded negative probe (throwaway scripts under the same gitignored evidence
+dir, not part of the harness): retaining a PHP reference to the orphaned
+comment and then calling `removeChild()` and forcing `gc_collect_cycles()`
+under `USE_ZEND_ALLOC=0` produced no ASan report on the affected binary;
+libxml tolerates the inconsistent parent/child list. On the fixed binary the
+same document keeps 2 children where the affected one keeps 1. No UAF or
+invalid dereference was reached, so no memory-safety grade is claimed for
+this hunk.
+
+Honest limits: no chosen-byte write, pointer control, marker, pre-auth or
+web path. This hunk is confirmed as a DOM-state fault patch-sensitive to the
+exact 8.5.13 source; it does **not** add a rung-3 memory-corruption claim and
+does not change any lane's grade. The lane's rung 3 remains wake 51's hunk-1
+double free. The hunk-1 glibc-tcache chosen-byte escalation from the wall was
+deferred: this ASan build has no `replace_malloc=0` flag and the host has 2
+cores, so a plain DOM build plus exploitation work would exceed this wake.
 
