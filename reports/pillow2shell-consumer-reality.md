@@ -544,3 +544,33 @@ witnessed grade. Opening rung 5 needs a new primitive — address disclosure
 plus an in-heap fake type, or a free-chunk/arbitrary-write lane — not another
 replay of the existing call. This is a negative assessment; no witness replay
 is owed.
+
+## W13 — measured tcache-placement negative (2026-11-21)
+
+The W12 follow-up asked whether a chunk freed inside the OOB span could give
+attacker-chosen tcache `fd`/`key` from live input. `lab/pillow2shell/` now
+carries the reproducible probe: `groom_tcache.py` allocates 64 chunks of a
+chosen size, finds an adjacent pair, and frees the higher then the lower one
+after `Image.open()` but before `load()`; `tcache_place.gdb` inspects the
+tcache struct and the chunk at `buffer+128` at `ImagingJpegDecode` entry.
+`case_tcache.fpx` (SHA-256
+`cb62b582efd51bb6f6bbafcef1529dc4ae5d2ed611739db8226737bed86689ef`) carries a
+47-wide 4-component JPEG whose 188-byte row writes chosen bytes at offsets
+144-151 (tcache `fd = 0xa2d260`) and 152-159 of the 128-byte tile buffer.
+
+`replay_tcache.sh` passes on two independently pinned plain 12.2.0 builds:
+at decoder entry the groomed addresses are absent from the whole tcache
+struct (`BUF=0x386023e0 X=384b4c30 Y=384b4cc0`, no `FOUND_X`/`FOUND_Y`), and
+the neighbour is still a live `0x21` chunk with pointer words at `+144` and
+`+152`. In isolation the same free order returns `x` then `y` from malloc, so
+the groom itself works; `load()`'s own allocations consume both chunks before
+the tile buffer is allocated. A 24-byte groom gave the same non-placement.
+A counterfactual where gdb forced `free()` of the live neighbour was
+overwritten by `malloc_consolidate` during `jinit_marker_reader` before the
+row write, so it contributes no attack-path observation.
+
+Result: the W9 row does cover the offsets where a free chunk's `fd`/`key`
+would be, but this input path cannot place a free chunk there without a
+debugger or a new primitive. No chosen command, no arbitrary write, no grade
+change. Rung-5 stays BLOCKED at the W12 structural condition; negative
+assessment, no witness replay owed.

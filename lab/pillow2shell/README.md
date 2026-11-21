@@ -480,3 +480,41 @@ chunks, leaving no free tcache `fd`/`key` to poison. Conclusion: rung-5
 BLOCKED at a measured structural condition; rung-4 grade ◐ unchanged; no new
 positive claim and no witness replay owed. Next new lane would need address
 disclosure/in-heap fake type or a free-chunk arbitrary-write primitive.
+
+## W13 — tcache fd/key lane is not reachable from Python-level grooming (2026-11-21, negative)
+
+W12 named one follow-up: free a chunk inside the row's past-end span before
+decode and see whether the image controls its tcache `fd`/`key` without
+debugger memory writes. Measured and closed as a negative.
+
+`groom_tcache.py` allocates 64 adjacent 128-byte glibc chunks, finds an
+adjacent pair (delta 144), and frees the higher then the lower one *after*
+`Image.open()` and immediately before `load()`. In isolation this is a working
+groom: freeing `y` then `x` and mallocing twice returns `x` then `y`.
+`case_tcache.fpx` (SHA-256
+`cb62b582efd51bb6f6bbafcef1529dc4ae5d2ed611739db8226737bed86689ef`,
+pattern `pattern_tcache.hex`) places chosen bytes at row offsets 144-151
+(tcache `fd` = `0xa2d260`) and 152-159; the 47-wide 4-component JPEG writes
+188 bytes into the 128-byte tile buffer.
+
+```
+PILLOW_BUILD=/tmp/pw2-w9/v12plain ./replay_tcache.sh /tmp/pw2-w13-replay
+```
+
+At the `ImagingJpegDecode` entry breakpoint the tile buffer is *not* either
+groomed chunk: `BUF=0x386023e0 X=384b4c30 Y=384b4cc0`, neither `X` nor `Y`
+appears anywhere in the 1024-byte tcache struct, and the chunk at
+`buffer+128` is still size `0x21` with pointer words at `+144`/`+152`.
+`im.load()` consumes both groomed chunks before the tile buffer is allocated;
+the same result on `/tmp/pw2-w2/v12plain` (PASS rc 0 on both builds) makes it
+independent of one pinned build. A 24-byte groom behaves the same way.
+
+Interpretation: the W9 row writes chosen bytes across the offsets where a
+free chunk's `fd`/`key` would live, but a free chunk cannot be placed there by
+Python-level grooming in this harness — `load()`'s own allocations take the
+groomed chunks first. A debugger-forced `free()` of the live neighbour at
+decode entry was also tried; a later `malloc(1943)` in
+`jinit_marker_reader`/`malloc_consolidate` rewrote that field before the row
+write, so it gives no attack-path claim. No chosen command, no arbitrary
+static-slot write. W12's structural blocker stands; grade ◐ and all rung
+claims are unchanged. This is a negative assessment — no witness replay owed.
