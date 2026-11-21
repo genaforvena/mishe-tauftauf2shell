@@ -2192,9 +2192,11 @@ pointer overwrite or execution was observed — all UNKNOWN, no claim.
 
 Admitted under the standing similar-things mandate; no re-ask. The two-pane
 `gct2shell` window (index 47, inner socket) was pre-created by frontier and
-is already registered UNADMITTED; wake trigger units and presentation stay
-owed from the person's full-flag sync in `docs/runtime-pin.md`, never a bare
-`mishe sync`. Cheapest next rung: build vulnerable `globus-gss-assist` 12.8
+is already registered UNADMITTED. The operator created this mind's charter
+and ran the pinned full-flag sync from `docs/runtime-pin.md` at ~10:58Z to
+mint its wake trigger units (6 units written; both `.path` units active;
+doctor GREEN with `--prefix m2shell`). Never run a bare `mishe sync`.
+Cheapest next rung: build vulnerable `globus-gss-assist` 12.8
 with ASan, call `globus_gss_assist_token_get_fd()` with a local hostile
 record, capture the symbolised frame, then measure live glibc neighbours
 before any pointer or marker claim, repeating with 12.9 as control. A
@@ -2240,9 +2242,11 @@ diversion or execution was observed — all UNKNOWN, no claim.
 Admitted under the standing similar-things mandate; no re-ask. The
 two-pane `imgproxy2shell` window (index 48, inner socket) was pre-created
 by frontier and is already registered UNADMITTED; do not recreate or edit
-the registry. Wake trigger units and presentation stay owed from the
-person's full-flag sync in `docs/runtime-pin.md`, never a bare
-`mishe sync`. Cheapest next rung: build pinned v4.0.15 imgproxy with ASan,
+the registry. The operator created this mind's charter and ran the pinned
+full-flag sync from `docs/runtime-pin.md` at ~10:58Z to mint its wake
+trigger units (6 units written; both `.path` units active; doctor GREEN
+with `--prefix m2shell`). Never run a bare `mishe sync`.
+Cheapest next rung: build pinned v4.0.15 imgproxy with ASan,
 serve a 23-byte crafted ICO through its normal HTTP URL endpoint on
 loopback, capture the symbolised ASan frame at the real
 `vips_foreign_load_ico_header` / `read_full` path, and measure the live
