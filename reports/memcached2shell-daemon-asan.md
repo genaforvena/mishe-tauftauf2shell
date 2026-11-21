@@ -1,14 +1,18 @@
 # memcached2shell — loopback daemon reproduction of the crawler overflow
 
-Status (2026-11-21, second memcached2shell wake): the published daemon ASan
+Status (2026-11-21, third memcached2shell wake): the published daemon ASan
 frame is **locally observed on pinned parent bytes**, and a non-perturbing
-observer now shows chosen key bytes at chosen offsets in a live, stock,
-non-ASan daemon — including a chosen-byte overwrite of pointer-shaped heap
-data. Rung 3 (confirmed memory corruption) is demonstrated in a real daemon.
-Rung 4 is **demonstrated for chosen bytes at chosen offsets in a stock daemon,
-pending witness acceptance**; pointer-shaped data was overwritten, but its
-semantic role and any control-flow effect remain UNKNOWN. All sockets were
-127.0.0.1; no external probe was sent.
+observer shows chosen key bytes at chosen offsets in a live, stock, non-ASan
+daemon — including a chosen-byte overwrite of pointer-shaped heap data,
+confirmed with a second key byte. Rung 3 (confirmed memory corruption) is
+demonstrated in a real daemon. Rung 4 is **demonstrated for chosen bytes at
+chosen offsets in a stock daemon, pending witness acceptance**. One prolonged
+run additionally saw a stock-daemon SIGSEGV in a slab-freelist pointer write
+in the crawler thread, but a second observer-confirmed run went further
+without crashing; that fault is a single non-deterministic observation, not
+an established impact. Pointer semantics, any crafted-pointer value and
+control-flow diversion remain UNKNOWN. All sockets were 127.0.0.1; no
+external probe was sent.
 
 ## Pins and provenance
 
@@ -133,10 +137,14 @@ is not reproduced as an immediate daemon crash here.
 - Rung 3 (confirmed memory corruption): observed in the real daemon under ASan,
   with pinned frames `:310` and `:825`.
 - Rung 4 (demonstrated security impact): chosen bytes at chosen offsets are
-  now **observed in a live stock daemon**, including a chosen-byte overwrite
-  of pointer-shaped heap data. No return address, function pointer or
-  control-flow diversion was observed. Proposed upgrade from INSTRUMENTED is
-  pending witness acceptance; see the second-wake sections below.
+  **observed in a live stock daemon**, including a chosen-byte overwrite of
+  pointer-shaped heap data, confirmed with a second key byte. A single
+  prolonged run saw a SIGSEGV in a slab-freelist pointer write in the crawler
+  thread, but a second observer-confirmed run went further without crashing;
+  that fault is not an established impact. No return address, function
+  pointer, crafted pointer value or control-flow diversion was observed.
+  Proposed upgrade from INSTRUMENTED is pending witness acceptance; see the
+  second- and third-wake sections below.
 
 ## What would change the grade further
 
@@ -264,4 +272,72 @@ pointer-shaped window, confirm that those overwritten bytes originate in the
 stored key record — not in an unrelated allocation. The witness's semantic
 role and dereference questions remain open; this differential does not answer
 them and does not by itself change the grade.
+
+### Prolonged overflow: one observed stock-daemon fault, not reproduced (third wake, 09:33-09:40Z)
+
+Earlier holds stopped at 80-86 s. A longer run asked whether the corruption
+eventually faults the stock daemon. Port 22146, 8000 keys of `0x5a`, 300 s
+requested, observer confirming the overflow at t=28 s; raw trace
+`daemon/long-crash-trace.txt`. At t=116 s, with `bufused = 158378` (frontier
+about 27 KB past the buffer), the daemon died with `rc=-11` (SIGSEGV).
+
+The host kernel journal recorded, at 09:32:42Z:
+
+```
+traps: mc-worker[889478] general protection fault ip:5bfa40032b1d sp:7f9656f319d0 error:0 in memcached[5bfa40024000+2e000]
+```
+
+`mc-worker` is the crawler thread. With ELF base `0x5bfa40020000` the
+instruction pointer is ELF offset `0x12b1d`; `addr2line` and `nm` on this
+pinned plain binary resolve it to `do_slabs_alloc`, `slabs.c:434` (inlined
+into `slabs_alloc`). The disassembly at that address is
+`movq $0x0,0x8(%rcx)`, i.e. the freelist pop at `slabs.c:432-434`:
+
+```
+it = (item *)p->slots;
+p->slots = it->next;
+if (it->next) it->next->prev = 0;
+```
+
+So the fault is a write through an invalid `it->next` taken from a slab
+freelist, in the crawler worker thread, downstream of the overflow into
+adjacent heap data. A core dump was not retained: `ulimit -c` was raised
+process-locally but apport wrote nothing. The faulting pointer value is
+therefore UNKNOWN; this does **not** establish that a `0x5a`-filled pointer
+was dereferenced, nor that the value was attacker-chosen.
+
+Caveats that keep this from being a demonstrated reliable impact:
+
+- A second observer-confirmed run (port 22149, same 8000 keys, 150 s hold,
+  `daemon/long-repro-no-crash-trace.txt`) crossed 131072 at t=28 s and kept
+  going to `bufused = 169020` at t=148 s — further than the crashing run —
+  then was deliberately stopped, `rc=0`. No crash. The t=116 s fault is a
+  **single, non-deterministic observation**, not a stable trigger.
+- A witness replay was running concurrently on port 22342 when the crash
+  happened, in a separate process and on a separate port. It is noted as an
+  environmental difference, not established as a cause.
+- A 150 s `trigger.py` repeat without the observer also survived, but did not
+  confirm the overflow, so it does not bound the crash.
+
+Source-backed interpretation of the pointer-shaped window (inference, not
+proven object identity): `item`'s first two fields are adjacent `next` and
+`prev` pointers (`memcached.h:615-616`). Default slab classes step
+96 → 120 → 152 → 192 → 240 → 304 → 384 bytes, and a 245-byte key with CAS
+needs about 305 bytes, so these items occupy 384-byte chunks. Across both
+ASLR-randomized key-byte runs the two window pointers sat at window−384 and
+window+384 (768 bytes apart) — exactly one chunk either side — consistent
+with item LRU or freelist links. The corrupted freelist write above is
+consistent with that interpretation, but no object identity was observed.
+
+Fix-sensitivity control (09:38-09:41Z): a plain (non-ASan) build of the pinned
+fixed tree was produced by rebuilding the already-configured parent-plain
+tree with `fixed/crawler.c` (that file is the only source difference from the
+parent). Running the identical observer and trigger for 150 s on port 22150
+kept `bufused = 123009` from t=0 to t=148 — it never crossed 131072 — and the
+daemon was alive at the deliberate stop (`rc=0`). Trace:
+`daemon/fixed-plain-150s-trace.txt`. The earlier `fixed/` ASan build was not
+used as a control: it exits on an unrelated 40-byte leak report and so is not
+comparable to the plain parent.
+
+
 
