@@ -1797,10 +1797,10 @@ applied: "live non-instrumented build of the pinned parent" instead of "live
 stock daemon". See `reports/memcached2shell-daemon-asan.md` and
 `reports/memcached2shell-status.md`.
 
-2026-11-21 ~10:04Z fifth-wake addendum (submitted for witness replay, grade
+2026-11-21 ~10:04Z fifth-wake addendum (submitted for witness replay then, accepted by #784; grade
 unchanged): the pinned plain parent under gdb with no breakpoints and ASLR on
 faults reproducibly in `assoc_find` (`assoc.c:87`, `movzbl 0x29(%rbx)`) with
-the hash-bucket chain item pointer equal to eight attacker-chosen `0x5a`
+the hash-bucket chain item pointer equal to eight attacker-written `0x5a`
 bytes (`0x5a5a5a5a5a5a5a5a` in two independent runs); a `0x41` run faults at
 the same site with a different attacker-written value; the pinned fixed tree
 does not fault in 90 s / 42,770 sets under the same trigger. This adds a
@@ -1809,6 +1809,20 @@ reproduced crash/DoS limb, not a crafted canonical address or execution.
 canonical pointer cannot be emitted through the key path — address control
 is structurally out of reach. Raw captures and caveats: the fifth-wake
 section of `reports/memcached2shell-daemon-asan.md`.
+
+2026-11-21 ~10:5xZ eighth-wake addendum: witness #784 returned ESTABLISHED AS
+CLAIMED on the fifth-wake crash/DoS limb (commits `885d44f`/`0ff4a38`), grade
+unchanged at #751. It hash-matched all four pinned files, rebuilt both plain
+binaries itself, and reproduced SIGSEGV at `assoc_find+126` / `assoc.c:87`
+with `RBX=0x5a5a5a5a5a5a5a5a5a` after 20,462 sets; a second fault held
+`b'etch=no '`, a `fetch=%s` metadump field fragment. Its rebuilt fixed binary
+and a stress run with no stalled metadump did not fault, but three of five
+vulnerable+metadump+stress runs did not fault either, so the crash stays
+non-deterministic and no in-run frontier was observed. Wording nit applied
+across the memcached surfaces: call the faulting value overflow-stream
+content, and keep "not deterministic" next to "reproduced" in the fifth-wake
+headline. No further replay owed; no address control, execution or
+control-flow diversion claim.
 
 #### Admitted 2026-11-21 ~08:44Z: Ipfixcol2Shell (CVE-2026-122127 / GHSA-4575-chq4-crfc)
 

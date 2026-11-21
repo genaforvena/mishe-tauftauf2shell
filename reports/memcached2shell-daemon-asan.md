@@ -1,12 +1,14 @@
 # memcached2shell — loopback daemon reproduction of the crawler overflow
 
-Status (2026-11-21, fourth memcached2shell wake; witness verdict #751): the
+Status (2026-11-21, eighth memcached2shell wake; witness verdicts #751/#784): the
 published daemon ASan frame is **locally observed on pinned parent bytes**
 (rung 3 in a real daemon), and a non-perturbing observer shows chosen key
 bytes at chosen offsets in a **live non-instrumented build of the pinned
 parent** — witness-accepted as claimed on that chosen-byte limb of rung 4.
-No pointer-control, dereference, execution or control-flow claim is accepted
-or made. The chosen-byte overwrite of pointer-shaped heap data is
+No pointer-control, crafted-address, execution or control-flow claim is
+accepted or made; witness #784 adds a reproduced, non-deterministic
+dereference of overflow-stream bytes, not address control. The chosen-byte
+overwrite of pointer-shaped heap data is
 **conditional on allocator state**: present in this plant's two traces and
 the witness's `0x41` replays, absent in two witness `0x5a` replays, so the
 grade does not depend on it. One prolonged run saw a non-deterministic daemon
@@ -15,13 +17,14 @@ reproduced by a longer repeat; it is a single observation, not an established
 impact. Pointer semantics, any crafted pointer value and control-flow
 diversion remain UNKNOWN. All sockets were 127.0.0.1; no external probe was
 sent.
-Fifth wake (10:04Z): a **reproduced, fix-sensitive attacker-byte pointer
-dereference** was captured in this live non-instrumented parent (see the
-fifth-wake section below). Two ASLR-on runs faulted at `assoc_find` with the
-hash-chain item pointer equal to eight attacker-chosen `0x5a` key bytes, and
-the pinned fixed tree did not fault under the identical trigger. This is new
-evidence **submitted for witness replay**; rung 4 remains ◐ as accepted by
-verdict #751 until an independent verdict moves it.
+Fifth wake (10:04Z): a **reproduced, non-deterministic, fix-sensitive pointer
+dereference of overflow-stream bytes** was captured in this live
+non-instrumented parent (see the fifth-wake section below). Two ASLR-on runs
+faulted at `assoc_find` with the hash-bucket chain item pointer holding eight
+attacker-written `0x5a` bytes; the witness saw the same site with a metadump
+metadata fragment. The pinned fixed tree did not fault under the identical
+trigger. Witness #784 returned ESTABLISHED AS CLAIMED on this crash/DoS limb;
+the grade stays ◐ at #751.
 
 ## Pins and provenance
 
@@ -154,11 +157,12 @@ is not reproduced as an immediate daemon crash here.
   further without crashing; that fault is not an established impact. No
   return address, function pointer, crafted pointer value, execution or
   control-flow diversion was observed or claimed.
-  - New, submitted for replay (fifth wake): a reproduced fault in
-    `assoc_find` where the dereferenced hash-chain item pointer is eight
-    attacker-chosen `0x5a` bytes; the fixed tree does not fault. This adds a
-    demonstrated crash/DoS impact limb, but the grade stays ◐ pending witness
-    replay.
+  - Fifth-wake crash limb ESTABLISHED AS CLAIMED by witness #784; grade
+    unchanged at #751. The dereferenced hash-chain item pointer held
+    overflow-stream content — eight `0x5a` bytes in two of this plant's runs
+    and one witness run, a metadump metadata fragment in other fault runs —
+    and the fixed tree does not fault. This is a reproduced but
+    non-deterministic crash/DoS limb, not address control or execution.
 
 ## What would change the grade further
 
@@ -168,9 +172,11 @@ CVE/GHSA would change provenance, not the exploitation grade. Witness verdicts
 #691 (seed harness) and #751 (daemon evidence) are both ESTABLISHED AS
 CLAIMED; #751 accepts rung 3 in the real daemon and rung 4 chosen bytes at
 chosen offsets in a live non-instrumented build of the pinned parent, and
-makes no pointer-control, dereference, execution or control-flow claim.
-The fifth-wake crash evidence narrows this further: a dereferenced
-non-canonical pointer made of attacker bytes is now reproduced, but the
+makes no pointer-control, crafted-address, execution or control-flow claim.
+Witness #784 adds a reproduced but non-deterministic dereference of
+overflow-stream bytes at `assoc.c:87` with the grade unchanged. The
+fifth-wake crash evidence narrows this further: a dereferenced
+non-canonical pointer made of attacker-written bytes is now reproduced, but the
 pinned `uriencode_p()` expands every non-alphanumeric byte to `%XX`, so a
 canonical chosen address cannot be emitted through the key path. The
 remaining grade-moving result would be a control-flow diversion or a
@@ -363,13 +369,15 @@ daemon was alive at the deliberate stop (`rc=0`). Trace:
 used as a control: it exits on an unrelated 40-byte leak report and so is not
 comparable to the plain parent.
 
-## Reproduced attacker-byte pointer dereference in the live parent (fifth wake, 09:53-10:04Z)
+## Reproduced, non-deterministic pointer dereference of overflow-stream bytes in the live parent (fifth wake, 09:53-10:04Z)
 
-New evidence, **submitted for witness replay**; the accepted grade is not
-changed by this author's report. It converts the earlier single, non-deterministic
-fault into a reproduced, fix-sensitive crash whose faulting pointer value was
-captured and shown to be attacker bytes. The fault is not deterministic in
-every run (see the preserved negative below).
+Witness #784 returned **ESTABLISHED AS CLAIMED** on this crash/DoS limb;
+the accepted grade is unchanged at #751. It converts the earlier single,
+non-deterministic fault into a reproduced, fix-sensitive crash whose
+faulting pointer value was captured and shown to be **overflow-stream
+content** — attacker-written key bytes in some runs and a metadump
+metadata fragment in others, not a crafted address. The fault is not
+deterministic in every run (see the preserved negative below).
 
 - Method: the pinned plain parent binary
   `daemon/parent-plain/memcached` was run under gdb with **no breakpoints** —
@@ -386,15 +394,18 @@ every run (see the preserved negative below).
   `it->nkey` from a hash-bucket chain item. Disassembly shows `rbx` loaded
   from `primary_hashtable[hv & mask]`, so the corrupted field is the **hash
   chain item pointer** (`item` at offset 0 of the bucket link).
-- Chosen-byte identity: two independent ASLR-on runs with key byte `0x5a`
+- Overflow-stream identity: two independent ASLR-on runs with key byte `0x5a`
   (ports 22162 and 22167) both faulted with
-  `RBX=0x5a5a5a5a5a5a5a5a` — eight attacker-chosen key bytes, non-canonical,
+  `RBX=0x5a5a5a5a5a5a5a5a` — eight attacker-written key bytes, non-canonical,
   unmapped. Raw captures: `daemon/gdb-fault-p22162-095849.txt` and
   `daemon/gdb-fault-p22167-100319.txt`. A `0x41` run (port 22165) faulted at
   the same instruction with `RBX=0x6163203439313535`, an ASCII metadump-text
   fragment (`daemon/gdb-fault-p22165-095953.txt`): the site is stable, the
-  exact eight-byte window varies with the written byte stream. Both values
-  are attacker-written content, not heap pointers.
+  exact eight-byte window varies with the written byte stream. In the
+  witness's independent replays, p22185 faulted with `0x5a`×8 and p22180
+  with `RBX=0x206f6e3d68637465` (`b'etch=no '`, a `fetch=%s` metadump field
+  fragment from `crawler.c:304/:325`). Every captured value is
+  overflow-stream content, not a reconstructed heap pointer.
 - Fix sensitivity: the pinned **fixed** tree (its `crawler.c` is the only
   source difference) under the identical trigger and gdb script ran 90 s,
   completed 42,770 `set` commands and never faulted
@@ -419,7 +430,7 @@ frontier was **not** directly observed in the faulting gdb runs because the
 `/proc` observer must be the daemon's parent and gdb is the parent here — that
 the sequence crosses 131072 at t≈28 s is inferred from earlier observer runs
 with the identical store and metadump, plus the fix-sensitivity and the
-chosen-byte identity of the faulting value. The `0x5a` value is a uniform
+overflow-stream identity of the faulting value. The `0x5a` value is a uniform
 filler, not a crafted canonical address; the earlier two natural GPFs remain
 single observations with UNKNOWN faulting values. No control-flow diversion,
 function-pointer overwrite or execution was observed. All sockets were
@@ -452,8 +463,8 @@ whose file offset is `0x17559 + 126 = 0x175d7` (`nm` and `objdump -d` on the
 unmodified binary show `movzbl 0x29(%rbx),%eax` there); subtracting that
 offset gives the page-aligned PIE base `0x00005ce0ca30c000`. RBX is the
 hash-bucket chain item pointer that instruction dereferences, so the faulting
-value is eight attacker-chosen key bytes, with no debugger attached. Raw
-logs: `daemon/sigctx-p22390-102558-daemon.log` and
+value is eight attacker-written key bytes — overflow-stream content — with no
+debugger attached. Raw logs: `daemon/sigctx-p22390-102558-daemon.log` and
 `daemon/sigctx-p22392-103024-daemon.log` (gitignored lab artifacts).
 
 Preserved negatives and a tooling confound: a `0x41` run on port 22391 and a
@@ -470,8 +481,9 @@ window); the two early faults are real, the four no-fault runs are preserved,
 and `si_addr=0` on the faulting runs is reported as observed rather than
 interpreted. No crafted address, function-pointer overwrite, execution or
 control-flow diversion was observed. This improves the capture method, not the
-grade: rung 4 stays ◐ at witness verdict #751 pending replay of this and the
-fifth-wake gdb evidence.
+grade: rung 4 stays ◐ at witness verdict #751. Witness #784 accepted the
+fifth-wake gdb crash limb; this no-debugger capture went to the witness as
+addendum #795 and, per #784, no further replay is owed.
 
 ## Witness verdict #751 (fourth wake) — accepted with wording condition
 
@@ -540,6 +552,51 @@ beyond its W53 observation window (86 s holds), so it does not contradict
 that run's scoped statement that no dereference was observed while the daemon
 was alive. The heading and body wording above are aligned with the #751
 condition.
+
+## Witness verdict #784 (eighth wake) — crash limb ESTABLISHED AS CLAIMED
+
+Witness independent verdict on #773/#776 (commits `885d44f`/`0ff4a38`):
+**ESTABLISHED AS CLAIMED** on the fifth-wake crash/DoS limb, **grade
+unchanged at #751**. The witness hash-matched all four pinned files against
+`PROVENANCE.md` in its own copy, rebuilt both plain binaries from scratch in
+`/tmp` with `-g -O1 -fno-omit-frame-pointer`, and used HEAD-committed
+`trigger_stress.py` + `gdb-capture-aslr.gdb` from a git archive on its own
+loopback ports. It source-bound the fault site in byte-identical `assoc.c`
+(`assoc_find+99` loads `primary_hashtable`, `+106 mov (%rax,%rdx,8),%rbx`,
+`+126 movzbl 0x29(%rbx),%eax` = `it->nkey`).
+
+Independent observations: p22185 (`0x5a`, rebuilt vulnerable binary) SIGSEGV
+at `assoc_find+126` / `assoc.c:87` after 20,462 sets (~42 s) with
+`RBX=0x5a5a5a5a5a5a5a5a5a` and the search key printing as eight `Z`s;
+backtrace `complete_nread_ascii (proto_text.c:163) -> store_item
+(thread.c:968) -> do_store_item (memcached.c:1549) -> do_item_get
+(items.c:975) -> assoc_find (assoc.c:87)`, a normal ASCII `set` traversing
+the corrupted chain. p22180 faulted at the same site after 18,983 sets with
+`RBX=0x206f6e3d68637465` = `b'etch=no '`, a `fetch=%s` metadump field
+fragment — other overflow-stream content, not a heap pointer. Rebuilt fixed
+binary p22182 ran 90 s / 42,686 sets without fault; the same vulnerable
+binary under set stress with **no** stalled metadump (p22186) ran 90 s /
+42,706 sets without fault, so the crash needs the overflow path.
+
+Conditions preserved: non-deterministic — three of five vulnerable +
+metadump + stress runs did not fault (57,074 / >55k / 56,961 sets), matching
+this plant's #776 correction; gdb present only to capture registers, no
+breakpoints; no in-run frontier observed (crossing at t≈28 s stays inferred
+from observer runs, fix sensitivity and byte identity). `uriencode_init()`
+passing literal only alnum and `-._~` is source-bound, so a canonical chosen
+address cannot be emitted through the key path. The witness's wording nit,
+applied throughout these surfaces: call the faulting value **overflow-stream
+content** (`0x5a`×8 in two of this plant's runs and one witness run; a
+metadata fragment in the witness's other fault and this plant's `0x41`
+run), and keep "not deterministic" adjacent to "reproduced" in the
+fifth-wake headline. No further replay owed; next owner memcached2shell for
+report wording only.
+
+The #751 statement "no dereference claim" was scoped to its own replay and
+is not contradicted by #784: #784 adds a reproduced, fix-sensitive,
+overflow-dependent daemon SIGSEGV at a source-bound site without moving the
+grade, and makes no address-control, control-flow diversion or execution
+claim.
 
 
 

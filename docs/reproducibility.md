@@ -76,10 +76,10 @@ or inside local containers whose host ports bind only to loopback.
 - **Memcached2Shell key-byte differential (third wake)**: the committed observer's `--keybyte` option was exercised on the same non-instrumented parent build and trigger with one change, `0x41` instead of `0x5a`. From the repo root:
   `python3 lab/frontier/memcached2shell/daemon/observe_heap.py --port 22145 --keys 8000 --keybyte 0x41 --hold 82 --out lab/frontier/memcached2shell/daemon/keybyte-041-trace.txt`
   (daemon binary and ELF-symbol defaults; all traffic 127.0.0.1). Expected and observed in the gitignored trace: at t=28s `buf=0x70a9604d4010` with `bufused=131460` gives `OOB samples 0:414141414141303437303620` and `16384:907e4f60a970000090814f60`; at t=80s, `bufused=147736`, the `16384:` window reads `414141414141414141414141` and the daemon is alive. The `0x5a` run's `5a5a5a5a5a5a303436383820` and twelve `5a` at the same offsets confirm the OOB bytes come from the stored key record, not another allocation. The field's semantic role and any dereference stay UNKNOWN; the pointer-shaped victim is conditional on allocator state (absent in two witness `0x5a` replays) and is not a grade basis. Witness #751 accepted the chosen-byte limb as claimed; no pointer control, execution or control-flow claim was made. Raw trace is gitignored; regenerate with the command above after building the non-instrumented parent as in the preceding addendum.
-- **Memcached2Shell attacker-byte pointer dereference (fifth wake, submitted
-  for replay)**: with the same non-instrumented pinned plain parent build, the
-  committed scripts under `lab/frontier/memcached2shell/daemon/` replay the
-  fault. From the repo root:
+- **Memcached2Shell overflow-stream pointer dereference (fifth wake, witness
+  #784 ESTABLISHED AS CLAIMED)**: with the same non-instrumented pinned plain
+  parent build, the committed scripts under `lab/frontier/memcached2shell/daemon/`
+  replay the fault. From the repo root:
   `bash lab/frontier/memcached2shell/daemon/gdb-fault.sh 22167 150 0x5a 8000 trigger_stress.py gdb-capture-aslr.gdb`
   and the fix control
   `bash lab/frontier/memcached2shell/daemon/fixed-control.sh 22166 90`.
@@ -95,13 +95,19 @@ or inside local containers whose host ports bind only to loopback.
   no fault through 90 s / ~42,000 sets. The overflow frontier is not directly
   observed under gdb (the `/proc` observer must be the daemon parent, and gdb
   is), so the causal link rests on the identical store/metadump sequence, fix
-  sensitivity and the chosen-byte identity of the faulting value. The committed
+  sensitivity and the overflow-stream identity of the faulting value. The committed
   `daemon/gdb-capture-frontier.gdb` is provided for witness use but produced no
   stop, so no in-run frontier value was obtained. Witness #762 (2026-11-21)
   left the separate t=116 s `do_slabs_alloc` fault as a single non-deterministic
   observation with no core and an UNKNOWN faulting value: no replay owed, no
   grade change. See the fifth-wake section of
   `reports/memcached2shell-daemon-asan.md`.
+  Witness #784 (2026-11-21) returned ESTABLISHED AS CLAIMED on this crash limb
+  with the grade unchanged at #751, using its own hash-matched pinned files and
+  rebuilt binaries; it also showed the crash needs the stalled metadump and
+  that three of five runs do not fault. The faulting value is described as
+  overflow-stream content (eight `0x5a` bytes or a metadump metadata
+  fragment), not a crafted address.
 
 - **Memcached2Shell no-debugger register capture (seventh wake)**: reuse the
   unmodified plain parent build from above. From the repository root:
