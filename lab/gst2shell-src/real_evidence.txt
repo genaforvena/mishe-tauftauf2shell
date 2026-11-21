@@ -1,0 +1,36 @@
+  Filename                 /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstrtp.so
+digest c504f5b8d020fdb401fd6da0827ad1f007b07c183e754f3758a51ea0f5274821  real_plugin.c
+=== single-field caps sweep (timeout 8s each) ===
+channels=8     rc=0
+channels=64    rc=0
+channels=74    rc=0
+channels=84    rc=0
+channels=85    rc=0
+lab/gst2shell-src/run_real.sh: line 18: 3260947 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=86    rc=139
+lab/gst2shell-src/run_real.sh: line 18: 3261051 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=87    rc=139
+channels=88    rc=124
+lab/gst2shell-src/run_real.sh: line 18: 3261738 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=100   rc=139
+channels=200   rc=124
+lab/gst2shell-src/run_real.sh: line 18: 3262214 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=1000  rc=139
+=== gdb backtrace, channels=1000 ===
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff769b410 in ?? () from /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstrtp.so
+#0  0x00007ffff769b410 in ??? () at /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstrtp.so
+#1  0x00007ffff740bded in ??? () at /lib/x86_64-linux-gnu/libgstrtp-1.0.so.0
+#2  0x00007ffff7ef107d in ??? () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#3  0x00007ffff7ef533f in gst_pad_send_event () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#4  0x00005555555555e9 in gst_pad_set_caps (pad=0x555555679160, caps=0x55555567ffa0) at /usr/include/gstreamer-1.0/gst/gstcompat.h:61
+#5  0x000055555555579b in main (argc=2, argv=0x7fffffffe2a8) at real_plugin.c:44
+rax            0xfffffffdfffffffd  -8589934595
+rip            0x7ffff769b410      0x7ffff769b410
+=== gdb backtrace, channels=86 ===
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7aade81 in arena_for_chunk (ptr=0x5555556790e0) at ./malloc/arena.c:153
+warning: 153	./malloc/arena.c: No such file or directory
+#0  0x00007ffff7aade81 in arena_for_chunk (ptr=0x5555556790e0) at ./malloc/arena.c:153
+#1  arena_for_chunk (ptr=0x5555556790e0) at ./malloc/arena.c:151
+#2  __GI___libc_free (mem=0x5555556790f0) at ./malloc/malloc.c:3397

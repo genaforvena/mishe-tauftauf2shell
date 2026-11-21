@@ -135,23 +135,49 @@ pointer value (the written pattern is fixed by the enum and the high half
 stays zero at channels=74). No code execution, no content-chosen offsets, no
 real SDP/RTSP pre-auth path demonstrated in this lab.
 
+## Shipping-plugin reproduction (2026-11-21 ~01:08Z)
+
+Installed `gstreamer1.0-plugins-good` 1.24.2 and drove the actual
+`/usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstrtp.so` `rtpL16depay` through
+`gst_pad_set_caps` with one added field, `encoding-params=(string)N`.
+Driver `bash lab/gst2shell-src/run_real.sh`, full output
+`lab/gst2shell-src/real_evidence.txt`, harness digest `c504f5b8…4821`.
+Local process only; no network target.
+
+- N=8, 64, 74, 84, 85: rc 0, no fault.
+- N=86, 87, 100, 1000: rc 139 (SIGSEGV). N=88 and N=200 hit the 8s timeout
+  (hang). The threshold is allocator-layout dependent, not a fixed count.
+- gdb at N=1000: fault inside `libgstrtp.so` during `gst_pad_set_caps`,
+  reached via `gst_pad_send_event`; the faulting instruction dereferences
+  `rax = 0xfffffffdfffffffd` — exactly the `NONE = -3` pattern in both halves
+  of a pointer. The library is stripped, so the exact field/object is not
+  symbolicated; the ASan harness above isolates the `order`-pointer mechanism.
+- gdb at N=86: fault in glibc `arena_for_chunk` / `__libc_free` — heap
+  metadata corruption from the escaping writes, a second distinct failure
+  mode.
+
+This moves the earlier "live build blocked / rung 4 not demonstrated" boundary:
+a single far-end caps field deterministically faults the shipping element. It
+is still count-controlled corruption with a fixed `-3` write pattern, not
+chosen bytes and not code execution.
+
 ## Evidence boundary
 
 Rungs 1/2/3 remain established in the extracted harness and were replayed
-again. A distinct **rung-4 effect** is now demonstrated in a live
-GStreamer-typed ASan build: count-controlled corruption of the `order` pointer
-into a non-NULL wild value, producing a deterministic invalid-pointer
-dereference in the real `process()` path (DoS-class). This is control of effect
-by channel count, not byte control — the written pattern is the fixed `NONE =
--3`, and the pointer value is not attacker-chosen. Strong rung-4 (chosen bytes
-at chosen offsets, arbitrary pointer control, benign marker execution)
-remains **NOT DEMONSTRATED**, as does any RCE claim. The earlier "zeroing
-`order` is harmless" negative is preserved as a superseded harness assumption,
-not erased. Still UNKNOWN: real SDP/RTSP caps delivery and pre-auth
-reachability, the unpatched plugin binary end to end, the identity of
-allocator-adjacent objects hit by the escaping bytes at channels=1000, and any
-consequence beyond the fault. All testing stayed on local builds. Author
-report is not acceptance; witness owns replay.
+again. A distinct **rung-4 effect** is now demonstrated twice: in a live
+GStreamer-typed ASan harness (count-controlled `order` corruption to a wild
+pointer and a deterministic dereference) and in the **shipping `rtpL16depay`
+plugin** (single caps field, deterministic SIGSEGV, two distinct fault modes).
+This is control of effect by channel count, not byte control — the written
+pattern is the fixed `NONE = -3`, and the pointer value is not
+attacker-chosen. Strong rung-4 (chosen bytes at chosen offsets, arbitrary
+pointer control, benign marker execution) remains **NOT DEMONSTRATED**, as
+does any RCE claim. The earlier "zeroing `order` is harmless" negative is
+preserved as a superseded harness assumption, not erased. Still UNKNOWN:
+real SDP/RTSP caps delivery and pre-auth reachability, the exact stripped
+library field dereferenced at N=1000, and any consequence beyond the fault.
+All testing stayed on local builds. Author report is not acceptance; witness
+owns replay.
 
 ## Next owner / action
 
@@ -159,14 +185,15 @@ Operator: wake trigger units and presentation `active` entry still owed from
 the person's full-flag sync (`docs/runtime-pin.md`) — never a bare `mishe
 sync`.
 
-gst2shell mind: bounded follow-up is the real plugin binary — install
-`gstreamer1.0-plugins-good`, load `rtpL16depay`, and confirm that after a
-channels>=74 caps negotiation an actual RTP buffer makes `process()` fault on
-the corrupted `order`; that upgrades the effect from a faithful harness to the
-shipping element. Keep the benign, fixed and ASan controls. Witness: replay
-`lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`, and the new
-`lab/gst2shell-src/run_live.sh`. Would change my mind: a caps clamp at <=64 in
-primary sources (checked: none), a failed replay or lost control, a real
-pipeline that cannot deliver `encoding-params`, or evidence that the corrupted
-pointer value is content-controllable (which would need a fresh, honestly
-labelled rung-4 claim).
+gst2shell mind: next bounded step is to symbolicate the shipping-plugin fault
+with the matching `gstreamer1.0-plugins-good-dbgsym` (or map the libgstrtp.so
+offset) and determine whether the N=1000 dereference is the `order` pointer or
+an adjacent heap object; the harness already isolates the former as a causal
+mechanism. Keep the benign, fixed and ASan controls. Witness: replay
+`lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`,
+`lab/gst2shell-src/run_live.sh` and `lab/gst2shell-src/run_real.sh`. Would
+change my mind: a caps clamp at <=64 in primary sources (checked: none), a
+failed replay or lost control, a real pipeline that cannot deliver
+`encoding-params`, or evidence that the corrupted pointer value is
+content-controllable (which would need a fresh, honestly labelled rung-4
+claim).
