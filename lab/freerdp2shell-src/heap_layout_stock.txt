@@ -1,0 +1,84 @@
+freerdp2shell wake 12 — stock-allocator heap layout around the 8820-byte rdpsnd
+out_buffer, live loopback shadow server (CVE-2026-114045 / GHSA-3m9q-g533-rqjq)
+
+Question: what physically follows the 8820-byte out_buffer in the live plain
+(no-sanitizer, glibc) build, and does the sequential 16384-byte chosen-0xDE
+write reach a pointer-bearing object? This is scratch observation only; the
+five committed replay patches, verify_live.sh and their pinned digests were
+NOT changed. No off-loopback probe: server bound 127.0.0.1, -auth, Sample
+client /sec:rdp /u:test /p:test /sound.
+
+Method: /tmp/fr-wake2/src3320 (pinned FreeRDP 3.32.0 d27a4f7c..., committed
+wake8 patches) with an ADDITIONAL scratch-only fprintf inserted BEFORE the
+real CopyMemory in rdpsnd_server_send_samples (rdpsnd_main.c:771). It runs once
+on the first OOB copy (out_pending_frames==0, cframesize==16384) and prints
+malloc_usable_size(out_buffer) plus the glibc chunk headers and first 16 data
+bytes of every following chunk out to ~20 KB. It observes; it does not create
+or alter the write. Rebuilt only server/shadow/cli/freerdp-shadow-cli in
+/tmp/fr-wake7-shadow-build. Three independent sessions on ports 23142-23145.
+
+--- run 1 (port 23143) ---
+HEAP12 base=0x7fe870000ba0 usable=8824 cframesize=16384
+HEAP12_CHUNK off=8816 sz=48 prev_inuse=1 data=0200020044ac000010b1020008001000
+HEAP12_CHUNK off=8864 sz=144 prev_inuse=1 data=700b0070e87f0000ffffffff01000000
+HEAP12_CHUNK off=9008 sz=48 prev_inuse=1 data=636f6d0066726565726470006368616e
+HEAP12_CHUNK off=9056 sz=64 prev_inuse=1 data=e02e0070e87f0000e42e0070e87f0000
+HEAP12_CHUNK off=9120 sz=48 prev_inuse=1 data=00000000000000000000000000000000
+HEAP12_CHUNK off=9168 sz=123024 prev_inuse=1 data=00000000000000000000000000000000
+WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00
+double free or corruption (!prev)
+
+--- run 2 (port 23144) ---
+HEAP12 base=0x7103a8000ba0 usable=8824 cframesize=16384
+HEAP12_CHUNK off=8816 sz=48 ... data=0200020044ac000010b1020008001000
+HEAP12_CHUNK off=8864 sz=144 ... data=700b00a803710000ffffffff01000000
+HEAP12_CHUNK off=9008 sz=48 ... data=636f6d0066726565726470006368616e
+HEAP12_CHUNK off=9056 sz=64 ... data=e02e00a803710000e42e00a803710000
+HEAP12_CHUNK off=9120 sz=48 ... data=00000000000000000000000000000000
+HEAP12_CHUNK off=9168 sz=123024 ... data=00000000000000000000000000000000
+wrap + corruption: both present
+
+--- run 3 (port 23145) ---
+HEAP12 base=0x71bae8000ba0 usable=8824 cframesize=16384
+HEAP12_CHUNK off=8816 sz=48 ... data=0200020044ac000010b1020008001000
+HEAP12_CHUNK off=8864 sz=144 ... data=700b00e8ba710000ffffffff01000000
+HEAP12_CHUNK off=9008 sz=48 ... data=636f6d0066726565726470006368616e
+HEAP12_CHUNK off=9056 sz=64 ... data=e02e00e8ba710000e42e00e8ba710000
+HEAP12_CHUNK off=9120 sz=48 ... data=00000000000000000000000000000000
+HEAP12_CHUNK off=9168 sz=123024 ... data=00000000000000000000000000000000
+wrap + corruption: both present
+
+All three also logged 'realloc failed!' and 'SelectFormat failed with 12'.
+
+--- analysis ---
+Layout is byte-identical across all three sessions; only the ASLR arena base
+changes. glibc geometry: requested 8820 -> usable 8824 -> chunk size 8832;
+the next chunk's size field sits at out_buffer+8824 (4 bytes past the logical
+8820-byte buffer), so the write immediately overwrites adjacent chunk metadata
+— this is the source of the pre-existing 'double free or corruption (!prev)'.
+
+Chunks fully inside the chosen-0xDE write (offsets 8820..16383):
+  off  8816  sz 48    small structure
+  off  8864  sz 144   structure with 0xffffffff / 1 fields
+  off  9008  sz 48    C strings: "com\0freerdp\0chan..."
+  off  9056  sz 64    TWO LIVE HEAP POINTERS
+  off  9120  sz 48    zeros
+  off  9168  sz 123024 large chunk / top
+
+The 64-byte chunk at off 9056 holds pointers at user offsets 9072 and 9080:
+  run 1: 0x00007fe870002ee0, 0x00007fe870002ee4
+  run 2: 0x00007103a8002ee0, 0x00007103a8002ee4
+  run 3: 0x000071bae8002ee0, 0x000071bae8002ee4
+Each equals base + 0x2340 (= base + 9024) = user data of the string chunk at
+off 9008. So a structure with pointers into a nearby string buffer sits
+entirely within the overwritten range, and the chosen 0xDE bytes replace both
+pointer values byte-for-byte.
+
+Honest boundary: this moves 'pointer-bearing heap data is reachable by the
+write' from UNKNOWN to OBSERVED and reproducible. It does NOT establish
+grooming of a specific target object, a chosen pointer value, or a controlled
+dereference of the clobbered pointers; the write is sequential and overwrote
+whatever was adjacent in this unmodified allocation sequence. The pointers'
+owning object was not identified (no allocation-site tracing, which would
+perturb the layout). Post-auth default (/auth) and subsystem-supplied ADPCM
+table remain lab conditions, as in the accepted wake-9/10/11 replay.

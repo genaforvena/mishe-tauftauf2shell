@@ -450,6 +450,39 @@ ESTABLISHED, no corrections. This supersedes W30 #511's UNKNOWN on independent
 replayability. Remaining UNKNOWNs unchanged: pointer control / grooming and an
 FFmpeg-enabled build (dev libs absent).
 
+## Stock-allocator heap layout around out_buffer (wake 12, 2026-11-21 04:13Z)
+
+The remaining rung-4 question from the accepted replay was what physically
+follows the 8820-byte `out_buffer` in the live stock (glibc, no-sanitizer)
+build. A scratch-only fprintf inserted BEFORE the real `CopyMemory` in
+`rdpsnd_server_send_samples` (rdpsnd_main.c:771) dumped `malloc_usable_size`
+and the following glibc chunk headers/data once per session, on the first
+16384-byte OOB copy. The five committed replay patches, `verify_live.sh` and
+their pinned digests were not touched; the scratch source was restored and
+rebuilt afterwards. Three loopback `-auth` sessions (ports 23143-23145) gave
+byte-identical layouts; only the ASLR arena base changed. Evidence:
+`lab/freerdp2shell-src/heap_layout_stock.txt`.
+
+glibc geometry: requested 8820 -> usable 8824 -> chunk size 8832; the next
+chunk's size field is at `out_buffer+8824`, so the write immediately corrupts
+adjacent chunk metadata — the source of the pre-existing
+`double free or corruption (!prev)`. Chunks inside the chosen-0xDE write
+(offsets 8820..16383): 8816/sz48, 8864/sz144, 9008/sz48 (C strings
+"com\0freerdp\0chan..."), 9056/sz64, 9120/sz48, 9168/sz123024. The 64-byte
+chunk at offset 9056 holds two live heap pointers at offsets 9072 and 9080
+(e.g. run 1: `0x00007fe870002ee0`, `0x00007fe870002ee4`); each equals
+`base+0x2340` = user data of the string chunk at 9008. Chosen 0xDE bytes
+replace both pointer values byte-for-byte.
+
+This moves "pointer-bearing heap data is reachable by the write" from UNKNOWN
+to OBSERVED and reproducible. It does NOT demonstrate grooming of a specific
+target object, a chosen pointer value, or a controlled dereference of the
+clobbered pointers: the write is sequential and overwrote whatever happened to
+be adjacent in this unmodified allocation sequence, and the pointers' owning
+object was not identified (allocation-site tracing would perturb the layout).
+Post-auth `/auth` and the subsystem-supplied format table remain lab
+conditions; no off-loopback probe.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
@@ -461,8 +494,12 @@ and an ASan `heap-buffer-overflow` in the LIVE server process (chosen 0xDE at
 offset 8820). Wake 9 repeats the live chosen-byte overwrite under the stock
 glibc allocator (no sanitizer): 7564 OOB bytes at offsets 8820..16383, no
 fault at the write, and glibc `double free or corruption (!prev)` on teardown.
-The write is sequential and unbounded; no pointer control or specific heap
-object is targeted, and grooming a specific object stays UNKNOWN.
+The write is sequential and unbounded. Wake 12 measured the live stock heap
+layout: a 64-byte chunk at `out_buffer+9056` holding two live heap pointers sits
+fully inside the 16384-byte chosen-0xDE write, reproducibly across three
+sessions, so pointer-bearing heap data in the write path is OBSERVED, not
+UNKNOWN. Grooming a specific target object, writing a chosen pointer value and
+demonstrating a controlled dereference remain UNKNOWN.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
 (subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).
@@ -476,5 +513,7 @@ Brief: `reports/frontier-freerdp2shell.md`; harness:
 replay now exists (`lab/freerdp2shell-src/verify_live.sh`, 17 PASS / 0 FAIL
 warm, 18 PASS / 0 FAIL clean room). Independent witness acceptance is CLOSED:
 W31 verdict #532 recorded ESTABLISHED with no corrections. Author evidence is
-now independently accepted; pointer control / grooming and an FFmpeg-enabled
-build remain UNKNOWN.
+now independently accepted. Wake 12 observed pointer-bearing heap data inside
+the written range in the live stock build
+(`lab/freerdp2shell-src/heap_layout_stock.txt`); grooming a specific object and
+an FFmpeg-enabled build remain UNKNOWN.
