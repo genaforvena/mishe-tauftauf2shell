@@ -62,10 +62,11 @@ independent replay at that scope. Author reports are never acceptance.
 | **Rsyslog2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a 9000-byte decoded Basic-Auth credential takes the `calloc(0, len)` branch in `imhttp.c:705` and writes chosen bytes past a zero-length allocation; rung 4 is instrumented chosen bytes read back at `pworkbuf[0..15]`. No live rsyslog, imhttp module or HTTP path; availability-only. [Status](reports/rsyslog2shell-status.md) |
 | **ProxySQL2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a declared 65535 (MySQL) / 100000 (PgSQL) first-packet length drives a second recv() of that many client-chosen bytes into a fixed 32768-byte queueIN before auth; ASan WRITE of size 65535 / 100000 at pinned mysql :665 / pgsql :534; rung 4 is instrumented chosen stripes at 32771 / 67237 bytes past the queue. No live daemon, listener, stock allocator or pointer control; advisory potentially-exploitable stays a claim. [Status](reports/proxysql2shell-status.md) |
 | **Strongswan2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a zero-length EAP-SIM/AKA attribute in libsimaka underflows size_t into a wrapped malloc()/memcpy() at pinned simaka_message.c:257-260; ASan WRITE of size 8 at :258, fixed 6.0.6 rejects; rung 4 is instrumented chosen 0x5a bytes under a bounded-copy collaborator, while the real-libc copy faults before writing. Needs local EAP-SIM/AKA termination, not RADIUS; no live daemon, pointer control or execution. [Status](reports/strongswan2shell-status.md) |
+| **Memcached2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — an idle lru_crawler metadump all client makes a poll() timeout read as success, appending stored key bytes past the 131072-byte crawler buffer at pinned crawler.c:307-310/:471; ASan WRITE of size 64 at :310, fixed 1.6.44. Rung 4 is instrumented chosen bytes in a zeroed 1 MiB collaborator; guard-mapped and real-libc paths fault before stable chosen bytes. Pre-auth default config; no upstream CVE/GHSA found; no live daemon, pointer control or execution. [Status](reports/memcached2shell-status.md) |
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 31 target
+Each admitted family is its own mind with its own tmux window: 32 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -73,7 +74,7 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell`,
 `indiserver2shell`, `shairport2shell`, `asterisk2shell`, `netatalk2shell`,
 `iondtn2shell`, `unbound2shell`, `opensips2shell`, `janus2shell`,
-`rsyslog2shell`, `proxysql2shell` and `strongswan2shell`. Each builds affected and fixed versions
+`rsyslog2shell`, `proxysql2shell`, `strongswan2shell` and `memcached2shell`. Each builds affected and fixed versions
 locally, writes
 harnesses, drives toward rung 4 and authors its report under `reports/`.
 
