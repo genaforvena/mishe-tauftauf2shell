@@ -42,9 +42,9 @@ or inside local containers whose host ports bind only to loopback.
 | FreeRADIUS2Shell | [report](../reports/frontier-freeradius2shell.md), [status](../reports/freeradius2shell-status.md) | source at vulnerable parent `3f802d74deef`, fix `064567a08f3b`; artifact digests in report | `cd lab/frontier/freeradius2shell && bash run.sh` builds vulnerable/fixed/canary/asan | same script prints `ALL CHECKS PASS`, writes `logs/` and `logs/digests.txt` |
 | Falkordb2Shell | [report](../reports/frontier-falkordb2shell.md), [status](../reports/falkordb2shell-status.md) | source at vulnerable parent `40780e992ecc`, fix `0b11a00b34b2` (removes Bolt/WebSocket; lab `FIXED` is a local length guard) | `cd lab/frontier/falkordb2shell && bash run.sh` builds vuln/fixed/asan | same script prints `ALL CHECKS PASS`: `payload_len=4144`, 525 OOB write operations, canary `K:K`, ASan heap-buffer-overflow (READ of size 8 at the `^=` load) |
 | Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan; `bash lab/freeswitch2shell/live/run.sh`, `bash lab/freeswitch2shell/live/run_pos.sh` and `bash lab/freeswitch2shell/live/run_live_gdb.sh` build the unmodified source over loopback | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Real-source `run.sh` (`FF FF FF FF`): ASan `negative-size-param (size=-5)`, plain rc 134, fixed `rc=-1009` with `wsh->ssl` untouched, offset 131112 validated. Real-source `run_pos.sh` (`7F FF FF FF 00 00 00 00`, `plen=INT_MAX`): plain `wsh->ssl=0x4142434445464748`, `ssl_bytes=4847464544434241`, `RESULT=PASS` rc 0; fixed `rc=-1009`, `ssl=(nil)`; ASan `WRITE of size 4096` at the end of a 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with a real WebSocket `101` upgrade; GDB caught the chosen `wsh->ssl` dereference in `SSL_shutdown`, witness-replayed (#338) with changed bytes at the same site. Stock heap layout and external reachability remain UNKNOWN. |
-| Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…`; real-library source tag 3.32.0 at `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1` | `cd lab/frontier/freerdp2shell && bash run.sh` builds the extracted harness; `bash lab/freerdp2shell-src/run.sh` builds source-built ASan and plain libraries; `python3 lab/freerdp2shell-src/loopback_shadow_probe.py nego|tls-auth` drives a real loopback shadow server | extracted harness prints `ALL CHECKS PASS` (rc 0) twice; the real library prints `ALL REAL-LIBRARY CHECKS PASS` (rc 0): ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `rdpsnd_server_send_samples`, chosen `de`/`ad` at OOB offsets 8820/21384 through the real `SNDC_FORMATS` parser, fixed-guard control rc 3 with no wrap. Wake 7: a real 3.32.0 `freerdp-shadow-cli` on 127.0.0.1:13890 answered X.224 / RDP_NEG_REQ over real TCP (`0x08` NLA, `0x02` TLS, `0x00` RDP) and the default NLA gate stopped a TLS-authenticated client at `CONNECTION_STATE_NEGO` when CredSSP was withheld; a standard-RDP local-peer offer advanced without credentials. The rung-4 replay is still in-process; MCS/channel setup, rdpsnd over the wire, live-process corruption, stock allocator layout, a full session and an FFmpeg-enabled build stay UNKNOWN. |
+| Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…`; real-library source tag 3.32.0 at `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1` | `cd lab/frontier/freerdp2shell && bash run.sh` builds the extracted harness; `bash lab/freerdp2shell-src/run.sh` builds source-built ASan and plain libraries; `python3 lab/freerdp2shell-src/loopback_shadow_probe.py nego|tls-auth` drives a real loopback shadow server; `python3 lab/freerdp2shell-src/live_mcs_join_probe.py` and a headless `sfreerdp` replay the live session | extracted harness prints `ALL CHECKS PASS` (rc 0) twice; the real library prints `ALL REAL-LIBRARY CHECKS PASS` (rc 0): ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `rdpsnd_server_send_samples`, chosen `de`/`ad` at OOB offsets 8820/21384 through the real `SNDC_FORMATS` parser, fixed-guard control rc 3 with no wrap. Wake 7: a real 3.32.0 `freerdp-shadow-cli` on 127.0.0.1:13890 answered X.224 / RDP_NEG_REQ over real TCP (`0x08` NLA, `0x02` TLS, `0x00` RDP) and the default NLA gate stopped a TLS-authenticated client at `CONNECTION_STATE_NEGO` when CredSSP was withheld; a standard-RDP local-peer offer advanced without credentials. Wake 8: MCS CONNECT / ERECT DOMAIN / ATTACH USER / three CHANNEL JOIN confirms, `CONNECTION_STATE_ACTIVE`, `SNDC_FORMATS` over the wire and the live server's `realloc failed!` / `SelectFormat failed with 12`; the live ASan server then reports `WRITE of size 16384` 0 bytes after an 8820-byte region with client-chosen `0xDE` at offset 8820 (`live_session_wrap.txt`). No-auth server, subsystem-supplied ADPCM table, ASan build and synthetic playback are explicit conditions; stock allocator layout, a stock wrap-capable format and an FFmpeg-enabled build stay UNKNOWN. |
 | Xrdp2Shell | [brief](../reports/frontier-xrdp2shell.md), [status](../reports/xrdp2shell-status.md) | xrdp 0.10.6 raw source (digest `d743c53f…`) and fixed 0.10.6.1 (`4b6c64e8…`), fix `43dc9c3b…`; harness digests `46735a43…` / `2da4d3ea…`; real-path drivers `a05ba8ac…` (`real_drdynvc_driver.c`) / `ecfe9f7e…` (`chosen_bytes_real_path.c`) | `cd lab/frontier/xrdp2shell && bash run.sh` builds the extracted harness; `lab/xrdp2shell-real/RUNBOOK.md` pins both exact `configure` lines and the `cc` links against the real ASan `build-asan/libxrdp/.libs/libxrdp.a` + `libcommon.a` | replayed ~20:25Z: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=11836 first_oob=8192 last_oob=20027`, chosen `ab`/`cd` at OOB offsets 8228/12028, ASan `WRITE of size 20000` 0 bytes after an 8192-byte region, rung 4 `de`/`ad` at offsets 8228/12024, fixed and benign controls `oob_writes=0`, 5/5 identical. Real compiled-code replay (2026-11-21): ASan `WRITE of size 20000` in `memcpy` 0 bytes after the 8192-byte `trans_create` region via `xrdp_channel_process()` → real `drdynvc_process_data_first()`; threshold 8164 clean / 8165 OOB, 5/5 identical; non-ASan reader `CANARY delta=8208 k1=84 k2=484`, `CHOSEN_BYTES m1=PASS m2=PASS` with `DEADBEEF-CR`/`C0FFEE00-CR` read back; gate 20000/1000 and 20000/19000 clean, 1600/1590 reject. Raw traces `vuln/threshold/determinism/chosen_bytes/gate.txt` are gitignored under `lab/build/xrdp2shell-live/client/` and regenerated by the runbook commands; the 8128-byte cap is a control, not the real fix. No full RDP session, dynamic-channel open, network PDU trace or live-session allocator layout; loopback COTP reply only; post-auth gate intrinsic; witness replay owed. |
-| Gst2Shell | [brief](../reports/frontier-gst2shell.md), [status](../reports/gst2shell-status.md) | source at vulnerable parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, fix `80c184b4c5ee8ba28b2540ba58f40b8d44b61622`; harness digests `3d2b8e06…` / `7dde5da7…` | `cd lab/frontier/gst2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants; `bash lab/gst2shell-src/run_live.sh` and `bash lab/gst2shell-src/run_real.sh` drive the live GObject and shipping-plugin cases; `bash lab/gst2shell-src/run_sdp.sh` drives SDP text through GStreamer's parser (digest `6ba2e707…c4f`) | replayed 20:47Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=936 first_oob=256 last_oob=3999` with 3744 counted OOB bytes, caps length controls which offsets are clobbered, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Wake 6 corrected the extracted harness's `NONE=0` model: pinned `audio-channels.h:101` defines `NONE=-3`, so index 73 turns NULL `order` into `0x00000000fffffffd`; the live ASan harness faults at `order->pos` and the shipping 1.24.2 `rtpL16depay` faults rc 139 for `encoding-params` 86/87/100/1000. A 2026-11-21 pass symbolicated the N=1000 fault by gdb debuginfod to `srcpad->g_class` of a heap-adjacent GstPad (`lab/gst2shell-src/gdb_symbolicated_1000.txt`) and reproduced the same fault from SDP text at N=86/1000 with the RTP structure name modelled in the harness; the native `sdpdemux` path reached PLAYING without instantiating `rtpL16depay` and fails at benign N=8 too (tracked `sdp_evidence.txt`). Count-controlled rung 4 is demonstrated; chosen bytes, arbitrary pointer control, code execution and remote pre-auth SDP reachability remain NOT DEMONSTRATED or UNKNOWN. |
+| Gst2Shell | [brief](../reports/frontier-gst2shell.md), [status](../reports/gst2shell-status.md) | source at vulnerable parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, fix `80c184b4c5ee8ba28b2540ba58f40b8d44b61622`; harness digests `3d2b8e06…` / `7dde5da7…` | `cd lab/frontier/gst2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants; `bash lab/gst2shell-src/run_live.sh` and `bash lab/gst2shell-src/run_real.sh` drive the live GObject and shipping-plugin cases; `bash lab/gst2shell-src/run_sdp.sh` drives SDP text through GStreamer's parser (digest `6ba2e707…c4f`); `python3 lab/gst2shell-src/rtsp_server.py` plus `bash lab/gst2shell-src/run_rtsp.sh` drive the remote loopback path | replayed 20:47Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=936 first_oob=256 last_oob=3999` with 3744 counted OOB bytes, caps length controls which offsets are clobbered, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Wake 6 corrected the extracted harness's `NONE=0` model: pinned `audio-channels.h:101` defines `NONE=-3`, so index 73 turns NULL `order` into `0x00000000fffffffd`; the live ASan harness faults at `order->pos` and the shipping 1.24.2 `rtpL16depay` faults rc 139 for `encoding-params` 86/87/100/1000. A 2026-11-21 pass symbolicated the N=1000 fault by gdb debuginfod to `srcpad->g_class` of a heap-adjacent GstPad (`lab/gst2shell-src/gdb_symbolicated_1000.txt`) and reproduced the same fault from SDP text at N=86/1000 with the RTP structure name modelled in the harness; the `sdpdemux` file path is a bounded negative (tracked `sdp_evidence.txt`). A loopback RTSP server then drove a real `rtspsrc ! rtpL16depay ! fakesink` victim with no auth challenge (`rtsp_server.py` `f812d844…e0668`, `run_rtsp.sh` `9841c920…2a5d`): N=1000 rc 139 four times against clean N=8, gdb locating the corruption in GLib's `block_source` (`rtsp_gdb_1000.txt`); stock `uridecodebin` auto-selects the depay and aborts rc 134 with `malloc(): invalid size` (`uridecode_{8,1000}.log`). Chosen bytes, arbitrary pointer control, code execution and whether a public service accepts attacker SDP remain NOT DEMONSTRATED or UNKNOWN. |
 | Babelfish2Shell | [brief](../reports/frontier-babelfish2shell.md), [status](../reports/babelfish2shell-status.md) | raw sources at tags `BABEL_4_8_0` / `BABEL_4_10_0`, fix `ab820bddaffa540af82f2f689c3e535f82f14d89`, harness digests in `PROVENANCE.md` | `cd lab/frontier/babelfish2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants | replayed 2026-11-20 from committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `token=0x02 length=4096 si_capacity=1024 oob_writes=3072 first_oob=1024 last_oob=4095`, rung 2 length 1050/1150/2100 clobbers neither/first/both stamps, rung 3 ASan `WRITE of size 4096` 0 bytes after a 1024-byte region in `wire_getbytes`, rung 4 `de ad be ef ca fe ba be` at offset 1100 and `41 42 43 44` at 2000, fixed control `rc=0 oob_writes=0`, 5/5 `sha256=e216eeec…`. Harness only: real palloc layout, live TDS process, pointer control and execution UNKNOWN. |
 | Bzfs2Shell | [brief](../reports/frontier-bzfs2shell.md), [status](../reports/bzfs2shell-status.md) | raw sources at tags `v2.4.30` / `v2.4.32`, fix `8e501d685aef549090b363260979a4eb93484ea1` (OSV also `f11f05485d74…`); harness digests `1a16963f…` / `f2686d5b…` in `PROVENANCE.md` | `cd lab/frontier/bzfs2shell && bash run.sh out` builds the extracted vulnerable/fixed/ASan variants | replayed at handoff 2026-11-21 from committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `tcplen=-1024` with chosen tail at `tcpmsg+1024`, rung 2 destination 936 bytes before the object and next length 1028, rung 3 ASan `heap-buffer-overflow` `WRITE of size 64`, rung 4 `DEADBEEFCAFEBABE` / `0123456789ABCDEF` read back byte-exact from chosen preceding harness members, fixed controls reject at the first bound and are ASan-clean, 5/5 identical (`sha256=cea3b92e…`). Harness-only chosen-value control; no live bzfs, real layout or execution. |
 | Kamailio2Shell | [brief](../reports/frontier-kamailio2shell.md), [status](../reports/kamailio2shell-status.md) | raw `notify.c` / `save.c` at tags `6.1.4` and `6.1.5`, fix commit `21261436492f0014930e804e20586e3833bb91b9`; source hashes and URLs in `lab/frontier/kamailio2shell/PROVENANCE.md` | `cd lab/frontier/kamailio2shell && bash run.sh <outdir>` builds the extracted alias-branch variants; gcc 13.3.0, `-O0 -g` | operator replay at admission: `ALL CHECKS PASS rc 0`, 15 PASS lines, deterministic trace `sha256=94ef79641b081f850cb04f95d0f0945e7de7f84f9505462f23bf8aa054fa1cb8`; rung 1 `len=80 oob=75`, rung 3 ASan `WRITE of size 80` in `memcpy` ← `parse_alias`, rung 4 marker through instrumented pointer only, pinned 6.1.5 rejects before the copy. No live Kamailio, real frame layout or return-address control |
@@ -80,9 +80,19 @@ to rc 139 with one caps field. A 2026-11-21 pass symbolicated the N=1000 fault
 by gdb debuginfod to `srcpad->g_class` of a heap-adjacent GstPad and drove SDP text to
 the same fault through GStreamer's own parser (`bash lab/gst2shell-src/run_sdp.sh`,
 digest `6ba2e707…c4f`; the RTP structure name is modelled in the harness); the
-native `sdpdemux` path reached PLAYING without instantiating `rtpL16depay` and
-fails at benign N=8 too. That is impact controlled by channel count, not
-chosen bytes: strong rung 4 and remote pre-auth SDP reachability stay UNKNOWN.
+native `sdpdemux` file path reached PLAYING without instantiating
+`rtpL16depay` and fails at benign N=8 too, a bounded negative. The local gap
+was closed with a loopback-only RTSP server:
+`python3 lab/gst2shell-src/rtsp_server.py` (digest `f812d844…e0668`) plus
+`bash lab/gst2shell-src/run_rtsp.sh` (digest `9841c920…2a5d`) run a real
+`rtspsrc ! rtpL16depay ! fakesink` victim with no auth challenge. N=8 stays
+alive (40 RTP packets, rc 124); N=1000 faults rc 139 four times and gdb shows
+`rbx = 0xfffffffdfffffffd` in GLib's `block_source` (`rtsp_gdb_1000.txt`).
+Stock `uridecodebin` auto-selects `GstRtpL16Depay` and aborts at N=1000 with
+`malloc(): invalid size` (rc 134) while N=8 stays alive
+(`uridecode_{8,1000}.log`). That is impact controlled by channel count, not
+chosen bytes: strong rung 4; whether any public service ingests attacker SDP,
+RCE and allocator layout stay UNKNOWN.
 
 Freerdp2Shell was handed off at 19:19Z and admitted by the operator at
 19:32Z under standing approval #6; the two-pane window, seed wall, charter
@@ -103,9 +113,19 @@ and drove X.224 / RDP_NEG_REQ over real TCP with the committed
 `lab/freerdp2shell-src/loopback_shadow_probe.py`; the default NLA gate held
 after a completed TLS handshake with CredSSP withheld (server at
 `CONNECTION_STATE_NEGO`), while a standard-RDP local-peer offer advanced
-without credentials. Still UNKNOWN: MCS/channel setup, rdpsnd over the wire,
-live-process heap corruption, stock allocator layout, a full RDP session and
-an FFmpeg-enabled build.
+without credentials. Wake 8 completed X.224 → MCS CONNECT → ERECT DOMAIN →
+ATTACH USER → three CHANNEL JOIN confirms (`live_mcs_join_probe.py`) and
+drove a headless `sfreerdp` to `CONNECTION_STATE_ACTIVE`; `SNDC_FORMATS`
+crossed the real wire and a subsystem-supplied ADPCM record logged
+`realloc failed!` / `SelectFormat failed with 12` in the live server. With
+`wVersion=1` in both PDUs the ASan build reports `heap-buffer-overflow`,
+`WRITE of size 16384`, 0 bytes after an 8820-byte region from
+`rdpsnd_server_send_samples`, first OOB byte 0xDE chosen by the client
+(`live_session_wrap.txt`, raw `live_session_*.log`, scratch diffs under
+`wake8-patches/`). Conditions: no-auth server, subsystem-supplied ADPCM
+table, ASan build, synthetic playback event. Still UNKNOWN: stock allocator
+layout, a stock wrap-capable server format, an FFmpeg-enabled build and a
+real audio source.
 
 Babelfish2Shell was handed off from frontier on 2026-11-20 ~22:08Z (commit
 `088d4bc`) and admitted by the operator ~22:2xZ under standing approval #6.
@@ -180,9 +200,14 @@ useful-pointer control was observed.
   release-ASan FPM replay on 8.5.12 (`--use-malloc`): both vendor diagnostics
   reproduce but `VERDICT=CLEAN_NO_UAF` with zero ASan markers, also with
   `ZEND_ASAN_FORCE_FAST_SHUTDOWN=1`, in ZendMM mode and under `--control`.
-  The grade stays UNKNOWN — the advisory behaviour was not reproduced on this
-  host — and the 8.5.13 fixed release build is unbuilt, so patch sensitivity
-  is untested.
+  Wake 47 pinned the exact fix: two `if (EG(active))` guards at `zend.c:1509`
+  and `:1534`, and a GDB-ordered replay showing request 1's fatal repopulates
+  the array before its own `zend_shutdown_executor_values()` UNDEFs the global
+  at `zend_execute_API.c:440` with `type=775` (IS_ARRAY); request 2's warning
+  then sees `type=IS_UNDEF`, so the dtor is a no-op. The earlier
+  `zend_activate()` label for `:440` was wrong. The grade stays UNKNOWN — the
+  advisory behaviour was not reproduced on this host — and no 8.5.13 fixed
+  release build was started, so patch sensitivity is untested.
 - **Mosquitto**: no published SHA-256 sidecar exists at the vendor path;
   `provision.sh` pins the exact local tarballs with hashes recorded from the
   audited files. cJSON 1.7.17 is pinned by `provision-cjson.sh`.
@@ -220,8 +245,11 @@ useful-pointer control was observed.
   `python3 lab/freerdp2shell-src/loopback_shadow_probe.py nego` and
   `... tls-auth` driving X.224 / RDP_NEG_REQ over real TCP. Exact CR/CC bytes,
   protocol selection (`0x08`/`0x02`/`0x00`), the TLS handshake and the NLA
-  gate log are in `loopback_shadow_probe.txt`. MCS/channel setup, rdpsnd over
-  the wire, live-process corruption and a full session stay UNKNOWN.
+  gate log are in `loopback_shadow_probe.txt`. Wake 8 adds
+  `python3 lab/freerdp2shell-src/live_mcs_join_probe.py` and the headless
+  `sfreerdp` session; full output is `live_session_wrap.txt` /
+  `live_session_*.log`. Stock allocator layout and an FFmpeg-enabled build
+  stay UNKNOWN.
 - **Xrdp**: `lab/xrdp2shell-real/RUNBOOK.md` pins the exact ASan and plain
   `configure` lines (plain `-g -O1` so the chosen-byte reader can read the
   adjacent chunk), the `cc` link against the real `build-asan/libxrdp/.libs/`
@@ -245,7 +273,12 @@ useful-pointer control was observed.
   `live_evidence.txt` and `real_evidence.txt`; upstream bytes and builds are
   gitignored under `lab/gst2shell-src/` and regenerated by the scripts. Both
   harnesses keep benign, fixed and ASan controls; the real-plugin fault is
-  count-controlled, not chosen-byte control.
+  count-controlled, not chosen-byte control. The remote path is
+  `python3 lab/gst2shell-src/rtsp_server.py` plus `bash lab/gst2shell-src/run_rtsp.sh`;
+  `gst-launch-1.0 -v uridecodebin uri=rtsp://127.0.0.1:<port>/ ! fakesink`
+  gives the stock auto-plumb case.
+  Both endpoints start on loopback; evidence `rtsp_evidence.txt`,
+  `rtsp_gdb_1000.txt` and `uridecode_{8,1000}.log` is tracked.
 - **Freeswitch**: a standalone, file-only C harness under
   `lab/frontier/freeswitch2shell/`; `run.sh` rebuilds vuln/fixed/asan and
   writes `logs/digests.txt`. Vulnerable parent `fbac12b451a1` and fix

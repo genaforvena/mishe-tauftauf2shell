@@ -64,14 +64,20 @@ claims, not conclusions.
   case. Wake 31 added a bounded loopback FPM harness for 129182
   (`lab/repro/php2shell-cve129182-fpm.py`, with release-ASan build support in
   `lab/php2shell/build-fpm-release.sh`); the debug ASan build preserves a
-  negative. Wake 45 finished the release-ASan 8.5.12 replay: both vendor
-  diagnostics reproduce but `VERDICT=CLEAN_NO_UAF` with zero ASan markers,
-  also with fast shutdown forced, in ZendMM mode and under `--control`. Wake
-  46 root-caused it under gdb: request N+1's `zend_activate()` UNDEFs
-  `EG(last_fatal_error_backtrace)` before the warning reaches the dtor, so
-  `zval_ptr_dtor` on `IS_UNDEF` is a no-op with no stale pointer to dereference.
-  The grade stays UNKNOWN with a measured cause; the 8.5.13 fixed release
-  build is unbuilt.
+  negative. Wake 45 finished the release-ASan
+  8.5.12 replay: both vendor diagnostics reproduce but
+  `VERDICT=CLEAN_NO_UAF` with zero ASan markers, also with fast shutdown
+  forced, in ZendMM mode and under `--control`. Wake 46 root-caused it under
+  gdb; wake 47 corrected the label and fixed the ordering: the 8.5.12 → 8.5.13
+  fix is two `if (EG(active))` guards at `zend.c:1509` (dtor) and `:1534`
+  (repop). Request 1's fatal repopulates the array; its own
+  `zend_shutdown_executor_values()` then clears `EG(active)` and UNDEFs the
+  global at `zend_execute_API.c:440` while the type is still `IS_ARRAY`
+  (`type=775`), leaving only `value.arr`. Request 2's PHP_VALUE warning sees
+  `active=0, flags=7, type=IS_UNDEF`, so `zval_ptr_dtor` is a no-op and the
+  `:1534` branch is unreachable; `zend_activate()` was wake 46's wrong label
+  for the `:440` site. Grade stays UNKNOWN with a fully ordered measured
+  cause; no fixed 8.5.13 release build was started.
   129289 remains untested (smuggling, not memory corruption).
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
@@ -284,9 +290,10 @@ the real `rdpsnd_server_recv_formats()` parser on source-built 3.32.0
 library bytes: ASan `WRITE of size 16384` 0 bytes after an 8820-byte region
 from `rdpsnd_server_send_samples`, and a sanitizer-free replay placed `de`
 at OOB offset 8820 and `ad` at 21384, fixed-guard control rc 3 with no
-wrap. This is a chosen-byte rung 4 on real library bytes, still in-process:
-MCS/channel setup, rdpsnd over the wire, live-process corruption, stock
-allocator layout and a full RDP session stay UNKNOWN.
+wrap. This was a chosen-byte rung 4 on real library bytes, still in-process at
+wake 4: MCS/channel setup, rdpsnd over the wire, live-process corruption,
+stock allocator layout and a full RDP session were UNKNOWN then; wake 8 below
+moves the transport and live-server items to observed.
 Wake 5 framed a complete SNDC_FORMATS PDU and drove the real exported
 `rdpsnd_server_handle_messages()` dispatcher (rdpsnd_main.c:1204-1298) with a
 stub WTS read callback, including body reassembly across reads and msgType
@@ -308,9 +315,17 @@ reader, dispatcher, activation and parser. Wake 7 ran a real 3.32.0
 X.224 / RDP_NEG_REQ over real TCP: protocol selection `0x08`/`0x02`/`0x00`,
 and a TLS handshake that stops at `CONNECTION_STATE_NEGO` when CredSSP is
 withheld under default NLA, while standard-RDP local-peer mode advances
-without credentials. MCS/channel setup, rdpsnd over the wire, live-process
-corruption, stock layout, a full session and an FFmpeg-enabled build stay
-UNKNOWN.
+without credentials. Wake 8 completed MCS CONNECT / ERECT DOMAIN / ATTACH
+USER / three CHANNEL JOIN confirms via `live_mcs_join_probe.py` and drove a
+headless `sfreerdp` to `CONNECTION_STATE_ACTIVE`; `SNDC_FORMATS` crossed the
+wire and a subsystem-supplied ADPCM record made the live server log
+`realloc failed!` / `SelectFormat failed with 12`. A synthetic playback
+event then gave the live ASan server `WRITE of size 16384`, 0 bytes after an
+8820-byte region, from `rdpsnd_server_send_samples`, with client-chosen
+`0xDE` at offset 8820. No-auth posture, subsystem-supplied format table,
+ASan build and synthetic audio are explicit conditions; stock allocator
+layout, a real audio source, an FFmpeg-enabled build and a stock
+wrap-capable format stay UNKNOWN.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
@@ -382,9 +397,10 @@ Claim sources: GHSA-62fg-53h6-6f68 / CVE-2026-111183 / ZDI-26-775
 `80c184b4c5ee8ba28b2540ba58f40b8d44b61622` (2026-10-08) against vulnerable
 parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, read as provisioning, not
 lab findings. CWE-122, CVSS 3.0 **9.8 Critical**
-(`AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`) — pre-auth by the vector, but the
-concrete reaching path (an RTP/RTSP pipeline accepting far-end caps) is
-UNKNOWN and the claimed RCE is a claim, not a demonstration. Claimed
+(`AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`) — pre-auth by the vector; a loopback
+RTSP server → `rtspsrc` caps path was later demonstrated locally (see below),
+but whether any public service accepts attacker SDP and the claimed RCE stay
+UNKNOWN. Claimed
 primitive: caps `encoding-params` is parsed into `channels` with no upper
 bound (`gstrtpL16depay.c:181-189`), stored in the heap-embedded
 `GstAudioInfo`; for `channels > 8` no channel order exists, so
@@ -417,16 +433,24 @@ pass symbolicated the N=1000 shipping fault by gdb debuginfod to `srcpad->g_clas
 of a heap-adjacent GstPad, and `bash lab/gst2shell-src/run_sdp.sh` drove
 `a=rtpmap:96 L16/44100/N` SDP text through GStreamer's own SDP parser into the
 fault at N=86/1000 (the harness explicitly models the RTP structure name); the
-native `uridecodebin`/`sdpdemux` path reached PLAYING without instantiating
-`rtpL16depay`, a lab-pipeline limit that also fails at benign N=8. This is a
-count-controlled rung-4 effect, not chosen bytes: strong rung 4, application
-far-end SDP ingestion, pre-auth reachability and code execution stay
-UNKNOWN. Evidence:
+`sdpdemux` file path reached PLAYING without instantiating `rtpL16depay` and
+fails at benign N=8 too, a bounded negative. A loopback RTSP server then fed a
+real `rtspsrc ! rtpL16depay ! fakesink` victim pipeline with no auth challenge
+(`rtsp_server.py` digest `f812d844…e0668`, `run_rtsp.sh` digest
+`9841c920…2a5d`): N=8 is clean, N=1000 faults rc 139 four times with the
+corruption in GLib's `block_source` (`rbx = 0xfffffffdfffffffd`); stock
+`uridecodebin` auto-plumbing selects the same depay and aborts rc 134 with
+`malloc(): invalid size`, removing the explicit-link step. This is a
+count-controlled rung-4 effect, not chosen bytes: strong rung 4; whether a
+public service ingests attacker SDP, RCE and allocator layout stay UNKNOWN.
+Evidence:
 `reports/frontier-gst2shell.md`, harness
 `lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
 `reports/gst2shell-status.md`; the SDP harness `lab/gst2shell-src/sdp_caps.c`
-and `run_sdp.sh` (digest `6ba2e707…c4f`) and the gdb trace
-`lab/gst2shell-src/gdb_symbolicated_1000.txt` are tracked. The dedicated
+and `run_sdp.sh` (digest `6ba2e707…c4f`), the gdb trace
+`lab/gst2shell-src/gdb_symbolicated_1000.txt`, the RTSP driver
+`lab/gst2shell-src/{rtsp_server.py,run_rtsp.sh}` and its tracked
+`rtsp_evidence.txt` / `rtsp_gdb_1000.txt` are tracked. The dedicated
 `gst2shell` mind owns this lane;
 details in `.mishe-tauftauf/charters/gst2shell.md`. Wake trigger units and
 the presentation.json entry are owed from the person's full-flag sync, never
