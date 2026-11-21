@@ -4,8 +4,8 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies twenty admitted vulnerability families in local, isolated copies
-of the affected software:
+It studies twenty-one admitted vulnerability families in local, isolated
+copies of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
   string case conversion (upcasing `ß` writes two bytes where the loop
@@ -209,6 +209,14 @@ of the affected software:
   under standing approval #6; rungs 1-3 run on the verbatim pinned upstream
   function, rung 4 is instrumented chosen-byte control only, and no RCE is
   demonstrated.
+- **Indiserver2Shell** — CVE-2026-71979, an unbounded `sprintf()` diagnostic
+  in INDI indiserver's XML chunk parser: a ~1.2 KB mismatched-tag packet
+  writes 1237 bytes into `err[1024]` on the shared TCP/7624 client/driver
+  read path, with no auth or config gate. CWE-121, CVSS 4.0 8.7 High
+  `AV:N/AC:L/AT:N/PR:N`, affected through 2.2.4.2, fixed at commit `96bbd7f`.
+  Admitted ~03:18Z under standing approval #6; rungs 1-3 run on verbatim
+  pinned upstream `lilxml.cpp` bytes, rung 4 is instrumented chosen-byte
+  control only, and the advisory claims availability only, not RCE.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -239,6 +247,7 @@ is called established.
 | **Iperf2Shell** | **Rungs 1-3 on real pinned upstream code; instrumented chosen-byte rung 4** | A 336-byte decoded authtoken crosses a 256-byte RSA heap allocation: ASan `WRITE of size 336` from `BIO_read` ← `decrypt_rsa_message` at `iperf_auth.c.3.21:324`; the plain build aborts at `free(): invalid size` from overwritten next-chunk metadata; chosen `IPERF2SHELL!` and `0x1122334455667788` are supplied in the write buffer only; pinned 3.22 rejects before `BIO_read`. No live server, stock heap layout, useful pointer or execution; the release-note CVE mislabel is preserved. [Status](reports/iperf2shell-status.md) |
 | **Uftpd2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4095-byte path with a 128-byte configured home shifts `dir[PATH_MAX]` right and writes 128 bytes past it: the plain build aborts with `*** stack smashing detected ***`, ASan reports `stack-buffer-overflow` `WRITE of size 4096` at pinned `common.c.v2.15:61`, and chosen `UFTPD2SHELL!` / `0x1122334455667788` are written by the upstream `memmove` only. Pinned 2.16 rejects at the guard with `returned=null`. No live uftpd, stock frame layout, useful pointer or execution; `PR:L`, no-chroot, and the 9-byte default-home reach are UNKNOWN. [Status](reports/uftpd2shell-status.md) |
 | **Accelppp2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 66 AVP chunks of 64 bytes put `pos=4254` into a 4160-byte `t->buf`: ASan `heap-buffer-overflow` `WRITE of size 64` at pinned `log_tcp.c.1.14.0:63`; chosen `0x1122334455667788` is read back byte-exact at offset 4 in the adjacent harness heap object; pinned 1.15.0 clamps to 4160 with a clean neighbour. No live daemon, real L2TP AVP path, verbose-logging configuration or useful-pointer control. [Status](reports/accelppp2shell-status.md) |
+| **Indiserver2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 1206-byte mismatched-tag packet formats 1237 bytes into `err[1024]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 1237` at pinned `lilxml.cpp:1281`, and token-safe `INDI2SHELL` reads back byte-exact at requested adjacent-stack offsets 0 and 64. Fixed `96bbd7f` bounds the format with `snprintf` and the neighbour is clean. No live daemon, real TCP/7624 path, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/indiserver2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -274,8 +283,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **dragonfly2shell**, **postgres2shell**, **brotli2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
 **freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell**,
-**bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell** and
-**accelppp2shell** pursue their lane
+**bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell**,
+**accelppp2shell** and **indiserver2shell** pursue their lane
 end-to-end — build, harness, debugger, report. Four
 further minds cut
 across them:
@@ -367,7 +376,8 @@ self-scheduling it.
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
   `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
   `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell` and
-  `frontier`, `docs`, `witness` and `operator` windows show each mind's wall and wake log;
+  `indiserver2shell` windows show each mind's wall and wake log; `frontier`,
+  `docs`, `witness` and `operator` show the cross-cutting minds' walls.
   `chat`, `git` and `wakes` show the shared tape. All minds run on
   `opencode-go/hy4-flash-free`.
 

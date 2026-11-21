@@ -808,6 +808,54 @@ handoff and were capture-verified at admission; wake trigger units and the
 presentation.json entry are owed from the person's full-flag sync, never a
 bare `mishe sync`.
 
+#### Admitted 2026-11-21 ~03:18Z: Indiserver2Shell (CVE-2026-71979)
+
+Claim sources: the VulnCheck CNA record for CVE-2026-71979 (published
+2026-08-17), the CVE record, OSV, upstream issue #2472 and fix commit
+`96bbd7f564bbb128a129019e44eadd40dd49cff9` (fix parent `3220880`, pinned as
+affected); pinned source hashes and URLs are in
+`lab/frontier/indiserver2shell/PROVENANCE.md`. CWE-121, CVSS 4.0 **8.7 High**
+`AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N` — availability only,
+no RCE claimed. Affected `0` through `2.2.4.2`, fixed at the commit; the
+advisory also names `v2.2.4` / `3371faeb` as reproduced. Claimed primitive:
+`indiserver` listens on TCP/7624 without authentication or transport
+encryption; a ~1.2 KB packet with mismatched XML tag names exceeding 1024
+bytes drives unbounded `sprintf()` into `err[1024]` in
+`MsgQueue::readFromFd()`, the shared read path for every client and driver.
+No configuration gate and no auth.
+
+Scope: INDI is a C instrument-control daemon, admitted as an X2Shell-class
+extension under the same "similar things" precedent that admitted FreeRADIUS,
+FreeSWITCH, Bzfs2Shell, Kamailio2Shell, Iperf2Shell, Uftpd2Shell and
+Accelppp2Shell; the judgment is in
+`.mishe-tauftauf/charters/indiserver2shell.md`. The advisory's
+availability-only ceiling stays in every impact claim.
+
+The write is a single large `vsprintf` of attacker-chosen alphanumeric bytes
+onto the stack, so saved-frame placement is structurally plausible and a
+rung-4 attempt is warranted; no structural-zero-store blocker was found. The
+operator replayed the committed harness at ~03:16Z: 19 PASS, `ALL CHECKS PASS
+rc 0`, trace
+`sha256=2c446e0f1b1beecee5aa437d5a15818ad0c951d72fbcdb2cb545a656925ca85c`.
+Rungs 1/2/3 are on the verbatim pinned upstream `oneXMLchar()` /
+`parseXMLChunk()` from `3220880`: a 1206-byte `<A*600>x</B*600>` packet
+formats 1237 bytes into `err[1024]` (`expected_oob=213`), the first byte past
+the buffer changes, and ASan reports `stack-buffer-overflow`, `WRITE of size
+1237`, with frames at pinned `lilxml.cpp:1281` / `:348`. Rung 4 is
+INSTRUMENTED chosen-byte control only: token-safe `INDI2SHELL` read back
+byte-exact at requested adjacent-stack offsets 0 and 64; fixed `96bbd7f`
+bounds the format with `snprintf(..., XML_ERROR_SIZE, ...)` and the neighbour
+is clean. No live daemon, real TCP/7624 path, stock stack layout,
+canary/NX measurement, useful-pointer control or execution. Evidence:
+`reports/frontier-indiserver2shell.md`, seed status
+`reports/indiserver2shell-status.md`, harness `lab/frontier/indiserver2shell/`.
+The dedicated `indiserver2shell` mind owns this lane. Its two-pane window
+(inner socket, window 28), registry entry and seed wall were live from
+frontier's handoff and were capture-verified at admission; wake trigger units
+and the presentation.json entry are owed from the person's full-flag sync,
+never a bare `mishe sync`.
+
+
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
 Frontier handed this find over on tape #448 after committing
