@@ -3767,3 +3767,49 @@ is historical and resolved by this verdict. Other peer verdicts in #992
 (IEC R4, asn1scc Results 4/5) and the Pillow W5 recipe repair/negative
 control are already-admitted targets at labeled grades; docs owns their index
 rows. No new advisory claim in the current dossier or tape.
+
+#### Admitted 2026-11-21 ~16:2xZ: Htslib2Shell / htslib2shell (CVE-2026-62257 / GHSA-6q7c-m967-9v37)
+
+Frontier's admission request #997 carried brief
+`reports/frontier-htslib2shell.md`, scoped harness commit `bced853`, a seed
+wall and an already-live two-pane window (index 62). Witness verdict #1008
+(restating #1007 to frontier) replayed `bced853` from a clean archive with its
+own offline rebuild: 10/10 pins, 9 PASS / 0 FAIL rc 0, trace
+`sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464`,
+source lines 1378/1388/2075/2079/3882 and `cram_io.c:4620` matching, fixed
+tagged 1.24 rejecting codec 51, and the index-1025 negative reproduced
+independently. The operator admitted this target under standing approval #6,
+no re-ask. All five elements are recorded in
+`.mishe-tauftauf/charters/htslib2shell.md`: **claim source** — CVE-2026-62257
+/ GHSA-6q7c-m967-9v37, CNA GitHub, Inc., "Heap read and write overflow in
+HTSlib CRAM 4.0 decoder", CWE-122/125/787, CVSS 4.0 8.8 HIGH, vector
+`AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N`, credit Trail of
+Bits and Anthropic; CVE record, cveawg API, OSV, GHSA and ten SHA-256 pins in
+`lab/frontier/htslib2shell/src/SHA256SUMS` and `PROVENANCE.md`. **Identifier**
+— CVE-2026-62257 / GHSA-6q7c-m967-9v37. **Affected/fixed pin** — affected
+`<1.21.2`, `1.22.0–1.22.2`, `1.23.0–1.23.1`; vulnerable tagged 1.23.1, fixed
+tagged 1.24 plus 1.21.2/1.22.3/1.23.2 backports; fix commits d66a77d
+(codec-local `expanded` members, no `hdr->ncodecs++`), c0b5037 (int32/nbits
+guards) and a3e8dca (CRAM v4 removed). **Primitive** — `cram_io.c:4620`
+allocates 512 pointer slots; `cram_codecs.c:3882` increments `hdr->ncodecs`
+per sub-codec; `cram_xpack_decode_expand_char` at `:1378` reads and at `:1388`
+writes `slice->block_by_id[512 + codec_id]`, reached with `codec_id=1` (index
+513) through real `cram_decoder_init`/`cram_xpack_get_block`; XRLE has the same
+pattern at `:2075`/`:2079` (not exercised). **Rung-4 plausibility** — an
+8-byte pointer store with a partially file-derived index and a tagged fixed
+release; `AV:N`/ACE are advisory claims about downstream deployments, with
+no web-facing consumer built here.
+
+Rungs 1/2/3 ESTABLISHED at the labeled sink/accounting/ASan grades; rung 4
+INSTRUMENTED only — no CRAM file, parser path from file bytes, consumer,
+listener, chosen pointer, live neighbour, control-flow diversion or execution.
+The negative `codec_id=513` (index 1025) leg, whose read landed in live heap
+(`0xbebebebebebebebe`) with no ASan report, is preserved. The two-pane window,
+seed wall and registry entry were pre-created by frontier and were not
+recreated or edited. The operator created the 57th `engine/routes.json`
+entry and this mind's wake trigger units with the pinned full-flag sync from
+`docs/runtime-pin.md`; never run a bare `mishe sync`. Cheapest next rung: a
+real CRAM v4 file driving `hdr->ncodecs` past 511 into pinned 1.23.1
+`htsfile`/`samtools` under ASan on loopback, with a gdb watchpoint on
+`slice->block_by_id[512]` and inspection of any live heap neighbour before a
+pointer claim.

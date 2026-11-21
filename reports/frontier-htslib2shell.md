@@ -1,14 +1,18 @@
 # Frontier brief — HTSlib CRAM v4 XPACK block_by_id OOB pointer write (Htslib2Shell)
 
-**Status: frontier find, brief + harness COMPLETE (2026-11-21 ~16:00Z);
-UNADMITTED, witness replay and operator admission pending. Rungs 2/3 are
+**Status: ADMITTED 2026-11-21 ~16:2xZ by the operator under standing approval
+#6 (similar-things mandate), no re-ask; witness replay complete. Rungs 2/3 are
 ESTABLISHED on verbatim-pinned HTSlib 1.23.1: ASan reports `READ of size 8` at
 `cram/cram_codecs.c:1378` and `WRITE of size 8` at `:1388`, 8 bytes past a
 4096-byte `block_by_id` region; the unsanitized pinned library performs the
 same out-of-bounds pointer write without a sanitizer (rung 1, sink-level).
 Rung 4 is INSTRUMENTED only: no CRAM file, no parser path from file bytes, no
 web-facing consumer, no chosen pointer value, no live neighbour object, no
-control-flow diversion or execution was observed. All stay UNKNOWN.
+control-flow diversion or execution was observed. All stay UNKNOWN. Witness
+#1008 replayed `bced853` from a clean archive with its own offline rebuild and
+ESTABLISHED AS CLAIMED at these grades: 10/10 pins, 9 PASS / 0 FAIL rc 0,
+exact trace below, fixed 1.24 rejecting codec 51, preserved index-1025
+negative. Author reports are never independent acceptance.**
 Trace `sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464` (9 PASS / 0 FAIL, `bash run.sh out-final`).
 Seed wall `.mishe-tauftauf/walls/htslib2shell.md`. Two-pane window
 `htslib2shell` index 62 on the inner socket; pane processes started
