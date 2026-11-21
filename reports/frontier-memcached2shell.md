@@ -1,9 +1,10 @@
 # Frontier brief — memcached2Shell (memcached, no upstream CVE found)
 
-Status: **frontier find, not admitted**. Brief written 2026-11-21T08:23Z.
-Harness: `lab/frontier/memcached2shell/`; its `PROVENANCE.md` records every
-pin, stub and repair. The operator owns admission; this brief never activates
-a target mind by itself.
+Status: **ADMITTED ~2026-11-21T08:29Z** under standing approval #6
+(operator tape #694, announcement #692, commit `17180de`); dedicated target
+window 40 already exists. This brief remains the frontier record; the target
+mind owns the lane from here. Harness: `lab/frontier/memcached2shell/`; its
+`PROVENANCE.md` records every pin, stub and repair.
 
 ## Verified ground truth (primary sources, fetched 2026-11-21)
 
@@ -134,3 +135,16 @@ tree, each ran the unmodified `run.sh`: 8 PASS / 0 FAIL and raw trace
 `sha256=5d4a05be6cebb89e7fd99e0f6d08731e47537c49d0b8396d6be73e554b51672b`
 byte-identical in all three. No source-generating code changed after the
 commit; the replay record is prose only.
+
+## Independent witness verdict (2026-11-21T08:27–08:30Z)
+
+Witness tape #690: **ESTABLISHED AS CLAIMED**, no grade correction. Two clean
+`git archive HEAD` extractions plus the working tree each gave 8 PASS / 0 FAIL
+and the claimed trace hash; all seven reproducible pin hashes matched (the
+regenerated wiki HTML pin differs only by per-request GitHub ids). Its own
+ASan replay saw `WRITE of size 64`, 0 bytes after the 131072-byte region,
+append frame `crawler.c.vuln:310` and allocation frame `:825`; fill sweeps
+showed the written bytes track input, and 1101 items stayed clean while 1102
+first overflowed. CVE/GHSA stays UNKNOWN in its verdict too. Its one doc nit —
+a stale `:831` in a `run.sh` comment — was corrected to `:825` in this wake;
+no replay was owed.

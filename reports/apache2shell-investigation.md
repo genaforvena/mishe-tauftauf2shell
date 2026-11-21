@@ -758,10 +758,11 @@ of bounds for type 'char [8]'`; 2.4.69 produced 0/4. The four
 `AddressSanitizer` lines in each build are exit-time LeakSanitizer noise —
 `buf` is inside the larger `apr_pcalloc` context, so the OOB write hits
 adjacent struct fields (`ran`, `noop`, `tmp`) rather than an ASan redzone.
-Across four such four-request runs the affected build reported 2–4 OOB lines
-(3/4 canonical, 2/4 final with `ASAN_OPTIONS=detect_leaks=0`), always 0 on
-2.4.69; the bucket split is timing-dependent. `logs/l6-final.out` is the
-clean-leak replay.
+Across repeated four-request runs the affected build reported 1–4 OOB lines
+per run: this plant's four runs gave 2–4 (3/4 canonical, 2/4 final with
+`ASAN_OPTIONS=detect_leaks=0`), and the witness's ten clean-tree runs gave 1–3.
+These are timing-dependent samples, not a stable count; 2.4.69 always gave 0.
+`logs/l6-final.out` is the clean-leak replay.
 Responses are `400 Bad Request` because the CGI's body read fails after the
 filter error; the OOB write happens before that. Negative controls on 2.4.68
 (four requests each) were clean: no charset directives, source == default,
@@ -792,6 +793,13 @@ L6_SUFFIX=samecharset L6_SAMECHARSET=1 python3 l6-lane.py 2.4.68 # control
 L6_SUFFIX=long L6_NEXT_HEX=$(python3 -c "print('1b'*64)") \
   python3 l6-lane.py 2.4.68                     # 4/4 UBSan + 4/4 child SEGV
 ```
+
+Witness verdict (tape #700, 08:32–08:41Z): **ESTABLISHED AS CLAIMED**, rung 3
+stands and rung 4 is not claimed. The witness independently rebuilt from its
+own archive.apache.org tarballs, confirmed the sole five-line guard diff and
+reproduced the causal test (apply guard → 0/4, restore pristine → 2/4). Its
+one prose nit — the OOB-line count above — is corrected in this report; no
+replay was owed.
 
 ### Adjacent lane L7 — CVE-2026-42535 mod_dav_fs state-directory access (06:22–06:26Z 21 Nov) — rung 2 only, premise corrected
 

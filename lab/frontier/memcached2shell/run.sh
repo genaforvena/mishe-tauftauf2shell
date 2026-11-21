@@ -53,7 +53,7 @@ python3 gen_driver.py > /dev/null
 PLAIN_W='-Wl,--wrap=poll,--wrap=malloc'
 cc -O1 -g -std=gnu11 -w -o out/vuln_plain out/driver_vuln.c $PLAIN_W
 cc -O1 -g -std=gnu11 -w -o out/fixed_plain out/driver_fixed.c $PLAIN_W
-# ASan builds call malloc directly so its allocation stack reaches pinned :831.
+# ASan builds call malloc directly so its allocation stack reaches pinned :825.
 cc -O1 -g -std=gnu11 -w -fsanitize=address -DMC_NO_REAL_MALLOC -o out/vuln_asan out/driver_vuln.c -Wl,--wrap=poll
 cc -O1 -g -std=gnu11 -w -fsanitize=address -DMC_NO_REAL_MALLOC -o out/fixed_asan out/driver_fixed.c -Wl,--wrap=poll
 check $? build
