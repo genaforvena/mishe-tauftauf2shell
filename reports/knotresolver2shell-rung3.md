@@ -113,6 +113,65 @@ An independent witness should re-run `harness/run_replay.sh 6.4.0 8853` and
 OOB/malformed split. The PoC frames are public; the harness is deterministic
 and needs only loopback.
 
+## Rung-4 geometry probe on this host (wake 2, 2026-11-21 ~18:40–19:0xZ)
+
+Question: does the published 6144-class neighbour geometry and dispatch
+offset set hold on THIS host (gnutls 3.8.3, jemalloc 5.3.0), or are the
+researcher's offsets specific to the 6.3.0-cznic.1 / gnutls 3.7.9 reference
+build? **Answer: the slot geometry holds; the dispatch offsets do not.**
+
+### Build and harness
+- Fresh build of pinned 6.4.0 with `-Dmalloc=jemalloc -Dquic=embedded
+  --buildtype=debug`, configured with a local `--prefix` and installed there.
+  The local prefix is required: wake 1 installed ASan-linked kres modules into
+  `/usr/local/.../kres_modules`, and a non-ASan kresd that dlopens them aborts
+  with "ASan runtime does not come first in initial library list". The pure-Lua
+  `policy.lua` stub was copied into the local prefix. No vulnerable code changed.
+- Loopback DoQ listener `127.0.0.1:8855`; kresd run **under gdb** (host
+  `ptrace_scope=1`, so gdb must be the parent). gdb disables ASLR for its
+  inferior by default; the host sysctl `kernel.randomize_va_space` was NOT
+  changed (still 2). No chosen-address was needed for the marker test.
+- `harness/jemalloc-oracle.gdb` breaks symbolically on `wire_buf_consume`
+  (`len==1438 && size==6960`, the post-F5 state) and dumps `buf`, `buf+6144`
+  and the mappings. Runner: `harness/run_jemalloc_layout.sh`; traffic is the
+  PoC's `poc.py probe` five escalation frames (no F6, no OOB write).
+
+### Observed neighbour (evidence: `harness/jemalloc-oracle.txt`)
+```
+ORACLE: buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1438 size=6960
+slot1+0x060..0x078: 0x5555555faf30 x4   (kresd r-xp text 0x...55e000-5ec000)
+slot1+0x0a0/0x0a8:  0x5555555ca51f, 0x5555555ca5c9 (kresd text)
+slot1+0x0b8:        0x10              (reference: dispatch ARG / RDI)
+slot1+0x110:        0xffffffffffffffff (reference: dispatch PTR / RIP)
+slot1+0x174:        0x0               (reference: dispatch gate)
+slot1+0x220..0x238: 0x5555555faf30 x4 (same kresd code pointer again)
+slot1+0x248:        0x7ffff68aa278    (self-pointer, slot1+0x278)
+```
+All non-zero code pointers in the first 0x300 bytes land in the **kresd text
+segment** (`0x55555555e000-0x5555555ec000`); none land in libgnutls text
+(`0x7ffff7bb0000-0x7ffff7cea000`). The neighbour is a live kresd-owned heap
+object with repeated function-pointer slots and an embedded self-pointer, not
+the reference gnutls cleanup handler. The 6144-byte slot spacing itself is
+confirmed, but the published `OFF_SENTINEL0=0xb8`, `OFF_TARGET=0x110`,
+`OFF_GATE=0x174` values do not describe it.
+
+### Marker test (evidence: `harness/jemalloc-rip.txt`, `harness/jemalloc-rip-stdout.log`)
+Replayed F1..F5 followed by F6 carrying the PoC's unmodified benign
+`build_rip_payload()` (RIP `0xdeadbeefdeadbeef`, RDI `0xcafebabecafebabe`,
+gate 1) against the same jemalloc build under gdb. Driver completed
+(`[driver] done`), kresd stayed alive, gdb logged no signal and no register
+state. No chosen-byte or pointer control was observed. This is a bounded
+negative for the published offsets on this host, **not** a proof that no other
+layout could be exploited here.
+
+### Disposition
+Rung 3 stands unchanged. Rung 4 remains **UNKNOWN**: no chosen-byte overwrite
+of a live neighbour, no pointer control, no marker execution. The reference
+exploit chain cannot be replayed verbatim on this build. Re-deriving a dispatch
+path would require identifying the kresd object at `buf+6144` and where its
+teardown reads its function pointers; that is a separate bounded wake. Stock
+(ASLR-on) exploitability and any information leak remain UNKNOWN.
+
 ## Boundaries
 
 No traffic off 127.0.0.1; no external scanning; no host sysctl changes; ASLR

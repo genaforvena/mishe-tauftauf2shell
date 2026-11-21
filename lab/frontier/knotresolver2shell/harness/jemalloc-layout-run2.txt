@@ -1,0 +1,273 @@
+[runner] gdb pid=3909573
+=== listener check ===
+UNCONN 0      0                                127.0.0.1:8855       0.0.0.0:*          
+=== probe frames ===
+[*] probe: five escalation frames to 127.0.0.1:8855 (no OOB write) x1
+[+] probe traffic sent; read pers_inbuf from the gdb oracle log
+harness/run_jemalloc_layout.sh: line 20: 3909573 Killed                  gdb -q -batch -x "$BASE/harness/jemalloc-oracle.gdb" "$KRESD" > "$BASE/harness/jemalloc-gdb-stdout.log" 2>&1
+=== oracle ===
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ORACLE: buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1438 size=6960
+ORACLE: --- own buffer first 0x80 bytes ---
+0x7ffff68a8800:	0x4141414141417816	0x4746454443424140
+0x7ffff68a8810:	0x4f4e4d4c4b4a4948	0x5756555453525150
+0x7ffff68a8820:	0x5f5e5d5c5b5a5958	0x6766656463626160
+0x7ffff68a8830:	0x6f6e6d6c6b6a6968	0x7776757473727170
+0x7ffff68a8840:	0x7f7e7d7c7b7a7978	0x8786858483828180
+0x7ffff68a8850:	0x8f8e8d8c8b8a8988	0x9796959493929190
+0x7ffff68a8860:	0x9f9e9d9c9b9a9998	0xa7a6a5a4a3a2a1a0
+0x7ffff68a8870:	0xafaeadacabaaa9a8	0xb7b6b5b4b3b2b1b0
+ORACLE: --- slot1 first 0x300 bytes (reference target offsets 0xb8/0x110/0x174) ---
+0x7ffff68aa000:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa010:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa020:	0xffffffffffffffff	0x0000000000000001
+0x7ffff68aa030:	0x0000000000000000	0x0000000000000001
+0x7ffff68aa040:	0x0000000000000000	0x0000555555611dc0
+0x7ffff68aa050:	0x0000000000000320	0x0000000000000000
+0x7ffff68aa060:	0x00005555555faf30	0x00005555555faf30
+0x7ffff68aa070:	0x00005555555faf30	0x00005555555faf30
+0x7ffff68aa080:	0x0000000000000000	0x00007ffff6907710
+0x7ffff68aa090:	0x00007ffff6907710	0x00007ffff6907710
+0x7ffff68aa0a0:	0x00005555555ca51f	0x00005555555ca5c9
+0x7ffff68aa0b0:	0x0000000000000001	0x0000000000000010
+0x7ffff68aa0c0:	0x0000000000000010	0x0000555555611dc0
+0x7ffff68aa0d0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa0e0:	0x000000000000007b	0x00007ffff6859140
+0x7ffff68aa0f0:	0x00007ffff6840740	0x0000000000000000
+0x7ffff68aa100:	0x00007ffff6859230	0x00007ffff6840c80
+0x7ffff68aa110:	0xffffffffffffffff	0x0000000000000000
+0x7ffff68aa120:	0x00007ffff68e1800	0x0000000000000000
+0x7ffff68aa130:	0x000000000000007b	0x00007ffff685e200
+0x7ffff68aa140:	0x000000000000007b	0x0000000000000000
+0x7ffff68aa150:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff68aa160:	0x0000000000000000	0xffffffffffffffff
+0x7ffff68aa170:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa180:	0x0000000000000000	0x00000000000001c5
+0x7ffff68aa190:	0x00000000000001c5	0x0000000000000000
+0x7ffff68aa1a0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa1b0:	0x0000555555611dc0	0x0000000000000000
+0x7ffff68aa1c0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa1d0:	0x0000000000000000	0x000000000000000a
+0x7ffff68aa1e0:	0x0000000000000010	0x0000000000000006
+0x7ffff68aa1f0:	0x0000000000000004	0x0000000000000000
+0x7ffff68aa200:	0x0000000000000000	0x0000555555611dc0
+0x7ffff68aa210:	0x0000000000000440	0x0000000000000000
+0x7ffff68aa220:	0x00005555555faf30	0x00005555555faf30
+0x7ffff68aa230:	0x00005555555faf30	0x00005555555faf30
+0x7ffff68aa240:	0x0000000000000000	0x00007ffff68aa278
+0x7ffff68aa250:	0x0000000000000000	0x000000000000001f
+0x7ffff68aa260:	0x0000000000000010	0x000000000000001f
+0x7ffff68aa270:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa280:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa290:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa2a0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa2b0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa2c0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa2d0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa2e0:	0x0000000000000000	0x0000000000000000
+0x7ffff68aa2f0:	0x0000000000000000	0x0000000000000000
+ORACLE: --- jemalloc chunk header just before buf (0x60 bytes) ---
+0x7ffff68a87a0:	0x0000000000000000	0x0000000000000000
+0x7ffff68a87b0:	0x0000000000000000	0x0000000000000000
+0x7ffff68a87c0:	0x0000000000000000	0x0000000000000000
+0x7ffff68a87d0:	0x0000000000000000	0x0000000000000000
+0x7ffff68a87e0:	0x0000000000000000	0x0000000000000000
+0x7ffff68a87f0:	0x0000000000000000	0x0000000000000000
+process 3909589
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x55555555e000     0xa000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/daemon/kresd
+      0x55555555e000     0x5555555ec000    0x8e000     0xa000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/daemon/kresd
+      0x5555555ec000     0x555555611000    0x25000    0x98000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/daemon/kresd
+      0x555555611000     0x555555613000     0x2000    0xbd000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/daemon/kresd
+      0x555555613000     0x555555614000     0x1000    0xbf000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/daemon/kresd
+      0x555555614000     0x555555615000     0x1000        0x0  rw-p   
+      0x7fff3d600000     0x7fffbd600000 0x80000000        0x0  r--s   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/ruledb/data.mdb
+      0x7fffbd780000     0x7fffbd790000    0x10000        0x0  r-xp   
+      0x7ffff5480000     0x7ffff5800000   0x380000        0x0  rw-p   
+      0x7ffff5800000     0x7ffff5c01000   0x401000        0x0  rw-s   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/defer
+      0x7ffff5d23000     0x7ffff5d34000    0x11000        0x0  rw-s   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/top
+      0x7ffff5d34000     0x7ffff5e23000    0xef000        0x0  rw-s   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/data.mdb
+      0x7ffff5e23000     0x7ffff63a3000   0x580000        0x0  rw-p   
+      0x7ffff63a3000     0x7ffff63d6000    0x33000        0x0  rw-p   
+      0x7ffff63d6000     0x7ffff63d7000     0x1000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/extended_error.so
+      0x7ffff63d7000     0x7ffff63d8000     0x1000     0x1000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/extended_error.so
+      0x7ffff63d8000     0x7ffff63d9000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/extended_error.so
+      0x7ffff63d9000     0x7ffff63da000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/extended_error.so
+      0x7ffff63da000     0x7ffff63db000     0x1000     0x3000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/extended_error.so
+      0x7ffff63db000     0x7ffff63dc000     0x1000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/refuse_nord.so
+      0x7ffff63dc000     0x7ffff63dd000     0x1000     0x1000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/refuse_nord.so
+      0x7ffff63dd000     0x7ffff63de000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/refuse_nord.so
+      0x7ffff63de000     0x7ffff63df000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/refuse_nord.so
+      0x7ffff63df000     0x7ffff63e0000     0x1000     0x3000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/refuse_nord.so
+      0x7ffff63e0000     0x7ffff6400000    0x20000        0x0  rw-p   
+      0x7ffff6400000     0x7ffff6c00000   0x800000        0x0  rw-p   
+      0x7ffff6c00000     0x7ffff6c9d000    0x9d000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff6c9d000     0x7ffff6de5000   0x148000    0x9d000  r-xp   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff6de5000     0x7ffff6e6c000    0x87000   0x1e5000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff6e6c000     0x7ffff6e77000     0xb000   0x26b000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff6e77000     0x7ffff6e7a000     0x3000   0x276000  rw-p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff6e7a000     0x7ffff6e7e000     0x4000        0x0  rw-p   
+      0x7ffff6e7f000     0x7ffff6f28000    0xa9000        0x0  rw-p   
+      0x7ffff6f28000     0x7ffff6f2c000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x7ffff6f2c000     0x7ffff6fd3000    0xa7000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x7ffff6fd3000     0x7ffff6fe0000     0xd000    0xab000  r--p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x7ffff6fe0000     0x7ffff6fe1000     0x1000    0xb7000  r--p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x7ffff6fe1000     0x7ffff6fe2000     0x1000    0xb8000  rw-p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x7ffff6fe2000     0x7ffff6fe4000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x7ffff6fe4000     0x7ffff6feb000     0x7000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x7ffff6feb000     0x7ffff6fec000     0x1000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x7ffff6fec000     0x7ffff6fed000     0x1000     0xa000  r--p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x7ffff6fed000     0x7ffff6fee000     0x1000     0xb000  rw-p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x7ffff6fee000     0x7ffff6ff0000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff6ff0000     0x7ffff7002000    0x12000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7002000     0x7ffff7008000     0x6000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7008000     0x7ffff7009000     0x1000    0x1a000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7009000     0x7ffff700a000     0x1000    0x1b000  rw-p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff700a000     0x7ffff700d000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+      0x7ffff700d000     0x7ffff7023000    0x16000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+      0x7ffff7023000     0x7ffff7027000     0x4000    0x19000  r--p   /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+      0x7ffff7027000     0x7ffff7028000     0x1000    0x1c000  r--p   /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+      0x7ffff7028000     0x7ffff7029000     0x1000    0x1d000  rw-p   /usr/lib/x86_64-linux-gnu/libelf-0.190.so
+      0x7ffff7029000     0x7ffff702b000     0x2000        0x0  rw-p   
+      0x7ffff702b000     0x7ffff7035000     0xa000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x7ffff7035000     0x7ffff7098000    0x63000     0xa000  r-xp   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x7ffff7098000     0x7ffff70ad000    0x15000    0x6d000  r--p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x7ffff70ad000     0x7ffff70ae000     0x1000    0x81000  r--p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x7ffff70ae000     0x7ffff70af000     0x1000    0x82000  rw-p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x7ffff70af000     0x7ffff70c0000    0x11000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x7ffff70c0000     0x7ffff70f7000    0x37000    0x11000  r-xp   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x7ffff70f7000     0x7ffff7257000   0x160000    0x48000  r--p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x7ffff7257000     0x7ffff725b000     0x4000   0x1a8000  r--p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x7ffff725b000     0x7ffff725c000     0x1000   0x1ac000  rw-p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x7ffff725c000     0x7ffff7294000    0x38000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x7ffff7294000     0x7ffff7366000    0xd2000    0x38000  r-xp   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x7ffff7366000     0x7ffff73e5000    0x7f000   0x10a000  r--p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x7ffff73e5000     0x7ffff73f2000     0xd000   0x188000  r--p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x7ffff73f2000     0x7ffff73ff000     0xd000   0x195000  rw-p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x7ffff73ff000     0x7ffff7400000     0x1000        0x0  rw-p   
+      0x7ffff7400000     0x7ffff7428000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7428000     0x7ffff75b1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff75b1000     0x7ffff7600000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7600000     0x7ffff7604000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7604000     0x7ffff7606000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7606000     0x7ffff7613000     0xd000        0x0  rw-p   
+      0x7ffff7614000     0x7ffff761c000     0x8000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x7ffff761c000     0x7ffff7630000    0x14000     0x8000  r-xp   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x7ffff7630000     0x7ffff7659000    0x29000    0x1c000  r--p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x7ffff7659000     0x7ffff765b000     0x2000    0x44000  r--p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x7ffff765b000     0x7ffff765c000     0x1000    0x46000  rw-p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x7ffff765c000     0x7ffff7668000     0xc000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x7ffff7668000     0x7ffff7697000    0x2f000     0xc000  r-xp   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x7ffff7697000     0x7ffff76ae000    0x17000    0x3b000  r--p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x7ffff76ae000     0x7ffff76b0000     0x2000    0x51000  r--p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x7ffff76b0000     0x7ffff76b1000     0x1000    0x53000  rw-p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x7ffff76b1000     0x7ffff76b4000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x7ffff76b4000     0x7ffff76c2000     0xe000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x7ffff76c2000     0x7ffff76c5000     0x3000    0x11000  r--p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x7ffff76c5000     0x7ffff76c6000     0x1000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x7ffff76c6000     0x7ffff76c7000     0x1000    0x15000  rw-p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x7ffff76c7000     0x7ffff76c9000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x7ffff76c9000     0x7ffff76cd000     0x4000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x7ffff76cd000     0x7ffff76e7000    0x1a000     0x6000  r--p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x7ffff76e7000     0x7ffff76e8000     0x1000    0x1f000  r--p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x7ffff76e8000     0x7ffff76e9000     0x1000    0x20000  rw-p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x7ffff76e9000     0x7ffff76ed000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff76ed000     0x7ffff7711000    0x24000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7711000     0x7ffff7715000     0x4000    0x28000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7715000     0x7ffff7716000     0x1000    0x2b000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7716000     0x7ffff7717000     0x1000    0x2c000  rw-p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7717000     0x7ffff7727000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7727000     0x7ffff77a6000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff77a6000     0x7ffff77fe000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff77fe000     0x7ffff77ff000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff77ff000     0x7ffff7800000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7800000     0x7ffff7809000     0x9000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+      0x7ffff7809000     0x7ffff78b6000    0xad000     0x9000  r-xp   /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+      0x7ffff78b6000     0x7ffff78c4000     0xe000    0xb6000  r--p   /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+      0x7ffff78c4000     0x7ffff78ca000     0x6000    0xc4000  r--p   /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+      0x7ffff78ca000     0x7ffff78cb000     0x1000    0xca000  rw-p   /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+      0x7ffff78cb000     0x7ffff7aec000   0x221000        0x0  rw-p   
+      0x7ffff7aec000     0x7ffff7af0000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libxdp.so.1.4.0
+      0x7ffff7af0000     0x7ffff7afa000     0xa000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libxdp.so.1.4.0
+      0x7ffff7afa000     0x7ffff7afe000     0x4000     0xe000  r--p   /usr/lib/x86_64-linux-gnu/libxdp.so.1.4.0
+      0x7ffff7afe000     0x7ffff7aff000     0x1000    0x11000  r--p   /usr/lib/x86_64-linux-gnu/libxdp.so.1.4.0
+      0x7ffff7aff000     0x7ffff7b00000     0x1000    0x12000  rw-p   /usr/lib/x86_64-linux-gnu/libxdp.so.1.4.0
+      0x7ffff7b00000     0x7ffff7b03000     0x3000        0x0  rw-p   
+      0x7ffff7b03000     0x7ffff7b0d000     0xa000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libbpf.so.1.3.0
+      0x7ffff7b0d000     0x7ffff7b4a000    0x3d000     0xa000  r-xp   /usr/lib/x86_64-linux-gnu/libbpf.so.1.3.0
+      0x7ffff7b4a000     0x7ffff7b5f000    0x15000    0x47000  r--p   /usr/lib/x86_64-linux-gnu/libbpf.so.1.3.0
+      0x7ffff7b5f000     0x7ffff7b62000     0x3000    0x5b000  r--p   /usr/lib/x86_64-linux-gnu/libbpf.so.1.3.0
+      0x7ffff7b62000     0x7ffff7b63000     0x1000    0x5e000  rw-p   /usr/lib/x86_64-linux-gnu/libbpf.so.1.3.0
+      0x7ffff7b63000     0x7ffff7b65000     0x2000        0x0  rw-p   
+      0x7ffff7b65000     0x7ffff7b68000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/liblmdb.so.0.0.0
+      0x7ffff7b68000     0x7ffff7b78000    0x10000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/liblmdb.so.0.0.0
+      0x7ffff7b78000     0x7ffff7b7b000     0x3000    0x13000  r--p   /usr/lib/x86_64-linux-gnu/liblmdb.so.0.0.0
+      0x7ffff7b7b000     0x7ffff7b7c000     0x1000    0x15000  r--p   /usr/lib/x86_64-linux-gnu/liblmdb.so.0.0.0
+      0x7ffff7b7c000     0x7ffff7b7d000     0x1000    0x16000  rw-p   /usr/lib/x86_64-linux-gnu/liblmdb.so.0.0.0
+      0x7ffff7b7d000     0x7ffff7bb0000    0x33000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x7ffff7bb0000     0x7ffff7cea000   0x13a000    0x33000  r-xp   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x7ffff7cea000     0x7ffff7d63000    0x79000   0x16d000  r--p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x7ffff7d63000     0x7ffff7d73000    0x10000   0x1e6000  r--p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x7ffff7d73000     0x7ffff7d75000     0x2000   0x1f6000  rw-p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x7ffff7d75000     0x7ffff7d78000     0x3000        0x0  rw-p   
+      0x7ffff7d78000     0x7ffff7d80000     0x8000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libluajit-5.1.so.2.1.1703358377
+      0x7ffff7d80000     0x7ffff7df0000    0x70000     0x8000  r-xp   /usr/lib/x86_64-linux-gnu/libluajit-5.1.so.2.1.1703358377
+      0x7ffff7df0000     0x7ffff7e06000    0x16000    0x78000  r--p   /usr/lib/x86_64-linux-gnu/libluajit-5.1.so.2.1.1703358377
+      0x7ffff7e06000     0x7ffff7e08000     0x2000    0x8e000  r--p   /usr/lib/x86_64-linux-gnu/libluajit-5.1.so.2.1.1703358377
+      0x7ffff7e08000     0x7ffff7e09000     0x1000    0x90000  rw-p   /usr/lib/x86_64-linux-gnu/libluajit-5.1.so.2.1.1703358377
+      0x7ffff7e09000     0x7ffff7e11000     0x8000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7e11000     0x7ffff7e33000    0x22000     0x8000  r-xp   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7e33000     0x7ffff7e3c000     0x9000    0x2a000  r--p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7e3c000     0x7ffff7e3d000     0x1000    0x32000  r--p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7e3d000     0x7ffff7e3e000     0x1000    0x33000  rw-p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7e3e000     0x7ffff7e40000     0x2000        0x0  rw-p   
+      0x7ffff7e40000     0x7ffff7e44000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libdnssec.so.9.0.0
+      0x7ffff7e44000     0x7ffff7e4b000     0x7000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libdnssec.so.9.0.0
+      0x7ffff7e4b000     0x7ffff7e4e000     0x3000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libdnssec.so.9.0.0
+      0x7ffff7e4e000     0x7ffff7e4f000     0x1000     0xd000  r--p   /usr/lib/x86_64-linux-gnu/libdnssec.so.9.0.0
+      0x7ffff7e4f000     0x7ffff7e50000     0x1000     0xe000  rw-p   /usr/lib/x86_64-linux-gnu/libdnssec.so.9.0.0
+      0x7ffff7e50000     0x7ffff7e52000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libzscanner.so.4.0.0
+      0x7ffff7e52000     0x7ffff7eab000    0x59000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libzscanner.so.4.0.0
+      0x7ffff7eab000     0x7ffff7ec6000    0x1b000    0x5b000  r--p   /usr/lib/x86_64-linux-gnu/libzscanner.so.4.0.0
+      0x7ffff7ec6000     0x7ffff7ec7000     0x1000    0x76000  r--p   /usr/lib/x86_64-linux-gnu/libzscanner.so.4.0.0
+      0x7ffff7ec7000     0x7ffff7ec8000     0x1000    0x77000  rw-p   /usr/lib/x86_64-linux-gnu/libzscanner.so.4.0.0
+      0x7ffff7ec8000     0x7ffff7ed2000     0xa000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libknot.so.14.0.0
+      0x7ffff7ed2000     0x7ffff7f24000    0x52000     0xa000  r-xp   /usr/lib/x86_64-linux-gnu/libknot.so.14.0.0
+      0x7ffff7f24000     0x7ffff7f32000     0xe000    0x5c000  r--p   /usr/lib/x86_64-linux-gnu/libknot.so.14.0.0
+      0x7ffff7f32000     0x7ffff7f37000     0x5000    0x6a000  r--p   /usr/lib/x86_64-linux-gnu/libknot.so.14.0.0
+      0x7ffff7f37000     0x7ffff7f3a000     0x3000    0x6f000  rw-p   /usr/lib/x86_64-linux-gnu/libknot.so.14.0.0
+      0x7ffff7f3a000     0x7ffff7f3c000     0x2000        0x0  rw-s   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/ruledb/lock.mdb
+      0x7ffff7f3c000     0x7ffff7f3e000     0x2000        0x0  rw-s   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/lock.mdb
+      0x7ffff7f3e000     0x7ffff7f3f000     0x1000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/edns_keepalive.so
+      0x7ffff7f3f000     0x7ffff7f40000     0x1000     0x1000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/edns_keepalive.so
+      0x7ffff7f40000     0x7ffff7f41000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/edns_keepalive.so
+      0x7ffff7f41000     0x7ffff7f42000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/edns_keepalive.so
+      0x7ffff7f42000     0x7ffff7f43000     0x1000     0x3000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/run/6.4.0-jemalloc/prefix/lib/x86_64-linux-gnu/knot-resolver/kres_modules/edns_keepalive.so
+      0x7ffff7f43000     0x7ffff7f44000     0x1000        0x0  r-xp   
+      0x7ffff7f44000     0x7ffff7f48000     0x4000 0x10000000  rw-s   anon_inode:[io_uring]
+      0x7ffff7f48000     0x7ffff7f4b000     0x3000        0x0  rw-s   anon_inode:[io_uring]
+      0x7ffff7f4b000     0x7ffff7f4c000     0x1000 0x10000000  rw-s   anon_inode:[io_uring]
+      0x7ffff7f4c000     0x7ffff7f4d000     0x1000        0x0  rw-s   anon_inode:[io_uring]
+      0x7ffff7f4d000     0x7ffff7f56000     0x9000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/lib/libkres.so.9
+      0x7ffff7f56000     0x7ffff7fa4000    0x4e000     0x9000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/lib/libkres.so.9
+      0x7ffff7fa4000     0x7ffff7fb9000    0x15000    0x57000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/lib/libkres.so.9
+      0x7ffff7fb9000     0x7ffff7fbb000     0x2000    0x6b000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/lib/libkres.so.9
+      0x7ffff7fbb000     0x7ffff7fbc000     0x1000    0x6d000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/lib/libkres.so.9
+      0x7ffff7fbc000     0x7ffff7fbf000     0x3000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffc8000     0x7ffffffff000    0x37000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+=== gdb stdout tail ===
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+=== END ===
