@@ -89,6 +89,9 @@ verbatim under `#line`; the generator aborts on drift. From committed HEAD,
 `ALL CHECKS PASS rc 0`, with two five-run groups at
 `sha256=4f8bf8b7c6de06df7ce370b3570babe8df25112b9d2380c9836852864a8048c4`.
 
+The same result was replayed from a clean `git archive HEAD` extraction at
+commit `a7d5884`: 13 PASS / 0 FAIL, rc 0, identical digest.
+
 - **Rung 1 (reproducible trigger)**: count=1, id=1, seq=1 →
   `rung1 totalsegs=1 segid=1 seq=1 verdict=TRIGGER`.
 - **Rung 2 (observed state failure)**: in the collaborator, id=3 clobbers

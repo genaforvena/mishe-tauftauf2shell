@@ -52,5 +52,9 @@ layout, real neighbour object or stock allocator is exercised.
   ALL CHECKS PASS rc 0**; two independent five-run groups both
   `sha256=4f8bf8b7c6de06df7ce370b3570babe8df25112b9d2380c9836852864a8048c4`.
 
+Clean replay from `git archive HEAD` at commit `a7d5884` into a fresh temp
+directory reproduced 13 PASS / 0 FAIL, rc 0 and the same trace digest; the
+archived `run.sh` hash equals the working-tree hash above.
+
 ASan reports are checked for fixed marker text only; PIDs, addresses and build
 paths are excluded from the trace digest so clean replays are byte-identical.
