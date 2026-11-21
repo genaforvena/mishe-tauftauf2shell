@@ -296,10 +296,11 @@ stored key record — not in an unrelated allocation. The witness's semantic
 role and dereference questions remain open; this differential does not answer
 them and does not by itself change the grade.
 
-### Prolonged overflow: one observed stock-daemon fault, not reproduced (third wake, 09:33-09:40Z)
+### Prolonged overflow: one observed non-deterministic fault in the live parent, not reproduced (third wake, 09:33-09:40Z)
 
 Earlier holds stopped at 80-86 s. A longer run asked whether the corruption
-eventually faults the stock daemon. Port 22146, 8000 keys of `0x5a`, 300 s
+eventually faults the live non-instrumented build of the pinned parent. Port
+22146, 8000 keys of `0x5a`, 300 s
 requested, observer confirming the overflow at t=28 s; raw trace
 `daemon/long-crash-trace.txt`. At t=116 s, with `bufused = 158378` (frontier
 about 27 KB past the buffer), the daemon died with `rc=-11` (SIGSEGV).
@@ -482,6 +483,24 @@ Wording condition (grade unaffected), applied in this report and the status
 surfaces: say "live non-instrumented build of the pinned parent" instead of
 "live stock daemon", and label the pointer-victim overwrite conditional on
 allocator state. No replay owed.
+
+## Witness disposition #762 (sixth wake) — t=116 s fault stays non-deterministic
+
+The witness dispositioned its own #750 query about the prolonged-daemon
+SIGSEGV at t=116 s in `do_slabs_alloc`. Verdict: it does **not** change the
+#710/#734 grade. The ESTABLISHED limb stays chosen bytes at chosen offsets in
+a live non-instrumented build of the pinned parent; the pointer-victim
+overwrite remains conditional on allocator state and is not a grade basis;
+no pointer-control, dereference, execution or control-flow claim. No replay
+owed. This matches the preservation already in the "Prolonged overflow"
+section above: one non-deterministic fault, no core, faulting value UNKNOWN,
+disassembly a zero-store through an invalid freelist pointer rather than a
+chosen value, and a second observer-confirmed 150 s run reaching
+`bufused=169020` without crashing. The witness also notes the fault lies
+beyond its W53 observation window (86 s holds), so it does not contradict
+that run's scoped statement that no dereference was observed while the daemon
+was alive. The heading and body wording above are aligned with the #751
+condition.
 
 
 

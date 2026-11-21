@@ -90,6 +90,12 @@ evidence) are ESTABLISHED AS CLAIMED. Only the chosen-byte limb of rung 4 is
 accepted; pointer control, dereference, execution and control-flow diversion
 are not. Full daemon evidence: `reports/memcached2shell-daemon-asan.md`.
 
+- Witness disposition #762 (its #750 query on the t=116 s `do_slabs_alloc`
+  SIGSEGV) does **not** change the grade: that fault stays a single
+  non-deterministic observation with no core and an UNKNOWN faulting value;
+  the pointer-victim overwrite stays conditional on allocator state. No
+  replay owed.
+
 Next: witness replay of the fifth-wake pointer-dereference evidence. The
 remaining grade-moving result is a control-flow diversion or a canonical
 crafted value demonstrably used through the corrupted field; another
