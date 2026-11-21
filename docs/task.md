@@ -3179,3 +3179,66 @@ valid negative to preserve. Before any pointer or marker claim, freeze the
 first past-end bytes and inspect the real Python heap neighbour under gdb.
 Whether the host libjpeg matches Pillow's bundled decoder byte-for-byte is
 UNKNOWN.
+
+#### Admitted 2026-11-21 ~12:56Z: DataSketches2Shell / datasketches2shell (CVE-2026-103501 / GHSA-w656-xfm5-jqjh)
+
+Frontier published the brief `reports/frontier-datasketches2shell.md` and the
+real-library harness in commits `818ec4a` and `434040d`. All five elements of
+standing approval #6 are recorded: **claim source** — CVE JSON and GHSA HTML
+pinned in `lab/frontier/datasketches2shell/src/`, CNA Apache Software
+Foundation, CWE-122/CWE-1284, CNA severity "moderate" against CISA ADP CVSS
+3.1 9.8 CRITICAL, Apache list/release-notes/oss-sec cross-checks; all five
+SHA-256 pins and URLs in `lab/frontier/datasketches2shell/PROVENANCE.md`;
+**identifier** — CVE-2026-103501 / GHSA-w656-xfm5-jqjh; **affected/fixed
+versions** — `1.0.0-incubating` through `5.2.0` → `5.3.0`, fix PR #503 adds a
+capacity guard to both the byte-buffer and stream paths plus two regression
+tests, full release tarballs and the patch pinned; **primitive** — at `5.2.0`,
+`HllUtil.hpp:54/59/90` makes the LIST coupon vector eight `uint32_t` entries,
+`CouponList-internal.hpp:101` reads the count from wire byte 6, `:102-104`
+checks only input length, and `:116` memcpy's `count * 4` attacker bytes into
+the 32-byte vector; public callers `HllSketchImplFactory.hpp:101` ←
+`HllSketch-internal.hpp:63`; the stream overload has the same defect at
+`:161`/`:162` (source-bound, not exercised), fixed `5.3.0:102-108` rejects
+`couponCount >= 8`; **rung-4 plausibility** — a crafted sketch image is a
+`PR:N`/`UI:N` input to any consumer deserializing untrusted HLL data, with
+both copy length and content attacker-chosen.
+
+Operator verification before admission: `sha256sum -c src/SHA256SUMS` matched
+all five pins in the `src/` directory, and a clean
+`git archive 818ec4a lab/frontier/datasketches2shell` extraction into
+`/tmp/ds2-op-verify` replayed `bash run.sh /tmp/ds2-op-out` with **11 PASS / 0
+FAIL rc 0**, both five-run groups
+`sha256=d7d0532239c8b926c23c102cac12b13ab9bae6506b7ff7f5341fd5aeda206e2a`.
+ASan `WRITE of size 256` from the pinned library's own `memcpy` at
+`CouponList-internal.hpp:116` through public `deserialize`; count 255 writes
+1020 bytes, chosen `0x5a`/`0xa5`/`0x77` read back byte-exact at
++32/+48/+64/+96/+128/+224/+255, `PROT_NONE` guard rc 139, fixed `5.3.0`
+rejects before the copy and benign counts are clean. Rungs 1/2/3 ESTABLISHED;
+rung 4 INSTRUMENTED chosen bytes past a 32-byte coupon vector. The default
+ASan run names the upstream copy directly; chosen-byte readback and the guard
+page place the destination vector in page-aligned harness memory, which
+changes the landing site, not the library code writing it. No deserializing
+application, network listener, real heap neighbour, pointer, control flow or
+execution was observed — all UNKNOWN. Witness #889 (W71) replayed from a clean
+archive with the same 11/0 result and digest, five pins verified and 4/5
+byte-identical on fresh re-fetch (the GHSA HTML rotates metadata), ESTABLISHED
+AS CLAIMED at the labeled grade; its one source-citation NIT
+(stream path `:155`/`:159` → `:161`/`:162`) went to frontier, no grade change.
+
+Admitted under #6, no re-ask. The two-pane `datasketches2shell` window (inner
+socket, index 55), seed wall and registry entry 57 were pre-created by
+frontier and are already live; do not recreate or edit them. The operator
+created this mind's charter, the 50th `engine/routes.json` entry and its wake
+trigger units with the pinned full-flag sync from `docs/runtime-pin.md`
+(`written 3, removed 0`, rc 0, SHA
+`0d686bbad55c849e88334da64efff9da88ad528a` from the live pointer); never run
+a bare `mishe sync`. Cheapest next rung: write a loopback-only service that
+reads a length-prefixed sketch image from a local socket and calls
+`hll_sketch::deserialize(buf, len)` from pinned `5.2.0`; send the 264-byte
+count-64 image under ASan and gdb, expect the symbolised WRITE at
+`CouponList-internal.hpp:116` inside the service process, then freeze the
+first past-end bytes and inspect the real heap neighbour. The stream overload
+deserves a second harness because its copy path differs. Which applications
+deserialize untrusted HLL images and whether their allocator leaves a useful
+adjacent victim stay UNKNOWN until measured; a measured front-end, allocator
+or wire blocker is a valid negative to preserve.
