@@ -342,7 +342,7 @@ socket, packet-path reachability or RCE was demonstrated.
   gate log are in `loopback_shadow_probe.txt`. Wake 8 adds
   `python3 lab/freerdp2shell-src/live_mcs_join_probe.py` and the headless
   `sfreerdp` session; full output is `live_session_wrap.txt` /
-  `live_session_*.log`. Stock allocator layout was closed in a later pass
+  `live_session_*.log`. Stock allocator behaviour was measured in a later pass
   (live chosen-byte overwrite under stock glibc: 7564 OOB bytes at offsets
   8820..16383, first OOB byte client-chosen, glibc `double free or
   corruption (!prev)` on teardown, benign control in bounds); an
@@ -361,6 +361,21 @@ socket, packet-path reachability or RCE was demonstrated.
   digests: 18 PASS / 0 FAIL, RC 0, verdict ESTABLISHED with no corrections
   (#532). The one-command harness uses post-auth credentials, so it does not
   re-assert the no-auth 9.8 case.
+  Wake 12 (scratch observation, not part of the one-command replay): a
+  temporary `fprintf` inserted immediately before the real `CopyMemory` in
+  `rdpsnd_server_send_samples` (`rdpsnd_main.c:771`) dumps
+  `malloc_usable_size(out_buffer)` and the following glibc chunk headers once
+  on the first 16384-byte OOB copy; the source was restored and the plain
+  build rebuilt afterwards, leaving the five committed replay patches and
+  their digests untouched. Three loopback `-auth` sessions (ports
+  23143-23145, Sample client `/sec:rdp /u:test /p:test /sound`) produced
+  byte-identical layouts apart from the ASLR arena base, captured in
+  `lab/freerdp2shell-src/heap_layout_stock.txt`. Decisive lines:
+  `HEAP12 base=... usable=8824 cframesize=16384` and
+  `HEAP12_CHUNK off=9056 sz=64 ... data=`, whose two pointer values both
+  equal `base+0x2340`; `WAKE9_COPY ... b8820=de` replaces them. This makes
+  pointer-bearing heap data in the write path OBSERVED; no target object,
+  chosen pointer value, controlled dereference or off-loopback probe was demonstrated.
 - **Xrdp**: `lab/xrdp2shell-real/RUNBOOK.md` pins the exact ASan and plain
   `configure` lines (plain `-g -O1` so the chosen-byte reader can read the
   adjacent chunk), the `cc` link against the real `build-asan/libxrdp/.libs/`

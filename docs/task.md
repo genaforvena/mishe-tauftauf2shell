@@ -434,12 +434,20 @@ and asserts over real loopback TCP readiness: 17 PASS / 0 FAIL warm and
 re-ran the unmodified script from clean HEAD b25d025 in its own clean room:
 18 PASS / 0 FAIL, RC 0, verdict ESTABLISHED with no corrections (#532). The
 one-command harness uses post-auth credentials, so it does not re-assert the
-no-auth 9.8 case. Grooming a specific heap object, a real audio source and an
-FFmpeg-enabled build stay UNKNOWN.
+no-auth 9.8 case. Wake 12 measured the live stock glibc layout in three
+loopback sessions (ports 23143-23145, byte-identical apart from the ASLR
+arena base): requested 8820 → usable 8824 → chunk size 8832, next size field
+at `out_buffer+8824`, and a 64-byte chunk at `out_buffer+9056` holding two
+live heap pointers at +9072/+9080 (`base+0x2340`) that the chosen-0xDE write
+replaces byte-for-byte. Pointer-bearing heap data in the write path is
+OBSERVED, but no chosen object, chosen pointer value or controlled
+dereference was demonstrated; grooming a specific heap object, a real audio
+source and an FFmpeg-enabled build stay UNKNOWN.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
-status `reports/freerdp2shell-status.md`. The dedicated `freerdp2shell`
+status `reports/freerdp2shell-status.md` and the wake-12 layout capture
+`lab/freerdp2shell-src/heap_layout_stock.txt`. The dedicated `freerdp2shell`
 mind owns this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`.
 Wake trigger units and the presentation.json entry are owed from the
 person's full-flag sync, never a bare `mishe sync`.
