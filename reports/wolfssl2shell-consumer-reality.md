@@ -542,3 +542,48 @@ UNKNOWN), no follow-up action. The corrected log
 `out/loopback/groom-victim2-corrected.log` is an ignored lab artefact and
 must stay in the lab tree so the citation at line 409 remains resolvable.
 This closes the last open evidence nit; nothing in this report is retracted.
+
+## Eighth wake: field-level pointer ceiling (2026-11-21, 21:3xZ)
+
+The seventh wake measured the ceiling; this wake explains it at field level
+and adds one new probe. No grade changes and no new remote route.
+
+Source map on the verbatim pinned v5.9.0 tree: `Dtls13RecordNumber` in
+`wolfssl/internal.h:5873` is `{next @0, epoch @8, seq @16}` (24 bytes, glibc
+chunk `0x21`); `Dtls13WriteAckMessage` (`src/dtls13.c:2604-2606`) emits the
+epoch at `output + 15 + 16i` and the seq at `output + 23 + 16i`, and
+`c64toa` (`wolfcrypt/src/misc.c:1004`) writes **big-endian** 8-byte values on
+this little-endian host. `output` and every node pointer are 16-byte aligned,
+so the parity is fixed: a node qword at +0/+16 takes bytes 1..7 of an epoch
+write plus byte 0 of the next seq write, while +8 takes bytes 1..7 of a seq
+write plus byte 0 of the next epoch write. The wire supplies a 48-bit seq
+(upper 16 bits of the 64-bit value always zero) and, in this route, epoch 0.
+Consequently `next @0` and `seq @16` are always zero, the chunk size field at
+node-8 has its low byte (PREV_INUSE) structurally zero, and the only chosen
+64-bit field reached is `epoch @8`. Heap grooming cannot change this parity
+on this build; it is not a claim about a 64-bit epoch field or another
+consumer.
+
+New probe (fourth sender base, loopback plain build with `pregrow=64`,
+`early13`, `unified_seen`, 4097 paced fragments): `seq_base=0x2071`
+(`bash run_groom_size.sh 18650 2071 out/loopback/groom-size-prev.log`).
+At the real `XFREE` in `Dtls13RtxFlushAcks` (`dtls13.c:780`) the head is
+`0x55555562b240`, `next=(nil)`, size field `0x0000210000000000` — the
+chosen `0x21` byte lands at size byte 5, so PREV_INUSE is still clear — and
+the node's `epoch` field reads `0x0001210000000000`. Cleanup still aborts
+`double free or corruption (out)`. The previously tested bases `0`,
+`0x1000` and `0x20ffffffff71` produced sizes `0x008f000000000000`,
+`0x008f100000000000` and `0x0000000000002100`; all have a zero low byte,
+so this probe excludes the hypothesis that a different seq base alone can
+set PREV_INUSE.
+
+Rungs 1/2/3 remain ESTABLISHED on the pinned harness and live server; rung 4
+remains ESTABLISHED for availability impact; rung 5 stays UNKNOWN and is now
+bounded at field level on this build. The `next` pointer never becomes a
+chosen value, no tcache insertion or control-flow diversion was observed,
+and the only live allocations identified in the overflow path after
+`pregrow` were `Dtls13RecordNumber` nodes — no live consumer pointer at
+offset 8 (mod 16) was found. The tagged
+v5.9.1 control (128-record cap) is unchanged. All probes stayed on
+127.0.0.1; no pinned library source was edited; the new log is an ignored
+lab artefact under `out/loopback/`.
