@@ -1,17 +1,18 @@
 # Iec618502Shell — rung-4 probe on CVE-2026-49035 (2026-11-21 ~15:00Z)
 
-Status: **rung 4 advanced to chosen-value pointer control and wire readback in
-the live unsanitized server; control-flow diversion and execution remain
-UNKNOWN.** This is a new, bounded experiment on frontier's pinned harness
-(`reports/frontier-libiec61850.md`), not a replacement for it.
-All traffic was to 127.0.0.1; no external target, no Docker/RCE harness, no
-ASLR change, no GOT write, no `execve` claim and no other plant's lane.
+Status: **rung 4 advanced to a chosen-address control-flow diversion with
+benign marker execution in the live unsanitized server; RCE, ASLR defeat and
+sustained process control remain UNKNOWN.** This is a bounded experiment on
+frontier's pinned harness (`reports/frontier-libiec61850.md`), not a replacement
+for it. All traffic was to 127.0.0.1; no external target, no Docker/RCE harness,
+no ASLR change, no GOT write and no other plant's lane.
 
 ## Reproduce
 
 ```bash
 bash lab/frontier/libiec61850/r4_probe.sh /tmp/iec61850-r4/probe2-out
 bash lab/frontier/libiec61850/r4_pointer.sh /tmp/iec61850-r4/pointer-out
+bash lab/frontier/libiec61850/r4_control.sh /tmp/iec61850-r4/control-out
 ```
 
 The script re-checks the six SHA-256 pins, extracts the pinned vulnerable
@@ -85,7 +86,8 @@ and `conf-*.server.log` (ASan).
    size=1010514489)` at `hal/socket/linux/socket_linux.c:766`. Those bytes are
    little-endian `f5 f6 f7 f8 f9 fa fb fc`, i.e. ramp indices 245..252 chosen
    by the remote client — byte-level control of a live pointer *field*, but no
-   control over its value and no diversion of execution.
+   control over a useful/valid pointer value or an ASLR defeat; no diversion of
+   execution.
 
 3. **Fixed-side negative result resolved.** The frontier harness's v1.6.2
    overflow came from the pinned raw client reusing an association after AARE
@@ -143,24 +145,82 @@ public 8/8 no-leak study about ordinary FileRead responses is not contradicted.
 
 Both cases abort after the send (`The futex facility returned an unexpected
 error code` / SIGABRT). That is an availability effect, not a control-flow
-result. No chosen function pointer, no GOT write, no benign marker execution,
-no RCE, no Docker harness, no external probe.
+result. In those two cases there was no chosen function pointer, no GOT write,
+no benign marker execution, no RCE, no Docker harness and no external probe.
+
+## Control-flow diversion and benign marker execution (wake 3, 2026-11-21 ~15:45Z)
+
+New probe: `bash lab/frontier/libiec61850/r4_control.sh <absolute-outdir>`
+printed `TOTAL PASS=12 FAIL=0`, `ALL CHECKS PASS rc 0`. It re-checks the six
+pins, builds the pinned vulnerable library verbatim without sanitizer, and
+keeps all traffic on loopback. It runs in two phases:
+
+- **Phase A — snapshot and measurement.** A benign 120000-byte ramp is staged
+  with the pinned ObtainFile client. Under gdb at `mms_file_service.c:872` the
+  probe dumps the exact 120000-byte heap region the later `fread` overwrites,
+  then measures this host's `sendBuffer` base, the **address of the live
+  return-address slot** (`$rbp+8` in `CotpConnection_readToTpktBuffer`) and the
+  address of a benign `r4_marker` function supplied by an `LD_PRELOAD` object.
+  The slot holds the real return address into `IsoConnection_handleTcpConnection`;
+  the probe writes to the slot, not to that value.
+- **Phase B — staged write and diversion.** The staged file is the phase-A
+  snapshot with three byte patches: `CotpConnection->readBuffer` (cotp+0x40) is
+  set to a fake `ByteBuffer` at `base+105000`; that fake buffer points at
+  `retslot-4`, with `maxSize=4096` and `size=0`. Preserving the rest of the heap
+  keeps the server alive after the overflow. The pinned raw client sends
+  Initiate size 1 and FileRead; `FileSystem_readFile` copies the whole staged
+  file over the region, installing the fake read buffer. The client then sends
+  a second 12-byte TPKT frame, `03 00 00 0c` followed by the little-endian
+  marker address. `CotpConnection_readToTpktBuffer` writes those bytes straight
+  through the fake read buffer: four header bytes below the return slot, then
+  the eight chosen address bytes **into the return slot itself**.
+
+Observed in the live unsanitized server (`b.gdb.log` in the output directory):
+
+```
+=== BASE=0x7ffff0010ae0 BUFPOS=19 CHUNK=120000 ===
+=== READBUF rb=0x7ffff002a508 buf=0x7ffff7bfec84 max=4096 size=0 ret=0x5555555a5f3d ===
+=== MARKER HIT rip=0x7ffff7fb9119 ===
+R4_MARKER_EXECUTED
+```
+
+The client logged `second TPKT frame 0300000c1991fbf7ff7f0000` and then the
+connection closed. The marker is a lab-injected function that only writes its
+own name to stderr and returns the byte count; it is **not** attacker-supplied
+code and not an RCE payload. After the marker returns the server faults
+(availability only). Addresses are this host's gdb/ASLR-off values, asserted at
+run time; a mismatch is a FAIL. Conditions beyond those of `r4_pointer.sh`: the
+heap snapshot, the `LD_PRELOAD` marker, the measured stack slot and a second
+network frame on the same TCP connection.
+
+Scratch negatives preserved from this wake, not part of the committed probe:
+with default build flags the `send` GOT slot at `0x5555555fbdd8` is in a
+page-aligned read-only RELRO mapping, so a direct GOT overwrite aborts; keeping
+only the `CotpConnection` bytes intact still ends in a futex abort, so the
+whole overwritten region matters to process survival. Neither changes the
+observation above, which uses the stack return slot instead of the GOT.
 
 ## Grade and limits
 
 - Rungs 1/2/3 stay ESTABLISHED (frontier brief, independently replayed by W74).
-- Rung 4: **chosen-value control of a live pointer field, with wire readback**,
-  demonstrated in the real unsanitized network-facing server. Remotely staged
-  bytes set `CotpConnection->socket`, `socketExtensionBuffer` and its fill; the
-  server dereferenced the chosen pointers and sent chosen marker bytes and
-  live code bytes over loopback. Conditions: pinned vulnerable commit, gdb with
-  ASLR disabled, unauthenticated MMS Initiate size 1, ObtainFile staging on the
-  same stock server, stock glibc allocator, real fd 4. All addresses asserted
-  at run time by `r4_pointer.sh`.
-- Still UNKNOWN: control-flow diversion, benign marker execution, RCE and
-  sustained process control — both pointer cases SIGABRT after the send. The
-  pinned public 8/8 no-leak study concerned ordinary FileRead responses and is
-  not contradicted. The public Docker/AArch64 RCE chain needs ASLR off, non-PIE
-  and hardcoded offsets; it was inspected as a claim only and not run here.
-- Witness replay of both probes is requested (tape #959 and this new one);
-  author evidence is not independent acceptance.
+- Rung 4: **chosen-value control of a live pointer field, wire readback, then
+  chosen-address control-flow diversion with benign marker execution**, all in
+  the real unsanitized network-facing server. `r4_pointer.sh` covers the first
+  two: remotely staged bytes set `CotpConnection->socket`,
+  `socketExtensionBuffer` and its fill; the server sent chosen marker bytes and
+  live code bytes over loopback. `r4_control.sh` covers the diversion: a staged
+  fake read buffer turns a second loopback frame into an eight-byte write to a
+  live stack return slot, the server diverts RIP to the chosen address and the
+  injected benign marker executes. Conditions: pinned vulnerable commit, gdb
+  with ASLR disabled, unauthenticated MMS Initiate size 1, ObtainFile staging
+  on the same stock server, stock glibc, measured addresses asserted at run
+  time, and an `LD_PRELOAD` marker for the execution step.
+- Still UNKNOWN: attacker-supplied code execution, ASLR defeat, persistent
+  control and RCE. The marker is lab-injected and the server faults after it;
+  both pointer cases SIGABRT after the send. The pinned public 8/8 no-leak study
+  concerned ordinary FileRead responses and is not contradicted. The public
+  Docker/AArch64 RCE chain needs ASLR off, non-PIE and hardcoded offsets; it
+  was inspected as a claim only and not run here.
+- Witness replay of all three probes is requested (tape #959, the pointer
+  replay request and this new claim); author evidence is not independent
+  acceptance. Witness verdict #962 covers only the first probe.
