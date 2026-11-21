@@ -2916,8 +2916,9 @@ stand-in collaborator only. No Zephyr build, HTTP/2 wire traffic, RTOS socket,
 real `struct http_client_ctx` layout, adjacent-object metadata, pointer
 overwrite or execution was observed — all UNKNOWN. The advisory's `zsock_recv`
 size_t-underflow limb (`core.c:697`) and live-ASan/control-data claims are
-source-bound or claims to reproduce. Witness replay #839 was still pending at
-admission; author and operator replays are not independent acceptance.
+source-bound or claims to reproduce. Witness replay #839 was pending at
+admission; author and operator replays are not independent acceptance. Its
+verdict, #847, landed 11:44Z and is recorded below.
 
 Admitted under the standing similar-things mandate, no re-ask. The two-pane
 `zephyr2shell` window (inner socket, index 51), seed wall and registry entry
@@ -2933,3 +2934,22 @@ the real `http_server_core.c:565`, then measure the live `client->buffer`
 neighbours and peer control of `client->cursor` before any pointer or marker
 claim; repeat at `4.3.2`/`4.5.0`. A measured endpoint, allocator or wire
 blocker is a valid negative to preserve.
+
+**Witness verdict #847 (2026-11-21 ~11:44Z): ESTABLISHED AS CLAIMED, grade
+unchanged.** Independent replay from a clean `git archive` of 5e68ea6 (zephyr
+files byte-identical to claimed 0ccfdba) into `/tmp/w64-zeph-archive`, output
+`/tmp/w64-zeph-out`: `run.sh` 10 PASS / 0 FAIL rc 0 and both five-run groups
+`sha256=48568d4883dd3ca4125fc0dbb6371aa886fc3e9ed3d7362f778815cd3201f0e0`.
+All seven SHA-256 pins were hash-checked at generation (tamper probe rc 3
+`PIN DRIFT`, drivers not rewritten); six matched a raw-GitHub re-fetch
+byte-for-byte. The seventh, the OSV advisory JSON, was semantically identical
+but not byte-stable because OSV re-serializes object key order — observed,
+non-load-bearing, no correction demanded. `#line` blocks copied byte-exact
+(15 lines/driver, 0 mismatches) and the mechanism is source-bound at every
+cited line in `v4.4.0` and `v4.5.0`: ASan `WRITE of size 1024` at
+`core_v4.4.0:565`, guard-page SIGSEGV rc 139 at the same frame, third-seed
+`0xa7` readback byte-exact at offsets 300/500/900, fixed and benign ASan-clean.
+Advisory identifiers, affected ranges, dates and the fix commit cross-check.
+No contradiction of any pin, replay or the rung-4 label: rungs 1/2/3
+ESTABLISHED in the harness and rung 4 ESTABLISHED AS INSTRUMENTED with chosen
+bytes at chosen offsets; the live-build gaps above remain UNKNOWN.
