@@ -2253,6 +2253,62 @@ loopback, capture the symbolised ASan frame at the real
 libvips/glibc neighbours of the 3-byte buffer before any pointer or marker
 claim; repeat at 4.0.16. A measured endpoint, libvips or allocator blocker
 is a valid negative to preserve.
+#### Admitted 2026-11-21 ~11:1xZ: Firebird2Shell / firebird2shell (CVE-2026-33337 / GHSA-89mq-229g-x47p)
+
+Frontier handed this find over in `reports/frontier-firebird2shell.md`
+(commits `dd2610f`, `4592fbf`). All five standing-approval #6 elements are
+present: **claim source** — CVE Program record `CVE-2026-33337` (CNA
+`GitHub_M`, published 2026-04-17T18:48:47.953Z), GitHub advisory
+GHSA-89mq-229g-x47p, master fix `2a5303dc9fb2cfc035a6aeb6274377d0e2dd3488`
+and the v5.0.4-branch fix `62fc37eda82fa1f8120aff7fb0fdd7c72b493a75`, plus
+raw `src/common/xdr.cpp` at `v5.0.3`/`v5.0.4`, `src/remote/protocol.cpp` and
+`src/common/dsc.h` at `v5.0.3`, with URLs, SHA-256 pins and git blob IDs in
+`lab/frontier/firebird2shell/PROVENANCE.md`; **identifier** —
+CVE-2026-33337 / GHSA-89mq-229g-x47p (CWE-120 / CWE-502);
+**affected/fixed versions** — Firebird `>= 3.0.0, < 3.0.14`,
+`>= 4.0.0, < 4.0.7`, `>= 5.0.0, < 5.0.4`; fixed in 3.0.14 / 4.0.7 / 5.0.4,
+with the harness pinning the 5.0 line (v5.0.3 affected, v5.0.4 fixed);
+**primitive** — on `XDR_DECODE`, `xdr.cpp:214` reads a wire-supplied `USHORT n`
+that `:216` passes unbounded to `xdr_opaque(xdrs, p, n)`, whose GETBYTES
+`memcpy` writes `n` bytes into a `dsc_length`-sized slot, followed by
+`p[n] = 0` at `:219`; pinned `protocol.cpp:1813/:1835/:1884-1889` shows each
+`p` is such a slot inside a wire-sized `UCHAR[lstr_length]` allocation.
+Fixed `v5.0.4:216` inserts `n = MIN(n, desc->dsc_length - 1);`, exactly the
+two-line fix in both pinned patches; **rung-4 plausibility** — an
+unauthenticated crafted slice packet to TCP/3050, CVSS 3.1 **7.5 High**
+`AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H` (availability only; the CVE's "other
+security impact" is a claim, not a lab observation).
+
+Operator replay ~11:08Z from a clean `git archive HEAD` at `4592fbf`:
+10 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`, wire length 60000 unclamped
+(`copy_len=60000`), chosen `0x5a5b5c5d…` read back byte-exact at `buffer+40`
+and `buffer+100`, `PROT_NONE` guard fault on the first past-end store,
+ASan `WRITE of size 60000` at pinned `xdr_v5.0.3:216`, fixed v5.0.4 clamped
+to 31 and ASan-clean on hostile and benign inputs, two independent five-run
+groups both
+`sha256=807b47150a58fe88094966b0affed9b35604a7b3730c68f53eeaa61057a25fbf`.
+All eight source pins and both harness-tool digests in `PROVENANCE.md`
+matched the committed bytes, the pinned v5.0.3→v5.0.4 diff is exactly the
+fix, and an independent web search confirmed the CVE record, GHSA and fixed
+release. Rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4 is
+INSTRUMENTED chosen-byte control at chosen offsets in a 1 MiB collaborator
+only. No live `fbserver`, wire packet, allocator neighbour, pointer
+overwrite, control-flow diversion or execution was observed — all UNKNOWN.
+
+Admitted under the standing similar-things mandate, no re-ask. The
+two-pane `firebird2shell` window (index 49, inner socket) and registry entry
+were pre-created by frontier and are already live; do not recreate or edit
+them. The operator created this mind's charter, added its per-admission
+`engine/routes.json` entry and ran the pinned full-flag sync from
+`docs/runtime-pin.md` at ~11:1xZ to mint its wake trigger units; never run a
+bare `mishe sync`. Cheapest next rung: build pinned v5.0.3 `fbserver` with
+ASan on loopback, send the advisory's crafted slice packet to a locally
+started TCP/3050 listener, capture a symbolised ASan report at the real
+`xdr_datum` / `xdr_opaque` frame, then measure the actual Firebird pool and
+wire-buffer neighbours of the 32-byte slot before any pointer or marker
+claim; repeat at 5.0.4. A measured listener, auth-gate, allocator or reachability
+blocker is a valid negative to preserve.
+
 
 #### Held 2026-11-21 ~09:47Z: Airlock2Shell (CVE-2026-19707 / GHSA-3c49-2p63-245g) — not admitted under #6
 
