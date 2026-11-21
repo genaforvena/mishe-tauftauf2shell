@@ -1,0 +1,38 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0xc250b0, state=0x7ffff77f7d10, buf=0xdb3d60 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+SAVED type=a472c0
+0x00007ffff744224d in _decode (decoder=0x7ffff77f7cf0, args=<optimized out>) at src/decode.c:132
+warning: 132	src/decode.c: No such file or directory
+Value returned is $1 = 762
+Restoring binary file /tmp/pw2-w7/pre1.bin into memory (0xd32d40 to 0xd32d78)
+Restoring binary file /tmp/pw2-w7/pre2.bin into memory (0xd32d80 to 0xd330c0)
+Restoring binary file /tmp/pw2-w7/img_fake.bin into memory (0xd32f90 to 0xd33130)
+Restoring binary file /tmp/pw2-w7/img_ptr.bin into memory (0xd32d78 to 0xd32d80)
+PTR184=d32f90 FAKE48=45e6e6 MATCH=1
+Breakpoint 2 at 0x45e6e6
+CONTINUE NATURAL (no gdb-set type or slot)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/tmp/pw2-w6/v12plain/PIL/FpxImagePlugin.py", line 241, in load
+    return ImageFile.ImageFile.load(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/pw2-w6/v12plain/PIL/ImageFile.py", line 409, in load
+    raise OSError(msg)
+OSError: image file is truncated (3334 bytes not processed)
+
+Breakpoint 2, 0x000000000045e6e6 in _PyObject_Dump ()
+HIT pc=0x45e6e6
+#0  0x000000000045e6e6 in _PyObject_Dump ()
+#1  0x00000000005917c2 in ?? ()
+#2  0x000000000054e77f in ?? ()
+#3  0x0000000000559fb8 in ?? ()
+#4  0x000000000057a3ee in ?? ()
+#5  0x000000000061d30d in ?? ()
+#6  0x00000000006bd1b9 in ?? ()
+#7  0x00000000006b11ed in Py_FinalizeEx ()
+rdi            0xd32d70            13839728

@@ -23,8 +23,10 @@ IW = int(sys.argv[4]) if len(sys.argv) > 4 else 16
 IH = int(sys.argv[5]) if len(sys.argv) > 5 else 16
 # Optional 6th argument: 512 hex chars = 256 desired raw scanline bytes.
 # When set, the embedded JPEG carries that pattern byte-for-byte in its
-# first 256 raw decoded bytes (libjpeg emits 0xff - encoded sample here).
+# first 256 raw decoded bytes (or a full 1024-byte row when a >=1024-byte
+# pattern is given; libjpeg emits 0xff - encoded sample here).
 PAT = bytes.fromhex(sys.argv[6]) if len(sys.argv) > 6 else None
+PAT_FULL = PAT is not None and len(PAT) >= 1024
 JPH = int(sys.argv[7]) if len(sys.argv) > 7 else 8
 
 PROP = ["Data Object Store 000001", "\x05Image Contents"]
@@ -74,8 +76,8 @@ def make_jpeg(w, h):
     if PAT is None:
         im = Image.new("CMYK", (w, h), (FILL, FILL, FILL, FILL))
     else:
-        assert len(PAT) == 256, len(PAT)
-        raw = (PAT * ((w * 4) // 256 + 1))[:w * 4]
+        assert len(PAT) == 256 or len(PAT) >= w * 4, len(PAT)
+        raw = PAT[:w * 4] if PAT_FULL else (PAT * ((w * 4) // 256 + 1))[:w * 4]
         inp = bytes(0xFF - v for v in raw)
         pix = b"".join(inp[4 * x:4 * x + 4] for x in range(w)) * JPH
         im = Image.frombytes("CMYK", (w, JPH), pix)

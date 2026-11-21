@@ -305,3 +305,23 @@ transfer: the interpreter's own finalization invokes the forged slot. It
 does NOT remove the other conditions — the fake type is still staged by
 gdb, the marker is an existing static function in a non-PIE build, and no
 code, ROP or PC write is injected. Grade stays ◐.
+
+## W7 — image-only fake type (2026-11-21)
+
+`pattern_fullrow.hex` (1024-byte row pattern, accepted by the extended
+`make_case.py`) embeds a 416-byte `PyUnicode_Type` image with `tp_dealloc`
+changed to `0x45e6e6` at absolute brk address `0xd32f90`, plus that address
+at row offset 184. `case_file.fpx` sha256
+`5e336b88a823c0f11b1c534781e36611f2ebefc10533b0c55911735126770788`.
+The gdb script preserves only the image-written bytes against a pristine-heap
+restore; it copies no host type:
+
+```
+PYTHONPATH=/tmp/pw2-w6/v12plain gdb -q -batch -x forged_type_file.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_file.fpx").load()'
+```
+
+3/3: `PTR184=d32f90 FAKE48=45e6e6 MATCH=1`, then `HIT pc=0x45e6e6`,
+`#7 Py_FinalizeEx ()`. Control `case_ctrl.fpx` (real `tp_dealloc=5a8450`)
+never reaches the marker and faults. Brk base is command-length sensitive;
+use the exact filename and command above. See the report W7 section.

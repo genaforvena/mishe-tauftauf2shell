@@ -340,6 +340,42 @@ through the forged slot. Conditions retained: gdb-staged fake type, non-PIE
 static marker, no injected code/ROP, no PC write, no ASLR leak, and no
 natural acquisition of the pointer. Grade stays ◐.
 
+## W7 — image-supplied fake type, no gdb type copy (2026-11-21)
+
+W6 still staged the forged `PyTypeObject` with a gdb `dump`/`restore` of the
+host `PyUnicode_Type` and a gdb `set` of its `tp_dealloc`. W7 removes both.
+The crafted image itself carries the fake type. `make_case.py` now accepts a
+full 1024-byte row pattern; `pattern_fullrow.hex` places a 416-byte
+`PyUnicode_Type` image at absolute brk address `0xd32f90` (`= buffer+720`
+for this build and command line), with only `tp_dealloc` changed to
+`0x45e6e6`, and puts the same address at pattern offset 184 so the OOB write
+stores it into the live object's `ob_type`. `case_file.fpx` (SHA-256
+`5e336b88a823c0f11b1c534781e36611f2ebefc10533b0c55911735126770788`) decodes
+the image bytes byte-exact at that address: `FAKE+0=0xffffffff...`,
+`FAKE+48=0x45e6e6`, `PTR184=0xd32f90`.
+
+`forged_type_file.gdb` snapshots the pristine span before the write, then
+restores it afterwards EXCEPT the image-written fake type and the
+image-written `ob_type` pointer — it copies no host type and sets no slot.
+It then `continue`s. 3/3 runs print `PTR184=d32f90 FAKE48=45e6e6 MATCH=1`,
+then `Breakpoint 2, 0x45e6e6 in _PyObject_Dump ()` with
+`HIT pc=0x45e6e6`, backtrace `#7 Py_FinalizeEx ()`, `rdi=0xd32d70`
+(the corrupted live object at `buffer+176`). The negative control
+`case_ctrl.fpx` (SHA-256 `891ac80d3f8e9367c5c14bf8f69c8971376e1c3f92007676e8e3146cfded0313`,
+`pattern_ctrl.hex`) carries the same fake type with the real
+`tp_dealloc=0x5a8450`: `PTR184=d32f90 FAKE48=5a8450 MATCH=1`, the marker
+breakpoint is never hit, and the process faults at `0x5a8497` instead.
+Logs: `forged_type_file.log`, `forged_type_file_control.log`.
+
+Limits retained and honest: the fake-type template was obtained once from
+this host's non-PIE Python 3.12, the absolute brk address is baked into the
+file and depends on build/cwd/command-line length (a longer command shifted
+the buffer by `0x50` and broke the phase), and the image is crafted for that
+layout. No ASLR leak, PIE bypass, injected code, ROP or PC write is shown;
+the grade stays ◐. The 1024-byte pattern also makes the embedded JPEG larger
+than the FPX data stream expects, so `load()` raises `OSError: image file is
+truncated` after the write; the marker is still reached during finalization.
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).
