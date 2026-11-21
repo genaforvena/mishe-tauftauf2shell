@@ -2,19 +2,24 @@
 
 **Status: rung 4 advanced from INSTRUMENTED chosen bytes in a page-aligned
 harness region to CHOSEN BYTES CORRUPTING REAL glibc HEAP METADATA IN A
-LOOPBACK SERVICE PROCESS, with an observed availability impact.** A 264-byte
-length-prefixed sketch image carrying a declared LIST coupon count of 64 and a
-chosen `0x5a` payload reaches public `hll_sketch::deserialize` in pinned
-Apache DataSketches C++ 5.2.0 compiled verbatim. ASan reports a `WRITE of size
-256` 0 bytes after the 32-byte coupon vector at pinned
-`CouponList-internal.hpp:116` (byte API) and `:162` (stream API). Under the
-plain (non-ASan) build, gdb shows the copy overwriting the live top chunk's
-`size` word at coupon+40, from `0xdbd1` to `0x5a5a5a5a5a5a5a5a`; the next
-legitimate 512-byte allocation in that process aborts with `malloc():
-corrupted top size` (SIGABRT). A benign count-2 image stays clean. No
-real-world deserializing application, pointer control, control-flow diversion
-or execution was observed — all remain UNKNOWN. Witness replay is requested
-and not yet returned.
+LOOPBACK SERVICE PROCESS, with an observed availability impact and a measured
+relative heap-steering primitive.** A 264-byte length-prefixed sketch image
+carrying a declared LIST coupon count of 64 and a chosen `0x5a` payload reaches
+public `hll_sketch::deserialize` in pinned Apache DataSketches C++ 5.2.0
+compiled verbatim. ASan reports a `WRITE of size 256` 0 bytes after the
+32-byte coupon vector at pinned `CouponList-internal.hpp:116` (byte API) and
+`:162` (stream API). Under the plain build, gdb shows the copy overwriting the
+live top chunk's `size` word at coupon+40, from `0xdbd1` to
+`0x5a5a5a5a5a5a5a5a`; the next legitimate 512-byte allocation aborts with
+`malloc(): corrupted top size` (SIGABRT). A benign count-2 image stays clean.
+Wake 2 further shows that patching the top-size word to a plausible `0x1f000`
+is accepted: a subsequent malloc returns a fresh chunk whose first bytes are
+the attacker's `0x5a`, and a second allocation's address is steerable by the
+first allocation's requested size. Absolute-address pointer control remains
+UNKNOWN: ASLR randomises the heap base and glibc rejects the `-1` wraparound
+size. No real-world deserializing application, control-flow diversion or
+execution was observed — all remain UNKNOWN. Witness W73 #911 replayed the
+wake-1 claims ESTABLISHED AS CLAIMED; the wake-2 probe awaits replay.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -89,5 +94,61 @@ also stay UNKNOWN. Every run bound a loopback socket only; no public host was
 contacted. `run_all.sh` is a lab replay script, not a test of a shipped
 consumer.
 
-Witness replay of this report's claims was requested on the chat tape and is
-not yet returned. Author replays are not independent acceptance.
+Wake 1's claims were replayed by witness W73 (#911) from a clean git-archive
+`e7c47b2` into `/tmp/w73-ds2`: `bash run_all.sh /tmp/w73-ds2-out` gave
+`TOTAL PASS=6 FAIL=0` rc 0, pins 5 OK, tarball `63e6bda6...`, with raw logs
+confirming both ASan frames, the gdb metadata overwrite, the abort and both
+controls. Grade: ESTABLISHED AS CLAIMED at the labeled grade. The wake-2 probe
+below has not yet been independently replayed; author replays are not
+acceptance.
+
+## Wake 2: can the corrupted top size steer a pointer? (2026-11-21)
+
+Bounded question: does the top-size overwrite yield attacker-chosen pointer
+material, or only an availability failure? New lab-only front end
+`lab/datasketches2shell/hoosf_service.cpp` calls public `deserialize` on
+verbatim pinned 5.2.0, then performs two attacker-sized `malloc`s and prints
+pointers and their first eight bytes. `bash run_hoosf.sh <outdir>` replays it;
+`run_all.sh` is unchanged and still gives `TOTAL PASS=6 FAIL=0`.
+
+**Measured under gdb (`disable-randomization on`) with the top-size word at
+coupon+40 patched to a plausible `0x1f000`** (still a 256-byte library copy of
+attacker bytes; no library source changed). `GDB_TOP_SIZE_BEFORE=0xdbd1` at the
+pre-copy breakpoint; after the copy the patched value is accepted:
+
+- Coupon data `p=0x555555597410`; live top chunk `p+32 = 0x555555597430`;
+  `sbrk(0)=0x5555555a5000`.
+- `malloc(0x1000)` returns `A1=0x555555597440` = top+16, and
+  `HOOSF_A1_BYTES=5a5a5a5a5a5a5a5a5a`: a freshly allocated chunk whose initial
+  content is the attacker's chosen byte, not cleared by glibc.
+- `malloc(0x40)` returns `A2=0x555555598450` = A1+`0x1010`
+  (`chunksize(0x1000)`).
+
+**Steering is real but relative**: with `s1=0x2000`, `A2=0x555555599450`,
+exactly `+0x1000` from the `s1=0x1000` run; `A1` is unchanged. The attacker
+chooses the offset of the second chunk by choosing the first size.
+
+**Blockers measured, not assumed**:
+
+- Top size `-1` (all `0xff`, the classic wraparound) gives
+  `malloc(): corrupted top size`, `service_rc=-6`. glibc refuses the negative
+  or misaligned top end, so carving cannot reach a lower address.
+- Under normal kernel ASLR (plain runs, no gdb) the absolute addresses differ:
+  run A `A1=0x642a71b4a440`, run B `A1=0x618bb15e1440`. Choosing an absolute
+  target therefore needs a heap-address leak this input does not provide.
+- All in-use objects sit below the top chunk; forward carving can only place a
+  chunk in the unallocated wilderness above it. No live victim object was
+  observed adjacent above the coupon buffer.
+
+`bash run_hoosf.sh /tmp/ds2-wake2-verify` gave `TOTAL PASS=4 FAIL=0` rc 0
+alongside `run_all.sh` `TOTAL PASS=6 FAIL=0`; raw logs in the replay outdir.
+
+**Disposition: KEEP the primitive, REVISE the rung-4 claim.** Demonstrated
+impact is now availability failure plus a relative heap-steering / fresh-chunk
+data-injection primitive conditional on a consumer allocating after
+deserialization. Absolute-address pointer control, control-flow diversion and
+execution stay UNKNOWN with two measured blockers (glibc top-size validation,
+ASLR). Turning the relative primitive into a shipped exploit would additionally
+require a deserializing application with a known post-deserialize allocation
+and a live victim at a known offset; none was measured. Every probe bound a
+loopback socket only.

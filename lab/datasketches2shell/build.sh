@@ -17,6 +17,7 @@ I52="-I$OUT/v52/hll/include -I$OUT/v52/common/include"
 
 g++ -std=c++11 -O0 -g -fsanitize=address -fno-omit-frame-pointer $I52 \
   "$HERE/service.cpp" -o "$OUT/service_asan" || exit 2
+g++ -std=c++11 -O0 -g $I52 "$HERE/hoosf_service.cpp" -o "$OUT/hoosf_plain" || exit 2
 g++ -std=c++11 -O0 -g $I52 "$HERE/service.cpp" -o "$OUT/service_plain" || exit 2
 g++ -std=c++11 -O0 -g $I52 "$HERE/seedgen.cpp" -o "$OUT/seedgen" || exit 2
 g++ -std=c++11 -O0 -g -fsanitize=address -fno-omit-frame-pointer $I52 \

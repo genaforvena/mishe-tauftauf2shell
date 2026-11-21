@@ -29,6 +29,7 @@ def main():
     ap.add_argument("--gdb-script")
     ap.add_argument("--stdin-feed", help="send this literal to process stdin")
     ap.add_argument("--extra", help="extra service argument, e.g. postalloc")
+    ap.add_argument("--extra-argv", default="", help="comma-separated extra service args after port")
     ap.add_argument("--patch", default="", help="comma-separated coupon-relative offset=hexbyte")
     args = ap.parse_args()
     image = bytearray(hostile_image(args.seed, args.count, args.value))
@@ -40,6 +41,9 @@ def main():
     cmd = [args.bin, str(args.port)]
     if args.extra:
         cmd.append(args.extra)
+    for x in args.extra_argv.split(","):
+        if x:
+            cmd.append(x)
     if args.gdb_script:
         cmd = ["gdb", "-q", "-batch", "-x", args.gdb_script, "--args"] + cmd
     env = {"PATH": "/usr/bin:/bin", "HOME": "/tmp",

