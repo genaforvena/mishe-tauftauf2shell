@@ -82,3 +82,36 @@ whatever was adjacent in this unmodified allocation sequence. The pointers'
 owning object was not identified (no allocation-site tracing, which would
 perturb the layout). Post-auth default (/auth) and subsystem-supplied ADPCM
 table remain lab conditions, as in the accepted wake-9/10/11 replay.
+
+--- exact scratch instrument (NOT committed to the replay patches) ---
+Added `#include <malloc.h>` at rdpsnd_main.c:27 and the following block at
+:771, immediately BEFORE the existing `CopyMemory(...)` in
+`rdpsnd_server_send_samples`. The existing WAKE9_COPY fprintf after the copy
+stayed unchanged. After capture the original file was restored from backup
+and the plain build rebuilt, so /tmp/fr-wake2 and /tmp/fr-wake7-shadow-build
+again match the committed five-patch replay.
+
+		/* HEAP12 scratch-only layout dump: BEFORE the copy, see original bytes. */
+		if (context->priv->out_pending_frames == 0 && cframesize >= 16384)
+		{
+			BYTE* base = context->priv->out_buffer;
+			const size_t usable = malloc_usable_size(base);
+			unsigned char* p;
+			fprintf(stderr, "HEAP12 base=%p usable=%zu cframesize=%zu\n",
+			        (void*)base, usable, cframesize);
+			p = base + usable - 8;
+			for (int ci = 0; ci < 24 && (size_t)(p - base) < 20000; ci++)
+			{
+				const size_t sz = *(size_t*)(p + 8);
+				const size_t szv = sz & ~(size_t)0xF;
+				fprintf(stderr, "HEAP12_CHUNK off=%td sz=%zu prev_inuse=%u data=",
+				        p - base, szv, (unsigned)(sz & 1));
+				for (int k = 0; k < 16; k++)
+					fprintf(stderr, "%02x", p[16 + k]);
+				fprintf(stderr, "\n");
+				if (szv < 32 || szv > 1000000)
+					break;
+				p += szv;
+			}
+			fflush(stderr);
+		}
