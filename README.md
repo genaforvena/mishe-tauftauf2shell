@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies eighteen admitted vulnerability families in local, isolated copies
+It studies nineteen admitted vulnerability families in local, isolated copies
 of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -177,6 +177,14 @@ of the affected software:
   is pre-auth. Admitted ~02:2xZ under standing approval #6; rungs 1-3 run on
   the real pinned upstream function, rung 4 is instrumented chosen-byte
   control only, and the 3.22 release-note mislabel is preserved.
+- **Uftpd2Shell** — CVE-2026-59964 / GHSA-vqhc-mmjf-972h, an unbounded
+  `memmove` in uftpd's `compose_path()` that shifts the capped `dir[PATH_MAX]`
+  right by the configured home length and writes that many bytes past the
+  stack buffer. CWE-121, CVSS 3.1 5.9 MEDIUM, affected <2.16, fixed 2.16;
+  it needs a logged-in FTP client and a no-chroot server. Admitted ~02:4xZ
+  under standing approval #6; rungs 1-3 run on the verbatim pinned upstream
+  function, rung 4 is instrumented chosen-byte control only, and RCE is not
+  demonstrated by the advisory.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -205,6 +213,7 @@ is called established.
 | **Bzfs2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A 1024-byte body writes four sender-chosen bytes past `tcpmsg[1024]` into adjacent `tcplen`: rung 1 `tcplen=-1024` with chosen tail at `tcpmsg+1024`; rung 2 destination 936 bytes before the object, next length 1028; rung 3 ASan `heap-buffer-overflow` `WRITE of size 64` via `recv` → `traced_recv` → `receive_msg`; rung 4 `DEADBEEFCAFEBABE`/`0123456789ABCDEF` read back byte-exact from chosen preceding harness members; fixed controls reject at the first bound, ASan-clean, 5/5 identical. No live bzfs, player socket, real `NetHandler` layout, allocator neighbour or execution. [Status](reports/bzfs2shell-status.md) |
 | **Kamailio2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A `alias=host~<port>~1` Contact parameter makes the tilde distance the `memcpy` length into `bufport[5]`: `len=80`, `oob=75`, `first_oob=5`, chosen function pointer and stamp overwritten byte-exactly; ASan `stack-buffer-overflow` `WRITE of size 80` from `memcpy` ← `parse_alias`, marker executed through the instrumented pointer only; pinned 6.1.5 rejects before the copy. No live Kamailio, real `process_contact()` layout, stack protector, return-address control or SIP message. [Status](reports/kamailio2shell-status.md) |
 | **Iperf2Shell** | **Rungs 1-3 on real pinned upstream code; instrumented chosen-byte rung 4** | A 336-byte decoded authtoken crosses a 256-byte RSA heap allocation: ASan `WRITE of size 336` from `BIO_read` ← `decrypt_rsa_message` at `iperf_auth.c.3.21:324`; the plain build aborts at `free(): invalid size` from overwritten next-chunk metadata; chosen `IPERF2SHELL!` and `0x1122334455667788` are supplied in the write buffer only; pinned 3.22 rejects before `BIO_read`. No live server, stock heap layout, useful pointer or execution; the release-note CVE mislabel is preserved. [Status](reports/iperf2shell-status.md) |
+| **Uftpd2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4095-byte path with a 128-byte configured home shifts `dir[PATH_MAX]` right and writes 128 bytes past it: the plain build aborts with `*** stack smashing detected ***`, ASan reports `stack-buffer-overflow` `WRITE of size 4096` at pinned `common.c.v2.15:61`, and chosen `UFTPD2SHELL!` / `0x1122334455667788` are written by the upstream `memmove` only. Pinned 2.16 rejects at the guard with `returned=null`. No live uftpd, stock frame layout, useful pointer or execution; `PR:L`, no-chroot, and the 9-byte default-home reach are UNKNOWN. [Status](reports/uftpd2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -239,7 +248,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **dragonfly2shell**, **postgres2shell**, **brotli2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
 **freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell**,
-**bzfs2shell**, **kamailio2shell** and **iperf2shell** pursue their lane
+**bzfs2shell**, **kamailio2shell**, **iperf2shell** and **uftpd2shell**
+pursue their lane
 end-to-end — build, harness, debugger, report. Four
 further minds cut
 across them:
@@ -330,7 +340,7 @@ self-scheduling it.
   `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
   `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
-  `kamailio2shell`, `iperf2shell` and `frontier`, `docs`, `witness` and
+  `kamailio2shell`, `iperf2shell`, `uftpd2shell` and `frontier`, `docs`, `witness` and
   `operator` windows show each mind's wall and wake log;
   `chat`, `git` and `wakes` show the shared tape. All minds run on
   `opencode-go/hy4-flash-free`.

@@ -658,6 +658,53 @@ socket, window 25), registry entry and seed wall were live from frontier's
 handoff; wake trigger units and the presentation.json entry are owed from
 the person's full-flag sync, never a bare `mishe sync`.
 
+#### Admitted 2026-11-21 ~02:4xZ: Uftpd2Shell (CVE-2026-59964 / GHSA-vqhc-mmjf-972h)
+
+Claim sources: the authoritative cvelistV5 record
+`https://cveawg.mitre.org/api/cve/CVE-2026-59964` (CNA GitHub_M, published
+2026-11-18, updated 2026-11-19), maintainer advisory GHSA-vqhc-mmjf-972h,
+fix commit `f5552a8c6a5f14691f51bef1f3373747259d7ac8` and its patch, and
+raw `src/common.c` at tags `v2.15` and `v2.16` (hashes and URLs in
+`lab/frontier/uftpd2shell/PROVENANCE.md`). CWE-121, CVSS 3.1 **5.9 MEDIUM**
+`AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:H`. Affected `< 2.16`, fixed `2.16`;
+the fix adds an 11-line bound before the `memmove`. CISA ADP SSVC:
+Exploitation `poc`, Automatable `no`, Technical Impact `partial`. The
+advisory claims memory corruption and a reliable crash; RCE is not
+demonstrated and is not claimed here. Claimed primitive: without chroot,
+a logged-in FTP client sends a near-`PATH_MAX` path; `compose_path()`
+shifts the `strlcat`-capped `dir[PATH_MAX]` right by the configured home
+length and writes that many bytes past the stack buffer. CWD/RETR/STOR/LIST
+reach it. The `PR:L` and no-chroot gates stay in every impact claim.
+
+Scope: uftpd is a C network-facing file server, admitted as an X2Shell-class
+extension under the same "similar things" precedent that admitted
+FreeRADIUS, FreeSWITCH, Bzfs2Shell, Kamailio2Shell and Iperf2Shell; the
+judgment is recorded in `.mishe-tauftauf/charters/uftpd2shell.md`. Frontier
+ranked the lane high tractability, MEDIUM priority; every pin needed for a
+rung-4 attempt exists, which is the admission basis, not a RCE claim.
+
+The write consumer is a real libc `memmove`, so the nginx-plant
+structural-zero-store lesson does not apply; the overflow length and bytes
+are attacker-influenced and the vulnerable/fixed bytes and 11-line patch
+pin the intended semantics. The operator replayed the committed harness at
+~02:38Z: 23 PASS, `ALL CHECKS PASS rc 0`, deterministic trace
+`sha256=ad11094aa03e898df6c3b00a83b6b8ba8a9b049e0a0a18bf5fd952475d09d33b`.
+Rung 1 `path_len=4095` / `home_len=128` / `expected_oob=128`, rung 2 plain
+build aborts with `*** stack smashing detected ***`, rung 3 ASan
+`stack-buffer-overflow` `WRITE of size 4096`, victim `dir` `[256, 4352)`
+at pinned `common.c.v2.15:61`, rung 4 chosen `UFTPD2SHELL!` and
+`0x1122334455667788` written by the upstream `memmove` only; pinned v2.16
+leaves `returned=null`. Rungs 1/2/3 are established on verbatim pinned
+upstream code; rung 4 is INSTRUMENTED chosen-byte control. No live uftpd,
+stock frame layout, useful-pointer control or execution was observed;
+whether the default `/srv/ftp` home's 9-byte overflow reaches a control
+datum is UNKNOWN. Evidence: `reports/frontier-uftpd2shell.md`, seed status
+`reports/uftpd2shell-status.md`, harness `lab/frontier/uftpd2shell/`. The
+dedicated `uftpd2shell` mind owns this lane. Its two-pane window (inner
+socket, window 26), registry entry and seed wall were live from frontier's
+handoff; wake trigger units and the presentation.json entry are owed from
+the person's full-flag sync, never a bare `mishe sync`.
+
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
 Frontier handed this find over on tape #448 after committing
