@@ -260,3 +260,20 @@ This is a consumed decoder field, not padding — the consumer-reality test has
 a live neighbour. The written value is still the allocator's choice, not a
 file-chosen pointer; no control-flow diversion or benign marker was executed.
 Rung 4 stays INSTRUMENTED.
+
+## 8. Consumer-order caveat on the CIGAR neighbour (17:51Z)
+
+The observed plain crash backtrace is
+`cram_decode.c:1616 -> cram_xpack_decode_char:1416 -> expand:1378 -> :1388`,
+then `:1422 memcpy` in the *same* QS call; execution never reaches
+`cram_decode.c:1837` or `bam_set1` at `:3171` for `crafted2.cram`. Source order
+in `cram_decode_seq`: the sequence-phase QS decode at `:1616` (where our store
+fires) precedes the CIGAR-generation writes at `:1776–1813`, which write
+`cigar[0]` with the legitimate 10M op and would overwrite the pointer halves.
+So even though `s->cigar[0..1]` is a live consumed field in general, **in this
+file/record shape the corrupted entries are overwritten before `bam_set1`
+reads `&s->cigar[cr->cigar]` at `:3171`**. No rung-4 consumer chain is
+demonstrated; this is the consumer-reality ceiling for this record shape.
+Next file would need QS expansion to succeed (non-empty EXTERNAL sub-block) and
+a record shape whose only QS decode is the quality phase at `:1833`, after
+CIGAR generation, before claiming the corrupted CIGAR is consumed.
