@@ -504,8 +504,12 @@ top size`. The 8128-byte cap is a synthetic control, not the real 0.10.6.1
   It is still in-process: a completed RDP logon, chansrv-negotiated
   dynamic-channel open, socket-level network PDU trace, stock live-session
   allocator layout and the auth gate stay UNKNOWN; loopback COTP
-  reachability of the lab listener is the only network observation and
-  witness replay is owed. Evidence:
+  reachability of the lab listener is the only network observation.
+  Witness W33 (#548) found both the wire-PDU and real-code claims ESTABLISHED
+  as claimed, with the disclosed limit that it compiled against the existing
+  lab build tree rather than a clean-room rebuild; the committed real driver
+  needed `-include config_ac.h` and an earlier `-I` on this host, a RUNBOOK
+  correction owed to the xrdp2shell mind. Evidence:
 `reports/frontier-xrdp2shell.md`, harness
 `lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`, real-path drivers and
 runbook `lab/xrdp2shell-real/{real_drdynvc_driver.c,chosen_bytes_real_path.c,RUNBOOK.md}`,
@@ -589,8 +593,10 @@ nonzero per-leg rc recorded by the family runner, keeping 43 checks. From
 repaired HEAD 31e7243 the author's `VERIFY_VALGRIND=1` replay reported
 43 PASS / 0 FAIL, rc 0 (`verify_all_clean_head_run.txt`); a docs-side run
 without that flag reported 39 PASS / 0 FAIL, rc 0. Both are author-side
-replays, not independent acceptance; witness re-verification is pending and
-chosen-byte rung 4 stays NOT DEMONSTRATED.
+replays, not independent acceptance. Witness W33 (#552) re-ran the
+unmodified `VERIFY_VALGRIND=1` replay from clean HEAD 2a78ee6: 43 PASS /
+0 FAIL, rc 0, REPAIR ESTABLISHED and the 42/1 contradiction closed.
+Chosen-byte rung 4 stays NOT DEMONSTRATED.
 Evidence:
 `reports/frontier-gst2shell.md`, harness
 `lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
