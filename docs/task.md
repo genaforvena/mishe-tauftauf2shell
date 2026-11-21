@@ -2878,3 +2878,58 @@ RTSP server and one HTTP request, capture a symbolised ASan frame at the
 real `rtsp.c:1825`, then measure the stock pool's slot layout and neighbours
 before any pointer or marker claim; repeat at `3.14.2`. A measured endpoint,
 allocator or reachability blocker is a valid negative to preserve.
+
+#### Admitted 2026-11-21 ~11:42Z: Zephyr2Shell / zephyr2shell (CVE-2026-82391 / GHSA-8jrg-wx88-g75j)
+
+Frontier handed this find over in `reports/frontier-zephyr2shell.md` (commit
+`0ccfdba`) and DM #840. All five standing-approval #6 elements are present:
+**claim source** — CVE-2026-82391 / GHSA-8jrg-wx88-g75j (CNA Zephyr Project,
+CVSS 3.1 9.1 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-787), OSV record
+pinned verbatim in `src/advisory82391.json` plus the fix patch and raw
+`v4.4.0` / `v4.5.0` sources with all seven SHA-256 pins in
+`lab/frontier/zephyr2shell/PROVENANCE.md`; the GitHub advisories API returned
+404, so the advisory HTML and OSV/CVE records are the pinned sources;
+**identifier** — CVE-2026-82391 / GHSA-8jrg-wx88-g75j; **affected/fixed
+versions** — Zephyr `>=4.0.0 <4.3.2` and `>=4.4.0 <4.5.0`, fixed in 4.3.2 /
+4.5.0 by commit `4e0a5f38b14dba5891fb558c49a526f9f6a3cc29` (PR #117267,
+backports #117602/#117603); **primitive** — `http_server_http2.c:496`/`:499`
+pass `&client->data_len` as the `file_size` out-param,
+`http_server_core.c:892` overwrites it with the on-disk file size, and the
+dispatch loop at `:557` feeds the corrupted residue to the verbatim `memmove`
+at `:563-566`, writing attacker-influenced bytes past the 256-byte
+`client->buffer`; fixed `v4.5.0:472/497/500/535` uses a local `size_t
+file_size`; **rung-4 plausibility** — an unauthenticated HTTP/2 GET with
+`CONFIG_HTTP_SERVER_VERSION_2=y` and a static-FS resource is network-reachable
+at `PR:N`.
+
+Operator verification before admission: all seven SHA-256 pins matched the
+stored bytes; a clean `git archive 0ccfdba lab/frontier/zephyr2shell`
+extraction into `/tmp/z2op-verify` replayed
+`bash run.sh /tmp/z2op-out` with **10 PASS / 0 FAIL rc 0**, two independent
+five-run groups both
+`sha256=48568d4883dd3ca4125fc0dbb6371aa886fc3e9ed3d7362f778815cd3201f0e0`.
+ASan `WRITE of size 1024` at the verbatim `core_v4.4.0:565`, chosen
+`0x41424344`/`0x5a5b5c5d` patterns at offsets 300/500/900, a guard-page fault
+and fixed/benign ASan-clean cases all reproduced. Rungs 1/2/3 ESTABLISHED in
+the extracted harness; rung 4 INSTRUMENTED chosen bytes at chosen offsets in a
+stand-in collaborator only. No Zephyr build, HTTP/2 wire traffic, RTOS socket,
+real `struct http_client_ctx` layout, adjacent-object metadata, pointer
+overwrite or execution was observed — all UNKNOWN. The advisory's `zsock_recv`
+size_t-underflow limb (`core.c:697`) and live-ASan/control-data claims are
+source-bound or claims to reproduce. Witness replay #839 was still pending at
+admission; author and operator replays are not independent acceptance.
+
+Admitted under the standing similar-things mandate, no re-ask. The two-pane
+`zephyr2shell` window (inner socket, index 51), seed wall and registry entry
+were pre-created by frontier and are already live; do not recreate or edit
+them. The operator created this mind's charter, added the 46th
+`engine/routes.json` entry and ran the pinned full-flag sync from
+`docs/runtime-pin.md` (`written 3, removed 0`) to mint its wake trigger units;
+never run a bare `mishe sync`. Doctor was GREEN rc 0 and omp-only rc 0 at 46
+roles. Cheapest next rung: build pinned `v4.4.0` with ASan on loopback, serve a
+file larger than the 256-byte client buffer, send an unauthenticated HTTP/2
+GET with trailing peer-controlled bytes, capture a symbolised ASan frame at
+the real `http_server_core.c:565`, then measure the live `client->buffer`
+neighbours and peer control of `client->cursor` before any pointer or marker
+claim; repeat at `4.3.2`/`4.5.0`. A measured endpoint, allocator or wire
+blocker is a valid negative to preserve.
