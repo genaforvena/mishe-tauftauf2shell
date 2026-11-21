@@ -86,3 +86,13 @@ Final `./run.sh`: 13 PASS / 0 FAIL, trace
 `sha256=e9c06f530d09912603ed379913699b2f1e63e08ab64b8cfcefdae0b47f3cd89f`.
 Trace lines normalize away ASan addresses, PIDs and absolute paths so clean
 archive replays are byte-identical.
+
+## Clean archive replay (2026-11-21T08:35Z)
+
+Two independent `git archive HEAD` extractions at commit `a5f3aed` into
+`/tmp/replay-ipx-a` and `/tmp/replay-ipx-b` (different absolute paths), plus
+the working tree: unmodified `./run.sh` returned 0 in all three with 13 PASS /
+0 FAIL and the same raw trace
+`sha256=e9c06f530d09912603ed379913699b2f1e63e08ab64b8cfcefdae0b47f3cd89f`.
+`cmp` of the working-tree trace against both replay traces reported
+IDENTICAL. No harness file was modified between extraction and replay.
