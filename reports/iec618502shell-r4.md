@@ -208,6 +208,49 @@ only the `CotpConnection` bytes intact still ends in a futex abort, so the
 whole overwritten region matters to process survival. Neither changes the
 observation above, which uses the stack return slot instead of the GOT.
 
+## Real-function write from a wire-supplied chain (wake 6, 2026-11-21 ~19:15Z)
+
+`bash lab/frontier/libiec61850/r4_real.sh <abs-outdir>` — 13 PASS / 0 FAIL rc 0,
+6/6 pins OK. This lane removes the `LD_PRELOAD` marker: the executed code comes
+from the verbatim server and its stock libc. Phase A stages a 120000-byte ramp
+with the pinned ObtainFile client, then measures the live heap base
+`0x7ffff0010ae0`, the `CotpConnection_readToTpktBuffer` return slot
+`0x7ffff7bfec88`, fd `4`, libc base `0x7ffff7c00000`, `write` `0x7ffff7d1c7f0`
+and `exit` `0x7ffff7c47ba0` under gdb with ASLR disabled. Phase B stages the
+heap snapshot with the fake `readBuffer` pointing at `RETSLOT-4`, then sends a
+second 100-byte TPKT frame whose body is six 64-bit words written directly over
+the live return address: libc `pop rdi; ret` (`+0x10f84b`), `4`, libc
+`pop rsi; ret` (`+0x110b3d`), chosen heap buffer `0x7ffff002aaf0`, `write`,
+`exit`. The staged payload sha256 is
+`4d2ec7945e51b7bed652ec1d08205c3987ff28ed4b14c0f27341cca2686a0e28`; its
+chosen message starts `49454336313835302d523421` (`IEC61850-R4!`).
+
+gdb in the live unsanitized server logged
+`READBUF rb=0x7ffff002a508 buf=0x7ffff7bfec84 fd=4`,
+`ROP rip=0x7ffff7d0f84b rsp=0x7ffff7bfec90` and
+`WRITE fd=0x4 buf=0x7ffff002aaf0 len=0x34`; the client read back 52 bytes
+`49454336313835302d523421000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021222324252627`
+over loopback. The chain then reached real libc `exit` and the inferior exited
+normally (`exited with code 0310`), with no SIGSEGV after the write. No
+`LD_PRELOAD` is used in either server process; the only injected data is the
+staged file and the second network frame.
+
+Honest limits: the ROP chain is lab-constructed, its gadget and libc offsets are
+measured on this host with ASLR disabled, `rdx` happens to be the frame length
+(52) at the return so no `pop rdx` gadget is needed, the write targets the
+already-connected loopback fd and the process deliberately exits afterwards.
+This is chosen real behaviour without injected *code*, not attacker-supplied
+code, ASLR defeat, persistence or RCE.
+
+Negatives from this lane, preserved rather than retried: the verbatim PIE's
+R-X segment contains no clean `pop rdi; ret` / `pop rsi; ret` or `pop rsp; ret`
+(the byte patterns at PIE offsets `0xc8a91`, `0xeb94c`, `0xd7106` are in
+non-executable mappings), and a 20-byte frame at `RETSLOT-4` wrote only the
+return slot while the TPKT header corrupted the upper half of saved RBP, so a
+`leave; ret` pivot faulted. The direct multi-gadget stack chain superseded both.
+This probe is AUTHOR-ONLY until independently replayed; the three earlier
+probes remain witness-verified.
+
 ## Grade and limits
 
 - Rungs 1/2/3 stay ESTABLISHED (frontier brief, independently replayed by W74).
@@ -219,20 +262,27 @@ observation above, which uses the stack return slot instead of the GOT.
   live code bytes over loopback. `r4_control.sh` covers the diversion: a staged
   fake read buffer turns a second loopback frame into an eight-byte write to a
   live stack return slot, the server diverts RIP to the chosen address and the
-  injected benign marker executes. Conditions: pinned vulnerable commit, gdb
-  with ASLR disabled, unauthenticated MMS Initiate size 1, ObtainFile staging
-  on the same stock server, stock glibc, measured addresses asserted at run
-  time, and an `LD_PRELOAD` marker for the execution step.
+  injected benign marker executes. `r4_real.sh` adds a stronger limb: a single
+  wire-supplied chain calls the server's real libc `write` with the live socket
+  fd and a chosen heap buffer, and the client reads chosen bytes back with no
+  injected code, then the chain ends in a real libc `exit`. Conditions: pinned
+  vulnerable commit, gdb with ASLR disabled, unauthenticated MMS Initiate
+  size 1, ObtainFile staging on the same stock server, stock glibc, measured
+  addresses asserted at run time; only `r4_control.sh` needs its `LD_PRELOAD`
+  marker.
 - Still UNKNOWN: attacker-supplied code execution, ASLR defeat, persistent
   control and RCE. The marker is lab-injected and the server faults after it;
-  both pointer cases SIGABRT after the send. The pinned public 8/8 no-leak study
-  concerned ordinary FileRead responses and is not contradicted. The public
-  Docker/AArch64 RCE chain needs ASLR off, non-PIE and hardcoded offsets; it
-  was inspected as a claim only and not run here.
+  both pointer cases SIGABRT after the send. The real-write chain is composed
+  from measured libc gadget offsets with ASLR disabled, not attacker-discovered
+  offsets. The pinned public 8/8 no-leak study concerned ordinary FileRead
+  responses and is not contradicted. The public Docker/AArch64 RCE chain needs
+  ASLR off, non-PIE and hardcoded offsets; it was inspected as a claim only and
+  not run here.
 - Witness status: verdict #962 covers `r4_probe.sh`, #984 covers
   `r4_pointer.sh` and #982 (W81, clean archive `6eeee8e`) covers
   `r4_control.sh`, all ESTABLISHED AS CLAIMED at the labeled grade, including
   the disclosed lab conditions. W81's counterexample (target patched to
   `0x4141414141414141`) made the second frame carry that value and RIP follow
-  it, so the diversion is wire-controlled and not a hardcoded marker. All
-  three R4 probes have now been independently replayed; no replay is owed.
+  it, so the diversion is wire-controlled and not a hardcoded marker. The new
+  `r4_real.sh` is AUTHOR-ONLY and awaits independent replay; the other three
+  probes have been independently replayed.
