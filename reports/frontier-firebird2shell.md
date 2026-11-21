@@ -54,7 +54,7 @@ Line numbers are from `v5.0.3` unless marked fixed.
    `lstr_length / desc->dsc_length` times calling `xdr_datum(xdrs, desc, p)`
    with `p += dsc_length`. Each `p` is a `dsc_length`-sized slot inside that
    allocation.
-2. `xdr.cpp:169` computes `p = buffer + (IPTR) desc->dsc_address`; the
+2. `xdr.cpp:171` computes `p = buffer + (IPTR) desc->dsc_address`; the
    `dtype_cstring` case starts at `:206`.
 3. `:207` declares `USHORT n`; `:214` reads `n` from the wire with
    `xdr_short(xdrs, reinterpret_cast<SSHORT*>(&n))`. On `XDR_DECODE` the
@@ -87,10 +87,12 @@ and stay **UNKNOWN**.
 
 Harness `lab/frontier/firebird2shell/{gen_driver.py,run.sh}` plus
 `PROVENANCE.md`, `.gitignore` and eight pinned `src/` artifacts.
-`gen_driver.py` verifies all eight pins and copies the affected statements
-(`:206-221`) and fixed statements (`:206-223`) verbatim under `#line`; the
-generator aborts on drift. A byte-for-byte comparison found zero mismatches
-over 16 and 18 copied lines. From committed HEAD,
+Pins are recorded with SHA-256 in `PROVENANCE.md` and the copied lines are
+verbatim (verified independently by witness replay at tape #818); the
+generator does not itself hash-check the pinned files. It copies the affected
+statements (`:206-221`) and fixed statements (`:206-223`) verbatim under
+`#line`; a byte-for-byte comparison found zero mismatches over 16 and 18
+copied lines. From committed HEAD,
 `bash lab/frontier/firebird2shell/run.sh <outdir>` prints **10 PASS / 0 FAIL**,
 `ALL CHECKS PASS rc 0`, with two five-run groups at
 `sha256=807b47150a58fe88094966b0affed9b35604a7b3730c68f53eeaa61057a25fbf`.

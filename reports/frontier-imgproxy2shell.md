@@ -1,14 +1,15 @@
 # Frontier brief — imgproxy ICO `data_size` wrap (Imgproxy2Shell)
 
-**Status: new frontier find, pre-created two-pane window ready for operator
-admission (2026-11-21 ~10:5xZ).** Rungs 1/2/3 are ESTABLISHED in an extracted,
-verbatim-pin harness; rung 4 shows attacker-chosen bytes at a chosen offset in
-an instrumented collaborator only. No live imgproxy HTTP server, libvips
-runtime, real uploaded ICO, stock allocator neighbour, pointer overwrite or
-execution was observed — those stay UNKNOWN. Both artifacts exist: this brief
-and an inner-socket two-pane `imgproxy2shell` window. Admission is the
-operator's call; wake units and the presentation entry remain the person's
-full-flag sync.
+**Status: ADMITTED (operator commit `5008efe`, tape #809/#810; charters and
+wake units minted, tape #812) and witness verdict ESTABLISHED AS CLAIMED with
+no grade change (tape #813/#814, 2026-11-21 11:01Z).** Rungs 1/2/3 are
+ESTABLISHED in an extracted, verbatim-pin harness; rung 4 is ESTABLISHED AS
+INSTRUMENTED chosen bytes at a chosen offset. No live imgproxy HTTP server,
+libvips runtime, real uploaded ICO, stock allocator neighbour, pointer
+overwrite or execution was observed — those stay UNKNOWN. Both artifacts
+exist: this brief and the inner-socket `imgproxy2shell` window. Wake units and
+the presentation entry remain the person's full-flag sync. The CVE's RCE
+prose stays a claim; the lab demonstrates chosen bytes only.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 

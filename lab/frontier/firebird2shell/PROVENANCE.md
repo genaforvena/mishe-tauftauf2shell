@@ -33,7 +33,9 @@ impact scored. No code-execution claim is made by the CVE record.
 
 ## Source-bound statements copied verbatim by `gen_driver.py`
 
-The generator verifies all eight pins and aborts on any drift. It emits only
+Pins are recorded below with SHA-256 and copied lines are verbatim (verified
+independently by witness replay at tape #818); `gen_driver.py` does not itself
+hash-check the pinned files. It emits only
 the `dtype_cstring` case of `xdr_datum()` under `#line` markers at their true
 line numbers:
 
