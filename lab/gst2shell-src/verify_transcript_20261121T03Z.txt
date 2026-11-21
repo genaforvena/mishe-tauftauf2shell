@@ -1,0 +1,492 @@
+### clock 2026-11-21T02:59:14Z
+### GIT HEAD ec06331
+########## lab/frontier/gst2shell/run.sh ##########
+rung1 channels=1000 position_capacity=64 oob_writes=936 first_oob=256 last_oob=3999
+rung1 counted_none_bytes=3744
+rung1 verdict=TRIGGER
+PASS rung1 write extent
+PASS rung1 counted bytes
+PASS rung1 trigger verdict
+rung2 before off1_abcd=1 off2_cdab=1
+rung2 channels200 off1_abcd=0 off2_cdab=1 oob_bytes=544
+rung2 channels1000 off1_abcd=0 off2_cdab=0 oob_bytes=3744
+rung2 verdict=LENGTH_CONTROL_OBSERVED
+PASS rung2 before stamps intact
+PASS rung2 channels200 partial
+PASS rung2 channels1000 full
+PASS rung2 verdict
+rung3 rc=1
+rung3 channels=1000 exact_alloc=1
+==3972230==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x511000000140 at pc 0x5c8184e03497 bp 0x7ffec1362d40 sp 0x7ffec1362d30
+WRITE of size 4 at 0x511000000140 thread T0
+    #0 0x5c8184e03496 in vuln_create_default /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gst2shell/rtp_channels_overflow.c:70
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gst2shell/rtp_channels_overflow.c:70 in vuln_create_default
+PASS rung3 nonzero exit
+PASS rung3 ASan heap-buffer-overflow
+PASS rung3 is a WRITE
+PASS rung3 after 256-byte region
+PASS rung3 in vuln_create_default
+rung4 chosen_before=deadbeeftest chosen_after=000000000000000000000000
+rung4 chosen_bytes_written=0 written_value_constant=NONE(0)
+rung4 verdict=NOT_DEMONSTRATED
+PASS rung4 constant write only
+PASS rung4 honest NOT
+fixed channels=1000 oob_writes=0 verdict=PASS
+PASS fixed control clean
+determinism sha256=c96ad6f616edf4765240bf0bb936ae3e30ca2c11f13b1edef70d46a16119f056
+PASS 5/5 identical
+ALL CHECKS PASS
+wrapper_rc=0
+########## lab/gst2shell-src/run.sh ##########
+=== pinned source digests (fetched under upstream/, gitignored) ===
+3934f423cfcc7b9e190a1fb38e9b4317e0c1dcc62dbddc1d6dc28f22e0f1b5ec  upstream/audio-channels.h
+c04ef55545dbe8ce03178c9c3f468715a34f29e0058b5f157a8c2a2aedad85bc  upstream/audio-info.c
+3b3911b599854a0bbb2a31a4013573527aadf52ee875de7a208cc1fce3eab40a  upstream/audio-info.h
+08ae20b33b764ce0a5f9e7e0e4d2b65cb3dc85e2b5bbee373218e817b75e577b  upstream/channels.c
+0d239c5005ba2995d41a2b51b9b3d6ffe262357619d311af1ee0f0abf15eb6b4  upstream/channels.h
+b454623c35e581bc10e832acac9489d74d5a4919b1fcedaeea2ba949941a50a3  upstream/depay.c
+e4f8067a044d59a8c82b035596220389d1de9bbca93ad495a9240eb00a612fa5  upstream/depay.h
+5c281edbfe301393d6f7e621d36743f8945123732f41ab665f9933358edcb3d5  upstream/depayload.h
+ce5ace6f3aea6d1bfbd8414981e8c6aa0950bef0d98c09d2f32bd5021935f2b1  upstream/gst.h
+=== compile ===
+61366975f94ce9223841ffa98719256b9515f88621ae783e7337f1d297d9818c  layout_probe.c
+=== non-ASan: channels=1000, 64 KiB backing (zone counts) ===
+channels=1000 mode=big info_size=320 elem_tail_size=328 position_off=28
+oob_writes=936 pad_writes=1 reserved_writes=8 order_writes=2 escape_writes=925
+order_after=(nil) (sentinel 0x4141... => zeroed=1)
+first_oob_index=64 first_escape_index=75
+=== non-ASan: channels=74, 64 KiB backing (partial) ===
+channels=74 mode=big info_size=320 elem_tail_size=328 position_off=28
+oob_writes=10 pad_writes=1 reserved_writes=8 order_writes=1 escape_writes=0
+order_after=0x4141414100000000 (sentinel 0x4141... => zeroed=0)
+first_oob_index=64 first_escape_index=75
+=== ASan: channels=1000, exact 328-byte element-tail allocation ===
+asan exit=1
+==3972307==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x513000000188 at pc 0x57640634c357 bp 0x7ffd80898570 sp 0x7ffd80898560
+WRITE of size 4 at 0x513000000188 thread T0
+0x513000000188 is located 0 bytes after 328-byte region [0x513000000040,0x513000000188)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/layout_probe.c:84 in vuln_create_default
+wrapper_rc=0
+########## lab/gst2shell-src/run_live.sh ##########
+pinned upstream/channels.c 08ae20b33b764ce0a5f9e7e0e4d2b65cb3dc85e2b5bbee373218e817b75e577b
+pinned upstream/channels.h 0d239c5005ba2995d41a2b51b9b3d6ffe262357619d311af1ee0f0abf15eb6b4
+pinned upstream/audio-channels.h 3934f423cfcc7b9e190a1fb38e9b4317e0c1dcc62dbddc1d6dc28f22e0f1b5ec
+live_setcaps.c: In function ‘main’:
+live_setcaps.c:199:27: warning: initialization discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  199 |     volatile gpointer v = ((LiveDepay *) dep)->order->pos;
+      |                           ^
+live_setcaps.c: In function ‘main’:
+live_setcaps.c:199:27: warning: initialization discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  199 |     volatile gpointer v = ((LiveDepay *) dep)->order->pos;
+      |                           ^
+digest 8c7502f584b2e272be3bfbe6000792afa10ca285a96642268935481617b8bb45  live_setcaps.c
+digest 08ae20b33b764ce0a5f9e7e0e4d2b65cb3dc85e2b5bbee373218e817b75e577b  upstream/channels.c
+NOTE:   GST_AUDIO_CHANNEL_POSITION_NONE = -3,
+=== benign channels=8 (real order table hit, no create_default) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=8 oob_writes=0 escape_bytes=-268
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, payload=(int)96
+setcaps_return=0 channels_field=8 order_ptr=0x6148eb1b0ab0
+rc=0
+=== vulnerable channels=74 (10 OOB writes, intra-object) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=74 oob_writes=10 escape_bytes=-4
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)74, payload=(int)96
+
+** (live_vuln:3972444): WARNING **: 02:59:15.474: Unknown channel order '(NULL)' for 74 channels
+setcaps_return=0 channels_field=74 order_ptr=0xfffffffd
+rc=0
+=== VULNERABLE channels=1000 (expect ASan heap-buffer-overflow) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=1000 oob_writes=936 escape_bytes=3700
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, payload=(int)96
+==3972448==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51900000ef60 at pc 0x567c7bd07100 bp 0x7ffdb64bbc60 sp 0x7ffdb64bbc50
+WRITE of size 4 at 0x51900000ef60 thread T0
+    #0 0x567c7bd070ff in gst_rtp_channels_create_default upstream/channels.c:309
+    #1 0x567c7bd0627a in live_setcaps /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:132
+    #2 0x567c7bd0674a in main /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:194
+0x51900000ef60 is located 0 bytes after 992-byte region [0x51900000eb80,0x51900000ef60)
+allocated by thread T0 here:
+    #0 0x7174ab4fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7174ab05a821 in g_malloc0 (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x63821) (BuildId: 32e71bdc4300e9f407c74441d1b02d962c8af007)
+    #2 0x7174ab180f65 in g_type_create_instance (/lib/x86_64-linux-gnu/libgobject-2.0.so.0+0x40f65) (BuildId: 7f05f3309a67e3e14d21138004573cb76a1cd904)
+    #4 0x7174ab168015 in g_object_new_with_properties (/lib/x86_64-linux-gnu/libgobject-2.0.so.0+0x28015) (BuildId: 7f05f3309a67e3e14d21138004573cb76a1cd904)
+    #5 0x7174ab168f70 in g_object_new (/lib/x86_64-linux-gnu/libgobject-2.0.so.0+0x28f70) (BuildId: 7f05f3309a67e3e14d21138004573cb76a1cd904)
+SUMMARY: AddressSanitizer: heap-buffer-overflow upstream/channels.c:309 in gst_rtp_channels_create_default
+vuln_rc=1
+=== FIXED control channels=1000 (MIN clamp, expect clean) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=1000 oob_writes=936 escape_bytes=3700
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, payload=(int)96
+
+** (live_fixed:3972462): WARNING **: 02:59:15.611: Unknown channel order '(NULL)' for 1000 channels
+setcaps_return=0 channels_field=1000 order_ptr=(nil)
+fixed_rc=0
+=== VULN channels=74 + deref order->pos (pinned depay.c:267) ===
+channels=74 oob_writes=10 escape_bytes=-4
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)74, payload=(int)96
+setcaps_return=0 channels_field=74 order_ptr=0xfffffffd
+==3972464==ERROR: AddressSanitizer: SEGV on unknown address 0x00009fff8001 (pc 0x6551374388a4 bp 0x7ffe3f55c000 sp 0x7ffe3f55bef0 T0)
+==3972464==The signal is caused by a READ memory access.
+    #0 0x6551374388a4 in main /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:199
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:199 in main
+deref_vuln_rc=1
+=== benign channels=8 + deref (real order, clean) ===
+setcaps_return=0 channels_field=8 order_ptr=0x5e1c294c1ab0
+deref_order_pos=0x5e1c294bfb20
+deref_benign_rc=0
+=== FIXED channels=74 + deref (order NULL, clean) ===
+setcaps_return=0 channels_field=74 order_ptr=(nil)
+deref_fixed_rc=0
+wrapper_rc=0
+### done 2026-11-21T02:59:15Z
+########## lab/gst2shell-src/run_real.sh ##########
+  Filename                 /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstrtp.so
+digest c504f5b8d020fdb401fd6da0827ad1f007b07c183e754f3758a51ea0f5274821  real_plugin.c
+=== single-field caps sweep (timeout 8s each) ===
+channels=8     rc=0
+channels=64    rc=0
+channels=74    rc=0
+channels=84    rc=0
+channels=85    rc=0
+lab/gst2shell-src/run_real.sh: line 18: 3973986 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=86    rc=139
+lab/gst2shell-src/run_real.sh: line 18: 3974087 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=87    rc=139
+channels=88    rc=124
+lab/gst2shell-src/run_real.sh: line 18: 3975529 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=100   rc=139
+channels=200   rc=124
+lab/gst2shell-src/run_real.sh: line 18: 3977956 Segmentation fault      timeout 8 ./real_plugin "$n" > /dev/null 2>&1
+channels=1000  rc=139
+=== gdb backtrace, channels=1000 ===
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff769b410 in ?? () from /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstrtp.so
+#0  0x00007ffff769b410 in ??? () at /usr/lib/x86_64-linux-gnu/gstreamer-1.0/libgstrtp.so
+#1  0x00007ffff740aded in ??? () at /lib/x86_64-linux-gnu/libgstrtp-1.0.so.0
+#2  0x00007ffff7ef007d in ??? () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#3  0x00007ffff7ef433f in gst_pad_send_event () at /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0
+#4  0x00005555555555e9 in gst_pad_set_caps (pad=0x555555728380, caps=0x555555730260) at /usr/include/gstreamer-1.0/gst/gstcompat.h:61
+#5  0x000055555555579b in main (argc=2, argv=0x7fffffffe2a8) at real_plugin.c:44
+rax            0xfffffffdfffffffd  -8589934595
+rip            0x7ffff769b410      0x7ffff769b410
+=== gdb backtrace, channels=86 ===
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7aade81 in arena_for_chunk (ptr=0x555555728300) at ./malloc/arena.c:153
+warning: 153	./malloc/arena.c: No such file or directory
+#0  0x00007ffff7aade81 in arena_for_chunk (ptr=0x555555728300) at ./malloc/arena.c:153
+#1  arena_for_chunk (ptr=0x555555728300) at ./malloc/arena.c:151
+#2  __GI___libc_free (mem=0x555555728310) at ./malloc/malloc.c:3397
+wrapper_rc=0
+########## lab/gst2shell-src/run_sdp.sh ##########
+digest 6ba2e70763383aad320956d6edc6eee865495dbaacef6bf3bd7d6f38707cfc4f  sdp_caps.c
+=== SDP rtpmap channel-count sweep (timeout 8s each) ===
+--- channels=2 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/2
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)2
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=8 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/8
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=64 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/64
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)64
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=74 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/74
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)74
+calling real set_caps
+set_caps=1
+rc=0
+--- channels=86 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/86
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)86
+calling real set_caps
+set_caps=1
+timeout: the monitored command dumped core
+lab/gst2shell-src/run_sdp.sh: line 14: 3978474 Segmentation fault      timeout 8 ./sdp_caps "$n" 2>&1
+rc=139
+--- channels=1000 ---
+sdp_rtpmap=a=rtpmap:96 L16/44100/1000
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000
+calling real set_caps
+timeout: the monitored command dumped core
+lab/gst2shell-src/run_sdp.sh: line 14: 3978544 Segmentation fault      timeout 8 ./sdp_caps "$n" 2>&1
+rc=139
+=== symbolicated fault, channels=1000 ===
+sdp_rtpmap=a=rtpmap:96 L16/44100/1000
+caps_from_sdp=application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000
+calling real set_caps
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff70ae410 in gst_pad_set_caps (caps=0x55555572df10 [GstCaps], pad=0x555555726490) at /usr/include/gstreamer-1.0/gst/gstcompat.h:53
+#0  0x00007ffff70ae410 in gst_pad_set_caps (caps=0x55555572df10 [GstCaps], pad=0x555555726490) at /usr/include/gstreamer-1.0/gst/gstcompat.h:53
+#1  gst_rtp_L16_depay_setcaps (depayload=Python Exception <class 'UnicodeDecodeError'>: 'utf-8' codec can't decode byte 0xfd in position 0: invalid start byte
+   0x7ffff70ae408 <gst_rtp_L16_depay_setcaps+472>:	mov    (%rbx),%rax
+   0x7ffff70ae40b <gst_rtp_L16_depay_setcaps+475>:	test   %rax,%rax
+   0x7ffff70ae40e <gst_rtp_L16_depay_setcaps+478>:	je     0x7ffff70ae415 <gst_rtp_L16_depay_setcaps+485>
+=> 0x7ffff70ae410 <gst_rtp_L16_depay_setcaps+480>:	cmp    (%rax),%rsi
+   0x7ffff70ae413 <gst_rtp_L16_depay_setcaps+483>:	je     0x7ffff70ae425 <gst_rtp_L16_depay_setcaps+501>
+   0x7ffff70ae415 <gst_rtp_L16_depay_setcaps+485>:	mov    %rbx,%rdi
+rax            0xfffffffdfffffffd  -8589934595
+rbx            0x555555726490      93824994141328
+wrapper_rc=0
+########## lab/gst2shell-src/run_rtsp.sh ##########
+server_digest f812d84453ed3e6f3698ed144cd36490bfc74eea78159defba4b06d40e1e0668  rtsp_server.py
+=== channels=8 port=18554 ===
+gst-launch rc=124
+--- server requests (channels=8) ---
+    RTSP listening 127.0.0.1:18554 channels=8
+    ACCEPT from ('127.0.0.1', 37548)
+    REQ OPTIONS rtsp://127.0.0.1:18554/ RTSP/1.0 (CSeq 1)
+    REQ DESCRIBE rtsp://127.0.0.1:18554/ RTSP/1.0 (CSeq 2)
+    REQ SETUP rtsp://127.0.0.1:18554/trackID=1 RTSP/1.0 (CSeq 3)
+    REQ PLAY rtsp://127.0.0.1:18554/ RTSP/1.0 (CSeq 4)
+--- depay caps / faults (channels=8) ---
+    Pipeline is PREROLLED ...
+    Setting pipeline to PLAYING ...
+    New clock: GstSystemClock
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:src_287454020: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpPtDemux:rtpptdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src.GstGhostPad:recv_rtp_src_0_287454020_96: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRtpL16Depay:rtpl16depay0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src.GstGhostPad:recv_rtp_src_0_287454020_96.GstProxyPad:proxypad4: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager.GstGhostPad:recv_rtp_src_0_287454020_96.GstProxyPad:proxypad3: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)496\,\ packets-received\=\(guint64\)31\,\ bytes-received\=\(guint64\)1736\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)1870\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)31\,\ sent-rb-jitter\=\(uint\)1870\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)640\,\ packets-received\=\(guint64\)40\,\ bytes-received\=\(guint64\)2240\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)2019\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)31\,\ sent-rb-jitter\=\(uint\)1870\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)640\,\ packets-received\=\(guint64\)40\,\ bytes-received\=\(guint64\)2240\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)2019\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)31\,\ sent-rb-jitter\=\(uint\)1870\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)640\,\ packets-received\=\(guint64\)40\,\ bytes-received\=\(guint64\)2240\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)2019\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)40\,\ sent-rb-jitter\=\(uint\)2019\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)640\,\ packets-received\=\(guint64\)40\,\ bytes-received\=\(guint64\)2240\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)2019\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)40\,\ sent-rb-jitter\=\(uint\)2019\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)640\,\ packets-received\=\(guint64\)40\,\ bytes-received\=\(guint64\)2240\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)2019\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)40\,\ sent-rb-jitter\=\(uint\)2019\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)640\,\ packets-received\=\(guint64\)40\,\ bytes-received\=\(guint64\)2240\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)2019\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)40\,\ sent-rb-jitter\=\(uint\)2019\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0: stats = application/x-rtp-session-stats, rtx-drop-count=(uint)0, sent-nack-count=(uint)0, recv-nack-count=(uint)0, source-stats=(GValueArray)< "application/x-rtp-source-stats\,\ ssrc\=\(uint\)287454020\,\ internal\=\(boolean\)false\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)true\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)44100\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)640\,\ packets-received\=\(guint64\)40\,\ bytes-received\=\(guint64\)2240\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)-1\,\ jitter\=\(uint\)2019\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)4294967295\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\,\ sent-rb\=\(boolean\)true\,\ sent-rb-fractionlost\=\(uint\)0\,\ sent-rb-packetslost\=\(int\)-1\,\ sent-rb-exthighestseq\=\(uint\)40\,\ sent-rb-jitter\=\(uint\)2019\,\ sent-rb-lsr\=\(uint\)0\,\ sent-rb-dlsr\=\(uint\)0\,\ have-rb\=\(boolean\)false\,\ rb-ssrc\=\(uint\)0\,\ rb-fractionlost\=\(uint\)0\,\ rb-packetslost\=\(int\)0\,\ rb-exthighestseq\=\(uint\)0\,\ rb-jitter\=\(uint\)0\,\ rb-lsr\=\(uint\)0\,\ rb-dlsr\=\(uint\)0\,\ rb-round-trip\=\(uint\)0\;", "application/x-rtp-source-stats\,\ ssrc\=\(uint\)3743980733\,\ internal\=\(boolean\)true\,\ validated\=\(boolean\)true\,\ received-bye\=\(boolean\)false\,\ is-csrc\=\(boolean\)false\,\ is-sender\=\(boolean\)false\,\ seqnum-base\=\(int\)-1\,\ clock-rate\=\(int\)-1\,\ octets-sent\=\(guint64\)0\,\ packets-sent\=\(guint64\)0\,\ octets-received\=\(guint64\)0\,\ packets-received\=\(guint64\)0\,\ bytes-received\=\(guint64\)0\,\ bitrate\=\(guint64\)0\,\ packets-lost\=\(int\)0\,\ jitter\=\(uint\)0\,\ sent-pli-count\=\(uint\)0\,\ recv-pli-count\=\(uint\)0\,\ sent-fir-count\=\(uint\)0\,\ recv-fir-count\=\(uint\)0\,\ sent-nack-count\=\(uint\)0\,\ recv-nack-count\=\(uint\)0\,\ recv-packet-rate\=\(uint\)0\,\ have-sr\=\(boolean\)false\,\ sr-ntptime\=\(guint64\)0\,\ sr-rtptime\=\(uint\)0\,\ sr-octet-count\=\(uint\)0\,\ sr-packet-count\=\(uint\)0\;" >, rtx-count=(uint)0, recv-rtx-req-count=(uint)0, sent-rtx-req-count=(uint)0;
+
+=== channels=1000 port=18555 ===
+gst-launch rc=124
+--- server requests (channels=1000) ---
+    RTSP listening 127.0.0.1:18555 channels=1000
+    ACCEPT from ('127.0.0.1', 50040)
+    REQ OPTIONS rtsp://127.0.0.1:18555/ RTSP/1.0 (CSeq 1)
+    REQ DESCRIBE rtsp://127.0.0.1:18555/ RTSP/1.0 (CSeq 2)
+    REQ SETUP rtsp://127.0.0.1:18555/trackID=1 RTSP/1.0 (CSeq 3)
+    REQ PLAY rtsp://127.0.0.1:18555/ RTSP/1.0 (CSeq 4)
+--- depay caps / faults (channels=1000) ---
+    Pipeline is PREROLLED ...
+    Setting pipeline to PLAYING ...
+    New clock: GstSystemClock
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:src_287454020: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src/GstRtpBin:manager/GstRtpPtDemux:rtpptdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    /GstPipeline:pipeline0/GstRTSPSrc:src.GstGhostPad:recv_rtp_src_0_287454020_96: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+    Caught SIGSEGV
+    Caught SIGSEGV
+
+wrapper_rc=0
+########## lab/gst2shell-src/run_rtsp_family.sh ##########
+server_codec_digest 1493f137e48baa063cdf6f06ec7483da878ca2512b56220e7ed455755a3cb45c  rtsp_server_codec.py
+=== codec=L8 channels=8 port=18600 ===
+gst-launch rc=0
+--- auto-plugged depay / caps / fault ---
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: rfc7273-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: add-reference-timestamp-meta = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-time-source = ntp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-rtcp-rtp-time-diff = 1000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-ts-offset-adjustment = 0
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0.GstProxyPad:proxypad1: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:sync_src: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-lost = false
+
+=== codec=L8 channels=1000 port=18601 ===
+lab/gst2shell-src/run_rtsp_family.sh: line 14: 3984046 Aborted                 timeout 12 gst-launch-1.0 -v uridecodebin uri="rtsp://127.0.0.1:${port}/" name=u u. ! fakesink > "family_${codec}_${n}.log" 2>&1
+gst-launch rc=134
+--- auto-plugged depay / caps / fault ---
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: rfc7273-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: add-reference-timestamp-meta = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-time-source = ntp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-rtcp-rtp-time-diff = 1000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-ts-offset-adjustment = 0
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0.GstProxyPad:proxypad1: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSgrep: family_L8_1000.log: binary file matches
+ession:rtpsession0.GstPad:sync_src: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-lost = false
+
+=== codec=L16 channels=8 port=18602 ===
+gst-launch rc=124
+--- auto-plugged depay / caps / fault ---
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: rfc7273-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: add-reference-timestamp-meta = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-time-source = ntp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-rtcp-rtp-time-diff = 1000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-ts-offset-adjustment = 0
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0.GstProxyPad:proxypad1: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:sync_src: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-lost = false
+
+=== codec=L16 channels=1000 port=18603 ===
+gst-launch rc=124
+--- auto-plugged depay / caps / fault ---
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: rfc7273-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: add-reference-timestamp-meta = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-time-source = ntp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-rtcp-rtp-time-diff = 1000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-ts-offset-adjustment = 0
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0.GstProxyPad:proxypad1: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:sync_src: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-lost = false
+
+=== codec=L24 channels=8 port=18604 ===
+gst-launch rc=124
+--- auto-plugged depay / caps / fault ---
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: rfc7273-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: add-reference-timestamp-meta = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-time-source = ntp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-rtcp-rtp-time-diff = 1000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-ts-offset-adjustment = 0
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)8, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0.GstProxyPad:proxypad1: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:sync_src: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-lost = false
+
+=== codec=L24 channels=1000 port=18605 ===
+lab/gst2shell-src/run_rtsp_family.sh: line 14: 3989067 Aborted                 timeout 12 gst-launch-1.0 -v uridecodebin uri="rtsp://127.0.0.1:${port}/" name=u u. ! fakesink > "family_${codec}_${n}.log" 2>&1
+gst-launch rc=134
+--- auto-plugged depay / caps / fault ---
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: rfc7273-sync = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: add-reference-timestamp-meta = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-time-source = ntp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-rtcp-rtp-time-diff = 1000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-ts-offset-adjustment = 0
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L24, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0.GstProxyPad:proxypad1: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:sync_src: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtcp_sink: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0: caps = application/x-rtcp
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: latency = 2000
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: drop-on-latency = false
+    /GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-lost = false
+
+wrapper_rc=0
+### done 2026-11-21T03:01:08Z

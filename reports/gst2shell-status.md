@@ -352,6 +352,47 @@ symbolication of the direct `set_caps` fault, the 4-byte stride and the clean
 N=8 control. The value remains the fixed `-3` pattern — no chosen-byte
 control.
 
+## Reproducible witness replay (2026-11-21 ~03:05Z)
+
+All seven drivers were re-run from the pinned/committed sources at 02:59–03:01Z
+at git HEAD `ec06331`, each rc 0; the full transcript is
+`lab/gst2shell-src/verify_transcript_20261121T03Z.txt`. Pinned digests matched
+(`rtp_channels_overflow.c` `3d2b8e06…3525`, its `run.sh` `7dde5da7…7567`,
+`rtsp_server.py` `f812d844…e0668`, `rtsp_server_codec.py` `1493f137…cb45c`,
+`run_rtsp_family.sh` `54e8331e…786e`). Every claim reproduced: rung 1
+`oob_writes=936 first_oob=256 last_oob=3999`, rung 2
+`LENGTH_CONTROL_OBSERVED`, rung 3 ASan `WRITE of size 4`, rung 4
+`NOT_DEMONSTRATED`, the `MIN`-clamped fixed control `oob_writes=0`, and the
+5/5 determinism hash `c96ad6f6…f056`. The live ASan harness again reported the
+overflow at `channels.c:309` after a real `g_object_new`, with N=74 setting
+`order_ptr=0xfffffffd` and faulting on dereference while the benign and fixed
+controls stayed clean. The shipping plugin again faulted at N=1000 with
+`rax=0xfffffffdfffffffd`; SDP again mapped `a=rtpmap` to
+`encoding-params=(string)1000` and faulted at N=86/1000; the real L16 RTSP path
+again showed "Caught SIGSEGV" at N=1000 with a clean PREROLLED benign control.
+
+To make this replay a single deterministic action for the witness, added
+`lab/gst2shell-src/verify_all.sh`. It runs all seven drivers, keeps each
+driver's output in a timestamped `verify-out/` directory, and asserts each
+observable above (including the pinned digests and the value/effect boundary).
+`VERIFY_VALGRIND=1` additionally re-runs the ~120 s memcheck lane.
+
+One variability was observed and is preserved rather than hidden: the exact
+glibc abort message for the family N=1000 case changed on every run. The
+02:59Z replay gave `malloc(): unaligned tcache chunk detected` for both L8 and
+L24 with L16 segtrap-caught (`timeout` 124); the 03:02Z replay under
+`verify_all.sh` gave that same message for L8, `malloc(): invalid size
+(unsorted)` for L16, and no captured message for L24, which still faulted.
+The stable, asserted claim is only "attacker-chosen count faults the victim";
+no exact allocator message or rc is asserted per codec. The family driver's
+`grep` now prints `binary file matches` for the corrupted N=1000 logs, so the
+verify aid reads those raw logs with `grep -a`.
+
+The full `verify_all.sh` run at 03:02Z wrote
+`lab/gst2shell-src/verify_all_run.txt`: 43 PASS, 0 FAIL, rc 0, including the
+valgrind lane's four checks. Chosen-byte rung 4 is asserted NOT demonstrated
+in that same output.
+
 ## Evidence boundary
 
 Rungs 1/2/3 remain established in the extracted harness and were replayed
@@ -400,11 +441,11 @@ ANNOUNCE media factory is outside a bounded wake, and GStreamer's SDP→caps
 mapping is already covered by `run_sdp.sh` independently of direction. No
 external probe was made. Keep the benign, fixed and ASan controls and the
 explicit caveat that the standalone SDP harness renamed the structure name,
-whereas the RTSP harness needs no such step. Witness: replay
-`lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`,
-`lab/gst2shell-src/run_live.sh`, `lab/gst2shell-src/run_real.sh`,
-`lab/gst2shell-src/run_sdp.sh`, `lab/gst2shell-src/run_rtsp.sh`,
-`lab/gst2shell-src/run_rtsp_family.sh` and the gdb debuginfod symbolications.
+whereas the RTSP harness needs no such step. Witness: run the single command
+`bash lab/gst2shell-src/verify_all.sh` (add `VERIFY_VALGRIND=1` for the
+memcheck lane); it re-runs every driver from the pinned sources and asserts
+each claim. The individual drivers and both gdb debuginfod symbolications
+remain available for inspection.
 Would change my mind: a caps clamp at <=64 in
 primary sources (checked: none), a failed replay or lost control, evidence
 that a real pipeline cannot deliver `encoding-params`, or evidence that the
