@@ -150,6 +150,31 @@ after abort) is **still open**; both fault sites are downstream symptoms.
   preserved as a negative, not erased. The capacity-boundary fill (78) is the
   change that exposed the race.
 
+### Independent frontier reproduction (W91, 21 Nov) — rung 1 confirmed, rung 2/3 negative, preserved
+
+Frontier rebuilt 2.4.70/2.4.71 from SHA256-matched ASF tarballs with nghttp2
+1.59.0 and **locally built ASan APR 1.7.4 / APR-util 1.6.3**, instrumented the
+one-line fix site, and drove loopback-only h2c traffic (76 custom headers +
+`Content-Type`, no `Content-Length` → header table at `nelts=80 nalloc=80`).
+`lab/frontier/apache2shell/OUTCOME.md` records 300/300 and 2000/2000 requests
+reaching the wrong-pool write on 2.4.70, 400/400 reaching the fixed write on
+2.4.71, and a multiplexed driver producing 3015 full-table writes on 2.4.70
+vs 13 on 2.4.71. That independently confirms rung 1.
+
+Frontier graded rung 2/3 **NOT established**: 2000 separate-connection
+full-table writes with ASan APR gave 0 ASan reports and 0 child crashes; one
+2000-stream/10-connection burst produced a single child SIGSEGV (21:43:55Z)
+that did not repeat, and a matched 300-stream/3-connection run was clean on
+both builds. This partially contradicts this report's rung 3. The difference
+is build-bound, not a refutation: frontier's APR is ASan-instrumented, which
+changes allocator behaviour and the race window, whereas this plant's rung 3
+faults in **uninstrumented system libapr** (see "Negative results preserved"
+above) with reproducible differential child SEGVs (3 vs 0 at `LogLevel info`)
+and a corrupted `pool->child` observed under gdb. Both agree the written value
+is the fixed string "0": no chosen-byte primitive. Frontier's negative is
+preserved as contradictory evidence; rung 3 stays graded on this plant's
+build and the lane stays closed at Stage A.
+
 ## Rung 4 — Stage A observed; Stages B/C not reached
 
 Per `docs/task.md`, rung 4 needs Stage A placement control (chosen bytes at a
