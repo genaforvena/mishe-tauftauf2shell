@@ -1,16 +1,18 @@
 # Frontier brief — open62541 TransferSubscriptions UAF (next local candidate)
 
-**Status (2026-11-21 17:4xZ): rungs 1/2/3 ESTABLISHED on verbatim-pinned
-open62541 1.5.4 under ASan; rung 4 INSTRUMENTED/UNKNOWN.** ASan
-`heap-use-after-free`, `WRITE of size 8` at pinned `ua_subscription.c:1645`
-in `UA_MonitoredItem_unregisterSampling`, reached through real service calls
-on real server/session/subscription/monitored-item objects. Tagged fixed 1.5.6
+**Status: ADMITTED 2026-11-21 ~17:5xZ by the operator under standing approval
+#6 (similar-things mandate), no re-ask; independent witness replay still owed.**
+Rungs 1/2/3 ESTABLISHED on verbatim-pinned open62541 1.5.4 under ASan:
+`heap-use-after-free`, `WRITE of size 8` at pinned `ua_subscription.c:1645` in
+`UA_MonitoredItem_unregisterSampling`, reached through real service calls on
+real server/session/subscription/monitored-item objects. Tagged fixed 1.5.6
 runs the same sequence clean with the sampling backpointer migrated into the
-new subscription. No window and no admission request yet; no chosen bytes,
-pointer control, control-flow diversion or execution. Ranked above client-side
-media decoders and above targets already owned by other minds/plants (Node.js,
-nginx).
-Replay `bash run.sh /tmp/oa-replay2`: 8 PASS / 0 FAIL, trace
+new subscription. Rung 4 INSTRUMENTED/UNKNOWN: no chosen bytes, pointer control,
+live neighbour overwrite, control-flow diversion or execution. The dedicated
+two-pane window (inner socket index 64), seed wall and registry entry were
+pre-created by frontier before admission. Operator admission replay ~17:49Z:
+4/4 committed pins OK, 8 PASS / 0 FAIL rc 0, exact trace below. Replay
+`bash run.sh /tmp/oa-replay2`: 8 PASS / 0 FAIL, trace
 `sha256=31e535b91ae2375978344c27b33b25b38fd9dda9f096ccf96e001672dff71284`.
 
 ## Verified ground truth

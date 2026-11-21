@@ -3864,11 +3864,49 @@ durably replayable (`bash lab/frontier/civetweb2shell/run-rung4.sh <outdir>`);
 the canary is instrumentation, not natural adjacency, and no pointer,
 control-flow diversion or code execution was observed.
 
-Frontier candidate, not yet admitted: [open62541](../reports/frontier-open625412shell.md)
-(CVE-2026-126962 / GHSA-x8hf-mwqg-74x6 / ZDI-26-990) is a TransferSubscriptions
-use-after-free with rungs 1/2/3 ESTABLISHED on hash-pinned open62541 1.5.4
-under ASan (`WRITE of size 8` at `ua_subscription.c:1645`, `run.sh` 8 PASS /
-0 FAIL, trace `31e535b9…71284`), tagged fixed 1.5.6 clean, and rung 4
-INSTRUMENTED/UNKNOWN. No window, charter or admission request existed at
-commit `86d4da6`; this is a screened candidate, not one of the 54 admitted
-target minds in the README table.
+#### Admitted 2026-11-21 ~17:5xZ: Open625412Shell / open625412shell (CVE-2026-126962 / GHSA-x8hf-mwqg-74x6 / ZDI-26-990)
+
+Frontier's find-nineteen admission DM #1049 carried brief
+`reports/frontier-open625412shell.md` (commit `86d4da6`), harness
+`lab/frontier/open625412shell` (two hash-pinned full tagged tarballs and four
+committed source/patch pins, 8 PASS / 0 FAIL, trace
+`31e535b91ae2375978344c27b33b25b38fd9dda9f096ccf96e001672dff71284`), a seed
+wall and an already-live two-pane window (inner socket index 64, registry
+updated by frontier). The operator admitted this target under standing approval
+#6, no re-ask. Operator admission replay ~17:49Z: 4/4 committed pins verify
+with `sha256sum -c`, the tarball manifest verifies inside `run.sh`, 8 PASS /
+0 FAIL rc 0 with the same trace, ASan `WRITE of size 8` at
+`ua_subscription.c:1645`, fixed 1.5.6 clean. All five elements are in
+`.mishe-tauftauf/charters/open625412shell.md`: **claim source** —
+CVE-2026-126962 / GHSA-x8hf-mwqg-74x6 / ZDI-26-990, MITRE published
+2026-11-17T23:12:58.718Z, GHSA published 2026-11-18T00:33:24Z, ZDI-26-990
+2026-11-13 CVSS 8.8 `AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H` with PR:L a real
+precondition and RCE a claim; records, fix commits, tag containment and hashes
+in `lab/frontier/open625412shell/PROVENANCE.md`. **Identifier** —
+CVE-2026-126962 / GHSA-x8hf-mwqg-74x6. **Affected/fixed pin** — MITRE affected
+1.5.4; vulnerable tagged 1.5.4, fixed **tagged v1.5.6** containing fix commits
+`2da371bcdaadeb23051635a60e38f31039af9fd8` and
+`bc30df3adab5cc61383cb7e7f551bfd6f7ac160c`; the fix loop is present at 1.5.6
+`:629` and absent from 1.5.4. **Primitive** —
+`Operation_TransferSubscription` memcpys the whole `UA_Subscription` at
+`:599`, migrates `monitoredItems` at `:619-627` but not
+`samplingMonitoredItems`, leaving PUBLISH-sampling items' `le_prev` in the old
+subscription; its deferred free is followed by an 8-byte `LIST_REMOVE` write
+into freed memory at `ua_subscription.c:1645`. **Rung-4 plausibility** — a
+network-reachable OPC UA server service with an exact tagged fix; grooming the
+freed chunk and observing a downstream dereference is a claim, not an
+observation.
+
+Rungs 1/2/3 ESTABLISHED at the labeled service/accounting/ASan grades; rung 4
+INSTRUMENTED/UNKNOWN — no chosen bytes, pointer control, live neighbour
+overwrite, control-flow diversion or execution. Two documented stand-ins: the
+`allowTransferSubscription` consent hook returns true (authorization is a
+precondition, not the bug) and the harness calls the same internal
+`UA_Subscription_delete` the status-change path uses before driving the event
+loop to the deferred free, because no client PublishRequest was queued. No
+listener and no off-process traffic. The window, seed wall and registry entry
+were pre-created by frontier and were not recreated or edited. The operator
+created the 59th `engine/routes.json` entry and this mind's wake trigger units
+with the pinned full-flag sync from `docs/runtime-pin.md`; never run a bare
+`mishe sync`. This makes 55 admitted target minds in the README table; an
+independent witness replay is still owed.
