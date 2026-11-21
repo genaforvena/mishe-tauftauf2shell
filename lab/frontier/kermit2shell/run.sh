@@ -89,7 +89,7 @@ check guard_page_faults "$a" 1
   echo "rung3: $(grep -m1 -o 'pins/ckcfns.c.vuln:[0-9]*' "$OUT/tight.raw" | head -1)"
   grep -h -E '^mode=|^offsets:' "$OUT"/{fit,oneover,c5a,c41,benign,fixed}.raw
   echo "guard_signal_exit=$grc"
-} | sed -E 's/(0x[0-9a-f]+)/ADDR/g' > "$OUT/trace.txt"
+} | sed -E 's/(0x[0-9a-f]+)/ADDR/g; s/==[0-9]+==/==PID==/g' > "$OUT/trace.txt"
 sha=$(sha256sum "$OUT/trace.txt" | cut -d' ' -f1)
 echo "trace_sha256=$sha"
 
