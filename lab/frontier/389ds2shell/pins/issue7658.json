@@ -1,0 +1,123 @@
+{
+  "url": "https://api.github.com/repos/389ds/389-ds-base/issues/7658",
+  "repository_url": "https://api.github.com/repos/389ds/389-ds-base",
+  "labels_url": "https://api.github.com/repos/389ds/389-ds-base/issues/7658/labels{/name}",
+  "comments_url": "https://api.github.com/repos/389ds/389-ds-base/issues/7658/comments",
+  "events_url": "https://api.github.com/repos/389ds/389-ds-base/issues/7658/events",
+  "html_url": "https://github.com/389ds/389-ds-base/issues/7658",
+  "id": 4941944680,
+  "node_id": "I_kwDOEZR7Xc8AAAABJpAXaA",
+  "number": 7658,
+  "title": "Potential sasl io overflow",
+  "user": {
+    "login": "mreynolds389",
+    "id": 3912140,
+    "node_id": "MDQ6VXNlcjM5MTIxNDA=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/3912140?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/mreynolds389",
+    "html_url": "https://github.com/mreynolds389",
+    "followers_url": "https://api.github.com/users/mreynolds389/followers",
+    "following_url": "https://api.github.com/users/mreynolds389/following{/other_user}",
+    "gists_url": "https://api.github.com/users/mreynolds389/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/mreynolds389/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/mreynolds389/subscriptions",
+    "organizations_url": "https://api.github.com/users/mreynolds389/orgs",
+    "repos_url": "https://api.github.com/users/mreynolds389/repos",
+    "events_url": "https://api.github.com/users/mreynolds389/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/mreynolds389/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "labels": [
+    {
+      "id": 2344120071,
+      "node_id": "MDU6TGFiZWwyMzQ0MTIwMDcx",
+      "url": "https://api.github.com/repos/389ds/389-ds-base/labels/security",
+      "name": "security",
+      "color": "d30c4b",
+      "default": false,
+      "description": "Security Issue",
+      "archived_at": null,
+      "archived_by": null
+    },
+    {
+      "id": 2347036306,
+      "node_id": "MDU6TGFiZWwyMzQ3MDM2MzA2",
+      "url": "https://api.github.com/repos/389ds/389-ds-base/labels/needs%20triage",
+      "name": "needs triage",
+      "color": "e07dcc",
+      "default": false,
+      "description": "The issue will be triaged during scrum",
+      "archived_at": null,
+      "archived_by": null
+    }
+  ],
+  "state": "closed",
+  "locked": false,
+  "assignees": [
+
+  ],
+  "milestone": null,
+  "comments": 1,
+  "created_at": "2026-07-21T18:29:59Z",
+  "updated_at": "2026-08-13T16:56:12Z",
+  "closed_at": "2026-08-13T16:56:11Z",
+  "assignee": null,
+  "author_association": "CONTRIBUTOR",
+  "issue_field_values": [
+
+  ],
+  "type": null,
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+    "total": 0,
+    "completed": 0,
+    "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+    "blocked_by": 0,
+    "total_blocked_by": 0,
+    "blocking": 0,
+    "total_blocking": 0
+  },
+  "body": "**Issue Description**\n\nHeap Buffer Overflow in sasl_io_recv() via Padded SASL UNBIND\n\nIn sasl_io.c, function sasl_io_recv(), when sasl_io_start_packet() returns\nSASL_IO_BUFFER_NOT_ENCRYPTED (triggered by sending an unencrypted LDAP UNBIND\nafter SASL layer setup) there is no check that sp->encrypted_buffer_count <= len before the memcpy\n\n",
+  "closed_by": {
+    "login": "mreynolds389",
+    "id": 3912140,
+    "node_id": "MDQ6VXNlcjM5MTIxNDA=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/3912140?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/mreynolds389",
+    "html_url": "https://github.com/mreynolds389",
+    "followers_url": "https://api.github.com/users/mreynolds389/followers",
+    "following_url": "https://api.github.com/users/mreynolds389/following{/other_user}",
+    "gists_url": "https://api.github.com/users/mreynolds389/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/mreynolds389/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/mreynolds389/subscriptions",
+    "organizations_url": "https://api.github.com/users/mreynolds389/orgs",
+    "repos_url": "https://api.github.com/users/mreynolds389/repos",
+    "events_url": "https://api.github.com/users/mreynolds389/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/mreynolds389/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "reactions": {
+    "url": "https://api.github.com/repos/389ds/389-ds-base/issues/7658/reactions",
+    "total_count": 0,
+    "+1": 0,
+    "-1": 0,
+    "laugh": 0,
+    "hooray": 0,
+    "confused": 0,
+    "heart": 0,
+    "rocket": 0,
+    "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/389ds/389-ds-base/issues/7658/timeline",
+  "performed_via_github_app": null,
+  "state_reason": "completed",
+  "pinned_comment": null
+}
