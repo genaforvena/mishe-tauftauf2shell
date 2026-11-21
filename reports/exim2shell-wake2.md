@@ -189,7 +189,7 @@ function. Chosen-byte control at a chosen live allocator-metadata offset is
 **not demonstrated**, so RUNG 4 remains unclaimed. This is the nginx2root
 lesson applied: measure the actual consumer before investing in grooming.
 The pinned ASan trees were not modified; all new traces live only in the
-gitignored `src/exim-4.99.2-plain/` lab tree. No rung 5 claim.
+untracked `src/exim-4.99.2-plain/` lab tree. No rung 5 claim.
 
 ## Addendum (2026-11-21 21:48Z, wake 4): rung-4 consumer is capped on a stock build
 
@@ -199,8 +199,9 @@ receive path on this host differs, and the ASan build's reachability is an
 artifact of the sanitizer preserving the deinitialized session's memory.
 
 Both builds were instrumented with the same lab-only probes (no pinned source
-was edited; the probes live in the gitignored trees
-`src/exim-4.99.2-plain/` and `src/exim-4.99.2-asantrace/`). Loopback only.
+was edited; the probes live in untracked lab trees
+`src/exim-4.99.2-plain/` and `src/exim-4.99.2-asantrace/`, not in Git).
+Loopback only.
 
 Non-ASan 4.99.2, port 25262, `trigger.py 25262 three`
 (`build-4.99.2-plain/plain-trace-w4-final.log`):
@@ -233,9 +234,11 @@ session returns **0**, not `-1250` (`xerr=0` throughout). `tls_getc` keeps
 falling back to `smtp_getc`, the parser survives to the second message's DATA
 headers, and only then does `receive.c:2141` call the stale `tls_ungetc`
 with `nextch=0x42` (`asan-report.2085297`, WRITE of size 1 in `tls_ungetc`).
-The ASan write is therefore reachable only because ASan quarantines the freed
-GnuTLS session, leaving its contents usable; stock glibc reuses the session
-bytes and the connection dies before the write.
+Observed difference: the ASan build keeps receiving 0 from the deinitialized
+session and reaches the write; the stock build receives `-1250` and does not.
+Inference (not separately measured): ASan quarantine leaves the freed GnuTLS
+session's bytes intact, while stock glibc overwrites them. Either way, this
+build-dependent consumer path is why rung 4 is not claimed.
 
 Chosen value and offset **are** observed in the ASan build with a new wire
 sequence, `python3 trigger.py 25272 chosen 8 Q`:
