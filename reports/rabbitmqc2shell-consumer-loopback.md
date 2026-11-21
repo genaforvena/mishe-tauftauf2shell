@@ -176,3 +176,42 @@ no real application doing that was built or observed, and no real broker was
 contacted. Rung 4 stays "demonstrated in the lab build" by the direct-API
 path. The `amqp_basic_publish` finding is a measured consumer-side blocker,
 preserved as a boundary condition rather than a failed claim.
+
+## Complete in-tree caller enumeration and external-caller search (2026-11-21 ~20:20Z)
+
+The high-level check above examined `amqp_basic_publish`. This wake closes the
+sub-question definitively by enumerating **every** in-tree caller of the
+vulnerable serializer in pinned v0.16.0 (source extracted to
+`/tmp/rmq2-src/rabbitmq-c-0.16.0`; grep pattern `amqp_send_frame`):
+
+- `librabbitmq/amqp_api.c:217` — `AMQP_FRAME_HEADER` (properties) inside
+  `amqp_basic_publish`; fixed-shape, no attacker-sized body.
+- `librabbitmq/amqp_api.c:242` — `AMQP_FRAME_BODY` inside the
+  `amqp_basic_publish` loop `:223-246`; each `body_fragment.len` is clamped to
+  `usable_body_payload_size = frame_max - (HEADER_SIZE+FOOTER_SIZE)`
+  (`:167-168`, `:233-238`). Safe.
+- `librabbitmq/amqp_socket.c:773` — `AMQP_FRAME_HEARTBEAT` via the public
+  `amqp_send_frame`; a body-less fixed-size frame. Safe.
+- `librabbitmq/amqp_socket.c:996` — `AMQP_FRAME_METHOD` via
+  `amqp_send_frame_inner` in `amqp_send_method_inner`; method arguments are
+  encoded with the bounded table encoder, not a caller-sized body. Safe.
+
+There are no other in-tree callers. `amqp_send_frame` itself
+(`amqp_connection.c:531`) and its inner routine (`:548`) are the only sinks,
+so **every internal library path is protected by either a fixed frame shape or
+the `frame_max` chunking**. The overflow requires an external caller to invoke
+the exported `amqp_send_frame` directly with `body.len > buffer.len-14` —
+exactly the frontier harness and the synthetic socket-fed service, neither of
+which is a real application.
+
+External direct callers remain UNKNOWN. Three bounded web searches
+(`"amqp_send_frame" rabbitmq-c direct caller proxy gateway source code`,
+`"amqp_send_frame" librabbitmq proxy OR gateway OR forwarder application
+source`, `github "amqp_send_frame(" -rabbitmq-c -docs -advisory`) returned only
+the CVE/GHSA records, PR #892, distribution trackers, API docs and a 2011
+rabbitmq-discuss thread about the *different* `amqp_send_frame_to` API in
+Tony Garnock-Jones' event-driven `rais` experiment. No named, deployed
+frame-level consumer was identified. This is a search negative, not proof none
+exists: GitHub code search across all forks and closed deployments was not
+available here, and no external system was probed. The rung-5 path through a
+real frame-level proxy stays plausible but UNPROVEN.
