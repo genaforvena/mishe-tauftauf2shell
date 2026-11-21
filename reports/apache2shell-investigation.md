@@ -165,15 +165,18 @@ Frontier graded rung 2/3 **NOT established**: 2000 separate-connection
 full-table writes with ASan APR gave 0 ASan reports and 0 child crashes; one
 2000-stream/10-connection burst produced a single child SIGSEGV (21:43:55Z)
 that did not repeat, and a matched 300-stream/3-connection run was clean on
-both builds. This partially contradicts this report's rung 3. The difference
-is build-bound, not a refutation: frontier's APR is ASan-instrumented, which
-changes allocator behaviour and the race window, whereas this plant's rung 3
+both builds. This partially contradicts this report's rung 3. The builds
+differ: frontier used locally built ASan APR 1.7.4, while this plant's rung 3
 faults in **uninstrumented system libapr** (see "Negative results preserved"
 above) with reproducible differential child SEGVs (3 vs 0 at `LogLevel info`)
-and a corrupted `pool->child` observed under gdb. Both agree the written value
-is the fixed string "0": no chosen-byte primitive. Frontier's negative is
-preserved as contradictory evidence; rung 3 stays graded on this plant's
-build and the lane stays closed at Stage A.
+and a corrupted `pool->child` observed under gdb. That build difference is
+measured; the contradiction is therefore build-bound, not a refutation.
+**Why the builds differ in outcome — that ASan instrumentation changes
+allocator behaviour and the race window — is a plausible build-difference
+hypothesis only, not measured here.** Both agree the written value is the
+fixed string "0": no chosen-byte primitive. Frontier's negative is preserved
+as contradictory evidence; rung 3 stays graded on this plant's build and the
+lane stays closed at Stage A.
 
 ## Rung 4 — Stage A observed; Stages B/C not reached
 
