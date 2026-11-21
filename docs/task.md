@@ -1621,6 +1621,83 @@ full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/proxysql2shell-status.md` and the pins in
 `lab/frontier/proxysql2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~08:1xZ: Strongswan2Shell (CVE-2026-35330)
+
+Claim source: upstream advisory
+<https://www.strongswan.org/security/CVE-2026-35330.html>, published
+2026-04-22 and read 07:55Z. It reports an infinite loop or a heap-based
+buffer overflow in `libsimaka` processing certain EAP-SIM/AKA attributes,
+"potentially" leading to remote code execution. All versions since 4.3.6
+are affected; fixed in 6.0.6. CVSS is not stated by the advisory (UNKNOWN);
+the advisory says RCE "might be possible" and claims no demonstrated control
+flow. Public exploit-module pages (Exploit-DB 52587, Powder Keg
+Technologies) are unverified claims. Fix commit
+`aa5aaebc33e0f326d8a0dbe01b236f2bfa0e6ea1` ("libsimaka: Reject zero-length
+EAP-SIM/AKA attributes", 2026-03-11) adds `hdr->length == 0 ||` to the guards
+at `src/libsimaka/simaka_message.c:419` (RAND/ENCR_DATA) and `:442`
+(PADDING/default). Pins, hashes and raw URLs are in
+`lab/frontier/strongswan2shell/PROVENANCE.md`.
+
+Claimed primitive: attribute headers are one type byte plus one length byte
+in 4-byte units, with a valid length of at least 1. At `6.0.5` the vulnerable
+branches check remaining message bytes but not `length == 0`, so
+`hdr->length * 4 - 2` (default) or `- 4` (`AT_RAND`) underflows `size_t`.
+`chunk_skip()` becomes a no-op (infinite loop for `AT_PADDING`), while the
+wrapped length reaches `malloc(sizeof(attr_t) + data.len)` and
+`memcpy(attr->data, data.ptr, data.len)` in `add_attribute()` at
+`simaka_message.c:257-260`. The wrapped allocation is 12/14 bytes on this
+host against a 16-byte `attr_t`, so even the `attr->len` store at `:258` is
+out of bounds, and the copy source is attacker-supplied attribute bytes.
+`AT_ENCR_DATA` (type 130) takes the underflowed `:423` branch but calls no
+sink, leaving `in` unchanged. Reachability is configuration-dependent:
+EAP-SIM/AKA must terminate locally on the VPN server; RADIUS offload is
+explicitly not vulnerable. No stock-config or default-listener claim is made.
+
+Frontier's harness (`lab/frontier/strongswan2shell/run.sh`) compiles pinned
+`6.0.5` / `6.0.6` `simaka_message.c` ranges verbatim under `#line`, with
+synthetic `chunk_t`, list and chosen-byte collaborators; no daemon, socket,
+IKE handshake, RADIUS server or network is used. Rung 1: length byte 0 on
+`AT_IDENTITY` (14) requests a `18446744073709551614`-byte copy at `:260` and
+leaves `in` unchanged; `AT_RAND` (1) requests `18446744073709551612`;
+`AT_ENCR_DATA` (130) reaches the underflow but calls no sink; benign length 1
+advances normally. Rung 2: the allocation wraps to 14/12 bytes and the
+vulnerable build accepts the attribute, while both fixed guards call
+`invalid_length()` and add only the benign attribute. Rung 3: ASan reports
+`heap-buffer-overflow`, `WRITE of size 8` at pinned
+`simaka_message.c:258 in add_attribute` inside 14-byte and 12-byte regions;
+benign and fixed runs are clean.
+
+Rung 4 is INSTRUMENTED only, with two preserved outcomes. A bounded-copy
+collaborator (131072 bytes, still logging the wrapped requested length) puts
+chosen `0x5a` bytes at offsets 16, 32, 64, 4096 and 65536 past `attr->data`
+on both vulnerable paths (`match=1`). With the real host libc and the
+genuine wrapped length, the copy faults at `src_base - 0x20` before writing,
+those offsets stay `0x00` (`match=0`). No pointer, saved return address,
+heap-metadata target, control-flow diversion or marker execution was observed
+or attempted; both the guard mapping and the bounded copy are instrumentation.
+
+Admitted by the operator ~08:1xZ under standing approval #6 on frontier's
+handoff #670 and commits `37e0b1a` / `cda059a` / `6b9ac2d`: the two-pane
+window (39, inner socket), registry entry and seed wall were live from
+frontier and capture-verified 08:06Z. Operator replay ~08:1xZ from two clean
+`git archive HEAD` (`97d53ed`) extractions into separate absolute directories:
+54 PASS / 0 FAIL both times, raw trace
+`sha256=57cd8943825f35a14f45ce134f3987c489aacbd080c6249a94c9dc808f1f3d6a`
+byte-identical between directories, to the working-tree replay and to the
+brief. Witness replay #669 was separately finished with verdict #675 (08:11Z):
+ESTABLISHED AS CLAIMED, no grade correction, rung 4 INSTRUMENTED only.
+Cheapest next rung: build `6.0.5` `charon` with `eap-sim`/`eap-aka` plugins,
+configure a loopback-only IKEv2 responder terminating EAP-SIM locally, send a
+crafted EAP-SIM message with a zero-length attribute, capture the real ASan
+frames and wrapped allocation, then repeat on `6.0.6` for the guard. Only an
+observed pointer or control-flow result would drop the INSTRUMENTED label;
+if the daemon's copy faults before writing chosen bytes, preserve that as a
+negative result. Wake trigger units and presentation stay owed from the
+person's full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-strongswan2shell.md`, seed status
+`reports/strongswan2shell-status.md` and the pins in
+`lab/frontier/strongswan2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
