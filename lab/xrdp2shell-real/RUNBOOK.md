@@ -77,3 +77,29 @@ layout or network PDU trace is claimed. Post-auth (`PR:L`) is intrinsic to
 the CVE, not a lab artifact. The separate multi-chunk OOB read at
 `xrdp_channel.c:630` is a different bug and must not be conflated with this
 sink.
+
+## Wire-format receive-chain driver (2026-11-21)
+
+`wire_drdynvc_driver.c` (sha256
+`51fd632401ebd4d70bf62e05dedfbcccb0454331069f7d6c524171b331df23a5`)
+builds one full wire PDU — TPKT, X.224 DT, MCS SendDataRequest (two-byte
+PER length), no security header, CHANNEL_PDU_HEADER, DYNVC_DATA_FIRST —
+and calls `xrdp_rdp_recv()` on it. Same ASan build and libraries as above,
+but add `-I$B` first so `config_ac.h` is found:
+
+    cc -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer \
+      -I$B -I$SRC/libxrdp -I$SRC/common -I$SRC/include \
+      wire_drdynvc_driver.c $B/libxrdp/.libs/libxrdp.a \
+      $B/common/.libs/libcommon.a -lssl -lcrypto -lpthread -ldl -lm \
+      -o wire_drdynvc_driver
+
+    ASAN_OPTIONS=abort_on_error=0:detect_leaks=0 ./wire_drdynvc_driver 8191 8191
+    ASAN_OPTIONS=abort_on_error=0:detect_leaks=0 ./wire_drdynvc_driver 8164 8164
+    ASAN_OPTIONS=abort_on_error=0:detect_leaks=0 ./wire_drdynvc_driver 20000 20000
+
+Observed: 8191 → ASan `WRITE of size 8191` 0 bytes past the 8192-byte
+`trans_create` region, stack through `xrdp_rdp_recv`; 8164 → rc 0,
+`callback_calls=1 bytes_seen=8164`; 20000 → `rv=1 callback_calls=0` because
+`xrdp_mcs_recv()` rejects MCS userData over 16K. UBSan misalignment
+warnings are a build artifact of xrdp's byte-macro parser, not the finding.
+No socket, logon, chansrv or negotiated dynamic-channel open is claimed.

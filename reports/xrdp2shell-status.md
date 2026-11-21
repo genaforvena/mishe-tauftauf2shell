@@ -89,19 +89,54 @@ callback re-creates `xrdp_mm_drdynvc_data_first()`'s body with real
   not that a full RDP session reaches the sink.
 
 
+## Wire-format receive-chain confirmation (2026-11-21)
+
+`lab/xrdp2shell-real/wire_drdynvc_driver.c` goes one layer beyond the direct
+driver above. It builds one wire-formatted RDP PDU — TPKT, X.224 DT-TPDU,
+MCS SendDataRequest with a two-byte PER length determinant, no security
+header (the `is_security_header_present = 0` / TLS posture), then
+CHANNEL_PDU_HEADER and DYNVC_DATA_FIRST — and feeds that byte buffer to the
+real `xrdp_rdp_recv()`. No function is reimplemented. Observed ASan stack:
+`memcpy` → `sink_data_first` → `drdynvc_process_data_first`
+(`xrdp_channel.c:490`) → `xrdp_channel_process_drdynvc` (:647) →
+`xrdp_channel_process` (:700) → `xrdp_rdp_recv` (`xrdp_rdp.c:512`) → main.
+
+- Payload 8191: ASan `WRITE of size 8191`, 0 bytes after the 8192-byte
+  `trans_create` region; the 28-byte sink header makes 8191 the first
+  overflowing payload on the wire path. Payload 8164: rc 0, clean,
+  `callback_calls=1 bytes_seen=8164`. Payload 8200: ASan `WRITE of size
+  8200`, same stack.
+- Payload 20000 (the extracted-harness size): `WIRE rv=1 callback_calls=0`,
+  rejected before the sink. `xrdp_mcs_recv()` rejects MCS userData above
+  16K (`xrdp_mcs.c:230`), so the 20000-byte harness configuration is NOT
+  wire-reachable in one PDU. An on-wire exploit needs 8165–~16375 bytes;
+  8191/8200 are demonstrated. Multi-chunk reassembly is a separate path
+  with its own OOB read (above), not conflated here.
+- UBSan reports misaligned `in_uint32_le` on the wire buffer. This is an
+  artifact of the `-fsanitize=undefined` ASan build and xrdp's byte-macro
+  parser, not part of the finding; ASan's OOB write is the observation.
+
+This exercises the real receive parser from wire bytes, but it is still an
+in-process driver: no live socket, no completed logon, no chansrv, and the
+`drdynvcs[1].data_first` callback is installed directly rather than by a
+negotiated dynamic-channel open. Those remain UNKNOWN.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS both in the extracted harness and in
 the real compiled xrdp 0.10.6 code, with client-chosen bytes read back at
-client-chosen offsets in an adjacent heap chunk. The real-code driver calls
-the real parse path directly; it is not a full network session. Loopback
-COTP reachability of the lab listener is evidenced, but a completed RDP
-logon, dynamic-channel open, stock allocator layout in a live session and a
-full network PDU trace remain UNKNOWN: xrdp needs PAM plus a session and a
-registered dynamic channel, no RDP client binary/lib is available in the
-lab and creating a host account is out of lab scope. The post-auth (PR:L)
-precondition is intrinsic to the CVE, not a lab artifact. No off-loopback
-probe. Author report is not independent acceptance; witness replay owed.
+client-chosen offsets in an adjacent heap chunk. The wire-format driver
+above additionally proves that a wire-parsed TPKT/X.224/MCS/channel/DYNVC
+PDU reaches the same sink through the real `xrdp_rdp_recv()` chain and
+overflows at 8191 bytes; the 20000-byte harness size is rejected by the MCS
+16K limit on the wire. Both drivers are in-process. A completed RDP logon,
+a chansrv-created dynamic channel, a live-session allocator layout and a
+full socket-level network trace remain UNKNOWN: xrdp needs PAM plus a
+session, the PyRDP checkout in the plant supplies wire codecs but no client
+(and no client-side NLA), and creating a host account is out of lab scope.
+The post-auth (PR:L) precondition is intrinsic to the CVE, not a lab
+artifact. No off-loopback probe. Author report is not independent
+acceptance; witness replay of `ab93fcc` is still owed.
 
 Brief: `reports/frontier-xrdp2shell.md`; harness:
 `lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`. Witness replay requested;
