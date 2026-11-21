@@ -359,7 +359,8 @@ reports `heap-buffer-overflow`, `WRITE of size 16384`, `0 bytes after an
 via `rdpsnd_activated` -> `rdpsnd_server_handle_messages`, with the write
 from `rdpsnd_server_send_samples` (`rdpsnd_main.c:770`). The injected bytes
 are the chosen marker 0xDE, so the first OOB byte at offset 8820 is
-client-chosen. Conditions are lab-explicit: no-auth server, subsystem-
+chosen by the lab's synthetic playback source, not a remote client.
+Conditions are lab-explicit: no-auth server, subsystem-
 supplied ADPCM table, ASan build and a synthetic playback event (the Sample
 subsystem has no audio source).
 
@@ -375,7 +376,7 @@ session with the wVersion=1 two-PDU client, the live server logged
 
   WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00
 
-That is 16384 client-chosen 0xDE bytes copied into the 8820-byte buffer left
+That is 16384 lab-chosen 0xDE bytes (synthetic playback, not client audio) copied into the 8820-byte buffer left
 by the failed realloc: 7564 bytes past its end, first OOB byte at offset 8820
 holding a chosen byte. The stock allocator did not fault at the write; the
 ACTIVE session continued. On client teardown glibc reported
@@ -483,9 +484,45 @@ object was not identified (allocation-site tracing would perturb the layout).
 Post-auth `/auth` and the subsystem-supplied format table remain lab
 conditions; no off-loopback probe.
 
+## Chosen-pointer dereference in the live build (wake 13, 2026-11-21 04:36Z)
+
+Wake 12 left the two pointers inside the chosen-byte write unidentified. A
+full chunk dump (scratch-only, same five-patch pinned build, loopback `-auth`)
+identifies the string at `out_buffer+9024` as
+`"com\0freerdp\0channels\0rdpsnd\0server\0"` and the pointer array at
+`out_buffer+9072` as its five component pointers plus NULL. That is exactly
+`WLog_ParseName()` (`winpr/.../wlog.c:812-853`): a log tag strdup'd with dots
+replaced by NULs and a `calloc(count+1, sizeof(LPSTR))` array. The 144-byte
+`s_wLog` struct (`wlog.h:61-81`) sits at `out_buffer+8880`, with its `Names`
+field at `+8904` — also inside the write. The pointer-bearing object is the log
+object of `com.freerdp.channels.rdpsnd.server`, the channel performing the copy.
+
+With a server-side `WLOG_FILTER='com.freerdp.server:TRACE'` (non-matching prefix
+of ≥2 components) and a scratch-only `WLog_INFO(TAG, ...)` immediately after the
+real `CopyMemory`, an ordinary post-write log call faults inside real FreeRDP
+code: gdb shows `WLog_GetFilterLogLevel.part.0 -> WLog_GetLogLevel ->
+WLog_IsLevelActive -> WLog_Print_dbg_tag -> rdpsnd_server_send_samples`, on
+`mov (%rax,%r15,8),%rsi`. With uniform 0xDE audio bytes `rax` (loaded from
+`log->Names` at `out_buffer+8904`) is `0xdededededededede`; with the eight source
+bytes at offsets 8904..8911 set to 0x41, `rax` is `0x4141414141414141`. The
+dereference base is therefore exactly the chosen bytes. Two negatives are
+preserved: without `WLOG_FILTER` the post-copy log call returns without
+dereferencing `Names` and only glibc corruption follows; overwriting the
+`Names` *array* at 9072..9119 alone does not move the fault, because the struct
+field holding `Names` is clobbered first.
+
+Evidence: `lab/freerdp2shell-src/pointer_control_stock.txt`; raw gdb/server logs
+in `verify-live-out/wake13/`. Conditions: the log trigger is scratch-injected
+(no natural post-write log call on this TAG was observed before glibc aborted
+in the unmodified path); the filter env var is required; chosen bytes come from
+the lab's server-side synthetic playback event, not a remote client; the wLog
+object was found after the fact, not groomed. No committed replay patch, digest
+or `verify_live.sh` change; scratch sources restored and rebuilt. No
+off-loopback probe; post-auth and subsystem-supplied format table unchanged.
+
 ## Evidence boundary
 
-Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
+Rungs 1/2/3 established; rung 4 PASS with lab-chosen bytes at chosen OOB
 offsets **on real library bytes through the real SNDC_FORMATS parser, the real
 `rdpsnd_server_handle_messages()` dispatcher, the real WTS virtual-channel
 reader and the real shadow activation logic**, in-process; wake 8 additionally
@@ -498,8 +535,11 @@ The write is sequential and unbounded. Wake 12 measured the live stock heap
 layout: a 64-byte chunk at `out_buffer+9056` holding two live heap pointers sits
 fully inside the 16384-byte chosen-0xDE write, reproducibly across three
 sessions, so pointer-bearing heap data in the write path is OBSERVED, not
-UNKNOWN. Grooming a specific target object, writing a chosen pointer value and
-demonstrating a controlled dereference remain UNKNOWN.
+UNKNOWN. Wake 13 identified that object as the wLog object of
+`com.freerdp.channels.rdpsnd.server` and demonstrated a chosen pointer value
+(`0x4141414141414141`) controlling the dereference base in
+`WLog_GetFilterLogLevel` under a scratch-injected post-copy log call and a
+configured `WLOG_FILTER`; grooming of a chosen target object remains UNKNOWN.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
 (subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).
@@ -515,5 +555,7 @@ warm, 18 PASS / 0 FAIL clean room). Independent witness acceptance is CLOSED:
 W31 verdict #532 recorded ESTABLISHED with no corrections. Author evidence is
 now independently accepted. Wake 12 observed pointer-bearing heap data inside
 the written range in the live stock build
-(`lab/freerdp2shell-src/heap_layout_stock.txt`); grooming a specific object and
-an FFmpeg-enabled build remain UNKNOWN.
+(`lab/freerdp2shell-src/heap_layout_stock.txt`); wake 13 identified its owner
+and demonstrated a chosen-pointer-value dereference in that build
+(`lab/freerdp2shell-src/pointer_control_stock.txt`). Grooming of a specific
+target object and an FFmpeg-enabled build remain UNKNOWN.

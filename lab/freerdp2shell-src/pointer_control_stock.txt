@@ -1,0 +1,87 @@
+freerdp2shell wake 13 — chosen-pointer-value dereference in the live stock-allocator
+rdpsnd overwrite (CVE-2026-114045 / GHSA-3m9q-g533-rqjq)
+
+Question: wake 12 found two live pointers inside the 16384-byte chosen-byte write
+but did not identify their owner or show a controlled dereference. This wake
+identifies the object and tests whether chosen bytes can control a dereference
+in the live process. Rung 4 was already independently accepted (W31 #532); this
+closes (or bounds) the remaining pointer-control UNKNOWN, not the rung-4 claim.
+
+All runs: pinned FreeRDP 3.32.0 d27a4f7c..., committed five wake8 patches applied,
+plain no-sanitizer build, freerdp-shadow-cli on 127.0.0.1 ports 23213-23220,
+-auth, Sample client /sec:rdp /u:test /p:test /sound. No off-loopback probe.
+Committed replay patches, verify_live.sh and their pinned digests were NOT
+changed. Raw logs: verify-live-out/wake13/ (gitignored).
+
+Scratch-only changes (restored after capture):
+1. rdpsnd_main.c at the real CopyMemory site: a full hex/ASCII dump of the
+   following glibc chunks before the copy (HEAP13_*), and a WLog_INFO(TAG,
+   "WAKE13 post-copy log on clobbered rdpsnd log object") immediately AFTER the
+   real copy, printing before/after markers. The write itself is untouched.
+2. server/shadow/shadow_client.c synthetic playback: the 16384 source bytes are
+   normally memset 0xDE; variants set 8 or 48 bytes at chosen offsets to 0x41.
+
+--- object identification (run 1, no WLOG_FILTER, port 23213) ---
+HEAP13 base=... usable=8824 cframesize=16384; layout as in wake 12. Full chunk
+data at out_buffer+9008 (chunk header offset) is:
+  "com\0freerdp\0channels\0rdpsnd\0server\0" + NUL padding
+The chunk header at +9056 (size 64) holds five pointers to the user data of
+that string chunk at base+9024 (+0,+4,+8,+13,+20) and a NULL terminator.
+This is exactly winpr/libwinpr/utils/wlog/wlog.c:812-853 WLog_ParseName():
+_strdup of a dot-separated log tag with dots replaced by NULs, plus a
+calloc(count+1, sizeof(LPSTR)) Names array. The owning wLog struct is the
+144-byte chunk at +8864 (user data +8880): struct s_wLog fields in
+wlog.h:61-81, with Name at +8880, Names at +8904, NameCount=5 at +8912.
+So the pointer-bearing object is the log object for the very channel whose
+code performs the write: com.freerdp.channels.rdpsnd.server.
+
+--- negative: no filter, post-copy log call (run 2, port 23214) ---
+"WAKE13 before post-copy WLog" and "WAKE13 after post-copy WLog" both printed;
+no SIGSEGV, then the usual "double free or corruption (!prev)". With no
+WLOG_FILTER configured, log->FilterLevel is already >= 0, so
+WLog_GetFilterLogLevel() returns before comparing Names entries (wlog.c:770).
+The clobbered Names array alone is not dereferenced on this path.
+
+--- dereference with a configured filter (runs 3-4, ports 23215-23216) ---
+Server env WLOG_FILTER='com.freerdp.server:TRACE' (a non-matching prefix longer
+than one component, so the filter loop reaches log->Names). With uniform 0xDE
+audio bytes, the post-copy log call dies: "WAKE13 before post-copy WLog" is the
+last line, no "after" marker, no glibc corruption message. gdb backtrace:
+  WLog_GetFilterLogLevel.part.0 () at libwinpr3.so.3
+  WLog_GetLogLevel () / WLog_IsLevelActive ()
+  WLog_Print_dbg_tag.constprop.21 () at libfreerdp-server3.so.3
+  rdpsnd_server_send_samples () at libfreerdp-server3.so.3
+  shadow_client_subsystem_process_message () / shadow_client_thread ()
+
+--- what is actually dereferenced (runs 6-7, ports 23218-23219) ---
+Writing 0x41 over the Names ARRAY at out_buffer+9072..9119 did NOT change the
+faulting address: gdb still stopped on
+  mov (%rax,%r15,8),%rsi    ; rax = 0xdededededededede, r15 = 0
+with memory at out_buffer+8904 = 0xdededededededede. The code first loads
+log->Names itself (the field in the wLog struct at +8904), then indexes it;
+that field is inside the chosen-byte write and is clobbered to 0xDEDE...
+
+--- chosen pointer value (run 8, port 23220) ---
+Same run with data[8904..8911] = 0x41 (all other bytes 0xDE):
+  faulting instruction: mov (%rax,%r15,8),%rsi
+  rax = 0x4141414141414141, r15 = 0
+  x/8gx out_buffer+8880 shows 0x4141414141414141 at +8904
+The dereference base is exactly the eight chosen 0x41 bytes. This is a
+controlled dereference of a chosen pointer value in the live stock-allocator
+process, through real FreeRDP WLog code, with chosen bytes supplied by the
+lab playback source.
+
+--- honest boundary ---
+* The WLog call that triggers the dereference is scratch-injected immediately
+  after the real CopyMemory; in the unmodified replay path no natural post-write
+  log call with this TAG was observed before glibc aborted. A WLOG_FILTER must
+  be configured on the server for WLog_GetFilterLogLevel to compare Names.
+* The chosen bytes come from the lab's server-side synthetic playback event,
+  not from a remote client. The remote client chooses the malformed format that
+  causes the wrap; in a real server the copied bytes are its own audio source.
+* No grooming was performed: the wLog object happened to be adjacent in the
+  unmodified allocation sequence and was identified after the fact. Only one
+  object was controlled; arbitrary heap targeting is NOT shown.
+* Default post-auth (/auth), subsystem-supplied wrap-capable format table,
+  loopback only. No FFmpeg build, no off-loopback probe. The benign PCM control
+  and the accepted wake-9/10/11 replay are unchanged.
