@@ -12,7 +12,7 @@ reproduce, not a result obtained here.
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
 - **Advisory**: CVE-2026-130603 / GHSA-fw6g-3fgh-f6m6, CNA Eclipse Foundation.
-  CVE record published `2026-11-17T13:57:33.777Z`, updated `2026-11-17`; finder
+  CVE record published `2026-11-17T13:57:33.777Z`, updated `2026-11-17T17:07:18.190Z`; finder
   Weiheng Qiu. Title/claim: zenoh-pico does not validate the Zenoh identifier
   (ZID) length when deserializing timestamps; an attacker-controlled length
   greater than 16 writes out of bounds to a fixed 16-byte identifier buffer and
@@ -25,7 +25,8 @@ reproduce, not a result obtained here.
   ordinary-frame decoding moved from heap to stack-local storage in 1.5.0.
   Verbatim CVE JSON pinned in
   `lab/frontier/zenohpico2shell/src/advisory130603.json`; OSV and the GitHub
-  advisory page were read-only cross-checks.
+  advisory page were read-only cross-checks. The GHSA id, fix parent SHA and
+  PR number come from those cross-checks, not from the pinned bytes.
 - **Affected/fixed**: `0.7.2-rc` up to but excluding **1.10.2**; fixed in
   **1.10.2** by commit `9198576fe69f6af66a2ab4f12f579f72208d7b28` (PR #1345,
   parent `a51e13e90ad68d0fa807ad8dfcd61044cbf926db`). The 2023 commit
@@ -52,10 +53,11 @@ Line numbers are from tag `1.10.1` unless marked fixed.
    carries that fixed-size ID (`message.c:102-112`).
 2. `message.c:79` reads a single attacker-controlled `uint8_t len` from the
    wire with no bound check: `uint8_t len = _z_zbuf_read(zbf);`.
-3. `message.c:80` calls `_z_zbuf_read_bytes(zbf, id->id, 0, len)`. The pinned
-   `iobuf.h:76-79` and `iobuf.c:162-164` show the reader asserts only that the
-   SOURCE has `length` bytes, then `memcpy`s into `dest` with no destination
-   bound. A full-payload wire therefore copies `len` bytes into `id->id[16]`.
+3. `message.c:80` calls `_z_zbuf_read_bytes(zbf, id->id, 0, len)`. In the
+   pinned `iobuf.h:76-79`, the assert at `:77` checks only that the SOURCE has
+   `length` bytes and the `memcpy` at `:79` writes into `dest` with no
+   destination bound; `iobuf.c:162-164` is just the forwarding wrapper. A
+   full-payload wire therefore copies `len` bytes into `id->id[16]`.
 4. `message.c:81` then executes `memset(id->id + len, 0, 16 - len)`. For
    `len > 16`, `16 - len` is negative and converts to a huge `size_t`: the
    advisory's second limb. It is **source-bound only** here; the harness exits
