@@ -68,40 +68,57 @@ This is the wrap (`bs = (8 - 7*2)*2/2 + 2 = -4`, widened to
 live FreeRDP server process, reached over the wire through the real parser,
 real dispatcher and real shadow activation callback.
 
-4. LIVE-PROCESS MEMORY CORRUPTION (CRASH)
-----------------------------------------
+4. LIVE-PROCESS HEAP OVERFLOW (ASan)
+-----------------------------------
 A synthetic audio playback event was injected through the real shadow
 message path (SHADOW_MSG_OUT_AUDIO_OUT_SAMPLES -> shadow_client_thread ->
 rdpsnd_server_send_samples), standing in for a server audio source; the
-Sample subsystem has none. Plain build under gdb:
-  Thread 4 received signal SIGSEGV, Segmentation fault.
-  #0 __memcpy_avx_unaligned_erms ()
-  #1 rdpsnd_server_send_samples () from libfreerdp-server3.so.3
-  #2 shadow_client_subsystem_process_message () from libfreerdp-shadow3.so
-  #3 shadow_client_thread () from libfreerdp-shadow3.so
-Full backtrace: live_session_crash_gdb.txt.
-ASan build (ASAN_OPTIONS=detect_leaks=0:allocator_may_return_null=1:abort_on_error=0):
-  ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000
-  The signal is caused by a WRITE memory access. Hint: address points to the zero page.
-  #0 __memmove_avx_unaligned_erms
-  #1 rdpsnd_server_send_samples .../channels/rdpsnd/server/rdpsnd_main.c:770
-  #2 shadow_client_subsystem_process_message .../server/shadow/shadow_client.c:2616
-  #3 shadow_client_thread .../shadow_client.c:2932
-Full report: live_session_asan_server.log.
+Sample subsystem has none. The injected 16384-byte buffer is filled with the
+chosen marker 0xDE. Plain build under gdb first showed SIGSEGV at
+`__memcpy_avx_unaligned_erms` <- `rdpsnd_server_send_samples` <-
+`shadow_client_subsystem_process_message` (live_session_crash_gdb.txt).
+
+The decisive condition was the SNDC_FORMATS `wVersion`. With the client's
+default `CHANNEL_VERSION_WIN_MAX`, `rdpsnd_main.c:1277-1278/1285-1286`
+invokes `Activated` only after SNDC_QUALITYMODE — after both format PDUs —
+so only the malicious record was selected and `out_buffer` stayed NULL
+(ASan WRITE SEGV at address zero; preserved negative in the earlier log).
+Setting `wVersion=1` in both PDUs makes Activated run after each
+SNDC_FORMATS: PDU 1 (benign PCM) allocates the 8820-byte buffer via realloc
+in `rdpsnd_server_select_format`, PDU 2 (ADPCM blockalign=8/channels=2)
+wraps and fails the realloc without rolling back `out_frames`. Then the
+playback event writes OOB. Final ASan report, exact:
+
+  ERROR: AddressSanitizer: heap-buffer-overflow on address 0x525000011374
+  WRITE of size 16384 at 0x525000011374 thread T3
+    #0 memcpy
+    #1 rdpsnd_server_send_samples .../channels/rdpsnd/server/rdpsnd_main.c:770
+    #2 shadow_client_subsystem_process_message .../server/shadow/shadow_client.c:2616
+    #3 shadow_client_thread .../shadow_client.c:2932
+  0x525000011374 is located 0 bytes after an 8820-byte region
+  [0x52500000f100,0x525000011374)
+  allocated by thread T4:
+    #1 rdpsnd_server_select_format .../rdpsnd_main.c:444
+    #2 rdpsnd_activated .../server/shadow/shadow_rdpsnd.c:44
+    #3 rdpsnd_server_handle_messages .../rdpsnd_main.c:1278
+    #4 rdpsnd_server_thread .../rdpsnd_main.c:336
+
+Full report: live_session_asan_server.log. Live server log in the same run:
+  [rdpsnd_server_select_format]: realloc failed!
+  [rdpsnd_activated]: SelectFormat failed with 12
 
 5. HONEST BOUNDARY
 ------------------
-The live-process fault is a write through the wrapped out_frames path, but
-the fault address was the zero page: in the live wire sequence the 8820-byte
-out_buffer had not been allocated (the harness needs a benign PCM format
-selected in a *separate* PDU first). Despite sending two PDUs and forcing a
-benign PCM record into the first, the server's coalesced dispatch did not
-reproduce that pre-allocation, so the exact `0 bytes after an 8820-byte
-region` overflow with client-chosen bytes at chosen offsets remains
-demonstrated only in the in-process harness (realwts_subsystem.txt,
-realwts_asan_subsystem.txt, wake 6). Live rungs established here: rung 2
-(format over the wire), rung 1 in the live process, and a real
-memcpy/SendSamples fault (rung 3-adjacent, fault address not the intended
-OOB region). Pointer control and stock heap grooming remain UNKNOWN.
-Post-auth caveat unchanged: default posture PR:L/CVSS 8.8; the no-auth lab
-configuration used for the session is the 9.8 case.
+This is a live FreeRDP 3.32.0 server process, on 127.0.0.1, in an ACTIVE RDP
+session: the two SNDC_FORMATS PDUs crossed a real virtual channel, the real
+dispatcher and parser ran, the wrap occurred in the live process, and ASan
+observed a 16384-byte client-data write starting exactly at offset 8820 of
+the 8820-byte allocation (first OOB byte is the chosen 0xDE marker).
+Conditions that are lab-provided, not stock: `-auth` (no-auth posture), a
+subsystem-supplied ADPCM format table (the same explicit condition as wake
+6's harness), an ASan build, and a synthetic audio playback event (the
+Sample subsystem has no audio source). The write is sequential, so pointer
+control and grooming a specific heap object remain UNKNOWN; only the first
+OOB byte offset is pinned here. FFmpeg-enabled builds and the live process
+under the stock allocator remain UNVERIFIED. Default posture is post-auth
+(PR:L, CVSS 8.8); the no-auth lab configuration is the 9.8 case.

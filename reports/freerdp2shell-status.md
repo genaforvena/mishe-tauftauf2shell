@@ -347,30 +347,39 @@ rejected at PostConnect (`client authentication failure: -1`).
 A synthetic audio playback event through the real shadow message path made
 the live server fault in `memcpy`: gdb shows SIGSEGV at
 `__memcpy_avx_unaligned_erms` <- `rdpsnd_server_send_samples` <-
-`shadow_client_subsystem_process_message`; the ASan build reports a WRITE
-SEGV at the same frame. The fault address was the zero page: the 8820-byte
-`out_buffer` was not allocated in the live wire sequence (the harness's
-separate-PDU pre-allocation was not reproduced), so the exact `0 bytes after
-an 8820-byte region` overflow with chosen bytes and the stock allocator
+`shadow_client_subsystem_process_message`. The decisive condition was the
+SNDC_FORMATS `wVersion`: with the default `CHANNEL_VERSION_WIN_MAX`,
+`Activated` runs only after SNDC_QUALITYMODE (`rdpsnd_main.c:1285-1286`), so
+only the malicious record was selected and `out_buffer` stayed NULL (ASan
+WRITE SEGV at the zero page, preserved negative). With `wVersion=1` in both
+PDUs, `Activated` runs after each SNDC_FORMATS (`:1277-1278`): PDU 1 (benign
+PCM) allocates the 8820-byte buffer, PDU 2 wraps. The final ASan build then
+reports `heap-buffer-overflow`, `WRITE of size 16384`, `0 bytes after an
+8820-byte region`, allocated by `realloc` in `rdpsnd_server_select_format`
+via `rdpsnd_activated` -> `rdpsnd_server_handle_messages`, with the write
+from `rdpsnd_server_send_samples` (`rdpsnd_main.c:770`). The injected bytes
+are the chosen marker 0xDE, so the first OOB byte at offset 8820 is
+client-chosen. Conditions are lab-explicit: no-auth server, subsystem-
+supplied ADPCM table, ASan build and a synthetic playback event (the Sample
+subsystem has no audio source).
 
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
 offsets **on real library bytes through the real SNDC_FORMATS parser, the real
 `rdpsnd_server_handle_messages()` dispatcher, the real WTS virtual-channel
-reader and the real shadow activation logic**, but still in-process with the
-channel queue fed directly and a harness-supplied server format table. The
-write is sequential and unbounded; no pointer control or specific heap object
-is targeted. In the FFmpeg-off builds tested, the stock shadow server's
-`Activated` callback selects only PCM and rejects both wrap-capable tags, so
-the exploit needs a server format table that offers one (subsystem-supplied,
-or an FFmpeg-enabled build, UNVERIFIED here). Network reachability of a live
-server and the default NLA auth gate are observed over real loopback TCP
-(wake 7). Wake 8 adds MCS/channel join, an ACTIVE session, rdpsnd PDUs over
-the wire, the wrap in the live process and a real SendSamples/memcpy fault;
-the intended 8820-byte OOB region and chosen-byte rung 4 remain harness-only.
-No off-loopback probe. Default posture is post-auth (PR:L, CVSS 8.8); the
-no-auth lab configuration used for the session is the 9.8 case.
+reader and the real shadow activation logic**, in-process; wake 8 additionally
+demonstrates MCS/channel join, an ACTIVE RDP session, rdpsnd PDUs over the wire
+and an ASan `heap-buffer-overflow` in the LIVE server process (chosen 0xDE at
+offset 8820). The write is sequential and unbounded; no pointer control or
+specific heap object is targeted, and stock-allocator layout stays UNKNOWN.
+In FFmpeg-off builds the stock shadow server's `Activated` callback selects
+only PCM, so a format table offering a wrap-capable tag is required
+(subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).
+Network reachability, the default NLA gate (wake 7) and the no-auth gate
+behavior are observed over real loopback TCP. No off-loopback probe. Default
+posture is post-auth (PR:L, CVSS 8.8); the no-auth lab configuration used for
+the live session is the 9.8 case.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay

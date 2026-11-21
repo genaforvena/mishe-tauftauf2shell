@@ -1,171 +1,230 @@
-[02:13:55:915] [3667980:0037f80c] [ERROR][com.freerdp.server.shadow] - [shadow_server_read_pem]: Certificate PEM /home/mesh-home/.config/freerdp/shadow/shadow.crt valid, but some properties failed to be extracted
-[02:13:55:915] [3667980:0037f80c] [WARN][com.freerdp.server.shadow.sample] - [sample_shadow_subsystem_init]: TODO: Implement!
-[02:13:55:916] [3667980:0037f823] [WARN][com.freerdp.server.shadow.sample] - [sample_shadow_subsystem_start]: TODO: Implement!
-[02:13:58:967] [3667980:0037f823] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: *************************************************
-[02:13:58:967] [3667980:0037f823] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: This build is using [runtime-check] build options:
-[02:13:58:967] [3667980:0037f823] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: * 'WITH_VERBOSE_WINPR_ASSERT=ON'
-[02:13:58:967] [3667980:0037f823] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: *
-[02:13:58:967] [3667980:0037f823] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: [runtime-check] build options might slow down the application
-[02:13:58:967] [3667980:0037f823] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: *************************************************
-[02:13:55:911] [3667980:0037f80c] [INFO][com.freerdp.server.shadow] - [main]: authentication: disabled
-[02:13:55:916] [3667980:0037f80c] [INFO][com.freerdp.core.listener] - [freerdp_listener_open]: Listening on [127.0.0.1]:13903
-[02:13:58:957] [3667980:0037f823] [INFO][com.freerdp.core.listener] - [freerdp_peer_set_local_and_hostname]: Accepting client from localhost
-[02:13:58:961] [3667980:0037f823] [DEBUG][com.winpr.timezone] - [winpr_get_unix_timezone_identifier_from_file]: tzid: Etc/UTC
-[02:13:58:961] [3667980:0037f823] [DEBUG][com.winpr.timezone] - [winpr_get_timezone_from_link]: tzid: Etc/UTC
-[02:13:58:964] [3667980:0037f823] [DEBUG][com.winpr.timezone] - [winpr_get_unix_timezone_identifier_from_file]: tzid: Etc/UTC
-[02:13:58:964] [3667980:0037f823] [DEBUG][com.winpr.timezone] - [winpr_get_timezone_from_link]: tzid: Etc/UTC
-[02:13:58:968] [3667980:0037f823] [DEBUG][com.winpr.thread] - [ThreadCloseHandle]: Thread running, setting to detached state!
-[02:13:58:968] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_INITIAL --> CONNECTION_STATE_INITIAL
-[02:13:58:968] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_INITIAL --> CONNECTION_STATE_NEGO
-[02:13:58:968] [3667980:0037fc27] [DEBUG][com.freerdp.core.nego] - [nego_read_request_token_or_cookie]: received cookie [Cookie: mstshash=test]
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_nego]: Client Security: RDSTLS:0 NLA:0 EXT:0 TLS:0 RDP:1
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_nego]: Server Security: RDSTLS:0 NLA:0 EXT:0 TLS:1 RDP:1
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_nego]: Negotiated Security: RDSTLS:0 NLA:0 EXT:0 TLS:0 RDP:1
-[02:13:58:969] [3667980:0037fc27] [INFO][com.freerdp.core.nego] - [nego_send_negotiation_response]: Turning off encryption for local peer with standard rdp security
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_NEGO --> CONNECTION_STATE_MCS_CREATE_REQUEST
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core] - [gcc_read_client_core_data]: Received EarlyCapabilityFlags=RNS_UD_CS_WANT_32BPP_SESSION|RNS_UD_CS_RELATIVE_MOUSE_INPUT|RNS_UD_CS_VALID_CONNECTION_TYPE|RNS_UD_CS_SUPPORT_NETCHAR_AUTODETECT|RNS_UD_CS_SUPPORT_DYNVC_GFX_PROTOCOL|RNS_UD_CS_SUPPORT_DYNAMIC_TIME_ZONE|RNS_UD_CS_SUPPORT_HEARTBEAT_PDU|RNS_UD_CS_SUPPORT_SKIP_CHANNELJOIN|[0x00000fb2]
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]: Accepted client: mesh-home
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]: Accepted channels:
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  rdpdr [1004]
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  rdpsnd [1005]
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  cliprdr [1006]
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  drdynvc [1007]
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_CREATE_REQUEST --> CONNECTION_STATE_MCS_CREATE_RESPONSE
-[02:13:58:969] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_CREATE_RESPONSE --> CONNECTION_STATE_MCS_ERECT_DOMAIN
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_ERECT_DOMAIN --> CONNECTION_STATE_MCS_ATTACH_USER
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_ATTACH_USER --> CONNECTION_STATE_MCS_ATTACH_USER_CONFIRM
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  rdpdr [1004]
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  rdpsnd [1005]
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  cliprdr [1006]
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  drdynvc [1007]
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_ATTACH_USER_CONFIRM --> CONNECTION_STATE_RDP_SECURITY_COMMENCEMENT
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_RDP_SECURITY_COMMENCEMENT --> CONNECTION_STATE_SECURE_SETTINGS_EXCHANGE
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_SECURE_SETTINGS_EXCHANGE --> CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_REQUEST
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_REQUEST --> CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_RESPONSE
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_RESPONSE --> CONNECTION_STATE_LICENSING
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_LICENSING --> CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_REQUEST
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_REQUEST --> CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_RESPONSE
-[02:13:58:970] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_RESPONSE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_CONFIRM_ACTIVE[0x00000003], tpktLength=553, remainingLength=547
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_CONFIRM_ACTIVE[0x00000003]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE --> CONNECTION_STATE_FINALIZATION_CLIENT_SYNC
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x1f size=37 channelId=1009)
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_SYNC --> CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_reset_flags][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE] reset finalize_sc_pdus
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE --> CONNECTION_STATE_FINALIZATION_SYNC
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=22, remainingLength=16
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_SYNC] received flag FINALIZE_CS_SYNCHRONIZE_PDU [0x00000010]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_SYNC --> CONNECTION_STATE_FINALIZATION_COOPERATE
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_COOPERATE] received flag FINALIZE_CS_CONTROL_COOPERATE_PDU [0x00000020]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_COOPERATE --> CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL] received flag FINALIZE_CS_CONTROL_REQUEST_PDU [0x00000040]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL --> CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST --> CONNECTION_STATE_FINALIZATION_FONT_LIST
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_FONT_LIST] received flag FINALIZE_CS_FONT_LIST_PDU [0x00000100]
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_FONT_LIST --> CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP
-[02:13:58:971] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x28 size=41 channelId=1009)
-[02:13:58:972] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP --> CONNECTION_STATE_ACTIVE
-[02:13:58:972] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_ACTIVE --> CONNECTION_STATE_ACTIVE
-[02:13:58:972] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_post_connect]: Client from 127.0.0.1 is activated (1024x768@32)
-[02:13:58:972] [3667980:0037fc27] [DEBUG][com.winpr.thread] - [ThreadCloseHandle]: Thread running, setting to detached state!
-[02:13:58:972] [3667980:0037fc29] [INFO][com.freerdp.api] - [wake8_audio_thread]: wake8 audio thread started
-[02:13:58:972] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_ACTIVE] received flag FINALIZE_DEACTIVATE_REACTIVATE [0x00000200]
-[02:13:58:972] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_ACTIVE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE
-[02:13:58:972] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT
-[02:13:58:972] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_send_desktop_resize]: Client 127.0.0.1 resize requested (1x1@32)
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_CONFIRM_ACTIVE[0x00000003], tpktLength=553, remainingLength=547
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_CONFIRM_ACTIVE[0x00000003]
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE --> CONNECTION_STATE_FINALIZATION_CLIENT_SYNC
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x1f size=37 channelId=1009)
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_SYNC --> CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_reset_flags][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE] reset finalize_sc_pdus
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE --> CONNECTION_STATE_FINALIZATION_SYNC
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=22, remainingLength=16
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_SYNC] received flag FINALIZE_CS_SYNCHRONIZE_PDU [0x00000010]
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_SYNC --> CONNECTION_STATE_FINALIZATION_COOPERATE
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_COOPERATE] received flag FINALIZE_CS_CONTROL_COOPERATE_PDU [0x00000020]
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_COOPERATE --> CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], t[02:13:59:076] [3667980:0037fc2e] [ERROR][com.freerdp.channels.audin.server] - [audin_server_thread_func]: WTSVirtualChannelQuery failed
-==3667980==WARNING: AddressSanitizer failed to allocate 0xfffffffffffffff0 bytes
-[02:13:59:382] [3667980:0037fc28] [ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
-[02:13:59:383] [3667980:0037fc28] [WARN][com.freerdp.server.shadow] - [rdpsnd_activated]: SelectFormat failed with 12
+[02:16:59:804] [3699260:0038723c] [ERROR][com.freerdp.server.shadow] - [shadow_server_read_pem]: Certificate PEM /home/mesh-home/.config/freerdp/shadow/shadow.crt valid, but some properties failed to be extracted
+[02:16:59:804] [3699260:0038723c] [WARN][com.freerdp.server.shadow.sample] - [sample_shadow_subsystem_init]: TODO: Implement!
+[02:16:59:805] [3699260:0038723d] [WARN][com.freerdp.server.shadow.sample] - [sample_shadow_subsystem_start]: TODO: Implement!
+[02:17:02:861] [3699260:0038723d] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: *************************************************
+[02:17:02:861] [3699260:0038723d] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: This build is using [runtime-check] build options:
+[02:17:02:861] [3699260:0038723d] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: * 'WITH_VERBOSE_WINPR_ASSERT=ON'
+[02:17:02:861] [3699260:0038723d] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: *
+[02:17:02:861] [3699260:0038723d] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: [runtime-check] build options might slow down the application
+[02:17:02:861] [3699260:0038723d] [WARN][com.freerdp.core.rdp] - [log_build_warn][0x51a00000fc80]: *************************************************
+[02:16:59:801] [3699260:0038723c] [INFO][com.freerdp.server.shadow] - [main]: authentication: disabled
+[02:16:59:805] [3699260:0038723c] [INFO][com.freerdp.core.listener] - [freerdp_listener_open]: Listening on [127.0.0.1]:13904
+[02:17:02:850] [3699260:0038723d] [INFO][com.freerdp.core.listener] - [freerdp_peer_set_local_and_hostname]: Accepting client from localhost
+[02:17:02:855] [3699260:0038723d] [DEBUG][com.winpr.timezone] - [winpr_get_unix_timezone_identifier_from_file]: tzid: Etc/UTC
+[02:17:02:855] [3699260:0038723d] [DEBUG][com.winpr.timezone] - [winpr_get_timezone_from_link]: tzid: Etc/UTC
+[02:17:02:858] [3699260:0038723d] [DEBUG][com.winpr.timezone] - [winpr_get_unix_timezone_identifier_from_file]: tzid: Etc/UTC
+[02:17:02:858] [3699260:0038723d] [DEBUG][com.winpr.timezone] - [winpr_get_timezone_from_link]: tzid: Etc/UTC
+[02:17:02:862] [3699260:0038723d] [DEBUG][com.winpr.thread] - [ThreadCloseHandle]: Thread running, setting to detached state!
+[02:17:02:862] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_INITIAL --> CONNECTION_STATE_INITIAL
+[02:17:02:862] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_INITIAL --> CONNECTION_STATE_NEGO
+[02:17:02:862] [3699260:00387299] [DEBUG][com.freerdp.core.nego] - [nego_read_request_token_or_cookie]: received cookie [Cookie: mstshash=test]
+[02:17:02:862] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_nego]: Client Security: RDSTLS:0 NLA:0 EXT:0 TLS:0 RDP:1
+[02:17:02:862] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_nego]: Server Security: RDSTLS:0 NLA:0 EXT:0 TLS:1 RDP:1
+[02:17:02:862] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_nego]: Negotiated Security: RDSTLS:0 NLA:0 EXT:0 TLS:0 RDP:1
+[02:17:02:862] [3699260:00387299] [INFO][com.freerdp.core.nego] - [nego_send_negotiation_response]: Turning off encryption for local peer with standard rdp security
+[02:17:02:862] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_NEGO --> CONNECTION_STATE_MCS_CREATE_REQUEST
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core] - [gcc_read_client_core_data]: Received EarlyCapabilityFlags=RNS_UD_CS_WANT_32BPP_SESSION|RNS_UD_CS_RELATIVE_MOUSE_INPUT|RNS_UD_CS_VALID_CONNECTION_TYPE|RNS_UD_CS_SUPPORT_NETCHAR_AUTODETECT|RNS_UD_CS_SUPPORT_DYNVC_GFX_PROTOCOL|RNS_UD_CS_SUPPORT_DYNAMIC_TIME_ZONE|RNS_UD_CS_SUPPORT_HEARTBEAT_PDU|RNS_UD_CS_SUPPORT_SKIP_CHANNELJOIN|[0x00000fb2]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]: Accepted client: mesh-home
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]: Accepted channels:
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  rdpdr [1004]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  rdpsnd [1005]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  cliprdr [1006]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_accept_mcs_connect_initial]:  drdynvc [1007]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_CREATE_REQUEST --> CONNECTION_STATE_MCS_CREATE_RESPONSE
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_CREATE_RESPONSE --> CONNECTION_STATE_MCS_ERECT_DOMAIN
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_ERECT_DOMAIN --> CONNECTION_STATE_MCS_ATTACH_USER
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_ATTACH_USER --> CONNECTION_STATE_MCS_ATTACH_USER_CONFIRM
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  rdpdr [1004]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  rdpsnd [1005]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  cliprdr [1006]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.connection] - [rdp_server_skip_mcs_channel_join]:  drdynvc [1007]
+[02:17:02:863] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MCS_ATTACH_USER_CONFIRM --> CONNECTION_STATE_RDP_SECURITY_COMMENCEMENT
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_RDP_SECURITY_COMMENCEMENT --> CONNECTION_STATE_SECURE_SETTINGS_EXCHANGE
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_SECURE_SETTINGS_EXCHANGE --> CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_REQUEST
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_REQUEST --> CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_RESPONSE
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CONNECT_TIME_AUTO_DETECT_RESPONSE --> CONNECTION_STATE_LICENSING
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_LICENSING --> CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_REQUEST
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_REQUEST --> CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_RESPONSE
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_MULTITRANSPORT_BOOTSTRAPPING_RESPONSE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_CONFIRM_ACTIVE[0x00000003], tpktLength=553, remainingLength=547
+[02:17:02:864] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_CONFIRM_ACTIVE[0x00000003]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE --> CONNECTION_STATE_FINALIZATION_CLIENT_SYNC
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x1f size=37 channelId=1009)
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_SYNC --> CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_reset_flags][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE] reset finalize_sc_pdus
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE --> CONNECTION_STATE_FINALIZATION_SYNC
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=22, remainingLength=16
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_SYNC] received flag FINALIZE_CS_SYNCHRONIZE_PDU [0x00000010]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_SYNC --> CONNECTION_STATE_FINALIZATION_COOPERATE
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_COOPERATE] received flag FINALIZE_CS_CONTROL_COOPERATE_PDU [0x00000020]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_COOPERATE --> CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL] received flag FINALIZE_CS_CONTROL_REQUEST_PDU [0x00000040]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL --> CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST --> CONNECTION_STATE_FINALIZATION_FONT_LIST
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_FONT_LIST] received flag FINALIZE_CS_FONT_LIST_PDU [0x00000100]
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_FONT_LIST --> CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x28 size=41 channelId=1009)
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP --> CONNECTION_STATE_ACTIVE
+[02:17:02:865] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_ACTIVE --> CONNECTION_STATE_ACTIVE
+[02:17:02:865] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_post_connect]: Client from 127.0.0.1 is activated (1024x768@32)
+[02:17:02:866] [3699260:00387299] [DEBUG][com.winpr.thread] - [ThreadCloseHandle]: Thread running, setting to detached state!
+[02:17:02:866] [3699260:0038729b] [INFO][com.freerdp.api] - [wake8_audio_thread]: wake8 audio thread started
+[02:17:02:866] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_ACTIVE] received flag FINALIZE_DEACTIVATE_REACTIVATE [0x00000200]
+[02:17:02:866] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_ACTIVE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE
+[02:17:02:866] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_DEMAND_ACTIVE --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT
+[02:17:02:866] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_send_desktop_resize]: Client 127.0.0.1 resize requested (1x1@32)
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_MONITOR_LAYOUT --> CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_CONFIRM_ACTIVE[0x00000003], tpktLength=553, remainingLength=547
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_CONFIRM_ACTIVE[0x00000003]
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_CAPABILITIES_EXCHANGE_CONFIRM_ACTIVE --> CONNECTION_STATE_FINALIZATION_CLIENT_SYNC
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x1f size=37 channelId=1009)
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_SYNC --> CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_reset_flags][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE] reset finalize_sc_pdus
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_COOPERATE --> CONNECTION_STATE_FINALIZATION_SYNC
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=22, remainingLength=16
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_SYNC] received flag FINALIZE_CS_SYNCHRONIZE_PDU [0x00000010]
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_SYNC --> CONNECTION_STATE_FINALIZATION_COOPERATE
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_COOPERATE] received flag FINALIZE_CS_CONTROL_COOPERATE_PDU [0x00000020]
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_COOPERATE --> CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], t[02:17:02:970] [3699260:003872a1] [ERROR][com.freerdp.channels.audin.server] - [audin_server_thread_func]: WTSVirtualChannelQuery failed
+==3699260==WARNING: AddressSanitizer failed to allocate 0xfffffffffffffff0 bytes
+[02:17:03:277] [3699260:0038729a] [ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
+[02:17:03:277] [3699260:0038729a] [WARN][com.freerdp.server.shadow] - [rdpsnd_activated]: SelectFormat failed with 12
 pktLength=26, remainingLength=20
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL] received flag FINALIZE_CS_CONTROL_REQUEST_PDU [0x00000040]
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL --> CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST
-[02:13:58:975] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST --> CONNECTION_STATE_FINALIZATION_FONT_LIST
-[02:13:58:976] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
-[02:13:58:976] [3667980:0037fc27] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
-[02:13:58:976] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_FONT_LIST] received flag FINALIZE_CS_FONT_LIST_PDU [0x00000100]
-[02:13:58:976] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_FONT_LIST --> CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP
-[02:13:58:976] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x28 size=41 channelId=1009)
-[02:13:58:976] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP --> CONNECTION_STATE_ACTIVE
-[02:13:58:976] [3667980:0037fc27] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_ACTIVE --> CONNECTION_STATE_ACTIVE
-[02:13:58:976] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_thread]: Gfx Pipeline Opened
-[02:13:58:977] [3667980:0037fc27] [DEBUG][com.freerdp.client.shadow] - [shadow_encoder_prepare]: initializing H.264 encoder
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_8 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_81 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_10 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_101 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_102 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_103 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_104 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_107 vs RDPGFX_CAPVERSION_107[0x000a0701]
-[02:13:58:977] [3667980:0037fc27] [DEBUG][com.freerdp.channels.rdpgfx.server] - [rdpgfx_send_caps_confirm_pdu]: CAPS version=0xa0701, flags=0x00a2, length=4
-[02:13:59:382] [3667980:0037fc28] [DEBUG][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_recv_quality_mode]: Client requested sound quality: 0x0002
-[02:14:00:172] [3667980:0037fc29] [INFO][com.freerdp.api] - [wake8_audio_thread]: wake8AddressSanitizer:DEADLYSIGNAL
-=================================================================
-==3667980==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7d14ef789087 bp 0x7d14e76be690 sp 0x7d14e76be648 T3)
-==3667980==The signal is caused by a WRITE memory access.
-==3667980==Hint: address points to the zero page.
-    #0 0x7d14ef789087 in __memmove_avx_unaligned_erms ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
-    #1 0x7d14f10bdea9 in rdpsnd_server_send_samples /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:770
-    #2 0x7d14f11d2f55 in shadow_client_subsystem_process_message /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:2616
-    #3 0x7d14f11d53bc in shadow_client_thread /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:2932
-    #4 0x7d14efbe875a in thread_launcher /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:540
-    #5 0x7d14f125ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
-    #6 0x7d14ef69cb63 in start_thread nptl/pthread_create.c:447
-    #7 0x7d14ef729e8b in clone3 ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+[02:17:02:869] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL] received flag FINALIZE_CS_CONTROL_REQUEST_PDU [0x00000040]
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x14 size=41 channelId=1009)
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_REQUEST_CONTROL --> CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_PERSISTENT_KEY_LIST --> CONNECTION_STATE_FINALIZATION_FONT_LIST
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_read_share_control_header][0x51a00000fc80]: type=PDU_TYPE_DATA[0x00000007], tpktLength=26, remainingLength=20
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.peer] - [peer_recv_tpkt_pdu]: Received PDU_TYPE_DATA[0x00000007]
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_finalize_set_flag][0x51a00000fc80]: [CONNECTION_STATE_FINALIZATION_FONT_LIST] received flag FINALIZE_CS_FONT_LIST_PDU [0x00000100]
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_FONT_LIST --> CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_send_data_pdu][0x51a00000fc80]: sending data (type=0x28 size=41 channelId=1009)
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_FINALIZATION_CLIENT_FONT_MAP --> CONNECTION_STATE_ACTIVE
+[02:17:02:870] [3699260:00387299] [DEBUG][com.freerdp.core.rdp] - [rdp_server_transition_to_state][0x51a00000fc80]: CONNECTION_STATE_ACTIVE --> CONNECTION_STATE_ACTIVE
+[02:17:02:870] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_thread]: Gfx Pipeline Opened
+[02:17:02:871] [3699260:00387299] [DEBUG][com.freerdp.client.shadow] - [shadow_encoder_prepare]: initializing H.264 encoder
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_8 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_81 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_10 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_101 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_102 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_103 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_104 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [INFO][com.freerdp.api] - [shadow_client_caps_test_version]: testing  RDPGFX_CAPVERSION_107 vs RDPGFX_CAPVERSION_107[0x000a0701]
+[02:17:02:871] [3699260:00387299] [DEBUG][com.freerdp.channels.rdpgfx.server] - [rdpgfx_send_caps_confirm_pdu]: CAPS version=0xa0701, flags=0x00a2, length=4
+[02:17:03:277] [3699260:0038729a] [DEBUG][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_recv_quality_mode]: Client requested sound quality: 0x0002
+[02:17:04:066] [3699260:0038729b] [INFO][com.freerdp.api] - [wake8_audio_thread]: wake8=================================================================
+==3699260==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x525000011374 at pc 0x7b64c0efb303 bp 0x7b64b72be640 sp 0x7b64b72bdde8
+WRITE of size 16384 at 0x525000011374 thread T3
+    #0 0x7b64c0efb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7b64c0d0dea9 in rdpsnd_server_send_samples /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:770
+    #2 0x7b64c14fff55 in shadow_client_subsystem_process_message /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:2616
+    #3 0x7b64c15023bc in shadow_client_thread /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:2932
+    #4 0x7b64bf7e875a in thread_launcher /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:540
+    #5 0x7b64c0e5ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #6 0x7b64bf29cb63 in start_thread nptl/pthread_create.c:447
+    #7 0x7b64bf329e8b in clone3 ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
 
-AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660 in __memmove_avx_unaligned_erms
+0x525000011374 is located 0 bytes after 8820-byte region [0x52500000f100,0x525000011374)
+allocated by thread T4 here:
+    #0 0x7b64c0efc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x7b64c0d0c11a in rdpsnd_server_select_format /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:444
+    #2 0x7b64c150d723 in rdpsnd_activated /tmp/fr-wake2/src3320/server/shadow/shadow_rdpsnd.c:44
+    #3 0x7b64c0d1144c in rdpsnd_server_handle_messages /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:1278
+    #4 0x7b64c0d0b12e in rdpsnd_server_thread /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:336
+    #5 0x7b64bf7e875a in thread_launcher /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:540
+    #6 0x7b64c0e5ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #7 0x7b64bf29cb63 in start_thread nptl/pthread_create.c:447
+
 Thread T3 created by T1 here:
-    #0 0x7d14f12f51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
-    #1 0x7d14efbe8b31 in winpr_StartThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:588
-    #2 0x7d14efbe95b8 in CreateThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:728
-    #3 0x7d14f11d6117 in shadow_client_accepted /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:3041
-    #4 0x7d14f0514c6b in freerdp_check_and_create_client /tmp/fr-wake2/src3320/libfreerdp/core/listener.c:468
-    #5 0x7d14f05152bc in freerdp_listener_check_fds /tmp/fr-wake2/src3320/libfreerdp/core/listener.c:514
-    #6 0x7d14f11e934e in shadow_server_thread /tmp/fr-wake2/src3320/server/shadow/shadow_server.c:697
-    #7 0x7d14efbe875a in thread_launcher /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:540
-    #8 0x7d14f125ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
-    #9 0x7d14ef69cb63 in start_thread nptl/pthread_create.c:447
+    #0 0x7b64c0ef51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x7b64bf7e8b31 in winpr_StartThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:588
+    #2 0x7b64bf7e95b8 in CreateThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:728
+    #3 0x7b64c1503117 in shadow_client_accepted /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:3041
+    #4 0x7b64c0114c6b in freerdp_check_and_create_client /tmp/fr-wake2/src3320/libfreerdp/core/listener.c:468
+    #5 0x7b64c01152bc in freerdp_listener_check_fds /tmp/fr-wake2/src3320/libfreerdp/core/listener.c:514
+    #6 0x7b64c151634e in shadow_server_thread /tmp/fr-wake2/src3320/server/shadow/shadow_server.c:697
+    #7 0x7b64bf7e875a in thread_launcher /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:540
+    #8 0x7b64c0e5ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #9 0x7b64bf29cb63 in start_thread nptl/pthread_create.c:447
 
 Thread T1 created by T0 here:
-    #0 0x7d14f12f51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
-    #1 0x7d14efbe8b31 in winpr_StartThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:588
-    #2 0x7d14efbe95b8 in CreateThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:728
-    #3 0x7d14f11e9e9f in shadow_server_start /tmp/fr-wake2/src3320/server/shadow/shadow_server.c:852
-    #4 0x59cb8ac42ee8 in main /tmp/fr-wake2/src3320/server/shadow/cli/shadow.c:201
-    #5 0x7d14ef62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x7d14ef62a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x59cb8ac42424 in _start (/tmp/fr-wake8-asan/server/shadow/cli/freerdp-shadow-cli+0x4424) (BuildId: c4825636639472fdc1004f4d2d0ffa630c0b0c85)
+    #0 0x7b64c0ef51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x7b64bf7e8b31 in winpr_StartThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:588
+    #2 0x7b64bf7e95b8 in CreateThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:728
+    #3 0x7b64c1516e9f in shadow_server_start /tmp/fr-wake2/src3320/server/shadow/shadow_server.c:852
+    #4 0x5d2adaccbee8 in main /tmp/fr-wake2/src3320/server/shadow/cli/shadow.c:201
+    #5 0x7b64bf22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7b64bf22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5d2adaccb424 in _start (/tmp/fr-wake8-asan/server/shadow/cli/freerdp-shadow-cli+0x4424) (BuildId: c4825636639472fdc1004f4d2d0ffa630c0b0c85)
 
-==3667980==ABORTING
+Thread T4 created by T3 here:
+    #0 0x7b64c0ef51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x7b64bf7e8b31 in winpr_StartThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:588
+    #2 0x7b64bf7e95b8 in CreateThread /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:728
+    #3 0x7b64c0d0f88f in rdpsnd_server_start /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:1016
+    #4 0x7b64c0d0b39f in rdpsnd_server_initialize /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c:361
+    #5 0x7b64c150dba8 in shadow_client_rdpsnd_init /tmp/fr-wake2/src3320/server/shadow/shadow_rdpsnd.c:82
+    #6 0x7b64c150c465 in shadow_client_channels_post_connect /tmp/fr-wake2/src3320/server/shadow/shadow_channels.c:41
+    #7 0x7b64c14f15de in shadow_client_post_connect /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:608
+    #8 0x7b64c011a5f9 in rdp_peer_handle_state_active /tmp/fr-wake2/src3320/libfreerdp/core/peer.c:753
+    #9 0x7b64c011c307 in peer_recv_callback_internal /tmp/fr-wake2/src3320/libfreerdp/core/peer.c:1153
+    #10 0x7b64c011c6c9 in peer_recv_callback /tmp/fr-wake2/src3320/libfreerdp/core/peer.c:1194
+    #11 0x7b64c00ccfed in transport_check_fds /tmp/fr-wake2/src3320/libfreerdp/core/transport.c:1530
+    #12 0x7b64c00a15cc in rdp_check_fds /tmp/fr-wake2/src3320/libfreerdp/core/rdp.c:2338
+    #13 0x7b64c01179c8 in freerdp_peer_check_fds /tmp/fr-wake2/src3320/libfreerdp/core/peer.c:325
+    #14 0x7b64c15015d6 in shadow_client_thread /tmp/fr-wake2/src3320/server/shadow/shadow_client.c:2810
+    #15 0x7b64bf7e875a in thread_launcher /tmp/fr-wake2/src3320/winpr/libwinpr/thread/thread.c:540
+    #16 0x7b64c0e5ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #17 0x7b64bf29cb63 in start_thread nptl/pthread_create.c:447
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x525000011080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000011100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000011180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000011200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000011280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x525000011300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00[04]fa
+  0x525000011380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000011400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000011480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000011500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000011580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3699260==ABORTING
