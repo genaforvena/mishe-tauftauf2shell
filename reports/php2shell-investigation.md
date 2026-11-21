@@ -760,8 +760,21 @@ loopback FPM harness (`lab/repro/php2shell-cve129182-fpm.py`) replaying its
 vendor regression case; both the debug and the finished 8.5.12 release ASan
 FPM builds preserve a negative (vendor diagnostics reproduced, zero ASan
 markers in malloc-backed, ZendMM and control modes — see the status ledger),
-so its grade is **UNKNOWN** and no rung 3/4 or pre-auth claim is made. The
-8.5.13 fixed release build is unbuilt, so patch sensitivity is untested.
+so its grade is **UNKNOWN** and no rung 3/4 or pre-auth claim is made. Wake 46
+root-caused that negative under gdb: the worker does receive
+`ZEND_ASAN_FORCE_FAST_SHUTDOWN=1` and takes the fast shutdown path
+(`fast_shutdown=1`), but request N+1's `zend_activate()` UNDEFs
+`EG(last_fatal_error_backtrace)` at `zend_execute_API.c:440` before the
+`PHP Request Shutdown` warning reaches the unconditional dtor at
+`zend.c:1509` (`active=0`, `type=IS_UNDEF`); `zval_ptr_dtor` on IS_UNDEF is a
+no-op, so no stale pointer is dereferenced. Removing the admin timezone
+directive changes nothing. An RSHUTDOWN fatal does produce ASan on this
+build, but its stack is the separate 129481 session-filename UAF, not the
+backtrace-repopulation path. The 8.5.13 fixed release build remains unbuilt;
+patch sensitivity is untested and is not worth a build while both verdicts
+are clean. A future attempt needs an exception-free fatal while
+`EG(active)==0` that reaches the repopulation branch before startup resets
+the global; full bytes are in `reports/php2shell-status.md` wake 46.
 129289 remains untested (smuggling, not memory corruption).
 
 ASan attributes the report to the FPM **worker** PID, which is shared across

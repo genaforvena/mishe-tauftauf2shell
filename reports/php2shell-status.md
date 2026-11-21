@@ -901,3 +901,44 @@ the earlier debug-build `vulnerable-shape.log` is intact. Grade stays
 **UNKNOWN**: the advisory claim is not reproduced under fast shutdown on
 this host. No rung 3, rung 4 or pre-auth claim. The 8.5.13 fixed release
 build is still unbuilt (324 objects), so patch sensitivity is untested.
+
+## Wake 46 (2026-11-21 01:31–01:52Z) — 129182 negative root-caused
+The 8.5.12 release-ASan FPM replay reproduces both vendor diagnostics but
+zero ASan; the reason is now instrument-observed, not inferred. All bytes in
+`lab/build/evidence/w46-cve129182/` (gitignored); committed harness unchanged.
+- Env probe (`envprobe.py`, reusing the committed harness) prints
+  `ENV='1'` for `ZEND_ASAN_FORCE_FAST_SHUTDOWN` inside the worker, so the pool
+  `env[...]` directive does reach `getenv()` — the earlier H1 (env lost) is
+  rejected. `shutdown_executor()` also measures `fast_shutdown=1`,
+  `full_tables_cleanup=0`, so the graceful dtor at `zend_execute_API.c:309-310`
+  is skipped as expected.
+- gdb breakpoints (`gdb-trace.log`) on every `ZVAL_UNDEF` site and on
+  `zend.c:1509` give the exact sequence: worker `init_executor():139` UNDEF;
+  req1 fatal hits `zend.c:1509` with `active=1, type=0, arr=nil`, then
+  `zend.c:1510` UNDEF and `zend.c:1534` populates the backtrace array;
+  **req2 startup `zend_activate()` (`zend_execute_API.c:440`) UNDEFs the global
+  (no dtor)**; req2's `PHP Request Shutdown: Invalid date.timezone value
+  'invalid'` warning then hits `zend.c:1509` with `active=0, type=0 (IS_UNDEF)`,
+  stale `value.arr=0x50600001c760`. `zval_ptr_dtor` on IS_UNDEF is a no-op —
+  there is no stale pointer to dereference, hence no UAF. The warning fires
+  after request startup (at shutdown), not before it.
+- Removing `php_admin_value[date.timezone] = UTC` (`fpm-noadmin.conf` +
+  `run-noadmin.sh`) gives identical diagnostics and zero ASan, so the timing
+  is not an artefact of the admin directive.
+- Reusing the committed 129481 RSHUTDOWN-fatal harness against the same
+  8.5.12 release FPM does produce an ASan UAF (`cve129481.log`), but the read
+  stack is `zend_string_release ← php_session_cleanup_filename ←
+  php_rshutdown_session_globals ← zm_deactivate_session`, i.e. 129481's
+  session-filename UAF — a new observation (129481 also reproduces on 8.5.12
+  release FPM), not 129182. Its fatal carried an exception, so `zend_error`
+  took the exception branch rather than the backtrace-repopulation branch;
+  an `E_USER_ERROR` variant (`inactivefatal.py`) ended at the same 129481
+  stack. Preserved as a negative for 129182.
+Grade stays **UNKNOWN with a measured cause**: the vendor trigger does not
+place a live stale backtrace pointer in front of the inactive `zend_error`
+on this host. NEWS calls it a UAF; the fix's own source comment says setting
+the global while inactive "would leak", so the leak reading is preserved
+alongside the advisory claim. No rung 3, rung 4 or pre-auth claim. Do not
+build the 8.5.13 fixed release merely to compare two clean verdicts; a
+future attempt needs a fatal, exception-free error while `EG(active)==0`
+that reaches the repopulation branch before request startup UNDEFs the global.
