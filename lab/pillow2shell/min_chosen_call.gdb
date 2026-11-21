@@ -10,6 +10,10 @@ set $slot=*(unsigned long*)(0xa2d260+48)
 printf "BUF=%p OBJ=%p SLOT=%lx TYPE=%lx\n", $b, $b+176, $slot, *(unsigned long*)($b+184)
 break *$slot if $rdi == (void*)($b+176)
 continue
-printf "HIT pc=%p rdi=%p OBJ=%p\n", $pc, $rdi, $b+176
-bt 8
+# A conditional-breakpoint miss leaves $pc at whatever stopped the inferior
+# (typically SIGSEGV), so print the marker only when the stop really matched.
+if $pc == $slot && $rdi == (void*)($b+176)
+  printf "HIT pc=%p rdi=%p OBJ=%p\n", $pc, $rdi, $b+176
+  bt 8
+end
 continue

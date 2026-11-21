@@ -438,7 +438,11 @@ chosen-code execution, an arbitrary chosen address, a ROP chain, PC control,
 an ASLR leak or a PIE bypass: the target is selected from the binary's type
 objects, gdb only observes, and no bytes are written to static memory. Grade
 ◐ unchanged. The witness replay of W5-W7 (#1021) closed all earlier pending
-requests at this grade; W9 replay is now owed.
+requests at this grade; witness #1048 replayed W9 at ◐ from its own plain
+12.2.0 build (four digests exact, marker and control as claimed, watchpoint
+store from libjpeg, three distinct heap bases). Its two non-material replay
+NITs were repaired: explicit `PILLOW_BUILD` now overrides the default CANON
+symlink, and the gdb script no longer prints a false HIT at a SIGSEGV stop.
 
 ## Evidence-ladder disposition
 
@@ -489,5 +493,5 @@ can be clobbered without blocking the chosen call); an ASLR-resilient forged
 type at a chosen heap address; a static type whose deallocator gives useful
 primitives with the corrupted object; PC control, chosen-code execution or
 the advisory's non-PIE `system@plt` chain. Witness replay of W1 (#898/#900),
-W3/W4 (#947) and the consolidated W5-W7 forged-type chain (#1021) all
-returned ESTABLISHED AS CLAIMED at the labeled grade ◐. W9 replay is owed.
+W3/W4 (#947), the consolidated W5-W7 forged-type chain (#1021) and W9 (#1048)
+all returned ESTABLISHED AS CLAIMED at the labeled grade ◐.

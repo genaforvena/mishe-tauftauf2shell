@@ -6,6 +6,7 @@
 #   PILLOW_BUILD=/path/to/plain-pillow-12.2.0 sh replay_min.sh [outdir]
 #   sh replay_min.sh --build /path/to/pillow-12.2.0.tar.gz [outdir]
 #
+# An explicitly set PILLOW_BUILD always wins over the default CANON symlink.
 # All runs are local processes. No socket, server or external probe. No
 # debugger staging of memory: gdb only sets breakpoints/watchpoints and
 # observes. "set disable-randomization off" keeps host ASLR active.
@@ -30,13 +31,18 @@ elif [ "$MODE" != "" ]; then
 fi
 
 BUILD=${PILLOW_BUILD:-}
-if [ ! -d "$CANON" ]; then
-    [ -n "$BUILD" ] && [ -d "$BUILD" ] || {
+# PILLOW_BUILD is authoritative. A stale /tmp/pw2-w9/v12plain symlink must
+# never silently redirect an independent replay to the author's own build.
+if [ -n "$BUILD" ]; then
+    [ -d "$BUILD" ] || {
+        echo "FAIL: PILLOW_BUILD is not a directory: $BUILD" >&2; exit 2; }
+    PY=$(cd "$BUILD" && pwd)
+else
+    [ -d "$CANON" ] || {
         echo "FAIL: set PILLOW_BUILD or use --build" >&2; exit 2; }
-    mkdir -p "$(dirname "$CANON")"
-    ln -s "$(cd "$BUILD" && pwd)" "$CANON"
+    PY=$(cd "$CANON" && pwd)
 fi
-PYTHONPATH="$CANON" python3 -c \
+PYTHONPATH="$PY" python3 -c \
     'import PIL, olefile; assert PIL.__version__ == "12.2.0", PIL.__version__' || {
     echo "FAIL: build is not plain Pillow 12.2.0 + olefile" >&2; exit 2; }
 
@@ -67,7 +73,7 @@ CODE='from PIL import Image; Image.open("%s").load(); print("LOAD_OK")'
 
 run_gdb() {
     name=$1; script=$2; casefile=$3
-    PYTHONPATH="$CANON" gdb -q -batch -x "$script" --args python3 -c \
+    PYTHONPATH="$PY" gdb -q -batch -x "$script" --args python3 -c \
         "$(printf "$CODE" "$casefile")" > "$OUT/$name.log" 2>&1 || true
 }
 
@@ -87,7 +93,7 @@ check w9_marker "$OUT/w9_marker.log" \
 
 run_gdb w9_control min_chosen_call.gdb case_min_ctrl.fpx
 check w9_control "$OUT/w9_control.log" \
-    'SLOT=54e700' 'LOAD_OK' '!HIT pc=0x54e700'
+    'SLOT=54e700' 'LOAD_OK' '!HIT pc='
 
 run_gdb w9_watch min_chosen_watch.gdb case_min.fpx
 check w9_watch "$OUT/w9_watch.log" \

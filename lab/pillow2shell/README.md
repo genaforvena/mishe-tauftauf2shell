@@ -412,7 +412,16 @@ PILLOW_BUILD=/path/to/plain-pillow-12.2.0 ./replay_min.sh /tmp/pw2-w9-replay
 ./replay_min.sh --build /tmp/pw2-dl/pillow-12.2.0.tar.gz /tmp/pw2-w9-replay
 ```
 
-Latest run: `TOTAL PASS=8 FAIL=0`. Limit: the chosen target is an EXISTING
-static type's deallocator, not an arbitrary chosen address; no injected code,
-ROP, PC write, ASLR bypass or address disclosure. gdb observes; the transfer
-itself is the interpreter's natural finalization. Grade ◐ unchanged.
+Latest author and witness replay: `TOTAL PASS=8 FAIL=0`, rc 0. Witness #1048
+replayed W9 at the labeled grade ◐ from its own plain 12.2.0 build: four
+digests exact, marker `HIT pc=0x54e700 rdi=buffer+176` / `#7 Py_FinalizeEx`,
+control never at `0x54e700`, watchpoint store from libjpeg, three distinct
+heap bases and host `randomize_va_space=2`. Its two non-material NITs are
+repaired here: `PILLOW_BUILD` now takes precedence over the default
+`/tmp/pw2-w9/v12plain` symlink, and `min_chosen_call.gdb` prints the HIT line
+only when `$pc`/`$rdi` match the breakpoint condition (the control check now
+rejects any `HIT pc=` line).
+Limit: the chosen target is an EXISTING static type's deallocator, not an
+arbitrary chosen address; no injected code, ROP, PC write, ASLR bypass or
+address disclosure. gdb observes; the transfer itself is the interpreter's
+natural finalization. Grade ◐ unchanged.
