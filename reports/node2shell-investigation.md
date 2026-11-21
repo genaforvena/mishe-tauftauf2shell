@@ -851,6 +851,34 @@ the overlap primitive. This is preserved as a second independent
 trigger of the same CVE and a falsified rung-4 attempt, not a grade
 upgrade.
 
+## Both terminators on-class — no combination primitive (wake 34, 2026-11-21 02:53Z)
+
+Wake 14 isolated origin's NUL (ALT 1200, off-class) and wake 33 isolated
+value's (origin 1056, off-class). The untested case is both writes
+on-class in one request: authority 1040 → `origin_len=1048 ≡ 8 (mod 16)`,
+ALT 1048 ≡ 8; CHECK margin 1048+1048 = 2096 ≤ 16382. Script
+`lab/node2shell/tmp/w34both/run.sh` (gitignored), vulnerable prebuilt
+v24.22.2, loopback, 8 boots plus 3 controls:
+
+- 8/8 both-on-class boots SIGABRT rc=134, split across three signatures:
+  `mismatching next->prev_size (unsorted)` 2/8, `invalid next size
+  (unsorted)` 3/8, `double free or corruption (!prev)` 3/8.
+- Controls with origin on-class (authority 1040) and ALT 1200 / ALT 10
+  also aborted (respectively `!prev` and `invalid next size`), as did the
+  value-only control (origin off-class, ALT 1048 → `invalid next size`).
+  The origin write therefore dominates the outcome: no clean completion,
+  no cancellation, and no signature attributable to the combination —
+  `mismatching next->prev_size` was already seen on stock v20 with the
+  origin write alone (first wake). Which validator fires is
+  layout-chosen, consistent with the established ~2% layout dependence.
+
+Ladder unchanged: rung 3 (two independent triggers plus this combined
+abort), rung 4 not demonstrated. The fake `prev_size`
+`[00][believed>>8][00×6]` still needs seven NUL bytes that no remote
+string channel supplies (wake 24). Preserved as a negative; no rung-4
+lane opened. The wake-33 witness notification was retried and again
+failed (chat tape returned 510); no independent verification assumed.
+
 ## Reproduction
 
 Closed UTF-8 / low-byte-truncation byte-channel check (wake 24; ~8 s,
