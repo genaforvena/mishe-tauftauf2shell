@@ -1,14 +1,16 @@
 # Frontier brief — FreeSWITCH mod_xml_rpc WebSocket extended-length heap over-write (Freeswitch2Shell)
 
 **Status: admitted 2026-11-20 ~17:52Z under standing approval #6; current
-grade is rungs 1/2/3 plus live rung-4 chosen-pointer control and dereference,
-independently replayed by the witness (#338).** Frontier was cut mid-wake
-before it pinned harness numbers. This brief is chronological: the sections
-through 19:45Z record intermediate states and their then-current UNKNOWNs;
-the live-process section at the end (20:29Z) and its witness replay give the
-final grade. The `freeswitch2shell` charter, docs/task.md entry and committed
-brief/status exist; wake trigger units remain the person's full-flag sync. The
-two-pane window and restorer registry entry are live.
+grade is rungs 1/2/3 plus live rung-4 chosen-pointer control and dereference
+(#338) and rung-5 wire-carried command execution (#1118), both
+witness-ESTABLISHED under the conditions recorded below.** Frontier was cut
+mid-wake before it pinned harness numbers. This brief is chronological: the
+sections through 19:45Z record intermediate states and their then-current
+UNKNOWNs; the live-process section (20:29Z) and the 2026-11-21 rung-5 section,
+each followed by its witness replay, give the final grades. The
+`freeswitch2shell` charter, docs/task.md entry and committed brief/status
+exist; wake trigger units remain the person's full-flag sync. The two-pane
+window and restorer registry entry are live.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-20)
 
@@ -477,14 +479,17 @@ the distro sofia-sip 1.12 needs three generated-Makefile settings
 build is the pinned `5a07965f…`. The built install tree and source tree are
 gitignored; `lab/freeswitch2shell/live/run/conf/` holds the loopback config.
 
-## Rung-5 first attempt — forged SSL METHOD call, author-positive 2026-11-21
+## Rung-5 first attempt — forged SSL METHOD call, witness-established 2026-11-21
 
 Under the owner's 2026-11-21 rung-5 mandate (`docs/rce.md`, approval #8, DMs
 #1097/#1100) the same unauthenticated wire frame was used to place a forged
 `SSL` object and `SSL_METHOD` inside `wsh`, redirecting the indirect
 `ssl_shutdown` call to a lab-chosen command. Grade of THIS section:
-**author-observed positive, NOT ESTABLISHED** until independent witness replay.
-It does not change the rung-4 grade above.
+**author-observed positive, independently replayed and ESTABLISHED at rung 5
+by witness #1118**, under the labeled conditions below (ASLR-off calibration
+and trigger, opt-in `mod_xml_rpc`/websocket config, lab build shims, gdb host,
+sudo-root netns, 127.0.0.1 only). ASLR-on reachability stays UNKNOWN. It does
+not change the rung-4 grade above.
 
 ### Gates measured, not assumed
 
@@ -556,7 +561,35 @@ addresses are environment-specific. `mod_xml_rpc` and `enable-websocket` are
 still opt-in and off by default; the build still needs the lab-only shims
 listed above; all traffic stays on 127.0.0.1 inside a private netns. The lab
 process runs under `sudo -n` to enter the netns, hence root in the `id`
-output. Independent witness replay from a clean checkout, including a
-varied command, is still required before any ESTABLISHED rung-5 claim; the
-README table must not change yet.
+output. The independent witness replay from a clean checkout, including a
+varied command, is reported below; the README table and the other status
+docs were updated with commit `eead196`.
+
+### Independent witness replay, 2026-11-21 (message #1118)
+
+W88 replayed the rung-5 claim from a clean checkout in its own outdir
+`/tmp/w88-fs-live`. It checked the HEAD script blobs itself and got exact
+matches to the pins quoted here: `run_live_rce.sh` `615f772f…`,
+`rce_client.py` `983e06a1…`, `live_client.py` `68d1c85c…`, with source pins
+`ws.c` `5a07965f…` and `ws.h` `1990aa2b…`. Two ASLR-off calibrations in that
+outdir gave the same `WSH_ADDR=0x7ffff44fb010` and
+`SYSTEM_ADDR=0x7ffff7658750` as this author's runs.
+
+Positive run `w88a`: 101 upgrade, `SENT_FRAME=131112`, `MARKER_EXISTS=1`, and
+a root-owned 39-byte marker in the target cwd holding
+`uid=0(root) gid=0(root) groups=0(root)`. Trace `w88t` hit `__libc_system`
+with `SYSTEM_RDI=0x7ffff44fb050` = `FAKE_SSL`, the wire-carried command
+`id>w88t`, and frame `#1 ws_destroy ws.c:367`. With only the command bytes
+changed in its own client copy, `pwd>p1` produced a root-owned marker `p1`
+containing `/tmp/w88-fs-live` — a different command and a different side
+effect, excluding a fixed marker. Safe run `w88s` and the witness's own
+pinned-fixed build `w88f` (module `.so` `e6fab9c9…` versus vulnerable
+`0b06c157…`) both left `MARKER_EXISTS=0`.
+
+Verdict: **ESTABLISHED at rung 5** for this build and these conditions
+(ASLR-off calibration and trigger, opt-in `mod_xml_rpc`/`enable-websocket`,
+lab build shims, gdb host, sudo-root netns, loopback only). No grade-changing
+contradiction; the rung-4 grade and boundaries above are unchanged. ASLR-on
+reachability stays UNKNOWN; the witness did not assert it. The README table,
+`docs/rce.md` and `docs/reproducibility.md` were updated with commit `eead196`.
 

@@ -96,7 +96,7 @@ and `enable-websocket` set; both off by default, endpoint `http-port` 8080.
   including fixed `rc=-1009`. No grade correction owed; boundary unchanged
   (sentinel not code, opt-in gate, lab-only shims, loopback only).
 
-## Rung-5 first attempt — author-positive, witness pending (2026-11-21)
+## Rung-5 first attempt — witness-ESTABLISHED (2026-11-21, #1118)
 
 Under approval #8 and `docs/rce.md`, a forged `SSL`/`SSL_METHOD` in the same
 wire frame redirected `SSL_shutdown`'s indirect method call to `system()` in
@@ -113,9 +113,18 @@ process. Trace `logs/rce_trace_20261121T195311Z`: `system` hit with
 Safe-frame and pinned-fixed-build controls both left the marker absent.
 Marker names must be at most 7 bytes (SSL+8 holds the method pointer).
 
-This is an author observation, NOT ESTABLISHED: independent witness replay
-from a clean checkout with a varied command is still required, and the README
-table must not change yet. Full recipe and boundaries are in
+Witness #1118 replayed commit `462e887` from clean blobs in its own outdir
+`/tmp/w88-fs-live`: script digests `615f772f…` / `983e06a1…` / `68d1c85c…`
+and source pins `ws.c 5a07965f…` / `ws.h 1990aa2b…` matched, its own two
+ASLR-off calibrations repeated `wsh=0x7ffff44fb010`, `system=0x7ffff7658750`,
+the exploit run wrote the target-owned marker, the trace hit `__libc_system`
+with `SYSTEM_RDI=0x7ffff44fb050` through `ws_destroy ws.c:367`, and a varied
+wire command `pwd>p1` produced a different marker side effect. Safe and its
+own pinned-fixed runs left the marker absent. Grade: R5 ESTABLISHED under
+the labeled conditions (ASLR-off calibration and trigger, opt-in
+`mod_xml_rpc`/websocket, lab shims, gdb host, sudo-root netns, loopback only);
+ASLR-on reachability stays UNKNOWN. The README table was updated in
+`eead196`. Full recipe, boundaries and replay evidence are in
 `reports/frontier-freeswitch2shell.md`, section "Rung-5 first attempt".
 Repro commands: `bash lab/freeswitch2shell/live/run_live_rce.sh calibrate`,
 then `exploit|trace|safe|fixed` with `$WSH $SYS r5`; new files
