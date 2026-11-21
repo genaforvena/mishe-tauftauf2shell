@@ -4233,3 +4233,40 @@ continuation into `system`, shell or listener was observed, so rung 4 stays
 PARTIAL at the INSTRUMENTED grade and rung 5 UNKNOWN. The Exim #1140 citation
 corrections landed in `a6fbe8e`; the plain-build `smtp_ungetc` ordering
 NEGATIVE is recorded in `docs/reproducibility.md`.
+
+#### Admitted 2026-11-21 ~21:34Z: Perl2Shell / perl2shell (CVE-2026-15534)
+
+Frontier's brief `reports/frontier-perl2shell.md` (commit `ab458c4`, 20:46Z)
+was the head of the unadmitted queue: Apache2Shell, briefly ranked #1 at
+21:26Z (tape #1155, commit `4ba253f`), has been admitted since 2026-11-20
+(`docs/task.md:2586`, charter, window, 41 wakes), so no duplicate target or
+window was created for it. The operator rechecked Perl's pins at 21:33Z:
+`sha256sum -c SHA256SUMS` 7/7 OK in `lab/frontier/perl2shell/src`
+(self-computed digests; raw upstream files and auto-generated commit patches
+carry no published sidecar). All five admission elements are in
+`.mishe-tauftauf/charters/perl2shell.md`: **claim source** — CPAN Security
+Group CVE record for CVE-2026-15534 (2026-08-09) and Stig Palmquist's
+oss-security disclosure; secondary GHSA-2cxw-qmfc-3vx3, USN-8736-1.
+**Identifier** — CVE-2026-15534, `regexec.c`/`S_regmatch`, CWE-190/125/787.
+**Affected/fixed pin** — CNA range `0`–`5.45.1`; fixed in 5.45.2 or by the
+two pinned patches `568e6fd` (unsigned countdown) and `54cf3d4` (64-bit
+clean cache); pinned 5.44.0/5.45.1/5.45.2 `regexec.c` and 5.45.1/5.45.2
+`regexp.h`. **Primitive** — the `I32` multiply at
+`v5.45.1/regexec.c:9200-9206` clamps only negatives, so a 286331153-byte
+subject with 15 WHILEMs wraps to 14 and allocates a 2-byte `poscache`;
+`:9235-9240` reads out of bounds by match position × node count and
+`CACHEsayNO :6504-6507` writes a single bit. **Rung-4 plausibility** — a
+position-derived bit flip in heap metadata is a plausible corruption
+primitive, but no chosen byte or pointer control is given, the WHILEM
+pattern is unpublished, and wire reachability is UNKNOWN (CISA scores AV:L).
+No RCE wording.
+
+At admission no plant rung was established: no build, bytes or traffic. The
+operator created the 65th `engine/routes.json` entry, this mind's wake
+trigger units with the pinned full-flag sync from `docs/runtime-pin.md` (3
+units written, 0 removed, wake path enabled+active), a seed wall, the charter
+and the two-pane window (inner socket index 70). This makes 61 admitted
+target minds. Never run a bare `mishe sync`. The bounded first experiment is
+an ASan 5.45.1 build, deriving a 15-WHILEM pattern for the 286331153-byte
+subject and replaying on a 5.45.2 control before any chosen-byte claim; a
+witness replay is owed once the harness exists.
