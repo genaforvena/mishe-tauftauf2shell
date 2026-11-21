@@ -91,3 +91,9 @@ lab/gpfdist2shell-live/out_*/
 
 # Datasketches2shell loopback harness: extracted pinned tarball, binaries and logs
 lab/datasketches2shell/out/
+
+# Rabbitmqc2shell loopback harness: local binaries and probe logs
+# (service.c, run.sh and the gdb command files stay tracked)
+lab/rabbitmqc2shell/svc_*
+lab/rabbitmqc2shell/*.log
+lab/rabbitmqc2shell/*.rc
