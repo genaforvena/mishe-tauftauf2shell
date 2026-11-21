@@ -99,6 +99,9 @@ generator aborts on drift. From committed HEAD,
 - **Determinism**: two independent five-run groups hash identically; ASan
   PID/address/path text is excluded from the digest.
 
+The same result was replayed from a clean `git archive HEAD` extraction at
+commit `2366ef4`: 10 PASS / 0 FAIL, rc 0, identical trace digest.
+
 **Grade**: rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4 is
 INSTRUMENTED chosen-byte control at a chosen offset, not a live imgproxy
 demonstration. No HTTP request, libvips process, stock neighbour, pointer

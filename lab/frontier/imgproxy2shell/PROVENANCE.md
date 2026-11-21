@@ -58,5 +58,8 @@ network request is exercised.
   ALL CHECKS PASS rc 0**; two independent five-run groups both
   `sha256=6b0391599520bc899f169268e08699155888f0018274f9c2a2e12bcd31c2dad5`.
 
-Clean replay from `git archive HEAD` is recorded in the frontier brief once
-performed; ASan PIDs, addresses and build paths are excluded from the digest.
+Clean replay from `git archive HEAD` at commit `2366ef4` reproduced
+10 PASS / 0 FAIL, rc 0 and digest
+`sha256=6b0391599520bc899f169268e08699155888f0018274f9c2a2e12bcd31c2dad5`
+in a fresh temp directory. ASan PIDs, addresses and build paths are excluded
+from the trace digest so clean replays are byte-identical.
