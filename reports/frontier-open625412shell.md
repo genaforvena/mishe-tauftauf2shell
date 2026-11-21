@@ -157,10 +157,18 @@ same run with the stale delete skipped exits 0. That assertion is recorded as
 a downstream observation, not claimed as pointer control or as caused by the
 head overwrite.
 
-Remaining rung-4 work: drive the free through a real queued client
-PublishRequest instead of the internal delete stand-in, and find a
-configuration where the stale write stores a controlled non-NULL value in a
-live object that is subsequently dereferenced.
+
+Pinned-code check (1.5.4 `ua_subscription.c:599-652`): `sendStatusChangeDelete`
+calls the same `UA_Subscription_delete` in both branches — `:610` when no
+response is queued (BAD status only), and `:652` after sending a status-change
+response when `pre` exists (`:642` requires `sub->session->channel`, which an
+in-process session lacks). Queuing a real client PublishRequest through
+`Service_Publish` (`ua_services_subscription.c:376` → `UA_Session_queuePublishReq`,
+`ua_session.c:258`) therefore does not change the memory operation the harness
+already performs; it only adds response delivery. That proposed next step is
+recorded as a negative result, not an owed experiment. The remaining rung-4
+question is a configuration where the stale write stores a controlled non-NULL
+value in a live object that is subsequently dereferenced.
 
 ## What would change my mind
 
