@@ -1,0 +1,62 @@
+Setting pipeline to PAUSED ...
+Pipeline is live and does not need PREROLL ...
+/GstPipeline:pipeline0/GstURIDecodeBin:u: source = "\(GstRTSPSrc\)\ source"
+Progress: (open) Opening Stream
+Pipeline is PREROLLED ...
+Prerolled, waiting for progress to finish...
+Progress: (connect) Connecting to rtsp://127.0.0.1:18601/
+Progress: (open) Retrieving server options
+Progress: (open) Retrieving media info
+Progress: (request) SETUP stream 0
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: latency = 2000
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-sync = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: rfc7273-sync = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: add-reference-timestamp-meta = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: ntp-time-source = ntp
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: drop-on-latency = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-rtcp-rtp-time-diff = 1000
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: max-ts-offset-adjustment = 0
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+Progress: (open) Opened Stream
+Setting pipeline to PLAYING ...
+New clock: GstSystemClock
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager: buffer-mode = slave
+Progress: (request) Sending PLAY request
+Progress: (request) Sending PLAY request
+Progress: (request) Sent PLAY request
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0.GstProxyPad:proxypad0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpStorage:rtpstorage0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtp_sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtp_sink_0: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0.GstProxyPad:proxypad1: caps = application/x-rtcp
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:sync_src: caps = application/x-rtcp
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:rtcp_sink: caps = application/x-rtcp
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSession:rtpsession0.GstPad:recv_rtcp_sink: caps = application/x-rtcp
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager.GstGhostPad:recv_rtcp_sink_0: caps = application/x-rtcp
+Redistribute latency...
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: latency = 2000
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: drop-on-latency = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-lost = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: mode = slave
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: do-retransmission = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: max-rtcp-rtp-time-diff = 1000
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: max-dropout-time = 60000
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: max-misorder-time = 2000
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: rfc7273-sync = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: add-reference-timestamp-meta = false
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: max-ts-offset-adjustment = 0
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0: sync-interval = 0
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpSsrcDemux:rtpssrcdemux0.GstPad:src_287454020: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpJitterBuffer:rtpjitterbuffer0.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source/GstRtpBin:manager/GstRtpPtDemux:rtpptdemux0.GstPad:sink: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstRTSPSrc:source.GstGhostPad:recv_rtp_src_0_287454020_96: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstDecodeBin:decodebin0.GstGhostPad:sink.GstProxyPad:proxypad5: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstDecodeBin:decodebin0/GstTypeFindElement:typefind.GstPad:src: caps = application/x-rtp, media=(string)audio, payload=(int)96, clock-rate=(int)44100, encoding-name=(string)L8, encoding-params=(string)1000, clock-base=(uint)0, seqnum-base=(uint)1, npt-start=(guint64)0, play-speed=(double)1, play-scale=(double)1, onvif-mode=(boolean)false, ssrc=(uint)287454020
+/GstPipeline:pipeline0/GstURIDecodeBin:u/GstDecodeBin:decodebin0/GstRtpL8Depay:rtpl8depay0: extensions = <  >
+malloc(): unaligned tcache chunk detected
+WARNING: from element /GstPipeline:pipeline0/GstURIDecodeBin:u/GstDecodeBin:decodebin0/GstRtpL8Depay:ýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿýÿÿÿU8: Could not decode stream.
+timeout: the monitored command dumped core

@@ -290,16 +290,54 @@ rtspsrc client without credentials. Whether any specific public service
 accepts attacker-supplied SDP remains UNKNOWN — no external service was
 probed. RCE and chosen-byte control remain NOT DEMONSTRATED.
 
+## Advisory family coverage (2026-11-21 ~02:35Z) — L8/L24 remote reachability
+
+The advisory and fix commit cover all three depays (rtpL8, rtpL16,
+rtpL24), but every earlier remote-path result was L16 only. This wake closed
+that gap. `lab/gst2shell-src/rtsp_server_codec.py` (digest
+`1493f137…cb45c`) is a copy of the pinned RTSP server with a CODEC argument;
+the original `rtsp_server.py`/`run_rtsp.sh` are untouched. `run_rtsp_family.sh`
+(digest `54e8331e…3d786e`) serves `a=rtpmap:96 <CODEC>/44100/N` on loopback
+and drives stock `uridecodebin uri=rtsp://127.0.0.1:<port>/ ! fakesink` —
+no element named by the harness and no SDP structure-name modelling. Full
+results and quoted log lines: `lab/gst2shell-src/family_evidence.txt`.
+
+- rtspsrc propagates `encoding-params=(string)N` unmodified for all three
+  codecs; decodebin itself auto-plugs `GstRtpL8Depay`, `GstRtpL16Depay` or
+  `GstRtpL24Depay` (each logs `extensions = < >`).
+- N=8 benign: L8 rc 124 alive, L16 rc 0 clean EOS, L24 rc 124 alive. The
+  synthetic RTP payload is 96 bytes — a multiple of all three 8-channel frame
+  sizes — so no codec has a payload-length artefact. An earlier 16/64-byte
+  payload made L24 N=8 fail with "Channel reordering failed" (rejected frame
+  length, not memory corruption); that negative is preserved in
+  `family_evidence.txt`, not hidden.
+- N=1000: L8 aborts rc 134 with `malloc(): unaligned tcache chunk detected`;
+  L24 aborts rc 134 with `malloc(): invalid size (unsorted)` — both
+  allocator-detected heap corruption in a stock playback path. L16 logs
+  `Caught SIGSEGV` / `Spinning. Please run gdb …` and returns rc 124 at the
+  timeout because GStreamer's segtrap handler catches the fault; the earlier
+  run of the same path (commit f1ae78d) aborted rc 134. Manifestation is
+  allocator/timing dependent; the stable claim is "attacker-chosen count
+  faults the victim", not a specific instruction or glibc message.
+
+An RTSP record/ANNOUNCE server lane (a service ingesting far-end SDP) was
+assessed and deferred: `gst-rtsp-server` is not installed, installing host
+packages plus a custom ANNOUNCE media factory is outside this bounded wake,
+and GStreamer's SDP→caps mapping is already covered by `run_sdp.sh`
+independently of direction. No external probe was made.
+
 ## Evidence boundary
 
 Rungs 1/2/3 remain established in the extracted harness and were replayed
-again. A distinct **rung-4 effect** is now demonstrated four ways: in a live
-GStreamer-typed ASan harness (count-controlled `order` corruption to a wild
-pointer and a deterministic dereference), in the **shipping `rtpL16depay`
-plugin** (single caps field, deterministic SIGSEGV, two distinct fault modes),
-from **SDP text to the vulnerable field** through GStreamer's own SDP parser,
-and through a **real remote RTSP SDP → rtspsrc → depay caps path** with no
-credentials, faulting the victim at N=1000 versus a clean N=8 control. The
+again. A distinct **rung-4 effect** is now demonstrated across the whole
+advisory family: in a live GStreamer-typed ASan harness (count-controlled
+`order` corruption to a wild pointer and a deterministic dereference), in the
+**shipping plugin** (single caps field, deterministic SIGSEGV, two distinct
+fault modes), from **SDP text to the vulnerable field** through GStreamer's own
+SDP parser, and through a **real remote RTSP SDP → rtspsrc → depay caps path**
+with no credentials — now for **rtpL8, rtpL16 and rtpL24**, each faulting the
+victim at N=1000 versus a clean N=8 control (L8/L24 by heap abort, L16 by
+SIGSEGV/segtrap). The
 direct-set_caps N=1000 fault is symbolicated to `srcpad->g_class` in a
 heap-adjacent GstPad GObject; the full RTSP pipeline instead faults in GLib
 `block_source` with the same `NONE = -3` pattern in `rbx` — two different
@@ -321,19 +359,21 @@ the person's full-flag sync (`docs/runtime-pin.md`) — never a bare `mishe
 sync`.
 
 gst2shell mind: symbolication, the local SDP→caps chain and the real loopback
-RTSP SDP→rtspsrc→depay chain are DONE. The file-based `sdpdemux` negative is
-superseded for the client model by the RTSP result, but is preserved as a
-negative. Next bounded step, only if a later wake has time: an RTSP
-*record/ANNOUNCE server* path (the opposite direction, where a service ingests
-far-end SDP) built from loopback sources this plant starts — `gst-rtsp-server`
-is not installed and the available RTSP server is playback-oriented; no
-external probe is allowed. Keep the benign, fixed and ASan controls and the
+RTSP SDP→rtspsrc→depay chain are DONE, now for all three advisory depays
+(L8/L16/L24). The file-based `sdpdemux` negative is superseded for the client
+model by the RTSP result, but preserved. The RTSP *record/ANNOUNCE server* lane
+(a service ingesting far-end SDP) is assessed and **deferred, not blocked**:
+`gst-rtsp-server` is not installed, host-package installation plus a custom
+ANNOUNCE media factory is outside a bounded wake, and GStreamer's SDP→caps
+mapping is already covered by `run_sdp.sh` independently of direction. No
+external probe was made. Keep the benign, fixed and ASan controls and the
 explicit caveat that the standalone SDP harness renamed the structure name,
 whereas the RTSP harness needs no such step. Witness: replay
 `lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`,
 `lab/gst2shell-src/run_live.sh`, `lab/gst2shell-src/run_real.sh`,
-`lab/gst2shell-src/run_sdp.sh`, `lab/gst2shell-src/run_rtsp.sh` and the gdb
-debuginfod symbolications. Would change my mind: a caps clamp at <=64 in
+`lab/gst2shell-src/run_sdp.sh`, `lab/gst2shell-src/run_rtsp.sh`,
+`lab/gst2shell-src/run_rtsp_family.sh` and the gdb debuginfod symbolications.
+Would change my mind: a caps clamp at <=64 in
 primary sources (checked: none), a failed replay or lost control, evidence
 that a real pipeline cannot deliver `encoding-params`, or evidence that the
 corrupted pointer value is content-controllable (which would need a fresh,

