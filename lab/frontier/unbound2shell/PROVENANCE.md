@@ -67,7 +67,8 @@ buffer), `rrdef.h:29` (`LDNS_MAX_DOMAINLEN 255`), `rrdef.h:249`
 (`sldns/sbuffer.c:19-42`) and the pinned buffer primitives
 (`sldns/sbuffer.h:189`, `206`, `270`, `343`, `411`, `423`, `433`, `462`) with
 `#line` attribution; the `sldns_buffer_write_at` memcpy is verbatim except
-for the `assert()` that `NDEBUG` removes in a shipping build. `driver.c`
+for the `assert()` at `sldns/sbuffer.h:435` that `NDEBUG` removes. The harness
+compiles with `NDEBUG`; shipping release flags are UNKNOWN. `driver.c`
 supplies stub `rrset_get_rdata`, `query_dname_tolower`, `ds_get_digest_algo`
 and `secalgo_ds_digest`, and sets the attacker-controlled name/RDATA lengths
 to the pinned wire maxima. It uses a static stdio buffer so the non-ASan run

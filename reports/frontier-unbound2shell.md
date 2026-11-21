@@ -54,7 +54,8 @@ sldns_buffer_flip(b);
 `sldns_buffer_new(cfg->msg_buffer_size)` at pinned `daemon/worker.c:2436` with
 default `cfg->msg_buffer_size = 65552` at pinned `util/config_file.c:176`.
 Both writes are `memcpy` at pinned `sldns/sbuffer.h:436`; its only capacity
-check is `assert()`, absent under `NDEBUG`, which a shipping build defines.
+check is an `assert()` at `:435`, compiled out under `NDEBUG`. The harness
+compiles with `NDEBUG`; the shipping release flags are UNKNOWN, not asserted.
 The name and RDATA lengths are bounded separately by the wire format —
 `LDNS_MAX_DOMAINLEN 255` (`sldns/rrdef.h:29`) and
 `LDNS_MAX_RDFLEN 65535` (`sldns/rrdef.h:249`) — but their sum is not bounded
