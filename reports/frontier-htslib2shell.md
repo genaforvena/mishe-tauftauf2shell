@@ -5,10 +5,15 @@
 ESTABLISHED on verbatim-pinned HTSlib 1.23.1: ASan reports `READ of size 8` at
 `cram/cram_codecs.c:1378` and `WRITE of size 8` at `:1388`, 8 bytes past a
 4096-byte `block_by_id` region (rung 3, observed under ASan; the zero redzone
-is what makes the write fire). The unsanitized pinned library instead
-OOB-reads adjacent-junk pointer `0x1011` (frontier plain build) / `0x61`
-(witness parser build) at `:1378` and takes the `if (b) return 0` early-out
-at `:1379`, so it performs NO pointer write (rung 1, sink-level).
+is what makes the write fire). In the file-derived `codec_id=1` / index-513
+lane, the unsanitized pinned library instead OOB-reads adjacent-junk pointer
+`0x1011` (frontier plain build) / `0x61` (witness parser build) at `:1378` and
+takes the `if (b) return 0` early-out at `:1379`, so that lane performs NO
+pointer write (rung 1, sink-level). The separate file-derived `codec_id=2` /
+index-514 lane lands on a NULL OOB slot in the plain build and DOES store a
+pointer at `:1388` (`crafted2.cram` sha256 `540714e2…`, gdb breakpoint HIT,
+witness #1053 re-observed from its own build), but the stored value is the
+allocator's, not chosen; rung 4 stays INSTRUMENTED.
 Rung 4 is INSTRUMENTED only: the author-only `realfile`/`parserpath` lanes now
 drive a real CRAM v4 file and the parser path to the OOB sink, but there is no
 web-facing consumer, chosen pointer value, live neighbour object, control-flow
@@ -95,13 +100,21 @@ from the pinned tarballs with no network access.
 
 - **Rung 1 (sink-level, unsanitized)** — the plain pinned 1.23.1 build runs
   the real `cram_decoder_init`/`cram_xpack_get_block` path to completion with
-  no sanitizer. The OOB slot at index 513 reads an adjacent-heap junk pointer
-  (`0x1011` in the frontier plain build, a glibc chunk-size field; `0x61` in
-  the witness's independent parser build) at `:1378` BEFORE any write. That
-  non-NULL value takes the `if (b) return 0` early-out at `:1379`; the plain
-  build performs no OOB write. The real-file lane later faults at
-  `cram_codecs.c:1422` dereferencing that junk pointer (exit 139); no chosen
-  byte or pointer is claimed.
+  no sanitizer. In the `codec_id=1` / index-513 lane the OOB slot reads an
+  adjacent-heap junk pointer (`0x1011` in the frontier plain build, a glibc
+  chunk-size field; `0x61` in the witness's independent parser build) at
+  `:1378` BEFORE any write. That non-NULL value takes the `if (b) return 0`
+  early-out at `:1379`; that lane performs no OOB write and the real-file
+  `crafted.cram` later faults at `cram_codecs.c:1422` dereferencing the junk
+  pointer (exit 139). A separate file-derived lane, `codec_id=2` from swapping
+  the BF/QS record-map order (`crafted2.cram`, sha256
+  `540714e2735a96d9c47242409da490baa6c4e9ba8c0718aada4a64d3d2bf97ac`), puts
+  index 514 on the NULL user-data slot of the following heap chunk: the
+  `:1379` guard passes and the plain, unsanitized build DOES store a freshly
+  allocated `cram_block *` at `:1388` (gdb breakpoint HIT, witness #1053
+  re-observed). No chosen byte or pointer is claimed in either lane; rung 4
+  stays INSTRUMENTED (the live CIGAR neighbour is overwritten but its
+  consumed-order ceiling is recorded in `realfile/NOTES.md` §§7–8).
 - **Rung 2 (accounting)** — the real dispatch assigned `codec_id=1`, giving
   cache index 513 into a 512-slot array; the harness printed the exact
   `512+codec_id=513 vs 512 slots` accounting.
