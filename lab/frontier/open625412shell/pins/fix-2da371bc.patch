@@ -1,0 +1,43 @@
+From 2da371bcdaadeb23051635a60e38f31039af9fd8 Mon Sep 17 00:00:00 2001
+From: Niels Beier <niels.beier@o6-automation.com>
+Date: Mon, 11 May 2026 13:21:15 +0200
+Subject: [PATCH] fix(server): migrate samplingMonitoredItems in
+ TransferSubscriptions
+
+Operation_TransferSubscription() copies the UA_Subscription struct with
+memcpy but only migrates monitoredItems, notificationQueue, and
+retransmissionQueue. The samplingMonitoredItems list was not re-initialized
+in the new subscription, leaving stale le_prev backpointers from items
+with samplingType==PUBLISH pointing into the freed old subscription struct.
+When UA_MonitoredItem_unregisterSampling() calls LIST_REMOVE, it writes
+to freed memory (heap-use-after-free).
+
+Add migration of samplingMonitoredItems to the new subscription after
+the point of no return, matching the pattern used for monitoredItems.
+
+Internal Vulnerability Advisory: open62541-SA-2026-0015
+Co-authored-by: Abhinav Agarwal <abhinavagarwal1996@gmail.com>
+---
+ src/server/ua_services_subscription.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/server/ua_services_subscription.c b/src/server/ua_services_subscription.c
+index ecec4b151bc..9ec6b40523b 100644
+--- a/src/server/ua_services_subscription.c
++++ b/src/server/ua_services_subscription.c
+@@ -549,6 +549,15 @@ Operation_TransferSubscription(UA_Server *server, UA_Session *session,
+     }
+     sub->monitoredItemsSize = 0;
+ 
++    /* Move over the samplingMonitoredItems and adjust the backpointers */
++    LIST_INIT(&newSub->samplingMonitoredItems);
++    UA_MonitoredItem *smon, *smon_tmp;
++    LIST_FOREACH_SAFE(smon, &sub->samplingMonitoredItems, sampling.samplingListEntry, smon_tmp) {
++        LIST_REMOVE(smon, sampling.samplingListEntry);
++        LIST_INSERT_HEAD(&newSub->samplingMonitoredItems, smon,
++                         sampling.samplingListEntry);
++    }
++
+     /* Move over the notification queue */
+     TAILQ_INIT(&newSub->notificationQueue);
+     UA_Notification *nn, *nn_tmp;
