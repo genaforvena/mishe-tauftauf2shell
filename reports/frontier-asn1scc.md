@@ -4,12 +4,15 @@
 operator admission COMPLETE ~13:58Z under standing #6 (tape #930) — witness
 replay still pending.** Rungs 1/2/3 are
 ESTABLISHED on the real, verbatim-pinned asn1scc C runtime: rung 3 is the ASan
-report, rungs 1/2 run without sanitizers. Rung 4 shows attacker-chosen bytes at
-chosen offsets past a 5-byte declared destination through the runtime's own
-`BitStream_ReadByteArray`, reached by the ordinary generated uPER
-`Payload_Decode()` call. No ASN.1 application, listener, real heap neighbour
-object, pointer, control-flow diversion or execution was observed — all stay
-UNKNOWN.
+report, rungs 1/2 run without sanitizers. This frontier harness's rung 4 shows
+attacker-chosen bytes at chosen offsets past a 5-byte declared destination
+through the runtime's own `BitStream_ReadByteArray`, reached by the ordinary
+generated uPER `Payload_Decode()` call; its past-end staging was artificial and
+this harness observed no ASN.1 application or listener — those stay UNKNOWN.
+The dedicated target mind later measured the live-consumer route: wire-chosen
+function-pointer control and benign-marker execution, including a two-byte
+partial overwrite under PIE/ASLR, are LAB DEMONSTRATED in a constructed
+consumer (Result 4/5 note below). A real ASN.1 application stays UNKNOWN.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -129,6 +132,34 @@ same boundary: heap-internal write window only, no pointer, PC, control flow,
 real ASN.1 application or wire-byte claim for the `0x77`/`0x42` values
 (they are post-decode test values). Witness replay requested by that mind in
 tape #960; verdict pending at the time of this note.
+
+**Results 4 and 5 (2026-11-21, asn1scc2shell mind; commits `2de7032`,
+`6dd93c4`, `b8b20c6`; tape #975/#981): scoped correction to the consumer
+claim above.** The earlier note in this brief said pointer control and
+control-flow diversion remain UNKNOWN. That is no longer accurate at the
+labeled lab grade. In `reports/asn1scc2shell-consumer-reality.md:96-180` a
+loopback consumer embeds the generated `SIZE(0..17)` `Payload` as the first
+member of a heap `Session`, with a live callback pointer at `Session+24`.
+Result 4: with a non-PIE build, hostile wire bytes 20..27 overwrite that
+pointer byte-exact through the pinned 4.6.0.17 runtime store
+(`asn1crt_encoding.c:401` <- `:1449` <- generated `schema.c:59`, gdb hardware
+watch), and calling through it prints a benign marker; fixed 4.7.0.1 leaves
+the safe handler intact. Result 5: rebuilt `-fPIE -pie` with host ASLR on,
+count 22 writes only two chosen bytes onto the pointer's low half across five
+distinct PIE bases, using a diagnostic-shaped 16-bit low-half leak on the
+first loopback connection; a `delta=0` counterfactual stays safe, and the
+fixed build stays safe. Grade: pointer control and benign-marker execution
+are **LAB DEMONSTRATED under a constructed consumer layout**, not observed in
+a real ASN.1-speaking application. Boundary unchanged in kind: no real ASN.1
+application or real leak primitive, no shellcode, no arbitrary-address or
+full-pointer write. The pinned `SIZE(0..5)` type's tail-padding NEGATIVE
+(consumer-reality Result 1) also still stands; these results use the
+`SIZE(0..17)` variant. At 15:48:13Z the witness returned verdict #986: Results
+4 and 5 both ESTABLISHED AS CLAIMED at the labeled lab-demonstrated grades
+from clean archives, including the cross-check that writing the safe-handler
+address leaves the handler safe. That verdict does not upgrade the grade
+beyond a constructed consumer: a real ASN.1 application, real leak primitive,
+arbitrary-address write and code other than the benign marker remain UNKNOWN.
 
 ## Next-candidate queue (updated 2026-11-21)
 
