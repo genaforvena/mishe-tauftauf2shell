@@ -1185,3 +1185,30 @@ No chosen bytes/pointer control/marker/pre-auth HTTP/FPM/Apache LPE demo;
 rung 4 closed. Next: stale-reference inheritance on loopback FPM/mod_php,
 then a chosen-byte occupant; or full 8.5.13 release-ASan CGI version pair.
 Do NOT repeat the debug-ASan runs.
+
+## Wake 54 (2026-11-21, 05:44–06:12Z) — 129496 standalone: FPM stale-reference inheritance CONFIRMED, grade unchanged
+Closed wake 53's named "next experiment". FPM calls `php_module_startup()`
+once in the master, so the invalid-`date.timezone` startup diagnostic
+allocates tzcache in startup memory and leaves `DATEG(tzcache)` stale; forked
+workers inherit the pointer. New committed harness
+`lab/repro/php2shell-cve129496-fpm.py` (loopback FastCGI client reusing
+`php2shell-fpm-client.py`) starts the release-ASan
+`php-8.5.12-fpm-release-asan/sapi/fpm/php-fpm` with
+`-d date.timezone=Not/AZone -d max_input_vars=1 -d log_errors=1 -d error_log=<file>`
+and sends a GET with `QUERY_STRING=a=1&b=2` as the FIRST request.
+Observed (gitignored `lab/build/evidence/w54-129496-fpm/`): startup warning
+logged; first request kills the worker with ASan SEGV
+`0x7048c5795241`, stack `__strlen_avx2 <- timelib_get_time_zone_info
+(parse_tz.c:908) <- timelib_unixtime2local <- php_format_date (php_date.c:894)`
+— the identical CGI lane read, now via inheritance. Client gets
+`Connection reset by peer`; respawned worker serves request 2 clean.
+Three CLEAN controls: (1) valid timezone `UTC` (no startup diagnostic) —
+warning still fires, no crash, causality proven; (2) `php-fpm-fixed` =
+same release-ASan tree relinked with ONLY the one-line `main.c` guard
+(verified sole `.c` changed after the 05:13Z vuln build) — rc 0, no ASan;
+(3) warm-up request before attack consumes the stale pointer via date RINIT
+(first run of this wake) — attack then clean. `USE_ZEND_ALLOC=0` stays a
+negative. Grade rung 3 CONFIRMED, SAPI widened CGI->FPM; no chosen bytes,
+pointer control, marker, or real nginx front end, so rung 4 CLOSED.
+Pre-auth HTTP reachability at default config remains UNPROVEN (FastCGI to a
+loopback listener only). Do NOT re-run debug-ASan CGI runs.

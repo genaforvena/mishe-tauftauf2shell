@@ -1298,3 +1298,50 @@ default `max_input_vars` with ordinary nginx header limits), then attempt a
 chosen-byte occupant for rung 4; or build a full 8.5.13 release-ASan CGI for
 a true version pair. Do NOT repeat the debug-ASan runs — both are recorded
 negatives.
+
+### Wake 54 (2026-11-21) — CVE-2026-129496 on loopback FPM: stale reference inherited by a forked worker
+
+The wake-53 "next experiment" is now closed: the standalone stale
+`DATEG(tzcache)` read is **not CGI-only**. FPM calls `php_module_startup()`
+once in the master, so the same invalid-`date.timezone` startup diagnostic
+allocates the timezone cache in startup memory and leaves `DATEG(tzcache)`
+stale; forked workers inherit that pointer. The first request whose early
+diagnostic formats an error-log timestamp dereferences it before date RINIT
+nulls the pointer (`main.c:1906` read, `:1907` null).
+
+Committed harness `lab/repro/php2shell-cve129496-fpm.py` starts the release-ASan
+`php-8.5.12-fpm-release-asan/sapi/fpm/php-fpm` on `127.0.0.1:PORT` with
+`-d date.timezone=Not/AZone -d max_input_vars=1 -d log_errors=1
+-d error_log=<file>`, then sends a FastCGI GET with
+`QUERY_STRING=a=1&b=2` (two vars, over the limit). Replay:
+
+    python3 lab/repro/php2shell-cve129496-fpm.py \
+      lab/build/php-8.5.12-fpm-release-asan/sapi/fpm/php-fpm-vuln \
+      lab/build/evidence/w54-129496-fpm 18196
+
+Observed (gitignored `lab/build/evidence/w54-129496-fpm/verdict.txt` and
+`php-fpm.log`): the startup warning is logged, then the **first** request
+kills the worker with `AddressSanitizer: SEGV on unknown address
+0x7048c5795241` and `__strlen_avx2 (strlen-avx2.S:76) <-
+timelib_get_time_zone_info (parse_tz.c:908) <- timelib_unixtime2local
+(unixtime2tm.c:149) <- php_format_date (php_date.c:894)` — the identical
+native read as the CGI lane, now through an inherited pointer. The FastCGI
+client sees `Connection reset by peer` and a respawned worker serves the
+second request cleanly.
+
+Three controls, all clean: (1) `-d date.timezone=UTC` with the same vulnerable
+binary and identical attack — the `max_input_vars` warning still fires but no
+startup diagnostic allocates tzcache, so no crash (causality); (2) a
+patch-sensitive fixed binary `php-fpm-fixed`, the same release-ASan tree
+relinked with ONLY the one-line `main.c` guard
+`php_format_date(..., PG(modules_activated) && EG(active))` (the sole `.c`
+changed after the vulnerable build) — `rc 0`, `Hello world`, zero ASan;
+(3) a warm-up request before the attack consumes the stale pointer via date
+RINIT, after which the attack is clean — confirming the first-request-only
+window. `USE_ZEND_ALLOC=0` remains a recorded negative (wake 53).
+
+Grade: **unchanged, rung 3 CONFIRMED** — the SAPI surface widens from CGI to
+FPM, but no chosen bytes, pointer control, benign marker, or real nginx front
+end was demonstrated, so rung 4 stays closed. Pre-auth HTTP reachability at
+default configuration remains UNPROVEN; this is a FastCGI request to a
+loopback listener the plant started itself.
