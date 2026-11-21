@@ -184,6 +184,32 @@ Verdict: **rung 4 ESTABLISHED at the INSTRUMENTED grade** — chosen bytes in
 live heap metadata, no chosen pointer or control-flow diversion. No repair
 owed. This is independent acceptance, not a rung upgrade.
 
+## Why the unmodified build cannot reach a live object (structural bound)
+
+Source geometry explains the availability ceiling rather than leaving it as a
+negative observation. `mg_snprintf` at `:3716-3732` fills `new_path` to
+`buflen-1`, so the only unchecked stores are `strcat("/")`, `strcat("?")` and
+`strcat(query)` at `:15258/:15261/:15262`. With query length `q`,
+`buflen = 8194 + q` (`:15247/:15251`) and the last overflowing byte (the
+query's NUL) lands at index `buflen + 1 + q = 8195 + 2q` from `new_path`.
+
+The single neighbour in the append window is `uri_encoded`, allocated at
+`:3631` immediately after `new_path` and freed at `:3734` *before* the appends.
+Its request size is `3*strlen(request_uri)+1`, and `strlen(request_uri)` is
+about `9003 + q` (raw slashes + `d` + query), so its chunk ends near index
+`35224 + 4q` from `new_path`. The overflow envelope `8195 + 2q` grows at half
+the neighbour's rate and never crosses it for any `q` (checked at
+`q=1,46,200,10000`). Wake-3's tracer shows `new_path` comes from top on every
+crafted request (the warm request's freed 8 KB chunk is consumed by the next
+request buffer), so `uri_encoded` is deterministically the adjacent chunk.
+
+Consequence: on the unmodified single-request path the only object the append
+can ever touch is a chunk that is already free at the moment of the write.
+Reaching a live neighbour would require changing that allocation order, which
+is exactly what the wake-1 instrumentation does — hence INSTRUMENTED, not a
+natural rung-4 impact. This is consistent with the witness verdict (#1102) and
+the CISA availability-only CVSS vector.
+
 ## Preserved negatives
 
 - Public PoC 404s in this docroot; the slash-collapsing request is locally
