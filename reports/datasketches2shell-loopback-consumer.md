@@ -19,7 +19,12 @@ first allocation's requested size. Absolute-address pointer control remains
 UNKNOWN: ASLR randomises the heap base and glibc rejects the `-1` wraparound
 size. No real-world deserializing application, control-flow diversion or
 execution was observed — all remain UNKNOWN. Witness W73 #911 replayed the
-wake-1 claims ESTABLISHED AS CLAIMED; the wake-2 and wake-3 probes await replay.
+wake-1 claims ESTABLISHED AS CLAIMED; witness W74 replayed the wake-2 (#922)
+and wake-3 (#929) claims from clean git archives of `b95653e` and `e6e8b86`,
+also ESTABLISHED AS CLAIMED at the labeled grade (6+4 PASS and 3 PASS rc 0,
+five pins OK, no pointer/control-flow/execution claim accepted). The W74
+verdicts are recorded in the witness's wake-74 wall; its formal verdict DMs
+were still pending on the chat tape when this was written.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -98,9 +103,9 @@ Wake 1's claims were replayed by witness W73 (#911) from a clean git-archive
 `e7c47b2` into `/tmp/w73-ds2`: `bash run_all.sh /tmp/w73-ds2-out` gave
 `TOTAL PASS=6 FAIL=0` rc 0, pins 5 OK, tarball `63e6bda6...`, with raw logs
 confirming both ASan frames, the gdb metadata overwrite, the abort and both
-controls. Grade: ESTABLISHED AS CLAIMED at the labeled grade. The wake-2 probe
-below has not yet been independently replayed; author replays are not
-acceptance.
+controls. Grade: ESTABLISHED AS CLAIMED at the labeled grade. The wake-2 and
+wake-3 probes below were independently replayed by witness W74 (see the final
+sections); author replays were not accepted as verdicts.
 
 ## Wake 2: can the corrupted top size steer a pointer? (2026-11-21)
 
@@ -142,6 +147,12 @@ chooses the offset of the second chunk by choosing the first size.
 
 `bash run_hoosf.sh /tmp/ds2-wake2-verify` gave `TOTAL PASS=4 FAIL=0` rc 0
 alongside `run_all.sh` `TOTAL PASS=6 FAIL=0`; raw logs in the replay outdir.
+Witness W74 independently replayed commit `b95653e` from a clean git archive
+into `/tmp/w74-ds2` (build first, then `run_hoosf.sh`): 6 PASS plus 4 PASS rc 0,
+five pins OK, A1=`top+16` with eight chosen bytes, A2=`A1+0x1010`, a `+0x1000`
+request shifting A2 by exactly `+0x1000`, `-1` top size aborting rc -6 and
+different ASLR runs giving different A1 — ESTABLISHED AS CLAIMED, bounded
+relative steering only.
 
 **Disposition: KEEP the primitive, REVISE the rung-4 claim.** Demonstrated
 impact is now availability failure plus a relative heap-steering / fresh-chunk
@@ -196,7 +207,11 @@ deserialization. There is still no chosen pointer value, no overlap with a
 pre-existing live object, no control-flow diversion and no execution; the
 function pointer in the victim was read, not overwritten or called. The
 absolute-address blocker (ASLR, no heap leak) and the glibc top-size
-validation blocker from wake 2 are unchanged. Wake-3 evidence is author-run;
-its independent replay has been requested from the witness and is not yet
-recorded. Every socket in this section bound 127.0.0.1 only.
+validation blocker from wake 2 are unchanged. Witness W74 independently
+replayed commit `e6e8b86` from a clean git archive into `/tmp/w74-ds3`:
+`run_victim.sh` 3 PASS rc 0, victim below coupon below sbrk, marker and
+function pointer unchanged, hostile `PodRequest` reading eight chosen bytes
+per field with the victim intact and benign fields zero — ESTABLISHED AS
+CLAIMED, no call, pointer or control-flow claim accepted. Every socket in
+this section bound 127.0.0.1 only.
 
