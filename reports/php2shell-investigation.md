@@ -755,7 +755,14 @@ variants are preserved as negatives in the status ledger. Grade: **rung 3
 CONFIRMED** for this lane on 8.4.27 FPM — confirmed memory corruption,
 patch-sensitive, no rung-4 control claimed. Pre-auth reachability is
 application-dependent and not claimed. CVE-2026-129474 was later tested at
-rung 3 in wakes 29–30 (section below); 129182 and 129289 remain untested.
+rung 3 in wakes 29–30 (section below). CVE-2026-129182 has a committed
+loopback FPM harness (`lab/repro/php2shell-cve129182-fpm.py`) replaying its
+vendor regression case; both the debug and the finished 8.5.12 release ASan
+FPM builds preserve a negative (vendor diagnostics reproduced, zero ASan
+markers in malloc-backed, ZendMM and control modes — see the status ledger),
+so its grade is **UNKNOWN** and no rung 3/4 or pre-auth claim is made. The
+8.5.13 fixed release build is unbuilt, so patch sensitivity is untested.
+129289 remains untested (smuggling, not memory corruption).
 
 ASan attributes the report to the FPM **worker** PID, which is shared across
 requests: the worker that logged it (3153888; witness replay 3168299) served

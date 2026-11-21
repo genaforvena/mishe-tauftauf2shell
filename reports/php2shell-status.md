@@ -731,6 +731,7 @@ incomplete fixes for CVE-2026-109619, this target's original bug;
 CVE-2026-129496 (Date cache) was already in both reports as the native bug.
 Only 129481 was tested this wake (one bounded experiment).
 
+
 Replay: `python3 lab/repro/php2shell-cve129481-fpm.py
 lab/build/php-8.4.27-fpm-asan/sapi/fpm/php-fpm <outdir> <port>`
 (`--control` for the benign-close control). Loopback only, one static FPM
@@ -855,3 +856,48 @@ args (`#0 ...: str_repeat(...)`), not in the trampoline; a huge
 earlier `sink()` call (`t6`) still produced correct args. Only the vendor's
 exact `$a.$a` CONCAT case produced the wrong-argument read. These are timing
 and layout constraints, not erased failures.
+
+**Wake 31 (2026-11-20, IN PROGRESS at this checkpoint) — CVE-2026-129182
+bounded harness, debug-build NEGATIVE preserved, release-build replay owed.**
+Claim source: NEWS of the pinned 8.5.13 tree names GHSA-2fjv-p558-g82m
+(CVE-2026-129182) "Use-after-free via repopulation of last_fatal_error_backtrace
+global after shutdown"; its vendor regression
+`sapi/fpm/tests/fatal-error-backtrace-request-reset.phpt` fires a fatal in
+req1 (`eval("class RequestReset {}; class RequestReset {}")`,
+`fatal_error_backtraces=1`) and sends req2 with FastCGI
+`PHP_VALUE=date.timezone=invalid`, applied before request startup while
+shutdown is still flagged. Fix diff: 8.5.13 `Zend/zend.c:1511` gates the dtor
+and `:1540` gates `zend_fetch_debug_backtrace` on `EG(active)`; 8.5.12
+`:1509`/`:1534` are unconditional.
+Harness `lab/repro/php2shell-cve129182-fpm.py` (loopback static FPM,
+`--control`, `--use-malloc`), build support in `lab/php2shell/build-fpm.sh`
+and `lab/php2shell/build-fpm-release.sh`; commit `c5eb6a8`.
+On the **debug** ASan FPM build
+(`lab/build/php-8.5.12-fpm-asan`, `--enable-debug`),
+`lab/build/evidence/w31-cve129182/vulnerable-shape.log` reproduces the
+vendor case exactly — `Cannot redeclare class RequestReset` with a Stack
+trace, then `PHP Warning: PHP Request Shutdown: Invalid date.timezone value
+'invalid', using 'UTC' instead`, body `UTC` — with **zero ASan output**.
+Causal limitation, not a grade: `Zend/zend_execute_API.c:455` only honours
+`ZEND_ASAN_FORCE_FAST_SHUTDOWN` when `ZEND_DEBUG` is OFF; the debug build
+takes the graceful path that dtors and UNDEFs the global at
+`zend_execute_API.c:309-310`. CLI destructor-fatal probes on both 8.5.12 and
+8.5.13 debug ASan builds (`lab/build/evidence/w31-cli-probe/`) are likewise
+clean and preserved as negatives. Wake 45 completed the release replay: the
+8.5.12 release ASan FPM binary (`lab/build/php-8.5.12-fpm-release-asan/sapi/fpm/php-fpm`,
+`Debug Build => no`) was finished by compiling the one remaining TU
+`ext/opcache/jit/zend_jit.lo` with `-g0 -O0` in the build-dir Makefile; every
+other TU kept `-g -O1`, ASan/UBSan instrumentation was unchanged and the
+harness disables opcache. `python3 lab/repro/php2shell-cve129182-fpm.py <bin>
+lab/build/evidence/w31-cve129182 18190 --use-malloc` reproduces both vendor
+diagnostics exactly — req1 fatal `Cannot redeclare class RequestReset` with a
+Stack trace, req2 `PHP Warning: PHP Request Shutdown: Invalid date.timezone
+value 'invalid', using 'UTC' instead`, body `UTC` — but `VERDICT=CLEAN_NO_UAF`
+with zero ASan markers. The same clean verdict holds with
+`ZEND_ASAN_FORCE_FAST_SHUTDOWN=1` exported in the parent environment, in
+ZendMM mode (no `--use-malloc`), and with `--control`. Evidence
+`lab/build/evidence/w31-cve129182/{vulnerable-malloc,vulnerable-shape,control.log,build-8.5.12-resume6.log}`;
+the earlier debug-build `vulnerable-shape.log` is intact. Grade stays
+**UNKNOWN**: the advisory claim is not reproduced under fast shutdown on
+this host. No rung 3, rung 4 or pre-auth claim. The 8.5.13 fixed release
+build is still unbuilt (324 objects), so patch sensitivity is untested.
