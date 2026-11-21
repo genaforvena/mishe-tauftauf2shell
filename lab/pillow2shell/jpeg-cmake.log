@@ -1,0 +1,66 @@
+CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- The C compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- CMAKE_BUILD_TYPE = Release
+-- VERSION = 2.1.5.1, BUILD = 20261121
+-- 64-bit build (x86_64)
+-- CMAKE_INSTALL_PREFIX = /tmp/pw2-w1/jpegasan
+-- CMAKE_INSTALL_BINDIR = bin (/tmp/pw2-w1/jpegasan/bin)
+-- CMAKE_INSTALL_DATAROOTDIR = share (/tmp/pw2-w1/jpegasan/share)
+-- CMAKE_INSTALL_DOCDIR = share/doc/libjpeg-turbo (/tmp/pw2-w1/jpegasan/share/doc/libjpeg-turbo)
+-- CMAKE_INSTALL_INCLUDEDIR = include (/tmp/pw2-w1/jpegasan/include)
+-- CMAKE_INSTALL_LIBDIR = lib (/tmp/pw2-w1/jpegasan/lib)
+-- CMAKE_INSTALL_MANDIR = share/man (/tmp/pw2-w1/jpegasan/share/man)
+-- Shared libraries enabled (ENABLE_SHARED = 1)
+-- Static libraries disabled (ENABLE_STATIC = 0)
+-- 12-bit JPEG support disabled (WITH_12BIT = 0)
+-- Arithmetic decoding support enabled (WITH_ARITH_DEC = 1)
+-- Arithmetic encoding support enabled (WITH_ARITH_ENC = 1)
+-- TurboJPEG API library enabled (WITH_TURBOJPEG = 1)
+-- TurboJPEG Java wrapper disabled (WITH_JAVA = 0)
+-- In-memory source/destination managers enabled (WITH_MEM_SRCDST = 1)
+-- Emulating libjpeg API/ABI v6.2 (WITH_JPEG7 = 0, WITH_JPEG8 = 0)
+-- libjpeg API shared library version = 62.3.0
+-- Compiler flags = -fsanitize=address -fno-omit-frame-pointer -g -O1 -O3 -DNDEBUG
+-- Linker flags =  
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of size_t
+-- Check size of size_t - done
+-- Check size of unsigned long
+-- Check size of unsigned long - done
+-- Performing Test HAVE_BUILTIN_CTZL
+-- Performing Test HAVE_BUILTIN_CTZL - Success
+-- Performing Test RIGHT_SHIFT_IS_UNSIGNED
+-- Performing Test RIGHT_SHIFT_IS_UNSIGNED - Failed
+-- Performing Test INLINE_WORKS
+-- Performing Test INLINE_WORKS - Success
+-- INLINE = __inline__ __attribute__((always_inline)) (FORCE_INLINE = 1)
+-- Performing Test HAVE_THREAD_LOCAL
+-- Performing Test HAVE_THREAD_LOCAL - Success
+-- THREAD_LOCAL = __thread
+-- Performing Test HAVE_VERSION_SCRIPT
+-- Performing Test HAVE_VERSION_SCRIPT - Success
+-- Linker supports GNU-style version scripts
+-- CMAKE_EXECUTABLE_SUFFIX = 
+-- SIMD extensions: None (WITH_SIMD = 0)
+-- FLOATTEST = no-fp-contract
+-- RPM architecture = x86_64, DEB architecture = amd64
+-- Configuring done (0.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/pw2-w1/jpeg-build

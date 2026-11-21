@@ -1,0 +1,71 @@
+open (64, 64) RGBA
+=================================================================
+==3651590==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50c000000840 at pc 0x7bb6613417f1 bp 0x7fff3b1f7cc0 sp 0x7fff3b1f7cb0
+WRITE of size 1 at 0x50c000000840 thread T0
+    #0 0x7bb6613417f0 in null_convert /tmp/pw2-w1/libjpeg-turbo-2.1.5.1/jdcolor.c:391
+    #1 0x7bb66137641c in sep_upsample /tmp/pw2-w1/libjpeg-turbo-2.1.5.1/jdsample.c:98
+    #2 0x7bb661353341 in process_data_simple_main /tmp/pw2-w1/libjpeg-turbo-2.1.5.1/jdmainct.c:313
+    #3 0x7bb6613314c1 in jpeg_read_scanlines /tmp/pw2-w1/libjpeg-turbo-2.1.5.1/jdapistd.c:298
+    #4 0x7bb661472a97 in ImagingJpegDecode src/libImaging/JpegDecode.c:252
+    #5 0x7bb6614165dd in _decode src/decode.c:132
+    #6 0x55099b  (/usr/bin/python3.12+0x55099b) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #7 0x5499b4 in PyObject_Vectorcall (/usr/bin/python3.12+0x5499b4) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #8 0x5d710e in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x5d710e) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #9 0x5d55ea in PyEval_EvalCode (/usr/bin/python3.12+0x5d55ea) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #10 0x608732 in PyRun_StringFlags (/usr/bin/python3.12+0x608732) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #11 0x6b40dd in PyRun_SimpleStringFlags (/usr/bin/python3.12+0x6b40dd) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #12 0x6bcda0 in Py_RunMain (/usr/bin/python3.12+0x6bcda0) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #13 0x6bc7bc in Py_BytesMain (/usr/bin/python3.12+0x6bc7bc) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #14 0x7bb66422a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x7bb66422a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x657a04 in _start (/usr/bin/python3.12+0x657a04) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+
+0x50c000000840 is located 0 bytes after 128-byte region [0x50c0000007c0,0x50c000000840)
+allocated by thread T0 here:
+    #0 0x7bb6646fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7bb66141604e in _setimage src/decode.c:226
+    #2 0x55099b  (/usr/bin/python3.12+0x55099b) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #3 0x5499b4 in PyObject_Vectorcall (/usr/bin/python3.12+0x5499b4) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #4 0x5d710e in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x5d710e) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #5 0x5d55ea in PyEval_EvalCode (/usr/bin/python3.12+0x5d55ea) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #6 0x608732 in PyRun_StringFlags (/usr/bin/python3.12+0x608732) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #7 0x6b40dd in PyRun_SimpleStringFlags (/usr/bin/python3.12+0x6b40dd) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #8 0x6bcda0 in Py_RunMain (/usr/bin/python3.12+0x6bcda0) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #9 0x6bc7bc in Py_BytesMain (/usr/bin/python3.12+0x6bc7bc) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+    #10 0x7bb66422a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x7bb66422a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x657a04 in _start (/usr/bin/python3.12+0x657a04) (BuildId: 337d65cf00021797985cc9f77c0cc334a9fbeb38)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/pw2-w1/libjpeg-turbo-2.1.5.1/jdcolor.c:391 in null_convert
+Shadow bytes around the buggy address:
+  0x50c000000580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fa
+  0x50c000000600: fa fa fa fa fa fa fa fa fd fd fd fd fd fd fd fd
+  0x50c000000680: fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa fa
+  0x50c000000700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50c000000780: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x50c000000800: 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa fa fa
+  0x50c000000880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3651590==ABORTING

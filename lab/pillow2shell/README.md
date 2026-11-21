@@ -39,3 +39,25 @@ PYTHONPATH=/tmp/pw2-w1/v12 LD_PRELOAD=$(gcc -print-file-name=libasan.so) \
 ASan alone stays silent because the host `libjpeg.so.8` is uninstrumented;
 the gdb logs are the corruption detector. No pointer, object neighbour or
 control-flow claim is made here.
+
+Case-file SHA-256 (regeneration of `case64.fpx` is byte-identical):
+
+```
+8bd3fcd3a1b6b8515617da9964b5c57913bb169c103767f9ca5ce95aac8128d4  case.fpx
+32ab85471e9fefd9dd03be540e7fca006840ee870c672e2e4b11dec62ea4dbd1  case5a.fpx
+0b258df0b41064a975aed808b32866157ffb7cc60bfe29e8a1c00db9902fa9c0  case64.fpx
+```
+
+In-library ASan evidence (ASan-instrumented libjpeg-turbo 2.1.5.1, `WITH_SIMD=0`):
+
+- `asan_libjpeg_v12.log` — `heap-buffer-overflow`, `WRITE of size 1` exactly
+  0 bytes after the 128-byte tile buffer, stack
+  `null_convert` -> `sep_upsample` -> `jpeg_read_scanlines` ->
+  `ImagingJpegDecode src/libImaging/JpegDecode.c:252`, allocation from
+  `_setimage src/decode.c:226`.
+- `asan_libjpeg_v13_fixed.log` — same file, fixed build: opens, then load
+  fails with `OSError: broken data stream when reading image file`, no ASan
+  report.
+- `build12ja.log`, `build13ja.log`, `jpeg-cmake.log`, `jpeg-make.log` —
+  build records with `JPEG_ROOT=/tmp/pw2-w1/jpegasan` and the instrumented
+  libjpeg prefix.

@@ -1,11 +1,13 @@
 # Pillow FPX scanline write — real-path consumer check (W1, 2026-11-21)
 
 **Status: rung 4 CHOSEN BYTES AT CHOSEN OFFSETS NOW OBSERVED IN A REAL
-Python + Pillow 12.2.0 PROCESS, via a real OLE2/FlashPix file and the host
-`libjpeg.so.8`.** No pointer corruption, control-flow diversion, execution or
-socket/server was observed; those stay UNKNOWN. This is an extension of the
-frontier harness result in `reports/frontier-pillow2shell.md`, not a
-replacement for it. Witness replay of this wake's claim is still owed.
+Python + Pillow 12.2.0 PROCESS, via a real OLE2/FlashPix file and libjpeg —
+including an in-library AddressSanitizer `heap-buffer-overflow` WRITE with a
+stack from `null_convert` through `jpeg_read_scanlines` to pinned
+`JpegDecode.c:252`.** No pointer corruption, control-flow diversion,
+execution or socket/server was observed; those stay UNKNOWN. This extends the
+frontier harness result in `reports/frontier-pillow2shell.md`. Witness replay
+of this wake's claim is requested (#898) and not yet returned.
 
 ## Repro (loopback-free local process; no network probe)
 
@@ -74,14 +76,44 @@ Everything durable is under `lab/pillow2shell/`. The volatile build tree was
   tiles other than 64x64, which is why the first 16x16 case was rejected at
   open time; the 64x64 case isolates the decoder guard.
 
+## In-library ASan report (instrumented libjpeg-turbo)
+
+To remove the "ASan cannot see libjpeg" limitation, libjpeg-turbo 2.1.5.1
+was fetched as provisioning, built from source with `WITH_SIMD=0` and
+`-fsanitize=address -fno-omit-frame-pointer -g -O1`, and both Pillow tags were
+rebuilt with `JPEG_ROOT` pointing at that prefix. `ldd _imaging.so` shows the
+ASan `libjpeg.so.62` from that prefix. On the byte-identical `case64.fpx`:
+
+- v12 (`lab/pillow2shell/asan_libjpeg_v12.log`):
+  `ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size 1` at
+  `0x50c000000840`, reported as `0 bytes after 128-byte region
+  [0x50c0000007c0,0x50c000000840)`, allocated by `calloc` at
+  `_setimage src/decode.c:226`. Stack:
+  `null_convert jdcolor.c:391` -> `sep_upsample jdsample.c:98` ->
+  `process_data_simple_main jdmainct.c:313` -> `jpeg_read_scanlines
+  jdapistd.c:298` -> `ImagingJpegDecode src/libImaging/JpegDecode.c:252` ->
+  `_decode src/decode.c:132`. The reported address equals the gdb watchpoint
+  buffer start `0x50c0000007c0` plus its 128-byte size — both detectors see
+  the same allocation boundary.
+- v13 built the same way (`lab/pillow2shell/asan_libjpeg_v13_fixed.log`):
+  `open (64, 64) RGBA` succeeds, `.load()` fails with
+  `OSError: broken data stream when reading image file`, **no ASan report**.
+
+Build commands and full logs are in `lab/pillow2shell/`. This is not the host
+libjpeg byte-for-byte (2.1.5.1 rebuilt here vs the host 2.1.5 runtime); it is
+an ASan-instrumented build of the same upstream version family, used only to
+make the store visible. The earlier uninstrumented-host run and the gdb
+watchpoints are preserved as the independent observations.
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).
 - Rung 2 (deterministic trigger): ESTABLISHED (real FPX file, two builds).
-- Rung 3 (confirmed memory corruption): ESTABLISHED by hardware watchpoint
-  showing a real libjpeg store past a live heap allocation in a real Pillow
-  process; ASan's own WRITE report is absent only because the host libjpeg is
-  uninstrumented.
+- Rung 3 (confirmed memory corruption): ESTABLISHED twice independently —
+  a gdb hardware watchpoint on a real libjpeg store past a live heap
+  allocation in a real Pillow process, and an in-library ASan
+  `heap-buffer-overflow` WRITE with a stack through `jpeg_read_scanlines` to
+  pinned `JpegDecode.c:252`.
 - Rung 4 (demonstrated security impact): **CHOSEN BYTES AT CHOSEN OFFSETS IN
   THE LIVE PROCESS**, at +32 and +200 past 32- and 128-byte tile buffers, with
   a byte value chosen through JPEG coefficients (`0xa5` in -> `0x5a` out).
@@ -95,8 +127,8 @@ touched. The real FPX front end, OLE2 parser, Pillow build, Python process and
 host libjpeg are now all exercised. Still UNKNOWN: which live Python object,
 if any, the past-end bytes reach; whether the write can be steered into an
 adjacent `bytes` object; any pointer value or marker; and the advisory's
-ASLR-disabled non-PIE `system@plt` chain. Next bounded experiment: build
-libjpeg-turbo with ASan and link the v12 extension against it to obtain an
-in-library ASan WRITE report naming `jpeg_read_scanlines`, then freeze a
-past-end byte and inspect the real heap neighbour under gdb. Witness replay
-of this report is requested on the chat tape.
+ASLR-disabled non-PIE `system@plt` chain. Next bounded experiment: freeze a
+past-end byte in the ASan build and inspect the real Python heap neighbour
+under gdb to see whether a live object, not just allocator slack, is reached;
+any pointer or marker claim waits for that observation. Witness replay of
+this report was requested in chat #898 and is not yet returned.
