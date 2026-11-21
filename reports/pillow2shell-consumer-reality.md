@@ -203,11 +203,10 @@ pattern) and an optional 7th (JPEG height). The encoder writes sample value
 quality 100, `subsampling=0`, `optimize=True`. `case_ptr64.fpx` (SHA-256
 `cf7787a35747ae88b65f22cf8187f8e7012812f9739cd7985d00365dd15c3bc6`, 64-row
 JPEG, 3188-byte embedded stream) carries `0x11` at row offsets 128-135 (first
-past-end bytes), `0x33` at 176-183 (the object's `ob_refcnt`), the little-endian
-valid address `60 d2 a2 00 00 00 00 00` (`0xa2d260`) at 184-191 (the object's
-`ob_type`), and `0x44` at 192-199. `firstrow.log` shows those bytes in the real
-process scanline. The uniform-fill invocation is unchanged: regenerating
-`case64.fpx` still gives
+past-end bytes), `0x5a` elsewhere except the little-endian valid address
+`60 d2 a2 00 00 00 00 00` (`0xa2d260`) at 184-191 (the object's `ob_type`).
+`firstrow.log` shows distinct chosen bytes in the real scanline. The
+uniform-fill invocation is unchanged: regenerating `case64.fpx` still gives
 `0b258df0b41064a975aed808b32866157ffb7cc60bfe29e8a1c00db9902fa9c0`.
 
 In the plain v12.2.0 build, the 128-byte tile buffer is again at `0xd32bb0`
@@ -216,9 +215,10 @@ and the following 992-byte chunk at `+176` is a live `PyUnicodeObject`
 watchpoint on `buffer+184` fires
 `Old value = 192 '\300'`, `New value = 96 '`'` at
 `0x00007ffff7333f98` in `libjpeg.so.8`, stack `jpeg_read_scanlines` ->
-`ImagingJpegDecode src/libImaging/JpegDecode.c:252` (`ptr_store.log`). After
-the row, `ob_refcnt` reads `0x3333333333333333`, `ob_type` reads the chosen
-valid `0xa2d260`, and the following word reads `0x4444444444444444`.
+`ImagingJpegDecode src/libImaging/JpegDecode.c:252`. In the earlier 8-row case
+`case_ptr.fpx` (`pattern2.hex`), whose pattern also sets `0x33` at 176-183 and
+`0x44` at 192-199, the post-row readback is `ob_refcnt=0x3333333333333333`,
+`ob_type=0xa2d260`, following word `0x4444444444444444`.
 
 Causal isolation used the same byte-identical `case_ptr64.fpx` in three gdb
 runs. After the first decoder call, the full 896-byte past-end span
@@ -238,6 +238,20 @@ afterwards:
   remaining overwritten span was still corrupt (`restore_all.log`,
   `restore_type.log`, `full_restore_clean.log` in the volatile tree; the
   conclusion is that a partial restore is not a control).
+
+A second valid-pointer differential pins the mechanism. `case_long.fpx`
+(SHA-256 `be85c9a647b43318547591d35fc60310befe2505b08d6fb1728512eb6331c05f`,
+`pattern_long.hex`) is decoded byte-for-byte identical to `case_ptr64.fpx`
+except bytes 184-191: `20 bf a3 00 00 00 00 00` = `0xa3bf20`
+(`&PyLong_Type`, a non-GC type) instead of `0xa2d260`
+(`&PyCode_Type`, a GC-tracked type). `full_restore_long.gdb` performs the same
+full-span snapshot/restore and re-applies only that field:
+`full64_restore_long.log` prints `LOAD_OK` and exits normally. Under identical
+isolation the GC-tracked chosen type faults. This is consistent with the
+chosen type's GC flag changing how finalization traverses an object that was
+originally allocated as non-GC; that mechanism is an INFERENCE, the
+differential and the fault are observed. It remains a type-confusion fault,
+not a call to attacker-chosen code.
 
 Without a debugger, 5/5 plain v12.2.0 runs of `case_ptr64.fpx` print
 `LOAD_OK`, then exit rc 134 with `corrupted size vs. prev_size`

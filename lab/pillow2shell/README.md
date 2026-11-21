@@ -159,7 +159,9 @@ New artifacts: `case_ptr64.fpx` (SHA-256
 calibrator), `firstrow.gdb` / `firstrow.log`, `ptr_store.gdb` / `ptr_store.log`,
 `full_restore_clean.gdb` / `full64_restore_clean.log`,
 `full_restore_type.gdb` / `full64_restore_type.log`, `crash_disasm.log`,
-`run64_[1-5].log`, `plain_v13_pattern_control.log`.
+`run64_[1-5].log`, `plain_v13_pattern_control.log`,
+`case_long.fpx` / `pattern_long.hex`, `full_restore_long.gdb` /
+`full64_restore_long.log`.
 
 Regenerate the case (Pillow 12.2.0 must be on PYTHONPATH for JPEG encoding):
 
@@ -199,3 +201,18 @@ type-confusion fault, not execution of chosen code: no marker, PC control or
 chosen-code call was observed. Plain non-gdb runs: 5/5 `LOAD_OK` then rc 134
 `corrupted size vs. prev_size`; plain fixed 13.0.0 raises `OSError`, rc 1.
 W3 (#926) and W4 are new author evidence awaiting witness replay.
+
+Type-flag differential (same isolation, byte-identical file except the 8
+pointer bytes): regenerate with `pattern_long.hex` to get `case_long.fpx`
+(SHA-256 `be85c9a647b43318547591d35fc60310befe2505b08d6fb1728512eb6331c05f`),
+whose chosen `ob_type` is `0xa3bf20` (`&PyLong_Type`, non-GC) instead of
+`0xa2d260` (`&PyCode_Type`, GC-tracked):
+
+```
+PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x full_restore_long.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_long.fpx").load(); print("LOAD_OK")'
+```
+
+It prints `LOAD_OK` and exits cleanly, while the GC-tracked pointer faults
+under the same restore. The GC-flag mechanism is an inference; the
+differential is observed. No chosen-code call, marker or PC control.
