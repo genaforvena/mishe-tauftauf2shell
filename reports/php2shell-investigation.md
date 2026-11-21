@@ -1033,3 +1033,66 @@ pre-auth claim or RCE. Grade stays **rung 3 CONFIRMED** for this lane, now
 with demonstrated HTTP reachability on a real web server; no other lane's
 grade changes.
 
+
+### Wake 51 — new adjacent lane: CVE-2026-129501 DOM XML serialization double-free (rung 3 CONFIRMED)
+
+8.5.13's NEWS (lines 82 and 85) named an unexamined adjacent lane:
+GHSA-x8r7-mg3g-74hg / CVE-2026-129501, "Double free during DOM XML
+serialization", next to "Fix error paths in
+`dom_xml_serializing_a_document_node()`". The exact 8.5.12 → 8.5.13
+`ext/dom/xml_serializer.c` diff is two hunks:
+
+1. `dom_xml_ns_prefix_map_add()`: when a candidates list has
+   `GC_REFCOUNT(list) > 1` it is duplicated with `zend_array_dup()`. The fix
+   adds `DOM_Z_UNOWNED(val, Z_PTR_P(val))` to every value in the duplicate,
+   because a descendant does not own the prefix. Without it, both the
+   original list and the duplicate carry the `DOM_Z_OWNED` flag and each
+   `efree()`s the same prefix at map destruction.
+2. `dom_xml_serializing_a_document_node()`: the old code set
+   `node->children = NULL` around `xmlSaveDoc()` and restored it afterwards.
+   A `TRY` bailout mid-save (a stream wrapper can reach the real document)
+   returned before the restore, leaving the real document mutated. The fix
+   serializes a shallow `xmlDoc declaration_doc` copy with NULL children.
+
+Build and fixed-side method (honest limits). No prior build had ext/dom.
+`lab/php2shell/build-dom.sh` produced ONE dom-enabled 8.5.12 ASan/UBSan CLI
+(`lab/build/php-8.5.12-asan-dom`, `--disable-all --enable-debug
+--enable-cli --enable-dom --with-libxml`, clang, libxml 2.9.14 with the
+`LIBXML_VERSION < 21300` compat path, bundled lexbor). The first `make`
+reached the tool's 1500-second deadline at 524 objects; a 28-second resume
+completed it. A full 8.5.13 dom build was not started. Instead the fixed
+variant is this same binary relinked after replacing `ext/dom/xml_serializer.c`
+with the byte-identical 8.5.13 file (verified with `diff -q`); the claim is
+therefore patch-sensitivity to the real 8.5.13 fix, not a version-pair
+build comparison. Both binaries are preserved as `sapi/cli/php-vuln` and
+`php-fixed` in that gitignored build directory.
+
+Harness `lab/repro/php2shell-cve129501-dom.py` runs three local CLI cases
+with `USE_ZEND_ALLOC=0` and `ASAN_OPTIONS=detect_leaks=0`: the vendor
+regression body from `ext/dom/tests/modern/xml/GHSA-x8r7-mg3g-74hg.phpt`,
+an XMLDocument-only shape (the second vendor case, no HTML5/lexbor parser),
+and a clean single-namespace control. Raw logs and
+`verdict.txt` are in gitignored `lab/build/evidence/w51-129501-dom/`.
+
+- vendor case: affected rc=1 `ASAN_DOUBLE_FREE`, fixed rc=0 `CLEAN`; the
+  fixed output matches the vendor `--EXPECT--` byte for byte.
+- XMLDocument-only case: affected rc=1 `ASAN_DOUBLE_FREE`, fixed rc=0 `CLEAN`.
+- control: `CLEAN` on both builds.
+- ASan stack (affected): `dom_xml_ns_prefix_map_destroy`
+  (`xml_serializer.c:126`) ← `dom_xml_ns_prefix_map_dtor` (`:143`) ←
+  `dom_xml_serialize_element_node` (`:1181`) inside
+  `Dom\XMLDocument::saveXml()`. A 4-byte prefix region is freed twice by
+  the same function — fix hunk 1.
+- Allocator condition measured: with the default ZendMM (no
+  `USE_ZEND_ALLOC=0`) the same input exits 0 with correct output and ASan
+  is silent (`xml_only.zendmm.log`) — the pooled allocator hides the second
+  free. No ASan claim is made for the default allocator, and no claim that
+  the underlying double free is absent there.
+
+This repro exercises fix hunk 1 only; the stream-wrapper bailout path of
+hunk 2 was not tested. Grade **rung 3 CONFIRMED** for this lane: an observed
+double free in the affected serializer source, patch-sensitive to the real
+fixed source. No chosen-byte write, pointer control, benign marker,
+pre-auth reachability or web-server path was demonstrated, so rung 4 is
+not claimed and no other lane's grade changes.
+

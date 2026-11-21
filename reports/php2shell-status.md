@@ -1070,3 +1070,34 @@ demonstrated HTTP reachability; no other lane's grade changes. Wake 48's
 "HTTP mapping UNKNOWN" is now CLOSED; wake 49's Apache negative stands but
 is no longer the last word on real-server reachability.
 
+
+## Wake 51 (2026-11-21 04:08–) — new lane CVE-2026-129501, rung 3 CONFIRMED
+Named next experiment from wake 50. 8.5.13 NEWS:82/85 names GHSA-x8r7-mg3g-74hg
+/ CVE-2026-129501 "Double free during DOM XML serialization" and
+"Fix error paths in dom_xml_serializing_a_document_node()". Exact 8.5.12→8.5.13
+`ext/dom/xml_serializer.c` diff = two hunks: (1) `dom_xml_ns_prefix_map_add`
+marks values in a `zend_array_dup`'d candidates list `DOM_Z_UNOWNED` so the two
+list copies do not both `efree()` the same prefix; (2) document serialization
+uses a shallow `xmlDoc declaration_doc` copy instead of NULLing the real
+document's children around `xmlSaveDoc()` (a TRY bailout mid-save left it NULL).
+ONE full build, `lab/build/php-8.5.12-asan-dom` (dom-enabled 8.5.12 ASan/UBSan
+CLI, clang, libxml 2.9.14 compat path, bundled lexbor) via the committed
+`lab/php2shell/build-dom.sh`; first make hit a 1500s tool deadline at 524
+objects, a 28s resume finished. The "fixed" binary is that same binary relinked
+after swapping in the byte-identical 8.5.13 `xml_serializer.c` (`diff -q`
+clean) — a real-fix patch-sensitivity comparison, NOT a full 8.5.13 build.
+Binaries kept as `sapi/cli/php-vuln` / `php-fixed`.
+Committed harness `lab/repro/php2shell-cve129501-dom.py`; evidence in gitignored
+`lab/build/evidence/w51-129501-dom/verdict.txt` = CONFIRMED:
+- vendor phpt body: affected rc=1 ASAN_DOUBLE_FREE; fixed rc=0 CLEAN, output
+  matches the vendor `--EXPECT--` byte for byte.
+- XMLDocument-only shape (no lexbor): affected rc=1 ASAN_DOUBLE_FREE; fixed
+  rc=0 CLEAN. Clean control: CLEAN on both.
+- ASan: 4-byte prefix chunk freed twice at `dom_xml_ns_prefix_map_destroy`
+  (`xml_serializer.c:126`) ← `:143` ← `dom_xml_serialize_element_node:1181`,
+  under `Dom\XMLDocument::saveXml()` — fix hunk 1.
+- Needs `USE_ZEND_ALLOC=0`; default ZendMM exit 0, correct output, ASan silent
+  (`xml_only.zendmm.log`) — pooled allocator hides the second free. No ASan
+  claim under ZendMM. Fix hunk 2's stream-wrapper path NOT tested.
+Honest limits: no chosen-byte write, pointer control, marker, pre-auth or web
+reachability. Grade **rung 3 CONFIRMED** for this lane only; no other lane changed.
