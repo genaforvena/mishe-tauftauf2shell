@@ -110,3 +110,12 @@ lab/frontier/openjpeg2shell/poc-pad.j2k
 # (build.sh, ack_overflow.c, run.sh, chosen_readback.sh, pins and PROVENANCE stay tracked)
 lab/frontier/wolfssl2shell/build/
 lab/frontier/wolfssl2shell/out/
+
+# ClassiCube2Shell harness: extracted pinned trees and local build output
+# (pins, harness sources, generator, run.sh and PROVENANCE stay tracked)
+lab/frontier/classicube2shell/src/
+lab/frontier/classicube2shell/build/
+lab/frontier/classicube2shell/out/
+lab/frontier/classicube2shell/out-*/
+lab/frontier/classicube2shell/asm_*
+lab/frontier/classicube2shell/*.log

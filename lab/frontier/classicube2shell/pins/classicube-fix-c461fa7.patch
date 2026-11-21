@@ -1,0 +1,85 @@
+From c461fa759f218e3c6bda4642b9af79a98dc84a43 Mon Sep 17 00:00:00 2001
+From: UnknownShadow200 <unknownshadow200@gmail.com>
+Date: Thu, 19 Nov 2026 07:39:04 +1100
+Subject: [PATCH] Fix some invalid PNGs still being parsed
+
+Thanks to deusrex.ai / Deus Rex research team from Cyrex for responsibly disclosing the vulnerabilities)
+---
+ .gitignore   |  1 +
+ src/Bitmap.c |  6 ++++--
+ src/Errors.h |  3 +++
+ src/Logger.c | 10 ++++++----
+ 4 files changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index 2fd7b452f2..d1ad81b198 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -167,6 +167,7 @@ ee_log.txt
+ *.bin
+ *.elf
+ *.exe
++*.EXE
+ 
+ # Visual C++ cache files
+ ipch/
+diff --git a/src/Bitmap.c b/src/Bitmap.c
+index 43e79acabb..f64d5ac78c 100644
+--- a/src/Bitmap.c
++++ b/src/Bitmap.c
+@@ -439,14 +439,16 @@ cc_result Png_Decode(struct Bitmap* bmp, struct Stream* stream) {
+ 
+ 			bmp->width  = (int)Mem_ReadU32_BE(tmp + 0);
+ 			bmp->height = (int)Mem_ReadU32_BE(tmp + 4);
+-			if (bmp->width  < 0 || bmp->width  > PNG_MAX_DIMS) return DecodeFailure(bmp, PNG_ERR_TOO_WIDE);
+-			if (bmp->height < 0 || bmp->height > PNG_MAX_DIMS) return DecodeFailure(bmp, PNG_ERR_TOO_TALL);
++			if (bmp->width <= 0 || bmp->height <= 0) return DecodeFailure(bmp, PNG_ERR_TOO_SMALL);
++			if (bmp->width  > PNG_MAX_DIMS)          return DecodeFailure(bmp, PNG_ERR_TOO_WIDE);
++			if (bmp->height > PNG_MAX_DIMS)          return DecodeFailure(bmp, PNG_ERR_TOO_TALL);
+ 
+ 			bitsPerSample = tmp[8]; colorspace = tmp[9];
+ 			if (bitsPerSample == 16) return DecodeFailure(bmp, PNG_ERR_16BITSAMPLES);
+ 
+ 			rowExpander = Png_GetExpander(colorspace, bitsPerSample);
+ 			if (!rowExpander) return DecodeFailure(bmp, PNG_ERR_INVALID_COL_BPP);
++			if (bmp->scan0)   return DecodeFailure(bmp, PNG_ERR_MULTI_HDRS);
+ 
+ 			if (tmp[10] != 0) return DecodeFailure(bmp, PNG_ERR_COMP_METHOD);
+ 			if (tmp[11] != 0) return DecodeFailure(bmp, PNG_ERR_FILTER);
+diff --git a/src/Errors.h b/src/Errors.h
+index e198e5d551..eab363bd24 100644
+--- a/src/Errors.h
++++ b/src/Errors.h
+@@ -139,5 +139,8 @@ enum CC_ERRORS {
+ 	PNG_ERR_16BITSAMPLES = 0xCCDED071UL, /* Image uses 16 bit samples, which is unimplemented */
+ 	ERR_NO_NETWORKING    = 0xCCDED072UL, /* No working network connection */
+ 	ERR_NON_WRITABLE_FS  = 0xCCDED073UL, /* No writable filesystem detected */
++
++	PNG_ERR_TOO_SMALL    = 0xCCDED074UL, /* Image width/height is <= zero */
++	PNG_ERR_MULTI_HDRS   = 0xCCDED075UL, /* Image has more than one header */
+ };
+ #endif
+diff --git a/src/Logger.c b/src/Logger.c
+index 31f72eed24..4edd046cbe 100644
+--- a/src/Logger.c
++++ b/src/Logger.c
+@@ -72,13 +72,15 @@ static const char* GetCCErrorDesc(cc_result res) {
+ 
+ 	case PNG_ERR_INVALID_SIG:      return "Only PNG images supported";
+ 	case PNG_ERR_INVALID_HDR_SIZE: return "Invalid PNG header size";
+-	case PNG_ERR_TOO_WIDE:         return "PNG image too wide";
+-	case PNG_ERR_TOO_TALL:         return "PNG image too tall";
++	case PNG_ERR_TOO_WIDE:         return "Image too wide (>32768 pixels)";
++	case PNG_ERR_TOO_TALL:         return "Image too tall (>32768 pixels)";
+ 	case PNG_ERR_INTERLACED:       return "Interlaced PNGs unsupported";
+ 	case PNG_ERR_REACHED_IEND:     return "Incomplete PNG image data";
+-	case PNG_ERR_NO_DATA:          return "No image in PNG";
++	case PNG_ERR_NO_DATA:          return "No pixels in image";
+ 	case PNG_ERR_INVALID_SCANLINE: return "Invalid PNG scanline type";
+-	case PNG_ERR_16BITSAMPLES:     return "16 bpp PNGs unsupported";
++	case PNG_ERR_16BITSAMPLES:     return "16 bps PNGs unsupported";
++	case PNG_ERR_TOO_SMALL:        return "Image <= 0 pixels in size";
++	case PNG_ERR_MULTI_HDRS:       return "Image has more than one header";
+ 
+ 	case NBT_ERR_UNKNOWN:   return "Unknown NBT tag type";
+ 	case CW_ERR_ROOT_TAG:   return "Invalid root NBT tag";
