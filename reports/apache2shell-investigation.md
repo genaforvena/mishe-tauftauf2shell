@@ -783,6 +783,52 @@ L6_SUFFIX=long L6_NEXT_HEX=$(python3 -c "print('1b'*64)") \
   python3 l6-lane.py 2.4.68                     # 4/4 UBSan + 4/4 child SEGV
 ```
 
+### Adjacent lane L7 — CVE-2026-42535 mod_dav_fs state-directory access (06:22–06:26Z 21 Nov) — rung 2 only, premise corrected
+
+My wall's previous "next experiment" named CVE-2026-93546, a mod_dav_fs
+PROPPATCH namespace overflow affecting 2.4.0–2.4.68 and fixed in 2.4.69.
+That premise was false. No such CVE appears in any available source tree;
+the real mod_dav_fs entry is `CVE-2026-42535` at
+`httpd-2.4.69/CHANGES:123-131`, a path-handling issue affecting 2.4.67 and
+earlier and fixed in 2.4.68. The fix is in `modules/dav/fs/repos.c`:
+`dav_fs_get_resource()` now denies any resource whose leaf or parent
+directory is `DAV_FS_STATE_DIR` (`.DAV`), returning 403; the same commit
+also makes a DELETE race return 404. There is no overflow, no chosen bytes
+and no pointer-shaped write. The correction is recorded here rather than
+silently replacing the old lane.
+
+`l7-lane.py` drives the ASan/UBSan httpd builds already built for L2 (2.4.67,
+from `l2/install-2.4.67-asan`) and L6 (2.4.68, from
+`l6/install-2.4.68-asan`) over 127.0.0.1 only. It configures a DAV share,
+PUTs `/probe.txt`, PROPPATCHes a property to materialize the 12 KB DBM file
+`.DAV/probe.txt`, then PROPFINDs both `/.DAV` and `/.DAV/probe.txt`.
+
+Canonical differential (`logs/l7-2.4.67-combined.log`,
+`logs/l7-2.4.68-combined.log`): PUT 201 and PROPPATCH 207 on both; the
+state-dir PROPFINDs return **207 Multi-Status on 2.4.67** (the state dir and
+its property DB are directly addressable) and **403 Forbidden on 2.4.68**
+(fix denies). No child SEGV, no ABRT, no ASan or UBSan report on either
+build. Causal check: copying the 2.4.68 `repos.c` into the 2.4.67 tree and
+rebuilding only `mod_dav_fs.so` changed the 2.4.67 answers to 403; restoring
+the pristine source and module byte-for-byte (SHA256 `19f66847…` source,
+`8cf617dc…` .so) restored 207.
+
+Negative result preserved: on vulnerable 2.4.67, overwriting the whole
+`.DAV/probe.txt` DBM file with 12288 `A` bytes via PUT was accepted (204),
+and the following PROPPATCH/PROPFIND still returned 207 with no crash,
+ASan or UBSan report (`logs/l7-crash-probe.log`). The advisory's "potentially
+causing child process crashes" was not reproduced by that direct overwrite.
+
+**L7 is a rung-2 access-control differential only.** The changed state is a
+status code, not memory; no deterministic fault, no corruption, no chosen
+bytes or pointer control. Rung 4 is unreachable for this bug class and the
+main lane is unchanged.
+
+```
+cd lab/apache2shell
+python3 l7-lane.py 2.4.67 2.4.68    # state-dir PROPFIND: 207 vs 403
+```
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -812,7 +858,9 @@ ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy \
   ./l5-lane.py 2.4.68 2.4.69                    # L5: 4/4 child SEGV vs 0/4
 bash build-l6.sh                                # ASan builds with mod_charset_lite
 python3 l6-lane.py 2.4.68 2.4.69               # L6: UBSan index-8 vs clean control
+python3 l7-lane.py 2.4.67 2.4.68               # L7: state-dir PROPFIND 207 vs 403
 ```
+
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
 (`logs/`, `run/`) is gitignored; only scripts and this report are committed.
