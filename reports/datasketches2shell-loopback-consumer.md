@@ -47,12 +47,12 @@ the sketch has been destroyed.
   `CouponList-internal.hpp:116` -> `HllSketchImplFactory.hpp:101` ->
   `HllSketch-internal.hpp:63` -> `service.cpp:68`. The allocation stack names
   the coupon vector from `CouponList-internal.hpp:39`/`:110`. Log:
-  `lab/datasketches2shell/out/byte_asan.log`.
+  `byte_asan.log` in the replay outdir.
 - **Stream API in the service process**: same overflow through
   `std::istream::read` -> `common_defs.hpp:82` ->
   `CouponList-internal.hpp:162`, factory `:86`, public stream entry
   `HllSketch-internal.hpp:57`. This closes the previously UNKNOWN stream
-  copy path. Log: `out/stream_asan.log`.
+  copy path. Log: `stream_asan.log` in the replay outdir.
 - **Real allocator metadata (plain build, gdb)**: breakpoint at pinned
   `:116`, coupon data `p=0x555555596410`, glibc chunk header at `p-16` has
   `size=0x31`. Before the copy, the next chunk's `prev_size` at `p+32` is `0`
@@ -60,7 +60,7 @@ the sketch has been destroyed.
   library's own copy, `p+32` and `p+40` both read
   `0x5a5a5a5a5a5a5a5a` and 32 bytes dumped from `p+24` are all `0x5a`.
   This is chosen bytes over real allocator metadata, not a harness page.
-  Log: `out/gdb_heap.log`; script `gdb_heap.gdb`.
+  Log: `gdb_heap.log` in the replay outdir; script `gdb_heap.gdb`.
 - **Observed consequence**: hostile count 64, `SERVICE_DESERIALIZE
   rv=ok estimate=64.000010` followed by `malloc(): corrupted top size`,
   `service_rc=-6`. Benign count 2: `SERVICE_POSTALLOC ok byte=11`,
