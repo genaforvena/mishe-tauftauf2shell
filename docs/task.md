@@ -1545,6 +1545,82 @@ owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/rsyslog2shell-status.md` and the pinned hashes in
 `lab/frontier/rsyslog2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~07:5xZ: ProxySQL2Shell (CVE-2026-48773 / GHSA-58ww-865x-grpr)
+
+Claim source: maintainer advisory
+<https://github.com/sysown/proxysql/security/advisories/GHSA-58ww-865x-grpr>,
+published 2026-05-26 by `renecannao`, CWE-787, Critical. CVSS 3.1 **9.8**
+`AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`. The advisory reports ASan-confirmed
+heap corruption on real daemons on both ordinary frontend paths — MySQL
+`:6033` at `lib/mysql_data_stream.cpp:665`, PostgreSQL `:6133` at
+`lib/PgSQL_Data_Stream.cpp:534` — and a stock Docker-image crash (`exit=139`)
+through the optional ClickHouse/MySQL-style listener. It claims no code
+execution and says the primitive "should be treated as potentially
+exploitable memory corruption unless proven otherwise". Affected
+`>= 2.0.18, <= 3.0.8`; patched `3.0.9`; tested source in the advisory `v3.0`
+branch commit `9cc20a8775f6c194335a940ed0ca12001166522a`; upstream fix
+`1cb2ecc17a0206bc2bed9090d5d7fab121f2798e` bounds the second `recv()` by the
+remaining queue capacity (`s-4` MySQL, `s-5` PgSQL) and calls `shut_soft()`.
+
+Claimed primitive: at tag `v3.0.8`, `include/MySQL_Data_Stream.h:30` and
+`include/PgSQL_Data_Stream.h:16` pin `QUEUE_T_DEFAULT_SIZE 32768`.
+`MySQL_Data_Stream::read_from_net()` (`:643-671`) reads four bytes, copies the
+declared 24-bit length into the pinned struct
+(`include/proxysql_structs.h:928-930`, `u_int pkt_length:24, pkt_id:8;`) and
+executes `recv(fd, queue_w_ptr(queueIN)+4, Hdr.pkt_length, 0)` at `:665`.
+`PgSQL_Data_Stream::read_from_net()` (`:504-541`) reads five bytes; with type
+byte 0 it takes `buff[0..3]` as a big-endian 32-bit length and executes
+`recv(fd, queue_w_ptr(queueIN)+5, length, 0)` at `:534`. Both declared length
+and second-read bytes are client-chosen and both sinks run before
+authentication or packet validation. The PostgreSQL frontend must be
+configured; the MySQL frontend is the ordinary listener. Adapter builds,
+allocator and shipping flags are UNKNOWN on any host here.
+
+Frontier's harness (`lab/frontier/proxysql2shell/run.sh`) executes the four
+verbatim pinned first-read blocks under `#line` directives: vulnerable
+`v3.0.8` (`mysql :643-671`, `pgsql :504-541`) and fixed `v3.0.9`
+(`mysql :651-689`, `pgsql :512-560`), with a synthetic in-memory `recv()`
+collaborator; no daemon, listener, socket or client is used. Rung 1: a
+100-byte packet leaves bytes past the queue untouched while MySQL declared
+65535 and PostgreSQL declared 100000 become the second `recv()` lengths;
+ASan is clean at exact capacity (32764 / 32763) and faults one byte above
+(32765 / 32764). Rung 2: vulnerable builds accept (`accepted=1 shut=0
+recv_calls=2`); fixed builds reject before the second recv (`rc=-1 accepted=0
+shut=1 recv_calls=1`) with the pinned `Oversized first packet ...` logs while
+still accepting the benign packet. Rung 3: ASan reports
+`heap-buffer-overflow`, `WRITE of size 65535` at pinned
+`lib/mysql_data_stream.cpp:665` and `WRITE of size 100000` at pinned
+`lib/PgSQL_Data_Stream.cpp:534`, with `malloc_usable_size()` 32768. Rung 4 is
+INSTRUMENTED only: in a separate guard-mapped plain build, chosen alternating
+stripes read back byte-exact at the logical queue boundary and sixteen bytes
+past it (`CHOSEN_MATCH=1`), 32771 bytes past for MySQL and 67237 for
+PostgreSQL; the queue was zeroed first, benign and fixed runs leave those
+offsets at zero. No pointer, saved return address, heap-metadata field,
+function pointer, control-flow diversion or marker execution was observed or
+attempted, and the guard mapping is instrumentation, not an upstream
+allocator property.
+
+Admitted by the operator ~07:5xZ under standing approval #6 on frontier's
+commit `3aea985`: the two-pane window (38, inner socket), registry entry and
+seed wall were live from frontier and capture-verified at 07:46Z. Operator
+replay ~07:5xZ from two clean `git archive HEAD` (`3aea985`) extractions into
+separate absolute directories: 53 PASS / 0 FAIL both times, raw trace
+`sha256=936fa128f01f1dd123b59b4b941310654d68cd5985449768b0d9ba51a8e77884`
+byte-identical between directories, to the working-tree replay and to the
+brief. Witness replay was requested in the handoff (#657); no verdict at
+admission. Cheapest next rung: build `v3.0.8` with `NOJEMALLOC=1 WITHASAN=1`,
+start it loopback-only with the MySQL frontend on 127.0.0.1:6033 and a
+PostgreSQL frontend on 127.0.0.1:6133, send the advisory's first packets and
+capture the real ASan frames, write sizes and queue allocation; repeat on
+`v3.0.9` for the guard. Only a pointer or control-flow observation would
+justify dropping the INSTRUMENTED label; if the stock daemon's allocator or
+read path lands the write in unusable poison, preserve that as a negative
+result. Wake trigger units and presentation stay owed from the person's
+full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-proxysql2shell.md`, seed status
+`reports/proxysql2shell-status.md` and the pins in
+`lab/frontier/proxysql2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
@@ -1951,6 +2027,27 @@ instrumentation timing artifact. All source and module bytes were restored
 (SHA256 `624f0c32…` source, `e657da06…` module). No chosen bytes, pointer
 control or rung-4 path; do not retry this trigger or those three variants.
 Reproduce with `cd lab/apache2shell && L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 python3 l8-lane.py 20`.
+
+Adjacent lane L9 (mod_auth_digest shared client-entry / auth-state corruption)
+is a ninth same-subsystem lane, graded rung 2: reproducible auth-state
+corruption with no confirmed memory corruption. The dossier's CVE-2026-73637
+is UNVERIFIED — 2.4.69's `CHANGES` records the change with no CVE number (drop
+RFC 2069 support, rewrite shared-memory and client-nonce handling). In 2.4.68
+`get_client()` returns an unlocked `client_entry*` into the APR RMM segment and
+stores it as `resp->client`; a challenge failure resets `nonce_count` and
+overwrites `last_nonce` while another child's `gc()` can free the same entry.
+The 2.4.69 fix removes `resp->client` and re-looks the entry up under
+`client_lock`. The committed `lab/apache2shell/l9-lane.py` oracle on loopback
+ASan 2.4.68/2.4.69 with `AuthType Digest`, `AuthDigestNcCheck On`,
+`AuthDigestNonceLifetime 0` gives 6/6 clean challenge→200 on both, but an
+unauthenticated request quoting the victim's opaque drops the 2.4.68 victim to
+0/6 (all 401) while 2.4.69 stays 6/6. A churn run (`L9_SHMEM=4096
+L9_CHURN=4 L9_VICTIMS=4 python3 l9-lane.py 15`) produced 1523 gc events on
+2.4.68 and no ASan report, child fault, chosen byte or failed victim —
+4529/4529 and 6616/6616 victim requests returned 200. No confirmed UAF,
+pointer control or rung-4 path; do not promote this to memory corruption.
+Reproduce with `cd lab/apache2shell && L9_CHURN=0 L9_VICTIMS=0 python3 l9-lane.py 1`
+(6/6 vs 0/6 oracle) and the report's reproduction block for the negative legs.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 

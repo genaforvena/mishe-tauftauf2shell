@@ -60,6 +60,7 @@ or inside local containers whose host ports bind only to loopback.
 | Unbound2Shell | [brief](../reports/frontier-unbound2shell.md), [status](../reports/unbound2shell-status.md) | raw pinned `validator/val_sigcrypt.c`, `sldns/sbuffer.{c,h}`, `config_file.c`, `worker.c`, `rrdef.h`, `val_secalgo.c` at tags `release-1.26.0` (affected), `release-1.26.1` (fixed) and fix commit `8c2e0fd6cc5b`; hashes and URLs in `lab/frontier/unbound2shell/PROVENANCE.md` | `bash lab/frontier/unbound2shell/run.sh <outdir>` extracts the verbatim pinned `ds_create_dnskey_digest()` (`:293-317`) under `#line` directives and compiles vulnerable, fix-commit and fixed-tag variants with stub collaborators under `NDEBUG`; gcc 13.3.0, `-O0 -g` | operator replay ~06:43Z from two clean `git archive HEAD` (1718991) extractions: 29 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`, byte-identical trace `sha256=05bf4ace988fc4fdc4d213674e1f30e85c739c170b47c5319cbfc2cd7f24f795`; rung 1 `written=65788 overflow=236`, rung 2 vulnerable `GUARD_REJECTED=0` vs both fixed `GUARD_REJECTED=1 rc=0`, rung 3 ASan `heap-buffer-overflow` `WRITE of size 65533` at pinned `sbuffer.h:436` from `val_sigcrypt.c:311`, rung 4 chosen RDATA bytes read back in the lab frame only. No resolver process, DNSKEY wire bytes, DNSSEC config or execution |
 | Janus2Shell | [brief](../reports/frontier-janus2shell.md), [status](../reports/janus2shell-status.md) | raw pinned `src/plugins/janus_recordplay.c` at tags `v1.4.2` (affected, sha256 `c06e9396…`) and `v1.4.3` (fixed, `745c4145…`) plus legacy `v0.16.2` / `v0.16.3`, fix commits `e55e2915…` and `c31cad97…`; hashes and URLs in `lab/frontier/janus2shell/PROVENANCE.md` | `bash lab/frontier/janus2shell/run.sh <outdir>` extracts the verbatim pinned parse blocks (`:669-670`, `:701-714`) under `#line` directives and compiles vulnerable, fixed and ASan variants with stub collaborators; gcc 13.3.0, `-O0 -g` | operator replay ~07:09Z from two clean `git archive HEAD` (dc1a4e1) extractions: 29 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`, byte-identical trace `sha256=c8568d26b07cac408da640b7e6d8347d1c43db3119274fafbfb73f3e41f9a21f`; rung 1 `overflow=486`, rung 2 fixed guard rejects, rung 3 ASan `WRITE of size 1986` at pinned `:707`, rung 4 chosen bytes and adjacent local in the lab frame plus canary abort. No live Janus or HTTP path; advisory availability-only preserved. |
 | Rsyslog2Shell | [brief](../reports/frontier-rsyslog2shell.md), [status](../reports/rsyslog2shell-status.md) | raw pinned `contrib/imhttp/imhttp.c` at tags `v8.2602.0` (affected, sha256 `4e4a9d2c…`) and `v8.2604.0` (fixed, `48f69a6f…`) plus fix `.patch` `acde2ba2…` (`f1935dd2…`); hashes and URLs in `lab/frontier/rsyslog2shell/PROVENANCE.md` | `bash lab/frontier/rsyslog2shell/run.sh <outdir>` extracts the verbatim pinned `auth_s` struct (`:71-77`) and `parse_auth_header()` (`:687-720`) under `#line` directives with the authentic libaprutil decode-length; gcc 13.3.0, `-O0 -g` | operator replay ~07:20Z from two clean `git archive HEAD` (`ba9a240`) extractions: 36 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`, byte-identical trace `sha256=fc9cd9bb…` |
+| ProxySQL2Shell | [brief](../reports/frontier-proxysql2shell.md), [status](../reports/proxysql2shell-status.md) | raw pinned `lib/mysql_data_stream.cpp` / `lib/PgSQL_Data_Stream.cpp` at tags `v3.0.8` (affected) and `v3.0.9` (fixed) plus headers `include/MySQL_Data_Stream.h`, `include/PgSQL_Data_Stream.h`, `include/MySQL_Protocol.h`, `include/proxysql_structs.h` and fix `.patch` `1cb2ecc…`; hashes and URLs in `lab/frontier/proxysql2shell/PROVENANCE.md` | `bash lab/frontier/proxysql2shell/run.sh <outdir>` extracts the four verbatim pinned first-read blocks under `#line` directives (mysql `:643-671`/`:651-689`, pgsql `:504-541`/`:512-560`) with a synthetic in-memory `recv()` collaborator; gcc 13.3.0, `-O0 -g` | operator replay ~07:5xZ from two clean `git archive HEAD` (`3aea985`) extractions: 53 PASS / 0 FAIL, byte-identical raw trace `sha256=936fa128…` |
 
 ### 2026-11-21 adjacent-lane replay addenda
 
@@ -134,6 +135,19 @@ or inside local containers whose host ports bind only to loopback.
   source and module bytes were restored byte-for-byte. Grade rung 1/2:
   suspected UAF with a reachable trigger, no confirmed corruption.
   `l8-lane.py` is tracked; raw `logs/` are gitignored.
+- **Apache2Root L9** (mod_auth_digest shared client-entry / auth-state
+  corruption): reuse the L3 ASan httpd installs (2.4.68 / 2.4.69) with
+  `modules/mod_auth_digest.so` loaded and run
+  `cd lab/apache2shell && L9_CHURN=0 L9_VICTIMS=0 python3 l9-lane.py 1`.
+  Both builds answer a clean Digest challenge→200 6/6; an unauthenticated
+  request quoting the victim's opaque leaves the 2.4.68 victim at 0/6 (all
+  401) against 6/6 on 2.4.69 — deterministic auth-state corruption. The churn
+  leg (`L9_SHMEM=4096 L9_CHURN=4 L9_VICTIMS=4 python3 l9-lane.py 15`) gives
+  1523/825 gc events and 4529/4529, 6616/6616 victim 200s with no ASan
+  report, child fault or chosen byte: rung 2 only, no confirmed UAF.
+  `l9-lane.py` is tracked; raw `logs/` are gitignored. The dossier CVE
+  (CVE-2026-73637) is UNVERIFIED — 2.4.69 `CHANGES` records the fix without a
+  CVE number.
 - **Freerdp2Shell wake 14**: no committed replay changed. On the live stock
   build from `verify_live.sh`, a scratch client-side delay after the second
   `SNDC_FORMATS` PDU lets FreeRDP's own `SNDC_QUALITYMODE` receive path log
@@ -195,6 +209,10 @@ or inside local containers whose host ports bind only to loopback.
   into separate absolute output directories with 36 PASS / 0 FAIL,
   `ALL CHECKS PASSED rc 0` and a byte-identical trace sha256 `fc9cd9bb…`
   (`reports/frontier-rsyslog2shell.md`).
+- **ProxySQL2Shell**: the clean `git archive HEAD` replay at `3aea985` ran twice
+  into separate absolute output directories with 53 PASS / 0 FAIL and a
+  byte-identical raw trace sha256 `936fa128…`
+  (`reports/frontier-proxysql2shell.md`).
 - **PHP2Shell wake 53 (CVE-2026-129496 / GHSA-gr4f-wgx5-jpfv)**: standalone
   stale-tzcache read, rung 3 CONFIRMED (no chosen bytes, rung 4 closed).
   Provision/build: patch-sensitive release-ASan 8.5.12 php-cgi pair in
@@ -549,6 +567,21 @@ zero-length heap allocation in a synthetic lab frame. No live rsyslog
 process, imhttp module, CivetWeb listener, HTTP request, shipping compile
 flags, caller-side pointer control or execution was demonstrated; witness
 replay was requested in the handoff and no verdict was in hand at admission.
+
+ProxySQL2Shell was handed off from frontier on 2026-11-21 ~07:46Z (handoff #658,
+commit `3aea985`) and admitted by the operator ~07:5xZ under standing approval
+#6. The two-pane window (38, inner socket), registry entry, seed wall and brief
+were already live and capture-verified; the charter, `docs/task.md`, README,
+seed status and this lane index are now updated. Wake trigger units and the
+presentation entry are owed from the person's full-flag sync
+(`docs/runtime-pin.md`), never a bare `mishe sync`. The harness executes the
+verbatim pinned `v3.0.8`/`v3.0.9` first-read blocks, so rungs 1/2/3 are on real
+upstream bytes; rung-4 chosen bytes land past the 32768-byte `queueIN` in a
+synthetic guard-mapped lab frame. No live ProxySQL daemon, frontend listener,
+stock allocator, PostgreSQL config gate, caller-side pointer control or
+execution was demonstrated; the advisory's real-daemon ASan frames and stock
+crash remain claims, and witness replay was requested (#657) with no verdict in
+hand at admission.
 
 ## Provisioning details
 
