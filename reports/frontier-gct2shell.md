@@ -1,13 +1,13 @@
 # Frontier brief — Grid Community Toolkit GSS-assist SSLv2 length underflow (Gct2Shell)
 
-**Status: new frontier find, pre-created two-pane window ready for operator
-admission (2026-11-21 ~10:4xZ).** Rungs 1/2/3 are ESTABLISHED in an extracted,
-verbatim-pin harness; rung 4 shows attacker-chosen bytes at a chosen offset in
-an instrumented collaborator layout only. No live gatekeeper/myproxy build,
-GSI handshake over a socket, stock allocator neighbour, pointer overwrite or
-execution was observed — those stay UNKNOWN. Both artifacts exist: this brief
-and an inner-socket two-pane `gct2shell` window. Admission is the operator's
-call; wake units and the presentation entry remain the person's full-flag sync.
+**Status: ADMITTED (operator commit `417a764`, tape #802/#803) and witness
+verdict ESTABLISHED AS CLAIMED with no grade change (tape #805, 2026-11-21
+10:48Z).** Rungs 1/2/3 are ESTABLISHED in an extracted, verbatim-pin harness;
+rung 4 is ESTABLISHED AS INSTRUMENTED chosen bytes at a chosen offset. No live
+gatekeeper/myproxy build, GSI handshake over a socket, stock allocator
+neighbour, pointer overwrite or execution was observed — those stay UNKNOWN.
+Both artifacts exist: this brief and the inner-socket `gct2shell` window.
+Wake units and the presentation entry remain the person's full-flag sync.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -83,8 +83,10 @@ gatekeeper or myproxy is **UNKNOWN**.
 ## Local harness evidence (10 PASS / 0 FAIL, replayed)
 
 Harness `lab/frontier/gct2shell/{gen_driver.py,run.sh}` plus `PROVENANCE.md`,
-`.gitignore` and eight pinned `src/` artifacts. `gen_driver.py` verifies every
-pin and copies the full function body (affected `:49-227`, fixed `:49-237`)
+`.gitignore` and eight pinned `src/` artifacts. `gen_driver.py` verifies the
+six driver-relevant pins (the parent duplicate and the 2019-tag cross-check
+are stored but not generator-checked) and copies the full function body
+(affected `:49-227`, fixed `:49-237`)
 verbatim under `#line`; the generator aborts on drift. From committed HEAD,
 `bash lab/frontier/gct2shell/run.sh <outdir>` prints **10 PASS / 0 FAIL**,
 `ALL CHECKS PASS rc 0`, with two five-run groups at
@@ -112,8 +114,22 @@ archived `run.sh` hash equals the working-tree hash.
 **Grade**: rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4 is
 INSTRUMENTED chosen-byte control at a chosen offset, not a live GSI
 demonstration. No listener, handshake through real GSSAPI, stock neighbour,
-pointer control or execution claim. This is a claim for the witness to replay,
-not acceptance.
+pointer control or execution claim. The witness independently replayed and
+accepted this grade (below); acceptance is still not a live-service claim.
+
+## Witness verdict (#805, 2026-11-21 10:48Z)
+
+Witness replayed from clean `git archive HEAD` at the admitted commit
+`417a764`: all eight `src/` pins and both generator digests matched,
+10 PASS / 0 FAIL rc 0 and identical trace digest. It parsed every `#line`
+block: 179 affected and 189 fixed copied lines byte-identical to the pinned
+sources, zero mismatches. ASan `WRITE of size 5` at `tokens_f_edf946b5:172`,
+zero bytes after a 3-byte region from `:162`; chosen `0x5a5b5c5d…` at `cp+5`;
+guard page faults; fixed build rejects record length 1 and is ASan-clean. gdb
+stopped at the verbatim `memcpy` on the guard case, not at harness scaffolding.
+Verdict: rungs 1/2/3 ESTABLISHED, rung 4 ESTABLISHED AS INSTRUMENTED, no grade
+change. One non-grade nit (six driver-relevant pins, not "every pin") is fixed
+above; no replay owed.
 
 ## Cheapest next experiment to move a rung
 
