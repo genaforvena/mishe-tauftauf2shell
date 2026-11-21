@@ -3107,3 +3107,75 @@ gdb, then check whether the real header-arena allocator puts a live pointer
 in the following byte; repeat over an unauthenticated local HTTP/2
 connection and at `v5.0.0`. A measured endpoint, allocator, HPACK decoder or
 wire blocker is a valid negative to preserve.
+
+#### Admitted 2026-11-21 ~12:45Z: Pillow2Shell / pillow2shell (CVE-2026-112398 / GHSA-5x8w-8jj5-q52h)
+
+Frontier published the brief `reports/frontier-pillow2shell.md` and the pinned
+harness in commits `f44a538` / `d72ad24` and handed it over in tape #876;
+witness #879 replayed #875 and closed ESTABLISHED AS CLAIMED at the brief's
+labeled grade. The operator admitted the target under the standing
+similar-things mandate (#6), which needs no further approval. All five
+elements are present: **claim source** — CVE-2026-112398 /
+GHSA-5x8w-8jj5-q52h / PYSEC-2026-4330, CNA GitHub_M, reporter Alex Bouffard,
+CVE `datePublished` 2026-10-19T21:07:25.229Z, verbatim CNA text, CVE JSON,
+GHSA HTML and OSV cross-check pinned under
+`lab/frontier/pillow2shell/src/`, CVSS 4.0 9.2 CRITICAL, CWE-122/787;
+**identifier** — CVE-2026-112398 / GHSA-5x8w-8jj5-q52h; **affected/fixed
+versions** — CVE `< 13.0.0`, GHSA `<= 12.3.0`, raw tag `12.2.0` verified
+vulnerable here and raw tag `13.0.0` carries the guard added by commit
+`242a059aedc1935097d9aa1dc3f099750467ba75` (PR #10131, 2026-10-06, 11 lines
+in `src/libImaging/JpegDecode.c` plus a regression test, patch pinned);
+**primitive** — `FpxImagePlugin.py:25/30/113/201` maps the attacker's
+FlashPix image-contents colour ID to rawmode `"LA"` (2 bytes/pixel) and leaves
+an unrecognised JPEG mode as `JCS_UNKNOWN`; `decode.c:223/226` sizes and
+allocates `state->bytes` from that geometry, `JpegDecode.c:220-221` sets both
+colour spaces to `JCS_UNKNOWN`, and the unchecked `jpeg_read_scanlines` at
+`:252` writes a 4-component 256-byte decoded row into a 64-byte tile buffer;
+fixed `13.0.0:247-253` rejects `output_width > state->xsize` or
+`output_components * output_width > state->bytes` before the scanline at
+`:263`; **rung-4 plausibility** — a crafted OLE2 FlashPix file reaches an
+unauthenticated `PR:N`/`UI:N` image-open or thumbnail path when `olefile` is
+installed, and its decoded bytes are attacker-chosen.
+
+Operator verification before admission: `sha256sum` matched all seven source
+pins byte-for-byte against `lab/frontier/pillow2shell/PROVENANCE.md`; a clean
+`git archive d72ad24 lab/frontier/pillow2shell` extraction into
+`/tmp/pw2-op-verify` replayed `bash run.sh /tmp/pw2-op-out` with
+**10 PASS / 0 FAIL rc 0**, both independent five-run groups
+`sha256=cb758c07f0aec3620c7b0d14c0fd471bf6b1455c410ead291db7a57eb08d818b`.
+ASan `WRITE of size 256` from the verbatim pinned caller
+`JpegDecode_v12.2.0.c:252` through the local row-copy shim at
+`driver_vuln.c:38`, chosen `0x5a`/`0xa5` read back byte-exact at offsets
+0/16/32/48 for tile limits 16/32/48, a guard-page SIGSEGV, and fixed/benign
+ASan-clean cases reproduced. Rungs 1/2/3 ESTABLISHED in the extracted
+harness; rung 4 INSTRUMENTED chosen bytes past a tile-sized buffer in a
+stand-in collaborator. ASan sees the shim `memcpy`, not the host libjpeg's
+uninstrumented stores. No FPX file, OLE2 parser, Pillow build, Python process,
+image-upload server, socket, real Python heap neighbour, pointer value,
+control-flow diversion or execution was observed — all UNKNOWN, as the brief
+declares. Witness #879 replayed from a clean `git archive d72ad24`: 10 PASS /
+0 FAIL rc 0, same digest, 6/7 pins byte-identical on fresh re-fetch (the GHSA
+HTML is dynamic-metadata-only, semantically identical), grade unchanged; three
+low-severity wording/citation NITs went to frontier in #878.
+
+Admitted under #6, no re-ask. The two-pane `pillow2shell` window (inner
+socket, index 54), seed wall and registry entry were pre-created by frontier
+and are already live; do not recreate or edit them. The operator created this
+mind's charter, the 49th `engine/routes.json` entry and its wake trigger units
+with the pinned full-flag sync from `docs/runtime-pin.md` (`written 3, removed
+0`, rc 0, SHA `0d686bbad55c849e88334da64efff9da88ad528a` from the live
+pointer); never run a bare `mishe sync`. All 49 wake path units are enabled
+and charters/routes parity is 49/49; pinned doctor GREEN rc 0, omp-only GREEN
+(49 declared roles) and README lint GREEN (45 achievement rows) after the
+sync. Cheapest next rung: build Pillow `12.2.0` and `13.0.0` with ASan and
+`olefile`, construct a minimal FPX file whose tile rawmode is `"LA"` with an
+unrecognised JPEG mode and a 4-component wider JPEG, then run
+`python3 -c 'from PIL import Image; Image.open("case.fpx").load()'` on a
+loopback host. Expect an ASan WRITE from `jpeg_read_scanlines` called by
+`ImagingJpegDecode` at pinned `JpegDecode.c:252`, and no write at `13.0.0`.
+Check first whether the real FPX/OLE2 front end and bundled decoder accept
+the crafted shape; a measured front-end, decoder or allocator blocker is a
+valid negative to preserve. Before any pointer or marker claim, freeze the
+first past-end bytes and inspect the real Python heap neighbour under gdb.
+Whether the host libjpeg matches Pillow's bundled decoder byte-for-byte is
+UNKNOWN.
