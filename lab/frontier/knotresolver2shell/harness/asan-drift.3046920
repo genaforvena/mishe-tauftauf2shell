@@ -1,0 +1,90 @@
+=================================================================
+==3046920==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x522000001782 at pc 0x783f04efb303 bp 0x7ffc1b8d87a0 sp 0x7ffc1b8d7f48
+WRITE of size 1198 at 0x522000001782 thread T0
+    #0 0x783f04efb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x6077ab8b2095 in kr_recv_stream_data_cb ../daemon/quic_conn.c:132
+    #2 0x6077ab8d406e in conn_call_recv_stream_data ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:132
+    #3 0x6077ab8fb55c in conn_recv_stream ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:7508
+    #4 0x6077ab90576d in conn_recv_pkt ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:9518
+    #5 0x6077ab9076c0 in conn_recv_cpkt ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:9936
+    #6 0x6077ab908f5a in ngtcp2_conn_read_pkt_versioned ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:10305
+    #7 0x6077ab8b17f2 in handle_packet ../daemon/quic_conn.c:34
+    #8 0x6077ab8b6466 in pl_quic_conn_unwrap ../daemon/quic_conn.c:697
+    #9 0x6077ab87e49a in protolayer_step ../daemon/session2.c:561
+    #10 0x6077ab87f7b9 in session2_submit ../daemon/session2.c:706
+    #11 0x6077ab8838d1 in session2_unwrap ../daemon/session2.c:1285
+    #12 0x6077ab8afb8b in pl_quic_demux_unwrap ../daemon/quic_demux.c:369
+    #13 0x6077ab87e49a in protolayer_step ../daemon/session2.c:561
+    #14 0x6077ab87f7b9 in session2_submit ../daemon/session2.c:706
+    #15 0x6077ab8838d1 in session2_unwrap ../daemon/session2.c:1285
+    #16 0x6077ab862267 in udp_recv ../daemon/io.c:98
+    #17 0x783f0550aaeb  (/lib/x86_64-linux-gnu/libuv.so.1+0x27aeb) (BuildId: 4f3057ab0c004ca62baf540982140a7bdd3adf3d)
+    #18 0x783f0550bbda  (/lib/x86_64-linux-gnu/libuv.so.1+0x28bda) (BuildId: 4f3057ab0c004ca62baf540982140a7bdd3adf3d)
+    #19 0x783f054f2ce7 in uv_run (/lib/x86_64-linux-gnu/libuv.so.1+0xfce7) (BuildId: 4f3057ab0c004ca62baf540982140a7bdd3adf3d)
+    #20 0x6077ab86900d in run_worker ../daemon/main.c:202
+    #21 0x6077ab86d7a9 in main ../daemon/main.c:662
+    #22 0x783f0462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #23 0x783f0462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #24 0x6077ab844cb4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-drift/asan-build/daemon/kresd+0x34cb4) (BuildId: a4ead4a9c754ae2445228110341ccf96f3d9cf65)
+
+0x522000001782 is located 0 bytes after 5762-byte region [0x522000000100,0x522000001782)
+allocated by thread T0 here:
+    #0 0x783f04efc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x6077ab8b1f59 in kr_recv_stream_data_cb ../daemon/quic_conn.c:111
+    #2 0x6077ab8d406e in conn_call_recv_stream_data ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:132
+    #3 0x6077ab8fb55c in conn_recv_stream ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:7508
+    #4 0x6077ab90576d in conn_recv_pkt ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:9518
+    #5 0x6077ab9076c0 in conn_recv_cpkt ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:9936
+    #6 0x6077ab908f5a in ngtcp2_conn_read_pkt_versioned ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_conn.c:10305
+    #7 0x6077ab8b17f2 in handle_packet ../daemon/quic_conn.c:34
+    #8 0x6077ab8b6466 in pl_quic_conn_unwrap ../daemon/quic_conn.c:697
+    #9 0x6077ab87e49a in protolayer_step ../daemon/session2.c:561
+    #10 0x6077ab87f7b9 in session2_submit ../daemon/session2.c:706
+    #11 0x6077ab8838d1 in session2_unwrap ../daemon/session2.c:1285
+    #12 0x6077ab8afb8b in pl_quic_demux_unwrap ../daemon/quic_demux.c:369
+    #13 0x6077ab87e49a in protolayer_step ../daemon/session2.c:561
+    #14 0x6077ab87f7b9 in session2_submit ../daemon/session2.c:706
+    #15 0x6077ab8838d1 in session2_unwrap ../daemon/session2.c:1285
+    #16 0x6077ab862267 in udp_recv ../daemon/io.c:98
+    #17 0x783f0550aaeb  (/lib/x86_64-linux-gnu/libuv.so.1+0x27aeb) (BuildId: 4f3057ab0c004ca62baf540982140a7bdd3adf3d)
+    #18 0x783f0550bbda  (/lib/x86_64-linux-gnu/libuv.so.1+0x28bda) (BuildId: 4f3057ab0c004ca62baf540982140a7bdd3adf3d)
+    #19 0x783f054f2ce7 in uv_run (/lib/x86_64-linux-gnu/libuv.so.1+0xfce7) (BuildId: 4f3057ab0c004ca62baf540982140a7bdd3adf3d)
+    #20 0x6077ab86900d in run_worker ../daemon/main.c:202
+    #21 0x6077ab86d7a9 in main ../daemon/main.c:662
+    #22 0x783f0462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #23 0x783f0462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #24 0x6077ab844cb4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-drift/asan-build/daemon/kresd+0x34cb4) (BuildId: a4ead4a9c754ae2445228110341ccf96f3d9cf65)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x522000001500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x522000001580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x522000001600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x522000001680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x522000001700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x522000001780:[02]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x522000001800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x522000001880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x522000001900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x522000001980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x522000001a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3046920==ABORTING

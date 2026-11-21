@@ -119,3 +119,11 @@ lab/frontier/classicube2shell/out/
 lab/frontier/classicube2shell/out-*/
 lab/frontier/classicube2shell/asm_*
 lab/frontier/classicube2shell/*.log
+
+# KnotResolver2Shell harness: extracted trees, builds, fetched PoC, verbose log.
+# The replay scripts, pin manifest and small evidence files stay tracked.
+lab/frontier/knotresolver2shell/build/
+lab/frontier/knotresolver2shell/check-6.4.0/
+lab/frontier/knotresolver2shell/check-6.4.1/
+lab/frontier/knotresolver2shell/poc/
+lab/frontier/knotresolver2shell/harness/k641-v.log

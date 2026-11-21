@@ -1,0 +1,7 @@
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[DRIFT] off=0 dlen=8 fin=0 size=1200 start=0 end=0 free=1200
+[DRIFT] off=8 dlen=1440 fin=0 size=1200 start=0 end=8 free=1192
+[DRIFT] off=1448 dlen=1440 fin=0 size=2640 start=0 end=1446 free=1194
+[DRIFT] off=2888 dlen=1440 fin=0 size=4080 start=0 end=2884 free=1196
+[DRIFT] off=4328 dlen=1440 fin=0 size=5520 start=0 end=4322 free=1198
+[DRIFT] off=5768 dlen=1200 fin=1 size=6960 start=0 end=5760 free=1200

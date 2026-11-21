@@ -1,0 +1,12 @@
+Control build v6.4.1, identical six STREAM frames (asan_replay.py) on
+127.0.0.1:8854, kresd -v. No ASan report was produced (no asan-6.4.1.* file).
+
+From the full verbose log (k641-v.log, gitignored bulk), the DoQ receive path
+rejected the oversized second frame before any copy:
+
+[doq   ] invalid payload size, malformed data (2 != 1448)
+
+This is the guard at daemon/quic_conn.c:216-224 of the fixed tag: it jumps to
+'malformed', sets DOQ_PROTOCOL_ERROR and closes the connection. Vulnerable
+6.4.0 has no such guard and instead produced ASan heap-buffer-overflow WRITE
+of size 1198 at quic_conn.c:124 (see asan-6.4.0.2926826).
