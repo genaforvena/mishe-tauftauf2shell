@@ -1,9 +1,10 @@
 # civetweb2shell — CVE-2025-55763 rung-4 boundary, wake 1 (2026-11-21)
 
-**Status: rung 4 INSTRUMENTED — chosen-byte overwrite of a live adjacent object
-OBSERVED in an instrumented copy; natural adjacency NOT OBSERVED in the
-unmodified build (wake-3 probes below); pointer control, control-flow
-diversion and code execution still UNKNOWN.** Rungs 1/2/3 remain
+**Status: rung 4 INSTRUMENTED — chosen-byte overwrite of the heap chunk header
+immediately after `new_path` OBSERVED in the unmodified build (wake-4 probe),
+plus chosen bytes in a live adjacent object in an instrumented copy (wake 1);
+natural live-object adjacency NOT OBSERVED (wake 3). Pointer control,
+control-flow diversion and code execution remain UNKNOWN.** Rungs 1/2/3 remain
 ESTABLISHED as recorded in `reports/frontier-civetweb2shell.md` and witness
 verdicts #1027/#1029. Fixed side is the merged commit `c584455…`, not a tag.
 
@@ -129,6 +130,37 @@ Self-checking replay from a clean archive:
 11 PASS / 0 FAIL, rc 0; trace sha256
 `15ce7bdba90a3f060304b584928f5c79974ff6b22b22944c23879b81b189ae8a`.
 This is a negative result; it does not upgrade the rung.
+
+## Chosen-byte heap-header overwrite (wake 4, unmodified build)
+
+Reading `v1.16/src/civetweb.c` corrected wake 3's causal account:
+`mg_get_request_link` (`:15257`) calls `mg_construct_local_link` (`:3601`),
+which allocates `uri_encoded` of `strlen(request_uri)*3+1` at `:3631`
+**between** the `new_path` malloc and the `strcat`s, then frees it at `:3734`.
+Wake 3's tracer logs (`w3/malloc2.log:147-149`, `malloc3.log:122-128`) confirm
+that for a 1-byte query this allocation is physically the next chunk at
+`new_path+8208`; wake 3's "neighbour allocated only later" wording was too
+strong, although the object is indeed freed before the append.
+
+With a 46-byte query (`ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghij`) and one
+benign warm redirect first, gdb on the rebuilt unmodified binary measured:
+
+- sink `buflen=8240`, glibc chunk span `8256`, so the neighbour chunk's size
+  field is at `new_path+8248` and its fd/bk at `+8256`/`+8264`;
+- **before** the appends the neighbour size field holds a valid allocator
+  value (`0x16db1` / `0x14de1`, i.e. a live top or free chunk header), and
+- **after** the appends it holds query bytes 8–15 `IJKLMNOP`
+  (`0x504f4e4d4c4b4a49`), with fd=`QRSTUVWX` (`0x5857565554535251`) and
+  bk=`YZ012345` (`0x3534333231305a59`). The process then takes SIGABRT in
+  glibc. This is chosen-byte control of heap metadata on the unmodified code
+  path, not a sanitizer artifact and not an instrumentation-placed canary.
+
+Self-checking replay from a clean archive:
+`cd lab/frontier/civetweb2shell && bash run-header.sh /tmp/cw-header` →
+13 PASS / 0 FAIL, rc 0; trace sha256
+`fe6e66c719fcadb147e39f0614510998c9b43e2f5dc22615c40090151d2c5557`.
+The abort and the absence of a chosen pointer keep this at INSTRUMENTED:
+the outcome is availability, consistent with the CISA CVSS vector.
 
 ## Preserved negatives
 
