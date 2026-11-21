@@ -1,0 +1,23 @@
+From 62fc37eda82fa1f8120aff7fb0fdd7c72b493a75 Mon Sep 17 00:00:00 2001
+From: TreeHunter <60896014+TreeHunter9@users.noreply.github.com>
+Date: Thu, 19 Mar 2026 12:40:40 +0300
+Subject: [PATCH] Merge commit from fork
+
+Co-authored-by: Artyom Ivanov <artyom.ivanov@red-soft.ru>
+---
+ src/common/xdr.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/common/xdr.cpp b/src/common/xdr.cpp
+index 555e6e1f40c..a5698288419 100644
+--- a/src/common/xdr.cpp
++++ b/src/common/xdr.cpp
+@@ -213,6 +213,8 @@ bool_t xdr_datum( xdr_t* xdrs, const dsc* desc, UCHAR* buffer)
+ 			}
+ 			if (!xdr_short(xdrs, reinterpret_cast<SSHORT*>(&n)))
+ 				return FALSE;
++			n = MIN(n, desc->dsc_length - 1);
++
+ 			if (!xdr_opaque(xdrs, reinterpret_cast<SCHAR*>(p), n))
+ 				return FALSE;
+ 			if (xdrs->x_op == XDR_DECODE)
