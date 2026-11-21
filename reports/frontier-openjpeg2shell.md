@@ -358,14 +358,66 @@ Rung 4 stays PARTIAL; the added fact is reachability of large `TPsot` and a
 chosen code-shaped write value, with the destination still not a controlled
 pointer.
 
-## Next-candidate queue (updated 2026-11-21)
+## Live ob_type takeover in the Pillow consumer (2026-11-21 ~18:40Z)
 
-- wolfSSL CVE-2026-6679 (DTLS 1.3 ACK integer truncation, fixed 5.9.1) and
-  HTSlib CVE-2026-62257 (CRAM v4 pointer write, fixed 1.24) are the remaining
-  ranked candidates. wolfSSL's stateful DTLS path is more expensive than this
-  decode path; HTSlib has a released fixed version.
-- OpenJPEG is ranked first for a dedicated mind once admitted; handoff needs
-  this brief, the live two-pane window and the operator's admission.
+The previous sections' strongest negative claim — that the written value is
+"only ever consumed as an `OPJ_OFF_T` seek offset" and that "no Python object
+was observed at any `base + TPsot*24 + {8,16}` destination" — is wrong for the
+live consumer.
+A pre-corruption scan of the 24-byte-strided OOB region in a pinned `-g -O0`
+build loaded by Pillow (`otype-takeover.gdb`, run before the first OOB store)
+found a live Python object whose header sits exactly on the `TPsot=1`
+destination:
+
+- discovery build: `ob_refcnt = 1` at `tp_index base + 32` and
+  `ob_type = 0xa2d260` (`&PyCode_Type`) at `base + 40`;
+- the self-contained replay build (fresh `-g -O0` from the committed pin):
+  `ob_refcnt = 2` at `base + 32` and `ob_type = 0xa472c0`
+  (`&PyUnicode_Type`) at `base + 40`.
+
+The concrete object type varies with build layout, but in both builds the
+destination held a live Python object with a valid static type pointer, not
+filler. A second such object appeared at `base + 1136`/`+1144` in the
+discovery build. The TPsot=1 store therefore overwrites both `ob_refcnt` and
+`ob_type` of a live Python object with codestream-derived 64-bit values.
+
+The two stores have a fixed difference: `end_pos - end_header =
+m_sot_length + 2`, and for the generated tile parts `m_sot_length = 0`. With
+`evil = 48`, tile part 1's SOD position (the `end_header` value) is the final
+tile part's chosen SOD offset minus `47*14`. Calling `make-large-tpsot.py`
+with `target = A + 47*14 - 2` therefore writes exactly `A` into the live
+object's `ob_type`. Observed with `A = 0xa3bf20` (`&PyLong_Type`):
+- replay build: `HIT1 tp=1 BEFORE32=0000000000000002
+  BEFORE40=0000000000a472c0 WRITE32=0000000000a3bf1e
+  WRITE40=0000000000a3bf20`, then `POST40=0000000000a3bf20`;
+- discovery build: same `WRITE40`, with `BEFORE40=0xa2d260` (`&PyCode_Type`).
+
+The ordered `HIT0/HIT1/POST32/POST40/PYTYPE` trace is in the replay's
+`gdb.log`.
+
+`bash lab/frontier/openjpeg2shell/otype-takeover.sh <outdir> [HEXADDR]` builds
+its own `-g -O0` libopenjp2 from the committed pin, regenerates the codestream
+from the committed PoC, checks that the pre-write type pointer matches a
+gdb-resolved static CPython type, checks the written and persisted value
+against the requested address, and runs the unsanitized consumer. A replay
+reports **4 PASS / 0 FAIL**; ordered trace
+`sha256=769e135ebe26f9cb8e482c6c1531718ab1e8e7f2588ddd6174595b5367082f77`.
+The plain run of the exact-value codestream exits **rc 0 with `LOAD_OK`** — a
+*silent* type confusion: the live object now claims `&PyLong_Type` while its
+body is still the original Python object, and the decoder reports success.
+This is stronger than the earlier availability-only result: an attacker-chosen
+static pointer now occupies a live object's control-flow-relevant type field.
+
+Honest boundary: no chosen deallocator call was observed. The companion
+`ob_refcnt` store receives the SOD position (here `0xa3bf1e`), so the object
+does not reach a natural `_Py_Dealloc` and no indirect call through the
+corrupted type occurred; the clean exit is a silent type confusion, not a
+diversion. Choosing a type whose deallocator is useful, and arranging a small
+`ob_refcnt` at the same destination, remain UNKNOWN. Rung 4 stays PARTIAL, but
+the primitive escalates from "bounded integer at a chosen offset" to "exact
+attacker-chosen static pointer in a live object's `ob_type`, with ASLR on and
+a clean consumer exit". The pinned fixed commit `91d08b11` still guards both
+stores; fixed-side claims remain scoped to that pin, not a release.
 
 ## Scope and boundaries
 
