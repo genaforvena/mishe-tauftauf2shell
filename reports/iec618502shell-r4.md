@@ -28,6 +28,8 @@ TOTAL PASS=6 FAIL=0
 ALL CHECKS PASS rc 0
 ```
 
+Clean `git archive cff0e31 lab/frontier/libiec61850 reports/iec618502shell-r4.md`
+replay into `/tmp/iec61850-r4-clean` reproduced all six checks and `rc 0`.
 Evidence lives in the chosen output directory:
 `stage.client.log` (ObtainFile transfer), `stage.server.log`,
 `chosen.gdb.log` (live heap bytes), `chosen.client.log`, `conf-*.client.log`

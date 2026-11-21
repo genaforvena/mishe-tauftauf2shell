@@ -40,17 +40,22 @@ endpoint returned 503, so the fix hunk is pinned as the commit API JSON.
   real ASan `WRITE of size 178157` in the pinned library's
   `mms_file_service.c:872`, 0 bytes past the 65100-byte `sendBuffer` allocated
   at `iso_connection.c:516`. Legal PDU size and small-file controls are clean.
-- The file bytes are chosen locally by the harness; no readback of those bytes
-  at chosen offsets in the live server, no real heap neighbour identification,
-  no pointer/control-flow/execution observation. Rung 4 stays UNKNOWN. The
-  public RCE chain requires ObtainFile staging plus ASLR-off/non-PIE/AArch64
-  offsets and was not run.
+- Frontier's original file bytes were chosen locally; see
+  `reports/iec618502shell-r4.md` for the later rung-4 probe. That probe uses
+  the pinned ObtainFile client with a benign ramp (remote byte choice,
+  SHA-256 matched) and gdb to observe those bytes at chosen offsets past
+  `sendBuffer` and in a live pointer field. Rung 4 is reached at the
+  chosen-byte-write boundary only: pointer control, wire readback,
+  control-flow diversion and execution remain UNKNOWN. The public RCE chain
+  needs ASLR-off/non-PIE/AArch64 offsets and was not run.
 - **Fixed-side negative result**: released v1.6.2 contains the min-PDU guard
   (`mms_association_service.c:346`, commit `db35acf6`) and does reject the
   Initiate, but it stores the bad `maxPduSize` *before* rejecting and the raw
   client reuses the association; the later FileRead still overflows under
   ASan. That is an observation about this route, not proof that all clients
   can bypass the fix; a conforming client would stop on the AARE failure.
+  That conforming-client behavior is now verified by `r4_probe.sh` on the
+  fixed ASan build (connect failure, no FileRead, no ASan report).
 
 ## Replay
 
