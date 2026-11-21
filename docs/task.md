@@ -2143,6 +2143,50 @@ start a loopback listener and send the hostile header trio to reach the real
 `session_attach()` / `OPEN_SEQ` stores, then repeat at 7.6.2. A measured
 header-length, APR or allocator blocker is a valid negative to preserve.
 
+#### Admitted 2026-11-21 ~10:4xZ: Gct2Shell / gct2shell (CVE-2026-123975)
+
+Frontier handed this find over in `reports/frontier-gct2shell.md` (commit
+`49ffba6`, pushed). All five standing-approval #6 elements are present:
+**claim source** — CVE Program record `CVE-2026-123975` (CNA VulnCheck,
+published 2026-11-13), the vendor advisory at `gridcf.org`, the upstream fix
+commit `3df2be4834c146bdcec90009a0f2e5771ff63cca` and the 6.2.20261111
+release notes, with URLs and SHA-256 pins in
+`lab/frontier/gct2shell/PROVENANCE.md`; **identifier** — CVE-2026-123975;
+**affected/fixed versions** — GCT before 6.2.20261111 /
+`globus-gss-assist` before 12.9, fixed 12.9 / 6.2.20261111, fix guard at
+`tokens_f.c:127-131`; **primitive** — an SSLv2 backward-compatible hello
+with record length 1 makes `dsize = -2` and `size = dsize + 5 = 3`, so the
+fixed 5-byte `memcpy` at `tokens_f.c:172` overruns the 3-byte token buffer
+and `fread(pp, 1, dsize, fd)` casts negative `dsize` to `size_t`, writing the
+attacker's body bytes past it; **rung-4 plausibility** — the CVE record
+`AV:N/AC:L/AT:N/PR:N/UI:N/VA:H` names `globus-gatekeeper` and `myproxy` as
+pre-auth consumers, and a loopback build of the vulnerable helper is inside
+standing provisioning approval #5.
+
+Operator replay ~10:46Z from a clean `git archive HEAD` extraction of
+`49ffba6` into `/tmp/gct-verify.*`: 10 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`,
+chosen `0x5a5b5c5d` at `cp+5`, guard-page fault on the first past-end store,
+fixed rejects the hostile length and is ASan-clean, two independent five-run
+groups both
+`sha256=e5ca3f256b9fd58bd493ad841286819c2dd8f731874424ab26f3b287af5c6204`.
+All ten pinned source and digest entries in `PROVENANCE.md` matched the
+committed bytes; an independent web search confirmed the CVE record and the
+fix commit. Rungs 1/2/3 ESTABLISHED in the verbatim-pin extracted harness;
+rung 4 is INSTRUMENTED chosen-byte control in an mmap collaborator only. No
+live GSI handshake, gatekeeper/myproxy build, stock allocator neighbour,
+pointer overwrite or execution was observed — all UNKNOWN, no claim.
+
+Admitted under the standing similar-things mandate; no re-ask. The two-pane
+`gct2shell` window (index 47, inner socket) was pre-created by frontier and
+is already registered UNADMITTED; wake trigger units and presentation stay
+owed from the person's full-flag sync in `docs/runtime-pin.md`, never a bare
+`mishe sync`. Cheapest next rung: build vulnerable `globus-gss-assist` 12.8
+with ASan, call `globus_gss_assist_token_get_fd()` with a local hostile
+record, capture the symbolised frame, then measure live glibc neighbours
+before any pointer or marker claim, repeating with 12.9 as control. A
+measured handshake, allocator or reachability blocker is a valid negative
+to preserve.
+
 #### Held 2026-11-21 ~09:47Z: Airlock2Shell (CVE-2026-19707 / GHSA-3c49-2p63-245g) — not admitted under #6
 
 Operator advisory watch; no handoff and no lab work. Claim sources: InfoGuard
