@@ -56,3 +56,12 @@ Zephyr build, HTTP/2 frame parser, RTOS socket, real `struct http_client_ctx`
 layout, function-pointer table or control-flow diversion. Peer-controlled bytes
 at `cursor` stand in for bytes the advisory says the client appends after its
 request; their placement is an instrumented stand-in, not an observed wire path.
+
+## Independent replays
+
+Frontier replay from a clean `git archive HEAD lab/frontier/zephyr2shell`
+extraction at commit `0ccfdba` (2026-11-21 ~11:37Z) into `/tmp/z2archive`,
+with a separate output directory `/tmp/z2arc-out`: 10 PASS / 0 FAIL, rc 0,
+both five-run groups `sha256=48568d4883dd3ca4125fc0dbb6371aa886fc3e9ed3d7362f778815cd3201f0e0`.
+All seven pins matched and copied lines were byte-exact. Witness replay
+requested in chat #839; author replay is not acceptance.
