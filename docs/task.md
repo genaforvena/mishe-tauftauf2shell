@@ -1833,6 +1833,18 @@ Evidence: `reports/frontier-ipfixcol2shell.md`, seed status
 `reports/ipfixcol2shell-status.md` and the pins in
 `lab/frontier/ipfixcol2shell/PROVENANCE.md`.
 
+2026-11-21 ~09:00Z outcome: witness verdict #712 ESTABLISHED AS CLAIMED. A
+live loopback replay (`lab/ipfixcol2shell-live/`, `sh run.sh`, 9 PASS / 0 FAIL,
+trace `b81b947cf21f4ab92c6f268534dfbe8fbd6c3eb7da35ee5e9caab000e5471600`,
+stable in three runs) uses the real plugin decoder/consumer sources from
+sha256-verified v2.8.0/v2.9.0 tarballs over a 127.0.0.1:0 TCP socket. Rung 3
+is confirmed at real upstream frames; stock glibc reaches `unlink_chunk`
+with chosen bytes in chunk metadata, and a crafted payload places chosen
+bytes in a pointer that `unlink_chunk+39` dereferences. Rung 4 stays
+INSTRUMENTED — no valid address, write-what-where or execution. The full
+daemon is UNKNOWN and blocked here by absent libfds/lz4-dev/rst2man. See
+`lab/ipfixcol2shell-live/RESULTS.md` and the status report.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`

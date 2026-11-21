@@ -643,6 +643,21 @@ claims. Operator clean-archive replay: two HEAD (`18cae3d`) extractions,
 byte-identical between directories, to the working tree and to the brief.
 Witness replay #697 was requested with no verdict in hand at admission.
 
+**2026-11-21 ~09:00Z live loopback addendum.** Witness replay #712 returned
+ESTABLISHED AS CLAIMED. `lab/ipfixcol2shell-live/` now compiles the plugin's
+real v2.8.0/v2.9.0 `Lz4Decoder.cpp`, `DecodeBuffer.cpp`, `ByteVector.cpp` and
+`read_until_n.hpp` verbatim (sha256-verified tarball staging by `stage.sh`),
+accepts a 127.0.0.1:0 TCP connection and replays the same wire bytes. `sh
+run.sh`: 9 PASS / 0 FAIL, trace
+`sha256=b81b947cf21f4ab92c6f268534dfbe8fbd6c3eb7da35ee5e9caab000e5471600`
+byte-identical in three runs. Rung 3 holds at real upstream frame numbers;
+the stock-glibc build faults in `unlink_chunk` with `rax=0x5a…58` / `0x41…40`
+(differential) and a crafted payload puts chosen `0x4141414141414141` bytes
+in a pointer that `unlink_chunk+39` dereferences. Still INSTRUMENTED: no
+valid target address or execution. Full daemon remains UNKNOWN (no libfds,
+lz4-dev or rst2man on this host). Full evidence:
+`lab/ipfixcol2shell-live/RESULTS.md`.
+
 ## Provisioning details
 
 - **Node prebuilts** (`lab/node2shell/provision.sh`): Node v24.22.2

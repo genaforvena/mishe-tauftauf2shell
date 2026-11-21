@@ -34,6 +34,13 @@ source-bound, not separately instrumented, and unused for a rung claim.
   — byte-identical between directories, to the working-tree replay and to the
   brief. All 11 pin hashes, the fix commit record, both tag refs, the advisory
   pin and the fix patch were checked against `PROVENANCE.md` and `run.sh`.
+- Witness replay verdict #712 (DM 2026-11-21, tape): **ESTABLISHED AS CLAIMED**.
+  Two clean `git archive HEAD` extractions plus the working tree: unmodified
+  `run.sh` 13 PASS / 0 FAIL and the same trace hash
+  `e9c06f530d09912603ed379913699b2f1e63e08ab64b8cfcefdae0b47f3cd89f` in all
+  three; rung-3 frames and fixed rejection reproduced; independent pin fetches
+  matched; boundary sweep clean through declared=24 and faults at 25+. Rung 4
+  stays INSTRUMENTED; live collector and allocator were UNKNOWN at that point.
 - Rungs 1/2/3 on verbatim pinned v2.8.0 (vulnerable) and v2.9.0 (fixed)
   `Lz4Decoder.cpp` under `#line`, linked against the host's real
   `liblz4.so.1`: vulnerable build faults on the crafted wire input with
@@ -48,20 +55,40 @@ source-bound, not separately instrumented, and unused for a rung claim.
   at offsets 0/24/28/64999 past the ring, `0x00` at 65000/65001; an `0x41`
   payload reproduces those offsets with `0x41`, and the benign input leaves
   them zero. The stock ASan build faults before those bytes can be read back.
-  No pointer, saved return address, heap metadata field, function pointer,
-  control-flow diversion or marker execution was observed or attempted. The
-  collaborator is instrumentation, not a stock allocator property.
-- UNKNOWN: live collector, loopback TCP input, shipping allocator and compile
-  flags, real daemon ASan frames, CVSS as local observation, and any
-  post-write pointer control. Witness replay #697 was requested; no verdict
-  was in hand at admission. All inputs stay on a local pipe; no probe was
-  sent off loopback.
+  In that frontier harness, no pointer, saved return address, heap metadata
+  field, function pointer, control-flow diversion or marker execution was
+  observed or attempted; the collaborator is instrumentation, not a stock
+  allocator property. A later live loopback harness did reach glibc metadata
+  (below).
 
-Cheapest next rung: build the real collector from pinned v2.8.0 and v2.9.0
-sources under `lab/`, bind TCP input to 127.0.0.1 only, send the same
-start/message headers over a loopback socket, and capture the daemon ASan
-frame plus the heap layout around the ring under the plugin's actual
-allocator; repeat on the fixed tag. Preserve the collaborator, `0x41` and
-benign negatives. Only an observed pointer or control-flow result would drop
-INSTRUMENTED; a measured allocator or placement blocker is a valid negative
-to record, not an excuse to re-run the same harness.
+## Live loopback TCP replay (2026-11-21 ~09:00Z)
+
+Harness `lab/ipfixcol2shell-live/`: the plugin's real `Lz4Decoder.cpp`,
+`DecodeBuffer.cpp`, `ByteVector.cpp` and `read_until_n.hpp` compiled verbatim
+from sha256-verified v2.8.0 / v2.9.0 tarballs, a real 127.0.0.1:0 TCP socket,
+the host's real liblz4 and stock glibc; `sh run.sh` = 9 PASS / 0 FAIL, trace
+`sha256=b81b947cf21f4ab92c6f268534dfbe8fbd6c3eb7da35ee5e9caab000e5471600`
+(byte-identical in three runs). Full detail and preserved negatives in
+`lab/ipfixcol2shell-live/RESULTS.md`.
+
+- Rung 3 holds on the loopback path: ASan `WRITE of size 65000`, 0 bytes after
+  a 24-byte region, allocation at real `Lz4Decoder.cpp:184`, write at `:145`;
+  fixed rejects at both ASan and plain, benign 24-byte IPFIX message decodes
+  clean.
+- Stock glibc, no sanitizer and no replaced allocator: SIGSEGV in
+  `unlink_chunk` reached from `_int_malloc` → `_int_realloc` →
+  `ByteVector::reserve` → `decompress`. GDB shows `rax=0x5a5a5a5a5a5a5a58`
+  for the `0x5a` payload and `0x4141414141414140` for `0x41` — chosen bytes
+  occupy the corrupted chunk's size field. A crafted payload putting valid
+  size/prev_size fields and chosen bytes in `p->fd`/`p->bk` faults at
+  `unlink_chunk+39` (`cmp 0x18(%rax),%rdi`) with
+  `rax=0x4141414141414141`: chosen bytes are consumed as a heap pointer.
+- Rung 4 is still INSTRUMENTED: chosen pointer **bytes**, not a chosen valid
+  address; no write-what-where, vtable/return-address overwrite, control-flow
+  diversion or marker execution. This host's glibc layout and allocation
+  order were required. The advisory scores availability only.
+- UNKNOWN: full `ipfixcol2` daemon, libfds-backed plugin loading, shipping
+  compile flags, real daemon ASan frames, CVSS as local observation, and any
+  valid-address retargeting or post-write control. A full daemon build is
+  blocked on this host by absent `libfds`, `lz4.h`/`liblz4-dev` and `rst2man`.
+  Every probe bound 127.0.0.1; source fetching by `stage.sh` is provisioning.
