@@ -1,0 +1,7 @@
+# Replay outputs and compiled harness binaries are generated, not source.
+out/
+build/
+*.o
+vuln
+asan
+fixed

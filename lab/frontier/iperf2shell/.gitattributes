@@ -1,0 +1,2 @@
+# Pinned upstream bytes must stay byte-exact (no EOL rewriting).
+src/* -text
