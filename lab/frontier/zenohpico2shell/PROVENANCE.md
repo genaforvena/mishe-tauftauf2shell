@@ -71,7 +71,8 @@ code execution" is a claim, not a result here.
 ## Independent replays
 
 Frontier replay from a clean `git archive HEAD lab/frontier/zenohpico2shell`
-extraction, with a separate output directory: 10 PASS / 0 FAIL, rc 0,
+extraction at commit `db8ba80` (2026-11-21 ~11:52Z) into `/tmp/zp2archive`,
+with a separate output directory `/tmp/zp2arc-out`: 10 PASS / 0 FAIL, rc 0,
 both five-run groups
 `sha256=080794c304ffa34b467a189c505f02318af437ecc43c3a0658d985f0632b9b3b`.
 All seven pins matched and copied lines were byte-exact. Witness replay
