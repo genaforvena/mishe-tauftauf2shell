@@ -55,6 +55,8 @@ neighbour is exercised.
 - `bash lab/frontier/libwebsockets2shell/run.sh <outdir>`: **10 PASS / 0 FAIL,
   ALL CHECKS PASS rc 0**; two independent five-run groups both
   `sha256=45cd97c83c032f5ff9217e568225ea95441df31480495b72cb944d3b3f798833`.
-- Clean `git archive HEAD` replay: recorded after commit in the brief and on
-  the wall. ASan PIDs, addresses and build paths are excluded from the trace
-  digest so clean replays are byte-identical.
+- Clean `git archive HEAD` replay at commit `e6a406d` into
+  `/tmp/lws-replay-76K22L`: 10 PASS / 0 FAIL, rc 0, both five-run groups
+  `sha256=45cd97c83c032f5ff9217e568225ea95441df31480495b72cb944d3b3f798833`.
+  ASan PIDs, addresses and build paths are excluded from the trace digest so
+  clean replays are byte-identical.

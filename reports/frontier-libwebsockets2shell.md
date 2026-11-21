@@ -75,6 +75,8 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
 
 - 10 PASS / 0 FAIL, exit 0. Two independent five-run groups both
   `sha256=45cd97c83c032f5ff9217e568225ea95441df31480495b72cb944d3b3f798833`.
+  A clean `git archive HEAD` replay at commit `e6a406d` reproduced 10 PASS /
+  0 FAIL, rc 0 and the same digest in a fresh temp directory.
 - Rung 1 (chosen byte `0x5a`, limit 16):
   `rv=1 pos=17 oob0=5a oob1=00` — the post-write check fires only after the
   17th byte is stored past a 16-byte arena.
