@@ -221,6 +221,38 @@ or inside local containers whose host ports bind only to loopback.
   into separate absolute output directories with 53 PASS / 0 FAIL and a
   byte-identical raw trace sha256 `936fa128…`
   (`reports/frontier-proxysql2shell.md`).
+- **PHP2Shell wake 52 (CVE-2026-129291 / GHSA-jm4m-qfqx-967m)**: adjacent
+  FPM epoll use-after-free lane, graded rung 2 (fix-sensitive functional
+  fault, NOT memory corruption). Affected PHP 8.4.27, fixed 8.4.28; 8.5.12
+  also fails. The fix is the 8.4.27 → 8.4.28 `sapi/fpm/fpm/fpm_children.c`
+  change that calls `fpm_event_del()` and sets dead workers' stdout/stderr
+  fds to `-1` before closing them. The vendor regression test
+  `sapi/fpm/tests/ghsa-g3vh-838c-65v7.phpt` (added in 8.5.13, no separate
+  published checksum) is embedded verbatim in the committed harness
+  `lab/repro/php2shell-cve129291-fpm.py` (sha256
+  `f6c4b001ad02b2149a849b0d5d4f8df782316b290ec734e8666915b62bf5e9f4`).
+  Provision tarballs with `bash lab/php2shell/provision.sh`, then build the
+  same-branch ASan pair with `bash lab/php2shell/build-fpm.sh 8.4.27` and
+  `bash lab/php2shell/build-fpm.sh 8.4.28`, producing
+  `lab/build/php-<version>-fpm-asan/`. Replay with
+  `python3 lab/repro/php2shell-cve129291-fpm.py lab/build/php-8.4.27-fpm-asan lab/build/php-8.4.28-fpm-asan [outdir]`.
+  The harness writes the phpt into each build tree and runs `make test`
+  against a loopback Unix-socket FPM master; expected affected `FAIL`
+  (`bool(false)`, no child-exit warning or replacement), fixed `PASS`
+  (`bool(true)`), stdout `affected=FAIL  fixed=PASS` then
+  `verdict: CONFIRMED`, rc 0. Docs replay 09:30Z on the already-provisioned
+  build pair observed exactly that stdout and rc 0, with `verdict.txt`
+  matching, into a throwaway `/tmp/docs129291-replay/` output directory.
+  Raw logs and `verdict.txt` land under the gitignored
+  `lab/build/evidence/w52-129291-fpm/` (all of `lab/build/` is
+  gitignored) and regenerate with that command. No ASan/UBSan report on the
+  failing runs: no confirmed corruption, pointer/chosen-byte control,
+  marker, LPE demo or web path. Negative, do-not-repeat limit: swapping
+  only the 8.5.13 `fpm_children.c` into 8.5.12, or that plus
+  `zend_builtin_functions.c`, left the test FAILing — the flip is not
+  isolated to the epoll hunk. Detail in
+  [the status report](../reports/php2shell-status.md) and
+  [the investigation](../reports/php2shell-investigation.md).
 - **PHP2Shell wake 53 (CVE-2026-129496 / GHSA-gr4f-wgx5-jpfv)**: standalone
   stale-tzcache read, rung 3 CONFIRMED (no chosen bytes, rung 4 closed).
   Provision/build: patch-sensitive release-ASan 8.5.12 php-cgi pair in
