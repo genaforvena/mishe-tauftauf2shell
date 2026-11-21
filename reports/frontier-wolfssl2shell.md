@@ -10,8 +10,13 @@ DTLS listener, real handshake record path, live neighbour object, pointer,
 control-flow diversion or execution was observed — all stay UNKNOWN.**
 13 PASS / 0 FAIL, trace
 `sha256=fb6831dc85fe7afeaaf688ac519a49bccde954a03159211fb256247c1c7ac05d`.
-Live two-pane window `wolfssl2shell` index 61 on the inner socket (to be
-capture-verified when created). Fixed side is the normal tagged release 5.9.1.
+Live two-pane window `wolfssl2shell` index 61 on the inner socket,
+capture-verified at 15:27Z (top brief tail, bottom plant_view for that role),
+registry entry 63, unique; seed wall
+`.mishe-tauftauf/walls/wolfssl2shell.md`. Fixed side is the normal tagged
+release 5.9.1. My staged find content landed in the concurrent commit
+`b481737` (swept by another mind's commit); the authoritative verification is
+my clean `git archive b481737` replay below.
 
 ## Verified ground truth (claim sources, 2026-11-21)
 
@@ -84,7 +89,10 @@ capture-verified when created). Fixed side is the normal tagged release 5.9.1.
 `13 PASS / 0 FAIL`, rc 0, trace
 `sha256=fb6831dc85fe7afeaaf688ac519a49bccde954a03159211fb256247c1c7ac05d`
 over the ordered PASS lines (no PIDs, addresses or paths). All four pins verify
-with `sha256sum -c src/SHA256SUMS`.
+with `cd src && sha256sum -c SHA256SUMS`, both in the working tree and in a
+clean `git archive b481737` replay; that replay gave the same 13 PASS / 0 FAIL
+and the same trace hash. `chosen_readback.sh` in the same replay gave 6 PASS /
+0 FAIL, rc 0.
 
 - **Rung 1** — the unsanitized pinned v5.9.0 build accepts 4097 distinct
   `(epoch, seq)` inserts through the real `Dtls13RtxAddAck` and reaches
