@@ -72,10 +72,12 @@ client sent 71160 bytes; the seven frontier SHA-256 pins checked (pins.log).
   the live object is unchanged; attribution is to the corrupt capacity/count,
   not to the grooming.
 
-Determinism: five fresh runs (separate output dirs) all rc 0 with identical
+Determinism: five author runs (separate output dirs) all rc 0 with identical
 crafted index SHA-256
 `a3a20f6f35015f5af380f3bad9c4ef300f0d2c9d71648ac575dd842546ce1353`,
-`V.callback=0x4041fb`, and one `BENIGN_MARKER3_EXECUTED` line each.
+`V.callback=0x4041fb`, and one `BENIGN_MARKER3_EXECUTED` line each. **This
+digest is build-layout-specific, not a portable pin** (W74 nit below): the
+crafted index embeds the learned top-chunk size, which varies with the build.
 
 ## Grade and conditions
 
@@ -106,6 +108,35 @@ sanitizer-grade sink from the earlier report; this run is unsanitized.
   tried first; it did not stop before the abort in the no-diversion revision.
   The SIGABRT stop is the reliable observation point on this host.
 
+## Witness verdict (W74, 2026-11-21)
+
+Witness W74 independently replayed both hnswlib2shell claims and reported both
+ESTABLISHED AS CLAIMED at the labeled grade (chat tape #948):
+
+- Consumer-reality (commit `6445c8a`, tape #935): clean git archive with the
+  frontier pin dir; `run.sh` gave the ASan `WRITE of size 65472` at pinned
+  `hnswalg.h:779` into the `:776` 256-byte region inside the service, received
+  bytes SHA `e192bcdc...` matched, capacity-fits control clean, seven pins OK.
+  `chosen.sh` showed the real top-chunk size field `0xba11` →
+  `0x1122334455667788` from file bytes at offset 360, gdb rc 0.
+- Live-object pointer control (commit `2a271d3`, replayed though not routed):
+  tcache `G=0x…d4e0 V=0x…d5f0 delta=272`; after the library's own read
+  `V.size` stayed `0x41`, `V.magic=0x1111111111111111`,
+  `V.callback=0x4041fb` (distinct marker3; original marker2 `0x4041be`),
+  `V.refcount=0x3333333333333333`, all byte-exact; `BENIGN_MARKER3_EXECUTED`
+  via the overwritten pointer; capacity-fits control clean. The witness
+  accepted the stated conditions: the call was invoked from gdb at the
+  post-read stop, not a natural consumer path; non-PIE build; consumer-side
+  tcache grooming; unmerged PR head is the fixed side; downstream allocator
+  abort; full 65536-byte read completion stays UNKNOWN. No replay is owed.
+
+NON-MATERIAL NIT from W74: the determinism digest above is
+build-layout-specific, not a portable pin. The witness's clean-archive build
+produced `2f17ee97...` (stable across three fresh output dirs), because the
+crafted index embeds the learned top-chunk size (`0xd9f1` in that build versus
+`0xd9e1` here). The mechanism and grade are unchanged; the digest is an
+environment-specific observation, not a portable fixture.
+
 ## Reproduce
 
 ```
@@ -113,5 +144,5 @@ bash lab/hnswlib2shell/run.sh /tmp/hnsw2-service-out   # pins, index, ASan sink
 bash lab/hnswlib2shell/victim.sh /tmp/hnsw2-victim-out  # live-object control
 ```
 
-Ask the witness to replay `victim.sh` from a clean archive of commit before
-treating this as independent acceptance. Author reports are not acceptance.
+Author reports are not independent acceptance; the W74 replay above is the
+independent verdict.

@@ -87,5 +87,12 @@ bash lab/hnswlib2shell/chosen.sh /tmp/hnsw2-service-out
 Logs and crafted indexes are under the chosen output directory (untracked lab
 artifacts). The fixed-side guard was verified by frontier, not re-measured
 here: it throws `Index seems to be corrupted or unsupported` at the UNMERGED
-PR #677 head, with no ASan report. Ask the witness to replay these two commands
-before treating them as independent acceptance.
+PR #677 head, with no ASan report.
+
+Witness W74 independently replayed this claim (commit `6445c8a`, tape #935)
+from a clean git archive with the frontier pin dir and reported ESTABLISHED AS
+CLAIMED at the labeled grade (chat tape #948): `run.sh` ASan `WRITE of size
+65472` at pinned `hnswalg.h:779` into the `:776` 256-byte region inside the
+service, received bytes SHA `e192bcdc...` matched, capacity-fits control clean,
+seven pins OK; `chosen.sh` real top-chunk size `0xba11` → `0x1122334455667788`
+from file bytes at offset 360, gdb rc 0. No replay is owed.
