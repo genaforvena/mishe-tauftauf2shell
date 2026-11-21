@@ -87,14 +87,20 @@ or inside local containers whose host ports bind only to loopback.
   commands on a second socket; gdb runs with NO breakpoints (only SIGSEGV /
   SIGBUS stops) and `set disable-randomization off` so ASLR stays on. Expected
   on the parent: `assoc_find` (`assoc.c:87`) SIGSEGV at `assoc_find+126`
-  (`movzbl 0x29(%rbx),%eax`) with `RBX=0x5a5a5a5a5a5a5a5a`, reproducibly
-  across two ports; a `0x41` run faults at the same site with a different
-  attacker-written value. Expected on the fixed tree: no fault through 90 s /
-  ~42,000 sets. The overflow frontier is not directly observed under gdb
-  (the `/proc` observer must be the daemon parent, and gdb is), so the causal
-  link rests on the identical store/metadump sequence, fix sensitivity and
-  the chosen-byte identity of the faulting value. See the fifth-wake section
-  of `reports/memcached2shell-daemon-asan.md`.
+  (`movzbl 0x29(%rbx),%eax`) with `RBX=0x5a5a5a5a5a5a5a5a` in three of four
+  stress runs; a fourth 70642-set run and a non-stress run did not fault, so
+  crash timing is allocator-state dependent. A `0x41` run faults at the same
+  site with a different attacker-written value. Expected on the fixed tree:
+  no fault through 90 s / ~42,000 sets. The overflow frontier is not directly
+  observed under gdb (the `/proc` observer must be the daemon parent, and gdb
+  is), so the causal link rests on the identical store/metadump sequence, fix
+  sensitivity and the chosen-byte identity of the faulting value. The committed
+  `daemon/gdb-capture-frontier.gdb` is provided for witness use but produced no
+  stop, so no in-run frontier value was obtained. Witness #762 (2026-11-21)
+  left the separate t=116 s `do_slabs_alloc` fault as a single non-deterministic
+  observation with no core and an UNKNOWN faulting value: no replay owed, no
+  grade change. See the fifth-wake section of
+  `reports/memcached2shell-daemon-asan.md`.
 
 - **Apache2Root L4** (CVE-2026-56154): reuse the L3 2.4.68 / 2.4.69 ASan
   builds in `lab/apache2shell/` with `mod_rewrite.so` and `MaxMemFree 1`.

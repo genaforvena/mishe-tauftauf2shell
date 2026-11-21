@@ -38,15 +38,17 @@ These are site-local runtime changes until a future release pin includes
 them; re-apply on upgrade.
 
 The `readme-lint` producer runs the checker from the pinned release
-(`releases/<sha>/tools/check-readme.py`) against the LIVE repo's `README.md`.
-The detector is frozen but its input is not: changing the achievement-table
-shape in the live README (as commit `48cddc0` did on 2026-11-21, 6 columns plus
-a matching in-repo checker) makes the pinned checker RED with a
-column-count/heading mismatch until the pin is re-pointed to a release whose
-checker agrees. That re-pointing is the person-only full-flag sync below; until
-then the RED is a checker-version mismatch, not a broken README. Diagnose by
-comparing the pinned checker's `EXPECTED_COLUMNS` with the live table header,
-and confirm the repo's own `python3 tools/check-readme.py` before editing docs.
+(`releases/<sha>/tools/check-readme.py`) against the LIVE repo's `README.md`,
+so the detector is frozen while its input changes. The current pin
+(`0d686bb…`) carries `EXPECTED_COLUMNS = ("Target", "R1", "R2", "R3", "R4",
+"Evidence / boundary")`, matching the six-column live table at README.md:32;
+on 2026-11-21T10:13:48Z the producer returned `readme-lint: GREEN (36
+achievement rows)`. An earlier note here claimed a three-column birth checker
+and a person-only re-point; that claim was wrong and is removed. If the signal
+is RED again, compare the pinned checker's `EXPECTED_COLUMNS` with the live
+table header and confirm the repo's own `python3 tools/check-readme.py` before
+editing docs; re-pointing units stays reserved to the person under the
+full-flag sync below.
 
 
 1. **Unit marker** (`units.py`): `# m2shell-generated: …` — each plant's
