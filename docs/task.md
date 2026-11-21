@@ -4376,3 +4376,47 @@ path, a canary/assert at `QuicPathSetActive`, and a v2.5.10 control where the
 guard must suppress the swap — before any chosen-byte or rung-5 wording. No
 public PoC exists, so constructing the packet sequence is the experiment's
 risk; a witness replay is owed once a harness exists.
+
+#### 2026-11-21 ~22:3xZ target-lane results (`e2af7fd`, `95056ee`, `7fd081b`, `a9f0210`, `5eceee0`)
+
+- RabbitMQC2Shell (`e2af7fd`, `95056ee`): a matched-pair probe on the
+  unmodified `svc_reuse` binary replaced "allocation pattern" with a measured
+  cause — the 200000-byte receive buffer must be mmap-backed (glibc default
+  `M_MMAP_THRESHOLD=131072`) for the 65600-byte body to reach `socket->klass`
+  and fire `marker_send`; forcing brk with
+  `MALLOC_MMAP_THRESHOLD_=300000` gives heap-metadata corruption and abort
+  with no marker, and fixed 0.17.0 returns `rc=-2` with no corruption. The
+  paired roundtrip `lab/rabbitmqc2shell/run_mmap_threshold.sh` is committed
+  (2 PASS / 0 FAIL); gdb script, allocator probe and raw logs stay gitignored.
+  A named-candidate source check ruled out FFmpeg 7.1's AMQP output
+  (`amqp_basic_publish`, BODY frames chunked to `frame_max-12`) while other
+  direct frame-level callers stay UNKNOWN. README row 88 and the
+  reproducibility addendum now carry the condition; the earlier "no named
+  frame-level consumer" line is superseded, not the witness grade.
+- Open625412Shell (`7fd081b`): DOC-OK. The no-chosen-bytes boundary now has a
+  structural reason — pinned `LIST_REMOVE` at `ua_subscription.c:1645`
+  expands to `*(elm)->le_prev = (elm)->le_next`
+  (`deps/open62541_queue.h:232`, byte-identical in both tags), so the written
+  value is a live monitored-item pointer by construction and no protocol
+  field supplies it. README row 96 already says values come from created
+  objects; rung 4 INSTRUMENTED and the R5 blocker are unchanged.
+- OpenJpeg2Shell (`a9f0210`): DOC-OK at the README boundary. The brief's
+  value-width rationale was wrong: pinned `j2k.c:5085-5090` stores
+  `l_current_pos` and `l_current_pos + m_sot_length + 2`, so `end_pos` is
+  independently steerable and a short command can fit a file-position write
+  value; the real ceiling is the mod-24 residue class (a mod-24=0 object gets
+  `ob_type` but keeps its refcount at +0, mod-24=8 gets a command at +0 but
+  the write value becomes that refcount, mod-24=16 gets no `ob_type` write).
+  README's "attacker-chosen argument UNKNOWN" survives; no grade change and
+  no witness replay is owed.
+- Perl2Shell (`5eceee0`, arrived mid-wake): the admission row's RUNG 0 was
+  stale. A locally derived 15-WHILEM pattern (`'((a+)+)' x 15`) on a
+  286331153-byte subject in a pinned 5.45.1 ASan debug build activates the
+  superlinear cache and gives an ASan READ SEGV at `regexec.c:9240` in two
+  of three runs; a third timed out at 180 s and stays a layout-dependent
+  negative. `CACHEsayNO`'s single-bit OR write was not reached, so rung 4
+  stays absent. No fixed binary (build hit the deadline), no named wire
+  consumer (CISA AV:L), no witness replay. README row 102 now reads rung 3
+  CODE/HARNESS; the reproducibility lane and both report links were updated.
+  The admission paragraph's "no plant rung at admission" remains historical
+  and was left intact.
