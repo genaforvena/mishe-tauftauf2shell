@@ -829,6 +829,51 @@ cd lab/apache2shell
 python3 l7-lane.py 2.4.67 2.4.68    # state-dir PROPFIND: 207 vs 403
 ```
 
+### Adjacent lane L8 — CVE-2026-48913 mod_http2 UAF when file handles exhausted (06:38–06:47Z 21 Nov) — rung 1/2, no confirmed corruption
+
+`httpd-2.4.71/CHANGES` lists CVE-2026-48913: use-after-free in mod_http2
+"when file handles are already exhausted", affecting 2.4.55–2.4.67, fixed in
+2.4.68 (credit IBM X-Force). Diffing `modules/http2/h2_mplx.c` between the L2
+2.4.67 tree (mod_http2 2.0.39) and the L3 2.4.68 tree (2.0.42) shows a narrow
+fix in `c2_setup_io()`: 2.4.67 registers `h2_beam_on_send/on_received/
+on_consumed` on `stream->input` with `c2` as context BEFORE
+`apr_file_pipe_create_pools()`; 2.4.68 moves all three registrations to after
+successful pipe creation. On EMFILE, `s_next_c2()` destroys `c2` via
+`apr_pool_destroy(c2->pool)` with stale beam callbacks still pointing at it —
+a source-level UAF, distinct from the main lane.
+
+`l8-lane.py` runs each ASan install on 127.0.0.1 with `RLIMIT_NOFILE=48` and
+drives 10 h2c connections × 80 POST-with-body streams (repeated `DATA` frames
+keep `stream->input` live). The trigger path is deterministic: both builds log
+hundreds of `(24)Too many open files ... AH10309 ... error create input write
+pipe` entries (119 on 2.4.67 / 718 on 2.4.68 in one 20 s run; up to
+1031 / 1454 in others). No pristine run produced an ASan use-after-free,
+double-free, chosen-byte write or deterministic child fault; the only
+sanitizer output was the known exit LeakSanitizer noise and Apache's SIGSEGV
+handler masking APR-pool-internal faults.
+
+Three attempts to confirm use of freed memory by instrumenting `h2_mplx.c`
+are preserved as negatives, not upgrades: (a) a global set of freed `c2`
+addresses reported hundreds of "stale callback" hits on 2.4.67 but also
+hundreds on a build carrying the 2.4.68 fix — APR recycles c2 addresses, so
+the check was invalid; (b) a poison field in `h2_conn_ctx_t` first hit an ABI
+mismatch (only one translation unit rebuilt), then, after a full rebuild,
+reported zero hits; (c) an allocation-aware freed/live tracking variant made
+`h2_beam_send`'s `beam->from == from` assertion abort children on the
+vulnerable build but not on the pristine build — an instrumentation timing
+artifact. All source and module bytes were restored byte-for-byte (source
+SHA256 `624f0c32…`, installed `mod_http2.so` SHA256 `e657da06…`).
+
+**L8 is graded rung 1/2:** a source-bound suspected UAF with a reachable,
+deterministic trigger, but no confirmed corruption, no chosen bytes, no
+pointer control and no rung-4 path. Do not retry this fd-exhaustion trigger or
+the three instrumentation variants.
+
+```
+cd lab/apache2shell
+L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 python3 l8-lane.py 20
+```
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -859,6 +904,8 @@ ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy \
 bash build-l6.sh                                # ASan builds with mod_charset_lite
 python3 l6-lane.py 2.4.68 2.4.69               # L6: UBSan index-8 vs clean control
 python3 l7-lane.py 2.4.67 2.4.68               # L7: state-dir PROPFIND 207 vs 403
+L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 \
+  python3 l8-lane.py 20                         # L8: EMFILE trigger, no confirmed UAF
 ```
 
 
