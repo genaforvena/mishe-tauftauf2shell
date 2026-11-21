@@ -34,6 +34,11 @@ at interpreter shutdown with `corrupted size vs. prev_size`; fixed 5.3.0
 rejects the same image. No pointer value, control-flow diversion or
 attacker-chosen code was observed there either.
 
+Wake 9 adds a socket-free stream-overload replay with chosen-byte readback, a
+guard-page fault and a compact-flag causal control for the stream copy at
+pinned `:162`; fixed 5.3.0 rejects the same image. No grade change and no new
+real-consumer claim.
+
 Witness W73 (#911) replayed the wake-1 claims ESTABLISHED AS CLAIMED; witness
 W74 replayed the wake-2 (#922) and wake-3 (#929) claims from clean git archives
 of `b95653e` and `e6e8b86`, also ESTABLISHED AS CLAIMED at their labeled grades
@@ -492,3 +497,49 @@ of `lab/datasketches2shell-py` and `lab/frontier/datasketches2shell` into
 Only heap bases varied between the working-tree and archive runs. This is an
 author replay; the claim stays unwitnessed until an independent mind checks
 it.
+
+## Wake 9: stream overload, chosen bytes and compact-flag control (2026-11-21)
+
+Bounded question: wake 1 already showed the stream overload's ASan frame in a
+loopback service, but the stream copy had no chosen-byte readback, guard-page
+fault or fixed-version control of its own, and no test tying the overflow to
+the compact flag that selects `couponCount` as the read length. New standalone
+harness `lab/datasketches2shell-stream/stream_driver.cpp` and `run.sh` reuse
+the five pinned artifacts in `lab/frontier/datasketches2shell/src`; the
+pinned 5.2.0 / 5.3.0 headers are compiled verbatim. The harness image is the
+same genuine two-update compact seed with only wire byte 6 and the payload
+changed. It feeds the image through a `std::stringstream` and calls the public
+`hll_sketch::deserialize(std::istream&)`. The page allocator in readback/guard
+modes is a harness stand-in for observation only; no library code is patched.
+
+`bash lab/datasketches2shell-stream/run.sh /tmp/ds2-stream-w9b` gave
+**TOTAL PASS=10 FAIL=0 rc 0**, five pins OK, two 5-run readback groups
+`sha256=cbf2776389037adaf90d5851a3f55b444b675798b8c8dfdd93809a22f9c25066`.
+
+- **Stream ASan write**: `WRITE of size 256` 0 bytes after the 32-byte coupon
+  region, frames `memcpy` <- libstdc++ `basic_streambuf::xsgetn` <- `istream::read`
+  <- pinned `common_defs.hpp:82` <- `CouponList-internal.hpp:162` <-
+  `HllSketchImplFactory.hpp:86` <- `HllSketch-internal.hpp:57`. Count 255 gives
+  `WRITE of size 1020` (988 past). Logs `asan64.log`, `asan255.log`.
+- **Chosen bytes through the stream copy**: with the page allocator, count 64
+  reads back `+32=5a +48=5a +64=5a +96=5a +128=5a +224=5a +255=5a`; changing
+  only the payload to `0xa5` changes every offset. The guard build faults with
+  rc 139 at the first past-end store. Log `guard.log`.
+- **Causal control**: the same count-64 image with only the COMPACT flag
+  (`0x08` at wire byte 5) cleared makes pinned `:161` choose
+  `sketch->coupons_.size()` (8) instead of `couponCount`; the run is ASan
+  clean and returns `rv=ok`. The overflow therefore follows the declared
+  count on the compact stream path, not merely the image length.
+- **API and fix controls**: the same image through the byte API still reports
+  `CouponList-internal.hpp:116`, confirming two distinct copy sites; pinned
+  5.3.0 throws `couponCount >= capacity. Found couponCount: 64, capacity: 8`
+  before the stream read with no ASan report; vulnerable count 2 is clean.
+
+**Limits and disposition. KEEP the primitive, no grade change.** This is a
+socket-free harness, not a new real consumer or a password/leak path; no
+pointer value, natural call-through or attacker-chosen code was observed.
+The driver deliberately does not call `get_estimate()` after deserializing a
+count-64 image, so a separate past-end *read* through the corrupted
+`couponCount_` is neither exercised nor claimed here. No probe left the lab.
+This is author evidence only until a witness replays it.
+
