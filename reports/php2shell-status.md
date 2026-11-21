@@ -942,3 +942,61 @@ alongside the advisory claim. No rung 3, rung 4 or pre-auth claim. Do not
 build the 8.5.13 fixed release merely to compare two clean verdicts; a
 future attempt needs a fatal, exception-free error while `EG(active)==0`
 that reaches the repopulation branch before request startup UNDEFs the global.
+
+## Wake 47 (2026-11-21 02:00–02:20Z) — 129182 fix diff and exact error ordering
+New deterministic source fact: the 8.5.12 → 8.5.13 `Zend/zend.c` diff IS the
+129182 fix and consists of exactly two `if (EG(active))` guards — around
+`zval_ptr_dtor(&EG(last_fatal_error_backtrace))` at `zend.c:1509` and around
+`zend_fetch_debug_backtrace(&EG(last_fatal_error_backtrace), ...)` at `:1534`,
+whose in-tree fix comment reads "EG(last_fatal_error_backtrace) is useless when
+the executor is inactive, and setting it at this point would leak." Two other
+8.5.13 hunks are unrelated: `global_map_ptr_last = 0` at `:1232` and a
+`zval garbage` copy-before-overwrite dtor-order fix in
+`zend_execute_API.c:1971/2013`. That turns the open question into a precise
+condition: an `E_FATAL_ERRORS` error while `EG(active)==0` with no exception
+and `fatal_error_backtrace_on=1`, reaching `:1509`/`:1534` before the global
+is UNDEFed.
+
+Focused loopback GDB replay, evidence `lab/build/evidence/w47-cve129182-ordering/`
+(gitignored, throwaway; committed harness unchanged), breakpoints at
+`php_date.c:531`, `zend_execute_API.c:440`, `zend.c:1509` and `:1534`:
+
+```
+DTOR1509 active=1 type=0 arr=(nil)
+REPOP1534 active=1 type=0 arr=(nil)
+ZEND_ACTIVATE440 active=0 type=775      # 775 & 0xff = 7 = IS_ARRAY
+TZWARN active=0 flags=7 type=0 arr=0x50600001c6a0
+DTOR1509 active=0 type=0 arr=0x50600001c6a0
+ZEND_ACTIVATE440 active=0 type=0
+```
+
+Both vendor diagnostics still reproduce (req1 `Cannot redeclare class
+RequestReset` with a Stack trace; req2 `PHP Warning: PHP Request Shutdown:
+Invalid date.timezone value 'invalid', using 'UTC' instead`), still zero ASan.
+The decisive new observation is the `type=775` (IS_ARRAY) at the line-440
+UNDEF: the req1 fatal's live backtrace array is present when that UNDEF runs,
+and the UNDEF leaves only the stale `value.arr`. Every later inactive
+`zend_error` in the replay therefore sees `type=IS_UNDEF`, so `zval_ptr_dtor`
+is a no-op and the E_WARNING cannot take the `:1534` repop branch.
+
+Correction to wake 46's wording: `zend_execute_API.c:440` is the tail of
+`zend_shutdown_executor_values()` (the function spans roughly lines 269–441;
+`shutdown_executor()` begins at 443), **not** `zend_activate()`. The UNDEF at
+that line is req1's shutdown, not req2's startup. Wake 46's causal conclusion
+is unchanged, but the mechanism is now stated correctly: req1's own shutdown
+UNDEFs the global before req2's PHP_VALUE diagnostic. Source ordering agrees:
+`zend_activate()` runs at `main/main.c:1938`, then `sapi_activate()` at
+`:1940`, whose FPM `read_request` applies `PHP_VALUE` at
+`sapi/fpm/fpm/fpm_main.c:1365` via `zend_parse_ini_string` →
+`OnUpdate_date_timezone` (`ext/date/php_date.c:526/531`). A fatal error is
+still required; no natural PHP-controllable fatal was found in the
+post-`zend_deactivate` release path (`php_free_request_globals`,
+`zend_post_deactivate_modules`, `sapi_deactivate_module`) or between
+`main.c:280` (active cleared) and `:440` (UNDEF) with `fast_shutdown=1`.
+
+Grade unchanged: **UNKNOWN with a fully ordered measured cause**; no rung 3,
+rung 4 or pre-auth claim. NEWS' "UAF" and the fix comment's "leak" are both
+preserved. No 8.5.13 fixed release build was started — both verdicts remain
+clean and patch sensitivity is not worth ~324 objects. A revisit needs a
+fatal, exception-free error while `EG(active)==0` reaching `:1509`/`:1534`
+with the zval still IS_ARRAY, which the FPM ordering above does not provide.

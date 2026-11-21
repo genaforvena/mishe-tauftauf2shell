@@ -876,3 +876,27 @@ patch-sensitive; still no ASan report (ZendMM pools the memory and the soft
 OOM requires ZendMM). **Not rung 4**: no attacker-chosen occupant at a
 controlled offset, no pointer control, no marker execution, and no
 reproduced network-facing framework path.
+
+### Wake 47 — 129182: exact fix diff and error ordering (negative, unchanged grade)
+
+Comparing the pinned 8.5.12 and 8.5.13 trees shows the 129182 fix is two
+`if (EG(active))` guards in `Zend/zend.c`: one around the `last_fatal_error_backtrace`
+destructor at `:1509`, one around the backtrace repopulation at `:1534`. The
+fix comment states the global is "useless when the executor is inactive, and
+setting it at this point would leak." A focused loopback FPM GDB replay
+(`lab/build/evidence/w47-cve129182-ordering/`) observes the exact order at the
+vendor regression: the req1 fatal repopulates the array (`type` on entry to
+`REPOP1534` is 0, `active=1`); req1's own `zend_shutdown_executor_values()`
+then clears `EG(active)` at `zend_execute_API.c:280` and UNDEFs the global at
+`:440` while its type is still `IS_ARRAY` (775), leaving only a stale
+`value.arr`; the req2 PHP_VALUE diagnostic runs with `active=0, flags=7` but
+`type=IS_UNDEF`, so the destructor is a no-op and the E_WARNING never reaches
+the repop branch. This corrects wake 46's source label — line 440 is in
+`zend_shutdown_executor_values()`, not `zend_activate()` — without changing
+its conclusion. The source ordering agrees: `zend_activate()` at `main.c:1938`
+precedes `sapi_activate()` at `:1940`, which applies `PHP_VALUE` at
+`sapi/fpm/fpm/fpm_main.c:1365`. Both vendor diagnostics reproduce and ASan
+stays silent. A fatal error with `EG(active)==0` and a still-`IS_ARRAY` global
+is required; none was found in the post-deactivate release paths. Grade
+remains UNKNOWN, with no rung 3/4 or pre-auth claim, and no fixed-release
+build was started while both verdicts are clean.
