@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x37798: file /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c, line 277.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[2026/11/21 12:55:28:0702] N: lws_create_context: LWS: 4.3.10-b073121, NET CLI SRV H1 H2 ConMon IPv6-absent
+[2026/11/21 12:55:28:0805] N: __lws_lc_tag:  ++ [wsi|0|pipe] (1)
+[2026/11/21 12:55:28:0805] N: __lws_lc_tag:  ++ [vh|0|netlink] (1)
+[2026/11/21 12:55:28:0805] N: __lws_lc_tag:  ++ [vh|1|default|127.0.0.1|127.0.0.1|18823] (2)
+[2026/11/21 12:55:28:0809] N: [vh|1|default|127.0.0.1|127.0.0.1|18823]: lws_socket_bind: source ads 127.0.0.1
+[2026/11/21 12:55:28:0809] N: __lws_lc_tag:  ++ [wsi|1|listen|default|127.0.0.1|18823] (2)
+[2026/11/21 12:55:28:0809] N: server: listening 127.0.0.1:18823, max_http_header_data=32
+[2026/11/21 12:55:29:9817] N: __lws_lc_tag:  ++ [wsisrv|0|adopted] (1)
+[2026/11/21 12:55:29:9819] N: __lws_lc_tag:  ++ [mux|0|h2_sid1_(wsisrv|0|adopted])] (1)
+
+Breakpoint 1, lws_frag_append (wsi=0x5555555cf590, c=55 '7') at /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+277		ah->data[ah->pos++] = (char)c;
+OOB-ENTRY pos=32 c=0x37 target=0x5555555cfdf0
+278		ah->frags[ah->nfrag].len++;
+READBACK data[32]=0x37 chosen=0x37

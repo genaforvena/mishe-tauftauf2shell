@@ -1,0 +1,70 @@
+[2026/11/21 12:55:46:8150] N: lws_create_context: LWS: 5.0.0-d72ad24, OpenSSL 3.0.13 30 Jan 2024, NET CLI SRV H1 H2 SS-JSON-POL ConMon IPV6-on
+=================================================================
+==3367587==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7778f6f00070 at pc 0x7778fa2fa97d bp 0x7ffeb337ccb0 sp 0x7ffeb337c458
+WRITE of size 28 at 0x7778f6f00070 thread T0
+    #0 0x7778fa2fa97c in memset ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87
+    #1 0x62b3551badaf in lws_sa46_parse_numeric_address /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:947
+    #2 0x62b3552e1ed5 in lws_interface_to_sa /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/plat/unix/unix-sockets.c:451
+    #3 0x62b3551b5a1d in interface_to_sa /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:96
+    #4 0x62b3551b72ef in lws_socket_bind /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:396
+    #5 0x62b3552326c1 in _lws_vhost_init_server_af /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/roles/http/server/server.c:137
+    #6 0x62b355236695 in _lws_vhost_init_server /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/roles/http/server/server.c:581
+    #7 0x62b3551cb748 in lws_create_vhost /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/vhost.c:1238
+    #8 0x62b355168cc1 in lws_create_context /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core/context.c:1578
+    #9 0x62b355161264 in main ../h2server.c:65
+    #10 0x7778f902a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x7778f902a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x62b355160c64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/h2server5r+0x52c64) (BuildId: d384fc8d2c2e15749565b685820deffd18cf2407)
+
+Address 0x7778f6f00070 is located in stack of thread T0 at offset 112 in frame
+    #0 0x62b3551b6bf1 in lws_socket_bind /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v5.0.0/lib/core-net/network.c:293
+
+  This frame has 11 object(s):
+    [48, 52) 'len' (line 304)
+    [64, 68) 'uid' (line 467)
+    [80, 84) 'gid' (line 468)
+    [96, 112) 'serv_addr4' (line 301)
+    [128, 156) 'serv_addr6' (line 298) <== Memory access at offset 112 partially underflows this variable
+    [192, 302) 'serv_unix' (line 295)
+    [336, 464) 'sin' (line 310)
+    [496, 512) 't16' (line 437)
+    [528, 544) 't16' (line 448)
+    [560, 576) 't16' (line 503)
+    [592, 664) 'buf' (line 528)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87 in memset
+Shadow bytes around the buggy address:
+  0x7778f6effd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7778f6effe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7778f6effe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7778f6efff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7778f6efff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7778f6f00000: f1 f1 f1 f1 f1 f1 04 f2 04 f2 04 f2 00 00[f2]f2
+  0x7778f6f00080: 00 00 00 04 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x7778f6f00100: 00 00 00 00 00 06 f2 f2 f2 f2 00 00 00 00 00 00
+  0x7778f6f00180: 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2 00 00
+  0x7778f6f00200: f2 f2 00 00 f2 f2 00 00 f2 f2 00 00 00 00 00 00
+  0x7778f6f00280: 00 00 00 f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+[2026/11/21 12:55:46:9128] W: [null wsi]: lws_socket_bind: setsockopt bind to device 127.0.0.1 error fd 7 (19)
+[2026/11/21 12:55:46:9129] N: server: listening 127.0.0.1:18830, max_http_header_data=32
+[2026/11/21 12:55:48:3503] N: lws_hpack_interpret: frag app fail

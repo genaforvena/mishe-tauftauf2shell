@@ -1,0 +1,81 @@
+[2026/11/21 12:52:49:9395] N: lws_create_context: LWS: 4.3.10-7f3c703, NET CLI SRV H1 H2 ConMon IPv6-absent
+[2026/11/21 12:52:49:9507] N: __lws_lc_tag:  ++ [wsi|0|pipe] (1)
+[2026/11/21 12:52:49:9508] N: __lws_lc_tag:  ++ [vh|0|netlink] (1)
+[2026/11/21 12:52:49:9510] N: __lws_lc_tag:  ++ [vh|1|default|127.0.0.1|127.0.0.1|18790] (2)
+[2026/11/21 12:52:49:9519] N: [vh|1|default|127.0.0.1|127.0.0.1|18790]: lws_socket_bind: source ads 127.0.0.1
+[2026/11/21 12:52:49:9519] N: __lws_lc_tag:  ++ [wsi|1|listen|default|127.0.0.1|18790] (2)
+[2026/11/21 12:52:49:9520] N: server: listening 127.0.0.1:18790, max_http_header_data=32
+[2026/11/21 12:52:50:9639] N: __lws_lc_tag:  ++ [wsisrv|0|adopted] (1)
+[2026/11/21 12:52:50:9642] N: __lws_lc_tag:  ++ [mux|0|h2_sid1_(wsisrv|0|adopted])] (1)
+=================================================================
+==3301456==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000120 at pc 0x58877eb53d6d bp 0x7fff3916bb20 sp 0x7fff3916bb10
+WRITE of size 1 at 0x503000000120 thread T0
+    #0 0x58877eb53d6c in lws_frag_append /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+    #1 0x58877eb5cf1e in lws_hpack_interpret /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:1168
+    #2 0x58877eb4d034 in lws_h2_parser /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/http2.c:2128
+    #3 0x58877eb526bc in lws_read_h2 /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/http2.c:2865
+    #4 0x58877eb61649 in rops_handle_POLLIN_h2 /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/ops-h2.c:311
+    #5 0x58877eaf0c51 in lws_service_fd_tsi /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/core-net/service.c:766
+    #6 0x58877eb80da9 in _lws_plat_service_forced_tsi /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/plat/unix/unix-service.c:51
+    #7 0x58877eb81d77 in _lws_plat_service_tsi /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/plat/unix/unix-service.c:216
+    #8 0x58877eb81e88 in lws_plat_service /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/plat/unix/unix-service.c:235
+    #9 0x58877eaf1185 in lws_service /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/core-net/service.c:838
+    #10 0x58877eaa8a6e in main ../h2server.c:74
+    #11 0x705891e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #12 0x705891e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #13 0x58877eaa83c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/h2server2+0x393c4) (BuildId: 7fe1f39b34e3163ae5390dd4949f19860d24111c)
+
+0x503000000120 is located 0 bytes after 32-byte region [0x503000000100,0x503000000120)
+allocated by thread T0 here:
+    #0 0x7058930fc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x58877eb9d732 in _realloc /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/core/alloc.c:133
+    #2 0x58877eb9d7c4 in lws_realloc /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/core/alloc.c:154
+    #3 0x58877eb07e4b in _lws_create_ah /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/http/parsers.c:50
+    #4 0x58877eb0a089 in lws_header_table_attach /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/http/parsers.c:257
+    #5 0x58877eb43f76 in lws_h2_parse_frame_header /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/http2.c:1324
+    #6 0x58877eb50a0c in lws_h2_parser /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/http2.c:2478
+    #7 0x58877eb526bc in lws_read_h2 /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/http2.c:2865
+    #8 0x58877eb61649 in rops_handle_POLLIN_h2 /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/ops-h2.c:311
+    #9 0x58877eaf0c51 in lws_service_fd_tsi /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/core-net/service.c:766
+    #10 0x58877eb80da9 in _lws_plat_service_forced_tsi /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/plat/unix/unix-service.c:51
+    #11 0x58877eb81d77 in _lws_plat_service_tsi /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/plat/unix/unix-service.c:216
+    #12 0x58877eb81e88 in lws_plat_service /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/plat/unix/unix-service.c:235
+    #13 0x58877eaf1185 in lws_service /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/core-net/service.c:838
+    #14 0x58877eaa8a6e in main ../h2server.c:74
+    #15 0x705891e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x705891e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x58877eaa83c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/h2server2+0x393c4) (BuildId: 7fe1f39b34e3163ae5390dd4949f19860d24111c)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277 in lws_frag_append
+Shadow bytes around the buggy address:
+  0x502ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x502fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x502fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503000000000: fa fa 00 00 00 fa fa fa 00 00 01 fa fa fa 00 00
+  0x503000000080: 04 fa fa fa 00 00 00 fa fa fa 00 00 00 00 fa fa
+=>0x503000000100: 00 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3301456==ABORTING

@@ -2,7 +2,7 @@
 """Loopback-only HTTP/2 prior-knowledge client: one HEADERS with a long :path.
 
 Sends the HTTP/2 connection preface, an empty SETTINGS frame and one HEADERS
-frame whose HPACK-decoded :path is PATHLEN bytes.  No external addresses.
+frame whose HPACK-decoded :path is PATHLEN+1 bytes (leading '/' plus PATHLEN filler bytes).  No external addresses.
 """
 import socket
 import struct

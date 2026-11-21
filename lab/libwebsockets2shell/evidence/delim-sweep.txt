@@ -1,0 +1,42 @@
+=== sweep-30-&-37.log ===
+==3319123==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000120 at pc 0x61d5e07e3d6d bp 0x7fffc99142f0 sp 0x7fffc99142e0
+WRITE of size 1 at 0x503000000120 thread T0
+    #0 0x61d5e07e3d6c in lws_frag_append /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+    #1 0x61d5e07ecf1e in lws_hpack_interpret /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:1168
+0x503000000120 is located 0 bytes after 32-byte region [0x503000000100,0x503000000120)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277 in lws_frag_append
+=== sweep-30-&-5a.log ===
+==3315883==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000120 at pc 0x636e8adc0d6d bp 0x7ffe86391d40 sp 0x7ffe86391d30
+WRITE of size 1 at 0x503000000120 thread T0
+    #0 0x636e8adc0d6c in lws_frag_append /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+    #1 0x636e8adc9f1e in lws_hpack_interpret /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:1168
+0x503000000120 is located 0 bytes after 32-byte region [0x503000000100,0x503000000120)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277 in lws_frag_append
+=== sweep-30-&-a5.log ===
+==3316299==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000120 at pc 0x65316bbf6d6d bp 0x7ffc0c5fb630 sp 0x7ffc0c5fb620
+WRITE of size 1 at 0x503000000120 thread T0
+    #0 0x65316bbf6d6c in lws_frag_append /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+    #1 0x65316bbfff1e in lws_hpack_interpret /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:1168
+0x503000000120 is located 0 bytes after 32-byte region [0x503000000100,0x503000000120)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277 in lws_frag_append
+=== sweep-30-;-5a.log ===
+==3317116==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000120 at pc 0x5d27e00d0d6d bp 0x7ffe355a6f60 sp 0x7ffe355a6f50
+WRITE of size 1 at 0x503000000120 thread T0
+    #0 0x5d27e00d0d6c in lws_frag_append /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+    #1 0x5d27e00d9f1e in lws_hpack_interpret /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:1168
+0x503000000120 is located 0 bytes after 32-byte region [0x503000000100,0x503000000120)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277 in lws_frag_append
+=== sweep-30-?-5a.log ===
+==3318247==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000120 at pc 0x59aa05bf7d6d bp 0x7fff2b787fe0 sp 0x7fff2b787fd0
+WRITE of size 1 at 0x503000000120 thread T0
+    #0 0x59aa05bf7d6c in lws_frag_append /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+    #1 0x59aa05c00f1e in lws_hpack_interpret /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:1168
+0x503000000120 is located 0 bytes after 32-byte region [0x503000000100,0x503000000120)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277 in lws_frag_append
+=== sweep-31-&-5a.log ===
+==3316671==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000121 at pc 0x5c059ddfcd6d bp 0x7ffcfcadbe10 sp 0x7ffcfcadbe00
+WRITE of size 1 at 0x503000000121 thread T0
+    #0 0x5c059ddfcd6c in lws_frag_append /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277
+    #1 0x5c059de05f1e in lws_hpack_interpret /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:1168
+0x503000000121 is located 1 bytes after 32-byte region [0x503000000100,0x503000000120)
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/libwebsockets2shell-src/v4.3.10/lib/roles/h2/hpack.c:277 in lws_frag_append

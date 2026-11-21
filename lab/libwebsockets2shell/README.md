@@ -52,8 +52,9 @@ python3 h2client.py 18780 65        # or 200 / 201
 ```
 
 `h2server.c` binds only 127.0.0.1 and sets `max_http_header_data = 32`.
-`h2client.py` sends the HTTP/2 preface, empty SETTINGS and one HEADERS
-frame whose HPACK literal `:path` (static index 5) decodes to N bytes.
+`h2client.py` sends the HTTP/2 preface, empty SETTINGS and one HEADERS frame
+whose HPACK literal `:path` (static index 5) decodes to N+1 bytes (leading `/`
+from the client plus N filler bytes).
 
 `trace.gdb` logs every store at raw `hpack.c:277`:
 
@@ -65,17 +66,49 @@ python3 h2client.py 18783 65
 
 ## Observations (2026-11-21 W1)
 
-- v4.3.10, path lengths 8/16/30/31/32/33/64/100/200/201:
-  `http/2 prior knowledge`, `http2: ... established`, then
+- v4.3.10, preserved raw logs for client args 65 and 201 (decoded 66 and
+  202): `http/2 prior knowledge`, `http2: ... established`, then
   `lws_hpack_interpret: frag app fail` and `lws_h2_parser: hpack failed`;
-  no hpack ASan report.
+  no hpack ASan report. W70's independent replay saw neither fail at arg 8
+  and only `hpack failed` at arg 30; the bottom line is unchanged. The gdb
+  trace additionally covered args 8/16/30/31/32/33/64/100/200.
 - gdb: 253 real stores across nine lengths, every one with `max=32` and
   `pos` in `0..31`, including NUL stores at `pos=9,13,18,28,31,...`.
   No store ever entered at `pos >= 32`.
-- Source audit: `:277` is the only H2 mutation of `ah->pos`; callers
-  `:286`, `:744`, `:1168` all check the post-write return; `ah->data` is a
-  separate `lws_malloc(data_size)` (`parsers.c:50`).
+- Source audit (W1): `:277` is the only direct `ah->pos` mutation in
+  `hpack.c`; callers `:286`, `:744`, `:1168` all check the post-write return;
+  `ah->data` is a separate `lws_malloc(data_size)` (`parsers.c:50`). W2 found
+  that `lws_parse_urldecode` also mutates `ah->pos` (section below).
 - v5.0.0 control: same `frag app fail` / `hpack failed`, no hpack ASan.
 
 Raw logs are in `evidence/`. `gdb-boundaries.log` and `gdb-path65.log` are
 complete gdb traces; the server logs include routine lws diagnostics.
+
+## Confirmed URI-delimiter route (W2, 2026-11-21)
+
+The W1 negative is specific to a plain long `:path`. `lws_parse_urldecode`
+also mutates `ah->pos`: a literal `&`, `;` or `?` in `:path` takes the
+delimiter branch (`parsers.c:862-874` / `:978`), where `issue_char` writes a
+NUL and `++ah->pos` advances again with no bounds check. The next literal
+path byte reaches `hpack.c:1168` with `pos >= limit`, so the pinned `:277`
+store lands past the arena.
+
+Reproduce against the same ASan server (loopback only):
+
+```
+ASAN_OPTIONS=detect_leaks=0 ./h2server2 18781 7 > delim.log 2>&1 &
+python3 h2client-delim.py 18781 30 '&' 5a
+```
+
+`h2client-delim.py PORT PREFIX DELIM MARKER [TAIL]` sends `/` + `A`*(PREFIX-1)
++ DELIM + MARKER*TAIL; MARKER may be a two-digit hex byte. PREFIX 30 enters
+the delimiter at `pos=30` and stores the marker at `data[32]`; PREFIX 31
+stores at `data[33]`.
+
+Observed: ASan `WRITE of size 1` at raw `hpack.c:277` from `hpack.c:1168`,
+0 or 1 bytes after the 32-byte arena; markers `5a`/`a5`/`37` and delimiters
+`&`/`;`/`?` all fault. gdb on a non-ASan Debug build of the same pinned tree:
+`OOB-ENTRY pos=32 c=0x37` then `READBACK data[32]=0x37` (also `0x5a`). v5.0.0
+with the same frame gives `frag app fail` and no hpack ASan. Raw logs in
+`evidence/`. No pointer or execution claim; witness replay pending.
+

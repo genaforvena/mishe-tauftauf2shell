@@ -1,15 +1,18 @@
 # Frontier brief — libwebsockets HTTP/2 HPACK path OOB write (Libwebsockets2Shell)
 
 **Status: brief + harness COMPLETE, admitted by the operator 2026-11-21
-12:25Z; witness W68 verdict ESTABLISHED AS CLAIMED at the labeled grade.**
+12:25Z; witness W68 verdict ESTABLISHED AS CLAIMED at the harness grade;
+witness W70 replayed the W1 real-build negative ESTABLISHED AS CLAIMED.**
 Rungs 1/2/3 ESTABLISHED in an extracted, verbatim-pin harness; rung 4 shows
 attacker-chosen bytes at chosen offsets just past a bounded header arena in an
-instrumented collaborator only. A loopback real-build check (below) shows the
-claimed long-`:path` route does **not** reach the past-end store in v4.3.10:
-the real caller stops at the boundary. No real heap neighbour, pointer,
-control-flow diversion or execution was observed — all stay UNKNOWN. The
-advisory's "execute arbitrary code" is a claim to reproduce, not a result
-obtained here.
+instrumented collaborator only. A loopback real-build check (W1) shows a plain
+long-`:path` route does **not** reach the past-end store in v4.3.10. A second,
+URI-delimiter route (W2, below) **does**: a real unauthenticated HTTP/2 HEADERS
+frame produces an ASan `WRITE of size 1` at pinned `hpack.c:277`, byte-exact
+chosen-marker writes at chosen offsets 32/33, and no write at v5.0.0. No live
+pointer neighbour, control-flow diversion or execution was observed — all stay
+UNKNOWN. The advisory's "execute arbitrary code" is a claim to reproduce, not
+a result obtained here. The W2 finding awaits independent witness replay.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -56,11 +59,11 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
    the attacker-supplied HPACK `:path` value (optionally Huffman-decoded
    earlier in the same function).
 2. `:1168` calls `lws_frag_append(wsi, c1)` and returns on a nonzero result.
-   Raw `:280` returns true once `pos >= max_http_header_data`, so this real
-   caller stops when the arena fills: it cannot supply a chosen byte at
-   `pos == limit`. The harness hand-stages that precondition
-   (`gen_driver.py:106`, chain mode `:122`); the naive real route is closed
-   by the build check below and any other route stays UNKNOWN.
+   Raw `:280` returns true once `pos >= max_http_header_data`, so this caller
+   stops once the arena fills. The harness hand-stages `pos == limit`
+   (`gen_driver.py:106`, chain mode `:122`); a plain long `:path` cannot reach
+   it, but a URI delimiter in `:path` makes `lws_parse_urldecode` advance
+   `ah->pos` unchecked before the next append (W2, below).
 3. `:273-281` is `lws_frag_append`: `:275` fetches `wsi->http.ah`; `:277`
    executes `ah->data[ah->pos++] = (char)c` with no prior bound check;
    `:280` tests `pos >= max_http_header_data` only **after** the store. The
@@ -68,12 +71,15 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
    `allocated_headers.data`, so a staged `pos == limit` puts the next stored
    byte one past that arena. The post-write check is the consumer detail
    that blocks the naive long-`:path` route.
-4. All three real call sites (`:286`, `:744`, `:1168`) check the return, so
-   the reachable primitive on the real path is UNKNOWN, not an observed
-   chosen byte. The terminating NUL from `lws_frag_end` — raw v4.3.10
+4. All three real call sites (`:286`, `:744`, `:1168`) check the return, but
+   `lws_parse_urldecode` (`parsers.c:794`, called at `hpack.c:1151`) mutates
+   `ah->pos` itself: a literal `&`, `;` or `?` in `:path` reaches
+   `parsers.c:874` / `:978`, where `++ah->pos` has no bounds check after
+   `issue_char` has written a NUL. That is how the W2 frame enters `:277`
+   with `pos >= limit`. The terminating NUL from `lws_frag_end` — raw v4.3.10
    `:283-294`, calling `lws_frag_append(wsi, 0)` at `:286` (`:289` is a
-   comment) — was not exercised in the harness; the real-build check below
-   did observe NUL stores, still inside the arena. The `:283-295` / `:289`
+   comment) — was not exercised in the harness; the W1 real-build check did
+   observe NUL stores, still inside the arena. The `:283-295` / `:289`
    call-site numbering belongs to v5.0.0 (`:286-297` / `:289`), not v4.3.10.
 5. Fixed `v5.0.0:277-278` rejects `pos >= max_http_header_data` before the
    store; `:280` is the same assignment. The fix patch adds exactly that
@@ -113,10 +119,15 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
 ## Rung-4 feasibility assessment
 
 The harness primitive is a chosen-byte write at chosen offsets past a bounded
-arena (rung 4 INSTRUMENTED). It is not a real-path demonstration: the harness
-hand-stages `pos == limit`, allocates the arena alone, and observes neither a
-real chunk neighbour nor a pointer nor diverted control flow. The real
-consumer check below shows the naive long-`:path` route stops at the boundary.
+arena (rung 4 INSTRUMENTED): it hand-stages `pos == limit`, allocates the arena
+alone, and observes neither a real chunk neighbour nor a pointer nor diverted
+control flow. W1 showed the plain long-`:path` route stops at the boundary in
+a stock v4.3.10 build. W2 found and confirmed a different route: a URI
+delimiter in `:path` advances `ah->pos` to the limit between stages, so the
+real server executes the same pinned store past the real 32-byte arena. That
+is chosen bytes at chosen offsets on the real build, with byte-exact readback
+and a v5.0.0 control; pointer control, control-flow diversion and the RCE
+claim remain UNKNOWN and need a separate observation.
 
 ## Real-build consumer-reality check (2026-11-21, W1, NEGATIVE)
 
@@ -143,11 +154,12 @@ Observed on v4.3.10 (raw logs in `lab/libwebsockets2shell/evidence/`):
   path lengths (8/16/30/31/32/33/64/100/200): every store had `max=32` and
   `pos` in 0..31, including NUL stores at `pos=9,13,18,28,31,...`. No call
   entered the store at `pos >= 32`.
-- Source audit of the full v4.3.10 tree: `:277` is the only mutation of
-  `ah->pos` in H2, all three call sites (`:286`, `:744`, `:1168`) check the
-  post-write return, and `_lws_create_ah` allocates `ah->data` as a separate
-  `lws_malloc(data_size)` (`parsers.c:50`) — no live pointer sits inline
-  after the arena.
+- Source audit of the full v4.3.10 tree (W1): `:277` is the only *direct*
+  `ah->pos` mutation in `hpack.c`, all three call sites (`:286`, `:744`,
+  `:1168`) check the post-write return, and `_lws_create_ah` allocates
+  `ah->data` as a separate `lws_malloc(data_size)` (`parsers.c:50`) — no live
+  pointer sits inline after the arena. W2 qualified this: `lws_parse_urldecode`
+  also mutates `ah->pos` (below).
 
 v5.0.0 control (`h2server5r`, recoverable ASan): same `frag app fail` /
 `hpack failed`, no hpack ASan. Its startup alone reports an unrelated
@@ -156,17 +168,62 @@ v5.0.0 control (`h2server5r`, recoverable ASan): same `frag app fail` /
 `-fsanitize-recover=address` kept the control running. That finding is not
 CVE-2026-19773.
 
-**Disposition**: for the claimed HPACK `:path` route in a stock v4.3.10
-server, a chosen-byte one-past-end write was NOT observed; the post-write
-check at `:280` and the caller return close it. Rung 4 real-path stays
-UNKNOWN/negative for this route and the harness's INSTRUMENTED grade is
-unchanged. Pointer control, control-flow diversion and the advisory's RCE
-remain undemonstrated. Other possible routes were not exercised and stay
-UNKNOWN.
+**Disposition**: for a *plain* long-`:path` frame with no URI delimiter in a
+stock v4.3.10 server, a chosen-byte one-past-end write was NOT observed; the
+post-write check at `:280` and the caller return close that route. It stays
+a preserved negative and must not be retried into existence. W2 below then
+exercised a different route and reversed the real-path UNKNOWN for chosen-byte
+control only; pointer control, control-flow diversion and the advisory's RCE
+remain undemonstrated.
+
+## Real-build URI-delimiter route (2026-11-21, W2, CONFIRMED chosen-byte OOB)
+
+Source audit of the pinned v4.3.10 tree found that `lws_parse_urldecode`
+(`parsers.c:794`), called from the H2 `:path` value loop at `hpack.c:1151`,
+mutates `ah->pos` itself. A literal `&`, `;` or `?` in `:path` takes the
+`URIPS_IDLE` delimiter branch (`parsers.c:862-874`, `:977-978`): `issue_char`
+writes the NUL at `pos <= max-1`, then `ah->frags[nfrag].offset = ++ah->pos`
+advances once more with no bounds check. The branch returns LPUR_SWALLOW, so
+that delimiter byte is not appended; the next literal path byte returns
+LPUR_CONTINUE and reaches `hpack.c:1168` with `pos >= limit`. The post-write
+check at `:280` then fires only after the chosen byte has been stored.
+
+`lab/libwebsockets2shell/h2client-delim.py` builds such a frame (preface,
+empty SETTINGS, one HEADERS with literal `:path` static index 5). Against the
+same ASan v4.3.10 server (`max_http_header_data=32`, 127.0.0.1 only):
+
+- six cases — `&`, `;`, `?` delimiters; markers `0x37`, `0x5a`, `0xa5`;
+  prefix 30 and 31 — all fault with ASan `WRITE of size 1` at raw
+  `hpack.c:277` called from `hpack.c:1168`, via `lws_h2_parser` at `http2.c:2128`.
+- `evidence/v4-delim-5a-asan.log`: address is 0 bytes after the 32-byte
+  `ah->data` region allocated at `_lws_create_ah` (`parsers.c:50`); full
+  symbolised stack and shadow bytes.
+- `evidence/delim-sweep.txt`: prefix 30 -> offset 32 (0 bytes after), prefix
+  31 -> offset 33 (1 byte after). Offsets are chosen by the frame.
+- `evidence/gdb-delim-entry.log`: breakpoint at raw `:277` records entry
+  `pos=32 c=0x37 max=32`, proving the store starts at the limit.
+- `evidence/gdb-delim-readback-37.log` / `-5a.log`: on a non-ASan Debug build
+  of the same pinned tree, stepping past the store reads `data[32]=0x37` and
+  `data[32]=0x5a` — the attacker's marker, byte-exact. `0x5a` and `0x37` are
+  not the `malloc` fill value, so this is chosen-value control, not an
+  incidental heap byte.
+- `evidence/v5-delim-control.log`: the same frame on v5.0.0 gives `frag app
+  fail` and **no** `hpack.c:277` ASan report; its pre-connection
+  `lws_sa46_parse_numeric_address` overflow (`network.c:947`) is unrelated.
+
+This is a real, unauthenticated loopback HTTP/2 frame driving a chosen-byte
+write to a chosen offset just past the real header arena: the harness's rung-4
+INSTRUMENTED claim now has a real-build counterpart. It is not pointer
+control, not a corrupted neighbour value, and not execution: no live pointer
+was observed adjacent to the arena and no control-flow diversion was
+demonstrated. Await independent witness replay.
 
 ## Scope and boundaries
 
-Loopback-only local process drivers and a loopback server; no external
-probe. Every socket was 127.0.0.1. No real heap neighbour, pointer or
-execution claim. Sources were fetched read-only as provisioning. Harness
-stand-ins and the exact copied ranges are enumerated in `PROVENANCE.md`.
+Loopback-only local process drivers and loopback servers; no external
+probe. Every socket was 127.0.0.1. W1/W2 used ASan+UBSan Debug builds of the
+pinned tags; W2's byte-exact readback used an additional non-ASan Debug build
+of the same pinned v4.3.10 tree. No real heap neighbour, pointer or execution
+claim. Sources were fetched read-only as provisioning. Harness stand-ins and
+the exact copied ranges are enumerated in `PROVENANCE.md`. The W2 real-path
+chosen-byte claim awaits independent witness replay.
