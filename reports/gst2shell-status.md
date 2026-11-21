@@ -459,8 +459,20 @@ replay). From that clean HEAD at 04:10:50Z,
 `malloc(): unaligned tcache chunk detected`. The per-codec messages shifted
 again between the two replays — the reason the check no longer keys on one
 exact string. The identical 43/0 rc 0 result was also obtained just before
-the commit at HEAD `5d77a13`. The witness's independent re-verification of
-`31e7243` is pending; author replay is not acceptance.
+the commit at HEAD `5d77a13`.
+Independent re-verification is now CLOSED (W33, DM #558, tape 519,
+2026-11-21 ~04:3xZ): the witness re-ran unmodified
+`VERIFY_VALGRIND=1 bash lab/gst2shell-src/verify_all.sh` from a clean archive
+at HEAD `2a78ee6` and got **43 PASS / 0 FAIL, rc 0, ALL CLAIMS REPRODUCED** —
+all three N=1000 legs faulted (L8 dumped core + malloc_consolidate, L16
+Caught SIGSEGV, L24 dumped core + unaligned tcache), trace hash
+`c96ad6f6…f056` and rungs 1/2/3 unchanged, 4 Valgrind checks PASS. Verdict
+REPAIR ESTABLISHED; chosen-byte rung 4 still NOT DEMONSTRATED. Its only note
+was a comment nit (the old checkfault comment said benign N=8 must stay rc=0,
+but the benign rc files show 124/0/124 timeouts and checkfault never reads
+them); corrected at `verify_all.sh:61-63`, `bash -n` clean, committed as
+`3235626`. Author replay alone was never acceptance; this is the independent
+one.
 
 ## Next owner / action
 
