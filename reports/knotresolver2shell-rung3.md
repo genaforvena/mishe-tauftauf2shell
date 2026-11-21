@@ -172,6 +172,70 @@ path would require identifying the kresd object at `buf+6144` and where its
 teardown reads its function pointers; that is a separate bounded wake. Stock
 (ASLR-on) exploitability and any information leak remain UNKNOWN.
 
+## Rung-4 dispatch probe on this host (wake 3, 2026-11-21 ~19:0x–19:2xZ)
+
+Question: is there a call-through pointer in the live neighbour that the F6 OOB
+write can replace with chosen bytes and that is subsequently dispatched?
+Answer: **a live function pointer is overwritten with chosen bytes, but it is
+never called on this host**; rung 4 stays UNKNOWN.
+
+### Identification of the neighbour
+Static resolution of the wake-2 oracle pointers with addr2line, nm and gdb
+`ptype /o`:
+- `slot1+0xa0/+0xa8` = `ngtcp2_ksl_range_compar` / `ngtcp2_ksl_range_search`
+  (`contrib/libngtcp2/ngtcp2/lib/ngtcp2_ksl.c:819,827`). `struct ngtcp2_ksl` is
+  128 bytes with `compar` at +0x58 and `search` at +0x60, so the ksl begins at
+  `slot1+0x48`.
+- Every field then matches: root/front/back at `slot1+0x88/0x90/0x98`,
+  compar/search at `+0xa0/+0xa8`, `n=1`, `keylen=16`, `aligned_keylen=16` at
+  `+0xb0/+0xb8/+0xc0`. `ngtcp2_pktns.rx.max_ack_eliciting_pkt_num` = -1 at
+  `slot1+0xd0` and `buffed_pkts` = NULL at `+0xd8`. The neighbour is an
+  `ngtcp2_pktns` (1632-byte struct); the ksl is its `rx.pngap.gap` tracker.
+- The repeated `0x5555555faf30` words at `slot1+0x60..0x78` and `+0x220..0x238`
+  resolve to `.rodata` (next to `__func__.0` at vaddr 0xa6f20), not code: they
+  are not dispatch pointers. The only genuine function pointers in reach are
+  `+0xa0/+0xa8`.
+
+### Chosen-byte overwrite (observed)
+`harness/ksl_marker.py` places `0x4141414141414141` at
+`body[384+0xa0] = body[544]` together with a coherent ksl (root/front/back and
+search preserved, `n`/`keylen` set). `harness/run_ksl_control.sh` fires F1..F6
+with grooms disabled so the layout matches the oracle. At the F6
+`wire_buf_consume` breakpoint (`len==1198`), `harness/ksl-control-nofollow.txt`
+records:
+```
+F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1198 size=6960
+F6 root=0x7ffff6907710 front=0x7ffff6907710 back=0x7ffff6907710
+F6 compar=0x4141414141414141 search=0x5555555ca5c9 n=1 keylen=16
+0x7ffff68aa0a0: 0x4141414141414141 0x00005555555ca5c9
+```
+This is a deterministic chosen-byte overwrite of a live function-pointer field
+in the adjacent object; the vulnerable `memcpy` at `quic_conn.c:124` is the
+only writer. A hardware read watchpoint was armed on `slot1+0xa0` at that point.
+
+### No call-through (bounded negative)
+- The read watchpoint never fired, with F6 last (`ksl-control-nofollow.txt`)
+  and with three trailing streams forced after F6 (`ksl-control.txt` via
+  `harness/run_ksl_control.sh follow`). kresd stayed alive; no SIGSEGV at the
+  marker address.
+- `harness/ksl-trace.gdb` + `harness/run_ksl_trace.sh` log every post-F6
+  `ngtcp2_ksl_insert`. Four calls occurred, all on other ksls
+  (`0x7ffff68e2008`, `0x7ffff68e1f18`) with `compar=0x5555555ca7ed`
+  (`ngtcp2_ksl_uint64_less`), never on the corrupted target `0x7ffff68aa048`.
+  `ngtcp2_gaptr_push()` (`ngtcp2_gaptr.c:38`, which calls `ksl_insert` →
+  `ksl->compar`) is not invoked on the corrupted pktns in this window.
+- The second ksl in the same pktns (`acktr.ents`, `pktns+0x388` = `slot1+0x388`)
+  lies 90 bytes beyond the 814-byte reachable neighbour span
+  (`slot1+0..0x32d`), so this write cannot reach it either.
+
+### Disposition
+Rung 3 unchanged. Rung 4 remains **UNKNOWN**: chosen bytes reach and replace a
+live function pointer, but no control flow is exercised through it on this
+host. The published gnutls-handler dispatch chain is unavailable in this
+build; an active object would have to be groomed into the +6144 neighbour,
+which was not achieved. All runs were loopback-only under gdb (which disables
+ASLR for its inferior); the host sysctl was untouched.
+
 ## Boundaries
 
 No traffic off 127.0.0.1; no external scanning; no host sysctl changes; ASLR

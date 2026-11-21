@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x74f98: file ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_ksl.c, line 288.
+Breakpoint 2 at 0x2a667: file ../daemon/session2.c, line 781.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+F6 slot1=0x7ffff68aa000 gaptr-ksl-target=0x7ffff68aa048 compar=0x4141414141414141
+POST-F6 KSL-INSERT ksl=0x7ffff68e2008 compar=0x5555555ca7ed target=0x7ffff68aa048
+POST-F6 KSL-INSERT ksl=0x7ffff68e1f18 compar=0x5555555ca7ed target=0x7ffff68aa048
+POST-F6 KSL-INSERT ksl=0x7ffff68e2008 compar=0x5555555ca7ed target=0x7ffff68aa048
+POST-F6 KSL-INSERT ksl=0x7ffff68e1f18 compar=0x5555555ca7ed target=0x7ffff68aa048
