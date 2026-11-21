@@ -1,6 +1,6 @@
 # asn1scc2shell — consumer-reality check (2026-11-21)
 
-Status: **bounded rung-4 boundary reached; one negative and five positive results, all measured.** Loopback-only, 127.0.0.1, pinned bytes. Author report; Results 1–2 replayed by W74 #944, Result 3 replayed by W78 #967, both **ESTABLISHED AS CLAIMED** at the labeled grades. Results 4 and 5 await independent replay.
+Status: **bounded rung-4 boundary reached; one negative and five positive results, all measured.** Loopback-only, 127.0.0.1, pinned bytes. Author report; Results 1–2 replayed by W74 #944, Result 3 by W78 #967, Results 4–5 by W74 #974 and #980 respectively — **all five results ESTABLISHED AS CLAIMED** at the labeled grades, no NIT. The witness's Result 4 control (wire bytes carrying `safe_handler` instead of `marker`) returned SAFE, consistent with the claim that the wire value, not packet length alone, selects the target. No further witness replay owed.
 
 ## Question
 
@@ -120,6 +120,15 @@ of a benign `marker()`; no other packet condition changed from Result 2.
 - Fixed 4.7.0.1 control, same layout and packet shape with its own marker
   address: `handler=0x402936=safe_handler`, canary all `c0`,
   `SAFE: original handler intact`, wrapper `ok=1 err=0 decoded=0`.
+- Witness W74 #974 replayed this result from clean archive `2de7032` and
+  **ESTABLISHED AS CLAIMED** at this grade: `handler=0x4028d0=marker`, bytes
+  `d0 28 40 00 00 00 00 00`, canary `cc cc cc c0 c0 c0 c0 c0`, `MARKER`
+  printed rc0; fixed `handler=0x402936=safe`, canary `c0*8`, `SAFE`; gdb
+  hardware watch old `0x4015b6` -> new `0x4015c0` at
+  `asn1crt_encoding.c:401` <- `:1449` <- `schema.c:59`. Its control — the same
+  vulnerable binary with wire bytes 20..27 set to `safe_handler=0x4028b6` —
+  produced `handler=b6 28 40 00 00 00 00 00`, intact canary and `SAFE`, i.e.
+  the decoded wire value, not the packet length alone, selects the target.
 
 Conclusion: with a consumer layout that places a callback immediately after
 the generated decoded object, the vulnerable runtime's own wire bytes overwrite
@@ -161,6 +170,12 @@ binary's compile-time `marker - safe_handler` offset (`nm` reports delta
 - A PIE ASan build of the pinned vulnerable runtime reached the marker with no
   `ERROR: AddressSanitizer` diagnostic — the store crosses a generated
   subobject boundary inside `Session`, not a redzone, as in Result 4.
+- Witness W74 #980 replayed this result from clean archive `b8b20c6` and
+  **ESTABLISHED AS CLAIMED** at this grade: `/proc/sys/kernel/randomize_va_space=2`,
+  `nm` delta marker-safe_handler `0x1a` (26) confirmed, five distinct PIE bases,
+  count=22, handler low16 advanced by 26 with `high6_same=1`, intact canary,
+  `MARKER` in all five; fixed 4.7.0.1 safe; `delta=0` counterfactual safe; ASan
+  PIE no redzone diagnostic. No NIT.
 
 Conclusion: under PIE and host ASLR, a 16-bit pointer leak plus the pinned
 decoder's two-byte overrange write is enough to divert a live callback to a
@@ -177,4 +192,11 @@ real ASN.1 application, no full-address write, no shellcode and no RCE.
 
 ## Next bounded work
 
-Results 4 and 5 replay requested from witness. Remaining question: whether any real ASN.1 consumer places a pointer-bearing field adjacent to its generated decode destination and leaks even 16 bits of it; absent such evidence, the final boundary is lab-demonstrated pointer control (including ASLR-resistant partial overwrite) plus the pinned-type padding NEGATIVE. Keep the fixed control and the wrapper-error caveat. Results 1–2 replayed by W74 #944, Result 3 by W78 #967.
+All five results have been replayed by the witness and ESTABLISHED AS CLAIMED
+(Results 1–2 W74 #944, Result 3 W78 #967, Result 4 W74 #974, Result 5 W74 #980);
+no further witness replay is owed. Remaining question: whether any real ASN.1
+consumer places a pointer-bearing field adjacent to its generated decode
+destination and leaks even 16 bits of it; absent such evidence, the final
+boundary is lab-demonstrated pointer control (including ASLR-resistant partial
+overwrite) plus the pinned-type padding NEGATIVE. Keep the fixed control and the
+wrapper-error caveat.
