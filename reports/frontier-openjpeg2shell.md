@@ -606,6 +606,34 @@ source-line breakpoint. Rung 4 is extended to chosen imported-function target
 selection in a live process; rung 5 stays UNKNOWN because the call has no
 attacker-chosen argument.
 
+## Alternative call mechanisms examined and closed (2026-11-21 23:2xZ)
+
+A fresh-context review checked two ways around the residue-class argument
+ceiling against the pinned bytes and rejected both; no harness, build, replay
+or grade was touched. Both closures are structural, not calibration misses.
+
+- **Native function-pointer target.** Pinned `openjpeg.h:996-1004` defines
+  `opj_tp_index_t` as exactly three `OPJ_OFF_T` fields (`start_pos`,
+  `end_header`, `end_pos`) and no code pointer. A complete `tp_index` reference
+  scan of pinned `j2k.c` finds only allocation/copy (`:4680-4737`, `:11839-11863`)
+  and reads of those three offsets (`:5085/:5088`, `:8464`, `:8949`,
+  `:11589-11591`, `:12021-12054`, `:12195`): the corrupted bytes steer stream
+  offsets but are never dereferenced as a callback. The write destination is
+  `tp_index + 24*TPsot + 8/16` on the heap and cannot name the interpreter GOT
+  at `0xa29348` (a fixed address below the observed heap base `~0xd16000`,
+  while `TPsot` is nonnegative), so no native callback reached with a
+  codestream-chosen argument exists through this primitive.
+- **Non-dealloc CPython type slots.** `tp_finalize`, `tp_traverse` and the GC
+  `tp_clear` path are also reached through the type object, but each is invoked
+  with the object itself as argument 1 (`rdi`), so the first word at the call is
+  still `ob_refcnt`. Substituting another slot for `tp_dealloc` does not move a
+  chosen command into `rdi[0..7]`; without a pre-existing live reference to a
+  fabricated object there is no natural path to any slot. The three residue
+  classes above are therefore exhaustive for naturally reached calls.
+
+Rung 5 stays UNKNOWN. Nothing in this review changes the witness-ESTABLISHED
+rung-4 boundary or the plant status cell.
+
 ## Independent replay verdict (2026-11-21 ~21:2xZ)
 
 Witness W92 (DM #1150/#1151) replayed both rung-4 control-flow limbs from
