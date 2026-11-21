@@ -4200,3 +4200,19 @@ child's closed stderr, the `three` shape gives a heap-use-after-free
 `WRITE of size 1` at `tls.c:510` on 4.99.2 and no report on 4.99.3 — rung 3
 confirmed. The non-ASan probe saw the free but never reached `tls_ungetc`, so
 rung 4 stays source-bound and unclaimed; witness #1140 (DM 4727) ESTABLISHED rung 3 as claimed on independent ASan-linked pinned builds. No wire-to-RCE claim exists for either target.
+
+#### Measured follow-through (21:27Z): WAMR chosen-immediate rung 4
+
+The W91 rung-4 negative above applies to the upstream PoC only. A different
+module shape — the pinned `.wasm` binary-patched to append eight
+`i64.const <chosen>; drop` pairs after the 21-result block — reaches inline
+immediate emit sites after the two-pass byte-count desync. Instrumented 2.4.4
+logs chosen 8-byte values at 11/29/47/65 bytes past `p_code_compiled_end`,
+with two value sets giving two different byte sequences at the same offsets;
+unmodified ASan 2.4.4 reports a load-time `WRITE of size 8` in
+`wasm_loader_emit_const :9382`, and 2.4.5 is clean. Rung 4 is now an author
+claim pending witness replay; no wire consumer was driven and no guest code
+executed, so rung 5 stays UNKNOWN. Envoy v1.39.3 is named as a genuine
+network-to-`wasm_runtime_load` consumer pinning WAMR 2.4.4 fast interp, but
+is NOT built or driven here. Evidence and generator:
+`reports/wamr2shell-rung4.md`, `lab/frontier/wamr2shell/make_chosen_variant.py`.
