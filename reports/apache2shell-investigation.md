@@ -715,6 +715,74 @@ L5_PROXY=yes L5_FLAGS=c L5_N=3 L5_SUFFIX=nocdata ./l5-lane.py 2.4.68 # control
 ./l5-gdb.py                                     # breakpoint + stale buf state
 ```
 
+### Adjacent lane L6 — CVE-2026-56153 mod_charset_lite `finish_partial_char` heap overflow (06:00–06:07Z 21 Nov) — rung 3 confirmed
+
+`2.4.70/CHANGES:158-163` lists CVE-2026-56153 as an out-of-bounds write in
+`mod_charset_lite`, affecting 2.4.0–2.4.68; NVD and Red Hat describe an
+unauthenticated remote memory-corruption/DoS claim. The whole 2.4.68→2.4.69
+fix in `modules/filters/mod_charset_lite.c` is a five-line guard added at the
+top of the `finish_partial_char` loop (2.4.69 lines 448–452): when
+`ctx->saved >= sizeof(ctx->buf)` it sets `EES_LIMIT`, returns
+`APR_INCOMPLETE` and breaks. 2.4.68 line 448 writes
+`ctx->buf[ctx->saved] = **cur_str;` with no bound. `ctx->buf` is `char[8]`
+(`FATTEST_CHAR`), embedded in the heap-allocated `charset_filter_ctx_t`.
+
+`build-l6.sh` builds 2.4.68 (affected) and 2.4.69 (control) with
+ASan/UBSan, event MPM and `--enable-charset-lite`; no earlier lane built this
+module (all prior configure logs say `mod_charset_lite... no`). `l6-lane.py`
+sets `CharsetSourceEnc UTF-8` / `CharsetDefault ISO-2022-JP` on a loopback
+docroot with a CGI that reads the body, and sends a chunked POST: chunk 1 is
+`A` + ESC, chunk 2 is 32 ESC bytes. The XLATEIN filter converts from
+`CharsetDefault` to `CharsetSourceEnc`; the trailing ESC of chunk 1 is saved
+by `set_aside_partial_char()`, and chunk 2 makes `finish_partial_char()`
+append bytes while iconv keeps returning `APR_INCOMPLETE`.
+
+An APR-level enumeration (`libaprutil` `apr_xlate_conv_buffer`, ISO-2022-JP
+→ UTF-8) shows ESC (`0x1b`) is the only single-byte partial, and `0x1b` is
+the *only* appended byte that keeps `APR_INCOMPLETE` past index 8 — `saved`
+then walks past 20. So the written byte value is fixed by the primitive.
+
+Canonical four-request differential (`logs/l6-canonical.out`):
+2.4.68 produced 3/4 `mod_charset_lite.c:448:17: runtime error: index 8 out
+of bounds for type 'char [8]'`; 2.4.69 produced 0/4. The four
+`AddressSanitizer` lines in each build are exit-time LeakSanitizer noise —
+`buf` is inside the larger `apr_pcalloc` context, so the OOB write hits
+adjacent struct fields (`ran`, `noop`, `tmp`) rather than an ASan redzone.
+Across four such four-request runs the affected build reported 2–4 OOB lines
+(3/4 canonical, 2/4 final with `ASAN_OPTIONS=detect_leaks=0`), always 0 on
+2.4.69; the bucket split is timing-dependent. `logs/l6-final.out` is the
+clean-leak replay.
+Responses are `400 Bad Request` because the CGI's body read fails after the
+filter error; the OOB write happens before that. Negative controls on 2.4.68
+(four requests each) were clean: no charset directives, source == default,
+and a second chunk of `A` bytes instead of ESC
+(`logs/l6-*-nocharset|samecharset|noesc-combined.log`).
+
+Causal check: applying the exact 2.4.69 guard to the 2.4.68 source and
+rebuilding only `mod_charset_lite.so` gave 0/4 UBSan reports; restoring the
+pristine source and module byte-for-byte (SHA256 `433a68d2…` source,
+`6e6b2ae3…` .so) restored 2/4 reports. Causality is to the guard, not to
+another 2.4.68/2.4.69 difference. A longer ESC run (64 bytes) gave 4/4 UBSan
+reports and 4/4 child `SIGSEGV (11)` (`logs/l6-2.4.68-long-combined.log`):
+the fixed `0x1b` bytes eventually corrupt a pointer field used downstream.
+
+Rung-4 boundary: the byte value is fixed at `0x1b`, the corrupted offsets are
+set by the struct layout rather than by the attacker, and the resulting SIGSEGV
+occurs on a corrupted context pointer with no benign-marker execution.
+**L6 closes at rung 3 (UBSan-confirmed OOB write plus child crash on the
+long run); rung 4 is not demonstrated.** Main-lane closure, negative list and
+do-not-retry conditions are unchanged.
+
+```
+cd lab/apache2shell
+bash build-l6.sh                                # one-time ASan charset-lite builds
+python3 l6-lane.py 2.4.68 2.4.69               # 3/4 UBSan OOB vs 0/4
+L6_SUFFIX=nocharset L6_NOCHARSET=1 python3 l6-lane.py 2.4.68   # control
+L6_SUFFIX=samecharset L6_SAMECHARSET=1 python3 l6-lane.py 2.4.68 # control
+L6_SUFFIX=long L6_NEXT_HEX=$(python3 -c "print('1b'*64)") \
+  python3 l6-lane.py 2.4.68                     # 4/4 UBSan + 4/4 child SEGV
+```
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -742,6 +810,8 @@ RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69  # L4: 12/12 vs 
 bash build-l5.sh                                # ASan builds with mod_proxy_html
 ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy \
   ./l5-lane.py 2.4.68 2.4.69                    # L5: 4/4 child SEGV vs 0/4
+bash build-l6.sh                                # ASan builds with mod_charset_lite
+python3 l6-lane.py 2.4.68 2.4.69               # L6: UBSan index-8 vs clean control
 ```
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
