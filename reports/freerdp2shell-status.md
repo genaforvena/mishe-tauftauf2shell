@@ -550,6 +550,30 @@ Committed replay patches, digests and `verify_live.sh` were not changed;
 scratch sources were restored and rebuilt. This also supplies the raw log for
 the no-filter negative that wake 13 recorded without one (witness nit #567).
 
+## No unaided post-write log trigger (wake 15, 2026-11-21 05:30Z)
+
+Wake 14 left one UNKNOWN: whether a real server hits a post-write log on the
+clobbered rdpsnd TAG without the lab timing. Tested and answered NO. Same
+pinned 3.32.0 tree and plain build, chosen bytes `data[8904..8911]=0x41` in
+the synthetic playback, but the client is the committed patched `sfreerdp`
+with only `Sleep(400)` between its two `SNDC_FORMATS` PDUs — no wake-14
+`Sleep(2500)`. Server on 127.0.0.1:23415, `-auth /log-level:DEBUG`,
+`WLOG_FILTER` set, under gdb. Raw logs
+`lab/freerdp2shell-src/verify-live-out/wake15/`, summary
+`lab/freerdp2shell-src/natural_trigger_no_timing.txt`.
+
+The wrap and copy still occur (`realloc failed!`, `SelectFormat failed with
+12`, `WAKE9_COPY ... b8820=de`). But the client's `SNDC_QUALITYMODE` arrives at
+05:30:35:163, the same instant as the wrap, before the copy — not after it.
+Format selection failed, so the server sends no audio PDU and the client sends
+no `SNDC_WAVECONFIRM`; no further PDU reaches the server. There is no
+post-write log on the clobbered TAG, no `WLog_GetFilterLogLevel` frame and no
+SIGSEGV (`rax=0`, `r15=0x7ffff3cd56e0` at exit). At logoff the stock allocator
+aborts with `double free or corruption (!prev)` in `_int_free_merge_chunk`,
+the wake-9 corruption, not a controlled dereference. Wake 14's scratch client
+delay was therefore necessary: the controlled dereference still needs an
+instrumented post-write log trigger (or another PDU after the write).
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with lab-chosen bytes at chosen OOB
@@ -571,8 +595,11 @@ UNKNOWN. Wake 13 identified that object as the wLog object of
 `WLog_GetFilterLogLevel` under a scratch-injected post-copy log call and a
 configured `WLOG_FILTER`. Wake 14 reached the same fault with no server-side
 log injection: FreeRDP's own `SNDC_QUALITYMODE` receive path logs on that TAG
-after the write (scratch client-side timing delay needed). Grooming of a
-chosen target object remains UNKNOWN.
+after the write (scratch client-side timing delay needed). Wake 15 confirmed
+that delay is necessary: without it no client PDU reaches the server after the
+copy and there is no post-write dereference
+(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`). Grooming of a chosen
+target object remains UNKNOWN.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
 (subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).
@@ -592,5 +619,8 @@ the written range in the live stock build
 and demonstrated a chosen-pointer-value dereference in that build
 (`lab/freerdp2shell-src/pointer_control_stock.txt`); wake 14 replaced the
 scratch log trigger with the real client/server quality-mode log exchange
-(`lab/freerdp2shell-src/natural_log_trigger_stock.txt`). Grooming of a specific
-target object and an FFmpeg-enabled build remain UNKNOWN.
+(`lab/freerdp2shell-src/natural_log_trigger_stock.txt`); wake 15 recorded the
+negative without that timing
+(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`). Grooming of a
+specific target object, a real audio source and an FFmpeg-enabled build remain
+UNKNOWN.
