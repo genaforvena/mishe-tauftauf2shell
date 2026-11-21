@@ -157,3 +157,33 @@ only an ordinary, legitimate path promotion in both versions — that result is
    ready.
 3. Preserve the Debug negative above; do not retry a failed frame ordering
    into existence.
+
+## Structural boundary on the rung-4 chain (source read, 23:39Z)
+
+No same-cycle heap UAF exists on this path, so the obvious ASan-style
+escalation is not available:
+
+- `QuicConnRetireCid` (`connection.c:1031-1056`) only sets `CID.Retired`,
+  increments counters and a send flag; it does **not** free the CID.
+- The retired CID is freed only when the peer's RETIRE_CONNECTION_ID frame is
+  acknowledged, in `QuicConnGetDestCidFromSeq(..., TRUE)` +
+  `CXPLAT_FREE(DestCid, QUIC_POOL_CIDLIST)` at `loss_detection.c:614` — a
+  later receive cycle. Promotion happens in the same receive cycle as the
+  NEW_CONNECTION_ID frame, while the CID is still allocated.
+- `QuicPathSetActive` (`path.c:263-305`) swaps two whole `QUIC_PATH` structs
+  with struct assignment. There is no attacker-chosen byte, offset, length or
+  pointer value in that write; every destination is `&Connection->Paths[0]`
+  or the stale slot. This is why stock ASan is silent and why no
+  write-what-where primitive is present.
+
+A downstream hypothesis remains **UNTRIGGERED (rung 1)**: after the swap,
+`Paths[0].DestCid` points at the retired CID; if a later ACK frees that CID,
+a subsequent consumer that dereferences `Paths[0].DestCid` (for example
+`path.c:251`, reached when a new path is added) could read freed memory. No
+such sequence was built or observed, and Debug invariants
+(`QUIC_CID_VALIDATE_NULL`, `Path->DestCid != DestCid`) are designed to reject
+it. Do not promote this to a confirmed finding without a triggered trace.
+
+On-the-wire reachability remains UNKNOWN: the pinned archives have empty
+quictls submodules, no libssl/libcrypto QUIC build exists in this lab, and no
+packet was injected. The frame-layer result is peer-frame-shaped, not wire.
