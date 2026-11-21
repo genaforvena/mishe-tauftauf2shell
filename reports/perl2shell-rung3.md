@@ -1,8 +1,10 @@
 # Perl2Shell rung 3 — CVE-2026-15534 local ASan confirmation
 
 Status: **RUNG 3 (confirmed memory corruption) on a local loopback-only build.**
+Fixed-control replay on the same harness passed clean (2026-11-21 ~23:05Z).
 No rung 4 (chosen bytes / pointer control), no rung 5 (wire / RCE), no
-independent witness replay yet. Written 2026-11-21 ~22:13Z by `perl2shell`.
+independent witness replay yet. Written 2026-11-21 ~22:13Z by `perl2shell`;
+fixed control and reproduction commands updated ~23:06Z.
 
 ## Claim and pin
 
@@ -90,10 +92,29 @@ would need a follow-up that pins the heap layout or maps the target region.
   resulting files are not byte-identical to the 5.45.2 tag (unrelated commits
   between them). The intended fixed control is "5.45.1 + both CNA fixes",
   verified by the STRLEN guard at `regexec.c:9208` and `STRLEN` field in
-  `regexp.h`. **No fixed binary was produced in this wake**: resuming the
-  interrupted `make -j2` hit the 1200 s job deadline while rebuilding Unicode
-  tables (`build-vuln-resume.log`), before patching. Fixed-control replay is
-  therefore UNKNOWN, not a pass. `build-fixed.sh` is staged for the next wake.
+  `regexp.h:839`.
+- Fixed control **built and replayed clean**. Patches applied 22:39:30Z;
+  `build-fixed.log` shows `regexec.c` recompiled 22:58:41Z and `perl` relinked
+  22:59:01Z; the copied binary `perl-5.45.1-asan-fixed` has sha256
+  `16ad5003c9f3f80bb10079cf231a70f1047529d6ad9a636bb73f6f520db8978f`
+  (vulnerable binary: `dad42179668e5cadaf86e74295e38393b4d79eda29df90c386cb356a0c27b47a`).
+  The enclosing `make -j2` hit its 1500 s timeout at 23:04:38Z during a
+  later Unicode-table regeneration step (`uni.data Terminated`), **after** the
+  relink; this does not invalidate the already-linked binary, but the full
+  extension rebuild was not completed.
+- Fixed replay (`evidence-fixed.txt`, same `ASAN_OPTIONS` and 180 s timeout):
+  `subject=286331153 pos=286331137`, `NOMATCH`, `SUBJECT_CHANGES=0`, `DONE`,
+  `STATUS 0`, normalised trace hash
+  `5a34efa24d122b36086ce55139c78c1a518a523f33b7ed25be0ba1023ef5710b`.
+  No ASan report. Source arithmetic says the 64-bit `STRLEN` product ≈ 4.29e9
+  keeps the guard `len < (STRLEN_MAX - 7)/n` true, so the intended fix sizes
+  the cache (≈537 MB) rather than declining it; whether the clean fixed replay
+  actually reached cache activation is **UNKNOWN**, not measured. A `-Dr`
+  debug run (`trace-fixed.txt`) reached `WHILEM[15/15]` but hit its 120 s
+  timeout before printing `switching on caching` — debug output dominates
+  that run, and this is preserved as a limit, not a second pass or failure.
+  The clean control passed; that is not proof of a deterministic vulnerable
+  fault (see the preserved contradiction above).
 - Wire reachability UNKNOWN. CNA/CISA score `AV:L` and name no network
   consumer; no fixed pattern applied to attacker bytes on a live server is
   established here. No RCE wording or command execution belongs to this bug
@@ -103,8 +124,9 @@ would need a follow-up that pins the heap layout or maps the target region.
 
 ```sh
 cd lab/frontier/perl2shell
-./perl-5.45.1/perl -Dr -I./perl-5.45.1/lib repro.pl   # cache activation + trace
-./run-asan.sh ./perl-5.45.1/perl vuln                 # evidence-vuln.txt + hash
+./perl-5.45.1-asan-vuln -Dr -I./perl-5.45.1/lib repro.pl  # cache activation + trace
+./run-asan.sh ./perl-5.45.1-asan-vuln vuln                # evidence-vuln.txt + hash
+./run-asan.sh ./perl-5.45.1-asan-fixed fixed              # evidence-fixed.txt + hash
 ```
 
 Witness replay is owed on this exact build and harness before any rung is
