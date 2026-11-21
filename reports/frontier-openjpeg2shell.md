@@ -1,17 +1,18 @@
 # Frontier brief — OpenJPEG TLM/SOT index overflow (OpenJpeg2Shell)
 
-**Status (updated 2026-11-21 ~16:50Z by openjpeg2shell): ADMITTED; witness
-replay ESTABLISHED AS CLAIMED (#957/#958). Rungs 1/2/3 ESTABLISHED on the real,
-verbatim-pinned OpenJPEG 2.5.4 `opj_decompress`. Rung 4: chosen 64-bit stream
-offsets are byte-exact at the TPsot-derived OOB offsets; the consumer-reality
-check observes them landing on a live neighbouring `tp_index` object and a
-live malloc size word, and the low-bit grooming sweep shows padding chooses
-the resulting glibc `free()` path (silent acceptance, `munmap_chunk` abort,
-`free(): invalid size` abort, or SIGSEGV) with a fixed-pin control clean.
-Availability impact is demonstrated; no pointer-value control, controlled
-dereference at a chosen address, control-flow diversion, execution or
-web-facing listener was observed — all UNKNOWN. The fix is a pinned master
-commit, not a tagged release.**
+**Status (updated 2026-11-21 ~16:52Z by openjpeg2shell): ADMITTED; witness
+replay ESTABLISHED AS CLAIMED (#957/#958, and #1022 for consumer-reality).
+Rungs 1/2/3 ESTABLISHED on the real, verbatim-pinned OpenJPEG 2.5.4
+`opj_decompress`. Rung 4: chosen 64-bit stream offsets are byte-exact at the
+TPsot-derived OOB offsets; the consumer-reality check observes them landing on
+a live neighbouring `tp_index` object and a live malloc size word, the low-bit
+grooming sweep shows padding chooses the resulting glibc `free()` path, and a
+Pillow consumer check reaches the same sink inside `Image.open().load()` in
+both the official bundled-library wheel and a pinned-source build.
+Availability impact is demonstrated in a shipped Python image library; no
+pointer-value control, controlled dereference at a chosen address,
+control-flow diversion, execution or web-facing listener was observed — all
+UNKNOWN. The fix is a pinned master commit, not a tagged release.**
 Scoped commit `958b319`; trace
 `sha256=6983a6a11c8236c6e991e15faa326b4c64f6269cf7f5f4fabca081bf7aa111ea`
 (10 PASS / 0 FAIL, clean `git archive` replay). Live two-pane window
@@ -20,7 +21,10 @@ wall `.mishe-tauftauf/walls/openjpeg2shell.md`. Witness verdict #958; operator
 admission #989 under standing #6. Replay traces: consumer-reality
 `sha256=55123f30823bda1083c5f4f8b4025767ae89b3fdcec06c3285f82a1aea57c3a1`;
 low-bit grooming
-`sha256=2c4ca81dc6c31e97969c9a203c8125fe02cfc04e13c0871193027a95204a7dd6`.
+`sha256=2c4ca81dc6c31e97969c9a203c8125fe02cfc04e13c0871193027a95204a7dd6`;
+Pillow consumer reachability
+`sha256=4903f4dc2468a38d5ca1244cd205b36ee6cc0c52b7e43e62e9d0f2370f7596e0`
+(15 PASS / 0 FAIL).
 
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
@@ -144,8 +148,9 @@ sink plus direct heap-word readback.
   bytes at chosen offsets in a live neighbouring object and live allocator
   metadata, with a deterministic abort in a real decoder process. No
   pointer-value control, pointer dereference, control-flow diversion,
-  execution, listener or web-facing consumer was observed. Rung 4 stays
-  PARTIAL/INSTRUMENTED under that label; no shell claim.
+  execution or listener was observed at that point; a Pillow consumer was
+  exercised later (section below). Rung 4 stays PARTIAL/INSTRUMENTED under
+  that label; no shell claim.
 
 ## Low-bit grooming: chosen size word selects the allocator outcome (2026-11-21 ~16:50Z)
 
@@ -192,6 +197,50 @@ dereference, control-flow diversion or execution was observed. This
 strengthens the demonstrated availability impact; rung 4 stays PARTIAL.
 
 
+## Pillow / libopenjp2 2.5.4 consumer reachability (2026-11-21 ~16:52Z)
+
+`bash lab/frontier/openjpeg2shell/pillow-consumer.sh <outdir>` → **15 PASS /
+0 FAIL**, trace
+`sha256=4903f4dc2468a38d5ca1244cd205b36ee6cc0c52b7e43e62e9d0f2370f7596e0`,
+logs in `lab/frontier/openjpeg2shell/out-pillow/`. This closes the gap the
+earlier sections left open: whether the GHSA-78g4-xqwv-q3g8 claim — a web-facing
+image consumer reaches the vulnerable library — holds on this host. Everything
+here is a local Python process; the PyPI fetches are pinned provisioning with
+verified SHA-256, never probes.
+
+- **Official shipped wheel, bundled library.** The manylinux CPython 3.12
+  `pillow-12.2.0` wheel reports `PIL.features.version("jpg_2000") == "2.5.4"`,
+  the exact affected pin; the pinned sdist's own
+  `depends/install_openjpeg.sh` sets `archive=openjpeg-2.5.4`. `Image.open(
+  path).load()` on either the public 202-byte PoC or the padded PoC aborts
+  deterministically with `corrupted size vs. prev_size`, rc 134; the bundled
+  benign `test-card-lossless.jp2` loads rc 0. No library swapping: this is the
+  unmodified wheel's own JPEG 2000 decoder.
+- **Exact sink inside `load()`.** Pillow 12.2.0 built with `JPEG2K_ROOT` against
+  the pinned vulnerable `libopenjp2.so.7`, with an ASan build of the same pinned
+  source, reports `heap-buffer-overflow WRITE of size 8` at `j2k.c:5086`; the
+  24-byte region is allocated at `j2k.c:8939`. The stack runs
+  `opj_read_tile_header → j2k_decode_entry (libImaging/Jpeg2KDecode.c:794) →
+  ImagingJpeg2KDecode (:949) → _decode (src/decode.c:132)` into the Python
+  caller. The plain pinned build faults rc 139 on both PoCs, the fixed pin
+  `91d08b11` in the same Pillow process decodes the padded PoC rc 0 with
+  `LOAD_OK`, and `LD_LIBRARY_PATH` resolution of each `.so` is asserted, not
+  assumed. A plain source install of the sdist has no JPEG 2000
+  (`jpg_2000 None`), so the route comes from the official wheel's bundle or a
+  deliberate pinned `JPEG2K_ROOT` build.
+
+gdb on the plain Pillow process places the rc 139 fault in `PyGC_Collect()`
+during `Py_FinalizeEx()`: the corrupted allocator metadata survives `load()`
+and faults at interpreter teardown, not at the sink. No listener, web server,
+external request or process outside this lab was used.
+
+Honest boundary: the written value remains a bounded codestream-derived stream
+offset, not a pointer. Reachability from a shipped Python image library is now
+lab evidence, but the primitive is unchanged — no chosen-address pointer
+control, controlled dereference, control-flow diversion, code execution or
+shell, and no web-facing listener. Rung 4 stays PARTIAL with a stronger
+availability-impact label; any shell claim remains UNKNOWN.
+
 ## Rung-4 feasibility and remaining gap
 
 The write value is a stream offset, not an arbitrary 64-bit constant: it is
@@ -199,23 +248,20 @@ bounded by practical codestream length, and the useful part (low bytes) can be
 shifted by padding. The index multiplies by 24, so larger `TPsot` values reach
 far past the small `tp_index` allocation — usually unmapped memory, i.e. a
 crash, unless a groomed heap places an object at that offset. Public metadata
-makes a real consumer route plausible: Pillow GHSA-78g4-xqwv-q3g8 bundles
-libopenjp2 2.5.4 reachable from `Image.open().load()`. That route was NOT built
-or tested here; it is a claim, not lab evidence.
+makes a real consumer route plausible, and that route has now been exercised
+locally (section above): the official Pillow 12.2.0 wheel bundles libopenjp2
+2.5.4 and reaches the sink through `Image.open().load()`, aborting on the PoC.
 
-The cheapest step above was carried out on 2026-11-21 and is reported in
-"Consumer reality on this host": a live neighbouring object and a live malloc
-size word are overwritten, and the unsanitized decoder aborts deterministically.
-The follow-up low-bit grooming sweep (above) shows that padding also chooses
-whether that corruption is silent or which allocator diagnostic fires, but
-the written value stays a bounded stream offset; no chosen-address pointer
-dereference was observed.
-Hardware watchpoints were unavailable in this container; equivalent evidence
-came from sink breakpoints plus direct heap readback. Remaining gap: the
-written value is a stream offset, not an arbitrary pointer, so pointer-value
-control, control-flow diversion, execution and a web-facing consumer remain
-UNKNOWN. A Pillow/libopenjp2 2.5.4 listener route was still not built or
-tested; the GHSA claim remains a claim.
+The consumer-reality check above found a live neighbouring object and a live
+malloc size word overwritten, with a deterministic abort in the real decoder;
+the grooming sweep showed padding also chooses which allocator path fires.
+The Pillow check adds reachability from a shipped image library but not a new
+primitive: the written value stays a bounded stream offset. Hardware
+watchpoints were unavailable in this container; equivalent evidence came from
+sink breakpoints and direct heap readback. Remaining gap: pointer-value
+control, control-flow diversion, execution and a web-facing listener remain
+UNKNOWN. No chosen-address pointer dereference was observed, and none appears
+reachable from a bounded stream-offset write with the heap layouts seen here.
 
 ## Next-candidate queue (updated 2026-11-21)
 
