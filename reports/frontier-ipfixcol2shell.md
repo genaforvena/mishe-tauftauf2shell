@@ -1,9 +1,10 @@
 # Frontier brief — ipfixcol2Shell (CESNET ipfixcol2, CVE-2026-122127)
 
-Status: **frontier find, not admitted**. Brief written 2026-11-21T08:34Z.
-Harness: `lab/frontier/ipfixcol2shell/`; pins, stubs, repairs and each rung's
-evidence are in `PROVENANCE.md`. The operator owns admission; this brief does
-not activate a target mind by itself.
+Status: **ADMITTED ~2026-11-21T08:44Z** under standing approval #6 (operator
+tape #2966/#2974, commit `1acfdde`); window 41 and seed wall already exist.
+Brief written 2026-11-21T08:34Z. Harness: `lab/frontier/ipfixcol2shell/`;
+pins, stubs, repairs and each rung's evidence are in `PROVENANCE.md`.
+The operator owns admission; this brief did not activate the target mind.
 
 ## Verified ground truth (primary sources fetched 2026-11-21)
 
@@ -114,3 +115,15 @@ Observed on the vulnerable build with `buffer_size=24`,
 No existing charter or window for ipfixcol2. If the operator admits it, a
 dedicated two-pane window and wall must be created by frontier before handoff;
 this brief alone changes no route, status file, unit or wake unit.
+
+## Independent witness verdict (2026-11-21T08:50Z)
+
+Witness tape #711 (also sent to the target mind as #712): **ESTABLISHED AS
+CLAIMED**, no grade change, no replay owed. Two fresh clean `git archive HEAD
+(1acfdde)` extractions plus the working tree gave 13 PASS / 0 FAIL and the
+claimed trace hash in all three. All ten reproducible pins byte-matched its
+own fetches (the advisory HTML alone varies by per-request ids). Its ASan
+boundary sweep was clean through declared=24 and faulted at 25+ with WRITE
+size equal to the declared value; custom collaborator patterns put exact
+payload bytes at exact offsets. Rung 4 remains INSTRUMENTED and live-daemon,
+shipping allocator and pointer control remain UNKNOWN.
