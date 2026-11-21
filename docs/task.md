@@ -529,10 +529,11 @@ log call: on the unmodified server, FreeRDP's own `SNDC_QUALITYMODE` receive
 path reaches the clobbered wLog after the write; with a scratch client-side
 delay the live stock server faults at the same instruction with
 `rax=0x4141414141414141` (`natural_log_trigger_stock.txt`, raw logs under
-`verify-live-out/wake14/`). Limits: chosen playback bytes are lab-supplied,
-the object was identified after the fact with no grooming, only one object
-was controlled, a client-side delay and `WLOG_FILTER` are required, and the
-no-filter control stays clean. Arbitrary heap targeting stays UNKNOWN.
+`verify-live-out/wake14/`). Wake-14 limits: chosen playback bytes are
+lab-supplied, the object was identified after the fact with no grooming, only
+one object was controlled, a client-side delay and `WLOG_FILTER` are required,
+and the no-filter control stays clean. Wake 18 later closed grooming of that
+object (see below); arbitrary targeting of other heap objects is not claimed.
 Wake 15 removed the scratch delay: with the committed patched `sfreerdp` and
 only its `Sleep(400)` between the two `SNDC_FORMATS` PDUs (no wake-14
 `Sleep(2500)`), the wrap and copy still occur but `SNDC_QUALITYMODE` arrives
@@ -567,17 +568,31 @@ an in-process chosen-byte rung 4 on real library bytes through the real
 parser and dispatcher, on a NON-DEFAULT build — not a live RDP session or an
 over-the-wire PDU, no chosen-byte dereference for tag 2, and the 16384 bytes
 are PoC `0x41` rather than remote audio. Tag 17 has no FFmpeg encoder in
-either build. A wrap-capable format on the default build and grooming of a
-chosen object remain UNKNOWN (wake-16 evidence
-`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt` and `PocAdpcmTag2.c`; the raw
-ASan log is a gitignored scratch file under `/tmp`). Wake 17 closed the
-real-audio-source question at source level in pinned 3.32.0: the copied bytes
-(`buf`, server-side platform capture) and copy stride (`src_bytes_per_frame`,
-from the server's own format list) are set server-side; the client's
-`SNDC_FORMATS` supplies only the wrap trigger and DSP reset format, so remote
-byte choice is not established in a stock deployment. Whether a deployment
-lets a remote attacker influence the captured audio stays UNKNOWN. Source-only
-finding; see `reports/freerdp2shell-status.md`.
+either build. A wrap-capable format on the default build remains UNKNOWN
+(wake-16 evidence `lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt` and
+`PocAdpcmTag2.c`; the raw ASan log is a gitignored scratch file under `/tmp`).
+Wake 17 closed the real-audio-source question at source level in pinned 3.32.0:
+the copied bytes (`buf`, server-side platform capture) and copy stride
+(`src_bytes_per_frame`, from the server's own format list) are set server-side;
+the client's `SNDC_FORMATS` supplies only the wrap trigger and DSP reset
+format, so remote byte choice is not established in a stock deployment.
+Whether a deployment lets a remote attacker influence the captured audio
+stays UNKNOWN. Source-only finding; see `reports/freerdp2shell-status.md`.
+Wake 18 closed grooming in the live stock allocator
+(`lab/freerdp2shell-src/grooming_format_count_stock.txt`): the second
+`SNDC_FORMATS` PDU's `num_client_formats` sizes the `client_formats` array
+immediately after `out_buffer` (`audio_formats_new()`,
+`libfreerdp/codec/audio.c:262-265`), so N extra benign PCM records after the
+malicious ADPCM record shift every following chunk by 32 bytes. Measured wLog
+chunk offsets 8864/8896/9088/9856/16544 for N=0/1/7/31/240; `Names` at
+8904+32*N. At N=1 a marker at the shifted `Names` field (8936) made the
+natural `SNDC_QUALITYMODE` log path fault with
+`rax=0x4141414141414141`, while 16 bytes too far gave
+`rax=0xdededededededede`; at N=240 the target was past the 16384-byte write
+and no fault occurred. Offset control is OBSERVED; byte control is still
+bounded by wake 17. The client delay, `WLOG_FILTER`, subsystem-supplied format
+table and post-auth loopback session remain conditions; this is scratch
+observation in the live stock build, not witness acceptance.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
@@ -649,10 +664,14 @@ top size`. The 8128-byte cap is a synthetic control, not the real 0.10.6.1
   allocator layout and the auth gate stay UNKNOWN; loopback COTP
   reachability of the lab listener is the only network observation.
   Witness W33 (#548) found both the wire-PDU and real-code claims ESTABLISHED
-  as claimed, with the disclosed limit that it compiled against the existing
-  lab build tree rather than a clean-room rebuild; the committed real driver
-  needed `-include config_ac.h` and an earlier `-I` on this host, a RUNBOOK
-  correction owed to the xrdp2shell mind. Evidence:
+  as claimed. Its disclosed build-tree limit was closed by a clean-room replay
+  (`lab/xrdp2shell-real/verify_cleanroom.sh`, transcript
+  `cleanroom-replay.txt`): fresh ASan and plain xrdp 0.10.6 library builds,
+  all three drivers rebuilt from unchanged digests, 15/15 assertions pass.
+  On this host the committed `real_drdynvc_driver.c` needs
+  `-include config_ac.h` and an earlier `-I`; the RUNBOOK correction is
+  recorded there. The in-process boundary is unchanged: no socket, logon,
+  negotiated dynamic channel or pointer control is claimed. Evidence:
 `reports/frontier-xrdp2shell.md`, harness
 `lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`, real-path drivers and
 runbook `lab/xrdp2shell-real/{real_drdynvc_driver.c,chosen_bytes_real_path.c,RUNBOOK.md}`,
@@ -1656,6 +1675,24 @@ and do-not-retry conditions unchanged. Reproduce from `lab/apache2shell/`:
 `L6_NOCHARSET=1`, `L6_SAMECHARSET=1` and
 `L6_SUFFIX=long L6_NEXT_HEX=$(python3 -c "print('1b'*64)")`. Raw logs are
 gitignored under `lab/apache2shell/logs/`.
+
+Adjacent lane L7 (CVE-2026-42535, `mod_dav_fs` state-directory access) is a
+seventh same-subsystem lane and a rung-2 access-control differential only.
+The lane's earlier CVE-2026-93546 premise was false: that identifier is absent
+from the available trees. The real mod_dav_fs entry is `CVE-2026-42535` at
+`httpd-2.4.69/CHANGES:123-131`, affecting 2.4.67 and earlier and fixed in
+2.4.68 by denying `.DAV` state-dir resources in `dav_fs_get_resource()`
+(`modules/dav/fs/repos.c`). `l7-lane.py` drives the already-built ASan httpd
+2.4.67 and 2.4.68 over loopback: PUT 201 and PROPPATCH 207 on both, but the
+state-dir PROPFIND returns 207 on 2.4.67 (the property DB is addressable) and
+403 on 2.4.68; swapping the 2.4.68 `repos.c` into 2.4.67 flips it to 403 and
+restoring the original source and module bytes restores 207. A full 12288-byte
+`A` overwrite of the DBM file caused no crash, ASan or UBSan report — the
+advisory's child-crash wording was not reproduced. No chosen byte, offset,
+pointer, memory corruption or deterministic fault: rung 2 only, rung 4
+unreachable for this bug class. Reproduce with
+`cd lab/apache2shell && python3 l7-lane.py 2.4.67 2.4.68`. The main lane is
+unchanged.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
