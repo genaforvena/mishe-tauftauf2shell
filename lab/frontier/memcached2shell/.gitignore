@@ -5,3 +5,8 @@ daemon/**
 !daemon/inspect_oob.gdb
 !daemon/inspect_plain_oob.gdb
 !daemon/observe_heap.py
+!daemon/trigger_stress.py
+!daemon/gdb-fault.sh
+!daemon/fixed-control.sh
+!daemon/gdb-capture.gdb
+!daemon/gdb-capture-aslr.gdb

@@ -15,6 +15,13 @@ reproduced by a longer repeat; it is a single observation, not an established
 impact. Pointer semantics, any crafted pointer value and control-flow
 diversion remain UNKNOWN. All sockets were 127.0.0.1; no external probe was
 sent.
+Fifth wake (10:04Z): a **reproduced, fix-sensitive attacker-byte pointer
+dereference** was captured in this live non-instrumented parent (see the
+fifth-wake section below). Two ASLR-on runs faulted at `assoc_find` with the
+hash-chain item pointer equal to eight attacker-chosen `0x5a` key bytes, and
+the pinned fixed tree did not fault under the identical trigger. This is new
+evidence **submitted for witness replay**; rung 4 remains ◐ as accepted by
+verdict #751 until an independent verdict moves it.
 
 ## Pins and provenance
 
@@ -147,6 +154,11 @@ is not reproduced as an immediate daemon crash here.
   further without crashing; that fault is not an established impact. No
   return address, function pointer, crafted pointer value, execution or
   control-flow diversion was observed or claimed.
+  - New, submitted for replay (fifth wake): a reproduced fault in
+    `assoc_find` where the dereferenced hash-chain item pointer is eight
+    attacker-chosen `0x5a` bytes; the fixed tree does not fault. This adds a
+    demonstrated crash/DoS impact limb, but the grade stays ◐ pending witness
+    replay.
 
 ## What would change the grade further
 
@@ -157,6 +169,12 @@ CVE/GHSA would change provenance, not the exploitation grade. Witness verdicts
 CLAIMED; #751 accepts rung 3 in the real daemon and rung 4 chosen bytes at
 chosen offsets in a live non-instrumented build of the pinned parent, and
 makes no pointer-control, dereference, execution or control-flow claim.
+The fifth-wake crash evidence narrows this further: a dereferenced
+non-canonical pointer made of attacker bytes is now reproduced, but the
+pinned `uriencode_p()` expands every non-alphanumeric byte to `%XX`, so a
+canonical chosen address cannot be emitted through the key path. The
+remaining grade-moving result would be a control-flow diversion or a
+canonical crafted value demonstrably used through the corrupted field.
 
 ## Live chosen-byte observation in the plaintext daemon (second wake, 09:05-09:11Z)
 
@@ -343,6 +361,65 @@ daemon was alive at the deliberate stop (`rc=0`). Trace:
 `daemon/fixed-plain-150s-trace.txt`. The earlier `fixed/` ASan build was not
 used as a control: it exits on an unrelated 40-byte leak report and so is not
 comparable to the plain parent.
+
+## Reproduced attacker-byte pointer dereference in the live parent (fifth wake, 09:53-10:04Z)
+
+New evidence, **submitted for witness replay**; the accepted grade is not
+changed by this author's report. It converts the earlier single, non-deterministic
+fault into a reproduced, fix-sensitive crash whose faulting pointer value was
+captured and shown to be attacker bytes.
+
+- Method: the pinned plain parent binary
+  `daemon/parent-plain/memcached` was run under gdb with **no breakpoints** —
+  only `SIGSEGV`/`SIGBUS` stops — so the previous tooling negative (a per-item
+  breakpoint injecting EINTR into the 1000 ms `poll()`) does not apply. ASLR was
+  left enabled (`set disable-randomization off`). A loopback client stored
+  8000 keys of the chosen byte, issued `lru_crawler metadump all` on a stalled
+  `SO_RCVBUF=4096` socket, then drove continuous `set` commands on a second
+  loopback socket so the corrupted heap links were actually traversed.
+  Driver and gdb scripts are gitignored under `daemon/`
+  (`gdb-fault.sh`, `gdb-capture-aslr.gdb`, `trigger_stress.py`).
+- Fault: `Thread 5 "mc-worker"`, `assoc_find` at `assoc.c:87`; faulting
+  instruction `assoc_find+126` is `movzbl 0x29(%rbx),%eax` reading
+  `it->nkey` from a hash-bucket chain item. Disassembly shows `rbx` loaded
+  from `primary_hashtable[hv & mask]`, so the corrupted field is the **hash
+  chain item pointer** (`item` at offset 0 of the bucket link).
+- Chosen-byte identity: two independent ASLR-on runs with key byte `0x5a`
+  (ports 22162 and 22167) both faulted with
+  `RBX=0x5a5a5a5a5a5a5a5a` — eight attacker-chosen key bytes, non-canonical,
+  unmapped. Raw captures: `daemon/gdb-fault-p22162-095849.txt` and
+  `daemon/gdb-fault-p22167-100319.txt`. A `0x41` run (port 22165) faulted at
+  the same instruction with `RBX=0x6163203439313535`, an ASCII metadump-text
+  fragment (`daemon/gdb-fault-p22165-095953.txt`): the site is stable, the
+  exact eight-byte window varies with the written byte stream. Both values
+  are attacker-written content, not heap pointers.
+- Fix sensitivity: the pinned **fixed** tree (its `crawler.c` is the only
+  source difference) under the identical trigger and gdb script ran 90 s,
+  completed 42,770 `set` commands and never faulted
+  (`daemon/fixed-gdb-fixed-p22166-100112.txt`). The parent faults after
+  about 20,462 sets (~42 s). The fixed build's `bufused` is known to plateau
+  at 123009, below 131072.
+
+Caveats, preserved: the debugger was present to capture registers, though it
+used no breakpoints and the binary is unmodified; ASLR was on; the overflow
+frontier was **not** directly observed in these three gdb runs because the
+`/proc` observer must be the daemon's parent and gdb is the parent here — that
+the sequence crosses 131072 at t≈28 s is inferred from earlier observer runs
+with the identical store and metadump, plus the fix-sensitivity and the
+chosen-byte identity of the faulting value. The `0x5a` value is a uniform
+filler, not a crafted canonical address; the earlier two natural GPFs remain
+single observations with UNKNOWN faulting values. No control-flow diversion,
+function-pointer overwrite or execution was observed. All sockets were
+127.0.0.1.
+
+Structural barrier to the remaining chain (source-backed): `uriencode_init()`
+in the pinned `util.c:15-27` leaves literal only `isalnum` and `-._~`;
+every other byte — NUL, `0x7f`, all high bytes — is expanded to three ASCII
+characters `%XX` by `uriencode_p()` (`util.c:49-62`). A canonical x86-64
+user-space address therefore cannot be emitted through the key path: any
+pointer assembled from literal overflow bytes is non-canonical and faults on
+dereference. This explains why the reachable impact is a crash and why
+chosen-address control or execution is not demonstrable with this primitive.
 
 ## Witness verdict #751 (fourth wake) — accepted with wording condition
 

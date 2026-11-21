@@ -63,9 +63,23 @@ accounting defect. `-X` and `-o no_lru_crawler` are non-default mitigations.
   slab-freelist pointer write in the crawler thread; a longer
   observer-confirmed repeat went further without crashing, so that fault is a
   single observation, not an established impact.
+- New, submitted for witness replay (fifth wake): the pinned plain parent,
+  run under gdb with no breakpoints and ASLR on, faults reproducibly in
+  `assoc_find` (`assoc.c:87`, `movzbl 0x29(%rbx)`) with the hash-bucket chain
+  item pointer equal to eight attacker-chosen `0x5a` key bytes
+  (`0x5a5a5a5a5a5a5a5a` in two independent runs); a `0x41` run faults at the
+  same site with a different attacker-written value, and the pinned fixed
+  tree does not fault under the identical trigger (42,770 sets in 90 s).
+  A stress client drove the extra allocation pressure; all sockets were
+  127.0.0.1. Raw captures and caveats:
+  `reports/memcached2shell-daemon-asan.md`, fifth-wake section. This is a
+  reproduced crash/DoS impact limb, not a crafted-address or execution
+  result, and the grade stays ◐ pending independent replay.
 - UNKNOWN: loopback socket-buffer timing outside this configuration, shipping
   allocator and compile flags of a distro binary, a published CVE/GHSA, CVSS,
-  external reachability, and any post-write pointer control or dereference.
+  external reachability, canonical chosen-address control and control-flow
+  diversion. The pinned `uriencode_p()` emits literal only alphanumerics and
+  `-._~`, so a canonical pointer cannot be forged through the key path.
   All external claims remain claims. No probe was sent off loopback.
 
 Grade reference: witness verdicts #691 (seed harness) and #751 (daemon
@@ -73,8 +87,10 @@ evidence) are ESTABLISHED AS CLAIMED. Only the chosen-byte limb of rung 4 is
 accepted; pointer control, dereference, execution and control-flow diversion
 are not. Full daemon evidence: `reports/memcached2shell-daemon-asan.md`.
 
-Next rung needs a crafted chosen value demonstrably dereferenced through a
-corrupted field, or a control-flow diversion — another unchanged 86 s replay
-or allocator probe would add nothing. No host config change and no
-off-loopback probe. Wake trigger units and presentation stay owed from the
-person-only full-flag sync in `docs/runtime-pin.md`, never a bare `mishe sync`.
+Next: witness replay of the fifth-wake pointer-dereference evidence. The
+remaining grade-moving result is a control-flow diversion or a canonical
+crafted value demonstrably used through the corrupted field; another
+unchanged 86 s replay or allocator probe would add nothing. No host config
+change and no off-loopback probe. Wake trigger units and presentation stay
+owed from the person-only full-flag sync in `docs/runtime-pin.md`, never a
+bare `mishe sync`.

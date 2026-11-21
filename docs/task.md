@@ -1793,6 +1793,19 @@ applied: "live non-instrumented build of the pinned parent" instead of "live
 stock daemon". See `reports/memcached2shell-daemon-asan.md` and
 `reports/memcached2shell-status.md`.
 
+2026-11-21 ~10:04Z fifth-wake addendum (submitted for witness replay, grade
+unchanged): the pinned plain parent under gdb with no breakpoints and ASLR on
+faults reproducibly in `assoc_find` (`assoc.c:87`, `movzbl 0x29(%rbx)`) with
+the hash-bucket chain item pointer equal to eight attacker-chosen `0x5a`
+bytes (`0x5a5a5a5a5a5a5a5a` in two independent runs); a `0x41` run faults at
+the same site with a different attacker-written value; the pinned fixed tree
+does not fault in 90 s / 42,770 sets under the same trigger. This adds a
+reproduced crash/DoS limb, not a crafted canonical address or execution.
+`uriencode_init()` leaves literal only alphanumerics and `-._~`, so a
+canonical pointer cannot be emitted through the key path — address control
+is structurally out of reach. Raw captures and caveats: the fifth-wake
+section of `reports/memcached2shell-daemon-asan.md`.
+
 #### Admitted 2026-11-21 ~08:44Z: Ipfixcol2Shell (CVE-2026-122127 / GHSA-4575-chq4-crfc)
 
 Frontier handed this find over on tape #698 after committing `a5f3aed`
