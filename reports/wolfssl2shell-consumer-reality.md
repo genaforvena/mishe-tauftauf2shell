@@ -173,4 +173,47 @@ python3 loopback_flood.py out/loopback/ch-nosuite.bin 18482 20
 ```
 
 The library trees, the ASan harness and the v5.9.1 control were untouched.
-handshake records within one plaintext epoch was not demonstrated here.
+
+## Third wake: structural ACK-flush ceiling (2026-11-21, 17:4xZ)
+
+A source read of the pinned v5.9.0 `src/dtls13.c` explains both prior
+negative results mechanically. `Dtls13WriteAckMessage` (the vulnerable
+serialization, called at `:2899`) is always followed by
+`Dtls13RtxFlushAcks` (`:2930`), which frees every `seenRecords` node and
+sets the list to NULL (`:775-783`). The overflow therefore requires 4097
+distinct ACK-eligible handshake records to accumulate **between two
+flushes**. Four pinned triggers start a flush:
+
+1. `Dtls13MsgWasProcessed` (`:336-347`) sets `sendAcks =
+   Dtls13RtxMsgNeedsAck(ssl, hs)`. On a server that helper returns 1 for
+   `finished` (`:324-325`), `session_ticket` and `key_update` (`:330-331`).
+   Each such message is self-flushing via `Dtls13DoScheduledWork` (`:2709`)
+   -> `SendDtls13Ack`. This matches the observed 2 AddAck / 2 WriteAck / 2
+   flush under the KeyUpdate flood and the ACK at the end of the real
+   handshake (`finished`).
+2. Retransmission (`:901-910`): `peer_handshake_number < expected` sets
+   `retransmit = 1` and, when `seenRecords != NULL`, `sendAcks = 1`.
+3. Disruption (`:930-934`): `dtls13SendMoreAcks && Dtls13DetectDisruption`
+   sets `sendAcks = 1`. The lab server sets `sendMoreAcks = 0`, so this
+   trigger is disabled there.
+4. Fast timeout (`Dtls13RtxTimeout`, `:2742-2748`): any timeout with a
+   non-empty list and (`serverState >= SERVER_HELLO_COMPLETE` or a seen
+   unified header) calls `SendDtls13Ack` directly.
+
+Structural consequence: a real client's post-handshake records are
+application data (outer type 23, never added) or self-flushing KeyUpdates,
+and forged plaintext records after the server's first flight are dropped
+at the epoch switch. None of the demonstrated loopback routes can hold 4097
+handshake records in one ACK cycle. This is a property of the pinned
+consumer, not of the sink: rungs 1/2/3 remain ESTABLISHED on the harness,
+where `Dtls13RtxAddAck` is driven directly and each insert is real.
+
+Still UNKNOWN: a peer that delivers 4097 distinct handshake records inside
+one epoch with no intervening finish/key-update/retransmission/timeout
+flush (e.g. a crafted multi-fragment client flight before any key switch,
+or a large in-order flight received within one fast-timeout interval). Not
+demonstrated here and not disproved. No live-neighbour overwrite, pointer
+control, control-flow diversion or execution was observed, so rung 4 stays
+INSTRUMENTED. Grades unchanged. Pinned library trees untouched; all
+addresses loopback; tagged v5.9.1 (128-record cap) remains the fixed-side
+baseline.
