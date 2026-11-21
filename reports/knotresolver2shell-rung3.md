@@ -4,9 +4,10 @@
 loopback-only ASan build of the hash-pinned vulnerable tag, with independent
 witness replay **ESTABLISHED in full** (wake 5). The fixed tag handles
 identical bytes cleanly. Rung 4 (demonstrated security impact: chosen-byte /
-pointer control in a live neighbour) remains **UNKNOWN**; chosen-byte
-overwrites of two live comparator fields were observed in wakes 3–4 but no
-control flow passed through either.
+pointer control in a live neighbour) remains **UNKNOWN**. Wakes 3–4 wrote
+chosen bytes into two comparator fields of what wake 6 identified as a stale
+Initial pktns; wake 6 steered the write into a live gnutls session but
+observed no control flow.
 
 ## Builds and inputs — exact, reproducible
 
@@ -101,10 +102,12 @@ At F6, `free = 1200 >= datalen = 1200`, so the `realloc` branch is skipped;
    per-frame drift measured.
 4. Demonstrated security impact — **UNKNOWN**, but partially approached: wakes
    3–4 observed a deterministic chosen-byte overwrite
-   (`0x4141414141414141`) of two live function-pointer fields — the `gap` and
-   `acktr.ents` comparators of an adjacent `ngtcp2_pktns` — with no call
-   through either. No RIP/RDI control, marker execution or chosen *call* was
-   observed. The published claims (five jemalloc size classes, ~814-byte
+   (`0x4141414141414141`) of two function-pointer fields — the `gap` and
+   `acktr.ents` comparators of an adjacent, wake-6-identified stale Initial
+   `ngtcp2_pktns` — with no call through either. Wake 6 groomed the neighbour
+   into the attacker's live gnutls session, still with no observed control
+   flow. No RIP/RDI control or marker execution was observed.
+   The published claims (five jemalloc size classes, ~814-byte
    write into a libgnutls handler, `system()` with ASLR off) are from the
    researcher's report and were not reproduced. Stock-build (ASLR on)
    exploitability remains UNKNOWN; an information leak would be needed.
@@ -330,6 +333,84 @@ alive, driver `done`. The corrupted pktns does not perform even the `search`
 read during post-F6 traffic on the same connection: it is idle on this host,
 not merely missed by the old `compar` watchpoint. Rung 3 unchanged; rung 4
 UNKNOWN.
+
+## Rung-4 neighbour identity and live-object grooming (wake 6, 2026-11-21 ~20:1x–20:3xZ)
+
+Question: WHY is the +6144 neighbour idle, and can its object type be changed?
+Wakes 3–5 had only typed its contents. Two new measurements answer both.
+
+### Baseline: a stale Initial pktns, not a live object
+`harness/pktns-owner.gdb` walks the stack at the F6 `wire_buf_consume`
+breakpoint to the live `ngtcp2_conn`, reads its `in_pktns` (offset 656),
+`hs_pktns` (664), embedded `pktns` (672) and `tls_native_handle` (7648;
+kresd sets it to `conn->tls_session` at `quic_conn.c:516`), and scans nearby
+heap for pointers to `slot1`. `harness/pktns-owner-direct.txt`:
+
+```
+F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1198
+found ngconn=0x7ffff68e1800 in frame 1 kr_recv_stream_data_cb
+conn=0x7ffff68e1800 in_pktns=0x0 hs_pktns=0x0 embedded_pktns=0x7ffff68e1aa0
+match: in=0 hs=0 embedded=0
+slot1 id=0 (0=INITIAL,1=HANDSHAKE,2=APPLICATION)
+embedded id=2
+tls_native_handle=0x7ffff6881000 at conn+7648 match_slot1=0
+ptr-to-slot1 matches=3 in [0x7ffff66e1800,0x7ffff6ae1800]
+```
+
+Pinned `ngtcp2_conn.h:339-341` makes `in_pktns`/`hs_pktns` separately allocated
+pointers and the application pktns embedded in `ngtcp2_conn`. `slot1->id == 0`
+identifies an Initial pktns; the live connection has already discarded its own
+(`in_pktns == NULL`) and its live TLS session is elsewhere. That is the causal
+reason no `compar`/`search` read ever followed the chosen-byte overwrites of
+wakes 3–5: those writes landed in a **freed/stale Initial pktns**, not in an
+active object. This supersedes the weaker "idle on this host" phrasing.
+
+### Groom: one stalled Initial connection makes the neighbour live
+`harness/ksl_stalled.py` sends one extra connection's Initial ClientHello from
+a raw loopback UDP socket and never returns the server's replies, so that
+connection's Initial allocation stays live and perturbs the 6144-byte
+size-class order before F1..F6. `harness/run_pktns_stalled.sh` then replays
+F1..F6; the neighbour becomes the *attacking* connection's live gnutls
+session. Evidence `harness/pktns-stalled.txt`:
+
+```
+F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1198
+conn=0x7ffff68f1000 in_pktns=0x0 hs_pktns=0x0 embedded_pktns=0x7ffff68f12a0
+tls_native_handle=0x7ffff68aa000 at conn+7648 match_slot1=1
+```
+
+The attacker's own **live gnutls session** is now the neighbour. A pre-write
+dump (4th `wire_buf_consume len==1438`, i.e. after F5's realloc and before
+F6's `memcpy`; `harness/gnutls-owner.gdb`, `harness/gnutls-stalled.txt`):
+
+```
+PRE-F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1438 size=6960
+PRE-F6 ngconn=0x7ffff6910000 tls_native_handle=0x7ffff68aa000 match=1
+slot1+0x00: 0x0002000200000001       +0x10: 0x00007ffff7d63e38
+slot1+0x18: 0x00007ffff7d73fe8       +0xb0: 0x0000000000000020
+slot1+0xb8: 0x000000006b01ff64       +0xd8: 0x00007ffff7d70480
+slot1+0xf8: 0x00007ffff7d730e0       +0x100: 0x00007ffff688e100
+slot1+0x178: 0x0000000000000001
+```
+
+This is a gnutls session layout (flags, library pointers, random session
+bytes, session pointer at +0x100), not the pktns of the baseline run: a single
+stalled handshake changes the +6144 object type. The reference offsets do not
+describe gnutls 3.8.3 even on the correct object: `+0xb8 = 0x6b01ff64`,
+`+0x110 = 0`, `+0x174 = 0`. F6 with the existing marker body, a re-sent Initial
+flight and a trailing DNS query on the attacked connection produced no
+watchpoint stop, no crash and no observable behaviour change; kresd stayed
+alive. (A benign `StreamStateError` in the driver's context-manager close is
+after the query and is not a server effect.)
+
+### Disposition
+Rung 3 unchanged. Rung 4 remains **UNKNOWN**, but the obstacle is now
+precisely scoped: chosen bytes can be steered into a *live* object (the
+attacker's gnutls session) by grooming, and the remaining work is to find a
+field of gnutls 3.8.3 that is dereferenced after the overwrite, then drive it.
+The stale-pktns path of wakes 3–5 is closed as a rung-4 route. Stock
+(ASLR-on) exploitability and any information leak remain UNKNOWN. All runs
+loopback-only under gdb; host ASLR sysctl untouched.
 
 ## Boundaries
 

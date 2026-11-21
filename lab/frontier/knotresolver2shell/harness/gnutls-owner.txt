@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+F5 buf=0x7ffff687f800 slot1=0x7ffff6881000
+#1  0x0000555555595fee in kr_recv_stream_data_cb (ngconn=0x7ffff68e1800, flags=0, stream_id=0, offset=8, data=0x7ffff684d005 "BB@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377", datalen=1440, user_data=0x7ffff69fb200, stream_user_data=0x7ffff688d3b0) at ../daemon/quic_conn.c:127
+127			wire_buf_consume(&stream->pers_inbuf, datalen - sizeof(uint16_t));
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/harness/gnutls-owner.gdb:28: Error in sourced command file:
+There is no member named tls_native_handle.
