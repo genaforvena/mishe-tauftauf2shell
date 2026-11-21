@@ -4190,7 +4190,7 @@ Both bounded first experiments have now run, so the two admission-time
 plausibility notes above are historical, not pending work. WAMR (`8686e9d`,
 `reports/frontier-wamr2shell.md`): both tags built with fast-interp and ASan;
 the pinned upstream `.wasm` gives an ASan `WRITE of size 2` on 2.4.4 and no
-load-time fault on 2.4.5 — rungs 1–3 locally reproduced, witness replay owed.
+load-time fault on 2.4.5 — rungs 1–3 and the rung-4 negative are independently witness-ESTABLISHED (W91, #1147).
 The admission guess that the OOB stream carries chosen immediates is REJECTED
 by the instrumented Pass-2 log: its 61 would-be writes are const-table indices
 and host branch pointers, so rung 4 is a measured negative and any future
@@ -4199,5 +4199,4 @@ rung-4 attempt needs a different overflow shape. Exim (`cd925eb`, `671a3b2`,
 child's closed stderr, the `three` shape gives a heap-use-after-free
 `WRITE of size 1` at `tls.c:510` on 4.99.2 and no report on 4.99.3 — rung 3
 confirmed. The non-ASan probe saw the free but never reached `tls_ungetc`, so
-rung 4 stays source-bound and unclaimed; witness replay is owed for both
-targets, and no wire-to-RCE claim exists for either.
+rung 4 stays source-bound and unclaimed; witness #1140 (DM 4727) ESTABLISHED rung 3 as claimed on independent ASan-linked pinned builds. No wire-to-RCE claim exists for either target.
