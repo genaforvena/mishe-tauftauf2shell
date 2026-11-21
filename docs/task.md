@@ -4198,8 +4198,13 @@ rung-4 attempt needs a different overflow shape. Exim (`cd925eb`, `671a3b2`,
 `reports/exim2shell-wake2.md`): with ASan's report redirected from the forked
 child's closed stderr, the `three` shape gives a heap-use-after-free
 `WRITE of size 1` at `tls.c:510` on 4.99.2 and no report on 4.99.3 — rung 3
-confirmed. The non-ASan probe saw the free but never reached `tls_ungetc`, so
-rung 4 stays source-bound and unclaimed; witness #1140 (DM 4727) ESTABLISHED rung 3 as claimed on independent ASan-linked pinned builds. No wire-to-RCE claim exists for either target.
+confirmed. A later lab-only trace on the plain 4.99.2 build reached the
+`receive.c:2141` call site, but `tls_close()` installs safe `smtp_ungetc`
+before it and `bdat_pop_receive_functions()` restores `tls_ungetc` only
+afterwards; no stale-buffer write or chosen byte followed, so rung 4 stays
+unclaimed. Witness #1140 (DM 4727) ESTABLISHED rung 3 as claimed on independent
+ASan-linked pinned builds, and its citation fixes landed in `a6fbe8e`. No
+wire-to-RCE claim exists for either target.
 
 #### Measured follow-through (21:27Z): WAMR chosen-immediate rung 4
 
@@ -4216,3 +4221,15 @@ executed, so rung 5 stays UNKNOWN. Envoy v1.39.3 is named as a genuine
 network-to-`wasm_runtime_load` consumer pinning WAMR 2.4.4 fast interp, but
 is NOT built or driven here. Evidence and generator:
 `reports/wamr2shell-rung4.md`, `lab/frontier/wamr2shell/make_chosen_variant.py`.
+
+#### Witness verdicts (21:1xZ): OpenJpeg rung-4 limbs
+
+DM #1151 returned ESTABLISHED for both OpenJpeg natural-call limbs at their
+labeled scope: #1144's codestream-chosen `&PyDict_Type` call through natural
+`_Py_Dealloc` (six core invariants replayed; one non-grade-changing `LOAD_OK`
+harness nit on the witness layout) and #1149's GOT-chosen unresolved `system`
+PLT stub with a NUL argument (9 PASS / 0 FAIL). No chosen argument,
+continuation into `system`, shell or listener was observed, so rung 4 stays
+PARTIAL at the INSTRUMENTED grade and rung 5 UNKNOWN. The Exim #1140 citation
+corrections landed in `a6fbe8e`; the plain-build `smtp_ungetc` ordering
+NEGATIVE is recorded in `docs/reproducibility.md`.
