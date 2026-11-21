@@ -524,8 +524,13 @@ a clean archive and returned ESTABLISHED at this labeled scope, trace
 Its seventh, non-grade-changing check failed only because that layout aborted
 with `corrupted size vs. prev_size` before `LOAD_OK`, an outcome already
 acknowledged above; `chosen-call.sh` now accepts either documented plain-run
-outcome and records it as `PLAIN_OUTCOME`, re-replayed at **7 PASS / 0 FAIL**
-with the unchanged invariant trace `sha256=ab46a561…`.
+outcome, records it as `PLAIN_OUTCOME`, and re-replayed at **7 PASS / 0 FAIL**
+with the unchanged invariant trace `sha256=ab46a561…`. A clean `git archive
+091488e` replay then took the other branch: **7 PASS / 0 FAIL**,
+`PLAIN_OUTCOME LOAD_OK`, object `0xd15ed0`, trace
+`sha256=25542f54d448d0bf4b2953c37d2fe2636fcfa1d2641f15410ca546423b18f6f4`.
+The checkout replay had `PLAIN_OUTCOME corrupted size vs. prev_size` with
+object `0xd160d0`, so both documented plain-run outcomes are exercised.
 
 ## Chosen imported-function target through the system GOT (2026-11-21 ~21:10Z)
 
