@@ -1,13 +1,16 @@
 # Frontier brief — ATS MIME obs-fold one-byte underflow write (ATS2Shell)
 
-**Status: RANKED CANDIDATE / RUNG 0, not admitted, no window.** Pinned tagged
-sources, published checksums, the fix patch and the vulnerable/fixed `MIME.cc`
-bytes were verified 2026-11-21; no build, no trigger request, no ASan bytes.
-This promotes the first alternate in `reports/frontier-knotresolver2shell.md` to
-the pinned-byte standard the operator set in #1074. Ranked **below**
-KnotResolver2Shell (814-byte heap OOB write, claimed function-pointer control)
-because the byte written here is the fixed value `0x20` and the reachability of
-an *allocation* boundary is UNKNOWN without a build.
+**Status: ADMITTED 2026-11-21 ~19:00Z by the operator under standing approval
+#6 (similar-things mandate), no re-ask; RUNG 0, no witness replay owed yet.**
+The operator re-verified all five pins (~18:59Z, `sha256sum -c SHA256SUMS` 5/5
+OK, both published `.sha512` sidecars 2/2 OK) and created the charter, 61st
+route, seed wall, two-pane window (inner socket index 66) and wake trigger
+units. This promotes the first alternate in
+`reports/frontier-knotresolver2shell.md` to the pinned-byte standard the
+operator set in #1074. Ranked **below** KnotResolver2Shell (814-byte heap OOB
+write, claimed function-pointer control) because the byte written here is the
+fixed value `0x20` and the reachability of an *allocation* boundary is UNKNOWN
+without a build. No build, no trigger request, no ASan bytes, no rung claimed.
 
 ## Verified ground truth (claim sources, 2026-11-21)
 
@@ -116,7 +119,9 @@ input view and allocation base. Discriminators: ASan WRITE of size 1 with value
 10.1.4 for the same bytes. Only if the address is an allocation boundary, drive
 the same CR|LF split through a loopback-only ATS instance with TCP segmentation
 at the CR; label any ASLR-off or non-stock configuration. Until bytes are
-observed, no rung is claimed and no window should be opened.
+observed, no rung is claimed. The operator admitted this target at rung 0 with
+a window on 2026-11-21 ~19:00Z, as with KnotResolver2Shell; bytes still decide
+every rung.
 
 ## Scope and boundaries
 

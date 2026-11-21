@@ -3973,3 +3973,45 @@ trigger units with the pinned full-flag sync from
 `docs/runtime-pin.md`, a seed wall and the two-pane window (inner socket index
 65). Never run a bare `mishe sync`. This makes 56 admitted target minds in the
 README table; an independent witness replay is owed once a harness exists.
+
+#### Admitted 2026-11-21 ~19:00Z: ATS2Shell / ats2shell (CVE-2026-58154)
+
+Frontier's DM #1076 carried brief `reports/frontier-ats2shell.md` (commit
+`595abba`), two hash-pinned tagged tarballs, their published SHA-512 sidecars
+and a fix patch with SHA-256 pins in `lab/frontier/ats2shell/src/SHA256SUMS`
+and a URL/digest table in `PROVENANCE.md`. The operator admitted this target
+under standing approval #6, no re-ask. Operator pin check ~18:59Z:
+`sha256sum -c SHA256SUMS` 5/5 OK and `sha512sum -c` on both sidecars 2/2 OK.
+All five elements are in `.mishe-tauftauf/charters/ats2shell.md`: **claim
+source** — CVE-2026-58154 (CNA Apache, MITRE published 2026-07-29T08:24:02Z,
+CWE-787, CVSS 3.1 8.9 `AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:H/A:H`), vendor
+security-2026-07.html, Apache announcement and oss-sec /2026/q3/338; the
+advisory bundles 34 issues, so its severity is not evidence for this hunk.
+**Identifier** — CVE-2026-58154 (no GHSA cited). **Affected/fixed pin** —
+affected 8.0.0–8.1.11 / 9.0.0–9.2.14 / 10.0.0–10.1.3, fixed 9.2.15 / 10.1.4;
+vulnerable tagged 10.1.3 tarball
+`b92302005fbd79c3918b97c8546471b988ce0a11dc99a2d39ba092bec45d843a`, fixed
+tagged 10.1.4 `47f09c65a3de70db38990124834f292081520e3290a7e781898291019b6f9d9f`,
+fix `f4561a945ac52010a598e0cd19b12d058044c3d2` with 10.1.x backport
+`5642692b888fcc9cf26a43ec2f39a05f938c4963` an ancestor of tag 10.1.4 (compare
+ahead 128 / behind 0), patch pin
+`6a6626f89f4255beee82b900a1ad35aa8150862ded9dedcd92cedd396e178092`.
+**Primitive** — pinned 10.1.3 `src/proxy/hdrs/MIME.cc:2427-2432` stores fixed
+`0x20` at `text.data()-1` and, on a preceding CR, at `input.data()-1`; fixed
+10.1.4 `:2477-2484` guards with `unfold > input.data()` and `m_line.back()`.
+The fix's two-fragment regression input is `"Foo: bar\r"` then `"\n baz\r\n"`;
+its NOTE limits the trigger to a CR|LF split across parser views.
+**Rung-4 plausibility** — pre-auth HTTP header parsing in a web-facing reverse
+proxy with a source-bound one-byte store; attacker influence is the split
+position, not the byte value. Ranked below KnotResolver2Shell: no chosen bytes,
+no pointer control, no public RCE claim for this hunk, and allocation-boundary
+reachability UNKNOWN without a build.
+
+At admission no rung was established: no build, no bytes, no trigger. The
+operator created the 61st `engine/routes.json` entry, this mind's wake trigger
+units with the pinned full-flag sync from `docs/runtime-pin.md`, a seed wall,
+the charter and the two-pane window (inner socket index 66). This makes 57
+admitted target minds in the README table. Never run a bare `mishe sync`. The
+bounded first experiment is an ASan build of the pinned 10.1.3 / 10.1.4
+MIMEScanner unit tests replaying the fix's two-fragment input; a witness replay
+is owed once a harness exists.
