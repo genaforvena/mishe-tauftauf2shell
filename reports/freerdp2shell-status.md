@@ -33,10 +33,12 @@ Line numbers for `rdpsnd_main.c` below are raw-file lines at the named tag
   `out_frames` becomes that wrapped value, `out_buffer_size` wraps to
   `0xFFFFFFFFFFFFFFC0`, `realloc` fails, and `out_frames` is **not rolled back**
   (:446-451).
-- `send_samples()` (:765-785) then `CopyMemory`s client sample bytes into the
-  still-8820-byte `out_buffer`; `out_pending_frames` never reaches the huge
-  `out_frames`, so successive calls append at monotonically advancing offsets
-  — an unbounded, sequential, attacker-controlled heap write.
+- `send_samples()` (:765-785) then `CopyMemory`s the server audio-capture
+  sample bytes (`buf`, see wake 17) into the still-8820-byte `out_buffer`;
+  `out_pending_frames` never reaches the huge `out_frames`, so successive
+  calls append at monotonically advancing offsets — an unbounded, sequential,
+  attacker-triggered heap write whose byte values come from the server's
+  audio source, not the client (wake 17).
 - Harness (pinned digests above): rung 1 `rc2=2 out_frames=0xfffffffffffffff0
   realloc_failed=1`, `oob_writes=7564 first_oob=8820 last_oob=16383`; rung 2
   chosen bytes `ab`/`cd` land at OOB offsets 8820/12000; rung 3 ASan
@@ -614,6 +616,48 @@ rung-4 dereference was attempted for tag 2 (that remains established for tag
 `0x41`, not remote audio. No probe off loopback, no committed harness or
 replay-patch change.
 
+## Real audio source: copied bytes are server capture, not client-chosen (wake 17, 2026-11-21 06:07Z)
+
+Source-bound reading of pinned 3.32.0 `d27a4f7c`, prompted by the remaining
+"real audio source" UNKNOWN. `rdpsnd_server_send_samples()`
+(`rdpsnd_main.c:747-793`) copies from its `buf` argument:
+`CopyMemory(out_buffer + out_pending_frames*src_bytes_per_frame, buf,
+cframesize)` at `:770-773`. Both quantities that shape the write are set
+server-side:
+
+- `src_bytes_per_frame` is `src_format->wBitsPerSample/8 * nChannels`
+  (`rdpsnd_main.c:383-385`); `src_format` is assigned only from the server's
+  own `server_formats[0]` in the shadow/Sample activation callbacks
+  (`server/shadow/shadow_rdpsnd.c:78`, `server/Sample/sf_rdpsnd.c:51`) or from
+  the audio-source message `msg->audio_format`
+  (`server/shadow/shadow_client.c:2570`). `select_format()` reads
+  `context->src_format` but never writes it. The client's `SNDC_FORMATS`
+  record fills `context->client_formats[...]`, which supplies only `bs` (the
+  wrap trigger) and the DSP reset format — not the copy stride.
+- `buf` is the server-side captured audio. On the Linux/X11 shadow server it
+  arrives as `SHADOW_MSG_OUT_AUDIO_OUT_SAMPLES` (`shadow_client.c:2561-2578`);
+  no in-tree producer of that message exists in 3.32.0 (a grep over
+  `server/` and `include/` finds only the definition at
+  `include/freerdp/server/shadow.h:279,309` and the consumer). The Windows
+  and macOS servers fill it from DirectSound/WASAPI/CoreAudio
+  (`server/Windows/wf_directsound.c:181`,
+  `server/Windows/wf_wasapi.c:290`, `server/Mac/mf_rdpsnd.c:171`). The client
+  microphone-redirection channel `audin`
+  (`channels/audin/server/audin.c`) has no data path into rdpsnd.
+
+Consequence for the honesty of rung 4: a remote client chooses the format
+fields that trigger the integer wrap and can time its PDUs (wakes 14/15), but
+it does **not** directly choose the bytes the server copies or the stride at
+which they land. The lab's "chosen bytes at chosen offsets" results (wakes 4,
+8, 9, 13, 14) use synthetic playback supplied through the lab subsystem table
+as a stand-in for that server capture source. Whether a particular
+deployment lets a remote attacker influence the captured audio content (for
+example system audio the attacker can cause to play) is deployment-specific
+and stays UNKNOWN. This does not change the demonstrated corruption, the
+pointer-bearing chunk or the chosen-pointer dereference in the lab build; it
+narrows the claim about who supplies the written bytes. Source-only finding —
+no new live session, no over-the-wire test, no probe off loopback.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with lab-chosen bytes at chosen OOB
@@ -668,6 +712,12 @@ scratch log trigger with the real client/server quality-mode log exchange
 negative without that timing
 (`lab/freerdp2shell-src/natural_trigger_no_timing.txt`); wake 16 measured the
 FFmpeg format gate and added an in-process tag-2 wrap on a non-default build
-(`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`). Grooming of a specific target
-object and a real audio source remain UNKNOWN; the FFmpeg-build UNKNOWN is
-CLOSED (default build NEGATIVE, experimental build OBSERVED for tag 2).
+(`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`), independently accepted by
+witness verdict #602 (ESTABLISHED, no replay owed). Wake 17 traced the real
+audio source in pinned 3.32.0: the copied bytes and copy stride come from the
+server's platform audio capture, not the client, so remote byte choice is not
+established in a stock deployment (deployment-specific influence stays
+UNKNOWN). Grooming of a specific target object remains UNKNOWN. The
+FFmpeg-build UNKNOWN is CLOSED (default build NEGATIVE, experimental build
+OBSERVED for tag 2); the real-audio-source question is CLOSED at the source
+level as described above.
