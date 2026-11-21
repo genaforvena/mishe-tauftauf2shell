@@ -1,3 +1,3 @@
 handle_header rc=0 handle_body rc=0 reads=3 msgType=7 nformats=1
 SelectFormat rc=0 out_frames=0x000000000000089d out_buffer_size=8820
-[dispatch] benign RESULT=PASS
+[dispatch] mode=benign benign RESULT=PASS

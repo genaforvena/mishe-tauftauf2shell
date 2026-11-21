@@ -153,31 +153,75 @@ parsed[1]: tag=17 channels=2 blockalign=4 cbsize=2
 SelectFormat rc=12 out_frames=0xfffffffffffffff0 out_buffer_size=8820
 readback offset 8819=11 offset 8820=de offset 21384=ad
 out_pending_frames=8192 out_frames=0xfffffffffffffff0
-[dispatch] chosen RESULT=PASS
+[dispatch] mode=dvi chosen RESULT=PASS
 ```
 
 The ASan build of the same PoC (`dispatch_asan.txt`) reports `WRITE of size
 16384`, `0 bytes after 8820-byte region`, frame
 `rdpsnd_server_send_samples rdpsnd_main.c:770`. A benign one-record PDU
 through the same dispatcher (`dispatch_benign.txt`) yields
-`out_frames=0x89d` and no chosen-byte write. `run.sh` now checks all three;
-`bash lab/freerdp2shell-src/run.sh` prints `ALL REAL-LIBRARY CHECKS PASS`,
-rc 0.
+`out_frames=0x89d` and no chosen-byte write.
+`run.sh` now checks all five cases; `bash lab/freerdp2shell-src/run.sh`
+prints `ALL REAL-LIBRARY CHECKS PASS`, rc 0.
 
 The WTS read callback is a stub: this is not a live RDP session, virtual
 channel transport, network path or auth gate. PDU framing and server message
 dispatch are now evidenced; those remaining layers are still UNKNOWN.
 
+
+### Activated-callback correction and the ADPCM variant (00:05Z)
+
+A read-only source survey corrected the plant's earlier framing: receiving
+`SNDC_FORMATS` alone does not call `select_format()`. The server does so from
+its `Activated` callback (`rdpsnd_main.c:1277-1278` for
+`clientVersion < CHANNEL_VERSION_WIN_7`), which `handle_messages()` invokes
+after a successful parse. Shadow installs
+`rdpsnd_activated` (`server/shadow/shadow_rdpsnd.c:35-44`); it selects with
+`audio_format_compatible` (`libfreerdp/codec/audio.c:225`), which requires
+equal `wFormatTag`. Shadow's default server format list
+(`server/common/server.c:128-137`) has no DVI_ADPCM (0x11), so the
+DVI_ADPCM PoC is a library-level path, not one the stock shadow server can
+select by default. The report's earlier implication that the DVI record is
+shadow-reachable was wrong.
+
+The same list does include `WAVE_FORMAT_ADPCM` (0x02). Its server record has
+`nBlockAlign=4`, which the compatibility check does not compare, so a client
+record with `nChannels=2, nSamplesPerSec=44100, wBitsPerSample=16,
+nBlockAlign=8` passes the parse-time floor and is selectable. The ADPCM
+expression `bs = (nBlockAlign - 7*nChannels)*2/nChannels + 2`
+(`rdpsnd_main.c:426-427`) evaluates to `-4` in `int` arithmetic and is
+widened to `UINT64` `0xfffffffffffffffc`; the same failed-realloc,
+unrolled-back `out_frames` and sequential write follow.
+
+The dispatch PoC's `adpcm` mode frames that record through the real
+dispatcher. `dispatch_adpcm.txt`:
+
+```
+parsed[1]: tag=2 channels=2 blockalign=8 cbsize=0
+SelectFormat rc=12 out_frames=0xfffffffffffffffc out_buffer_size=8820
+readback offset 8819=11 offset 8820=de offset 21384=ad
+[dispatch] mode=adpcm chosen RESULT=PASS
+```
+
+`dispatch_adpcm_asan.txt` shows the same `WRITE of size 16384`, `0 bytes
+after 8820-byte region`, `rdpsnd_server_send_samples rdpsnd_main.c:770`.
+The WTS read callback remains a stub, so this is still not a live shadow
+session, real channel transport or auth gate; it does remove the
+"server must offer DVI_ADPCM" precondition for this variant.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
 offsets **on real library bytes through the real SNDC_FORMATS parser and the
-real `rdpsnd_server_handle_messages()` dispatcher**, but still in-process with
-a stubbed WTS read callback. The write is sequential and unbounded; no pointer
-control or specific heap object is targeted. Live FreeRDP process, real
-virtual-channel transport, RDP session, stock allocator layout, network
-reachability and the auth gate remain UNKNOWN. No off-loopback probe. Default
-posture is post-auth (PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
+real `rdpsnd_server_handle_messages()` dispatcher**, for both DVI_ADPCM and
+the shadow-compatible WAVE_FORMAT_ADPCM variant, but still in-process with a
+stubbed WTS read callback. The write is sequential and unbounded; no pointer
+control or specific heap object is targeted. The stock shadow server's
+`Activated` callback cannot select DVI_ADPCM by default; the ADPCM variant
+does not have that precondition. Live FreeRDP process, real virtual-channel
+transport, RDP session, stock allocator layout, network reachability and the
+auth gate remain UNKNOWN. No off-loopback probe. Default posture is post-auth
+(PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay

