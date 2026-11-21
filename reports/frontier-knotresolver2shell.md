@@ -15,10 +15,13 @@ CVE-2026-58154, BIND 9 CVE-2026-3593, Exim CVE-2026-45185 below).**
   execution via a heap-based buffer overflow in the DoQ (DNS-over-QUIC) receive
   path." CVSS 3.1 8.1 HIGH
   `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:H/A:L`, CWE-1284 in the CVE record
-  (the researcher calls it CWE-787). CISA ADP: exploitation `poc`,
-  automatable `no`, technical impact `partial`. Records:
+  (the researcher calls it CWE-787). Records:
   `https://cveawg.mitre.org/api/cve/CVE-2026-66374`,
   `https://www.cve.org/CVERecord?id=CVE-2026-66374`.
+- **Researcher follow-up**: oss-sec #234, 2026-07-24 08:43:38 +0200, raw-read at
+  `https://seclists.org/oss-sec/2026/q3/234`: the researcher says the vendor
+  did not request a CVE and asks for one — consistent with MITRE creating the
+  record on 2026-07-25.
 - **Researcher report**: oss-sec 2026-07-23 by Przemyslaw Frasunek, raw-verified
   at `https://seclists.org/oss-sec/2026/q3/226` (also linked by the CVE as
   `https://openwall.com/lists/oss-security/2026/07/23/6`). Claims: affected
@@ -47,6 +50,10 @@ CVE-2026-58154, BIND 9 CVE-2026-3593, Exim CVE-2026-45185 below).**
   by the scout within the 6.4.0...6.4.1 range but its bytes were NOT read this
   wake. The 6.4.1 tarball already contains a more evolved form of the guard
   than this patch, so the tag is authoritative for the fixed side.
+  Tag containment verified from the GitHub compare API
+  `https://api.github.com/repos/CZ-NIC/knot-resolver/compare/7eb2e11810966323ed7c2385b8922eb8d57c46d2...v6.4.1`:
+  `status: ahead`, `ahead_by: 11`, `behind_by: 0`, merge base is the fix commit
+  itself; `2e18114a…` is the first commit after it.
 - **Pins**: two tagged tarballs plus the patch, exact SHA-256 in
   `lab/frontier/knotresolver2shell/src/SHA256SUMS`; URL/digest table in
   `lab/frontier/knotresolver2shell/PROVENANCE.md`. Vulnerable is tagged
