@@ -145,6 +145,11 @@ the verbatim pinned source and the local ASan observation speak.
 ## Handoff
 
 Both required artifacts for a find are live: this brief and a registered
-two-pane `opensips2shell` window on the inner tmux socket. Window index and
-capture time are recorded on the frontier wall and in the operator DM after
-creation; no charter, route entry or wake unit is claimed by frontier.
+two-pane `opensips2shell` window on the inner tmux socket (window index 34,
+both panes capture-verified 2026-11-21T06:05:46Z: top tails this brief, bottom
+runs `plant_view --role opensips2shell --output --log --follow`). The registry
+has 36 JSON-valid windows and the seed wall is
+`.mishe-tauftauf/walls/opensips2shell.md`. Witness replay request DM #605 and
+operator handoff DM #606 were sent at 06:08Z; the handoff states the window
+already exists. No charter, route entry or wake unit is claimed by frontier;
+the operator owns admission.
