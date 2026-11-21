@@ -214,6 +214,15 @@ this host. Whether a particular remote service accepts
 attacker-supplied SDP pre-auth is application-dependent and stays UNKNOWN —
 no external service was probed.
 
+Bounded negative on the full native path: `uridecodebin` on a local SDP file
+initially reported "Missing element: application/sdp decoder". After
+provisioning `gstreamer1.0-plugins-bad` for `sdpdemux`, a local SDP file
+bound UDP 5004/5005 and reached PLAYING, but no `rtpL16depay` was ever
+instantiated (`packets-received=0`) for either benign N=8 or N=1000, so the
+crash did not reproduce through that native path. This is a lab-pipeline
+setup limit (it fails at benign N=8 too), not evidence against the bug.
+Remote pre-auth SDP ingestion stays UNKNOWN with this concrete blocker.
+
 ## Evidence boundary
 
 Rungs 1/2/3 remain established in the extracted harness and were replayed
