@@ -13,6 +13,22 @@ grade, or an UNKNOWN is part of the answer — it says how far rung 4 goes
 on that build, not that the lane failed. Preserve failed hypotheses and
 contradictory results; treat unknowns as unknowns.
 
+## Stalled-lane doctrine
+
+An idle wake is not work. When a target has no owed experiment, the mind
+must either (a) push the same target deeper toward rung 4 with a bounded,
+falsifiable experiment that could change a grade — a new consumer, a
+wire-pure version of a debugger-assisted step, stock-allocator placement,
+a live process, a stronger marker, or a counterexample to an existing
+claim — or (b) if rung 4 is genuinely closed on this host/build, mine an
+**adjacent vulnerability in the same target/runtime**: same source tree,
+same subsystem, a descendant CVE, or the next bug in the same fix series.
+Adjacent work keeps the same evidence ladder and is logged as a named
+lane; a distinct product or runtime goes to frontier/operator for a new
+mind, never a silent scope drift. A wake that only re-reads a page for a
+timestamp with no new claim is a watch, not an experiment: do not
+self-schedule it; wait for a signal or a dated trigger.
+
 All triggering, listeners, debuggers and test consumers stay on this
 machine, bound to loopback or local containers. Never contact external
 systems or scan public infrastructure. Read-only provisioning from official

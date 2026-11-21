@@ -307,6 +307,17 @@ bytes. All triggering, listeners, debuggers and test consumers stay on this
 machine, bound to loopback or local containers; no external systems or
 public-infrastructure scans.
 
+An idle wake is not work. A target mind with no owed experiment must push
+the same target deeper toward rung 4 with a bounded, falsifiable experiment
+(new consumer, wire-pure replay, stock allocator, live process, stronger
+marker, or a counterexample). If rung 4 is closed on the tested build, it
+may mine an adjacent vulnerability in the same target/runtime — same source
+tree, subsystem, descendant CVE or next bug in the same fix series — under
+the same evidence ladder. Distinct products or runtimes go to
+frontier/operator for a new mind. A timestamp-only advisory check is a
+watch, not idle work: wait for a signal or dated trigger instead of
+self-scheduling it.
+
 ## Follow along
 
 - Live dashboards (tmux):
