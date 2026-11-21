@@ -11,13 +11,23 @@ fresh checkout.
 ## Evidence ladder and isolation
 
 Rungs — **suspected** (source/advisory) → **reproducible crash** →
-**confirmed memory corruption** → **demonstrated impact** — are a depth
-investigation of how far rung 4 can be pushed on each build, not boxes to
-touch. A negative result, a harness-only grade, or an UNKNOWN records that
-boundary and stays in the report. Nothing in this lab contacts a public
-target or any external system; provisioning downloads public sources, and
-all triggers, listeners, debuggers and test consumers run on `127.0.0.1`
-or inside local containers whose host ports bind only to loopback.
+**confirmed memory corruption** → **demonstrated impact** → (additive, only
+where a measured rung-4 primitive leaves a path) **working remote command
+execution** — are a depth investigation of how far rung 4, and where attempted
+rung 5, can be pushed on each build, not boxes to touch. A negative result, a
+harness-only grade, or an UNKNOWN records that boundary and stays in the
+report. Rung 5 requires a live plant-started target on loopback, attacker wire
+or request input that makes it execute a lab-chosen benign command with an
+observed side effect bound to that request, vulnerable / fixed / safe-input
+differential controls, exact conditions (pins, flags, auth gate, ASLR,
+grooming, debugger involvement, process survival) and an independent witness
+replay from a clean checkout that varies the command or an attacker byte. A
+pointer fault, a call to a pre-existing benign marker or a debugger-forced
+call stays rung-4 mechanics; no target currently claims R5. Full contract:
+[docs/rce.md](rce.md). Nothing in this lab contacts a public target or any
+external system; provisioning downloads public sources, and all triggers,
+listeners, debuggers and test consumers run on `127.0.0.1` or inside local
+containers whose host ports bind only to loopback.
 
 ## Common setup
 

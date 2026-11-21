@@ -1,17 +1,24 @@
-# Research task: investigate how far rung 4 goes
+# Research task: investigate how far rung 4 — and where measured, rung 5 — goes
 
 General goal: for memory-safety vulnerabilities in language runtimes and
 web-facing servers — the "X2Shell" class — reproduce the failures in a
 local, isolated laboratory and investigate how far **rung 4 (demonstrated
 security impact: chosen bytes at chosen offsets, pointer control, benign
-marker execution, per-build labeled)** can be pushed for each target.
+marker execution, per-build labeled)** can be pushed for each target. Where a
+measured rung-4 primitive leaves a credible bounded path, the same lane may
+also attempt **rung 5 (working remote command execution)**: attacker wire
+input drives a live loopback target to run a lab-chosen benign command, with
+vulnerable / fixed / safe-input controls and an independent witness replay.
+Rung 5 is additive and per-build, never a relabel of a pointer fault or an
+in-process marker; a measured structural blocker is a valid negative result.
+The full acceptance contract is in [docs/rce.md](rce.md).
 
 Rungs are not boxes to touch. They are a depth investigation: each rung
 states what evidence is strong enough to support, and the lane records the
 exact boundary where the evidence stops. A negative result, a harness-only
-grade, or an UNKNOWN is part of the answer — it says how far rung 4 goes
-on that build, not that the lane failed. Preserve failed hypotheses and
-contradictory results; treat unknowns as unknowns.
+grade, or an UNKNOWN is part of the answer — it says how far rung 4 (and rung 5
+where attempted) goes on that build, not that the lane failed. Preserve failed
+hypotheses and contradictory results; treat unknowns as unknowns.
 
 ## Stalled-lane doctrine
 
@@ -2816,6 +2823,28 @@ and only Stage A on another reports both boundaries separately.
    operator's purpose gate.
 5. **Stage C — control-flow hijack.** Pointer control / benign marker
    execution, ASLR disabled where needed, honestly labeled per-build.
+
+## Staged rung-5 plan (additive, only after a measured rung-4 primitive)
+
+Rung 5 is never a relabel of a fault or an in-process marker. A mind opens
+this stage only when a rung-4 result on the tested build leaves a credible
+bounded path; the full acceptance contract is `docs/rce.md`.
+
+1. **Wire path.** Prove the corrupted field is reached by attacker-controlled
+   wire/request bytes in a live plant-started loopback target, not a harness or
+   a debugger-forced call.
+2. **Chosen command.** Make those bytes select a lab-benign proof command (a
+   unique marker file under `lab/`, or a unique line printed by the target). A
+   call to a pre-existing benign marker or a marker address alone stays rung 4.
+3. **Observed side effect.** Check the marker directly and bind it to the
+   triggering request, not to the client or a debugger action.
+4. **Differentials.** Fixed target and safe input on the affected target both
+   leave the marker absent; the vulnerable positive repeats.
+5. **Exact conditions and witness.** Record pins, flags, config/auth gates,
+   ASLR state, address provenance, grooming, debugger involvement and process
+   survival, then require a fresh witness replay from a clean checkout that
+   varies the command or an attacker byte. No R5 claim before that verdict;
+   "attempt active, no R5 claim" is the honest status until then.
 
 ## Deliverable
 

@@ -42,21 +42,24 @@ The 2026-11-21 owner-directed self-healing patch also updates the pinned
 independent push-lag detection, m2shell next-due armed/churn checks, overdue
 intentions aligned with `owed._budget_green`, and m2shell signal coverage.
 The dispatch producer moves from 60 s to 120 s to respect the unit start limit.
-Re-apply these changes and the six-column README checker on upgrade; see
+Re-apply these changes and the seven-column README checker on upgrade; see
 [`self-healing.md`](self-healing.md).
 
 The `readme-lint` producer runs the checker from the pinned release
 (`releases/<sha>/tools/check-readme.py`) against the LIVE repo's `README.md`,
 so the detector is frozen while its input changes. The current pin
 (`0d686bb…`) carries `EXPECTED_COLUMNS = ("Target", "R1", "R2", "R3", "R4",
-"Evidence / boundary")`, matching the six-column live table at README.md:32;
-on 2026-11-21T10:13:48Z the producer returned `readme-lint: GREEN (36
-achievement rows)`. An earlier note here claimed a three-column birth checker
-and a person-only re-point; that claim was wrong and is removed. If the signal
-is RED again, compare the pinned checker's `EXPECTED_COLUMNS` with the live
-table header and confirm the repo's own `python3 tools/check-readme.py` before
-editing docs; re-pointing units stays reserved to the person under the
-full-flag sync below.
+"Evidence / boundary")`, matching the six-column table that shipped until
+2026-11-21. On 2026-11-21 the owner added rung 5: the repo's own
+`tools/check-readme.py` and the live README table now use seven columns
+(`"R5"` inserted before `"Evidence / boundary"`), with every R5 cell `—`
+because no target has a witness-accepted R5 result. The frozen pin still has
+six columns, so until the unit is re-pointed the producer can read RED from
+that detector/input mismatch; re-pointing stays reserved to the person under
+the full-flag sync below. If the signal is RED, compare the pinned checker's
+`EXPECTED_COLUMNS` with the live header and confirm the repo's own
+`python3 tools/check-readme.py .` before editing docs — a cell-count mismatch
+there is a pin issue, not a missing README row.
 
 
 1. **Unit marker** (`units.py`): `# m2shell-generated: …` — each plant's

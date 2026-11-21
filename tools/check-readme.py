@@ -17,7 +17,7 @@ ROOT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).reso
 README = ROOT / "README.md"
 REQUIRED_HEADINGS = ("## What it has achieved so far", "## How the plant works", "## Follow along")
 TABLE_HEADING = "## What it has achieved so far"
-EXPECTED_COLUMNS = ("Target", "R1", "R2", "R3", "R4", "Evidence / boundary")
+EXPECTED_COLUMNS = ("Target", "R1", "R2", "R3", "R4", "R5", "Evidence / boundary")
 
 
 def split_cells(line: str) -> list[str]:
