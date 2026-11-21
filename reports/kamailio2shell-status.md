@@ -26,7 +26,7 @@ The module must be loaded and configured; the advisory's DoS claim and its
 
 `bash lab/frontier/kamailio2shell/run.sh <outdir>` builds an extracted
 harness of the pinned alias branch with gcc 13.3.0, `-O0 -g`. Operator replay
-at admission: 15 PASS lines, `ALL CHECKS PASS rc 0`, deterministic trace
+at admission: 16 PASS lines, `ALL CHECKS PASS rc 0`, deterministic trace
 `sha256=94ef79641b081f850cb04f95d0f0945e7de7f84f9505462f23bf8aa054fa1cb8`
 (matching the brief; ASan text is excluded from the hash).
 
