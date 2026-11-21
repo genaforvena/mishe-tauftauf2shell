@@ -604,8 +604,9 @@ re-replayed after the verdict.
 
 No chosen argument, continuation into `system()`, shell, listener, external
 probe, chosen-address dereference or attacker-created code was observed.
-Rung 4 remains DEMONSTRATED at the control-flow boundary of this debug,
-non-PIE, argv-calibrated lab build; rung 5 stays UNKNOWN.
+The author labels the measured control-flow boundary rung 4 DEMONSTRATED;
+W92 ESTABLISHED that claim at its labeled scope with no grade change, so the
+plant status cell keeps rung 4 ◐ (INSTRUMENTED/PARTIAL). Rung 5 stays UNKNOWN.
 
 ## Scope and boundaries
 
