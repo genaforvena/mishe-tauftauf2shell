@@ -444,6 +444,21 @@ store from libjpeg, three distinct heap bases). Its two non-material replay
 NITs were repaired: explicit `PILLOW_BUILD` now overrides the default CANON
 symlink, and the gdb script no longer prints a false HIT at a SIGSEGV stop.
 
+**W11 (2026-11-21) — bounded negative probes, no grade change.** Two ways to
+remove the "gdb observes" condition were measured and preserved as negatives.
+A Python-level readback of the overwritten `ob_type` was not obtained: the
+neighbour at `buffer+176` is a live `str` whose identity changes with the
+invocation (a `typing` docstring under the W9 `-c` command with gdb's default
+ASLR-off, a `tempfile` docstring under a script-file command with ASLR on),
+holding a reference before decode perturbs the layout, and post-decode or
+`atexit` object scans found no reachable object reporting the image-chosen
+`code` type. The capsule-destructor lane is also blocked on this host:
+ctypes-created capsules land in mmap arenas, not adjacent to the brk tile
+buffer, and W9's 60-byte span stops short of the destructor offset. A survey
+of builtin static `tp_dealloc` slots found only ordinary free paths, none
+output-producing. These narrow two candidate upgrades but do not disprove the
+general lanes; the open items and the ◐ grade stand.
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).

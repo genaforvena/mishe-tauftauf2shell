@@ -425,3 +425,44 @@ Limit: the chosen target is an EXISTING static type's deallocator, not an
 arbitrary chosen address; no injected code, ROP, PC write, ASLR bypass or
 address disclosure. gdb observes; the transfer itself is the interpreter's
 natural finalization. Grade ◐ unchanged.
+
+## W11 — bounded debugger-free observation probes (2026-11-21, negative)
+
+Two ways to remove the "gdb observes" condition were measured. Neither gave a
+clean positive on this host; both are preserved as negatives. Grade stays ◐.
+
+The neighbour at `state->buffer+176` is a live `str` (`ob_refcnt=2`,
+`ob_type=&PyUnicode_Type` = `0xa472c0`, `tp_name="str"`) but its identity is
+invocation-dependent. Under gdb with its default ASLR-off and the exact W9
+`-c` command it is the 579-byte `typing._should_unflatten_callable_args.__doc__`
+; with `set disable-randomization off` and a script-file command it is the
+1171-byte `tempfile.NamedTemporaryFile.__doc__`. Three Python-level readback
+attempts failed:
+
+- holding a reference to the identified docstring before `load()` changes the
+  allocation and removes the marker/control split (both cases then crash);
+- a post-decode scan of reachable module docstrings and code constants found
+  no object reporting the image-chosen `code` type (zero code-typed
+  docstrings in both marker and control);
+- an `atexit` scanner injected via `sitecustomize.py` completed in the control
+  but not in the marker, which SIGSEGV'd (rc 139) before the scan printed.
+
+The scan covers objects reachable from module attributes and code constants;
+the corrupted object need not be in that set. No debugger-free Python-level
+observation of the overwritten `ob_type` was obtained.
+
+The capsule-destructor lane is also blocked here. `PyCapsule.tp_dealloc` calls
+a function pointer stored in the capsule object, so an adjacent capsule with
+an image-written static callee (for example `_PyObject_Dump` at `0x45e6e6`)
+would give a finalization call with an observable side effect, no fake type and
+no gdb. Sixty-four capsules made before `load()` through
+`ctypes.pythonapi.PyCapsule_New` put no `&PyCapsule_Type` word in
+`state->buffer+128..+512`: their ids were in an mmap range (`0x7ec5…`) while
+the tile buffer was on the brk heap (`0x1b82…`). W9's 60-byte write also ends
+at `buffer+188`, short of a capsule destructor field at `+216`, so this lane
+would need the long-case span even with adjacency. No capsule call was seen.
+
+A survey of builtin static types via their `tp_dealloc` slot (`type+48`)
+found only ordinary free paths; none of the enumerated builtin deallocators
+is `_PyObject_Dump` or another output-producing function. These are bounded
+negative results, not proofs of impossibility. No rung claim changed.
