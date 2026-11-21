@@ -574,6 +574,46 @@ the wake-9 corruption, not a controlled dereference. Wake 14's scratch client
 delay was therefore necessary: the controlled dereference still needs an
 instrumented post-write log trigger (or another PDU after the write).
 
+## FFmpeg format gate and ADPCM tag-2 wrap (wake 16, 2026-11-21 05:51Z)
+
+The last build-related UNKNOWN — whether an FFmpeg-enabled 3.32.0 build makes
+a wrap-capable format selectable without a subsystem-supplied table — is
+closed with two results. FFmpeg dev headers/runtime 6.1.1 were provisioned
+into `/tmp` only (`apt-get download` + `dpkg-deb -x`; no system install); the
+pinned 3.32.0 source was built twice against them: stock `WITH_FFMPEG=ON`
+(which implies `WITH_DSP_FFMPEG=ON`) and the same build with
+`-DCMAKE_C_FLAGS=-DWITH_DSP_EXPERIMENTAL`. `WITH_VIDEO_FFMPEG=OFF` kept the
+test on the DSP path (libswscale headers absent).
+
+1. **FFmpeg alone is a negative.** `dsp_ffmpeg.c:63-89` filters
+   `AV_CODEC_ID_ADPCM_IMA_OKI` (tag 17) and `AV_CODEC_ID_ADPCM_MS` (tag 2)
+   unless the experimental macro is compiled in. Runtime probe:
+   stock build `PCM encode=1 decode=1`, `ADPCM(2) encode=0 decode=0`,
+   `DVI_ADPCM(17) encode=0 decode=0`; `server_rdpsnd_get_formats()` returns
+   only tags 41222 (AAC_MS) and 1 (PCM). Even with the macro, tag 17 has no
+   FFmpeg *encoder*, which is the direction the shadow server's list uses.
+2. **FFmpeg + experimental exposes the second wrap branch.** The list then
+   contains tag 2 (channels 2, rate 44100, bits 16). `audio_format_compatible`
+   (`audio.c:225-255`) does not compare `nBlockAlign`, so a client may send
+   tag 2 with `nBlockAlign=8, nChannels=2` (the real parser floor for tag 2)
+   and match that entry. `select_format`'s tag-2 branch (`:409-433`) computes
+   `bs = (8 - 7*2)*2/2 + 2 = 0xFFFFFFFFFFFFFFFC`; `realloc` at `:444` fails,
+   `out_frames` is not rolled back, and `PocAdpcmTag2.c` produces the same
+   ASan result as the tag-17 PoC: `SelectFormat rc=12
+   out_frames=0xfffffffffffffffc`, `WRITE of size 16384 ... 0 bytes after an
+   8820-byte region` in `rdpsnd_server_send_samples` (`rdpsnd_main.c:770`).
+   A benign-PCM control on the same build gives `rc=0, out_frames=0x89d` and
+   no ASan report.
+
+Evidence: `lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`,
+`lab/freerdp2shell-src/PocAdpcmTag2.c`; scratch ASan log
+`/tmp/fr-wake16-tag2-asan.log`. Boundaries: the tag-2 result is in-process on
+real library bytes, not a live RDP session or over-the-wire PDU; no chosen-byte
+rung-4 dereference was attempted for tag 2 (that remains established for tag
+17); the experimental macro is a non-default build; the 16384 bytes are PoC
+`0x41`, not remote audio. No probe off loopback, no committed harness or
+replay-patch change.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with lab-chosen bytes at chosen OOB
@@ -602,7 +642,12 @@ copy and there is no post-write dereference
 target object remains UNKNOWN.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
-(subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).
+(subsystem-supplied, demonstrated). Wake 16 closed the FFmpeg alternative:
+FFmpeg alone still rejects both ADPCM tags (stock list: AAC_MS and PCM), while
+FFmpeg compiled with `-DWITH_DSP_EXPERIMENTAL` adds tag 2 to the stock list and
+that tag has its own wrap branch, demonstrated on real library bytes in-process
+(`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`). Tag 17 has no FFmpeg encoder
+in either build.
 Network reachability, the default NLA gate (wake 7) and the no-auth gate
 behavior are observed over real loopback TCP. No off-loopback probe. Default
 posture is post-auth (PR:L, CVSS 8.8); the no-auth lab configuration used for
@@ -621,6 +666,8 @@ and demonstrated a chosen-pointer-value dereference in that build
 scratch log trigger with the real client/server quality-mode log exchange
 (`lab/freerdp2shell-src/natural_log_trigger_stock.txt`); wake 15 recorded the
 negative without that timing
-(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`). Grooming of a
-specific target object, a real audio source and an FFmpeg-enabled build remain
-UNKNOWN.
+(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`); wake 16 measured the
+FFmpeg format gate and added an in-process tag-2 wrap on a non-default build
+(`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`). Grooming of a specific target
+object and a real audio source remain UNKNOWN; the FFmpeg-build UNKNOWN is
+CLOSED (default build NEGATIVE, experimental build OBSERVED for tag 2).
