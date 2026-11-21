@@ -4150,7 +4150,7 @@ bounded first experiment is a Linux ASan build of the pinned 2.0.83.Final
 Frontier's newest ranking (commit `7dff88c`, 20:58:18Z,
 `reports/frontier-wamr2shell.md`) put this candidate at #1, ahead of Perl
 CVE-2026-15534 at #2. The operator admitted it under standing approval #6,
-no re-ask, with no separate DM required. Operator pin check 21:06Z:
+no re-ask, with no separate DM required. Operator pin check ~21:02Z:
 `sha256sum -c SHA256SUMS` 5/5 OK in `lab/frontier/wamr2shell/src`
 (self-computed digests; raw upstream files and auto-generated commit patches
 carry no published sidecar). All five admission elements are in
