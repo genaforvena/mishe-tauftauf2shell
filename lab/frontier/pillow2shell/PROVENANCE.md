@@ -35,3 +35,11 @@ and a local row-copy shim. System libjpeg is not ASan-instrumented, so the
 ASan WRITE is reported in the shim called from the pinned caller line; the
 libjpeg stores themselves were not ASan-observed in this harness. No FPX file,
 olefile, Pillow build, socket or Pillow process was used.
+
+## Replay record
+
+Commit `f44a538`: `git archive f44a538 lab/frontier/pillow2shell` extracted
+into `/tmp/pw2-archive` and replayed with an absolute outdir `/tmp/pw2-out`
+gave 10 PASS / 0 FAIL rc 0, two five-run groups both
+`sha256=cb758c07f0aec3620c7b0d14c0fd471bf6b1455c410ead291db7a57eb08d818b`.
+The seven pins were byte-identical to the direct fetches in the table above.

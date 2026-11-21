@@ -74,6 +74,9 @@ Line numbers are from raw pinned bytes, tag `12.2.0` unless marked fixed.
 
 `cd lab/frontier/pillow2shell && bash run.sh <outdir>`:
 
+- A clean `git archive f44a538 lab/frontier/pillow2shell` extraction into
+  `/tmp/pw2-archive`, replayed with an absolute outdir `/tmp/pw2-out`, gave the
+  same 10 PASS / 0 FAIL rc 0 and the same digest in both five-run groups.
 - 10 PASS / 0 FAIL, exit 0. Two independent five-run groups both
   `sha256=cb758c07f0aec3620c7b0d14c0fd471bf6b1455c410ead291db7a57eb08d818b`.
 - Rung 1: `rv=1 limit=64 staged=256 stag0=5a` — a 4-component row of 256 bytes
