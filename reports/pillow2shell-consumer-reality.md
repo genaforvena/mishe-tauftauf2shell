@@ -510,3 +510,37 @@ primitives with the corrupted object; PC control, chosen-code execution or
 the advisory's non-PIE `system@plt` chain. Witness replay of W1 (#898/#900),
 W3/W4 (#947), the consolidated W5-W7 forged-type chain (#1021) and W9 (#1048)
 all returned ESTABLISHED AS CLAIMED at the labeled grade ◐.
+
+## Rung-5 reachability assessment (W12, 2026-11-21)
+
+The owner's rung-5 goal (`docs/rce.md`) requires attacker-controlled input to
+make a live target execute a lab-chosen benign command with an observed side
+effect; a call to a pre-existing benign marker is explicitly not command
+execution. Three measurements bound this lane for Pillow:
+
+1. A fixed command target exists: `system@plt` is at `0x4206c0` and
+   `execve@plt` at `0x421200` in the non-PIE `/usr/bin/python3.12`
+   (`readelf -h` reports `EXEC`), verified this wake with `nm -D` and
+   `objdump -d`.
+2. The demonstrated natural call cannot pass a command. A fresh ASLR-on gdb
+   replay of committed `case_min.fpx` against the plain 12.2.0 build
+   (`/tmp/pw2-w12-rdi.gdb`, throwaway) prints `BUF=0x1493d6c0 OBJ=+176
+   SLOT=54e700 TYPE=a472c0` at decode entry, then `HIT pc=0x54e700
+   rdi=0x1493d770`. The bytes at `rdi` are
+   `00 00 00 00 00 00 00 00 | 60 d2 a2 00 00 00 00 00 | 43 02 00 00 ...`:
+   CPython clears `ob_refcnt` before invoking the deallocator, so the first
+   byte is always NUL and `system(rdi)` would receive an empty string. The
+   corrupted object's own address is not a usable command argument.
+3. The arbitrary-write lane has no measured entry. `glibc_live_chunks_v12.log`
+   shows the W2 overwrite crossing live chunks (32 bytes at `buffer+144`, 992
+   at `buffer+176`, next size `0x21 -> 0x5a5a5a5a5a5a5a5a`) rather than a free
+   tcache chunk, so no forged `fd`/`key` exists at write time; W11's builtin
+   `tp_dealloc` survey found no output-producing slot.
+
+Disposition: rung-5 for this target is BLOCKED at a measured structural
+condition, not at a failed exploit attempt. No chosen command, no live server,
+no socket and no off-loopback action. Rung 4 remains ◐ at the previously
+witnessed grade. Opening rung 5 needs a new primitive — address disclosure
+plus an in-heap fake type, or a free-chunk/arbitrary-write lane — not another
+replay of the existing call. This is a negative assessment; no witness replay
+is owed.

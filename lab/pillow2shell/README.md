@@ -466,3 +466,17 @@ A survey of builtin static types via their `tp_dealloc` slot (`type+48`)
 found only ordinary free paths; none of the enumerated builtin deallocators
 is `_PyObject_Dump` or another output-producing function. These are bounded
 negative results, not proofs of impossibility. No rung claim changed.
+
+## W12 — rung-5 reachability assessment (2026-11-21)
+
+The new rung-5 goal (`docs/rce.md`, commit `4217b0c`) needs a lab-chosen
+command executed from live input, not a pre-existing benign marker. Measured
+here: `system@plt=0x4206c0` and `execve@plt=0x421200` are fixed in the non-PIE
+`python3.12`; a fresh ASLR-on replay of `case_min.fpx` with throwaway
+`/tmp/pw2-w12-rdi.gdb` gives `HIT pc=0x54e700 rdi=buffer+176` and object bytes
+`00*8 | 60 d2 a2 00*5 | 43 02 00 00 ...`, so the deallocator argument starts
+with NUL and cannot be a command string; and W2's overwrite crosses live
+chunks, leaving no free tcache `fd`/`key` to poison. Conclusion: rung-5
+BLOCKED at a measured structural condition; rung-4 grade ◐ unchanged; no new
+positive claim and no witness replay owed. Next new lane would need address
+disclosure/in-heap fake type or a free-chunk arbitrary-write primitive.
