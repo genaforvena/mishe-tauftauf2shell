@@ -125,3 +125,12 @@ the same real-libc negative and cap this path at rung 3 in practice.
 All advisory and reachability claims remain reproduced from public sources;
 this brief proves the pinned code paths and their local memory effects, not
 live-daemon exploitability, a CVE identifier, or RCE.
+
+## Clean replay (2026-11-21T08:24Z)
+
+Committed as `b7fb237`. Two `git archive HEAD lab/frontier/memcached2shell`
+extractions into `/tmp/replay-mc2-a` and `/tmp/replay-mc2-b`, plus the working
+tree, each ran the unmodified `run.sh`: 8 PASS / 0 FAIL and raw trace
+`sha256=5d4a05be6cebb89e7fd99e0f6d08731e47537c49d0b8396d6be73e554b51672b`
+byte-identical in all three. No source-generating code changed after the
+commit; the replay record is prose only.
