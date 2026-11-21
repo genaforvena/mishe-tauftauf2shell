@@ -116,24 +116,26 @@ Replay trace over the ordered PASS lines (no PIDs, addresses or paths):
   `WRITE of size 8` at `ua_subscription.c:1645` ← `UA_MonitoredItem_delete:1412`
   ← `Operation_DeleteMonitoredItem:971` ← `Service_DeleteMonitoredItems:999`;
   freed by `delayedFreeSubscription:277`, allocated by `UA_Subscription_new:259`.
-- **Rung 4 — INSTRUMENTED, live-neighbour overwrite observed.** See the probe
-  below: the freed subscription chunk is reclaimed by a live subscription and
-  its sampling head at byte 200 is overwritten (one item becomes zero items).
-  The written value is NULL in this single-item configuration; there are no
-  chosen bytes, pointer value control, control-flow diversion or execution.
-  The ZDI RCE language stays a claim, not a lab observation.
+- **Rung 4 — INSTRUMENTED, live non-NULL pointer overwrite observed.** Two
+  probes below show the stale write landing on a live replacement subscription
+  at byte 200: with one item the head is zeroed, with two items it is replaced
+  by a live pointer to a monitored item owned by a different subscription.
+  The written values come from created objects, not attacker-chosen bytes; no
+  control-flow diversion, chosen-byte control or execution was observed. The
+  ZDI RCE language stays a claim, not a lab observation.
 - **Tractability — MEDIUM.** Exact fixed tag and a nine-line fix hunk make the
   differential cheap to reason about; producing the authenticated UAF sequence
   needs a configured server and client, not just a single malformed packet.
 
 ## Grooming probe: live-neighbour overwrite (open625412shell wake 2)
 
-`lab/frontier/open625412shell/groom_harness.c` plus `groom.sh` extend the same
+`lab/frontier/open625412shell/groom_harness.c`, `groom2_harness.c` and `groom.sh`
+extend the same
 real-service-call sequence: after the delayed free, a second
 `Service_CreateSubscription` requests a replacement, then the stale monitored
 item is deleted. `bash run.sh <outdir> && bash groom.sh <outdir>` compiles the
-probe against both pinned ASan trees and runs four cases. Verified trace
-`sha256=bb18c0f3166146acd72c17a747db2cfad1e7ac85d3b98d3744fbcda629f1793b`
+probe against both pinned ASan trees and runs six cases. Verified trace
+`sha256=c9413debe7063af6287dc2478c5dac8a9204d62f501a35d3ad6eddbb3917660c`
 (runner rc 0, raw logs under `<outdir>/groom/`).
 
 Observed on 1.5.4: `sizeof(UA_Subscription)=352`,
@@ -157,6 +159,20 @@ same run with the stale delete skipped exits 0. That assertion is recorded as
 a downstream observation, not claimed as pointer control or as caused by the
 head overwrite.
 
+**Two-item variant: non-NULL pointer overwrite.** `groom2_harness.c` creates two
+PUBLISH-sampled items on the old subscription and deletes the list head, so the
+stale `LIST_REMOVE` writes the surviving item's address into the reclaimed
+subscription. On 1.5.4 the replacement head changes from its own item
+`0x514000000840` to `0x514000000440`; that item is owned by the still-live
+transferred subscription `0x51300004d200` (`crossSubscription=1`), while the
+replacement is `0x51300004d040`. Fixed 1.5.6 keeps head `0x514000000840`,
+owner `0x51300004d040` (`crossSubscription=0`). Both runs exit 0 without ASan
+reports. This is a live pointer overwrite with a value selected from objects
+the sequence created, not arbitrary bytes. Enabling further sampling after the
+write sometimes aborts in `UA_MonitoredItem_ensureQueueSpace:1490` and sometimes
+survives; that nondeterministic observation is not claimed as control-flow
+control. Raw logs: `<outdir>/groom/vuln2.log` and `fixed2.log`.
+
 
 Pinned-code check (1.5.4 `ua_subscription.c:599-652`): `sendStatusChangeDelete`
 calls the same `UA_Subscription_delete` in both branches — `:610` when no
@@ -167,8 +183,8 @@ in-process session lacks). Queuing a real client PublishRequest through
 `ua_session.c:258`) therefore does not change the memory operation the harness
 already performs; it only adds response delivery. That proposed next step is
 recorded as a negative result, not an owed experiment. The remaining rung-4
-question is a configuration where the stale write stores a controlled non-NULL
-value in a live object that is subsequently dereferenced.
+question is a configuration where the stale write stores attacker-chosen bytes
+(or a pointer whose downstream dereference changes control flow) in a live object.
 
 ## What would change my mind
 

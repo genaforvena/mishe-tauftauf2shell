@@ -18,8 +18,13 @@ for v in 1.5.4 1.5.6; do
     -I"$T/deps" -I"$T/src" -I"$T" -o "$OUT/groom/harness-$v" \
     "$HERE/groom_harness.c" "$T/out-asan/bin/libopen62541.a" -lpthread -lm \
     > "$OUT/groom/build-$v.log" 2>&1 || f "compile failed for $v"
+  gcc -std=c99 -g -O1 -fsanitize=address -fno-omit-frame-pointer \
+    -I"$T/out-asan/src_generated" -I"$T/include" -I"$T/plugins/include" \
+    -I"$T/deps" -I"$T/src" -I"$T" -o "$OUT/groom/harness2-$v" \
+    "$HERE/groom2_harness.c" "$T/out-asan/bin/libopen62541.a" -lpthread -lm \
+    > "$OUT/groom/build2-$v.log" 2>&1 || f "compile failed for two-item harness $v"
 done
-p 'groom harness compiled against both pinned ASan builds'
+p 'groom harnesses compiled against both pinned ASan builds'
 
 # Quarantine must be disabled for a freed 352-byte chunk to be recycled by the
 # very next UA_Subscription allocation. This is a stated lab condition, not a
@@ -36,6 +41,10 @@ VCRC=$?
 ASAN_OPTIONS="$GROOM_OPTS" OA_RUN_SAMPLING=1 "$OUT/groom/harness-1.5.6" \
   > "$OUT/groom/fixed.log" 2>&1
 FRC=$?
+ASAN_OPTIONS="$GROOM_OPTS" "$OUT/groom/harness2-1.5.4" > "$OUT/groom/vuln2.log" 2>&1
+V2RC=$?
+ASAN_OPTIONS="$GROOM_OPTS" "$OUT/groom/harness2-1.5.6" > "$OUT/groom/fixed2.log" 2>&1
+F2RC=$?
 
 grep -q 'sizeof(UA_Subscription)=352 offset(samplingMonitoredItems)=200' "$OUT/groom/vuln.log" && \
   p 'stale backpointer offset in UA_Subscription is byte 200 of 352'
@@ -52,10 +61,19 @@ grep -q 'replacementHeadAfter=0x.* samplingCountAfter=1 changed=0' "$OUT/groom/v
 grep -q 'replacementHeadAfter=0x.* samplingCountAfter=1 changed=0' "$OUT/groom/fixed.log" && \
   p 'fixed 1.5.6: live head intact through the same delete'
 [ "$FRC" -eq 0 ] && p "fixed rc=$FRC"
-printf 'INFO vulnerable-with-sampling rc=%s (downstream assertion is recorded, not claimed as pointer control)\n' "$VSRC"
+printf 'INFO vulnerable-with-sampling rc=%s (assertion observed in some runs; not claimed as pointer control)\n' "$VSRC"
+grep -q 'replacementHeadAfter=0x.* samplingCountAfter=1 changed=1' "$OUT/groom/vuln2.log" && \
+  p 'two-item stale write replaced live head with a non-NULL pointer'
+grep -q 'crossSubscription=1' "$OUT/groom/vuln2.log" && \
+  p 'groomed head points to a monitored item owned by another live subscription'
+[ "$V2RC" -eq 0 ] && p "two-item vulnerable run rc=$V2RC"
+grep -q 'crossSubscription=0' "$OUT/groom/fixed2.log" && \
+  p 'fixed 1.5.6: groomed head still owned by the replacement subscription'
+[ "$F2RC" -eq 0 ] && p "two-item fixed rc=$F2RC"
 
 if grep -q 'replacementHeadAfter=(nil) samplingCountAfter=0 changed=1' "$OUT/groom/vuln.log" && \
-   grep -q 'samplingCountAfter=1 changed=0' "$OUT/groom/fixed.log"; then
+   grep -q 'crossSubscription=1' "$OUT/groom/vuln2.log" && \
+   grep -q 'crossSubscription=0' "$OUT/groom/fixed2.log"; then
   p "trace sha256=$(sha256sum "$OUT/groom/pass.log" | cut -d' ' -f1)"
 else
   f 'grooming differential not observed'
