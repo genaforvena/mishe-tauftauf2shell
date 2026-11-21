@@ -1,0 +1,23 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0xc25180, state=0x7ffff77f7d10, buf=0xdb3e30 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+SAVED type=a472c0
+0x00007ffff744224d in _decode (decoder=0x7ffff77f7cf0, args=<optimized out>) at src/decode.c:132
+warning: 132	src/decode.c: No such file or directory
+Value returned is $1 = -1
+AFTER_DECODE type=a2d260
+Restoring binary file /tmp/pw2-w4/heap_orig.bin into memory (0xd32e10 to 0xd33190)
+AFTER_RESTORE type=a2d260 sizefield=21
+LOAD_OK
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000447239 in ?? ()
+END pc=0x447239
+#0  0x0000000000447239 in ?? ()
+#1  0x00000000005917c2 in ?? ()
+#2  0x000000000054e77f in ?? ()
+#3  0x0000000000559fb8 in ?? ()

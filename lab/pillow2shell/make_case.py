@@ -21,6 +21,11 @@ JW = int(sys.argv[2]) if len(sys.argv) > 2 else 256
 FILL = int(sys.argv[3], 0) if len(sys.argv) > 3 else 0x5A
 IW = int(sys.argv[4]) if len(sys.argv) > 4 else 16
 IH = int(sys.argv[5]) if len(sys.argv) > 5 else 16
+# Optional 6th argument: 512 hex chars = 256 desired raw scanline bytes.
+# When set, the embedded JPEG carries that pattern byte-for-byte in its
+# first 256 raw decoded bytes (libjpeg emits 0xff - encoded sample here).
+PAT = bytes.fromhex(sys.argv[6]) if len(sys.argv) > 6 else None
+JPH = int(sys.argv[7]) if len(sys.argv) > 7 else 8
 
 PROP = ["Data Object Store 000001", "\x05Image Contents"]
 HDR = ["Data Object Store 000001", "Resolution 0000", "Subimage 0000 Header"]
@@ -66,9 +71,17 @@ def build_header(w, h):
 
 
 def make_jpeg(w, h):
-    im = Image.new("CMYK", (w, h), (FILL, FILL, FILL, FILL))
+    if PAT is None:
+        im = Image.new("CMYK", (w, h), (FILL, FILL, FILL, FILL))
+    else:
+        assert len(PAT) == 256, len(PAT)
+        raw = (PAT * ((w * 4) // 256 + 1))[:w * 4]
+        inp = bytes(0xFF - v for v in raw)
+        pix = b"".join(inp[4 * x:4 * x + 4] for x in range(w)) * JPH
+        im = Image.frombytes("CMYK", (w, JPH), pix)
     b = io.BytesIO()
-    im.save(b, format="JPEG", quality=100, subsampling=0)
+    im.save(b, format="JPEG", quality=100, subsampling=0,
+            optimize=(PAT is not None))
     return b.getvalue()
 
 
@@ -83,7 +96,7 @@ def build_data(jpg):
 
 
 print("propset", len(build_propset(IW, IH)), "header", len(build_header(IW, IH)))
-jpg = make_jpeg(JW, IH)
+jpg = make_jpeg(JW, JPH if PAT is not None else IH)
 print("jpeg", len(jpg), "fill", hex(FILL))
 o = olefile.OleFileIO(BASE)
 p = o.openstream(PROP).read()

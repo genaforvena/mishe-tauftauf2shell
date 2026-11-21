@@ -10,13 +10,18 @@ overwrites the next malloc chunk's size field and two live heap chunks, then
 5/5 runs end in SIGSEGV inside `PyGC_Collect()` at Python finalization, with
 `MALLOC_CHECK_=3` reporting `corrupted double-linked list`. W3 identifies one
 crossed chunk as a live CPython `PyUnicodeObject` and observes its `ob_type`
-pointer field replaced by the coefficient-chosen byte pattern. No chosen valid
-pointer value, PC control, control-flow diversion, code execution or
-socket/server was observed; those stay UNKNOWN. This extends the frontier
-harness result in `reports/frontier-pillow2shell.md`. Witness replay #898/#900
-returned ESTABLISHED AS CLAIMED at the W1 labeled grade; the witness's own
-rebuild matched the stores and the fixed-build control. Author/operator replays
-are not independent acceptance. W3 is new author evidence, not replayed.**
+pointer field replaced by the coefficient-chosen byte pattern. W4 shows the
+raw scanline can carry DISTINCT chosen bytes at distinct offsets, places a
+chosen VALID pointer (`&PyCode_Type`, `0xa2d260`) in that live object's
+`ob_type`, and isolates it causally: restoring every other overwritten byte
+leaves `LOAD_OK`/exit 0, while restoring all but that one pointer field gives
+a deterministic SIGSEGV in `Py_FinalizeEx()`. No chosen code, marker, PC
+control or execution was observed; those stay UNKNOWN. This extends the
+frontier harness result in `reports/frontier-pillow2shell.md`. Witness replay
+#898/#900 returned ESTABLISHED AS CLAIMED at the W1 labeled grade; the
+witness's own rebuild matched the stores and the fixed-build control.
+Author/operator replays are not independent acceptance. W3 (#926) and W4 are
+new author evidence, not replayed.**
 
 ## Repro (loopback-free local process; no network probe)
 
@@ -187,6 +192,62 @@ was a 920-byte `PyObject_Malloc` from `_PyObject_NewVar` / `_PyCode_New`.
 That trace is supporting only; the `PyUnicode_Type` identification above is
 the direct observation in the unmodified plain run.
 
+
+## W4 — distinct chosen bytes, chosen valid pointer, isolated fault (2026-11-21)
+
+W1-W3 used one uniform decoded byte (`0x5a`). `make_case.py` now takes an
+optional 6th argument (256 bytes as 512 hex chars = the desired raw scanline
+pattern) and an optional 7th (JPEG height). The encoder writes sample value
+`0xff - desired` per component; `rawscan.c` and a gdb read at the return of
+`jpeg_read_scanlines` confirm libjpeg emits the desired bytes exactly with
+quality 100, `subsampling=0`, `optimize=True`. `case_ptr64.fpx` (SHA-256
+`cf7787a35747ae88b65f22cf8187f8e7012812f9739cd7985d00365dd15c3bc6`, 64-row
+JPEG, 3188-byte embedded stream) carries `0x11` at row offsets 128-135 (first
+past-end bytes), `0x33` at 176-183 (the object's `ob_refcnt`), the little-endian
+valid address `60 d2 a2 00 00 00 00 00` (`0xa2d260`) at 184-191 (the object's
+`ob_type`), and `0x44` at 192-199. `firstrow.log` shows those bytes in the real
+process scanline. The uniform-fill invocation is unchanged: regenerating
+`case64.fpx` still gives
+`0b258df0b41064a975aed808b32866157ffb7cc60bfe29e8a1c00db9902fa9c0`.
+
+In the plain v12.2.0 build, the 128-byte tile buffer is again at `0xd32bb0`
+and the following 992-byte chunk at `+176` is a live `PyUnicodeObject`
+(`ob_refcnt=2`, `ob_type=&PyUnicode_Type=0xa472c0`, resolved by gdb). A hardware
+watchpoint on `buffer+184` fires
+`Old value = 192 '\300'`, `New value = 96 '`'` at
+`0x00007ffff7333f98` in `libjpeg.so.8`, stack `jpeg_read_scanlines` ->
+`ImagingJpegDecode src/libImaging/JpegDecode.c:252` (`ptr_store.log`). After
+the row, `ob_refcnt` reads `0x3333333333333333`, `ob_type` reads the chosen
+valid `0xa2d260`, and the following word reads `0x4444444444444444`.
+
+Causal isolation used the same byte-identical `case_ptr64.fpx` in three gdb
+runs. After the first decoder call, the full 896-byte past-end span
+(`buffer+128 .. buffer+1024`) was snapshotted before the write and restored
+afterwards:
+
+- `full64_restore_clean.log` — full restore, no other edit: prints `LOAD_OK`,
+  inferior exits normally.
+- `full64_restore_type.log` — same restore, then only `*(unsigned long
+  *)(buffer+184) = 0xa2d260` re-applied: prints `LOAD_OK`, then SIGSEGV at
+  `0x447239`, stack through `Py_FinalizeEx()`. `crash_disasm.log` shows the
+  fault at a read from a pointer held in a finalizer object; no attacker-chosen
+  code address is executed. This isolates the chosen pointer value as the
+  sole difference between clean exit and fault.
+- Negative control preserved: restoring only the 24-byte object header, or
+  only the first 256 past-end bytes, still crashed at `0x61d988` because the
+  remaining overwritten span was still corrupt (`restore_all.log`,
+  `restore_type.log`, `full_restore_clean.log` in the volatile tree; the
+  conclusion is that a partial restore is not a control).
+
+Without a debugger, 5/5 plain v12.2.0 runs of `case_ptr64.fpx` print
+`LOAD_OK`, then exit rc 134 with `corrupted size vs. prev_size`
+(`run64_[1-5].log`). Plain fixed 13.0.0 on the same file raises
+`OSError: broken data stream when reading image file`, rc 1
+(`plain_v13_pattern_control.log`). No socket, server, external probe or
+chosen-code marker was used. The label stays type-confusion fault, NOT
+pointer-to-code execution, PC control or a valid-chosen-pointer dereference
+to attacker-chosen code.
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).
@@ -197,32 +258,37 @@ the direct observation in the unmodified plain run.
   `heap-buffer-overflow` WRITE with a stack through `jpeg_read_scanlines` to
   pinned `JpegDecode.c:252`.
 - Rung 4 (demonstrated security impact): **CHOSEN BYTES AT CHOSEN OFFSETS IN
-  THE LIVE PROCESS, WITH LIVE GLIBC HEAP METADATA CORRUPTION AND A
-  DETERMINISTIC PROCESS ABORT**. W1: +32 and +200 past 32- and 128-byte tile
-  buffers, byte value chosen through JPEG coefficients (`0xa5` in -> `0x5a`
-  out). W2: next malloc chunk size field `0x21 -> 0x5a5a5a5a5a5a5a5a`, two
-  live chunks overwritten, 5/5 SIGSEGV in `PyGC_Collect()` at finalization,
-  glibc `corrupted double-linked list` under `MALLOC_CHECK_=3`. W3: the
-  coefficient-chosen `0x5a` replaces `ob_refcnt` and `ob_type` of a live
-  `PyUnicodeObject` at `buffer+176`. Not demonstrated: control of a valid
-  pointer value, PC or control flow, code execution, or the advisory's
-  non-PIE `system@plt` chain. Do not upgrade the label beyond this.
+  THE LIVE PROCESS, WITH LIVE GLIBC HEAP METADATA CORRUPTION, A DETERMINISTIC
+  PROCESS ABORT, AND A CHOSEN VALID POINTER VALUE IN A LIVE OBJECT'S TYPE
+  FIELD WHOSE ISOLATED PRESENCE CAUSES A DETERMINISTIC FAULT**. W1: +32 and
+  +200 past 32- and 128-byte tile buffers, byte value chosen through JPEG
+  coefficients (`0xa5` in -> `0x5a` out). W2: next malloc chunk size field
+  `0x21 -> 0x5a5a5a5a5a5a5a5a`, two live chunks overwritten, 5/5 SIGSEGV in
+  `PyGC_Collect()` at finalization, glibc `corrupted double-linked list` under
+  `MALLOC_CHECK_=3`. W3: the coefficient-chosen `0x5a` replaces `ob_refcnt`
+  and `ob_type` of a live `PyUnicodeObject` at `buffer+176`. W4: distinct
+  chosen bytes at distinct offsets, chosen valid `0xa2d260` in `ob_type`
+  written from `libjpeg.so.8` at pinned `JpegDecode.c:252`, and a causal
+  differential (all other bytes restored -> clean exit; only the pointer
+  re-applied -> SIGSEGV in `Py_FinalizeEx()`). Not demonstrated: execution
+  of chosen code, a benign marker, PC or arbitrary control-flow diversion,
+  or the advisory's non-PIE `system@plt` chain. Do not upgrade the label
+  beyond this.
 
 ## Boundaries and open work
 
 All work was local; no socket, server, external probe or other plant was
 touched. The real FPX front end, OLE2 parser, Pillow build, Python process and
-host libjpeg are now all exercised. W2 resolves the W1 open question: the
+host libjpeg are now all exercised. W2 resolved the W1 open question: the
 bytes reach live glibc heap chunks and their metadata, not only slack, and
-the corrupted heap deterministically aborts the process. W3 resolves one
-owner question: in the unmodified plain gdb run, the crossed chunk at
-`buffer+176` is a live CPython `PyUnicodeObject`, and its `ob_type` pointer
-field is overwritten by the chosen byte. Still UNKNOWN: which object (if any)
-owns the 32-byte chunk at `buffer+144`; whether the write can be steered into
-a chosen adjacent `bytes` object; whether an arbitrary chosen address can be
-placed in `ob_type`; any dereference of the corrupted object, PC or control
-flow diversion, or execution; and the advisory's ASLR-disabled non-PIE
-`system@plt` chain. A valid-pointer or marker claim still waits for direct
-observation of a chosen address reaching an object field. Witness replay of
-W1 (#898/#900) returned ESTABLISHED AS CLAIMED at the report's labeled
-rung-4 grade; W3 is new author evidence and has not been replayed.
+the corrupted heap deterministically aborts the process. W3 identified the
+crossed chunk at `buffer+176` as a live CPython `PyUnicodeObject`; W4 put a
+chosen valid pointer in its `ob_type` and isolated that one field as the
+cause of a fault when every other overwritten byte is restored. Still
+UNKNOWN: which object owns the 32-byte chunk at `buffer+144`; a chosen
+adjacent `bytes` object; whether a *forged* type object with attacker-chosen
+function pointers can be placed at a known address and called (no address
+disclosure was observed); PC control, chosen-code execution or the advisory's
+ASLR-disabled non-PIE `system@plt` chain. Witness replay of W1 (#898/#900)
+returned ESTABLISHED AS CLAIMED at the report's labeled rung-4 grade; W3
+(#926) and W4 are new author evidence and have not been replayed.

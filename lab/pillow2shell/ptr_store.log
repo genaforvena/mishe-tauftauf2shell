@@ -1,0 +1,44 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0xc24fa0, state=0x7ffff77f7d10, buf=0xdb3c50 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+BUF=0xd32bb0 BEFORE_TYPE=a472c0
+Hardware watchpoint 2: *(unsigned char*)($b+184)
+
+Hardware watchpoint 2: *(unsigned char*)($b+184)
+
+Old value = 192 '\300'
+New value = 96 '`'
+0x00007ffff7333f98 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+STORE pc=0x7ffff7333f98 TYPE_NOW=a47260
+0xd32c60:	0x3333333333333333	0x0000000000a47260
+0xd32c70:	0x0000000000000243	0xffffffffffffffff
+#0  0x00007ffff7333f98 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#1  0x00007ffff73478e4 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#2  0x00007ffff733d577 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#3  0x00007ffff7338966 in jpeg_read_scanlines () from /lib/x86_64-linux-gnu/libjpeg.so.8
+#4  0x00007ffff746377a in ImagingJpegDecode (im=0xc24fa0, state=0x7ffff77f7d10, buf=0xdb3c50 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:252
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000000000061d988 in ?? ()
+CRASH pc=0x61d988
+#0  0x000000000061d988 in ?? ()
+#1  0x000000000055984c in ?? ()
+#2  0x000000000061cbe6 in ?? ()
+#3  0x000000000061c5d1 in ?? ()
+#4  0x00000000005fc343 in ?? ()
+#5  0x00000000005e1732 in _PyEval_EvalFrameDefault ()
+#6  0x00000000005d55eb in PyEval_EvalCode ()
+#7  0x00000000005d33dc in ?? ()
+#8  0x0000000000581fed in ?? ()
+#9  0x00000000005db2ee in _PyEval_EvalFrameDefault ()
+#10 0x0000000000549d87 in ?? ()
+#11 0x000000000054b603 in PyObject_CallMethodObjArgs ()
+No symbol matches 0x61d988.
+No symbol matches 0x55984c.
+No symbol matches 0x61cbe6.
+No symbol matches 0x61c5d1.
+No symbol matches 0x5fc343.

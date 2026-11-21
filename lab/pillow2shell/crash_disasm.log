@@ -1,0 +1,50 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0xc25180, state=0x7ffff77f7d10, buf=0xdb3e30 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+SAVED type=a472c0
+0x00007ffff744224d in _decode (decoder=0x7ffff77f7cf0, args=<optimized out>) at src/decode.c:132
+warning: 132	src/decode.c: No such file or directory
+Value returned is $1 = -1
+AFTER_DECODE type=a2d260
+Restoring binary file /tmp/pw2-w4/heap_orig.bin into memory (0xd32e10 to 0xd33190)
+AFTER_RESTORE type=a2d260 sizefield=21
+LOAD_OK
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000447239 in ?? ()
+CRASH pc=0x447239 TYPE=a2d260
+   0x447219:	jmp    0x54e961
+   0x44721e:	mov    0xb8(%rbx),%r12
+   0x447225:	test   %r12,%r12
+   0x447228:	je     0x54e761
+   0x44722e:	mov    %fs:(%r14),%rax
+   0x447232:	xor    %r13d,%r13d
+   0x447235:	mov    0x10(%rax),%r14
+=> 0x447239:	cmp    %r13,(%r12)
+   0x44723d:	jle    0x44725b
+   0x44723f:	mov    0x728(%r14,%r13,8),%rax
+   0x447247:	test   %rax,%rax
+   0x44724a:	jne    0x447252
+   0x44724c:	add    $0x1,%r13
+   0x447250:	jmp    0x447239
+   0x447252:	mov    0x8(%r12,%r13,8),%rdi
+   0x447257:	call   *%rax
+rax            0xba6748            12216136
+rbx            0xd32e40            13839936
+rcx            0x2                 2
+rdx            0x0                 0
+rdi            0xd32e40            13839936
+rsi            0x7ffff76f3a40      140737344649792
+r8             0x96000             614400
+#0  0x0000000000447239 in ?? ()
+#1  0x00000000005917c2 in ?? ()
+#2  0x000000000054e77f in ?? ()
+#3  0x0000000000559fb8 in ?? ()
+#4  0x000000000057a3ee in ?? ()
+#5  0x000000000061d30d in ?? ()
+#6  0x00000000006bd1b9 in ?? ()
+#7  0x00000000006b11ed in Py_FinalizeEx ()
