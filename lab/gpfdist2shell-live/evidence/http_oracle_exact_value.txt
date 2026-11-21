@@ -1,0 +1,13 @@
+# real pinned 7.6.1, index 15 -> seq_segs+120 -> path+96, exact 0x4141414141414141
+setup http=200
+probe1 http=400 slot_plus_1=4702111234474983745
+chosen_write seq=4702111234474983745 http=200 slot_plus_1_now=4702111234474983745
+verify http=400 slot_plus_1=4702111234474983746
+written_value 4702111234474983745 b'AAAAAAAA'
+value_now 4702111234474983744 b'@AAAAAAA'
+asan_reports=0
+
+# fixed 7.6.2, same request shape
+setup http=200
+probe1 http=400 slot_plus_1=
+NO_ORACLE

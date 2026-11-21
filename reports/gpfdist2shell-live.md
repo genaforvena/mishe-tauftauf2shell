@@ -2,12 +2,13 @@
 
 **Status (2026-11-21, first gpfdist2shell wake):** the harness result from
 `reports/frontier-gpfdist2shell.md` has been extended to a live 127.0.0.1
-listener running the **real pinned WarehousePG 7.6.1 `gpfdist.c`**. A chosen
-value (`1`, then `2`, then `3`) is written byte-for-byte into a real APR-pool
-neighbour — the session path string — at `seq_segs + 24`. A symbolised ASan
-SEGV report fires at the real `gpfdist.c:1988` frame for a large hostile index.
-The fixed 7.6.2 source rejects the same requests. This report is evidence, not
-independent acceptance; the witness still replays it.
+listener running the **real pinned WarehousePG 7.6.1 `gpfdist.c`**. Attacker-chosen
+8-byte values — including `0x4141414141414141`, the harness's exact value —
+are written byte-for-byte into real APR-pool neighbours (the pstrdup'd session
+path string) at chosen offsets. A symbolised ASan SEGV report fires at the real
+`gpfdist.c:1988` frame for a large hostile index. The fixed 7.6.2 source
+rejects the same requests. This report is evidence, not independent
+acceptance; the witness still replays it.
 
 ## What was built, exactly
 
@@ -76,14 +77,33 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
    `id=3`, while the in-bounds `id=0` request still returns 200
    (`evidence/http_oracle_chosen.txt`, `evidence/http_oracle_basic.txt`).
 
+6. **Chosen 64-bit value in the live build.** Because the OOB slot for index
+   `N` is `path + 8N - 24` (gdb showed `seq_segs+24 == path`), an index deep
+   enough lands in the attacker-supplied filename inside the pstrdup'd path.
+   `probe_deep.sh` first reads the slot through the `:3517` oracle, crafts a
+   filename whose eight bytes make the slot `value - 1`, then sends
+   `X-GP-SEQ = value` so the `:3502` equality passes and `:3677` writes
+   `value`. With index 15, filename `AAAA@AAA…`, count 1, a named session
+   created in-bounds at id 0, this wrote exactly
+   `0x4141414141414141` (4702111234474983745, `b'AAAAAAAA'`) at
+   `seq_segs+120` = `path+96`: `chosen_write http=200`, then a follow-up oracle
+   reads `slot+1 = 4702111234474983746`, proving persistence
+   (`evidence/http_oracle_exact_value.txt`). The same request shape against
+   7.6.2 yields no oracle because the guard rejects it. Values are chosen
+   modulo the constraint that the slot must initially hold `value-1`; the
+   filename supplies those bytes.
+
 ## Rung assessment
 
 - Rungs 1/2/3: ESTABLISHED in the extracted harness (frontier, independently
   replayed by witness #805) and independently corroborated here by a live ASan
   SEGV at the real `:1988` frame.
-- Rung 4: LIVE-BUILD DEMONSTRATED for chosen small values at
-  `seq_segs+24` in a real APR neighbour, with byte-for-byte debugger evidence
-  and an HTTP oracle in a loopback process running the real pinned source.
+- Rung 4: LIVE-BUILD DEMONSTRATED. Attacker-chosen 8-byte values at chosen
+  byte offsets in real APR-pool neighbours: `1`, `2`, `3` at `seq_segs+24`
+  (gdb byte dumps) and the harness's exact `0x4141414141414141` at
+  `seq_segs+120` (HTTP oracle), in a loopback process running the real pinned
+  7.6.1 source.
+
 
 ## Preserved negatives and limits
 
@@ -93,11 +113,12 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
   harness's `heap-buffer-overflow` (that used exact `calloc`), and it is the
   reason the live proof uses gdb and the sequence oracle. A crash appears only
   for a large index that leaves the pool block entirely.
-- **No arbitrary 64-bit value in the live build.** The `:3502` equality check
-  only advances the slot by one per DATA request; reaching
-  `0x4141414141414141` would need ~4.7e18 requests. The harness's chosen
-  8-byte value remains INSTRUMENTED-only. Values written live here are `1`,
-  `2`, `3`.
+- **Values are constrained by the sequence check.** The `:3502` equality
+  requires the slot to hold `value-1` before an OPEN/DATA store; choosing the
+  filename bytes supplies that precondition for deep indices. Values `1`,
+  `2`, `3` were written by in-session increments; `0x4141414141414141` was
+  written by the crafted-filename precondition. The value space reachable
+  with arbitrary (not merely printable-ASCII path) bytes remains UNKNOWN.
 - **No pointer overwrite, control-flow diversion, marker execution or stock
   binary behaviour was observed.** The reachable neighbours at small positive
   indices are strings, not pointers; nothing here demonstrates code control.
@@ -113,6 +134,8 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
 bash lab/gpfdist2shell-live/build.sh
 bash lab/gpfdist2shell-live/probe_chosen.sh ./gpfdist_v761_asan 18100 3
 bash lab/gpfdist2shell-live/probe_chosen.sh ./gpfdist_v762_asan 18101 3
+bash lab/gpfdist2shell-live/probe_deep.sh ./gpfdist_v761_asan 18116 15 \
+  'AAAA@AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.txt'
 # gdb transcript: gdb -q -batch -x lab/gpfdist2shell-live/gdb_chain3.gdb \
 #   lab/gpfdist2shell-live/gpfdist_v761_asan  (then send the four requests
 #   from probe_chosen.sh to 127.0.0.1:18097)
