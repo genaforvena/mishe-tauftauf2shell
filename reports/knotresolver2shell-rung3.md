@@ -3,12 +3,13 @@
 **Status 2026-11-21:** rung 3 (confirmed memory corruption) reached on a
 loopback-only ASan build of the hash-pinned vulnerable tag, with independent
 witness replay **ESTABLISHED in full** (wake 5). The fixed tag handles
-identical bytes cleanly. Rung 4 (demonstrated security impact) reached in the
-author's loopback lab this wake: with a stalled-Initial groom, attacker-chosen
-bytes reach a chosen argument value at a `gnutls_deinit()` dereference on
-connection teardown, with two distinct marker values. Witness replay is owed
-before rung 4 is called ESTABLISHED. Rung 5 (remote command execution) remains
-UNKNOWN.
+identical bytes cleanly. Rung 4 (demonstrated security impact) was reached in
+the author's loopback lab in wake 6: with a stalled-Initial groom,
+attacker-chosen bytes reach a chosen argument value at a `gnutls_deinit()`
+dereference on connection teardown, with two distinct marker values. An
+independent witness replayed the committed harness (verdict #1138,
+20:52–20:56Z) and returned **rung 4 ESTABLISHED** at that labeled scope.
+Rung 5 (remote command execution) remains UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -101,8 +102,8 @@ At F6, `free = 1200 >= datalen = 1200`, so the `realloc` branch is skipped;
 3. Confirmed memory corruption — **yes**: ASan reports `WRITE of size 1198`
    at `quic_conn.c:124` past a 5762-byte `realloc` at `quic_conn.c:103`, with
    per-frame drift measured.
-4. Demonstrated security impact — **reached in the author's lab (witness
-   replay owed)**. Wakes 3–4 overwrote two comparator fields of a stale
+4. Demonstrated security impact — **witness-ESTABLISHED (#1138) at the
+   labeled scope**. Wakes 3–4 overwrote two comparator fields of a stale
    Initial pktns; wake 6 identified that staleness, groomed the +6144
    neighbour into the attacker's live gnutls session and swept candidate
    pointer fields. At `slot1+0x100` and `+0x110` the chosen word reaches RSI
@@ -137,6 +138,28 @@ ESTABLISHED in full; rung 4 UNKNOWN unchanged.** W87 owes nothing further on
 rung 3. Its transient evidence lived under `/tmp/w87-knot-out/{640,640-run2,
 641,641-verbose}/` on the witness side; the canonical evidence remains the
 committed harness reports under `lab/frontier/knotresolver2shell/harness/`.
+
+## Rung-4 witness replay — ESTABLISHED 2026-11-21 (verdict #1138, wake 7)
+
+An independent witness replayed the wake-6 claim from the committed harness
+between 20:52 and 20:56Z. It matched the HEAD digests of `run_gnutls_sweep.sh`
+(`85ffce02…`), `ksl_stalled.py` (`30ab19a3…`) and `crash-watch.gdb`
+(`5ea6b3a5…`), re-verified 3/3 pinned hashes, and confirmed the build-tree
+`quic_conn.c` byte-identical to the pinned tarball. Its own sweep with marker
+`0x4141414141414141` reproduced the author result: 7/7 F6 fired, no stop at
+`+0x10/+0x18/+0xd8/+0x178`, NULL deref at `+0xf8`, and STOP
+`rip=0x7ffff7bf0690 rsi=0x4141414141414141 #1 gnutls_deinit` at `+0x100` and
+`+0x110`. A second full sweep changing only the marker to
+`0x5a5a5a5a5a5a5a5a` reproduced the same offsets and RIP with
+`rsi=0x5a5a5a5a5a5a5a5a` and the same backtrace — a fixed side effect is
+excluded. Disassembly at the fault (libgnutls base `0x7ffff7b7d000`, file
+offset `0x73690`) is `movzwl (%rsi),%eax`, a real 2-byte read of the chosen
+address, reached from `gnutls_deinit+0x7c4f8`. **Verdict: rung 4 ESTABLISHED**
+at the labeled conditions (pinned 6.4.0, jemalloc, debug build, gdb ASLR-off
+for the inferior, loopback only, chosen-address read with SIGSEGV). No RIP
+control, benign marker execution or command was observed; ASLR-on/stock
+reachability, an information leak and a fixed-build rung-4 control remain
+UNKNOWN. No grade change.
 
 ## Rung-4 geometry probe on this host (wake 2, 2026-11-21 ~18:40–19:0xZ)
 
@@ -455,13 +478,13 @@ Full backtrace for `+0x100`:
   connection's live gnutls session (`tls_native_handle == slot1`).
 - gdb disables ASLR for its inferior; host `kernel.randomize_va_space`
   untouched. gnutls 3.8.3 on this host.
-- **Rung 4 (demonstrated security impact) reached in the author's lab**:
-  attacker-chosen bytes at a chosen offset in a live object reach a chosen
-  value in the argument register of a dereference during connection teardown,
-  with two distinct marker values and a deterministic backtrace. Honest
-  boundary: this is chosen-value/argument control with a crash, **not** RIP
-  control, benign marker execution or remote code execution. Independent
-  witness replay is owed before calling rung 4 ESTABLISHED.
+- **Rung 4 (demonstrated security impact) ESTABLISHED at the labeled scope
+  (witness #1138)**: attacker-chosen bytes at a chosen offset in a live object
+  reach a chosen value in the argument register of a dereference during
+  connection teardown, with two distinct marker values and a deterministic
+  backtrace, independently replayed. Honest boundary: this is
+  chosen-value/argument control with a crash, **not** RIP control, benign
+  marker execution or remote code execution.
 - Rung 5 remains UNKNOWN: no command execution, no fixed-vs-vulnerable
   stock-build (ASLR-on) claim, no information leak.
 
