@@ -492,12 +492,15 @@ event then gave the live ASan server `WRITE of size 16384`, 0 bytes after an
 8820-byte region, from `rdpsnd_server_send_samples`, with client-chosen
 `0xDE` at offset 8820. No-auth posture, subsystem-supplied format table,
 ASan build and synthetic audio are explicit conditions; stock allocator
-layout, a real audio source and an FFmpeg-enabled build stayed UNKNOWN
-then; wake 9 closed the stock-allocator item: the live chosen-byte overwrite
+layout, a real audio source and an FFmpeg-enabled build were UNKNOWN at wake
+8. Wake 9 closed the stock-allocator item (the live chosen-byte overwrite
 under stock glibc wrote 7564 OOB bytes at offsets 8820..16383 with the first
 OOB byte client-chosen, did not fault at the write and produced glibc
 `double free or corruption (!prev)` on teardown; a benign control stayed in
-bounds. Wake 10 made that live result one command:
+bounds); wake 16 closed the FFmpeg-build item and wake 17 the real-audio-source
+question at source level (server-side capture and stride, not client-chosen;
+deployment-specific influence stays UNKNOWN). Wake 10 made that live result
+one command:
 `bash lab/freerdp2shell-src/verify_live.sh` applies five committed patches
 to pinned 3.32.0, builds a plain shadow server and `client/Sample sfreerdp`,
 and asserts over real loopback TCP readiness: 17 PASS / 0 FAIL warm and
@@ -564,10 +567,17 @@ an in-process chosen-byte rung 4 on real library bytes through the real
 parser and dispatcher, on a NON-DEFAULT build — not a live RDP session or an
 over-the-wire PDU, no chosen-byte dereference for tag 2, and the 16384 bytes
 are PoC `0x41` rather than remote audio. Tag 17 has no FFmpeg encoder in
-either build. A real audio source, a wrap-capable format on the default
-build and grooming of a chosen object remain UNKNOWN (evidence
+either build. A wrap-capable format on the default build and grooming of a
+chosen object remain UNKNOWN (wake-16 evidence
 `lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt` and `PocAdpcmTag2.c`; the raw
-ASan log is a gitignored scratch file under `/tmp`).
+ASan log is a gitignored scratch file under `/tmp`). Wake 17 closed the
+real-audio-source question at source level in pinned 3.32.0: the copied bytes
+(`buf`, server-side platform capture) and copy stride (`src_bytes_per_frame`,
+from the server's own format list) are set server-side; the client's
+`SNDC_FORMATS` supplies only the wrap trigger and DSP reset format, so remote
+byte choice is not established in a stock deployment. Whether a deployment
+lets a remote attacker influence the captured audio stays UNKNOWN. Source-only
+finding; see `reports/freerdp2shell-status.md`.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
@@ -1564,6 +1574,39 @@ list are unchanged. Reproduce from `lab/apache2shell/`:
 `./build-l5.sh`, then
 `ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy ./l5-lane.py 2.4.68 2.4.69`,
 the `L5_EXT` / `L5_FLAGS=c` controls and `./l5-gdb.py`. Raw logs are
+gitignored under `lab/apache2shell/logs/`.
+
+Adjacent lane L6 (CVE-2026-56153, a `mod_charset_lite` `finish_partial_char`
+heap overflow) is a sixth same-subsystem lane, not a reopen of
+CVE-2026-119618. `2.4.70/CHANGES:158-163` lists an out-of-bounds write
+affecting 2.4.0-2.4.68; the whole 2.4.68→2.4.69 fix is a five-line guard at
+the top of the `finish_partial_char` loop (2.4.69 lines 448-452): when
+`ctx->saved >= sizeof(ctx->buf)` it sets `EES_LIMIT`, returns
+`APR_INCOMPLETE` and breaks, while 2.4.68 line 448 writes
+`ctx->buf[ctx->saved] = **cur_str;` unbounded into a `char[8]` (`FATTEST_CHAR`)
+embedded in the heap-allocated `charset_filter_ctx_t`. `build-l6.sh` builds
+2.4.68 (affected) and 2.4.69 (control) with ASan/UBSan, event MPM and
+`--enable-charset-lite`; no earlier lane built this module. `l6-lane.py` sets
+`CharsetSourceEnc UTF-8` / `CharsetDefault ISO-2022-JP` on a loopback docroot
+with a body-reading CGI and sends a chunked POST (chunk 1 `A` + ESC, chunk 2
+32 ESC bytes) so the saved ESC makes `finish_partial_char()` append past the
+8-byte buffer. An APR-level enumeration found ESC (`0x1b`) is the only
+single-byte partial and the only appended byte that keeps `APR_INCOMPLETE`
+past index 8, so the written byte is fixed. The canonical four-request replay
+gives 2.4.68 3/4 UBSan `mod_charset_lite.c:448:17: runtime error: index 8 out
+of bounds for type 'char [8]'` against 2.4.69 0/4; the `AddressSanitizer`
+lines are exit-time LeakSanitizer noise because the write lands in adjacent
+struct fields (`ran`, `noop`, `tmp`) inside the larger `apr_pcalloc` context.
+No-charset, same-charset and `A`-chunk controls are clean; applying the exact
+2.4.69 guard to 2.4.68 and rebuilding only `mod_charset_lite.so` gives 0/4
+reports and byte-for-byte restoration gives 2/4. A 64-byte ESC run gives 4/4
+UBSan reports and 4/4 child `SIGSEGV (11)` on a corrupted context pointer.
+Grade rung 3 confirmed: no chosen byte, chosen offset, pointer control or
+benign marker; L6 closes there with the main lane's closure, negative list
+and do-not-retry conditions unchanged. Reproduce from `lab/apache2shell/`:
+`bash build-l6.sh`, then `python3 l6-lane.py 2.4.68 2.4.69`; controls are
+`L6_NOCHARSET=1`, `L6_SAMECHARSET=1` and
+`L6_SUFFIX=long L6_NEXT_HEX=$(python3 -c "print('1b'*64)")`. Raw logs are
 gitignored under `lab/apache2shell/logs/`.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
