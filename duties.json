@@ -5,9 +5,9 @@
   {
    "name": "dispatch",
    "builtin": true,
-   "every": 60,
+   "every": 120,
    "timeout": 30,
-   "max_age": 300,
+   "max_age": 600,
    "resolver": "operator",
    "replaces": [],
    "covers": "a wake left open (started/unknown) longer than 30 minutes"
