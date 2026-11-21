@@ -9,6 +9,12 @@ TPsot-derived out-of-bounds offsets in a staged heap area. No JPEG 2000
 application, listener, real heap neighbour object, pointer, control-flow
 diversion or execution was observed — all stay UNKNOWN. The fix is a pinned
 master commit, not a tagged release.**
+Scoped commit `958b319`; trace
+`sha256=6983a6a11c8236c6e991e15faa326b4c64f6269cf7f5f4fabca081bf7aa111ea`
+(10 PASS / 0 FAIL, clean `git archive` replay). Live two-pane window
+`openjpeg2shell` index 60 on the inner tmux socket, registry entry 62,
+seed wall `.mishe-tauftauf/walls/openjpeg2shell.md`. Witness replay request
+and operator admission request on the tape (#955/#956).
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
