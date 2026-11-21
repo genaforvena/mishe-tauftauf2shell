@@ -127,7 +127,7 @@ for spec in "${cases[@]}"; do
         | sed -E 's/0x[0-9a-fA-F]+/ADDR/g' >> "$O/trace.txt" || true
     if grep -q 'AddressSanitizer: heap-buffer-overflow' "$O/$name.log"; then
         wr=$(grep -m1 -o 'WRITE of size [0-9-]*' "$O/$name.log" | tr ' ' '=')
-        fr=$(grep -m1 'simaka_message.c:258' "$O/$name.log" | tr -s ' ' | cut -c1-120)
+        fr=$(grep -m1 'simaka_message.c:258' "$O/$name.log" | tr -s ' ' | sed -E 's/0x[0-9a-fA-F]+/ADDR/g' | cut -c1-120)
         trace "ASAN case=$name $wr caller=${fr:-MISSING}"
     fi
 done
