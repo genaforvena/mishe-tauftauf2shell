@@ -68,49 +68,105 @@ lab/gst2shell-src/run.sh`; upstream bytes are gitignored under
   at `info+320`; the element allocation tail ends at `info+328`.
 
 Therefore the OOB indices land as follows: `i=64` in alignment padding,
-`i=65..72` in `reserved`, `i=73..74` zero the `order` pointer, and `i>=75`
+`i=65..72` in `reserved`, `i=73..74` hit the `order` pointer (the extracted
+probe modelled the value as zero; the pinned enum is -3, so these writes set
+pointer halves to `0xfffffffd` — see the live section below), and `i>=75`
 escape the element allocation entirely. A source-faithful tail-layout probe
 (`lab/gst2shell-src/layout_probe.c`, pinned source digests in
 `lab/gst2shell-src/evidence.txt`) confirms this exactly:
 
 - `channels=1000`: `oob_writes=936 pad_writes=1 reserved_writes=8
   order_writes=2 escape_writes=925` — 925 writes / 3700 bytes leave the
-  element allocation; the `order` sentinel reads back zeroed.
+  element allocation; the `order` sentinel read back zeroed in that harness,
+  whose NONE=0 model is corrected below.
 - ASan on an exact 328-byte element-tail allocation: `heap-buffer-overflow`,
   `WRITE of size 4`, `0 bytes after 328-byte region`, in `vuln_create_default`.
 - `channels=74`: `order_writes=1 escape_writes=0` — partial write reaches only
-  the first half of `order`, no escape (length control, still constant zeros).
+  the first half of `order`, no escape (length control; the harness's
+  zero-value model is corrected below).
+
+
+## Live GStreamer GObject/ASan set_caps (2026-11-21 ~01:04Z)
+
+Provisioned `libglib2.0-dev`, `libgstreamer1.0-dev`,
+`libgstreamer-plugins-base1.0-dev` (GLib 2.80.0, GStreamer 1.24.2). Built
+`lab/gst2shell-src/live_setcaps.c` with ASan: a real `GstRTPBaseDepayload`
+subclass instance allocated by `g_object_new`, the **actual pinned vulnerable
+`upstream/channels.c`**, and a faithful copy of pinned `depay.c:140-230` as
+`set_caps`. Driver `bash lab/gst2shell-src/run_live.sh`; full output in
+`lab/gst2shell-src/live_evidence.txt`; digests `8c7502f5…bb45` (harness) and
+`08ae20b3…577b` (pinned channels.c). This is not the full plugin binary.
+
+Measured on this host: `sizeof(GstAudioInfo)=320`, `position` at +28,
+`sizeof(LiveDepay)=784`, `position` at instance offset 484, GObject allocation
+**992 bytes**. Synthesized caps `application/x-rtp, clock-rate=(int)44100,
+encoding-params=(string)1000, payload=(int)96` drive `set_caps` into the real
+vulnerable function:
+
+- channels=1000: ASan `heap-buffer-overflow`, `WRITE of size 4`, `0 bytes
+  after 992-byte region`, stack `#0 gst_rtp_channels_create_default
+  (upstream/channels.c:309)`, `#1 live_setcaps`, allocation via `g_malloc0`
+  -> `g_type_create_instance` -> `g_object_new`. rc 1.
+- channels=74: 10 OOB writes, no allocation escape; `order_ptr=0xfffffffd`.
+- benign channels=8: valid order from the real table, clean, rc 0.
+- `MIN`-clamped fixed control at 1000 and 74: clean, `order_ptr=(nil)`, rc 0.
+
+**Correction to the extracted-harness claim.** Both pinned
+`upstream/audio-channels.h:101` (SHA-256 `3934f423…22e0`) and the installed
+1.24.2 header define `GST_AUDIO_CHANNEL_POSITION_NONE = -3` (`0xfffffffd`).
+The frontier harness's `#define NONE 0` (`rtp_channels_overflow.c:50`) and the
+earlier layout probe's "all-zero writes / zeroing order is harmless" conclusion
+are artifacts of that mis-model. The real OOB writes store the fixed 32-bit
+pattern `fd ff ff ff`; index 73 lands on the low half of the 8-byte `order`
+pointer (instance offset 776). Since `depay.c:204` sets `order = NULL` for
+channels>8, index 73 turns the NULL guard into a **non-NULL wild pointer**
+`0x00000000fffffffd`; index 74 (channels>=75) also corrupts its high half.
+`process()` tests `order` at `depay.c:264` and dereferences `order->pos` at
+`:267`.
+
+Demonstrated effect (honest label): with channels=74, evaluating the exact
+`order->pos` dereference faults — ASan `SEGV`, `READ memory access`,
+`unknown address 0x00009fff8001`, rc 1. Controls: channels=8 dereferences a
+valid order cleanly; the fixed control leaves `order` NULL and never enters
+the dereference (both rc 0). The attacker controls the **channel count**,
+hence whether a valid guard becomes a wild-pointer dereference on the next RTP
+buffer — control of effect, **not** chosen bytes and **not** an arbitrary
+pointer value (the written pattern is fixed by the enum and the high half
+stays zero at channels=74). No code execution, no content-chosen offsets, no
+real SDP/RTSP pre-auth path demonstrated in this lab.
 
 ## Evidence boundary
 
-Rungs 1/2/3 established in the extracted harness; the replay passed again this
-wake. **Rung 4 NOT DEMONSTRATED**, with a sharper reason than before: the only
-named in-allocation neighbour, `rtpL16depay->order`, is set to NULL at
-`depay.c:204` before the overflow at `:214` (channels>8 has no known order), so
-zeroing it at indices 73/74 is a no-op. `gst_audio_info_to_caps`
-(`audio-info.c:377-405`) reads only `position[0]` and honours the UNPOSITIONED
-flag set at `depay.c:215`; `process` (`depay.c:264`) skips reordering because
-`order` is NULL. All 11 in-allocation OOB writes are therefore harmless, and
-the 925 escaping writes are blind zeros into allocator-adjacent memory whose
-object identity and security relevance stay UNKNOWN without a live build. The
-value written is still the compile-time constant `NONE` (0): the attacker
-controls the length and offsets, not the bytes. A live GStreamer process,
-SDP/RTSP negotiation, the real neighbour object and any code execution stay
-UNKNOWN; no off-loopback probe. Author report is not acceptance; witness owns
-replay.
+Rungs 1/2/3 remain established in the extracted harness and were replayed
+again. A distinct **rung-4 effect** is now demonstrated in a live
+GStreamer-typed ASan build: count-controlled corruption of the `order` pointer
+into a non-NULL wild value, producing a deterministic invalid-pointer
+dereference in the real `process()` path (DoS-class). This is control of effect
+by channel count, not byte control — the written pattern is the fixed `NONE =
+-3`, and the pointer value is not attacker-chosen. Strong rung-4 (chosen bytes
+at chosen offsets, arbitrary pointer control, benign marker execution)
+remains **NOT DEMONSTRATED**, as does any RCE claim. The earlier "zeroing
+`order` is harmless" negative is preserved as a superseded harness assumption,
+not erased. Still UNKNOWN: real SDP/RTSP caps delivery and pre-auth
+reachability, the unpatched plugin binary end to end, the identity of
+allocator-adjacent objects hit by the escaping bytes at channels=1000, and any
+consequence beyond the fault. All testing stayed on local builds. Author
+report is not acceptance; witness owns replay.
 
 ## Next owner / action
 
 Operator: wake trigger units and presentation `active` entry still owed from
-the person's full-flag sync. The `gst2shell` mind: the live ASan build remains
-the next step but is BLOCKED this wake on missing prerequisites — no
-`glib-2.0`/`gobject-2.0` pkg-config, no meson, 2 cores; provisioning glib dev
-and building gstreamer+base+good at the pinned parent needs a dedicated wake.
-Cheapest follow-up: install glib-2.0-dev + meson, fetch the monorepo at
-`0b70c356...`, build the RTP depayload plugin with ASan, drive `set_caps` with
-`encoding-params=(string)1000` and record the real ASan allocation size and
-first clobbered neighbour. Witness: replay both pinned drivers
-(`lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`). Would change my
-mind: a caps clamp at <=64 in primary sources (checked: none), a failed replay,
-a controller-meaningful in-allocation field, or proof the real pipeline cannot
-deliver the caps field.
+the person's full-flag sync (`docs/runtime-pin.md`) — never a bare `mishe
+sync`.
+
+gst2shell mind: bounded follow-up is the real plugin binary — install
+`gstreamer1.0-plugins-good`, load `rtpL16depay`, and confirm that after a
+channels>=74 caps negotiation an actual RTP buffer makes `process()` fault on
+the corrupted `order`; that upgrades the effect from a faithful harness to the
+shipping element. Keep the benign, fixed and ASan controls. Witness: replay
+`lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`, and the new
+`lab/gst2shell-src/run_live.sh`. Would change my mind: a caps clamp at <=64 in
+primary sources (checked: none), a failed replay or lost control, a real
+pipeline that cannot deliver `encoding-params`, or evidence that the corrupted
+pointer value is content-controllable (which would need a fresh, honestly
+labelled rung-4 claim).
