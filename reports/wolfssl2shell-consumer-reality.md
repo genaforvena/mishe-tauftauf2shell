@@ -108,3 +108,69 @@ timeout 200 ./out/loopback/real-client 18458 4100
 All addresses are 127.0.0.1; the sender/receiver pair exits with the server
 `loopback_ack.gdb` counts hits on the real symbols; transient variants of
 that script used the ports printed in the corresponding logs above.
+
+## Second wake: same-socket injection attempt (2026-11-21, 17:0xZ)
+
+The first wake's replay used a fresh UDP socket per flood, so a different
+source port was one possible explanation for `ack_count=0`. That sender
+artifact is now excluded, and a stronger negative result recorded.
+
+New lab-only files: `loopback_flood.py` (one connected UDP socket sends a
+captured ClientHello plus copies with distinct 64-bit record numbers),
+`loopback_inject_client.c` (wolfSSL IO-send callback injects forged handshake
+records on the real client's own fd immediately after the real ClientHello),
+`loopback_flood_test.py` (time-bounded orchestrator). `loopback_server.c`
+gained a timeout argument and a 0.5 s monitoring thread; no pinned library
+source was edited. All addresses 127.0.0.1.
+
+Observed with `out/loopback/server-plain` (v5.9.0):
+
+1. **Datagrams arrive.** `strace-inject.log` shows 11 `recvfrom` calls on
+   the connected socket: the real ClientHello (record seq 0) plus 10 forged
+   copies (seq 1–10), all from the client's single source port. The
+   different-source-port explanation is therefore eliminated.
+2. **Forged records are dropped before the ACK chain.** Under gdb
+   (`gdb-inject10.log`) a 10-record injection produced exactly one
+   `Dtls13CheckWindow`, one `Dtls13RecordRecvd`, one `Dtls13RtxAddAck` and
+   four `Dtls13RtxFlushAcks` hits; none of the forged records reached
+   `Dtls13CheckWindow`. A companion trace (`gdb-drop-diag.log`) counted 2
+   `Dtls13CheckWindow` and 10 `DropAndRestartProcessReply` hits, with **no**
+   `HandleDTLSDecryptFailed` hit. The live monitor stayed at `ack_count=0`,
+   `done=1`, `state=10` for the full 4097-record injection. Symbolized
+   cause of the drops beyond `DropAndRestartProcessReply` is UNKNOWN; the
+   timing coincides with the server's switch from plaintext ClientHello
+   records to encrypted handshake keys after its first reply.
+3. **Plaintext-epoch extension attempt failed.** Rewriting every cipher
+   suite in the captured ClientHello to `0x0000` (`ch-nosuite.bin`) to keep
+   the server in plaintext epoch 0 after entering stateful mode left the
+   server at `state=0`, `ack_count=0` for a 21-datagram flood
+   (`nosuite-server.log`); that ClientHello never reached the stateful
+   transition. `WOLFSSL_DTLS_CH_FRAG` is not defined in the pinned build's
+   `wolfssl/options.h`, so fragmented-ClientHello filling is unavailable.
+
+Grades are unchanged: rungs 1/2/3 ESTABLISHED on the verbatim pinned ASan
+harness; rung 4 INSTRUMENTED (staged-heap chosen-byte readback only). No
+live-neighbour overwrite, pointer control, control-flow diversion or
+execution was observed. The remote fill route remains UNKNOWN, not
+disproved: a crafted peer that produces thousands of ACK-eligible
+handshake records within one plaintext epoch was not demonstrated here.
+
+Reproduce the second-wake probes (all loopback only):
+
+```
+cd lab/frontier/wolfssl2shell
+# same-socket replay; server prints ack_count via its monitor thread
+./out/loopback/server-plain 18480 1 > out/loopback/replay-server.log 2>&1 &
+python3 loopback_flood.py out/loopback/ch.bin 18480 20
+# same-flight injection from the real client's fd
+./out/loopback/server-plain 18481 1 > out/loopback/inject-server.log 2>&1 &
+./out/loopback/inject-client 18481 4097
+# unsupported-cipher variant (cipher-suite bytes 63..116 of ch.bin -> 0)
+python3 -c 'b=bytearray(open("out/loopback/ch.bin","rb").read()); \
+[b.__setitem__(i,0) for i in range(63,117)]; \
+open("out/loopback/ch-nosuite.bin","wb").write(b)'
+python3 loopback_flood.py out/loopback/ch-nosuite.bin 18482 20
+```
+
+The library trees, the ASan harness and the v5.9.1 control were untouched.
+handshake records within one plaintext epoch was not demonstrated here.

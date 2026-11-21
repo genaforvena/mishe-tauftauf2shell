@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -33,6 +34,19 @@ static int ack_count(const WOLFSSL* ssl)
     }
     return n;
 }
+static volatile int g_monitor_run = 1;
+
+static void* ack_monitor(void* arg)
+{
+    WOLFSSL* s = (WOLFSSL*)arg;
+    while (g_monitor_run) {
+        printf("FACT MONITOR ack_count=%d state=%d done=%d\n",
+               ack_count(s), s->options.serverState, s->options.handShakeDone);
+        fflush(stdout);
+        usleep(500000);
+    }
+    return NULL;
+}
 
 int main(int argc, char** argv)
 {
@@ -42,8 +56,8 @@ int main(int argc, char** argv)
     WOLFSSL* ssl = NULL;
     char tree[1024];
 
-    if (argc != 2) {
-        fprintf(stderr, "usage: loopback_server PORT\n");
+    if (argc != 2 && argc != 3) {
+        fprintf(stderr, "usage: loopback_server PORT [TIMEOUT_SEC]\n");
         return 2;
     }
     port = atoi(argv[1]);
@@ -77,8 +91,12 @@ int main(int argc, char** argv)
      * and no opportunistic ACK flush while the sender fills seenRecords. */
     ssl->options.sendCookie = 0;
     wolfSSL_dtls13_set_send_more_acks(ssl, 0);
-    (void)wolfSSL_dtls_set_timeout_init(ssl, 60);
-    (void)wolfSSL_dtls_set_timeout_max(ssl, 120);
+    {
+        int tmo = (argc == 3) ? atoi(argv[2]) : 60;
+        if (tmo < 1) tmo = 1;
+        (void)wolfSSL_dtls_set_timeout_init(ssl, tmo);
+        (void)wolfSSL_dtls_set_timeout_max(ssl, tmo * 2);
+    }
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0)
@@ -101,6 +119,10 @@ int main(int argc, char** argv)
     }
     if (wolfSSL_set_fd(ssl, fd) != WOLFSSL_SUCCESS)
         return 2;
+    {
+        pthread_t mon;
+        pthread_create(&mon, NULL, ack_monitor, ssl);
+    }
 
     printf("FACT server=loopback version=%s port=%d\n",
            LIBWOLFSSL_VERSION_STRING, port);
