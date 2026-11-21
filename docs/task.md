@@ -175,23 +175,33 @@ claims, not conclusions.
 
 ### Node2Shell — CVE-2026-123828 (admitted 2026-11-20, standing approval #6)
 
-- **One-byte heap overflow** in Node.js HTTP/2 `session.altsvc()`
-  (`src/node_http2.cc`): the buffer is sized to the origin length and
-  the null terminator is written one byte past its end. Remote
-  unauthenticated single-request trigger: a long valid `:authority`
-  that an application forwards to altsvc. Attacker controls the
-  allocation size through the authority length — same class as
-  Ruby2Shell.
+- **Two one-byte heap overflows** in Node.js HTTP/2 `session.altsvc()`
+  (`src/node_http2.cc`): the origin buffer is sized to the origin length and
+  the null terminator is written one byte past its end; the fix removes
+  `kNullTerminate` from **both** `WriteOneByteV2` calls in `AltSvc`, so the
+  app-supplied ALT/value buffer has the same one-byte overflow when it exceeds
+  1024 bytes and its length is ≡ 8 (mod 16). Remote unauthenticated
+  single-request trigger: a long valid `:authority` that an application
+  forwards to altsvc. Attacker controls the allocation size through the
+  authority length — same class as Ruby2Shell.
 - Affected 24.x, 26.x per the official advisory; fixed 24.22.3 /
   26.13.1 (2026-11-11); fix commit `nodejs/node@ae9ab37d62`
   (nodejs-private#1035). Snyk also claims 22.x<22.23.5, but the fix
   is absent from the 22.23.5 release notes — backport unverified;
   check the 22.x source before building it.
-- Rung-4 angle: attacker-chosen allocation size and pre-overflow
-  content; Node ASan/UBSan source builds fit this lab. Fallback
-  candidate in the same release if altsvc is structurally gated:
-  CVE-2026-123874 (Http2Stream use-after-free via respondWithFile
-  reset, unauthenticated).
+- **Lab position (2026-11-21): rung 3, two independent triggers; rung 4 not
+  demonstrated.** Wake 33 isolated the value-side terminator (v24.22.2,
+  loopback, one request, ALT 1048 → 4/4 then 3/3 SIGABRT rc=134 `malloc():
+  invalid next size (unsorted)`; ALT 1200 and ALT 10 controls 2/2 each with
+  the ALTSVC echo). Its pre-write sizefield was never captured, so neither
+  magnitude shrink nor flag-only clear is claimed for that lane. Wake 34 ran
+  both terminators on-class in one request: 8/8 aborts rc=134 split
+  `mismatching next->prev_size` 2/8, `invalid next size` 3/8, `double free or
+  corruption (!prev)` 3/8; the origin write dominates, no combination
+  primitive appears and the third `WriteOneByteV2` in the subsystem is safe
+  (shipped JS appends a NUL). Reproduce: `sh
+  lab/repro/node2shell-valnul/run.sh 3`. Witness notification failed (chat
+  tape 510); no independent verification is assumed.
 
 ### Similar things (operator's standing mandate)
 
@@ -399,7 +409,19 @@ then; wake 9 closed the stock-allocator item: the live chosen-byte overwrite
 under stock glibc wrote 7564 OOB bytes at offsets 8820..16383 with the first
 OOB byte client-chosen, did not fault at the write and produced glibc
 `double free or corruption (!prev)` on teardown; a benign control stayed in
-bounds. A real audio source and an FFmpeg-enabled build stay UNKNOWN.
+bounds. Wake 10 made that live result one command:
+`bash lab/freerdp2shell-src/verify_live.sh` applies five committed patches
+to pinned 3.32.0, builds a plain shadow server and `client/Sample sfreerdp`,
+and asserts over real loopback TCP readiness: 17 PASS / 0 FAIL warm and
+18 PASS / 0 FAIL clean-room, rc 0, in
+`lab/freerdp2shell-src/verify_live_run.txt`. The vulnerable session logs
+`WAKE9_COPY ... b8820=de ... b21384=00` before glibc corruption and the
+`FR_BENIGN_ONLY=1` control keeps `b8820=00`. Witness W31 independently
+re-ran the unmodified script from clean HEAD b25d025 in its own clean room:
+18 PASS / 0 FAIL, RC 0, verdict ESTABLISHED with no corrections (#532). The
+one-command harness uses post-auth credentials, so it does not re-assert the
+no-auth 9.8 case. Grooming a specific heap object, a real audio source and an
+FFmpeg-enabled build stay UNKNOWN.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
@@ -517,6 +539,20 @@ corruption in GLib's `block_source` (`rbx = 0xfffffffdfffffffd`); stock
 `malloc(): invalid size`, removing the explicit-link step. This is a
 count-controlled rung-4 effect, not chosen bytes: strong rung 4; whether a
 public service ingests attacker SDP, RCE and allocator layout stay UNKNOWN.
+The same loopback server was run across the whole advisory family
+(`rtsp_server_codec.py` `1493f137…cb45c`, `run_rtsp_family.sh`
+`54e8331e…786e`, evidence `family_evidence.txt`): decodebin auto-plugs
+`GstRtpL8Depay`, `GstRtpL16Depay` and `GstRtpL24Depay`, and N=1000 faults each
+— L8 `malloc(): unaligned tcache chunk detected` rc 134, L24 `malloc():
+invalid size (unsorted)` rc 134, L16 `Caught SIGSEGV` rc 124 at the timeout —
+against clean N=8 controls. The exact glibc message and rc vary between runs,
+so the asserted claim is only "attacker-chosen count faults the victim". The
+same L8 path under memcheck shows three 4-byte invalid stores 0/4/12 bytes
+past a 1016-byte GObject allocation; the shipping plugin has no debug info,
+so that write is not symbolicated to a function name in that run. One command
+replays every driver: `bash lab/gst2shell-src/verify_all.sh` (add
+`VERIFY_VALGRIND=1` for the memcheck lane) — 43 PASS / 0 FAIL, rc 0 at git HEAD
+3b07571, with chosen-byte rung 4 asserted NOT demonstrated.
 Evidence:
 `reports/frontier-gst2shell.md`, harness
 `lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
@@ -1068,21 +1104,43 @@ and CVE.org scores `AC:H` against Red Hat's `AC:L` — reliability stays
 UNVERIFIED. No CPU blocker on this host, so this is the top tractability
 candidate. Full source-bound mechanism, unknowns and the cheapest
 loopback h2c experiment are in `reports/frontier-apache2root.md`.
-**No mind/charter/window owed yet**: rung 0 only, no local build or
-trigger. `lab/apache2root/` is a PHP2Shell fixture, not this lane.
-Hand to the operator for admission only if a local rung 1-2 observation
-appears; frontier then moves to the next candidate.
-
-Local update 2026-11-20 13:00Z (`frontier`, commit pending): rung 2
-observed on two gcc ASan/UBSan builds under
-`lab/frontier/apache2root/` — the loopback h2c CGI oracle returns
-`CONTENT_LENGTH=[<UNSET>]` on 2.4.70 and `CONTENT_LENGTH=[0]` on 2.4.71
-for HEADERS with Content-Type, no Content-Length, END_STREAM
-(`logs/oracle-run5.log`). This confirms the wrong-table write, not heap
-corruption: no ASan report yet. Build/harness are
-`build.sh` / `oracle.sh`; full evidence in
-`reports/frontier-apache2root.md`. Operator notified for a dedicated
-mind if rung 3 appears; frontier does not duplicate an admitted lane.
+Admitted as the dedicated `apache2shell` mind under standing approval #6;
+rung 3 is confirmed and the main lane is closed at Stage A — Stage C pointer
+control is UNREACHABLE on this build and host (the wire-byte alphabet rejects
+the bytes a canonical pointer needs, Huffman-coded HPACK does not bypass
+validation, and a 15-capture fault-site census plus a heap-layout check found
+only pointer slots). A second, adjacent same-subsystem lane L1 covers httpd
+2.4.71's `CHANGES` entry "Fix a crash creating an HTTP/2 session with
+`H2PushDiarySize 0` and debug logging enabled": `h2_push_diary_create(pool, 0)`
+returns NULL (`h2_push.c:549-555`) and `h2_session_create()` reads
+`session->push_diary->dtype` under `APLOGcdebug(c)`; 2.4.71 guards it at
+`h2_session.c:1068-1069`. On 2.4.70 with `H2PushDiarySize 0` and debug
+logging, the h2c handshake fails (server rc=1) with UBSan `member access
+within null pointer of type 'struct h2_push_diary'` and ASan `SEGV on unknown
+address 0x00000000000c` in `h2_session_create`; 2.4.71 answers rc=0 with no
+sanitizer report. Grade: rung 2 only — a fixed-offset NULL read requiring
+operator-set config, no chosen-byte, chosen-offset or scalar-steering
+primitive and no route to rung 4; the main lane's Stage A closure stands.
+Reproduce: `python3 lab/apache2shell/pushdiary-lane.py`. Evidence:
+`reports/apache2shell-investigation.md`, "Adjacent lane L1"; raw logs are
+gitignored under `lab/apache2shell/logs/`.
+Adjacent lane L2 (CVE-2026-23918) is a second same-subsystem crash, not a
+reopen of the main CVE: the 2.4.70 build already carries mod_http2 2.0.42,
+so `lab/apache2shell/build-l2.sh` builds pristine ASan/UBSan httpd 2.4.66
+(mod_http2 2.0.35; source SHA-256
+`94d7ff2b42acbb828e870ba29e4cbad48e558a79c623ad3596e4116efcfea25a`) and
+2.4.67 (2.0.39; SHA-256
+`66cd206637b0d5c446fa7dabe75fe03525da8fb55855876c46288cd88b136aa4`). The
+fix replaces three unguarded `APR_ARRAY_PUSH(m->spurge, ...)` sites
+(`h2_mplx.c:134/167/183` in 2.4.66) with a duplicate-refusing
+`add_for_purge()`. `python3 lab/apache2shell/l2-lane.py` drives h2c HEADERS
+plus RST_STREAM (fill 0, 8 connections × 100 streams) on loopback
+7266/7267: 2.4.66 gives 800 sent / 18 responses with child aborts or SEGVs
+in both pristine runs (assertion message varies, child failure does not),
+while 2.4.67 answers 800/234 and 800/248 with zero assertions, aborts or
+SEGVs. Grade: rung 2 — reproducible crash on unmodified vendor builds with
+a clean fixed control, no confirmed attacker-controlled corruption and no
+route to rung 4; the main lane's Stage A closure stands.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
