@@ -170,3 +170,38 @@ would require a new mechanism — pin or map the target region so the read
 survives, then observe a controlled bit flip in a live neighbour — and rung 5
 would additionally require a named network consumer and a benign command
 executed on loopback with vulnerable, fixed and safe-input controls.
+
+## Instrumented write-path probe (wake 4, 2026-11-21 23:50Z)
+
+One bounded experiment tested the ceiling claim above. It is **not** a
+reproduction of the unmodified bug and does not move the rung: all changes
+were in a throwaway copy of the built tree under `/tmp/perl2shell-groom`, with
+pinned sources and both committed binaries left untouched. The built objects
+use the fixed-header `STRLEN` fields, so the throwaway `regexec.c` (a) computes
+the wrap explicitly in `I32`, (b) enlarges the cache backing to 600 MiB and
+fills it with `0x41`, (c) casts `poscache_iter` to `I32` for the `< 0` test so
+the unsigned built field behaves like the vulnerable one, and (d) prints at
+activation, read and `CACHEsayNO` via `PerlIO_printf`. Only `regexec.o` was
+recompiled; the instrumented binary's sha256 is
+`8de5da62e17323f396a66b13e37cf00953639ba0a697ffbaf4a3cee2014ebb6a`.
+
+With the 286,331,153-byte subject, the wrap printed (`wrapped=14`,
+`len=286331154`, `n=15`; also repeated with `wrapped=1` to force early
+activation), but no cache activation or read was reached within 180 s in any
+of three runs, nor in a 60 s diagnostic with an activation print. This is
+preserved as a negative; the reason the instrumented build stalls before
+activation is UNKNOWN. The earlier author timeout negative remains the only
+big-subject timing observation.
+
+With a 1,000-byte subject and the same 15-WHILEM pattern (countdown forced to
+1), the instrumented build reached the cache and the write path in 0.47 s:
+1,050 `GROOM_READ`, 103 `GROOM_WRITE`/`GROOM_WROTE` pairs, then `NOMATCH`,
+`DONE`, status 0, no ASan report. First write: offset 1875, mask `0x02`,
+`before=0x41 after=0x43`; later writes show `0x43→0x47` and `0x41→0x45`, and
+subsequent reads observe the earlier-written bits. That confirms the source
+reading: `CACHEsayNO` executes a single-bit OR at a position-derived index and
+nothing more — no chosen byte, no pointer control, no guest code. Because it
+required forced early activation and a 600 MiB backing store, it is a
+confirmed code-path mechanic under lab instrumentation, **not** a rung-4
+demonstration against the shipped 2-byte-cache configuration. RUNG 3
+ESTABLISHED at the original scope; rung 4 and rung 5 remain UNKNOWN.
