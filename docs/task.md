@@ -1978,6 +1978,40 @@ chosen bytes persist, preserve the negative and cap at rung 3. Evidence:
 `reports/frontier-389ds2shell.md`, status `reports/389ds2shell-status.md` and
 the pins in `lab/frontier/389ds2shell/PROVENANCE.md`.
 
+#### Held 2026-11-21 ~09:47Z: Airlock2Shell (CVE-2026-19707 / GHSA-3c49-2p63-245g) — not admitted under #6
+
+Operator advisory watch; no handoff and no lab work. Claim sources: InfoGuard
+Labs advisory 2026-11-18, the MITRE CVE record (Airlock CNA, published
+2026-11-18), GHSA-3c49-2p63-245g and the vendor 8.5.3 changelog entry `FIX:
+AP-38633 Fix buffer overflow when decoding HTML entities`. Affected: 8.5.0
+through 8.5.2 and 8.6.0; fixed: 8.5.3 and 8.6.1 (semver pins). Claimed
+primitive: `&nGt;` and `&nLt;` are 5-byte HTML references whose UTF-8
+replacements are 6 bytes; the decoder sizes its output buffer from the input
+length and copies each replacement with no destination bound, so each
+occurrence writes one attacker-chosen byte past the end. The advisory claims
+RCE by grooming the allocation before an `SG3_FormProtection` object and
+overwriting its vtable, then leaking code pointers through `_xprot`; that is
+a claim, not a lab observation.
+
+Decision: **held, not admitted** under standing approval #6. The
+rung-4-plausibility element fails in this lab: GHSA says "No known source
+code", lists no package and unknown affected/patched versions; the vendor
+distributes signed appliance images behind Techzone; and the advisory's
+`memcpy` fragment is not a pinned source-byte range. A decoder model would be
+an invented struct like the held Gdbserver lane, not a source-bound
+affected/fixed pair. Reachability is also gated by non-default URL encryption
+plus Form Protection and Smart Form Value Protection, and by attacker control
+of backend HTML served as `text/html`: no login at the gateway, but not a
+default-configuration pre-auth trigger. No charter, wall, window, engine
+route, wake unit or harness was created; no person action is owed.
+
+Revisit trigger: vendor-released source or patch bytes for the 8.5.2 ->
+8.5.3 decoder change (AP-38633), or a public write-up pinning exact
+vulnerable and fixed source ranges, together with a local build reproducing
+the one-byte-per-entity overflow at the real decoder frame and a
+source-bound victim object. A version pin without source bytes does not
+reopen admission.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
