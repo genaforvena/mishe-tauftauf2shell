@@ -2,7 +2,8 @@
 
 Loopback-only check of whether the pinned HPACK `:path` chosen-byte OOB is
 reachable in a real libwebsockets server. Result: **negative for the naive
-long-`:path` route**; the harness's rung-4 INSTRUMENTED grade is unchanged.
+long-`:path` route**; the harness's rung-4 INSTRUMENTED grade is unchanged,
+but the URI-delimiter route (W2, below) gives a real-build chosen-byte OOB.
 
 ## Provisioning (fetch only, no probe)
 
@@ -88,10 +89,11 @@ complete gdb traces; the server logs include routine lws diagnostics.
 
 The W1 negative is specific to a plain long `:path`. `lws_parse_urldecode`
 also mutates `ah->pos`: a literal `&`, `;` or `?` in `:path` takes the
-delimiter branch (`parsers.c:862-874` / `:978`), where `issue_char` writes a
-NUL and `++ah->pos` advances again with no bounds check. The next literal
-path byte reaches `hpack.c:1168` with `pos >= limit`, so the pinned `:277`
-store lands past the arena.
+delimiter branch (`&`/`;` at `parsers.c:862-877`, `?` at `:962-985`), where
+`issue_char` writes a NUL (`:863`/`:968`) and `++ah->pos` (`:874`/`:978`)
+advances again with no bounds check. The next literal path byte reaches
+`hpack.c:1168` with `pos >= limit`, so the pinned `:277` store lands past
+the arena.
 
 Reproduce against the same ASan server (loopback only):
 
@@ -110,5 +112,6 @@ Observed: ASan `WRITE of size 1` at raw `hpack.c:277` from `hpack.c:1168`,
 `&`/`;`/`?` all fault. gdb on a non-ASan Debug build of the same pinned tree:
 `OOB-ENTRY pos=32 c=0x37` then `READBACK data[32]=0x37` (also `0x5a`). v5.0.0
 with the same frame gives `frag app fail` and no hpack ASan. Raw logs in
-`evidence/`. No pointer or execution claim; witness replay pending.
+`evidence/`. No pointer or execution claim. Witness W72 independently
+replayed this route on fresh builds and reported ESTABLISHED AS CLAIMED.
 

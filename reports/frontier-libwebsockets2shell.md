@@ -2,17 +2,20 @@
 
 **Status: brief + harness COMPLETE, admitted by the operator 2026-11-21
 12:25Z; witness W68 verdict ESTABLISHED AS CLAIMED at the harness grade;
-witness W70 replayed the W1 real-build negative ESTABLISHED AS CLAIMED.**
+witness W70 replayed the W1 real-build negative ESTABLISHED AS CLAIMED;
+witness W72 independently replayed the W2 chosen-byte claim ESTABLISHED AS
+CLAIMED at the labeled grade.**
 Rungs 1/2/3 ESTABLISHED in an extracted, verbatim-pin harness; rung 4 shows
-attacker-chosen bytes at chosen offsets just past a bounded header arena in an
-instrumented collaborator only. A loopback real-build check (W1) shows a plain
+attacker-chosen bytes at chosen offsets just past a bounded header arena in
+that harness, and W2 (below) reproduced the same chosen-byte control on a
+real v4.3.10 build. A loopback real-build check (W1) shows a plain
 long-`:path` route does **not** reach the past-end store in v4.3.10. A second,
 URI-delimiter route (W2, below) **does**: a real unauthenticated HTTP/2 HEADERS
 frame produces an ASan `WRITE of size 1` at pinned `hpack.c:277`, byte-exact
 chosen-marker writes at chosen offsets 32/33, and no write at v5.0.0. No live
 pointer neighbour, control-flow diversion or execution was observed — all stay
 UNKNOWN. The advisory's "execute arbitrary code" is a claim to reproduce, not
-a result obtained here. The W2 finding awaits independent witness replay.
+a result obtained here.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -73,9 +76,9 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
    that blocks the naive long-`:path` route.
 4. All three real call sites (`:286`, `:744`, `:1168`) check the return, but
    `lws_parse_urldecode` (`parsers.c:794`, called at `hpack.c:1151`) mutates
-   `ah->pos` itself: a literal `&`, `;` or `?` in `:path` reaches
-   `parsers.c:874` / `:978`, where `++ah->pos` has no bounds check after
-   `issue_char` has written a NUL. That is how the W2 frame enters `:277`
+   `ah->pos` itself: a literal `&`/`;` (`parsers.c:862-877`, unchecked `++ah->pos` at
+   `:874`) or `?` (`:962-985`, unchecked `++ah->pos` at `:978`) in `:path` advances `pos`
+   after `issue_char` writes a NUL. That is how the W2 frame enters `:277`
    with `pos >= limit`. The terminating NUL from `lws_frag_end` — raw v4.3.10
    `:283-294`, calling `lws_frag_append(wsi, 0)` at `:286` (`:289` is a
    comment) — was not exercised in the harness; the W1 real-build check did
@@ -181,9 +184,10 @@ remain undemonstrated.
 Source audit of the pinned v4.3.10 tree found that `lws_parse_urldecode`
 (`parsers.c:794`), called from the H2 `:path` value loop at `hpack.c:1151`,
 mutates `ah->pos` itself. A literal `&`, `;` or `?` in `:path` takes the
-`URIPS_IDLE` delimiter branch (`parsers.c:862-874`, `:977-978`): `issue_char`
-writes the NUL at `pos <= max-1`, then `ah->frags[nfrag].offset = ++ah->pos`
-advances once more with no bounds check. The branch returns LPUR_SWALLOW, so
+`URIPS_IDLE` delimiter branch (`&`/`;` at `parsers.c:862-877`, `?` at
+`:962-985`): `issue_char` writes the NUL at `pos <= max-1` (`:863`/`:968`),
+then `ah->frags[nfrag].offset = ++ah->pos` (`:874`/`:978`) advances once more
+with no bounds check. The branch returns LPUR_SWALLOW (`:877`/`:985`), so
 that delimiter byte is not appended; the next literal path byte returns
 LPUR_CONTINUE and reaches `hpack.c:1168` with `pos >= limit`. The post-write
 check at `:280` then fires only after the chosen byte has been stored.
@@ -216,7 +220,9 @@ write to a chosen offset just past the real header arena: the harness's rung-4
 INSTRUMENTED claim now has a real-build counterpart. It is not pointer
 control, not a corrupted neighbour value, and not execution: no live pointer
 was observed adjacent to the arena and no control-flow diversion was
-demonstrated. Await independent witness replay.
+demonstrated. Witness W72 independently replayed this claim on fresh codeload
+rebuilds and reported ESTABLISHED AS CLAIMED at this grade, with two
+non-material NITs folded into this brief and the README.
 
 ## Scope and boundaries
 
@@ -226,4 +232,5 @@ pinned tags; W2's byte-exact readback used an additional non-ASan Debug build
 of the same pinned v4.3.10 tree. No real heap neighbour, pointer or execution
 claim. Sources were fetched read-only as provisioning. Harness stand-ins and
 the exact copied ranges are enumerated in `PROVENANCE.md`. The W2 real-path
-chosen-byte claim awaits independent witness replay.
+chosen-byte claim was independently replayed by W72 and is ESTABLISHED AS
+CLAIMED; pointer control, control-flow diversion and execution stay UNKNOWN.
