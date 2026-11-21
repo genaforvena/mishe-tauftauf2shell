@@ -31,8 +31,8 @@ or inside local containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| Ruby2Shell | [report](../reports/ruby2shell-investigation.md) | `bash lab/ruby2shell/provision.sh` | Ruby build recipe in report | `lab/repro/ruby2shell-rung1.rb`, `stageA.rb`, `stageC.sh`, `stageB-http.sh` |
-| PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-fpm-release.sh`, `build-apache.sh`, `build-apache-plain.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb` |
+| Ruby2Shell | [report](../reports/ruby2shell-investigation.md) | `bash lab/ruby2shell/provision.sh` | plain build `lab/build/plain/ruby-3.4.12-plain/bin/ruby` (recipe in report); ASan build `lab/build/ruby-3.4.12-asan` | `lab/repro/ruby2shell-rung1.rb`, `stageA.rb`, `stageC.sh`, `stageB-http.sh`, `stageB-rails.sh`, `bash lab/repro/ruby2shell-stageC-http.sh 3 2` with `stageC-http.ru` (Sinatra request-thread Stage C: 3/3 attacks read chosen bytes at the nominated address in the HTTP response, 2/2 controls clean; the process aborts in worker-thread teardown after readback — depth result, no grade change); copy-out lane: `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's="\xDF".b*21; s.force_encoding(Encoding::ISO_8859_1); p s.upcase.bytesize'` — N=21 shows `Invalid write of size 1` at `case_map (iso_8859_1.c:293)` and `Invalid read of size 2` via `rb_str_casemap (string.c:7857)`, `outlen=42`; N=20 clean, `outlen=40`. The read byte is the same fixed `0x53`, so this is rung-3 class, not a leak or rung 4 |
+| PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-fpm-release.sh`, `build-apache.sh`, `build-apache-plain.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb`; `lab/repro/php2shell-cve129538.py` and `lab/repro/php2shell-cve129538-fcgi.py` replay the adjacent CVE-2026-129538 lane on pinned 8.5.12-asan / 8.5.13-asan / 8.4.27-asan: direct php-cgi `VERDICT CONFIRMED` 7/7, FastCGI long suffix yields `PATH_INFO=".0.1"` on affected and `"/x"` on fixed 3/3, steering leaks `"23456789"` / `"27.0.0.1"` by param order 5/5; gdb observes the OOB NUL byte at `cgi_main.c:1294`, ASan silent by design; evidence `lab/build/evidence/w48-cve129538/{committed,fcgi-committed,fcgi-steered}/verdict.txt` |
 | Node2Shell | [report](../reports/node2shell-investigation.md) | `bash lab/node2shell/provision.sh` | prebuilt binaries, no local source build | `sh lab/repro/node2shell-stageA.sh 5`; `lab/repro/node2shell-shrinkwalk/run-multi.sh`; `sh lab/repro/node2shell-utf8check/run.sh c480 520` and `... run.sh 61 520` — replayed this wake on pinned v24.22.2: U+0100 (`c4 80`) `:authority` draws `NGHTTP2_PROTOCOL_ERROR`, ASCII `61` control completes with `ALTSVC origin_len=528`; preserved negative, no binary-capable heap-byte channel |
 | Apache2Root | [report](../reports/apache2shell-investigation.md) | `lab/src/httpd-2.4.{70,71}.tar.bz2` + `.sha256` sidecars; `nghttp2-1.64.0.tar.xz` SHA-256 `88bb94c9…dd9` | `lab/frontier/apache2root/build.sh` | `oracle.sh`, `race.sh`, `lab/apache2shell/{sweep,gdb-inspect,drive.py,alphabet-probe.py,huffman-probe.py}`; the Huffman probe now self-checks its wire bytes and was repaired and re-run at 19:11Z (the older Huffman rows were literal restatements) |
 | Mosquitto2Shell | [report](../reports/frontier-mosquitto2shell.md), [status](../reports/mosquitto2shell-status.md) | `bash lab/frontier/mosquitto2shell/provision.sh`, `bash …/provision-cjson.sh` | `build.sh`, `build-glibc.sh` | `run.sh`, `placement.sh`, `tcache_probe.py`, `pong_leak_probe.py` |
@@ -233,7 +233,10 @@ claim; no live daemon, real L2TP AVP path or RCE was demonstrated.
   then sees `type=IS_UNDEF`, so the dtor is a no-op. The earlier
   `zend_activate()` label for `:440` was wrong. The grade stays UNKNOWN — the
   advisory behaviour was not reproduced on this host — and no 8.5.13 fixed
-  release build was started, so patch sensitivity is untested.
+  release build was started for that lane, so its patch sensitivity is
+  untested. The CVE-2026-129538 lane separately uses the pinned 8.5.13-asan
+  CGI build (`provision.sh` FIXED3=8.5.13) as its fixed control against
+  8.5.12-asan and 8.4.27-asan.
 - **Mosquitto**: no published SHA-256 sidecar exists at the vendor path;
   `provision.sh` pins the exact local tarballs with hashes recorded from the
   audited files. cJSON 1.7.17 is pinned by `provision-cjson.sh`.
@@ -274,8 +277,11 @@ claim; no live daemon, real L2TP AVP path or RCE was demonstrated.
   gate log are in `loopback_shadow_probe.txt`. Wake 8 adds
   `python3 lab/freerdp2shell-src/live_mcs_join_probe.py` and the headless
   `sfreerdp` session; full output is `live_session_wrap.txt` /
-  `live_session_*.log`. Stock allocator layout and an FFmpeg-enabled build
-  stay UNKNOWN.
+  `live_session_*.log`. Stock allocator layout was closed in a later pass
+  (live chosen-byte overwrite under stock glibc: 7564 OOB bytes at offsets
+  8820..16383, first OOB byte client-chosen, glibc `double free or
+  corruption (!prev)` on teardown, benign control in bounds); an
+  FFmpeg-enabled build stays UNKNOWN.
 - **Xrdp**: `lab/xrdp2shell-real/RUNBOOK.md` pins the exact ASan and plain
   `configure` lines (plain `-g -O1` so the chosen-byte reader can read the
   adjacent chunk), the `cc` link against the real `build-asan/libxrdp/.libs/`

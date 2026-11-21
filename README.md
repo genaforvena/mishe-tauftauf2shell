@@ -35,7 +35,19 @@ of the affected software:
   reached. `zend_activate()` is not the UNDEF site — that was wake 46's
   source-label error. The grade stays UNKNOWN with a fully ordered measured
   cause; no fatal while `active==0` with the zval still `IS_ARRAY` was found,
-  and no 8.5.13 fixed release build was started.
+  and no 8.5.13 fixed release build was started for that lane.
+  A new adjacent lane, CVE-2026-129538 / GHSA-5j3f-64r7-f564 (PHP-CGI
+  out-of-bounds read and write during PATH_INFO correction), is rung 3
+  CONFIRMED: on 8.5.12 a PATH_INFO shorter than the stripped SCRIPT_FILENAME
+  suffix makes `path_info[0] = 0` write 15 bytes before the PATH_INFO string,
+  and gdb observes that byte change from `47` to `0` at `cgi_main.c:1294`.
+  The suffix length chooses the out-of-bounds offset and the FastCGI parameter
+  order chooses the neighbouring value leaked into `$_SERVER['PATH_INFO']`
+  (`"23456789"` or `"27.0.0.1"`); fixed 8.5.13 returns `"/x"` in both orders.
+  ASan is silent because the touched bytes live in the environment block, so
+  the evidence is the gdb byte observation plus the affected/fixed output
+  difference. No chosen-byte write, pointer control or marker execution, and
+  the HTTP-to-FastCGI mapping stays UNKNOWN without a web server.
 - **Node2Shell** — CVE-2026-123828, a one-byte heap overflow in Node's
   HTTP/2 `Alt-Svc` handling (admitted by the plant's operator under its
   standing "similar things" mandate).
@@ -107,8 +119,12 @@ of the affected software:
   `WRITE of size 16384` 0 bytes after the 8820-byte region in
   `rdpsnd_server_send_samples` with a client-chosen `0xDE` at offset 8820.
   Those results used a no-auth server, a subsystem-supplied format table and
-  an ASan build; stock allocator layout, a real audio source and an
-  FFmpeg-enabled build stay UNKNOWN.
+  an ASan build. A later pass repeated the live chosen-byte overwrite under
+  the stock glibc allocator with no sanitizer: 7564 OOB bytes at offsets
+  8820..16383, the first OOB byte client-chosen, no fault at the write, and
+  glibc `double free or corruption (!prev)` on teardown; a benign-only
+  control stayed in bounds. Grooming a specific heap object, a real audio
+  source and an FFmpeg-enabled build stay UNKNOWN.
 - **Xrdp2Shell** — CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4, a client-controlled
   reassembled DYNVC virtual-channel payload copied into xrdp's fixed
   8192-byte server→chansrv out stream. Default posture is post-auth (`PR:L`)
@@ -203,7 +219,7 @@ is called established.
 
 | Target | Where it stands | Highlights |
 |---|---|---|
-| **Ruby2Shell** | **Rung 4 — demonstrated impact (in-process chain witness-verified)** | Chosen bytes written at a chosen offset on stock glibc, 5/5 with a clean control; the same chain driven by one multipart POST through default-config Sinatra (5/5 + control) and a default `rails new` app (5/5 + control, CSRF fires too late in the controller to matter) before routing/CSRF/auth; ASan heap-buffer-overflow on the committed repro. Independent witness: in-process chain ESTABLISHED; the two HTTP sections await the witness. [Full report](reports/ruby2shell-investigation.md) |
+| **Ruby2Shell** | **Rung 4 — demonstrated impact, request-reachable on both claimed default stacks; every rung-4 claim witness-ESTABLISHED** | Chosen bytes written at a chosen offset on stock glibc, 5/5 with a clean control; the same chain driven by one multipart POST through default-config Sinatra (5/5 + control) and a default `rails new` app (5/5 + control, CSRF fires too late in the controller to matter) before routing/CSRF/auth; ASan heap-buffer-overflow on the committed repro. Independent witness: in-process chain ESTABLISHED (tape #51), both HTTP sections ESTABLISHED request-reachable (tape #65) and Stage C ESTABLISHED as strengthened pointer control (tape #89). A 2026-11-21 depth pass carried Stage C onto the Sinatra request thread (3/3 attacks, 2/2 controls): the nominated address was handed out and its chosen bytes read back in the HTTP response, but the process then aborts in WEBrick worker-thread tcache teardown — no persistence or surviving process claimed. The vendor's copy-out one-byte over-read was separately reproduced under valgrind as a second observed invalid access (rung 3 class): the byte read back is the same `0x53` the overflow wrote and the returned string is correct, so it is not an information leak and raises no grade. [Full report](reports/ruby2shell-investigation.md) |
 | **PHP2Shell** | **Rung 4 — constrained placement (CGI and mod_php witness-established)** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. Reopened 2026-11-20 under CVE-2026-126714: both splice halves reproduced on both pinned ASan builds — an interrupted real session write leaves a replacement prefix plus carrier tail on disk and the next request promotes the object; the kill is shim-simulated, not a remote trigger. The 8.4.28 fix was verified in the lab: under the same kill the write leaves only a truncated new prefix and no promoted object. A separate Stage A chain writes chosen bytes at chosen offsets of the consumed stale HashTable: witness #138 ESTABLISHED the constrained rung-4 form on CGI and witness #258 independently re-ran the mod_php leg to the same grade (fresh logs in `lab/build/evidence/w18-apache-modphp/`); `arData` is only a length, so there is no pointer control or marker execution, and FPM stays rung 3. New descendant lane CVE-2026-129481 (session-filename use-after-free) is rung 3 on FPM 8.4.27, patch-sensitive with a benign control; no rung 4. [Status](reports/php2shell-status.md) |
 | **Apache2Root** | **Rung 3 — lane closed at Stage A; rung 4 not demonstrated** | Differential child SIGSEGV on affected 2.4.70 and clean fixed control under gdb, with chosen-byte placement at a capacity boundary. Stage C is closed as unreachable on this host: a repaired Huffman probe re-ran at 19:11Z and every forbidden value still draws RST:1 (the ASCII control gets HTTP 200), and a 15-capture fault-site census plus a heap-layout check found only pointer slots, no scalar control field. The earlier bounded ASan sweep was negative and is preserved. [Report](reports/apache2shell-investigation.md) |
 | **Mosquitto2Shell** | **Rung 3 — confirmed corruption; info disclosure witness-established** | ASan `WRITE of size 256`, 3 bytes after a 1-byte region, via `net__read_ws (net_ws.c:305)` on affected 2.1.0-2.1.2; clean close on fixed 2.1.3; Stage A places 4N chosen bytes at a chosen offset. A wire-only pre-auth 32 KiB heap read with live pointer disclosure is witness-ESTABLISHED (#246), but the enlargement is layout-dependent on fresh brokers; wire-derived code execution / tcache control remains UNVERIFIED. [Brief](reports/frontier-mosquitto2shell.md) |
@@ -226,7 +242,8 @@ is called established.
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
-new 8.5 stale-argument read and 129182's root-caused clean replay),
+new 8.5 stale-argument read, 129182's root-caused clean replay and the
+129538 CGI PATH_INFO lane's HTTP-to-FastCGI mapping),
 Node's path from corruption
 to control, Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
@@ -234,7 +251,7 @@ index 27, FreeRADIUS's live `radiusd` replay, FalkorDB's four-byte-repeating
 mask, Freeswitch's stock heap layout and any executable sentinel, Xrdp's full
 PDU trace and auth gate, GStreamer's RCE and chosen-byte control beyond the
 demonstrated loopback RTSP caps fault, and
-Freerdp's stock-allocator layout, a real audio source, an FFmpeg-enabled
+Freerdp's real audio source, an FFmpeg-enabled
 build and a stock wrap-capable server format are still open. Apache's
 Stage C route was closed as unreachable in this build on this host and is
 preserved as a negative. Each open question is recorded as an UNKNOWN in its

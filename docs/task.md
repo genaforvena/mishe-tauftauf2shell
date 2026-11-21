@@ -93,8 +93,40 @@ claims, not conclusions.
   `active=0, flags=7, type=IS_UNDEF`, so `zval_ptr_dtor` is a no-op and the
   `:1534` branch is unreachable; `zend_activate()` was wake 46's wrong label
   for the `:440` site. Grade stays UNKNOWN with a fully ordered measured
-  cause; no fixed 8.5.13 release build was started.
+  cause; no fixed 8.5.13 release build was started for that lane.
   129289 remains untested (smuggling, not memory corruption).
+- 2026-11-21 new adjacent lane (**CVE-2026-129538** /
+  GHSA-5j3f-64r7-f564), named by 8.5.13's NEWS (`NEWS:49-51`): "PHP-CGI
+  out-of-bounds read and write during PATH_INFO correction". The
+  8.5.12→8.5.13 `sapi/cgi/cgi_main.c` diff is exactly the `pilen > slen`
+  guard on the `env_path_info + pilen - slen` computation and a `path_info
+  &&` guard on its use; 8.4.28 carries the same fix, 8.4.27/8.5.12 do not.
+  Vendor regression `ghsa-5j3f-64r7-f564.phpt` supplied three shapes.
+  Committed harness `lab/repro/php2shell-cve129538.py` (direct php-cgi
+  calls, loopback only) replays them on 8.5.12-asan vs 8.5.13-asan:
+  affected 8.5.12 long-suffix `PATH_INFO="xxxx"` and PATH_TRANSLATED shape
+  `"cted"` (fixed `"/x"`, ORIG NULL); a sweep n=1..20 leaks the
+  `PATH_INFO=` name tail for n=2..11, is empty at n=12 and leaks the SECRET
+  value tail for n=13..20 (n=20 → `"23456789"`), fixed clean for all 20;
+  gdb at `cgi_main.c:1294` shows the store 15 bytes before
+  `getenv("PATH_INFO")`, byte `47`→`0`. 8.4.27-asan also yields `"xxxx"`.
+  ASan stays silent (the environment block is not redzoned); the proof is
+  the gdb byte observation plus the patch-sensitive output difference.
+  Grade **rung 3 CONFIRMED** for this lane: an observed OOB write and an
+  attacker-offset OOB read with a server-visible leak of neighbouring
+  bytes. No arbitrary write, pointer control, marker execution, pre-auth
+  reachability or RCE claim, and no other lane's grade changes.
+  `lab/repro/php2shell-cve129538-fcgi.py` then reaches the same shape through
+  loopback FastCGI params (php-cgi as a 127.0.0.1 FastCGI responder,
+  FCGI_PARAMS with `has_env=1`): long suffix yields `PATH_INFO=".0.1"` on
+  8.4.27-asan and 8.5.12-asan but `"/x"` on fixed 8.5.13, short suffix clean
+  on all three. A steering leg with the SECRET param before or after
+  PATH_INFO leaks `"23456789"` / `"27.0.0.1"` respectively (fixed 8.5.13
+  `"/x"` both), so the attacker chooses the offset (suffix length) and the
+  adjacent value (param order); the leak destination is
+  `$_SERVER['PATH_INFO']`. Real-web-server HTTP reachability stays UNKNOWN
+  (no web server used) and ASan still silent. The lane is at its natural
+  stop: no chosen-byte write, pointer control or marker execution.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
@@ -112,12 +144,34 @@ claims, not conclusions.
   unaffected. Rails and classic Sinatra exposed in default configs.
 - Affected/fixed: 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; 3.2 and older EOL.
   Fix commit `ruby/ruby@d582f8f`.
-- Veria Labs demonstrated RCE on stock Rails and publishes a PoC on
-  **2026-11-25**.
-- Rung-4 angle: the most tractable subject in the class — a *controlled*
-  single-byte write with attacker-chosen heap placement via buffer size.
-  Classic one-byte-off exploitation (heap grooming to an adjacent
-  length/size field or pointer's low byte) applies directly.
+- Vendor claim: Veria Labs demonstrated RCE on stock Rails and publishes a
+  PoC on **2026-11-25**. That RCE is the vendor's claim, not a lab finding;
+  the PoC is still unpublished and the lab's own RCE is not demonstrated.
+- **Lab position (2026-11-21): rung 4 — demonstrated impact,
+  request-reachable, every rung-4 claim witness-ESTABLISHED.** Chosen bytes
+  at a chosen offset on stock glibc (5/5 + clean control); the same chain
+  driven by one multipart POST through a default-config classic Sinatra app
+  and a default `rails new` app (5/5 + control each, before
+  routing/CSRF/auth); Stage C tcache poisoning handing out an
+  attacker-nominated address. Witness tapes #51 (in-process), #65 (both
+  HTTP sections) and #89 (Stage C) independently re-ran the committed
+  scripts. Evidence: `reports/ruby2shell-investigation.md`.
+- **Depth results, 2026-11-21 (no ladder grade change).** (a) HTTP Stage C
+  ran on the Sinatra request thread: 3/3 attacks read the nominated address's
+  chosen bytes back in the HTTP response, 2/2 controls clean, but the
+  process then aborts in WEBrick worker-thread tcache teardown — no
+  persistence or surviving stock-process foothold is claimed. (b) The
+  vendor's copy-out one-byte over-read was separately reproduced under
+  valgrind as a second observed invalid access (rung 3 class): the byte read
+  back is the same `0x53` the overflow wrote and the returned string is
+  correct, so it is not an information leak and not rung 4.
+- **Remaining gaps (UNKNOWN):** request-shaped grooming (the groom and
+  marker are lab middleware, not an attacker's request), control-flow
+  hijack, the target nominated inside attacker-controlled string content,
+  and GC disabled between frees and readback. Next trigger: the vendor's
+  PoC (dated 2026-11-25, or later while major vendors lag); compare its
+  mechanics against these honest gaps. A timestamp-only advisory re-check
+  is a watch, not an experiment.
 
 ### Node2Shell — CVE-2026-123828 (admitted 2026-11-20, standing approval #6)
 
@@ -340,8 +394,12 @@ event then gave the live ASan server `WRITE of size 16384`, 0 bytes after an
 8820-byte region, from `rdpsnd_server_send_samples`, with client-chosen
 `0xDE` at offset 8820. No-auth posture, subsystem-supplied format table,
 ASan build and synthetic audio are explicit conditions; stock allocator
-layout, a real audio source, an FFmpeg-enabled build and a stock
-wrap-capable format stay UNKNOWN.
+layout, a real audio source and an FFmpeg-enabled build stayed UNKNOWN
+then; wake 9 closed the stock-allocator item: the live chosen-byte overwrite
+under stock glibc wrote 7564 OOB bytes at offsets 8820..16383 with the first
+OOB byte client-chosen, did not fault at the write and produced glibc
+`double free or corruption (!prev)` on teardown; a benign control stayed in
+bounds. A real audio source and an FFmpeg-enabled build stay UNKNOWN.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
@@ -593,7 +651,7 @@ to revisit if the class is narrowed.
 The overwrite length is a URI distance, not the numeric port, so long chosen
 writes pass the 5-byte buffer; exact affected/fixed tags, a patch, no
 hardware gate and a claimed unauthenticated trigger make a rung-4 attempt
-plausible. The operator replayed the committed harness at ~02:1xZ: 15 PASS,
+plausible. The operator replayed the committed harness at ~02:1xZ: 16 PASS,
 `ALL CHECKS PASS rc 0`, deterministic trace
 `sha256=94ef79641b081f850cb04f95d0f0945e7de7f84f9505462f23bf8aa054fa1cb8`.
 Rung 1 `len=80` with `oob=75`, rung 2 chosen function pointer and stamp
