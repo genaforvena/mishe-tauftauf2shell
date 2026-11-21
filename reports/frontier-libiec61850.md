@@ -46,7 +46,8 @@ real heap neighbour, pointer, control-flow diversion or execution was observed.
 
 7 PASS / 0 FAIL rc 0; two independent three-run groups both
 `sha256=5a7bb6904856d6f8577c06958c66ff9b7721f550701257cf3b427a679bd9d1ce`.
-Clean `git archive` replay recorded below once committed.
+Clean `git archive e6efd18 lab/frontier/libiec61850` replay into a fresh `/tmp`
+directory gave the same 7 PASS / 0 FAIL rc 0 and the same digest.
 
 - Loopback-only local process: stock ASan `server_example_files` built from
   the pinned vulnerable source on port 10110, raw MMS client from the pinned
