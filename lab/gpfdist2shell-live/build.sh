@@ -7,6 +7,10 @@
 # generated headers (postgres.h / pg_config*.h) and the WarehousePG fstream
 # file-I/O backend (stubbed to always open successfully).  This is NOT a stock
 # WarehousePG binary; the report labels it accordingly.
+# Provisioning (W65 nit): upstream/gpfdist_helper.c is real 7.6.1-WHPG
+# upstream bytes, but .gitignore:88 ignores upstream/, so a clean checkout
+# has no helper. Fetch the tag's gpfdist_helper.c into upstream/ before
+# building; its bytes must match the 7.6.1-WHPG tag.
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 PIN=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src

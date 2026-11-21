@@ -1,0 +1,8 @@
+2026-11-21 12:02:00 2175879 WARN [0:1:28:8] HTTP ERROR: 127.0.0.1 - 400 bad request, invalid segment id or count
+
+2026-11-21 12:02:00 2175879 WARN signal 15 received. gpfdist exits
+2026-11-21 12:02:00 2175879 INFO ---------------------------------------
+2026-11-21 12:02:00 2175879 INFO STATUS: total session(s) 0
+session: [
+]
+2026-11-21 12:02:00 2175879 INFO ---------------------------------------

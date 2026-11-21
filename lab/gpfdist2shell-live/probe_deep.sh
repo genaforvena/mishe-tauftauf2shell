@@ -30,7 +30,8 @@ c2=$(req "$e1"); e2=$(expected)
 echo "chosen_write seq=$e1 http=$c2 slot_plus_1_now=$e2"
 c3=$(req 2); e3=$(expected)
 echo "verify http=$c3 slot_plus_1=$e3"
-python3 - "$e1" "$e2" <<'PY'
+# $e3 is the fresh post-write verify readback; $e2 is the stale pre-write value.
+python3 - "$e1" "$e3" <<'PY'
 import sys
 a=int(sys.argv[1]); b=int(sys.argv[2])
 print("written_value", a, a.to_bytes(8,"little"))

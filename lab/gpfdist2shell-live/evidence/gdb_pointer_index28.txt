@@ -1,0 +1,23 @@
+Breakpoint 1 at 0x18cde: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c, line 3677.
+Breakpoint 2 at 0x18dad: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpfdist2shell/src/gpfdist_v7.6.1.c, line 3680.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+2026-11-21 12:01:33 2172435 INFO Before opening listening sockets - following listening sockets are available:
+2026-11-21 12:01:33 2172435 INFO IPV4 socket: 127.0.0.1:18121
+2026-11-21 12:01:33 2172435 INFO Trying to open listening socket:
+2026-11-21 12:01:33 2172435 INFO IPV4 socket: 127.0.0.1:18121
+2026-11-21 12:01:33 2172435 INFO Opening listening socket succeeded
+Serving HTTP on port 18121, directory /home/mesh-home/mishe-tauftauf2shell/lab/gpfdist2shell-live/out_pointer_18121/data
+
+=== BEFORE STORE segid=28 seq=1 ===
+calibration: requests - seq_segs = 224 bytes = 28 indices
+seq_segs=0x7ffff76de1a8 active_segids=0x7ffff76de1a0 requests=0x7ffff76de288 target=0x7ffff76de288
+requests[0] word before:
+0x7ffff76de288:	0x00007ffff76de028
+8 bytes at target before:
+0x7ffff76de288:	0x28	0xe0	0x6d	0xf7	0xff	0x7f	0x00	0x00
+=== AFTER STORE segid=28 seq=1 ===
+requests[0] word after:
+0x7ffff76de288:	0x0000000000000001
+8 bytes at target after:
+0x7ffff76de288:	0x01	0x00	0x00	0x00	0x00	0x00	0x00	0x00
