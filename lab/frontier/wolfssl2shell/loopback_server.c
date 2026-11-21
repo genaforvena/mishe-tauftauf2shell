@@ -56,8 +56,8 @@ int main(int argc, char** argv)
     WOLFSSL* ssl = NULL;
     char tree[1024];
 
-    if (argc != 2 && argc != 3) {
-        fprintf(stderr, "usage: loopback_server PORT [TIMEOUT_SEC]\n");
+    if (argc < 2 || argc > 5) {
+        fprintf(stderr, "usage: loopback_server PORT [TIMEOUT_SEC] [early13] [unified_seen]\n");
         return 2;
     }
     port = atoi(argv[1]);
@@ -91,8 +91,20 @@ int main(int argc, char** argv)
      * and no opportunistic ACK flush while the sender fills seenRecords. */
     ssl->options.sendCookie = 0;
     wolfSSL_dtls13_set_send_more_acks(ssl, 0);
+    /* Lab-only: enter TLS1.3 accept mode from the first call, modelling a
+     * server after version negotiation. No pinned library source is edited. */
+    if (argc >= 4 && atoi(argv[3])) {
+        ssl->options.tls1_3 = 1;
+        printf("FACT early13=1 tls1_3=%d\n", ssl->options.tls1_3);
+        fflush(stdout);
+    }
+    if (argc == 5 && atoi(argv[4])) {
+        ssl->options.seenUnifiedHdr = 1;
+        printf("FACT unified_seen=1\n");
+        fflush(stdout);
+    }
     {
-        int tmo = (argc == 3) ? atoi(argv[2]) : 60;
+        int tmo = (argc >= 3) ? atoi(argv[2]) : 60;
         if (tmo < 1) tmo = 1;
         (void)wolfSSL_dtls_set_timeout_init(ssl, tmo);
         (void)wolfSSL_dtls_set_timeout_max(ssl, tmo * 2);
