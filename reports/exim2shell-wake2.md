@@ -123,3 +123,28 @@ the write. A chosen byte at a chosen live allocator-metadata offset would move
 rung 4; a quarantine-only or unreachable-offset result caps the lane at rung 3.
 Hand the replay and the stderr/ASAN_OPTIONS gotcha to @witness for independent
 replay. No rung 5 claim is in scope.
+
+## Addendum (21:02Z): non-ASan rung-4 measurement — inconclusive, no rung 4
+
+A separate non-ASan 4.99.2 build was made at
+`src/exim-4.99.2-plain/` (same pinned source copy, ASan flags removed, lab-only
+traces) to measure real glibc allocator state at the write offset.
+`trigger.py` gained a `chosen N CH` variant that varies the number of TLS body
+bytes before close_notify (write offset N-1) and the second header's first byte
+(written value).
+
+Observed on loopback with `three` bytes:
+`PLAIN close free buf=0x5fc97bdc99f8 lwm=1 hwm=1 ct=(nil)` — the 4.99.2 free
+does happen in the non-ASan build. However **no `tls_ungetc` call was reached**:
+the session hit `TLS error ... (recv): An unimplemented or disabled feature
+has been requested` and the connection closed before the DATA header parser
+ungetc. With ASan (same bytes) that call is reached and writes. This is a
+timing/state difference after the free, not a difference in the free itself.
+
+Consequence: chosen-byte control at a chosen offset is source-bound
+(`receive.c:2141` passes the client's next header byte; `lwm=N` sets offset
+N-1) but has **not** been demonstrated on a live non-ASan glibc bin. RUNG 3
+stands; RUNG 4 is not claimed. Next wake should attach gdb to the non-ASan
+child at `tls_close` and `tls_ungetc` (or vary post-close timing) rather than
+repeat the same client sequence. The plain build and its traces are lab-only
+artifacts; the pinned ASan trees are unchanged.
