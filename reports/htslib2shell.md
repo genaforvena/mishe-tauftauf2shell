@@ -18,6 +18,12 @@ gcc -g -O0 -Ibuild-plain -Ibuild-plain/cram -Ibuild-plain/htslib \
     -ldeflate -lz -lpthread -lm -ldl
 cd realfile && ./inject4 base.cram crafted4.cram && ./htsfile-plain -c crafted4.cram
 ```
+The CRAM file definition embeds a writer timestamp, so regenerating a `.cram`
+changes its SHA-256 (repeated runs differ at byte 15) while the parsed
+compression-header bytes and decode behavior are identical. Replays should
+compare semantic output and the gdb stop, not the whole-file hash. Example:
+rebuilding `crafted4.cram` from the committed `inject4.c` against the pinned
+`base.cram` reproduces `codec=2 slot=0xa0` at `:1378` and rc 139.
 
 ## Result 1 — NEGATIVE: dropping FC/FP from the map fails (`inject3.c`)
 
