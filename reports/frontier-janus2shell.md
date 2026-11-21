@@ -32,9 +32,9 @@ and `janus_recordplay_get_frames()` (`:2603-2617`) the new `.mjr` header path
 reads a 16-bit big-endian info-header length and executes, with no bound:
 
 ```
-bytes = fread(prebuffer, sizeof(char), len, file);   /* :707, :2610 */
+bytes = fread(prebuffer, sizeof(char), len, file);   /* :707, :2608 */
 ...
-prebuffer[len] = '\0';                               /* :714, :2617 */
+prebuffer[len] = '\0';                               /* :714, :2615 */
 ```
 
 `len` comes from file bytes the recording client influenced; the source has
