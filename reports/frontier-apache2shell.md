@@ -107,7 +107,7 @@ by frontier.
 
 ## Pins and provenance
 
-All bytes in `lab/frontier/apache2shell/src/`; `sha256sum -c SHA256SUMS`
+All bytes in `lab/frontier/apache2shell/src/`; `cd src && sha256sum -c SHA256SUMS`
 verifies 6/6. Raw sources were fetched from the Apache httpd Git tags and
 the CVE/OSV APIs on 2026-11-21; the PoC README is an external claim pinned
 for wording only. Release tarballs were SHA256-checked against ASF-published

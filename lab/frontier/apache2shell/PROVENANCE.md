@@ -1,7 +1,7 @@
 # apache2shell frontier pins — provenance
 
 Fetched 2026-11-21 ~21:40Z from primary/public sources. No local build or
-traffic has been run from these pins. `sha256sum -c src/SHA256SUMS` → 6/6 OK.
+traffic has been run from these pins. `cd src && sha256sum -c SHA256SUMS` → 6/6 OK.
 
 | File | Source |
 |---|---|
