@@ -14,7 +14,7 @@ copies of the affected software:
   corruption and stale state across requests; plus the reopened lane
   CVE-2026-126714, a session-file splice that decodes as a third session.
   Both splice halves were reproduced on the pinned affected builds, and the
-  8.4.28 fix was verified in the lab. Two descendant lanes are at rung 3:
+  8.4.28 fix was verified in the lab. Several descendant lanes are at rung 3:
   CVE-2026-129481, a session-filename use-after-free after an interrupted
   shutdown on FPM 8.4.27, and CVE-2026-129474, a stale-argument read in
   `debug_backtrace()` on 8.5.12 triggered by the vendor's own regression
@@ -53,6 +53,20 @@ copies of the affected software:
   leaks adjacent param bytes (`6789` / `23456789`) on 8.5.12 and stays clean
   on 8.5.13 — verdict `HTTP-REACHABLE OOB READ CONFIRMED`. No chosen-byte
   write, pointer control or marker execution; grade stays rung 3.
+  Another adjacent lane, CVE-2026-129501 / GHSA-x8r7-mg3g-74hg (double free
+  during DOM XML serialization), is rung 3 CONFIRMED on 8.5.12: the vendor
+  regression body and an XMLDocument-only shape both exit rc=1
+  `ASAN_DOUBLE_FREE` on a dom-enabled ASan CLI, while a binary relinked with
+  the byte-identical 8.5.13 `ext/dom/xml_serializer.c` exits rc=0 CLEAN and a
+  single-namespace control is clean on both. The double free is in
+  `dom_xml_ns_prefix_map_destroy()` at `xml_serializer.c:126`, patch-sensitive
+  to the real fix; it needs `USE_ZEND_ALLOC=0` because the default ZendMM
+  pools the 4-byte prefix and hides the second free from ASan. The 8.5.13
+  hunk for the stream-wrapper bailout was not tested; there is no chosen-byte
+  write, pointer control, marker, web-server reachability or rung 4 claim.
+  Reproduce with `bash lab/php2shell/build-dom.sh 8.5.12`,
+  `bash lab/php2shell/build-dom-fixed-variant.sh` and
+  `python3 lab/repro/php2shell-cve129501-dom.py <php-vuln> <php-fixed>`.
 - **Node2Shell** — CVE-2026-123828, two one-byte heap overflows in Node's
   HTTP/2 `Alt-Svc` handling (`src/node_http2.cc`): fix `nodejs/node@ae9ab37d62`
   removes `kNullTerminate` from both `WriteOneByteV2` calls, so the origin
@@ -91,9 +105,17 @@ copies of the affected software:
   rung 3: on pristine ASan httpd 2.4.68, h2c GET/POST/RST_STREAM/GOAWAY
   traffic produces child SEGVs and a forced-ASan wild-jump PC in
   `h2_c1_read (h2_c1_io.c:502)`, while 2.4.69 stays clean. The race is
-  intermittent and the jump target is not attacker-chosen, so rung 4 is NOT
-  demonstrated. Reproduce with `bash lab/apache2shell/build-l3.sh` and
-  `ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_error=0:halt_on_error=1' python3 lab/apache2shell/l3-lane.py 10 8 20`.
+  intermittent and the jump target is not attacker-chosen. A body-canary pass
+  (12 forced-ASan runs per byte, 8 connections × 20 streams) got wild-jump PCs
+  in 8/12 runs for body byte `0x42` and 6/12 for `0x5a`, with low 12 bits from
+  `{0x048, 0x228, 0x2c8, 0x7c8, 0x868}` and no byte pattern in any PC; an
+  input-filter probe saw a stable `in_func` low 12 bits `0xa86` across 744
+  calls while the PC varied. This is evidence against a body-steered jump,
+  not proof of which slot held the target. L3 is closed at rung 3 with no
+  reopen condition; rung 4 is NOT demonstrated. Reproduce with
+  `bash lab/apache2shell/build-l3.sh` and
+  `ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_error=0:halt_on_error=1' python3 lab/apache2shell/l3-lane.py 10 8 20`;
+  add `L3_BODY_BYTE=5a L3_VERSIONS=2.4.68` before `python3` for the canary leg.
 - **Mosquitto2Shell** — CVE-2026-110486 / GHSA-6j8m-r32v-4h38, a masked
   zero-length WebSocket frame that overruns a one-byte allocation in
   Mosquitto's built-in WebSocket backend; rung 3 + Stage A placement are
@@ -173,9 +195,15 @@ copies of the affected software:
   byte-identical): a 64-byte chunk at `out_buffer+9056` holds two live heap
   pointers at +9072/+9080 inside the chosen-0xDE write, so pointer-bearing
   heap data in the write path is OBSERVED
-  (`lab/freerdp2shell-src/heap_layout_stock.txt`); grooming a chosen object,
-  writing a chosen pointer value and a controlled dereference remain UNKNOWN.
-  A real audio source and an FFmpeg-enabled build stay UNKNOWN too.
+  (`lab/freerdp2shell-src/heap_layout_stock.txt`). Wake 13 identified that
+  object as the wLog for `com.freerdp.channels.rdpsnd.server` and, with a
+  configured `WLOG_FILTER` and a scratch log call injected right after the
+  real copy, showed `mov (%rax,%r15,8)` dereferencing the eight chosen `0x41`
+  bytes at `out_buffer+8904` as `rax=0x4141414141414141` in the live stock
+  build (`lab/freerdp2shell-src/pointer_control_stock.txt`). The trigger call
+  and chosen playback bytes are lab-supplied, the object was found after the
+  fact with no grooming, and only one object was controlled; arbitrary heap
+  targeting, a real audio source and an FFmpeg-enabled build stay UNKNOWN.
 - **Xrdp2Shell** — CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4, a client-controlled
   reassembled DYNVC virtual-channel payload copied into xrdp's fixed
   8192-byte server→chansrv out stream. Default posture is post-auth (`PR:L`)
@@ -327,7 +355,7 @@ is called established.
 | **Dragonfly2Shell** | **Rungs 1/2 — established on stock** | A 20000-byte key created over RESP is echoed through memcached in a 20024-byte reply; witness gdb observed `SendValue` with `rdx=0x4e20`. Stock rung 3 and rung 4 are NOT demonstrated; the ASan 20000-byte write is a labeled synthetic harness. [Status](reports/dragonfly2shell-status.md) |
 | **Postgres2Shell** | **Rung 3 — confirmed corruption under Valgrind** | FDW batch-insert overcount on stock 17.11: uninitialised 8-byte heap value used as a pointer, invalid write at `0x38`, SIGSEGV; fixed 17.12 completes. It requires `PR:L`, so pre-auth RCE is NOT demonstrated. [Status](reports/postgres2shell-status.md) |
 | **Brotli2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | Pinned two-stage stream drives 20 attacker-chosen bytes past an 8-byte decoder buffer into named state fields; fixed build rejects with `ERROR -17`. Rung 4 is NOT demonstrated; network reachability is a claim. [Status](reports/brotli2shell-status.md) |
-| **Freerdp2Shell** | **Rung 4 — chosen bytes on real library bytes and in the live server over the wire** | A crafted `SNDC_FORMATS` record with `nChannels=2, nBlockAlign=4` passes the scalar guard, wraps `out_frames` to `0xfffffffffffffff0` after a failed realloc, and drives sequential client copies past the 8820-byte buffer. ASan reports `WRITE of size 16384` in `rdpsnd_server_send_samples` on source-built 3.32.0; a sanitizer-free replay through the real `rdpsnd_server_recv_formats()` parser places `de` at OOB offset 8820 and `ad` at 21384, with a fixed-guard control at rc 3 and no wrap. Wake 5 drove a framed PDU through the real dispatcher; wake 6 replaced its stub WTS reader with libfreerdp's real reader and shadow activation, and measured that FFmpeg-off builds offer PCM only, so the positive case needs a subsystem-supplied ADPCM server record. The ADPCM variant wraps `out_frames` to `0xfffffffffffffffc`. Wake 7 ran a real 3.32.0 `freerdp-shadow-cli` on 127.0.0.1:13890 and drove X.224 / RDP_NEG_REQ over real TCP: protocol `0x08` NLA / `0x02` TLS / `0x00` RDP, and the default NLA gate held after a completed TLS handshake with CredSSP withheld (`CONNECTION_STATE_NEGO`), while standard-RDP local-peer mode advanced without credentials. Wake 8 completed MCS/ERECT-DOMAIN/ATTACH-USER/channel-join, reached `CONNECTION_STATE_ACTIVE` with a headless `sfreerdp`, observed `SNDC_FORMATS` over the wire and the live server's `realloc failed!` / `SelectFormat failed with 12`, and reproduced the ASan `WRITE of size 16384` in the LIVE server with client-chosen `0xDE` at offset 8820. No-auth server, subsystem-supplied ADPCM table, ASan build and synthetic playback are explicit conditions; the stock-allocator live replay is one command (`bash lab/freerdp2shell-src/verify_live.sh`, 17 PASS warm / 18 PASS clean) independently accepted by witness W31 (#532, ESTABLISHED, no corrections; post-auth credentials, so no-auth 9.8 is not re-asserted). Wake 12 measured the stock glibc layout in three loopback sessions: two live heap pointers at `out_buffer+9072/+9080` lie inside the chosen-0xDE range, so pointer-bearing heap data in the write path is observed without a chosen target object, pointer value or dereference (`heap_layout_stock.txt`). A real audio source and an FFmpeg-enabled build stay UNKNOWN. [Status](reports/freerdp2shell-status.md) |
+| **Freerdp2Shell** | **Rung 4 — chosen bytes on real library bytes and in the live server over the wire** | A crafted `SNDC_FORMATS` record with `nChannels=2, nBlockAlign=4` passes the scalar guard, wraps `out_frames` to `0xfffffffffffffff0` after a failed realloc, and drives sequential client copies past the 8820-byte buffer. ASan reports `WRITE of size 16384` in `rdpsnd_server_send_samples` on source-built 3.32.0; a sanitizer-free replay through the real `rdpsnd_server_recv_formats()` parser places `de` at OOB offset 8820 and `ad` at 21384, with a fixed-guard control at rc 3 and no wrap. Wake 5 drove a framed PDU through the real dispatcher; wake 6 replaced its stub WTS reader with libfreerdp's real reader and shadow activation, and measured that FFmpeg-off builds offer PCM only, so the positive case needs a subsystem-supplied ADPCM server record. The ADPCM variant wraps `out_frames` to `0xfffffffffffffffc`. Wake 7 ran a real 3.32.0 `freerdp-shadow-cli` on 127.0.0.1:13890 and drove X.224 / RDP_NEG_REQ over real TCP: protocol `0x08` NLA / `0x02` TLS / `0x00` RDP, and the default NLA gate held after a completed TLS handshake with CredSSP withheld (`CONNECTION_STATE_NEGO`), while standard-RDP local-peer mode advanced without credentials. Wake 8 completed MCS/ERECT-DOMAIN/ATTACH-USER/channel-join, reached `CONNECTION_STATE_ACTIVE` with a headless `sfreerdp`, observed `SNDC_FORMATS` over the wire and the live server's `realloc failed!` / `SelectFormat failed with 12`, and reproduced the ASan `WRITE of size 16384` in the LIVE server with client-chosen `0xDE` at offset 8820. No-auth server, subsystem-supplied ADPCM table, ASan build and synthetic playback are explicit conditions; the stock-allocator live replay is one command (`bash lab/freerdp2shell-src/verify_live.sh`, 17 PASS warm / 18 PASS clean) independently accepted by witness W31 (#532, ESTABLISHED, no corrections; post-auth credentials, so no-auth 9.8 is not re-asserted). Wake 12 measured the stock glibc layout in three loopback sessions: two live heap pointers at `out_buffer+9072/+9080` lie inside the chosen-0xDE range (`heap_layout_stock.txt`). Wake 13 identified that object as the rdpsnd channel's wLog and showed a chosen `0x4141414141414141` dereference in `WLog_GetFilterLogLevel` in the live stock build, with a scratch post-copy log call, a configured `WLOG_FILTER` and lab-supplied playback bytes; no grooming or arbitrary target control (`pointer_control_stock.txt`). A real audio source and an FFmpeg-enabled build stay UNKNOWN. [Status](reports/freerdp2shell-status.md) |
 | **Falkordb2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | A masked zero-payload extended-length frame drives 525 out-of-bounds write operations (word XORs plus trailing bytes); chosen mask bytes overwrite a canary at chunk offset 104. ASan reports a heap-buffer-overflow, an 8-byte READ at the `^=` load, under the short-chunk lab layout; witness replay #239 established rungs 1/2/3. Rung 4 is NOT demonstrated because the mask repeats every four bytes. [Status](reports/falkordb2shell-status.md) |
 | **Freeswitch2Shell** | **Rung 4 — chosen-pointer dereference in a live FreeSWITCH process over loopback; sentinel is a value, not code** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with `mod_xml_rpc` + `enable-websocket`: a real WebSocket `101` upgrade delivered the frame and GDB caught the chosen `wsh->ssl` value dereferenced in `SSL_shutdown` from `ws_destroy (ws.c:367)` ← `websocket_hook (mod_xml_rpc.c:703)`; witness replay #338 changed only the 8 chosen bytes and saw the new value at the same fault site. Fixed and in-bounds controls survive. Stock heap layout, external reachability and the opt-in config gate stay in the claim; the sentinel is not executable code. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
 | **Freeradius2Shell** | **Rung 4 — demonstrated impact in a standalone harness** | A crafted EAP-FAST ticket writes 208 bytes into a 152-byte stack structure and executes a chosen `verify_marker()` address at rc 42; fixed build rejects the same ticket. Live `radiusd` reachability and key-unknown byte control remain UNKNOWN. [Status](reports/freeradius2shell-status.md) |
@@ -341,7 +369,7 @@ is called established.
 | **Accelppp2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 66 AVP chunks of 64 bytes put `pos=4254` into a 4160-byte `t->buf`: ASan `heap-buffer-overflow` `WRITE of size 64` at pinned `log_tcp.c.1.14.0:63`; chosen `0x1122334455667788` is read back byte-exact at offset 4 in the adjacent harness heap object; pinned 1.15.0 clamps to 4160 with a clean neighbour. No live daemon, real L2TP AVP path, verbose-logging configuration or useful-pointer control. [Status](reports/accelppp2shell-status.md) |
 | **Indiserver2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 1206-byte mismatched-tag packet formats 1237 bytes into `err[1024]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 1237` at pinned `lilxml.cpp:1281`, and token-safe `INDI2SHELL` reads back byte-exact at requested adjacent-stack offsets 0 and 64. Fixed `96bbd7f` bounds the format with `snprintf` and the neighbour is clean. No live daemon, real TCP/7624 path, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/indiserver2shell-status.md) |
 | **Shairport2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4096-byte unrecognised-method RTSP body writes 8193 bytes into `obf[4096]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 3` at pinned `rtsp.c:4215`, and token-safe `INDI2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fixed `c1c41c4` declares `obf[2*4096+1]` and the neighbour is clean. No live daemon, socket, AirPlay-2 auth-bypass observation, stock frame layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/shairport2shell-status.md) |
-| **Asterisk2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 2432-byte `%s` argument writes 2433 bytes into `logMessage[2048]` at pinned `ootrace.c:50`: a harness caller 2272 bytes away changes first, ASan reports `stack-buffer-overflow` `WRITE of size 2433`, and token-safe `AST2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fix `2d7b8c8` uses `ast_vasprintf` and the neighbour is clean. No live daemon, H.323 socket, packet-path reachability, stock frame layout, canary/NX measurement, useful-pointer control or execution; GHSA/CVE impact claims conflict, conservative ceiling is a crash. [Status](reports/asterisk2shell-status.md) |
+| **Asterisk2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 2432-byte `%s` argument writes 2433 bytes into `logMessage[2048]` at pinned `ootrace.c:50`: a harness caller 2272 bytes away changes first, ASan reports `stack-buffer-overflow` `WRITE of size 2433`, and token-safe `AST2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fix `2d7b8c8` uses `ast_vasprintf` and the neighbour is clean. No live daemon, H.323 socket, packet-path replay, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/asterisk2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
