@@ -4183,3 +4183,21 @@ first experiment is an ASan build of pinned 2.4.4 and 2.4.5 with
 `-DWAMR_BUILD_FAST_INTERP=1`, replaying the exact upstream `.wasm` with a
 clean fixed control, then measuring chosen-immediate byte placement;
 a witness replay is owed once the harness exists.
+
+#### Measured follow-through (21:02Z): WAMR W90 and Exim wake 2
+
+Both bounded first experiments have now run, so the two admission-time
+plausibility notes above are historical, not pending work. WAMR (`8686e9d`,
+`reports/frontier-wamr2shell.md`): both tags built with fast-interp and ASan;
+the pinned upstream `.wasm` gives an ASan `WRITE of size 2` on 2.4.4 and no
+load-time fault on 2.4.5 — rungs 1–3 locally reproduced, witness replay owed.
+The admission guess that the OOB stream carries chosen immediates is REJECTED
+by the instrumented Pass-2 log: its 61 would-be writes are const-table indices
+and host branch pointers, so rung 4 is a measured negative and any future
+rung-4 attempt needs a different overflow shape. Exim (`cd925eb`, `671a3b2`,
+`reports/exim2shell-wake2.md`): with ASan's report redirected from the forked
+child's closed stderr, the `three` shape gives a heap-use-after-free
+`WRITE of size 1` at `tls.c:510` on 4.99.2 and no report on 4.99.3 — rung 3
+confirmed. The non-ASan probe saw the free but never reached `tls_ungetc`, so
+rung 4 stays source-bound and unclaimed; witness replay is owed for both
+targets, and no wire-to-RCE claim exists for either.
