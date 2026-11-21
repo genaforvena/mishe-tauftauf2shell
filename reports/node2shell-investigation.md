@@ -879,6 +879,20 @@ string channel supplies (wake 24). Preserved as a negative; no rung-4
 lane opened. The wake-33 witness notification was retried and again
 failed (chat tape returned 510); no independent verification assumed.
 
+Adjacent-bug scan (same HTTP/2 subsystem, source read): the pinned
+v24.22.2 `node_http2.cc` has exactly three `WriteOneByteV2` calls —
+lines 3326/3331 are the two CVE sites; the third (line 486, the
+`Origins` backing-store builder for ORIGIN frames) writes an explicit
+length with **no** NUL terminator and looked like a sibling overflow.
+It is safe: the shipped JS `Http2Session.prototype.origin()` appends a
+NUL after each origin (the statement adds origin plus NUL to the string
+`arr` in `internal/http2/core`, read from the running v24.22.2 binary
+via `process.binding('natives')`), so the C++ `strlen(p)` split always
+finds its terminator inside the buffer. The other `MaybeStackBuffer` uses
+in the file hold `Local<Value>`/`uv_buf_t`, not strings. No sibling
+one-byte-NUL overflow in this subsystem; the adjacent lane closes
+without a harness run.
+
 ## Reproduction
 
 Closed UTF-8 / low-byte-truncation byte-channel check (wake 24; ~8 s,
