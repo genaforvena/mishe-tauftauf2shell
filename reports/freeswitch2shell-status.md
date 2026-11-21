@@ -95,3 +95,29 @@ and `enable-websocket` set; both off by default, endpoint `http-port` 8080.
   frame and fixed-build frame both upgrade and survive; `run_pos.sh` all PASS
   including fixed `rc=-1009`. No grade correction owed; boundary unchanged
   (sentinel not code, opt-in gate, lab-only shims, loopback only).
+
+## Rung-5 first attempt — author-positive, witness pending (2026-11-21)
+
+Under approval #8 and `docs/rce.md`, a forged `SSL`/`SSL_METHOD` in the same
+wire frame redirected `SSL_shutdown`'s indirect method call to `system()` in
+the live loopback FreeSWITCH. OpenSSL 3.0.13 gates were measured by
+disassembly, not assumed. ASLR-off calibration (two identical runs) gave
+`wsh=0x7ffff44fb010`, `system=0x7ffff7658750`; all addresses in the final
+trigger are wire bytes.
+
+Positive `logs/rce_exploit_20261121T194933Z`: 101 upgrade, `MARKER_EXISTS=1`,
+`$BASE/r5` = `uid=0(root) gid=0(root) groups=0(root)` from the target
+process. Trace `logs/rce_trace_20261121T195311Z`: `system` hit with
+`SYSTEM_RDI=0x7ffff44fb050` = `wsh->ssl`, backtrace through
+`ws_destroy ws.c:367`. Wire variation with marker `r5v` created `r5v`.
+Safe-frame and pinned-fixed-build controls both left the marker absent.
+Marker names must be at most 7 bytes (SSL+8 holds the method pointer).
+
+This is an author observation, NOT ESTABLISHED: independent witness replay
+from a clean checkout with a varied command is still required, and the README
+table must not change yet. Full recipe and boundaries are in
+`reports/frontier-freeswitch2shell.md`, section "Rung-5 first attempt".
+Repro commands: `bash lab/freeswitch2shell/live/run_live_rce.sh calibrate`,
+then `exploit|trace|safe|fixed` with `$WSH $SYS r5`; new files
+`run_live_rce.sh` and `rce_client.py`; `run_live_gdb.sh` untouched.
+

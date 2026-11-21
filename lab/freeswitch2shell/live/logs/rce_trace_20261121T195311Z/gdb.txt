@@ -1,0 +1,340 @@
+Breakpoint 1 at 0x28d0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff5be76c0 (LWP 1332776)]
+[New Thread 0x7ffff5a346c0 (LWP 1332777)]
+[New Thread 0x7ffff59f76c0 (LWP 1332779)]
+[New Thread 0x7ffff58f56c0 (LWP 1332780)]
+[New Thread 0x7ffff56ce6c0 (LWP 1332784)]
+2026-11-21 19:53:11.930448 0.00% [INFO] switch_event.c:715 Activate Eventing Engine.
+2026-11-21 19:53:11.940952 0.00% [WARNING] switch_event.c:686 Create additional event dispatch thread 0
+2026-11-21 19:53:11.949959 0.00% [DEBUG] switch_scheduler.c:263 Added task 1 heartbeat (core) to run at 1795290791
+2026-11-21 19:53:11.949970 0.00% [DEBUG] switch_scheduler.c:263 Added task 2 check_ip (core) to run at 1795290791
+2026-11-21 19:53:11.949949 0.00% [NOTICE] switch_scheduler.c:186 Starting task thread
+2026-11-21 19:53:11.950019 0.00% [NOTICE] switch_core.c:1482 Created ip list rfc6598.auto default (deny)
+2026-11-21 19:53:11.950028 0.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list rfc6598.auto
+2026-11-21 19:53:11.950031 0.00% [NOTICE] switch_core.c:1488 Created ip list rfc1918.auto default (deny)
+2026-11-21 19:53:11.950034 0.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list rfc1918.auto
+2026-11-21 19:53:11.950037 0.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list rfc1918.auto
+2026-11-21 19:53:11.950040 0.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list rfc1918.auto
+2026-11-21 19:53:11.950042 0.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (allow) [] to list rfc1918.auto
+2026-11-21 19:53:11.950045 0.00% [NOTICE] switch_core.c:1497 Created ip list wan.auto default (allow)
+2026-11-21 19:53:11.950047 0.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan.auto
+2026-11-21 19:53:11.950049 0.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan.auto
+2026-11-21 19:53:11.950051 0.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan.auto
+2026-11-21 19:53:11.950053 0.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan.auto
+2026-11-21 19:53:11.950054 0.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan.auto
+2026-11-21 19:53:11.950056 0.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan.auto
+2026-11-21 19:53:11.950057 0.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan.auto
+2026-11-21 19:53:11.950059 0.00% [NOTICE] switch_core.c:1509 Created ip list wan_v6.auto default (allow)
+2026-11-21 19:53:11.950061 0.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list wan_v6.auto
+2026-11-21 19:53:11.950062 0.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan_v6.auto
+2026-11-21 19:53:11.950064 0.00% [NOTICE] switch_core.c:1517 Created ip list wan_v4.auto default (allow)
+2026-11-21 19:53:11.950065 0.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan_v4.auto
+2026-11-21 19:53:11.950067 0.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan_v4.auto
+2026-11-21 19:53:11.950068 0.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan_v4.auto
+2026-11-21 19:53:11.950072 0.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan_v4.auto
+2026-11-21 19:53:11.950074 0.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan_v4.auto
+2026-11-21 19:53:11.950075 0.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan_v4.auto
+2026-11-21 19:53:11.950077 0.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list wan_v4.auto
+2026-11-21 19:53:11.950078 0.00% [NOTICE] switch_core.c:1530 Created ip list any_v6.auto default (allow)
+2026-11-21 19:53:11.950080 0.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list any_v6.auto
+2026-11-21 19:53:11.950082 0.00% [NOTICE] switch_core.c:1537 Created ip list any_v4.auto default (allow)
+2026-11-21 19:53:11.950083 0.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list any_v4.auto
+2026-11-21 19:53:11.950085 0.00% [NOTICE] switch_core.c:1544 Created ip list nat.auto default (deny)
+2026-11-21 19:53:11.950088 0.00% [NOTICE] switch_core.c:1546 Adding 127.0.0.1/0.0.0.0 (deny) to list nat.auto
+2026-11-21 19:53:11.950090 0.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list nat.auto
+2026-11-21 19:53:11.950091 [New Thread 0x7ffff4ecd6c0 (LWP 1332785)]
+[Thread 0x7ffff4ecd6c0 (LWP 1332785) exited]
+0.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list nat.auto
+2026-11-21 19:53:11.950100 0.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list nat.auto
+2026-11-21 19:53:11.950102 0.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list nat.auto
+2026-11-21 19:53:11.950104 0.00% [NOTICE] switch_core.c:1556 Created ip list loopback.auto default (deny)
+2026-11-21 19:53:11.950105 0.00% [NOTICE] switch_utils.c:665 Adding 127.0.0.0/8 (allow) [] to list loopback.auto
+2026-11-21 19:53:11.950107 0.00% [NOTICE] switch_utils.c:665 Adding ::1/128 (allow) [] to list loopback.auto
+2026-11-21 19:53:11.950109 0.00% [NOTICE] switch_core.c:1563 Created ip list localnet.auto default (deny)
+2026-11-21 19:53:11.950110 0.00% [NOTICE] switch_core.c:1566 Adding 127.0.0.1/0.0.0.0 (allow) to list localnet.auto
+2026-11-21 19:53:11.950113 0.00% [CONSOLE] switch_core.c:1593 Created ip list domains default (deny)
+2026-11-21 19:53:11.950134 0.00% [WARNING] switch_msrp.c:204 Open of msrp.conf failed
+2026-11-21 19:53:11.950137 0.00% [CONSOLE] switch_core.c:2471 Bringing up environment.
+2026-11-21 19:53:11.950140 0.00% [CONSOLE] switch_core.c:2472 Loading Modules.
+2026-11-21 19:53:11.950274 0.00% [INFO] switch_time.c:1436 Timezone loaded 597 definitions
+2026-11-21 19:53:11.950278 0.00% [CONSOLE] switch_time.c:1579 Clock calibration disabled.
+2026-11-21 19:53:11.950282 0.00% [CONSOLE] switch_loadable_module.c:1833 Successfully Loaded [CORE_SOFTTIMER_MODULE]
+2026-11-21 19:53:11.950290 0.00% [NOTICE] switch_loadable_module.c:354 Adding Timer 'soft'
+2026-11-21 19:53:11.950322 0.00% [CONSOLE] switch_loadable_module.c:1833 Successfully Loaded [CORE_PCM_MODULE]
+2026-11-21 19:53:11.950330 0.00% [NOTICE] switch_loadable_module.c:282 Adding Codec PROXY-VID 31 PROXY VIDEO PASS-THROUGH 90000hz 0ms 1ch (VBR)
+2026-11-21 19:53:11.950336 0.00% [NOTICE] switch_loadable_module.c:282 Adding Codec PROXY 0 PROXY PASS-THROUGH 8000hz 20ms 2ch (VBR)
+2026-11-21 19:53:11.950338 0.00% [NOTICE] switch_loadable_module.c:282 Adding Codec PROXY 0 PROXY PASS-THROUGH 8000hz 20ms 1ch (VBR)
+2026-11-21 19:53:11.950344 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 11025hz 32ms 2ch 352800bps
+2026-11-21 19:53:11.950347 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 11025hz 32ms 1ch 176400bps
+2026-11-21 19:53:11.950349 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 11025hz 40ms 2ch 352800bps
+2026-11-21 19:53:11.950350 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 11025hz 40ms 1ch 176400bps
+2026-11-21 19:53:11.950352 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 22050hz 20ms 2ch 705600bps
+2026-11-21 19:53:11.950354 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 22050hz 20ms 1ch 352800bps
+2026-11-21 19:53:11.950355 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 44100hz 30ms 2ch 705600bps
+2026-11-21 19:53:11.950357 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 44100hz 30ms 1ch 705600bps
+2026-11-21 19:53:11.950358 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 44100hz 20ms 2ch 705600bps
+2026-11-21 19:53:11.950360 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 44100hz 20ms 1ch 705600bps
+2026-11-21 19:53:11.950362 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 44100hz 10ms 2ch 705600bps
+2026-11-21 19:53:11.950363 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 44100hz 10ms 1ch 705600bps
+2026-11-21 19:53:11.950365 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 40ms 2ch 1536000bps
+2026-11-21 19:53:11.950367 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 40ms 1ch 768000bps
+2026-11-21 19:53:11.950374 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 30ms 2ch 1536000bps
+2026-11-21 19:53:11.950376 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 30ms 1ch 768000bps
+2026-11-21 19:53:11.950378 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 20ms 2ch 1536000bps
+2026-11-21 19:53:11.950379 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 20ms 1ch 768000bps
+2026-11-21 19:53:11.950381 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 8ms 2ch 1024000bps
+2026-11-21 19:53:11.950383 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 8ms 1ch 512000bps
+2026-11-21 19:53:11.950384 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 6ms 2ch 1024000bps
+2026-11-21 19:53:11.950386 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 6ms 1ch 512000bps
+2026-11-21 19:53:11.950388 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 4ms 2ch 1024000bps
+2026-11-21 19:53:11.950389 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 4ms 1ch 512000bps
+2026-11-21 19:53:11.950391 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 2ms 2ch 1024000bps
+2026-11-21 19:53:11.950393 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 2ms 1ch 512000bps
+2026-11-21 19:53:11.950394 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 8ms 2ch 512000bps
+2026-11-21 19:53:11.950396 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 8ms 1ch 256000bps
+2026-11-21 19:53:11.950397 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 6ms 2ch 512000bps
+2026-11-21 19:53:11.950399 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 6ms 1ch 256000bps
+2026-11-21 19:53:11.950401 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 4ms 2ch 512000bps
+2026-11-21 19:53:11.950402 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 4ms 1ch 256000bps
+2026-11-21 19:53:11.950404 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 2ms 2ch 512000bps
+2026-11-21 19:53:11.950406 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 2ms 1ch 256000bps
+2026-11-21 19:53:11.950407 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 8ms 2ch 256000bps
+2026-11-21 19:53:11.950409 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 8ms 1ch 128000bps
+2026-11-21 19:53:11.950410 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 6ms 2ch 256000bps
+2026-11-21 19:53:11.950412 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 6ms 1ch 128000bps
+2026-11-21 19:53:11.950414 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 4ms 2ch 256000bps
+2026-11-21 19:53:11.950415 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 4ms 1ch 128000bps
+2026-11-21 19:53:11.950417 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 2ms 2ch 256000bps
+2026-11-21 19:53:11.950419 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 2ms 1ch 128000bps
+2026-11-21 19:53:11.950424 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 10ms 2ch 1536000bps
+2026-11-21 19:53:11.950426 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 10ms 1ch 768000bps
+2026-11-21 19:53:11.950427 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 8ms 2ch 1536000bps
+2026-11-21 19:53:11.950429 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 8ms 1ch 768000bps
+2026-11-21 19:53:11.950430 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 6ms 2ch 1536000bps
+2026-11-21 19:53:11.950432 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 6ms 1ch 768000bps
+2026-11-21 19:53:11.950434 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 4ms 2ch 1536000bps
+2026-11-21 19:53:11.950435 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 4ms 1ch 768000bps
+2026-11-21 19:53:11.950437 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 2ms 2ch 1536000bps
+2026-11-21 19:53:11.950439 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 48000hz 2ms 1ch 768000bps
+2026-11-21 19:53:11.950440 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 24000hz 60ms 2ch 768000bps
+2026-11-21 19:53:11.950444 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 24000hz 60ms 1ch 384000bps
+2026-11-21 19:53:11.950445 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 24000hz 40ms 2ch 768000bps
+2026-11-21 19:53:11.950447 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 24000hz 40ms 1ch 384000bps
+2026-11-21 19:53:11.950449 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 24000hz 20ms 2ch 768000bps
+2026-11-21 19:53:11.950450 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 24000hz 20ms 1ch 384000bps
+2026-11-21 19:53:11.950452 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 100ms 2ch 384000bps
+2026-11-21 19:53:11.950453 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 100ms 1ch 192000bps
+2026-11-21 19:53:11.950455 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 80ms 2ch 384000bps
+2026-11-21 19:53:11.950457 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 80ms 1ch 192000bps
+2026-11-21 19:53:11.950458 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 60ms 2ch 384000bps
+2026-11-21 19:53:11.950460 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 60ms 1ch 192000bps
+2026-11-21 19:53:11.950462 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 40ms 2ch 384000bps
+2026-11-21 19:53:11.950463 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 40ms 1ch 192000bps
+2026-11-21 19:53:11.950465 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 20ms 2ch 384000bps
+2026-11-21 19:53:11.950466 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 12000hz 20ms 1ch 192000bps
+2026-11-21 19:53:11.950468 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 10ms 2ch 512000bps
+2026-11-21 19:53:11.950470 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 10ms 1ch 512000bps
+2026-11-21 19:53:11.950475 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 20ms 2ch 512000bps
+2026-11-21 19:53:11.950476 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 20ms 1ch 512000bps
+2026-11-21 19:53:11.950478 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 30ms 2ch 512000bps
+2026-11-21 19:53:11.950480 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 30ms 1ch 512000bps
+2026-11-21 19:53:11.950481 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 40ms 2ch 512000bps
+2026-11-21 19:53:11.950483 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 40ms 1ch 512000bps
+2026-11-21 19:53:11.950485 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 50ms 2ch 512000bps
+2026-11-21 19:53:11.950486 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 50ms 1ch 512000bps
+2026-11-21 19:53:11.950488 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 60ms 2ch 512000bps
+2026-11-21 19:53:11.950489 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 32000hz 60ms 1ch 512000bps
+2026-11-21 19:53:11.950491 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 10ms 2ch 256000bps
+2026-11-21 19:53:11.950493 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 10ms 1ch 256000bps
+2026-11-21 19:53:11.950494 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 20ms 2ch 256000bps
+2026-11-21 19:53:11.950496 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 20ms 1ch 256000bps
+2026-11-21 19:53:11.950498 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 30ms 2ch 256000bps
+2026-11-21 19:53:11.950499 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 30ms 1ch 256000bps
+2026-11-21 19:53:11.950501 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 40ms 2ch 256000bps
+2026-11-21 19:53:11.950502 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 40ms 1ch 256000bps
+2026-11-21 19:53:11.950504 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 50ms 2ch 256000bps
+2026-11-21 19:53:11.950506 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 50ms 1ch 256000bps
+2026-11-21 19:53:11.950507 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 60ms 2ch 256000bps
+2026-11-21 19:53:11.950509 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 16000hz 60ms 1ch 256000bps
+2026-11-21 19:53:11.950511 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 10ms 2ch 128000bps
+2026-11-21 19:53:11.950512 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 10ms 1ch 128000bps
+2026-11-21 19:53:11.950514 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 20ms 2ch 128000bps
+2026-11-21 19:53:11.950516 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 20ms 1ch 128000bps
+2026-11-21 19:53:11.950517 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 30ms 2ch 128000bps
+2026-11-21 19:53:11.950519 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 30ms 1ch 128000bps
+2026-11-21 19:53:11.950524 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 40ms 2ch 128000bps
+2026-11-21 19:53:11.950526 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 40ms 1ch 128000bps
+2026-11-21 19:53:11.950527 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 50ms 2ch 128000bps
+2026-11-21 19:53:11.950529 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 50ms 1ch 128000bps
+2026-11-21 19:53:11.950530 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 60ms 2ch 128000bps
+2026-11-21 19:53:11.950532 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 60ms 1ch 128000bps
+2026-11-21 19:53:11.950534 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 70ms 2ch 128000bps
+2026-11-21 19:53:11.950535 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 70ms 1ch 128000bps
+2026-11-21 19:53:11.950537 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 80ms 2ch 128000bps
+2026-11-21 19:53:11.950539 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 80ms 1ch 128000bps
+2026-11-21 19:53:11.950540 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 90ms 2ch 128000bps
+2026-11-21 19:53:11.950542 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 90ms 1ch 128000bps
+2026-11-21 19:53:11.950543 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 100ms 2ch 128000bps
+2026-11-21 19:53:11.950545 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 100ms 1ch 128000bps
+2026-11-21 19:53:11.950547 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 110ms 2ch 128000bps
+2026-11-21 19:53:11.950548 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 110ms 1ch 128000bps
+2026-11-21 19:53:11.950550 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 120ms 2ch 128000bps
+2026-11-21 19:53:11.950551 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec L16 100 RAW Signed Linear (16 bit) 8000hz 120ms 1ch 128000bps
+2026-11-21 19:53:11.950557 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 10ms 2ch 768000bps
+2026-11-21 19:53:11.950559 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 10ms 1ch 384000bps
+2026-11-21 19:53:11.950561 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 10ms 1ch 64000bps
+2026-11-21 19:53:11.950563 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 20ms 2ch 768000bps
+2026-11-21 19:53:11.950564 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 20ms 1ch 384000bps
+2026-11-21 19:53:11.950566 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 20ms 1ch 64000bps
+2026-11-21 19:53:11.950567 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 30ms 2ch 768000bps
+2026-11-21 19:53:11.950569 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 30ms 1ch 384000bps
+2026-11-21 19:53:11.950571 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 30ms 1ch 64000bps
+2026-11-21 19:53:11.950572 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 40ms 2ch 768000bps
+2026-11-21 19:53:11.950574 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 48000hz 40ms 1ch 384000bps
+2026-11-21 19:53:11.950576 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 40ms 1ch 64000bps
+2026-11-21 19:53:11.950581 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 50ms 1ch 64000bps
+2026-11-21 19:53:11.950582 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 60ms 1ch 64000bps
+2026-11-21 19:53:11.950584 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 70ms 1ch 64000bps
+2026-11-21 19:53:11.950586 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 80ms 1ch 64000bps
+2026-11-21 19:53:11.950587 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 90ms 1ch 64000bps
+2026-11-21 19:53:11.950589 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 100ms 1ch 64000bps
+2026-11-21 19:53:11.950591 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 110ms 1ch 64000bps
+2026-11-21 19:53:11.950592 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMU 0 G.711 ulaw 8000hz 120ms 1ch 64000bps
+2026-11-21 19:53:11.950596 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 10ms 1ch 64000bps
+2026-11-21 19:53:11.950598 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 20ms 1ch 64000bps
+2026-11-21 19:53:11.950599 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 30ms 1ch 64000bps
+2026-11-21 19:53:11.950601 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 40ms 1ch 64000bps
+2026-11-21 19:53:11.950602 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 50ms 1ch 64000bps
+2026-11-21 19:53:11.950604 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 60ms 1ch 64000bps
+2026-11-21 19:53:11.950606 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 70ms 1ch 64000bps
+2026-11-21 19:53:11.950607 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 80ms 1ch 64000bps
+2026-11-21 19:53:11.950609 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 90ms 1ch 64000bps
+2026-11-21 19:53:11.950611 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 100ms 1ch 64000bps
+2026-11-21 19:53:11.950612 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 110ms 1ch 64000bps
+2026-11-21 19:53:11.950616 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec PCMA 8 G.711 alaw 8000hz 120ms 1ch 64000bps
+2026-11-21 19:53:11.950630 0.00% [CONSOLE] switch_loadable_module.c:1833 Successfully Loaded [CORE_SPEEX_MODULE]
+2026-11-21 19:53:11.950638 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec SPEEX 99 Speex 32000hz 20ms 1ch 44000bps
+2026-11-21 19:53:11.950641 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec SPEEX 99 Speex 16000hz 20ms 1ch 42200bps
+2026-11-21 19:53:11.950643 0.00% [NOTICE] switch_loadable_module.c:276 Adding Codec SPEEX 99 Speex 8000hz 20ms 1ch 24600bps
+2026-11-21 19:53:11.950650 0.00% [CONSOLE] switch_loadable_module.c:2381 open of pre_load_modules.conf failed
+2026-11-21 19:53:11.950692 0.00% [CONSOLE] switch_loadable_module.c:1833 Successfully Loaded [CORE_VPX_MODULE]
+2026-11-21 19:53:11.950699 0.00% [NOTICE] switch_loadable_module.c:282 Adding Codec VP8 99 VP8 Video 90000hz 0ms 1ch (VBR)
+2026-11-21 19:53:11.950710 0.00% [NOTICE] switch_loadable_module.c:282 Adding Codec VP9 99 VP9 Video 90000hz 0ms 1ch (VBR)
+2026-11-21 19:53:11.950716 0.00% [NOTICE] switch_loadable_module.c:448 Adding API Function 'vpx'
+[m2026-11-21 19:53:11.953363 0.00% [CONSOLE] switch_loadable_module.c:1833 Successfully Loaded [mod_console]
+[m[36m2026-11-21 19:53:11.953373 0.00% [NOTICE] switch_loadable_module.c:448 Adding API Function 'console'
+[m[m2026-11-21 19:53:11.957405 0.00% [CONSOLE] switch_loadable_module.c:1833 Successfully Loaded [mod_xml_rpc]
+[m[m2026-11-21 19:53:11.957423 0.00% [CONSOLE] switch_loadable_module.c:2470 open of post_load_m[New Thread 0x7ffff466e6c0 (LWP 1332789)]
+[New Thread 0x7ffff46316c0 (LWP 1332790)]
+[New Thread 0x7ffff45f46c0 (LWP 1332791)]
+[New Thread 0x7ffff45b76c0 (LWP 1332792)]
+odules.conf failed
+[m[m2026-11-21 19:53:11.957428 0.00% [CONSOLE] switch_loadable_module.c:151 Starting runtime thread for mod_xml_rpc
+[m[m2026-11-21 19:53:11.957548 0.00% [CONSOLE] switch_loadable_module.c:151 Starting runtime thread for CORE_SOFTTIMER_MODULE
+[m[36m2026-11-21 19:53:11.957610 0.00% [NOTICE] mod_xml_rpc.c:1262 Starting HTTP Port 18080, DocRoot [/home/mesh-home/mishe-tauftauf2shell/lab/freeswitch2shell/live/run/install/htdocs] with websocket.
+[m[32m2026-11-21 19:53:11.957861 100.00% [INFO] switch_time.c:627 Clock synchronized to system time.
+[m[33m2026-11-21 19:53:11.957904 100.00% [DEBUG] switch_loadable_module.c:971 Chat Thread Started
+[m[36m2026-11-21 19:53:11.958045 100.00% [NOTICE] switch_core.c:1482 Created ip list rfc6598.auto default (deny)
+[m[33m2026-11-21 19:53:11.958024 100.00% [DEBUG] switch_loadable_module.c:971 Chat Thread Started
+[m[36m2026-11-21 19:53:11.958050 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list rfc6598.auto
+[m[36m2026-11-21 19:53:11.958052 100.00% [NOTICE] switch_core.c:1488 Created ip list rfc1918.auto default (deny)
+[m[36m2026-11-21 19:53:11.958053 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list rfc1918.auto
+[m[36m2026-11-21 19:53:11.958055 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list rfc1918.auto
+[m[36m2026-11-21 19:53:11.958056 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list rfc1918.auto
+[m[36m2026-11-21 19:53:11.958057 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (allow) [] to list rfc1918.auto
+[m[36m2026-11-21 19:53:11.958058 100.00% [NOTICE] switch_core.c:1497 Created ip list wan.auto default (allow)
+[m[36m2026-11-21 19:53:11.958059 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan.auto
+[m[36m2026-11-21 19:53:11.958060 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan.auto
+[m[36m2026-11-21 19:53:11.958061 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan.auto
+[m[36m2026-11-21 19:53:11.958061 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan.auto
+[m[36m2026-11-21 19:53:11.958062 100.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan.auto
+[m[36m2026-11-21 19:53:11.958063 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan.auto
+[m[36m2026-11-21 19:53:11.958064 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan.auto
+[m[36m2026-11-21 19:53:11.958064 100.00% [NOTICE] switch_core.c:1509 Created ip list wan_v6.auto default (allow)
+[m[36m2026-11-21 19:53:11.958065 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list wan_v6.auto
+[m[36m2026-11-21 19:53:11.958066 100.00% [NOTICE] switch_utils.c:665 Adding fe80::/10 (deny) [] to list wan_v6.auto
+[m[36m2026-11-21 19:53:11.958067 100.00% [NOTICE] switch_core.c:1517 Created ip list wan_v4.auto default (allow)
+[m[36m2026-11-21 19:53:11.958069 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/8 (deny) [] to list wan_v4.auto
+[m[36m2026-11-21 19:53:11.958070 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (deny) [] to list wan_v4.auto
+[m[36m2026-11-21 19:53:11.958071 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (deny) [] to list wan_v4.auto
+[m[36m2026-11-21 19:53:11.958072 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (deny) [] to list wan_v4.auto
+[m[36m2026-11-21 19:53:11.958073 100.00% [NOTICE] switch_utils.c:665 Adding 169.254.0.0/16 (deny) [] to list wan_v4.auto
+[m[36m2026-11-21 19:53:11.958074 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (deny) [] to list wan_v4.auto
+[m[36m2026-11-21 19:53:11.958075 100.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list wan_v4.auto
+[m[36m2026-11-21 19:53:11.958076 100.00% [NOTICE] switch_core.c:1530 Created ip list any_v6.auto default (allow)
+[m[36m2026-11-21 19:53:11.958077 100.00% [NOTICE] switch_utils.c:665 Adding 0.0.0.0/0 (deny) [] to list any_v6.auto
+[m[36m2026-11-21 19:53:11.958078 100.00% [NOTICE] switch_core.c:1537 Created ip list any_v4.auto default (allow)
+[m[36m2026-11-21 19:53:11.958079 100.00% [NOTICE] switch_utils.c:665 Adding ::/0 (deny) [] to list any_v4.auto
+[m[36m2026-11-21 19:53:11.958080 100.00% [NOTICE] switch_core.c:1544 Created ip list nat.auto default (deny)
+[m[36m2026-11-21 19:53:11.958082 100.00% [NOTICE] switch_core.c:1546 Adding 127.0.0.1/0.0.0.0 (deny) to list nat.auto
+[m[36m2026-11-21 19:53:11.958082 100.00% [NOTICE] switch_utils.c:665 Adding 10.0.0.0/8 (allow) [] to list nat.auto
+[m[36m2026-11-21 19:53:11.958083 100.00% [NOTICE] switch_utils.c:665 Adding 172.16.0.0/12 (allow) [] to list nat.auto
+[m[36m2026-11-21 19:53:11.958084 100.00% [NOTICE] switch_utils.c:665 Adding 192.168.0.0/16 (allow) [] to list nat.auto
+[m[36m2026-11-21 19:53:11.958085 100.00% [NOTICE] switch_utils.c:665 Adding 100.64.0.0/10 (allow) [] to list nat.auto
+[m[36m2026-11-21 19:53:11.958085 100.00% [NOTICE] switch_core.c:1556 Created ip list loopback.auto default (deny)
+[m[36m2026-11-21 19:53:11.958088 100.00% [NOTICE] switch_utils.c:665 Adding 127.0.0.0/8 (allow) [] to list loopback.auto
+[m[36m2026-11-21 19:53:11.958089 100.00% [NOTICE] switch_utils.c:665 Adding ::1/128 (allow) [] to list loopback.auto
+[m[36m2026-11-21 19:53:11.958089 100.00% [NOTICE] switch_core.c:1563 Created ip list localnet.auto default (deny)
+[m[36m2026-11-21 19:53:11.958090 100.00% [NOTICE] switch_core.c:1566 Adding 127.0.0.1/0.0.0.0 (allow) to list localnet.auto
+[m[m2026-11-21 19:53:11.958092 100.00% [CONSOLE] switch_core.c:1593 Created ip list domains default (deny)
+[m[m2026-11-21 19:53:11.958109 100.00% [CONSOLE] switch_core.c:2497 [m[33m[44m
+.=============================================================.
+|   _____              ______        _____ _____ ____ _   _   |
+|  |  ___| __ ___  ___/ ___\ \      / /_ _|_   _/ ___| | | |  |
+|  | |_ | '__/ _ \/ _ \___ \\ \ /\ / / | |  | || |   | |_| |  |
+|  |  _|| | |  __/  __/___) |\ V  V /  | |  | || |___|  _  |  |
+|  |_|  |_|  \___|\___|____/  \_/\_/  |___| |_| \____|_| |_|  |
+|                                                             |
+.=============================================================.
+|   Anthony Minessale II, Michael Jerris, Brian West, Others  |
+|   FreeSWITCH (http://www.freeswitch.org)                    |
+|   Paypal Donations Appreciated: paypal@freeswitch.org       |
+|   Brought to you by ClueCon http://www.cluecon.com/         |
+.=============================================================.
+
+.=======================================================================================================.
+|       _                            _    ____ _             ____                                       |
+|      / \   _ __  _ __  _   _  __ _| |  / ___| |_   _  ___ / ___|___  _ __                             |
+|     / _ \ | '_ \| '_ \| | | |/ _` | | | |   | | | | |/ _ \ |   / _ \| '_ \                            |
+|    / ___ \| | | | | | | |_| | (_| | | | |___| | |_| |  __/ |__| (_) | | | |                           |
+|   /_/   \_\_| |_|_| |_|\__,_|\__,_|_|  \____|_|\__,_|\___|\____\___/|_| |_|                           |
+|                                                                                                       |
+|    ____ _____ ____    ____             __                                                             |
+|   |  _ \_   _/ ___|  / ___|___  _ __  / _| ___ _ __ ___ _ __   ___ ___                                |
+|   | |_) || || |     | |   / _ \| '_ \| |_ / _ \ '__/ _ \ '_ \ / __/ _ \                               |
+|   |  _ < | || |___  | |__| (_) | | | |  _|  __/ | |  __/ | | | (_|  __/                               |
+|   |_| \_\|_| \____|  \____\___/|_| |_|_|  \___|_|  \___|_| |_|\___\___|                               |
+|                                                                                                       |
+|     ____ _             ____                                                                           |
+|    / ___| |_   _  ___ / ___|___  _ __         ___ ___[New Thread 0x7ffff457a6c0 (LWP 1332793)]
+[New Thread 0x7ffff453d2c0 (LWP 1332832)]
+[Switching to Thread 0x7ffff453d2c0 (LWP 1332832)]
+
+Thread 13 "freeswitch" hit Breakpoint 1, __libc_system (line=0x7ffff44fb050 "id>r5t") at ../sysdeps/posix/system.c:202
+warning: 202	../sysdeps/posix/system.c: No such file or directory
+STOP_PC=0x7ffff7658750
+SYSTEM_RDI=0x7ffff44fb050
+0x7ffff44fb050:	"id>r5t"
+#0  __libc_system (line=0x7ffff44fb050 "id>r5t") at ../sysdeps/posix/system.c:202
+#1  0x00007ffff467aa22 in ws_destroy (wsh=wsh@entry=0x7ffff44fb010) at ws.c:367
+#2  0x00007ffff4679954 in websocket_hook (r=<optimized out>) at mod_xml_rpc.c:703
+#3  0x00007ffff4686b43 in runUserHandler (srvP=0x7fffe4000c80, sessionP=0x7ffff453c560) at ../../../../libs/xmlrpc-c/lib/abyss/src/server.c:576
+#4  processRequestFromClient (connectionP=connectionP@entry=0x7fffe400c440, lastReqOnConn=<optimized out>, timeout=<optimized out>, keepAliveP=keepAliveP@entry=0x7ffff453c6bc) at ../../../../libs/xmlrpc-c/lib/abyss/src/server.c:664
+#5  0x00007ffff4686c98 in serverFunc (userHandle=0x7fffe400c440) at ../../../../libs/xmlrpc-c/lib/abyss/src/server.c:730
+#6  0x00007ffff467cc7b in connJob (userHandle=0x7fffe400c440) at ../../../../libs/xmlrpc-c/lib/abyss/src/conn.c:39
+#7  0x00007ffff468b376 in pthreadStart (arg=0x7fffe4000c20) at ../../../../libs/xmlrpc-c/lib/abyss/src/thread_pthread.c:49
+#8  0x00007ffff769cb64 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#9  0x00007ffff7729e8c in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+FAULT_PC=0x7ffff7658750
+#1  0x00007ffff467aa22 in ws_destroy (wsh=wsh@entry=0x7ffff44fb010) at ws.c:367
+367				code = SSL_shutdown(wsh->ssl);
+WSH_ADDR=0x7ffff44fb010
+SSL_PTR=0x7ffff44fb050
+#0  __libc_system (line=0x7ffff44fb050 "id>r5t") at ../sysdeps/posix/system.c:202
+warning: 202	../sysdeps/posix/system.c: No such file or directory
+SSL_ARG=0x7ffff44fb050
+SYSTEM_ADDR=0x7ffff7658750
+From                To                  Syms Read   Shared Object Library
+0x00007ffff4676500  0x00007ffff46af2de  Yes         /home/mesh-home/mishe-tauftauf2shell/lab/freeswitch2shell/live/run/install/mod/mod_xml_rpc.so

