@@ -1345,3 +1345,51 @@ FPM, but no chosen bytes, pointer control, benign marker, or real nginx front
 end was demonstrated, so rung 4 stays closed. Pre-auth HTTP reachability at
 default configuration remains UNPROVEN; this is a FastCGI request to a
 loopback listener the plant started itself.
+
+### Wake 55 (2026-11-21) — adjacent DOM lane: reflected-attribute setter UAF with a live attribute-child wrapper (rung 3 CONFIRMED)
+
+The 8.5.13 NEWS DOM section (line ~80) records "Fixed a use-after-free when
+reflected attribute setters replace an attribute whose child still has a live
+wrapper" without a CVE/GHSA id. The release tree ships the regression test
+`ext/dom/tests/reflected_attribute_write_live_child.phpt`, whose `--FILE--`
+body is the exact reproducer used here.
+
+Mechanism. `dom_element_reflected_attribute_write()` (`ext/dom/element.c:160`)
+and the DOMTokenList setters (`token_list.c:197/:437`) call `xmlSetNsProp()`
+directly. libxml frees the old attribute's child text node; a PHP wrapper for
+that child (`$text = $element->getAttributeNode('class')->firstChild`) stays
+live, so `$text->parentNode` and `$text->textContent` dereference freed memory.
+The 8.5.13 fix defines `dom_set_attribute_value()` (`php_dom.c:2348`,
+declared `php_dom.h:118`), which calls `node_list_unlink(existing->children)`
+before `xmlSetNsProp()`, and routes all four setters through it.
+
+One existing dom-enabled 8.5.12 ASan/UBSan CLI build (`lab/build/php-8.5.12-asan-dom`,
+wake 51) was reused; no new full build. Affected A side is the wake-51
+`php-fixed` binary (8.5.13 `xml_serializer.c` only, no reflected-attribute
+fix); fixed B side is the same tree relinked after applying the minimal
+four-file upstream patch, committed as
+`lab/php2shell/dom-reflected-attribute-fix.patch`, saved as
+`sapi/cli/php-fixed-domattr`. The build-tree patch is the sole difference in
+the A/B. Committed harness `lab/repro/php2shell-dom-reflected-attr.py` runs
+the five vendor cases plus a no-replacement control under
+`ASAN_OPTIONS=detect_leaks=0`. Evidence
+`lab/build/evidence/w55-domattr/harness/verdict.txt` = `CONFIRMED` (5/5
+ASAN_UAF/CLEAN, control CLEAN/CLEAN, fixed output matches vendor EXPECT).
+
+Observed on every trigger case: rc=1, ASan heap-use-after-free READ of 8 at
+`dom_node_parent_get` (`ext/dom/node.c:247`) from `$text->parentNode`, freed by
+`xmlFreeNodeList <- xmlSetNsProp <- dom_element_reflected_attribute_write`
+(`ext/dom/element.c:160`), reached via the `className`, DOMTokenList and `id`
+reflected setters. Raw reports:
+`lab/build/evidence/w55-domattr/{vuln.out,case0..4.out}`. The fixed binary
+prints the vendor's exact expected output (`detached: bool(true)`,
+`text: string(3) "old"`, the new attribute value) with rc=0 and zero ASan.
+
+Honest limits: this is a local CLI process with the `dom` extension and a
+userland wrapper to the attribute child; no SAPI, pre-auth HTTP path, chosen
+bytes, pointer control, marker execution or controlled write is shown. ASan
+observes the invalid read; no claim is made about exploitability of the freed
+chunk. Grade: **rung 3 CONFIRMED for this new lane**, overall PHP2Shell rung 4
+unchanged. Next experiment, if reopened: a chosen-byte occupant of the freed
+`xmlNode` child with a live accessor that dereferences attacker bytes, or a
+real DOM-consuming web app that reaches a reflected setter from HTTP input.

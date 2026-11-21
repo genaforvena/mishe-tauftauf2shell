@@ -1212,3 +1212,25 @@ negative. Grade rung 3 CONFIRMED, SAPI widened CGI->FPM; no chosen bytes,
 pointer control, marker, or real nginx front end, so rung 4 CLOSED.
 Pre-auth HTTP reachability at default config remains UNPROVEN (FastCGI to a
 loopback listener only). Do NOT re-run debug-ASan CGI runs.
+
+## Wake 55 (2026-11-21, 06:19–) — new adjacent DOM lane: reflected-attribute setter UAF CONFIRMED, rung 3
+Named experiment: 8.5.13 NEWS's un-CVE'd DOM fix "use-after-free when reflected
+attribute setters replace an attribute whose child still has a live wrapper",
+with vendor test `ext/dom/tests/reflected_attribute_write_live_child.phpt`.
+One existing dom-enabled 8.5.12 ASan CLI build reused (no new full build).
+Committed harness `lab/repro/php2shell-dom-reflected-attr.py`; committed
+minimal fix patch `lab/php2shell/dom-reflected-attribute-fix.patch`.
+A/B: vulnerable = wake-51 `php-fixed` (8.5.13 xml_serializer only); fixed =
+`php-fixed-domattr` = same tree + upstream `dom_set_attribute_value()` helper
+(`node_list_unlink(existing->children)` before `xmlSetNsProp`, element.c:160,
+token_list.c:197/:437, php_dom.c:2348, php_dom.h:118). Evidence
+`lab/build/evidence/w55-domattr/harness/verdict.txt` = CONFIRMED: all five
+vendor cases ASAN_UAF on vulnerable / CLEAN on fixed, control CLEAN/CLEAN,
+fixed output matches vendor EXPECT byte for byte. ASan: heap-use-after-free
+READ of 8 at `dom_node_parent_get node.c:247`, freed by `xmlFreeNodeList <-
+xmlSetNsProp <- dom_element_reflected_attribute_write element.c:160`.
+Grade rung 3 CONFIRMED for this lane only; overall rung 4 unchanged — no
+SAPI, HTTP reachability, chosen bytes, pointer control or marker.
+NEXT if reopened: chosen-byte occupant of the freed xmlNode child with a live
+accessor, or a DOM-consuming HTTP app reaching a reflected setter. Do NOT
+repeat the same A/B (closed).
