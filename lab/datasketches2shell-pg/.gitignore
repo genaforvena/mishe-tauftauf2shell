@@ -6,6 +6,7 @@ pg-build-*/
 pg-install*/
 datasketches-postgresql-*/
 v52/
+v53/
 pgdata*/
 *.log
 run-out/
