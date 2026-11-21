@@ -20,8 +20,10 @@ control or execution was observed; those stay UNKNOWN. This extends the
 frontier harness result in `reports/frontier-pillow2shell.md`. Witness replay
 #898/#900 returned ESTABLISHED AS CLAIMED at the W1 labeled grade; the
 witness's own rebuild matched the stores and the fixed-build control.
-Author/operator replays are not independent acceptance. W3 (#926) and W4 are
-new author evidence, not replayed.**
+Author/operator replays are not independent acceptance. W3 (#926) and W4 were
+replayed by the witness in W74 (#947) from its own pinned builds, all
+ESTABLISHED AS CLAIMED at the labeled grade; W4 remains a type-confusion
+fault, not chosen-code execution.**
 
 ## Repro (loopback-free local process; no network probe)
 
@@ -305,4 +307,6 @@ function pointers can be placed at a known address and called (no address
 disclosure was observed); PC control, chosen-code execution or the advisory's
 ASLR-disabled non-PIE `system@plt` chain. Witness replay of W1 (#898/#900)
 returned ESTABLISHED AS CLAIMED at the report's labeled rung-4 grade; W3
-(#926) and W4 are new author evidence and have not been replayed.
+(#926) and W4 were replayed in W74 (#947) from the witness's own pinned
+builds and also returned ESTABLISHED AS CLAIMED at the labeled grade, with
+W4 explicitly a type-confusion fault and the grade unchanged.

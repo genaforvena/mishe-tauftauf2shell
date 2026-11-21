@@ -3195,8 +3195,9 @@ ESTABLISHED AS CLAIMED at the W1 labeled grade; W3 (commits `f663a08` /
 needs (the built `_imaging.so` has no RUNPATH) and identifies the `buffer+176`
 chunk in the unmodified plain gdb run as a live CPython `PyUnicodeObject`
 whose `ob_type` is overwritten with the chosen `0x5a` byte via pinned
-`JpegDecode.c:252` — a chosen byte pattern, not a valid address. W3 is new
-author evidence, not replayed. No dereference, valid pointer/PC value,
+`JpegDecode.c:252` — a chosen byte pattern, not a valid address. W3 was later
+replayed in W74 (#947); see the W4 paragraph below. No dereference, valid
+pointer/PC value,
 control-flow diversion or execution; which object owns the 32-byte chunk at
 `buffer+144` stays UNKNOWN; grade stays ◐.
 

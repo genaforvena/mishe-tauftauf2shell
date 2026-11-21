@@ -202,7 +202,8 @@ First run exits normally after `LOAD_OK`; second re-applies only
 type-confusion fault, not execution of chosen code: no marker, PC control or
 chosen-code call was observed. Plain non-gdb runs: 5/5 `LOAD_OK` then rc 134
 `corrupted size vs. prev_size`; plain fixed 13.0.0 raises `OSError`, rc 1.
-W3 (#926) and W4 are new author evidence awaiting witness replay.
+W3 (#926) and W4 were replayed by the witness in W74 (#947) from its own
+pinned builds: ESTABLISHED AS CLAIMED at the labeled grade, no grade change.
 
 Type-flag differential (same isolation, byte-identical file except the 8
 pointer bytes): regenerate with `pattern_long.hex` to get `case_long.fpx`
@@ -218,3 +219,5 @@ PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x full_restore_long.gdb --args py
 It prints `LOAD_OK` and exits cleanly, while the GC-tracked pointer faults
 under the same restore. The GC-flag mechanism is an inference; the
 differential is observed. No chosen-code call, marker or PC control.
+W74 (#947) also replayed the long-type differential from the witness's own
+builds: ESTABLISHED AS CLAIMED with the GC-flag mechanism still INFERENCE.
