@@ -4103,3 +4103,44 @@ admitted target minds in the README table. Never run a bare `mishe sync`. The
 bounded first experiment is a `USE_GNUTLS=yes` ASan build of 4.99.2 driving
 STARTTLS → short BDAT → close_notify → one cleartext byte on loopback, with a
 4.99.3 control; a witness replay is owed once a harness exists.
+
+#### Admitted 2026-11-21 ~20:32Z: NettyTcnative2Shell / netty2shell (CVE-2026-116539)
+
+Frontier's DM #1119 carried brief `reports/frontier-netty2shell.md` (commit
+`47a8038`) with three hash-pinned files in
+`lab/frontier/netty2shell/src/SHA256SUMS`. The operator admitted this target
+under standing approval #6, no re-ask. Operator pin check 20:30:34Z:
+`sha256sum -c SHA256SUMS` 3/3 OK (self-computed digests; the auto-generated
+GitHub tag archives have no published sidecar). All five admission elements
+are in `.mishe-tauftauf/charters/netty2shell.md`: **claim source** — maintainer
+advisory GHSA-gf9q-9mg7-g5qh (published 2026-10-26 by `normanmaurer`, reporter
+`@August829`), Debian tracker CVE-2026-116539 and the NVD-derived
+GHSA-22qq-f4wc-4vfx; the CVE and NVD full bodies were not retrieved.
+**Identifier** — CVE-2026-116539 / GHSA-gf9q-9mg7-g5qh. **Affected/fixed pin**
+— affected `<= 2.0.83.Final`, fixed 2.0.84.Final; vulnerable tarball
+`f6ae09cf544397edd33ffd23affd7cad09059d757b1510d4d909539cadbcb335`, fixed
+`cb419d0132a970338087a677a82dc4e5e3a4837c1da6ff1f15bd1a0ba94ccef0`, fix patch
+`b51333461dfbbc261f9e8463a1f602482de9c59efcafade677caf0431a88a7ec`, fix
+commit `92dd66fd1243d85c05a61288f96367a70260b6b8` (parent `e28f849e`). The raw
+hunk in `openssl-dynamic/src/main/c/ssl.c` `@@ -196,7 +196,9 @@` adds a modulo
+to `startIndex` in `tcn_write_to_bytebuffer`. **Primitive** — after a partial
+drain of the non-application ring, offset + length exceeds the buffer size;
+with size 10 the maintainer's four JNI calls reach `startIndex=11`,
+`writeChunk=-1` and `memcpy(&buffer[startIndex], in, (size_t)writeChunk)` at
+raw `:207-209`, a near-`SIZE_MAX` length write past an `OPENSSL_malloc` buffer,
+plus an OOB `&in[writeChunk]` read. The observed consequence is a SIGBUS crash
+(3/3), not RCE. **Rung-4 plausibility** — attacker-chosen source bytes at a
+cross-object destination with a byte-exact fixed side; first bytes past the
+ring are chosen input. Honest gate: wire-only reachability UNKNOWN — the
+maintainer states the PoC does not derive the trigger from unmodified TLS wire
+bytes against a specific integrator; buffer size and partial-drain timing
+matter. First work stays harness-grade rungs 1–3.
+
+At admission no rung was established: no build, no bytes, no traffic. The
+operator created the 63rd `engine/routes.json` entry, this mind's wake trigger
+units with the pinned full-flag sync from `docs/runtime-pin.md`, a seed wall,
+the charter and the two-pane window (inner socket index 68). This makes 59
+admitted target minds in the README table. Never run a bare `mishe sync`. The
+bounded first experiment is a Linux ASan build of the pinned 2.0.83.Final
+`openssl-dynamic` library plus the advisory's four-step JNI harness, with a
+2.0.84.Final fixed control; a witness replay is owed once a harness exists.
