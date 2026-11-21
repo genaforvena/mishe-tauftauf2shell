@@ -263,6 +263,101 @@ control, control-flow diversion, execution and a web-facing listener remain
 UNKNOWN. No chosen-address pointer dereference was observed, and none appears
 reachable from a bounded stream-offset write with the heap layouts seen here.
 
+## Transferability check: the Pillow W9 chosen-deallocator call does not transfer (2026-11-21 ~17:25Z)
+
+The peer `pillow2shell` W9 result (commit `249281e`) gets a natural call to an
+existing static type's deallocator with ASLR on by writing 60 attacker-chosen
+bytes over a live Python object's `ob_type`. That is a structurally different
+primitive from this target's, and the difference is decisive.
+
+- W9 writes **arbitrary bytes**, including the low bytes of `&PyCode_Type`, at
+  a fixed offset into a live `PyUnicodeObject`. This sink writes two **8-byte
+  stream offsets** — `l_current_pos` at `tp_index[TPsot].end_header`
+  (allocation base + `TPsot*24 + 8`) and `l_current_pos + m_sot_length + 2`
+  at `.end_pos` (+16) — through `j2k.c:5086`/`:5088`. The value is a
+  codestream position bounded by the file length, not an arbitrary constant.
+  Tuning it to a non-PIE static address such as `0xa2d260` would need a
+  roughly 10.6 MB COM-padded codestream, and would still be consumed as an
+  integer (see below), not as a pointer.
+- Every pinned-source read of these fields treats them as `OPJ_OFF_T`
+  integers. `j2k.c:8464` writes `start_pos = pos`; `:8949`/`:8953`
+  initialise `start_pos`/`end_pos` from `l_cur_offset`; `:11567` and
+  `:11589-91` compare and print them; `:12021-23` compares `end_pos`;
+  `:12054` and `:12195` copy `start_pos` into an `opj_stream_read_seek`
+  target; `:9928` reads `start_pos` for another seek. None dereferences the
+  value, uses it as a vtable or calls it. A value numerically equal to a code
+  address is therefore still just a seek offset, which fails or seeks within
+  the codestream rather than transferring control.
+- The destination neighbours measured by `consumer-reality.sh` are a live
+  `tp_index` array (tile 1) and a live glibc malloc size word
+  (`m_mct_records` chunk). `opj_tp_index_t` is three `OPJ_OFF_T` fields
+  (`openjpeg.h:996-1004`) — no function pointer. Small Python objects come
+  from pymalloc arenas, separate from the glibc arena holding this 24-byte
+  buffer; no Python object was observed at any
+  `base + TPsot*24 + {8,16}` destination in the local process.
+
+Disposition: rung 4 stays PARTIAL. The condition that would change this mind
+is an observed Python object at a reachable destination whose `ob_type`
+receives a codestream-tuned value and whose type's deallocator is then called
+at natural finalization, with ASLR on. That would need both consumer-process
+heap grooming and a multi-megabyte codestream; neither was attempted, so both
+remain UNKNOWN. No chosen-address pointer dereference, control-flow diversion
+or execution was observed. The `free()`-path outcomes already measured remain
+availability impact only: `munmap_chunk()` derives its address from the chunk
+pointer, and the backward-consolidation dereference uses stale heap words,
+not codestream bytes.
+
+## Large TPsot is reachable: sequential tile parts and a chosen static write value (2026-11-21 ~17:32Z)
+
+The earlier feasibility text said larger `TPsot` values "usually reach
+unmapped memory". That is only true for the public PoC's short tile-part
+sequence. `j2k.c:4494` requires `TPsot == m_current_tile_part_number + 1`, so
+a large index is legal if the codestream first presents that many sequential
+tile parts. `make-large-tpsot.py` builds exactly that from the committed
+202-byte PoC: tile parts with `TPsot = 0..evil`, each a 12-byte SOT segment
+plus SOD, with COM padding before them choosing the last SOD position (the
+64-bit value the sink stores).
+
+Observed on the pinned v2.5.4 source built with `-g -O0 -fno-omit-frame-
+pointer` and loaded into the plain Pillow 12.2.0 build from `out-pillow/pw-
+vuln` (local process, gdb only observes; the debug build is needed for a
+source-line breakpoint, so its layout is not the shipped Release layout):
+
+- With `evil=126` and COM padding choosing SOD position 2048, the sink
+  breakpoint was reached at `TPSNO=126 POS=2048` exactly as predicted — the
+  store targeted `tp_index base + 126*24 + 8 = +3032`. With `evil=188`,
+  `TPSNO=188 POS=3072` was reached the same way. Earlier variants that simply
+  changed the public PoC's single `TPsot` byte were rejected with "Invalid
+  tile part index" (`j2k.c:4499`); the sequential construction is required.
+- With a 5,786,655-byte COM pad (`evil=188`, target `0x58530e`), the sink wrote
+  exactly `0x58530e` at base +4520 and `0x585310` at base +4528. `0x585310`
+  is a static code address in this non-PIE CPython 3.12.3 build
+  (`PyObject_GenericGetAttr`, resolved by gdb). This is the first local
+  observation of a *codestream-chosen code-shaped 64-bit value*, not just a
+  small stream offset, at a chosen destination offset.
+- That is not pointer control. In the large-pad run the reachable 24-byte-
+  strided destinations are mostly filled by the earlier tile parts' own
+  OOB-written stream offsets (~`0x5848d4`, `0x5848d6`, …), not by pre-existing
+  function pointers; a scan with a narrower filter found live code pointers
+  such as `PyObject_GC_Del` at some offsets in one run, but their identity and
+  position changed between runs (ASLR-on plain runs gave different old
+  values, e.g. `0x61c430` vs `0x11156a` at +4528). No object with a small
+  live refcount (a plausible `ob_type` target) was found at a reachable
+  destination. No indirect call, controlled dereference or diversion was
+  observed. The plain no-gdb run of the exact-value file faults rc 139 —
+  availability impact, as before.
+
+Reproduce: `./make-large-tpsot.py src/poc.j2k /tmp/oj.j2k $((0x58530e)) 188`, then
+`gdb -q -batch -ex 'set $want=188' -x large-tpsot.gdb --args python3
+pillow-probe.py /tmp/oj.j2k` with `PILROOT` and `LD_LIBRARY_PATH` pointing at
+the pinned debug lib and the Pillow build. Digests: generator
+`sha256=a04bf6b54205d8d9f1b533c6b574b38e218f551634b4d842ce41c9a2367f0965`,
+gdb script
+`sha256=0928fa589b66aed23a0ba65f76d3b29845ded50212bda0f910effc937adac04e`.
+Rung 4 stays PARTIAL; the added fact is reachability of large `TPsot` and a
+chosen code-shaped write value, with the destination still not a controlled
+pointer.
+
 ## Next-candidate queue (updated 2026-11-21)
 
 - wolfSSL CVE-2026-6679 (DTLS 1.3 ACK integer truncation, fixed 5.9.1) and
