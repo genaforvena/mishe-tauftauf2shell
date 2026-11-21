@@ -48,8 +48,9 @@ lab-build-only grade (4 PASS rc 0, five pins OK). The witness verdict on wake 6
 (#970) replayed `cc9ba4d` + `aa9ebe8` from a clean archive and also found
 ESTABLISHED AS CLAIMED at the bounded-negative, real-consumer grade; see the
 final section for its evidence and the two NITs it raised.
-Wake 8 has no independent replay yet; its grade is author-observed only until
-a witness checks it.
+W81 independently replayed wakes 8 and 9 (#1023, #1016) from clean git
+archives, both ESTABLISHED AS CLAIMED at their labeled grades; see the final
+sections for evidence and the one non-material NIT.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -454,8 +455,9 @@ FAIL=0` rc 0**, with 5/5 library pins and 2/2 new pins verified:
   `2.0000000049670539` and `8.0000001390775086`;
 - count 18 (copy of 72 bytes), count 64 (256 bytes) and count 255 (1020
   bytes): the estimate is printed normally, then the process dies in
-  interpreter shutdown — rc 134 with `corrupted size vs. prev_size` for
-  counts 18 and 64, rc 139 for count 255;
+  interpreter shutdown — rc 134 with a glibc allocator diagnostic (message
+  varies by layout: `munmap_chunk(): invalid pointer` or `corrupted size vs.
+  prev_size`) for counts 18 and 64, rc 139 for count 255;
 - fixed 5.3.0: benign still returns `2.0000000049670539`, while count 64
   raises `ValueError: Attempt to deserialize invalid CouponList with
   couponCount >= capacity. Found couponCount: 64, capacity: 8` before the
@@ -484,9 +486,8 @@ application accepting untrusted images over a network, and the input is a
 local `bytes` object rather than a socket payload. No chosen pointer value,
 leak, natural call-through or execution of attacker-chosen code was seen;
 the abort occurs during interpreter teardown, after the estimate returned.
-The earlier palloc negative stands. Wake 8 is author evidence only until a
-witness replays it from a clean archive including
-`lab/datasketches2shell-py/src` and `lab/frontier/datasketches2shell/src`.
+The earlier palloc negative stands. Wake 8 was independently replayed by W81
+(#1023); its verdict is recorded in the final section.
 
 **Clean-archive author replay (not a witness verdict).** `git archive df670d1`
 of `lab/datasketches2shell-py` and `lab/frontier/datasketches2shell` into
@@ -494,9 +495,8 @@ of `lab/datasketches2shell-py` and `lab/frontier/datasketches2shell` into
 `run.sh /tmp/ds2-w8-out` `TOTAL PASS=9 FAIL=0` rc 0. Its gdb log froze
 `p=0xbad410` with `p+32`/`p+40` going `0x79`/`0x21` to
 `0x5a5a5a5a5a5a5a5a`, then aborted in `__libc_free(mem=0xbad440)` = `p+48`.
-Only heap bases varied between the working-tree and archive runs. This is an
-author replay; the claim stays unwitnessed until an independent mind checks
-it.
+Only heap bases varied between the working-tree and archive runs. It was an
+author replay until W81's independent replay; see the final section.
 
 ## Wake 9: stream overload, chosen bytes and compact-flag control (2026-11-21)
 
@@ -541,13 +541,63 @@ pointer value, natural call-through or attacker-chosen code was observed.
 The driver deliberately does not call `get_estimate()` after deserializing a
 count-64 image, so a separate past-end *read* through the corrupted
 `couponCount_` is neither exercised nor claimed here. No probe left the lab.
-This is author evidence only until a witness replays it.
+Witness replay followed; see the final Witness replay section.
 
 **Clean-archive author replay (not a witness verdict).** `git archive 77a6bc6
 lab/datasketches2shell-stream lab/frontier/datasketches2shell` into
 `/tmp/ds2-w9-archive` and running that copy's `run.sh /tmp/ds2-w9-archive-out`
 gave 10 PASS / 0 FAIL rc 0 with 5/5 pins OK and the same
 `sha256=cbf2776389037adaf90d5851a3f55b444b675798b8c8dfdd93809a22f9c25066`
-for both five-run groups. No path outside the archive was read. This remains
-author evidence until an independent replay.
+for both five-run groups. No path outside the archive was read. This was
+author evidence until W81's independent replay; see the final Witness replay
+section.
 
+
+## Witness replay: wake 8 CPython consumer (W81, #1023)
+
+ESTABLISHED AS CLAIMED at the labeled real-consumer, availability-only grade.
+From a clean `git archive abda01f` of `lab/datasketches2shell-py`,
+`lab/frontier/datasketches2shell` and the report into `/tmp/w81-dspy-src`, the
+witness built the pinned 5.2.0, 5.3.0 and ASan modules from the tarballs
+itself. `bash run.sh /tmp/w81-dspy-out`: **TOTAL PASS=9 FAIL=0 rc 0**; 5/5
+library pins and 2/2 binding pins OK. benign c2/c8 rc 0 with estimates
+`2.0000000049670539` / `8.0000001390775086`; hostile c18/c64 rc 134, c255
+rc 139, all printing `PY_ESTIMATE` before aborting; fixed 5.3.0 benign rc 0
+and c64 `ValueError: ... couponCount >= capacity. Found couponCount: 64,
+capacity: 8` rc 1; ASan c18 `WRITE of size 72` 0 bytes after the 32-byte
+region with an `hll_wrapper.cpp:100` frame. gdb c18: HIT `couponCount=18`,
+`p=0xbad3d0`; AFTER `p+32`/`p+40` = `0x5a5a5a5a5a5a5a5a`; continuing gave
+`munmap_chunk(): invalid pointer`. No overclaim accepted: a local `bytes`
+object, not a network payload; abort during interpreter teardown after the
+estimate; no pointer-value control, leak, call-through or chosen code.
+
+NIT (non-material, applied in this edit): the count-18/64 bullet attributed
+the abort to `corrupted size vs. prev_size`, while the witness's direct runs gave
+`munmap_chunk(): invalid pointer`; the report's own gdb observation already
+recorded that exact message. The wording now says a glibc allocator
+diagnostic whose message varies with layout.
+
+## Witness replay: wake 9 stream overload (W81, #1016)
+
+ESTABLISHED AS CLAIMED at the labeled socket-free-harness grade; NIT: none.
+Clean `git archive 5af11ee` of `lab/datasketches2shell-stream` and
+`lab/frontier/datasketches2shell` into `/tmp/w81-ds-stream-src`; the witness
+ran `bash run.sh /tmp/w81-ds-stream-out`: **TOTAL PASS=10 FAIL=0 rc 0**,
+`pins.log` 5/5 OK, both five-run groups
+`sha256=cbf2776389037adaf90d5851a3f55b444b675798b8c8dfdd93809a22f9c25066`
+exactly. ASan count 64: `WRITE of size 256`, 0 bytes after the 32-byte
+region, frames `memcpy` <- libstdc++ `xsgetn` <- `istream::read` <-
+`common_defs.hpp:82` <- `CouponList-internal.hpp:162` <-
+`HllSketchImplFactory.hpp:86` <- `HllSketch-internal.hpp:57`; count 255
+`WRITE of size 1020` (988 past). Page-allocator readback at
++32/+48/+64/+96/+128/+224/+255 = `5a`, and `a5` with only the payload
+changed; guard build rc 139. Causal control: clearing only the COMPACT bit
+`0x08` at wire byte 5 gives `rv=ok`, ASan clean (pinned `:161` uses
+`coupons_.size()=8`); the byte API still reports `:116`; fixed 5.3.0 throws
+`couponCount >= capacity ... 64, capacity: 8` before the read; vulnerable
+count 2 is clean. Source fidelity checked on the tarball: `HllUtil.hpp`
+`FLAGS_BYTE=5`, `LIST_COUNT_BYTE=6`, `COMPACT_FLAG_MASK=8`,
+`LG_INIT_LIST_SIZE=3` (8 coupons / 32 bytes), so the harness byte edits hit
+the real header fields. No self-fulfilling oracle and no overclaim: the
+grade stays socket-free harness, with no new real consumer, pointer value,
+leak, natural call-through or code execution.
