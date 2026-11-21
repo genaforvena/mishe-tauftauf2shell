@@ -1698,6 +1698,80 @@ person's full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/strongswan2shell-status.md` and the pins in
 `lab/frontier/strongswan2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~08:29Z: Memcached2Shell (no upstream CVE/GHSA found)
+
+Claim source: upstream fix commit
+`7eeac6e9a9945aa68298aff379cea5ab3817af7c` ("crawler: fix buffer overflow on
+idle client", 2026-07-07, reporter Nicolas Krassas), parent
+`aa352388abf903d50e6bdd22dfb8ab9373d2896b`, and release 1.6.44 (annotated
+tag `7d2f9295…`, target commit `e44dd0b01234bc0faf970e9225e3423e98022129`).
+Ubuntu LP#2161693 and openSUSE-SU-2026:21872-1 are distro advisories. Read
+08:27Z, LP#2161693 independently describes the same `lru_crawler_write()`
+bug, an unauthenticated stalled-reader reproducer on a default non-SASL
+instance, affected Ubuntu 1.6.24 (noble) / 1.6.40 (resolute) and the upstream
+fix in 1.6.44; a comment dates the vulnerable buffer redesign to `a22be2bd…`.
+Full upstream affected range UNKNOWN. NVD keyword search returned 0 results
+at 08:13Z; no upstream CVE/GHSA was found, so CVE/GHSA is UNKNOWN /
+NO-CVE-FOUND, not a proven negative. Pins, hashes and raw URLs are in
+`lab/frontier/memcached2shell/PROVENANCE.md`.
+
+Claimed primitive: the default config sets `lru_crawler` and `dump_enabled`
+true with no SASL gate. A client issues `lru_crawler metadump all` and never
+reads. In the pinned parent `lru_crawler_write()` returns 0 on a 1000 ms
+`poll()` timeout while `bufused` is still nonzero (`crawler.c:471`); the
+per-LRU caller at `:628-640` treats that as success and never expands the
+buffer, unlike the hash path at `:582-587`. `crawler_metadump_eval()` keeps
+appending attacker-stored, percent-encoded key bytes at `buf + bufused`
+(`:307-310`, `:371`) past the 131072-byte allocation from `:824-825`. The
+unconditional `sent += total` at `:499` is a second, separately preserved
+accounting defect. `-X` and `-o no_lru_crawler` are non-default mitigations.
+
+Frontier's harness (`lab/frontier/memcached2shell/run.sh`) compiles the
+pinned parent/fixed `crawler.c` ranges verbatim under `#line` with synthetic
+`conn`, item, `poll()` and buffer collaborators; no daemon, socket, thread or
+network. Rung 1: the parent idle client faults (exit 77) after ~1000 appended
+lines while the fixed build times out 1800 polls and closes the client. Rung
+2: parent EAGAIN reports `write_ret=0` with zero bytes written and no client
+close; the fixed build returns -1 after bounded retries and the timeout
+backstop. Rung 3: ASan reports `heap-buffer-overflow`, `WRITE of size 64`,
+0 bytes after the 131072-byte region, append frame `crawler.c.vuln:310` and
+allocation frame `:825`, with clean fixed and benign-parent controls. The 64
+bytes are a verbatim harness key; real `uriencode_p()` makes the write
+key-length dependent.
+
+Rung 4 is INSTRUMENTED only, with preserved negatives. With a zeroed 1 MiB
+collaborator replacing the nominal buffer, chosen key byte `0x5a` is read
+back at offsets 0, 4 and 65536 past the nominal end (35231 of 65536 bytes
+matched); a `0x41` differential puts `0x41` at exactly those offsets. Under a
+guard-mapped allocation the parent faults at the first byte past 131072, and
+the unmodified plain parent faults in host libc before any stable chosen
+bytes can be inspected. No pointer, saved return address, heap metadata
+field, function pointer, control-flow diversion or marker execution was
+observed or attempted; the collaborator and guard mapping are
+instrumentation.
+
+Admitted by the operator ~08:29Z under standing approval #6 on frontier's
+handoff #686 and commits `b7fb237` / `163433e`: the two-pane window (40,
+inner socket), registry entry and seed wall were live and capture-verified
+08:24Z; the bottom-pane plant_view process was live at admission. Operator
+replay ~08:28Z from two clean `git archive HEAD` (`163433e`) extractions into
+separate absolute directories: 8 PASS / 0 FAIL both times, raw trace
+`sha256=5d4a05be6cebb89e7fd99e0f6d08731e47537c49d0b8396d6be73e554b51672b`
+byte-identical between directories, to the working-tree replay and to the
+brief. Witness replay #685 was requested; no verdict was in hand at
+admission. Wake trigger units and presentation stay owed from the person's
+full-flag sync, never a bare `mishe sync`. Cheapest next rung: determine this
+host's actual consumer behavior at the buffer boundary first (allocator
+layout, `write()`/`poll()` timing), then build the pinned vulnerable tree
+under ASan, run a loopback-only daemon with many stored keys, stall a
+`lru_crawler metadump all` client, capture the real ASan frame and heap
+layout, and repeat on 1.6.44 for the guard. Only an observed pointer or
+control-flow result would drop the INSTRUMENTED label; the LP's daemon frame
+at `crawler.c:275` is from a different build and stays a claim. Evidence:
+`reports/frontier-memcached2shell.md`, seed status
+`reports/memcached2shell-status.md` and the pins in
+`lab/frontier/memcached2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
