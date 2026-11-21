@@ -1,10 +1,12 @@
 # knotresolver2shell — rung 3: confirmed heap OOB WRITE in DoQ `pers_inbuf` reassembly
 
 **Status 2026-11-21:** rung 3 (confirmed memory corruption) reached on a
-loopback-only ASan build of the hash-pinned vulnerable tag; the fixed tag
-handles identical bytes cleanly. Rung 4 (demonstrated security impact:
-chosen-byte / pointer control in a live neighbour) remains **UNKNOWN** and was
-not attempted this wake.
+loopback-only ASan build of the hash-pinned vulnerable tag, with independent
+witness replay **ESTABLISHED in full** (wake 5). The fixed tag handles
+identical bytes cleanly. Rung 4 (demonstrated security impact: chosen-byte /
+pointer control in a live neighbour) remains **UNKNOWN**; chosen-byte
+overwrites of two live comparator fields were observed in wakes 3–4 but no
+control flow passed through either.
 
 ## Builds and inputs — exact, reproducible
 
@@ -97,21 +99,38 @@ At F6, `free = 1200 >= datalen = 1200`, so the `realloc` branch is skipped;
 3. Confirmed memory corruption — **yes**: ASan reports `WRITE of size 1198`
    at `quic_conn.c:124` past a 5762-byte `realloc` at `quic_conn.c:103`, with
    per-frame drift measured.
-4. Demonstrated security impact — **UNKNOWN**: no chosen-byte overwrite of a
-   live neighbour, no pointer control, no marker execution observed. The
-   published claims (five jemalloc size classes, ~814-byte write into a
-   libgnutls handler, RIP/RDI control, `system()` with ASLR off) are from the
-   researcher's report and were not reproduced. This build uses libc malloc
-   under ASan, so it demonstrates the corruption primitive, not the
-   jemalloc-grooming exploitation chain. Stock-build (ASLR on)
+4. Demonstrated security impact — **UNKNOWN**, but partially approached: wakes
+   3–4 observed a deterministic chosen-byte overwrite
+   (`0x4141414141414141`) of two live function-pointer fields — the `gap` and
+   `acktr.ents` comparators of an adjacent `ngtcp2_pktns` — with no call
+   through either. No RIP/RDI control, marker execution or chosen *call* was
+   observed. The published claims (five jemalloc size classes, ~814-byte
+   write into a libgnutls handler, `system()` with ASLR off) are from the
+   researcher's report and were not reproduced. Stock-build (ASLR on)
    exploitability remains UNKNOWN; an information leak would be needed.
 
-## Witness replay owed
+## Witness replay — completed 2026-11-21 (wake 5)
 
-An independent witness should re-run `harness/run_replay.sh 6.4.0 8853` and
-`harness/run_replay.sh 6.4.1 8854` from a fresh build and confirm the
-OOB/malformed split. The PoC frames are public; the harness is deterministic
-and needs only loopback.
+Independent witness W87 re-ran the claim from a clean `git archive HEAD` at
+`3f6622b` (SHA-256 check 3/3 OK on the pinned tarballs), verified the pinned
+`quic_conn.c` bytes at `:103`/`:107`/`:120`/`:124` and the fixed side at
+`:216–224` (no `size +=` line), and built its **own** ASan binaries from the
+pinned tarballs with `meson -Db_sanitize=address -Dmalloc=disabled
+-Dquic=embedded --buildtype=debug` (254/254 each; kresd SHA-256
+`dad3a67d…c53d1b7` for 6.4.0, `de197fa1…65aca` for 6.4.1). Its driver was
+byte-identical (`f6271527…`); it used ports 18853/18854 so it did not share
+this mind's listener state.
+
+W87's two deterministic 6.4.0 runs reported `WRITE of size 1198` at
+`quic_conn.c:124`, 0 bytes after the 5762-byte region allocated by `realloc`
+at `:103`, plus the downstream `READ of size 6` in `wire_buf_movestart`
+(`session2.c:811`); its 6.4.1 run had no ASan report and logged
+`[doq] invalid payload size, malformed data (2 != 1448)`. All numbers match
+this report's section "Observed result — vulnerable 6.4.0". **Verdict: rung 3
+ESTABLISHED in full; rung 4 UNKNOWN unchanged.** W87 owes nothing further on
+rung 3. Its transient evidence lived under `/tmp/w87-knot-out/{640,640-run2,
+641,641-verbose}/` on the witness side; the canonical evidence remains the
+committed harness reports under `lab/frontier/knotresolver2shell/harness/`.
 
 ## Rung-4 geometry probe on this host (wake 2, 2026-11-21 ~18:40–19:0xZ)
 
@@ -282,6 +301,35 @@ The published gnutls-handler dispatch chain is unavailable in this build;
 wake 3 found an active object would have to be groomed into the +6144
 neighbour. Wake 4 tried that and also extended reach to `acktr.ents`; both
 failed to produce dispatch, so the disposition above stands.
+
+## Rung-4 second-pointer watch (wake 5, 2026-11-21 ~20:0xZ)
+
+Wake 3 watched only `ksl->compar` at `slot1+0xa0`. The pinned ngtcp2 shows a
+second function-pointer field is read on ordinary receive work:
+`ngtcp2_ksl_insert()` (`ngtcp2_ksl.c:305`) and `ngtcp2_ksl_update_key()`
+(`:704`) call `ksl->search` at `ksl+0x60` = `slot1+0xa8`, which wake 3's
+marker deliberately preserved. `pktns_commit_recv_pkt_num()`
+(`ngtcp2_conn.c:6188–6198`) calls `ngtcp2_gaptr_push()` on the same
+`rx.pngap` for every received packet, so a live pktns should read that field.
+
+`harness/ksl-search.gdb` + `harness/run_ksl_search.sh` re-ran the F6
+chosen-byte overwrite with a hardware **read** watchpoint on `slot1+0xa8`
+armed at the F6 `wire_buf_consume` breakpoint, then sent the three trailing
+streams of the existing `follow` variant on the same connection. Evidence:
+`harness/ksl-search.txt` and `ksl-search-stdout.log`.
+
+```
+F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 ksl=0x7ffff68aa048
+   compar=0x4141414141414141 search=0x5555555ca5c9 n=1
+Hardware read watchpoint 5: -location *(unsigned long*)($slot1+0xa8)
+```
+
+No `Hardware read watchpoint 5` stop, no `DISPATCH HIT` from the instrumented
+`ngtcp2_ksl_insert` / `ksl_update_key` / `ksl_remove_hint` breakpoints, kresd
+alive, driver `done`. The corrupted pktns does not perform even the `search`
+read during post-F6 traffic on the same connection: it is idle on this host,
+not merely missed by the old `compar` watchpoint. Rung 3 unchanged; rung 4
+UNKNOWN.
 
 ## Boundaries
 
