@@ -384,6 +384,66 @@ there is no chosen-byte, chosen-offset or scalar-steering primitive and no
 route to rung 4 on this lane. Main-lane closure at Stage A is unchanged:
 this is a NULL dereference, not a binary-capable primitive.
 
+### Adjacent lane L2 — CVE-2026-23918 early-reset double purge (03:29–03:38Z 21 Nov) — rung 2 only
+
+Named lane L2, not a reopen of CVE-2026-119618. The 2.4.70 `CHANGES` file
+records "CVE-2026-23918: Apache HTTP Server: http2: double free and possible
+RCE on early reset ... This issue affects Apache HTTP Server: 2.4.66"
+(`CHANGES:515-520`, credit Bartlomiej Dmitruk), followed by mod_http2 2.0.37
+"Prevent double purge of a stream, resulting in a double free. Fixes PR
+69899" (`CHANGES:553-556`). 2.4.66 ships mod_http2 2.0.35; 2.4.67 ships
+2.0.39. The local 2.4.70 build (2.0.42) is already patched, so L2 required a
+new source: `lab/src/httpd-2.4.66.tar.bz2` SHA256
+`94d7ff2b42acbb828e870ba29e4cbad48e558a79c623ad3596e4116efcfea25a` and
+`lab/src/httpd-2.4.67.tar.bz2` SHA256
+`66cd206637b0d5c446fa7dabe75fe03525da8fb55855876c46288cd88b136aa4`,
+both verified against the published `.sha256` files (provisioning only).
+The 2.4.66→2.4.67 `modules/http2/h2_mplx.c` diff replaces three unguarded
+`APR_ARRAY_PUSH(m->spurge, h2_stream *) = stream` sites (2.4.66 lines
+134/167/183) with `add_for_purge()`, which scans `m->spurge` and refuses a
+duplicate. `c1_purge_streams()` destroys every `spurge` entry, so a duplicate
+is a double destroy; the 2.4.66 c2-done "already in spurge" check at
+`h2_mplx.c:1022-1028` compares the local NULL `stream` instead of the array
+element and cannot catch it.
+
+`lab/apache2shell/build-l2.sh` builds both versions ASan/UBSan with the
+pinned loopback nghttp2 1.64.0. `lab/apache2shell/l2-lane.py` starts each
+build on 127.0.0.1:7266/7267 and drives h2c HEADERS followed immediately by
+RST_STREAM (`drive.py --shape rst`, fill 0, 8 connections × 100 streams);
+fill 0 keeps CVE-2026-119618's header groom out of this lane. Pristine
+results (`logs/l2-lane-0335Z.log`, `logs/l2-lane-pristine-0338Z.log`, error
+logs `logs/l2-2.4.{66,67}-error.log`):
+
+- 2.4.66 at 03:35Z: 800 sent / 18 responses, one `AH00102 ... h2_mplx.c,
+  line 606, assertion "stream->state == H2_SS_CLEANUP" failed`, child
+  Abort(6), two more children SEGV(11).
+- 2.4.66 at 03:38Z (same pristine binary): 800/18, three children SEGV(11),
+  no assertion. The expression of the race varies; the child failures do not.
+- 2.4.67 control in both runs: 800/234 and 800/248 responses, zero
+  assertions, aborts or SEGVs. LeakSanitizer's 200-byte thread-allocator
+  report at SIGTERM appears in both builds and is unrelated.
+
+`ap_assert` is unconditional in this build (`include/httpd.h:2284`), so on
+the assertion path the invariant fires before the second destroy. To observe
+the queue itself, a temporary instrumented 2.4.66 build logged every push and
+purge entry (`logs/l2-lane-instrumented2-0337Z.log`,
+`logs/l2-h2_mplx-instrumented.c`); the pristine source was then restored and
+rebuilt. In that run, connection `127.0.0.1:56870` pushed the *same pointer*
+`0x774f4df750a0` (stream 1) into `m->spurge` twice at `nelts=0` and `nelts=1`,
+and likewise `0x774f4c5960a0` (stream 3) and `0x774f4c58c0a0` (stream 5);
+`c1_purge_streams()` then iterated those duplicate slots. An earlier
+instrumented run (`logs/l2-lane-instrumented-0336Z.log`) logged a second
+entry after the first destroy with `id=-245919704 state=0`, a stale-entry
+read. ASan does not report a malloc double-free because `h2_stream` comes
+from an APR pool, not the malloc allocator.
+
+Grade: rung 2 on the unmodified vendor builds — a reproducible early-reset
+crash with a clean fixed-build control. The instrumented log proves the
+duplicate-pointer precondition, but it is not attacker-chosen bytes or a
+chosen pointer, and no marker execution was attempted. Rung 4 remains NOT
+demonstrated, and the main Stage A closure and do-not-retry list are
+unchanged.
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -400,6 +460,8 @@ python3 huffman-probe.py <port>                 # Huffman NUL: RST:1, no bypass
 BODY_CANARY_HEX=00007fff424f445943414e00000000 \
   ./gdb-inspect.sh 2.4.70 <port> 78 30          # binary DATA: no NUL in fault word
 python3 pushdiary-lane.py                       # adjacent lane L1: 2.4.70 SEGV, 2.4.71 OK
+bash build-l2.sh                                # ASan builds of 2.4.66 / 2.4.67
+python3 l2-lane.py 20                           # L2: 2.4.66 child failure, 2.4.67 clean
 ```
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
