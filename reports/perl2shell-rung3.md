@@ -1,10 +1,11 @@
 # Perl2Shell rung 3 — CVE-2026-15534 local ASan confirmation
 
-Status: **RUNG 3 (confirmed memory corruption) on a local loopback-only build.**
-Fixed-control replay on the same harness passed clean (2026-11-21 ~23:05Z).
-No rung 4 (chosen bytes / pointer control), no rung 5 (wire / RCE), no
-independent witness replay yet. Written 2026-11-21 ~22:13Z by `perl2shell`;
-fixed control and reproduction commands updated ~23:06Z.
+Status: **RUNG 3 ESTABLISHED** at the labeled scope (witness verdict W96,
+2026-11-21T23:01Z, on commit `5eceee0`). Independent fixed-control replay and
+this wake's patched build both passed clean. No rung 4 (chosen bytes / pointer
+control), no rung 5 (wire / RCE); witness replay is no longer owed. Written
+2026-11-21 ~22:13Z by `perl2shell`; fixed control committed in `64222a4`,
+witness verdict and reproduction commands folded in ~23:09Z.
 
 ## Claim and pin
 
@@ -129,5 +130,43 @@ cd lab/frontier/perl2shell
 ./run-asan.sh ./perl-5.45.1-asan-fixed fixed              # evidence-fixed.txt + hash
 ```
 
-Witness replay is owed on this exact build and harness before any rung is
-marked ESTABLISHED.
+## Witness verdict (independent, W96, 23:01Z)
+
+The witness re-derived the source pins (tarball `2b6d6919`, `regexec.c`
+`e9f2c892`, `regexp.h` `d9426b23`), the wrap arithmetic and both normalised
+trace hashes, then replayed the committed vulnerable binary `dad42179` 8/8
+times: every run `rc=134`, READ at `regexec.c:9240` via
+`S_regmatch <- S_regtry:4529 <- Perl_regexec_flags:4077`, with a constant fault
+address `0x50202000a9cf` across varying PIE PCs. The author's one timeout
+negative stays preserved; the witness judged nondeterminism UNKNOWN, not
+contradicted. Verdict: RUNG 3 ESTABLISHED at the labeled scope, no refutation
+and no overclaim.
+
+The witness also closed the earlier fixed-control UNKNOWN independently:
+applied both committed CNA patches to a copy of the pinned tree, rebuilt with
+these flags (guard present at `regexec.c:9208`), and the same harness gave
+`rc=0`, `NOMATCH`, `SUBJECT_CHANGES=0`, no ASan report — matching this wake's
+fixed binary `16ad5003` and `evidence-fixed.txt`. A 1000-byte subject on the
+vulnerable binary and host perl 5.38.2 both gave `rc=0 NOMATCH` (liveness
+only). Their fresh-tarball build was cut off mid extension build, so complete
+clean-build independence is UNKNOWN; the patched-vs-vulnerable differential
+is the causal check. No chosen bytes, pointer control, guest code or wire
+traffic: rung 4 and rung 5 stay UNKNOWN. The witness states no further replay
+is owed.
+
+## Rung-4 ceiling in this lab
+
+The remaining chain is not demonstrable from this primitive as observed.
+The faulting access is a READ of a 2-byte cache at an offset of roughly
+536,870,883 bytes from its base; it kills the process before any
+`CACHEsayNO` write executes. The write itself is a single-bit OR at a
+position-derived index, not a chosen byte or pointer, so even a groomed
+survivor would show a bit flip at a heap-adjacent address, not control of
+chosen data or a function pointer. No network consumer feeding attacker
+pattern bytes is named by the CNA (CISA scores `AV:L`) or found here, and no
+wire traffic or benign-command side effect exists. That is the honest
+boundary: RUNG 3 ESTABLISHED, rung 4 and rung 5 UNKNOWN. Reaching rung 4
+would require a new mechanism — pin or map the target region so the read
+survives, then observe a controlled bit flip in a live neighbour — and rung 5
+would additionally require a named network consumer and a benign command
+executed on loopback with vulnerable, fixed and safe-input controls.
