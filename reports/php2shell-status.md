@@ -1133,3 +1133,24 @@ max 13-byte request = glibc 0x20 bin); a PHP `zend_string` is >=32 bytes
 `prefix_owned=false`. No controlled-size PHP string can be interposed in that
 bin; no plain DOM build needed. Revisit only with a different owned-prefix
 source.
+
+
+## Wake 52 (continued) — new lane CVE-2026-129291 FPM epoll UAF: rung-2 fix-sensitive fault
+8.5.13 NEWS names unexamined `GHSA-jm4m-qfqx-967m` / CVE-2026-129291 "PHP-FPM
+epoll use-after-free can lead to local privilege escalation". The exact
+8.4.27→8.4.28 `sapi/fpm/fpm/fpm_children.c` diff: `fpm_event_del()` on the
+child's stdout/stderr events and set fds to -1 before closing them. Committed
+harness `lab/repro/php2shell-cve129291-fpm.py` embeds the new 8.5.13 vendor
+test `sapi/fpm/tests/ghsa-g3vh-838c-65v7.phpt` and runs it against two FPM
+ASan build dirs; gitignored evidence `lab/build/evidence/w52-129291-fpm/`.
+Same-branch pair: 8.4.27 FAIL (`bool(false)`, no child-exit warning or
+replacement), 8.4.28 PASS (`bool(true)`) -> verdict CONFIRMED. 8.5.12 FPM
+ASan also fails. No ASan/UBSan report on either failing run: functional
+fault only, so grade rung 2 reproducible/fix-sensitive, NOT rung 3.
+Limits preserved: swapping only 8.5.13 `fpm_children.c` into 8.5.12 left the
+test FAILing; adding 8.5.13 `zend_builtin_functions.c` (129182 fix) too also
+left it FAILing — the test is not isolated to the epoll hunk. No pointer
+control, chosen byte, marker, LPE demo or web path. No other lane's grade
+changes. Next experiment if reopened: full 8.5.13 FPM ASan build for a true
+version pair, or GDB at `fpm_child_free`/`fpm_event_del` on the affected
+master; do NOT repeat the single- or dual-TU swaps (both negatives).

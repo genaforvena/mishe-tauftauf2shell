@@ -615,6 +615,18 @@ Thread 3 "httpd" received signal SIGSEGV, Segmentation fault.
 rdi = rsi = 0x7ffff6a8f088   (unmapped)
 ```
 
+**Causal confirmation by fixed variant (05:19–05:20Z).** The exact two-line
+2.4.69 fix was applied to the pinned 2.4.68 tree at both lookahead sites (source
+snapshot `logs/rw-mod_rewrite-pristine.c` preserves the original), only
+`mod_rewrite.so` was rebuilt with the lane's ASan flags and copied into
+`install-2.4.68-asan/modules/`, and the same 8-request test gave **0/8 child
+SEGV** — every request returned normally. The pristine source and module were
+then restored byte-for-byte (source SHA256
+`52a3c5b1b60fe0acec587df04e388f76298bc64f727c616e7c7bf4688febeb77` on both
+restored file and snapshot), and the crash returned in **6/6** requests. This
+ties the crash to the `vary_this` duplication and not to another difference
+between the 2.4.68 and 2.4.69 builds.
+
 Frame 4 is the exact Vary merge named by the source diff; the faulting
 `strlen()` argument is the dangling `ctx->vary`. This is **rung 3 confirmed
 memory corruption** (debugger-inspected dereference of freed memory), not just
