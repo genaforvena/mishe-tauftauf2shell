@@ -248,8 +248,10 @@ R-X segment contains no clean `pop rdi; ret` / `pop rsi; ret` or `pop rsp; ret`
 non-executable mappings), and a 20-byte frame at `RETSLOT-4` wrote only the
 return slot while the TPKT header corrupted the upper half of saved RBP, so a
 `leave; ret` pivot faulted. The direct multi-gadget stack chain superseded both.
-This probe is AUTHOR-ONLY until independently replayed; the three earlier
-probes remain witness-verified.
+W89 verdict #1127 replayed this probe from a clean git-archive HEAD tree:
+13 PASS / 0 FAIL rc 0, 6/6 pins OK, with the READBUF/ROP/WRITE trace and the
+52-byte loopback readback matched and no `LD_PRELOAD`; ESTABLISHED AS CLAIMED
+at the labeled grade. All four rung-4 probes now have replay verdicts.
 
 ## Bounded rung-5 experiment: real libc `system` from wire input (wake 7, 2026-11-21 ~19:56Z)
 
@@ -282,7 +284,7 @@ includes live heap bytes, so it need not match across runs.
 Observation: gdb at real `system` logged
 `SYSTEM hit rip=0x7ffff7c58750 rdi=0x7ffff002aaf0 str=printf R5_IEC_MARKER_49035 > ...`,
 the target process created `r5_marker.txt` containing exactly
-`R5_IEC_MARKER_49035` (18 bytes, sha256
+`R5_IEC_MARKER_49035` (19 bytes, sha256
 `697191af345051bfaa3f398d462fa905af4491498aa8865f1eb239db0e55b5f4`), and the
 inferior exited with code 02, no SIGSEGV. The marker is copied to
 `<outdir>/marker.txt` before the controls remove it. gdb supplies addresses
@@ -295,13 +297,14 @@ pinned conforming `exploit_client.c` stops at the AARE failure and leaves the
 marker absent. The vulnerable positive was observed in two independent runs
 (author repeat and clean replay) with different staged-file digests.
 
-Status: **AUTHOR-OBSERVED rung-5 limb, pending independent witness replay**;
-not ESTABLISHED. Conditions remain ASLR disabled, measured host offsets, a
-lab-constructed chain and a lab-chosen command; no attacker-supplied code,
-ASLR defeat, persistence, credential or off-loopback action. The rung-4 grade
-and its witness verdicts are unchanged. A first author attempt failed because
-gdb tried to insert the absolute `system` breakpoint before libc loaded; the
-harness now installs it after `start`, and that failed run is preserved in
+Status: **witness-ESTABLISHED rung-5 limb** (verdict #1127, W89) at the labeled
+conditions; the author observation and clean replay are independently
+confirmed. ASLR remains disabled, host offsets are measured, and the chain and
+command are lab-chosen; no attacker-supplied code, ASLR defeat, persistence,
+credential or off-loopback action. The rung-4 grade and its witness verdicts
+are unchanged. A first author attempt failed because gdb tried to insert the
+absolute `system` breakpoint before libc loaded; the harness now installs it
+after `start`, and that failed run is preserved in
 `/tmp/iec-r5-final-console.txt`.
 
 ## Grade and limits
@@ -332,15 +335,20 @@ harness now installs it after `start`, and that failed run is preserved in
   ASLR off, non-PIE and hardcoded offsets; it was inspected as a claim only and
   not run here.
 - Witness status: verdict #962 covers `r4_probe.sh`, #984 covers
-  `r4_pointer.sh` and #982 (W81, clean archive `6eeee8e`) covers
-  `r4_control.sh`, all ESTABLISHED AS CLAIMED at the labeled grade, including
-  the disclosed lab conditions. W81's counterexample (target patched to
-  `0x4141414141414141`) made the second frame carry that value and RIP follow
-  it, so the diversion is wire-controlled and not a hardcoded marker. The new
-  `r4_real.sh` is AUTHOR-ONLY and awaits independent replay; the other three
-  probes have been independently replayed.
-- Rung 5 (additive, owner standing #8): AUTHOR-OBSERVED only — the wire-supplied
-  chain calls real libc `system` in the live server and creates a lab marker,
-  with fixed and safe-input controls, in `r5_system.sh` (clean replay 15 PASS /
-  0 FAIL). Independent witness replay is still owed before any ESTABLISHED R5
-  claim; rung 4 above is unchanged.
+  `r4_pointer.sh`, #982 (W81, clean archive `6eeee8e`) covers
+  `r4_control.sh`, and #1127 (W89, clean git-archive HEAD tree, 13 PASS /
+  0 FAIL) covers `r4_real.sh`; all are ESTABLISHED AS CLAIMED at the labeled
+  grade, including the disclosed lab conditions. W81's counterexample (target
+  patched to `0x4141414141414141`) made the second frame carry that value and
+  RIP follow it, so the diversion is wire-controlled and not a hardcoded
+  marker. W89 observed the same READBUF/ROP/WRITE trace and 52-byte readback
+  with a different staged-file digest, excluding a fixed side effect.
+- Rung 5 (additive, owner standing #8): **witness-ESTABLISHED at the labeled
+  grade** (verdict #1127, W89). The wire-supplied chain calls real libc
+  `system` in the live server and creates a lab marker, with fixed and
+  safe-input controls, in `r5_system.sh` (clean replay 15 PASS / 0 FAIL).
+  W89 replayed it from a clean git-archive tree with 6/6 pins and varied the
+  command (`W89_VARIED_MARKER_7F3A`), producing a different marker digest;
+  both marker-absent controls held. Conditions remain ASLR disabled, measured
+  host offsets and a lab-constructed chain; ASLR-on reachability, attacker
+  code and general RCE stay UNKNOWN. Rung 4 above is unchanged.

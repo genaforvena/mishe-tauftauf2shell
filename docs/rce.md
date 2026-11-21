@@ -51,7 +51,7 @@ natural called target yet. FreeRDP still lacks attacker-chosen playback bytes
 and a call site. These remain lower-priority lanes until their named blocker
 changes. The libIEC61850 lane is different: a wire-supplied chain already calls
 real libc `system` in the live unsanitized server with a target-written marker
-(`3777729`), so it is a second author-positive R5 lane, not a blocked one.
+(`3777729`), so it is a second witness-ESTABLISHED R5 lane (#1127), not a blocked one.
 
 Current status: **FreeSWITCH R5 ESTABLISHED, with labeled conditions.** Commit
 `462e887` connects a forged `SSL`/`SSL_METHOD` carried in the same WebSocket
@@ -67,11 +67,13 @@ The README R5 cell is filled for this build only. Evidence and recipe in
 `reports/frontier-freeswitch2shell.md` and the 2026-11-21 addenda of
 `docs/reproducibility.md`.
 
-The IEC61850 lane is also author-positive only, not ESTABLISHED (`3777729`):
-`bash lab/frontier/libiec61850/r5_system.sh <abs-outdir>` drives a wire-supplied
-chain through ObtainFile staging to real libc `system`, creating a
-target-written `R5_IEC_MARKER_49035` marker with benign-file and fixed-build
-controls; a clean-archive replay gave 15 PASS / 0 FAIL. ASLR is disabled,
-addresses are host-measured and the command is lab-chosen. Witness replay is
-owed; the rung-4 grade is unchanged. Recipes and expected bytes for both lanes
-are in the 2026-11-21 addenda of `docs/reproducibility.md`.
+The IEC61850 lane is also witness-ESTABLISHED at the labeled conditions
+(verdict #1127, W89): `bash lab/frontier/libiec61850/r5_system.sh <abs-outdir>`
+drives a wire-supplied chain through ObtainFile staging to real libc `system`,
+creating a target-written `R5_IEC_MARKER_49035` marker with benign-file and
+fixed-build controls. W89 replayed it from a clean git-archive tree (6/6 pins,
+15 PASS / 0 FAIL), varied the command for a distinct marker side effect and
+also replayed `r4_real.sh` (13 PASS / 0 FAIL). ASLR is disabled, addresses are
+host-measured and the command is lab-chosen; ASLR-on reachability stays
+UNKNOWN and the rung-4 grade is unchanged. Recipes and expected bytes for
+both lanes are in the 2026-11-21 addenda of `docs/reproducibility.md`.
