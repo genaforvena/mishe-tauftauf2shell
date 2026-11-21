@@ -44,7 +44,7 @@ or inside local containers whose host ports bind only to loopback.
 | Freeswitch2Shell | [report](../reports/frontier-freeswitch2shell.md), [status](../reports/freeswitch2shell-status.md) | source at vulnerable parent `fbac12b451a1`, fix `d557ca6d29e6da4f10824dc158100906a592b91a`; both `mod_xml_rpc` and `enable-websocket` off by default | `cd lab/frontier/freeswitch2shell && bash run.sh` builds vuln/fixed/asan; `bash lab/freeswitch2shell/live/run.sh`, `bash lab/freeswitch2shell/live/run_pos.sh` and `bash lab/freeswitch2shell/live/run_live_gdb.sh` build the unmodified source over loopback | repaired driver prints `ALL CHECKS PASS` (rc 0) with pinned sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`: ASan `WRITE of size 132146` in `ws_raw_read`, 1464 OOB writes from 65536 to 66999, chosen 8 bytes at `offsetof(wsh_t, ssl)=131112` with `marker_called=1` and `rc=42`, fixed `rc=-1009`, 5/5 identical. Real-source `run.sh` (`FF FF FF FF`): ASan `negative-size-param (size=-5)`, plain rc 134, fixed `rc=-1009` with `wsh->ssl` untouched, offset 131112 validated. Real-source `run_pos.sh` (`7F FF FF FF 00 00 00 00`, `plen=INT_MAX`): plain `wsh->ssl=0x4142434445464748`, `ssl_bytes=4847464544434241`, `RESULT=PASS` rc 0; fixed `rc=-1009`, `ssl=(nil)`; ASan `WRITE of size 4096` at the end of a 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with a real WebSocket `101` upgrade; GDB caught the chosen `wsh->ssl` dereference in `SSL_shutdown`, witness-replayed (#338) with changed bytes at the same site. Stock heap layout and external reachability remain UNKNOWN. |
 | Freerdp2Shell | [report](../reports/frontier-freerdp2shell.md), [status](../reports/freerdp2shell-status.md) | source at vulnerable parent `8ec6d3923b`, fix `bf217a5` (3.32.1, `/ 4` division guard); digests `d0a31487…` / `c5186500…`; real-library source tag 3.32.0 at `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1` | `cd lab/frontier/freerdp2shell && bash run.sh` builds the extracted harness; `bash lab/freerdp2shell-src/run.sh` builds source-built ASan and plain libraries | extracted harness prints `ALL CHECKS PASS` (rc 0) twice; the real library prints `ALL REAL-LIBRARY CHECKS PASS` (rc 0): ASan `WRITE of size 16384` 0 bytes after an 8820-byte region in `rdpsnd_server_send_samples`, chosen `de`/`ad` at OOB offsets 8820/21384 through the real `SNDC_FORMATS` parser, fixed-guard control rc 3 with no wrap. In-process; live RDP, virtual-channel transport, session, stock allocator layout and auth gate UNKNOWN. |
 | Xrdp2Shell | [brief](../reports/frontier-xrdp2shell.md), [status](../reports/xrdp2shell-status.md) | xrdp 0.10.6 raw source (digest `d743c53f…`) and fixed 0.10.6.1 (`4b6c64e8…`), fix `43dc9c3b…`; harness digests `46735a43…` / `2da4d3ea…` | `cd lab/frontier/xrdp2shell && bash run.sh` builds instrumented vulnerable and ASan variants | replayed ~20:25Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=11836 first_oob=8192 last_oob=20027`, chosen `ab`/`cd` at OOB offsets 8228/12028, ASan `WRITE of size 20000` 0 bytes after an 8192-byte region, rung 4 `de`/`ad` at offsets 8228/12024, fixed and benign controls `oob_writes=0`, 5/5 traces identical. Harness only; live xrdp process, PDU path, dynamic-channel open and auth gate UNKNOWN. |
-| Gst2Shell | [brief](../reports/frontier-gst2shell.md), [status](../reports/gst2shell-status.md) | source at vulnerable parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, fix `80c184b4c5ee8ba28b2540ba58f40b8d44b61622`; harness digests `3d2b8e06…` / `7dde5da7…` | `cd lab/frontier/gst2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants | replayed 20:47Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=936 first_oob=256 last_oob=3999` with 3744 counted zeroed bytes, caps length controls which offsets are clobbered, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Rung 4 NOT demonstrated (constant `NONE(0)` zero-fill); live pipeline, SDP/RTSP path and allocator layout UNKNOWN. |
+| Gst2Shell | [brief](../reports/frontier-gst2shell.md), [status](../reports/gst2shell-status.md) | source at vulnerable parent `0b70c356345335dacc0acdc45d07a8a33bdf5eab`, fix `80c184b4c5ee8ba28b2540ba58f40b8d44b61622`; harness digests `3d2b8e06…` / `7dde5da7…` | `cd lab/frontier/gst2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants; `bash lab/gst2shell-src/run_live.sh` and `bash lab/gst2shell-src/run_real.sh` drive the live GObject and shipping-plugin cases | replayed 20:47Z from clean committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `oob_writes=936 first_oob=256 last_oob=3999` with 3744 counted OOB bytes, caps length controls which offsets are clobbered, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Wake 6 corrected the extracted harness's `NONE=0` model: pinned `audio-channels.h:101` defines `NONE=-3`, so index 73 turns NULL `order` into `0x00000000fffffffd`; the live ASan harness faults at `order->pos` and the shipping 1.24.2 `rtpL16depay` faults rc 139 for `encoding-params` 86/87/100/1000. Count-controlled rung 4 is demonstrated; chosen bytes, arbitrary pointer control, code execution and a real SDP/RTSP path remain NOT DEMONSTRATED or UNKNOWN. |
 | Babelfish2Shell | [brief](../reports/frontier-babelfish2shell.md), [status](../reports/babelfish2shell-status.md) | raw sources at tags `BABEL_4_8_0` / `BABEL_4_10_0`, fix `ab820bddaffa540af82f2f689c3e535f82f14d89`, harness digests in `PROVENANCE.md` | `cd lab/frontier/babelfish2shell && bash run.sh` builds the extracted vulnerable/fixed/ASan variants | replayed 2026-11-20 from committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `token=0x02 length=4096 si_capacity=1024 oob_writes=3072 first_oob=1024 last_oob=4095`, rung 2 length 1050/1150/2100 clobbers neither/first/both stamps, rung 3 ASan `WRITE of size 4096` 0 bytes after a 1024-byte region in `wire_getbytes`, rung 4 `de ad be ef ca fe ba be` at offset 1100 and `41 42 43 44` at 2000, fixed control `rc=0 oob_writes=0`, 5/5 `sha256=e216eeec…`. Harness only: real palloc layout, live TDS process, pointer control and execution UNKNOWN. |
 | Bzfs2Shell | [brief](../reports/frontier-bzfs2shell.md), [status](../reports/bzfs2shell-status.md) | raw sources at tags `v2.4.30` / `v2.4.32`, fix `8e501d685aef549090b363260979a4eb93484ea1` (OSV also `f11f05485d74…`); harness digests `1a16963f…` / `f2686d5b…` in `PROVENANCE.md` | `cd lab/frontier/bzfs2shell && bash run.sh out` builds the extracted vulnerable/fixed/ASan variants | replayed at handoff 2026-11-21 from committed sources: `ALL CHECKS PASS`, rc 0 — rung 1 `tcplen=-1024` with chosen tail at `tcpmsg+1024`, rung 2 destination 936 bytes before the object and next length 1028, rung 3 ASan `heap-buffer-overflow` `WRITE of size 64`, rung 4 `DEADBEEFCAFEBABE` / `0123456789ABCDEF` read back byte-exact from chosen preceding harness members, fixed controls reject at the first bound and are ASan-clean, 5/5 identical (`sha256=cea3b92e…`). Harness-only chosen-value control; no live bzfs, real layout or execution. |
 
@@ -63,9 +63,16 @@ two-pane window (20, inner socket), seed wall and status file are live; wake
 trigger units and the presentation.json entry are owed from the person's
 full-flag sync (`docs/runtime-pin.md`), never a bare `mishe sync`. The
 [brief](../reports/frontier-gst2shell.md) pins the sources, harness digests
-and expected bytes for rungs 1-3; rung 4 is an honest negative because the
-sink writes only a constant zero, and live caps negotiation and allocator
-layout stay UNKNOWN.
+and expected bytes for rungs 1-3. The extracted harness's "rung 4 is a
+zero-fill negative" claim is superseded: pinned `audio-channels.h:101` defines
+`GST_AUDIO_CHANNEL_POSITION_NONE = -3`, so the OOB writes store
+`fd ff ff ff` and index 73 corrupts the low half of the `order` pointer from
+NULL to `0x00000000fffffffd`. Wake 6 drove real GStreamer 1.24.2 types under
+ASan (`bash lab/gst2shell-src/run_live.sh`) to a deterministic `order->pos`
+fault and the shipping `rtpL16depay` plugin (`bash lab/gst2shell-src/run_real.sh`)
+to rc 139 with one caps field. That is impact controlled by channel count, not
+chosen bytes: strong rung 4, real SDP/RTSP caps delivery and pre-auth
+reachability stay UNKNOWN.
 
 Freerdp2Shell was handed off at 19:19Z and admitted by the operator at
 19:32Z under standing approval #6; the two-pane window, seed wall, charter
@@ -73,14 +80,16 @@ and task-file entry are live. Wake trigger units and the presentation.json
 entry are owed from the person's full-flag sync (`docs/runtime-pin.md`),
 never a bare `mishe sync`. The [brief](../reports/frontier-freerdp2shell.md)
 pins the sources, harness digests and expected bytes for rungs 1-3 plus
-harness-only rung 4. Wake 4 also drove chosen bytes through the real
-`SNDC_FORMATS` parser on source-built 3.32.0 library bytes (rung 4, still
-in-process). Wake 5 drove a framed PDU through the real
-`rdpsnd_server_handle_messages()` dispatcher (stub WTS read) and verified a
-shadow-compatible WAVE_FORMAT_ADPCM variant; a source survey corrected the
-earlier implication that DVI_ADPCM was reachable on the stock shadow server —
-its `Activated` callback cannot select tag `0x11` by default. Live RDP,
-virtual-channel transport, session, network and the post-auth gate stay UNKNOWN.
+harness-only rung 4. Wake 4 drove chosen bytes through the real
+`SNDC_FORMATS` parser on source-built 3.32.0 library bytes; wake 5 framed a
+PDU through the real `rdpsnd_server_handle_messages()` dispatcher. Wake 6
+replaced the stub WTS callback with libfreerdp's real WTS reader and ran the
+shadow `Activated` selection logic, but measured that the FFmpeg-off builds'
+server format list is PCM-only: both wrap-capable tags need a
+subsystem-supplied server format table to be selected. Rung 4 through that
+real reader, dispatcher, activation and parser is recorded with the condition
+explicit; still UNKNOWN are a live RDP process, real channel transport,
+session, network, stock heap layout and the post-auth gate.
 
 Babelfish2Shell was handed off from frontier on 2026-11-20 ~22:08Z (commit
 `088d4bc`) and admitted by the operator ~22:2xZ under standing approval #6.
@@ -126,9 +135,13 @@ control and execution stay UNKNOWN, and witness replay was requested (#429).
   build; 8.4.28 and a benign-close control are the negatives.
   CVE-2026-129182 (backtrace-global repopulation UAF, 8.5 only) has a bounded
   loopback FPM harness `lab/repro/php2shell-cve129182-fpm.py` with release-ASan
-  build support in `lab/php2shell/build-fpm-release.sh`; the debug ASan build
-  preserves a negative and the release replay is still owed, so its grade is
-  UNKNOWN.
+  build support in `lab/php2shell/build-fpm-release.sh`. Wake 45 finished the
+  release-ASan FPM replay on 8.5.12 (`--use-malloc`): both vendor diagnostics
+  reproduce but `VERDICT=CLEAN_NO_UAF` with zero ASan markers, also with
+  `ZEND_ASAN_FORCE_FAST_SHUTDOWN=1`, in ZendMM mode and under `--control`.
+  The grade stays UNKNOWN — the advisory behaviour was not reproduced on this
+  host — and the 8.5.13 fixed release build is unbuilt, so patch sensitivity
+  is untested.
 - **Mosquitto**: no published SHA-256 sidecar exists at the vendor path;
   `provision.sh` pins the exact local tarballs with hashes recorded from the
   audited files. cJSON 1.7.17 is pinned by `provision-cjson.sh`.
@@ -148,18 +161,29 @@ control and execution stay UNKNOWN, and witness replay was requested (#429).
 - **Freerdp**: `lab/freerdp2shell-src/run.sh` clones tag 3.32.0 at
   `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`, builds ASan and plain
   libraries with the pinned feature flags, and checks the source-built PoCs
-  plus the real-dispatcher cases; clean-room replay uses
+  plus the real-dispatcher and real-WTS cases; clean-room replay uses
   `FREERDP_WORK=/tmp/fr-wake4-fresh bash lab/freerdp2shell-src/run.sh`.
   The chosen-byte PoCs are sanitizer-free so both OOB writes can be read back;
   raw traces `vuln_real_library_asan.txt`, `wire_parse_asan.txt`,
-  `chosen_bytes_real_library.txt`, `dispatch_{asan,chosen,benign}.txt` and
-  `dispatch_adpcm{,_asan}.txt` are committed. Wake 5 added
-  `PocRdpsndChannelDispatch.c`, which frames a SNDC_FORMATS PDU and drives the
-  real `rdpsnd_server_handle_messages()` with a stub WTS read callback, plus a
-  shadow-compatible WAVE_FORMAT_ADPCM variant; the DVI record is not
-  selectable from the stock shadow server's default format list. Everything
-  stays in-process: no live RDP session, virtual-channel transport or auth
-  gate.
+  `chosen_bytes_real_library.txt`, `dispatch_{asan,chosen,benign}.txt`,
+  `dispatch_adpcm{,_asan}.txt`, `realwts_controls.txt`,
+  `realwts_subsystem.txt` and `realwts_asan_subsystem.txt` are committed.
+  `PocRdpsndChannelDispatch.c` frames a PDU through the real dispatcher;
+  wake 6's `PocRdpsndRealWts.c` uses libfreerdp's real WTS reader, real queue
+  and shadow `Activated` selection. Controls show the FFmpeg-off server
+  format list is PCM-only, so the positive case supplies a server ADPCM
+  record through `subsystem->rdpsndFormats`. Everything stays in-process:
+  no live RDP session, virtual-channel transport or auth gate.
+- **Gst**: `bash lab/gst2shell-src/run.sh` checks the extracted harness,
+  `bash lab/gst2shell-src/run_live.sh` builds a real GStreamer-typed ASan
+  instance against pinned `upstream/channels.c` (SHA-256 `08ae20b3…577b`)
+  and drives caps through a faithful copy of `depay.c:140-230`, and
+  `bash lab/gst2shell-src/run_real.sh` drives the installed
+  `libgstrtp.so` `rtpL16depay` through `gst_pad_set_caps`. Full outputs are
+  `live_evidence.txt` and `real_evidence.txt`; upstream bytes and builds are
+  gitignored under `lab/gst2shell-src/` and regenerated by the scripts. Both
+  harnesses keep benign, fixed and ASan controls; the real-plugin fault is
+  count-controlled, not chosen-byte control.
 - **Freeswitch**: a standalone, file-only C harness under
   `lab/frontier/freeswitch2shell/`; `run.sh` rebuilds vuln/fixed/asan and
   writes `logs/digests.txt`. Vulnerable parent `fbac12b451a1` and fix
