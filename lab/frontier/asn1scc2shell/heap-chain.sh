@@ -7,6 +7,12 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 OUT=$HERE/run
 cd "$HERE" || exit 2
 
+mkdir -p "$OUT/gen-v17"
+printf 'TEST DEFINITIONS ::= BEGIN\nPayload ::= OCTET STRING (SIZE(0..17))\nEND\n' \
+  > "$OUT/gen-v17/schema.asn"
+(cd "$OUT/gen-v17" && ../build/asn1scc/asn1scc -c -uPER schema.asn) \
+  > "$OUT/codegen-chain.log" 2>&1 || exit 2
+
 INC="-I$OUT/gen-v17 -I$OUT/build/v46/asn1crt"
 gcc -g -O0 -Wall $INC "$HERE/heap-chain.c" "$OUT/gen-v17/schema.c" \
   "$OUT/build/v46/asn1crt/"*.c -o "$OUT/heap_chain_v46" || exit 2
