@@ -57,7 +57,7 @@ Affected tag 5.2.0:
 
 Fixed tag 5.3.0: `CouponList-internal.hpp:102-108` rejects
 `couponCount >= 8` before allocation in the byte path; the stream path has
-the equivalent guard at `:156-164`; the surviving copy is at `:123`.
+the equivalent guard at `:156-163`; the surviving copy is at `:123`.
 `pr503.diff` adds those two guards plus the two regression tests.
 
 ## Replay record
@@ -66,3 +66,7 @@ Direct run 2026-11-21 ~12:48Z: 11 PASS / 0 FAIL rc 0, two five-run groups both
 `sha256=d7d0532239c8b926c23c102cac12b13ab9bae6506b7ff7f5341fd5aeda206e2a`.
 Trace lines exclude ASan addresses, paths and PIDs; the readback line prints
 offsets and byte values only.
+
+A clean `git archive 818ec4a lab/frontier/datasketches2shell` extraction into
+`/tmp/ds2-archive`, run with absolute outdir `/tmp/ds2-out-clean`, reproduced
+11 PASS / 0 FAIL rc 0 and the same digest in both groups.
