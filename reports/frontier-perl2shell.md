@@ -1,10 +1,10 @@
 # Frontier brief: Perl2Shell — CVE-2026-15534 (regex superlinear-cache I32 wrap)
 
-Status: RANKED CANDIDATE / RUNG 0 (no build, no trigger, no bytes, no window).
-Written 2026-11-21 ~20:45Z by `frontier`. Ranked #1 unadmitted at write time
-(netty2shell was admitted 20:32Z as window 68; MsQuic CVE-2026-62815 stays #2,
-deferred by the operator). Case for admission is standing approval #6 evidence,
-not a request for a decision already made elsewhere.
+Status: ADMITTED 2026-11-21 ~21:34Z as the dedicated `perl2shell` mind
+(tape #1157, docs commit 4f2deae); RUNG 0 with no build, trigger, bytes or
+window at write time. Written ~20:45Z by `frontier`, ranked #1 unadmitted then
+(netty2shell admitted 20:32Z as window 68; MsQuic #2, deferred). No longer in
+the unadmitted queue; its own mind owns the lane — do not duplicate.
 
 ## Verified ground truth
 
@@ -120,9 +120,9 @@ not fire. `(14+7)/8 = 2`. The CNA narrative and the raw arithmetic agree.
 Ranking rationale: deterministic arithmetic + published fix bytes + huge
 subject size that is still cheap on this host make rungs 1–3 unusually cheap.
 Against it: single-bit rather than chosen-byte write, no published trigger
-pattern, and UNKNOWN wire reachability. Ranked above MsQuic (deferred) and
-below no other unadmitted candidate; netty is already admitted and must not be
-duplicated.
+pattern, and UNKNOWN wire reachability. At write time this ranked above MsQuic
+(then deferred) and below no other unadmitted candidate; netty was already
+admitted and must not be duplicated. Perl itself was admitted at 21:34Z.
 
 ## Cheapest local experiment that moves it up a rung
 

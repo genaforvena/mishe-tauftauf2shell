@@ -1,7 +1,14 @@
 # Frontier brief: Apache2Shell — CVE-2026-119618
 
-**Verdict: RANKED CANDIDATE #1 (unadmitted), RUNG 1 ESTABLISHED locally —
-reproducible wire trigger of the wrong-pool write; rungs 2/3 NOT established.**
+**Status: ADMITTED 2026-11-20 under standing approval #6 as the dedicated
+`apache2shell` mind; this brief was written before the operator's 21:37Z
+correction (#1158, docs/task.md:2586) and is retained as frontier's
+independent local evidence, NOT a live ranking. Frontier's local result:
+RUNG 1 ESTABLISHED — reproducible wire trigger of the wrong-pool write;
+rungs 2/3 NOT established on the locally ASan-instrumented APR build. The
+admitted mind separately records rungs 1–3, Stage A chosen bytes and Stage C
+UNREACHABLE on its uninstrumented system-libapr build, with the main lane
+closed. Do not duplicate that lane.**
 
 ## Local result (W91, 2026-11-21)
 
@@ -81,22 +88,22 @@ differential plausible.
   4 requires showing control (overlapping allocations or chosen bytes at
   chosen offsets), which the `"0"`-string write does not give directly.
   ASLR/heap-shape escalation and any actual command execution are UNKNOWN.
-- **Ranking.** #1 ahead of Perl (CVE-2026-15534, AV:L/no wire path) and
-  MsQuic (deferred): this is the only fresh candidate with a vendor-critical
-  network primitive, a tagged fix and a published PoC to replay.
+- **Ranking — HISTORICAL, superseded.** At write time this was ranked #1
+  ahead of Perl and MsQuic. Apache2Shell had already been admitted on
+  2026-11-20 (#1158, docs/task.md:2586); Perl was admitted 2026-11-21 ~21:34Z
+  (#1157). MsQuic CVE-2026-62815 is the deferred head of the unadmitted queue.
+  This candidate is no longer in that queue.
 
-## Next bounded experiment (rung 2/3)
+## Former next bounded experiment — CLOSED, not frontier's lane
 
-The wrong-pool full-table write is reproducible, but the allocator race
-was not: 0 ASan reports across 2000+ full-table writes and one unrepeated
-child SIGSEGV. The missing variable is sustained multiplexed traffic on a
-small set of connections while the connection thread frees socket buckets.
-Next: repeat the 2000-stream/10-connection `repro-h2c-mux.py` burst on
-freshly restarted vulnerable and fixed servers several times, with TSan
-instrumentation on httpd and APR to observe the unsynchronised free-list
-read/write directly. An ASan report or deterministic child crash on the
-vulnerable build with a clean fixed control would establish rungs 2/3;
-label any in-process marker as rung-4 mechanics, not rung 5.
+Before the correction I proposed repeated 2000-stream/10-connection
+`repro-h2c-mux.py` bursts with TSan on httpd and APR. That experiment is not
+mine to run: `apache2shell` owns the lane, and its commit `e8b106c` (DM #1167)
+already folded my negative result into `reports/apache2shell-investigation.md`
+as build-bound contradictory evidence. Its main lane is closed at Stage A and
+reopens only on a binary-capable primitive; the fixed `"0"` byte and APR
+free-list corruption supply no reopen condition. No replay or window is owed
+by frontier.
 
 ## Pins and provenance
 
@@ -104,5 +111,6 @@ All bytes in `lab/frontier/apache2shell/src/`; `sha256sum -c SHA256SUMS`
 verifies 6/6. Raw sources were fetched from the Apache httpd Git tags and
 the CVE/OSV APIs on 2026-11-21; the PoC README is an external claim pinned
 for wording only. Release tarballs were SHA256-checked against ASF-published
-checksums. Builds and loopback traffic are recorded in `OUTCOME.md`; no
-window has been created by me.
+checksums. Builds and loopback traffic are recorded in `OUTCOME.md`. No
+window was created by me: the target already had window 45 under
+`apache2shell` when this brief was written.
