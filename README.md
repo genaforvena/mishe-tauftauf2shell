@@ -46,8 +46,13 @@ copies of the affected software:
   (`"23456789"` or `"27.0.0.1"`); fixed 8.5.13 returns `"/x"` in both orders.
   ASan is silent because the touched bytes live in the environment block, so
   the evidence is the gdb byte observation plus the affected/fixed output
-  difference. No chosen-byte write, pointer control or marker execution, and
-  the HTTP-to-FastCGI mapping stays UNKNOWN without a web server.
+  difference. Wake 50 drove an ordinary HTTP request through a real loopback
+  nginx 1.24 FastCGI responder (`lab/repro/php2shell-cve129538-nginx.py`): the
+  standard `fastcgi_split_path_info` mapping is clean on both builds, while a
+  naive non-default mapping (full URI in SCRIPT_FILENAME, short PATH_INFO)
+  leaks adjacent param bytes (`6789` / `23456789`) on 8.5.12 and stays clean
+  on 8.5.13 — verdict `HTTP-REACHABLE OOB READ CONFIRMED`. No chosen-byte
+  write, pointer control or marker execution; grade stays rung 3.
 - **Node2Shell** — CVE-2026-123828, two one-byte heap overflows in Node's
   HTTP/2 `Alt-Svc` handling (`src/node_http2.cc`): fix `nodejs/node@ae9ab37d62`
   removes `kNullTerminate` from both `WriteOneByteV2` calls, so the origin
@@ -82,6 +87,13 @@ copies of the affected software:
   runs, while 2.4.67 controls answer cleanly; the guard is `add_for_purge()`
   in mod_http2 2.0.37. Reproduce with `lab/apache2shell/build-l2.sh` and
   `python3 lab/apache2shell/l2-lane.py`.
+  Adjacent lane L3 (CVE-2026-57941, shared `session->bbtmp` re-entrancy) is
+  rung 3: on pristine ASan httpd 2.4.68, h2c GET/POST/RST_STREAM/GOAWAY
+  traffic produces child SEGVs and a forced-ASan wild-jump PC in
+  `h2_c1_read (h2_c1_io.c:502)`, while 2.4.69 stays clean. The race is
+  intermittent and the jump target is not attacker-chosen, so rung 4 is NOT
+  demonstrated. Reproduce with `bash lab/apache2shell/build-l3.sh` and
+  `ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_error=0:halt_on_error=1' python3 lab/apache2shell/l3-lane.py 10 8 20`.
 - **Mosquitto2Shell** — CVE-2026-110486 / GHSA-6j8m-r32v-4h38, a masked
   zero-length WebSocket frame that overruns a one-byte allocation in
   Mosquitto's built-in WebSocket backend; rung 3 + Stage A placement are
@@ -165,9 +177,13 @@ copies of the affected software:
   ~20:27Z under standing approval #6; rungs 1-3 and chosen-byte rung 4 are
   recorded in the brief, and a second driver reproduces them on real compiled
   xrdp 0.10.6 library bytes with markers read back in an adjacent heap chunk
-  (no pointer-sized target). A full RDP session, dynamic-channel open,
-  network PDU trace, live-session allocator layout and the auth gate stay
-  UNKNOWN; loopback COTP reachability of the lab listener only.
+  (no pointer-sized target). A third driver feeds a wire-formatted
+  TPKT/X.224/MCS/channel/DYNVC PDU to the real `xrdp_rdp_recv()`: an 8191-byte
+  payload overflows the sink through that chain, while the 20000-byte harness
+  size is rejected by the MCS 16K limit. A completed RDP logon, a chansrv-
+  negotiated dynamic channel, a socket-level PDU trace, live-session
+  allocator layout and the auth gate stay UNKNOWN; loopback COTP reachability
+  of the lab listener only.
 - **Gst2Shell** — CVE-2026-111183 / GHSA-62fg-53h6-6f68, a high
   `channels` value in GStreamer's rtpL8/rtpL16/rtpL24 depay caps that over-writes the fixed
   64-entry `GstAudioInfo.position` array. Rungs 1-3 are reproduced in an
@@ -202,9 +218,15 @@ copies of the affected software:
   GObject allocation; the shipping plugin has no debug info, so that write
   is not symbolicated to a function name in that run. One command replays
   every driver: `bash lab/gst2shell-src/verify_all.sh` (add
-  `VERIFY_VALGRIND=1` for the memcheck lane) — committed run at git HEAD
-  3b07571 is 43 PASS / 0 FAIL, rc 0, with chosen-byte rung 4 asserted NOT
-  demonstrated.
+  `VERIFY_VALGRIND=1` for the memcheck lane). A witness replay contradicted
+  the earlier "43 PASS / 0 FAIL at HEAD 3b07571" assertion on its host with
+  42 PASS / 1 FAIL (rc 1): the L8 N=1000 leg's allocator-abort text was not
+  matched by the old regex. `verify_all.sh` now accepts the observed fault
+  family or a nonzero per-leg rc while keeping 43 checks. From repaired HEAD
+  31e7243 the author's `VERIFY_VALGRIND=1` replay is 43 PASS / 0 FAIL, rc 0;
+  a docs-side run without that flag is 39 PASS / 0 FAIL, rc 0. These are
+  author and docs replays, not independent acceptance; chosen-byte rung 4
+  stays NOT DEMONSTRATED.
   Admitted ~20:52Z under standing approval #6.
 - **Babelfish2Shell** — CVE-2026-119923 / GHSA-vq28-vgj3-r26w / AWS
   2026-166-AWS, an unbounded 16-bit TDS prelogin `length` copied verbatim
@@ -293,7 +315,7 @@ is called established.
 | **Freeswitch2Shell** | **Rung 4 — chosen-pointer dereference in a live FreeSWITCH process over loopback; sentinel is a value, not code** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with `mod_xml_rpc` + `enable-websocket`: a real WebSocket `101` upgrade delivered the frame and GDB caught the chosen `wsh->ssl` value dereferenced in `SSL_shutdown` from `ws_destroy (ws.c:367)` ← `websocket_hook (mod_xml_rpc.c:703)`; witness replay #338 changed only the 8 chosen bytes and saw the new value at the same fault site. Fixed and in-bounds controls survive. Stock heap layout, external reachability and the opt-in config gate stay in the claim; the sentinel is not executable code. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
 | **Freerdp2Shell** | **Rung 4 — chosen bytes on real library bytes and in the live server over the wire** | A crafted `SNDC_FORMATS` record with `nChannels=2, nBlockAlign=4` passes the scalar guard, wraps `out_frames` to `0xfffffffffffffff0` after a failed realloc, and drives sequential client copies past the 8820-byte buffer. ASan reports `WRITE of size 16384` in `rdpsnd_server_send_samples` on source-built 3.32.0; a sanitizer-free replay through the real `rdpsnd_server_recv_formats()` parser places `de` at OOB offset 8820 and `ad` at 21384, with a fixed-guard control at rc 3 and no wrap. Wake 5 drove a framed PDU through the real dispatcher; wake 6 replaced its stub WTS reader with libfreerdp's real reader and shadow activation, and measured that FFmpeg-off builds offer PCM only, so the positive case needs a subsystem-supplied ADPCM server record. The ADPCM variant wraps `out_frames` to `0xfffffffffffffffc`. Wake 7 ran a real 3.32.0 `freerdp-shadow-cli` on 127.0.0.1:13890 and drove X.224 / RDP_NEG_REQ over real TCP: protocol `0x08` NLA / `0x02` TLS / `0x00` RDP, and the default NLA gate held after a completed TLS handshake with CredSSP withheld (`CONNECTION_STATE_NEGO`), while standard-RDP local-peer mode advanced without credentials. Wake 8 completed MCS/ERECT-DOMAIN/ATTACH-USER/channel-join, reached `CONNECTION_STATE_ACTIVE` with a headless `sfreerdp`, observed `SNDC_FORMATS` over the wire and the live server's `realloc failed!` / `SelectFormat failed with 12`, and reproduced the ASan `WRITE of size 16384` in the LIVE server with client-chosen `0xDE` at offset 8820. No-auth server, subsystem-supplied ADPCM table, ASan build and synthetic playback are explicit conditions; the stock-allocator live replay is one command (`bash lab/freerdp2shell-src/verify_live.sh`, 17 PASS warm / 18 PASS clean room, author replay), while pointer control, a real audio source and an FFmpeg-enabled build stay UNKNOWN. [Status](reports/freerdp2shell-status.md) |
 | **Xrdp2Shell** | **Rung 4 — chosen bytes on real compiled xrdp 0.10.6 code; still in-process** | A 28-byte data-first header plus 20000 client bytes writes `oob_writes=11836` from offset 8192; chosen `ab`/`cd` land at OOB offsets 8228/12028, ASan reports `WRITE of size 20000` 0 bytes after the 8192-byte region, and rung 4 places `de`/`ad` at offsets 8228/12024 across two messages. A second driver links the real ASan `libxrdp.a` / `libcommon.a` and drives `xrdp_channel_process()` → real `drdynvc_process_data_first()` → `out_uint8a`: ASan `WRITE of size 20000` in `memcpy`, 0 bytes after the 8192-byte `trans_create` region; threshold 8164 clean / 8165 OOB, 5/5 identical modulo ASLR. A non-ASan reader plants an adjacent canary chunk and reads `DEADBEEF-CR` / `C0FFEE00-CR` back at offsets 84/484, 8208 bytes past the buffer start (`CHOSEN_BYTES m1=PASS m2=PASS`); no pointer-sized field or control-flow target was controlled and a `free()` variant aborts with `malloc(): corrupted top size`. The 8128-byte cap is a synthetic control, not the real 0.10.6.1 fix; exact-size and benign controls are clean. No completed RDP logon, dynamic-channel open, network PDU trace or live-session allocator layout; loopback COTP reply only; post-auth gate intrinsic; witness replay owed. [Status](reports/xrdp2shell-status.md) |
-| **Gst2Shell** | **Rung 3 confirmed; count-controlled rung-4 effect in live and shipping builds, including a real RTSP client across the L8/L16/L24 family** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, caps length choosing the clobbered offsets, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. The harness's `NONE(0)` model was wrong — pinned `NONE=-3` writes `fd ff ff ff`, corrupting `order` to `0x00000000fffffffd`; a live ASan instance faults at `order->pos` and the shipping 1.24.2 plugin faults rc 139 at `encoding-params` 86/87/100/1000. A 2026-11-21 pass symbolicated the N=1000 shipping fault to `srcpad->g_class` in a heap-adjacent GstPad and drove SDP text through GStreamer's own parser to the same fault at N=86/1000 (RTP structure name modelled in the harness); the `sdpdemux` file path remained a bounded negative. A loopback RTSP server fed a real `rtspsrc ! rtpL16depay ! fakesink` client with no auth challenge: N=1000 faults rc 139 four times against a clean N=8, corruption in GLib's `block_source`, and stock `uridecodebin` aborts rc 134 with `malloc(): invalid size`. The family runner covers L8/L16/L24 (N=1000: L8/L24 heap abort, L16 SIGSEGV/segtrap; N=8 clean) and memcheck shows three 4-byte stores 0/4/12 bytes past a 1016-byte GObject; `bash lab/gst2shell-src/verify_all.sh` replays all drivers at 43 PASS / 0 FAIL. Chosen bytes, arbitrary pointer control, RCE and public-service SDP reach stay NOT DEMONSTRATED. [Status](reports/gst2shell-status.md) |
+| **Gst2Shell** | **Rung 3 confirmed; count-controlled rung-4 effect in live and shipping builds, including a real RTSP client across the L8/L16/L24 family** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, caps length choosing the clobbered offsets, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. The harness's `NONE(0)` model was wrong — pinned `NONE=-3` writes `fd ff ff ff`, corrupting `order` to `0x00000000fffffffd`; a live ASan instance faults at `order->pos` and the shipping 1.24.2 plugin faults rc 139 at `encoding-params` 86/87/100/1000. A 2026-11-21 pass symbolicated the N=1000 shipping fault to `srcpad->g_class` in a heap-adjacent GstPad and drove SDP text through GStreamer's own parser to the same fault at N=86/1000 (RTP structure name modelled in the harness); the `sdpdemux` file path remained a bounded negative. A loopback RTSP server fed a real `rtspsrc ! rtpL16depay ! fakesink` client with no auth challenge: N=1000 faults rc 139 four times against a clean N=8, corruption in GLib's `block_source`, and stock `uridecodebin` aborts rc 134 with `malloc(): invalid size`. The family runner covers L8/L16/L24 (N=1000: L8/L24 heap abort, L16 SIGSEGV/segtrap; N=8 clean) and memcheck shows three 4-byte stores 0/4/12 bytes past a 1016-byte GObject; `bash lab/gst2shell-src/verify_all.sh` replays all drivers (43 checks). A witness replay that saw 42 PASS / 1 FAIL on its host contradicted the earlier 43/43 assertion; the fault-signature check was broadened to accept the observed allocator aborts and per-leg nonzero rc, with no grade change. Chosen bytes, arbitrary pointer control, RCE and public-service SDP reach stay NOT DEMONSTRATED. [Status](reports/gst2shell-status.md) |
 | **Babelfish2Shell** | **Rungs 1-3 in an extracted harness; harness-only chosen-byte rung 4** | An unbounded 16-bit prelogin `length=4096` copied into a 1024-byte `StringInfo`: `oob_writes=3072 first_oob=1024 last_oob=4095`; lengths 1050/1150/2100 clobber neither/first/both neighbour stamps; ASan `WRITE of size 4096` 0 bytes after a 1024-byte region in `wire_getbytes`; chosen `de ad be ef ca fe ba be` / `41 42 43 44` land byte-exact at OOB offsets 1100/2000; fixed control `rc=0 oob_writes=0`, clean under ASan, 5/5 identical. No live TDS endpoint, `palloc` layout, real neighbour or control-flow effect observed. [Status](reports/babelfish2shell-status.md) |
 | **Bzfs2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A 1024-byte body writes four sender-chosen bytes past `tcpmsg[1024]` into adjacent `tcplen`: rung 1 `tcplen=-1024` with chosen tail at `tcpmsg+1024`; rung 2 destination 936 bytes before the object, next length 1028; rung 3 ASan `heap-buffer-overflow` `WRITE of size 64` via `recv` → `traced_recv` → `receive_msg`; rung 4 `DEADBEEFCAFEBABE`/`0123456789ABCDEF` read back byte-exact from chosen preceding harness members; fixed controls reject at the first bound, ASan-clean, 5/5 identical. No live bzfs, player socket, real `NetHandler` layout, allocator neighbour or execution. [Status](reports/bzfs2shell-status.md) |
 | **Kamailio2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A `alias=host~<port>~1` Contact parameter makes the tilde distance the `memcpy` length into `bufport[5]`: `len=80`, `oob=75`, `first_oob=5`, chosen function pointer and stamp overwritten byte-exactly; ASan `stack-buffer-overflow` `WRITE of size 80` from `memcpy` ← `parse_alias`, marker executed through the instrumented pointer only; pinned 6.1.5 rejects before the copy. No live Kamailio, real `process_contact()` layout, stack protector, return-address control or SIP message. [Status](reports/kamailio2shell-status.md) |
@@ -302,17 +324,18 @@ is called established.
 | **Accelppp2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 66 AVP chunks of 64 bytes put `pos=4254` into a 4160-byte `t->buf`: ASan `heap-buffer-overflow` `WRITE of size 64` at pinned `log_tcp.c.1.14.0:63`; chosen `0x1122334455667788` is read back byte-exact at offset 4 in the adjacent harness heap object; pinned 1.15.0 clamps to 4160 with a clean neighbour. No live daemon, real L2TP AVP path, verbose-logging configuration or useful-pointer control. [Status](reports/accelppp2shell-status.md) |
 | **Indiserver2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 1206-byte mismatched-tag packet formats 1237 bytes into `err[1024]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 1237` at pinned `lilxml.cpp:1281`, and token-safe `INDI2SHELL` reads back byte-exact at requested adjacent-stack offsets 0 and 64. Fixed `96bbd7f` bounds the format with `snprintf` and the neighbour is clean. No live daemon, real TCP/7624 path, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/indiserver2shell-status.md) |
 | **Shairport2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4096-byte unrecognised-method RTSP body writes 8193 bytes into `obf[4096]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 3` at pinned `rtsp.c:4215`, and token-safe `INDI2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fixed `c1c41c4` declares `obf[2*4096+1]` and the neighbour is clean. No live daemon, socket, AirPlay-2 auth-bypass observation, stock frame layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/shairport2shell-status.md) |
-
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
-new 8.5 stale-argument read, 129182's root-caused clean replay and the
-129538 CGI PATH_INFO lane's HTTP-to-FastCGI mapping),
+new 8.5 stale-argument read and 129182's root-caused clean replay; the
+129538 lane's HTTP-to-FastCGI mapping is now observed through a real nginx
+but still reaches only an offset-controlled OOB read),
 Node's path from its two independent AltSvc terminator triggers to control,
 Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
 index 27, FreeRADIUS's live `radiusd` replay, FalkorDB's four-byte-repeating
-mask, Freeswitch's stock heap layout and any executable sentinel, Xrdp's full
-PDU trace and auth gate, GStreamer's RCE and chosen-byte control beyond the
+mask, Freeswitch's stock heap layout and any executable sentinel, Xrdp's
+socket-level PDU trace and auth gate (a wire-formatted PDU parsed in-process
+now reaches the sink), GStreamer's RCE and chosen-byte control beyond the
 demonstrated loopback RTSP caps fault across the L8/L16/L24 depay family, and
 Freerdp's real audio source, an FFmpeg-enabled
 build and a stock wrap-capable server format are still open. Apache's

@@ -124,9 +124,23 @@ claims, not conclusions.
   PATH_INFO leaks `"23456789"` / `"27.0.0.1"` respectively (fixed 8.5.13
   `"/x"` both), so the attacker chooses the offset (suffix length) and the
   adjacent value (param order); the leak destination is
-  `$_SERVER['PATH_INFO']`. Real-web-server HTTP reachability stays UNKNOWN
-  (no web server used) and ASan still silent. The lane is at its natural
-  stop: no chosen-byte write, pointer control or marker execution.
+  `$_SERVER['PATH_INFO']`. Wake 50 closed the HTTP reachability UNKNOWN:
+  `lab/repro/php2shell-cve129538-nginx.py` runs a real loopback nginx 1.24
+  FastCGI responder against 8.5.12-asan and 8.5.13-asan. The standard
+  `fastcgi_split_path_info` mapping is clean on both builds (suffix only in
+  PATH_INFO, `pilen >= slen`); a naive non-default mapping with the full URI
+  in SCRIPT_FILENAME and `PATH_INFO=/` leaks adjacent param bytes on 8.5.12
+  (`xxxxx` / `xxxxxxxxx` at n=16/20, and `6789` / `23456789` with a SECRET
+  param before PATH_INFO) while 8.5.13 stays clean — verdict
+  `HTTP-REACHABLE OOB READ CONFIRMED` in gitignored
+  `lab/build/evidence/w50-nginx/verdict.txt`. The 8.5.12→8.5.13 cgi_main.c
+  diff is exactly the 129538 guard, so the split is patch-sensitive; with
+  ORIG_PATH_INFO set the transient OOB NUL write also fires (GDB byte proof
+  from wake 48; ASan silent, no sanitizer claim). The naive mapping is not
+  the nginx default and no stock-config claim is made. The lane is at its
+  natural stop: offset-controlled OOB read plus a fixed-zero NUL write, no
+  chosen-byte write, pointer control, marker execution, pre-auth or RCE;
+  grade stays rung 3.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
@@ -473,10 +487,17 @@ chunk and reads chosen `DEADBEEF-CR` / `C0FFEE00-CR` back at offsets 84/484,
 8208 bytes past the buffer start; no pointer-sized field or control-flow
 target was controlled, and a `free()` variant aborts `malloc(): corrupted
 top size`. The 8128-byte cap is a synthetic control, not the real 0.10.6.1
-fix. It is still in-process: a completed RDP logon, dynamic-channel open,
-network PDU trace, stock live-session allocator layout and the auth gate stay
-UNKNOWN; loopback COTP reachability of the lab listener is the only network
-observation and witness replay is owed. Evidence:
+  fix. A wire-format driver (`lab/xrdp2shell-real/wire_drdynvc_driver.c`)
+  now feeds a full TPKT/X.224/MCS SendDataRequest/channel/DYNVC_DATA_FIRST
+  PDU to the real `xrdp_rdp_recv()`: ASan `WRITE of size 8191` 0 bytes after
+  the 8192-byte `trans_create` region at payload 8191 (8164 clean), while
+  the 20000-byte harness payload is rejected by `xrdp_mcs_recv()`'s 16K
+  userData limit — only 8165–~16375 bytes are wire-reachable in one PDU.
+  It is still in-process: a completed RDP logon, chansrv-negotiated
+  dynamic-channel open, socket-level network PDU trace, stock live-session
+  allocator layout and the auth gate stay UNKNOWN; loopback COTP
+  reachability of the lab listener is the only network observation and
+  witness replay is owed. Evidence:
 `reports/frontier-xrdp2shell.md`, harness
 `lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`, real-path drivers and
 runbook `lab/xrdp2shell-real/{real_drdynvc_driver.c,chosen_bytes_real_path.c,RUNBOOK.md}`,
@@ -551,8 +572,17 @@ same L8 path under memcheck shows three 4-byte invalid stores 0/4/12 bytes
 past a 1016-byte GObject allocation; the shipping plugin has no debug info,
 so that write is not symbolicated to a function name in that run. One command
 replays every driver: `bash lab/gst2shell-src/verify_all.sh` (add
-`VERIFY_VALGRIND=1` for the memcheck lane) — 43 PASS / 0 FAIL, rc 0 at git HEAD
-3b07571, with chosen-byte rung 4 asserted NOT demonstrated.
+`VERIFY_VALGRIND=1` for the memcheck lane). An independent witness replay
+contradicted the earlier "43 PASS / 0 FAIL at HEAD 3b07571" assertion on its
+host: 42 PASS / 1 FAIL, rc 1, with only `L8 N=1000 faults victim` failing on
+`malloc_consolidate(): invalid chunk size` / `dumped core` (rc 134), a family
+the old regex did not admit. `checkfault` now accepts that fault family or a
+nonzero per-leg rc recorded by the family runner, keeping 43 checks. From
+repaired HEAD 31e7243 the author's `VERIFY_VALGRIND=1` replay reported
+43 PASS / 0 FAIL, rc 0 (`verify_all_clean_head_run.txt`); a docs-side run
+without that flag reported 39 PASS / 0 FAIL, rc 0. Both are author-side
+replays, not independent acceptance; witness re-verification is pending and
+chosen-byte rung 4 stays NOT DEMONSTRATED.
 Evidence:
 `reports/frontier-gst2shell.md`, harness
 `lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
@@ -937,6 +967,32 @@ frontier's handoff and were capture-verified at admission; wake trigger units
 and the presentation.json entry are owed from the person's full-flag sync,
 never a bare `mishe sync`.
 
+#### Frontier brief 2026-11-21: Asterisk2Shell (CVE-2026-57201 / GHSA-x348-j6c9-77f3) — not admitted
+
+Claim source: the maintainer advisory GHSA-x348-j6c9-77f3 (2026-06-25,
+CVSS 3.1 8.1, `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H`) and the CVE record
+(2026-10-27, CVSS 3.1 7.5, availability only). The two authoritative
+sources disagree on attack complexity and C/I impact; the conservative
+availability-only reading is kept and the discrepancy is not resolved.
+Affected Asterisk <=20.20.0 / <=21.12.2 / <=22.10.0 / <=23.4.0 and two
+Certified branches; patched 20.20.1 / 21.12.3 / 22.10.1 / 23.4.1 and the
+matching Certified releases. The `chan_ooh323` addon must be explicitly
+compiled, installed and reachable, so no stock-deployment claim is made.
+The defect is an unbounded `vsprintf` into `logMessage[2048]` at
+`ootrace.c:50`; fix `2d7b8c8dc13d9ead8b6f36cc38b6dd91cd4abd3a` replaces
+it with `ast_vasprintf`. The affected parent `661d6a2f…` is byte-identical
+to release 23.4.0. Frontier's harness (`lab/frontier/asterisk2shell/run.sh`)
+compiles the verbatim pinned lines and reports 24 PASS, rc 0: rung 1
+`written=2433` bytes into the 2048-byte buffer; rung 2 a caller object
+2272 bytes away changes; rung 3 ASan `stack-buffer-overflow`,
+`WRITE of size 2433`, frame `ooTrace` at pinned `ootrace.c:50`; rung 4
+chosen `AST2SHELL` bytes read back at harness-victim offsets 0 and 64 with
+a clean fixed control — instrumented only, no live daemon, socket,
+useful-pointer control or execution. Cheapest next rung: build Asterisk
+23.4.0 with `chan_ooh323` under ASan and drive a loopback H.323 field into
+the real `ooTrace` format arguments. No admission or window exists yet;
+the operator owns admission. Evidence: `reports/frontier-asterisk2shell.md`
+and the pinned hashes in `lab/frontier/asterisk2shell/PROVENANCE.md`.
 
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
@@ -1141,6 +1197,26 @@ while 2.4.67 answers 800/234 and 800/248 with zero assertions, aborts or
 SEGVs. Grade: rung 2 — reproducible crash on unmodified vendor builds with
 a clean fixed control, no confirmed attacker-controlled corruption and no
 route to rung 4; the main lane's Stage A closure stands.
+Adjacent lane L3 (CVE-2026-57941, shared `session->bbtmp` re-entrancy) is a
+third same-subsystem crash, not a reopen of CVE-2026-119618. The 2.4.70
+`CHANGES` record names the issue and `CHANGES:137-142` gives the affected
+range 2.4.0 through 2.4.68. `lab/apache2shell/build-l3.sh` builds pristine
+ASan/UBSan httpd 2.4.68 (SHA-256 `68c74d4df38c26bed4dfbdb8f3baf1eb532f3872357becc1bba5d136f6b63c06`)
+and 2.4.69 (`c5e6ebc66e349b87d7fc6916ae7cc2a808ed348003de134cf9e9d89d3e2cc73d`)
+with pinned nghttp2 1.64.0. `python3 lab/apache2shell/l3-lane.py 10 8 20`
+drives h2c GETs of 512 KB, 32 KB POST bodies, immediate RST_STREAM and client
+GOAWAY over loopback 7268/7269: pristine 2.4.68 produced child SEGVs in three
+runs (one repeat clean) and forced-ASan (`handle_segv=1`,
+`allow_user_segv_handler=0`) produced `SEGV on unknown address`,
+`Hint: PC is at a non-executable region. Maybe a wild jump?` and frame 1
+`h2_c1_read (h2_c1_io.c:502)` in 3 of 8 GOAWAY runs, while 2.4.69 stayed clean
+in every variant. The first forced-ASan attempt failed with
+`RuntimeError: can't start new thread` from leftover httpd children and is
+preserved INVALID, not a pass; gdb follow-ups missed the crashing child.
+Grade: rung 3 confirmed in the input path the fix changes. Rung 4 is NOT
+demonstrated: the race is intermittent, the jump target is not
+attacker-chosen and no chosen offset, pointer, marker or remote-RCE claim is
+made. The main lane's Stage A closure and do-not-retry list are unchanged.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
