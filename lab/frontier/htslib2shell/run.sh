@@ -35,7 +35,7 @@ grep -q 'WRITE of size 8' "$OUT/asan.log" && grep -q 'cram_xpack_decode_expand_c
 grep -q '8 bytes after 4096-byte region' "$OUT/asan.log" && p 'OOB pointer slot 8 bytes after 4096-byte block_by_id region'
 grep -q 'codec_id=1 expected=1' "$OUT/plain.log" && p 'real cram_decoder_init assigns codec_id=1'
 grep -q 'cache index 512+codec_id=513 vs 512 slots' "$OUT/plain.log" && p 'OOB index 513 vs 512 allocated slots'
-grep -q 'RESULT PASS' "$OUT/plain.log" && p 'unsanitized pinned library completes OOB write'
+grep -q 'RESULT PASS' "$OUT/plain.log" && p 'unsanitized pinned library OOB read returns adjacent junk (guard early-out, no write)'
 grep -q 'Unimplemented codec of type' "$OUT/fixed.log" && p 'fixed 1.24 rejects codec 51 (CRAM v4 removed)'
 grep -q 'RESULT PASS' "$OUT/asan.log" && p 'harness accounting checks under ASan'
 printf 'TRACE sha256=%s\n' "$(sha256sum "$OUT/pass.log" | cut -d' ' -f1)"

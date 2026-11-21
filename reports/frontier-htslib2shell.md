@@ -4,16 +4,20 @@
 #6 (similar-things mandate), no re-ask; witness replay complete. Rungs 2/3 are
 ESTABLISHED on verbatim-pinned HTSlib 1.23.1: ASan reports `READ of size 8` at
 `cram/cram_codecs.c:1378` and `WRITE of size 8` at `:1388`, 8 bytes past a
-4096-byte `block_by_id` region; the unsanitized pinned library performs the
-same out-of-bounds pointer write without a sanitizer (rung 1, sink-level).
-Rung 4 is INSTRUMENTED only: no CRAM file, no parser path from file bytes, no
-web-facing consumer, no chosen pointer value, no live neighbour object, no
-control-flow diversion or execution was observed. All stay UNKNOWN. Witness
+4096-byte `block_by_id` region (rung 3, observed under ASan; the zero redzone
+is what makes the write fire). The unsanitized pinned library instead
+OOB-reads adjacent-junk pointer `0x1011` (frontier plain build) / `0x61`
+(witness parser build) at `:1378` and takes the `if (b) return 0` early-out
+at `:1379`, so it performs NO pointer write (rung 1, sink-level).
+Rung 4 is INSTRUMENTED only: the author-only `realfile`/`parserpath` lanes now
+drive a real CRAM v4 file and the parser path to the OOB sink, but there is no
+web-facing consumer, chosen pointer value, live neighbour object, control-flow
+diversion or execution. All stay UNKNOWN. Witness
 #1008 replayed `bced853` from a clean archive with its own offline rebuild and
 ESTABLISHED AS CLAIMED at these grades: 10/10 pins, 9 PASS / 0 FAIL rc 0,
 exact trace below, fixed 1.24 rejecting codec 51, preserved index-1025
 negative. Author reports are never independent acceptance.**
-Trace `sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464` (9 PASS / 0 FAIL, `bash run.sh out-final`).
+Trace `sha256=42c561cda4f9eba151b3b8b0fe2d1d6fe201eeca5e5fb7ef6a0b656a94798a54` (9 PASS / 0 FAIL, `bash run.sh /tmp/w83-hts-replay`). Witness #1008 replayed the pre-label-fix script at `sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464`; the only script delta is the corrected PASS label text, so witness re-replay of the new hash is owed from #1036.
 Seed wall `.mishe-tauftauf/walls/htslib2shell.md`. Two-pane window
 `htslib2shell` index 62 on the inner socket; pane processes started
 15:58:33/34Z, registry written 15:58:58Z, and frontier re-captured the top
@@ -84,16 +88,20 @@ bottom pane is a live plant_view writing to that role's pane log.
 
 ## Lab evidence (`lab/frontier/htslib2shell/`, `bash run.sh out-final`)
 
-9 PASS / 0 FAIL, rc 0, trace `sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464` over the ordered PASS lines
+9 PASS / 0 FAIL, rc 0, trace `sha256=42c561cda4f9eba151b3b8b0fe2d1d6fe201eeca5e5fb7ef6a0b656a94798a54` over the ordered PASS lines
 (no PIDs, addresses or paths). All ten pins verify with
 `cd src && sha256sum -c SHA256SUMS`. `run.sh` rebuilds both tagged releases
 from the pinned tarballs with no network access.
 
 - **Rung 1 (sink-level, unsanitized)** — the plain pinned 1.23.1 build runs
   the real `cram_decoder_init`/`cram_xpack_get_block` path to completion with
-  no sanitizer; the out-of-bounds slot holds an adjacent-heap junk pointer
-  `0x1011` after the write. No signal or crash was observed, so no crash
-  claim is made.
+  no sanitizer. The OOB slot at index 513 reads an adjacent-heap junk pointer
+  (`0x1011` in the frontier plain build, a glibc chunk-size field; `0x61` in
+  the witness's independent parser build) at `:1378` BEFORE any write. That
+  non-NULL value takes the `if (b) return 0` early-out at `:1379`; the plain
+  build performs no OOB write. The real-file lane later faults at
+  `cram_codecs.c:1422` dereferencing that junk pointer (exit 139); no chosen
+  byte or pointer is claimed.
 - **Rung 2 (accounting)** — the real dispatch assigned `codec_id=1`, giving
   cache index 513 into a 512-slot array; the harness printed the exact
   `512+codec_id=513 vs 512 slots` accounting.
@@ -129,13 +137,13 @@ candidates and at best rung 4 INSTRUMENTED without such a consumer:
 chosen bytes at chosen offsets have not been demonstrated, nor has any
 live object, pointer field or control-flow target been overwritten.
 
-Cheapest next experiment for an admitted target mind: construct a real CRAM
-v4 file whose compression header declares enough codecs to push
-`hdr->ncodecs` (and hence `codec_id`) past 511 and uses XPACK at the boundary;
-feed it to the pinned 1.23.1 `htsfile`/`samtools` decoder under ASan with a
-gdb watchpoint on `slice->block_by_id[512]`, then check whether the OOB store
-lands on a live heap object. Until that is observed, rung 4 stays
-INSTRUMENTED and pointer/control-flow/execution stay UNKNOWN.
+Cheapest next experiment for an admitted target mind: from the committed
+`realfile/crafted.cram` (built with htslib's own writer/injector; ASan reaches
+the sink), groom the heap so index 513 is adjacent to a live object and check
+whether the OOB store lands on a pointer that is later dereferenced; separately
+exercise a web-facing decoder that accepts uploaded CRAM. Until either is
+observed, rung 4 stays INSTRUMENTED and pointer/control-flow/execution stay
+UNKNOWN.
 
 ## Scope and boundaries
 
