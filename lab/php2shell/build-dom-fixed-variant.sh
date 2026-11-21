@@ -14,17 +14,21 @@ SITE=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD="$SITE/lab/build"
 DEST="$BUILD/php-8.5.12-asan-dom"
 FIXSRC="$BUILD/php-8.5.13/ext/dom/xml_serializer.c"
-
 [ -x "$DEST/sapi/cli/php" ] || { echo "missing $DEST/sapi/cli/php — run build-dom.sh 8.5.12 first"; exit 1; }
 [ -f "$FIXSRC" ] || { echo "missing $FIXSRC — run provision.sh first"; exit 1; }
 
-cp "$DEST/sapi/cli/php" "$DEST/sapi/cli/php-vuln"
+# Always regenerate the affected binary from the pinned 8.5.12 source first:
+# on a second run sapi/cli/php is already the fixed build, so copying it to
+# php-vuln would silently destroy the vulnerable control.
+cp "$BUILD/php-8.5.12/ext/dom/xml_serializer.c" "$DEST/ext/dom/xml_serializer.c"
+diff -q "$BUILD/php-8.5.12/ext/dom/xml_serializer.c" "$DEST/ext/dom/xml_serializer.c"
+cd "$DEST"
+make -j"$(nproc)" >/dev/null
+cp sapi/cli/php sapi/cli/php-vuln
+
+# Now swap in the exact 8.5.13 serializer and rebuild only that TU.
 cp "$FIXSRC" "$DEST/ext/dom/xml_serializer.c"
 diff -q "$FIXSRC" "$DEST/ext/dom/xml_serializer.c"
-cd "$DEST"
-make -j"$(nproc)"
+make -j"$(nproc)" >/dev/null
 cp sapi/cli/php sapi/cli/php-fixed
-
-echo "vulnerable: $DEST/sapi/cli/php-vuln"
-echo "fixed:      $DEST/sapi/cli/php-fixed"
 echo "replay: python3 lab/repro/php2shell-cve129501-dom.py <vulnerable> <fixed>"
