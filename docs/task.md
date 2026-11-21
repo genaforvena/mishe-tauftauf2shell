@@ -3430,3 +3430,95 @@ gdb, send the crafted 5a index, expect the symbolised `WRITE` at
 `hnswalg.h:779` inside the service process, then freeze the first past-end
 bytes and inspect the real heap neighbour before any pointer claim. The
 Spotify Voyager path has a different header layout and needs its own harness.
+
+#### Admitted 2026-11-21 ~14:00Z: Asn1scc2Shell / asn1scc2shell (CVE-2026-75614 / GHSA-825c-7h77-2jjq)
+
+Frontier published the brief `reports/frontier-asn1scc.md` and handoff #921.
+The operator admitted this target under standing approval #6, no re-ask. All
+five elements are recorded in `.mishe-tauftauf/charters/asn1scc2shell.md`:
+**claim source** — CVE-2026-75614 / GHSA-825c-7h77-2jjq, CNA GitHub_M,
+published 2026-11-05T16:47:56Z, maintainer advisory by usr3-1415, CVSS 3.1
+8.1 HIGH, CWE-129/787; raw CVE, GHSA, OSV and release records are pinned with
+eight SHA-256 entries in `lab/frontier/asn1scc2shell/src/SHA256SUMS` and
+`PROVENANCE.md`; **identifier** — CVE-2026-75614; **affected/fixed pin** —
+`<4.7.0.1` affected including pinned tag `4.6.0.17`, fixed in **released**
+`4.7.0.1` (release API draft=false, prerelease=false, 2026-03-15T19:38:10Z)
+by commit `fe6ab763bc60d8a2def4104c15414809b45fffd9`; **primitive** —
+pinned vulnerable `asn1crt_encoding.c:801/:819-822` decodes `uv > range`
+unchecked for a non-power-of-two range, generated `schema.c:58/:59` assigns
+the over-range 7 to `nCount` for `SIZE(0..5)` and copies through
+`BitStream_DecodeOctetString_no_length` (`:1449`) whose per-byte store is
+`asn1crt_encoding.c:400`; fixed runtime adds `if (uv > range) return FALSE;`
+at `:821-822`; **rung-4 plausibility** — an untrusted-uPER-decoding service
+is a plausible trust boundary, but no such consumer was run, so the consumer
+is a hypothesis only.
+
+Operator check before admission: a clean `git archive 821647e
+lab/frontier/asn1scc2shell` replay gave 12 PASS / 0 FAIL rc 0 with both
+five-run groups at
+`sha256=e39fec33622f9f10b63c2b0b804fcfa7072ac7b6498d63c2801ec3bd24b7bcd6`.
+ASan `WRITE of size 1` 0 bytes after a 9-byte region at
+`asn1crt_encoding.c:400` ← `:1449` ← generated `schema.c:59`; rung 4 shows
+two distinct chosen patterns byte-exact at +5/+6 and a `PROT_NONE` rc 139
+fault; fixed 4.7.0.1 returns `rt=0 decoded=0` and is ASan clean (its
+generated wrapper still returns `ok=1 decoded=0` because it overwrites the
+runtime failure code, but writes zero bytes). Rungs 1/2/3 ESTABLISHED, rung 4
+INSTRUMENTED in harness staging; no application, listener, live heap
+neighbour, pointer, control flow or execution — all UNKNOWN. Witness replay
+was requested on the tape; author reports are never independent acceptance.
+
+The two-pane `asn1scc2shell` window (inner socket, index 58), seed wall and
+registry entry 60 were pre-created by frontier and are already live; do not
+recreate or edit them. The operator created this mind's charter, the 53rd
+`engine/routes.json` entry and its wake trigger units with the pinned
+full-flag sync from `docs/runtime-pin.md`; never run a bare `mishe sync`.
+Cheapest next rung: a loopback-only uPER service calling the generated
+decoder on pinned 4.6.0.17 under ASan and gdb, watchpoint `arr[5]`, inspect
+the real heap neighbour before any pointer claim.
+
+#### Admitted 2026-11-21 ~14:00Z: Iec618502Shell / iec618502shell (CVE-2026-49035 / CISA ICSA-26-204-06)
+
+Frontier published the brief `reports/frontier-libiec61850.md` and handoff
+#928. The operator admitted this target under standing approval #6, no
+re-ask. All five elements are recorded in
+`.mishe-tauftauf/charters/iec618502shell.md`: **claim source** —
+CVE-2026-49035 / CISA ICSA-26-204-06, CNA `icscert`, CVSS 3.1 8.1 HIGH and
+CVSS 4.0 9.2, CWE-122/191; the CISA HTML returned HTTP 403 in provisioning,
+so that prose is a claim from the pinned CNA/NVD records, not an independent
+byte snapshot; six SHA-256 pins in `lab/frontier/libiec61850/src/SHA256SUMS`
+and `PROVENANCE.md`; **identifier** — CVE-2026-49035; **affected/fixed pin**
+— `>=v1.0.0 <=v1.6.1` affected, vulnerable commit `a1396111` pinned, fixed
+in **released** `v1.6.2` by commit
+`db35acf67bfdb4c5bdbcfb19b66529476bf72d21`; **primitive** —
+`mms_association_service.c:359-363` accepts Initiate size 1,
+`mms_file_service.c:834` wraps `maxPduSize - 20` to `0xffffffed`, `:840`'s
+guard is false, `:844` sets `fileChunkSize = bytesLeft`, and `:872` copies
+the whole file into the 65100-byte `sendBuffer` at `iso_connection.c:47/:516`;
+v1.6.2 adds `MMS_MIN_MAX_PDU_SIZE 128` and rejects small sizes; **rung-4
+plausibility** — the network-facing MMS server is the real consumer and
+rungs 1/2/3 were observed in that process over loopback.
+
+Operator check before admission: a clean `git archive e6efd18
+lab/frontier/libiec61850` replay gave 7 PASS / 0 FAIL rc 0 with both
+three-run groups at
+`sha256=5a7bb6904856d6f8577c06958c66ff9b7721f550701257cf3b427a679bd9d1ce`.
+Real stock ASan `server_example_files` on 127.0.0.1:10110 with the pinned raw
+client gives `WRITE of size 178157`, 0 bytes after the 65100-byte region at
+`iso_connection.c:516`, frames `mms_file_service.c:872` ← `:896`; controls
+with maxPduSize 20 or a 200-byte file are clean. Grade: rungs 1/2/3
+ESTABLISHED in a real network-facing library process; rung 4 UNKNOWN — no
+chosen-byte readback in the live server, live neighbour, pointer, control
+flow or execution. **Preserved negative:** v1.6.2 rejects Initiate (AARE
+`0x08`) but stores `maxPduSize = 1` first and the raw client reuses the
+association, so FileRead still overflows in this harness; a conforming client
+would stop on AARE failure, so this is not proof the fix is useless.
+
+The two-pane `iec618502shell` window (inner socket, index 59), seed wall and
+registry entry 61 were pre-created by frontier and are already live; do not
+recreate or edit them. The operator created this mind's charter, the 54th
+`engine/routes.json` entry and its wake trigger units with the pinned
+full-flag sync from `docs/runtime-pin.md`; never run a bare `mishe sync`.
+Cheapest next rung: gdb watchpoint on `sendBuffer + 65100` in the ASan-free
+loopback service with a varied staged-file pattern, then ObtainFile staging
+so bytes are remotely chosen; check the AARE-reuse path with a conforming
+client. Keep all traffic on 127.0.0.1.

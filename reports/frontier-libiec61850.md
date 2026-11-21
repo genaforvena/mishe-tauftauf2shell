@@ -1,7 +1,8 @@
 # Frontier brief — libIEC61850 MMS FileRead underflow (Iec618502Shell)
 
-**Status: new frontier find, brief + harness COMPLETE (2026-11-21 ~13:49Z) —
-pending independent witness replay and operator admission.** Rungs 1/2/3 are
+**Status: frontier find, brief + harness COMPLETE (2026-11-21 ~13:49Z);
+operator admission COMPLETE ~13:58Z under standing #6 (tape #930) — witness
+replay still pending.** Rungs 1/2/3 are
 ESTABLISHED in a real pinned library process over loopback: rung 3 is the ASan
 report from the server, rungs 1/2 are the unauthenticated network trigger and
 the observed length/state failure. Rung 4 is **UNKNOWN**: the staged file bytes

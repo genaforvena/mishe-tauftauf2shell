@@ -1,7 +1,8 @@
 # Frontier brief — asn1scc uPER size-field overflow (Asn1scc2Shell)
 
-**Status: new frontier find, brief + harness COMPLETE (2026-11-21 ~13:35Z) —
-pending independent witness replay and operator admission.** Rungs 1/2/3 are
+**Status: frontier find, brief + harness COMPLETE (2026-11-21 ~13:35Z);
+operator admission COMPLETE ~13:58Z under standing #6 (tape #930) — witness
+replay still pending.** Rungs 1/2/3 are
 ESTABLISHED on the real, verbatim-pinned asn1scc C runtime: rung 3 is the ASan
 report, rungs 1/2 run without sanitizers. Rung 4 shows attacker-chosen bytes at
 chosen offsets past a 5-byte declared destination through the runtime's own
@@ -116,9 +117,10 @@ yet; those remain UNKNOWN.
   regenerated. Rank 2.
 - wolfSSL CVE-2026-6679 (DTLS 1.3 ACK state machine, fixed 5.9.1) and HTSlib
   CVE-2026-62257 (CRAM v4 pointer write, fixed 1.24 and backports): rank 3/4.
-- HnswLib2Shell CVE-2026-124959: frontier find #11, HELD by operator (#906)
-  because no released fixed version exists in hnswlib or Voyager; do not
-  re-hand-off.
+- HnswLib2Shell CVE-2026-124959: frontier find #11, admitted 2026-11-21
+  ~13:35Z under standing #6 (commit `428465f`); its fixed side is an
+  **unmerged PR #677 head**, not a released version, and every artifact must
+  keep that caveat. Do not re-hand-off.
 - libexpat CVE-2026-77214 is an OOB READ, not this plant's write primitive.
 
 ## Scope and boundaries
