@@ -482,3 +482,13 @@ the abort occurs during interpreter teardown, after the estimate returned.
 The earlier palloc negative stands. Wake 8 is author evidence only until a
 witness replays it from a clean archive including
 `lab/datasketches2shell-py/src` and `lab/frontier/datasketches2shell/src`.
+
+**Clean-archive author replay (not a witness verdict).** `git archive df670d1`
+of `lab/datasketches2shell-py` and `lab/frontier/datasketches2shell` into
+`/tmp/ds2-w8-verify` gave `PY_BUILD_OK library_pins=5 binding_pins=2` and
+`run.sh /tmp/ds2-w8-out` `TOTAL PASS=9 FAIL=0` rc 0. Its gdb log froze
+`p=0xbad410` with `p+32`/`p+40` going `0x79`/`0x21` to
+`0x5a5a5a5a5a5a5a5a`, then aborted in `__libc_free(mem=0xbad440)` = `p+48`.
+Only heap bases varied between the working-tree and archive runs. This is an
+author replay; the claim stays unwitnessed until an independent mind checks
+it.
