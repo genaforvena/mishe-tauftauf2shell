@@ -1000,3 +1000,30 @@ preserved. No 8.5.13 fixed release build was started — both verdicts remain
 clean and patch sensitivity is not worth ~324 objects. A revisit needs a
 fatal, exception-free error while `EG(active)==0` reaching `:1509`/`:1534`
 with the zval still IS_ARRAY, which the FPM ordering above does not provide.
+
+## Wake 48 (2026-11-21 02:27–) — new lane CVE-2026-129538, rung 3 CONFIRMED
+
+From 8.5.13 NEWS (`lab/build/php-8.5.13-asan/NEWS:49-51`): GHSA-5j3f-64r7-f564
+/ CVE-2026-129538, "PHP-CGI out-of-bounds read and write during PATH_INFO
+correction." The 8.5.12→8.5.13 `sapi/cgi/cgi_main.c` diff is exactly the
+`pilen > slen` guard on the `env_path_info + pilen - slen` computation and a
+`path_info &&` guard on its use; 8.4.28 carries the same fix, 8.4.27/8.5.12
+do not. Vendor regression `ghsa-5j3f-64r7-f564.phpt` supplied three shapes.
+Committed harness `lab/repro/php2shell-cve129538.py` (direct php-cgi calls,
+loopback only) replays them on 8.5.12-asan vs 8.5.13-asan, a suffix-length
+sweep with a `SECRET` neighbour, and a GDB write observation. Evidence
+`lab/build/evidence/w48-cve129538/committed/verdict.txt`: `VERDICT: CONFIRMED`,
+seven/seven checks PASS. Affected 8.5.12: long-suffix `PATH_INFO="xxxx"`,
+PATH_TRANSLATED shape `"cted"` (fixed: `"/x"`, ORIG NULL); sweep n=2..11 leaks
+the `PATH_INFO=` name tail, n=12 empty, n=13..20 leaks the SECRET value tail
+(`n=20` → `"23456789"`), fixed clean for all 20; GDB at `cgi_main.c:1294`
+shows the store 15 bytes before `getenv("PATH_INFO")`, byte `47`→`0`.
+8.4.27-asan also yields `"xxxx"` on the long-suffix shape. ASan silent
+(environment block is not redzoned); the proof is the GDB byte observation
+plus the patch-sensitive output difference. Grade **rung 3 CONFIRMED** for
+this new lane: observed OOB write and attacker-offset OOB read with a
+server-visible leak. No arbitrary write, pointer control, marker execution,
+pre-auth reachability or RCE claim; harness-set env variables simulate a CGI
+server, remote HTTP reachability UNKNOWN. No other lane's grade changes.
+Next experiment: replay through loopback FastCGI (`has_env=1`, FCGI_PUTENV)
+to test whether the two variables arrive as request params.

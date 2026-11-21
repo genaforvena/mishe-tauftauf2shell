@@ -900,3 +900,67 @@ stays silent. A fatal error with `EG(active)==0` and a still-`IS_ARRAY` global
 is required; none was found in the post-deactivate release paths. Grade
 remains UNKNOWN, with no rung 3/4 or pre-auth claim, and no fixed-release
 build was started while both verdicts are clean.
+
+### Wake 48 — new adjacent lane: CVE-2026-129538, CGI PATH_INFO underflow (rung 3 CONFIRMED)
+
+8.5.13's NEWS (`lab/build/php-8.5.13-asan/NEWS:49-51`) lists
+GHSA-5j3f-64r7-f564 / CVE-2026-129538, "PHP-CGI out-of-bounds read and write
+during PATH_INFO correction" — an adjacent memory-corruption claim in the
+same tree and the CGI SAPI already used by the Stage A lane. The deterministic
+8.5.12→8.5.13 `sapi/cgi/cgi_main.c` diff is two guards:
+
+```diff
+- char *path_info = env_path_info ? env_path_info + pilen - slen : NULL;
++ char *path_info = (env_path_info && pilen > slen) ? env_path_info + pilen - slen : NULL;
+- if (orig_path_info != path_info) {
++ if (path_info && orig_path_info != path_info) {
+```
+
+`slen` is the length stripped off `SCRIPT_FILENAME` while walking back to a
+regular file (`cgi_main.c:1262-1286`); when `slen > pilen = strlen(PATH_INFO)`,
+`path_info` points BEFORE the PATH_INFO environment string. The following
+`path_info[0] = 0` (`:1294`) and `CGI_PUTENV("PATH_INFO", path_info)` (`:1306`)
+therefore write and read out of bounds. The vendor regression
+`sapi/cgi/tests/ghsa-5j3f-64r7-f564.phpt` supplied the three shapes.
+
+Committed harness `lab/repro/php2shell-cve129538.py` invokes php-cgi directly
+with those shapes (no web server; loopback-only) on the pinned 8.5.12-asan
+(affected) and 8.5.13-asan (fixed) builds, plus a suffix-length sweep and an
+optional GDB observation. Evidence `lab/build/evidence/w48-cve129538/`
+(gitignored throwaway); `committed/verdict.txt` reads `VERDICT: CONFIRMED`,
+all seven checks PASS.
+
+- Vendor shapes, affected 8.5.12: short suffix `PATH_INFO="/b"` (correct),
+  long suffix `PATH_INFO="xxxx"`, `PATH_TRANSLATED` shape `PATH_INFO="cted"` —
+  both corrupted values are adjacent bytes read from before the real
+  PATH_INFO; fixed 8.5.13 returns `"/x"` with `ORIG_PATH_INFO=NULL` for both.
+- Sweep with `SECRET=TOPSECRET0123456789` and suffix length `n=1..20`: on
+  8.5.12, `PATH_INFO` is the last `n+1` bytes of the preceding
+  `PATH_INFO=` name for n=2..11, empty at n=12, then the last `n-11` bytes of
+  the SECRET value for n=13..20 (`n=20` → `"23456789"`). The suffix length
+  chooses the out-of-bounds offset. 8.5.13 returns `"/x"` for all 20 lengths.
+  The same long-suffix shape on 8.4.27-asan also yields `"xxxx"`; 8.4.28's
+  source carries the identical `pilen > slen` guard, so the fix covers both
+  affected branch heads tested here.
+- GDB (`php2shell-cve129538.py` GDB leg) stops at `cgi_main.c:1294`:
+  `PTR 0x7fffffffef08 ENV 0x7fffffffef17` — the store address is 15 bytes
+  before `getenv("PATH_INFO")`; the byte is `47` (`'/'`) before the store and
+  `0` after. The out-of-bounds NUL write is observed in memory, not inferred.
+
+ASan stays silent because the overwritten/read bytes belong to the initial
+environment block, which the sanitizer does not redzone; the evidence is the
+byte-level GDB observation and the affected/fixed output difference, not a
+sanitizer report. Conditions needed: `cgi.fix_pathinfo=1`, a SCRIPT_FILENAME
+whose last component is not a regular file, a PATH_INFO shorter than the
+stripped suffix, and a preceding environment string to read from. The harness
+supplies those environment variables directly, as a CGI web server would;
+whether a remote HTTP request can set both on the tested deployment is
+UNKNOWN. Grade: **rung 3 CONFIRMED** for the new lane — observed OOB write and
+attacker-offset OOB read with a server-visible leak of neighbouring bytes.
+No arbitrary-address or chosen-byte write, pointer control, marker execution,
+pre-auth reachability or RCE is claimed; no prior lane's grade changes.
+
+Next bounded experiment for this lane: replay the shapes through a real
+loopback FastCGI server (`has_env=1`, `FCGI_PUTENV`) to see whether PATH_INFO
+and SCRIPT_FILENAME can be supplied as FastCGI params from a request, which
+would establish the remote-input condition rather than leave it UNKNOWN.
