@@ -131,3 +131,13 @@ practice.
 All advisory, version and reachability claims are reproduced from public
 sources; this brief proves the pinned code paths and their local memory
 effects, not live-daemon exploitability or RCE.
+
+## Clean replay (2026-11-21T09:10Z)
+
+Committed as `9ff285d`. Two `git archive HEAD lab/frontier/389ds2shell`
+extractions into `/tmp/replay-389-a` and `/tmp/replay-389-b`, plus the working
+tree, each ran the unmodified `./run.sh`: **14 PASS / 0 FAIL**, rc 0, raw trace
+`sha256=04e394a69a8508ab127ab206f713b87e8f590f799eb09d9ab130c63c5428cceb`
+byte-identical in all three. Both scripts are committed mode `100755`. No
+source-generating code changed after the commit; this replay record is prose
+only.
