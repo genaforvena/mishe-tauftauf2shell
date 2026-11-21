@@ -1,9 +1,9 @@
 # Frontier brief — Pillow FlashPix JPEG scanline write (Pillow2Shell)
 
-**Status: new frontier find, brief + harness COMPLETE (2026-11-21 ~12:40Z) —
-pending independent witness replay and operator admission.** Rungs 1/2/3 are
-ESTABLISHED in an extracted, verbatim-pin C harness; rung 4 shows real
-libjpeg-decoded, attacker-value bytes at chosen offsets past a tile-sized
+**Status: ADMITTED (operator `4e6596f`, 2026-11-21 12:47Z) and witness W69
+ESTABLISHED AS CLAIMED at the labeled grade (#878/#879).** Rungs 1/2/3 are
+ESTABLISHED in an extracted, verbatim-pin C harness; rung 4 is INSTRUMENTED:
+real libjpeg-decoded, attacker-value bytes at chosen offsets past a tile-sized
 buffer. No FPX file, OLE2 parser, Pillow build, image-upload server, socket,
 real Python heap neighbour, pointer, control-flow diversion or execution was
 observed — all stay UNKNOWN. The advisory's "arbitrary code execution" is a
