@@ -9,10 +9,11 @@ a live neighbouring `tp_index` object and a live malloc size word, the low-bit
 grooming sweep shows padding chooses the resulting glibc `free()` path, and a
 Pillow consumer check reaches the same sink inside `Image.open().load()` in
 both the official bundled-library wheel and a pinned-source build.
-Availability impact is demonstrated in a shipped Python image library; no
-pointer-value control, controlled dereference at a chosen address,
-control-flow diversion, execution or web-facing listener was observed — all
-UNKNOWN. The fix is a pinned master commit, not a tagged release.**
+Availability impact is demonstrated in a shipped Python image library; a later
+section demonstrates a natural call to a chosen static type's deallocator in a
+debug lab build, but no attacker-chosen code, controlled dereference at a
+chosen address, execution or web-facing listener was observed — all UNKNOWN.
+The fix is a pinned master commit, not a tagged release.**
 Scoped commit `958b319`; trace
 `sha256=6983a6a11c8236c6e991e15faa326b4c64f6269cf7f5f4fabca081bf7aa111ea`
 (10 PASS / 0 FAIL, clean `git archive` replay). Live two-pane window
@@ -466,6 +467,49 @@ outcome. No chosen deallocator call was observed; rung 4 stays PARTIAL. What
 would change the mind: a build/layout where the gap object index `k` and
 `SOD_k = chosen static type address` coincide under one fixed argv, or a
 separate path that preserves a small `ob_refcnt` while writing `ob_type`.
+
+## Natural call through a chosen ob_type (2026-11-21 ~19:45Z, openjpeg2shell)
+
+`bash lab/frontier/openjpeg2shell/chosen-call.sh <outdir>` → **7 PASS / 0
+FAIL**, trace
+`sha256=ab46a561e9b9f4aefeb0fd9ec52810cd36cd2c07dfaee627477de96e4e56afaf`.
+This closes the remaining gap from the preceding two sections: a natural
+finalization call through an `ob_type` value chosen by the codestream, with
+ASLR on. Everything is a local Pillow process; the debug `-g -O0` lib is needed
+for the line breakpoint, so its heap layout is not the shipped Release layout.
+
+The generator `make-chosen-call.py` keeps the COM pad at 10,731,137 bytes,
+emits 158 sequential tile parts, puts 20 bytes of payload in tile part 1 and
+4,272 in tile part 60. Tile part 59's second store writes `0xa2d260`
+(`&PyCode_Type`) over the `ob_type` of a live object at `tp_index` base+1424,
+preserving its original type; tile part 154's first store writes
+`0xa3d840` (`&PyDict_Type`) at base+`24*154+8`. Because both the 24-byte
+stride and CPython's 16-byte object alignment hold, the object at that
+offset has `ob_refcnt=1` in the untouched gap (`base+24*154`) and its
+`ob_type` receives the chosen pointer. Observed in the replay trace:
+`PRE OBJ=0xd160d0 REF=1 TYPE=0000000000a2d260`,
+`WRITE W1=0000000000a3d840 W2=0000000000a3d842`,
+`POST REF=1 TYPE=0000000000a3d840`.
+
+Continuing without the sink breakpoint, the same object reaches
+`DEALLOC pc=0x583dc0 rdi=0xd160d0 TYPE=0000000000a3d840` — a natural
+`_Py_Dealloc` call in `PyGC_Collect` at interpreter finalization. Its
+instructions are `mov 0x8(%rdi),%rax; jmp *0x30(%rax)`; single-stepping the
+jump gives `CHOSEN_CALL pc=0x575cb0`, which is exactly the `tp_dealloc` slot
+of `&PyDict_Type` (`DICT_DEALLOC=0x575cb0`), not that of the object's original
+type (`CODE_DEALLOC=0x54e700`). The plain consumer prints `LOAD_OK` and then
+faults at finalization (rc 134/139, layout-dependent).
+
+Honest boundary: this is a call to a chosen *existing* type's deallocator with
+a type-confused object body, not attacker-chosen code; no benign marker was
+executed, no pointer was dereferenced at a chosen address, no shell, listener
+or external probe was observed. The write value is a codestream position
+tuned to a static non-PIE address, so the demonstration is specific to this
+build and to a measured argv-sensitive heap layout; the harness pads the
+codestream filename until the required gap object appears before asserting
+the chain. Fixed-side claims remain scoped to master pin `91d08b11`, not a
+release. Rung 4 is now demonstrated at the control-flow boundary in this lab
+build; rung 5 stays UNKNOWN.
 
 ## Scope and boundaries
 
