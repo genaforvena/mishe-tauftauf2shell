@@ -1,0 +1,113 @@
+{
+  "sha": "db35acf67bfdb4c5bdbcfb19b66529476bf72d21",
+  "node_id": "C_kwDOBN0V0doAKGRiMzVhY2Y2N2JmZGI0YzViZGJjZmIxOWI2NjUyOTQ3NmJmNzJkMjE",
+  "commit": {
+    "author": {
+      "name": "Michael Zillgith",
+      "email": "michael.zillgith@mz-automation.de",
+      "date": "2026-05-08T15:19:32Z"
+    },
+    "committer": {
+      "name": "Michael Zillgith",
+      "email": "michael.zillgith@mz-automation.de",
+      "date": "2026-05-08T15:19:32Z"
+    },
+    "message": "- MMS server: added check for minimum PDU size in associate request handling and set absolute allowed minimum to 128 bytes (LIB61850-552)\n- This change also fixes a potential buffer underflow issue with the file service when the client connects and proposes a PDU size < 20",
+    "tree": {
+      "sha": "e80289fb67cb5d9928661a41870bfc70fae76270",
+      "url": "https://api.github.com/repos/mz-automation/libiec61850/git/trees/e80289fb67cb5d9928661a41870bfc70fae76270"
+    },
+    "url": "https://api.github.com/repos/mz-automation/libiec61850/git/commits/db35acf67bfdb4c5bdbcfb19b66529476bf72d21",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "url": "https://api.github.com/repos/mz-automation/libiec61850/commits/db35acf67bfdb4c5bdbcfb19b66529476bf72d21",
+  "html_url": "https://github.com/mz-automation/libiec61850/commit/db35acf67bfdb4c5bdbcfb19b66529476bf72d21",
+  "comments_url": "https://api.github.com/repos/mz-automation/libiec61850/commits/db35acf67bfdb4c5bdbcfb19b66529476bf72d21/comments",
+  "author": {
+    "login": "mzillgith",
+    "id": 25686324,
+    "node_id": "MDQ6VXNlcjI1Njg2MzI0",
+    "avatar_url": "https://avatars.githubusercontent.com/u/25686324?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/mzillgith",
+    "html_url": "https://github.com/mzillgith",
+    "followers_url": "https://api.github.com/users/mzillgith/followers",
+    "following_url": "https://api.github.com/users/mzillgith/following{/other_user}",
+    "gists_url": "https://api.github.com/users/mzillgith/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/mzillgith/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/mzillgith/subscriptions",
+    "organizations_url": "https://api.github.com/users/mzillgith/orgs",
+    "repos_url": "https://api.github.com/users/mzillgith/repos",
+    "events_url": "https://api.github.com/users/mzillgith/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/mzillgith/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "mzillgith",
+    "id": 25686324,
+    "node_id": "MDQ6VXNlcjI1Njg2MzI0",
+    "avatar_url": "https://avatars.githubusercontent.com/u/25686324?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/mzillgith",
+    "html_url": "https://github.com/mzillgith",
+    "followers_url": "https://api.github.com/users/mzillgith/followers",
+    "following_url": "https://api.github.com/users/mzillgith/following{/other_user}",
+    "gists_url": "https://api.github.com/users/mzillgith/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/mzillgith/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/mzillgith/subscriptions",
+    "organizations_url": "https://api.github.com/users/mzillgith/orgs",
+    "repos_url": "https://api.github.com/users/mzillgith/repos",
+    "events_url": "https://api.github.com/users/mzillgith/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/mzillgith/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "ab93e0734fcb312a4e81c30c625a375ff6552356",
+      "url": "https://api.github.com/repos/mz-automation/libiec61850/commits/ab93e0734fcb312a4e81c30c625a375ff6552356",
+      "html_url": "https://github.com/mz-automation/libiec61850/commit/ab93e0734fcb312a4e81c30c625a375ff6552356"
+    }
+  ],
+  "stats": {
+    "total": 23,
+    "additions": 23,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "0aad1dba48a528dbb219fd0548acb5391d5a8743",
+      "filename": "config/stack_config.h",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "changes": 3,
+      "blob_url": "https://github.com/mz-automation/libiec61850/blob/db35acf67bfdb4c5bdbcfb19b66529476bf72d21/config%2Fstack_config.h",
+      "raw_url": "https://github.com/mz-automation/libiec61850/raw/db35acf67bfdb4c5bdbcfb19b66529476bf72d21/config%2Fstack_config.h",
+      "contents_url": "https://api.github.com/repos/mz-automation/libiec61850/contents/config%2Fstack_config.h?ref=db35acf67bfdb4c5bdbcfb19b66529476bf72d21",
+      "patch": "@@ -27,6 +27,9 @@\n #define DEBUG_SV_PUBLISHER 0\n #define DEBUG_HAL_ETHERNET 0\n \n+/* Minimum MMS PDU SIZE - default is 128 - when value is smaller than this, the connection is rejected */\n+#define CONFIG_MMS_MINIMUM_PDU_SIZE 128\n+\n /* Maximum MMS PDU SIZE - default is 65000 */\n #define CONFIG_MMS_MAXIMUM_PDU_SIZE 65000\n "
+    },
+    {
+      "sha": "110c7c2b489715f5b98a1077872de78f74c81b73",
+      "filename": "src/mms/iso_mms/server/mms_association_service.c",
+      "status": "modified",
+      "additions": 20,
+      "deletions": 0,
+      "changes": 20,
+      "blob_url": "https://github.com/mz-automation/libiec61850/blob/db35acf67bfdb4c5bdbcfb19b66529476bf72d21/src%2Fmms%2Fiso_mms%2Fserver%2Fmms_association_service.c",
+      "raw_url": "https://github.com/mz-automation/libiec61850/raw/db35acf67bfdb4c5bdbcfb19b66529476bf72d21/src%2Fmms%2Fiso_mms%2Fserver%2Fmms_association_service.c",
+      "contents_url": "https://api.github.com/repos/mz-automation/libiec61850/contents/src%2Fmms%2Fiso_mms%2Fserver%2Fmms_association_service.c?ref=db35acf67bfdb4c5bdbcfb19b66529476bf72d21",
+      "patch": "@@ -24,6 +24,8 @@\n #include \"libiec61850_platform_includes.h\"\n #include \"mms_server_internal.h\"\n \n+#define MMS_MIN_MAX_PDU_SIZE 128\n+\n /**********************************************************************************************\n  * MMS Server Capabilities\n  *********************************************************************************************/\n@@ -341,6 +343,24 @@ parseInitiateRequestPdu(MmsServerConnection self, uint8_t* buffer, int bufPos, i\n         case 0x80: /* local-detail-calling */\n             self->maxPduSize = BerDecoder_decodeUint32(buffer, length, bufPos);\n \n+            if (self->maxPduSize < MMS_MIN_MAX_PDU_SIZE)\n+            {\n+                if (DEBUG_MMS_SERVER)\n+                    printf(\"MMS_SERVER: proposed max PDU size too small, reject connection\\n\");\n+\n+                return false;\n+            }\n+\n+#ifdef CONFIG_MMS_MINIMUM_PDU_SIZE\n+            if (self->maxPduSize < CONFIG_MMS_MINIMUM_PDU_SIZE)\n+            {\n+                if (DEBUG_MMS_SERVER)\n+                    printf(\"MMS_SERVER: proposed max PDU size too small, reject connection\\n\");\n+\n+                return false;\n+            }\n+#endif\n+\n             if (self->maxPduSize > CONFIG_MMS_MAXIMUM_PDU_SIZE)\n                 self->maxPduSize = CONFIG_MMS_MAXIMUM_PDU_SIZE;\n "
+    }
+  ]
+}
