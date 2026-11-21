@@ -1,0 +1,28 @@
+Breakpoint 1 at 0x10dc48: file cram/cram_codecs.c, line 1378.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+@HD	VN:1.6	SO:coordinate
+@SQ	SN:chr1	LN:1000
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+
+Breakpoint 1, cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1378
+1378	    cram_block *b = slice->block_by_id[512 + c->codec_id];
+STOP codec_id=2 base=0x5555556dd5d0 slot513=0x1011 slot514=(nil) slot515=(nil)
+0x5555556de5d0:	0x0000000000000000	0x0000000000001011
+0x5555556de5e0:	0x0000000000000000	0x0000000000000000
+0x5555556de5f0:	0x0000000000000000	0x0000000000000000
+Breakpoint 2 at 0x555555661ccd: file cram/cram_codecs.c, line 1388.
+
+Breakpoint 2, cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1388
+1388	    b = slice->block_by_id[512 + c->codec_id] = cram_new_block(0, 0);
+AT1388 codec_id=2
+0x5555556de5d8:	0x0000000000001011	0x0000000000000000
+0x5555556de5e8:	0x0000000000000000	0x0000000000000000
+
+Breakpoint 1, cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1378
+1378	    cram_block *b = slice->block_by_id[512 + c->codec_id];
+SECOND HIT codec_id=2 slot514=0x5555556e01c0
+#0  cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1378
+#1  0x0000555555661e82 in cram_xpack_decode_char (slice=0x5555556dd130, c=0x5555556d0820, in=0x5555556dd2d0, out=0x5555556dfdd1 "", out_size=0x7fffffffd844) at cram/cram_codecs.c:1416
