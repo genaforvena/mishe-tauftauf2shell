@@ -1,0 +1,20 @@
+--- /tmp/fr-wake6-fresh/src3320/channels/rdpsnd/server/rdpsnd_main.c	2026-11-21 00:34:22.298653975 +0000
++++ /tmp/fr-wake2/src3320/channels/rdpsnd/server/rdpsnd_main.c	2026-11-21 02:52:47.781984732 +0000
+@@ -770,6 +770,17 @@
+ 		CopyMemory(context->priv->out_buffer +
+ 		               (context->priv->out_pending_frames * context->priv->src_bytes_per_frame),
+ 		           buf, cframesize);
++		{
++			const size_t dst_off = context->priv->out_pending_frames * context->priv->src_bytes_per_frame;
++			const BYTE* dst = context->priv->out_buffer + dst_off;
++			fprintf(stderr,
++			        "WAKE9_COPY dst_off=%zu cframesize=%zu b0=%02x blast=%02x b8820=%02x b21384=%02x\n",
++			        dst_off, cframesize, (cframesize > 0) ? dst[0] : 0,
++			        (cframesize > 0) ? dst[cframesize - 1] : 0,
++			        (dst_off <= 8820 && (8820 - dst_off) < cframesize) ? dst[8820 - dst_off] : 0,
++			        (dst_off <= 21384 && (21384 - dst_off) < cframesize) ? dst[21384 - dst_off] : 0);
++			fflush(stderr);
++		}
+ 		buf = (const BYTE*)buf + cframesize;
+ 		nframes -= cframes;
+ 		context->priv->out_pending_frames += cframes;

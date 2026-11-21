@@ -1,0 +1,54 @@
+FreeRDP wake 10: one-command witness replay of the live stock-allocator claim
+=============================================================================
+
+Command (from repo root):
+  bash lab/freerdp2shell-src/verify_live.sh
+Clean-room variant (fresh clone, patch, build):
+  FREERDP_VERIFY_WORK=/tmp/fr-verify-clean bash lab/freerdp2shell-src/verify_live.sh
+
+Pinned inputs (sha256, printed by the script):
+  83cd9a81d9aa79e01d72ce5af69d27f813eb67a3da1d23de7997be575bca8ba6  run.sh
+  984267cd9f5d93e5c2cf1cff1f224cfd5500183b4ba97e42495b4164812ce531  wake8-patches/client-rdpsnd.patch
+  85b66262be0b6bfadbf88b6158559a2e91be6d99b94fd2a1d8a1cfa17cbfd754  wake8-patches/server-sample-subsystem.patch
+  618d6a46f4606aa5a805e3263ea6fc84f0581f3ececdd1a464c279b272a7aa9b  wake8-patches/server-shadow-client.patch
+  c26c0142b71f44627b3184272cbb4c55377e23fa30482036b509681316161f57  wake8-patches/server-wake9-copy-trace.patch
+  fd77c4d4dcace3a1b362354aff4ccc5edc62e77b2cb59ccff1c84d17a77d9f81  wake8-patches/client-benign-control-gate.patch
+Result, warm tree (`/tmp/fr-verify-live`): 17 PASS / 0 FAIL, rc 0; logs
+`verify-live-out/20261121T031459Z/`. Result, clean room (fresh clone, patch and
+build into `/tmp/fr-verify-clean`): **18 PASS / 0 FAIL, rc 0** (the extra PASS
+is the patch-application check), logs `verify-live-out/20261121T031631Z/`.
+(Raw logs are gitignored; regenerate with the command above.)
+
+Decisive lines, vulnerable session (wrap-server.log, ports chosen at runtime):
+  VERIFY: loopback TCP connect to 127.0.0.1:21931 succeeded
+  [rdpsnd_server_select_format]: realloc failed!
+  [rdpsnd_activated]: SelectFormat failed with 12
+  WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00
+  double free or corruption (!prev)
+  16384 client-chosen 0xDE bytes were copied into the 8820-byte buffer left by
+  the failed realloc. Offsets 8820..16383 are out of bounds; the first OOB byte
+  holds the chosen marker. glibc detected heap metadata corruption on free.
+
+Decisive lines, benign control (benign-server.log, FR_BENIGN_ONLY=1):
+  VERIFY: loopback TCP connect to 127.0.0.1:21932 succeeded
+  WAKE9_COPY dst_off=0 cframesize=8820 b0=de blast=de b8820=00 b21384=00
+  WAKE9_COPY dst_off=0 cframesize=7564 b0=de blast=de b8820=00 b21384=00
+No realloc failure, no SelectFormat failure, no glibc corruption; offset 8820
+untouched. The OOB write is caused by the wrap, not the playback frame count.
+
+Both sessions used a source-built plain (no sanitizer) freerdp-shadow-cli and
+client/Sample sfreerdp bound to 127.0.0.1, with an ACTIVE session, the rdpsnd
+channel joined and both audio-format PDUs observed. No off-loopback probe.
+
+Two earlier replays in the same wake failed only on harness assertions (the
+readiness check waited for a log line that is not flushed, and the assertions
+read a log file with the wrong name); their captured server logs already
+contained the same wrap, chosen-byte and glibc-corruption lines above. Those
+harness bugs are fixed in verify_live.sh. Author replay is still not
+independent witness acceptance.
+
+Still lab-explicit conditions: no-auth server (the CVSS 9.8 case; default
+post-auth is PR:L / 8.8), a subsystem-supplied wrap-capable ADPCM format table,
+and a synthetic playback event. Pointer control / grooming a specific heap
+object remains UNKNOWN; the write is sequential. FFmpeg-enabled build remains
+UNVERIFIED (dev libs absent on this host).

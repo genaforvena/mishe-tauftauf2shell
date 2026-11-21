@@ -1,0 +1,11 @@
+--- /tmp/fr-wake2/src3320/channels/rdpsnd/client/rdpsnd_main.c	2026-11-21 02:16:49.174221333 +0000
++++ /tmp/fr-wake2/src3320/channels/rdpsnd/client/rdpsnd_main.c	2026-11-21 03:15:00.000000000 +0000
+@@ -257,6 +257,8 @@
+ 	WLog_Print(rdpsnd->log, WLOG_DEBUG, "%s Client Audio Formats",
+ 	           rdpsnd_is_dyn_str(rdpsnd->dynamic));
+ 	UINT rc = rdpsnd_virtual_channel_write(rdpsnd, pdu);
++	if (getenv("FR_BENIGN_ONLY") != NULL)
++		return rc;
+ 	/* Let the server process PDU 1 before PDU 2 arrives (separate WTS messages). */
+ 	Sleep(400);
+ 	if (rc != CHANNEL_RC_OK)

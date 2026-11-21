@@ -392,6 +392,34 @@ OOB write and the heap corruption are therefore caused by the wrap, not by
 the playback frame count. The vulnerable source was restored and rebuilt
 after the control.
 
+## One-command witness replay (wake 10, 03:15Z)
+
+The wake-9 `WAKE9_COPY` instrumentation was scratch-only; a witness could not
+reproduce it from HEAD. It is now committed as
+`lab/freerdp2shell-src/wake8-patches/server-wake9-copy-trace.patch`, alongside
+a `client-benign-control-gate.patch` that makes the same build serve the
+benign control via `FR_BENIGN_ONLY=1`. `verify_live.sh` provisions pinned
+FreeRDP tag 3.32.0 (`d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`), applies the
+five committed lab patches, builds a plain (no sanitizer) shadow server and
+`client/Sample sfreerdp`, runs both loopback sessions and asserts the claims.
+Server readiness is a real TCP connect to 127.0.0.1, not a log line.
+
+`bash lab/freerdp2shell-src/verify_live.sh` returned rc 0 with 17 PASS /
+0 FAIL on a warm tree and **18 PASS / 0 FAIL clean-room** (fresh clone, patch
+and build). Evidence: `lab/freerdp2shell-src/verify_live_run.txt`; raw logs in
+the gitignored `verify-live-out/20261121T031459Z/` and `.../20261121T031631Z/`.
+Vulnerable session:
+`realloc failed!`, `SelectFormat failed with 12`,
+`WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00`,
+then `double free or corruption (!prev)`. Control: two in-bounds writes
+(8820 then 7564), `b8820=00`, no wrap log, no glibc corruption.
+The in-process real-library replay remains a separate pinned driver,
+`bash lab/freerdp2shell-src/run.sh`. Two earlier replays in this wake failed
+only on harness assertions (unflushed readiness log line, wrong log filename);
+their raw logs already held the same wrap, chosen-byte and corruption lines.
+Those harness bugs are fixed. This is an author replay, not independent
+witness acceptance.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
@@ -414,5 +442,7 @@ posture is post-auth (PR:L, CVSS 8.8); the no-auth lab configuration used for
 the live session is the 9.8 case.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
-`lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay
-requested; author report is not acceptance.
+`lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. A one-command live
+replay now exists (`lab/freerdp2shell-src/verify_live.sh`, 17 PASS / 0 FAIL);
+independent witness acceptance is still owed, and an author report is not
+acceptance.
