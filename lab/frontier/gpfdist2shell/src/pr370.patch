@@ -1,0 +1,226 @@
+From 74934874c5c8d94e96953507737a42d97c24265e Mon Sep 17 00:00:00 2001
+From: Wen Lin <wen.lin@enterprisedb.com>
+Date: Wed, 28 Oct 2026 08:51:34 +0800
+Subject: [PATCH] Reject out-of-range segment id and count in gpfdist requests
+
+session_attach() took the segment count and id straight from the
+X-GP-SEGMENT-COUNT and X-GP-SEGMENT-ID request headers.  The count
+sizes the per-segment active_segids and seq_segs arrays and the id is
+used as the index written into them, and nothing checked that the id
+fit.  A request carrying an out-of-range or negative id made gpfdist
+write outside the allocation and crash, taking down the server that
+every external table using it depends on.
+
+Validate the two values at the start of session_attach(): the count
+must be positive and the id must fall inside the bounds of an array of
+that size.  The count is also capped at 32767, because segment content
+ids are int16 in gp_segment_configuration and no cluster can have more
+segments; without the cap a huge count made gpfdist try to allocate
+many gigabytes for the two arrays.  When a request joins an existing
+session, also bound the id by the size the session was created with,
+since a later request may carry a larger count than the one that
+allocated the arrays.  Every other use of the id goes through the
+session and is already bounded by that size.
+
+A plain download that sends only X-GP-PROTO and omits the segment
+headers is served as a single-segment session, so default the count to
+one and the id to zero when the headers are absent; an explicit value
+still has to pass the bounds check.
+
+A shell test under src/bin/gpfdist/regress covers the rejected and the
+accepted cases.
+---
+ src/bin/gpfdist/gpfdist.c                     | 46 +++++++++++
+ src/bin/gpfdist/regress/Makefile              |  5 +-
+ .../gpfdist/regress/test_segment_headers.sh   | 81 +++++++++++++++++++
+ 3 files changed, 131 insertions(+), 1 deletion(-)
+ create mode 100755 src/bin/gpfdist/regress/test_segment_headers.sh
+
+diff --git a/src/bin/gpfdist/gpfdist.c b/src/bin/gpfdist/gpfdist.c
+index af3c3704182..702c98a6d54 100644
+--- a/src/bin/gpfdist/gpfdist.c
++++ b/src/bin/gpfdist/gpfdist.c
+@@ -398,6 +398,13 @@ static int setup_read(request_t* r);
+ static int setup_write(request_t* r);
+ static void setup_do_close(request_t* r);
+ static int session_attach(request_t* r);
++
++/*
++ * Upper bound for the segment count a request may declare.  Segment content
++ * ids are stored as int16 in gp_segment_configuration, so no cluster has
++ * more segments than this.
++ */
++#define GPFDIST_MAX_SEGMENTS 32767
+ static void session_detach(request_t* r);
+ static void session_end(session_t* s, int error, const char *errmsg);
+ static void session_free(session_t* s);
+@@ -1847,6 +1854,22 @@ static int session_attach(request_t* r)
+ 		return -1;
+ 	}
+ 
++	/*
++	 * The segment count and id are taken verbatim from the X-GP-SEGMENT-COUNT
++	 * and X-GP-SEGMENT-ID request headers.  The count sizes the per-segment
++	 * arrays (active_segids, seq_segs) and the id is used as the write index
++	 * into them, so a request whose id does not fit an array of that size
++	 * would write outside the allocation.  Reject such a request before
++	 * anything is allocated or indexed.
++	 */
++	if (r->totalsegs <= 0 || r->totalsegs > GPFDIST_MAX_SEGMENTS ||
++		r->segid < 0 || r->segid >= r->totalsegs)
++	{
++		http_error(r, FDIST_BAD_REQUEST, "bad request, invalid segment id or count");
++		request_end(r, ERROR_CODE_GENERIC, 0);
++		return -1;
++	}
++
+ 
+ 	/* check if such session already exists in hashtable */
+ 	session = apr_hash_get(gcb.session.tab, key, APR_HASH_KEY_STRING);
+@@ -2031,6 +2054,19 @@ static int session_attach(request_t* r)
+ 		return -1;
+ 	}
+ 
++	/*
++	 * The per-segment arrays were sized by the request that created the
++	 * session (session->maxsegs).  A later request joining the session may
++	 * carry a different, larger id, so bound it by the session's size as well
++	 * before using it as an index below.
++	 */
++	if (r->segid >= session->maxsegs)
++	{
++		http_error(r, FDIST_BAD_REQUEST, "bad request, segment id out of range for session");
++		request_end(r, ERROR_CODE_GENERIC, 0);
++		return -1;
++	}
++
+ 	gprintlnif(r, "joined session (%s, %s)", session->path, session->tid);
+ 
+ 	/* one more request for session */
+@@ -3846,6 +3882,16 @@ static int request_parse_gp_headers(request_t *r, int opt_g)
+ 	r->is_final = 0;
+ 	r->seq = 0;
+ 
++	/*
++	 * Default to a single-segment session.  A plain download that sends only
++	 * X-GP-PROTO and omits the segment headers is served as one consumer;
++	 * without these defaults the count would stay zero and the bounds check
++	 * in session_attach() would reject such a request.  An explicit value in
++	 * the headers below overrides these, and is still validated there.
++	 */
++	r->totalsegs = 1;
++	r->segid = 0;
++
+ 	for (i = 0; i < r->in.req->hc; i++)
+ 	{
+ 		if (0 == strcasecmp("X-GP-XID", r->in.req->hname[i]))
+diff --git a/src/bin/gpfdist/regress/Makefile b/src/bin/gpfdist/regress/Makefile
+index f7a3b7a6db5..d30ac1bc133 100644
+--- a/src/bin/gpfdist/regress/Makefile
++++ b/src/bin/gpfdist/regress/Makefile
+@@ -31,7 +31,7 @@ endif
+ 
+ REGRESS_OPTS = --init-file=init_file
+ 
+-installcheck: watchdog ipv4v6_ports
++installcheck: watchdog ipv4v6_ports segment_headers
+ ifeq ($(enable_gpfdist),yes)
+ ifeq ($(with_openssl),yes)
+ 	rm -rf data/gpfdist_ssl/certs_server_no_verify
+@@ -59,6 +59,9 @@ watchdog:
+ ipv4v6_ports:
+ 	./test_ipv4v6_port.sh
+ 
++segment_headers:
++	./test_segment_headers.sh
++
+ clean:
+ 	rm -rf regression.* sql results expected
+ 
+diff --git a/src/bin/gpfdist/regress/test_segment_headers.sh b/src/bin/gpfdist/regress/test_segment_headers.sh
+new file mode 100755
+index 00000000000..c3d72dd1bd8
+--- /dev/null
++++ b/src/bin/gpfdist/regress/test_segment_headers.sh
+@@ -0,0 +1,81 @@
++#!/bin/bash
++#
++# Regression test for the X-GP-SEGMENT-COUNT / X-GP-SEGMENT-ID bounds checks
++# in session_attach().  An out-of-range or negative segment id must be
++# rejected with HTTP 400 instead of indexing past the per-segment arrays,
++# while a plain download that omits the segment headers must still succeed.
++
++PORT=8088
++DATADIR=$(mktemp -d)
++GPFDIST_PID=0
++rc=0
++
++function cleanup()
++{
++	if [ $GPFDIST_PID -ne 0 ]; then
++		kill $GPFDIST_PID >/dev/null 2>&1
++		GPFDIST_PID=0
++	fi
++	rm -rf "$DATADIR"
++}
++trap cleanup EXIT
++
++if ! which curl >/dev/null 2>&1; then
++	echo -e "\033[32m curl not available, skipping segment-header test\033[0m"
++	exit 0
++fi
++
++printf 'row1\nrow2\n' > "$DATADIR/data.txt"
++
++gpfdist -d "$DATADIR" -p $PORT >/dev/null 2>&1 &
++GPFDIST_PID=$!
++sleep 2
++
++if ! kill -0 $GPFDIST_PID >/dev/null 2>&1; then
++	echo -e "\033[31m gpfdist failed to start on port $PORT\033[0m"
++	exit 1
++fi
++
++# $1 = description, $2 = expected HTTP status, rest = curl header args
++function check()
++{
++	local desc="$1"; local want="$2"; shift 2
++	local got
++	got=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:$PORT/data.txt" "$@")
++	if [ "$got" == "$want" ]; then
++		echo -e "\033[32m ok   [$desc] -> $got\033[0m"
++	else
++		echo -e "\033[31m FAIL [$desc] expected $want, got $got\033[0m"
++		rc=1
++	fi
++}
++
++PROTO="-H X-GP-PROTO:1"
++
++# a download that omits the segment headers is served as a single consumer
++check "proto only, no segment headers" 200 $PROTO
++# a well-formed single-segment request succeeds
++check "count=1 id=0" 200 $PROTO -H X-GP-SEGMENT-COUNT:1 -H X-GP-SEGMENT-ID:0
++# an id past the segment count is rejected
++check "count=1 id=2000000000" 400 $PROTO -H X-GP-SEGMENT-COUNT:1 -H X-GP-SEGMENT-ID:2000000000
++# a negative id is rejected
++check "count=4 id=-1" 400 $PROTO -H X-GP-SEGMENT-COUNT:4 -H X-GP-SEGMENT-ID:-1
++# a non-positive count is rejected
++check "count=0 id=0" 400 $PROTO -H X-GP-SEGMENT-COUNT:0 -H X-GP-SEGMENT-ID:0
++# a count larger than any cluster can have is rejected
++check "count=2000000000 id=0" 400 $PROTO -H X-GP-SEGMENT-COUNT:2000000000 -H X-GP-SEGMENT-ID:0
++
++# the server must still be serving after the rejected requests
++check "normal request after rejects" 200 $PROTO -H X-GP-SEGMENT-COUNT:1 -H X-GP-SEGMENT-ID:0
++
++if ! kill -0 $GPFDIST_PID >/dev/null 2>&1; then
++	echo -e "\033[31m gpfdist is no longer running after the bad requests\033[0m"
++	rc=1
++fi
++
++if [ $rc -eq 0 ]; then
++	echo -e "\033[32m test [gpfdist segment header bounds] success\033[0m"
++else
++	echo -e "\033[31m test [gpfdist segment header bounds] failed\033[0m"
++fi
++exit $rc
