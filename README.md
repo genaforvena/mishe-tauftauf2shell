@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies sixteen admitted vulnerability families in local, isolated copies
+It studies eighteen admitted vulnerability families in local, isolated copies
 of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -144,6 +144,21 @@ of the affected software:
   rung 4 are recorded in the brief; no live bzfs, real layout or execution
   was observed.
 
+- **Kamailio2Shell** — CVE-2026-106803, an unbounded tilde-distance `memcpy`
+  into `char bufport[5]` in Kamailio's IMS P-CSCF `ims_registrar_pcscf`
+  module, reachable through a crafted reginfo+xml NOTIFY Contact URI. CWE-121,
+  CVSS 3.1 9.8, affected 6.1.3/6.1.4, fixed 6.1.5. Admitted ~02:2xZ under
+  standing approval #6; rungs 1-3 and instrumented chosen-value rung 4 are
+  recorded in the brief, with the module gate, real frame layout and any
+  return-address control UNKNOWN.
+- **Iperf2Shell** — CVE-2026-101283 / GHSA-pwcx-5qh6-2pxc, a 336-byte
+  base64-decoded `authtoken` passed as the `BIO_read` size into a 256-byte
+  RSA heap buffer in iperf3's `decrypt_rsa_message()`. CWE-122, CVSS 4.0
+  9.2, affected 3.20/3.21, fixed 3.22; RSA auth must be enabled but the write
+  is pre-auth. Admitted ~02:2xZ under standing approval #6; rungs 1-3 run on
+  the real pinned upstream function, rung 4 is instrumented chosen-byte
+  control only, and the 3.22 release-note mislabel is preserved.
+
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
 `127.0.0.1`, and a separate mind re-runs every claimed result before it
@@ -169,6 +184,8 @@ is called established.
 | **Gst2Shell** | **Rung 3 confirmed; count-controlled rung-4 effect in live and shipping builds** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, caps length choosing the clobbered offsets, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. The harness's `NONE(0)` model was wrong — pinned `NONE=-3` writes `fd ff ff ff`, corrupting `order` to `0x00000000fffffffd`; a live ASan instance faults at `order->pos` and the shipping 1.24.2 plugin faults rc 139 at `encoding-params` 86/87/100/1000. A 2026-11-21 pass symbolicated the N=1000 shipping fault to `srcpad->g_class` in a heap-adjacent GstPad and drove SDP text through GStreamer's own parser to the same fault at N=86/1000 (RTP structure name modelled in the harness); the native `sdpdemux` path reached PLAYING without instantiating `rtpL16depay` and fails at benign N=8 too. Chosen bytes, arbitrary pointer control, RCE and a real remote SDP/RTSP pre-auth path are NOT DEMONSTRATED. [Status](reports/gst2shell-status.md) |
 | **Babelfish2Shell** | **Rungs 1-3 in an extracted harness; harness-only chosen-byte rung 4** | An unbounded 16-bit prelogin `length=4096` copied into a 1024-byte `StringInfo`: `oob_writes=3072 first_oob=1024 last_oob=4095`; lengths 1050/1150/2100 clobber neither/first/both neighbour stamps; ASan `WRITE of size 4096` 0 bytes after a 1024-byte region in `wire_getbytes`; chosen `de ad be ef ca fe ba be` / `41 42 43 44` land byte-exact at OOB offsets 1100/2000; fixed control `rc=0 oob_writes=0`, clean under ASan, 5/5 identical. No live TDS endpoint, `palloc` layout, real neighbour or control-flow effect observed. [Status](reports/babelfish2shell-status.md) |
 | **Bzfs2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A 1024-byte body writes four sender-chosen bytes past `tcpmsg[1024]` into adjacent `tcplen`: rung 1 `tcplen=-1024` with chosen tail at `tcpmsg+1024`; rung 2 destination 936 bytes before the object, next length 1028; rung 3 ASan `heap-buffer-overflow` `WRITE of size 64` via `recv` → `traced_recv` → `receive_msg`; rung 4 `DEADBEEFCAFEBABE`/`0123456789ABCDEF` read back byte-exact from chosen preceding harness members; fixed controls reject at the first bound, ASan-clean, 5/5 identical. No live bzfs, player socket, real `NetHandler` layout, allocator neighbour or execution. [Status](reports/bzfs2shell-status.md) |
+| **Kamailio2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A `alias=host~<port>~1` Contact parameter makes the tilde distance the `memcpy` length into `bufport[5]`: `len=80`, `oob=75`, `first_oob=5`, chosen function pointer and stamp overwritten byte-exactly; ASan `stack-buffer-overflow` `WRITE of size 80` from `memcpy` ← `parse_alias`, marker executed through the instrumented pointer only; pinned 6.1.5 rejects before the copy. No live Kamailio, real `process_contact()` layout, stack protector, return-address control or SIP message. [Status](reports/kamailio2shell-status.md) |
+| **Iperf2Shell** | **Rungs 1-3 on real pinned upstream code; instrumented chosen-byte rung 4** | A 336-byte decoded authtoken crosses a 256-byte RSA heap allocation: ASan `WRITE of size 336` from `BIO_read` ← `decrypt_rsa_message` at `iperf_auth.c.3.21:324`; the plain build aborts at `free(): invalid size` from overwritten next-chunk metadata; chosen `IPERF2SHELL!` and `0x1122334455667788` are supplied in the write buffer only; pinned 3.22 rejects before `BIO_read`. No live server, stock heap layout, useful pointer or execution; the release-note CVE mislabel is preserved. [Status](reports/iperf2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -192,14 +209,21 @@ Bzfs2Shell's live `bzfs` reachability, real `NetHandler` object layout and
 witness replay are open; its status file records the harness-only rung-4
 boundary without claiming a live result.
 
+Kamailio2Shell's loaded `ims_registrar_pcscf` module gate, real
+`process_contact()` frame layout, stack protector and return-address control
+are open; Iperf2Shell's live RSA-auth server, stock heap layout and
+useful-pointer control are open. Both status files record the instrumented
+rung-4 boundary without claiming a live result.
+
 ## How the plant works
 
 Each target is its own mind with its own window: **ruby2shell**,
 **php2shell**, **node2shell**, **apache2shell**, **mosquitto2shell**,
 **dragonfly2shell**, **postgres2shell**, **brotli2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
-**freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell** and
-**bzfs2shell** pursue their lane end-to-end — build, harness, debugger, report. Four
+**freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell**,
+**bzfs2shell**, **kamailio2shell** and **iperf2shell** pursue their lane
+end-to-end — build, harness, debugger, report. Four
 further minds cut
 across them:
 
@@ -245,6 +269,18 @@ the status file, not treated as a live result. Frontier also reported the
 earlier mapserver2shell window absent from the restarted inner tmux server;
 the restorer rebuilds it, and no duplicate lane was opened.
 
+Kamailio2Shell was admitted ~02:2xZ: the charter, docs entry, window (24,
+inner socket), seed wall and status file are live from frontier's handoff;
+wake trigger units and the presentation.json entry are owed from the
+person's full-flag sync. The module must be configured; rung 4 is
+instrumented only.
+
+Iperf2Shell was admitted ~02:2xZ: the charter, docs entry, window (25, inner
+socket), seed wall and status file are live from frontier's handoff; wake
+trigger units and the presentation.json entry are owed from the person's
+full-flag sync. RSA auth must be enabled and the rung-4 bytes are supplied
+in the harness write buffer, not a stock process.
+
 The rungs — **suspected → reproducible crash → confirmed memory
 corruption → demonstrated impact** — are a depth investigation of how far
 rung 4 can be pushed on each build, not boxes to touch. Every lane records
@@ -265,8 +301,9 @@ public-infrastructure scans.
   The `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
   `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
-  `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell` and `frontier`,
-  `docs`, `witness` and `operator` windows show each mind's wall and wake log;
+  `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
+  `kamailio2shell`, `iperf2shell` and `frontier`, `docs`, `witness` and
+  `operator` windows show each mind's wall and wake log;
   `chat`, `git` and `wakes` show the shared tape. All minds run on
   `opencode-go/hy4-flash-free`.
 

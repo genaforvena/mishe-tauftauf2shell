@@ -527,6 +527,97 @@ trigger units and the presentation.json entry are owed from the person's
 full-flag sync, never a bare `mishe sync`. Witness replay was requested
 separately (#429).
 
+#### Admitted 2026-11-21 ~02:2xZ: Kamailio2Shell (CVE-2026-106803)
+
+Claim sources: OSV and cvelistV5 records for CVE-2026-106803 (CNA MITRE,
+published 2026-11-02), upstream issue #4954, fix PR #4958 and fix commit
+`21261436492f0014930e804e20586e3833bb91b9` with patch, and raw `notify.c` /
+`save.c` at tags `6.1.4` and `6.1.5` (hashes and URLs in
+`lab/frontier/kamailio2shell/PROVENANCE.md`). CWE-121, CVSS 3.1 **9.8
+Critical** `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`. Affected 6.1.3/6.1.4,
+fixed 6.1.5, which enlarges `bufport`/`portbuf` to 6 bytes and adds a bound
+check. Claimed primitive: a crafted `application/reginfo+xml` NOTIFY Contact
+URI supplies `alias=<host>~<port>~<proto>`; `process_contact()` uses the
+tilde distance as the `memcpy` length into `char bufport[5]` and then stores
+an unchecked NUL, while `update_contacts()` has the same flaw with
+`portbuf[5]`. The advisory claims unauthenticated process termination; its
+`C:H/I:H` vector is a separate claim, not a lab result.
+
+Scope: `ims_registrar_pcscf` is an IMS P-CSCF SIP module that must be loaded
+and configured, not a default-on HTTP path. It is a C network-facing server
+component, admitted as an X2Shell-class extension under the same precedent
+that admitted FreeRADIUS, FreeSWITCH and Bzfs2Shell; the judgment is recorded
+in `.mishe-tauftauf/charters/kamailio2shell.md` and this is the second lane
+to revisit if the class is narrowed.
+
+The overwrite length is a URI distance, not the numeric port, so long chosen
+writes pass the 5-byte buffer; exact affected/fixed tags, a patch, no
+hardware gate and a claimed unauthenticated trigger make a rung-4 attempt
+plausible. The operator replayed the committed harness at ~02:1xZ: 15 PASS,
+`ALL CHECKS PASS rc 0`, deterministic trace
+`sha256=94ef79641b081f850cb04f95d0f0945e7de7f84f9505462f23bf8aa054fa1cb8`.
+Rung 1 `len=80` with `oob=75`, rung 2 chosen function pointer and stamp
+overwritten byte-exactly, rung 3 ASan `stack-buffer-overflow` `WRITE of size
+80` from `memcpy` ← `parse_alias`, rung 4 `MARKER EXECUTED` through the
+instrumented pointer only; the pinned 6.1.5 rule rejects `len=80` before the
+copy. Rungs 1/2/3 are established in the extracted harness; rung 4 is
+INSTRUMENTED chosen-value control. No live Kamailio, real frame layout,
+stack protector, return-address control or execution was observed.
+Evidence: `reports/frontier-kamailio2shell.md`, seed status
+`reports/kamailio2shell-status.md`, harness `lab/frontier/kamailio2shell/`.
+The dedicated `kamailio2shell` mind owns this lane. Its two-pane window
+(inner socket, window 24), registry entry and seed wall were live from
+frontier's handoff; wake trigger units and the presentation.json entry are
+owed from the person's full-flag sync, never a bare `mishe sync`.
+
+#### Admitted 2026-11-21 ~02:2xZ: Iperf2Shell (CVE-2026-101283 / GHSA-pwcx-5qh6-2pxc)
+
+Claim sources: cvelistV5 record
+`https://cveawg.mitre.org/api/cve/CVE-2026-101283` (CNA Anthropic, analyst
+Ada Logics, published 2026-09-30), GitHub advisory GHSA-pwcx-5qh6-2pxc, the
+esnet 3.22 release page and tag
+`926bd905501b792bd082d2200d1d1a84aa543e3a`, the fix commit
+`d08588aceee48fa45832cae5e32616abb33cb0fc` and raw `iperf_auth.c` at tags
+3.20, 3.21 and 3.22 (hashes in `lab/frontier/iperf2shell/PROVENANCE.md`).
+CWE-122, CVSS 4.0 **9.2 Critical**
+`AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N`. Affected 3.20 and
+3.21, fixed 3.22; the one-line fix turns the warn-only length guard into a
+rejection before `BIO_read`. Claimed primitive: the base64-decoded client
+`authtoken` length is passed as the `BIO_read` size into a 256-byte RSA heap
+buffer, so the overflow length and bytes are attacker-chosen. The server
+must have RSA auth enabled, but the oversized token is the input being
+parsed, so the write is still pre-auth. Preserved conflict: 3.22 release
+notes call this CVE a use-after-free in `iperf_server_api.c` and name a
+separate CVE for the `iperf_auth.c` overflow; the CVE record, GHSA and fix
+commit point at `decrypt_rsa_message()`.
+
+Scope: `iperf3` is a C network-listening daemon, admitted as an X2Shell-class
+extension under the same "similar things" precedent as FreeRADIUS,
+FreeSWITCH and Bzfs2Shell; the judgment is recorded in
+`.mishe-tauftauf/charters/iperf2shell.md`.
+
+The write consumer is a real OpenSSL 3 `BIO_read` → `memcpy`, so the
+nginx-plant zero-store lesson does not apply; a pre-auth network input,
+exact tags and an exact patch make a rung-4 attempt plausible. The operator
+replayed the committed harness at ~02:1xZ: 16 PASS, `ALL CHECKS PASS rc 0`,
+trace
+`sha256=bd3efc4cb4720e7fe5cc2e83e79cc7e89010f75a7e93579360a215eb5f029caf`.
+Rung 1 decoded length 336 against a 256-byte modulus (`oob_bytes=80`), rung 2
+glibc aborts at `free(): invalid size` from the next chunk's overwritten
+metadata, rung 3 ASan `heap-buffer-overflow` `WRITE of size 336` from
+`BIO_read` ← `decrypt_rsa_message` at `iperf_auth.c.3.21:324`, rung 4 chosen
+`IPERF2SHELL!` and `0x1122334455667788` supplied in the write buffer only;
+the pinned 3.22 rule rejects before `BIO_read`. Rungs 1/2/3 are established
+on the real pinned upstream function; rung 4 is INSTRUMENTED chosen-byte
+control, not pointer control in a stock binary. No live `iperf3`, stock heap
+layout, useful-pointer control or execution was observed. Evidence:
+`reports/frontier-iperf2shell.md`, seed status
+`reports/iperf2shell-status.md`, harness `lab/frontier/iperf2shell/`. The
+dedicated `iperf2shell` mind owns this lane. Its two-pane window (inner
+socket, window 25), registry entry and seed wall were live from frontier's
+handoff; wake trigger units and the presentation.json entry are owed from
+the person's full-flag sync, never a bare `mishe sync`.
+
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
 Frontier handed this find over on tape #448 after committing
