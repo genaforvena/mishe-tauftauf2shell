@@ -181,8 +181,10 @@ PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x ptr_store.gdb --args python3 -c
   'from PIL import Image; Image.open("case_ptr64.fpx").load()'
 ```
 
-Expected: buffer `0xd32bb0`, `Old value = 192 '\300'`, `New value = 96 '`'` at
-`buffer+184` from `libjpeg.so.8`, stack through pinned `JpegDecode.c:252`.
+Expected: `Old value = 192 '\300'`, `New value = 96 '`'` at `buffer+184` from
+`libjpeg.so.8`, stack through pinned `JpegDecode.c:252`. The absolute brk
+address shifts with cwd/environment (`0xd32bb0` in the recorded log,
+`0xd32c10` when running from the lane); offsets and byte values are invariant.
 
 Causal differential on the same byte-identical file (both scripts snapshot the
 full 896-byte past-end span before the write and restore it after the decoder
