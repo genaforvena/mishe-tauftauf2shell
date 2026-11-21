@@ -1,0 +1,8 @@
+PASS slice+block_by_id allocated
+PASS cram_decoder_init(E_XPACK) returned codec
+PASS codec_id=1 expected=1 (hdr->ncodecs++)
+PASS hdr->ncodecs advanced to 2
+PASS cache index 512+codec_id=513 vs 512 slots
+INFO get_block returned 0x1011 (NULL means OOB slot was still zero)
+PASS get_block completed (ASan reports above are the evidence)
+RESULT PASS

@@ -1,0 +1,157 @@
+=================================================================
+==2699315==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000001108 at pc 0x56beae1f669b bp 0x7ffee0569d80 sp 0x7ffee0569d70
+READ of size 8 at 0x521000001108 thread T0
+    #0 0x56beae1f669a in cram_xpack_decode_expand_char cram/cram_codecs.c:1378
+    #1 0x56beae1f70e1 in cram_xpack_get_block cram/cram_codecs.c:1449
+    #2 0x56beae1eb0fe in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness.c:70
+    #3 0x71c3aea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x71c3aea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x56beae1ea704 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness-asan+0x27704) (BuildId: 2a3118c709d5bb5b779a23565ef211682acf569d)
+
+0x521000001108 is located 8 bytes after 4096-byte region [0x521000000100,0x521000001100)
+allocated by thread T0 here:
+    #0 0x71c3aeefd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x56beae1eab04 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness.c:44
+    #2 0x71c3aea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x71c3aea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x56beae1ea704 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness-asan+0x27704) (BuildId: 2a3118c709d5bb5b779a23565ef211682acf569d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow cram/cram_codecs.c:1378 in cram_xpack_decode_expand_char
+Shadow bytes around the buggy address:
+  0x521000000e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x521000001100: fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==2699315==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000001108 at pc 0x56beae1f67fa bp 0x7ffee0569d80 sp 0x7ffee0569d70
+WRITE of size 8 at 0x521000001108 thread T0
+    #0 0x56beae1f67f9 in cram_xpack_decode_expand_char cram/cram_codecs.c:1388
+    #1 0x56beae1f70e1 in cram_xpack_get_block cram/cram_codecs.c:1449
+    #2 0x56beae1eb0fe in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness.c:70
+    #3 0x71c3aea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x71c3aea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x56beae1ea704 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness-asan+0x27704) (BuildId: 2a3118c709d5bb5b779a23565ef211682acf569d)
+
+0x521000001108 is located 8 bytes after 4096-byte region [0x521000000100,0x521000001100)
+allocated by thread T0 here:
+    #0 0x71c3aeefd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x56beae1eab04 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness.c:44
+    #2 0x71c3aea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x71c3aea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x56beae1ea704 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness-asan+0x27704) (BuildId: 2a3118c709d5bb5b779a23565ef211682acf569d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow cram/cram_codecs.c:1388 in cram_xpack_decode_expand_char
+Shadow bytes around the buggy address:
+  0x521000000e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x521000001100: fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==2699315==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000001108 at pc 0x56beae1f7177 bp 0x7ffee0569f90 sp 0x7ffee0569f80
+READ of size 8 at 0x521000001108 thread T0
+    #0 0x56beae1f7176 in cram_xpack_get_block cram/cram_codecs.c:1450
+    #1 0x56beae1eb0fe in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness.c:70
+    #2 0x71c3aea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x71c3aea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x56beae1ea704 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness-asan+0x27704) (BuildId: 2a3118c709d5bb5b779a23565ef211682acf569d)
+
+0x521000001108 is located 8 bytes after 4096-byte region [0x521000000100,0x521000001100)
+allocated by thread T0 here:
+    #0 0x71c3aeefd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x56beae1eab04 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness.c:44
+    #2 0x71c3aea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x71c3aea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x56beae1ea704 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/harness-asan+0x27704) (BuildId: 2a3118c709d5bb5b779a23565ef211682acf569d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow cram/cram_codecs.c:1450 in cram_xpack_get_block
+Shadow bytes around the buggy address:
+  0x521000000e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x521000001100: fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+PASS slice+block_by_id allocated
+PASS cram_decoder_init(E_XPACK) returned codec
+PASS codec_id=1 expected=1 (hdr->ncodecs++)
+PASS hdr->ncodecs advanced to 2
+PASS cache index 512+codec_id=513 vs 512 slots
+INFO get_block returned 0x507000000100 (NULL means OOB slot was still zero)
+PASS get_block completed (ASan reports above are the evidence)
+RESULT PASS

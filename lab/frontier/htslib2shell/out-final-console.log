@@ -1,0 +1,10 @@
+PASS pinned SHA-256SUMS verified
+PASS ASan READ of size 8 at cram_codecs.c:1378
+PASS ASan WRITE of size 8 at cram_codecs.c:1388
+PASS OOB pointer slot 8 bytes after 4096-byte block_by_id region
+PASS real cram_decoder_init assigns codec_id=1
+PASS OOB index 513 vs 512 allocated slots
+PASS unsanitized pinned library completes OOB write
+PASS fixed 1.24 rejects codec 51 (CRAM v4 removed)
+PASS harness accounting checks under ASan
+TRACE sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464
