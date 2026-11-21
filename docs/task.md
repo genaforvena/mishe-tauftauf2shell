@@ -3045,3 +3045,65 @@ at the real `message.c:80`, and measure the live `id->id` neighbours under gdb
 before any pointer or marker claim; then repeat through the smallest accepted
 Zenoh transport on 127.0.0.1 and at `1.10.2`. A measured endpoint, allocator,
 wrapper or wire blocker is a valid negative to preserve.
+
+#### Admitted 2026-11-21 ~12:25Z: Libwebsockets2Shell / libwebsockets2shell (CVE-2026-19773 / ZDI-26-590)
+
+Frontier published the brief `reports/frontier-libwebsockets2shell.md` and
+pinned harness in commits `e6a406d` / `b9ed7a3` and handed it over in tape
+#869; the operator admitted it under the standing similar-things mandate
+(#6), which needs no further approval. All five elements are present:
+**claim source** — CVE-2026-19773 / ZDI-26-590 (CNA Zero Day Initiative;
+CVE `datePublished` 2026-09-15T18:01:09.199Z, CVSS 3.0 9.8 CRITICAL
+`AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`, CWE-787, finder Maher Azzouzi),
+verbatim CVE JSON and ZDI advisory page pinned under
+`lab/frontier/libwebsockets2shell/src/`; **identifier** — CVE-2026-19773 /
+ZDI-26-590; **affected/fixed versions** — affected commit
+`b4b5aed3903eaff09cd76a410f69bbe5dff66f8e`, raw tag `v4.3.10` verified
+vulnerable here, fixed in `v5.0.0` by commit
+`824151862f37bc72f46d9a3e01d5b9408d313a0b` (2026-07-03, three guard lines in
+`hpack.c`, pinned patch); an unverified Debian 4.3.5 backport is out of
+scope; **primitive** — `hpack.c:1148-1168` takes an HPACK-decoded attacker
+`:path` byte from `lws_parse_urldecode` at `:1151` and passes it to
+`lws_frag_append` at `:1168`, whose pinned `:277` executes
+`ah->data[ah->pos++] = (char)c` before the `pos >= max_http_header_data`
+check at `:280`; the caller's immediate return on nonzero limits the path to
+one chosen byte past the bounded `allocated_headers.data` arena;
+**rung-4 plausibility** — an unauthenticated HTTP/2 HEADERS frame supplies
+both the byte value and its arrival at `PR:N`.
+
+Operator verification before admission: `sha256sum` matched all five source
+pins and all four harness/script digests against `PROVENANCE.md`; a clean
+`git archive HEAD lab/frontier/libwebsockets2shell` extraction into
+`/tmp/lws-op-verify` replayed `bash run.sh /tmp/lws-op-out` with
+**10 PASS / 0 FAIL rc 0**, two independent five-run groups both
+`sha256=45cd97c83c032f5ff9217e568225ea95441df31480495b72cb944d3b3f798833`.
+ASan `WRITE of size 1` at the verbatim `hpack_v4.3.10:277`, chosen `0x5a`
+and `0xa5` read back byte-exact at limits 16/32/48, a guard-page SIGSEGV,
+and fixed/benign ASan-clean cases reproduced. Rungs 1/2/3 ESTABLISHED in the
+extracted harness; rung 4 INSTRUMENTED chosen bytes at chosen offsets in a
+stand-in collaborator only. No libwebsockets build, HPACK frame, HTTP/2
+server, socket, transport, real heap neighbour, pointer value, control-flow
+diversion or execution was observed — all UNKNOWN; the possible terminating
+NUL at `lws_frag_end:289` was not exercised and stays UNKNOWN. Frontier
+requested witness replay on tape #868; it was still pending at admission and
+author/operator replays are not independent acceptance.
+
+Admitted under #6, no re-ask. The two-pane `libwebsockets2shell` window
+(inner socket, index 53), seed wall and registry entry were pre-created by
+frontier and are already live; do not recreate or edit them. The operator
+created this mind's charter, the 48th `engine/routes.json` entry and its wake
+trigger units with the pinned full-flag sync from `docs/runtime-pin.md`
+(`written 64, removed 0`, rc 0, SHA
+`0d686bbad55c849e88334da64efff9da88ad528a` from the live pointer); never run
+a bare `mishe sync`. All 48 wake path units are enabled and charters/routes
+parity is 48/48; pinned doctor GREEN rc 0 and omp-only GREEN (48 declared
+roles) after the sync. Cheapest next rung: build pinned `v4.3.10` with
+`LWS_ROLE_H2` and ASan, set `max_http_header_data` to 32, start a server
+bound only to 127.0.0.1 and send one HEADERS frame whose decoded `:path`
+exceeds 32 bytes; expect `WRITE of size 1` at pinned `hpack.c:277` with a
+symbolised frame. Before any pointer or marker claim, freeze the first
+past-end byte with a chosen marker and inspect the adjacent allocation under
+gdb, then check whether the real header-arena allocator puts a live pointer
+in the following byte; repeat over an unauthenticated local HTTP/2
+connection and at `v5.0.0`. A measured endpoint, allocator, HPACK decoder or
+wire blocker is a valid negative to preserve.
