@@ -83,3 +83,9 @@ Fixed 0.17.0 returns `rc=-2` (`AMQP_STATUS_BAD_AMQP_DATA`) with no ASan report;
 a body of length 2 is clean on both builds. Determinism lines carry mode,
 length, value, return code and offset/value pairs only — no ASan PID, address
 or path text.
+
+A clean `git archive f773017 lab/frontier/rabbitmqc2shell` extraction into
+`/tmp/rmq-archive`, run with absolute outdir `/tmp/rmq-out-clean`, reproduced
+10 PASS / 0 FAIL rc 0 and the same digest in both five-run groups; `pins.log`
+showed all six pins OK. Window 56 created on the inner tmux socket at 13:07Z
+with both panes capture-verified and registered as entry 58 (58 unique).
