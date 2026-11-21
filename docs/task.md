@@ -540,6 +540,34 @@ or SIGSEGV occurs. At logoff the stock allocator aborts with the wake-9
 (`natural_trigger_no_timing.txt`, raw logs under `verify-live-out/wake15/`).
 The client delay is therefore necessary; the unaided live trigger is a
 recorded NEGATIVE.
+Wake 16 closed the FFmpeg-build UNKNOWN. FFmpeg 6.1.1 development headers
+and runtime were provisioned into `/tmp` only (apt download plus dpkg-deb
+extraction, no system install), and pinned 3.32.0 was built twice:
+stock `WITH_FFMPEG=ON` (implies `WITH_DSP_FFMPEG=ON`) and the same build with
+`-DCMAKE_C_FLAGS=-DWITH_DSP_EXPERIMENTAL`; `WITH_VIDEO_FFMPEG=OFF` kept the
+test on the DSP path. Stock FFmpeg is a NEGATIVE: `dsp_ffmpeg.c:63-89`
+filters `AV_CODEC_ID_ADPCM_MS` (tag 2) and `AV_CODEC_ID_ADPCM_IMA_OKI`
+(tag 17) without the macro, the runtime probe reports `PCM encode=1
+decode=1`, `ADPCM(2) encode=0 decode=0`, `DVI_ADPCM(17) encode=0 decode=0`,
+and `server_rdpsnd_get_formats()` lists only AAC_MS (41222) and PCM (1).
+With the macro, tag 2 enters the list (2 channels, 44100 Hz, 16 bits);
+because `audio_format_compatible` (`audio.c:225-255`) ignores `nBlockAlign`,
+a client tag-2 record with `nBlockAlign=8, nChannels=2` matches it and the
+tag-2 branch of `select_format` (`:409-433`) computes `bs = -4`, fails the
+`realloc` at `:444` without rolling back `out_frames` and leaves
+`0xfffffffffffffffc`. `PocAdpcmTag2.c` then gets the same ASan result as the
+tag-17 PoC: `SelectFormat rc=12`, `out_frames=0xfffffffffffffffc`,
+`WRITE of size 16384 ... 0 bytes after an 8820-byte region` from
+`rdpsnd_server_send_samples (rdpsnd_main.c:770)`; a benign-PCM control on the
+same build gives `rc=0, out_frames=0x89d` with no report. Grade: rung 3 and
+an in-process chosen-byte rung 4 on real library bytes through the real
+parser and dispatcher, on a NON-DEFAULT build — not a live RDP session or an
+over-the-wire PDU, no chosen-byte dereference for tag 2, and the 16384 bytes
+are PoC `0x41` rather than remote audio. Tag 17 has no FFmpeg encoder in
+either build. A real audio source, a wrap-capable format on the default
+build and grooming of a chosen object remain UNKNOWN (evidence
+`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt` and `PocAdpcmTag2.c`; the raw
+ASan log is a gitignored scratch file under `/tmp`).
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
@@ -549,6 +577,9 @@ capture `lab/freerdp2shell-src/pointer_control_stock.txt`, the wake-14
 natural-trigger capture `lab/freerdp2shell-src/natural_log_trigger_stock.txt`
 and the wake-15 negative capture
 `lab/freerdp2shell-src/natural_trigger_no_timing.txt`.
+Wake 16's format-gate measurement and tag-2 wrap are in
+`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt` with the driver
+`lab/freerdp2shell-src/PocAdpcmTag2.c`.
 The dedicated
 mind owns this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`.
 Wake trigger units and the presentation.json entry are owed from the
@@ -1503,6 +1534,37 @@ Grade rung 3 confirmed; no chosen bytes, offset, pointer control or marker,
 and L4 closes there. Raw logs are gitignored; reproduce with
 `RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69` from
 `lab/apache2shell/` plus the two controls and `python3 rw-gdb.py`.
+Adjacent lane L5 (CVE-2026-56449, a mod_proxy_html `dump_content` OOB write
+with crafted HTTP response bodies) is a fifth same-subsystem lane, not a
+reopen of CVE-2026-119618. `2.4.70/CHANGES:144-149` gives the affected range
+2.4.0-2.4.68; the whole 2.4.68→2.4.69 fix in
+`modules/filters/mod_proxy_html.c` is removal of one `dump_content(ctx)`
+call from `pcomment()` (2.4.68 line 312). `lab/apache2shell/build-l5.sh`
+builds ASan/UBSan httpd 2.4.68 and 2.4.69 with `--enable-proxy-html` against
+host libxml2 2.9.14. `pstartElement` leaves the last attribute value in
+`ctx->vb.buf` while resetting only `ctx->vb.strlen = 0` (line 617); with
+`ProxyHTMLExtended Off` a following HTML comment reaches `pcomment`, whose
+`dump_content` string-literal branch computes `len + 1 - s_from - match =
+0 + 1 - 4 - 0 = -3` as `size_t` and passes it to `memmove` at line 272. The
+`c` map flag is an exclude flag (clears M_CDATA), so a `c`-flagged rule is a
+clean negative control. In the canonical loopback reverse-proxy mode the
+body `<p title="AAAAAAAAAA">x</p><!--trigger-->` gives 2.4.68 4/4 child
+SIGSEGV with four ASan `negative-size-param: (size=-3)` reports at line 272
+via `pcomment:312` → `htmlParseChunk` → `proxy_html_filter:982`, against
+2.4.69 0/4 and none; extended mode, a `c`-flagged map and an attribute-free
+body are 0/3 each. Applying the 2.4.69 one-line fix to 2.4.68 and rebuilding
+only `mod_proxy_html.so` gives 0/6 reports, and byte-for-byte restoration
+restores 6/6. Grade rung 3 (ASan-confirmed invalid write) with a rung-2
+crash on the genuine proxy path; the underflow magnitude follows the stale
+string's offset (`L5_ATTR=XXAAAAAAAAAA` gives `size=-5`) but stays negative,
+ASan aborts before the write and source and target share the varbuf, so no
+chosen bytes at a meaningful offset, no pointer control and no marker.
+L5 is closed at rung 3; the main lane's Stage A closure and do-not-retry
+list are unchanged. Reproduce from `lab/apache2shell/`:
+`./build-l5.sh`, then
+`ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy ./l5-lane.py 2.4.68 2.4.69`,
+the `L5_EXT` / `L5_FLAGS=c` controls and `./l5-gdb.py`. Raw logs are
+gitignored under `lab/apache2shell/logs/`.
 
 ## Staged rung-4 plan (per target, revised from the nginx2root experience)
 
