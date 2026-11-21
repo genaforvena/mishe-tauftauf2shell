@@ -1,0 +1,88 @@
+Loopback shadow server: network reachability and NLA auth gate
+===============================================================
+Wake 7, 2026-11-21 ~01:33-01:36Z. All bytes below were observed on this host.
+Live process: FreeRDP 3.32.0 source-built freerdp-shadow-cli, X11-free Sample
+shadow subsystem, ASan OFF (plain build). Nothing outside loopback was touched.
+
+Build (scratch, from the committed 3.32.0 source in /tmp/fr-wake2/src3320):
+  cmake -S /tmp/fr-wake2/src3320 -B /tmp/fr-wake7-shadow-build -G Ninja \
+    -DWITH_SERVER=ON -DWITH_CLIENT=OFF -DWITH_SERVER_CHANNELS=ON \
+    -DWITH_SHADOW=ON -DWITH_SHADOW_SUBSYSTEM=OFF -DWITH_SERVER_SHADOW_CLI=ON \
+    -DWITH_KRB5=OFF -DWITH_PKCS11=OFF -DWITH_SMARTCARD_EMULATE=OFF \
+    -DWITH_FFMPEG=OFF -DWITH_SWSCALE=OFF -DCHANNEL_URBDRC=OFF \
+    -DWITH_CUPS=OFF -DWITH_FUSE=OFF -DWITH_SAMPLE=ON
+  cd /tmp/fr-wake7-shadow-build && ninja freerdp-shadow-cli   # rc 0, 397 steps
+
+Launch (bound to 127.0.0.1 ONLY; SAM file deliberately nonexistent):
+  LD_LIBRARY_PATH=$PWD/libwinpr:$PWD/libfreerdp:$PWD/server/common:$PWD/server/shadow \
+  ./server/shadow/cli/freerdp-shadow-cli \
+    /bind-address:127.0.0.1 /port:13890 \
+    /sam-file:/tmp/fr-wake7-nonexistent.sam /log-level:DEBUG
+
+  ss -ltnp: LISTEN 0 10 127.0.0.1:13890 0.0.0.0:* users:(("freerdp-shadow-",pid=3398576,fd=10))
+  server log: [INFO][com.freerdp.core.listener] - [freerdp_listener_open]: Listening on [127.0.0.1]:13890
+  server log: [INFO][com.freerdp.server.shadow] - [dump_security_settings]: security: RDP:TRUE, TLS:TRUE, NLA:TRUE, EXT:TRUE, AAD:FALSE, RDSTLS:FALSE
+
+Probe (committed script, forced to 127.0.0.1):
+  python3 lab/freerdp2shell-src/loopback_shadow_probe.py --port 13890 --mode nego
+  --8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<--
+  target=127.0.0.1:13890 mode=nego
+  HYBRID|HYBRID_EX (NLA): TCP connect OK, CR 45 bytes
+    CR   = 0300002d28e00000000000436f6f6b69653a206d737473686173683d667270726f62650d0a010008000a000000
+    CC   = 030000130ed00000000000020b080008000000 (19 bytes)
+  TLS: TCP connect OK, CR 45 bytes
+    CR   = 0300002d28e00000000000436f6f6b69653a206d737473686173683d667270726f62650d0a0100080002000000
+    CC   = 030000130ed00000000000020b080002000000 (19 bytes)
+  RDP: TCP connect OK, CR 45 bytes
+    CR   = 0300002d28e00000000000436f6f6b69653a206d737473686173683d667270726f62650d0a0100080000000000
+    CC   = 030000130ed00000000000020b080000000000 (19 bytes)
+  --8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<--
+
+The CC is TPKT 03 00 00 13, LI 0E, X.224 CC D0, then RDP_NEG_RSP
+02 0B 08 00 <selectedProtocols>. Selected values: 0x08 (NLA) when NLA+TLS
+offered, 0x02 (TLS) when only TLS offered, 0x00 (RDP) when only RDP offered.
+A real server process, over real TCP, parsed the CR and replied.
+
+Auth-gate probe, then withhold CredSSP:
+  python3 lab/freerdp2shell-src/loopback_shadow_probe.py --port 13890 --mode tls-auth
+  --8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<--
+  target=127.0.0.1:13890 mode=tls-auth
+  NLA negotiation CC = 030000130ed00000000000020b080008000000
+  TLS handshake: OK; cipher=TLS_AES_256_GCM_SHA384; peer cert present=True
+  post-TLS: no bytes within timeout (server awaiting CredSSP/NLA token)
+  --8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<-- 8<--
+
+Server log for that connection (excerpts, exact lines):
+  [INFO] [freerdp_peer_set_local_and_hostname]: Accepting client from localhost
+  [DEBUG] [nego_process_negotiation_request]: RDP_NEG_REQ: RequestedProtocol: [HYBRID|HYBRID_EX][0x0000000a]
+  [DEBUG] [rdp_server_accept_nego]: Client Security: RDSTLS:0 NLA:1 EXT:1 TLS:0 RDP:0
+  [DEBUG] [rdp_server_accept_nego]: Server Security: RDSTLS:0 NLA:1 EXT:1 TLS:1 RDP:1
+  [DEBUG] [rdp_server_accept_nego]: Negotiated Security: RDSTLS:0 NLA:0 EXT:1 TLS:0 RDP:0
+  [ERROR] [nla_server_recv_stream]: nla_recv() error: -1
+  [ERROR] [transport_accept_nla]: client authentication failure
+  [ERROR] [peer_recv_callback_internal]: CONNECTION_STATE_NEGO - rdp_server_accept_nego() fail
+
+So NLA is selected by the live default server; after a successful TLS handshake
+a client that withholds CredSSP credentials is rejected at CONNECTION_STATE_NEGO
+and never reaches MCS/channel setup, hence never reaches rdpsnd. This is the
+post-auth (PR:L) gate, observed over a real loopback TCP session.
+
+NEGATIVE / boundary observations, preserved:
+- The RDP-only offer (0x00) against a loopback peer produced
+  "Turning off encryption for local peer with standard rdp security" and a
+  CONNECTION_STATE_NEGO -> CONNECTION_STATE_MCS_CREATE_REQUEST transition with
+  no credentials. The auth gate is therefore configuration/security-mode
+  dependent; the default NLA posture enforces it, standard-RDP local-peer
+  mode does not. This is a local-peer observation, not a claim about remote.
+- Sample shadow subsystem logs "TODO: Implement!" for enum_monitors/init/start.
+  No full desktop session was established by these probes.
+- The live shadow server's rdpsnd format table comes from
+  shadow_rdpsnd.c:69-74: subsystem->rdpsndFormats if supplied, else
+  server_rdpsnd_get_formats(). The in-tree Sample subsystem supplies no table
+  (no rdpsndFormats in server/shadow/Sample/), and server_rdpsnd_get_formats()
+  filters through freerdp_dsp_supports_format() to PCM only in this FFmpeg-off
+  build. So this stock live server cannot select a wrap-capable tag; the
+  codec-gate precondition from wake 6 is unchanged.
+- NOT demonstrated here: MCS connect, virtual-channel join, rdpsnd PDUs over
+  the wire, a client format list, or the heap overwrite in a live process.
+  Those remain UNKNOWN. No off-loopback probe.

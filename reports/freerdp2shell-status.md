@@ -283,6 +283,45 @@ reproduces shadow's static `rdpsnd_activated()` loop because that function is
 not exported; both call real FreeRDP functions.
 
 
+## Live loopback shadow server: transport and auth gate (wake 7, 01:33Z)
+
+A real FreeRDP 3.32.0 `freerdp-shadow-cli` process (X11-free Sample shadow
+subsystem, plain build) was built from the committed source and launched with
+`/bind-address:127.0.0.1 /port:13890` and a deliberately nonexistent SAM file.
+`ss` and the server log both confirm it listened on 127.0.0.1 only. The
+committed probe `lab/freerdp2shell-src/loopback_shadow_probe.py` (forced to
+127.0.0.1) completed the X.224 Connection Request / RDP_NEG_REQ exchange over a
+real TCP socket and received a well-formed Connection Confirm with RDP_NEG_RSP:
+selected protocol `0x08` (NLA) when NLA+TLS was offered, `0x02` (TLS) for a
+TLS-only offer, `0x00` (RDP) for RDP-only. Exact CR/CC bytes, build and launch
+commands are in `lab/freerdp2shell-src/loopback_shadow_probe.txt`.
+
+The auth gate is now observed on that live path. In `tls-auth` mode the probe
+completed the TLS handshake (`TLS_AES_256_GCM_SHA384`, peer cert present) and
+then withheld CredSSP credentials. The server log records
+`RDP_NEG_REQ: RequestedProtocol: [HYBRID|HYBRID_EX][0x0000000a]`,
+`Negotiated Security: ... EXT:1`, then `nla_recv() error: -1`,
+`client authentication failure` and `rdp_server_accept_nego() fail` at
+`CONNECTION_STATE_NEGO`. An unauthenticated client therefore does not reach
+MCS or channel setup, and cannot reach rdpsnd — the post-auth (PR:L) posture
+observed on a real loopback session.
+
+Preserved negatives: the RDP-only offer against a loopback peer logged
+`Turning off encryption for local peer with standard rdp security` and moved to
+`CONNECTION_STATE_MCS_CREATE_REQUEST` without credentials, so the gate is
+security-mode dependent (default NLA enforces it; standard-RDP local-peer mode
+does not). The Sample subsystem's `enum_monitors/init/start` are unimplemented,
+so no full desktop session was established. The live server's rdpsnd table is
+`subsystem->rdpsndFormats` when supplied, else `server_rdpsnd_get_formats()`
+(`shadow_rdpsnd.c:69-74`); the in-tree Sample subsystem supplies no table and
+the filtered default is PCM-only in this FFmpeg-off build, so this stock live
+server cannot select a wrap-capable tag. FFmpeg dev libraries are absent here
+(`/usr/include/libavcodec` missing, `pkg-config libavcodec` not found), so an
+FFmpeg-enabled build remains UNVERIFIED.
+
+MCS connect, virtual-channel join, rdpsnd PDUs over the wire and the heap
+overwrite in a live process were NOT demonstrated; those remain UNKNOWN.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with client-chosen bytes at chosen OOB
@@ -294,10 +333,12 @@ write is sequential and unbounded; no pointer control or specific heap object
 is targeted. In the FFmpeg-off builds tested, the stock shadow server's
 `Activated` callback selects only PCM and rejects both wrap-capable tags, so
 the exploit needs a server format table that offers one (subsystem-supplied,
-or an FFmpeg-enabled build, UNVERIFIED here). Live FreeRDP process, real
-virtual-channel transport, RDP session, stock allocator layout, network
-reachability and the auth gate remain UNKNOWN. No off-loopback probe. Default
-posture is post-auth (PR:L, CVSS 8.8); only no-auth deployments reach 9.8.
+or an FFmpeg-enabled build, UNVERIFIED here). Network reachability of a live
+server and the default NLA auth gate are now observed over real loopback TCP
+(wake 7 above). Still UNKNOWN: MCS/channel setup on that session, rdpsnd over
+the wire, live-process heap corruption, stock allocator layout and full RDP
+session. No off-loopback probe. Default posture is post-auth (PR:L, CVSS 8.8);
+only no-auth deployments reach 9.8.
 
 Brief: `reports/frontier-freerdp2shell.md`; harness:
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`. Witness replay
