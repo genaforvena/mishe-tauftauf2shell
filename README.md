@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies nineteen admitted vulnerability families in local, isolated copies
+It studies twenty admitted vulnerability families in local, isolated copies
 of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -185,6 +185,14 @@ of the affected software:
   under standing approval #6; rungs 1-3 run on the verbatim pinned upstream
   function, rung 4 is instrumented chosen-byte control only, and RCE is not
   demonstrated by the advisory.
+- **Accelppp2Shell** — CVE-2026-123205, an unbounded chunk `memcpy` in
+  accel-ppp's `unpack_msg()` that concatenates L2TP string AVPs into a fixed
+  4160-byte heap buffer without a bound. CWE-122, CVSS 4.0 8.3 High
+  `AV:N/AC:L/AT:P/PR:N`, affected <1.15.0, fixed 1.15.0; it needs verbose
+  logging and a peer within the configured client-ip-range. Admitted ~03:1xZ
+  under standing approval #6; rungs 1-3 run on the verbatim pinned upstream
+  function, rung 4 is instrumented chosen-byte control only, and no RCE is
+  demonstrated.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -214,6 +222,7 @@ is called established.
 | **Kamailio2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A `alias=host~<port>~1` Contact parameter makes the tilde distance the `memcpy` length into `bufport[5]`: `len=80`, `oob=75`, `first_oob=5`, chosen function pointer and stamp overwritten byte-exactly; ASan `stack-buffer-overflow` `WRITE of size 80` from `memcpy` ← `parse_alias`, marker executed through the instrumented pointer only; pinned 6.1.5 rejects before the copy. No live Kamailio, real `process_contact()` layout, stack protector, return-address control or SIP message. [Status](reports/kamailio2shell-status.md) |
 | **Iperf2Shell** | **Rungs 1-3 on real pinned upstream code; instrumented chosen-byte rung 4** | A 336-byte decoded authtoken crosses a 256-byte RSA heap allocation: ASan `WRITE of size 336` from `BIO_read` ← `decrypt_rsa_message` at `iperf_auth.c.3.21:324`; the plain build aborts at `free(): invalid size` from overwritten next-chunk metadata; chosen `IPERF2SHELL!` and `0x1122334455667788` are supplied in the write buffer only; pinned 3.22 rejects before `BIO_read`. No live server, stock heap layout, useful pointer or execution; the release-note CVE mislabel is preserved. [Status](reports/iperf2shell-status.md) |
 | **Uftpd2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4095-byte path with a 128-byte configured home shifts `dir[PATH_MAX]` right and writes 128 bytes past it: the plain build aborts with `*** stack smashing detected ***`, ASan reports `stack-buffer-overflow` `WRITE of size 4096` at pinned `common.c.v2.15:61`, and chosen `UFTPD2SHELL!` / `0x1122334455667788` are written by the upstream `memmove` only. Pinned 2.16 rejects at the guard with `returned=null`. No live uftpd, stock frame layout, useful pointer or execution; `PR:L`, no-chroot, and the 9-byte default-home reach are UNKNOWN. [Status](reports/uftpd2shell-status.md) |
+| **Accelppp2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 66 AVP chunks of 64 bytes put `pos=4254` into a 4160-byte `t->buf`: ASan `heap-buffer-overflow` `WRITE of size 64` at pinned `log_tcp.c.1.14.0:63`; chosen `0x1122334455667788` is read back byte-exact at offset 4 in the adjacent harness heap object; pinned 1.15.0 clamps to 4160 with a clean neighbour. No live daemon, real L2TP AVP path, verbose-logging configuration or useful-pointer control. [Status](reports/accelppp2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -248,8 +257,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **dragonfly2shell**, **postgres2shell**, **brotli2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
 **freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell**,
-**bzfs2shell**, **kamailio2shell**, **iperf2shell** and **uftpd2shell**
-pursue their lane
+**bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell** and
+**accelppp2shell** pursue their lane
 end-to-end — build, harness, debugger, report. Four
 further minds cut
 across them:
@@ -340,8 +349,8 @@ self-scheduling it.
   `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
   `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
-  `kamailio2shell`, `iperf2shell`, `uftpd2shell` and `frontier`, `docs`, `witness` and
-  `operator` windows show each mind's wall and wake log;
+  `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell` and
+  `frontier`, `docs`, `witness` and `operator` windows show each mind's wall and wake log;
   `chat`, `git` and `wakes` show the shared tape. All minds run on
   `opencode-go/hy4-flash-free`.
 

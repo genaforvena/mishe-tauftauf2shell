@@ -705,6 +705,51 @@ socket, window 26), registry entry and seed wall were live from frontier's
 handoff; wake trigger units and the presentation.json entry are owed from
 the person's full-flag sync, never a bare `mishe sync`.
 
+#### Admitted 2026-11-21 ~03:1xZ: Accelppp2Shell (CVE-2026-123205)
+
+Claim sources: the VulnCheck CNA record for CVE-2026-123205 (published
+2026-11-05, PR #374), the OSV entry, the VulnCheck advisory and fix commit
+`58e399400c4ef4b71472ab7c2c71c54a677a05a8`; pinned source hashes and URLs in
+`lab/frontier/accelppp2shell/PROVENANCE.md`. CWE-122, CVSS 4.0 **8.3 High**
+`AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:L/VA:H/SC:N/SI:N/SA:N`. Affected
+`>= 0, < 1.15.0` (OSV lists 1.10.0/1.12.0/1.13.0/1.14.0), fixed 1.15.0.
+The advisory claims memory corruption and a crash only; RCE is not claimed.
+Claimed primitive: `unpack_msg()` in the tcp/syslog/pgsql log targets concatenates
+unbounded chunk `memcpy`s into a fixed `LOG_MAX_SIZE 4096`-derived heap buffer;
+in 1.14.0 the tcp target allocates 4160 bytes and a flood of L2TP string AVPs
+under verbose logging assembles an arbitrary-length line before the trailing
+newline. The `AT:P` logging gate and "within client-ip-range" condition stay
+in every impact claim.
+
+Scope: accel-ppp is a C network-facing PPP daemon, admitted as an X2Shell-class
+extension under the same "similar things" precedent that admitted FreeRADIUS,
+FreeSWITCH, Bzfs2Shell, Kamailio2Shell, Iperf2Shell and Uftpd2Shell; the
+judgment is recorded in `.mishe-tauftauf/charters/accelppp2shell.md`. Frontier
+ranked the lane high tractability, HIGH advisory severity; every pin needed
+for a rung-4 attempt exists, which is the admission basis, not an RCE claim.
+
+The write consumer is a real `memcpy` into a heap buffer, so the
+nginx-plant structural-zero-store lesson does not apply; the overflow bytes
+are attacker-supplied AVP strings. The operator replayed the committed harness
+at ~03:07Z: 19 PASS, `ALL CHECKS PASS rc 0`, trace
+`sha256=3499f52eef8814e5cc73c5e38f990ca0de3f4f0fc243640452c7806dc9c2b18a`.
+Rungs 1/2/3 are established on the verbatim pinned upstream `unpack_msg()`
+from `log_tcp.c.1.14.0`: 66 64-byte chunks plus a 30-byte header give
+`pos=4254` into a 4160-byte region, `expected_oob=94`; chosen
+`0x1122334455667788` reads back byte-exact at offset 4 in the adjacent
+harness heap object; ASan reports `heap-buffer-overflow`, `WRITE of size 64`,
+0 bytes after the region at pinned line 63. Rung 4 is INSTRUMENTED
+chosen-byte control only; pinned 1.15.0 stops at `pos=4160` with a clean
+neighbour. No live daemon, real L2TP AVP path, verbose-logging configuration,
+stock heap layout, useful-pointer control or execution was observed. Evidence:
+`reports/frontier-accelppp2shell.md`, seed status
+`reports/accelppp2shell-status.md`, harness `lab/frontier/accelppp2shell/`.
+The dedicated `accelppp2shell` mind owns this lane. Its two-pane window (inner
+socket, window 27), registry entry and seed wall were live from frontier's
+handoff and were capture-verified at admission; wake trigger units and the
+presentation.json entry are owed from the person's full-flag sync, never a
+bare `mishe sync`.
+
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
 Frontier handed this find over on tape #448 after committing
