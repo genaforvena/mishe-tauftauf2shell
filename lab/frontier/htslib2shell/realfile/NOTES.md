@@ -189,3 +189,51 @@ Not claimed: rung 4 (no chosen pointer, no controlled heap neighbour value was
 demonstrated). Under the unsanitized allocator the neighbouring slot is a
 non-NULL chunk-size field (`0x1011`), which suppresses the write and produces a
 junk-pointer read instead.
+
+## 6. FILE-DERIVED codec_id=2: unsanitized OOB pointer WRITE fires (2026-11-21 ~17:32Z, wake 2)
+
+New lane: `inject2.c` (copy of `inject.c` with the BF record-map entry emitted
+before QS). BF consumes `codec_id=0`, XPACK's nested EXTERNAL sub-codec gets 1,
+XPACK itself gets **2** — entirely from compression-header bytes, no gdb edit.
+`./inject2 base.cram crafted2.cram` builds it with htslib's own container/block
+writers (same layout as `crafted.cram`, 523-ish bytes).
+
+Observed in the **plain, unsanitized** `htsfile-plain` under gdb:
+
+```
+break cram_codecs.c:1378
+STOP codec_id=2 base=0x5555556dc5c0 slot513=0x1011 slot514=(nil) slot515=(nil)
+x/6gx base+4096:  0x0  0x1011  0x0  0x0  0x0  0x0
+break cram_codecs.c:1388; continue
+AT1388 codec_id=2        # guard at :1379 PASSED in the natural plain heap
+continue -> second hit :1378 shows slot514=0x5555556df1b0
+```
+
+So index **514** (offset 4112, 16 bytes past the 4096-byte `calloc`) reads NULL
+in the untouched glibc heap: it is the *user data* of the following live 4096-
+byte chunk (its size field `0x1011` sits at offset 4104 = index 513, which is
+why the earlier codec_id=1 file took the early-out and only did an OOB read).
+`:1388` stores the freshly allocated `cram_block *` into index 514. This is a
+real 8-byte pointer store outside the array in a build with **no sanitizer and
+no instrumentation change to codec_id**; only the codec order in the file changed.
+The stored value is the allocator's pointer, not a chosen value.
+
+Controls:
+
+* `ASAN_OPTIONS=detect_leaks=0:halt_on_error=0 ./htsfile-asan -c crafted2.cram`
+  rc 0, 3 heap-buffer-overflow reports; `READ of size 8` at :1378 and
+  `WRITE of size 8` at :1388, address `0x521000003910` (= 16 bytes after the
+  4096-byte `cram_read_slice` region). Logs `crafted2.asan.stderr`.
+* Plain `./htsfile-plain -c crafted2.cram` still exits 139: gdb puts the fault
+  at `cram_codecs.c:1422 memcpy(out, b->data + b->byte, *out_size)` from
+  `cram_decode.c:1833`, i.e. a later decode of a different instance/series;
+  the pointer store at :1388 had already executed. Not a controlled diversion.
+* `htsfile-fixed` built from pinned 1.24 against `build-fixed/libhts.a` is NOT a
+  valid whole-file control here: it reports `Container header CRC32 failure`
+  even on `base.cram`. Frontier's harness-level 1.24 control (codec 51 rejected)
+  remains the only clean fixed-pin evidence. Do not cite this broken control.
+
+Grade: rung 1 corrected once more — the unsanitized WRITE is reachable from a
+real CRAM file when the file-derived codec index lands on a NULL OOB slot.
+Rung 4 is still INSTRUMENTED: no chosen pointer value, no groomed neighbour
+field with a known consumer, no control-flow diversion, no execution.
