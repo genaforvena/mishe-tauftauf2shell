@@ -53,11 +53,11 @@ driver, zero mismatches against the pins.
   `memcpy` now at `:1826`).
 
 Sizes are source-bound: `rtsp.v3.14.1.h:25` `RTSP_RESPONSE_BUFFER_SIZE 4096`;
-`buffer_pool.v3.14.1.h:13` `BUFFER_POOL_BUFFER_SIZE 1536`; `buffer_pool.c:58`
-`posix_memalign(buffer_size * num_buffers)` and `:73`
-`ref->data = segment->buffers + i * 1536`; `zerocopy.c:97` initializes the pool
-with `BUFFER_POOL_BUFFER_SIZE`. Maximum overshoot is `4092 - 1536 = 2556`
-chosen bytes.
+`buffer_pool.v3.14.1.h:13` `BUFFER_POOL_BUFFER_SIZE 1536`; `buffer_pool.c:52`
+`posix_memalign(buffer_size * num_buffers)` and `:67`
+`ref->data = segment->buffers + (i * buffer_size)`; `zerocopy.c:91` initializes
+with `BUFFER_POOL_BUFFER_SIZE` (1536 at the call site). Maximum overshoot is
+`4092 - 1536 = 2556` chosen bytes.
 
 ## Harness stand-ins (not upstream code)
 

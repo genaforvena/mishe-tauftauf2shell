@@ -48,8 +48,8 @@ Line numbers are from `v3.14.1` unless marked fixed.
 2. `:1800` checks `packet_length > RTSP_RESPONSE_BUFFER_SIZE - 4` — the
    **source** buffer size (4092), not the **destination** pool slot.
 3. `:1823` calls `buffer_pool_alloc()`; the returned `data` is a slot of
-   `BUFFER_POOL_BUFFER_SIZE 1536` (`buffer_pool.h:13`, `zerocopy.c:97`,
-   `buffer_pool.c:58,73`).
+   `BUFFER_POOL_BUFFER_SIZE 1536` (`buffer_pool.h:13`, `zerocopy.c:91`,
+   `buffer_pool.c:52,67`).
 4. `:1825` copies `memcpy(packet_buf->data, &session->response_buffer[4],
    packet_length)` into that 1536-byte slot. Lengths 1537..4092 therefore
    write up to **2556 chosen bytes** past the slot; `:1826` then records the
