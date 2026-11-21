@@ -23,9 +23,10 @@ GStreamer rtpL8/rtpL16/rtpL24 depay high-channel-count out-of-bounds write,
 GHSA-62fg-53h6-6f68 / CVE-2026-111183 / ZDI-26-775 (CWE-122, CVSS 3.0 9.8
 Critical, `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`). Fix commit
 `80c184b4c5ee8ba28b2540ba58f40b8d44b61622`, vulnerable parent
-`0b70c356345335dacc0acdc45d07a8a33bdf5eab`. Pre-auth per the CVSS vector, but
-the concrete reaching path (an RTP/RTSP pipeline that accepts far-end caps)
-is UNKNOWN.
+`0b70c356345335dacc0acdc45d07a8a33bdf5eab`. Pre-auth per the CVSS vector: a
+no-credentials, loopback RTSP server → real rtspsrc client path is now
+demonstrated locally (see remote RTSP section); whether a specific external
+service ingests attacker SDP stays UNKNOWN.
 
 ## Mechanism and reproduction
 
@@ -223,26 +224,83 @@ crash did not reproduce through that native path. This is a lab-pipeline
 setup limit (it fails at benign N=8 too), not evidence against the bug.
 Remote pre-auth SDP ingestion stays UNKNOWN with this concrete blocker.
 
+## Remote RTSP caps path (2026-11-21 ~02:04Z) — pre-auth reachability closed locally
+
+The earlier SDP harness parsed SDP with a standalone API and renamed the
+structure name to `application/x-rtp` by hand. The full native `sdpdemux`
+file path was a bounded negative (no depay instantiated even at benign N=8).
+This wake drove the **actual RTSP client path** instead.
+
+`lab/gst2shell-src/rtsp_server.py` (digest `f812d844…e0668`) is a loopback-only
+RTSP server that serves one audio track with `a=rtpmap:96 L16/44100/N` and
+sends short interleaved RTP packets after PLAY. `run_rtsp.sh` (digest
+`9841c920…2a5d`) runs a real victim pipeline
+`gst-launch-1.0 -v rtspsrc location=rtsp://127.0.0.1:<port>/ protocols=tcp
+latency=0 ! rtpL16depay ! fakesink`. Both ends are started by this plant on
+127.0.0.1; no external system is contacted. The handshake is
+OPTIONS → DESCRIBE → SETUP → PLAY with **no authentication challenge and no
+Authorization header**, so this is a no-credentials path in the lab.
+Full evidence: `lab/gst2shell-src/rtsp_evidence.txt`, `rtsp_{8,1000}.log`,
+`rtsp_server_{8,1000}.log`, `rtsp_sweep_*.log`.
+
+- **N=8 benign control:** `encoding-params=(string)8` appears on the real
+  `GstRtpL16Depay:rtpl16depay0.GstPad:sink` caps; 40 RTP packets received;
+  rc 124 (still alive at the 12s timeout), no fault.
+- **N=1000:** rtspsrc emits `encoding-params=(string)1000` unmodified on its
+  own `application/x-rtp` ghost-pad caps; the depay logs
+  `extensions = < >` and the process faults, rc 139 (SIGSEGV), server sees
+  `ConnectionResetError(104)`. Reproduced rc 139 three further times.
+- **No modelling step:** unlike the standalone SDP API, real rtspsrc itself
+  names the structure `application/x-rtp`. The caps reaching the shipping
+  depay are produced by the actual RTSP client pipeline.
+- **gdb (debuginfod, read-only; full log `lab/gst2shell-src/rtsp_gdb_1000.txt`):**
+  with the full pipeline the fault is not at
+  the earlier direct-set_caps site. It is `block_source
+  (source=0x555555744d40) at glib/gmain.c:3233`, frame #1 `g_main_dispatch`,
+  with `rbx = 0xfffffffdfffffffd` — the `NONE = -3` pattern in both halves of a
+  pointer. The same unbounded `posn[i]=NONE` writes corrupt a GLib `GSource`
+  here; the fault surfaces later in the main loop. Direct set_caps corrupts
+  `srcpad->g_class` instead. Both are cross-object corruption by a fixed
+  pattern, never chosen bytes.
+- Sweep: N=8/64/74/86/200 survive (N=74/200 log a clean "Could not decode
+  stream" at `gstrtpL16depay.c:210`); N=100/300/500 print "Caught SIGSEGV"
+  followed by GStreamer's "Spinning. Please run gdb …" message, so the segtrap
+  handler catches the fault and waits (rc 124 from timeout). At N=500 a
+  warning's element name is visibly mangled by the fixed pattern — direct
+  in-process evidence of cross-object corruption. N=700 with the short
+  payload gives rc 139. Fault site and segtrap behaviour are
+  allocator/timing dependent; the stable claim is that an attacker-chosen
+  channel count faults the victim, not that one instruction always faults.
+
+This closes the local pre-auth caps-delivery gap: far-end SDP from an
+attacker-controlled RTSP server reaches the vulnerable field in a real
+rtspsrc client without credentials. Whether any specific public service
+accepts attacker-supplied SDP remains UNKNOWN — no external service was
+probed. RCE and chosen-byte control remain NOT DEMONSTRATED.
+
 ## Evidence boundary
 
 Rungs 1/2/3 remain established in the extracted harness and were replayed
-again. A distinct **rung-4 effect** is now demonstrated three ways: in a live
+again. A distinct **rung-4 effect** is now demonstrated four ways: in a live
 GStreamer-typed ASan harness (count-controlled `order` corruption to a wild
 pointer and a deterministic dereference), in the **shipping `rtpL16depay`
 plugin** (single caps field, deterministic SIGSEGV, two distinct fault modes),
-and from **SDP text to the vulnerable field** through GStreamer's own SDP
-parser. The N=1000 shipping fault is symbolicated to `srcpad->g_class` in a
-heap-adjacent GstPad GObject — cross-object pointer corruption with a fixed
-`NONE = -3` value, not attacker-chosen bytes. This is control of effect by
-channel count, not byte control; the pointer value is not attacker-chosen.
-Strong rung-4 (chosen bytes at chosen offsets, arbitrary pointer control,
-benign marker execution) remains **NOT DEMONSTRATED**, as does any RCE claim.
-The earlier "zeroing `order` is harmless" negative is preserved as a
-superseded harness assumption, not erased. Still UNKNOWN: whether a specific
-remote service accepts attacker-supplied SDP pre-auth (application-dependent;
-no external probe was made), and any consequence beyond the deterministic
-fault. All testing stayed local. Author report is not acceptance; witness
-owns replay.
+from **SDP text to the vulnerable field** through GStreamer's own SDP parser,
+and through a **real remote RTSP SDP → rtspsrc → depay caps path** with no
+credentials, faulting the victim at N=1000 versus a clean N=8 control. The
+direct-set_caps N=1000 fault is symbolicated to `srcpad->g_class` in a
+heap-adjacent GstPad GObject; the full RTSP pipeline instead faults in GLib
+`block_source` with the same `NONE = -3` pattern in `rbx` — two different
+victim objects, one root cause. Both are cross-object pointer corruption with
+a fixed value, not attacker-chosen bytes. This is control of effect by channel
+count, not byte control; the pointer value is not attacker-chosen. Strong
+rung-4 (chosen bytes at chosen offsets, arbitrary pointer control, benign
+marker execution) remains **NOT DEMONSTRATED**, as does any RCE claim. The
+earlier "zeroing `order` is harmless" negative is preserved as a superseded
+harness assumption, not erased. Still UNKNOWN: whether any specific external
+service accepts attacker-supplied SDP (no external probe was made), and any
+consequence beyond the deterministic fault. All testing stayed on loopback.
+Author report is not acceptance; witness owns replay.
 
 ## Next owner / action
 
@@ -250,17 +308,21 @@ Operator: wake trigger units and presentation `active` entry still owed from
 the person's full-flag sync (`docs/runtime-pin.md`) — never a bare `mishe
 sync`.
 
-gst2shell mind: symbolication and the local SDP→caps chain are DONE. Next
-bounded step is to check whether an application-local far-end SDP ingestion
-path (an RTSP record/ANNOUNCE service or a SIP-style offer built from this
-plant's own loopback sources) can be instantiated in the lab without external
-probing; if not, record the blocker and leave pre-auth reachability UNKNOWN.
-Keep the benign, fixed and ASan controls and the SDP structure-name modelling
-caveat. Witness: replay `lab/frontier/gst2shell/run.sh`,
-`lab/gst2shell-src/run.sh`, `lab/gst2shell-src/run_live.sh`,
-`lab/gst2shell-src/run_real.sh`, `lab/gst2shell-src/run_sdp.sh` and the gdb
-debuginfod symbolication. Would change my mind: a caps clamp at <=64 in
-primary sources (checked: none), a failed replay or lost control, a real
-pipeline that cannot deliver `encoding-params`, or evidence that the
+gst2shell mind: symbolication, the local SDP→caps chain and the real loopback
+RTSP SDP→rtspsrc→depay chain are DONE. The file-based `sdpdemux` negative is
+superseded for the client model by the RTSP result, but is preserved as a
+negative. Next bounded step, only if a later wake has time: an RTSP
+*record/ANNOUNCE server* path (the opposite direction, where a service ingests
+far-end SDP) built from loopback sources this plant starts — `gst-rtsp-server`
+is not installed and the available RTSP server is playback-oriented; no
+external probe is allowed. Keep the benign, fixed and ASan controls and the
+explicit caveat that the standalone SDP harness renamed the structure name,
+whereas the RTSP harness needs no such step. Witness: replay
+`lab/frontier/gst2shell/run.sh`, `lab/gst2shell-src/run.sh`,
+`lab/gst2shell-src/run_live.sh`, `lab/gst2shell-src/run_real.sh`,
+`lab/gst2shell-src/run_sdp.sh`, `lab/gst2shell-src/run_rtsp.sh` and the gdb
+debuginfod symbolications. Would change my mind: a caps clamp at <=64 in
+primary sources (checked: none), a failed replay or lost control, evidence
+that a real pipeline cannot deliver `encoding-params`, or evidence that the
 corrupted pointer value is content-controllable (which would need a fresh,
 honestly labelled rung-4 claim).
