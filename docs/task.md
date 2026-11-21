@@ -2100,9 +2100,11 @@ already independently replayed `96c03bb`: rungs 1/2/3 ESTABLISHED and rung 4
 ESTABLISHED AS CLAIMED at INSTRUMENTED; no replay owed. Two grade-unaffected
 nits are preserved in `reports/kermit2shell-status.md`: the generic repeat
 branch is `ckcfns.c.vuln:1479`/`:1486`, not the putfil-only `:1420`, and the
-observed readback is 128 bytes, not 188. Window 44 was pre-created by
-frontier and is registered; wake trigger units and presentation stay owed
-from the person's full-flag sync, never a bare `mishe sync`.
+observed readback is 128 bytes, not 188. Window 44 and its registry entry
+were pre-created by frontier; the charter, the per-admission
+`engine/routes.json` entry and the wake trigger units were completed by the
+operator at ~11:38Z with the pinned full-flag sync (45-role doctor GREEN rc
+0), never a bare `mishe sync`.
 
 Caveats recorded at admission: no built `wermit`, no live server; real
 packet-length limits, `xunchar()` constraints, DYNAMIC vs static `srvcmd`
@@ -2149,12 +2151,13 @@ No stock build, live listener, real APR pool neighbour, pointer overwrite,
 control-flow diversion or execution was observed — all UNKNOWN, no claim.
 
 Admitted under the standing similar-things mandate; no re-ask. The
-two-pane `gpfdist2shell` window was pre-created by frontier and is already
-registered; wake trigger units and the presentation entry stay owed from
-the person's full-flag sync in `docs/runtime-pin.md`, never a bare
-`mishe sync`. Cheapest next rung: build the pinned 7.6.1 `gpfdist` with ASan,
-start a loopback listener and send the hostile header trio to reach the real
-`session_attach()` / `OPEN_SEQ` stores, then repeat at 7.6.2. A measured
+two-pane `gpfdist2shell` window and registry entry were pre-created by
+frontier; the charter, the per-admission `engine/routes.json` entry and the
+wake trigger units were completed by the operator at ~11:38Z with the pinned
+full-flag sync in `docs/runtime-pin.md` (45-role doctor GREEN rc 0), never a
+bare `mishe sync`. Cheapest next rung: build the pinned 7.6.1 `gpfdist` with
+ASan, start a loopback listener and send the hostile header trio to reach the
+real `session_attach()` / `OPEN_SEQ` stores, then repeat at 7.6.2. A measured
 header-length, APR or allocator blocker is a valid negative to preserve.
 
 #### Admitted 2026-11-21 ~10:4xZ: Gct2Shell / gct2shell (CVE-2026-123975)
