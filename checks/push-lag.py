@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Detector: local main reaches the remote within a bounded time.
 
-Genome owns publication. A held or silent publisher leaves commits only on this host, where one disk
+Operator owns publication. A held or silent publisher leaves commits only on this host, where one disk
 failure or rewrite loses them and CI never sees them. This compares local HEAD with the remote `main`
 (a read-only `git ls-remote`) and goes RED when the oldest unpushed commit is older than --max-age.
 
@@ -23,7 +23,7 @@ MAX_AGE_S = 15 * 60.0
 is a broken publisher, not a slow one. Two hours was the old bound and it hid a real loss: two commits
 made with ``git -c core.hooksPath=/dev/null commit`` (which skips the post-commit push hook entirely,
 2026-11-17 22:54Z and 22:59Z) sat unpublished for 16 minutes while this check read GREEN, and only the
-end-of-wake inspection found them. The producer runs every 600 s, so the worst-case detection is ~25 min."""
+end-of-wake inspection found them. This plant's producer runs every 300 s, so the worst-case detection is ~20 min."""
 
 
 def git(repo: Path, *args: str, timeout: float = 45.0) -> tuple[int, str]:

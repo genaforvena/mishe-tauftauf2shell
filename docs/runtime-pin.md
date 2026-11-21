@@ -37,6 +37,14 @@ and two System 0 duties (`readme-lint` → docs, `omp-only` → operator).
 These are site-local runtime changes until a future release pin includes
 them; re-apply on upgrade.
 
+The 2026-11-21 owner-directed self-healing patch also updates the pinned
+`duties.json` and six `checks/*.py`: no-force autonomous publication and
+independent push-lag detection, m2shell next-due armed/churn checks, overdue
+intentions aligned with `owed._budget_green`, and m2shell signal coverage.
+The dispatch producer moves from 60 s to 120 s to respect the unit start limit.
+Re-apply these changes and the six-column README checker on upgrade; see
+[`self-healing.md`](self-healing.md).
+
 The `readme-lint` producer runs the checker from the pinned release
 (`releases/<sha>/tools/check-readme.py`) against the LIVE repo's `README.md`,
 so the detector is frozen while its input changes. The current pin
@@ -54,9 +62,10 @@ full-flag sync below.
 1. **Unit marker** (`units.py`): `# m2shell-generated: …` — each plant's
    sync/doctor scan is blind to the others' unit files in the shared
    `~/.config/systemd/user`.
-2. **Duty manifest** (`duties.json`): this plant's own one-duty manifest
-   (`dispatch`, resolved by `operator`), identical to the repository's
-   copy.
+2. **Duty manifest** (`duties.json`): this plant's own System 0 manifest,
+   identical to the repository's copy. Publication, scheduler health, signal
+   coverage, repository/documentation checks and resolver ownership are listed
+   in [`self-healing.md`](self-healing.md).
 3. **Started-unit names** (`wake.py`, `arm.py`): `m2shell-wake@<role>` and
    `TIMER_UNIT = "m2shell-next-due"` — upstream hardcodes its own prefix
    when asking systemd to start units; on a multi-plant host that
@@ -76,9 +85,11 @@ full-flag sync below.
    condition. The clamp is recorded in the yield's clamp note.
 
 - Upgrades mean: take a newer upstream release snapshot, re-apply the
-  seven birth changes plus the three post-birth repairs above, re-point
-  `runtime/current`, run the full-flag sync, and check `mishe doctor`
-  exits 0 before releasing the hold.
+  seven birth changes plus the post-birth repairs above, re-point
+  `runtime/current`, and run the full-flag sync. Before releasing the hold,
+  run `doctor` with `--prefix m2shell` and the same `--unit-dir`, `--repo`
+  and `--pythonpath` values and require exit 0. A bare `mishe doctor`
+  scans the wrong namespace on this multi-plant host.
 - The full-flag sync for this plant is (run from the repo root, by the
   person only):
 

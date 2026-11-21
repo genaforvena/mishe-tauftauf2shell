@@ -7,9 +7,9 @@ proves that a timer exists, so nothing reported the lateness.
 
 For every intention more than --grace-minutes past its ``due`` time:
   * a wake of that role started at or after the due time: served (no finding);
-  * a spontaneous intention whose role's engine budget signal is not GREEN: an intentional budget hold. A hold on a
-    signal that is itself RED (the provider quota holds work) is HELD (reported, not a fault). A hold on an UNKNOWN,
-    stale or unreadable budget signal is UNKNOWN, because missing evidence must not look like a deliberate hold;
+  * a spontaneous intention is admitted only by a fresh GREEN budget signal or a fresh FREE row in
+    ``engine/budget.json`` (matching ``owed._budget_green``). Every other budget outcome closes the
+    scheduler gate, so the intention is HELD, not a lost wake;
   * a delivery or operator hold in force now (``home/hold`` or ``work/delivery-admission.json``) that blocks every wake:
     HELD, naming the hold. Observed 2026-11-12: the steward intention went RED at 14:04:32Z while a moving-pin delivery
     hold stood; the wake started the second the hold was released, so the RED named the wrong cause;
@@ -20,7 +20,7 @@ Only stdlib is used, so the check runs from committed HEAD bytes without importi
 Exit status:
   0  no intention is overdue, or every overdue one is served or intentionally HELD
   2  an overdue intention has no wake and no budget-hold explanation (RED)
-  3  undecidable: an intention, the wake ledger, an engine config or a budget signal is unreadable or stale (UNKNOWN)
+  3  undecidable: an intention or the wake ledger is unreadable (UNKNOWN)
 """
 from __future__ import annotations
 
@@ -72,36 +72,51 @@ def _seen_time(home: Path, name: str):
         return None
 
 
+def _fresh_free_route(home: Path, now: float) -> bool:
+    """Mirror owed._budget_green's fresh_free_route fallback exactly."""
+    try:
+        data = _read_json(home / "engine" / "budget.json")
+    except (OSError, ValueError):
+        return False
+    if not isinstance(data, dict) or not isinstance(data.get("free_models"), dict):
+        return False
+    for row in data["free_models"].values():
+        if not isinstance(row, dict):
+            continue
+        if row.get("free") is not True or row.get("in_routes") is not True or row.get("verdict") != "FREE":
+            continue
+        try:
+            age = now - float(row["observed_at"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if 0 <= age <= 3600:
+            return True
+    return False
+
+
 def _budget_state(home: Path, role: str, now: float):
-    """(state, value, reason) of the role's budget signal; state is OK, RED or UNKNOWN."""
+    """Mirror owed._budget_green: GREEN signal or a fresh free route admits spontaneous work."""
     try:
         config = _read_json(home / "engines" / f"{role}.json")
     except FileNotFoundError:
-        # No engine file: engines.for_role runs the role on the default claude engine and owed._budget_green
-        # gates it on the default budget signal. Read it the same way instead of calling the role unreadable.
         config = {}
-    except (OSError, ValueError) as exc:
-        return "UNKNOWN", None, f"engine config for {role} unreadable: {str(exc)[:80]}"
+    except (OSError, ValueError):
+        config = None
     name = config.get("budget_signal", DEFAULT_BUDGET_SIGNAL) if isinstance(config, dict) else None
-    if not isinstance(name, str) or not name:
-        return "UNKNOWN", None, f"engine config for {role} names no budget signal"
-    try:
-        sig = _read_json(home / "signals" / f"{name}.json")
-    except (OSError, ValueError) as exc:
-        return "UNKNOWN", None, f"budget signal {name} unreadable: {str(exc)[:80]}"
-    if not isinstance(sig, dict):
-        return "UNKNOWN", None, f"budget signal {name} is not a JSON object"
-    # Freshness is the .seen stamp (signal_store touches it on every observation). observed_at only moves on
-    # a value edge, so a steady RED would read stale here while the producer keeps re-observing it.
-    seen = _seen_time(home, name)
-    if seen is None or now - seen > SIGNAL_FRESH_S:
-        return "UNKNOWN", None, f"budget signal {name} stale or has no observation time"
-    state = sig.get("state")
-    if state == "OK" and sig.get("value") == "GREEN":
-        return "OK", "GREEN", f"budget signal {name} GREEN"
-    if state == "RED" or (state == "OK" and sig.get("value") == "RED"):
-        return "RED", "RED", f"budget signal {name} RED"
-    return "UNKNOWN", None, f"budget signal {name} is {state}"
+    if isinstance(name, str) and name:
+        try:
+            sig = _read_json(home / "signals" / f"{name}.json")
+            seen = _seen_time(home, name)
+            fresh = seen is not None and now - seen <= SIGNAL_FRESH_S
+            if fresh and sig.get("state") == "OK" and sig.get("value") == "GREEN":
+                return "OK", "GREEN", f"budget signal {name} GREEN"
+        except (OSError, ValueError, AttributeError):
+            pass
+    if _fresh_free_route(home, now):
+        return "OK", "GREEN", "fresh free route in engine/budget.json"
+    # owed._budget_green fails closed in every other case, so the scheduler is
+    # intentionally holding this spontaneous intention; this is HELD, not a lost wake.
+    return "RED", "RED", "scheduler budget gate closed: no fresh GREEN budget signal or free route"
 
 
 def _hold_reason(home: Path):

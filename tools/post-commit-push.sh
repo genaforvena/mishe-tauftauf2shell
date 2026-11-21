@@ -25,8 +25,8 @@ committed=$(git -C "$root" rev-parse HEAD 2>/dev/null) || exit 0
 # start the unit, so a commit is never left unpublished for lack of the manager.
 if [ -z "${MISHE_PUSH_DETACHED:-}" ] && command -v systemd-run >/dev/null 2>&1; then
 	self=$(readlink -f "$0" 2>/dev/null || printf '%s' "$0")
-	if systemd-run --user --collect --quiet --slice=mishe.slice --working-directory="$root" \
-		--unit="mishe-push-$(printf '%s' "$committed" | cut -c1-12)-$$" \
+	if systemd-run --user --collect --quiet --slice=m2shell-plants.slice --working-directory="$root" \
+		--unit="m2shell-push-$(printf '%s' "$committed" | cut -c1-12)-$$" \
 		--setenv=MISHE_PUSH_DETACHED=1 \
 		${MISHE_PUSH_SETTLE_S:+--setenv=MISHE_PUSH_SETTLE_S="$MISHE_PUSH_SETTLE_S"} \
 		/bin/sh "$self" >/dev/null 2>&1; then

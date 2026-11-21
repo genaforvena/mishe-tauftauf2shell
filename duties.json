@@ -13,6 +13,78 @@
    "covers": "a wake left open (started/unknown) longer than 30 minutes"
   },
   {
+   "name": "main-publication",
+   "every": 120,
+   "timeout": 300,
+   "max_age": 600,
+   "resolver": "operator",
+   "red_codes": [2],
+   "unknown_codes": [3],
+   "command": ["{python}", "{repo}/checks/main-publication.py", "--repo", "{repo}"],
+   "replaces": [],
+   "covers": "Autonomous publication of local main: fetch and fast-forward origin/main when possible; on divergence create an atomic two-parent reconciliation preserving the published commit and the local final tree, then push without force. RED when an actionable publication failure remains; UNKNOWN when the remote or a racing checkout cannot be read safely."
+  },
+  {
+   "name": "push-lag",
+   "every": 300,
+   "timeout": 120,
+   "max_age": 1800,
+   "resolver": "operator",
+   "red_codes": [2],
+   "unknown_codes": [3],
+   "command": ["{python}", "{repo}/checks/push-lag.py", "--repo", "{repo}"],
+   "replaces": [],
+   "covers": "Independent publication detector: RED when origin/main and local main diverge or the oldest unpublished commit is over 15 minutes old; UNKNOWN when the remote cannot be read. The operator owns reconciliation and the publisher owns routine fast-forwards."
+  },
+  {
+   "name": "next-due-armed",
+   "every": 300,
+   "timeout": 60,
+   "max_age": 900,
+   "resolver": "operator",
+   "red_codes": [2],
+   "unknown_codes": [3],
+   "command": ["{python}", "{repo}/checks/next-due-armed.py", "--home", "{home}"],
+   "replaces": [],
+   "covers": "Due intentions and signal expiries can wake minds: next-due.json and units-installed exist and an m2shell-next-due transient timer is armed when required. An overdue instant with an armed retry timer is GREEN."
+  },
+  {
+   "name": "next-due-churn",
+   "every": 300,
+   "timeout": 90,
+   "max_age": 900,
+   "resolver": "operator",
+   "red_codes": [2],
+   "unknown_codes": [3],
+   "command": ["{python}", "{repo}/checks/next-due-churn.py"],
+   "replaces": [],
+   "covers": "The m2shell next-due scheduler keeps a pending timer instead of repeatedly replacing it without a due-handler run; only m2shell-next-due units are measured."
+  },
+  {
+   "name": "overdue-intention",
+   "every": 300,
+   "timeout": 60,
+   "max_age": 900,
+   "resolver": "operator",
+   "red_codes": [2],
+   "unknown_codes": [3],
+   "command": ["{python}", "{repo}/checks/overdue-intention.py", "--home", "{home}"],
+   "replaces": [],
+   "covers": "Every overdue intention is either served by a later role wake or explained by an intentional hold; an unexplained overdue intention wakes operator, while missing evidence is UNKNOWN."
+  },
+  {
+   "name": "signal-coverage",
+   "every": 300,
+   "timeout": 120,
+   "max_age": 900,
+   "resolver": "operator",
+   "red_codes": [2],
+   "unknown_codes": [3],
+   "command": ["{python}", "{repo}/checks/signal-coverage.py", "--home", "{home}"],
+   "replaces": [],
+   "covers": "The signal of signals: every registered signal has a fresh producer and subscriber, every declared producer runs, and RED or UNKNOWN readings receive an operator wake or a recorded disposition. Only m2shell producer units are inspected."
+  },
+  {
    "name": "repo-change",
    "builtin": true,
    "every": 900,
