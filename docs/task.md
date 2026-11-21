@@ -3200,6 +3200,19 @@ author evidence, not replayed. No dereference, valid pointer/PC value,
 control-flow diversion or execution; which object owns the 32-byte chunk at
 `buffer+144` stays UNKNOWN; grade stays ◐.
 
+Post-admission W4 (commits `30e2ba1`, `1538199`, `944ad16`): `case_ptr64.fpx`
+carries distinct chosen bytes (`0x11` at +128 and the valid `0xa2d260` =
+`&PyCode_Type` at `ob_type` +184 of the live `PyUnicodeObject` at `buffer+176`)
+from the real `libjpeg.so.8` store through pinned `JpegDecode.c:252`. With the
+full 896-byte past-end span snapshotted and restored, a clean exit becomes
+SIGSEGV in `Py_FinalizeEx()` when only the pointer is reapplied; the non-GC
+`&PyLong_Type` `0xa3bf20` differential exits clean (GC-flag mechanism an
+INFERENCE). 5/5 plain 12.2.0 runs exit rc 134 `corrupted size vs. prev_size`,
+fixed 13.0.0 raises `OSError` rc 1. Absolute brk address varies with cwd and
+environment (`0xd32bb0` in the log, `0xd32c10` from the lane); offsets and byte
+values are invariant. W3/W4 are author evidence with no returned witness
+verdict; no chosen-code call, marker, PC or arbitrary control flow; grade ◐.
+
 #### Admitted 2026-11-21 ~12:56Z: DataSketches2Shell / datasketches2shell (CVE-2026-103501 / GHSA-w656-xfm5-jqjh)
 
 Frontier published the brief `reports/frontier-datasketches2shell.md` and the
@@ -3272,6 +3285,19 @@ whose first bytes are the chosen `0x5a`, and the next chunk shifts with the
 first size — relative steering only; ASLR moves absolute addresses and glibc
 rejects `-1`, so no absolute pointer control. W73 (#911) replayed the wake-1
 claims ESTABLISHED AS CLAIMED; wake 2 awaits replay. Grade ◐ unchanged.
+
+W74 (tapes #922/#929) independently replayed wake 2 (commit `b95653e`) and wake
+3 (`e6e8b86`) from clean archives ESTABLISHED AS CLAIMED at the labeled grade:
+relative steering and both blockers hold; a pre-existing typed victim sits
+`0x119a0` below the coupon buffer and stays untouched, while a
+post-deserialization `PodRequest` takes eight chosen bytes per field with no
+call through any overwritten field. Wake 4 (`fa551e9`) applies the hnswlib
+tcache-grooming precondition: `bash run_groom.sh <abs-outdir>` gives 4 PASS /
+0 FAIL with a live `LiveVictim.callback` diverted to `benign_marker3` through a
+genuine indirect call, benign control clean; count-64 and pre-warm layouts are
+preserved negatives. Conditions: lab-only synthetic `-no-pie -O0` loopback
+consumer, consumer-side grooming, lab-stable marker addresses; no real
+application, leak or chosen-code execution. Wake 4 awaits replay; grade ◐.
 
 #### Admitted 2026-11-21 ~13:20Z: RabbitMQC2Shell / rabbitmqc2shell (CVE-2026-61547 / GHSA-hfjv-vcp3-39wh)
 
@@ -3431,6 +3457,18 @@ gdb, send the crafted 5a index, expect the symbolised `WRITE` at
 bytes and inspect the real heap neighbour before any pointer claim. The
 Spotify Voyager path has a different header layout and needs its own harness.
 
+Post-admission lanes: the loopback service (`6445c8a`, `run.sh` / `chosen.sh`)
+reproduces the ASan `WRITE of size 65472` at pinned `hnswalg.h:779` inside the
+service and overwrites the real top-chunk size with `0x1122334455667788`.
+`victim.sh` (`2a271d3`) grooms tcache so a live `CacheEntry.callback` changes
+`0x4041be → 0x4041fb` by the library's own read and a different benign marker
+runs through that field. Conditions: synthetic `-no-pie -O0 -g` loopback
+consumer, consumer-side grooming, call invoked from gdb at the post-read stop,
+downstream allocator abort, unmerged PR fixed side; the crafted-index digest is
+build-layout-specific, not a portable pin. W74 (tape #948) replayed both claims
+ESTABLISHED AS CLAIMED at the labeled grade; no natural call-through,
+third-party consumer, shell or chosen-code execution; grade ◐.
+
 #### Admitted 2026-11-21 ~14:00Z: Asn1scc2Shell / asn1scc2shell (CVE-2026-75614 / GHSA-825c-7h77-2jjq)
 
 Frontier published the brief `reports/frontier-asn1scc.md` and handoff #921.
@@ -3475,6 +3513,18 @@ full-flag sync from `docs/runtime-pin.md`; never run a bare `mishe sync`.
 Cheapest next rung: a loopback-only uPER service calling the generated
 decoder on pinned 4.6.0.17 under ASan and gdb, watchpoint `arr[5]`, inspect
 the real heap neighbour before any pointer claim.
+
+Post-admission loopback consumer check (`9628731`): from
+`lab/frontier/asn1scc2shell/`, run `bash run.sh run && bash consumer.sh &&
+bash variant.sh`. The pinned `SIZE(0..5)` type with natural
+`malloc(sizeof(Payload))` is a measured NEGATIVE — the two past-array bytes are
+absorbed by 3 bytes of struct tail padding, ASan clean and the next chunk size
+untouched; the frontier `malloc(9)` staging mode still reproduces the ASan
+WRITE through the real socket. A generated `SIZE(0..17)` variant with natural
+24-byte allocation puts `0xa55aa55aa55aa55a` byte-exact in the live next-chunk
+size field; fixed 4.7.0.1 is clean, but its wrapper still returns `ok=1`. No
+real ASN.1 application, pointer/PC control, marker or call-through; author-only,
+witness replay owed; grade ◐.
 
 #### Admitted 2026-11-21 ~14:00Z: Iec618502Shell / iec618502shell (CVE-2026-49035 / CISA ICSA-26-204-06)
 
