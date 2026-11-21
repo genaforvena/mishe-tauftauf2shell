@@ -64,12 +64,15 @@ accounting defect. `-X` and `-o no_lru_crawler` are non-default mitigations.
   observer-confirmed repeat went further without crashing, so that fault is a
   single observation, not an established impact.
 - New, submitted for witness replay (fifth wake): the pinned plain parent,
-  run under gdb with no breakpoints and ASLR on, faults reproducibly in
-  `assoc_find` (`assoc.c:87`, `movzbl 0x29(%rbx)`) with the hash-bucket chain
+  run under gdb with no breakpoints and ASLR on, faults in
+  `assoc_find` (`assoc.c:87`, `movzbl 0x29(%rbx)`) in three of four stress
+  runs; with the chosen byte `0x5a` the hash-bucket chain
   item pointer equal to eight attacker-chosen `0x5a` key bytes
   (`0x5a5a5a5a5a5a5a5a` in two independent runs); a `0x41` run faults at the
   same site with a different attacker-written value, and the pinned fixed
   tree does not fault under the identical trigger (42,770 sets in 90 s).
+  A fourth stress run and a non-stress run did not fault; crash timing is
+  allocator-state dependent, and the frontier was not read in-run.
   A stress client drove the extra allocation pressure; all sockets were
   127.0.0.1. Raw captures and caveats:
   `reports/memcached2shell-daemon-asan.md`, fifth-wake section. This is a

@@ -367,7 +367,8 @@ comparable to the plain parent.
 New evidence, **submitted for witness replay**; the accepted grade is not
 changed by this author's report. It converts the earlier single, non-deterministic
 fault into a reproduced, fix-sensitive crash whose faulting pointer value was
-captured and shown to be attacker bytes.
+captured and shown to be attacker bytes. The fault is not deterministic in
+every run (see the preserved negative below).
 
 - Method: the pinned plain parent binary
   `daemon/parent-plain/memcached` was run under gdb with **no breakpoints** —
@@ -399,10 +400,21 @@ captured and shown to be attacker bytes.
   (`daemon/fixed-gdb-fixed-p22166-100112.txt`). The parent faults after
   about 20,462 sets (~42 s). The fixed build's `bufused` is known to plateau
   at 123009, below 131072.
+- Preserved negative: a supplementary ASLR-on `0x5a` run on port 22168, with
+  the same trigger and a gdb script extended to print `active_crawler_mod.c`
+  at the stop, completed 70,642 `set` commands over 150 s **without** faulting
+  (`daemon/gdb-fault-p22168-100757.txt`, `daemon/gdb-trigger-p22168-100757.log`).
+  Of four gdb stress runs, three faulted (one with ASLR disabled, two ASLR-on
+  with the chosen pointer captured) and one did not; the fifth-wake non-stress
+  gdb run on port 22160 also did not fault. The crash is therefore itself
+  allocator-state dependent, consistent with the accepted pointer-window
+  counterexample. The frontier-reading gdb script
+  (`daemon/gdb-capture-frontier.gdb`) remains available but produced no stop
+  in its one use, so no direct in-run frontier value was obtained.
 
 Caveats, preserved: the debugger was present to capture registers, though it
 used no breakpoints and the binary is unmodified; ASLR was on; the overflow
-frontier was **not** directly observed in these three gdb runs because the
+frontier was **not** directly observed in the faulting gdb runs because the
 `/proc` observer must be the daemon's parent and gdb is the parent here — that
 the sequence crosses 131072 at t≈28 s is inferred from earlier observer runs
 with the identical store and metadump, plus the fix-sensitivity and the

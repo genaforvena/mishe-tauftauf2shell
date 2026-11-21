@@ -10,3 +10,4 @@ daemon/**
 !daemon/fixed-control.sh
 !daemon/gdb-capture.gdb
 !daemon/gdb-capture-aslr.gdb
+!daemon/gdb-capture-frontier.gdb
