@@ -1,0 +1,9 @@
+open (64, 64) RGBA
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/tmp/pw2-w1/v13/PIL/FpxImagePlugin.py", line 247, in load
+    return ImageFile.ImageFile.load(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/pw2-w1/v13/PIL/ImageFile.py", line 444, in load
+    raise _get_oserror(err_code, encoder=False)
+OSError: broken data stream when reading image file

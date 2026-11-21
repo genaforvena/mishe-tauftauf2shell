@@ -1,0 +1,20 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0x50c000000700, state=0x7ffff6dfbd10, buf=0x521000085d20 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+ENTRY buffer=0x50c0000007c0 bytes=128 xsize=64 ysize=64
+Hardware watchpoint 2: *$deep
+
+Hardware watchpoint 2: *$deep
+
+Old value = 0 '\000'
+New value = 90 'Z'
+0x00007ffff4672f98 in ?? () from /lib/x86_64-linux-gnu/libjpeg.so.8
+DEEP WATCH HIT
+0x50c0000007c0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x50c0000007c8:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x50c000000888:	0x5a	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x50c000000890:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
