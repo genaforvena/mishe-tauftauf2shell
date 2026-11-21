@@ -3180,6 +3180,19 @@ first past-end bytes and inspect the real Python heap neighbour under gdb.
 Whether the host libjpeg matches Pillow's bundled decoder byte-for-byte is
 UNKNOWN.
 
+Post-admission lanes (2026-11-21, commits `4f8e123` / `f5d0dcc` / `a8ea407`):
+the real FPX front end accepted the crafted case. W1 observed the in-library
+ASan WRITE at pinned `JpegDecode.c:252` in a Python + Pillow 12.2.0 process,
+with a gdb watchpoint `0x00 → 0x5a` at `buffer+32` / `+200`. W2 rebuilt 12.2.0
+without sanitizers against host libjpeg: the chosen `0x5a` overwrites the next
+malloc chunk size field (`0x21 → 0x5a5a5a5a5a5a5a5a5a`) and two live chunks
+(`buffer+144`, `+176`); 5/5 runs exit rc 139 (SIGSEGV in `PyGC_Collect()`),
+`MALLOC_CHECK_=3` reports `corrupted double-linked list`, and plain 13.0.0
+raises `OSError` rc 1. Detail in
+`reports/pillow2shell-consumer-reality.md`. The specific owning Python object,
+any pointer/PC value, control-flow diversion and execution remain UNKNOWN;
+grade stays ◐, and witness #898 plus the W2 replay are requested, not returned.
+
 #### Admitted 2026-11-21 ~12:56Z: DataSketches2Shell / datasketches2shell (CVE-2026-103501 / GHSA-w656-xfm5-jqjh)
 
 Frontier published the brief `reports/frontier-datasketches2shell.md` and the
@@ -3294,7 +3307,8 @@ down for writing lets the post-copy send fail without a broker. No messaging
 application, broker, network listener, real heap neighbour, pointer,
 control-flow diversion or execution was observed — all UNKNOWN. Witness
 replay was requested on tape #896 and no verdict had returned at admission;
-the operator replay is not independent acceptance.
+W73 (#914) later returned ESTABLISHED AS CLAIMED at the labeled grade, grade
+unchanged; the operator replay itself is not independent acceptance.
 
 Admitted under #6, no re-ask. The two-pane `rabbitmqc2shell` window (inner
 socket, index 56), seed wall and registry entry 58 were pre-created by
@@ -3370,7 +3384,8 @@ ESTABLISHED, rung 4 INSTRUMENTED: the write comes from the library's own
 read, but chosen-byte observation relocates the buffer with a link-time
 `malloc` interposer. No index-loading application, listener, real heap
 neighbour, pointer, control flow or execution was observed. Witness replay
-#901 is pending; author replays are never independent acceptance.
+#901 was pending at admission; W73 (#913) later returned ESTABLISHED AS
+CLAIMED at the labeled grade. Author replays are never independent acceptance.
 
 Admitted under #6, no re-ask, with the unmerged-fixed-side caveat carried into
 every artifact. The two-pane `hnswlib2shell` window (inner socket, index 57),
