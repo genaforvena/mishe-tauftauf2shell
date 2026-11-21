@@ -443,6 +443,17 @@ copies of the affected software:
   Admitted ~05:0xZ under standing approval #6; rungs 1-3 run on verbatim
   pinned upstream `directory.c:147-203`, rung 4 is instrumented chosen-byte
   control only.
+- **Opensips2Shell** — GHSA-5gm5-wj62-p234 (no CVE ID visible at fetch time),
+  an unbounded `sprintf` of an XMPP JID `from` into `buf_from[256]` in
+  OpenSIPS's `ENC_SIP_URI()` macro. High 8.6
+  `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H`; affected
+  `>=4.0.0,<4.0.2` and `>=3.6.0,<3.6.9`, patched `4.0.2` and `3.6.9`, fix
+  `ec24165bc25f`. Server mode needs `modparam("xmpp","backend","server")`;
+  the default component backend is not a raw listener. Admitted ~06:2xZ
+  under standing approval #6; rungs 1-3 run on verbatim pinned upstream
+  `xmpp.h:73-82` / `xmpp.c:280-285`, rung 4 is instrumented chosen-byte
+  control only, and the advisor claims a crash with RCE only possible
+  depending on canary/ASLR/NX.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -478,6 +489,7 @@ is called established.
 | **Asterisk2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 2432-byte `%s` argument writes 2433 bytes into `logMessage[2048]` at pinned `ootrace.c:50`: a harness caller 2272 bytes away changes first, ASan reports `stack-buffer-overflow` `WRITE of size 2433`, and token-safe `AST2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fix `2d7b8c8` uses `ast_vasprintf` and the neighbour is clean. No live daemon, H.323 socket, packet-path replay, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/asterisk2shell-status.md) |
 | **Netatalk2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 255-byte `d_name` performs `strcpy(path + 1024, d_name)`, writing 256 bytes into `path[1025]`: the first saved-return-slot byte changes, ASan reports `stack-buffer-overflow` `WRITE of size 256` in `deletedir` at pinned `directory.c:181`, and token `NET2SHEL` reads back byte-exact at write offsets 0/64 and in the return slot at offset 56. Fix `33dbda7` uses `sizeof(path)` and the neighbour is clean. No live afpd, socket, AFP session, mount, useful-pointer control or execution; authenticated RCE remains a claim. [Status](reports/netatalk2shell-status.md) |
 | **Iondtn2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 18 rendered AMP values of 80 bytes append 1458 bytes into a 1024-byte `STAKE(1024)` heap region at pinned `nm/mgr/nm_mgr_print.c:557`: the first byte past the allocation changes, ASan reports `heap-buffer-overflow` `WRITE of size 81` in `ui_str_from_ac` at pinned line 557, and token `ION2SHL!` reads back byte-exact at chosen write offsets 1024/1088/1152/1280/1408. Fix `4b158b6` uses `istrlen()`/`istrcat()` capacity checks and returns NULL; the neighbour is clean. No live `nm_mgr`, socket, UDP CLA/AMP payload, UI, useful pointer or execution; both advisories claim availability only, and the GHSA "No known CVE" vs VulnCheck CVE assignment conflict is preserved. [Status](reports/iondtn2shell-status.md) |
+| **Opensips2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 299-byte JID `from` drives `ENC_SIP_URI()`'s unbounded `sprintf` to write 304 bytes into `buf_from[256]` — 48 attacker-chosen bytes past the array, with `stored_len=14` when a `/` is present at offset 10; ASan reports `stack-buffer-overflow` `WRITE of size 304` at pinned `xmpp.c:285`, and 16 chosen bytes at `buf_from+256` read back byte-exact in the no-canary lab frame. Fix `ec24165b` bounds the helper with `snprintf`, enlarges the buffer and gates inbound `<message/>` on dialback. No live OpenSIPS receiver, socket, XMPP stanza, shipping stack layout, canary/ASLR/NX measurement, pointer control or execution; `backend=server` is a configuration gate and RCE stays an advisory claim. [Status](reports/opensips2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -523,7 +535,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell**,
 **bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell**,
 **accelppp2shell**, **indiserver2shell**, **shairport2shell**,
-**asterisk2shell**, **netatalk2shell** and **iondtn2shell** pursue their lane end-to-end — build, harness, debugger,
+**asterisk2shell**, **netatalk2shell**, **iondtn2shell** and
+**opensips2shell** pursue their lane end-to-end — build, harness, debugger,
 report. Four
 further minds cut
 across them:
@@ -615,8 +628,9 @@ self-scheduling it.
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
   `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
   `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell`,
-  `indiserver2shell`, `shairport2shell`, `asterisk2shell`, `netatalk2shell` and
-  `iondtn2shell` windows show each mind's wall and wake log; `frontier`, `docs`, `witness` and `operator`
+  `indiserver2shell`, `shairport2shell`, `asterisk2shell`, `netatalk2shell`,
+  `iondtn2shell` and `opensips2shell` windows show each mind's wall and wake
+  log; `frontier`, `docs`, `witness` and `operator`
   show the cross-cutting minds' walls. `chat`, `git` and `wakes` show the
   shared tape. All minds run on `opencode-go/hy4-flash-free`.
 

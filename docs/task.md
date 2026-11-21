@@ -1245,6 +1245,54 @@ owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/iondtn2shell-status.md` and the pinned hashes in
 `lab/frontier/iondtn2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~06:2xZ: Opensips2Shell (GHSA-5gm5-wj62-p234, no CVE ID visible)
+
+Claim source: maintainer advisory GHSA-5gm5-wj62-p234 (2026-09-28, High 8.6
+`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H`); no CVE ID was visible on the
+advisory or in a targeted search at fetch time (UNKNOWN, not asserted).
+Affected `>=4.0.0,<4.0.2` and `>=3.6.0,<3.6.9`, patched `4.0.2` and `3.6.9`;
+upstream fix `ec24165bc25fa462e08cdb33ee8071f58e166d36` (`Fixes
+GHSA-5gm5-wj62-p234`). Claimed primitive: at tag `4.0.1`,
+`modules/xmpp/xmpp.h:73-82` defines `ENC_SIP_URI()` whose
+`sprintf(buf, "sip:%s", src)` copies an XMPP JID `from` into `buf_from[256]`
+at `xmpp.c:280-285` with no length check, so a 299-byte JID writes 304 bytes
+(48 past the array) with attacker-chosen length and contents. Pinned
+`xmpp_server.c:361-382` reaches the sink on an unauthenticated `<message/>`
+stanza. Reachability gate from the advisory: server mode needs
+`modparam("xmpp","backend","server")`; the default component backend is not a
+raw listener. The advisor claims a reliable receiver crash and RCE only as
+possible depending on canary/ASLR/NX.
+
+Frontier's harness (`lab/frontier/opensips2shell/run.sh`) compiles the verbatim
+pinned `xmpp.h:73-82` and `xmpp.c:280-285` from tag 4.0.1 plus the fixed helper
+and guards from tag 4.0.2 under `#line` directives with stubbed collaborators:
+rung 1 `written=303 overflow=48`; rung 2 `stored_len=14` with `/` at offset 10
+while the write still overruns; rung 3 ASan `stack-buffer-overflow`,
+`WRITE of size 304`, frame `xmpp.c:285`; rung 4 reads 16 chosen bytes at
+`buf_from + 256` back byte-exact (`CHOSEN_MATCH=1`), while the fixed build
+writes 1024 bytes into 1025 and rejects a 1500-byte JID. Rung 4 is
+INSTRUMENTED only — chosen bytes in the lab frame, no return address,
+pointer, marker, daemon, socket, XMPP stream, shipping stack layout, canary,
+ASLR or NX exercised. Cheapest next rung: build stock 4.0.1 with the xmpp
+module under ASan plus a no-canary build, bind only 127.0.0.1 with
+`backend=server`, send one stream header and one `<message from="…299 chosen
+bytes…">` stanza, capture the real receiver's report, crash, wire bytes and
+stack, then repeat with tag 4.0.2 as the control.
+
+Admitted by the operator ~06:2xZ under standing approval #6 on handoff #606
+(commits `b4bc31a`, `92a9c15`, `41818af`): the two-pane window (34, inner
+socket), registry entry and seed wall were live from frontier and were
+capture-verified at 06:05:46Z. Operator replay ~06:19Z from a clean `git
+archive HEAD` extraction of `7674a58` into two separate absolute output
+directories: 26 PASS / 0 FAIL and `ALL CHECKS PASSED rc 0` both times, byte
+identical trace
+`sha256=a69657bb243b83b850b332a4307996f5705d6b0bd6b3cdefbccba022c0c78b06`.
+Wake trigger units and the presentation entry are owed from the person's
+full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-opensips2shell.md`, seed status
+`reports/opensips2shell-status.md` and the pinned hashes in
+`lab/frontier/opensips2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
