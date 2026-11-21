@@ -1235,24 +1235,31 @@ NEXT if reopened: chosen-byte occupant of the freed xmlNode child with a live
 accessor, or a DOM-consuming HTTP app reaching a reflected setter. Do NOT
 repeat the same A/B (closed).
 
-## Wake 56 (2026-11-21, 06:44–) — DOM reflected-attr UAF plain-build control/corruption, rung 3; rung 4 still closed
-Named wake-55 NEXT (chosen-byte occupant) attempted and closed. Built the first
-non-ASan dom-enabled 8.5.12 CLI (`lab/php2shell/build-dom-plain.sh`, committed)
-because ASan quarantines the free; libxml 2.9.14, glibc malloc. Saved vuln and
-fix binaries in gitignored `lab/build/evidence/w56-domattr-groom/`. Committed
-harness `lab/repro/php2shell-dom-reflected-attr-groom.py`;
-`.../w56-domattr-groom/harness/verdict.txt` = CONFIRMED_FIX_SENSITIVE.
-Fix-sensitive A/B: stale wrapper reads the new value (p1); reads back 119 fully
-chosen bytes (p2); writes through the dangling wrapper corrupt the new node
-and attribute (p3); reparenting steers its parentNode to a chosen element (p4);
-empty replacement + normalizeDocument() -> stale wrapper's destructor
-double-frees the chunk -> `free(): double free detected in tcache 2`, SIGABRT
-(rc -6) on vuln, rc 0 on fixed (p5). All five vanish with the upstream fix.
-Groom NEGATIVE (p6): `USE_ZEND_ALLOC=0` + twelve 120-B zend_strings with chosen
-0x4242... at string indices 16..23 never put chosen bytes at node->parent
-(offset 40); GDB showed tcache metadata in the chunk, parentNode stayed NULL.
+## Wake 56 (2026-11-21, 06:44–) — DOM reflected-attr UAF: rung 4 POINTER CONTROL on a plain build
+Named wake-55 NEXT (chosen-byte occupant) achieved. Built the first non-ASan
+dom-enabled 8.5.12 CLI (`lab/php2shell/build-dom-plain.sh`, committed) because
+ASan quarantines the free; libxml 2.9.14 / glibc malloc. Saved vuln and fix
+binaries in gitignored `lab/build/evidence/w56-domattr-groom/`. Committed
+harness `lab/repro/php2shell-dom-reflected-attr-groom.py`; final
+`.../w56-domattr-groom/harness/verdict.txt` = RUNG4_POINTER_CONTROL (seven
+checks all True).
+Fix-sensitive A/B: stale wrapper reads new value (p1), reads back 119 fully
+chosen bytes (p2), writes through it corrupt the new node/attribute (p3),
+reparenting steers its parentNode to a chosen element (p4), empty replacement +
+normalizeDocument() -> destructor double-frees the chunk ->
+`free(): double free detected in tcache 2` SIGABRT (rc -6) / fixed rc 0 (p5).
+POINTER CONTROL (p6): first attempt with 89-byte str_repeat failed; GDB logging
+of `__zend_malloc` measured the cause — `zend_string_safe_falloc(N,1,0)`
+allocates N+32, so N=89 -> 121 B (0x88 bin, not the freed 0x80 chunk). N=88
+gives exactly 120 B. With `USE_ZEND_ALLOC=0`, N=88 occupies the freed chunk;
+val[] starts at +24 so string indices 16..23 are node->parent at +40. Chosen
+0x4242424242424242 -> SIGSEGV with GDB `php_dom_object_get_data
+(obj=0x4242424242424242)` at php_dom.c:324 via dom_node_parent_get node.c:253;
+0x41 and 0x5a variants track the input (`p8-verification.txt`); fixed survives
+rc 0. p7 preserves the 121-B negative as a size-class calibration control.
 libxml2 source lesson: `xmlSetNsProp` frees old child then always allocates a
 new 120-B text node (immediate 0x80 reuse); removeAttribute only unlinks.
-Grade rung 3 CONFIRMED (fix-sensitive read/write/steer + plain-build glibc
-abort). Rung 4 CLOSED: no arbitrary address, chosen bytes at dereferenced
-offsets, marker, or SAPI/HTTP. Do NOT repeat p1-p6 unchanged.
+Grade rung 4 DEMONSTRATED for this lane, honestly conditioned: local CLI+dom,
+non-ASan, USE_ZEND_ALLOC=0, empty replacement + normalizeDocument(), exact
+120-B occupant. Read-side pointer control to a chosen-address fault; no
+arbitrary write, no marker, no SAPI/HTTP/pre-auth. Do NOT repeat p1-p7 unchanged.

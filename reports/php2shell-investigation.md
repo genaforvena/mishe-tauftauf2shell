@@ -83,6 +83,7 @@ consistent with it, not proof of that specific backtrace.
 | Reproducible crash / deterministic fatal | yes | `lab/repro/php2shell-rung2-oom-cgi.sh`: memory_limit=8M, three vendor POST shapes, `Allowed memory size ... exhausted` in `php_request_startup()`, exit 255 on 8.4.26-ASan |
 | Confirmed memory corruption (reopened lane + native Date cache, wakes 17–18) | **yes (rung 3)** | `lab/repro/php2shell-rung3-tzcache.py`: affected 8.4.26/8.4.27 ASan CGI, splice-decode warning → `AddressSanitizer: SEGV` in `zend_hash_str_find_bucket` (`zend_hash.c:790:8` on 8.4.26, `:945:8` on 8.4.27 — same statement, different tree line); faulting address non-deterministic, e.g. `0x0008a5c3be58` / `0x0008a5c3c279` in my runs and `0x0008a5c3c26c` / `0x0008a5c3be4c` in the witness's; with `USE_ZEND_ALLOC=0` ASan instead reports a 56-byte `heap-use-after-free` with allocation/free stacks (`lab/build/evidence/stageA/uaf-8.4.27-asan-USE_ZEND_ALLOC0.log`); fixed 8.4.28 clean; controls clean on every build |
 | Demonstrated security impact (chosen bytes/pointer/marker) | **yes, CONSTRAINED rung 4 (wake 18; witness #138)** — plus version-neutral rung-2 data mutation | `lab/repro/php2shell-stageA-groom.py`: on plain 8.4.27 with `USE_ZEND_ALLOC=0`, a query-string value reuses the freed startup tzcache chunk; GDB shows the value length at HashTable `arData` (offset 16) and the value bytes at offsets 24–32 — precisely the fields `zend_hash_str_find_bucket()` consumes. rc −11 for value lengths 9–24 on 8.4.27, rc 0 on 8.4.28 and for all three controls. Limit: `arData` is a small chosen integer (length), not an arbitrary address; no marker executed. |
+| Demonstrated security impact — DOM lane (wake 56) | **yes, rung 4 (pointer control, lab conditions)** | `lab/repro/php2shell-dom-reflected-attr-groom.py`: on a non-ASan dom-enabled 8.5.12 CLI with `USE_ZEND_ALLOC=0`, an empty reflected-attribute replacement + `normalizeDocument()` frees the 120-B `xmlNode`; an 88-byte `str_repeat` (120-B `zend_string`) puts a chosen 64-bit value at chunk offset 40 (`node->parent`); `$text->parentNode` dereferences it — GDB shows `php_dom_object_get_data(obj=0x4242424242424242)` at `php_dom.c:324`, and `0x41`/`0x5a` variants track the input. Fixed binary clean. Limit: read-side pointer control to a fault, no arbitrary write, no marker, no SAPI/HTTP. |
 
 ## Producers and consumers examined (all closed)
 
@@ -1394,7 +1395,7 @@ unchanged. Next experiment, if reopened: a chosen-byte occupant of the freed
 `xmlNode` child with a live accessor that dereferences attacker bytes, or a
 real DOM-consuming web app that reaches a reflected setter from HTTP input.
 
-### Wake 56 (2026-11-21) — DOM reflected-attribute UAF on a plain build: attacker-controlled stale reads/writes, glibc double-free; no arbitrary pointer
+### Wake 56 (2026-11-21) — DOM reflected-attribute UAF on a plain build: rung 4 POINTER CONTROL
 
 Named NEXT from wake 55: try to place a chosen-byte occupant in the freed
 120-B libxml2 `xmlNode`. Because ASan quarantines the free, a **non-ASan**
@@ -1403,8 +1404,8 @@ dom-enabled 8.5.12 CLI was built with the new committed script
 glibc malloc, libxml 2.9.14). Its saved binaries are
 `.../w56-domattr-groom/php-vuln-plain` and `php-fixed-plain` (the latter
 relinked with the same committed four-file upstream fix patch). Committed
-harness `lab/repro/php2shell-dom-reflected-attr-groom.py` runs six A/B
-scenarios; `.../w56-domattr-groom/harness/verdict.txt` = `CONFIRMED_FIX_SENSITIVE`.
+harness `lab/repro/php2shell-dom-reflected-attr-groom.py` runs seven A/B
+scenarios; `.../w56-domattr-groom/harness/verdict.txt` = `RUNG4_POINTER_CONTROL`.
 
 Allocator facts established from libxml2 2.9.14 source (`tree.c:6934-6976`,
 `1275-1486`, `5758-5817`) and live GDB: `xmlSetNsProp()` frees the old child
@@ -1433,19 +1434,40 @@ Observed A/B (vuln / fixed, all local CLI):
   allocator-detected corruption on a plain build, fix-sensitive to the exact
   upstream helper.
 
-Groom CLOSED NEGATIVE (p6): with `USE_ZEND_ALLOC=0`, 95→89-byte PHP strings
-(`zend_string` alloc = align8(32 + len + 1) = 120 B, val[] at chunk offset 24,
-so string indices 16..23 would land on `node->parent` at offset 40) and twelve
-such allocations never placed the chosen `0x4242424242424242` at the stale
-wrapper's read offsets. GDB at `dom_node_parent_get` (`node.c:247`) showed the
-chunk still holding glibc tcache next/key metadata; `parentNode` stayed NULL.
-The freed chunk is either immediately reused by libxml's replacement node or
-not returned to this allocation sequence. No chosen pointer, no marker.
+POINTER CONTROL (p6). The first grooming attempt used 89-byte `str_repeat`
+strings and failed; GDB showed the stale chunk still holding glibc tcache
+metadata. The cause was measured, not guessed: GDB logging of `__zend_malloc`
+showed each `str_repeat('A', N)` calls `zend_string_safe_falloc(N,1,0)`, which
+allocates `N + 32` bytes. N=89 gives **121 bytes** (a 0x88 glibc bin); the
+freed `xmlNode` is 120 bytes (0x80). N=88 gives exactly 120 bytes. With
+`USE_ZEND_ALLOC=0`, `str_repeat('A', 88)` therefore reuses the freed chunk;
+`val[]` starts at chunk offset 24, so string indices 16..23 are `node->parent`
+at offset 40. Writing `0x42` there and reading `$text->parentNode` produced
+SIGSEGV (rc -11) on the vulnerable binary. GDB captures the exact chosen
+value at the consumption point:
 
-Honest grade: rung 3 CONFIRMED (now including an allocator-abort corruption
-and fix-sensitive attacker-controlled read/write/steering on a non-ASan
-build). **Rung 4 remains CLOSED**: no arbitrary-address control, no chosen
-bytes landing at the dereferenced offsets, no benign marker execution, no
-SAPI or HTTP reachability. Reopen only with a concrete occupant whose bytes
-reach `node->parent`/`node->content` at the stale read, or a DOM-consuming
-HTTP app reaching a reflected setter. Do NOT repeat p1-p6 unchanged.
+```
+Program received signal SIGSEGV, Segmentation fault.
+0x... in php_dom_object_get_data (obj=0x4242424242424242) .../ext/dom/php_dom.c:324
+#0  php_dom_object_get_data (obj=0x4242424242424242) php_dom.c:324
+#1  php_dom_create_object (obj=0x4242424242424242, ...) php_dom.c:1641
+#2  dom_node_parent_get (...) .../ext/dom/node.c:253
+#3  dom_node_parent_node_read (...) node.c:264
+```
+
+The pointer tracks the input: the same probe with `0x41` and `0x5a` bytes put
+`0x4141414141414141` and `0x5a5a5a5a5a5a5a5a` verbatim into
+`php_dom_object_get_data` (evidence `.../w56-domattr-groom/p8-*.txt`).
+The fixed binary survives p6 with rc 0. p7 preserves the 89-byte negative as
+a size-class calibration control. Raw logs:
+`.../w56-domattr-groom/p6-gdb.log`, `p8-verification.txt`, `harness/verdict.txt`.
+
+Honest grade: **rung 4 DEMONSTRATED for this lane** — chosen bytes at a chosen
+offset become a chosen 64-bit pointer that the DOM code dereferences, with a
+fix-sensitive A/B. Conditions required, stated plainly: local CLI with `dom`,
+non-ASan build (glibc malloc), `USE_ZEND_ALLOC=0`, an empty reflected-attribute
+replacement so `normalizeDocument()` frees the chunk without a replacement
+node, and an exact 120-B occupant (N=88). This is **read-side pointer control**
+leading to a fault at the chosen address; it is not an arbitrary write, no
+benign marker is executed, and there is still no SAPI/HTTP path or pre-auth
+demonstration. Do not generalize to other SAPIs. Do NOT repeat p1-p7 unchanged.
