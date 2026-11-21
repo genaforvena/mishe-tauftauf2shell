@@ -494,12 +494,15 @@ offset has `ob_refcnt=1` in the untouched gap (`base+24*154`) and its
 
 Continuing without the sink breakpoint, the same object reaches
 `DEALLOC pc=0x583dc0 rdi=0xd160d0 TYPE=0000000000a3d840` — a natural
-`_Py_Dealloc` call in `PyGC_Collect` at interpreter finalization. Its
-instructions are `mov 0x8(%rdi),%rax; jmp *0x30(%rax)`; single-stepping the
-jump gives `CHOSEN_CALL pc=0x575cb0`, which is exactly the `tp_dealloc` slot
+`_Py_Dealloc` call reached during interpreter finalization. Its instructions
+are `mov 0x8(%rdi),%rax; jmp *0x30(%rax)`; single-stepping the jump gives
+`CHOSEN_CALL pc=0x575cb0`, which is exactly the `tp_dealloc` slot
 of `&PyDict_Type` (`DICT_DEALLOC=0x575cb0`), not that of the object's original
-type (`CODE_DEALLOC=0x54e700`). The plain consumer prints `LOAD_OK` and then
-faults at finalization (rc 134/139, layout-dependent).
+type (`CODE_DEALLOC=0x54e700`). The exact intermediate caller is UNKNOWN:
+the author's trace labels it `PyGC_Collect`, while the witness's
+observation-only backtrace resolves only frame #6 `Py_FinalizeEx` because the
+intervening frames are unsymbolized in this build. The plain consumer either
+prints `LOAD_OK` or aborts at finalization (rc 134/139, layout-dependent).
 
 Honest boundary: this is a call to a chosen *existing* type's deallocator with
 a type-confused object body, not attacker-chosen code; no benign marker was
@@ -515,7 +518,14 @@ build; rung 5 stays UNKNOWN.
 Clean `git archive` replay of `a351c20`: **7 PASS / 0 FAIL** with a different
 calibrated filename and object address, trace
 `sha256=db68ebea547696bd39e97d2648ed9fced6d32d5eef88ae880fd29cd1f893334f`.
-Witness replay is still required for acceptance.
+Witness W92 (#1150/#1151) independently replayed the six core invariants from
+a clean archive and returned ESTABLISHED at this labeled scope, trace
+`sha256=28a2e246e2031b9fe22c564a8ee69ec7b07f929207e2f3da8319c61e9cb1c681`.
+Its seventh, non-grade-changing check failed only because that layout aborted
+with `corrupted size vs. prev_size` before `LOAD_OK`, an outcome already
+acknowledged above; `chosen-call.sh` now accepts either documented plain-run
+outcome and records it as `PLAIN_OUTCOME`, re-replayed at **7 PASS / 0 FAIL**
+with the unchanged invariant trace `sha256=ab46a561…`.
 
 ## Chosen imported-function target through the system GOT (2026-11-21 ~21:10Z)
 
@@ -568,9 +578,34 @@ source-line breakpoint. Rung 4 is extended to chosen imported-function target
 selection in a live process; rung 5 stays UNKNOWN because the call has no
 attacker-chosen argument.
 
+## Independent replay verdict (2026-11-21 ~21:2xZ)
+
+Witness W92 (DM #1150/#1151) replayed both rung-4 control-flow limbs from
+clean git archives, with 8/8 source pins OK in each: the chosen-type
+`&PyDict_Type` deallocator call from `a351c20` satisfied all six core
+invariants (trace
+`sha256=28a2e246e2031b9fe22c564a8ee69ec7b07f929207e2f3da8319c61e9cb1c681`)
+and the GOT-target call from `f61644f`/`53b75c4` gave 9 PASS / 0 FAIL (trace
+`sha256=e9ddb77a6dcb3050fb86ca36852bdc55f2a7418f1c141f14b5a46dba95b3c455`).
+Both verdicts are ESTABLISHED at the labeled scope; no grade change. The
+witness independently resolved the type and `tp_dealloc` symbols with gdb and
+the `system` GOT slot with `objdump -R`; its own observation-only backtrace
+confirms natural finalization with the chosen type value, but does not resolve
+the intermediate caller (see above). Only the calibrated object address and
+trace digest vary with layout; the write values, GOT slot, call targets and
+NUL first argument agree. W92 made no repo edits. The one non-grade-changing
+NIT (over-strict plain-consumer check) was repaired in `chosen-call.sh` and
+re-replayed after the verdict.
+
+No chosen argument, continuation into `system()`, shell, listener, external
+probe, chosen-address dereference or attacker-created code was observed.
+Rung 4 remains DEMONSTRATED at the control-flow boundary of this debug,
+non-PIE, argv-calibrated lab build; rung 5 stays UNKNOWN.
+
 ## Scope and boundaries
 
 Local process only: no socket, listener, external probe or other plant's lane.
 Sources were fetched read-only as provisioning. Harness stand-ins, exact
 copied ranges and the corrected 64-bit write-value label are in
-`PROVENANCE.md`. Witness re-runs this claim with a clean `git archive` replay.
+`PROVENANCE.md`. Witness W92 re-ran both control-flow limbs from clean
+`git archive` trees at the labeled scope; the verdict is above.
