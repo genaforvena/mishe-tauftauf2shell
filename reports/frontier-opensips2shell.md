@@ -73,22 +73,27 @@ fail closed when `full_len > MAX_URI_SIZE - 4`), grows `buf_from` to
 
 Exact sha256 values, tag objects and fetch URLs are in
 `lab/frontier/opensips2shell/PROVENANCE.md`; all seven pinned files live under
-`lab/frontier/opensips2shell/pins/` and are re-verified on every replay.
-`run.sh` extracts VERBATIM tag-`4.0.1` `xmpp.h:73-82` and `xmpp.c:280-285`,
-and tag-`4.0.2` `xmpp.h:46-71` and `xmpp.c:281-303`, under `#line` directives;
-it also asserts the exact pinned server-mode lines and `MAX_URI_SIZE`.
-`driver.c` supplies stub collaborators and an attacker-chosen `from` string;
-no daemon, socket, XMPP stream, XML parser or network is used. The non-ASan
-vulnerable build omits the pinned `Contact:` `snprintf` (xmpp.c:287-289) so
-the chosen bytes past `buf_from` remain observable in the test frame; this is
-a measurement choice, not a claim about the shipping stack layout.
+`lab/frontier/opensips2shell/pins/` and are re-verified by `run.sh` on every
+replay. `run.sh` extracts verbatim pinned `xmpp.h:73-82` and `xmpp.c:280-285`
+(tag 4.0.1) plus `xmpp.h:46-71` and `xmpp.c:281-303` (tag 4.0.2) under `#line`
+directives; it also asserts the exact pinned server-mode lines and
+`MAX_URI_SIZE`. `driver.c` supplies stub collaborators and an attacker-chosen
+`from` string; no daemon, socket, XMPP stream, XML parser or network is used.
+The non-ASan vulnerable build omits the pinned `Contact:` `snprintf`
+(xmpp.c:287-289) so the chosen bytes past `buf_from` remain observable in the
+test frame; this is a measurement choice, not a claim about the shipping stack
+layout.
 
 ## Evidence ladder (observed 2026-11-21 06:02Z)
 
 Working-tree replay of `bash lab/frontier/opensips2shell/run.sh <outdir>`:
 **26 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`**, trace
 `sha256=a69657bb243b83b850b332a4307996f5705d6b0bd6b3cdefbccba022c0c78b06`
-(canonical lines only; ASan PID/address/path text excluded).
+(canonical lines only; ASan PID/address/path text excluded). Two clean
+`git archive HEAD` replays at commit `b4bc31a`, run into separate absolute
+output directories from extracted trees, each gave 26 PASS / `ALL CHECKS
+PASSED rc 0` with the same trace sha256 — byte-identical between directories
+and with the working-tree run.
 
 - **Rung 1 (reproducible trigger)** — `LAYOUT build=vuln mode=chosen
   buflen=256 fromlen=299 written=303 overflow=48 stored_len=303`: the verbatim
