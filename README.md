@@ -337,6 +337,16 @@ copies of the affected software:
   a deployment gate, not an in-protocol auth gate. Admitted ~04:2xZ under
   standing approval #6; rungs 1-3 run on verbatim pinned upstream
   `ootrace.c:35-53`, rung 4 is instrumented chosen-byte control only.
+- **Netatalk2Shell** — CVE-2026-45698 / GHSA-5443-v9xg-mqgv, an integer
+  underflow in `afpd`'s `deletedir()` that turns `remain` into `SIZE_MAX` and
+  lets an unbounded `strcpy` write an attacker-chosen filename past
+  `char path[MAXPATHLEN + 1]`. CWE-787, High 7.5
+  `AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H`; the maintainer's authenticated RCE
+  claim stays a claim. Affected `>=3.1.19, <4.4.3`, fixed 4.4.3. Needs an
+  authenticated AFP session and a cross-device rename path inside a share.
+  Admitted ~05:0xZ under standing approval #6; rungs 1-3 run on verbatim
+  pinned upstream `directory.c:147-203`, rung 4 is instrumented chosen-byte
+  control only.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -370,6 +380,7 @@ is called established.
 | **Indiserver2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 1206-byte mismatched-tag packet formats 1237 bytes into `err[1024]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 1237` at pinned `lilxml.cpp:1281`, and token-safe `INDI2SHELL` reads back byte-exact at requested adjacent-stack offsets 0 and 64. Fixed `96bbd7f` bounds the format with `snprintf` and the neighbour is clean. No live daemon, real TCP/7624 path, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/indiserver2shell-status.md) |
 | **Shairport2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4096-byte unrecognised-method RTSP body writes 8193 bytes into `obf[4096]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 3` at pinned `rtsp.c:4215`, and token-safe `INDI2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fixed `c1c41c4` declares `obf[2*4096+1]` and the neighbour is clean. No live daemon, socket, AirPlay-2 auth-bypass observation, stock frame layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/shairport2shell-status.md) |
 | **Asterisk2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 2432-byte `%s` argument writes 2433 bytes into `logMessage[2048]` at pinned `ootrace.c:50`: a harness caller 2272 bytes away changes first, ASan reports `stack-buffer-overflow` `WRITE of size 2433`, and token-safe `AST2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fix `2d7b8c8` uses `ast_vasprintf` and the neighbour is clean. No live daemon, H.323 socket, packet-path replay, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/asterisk2shell-status.md) |
+| **Netatalk2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 255-byte `d_name` performs `strcpy(path + 1024, d_name)`, writing 256 bytes into `path[1025]`: the first saved-return-slot byte changes, ASan reports `stack-buffer-overflow` `WRITE of size 256` in `deletedir` at pinned `directory.c:181`, and token `NET2SHEL` reads back byte-exact at write offsets 0/64 and in the return slot at offset 56. Fix `33dbda7` uses `sizeof(path)` and the neighbour is clean. No live afpd, socket, AFP session, mount, useful-pointer control or execution; authenticated RCE remains a claim. [Status](reports/netatalk2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -409,8 +420,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
 **freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell**,
 **bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell**,
-**accelppp2shell**, **indiserver2shell**, **shairport2shell** and
-**asterisk2shell** pursue their lane end-to-end — build, harness, debugger,
+**accelppp2shell**, **indiserver2shell**, **shairport2shell**,
+**asterisk2shell** and **netatalk2shell** pursue their lane end-to-end — build, harness, debugger,
 report. Four
 further minds cut
 across them:
@@ -502,8 +513,8 @@ self-scheduling it.
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
   `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
   `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell`,
-  `indiserver2shell`, `shairport2shell` and `asterisk2shell` windows show
-  each mind's wall and wake log; `frontier`, `docs`, `witness` and `operator`
+  `indiserver2shell`, `shairport2shell`, `asterisk2shell` and
+  `netatalk2shell` windows show each mind's wall and wake log; `frontier`, `docs`, `witness` and `operator`
   show the cross-cutting minds' walls. `chat`, `git` and `wakes` show the
   shared tape. All minds run on `opencode-go/hy4-flash-free`.
 

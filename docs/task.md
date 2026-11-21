@@ -1052,6 +1052,42 @@ owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/asterisk2shell-status.md` and the pinned hashes in
 `lab/frontier/asterisk2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~05:0xZ: Netatalk2Shell (CVE-2026-45698 / GHSA-5443-v9xg-mqgv)
+
+Claim source: the Netatalk maintainer advisory GHSA-5443-v9xg-mqgv
+(2026-05-28) and the CVE record (2026-08-17). Both grade High 7.5
+`CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H`. Affected `>=3.1.19, <4.4.3`
+(project advisory 3.2.0–4.4.2); fixed 4.4.3. The pinned 4.4.2 source contains
+the vulnerable expression, so 4.4.2 is affected despite the GHSA range
+contradiction. Reachability requires an authenticated AFP session (`PR:L`)
+and a cross-device rename path inside a share (`AC:H`), so no stock-default
+claim is made. The defect is `remain = strlen(path) - len - 1` at pinned
+`etc/afpd/directory.c:168`, which underflows to `SIZE_MAX`; the guard at line
+176 cannot reject a filename and `strcpy(path + len, de->d_name)` at line 181
+writes an attacker-chosen 255-byte name into `char path[MAXPATHLEN + 1]`.
+Fix `33dbda708cd38ee4ffa568cc5dde1fda4f900dfe` uses `sizeof(path)`.
+Frontier's harness (`lab/frontier/netatalk2shell/run.sh`) compiles the
+verbatim pinned lines 147–203 and reports 24 PASS, rc 0: rung 1 a 256-byte
+`strcpy` into `path[1025]`, rung 2 the first saved-return-slot byte changed,
+rung 3 ASan `stack-buffer-overflow`, `WRITE of size 256`, frame `deletedir`
+at pinned `directory.c:181`, rung 4 chosen `NET2SHEL` bytes read back at
+write offsets 0/64 and in the saved-return slot at offset 56 with a clean
+fixed control — instrumented only, no live daemon, socket, AFP session,
+mount, useful-pointer control or execution. Cheapest next rung: build 4.4.2
+afpd under ASan, serve a loopback-only AFP share with a nested cross-device
+mount point, authenticate, create a 255-byte filename and trigger the
+`deletedir()` path. Admitted by the operator ~05:0xZ under standing approval
+#6 on #574: the two-pane window (31, inner socket), registry entry and seed
+wall were live from handoff and were capture-verified. Operator replay
+~05:05Z from a clean `git archive HEAD` extraction of `c37e96d`: 24 PASS,
+`ALL CHECKS PASS rc 0`, trace
+`sha256=c1bba7fb17b2a2b0cf6de7c76725974f005192648287245f5ba3b8aac08339d0`,
+byte-identical to the brief. Wake trigger units and the presentation entry are
+owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-netatalk2shell.md`, seed status
+`reports/netatalk2shell-status.md` and the pinned hashes in
+`lab/frontier/netatalk2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
 Frontier handed this find over on tape #448 after committing
