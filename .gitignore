@@ -88,3 +88,6 @@ lab/freerdp2shell-src/verify-live-out/
 lab/gpfdist2shell-live/upstream/
 lab/gpfdist2shell-live/gpfdist_v*_asan
 lab/gpfdist2shell-live/out_*/
+
+# Datasketches2shell loopback harness: extracted pinned tarball, binaries and logs
+lab/datasketches2shell/out/
