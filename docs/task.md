@@ -4292,11 +4292,16 @@ Four lanes changed evidence without changing their README grade cells:
   `xfer_buffer[7]`. The observed build difference is measured, the
   quarantine-versus-reuse cause is an INFERENCE. Rung 4 is not claimed on
   either build; rung 3 witness #1140 stands.
-- WAMR (`7672af9`): the original instrumented patch skipped the real store;
-  two non-ASan 2.4.4 builds with committed `passive-oob.patch` /
-  `caller-store.patch` show `in == mem` at +11/+29/+47/+65 from the emitter's
-  own store and end in glibc `double free or corruption (out)`. Values chosen,
-  addresses not; no witness replay and no R5.
+- WAMR (`7672af9`, `eae41cd`, `922af77`): the original instrumented patch
+  skipped the real store; two non-ASan 2.4.4 builds with committed
+  `passive-oob.patch` / `caller-store.patch` show `in == mem` at
+  +11/+29/+47/+65 from the emitter's own store and end in glibc `double free
+  or corruption (out)`. Values chosen, addresses not. Witness #1168 rebuilt
+  from clean pinned tags (3/3 pins, byte-for-byte variant regeneration,
+  matching patch digest), replayed the eight store readbacks and an
+  unmodified-ASan `WRITE of size 8` at `wasm_loader.c:9382` on 2.4.4 with a
+  clean 2.4.5 control; rung 4 is witness-ESTABLISHED at that labeled scope,
+  raw digests differ only through ASLR. R5 remains UNKNOWN.
 - Apache2Root CVE-2026-119618 (`432d053`, `e8b106c`): the already-admitted
   apache2shell target reached a locally reproducible wrong-pool trigger
   (rung 1) on pinned 2.4.70 with ASan APR; 0 ASan reports over 2000+ writes
@@ -4306,7 +4311,18 @@ Four lanes changed evidence without changing their README grade cells:
   negative as build-bound contradictory evidence, not a refutation. No
   chosen bytes. The brief's "(unadmitted)" label is stale. Full details and
   commands are in `docs/reproducibility.md`.
-Peer `4f2deae` admitted Perl2Shell (65th role, 61st target); its own docs
-commit is the source of truth for that admission. The README's duplicate,
-truncated family paragraph left by `cfe19a4` was deleted this wake; the full
-list under "How the plant works" remains canonical.
+
+#### 2026-11-21 ~22:0xZ frontier status corrections (`a291cb7`, `ff54725`)
+
+- `reports/frontier-apache2shell.md` now records the target as admitted
+  under standing approval #6 since 2026-11-20; the #1 unadmitted rank is
+  explicitly historical and the former 2000-stream TSan burst is closed as
+  `apache2shell`'s lane (its negative was already folded in `e8b106c`).
+- `reports/frontier-msquic2shell.md` is the head of the unadmitted queue,
+  DEFERRED by the operator, still rung 0: no build, packets or window.
+- `reports/frontier-perl2shell.md` records its 2026-11-21 ~21:34Z admission;
+  its own mind owns the lane. No README grade or admitted-mind list changed:
+  both were already in the canonical table.
+- `ff54725` corrected the pin-check command in the Apache brief and its
+  provenance to `cd src && sha256sum -c SHA256SUMS` (6/6 OK from that
+  directory); the reproducibility index now carries the same command.
