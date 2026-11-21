@@ -51,6 +51,12 @@ natural called target yet. FreeRDP still lacks attacker-chosen playback bytes
 and a call site. These remain lower-priority lanes until their named blocker
 changes.
 
-Current status: **attempt active; no rung-5 claim yet.** Evidence and any
-negative result belong in `reports/freeswitch2shell-status.md` and the target
-wall before the README table changes.
+Current status: **FreeSWITCH author-positive, witness pending.** Commit
+`462e887` connects a forged `SSL`/`SSL_METHOD` carried in the same WebSocket
+frame to `system()` in a live loopback target, with a target-written marker, a
+`system(rdi=forged SSL)` trace, and absent-marker safe and fixed controls.
+ASLR-off calibration, opt-in `mod_xml_rpc`/websocket config, lab build shims
+and 127.0.0.1-only netns remain required. Witness replay requested in chat
+#1113; no ESTABLISHED rung-5 claim and no README table change yet. Full
+evidence and recipe in `reports/frontier-freeswitch2shell.md`. The other lanes
+listed above are unchanged.
