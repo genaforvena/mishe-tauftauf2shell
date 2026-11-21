@@ -463,3 +463,59 @@ gdb -q -batch -x groom_abort.gdb ./out/loopback/server-groom \
 sleep 2
 python3 loopback_frag_sender.py 18635 4097 0 1024 1200
 ```
+
+## Seventh wake: pointer-control ceiling at the live free site (2026-11-21, 19:2xZ)
+
+The sixth-wake result left two open questions: does the overwritten `next`
+pointer ever become non-NULL, and can the overwritten chunk size be made a
+valid glibc size so the real cleanup completes instead of aborting? Both were
+tested at the live free site, loopback only, with no pinned library edits.
+
+Probe: `groom_size.gdb` breaks at the real `XFREE` in `Dtls13RtxFlushAcks`
+(`dtls13.c:780`) and prints the node being freed, its `next`, and the chunk
+size field at `rn - 8`. `run_groom_size.sh PORT SEQ_BASE_HEX LOG` runs the
+plain build with `pregrow=64`, `early13`, `unified_seen` and 4097 paced
+fragments (1200 us), varying only the sender's 48-bit `seq_base`.
+
+Observed (logs in `out/loopback/`):
+
+1. Control, `seq_base=0` (`groom-size-control.log`): `rn=0x55555562b240`,
+   `next=(nil)`, `list=(nil)`, size field at `0x55555562b238` =
+   `0x008f000000000000`. Cleanup aborts: `double free or corruption (out)`
+   from `_int_free_merge_chunk`. This reproduces the sixth-wake result with
+   the new breakpoint.
+2. Chosen size, `seq_base=0x20ffffffff71` (`groom-size-21.log`): same node
+   and same `next=(nil)`; the size field becomes `0x0000000000002100` —
+   256 bytes, 16-byte aligned, i.e. a *plausible* glibc chunk size chosen by
+   wire bytes. Cleanup still aborts, now with `double free or corruption
+   (!prev)`. The neighbouring qwords at `0x55555562b230/240/248` are
+   `0`, `0`, `0x0001000000002100`: chosen bytes also reach the node's data,
+   but the `next` field stays zero.
+3. Across three sender bases (`0`, `0x1000` in the sixth wake, and
+   `0x20ffffffff71` here) every overwritten size field has its low byte
+   zero (PREV_INUSE clear) and every observed node `next` field is NULL.
+   The sender sends a 48-bit sequence number, so the bytes feeding the size
+   field's low byte and `next` are structurally zero on this host; epoch is
+   not attacker-chosen here (sixth wake, `groom-abort2-gdb.log`). This is a
+   measured ceiling on this build, not a claim about other heap layouts or
+   64-bit sequence support.
+
+Disposition: rung 4 stays **ESTABLISHED for availability impact** — nothing
+here weakens the chosen-byte overwrite or the deterministic abort. Rung 5
+stays **UNKNOWN** and is now bounded on this build: no non-NULL `next` was
+observed, no tcache insertion or subsequent allocation was reached, and even
+an aligned chosen size forces glibc into backward-consolidation checks
+against an also-corrupted neighbour, so cleanup aborts. No pointer
+diversion, arbitrary write, benign marker call or execution was observed.
+The tagged v5.9.1 control from the sixth wake (128-record cap, no abort)
+still applies; the fixed code rejects the list before this loop regardless
+of `seq_base`.
+
+Reproduce, all loopback:
+
+```
+cd lab/frontier/wolfssl2shell
+bash run_groom_size.sh 18644 0 out/loopback/groom-size-control.log
+bash run_groom_size.sh 18645 20ffffffff71 out/loopback/groom-size-21.log
+```
+
