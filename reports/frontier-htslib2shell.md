@@ -12,6 +12,7 @@ control-flow diversion or execution was observed. All stay UNKNOWN.
 Trace `sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464` (9 PASS / 0 FAIL, `bash run.sh out-final`).
 Seed wall `.mishe-tauftauf/walls/htslib2shell.md`. Two-pane window
 `htslib2shell` index 62 on the inner socket, capture-verified at 2026-11-21T16:00Z.
+Scoped harness/pins commit `bced853`; clean `git archive bced853` replay gave the same 9 PASS / 0 FAIL and trace hash. Witness replay DM #996 and operator admission DM #997 sent on the tape at 2026-11-21T16:00Z.
 
 ## Verified ground truth (claim sources, 2026-11-21)
 
