@@ -1039,3 +1039,34 @@ SECRET param before/after PATH_INFO): 8.5.12 leaks `"23456789"` /
 Attacker chooses offset (suffix length) and adjacent value (param order);
 leak destination `$_SERVER['PATH_INFO']`. Lane at natural stop: no chosen-byte
 write, pointer control or marker execution; HTTP-to-FastCGI mapping UNKNOWN.
+
+## Wake 50 (2026-11-21 03:33–) — 129538 real-nginx HTTP reachability: POSITIVE
+Named next experiment, reopening 129538 after wake 49's Apache-only negative:
+can a real web server's HTTP→FastCGI mapping produce `slen > pilen`?
+Provisioned nginx 1.24 by extracting the Ubuntu `.deb` locally into
+gitignored `lab/nginx-local/` (sudo not needed, no system install); added
+`lab/nginx-local/` to `.gitignore`. Committed harness
+`lab/repro/php2shell-cve129538-nginx.py` (self-provisioning; commit `3009924`)
+starts nginx on 127.0.0.1:18081 → php-cgi on 127.0.0.1:18952 and tests three
+mappings on 8.5.12-asan vs 8.5.13-asan. Evidence gitignored
+`lab/build/evidence/w50-nginx/verdict.txt`.
+- standard `fastcgi_split_path_info`: clean and identical on both builds
+  (suffix only in PATH_INFO, `pilen >= slen`) — confirms wake 49's negative
+  class on nginx too.
+- naive `SCRIPT_FILENAME $document_root$uri`, `PATH_INFO=/`, `ORIG_PATH_INFO=/`:
+  8.5.12 corrected PATH_INFO=`xxxxx` (n=16) / `xxxxxxxxx` (n=20); 8.5.13
+  leaves `/` unchanged.
+- naive + `SECRET=TOPSECRET0123456789` before PATH_INFO: 8.5.12 leaks
+  `6789` (n=16) / `23456789` (n=20) into `$_SERVER['PATH_INFO']`, matching
+  wake 48's direct-FastCGI steering; 8.5.13 clean (`/x`) both lengths.
+Verdict: `HTTP-REACHABLE OOB READ CONFIRMED`. The 8.5.12→8.5.13 cgi_main.c diff
+is exactly the 129538 guard (wake 48), so patch-sensitive. ORIG_PATH_INFO is
+set, so the OOB NUL write at `:1294` fires on this path too (GDB byte proof in
+wake 48; ASan silent, no sanitizer claim). Honest limits: the naive mapping
+is a specific (non-default) nginx config; the primitive is still an
+attacker-offset OOB read + fixed-zero NUL write, no chosen-byte write,
+pointer control, marker, pre-auth or RCE. Grade **rung 3 CONFIRMED** with
+demonstrated HTTP reachability; no other lane's grade changes. Wake 48's
+"HTTP mapping UNKNOWN" is now CLOSED; wake 49's Apache negative stands but
+is no longer the last word on real-server reachability.
+

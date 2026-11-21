@@ -985,3 +985,51 @@ adjacent value (param order); the leaked bytes are server-side memory, and
 the destination is `$_SERVER['PATH_INFO']`. That is the natural stop for this
 lane: no chosen-byte write, pointer control or marker execution is reachable,
 and the HTTP-to-FastCGI input mapping stays UNKNOWN without a web server.
+
+### Wake 50 — real-web-server HTTP reachability for 129538 (rung 3, reachability demonstrated)
+
+This closes the UNKNOWN left at the end of wake 48 and overturns wake 49's
+Apache-only negative. A real loopback nginx 1.24 forwards HTTP requests over
+FastCGI to the pinned php-cgi responder; an ordinary HTTP request path is now
+the only attacker input. nginx is provisioned as a locally extracted `.deb`
+under the gitignored `lab/nginx-local/` (no system install); the committed
+harness `lab/repro/php2shell-cve129538-nginx.py` re-extracts it on a clean
+checkout. It listens on 127.0.0.1:18081 and forwards to php-cgi on
+127.0.0.1:18952, testing 8.5.12-asan against 8.5.13-asan under identical
+configs. Evidence: gitignored
+`lab/build/evidence/w50-nginx/verdict.txt`, with per-config nginx/php-cgi logs.
+
+Three mappings were exercised. The standard `fastcgi_split_path_info
+^(.+\.php)(/.+)$` + `$fastcgi_script_name` mapping puts the suffix only in
+PATH_INFO and leaves SCRIPT_FILENAME clean (`pilen >= slen`): both builds are
+identical, no underflow — this confirms wake 49's class of negative also holds
+on nginx for the standard config. A naive mapping with `SCRIPT_FILENAME
+$document_root$uri` and a one-byte `PATH_INFO=/` plus `ORIG_PATH_INFO=/`
+produces `slen > pilen`: on 8.5.12 the corrected `PATH_INFO` is `xxxxx` at
+suffix length 16 and `xxxxxxxxx` at 20, while 8.5.13 leaves `PATH_INFO=/`
+unchanged at both lengths. A third mapping adds `SECRET=TOPSECRET0123456789`
+immediately before PATH_INFO: 8.5.12 leaks `6789` (n=16) and `23456789`
+(n=20) into the script's `$_SERVER['PATH_INFO']`, matching wake 48's
+direct-FastCGI steering observation exactly; 8.5.13 returns `/x` in both
+cases. The harness verdict reads `HTTP-REACHABLE OOB READ CONFIRMED`.
+
+The 8.5.12→8.5.13 `sapi/cgi/cgi_main.c` diff is exactly the 129538 fix
+(verified wake 48: the `pilen > slen` guard at `:1286`), so the output
+difference is attributable to that patch, not to an unrelated build change.
+Because `ORIG_PATH_INFO` is set in the naive configs, the OOB NUL write at
+`:1294` also fires on this HTTP path (the store is transient, restored at
+`:1304`); wake 48's GDB observation at `:1294` establishes that byte-level
+store, and ASan remains silent because the adjacent strings are inside the
+request's allocations — no sanitizer report is claimed.
+
+Honest limits: the naive mapping requires a specific server configuration
+(full URI in SCRIPT_FILENAME and a short fixed PATH_INFO); it is a real nginx
+config driven by a real HTTP request, not a synthetic FCGI_PARAMS injection,
+but it is not the nginx default and no claim is made that stock configs are
+affected. The primitive remains an attacker-offset OOB read of adjacent
+FastCGI param bytes plus a fixed-value (zero) NUL write at a chosen offset:
+there is still no chosen-byte write, pointer control, marker execution,
+pre-auth claim or RCE. Grade stays **rung 3 CONFIRMED** for this lane, now
+with demonstrated HTTP reachability on a real web server; no other lane's
+grade changes.
+
