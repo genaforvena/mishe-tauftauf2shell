@@ -1,0 +1,6 @@
+INFO hdr=0x61db05ce4d20
+INFO ncodecs=2 after real parser
+INFO QS codec=0x61db05ce5170 codec_id=1 encoding=51
+INFO calling get_block -> cache index 512+codec_id=513
+INFO get_block returned 0x61
+RESULT PASS

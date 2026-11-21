@@ -1,0 +1,200 @@
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+=================================================================
+==354104==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000003908 at pc 0x580d63faf3a1 bp 0x7ffc827354b0 sp 0x7ffc827354a0
+READ of size 8 at 0x521000003908 thread T0
+    #0 0x580d63faf3a0 in cram_xpack_decode_expand_char cram/cram_codecs.c:1378
+    #1 0x580d63faf993 in cram_xpack_decode_char cram/cram_codecs.c:1416
+    #2 0x580d63e1c920 in cram_decode_seq cram/cram_decode.c:1616
+    #3 0x580d63e2a98c in cram_decode_slice cram/cram_decode.c:2918
+    #4 0x580d63e2be7f in cram_decode_slice_mt cram/cram_decode.c:3053
+    #5 0x580d63e2f533 in cram_next_slice cram/cram_decode.c:3461
+    #6 0x580d63e2fe12 in cram_get_seq cram/cram_decode.c:3558
+    #7 0x580d63e307f2 in cram_get_bam_seq cram/cram_decode.c:3620
+    #8 0x580d63d93905 in sam_read1_cram /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4141
+    #9 0x580d63d94600 in sam_read1 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4273
+    #10 0x580d63d19285 in view_sam htslib-1.23.1/htsfile.c:92
+    #11 0x580d63d1a1b9 in main htslib-1.23.1/htsfile.c:293
+    #12 0x7c757b82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7c757b82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x580d63d18784 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-asan+0x2f784) (BuildId: 1254c48e5de5f01c26eb0c970b646882bdeeb441)
+
+0x521000003908 is located 8 bytes after 4096-byte region [0x521000002900,0x521000003900)
+allocated by thread T0 here:
+    #0 0x7c757bcfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x580d63e91f46 in cram_read_slice cram/cram_io.c:4620
+    #2 0x580d63e2ee9c in cram_next_slice cram/cram_decode.c:3416
+    #3 0x580d63e2fe12 in cram_get_seq cram/cram_decode.c:3558
+    #4 0x580d63e307f2 in cram_get_bam_seq cram/cram_decode.c:3620
+    #5 0x580d63d93905 in sam_read1_cram /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4141
+    #6 0x580d63d94600 in sam_read1 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4273
+    #7 0x580d63d19285 in view_sam htslib-1.23.1/htsfile.c:92
+    #8 0x580d63d1a1b9 in main htslib-1.23.1/htsfile.c:293
+    #9 0x7c757b82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7c757b82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x580d63d18784 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-asan+0x2f784) (BuildId: 1254c48e5de5f01c26eb0c970b646882bdeeb441)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow cram/cram_codecs.c:1378 in cram_xpack_decode_expand_char
+Shadow bytes around the buggy address:
+  0x521000003680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x521000003900: fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==354104==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000003908 at pc 0x580d63faf500 bp 0x7ffc827354b0 sp 0x7ffc827354a0
+WRITE of size 8 at 0x521000003908 thread T0
+    #0 0x580d63faf4ff in cram_xpack_decode_expand_char cram/cram_codecs.c:1388
+    #1 0x580d63faf993 in cram_xpack_decode_char cram/cram_codecs.c:1416
+    #2 0x580d63e1c920 in cram_decode_seq cram/cram_decode.c:1616
+    #3 0x580d63e2a98c in cram_decode_slice cram/cram_decode.c:2918
+    #4 0x580d63e2be7f in cram_decode_slice_mt cram/cram_decode.c:3053
+    #5 0x580d63e2f533 in cram_next_slice cram/cram_decode.c:3461
+    #6 0x580d63e2fe12 in cram_get_seq cram/cram_decode.c:3558
+    #7 0x580d63e307f2 in cram_get_bam_seq cram/cram_decode.c:3620
+    #8 0x580d63d93905 in sam_read1_cram /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4141
+    #9 0x580d63d94600 in sam_read1 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4273
+    #10 0x580d63d19285 in view_sam htslib-1.23.1/htsfile.c:92
+    #11 0x580d63d1a1b9 in main htslib-1.23.1/htsfile.c:293
+    #12 0x7c757b82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7c757b82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x580d63d18784 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-asan+0x2f784) (BuildId: 1254c48e5de5f01c26eb0c970b646882bdeeb441)
+
+0x521000003908 is located 8 bytes after 4096-byte region [0x521000002900,0x521000003900)
+allocated by thread T0 here:
+    #0 0x7c757bcfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x580d63e91f46 in cram_read_slice cram/cram_io.c:4620
+    #2 0x580d63e2ee9c in cram_next_slice cram/cram_decode.c:3416
+    #3 0x580d63e2fe12 in cram_get_seq cram/cram_decode.c:3558
+    #4 0x580d63e307f2 in cram_get_bam_seq cram/cram_decode.c:3620
+    #5 0x580d63d93905 in sam_read1_cram /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4141
+    #6 0x580d63d94600 in sam_read1 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4273
+    #7 0x580d63d19285 in view_sam htslib-1.23.1/htsfile.c:92
+    #8 0x580d63d1a1b9 in main htslib-1.23.1/htsfile.c:293
+    #9 0x7c757b82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7c757b82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x580d63d18784 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-asan+0x2f784) (BuildId: 1254c48e5de5f01c26eb0c970b646882bdeeb441)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow cram/cram_codecs.c:1388 in cram_xpack_decode_expand_char
+Shadow bytes around the buggy address:
+  0x521000003680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x521000003900: fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==354104==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000003908 at pc 0x580d63fafa29 bp 0x7ffc827356c0 sp 0x7ffc827356b0
+READ of size 8 at 0x521000003908 thread T0
+    #0 0x580d63fafa28 in cram_xpack_decode_char cram/cram_codecs.c:1417
+    #1 0x580d63e1c920 in cram_decode_seq cram/cram_decode.c:1616
+    #2 0x580d63e2a98c in cram_decode_slice cram/cram_decode.c:2918
+    #3 0x580d63e2be7f in cram_decode_slice_mt cram/cram_decode.c:3053
+    #4 0x580d63e2f533 in cram_next_slice cram/cram_decode.c:3461
+    #5 0x580d63e2fe12 in cram_get_seq cram/cram_decode.c:3558
+    #6 0x580d63e307f2 in cram_get_bam_seq cram/cram_decode.c:3620
+    #7 0x580d63d93905 in sam_read1_cram /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4141
+    #8 0x580d63d94600 in sam_read1 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4273
+    #9 0x580d63d19285 in view_sam htslib-1.23.1/htsfile.c:92
+    #10 0x580d63d1a1b9 in main htslib-1.23.1/htsfile.c:293
+    #11 0x7c757b82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #12 0x7c757b82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #13 0x580d63d18784 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-asan+0x2f784) (BuildId: 1254c48e5de5f01c26eb0c970b646882bdeeb441)
+
+0x521000003908 is located 8 bytes after 4096-byte region [0x521000002900,0x521000003900)
+allocated by thread T0 here:
+    #0 0x7c757bcfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x580d63e91f46 in cram_read_slice cram/cram_io.c:4620
+    #2 0x580d63e2ee9c in cram_next_slice cram/cram_decode.c:3416
+    #3 0x580d63e2fe12 in cram_get_seq cram/cram_decode.c:3558
+    #4 0x580d63e307f2 in cram_get_bam_seq cram/cram_decode.c:3620
+    #5 0x580d63d93905 in sam_read1_cram /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4141
+    #6 0x580d63d94600 in sam_read1 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/build-vuln/sam.c:4273
+    #7 0x580d63d19285 in view_sam htslib-1.23.1/htsfile.c:92
+    #8 0x580d63d1a1b9 in main htslib-1.23.1/htsfile.c:293
+    #9 0x7c757b82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7c757b82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x580d63d18784 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/htslib2shell/realfile/htsfile-asan+0x2f784) (BuildId: 1254c48e5de5f01c26eb0c970b646882bdeeb441)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow cram/cram_codecs.c:1417 in cram_xpack_decode_char
+Shadow bytes around the buggy address:
+  0x521000003680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000003880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x521000003900: fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000003b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb

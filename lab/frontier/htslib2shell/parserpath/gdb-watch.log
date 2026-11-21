@@ -1,0 +1,17 @@
+Breakpoint 1 at 0xd4598: file cram/cram_codecs.c, line 1377.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, cram_xpack_decode_expand_char (slice=0x5555556762d0, c=0x555555674170) at cram/cram_codecs.c:1377
+1377	static int cram_xpack_decode_expand_char(cram_slice *slice, cram_codec *c) {
+target=0x5555556773d8 pre=0x61
+Hardware watchpoint 2: *(void **)$oob
+INFO hdr=0x555555673d20
+INFO ncodecs=2 after real parser
+INFO QS codec=0x555555674170 codec_id=1 encoding=51
+INFO calling get_block -> cache index 512+codec_id=513
+INFO get_block returned 0x61
+RESULT PASS
+[Inferior 1 (process 181410) exited normally]
+No stack.
+post=Cannot access memory at address 0x5555556773d8

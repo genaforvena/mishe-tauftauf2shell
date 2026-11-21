@@ -1,0 +1,20 @@
+Breakpoint 1 at 0xd4598: file cram/cram_codecs.c, line 1377.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, cram_xpack_decode_expand_char (slice=0x5555556762d0, c=0x555555674170) at cram/cram_codecs.c:1377
+1377	static int cram_xpack_decode_expand_char(cram_slice *slice, cram_codec *c) {
+pre=0x61
+forced=(nil)
+Hardware watchpoint 2: *(void **)$oob
+
+Hardware watchpoint 2: *(void **)$oob
+
+Old value = (void *) 0x0
+New value = (void *) 0x555555677460
+0x0000555555628662 in cram_xpack_decode_expand_char (slice=0x5555556762d0, c=0x555555674170) at cram/cram_codecs.c:1388
+1388	    b = slice->block_by_id[512 + c->codec_id] = cram_new_block(0, 0);
+#0  0x0000555555628662 in cram_xpack_decode_expand_char (slice=0x5555556762d0, c=0x555555674170) at cram/cram_codecs.c:1388
+#1  0x0000555555628951 in cram_xpack_get_block (slice=0x5555556762d0, c=0x555555674170) at cram/cram_codecs.c:1449
+#2  0x000055555555968e in main () at parser_harness.c:94
+post=0x555555677460
