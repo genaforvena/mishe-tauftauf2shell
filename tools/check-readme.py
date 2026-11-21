@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Lint README.md structure and the achievement table.
 
-Exit 0 GREEN, 2 RED. This is a System 0 check: no model, no fix, exact rules.
-It catches the failure mode where a table row is orphaned by a blank line,
-a row has the wrong number of cells, a report link is missing, or a heading
-structure is broken. The docs mind owns repairs.
+Exit 0 GREEN, 2 RED. System 0 check: no model, no repair, exact rules.
+It parses the achievement table as a contiguous block and catches the real
+failure modes: an orphan row, a blank line inside the block, a prose line
+that starts before the table has ended (GitHub-style tables swallow it),
+wrong cell counts, duplicate headings, and missing report links.
 """
 from __future__ import annotations
 
@@ -18,9 +19,37 @@ REQUIRED_HEADINGS = ("## What it has achieved so far", "## How the plant works",
 TABLE_HEADING = "## What it has achieved so far"
 EXPECTED_COLUMNS = ("Target", "Where it stands", "Highlights")
 
-def cells(line: str) -> int:
-    """Count Markdown table cells, ignoring pipes escaped with a backslash."""
-    return len(re.findall(r"(?<!\\)\|", line)) - 1
+
+def split_cells(line: str) -> list[str]:
+    """Split a GFM table row on unescaped pipes, ignoring pipes in code spans."""
+    cells: list[str] = []
+    buf: list[str] = []
+    code = False
+    i = 0
+    while i < len(line):
+        ch = line[i]
+        if ch == "\\" and i + 1 < len(line) and line[i + 1] == "|":
+            buf.append("|")
+            i += 2
+            continue
+        if ch == "`":
+            code = not code
+            buf.append(ch)
+            i += 1
+            continue
+        if ch == "|" and not code:
+            cells.append("".join(buf).strip())
+            buf = []
+            i += 1
+            continue
+        buf.append(ch)
+        i += 1
+    cells.append("".join(buf).strip())
+    if cells and not cells[0]:
+        cells = cells[1:]
+    if cells and not cells[-1]:
+        cells = cells[:-1]
+    return cells
 
 
 def main() -> int:
@@ -31,8 +60,9 @@ def main() -> int:
     text = README.read_text(encoding="utf-8")
     lines = text.splitlines()
     for heading in REQUIRED_HEADINGS:
-        if lines.count(heading) != 1:
-            problems.append(f"expected exactly one heading: {heading}")
+        count = lines.count(heading)
+        if count != 1:
+            problems.append(f"expected exactly one heading {heading!r}, found {count}")
 
     try:
         start = lines.index(TABLE_HEADING)
@@ -40,49 +70,50 @@ def main() -> int:
         print(f"missing table heading: {TABLE_HEADING}")
         return 2
 
-    # Find the first table after the achievement heading.
     header = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("|")), None)
     if header is None:
         print("achievement table has no header")
         return 2
     delimiter = header + 1
     if delimiter >= len(lines) or not lines[delimiter].startswith("|"):
-        problems.append("achievement table has no delimiter row")
+        problems.append(f"achievement table has no delimiter row at line {delimiter + 1}")
+        header_cells: list[str] = []
+        last_row = header
     else:
-        if cells(lines[header]) != cells(lines[delimiter]):
-            problems.append("achievement table header and delimiter have different column counts")
+        header_cells = split_cells(lines[header])
+        delimiter_cells = split_cells(lines[delimiter])
+        if len(header_cells) != len(delimiter_cells):
+            problems.append(
+                f"table header has {len(header_cells)} cells but delimiter has {len(delimiter_cells)}")
+        if len(header_cells) != len(EXPECTED_COLUMNS):
+            problems.append(f"achievement header has {len(header_cells)} cells, expected {len(EXPECTED_COLUMNS)}")
         for column in EXPECTED_COLUMNS:
-            if column not in lines[header]:
+            if column not in header_cells:
                 problems.append(f"achievement header missing column: {column}")
+        if any(not re.fullmatch(r":?-{3,}:?", cell) for cell in delimiter_cells):
+            problems.append("achievement delimiter row is not a Markdown separator")
 
-    # Walk the whole table. A blank line followed by another pipe row is the
-    # exact bug this lint exists to catch. A non-pipe line ends the table.
-    in_table = False
-    ended = False
-    previous_blank = False
-    row_count = 0
-    expected = cells(lines[header])
-    for index in range(header, len(lines)):
-        line = lines[index]
-        number = index + 1
-        if line.startswith("|"):
-            if ended:
-                problems.append(f"orphan table row after blank line at {number}")
-            elif previous_blank:
-                problems.append(f"blank line splits achievement table at {number}")
-            if cells(line) != expected:
-                problems.append(f"table row {number} has {cells(line)} cells, expected {expected}")
-            in_table = True
-            previous_blank = False
-            if index > delimiter:
-                row_count += 1
-        elif in_table and not line.strip():
-            previous_blank = True
-        elif in_table:
-            in_table = False
-            ended = True
-            previous_blank = False
+        last_row = header
+        idx = delimiter + 1
+        while idx < len(lines) and lines[idx].startswith("|"):
+            row_cells = split_cells(lines[idx])
+            if len(row_cells) != len(header_cells):
+                problems.append(
+                    f"table row {idx + 1} has {len(row_cells)} cells, expected {len(header_cells)}")
+            last_row = idx
+            idx += 1
 
+        # The exact bug seen in the README: prose immediately after the last
+        # pipe row is swallowed into the GFM table. Require a blank boundary.
+        if idx < len(lines) and lines[idx].strip():
+            problems.append(
+                f"achievement table needs a blank line after row {last_row + 1}; "
+                f"line {idx + 1} would be parsed as a table row: {lines[idx][:60]!r}")
+        if any(line.startswith("|") for line in lines[idx + 1:] if line.strip()):
+            orphan = next(i + 1 for i in range(idx + 1, len(lines)) if lines[i].startswith("|"))
+            problems.append(f"orphan table row after the achievement table at line {orphan}")
+
+    row_count = max(0, last_row - delimiter)
     if row_count < 5:
         problems.append(f"achievement table has only {row_count} data rows")
     for match in re.finditer(r"\]\((reports/[^)]+)\)", text):
