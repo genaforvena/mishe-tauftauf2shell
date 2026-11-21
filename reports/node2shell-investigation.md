@@ -784,6 +784,73 @@ ALT_HEX=$(python3 -c "print('41'*1200)") OUT=lab/node2shell/tmp/w14 \
 # FAKE_SIZEONLY=0x20 adds a debugger-only sane sizefield for contrast.
 ```
 
+## Value-side second write — independent deterministic abort (wake 33, 2026-11-21)
+
+The fix removes `kNullTerminate` from **both** `WriteOneByteV2` calls;
+the second (on the `value` buffer) had been studied only as the victim
+of *origin's* NUL (wake 14, `value_len=1200`). Its own terminator had
+never been isolated as the primary corruption. Grep of the pinned
+`node_http2_v24.22.2.cc` finds exactly two `kNullTerminate` occurrences
+(lines 3330 and 3332, both AltSvc), so there is no sibling call site;
+this is the next site in the same fix, not a new product.
+
+Class arithmetic: with `value_len ≡ 8 (mod 16)` and >1024,
+`malloc_usable_size(value) == value_len`, so the terminator lands on
+the following chunk's size-field LSB — exactly as for origin. Wake
+14's `1200 ≡ 0` left it in intra-chunk slack, which is why the lane
+looked clean.
+
+**Isolation.** The app-controlled ALT is the only changed input;
+`:authority_len = 1048` makes `origin_len = 1056 ≡ 0 (mod 16)`, the
+stage-A off-class control in which origin's NUL is harmless. Origin
+and value are not even adjacent in most boots (gdb walk: `delta =
+0x8dd0` or `0x0`, layout-dependent), so the observed corruption is
+value's own write.
+
+- Vulnerable prebuilt `v24.22.2`, loopback, one request, ALT length
+  1048 (`h2x:` + 1043×`8` + `#`): server SIGABRT rc=134,
+  `malloc(): invalid next size (unsorted)` in **4/4** isolated runs,
+  then **3/3** in the committed reproducer. A longer unsynchronized
+  sweep included one clean completion, consistent with this report's
+  established layout dependence; the abort is not claimed universal.
+- Controls, same origin: ALT length 1200 (`≡ 0`) and ALT length 10
+  both completed with the ALTSVC echo received (`127` = killed alive),
+  **2/2 each**.
+- Reproduce (~6 s, no debugger):
+  `sh lab/repro/node2shell-valnul/run.sh 3`.
+
+**Measured bytes** (gdb 15.1, ASLR off, breakpoint at
+`nghttp2_submit_altsvc`, log `lab/node2shell/tmp/w33valown/gdb.log`,
+gitignored):
+
+```
+value ptr=0x6e3e6d0  chunk=0x6e3e6c0  sizefield=0x421 (size 0x420)
+origin=0x6e3e290 size=0x430  delta=0x0
+W33 nul-at=0x6e3eae8 (= value-user + 1048)
+0x6e3eae0: 0x2338383838383838   ← following chunk prev_size: ALT bytes
+0x6e3eae8: 0x0000000000000800   ← following chunk sizefield after NUL
+0x6e3eaf0: 0x00007ffff7a04b20   ← fd  = unsorted-bin head
+0x6e3eaf8: 0x00007ffff7a04b20   ← bk  = unsorted-bin head
+```
+
+The victim chunk is **already free in the unsorted bin** at corruption
+time, and the next malloc dies in the unsorted validator. The
+pre-write sizefield was not captured, so this lane does not claim
+either magnitude shrink or flag-only clear; only the post-write byte
+and the abort are observed.
+
+**Grade: rung 3 (deterministic abort / confirmed corruption), not rung
+4.** The blocker is unchanged: the 8 bytes before the corrupted
+sizefield (here `0x2338383838383838`) are attacker-controlled ALT
+bytes, and the fake `prev_size` the unsorted checks require is
+`[00][believed>>8][00×6]`. ALT cannot carry NUL (wake 24 boundary
+sweep: allowed set `\x20-\x7e\x80-\xff`), and only the terminator's
+single zero exists — on the sizefield, eight bytes too late. An
+already-free right neighbor therefore yields a validator abort, not
+the overlap primitive. This is preserved as a second independent
+trigger of the same CVE and a falsified rung-4 attempt, not a grade
+upgrade.
+
 ## Reproduction
 
 Closed UTF-8 / low-byte-truncation byte-channel check (wake 24; ~8 s,
