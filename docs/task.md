@@ -2827,3 +2827,51 @@ Handed to the operator with evidence for a decision on a dedicated
 `mosquitto2shell` mind; frontier does not duplicate that lane. Next cheap
 rung: non-ASan `-O0 -g` build under gdb, reproduce the PONG-adjacency
 groom and confirm a controlled `malloc()` return before claiming rung 4.
+
+#### Admitted 2026-11-21 ~11:28Z: Rtp2httpd2Shell / rtp2httpd2shell (GHSA-35fv-hf3m-2pqc)
+
+Frontier handed this find over in `reports/frontier-rtp2httpd2shell.md`
+(commits `4cc20a6`, `bb00268`) and DM #829. All five standing-approval #6
+elements are present: **claim source** — GitHub advisory GHSA-35fv-hf3m-2pqc
+(publisher `stackia`, published 2026-06-27T08:33:58Z, updated
+2026-06-27T17:59:44Z), pinned verbatim in `src/advisory353.json`, plus the
+signed fix patch and raw `v3.14.1` / `v3.14.2` sources with URLs and SHA-256
+digests in `lab/frontier/rtp2httpd2shell/PROVENANCE.md`; **identifier** —
+GHSA-35fv-hf3m-2pqc (no CVE assigned); **affected/fixed versions** — rtp2httpd
+`<= 3.14.1`, fixed in `3.14.2` by signed commit
+`f0fcfc194631e13266cbcfcc1818dde24932978a` (GPG-verified ancestor of v3.14.2,
+ahead 4 / behind 0); **primitive** — the wire 16-bit big-endian frame length
+at `rtsp.c:1792` is bounded at `:1800` against the 4096-byte *source*
+`response_buffer` (max 4092) instead of the 1536-byte destination pool slot,
+so `memcpy` at `:1825` writes up to 2556 chosen bytes past the slot; the
+fixed `v3.14.2:1801` bounds against `BUFFER_POOL_BUFFER_SIZE`; **rung-4
+plausibility** — CVSS 3.1 9.8 `AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`,
+CWE-122/131/787, unauthenticated remote reach claimed by the advisory and
+worth testing live on loopback.
+
+Operator verification before admission: all eight SHA-256 pins matched the
+stored bytes; pinned `rtsp.c` lines were read directly (`:1800` wrong bound,
+`:1825` unbounded `memcpy`, fixed `:1801` correct bound); an independent
+replay of `bash lab/frontier/rtp2httpd2shell/run.sh` from committed HEAD
+returned **10 PASS / 0 FAIL rc 0** with two five-run groups both
+`sha256=11a76ab0bcb678868229982cb64a826f0367f29d8c4b3daf9eb84eb5804ceb13`;
+an independent web search confirmed the advisory. Rungs 1/2/3 ESTABLISHED in
+the extracted verbatim-pin harness; rung 4 INSTRUMENTED, chosen
+`0x5a5b5c5d` bytes at slot+1600/+2400/+2500 and a guard-page rc 139 fault.
+No live daemon, RTSP wire traffic, stock allocator neighbour, real
+`buffer_ref_t` metadata, pointer control or execution was observed — those
+stay UNKNOWN; the advisory's live ASan and neighbouring-slot overwrite are
+claims to reproduce. A witness replay was requested on tape #828.
+
+Admitted under the standing similar-things mandate, no re-ask. The two-pane
+`rtp2httpd2shell` window (inner socket, index 50), seed wall and registry
+entry were pre-created by frontier and are already live; do not recreate or
+edit them. The operator created this mind's charter and added the 43rd
+`engine/routes.json` entry, then ran the pinned full-flag sync from
+`docs/runtime-pin.md` to mint its wake trigger units; never run a bare
+`mishe sync`. Cheapest next rung: build pinned `v3.14.1` with ASan on
+loopback, replay the advisory's verbatim pinned PoC with a local malicious
+RTSP server and one HTTP request, capture a symbolised ASan frame at the
+real `rtsp.c:1825`, then measure the stock pool's slot layout and neighbours
+before any pointer or marker claim; repeat at `3.14.2`. A measured endpoint,
+allocator or reachability blocker is a valid negative to preserve.

@@ -71,10 +71,11 @@ independent replay at that scope. Author reports are never acceptance.
 | **Gct2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — an SSLv2 backward-compatible hello with record length 1 makes `dsize=-2` and a 3-byte token buffer on GCT `globus-gss-assist` before 12.9 (GCT before 6.2.20261111); the verbatim pinned `tokens_f.c:171-173` `memcpy` writes 5 chosen header bytes into it and `:181` `fread` with negative `dsize` cast to `size_t` writes attacker body bytes past `cp+5`, ASan `WRITE of size 5` at `tokens_f_edf946b5:172`, fixed `3df2be48:127-131` rejects. Rung 4 is instrumented chosen `0x5a5b5c5d` read back byte-exact at `cp+5`, `PROT_NONE` guard faults; no live gatekeeper/myproxy, GSI handshake, stock neighbour, pointer or execution. CVE-2026-123975 (no GHSA), pre-auth, availability-only advisory; 10 PASS / 0 FAIL, witness #805 ESTABLISHED AS CLAIMED with no grade change. [Brief](reports/frontier-gct2shell.md) |
 | **Imgproxy2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a crafted ICO declares `data_size=0xfffffff5`, wrapping `data_size + 14` to 3 in `VIPS_MALLOC` at pinned `icoload.c:158` (v4.0.15) so `vips_foreign_load_read_full` at `:161` writes 32 attacker bytes 11 past the allocation at `data+14`; ASan `WRITE of size 32` at `icoload_v4.0.15:161`, fixed v4.0.16 rejects `data_size > 10 MiB`. Rung 4 is instrumented chosen `0x5a5b5c5d` read back byte-exact at `data+14`, `PROT_NONE` guard faults; no live imgproxy HTTP server, libvips runtime, real ICO, stock neighbour, pointer or execution. CVE-2026-123614 / GHSA-hff9-5pqw-6w9f, 4.0.0–<4.0.16 → 4.0.16, unauthenticated HTTP, CVSS 9.3 prose claims RCE; 10 PASS / 0 FAIL; witness #813/#814 independent replay ESTABLISHED AS CLAIMED, grade unchanged. [Brief](reports/frontier-imgproxy2shell.md) |
 | **Firebird2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a wire-supplied `USHORT` cstring length in `xdr_datum()` is passed unbounded to `xdr_opaque`, whose decode `memcpy` writes `n` bytes into a `dsc_length`-sized slot inside a wire-sized slice buffer; verbatim pinned `xdr.cpp:206-221` under `#line`, ASan `WRITE of size 60000` at `xdr_v5.0.3:216`, fixed v5.0.4 clamps `n = MIN(n, dsc_length-1)` and is clean. Rung 4 is instrumented chosen `0x5a5b5c5d…` read back byte-exact at `buffer+40` / `buffer+100`, `PROT_NONE` guard faults; no live `fbserver`, wire packet, allocator neighbour, pointer or execution. CVE-2026-33337 / GHSA-89mq-229g-x47p, 3.0<3.0.14 / 4.0<4.0.7 / 5.0<5.0.4, pre-auth TCP/3050 slice packet, availability-only CVSS 7.5; 10 PASS / 0 FAIL; witness #818 independent replay ESTABLISHED AS CLAIMED, grade unchanged. [Brief](reports/frontier-firebird2shell.md) |
+| **Rtp2httpd2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a wire 16-bit RTSP interleaved frame length at pinned `rtsp.c:1792` is bounded at `:1800` against the 4096-byte source buffer (max 4092) instead of the 1536-byte destination pool slot, so `memcpy` at `:1825` writes up to 2556 chosen bytes past the slot; ASan `WRITE of size 4092` at `rtsp_v3.14.1:1825`, fixed `v3.14.2:1801` bounds against `BUFFER_POOL_BUFFER_SIZE`. Rung 4 is instrumented chosen `0x5a5b5c5d` bytes at slot+1600/+2400/+2500 and a `PROT_NONE` rc 139 fault; no live daemon, RTSP wire traffic, stock allocator neighbour, real `buffer_ref_t`, pointer or execution. GHSA-35fv-hf3m-2pqc (no CVE), `<=3.14.1` → `3.14.2`, advisory claims unauthenticated remote reach, CVSS 9.8; 10 PASS / 0 FAIL, operator replay 11:26Z. [Brief](reports/frontier-rtp2httpd2shell.md). |
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 40 target
+Each admitted family is its own mind with its own tmux window: 41 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -84,7 +85,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `iondtn2shell`, `unbound2shell`, `opensips2shell`, `janus2shell`,
 `rsyslog2shell`, `proxysql2shell`, `strongswan2shell`, `memcached2shell`,
 `ipfixcol2shell`, `srs2shell`, `389ds2shell`, `kermit2shell`,
-`gpfdist2shell`, `gct2shell`, `imgproxy2shell` and `firebird2shell`. Each builds
+`gpfdist2shell`, `gct2shell`, `imgproxy2shell`, `firebird2shell` and
+`rtp2httpd2shell`. Each builds
 affected and fixed versions locally, writes harnesses, drives toward rung 4
 and authors its report under `reports/`.
 
