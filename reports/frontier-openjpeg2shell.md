@@ -1,20 +1,24 @@
 # Frontier brief — OpenJPEG TLM/SOT index overflow (OpenJpeg2Shell)
 
-**Status: frontier find, brief + harness COMPLETE (2026-11-21 ~14:45Z);
-UNADMITTED, witness replay and operator admission pending. Rungs 1/2/3 are
-ESTABLISHED on the real, verbatim-pinned OpenJPEG 2.5.4 `opj_decompress`
-binary: rung 3 is the ASan report, rungs 1/2 run without sanitizers. Rung 4 is
-INSTRUMENTED: two chosen 64-bit stream-offset values, byte-exact, at the
-TPsot-derived out-of-bounds offsets in a staged heap area. No JPEG 2000
-application, listener, real heap neighbour object, pointer, control-flow
-diversion or execution was observed — all stay UNKNOWN. The fix is a pinned
-master commit, not a tagged release.**
+**Status (updated 2026-11-21 ~16:08Z by openjpeg2shell): ADMITTED; witness
+replay ESTABLISHED AS CLAIMED (#957/#958). Rungs 1/2/3 ESTABLISHED on the real,
+verbatim-pinned OpenJPEG 2.5.4 `opj_decompress`. Rung 4: chosen 64-bit stream
+offsets are byte-exact at the TPsot-derived OOB offsets, and the 2026-11-21
+consumer-reality check observes those stores landing on a live neighbouring
+`tp_index` object and on a live malloc chunk size word, with a deterministic
+`munmap_chunk(): invalid pointer` SIGABRT (rc 134) in the unsanitized pinned
+decoder; fixed pin `91d08b11` is clean. No pointer-value control, pointer
+dereference, control-flow diversion, execution or web-facing listener was
+observed — all UNKNOWN. The fix is a pinned master commit, not a tagged
+release.**
 Scoped commit `958b319`; trace
 `sha256=6983a6a11c8236c6e991e15faa326b4c64f6269cf7f5f4fabca081bf7aa111ea`
 (10 PASS / 0 FAIL, clean `git archive` replay). Live two-pane window
 `openjpeg2shell` index 60 on the inner tmux socket, registry entry 62,
-seed wall `.mishe-tauftauf/walls/openjpeg2shell.md`. Witness replay request
-and operator admission request on the tape (#955/#956).
+wall `.mishe-tauftauf/walls/openjpeg2shell.md`. Witness verdict #958; operator
+admission #989 under standing #6. New consumer-reality check trace
+`sha256=55123f30823bda1083c5f4f8b4025767ae89b3fdcec06c3285f82a1aea57c3a1`.
+
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -23,8 +27,8 @@ and operator admission request on the tape (#955/#956).
   2025-03-18T00:18:30Z, modified 2026-10-20T17:24:20Z. Crash type as reported:
   "Heap-buffer-overflow WRITE 8", crash state
   `opj_j2k_read_tile_header` ← `opj_j2k_decode_tiles` ← `opj_j2k_decode`.
-  Ecosystem severity HIGH. No CVE or GHSA identifier is present in the OSV
-  record; the public claim is tracked under the OSV id.
+  The pinned OSV JSON has **no severity field**; no CVE or GHSA identifier is
+  present, so the claim is tracked under the OSV id.
 - **Versions**: OSV's affected range is git `introduced 954c6e3c…`, fixed by
   `d33cbecc…` and `91d08b11…`; its concrete version list still names v2.5.3
   and v2.5.4 as affected. The fix commit is dated 2026-02-10 and is on master,
@@ -98,11 +102,49 @@ over the ordered PASS lines (no PIDs, addresses or paths).
   `0x…021d (541)` and `0x…021f (543)` at the same +32/+40, and the padded file
   still faults the pinned sink under ASan. The attacker chooses the 64-bit
   value through codestream layout and the offset through `TPsot`; the bytes
-  are byte-exact, but the destination is a staged adjacent heap area, not an
-  identified live object. Logs: `out-w75/gdb-orig.log`, `gdb-pad.log`,
-  `asan-pad.log`.
+  are byte-exact. That earlier run did not identify the destination; the
+  consumer-reality check below does: a live neighbouring `tp_index` object.
+  Logs: `out-w75/gdb-orig.log`, `gdb-pad.log`, `asan-pad.log`.
 
-## Rung-4 feasibility and cheapest next experiment
+## Consumer reality on this host (2026-11-21 ~16:08Z, openjpeg2shell)
+
+The AGENTS.md consumer-reality check was performed on the real, unsanitized,
+verbatim-pinned `opj_decompress` under glibc 2.39-0ubuntu8.12 (x86-64):
+`bash lab/frontier/openjpeg2shell/consumer-reality.sh` → **10 PASS / 0 FAIL**,
+trace
+`sha256=55123f30823bda1083c5f4f8b4025767ae89b3fdcec06c3285f82a1aea57c3a1`,
+logs and gdb transcript in `lab/frontier/openjpeg2shell/out-consumer/`.
+Hardware watchpoints are unavailable in this container (gdb 15.1: "Could not
+insert hardware watchpoint"), so the observation uses breakpoints at the real
+sink plus direct heap-word readback.
+
+- glibc maps the 24-byte `tp_index` request to a 0x20 chunk: user base
+  `0x…ecf0`, size word `0x21` at base−8. The following 0x20 chunk's user area
+  begins at base+32, and gdb reports **tile 1's live `tp_index` array at
+  `0x…ed10` = tile 0 base + 32** — exactly the OOB destination. At the next
+  sink hit, tile 1's `start_pos` reads back `0x21d` (541), the chosen offset
+  stored by the TPsot=1 write. This is a live object, not filler.
+- The next sink hit (tile 0, TPsot=2, pos 555) overwrites the **following
+  chunk's malloc size word** at base+56 from `0x151` (PREV_INUSE only) to
+  `0x22b` = 555; `0x22b & 0x2` sets IS_MMAPPED. `opj_j2k_tcp_destroy` then
+  calls `free(0x…ed30)` on that chunk's user pointer; glibc takes the
+  `munmap_chunk()` path and aborts: `munmap_chunk(): invalid pointer`, rc 134.
+  Backtrace: `__libc_free ← opj_free ← opj_j2k_tcp_destroy (j2k.c:9526) ←
+  opj_j2k_cp_destroy (:9562)`. Deterministic in 3/3 direct runs of the
+  original 202-byte PoC, and also on the padded PoC.
+- Controls: pinned fix `91d08b11` in a plain (non-ASan) build decodes the
+  padded PoC rc 0 with "Generated Outfile" and no abort; flipping SOT TPsot
+  1→0 removes both the OOB and the allocator abort (rc 1, "Invalid tile part
+  index"). Fixed-side claims remain scoped to that master pin, not a release.
+- Honest boundary: the written value is still a codestream-derived 64-bit
+  stream offset, not an arbitrary pointer. What is demonstrated is chosen
+  bytes at chosen offsets in a live neighbouring object and live allocator
+  metadata, with a deterministic abort in a real decoder process. No
+  pointer-value control, pointer dereference, control-flow diversion,
+  execution, listener or web-facing consumer was observed. Rung 4 stays
+  PARTIAL/INSTRUMENTED under that label; no shell claim.
+
+## Rung-4 feasibility and remaining gap
 
 The write value is a stream offset, not an arbitrary 64-bit constant: it is
 bounded by practical codestream length, and the useful part (low bytes) can be
@@ -113,12 +155,15 @@ makes a real consumer route plausible: Pillow GHSA-78g4-xqwv-q3g8 bundles
 libopenjp2 2.5.4 reachable from `Image.open().load()`. That route was NOT built
 or tested here; it is a claim, not lab evidence.
 
-Cheapest rung-4 step for an admitted target mind: build the actual
-`opj_decompress`/Pillow consumer on loopback against pinned 2.5.4, feed the
-padded codestream, set a gdb watchpoint on `tp_index[1].end_header`, and
-observe whether a live heap object's metadata or pointer field is overwritten
-before the process aborts. Until that is observed, pointer control,
-control-flow diversion and execution stay UNKNOWN.
+The cheapest step above was carried out on 2026-11-21 and is reported in
+"Consumer reality on this host": a live neighbouring object and a live malloc
+size word are overwritten, and the unsanitized decoder aborts deterministically.
+Hardware watchpoints were unavailable in this container; equivalent evidence
+came from sink breakpoints plus direct heap readback. Remaining gap: the
+written value is a stream offset, not an arbitrary pointer, so pointer-value
+control, control-flow diversion, execution and a web-facing consumer remain
+UNKNOWN. A Pillow/libopenjp2 2.5.4 listener route was still not built or
+tested; the GHSA claim remains a claim.
 
 ## Next-candidate queue (updated 2026-11-21)
 
