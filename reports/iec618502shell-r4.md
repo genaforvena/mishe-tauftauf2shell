@@ -307,6 +307,53 @@ absolute `system` breakpoint before libc loaded; the harness now installs it
 after `start`, and that failed run is preserved in
 `/tmp/iec-r5-final-console.txt`.
 
+## ASLR-on structural negative (wake 9, 2026-11-21 ~23:06Z)
+
+The address dependency in the R5 chain is structural: `r5_system.sh` Phase A
+measures `response->buffer`, the `CotpConnection_readToTpktBuffer` saved-RBP/ret
+slot and `&write`/`&exit`/`&system` in one process, then Phase B stages those
+absolute addresses into a second, freshly started server. Neither gdb script
+sets `disable-randomization`; gdb's default (ASLR off for the debuggee) is what
+makes the two processes share bases. No host ASLR setting was changed
+(`/proc/sys/kernel/randomize_va_space` stayed `2`).
+
+Method: `r5_system_aslr_on.sh`, a copy of the canonical harness with exactly
+three edits — `set disable-randomization off` in the a.gdb and b.gdb blocks and
+a distinct marker path. Canonical `r5_system.sh` digest `a3000fcb...` was left
+untouched; `diff -u` shows only those edits and `bash -n` is clean. A second
+copy, `r5_system_aslr_on_obs.sh`, changes only the Phase B breakpoint from
+`break *$SYSTEM` (a Phase A absolute address) to symbolic `break system`, so
+gdb does not abort before the server accepts connections. All traffic stayed
+on 127.0.0.1 against the same pinned build; no `LD_PRELOAD`, no external probe.
+
+Observation A (first copy, 10 PASS / 5 FAIL): Phase A's `system` address
+`0x71a926658750` is unmapped in the Phase B process — gdb logged `Cannot insert
+breakpoint 4. Cannot access memory at address 0x71a926658750` — so the server
+never served and the marker was absent.
+
+Observation B (observation copy, 10 PASS / 5 FAIL, rc 1): the overflow still
+fired (client: `HEAP BUFFER OVERFLOW expected`, `Server CRASH`), but the live
+bases differed. Phase A `BASE=0x7087b0010ae0`, `libc=0x7087b5e00000`,
+`system=0x7087b5e58750`; Phase B live `B BASE=0x748b28010ae0`, a slide of
+`0x40378000000` with identical low bits (fixed offsets). The fake read buffer
+landed at `rb=0x748b28000be0 buf=0x748b280209b0`, not the Phase A return slot,
+and the server faulted in `CotpConnection_resetPayload`
+(`self=0x748b280249d0`, `self->payload->size = 0`). Marker absent.
+
+Same-wake control: canonical `r5_system.sh` on the same build gave 15 PASS /
+0 FAIL rc 0 and created the marker. The five ASLR-on failures are therefore
+attributable to cross-process address instability, not a build or harness
+regression. Logs: `lab/frontier/libiec61850/r5-aslr-on-out/`,
+`r5-aslr-on-obs-out/` and `r5-aslr-off-control-out/`.
+
+Disposition: preserved negative. This chain is not reachable with ASLR on when
+bases are measured in a different process, and the harness exposes no on-wire
+leak of live heap/libc/stack addresses (the readback carries staged bytes, not
+adjacent heap). That does not prove ASLR-on exploitation impossible: a real
+leak and a partial-pointer-overwrite construction were not attempted, so
+ASLR-on reachability with an attacker-derived base stays UNKNOWN. Grade and
+witness verdicts are unchanged.
+
 ## Grade and limits
 
 - Rungs 1/2/3 stay ESTABLISHED (frontier brief, independently replayed by W74).
