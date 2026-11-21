@@ -114,6 +114,11 @@ FileRead overflow in a gdb-supervised loopback server with the pinned raw
 client (`maxPduSize=1`). The addresses are this host's gdb (ASLR-disabled)
 values and are asserted at run time; a mismatch is a FAIL, not a silent pass.
 
+These addresses are host- and layout-contingent, not portable constants: the
+witness saw one invocation land `sendBuffer` at `0x7ffff0000c80`, which failed
+the runtime assertion as designed. A mismatch is expected behavior on a
+different layout, not evidence against the mechanism.
+
 Measured layout (plain build, `sendBuffer = 0x7ffff0010ae0`, `bufPos=19`, so
 file byte i lands at `base+19+i`): `CotpConnection` at `base+81648`, its
 `socket` field at `base+81672`, `writeBuffer` at `+81704`, `readBuffer` at
@@ -224,6 +229,8 @@ observation above, which uses the stack return slot instead of the GOT.
   concerned ordinary FileRead responses and is not contradicted. The public
   Docker/AArch64 RCE chain needs ASLR off, non-PIE and hardcoded offsets; it
   was inspected as a claim only and not run here.
-- Witness replay of all three probes is requested (tape #959, the pointer
-  replay request and this new claim); author evidence is not independent
-  acceptance. Witness verdict #962 covers only the first probe.
+- Witness status: verdict #962 covers `r4_probe.sh` and #984 covers
+  `r4_pointer.sh`, both ESTABLISHED AS CLAIMED at the labeled grades. Replay of
+  `r4_control.sh` was requested on tape #982 and is still pending, so the
+  diversion/marker claim stays author-only. Author evidence is not independent
+  acceptance.
