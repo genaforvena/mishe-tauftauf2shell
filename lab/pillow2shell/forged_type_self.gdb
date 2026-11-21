@@ -2,11 +2,11 @@ set breakpoint pending on
 break ImagingJpegDecode
 run
 set $b=(unsigned char*)state->buffer
-set $fake=$b+512
 dump binary memory /tmp/pw2-w4/heap_pre.bin $b+128 $b+184
 dump binary memory /tmp/pw2-w4/heap_post.bin $b+192 $b+1024
 printf "SAVED type=%lx\n",*(unsigned long*)($b+184)
 finish
+set $fake=*(unsigned long*)($b+184)
 printf "AFTER_DECODE type=%lx fake=%lx\n",*(unsigned long*)($b+184),$fake
 restore /tmp/pw2-w4/heap_pre.bin binary $b+128
 restore /tmp/pw2-w4/heap_post.bin binary $b+192

@@ -280,30 +280,32 @@ conditions.
 `60 d2 a2 00 00 00 00 00` (`&PyCode_Type`) to `90 2f d3 00 00 00 00 00`
 (`0xd32f90`). `case_fake.fpx` (SHA-256
 `6c59dd01bc9c8a77e7d84d77b8ef8b79f77d2b3ef7678b880604098f80ffedea`) is
-generated with the same pinned `make_case.py` invocation as W4. In the plain
-non-PIE v12.2.0 gdb session the tile buffer again lands at `0xd32d90`, so
-`buffer+512 = 0xd32f90` is inside the OOB-reachable span and is the address
-the image itself writes into `ob_type`:
+generated with the same pinned `make_case.py` invocation as W4; regeneration
+from the pinned tarball in W6 was byte-identical. In the plain non-PIE v12.2.0
+gdb session the image's OOB write supplies `0xd32f90` to the live object's
+`ob_type`. The tile buffer's brk address is host-dependent (`0xd32d90` in W5,
+`0xd32cc0` in W6), so both scripts now take the fake-type address from the
+post-decode `*(unsigned long*)($b+184)` instead of a fixed `buffer+512`:
 `forged_type_self.log` prints `AFTER_DECODE type=d32f90 fake=d32f90`.
 
 The script snapshots the past-end span in two pieces, deliberately excluding
 the 8 `ob_type` bytes, so the OOB-written pointer survives while the rest of
 the heap is restored. It then stages a 416-byte copy of the real
-`PyUnicode_Type` at that address (measured with the system Python 3.12
-headers: `sizeof(PyTypeObject)=416`, `tp_dealloc` at offset 48) and changes
+`PyUnicode_Type` at that OOB-derived address (measured with the system Python
+3.12 headers: `sizeof(PyTypeObject)=416`, `tp_dealloc` at offset 48) and changes
 only the copy's `tp_dealloc` to `0x45e6e6` (`_PyObject_Dump`, a known static
 address in the non-PIE binary). The log records
 `OBTYPE_FROM_OOB=d32f90 forged_slot=45e6e6 MATCH=1`. Calling
 `_Py_Dealloc` on the live object at `buffer+176` then transfers to the chosen
 address: `Breakpoint 2, 0x000000000045e6e6 in _PyObject_Dump ()`.
 
-The causal control is byte-for-byte identical except that `tp_dealloc` is
-left at the copied real value (`0x5a8450`):
-`forged_type_control.log` prints `CONTROL ... tp_dealloc=5a8450`, does **not**
-hit the marker breakpoint, and instead faults in `PyObject_Free()`. An
-earlier variant that set `ob_type` with gdb rather than taking the OOB value
-(`forged_type_call.log`) also reached the marker; the self-supplied run is the
-stronger one and is the claim.
+The causal control uses the same `case_fake.fpx` and the same OOB-derived
+address, and is identical except that `tp_dealloc` is left at the copied real
+value (`0x5a8450`): `forged_type_control.log` prints `CONTROL ...
+tp_dealloc=5a8450`, does **not** hit the marker breakpoint, and instead faults
+in `PyObject_Free()`. An earlier variant that set `ob_type` with gdb rather
+than taking the OOB value (`forged_type_call.log`) also reached the marker; the
+self-supplied run is the stronger one and is the claim.
 
 **Label for W5:** chosen indirect call **target** reached through a forged
 type slot whose pointer came from the image's OOB write, with an observed
@@ -313,6 +315,15 @@ fake type is staged by gdb inside the overwritten span, the binary is non-PIE
 and the `0xd32f90` address is a deterministic brk address with no disclosed
 ASLR leak. No injected code, ROP chain, PC write, natural trigger, socket or
 external probe was demonstrated. Grade stays ◐.
+
+**W6 recipe repair (2026-11-21).** Witness verdict #978/#987 established the
+mechanism at this grade but found the committed recipe non-reproducing on its
+host: both scripts hardcoded `$fake=$b+512`, which was `0xd32ec0` while the
+image supplied `0xd32f90` when the buffer landed at `0xd32cc0`. Deriving the
+address from the post-decode `ob_type` repaired it; both logs were regenerated
+from a fresh pinned v12.2.0 build and the recipe re-checked on three builds
+(`/tmp/pw2-w2`, `/tmp/w73-pw2`, `/tmp/pw2-w6`). The claim and grade are
+unchanged; no new exploitation step is claimed.
 
 ## Evidence-ladder disposition
 

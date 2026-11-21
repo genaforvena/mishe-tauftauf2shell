@@ -242,19 +242,36 @@ The stronger run, where the OOB write itself supplies the pointer:
 ```
 PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x forged_type_self.gdb --args python3 -c \
   'from PIL import Image; Image.open("case_fake.fpx").load()'
+PYTHONPATH=/tmp/pw2-w2/v12plain gdb -q -batch -x forged_type_control.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_fake.fpx").load()'
 ```
 
-Expected (`forged_type_self.log`): tile buffer at `0xd32d90`,
+Any pinned plain v12.2.0 build works. W6 regenerated both logs from a fresh
+build:
+
+```
+python3 -m pip install --no-binary :all: --no-deps \
+  --target /tmp/pw2-w6/v12plain /tmp/pw2-dl/pillow-12.2.0.tar.gz
+```
+
+and a byte-identical `case_fake.fpx`.
+
+Expected (`forged_type_self.log`, fresh W6 build):
 `AFTER_DECODE type=d32f90 fake=d32f90`, `OBTYPE_FROM_OOB=d32f90
 forged_slot=45e6e6 MATCH=1`, then
 `Breakpoint 2, 0x000000000045e6e6 in _PyObject_Dump ()` after the gdb-invoked
-`_Py_Dealloc`. The script stages a 416-byte copy of `PyUnicode_Type` at
-`buffer+512` (inside the OOB span, `sizeof(PyTypeObject)=416`, `tp_dealloc` at
-offset 48 in Python 3.12) with only `tp_dealloc` changed to `0x45e6e6`, and
-snapshots the past-end span in two pieces so the OOB-written `ob_type`
-survives the restore. `forged_type_control.gdb` leaves `tp_dealloc` at the
-copied real value: the marker breakpoint is NOT hit and the process faults in
-`PyObject_Free()` instead.
+`_Py_Dealloc`. Both scripts take the fake-type address from the POST-decode
+`*(unsigned long*)($b+184)` — the pointer the image's OOB write supplies —
+not from a fixed `buffer+512`. The tile buffer's brk address varies by host
+(`0xd32d90` in W5, `0xd32cc0` in W6); the image-supplied `0xd32f90` and the
+marker address do not, so the recipe no longer depends on that offset. The
+script stages a 416-byte copy of `PyUnicode_Type` at the OOB-derived address
+(inside the OOB span, `sizeof(PyTypeObject)=416`, `tp_dealloc` at offset 48 in
+Python 3.12) with only `tp_dealloc` changed to `0x45e6e6`, and snapshots the
+past-end span in two pieces so the OOB-written `ob_type` survives the restore.
+`forged_type_control.gdb` stages the same copy at the same address with the
+real `tp_dealloc` (`0x5a8450`): the marker breakpoint is NOT hit and the
+process faults in `PyObject_Free()` instead.
 
 Limit: the deallocation call is invoked from gdb, the fake type is staged by
 gdb, the build is non-PIE with a deterministic brk address, and the marker is

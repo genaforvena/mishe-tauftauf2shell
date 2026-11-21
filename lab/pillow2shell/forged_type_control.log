@@ -3,14 +3,14 @@ Breakpoint 1 (ImagingJpegDecode) pending.
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
 
-Breakpoint 1, ImagingJpegDecode (im=0xc25180, state=0x7ffff77f7d10, buf=0xdb3e30 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+Breakpoint 1, ImagingJpegDecode (im=0xc250b0, state=0x7ffff77f7d10, buf=0xdb3d60 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
 warning: 132	src/libImaging/JpegDecode.c: No such file or directory
 SAVED type=a472c0
 0x00007ffff744224d in _decode (decoder=0x7ffff77f7cf0, args=<optimized out>) at src/decode.c:132
 warning: 132	src/decode.c: No such file or directory
 Value returned is $1 = -1
-AFTER_DECODE type=a2d260
-Restoring binary file /tmp/pw2-w4/heap_orig.bin into memory (0xd32e10 to 0xd33190)
+AFTER_DECODE type=d32f90
+Restoring binary file /tmp/pw2-w4/heap_orig.bin into memory (0xd32d40 to 0xd330c0)
 Restoring binary file /tmp/pw2-w4/realtype.bin into memory (0xd32f90 to 0xd33130)
 CONTROL faketype=d32f90 tp_dealloc=5a8450 objtype=d32f90
 Breakpoint 2 at 0x45e6e6
@@ -18,7 +18,7 @@ CALLING _Py_Dealloc (control)
 
 Program received signal SIGSEGV, Segmentation fault.
 0x00000000005886e0 in PyObject_Free ()
-forged_type_control.gdb:17: Error in sourced command file:
+forged_type_control.gdb:18: Error in sourced command file:
 The program being debugged was signaled while in a function called from GDB.
 GDB remains in the frame where the signal was received.
 To change this behavior use "set unwind-on-signal on".
