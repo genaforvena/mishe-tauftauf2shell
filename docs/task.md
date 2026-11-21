@@ -1204,6 +1204,51 @@ owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/iondtn2shell-status.md` and the pinned hashes in
 `lab/frontier/iondtn2shell/PROVENANCE.md`.
 
+#### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
+
+Frontier handed this find over on tape #594 after committing `25ca75d`
+(brief `reports/frontier-dnsmasq2shell.md`, seed wall and window already
+live; final brief text landed in shared HEAD `4882d5d` when a concurrent
+apache2shell commit collected the staged edit, harness bytes unchanged).
+Claim sources: Ubuntu's CVE record, Red Hat BZ 2490763, the GHSA and the
+upstream fix patch `36d081e37477027fd721fea498f3760f529034ad`. Ubuntu rates
+Medium 5.9 `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H` (availability
+only). Claimed primitive: with DNSSEC validation and query logging both
+enabled, `log_query()` writes a DS/DNSKEY description into the 46-byte
+`daemon->addrbuff` with `sprintf` at pinned `cache.c:2291`; keytag 65535 /
+algorithm 255 / digest 255 yields 58 bytes including NUL, 12 bytes past the
+buffer.
+
+Frontier's harness reaches rungs 1/2/3 on verbatim pinned
+`cache.c:2266-2291` from tag `v2.92` and the `dnssec.c:1100` caller: ASan
+`heap-buffer-overflow`, `WRITE of size 58`, neighbour byte changed, 22 PASS /
+rc 0 twice from a clean `git archive` extraction with trace
+`sha256=2673af32ec5fb1de34bf7774184551cd727e18abd00b80b733122d232c630e42`
+byte-identical. Rung 4 is INSTRUMENTED only: the overflow bytes are the
+caller's fixed literal `" (not supported)"` tail (`20 73 75 70` at offsets
+46-49), not attacker-chosen; no pointer control and no execution. The brief
+stamps its observation "~05:55Z" although its file mtime is 05:50:15Z and
+the handoff tape is 05:51:11Z; that timestamp stays UNKNOWN.
+
+Decision: **held, not admitted** under standing approval #6. That approval
+requires "affected/fixed versions" and "rung-4 plausibility"; both fail
+here. GHSA lists no package and unknown versions, there is no upstream fixed
+release tag, and the fix commit's first parent is unreachable in the mirror
+("fixed in 2.92rel2" is a distro backport fact). The overflow bytes are a
+caller literal, so this primitive offers no chosen-byte, pointer-control or
+marker path. Reachability also needs AC:H plus DNSSEC validation and query
+logging plus a malicious upstream reply; the maintainer calls RCE unlikely.
+No charter, status file, docs admission entry, engine route or wake unit is
+created, and none is requested from the person. Frontier's two-pane
+`dnsmasq2shell` window (inner socket, index 33), registry entry and seed
+wall remain a frontier research artifact, not a declared target; no wake
+unit or presentation entry is owed.
+
+Revisit trigger: a fixed-release pin or reachable fix parent, plus evidence
+of attacker-controlled overflow bytes or a live `dnsmasq` process showing
+control at the real `cache.c:2291` frame. Witness replay #593 verifies the
+finding, not the admission.
+
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
 Frontier handed this find over on tape #448 after committing
