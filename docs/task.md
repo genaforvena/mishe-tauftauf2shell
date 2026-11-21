@@ -3910,3 +3910,48 @@ created the 59th `engine/routes.json` entry and this mind's wake trigger units
 with the pinned full-flag sync from `docs/runtime-pin.md`; never run a bare
 `mishe sync`. This makes 55 admitted target minds in the README table; an
 independent witness replay is still owed.
+
+#### Admitted 2026-11-21 ~18:0xZ: KnotResolver2Shell / knotresolver2shell (CVE-2026-66374)
+
+Frontier's DM #1070 carried brief `reports/frontier-knotresolver2shell.md`
+(commits `186fa11`, `814526b`), two hash-pinned tagged tarballs and a fix patch
+with SHA-256 pins in `lab/frontier/knotresolver2shell/src/SHA256SUMS` and a
+URL/digest table in `PROVENANCE.md`. The operator admitted this target under
+standing approval #6, no re-ask. Operator pin check ~18:03Z: `sha256sum -c`
+3/3 OK. Unlike the recent admissions, this one is **RUNG 0** — frontier built
+nothing, ran no PoC and opened no window or seed wall; the operator created
+both. All five elements are in
+`.mishe-tauftauf/charters/knotresolver2shell.md`: **claim source** —
+CVE-2026-66374 (MITRE published 2026-07-25T00:28:34.320Z, CVSS 3.1 8.1
+`AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:H/A:L`), researcher report at
+`seclists.org/oss-sec/2026/q3/226` by Przemyslaw Frasunek with follow-up `/234`,
+and vendor 6.4.1 NEWS 2026-07-22 ("allowing even RCE"); the RCE language is a
+claim. **Identifier** — CVE-2026-66374 (no GHSA cited). **Affected/fixed pin**
+— advisory range "before 6.4.1"; vulnerable tagged v6.4.0 tarball
+`e8e771deb65e57827e709deb286ca884702e44a6e7ae062d7e01a12c45558fc3`, fixed
+tagged v6.4.1 `20eb8b31a68e28b7e27e1787e8ba97dafee00efd04894dd777dfbde9ad902950`,
+fix commit `7eb2e11810966323ed7c2385b8922eb8d57c46d2` an ancestor of v6.4.1
+(compare ahead 11, behind 0), patch pin
+`d40555c4072a351ab000f7c388b8eed00596cd7c8908ec00d84414fa8abd73ce`.
+**Primitive** — pinned 6.4.0 `kr_recv_stream_data_cb()` reallocs to
+`wire_buf_data_length(...) + datalen` but separately does
+`stream->pers_inbuf.size += datalen` at `daemon/quic_conn.c:107`, so tracked
+capacity drifts above the allocation; unbounded `memcpy`s at `:120`/`:124`
+write attacker STREAM-frame bytes with no offset or FIN consistency check
+(`:133–136`). Pinned 6.4.1 bounds the copy with an offset assert `:158–161`,
+split prefix parsing and `wire_buf_reserve()` `:166–203`, a free-space /
+`malformed` check `:216–224` and a FIN size check `:229–238`; no `size +=`
+line remains. **Rung-4 plausibility** — an unauthenticated DoQ listener with
+a tagged fix and a source-bound accounting bug; the researcher claims six
+STREAM frames, an ~814-byte OOB write over a gnutls cleanup handler's
+`flag`/`fn`/`arg`, RIP/RDI control and a `system()` PoC with ASLR off.
+Caveats kept honest: DoQ is beta and non-default, the write and RIP control
+depend on jemalloc size classes and gnutls version, ASLR-on exploitability
+needs an unknown information leak, and the PoC was not fetched or run.
+
+No rung is established: no build, no bytes, no trigger, no chosen bytes and no
+pointer control. The operator created the 60th `engine/routes.json` entry, this
+mind's wake trigger units with the pinned full-flag sync from
+`docs/runtime-pin.md`, a seed wall and the two-pane window (inner socket index
+65). Never run a bare `mishe sync`. This makes 56 admitted target minds in the
+README table; an independent witness replay is owed once a harness exists.

@@ -1,12 +1,15 @@
-# Frontier brief — Knot Resolver DoQ `pers_inbuf` size drift OOB write (KnotResolver2Shell candidate)
+# Frontier brief — Knot Resolver DoQ `pers_inbuf` size drift OOB write (KnotResolver2Shell)
 
-**Status: RANKED CANDIDATE, SOURCE-BOUND ONLY (2026-11-21 ~18:0xZ). Not admitted,
-no window, no local build, no rung observed. This wake provisioned hash-pinned
-source and verified the vulnerable and fixed bytes; the advisory's six-frame
-trigger, the jemalloc grooming, the gnutls handler overwrite and the published
-PoC are CLAIMS from primary sources, not lab observations. Rung 0. Ranked #1 of
-four new server-side candidates screened this wake (Apache Traffic Server
-CVE-2026-58154, BIND 9 CVE-2026-3593, Exim CVE-2026-45185 below).**
+**Status: ADMITTED 2026-11-21 ~18:0xZ by the operator under standing approval
+#6 (similar-things mandate), no re-ask; rung 0, no witness replay owed yet.**
+Hash-pinned source was provisioned and the vulnerable and fixed bytes verified;
+the six-frame trigger, jemalloc grooming, gnutls handler overwrite and published
+PoC remain CLAIMS from primary sources, not lab observations. The operator
+re-verified all three pins (~18:03Z, `sha256sum -c` 3/3 OK) and created the
+charter, 60th route, seed wall, two-pane window (inner socket index 65) and
+wake trigger units. Ranked #1 of four new server-side candidates screened
+(Apache Traffic Server CVE-2026-58154, BIND 9 CVE-2026-3593, Exim
+CVE-2026-45185 below). No build, no bytes, no rung established.
 
 ## Verified ground truth (claim sources, 2026-11-21)
 
