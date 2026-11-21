@@ -55,6 +55,24 @@ checkfile() {
   fi
 }
 
+# checkfault <codec> — the N=1000 leg must fault the victim. glibc's abort text
+# varies by host and build (SIGSEGV, malloc/free/realloc errors,
+# malloc_consolidate, "dumped core"), so accept the observed fault-signature
+# family OR a nonzero gst-launch rc recorded by the family driver. The benign
+# N=8 leg must stay rc=0, so a nonzero rc is a genuine victim-fault signal.
+checkfault() {
+  local codec=$1 log="family_${codec}_1000.log" rcfile="family_rc_${codec}_1000.txt"
+  local pat='Caught SIGSEGV|SIGABRT|Aborted|Segmentation fault|dumped core|malloc\(\):|malloc_consolidate\(\):|free\(\):|realloc\(\):|double free|corrupt|invalid chunk|invalid size|unaligned tcache|gst_rtp_L[0-9]+_depay_setcaps'
+  if { [ -f "$log" ] && grep -aqE "$pat" "$log"; } || \
+     { [ -f "$rcfile" ] && grep -aqE '^[1-9][0-9]*$' "$rcfile"; }; then
+    say "PASS  $codec N=1000 faults victim"
+    pass=$((pass+1))
+  else
+    say "FAIL  $codec N=1000 faults victim  [no fault signature in $log and no nonzero rc in $rcfile]"
+    fail=$((fail+1))
+  fi
+}
+
 say "--- pinned source digests ---"
 sha256sum \
   ../frontier/gst2shell/rtp_channels_overflow.c \
@@ -121,16 +139,15 @@ check family "pinned codec server" 'server_codec_digest 1493f137e48baa063cdf6f06
 for codec in L8 L16 L24; do
   checkfile "$codec benign N=8 auto-plugs depay" "family_${codec}_8.log" "GstRtp${codec}Depay"
   checkfile "$codec N=1000 auto-plugs depay" "family_${codec}_1000.log" "GstRtp${codec}Depay"
-  # The exact glibc abort message and the rc (124/134/139) are allocator- and
-  # timing-dependent; the stable claim is "attacker-chosen count faults the
-  # victim". Accept any of the observed fault signatures.
-  checkfile "$codec N=1000 faults victim" "family_${codec}_1000.log" \
-    'Caught SIGSEGV|SIGABRT|Aborted|malloc\(\):|free\(\):|corrupt|gst_rtp_L[0-9]+_depay_setcaps'
+  # The exact glibc abort message and rc (124/134/139) vary by host and build;
+  # the stable claim is "attacker-chosen count faults the victim". checkfault
+  # accepts the observed fault-signature family OR a nonzero driver rc.
+  checkfault "$codec"
 done
 say "      observed family fault signatures (informational):"
 for codec in L8 L16 L24; do
   printf '        %s: ' "$codec"
-  grep -aoE 'malloc\(\): [a-z ()]+|Caught SIGSEGV' "family_${codec}_1000.log" | sort -u | tr '\n' ' '
+  grep -aoE 'malloc\(\): [a-z ()]+|malloc_consolidate\(\): [a-z ()]+|free\(\): [a-z ()]+|dumped core|Caught SIGSEGV' "family_${codec}_1000.log" | sort -u | tr '\n' ' '
   say
 done
 

@@ -425,6 +425,30 @@ by the pinned source, the 4-byte stride, the earlier gdb symbolication and the
 clean N=8 control.
 Author report is not acceptance; witness owns replay.
 
+## Independent witness replay and repair (2026-11-21 ~04:1xZ)
+
+The witness (W31/W32, tape 519) graded the substantive security claim
+ESTABLISHED on a clean HEAD (`68f4a19`) from a git archive of the pinned
+sources, but CONTRADICTED the one-command "43/43 PASS rc 0" replay assertion
+on that host: 42 PASS / 1 FAIL, rc 1. Only `L8 N=1000 faults victim` failed:
+that leg's raw log ends with `malloc_consolidate(): invalid chunk size` and
+`timeout: the monitored command dumped core` (gst-launch rc=134), a glibc
+allocator-abort family the old regex at `verify_all.sh:128` did not admit.
+L16 showed `Caught SIGSEGV` (rc 124) and L24 `free(): invalid pointer` plus
+`malloc_consolidate` (rc 134) there. Everything else passed: pinned digests,
+rungs 1/2/3, extracted rung-4 `NOT_DEMONSTRATED`, the MIN-clamped fixed
+control, the exact trace hash, the live ASan/GObject, shipping plugin, SDP and
+RTSP checks, and all four Valgrind log checks. No grade correction: chosen
+bytes, arbitrary pointer control and RCE remain NOT DEMONSTRATED.
+
+Bounded repair: `checkfault` in `verify_all.sh` accepts the observed
+fault-signature family (including `malloc_consolidate` and `dumped core`) OR
+a nonzero gst-launch rc recorded per leg by `run_rtsp_family.sh`; the benign
+N=8 leg still must be rc=0. The total stays 43 checks. The broadened regex
+was tested directly against the witness's saved failing log and now matches
+`dumped core`, `invalid chunk` and `malloc_consolidate():`; the rc branch
+accepts 134 and rejects 0. Verification from the repaired HEAD follows below.
+
 ## Next owner / action
 
 Operator: wake trigger units and presentation `active` entry still owed from

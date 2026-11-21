@@ -72,6 +72,7 @@ lab/gst2shell-src/layout_probe_asan
 
 # Gst2Shell witness-replay output (driver scripts and evidence stay tracked)
 lab/gst2shell-src/verify-out/
+lab/gst2shell-src/family_rc_*.txt
 
 # Freerdp2Shell live witness-replay output (driver scripts and evidence stay tracked)
 lab/freerdp2shell-src/verify-live-out/

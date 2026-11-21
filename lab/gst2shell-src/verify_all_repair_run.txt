@@ -1,0 +1,78 @@
+gst2shell witness replay 2026-11-21T04:06:46Z
+git HEAD: 5d77a13
+output:   verify-out/20261121T040646Z
+
+--- pinned source digests ---
+3d2b8e06da30fca138d120ac1445debb4b45815c4fd1eacd6ffe4eed39373525  ../frontier/gst2shell/rtp_channels_overflow.c
+7dde5da764767183763328f8ffe7be759b7e5cf907726353e2c47058d2437567  ../frontier/gst2shell/run.sh
+f812d84453ed3e6f3698ed144cd36490bfc74eea78159defba4b06d40e1e0668  rtsp_server.py
+1493f137e48baa063cdf6f06ec7483da878ca2512b56220e7ed455755a3cb45c  rtsp_server_codec.py
+9841c9209f9f0c767dd1858307dd4b258f454191f3062fedb324598946fd2a5d  run_rtsp.sh
+e6b1f1d155e650ecf9d624ac61e9647a2f223a2b31f446b9314884e438ef3974  run_rtsp_family.sh
+
+===== running ../frontier/gst2shell/run.sh =====
+      rc=0
+PASS  rung1 write extent
+PASS  rung2 length control
+PASS  rung3 ASan heap-buffer-overflow WRITE
+PASS  rung4 honestly NOT demonstrated
+PASS  MIN-clamped fixed control clean
+PASS  5/5 deterministic traces
+PASS  harness aggregate
+PASS  trace hash stable
+===== running run.sh =====
+      rc=0
+PASS  layout zone counts at N=1000
+PASS  ASan WRITE past 328-byte tail
+PASS  ASan heap-buffer-overflow
+===== running run_live.sh =====
+      rc=0
+PASS  pinned vulnerable channels.c
+PASS  NONE is -3, not zero
+PASS  create_default overflow frame
+PASS  N=74 corrupts order to 0xfffffffd
+PASS  N=74 order deref faults
+PASS  benign N=8 order deref clean
+PASS  MIN-clamped fixed control clean
+===== running run_real.sh =====
+      rc=0
+PASS  benign N=8 clean
+PASS  N=1000 faults
+PASS  corrupted pad g_class value
+PASS  N=86 heap-metadata fault
+===== running run_sdp.sh =====
+      rc=0
+PASS  rtpmap maps to encoding-params=1000
+PASS  N=86 faults
+PASS  fault symbolicated in setcaps
+PASS  benign paths reach real set_caps
+===== running run_rtsp.sh =====
+      rc=0
+PASS  pinned L16 server
+PASS  rtspsrc propagates encoding-params
+PASS  attacker count faults victim
+===== running run_rtsp_family.sh =====
+      rc=0
+PASS  pinned codec server
+PASS  L8 benign N=8 auto-plugs depay
+PASS  L8 N=1000 auto-plugs depay
+PASS  L8 N=1000 faults victim
+PASS  L16 benign N=8 auto-plugs depay
+PASS  L16 N=1000 auto-plugs depay
+PASS  L16 N=1000 faults victim
+PASS  L24 benign N=8 auto-plugs depay
+PASS  L24 N=1000 auto-plugs depay
+PASS  L24 N=1000 faults victim
+      observed family fault signatures (informational):
+        L8: dumped core malloc(): unaligned tcache chunk detected 
+        L16: Caught SIGSEGV 
+        L24: dumped core malloc_consolidate(): invalid chunk size 
+===== valgrind memcheck, L8 N=1000 (slow) =====
+      valgrind wrapper rc=124
+PASS  Invalid write of size 4
+PASS  0 bytes past 1,016-byte GObject block
+PASS  gst_pad_send_event frame
+PASS  g_malloc0 -> g_type_create_instance allocation
+
+TOTAL: pass=43 fail=0
+VERDICT: ALL CLAIMS REPRODUCED (chosen-byte rung 4 still NOT demonstrated)

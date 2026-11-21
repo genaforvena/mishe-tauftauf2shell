@@ -21,11 +21,12 @@ for codec in L8 L16 L24; do
       u. ! fakesink \
       >"family_${codec}_${n}.log" 2>&1
     rc=$?
+    echo "$rc" > "family_rc_${codec}_${n}.txt"
     echo "gst-launch rc=$rc"
     kill "$srvpid" 2>/dev/null
     wait "$srvpid" 2>/dev/null
     echo "--- auto-plugged depay / caps / fault ---"
-    grep -E 'rtp[L8L124]+depay|rtpL.*depay|encoding-params|application/x-rtp|SIGSEGV|segmentation|SIGABRT|malloc\(\)|free\(\)|corrupt|Aborted|Caught|Spinning|ERROR|WARNING|GstRtp' \
+    grep -aE 'rtp[L8L124]+depay|rtpL.*depay|encoding-params|application/x-rtp|SIGSEGV|segmentation|SIGABRT|malloc\(\)|malloc_consolidate\(\)|free\(\)|realloc\(\)|corrupt|invalid chunk|dumped core|Aborted|Caught|Spinning|ERROR|WARNING|GstRtp' \
       "family_${codec}_${n}.log" | sed 's/^/    /' | head -25
     echo
     port=$((port+1))
