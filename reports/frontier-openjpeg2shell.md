@@ -517,6 +517,52 @@ calibrated filename and object address, trace
 `sha256=db68ebea547696bd39e97d2648ed9fced6d32d5eef88ae880fd29cd1f893334f`.
 Witness replay is still required for acceptance.
 
+## Chosen imported-function target through the system GOT (2026-11-21 ~21:10Z)
+
+`bash lab/frontier/openjpeg2shell/got-target.sh <outdir>` extends the
+control-flow result from a chosen *type* to a chosen static function-pointer
+slot. Prediction: `ob_type = GOT(system) - 0x30` makes `_Py_Dealloc`'s
+`mov 0x8(%rdi),%rax; jmp *0x30(%rax)` load the system GOT slot's value instead
+of a `tp_dealloc` pointer. The harness derives the slot from the live
+interpreter's own relocation table (`objdump -R $(command -v python3)`), so no
+address is hard-coded; it corrects the generator's write value once from a gdb
+measurement of the realized `l_current_pos`, then calibrates the argv filename
+until a live `refcnt=1` object sits at `tp_index` base + `24*154`.
+The harness reports **9 PASS / 0 FAIL**, trace
+`sha256=8ef9d68d5af6bd7ece8fab2f39e0adc1f3ce4c0b4e4e7275b4e3deaa304b33a6`
+over the ordered `PRE`, `WRITE`, `GOT_SLOT`, `POST`, `DEALLOC`,
+`ARG_FIRST_QWORD` and `CHOSEN_CALL` lines.
+
+Observed in the debug `-g -O0` pinned v2.5.4 build under a real Pillow process:
+`WRITE W1=0000000000a29318` (`GOT(system)=0xa29348`, minus `0x30`),
+`POST REF=1 TYPE=0000000000a29318`, then `DEALLOC pc=0x583dc0 rdi=0xd160d0`
+and, after three single-steps, `CHOSEN_CALL pc=0x4206c6`. gdb's
+`info symbol 0xa29348` reports `system@got[plt] in section .got.plt of
+/usr/bin/python3.12`, and the GOT slot itself holds `0x4206c6` (the unresolved
+PLT push stub). The indirect jump therefore transfers control to the value of
+the codestream-chosen GOT slot. We deliberately stop at the stub: continuing
+would call `system()` with an empty string and spawn a shell, which is outside
+this lab's claim. Whether the resolver would subsequently reach libc `system`
+is NOT observed.
+
+Argument ceiling is structural, not a tuning miss. `rdi=0xd160d0` has
+`ARG_FIRST_QWORD=0000000000000000` (NUL); the companion OOB store writes
+`W2=0xa2931a` at object +16, never at +0 of the object whose `ob_type` was
+corrupted. The stores sit at +8/+16 of a 24-byte block, so no alignment lets
+both the fake type and an arbitrary string occupy the first two words. Write
+values are codestream file positions — bounded integers, not arbitrary byte
+strings — so an eight-character command cannot be encoded into one at a
+realistic file size. No chosen argument, command, shell, listener, external
+probe, chosen-address dereference or attacker-created code was observed.
+
+Non-PIE note: this is not only a debug artifact. The installed
+`/usr/bin/python3.12` is ELF `EXEC` (`readelf -h` `Type: EXEC`, LOAD at
+`0x400000`), so its GOT, PLT and static type addresses stay fixed while OS ASLR
+randomizes heap, stack and libc. The debug lib remains necessary only for the
+source-line breakpoint. Rung 4 is extended to chosen imported-function target
+selection in a live process; rung 5 stays UNKNOWN because the call has no
+attacker-chosen argument.
+
 ## Scope and boundaries
 
 Local process only: no socket, listener, external probe or other plant's lane.
