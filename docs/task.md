@@ -3210,8 +3210,9 @@ SIGSEGV in `Py_FinalizeEx()` when only the pointer is reapplied; the non-GC
 INFERENCE). 5/5 plain 12.2.0 runs exit rc 134 `corrupted size vs. prev_size`,
 fixed 13.0.0 raises `OSError` rc 1. Absolute brk address varies with cwd and
 environment (`0xd32bb0` in the log, `0xd32c10` from the lane); offsets and byte
-values are invariant. W3/W4 are author evidence with no returned witness
-verdict; no chosen-code call, marker, PC or arbitrary control flow; grade ◐.
+values are invariant. W74 (tape #947) replayed W3/W4 from the witness's own
+pinned builds ESTABLISHED AS CLAIMED at the labeled grade; W4 remains a
+type-confusion fault, not chosen-code execution; grade ◐.
 
 #### Admitted 2026-11-21 ~12:56Z: DataSketches2Shell / datasketches2shell (CVE-2026-103501 / GHSA-w656-xfm5-jqjh)
 
@@ -3284,7 +3285,7 @@ that word to `0x1f000`: a following `malloc(0x1000)` returns a fresh chunk
 whose first bytes are the chosen `0x5a`, and the next chunk shifts with the
 first size — relative steering only; ASLR moves absolute addresses and glibc
 rejects `-1`, so no absolute pointer control. W73 (#911) replayed the wake-1
-claims ESTABLISHED AS CLAIMED; wake 2 awaits replay. Grade ◐ unchanged.
+claims ESTABLISHED AS CLAIMED. Grade ◐ unchanged.
 
 W74 (tapes #922/#929) independently replayed wake 2 (commit `b95653e`) and wake
 3 (`e6e8b86`) from clean archives ESTABLISHED AS CLAIMED at the labeled grade:
@@ -3297,7 +3298,19 @@ tcache-grooming precondition: `bash run_groom.sh <abs-outdir>` gives 4 PASS /
 genuine indirect call, benign control clean; count-64 and pre-warm layouts are
 preserved negatives. Conditions: lab-only synthetic `-no-pie -O0` loopback
 consumer, consumer-side grooming, lab-stable marker addresses; no real
-application, leak or chosen-code execution. Wake 4 awaits replay; grade ◐.
+application, leak or chosen-code execution; grade ◐.
+
+W75 (tape #951) replayed wake 4 (`fa551e9`) from a clean archive ESTABLISHED
+AS CLAIMED at the lab-build-only grade: five pins OK, `run_groom.sh` 4 PASS /
+0 FAIL, `p=0x442320`, `V=p+48`, live `callback` `0x403b4a → 0x403b84` with a
+genuine `call *%rax` to `benign_marker3` (count-2 control leaves V unchanged),
+ASan `WRITE of size 72` at pinned `:116` via public `:63`, 5/5 identical.
+Counterexamples discharged: re-patching only the callback bytes to marker2
+yields marker2 with chosen magic/refcount (pointer is image-carried); gdb at
+`main+1068` shows `call *%rax` with `rax=0x403b84` and no re-store. Bounds:
+synthetic non-PIE loopback consumer, consumer-side grooming, address from `nm`
+(no leak), benign markers; no real app, natural call-through or chosen code.
+Grade ◐ unchanged.
 
 #### Admitted 2026-11-21 ~13:20Z: RabbitMQC2Shell / rabbitmqc2shell (CVE-2026-61547 / GHSA-hfjv-vcp3-39wh)
 
@@ -3381,8 +3394,12 @@ body carrying a fake vtable plus the body address, the library's own path at
 call reached`, rc 0); fixed 0.17.0 returns `AMQP_STATUS_BAD_AMQP_DATA`.
 Conditions: synthetic local service, lab-only address file (simulated
 disclosure), benign marker — not a shipped-product exploit. 8 PASS / 0 FAIL;
-no real messaging application, remote listener or address-disclosure
-primitive. Service probe awaits replay; grade ◐ unchanged.
+no real messaging application, remote listener or address-disclosure primitive;
+grade ◐ unchanged. W74 (tape #946) replayed the socket-fed service from a clean
+archive ESTABLISHED AS CLAIMED at that grade: 8 PASS / 0 FAIL, six pins OK,
+matching digest, ASan `WRITE` at `amqp_connection.c:467`, byte-exact `klass`
+overwrite and a library-path `marker_send` call; the address disclosure remains
+simulated by a lab file.
 
 #### 2026-11-21 ~13:20Z operator disposition of witness W72 / #895 (Libwebsockets2Shell)
 
@@ -3523,8 +3540,12 @@ untouched; the frontier `malloc(9)` staging mode still reproduces the ASan
 WRITE through the real socket. A generated `SIZE(0..17)` variant with natural
 24-byte allocation puts `0xa55aa55aa55aa55a` byte-exact in the live next-chunk
 size field; fixed 4.7.0.1 is clean, but its wrapper still returns `ok=1`. No
-real ASN.1 application, pointer/PC control, marker or call-through; author-only,
-witness replay owed; grade ◐.
+real ASN.1 application, pointer/PC control, marker or call-through; grade ◐.
+W74 (tapes #943/#944) replayed both the frontier brief and this consumer check
+from clean archives ESTABLISHED AS CLAIMED at the labeled grade: all eight pins
+OK, 12 PASS, chosen bytes byte-exact in the live next-chunk size field for the
+`SIZE(0..17)` variant, fixed 4.7.0.1 ASan-clean with the wrapper still returning
+`ok=1`.
 
 #### Admitted 2026-11-21 ~14:00Z: Iec618502Shell / iec618502shell (CVE-2026-49035 / CISA ICSA-26-204-06)
 
@@ -3572,3 +3593,24 @@ Cheapest next rung: gdb watchpoint on `sendBuffer + 65100` in the ASan-free
 loopback service with a varied staged-file pattern, then ObtainFile staging
 so bytes are remotely chosen; check the AARE-reuse path with a conforming
 client. Keep all traffic on 127.0.0.1.
+
+#### 2026-11-21 ~14:5xZ operator disposition of witness W74/W75
+
+Witness #949 closed W74: ten queued replays discharged from clean archives and
+the witness's own builds, all ESTABLISHED AS CLAIMED at their labeled grades,
+no overclaim found. Verdict DMs #943-#948 reached frontier, asn1scc2shell,
+datasketches2shell, rabbitmqc2shell, pillow2shell and hnswlib2shell; the
+operator recorded them in each target's charter and admission section above.
+No grade changed. The one material update is hnswlib2shell `2a271d3`: chosen
+bytes in a live object's function-pointer field and a benign marker reached
+through it, under stated conditions (gdb-invoked call, non-PIE, groomed
+synthetic consumer, unmerged PR head fixed side); #952 discharged both
+counterexamples and re-observed that the crafted-index digest is
+build-layout-specific. W75 #951 established DataSketches wake 4 at the
+lab-build-only grade. Honest bounds preserved by the witness: the asn1scc
+variant is a different schema, its fixed wrapper overwrites the error and
+exact-9 staging is artificial for the natural 12-byte type; the IEC v1.6.2
+bypass is harness-specific with rung 4 UNKNOWN; DataSketches has relative
+steering only; RabbitMQC address disclosure is simulated by a lab file; Pillow
+W4 is a type-confusion fault, not chosen-code execution. No admission opens or
+withdraws on these verdicts; rung 4 stays ◐ (— for IEC) at every target.
