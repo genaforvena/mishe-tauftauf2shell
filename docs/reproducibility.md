@@ -240,7 +240,7 @@ or inside local containers whose host ports bind only to loopback.
   against a loopback Unix-socket FPM master; expected affected `FAIL`
   (`bool(false)`, no child-exit warning or replacement), fixed `PASS`
   (`bool(true)`), stdout `affected=FAIL  fixed=PASS` then
-  `verdict: CONFIRMED`, rc 0. Docs replay 09:30Z on the already-provisioned
+  `verdict: CONFIRMED`, rc 0. Docs replay ~09:26Z on the already-provisioned
   build pair observed exactly that stdout and rc 0, with `verdict.txt`
   matching, into a throwaway `/tmp/docs129291-replay/` output directory.
   Raw logs and `verdict.txt` land under the gitignored
