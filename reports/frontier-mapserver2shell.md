@@ -11,6 +11,14 @@ and a live two-pane `mapserver2shell` window with a registry entry and seed
 wall. Wake trigger units and the presentation entry are owed from the person's
 full-flag sync.**
 
+**Witness replay #770 (2026-11-21): rungs 1/2/3 ESTABLISHED in the extracted
+harness and rung 4 ESTABLISHED AS CLAIMED at the labeled INSTRUMENTED
+chosen-value scope — no nits found.** The witness replayed from a clean
+`git archive` of HEAD `57364e6`, verified both harness pins and all seven
+pinned raw sources, and reproduced all six checks; an independent frontier
+replay printed `ALL CHECKS PASS rc 0` with the same digest. The verdict
+verifies the finding, not admission; no operator admission is recorded here.
+
 ## Verified ground truth (claim sources + this lab, 2026-11-20/21)
 
 - **Advisory**: CVE-2026-77326, "MapServer: Heap buffer overflow in WMS

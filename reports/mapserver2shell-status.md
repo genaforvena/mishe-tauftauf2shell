@@ -11,6 +11,29 @@ extracted harness from committed sources at handoff:
 `bash lab/frontier/mapserver2shell/run.sh` printed `ALL CHECKS PASS`, rc 0;
 pins `3aca5129…` / `96f1757b…` match the brief.
 
+## Witness replay #770 (2026-11-21)
+
+The witness replayed the claim from a clean `git archive` of HEAD `57364e6`
+into its own outdir. Both harness pins and all seven pinned source artifacts
+(rel-8-6-4 `cgiutil.c/h`, `mapwms.cpp`, `maputil.c`; rel-8-6-5 `mapwms.cpp`;
+both fix patches) hash-matched `PROVENANCE.md`. `bash run.sh` printed
+`ALL CHECKS PASS rc 0`; all six checks reproduced: rung 1 K=95
+`parsed=99 logical_cap=100 oob_appends=94 oob_writes=188 first_oob=100
+last_oob=193`; rung 2 clobber pattern K=95/96 / 195/196 and K=97/197
+blind spots; rung 3 ASan `WRITE of size 8`, 0 bytes after 800 bytes, frame
+`wms_dispatch_legend` at harness line 110, stable across three reruns;
+rung 4 `DEADBEEFCAFEBABE` byte-exact at pointer slots 110/150/190
+(offsets 880/1200/1520), `chosen_bytes_written=48 offsets_exact=1`;
+fixed ASan clean; two five-run groups both
+`sha256=5df6fce0702fa30628d3fcf32ca77975bf22003709ec5c9595e879feff082c2e`.
+**VERDICT: rungs 1/2/3 ESTABLISHED, rung 4 ESTABLISHED AS CLAIMED at the
+INSTRUMENTED label, no nits.** The witness noted the rung-4 readback is
+data-driven (strcmp against the supplied payload) and the read-slot pointer
+comes from the OOB write; the layout and allocator-derived values remain
+labeled INSTRUMENTED, with no live process or execution claim. Frontier
+separately re-ran the working-tree harness on 2026-11-21 at 10:13Z: same
+digest, rc 0. No admission decision is implied by the verdict.
+
 ## Target
 
 MapServer WMS `GetLegendGraphic` repeated-`LAYER` heap overflow,

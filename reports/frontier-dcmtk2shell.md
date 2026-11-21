@@ -1,24 +1,40 @@
 # Frontier brief — DCMTK JPEG encoder planar-configuration OOB write (Dcmtk2Shell)
 
-**Status: new frontier find, handed off to the operator for admission under the
-standing similar-things mandate. Rungs 1/2/3 ESTABLISHED and attacker-chosen
-bytes read back byte-exact at chosen offsets past the allocation in an
-extracted, source-bound harness; rung 4 is INSTRUMENTED CHOSEN-VALUE CONTROL,
-NOT a live-DCMTK, real-object-layout or execution demonstration. No live
-process, DICOM network service, real allocator neighbour, function pointer or
-code execution was observed — all of those stay UNKNOWN. Both artifacts exist:
-this brief and a live two-pane `dcmtk2shell` window with a registry entry and
-seed wall. Wake trigger units and the presentation entry are owed from the
-person's full-flag sync.**
+**Status: HELD, not admitted under standing approval #6 (operator disposition
+#775, 2026-11-21 ~10:06Z, recorded in `docs/task.md` commit `6b4e3be`).** The
+finding is verified: rungs 1/2/3 ESTABLISHED and attacker-chosen bytes read
+back byte-exact at chosen offsets past the allocation in an extracted,
+source-bound harness; rung 4 is INSTRUMENTED CHOSEN-VALUE CONTROL, NOT a
+live-DCMTK, real-object-layout or execution demonstration. No live process,
+DICOM network service, real allocator neighbour, function pointer or code
+execution was observed — all of those stay UNKNOWN. Both artifacts exist:
+this brief and a two-pane `dcmtk2shell` window with a registry entry and
+seed wall, retained as a frontier research artifact. No charter, status
+file, admission, engine route, wake unit or presentation entry was created;
+no person action is owed.
 
-**Scope judgment for the operator**: DCMTK is a C++ DICOM toolkit, not a
-language runtime or HTTP server. It is submitted as an X2Shell-class candidate
-because the primitive is a heap out-of-bounds write of attacker-chosen bytes
-from a crafted color-by-plane DICOM image, and DICOM storage services are
-network-facing. The advisory itself rates AV:Local and UI:Passive, so network
-reachability through a real DICOM service is **UNKNOWN and untested** here.
-Scope fit is the weakest of the recent finds; admission is the operator's call
-and this brief does not pre-empt it.
+**Scope judgment (now decided, see disposition above)**: DCMTK is a C++ DICOM
+toolkit, not a language runtime or HTTP server. It was submitted as an
+X2Shell-class candidate because the primitive is a heap out-of-bounds write
+of attacker-chosen bytes from a crafted color-by-plane DICOM image, and
+DICOM storage services are network-facing. The advisory itself rates
+AV:Local and UI:Passive, so network reachability through a real DICOM
+service is **UNKNOWN and untested** here. Scope fit was the weakest of the
+recent finds; the operator held it on that basis.
+
+**Operator disposition #775**: held purely on scope and reachability. DCMTK
+is a C++ DICOM toolkit, not a language runtime or web-facing server; the
+advisory rates AV:L/UI:P, and no live DICOM service, network trigger or
+stock allocator neighbour was exercised. Witness replay #775 independently
+replayed the committed harness from a clean `git archive HEAD` extraction:
+8 PASS / 0 FAIL, rc 0, five-run digest
+`03eb9e16ef2f16d64b4ef0d1b1f77f6549f885752debe15a050f5810fc970649`
+matching the brief, rung 3 ASan `WRITE of size 1` at pinned
+`djcodece_v3.7.1.cc:1525`, rung 4 INSTRUMENTED chosen-value control. That
+verdict verifies the finding, not admission. Revisit only with a live
+loopback DICOM C-STORE or real 3.7.1 `DJCodecEncoder` path reaching this
+frame with chosen bytes at chosen offsets on a network-reachable path; a
+measured no-network-path negative is a valid outcome.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -132,7 +148,9 @@ declared PixelData length 80000. From committed HEAD,
 **Grade**: rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4
 INSTRUMENTED chosen-value control only. No live DCMTK process, DICOM service,
 real object layout, neighbouring heap object, function-pointer overwrite,
-execution, witness replay or independent acceptance.
+execution or code-execution claim. The witness replay #775 reproduced every
+labelled rung and found no nit; the operator then held the lane on scope and
+reachability. Independent verification is not admission.
 
 ## Cheapest next experiments to move up a rung
 
