@@ -1,0 +1,481 @@
+From 58e399400c4ef4b71472ab7c2c71c54a677a05a8 Mon Sep 17 00:00:00 2001
+From: Denys Fedoryshchenko <denys.f@collabora.com>
+Date: Wed, 28 Oct 2026 14:18:18 +0200
+Subject: [PATCH] log: bound log lines and share target unpacking
+
+A log line is flushed only when its text ends in a newline, so it can be
+assembled from any number of log calls. Packet printers make one call per
+attribute, so a single line could grow far beyond LOG_MAX_SIZE, while the
+tcp, syslog and pgsql targets each copied the whole chunk list into a
+fixed size buffer without checking its length.
+
+Cap the accumulated line at LOG_MAX_SIZE in do_log(), keeping the
+trailing newline so the line is still flushed, and replace the three
+duplicated unpack loops with log_unpack_msg(), which never writes past
+the size it is given. The syslog bound is needed on its own: a session
+header plus a full length line does not fit its buffer.
+
+Also skip empty formatted strings, which made do_log() read the byte
+before its buffer.
+
+When a single call is cut short by vsnprintf its newline is lost; restore
+it when the format ends in one, so the line is closed instead of
+swallowing the next one. The syslog and pgsql targets now strip the
+trailing newline only when it is there, instead of dropping the last
+character of a line cut to fit.
+
+Signed-off-by: Denys Fedoryshchenko <denys.f@collabora.com>
+---
+ accel-pppd/log.c                      |  61 ++++++++--
+ accel-pppd/log.h                      |   1 +
+ accel-pppd/logs/log_pgsql.c           |  15 +--
+ accel-pppd/logs/log_syslog.c          |  15 +--
+ accel-pppd/logs/log_tcp.c             |  11 +-
+ tests/README.md                       |  13 ++
+ tests/unit/log_line_safeguards_test.c | 164 ++++++++++++++++++++++++++
+ tests/unit/run_safeguards.sh          |   6 +-
+ 8 files changed, 250 insertions(+), 36 deletions(-)
+ create mode 100644 tests/unit/log_line_safeguards_test.c
+
+diff --git a/accel-pppd/log.c b/accel-pppd/log.c
+index 7fac66df7..324ec5199 100644
+--- a/accel-pppd/log.c
++++ b/accel-pppd/log.c
+@@ -40,6 +40,7 @@ struct _log_msg_t
+ 	struct timeval timestamp;
+ 	struct list_head chunks;
+ 	unsigned int refs;
++	int len;
+ };
+ 
+ static int log_level;
+@@ -59,7 +60,7 @@ static FILE *debug_file;
+ 
+ static void _log_free_msg(struct _log_msg_t *msg);
+ static struct log_msg_t *clone_msg(struct _log_msg_t *msg);
+-static int add_msg(struct _log_msg_t *msg, const char *buf);
++static int add_msg(struct _log_msg_t *msg, const char *buf, int len);
+ //static struct log_pd_t *find_pd(struct ap_session *ses);
+ static void write_msg(FILE *f, struct _log_msg_t *msg, struct ap_session *ses);
+ 
+@@ -72,13 +73,27 @@ static void do_log(int level, const char *fmt, va_list ap, struct ap_session *se
+ {
+ 	struct log_target_t *t;
+ 	struct log_msg_t *m;
++	int n, len, eol, room;
+ 
+ 	if (!stat_buf) {
+ 		stat_buf = _malloc(LOG_MAX_SIZE + 1);
+ 		pthread_setspecific(stat_buf_key, stat_buf);
+ 	}
+ 
+-	vsnprintf(stat_buf, LOG_MAX_SIZE, fmt, ap);
++	n = vsnprintf(stat_buf, LOG_MAX_SIZE, fmt, ap);
++	if (n <= 0)
++		return;
++
++	len = strlen(stat_buf);
++	if (!len)
++		return;
++
++	/* output cut short by vsnprintf lost its newline, restore it so
++	 * the line still ends here instead of swallowing the next one */
++	if (n >= LOG_MAX_SIZE && fmt[strlen(fmt) - 1] == '\n')
++		stat_buf[len - 1] = '\n';
++
++	eol = stat_buf[len - 1] == '\n';
+ 
+ 	if (!cur_msg) {
+ 		cur_msg = mempool_alloc(_msg_pool);
+@@ -87,13 +102,27 @@ static void do_log(int level, const char *fmt, va_list ap, struct ap_session *se
+ 		INIT_LIST_HEAD(&cur_msg->chunks);
+ 		cur_msg->refs = 1;
+ 		cur_msg->level = level;
++		cur_msg->len = 0;
+ 		gettimeofday(&cur_msg->timestamp, NULL);
+ 	}
+ 
+-	if (add_msg(cur_msg, stat_buf))
+-		goto out;
++	/* a line may be assembled from any number of calls, some of them
++	 * printing peer supplied data; cap it at LOG_MAX_SIZE, keeping the
++	 * newline, so targets can unpack it into a fixed size buffer */
++	room = LOG_MAX_SIZE - 1 - cur_msg->len;
++	if (len - eol > room) {
++		len = room;
++		if (eol)
++			stat_buf[len++] = '\n';
++	}
++
++	if (len) {
++		if (add_msg(cur_msg, stat_buf, len))
++			goto out;
++		cur_msg->len += len;
++	}
+ 
+-	if (stat_buf[strlen(stat_buf) - 1] != '\n')
++	if (!eol)
+ 		return;
+ 
+ 	if (debug_file)
+@@ -261,6 +290,24 @@ void __export log_free_msg(struct log_msg_t *m)
+ }
+ 
+ 
++/* concatenate the chunks of msg into buf, writing at most size bytes;
++ * returns the number of bytes written */
++int __export log_unpack_msg(struct log_msg_t *msg, char *buf, int size)
++{
++	struct log_chunk_t *chunk;
++	int pos = 0, len;
++
++	list_for_each_entry(chunk, msg->chunks, entry) {
++		if (pos >= size)
++			break;
++		len = min(chunk->len, size - pos);
++		memcpy(buf + pos, chunk->msg, len);
++		pos += len;
++	}
++
++	return pos;
++}
++
+ static void _log_free_msg(struct _log_msg_t *msg)
+ {
+ 	struct log_chunk_t *chunk;
+@@ -304,10 +351,10 @@ static struct log_msg_t *clone_msg(struct _log_msg_t *msg)
+ 	return m;
+ }
+ 
+-static int add_msg(struct _log_msg_t *msg, const char *buf)
++static int add_msg(struct _log_msg_t *msg, const char *buf, int len)
+ {
+ 	struct log_chunk_t *chunk;
+-	int i, chunk_cnt, len = strlen(buf);
++	int i, chunk_cnt;
+ 
+ 	if (!list_empty(&msg->chunks)) {
+ 		chunk = list_entry(msg->chunks.prev, typeof(*chunk), entry);
+diff --git a/accel-pppd/log.h b/accel-pppd/log.h
+index 5f3fd9674..b06dab5f2 100644
+--- a/accel-pppd/log.h
++++ b/accel-pppd/log.h
+@@ -38,6 +38,7 @@ struct log_target_t
+ };
+ 
+ void log_free_msg(struct log_msg_t *msg);
++int log_unpack_msg(struct log_msg_t *msg, char *buf, int size);
+ 
+ void log_emerg(const char *fmt, ...) __attribute__((format(gnu_printf, 1, 2)));
+ 
+diff --git a/accel-pppd/logs/log_pgsql.c b/accel-pppd/logs/log_pgsql.c
+index 6589da0e8..0fae52bc2 100644
+--- a/accel-pppd/logs/log_pgsql.c
++++ b/accel-pppd/logs/log_pgsql.c
+@@ -53,17 +53,12 @@ static int need_close;
+ 
+ static void unpack_msg(struct log_msg_t *msg)
+ {
+-	struct log_chunk_t *chunk;
+-	int pos = 0;
++	int pos = log_unpack_msg(msg, log_buf, LOG_MAX_SIZE);
+ 
+-	list_for_each_entry(chunk, msg->chunks, entry) {
+-		memcpy(log_buf + pos, chunk->msg, chunk->len);
+-		pos += chunk->len;
+-	}
+-	if (pos > 1)
+-		log_buf[pos - 1] = 0;
+-	else
+-		log_buf[0] = 0;
++	/* a line cut to fit the buffer has lost its newline */
++	if (pos && log_buf[pos - 1] == '\n')
++		pos--;
++	log_buf[pos] = 0;
+ }
+ 
+ static void set_hdr(struct log_msg_t *msg, struct ap_session *ses)
+diff --git a/accel-pppd/logs/log_syslog.c b/accel-pppd/logs/log_syslog.c
+index f06c1cc88..7e298fe63 100644
+--- a/accel-pppd/logs/log_syslog.c
++++ b/accel-pppd/logs/log_syslog.c
+@@ -33,21 +33,16 @@ static int prio_map[] = {LOG_INFO, LOG_ERR, LOG_WARNING, LOG_INFO, LOG_INFO, LOG
+ 
+ static void unpack_msg(struct log_msg_t *msg)
+ {
+-	struct log_chunk_t *chunk;
+ 	int pos;
+ 
+ 	strcpy(log_buf, msg->hdr->msg);
+ 	pos = strlen(log_buf);
++	pos += log_unpack_msg(msg, log_buf + pos, LOG_MAX_SIZE - pos);
+ 
+-	list_for_each_entry(chunk, msg->chunks, entry) {
+-		memcpy(log_buf + pos, chunk->msg, chunk->len);
+-		pos += chunk->len;
+-	}
+-
+-	if (pos > 1)
+-		log_buf[pos - 1] = 0;
+-	else
+-		log_buf[0] = 0;
++	/* a line cut to fit the buffer has lost its newline */
++	if (pos && log_buf[pos - 1] == '\n')
++		pos--;
++	log_buf[pos] = 0;
+ }
+ 
+ static void set_hdr(struct log_msg_t *msg, struct ap_session *ses)
+diff --git a/accel-pppd/logs/log_tcp.c b/accel-pppd/logs/log_tcp.c
+index ca803a7e5..1704caf9e 100644
+--- a/accel-pppd/logs/log_tcp.c
++++ b/accel-pppd/logs/log_tcp.c
+@@ -17,6 +17,8 @@
+ 
+ #include "memdebug.h"
+ 
++#define BUF_SIZE (LOG_MAX_SIZE + 64)
++
+ struct tcp_target_t
+ {
+ 	struct log_target_t target;
+@@ -54,15 +56,10 @@ static void disconnect(struct tcp_target_t *t)
+ 
+ static void unpack_msg(struct tcp_target_t *t, struct log_msg_t *msg)
+ {
+-	struct log_chunk_t *chunk;
+ 	int pos = strlen(msg->hdr->msg);
+ 
+ 	strcpy(t->buf, msg->hdr->msg);
+-
+-	list_for_each_entry(chunk, msg->chunks, entry) {
+-		memcpy(t->buf + pos, chunk->msg, chunk->len);
+-		pos += chunk->len;
+-	}
++	pos += log_unpack_msg(msg, t->buf + pos, BUF_SIZE - pos);
+ 
+ 	t->buf_size = pos;
+ 	t->buf_pos = 0;
+@@ -266,7 +263,7 @@ static int start_log(const char *_opt)
+ 	t = _malloc(sizeof(*t));
+ 	memset(t, 0, sizeof(*t));
+ 
+-	t->buf = _malloc(LOG_MAX_SIZE + 64);
++	t->buf = _malloc(BUF_SIZE);
+ 
+ 	t->conn_timer.expire_tv.tv_sec = conf_connect_interval;
+ 	t->conn_timer.expire = connect_timer;
+diff --git a/tests/README.md b/tests/README.md
+index 65afd2546..01a015d89 100644
+--- a/tests/README.md
++++ b/tests/README.md
+@@ -2,6 +2,19 @@
+ 
+ These tests are done for Ubuntu and Debian distros. Please use latest stable Debian or Ubuntu to run the tests.
+ 
++## Focused unit tests
++
++The standalone unit tests compile production callbacks with small test fixtures
++and run them with AddressSanitizer and UndefinedBehaviorSanitizer. Pass a configured
++CMake build directory and optional test names:
++
++```bash
++sh tests/unit/run_safeguards.sh build log_line
++```
++
++These tests do not require installed kernel modules or root privileges. The
++sanitizer runtime needs an environment that permits its process inspection.
++
+ ## Kernel module installation test
+ 
+ The kernel module installation regression test is rootless and does not need
+diff --git a/tests/unit/log_line_safeguards_test.c b/tests/unit/log_line_safeguards_test.c
+new file mode 100644
+index 000000000..487e763b4
+--- /dev/null
++++ b/tests/unit/log_line_safeguards_test.c
+@@ -0,0 +1,164 @@
++/* A log line assembled from many calls must not outgrow LOG_MAX_SIZE,
++ * nor overflow a target buffer once a session header is prepended. */
++#include <assert.h>
++#include <pthread.h>
++#include "triton.h"
++#undef DEFINE_INIT
++#define DEFINE_INIT(o, f)
++#define load_config core_load_config
++#include "../../accel-pppd/log.c"
++#undef load_config
++#include "../../accel-pppd/logs/log_syslog.c"
++
++static char *line;
++static int line_len, lines;
++
++mempool_t *mempool_create(int size)
++{
++	int *p = malloc(sizeof(*p));
++	*p = size;
++	return (mempool_t *)p;
++}
++void *mempool_alloc(mempool_t *pool) { return calloc(1, *(int *)pool); }
++void mempool_free(void *ptr) { free(ptr); }
++char *conf_get_opt(const char *sect, const char *name)
++{
++	return strcmp(name, "level") ? NULL : "5";
++}
++int triton_event_register_handler(int ev_id, triton_event_func func) { return 0; }
++
++/* Unpack like the syslog/pgsql targets do, into a buffer of the same size,
++ * without a bound of its own so ASan reports an oversized line. */
++static void test_log(struct log_target_t *t, struct log_msg_t *msg, struct ap_session *ses)
++{
++	struct log_chunk_t *chunk;
++
++	line_len = 0;
++	list_for_each_entry(chunk, msg->chunks, entry) {
++		memcpy(line + line_len, chunk->msg, chunk->len);
++		line_len += chunk->len;
++	}
++	line[line_len] = 0;
++	lines++;
++	log_free_msg(msg);
++}
++
++static struct log_target_t test_target = {
++	.log = test_log,
++};
++
++/* the longest line the core passes on, behind the longest session header */
++static void test_syslog(void)
++{
++	struct ap_ctrl ctrl = {};
++	struct ap_session ses = {.ctrl = &ctrl};
++	struct log_msg_t msg = {};
++	struct log_chunk_t *chunk;
++	LIST_HEAD(chunks);
++	char username[256];
++	int i, n = LOG_MAX_SIZE / LOG_CHUNK_SIZE;
++
++	log_buf = malloc(LOG_MAX_SIZE + 1);
++	msg.hdr = malloc(sizeof(struct log_chunk_t) + LOG_CHUNK_SIZE + 1);
++	assert(log_buf && msg.hdr);
++	strcpy(ses.ifname, "ppp0");
++	memset(username, 'u', sizeof(username) - 1);
++	username[sizeof(username) - 1] = 0;
++	ses.username = username;
++
++	for (i = 0; i < n; i++) {
++		chunk = malloc(sizeof(*chunk) + LOG_CHUNK_SIZE + 1);
++		assert(chunk);
++		chunk->len = LOG_CHUNK_SIZE;
++		memset(chunk->msg, 'A', LOG_CHUNK_SIZE);
++		list_add_tail(&chunk->entry, &chunks);
++	}
++	chunk->msg[LOG_CHUNK_SIZE - 1] = '\n';
++	msg.chunks = &chunks;
++
++	set_hdr(&msg, &ses);
++	assert(strlen(msg.hdr->msg) == LOG_CHUNK_SIZE - 1);
++	unpack_msg(&msg);
++	assert(strlen(log_buf) == LOG_MAX_SIZE);
++	assert(!memcmp(log_buf, "ppp0:uuu", 8));
++	assert(log_buf[LOG_MAX_SIZE - 1] == 'A');
++
++	/* nothing is written to a buffer that is already full */
++	assert(log_unpack_msg(&msg, NULL, 0) == 0);
++	assert(log_unpack_msg(&msg, NULL, -LOG_CHUNK_SIZE) == 0);
++
++	/* a short line is unaffected */
++	chunk = list_first_entry(&chunks, typeof(*chunk), entry);
++	strcpy(chunk->msg, "hello\n");
++	chunk->len = 6;
++	while (chunks.prev != &chunk->entry) {
++		struct log_chunk_t *c = list_entry(chunks.prev, typeof(*c), entry);
++		list_del(&c->entry);
++		free(c);
++	}
++	set_hdr(&msg, NULL);
++	unpack_msg(&msg);
++	assert(!strcmp(log_buf, "hello"));
++
++	list_del(&chunk->entry);
++	free(chunk);
++	free(msg.hdr);
++	free(log_buf);
++}
++
++int main(void)
++{
++	char big[1024], *huge;
++	int i;
++
++	line = malloc(LOG_MAX_SIZE + 1);
++	assert(line);
++	log_init();
++	log_register_target(&test_target);
++	memset(big, 'A', sizeof(big) - 1);
++	big[sizeof(big) - 1] = 0;
++
++	/* the L2TP packet printer: one call per AVP, newline at the end */
++	log_info2("recv [");
++	for (i = 0; i < 64; i++)
++		log_info2(" <%s>", big);
++	log_info2("]\n");
++	assert(lines == 1);
++	assert(line_len == LOG_MAX_SIZE);
++	assert(!memcmp(line, "recv [ <AAA", 11));
++	assert(line[LOG_MAX_SIZE - 2] == 'A' && line[LOG_MAX_SIZE - 1] == '\n');
++
++	/* the next line starts from scratch */
++	log_info2("short");
++	log_info2(" line\n");
++	assert(lines == 2 && !strcmp(line, "short line\n"));
++
++	/* a line that fits exactly is delivered unchanged */
++	for (i = 0; i < 4; i++)
++		log_info2("%.1023s", big);
++	log_info2("BCD\n");
++	assert(lines == 3 && line_len == LOG_MAX_SIZE);
++	assert(!strcmp(line + 4 * 1023, "BCD\n"));
++
++	/* an empty format neither ends nor breaks the line */
++	log_info2("%s", "");
++	log_info2("x\n");
++	assert(lines == 4 && !strcmp(line, "x\n"));
++
++	/* a single call longer than LOG_MAX_SIZE still ends its line */
++	huge = malloc(2 * LOG_MAX_SIZE);
++	assert(huge);
++	memset(huge, 'H', 2 * LOG_MAX_SIZE - 1);
++	huge[2 * LOG_MAX_SIZE - 1] = 0;
++	log_info2("%s\n", huge);
++	assert(lines == 5 && line_len == LOG_MAX_SIZE - 1);
++	assert(line[LOG_MAX_SIZE - 3] == 'H' && line[LOG_MAX_SIZE - 2] == '\n');
++	log_info2("next\n");
++	assert(lines == 6 && !strcmp(line, "next\n"));
++	free(huge);
++
++	free(line);
++	test_syslog();
++	puts("Log line safeguards: PASS");
++	return 0;
++}
+diff --git a/tests/unit/run_safeguards.sh b/tests/unit/run_safeguards.sh
+index 1c69efd7b..7f18c4925 100644
+--- a/tests/unit/run_safeguards.sh
++++ b/tests/unit/run_safeguards.sh
+@@ -2,11 +2,13 @@
+ # Run from any directory, passing a configured CMake build directory.
+ set -eu
+ root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+-build=${1:?usage: run_safeguards.sh /path/to/cmake-build}
++build=${1:?usage: run_safeguards.sh /path/to/cmake-build [test-name ...]}
++shift
+ out=$(mktemp -d)
+ trap 'rm -rf "$out"' EXIT HUP INT TERM
+ cd "$root"
+-for name in dhcpv6 radius vrf lcp mempool; do
++names=${*:-"dhcpv6 radius vrf lcp mempool log_line"}
++for name in $names; do
+ 	extra=
+ 	# LCP's global layer table retains the whole daemon under ASan; its test
+ 	# checks wire lengths with UBSan. The packet/VRF tests also use ASan.
