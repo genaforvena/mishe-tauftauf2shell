@@ -434,6 +434,45 @@ pointer assembled from literal overflow bytes is non-canonical and faults on
 dereference. This explains why the reachable impact is a crash and why
 chosen-address control or execution is not demonstrable with this primitive.
 
+## No-debugger register capture of the same fault (seventh wake, 10:25-10:39Z)
+
+The fifth-wake capture used gdb with no breakpoints, but a debugger was still
+the daemon's parent. This wake removes that caveat from the capture itself:
+`daemon/sigctx.c` is a minimal `LD_PRELOAD` shim whose SIGSEGV/SIGBUS handler
+prints the kernel-supplied `ucontext` registers at the fault and exits. It
+uses no ptrace, breakpoint, live signal or in-run heap allocation. The pinned
+plain parent binary is unmodified, ASLR is on, and every socket is 127.0.0.1.
+`daemon/sigctx-fault.sh` starts the committed stress trigger and the daemon.
+
+Two independent `0x5a` runs (ports 22390 and 22392) exited 139 after exactly
+20,462 stress sets (~42 s). Both printed `RBX=0x5a5a5a5a5a5a5a5a` and
+`RAX=0x000000000000005a`. The first printed
+`RIP=0x00005ce0ca3235d7`: its low 12 bits `0x5d7` match `assoc_find+126`,
+whose file offset is `0x17559 + 126 = 0x175d7` (`nm` and `objdump -d` on the
+unmodified binary show `movzbl 0x29(%rbx),%eax` there); subtracting that
+offset gives the page-aligned PIE base `0x00005ce0ca30c000`. RBX is the
+hash-bucket chain item pointer that instruction dereferences, so the faulting
+value is eight attacker-chosen key bytes, with no debugger attached. Raw
+logs: `daemon/sigctx-p22390-102558-daemon.log` and
+`daemon/sigctx-p22392-103024-daemon.log` (gitignored lab artifacts).
+
+Preserved negatives and a tooling confound: a `0x41` run on port 22391 and a
+`0x5a` run on port 22393 used a shim variant whose constructor read
+`/proc/self/maps` to print the load base; both completed the full 120 s hold
+(56,895 and 56,999 sets) without faulting. That variant allocates a `FILE`
+buffer at process startup, so it is itself a heap-layout perturbation; its
+printed `RIP_REL=0x135d7` came from matching the shim mapping, not the daemon
+executable, and was discarded. With the final minimal shim, a `0x41` run on
+port 22394 completed 42,764 sets in 90 s and a `0x5a` run on port 22395
+completed 42,758 sets in 90 s, both without faulting. Crash timing is
+therefore non-deterministic across runs (as already accepted for the pointer
+window); the two early faults are real, the four no-fault runs are preserved,
+and `si_addr=0` on the faulting runs is reported as observed rather than
+interpreted. No crafted address, function-pointer overwrite, execution or
+control-flow diversion was observed. This improves the capture method, not the
+grade: rung 4 stays ◐ at witness verdict #751 pending replay of this and the
+fifth-wake gdb evidence.
+
 ## Witness verdict #751 (fourth wake) — accepted with wording condition
 
 The witness replayed the daemon evidence independently and returned

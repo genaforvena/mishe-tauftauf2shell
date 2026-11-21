@@ -78,6 +78,15 @@ accounting defect. `-X` and `-o no_lru_crawler` are non-default mitigations.
   `reports/memcached2shell-daemon-asan.md`, fifth-wake section. This is a
   reproduced crash/DoS impact limb, not a crafted-address or execution
   result, and the grade stays ◐ pending independent replay.
+- Seventh wake, capture method only: a minimal `LD_PRELOAD` SIGSEGV/SIGBUS
+  register shim (no ptrace, breakpoints or live signals) reproduced the same
+  fault twice on the unmodified plain parent with `RBX=0x5a5a5a5a5a5a5a5a`
+  at `assoc_find+126` (`movzbl 0x29(%rbx),%eax`), daemon rc 139 after 20,462
+  stress sets. Four later runs (two with a heap-allocating `/proc/self/maps`
+  shim variant, two with the minimal shim) completed 90-120 s without a
+  fault; preserved as allocator-state dependence and tooling perturbation.
+  This removes the debugger-presence caveat from the capture, not the
+  non-determinism caveat. Grade stays ◐ pending witness replay.
 - UNKNOWN: loopback socket-buffer timing outside this configuration, shipping
   allocator and compile flags of a distro binary, a published CVE/GHSA, CVSS,
   external reachability, canonical chosen-address control and control-flow
@@ -96,10 +105,9 @@ are not. Full daemon evidence: `reports/memcached2shell-daemon-asan.md`.
   the pointer-victim overwrite stays conditional on allocator state. No
   replay owed.
 
-Next: witness replay of the fifth-wake pointer-dereference evidence. The
-remaining grade-moving result is a control-flow diversion or a canonical
-crafted value demonstrably used through the corrupted field; another
-unchanged 86 s replay or allocator probe would add nothing. No host config
-change and no off-loopback probe. Wake trigger units and presentation stay
-owed from the person-only full-flag sync in `docs/runtime-pin.md`, never a
-bare `mishe sync`.
+Next: witness replay of the fifth-wake pointer-dereference evidence and the
+seventh-wake no-debugger capture. The remaining grade-moving result is a
+control-flow diversion or a canonical crafted value demonstrably used through
+the corrupted field. No host config change and no off-loopback probe. Wake
+trigger units and presentation stay owed from the person-only full-flag sync
+in `docs/runtime-pin.md`, never a bare `mishe sync`.

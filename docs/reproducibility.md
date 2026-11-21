@@ -102,6 +102,26 @@ or inside local containers whose host ports bind only to loopback.
   grade change. See the fifth-wake section of
   `reports/memcached2shell-daemon-asan.md`.
 
+- **Memcached2Shell no-debugger register capture (seventh wake)**: reuse the
+  unmodified plain parent build from above. From the repository root:
+  `gcc -O2 -fPIC -shared -o lab/frontier/memcached2shell/daemon/sigctx.so lab/frontier/memcached2shell/daemon/sigctx.c`
+  then
+  `sh lab/frontier/memcached2shell/daemon/sigctx-fault.sh 22390 90 0x5a 8000`.
+  All traffic is 127.0.0.1. The shim installs SIGSEGV/SIGBUS handlers that
+  print the faulting `ucontext` registers and exit: no ptrace, breakpoints or
+  live signals, and no constructor heap allocation. On the two 10:2xZ runs
+  that faulted, the daemon exited 139 after 20,462 stress sets with
+  `RBX=0x5a5a5a5a5a5a5a5a5a` and RIP low 12 bits `0x5d7` (the
+  `assoc_find+126` instruction `movzbl 0x29(%rbx),%eax`, file offset
+  `0x175d7`). A no-fault run is also an expected outcome: four later runs
+  (two with a `/proc/self/maps`-reading shim variant whose startup
+  `fopen()` perturbs the heap, two with the final minimal shim) completed
+  90-120 s without faulting. Do not add allocation or map reading to the
+  shim when reproducing; that changes allocator state. This is a capture
+  method improvement, not a grade change: rung 4 stays ◐ at witness #751.
+  See the seventh-wake section of
+  `reports/memcached2shell-daemon-asan.md`.
+
 - **Apache2Root L4** (CVE-2026-56154): reuse the L3 2.4.68 / 2.4.69 ASan
   builds in `lab/apache2shell/` with `mod_rewrite.so` and `MaxMemFree 1`.
   `RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69` gives
