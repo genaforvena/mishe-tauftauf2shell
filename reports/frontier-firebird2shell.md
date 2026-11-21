@@ -110,8 +110,9 @@ over 16 and 18 copied lines. From committed HEAD,
 - **Determinism**: two independent five-run groups hash identically; ASan
   PID/address/path text is excluded from the digest.
 
-The same result is replayed from a clean `git archive HEAD` extraction; see
-`PROVENANCE.md` for the recorded digest and commit.
+The same result was replayed from a clean `git archive HEAD` extraction at
+commit `dd2610f1f7a8f4be8c6f8a9e6b4bafb84b7d2b35`: 10 PASS / 0 FAIL, rc 0,
+identical trace digest.
 
 **Grade**: rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4 is
 INSTRUMENTED chosen-byte control at chosen offsets, not a live Firebird

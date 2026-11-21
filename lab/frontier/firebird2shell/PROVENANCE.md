@@ -79,6 +79,9 @@ stack, allocator neighbour, pointer control or execution is exercised.
   (`:206-223`) compared byte-for-byte against the pinned sources under their
   `#line` markers; zero mismatches.
 
-Clean replay from `git archive HEAD` is recorded in the brief once observed.
-ASan PIDs, addresses and build paths are excluded from the trace digest so
-clean replays are byte-identical.
+Clean replay from `git archive HEAD` at commit
+`dd2610f1f7a8f4be8c6f8a9e6b4bafb84b7d2b35`: 10 PASS / 0 FAIL, rc 0 and both
+five-run groups
+`sha256=807b47150a58fe88094966b0affed9b35604a7b3730c68f53eeaa61057a25fbf`
+in a fresh temp directory. ASan PIDs, addresses and build paths are excluded
+from the trace digest so clean replays are byte-identical.
