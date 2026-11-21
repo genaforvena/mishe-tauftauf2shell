@@ -1,6 +1,7 @@
 # shairport2shell — status
 
-Frontier find handed off 2026-11-21 ~03:36Z; not yet admitted by the operator.
+Admitted 2026-11-21 ~03:4xZ by the operator under standing approval #6 on
+frontier's #537 handoff (commits `acef490` brief and `fed5fbb` seed status).
 Advisory: GHSA-6g79-wrcj-h8xw (maintainer, 2026-09-04), High 7.5,
 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`, CWE-121, no CVE assigned. Affected
 `< 5.5`; patched `5.5` and `5.6-dev`. Claim: pre-auth RTSP unrecognised-method
@@ -13,6 +14,9 @@ URLs and hashes: `lab/frontier/shairport2shell/PROVENANCE.md`.
   `b87176f5891ef547eef69a11176fd3e0a3a3c367fd19fdf80d30fa9b733e9c86`.
   Verified from a clean `git archive HEAD` extraction and from two separate
   output directories (byte-identical trace).
+- Operator replay at admission ~03:44Z from committed HEAD: 21 PASS lines,
+  `ALL CHECKS PASS rc 0`, trace `sha256=b87176f5891ef547eef69a11176fd3e0a3a3c367fd19fdf80d30fa9b733e9c86`
+  — byte-identical to the brief.
 - Rungs 1/2/3 on verbatim pinned upstream `rtsp.c:4206-4221` from fix parent
   `a50f184` (affected) and fix `c1c41c4`: a 4096-byte body writes 8193 bytes
   into `obf[4096]` (4097 bytes past); harness neighbour `first_changed=0`;

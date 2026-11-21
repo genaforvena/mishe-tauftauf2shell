@@ -855,6 +855,52 @@ frontier's handoff and were capture-verified at admission; wake trigger units
 and the presentation.json entry are owed from the person's full-flag sync,
 never a bare `mishe sync`.
 
+#### Admitted 2026-11-21 ~03:4xZ: Shairport2Shell (GHSA-6g79-wrcj-h8xw)
+
+Claim source: the maintainer advisory GHSA-6g79-wrcj-h8xw, published
+2026-09-04 by `mikebrady` at
+`https://github.com/mikebrady/shairport-sync/security/advisories/GHSA-6g79-wrcj-h8xw`,
+with no CVE assigned. CWE-121, CVSS 3.1 **7.5 High**
+`AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H` — availability only, no RCE claimed.
+Affected `< 5.5`; patched `5.5` and `5.6-dev`. Fix history: development PR
+#2263 merged 2026-08-26 (`74d59d8f83538c03852d51f953a2ca7716340fc2`), master
+backport PR #2267 merged 2026-08-31
+(`a5d8f46a54c0440bdd5290d385fe8a740c636d36`). Fix parent
+`a50f18469143b9dbe599b8333d228a586dc29e67` is pinned affected and fix
+`c1c41c4ec9937eb7d2f8819dadd5bc45f65ab3f4` pinned fixed; source hashes and
+URLs are in `lab/frontier/shairport2shell/PROVENANCE.md`.
+
+Claimed primitive: an AirPlay-2 receiver accepts an RTSP request whose method
+is not in `method_handlers[]` and hex-dumps the request body into a fixed
+4096-byte stack buffer. The length is clamped to 4096 **bytes**, but each byte
+becomes two hex characters plus a final NUL, so up to 8193 bytes are written
+into `char obf[4096]` at `rtsp.c:4208`. The fill loop runs regardless of log
+verbosity; a fresh connection defaults to `airplay_type = ap_2`, which the
+advisory says bypasses the RTSP authentication check. That auth-bypass and
+pre-auth reachability stay advisory claims until observed on a live daemon.
+
+Why a rung-4 attempt is plausible: the overflow is a single loop of small
+`snprintf(obfp, 3, "%02X", ...)` writes of attacker-chosen bytes (within a
+token-safe hex alphabet) onto the stack, so a saved-frame overwrite is
+structurally plausible and no structural-zero-store blocker was found.
+Vulnerable and fixed bytes, exact commits and a public patch pin the intended
+semantics. Rung 4 is INSTRUMENTED chosen-byte control only in harness stack
+storage: no live daemon, socket, auth-bypass observation, stack layout, useful
+pointer or execution.
+
+Operator replay 2026-11-21 ~03:44Z from committed HEAD:
+`bash lab/frontier/shairport2shell/run.sh <outdir>` printed 21 PASS lines,
+`ALL CHECKS PASS rc 0`, trace
+`sha256=b87176f5891ef547eef69a11176fd3e0a3a3c367fd19fdf80d30fa9b733e9c86`,
+byte-identical to the brief. Evidence:
+`reports/frontier-shairport2shell.md`, seed status
+`reports/shairport2shell-status.md`, harness `lab/frontier/shairport2shell/`.
+The dedicated `shairport2shell` mind owns this lane. Its two-pane window
+(inner socket, window 29), registry entry and seed wall were live from
+frontier's handoff and were capture-verified at admission; wake trigger units
+and the presentation.json entry are owed from the person's full-flag sync,
+never a bare `mishe sync`.
+
 
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 

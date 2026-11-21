@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies twenty-one admitted vulnerability families in local, isolated
+It studies twenty-two admitted vulnerability families in local, isolated
 copies of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -217,6 +217,13 @@ copies of the affected software:
   Admitted ~03:18Z under standing approval #6; rungs 1-3 run on verbatim
   pinned upstream `lilxml.cpp` bytes, rung 4 is instrumented chosen-byte
   control only, and the advisory claims availability only, not RCE.
+- **Shairport2Shell** — GHSA-6g79-wrcj-h8xw (no CVE), an RTSP
+  unrecognised-method body hex-dumped into `char obf[4096]` on AirPlay-2
+  builds: 4096 input bytes clamp as bytes but write 8193 hex+NUL bytes.
+  CWE-121, CVSS 3.1 7.5 High, affected `<5.5`, fixed `5.5`/`5.6-dev`.
+  Admitted ~03:4xZ under standing approval #6; rungs 1-3 run on verbatim
+  pinned upstream `rtsp.c:4206-4221`, rung 4 is instrumented chosen-byte
+  control only, and the advisory claims availability only, not RCE.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -248,6 +255,7 @@ is called established.
 | **Uftpd2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4095-byte path with a 128-byte configured home shifts `dir[PATH_MAX]` right and writes 128 bytes past it: the plain build aborts with `*** stack smashing detected ***`, ASan reports `stack-buffer-overflow` `WRITE of size 4096` at pinned `common.c.v2.15:61`, and chosen `UFTPD2SHELL!` / `0x1122334455667788` are written by the upstream `memmove` only. Pinned 2.16 rejects at the guard with `returned=null`. No live uftpd, stock frame layout, useful pointer or execution; `PR:L`, no-chroot, and the 9-byte default-home reach are UNKNOWN. [Status](reports/uftpd2shell-status.md) |
 | **Accelppp2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 66 AVP chunks of 64 bytes put `pos=4254` into a 4160-byte `t->buf`: ASan `heap-buffer-overflow` `WRITE of size 64` at pinned `log_tcp.c.1.14.0:63`; chosen `0x1122334455667788` is read back byte-exact at offset 4 in the adjacent harness heap object; pinned 1.15.0 clamps to 4160 with a clean neighbour. No live daemon, real L2TP AVP path, verbose-logging configuration or useful-pointer control. [Status](reports/accelppp2shell-status.md) |
 | **Indiserver2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 1206-byte mismatched-tag packet formats 1237 bytes into `err[1024]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 1237` at pinned `lilxml.cpp:1281`, and token-safe `INDI2SHELL` reads back byte-exact at requested adjacent-stack offsets 0 and 64. Fixed `96bbd7f` bounds the format with `snprintf` and the neighbour is clean. No live daemon, real TCP/7624 path, stock stack layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/indiserver2shell-status.md) |
+| **Shairport2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 4096-byte unrecognised-method RTSP body writes 8193 bytes into `obf[4096]`: the first byte past the buffer changes, ASan reports `stack-buffer-overflow` `WRITE of size 3` at pinned `rtsp.c:4215`, and token-safe `INDI2SHELL` reads back byte-exact at requested harness-stack offsets 0 and 64. Fixed `c1c41c4` declares `obf[2*4096+1]` and the neighbour is clean. No live daemon, socket, AirPlay-2 auth-bypass observation, stock frame layout, canary/NX measurement, useful-pointer control or execution; advisory claims availability only. [Status](reports/shairport2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
@@ -284,8 +292,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **freeradius2shell**, **falkordb2shell**, **freeswitch2shell**,
 **freerdp2shell**, **xrdp2shell**, **gst2shell**, **babelfish2shell**,
 **bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell**,
-**accelppp2shell** and **indiserver2shell** pursue their lane
-end-to-end — build, harness, debugger, report. Four
+**accelppp2shell**, **indiserver2shell** and **shairport2shell** pursue their
+lane end-to-end — build, harness, debugger, report. Four
 further minds cut
 across them:
 
