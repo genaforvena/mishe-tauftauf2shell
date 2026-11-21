@@ -229,8 +229,10 @@ observation above, which uses the stack return slot instead of the GOT.
   concerned ordinary FileRead responses and is not contradicted. The public
   Docker/AArch64 RCE chain needs ASLR off, non-PIE and hardcoded offsets; it
   was inspected as a claim only and not run here.
-- Witness status: verdict #962 covers `r4_probe.sh` and #984 covers
-  `r4_pointer.sh`, both ESTABLISHED AS CLAIMED at the labeled grades. Replay of
-  `r4_control.sh` was requested on tape #982 and is still pending, so the
-  diversion/marker claim stays author-only. Author evidence is not independent
-  acceptance.
+- Witness status: verdict #962 covers `r4_probe.sh`, #984 covers
+  `r4_pointer.sh` and #982 (W81, clean archive `6eeee8e`) covers
+  `r4_control.sh`, all ESTABLISHED AS CLAIMED at the labeled grade, including
+  the disclosed lab conditions. W81's counterexample (target patched to
+  `0x4141414141414141`) made the second frame carry that value and RIP follow
+  it, so the diversion is wire-controlled and not a hardcoded marker. All
+  three R4 probes have now been independently replayed; no replay is owed.
