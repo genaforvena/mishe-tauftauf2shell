@@ -402,11 +402,13 @@ gdb-resolved static CPython type, checks the written and persisted value
 against the requested address, and runs the unsanitized consumer. A replay
 reports **4 PASS / 0 FAIL**; ordered trace
 `sha256=769e135ebe26f9cb8e482c6c1531718ab1e8e7f2588ddd6174595b5367082f77`.
-The plain run of the exact-value codestream exits **rc 0 with `LOAD_OK`** — a
-*silent* type confusion: the live object now claims `&PyLong_Type` while its
-body is still the original Python object, and the decoder reports success.
-This is stronger than the earlier availability-only result: an attacker-chosen
-static pointer now occupies a live object's control-flow-relevant type field.
+The plain run's outcome is layout-dependent: one build exits **rc 0 with
+`LOAD_OK`** (silent type confusion — the live object claims `&PyLong_Type`
+while its body is still the original Python object), a freshly built clean
+archive aborts **rc 134 `corrupted size vs. prev_size`** on adjacent allocator
+metadata. Both follow from the same OOB stores; neither is a chosen call. The
+durable new fact is that an attacker-chosen static pointer occupies a live
+object's control-flow-relevant type field, with ASLR on.
 
 Honest boundary: no chosen deallocator call was observed. The companion
 `ob_refcnt` store receives the SOD position (here `0xa3bf1e`), so the object

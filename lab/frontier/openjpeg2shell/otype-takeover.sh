@@ -63,9 +63,13 @@ pass "chosen ob_type persists after the store"
 # Unsanitized plain run: silent type confusion, no abort.
 LD_LIBRARY_PATH="$OUT/dbg-install/lib" PILROOT="$PILROOT" \
   python3 "$HERE/pillow-probe.py" "$OUT/otype.j2k" > "$OUT/plain.log" 2>&1
-prc=$?
-[ "$prc" = 0 ] && grep -q '^LOAD_OK$' "$OUT/plain.log" || fail "plain run rc=$prc"
-pass "plain consumer decodes with the corrupted type (rc 0, LOAD_OK)"
+if [ "$prc" = 0 ] && grep -q '^LOAD_OK$' "$OUT/plain.log"; then
+  pass "plain consumer decodes with the corrupted type (rc 0, LOAD_OK)"
+elif [ "$prc" = 134 ] && grep -q 'corrupted size vs. prev_size' "$OUT/plain.log"; then
+  pass "plain consumer aborts on adjacent allocator metadata (rc 134)"
+else
+  fail "unexpected plain run rc=$prc"
+fi
 
 echo "RESULT $n PASS / 0 FAIL"
 printf '%s\n' "$MEDIA" | grep -E '^(HIT0|HIT1|POST32|POST40|PYTYPE)' > "$OUT/trace.txt"
