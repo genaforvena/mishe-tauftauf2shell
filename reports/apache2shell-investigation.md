@@ -652,9 +652,14 @@ python3 rw-gdb.py                                               # backtrace
 
 Source facts, re-verified from the local tarballs: `2.4.70/CHANGES:144-149`
 lists CVE-2026-56449 as an out-of-bounds write in `mod_proxy_html` with
-crafted HTTP response bodies, affecting 2.4.0–2.4.68. The entire code fix
+crafted HTTP response bodies, affecting 2.4.0–2.4.68. The functional fix
 between 2.4.68 and 2.4.69 in `modules/filters/mod_proxy_html.c` is the
-removal of one call, `dump_content(ctx)`, from `pcomment()` (2.4.68 line 312).
+removal of one call, `dump_content(ctx)`, from `pcomment()` (2.4.68 line
+312). It is not the *only* textual change in that file: upstream also adds a
+`const` to `aszSucc`. The declaration at 2.4.68 :1304 is
+`static const char *aszSucc[]`; at 2.4.69 :1303 it is
+`static const char *const aszSucc[]`, a harmless qualification. Verified by
+direct diff of the local pinned trees 2026-11-21.
 
 `build-l5.sh` builds ASan/UBSan httpd 2.4.68 (affected) and 2.4.69 (control)
 with `--enable-proxy-html` against the host libxml2 2.9.14. `l5-lane.py` has
@@ -671,7 +676,12 @@ attribute value into `ctx->vb` and then resets only `ctx->vb.strlen = 0`
 which calls `dump_content()` on that stale buffer. gdb breakpoints in
 `logs/l5-gdb-trace.txt` show at the first hit: caller `pcomment` at line 312,
 `ctx->vb.strlen = 0`, `ctx->vb.buf = "AAAAAAAAAA"`, and the map
-`AAAA -> BBBB` with `flags = 3` (M_HTML|M_EVENTS; default M_CDATA present).
+`AAAA -> BBBB` with `flags = 3` (M_HTML 0x01 | M_EVENTS 0x02). `M_CDATA` is
+0x04 (2.4.68 `mod_proxy_html.c:77-79`), so flags=3 does **not** include
+M_CDATA. The witness's clean-tree gdb run with the committed harness shows
+flags = 7 (M_HTML|M_EVENTS|M_CDATA, the default map); the provenance of the
+recorded flags=3 trace is UNKNOWN (witness suggests a c-flagged or older
+config). The stale-buffer mechanism and size=-3 result are unchanged.
 The string-literal branch then computes
 `len + 1 - s_from - match = 0 + 1 - 4 - 0 = -3` as a `size_t` and passes it
 to `memmove` at line 272. Note the `c` map flag is an *exclude* flag

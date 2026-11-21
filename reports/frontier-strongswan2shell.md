@@ -127,3 +127,16 @@ All ground-truth items in the first section remain claims reproduced from
 public sources; this brief proves the pinned code paths and their memory
 effects in a synthetic frame, not advisory reachability, CVSS, or daemon
 exploitability.
+
+## Independent witness (closed 2026-11-21T08:12Z)
+
+Witness request #669 is closed by verdict #675 (tape #675): ESTABLISHED AS
+CLAIMED, no grade correction, rung 4 remains INSTRUMENTED, no replay owed and
+no doc nit. The witness replayed unmodified `run.sh` from two clean
+`git archive HEAD` (`6b9ac2d`) extractions plus the working tree: 54 PASS / 0
+FAIL and raw trace
+`sha256=57cd8943825f35a14f45ce134f3987c489aacbd080c6249a94c9dc808f1f3d6a`
+byte-identical in all three. Its own primary-source fetches reproduced all
+five pin hashes and its counterexample hunt found no benign-length false trip;
+the real-libc rung-4 negative was confirmed independently. No brief revision
+was required.
