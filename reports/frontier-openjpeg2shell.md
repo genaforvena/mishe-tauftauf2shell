@@ -450,6 +450,15 @@ bytes scanned through the archive script paths gave a gap object at `24*30`,
 while the same bytes through the repository paths gave `24*184` or `24*498`.
 Any future reproduction must fix cwd and argv, not just the codestream digest.
 
+There is also an arithmetic constraint: every 14-byte tile part shifts `SOD_k`
+by 14, so with the good pad (`target=10731952`, divisible by 8) the write value
+is 8-byte aligned only when `k` is a multiple of 4. The reachable gap object in
+that layout sat at `k=30`, whose `SOD_30=0xa3c134` is 4-byte aligned and cannot
+be a valid Python object pointer at all. Moving 404 bytes from the COM pad into
+a later tile part kept total codestream length and tile-part count fixed but
+did not restore the layout; the COM allocation size, not total length, drives
+the observed placement.
+
 `bash lab/frontier/openjpeg2shell/gap-reach.sh OUTDIR` rebuilds the pinned lib,
 scans three codestreams (evil 48/154/184), asserts the scan is non-vacuous and
 prints each layout's `min_gap_index` and reachability instead of asserting an
