@@ -41,12 +41,67 @@ posture is post-authentication (PR:L) with a dynamic channel open.
   8228/12024; exact-size and benign controls `oob_writes=0`; 5/5 traces
   byte-identical.
 
+## Real compiled-code confirmation (2026-11-21)
+
+Reproducible sources:
+`lab/xrdp2shell-real/{real_drdynvc_driver.c,chosen_bytes_real_path.c,RUNBOOK.md}`.
+The frontier harness is a reimplementation; a second harness,
+`real_drdynvc_driver.c` (digest `a05ba8ac…`), links against the actual
+ASan-instrumented xrdp 0.10.6 `build-asan/libxrdp/.libs/libxrdp.a` and
+`libcommon.a` and drives
+`xrdp_channel_process()` → `xrdp_channel_process_drdynvc()` → real
+`drdynvc_process_data_first()` (`libxrdp/xrdp_channel.c:490`) with a crafted
+DYNVC_DATA_FIRST in a CHANNEL_FLAG_FIRST|LAST virtual-channel PDU. The
+callback re-creates `xrdp_mm_drdynvc_data_first()`'s body with real
+`trans_create` / `trans_get_out_s` / `out_uint8a`.
+
+- Rung 3, real ASan (`vuln.txt`): `WRITE of size 20000` in `memcpy`,
+  0 bytes after an 8192-byte region allocated by `trans_create`
+  (`common/trans.c:110`); stack `memcpy` → `sink_data_first` →
+  `drdynvc_process_data_first` → `xrdp_channel_process_drdynvc` →
+  `xrdp_channel_process`. The chosen marker `XRDP2SHELL-CHOSEN-MARKER`
+  is in the copied data.
+- Exact threshold (`threshold.txt`): payload 8164 rc 0 clean, 8165 ASan OOB;
+  28-byte sink header + payload vs the 8192 buffer. 5/5 runs identical
+  modulo ASLR (`determinism.txt`).
+- Rung 4, chosen bytes in real compiled code (`chosen_bytes.txt`, non-ASan
+  build so bytes can be read back): markers `DEADBEEF-CR` and `C0FFEE00-CR`
+  land in an adjacent malloc chunk 8208 bytes after the buffer start, at
+  offsets 84 and 484; `CHOSEN_BYTES m1=PASS m2=PASS`, `callback_calls=1`,
+  `bytes_seen=20000`. A variant that called `free()` after the overflow
+  aborted with `malloc(): corrupted top size` (glibc heap corruption).
+  No pointer-sized field or control-flow target was controlled.
+- Gate controls (`gate.txt`): payload 20000/declared 1000 and 19000 →
+  callback_calls=0, clean; 20000/20000 → ASan OOB; 1600/1590 → reject;
+  1600/1600 → callback_calls=1, clean. The only gate is
+  `total_bytes >= 1590 && bytes <= total_bytes`, trivially satisfied.
+- Separate negative finding (do not conflate with the CVE sink): multi-chunk
+  FIRST/MIDDLE/LAST reassembly has an OOB read at
+  `libxrdp/xrdp_channel.c:630` — `out_uint8a` leaves `self->s->p` at the
+  buffer end and nothing resets it before `in_uint8(ls, cmd)`. The single
+  FIRST|LAST path avoids it.
+- A synthetic fixed control that caps the copy at 8128 is clean; that cap is
+  NOT the real 0.10.6.1 fix, only a control on the same sink.
+- Loopback reachability: the real ASan `xrdp` was started from
+  `lab/build/xrdp2shell-live/run/` bound to 127.0.0.1:3390 only; a Python
+  X.224 Connection Request carrying RDP_NEG_REQ drew the COTP reply
+  `03 00 00 09 02 f0 80 21 80`. This proves the lab listener is reachable,
+  not that a full RDP session reaches the sink.
+
+
 ## Evidence boundary
 
-Rungs 1/2/3 established, rung 4 PASS in the extracted harness with
-client-chosen bytes at client-chosen offsets. Live xrdp process, real
-DRDYNVC PDU parse/reassembly, dynamic-channel open, stock allocator layout,
-network reachability and the auth gate remain UNKNOWN. No off-loopback probe.
+Rungs 1/2/3 established; rung 4 PASS both in the extracted harness and in
+the real compiled xrdp 0.10.6 code, with client-chosen bytes read back at
+client-chosen offsets in an adjacent heap chunk. The real-code driver calls
+the real parse path directly; it is not a full network session. Loopback
+COTP reachability of the lab listener is evidenced, but a completed RDP
+logon, dynamic-channel open, stock allocator layout in a live session and a
+full network PDU trace remain UNKNOWN: xrdp needs PAM plus a session and a
+registered dynamic channel, no RDP client binary/lib is available in the
+lab and creating a host account is out of lab scope. The post-auth (PR:L)
+precondition is intrinsic to the CVE, not a lab artifact. No off-loopback
+probe. Author report is not independent acceptance; witness replay owed.
 
 Brief: `reports/frontier-xrdp2shell.md`; harness:
 `lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`. Witness replay requested;

@@ -1,0 +1,74 @@
+# xrdp2shell — real compiled-code reproduction runbook
+
+Companion to `reports/xrdp2shell-status.md`. These drivers exercise the real
+compiled xrdp 0.10.6 libraries; they do not reimplement the vulnerable
+function. The extracted-model harness lives in `lab/frontier/xrdp2shell/`.
+
+## Provisions
+
+xrdp source tree with `configure.ac` `AC_INIT([xrdp], [0.10.6], ...)`.
+Fixed comparison is v0.10.6.1 / fix commit
+`43dc9c3b71e5e46733d70ec0239c482ee264cd9f`.
+
+ASan build (from `lab/build/xrdp2shell-live/`):
+
+    mkdir build-asan && cd build-asan
+    ../src/configure 'CFLAGS=-g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined' \
+      LDFLAGS=-fsanitize=address,undefined --prefix=$PWD/install \
+      --enable-fuse=no --enable-vsock=no --enable-jpeg=no --enable-opus=no \
+      --enable-mp3lame=no --enable-xrdpvr=no --enable-painter=no \
+      --enable-rfxcodec=no --enable-freerdp1=no
+    make -j2
+
+A plain build (`build-plain/`, same configure without the sanitizer flags) is
+needed for the chosen-byte reader: ASan poisons the adjacent chunk.
+
+## Drivers
+
+- `real_drdynvc_driver.c` (sha256 `a05ba8ac19f284755443d65b5c0f9f840cbd9b7767cf35dcbd58d3580672100c`)
+  links the real ASan `libxrdp.a` and `libcommon.a`, builds a real
+  `struct xrdp_channel` around zeroed real structs, and calls
+  `xrdp_channel_process()` with one CHANNEL_FLAG_FIRST|LAST virtual-channel
+  PDU carrying a DYNVC_DATA_FIRST body. The data_first callback is the body
+  of `xrdp_mm_drdynvc_data_first()` using real `trans_create` /
+  `trans_get_out_s` / `out_uint8a`.
+
+      cc -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer \
+        -I$SRC/libxrdp -I$SRC/common -I$SRC/include -I$B \
+        real_drdynvc_driver.c $B/libxrdp/.libs/libxrdp.a \
+        $B/common/.libs/libcommon.a -lssl -lcrypto -lpthread -ldl -lm \
+        -o real_drdynvc_driver
+
+  where `$SRC` is the source tree and `$B` the ASan build dir. Arguments:
+  `[fixed] [payload_len] [declared_total_bytes]`, default 20000/20000.
+  `fixed` applies a synthetic 8128-byte cap — a control on the same sink,
+  NOT the real 0.10.6.1 fix.
+
+- `chosen_bytes_real_path.c` (sha256 `ecfe9f7e8e0582fa9ec896d0b0159f64bae06e70745bc182938892dee53320d1`)
+  is the non-ASan reader: it plants an adjacent canary chunk and prints the
+  bytes written past the 8192-byte buffer at predicted offsets.
+
+## Observed output (2026-11-21, driver digests above)
+
+- Default run: ASan `WRITE of size 20000` in `memcpy`, 0 bytes after an
+  8192-byte region allocated by `trans_create` (`common/trans.c:110`);
+  stack `memcpy` -> `sink_data_first` -> `drdynvc_process_data_first`
+  (`xrdp_channel.c:490`) -> `xrdp_channel_process_drdynvc` (:647) ->
+  `xrdp_channel_process` (:700). Marker `XRDP2SHELL-CHOSEN-MARKER` in data.
+- Payload 8164 -> clean, 8165 -> ASan OOB; 5/5 runs identical modulo ASLR.
+- Chosen bytes: `CANARY delta=8208 k1=84 k2=484 m1='DEADBEEF-CR' m2='C0FFEE00-CR'`,
+  `CHOSEN_BYTES m1=PASS m2=PASS`, `callback_calls=1 bytes_seen=20000`. An
+  earlier variant that called `free()` after the overflow aborted with
+  `malloc(): corrupted top size`.
+- Gate: 20000/1000 and 20000/19000 -> `callback_calls=0`, clean;
+  20000/20000 -> OOB; 1600/1590 -> reject; 1600/1600 -> clean. The only gate
+  is `total_bytes >= 1590 && bytes <= total_bytes`.
+
+## Limits
+
+These are direct calls into the real parse path, not a full network RDP
+session. No completed logon, dynamic-channel open, live-session allocator
+layout or network PDU trace is claimed. Post-auth (`PR:L`) is intrinsic to
+the CVE, not a lab artifact. The separate multi-chunk OOB read at
+`xrdp_channel.c:630` is a different bug and must not be conflated with this
+sink.
