@@ -59,8 +59,8 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
    Raw `:280` returns true once `pos >= max_http_header_data`, so this real
    caller stops when the arena fills: it cannot supply a chosen byte at
    `pos == limit`. The harness hand-stages that precondition
-   (`gen_driver.py:106`, chain mode `:122`); real-path reachability of a
-   chosen-byte OOB stays UNKNOWN.
+   (`gen_driver.py:106`, chain mode `:122`); the naive real route is closed
+   by the build check below and any other route stays UNKNOWN.
 3. `:273-281` is `lws_frag_append`: `:275` fetches `wsi->http.ah`; `:277`
    executes `ah->data[ah->pos++] = (char)c` with no prior bound check;
    `:280` tests `pos >= max_http_header_data` only **after** the store. The
@@ -70,9 +70,10 @@ Line numbers are from raw pinned bytes, `v4.3.10` unless marked fixed.
    that blocks the naive long-`:path` route.
 4. All three real call sites (`:286`, `:744`, `:1168`) check the return, so
    the reachable primitive on the real path is UNKNOWN, not an observed
-   chosen byte. A possible terminating NUL from `lws_frag_end` — raw v4.3.10
+   chosen byte. The terminating NUL from `lws_frag_end` — raw v4.3.10
    `:283-294`, calling `lws_frag_append(wsi, 0)` at `:286` (`:289` is a
-   comment) — was not exercised and stays UNKNOWN. The `:283-295` / `:289`
+   comment) — was not exercised in the harness; the real-build check below
+   did observe NUL stores, still inside the arena. The `:283-295` / `:289`
    call-site numbering belongs to v5.0.0 (`:286-297` / `:289`), not v4.3.10.
 5. Fixed `v5.0.0:277-278` rejects `pos >= max_http_header_data` before the
    store; `:280` is the same assignment. The fix patch adds exactly that
