@@ -281,8 +281,8 @@ library bytes: ASan `WRITE of size 16384` 0 bytes after an 8820-byte region
 from `rdpsnd_server_send_samples`, and a sanitizer-free replay placed `de`
 at OOB offset 8820 and `ad` at 21384, fixed-guard control rc 3 with no
 wrap. This is a chosen-byte rung 4 on real library bytes, still in-process:
-a live FreeRDP process, virtual-channel transport, RDP session, stock
-allocator layout, network reachability and the auth gate stay UNKNOWN.
+MCS/channel setup, rdpsnd over the wire, live-process corruption, stock
+allocator layout and a full RDP session stay UNKNOWN.
 Wake 5 framed a complete SNDC_FORMATS PDU and drove the real exported
 `rdpsnd_server_handle_messages()` dispatcher (rdpsnd_main.c:1204-1298) with a
 stub WTS read callback, including body reassembly across reads and msgType
@@ -299,9 +299,14 @@ the FFmpeg-off builds tested here, so neither wrap-capable tag is selected
 from the stock server list. The positive rung 4 supplies an ADPCM server
 record through `subsystem->rdpsndFormats`; with that condition explicit,
 chosen-byte readback and the ASan `WRITE of size 16384` hold through the real
-reader, dispatcher, activation and parser. Live RDP, channel transport,
-session, network, stock layout, an FFmpeg-enabled build and the auth gate
-stay UNKNOWN.
+reader, dispatcher, activation and parser. Wake 7 ran a real 3.32.0
+`freerdp-shadow-cli` on 127.0.0.1:13890 and the committed probe completed
+X.224 / RDP_NEG_REQ over real TCP: protocol selection `0x08`/`0x02`/`0x00`,
+and a TLS handshake that stops at `CONNECTION_STATE_NEGO` when CredSSP is
+withheld under default NLA, while standard-RDP local-peer mode advances
+without credentials. MCS/channel setup, rdpsnd over the wire, live-process
+corruption, stock layout, a full session and an FFmpeg-enabled build stay
+UNKNOWN.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
