@@ -1,8 +1,9 @@
 # civetweb2shell — CVE-2025-55763 rung-4 boundary, wake 1 (2026-11-21)
 
 **Status: rung 4 INSTRUMENTED — chosen-byte overwrite of a live adjacent object
-OBSERVED in an instrumented copy; natural adjacency, pointer control,
-control-flow diversion and code execution still UNKNOWN.** Rungs 1/2/3 remain
+OBSERVED in an instrumented copy; natural adjacency NOT OBSERVED in the
+unmodified build (wake-3 probes below); pointer control, control-flow
+diversion and code execution still UNKNOWN.** Rungs 1/2/3 remain
 ESTABLISHED as recorded in `reports/frontier-civetweb2shell.md` and witness
 verdicts #1027/#1029. Fixed side is the merged commit `c584455…`, not a tag.
 
@@ -98,11 +99,43 @@ Raw wake-1 logs are committed under `w1/instr-out/q=*/server.out` and
 0 FAIL, trace sha256
 `2ecaac759e4230f9549507091cff212adb68dd63e650d3abf6ced2406e5e2d50`.
 
+## Natural-adjacency probe (wake 3, unmodified build)
+
+Two independent observations of the pinned, unmodified v1.16 rebuilt with
+`WITH_CFLAGS='-U_FORTIFY_SOURCE -O0 -g' NO_SSL=1`, a real loopback listener
+and one worker thread:
+
+- gdb break at `civetweb.c:15257` (after `mg_malloc(buflen)`, before the
+  appends): for `buflen=8197` the word at `new_path+8200` (next chunk SIZE)
+  was `0x16d11`, a ~91 KB **top chunk**, with zeroed user data at `+8208`.
+  No live object followed `new_path`.
+- gdb break at `:15264` (after the appends): that word became `0x16d00` —
+  the query's NUL terminator cleared `PREV_INUSE` on the top chunk. Chosen
+  bytes sit in top-chunk padding/old data, not in a live object's fields.
+  Raw dumps: `w3/gdb-probe.log` and `w3/gdb-post.log`.
+- An observation-only `LD_PRELOAD` tracer (it calls `__libc_malloc` and
+  `__libc_free` directly, so it does not recurse) logged allocation
+  addresses for one benign warm redirect plus three crafted redirects.
+  Every 8197-byte `new_path` had **no live allocation at `new_path+8208` at
+  the moment it was allocated** (`live_at_alloc=0,0,0,0`); that neighbour is
+  allocated only later on the response path. The warm request's freed 8 KB
+  chunk is consumed by the next request's 9003-byte request buffer, so the
+  crafted `new_path` comes from top again. With a 38-byte query the first
+  crafted request already aborts the allocator, consistent with the
+  availability-only ceiling.
+
+Self-checking replay from a clean archive:
+`cd lab/frontier/civetweb2shell && bash run-natural.sh /tmp/cw-natural` →
+11 PASS / 0 FAIL, rc 0; trace sha256
+`15ce7bdba90a3f060304b584928f5c79974ff6b22b22944c23879b81b189ae8a`.
+This is a negative result; it does not upgrade the rung.
+
 ## Preserved negatives
 
 - Public PoC 404s in this docroot; the slash-collapsing request is locally
   derived. Long query + short path does not overflow (`:15251` budgets it).
 - Short slash run is a 301 with no corruption (negative control in `run.sh`).
-- No natural adjacency, pointer control or execution was observed. CISA's
+- Natural adjacency was measured absent in the unmodified build (probe
+  above); no pointer control or execution was observed. CISA's
   published CVSS vector is availability-only; the CVE's CWE-121 (stack) label
   is inconsistent with the heap allocation.

@@ -1,0 +1,14 @@
+PASS pin_v1_16=f0e471c1bf4e7804a6cfb41ea9d13e7d623b2bcc7bc1e2a4dd54951a24d60285
+PASS tracer_build=0
+PASS vuln_build=0
+PASS unmodified_sink=1
+PASS no_canary_patch=0
+PASS warm_req_bytes=59
+PASS crafted_req_bytes=9059
+PASS newpath_count=4
+PASS newpath_sizes=8197,8197,8197,8197
+PASS neighbour_live_at_alloc=0,0,0,0
+PASS crafted_neighbour_allocated_later=1,1,1
+PASS_COUNT=11
+FAIL_COUNT=0
+TRACE_SHA256=15ce7bdba90a3f060304b584928f5c79974ff6b22b22944c23879b81b189ae8a
