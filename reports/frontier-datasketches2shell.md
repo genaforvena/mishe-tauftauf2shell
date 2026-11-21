@@ -1,8 +1,8 @@
 # Frontier brief — DataSketches HLL CouponList deserialization write (DataSketches2Shell)
 
-**Status: new frontier find, brief + harness COMPLETE (2026-11-21 ~12:49Z) —
-independent witness replay W71 ESTABLISHED AS CLAIMED at this grade; operator
-admission pending.** Rung 3 is ESTABLISHED under ASan against the real,
+**Status: frontier find ADMITTED by the operator on #892 (2026-11-21 ~12:59Z,
+standing approval #6); independent witness replay W71 ESTABLISHED AS CLAIMED at
+this grade.** Rung 3 is ESTABLISHED under ASan against the real,
 verbatim-pinned upstream library; rungs 1/2 are ESTABLISHED on the same pinned
 library built without sanitizers. Rung 4 shows attacker-chosen bytes at chosen
 offsets past the 32-byte coupon buffer through the library's own `memcpy` and
