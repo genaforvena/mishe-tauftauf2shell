@@ -1,0 +1,91 @@
+From a7d5eb844a59ea076b7972a018753242f18e6f7b Mon Sep 17 00:00:00 2001
+From: "github-actions[bot]"
+ <41898282+github-actions[bot]@users.noreply.github.com>
+Date: Thu, 9 Jul 2026 12:40:55 -0300
+Subject: [PATCH] WMS: GetLegendGraphic: avoid potential write heap buffer
+ overflow via repeated LAYER parameters (#7569)
+
+Fixes https://github.com/MapServer/MapServer/security/advisories/GHSA-4mwc-qc95-5959
+
+Funded by RGD Savoie Mont-Blanc
+
+Co-authored-by: Even Rouault <even.rouault@spatialys.com>
+---
+ msautotest/renderers/resolution.map |  6 +++---
+ src/mapwms.cpp                      | 27 ++++++++++-----------------
+ 2 files changed, 13 insertions(+), 20 deletions(-)
+
+diff --git a/msautotest/renderers/resolution.map b/msautotest/renderers/resolution.map
+index d98bd58227..631c229c2c 100644
+--- a/msautotest/renderers/resolution.map
++++ b/msautotest/renderers/resolution.map
+@@ -10,9 +10,9 @@
+ # RUN_PARMS: resolution_text_1.png [MAPSERV] QUERY_STRING="map.resolution=72&WIDTH=25&HEIGHT=25&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetMap&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYERS=text" > [RESULT_DEMIME]
+ # RUN_PARMS: resolution_text_2.png [MAPSERV] QUERY_STRING="map.resolution=144&WIDTH=50&HEIGHT=50&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetMap&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYERS=text" > [RESULT_DEMIME]
+ # RUN_PARMS: resolution_text_4.png [MAPSERV] QUERY_STRING="map.resolution=288&WIDTH=100&HEIGHT=100&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetMap&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYERS=text" > [RESULT_DEMIME]
+-# RUN_PARMS: legend_resolution_point_1.png [MAPSERV] QUERY_STRING="map.resolution=72&keysize=20+20&WIDTH=25&HEIGHT=25&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYERS=point" > [RESULT_DEMIME]
+-# RUN_PARMS: legend_resolution_point_2.png [MAPSERV] QUERY_STRING="map.resolution=144&keysize=40+40&WIDTH=50&HEIGHT=50&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYERS=point" > [RESULT_DEMIME]
+-# RUN_PARMS: legend_resolution_point_4.png [MAPSERV] QUERY_STRING="map.resolution=288&keysize=80+80&WIDTH=100&HEIGHT=100&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYERS=point" > [RESULT_DEMIME]
++# RUN_PARMS: legend_resolution_point_1.png [MAPSERV] QUERY_STRING="map.resolution=72&keysize=20+20&WIDTH=25&HEIGHT=25&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYER=point" > [RESULT_DEMIME]
++# RUN_PARMS: legend_resolution_point_2.png [MAPSERV] QUERY_STRING="map.resolution=144&keysize=40+40&WIDTH=50&HEIGHT=50&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYER=point" > [RESULT_DEMIME]
++# RUN_PARMS: legend_resolution_point_4.png [MAPSERV] QUERY_STRING="map.resolution=288&keysize=80+80&WIDTH=100&HEIGHT=100&map=[MAPFILE]&SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&SRS=EPSG:4326&BBOX=0,0,100,100&FORMAT=image/png&STYLES=&LAYER=point" > [RESULT_DEMIME]
+ #
+ # REQUIRES: OUTPUT=PNG
+ #
+diff --git a/src/mapwms.cpp b/src/mapwms.cpp
+index 6538008b6f..38514e9844 100644
+--- a/src/mapwms.cpp
++++ b/src/mapwms.cpp
+@@ -991,9 +991,12 @@ int msWMSLoadGetMapParams(mapObj *map, int nVersion, char **names,
+     non mandatory
+    */
+   for (int i = 0; i < numentries; i++) {
++    if (strcasecmp(names[i], "REQUEST") == 0) {
++      request = values[i];
++    }
+     /* check if SLD is passed.  If yes, check for OGR support */
+-    if (strcasecmp(names[i], "SLD") == 0 ||
+-        strcasecmp(names[i], "SLD_BODY") == 0) {
++    else if (strcasecmp(names[i], "SLD") == 0 ||
++             strcasecmp(names[i], "SLD_BODY") == 0) {
+       sldenabled =
+           msOWSLookupMetadata(&(map->web.metadata), "MO", "sld_enabled");
+ 
+@@ -1012,15 +1015,15 @@ int msWMSLoadGetMapParams(mapObj *map, int nVersion, char **names,
+     }
+   }
+ 
++  const char *layerKey = request && strcasecmp(request, "GetLegendGraphic") == 0
++                             ? "LAYER"
++                             : "LAYERS";
++
+   std::vector<std::string> wmslayers;
+   for (int i = 0; i < numentries; i++) {
+     /* getMap parameters */
+ 
+-    if (strcasecmp(names[i], "REQUEST") == 0) {
+-      request = values[i];
+-    }
+-
+-    if (strcasecmp(names[i], "LAYERS") == 0) {
++    if (strcasecmp(names[i], layerKey) == 0) {
+       std::vector<int> layerOrder(map->numlayers);
+ 
+       wmslayers = msStringSplit(values[i], ',');
+@@ -5983,16 +5986,6 @@ int msWMSDispatch(mapObj *map, cgiRequestObj *req, owsRequestObj *ows_request,
+     }
+     if (found) {
+       isContentDependentLegend = true;
+-      /* getLegendGraphic uses LAYER= , we need to create a LAYERS= value that
+-       * is identical we'll suppose that the client is conformat and hasn't
+-       * included a LAYERS= parameter in its request */
+-      for (int i = 0; i < req->NumParams; i++) {
+-        if (strcasecmp(req->ParamNames[i], "LAYER") == 0) {
+-          req->ParamNames[req->NumParams] = msStrdup("LAYERS");
+-          req->ParamValues[req->NumParams] = msStrdup(req->ParamValues[i]);
+-          req->NumParams++;
+-        }
+-      }
+     } else {
+       return msWMSLegendGraphic(map, nVersion, req->ParamNames,
+                                 req->ParamValues, req->NumParams,
