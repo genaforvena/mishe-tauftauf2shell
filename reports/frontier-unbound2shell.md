@@ -95,8 +95,12 @@ lab frame, not a claim about a shipping build's allocator behavior.
 ## Evidence ladder (observed 2026-11-21 06:31Z)
 
 Working-tree replay `bash lab/frontier/unbound2shell/run.sh <outdir>`:
-**26 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`**, trace
+**29 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`**, trace
 `sha256=05bf4ace988fc4fdc4d213674e1f30e85c739c170b47c5319cbfc2cd7f24f795`.
+Two clean `git archive HEAD` (`f9295a0`) extractions were replayed into
+absolute directories `replay-1` and `replay-2` with the unmodified `run.sh`:
+both returned 29 PASS / 0 FAIL and `ALL CHECKS PASSED rc 0`, with byte-identical
+`trace.txt` sha256 `05bf4ace988fc4fdc4d213674e1f30e85c739c170b47c5319cbfc2cd7f24f795`.
 
 - Rung 1 — deterministic trigger: pinned max lengths `dname_len=255`,
   `rdata_len=65535` yield `written=65788`, `overflow=236`, `rc=1`;
