@@ -60,18 +60,20 @@ independent replay at that scope. Author reports are never acceptance.
 | **Unbound2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a DNSKEY name plus RDATA writes 65788 bytes into a 65552-byte scratch buffer in `ds_create_dnskey_digest()`; rung 4 is instrumented chosen RDATA bytes. No live resolver, DNSSEC gate or compression-pointer route; advisory RCE remains a claim. [Status](reports/unbound2shell-status.md) |
 | **Janus2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a 1986-byte `.mjr` info header is `fread` into `prebuffer[1500]`; rung 4 is instrumented chosen bytes. Availability-only; no live Janus, HTTP/SDP path or real recording. [Status](reports/janus2shell-status.md) |
 | **Rsyslog2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a 9000-byte decoded Basic-Auth credential takes the `calloc(0, len)` branch in `imhttp.c:705` and writes chosen bytes past a zero-length allocation; rung 4 is instrumented chosen bytes read back at `pworkbuf[0..15]`. No live rsyslog, imhttp module or HTTP path; availability-only. [Status](reports/rsyslog2shell-status.md) |
+| **ProxySQL2Shell** | ✓ | ✓ | ✓ | ◐ | **CODE/HARNESS** — a declared 65535 (MySQL) / 100000 (PgSQL) first-packet length drives a second recv() of that many client-chosen bytes into a fixed 32768-byte queueIN before auth; ASan WRITE of size 65535 / 100000 at pinned mysql :665 / pgsql :534; rung 4 is instrumented chosen stripes at 32771 / 67237 bytes past the queue. No live daemon, listener, stock allocator or pointer control; advisory potentially-exploitable stays a claim. [Status](reports/proxysql2shell-status.md) |
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 29 target
+Each admitted family is its own mind with its own tmux window: 30 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
 `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
 `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell`,
 `indiserver2shell`, `shairport2shell`, `asterisk2shell`, `netatalk2shell`,
-`iondtn2shell`, `unbound2shell`, `opensips2shell`, `janus2shell` and
-`rsyslog2shell`. Each builds affected and fixed versions locally, writes
+`iondtn2shell`, `unbound2shell`, `opensips2shell`, `janus2shell`,
+`rsyslog2shell` and `proxysql2shell`. Each builds affected and fixed versions
+locally, writes
 harnesses, drives toward rung 4 and authors its report under `reports/`.
 
 Four cross-cutting minds: **frontier** hunts public advisories and hands a
