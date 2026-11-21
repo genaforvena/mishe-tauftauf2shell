@@ -53,14 +53,19 @@ changes. The libIEC61850 lane is different: a wire-supplied chain already calls
 real libc `system` in the live unsanitized server with a target-written marker
 (`3777729`), so it is a second author-positive R5 lane, not a blocked one.
 
-Current status: **FreeSWITCH author-positive, witness pending.** Commit
+Current status: **FreeSWITCH R5 ESTABLISHED, with labeled conditions.** Commit
 `462e887` connects a forged `SSL`/`SSL_METHOD` carried in the same WebSocket
 frame to `system()` in a live loopback target, with a target-written marker, a
 `system(rdi=forged SSL)` trace, and absent-marker safe and fixed controls.
-ASLR-off calibration, opt-in `mod_xml_rpc`/websocket config, lab build shims
-and 127.0.0.1-only netns remain required. Witness replay requested in chat
-#1113; no ESTABLISHED rung-5 claim and no README table change yet. Full
-evidence and recipe in `reports/frontier-freeswitch2shell.md`.
+Witness #1118 replayed the committed harness from clean blobs (matching script
+digests and source pins), reproduced the marker and varied the command
+(`id>r5` → `pwd>p1`) for a different side effect; safe and pinned-fixed runs
+left the marker absent. ASLR-off calibration and trigger, opt-in
+`mod_xml_rpc`/websocket config, lab build shims, a sudo-root netns and
+127.0.0.1-only traffic remain required; ASLR-on reachability stays UNKNOWN.
+The README R5 cell is filled for this build only. Evidence and recipe in
+`reports/frontier-freeswitch2shell.md` and the 2026-11-21 addenda of
+`docs/reproducibility.md`.
 
 The IEC61850 lane is also author-positive only, not ESTABLISHED (`3777729`):
 `bash lab/frontier/libiec61850/r5_system.sh <abs-outdir>` drives a wire-supplied

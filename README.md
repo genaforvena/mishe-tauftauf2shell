@@ -21,9 +21,9 @@ The rungs are depth of proof, not boxes to tick:
   request input makes a live target run a lab-chosen benign command, with
   vulnerable, fixed and safe-input controls and an independent witness replay.
   Additive and per-build, never a relabel of a pointer fault or an in-process
-  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. Two
-  author-positive R5 limbs await witness replay; no R5 cell is filled until a
-  witness establishes one.
+  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. FreeSWITCH's
+  R5 cell is witness-ESTABLISHED under the labeled conditions (#1118);
+  Iec61850's R5 limb stays author-positive pending witness replay.
 
 Rung cells: `✓` demonstrated · `◐` limited (harness-only, instrumented, or a
 count-controlled effect) · `—` not demonstrated.
@@ -49,7 +49,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Brotli2Shell** | ✓ | ✓ | ✓ | — | — | **HARNESS** — chosen bytes at chosen offsets past an 8-byte decoder buffer; the fixed build rejects. Rung 4 not demonstrated; network reachability is a claim. [Status](reports/brotli2shell-status.md) |
 | **Freeradius2Shell** | ✓ | ✓ | ✓ | ◐ | — | **HARNESS** — an EAP-FAST ticket writes 208 bytes into a 152-byte stack struct and executes a chosen `verify_marker()` at rc 42; the fixed build rejects. Witness tape #227 reproduced byte-identical digests including the offset-specific marker control. Live `radiusd`, network reach and real stack layout UNKNOWN; rung 4 is harness-only. [Status](reports/freeradius2shell-status.md) |
 | **Falkordb2Shell** | ✓ | ✓ | ✓ | — | — | **HARNESS** — a masked extended-length frame drives 525 out-of-bounds writes and chosen mask bytes overwrite a canary; witness replay #239 established rungs 1/2/3. Rung 4 not demonstrated because the mask repeats every four bytes. [Status](reports/falkordb2shell-status.md) |
-| **Freeswitch2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE** — a chosen 8-byte value at `wsh->ssl` is dereferenced in `SSL_shutdown` in a live FreeSWITCH over a loopback WebSocket `101`; the sentinel is a value, not code. Witness #338 replay with different bytes at the same fault site, controls clean. Stock heap layout, external reachability and the opt-in `mod_xml_rpc` gate stay in the claim. [Status](reports/freeswitch2shell-status.md) |
+| **Freeswitch2Shell** | ✓ | ✓ | ✓ | ✓ | ✓ | **LIVE** — a chosen 8-byte value at `wsh->ssl` is dereferenced in `SSL_shutdown` in a live FreeSWITCH over a loopback WebSocket `101`; the sentinel is a value, not code. Witness #338 replay with different bytes at the same fault site, controls clean. Stock heap layout, external reachability and the opt-in `mod_xml_rpc` gate stay in the claim. R5 ESTABLISHED by witness #1118 under the recorded conditions (ASLR-off calibration and trigger, opt-in `mod_xml_rpc`/websocket, lab shims, sudo-root netns, loopback only): a forged `SSL_METHOD` in the same frame calls `system()` with a wire-carried command, the target writes the marker, a varied command gives a different side effect, and safe/fixed controls leave it absent. ASLR-on reachability stays UNKNOWN. [Report](reports/frontier-freeswitch2shell.md) |
 | **Freerdp2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE** — a client `SNDC_FORMATS` record wraps `out_frames` after a failed realloc; chosen `de` at OOB offset 8820 in a live post-auth RDP session over real TCP, under stock glibc and ASan. Witness W31/#532 ESTABLISHED the one-command replay from clean HEAD; #602 ESTABLISHED the FFmpeg format gate NEGATIVE on stock 6.1.1. The client controls the offset, not the audio bytes; the default ADPCM format is unavailable and the no-auth 9.8 case is not re-asserted. [Status](reports/freerdp2shell-status.md) |
 | **Xrdp2Shell** | ✓ | ✓ | ✓ | ✓ | — | **CODE** — chosen bytes on real compiled xrdp 0.10.6 code: a 20000-byte DYNVC payload overflows the 8192-byte `trans_create` region through the real receive chain. Witness W33 ESTABLISHED both claims, W41/#617 clean-room 15/15 on two fresh builds closing the build-tree limit. Still in-process: no logon, negotiated channel, socket PDU trace or live-session allocator layout. [Status](reports/xrdp2shell-status.md) |
 | **Gst2Shell** | ✓ | ✓ | ✓ | ◐ | — | **LIVE** — attacker-chosen `channels=1000` in `encoding-params` faults the shipping `rtpL8`/`rtpL16`/`rtpL24` depays and a loopback RTSP `rtspsrc` client; the OOB store is constant `-3`, so this is a count-controlled effect, not chosen bytes. Witness W33/#552 ESTABLISHED the 43/43 harness repair, closing the 42/1 contradiction. Strong rung 4, public-service SDP acceptance and allocator layout UNKNOWN. [Status](reports/gst2shell-status.md) |
@@ -98,15 +98,16 @@ independent replay at that scope. Author reports are never acceptance.
 | **ATS2Shell** | — | — | — | — | — | **SOURCE-BOUND, RUNG 0** — hash-pinned Apache Traffic Server 10.1.3 `src/proxy/hdrs/MIME.cc:2427-2432` stores a fixed `0x20` byte at `input.data()-1` when a CR/LF split lands at a parser view boundary; fixed 10.1.4 `:2477-2484` guards with `unfold > input.data()` and `m_line.back()`. CVE-2026-58154 (CNA Apache, 2026-07-29, CWE-787, CVSS 8.9; advisory bundles 34 issues). No build, no trigger, no ASan bytes; allocation-boundary reachability, chosen bytes and pointer control UNKNOWN. Ranked below KnotResolver2Shell; admitted under standing #6 at rung 0. [Brief](reports/frontier-ats2shell.md) |
 | **Exim2Shell** | — | — | — | — | — | **SOURCE-BOUND, RUNG 0** — hash-pinned Exim 4.99.2 `src/tls-gnu.c:639` calls `tls_close(NULL, TLS_NO_SHUTDOWN)` on a mid-BDAT GnuTLS `close_notify`, freeing the 4096-byte `xfer_buffer` while the bdat receive layer stays installed; a final cleartext byte reaches stale `tls_ungetc()` and writes one fixed `0x0A` at `xfer_buffer[--lwm]`. Fixed 4.99.3 adds `tls_close_notify()` plus `smtp_rcv_cleartext()` in `smtp_in.c:984+`. CVE-2026-45185 (CNA MITRE, 2026-05-12, CWE-416, CVSS 9.8; pre-auth, GnuTLS builds only). XBOW's RCE narrative is a claim observed only ASLR-off/non-PIE; real build yielded a stack leak. No build, no traffic, no ASan bytes; allocator placement and pointer control UNKNOWN. Ranked #1 frontier candidate; admitted under standing #6 at rung 0. [Brief](reports/frontier-exim2shell.md) |
 
-**Rung-5 attempts, author-only.** Two targets have measured wire-to-command
-limbs awaiting independent witness replay: FreeSWITCH (`462e887`, a forged SSL
-method in the same WebSocket frame reaches `system()`, with a target-written
-marker and safe/fixed controls; [report](reports/frontier-freeswitch2shell.md))
-and Iec61850 (`3777729`, a wire-supplied chain calls real libc `system` on an
-ObtainFile-staged command string, with a target-written marker and benign-file
-and fixed-build controls; [rung-4 probe](reports/iec618502shell-r4.md)). Both
-reports name the ASLR-off, host-specific and opt-in gates and the exact replay
-commands; neither is ESTABLISHED, so their R5 cells stay `—`.
+**Rung-5 claims and attempts.** FreeSWITCH has an ESTABLISHED R5 cell
+(#1118): the witness replayed commit `462e887` from clean blobs, reproduced
+the target-written marker and a varied command with a distinct side effect,
+and confirmed safe and fixed marker-absent controls. Conditions stay ASLR-off,
+opt-in `mod_xml_rpc`/websocket, lab shims and a sudo-root loopback netns;
+ASLR-on reachability is UNKNOWN. Iec61850 has an author-observed R5 limb
+(`3777729`, a wire-supplied chain to real libc `system` with a target-written
+marker) whose independent witness replay is still owed, so its R5 cell stays
+`—`. Recipes, expected bytes and gitignored-log policy are in
+`docs/reproducibility.md`; the contract and lane status are in `docs/rce.md`.
 
 ## How the plant works
 
