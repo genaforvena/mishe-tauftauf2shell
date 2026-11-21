@@ -1,0 +1,9 @@
+/driver_vuln.c
+/driver_fixed.c
+/vuln
+/fixed
+/vuln_asan
+/fixed_asan
+/out/
+/core
+/core.*
