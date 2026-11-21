@@ -1,0 +1,64 @@
+freerdp2shell wake 14 — natural post-write log trigger on the clobbered rdpsnd
+log object (CVE-2026-114045 / GHSA-3m9q-g533-rqjq)
+
+Question left open by wake 13: the chosen-pointer dereference needed a
+scratch-injected WLog_INFO(TAG, ...) immediately after the real CopyMemory.
+Does an unmodified FreeRDP log call, reached by an ordinary client PDU after
+the corruption, dereference the same clobbered object?
+
+Answer: YES, observed in the live stock-allocator build.
+
+All runs: pinned FreeRDP 3.32.0 d27a4f7c..., committed five wake8 patches,
+plain no-sanitizer build in /tmp/fr-wake7-shadow-build, freerdp-shadow-cli on
+127.0.0.1 ports 23221-23223 with -auth /log-level:DEBUG, Sample client
+/sec:rdp /u:test /p:test /sound. No off-loopback probe. Committed replay
+patches, verify_live.sh and their pinned digests were NOT changed.
+
+Scratch-only changes (restored after capture):
+1. server/shadow/shadow_client.c: the synthetic 16384-byte playback buffer is
+   memset 0xDE as before, with data[8904..8911] = 0x41. No server-side log
+   call was added: channels/rdpsnd/server/rdpsnd_main.c is the unmodified
+   committed wake-9 trace build.
+2. channels/rdpsnd/client/rdpsnd_main.c: Sleep(2500) after sending the second
+   SNDC_FORMATS PDU, before returning to rdpsnd_recv_server_audio_formats_pdu.
+   This lets FreeRDP's own rdpsnd_send_quality_mode_pdu() SNDC_QUALITYMODE
+   PDU arrive after the synthetic playback. No third PDU was crafted in the
+   reported run (port 23222); the first exploratory run on port 23221 did
+   craft one and is superseded by the port-23222 result.
+
+--- port 23222, WLOG_FILTER='com.freerdp.server:TRACE' ---
+Server log: "realloc failed!", "SelectFormat failed with 12",
+"WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de", then:
+  Thread 7 "freerdp-shadow-" received signal SIGSEGV, Segmentation fault.
+  0x... in WLog_GetFilterLogLevel.part.0 () from libwinpr3.so.3
+  #0 WLog_GetFilterLogLevel.part.0        libwinpr3.so.3
+  #1 WLog_GetLogLevel                     libwinpr3.so.3
+  #2 WLog_IsLevelActive                   libwinpr3.so.3
+  #3 WLog_Print_dbg_tag.constprop.21      libfreerdp-server3.so.3
+  #4 rdpsnd_server_handle_messages        libfreerdp-server3.so.3
+  #5 rdpsnd_server_thread                 libfreerdp-server3.so.3
+  mov (%rax,%r15,8),%rsi ; rax=0x4141414141414141, r15=0
+Client log: its own "[rdpsnd_send_quality_mode_pdu] QualityMode: 2" appears
+2.5 s after the two format PDUs, i.e. after the copy. The faulting log path
+is the real server receive path, not a scratch post-copy log call.
+
+--- port 23223, no WLOG_FILTER (control) ---
+Same wrap and WAKE9_COPY, same client quality-mode PDU arrives, but zero
+SIGSEGV in the raw log: WLog_GetFilterLogLevel returns at
+`if (log->FilterLevel >= 0)` (wlog.c:770) without comparing log->Names.
+This is a raw log for the no-filter negative that wake 13 recorded only in
+pointer_control_stock.txt.
+
+--- honest boundary ---
+The log trigger is natural code on both sides (client SNDC_QUALITYMODE, server
+WLog_DBG on the rdpsnd TAG), but a scratch client-side delay was needed to
+place it after the synthetic playback in this replay. Chosen bytes still come
+from the lab's server-side synthetic playback, not a remote client. The wLog
+object was found after the fact, not groomed. WLOG_FILTER, post-auth /auth,
+subsystem-supplied format table and loopback-only remain required. No commit
+to replay patches, verify_live.sh or digests; scratch sources restored and
+rebuilt afterwards.
+
+Raw logs: verify-live-out/wake14/{natural-gdb.log,natural-client.log,
+natural-ownpdu-gdb.log,natural-ownpdu-client.log,natural-nofilter-gdb.log,
+natural-nofilter-client.log}.

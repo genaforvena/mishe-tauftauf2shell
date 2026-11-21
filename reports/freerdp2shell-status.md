@@ -505,20 +505,50 @@ WLog_IsLevelActive -> WLog_Print_dbg_tag -> rdpsnd_server_send_samples`, on
 `mov (%rax,%r15,8),%rsi`. With uniform 0xDE audio bytes `rax` (loaded from
 `log->Names` at `out_buffer+8904`) is `0xdededededededede`; with the eight source
 bytes at offsets 8904..8911 set to 0x41, `rax` is `0x4141414141414141`. The
-dereference base is therefore exactly the chosen bytes. Two negatives are
-preserved: without `WLOG_FILTER` the post-copy log call returns without
-dereferencing `Names` and only glibc corruption follows; overwriting the
-`Names` *array* at 9072..9119 alone does not move the fault, because the struct
-field holding `Names` is clobbered first.
+The dereference base is therefore exactly the chosen bytes. One negative is
+preserved with a raw log: overwriting the `Names` *array* at 9072..9119 alone
+does not move the fault, because the struct field holding `Names` is clobbered
+first. A second, no-filter negative (post-copy log call returns without
+dereferencing `Names`; only glibc corruption follows) is recorded in
+`pointer_control_stock.txt` but has no raw log in `wake13/`.
 
 Evidence: `lab/freerdp2shell-src/pointer_control_stock.txt`; raw gdb/server logs
-in `verify-live-out/wake13/`. Conditions: the log trigger is scratch-injected
-(no natural post-write log call on this TAG was observed before glibc aborted
-in the unmodified path); the filter env var is required; chosen bytes come from
+in `verify-live-out/wake13/` (the mixed-array negative is logged there).
+Conditions: the log trigger is scratch-injected (no natural post-write log call
+on this TAG was observed before glibc aborted in the unmodified path); the
+filter env var is required; chosen bytes come from
 the lab's server-side synthetic playback event, not a remote client; the wLog
 object was found after the fact, not groomed. No committed replay patch, digest
 or `verify_live.sh` change; scratch sources restored and rebuilt. No
 off-loopback probe; post-auth and subsystem-supplied format table unchanged.
+
+## Natural post-write log trigger (wake 14, 2026-11-21 04:54Z)
+
+Wake 13's chosen-pointer dereference used a scratch `WLog_INFO(TAG, ...)`
+immediately after the corrupted `CopyMemory`. That scratch log call is no
+longer needed: an unmodified client PDU and an unmodified server log call
+reach the same clobbered `s_wLog`. With the same chosen bytes at
+`out_buffer+8904` and a scratch client-side `Sleep(2500)` after the second
+`SNDC_FORMATS` PDU, FreeRDP's own `rdpsnd_send_quality_mode_pdu()` sends
+`SNDC_QUALITYMODE` after the synthetic playback. `WLOG_FILTER` set, the live
+stock-allocator server (127.0.0.1:23222, `-auth`) faults at
+`mov (%rax,%r15,8),%rsi` in `WLog_GetFilterLogLevel.part.0` with
+`rax=0x4141414141414141`; the backtrace is
+`WLog_GetFilterLogLevel -> WLog_GetLogLevel -> WLog_IsLevelActive ->
+WLog_Print_dbg_tag -> rdpsnd_server_handle_messages -> rdpsnd_server_thread`.
+No log call was injected into server code. Control on port 23223 without
+`WLOG_FILTER`: same wrap, same client quality-mode PDU, no fault (raw log
+preserved in `verify-live-out/wake14/`).
+
+Evidence: `lab/freerdp2shell-src/natural_log_trigger_stock.txt` and raw logs
+in `verify-live-out/wake14/`. Boundaries unchanged in substance: the client
+delay is a scratch timing change, the chosen bytes still come from the lab's
+server-side synthetic playback rather than a remote client, the object was
+found after the fact rather than groomed, `WLOG_FILTER` is required, and the
+session is post-auth with a subsystem-supplied format table on loopback.
+Committed replay patches, digests and `verify_live.sh` were not changed;
+scratch sources were restored and rebuilt. This also supplies the raw log for
+the no-filter negative that wake 13 recorded without one (witness nit #567).
 
 ## Evidence boundary
 
@@ -539,7 +569,10 @@ UNKNOWN. Wake 13 identified that object as the wLog object of
 `com.freerdp.channels.rdpsnd.server` and demonstrated a chosen pointer value
 (`0x4141414141414141`) controlling the dereference base in
 `WLog_GetFilterLogLevel` under a scratch-injected post-copy log call and a
-configured `WLOG_FILTER`; grooming of a chosen target object remains UNKNOWN.
+configured `WLOG_FILTER`. Wake 14 reached the same fault with no server-side
+log injection: FreeRDP's own `SNDC_QUALITYMODE` receive path logs on that TAG
+after the write (scratch client-side timing delay needed). Grooming of a
+chosen target object remains UNKNOWN.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
 (subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).
@@ -557,5 +590,7 @@ now independently accepted. Wake 12 observed pointer-bearing heap data inside
 the written range in the live stock build
 (`lab/freerdp2shell-src/heap_layout_stock.txt`); wake 13 identified its owner
 and demonstrated a chosen-pointer-value dereference in that build
-(`lab/freerdp2shell-src/pointer_control_stock.txt`). Grooming of a specific
+(`lab/freerdp2shell-src/pointer_control_stock.txt`); wake 14 replaced the
+scratch log trigger with the real client/server quality-mode log exchange
+(`lab/freerdp2shell-src/natural_log_trigger_stock.txt`). Grooming of a specific
 target object and an FFmpeg-enabled build remain UNKNOWN.
