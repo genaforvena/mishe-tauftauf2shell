@@ -507,6 +507,47 @@ the 2.4.68 c1 filter/brigade path to name the corrupted indirect-call field,
 then test whether a request-body canary steers the jump target; without a
 steerable field L3 closes at rung 3.
 
+
+#### L3 revisit: indirect-call field and body-canary steering (04:38–04:46Z 21 Nov)
+
+The named revisit experiment closes L3 at rung 3. Disassembly of the affected
+ASan build pins the wild-jump path: `read_and_feed()` calls
+`ap_get_brigade@plt` at `mod_http2.so+0x2bde8d`; in `server/util_filter.c:552-554`
+that function calls `next->frec->filter_func.in_func(...)`. ASan frame 1 is
+`h2_c1_read+0x7e3` (return address `0x...a326` after `call read_and_feed` at
+`0x2ca321`). The candidate corrupted field is therefore the input filter's
+`filter_func.in_func` function pointer, not the `session->bbtmp` brigade's
+data itself.
+
+`l3-lane.py` gained `L3_BODY_BYTE` (a hex byte repeated through every POST
+DATA frame) and `L3_VERSIONS` (so control runs can be skipped). Twelve forced-ASan
+2.4.68 runs per byte at 8 connections × 20 streams gave 8/12 wild-jump PCs for
+body byte `0x42` and 6/12 for `0x5a` (logs `l3-canary-{42,5a}-0440-*.log`).
+The jump-target low 12 bits came from `{0x048, 0x228, 0x2c8, 0x7c8, 0x868}` and
+were unrelated to the body byte; no `0x42`/`0x5a` byte pattern appeared in any
+PC. The frequency difference is within the known run-to-run race variation.
+
+Instrumenting `read_and_feed()` to log every input filter's `frec` and
+`in_func` before `ap_get_brigade` (snapshot
+`logs/l3-h2_c1_io-pristine-0442Z.c`, probe logs `l3-probe-*.log`,
+`l3-probehex-*.log`, `l3-chainprobe-*.log`) found one filter at index 0 whose
+`in_func` low 12 bits were always `0xa86`, a valid code address, in 744 calls
+across eight runs — including runs where the PC jumped to `0x...7c8` or
+`0x...048`. The first probe format used `%p`, which httpd's logger renders
+as `bogus`; it was changed to hex before the usable runs. This is evidence
+against a body-steered jump through that field; it does not prove which slot
+held the bad target at the instant of the jump (the race can corrupt between
+log and call, or corrupt a deeper frame). No chosen bytes, chosen offset,
+pointer control or marker were obtained.
+
+Pristine source was restored byte-for-byte, the module rebuilt (no `L3PROBE`
+string remains in `mod_http2.so`), and the wild jump still reproduced on
+2.4.68 in 1 of 2 post-restore runs (`l3-restore-smoke-0446-2.log`, PC
+`0x7dc388d172c8`). **L3 is closed at rung 3: no binary-capable primitive and
+no reopen condition.** The main-lane Stage A closure and do-not-retry list are
+unchanged.
+
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -528,6 +569,8 @@ python3 l2-lane.py 20                           # L2: 2.4.66 child failure, 2.4.
 bash build-l3.sh                                # ASan builds of 2.4.68 / 2.4.69
 ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_error=0:halt_on_error=1' \
   python3 l3-lane.py 10 8 20                    # L3: 2.4.68 wild jump, 2.4.69 clean
+L3_BODY_BYTE=5a L3_VERSIONS=2.4.68 \
+  python3 l3-lane.py 10 8 20                    # body canary: PC still data-like
 ```
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state

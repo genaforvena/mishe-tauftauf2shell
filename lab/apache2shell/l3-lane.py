@@ -43,6 +43,13 @@ SIGS = ("AddressSanitizer", "heap-use-after-free", "double-free",
         " Attempting free", "stream not found", "assertion", "mutex",
         "thread-safety")
 
+# L3_BODY_BYTE is a hex byte repeated through every POST DATA frame. It is a
+# canary for the wild-jump experiment: if the jump target is assembled from
+# request-body bytes, changing it must change the PC.
+BODY_BYTE = int(os.environ.get("L3_BODY_BYTE", "42"), 16)
+VERSIONS = os.environ.get("L3_VERSIONS", "2.4.68,2.4.69").split(",")
+
+
 
 def conf_for(version, port):
     root = os.path.join(BASE, "install-%s-asan" % version)
@@ -130,7 +137,7 @@ def hammer(host, port, deadline, stats, streams, goaway):
                                 extra=[("content-type",
                                         "application/octet-stream")]),
                             end_stream=False)
-                        conn.send_data(sid, b"B" * 32768, end_stream=True)
+                        conn.send_data(sid, bytes([BODY_BYTE]) * 32768, end_stream=True)
                     else:
                         conn.send_request_headers(
                             sid, default_headers(method="GET",
@@ -218,9 +225,10 @@ def main():
     connections = int(sys.argv[2]) if len(sys.argv) > 2 else 8
     streams = int(sys.argv[3]) if len(sys.argv) > 3 else 20
     goaway = (len(sys.argv) <= 4 or sys.argv[4] != "nogoaway")
-    for version, port in (("2.4.68", 7268), ("2.4.69", 7269)):
+    for version in VERSIONS:
+        port = {"2.4.68": 7268, "2.4.69": 7269}[version]
         r = probe(version, port, duration, connections, streams, goaway)
-        print("=== %s port %d ===" % (version, port), flush=True)
+        print("=== %s port %d body_byte=%02x ===" % (version, port, BODY_BYTE), flush=True)
         print("srv_rc=%s requests=%d frames=%d closed=%d goaways=%d "
               "signatures=%s log_bytes=%d" %
               (r["srv_rc"], r["requests"], r["frames"], r["closed"],
