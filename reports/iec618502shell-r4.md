@@ -11,6 +11,7 @@ ASLR change, no GOT write, no `execve` claim and no other plant's lane.
 
 ```bash
 bash lab/frontier/libiec61850/r4_probe.sh /tmp/iec61850-r4/probe2-out
+bash lab/frontier/libiec61850/r4_pointer.sh /tmp/iec61850-r4/pointer-out
 ```
 
 The script re-checks the six SHA-256 pins, extracts the pinned vulnerable
@@ -31,6 +32,9 @@ ALL CHECKS PASS rc 0
 
 Clean `git archive cff0e31 lab/frontier/libiec61850 reports/iec618502shell-r4.md`
 replay into `/tmp/iec61850-r4-clean` reproduced all six checks and `rc 0`.
+Clean `git archive fcc32d8 lab/frontier/libiec61850 reports/iec618502shell-r4.md`
+replay into `/tmp/iec61850-r4-ptr-clean` reproduced all eleven pointer checks
+and `rc 0`.
 Evidence lives in the chosen output directory:
 `stage.client.log` (ObtainFile transfer), `stage.server.log`,
 `chosen.gdb.log` (live heap bytes), `chosen.client.log`, `conf-*.client.log`

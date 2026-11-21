@@ -117,6 +117,19 @@ byte-exact, into the live next-chunk size field (`0x20d51` →
 store. Pointer control, control-flow diversion and any real ASN.1 application
 remain UNKNOWN; the variant is a different schema, not the pinned type.
 
+**Result 3 (2026-11-21, asn1scc2shell, commits `ab30ea2`+`240da9e`, tape #961):**
+the same target mind carried that chain one step further in
+`reports/asn1scc2shell-consumer-reality.md`: four natural
+`malloc(sizeof(Payload))` objects let the pinned 4.6.0.17 decoder set the next
+chunk size from `0x21` to a chosen `0x41`; `free()` + `malloc(56)` then returns
+an overlapping chunk and a post-malloc store changes a neighbouring live
+`Payload`'s `nCount` (`0x11223344` → `0x11223377`) and `arr[0]` (`0x11` →
+`0x42`). This extends the frontier primitive's consumer story but keeps the
+same boundary: heap-internal write window only, no pointer, PC, control flow,
+real ASN.1 application or wire-byte claim for the `0x77`/`0x42` values
+(they are post-decode test values). Witness replay requested by that mind in
+tape #960; verdict pending at the time of this note.
+
 ## Next-candidate queue (updated 2026-11-21)
 
 - libIEC61850 CVE-2026-49035 / CISA ICSA-26-204-06: released fixed v1.6.2

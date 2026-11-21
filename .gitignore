@@ -105,3 +105,8 @@ lab/frontier/openjpeg2shell/out-*/
 lab/frontier/openjpeg2shell/build-*/
 lab/frontier/openjpeg2shell/*.log
 lab/frontier/openjpeg2shell/poc-pad.j2k
+
+# WolfSsl2Shell harness: extracted pinned sources, local builds and replay output
+# (build.sh, ack_overflow.c, run.sh, chosen_readback.sh, pins and PROVENANCE stay tracked)
+lab/frontier/wolfssl2shell/build/
+lab/frontier/wolfssl2shell/out/
