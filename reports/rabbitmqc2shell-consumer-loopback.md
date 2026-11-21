@@ -216,7 +216,7 @@ exists: GitHub code search across all forks and closed deployments was not
 available here, and no external system was probed. The rung-5 path through a
 real frame-level proxy stays plausible but UNPROVEN.
 
-## Allocator placement decides the rung-4 path (2026-11-21 ~22:40Z)
+## Allocator placement decides the rung-4 path (2026-11-21 ~22:22Z)
 
 An earlier section recorded a boundary condition: the minimal 65600-byte
 overflow reaches `socket->klass` only with a 200000-byte reusable receive
@@ -265,3 +265,26 @@ control. This is a measured consumer-side boundary, preserved as a condition
 of the rung-4 result; it changes neither the grade nor the witness-verified
 claim. No real application, listener or infoleak was involved, and the
 addresses still come from the lab-only file.
+
+## Named real consumer checked: FFmpeg AMQP muxer (2026-11-21 ~22:26Z)
+
+The external-caller search above was keyword-based and returned no named
+deployed frame-level consumer. A different angle named real consumers from the
+host's package metadata: `apt-cache rdepends librabbitmq4` lists `amqp-tools`,
+`radosgw`, `syslog-ng-mod-amqp`, `pmacct`, `php8.3-amqp`, `libavformat60`,
+`kamailio-rabbitmq-modules`, `janus` and `collectd` (packages not installed
+here; only `librabbitmq4` 0.11.0 is). None was built or driven.
+
+One of them forwards genuinely unbounded data: FFmpeg's `libavformat/libamqp.c`
+AMQP output. Checked against the published FFmpeg 7.1 source
+(`libamqp_8c_source.html`): it publishes media packets with
+`amqp_basic_publish` at line 251, not `amqp_send_frame`. Its `pkt_size` option
+(default 131072) sets `max_packet_size`, and the high-level path chunks BODY
+frames to `frame_max-12` as already measured for `amqp-publish`. So this
+real, widely deployed forwarder is structurally on the safe side of
+`amqp_connection.c:467`. A `collectd` AMQP 1.0 plugin was also fetched but uses
+a different AMQP implementation (no `amqp_*` calls) and is irrelevant here.
+
+This is a source-level negative on one named consumer, not a survey of all
+reverse dependencies. A real frame-level caller remains UNKNOWN; no external
+system was probed and no broker was contacted.
