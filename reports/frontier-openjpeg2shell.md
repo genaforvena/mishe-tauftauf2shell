@@ -576,11 +576,24 @@ Argument ceiling is structural, not a tuning miss. `rdi=0xd160d0` has
 `ARG_FIRST_QWORD=0000000000000000` (NUL); the companion OOB store writes
 `W2=0xa2931a` at object +16, never at +0 of the object whose `ob_type` was
 corrupted. The stores sit at +8/+16 of a 24-byte block, so no alignment lets
-both the fake type and an arbitrary string occupy the first two words. Write
-values are codestream file positions — bounded integers, not arbitrary byte
-strings — so an eight-character command cannot be encoded into one at a
-realistic file size. No chosen argument, command, shell, listener, external
-probe, chosen-address dereference or attacker-created code was observed.
+both the fake type and an arbitrary string occupy the first two words. The two
+stores are not fixed copies: pinned `j2k.c:5085-5090` writes `end_header =
+l_current_pos` and `end_pos = l_current_pos + m_sot_length + 2`, with
+`m_sot_length = Lsot - 12` for a non-last tile part (`j2k.c:4631`), so the
+observed `W2 = W1 + 2` is this codestream's value, not a constant, and
+`end_pos` is independently steerable. A short command whose little-endian
+bytes fit in a file position (e.g. `0x6469` = "id\0") can be encoded in a write
+value; the ceiling is the residue class, not the value width. `tp_index`
+entries are 24 bytes and the stores land only at +8 and +16, so a mod-24=0
+object gets a controlled `ob_type` but keeps its small `ob_refcnt` at +0
+(natural dealloc fires, `rdi[0..7]` is that refcount, not a command); a
+mod-24=8 object gets `ob_refcnt` at +0 and `ob_type` at +8 (a short command can
+sit at `rdi[0..7]`, but the write value is then the refcount, e.g. 25705 for
+"id", which never reaches zero, so no natural finalization); a mod-24=16
+object gets `end_pos` at +0 but has no write at +8 for `ob_type`. The two
+requirements are complementary across the three residue classes. No chosen
+argument, command, shell, listener, external probe, chosen-address dereference
+or attacker-created code was observed.
 Here "chosen-address dereference" means an attacker-selected arbitrary
 address; the dereference that was observed is of a fixed GOT slot in the
 known non-PIE interpreter, derived from its own relocation table.
