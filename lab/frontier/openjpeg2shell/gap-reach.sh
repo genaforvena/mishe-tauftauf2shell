@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-# Measure whether the strided OOB write can reach a gap-aligned live Python
-# object. The 24-byte tp_index stride writes at base+24k+8 and +24k+16 and
-# leaves base+24k..+24k+7 untouched, so an object whose ob_refcnt sits at
-# base+24k would keep its small refcnt while ob_type takes the store at +8.
-# This harness scans the real pinned build and checks the reachability of such
-# objects. Local process only; gdb observes, never writes memory.
+# Measure gap-aligned live Python objects in the 24-byte-strided OOB region.
+# The stores land at base+24k+8 and base+24k+16 and leave base+24k..+24k+7
+# untouched, so an object with ob_refcnt at base+24k would keep a small refcnt
+# while ob_type at base+24k+8 takes the store. This harness measures where such
+# objects actually sit relative to the reachable TPsot range. Local process
+# only; gdb observes, never writes memory. The outcome is layout-dependent:
+# this script reports reachability, it does not assert a structural result.
 #
 # Usage: bash gap-reach.sh OUTDIR
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 OUT=$(mkdir -p "$1" && cd "$1" && pwd)
-ADDR=0xa3bf20                          # &PyLong_Type, pinned non-PIE CPython 3.12.3
-WANT=$((ADDR))
 
 VLSRC="$OUT/src/openjpeg-2.5.4"
 mkdir -p "$OUT/src"
@@ -36,7 +35,8 @@ pass() { n=$((n+1)); echo "PASS $n $1"; }
 fail() { echo "FAIL $1"; exit 1; }
 
 : > "$OUT/trace.txt"
-ANY_GAP=0
+TOTAL_OBJ=0
+TOTAL_GAP=0
 # label evil target
 while read -r label evil target; do
   [ -n "$label" ] || continue
@@ -49,25 +49,29 @@ while read -r label evil target; do
   BASE=$(sed -n 's/^BASE=\(0x[0-9a-f]*\)$/\1/p' "$OUT/$label.gdb.log")
   [ -n "$BASE" ] || fail "$label: no sink observation"
 
-  # Gap-aligned objects sit at off = 24k; index k is the TPsot needed to hit
-  # their ob_type. KEEP the scan honest: require at least one such object.
+  OBJ_COUNT=$(grep -c '^OBJ ' "$OUT/$label.gdb.log" || true)
   GAP_COUNT=$(grep '^OBJ ' "$OUT/$label.gdb.log" | grep -c 'mod24=0 ' || true)
-  [ "$GAP_COUNT" -gt 0 ] || fail "$label: scanner found no gap-aligned objects"
-  ANY_GAP=$((ANY_GAP+GAP_COUNT))
+  TOTAL_OBJ=$((TOTAL_OBJ+OBJ_COUNT))
+  TOTAL_GAP=$((TOTAL_GAP+GAP_COUNT))
   MIN_IDX=$(grep '^OBJ ' "$OUT/$label.gdb.log" | grep 'mod24=0 ' \
     | sed -n 's/.*off=\([0-9]*\) .*/\1/p' | sort -n | head -1)
-  MIN_IDX=$((MIN_IDX / 24))
-  echo "$label evil=$evil min_gap_index=$MIN_IDX gap_count=$GAP_COUNT"
-  [ "$MIN_IDX" -gt "$evil" ] || fail "$label: gap object at index $MIN_IDX is reachable by TPsot=$evil"
+  if [ -n "$MIN_IDX" ]; then
+    MIN_IDX=$((MIN_IDX / 24))
+    if [ "$MIN_IDX" -le "$evil" ]; then R=REACHABLE; else R=OUT_OF_RANGE; fi
+  else
+    MIN_IDX=none; R=NO_GAP_OBJECT
+  fi
+  echo "MEASURE $label base=$BASE objects=$OBJ_COUNT gap_objects=$GAP_COUNT min_gap_index=$MIN_IDX evil=$evil reachability=$R"
 done <<EOF
 takeover 48 10731952
 mid 154 10731296
 large 184 10731296
 EOF
 
-[ "$ANY_GAP" -gt 0 ] || fail "no gap-aligned live object found in any layout"
-pass "gap-aligned live objects exist (count=$ANY_GAP)"
-pass "every gap-aligned object lies beyond the reachable TPsot in all 3 layouts"
+[ "$TOTAL_OBJ" -gt 0 ] || fail "scanner found no live object headers"
+pass "scanner found live object headers (count=$TOTAL_OBJ)"
+[ "$TOTAL_GAP" -gt 0 ] || fail "scanner found no gap-aligned objects"
+pass "scanner found gap-aligned objects (count=$TOTAL_GAP)"
 
 echo "RESULT $n PASS / 0 FAIL"
 sha256sum "$OUT/trace.txt"

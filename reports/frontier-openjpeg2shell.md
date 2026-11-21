@@ -421,50 +421,42 @@ attacker-chosen static pointer in a live object's `ob_type`, with ASLR on and
 a clean consumer exit". The pinned fixed commit `91d08b11` still guards both
 stores; fixed-side claims remain scoped to that pin, not a release.
 
-## Gap-alignment reachability: natural deallocator stays out of reach (2026-11-21 ~19:13Z)
+## Gap-alignment reachability: measured, layout-dependent (2026-11-21 ~19:18Z)
 
 The missing condition from the previous section is a small `ob_refcnt` at the
 destination: the sink writes the codestream-derived SOD offset (`0xa3bf1e` in
-that replay) into `ob_refcnt`, so the corrupted object never reaches a natural
+that replay) into `ob_refcnt`, so the object never reaches a natural
 `_Py_Dealloc`. The 24-byte `tp_index` stride offers a candidate: stores land at
 `base+24k+8` and `base+24k+16`, leaving `base+24k .. base+24k+7` untouched.
 An object with `ob_refcnt` at `base+24k` would keep its small refcnt while its
 `ob_type` at `base+24k+8` receives the store.
 
-Measured in the pinned `-g -O0` libopenjp2 2.5.4 build inside Pillow, scanning
-64 KiB past `tp_index` for live object headers (small refcnt plus static
-CPython type pointer), with gdb observing only:
+This lane was first measured as a negative result in an earlier author build
+and that conclusion is **retracted**: the clean-archive replay of committed
+harness `66965f6` failed its own "unreachable" assertion. In that replay the
+evil=48, target=`10731952` codestream had a gap-aligned live object at
+`base+720 = 24*30` with `ob_refcnt=1` and `ob_type=&PyCode_Type` — squarely
+reachable by `TPsot=30`. Gap-aligned objects therefore exist and can be in
+range; the obstacle is the second condition, not the first.
 
-- gap-aligned live objects **do** exist (`ob_refcnt=1`,
-  `ob_type=&PyCode_Type` / `&PyUnicode_Type` at offsets `24*184`, `24*498`,
-  and higher), so the scan is not vacuous;
-- in a freshly built lib the smallest gap-aligned index is 498; other measured
-  builds gave 154 (evil=48), 184 (evil=154) and 308 (evil=184);
-- `j2k.c:4497` requires `TPsot == m_current_tile_part_number + 1`, so reaching
-  index `k` requires at least `k` sequential tile parts — the reachable maximum
-  is the emitted tile-part count `evil`;
-- in every measured configuration the first gap-aligned object index exceeds
-  the reachable maximum (`154 > 48`, `184 > 154`, `308 > 184`, `498 > 184`).
-  Raising the tile-part count moved the first gap object out by at least as
-  much; sweeping ten COM-pad lengths at fixed `evil` left it unchanged.
+To make that store write a chosen static address, `SOD_k = target - (evil-k)*14`
+must equal the address; for `k=30`, `evil=48`, `&PyLong_Type=0xa3bf20` that
+means `target = 10731548`. Generating that codestream moved the first gap
+object to `24*70` (`ob_refcnt=9`, `&PyType_Type`) in the same cwd/argv, so the
+needed coincidence was gone. A sweep of 21 alignments (`target = &PyLong_Type
++ 14n`, `n=0..20`, so `k = 48-n`) found no layout whose gap object sat at the
+matching index `k`. Layout is also argv-sensitive: the identical codestream
+bytes scanned through the archive script paths gave a gap object at `24*30`,
+while the same bytes through the repository paths gave `24*184` or `24*498`.
+Any future reproduction must fix cwd and argv, not just the codestream digest.
 
 `bash lab/frontier/openjpeg2shell/gap-reach.sh OUTDIR` rebuilds the pinned lib,
-generates three codestreams (evil 48/154/184), checks both that gap-aligned
-objects exist and that none is reachable, and reports **2 PASS / 0 FAIL**;
-trace `sha256=6b9b1ff1cb47cd0f8b503582e1f850f23ad2c3d8decd7c372560d55036f7eb09`.
-
-Disposition: the natural-deallocator extension is not reachable through this
-`TPsot` stride in the measured layouts on this host — a bounded negative
-result, not a tuning failure. The mechanism (each extra tile part both extends
-reach by one 24-byte slot and consumes heap that pushes the first usable Python
-object at least one slot farther out) is an inference from the per-part
-allocations; the offset inequality is observed. This is the consumer-reality
-constraint `AGENTS.md` asks to check before exploitation mechanics. No chosen
-call was observed; rung 4 stays PARTIAL. The earlier chosen static pointer in a
-live object's `ob_type` with ASLR on is unchanged. What would change the mind:
-a decoder path that reaches a high `TPsot` without the proportional heap shift,
-or a layout where a gap-aligned object's `ob_type` is struck by store #1 at an
-index within the emitted tile-part count.
+scans three codestreams (evil 48/154/184), asserts the scan is non-vacuous and
+prints each layout's `min_gap_index` and reachability instead of asserting an
+outcome. No chosen deallocator call was observed; rung 4 stays PARTIAL. What
+would change the mind: a build/layout where the gap object index `k` and
+`SOD_k = chosen static type address` coincide under one fixed argv, or a
+separate path that preserves a small `ob_refcnt` while writing `ob_type`.
 
 ## Scope and boundaries
 
