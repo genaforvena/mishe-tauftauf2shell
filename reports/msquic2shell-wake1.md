@@ -21,7 +21,30 @@ named wire consumer and no control-flow effect. It is **not** wire traffic:
 the harness calls pinned core functions in-process with a constructed
 `QUIC_CONNECTION`, no sockets, TLS, packets on a wire or encryption. The
 vendor's "execute code over a network" remains a claim, not an observation.
-Witness replay is owed once a wire-visible harness exists.
+Witness W97 independently replayed the frame result (section below); no wire
+replay is owed because no wire claim is made.
+
+## Witness replay (W97, 23:29:44Z)
+
+The witness rebuilt both pins independently from the pinned tarballs in
+`/tmp/w97-msquic` (`libcore.a` sha 7fc9e325 v2.5.9, f24611e9 v2.5.10),
+rechecked the pins 3/3 OK and replayed the committed harness with our flags:
+5/5 v259 runs rc=1 with stdout sha 9e6d418f, 5/5 v2510 runs rc=0 with sha
+7196bc8d — byte-identical to the outputs at :94-110 at replay time. A causal
+control: applying the pinned `fix-e0f55b5.patch` to the v259 tree and
+rebuilding gave 5/5 rc=0 with sha 7196bc8d, identical to v2510; the promotion
+guard alone causes the divergence. The Debug negative reproduced 2/2 (abort
+at `connection.c:1140`). Verdict: **RUNG 3 ESTABLISHED at the labeled scope**,
+no refutation and no overclaim; on-the-wire reachability stays UNKNOWN.
+
+The witness flagged one cosmetic label defect: :118 printed
+`seq=2, retire_prior_to=3` although the encoded frame at :95-97 is
+`Sequence=1, RetirePriorTo=1` (the 29-byte payload was consistent with the
+code). The label is now corrected in the harness and in the quote at :97;
+both Release binaries were rebuilt and rerun 5/5 each at 23:39Z with
+unchanged state lines, verdicts and exit codes. Post-correction stdout hashes
+are `ee1e54b8…c1615f` (v259) and `0efa09a8…cebf9` (v2510); the hashes quoted
+above are the witness's pre-correction replay.
 
 ## Exact input and build
 
@@ -94,7 +117,7 @@ and the Release `libcore.a`. Binaries `frame_swap_v259`, `frame_swap_v2510`.
 v2.5.9 — identical output 5/5 runs:
 
 ```
-FRAMES: NEW_CONNECTION_ID(seq=2, retire_prior_to=3) + PING, payload=29 bytes
+FRAMES: NEW_CONNECTION_ID(seq=1, retire_prior_to=1) + PING, payload=29 bytes
 BEFORE frames: count=2 p0(ID=10 inuse=1) p1(ID=99 inuse=1 retired_cid=0)
 AFTER frames:  ok=1 count=1 p0(ID=10 inuse=1) p1(ID=99 inuse=0) nonprobing=1 stale=Paths[1]
 AFTER post:    count=1 p0(ID=99 inuse=0 active=1) p1(ID=10 inuse=1 active=0)
@@ -153,8 +176,8 @@ only an ordinary, legitimate path promotion in both versions — that result is
    configured but libssl/libcrypto are not built) or an equivalent
    packet-injection seam. Until then, **on-the-wire peer reachability is
    UNKNOWN** even though frame-layer reachability is demonstrated.
-2. Witness replay of the frame harness on both pins — now deterministic and
-   ready.
+2. Witness replay of the frame harness — completed, W97 above. A wire replay
+   is owed if a wire harness is ever built.
 3. Preserve the Debug negative above; do not retry a failed frame ordering
    into existence.
 

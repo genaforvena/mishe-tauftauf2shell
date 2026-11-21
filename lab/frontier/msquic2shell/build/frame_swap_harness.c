@@ -115,7 +115,7 @@ main(void)
     Packet.DestCidLen = 0;
     Packet.NewLargestPacketNumber = TRUE; /* packet-level property, set by real recv path */
 
-    printf("FRAMES: NEW_CONNECTION_ID(seq=2, retire_prior_to=3) + PING, payload=%u bytes\n", Offset);
+    printf("FRAMES: NEW_CONNECTION_ID(seq=1, retire_prior_to=1) + PING, payload=%u bytes\n", Offset);
     printf("BEFORE frames: count=%u p0(ID=%u inuse=%d) p1(ID=%u inuse=%d retired_cid=%d)\n",
         Conn->PathsCount,
         Conn->Paths[0].ID, Conn->Paths[0].InUse,
