@@ -5,6 +5,12 @@ parser; rung 4 structurally blocked on this host/build. NOT admitted, no
 window, no chosen-byte control, no RCE claim.** The 12:40Z decision to DEFER
 behind Pillow stands as an admission decision; this wake ran the cheap harness
 the old brief proposed and preserved the ceiling as a measured negative.
+Witness W97 (2026-11-21, chat #1202) independently rebuilt both pinned tarballs
+and re-ran the committed harness: 5/5 vulnerable-mode ASan hits at the cited
+lines, 5/5 fixed clean, 5/5 safe-input clean, and a non-ASan layout check
+reproducing the +4-locals ceiling. Verdict RUNG 3 ESTABLISHED AS CLAIMED, no
+refutation; the only finding was an arithmetic typo in this brief's write-index
+sentence, corrected this wake (W95).
 
 ## Verified ground truth
 
@@ -70,8 +76,9 @@ iteration (`i == 1022`, `byte == 4`, plain build). Distances from buffer end:
 
 
 The maximum spill is four bytes: the loop-entry offset is at most 1022 and
-`__nxml_utf8()` returns width at most 5, so the last written index is 1027 and
-the trailing NUL is at 1027 (three or four bytes past the end). Even the
+`__nxml_utf8()` returns width at most 5. For a five-byte name character the
+`memcpy` writes offsets 1022-1026 and the trailing NUL lands at 1027; for the
+observed four-byte case it writes 1022-1025 with the NUL at 1026. Even the
 theoretical five-byte case cannot reach the +4 locals. No live pointer, saved
 register or return address is within reach on this build; compiler/layout
 variance elsewhere remains UNKNOWN, not GREEN. This is the nginx2root lesson
