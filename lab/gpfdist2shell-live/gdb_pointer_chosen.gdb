@@ -7,7 +7,8 @@ break gpfdist_v7.6.1.c:3677
 commands
 silent
 printf "\n=== BEFORE STORE segid=%ld seq=%ld ===\n", r->segid, r->seq
-printf "seq_segs=%p requests=%p target=%p offset=%ld\n", session->seq_segs, session->requests, (char*)session->seq_segs + 8*r->segid, ((char*)session->requests - (char*)session->seq_segs)/8
+# layout_offset is the constant (requests - seq_segs)/8, not the write index.
+printf "seq_segs=%p requests=%p target=%p layout_offset=%ld\n", session->seq_segs, session->requests, (char*)session->seq_segs + 8*r->segid, ((char*)session->requests - (char*)session->seq_segs)/8
 printf "requests[0] word before:\n"
 x/gx session->requests
 continue

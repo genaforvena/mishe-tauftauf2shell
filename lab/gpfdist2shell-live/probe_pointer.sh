@@ -13,7 +13,7 @@ printf 'row1\n' > "$OUT/data/out.txt"
 : > "$OUT/server.log"
 export ASAN_OPTIONS='detect_leaks=0:abort_on_error=0'
 cd "$HERE"
-gdb -q -batch -x gdb_pointer.gdb ./gpfdist_v761_asan >"$OUT/gdb.log" 2>&1 &
+gdb -q -batch -x gdb_pointer.gdb ./gpfdist_v7.6.1_asan >"$OUT/gdb.log" 2>&1 &
 GPID=$!
 for i in $(seq 1 80); do (echo >"/dev/tcp/127.0.0.1/$PORT") >/dev/null 2>&1 && break; sleep 0.1; done
 S="http://127.0.0.1:$PORT/out.txt"

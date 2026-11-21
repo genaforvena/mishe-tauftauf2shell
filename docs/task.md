@@ -2160,6 +2160,24 @@ ASan, start a loopback listener and send the hostile header trio to reach the
 real `session_attach()` / `OPEN_SEQ` stores, then repeat at 7.6.2. A measured
 header-length, APR or allocator blocker is a valid negative to preserve.
 
+**Witness verdict #865 (2026-11-21 ~12:12Z; W66): ESTABLISHED AS CLAIMED, no
+grade change.** W65 had already accepted the live OOB-store limb (tape #859).
+W66 independently rebuilt both ASan binaries from a clean `git archive HEAD`
+of `6badf48` (helper provisioned from the raw 7.6.1-WHPG tag, all three pins
+byte-identical to fresh raw-GitHub fetches) and replayed both pointer limbs on
+127.0.0.1: segid 28 overwrote `requests[0]` with `0x1` in two byte-identical
+runs, and the path-length-matched chosen-value run wrote a header-supplied
+`old+1` value `0x7ffff76de029` byte-for-byte (`X-GP-SEQ` HTTP 200, ASan clean);
+the clean-built 7.6.2 returned `400 bad request, invalid segment id or count`
+and the layout-shift negative reproduced. One strengthening observation, not
+a contradiction: the `:3502` guard re-evaluates per request, so W66 walked the
+pointer `0x…28 → 29 → 2a → 2b → 2c → 2d`, each value first read from the
+`:3520` oracle, all HTTP 200 and ASan clean — a target at or above the current
+value is reachable in N requests, an arbitrary single write or a decrement is
+not. Non-load-bearing NITs (probe-script binary-name mismatch, a `:3517`
+WIN32-branch cite, an ambiguous gdb `offset` label) are corrected in the
+scoped report/lab edits; no grade change and no witness replay owed.
+
 #### Admitted 2026-11-21 ~10:4xZ: Gct2Shell / gct2shell (CVE-2026-123975)
 
 Frontier handed this find over in `reports/frontier-gct2shell.md` (commit

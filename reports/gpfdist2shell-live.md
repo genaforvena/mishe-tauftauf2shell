@@ -10,8 +10,10 @@ pointer with `0x1`, and a matched-layout variant writes a header-supplied
 64-bit value into that pointer (item 7). A symbolised ASan SEGV report fires
 at the real `gpfdist.c:1988` frame for a large hostile index. The fixed 7.6.2 source
 rejects the same requests. Witness W65 accepted the earlier live limb as
-claimed (chat tape #859); the pointer extension is new and awaiting replay.
-This report is evidence, not independent acceptance.
+claimed (chat tape #859); witness W66 accepted both pointer limbs as claimed
+(chat tape #865), with no grade change, and noted a repeatable +1 pointer walk
+as a strengthening observation. This report is evidence, not independent
+acceptance.
 
 ## What was built, exactly
 
@@ -117,22 +119,34 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
    variant there wrote `b'ta/out.t'` → `b'ua/out.t'` (the supplied sequence
    value), not a pointer. That negative is preserved in
    `evidence/gdb_pointer_layout_shift.txt` (`probe_pointer_chosen.sh`,
-   `gdb_pointer_chosen.gdb`). Whether an arbitrary pointer value can be
-   written at a reachable pointer-valued neighbour stays UNKNOWN.
+   `gdb_pointer_chosen.gdb`). Whether a single write can put an *arbitrary*
+   pointer value at a reachable pointer-valued neighbour stays UNKNOWN: the
+   `:3502` equality forces the written value to `old_slot + 1`.
 
    With the path length matched to that layout (17-character
    `out_pointer_18124`), the same HTTP oracle wrote a **header-supplied 64-bit
-   value** into the pointer: before a chosen write, `:3517` reported the
-   expected value `140737344561193` (`0x7ffff76de029`, the existing pool
-   pointer plus one). A request with `X-GP-SEQ:140737344561193` returned 200;
-   at `:3677` gdb read `requests[0]` before as `0x00007ffff76de028` and after
-   as `0x00007ffff76de029` (bytes `28 e0 6d f7 ff 7f 00 00` →
+   value** into the pointer: before a chosen write, the Linux oracle at
+   `:3520-3521` (`:3517` is the WIN32 log branch) reported the expected value
+   `140737344561193` (`0x7ffff76de029`, the existing pool pointer plus one).
+   A request with `X-GP-SEQ:140737344561193` returned 200; at `:3677` gdb read
+   `requests[0]` before as `0x00007ffff76de028` and after as
+   `0x00007ffff76de029` (bytes `28 e0 6d f7 ff 7f 00 00` →
    `29 e0 6d f7 ff 7f 00 00`), and a fresh oracle reported
    `140737344561194`. ASan stayed clean
    (`evidence/gdb_pointer_chosen_value.txt`,
-   `evidence/http_oracle_pointer_chosen.txt`). The value is not arbitrary:
-   `:3502` requires `value = old_slot + 1`, so the increment is
-   attacker-supplied but bounded by the pre-existing pointer.
+   `evidence/http_oracle_pointer_chosen.txt`). The value is not arbitrary in
+   one request: `:3502` requires `value = old_slot + 1`, so the write is a
+   fixed increment of the pre-existing pointer, not an attacker-supplied
+   displacement.
+8. **Witness W66 strengthening: repeatable +1 pointer walk.** The witness's
+   independent replay (chat tape #865) accepted both pointer limbs as claimed
+   and observed that the `:3502` guard re-evaluates on every request: reading
+   the current slot from the `:3520-3521` oracle first, it walked
+   `requests[0]` `0x…28 → 29 → 2a → 2b → 2c → 2d`, each write HTTP 200 and
+   ASan clean. A target at or above the current pointer value is therefore
+   reachable in N requests; a decrease, or an arbitrary value in a *single*
+   write, is not. No grade change; no control-flow diversion or execution
+   claimed.
 
 ## Rung assessment
 
@@ -148,10 +162,12 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
   overwrote a live APR hash pool pointer with `0x1`, byte-for-byte under gdb
   (`evidence/gdb_pointer_index28.txt`). This is pointer corruption in a
   real-source/shimmed-dependency loopback build, NOT control-flow diversion
-  or execution.
-  A matched-layout variant also wrote a header-supplied 64-bit value
-  (`0x7ffff76de029`) byte-for-byte into that pointer, constrained to the old
-  pointer plus one (`evidence/gdb_pointer_chosen_value.txt`).
+  or execution. A matched-layout variant also wrote a header-supplied 64-bit
+  value (`0x7ffff76de029`) byte-for-byte into that pointer, constrained to
+  the old pointer plus one (`evidence/gdb_pointer_chosen_value.txt`). Both
+  pointer limbs were independently replayed and accepted by witness W66
+  (tape #865), which also demonstrated a repeatable +1 walk across six
+  requests (item 8).
 
 
 ## Preserved negatives and limits
@@ -169,9 +185,11 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
   written by the crafted-filename precondition. The value space reachable
   with arbitrary (not merely printable-ASCII path) bytes remains UNKNOWN.
 - **No control-flow diversion, marker execution or stock-binary behaviour was
-  observed.** A pointer-valued neighbour was overwritten (item 7), but only
-  with the small value `0x1` at a path-length-dependent index; arbitrary
-  pointer values are UNKNOWN. Nothing here demonstrates code control.
+  observed.** A pointer-valued neighbour was overwritten (item 7) with `0x1`
+  and with a header-supplied `old+1` value at a path-length-dependent index,
+  and W66 walked it upward in six requests. An arbitrary value in a single
+  write, a decrement, and a value below the current pointer remain UNKNOWN;
+  nothing here demonstrates code control.
 - The shimmed fstream backend means this is not a full product build; whether
   a stock WarehousePG gpfdist's allocator state and neighbour objects differ
   remains UNKNOWN.
@@ -181,18 +199,20 @@ Transcripts are tracked under `lab/gpfdist2shell-live/evidence/`.
 ## Reproduce
 
 ```
-bash lab/gpfdist2shell-live/build.sh
-bash lab/gpfdist2shell-live/probe_chosen.sh ./gpfdist_v761_asan 18100 3
-bash lab/gpfdist2shell-live/probe_chosen.sh ./gpfdist_v762_asan 18101 3
-bash lab/gpfdist2shell-live/probe_deep.sh ./gpfdist_v761_asan 18116 15 \
+bash lab/gpfdist2shell-live/build.sh   # emits gpfdist_v7.6.1_asan, gpfdist_v7.6.2_asan
+bash lab/gpfdist2shell-live/probe_chosen.sh ./gpfdist_v7.6.1_asan 18100 3
+bash lab/gpfdist2shell-live/probe_chosen.sh ./gpfdist_v7.6.2_asan 18101 3
+bash lab/gpfdist2shell-live/probe_deep.sh ./gpfdist_v7.6.1_asan 18116 15 \
   'AAAA@AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.txt'
 # gdb transcript: gdb -q -batch -x lab/gpfdist2shell-live/gdb_chain3.gdb \
-#   lab/gpfdist2shell-live/gpfdist_v761_asan  (then send the four requests
+#   lab/gpfdist2shell-live/gpfdist_v7.6.1_asan  (then send the four requests
 #   from probe_chosen.sh to 127.0.0.1:18097)
 bash lab/gpfdist2shell-live/probe_pointer.sh 18121 28
 # produces evidence/gdb_pointer_index28.txt-equivalent gdb transcript
 bash lab/gpfdist2shell-live/probe_pointer_chosen.sh
-# 17-char out_pointer_18124 path; writes the oracle value into requests[0]
+# 17-char out_pointer_18124 path; writes the oracle value into requests[0].
+# Pointer probes need this lab's path length: the :3677 layout is
+# path-length sensitive. Provision upstream/gpfdist_helper.c (build.sh note).
 ```
 
 All inputs are local header values from the vendor regression test and the

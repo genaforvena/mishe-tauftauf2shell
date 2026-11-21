@@ -3,7 +3,7 @@
 # All traffic stays on 127.0.0.1. One process per case; ASan aborts on fault.
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
-BIN=${1:-$HERE/gpfdist_v761_asan}
+BIN=${1:-$HERE/gpfdist_v7.6.1_asan}
 PORT=${2:-18088}
 CASE=${3:-both}
 TAG=$(basename "$BIN")_${CASE}

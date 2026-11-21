@@ -5,7 +5,7 @@
 # Without that store, seq_segs[3] holds pstrdup'd path bytes and it returns 400.
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
-BIN=${1:-$HERE/gpfdist_v761_asan}
+BIN=${1:-$HERE/gpfdist_v7.6.1_asan}
 PORT=${2:-18089}
 TAG=$(basename "$BIN")_session
 OUT="$HERE/out_$TAG"; rm -rf "$OUT"; mkdir -p "$OUT/data"

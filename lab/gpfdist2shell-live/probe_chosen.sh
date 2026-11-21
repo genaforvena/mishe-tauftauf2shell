@@ -8,7 +8,7 @@
 #   req4 id=3 seq=T   -> equality check passes, OOB store writes T (chosen)
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
-BIN=${1:-$HERE/gpfdist_v761_asan}
+BIN=${1:-$HERE/gpfdist_v7.6.1_asan}
 PORT=${2:-18094}
 TARGET=${3:-4702111234474983745}
 OUT="$HERE/out_chosen_$(basename "$BIN")"; rm -rf "$OUT"; mkdir -p "$OUT/data"
