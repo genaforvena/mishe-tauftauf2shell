@@ -61,12 +61,21 @@ copies of the affected software:
   single-namespace control is clean on both. The double free is in
   `dom_xml_ns_prefix_map_destroy()` at `xml_serializer.c:126`, patch-sensitive
   to the real fix; it needs `USE_ZEND_ALLOC=0` because the default ZendMM
-  pools the 4-byte prefix and hides the second free from ASan. The 8.5.13
-  hunk for the stream-wrapper bailout was not tested; there is no chosen-byte
-  write, pointer control, marker, web-server reachability or rung 4 claim.
-  Reproduce with `bash lab/php2shell/build-dom.sh 8.5.12`,
-  `bash lab/php2shell/build-dom-fixed-variant.sh` and
-  `python3 lab/repro/php2shell-cve129501-dom.py <php-vuln> <php-fixed>`.
+  pools the 4-byte prefix and hides the second free from ASan. Wake 52 tested
+  hunk 2 with the two 8.5.13 DOM regression bodies: both show affected-only
+  DOM-state faults (lost children, orphaned comments) with rc=0 and no ASan
+  report, while fixed matches vendor EXPECT; grade stays rung 3 from hunk 1.
+  Tcache escalation is CLOSED NEGATIVE: the only owned prefix is `ns` plus a
+  number (max 13 bytes, glibc 0x20 bin), while a PHP `zend_string` is at least
+  32 bytes. A new FPM lane, CVE-2026-129291 / GHSA-jm4m-qfqx-967m (epoll UAF,
+  claimed local privilege escalation), is rung 2 only: the 8.4.27 vendor phpt
+  FAILs and 8.4.28 PASSes with no sanitizer report; single- and dual-file
+  swaps of the fix did not isolate it. No chosen byte, pointer, marker, LPE
+  demo or web path. Reproduce with `bash lab/php2shell/build-dom.sh 8.5.12`,
+  `bash lab/php2shell/build-dom-fixed-variant.sh`,
+  `python3 lab/repro/php2shell-cve129501-dom.py <php-vuln> <php-fixed>`,
+  `python3 lab/repro/php2shell-cve129501-dom-hunk2.py <php-vuln> <php-fixed>`
+  and `python3 lab/repro/php2shell-cve129291-fpm.py <php-8.4.27-fpm> <php-8.4.28-fpm>`.
 - **Node2Shell** — CVE-2026-123828, two one-byte heap overflows in Node's
   HTTP/2 `Alt-Svc` handling (`src/node_http2.cc`): fix `nodejs/node@ae9ab37d62`
   removes `kNullTerminate` from both `WriteOneByteV2` calls, so the origin
@@ -116,6 +125,16 @@ copies of the affected software:
   `bash lab/apache2shell/build-l3.sh` and
   `ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_error=0:halt_on_error=1' python3 lab/apache2shell/l3-lane.py 10 8 20`;
   add `L3_BODY_BYTE=5a L3_VERSIONS=2.4.68` before `python3` for the canary leg.
+  Adjacent lane L4 (CVE-2026-56154, stale `ctx->vary` after
+  `ap_destroy_sub_req()` in mod_rewrite's `%{LA-U:HTTP:...}` lookahead) is
+  rung 3 confirmed: 2.4.68 gives 12/12 child SIGSEGV versus 2.4.69 0/12,
+  with plain-header and absent-header controls 0/12. gdb pins the dangling
+  pointer through `strlen` → `apr_pstrdup` → `apr_table_merge` at
+  `mod_rewrite.c:4701`; ASan is silent inside uninstrumented system libapr.
+  No chosen bytes, offset or pointer control; L4 closes at rung 3. Reuse the
+  L3 2.4.68/69 ASan builds with `mod_rewrite.so` and `MaxMemFree 1`, then
+  `cd lab/apache2shell && RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69`
+  (plus the `plain` / `none` controls and `python3 rw-gdb.py`).
 - **Mosquitto2Shell** — CVE-2026-110486 / GHSA-6j8m-r32v-4h38, a masked
   zero-length WebSocket frame that overruns a one-byte allocation in
   Mosquitto's built-in WebSocket backend; rung 3 + Stage A placement are
@@ -200,10 +219,17 @@ copies of the affected software:
   configured `WLOG_FILTER` and a scratch log call injected right after the
   real copy, showed `mov (%rax,%r15,8)` dereferencing the eight chosen `0x41`
   bytes at `out_buffer+8904` as `rax=0x4141414141414141` in the live stock
-  build (`lab/freerdp2shell-src/pointer_control_stock.txt`). The trigger call
-  and chosen playback bytes are lab-supplied, the object was found after the
-  fact with no grooming, and only one object was controlled; arbitrary heap
-  targeting, a real audio source and an FFmpeg-enabled build stay UNKNOWN.
+  build (`lab/freerdp2shell-src/pointer_control_stock.txt`). Wake 14 replaced
+  the scratch server log call with FreeRDP's own `SNDC_QUALITYMODE` receive
+  path: with a scratch client-side delay after the second `SNDC_FORMATS` PDU,
+  the unmodified live stock server faults at the same `mov (%rax,%r15,8)`
+  with `rax=0x4141414141414141`
+  (`lab/freerdp2shell-src/natural_log_trigger_stock.txt`). No server code was
+  injected; `WLOG_FILTER` is still required and the no-filter control is clean
+  with a raw log in `verify-live-out/wake14/`. The trigger and chosen playback
+  bytes are lab-supplied, the object was found after the fact with no grooming,
+  and only one object was controlled; arbitrary heap targeting, a real audio
+  source and an FFmpeg-enabled build stay UNKNOWN.
 - **Xrdp2Shell** — CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4, a client-controlled
   reassembled DYNVC virtual-channel payload copied into xrdp's fixed
   8192-byte server→chansrv out stream. Default posture is post-auth (`PR:L`)
