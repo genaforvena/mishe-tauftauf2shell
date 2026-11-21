@@ -138,6 +138,66 @@ containers whose host ports bind only to loopback.
 - **WolfSsl2Shell corrected head-chunk citation and witness #1128 (commits `01f8ad2`, `948dccc`)**: the sixth-wake gdb dump used `x/8gx ssl->dtls13Rtx.seenRecords - 16`, a display offset rather than byte arithmetic, so the quoted `0x0078000000000000` at `0x55555562b238` came from an unrelated slab region. `lab/frontier/wolfssl2shell/groom_victim2.gdb` now uses `x/8gx ((char*)ssl->dtls13Rtx.seenRecords - 16)`; the corrected dump in gitignored `out/loopback/groom-victim2-corrected.log` reads `prev_size=0` at `0x55555562b230` and size `0x008f000000000000` at `0x55555562b238` for the live head node, with sender-derived sizes in neighbouring headers. Witness #1128 returned VERIFIED source-bound; the overwrite, chosen bytes and abort are unchanged, rung 4 availability remains ESTABLISHED and rung 5 UNKNOWN. The ignored corrected log must stay in the lab tree for the report citation to resolve.
 - **CivetWeb2Shell structural bound on the unmodified build (commit `575302d`)**: `mg_snprintf` (`civetweb.c:3716-3732`) fills `new_path` to `buflen-1`; with query length `q` the last overflowing byte lands at index `8195+2q`, while the only adjacent neighbour `uri_encoded` (allocated at `:3631`, freed at `:3734` before the appends) ends near `35224+4q`. The overflow envelope grows at half that rate and never reaches the neighbour for `q=1,46,200,10000`; wake-3 tracing shows `new_path` comes from top, so the neighbour is deterministically adjacent but already free at write time. Reaching a live object needs the wake-1 allocation-order instrumentation, hence INSTRUMENTED rung 4, consistent with witness #1102 and the availability-only CVSS vector.
 - **RabbitMQC2Shell complete caller enumeration and external search NEGATIVE (commit `4ca0160`)**: every in-tree `amqp_send_frame` call in pinned v0.16.0 is safe — `amqp_api.c:217` fixed header, `:242` body clamped by `frame_max-(HEADER_SIZE+FOOTER_SIZE)` at `:167-168/:233-238`, `amqp_socket.c:773` fixed-size heartbeat, `:996` bounded table-encoded method. The only sinks are `amqp_connection.c:531`/`:548`; the overflow needs an external caller passing `body.len > buffer.len-14` directly, as the harness and synthetic socket service do. Three bounded web searches found only advisories, docs and a 2011 discussion of the different `amqp_send_frame_to` API — no named frame-level consumer. Search negative, not proof none exists; external direct callers stay UNKNOWN and the real-proxy rung-5 route stays UNPROVEN. No off-loopback probe was made.
+- **OpenJpeg2Shell W92 both-branch NIT replay and caller boundary (commits
+  `091488e`, `6b8fe7c`, `10e6d35`)**: `bash lab/frontier/openjpeg2shell/chosen-call.sh <outdir>`
+  now accepts either documented plain-consumer result and records it as
+  `PLAIN_OUTCOME`. The checkout replay gives 7 PASS / 0 FAIL with
+  `corrupted size vs. prev_size` at object `0xd160d0` (invariant trace
+  `sha256=ab46a561…`); a clean `git archive 091488e` replay gives the other
+  branch, 7 PASS / 0 FAIL, `PLAIN_OUTCOME LOAD_OK` at `0xd15ed0`, trace
+  `sha256=25542f54d448d0bf4b2953c37d2fe2636fcfa1d2641f15410ca546423b18f6f4`.
+  The author's trace labels the natural dealloc caller `PyGC_Collect`;
+  witness W92's observation-only backtrace resolves only `Py_FinalizeEx`, so
+  the intermediate caller is UNKNOWN. W92 ESTABLISHED both rung-4 limbs at
+  their labelled scope with no grade change; the plant cell stays `◐`.
+- **Exim2Shell wake-4 stock-build cap and ASan-only chosen byte (commits
+  `5d67af7`, `d4e5d9d`)**: start the instrumented non-ASan 4.99.2 build in
+  the gitignored `lab/frontier/exim2shell/src/exim-4.99.2-plain/` tree on
+  127.0.0.1:25262 and run `python3 trigger.py 25262 three`; expect
+  `PLAIN call-site nextch=0x4d ungetc_fn=0x…0447` (safe `smtp_ungetc`),
+  `PLAIN bdat-pop ungetc_fn=0x…6b15` (restored `tls_ungetc`), then
+  `gnutls_record_recv` returning `-1250` and `421 lost input connection` —
+  no stale write, also with `EXIM2SHELL_TLS12=1`. On the instrumented ASan
+  copy in `src/exim-4.99.2-asantrace/` on 25272, `python3 trigger.py 25272
+  chosen 8 Q` gives `call-site nextch=0x51 ungetc_fn=tls_ungetc` and
+  `WRITE of size 1` at `xfer_buffer[7]` (15 bytes into a 4104-byte region);
+  later `gnutls_record_recv` calls there return 0, not `-1250`. The observed
+  ASan-versus-stock difference is measured; the quarantine-versus-reuse
+  cause is an INFERENCE. Rung 4 is not claimed on either build; rung 3
+  witness #1140 and the fixed 4.99.3 control are unchanged. Raw traces and
+  ASan reports are untracked lab artifacts under those trees.
+- **WAMR2Shell chosen bytes come from real stores (commit `7672af9`)**: the
+  original instrumented patch skips the OOB store, so its `WAMR_OOB`
+  lines are would-be values. Build two non-ASan 2.4.4 trees from the pinned
+  tag with the committed patches `lab/frontier/wamr2shell/passive-oob.patch`
+  (sha256 `1e4199eace52064722771ee410ef2f5ff50776db49d0149090b872d619f4fba9`)
+  and `lab/frontier/wamr2shell/caller-store.patch` (sha256
+  `9c0e79073eac423b15b5ead6302fb1cd87653719f414785ec9ab3569e1b5302e`),
+  regenerate variants with `python3 lab/frontier/wamr2shell/make_chosen_variant.py
+  /tmp/w2-v1.wasm 4142434445464700 8`, then run `iwasm-2.4.4 -f test
+  /tmp/w2-v1.wasm`. Expect `WAMR_CALLER tag=const phase=before size=8` and
+  `phase=after size=8 … mem=` equal to `in=` at +11/+29/+47/+65 (`0447464544434241`
+  … `0747464544434241` for variant 1; `04b0fecaefbead7e` … for variant 2),
+  48 OOB writes in the passive build, and glibc `double free or corruption
+  (out)` in both. Offset set is fixed and the attacker picks values, not
+  addresses; witness replay is still owed and R5 stays UNKNOWN. Build trees
+  and raw logs (`callerstore-v1.out` `dc126e66…`, `passive-v1.out`
+  `9899fc54…`) are gitignored and regenerate from the committed patches.
+- **Apache2Root CVE-2026-119618 rung 1 local result, rungs 2/3 NEGATIVE
+  (commit `432d053`)**: full pins, build flags and logs are in
+  `lab/frontier/apache2shell/OUTCOME.md`; drivers
+  `lab/frontier/apache2shell/repro-h2c.sh` and `repro-h2c-mux.py` drive only
+  127.0.0.1 ports 18080–18082. Expect 76 custom headers plus
+  `Content-Type` and no `Content-Length` to drive `nelts=80 nalloc=80` and
+  the vulnerable wrong-pool `apr_table_setn()` marker on 2.4.70 (300/300
+  and 2000/2000), with the 2.4.71 fixed-path marker on the matched control.
+  No ASan report across 2000+ full-table writes; one 2000-stream child
+  SIGSEGV was not repeated in a repeat burst or the matched 300-stream run,
+  so rung 2 stays UNKNOWN. The written value is the fixed string "0":
+  no chosen byte, pointer control or RCE. This is an adjacent lane of the
+  already-admitted `apache2shell` target, not a new admission; the brief's
+  "(unadmitted)" label is stale. Driver scripts and `OUTCOME.md` are
+  tracked, build trees and `out-*` logs are gitignored.
 
 - **Memcached2Shell live-daemon chosen bytes (second wake)**: build the non-instrumented pinned parent as in [the report](../reports/memcached2shell-daemon-asan.md) (`./autogen.sh`; `CFLAGS='-g -O1 -fno-omit-frame-pointer'` with empty `LDFLAGS`, `./configure --disable-sasl --disable-enchant`; `make -j2`), then
   `python3 lab/frontier/memcached2shell/daemon/observe_heap.py --port 22142 --keys 8000 --hold 86 --out /tmp/replay.txt`.
