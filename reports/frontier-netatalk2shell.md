@@ -70,7 +70,10 @@ Working-tree replay of `bash lab/frontier/netatalk2shell/run.sh <outdir>`:
 **24 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`**, trace
 `sha256=c1bba7fb17b2a2b0cf6de7c76725974f005192648287245f5ba3b8aac08339d0`
 (canonical lines only; ASan PID/address/path text excluded). A clean
-`git archive HEAD` replay is recorded below after commit.
+`git archive HEAD` replay at commit `bd30e2d`, run twice into separate
+absolute output directories from the extracted tree, gave 24 PASS /
+`ALL CHECKS PASS rc 0` both times with the same trace sha256 (byte-identical
+between directories).
 
 - **Rung 1 (reproducible trigger)** — pinned affected `deletedir()` with a
   1023-byte directory path and a 255-byte synthetic `d_name` performs
