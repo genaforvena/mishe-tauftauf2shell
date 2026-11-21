@@ -1772,6 +1772,27 @@ at `crawler.c:275` is from a different build and stays a claim. Evidence:
 `reports/memcached2shell-status.md` and the pins in
 `lab/frontier/memcached2shell/PROVENANCE.md`.
 
+2026-11-21 ~09:45Z outcome: witness verdict #751 ESTABLISHED AS CLAIMED on the
+chosen-byte limb, after #710 established rung 3. A loopback daemon on the
+pinned parent built with `-g -O1 -fno-omit-frame-pointer` (not a distro
+binary), 8000 keys of 245 bytes, a stalled `lru_crawler metadump all` client
+with `SO_RCVBUF=4096`, a 64 MB daemon and a ~80 s hold gives rung 3 in process
+(ASan `WRITE of size 1` at `util.c:57` via `crawler.c:310`, allocation at
+`:825`; fixed tree clean) and rung 4 chosen bytes at chosen offsets in a live
+non-instrumented build of the pinned parent. A non-perturbing `/proc` observer
+reads pinned `active_crawler_mod` at `base+0x54320` through `/proc/pid/mem`
+without stopping the crawler, so the 1000 ms `poll()` timeout stays intact;
+two key bytes (`0x5a`, `0x41`) at identical offsets and timing confirm the OOB
+bytes come from the stored key record, and writes are frontier-local. No
+pointer-control, dereference, execution or control-flow claim was accepted or
+made, so R4 stays ◐. The chosen-byte overwrite of a pointer-shaped heap window
+is conditional on allocator state (absent in two witness `0x5a` replays) and
+not a grade basis; one non-reproduced daemon SIGSEGV in a slab-freelist
+pointer write is preserved as a single observation. Wording nit from #751
+applied: "live non-instrumented build of the pinned parent" instead of "live
+stock daemon". See `reports/memcached2shell-daemon-asan.md` and
+`reports/memcached2shell-status.md`.
+
 #### Admitted 2026-11-21 ~08:44Z: Ipfixcol2Shell (CVE-2026-122127 / GHSA-4575-chq4-crfc)
 
 Frontier handed this find over on tape #698 after committing `a5f3aed`

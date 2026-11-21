@@ -42,29 +42,39 @@ accounting defect. `-X` and `-o no_lru_crawler` are non-default mitigations.
   frame `:825`, with clean fixed and benign-parent controls. The 64 bytes are
   a verbatim harness key; real `uriencode_p()` makes the write key-length
   dependent.
-- Rung 4 INSTRUMENTED only, with preserved negatives. With a zeroed 1 MiB
-  collaborator replacing the nominal buffer, chosen key byte `0x5a` is read
-  back at offsets 0, 4 and 65536 past the nominal end (35231 of 65536 bytes
-  matched); a differential `0x41` run puts `0x41` at exactly those offsets.
-  Under a guard-mapped allocation the parent faults at the first byte past
-  131072 (exit 77), and the unmodified plain parent faults in host libc
-  before any stable chosen bytes can be inspected. No pointer, saved return
-  address, heap metadata field, function pointer, control-flow diversion or
-  marker execution was observed or attempted. The collaborator and guard
-  mapping are instrumentation, not upstream allocator properties.
-- UNKNOWN: live daemon, loopback socket-buffer timing, shipping allocator and
-  compile flags, real daemon ASan frames (the LP recipe reports a frame at
-  `crawler.c:275` on 1.6.24, a different build), CVSS, CVE/GHSA assignment,
-  and any post-write pointer control. All external claims remain claims.
-  Witness replay #685 was requested; no verdict was in hand at admission.
-  No probe was sent off loopback.
+- Rung 4, chosen-byte limb ESTABLISHED AS CLAIMED (witness #751). In the
+  harness a zeroed 1 MiB collaborator gives chosen `0x5a` at offsets 0, 4 and
+  65536 past the nominal end (35231 of 65536 bytes matched), with an `0x41`
+  differential at exactly those offsets; a guard-mapped allocation faults at
+  the first byte past 131072 (exit 77). Those are instrumentation. The
+  decisive evidence is in a real daemon: a non-perturbing `/proc` observer on
+  a live non-instrumented build of the pinned parent sees chosen key bytes at
+  `buf+131072` and at +512/+1024/+2048/+16384 as the write frontier advances;
+  two key bytes (`0x5a` and `0x41`) at identical offsets and timing prove the
+  bytes come from the stored key record. The witness replayed all of it
+  independently (#710 rung 3, #751 chosen bytes) and accepted it as claimed.
+  No pointer, saved return address, heap metadata field, function pointer,
+  execution or control-flow diversion was observed or claimed.
+- Conditional, not a grade basis: the chosen-byte overwrite of a
+  pointer-shaped heap window at `buf+131072+16384` appeared in this plant's
+  two traces and the witness's `0x41` replays, but the window was zero in two
+  witness `0x5a` replays — allocator-state dependent and semantically
+  unidentified. One prolonged run saw a non-deterministic daemon SIGSEGV in a
+  slab-freelist pointer write in the crawler thread; a longer
+  observer-confirmed repeat went further without crashing, so that fault is a
+  single observation, not an established impact.
+- UNKNOWN: loopback socket-buffer timing outside this configuration, shipping
+  allocator and compile flags of a distro binary, a published CVE/GHSA, CVSS,
+  external reachability, and any post-write pointer control or dereference.
+  All external claims remain claims. No probe was sent off loopback.
 
-Cheapest next rung: determine this host's actual consumer behavior at the
-buffer boundary first (allocator layout, `write()`/`poll()` timing), then
-build the pinned vulnerable tree under ASan, run a loopback-only daemon with
-many stored keys, stall a `lru_crawler metadump all` client and capture the
-real ASan frame plus the heap layout around the 131072-byte buffer; repeat on
-1.6.44 for the guard. Only an observed pointer or control-flow result would
-drop the INSTRUMENTED label. If the daemon's allocator faults before chosen
-bytes persist, preserve that as the same real-libc negative and cap this path
-at rung 3 in practice (the sibling nginx2root lesson applies).
+Grade reference: witness verdicts #691 (seed harness) and #751 (daemon
+evidence) are ESTABLISHED AS CLAIMED. Only the chosen-byte limb of rung 4 is
+accepted; pointer control, dereference, execution and control-flow diversion
+are not. Full daemon evidence: `reports/memcached2shell-daemon-asan.md`.
+
+Next rung needs a crafted chosen value demonstrably dereferenced through a
+corrupted field, or a control-flow diversion — another unchanged 86 s replay
+or allocator probe would add nothing. No host config change and no
+off-loopback probe. Wake trigger units and presentation stay owed from the
+person-only full-flag sync in `docs/runtime-pin.md`, never a bare `mishe sync`.

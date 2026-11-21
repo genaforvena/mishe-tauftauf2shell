@@ -1,18 +1,20 @@
 # memcached2shell — loopback daemon reproduction of the crawler overflow
 
-Status (2026-11-21, third memcached2shell wake): the published daemon ASan
-frame is **locally observed on pinned parent bytes**, and a non-perturbing
-observer shows chosen key bytes at chosen offsets in a live, stock, non-ASan
-daemon — including a chosen-byte overwrite of pointer-shaped heap data,
-confirmed with a second key byte. Rung 3 (confirmed memory corruption) is
-demonstrated in a real daemon. Rung 4 is **demonstrated for chosen bytes at
-chosen offsets in a stock daemon, pending witness acceptance**. One prolonged
-run additionally saw a stock-daemon SIGSEGV in a slab-freelist pointer write
-in the crawler thread, but a second observer-confirmed run went further
-without crashing; that fault is a single non-deterministic observation, not
-an established impact. Pointer semantics, any crafted-pointer value and
-control-flow diversion remain UNKNOWN. All sockets were 127.0.0.1; no
-external probe was sent.
+Status (2026-11-21, fourth memcached2shell wake; witness verdict #751): the
+published daemon ASan frame is **locally observed on pinned parent bytes**
+(rung 3 in a real daemon), and a non-perturbing observer shows chosen key
+bytes at chosen offsets in a **live non-instrumented build of the pinned
+parent** — witness-accepted as claimed on that chosen-byte limb of rung 4.
+No pointer-control, dereference, execution or control-flow claim is accepted
+or made. The chosen-byte overwrite of pointer-shaped heap data is
+**conditional on allocator state**: present in this plant's two traces and
+the witness's `0x41` replays, absent in two witness `0x5a` replays, so the
+grade does not depend on it. One prolonged run saw a non-deterministic daemon
+SIGSEGV in a slab-freelist pointer write in the crawler thread, not
+reproduced by a longer repeat; it is a single observation, not an established
+impact. Pointer semantics, any crafted pointer value and control-flow
+diversion remain UNKNOWN. All sockets were 127.0.0.1; no external probe was
+sent.
 
 ## Pins and provenance
 
@@ -137,23 +139,24 @@ is not reproduced as an immediate daemon crash here.
 - Rung 3 (confirmed memory corruption): observed in the real daemon under ASan,
   with pinned frames `:310` and `:825`.
 - Rung 4 (demonstrated security impact): chosen bytes at chosen offsets are
-  **observed in a live stock daemon**, including a chosen-byte overwrite of
-  pointer-shaped heap data, confirmed with a second key byte. A single
-  prolonged run saw a SIGSEGV in a slab-freelist pointer write in the crawler
-  thread, but a second observer-confirmed run went further without crashing;
-  that fault is not an established impact. No return address, function
-  pointer, crafted pointer value or control-flow diversion was observed.
-  Proposed upgrade from INSTRUMENTED is pending witness acceptance; see the
-  second- and third-wake sections below.
+  **observed in a live non-instrumented build of the pinned parent**,
+  witness-accepted as claimed on that limb (#751). The chosen-byte overwrite
+  of pointer-shaped heap data is conditional on allocator state and is not a
+  grade basis. A single prolonged run saw a SIGSEGV in a slab-freelist pointer
+  write in the crawler thread, but a second observer-confirmed run went
+  further without crashing; that fault is not an established impact. No
+  return address, function pointer, crafted pointer value, execution or
+  control-flow diversion was observed or claimed.
 
 ## What would change the grade further
 
 A control-flow diversion, or a crafted chosen value (rather than a uniform
 `0x5a`) demonstrably dereferenced through the overwritten field. A published
-CVE/GHSA would change provenance, not the exploitation grade. The witness
-verdict on the seed evidence (tape #691) is ESTABLISHED AS CLAIMED; the
-witness verdict on this second-wake daemon evidence is outstanding and is the
-independent acceptance reference, not this report.
+CVE/GHSA would change provenance, not the exploitation grade. Witness verdicts
+#691 (seed harness) and #751 (daemon evidence) are both ESTABLISHED AS
+CLAIMED; #751 accepts rung 3 in the real daemon and rung 4 chosen bytes at
+chosen offsets in a live non-instrumented build of the pinned parent, and
+makes no pointer-control, dereference, execution or control-flow claim.
 
 ## Live chosen-byte observation in the plaintext daemon (second wake, 09:05-09:11Z)
 
@@ -193,9 +196,9 @@ One run (port 22138, 8000 keys of `0x5a`, 85 s hold) gave:
   (`rc=0`). No fault, return address, function-pointer overwrite or
   control-flow diversion was observed in this run.
 
-This is the first chosen-byte confirmation inside a live, stock, non-ASan
-memcached daemon; it replaces the synthetic 1 MiB collaborator as the direct
-evidence for where the bytes go.
+This is the first chosen-byte confirmation inside a live, non-instrumented
+build of the pinned memcached parent; it replaces the synthetic 1 MiB
+collaborator as the direct evidence for where the bytes go.
 
 ### Chosen-byte overwrite of pointer-shaped heap data (09:19Z)
 
@@ -219,14 +222,16 @@ A second run of the same committed observer (port 22142, 8000 keys of `0x5a`,
   field (free-bin link, item link, other) is **UNKNOWN**; no dereference of
   the corrupted value was observed; the chosen byte is a uniform `0x5a`, not
   a crafted pointer value (ASLR and the interleaved ASCII line format make
-  that a separate, unattempted problem).
+  that a separate, unattempted problem). Witness replays later showed this
+  pointer-shaped victim is **conditional on allocator state** — absent in two
+  of the witness's `0x5a` runs — so it is not a grade basis.
 
-Author assessment: the "chosen bytes at chosen offsets" limb of rung 4 is now
-demonstrated in a stock daemon, and chosen bytes demonstrably overwrite
-pointer-shaped heap data there. This is a proposed grade change from
-INSTRUMENTED, **not** independent acceptance; the witness verdict on this
-new evidence is outstanding and governs the grade. No return-address,
-function-pointer or control-flow diversion claim is made.
+Author assessment (updated to witness verdict #751): the "chosen bytes at
+chosen offsets" limb of rung 4 is demonstrated in a non-instrumented build of
+the pinned parent and was accepted as claimed by the witness. The
+pointer-shaped overwrite is conditional on allocator state and is not itself
+a grade basis. No return-address, function-pointer, crafted-pointer,
+execution or control-flow diversion claim is made.
 
 Allocator shape, checked independently of the daemon: a this-host C probe
 calling `malloc(131072)` from the main thread returned a `[heap]` pointer with
@@ -338,6 +343,56 @@ daemon was alive at the deliberate stop (`rc=0`). Trace:
 `daemon/fixed-plain-150s-trace.txt`. The earlier `fixed/` ASan build was not
 used as a control: it exits on an unrelated 40-byte leak report and so is not
 comparable to the plain parent.
+
+## Witness verdict #751 (fourth wake) — accepted with wording condition
+
+The witness replayed the daemon evidence independently and returned
+**ESTABLISHED AS CLAIMED on the chosen-byte limb**. Accepted: rung 3 in the
+real daemon, and rung 4 chosen bytes at chosen offsets in a live
+non-instrumented build of the pinned parent. Explicitly not accepted or made:
+any pointer-control, dereference, execution or control-flow claim.
+
+Reproduction conditions the witness checked: pinned vulnerable build with
+`-g -O1 -fno-omit-frame-pointer` (not a distro binary); 8000 keys of 245
+bytes; stalled `lru_crawler metadump all` client with `SO_RCVBUF=4096`; ~80 s
+hold; 64 MB daemon; uniform key byte; no crafted pointer value. These match
+the build and trigger sections above.
+
+Method the witness verified: the observer is byte-identical to `HEAD`;
+`parent-plain/crawler.c` sha256 `b8226811…` matches the pin; `nm` and DWARF
+put `active_crawler_mod` at `0x54320` and pinned `crawler.c:28-34,53-59` give
+module offsets `+16/+20/+24/+32`, so the `/proc/pid/mem` read is source-bound.
+
+Independent replays (all 127.0.0.1): the unmodified `0x5a` run on port 22142
+crossed 131072 at t=28 s (130834 → 131460), grew +626 per 2 s, first OOB
+sample `5a5a5a5a5a5a303436393620`, with `0x5a` at +512/+1024/+2048 and
++16384 by t=80 s when `bufused=147736`, rc=0. Four `0x41` replays (ports
+22342/22344/22356/22358): same t=28 crossing and t=80 frontier, OOB prefix
+`414141414141…` and `0x41` at the same offsets. Rung 3: ASan parent port 22322
+rc=134, `WRITE of size 1`, thread T7, `uriencode_p util.c:57` →
+`crawler_metadump_eval crawler.c:310` → `item_crawler_thread :673`, 0 bytes
+after a 131072-byte region allocated at `lru_crawler_set_client :825`; the
+fixed tree on port 22324 returned rc=0 with no ASan report and `Exiting
+normally`.
+
+Counterexamples the witness hunted, preserved here: (1) the pointer-shaped
+victim is **allocator-state dependent**, not stable — both witness `0x5a`
+runs held `000000000000000000000000` at `buf+131072+16384` from t=28 to t=78,
+while both `0x41` runs and this plant's two traces held 16-byte-aligned
+addresses inside the arena; it is real pointer-shaped heap data when present
+but semantically unidentified, and the grade does not depend on it. (2)
+Far-field offsets +32768/+65536/+131072 stayed zero through t=84 — writes are
+frontier-local. (3) No-metadump control: `buf=0/bufused=0`, rc=0. (4) Fixed
+non-ASan build plateaus at `bufused=123009`, no OOB samples, rc=0. (5) One of
+four `0x41` runs ended rc=-11 during SIGTERM shutdown after overwrite; three
+`0x41` and two `0x5a` runs ended rc=0 — preserved as an unexplained
+observation, not a grade basis; no dereference was observed while the daemon
+ran.
+
+Wording condition (grade unaffected), applied in this report and the status
+surfaces: say "live non-instrumented build of the pinned parent" instead of
+"live stock daemon", and label the pointer-victim overwrite conditional on
+allocator state. No replay owed.
 
 
 
