@@ -1,0 +1,149 @@
+{
+  "sha": "ab03c94b0744ab392320253ad1767b21b6c82a59",
+  "node_id": "C_kwDOAhKp2toAKGFiMDNjOTRiMDc0NGFiMzkyMzIwMjUzYWQxNzY3YjIxYjZjODJhNTk",
+  "commit": {
+    "author": {
+      "name": "winlin",
+      "email": "winlinvip@gmail.com",
+      "date": "2026-10-29T21:18:45Z"
+    },
+    "committer": {
+      "name": "winlin",
+      "email": "winlinvip@gmail.com",
+      "date": "2026-10-29T21:48:41Z"
+    },
+    "message": "Claude: RTC: Fix crash and heap overflow from a malformed RTCP packet. v8.0.73\n\nA WebRTC peer could crash the server with one RTCP packet:\n\n- A header length of 0 made the payload length negative, so read_bytes\n  failed its assert and aborted the process (BYE, TWCC and every other\n  type decoded by SrsRtcpCommon).\n- A feedback packet (generic FB, NACK, PLI, SLI, RPSI) with length 1\n  at the end of the compound read the media SSRC past the buffer and\n  aborted the same way.\n- A packet over 1500 bytes copied past the fixed payload_ buffer in\n  SrsRtcpCommon and SrsRtcpTWCC, a heap overflow, because the UDP read\n  buffer takes up to 64KB.\n\ndecode_header now rejects length 0, the feedback decoders reject\nlength < 2 before the media SSRC, and Common and TWCC reject a payload\nlarger than kRtcpPacketSize. SrsRtcpApp now starts with the length of\nan empty APP packet, which it used to leave unset and which the new\ncheck rejects.\n\nAdds 9 KernelRTCPTest.SrsRtcpCompound_Decode* tests that failed on\ndevelop, with asserts and ASAN heap-buffer-overflow, and pass now.\n\n---------\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
+    "tree": {
+      "sha": "d2d9bf8828a02575f101734e5218d322666e8a37",
+      "url": "https://api.github.com/repos/ossrs/srs/git/trees/d2d9bf8828a02575f101734e5218d322666e8a37"
+    },
+    "url": "https://api.github.com/repos/ossrs/srs/git/commits/ab03c94b0744ab392320253ad1767b21b6c82a59",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN SSH SIGNATURE-----\nU1NIU0lHAAAAAQAAAZcAAAAHc3NoLXJzYQAAAAMBAAEAAAGBALUTqpftOXeambT9zqlOhk\npM36D5fg1AkzrXVMloS2aE7Eznn+daKOpb/YOckDrTOPmmq7xU2VDWfP6P9T/HLQPQVhdH\n9L82nJANQ72vBRUpiUWKi+oqoqfO1xkxHlTjggHkfexso1i3P5vvnnL2Dwnf2lDt7BzZB0\nwpT9OXeaT4S8rHyxEaI+EnxeipVVU8rLRkBckMLyunamVhIRBbFxpJjhRVikF58jgjKGrF\nnDZVf/P+/tZD1NR8Z41umYl3aBZNcULUSskLcgTC29gRus5zowEzvdSxPHh3IeBOhIlylv\nwpVODwEMW2G1q2HEnHJF1c+hKm7/UumxG71xyDGx0B0uh5Ho6o4h+kTHuc8e/fxWO1MpyH\nFutLmGndBwnZeUdJrTnTz8Apt4wjbGubpRsGKMH1W85suuUrO6kGTvvS48F5AhNtVUGxoi\nuRoQ1bnEAbtrcXNXBnCwPeRfKGey1UECLl7OXqUFV1nECjeNkxTz/wgi2ddgX3XUhnNViz\nYQAAAANnaXQAAAAAAAAABnNoYTUxMgAAAZQAAAAMcnNhLXNoYTItNTEyAAABgFzdm6N622\nW+zo/WMejc4Uoya2hNDFBgn1gGOy+zpyA9zvqqpV+rVbN7ECui32qJWE/fNH1DLuGVj9jq\ndzGkMxdtN4KPZhxccSIUGFqlgeHbg2+caXew9ZD7AiKAIx0WQ6A/zAy0fxv5ICRawRf/IO\n+OG79OyBI5CVt8yaDgojT6Xe25+4j0CGYzXrK7vtlnS2EhiR7BXJiAPSmU6taDtNyL0xC+\norSK06pywT8WetVTY4rVqeZNRhrE0TCKxmHDh4kE5SM5HpWCsu6E+sfSMoFsZUloIwoQ+6\n0CCGvhk6G3T+rih1d5XB8UUhtbS5dgcr4MuVpdNf6I71IqyLO9B+TudO9uqUJCUG23quCT\nyHlrWyOpf3SZ3IHtGlyHs+ls6FAr/izftRWjCI8EXeRS4thJ2D0+H4o1g9rN9D0V65jODt\nqo6IoxoxULafYdOY3WAohzZ3OaiwUxGjO7ZCY443vEVEueAdp3KcfEArddkvkuYsc1zTjr\nU6buvP14pLegQA==\n-----END SSH SIGNATURE-----",
+      "payload": "tree d2d9bf8828a02575f101734e5218d322666e8a37\nparent f7968893cfdefcfa681ed5499c804095daf67469\nauthor winlin <winlinvip@gmail.com> 1793308725 -0400\ncommitter winlin <winlinvip@gmail.com> 1793310521 -0400\n\nClaude: RTC: Fix crash and heap overflow from a malformed RTCP packet. v8.0.73\n\nA WebRTC peer could crash the server with one RTCP packet:\n\n- A header length of 0 made the payload length negative, so read_bytes\n  failed its assert and aborted the process (BYE, TWCC and every other\n  type decoded by SrsRtcpCommon).\n- A feedback packet (generic FB, NACK, PLI, SLI, RPSI) with length 1\n  at the end of the compound read the media SSRC past the buffer and\n  aborted the same way.\n- A packet over 1500 bytes copied past the fixed payload_ buffer in\n  SrsRtcpCommon and SrsRtcpTWCC, a heap overflow, because the UDP read\n  buffer takes up to 64KB.\n\ndecode_header now rejects length 0, the feedback decoders reject\nlength < 2 before the media SSRC, and Common and TWCC reject a payload\nlarger than kRtcpPacketSize. SrsRtcpApp now starts with the length of\nan empty APP packet, which it used to leave unset and which the new\ncheck rejects.\n\nAdds 9 KernelRTCPTest.SrsRtcpCompound_Decode* tests that failed on\ndevelop, with asserts and ASAN heap-buffer-overflow, and pass now.\n\n---------\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n",
+      "verified_at": "2026-10-30T14:17:28Z"
+    }
+  },
+  "url": "https://api.github.com/repos/ossrs/srs/commits/ab03c94b0744ab392320253ad1767b21b6c82a59",
+  "html_url": "https://github.com/ossrs/srs/commit/ab03c94b0744ab392320253ad1767b21b6c82a59",
+  "comments_url": "https://api.github.com/repos/ossrs/srs/commits/ab03c94b0744ab392320253ad1767b21b6c82a59/comments",
+  "author": {
+    "login": "winlinvip",
+    "id": 2777660,
+    "node_id": "MDQ6VXNlcjI3Nzc2NjA=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/2777660?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/winlinvip",
+    "html_url": "https://github.com/winlinvip",
+    "followers_url": "https://api.github.com/users/winlinvip/followers",
+    "following_url": "https://api.github.com/users/winlinvip/following{/other_user}",
+    "gists_url": "https://api.github.com/users/winlinvip/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/winlinvip/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/winlinvip/subscriptions",
+    "organizations_url": "https://api.github.com/users/winlinvip/orgs",
+    "repos_url": "https://api.github.com/users/winlinvip/repos",
+    "events_url": "https://api.github.com/users/winlinvip/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/winlinvip/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "winlinvip",
+    "id": 2777660,
+    "node_id": "MDQ6VXNlcjI3Nzc2NjA=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/2777660?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/winlinvip",
+    "html_url": "https://github.com/winlinvip",
+    "followers_url": "https://api.github.com/users/winlinvip/followers",
+    "following_url": "https://api.github.com/users/winlinvip/following{/other_user}",
+    "gists_url": "https://api.github.com/users/winlinvip/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/winlinvip/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/winlinvip/subscriptions",
+    "organizations_url": "https://api.github.com/users/winlinvip/orgs",
+    "repos_url": "https://api.github.com/users/winlinvip/repos",
+    "events_url": "https://api.github.com/users/winlinvip/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/winlinvip/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "f7968893cfdefcfa681ed5499c804095daf67469",
+      "url": "https://api.github.com/repos/ossrs/srs/commits/f7968893cfdefcfa681ed5499c804095daf67469",
+      "html_url": "https://github.com/ossrs/srs/commit/f7968893cfdefcfa681ed5499c804095daf67469"
+    }
+  ],
+  "stats": {
+    "total": 159,
+    "additions": 157,
+    "deletions": 2
+  },
+  "files": [
+    {
+      "sha": "30910aa2a8efd363d923bedd6d96856606982430",
+      "filename": "internal/version/version.go",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/ossrs/srs/blob/ab03c94b0744ab392320253ad1767b21b6c82a59/internal%2Fversion%2Fversion.go",
+      "raw_url": "https://github.com/ossrs/srs/raw/ab03c94b0744ab392320253ad1767b21b6c82a59/internal%2Fversion%2Fversion.go",
+      "contents_url": "https://api.github.com/repos/ossrs/srs/contents/internal%2Fversion%2Fversion.go?ref=ab03c94b0744ab392320253ad1767b21b6c82a59",
+      "patch": "@@ -15,7 +15,7 @@ func VersionMinor() int {\n }\n \n func VersionRevision() int {\n-\treturn 72\n+\treturn 73\n }\n \n func Version() string {"
+    },
+    {
+      "sha": "007efebb88de1c89fa53d4673cb909f914f4c912",
+      "filename": "trunk/doc/CHANGELOG.md",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/ossrs/srs/blob/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fdoc%2FCHANGELOG.md",
+      "raw_url": "https://github.com/ossrs/srs/raw/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fdoc%2FCHANGELOG.md",
+      "contents_url": "https://api.github.com/repos/ossrs/srs/contents/trunk%2Fdoc%2FCHANGELOG.md?ref=ab03c94b0744ab392320253ad1767b21b6c82a59",
+      "patch": "@@ -7,6 +7,7 @@ The changelog for SRS.\n <a name=\"v8-changes\"></a>\n \n ## SRS 8.0 Changelog\n+* v8.0, 2026-10-29, RTC: Fix crash and heap overflow from a malformed RTCP packet. v8.0.73\n * v8.0, 2026-10-29, Merge [#4792](https://github.com/ossrs/srs/pull/4792): Chrome: Control skill and Chrome tests in the Full tier. v8.0.72 (#4792)\n * v8.0, 2026-10-28, Merge [#4791](https://github.com/ossrs/srs/pull/4791): UTest: Raise C++ utest coverage from 90.75% to 95.6% and fix the bugs it found. v8.0.71 (#4791)\n * v8.0, 2026-10-25, Merge [#4789](https://github.com/ossrs/srs/pull/4789): RTC: Fix out-of-range read decoding a malformed RTCP report. v8.0.70 (#4789)"
+    },
+    {
+      "sha": "29ff2ddb4ad78c78b720d1ebb9a49899287bfcd0",
+      "filename": "trunk/src/core/srs_core_version8.hpp",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/ossrs/srs/blob/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fsrc%2Fcore%2Fsrs_core_version8.hpp",
+      "raw_url": "https://github.com/ossrs/srs/raw/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fsrc%2Fcore%2Fsrs_core_version8.hpp",
+      "contents_url": "https://api.github.com/repos/ossrs/srs/contents/trunk%2Fsrc%2Fcore%2Fsrs_core_version8.hpp?ref=ab03c94b0744ab392320253ad1767b21b6c82a59",
+      "patch": "@@ -9,6 +9,6 @@\n \n #define VERSION_MAJOR 8\n #define VERSION_MINOR 0\n-#define VERSION_REVISION 72\n+#define VERSION_REVISION 73\n \n #endif"
+    },
+    {
+      "sha": "06084d29f7506c71e23e04a0f5ef0bb25860cf88",
+      "filename": "trunk/src/kernel/srs_kernel_rtc_rtcp.cpp",
+      "status": "modified",
+      "additions": 27,
+      "deletions": 0,
+      "changes": 27,
+      "blob_url": "https://github.com/ossrs/srs/blob/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fsrc%2Fkernel%2Fsrs_kernel_rtc_rtcp.cpp",
+      "raw_url": "https://github.com/ossrs/srs/raw/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fsrc%2Fkernel%2Fsrs_kernel_rtc_rtcp.cpp",
+      "contents_url": "https://api.github.com/repos/ossrs/srs/contents/trunk%2Fsrc%2Fkernel%2Fsrs_kernel_rtc_rtcp.cpp?ref=ab03c94b0744ab392320253ad1767b21b6c82a59",
+      "patch": "@@ -59,6 +59,11 @@ srs_error_t SrsRtcpCommon::decode_header(SrsBuffer *buffer)\n     buffer->read_bytes((char *)(&header_), sizeof(SrsRtcpHeader));\n     header_.length = ntohs(header_.length);\n \n+    // The length counts the 32-bit words after the first one, so it must cover the SSRC read below.\n+    if (header_.length < 1) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"require length for ssrc, length=%u\", header_.length);\n+    }\n+\n     int payload_len = header_.length * 4;\n     if (payload_len > buffer->left()) {\n         return srs_error_new(ERROR_RTC_RTCP,\n@@ -92,6 +97,9 @@ srs_error_t SrsRtcpCommon::decode(SrsBuffer *buffer)\n     }\n \n     payload_len_ = (header_.length + 1) * 4 - sizeof(SrsRtcpHeader) - 4;\n+    if (payload_len_ > kRtcpPacketSize) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"payload len=%d exceeds %d\", payload_len_, kRtcpPacketSize);\n+    }\n     buffer->read_bytes((char *)payload_, payload_len_);\n \n     return err;\n@@ -114,6 +122,7 @@ SrsRtcpApp::SrsRtcpApp()\n     header_.type = SrsRtcpType_app;\n     header_.rc = 0;\n     header_.version = kRtcpVersion;\n+    header_.length = 2;\n }\n \n SrsRtcpApp::~SrsRtcpApp()\n@@ -838,6 +847,9 @@ srs_error_t SrsRtcpTWCC::decode(SrsBuffer *buffer)\n     }\n \n     payload_len_ = (header_.length + 1) * 4 - sizeof(SrsRtcpHeader) - 4;\n+    if (payload_len_ > kRtcpPacketSize) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"payload len=%d exceeds %d\", payload_len_, kRtcpPacketSize);\n+    }\n     buffer->read_bytes((char *)payload_, payload_len_);\n \n     return err;\n@@ -1296,6 +1308,9 @@ srs_error_t SrsRtcpNack::decode(SrsBuffer *buffer)\n         return srs_error_wrap(err, \"decode header\");\n     }\n \n+    if (header_.length < 2) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"require length for media ssrc, length=%u\", header_.length);\n+    }\n     media_ssrc_ = buffer->read_4bytes();\n     char bitmask[20];\n     for (int i = 0; i < (header_.length - 2); i++) {\n@@ -1444,6 +1459,9 @@ srs_error_t SrsRtcpFbCommon::decode(SrsBuffer *buffer)\n         return srs_error_wrap(err, \"decode header\");\n     }\n \n+    if (header_.length < 2) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"require length for media ssrc, length=%u\", header_.length);\n+    }\n     media_ssrc_ = buffer->read_4bytes();\n     int len = (header_.length + 1) * 4 - 12;\n     buffer->skip(len);\n@@ -1498,6 +1516,9 @@ srs_error_t SrsRtcpPli::decode(SrsBuffer *buffer)\n         return srs_error_wrap(err, \"decode header\");\n     }\n \n+    if (header_.length < 2) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"require length for media ssrc, length=%u\", header_.length);\n+    }\n     media_ssrc_ = buffer->read_4bytes();\n     return err;\n }\n@@ -1588,6 +1609,9 @@ srs_error_t SrsRtcpSli::decode(SrsBuffer *buffer)\n         return srs_error_wrap(err, \"decode header\");\n     }\n \n+    if (header_.length < 2) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"require length for media ssrc, length=%u\", header_.length);\n+    }\n     media_ssrc_ = buffer->read_4bytes();\n     int len = (header_.length + 1) * 4 - 12;\n     buffer->skip(len);\n@@ -1659,6 +1683,9 @@ srs_error_t SrsRtcpRpsi::decode(SrsBuffer *buffer)\n         return srs_error_wrap(err, \"decode header\");\n     }\n \n+    if (header_.length < 2) {\n+        return srs_error_new(ERROR_RTC_RTCP, \"require length for media ssrc, length=%u\", header_.length);\n+    }\n     media_ssrc_ = buffer->read_4bytes();\n     int len = (header_.length + 1) * 4 - 12;\n     buffer->skip(len);"
+    },
+    {
+      "sha": "1d8a7f2a0c4b878fcdd0ec89dca63bf0d35db9a1",
+      "filename": "trunk/src/utest/srs_utest_ai05.cpp",
+      "status": "modified",
+      "additions": 127,
+      "deletions": 0,
+      "changes": 127,
+      "blob_url": "https://github.com/ossrs/srs/blob/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fsrc%2Futest%2Fsrs_utest_ai05.cpp",
+      "raw_url": "https://github.com/ossrs/srs/raw/ab03c94b0744ab392320253ad1767b21b6c82a59/trunk%2Fsrc%2Futest%2Fsrs_utest_ai05.cpp",
+      "contents_url": "https://api.github.com/repos/ossrs/srs/contents/trunk%2Fsrc%2Futest%2Fsrs_utest_ai05.cpp?ref=ab03c94b0744ab392320253ad1767b21b6c82a59",
+      "patch": "@@ -4439,6 +4439,133 @@ VOID TEST(KernelRTCPTest, SrsRtcpCompound_Decode)\n     }\n }\n \n+// A peer sends RTCP whose header length is 0, shorter than the SSRC it carries,\n+// so the payload length is negative. It must be an error, not abort the server.\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeZeroLengthBye)\n+{\n+    unsigned char data[] = {\n+        0x81, 0xCB, 0x00, 0x00, // V=2, RC=1, PT=203(BYE), length=0\n+        0x12, 0x34, 0x56, 0x78  // SSRC\n+    };\n+    SrsBuffer buffer((char *)data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeZeroLengthTwcc)\n+{\n+    unsigned char data[] = {\n+        0x8F, 0xCD, 0x00, 0x00, // V=2, FMT=15, PT=205(RTPFB), length=0\n+        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender\n+    };\n+    SrsBuffer buffer((char *)data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+// A feedback packet at the end of the compound whose length=1 leaves no room\n+// for the media SSRC. It must be an error, not abort the server.\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortFbCommon)\n+{\n+    unsigned char data[] = {\n+        0x83, 0xCD, 0x00, 0x01, // V=2, FMT=3, PT=205(RTPFB), length=1\n+        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender\n+    };\n+    SrsBuffer buffer((char *)data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortNack)\n+{\n+    unsigned char data[] = {\n+        0x81, 0xCD, 0x00, 0x01, // V=2, FMT=1, PT=205(RTPFB), length=1\n+        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender\n+    };\n+    SrsBuffer buffer((char *)data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortPli)\n+{\n+    unsigned char data[] = {\n+        0x81, 0xCE, 0x00, 0x01, // V=2, FMT=1, PT=206(PSFB), length=1\n+        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender\n+    };\n+    SrsBuffer buffer((char *)data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortSli)\n+{\n+    unsigned char data[] = {\n+        0x82, 0xCE, 0x00, 0x01, // V=2, FMT=2, PT=206(PSFB), length=1\n+        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender\n+    };\n+    SrsBuffer buffer((char *)data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortRpsi)\n+{\n+    unsigned char data[] = {\n+        0x83, 0xCE, 0x00, 0x01, // V=2, FMT=3, PT=206(PSFB), length=1\n+        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender\n+    };\n+    SrsBuffer buffer((char *)data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+// The UDP read buffer takes up to 64KB, but payload_ holds kRtcpPacketSize\n+// bytes. A 2008-byte RTCP packet must be an error, not copied past payload_.\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeOversizedBye)\n+{\n+    char data[2008];\n+    memset(data, 0, sizeof(data));\n+    data[0] = (char)0x81; // V=2, RC=1\n+    data[1] = (char)0xCB; // PT=203(BYE)\n+    data[2] = (char)0x01; // length=501, (501+1)*4=2008 bytes\n+    data[3] = (char)0xF5;\n+    SrsBuffer buffer(data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n+VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeOversizedTwcc)\n+{\n+    char data[2008];\n+    memset(data, 0, sizeof(data));\n+    data[0] = (char)0x8F; // V=2, FMT=15\n+    data[1] = (char)0xCD; // PT=205(RTPFB)\n+    data[2] = (char)0x01; // length=501, (501+1)*4=2008 bytes\n+    data[3] = (char)0xF5;\n+    SrsBuffer buffer(data, sizeof(data));\n+    SrsRtcpCompound compound;\n+    srs_error_t err = compound.decode(&buffer);\n+    EXPECT_TRUE(err != srs_success);\n+    srs_freep(err);\n+}\n+\n VOID TEST(KernelRTPTest, srs_global_kbps_update)\n {\n     // Test srs_global_kbps_update function"
+    }
+  ]
+}
