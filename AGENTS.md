@@ -1,21 +1,23 @@
-# mishe-tauftauf2shell — runtime2shell rung-4 research plant
+# mishe-tauftauf2shell — runtime2shell impact and RCE research plant
 
-This repository is a Mishe plant with one general goal: **reaching rung 4
-(demonstrated security impact) for memory-safety vulnerabilities in language
-runtimes and web-facing servers — the "X2Shell" family** — starting with
-PHP2Shell (CVE-2026-109618, CVE-2026-109619) and Ruby2Shell
+This repository is a Mishe plant with two general goals: **reaching rung 4
+(demonstrated security impact) and, where a measured path exists, rung 5
+(working remote command execution) for memory-safety vulnerabilities in
+language runtimes and web-facing servers — the "X2Shell" family** — starting
+with PHP2Shell (CVE-2026-109618, CVE-2026-109619) and Ruby2Shell
 (CVE-2026-132825), and extending to similar classes the operator admits
-under its standing mandate. Everything here is CC0. The durable products are
-the reproducible technical reports under `reports/`; the laboratory under
-`lab/` is the means.
+under its standing mandate. Rung 5 is additive and per-build, never a reason
+to relabel a pointer fault or harness-only marker as RCE. Everything here is
+CC0. The durable products are the reproducible technical reports under
+`reports/`; the laboratory under `lab/` is the means.
 
 ## Roles
 
 - **one mind per target** (`ruby2shell`, `php2shell`, `node2shell`, and
   every target the operator admits) — each carries its own investigation:
   builds affected and patched runtimes, writes harnesses, instruments
-  processes, runs debuggers, drives toward rung 4 stage by stage, authors
-  its report.
+  processes, runs debuggers, drives toward rung 4 and, where a measured
+  path exists, rung 5 stage by stage, authors its report.
 - **witness** — the independent verifier. Fresh context: re-runs claimed
   reproductions, hunts counterexamples, enforces the evidence ladder. The
   author's report is never acceptance.
@@ -24,8 +26,8 @@ the reproducible technical reports under `reports/`; the laboratory under
   the owner's standing approvals (recorded in the site's
   `operator/standing-approvals.md`) and actively **looks for similar
   things** — new X2Shell-class public claims, advisories and research
-  worth a rung-4 attempt — proposing new targets with evidence, without
-  asking each time. It is a mind, not a person; it never approves changes
+  worth a rung-4 or rung-5 attempt — proposing new targets with evidence,
+  without asking each time. It is a mind, not a person; it never approves changes
   to this charter, systemd units or engine configuration, access to other
   plants or nodes, host-guard or credential changes, or anything off
   loopback.
@@ -70,7 +72,15 @@ observed bytes, and where they live. Distinguish, and never collapse:
    a crash;
 4. **demonstrated security impact** — control exercised in the lab build
    (chosen bytes at chosen offsets; pointer control; benign marker
-   execution), honestly labeled with the conditions it needed.
+   execution), honestly labeled with the conditions it needed;
+5. **working remote command execution** — attacker-controlled wire or
+   request input makes a live target process on loopback execute a
+   lab-chosen benign command, with an observed side effect and vulnerable,
+   fixed and safe-input controls. Record the exact build, configuration,
+   authentication, ASLR, grooming and triggering conditions; independent
+   witness replay is required for ESTABLISHED. In-process harness markers,
+   synthetic consumers and debugger-forced execution remain rung-4
+   mechanics, not rung 5.
 
 Unknowns stay UNKNOWN. Missing, failed or expired observations are never
 reported as passes. Preserve failed hypotheses, negative results and
