@@ -21,8 +21,9 @@ The rungs are depth of proof, not boxes to tick:
   request input makes a live target run a lab-chosen benign command, with
   vulnerable, fixed and safe-input controls and an independent witness replay.
   Additive and per-build, never a relabel of a pointer fault or an in-process
-  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. No R5 column
-  is filled yet.
+  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. Two
+  author-positive R5 limbs await witness replay; no R5 cell is filled until a
+  witness establishes one.
 
 Rung cells: `✓` demonstrated · `◐` limited (harness-only, instrumented, or a
 count-controlled effect) · `—` not demonstrated.
@@ -96,6 +97,16 @@ independent replay at that scope. Author reports are never acceptance.
 | **KnotResolver2Shell** | ✓ | ✓ | ✓ | — | — | **CODE/HARNESS — RUNG 3, rung 4 UNKNOWN** — hash-pinned tagged Knot Resolver 6.4.0 `pers_inbuf.size += datalen` at `daemon/quic_conn.c:107` drifts tracked capacity above the realloc target; unbounded `memcpy`s at `:120`/`:124` and no FIN consistency check at `:133–136`. Tagged v6.4.1 adds an offset assert `:158–161`, `wire_buf_reserve()` `:166–203`, a free-space/`malformed` check `:216–224` and a FIN size check `:229–238`. CVE-2026-66374 (MITRE 2026-07-25, CVSS 8.1 `AV:N/AC:H/PR:N/UI:N/S:C`); six STREAM frames against a loopback-only ASan 6.4.0 DoQ listener give ASan `WRITE of size 1198` at `quic_conn.c:124` past a 5762-byte `realloc` at `:103`, with a downstream READ in `wire_buf_movestart`; identical bytes on tagged 6.4.1 are rejected `malformed` with no ASan report ([rung-3 report](reports/knotresolver2shell-rung3.md)). DoQ is beta and non-default. On this host (jemalloc 5.3.0, gnutls 3.8.3) the 6144-byte neighbour slot geometry holds but the published dispatch offsets do not (`5a6ebab`): the live neighbour resolves to a kresd-owned `ngtcp2_pktns`, not the reference gnutls cleanup handler, and the reference RIP/RDI marker never fired — a bounded negative for those offsets, not a proof that no layout works here. `5f850fc` then placed chosen `0x4141414141414141` in a live function pointer (`ngtcp2_ksl_range_compar` at `slot1+0xa0`) with a coherent ksl; the write is deterministic, but a read watchpoint and a post-F6 `ksl_insert` trace recorded no call through it and the second ksl lies beyond the reachable span, Wake 4 (`3ddc2fc`) reached both live `ngtcp2_pktns` ksl `compar` fields — the gap ksl at `slot1+0xa0` and the extended `acktr.ents` ksl at `slot1+0x3e0` — with coherent root/front/back/search and chosen `0x4141414141414141`; a second active QUIC connection before or between frames and hardware read watchpoints on both fields gave no dispatch, no watchpoint hit and a live kresd, and scaling `pers_inbuf` to the 65536-byte class put the next live object ~1500 bytes past the write. Rung 3 unchanged; rung 4 stays UNKNOWN. The published ~814-byte handler overwrite, RIP/RDI control and `system()` PoC remain claims; all these runs were loopback-only under gdb (ASLR disabled for the inferior, host sysctl untouched). Witness replay owed. [Brief](reports/frontier-knotresolver2shell.md) |
 | **ATS2Shell** | — | — | — | — | — | **SOURCE-BOUND, RUNG 0** — hash-pinned Apache Traffic Server 10.1.3 `src/proxy/hdrs/MIME.cc:2427-2432` stores a fixed `0x20` byte at `input.data()-1` when a CR/LF split lands at a parser view boundary; fixed 10.1.4 `:2477-2484` guards with `unfold > input.data()` and `m_line.back()`. CVE-2026-58154 (CNA Apache, 2026-07-29, CWE-787, CVSS 8.9; advisory bundles 34 issues). No build, no trigger, no ASan bytes; allocation-boundary reachability, chosen bytes and pointer control UNKNOWN. Ranked below KnotResolver2Shell; admitted under standing #6 at rung 0. [Brief](reports/frontier-ats2shell.md) |
 | **Exim2Shell** | — | — | — | — | — | **SOURCE-BOUND, RUNG 0** — hash-pinned Exim 4.99.2 `src/tls-gnu.c:639` calls `tls_close(NULL, TLS_NO_SHUTDOWN)` on a mid-BDAT GnuTLS `close_notify`, freeing the 4096-byte `xfer_buffer` while the bdat receive layer stays installed; a final cleartext byte reaches stale `tls_ungetc()` and writes one fixed `0x0A` at `xfer_buffer[--lwm]`. Fixed 4.99.3 adds `tls_close_notify()` plus `smtp_rcv_cleartext()` in `smtp_in.c:984+`. CVE-2026-45185 (CNA MITRE, 2026-05-12, CWE-416, CVSS 9.8; pre-auth, GnuTLS builds only). XBOW's RCE narrative is a claim observed only ASLR-off/non-PIE; real build yielded a stack leak. No build, no traffic, no ASan bytes; allocator placement and pointer control UNKNOWN. Ranked #1 frontier candidate; admitted under standing #6 at rung 0. [Brief](reports/frontier-exim2shell.md) |
+
+**Rung-5 attempts, author-only.** Two targets have measured wire-to-command
+limbs awaiting independent witness replay: FreeSWITCH (`462e887`, a forged SSL
+method in the same WebSocket frame reaches `system()`, with a target-written
+marker and safe/fixed controls; [report](reports/frontier-freeswitch2shell.md))
+and Iec61850 (`3777729`, a wire-supplied chain calls real libc `system` on an
+ObtainFile-staged command string, with a target-written marker and benign-file
+and fixed-build controls; [rung-4 probe](reports/iec618502shell-r4.md)). Both
+reports name the ASLR-off, host-specific and opt-in gates and the exact replay
+commands; neither is ESTABLISHED, so their R5 cells stay `—`.
 
 ## How the plant works
 

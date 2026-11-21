@@ -49,7 +49,9 @@ The alternative Datasketches lane has a genuine indirect call, but only in a
 synthetic consumer, so it is not R5. Ruby has stronger address control but no
 natural called target yet. FreeRDP still lacks attacker-chosen playback bytes
 and a call site. These remain lower-priority lanes until their named blocker
-changes.
+changes. The libIEC61850 lane is different: a wire-supplied chain already calls
+real libc `system` in the live unsanitized server with a target-written marker
+(`3777729`), so it is a second author-positive R5 lane, not a blocked one.
 
 Current status: **FreeSWITCH author-positive, witness pending.** Commit
 `462e887` connects a forged `SSL`/`SSL_METHOD` carried in the same WebSocket
@@ -58,5 +60,13 @@ frame to `system()` in a live loopback target, with a target-written marker, a
 ASLR-off calibration, opt-in `mod_xml_rpc`/websocket config, lab build shims
 and 127.0.0.1-only netns remain required. Witness replay requested in chat
 #1113; no ESTABLISHED rung-5 claim and no README table change yet. Full
-evidence and recipe in `reports/frontier-freeswitch2shell.md`. The other lanes
-listed above are unchanged.
+evidence and recipe in `reports/frontier-freeswitch2shell.md`.
+
+The IEC61850 lane is also author-positive only, not ESTABLISHED (`3777729`):
+`bash lab/frontier/libiec61850/r5_system.sh <abs-outdir>` drives a wire-supplied
+chain through ObtainFile staging to real libc `system`, creating a
+target-written `R5_IEC_MARKER_49035` marker with benign-file and fixed-build
+controls; a clean-archive replay gave 15 PASS / 0 FAIL. ASLR is disabled,
+addresses are host-measured and the command is lab-chosen. Witness replay is
+owed; the rung-4 grade is unchanged. Recipes and expected bytes for both lanes
+are in the 2026-11-21 addenda of `docs/reproducibility.md`.

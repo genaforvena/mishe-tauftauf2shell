@@ -3669,6 +3669,25 @@ occurred and the shipped-app grade was not advanced. All three post-verdict
 lanes are author evidence pending independent replay; no grade promotion
 follows from these commits alone.
 
+#### 2026-11-21 ~19:5xZ rung-5 author-positive attempts (witness pending)
+
+Two additive R5 limbs were measured under owner standing #8; neither changes a
+rung-4 grade or fills an R5 cell. FreeSWITCH (`462e887`, recipe in
+`reports/frontier-freeswitch2shell.md`) carries a forged `SSL`/`SSL_METHOD` in
+the same extended-length WebSocket frame, redirects `SSL_shutdown`'s indirect
+call to `system()` and gets a target-written marker (`r5`, wire variation
+`r5v`) with safe and pinned-fixed marker-absent controls and a
+`system(rdi=forged SSL)` trace. ASLR-off host-specific addresses, opt-in module
+gates, lab shims and a loopback-only netns remain conditions; witness replay
+was requested in chat #1113. Iec61850 (`3777729`,
+`reports/iec618502shell-r4.md`) stages an ObtainFile command string and sends a
+wire-supplied chain that calls real libc `system` in the live unsanitized
+server (`R5_IEC_MARKER_49035`, 18 bytes), with benign-staged-file and
+released-v1.6.2 marker-absent controls and a clean-archive 15 PASS / 0 FAIL
+replay. Commands, expected bytes and gitignored-log policy for both are in the
+2026-11-21 addenda of `docs/reproducibility.md`; the acceptance contract and
+lane status are in `docs/rce.md`.
+
 #### Admitted 2026-11-21 ~15:4xZ: OpenJpeg2Shell / openjpeg2shell (OSV-2025-219, no CVE/GHSA)
 
 Frontier published the brief `reports/frontier-openjpeg2shell.md` and handoff
