@@ -1,0 +1,24 @@
+RUN Sat Nov 21 10:11:02 PM UTC 2026 binary=./perl-5.45.1/perl label=vuln
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2193817==ERROR: AddressSanitizer: SEGV on unknown address 0x50202000aa0f (pc 0x6306809770ec bp 0x520000004150 sp 0x7ffd5671aa90 T0)
+==2193817==The signal is caused by a READ memory access.
+    #0 0x6306809770ec in S_regmatch /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/regexec.c:9240
+    #1 0x63068098587f in S_regtry /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/regexec.c:4529
+    #2 0x6306809a2a75 in Perl_regexec_flags /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/regexec.c:4077
+    #3 0x6306807ce785 in Perl_pp_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/pp_hot.c:3833
+    #4 0x6306805ff560 in Perl_runops_debug /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/dump.c:3351
+    #5 0x6306805bd73e in S_run_body /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/perl.c:2901
+    #6 0x6306805bd73e in perl_run /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/perl.c:2814
+    #7 0x63068053359b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/perlmain.c:127
+    #8 0x75cb0402a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x75cb0402a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x6306805332a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/perl+0x1ce2a4) (BuildId: c914c2322ebc8069c98a5d556677869ef79e8089)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/perl2shell/perl-5.45.1/regexec.c:9240 in S_regmatch
+==2193817==ABORTING
+timeout: the monitored command dumped core
+Aborted
+STATUS 134
+5848bedd0f6193eecc381247e416e47c7d1a57c7d5b68a46d4fe46c80bf9baac  TRACE_HASH vuln

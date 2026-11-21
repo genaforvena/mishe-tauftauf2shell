@@ -1,0 +1,255 @@
+Compiling REx "(?x) \b     strict  \.pmc? \z"
+Final program:
+   1: BOUND (2)
+   2: EXACT <strict.pm> (6)
+   6: CURLY{0,1} (12)
+  10:   EXACT <c> (0)
+  12: EOS (13)
+  13: END (0)
+anchored "strict.pm" at 0..0 floating ""$ at 9..10 (checking anchored) stclass BOUND minlen 9 
+Compiling REx "(?x) \b (?i:strict) \.pmc? \z"
+Final program:
+   1: BOUND (2)
+   2: EXACTFU <strict> (5)
+   5: EXACT <.pm> (7)
+   7: CURLY{0,1} (13)
+  11:   EXACT <c> (0)
+  13: EOS (14)
+  14: END (0)
+floating ".pm" at 5..6 (checking floating) stclass BOUND minlen 8 
+Matching REx "(?x) \b     strict  \.pmc? \z" against "perl-5.45.1/lib/strict.pm"
+Intuit: trying to determine minimum start position...
+  doing 'check' fbm scan, [0..25] gave 16
+  Found anchored substr "strict.pm" at offset 16 (rx_origin now 16)...
+  doing 'other' fbm scan, [25..25] gave 25
+  Found floating substr ""$ at offset 25 (rx_origin now 16)...
+  (multiline anchor test skipped)
+  looking for class: start_shift: 0 check_at: 16 rx_origin: 16 endpos: 17
+  Does not contradict STCLASS...
+  try at offset...
+Intuit: Successfully guessed: match at offset 16
+  16 </lib/> <strict.pm>     |   0| 1:BOUND(2)
+  16 </lib/> <strict.pm>     |   0| 2:EXACT <strict.pm>(6)
+  25 <ib/strict.pm> <>       |   0| 6:CURLY{0,1}(12)
+                             |   0| EXACT <c> can match 0 times out of 1...
+  25 <ib/strict.pm> <>       |   1|  12:EOS(13)
+  25 <ib/strict.pm> <>       |   1|  13:END(0)
+Match successful!
+Freeing REx: "(?x) \b     strict  \.pmc? \z"
+Freeing REx: "(?x) \b (?i:strict) \.pmc? \z"
+Compiling REx "(?x) \b     warnings  \.pmc? \z"
+Final program:
+   1: BOUND (2)
+   2: EXACT <warnings.pm> (6)
+   6: CURLY{0,1} (12)
+  10:   EXACT <c> (0)
+  12: EOS (13)
+  13: END (0)
+anchored "warnings.pm" at 0..0 floating ""$ at 11..12 (checking anchored) stclass BOUND minlen 11 
+Compiling REx "(?x) \b (?i:warnings) \.pmc? \z"
+Final program:
+   1: BOUND (2)
+   2: EXACTFU <warnings> (5)
+   5: EXACT <.pm> (7)
+   7: CURLY{0,1} (13)
+  11:   EXACT <c> (0)
+  13: EOS (14)
+  14: END (0)
+anchored ".pm" at 8..8 floating ""$ at 11..12 (checking anchored) stclass BOUND minlen 11 
+Compiling REx "^(NON)?FATAL$"
+synthetic stclass "ANYOF[FN]".
+Final program:
+   1: SBOL /^/ (2)
+   2: CURLYM<1:1>[1]{0,1} (14)
+   8:   EXACT <NON> (12)
+  12:   SUCCEED (0)
+  13: NOTHING (14)
+  14: EXACT <FATAL> (17)
+  17: SEOL (18)
+  18: END (0)
+floating "FATAL"$ at 0..3 (checking floating) stclass ANYOF[FN] anchored(SBOL) minlen 5 
+Matching REx "(?x) \b     warnings  \.pmc? \z" against "perl-5.45.1/lib/warnings.pm"
+Intuit: trying to determine minimum start position...
+  doing 'check' fbm scan, [0..27] gave 16
+  Found anchored substr "warnings.pm" at offset 16 (rx_origin now 16)...
+  doing 'other' fbm scan, [27..27] gave 27
+  Found floating substr ""$ at offset 27 (rx_origin now 16)...
+  (multiline anchor test skipped)
+  looking for class: start_shift: 0 check_at: 16 rx_origin: 16 endpos: 17
+  Does not contradict STCLASS...
+  try at offset...
+Intuit: Successfully guessed: match at offset 16
+  16 </lib/> <warnings.p>    |   0| 1:BOUND(2)
+  16 </lib/> <warnings.p>    |   0| 2:EXACT <warnings.pm>(6)
+  27 </warnings.pm> <>       |   0| 6:CURLY{0,1}(12)
+                             |   0| EXACT <c> can match 0 times out of 1...
+  27 </warnings.pm> <>       |   1|  12:EOS(13)
+  27 </warnings.pm> <>       |   1|  13:END(0)
+Match successful!
+Freeing REx: "(?x) \b     warnings  \.pmc? \z"
+Freeing REx: "(?x) \b (?i:warnings) \.pmc? \z"
+String shorter than min possible regex match (3 < 5)
+Compiling REx "([^ax])"
+Final program:
+   1: OPEN1 (3)
+   3:   ANYOF[^ax][0100-INFTY] (13)
+  13: CLOSE1 (15)
+  15: END (0)
+stclass ANYOF[^ax][0100-INFTY] minlen 1 
+Enabling $` $& $' support (0x7).
+
+EXECUTING...
+
+Compiling REx "\G((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)(("...
+Final program:
+   1: GPOS (2)
+   2: OPEN1 (4)
+   4:   CURLYX<2:2>[0]{1,INFTY} (16)
+   8:     OPEN2 (10)
+  10:       PLUS (13)
+  11:         EXACT <a> (0)
+  13:     CLOSE2 (15)
+  15:   WHILEM[1/15] (0)
+  16:   NOTHING (17)
+  17: CLOSE1 (19)
+  19: OPEN3 (21)
+  21:   CURLYX<4:4>[1]{1,INFTY} (33)
+  25:     OPEN4 (27)
+  27:       PLUS (30)
+  28:         EXACT <a> (0)
+  30:     CLOSE4 (32)
+  32:   WHILEM[2/15] (0)
+  33:   NOTHING (34)
+  34: CLOSE3 (36)
+  36: OPEN5 (38)
+  38:   CURLYX<6:6>[3]{1,INFTY} (50)
+  42:     OPEN6 (44)
+  44:       PLUS (47)
+  45:         EXACT <a> (0)
+  47:     CLOSE6 (49)
+  49:   WHILEM[3/15] (0)
+  50:   NOTHING (51)
+  51: CLOSE5 (53)
+  53: OPEN7 (55)
+  55:   CURLYX<8:8>[5]{1,INFTY} (67)
+  59:     OPEN8 (61)
+  61:       PLUS (64)
+  62:         EXACT <a> (0)
+  64:     CLOSE8 (66)
+  66:   WHILEM[4/15] (0)
+  67:   NOTHING (68)
+  68: CLOSE7 (70)
+  70: OPEN9 (72)
+  72:   CURLYX<10:10>[7]{1,INFTY} (84)
+  76:     OPEN10 (78)
+  78:       PLUS (81)
+  79:         EXACT <a> (0)
+  81:     CLOSE10 (83)
+  83:   WHILEM[5/15] (0)
+  84:   NOTHING (85)
+  85: CLOSE9 (87)
+  87: OPEN11 (89)
+  89:   CURLYX<12:12>[9]{1,INFTY} (101)
+  93:     OPEN12 (95)
+  95:       PLUS (98)
+  96:         EXACT <a> (0)
+  98:     CLOSE12 (100)
+ 100:   WHILEM[6/15] (0)
+ 101:   NOTHING (102)
+ 102: CLOSE11 (104)
+ 104: OPEN13 (106)
+ 106:   CURLYX<14:14>[11]{1,INFTY} (118)
+ 110:     OPEN14 (112)
+ 112:       PLUS (115)
+ 113:         EXACT <a> (0)
+ 115:     CLOSE14 (117)
+ 117:   WHILEM[7/15] (0)
+ 118:   NOTHING (119)
+ 119: CLOSE13 (121)
+ 121: OPEN15 (123)
+ 123:   CURLYX<16:16>[13]{1,INFTY} (135)
+ 127:     OPEN16 (129)
+ 129:       PLUS (132)
+ 130:         EXACT <a> (0)
+ 132:     CLOSE16 (134)
+ 134:   WHILEM[8/15] (0)
+ 135:   NOTHING (136)
+ 136: CLOSE15 (138)
+ 138: OPEN17 (140)
+ 140:   CURLYX<18:18>[15]{1,INFTY} (152)
+ 144:     OPEN18 (146)
+ 146:       PLUS (149)
+ 147:         EXACT <a> (0)
+ 149:     CLOSE18 (151)
+ 151:   WHILEM[9/15] (0)
+ 152:   NOTHING (153)
+ 153: CLOSE17 (155)
+ 155: OPEN19 (157)
+ 157:   CURLYX<20:20>[17]{1,INFTY} (169)
+ 161:     OPEN20 (163)
+ 163:       PLUS (166)
+ 164:         EXACT <a> (0)
+ 166:     CLOSE20 (168)
+ 168:   WHILEM[10/15] (0)
+ 169:   NOTHING (170)
+ 170: CLOSE19 (172)
+ 172: OPEN21 (174)
+ 174:   CURLYX<22:22>[19]{1,INFTY} (186)
+ 178:     OPEN22 (180)
+ 180:       PLUS (183)
+ 181:         EXACT <a> (0)
+ 183:     CLOSE22 (185)
+ 185:   WHILEM[11/15] (0)
+ 186:   NOTHING (187)
+ 187: CLOSE21 (189)
+ 189: OPEN23 (191)
+ 191:   CURLYX<24:24>[21]{1,INFTY} (203)
+ 195:     OPEN24 (197)
+ 197:       PLUS (200)
+ 198:         EXACT <a> (0)
+ 200:     CLOSE24 (202)
+ 202:   WHILEM[12/15] (0)
+ 203:   NOTHING (204)
+ 204: CLOSE23 (206)
+ 206: OPEN25 (208)
+ 208:   CURLYX<26:26>[23]{1,INFTY} (220)
+ 212:     OPEN26 (214)
+ 214:       PLUS (217)
+ 215:         EXACT <a> (0)
+ 217:     CLOSE26 (219)
+ 219:   WHILEM[13/15] (0)
+ 220:   NOTHING (221)
+ 221: CLOSE25 (223)
+ 223: OPEN27 (225)
+ 225:   CURLYX<28:28>[25]{1,INFTY} (237)
+ 229:     OPEN28 (231)
+ 231:       PLUS (234)
+ 232:         EXACT <a> (0)
+ 234:     CLOSE28 (236)
+ 236:   WHILEM[14/15] (0)
+ 237:   NOTHING (238)
+ 238: CLOSE27 (240)
+ 240: OPEN29 (242)
+ 242:   CURLYX<30:30>[27]{1,INFTY} (254)
+ 246:     OPEN30 (248)
+ 248:       PLUS (251)
+ 249:         EXACT <a> (0)
+ 251:     CLOSE30 (253)
+ 253:   WHILEM[15/15] (0)
+ 254:   NOTHING (255)
+ 255: CLOSE29 (257)
+ 257: EXACT <b> (259)
+ 259: END (0)
+anchored "a" at 0..0 floating "aa" at 0..9223372036854775807 (checking floating) anchored(GPOS) GPOS:0 minlen 16 
+Matching REx "\G((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)(("... against "aaaaaaaaaaaaaaa"
+Regex match can't succeed, so not even tried
+Matching REx "([^ax])" against "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"...
+Matching stclass ANYOF[^ax][0100-INFTY] against "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"... (286331153 bytes)
+Contradicts stclass... [regexec_flags]
+Match failed
+subject=286331153 pos=286331138
+NOMATCH
+SUBJECT_CHANGES=0
+DONE
+Freeing REx: "\G((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)((a+)+)(("...
+Freeing REx: "([^ax])"

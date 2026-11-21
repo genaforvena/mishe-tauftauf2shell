@@ -1,0 +1,12 @@
+perl-5.45.1.tar.gz
+perl-5.45.1/
+perl-5.45.1-asan-*
+patchcheck/
+build-driver.log
+configure.log
+build-vuln.log
+build-fixed.log
+fixpatch1.log
+fixpatch2.log
+patch1.log
+patch2.log
