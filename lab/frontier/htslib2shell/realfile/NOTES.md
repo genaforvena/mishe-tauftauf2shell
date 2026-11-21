@@ -277,3 +277,100 @@ demonstrated; this is the consumer-reality ceiling for this record shape.
 Next file would need QS expansion to succeed (non-empty EXTERNAL sub-block) and
 a record shape whose only QS decode is the quality phase at `:1833`, after
 CIGAR generation, before claiming the corrupted CIGAR is consumed.
+
+## 9. Consumer-reality ceiling: the OOB slot aliases live decoder fields (17:55–18:05Z, wake 3)
+
+Goal: make the OOB pointer store land *after* CIGAR generation so the corrupted
+neighbour is consumed by `bam_set1` at `cram_decode.c:3171`. Result: no file
+shape in this build does that. Two independent structural blockers, both
+observed; keep both as negative results.
+
+### 9a. Removing FC/FP from the record map does not help (`inject3.c`)
+
+`cram_decode_compression_header` re-adds `CRAM_FC|CRAM_FP` to `s->data_series`
+whenever `CRAM_QS` is present (`cram_decode.c:648`), plus `CRAM_FN` via `:655`.
+Dropping the FC/FP map entries therefore leaves `ds` set but `codecs[DS_FC/FP]`
+NULL; with the file's `FN=20` the decoder returns -1 at `:1154`. `crafted3.cram`
+fails with `Failure to decode slice`. Do not reuse this file.
+
+### 9b. FN=0 moves QS to the only post-CIGAR site, and the guard kills the write (`inject4.c`)
+
+The base file's FN series is `E_CONST_INT(20)` (enc 44, one param byte `0x14`).
+`inject4.c` rewrites that byte to `0` with htslib's own writers, so the feature
+loop is skipped and the *only* QS decode is the quality-phase call at
+`cram_decode.c:1833`, after CIGAR generation at `:1805–1815`.
+
+gdb on plain `crafted4.cram` (`crafted4.gdb-postcigar.log`):
+
+```
+Breakpoint 1, cram_xpack_decode_expand_char ... cram_codecs.c:1378
+codec=2 slot=0xa0
+#0  expand :1378
+#1  cram_xpack_decode_char :1416
+#2  cram_decode_seq cram/cram_decode.c:1833     <-- quality phase
+...
+Program received signal SIGSEGV ... cram_codecs.c:1422 memcpy(out, b->data + b->byte, ...)
+#1  cram_decode_seq ...:1833
+```
+
+`slot=0xa0` is the legitimate `10M` CIGAR operation written at `:1815` into
+`s->cigar[0]`, i.e. the very OOB slot. `if (b) return 0;` at `:1379` takes the
+early-out: **no OOB write**. Decode then segfaults at `:1422` on `b=0xa0`
+(`crafted4.plain.err`, rc 139). This is the decisive ceiling: the OOB slot
+*is* the CIGAR array, and CIGAR generation always precedes the one QS decode
+that follows it. Decode early (crafted2) → write fires but CIGAR generation
+clobbers it; decode late (crafted4) → CIGAR value occupies the slot and
+suppresses the write.
+
+### 9c. Raising codec_id past the CIGAR chunk with file bytes (`inject5.c`)
+
+`cram_decoder_init` increments `hdr->ncodecs` for every codec, including
+duplicate record-map keys (the duplicate is warned about and freed, but
+`ncodecs` still grows). `inject5.c IN BASE OUT N_DUP` emits `N_DUP` extra
+`BF` entries before QS; XPACK then gets `codec_id = N_DUP + 2` entirely from
+compression-header bytes. Confirmed: N_DUP=518 → codec_id 520 (`crafted5`),
+N_DUP=566 → codec_id 568 (`crafted6`), N_DUP=554 → codec_id 556 (`crafted7`).
+
+gdb heap map (`crafted5`, BASE = `slice->block_by_id`), index = (addr-BASE)/8:
+
+```
+1028 seqs_blk       1032 seqs_blk->data = 0x...510 (NON-NULL)
+1040 qual_blk       1044 qual_blk->data = 0x...900 (NON-NULL)
+1052 name_blk       1056 name_blk->data (NON-NULL)
+1064 aux_blk        1068 aux_blk->data = NULL in untagged file
+1076 base_blk       1080 base_blk->data = NULL
+1088 soft_blk       1092 soft_blk->data = NULL
+1116 crecs[0]       cr->s = slice (NON-NULL)
+```
+
+Observed consequences:
+
+* `crafted6.cram` (codec_id 568, index 1080 = `s->base_blk->data`, NULL):
+  `crafted6.gdb-nullslot.log` shows the guard passes and `:1388` executes;
+  stepping over the assignment changes the slot from NULL to
+  `0x5555556e76f0`. Plain decode then exits **rc 0 with correct SAM output**
+  (`crafted6.view.sam`). This is a *silent* OOB pointer store into a live
+  slice field — no crash, no ASan on the plain build. `base_blk` is not read
+  by `cram_decode.c` (grep confirms zero uses), so no consumer.
+* `crafted7.cram` (codec_id 556, index 1068 = `s->aux_blk->data`, NULL):
+  `crafted7.gdb-aux.log` confirms `aux_blk->data` changes from NULL to the
+  fresh `cram_block *`. `aux_blk` *is* consumed (`BLOCK_APPEND`, `bam_set1`
+  at `:3183`), but the untagged file writes no aux bytes, so plain decode
+  again exits rc 0 with correct output.
+* `crafted8.cram`: same codec_id on a file whose reads carry `XX:i:` tags
+  (`tiny2.sam`, `base2.cram`). By the time the first QS decode runs, tag
+  decoding has already made `aux_blk->data` non-NULL, so the guard suppresses
+  the write. No corruption.
+* ASan on crafted6/7 gives `SEGV on unknown address`, not a heap-overflow
+  report: the high index leaves ASan's allocator region entirely. The rung-3
+  ASan evidence remains the codec_id 1/2 files (§3, §6).
+
+### 9d. Disposition
+
+Every live pointer field reachable at a positive offset from `block_by_id`
+is either already non-NULL when QS decodes (seq/qual/name/aux-with-tags,
+`crecs[i].s`) or is unused by decode (`base_blk`, `soft_blk`). The CIGAR
+array is the only field both written by the OOB store and consumed by a
+later decoder stage, and its generation ordering blocks the chain both ways.
+Rung 4 stays INSTRUMENTED. Keep the fixed-1.24 harness control and the
+index-513 negative result. Do not promote a grade from a staged replay.

@@ -1,0 +1,24 @@
+Breakpoint 1 at 0x10dc48: file cram/cram_codecs.c, line 1378.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+@HD	VN:1.6	SO:coordinate
+@SQ	SN:chr1	LN:1000
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+[E::cram_codec_to_id] Unknown codec type 51
+
+Breakpoint 1, cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1378
+1378	    cram_block *b = slice->block_by_id[512 + c->codec_id];
+codec=2 slot=0xa0
+#0  cram_xpack_decode_expand_char (slice=0x5555556dd130, c=0x5555556d0820) at cram/cram_codecs.c:1378
+#1  0x0000555555661e82 in cram_xpack_decode_char (slice=0x5555556dd130, c=0x5555556d0820, in=0x5555556dd2d0, out=0x5555556dfdd0 "", out_size=0x7fffffffd858) at cram/cram_codecs.c:1416
+#2  0x00005555555bfc64 in cram_decode_seq (fd=0x555555694410, c=0x5555556cf220, s=0x5555556dd130, blk=0x5555556dd2d0, cr=0x5555556df8b0, sh=0x55555569d1f0, cf=3, seq=0x5555556df9e0 "==========", qual=0x5555556dfdd0 "", has_MD=0, has_NM=0) at cram/cram_decode.c:1833
+#3  0x00005555555c3acb in cram_decode_slice (fd=0x555555694410, c=0x5555556cf220, s=0x5555556dd130, sh=0x55555569d1f0) at cram/cram_decode.c:2918
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555555661ec8 in cram_xpack_decode_char (slice=0x5555556dd130, c=0x5555556d0820, in=0x5555556dd2d0, out=0x5555556dfdd0 "", out_size=0x7fffffffd858) at cram/cram_codecs.c:1422
+1422	            memcpy(out, b->data + b->byte, *out_size);
+#0  0x0000555555661ec8 in cram_xpack_decode_char (slice=0x5555556dd130, c=0x5555556d0820, in=0x5555556dd2d0, out=0x5555556dfdd0 "", out_size=0x7fffffffd858) at cram/cram_codecs.c:1422
+#1  0x00005555555bfc64 in cram_decode_seq (fd=0x555555694410, c=0x5555556cf220, s=0x5555556dd130, blk=0x5555556dd2d0, cr=0x5555556df8b0, sh=0x55555569d1f0, cf=3, seq=0x5555556df9e0 "==========", qual=0x5555556dfdd0 "", has_MD=0, has_NM=0) at cram/cram_decode.c:1833
+#2  0x00005555555c3acb in cram_decode_slice (fd=0x555555694410, c=0x5555556cf220, s=0x5555556dd130, sh=0x55555569d1f0) at cram/cram_decode.c:2918
+#3  0x00005555555c4208 in cram_decode_slice_mt (fd=0x555555694410, c=0x5555556cf220, s=0x5555556dd130, bfd=0x55555569d1f0) at cram/cram_decode.c:3053
