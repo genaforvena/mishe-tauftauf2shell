@@ -1,14 +1,17 @@
 # Frontier brief — open62541 TransferSubscriptions UAF (next local candidate)
 
 **Status: ADMITTED 2026-11-21 ~17:5xZ by the operator under standing approval
-#6 (similar-things mandate), no re-ask; independent witness replay still owed.**
+#6 (similar-things mandate), no re-ask; independent witness replay delivered
+2026-11-21 by the witness (DM #1066): exact 8 PASS trace, raw ASan frames, no repair owed.**
 Rungs 1/2/3 ESTABLISHED on verbatim-pinned open62541 1.5.4 under ASan:
 `heap-use-after-free`, `WRITE of size 8` at pinned `ua_subscription.c:1645` in
 `UA_MonitoredItem_unregisterSampling`, reached through real service calls on
 real server/session/subscription/monitored-item objects. Tagged fixed 1.5.6
 runs the same sequence clean with the sampling backpointer migrated into the
-new subscription. Rung 4 INSTRUMENTED/UNKNOWN: no chosen bytes, pointer control,
-live neighbour overwrite, control-flow diversion or execution. The dedicated
+new subscription. A follow-up grooming probe (below) observed the stale write
+landing on a live replacement object at the fixed offset, but rung 4 stays
+INSTRUMENTED: no chosen bytes, pointer control, control-flow diversion or
+execution. The dedicated
 two-pane window (inner socket index 64), seed wall and registry entry were
 pre-created by frontier before admission. Operator admission replay ~17:49Z:
 4/4 committed pins OK, 8 PASS / 0 FAIL rc 0, exact trace below. Replay
@@ -113,24 +116,51 @@ Replay trace over the ordered PASS lines (no PIDs, addresses or paths):
   `WRITE of size 8` at `ua_subscription.c:1645` ← `UA_MonitoredItem_delete:1412`
   ← `Operation_DeleteMonitoredItem:971` ← `Service_DeleteMonitoredItems:999`;
   freed by `delayedFreeSubscription:277`, allocated by `UA_Subscription_new:259`.
-- **Rung 4 — INSTRUMENTED/UNKNOWN.** No chosen bytes, pointer value control,
-  live neighbour object overwritten, control-flow diversion or execution. The
-  ZDI RCE language stays a claim, not a lab observation.
+- **Rung 4 — INSTRUMENTED, live-neighbour overwrite observed.** See the probe
+  below: the freed subscription chunk is reclaimed by a live subscription and
+  its sampling head at byte 200 is overwritten (one item becomes zero items).
+  The written value is NULL in this single-item configuration; there are no
+  chosen bytes, pointer value control, control-flow diversion or execution.
+  The ZDI RCE language stays a claim, not a lab observation.
 - **Tractability — MEDIUM.** Exact fixed tag and a nine-line fix hunk make the
   differential cheap to reason about; producing the authenticated UAF sequence
   needs a configured server and client, not just a single malformed packet.
 
-## Cheapest next experiment to move up a rung
+## Grooming probe: live-neighbour overwrite (open625412shell wake 2)
 
-Already done this wake: both tagged trees were built with ASan from hash-pinned
-tarballs and the sequence above was driven on in-process real server objects
-(no listener, no external contact). Next cheapest experiment for an admitted
-target mind: put a real client PublishRequest outstanding so the status-change
-removal happens through `sendStatusChangeDelete` without the harness forcing
-`UA_Subscription_delete`, then groom the freed old-subscription chunk so the
-8-byte stale-backpointer write lands on a live object or pointer field and
-observe a downstream dereference. Until that is observed rung 4 stays
-INSTRUMENTED.
+`lab/frontier/open625412shell/groom_harness.c` plus `groom.sh` extend the same
+real-service-call sequence: after the delayed free, a second
+`Service_CreateSubscription` requests a replacement, then the stale monitored
+item is deleted. `bash run.sh <outdir> && bash groom.sh <outdir>` compiles the
+probe against both pinned ASan trees and runs four cases. Verified trace
+`sha256=bb18c0f3166146acd72c17a747db2cfad1e7ac85d3b98d3744fbcda629f1793b`
+(runner rc 0, raw logs under `<outdir>/groom/`).
+
+Observed on 1.5.4: `sizeof(UA_Subscription)=352`,
+`offset(samplingMonitoredItems)=200`; old and replacement subscriptions share
+address `0x51300004d040` (`same_chunk=1`), while the replacement's monitored
+item `0x514000000640` is a distinct object (`aliased_with_old_mon=0`). Before
+the stale delete the replacement's sampling head is `0x514000000640` with one
+item; after it the head is `(nil)` with zero items (`changed=1`), and the
+process exits 0 because the chunk is allocated, not freed. The skip-delete
+control and fixed 1.5.6 both keep the head and one item (`changed=0`, rc 0).
+
+**Conditions and limits.** ASan's quarantine must be disabled
+(`quarantine_size_mb=0`) for same-chunk recycling; this is a lab condition, not
+a default allocator state. The forced internal delete stand-in and permissive
+consent hook from the main harness remain. The value written at byte 200 is
+NULL because the transferred sampling list holds one item; no attacker-chosen
+bytes or pointer values were demonstrated. A further `UA_Server_run_iterate`
+after the write aborts in `UA_MonitoredItem_ensureQueueSpace`
+(`ua_subscription.c:1490`) on the *old* monitored item `0x514000000440`; the
+same run with the stale delete skipped exits 0. That assertion is recorded as
+a downstream observation, not claimed as pointer control or as caused by the
+head overwrite.
+
+Remaining rung-4 work: drive the free through a real queued client
+PublishRequest instead of the internal delete stand-in, and find a
+configuration where the stale write stores a controlled non-NULL value in a
+live object that is subsequently dereferenced.
 
 ## What would change my mind
 
