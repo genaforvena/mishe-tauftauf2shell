@@ -1,0 +1,34 @@
+Function "ImagingJpegDecode" not defined.
+Breakpoint 1 (ImagingJpegDecode) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ImagingJpegDecode (im=0xc25180, state=0x7ffff77f7d10, buf=0xdb3e30 "\377\330\377", <incomplete sequence \356>, bytes=4096) at src/libImaging/JpegDecode.c:132
+warning: 132	src/libImaging/JpegDecode.c: No such file or directory
+SAVED type=a472c0
+0x00007ffff744224d in _decode (decoder=0x7ffff77f7cf0, args=<optimized out>) at src/decode.c:132
+warning: 132	src/decode.c: No such file or directory
+Value returned is $1 = -1
+AFTER_DECODE type=d32f90 fake=d32f90
+Restoring binary file /tmp/pw2-w4/heap_pre.bin into memory (0xd32e10 to 0xd32e48)
+Restoring binary file /tmp/pw2-w4/heap_post.bin into memory (0xd32e50 to 0xd33190)
+Restoring binary file /tmp/pw2-w4/realtype.bin into memory (0xd32f90 to 0xd33130)
+OBTYPE_FROM_OOB=d32f90 real_slot=5a8450 MATCH=1
+Breakpoint 2 at 0x45e6e6
+CONTINUING NATURALLY (control: real tp_dealloc)
+LOAD_OK
+double free or corruption (!prev)
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+AFTER_CONTINUE pc=0x7ffff7c9ebec
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff7c4527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff7c288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff7c297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff7dcf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x00007ffff7ca90b5 in malloc_printerr (str=str@entry=0x7ffff7dd2b00 "double free or corruption (!prev)") at ./malloc/malloc.c:5775
+#7  0x00007ffff7cab1ec in _int_free_merge_chunk (av=0x7ffff7e04ac0 <main_arena>, p=0xd32e30, size=640) at ./malloc/malloc.c:4679
+rdi            0x28a6b6            2664118

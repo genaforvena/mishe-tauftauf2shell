@@ -275,5 +275,33 @@ process faults in `PyObject_Free()` instead.
 
 Limit: the deallocation call is invoked from gdb, the fake type is staged by
 gdb, the build is non-PIE with a deterministic brk address, and the marker is
-an existing static function address. No injected code, natural trigger, PC
-write or ASLR leak was demonstrated; grade stays ◐.
+an existing static function address. In W5 itself no natural trigger was
+shown; W6 below reaches the slot from natural finalization. No injected
+code, PC write or ASLR leak was demonstrated; grade stays ◐.
+
+## W6 — natural finalization reaches the forged slot (2026-11-21)
+
+After the W5 recipe repair, `forged_type_natural.gdb` stages the same
+OOB-derived fake type and then issues `continue`; it never calls
+`_Py_Dealloc` from gdb:
+
+```
+PYTHONPATH=/tmp/pw2-w6/v12plain gdb -q -batch -x forged_type_natural.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_fake.fpx").load(); print("LOAD_OK")'
+PYTHONPATH=/tmp/pw2-w6/v12plain gdb -q -batch -x forged_type_natural_control.gdb --args python3 -c \
+  'from PIL import Image; Image.open("case_fake.fpx").load(); print("LOAD_OK")'
+```
+
+Expected (`forged_type_natural.log`, 3/3 on the fresh pinned build):
+`LOAD_OK` prints first, then `Breakpoint 2, 0x45e6e6 in _PyObject_Dump ()`
+and `AFTER_CONTINUE pc=0x45e6e6`; the backtrace is `#1 0x5917c2 -> ... ->
+#7 Py_FinalizeEx ()` and `rdi=0xd32e40` (`buffer+176`, the corrupted live
+object). The control (`forged_type_natural_control.log`, 3/3) leaves
+`tp_dealloc=5a8450`, never hits the marker, and aborts with
+`double free or corruption (!prev)` during finalization.
+
+This removes the "gdb-invoked deallocation" condition from the observed
+transfer: the interpreter's own finalization invokes the forged slot. It
+does NOT remove the other conditions — the fake type is still staged by
+gdb, the marker is an existing static function in a non-PIE build, and no
+code, ROP or PC write is injected. Grade stays ◐.

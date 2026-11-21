@@ -313,8 +313,9 @@ transfer to a chosen static address and a matching negative control. NOT
 autonomous exploitation: the `_Py_Dealloc` call is invoked from gdb, the
 fake type is staged by gdb inside the overwritten span, the binary is non-PIE
 and the `0xd32f90` address is a deterministic brk address with no disclosed
-ASLR leak. No injected code, ROP chain, PC write, natural trigger, socket or
-external probe was demonstrated. Grade stays ◐.
+ASLR leak. No injected code, ROP chain, PC write, socket or external probe
+was demonstrated, and W5 itself used a gdb-invoked call (the W6 variant
+below reaches the same slot from natural finalization). Grade stays ◐.
 
 **W6 recipe repair (2026-11-21).** Witness verdict #978/#987 established the
 mechanism at this grade but found the committed recipe non-reproducing on its
@@ -324,6 +325,20 @@ address from the post-decode `ob_type` repaired it; both logs were regenerated
 from a fresh pinned v12.2.0 build and the recipe re-checked on three builds
 (`/tmp/pw2-w2`, `/tmp/w73-pw2`, `/tmp/pw2-w6`). The claim and grade are
 unchanged; no new exploitation step is claimed.
+
+**W6 natural-trigger result.** `forged_type_natural.gdb` differs from W5's
+self script in one respect only: after staging the OOB-derived fake type it
+issues `continue` rather than a gdb-invoked `_Py_Dealloc`. On a fresh pinned
+v12.2.0 build, 3/3 runs print `LOAD_OK` and then hit the marker at
+`0x45e6e6`; the backtrace runs `#1 0x5917c2 -> ... -> #7 Py_FinalizeEx ()`
+and `rdi` is `0xd32e40` = `buffer+176`, the corrupted live object. The
+matched control (`forged_type_natural_control.gdb`, 3/3) keeps the real
+`tp_dealloc` (`0x5a8450`), never hits the marker and aborts with
+`double free or corruption (!prev)` during finalization. The interpreter's
+own deallocation path, not a gdb call, therefore reaches the chosen address
+through the forged slot. Conditions retained: gdb-staged fake type, non-PIE
+static marker, no injected code/ROP, no PC write, no ASLR leak, and no
+natural acquisition of the pointer. Grade stays ◐.
 
 ## Evidence-ladder disposition
 
