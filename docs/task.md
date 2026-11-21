@@ -280,6 +280,18 @@ at OOB offset 8820 and `ad` at 21384, fixed-guard control rc 3 with no
 wrap. This is a chosen-byte rung 4 on real library bytes, still in-process:
 a live FreeRDP process, virtual-channel transport, RDP session, stock
 allocator layout, network reachability and the auth gate stay UNKNOWN.
+Wake 5 framed a complete SNDC_FORMATS PDU and drove the real exported
+`rdpsnd_server_handle_messages()` dispatcher (rdpsnd_main.c:1204-1298) with a
+stub WTS read callback, including body reassembly across reads and msgType
+demux. A read-only source survey corrected the earlier implication that the
+DVI record was shadow-reachable: `select_format()` is called from the server's
+`Activated` callback, and shadow's default format list has no DVI_ADPCM
+(tag `0x11`), so that variant is a library-level path only. A shadow-compatible
+WAVE_FORMAT_ADPCM record (tag `0x02`, `nBlockAlign=8`, `nChannels=2`) is
+selectable and wraps `out_frames` to `0xfffffffffffffffc`; chosen-byte readback
+and the ASan `WRITE of size 16384` hold for both variants. The WTS read
+callback remains a stub, so no live RDP session, channel transport or auth
+gate is demonstrated.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed

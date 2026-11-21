@@ -74,8 +74,12 @@ never a bare `mishe sync`. The [brief](../reports/frontier-freerdp2shell.md)
 pins the sources, harness digests and expected bytes for rungs 1-3 plus
 harness-only rung 4. Wake 4 also drove chosen bytes through the real
 `SNDC_FORMATS` parser on source-built 3.32.0 library bytes (rung 4, still
-in-process); live RDP, virtual-channel transport, session, network and the
-post-auth gate stay UNKNOWN.
+in-process). Wake 5 drove a framed PDU through the real
+`rdpsnd_server_handle_messages()` dispatcher (stub WTS read) and verified a
+shadow-compatible WAVE_FORMAT_ADPCM variant; a source survey corrected the
+earlier implication that DVI_ADPCM was reachable on the stock shadow server —
+its `Activated` callback cannot select tag `0x11` by default. Live RDP,
+virtual-channel transport, session, network and the post-auth gate stay UNKNOWN.
 
 Babelfish2Shell was handed off from frontier on 2026-11-20 ~22:08Z (commit
 `088d4bc`) and admitted by the operator ~22:2xZ under standing approval #6.
@@ -128,12 +132,19 @@ execution stay UNKNOWN.
   reachability and a live `BOLT_PORT` service remain UNKNOWN.
 - **Freerdp**: `lab/freerdp2shell-src/run.sh` clones tag 3.32.0 at
   `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`, builds ASan and plain
-  libraries with the pinned feature flags, and checks all four PoCs;
-  clean-room replay uses `FREERDP_WORK=/tmp/fr-wake4-fresh bash lab/freerdp2shell-src/run.sh`.
-  The chosen-byte PoC is sanitizer-free so both OOB writes can be read back;
-  raw traces `vuln_real_library_asan.txt`,
-  `wire_parse_asan.txt` and `chosen_bytes_real_library.txt` are committed.
-  Everything stays in-process: no virtual-channel transport or auth gate.
+  libraries with the pinned feature flags, and checks the source-built PoCs
+  plus the real-dispatcher cases; clean-room replay uses
+  `FREERDP_WORK=/tmp/fr-wake4-fresh bash lab/freerdp2shell-src/run.sh`.
+  The chosen-byte PoCs are sanitizer-free so both OOB writes can be read back;
+  raw traces `vuln_real_library_asan.txt`, `wire_parse_asan.txt`,
+  `chosen_bytes_real_library.txt`, `dispatch_{asan,chosen,benign}.txt` and
+  `dispatch_adpcm{,_asan}.txt` are committed. Wake 5 added
+  `PocRdpsndChannelDispatch.c`, which frames a SNDC_FORMATS PDU and drives the
+  real `rdpsnd_server_handle_messages()` with a stub WTS read callback, plus a
+  shadow-compatible WAVE_FORMAT_ADPCM variant; the DVI record is not
+  selectable from the stock shadow server's default format list. Everything
+  stays in-process: no live RDP session, virtual-channel transport or auth
+  gate.
 - **Freeswitch**: a standalone, file-only C harness under
   `lab/frontier/freeswitch2shell/`; `run.sh` rebuilds vuln/fixed/asan and
   writes `logs/digests.txt`. Vulnerable parent `fbac12b451a1` and fix
