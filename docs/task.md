@@ -1772,6 +1772,67 @@ at `crawler.c:275` is from a different build and stays a claim. Evidence:
 `reports/memcached2shell-status.md` and the pins in
 `lab/frontier/memcached2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~08:44Z: Ipfixcol2Shell (CVE-2026-122127 / GHSA-4575-chq4-crfc)
+
+Frontier handed this find over on tape #698 after committing `a5f3aed`
+(brief and harness) and `a832dcd` (replay record). Claim sources: GitHub
+Advisory `GHSA-4575-chq4-crfc` and CVE-2026-122127 (VulnCheck, published
+2026-11-04), both pinned in `lab/frontier/ipfixcol2shell/PROVENANCE.md`.
+The advisory states that ipfixcol2 2.7.1 before 2.9.0 lets an unauthenticated
+network peer declare a small ring `buffer_size` followed by a large
+`decompressed_size` and write up to 65535 controlled bytes past a heap
+buffer; CVSS v4 8.7 is availability-only (`VC:N/VI:N/VA:H`). Vulnerable tags
+`v2.7.1`/`v2.8.0` carry byte-identical `Lz4Decoder.cpp`
+(`sha256=3e618628…`); fixed `v2.9.0` carries the check
+(`sha256=46a0fc8b…`). The fix `fd5cb168efb4b864d33f655174711b2779cef502`
+adds one four-line validation before `LZ4_decompress_safe_continue()`.
+
+The wire starts with an eight-byte ring size that `read_start_header()`
+(pinned `Lz4Decoder.cpp:114-133`) passes to `reset_stream()`, whose
+`m_decompressed.resize(buffer_size)` is at `:184`. The next four-byte header
+supplies `decompressed_size` unchecked (`:104-107`). `decompress()` wraps the
+position at `:141-143` but passes the attacker's declared size as
+`dstCapacity` to `LZ4_decompress_safe_continue()` at `:145-151`; a matching
+all-literals block makes the real host `liblz4.so.1` write the declared count
+of chosen bytes past the small ring. The fix checks exactly that inequality.
+The accounting fault at `:170-173` is source-bound, not separately
+instrumented and unused for a rung claim.
+
+Rungs 1/2/3 run the pinned `.cpp` verbatim under `#line`, linked against the
+host's real liblz4: with `buffer_size=24` and `decompressed_size=65000` the
+vulnerable build faults, ASan reports `heap-buffer-overflow`, `WRITE of size
+65000`, 0 bytes after the 24-byte region, allocation at pinned `:184` via
+`:131` and the write at `:145`; the fixed build throws `LZ4 Decoder: invalid
+decompressed size` in both ASan and plain builds, and a benign 8-byte input
+decodes clean. Rung 4 is INSTRUMENTED only: in a 1 MiB mmap collaborator
+chosen wire byte `0x5a` lands at offsets 0/24/28/64999 past the ring and
+`0x00` at 65000/65001, an `0x41` payload gives `0x41` at the same offsets,
+and the benign input leaves them zero. The stock ASan build faults before the
+bytes can be read back. No pointer, saved return address, heap metadata
+field, function pointer, control-flow diversion or marker execution was
+observed or attempted.
+
+Admitted by the operator ~08:44Z under standing approval #6: the two-pane
+window (41, inner socket), registry entry and seed wall were live and
+capture-verified 08:35Z. Operator replay ~08:43Z from two clean `git archive
+HEAD` (`18cae3d`) extractions into separate absolute directories: 13 PASS /
+0 FAIL both times, raw trace
+`sha256=e9c06f530d09912603ed379913699b2f1e63e08ab64b8cfcefdae0b47f3cd89f`
+byte-identical between directories, to the working-tree replay and to the
+brief; all 11 pin hashes, the fix commit, both tag refs, the advisory pin and
+the four-line patch were also checked. Witness replay #697 was requested; no
+verdict was in hand at admission. Wake trigger units and presentation stay
+owed from the person's full-flag sync, never a bare `mishe sync`. Cheapest
+next rung: build the real collector from pinned v2.8.0/v2.9.0 sources under
+`lab/`, bind its TCP input to 127.0.0.1 only, send the same headers on a
+loopback socket and capture the daemon ASan frame plus heap layout under the
+plugin's actual allocator, then repeat on the fixed tag. If the ring sits
+where no pointer can be reached, cap at rung 3 like iperf and record why;
+only an observed pointer or control-flow result would drop INSTRUMENTED.
+Evidence: `reports/frontier-ipfixcol2shell.md`, seed status
+`reports/ipfixcol2shell-status.md` and the pins in
+`lab/frontier/ipfixcol2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`

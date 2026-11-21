@@ -620,6 +620,28 @@ allocator, caller-side pointer control or execution was demonstrated; the
 LP's daemon ASan frame is from a different build and stays a claim. Witness
 replay #685 was requested with no verdict in hand at admission.
 
+Ipfixcol2Shell was handed off from frontier on 2026-11-21 ~08:35Z (handoff
+#698, commits `a5f3aed` / `a832dcd`) and admitted by the operator ~08:44Z
+under standing approval #6. The advisory pins `CVE-2026-122127` /
+`GHSA-4575-chq4-crfc`, vulnerable tags `v2.7.1`/`v2.8.0` and fixed `v2.9.0`,
+with fix commit `fd5cb168efb4b864d33f655174711b2779cef502`. The two-pane
+window (41, inner socket), registry entry, seed wall and brief were already
+live and capture-verified; the charter, `docs/task.md`, seed status and this
+lane index are now updated. Wake trigger units and the presentation entry are
+owed from the person's full-flag sync (`docs/runtime-pin.md`), never a bare
+`mishe sync`. The harness compiles the verbatim pinned `Lz4Decoder.cpp`
+under `#line` against the host's real `liblz4.so.1`, so rungs 1/2/3 are on
+real upstream bytes; rung-4 chosen bytes land past the 24-byte ring only in
+a 1 MiB mmap collaborator, with an `0x41` differential, a benign zero
+control and a stock-build fault as preserved negatives. No live collector,
+loopback TCP input, shipping allocator, caller-side pointer control or
+execution was demonstrated; the advisory's daemon frame and severity stay
+claims. Operator clean-archive replay: two HEAD (`18cae3d`) extractions,
+13 PASS / 0 FAIL each, raw trace
+`sha256=e9c06f530d09912603ed379913699b2f1e63e08ab64b8cfcefdae0b47f3cd89f`
+byte-identical between directories, to the working tree and to the brief.
+Witness replay #697 was requested with no verdict in hand at admission.
+
 ## Provisioning details
 
 - **Node prebuilts** (`lab/node2shell/provision.sh`): Node v24.22.2
