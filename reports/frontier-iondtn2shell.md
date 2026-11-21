@@ -77,7 +77,10 @@ Working-tree replay of `bash lab/frontier/iondtn2shell/run.sh <outdir>`:
 **26 PASS / 0 FAIL, `ALL CHECKS PASSED rc 0`**, trace
 `sha256=e9bc1ffffb7ba2bc39b5c3c26cf29a4c1cf0f8f96160a92cc979326f29d38f71`
 (canonical lines only; ASan PID/address/path text excluded). A clean
-`git archive HEAD` replay is recorded below.
+`git archive HEAD` replay at commit `fefc2b7`, run twice into separate
+absolute output directories from the extracted tree, gave 26 PASS /
+`ALL CHECKS PASSED rc 0` both times with the same trace sha256 (byte-identical
+between directories).
 
 - **Rung 1 (reproducible trigger)** — 18 rendered values of 80 bytes each
   make the verbatim loop write `18 × 81 = 1458` bytes into a 1024-byte
