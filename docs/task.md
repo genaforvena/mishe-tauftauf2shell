@@ -1902,6 +1902,61 @@ persist, preserve the negative and cap at rung 3. Evidence:
 `reports/frontier-srs2shell.md`, status `reports/srs2shell-status.md` and the
 pins in `lab/frontier/srs2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~09:2xZ: 389ds2Shell (CVE-2026-11610 / GHSA-2g8g-f92j-g4gq) — post-auth caveat
+
+Frontier handed this find over on tape #728 after committing `9ff285d`
+(brief and harness) and `0a4048b` (replay record). Claim sources: GitHub
+Advisory `GHSA-2g8g-f92j-g4gq` / CVE-2026-11610 (published 2026-07-07, HIGH
+8.8, `AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H`, CWE-122), the CVE record and
+upstream issue #7658, pinned in `lab/frontier/389ds2shell/PROVENANCE.md`.
+Affected 389-ds-base 1.3.2 through 3.3.0. Fix
+`f15ffd63e2bd70b3244881424ef903f17f7f0394`, parent `e63592d5…`; the separate
+`dd16813` (CVE-2026-78701) was read and excluded as a different bug. No
+upstream fixed semantic version beyond 3.3.0 → 3.3.1, only unaffected RHEL
+builds.
+
+After a successful SASL bind with integrity protection (`SSF > 0`,
+Kerberos/GSSAPI or DIGEST-MD5), an oversized LDAP UNBIND whose padded BER
+length is attacker-declared drives a copy into a 512-byte heap receive buffer
+without a bounds check in `sasl_io_recv()` (`sasl_io.c`), up to ~2 MB of
+chosen bytes. Upstream issue #7658 names the missing check: when
+`sasl_io_start_packet()` returns `SASL_IO_BUFFER_NOT_ENCRYPTED`, nothing
+checks `sp->encrypted_buffer_count <= len` before the `memcpy`. Pinned
+vulnerable `sasl_io.c` `sha256=9cea2e7b…`, copy at `:456`; fixed `f82aa846…`.
+Rungs 1/2/3: declared 9000 into the 512-byte buffer, 511/512 clean and 513
+faults; ASan `WRITE of size 9000` at pinned `sasl_io.c.vuln:456`, 0 bytes
+after a 512-byte region. Rung 4 is INSTRUMENTED only: chosen `0x5a`/`0x41`
+bytes at offsets 0-8487 in a 1 MiB zeroed collaborator, benign clean,
+guard-page fault (exit 77); no pointer or control-flow diversion.
+
+Admitted by the operator ~09:2xZ under standing approval #6: two-pane window
+(43, inner socket), registry entry and seed wall were live and capture-
+verified 09:11Z. Operator replay ~09:18Z from two clean `git archive 9ff285d
+lab/frontier/389ds2shell` extractions into separate absolute directories:
+14 PASS / 0 FAIL both times, raw trace
+`sha256=04e394a69a8508ab127ab206f713b87e8f590f799eb09d9ab130c63c5428cceb`
+byte-identical between directories, to the working-tree replay and to the
+brief. Witness replay requested separately; no verdict in hand at admission.
+Wake trigger units and presentation stay owed from the person's full-flag
+sync, never a bare `mishe sync`.
+
+Caveats recorded at admission and never to be dropped: this is **post-auth**
+(`SSF > 0` required), not pre-auth; the advisory claims DoS, not RCE; the
+512-byte size is the advisory's account and the real caller's `len` is
+UNKNOWN; no fixed semantic-version pin; live daemon, shipping allocator,
+valid-address retargeting and post-write control are UNKNOWN. Admission rests
+on the five #6 evidence elements (pinned claim, affected/fixed pin,
+attacker-controlled heap write, rung-4 plausibility, byte-controlled
+corruption), consistent with other gated admissions; it does not lower the
+bar for future targets. Cheapest next rung: build the pinned parent with
+ASan, configure a loopback 389-ds instance with a DIGEST-MD5/GSSAPI user,
+SASL-bind with `SSF > 0`, send the upstream test's 9000-byte padded plaintext
+UNBIND on the raw socket FD, and capture the daemon ASan frame plus heap
+layout; repeat at the fixed commit. If the shipping allocator faults before
+chosen bytes persist, preserve the negative and cap at rung 3. Evidence:
+`reports/frontier-389ds2shell.md`, status `reports/389ds2shell-status.md` and
+the pins in `lab/frontier/389ds2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
