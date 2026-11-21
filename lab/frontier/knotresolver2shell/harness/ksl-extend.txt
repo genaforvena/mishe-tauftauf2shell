@@ -1,0 +1,67 @@
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+FRAME n=91 buf=0x7ffff688fe40 len=1500 tracked=65536
+FRAME n=93 buf=0x7ffff688fe40 len=1500 tracked=65536
+FRAME n=99 buf=0x7ffff688fe40 len=1482 tracked=65536
+FRAME n=100 buf=0x7ffff687f800 len=1438 tracked=2640
+FRAME n=101 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=104 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=105 buf=0x7ffff68fdc00 len=1438 tracked=4080
+FRAME n=106 buf=0x7ffff688fe40 len=1484 tracked=65536
+FRAME n=108 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=109 buf=0x7ffff690e000 len=1438 tracked=5520
+FRAME n=110 buf=0x7ffff688fe40 len=1484 tracked=65536
+FRAME n=113 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=114 buf=0x7ffff68a8800 len=1438 tracked=6960
+FRAME n=115 buf=0x7ffff688fe40 len=1484 tracked=65536
+FRAME n=117 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=118 buf=0x7ffff68aa000 len=1438 tracked=8400
+FRAME n=119 buf=0x7ffff688fe40 len=1484 tracked=65536
+FRAME n=122 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=123 buf=0x7ffff68f1000 len=1438 tracked=9840
+FRAME n=124 buf=0x7ffff688fe40 len=1484 tracked=65536
+FRAME n=126 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=127 buf=0x7ffff68f1000 len=1438 tracked=11280
+FRAME n=128 buf=0x7ffff688fe40 len=1484 tracked=65536
+FRAME n=131 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=132 buf=0x7ffff6935000 len=1438 tracked=12720
+FRAME n=134 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=135 buf=0x7ffff6964000 len=1438 tracked=14160
+FRAME n=138 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=139 buf=0x7ffff6987b40 len=1438 tracked=15600
+FRAME n=141 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=142 buf=0x7ffff6987b40 len=1438 tracked=17040
+FRAME n=143 buf=0x7ffff688fe40 len=1484 tracked=65536
+FRAME n=146 buf=0x7ffff688fe40 len=1483 tracked=65536
+FRAME n=147 buf=0x7ffff6987b40 len=1438 tracked=18480
+FRAME n=151 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=152 buf=0x7ffff6987b40 len=1438 tracked=19920
+FRAME n=155 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=156 buf=0x7ffff6987b40 len=1438 tracked=21360
+FRAME n=158 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=159 buf=0x7ffff6987b40 len=1438 tracked=22800
+FRAME n=162 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=163 buf=0x7ffff6987b40 len=1438 tracked=24240
+FRAME n=165 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=166 buf=0x7ffff6987b40 len=1438 tracked=25680
+FRAME n=169 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=170 buf=0x7ffff6987b40 len=1438 tracked=27120
+FRAME n=172 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=173 buf=0x7ffff6987b40 len=1438 tracked=28560
+FRAME n=176 buf=0x7ffff688fe40 len=1485 tracked=65536
+FRAME n=177 buf=0x7ffff6987b40 len=1438 tracked=30000
+FRAME n=179 buf=0x7ffff688fe40 len=1285 tracked=65536
+FRAME n=180 buf=0x7ffff6987b40 len=1238 tracked=31240
+=== F6 CANDIDATE ===
+0x7ffff6987b40:	0x4141414141412e75	0x4746454443424140
+0x7ffff6987b50:	0x4f4e4d4c4b4a4948	0x5756555453525150
+0x7ffff6989340:	0xc7c6c5c4c3c2c1c0	0xcfcecdcccbcac9c8
+0x7ffff6989350:	0xd7d6d5d4d3d2d1d0	0xdfdedddcdbdad9d8
+0x7ffff6989360:	0xe7e6e5e4e3e2e1e0	0xefeeedecebeae9e8
+0x7ffff6989370:	0xf7f6f5f4f3f2f1f0	0xfffefdfcfbfaf9f8
+0x7ffff698bb40:	0x7574737271706f6e	0x7d7c7b7a79787776
+0x7ffff698bb50:	0x8584838281807f7e	0x8d8c8b8a89888786
+0x7ffff698fb40:	0x0000000000000000	0x0000000000000000
+0x7ffff698fb50:	0x0005012000000010	0x0000000000000200
+FRAME n=181 buf=0x7ffff688fe40 len=1286 tracked=65536

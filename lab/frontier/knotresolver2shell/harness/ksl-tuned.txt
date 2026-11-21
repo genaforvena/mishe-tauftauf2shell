@@ -1,0 +1,30 @@
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+Breakpoint 2 at 0x74f98: file ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_ksl.c, line 288.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1200 tracked=7325
+gap-ksl=0x7ffff68aa048 compar=0x4141414141414141 search=0x5555555ca5c9 n=1 keylen=16
+acktr-ksl=0x7ffff68aa388 compar=0x4141414141414141 search=0x5555555ca5c9 n=1 keylen=8
+0x7ffff68aa080:	0x5a5a5a5a5a5a5a5a	0x00007ffff6907710
+0x7ffff68aa090:	0x00007ffff6907710	0x00007ffff6907710
+0x7ffff68aa0a0:	0x4141414141414141	0x00005555555ca5c9
+0x7ffff68aa0b0:	0x0000000000000001	0x0000000000000010
+0x7ffff68aa0c0:	0x0000000000000010	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa0d0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa0e0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa0f0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa100:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa110:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa120:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa130:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa140:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa150:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa160:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa170:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa380:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa390:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa3a0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7ffff68aa3b0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+Hardware read watchpoint 3: -location *(unsigned long*)($slot1+0xa0)
+Hardware read watchpoint 4: -location *(unsigned long*)($slot1+0x3e0)
+watchpoints armed

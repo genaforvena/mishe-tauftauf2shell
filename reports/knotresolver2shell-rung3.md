@@ -226,15 +226,62 @@ only writer. A hardware read watchpoint was armed on `slot1+0xa0` at that point.
   `ksl->compar`) is not invoked on the corrupted pktns in this window.
 - The second ksl in the same pktns (`acktr.ents`, `pktns+0x388` = `slot1+0x388`)
   lies 90 bytes beyond the 814-byte reachable neighbour span
-  (`slot1+0..0x32d`), so this write cannot reach it either.
+  (`slot1+0..0x32d`) in the original 4-frame geometry. Wake 4 reached it with
+  retuned frame sizes (below), so "cannot reach" applies only to that geometry.
+
+## Rung-4 reach and dispatch ceiling (wake 4, 2026-11-21 ~19:3xZ)
+
+Question: can the OOB write reach a *dispatched* pointer in the neighbour? Two
+bounded experiments and one arithmetic derivation answer no for this build.
+
+### Arithmetic
+From `quic_conn.c:102-127`, with N escalation frames of payload D after F1:
+`end = 8 + N*(D-2)` (memcpy destination), `real = end + 2` (realloc size),
+`size = 1200 + N*D`, `free = 1192 + 2*N` (max F6 datalen), and the neighbour
+at `buf+6144` starts at body offset `6144 - end`. Verified: N=4, D=1440 gives
+`end=5760`, `real=5762`, drift 1198; N=5, D=1225 gives `end=6123`, `real=6125`,
+drift 1200, so the buffer still lands in jemalloc's 6144-byte class.
+
+### Active-neighbour attempt (negative)
+`harness/ksl_active.py` opened a second loopback QUIC connection either before
+F1 or between F5 and F6 and drove six streams on it after F6. Both runs
+(`harness/ksl-active-after.txt`, `ksl-active-before-run2.log`) logged the same
+F6 neighbour (`0x7ffff68aa000`, compar `0x4141414141414141`) while the second
+connection's active ksls stayed ~0x37xxx bytes away
+(`0x7ffff6921808`, `0x7ffff6921718` / `0x7ffff68f1808`, `0x7ffff68f1718`).
+No `DISPATCH HIT`, no watchpoint hit. The pktns at +6144 was not made active.
+
+### Reach extended to `acktr.ents` (negative)
+`harness/ksl_tuned.py` with N=5, D=1225, F6 datalen 1202 placed coherent
+ksls with both `compar` fields = `0x4141414141414141` and preserved
+root/front/back/search/n/keylen. `harness/ksl-tuned.txt` records
+`gap-ksl=0x7ffff68aa048 compar=0x4141414141414141` and
+`acktr-ksl=0x7ffff68aa388 compar=0x4141414141414141 n=1 keylen=8`.
+Hardware read watchpoints were armed on `slot1+0xa0` and `slot1+0x3e0`;
+neither fired, no dispatch hit was logged, kresd stayed alive. The extra
+`+0x388` reach removes the geometric excuse: the pktns is simply idle.
+
+### Scaling drift does not help
+`harness/ksl_extend.py` with 20 extra 1440-byte frames grows `pers_inbuf` to
+the 65536-byte class. `harness/ksl-extend.txt` logs `buf=0x7ffff688fe40
+len=1500 tracked=65536`; at `+6144`, `+16384` and `+32768` the bytes are either
+the buffer's own payload or fresh zero pages, and the next live object at
+`+32768` is ~1500 bytes past the OOB write. Larger classes separate
+allocations faster than the ~2-byte-per-frame drift grows, so no live neighbour
+is reachable by scaling this primitive.
 
 ### Disposition
-Rung 3 unchanged. Rung 4 remains **UNKNOWN**: chosen bytes reach and replace a
-live function pointer, but no control flow is exercised through it on this
-host. The published gnutls-handler dispatch chain is unavailable in this
-build; an active object would have to be groomed into the +6144 neighbour,
-which was not achieved. All runs were loopback-only under gdb (which disables
-ASLR for its inferior); the host sysctl was untouched.
+Rung 3 unchanged; rung 4 remains UNKNOWN. On this build the OOB write reaches
+two live function-pointer fields (gap and acktr comparators of an idle
+`ngtcp2_pktns`), but no control flow passes through either. Stock (ASLR-on)
+exploitability and any information leak remain UNKNOWN. All runs loopback-only
+under gdb; the host ASLR sysctl was untouched.
+
+### Wake-3 disposition (superseded detail)
+The published gnutls-handler dispatch chain is unavailable in this build;
+wake 3 found an active object would have to be groomed into the +6144
+neighbour. Wake 4 tried that and also extended reach to `acktr.ents`; both
+failed to produce dispatch, so the disposition above stands.
 
 ## Boundaries
 

@@ -1,0 +1,22 @@
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+Breakpoint 2 at 0x74f98: file ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_ksl.c, line 288.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1198 size=6960
+F6 ksl=0x7ffff68aa048 compar=0x4141414141414141 search=0x5555555ca5c9 n=1 keylen=16
+0x7ffff68aa080:	0x0000000000000000	0x00007ffff6907710
+0x7ffff68aa090:	0x00007ffff6907710	0x00007ffff6907710
+0x7ffff68aa0a0:	0x4141414141414141	0x00005555555ca5c9
+0x7ffff68aa0b0:	0x0000000000000001	0x0000000000000010
+Hardware read watchpoint 3: -location *(unsigned long*)($slot1+0xa0)
+F6 read-watchpoint armed on 0x7ffff68aa0a0
+ksl-insert other ksl=0x7ffff68e2008 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff68e1f18 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff6921808 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff6921718 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff6921808 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff6921718 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff6921808 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff6921718 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff68e2008 compar=0x5555555ca7ed
+ksl-insert other ksl=0x7ffff68e1f18 compar=0x5555555ca7ed

@@ -1,0 +1,3 @@
+Breakpoint 1 at 0x41f67: file ../daemon/quic_conn.c, line 124.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".

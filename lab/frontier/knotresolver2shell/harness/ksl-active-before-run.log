@@ -1,0 +1,40 @@
+[runner] gdb pid=1021615 mode=before
+no 8855 socket yet
+=== active-neighbour frames mode=before ===
+[driver] active-neighbour mode=before marker=0x4141414141414141 port=8855
+Traceback (most recent call last):
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/harness/ksl_active.py", line 95, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/harness/ksl_active.py", line 54, in main
+    async with poc.connect("127.0.0.1", port, configuration=_cfg()) as proto:
+  File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/client.py", line 94, in connect
+    await protocol.wait_connected()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 148, in wait_connected
+    await asyncio.shield(self._connected_waiter)
+ConnectionError
+=== gdb oracle ===
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+Breakpoint 2 at 0x74f98: file ../contrib/libngtcp2/ngtcp2/lib/ngtcp2_ksl.c, line 288.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program terminated with signal SIGKILL, Killed.
+The program no longer exists.
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/harness/ksl-active-run.gdb:46: Error in sourced command file:
+No registers.
+=== gdb stdout tail ===
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+=== END ===
