@@ -1312,6 +1312,65 @@ full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/opensips2shell-status.md` and the pinned hashes in
 `lab/frontier/opensips2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~06:5xZ: Unbound2Shell (CVE-2026-81642)
+
+Claim source: CVE record <https://cveawg.mitre.org/api/cve/CVE-2026-81642>
+(CNA NLnet Labs) and maintainer advisory
+<https://nlnetlabs.nl/downloads/unbound/CVE-2026-81642.txt>: "A DNSKEY with
+an owner compression pointer to its own RDATA can overflow the digest
+buffer. Remote code execution is possible through attacker controlled data."
+CWE-122 heap buffer overflow; CNA CVSS 4.0 9.1 Critical
+`CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:U/U:Red`,
+NVD CVSS 3.1 9.8, Ubuntu priority Medium (vendor variance, kept as a claim).
+Affected: all versions through `1.26.0`, fixed `1.26.1`; upstream fix
+`8c2e0fd6cc5b6eaa618ac72227808824b4edee7c`. Claimed primitive: at tag
+`release-1.26.0`, `validator/val_sigcrypt.c:293-317`
+(`ds_create_dnskey_digest`) writes the owner name and RDATA into
+`env->scratch_buffer` (allocated at `daemon/worker.c:2436`, default size
+65552 at `util/config_file.c:176`) using two `memcpy`s at
+`sldns/sbuffer.h:436`; the wire maxima `LDNS_MAX_DOMAINLEN 255` and
+`LDNS_MAX_RDFLEN 65535` are bounded separately, so `255 + 65533 = 65788`
+writes 236 bytes past the buffer. The only capacity guard is an `assert()`
+compiled out under `NDEBUG`; shipping compile flags are UNKNOWN. The fix
+adds a two-line `sldns_buffer_available()` check. Advisory reachability
+(attacker-controlled zone and a compression-pointer-inflated owner name),
+the DNSSEC config gate and RCE remain claims.
+
+Frontier's harness (`lab/frontier/unbound2shell/run.sh`) extracts the
+verbatim pinned function from `release-1.26.0`, fix commit `8c2e0fd6cc5b`
+and `release-1.26.1` under `#line` directives with stub collaborators:
+rung 1 `written=65788 overflow=236 rc=1` with a benign `32`/`100` control;
+rung 2 vulnerable `GUARD_REJECTED=0` while both fixed builds return 0 and
+set `GUARD_REJECTED=1`; rung 3 ASan `heap-buffer-overflow`, `WRITE of size
+65533` at pinned `sldns/sbuffer.h:436` from `val_sigcrypt.c:311`; rung 4
+reads 16 chosen RDATA bytes back byte-exact at the first out-of-bounds
+offset (`CHOSEN_MATCH=1`). Rung 4 is INSTRUMENTED only — chosen bytes in a
+synthetic lab frame, no pointer, return address, marker, resolver process,
+DNSKEY wire bytes, decompression path, DNSSEC configuration, allocator
+adjacency or shipping flags exercised. Cheapest next rung: build stock
+`release-1.26.0` under ASan with DNSSEC validation, bind only 127.0.0.1,
+serve a local malicious zone whose DNSKEY owner uses a self-referential
+compression pointer, query it from the lab resolver and capture the real
+ASan frame, wire bytes and post-write heap state; repeat with `1.26.1` as
+control. Attempt a benign marker only if chosen bytes reach a pointer or
+saved control-flow datum.
+
+Admitted by the operator ~06:5xZ under standing approval #6 on handoff #620
+(commits `f9295a0`, `34fd212`, `e76e23d`): the two-pane window (35, inner
+socket), registry entry and seed wall were live from frontier and
+capture-verified at 06:32:41Z. Operator replay ~06:43Z from two clean `git
+archive HEAD` (1718991) extractions into separate absolute output
+directories: 29 PASS / 0 FAIL and `ALL CHECKS PASSED rc 0` both times, byte
+identical trace
+`sha256=05bf4ace988fc4fdc4d213674e1f30e85c739c170b47c5319cbfc2cd7f24f795`.
+Witness #619 independently reached ESTABLISHED AS CLAIMED with no grade
+correction; its stale-NDEBUG-comment nit is fixed in the admission commit.
+Wake trigger units and the presentation entry are owed from the person's
+full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-unbound2shell.md`, seed status
+`reports/unbound2shell-status.md` and the pinned hashes in
+`lab/frontier/unbound2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`

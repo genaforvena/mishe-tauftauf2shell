@@ -1,9 +1,10 @@
 #ifndef UNBOUND_FRONTIER_STUBS_H
 #define UNBOUND_FRONTIER_STUBS_H
 /* Minimal collaborators for the verbatim pinned ds_create_dnskey_digest().
- * The shipping build compiles with NDEBUG, so the assert() inside
+ * This harness defines NDEBUG, so the assert() inside
  * sldns_buffer_write_at() is absent: the stub memcpy below is the exact
  * pinned body at sldns/sbuffer.h:433-438 with that assert compiled out.
+ * Shipping compile flags are UNKNOWN.
  * No Unbound daemon, resolver, DNS packet, parser or network is involved.
  */
 #define NDEBUG 1

@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies twenty-five admitted vulnerability families in local, isolated
+It studies twenty-seven admitted vulnerability families in local, isolated
 copies of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -471,6 +471,17 @@ copies of the affected software:
   `xmpp.h:73-82` / `xmpp.c:280-285`, rung 4 is instrumented chosen-byte
   control only, and the advisor claims a crash with RCE only possible
   depending on canary/ASLR/NX.
+- **Unbound2Shell** — CVE-2026-81642 (CNA NLnet Labs), a heap buffer
+  overflow in `ds_create_dnskey_digest()`: a DNSKEY owner name plus RDATA
+  writes up to 65788 bytes into the 65552-byte per-worker scratch buffer,
+  236 bytes past it, with the only capacity check an `assert()` compiled
+  out under the harness's `NDEBUG` (shipping flags UNKNOWN). CNA CVSS 4.0
+  9.1 Critical / NVD 3.1 9.8; affected through `1.26.0`, fixed `1.26.1`,
+  fix `8c2e0fd6cc5b`. Advisory claims attacker-controlled RCE via a
+  malicious zone and compression pointer; the DNSSEC gate and that route
+  stay UNKNOWN. Admitted ~06:5xZ under standing approval #6; rungs 1-3
+  run on verbatim pinned upstream lines, rung 4 is instrumented
+  chosen-byte control only.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -507,6 +518,7 @@ is called established.
 | **Netatalk2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 255-byte `d_name` performs `strcpy(path + 1024, d_name)`, writing 256 bytes into `path[1025]`: the first saved-return-slot byte changes, ASan reports `stack-buffer-overflow` `WRITE of size 256` in `deletedir` at pinned `directory.c:181`, and token `NET2SHEL` reads back byte-exact at write offsets 0/64 and in the return slot at offset 56. Fix `33dbda7` uses `sizeof(path)` and the neighbour is clean. No live afpd, socket, AFP session, mount, useful-pointer control or execution; authenticated RCE remains a claim. [Status](reports/netatalk2shell-status.md) |
 | **Iondtn2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | 18 rendered AMP values of 80 bytes append 1458 bytes into a 1024-byte `STAKE(1024)` heap region at pinned `nm/mgr/nm_mgr_print.c:557`: the first byte past the allocation changes, ASan reports `heap-buffer-overflow` `WRITE of size 81` in `ui_str_from_ac` at pinned line 557, and token `ION2SHL!` reads back byte-exact at chosen write offsets 1024/1088/1152/1280/1408. Fix `4b158b6` uses `istrlen()`/`istrcat()` capacity checks and returns NULL; the neighbour is clean. No live `nm_mgr`, socket, UDP CLA/AMP payload, UI, useful pointer or execution; both advisories claim availability only, and the GHSA "No known CVE" vs VulnCheck CVE assignment conflict is preserved. [Status](reports/iondtn2shell-status.md) |
 | **Opensips2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 299-byte JID `from` drives `ENC_SIP_URI()`'s unbounded `sprintf` to write 304 bytes into `buf_from[256]` — 48 attacker-chosen bytes past the array, with `stored_len=14` when a `/` is present at offset 10; ASan reports `stack-buffer-overflow` `WRITE of size 304` at pinned `xmpp.c:285`, and 16 chosen bytes at `buf_from+256` read back byte-exact in the no-canary lab frame. Fix `ec24165b` bounds the helper with `snprintf`, enlarges the buffer and gates inbound `<message/>` on dialback. No live OpenSIPS receiver, socket, XMPP stanza, shipping stack layout, canary/ASLR/NX measurement, pointer control or execution; `backend=server` is a configuration gate and RCE stays an advisory claim. [Status](reports/opensips2shell-status.md) |
+| **Unbound2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | `dname_len=255` plus `rdata_len=65535` writes 65788 bytes into the 65552-byte `env->scratch_buffer` (`overflow=236`) in pinned `val_sigcrypt.c:293-317`; ASan reports `heap-buffer-overflow` `WRITE of size 65533` at pinned `sldns/sbuffer.h:436` from `val_sigcrypt.c:311`, and 16 chosen RDATA bytes read back byte-exact past the allocation in the lab frame. Both fixed pins (`8c2e0fd6cc5b`, `1.26.1`) reject the same input with `GUARD_REJECTED=1`. No live resolver, DNSKEY wire bytes, compression-pointer route, DNSSEC config, shipping flags, pointer control or execution; advisory RCE remains a claim. [Status](reports/unbound2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the

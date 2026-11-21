@@ -3,8 +3,9 @@
 # Executes the VERBATIM pinned ds_create_dnskey_digest() from Unbound
 # validator/val_sigcrypt.c at tag release-1.26.0 (vulnerable), fix commit
 # 8c2e0fd6cc5b and tag release-1.26.1 (both guarded). Stubbed collaborators
-# reproduce the pinned sldns_buffer memcpy under NDEBUG, as in a shipping
-# build. No daemon, resolver, DNS packet, socket or network is created.
+# reproduce the pinned sldns_buffer memcpy with NDEBUG defined by this harness;
+# shipping compile flags are UNKNOWN. No daemon, resolver, DNS packet, socket
+# or network is created.
 set -u
 
 here=$(cd "$(dirname "$0")" && pwd)
