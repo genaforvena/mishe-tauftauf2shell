@@ -20,15 +20,19 @@ lab conditions (synthetic loopback consumer, consumer-side tcache grooming,
 `-no-pie` build carrying a stable marker address in the image), the pinned
 copy can overwrite a live object's function pointer with an image-chosen
 address and an indirect call through that field reaches a *different* benign
-marker; a benign count-2 control reaches the original marker. No real-world
-deserializing application, ASLR-resistant pointer control or execution of
-attacker-chosen code was observed — all remain UNKNOWN. Witness W73 #911
+marker; a benign count-2 control reaches the original marker. Wake 6 found
+one shipped deserializing consumer (the DataSketches PostgreSQL extension),
+measured the same pinned write inside it under both stock and assertion
+builds, and observed no failure there. ASLR-resistant pointer control and
+execution of attacker-chosen code remain UNKNOWN.
+
 replayed the wake-1 claims ESTABLISHED AS CLAIMED; witness W74 replayed the
 wake-2 (#922) and wake-3 (#929) claims from clean git archives of `b95653e`
 and `e6e8b86`, also ESTABLISHED AS CLAIMED at their labeled grades (6+4 PASS
 and 3 PASS rc 0, five pins OK). Witness W75 replayed wake 4 (#951) from a clean
 git archive of `fa551e9`, ESTABLISHED AS CLAIMED at the lab-build-only grade
-(4 PASS rc 0, five pins OK).
+(4 PASS rc 0, five pins OK). Wake 6 is new and awaits independent replay; see
+the final section for its bounded, loopback-only negative result.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -302,4 +306,65 @@ main+1068 showed `call *%rax` with `rax=0x403b84`, a genuine indirect call
 through the written field with no re-store in `groom_service.cpp`. Grade:
 ESTABLISHED AS CLAIMED at the lab-build-only grade, with the bounds above
 retained. Every socket in this section bound 127.0.0.1 only.
+
+
+## Wake 6: a real deserializing consumer, measured (2026-11-21)
+
+The previously UNKNOWN question "which applications deserialize untrusted
+HLL images" now has one concrete, shipped answer: the Apache DataSketches
+PostgreSQL extension. In the pinned extension source at commit
+`56d871276d32a1235041b553559143a9697f8906`,
+`src/hll_sketch_pg_functions.c:176` and `:353` call `hll_sketch_deserialize`
+on a client-supplied `bytea`, as does `pg_hll_sketch_get_estimate` (around
+`:370`); `sql/datasketches_hll_sketch.sql` defines
+`hll_sketch_in(cstring)` and `CREATE CAST (bytea as hll_sketch)`, so a base64
+client literal is a deserialization input. The extension instantiates
+`hll_sketch_alloc<palloc_allocator<char>>` (`src/allocator.h`), i.e. its
+allocations come from PostgreSQL memory contexts, **not** glibc malloc.
+
+Sources and hashes are in `lab/datasketches2shell-pg/PROVENANCE.md` and
+`SHA256SUMS`. `bash lab/datasketches2shell-pg/run.sh <outdir>` rebuilds if
+needed, starts a loopback-only PostgreSQL 16.4 instance, creates a fresh
+database, loads the extension's verbatim HLL SQL, sends four images through
+`hll_sketch_get_estimate`, and stops the server on exit. The extension's HLL
+objects are built from verbatim source against the pinned, unmodified 5.2.0
+headers; unrelated sketch families are omitted only to avoid Boost headers.
+
+Observed (`/tmp/ds2-pg-replay2`, rc 0):
+
+- benign 16-byte genuine seed: `PG_DS2_BENIGN 2.000000004967054`;
+- count 18 (80 bytes): `PG_DS2_C18 18.00000075995926`;
+- count 64 (264 bytes): `PG_DS2_C64 64.00001001358214`;
+- count 255 (1028 bytes): `PG_DS2_C255 255.00016085815176`.
+
+All four queries returned normally and a follow-up `select 1` succeeded. A
+second build with `--enable-cassert` (MEMORY_CONTEXT_CHECKING) on a separate
+loopback port gave the same four estimates, no warning and a live server.
+
+gdb on a single-user backend confirmed the same library copy inside the real
+consumer: breakpoint at pinned `CouponList-internal.hpp:116` in
+`CouponList<palloc_allocator<char>>::newList`, `count=64`, coupon data
+`p=0x5555562d70f0`. In the stock build the words at `p+32` and `p+40` were
+`0` before the library's `memcpy` and `0x5a5a5a5a5a5a5a5a` after; in the
+assertion build (`p=0x5555563b18c8`) the memory-context sentinel at `p+32`
+was `0x7f7f7f7f7f7f7f7f` before and `0x5a5a5a5a5a5a5a5a` after. Both raw
+logs are in `lab/datasketches2shell-pg/gdb_pg.log` and `gdb_pg_assert.log`.
+So chosen bytes do overwrite real allocator state in a shipped consumer,
+but no crash, abort, pointer value or diverted call was observed.
+
+The absence of a sentinel warning has a source-level reason, preserved as a
+negative: `AllocSetFree` checks the trailing sentinel only for external
+single-chunk blocks (`src/backend/utils/mmgr/aset.c:1008-1027`); a 32-byte
+coupon vector is an ordinary chunk in a block, and a context reset does not
+check per-chunk sentinels. The glibc top-size steering and tcache grooming of
+wakes 2-4 do not transfer to this consumer because it uses `palloc`.
+
+**Disposition: KEEP the lab-build grade, do not advance the shipped-app grade.**
+The real-consumer item moves from UNKNOWN to "identified and measured": a
+client-reachable deserialization path exists in the PostgreSQL extension and
+the pinned write occurs there, but with no observed impact beyond chosen
+bytes in allocator slack. Real applications with a glibc allocator, a live
+victim at a known offset, an address leak and natural call-through remain
+UNKNOWN. Every socket in this section bound 127.0.0.1 only; no probe left the
+loopback host. This wake's claims are new and await independent replay.
 

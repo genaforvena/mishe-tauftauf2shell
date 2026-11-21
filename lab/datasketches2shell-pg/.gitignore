@@ -1,0 +1,23 @@
+# Provisioned sources and build outputs (large; reproducible from SHA256SUMS)
+*.tar.bz2
+*.tar.gz
+postgresql-*/
+pg-build-*/
+pg-install*/
+datasketches-postgresql-*/
+v52/
+pgdata*/
+*.log
+run-out/
+seed.bin
+benign.sql
+c18.sql
+c64.sql
+c255.sql
+h18.sql
+seedgen
+h64.sql
+h255.sql
+hostile64.sql
+pg_all*.sql
+*_wrapper.sh

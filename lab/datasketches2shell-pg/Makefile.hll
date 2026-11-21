@@ -1,0 +1,12 @@
+# HLL-only build of the shipped Apache DataSketches PostgreSQL extension,
+# linked against the pinned, verbatim datasketches-cpp 5.2.0 headers.
+# Other sketch families are omitted only to avoid unrelated Boost headers.
+MODULE_big = datasketches
+OBJS = src/base64.o src/common.o \
+       src/hll_sketch_pg_functions.o src/hll_sketch_c_adapter.o
+PG_CPPFLAGS = -fPIC -O0 -g -I../v52/common/include -I../v52/hll/include
+PG_CXXFLAGS = -std=c++11 -O0 -g
+SHLIB_LINK = -lstdc++
+PG_CONFIG = ../pg-install/bin/pg_config
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+include $(PGXS)
