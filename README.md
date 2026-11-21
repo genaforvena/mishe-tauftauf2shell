@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies twenty-eight admitted vulnerability families in local, isolated
+It studies twenty-nine admitted vulnerability families in local, isolated
 copies of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -95,12 +95,32 @@ copies of the affected software:
   The vendor's five cases give ASan heap-use-after-free READs at
   `dom_node_parent_get (node.c:247)` after `xmlSetNsProp` frees the old child;
   the same tree relinked with `dom_set_attribute_value()` is clean and matches
-  vendor EXPECT. Local CLI with a userland wrapper only — no SAPI, HTTP path,
-  chosen bytes, pointer control or marker. Reproduce with
+  vendor EXPECT. In that ASan A/B, local CLI with a userland wrapper only — no
+  SAPI, HTTP path, chosen bytes, pointer control or marker. Reproduce with
   `python3 lab/repro/php2shell-dom-reflected-attr.py <php-vuln> <php-fixed>`:
   the A side is wake 51's `php-fixed`, the B side applies the committed
   `lab/php2shell/dom-reflected-attribute-fix.patch` and is saved as
   `php-fixed-domattr`.
+  Wake 56 carried the same bug onto a plain, dom-enabled 8.5.12 CLI built by
+  `bash lab/php2shell/build-dom-plain.sh 8.5.12` (glibc malloc, no ASan), where
+  the freed 120-byte `xmlNode` can be reused. That lane is graded **rung 4 (lab
+  conditions)**: with `USE_ZEND_ALLOC=0`, an empty reflected-attribute
+  replacement plus `normalizeDocument()` frees the chunk without a replacement
+  node, and `str_repeat('A', 88)` — exactly 120 bytes because
+  `zend_string_safe_falloc(N,1,0)` allocates N+32 — occupies it, putting
+  attacker bytes at `node->parent` (chunk offset 40). Reading
+  `$text->parentNode` then dereferences the chosen 64-bit value: GDB shows
+  `php_dom_object_get_data(obj=0x4242424242424242)` at `php_dom.c:324` via
+  `dom_node_parent_get (node.c:253)`, and `0x41` / `0x5a` variants track the
+  input; the fixed binary survives. The same harness also observed a 119-byte
+  chosen readback, a cross-object write, parent steering and a plain-build
+  glibc `double free` SIGABRT. Replay with
+  `python3 lab/repro/php2shell-dom-reflected-attr-groom.py <php-vuln-plain> <php-fixed-plain> [outdir]`:
+  verdict `RUNG4_POINTER_CONTROL`, raw logs in gitignored
+  `lab/build/evidence/w56-domattr-groom/`. Conditions are local CLI with `dom`,
+  a non-ASan build, `USE_ZEND_ALLOC=0`, the empty replacement and N=88; this is
+  read-side pointer control to a fault, not an arbitrary write, marker,
+  SAPI/HTTP path or pre-auth claim.
 - **Node2Shell** — CVE-2026-123828, two one-byte heap overflows in Node's
   HTTP/2 `Alt-Svc` handling (`src/node_http2.cc`): fix `nodejs/node@ae9ab37d62`
   removes `kNullTerminate` from both `WriteOneByteV2` calls, so the origin
@@ -517,6 +537,14 @@ copies of the affected software:
   affected `<=1.4.2` / `<=0.16.2`, fixed `1.4.3` / `0.16.3`. Admitted
   ~07:1xZ under standing approval #6; rungs 1-3 run on verbatim pinned
   upstream lines, rung 4 is instrumented chosen-byte control only.
+- **Rsyslog2Shell** — CVE-2026-55556 / GHSA-947w-69ph-mc2r (2026-06-23), a
+  pre-auth `Authorization: Basic` header whose base64 decodes past 8192 bytes
+  makes `parse_auth_header()` call `calloc(0, len)` and decode the whole
+  attacker-chosen credential past the zero-length allocation at pinned
+  `contrib/imhttp/imhttp.c:705`. Advisory CVSS 4.0 8.2, availability-only;
+  affected `>=8.2110.0, <8.2604.0`, fixed `8.2604.0`. Admitted ~07:2xZ
+  under standing approval #6; rungs 1-3 run on verbatim pinned upstream
+  lines, rung 4 is instrumented chosen-byte control only.
 
 Nothing here scans the internet or talks to a real target. Sources are
 downloaded from their official homes, builds and test servers run on
@@ -528,7 +556,7 @@ is called established.
 | Target | Where it stands | Highlights |
 |---|---|---|
 | **Ruby2Shell** | **Rung 4 — demonstrated impact, request-reachable on both claimed default stacks; every rung-4 claim witness-ESTABLISHED** | Chosen bytes written at a chosen offset on stock glibc, 5/5 with a clean control; the same chain driven by one multipart POST through default-config Sinatra (5/5 + control) and a default `rails new` app (5/5 + control, CSRF fires too late in the controller to matter) before routing/CSRF/auth; ASan heap-buffer-overflow on the committed repro. Independent witness: in-process chain ESTABLISHED (tape #51), both HTTP sections ESTABLISHED request-reachable (tape #65) and Stage C ESTABLISHED as strengthened pointer control (tape #89). A 2026-11-21 depth pass carried Stage C onto the Sinatra request thread (3/3 attacks, 2/2 controls): the nominated address was handed out and its chosen bytes read back in the HTTP response, but the process then aborts in WEBrick worker-thread tcache teardown — no persistence or surviving process claimed. The vendor's copy-out one-byte over-read was separately reproduced under valgrind as a second observed invalid access (rung 3 class): the byte read back is the same `0x53` the overflow wrote and the returned string is correct, so it is not an information leak and raises no grade. [Full report](reports/ruby2shell-investigation.md) |
-| **PHP2Shell** | **Rung 4 — constrained placement (CGI and mod_php witness-established)** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. Reopened 2026-11-20 under CVE-2026-126714: both splice halves reproduced on both pinned ASan builds — an interrupted real session write leaves a replacement prefix plus carrier tail on disk and the next request promotes the object; the kill is shim-simulated, not a remote trigger. The 8.4.28 fix was verified in the lab: under the same kill the write leaves only a truncated new prefix and no promoted object. A separate Stage A chain writes chosen bytes at chosen offsets of the consumed stale HashTable: witness #138 ESTABLISHED the constrained rung-4 form on CGI and witness #258 independently re-ran the mod_php leg to the same grade (fresh logs in `lab/build/evidence/w18-apache-modphp/`); `arData` is only a length, so there is no pointer control or marker execution, and FPM stays rung 3. New descendant lane CVE-2026-129481 (session-filename use-after-free) is rung 3 on FPM 8.4.27, patch-sensitive with a benign control; no rung 4. [Status](reports/php2shell-status.md) |
+| **PHP2Shell** | **Rung 4 — constrained placement (CGI and mod_php witness-established); separate DOM lane reaches read-side chosen-pointer rung 4 on a local plain CLI** | Deterministic OOM-during-request-parsing trigger (rung 1); every cheaply reachable SAPI consumer surveyed with negatives observed, not assumed; rfc1867 upload-progress PoC ported with version-discriminating behavior on affected 8.4.26 vs fixed builds. Reopened 2026-11-20 under CVE-2026-126714: both splice halves reproduced on both pinned ASan builds — an interrupted real session write leaves a replacement prefix plus carrier tail on disk and the next request promotes the object; the kill is shim-simulated, not a remote trigger. The 8.4.28 fix was verified in the lab: under the same kill the write leaves only a truncated new prefix and no promoted object. A separate Stage A chain writes chosen bytes at chosen offsets of the consumed stale HashTable: witness #138 ESTABLISHED the constrained rung-4 form on CGI and witness #258 independently re-ran the mod_php leg to the same grade (fresh logs in `lab/build/evidence/w18-apache-modphp/`); `arData` is only a length, so Stage A has no pointer control or marker execution, and FPM stays rung 3. New descendant lane CVE-2026-129481 (session-filename use-after-free) is rung 3 on FPM 8.4.27, patch-sensitive with a benign control; no rung 4. Wake 56 graded the un-CVE'd DOM reflected-attribute lane rung 4 on a non-ASan 8.5.12 CLI: with `USE_ZEND_ALLOC=0`, an empty replacement plus `normalizeDocument()` frees the 120-B `xmlNode` and a 120-B `str_repeat('A', 88)` puts a chosen 64-bit value at `node->parent`; GDB sees `php_dom_object_get_data(obj=0x4242424242424242)` at `php_dom.c:324` and `0x41`/`0x5a` track the input, with the fixed binary surviving (verdict `RUNG4_POINTER_CONTROL`). Local CLI with `dom`, non-ASan; no arbitrary write, marker, SAPI/HTTP path or pre-auth claim. [Status](reports/php2shell-status.md) |
 | **Apache2Root** | **Rung 3 — lane closed at Stage A; rung 4 not demonstrated** | Differential child SIGSEGV on affected 2.4.70 and clean fixed control under gdb, with chosen-byte placement at a capacity boundary. Stage C is closed as unreachable on this host: a repaired Huffman probe re-ran at 19:11Z and every forbidden value still draws RST:1 (the ASCII control gets HTTP 200), and a 15-capture fault-site census plus a heap-layout check found only pointer slots, no scalar control field. The earlier bounded ASan sweep was negative and is preserved. Adjacent same-subsystem lane L1 (`H2PushDiarySize 0` + debug logging) is rung 2 only: 2.4.70 UBSan NULL-member access and ASan `SEGV on unknown address 0x00000000000c` in `h2_session_create`, 2.4.71 rc=0 clean; reproduce `python3 lab/apache2shell/pushdiary-lane.py`. Adjacent lane L5 (CVE-2026-56449, mod_proxy_html `dump_content` on a stale varbuf) is rung 3 on the genuine reverse-proxy path: 2.4.68 4/4 child SIGSEGV and ASan `negative-size-param (size=-3)` at `mod_proxy_html.c:272` from `pcomment:312`, 2.4.69 0/4; the one-line fix and its reversal flip 0/6 to 6/6. ASan aborts before the write, so no chosen byte, pointer or marker; L5 is closed at rung 3. Reproduce `bash lab/apache2shell/build-l5.sh` then `ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 ./l5-lane.py 2.4.68 2.4.69`. Adjacent lane L6 (CVE-2026-56153, `mod_charset_lite` `finish_partial_char` OOB write) is rung 3: on loopback ASan/UBSan 2.4.68 a chunked ISO-2022-JP POST ending in ESC gives 3/4 UBSan `index 8 out of bounds for type 'char [8]'` at `mod_charset_lite.c:448` versus 2.4.69 0/4; the written byte is fixed `0x1b`, offsets follow struct layout, the 2.4.69 guard flip gives 0/4 and restoration 2/4, and a 64-ESC run gives 4/4 UBSan plus 4/4 child SIGSEGV with no chosen byte, pointer or marker. Reproduce `bash lab/apache2shell/build-l6.sh` then `python3 lab/apache2shell/l6-lane.py 2.4.68 2.4.69`. [Report](reports/apache2shell-investigation.md) |
 | **Mosquitto2Shell** | **Rung 3 — confirmed corruption; info disclosure witness-established** | ASan `WRITE of size 256`, 3 bytes after a 1-byte region, via `net__read_ws (net_ws.c:305)` on affected 2.1.0-2.1.2; clean close on fixed 2.1.3; Stage A places 4N chosen bytes at a chosen offset. A wire-only pre-auth 32 KiB heap read with live pointer disclosure is witness-ESTABLISHED (#246), but the enlargement is layout-dependent on fresh brokers; wire-derived code execution / tcache control remains UNVERIFIED. [Brief](reports/frontier-mosquitto2shell.md) |
 | **Node2Shell** | **Rung 3/3.5 — two independent AltSvc terminators; rung 4 not demonstrated** | One-request stock-glibc abort is 10/10 deterministic on officially affected v24.22.2 (`origin_len=1048`); deterministic Memcheck differential there (`Invalid write of size 1` in `WriteOneByteV2`, 2/2) against a clean v24.22.3 control. The debugger-observed NUL shrinks a free chunk's size magnitude by 0x10..0xf0 — the earlier flags-only PREV_INUSE-clear reading was retracted. The UTF-8 low-byte-truncation channel was tested and closed (U+0100 `c4 80` rejected), leaving no binary-capable heap-byte channel in this attacker model. Wake 33 isolated the second (value/ALT) terminator as an independent rung-3 trigger: ALT 1048 aborts 4/4 then 3/3 with `malloc(): invalid next size (unsorted)`, ALT 1200 and ALT 10 complete 2/2 each; wake 34 put both on-class in one request — 8/8 SIGABRT rc=134 across `mismatching next->prev_size` 2/8, `invalid next size` 3/8, `double free or corruption (!prev)` 3/8, with the origin write dominating and no combination primitive. The value lane never captured its pre-write sizefield; the ladder stays rung 3. [Report](reports/node2shell-investigation.md) |
@@ -555,12 +583,14 @@ is called established.
 | **Opensips2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 299-byte JID `from` drives `ENC_SIP_URI()`'s unbounded `sprintf` to write 304 bytes into `buf_from[256]` — 48 attacker-chosen bytes past the array, with `stored_len=14` when a `/` is present at offset 10; ASan reports `stack-buffer-overflow` `WRITE of size 304` at pinned `xmpp.c:285`, and 16 chosen bytes at `buf_from+256` read back byte-exact in the no-canary lab frame. Fix `ec24165b` bounds the helper with `snprintf`, enlarges the buffer and gates inbound `<message/>` on dialback. No live OpenSIPS receiver, socket, XMPP stanza, shipping stack layout, canary/ASLR/NX measurement, pointer control or execution; `backend=server` is a configuration gate and RCE stays an advisory claim. [Status](reports/opensips2shell-status.md) |
 | **Unbound2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | `dname_len=255` plus `rdata_len=65535` writes 65788 bytes into the 65552-byte `env->scratch_buffer` (`overflow=236`) in pinned `val_sigcrypt.c:293-317`; ASan reports `heap-buffer-overflow` `WRITE of size 65533` at pinned `sldns/sbuffer.h:436` from `val_sigcrypt.c:311`, and 16 chosen RDATA bytes read back byte-exact past the allocation in the lab frame. Both fixed pins (`8c2e0fd6cc5b`, `1.26.1`) reject the same input with `GUARD_REJECTED=1`. No live resolver, DNSKEY wire bytes, compression-pointer route, DNSSEC config, shipping flags, pointer control or execution; advisory RCE remains a claim. [Status](reports/unbound2shell-status.md) |
 | **Janus2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 1986-byte `.mjr` info header freads into `char prebuffer[1500]` (`overflow=486`) at pinned `janus_recordplay.c:707`; the vulnerable build accepts it, the `v1.4.3` guard rejects with `Info header too big (1986 bytes)`, ASan reports `stack-buffer-overflow` `WRITE of size 1986`, and 16 chosen bytes read back byte-exact past the array with the adjacent local overwritten and a canary control abort. No live Janus, HTTP/SDP path, real `.mjr`, shipping flags, pointer control or execution; availability-only as claimed. [Status](reports/janus2shell-status.md) |
+| **Rsyslog2Shell** | **Rungs 1-3 on verbatim pinned upstream code; instrumented chosen-byte rung 4** | A 9000-byte decoded Basic-Auth credential takes the `calloc(0, len)` branch at pinned `contrib/imhttp/imhttp.c:702-705` and writes 9000 chosen bytes past a zero-length heap allocation with `usable=24` on this glibc; the vulnerable build returns normally, the `8.2604.0` fixed build rejects the header, ASan reports `heap-buffer-overflow` `WRITE of size 1` at the pinned caller frame, and 16 chosen bytes read back byte-exact at `pworkbuf[0..15]`. No live rsyslog process, imhttp module, CivetWeb listener, HTTP path, shipping flags, caller-side pointer control or execution; availability-only as claimed. [Status](reports/rsyslog2shell-status.md) |
 
-Work is ongoing: PHP's path from constrained placement to pointer control
-(including the reopened session-splice lane, the session-filename UAF, the
-new 8.5 stale-argument read and 129182's root-caused clean replay; the
-129538 lane's HTTP-to-FastCGI mapping is now observed through a real nginx
-but still reaches only an offset-controlled OOB read),
+Work is ongoing: PHP's DOM lane now has local read-side chosen-pointer rung 4
+on a plain CLI (wake 56), so what remains there is a SAPI/HTTP path, pre-auth
+reach and control past the dereference fault; its other lanes (the reopened
+session splice, the session-filename UAF, the 8.5 stale-argument read,
+129182's root-caused clean replay and 129538's offset-controlled OOB read)
+stay at their recorded grades,
 Node's path from its two independent AltSvc terminator triggers to control,
 Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
@@ -604,8 +634,8 @@ Each target is its own mind with its own window: **ruby2shell**,
 **bzfs2shell**, **kamailio2shell**, **iperf2shell**, **uftpd2shell**,
 **accelppp2shell**, **indiserver2shell**, **shairport2shell**,
 **asterisk2shell**, **netatalk2shell**, **iondtn2shell**,
-**unbound2shell**, **opensips2shell** and **janus2shell** pursue their
-lane end-to-end — build,
+**unbound2shell**, **opensips2shell**, **janus2shell** and
+**rsyslog2shell** pursue their lane end-to-end — build,
 harness, debugger, report. Four
 further minds cut
 across them:
@@ -697,7 +727,8 @@ self-scheduling it.
   `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
   `xrdp2shell`, `gst2shell`, `babelfish2shell`, `bzfs2shell`,
   `kamailio2shell`, `iperf2shell`, `uftpd2shell`, `accelppp2shell`,
-  `iondtn2shell`, `unbound2shell`, `opensips2shell` and `janus2shell` windows
+  `iondtn2shell`, `unbound2shell`, `opensips2shell`, `janus2shell` and
+  `rsyslog2shell` windows
   show each
   mind's wall and wake
   log; `frontier`, `docs`, `witness` and `operator`

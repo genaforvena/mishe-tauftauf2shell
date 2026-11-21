@@ -1480,6 +1480,71 @@ presentation entry are owed from the person's full-flag sync, never a bare
 `reports/janus2shell-status.md` and the pinned hashes in
 `lab/frontier/janus2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~07:2xZ: Rsyslog2Shell (CVE-2026-55556 / GHSA-947w-69ph-mc2r)
+
+Claim source: maintainer advisory
+<https://github.com/rsyslog/rsyslog/security/advisories/GHSA-947w-69ph-mc2r>,
+published 2026-06-23 by `rgerhards`, CWE-122, High. CVSS 4.0 8.2
+`AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N` — availability
+impact only, and the advisory explicitly says "code execution has not been
+demonstrated". Affected `>= 8.2110.0, < 8.2604.0`; patched `8.2604.0`;
+bug-introducing commit `a8b8d6c1f969286adac3d465e6ac018968550667`; upstream
+fix `acde2ba25ea33816694b787859f4a727a247b6d6` removes the dynamic
+Basic-Auth buffer and adds `BASIC_AUTH_MAX_ENCODED 2048` /
+`BASIC_AUTH_MAX_DECODED 1536` with early rejection and post-decode bounds
+checks.
+
+Claimed primitive: at tag `v8.2602.0`, `contrib/imhttp/imhttp.c:62` sets
+`IMHTTP_MAX_BUF_LEN (8192)`; `parse_auth_header()` (`:687`) takes
+`len = apr_base64_decode_len(src)` (`:699`), points `pworkbuf` at the
+8192-byte stack `workbuf` (`:700`) and, when `len > sizeof(workbuf)`, switches
+it to `calloc(0, len)` (`:702`) — zero bytes — before
+`apr_base64_decode(auth->pworkbuf, src)` (`:705`) writes the full
+attacker-chosen decoded credential past that allocation. Length and content
+both come from one `Authorization: Basic` header, and the overflow fires
+before credential validation, so no authentication is needed. The advisory's
+config gate — imhttp must be built, installed, explicitly loaded and
+configured with Basic Auth, with no known default-active distribution — is
+UNKNOWN here and was not exercised.
+
+Frontier's harness (`lab/frontier/rsyslog2shell/run.sh`) executes the
+verbatim pinned struct (`:71-77`) and function (`:687-720`) from `v8.2602.0`
+plus the fixed blocks from `v8.2604.0` under `#line` directives, with a stub
+CivetWeb connection, an in-memory Authorization header and the authentic
+host libaprutil `apr_base64_decode_len()`: rung 1 a 100-byte payload stays on
+the stack (`dynamic=0`) while a 9000-byte payload takes `calloc(0, len)` and
+writes 9000 bytes past it (`dynamic=1`); rung 2 the vulnerable build returns
+normally and the fixed build rejects with `imhttp: rejecting oversized
+Basic-auth header (12000 bytes, max 2048 bytes)` while accepting a benign
+header; rung 3 ASan reports `heap-buffer-overflow`, `WRITE of size 1` with
+the pinned caller frame `parse_auth_header contrib/imhttp/imhttp.c:705` (the
+ASan summary frame is the instrumented decoder); rung 4 reads the 16-byte
+chosen marker `54535253595348454c4c212121212121` back byte-exact at
+`pworkbuf[0..15]`. The zero-length allocation has `usable=24` on this glibc
+while 9000 bytes were written. Rung 4 is INSTRUMENTED only — no pointer,
+saved return address, heap-metadata target, control-flow diversion, marker
+execution, live rsyslog process, imhttp module, CivetWeb listener, HTTP
+request, socket, shipping flags or allocator neighbourhood exercised.
+
+Admitted by the operator ~07:2xZ under standing approval #6 on frontier's
+commit `759215f`: the two-pane window (37, inner socket), registry entry and
+seed wall were live from frontier and capture-verified at 07:19Z. Operator
+replay ~07:20Z from two clean `git archive HEAD` (`ba9a240`) extractions into
+separate absolute directories: 36 PASS / 0 FAIL and `ALL CHECKS PASSED rc 0`
+both times, byte-identical trace
+`sha256=fc9cd9bbfac007af32311d6d61a0d43cd27297c00d1b1b18fee30fb9d0e255be`.
+Witness replay was requested in the handoff; no verdict at admission.
+Cheapest next rung: build imhttp on the pinned affected tag with ASan, run
+the advisory's single-request PoC against a loopback-only listener and
+inspect the allocator neighbourhood at the `calloc(0, len)` site —
+specifically whether a subsequent CivetWeb connection/request-state
+allocation with a useful caller-side pointer can be reached with chosen
+offsets before the process aborts. Wake trigger units and presentation stay
+owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-rsyslog2shell.md`, seed status
+`reports/rsyslog2shell-status.md` and the pinned hashes in
+`lab/frontier/rsyslog2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~05:54Z: Dnsmasq2Shell (CVE-2026-12725 / GHSA-hv63-qc47-8j8h) — not admitted under #6
 
 Frontier handed this find over on tape #594 after committing `25ca75d`
