@@ -1,0 +1,50 @@
+From 8e501d685aef549090b363260979a4eb93484ea1 Mon Sep 17 00:00:00 2001
+From: Andrew Wilke <Andrewdwilke@gmail.com>
+Date: Fri, 6 Nov 2026 21:34:20 -0600
+Subject: [PATCH] fix TCP length overrun in NetHandler
+
+tcpReceive() bounds the declared payload length against MaxPacketLen even
+though tcpmsg holds the header and the body, so len == 1024 asked receive()
+for 1028 bytes and wrote four past the buffer into tcplen.  Bound it to
+MaxPacketLen - 4, and reject a receive() destination outside tcpmsg so a
+corrupted tcplen can never become a wild recv.
+
+tcplen greater than the requested length is left alone: that is the normal
+case when more bytes are already buffered, and the existing ReadAll path
+handles it.
+---
+ src/game/NetHandler.cxx | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/src/game/NetHandler.cxx b/src/game/NetHandler.cxx
+index 797c95c087..e87227bde9 100644
+--- a/src/game/NetHandler.cxx
++++ b/src/game/NetHandler.cxx
+@@ -578,7 +578,10 @@ RxStatus NetHandler::tcpReceive()
+     buf = nboUnpackUShort(buf, len);
+     buf = nboUnpackUShort(buf, code);
+ //  logDebugMessage(1,"rcvd %s len %d\n",MsgStrings::strMsgCode(code),len);
+-    if (len > MaxPacketLen)
++    // tcpmsg holds the header *and* the body, so the payload can only be
++    // MaxPacketLen - 4 bytes; anything more would make receive() write past
++    // the buffer and into tcplen.
++    if (len > MaxPacketLen - 4)
+     {
+         logDebugMessage(1,"Player [%d] sent huge packet length (len=%d), possible attack\n",
+                         playerIndex, len);
+@@ -626,6 +629,15 @@ RxStatus NetHandler::receive(size_t length, bool *retry)
+     // Degenerate case, because a closed socket should not be sending data, but be paranoid and test for it anyway
+     if (closed) return returnValue;
+ 
++    // tcplen is the read offset into tcpmsg, and every caller's length is a
++    // count of bytes *including* what is already buffered.  Reject an offset
++    // outside the buffer, since it would become the destination of the recv()
++    // below.  tcplen greater than length is not an error: it means more bytes
++    // are already buffered than this call needs, and the ReadAll path below
++    // handles it.
++    if ((tcplen < 0) || ((size_t)tcplen > sizeof(tcpmsg)) || (length > sizeof(tcpmsg)))
++        return returnValue;
++
+     if ((int)length <= tcplen) return ReadAll;
+     int size = recv(fd, tcpmsg + tcplen, (int)length - tcplen, 0);
+     if (size > 0)
