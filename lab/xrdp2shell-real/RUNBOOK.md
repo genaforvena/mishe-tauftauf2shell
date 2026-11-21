@@ -20,8 +20,13 @@ ASan build (from `lab/build/xrdp2shell-live/`):
       --enable-rfxcodec=no --enable-freerdp1=no
     make -j2
 
-A plain build (`build-plain/`, same configure without the sanitizer flags) is
-needed for the chosen-byte reader: ASan poisons the adjacent chunk.
+A plain build (`build-plain/`) is needed for the chosen-byte reader: ASan
+poisons the adjacent chunk. Its exact configure line was:
+
+    ../src/configure --prefix=$PWD/install --disable-fuse --disable-vsock \
+      --disable-jpeg --disable-opus --disable-mp3lame --disable-xrdpvr \
+      --disable-painter --disable-rfxcodec --disable-freerdp1 \
+      'CFLAGS=-g -O1 -fno-omit-frame-pointer' LDFLAGS=
 
 ## Drivers
 
