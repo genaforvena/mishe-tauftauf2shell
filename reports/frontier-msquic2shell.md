@@ -1,13 +1,15 @@
 # MsQuic2Shell — frontier brief: CVE-2026-62815 (QUIC path-promotion stale-pointer UAF)
 
-**State: HEAD of the unadmitted queue, DEFERRED by the operator; RUNG 0
-(no local build, no packets, no window).** Scouted and source-pinned read-only
-in W87 (2026-11-21). Not admitted; the operator owns admission. Operator
-correction #1158 (2026-11-21 21:37Z) makes MsQuic the deferred head after
-Apache2Shell (admitted 2026-11-20) and Perl (admitted 21:34Z, #1157) left the
-queue. Nothing here is an independent acceptance — the witness re-runs any
-published claim. Chosen for a clean one-line fix, paired tagged source pins
-and a server-facing unauthenticated RCE claim, not demonstrated mechanics.
+**State: ADMITTED 2026-11-21 ~22:1xZ by the operator under standing approval #6;
+owned by the `msquic2shell` mind; RUNG 0 (no local build, no packets, no chosen
+bytes).** Scouted and source-pinned read-only in W87 (2026-11-21). It was the
+head of the unadmitted queue after Apache2Shell (admitted 2026-11-20) and Perl
+(admitted 21:34Z, #1157) left it; operator correction #1158 (21:37Z) ranked it
+first. Admission rechecked 3/3 pins OK at 22:12Z; charter, seed wall, route 66,
+wake units and a two-pane window (index 71) now exist. Nothing here is an
+independent acceptance — the witness re-runs any published claim. Chosen for a
+clean one-line fix, paired tagged source pins and a server-facing unauthenticated
+RCE claim, not demonstrated mechanics.
 
 ## Verified ground truth
 
@@ -130,9 +132,8 @@ and a server-facing unauthenticated RCE claim, not demonstrated mechanics.
 ## Alternates and ranking (W87, historical)
 
 At write time Exim was first and this brief second. Exim, Netty, WAMR,
-Apache2Shell and Perl have since been admitted; BIND 9 remains SCREENED LOW
-(#1158). MsQuic is now the head of the unadmitted queue, deferred by the
-operator. The entries below are preserved reconnaissance, not current ranks.
+Apache2Shell, Perl and MsQuic have since been admitted; BIND 9 remains SCREENED
+LOW (#1158). The entries below are preserved reconnaissance, not current ranks.
 
 1. **Exim CVE-2026-45185** (W86 pin) — first at write time (since admitted):
    one-byte write into freed heap metadata with a public escalation narrative.
@@ -169,7 +170,8 @@ scout payload and the tape.
 
 ## Status
 
-HEAD OF UNADMITTED QUEUE (DEFERRED), RUNG 0. No build, no network traffic to
-any target, no PoC run, no window. Operator owns admission under standing #6;
-witness owns independent replay. All bytes and claims live in
+ADMITTED ~22:1xZ under standing approval #6; RUNG 0. No build, no network
+traffic to any target, no PoC run, no chosen bytes. The `msquic2shell` mind owns
+the lane (charter, wall, wake units, window 71); the witness owns independent
+replay. All bytes and claims live in
 `lab/frontier/msquic2shell/{PROVENANCE.md,src/SHA256SUMS}` and this brief.

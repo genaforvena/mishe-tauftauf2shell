@@ -4326,3 +4326,51 @@ Four lanes changed evidence without changing their README grade cells:
 - `ff54725` corrected the pin-check command in the Apache brief and its
   provenance to `cd src && sha256sum -c SHA256SUMS` (6/6 OK from that
   directory); the reproducibility index now carries the same command.
+
+#### Admitted 2026-11-21 ~22:1xZ: MsQuic2Shell / msquic2shell (CVE-2026-62815)
+
+Frontier's brief `reports/frontier-msquic2shell.md` (commit `3f6622b`) was the
+head of the unadmitted queue and the only standing-approvals #6 candidate left
+after Apache2Shell and Perl were admitted. This supersedes the DEFERRED line in
+the ~22:0xZ corrections above. The operator rechecked the pins at 22:12Z:
+`cd lab/frontier/msquic2shell/src && sha256sum -c SHA256SUMS` 3/3 OK
+(self-computed digests; upstream tag archives and the auto-generated commit
+patch carry no published hash sidecar). All five admission elements are in
+`.mishe-tauftauf/charters/msquic2shell.md`: **claim source** — MITRE CVE record
+for CVE-2026-62815 (CNA Microsoft, published 2026-08-11, CWE-416, CVSS 9.8,
+"use after free … execute code over a network") and GitHub advisory
+`GHSA-92f5-vc22-8j33` (CVSS 4.0 10.0, unauthenticated pre-auth RCE claim;
+fix `e0f55b5`); the MSRC page body was not retrieved. **Identifier** —
+CVE-2026-62815, `src/core/connection.c` / `QuicConnRecvPostProcessing`,
+CWE-416 as claimed. **Affected/fixed pin** — GHSA affected `< 2.5.10`, patched
+`2.5.10` and `2.4.19`; pinned v2.5.9 (`ccf4170e…5fa38`, tag
+`87b53085d76bd7920d490a6f226c9999b6614d14`) and v2.5.10 (`b77be2c9…166d5`,
+tag `9ff06b71fd4b4d5258361598ada5b24cbc1beb20`) tag archives plus the one-line
+fix patch (`c74bfda5…e61af`); v2.4.19 tag object recorded, archive not pinned.
+**Primitive** — v2.5.9 `connection.c:5516` promotes a stale `*Path` after a
+NEW_CONNECTION_ID frame removed that path via `QuicPathRemove` (`path.c:51-86`,
+an embedded-array slot shift, not a heap free); `QuicPathSetActive`
+(`path.c:263-291`) swaps whole `QUIC_PATH` structs between the stale slot and
+`Connection->Paths[0]`, corrupting ownership/active flag/CID/route. Fixed
+v2.5.10 adds `&& (*Path)->InUse` to the promotion guard (`path.h:55`).
+**Rung-4 plausibility** — the swap stays inside `Connection->Paths[]`, so
+stock ASan will not flag a heap UAF: rung 3 needs a logical-state
+canary/assert, the main cost and why this ranked below a freed-heap write. The
+trigger is protocol-state work, not allocator-layout guesswork. Wire
+reachability is claimed unauthenticated (AV:N/PR:N) but the exact peer packet
+ordering is UNKNOWN without a build; "execute code" stays a vendor claim
+(CISA exploitation none).
+
+At admission no plant rung was established: no build, harness, packets or
+chosen bytes. The operator created the 66th `engine/routes.json` entry, this
+mind's wake trigger units with the pinned full-flag sync from
+`docs/runtime-pin.md` (3 units written, 0 removed, wake path enabled+active;
+66 wake paths present), a seed wall, the charter and the two-pane window
+(inner socket index 71). This makes 62 admitted target minds. Never run a bare
+`mishe sync`. The bounded first experiment is a v2.5.9 msquic core + interop
+server build with debug assertions, a loopback 127.0.0.1 client sending a
+NEW_CONNECTION_ID that retires a path then a non-probing frame on the stale
+path, a canary/assert at `QuicPathSetActive`, and a v2.5.10 control where the
+guard must suppress the swap — before any chosen-byte or rung-5 wording. No
+public PoC exists, so constructing the packet sequence is the experiment's
+risk; a witness replay is owed once a harness exists.
