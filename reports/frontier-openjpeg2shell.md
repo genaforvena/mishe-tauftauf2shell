@@ -1,23 +1,26 @@
 # Frontier brief — OpenJPEG TLM/SOT index overflow (OpenJpeg2Shell)
 
-**Status (updated 2026-11-21 ~16:08Z by openjpeg2shell): ADMITTED; witness
+**Status (updated 2026-11-21 ~16:50Z by openjpeg2shell): ADMITTED; witness
 replay ESTABLISHED AS CLAIMED (#957/#958). Rungs 1/2/3 ESTABLISHED on the real,
 verbatim-pinned OpenJPEG 2.5.4 `opj_decompress`. Rung 4: chosen 64-bit stream
-offsets are byte-exact at the TPsot-derived OOB offsets, and the 2026-11-21
-consumer-reality check observes those stores landing on a live neighbouring
-`tp_index` object and on a live malloc chunk size word, with a deterministic
-`munmap_chunk(): invalid pointer` SIGABRT (rc 134) in the unsanitized pinned
-decoder; fixed pin `91d08b11` is clean. No pointer-value control, pointer
-dereference, control-flow diversion, execution or web-facing listener was
-observed — all UNKNOWN. The fix is a pinned master commit, not a tagged
-release.**
+offsets are byte-exact at the TPsot-derived OOB offsets; the consumer-reality
+check observes them landing on a live neighbouring `tp_index` object and a
+live malloc size word, and the low-bit grooming sweep shows padding chooses
+the resulting glibc `free()` path (silent acceptance, `munmap_chunk` abort,
+`free(): invalid size` abort, or SIGSEGV) with a fixed-pin control clean.
+Availability impact is demonstrated; no pointer-value control, controlled
+dereference at a chosen address, control-flow diversion, execution or
+web-facing listener was observed — all UNKNOWN. The fix is a pinned master
+commit, not a tagged release.**
 Scoped commit `958b319`; trace
 `sha256=6983a6a11c8236c6e991e15faa326b4c64f6269cf7f5f4fabca081bf7aa111ea`
 (10 PASS / 0 FAIL, clean `git archive` replay). Live two-pane window
 `openjpeg2shell` index 60 on the inner tmux socket, registry entry 62,
 wall `.mishe-tauftauf/walls/openjpeg2shell.md`. Witness verdict #958; operator
-admission #989 under standing #6. New consumer-reality check trace
-`sha256=55123f30823bda1083c5f4f8b4025767ae89b3fdcec06c3285f82a1aea57c3a1`.
+admission #989 under standing #6. Replay traces: consumer-reality
+`sha256=55123f30823bda1083c5f4f8b4025767ae89b3fdcec06c3285f82a1aea57c3a1`;
+low-bit grooming
+`sha256=2c4ca81dc6c31e97969c9a203c8125fe02cfc04e13c0871193027a95204a7dd6`.
 
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
@@ -144,6 +147,51 @@ sink plus direct heap-word readback.
   execution, listener or web-facing consumer was observed. Rung 4 stays
   PARTIAL/INSTRUMENTED under that label; no shell claim.
 
+## Low-bit grooming: chosen size word selects the allocator outcome (2026-11-21 ~16:50Z)
+
+`bash lab/frontier/openjpeg2shell/groom.sh <outdir>` → **5 PASS / 0 FAIL**,
+trace
+`sha256=2c4ca81dc6c31e97969c9a203c8125fe02cfc04e13c0871193027a95204a7dd6`,
+sweep table and per-run logs in `lab/frontier/openjpeg2shell/out-groom/`.
+Question: can benign COM padding tune the OOB-written stream offset — the
+`end_header` value landing on the live `m_mct_records` chunk's size word at
+`tp_index` base +56 — into a chosen glibc chunk size, and what does the real
+`free()` do with it?
+
+The inserted COM segment adds 6+N bytes before the first SOT, so the second
+tile-part's SOD offset, i.e. the value the TPsot=2 store writes at base+56, is
+177+N. A small `free()` interposer built by the script logs the size word at
+the pointer actually passed to `free()` in the unsanitized pinned process.
+This observes the unperturbed heap: gdb breakpoints change this small PoC's
+layout (at the sink the size word at base+56 reads 0, and the crash disappears),
+so the decisive observation is from the interposer, not gdb.
+
+Sweep N=0..16 (size word 177..193 = 0xb1..0xc1):
+
+- N=0 (0xb1) and N=15/16 (0xc0/0xc1): the chosen size word is accepted,
+  `free()` returns normally and the decoder exits rc 0 with "Generated
+  Outfile" — the metadata corruption is **silent**. The interposer sees the
+  chosen size at the freed pointer.
+- Size words 0xb2/0xb3/0xb6/0xb7/0xba/0xbb/0xbe/0xbf: `munmap_chunk():
+  invalid pointer`, rc 134.
+- Size words 0xb4/0xb5/0xbc/0xbd: rc 139 SIGSEGV, consistent with a
+  backward-consolidation dereference; that internal path was not traced under
+  the unperturbed process, so the mechanism stays an inference.
+- Size words 0xb8/0xb9: `free(): invalid size`, rc 134.
+
+The outcome class is chosen by codestream padding and repeats deterministically.
+The fixed pin `91d08b11` decodes the N=1 codestream rc 0 with "Generated
+Outfile", no allocator diagnostic.
+
+Honest boundary: the value remains a bounded stream offset (177..193 here;
+541/555 in the larger pad), not an arbitrary pointer. The glibc *path* is
+codestream-chosen and the availability impact is real, but the pointer
+dereferenced in the SIGSEGV class comes from stale heap words, not from
+codestream-supplied bytes. No chosen-address pointer control, controlled
+dereference, control-flow diversion or execution was observed. This
+strengthens the demonstrated availability impact; rung 4 stays PARTIAL.
+
+
 ## Rung-4 feasibility and remaining gap
 
 The write value is a stream offset, not an arbitrary 64-bit constant: it is
@@ -158,6 +206,10 @@ or tested here; it is a claim, not lab evidence.
 The cheapest step above was carried out on 2026-11-21 and is reported in
 "Consumer reality on this host": a live neighbouring object and a live malloc
 size word are overwritten, and the unsanitized decoder aborts deterministically.
+The follow-up low-bit grooming sweep (above) shows that padding also chooses
+whether that corruption is silent or which allocator diagnostic fires, but
+the written value stays a bounded stream offset; no chosen-address pointer
+dereference was observed.
 Hardware watchpoints were unavailable in this container; equivalent evidence
 came from sink breakpoints plus direct heap readback. Remaining gap: the
 written value is a stream offset, not an arbitrary pointer, so pointer-value
