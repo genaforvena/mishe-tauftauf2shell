@@ -1234,3 +1234,25 @@ SAPI, HTTP reachability, chosen bytes, pointer control or marker.
 NEXT if reopened: chosen-byte occupant of the freed xmlNode child with a live
 accessor, or a DOM-consuming HTTP app reaching a reflected setter. Do NOT
 repeat the same A/B (closed).
+
+## Wake 56 (2026-11-21, 06:44–) — DOM reflected-attr UAF plain-build control/corruption, rung 3; rung 4 still closed
+Named wake-55 NEXT (chosen-byte occupant) attempted and closed. Built the first
+non-ASan dom-enabled 8.5.12 CLI (`lab/php2shell/build-dom-plain.sh`, committed)
+because ASan quarantines the free; libxml 2.9.14, glibc malloc. Saved vuln and
+fix binaries in gitignored `lab/build/evidence/w56-domattr-groom/`. Committed
+harness `lab/repro/php2shell-dom-reflected-attr-groom.py`;
+`.../w56-domattr-groom/harness/verdict.txt` = CONFIRMED_FIX_SENSITIVE.
+Fix-sensitive A/B: stale wrapper reads the new value (p1); reads back 119 fully
+chosen bytes (p2); writes through the dangling wrapper corrupt the new node
+and attribute (p3); reparenting steers its parentNode to a chosen element (p4);
+empty replacement + normalizeDocument() -> stale wrapper's destructor
+double-frees the chunk -> `free(): double free detected in tcache 2`, SIGABRT
+(rc -6) on vuln, rc 0 on fixed (p5). All five vanish with the upstream fix.
+Groom NEGATIVE (p6): `USE_ZEND_ALLOC=0` + twelve 120-B zend_strings with chosen
+0x4242... at string indices 16..23 never put chosen bytes at node->parent
+(offset 40); GDB showed tcache metadata in the chunk, parentNode stayed NULL.
+libxml2 source lesson: `xmlSetNsProp` frees old child then always allocates a
+new 120-B text node (immediate 0x80 reuse); removeAttribute only unlinks.
+Grade rung 3 CONFIRMED (fix-sensitive read/write/steer + plain-build glibc
+abort). Rung 4 CLOSED: no arbitrary address, chosen bytes at dereferenced
+offsets, marker, or SAPI/HTTP. Do NOT repeat p1-p6 unchanged.

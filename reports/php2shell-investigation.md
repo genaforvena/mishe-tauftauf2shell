@@ -1393,3 +1393,59 @@ chunk. Grade: **rung 3 CONFIRMED for this new lane**, overall PHP2Shell rung 4
 unchanged. Next experiment, if reopened: a chosen-byte occupant of the freed
 `xmlNode` child with a live accessor that dereferences attacker bytes, or a
 real DOM-consuming web app that reaches a reflected setter from HTTP input.
+
+### Wake 56 (2026-11-21) — DOM reflected-attribute UAF on a plain build: attacker-controlled stale reads/writes, glibc double-free; no arbitrary pointer
+
+Named NEXT from wake 55: try to place a chosen-byte occupant in the freed
+120-B libxml2 `xmlNode`. Because ASan quarantines the free, a **non-ASan**
+dom-enabled 8.5.12 CLI was built with the new committed script
+`lab/php2shell/build-dom-plain.sh 8.5.12` (`-fno-omit-frame-pointer -g -O1`,
+glibc malloc, libxml 2.9.14). Its saved binaries are
+`.../w56-domattr-groom/php-vuln-plain` and `php-fixed-plain` (the latter
+relinked with the same committed four-file upstream fix patch). Committed
+harness `lab/repro/php2shell-dom-reflected-attr-groom.py` runs six A/B
+scenarios; `.../w56-domattr-groom/harness/verdict.txt` = `CONFIRMED_FIX_SENSITIVE`.
+
+Allocator facts established from libxml2 2.9.14 source (`tree.c:6934-6976`,
+`1275-1486`, `5758-5817`) and live GDB: `xmlSetNsProp()` frees the old child
+with `xmlFreeNodeList()` and then **always** allocates a new 120-B text-node
+struct (immediate tcache reuse of the same 0x80 chunk); `removeAttribute()`
+and `dom_remove_attribute()` (`element.c:548-562`) *unlink* children rather
+than free them; `xmlNodeSetContentLen()` on a text node is a pure content
+`xmlFree` + `xmlStrndup`. The stale wrapper therefore aliases the replacement
+node on a plain build (ASan instead showed the un-reused freed bytes).
+
+Observed A/B (vuln / fixed, all local CLI):
+
+- p1: `parentNode === null` false / true; `textContent` `"new"` / `"old"`.
+- p2: a 119-byte fully chosen replacement value is read back intact by the
+  stale wrapper (`same: bool(true)`, `len: int(119)`) / false, `int(3)`.
+- p3: writing `$text->nodeValue = 'CROSS-WRITE'` changes the **new** node and
+  the attribute value (`"CROSS-WRITE"`) / no change (`"new"`) — a cross-object
+  write through the dangling wrapper.
+- p4: reparenting the replacement node steers the stale wrapper's
+  `parentNode` to the attacker-chosen `<target>` element / `NULL`.
+- p5: `className = ''` + `normalizeDocument()` frees the empty replacement
+  child via `free_node()` (`php_dom.c:1931-1935`, no replacement allocation);
+  the stale wrapper's destructor then calls `xmlFreeNode()` on it a second
+  time at shutdown — `free(): double free detected in tcache 2`, SIGABRT
+  (rc -6) on the vulnerable binary, rc 0 on the fixed one. This is an
+  allocator-detected corruption on a plain build, fix-sensitive to the exact
+  upstream helper.
+
+Groom CLOSED NEGATIVE (p6): with `USE_ZEND_ALLOC=0`, 95→89-byte PHP strings
+(`zend_string` alloc = align8(32 + len + 1) = 120 B, val[] at chunk offset 24,
+so string indices 16..23 would land on `node->parent` at offset 40) and twelve
+such allocations never placed the chosen `0x4242424242424242` at the stale
+wrapper's read offsets. GDB at `dom_node_parent_get` (`node.c:247`) showed the
+chunk still holding glibc tcache next/key metadata; `parentNode` stayed NULL.
+The freed chunk is either immediately reused by libxml's replacement node or
+not returned to this allocation sequence. No chosen pointer, no marker.
+
+Honest grade: rung 3 CONFIRMED (now including an allocator-abort corruption
+and fix-sensitive attacker-controlled read/write/steering on a non-ASan
+build). **Rung 4 remains CLOSED**: no arbitrary-address control, no chosen
+bytes landing at the dereferenced offsets, no benign marker execution, no
+SAPI or HTTP reachability. Reopen only with a concrete occupant whose bytes
+reach `node->parent`/`node->content` at the stale read, or a DOM-consuming
+HTTP app reaching a reflected setter. Do NOT repeat p1-p6 unchanged.
