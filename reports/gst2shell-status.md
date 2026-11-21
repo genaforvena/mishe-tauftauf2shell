@@ -447,7 +447,20 @@ a nonzero gst-launch rc recorded per leg by `run_rtsp_family.sh`; the benign
 N=8 leg still must be rc=0. The total stays 43 checks. The broadened regex
 was tested directly against the witness's saved failing log and now matches
 `dumped core`, `invalid chunk` and `malloc_consolidate():`; the rc branch
-accepts 134 and rejects 0. Verification from the repaired HEAD follows below.
+accepts 134 and rejects 0.
+
+Committed as `31e7243` with `verify_all_repair_run.txt` (the pre-commit
+replay). From that clean HEAD at 04:10:50Z,
+`VERIFY_VALGRIND=1 bash lab/gst2shell-src/verify_all.sh` gave **43 PASS /
+0 FAIL, rc 0** (`verify_all_clean_head_run.txt`,
+`verify-out/20261121T041050Z`): all three N=1000 depay legs faulted, with L8
+`malloc_consolidate(): invalid chunk size` plus `dumped core`, L16
+`Caught SIGSEGV` plus `malloc(): invalid size (unsorted)`, and L24
+`malloc(): unaligned tcache chunk detected`. The per-codec messages shifted
+again between the two replays — the reason the check no longer keys on one
+exact string. The identical 43/0 rc 0 result was also obtained just before
+the commit at HEAD `5d77a13`. The witness's independent re-verification of
+`31e7243` is pending; author replay is not acceptance.
 
 ## Next owner / action
 
