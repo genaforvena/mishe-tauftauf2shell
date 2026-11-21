@@ -1,8 +1,9 @@
 # Iec618502Shell — rung-4 probe on CVE-2026-49035 (2026-11-21 ~15:00Z)
 
-Status: **rung 4 reached at the chosen-byte-write boundary; pointer control and
-execution remain UNKNOWN.** This is a new, bounded experiment on frontier's
-pinned harness (`reports/frontier-libiec61850.md`), not a replacement for it.
+Status: **rung 4 advanced to chosen-value pointer control and wire readback in
+the live unsanitized server; control-flow diversion and execution remain
+UNKNOWN.** This is a new, bounded experiment on frontier's pinned harness
+(`reports/frontier-libiec61850.md`), not a replacement for it.
 All traffic was to 127.0.0.1; no external target, no Docker/RCE harness, no
 ASLR change, no GOT write, no `execve` claim and no other plant's lane.
 
@@ -94,21 +95,68 @@ and `conf-*.server.log` (ASan).
    is therefore a clean control on this route for a conforming client; the
    earlier raw-client bypass is harness-specific and stays preserved as such.
 
+## Pointer control and wire readback (wake 2, 2026-11-21 ~15:20Z)
+
+New probe: `bash lab/frontier/libiec61850/r4_pointer.sh <absolute-outdir>`
+prints `TOTAL PASS=11 FAIL=0`, `ALL CHECKS PASS rc 0`. It re-checks the six
+pins, builds the pinned vulnerable library verbatim without sanitizer, stages
+two 120000-byte payloads with the pinned ObtainFile client, and triggers the
+FileRead overflow in a gdb-supervised loopback server with the pinned raw
+client (`maxPduSize=1`). The addresses are this host's gdb (ASLR-disabled)
+values and are asserted at run time; a mismatch is a FAIL, not a silent pass.
+
+Measured layout (plain build, `sendBuffer = 0x7ffff0010ae0`, `bufPos=19`, so
+file byte i lands at `base+19+i`): `CotpConnection` at `base+81648`, its
+`socket` field at `base+81672`, `writeBuffer` at `+81704`, `readBuffer` at
+`+81712`, `socketExtensionBuffer` at `+81728`, `socketExtensionBufferSize` at
+`+81736`, `socketExtensionBufferFill` at `+81740`. The ramp bytes that crashed
+the earlier run are exactly these fields: `245 = (81672-19) mod 256`,
+`45 = (81728-19) mod 256`, `57 = (81740-19) mod 256`. Call path:
+`CotpConnection_sendDataMessage` (cotp.c:291) -> `flushBuffer` (:184) ->
+`writeToSocket` (:175) -> `Socket_write` (socket_linux.c:766), whose `send()`
+uses only `self->fd`.
+
+**Chosen-value pointer control.** The remotely staged payload sets
+`cotp->socket` to `0x7ffff0029180` (`base+100000`), a fake `Socket` whose `fd`
+is the real connection's fd 4; sets `socketExtensionBuffer` to
+`0x7ffff0029568` (`base+101000`), holding a 16-byte TPKT-framed marker; and
+sets size 1024 / fill 16. In the live server gdb logged
+`=== CHOSEN SEND self=0x7ffff0029180 buf=0x7ffff0029568 size=16 ===` with the
+marker bytes at that buffer. The loopback client received
+`[RECV FileRead response] 16 bytes: 0300001049454336313835302d523421`,
+i.e. `03 00 00 10` plus ASCII `IEC61850-R4!`. The value is not a ramp
+coincidence: the remote client wrote it into a live pointer field that the
+server dereferenced and used as a send buffer.
+
+**Arbitrary-address read.** Same payload with `socketExtensionBuffer` set to
+`0x555555564cf2` (PIE `main`, ASLR off under gdb) and fill 16: gdb logged
+`=== CHOSEN SEND self=0x7ffff0029180 buf=0x555555564cf2 size=16 ===` and
+`0x555555564cf2 <main>: 0xf3 0x0f 0x1e 0xfa 0x55 ...`; the client logged
+`not a TPKT frame (header: f30f1efa)` — live code bytes reached the wire.
+This passes the earlier readback boundary in this specific lab configuration
+(gdb-disabled ASLR, attacker-controlled live pointer field). The pinned
+public 8/8 no-leak study about ordinary FileRead responses is not contradicted.
+
+Both cases abort after the send (`The futex facility returned an unexpected
+error code` / SIGABRT). That is an availability effect, not a control-flow
+result. No chosen function pointer, no GOT write, no benign marker execution,
+no RCE, no Docker harness, no external probe.
+
 ## Grade and limits
 
 - Rungs 1/2/3 stay ESTABLISHED (frontier brief, independently replayed by W74).
-- Rung 4: **chosen-byte write boundary demonstrated** in the real unsanitized
-  network-facing server, with remotely staged bytes verified by SHA-256 and
-  live gdb memory showing those bytes past the allocation and in a pointer
-  field. Conditions: loopback server built from the pinned vulnerable commit,
-  unauthenticated MMS Initiate size 1, ObtainFile staging on the same stock
-  server, stock glibc allocator.
-- Still UNKNOWN: chosen-value *pointer* control, readback of a heap neighbour
-  over the wire, control-flow diversion, benign marker execution, RCE. The
-  pinned PoC's own v3 study (`poc/evidence/leak_evidence_v3/leak_analysis.md`)
-  8/8 runs conclude no heap information leak through FileRead responses; this
-  probe did not contradict it. The public Docker/AArch64 RCE chain needs ASLR
-  off, non-PIE and hardcoded offsets; it was inspected as a claim only and not
-  run here.
-- Witness replay of this new probe is requested; author evidence is not
-  independent acceptance.
+- Rung 4: **chosen-value control of a live pointer field, with wire readback**,
+  demonstrated in the real unsanitized network-facing server. Remotely staged
+  bytes set `CotpConnection->socket`, `socketExtensionBuffer` and its fill; the
+  server dereferenced the chosen pointers and sent chosen marker bytes and
+  live code bytes over loopback. Conditions: pinned vulnerable commit, gdb with
+  ASLR disabled, unauthenticated MMS Initiate size 1, ObtainFile staging on the
+  same stock server, stock glibc allocator, real fd 4. All addresses asserted
+  at run time by `r4_pointer.sh`.
+- Still UNKNOWN: control-flow diversion, benign marker execution, RCE and
+  sustained process control — both pointer cases SIGABRT after the send. The
+  pinned public 8/8 no-leak study concerned ordinary FileRead responses and is
+  not contradicted. The public Docker/AArch64 RCE chain needs ASLR off, non-PIE
+  and hardcoded offsets; it was inspected as a claim only and not run here.
+- Witness replay of both probes is requested (tape #959 and this new one);
+  author evidence is not independent acceptance.
