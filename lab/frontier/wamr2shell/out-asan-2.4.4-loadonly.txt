@@ -1,0 +1,71 @@
+=================================================================
+==1730873==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000000e7b at pc 0x651b0882fc0b bp 0x7ffce2159d20 sp 0x7ffce2159d10
+WRITE of size 2 at 0x519000000e7b thread T0
+    #0 0x651b0882fc0a in STORE_U16 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/../common/wasm_runtime_common.h:68
+    #1 0x651b088481d2 in wasm_loader_emit_int16 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:9420
+    #2 0x651b0884d805 in reserve_block_ret /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:10449
+    #3 0x651b08854666 in wasm_loader_prepare_bytecode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:12450
+    #4 0x651b08842d34 in load_from_sections /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:6493
+    #5 0x651b0884461c in load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:6921
+    #6 0x651b08844de5 in wasm_loader_load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:7098
+    #7 0x651b08781e9f in wasm_load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_runtime.c:65
+    #8 0x651b08777e16 in wasm_runtime_load_ex /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/common/wasm_runtime_common.c:1477
+    #9 0x651b0877805f in wasm_runtime_load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/common/wasm_runtime_common.c:1530
+    #10 0x651b08770657 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/product-mini/platforms/linux/../posix/main.c:934
+    #11 0x78585f42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #12 0x78585f42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #13 0x651b0876db54 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/build-asan-2.4.4/iwasm-2.4.4+0x1eb54) (BuildId: d46ea256bd2b2b02d2087beeb39d7609c1efbcd3)
+
+0x519000000e7c is located 0 bytes after 1020-byte region [0x519000000a80,0x519000000e7c)
+allocated by thread T0 here:
+    #0 0x78585f8fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x651b0876f8f1 in malloc_func /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/product-mini/platforms/linux/../posix/main.c:463
+    #2 0x651b087751db in wasm_runtime_malloc_internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/common/wasm_memory.c:883
+    #3 0x651b08775398 in wasm_runtime_malloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/common/wasm_memory.c:978
+    #4 0x651b08830421 in loader_malloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:345
+    #5 0x651b088479bf in wasm_loader_ctx_reinit /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:9329
+    #6 0x651b08851636 in wasm_loader_prepare_bytecode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:11651
+    #7 0x651b08842d34 in load_from_sections /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:6493
+    #8 0x651b0884461c in load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:6921
+    #9 0x651b08844de5 in wasm_loader_load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_loader.c:7098
+    #10 0x651b08781e9f in wasm_load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/wasm_runtime.c:65
+    #11 0x651b08777e16 in wasm_runtime_load_ex /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/common/wasm_runtime_common.c:1477
+    #12 0x651b0877805f in wasm_runtime_load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/common/wasm_runtime_common.c:1530
+    #13 0x651b08770657 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/product-mini/platforms/linux/../posix/main.c:934
+    #14 0x78585f42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x78585f42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x651b0876db54 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/build-asan-2.4.4/iwasm-2.4.4+0x1eb54) (BuildId: d46ea256bd2b2b02d2087beeb39d7609c1efbcd3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/wamr2shell/src/wamr-2.4.4/core/iwasm/interpreter/../common/wasm_runtime_common.h:68 in STORE_U16
+Shadow bytes around the buggy address:
+  0x519000000b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000c80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000000e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00[04]
+  0x519000000e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000f00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000001000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000001080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1730873==ABORTING

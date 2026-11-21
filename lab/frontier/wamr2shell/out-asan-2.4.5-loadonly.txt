@@ -1,0 +1,1 @@
+Exception: lookup the entry point symbol (like _start, main, _main, __main_argc_argv) failed

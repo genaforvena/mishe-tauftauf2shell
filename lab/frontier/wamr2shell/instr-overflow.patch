@@ -1,0 +1,85 @@
+diff --git a/core/iwasm/interpreter/wasm_loader.c b/core/iwasm/interpreter/wasm_loader.c
+index 5cda6d8..b7adfb8 100644
+--- a/core/iwasm/interpreter/wasm_loader.c
++++ b/core/iwasm/interpreter/wasm_loader.c
+@@ -9370,6 +9370,26 @@ increase_compiled_code_space(WASMLoaderContext *ctx, int32 size)
+     }
+ }
+ 
++/* W90 frontier instrumentation (not upstream): record every would-be write
++   past the Pass-1-sized code buffer, skip the real store, keep the cursor
++   advancing so the full Pass-2 sequence is observable under ASan. */
++static bool
++wamr_oob_log(WASMLoaderContext *ctx, const void *value, uint32 size,
++             const char *tag)
++{
++    uintptr_t a = (uintptr_t)ctx->p_code_compiled;
++    uintptr_t e = (uintptr_t)ctx->p_code_compiled_end;
++    if (a + size > e) {
++        fprintf(stderr, "WAMR_OOB tag=%s size=%u past=%llu bytes=", tag, size,
++                (unsigned long long)(a + size - e));
++        for (uint32 i = 0; i < size; i++)
++            fprintf(stderr, "%02x", ((const uint8 *)value)[i]);
++        fprintf(stderr, "\n");
++        return true;
++    }
++    return false;
++}
++
+ static void
+ wasm_loader_emit_const(WASMLoaderContext *ctx, void *value, bool is_32_bit)
+ {
+@@ -9379,9 +9399,10 @@ wasm_loader_emit_const(WASMLoaderContext *ctx, void *value, bool is_32_bit)
+ #if WASM_CPU_SUPPORTS_UNALIGNED_ADDR_ACCESS == 0
+         bh_assert(((uintptr_t)ctx->p_code_compiled & 1) == 0);
+ #endif
+-        bh_memcpy_s(ctx->p_code_compiled,
+-                    (uint32)(ctx->p_code_compiled_end - ctx->p_code_compiled),
+-                    value, size);
++        if (!wamr_oob_log(ctx, value, size, "const"))
++            bh_memcpy_s(ctx->p_code_compiled,
++                        (uint32)(ctx->p_code_compiled_end - ctx->p_code_compiled),
++                        value, size);
+         ctx->p_code_compiled += size;
+     }
+     else {
+@@ -9399,7 +9420,8 @@ wasm_loader_emit_uint32(WASMLoaderContext *ctx, uint32 value)
+ #if WASM_CPU_SUPPORTS_UNALIGNED_ADDR_ACCESS == 0
+         bh_assert(((uintptr_t)ctx->p_code_compiled & 1) == 0);
+ #endif
+-        STORE_U32(ctx->p_code_compiled, value);
++        if (!wamr_oob_log(ctx, &value, sizeof(value), "u32"))
++            STORE_U32(ctx->p_code_compiled, value);
+         ctx->p_code_compiled += sizeof(uint32);
+     }
+     else {
+@@ -9417,7 +9439,8 @@ wasm_loader_emit_int16(WASMLoaderContext *ctx, int16 value)
+ #if WASM_CPU_SUPPORTS_UNALIGNED_ADDR_ACCESS == 0
+         bh_assert(((uintptr_t)ctx->p_code_compiled & 1) == 0);
+ #endif
+-        STORE_U16(ctx->p_code_compiled, (uint16)value);
++        if (!wamr_oob_log(ctx, &value, sizeof(value), "i16"))
++            STORE_U16(ctx->p_code_compiled, (uint16)value);
+         ctx->p_code_compiled += sizeof(int16);
+     }
+     else {
+@@ -9432,7 +9455,8 @@ static void
+ wasm_loader_emit_uint8(WASMLoaderContext *ctx, uint8 value)
+ {
+     if (ctx->p_code_compiled) {
+-        *(ctx->p_code_compiled) = value;
++        if (!wamr_oob_log(ctx, &value, sizeof(value), "u8"))
++            *(ctx->p_code_compiled) = value;
+         ctx->p_code_compiled += sizeof(uint8);
+ #if WASM_CPU_SUPPORTS_UNALIGNED_ADDR_ACCESS == 0
+         ctx->p_code_compiled++;
+@@ -9455,7 +9479,8 @@ wasm_loader_emit_ptr(WASMLoaderContext *ctx, void *value)
+ #if WASM_CPU_SUPPORTS_UNALIGNED_ADDR_ACCESS == 0
+         bh_assert(((uintptr_t)ctx->p_code_compiled & 1) == 0);
+ #endif
+-        STORE_PTR(ctx->p_code_compiled, value);
++        if (!wamr_oob_log(ctx, &value, sizeof(value), "ptr"))
++            STORE_PTR(ctx->p_code_compiled, value);
+         ctx->p_code_compiled += sizeof(void *);
+     }
+     else {
