@@ -10,6 +10,12 @@ OUT=$HERE/run
 cd "$HERE" || exit 2
 export ASAN_OPTIONS=detect_leaks=0
 
+mkdir -p "$OUT/gen-v17"
+printf 'TEST DEFINITIONS ::= BEGIN\nPayload ::= OCTET STRING (SIZE(0..17))\nEND\n' \
+  > "$OUT/gen-v17/schema.asn"
+(cd "$OUT/gen-v17" && ../build/asn1scc/asn1scc -c -uPER schema.asn) \
+  > "$OUT/codegen-pie.log" 2>&1 || exit 2
+
 INC="-I$OUT/gen-v17 -I$OUT/build/v46/asn1crt"
 FIX="-I$OUT/gen-v17 -I$OUT/build/v47/asn1crt"
 SRC="$HERE/pie-partial.c $OUT/gen-v17/schema.c"
