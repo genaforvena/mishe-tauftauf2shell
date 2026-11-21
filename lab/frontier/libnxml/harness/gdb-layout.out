@@ -1,0 +1,16 @@
+Breakpoint 1 at 0x28ff: file nxml_parser.c, line 942.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+INPUT n=1022 len=1028 tail=fffffff0ffffff9fffffff98ffffff80
+
+Breakpoint 1, __nxml_parse_get_tag (doc=0x555555583ab0, buffer=0x7fffffffe060, size=0x7fffffffe058, data=0x7fffffffe088, doctype=0x7fffffffe074) at nxml_parser.c:942
+942	    memcpy(&str[i], *buffer, byte);
+str_base=0x7fffffffdb90 str_end=0x7fffffffdf90 i=1022 byte=4
+addr i=0x7fffffffdb8c byte=4 ch=0x7fffffffdb78 attr=0x7fffffffdfb8 tag=0x7fffffffdfa8 child=0x7fffffffdfa0 err=0x7fffffffdf94 closed=0x7fffffffdb88
+0x7fffffffdf88:	0x8000414141414141	0x0000000000000000
+0x7fffffffdf98:	0x0000000000000000	0x00007fffffffe278
+0x7fffffffdfa8:	0x00007ffff7ffe2e0	0x0000000000000002
+0x7fffffffdfb8:	0x000055555555bf41	0x00007fffffffe074
+#0  __nxml_parse_get_tag (doc=0x555555583ab0, buffer=0x7fffffffe060, size=0x7fffffffe058, data=0x7fffffffe088, doctype=0x7fffffffe074) at nxml_parser.c:942
+#1  0x0000555555555b07 in __nxml_parse_buffer (nxml=0x555555583ab0, r_buffer=0x5555555836a0 "<", 'A' <repeats 199 times>..., r_size=1028) at nxml_parser.c:1241
+#2  0x0000555555555f58 in nxml_parse_buffer (nxml=0x555555583ab0, buffer=0x5555555836a0 "<", 'A' <repeats 199 times>..., size=1028) at nxml_parser.c:1382

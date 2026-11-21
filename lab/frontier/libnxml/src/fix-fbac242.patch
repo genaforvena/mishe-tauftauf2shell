@@ -1,0 +1,70 @@
+From fbac242374883edf2ec14127ca6d2accf4704b6a Mon Sep 17 00:00:00 2001
+From: Deus Rex <research@deusrex.ai>
+Date: Thu, 29 Oct 2026 08:48:19 -0400
+Subject: [PATCH] Fix stack buffer overflow when parsing long XML names
+
+The name-copying loops in __nxml_parse_get_tag, __nxml_parse_close,
+__nxml_parse_get_attr, __nxml_parse_doctype and __nxml_parse_entity
+checked only the start offset of the next character against the
+1024-byte stack buffer, ignoring its width (1 to 5 bytes as reported by
+__nxml_utf8()). A name of 1022 single-byte characters followed by a
+multibyte one wrote attacker-controlled bytes past the end of the
+buffer, followed by the NUL terminator.
+
+Bound the copy with `i + byte < sizeof(buf)`, which leaves room for
+both the character and the terminator.
+
+Reported-by: Deus Rex <research@deusrex.ai>
+---
+ src/nxml_parser.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/src/nxml_parser.c b/src/nxml_parser.c
+index d0709cc..9049543 100644
+--- a/src/nxml_parser.c
++++ b/src/nxml_parser.c
+@@ -191,7 +191,7 @@ static int __nxml_parse_get_attr(nxml_t *doc, char **buffer, size_t *size,
+   (*buffer) += byte;
+   (*size) -= byte;
+ 
+-  while (__NXML_NAMECHARS && *size && i < sizeof(attr) - 1) {
++  while (__NXML_NAMECHARS && *size && i + byte < sizeof(attr)) {
+     memcpy(&attr[i], *buffer, byte);
+ 
+     i += byte;
+@@ -415,7 +415,7 @@ static void __nxml_parse_entity(nxml_t *doc, char **buffer, size_t *size) {
+   (*buffer) += byte;
+   (*size) -= byte;
+ 
+-  while (__NXML_NAMECHARS && *size && i < sizeof(name) - 1) {
++  while (__NXML_NAMECHARS && *size && i + byte < sizeof(name)) {
+     memcpy(&name[i], *buffer, byte);
+ 
+     i += byte;
+@@ -517,7 +517,7 @@ static nxml_error_t __nxml_parse_doctype(nxml_t *doc, char **buffer,
+   (*buffer) += byte;
+   (*size) -= byte;
+ 
+-  while (__NXML_NAMECHARS && *size && i < sizeof(str) - 1) {
++  while (__NXML_NAMECHARS && *size && i + byte < sizeof(str)) {
+     memcpy(&str[i], *buffer, byte);
+ 
+     i += byte;
+@@ -835,7 +835,7 @@ static nxml_error_t __nxml_parse_close(nxml_t *doc, char **buffer, size_t *size,
+   (*buffer) += byte;
+   (*size) -= byte;
+ 
+-  while (__NXML_NAMECHARS && *size && i < sizeof(str) - 1) {
++  while (__NXML_NAMECHARS && *size && i + byte < sizeof(str)) {
+     memcpy(&str[i], *buffer, byte);
+ 
+     i += byte;
+@@ -938,7 +938,7 @@ static nxml_error_t __nxml_parse_get_tag(nxml_t *doc, char **buffer,
+   (*buffer) += byte;
+   (*size) -= byte;
+ 
+-  while (__NXML_NAMECHARS && *size && i < sizeof(str) - 1) {
++  while (__NXML_NAMECHARS && *size && i + byte < sizeof(str)) {
+     memcpy(&str[i], *buffer, byte);
+ 
+     i += byte;

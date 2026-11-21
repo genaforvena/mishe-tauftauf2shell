@@ -127,3 +127,8 @@ lab/frontier/knotresolver2shell/check-6.4.0/
 lab/frontier/knotresolver2shell/check-6.4.1/
 lab/frontier/knotresolver2shell/poc/
 lab/frontier/knotresolver2shell/harness/k641-v.log
+
+# Libnxml2shell harness: extracted pinned trees, local builds and binaries.
+# Pins, harness sources, gdb helper and ASan/gdb evidence stay tracked.
+lab/frontier/libnxml/build/
+lab/frontier/libnxml/harness/bin/

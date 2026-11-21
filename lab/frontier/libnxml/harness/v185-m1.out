@@ -1,0 +1,56 @@
+INPUT mode=1 n=1022 len=1032
+=================================================================
+==2447657==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b8594001c20 at pc 0x60c2c021e148 bp 0x7ffc1f94e1d0 sp 0x7ffc1f94d990
+WRITE of size 4 at 0x7b8594001c20 thread T0
+    #0 0x60c2c021e147 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/harness/bin/name_overflow-0.18.5+0xc6147) (BuildId: cd0e149300ea4ef0a66aa3797480f25e91c0c0ef)
+    #1 0x60c2c02679ef in __nxml_parse_close /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/build/libnxml-0.18.5/src/nxml_parser.c:839:5
+    #2 0x60c2c0261a4d in __nxml_parse_get_tag /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/build/libnxml-0.18.5/src/nxml_parser.c:923:12
+    #3 0x60c2c02634b7 in __nxml_parse_get_tag /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/build/libnxml-0.18.5/src/nxml_parser.c:1032:20
+    #4 0x60c2c0260191 in __nxml_parse_buffer /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/build/libnxml-0.18.5/src/nxml_parser.c:1241:18
+    #5 0x60c2c0260c72 in nxml_parse_buffer /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/build/libnxml-0.18.5/src/nxml_parser.c:1382:10
+    #6 0x60c2c025ec7b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/harness/name_overflow.c:50:22
+    #7 0x7b8596c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7b8596c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x60c2c01853b4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/harness/bin/name_overflow-0.18.5+0x2d3b4) (BuildId: cd0e149300ea4ef0a66aa3797480f25e91c0c0ef)
+
+Address 0x7b8594001c20 is located in stack of thread T0 at offset 1056 in frame
+    #0 0x60c2c0266f4f in __nxml_parse_close /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/build/libnxml-0.18.5/src/nxml_parser.c:809
+
+  This frame has 2 object(s):
+    [32, 1056) 'str' (line 815) <== Memory access at offset 1056 overflows this variable
+    [1184, 1188) 'byte' (line 817)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libnxml/harness/bin/name_overflow-0.18.5+0xc6147) (BuildId: cd0e149300ea4ef0a66aa3797480f25e91c0c0ef) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x7b8594001980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8594001a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8594001a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8594001b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8594001b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7b8594001c00: 00 00 00 00[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x7b8594001c80: f2 f2 f2 f2 04 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x7b8594001d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8594001d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8594001e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8594001e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2447657==ABORTING

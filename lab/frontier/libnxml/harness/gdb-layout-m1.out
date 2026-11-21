@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x4c0b: file nxml_parser.c, line 839.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+INPUT mode=1 n=1022 len=1032
+
+Breakpoint 1, __nxml_parse_close (doc=0x555555583ac0, buffer=0x7fffffffe010, size=0x7fffffffe008, data=0x7fffffffdf50) at nxml_parser.c:839
+839	    memcpy(&str[i], *buffer, byte);
+BUFEND str 0x7fffffffd570
+NEAR tag              0x7fffffffd570 delta=0

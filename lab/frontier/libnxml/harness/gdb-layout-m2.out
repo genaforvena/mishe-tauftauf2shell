@@ -1,0 +1,8 @@
+Breakpoint 1 at 0x36ce: file nxml_parser.c, line 195.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+INPUT mode=2 n=1022 len=1034
+
+Breakpoint 1, __nxml_parse_get_attr (doc=0x555555583ac0, buffer=0x7fffffffe010, size=0x7fffffffe008, result=0x7fffffffda70) at nxml_parser.c:195
+195	    memcpy(&attr[i], *buffer, byte);
+BUFEND attr 0x7fffffffd9f0

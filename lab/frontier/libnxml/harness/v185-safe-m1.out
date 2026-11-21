@@ -1,0 +1,2 @@
+INPUT mode=1 n=1000 len=1010
+PARSE err=2
