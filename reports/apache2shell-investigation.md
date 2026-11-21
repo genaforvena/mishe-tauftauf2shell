@@ -444,6 +444,69 @@ chosen pointer, and no marker execution was attempted. Rung 4 remains NOT
 demonstrated, and the main Stage A closure and do-not-retry list are
 unchanged.
 
+### Adjacent lane L3 — CVE-2026-57941 shared-bbtmp re-entrancy (03:49–04:02Z 21 Nov) — rung 3 confirmed
+
+Named lane L3, not a reopen of CVE-2026-119618. The local 2.4.70 `CHANGES`
+records "CVE-2026-57941: mod_http2 use-after-free / wild write via shared
+session->bbtmp re-entrancy ... This issue affects Apache HTTP Server: from
+2.4.0 through 2.4.68", credit Lucian Nitescu (`CHANGES:137-142`). New sources
+were provisioned from archive.apache.org (provisioning only): 2.4.68 SHA256
+`68c74d4df38c26bed4dfbdb8f3baf1eb532f3872357becc1bba5d136f6b63c06` and
+2.4.69 SHA256 `c5e6ebc66e349b87d7fc6916ae7cc2a808ed348003de134cf9e9d89d3e2cc73d`,
+both verified with `sha256sum -c`.
+
+The 2.4.68→2.4.69 diff is a multi-primitive fix bundle in the same subsystem:
+`modules/http2/h2_session.c` stops using the shared `session->bbtmp` in
+`on_send_data_cb()` and `ev_stream_closed()` (each creates and destroys its
+own brigade); `on_frame_recv_cb()`/`on_stream_close_cb()` gain
+`stream->state < H2_SS_CLEANUP` guards; a client GOAWAY with open streams no
+longer transits straight to `H2_SESSION_ST_DONE`. `modules/http2/h2_mplx.c`
+adds `mplx_cleanup_done` and `in_stream_cleanup` guards to
+`m_stream_cleanup()` and moves the two iqueues onto a separate `poll_pool`,
+with the in-tree comment that `apr_palloc` is not thread-safe on one pool
+under different locks. In 2.4.69 `bbtmp` remains only in `h2_c1_io.c`'s
+input path, confirming that the input/output sharing was the defect.
+
+`lab/apache2shell/build-l3.sh` builds both versions ASan/UBSan (event MPM,
+pinned nghttp2 1.64.0); `lab/apache2shell/l3-lane.py` starts each on
+127.0.0.1:7268/7269 and drives h2c GETs of a 512 KB file, 32 KB POST bodies,
+immediate RST_STREAM and client GOAWAY on 8 connections × 20 streams. No
+CVE-2026-119618 header groom is used. Results (logs `l3-lane-*.log`,
+`l3-2.4.{68,69}-error*.log`):
+
+- Pristine 2.4.68: two child SEGV(11) at 03:55Z (`l3-lane-pristine-0400Z.log`),
+  one at 03:56Z (`l3-lane-nogoaway-0356Z.log`), one at 03:57Z
+  (`l3-lane-sustained-0357Z.log`); one repeat was clean. 2.4.69: zero in all
+  runs. Expression of the race varies; the affected/fixed split does not.
+- ASan handler forced (`ASAN_OPTIONS=detect_leaks=0:handle_segv=1:
+  allow_user_segv_handler=0:abort_on_error=0:halt_on_error=1`): at 04:00Z
+  and in 2 of 6 GOAWAY runs at 04:01Z, 2.4.68 produced
+  `ERROR: AddressSanitizer: SEGV on unknown address 0x... (pc 0x..., TNN)`,
+  `The signal is caused by a READ memory access`,
+  `Hint: PC is at a non-executable region. Maybe a wild jump?`, frame 0
+  `<unknown module>`, frame 1 `h2_c1_read (h2_c1_io.c:502)`. A second stack
+  reached it through `on_stream_input (h2_session.c:1395)` under
+  `mplx_pollset_poll (h2_mplx.c:1291)`; another ran under
+  `h2_session_process (h2_session.c:2010)`. 2.4.69 produced no ASan report
+  in any run, including the GOAWAY and heavy variants.
+- The first forced-ASan attempt failed with `RuntimeError: can't start new
+  thread` because leftover gdb-run httpd children exhausted thread slots;
+  it is preserved as INVALID, not a pass. gdb attempts that followed only the
+  first forked child missed the crashing child, and `detach-on-fork off`
+  stopped the parent before startup; neither produced a usable stack. The
+  forced-ASan detector is the working evidence path.
+
+Grade: **rung 3 confirmed** for L3 — an observed wild-jump PC with a
+patch-sensitive affected/clean differential on the same traffic, in the c1
+input path the fix changes. Rung 4 is NOT demonstrated: the crash is an
+intermittent race, the jump target is not attacker-chosen bytes, no chosen
+offset or pointer control was exercised, and no marker was executed. No
+remote-RCE claim is made. The main-lane Stage A closure and do-not-retry list
+are unchanged. Next bounded experiment, only if L3 is revisited: instrument
+the 2.4.68 c1 filter/brigade path to name the corrupted indirect-call field,
+then test whether a request-body canary steers the jump target; without a
+steerable field L3 closes at rung 3.
+
 ## Reproduction (from a clean checkout, loopback only)
 
 ```
@@ -462,6 +525,9 @@ BODY_CANARY_HEX=00007fff424f445943414e00000000 \
 python3 pushdiary-lane.py                       # adjacent lane L1: 2.4.70 SEGV, 2.4.71 OK
 bash build-l2.sh                                # ASan builds of 2.4.66 / 2.4.67
 python3 l2-lane.py 20                           # L2: 2.4.66 child failure, 2.4.67 clean
+bash build-l3.sh                                # ASan builds of 2.4.68 / 2.4.69
+ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_error=0:halt_on_error=1' \
+  python3 l3-lane.py 10 8 20                    # L3: 2.4.68 wild jump, 2.4.69 clean
 ```
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
