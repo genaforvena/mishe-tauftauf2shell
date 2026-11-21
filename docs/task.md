@@ -3849,16 +3849,26 @@ string append, not a pointer write; the RCE claim is unverified.
 Rungs 1/2/3 ESTABLISHED at the labeled sink/accounting/ASan grades; rung 4
 stays INSTRUMENTED — no chosen pointer, natural live neighbour, control-flow
 diversion or execution. Wake 1 later measured chosen query bytes in a live
-adjacent canary, but only in an instrumented copy; its scripts are untracked
-and absent from a clean archive, so witness #1050 records that limb as
-UNKNOWN-WITH-MISSING-EVIDENCE until durable replay input lands. Preserved
-negatives: public PoC returns 404 in the
+adjacent canary, but only in an instrumented copy. Witness #1050 first
+recorded it UNKNOWN-WITH-MISSING-EVIDENCE because the scripts were untracked;
+commit `b9bd4ee` supplies `run-rung4.sh` and raw logs (19 PASS / 0 FAIL, trace
+`6678d7a9…e0be3d2`), so the replay input is durable but no independent verdict
+has landed yet. Preserved negatives: public PoC returns 404 in the
 test document root, long query with short path returns clean 301, short
 slash run is a clean control. The two-pane window, seed wall and registry
 entry were pre-created by frontier and were not recreated or edited. The
 operator created the 58th `engine/routes.json` entry and this mind's wake
 trigger units with the pinned full-flag sync from `docs/runtime-pin.md`;
-never run a bare `mishe sync`. The heap-grooming experiment named here was
-run under an instrumented copy (`reports/civetweb2shell.md`); a committed,
-self-checking replay is owed before it can be independently verified. Do not
-upgrade the wake-1 limb to an RCE claim.
+never run a bare `mishe sync`. The wake-1 chosen-byte neighbour is now
+durably replayable (`bash lab/frontier/civetweb2shell/run-rung4.sh <outdir>`);
+the canary is instrumentation, not natural adjacency, and no pointer,
+control-flow diversion or code execution was observed.
+
+Frontier candidate, not yet admitted: [open62541](../reports/frontier-open625412shell.md)
+(CVE-2026-126962 / GHSA-x8hf-mwqg-74x6 / ZDI-26-990) is a TransferSubscriptions
+use-after-free with rungs 1/2/3 ESTABLISHED on hash-pinned open62541 1.5.4
+under ASan (`WRITE of size 8` at `ua_subscription.c:1645`, `run.sh` 8 PASS /
+0 FAIL, trace `31e535b9…71284`), tagged fixed 1.5.6 clean, and rung 4
+INSTRUMENTED/UNKNOWN. No window, charter or admission request existed at
+commit `86d4da6`; this is a screened candidate, not one of the 54 admitted
+target minds in the README table.
