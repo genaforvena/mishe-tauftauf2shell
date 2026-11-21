@@ -352,6 +352,14 @@ logs are in `lab/datasketches2shell-pg/gdb_pg.log` and `gdb_pg_assert.log`.
 So chosen bytes do overwrite real allocator state in a shipped consumer,
 but no crash, abort, pointer value or diverted call was observed.
 
+**Fixed-version causal control in the same consumer.** Rebuilding the same
+verbatim extension objects against the pinned, unmodified 5.3.0 headers
+changes only that image's fate: the benign seed still returns
+`PG_DS2_BENIGN 2.000000004967054`, while the count-64 image is rejected before
+the copy with `ERROR: Attempt to deserialize invalid CouponList with
+couponCount >= capacity. Found couponCount: 64, capacity: 8` and the server
+stays alive. The 5.2.0 build was restored afterwards; `run.sh` uses 5.2.0.
+
 The absence of a sentinel warning has a source-level reason, preserved as a
 negative: `AllocSetFree` checks the trailing sentinel only for external
 single-chunk blocks (`src/backend/utils/mmgr/aset.c:1008-1027`); a 32-byte
