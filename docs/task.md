@@ -188,6 +188,33 @@ claims, not conclusions.
   demo or web path; no other lane's grade changes. Gitignored evidence
   `lab/build/evidence/w52-129291-fpm/`; do not repeat the single- or dual-TU
   swaps if reopened.
+- 2026-11-21 new adjacent lane (**CVE-2026-129496** /
+  GHSA-gr4f-wgx5-jpfv), the standalone stale-`DATEG(tzcache)` read isolated
+  from wake 17's combined splice chain. An invalid `date.timezone` plus
+  `max_input_vars=1` and a file `error_log` writes a startup diagnostic
+  through file logging (timezone cache allocated in temporary startup memory
+  and freed at its end while `DATEG(tzcache)` still points at it), then an
+  early request diagnostic reads it while formatting the log timestamp. The
+  exact 8.5.12→8.5.13 fix guards the timestamp with
+  `PG(modules_activated) && EG(active)` in `main/main.c` and moves
+  `php_date_global_timezone_db` init before `REGISTER_INI_ENTRIES()` in
+  `ext/date/php_date.c`. `lab/repro/php2shell-cve129496-tzcache.py` invokes
+  php-cgi directly (no listener): pinned 8.5.12 release-ASan `php-cgi-vuln`
+  rc=1, ASan SEGV READ in `__strlen_avx2` via `php_default_treat_data`
+  (`php_variables.c:583`) → `php_error_docref` → `php_log_err_with_severity`
+  (`main.c:991`) → `php_format_date` (`php_date.c:894`) →
+  `timelib_get_time_zone_info` (`parse_tz.c:908`) → `_estrdup` → `strlen`;
+  the same build with only the upstream one-line `main.c` guard rebuilt
+  (`php-cgi-fixed`) rc=0 clean, and controls without the invalid timezone are
+  clean on both. Plain 8.4.27 rc=139 vs 8.4.28 rc=0 cross-branch. Requires
+  default ZendMM and release-ASan: `USE_ZEND_ALLOC=0` and debug ASan CLI
+  builds are recorded negatives. A local `zend_test warn_on_startup` phpt
+  reproduced the vendor output but stayed clean on debug ASan. Verdict
+  CONFIRMED, **rung 3** for this lane: invalid read with a symbolized
+  consumer path and a fix-sensitive comparison; no chosen bytes, pointer
+  control, marker, pre-auth HTTP or FPM/Apache LPE demo, so rung 4 is closed.
+  Gitignored evidence `lab/build/evidence/w53-129496/` (`verdict.txt`); do
+  NOT repeat the debug-ASan runs.
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
   ASan/UBSan builds of an affected PHP, then attempts placement and
@@ -503,13 +530,25 @@ delay the live stock server faults at the same instruction with
 the object was identified after the fact with no grooming, only one object
 was controlled, a client-side delay and `WLOG_FILTER` are required, and the
 no-filter control stays clean. Arbitrary heap targeting stays UNKNOWN.
+Wake 15 removed the scratch delay: with the committed patched `sfreerdp` and
+only its `Sleep(400)` between the two `SNDC_FORMATS` PDUs (no wake-14
+`Sleep(2500)`), the wrap and copy still occur but `SNDC_QUALITYMODE` arrives
+at the same instant as the wrap, before the copy; format selection failed, so
+no audio PDU or `SNDC_WAVECONFIRM` follows and no post-write log, filter frame
+or SIGSEGV occurs. At logoff the stock allocator aborts with the wake-9
+`double free or corruption (!prev)`, not a controlled dereference
+(`natural_trigger_no_timing.txt`, raw logs under `verify-live-out/wake15/`).
+The client delay is therefore necessary; the unaided live trigger is a
+recorded NEGATIVE.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
 status `reports/freerdp2shell-status.md`, the wake-12 layout capture
 `lab/freerdp2shell-src/heap_layout_stock.txt`, the wake-13 chosen-pointer
-capture `lab/freerdp2shell-src/pointer_control_stock.txt` and the wake-14
-natural-trigger capture `lab/freerdp2shell-src/natural_log_trigger_stock.txt`.
+capture `lab/freerdp2shell-src/pointer_control_stock.txt`, the wake-14
+natural-trigger capture `lab/freerdp2shell-src/natural_log_trigger_stock.txt`
+and the wake-15 negative capture
+`lab/freerdp2shell-src/natural_trigger_no_timing.txt`.
 The dedicated
 mind owns this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`.
 Wake trigger units and the presentation.json entry are owed from the
@@ -1089,9 +1128,12 @@ the vulnerable expression, so 4.4.2 is affected despite the GHSA range
 contradiction. Reachability requires an authenticated AFP session (`PR:L`)
 and a cross-device rename path inside a share (`AC:H`), so no stock-default
 claim is made. The defect is `remain = strlen(path) - len - 1` at pinned
-`etc/afpd/directory.c:168`, which underflows to `SIZE_MAX`; the guard at line
-176 cannot reject a filename and `strcpy(path + len, de->d_name)` at line 181
-writes an attacker-chosen 255-byte name into `char path[MAXPATHLEN + 1]`.
+`etc/afpd/directory.c:168`, which underflows to `SIZE_MAX` for
+`dir_len<=1022`; at the witness's chosen `dir_len=1023` the trailing slash
+truncates, giving `strlen(path)=1023`, `len=1024` and `remain=SIZE_MAX-1`.
+The guard at line 176 cannot reject a filename and
+`strcpy(path + len, de->d_name)` at line 181 writes an attacker-chosen
+255-byte name into `char path[MAXPATHLEN + 1]`.
 Fix `33dbda708cd38ee4ffa568cc5dde1fda4f900dfe` uses `sizeof(path)`.
 Frontier's harness (`lab/frontier/netatalk2shell/run.sh`) compiles the
 verbatim pinned lines 147–203 and reports 24 PASS, rc 0: rung 1 a 256-byte

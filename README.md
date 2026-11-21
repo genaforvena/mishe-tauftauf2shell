@@ -71,11 +71,24 @@ copies of the affected software:
   claimed local privilege escalation), is rung 2 only: the 8.4.27 vendor phpt
   FAILs and 8.4.28 PASSes with no sanitizer report; single- and dual-file
   swaps of the fix did not isolate it. No chosen byte, pointer, marker, LPE
-  demo or web path. Reproduce with `bash lab/php2shell/build-dom.sh 8.5.12`,
+  demo or web path.
+  A standalone CVE-2026-129496 / GHSA-gr4f-wgx5-jpfv lane (stale
+  `DATEG(tzcache)` read when an early file-`error_log` diagnostic formats its
+  timestamp after startup memory is freed) is rung 3 CONFIRMED: the pinned
+  8.5.12 release-ASan CGI `php-cgi-vuln` exits rc=1 with an ASan SEGV read in
+  `__strlen_avx2` through `php_error_docref` → `php_format_date` →
+  `timelib_get_time_zone_info`, while the same build with only the upstream
+  one-line `main.c` guard rebuilt (`php-cgi-fixed`) exits rc=0 clean; plain
+  8.4.27 CGI rc=139 vs plain 8.4.28 rc=0. Default ZendMM and a release-ASan
+  build are required — `USE_ZEND_ALLOC=0` and the debug ASan CLIs are clean
+  controls. No chosen bytes, pointer control or marker; rung 4 stays closed.
+  Reproduce with `bash lab/php2shell/build-dom.sh 8.5.12`,
   `bash lab/php2shell/build-dom-fixed-variant.sh`,
   `python3 lab/repro/php2shell-cve129501-dom.py <php-vuln> <php-fixed>`,
   `python3 lab/repro/php2shell-cve129501-dom-hunk2.py <php-vuln> <php-fixed>`
   and `python3 lab/repro/php2shell-cve129291-fpm.py <php-8.4.27-fpm> <php-8.4.28-fpm>`.
+  Wake 53 replays 129496 with
+  `python3 lab/repro/php2shell-cve129496-tzcache.py <php-cgi-vuln> <php-cgi-fixed>`.
 - **Node2Shell** — CVE-2026-123828, two one-byte heap overflows in Node's
   HTTP/2 `Alt-Svc` handling (`src/node_http2.cc`): fix `nodejs/node@ae9ab37d62`
   removes `kNullTerminate` from both `WriteOneByteV2` calls, so the origin
@@ -230,6 +243,13 @@ copies of the affected software:
   bytes are lab-supplied, the object was found after the fact with no grooming,
   and only one object was controlled; arbitrary heap targeting, a real audio
   source and an FFmpeg-enabled build stay UNKNOWN.
+  Wake 15 tested the unaided case: with the committed patched `sfreerdp` and
+  only `Sleep(400)` between its two `SNDC_FORMATS` PDUs (no scratch delay),
+  `SNDC_QUALITYMODE` arrives at the wrap instant before the copy, no audio PDU
+  or `SNDC_WAVECONFIRM` follows and there is no post-write log, filter frame
+  or SIGSEGV — only the wake-9 allocator abort at logoff
+  (`lab/freerdp2shell-src/natural_trigger_no_timing.txt`). The client delay is
+  therefore necessary for the controlled dereference.
 - **Xrdp2Shell** — CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4, a client-controlled
   reassembled DYNVC virtual-channel payload copied into xrdp's fixed
   8192-byte server→chansrv out stream. Default posture is post-auth (`PR:L`)
@@ -364,9 +384,10 @@ copies of the affected software:
   standing approval #6; rungs 1-3 run on verbatim pinned upstream
   `ootrace.c:35-53`, rung 4 is instrumented chosen-byte control only.
 - **Netatalk2Shell** — CVE-2026-45698 / GHSA-5443-v9xg-mqgv, an integer
-  underflow in `afpd`'s `deletedir()` that turns `remain` into `SIZE_MAX` and
-  lets an unbounded `strcpy` write an attacker-chosen filename past
-  `char path[MAXPATHLEN + 1]`. CWE-787, High 7.5
+  underflow in `afpd`'s `deletedir()` that leaves `remain` at `SIZE_MAX`
+  (`SIZE_MAX-1` at the witness's chosen `dir_len=1023`, where the trailing
+  slash is truncated) and lets an unbounded `strcpy` write an attacker-chosen
+  filename past `char path[MAXPATHLEN + 1]`. CWE-787, High 7.5
   `AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H`; the maintainer's authenticated RCE
   claim stays a claim. Affected `>=3.1.19, <4.4.3`, fixed 4.4.3. Needs an
   authenticated AFP session and a cross-device rename path inside a share.
