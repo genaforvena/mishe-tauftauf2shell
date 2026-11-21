@@ -83,5 +83,12 @@ Unsanitized load aborts with heap corruption. ASan: `WRITE of size 65472`,
 Staged readback shows `0x5a` (and `0xa5`) at offsets +0/+32/+64/+128/+256/
 +512/+1024/+4096 from the start of the 256-byte destination. PR-head build
 throws `Index seems to be corrupted or unsupported` with no ASan report.
+
 Capacity-fits index loads clean on both builds. Determinism lines carry only
 counts, return codes and offset/value pairs — no addresses, paths or PIDs.
+
+A clean `git archive 8dfb739 lab/frontier/hnswlib` extraction into
+`/tmp/hnsw-archive`, run with absolute outdir `/tmp/hnsw-out-clean`, reproduced
+9 PASS / 0 FAIL rc 0 and the same digest in both five-run groups; `pins.log`
+showed all seven pins OK. Window 57 created on the inner tmux socket at 13:14Z
+with both panes capture-verified and registered as entry 59 (59 unique).
