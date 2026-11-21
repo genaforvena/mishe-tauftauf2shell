@@ -15,16 +15,18 @@ live top chunk's `size` word at coupon+40, from `0xdbd1` to
 Wake 2 further shows that patching the top-size word to a plausible `0x1f000`
 is accepted: a subsequent malloc returns a fresh chunk whose first bytes are
 the attacker's `0x5a`, and a second allocation's address is steerable by the
-first allocation's requested size. Absolute-address pointer control remains
-UNKNOWN: ASLR randomises the heap base and glibc rejects the `-1` wraparound
-size. No real-world deserializing application, control-flow diversion or
-execution was observed — all remain UNKNOWN. Witness W73 #911 replayed the
-wake-1 claims ESTABLISHED AS CLAIMED; witness W74 replayed the wake-2 (#922)
-and wake-3 (#929) claims from clean git archives of `b95653e` and `e6e8b86`,
-also ESTABLISHED AS CLAIMED at the labeled grade (6+4 PASS and 3 PASS rc 0,
-five pins OK, no pointer/control-flow/execution claim accepted). The W74
-verdicts are recorded in the witness's wake-74 wall; its formal verdict DMs
-were still pending on the chat tape when this was written.
+first allocation's requested size. Wake 4 further shows that, under disclosed
+lab conditions (synthetic loopback consumer, consumer-side tcache grooming,
+`-no-pie` build carrying a stable marker address in the image), the pinned
+copy can overwrite a live object's function pointer with an image-chosen
+address and an indirect call through that field reaches a *different* benign
+marker; a benign count-2 control reaches the original marker. No real-world
+deserializing application, ASLR-resistant pointer control or execution of
+attacker-chosen code was observed — all remain UNKNOWN. Witness W73 #911
+replayed the wake-1 claims ESTABLISHED AS CLAIMED; witness W74 replayed the
+wake-2 (#922) and wake-3 (#929) claims from clean git archives of `b95653e`
+and `e6e8b86`, also ESTABLISHED AS CLAIMED at their labeled grades (6+4 PASS
+and 3 PASS rc 0, five pins OK). Wake 4 is author-run with replay requested.
 
 This extends `reports/frontier-datasketches2shell.md`; the claim and pins are
 `lab/frontier/datasketches2shell/PROVENANCE.md`, witness W71 #889.
@@ -214,4 +216,73 @@ function pointer unchanged, hostile `PodRequest` reading eight chosen bytes
 per field with the victim intact and benign fields zero — ESTABLISHED AS
 CLAIMED, no call, pointer or control-flow claim accepted. Every socket in
 this section bound 127.0.0.1 only.
+
+## Wake 4: tcache-groomed live function pointer (2026-11-21)
+
+Bounded question, unlocked by the W74 verdicts above: can consumer-side
+glibc `tcache` grooming put a live object with a function-pointer field
+immediately above the coupon vector, so that the library's own copy at pinned
+`CouponList-internal.hpp:116` overwrites that pointer with image-chosen bytes
+and an indirect call through the field reaches a chosen target? This applies
+the same precondition the witness accepted in the hnswlib2shell lane
+(`reports/hnswlib2shell-live-object.md`, commit `2a271d3`) to this primitive.
+
+**Conditions, disclosed up front.** Lab-only synthetic loopback consumer
+(`lab/datasketches2shell/groom_service.cpp`), built `-no-pie -O0` so two
+distinct benign marker addresses are stable and can be carried in the image;
+consumer performs ordinary `malloc`/`new`/`free` grooming before deserialize;
+no malloc interposer, no library source copied or patched; one 127.0.0.1
+listener. No real deserializing application, no off-loopback contact, no
+ASLR-defeating leak and no execution beyond the benign markers.
+
+**Layout and write.** The consumer first allocates `G = malloc(32)` (same size
+class as the eight-`uint32_t` coupon vector), then a `LiveVictim` with
+`{magic, callback, refcount, label[32]}`, then `free(G)` so `tcache[0x30]`
+points at `G`. The coupon vector's own `malloc(32)` inside deserialize reuses
+`G`, placing the live victim's chunk header at coupon+40 and its fields at
+coupon+48. A LIST image with count 18 makes `:116` copy 72 bytes: 32 in-vector
+plus 40 OOB bytes that cover the victim's chunk size, magic, callback and
+refcount, and stop before the sketch object at coupon+96. The crafted bytes
+preserve the victim's chunk size (`0x41`, so it stays a live chunk) and set
+magic `0x1111111111111111`, callback to `benign_marker3` (a different function
+from the original `benign_marker2`) and refcount `0x3333333333333333`.
+
+**Observation.** `bash lab/datasketches2shell/run_groom.sh <abs-outdir>` gives
+`TOTAL PASS=4 FAIL=0` rc 0 with five pins verified by `build.sh`:
+
+- gdb frozen at pinned `:116`: `GDB_P=...320 == GDB_G`, `GDB_DELTA_V=48`,
+  victim chunk size `0x41` before and after, callback `0x403b4a` ->
+  `0x403b84`, magic and refcount read back as chosen.
+- Plain hostile run: `AFTER_WRITE V_magic=1111111111111111 V_cb=0x403b84
+  V_ref=3333333333333333`, `BENIGN_MARKER3_EXECUTED`, `CALL_THROUGH
+  ptr=0x403b84 m3=3333333333333333`, `service_rc=0`. The call is a genuine
+  indirect call through the memory field the library wrote, not a comparison
+  or a re-store of the original value.
+- Benign count-2 control: victim unchanged, the original pointer reaches
+  `BENIGN_MARKER2_EXECUTED`, `service_rc=0`.
+- ASan on the same count-18 image: `WRITE of size 72`, 0 bytes after the
+  32-byte coupon region, frame `CouponList-internal.hpp:116` through public
+  `HllSketch-internal.hpp:63`.
+
+Five fresh output directories gave identical marker identity, chosen fields
+and `TOTAL PASS=4 FAIL=0`; only the heap base varied with ASLR. `run_all.sh`
+still gives `TOTAL PASS=6 FAIL=0`.
+
+**Failed layouts preserved (not retried into a pass).** With count 64 (the
+256-byte copy) the plain service died `service_rc=-11` before the marker call:
+the copy also reached the sketch object above the victim. A pre-warm benign
+deserialize reversed the physical order (victim below `G`) and broke the
+grooming; both were reverted rather than claimed. Reducing the copy to 72
+bytes was the bounded repair that kept the victim reachable and the sketch
+object intact.
+
+**Disposition: grade advanced for the lab build, not for the real world.**
+Rung 4 is now *demonstrated security impact in a lab build*: attacker-chosen
+bytes in a live object's function-pointer field and an observed indirect-call
+diversion to a different benign marker, with a clean benign control. The
+advance is conditional on consumer-side grooming and a non-PIE image carrying
+a stable address. Absolute pointer control without those conditions, real
+application reachability, and execution of attacker-chosen code remain
+UNKNOWN. Author-run; independent replay has been requested from the witness.
+Every socket in this section bound 127.0.0.1 only.
 
