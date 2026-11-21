@@ -58,8 +58,9 @@ checkfile() {
 # checkfault <codec> — the N=1000 leg must fault the victim. glibc's abort text
 # varies by host and build (SIGSEGV, malloc/free/realloc errors,
 # malloc_consolidate, "dumped core"), so accept the observed fault-signature
-# family OR a nonzero gst-launch rc recorded by the family driver. The benign
-# N=8 leg must stay rc=0, so a nonzero rc is a genuine victim-fault signal.
+# family driver records a per-leg rc; only the N=1000 rc is read here. The
+# benign N=8 leg is not consulted (a live benign stream may time out, rc=124),
+# so any nonzero rc below is from the attacker-count leg only.
 checkfault() {
   local codec=$1 log="family_${codec}_1000.log" rcfile="family_rc_${codec}_1000.txt"
   local pat='Caught SIGSEGV|SIGABRT|Aborted|Segmentation fault|dumped core|malloc\(\):|malloc_consolidate\(\):|free\(\):|realloc\(\):|double free|corrupt|invalid chunk|invalid size|unaligned tcache|gst_rtp_L[0-9]+_depay_setcaps'
