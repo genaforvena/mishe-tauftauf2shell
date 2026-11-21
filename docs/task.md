@@ -66,8 +66,12 @@ claims, not conclusions.
   `lab/php2shell/build-fpm-release.sh`); the debug ASan build preserves a
   negative. Wake 45 finished the release-ASan 8.5.12 replay: both vendor
   diagnostics reproduce but `VERDICT=CLEAN_NO_UAF` with zero ASan markers,
-  also with fast shutdown forced, in ZendMM mode and under `--control`; the
-  grade stays UNKNOWN and the 8.5.13 fixed release build is unbuilt.
+  also with fast shutdown forced, in ZendMM mode and under `--control`. Wake
+  46 root-caused it under gdb: request N+1's `zend_activate()` UNDEFs
+  `EG(last_fatal_error_backtrace)` before the warning reaches the dtor, so
+  `zval_ptr_dtor` on `IS_UNDEF` is a no-op with no stale pointer to dereference.
+  The grade stays UNKNOWN with a measured cause; the 8.5.13 fixed release
+  build is unbuilt.
   129289 remains untested (smuggling, not memory corruption).
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
@@ -408,13 +412,22 @@ NULL to `0x00000000fffffffd`. A live GStreamer 1.24.2 ASan harness
 (`bash lab/gst2shell-src/run_live.sh`) faults at the real `depay.c:267`
 `order->pos` dereference; the shipping `rtpL16depay` plugin
 (`bash lab/gst2shell-src/run_real.sh`) faults rc 139 for `encoding-params`
-86/87/100/1000, with a second glibc `free()` fault mode at N=86. This is a
-count-controlled rung-4 effect, not chosen bytes: strong rung 4, real
-SDP/RTSP caps negotiation, pre-auth reachability and code execution stay
+86/87/100/1000, with a second glibc `free()` fault mode at N=86. A 2026-11-21
+pass symbolicated the N=1000 shipping fault by gdb debuginfod to `srcpad->g_class`
+of a heap-adjacent GstPad, and `bash lab/gst2shell-src/run_sdp.sh` drove
+`a=rtpmap:96 L16/44100/N` SDP text through GStreamer's own SDP parser into the
+fault at N=86/1000 (the harness explicitly models the RTP structure name); the
+native `uridecodebin`/`sdpdemux` path reached PLAYING without instantiating
+`rtpL16depay`, a lab-pipeline limit that also fails at benign N=8. This is a
+count-controlled rung-4 effect, not chosen bytes: strong rung 4, application
+far-end SDP ingestion, pre-auth reachability and code execution stay
 UNKNOWN. Evidence:
 `reports/frontier-gst2shell.md`, harness
 `lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
-`reports/gst2shell-status.md`. The dedicated `gst2shell` mind owns this lane;
+`reports/gst2shell-status.md`; the SDP harness `lab/gst2shell-src/sdp_caps.c`
+and `run_sdp.sh` (digest `6ba2e707…c4f`) and the gdb trace
+`lab/gst2shell-src/gdb_symbolicated_1000.txt` are tracked. The dedicated
+`gst2shell` mind owns this lane;
 details in `.mishe-tauftauf/charters/gst2shell.md`. Wake trigger units and
 the presentation.json entry are owed from the person's full-flag sync, never
 a bare `mishe sync`.
