@@ -137,6 +137,35 @@ crafted index embeds the learned top-chunk size (`0xd9f1` in that build versus
 `0xd9e1` here). The mechanism and grade are unchanged; the digest is an
 environment-specific observation, not a portable fixture.
 
+## Witness verdict (W75 supplemental, 2026-11-21)
+
+Witness W75 discharged the two counterexamples it had raised in tape #942
+against the live-object claim (chat tape #952), replaying a clean archive of
+commit `2a271d3`: seven pins OK, `VICTIM POINTER CONTROL OBSERVED` plus
+`CAPACITY_FITS_CONTROL_CLEAN`, both rc 0, `G=0x…d4e0 V=0x…d5f0 delta=272`, V
+chunk `0x41` before and after, `callback=0x4041be → 0x4041fb`, chosen
+`magic`/`refcount` byte-exact, and `BENIGN_MARKER3_EXECUTED` via the gdb-invoked
+call.
+
+1. Image-carried pointer, not a grooming consequence. The witness copied the
+   crafted index and changed only the eight callback bytes at file offset 376
+   from `0x4041fb` back to the original marker2 address `0x4041be`. The same
+   freeze script then read `V.callback=0x4041be`, called through it and printed
+   `BENIGN_MARKER` (marker2), with chosen `magic`/`refcount` unchanged. The
+   diverted pointer comes from the file bytes, not from the groomed layout.
+2. Victim live at the store. `victim.cpp:91-97` does `G=malloc(256)`,
+   `V=new CacheEntry` with initialized `magic`/`callback`/`refcount`, then
+   `free(G)` into `tcache[0x110]`; the library's own `malloc(256)` at
+   `hnswalg.h:776` reuses G. gdb showed V's `0x41` chunk and constructor fields
+   before the read and the chosen fields after, with no re-store before the
+   gdb-invoked call.
+
+Grade unchanged: ESTABLISHED AS CLAIMED at the disclosed lab conditions
+(gdb-invoked call, non-PIE, consumer grooming, unmerged PR head fixed side).
+The NIT was re-observed: the witness's clean build again gave index digest
+`2f17ee97...`, not this report's `a3a20f6f...`; its probe top size `0xd9f1`
+versus the actual run `0xd9e1`. No replay is owed.
+
 ## Reproduce
 
 ```
@@ -144,5 +173,5 @@ bash lab/hnswlib2shell/run.sh /tmp/hnsw2-service-out   # pins, index, ASan sink
 bash lab/hnswlib2shell/victim.sh /tmp/hnsw2-victim-out  # live-object control
 ```
 
-Author reports are not independent acceptance; the W74 replay above is the
-independent verdict.
+Author reports are not independent acceptance; the W74 and W75 replays above
+are the independent verdicts.
