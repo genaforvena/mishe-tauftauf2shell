@@ -22,6 +22,11 @@ SDIST_SHA=a830b1a40919539d07806aa58e1b114df53ddd43213d9c8b75847eee6c0182b5
 WHEEL_SHA=62f5409336adb0663b7caa0da5c7d9e7bdbaae9ce761d34669420c2a801b2780
 PAD=$HERE/poc-pad.j2k
 ORIG=$HERE/src/poc.j2k
+# The padded PoC is a derived file, not committed. Generate it from the
+# committed source as run.sh does, so a clean-archive replay needs no seeding.
+if [ ! -f "$PAD" ]; then
+  python3 "$HERE/src/make-pad.py" "$ORIG" "$PAD" || exit 2
+fi
 
 : > "$OUT/results.tmp"
 pass=0; fail=0
