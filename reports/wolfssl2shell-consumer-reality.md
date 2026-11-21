@@ -1,12 +1,18 @@
 # wolfSSL2shell — consumer-reality check on loopback (2026-11-21)
 
-**Result: the remote ACK-fill route is gated in a real wolfSSL DTLS 1.3
-server; no rung-4 promotion.** Rungs 1/2/3 of CVE-2026-6679 remain
-ESTABLISHED on the verbatim pinned v5.9.0 ASan harness
-(`reports/frontier-wolfssl2shell.md`, witness #985). Rung 4 remains
-INSTRUMENTED (staged-heap chosen-byte readback only). This report adds a
-negative/consumer-reality result from a real 127.0.0.1 server, not a
-counterclaim about the sink.
+**Result: rung 4 is now ESTABLISHED for availability impact on a live
+loopback wolfSSL DTLS 1.3 server, under explicit lab preconditions; code
+execution remains UNKNOWN.** Rungs 1/2/3 of CVE-2026-6679 stay ESTABLISHED
+on the verbatim pinned v5.9.0 ASan harness
+(`reports/frontier-wolfssl2shell.md`, witnesses #985 and #1080). The natural
+fill route hits only the heap top chunk (fifth wake below), but a lab-only
+pre-grown output buffer — modelling a server that has already sent a flight
+— puts the overflowing ACK write across the live `seenRecords` nodes:
+sender-chosen record-number bytes overwrite a live node's glibc chunk size
+and `next` pointer, and the real `Dtls13RtxFlushAcks` free path aborts with
+`double free or corruption (out)` (sixth wake below). This is a
+chosen-byte-in-live-object, symbolized, loopback-only result; no pointer
+diversion to attacker code, control-flow hijack or execution was observed.
 
 ## Question and method
 
@@ -307,4 +313,153 @@ gcc -g -O0 -fsanitize=address -fno-omit-frame-pointer \
 ASAN_OPTIONS=detect_leaks=0 ./out/loopback/server-asan 18516 1 1 1 \
     > out/loopback/frag-asan-gate2.log 2>&1 &
 python3 loopback_frag_sender.py 18516 4097 0 1024 800 legacy 424242420000
+```
+
+## Fifth wake: the overflow path is wilderness, not a live object (2026-11-21, 18:4xZ)
+
+Question: with the fill route solved, can a chosen live object or pointer be
+placed at the overwritten offsets? Answer from the live plain build: **no,
+not in this route** — the 65,552-byte overwrite lands entirely in the glibc
+top chunk, because the ACK output buffer is the last live allocation before
+the sink. This is a structural ceiling on the demonstrated route, not a
+claim that CVE-2026-6679 is unexploitable by some other fill route.
+
+Method: `groom_inspect.gdb` breaks at `dtls13.c:2604` on the first epoch
+write past `output + headerLength + 2 + msgSz`, dumps live object addresses,
+1024 bytes past the region, the neighbouring glibc chunk headers and
+`info proc mappings`, then breaks at `:2613` after the full loop. Server:
+plain (non-ASan) `server-plain`, port 18630, 4097 paced fragments at 1200 us.
+All addresses 127.0.0.1; full log `out/loopback/groom-inspect.log`.
+
+Observed:
+
+1. `output=0x55555564b210`, `region_end=0x55555564b22f`, `msgSz=16`,
+   `headerLength=13`. Live objects are all *below* the output buffer:
+   `ssl=0x555555628620`, `ctx=0x5555556272c0`,
+   `inputBuffer.buffer=0x55555562aa50`,
+   `seenRecords=0x55555562b1f0`, encryption epochs `0x555555628c28`,
+   `rtxRecords=NULL`. `seenRecords` nodes are 0x20 apart and
+   `0x62b1f0 + 4097*0x20 = 0x64b210` exactly: the output buffer is the very
+   next allocation after the last inserted record number.
+2. The chunk header immediately after the output buffer is at
+   `0x55555564b230` with `size=0x1ddd1`. `info proc mappings` gives the heap
+   as `[0x555555627000,0x555555669000)`; `0x669000 - 0x64b230 = 0x1ddd0`.
+   That chunk is the **top chunk** (wilderness), not a live object. The 1024
+   bytes past the region are all zero before the write — no allocated chunk,
+   no tcache/fastbin `fd`/`bk`, no pointer to corrupt.
+3. After the loop, `ackMessage=0x55555565b22f` (65,552 bytes past the start)
+   and the region reads as the attacker's repeating pattern
+   (`0x0000000000000000` epoch, `0x0100000000000000`,
+   `0x0200000000000000`, ... sequence). All 65,552 controlled bytes land in
+   unallocated top memory; `0x64b22f + 65552 = 0x65b22f` is still below the
+   heap end `0x669000`.
+4. The adjacent top-chunk size field at `0x55555564b238` is attacker-writable
+   (7 bytes from the sequence value, 1 from the next epoch value), but this
+   host is glibc 2.39: its `sysmalloc`/top-size sanity checks rule out the
+   classic House-of-Force follow-up. A plain run to completion
+   (`out/loopback/groom-plain-post.log`) exited 0 with no malloc/abort — no
+   consumer allocates from the corrupted top after the write.
+
+Interpretation: the fill route requires the incomplete-ClientHello path,
+which suppresses the handshake, all ACK flushes and every prior output
+write. `CheckAvailableSize` therefore grows the output buffer at `:2588`
+immediately before the write loop, so it is always the last live chunk and
+the overflow has no live neighbour to hit. Nothing allocates between the
+grow and the write, and the receiver is single-threaded, so network-driven
+grooming cannot insert a victim there. A live-pointer overwrite would need
+the output buffer to be a pre-existing large allocation with live chunks
+after it (the state of a real server after a completed handshake); producing
+4097 ACK-eligible records in that state remains UNKNOWN — KeyUpdates
+self-flush and post-handshake plaintext records are dropped at the epoch
+switch, as recorded above. Rung 4 stays INSTRUMENTED; rungs 1/2/3 are
+unchanged. Tagged v5.9.1 (128-record cap) remains the fixed control.
+
+Reproduce (all loopback, no pinned source edits):
+
+```
+cd lab/frontier/wolfssl2shell
+gdb -q -batch -x groom_inspect.gdb ./out/loopback/server-plain \
+    > out/loopback/groom-inspect.log 2>&1 &
+sleep 2
+python3 loopback_frag_sender.py 18630 4097 0 1024 1200
+```
+
+## Sixth wake: chosen bytes in a live node, real cleanup abort (2026-11-21, 18:5xZ)
+
+The fifth-wake ceiling applies to the *natural* fill route, where the output
+buffer is grown at the sink and is the last live chunk. A lab-only variant
+reaches the live objects. `loopback_server.c` gained an optional sixth
+argument `pregrow`: before the flood it calls `CheckAvailableSize(ssl, 64)`,
+modelling a real server whose output buffer already exists because it has
+sent a flight. No pinned library source was edited. `CheckAvailableSize`
+then does not grow the buffer at `:2588`, so the 4097 `seenRecords` nodes
+are allocated *after* it, inside the 65,552-byte overflow path.
+
+Preconditions, reported with the result: `early13`, `unified_seen`,
+`pregrow=64`, epoch 0, 4097 paced fragments (1200 us), loopback only. Epoch
+is not attacker-chosen in this route: sending epoch `0x4242` kept
+`ack_count=0` (`groom-abort2-gdb.log`), so the chosen bytes come from the
+64-bit record *sequence number*.
+
+Observed:
+
+1. Gdb at `dtls13.c:2613` after the write (plain build, port 18632,
+   `groom-victim2.gdb`, `out/loopback/groom-victim2.log`): `output=0x55555562a930`,
+   `ackMessage=0x55555563a94f`, `seenRecords=0x55555562b240`. The live head
+   node's glibc chunk size field at `0x55555562b238` reads
+   `0x0078000000000000` (originally `0x21`), and its `next` pointer at
+   `0x55555562b250` reads `0x0000000000000000` (originally the address of
+   the next node). Neighbouring node chunk headers carry the same
+   sender-derived pattern. The write cursor reaches these live fields with
+   the full symbolized frame chain
+   `Dtls13WriteAckMessage dtls13.c:2613` ← `SendDtls13Ack :2899` ←
+   `Dtls13RtxTimeout :2748` ← `wolfSSLReceive internal.c:11132` ←
+   `wolfSSL_accept_TLSv13 tls13.c:14783`.
+2. Without gdb, the same live server aborts: `out/loopback/groom-plain-crash.log`
+   shows 4097 ACK records then `double free or corruption (out)`, server
+   exit code 134 (SIGABRT). Under gdb (`groom_abort.gdb`,
+   `out/loopback/groom-abort-gdb.log`) the symbolized chain is
+   `malloc_printerr` ← `_int_free_merge_chunk(p=0x55555562b230,
+   size=40250921669623808)` ← `_int_free` ← `__GI___libc_free` ←
+   `wolfSSL_Free wolfcrypt/src/memory.c:449` ←
+   `Dtls13RtxFlushAcks dtls13.c:780` ← `SendDtls13Ack :2930` ←
+   `Dtls13RtxTimeout :2748` ← `wolfSSLReceive internal.c:11132` ←
+   `GetInputData :22186` ← `DoProcessReplyEx :22728` ←
+   `wolfSSL_accept_TLSv13 tls13.c:14783`. The abort is in the real ACK
+   cleanup, entered from the record receive path, not in lab instrumentation.
+3. The aborting size is sender-chosen. With `seq_base=0` the free size is
+   `0x008f000000000000` (143 << 48, where 143 is a chosen record number);
+   with `seq_base=0x1000` (`run_groom_seqbase.sh`,
+   `out/loopback/groom-abort3-gdb.log`) it is `0x008f100000000000` — the
+   chosen `0x10` byte appears in the size argument. Same frames and same
+   chunk `0x55555562b230` in both runs.
+4. Fixed control: the tagged v5.9.1 server built from the same wrapper with
+   `pregrow=64` and the identical 4097 fragments
+   (`out/loopback/groom-fixed-control.log`) reported no abort and zero ASan
+   reports across 184 monitor samples; the known 128-record cap applies.
+   The run was stopped at the harness timeout while still looping, so this
+   control is bounded to that observation window, not a full server exit.
+
+Grade disposition: rung 4 moves from INSTRUMENTED to **ESTABLISHED for
+availability impact** — chosen record-number bytes at chosen offsets in a
+live heap object, symbolized frames, and a deterministic server abort on a
+loopback socket. This matches the advisory's `VA:H`. It does **not**
+establish pointer diversion, arbitrary write or execution: the `next`
+pointer was overwritten with a chosen value but the flush traverses only
+one node before the abort, and no fake-chunk or tcache follow-up was
+demonstrated. Those remain UNKNOWN. All four lab preconditions above are
+part of the demonstrated conditions; early13 and unified_seen were already
+reported in the fourth wake, and pregrow models a post-flight server.
+
+Reproduce (all loopback, no pinned source edits):
+
+```
+cd lab/frontier/wolfssl2shell
+gcc -g -O0 -Ibuild/wolfssl-5.9.0-plain loopback_server.c \
+    build/wolfssl-5.9.0-plain/src/.libs/libwolfssl.a -lm -lpthread \
+    -o out/loopback/server-groom
+gdb -q -batch -x groom_abort.gdb ./out/loopback/server-groom \
+    > out/loopback/groom-abort-gdb.log 2>&1 &
+sleep 2
+python3 loopback_frag_sender.py 18635 4097 0 1024 1200
 ```

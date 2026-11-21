@@ -1,0 +1,8 @@
+set pagination off
+set confirm off
+set print thread-events off
+set print elements 0
+run 18635 60 1 1 64
+printf "FACT ABORT_STOP signal arrived\n"
+bt 20
+info program

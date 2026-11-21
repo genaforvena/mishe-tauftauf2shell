@@ -56,8 +56,8 @@ int main(int argc, char** argv)
     WOLFSSL* ssl = NULL;
     char tree[1024];
 
-    if (argc < 2 || argc > 5) {
-        fprintf(stderr, "usage: loopback_server PORT [TIMEOUT_SEC] [early13] [unified_seen]\n");
+    if (argc < 2 || argc > 6) {
+        fprintf(stderr, "usage: loopback_server PORT [TIMEOUT_SEC] [early13] [unified_seen] [pregrow]\n");
         return 2;
     }
     port = atoi(argv[1]);
@@ -98,9 +98,18 @@ int main(int argc, char** argv)
         printf("FACT early13=1 tls1_3=%d\n", ssl->options.tls1_3);
         fflush(stdout);
     }
-    if (argc == 5 && atoi(argv[4])) {
+    if (argc >= 5 && atoi(argv[4])) {
         ssl->options.seenUnifiedHdr = 1;
         printf("FACT unified_seen=1\n");
+        fflush(stdout);
+    }
+    /* Lab-only: pre-grow the output buffer, modelling a real server that has
+     * already sent a flight before the retransmission ACK. No library edit. */
+    if (argc == 6 && atoi(argv[5]) > 0) {
+        int pg = atoi(argv[5]);
+        int pgr = CheckAvailableSize(ssl, pg);
+        printf("FACT pregrow=%d ret=%d size=%u\n", pg, pgr,
+               ssl->buffers.outputBuffer.bufferSize);
         fflush(stdout);
     }
     {
