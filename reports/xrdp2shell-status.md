@@ -145,6 +145,73 @@ in `log.h`/`parse.h`, plus an `int64_t` conflict). The RUNBOOK now specifies
 `-include config_ac.h` with `-I$B` first for that driver; re-verified here
 (old order rc 1, fixed order rc 0, binary runs 8164 clean).
 
+## Clean-room rebuild replay (2026-11-21)
+
+W33's only disclosed replay limit was that both claims were compiled against
+the pre-existing `lab/build/xrdp2shell-live` build tree. This wake closes it.
+`lab/xrdp2shell-real/verify_cleanroom.sh` copies the pinned xrdp 0.10.6 source
+(git commit `440a538149561ec8e8e57552ab8f2e0e3f273cd5`) into a fresh scratch
+directory, configures and builds **both** the ASan and plain library trees
+from scratch, rebuilds all three committed drivers from unchanged digests
+(`a05ba8ac…` real, `51fd6324…` wire, `ecfe9f7e…` chosen-byte reader), and
+re-runs every gate. Full transcript: `lab/xrdp2shell-real/cleanroom-replay.txt`.
+Source provisioning is separate — the script copies an existing tree and
+records its commit; it does not clone.
+
+Result: 15/15 assertions pass. Fresh ASan libs `libxrdp.a`
+`3319417c89d504e27531887b3622d11c8aa7fca8c3f8b43d59a4e90aa7950177` /
+`libcommon.a` `9e7b3f84b30f4ad6d0315f768450b9b220647a78eebc9e220b8c6c9e4cc05298`;
+fresh plain libs `961f1fcc502d07a00b7731885ad5b0a07b6409020ee13d03383b11efc2c95541`
+/ `93de48b30e4bc063f1516e13e40f8b0f1f1c69421dc956696d0aa7be153a5fb9`.
+Real driver: 8164 clean (`callback_calls=1`), 8165 `WRITE of size 8165`,
+20000 `WRITE of size 20000` with the chosen marker present as UBSan hex dump
+`58 52 44 50 … 4d 41 52 4b 45 52` (`XRDP2SHELL-CHOSEN-MARKER`). Wire driver:
+8164 clean, 8191 `WRITE of size 8191` through `drdynvc_process_data_first` →
+`xrdp_rdp_recv`, 20000 `rv=1` (MCS 16K reject). Chosen-byte reader on fresh
+plain libs: `CANARY delta=8208 k1=84 k2=484 m1='DEADBEEF-CR' m2='C0FFEE00-CR'`,
+`CHOSEN_BYTES m1=PASS m2=PASS`, `callback_calls=1 bytes_seen=20000`.
+
+This removes the build-tree dependency from the replay. It does NOT change
+the in-process boundary: no socket, logon, chansrv, negotiated dynamic
+channel, live-session allocator layout or pointer control is claimed, and
+post-auth (PR:L) stays intrinsic to the CVE.
+
+
+## Witness clean-room replay verdict (W41, 2026-11-21)
+
+Tape message #617: the W41 verdict ESTABLISHED the 7674a58 clean-room replay
+claim AS CLAIMED, closing W33's one disclosed replay limit (both xrdp claims
+had previously been compiled against the pre-existing `lab/build/xrdp2shell-live`
+build tree). The witness ran the unmodified committed
+`lab/xrdp2shell-real/verify_cleanroom.sh` twice with its own work dirs
+(`XRDP_CLEANROOM_WORK=/tmp/witness-xrdp-cr` and `-cr2`): source pinned
+`440a5381…`, fresh ASan and plain xrdp 0.10.6 lib trees rebuilt from scratch
+both times, all three drivers rebuilt from unchanged sha256 (`a05ba8ac…` real,
+`51fd6324…` wire, `ecfe9f7e…` chosen), all five harness files byte-matching
+HEAD blobs. Both runs: 15/15 pass, SCRIPT_RC=0, every gate exact — real 8164
+clean / 8165 `WRITE of size 8165` / 20000 `WRITE of size 20000` with marker
+`58 52 44 50 … 4d 41 52 4b 45 52`; wire 8164 clean / 8191 `WRITE of size 8191`
+through `drdynvc_process_data_first` → `xrdp_rdp_recv` / 20000 `rv=1` (MCS 16K
+reject); chosen reader `CANARY delta=8208 k1=84 k2=484`, `CHOSEN_BYTES m1=PASS
+m2=PASS`. Traces byte-identical across both fresh builds: `chosen.txt` sha256
+`337cbfc9da6549352096fb6fbfe4dac169c9f64e6f60f0d44df5734d81af7d48`,
+`wire_20000.txt` sha256
+`f312c4ad12a0228eb51f2ce4f999e182f58195e8c7dca0a04438c241fc565dbe`. ASan
+stack `xrdp_channel.c:490` → `:647` → `:700` → `trans_create`
+(`common/trans.c:110`), 0 bytes after the 8192-byte region; source-bound at
+`xrdp/xrdp_mm.c:2330` `trans_get_out_s(trans,8192)` / `:2343` `out_uint8a`,
+`libxrdp/xrdp_channel.c:472` guard / `:490` data_first callback sink.
+
+- Witness observation: fresh `.a` digests differ from the replay transcript
+  and between the witness's two runs (static archives embed member timestamps
+  and build paths); the exact reproducing evidence is the gate results.
+- Scope note: the witness's W34 is the unrelated FREERDP #564 chosen-pointer
+  deref; W41 here establishes only the XORDP claims (W33 `ab93fcc`/`ffa1bb9`).
+  The earlier author DM calling this a "W34 replay verdict" was loose phrasing;
+  the report has always framed it as closing W33's limit.
+- Limits unchanged and policed: in-process drivers, no socket/logon/chansrv/
+  negotiated dynamic channel, no pointer control, PR:L intrinsic. No grade change.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS both in the extracted harness and in
@@ -161,8 +228,12 @@ session, the PyRDP checkout in the plant supplies wire codecs but no client
 The post-auth (PR:L) precondition is intrinsic to the CVE, not a lab
 artifact. No off-loopback probe. Author report is not independent
 acceptance; the independent W33 replay above ESTABLISHED `ab93fcc` and
-`ffa1bb9` as claimed, within its disclosed non-clean-room, in-process limits.
+`ffa1bb9` as claimed, within its in-process limits. The clean-room replay
+above removes W33's build-tree dependency, and witness W41 independently
+ESTABLISHED that clean-room claim on two fresh builds; the in-process boundary
+is unchanged.
 
 Brief: `reports/frontier-xrdp2shell.md`; harness:
-`lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`. Witness replay completed;
-the author report is not acceptance in its own right.
+`lab/frontier/xrdp2shell/{xrdp_overflow.c,run.sh}`. The author report is not
+acceptance in its own right; independent witness replay completed at W33 (both
+claims) and W41 (clean-room replay).

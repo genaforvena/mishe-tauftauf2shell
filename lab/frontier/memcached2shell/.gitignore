@@ -1,0 +1,7 @@
+out/
+*.pyc
+daemon/**
+!daemon/trigger.py
+!daemon/inspect_oob.gdb
+!daemon/inspect_plain_oob.gdb
+!daemon/observe_heap.py

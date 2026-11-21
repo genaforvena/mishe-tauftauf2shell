@@ -1,0 +1,82 @@
+Wake 16 (2026-11-21, 05:40-05:5xZ): FFmpeg format gate and ADPCM tag-2 wrap.
+
+Scope: bounded closure of the report's "FFmpeg-enabled build UNVERIFIED" gap.
+Pinned FreeRDP 3.32.0 commit d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1,
+checked out locally from /tmp/fr-verify-live/src3320 into /tmp/fr-wake16-src.
+FFmpeg dev headers/runtime 7:6.1.1-3ubuntu5 (libavcodec.so.60.31.102) were
+apt-downloaded and dpkg-deb -x extracted into /tmp/fr-wake16-ffmpeg; no system
+package was installed, no external target was contacted. Two scratch builds:
+  /tmp/fr-wake16-build     -DWITH_FFMPEG=ON (WITH_DSP_FFMPEG=ON by default)
+  /tmp/fr-wake16-build-exp -DWITH_FFMPEG=ON -DCMAKE_C_FLAGS=-DWITH_DSP_EXPERIMENTAL
+Both used -DWITH_VIDEO_FFMPEG=OFF -DWITH_SWSCALE=OFF because only the DSP path
+was under test (libswscale headers absent); the remaining flags match
+verify_live.sh. No committed replay patch, digest or script was changed.
+
+SOURCE REASONING (raw-file lines in the pinned tree)
+  libfreerdp/codec/dsp.c:1512-1526 - with WITH_DSP_FFMPEG, delegation to
+    freerdp_dsp_ffmpeg_supports_format().
+  libfreerdp/codec/dsp_ffmpeg.c:63-89 - ffmpeg_codec_is_filtered() rejects
+    AV_CODEC_ID_ADPCM_IMA_OKI and AV_CODEC_ID_ADPCM_MS unless
+    WITH_DSP_EXPERIMENTAL is compiled in; AV_CODEC_ID_NONE always rejected.
+  libfreerdp/codec/dsp_ffmpeg.c:91-141 - tag 17 -> AV_CODEC_ID_ADPCM_IMA_OKI,
+    tag 2 -> AV_CODEC_ID_ADPCM_MS.
+  server/common/server.c:125-156 - server_rdpsnd_get_formats() calls
+    freerdp_dsp_supports_format(format, TRUE) (encode) over a list containing
+    tag 2, channels 2, rate 44100, bits 16; tag 17 is not in that list.
+  libfreerdp/codec/audio.c:225-255 - audio_format_compatible() compares tag,
+    channels, rate, bits but NOT nBlockAlign.
+  channels/rdpsnd/server/rdpsnd_main.c:265-277 - real parser requires
+    nBlockAlign >= 8 for tag 2, rejects only zero channels/blockalign.
+  channels/rdpsnd/server/rdpsnd_main.c:409-433 - tag-2 branch computes
+    bs = (nBlockAlign - 7*nChannels)*2/nChannels + 2 with no consistency
+    check; with 8/2: (8-14)*2/2+2 = -4 -> UINT64 0xFFFFFFFFFFFFFFFC.
+  :444-451 - realloc fails, error returned, out_frames NOT rolled back;
+    :770 - subsequent CopyMemory of 16384 client/synthetic bytes into the
+    still-8820-byte buffer.
+
+RUNTIME FORMAT SUPPORT (freerdp_dsp_supports_format, tag/blockalign/channels
+set as in a client format: PCM 16-bit, ADPCM tags 4-bit):
+  stock FFmpeg build:
+    PCM(1)         encode=1 decode=1
+    ADPCM(2)       encode=0 decode=0
+    DVI_ADPCM(17)  encode=0 decode=0
+  FFmpeg + WITH_DSP_EXPERIMENTAL build:
+    PCM(1)         encode=1 decode=1
+    ADPCM(2)       encode=1 decode=1
+    DVI_ADPCM(17)  encode=0 decode=1
+FFmpeg alone therefore does NOT make DVI_ADPCM (tag 17) selectable: the
+experimental codec filter rejects it, and even with the macro FFmpeg has no
+ADPCM_IMA_OKI encoder (shadow uses the encode direction).
+
+ACTUAL STOCK SHADOW FORMAT LIST (server_rdpsnd_get_formats()):
+  stock FFmpeg build: n=2, tags 41222 (AAC_MS) and 1 (PCM).
+  FFmpeg + experimental: n=7, tags 41222, 66, 49, 2, 1, 6, 7.
+Tag 2 is present only in the experimental build; a client may advertise tag 2
+with nBlockAlign=8 (parser floor) and it still matches the server's tag-2
+entry because nBlockAlign is not part of audio_format_compatible().
+
+REAL-LIBRARY TAG-2 WRAP (PocAdpcmTag2.c, FFmpeg + experimental build, gcc,
+plain and ASan; no RDP session, in-process):
+  [ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
+  SelectFormat rc=12  out_frames=0xfffffffffffffffc
+  double free or corruption (out)          [plain build, exit 134]
+  ASAN_OPTIONS=detect_leaks=0:allocator_may_return_null=1:abort_on_error=0:
+  ==NOTE== WARNING: AddressSanitizer failed to allocate 0xfffffffffffffff0 bytes
+  SelectFormat rc=12  out_frames=0xfffffffffffffffc
+  ERROR: AddressSanitizer: heap-buffer-overflow
+  WRITE of size 16384 ... 0 bytes after 8820-byte region
+    #0 memcpy
+    #1 rdpsnd_server_send_samples /tmp/fr-wake16-src/channels/rdpsnd/server/rdpsnd_main.c:770
+  allocated by realloc in rdpsnd_server_select_format rdpsnd_main.c:444
+  SUMMARY: AddressSanitizer: heap-buffer-overflow ... in memcpy
+Full ASan log: /tmp/fr-wake16-tag2-asan.log (scratch, not committed).
+
+CONTROL (same experimental build, stage 2 benign PCM instead of tag 2):
+  SelectFormat rc=0  out_frames=0x000000000000089d
+No ASan report; a later Stream_ResetPosition assert in the in-process harness
+is the already-documented unrelated harness limitation (wake 3).
+
+BOUNDARIES: in-process tag-2 PoC, not a live RDP session or over-the-wire PDU;
+no chosen-byte rung-4 dereference for tag 2 (already established for tag 17);
+experimental macro is a non-default build; the write bytes here are 0x41 from
+the PoC, not remote audio; post-auth/loopback caveats of the main claim stand.

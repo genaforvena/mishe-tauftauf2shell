@@ -1,0 +1,104 @@
+freerdp2shell wake 18 — client-controlled grooming of the pointer-bearing
+target object in the live stock-allocator heap (CVE-2026-114045 /
+GHSA-3m9q-g533-rqjq)
+
+Question left open by wake 17: the wLog object of
+com.freerdp.channels.rdpsnd.server was FOUND at out_buffer+8880 after the
+fact; can a remote client move that target object relative to the overwrite?
+
+Answer: YES, in the live loopback build. The number of AUDIO_FORMAT records in
+the client's second SNDC_FORMATS PDU sizes the server's client_formats array,
+which is the chunk immediately after out_buffer. One extra record shifts the
+following chunks, including the identified wLog object, by exactly 32 bytes.
+The natural post-write quality-mode log then dereferences the shifted object's
+Names field; chosen marker bytes placed at the shifted offset control the
+faulting pointer value. Shifting the object past the end of the 16384-byte
+write suppresses that dereference.
+
+Method (all scratch-only; five committed wake8 replay patches unchanged)
+-----------------------------------------------------------------------
+- Pinned FreeRDP 3.32.0 d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1 in
+  /tmp/fr-wake2/src3320; plain no-sanitizer build in
+  /tmp/fr-wake7-shadow-build (build only freerdp-shadow-cli and sfreerdp).
+- Scratch instrumentation before the real CopyMemory in
+  rdpsnd_server_send_samples dumped malloc_usable_size and following glibc
+  chunk headers (same observation-only technique as wake 12). It runs before
+  the copy and does not alter it.
+- Scratch client knob FR_EXTRA2=N appended N benign PCM records after the
+  malicious ADPCM record in PDU 2. The malicious record stays at index 0, so
+  activation still selects it and the wrap still happens. PDU 1 is unchanged.
+- Scratch synthetic-playback knob FR_TAG_OFF=OFF wrote eight 0x41 bytes at
+  buffer offset OFF; scratch FR_LATE=1 added Sleep(2500) after PDU 2 so the
+  client's own SNDC_QUALITYMODE reaches the server after the copy (wake 14
+  timing). WLOG_FILTER='com.freerdp.server:TRACE' on the server.
+- Every server bound 127.0.0.1 only, -auth, /log-level:DEBUG; client
+  /v:127.0.0.1:<port> /sec:rdp /u:test /p:test /sound. No off-loopback probe,
+  no live desktop session outside the lab, no new committed replay patch.
+- Scratch sources were restored and the plain build rebuilt afterwards; grep
+  over the three scratch files reports 0 occurrences of HEAP18/FR_EXTRA/
+  FR_TAG_OFF/FR_LATE.
+
+1. Offset control (N = extra records in PDU 2)
+----------------------------------------------
+Each run logged 'realloc failed!', WAKE9_COPY
+'dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00'.
+The chunk at user offset 8816 is the client_formats array: its first 16 data
+bytes are the parsed malicious ADPCM record
+(02 00 02 00 44 ac 00 00 10 b1 02 00 08 00 10 00).
+
+  N     array chunk sz   array bytes   wLog chunk off   wLog Names field
+  0     48               32            8864             8904
+  1     80               64            8896             8936
+  7     272              256           9088             9128
+  31    1040             1024          9856             9896
+  240   7728             7712          16544            16584
+
+Names field = wLog chunk header offset + 16 (struct user data) + 24
+(wLog struct field offset). The shift is exactly 32*N bytes, matching
+sizeof(AUDIO_FORMAT) from audio_formats_new(count) = calloc(count,
+sizeof(AUDIO_FORMAT)) (audio.c:262-265); the array is the chunk directly after
+out_buffer. Raw logs: verify-live-out/wake18/{baseline,x2-1,x2-7,x2-31,
+shifted240}-server.log.
+
+2. Dereference follows the shifted target (N=1)
+-----------------------------------------------
+With FR_EXTRA2=1, FR_LATE=1, WLOG_FILTER set, FR_TAG_OFF=8936 (the shifted
+Names field), gdb shows the real quality-mode receive path faulting:
+
+  Thread 7 "freerdp-shadow-" received signal SIGSEGV, Segmentation fault.
+  0x... in WLog_GetFilterLogLevel.part.0 () from libwinpr3.so.3
+  #0 WLog_GetFilterLogLevel.part.0    libwinpr3.so.3
+  #1 WLog_GetLogLevel                 libwinpr3.so.3
+  #2 WLog_IsLevelActive               libwinpr3.so.3
+  #3 WLog_Print_dbg_tag.constprop.21  libfreerdp-server3.so.3
+  #4 rdpsnd_server_handle_messages    libfreerdp-server3.so.3
+  #5 rdpsnd_server_thread             libfreerdp-server3.so.3
+  rax 0x4141414141414141   r15 0x0
+
+No server-side log call was injected; the log is FreeRDP's own WLog_DBG on the
+clobbered TAG. Precision check: the same run with FR_TAG_OFF=8952 (16 bytes
+past the Names field) yields rax=0xdededededededede instead — the dereference
+base is exactly the eight bytes at the groomed offset. Raw logs:
+verify-live-out/wake18/shifted1b-gdb.log and shifted1-gdb.log.
+
+3. Out-of-write negative (N=240)
+--------------------------------
+With FR_EXTRA2=240 the wLog chunk moves to 16544 and its Names field to
+16584, past the end of the 16384-byte copy. The wrap and the 16384-byte
+WAKE9_COPY still occur, but there is no WLog SIGSEGV: the only fault is the
+familiar glibc 'double free or corruption (!prev)' at teardown. Raw log:
+verify-live-out/wake18/shifted240-gdb.log.
+
+Honest boundary
+---------------
+The CLIENT controls the OFFSET of the target object through the PDU's format
+record count; it does not choose the bytes written. The 0x41/0xDE bytes come
+from the lab's synthetic server-side playback source (wake 17: in a stock
+deployment the copied bytes and stride come from the server's platform audio
+capture, so remote byte choice is NOT established). Dereference still needs
+the lab timing delay, WLOG_FILTER, a lab subsystem-supplied wrap-capable
+format table, post-auth /auth and loopback. No pointer-bearing object was
+groomed in a stock (unpatched-format-table) session; the accepted replay
+patches, their digests and verify_live.sh were not changed. This is a
+scratch observation in the live stock allocator, not an independent witness
+acceptance.

@@ -1,0 +1,37 @@
+From e55e2915a2801f18495c7f0d049af9274dd70065 Mon Sep 17 00:00:00 2001
+From: Lorenzo Miniero <lminiero@gmail.com>
+Date: Mon, 12 Oct 2026 11:35:32 +0200
+Subject: [PATCH] Check buffer size in Record&Play plugin (#3688)
+
+---
+ src/plugins/janus_recordplay.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/src/plugins/janus_recordplay.c b/src/plugins/janus_recordplay.c
+index 7a7b45a4a8..1434a3dbce 100644
+--- a/src/plugins/janus_recordplay.c
++++ b/src/plugins/janus_recordplay.c
+@@ -704,6 +704,11 @@ static const char *janus_recordplay_parse_codec(const char *dir, const char *fil
+ 			offset += 2;
+ 			if(len > 0 && !parsed_header) {
+ 				/* This is the info header */
++				if(len >= sizeof(prebuffer)) {
++					JANUS_LOG(LOG_ERR, "Info header too big (%"SCNu16" bytes), invalid recording\n", len);
++					fclose(file);
++					return NULL;
++				}
+ 				bytes = fread(prebuffer, sizeof(char), len, file);
+ 				if(bytes < 0) {
+ 					JANUS_LOG(LOG_ERR, "Error reading from file... %s\n", g_strerror(errno));
+@@ -2605,6 +2610,11 @@ janus_recordplay_frame_packet *janus_recordplay_get_frames(const char *dir, cons
+ 			if(len > 0 && !parsed_header) {
+ 				/* This is the info header */
+ 				JANUS_LOG(LOG_VERB, "New .mjr header format\n");
++				if(len >= sizeof(prebuffer)) {
++					JANUS_LOG(LOG_ERR, "Info header too big (%"SCNu16" bytes), invalid recording\n", len);
++					fclose(file);
++					return NULL;
++				}
+ 				bytes = fread(prebuffer, sizeof(char), len, file);
+ 				if(bytes < 0) {
+ 					JANUS_LOG(LOG_ERR, "Error reading from file... %s\n", g_strerror(errno));

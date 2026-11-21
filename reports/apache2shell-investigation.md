@@ -615,6 +615,18 @@ Thread 3 "httpd" received signal SIGSEGV, Segmentation fault.
 rdi = rsi = 0x7ffff6a8f088   (unmapped)
 ```
 
+**Causal confirmation by fixed variant (05:19–05:20Z).** The exact two-line
+2.4.69 fix was applied to the pinned 2.4.68 tree at both lookahead sites (source
+snapshot `logs/rw-mod_rewrite-pristine.c` preserves the original), only
+`mod_rewrite.so` was rebuilt with the lane's ASan flags and copied into
+`install-2.4.68-asan/modules/`, and the same 8-request test gave **0/8 child
+SEGV** — every request returned normally. The pristine source and module were
+then restored byte-for-byte (source SHA256
+`52a3c5b1b60fe0acec587df04e388f76298bc64f727c616e7c7bf4688febeb77` on both
+restored file and snapshot), and the crash returned in **6/6** requests. This
+ties the crash to the `vary_this` duplication and not to another difference
+between the 2.4.68 and 2.4.69 builds.
+
 Frame 4 is the exact Vary merge named by the source diff; the faulting
 `strlen()` argument is the dangling `ctx->vary`. This is **rung 3 confirmed
 memory corruption** (debugger-inspected dereference of freed memory), not just
@@ -634,6 +646,324 @@ RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69  # 12/12 vs 0/12
 RW_VARIANT=plain RW_HEADER=yes ./rw-lane.py 2.4.68               # control: 0
 RW_VARIANT=lau RW_HEADER=none ./rw-lane.py 2.4.68                # control: 0
 python3 rw-gdb.py                                               # backtrace
+```
+
+### Adjacent lane L5 — CVE-2026-56449 mod_proxy_html `dump_content` OOB write (05:34–05:48Z 21 Nov) — rung 3 confirmed
+
+Source facts, re-verified from the local tarballs: `2.4.70/CHANGES:144-149`
+lists CVE-2026-56449 as an out-of-bounds write in `mod_proxy_html` with
+crafted HTTP response bodies, affecting 2.4.0–2.4.68. The functional fix
+between 2.4.68 and 2.4.69 in `modules/filters/mod_proxy_html.c` is the
+removal of one call, `dump_content(ctx)`, from `pcomment()` (2.4.68 line
+312). It is not the *only* textual change in that file: upstream also adds a
+`const` to `aszSucc`. The declaration at 2.4.68 :1304 is
+`static const char *aszSucc[]`; at 2.4.69 :1303 it is
+`static const char *const aszSucc[]`, a harmless qualification. Verified by
+direct diff of the local pinned trees 2026-11-21.
+
+`build-l5.sh` builds ASan/UBSan httpd 2.4.68 (affected) and 2.4.69 (control)
+with `--enable-proxy-html` against the host libxml2 2.9.14. `l5-lane.py` has
+two modes. The canonical one (`L5_PROXY=yes`) starts a loopback-only Python
+backend that supplies the crafted response body, reverse-proxies it through
+the lab httpd on 127.0.0.1, and counts child deaths and ASan reports. The
+other mode forces the output filter on a local file with `PROXY_HTML_FORCE`;
+it produced the same fault and is kept as the cheaper diagnostic driver.
+
+Causal chain, observed rather than inferred: `pstartElement` writes the last
+attribute value into `ctx->vb` and then resets only `ctx->vb.strlen = 0`
+(2.4.68 `mod_proxy_html.c:617`), leaving the value in `buf`. With
+`ProxyHTMLExtended Off`, a following HTML comment reaches `pcomment()`,
+which calls `dump_content()` on that stale buffer. gdb breakpoints in
+`logs/l5-gdb-trace.txt` show at the first hit: caller `pcomment` at line 312,
+`ctx->vb.strlen = 0`, `ctx->vb.buf = "AAAAAAAAAA"`, and the map
+`AAAA -> BBBB` with `flags = 3` (M_HTML 0x01 | M_EVENTS 0x02). `M_CDATA` is
+0x04 (2.4.68 `mod_proxy_html.c:77-79`), so flags=3 does **not** include
+M_CDATA. The witness's clean-tree gdb run with the committed harness shows
+flags = 7 (M_HTML|M_EVENTS|M_CDATA, the default map); the provenance of the
+recorded flags=3 trace is UNKNOWN (witness suggests a c-flagged or older
+config). The stale-buffer mechanism and size=-3 result are unchanged.
+The string-literal branch then computes
+`len + 1 - s_from - match = 0 + 1 - 4 - 0 = -3` as a `size_t` and passes it
+to `memmove` at line 272. Note the `c` map flag is an *exclude* flag
+(`XREGFLAG` clears M_CDATA), so a `c`-flagged rule is a valid negative
+control, not the trigger.
+
+Canonical differential, `L5_PROXY=yes`, body
+`<p title="AAAAAAAAAA">x</p><!--trigger-->`, four requests per build:
+2.4.68 showed 4/4 child `SIGSEGV (11)` and four `AddressSanitizer` reports;
+2.4.69 showed 0/4 and none. The report is
+`ERROR: AddressSanitizer: negative-size-param: (size=-3)` at
+`mod_proxy_html.c:272`, called from `pcomment` at line 312, through
+`htmlParseChunk` and `proxy_html_filter` at line 982. Logs:
+`logs/l5-smoke-2.4.68-proxy.txt` and `logs/l5-smoke-2.4.69-proxy.txt`.
+Specificity controls on 2.4.68 (three requests each) were all clean:
+`ProxyHTMLExtended On` (fix path, no call from `pcomment`), a `c`-flagged map
+(no M_CDATA), and a body with no attribute (no stale value).
+
+Causal check: applying the exact 2.4.69 one-line fix to the 2.4.68 source and
+rebuilding only `mod_proxy_html.so` gave 0/6 ASan reports and six normal
+responses. Restoring the pristine source and module byte-for-byte (SHA256
+`53b2e5a9…` and `856a7e72…`) restored 6/6 reports and child faults. The fault
+is caused by the removed call, not by another 2.4.68/2.4.69 difference.
+
+Rung-4 boundary: the underflow magnitude follows the offset of the stale
+string (`L5_ATTR=XXAAAAAAAAAA` gives `size=-5` instead of `-3`), but the size
+stays negative; ASan's interceptor aborts before any write, and the write
+target and source remain inside the same varbuf. No chosen bytes at a
+meaningful offset, no pointer control and no marker execution was obtained.
+**L5 closes at rung 3 (ASan-confirmed invalid write) with a rung-2
+reproducible crash on the genuine proxy path; rung 4 is not demonstrated.**
+The main-lane closure and do-not-retry list are unchanged.
+
+```
+cd lab/apache2shell
+./build-l5.sh                                   # both ASan builds, one-time
+ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy \
+  ./l5-lane.py 2.4.68 2.4.69                    # 4/4 child SEGV vs 0/4
+L5_PROXY=yes L5_EXT=yes L5_N=3 L5_SUFFIX=exton ./l5-lane.py 2.4.68  # control
+L5_PROXY=yes L5_FLAGS=c L5_N=3 L5_SUFFIX=nocdata ./l5-lane.py 2.4.68 # control
+./l5-gdb.py                                     # breakpoint + stale buf state
+```
+
+### Adjacent lane L6 — CVE-2026-56153 mod_charset_lite `finish_partial_char` heap overflow (06:00–06:07Z 21 Nov) — rung 3 confirmed
+
+`2.4.70/CHANGES:158-163` lists CVE-2026-56153 as an out-of-bounds write in
+`mod_charset_lite`, affecting 2.4.0–2.4.68; NVD and Red Hat describe an
+unauthenticated remote memory-corruption/DoS claim. The whole 2.4.68→2.4.69
+fix in `modules/filters/mod_charset_lite.c` is a five-line guard added at the
+top of the `finish_partial_char` loop (2.4.69 lines 448–452): when
+`ctx->saved >= sizeof(ctx->buf)` it sets `EES_LIMIT`, returns
+`APR_INCOMPLETE` and breaks. 2.4.68 line 448 writes
+`ctx->buf[ctx->saved] = **cur_str;` with no bound. `ctx->buf` is `char[8]`
+(`FATTEST_CHAR`), embedded in the heap-allocated `charset_filter_ctx_t`.
+
+`build-l6.sh` builds 2.4.68 (affected) and 2.4.69 (control) with
+ASan/UBSan, event MPM and `--enable-charset-lite`; no earlier lane built this
+module (all prior configure logs say `mod_charset_lite... no`). `l6-lane.py`
+sets `CharsetSourceEnc UTF-8` / `CharsetDefault ISO-2022-JP` on a loopback
+docroot with a CGI that reads the body, and sends a chunked POST: chunk 1 is
+`A` + ESC, chunk 2 is 32 ESC bytes. The XLATEIN filter converts from
+`CharsetDefault` to `CharsetSourceEnc`; the trailing ESC of chunk 1 is saved
+by `set_aside_partial_char()`, and chunk 2 makes `finish_partial_char()`
+append bytes while iconv keeps returning `APR_INCOMPLETE`.
+
+An APR-level enumeration (`libaprutil` `apr_xlate_conv_buffer`, ISO-2022-JP
+→ UTF-8) shows ESC (`0x1b`) is the only single-byte partial, and `0x1b` is
+the *only* appended byte that keeps `APR_INCOMPLETE` past index 8 — `saved`
+then walks past 20. So the written byte value is fixed by the primitive.
+
+Canonical four-request differential (`logs/l6-canonical.out`):
+2.4.68 produced 3/4 `mod_charset_lite.c:448:17: runtime error: index 8 out
+of bounds for type 'char [8]'`; 2.4.69 produced 0/4. The four
+`AddressSanitizer` lines in each build are exit-time LeakSanitizer noise —
+`buf` is inside the larger `apr_pcalloc` context, so the OOB write hits
+adjacent struct fields (`ran`, `noop`, `tmp`) rather than an ASan redzone.
+Across repeated four-request runs the affected build reported 1–4 OOB lines
+per run: this plant's four runs gave 2–4 (3/4 canonical, 2/4 final with
+`ASAN_OPTIONS=detect_leaks=0`), and the witness's ten clean-tree runs gave 1–3.
+These are timing-dependent samples, not a stable count; 2.4.69 always gave 0.
+`logs/l6-final.out` is the clean-leak replay.
+Responses are `400 Bad Request` because the CGI's body read fails after the
+filter error; the OOB write happens before that. Negative controls on 2.4.68
+(four requests each) were clean: no charset directives, source == default,
+and a second chunk of `A` bytes instead of ESC
+(`logs/l6-*-nocharset|samecharset|noesc-combined.log`).
+
+Causal check: applying the exact 2.4.69 guard to the 2.4.68 source and
+rebuilding only `mod_charset_lite.so` gave 0/4 UBSan reports; restoring the
+pristine source and module byte-for-byte (SHA256 `433a68d2…` source,
+`6e6b2ae3…` .so) restored 2/4 reports. Causality is to the guard, not to
+another 2.4.68/2.4.69 difference. A longer ESC run (64 bytes) gave 4/4 UBSan
+reports and 4/4 child `SIGSEGV (11)` (`logs/l6-2.4.68-long-combined.log`):
+the fixed `0x1b` bytes eventually corrupt a pointer field used downstream.
+
+Rung-4 boundary: the byte value is fixed at `0x1b`, the corrupted offsets are
+set by the struct layout rather than by the attacker, and the resulting SIGSEGV
+occurs on a corrupted context pointer with no benign-marker execution.
+**L6 closes at rung 3 (UBSan-confirmed OOB write plus child crash on the
+long run); rung 4 is not demonstrated.** Main-lane closure, negative list and
+do-not-retry conditions are unchanged.
+
+```
+cd lab/apache2shell
+bash build-l6.sh                                # one-time ASan charset-lite builds
+python3 l6-lane.py 2.4.68 2.4.69               # 3/4 UBSan OOB vs 0/4
+L6_SUFFIX=nocharset L6_NOCHARSET=1 python3 l6-lane.py 2.4.68   # control
+L6_SUFFIX=samecharset L6_SAMECHARSET=1 python3 l6-lane.py 2.4.68 # control
+L6_SUFFIX=long L6_NEXT_HEX=$(python3 -c "print('1b'*64)") \
+  python3 l6-lane.py 2.4.68                     # 4/4 UBSan + 4/4 child SEGV
+```
+
+Witness verdict (tape #700, 08:32–08:41Z): **ESTABLISHED AS CLAIMED**, rung 3
+stands and rung 4 is not claimed. The witness independently rebuilt from its
+own archive.apache.org tarballs, confirmed the sole five-line guard diff and
+reproduced the causal test (apply guard → 0/4, restore pristine → 2/4). Its
+one prose nit — the OOB-line count above — is corrected in this report; no
+replay was owed.
+
+### Adjacent lane L7 — CVE-2026-42535 mod_dav_fs state-directory access (06:22–06:26Z 21 Nov) — rung 2 only, premise corrected
+
+My wall's previous "next experiment" named CVE-2026-93546, a mod_dav_fs
+PROPPATCH namespace overflow affecting 2.4.0–2.4.68 and fixed in 2.4.69.
+That premise was false. No such CVE appears in any available source tree;
+the real mod_dav_fs entry is `CVE-2026-42535` at
+`httpd-2.4.69/CHANGES:123-131`, a path-handling issue affecting 2.4.67 and
+earlier and fixed in 2.4.68. The fix is in `modules/dav/fs/repos.c`:
+`dav_fs_get_resource()` now denies any resource whose leaf or parent
+directory is `DAV_FS_STATE_DIR` (`.DAV`), returning 403; the same commit
+also makes a DELETE race return 404. There is no overflow, no chosen bytes
+and no pointer-shaped write. The correction is recorded here rather than
+silently replacing the old lane.
+
+`l7-lane.py` drives the ASan/UBSan httpd builds already built for L2 (2.4.67,
+from `l2/install-2.4.67-asan`) and L6 (2.4.68, from
+`l6/install-2.4.68-asan`) over 127.0.0.1 only. It configures a DAV share,
+PUTs `/probe.txt`, PROPPATCHes a property to materialize the 12 KB DBM file
+`.DAV/probe.txt`, then PROPFINDs both `/.DAV` and `/.DAV/probe.txt`.
+
+Canonical differential (`logs/l7-2.4.67-combined.log`,
+`logs/l7-2.4.68-combined.log`): PUT 201 and PROPPATCH 207 on both; the
+state-dir PROPFINDs return **207 Multi-Status on 2.4.67** (the state dir and
+its property DB are directly addressable) and **403 Forbidden on 2.4.68**
+(fix denies). No child SEGV, no ABRT, no ASan or UBSan report on either
+build. Causal check: copying the 2.4.68 `repos.c` into the 2.4.67 tree and
+rebuilding only `mod_dav_fs.so` changed the 2.4.67 answers to 403; restoring
+the pristine source and module byte-for-byte (SHA256 `19f66847…` source,
+`8cf617dc…` .so) restored 207.
+
+Negative result preserved: on vulnerable 2.4.67, overwriting the whole
+`.DAV/probe.txt` DBM file with 12288 `A` bytes via PUT was accepted (204),
+and the following PROPPATCH/PROPFIND still returned 207 with no crash,
+ASan or UBSan report (`logs/l7-crash-probe.log`). The advisory's "potentially
+causing child process crashes" was not reproduced by that direct overwrite.
+
+**L7 is a rung-2 access-control differential only.** The changed state is a
+status code, not memory; no deterministic fault, no corruption, no chosen
+bytes or pointer control. Rung 4 is unreachable for this bug class and the
+main lane is unchanged.
+
+```
+cd lab/apache2shell
+python3 l7-lane.py 2.4.67 2.4.68    # state-dir PROPFIND: 207 vs 403
+```
+
+### Adjacent lane L8 — CVE-2026-48913 mod_http2 UAF when file handles exhausted (06:38–06:47Z 21 Nov) — rung 1/2, no confirmed corruption
+
+`httpd-2.4.71/CHANGES` lists CVE-2026-48913: use-after-free in mod_http2
+"when file handles are already exhausted", affecting 2.4.55–2.4.67, fixed in
+2.4.68 (credit IBM X-Force). Diffing `modules/http2/h2_mplx.c` between the L2
+2.4.67 tree (mod_http2 2.0.39) and the L3 2.4.68 tree (2.0.42) shows a narrow
+fix in `c2_setup_io()`: 2.4.67 registers `h2_beam_on_send/on_received/
+on_consumed` on `stream->input` with `c2` as context BEFORE
+`apr_file_pipe_create_pools()`; 2.4.68 moves all three registrations to after
+successful pipe creation. On EMFILE, `s_next_c2()` destroys `c2` via
+`apr_pool_destroy(c2->pool)` with stale beam callbacks still pointing at it —
+a source-level UAF, distinct from the main lane.
+
+`l8-lane.py` runs each ASan install on 127.0.0.1 with `RLIMIT_NOFILE=48` and
+drives 10 h2c connections × 80 POST-with-body streams (repeated `DATA` frames
+keep `stream->input` live). The trigger path is deterministic: both builds log
+hundreds of `(24)Too many open files ... AH10309 ... error create input write
+pipe` entries (119 on 2.4.67 / 718 on 2.4.68 in one 20 s run; up to
+1031 / 1454 in others). No pristine run produced an ASan use-after-free,
+double-free, chosen-byte write or deterministic child fault; the only
+sanitizer output was the known exit LeakSanitizer noise and Apache's SIGSEGV
+handler masking APR-pool-internal faults.
+
+Three attempts to confirm use of freed memory by instrumenting `h2_mplx.c`
+are preserved as negatives, not upgrades: (a) a global set of freed `c2`
+addresses reported hundreds of "stale callback" hits on 2.4.67 but also
+hundreds on a build carrying the 2.4.68 fix — APR recycles c2 addresses, so
+the check was invalid; (b) a poison field in `h2_conn_ctx_t` first hit an ABI
+mismatch (only one translation unit rebuilt), then, after a full rebuild,
+reported zero hits; (c) an allocation-aware freed/live tracking variant made
+`h2_beam_send`'s `beam->from == from` assertion abort children on the
+vulnerable build but not on the pristine build — an instrumentation timing
+artifact. All source and module bytes were restored byte-for-byte (source
+SHA256 `624f0c32…`, installed `mod_http2.so` SHA256 `e657da06…`).
+
+**L8 is graded rung 1/2:** a source-bound suspected UAF with a reachable,
+deterministic trigger, but no confirmed corruption, no chosen bytes, no
+pointer control and no rung-4 path. Do not retry this fd-exhaustion trigger or
+the three instrumentation variants.
+
+```
+cd lab/apache2shell
+L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 python3 l8-lane.py 20
+```
+
+### Adjacent lane L9 — mod_auth_digest shared client-entry UAF / auth-state corruption (06:55–07:10Z 21 Nov) — rung 2, no confirmed corruption
+
+**Premise check.** The wake dossier named CVE-2026-73637 for this lane. No
+primary advisory was found and `CHANGES` of 2.4.69 has no CVE entry for the
+change: it reads "mod_auth_digest.c: Drop RFC 2069 support; rewrite shared
+memory handling and client nonce handling; 'authdigest-opaque' mutex is now
+longer needed" (line 18). The CVE number is UNVERIFIED; the code-level defect
+below is local evidence and does not depend on it.
+
+**Source-bound hazard (rung 1).** In 2.4.68 `get_client()` (`mod_auth_digest.c:
+~780`) returns a `client_entry*` pointing into the APR RMM shared-memory
+segment and stores it as `resp->client`. That pointer is then used with no
+lock: `nonce_count++` in `init_digest_request` (~1097), `memcpy(last_nonce,
+nonce, NONCE_LEN+1)` in `note_digest_auth_failure` (~1243) and `add_auth_info`
+(~1885), and `memcmp(last_nonce, nonce, NONCE_LEN)` in `check_nonce` (~1468).
+Meanwhile `add_client()` calls `gc()` (~813) on allocation failure, and `gc()`
+calls `rmm_free()` on entries in the same segment on behalf of any child
+process. The fix in 2.4.69 removes `resp->client` entirely, adds
+`find_client()`/`client_exists()`/`client_update_nonce()` that re-look-up the
+entry under `client_lock`, and replaces the 53-byte `last_nonce` array with
+`apr_time_t last_nonce_time`; the new `find_client()` comment explicitly says
+the entry "can [be] free[d] at any time on behalf of another process".
+
+**Deterministic rung-2 oracle (`l9-lane.py`).** Both ASan installs under
+`lab/apache2shell/l3/` load `modules/mod_auth_digest.so`. Config: loopback,
+`AuthType Digest`, `AuthDigestProvider file`, `AuthDigestNcCheck On`,
+`AuthDigestNonceLifetime 0`, `AuthDigestShmemSize 512`, event MPM. `rounds=6`:
+
+| build | clean challenge→auth 200 | unauthenticated request quoting the victim's opaque, then victim auth 200 |
+|---|---|---|
+| 2.4.68 | 6/6 | **0/6** (all 401) |
+| 2.4.69 | 6/6 | **6/6** |
+
+The 2.4.68 challenge path for an existing client resets
+`resp->client->nonce_count = 0` and overwrites `last_nonce` with a freshly
+generated nonce (`mod_auth_digest.c:1229,1243`), so a request that never
+authenticates invalidates the nonce a legitimate client is holding. 2.4.69's
+`note_digest_auth_failure` deliberately leaves that state alone; the observed
+behavior matches the fix comment exactly. This is reproducible auth-state
+corruption (authentication DoS), graded **rung 2**.
+
+**Corruption search — negatives preserved.** `L9_SHMEM=4096 L9_CHURN=4
+L9_VICTIMS=4 python3 l9-lane.py 15`: 2.4.68 had 1523 `gc'd N client entries`
+events and 4529/4529 victim requests returned 200; 2.4.69 had 825 gc events
+and 6616/6616 victims returned 200. No ASan use-after-free, double-free or
+overflow report, no child fault, and no chosen byte from the spoofed
+`opaque`/`nonce`/`cnonce` headers was observed in any corrupted state. An
+earlier tiny-shmem run (`512`, 16 churners, 8 victims, 10 s) produced 18481
+(2.4.68) / 12224 (2.4.69) gc events and 0/3080 / 0/4070 victim 200s: entries
+were gc'd before the victim could authenticate, on both builds, so that run
+is a starvation artifact, not a corruption signal. ASan does not instrument
+APR RMM shared memory, so a silent UAF cannot be excluded, but it is not
+demonstrated here.
+
+**Failed causal backport (negative).** Deleting the two state-mutating lines
+from pristine 2.4.68 and rebuilding `mod_auth_digest.so` broke the clean case
+as well (`last_nonce` is then never populated for a new client and
+`nonce_count` is no longer reset per challenge), so that is not a faithful
+minimal version of the 2.4.69 rewrite. The attempt was reverted: source
+SHA256 `13056f73…` and installed `mod_auth_digest.so` SHA256 `a0a553a4…`
+match the pre-experiment bytes.
+
+**L9 is graded rung 2**, with a source-bound UAF at rung 1. No confirmed
+memory corruption, no chosen bytes at a chosen offset, no pointer control —
+rung 4 is not reached. The Digest `opaque` is a hex-parsed integer key and
+`last_nonce` bytes are SHA1/base64-derived, so this is not the binary-capable
+field-value channel the main lane required. Close L9; do not retry its
+trigger, its churn settings or that backport.
+
+```
+cd lab/apache2shell
+L9_CHURN=0 L9_VICTIMS=0 python3 l9-lane.py 1   # 6/6 vs 0/6 oracle
 ```
 
 ## Reproduction (from a clean checkout, loopback only)
@@ -659,7 +989,18 @@ ASAN_OPTIONS='detect_leaks=0:handle_segv=1:allow_user_segv_handler=0:abort_on_er
   python3 l3-lane.py 10 8 20                    # L3: 2.4.68 wild jump, 2.4.69 clean
 L3_BODY_BYTE=5a L3_VERSIONS=2.4.68 \
   python3 l3-lane.py 10 8 20                    # body canary: PC still data-like
+RW_VARIANT=lau RW_HEADER=yes RW_N=12 ./rw-lane.py 2.4.68 2.4.69  # L4: 12/12 vs 0/12
+bash build-l5.sh                                # ASan builds with mod_proxy_html
+ASAN_OPTIONS=detect_leaks=0 L5_PROXY=yes L5_N=4 L5_SUFFIX=proxy \
+  ./l5-lane.py 2.4.68 2.4.69                    # L5: 4/4 child SEGV vs 0/4
+bash build-l6.sh                                # ASan builds with mod_charset_lite
+python3 l6-lane.py 2.4.68 2.4.69               # L6: UBSan index-8 vs clean control
+python3 l7-lane.py 2.4.67 2.4.68               # L7: state-dir PROPFIND 207 vs 403
+L8_NOFILE=48 L8_CONNS=10 L8_STREAMS=80 L8_DATA_ROUNDS=3 \
+  python3 l8-lane.py 20                         # L8: EMFILE trigger, no confirmed UAF
+L9_CHURN=0 L9_VICTIMS=0 python3 l9-lane.py 1    # L9: 6/6 vs 0/6 auth-state oracle
 ```
+
 
 `oracle.sh` in `lab/frontier/apache2root/` reproduces rung 2. Runtime state
 (`logs/`, `run/`) is gitignored; only scripts and this report are committed.

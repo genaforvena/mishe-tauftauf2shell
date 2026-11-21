@@ -33,10 +33,12 @@ Line numbers for `rdpsnd_main.c` below are raw-file lines at the named tag
   `out_frames` becomes that wrapped value, `out_buffer_size` wraps to
   `0xFFFFFFFFFFFFFFC0`, `realloc` fails, and `out_frames` is **not rolled back**
   (:446-451).
-- `send_samples()` (:765-785) then `CopyMemory`s client sample bytes into the
-  still-8820-byte `out_buffer`; `out_pending_frames` never reaches the huge
-  `out_frames`, so successive calls append at monotonically advancing offsets
-  — an unbounded, sequential, attacker-controlled heap write.
+- `send_samples()` (:765-785) then `CopyMemory`s the server audio-capture
+  sample bytes (`buf`, see wake 17) into the still-8820-byte `out_buffer`;
+  `out_pending_frames` never reaches the huge `out_frames`, so successive
+  calls append at monotonically advancing offsets — an unbounded, sequential,
+  attacker-triggered heap write whose byte values come from the server's
+  audio source, not the client (wake 17).
 - Harness (pinned digests above): rung 1 `rc2=2 out_frames=0xfffffffffffffff0
   realloc_failed=1`, `oob_writes=7564 first_oob=8820 last_oob=16383`; rung 2
   chosen bytes `ab`/`cd` land at OOB offsets 8820/12000; rung 3 ASan
@@ -550,6 +552,151 @@ Committed replay patches, digests and `verify_live.sh` were not changed;
 scratch sources were restored and rebuilt. This also supplies the raw log for
 the no-filter negative that wake 13 recorded without one (witness nit #567).
 
+## No unaided post-write log trigger (wake 15, 2026-11-21 05:30Z)
+
+Wake 14 left one UNKNOWN: whether a real server hits a post-write log on the
+clobbered rdpsnd TAG without the lab timing. Tested and answered NO. Same
+pinned 3.32.0 tree and plain build, chosen bytes `data[8904..8911]=0x41` in
+the synthetic playback, but the client is the committed patched `sfreerdp`
+with only `Sleep(400)` between its two `SNDC_FORMATS` PDUs — no wake-14
+`Sleep(2500)`. Server on 127.0.0.1:23415, `-auth /log-level:DEBUG`,
+`WLOG_FILTER` set, under gdb. Raw logs
+`lab/freerdp2shell-src/verify-live-out/wake15/`, summary
+`lab/freerdp2shell-src/natural_trigger_no_timing.txt`.
+
+The wrap and copy still occur (`realloc failed!`, `SelectFormat failed with
+12`, `WAKE9_COPY ... b8820=de`). But the client's `SNDC_QUALITYMODE` arrives at
+05:30:35:163, the same instant as the wrap, before the copy — not after it.
+Format selection failed, so the server sends no audio PDU and the client sends
+no `SNDC_WAVECONFIRM`; no further PDU reaches the server. There is no
+post-write log on the clobbered TAG, no `WLog_GetFilterLogLevel` frame and no
+SIGSEGV (`rax=0`, `r15=0x7ffff3cd56e0` at exit). At logoff the stock allocator
+aborts with `double free or corruption (!prev)` in `_int_free_merge_chunk`,
+the wake-9 corruption, not a controlled dereference. Wake 14's scratch client
+delay was therefore necessary: the controlled dereference still needs an
+instrumented post-write log trigger (or another PDU after the write).
+
+## FFmpeg format gate and ADPCM tag-2 wrap (wake 16, 2026-11-21 05:51Z)
+
+The last build-related UNKNOWN — whether an FFmpeg-enabled 3.32.0 build makes
+a wrap-capable format selectable without a subsystem-supplied table — is
+closed with two results. FFmpeg dev headers/runtime 6.1.1 were provisioned
+into `/tmp` only (`apt-get download` + `dpkg-deb -x`; no system install); the
+pinned 3.32.0 source was built twice against them: stock `WITH_FFMPEG=ON`
+(which implies `WITH_DSP_FFMPEG=ON`) and the same build with
+`-DCMAKE_C_FLAGS=-DWITH_DSP_EXPERIMENTAL`. `WITH_VIDEO_FFMPEG=OFF` kept the
+test on the DSP path (libswscale headers absent).
+
+1. **FFmpeg alone is a negative.** `dsp_ffmpeg.c:63-89` filters
+   `AV_CODEC_ID_ADPCM_IMA_OKI` (tag 17) and `AV_CODEC_ID_ADPCM_MS` (tag 2)
+   unless the experimental macro is compiled in. Runtime probe:
+   stock build `PCM encode=1 decode=1`, `ADPCM(2) encode=0 decode=0`,
+   `DVI_ADPCM(17) encode=0 decode=0`; `server_rdpsnd_get_formats()` returns
+   only tags 41222 (AAC_MS) and 1 (PCM). Even with the macro, tag 17 has no
+   FFmpeg *encoder*, which is the direction the shadow server's list uses.
+2. **FFmpeg + experimental exposes the second wrap branch.** The list then
+   contains tag 2 (channels 2, rate 44100, bits 16). `audio_format_compatible`
+   (`audio.c:225-255`) does not compare `nBlockAlign`, so a client may send
+   tag 2 with `nBlockAlign=8, nChannels=2` (the real parser floor for tag 2)
+   and match that entry. `select_format`'s tag-2 branch (`:409-433`) computes
+   `bs = (8 - 7*2)*2/2 + 2 = 0xFFFFFFFFFFFFFFFC`; `realloc` at `:444` fails,
+   `out_frames` is not rolled back, and `PocAdpcmTag2.c` produces the same
+   ASan result as the tag-17 PoC: `SelectFormat rc=12
+   out_frames=0xfffffffffffffffc`, `WRITE of size 16384 ... 0 bytes after an
+   8820-byte region` in `rdpsnd_server_send_samples` (`rdpsnd_main.c:770`).
+   A benign-PCM control on the same build gives `rc=0, out_frames=0x89d` and
+   no ASan report.
+
+Evidence: `lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`,
+`lab/freerdp2shell-src/PocAdpcmTag2.c`; scratch ASan log
+`/tmp/fr-wake16-tag2-asan.log`. Boundaries: the tag-2 result is in-process on
+real library bytes, not a live RDP session or over-the-wire PDU; no chosen-byte
+rung-4 dereference was attempted for tag 2 (that remains established for tag
+17); the experimental macro is a non-default build; the 16384 bytes are PoC
+`0x41`, not remote audio. No probe off loopback, no committed harness or
+replay-patch change.
+
+## Real audio source: copied bytes are server capture, not client-chosen (wake 17, 2026-11-21 06:07Z)
+
+Source-bound reading of pinned 3.32.0 `d27a4f7c`, prompted by the remaining
+"real audio source" UNKNOWN. `rdpsnd_server_send_samples()`
+(`rdpsnd_main.c:747-793`) copies from its `buf` argument:
+`CopyMemory(out_buffer + out_pending_frames*src_bytes_per_frame, buf,
+cframesize)` at `:770-773`. Both quantities that shape the write are set
+server-side:
+
+- `src_bytes_per_frame` is `src_format->wBitsPerSample/8 * nChannels`
+  (`rdpsnd_main.c:383-385`); `src_format` is assigned only from the server's
+  own `server_formats[0]` in the shadow/Sample activation callbacks
+  (`server/shadow/shadow_rdpsnd.c:78`, `server/Sample/sf_rdpsnd.c:51`) or from
+  the audio-source message `msg->audio_format`
+  (`server/shadow/shadow_client.c:2570`). `select_format()` reads
+  `context->src_format` but never writes it. The client's `SNDC_FORMATS`
+  record fills `context->client_formats[...]`, which supplies only `bs` (the
+  wrap trigger) and the DSP reset format — not the copy stride.
+- `buf` is the server-side captured audio. On the Linux/X11 shadow server it
+  arrives as `SHADOW_MSG_OUT_AUDIO_OUT_SAMPLES` (`shadow_client.c:2561-2578`);
+  no in-tree producer of that message exists in 3.32.0 (a grep over
+  `server/` and `include/` finds only the definition at
+  `include/freerdp/server/shadow.h:279,309` and the consumer). The Windows
+  and macOS servers fill it from DirectSound/WASAPI/CoreAudio
+  (`server/Windows/wf_directsound.c:181`,
+  `server/Windows/wf_wasapi.c:290`, `server/Mac/mf_rdpsnd.c:171`). The client
+  microphone-redirection channel `audin`
+  (`channels/audin/server/audin.c`) has no data path into rdpsnd.
+
+Consequence for the honesty of rung 4: a remote client chooses the format
+fields that trigger the integer wrap and can time its PDUs (wakes 14/15), but
+it does **not** directly choose the bytes the server copies or the stride at
+which they land. The lab's "chosen bytes at chosen offsets" results (wakes 4,
+8, 9, 13, 14) use synthetic playback supplied through the lab subsystem table
+as a stand-in for that server capture source. Whether a particular
+deployment lets a remote attacker influence the captured audio content (for
+example system audio the attacker can cause to play) is deployment-specific
+and stays UNKNOWN. This does not change the demonstrated corruption, the
+pointer-bearing chunk or the chosen-pointer dereference in the lab build; it
+narrows the claim about who supplies the written bytes. Source-only finding —
+no new live session, no over-the-wire test, no probe off loopback.
+
+## Client-controlled grooming of the target object (wake 18, 2026-11-21 06:22Z)
+
+The last lab-level UNKNOWN — whether the pointer-bearing object found after
+the fact in wake 13 can be positioned by the client — is CLOSED OBSERVED in
+the live stock-allocator build. Full evidence:
+`lab/freerdp2shell-src/grooming_format_count_stock.txt`, raw logs in
+`verify-live-out/wake18/`.
+
+The client's second `SNDC_FORMATS` PDU controls `num_client_formats`, which
+sizes the server's `client_formats` allocation
+(`audio_formats_new()` = `calloc(count, sizeof(AUDIO_FORMAT))`,
+`libfreerdp/codec/audio.c:262-265`). That array is the heap chunk immediately
+after `out_buffer`; adding N benign PCM records **after** the malicious
+ADPCM record (which stays at index 0, so the wrap still happens) grows it by
+32 bytes per record and shifts every following chunk by the same amount.
+Measured wLog chunk-header offsets for N = 0/1/7/31/240 extra records:
+8864 / 8896 / 9088 / 9856 / 16544, i.e. `8864 + 32*N`; the identified
+`Names` field is at `8904 + 32*N`. All runs still logged the wrap and
+`WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00`.
+
+With N=1 and the wake-14 natural quality-mode log path, marker bytes placed
+at the shifted `Names` field (offset 8936) made the live server fault in
+`WLog_GetFilterLogLevel` with `rax=0x4141414141414141`; the same run with the
+marker 16 bytes too far (8952) gave `rax=0xdededededededede`, confirming the
+faulting pointer is read from exactly the groomed offset. With N=240 the
+target moved past the end of the 16384-byte write (`Names` at 16584), and the
+natural log path no longer faulted — only the familiar glibc abort at
+teardown. This is bidirectional, client-controlled placement of a specific
+pointer-bearing object relative to the overwrite.
+
+Honest boundary: the client controls the OFFSET, not the written BYTES.
+Wake 17 established that the copied bytes and stride come from the server's
+audio capture; the 0x41/0xDE markers are the lab's synthetic playback source.
+The log trigger still needs the scratch client delay and `WLOG_FILTER`, the
+format table is lab subsystem-supplied, the session is post-auth and
+loopback-only, and the committed replay patches/digests were not changed.
+Scratch sources were restored and rebuilt. This is scratch observation in the
+live stock build, not independent witness acceptance.
+
 ## Evidence boundary
 
 Rungs 1/2/3 established; rung 4 PASS with lab-chosen bytes at chosen OOB
@@ -571,11 +718,25 @@ UNKNOWN. Wake 13 identified that object as the wLog object of
 `WLog_GetFilterLogLevel` under a scratch-injected post-copy log call and a
 configured `WLOG_FILTER`. Wake 14 reached the same fault with no server-side
 log injection: FreeRDP's own `SNDC_QUALITYMODE` receive path logs on that TAG
-after the write (scratch client-side timing delay needed). Grooming of a
-chosen target object remains UNKNOWN.
+after the write (scratch client-side timing delay needed). Wake 15 confirmed
+that delay is necessary: without it no client PDU reaches the server after the
+copy and there is no post-write dereference
+(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`). Wake 18 then CLOSED
+the grooming question: the client's format-record count sizes the
+`client_formats` chunk directly after `out_buffer`, shifting the identified
+wLog object by exactly 32 bytes per extra record; the natural post-write log
+dereferences the shifted `Names` field with a chosen pointer value, and
+shifting the object past the write suppresses that fault
+(`lab/freerdp2shell-src/grooming_format_count_stock.txt`). Offset control is
+therefore OBSERVED; byte control remains bounded by wake 17.
 In FFmpeg-off builds the stock shadow server's `Activated` callback selects
 only PCM, so a format table offering a wrap-capable tag is required
-(subsystem-supplied, demonstrated; or FFmpeg-enabled, UNVERIFIED here).
+(subsystem-supplied, demonstrated). Wake 16 closed the FFmpeg alternative:
+FFmpeg alone still rejects both ADPCM tags (stock list: AAC_MS and PCM), while
+FFmpeg compiled with `-DWITH_DSP_EXPERIMENTAL` adds tag 2 to the stock list and
+that tag has its own wrap branch, demonstrated on real library bytes in-process
+(`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`). Tag 17 has no FFmpeg encoder
+in either build.
 Network reachability, the default NLA gate (wake 7) and the no-auth gate
 behavior are observed over real loopback TCP. No off-loopback probe. Default
 posture is post-auth (PR:L, CVSS 8.8); the no-auth lab configuration used for
@@ -592,5 +753,21 @@ the written range in the live stock build
 and demonstrated a chosen-pointer-value dereference in that build
 (`lab/freerdp2shell-src/pointer_control_stock.txt`); wake 14 replaced the
 scratch log trigger with the real client/server quality-mode log exchange
-(`lab/freerdp2shell-src/natural_log_trigger_stock.txt`). Grooming of a specific
-target object and an FFmpeg-enabled build remain UNKNOWN.
+(`lab/freerdp2shell-src/natural_log_trigger_stock.txt`); wake 15 recorded the
+negative without that timing
+(`lab/freerdp2shell-src/natural_trigger_no_timing.txt`); wake 16 measured the
+FFmpeg format gate and added an in-process tag-2 wrap on a non-default build
+(`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`), independently accepted by
+witness verdict #602 (ESTABLISHED, no replay owed). Wake 17 traced the real
+audio source in pinned 3.32.0: the copied bytes and copy stride come from the
+server's platform audio capture, not the client, so remote byte choice is not
+established in a stock deployment (deployment-specific influence stays
+UNKNOWN). Wake 18 demonstrated client-controlled grooming of that target
+object in the live stock allocator (32 bytes per extra format record), with a
+controlled dereference at the groomed offset and an out-of-write negative;
+the client controls the offset, not the written bytes. The
+FFmpeg-build UNKNOWN is CLOSED (default build NEGATIVE, experimental build
+OBSERVED for tag 2); the real-audio-source question is CLOSED at the source
+level as described above. No lab-level UNKNOWN remains: only the
+deployment-specific question of whether an attacker can influence the
+server's captured audio content stays open and is not measurable here.

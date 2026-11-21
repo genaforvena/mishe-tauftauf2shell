@@ -179,6 +179,45 @@ there is no cross-batch stale-pointer reuse, and the OOB loop is additionally
 gated on `ri_TrigDesc->trig_insert_after_row`. This path offers strictly less
 attacker control than the INSERT path; no reproduction was attempted.
 
+## Chunk-placement probe — the proposed new primitive tested and failed (gdb, 2026-11-21)
+
+The closed grooming lane named one remaining idea worth testing: SQL might
+place a chosen 8-byte value in the arena chunk immediately after `ri_Slots`,
+so the OOB `rslots[i]` load would consume an attacker-chosen pointer. That
+idea is now tested and NEGATIVE.
+
+Harness `lab/frontier/postgres2shell/{trigger-marker.sql,gdb-marker.cmd,
+marker-probe.sh}` replays the batch_size=2 / 24-reported-rows trigger on the
+PTRACE-capable stock 17.11 container, but with the two local rows carrying
+distinctive 64-bit markers `0x4000000000000001` (4611686018427387905) and
+`0x7ffffffffffffffe` (9223372036854775806). At the OOB loop head
+(`ExecBatchInsert+120`) the exact-build symbols give `rslots=0x61a0495ce428`,
+`ri_PlanSlots=0x61a0495df350` (a different arena block), `numSlots=2`,
+`numInserted=24`, and the relation OID to be stored `0x22007`.
+
+The 48 words read from `rslots` contain only: slots[0]/slots[1] (valid slot
+pointers), NULLs, fixed descriptor constants (`0x2011`, `0x1d5`, `0x2000`),
+pointers to allocator objects, and palloc chunk headers
+(`0x000000a000000083`, `0x0000001000000002`). Neither marker appears as any
+OOB word; the only occurrence of the marker literals anywhere in the capture
+is the `sourceText=` string of the INSERT in the SIGSEGV backtrace. The first
+out-of-array value, `rslots[2]` at `0x...ce438`, is NULL and the loop faults
+at line 1274 as before. The `planSlots` array's tail is likewise fixed
+metadata (`0x0002200900000001` is consistent with a TupleDesc header,
+natts=1 / tdtypeid=0x22009), not a controllable pointer.
+
+Source closure: exact REL_17_11 `nodeModifyTable.c:891-921` writes
+`ri_Slots[i]` only at line 913, for `i = ri_NumSlots < ri_BatchSize`; no SQL
+path stores a chosen 8-byte value beyond the allocated array. The only writes
+to that region are palloc chunk headers and fixed TupleDesc/TupleTableSlot
+struct fields. Chosen-pointer control would need allocator-level stale-chunk
+grooming (a freed arena block reused with attacker bytes at the exact
+offset), which is not a SQL-visible primitive and was not observed here.
+
+Evidence: `lab/frontier/postgres2shell/logs/marker-17.11-gdb.log` (sha256
+`c0ccadd2d33c824eb860c47a6300b9b46a880a12c04967a997e3fa75acd49b2d`) and
+`logs/marker-17.11-psql.log`. No new primitive; the rung-4 lane stays closed.
+
 ## Source-bound mechanism (read from the fix patch, not inferred)
 
 `ExecForeignBatchInsert()` is an FDW callback that returns the count of
@@ -253,13 +292,15 @@ placed a chosen pointer there in this lane. Even with a chosen pointer, the
 written value is a relation OID, so a demonstration would need an observed
 controlled write at a chosen address, not just an OOB pointer read.
 
-The grooming lane is closed after this bounded matrix: the first OOB pointer
-is always allocator metadata (NULL or a chunk header), not a value the
-attacker can set from SQL. A future rung-4 attempt would need a different
-primitive (e.g. a way to place a chosen 8-byte value in the arena chunk
-immediately after `ri_Slots`), not more repetitions of this trigger. The
-fixed-build differential and all zero/NULL/chunk-header negatives are
-preserved above.
+The grooming lane and the proposed follow-on primitive are both closed: the
+first OOB pointer is always allocator metadata (NULL, descriptor constants or
+a chunk header), not a value the attacker can set from SQL. The 2026-11-21
+marker probe above tested the one named alternative — a chosen 8-byte value
+in the chunk after `ri_Slots` — and found no SQL path that writes it. A future
+rung-4 attempt would need a fundamentally different primitive (e.g.
+allocator-level stale-chunk grooming with byte-exact placement, which is not
+SQL-visible), not more repetitions of this trigger. The fixed-build
+differential and all zero/NULL/chunk-header negatives are preserved above.
 
 ## Reproduce
 
@@ -307,6 +348,19 @@ docker exec pg2shell-gdb bash /tmp/groom-probe.sh
 docker cp trigger-fullbatch.sql pg2shell-17-12:/tmp/trigger-fullbatch.sql
 docker exec -e PGPASSWORD=pg2shell pg2shell-17-12 \
   psql -U postgres -h 127.0.0.1 -p 5432 -f /tmp/trigger-fullbatch.sql
+```
+
+Chunk-placement probe (same PTRACE-capable 17.11 container, loopback only):
+
+```
+cd lab/frontier/postgres2shell
+docker cp trigger-marker.sql pg2shell-gdb:/tmp/trigger-marker.sql
+docker cp gdb-marker.cmd   pg2shell-gdb:/tmp/gdbmark.cmd
+docker cp marker-probe.sh  pg2shell-gdb:/tmp/marker-probe.sh
+docker exec pg2shell-gdb bash /tmp/marker-probe.sh
+# captures logs/marker-17.11-{gdb,psql}.log on the host; the gdb dump shows
+# rslots=... with no 0x4000000000000001 / 0x7ffffffffffffffe OOB word and
+# rslots[2]=NULL -> SIGSEGV at nodeModifyTable.c:1274.
 ```
 
 All listeners bind/publish on 127.0.0.1 only (host ports 55431/55432;

@@ -1154,3 +1154,112 @@ control, chosen byte, marker, LPE demo or web path. No other lane's grade
 changes. Next experiment if reopened: full 8.5.13 FPM ASan build for a true
 version pair, or GDB at `fpm_child_free`/`fpm_event_del` on the affected
 master; do NOT repeat the single- or dual-TU swaps (both negatives).
+
+
+## Wake 53 (2026-11-21, 05:23–05:36Z) — standalone CVE-2026-129496, rung 3 CONFIRMED
+GHSA-gr4f-wgx5-jpfv was already used in wake 17's combined splice chain;
+wake 53 isolates it as its own lane using the advisory's simpler
+startup-diagnostic recipe (invalid `date.timezone` + `max_input_vars=1` + file
+`error_log`, no session corruption and no third-party extension).
+Exact fix: `main/main.c` error-log timestamp uses
+`php_format_date(..., PG(modules_activated) && EG(active))`;
+`ext/date/php_date.c` also moves `php_date_global_timezone_db` init before
+`REGISTER_INI_ENTRIES`. New committed harness
+`lab/repro/php2shell-cve129496-tzcache.py`; evidence
+`lab/build/evidence/w53-129496/verdict.txt` = CONFIRMED.
+Affected `php-8.5.12-fpm-release-asan/sapi/cgi/php-cgi-vuln`: rc=1, ASan SEGV
+read in `__strlen_avx2`, stack `php_default_treat_data` (php_variables.c:583)
+→ `php_error_docref` → `php_log_err_with_severity` (main.c:991) →
+`php_format_date` (php_date.c:894) → `timelib_unixtime2local` →
+`timelib_get_time_zone_info` (parse_tz.c:908) → `_estrdup` → strlen on stale
+tzcache. Fixed `php-cgi-fixed` = same build with ONLY the upstream one-line
+main.c guard rebuilt: rc=0, correct output, no ASan. Controls without the
+invalid timezone clean on both. Cross-branch: plain 8.4.27 rc=139 vs plain
+8.4.28 rc=0; 8.4.28 carries the same guard.
+Conditions/negatives: default ZendMM required — `USE_ZEND_ALLOC=0` leaves both
+clean; debug ASan CLI builds clean; release-ASan needed. Local zend_test
+`warn_on_startup` phpt reproduced vendor output but stayed clean on debug
+ASan. Grade rung 3 CONFIRMED for this lane only: observed invalid read of
+freed tzcache with symbolized consumer path and fix-sensitive comparison.
+No chosen bytes/pointer control/marker/pre-auth HTTP/FPM/Apache LPE demo;
+rung 4 closed. Next: stale-reference inheritance on loopback FPM/mod_php,
+then a chosen-byte occupant; or full 8.5.13 release-ASan CGI version pair.
+Do NOT repeat the debug-ASan runs.
+
+## Wake 54 (2026-11-21, 05:44–06:12Z) — 129496 standalone: FPM stale-reference inheritance CONFIRMED, grade unchanged
+Closed wake 53's named "next experiment". FPM calls `php_module_startup()`
+once in the master, so the invalid-`date.timezone` startup diagnostic
+allocates tzcache in startup memory and leaves `DATEG(tzcache)` stale; forked
+workers inherit the pointer. New committed harness
+`lab/repro/php2shell-cve129496-fpm.py` (loopback FastCGI client reusing
+`php2shell-fpm-client.py`) starts the release-ASan
+`php-8.5.12-fpm-release-asan/sapi/fpm/php-fpm` with
+`-d date.timezone=Not/AZone -d max_input_vars=1 -d log_errors=1 -d error_log=<file>`
+and sends a GET with `QUERY_STRING=a=1&b=2` as the FIRST request.
+Observed (gitignored `lab/build/evidence/w54-129496-fpm/`): startup warning
+logged; first request kills the worker with ASan SEGV
+`0x7048c5795241`, stack `__strlen_avx2 <- timelib_get_time_zone_info
+(parse_tz.c:908) <- timelib_unixtime2local <- php_format_date (php_date.c:894)`
+— the identical CGI lane read, now via inheritance. Client gets
+`Connection reset by peer`; respawned worker serves request 2 clean.
+Three CLEAN controls: (1) valid timezone `UTC` (no startup diagnostic) —
+warning still fires, no crash, causality proven; (2) `php-fpm-fixed` =
+same release-ASan tree relinked with ONLY the one-line `main.c` guard
+(verified sole `.c` changed after the 05:13Z vuln build) — rc 0, no ASan;
+(3) warm-up request before attack consumes the stale pointer via date RINIT
+(first run of this wake) — attack then clean. `USE_ZEND_ALLOC=0` stays a
+negative. Grade rung 3 CONFIRMED, SAPI widened CGI->FPM; no chosen bytes,
+pointer control, marker, or real nginx front end, so rung 4 CLOSED.
+Pre-auth HTTP reachability at default config remains UNPROVEN (FastCGI to a
+loopback listener only). Do NOT re-run debug-ASan CGI runs.
+
+## Wake 55 (2026-11-21, 06:19–) — new adjacent DOM lane: reflected-attribute setter UAF CONFIRMED, rung 3
+Named experiment: 8.5.13 NEWS's un-CVE'd DOM fix "use-after-free when reflected
+attribute setters replace an attribute whose child still has a live wrapper",
+with vendor test `ext/dom/tests/reflected_attribute_write_live_child.phpt`.
+One existing dom-enabled 8.5.12 ASan CLI build reused (no new full build).
+Committed harness `lab/repro/php2shell-dom-reflected-attr.py`; committed
+minimal fix patch `lab/php2shell/dom-reflected-attribute-fix.patch`.
+A/B: vulnerable = wake-51 `php-fixed` (8.5.13 xml_serializer only); fixed =
+`php-fixed-domattr` = same tree + upstream `dom_set_attribute_value()` helper
+(`node_list_unlink(existing->children)` before `xmlSetNsProp`, element.c:160,
+token_list.c:197/:437, php_dom.c:2348, php_dom.h:118). Evidence
+`lab/build/evidence/w55-domattr/harness/verdict.txt` = CONFIRMED: all five
+vendor cases ASAN_UAF on vulnerable / CLEAN on fixed, control CLEAN/CLEAN,
+fixed output matches vendor EXPECT byte for byte. ASan: heap-use-after-free
+READ of 8 at `dom_node_parent_get node.c:247`, freed by `xmlFreeNodeList <-
+xmlSetNsProp <- dom_element_reflected_attribute_write element.c:160`.
+Grade rung 3 CONFIRMED for this lane only; overall rung 4 unchanged — no
+SAPI, HTTP reachability, chosen bytes, pointer control or marker.
+NEXT if reopened: chosen-byte occupant of the freed xmlNode child with a live
+accessor, or a DOM-consuming HTTP app reaching a reflected setter. Do NOT
+repeat the same A/B (closed).
+
+## Wake 56 (2026-11-21, 06:44–) — DOM reflected-attr UAF: rung 4 POINTER CONTROL on a plain build
+Named wake-55 NEXT (chosen-byte occupant) achieved. Built the first non-ASan
+dom-enabled 8.5.12 CLI (`lab/php2shell/build-dom-plain.sh`, committed) because
+ASan quarantines the free; libxml 2.9.14 / glibc malloc. Saved vuln and fix
+binaries in gitignored `lab/build/evidence/w56-domattr-groom/`. Committed
+harness `lab/repro/php2shell-dom-reflected-attr-groom.py`; final
+`.../w56-domattr-groom/harness/verdict.txt` = RUNG4_POINTER_CONTROL (seven
+checks all True).
+Fix-sensitive A/B: stale wrapper reads new value (p1), reads back 119 fully
+chosen bytes (p2), writes through it corrupt the new node/attribute (p3),
+reparenting steers its parentNode to a chosen element (p4), empty replacement +
+normalizeDocument() -> destructor double-frees the chunk ->
+`free(): double free detected in tcache 2` SIGABRT (rc -6) / fixed rc 0 (p5).
+POINTER CONTROL (p6): first attempt with 89-byte str_repeat failed; GDB logging
+of `__zend_malloc` measured the cause — `zend_string_safe_falloc(N,1,0)`
+allocates N+32, so N=89 -> 121 B (0x88 bin, not the freed 0x80 chunk). N=88
+gives exactly 120 B. With `USE_ZEND_ALLOC=0`, N=88 occupies the freed chunk;
+val[] starts at +24 so string indices 16..23 are node->parent at +40. Chosen
+0x4242424242424242 -> SIGSEGV with GDB `php_dom_object_get_data
+(obj=0x4242424242424242)` at php_dom.c:324 via dom_node_parent_get node.c:253;
+0x41 and 0x5a variants track the input (`p8-verification.txt`); fixed survives
+rc 0. p7 preserves the 121-B negative as a size-class calibration control.
+libxml2 source lesson: `xmlSetNsProp` frees old child then always allocates a
+new 120-B text node (immediate 0x80 reuse); removeAttribute only unlinks.
+Grade rung 4 DEMONSTRATED for this lane, honestly conditioned: local CLI+dom,
+non-ASan, USE_ZEND_ALLOC=0, empty replacement + normalizeDocument(), exact
+120-B occupant. Read-side pointer control to a chosen-address fault; no
+arbitrary write, no marker, no SAPI/HTTP/pre-auth. Do NOT repeat p1-p7 unchanged.

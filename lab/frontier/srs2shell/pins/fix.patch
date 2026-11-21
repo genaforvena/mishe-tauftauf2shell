@@ -1,0 +1,307 @@
+From ab03c94b0744ab392320253ad1767b21b6c82a59 Mon Sep 17 00:00:00 2001
+From: winlin <winlinvip@gmail.com>
+Date: Thu, 29 Oct 2026 17:18:45 -0400
+Subject: [PATCH] Claude: RTC: Fix crash and heap overflow from a malformed
+ RTCP packet. v8.0.73
+
+A WebRTC peer could crash the server with one RTCP packet:
+
+- A header length of 0 made the payload length negative, so read_bytes
+  failed its assert and aborted the process (BYE, TWCC and every other
+  type decoded by SrsRtcpCommon).
+- A feedback packet (generic FB, NACK, PLI, SLI, RPSI) with length 1
+  at the end of the compound read the media SSRC past the buffer and
+  aborted the same way.
+- A packet over 1500 bytes copied past the fixed payload_ buffer in
+  SrsRtcpCommon and SrsRtcpTWCC, a heap overflow, because the UDP read
+  buffer takes up to 64KB.
+
+decode_header now rejects length 0, the feedback decoders reject
+length < 2 before the media SSRC, and Common and TWCC reject a payload
+larger than kRtcpPacketSize. SrsRtcpApp now starts with the length of
+an empty APP packet, which it used to leave unset and which the new
+check rejects.
+
+Adds 9 KernelRTCPTest.SrsRtcpCompound_Decode* tests that failed on
+develop, with asserts and ASAN heap-buffer-overflow, and pass now.
+
+---------
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ internal/version/version.go              |   2 +-
+ trunk/doc/CHANGELOG.md                   |   1 +
+ trunk/src/core/srs_core_version8.hpp     |   2 +-
+ trunk/src/kernel/srs_kernel_rtc_rtcp.cpp |  27 +++++
+ trunk/src/utest/srs_utest_ai05.cpp       | 127 +++++++++++++++++++++++
+ 5 files changed, 157 insertions(+), 2 deletions(-)
+
+diff --git a/internal/version/version.go b/internal/version/version.go
+index 03b5b8181d..30910aa2a8 100644
+--- a/internal/version/version.go
++++ b/internal/version/version.go
+@@ -15,7 +15,7 @@ func VersionMinor() int {
+ }
+ 
+ func VersionRevision() int {
+-	return 72
++	return 73
+ }
+ 
+ func Version() string {
+diff --git a/trunk/doc/CHANGELOG.md b/trunk/doc/CHANGELOG.md
+index ccfab77cb0..007efebb88 100644
+--- a/trunk/doc/CHANGELOG.md
++++ b/trunk/doc/CHANGELOG.md
+@@ -7,6 +7,7 @@ The changelog for SRS.
+ <a name="v8-changes"></a>
+ 
+ ## SRS 8.0 Changelog
++* v8.0, 2026-10-29, RTC: Fix crash and heap overflow from a malformed RTCP packet. v8.0.73
+ * v8.0, 2026-10-29, Merge [#4792](https://github.com/ossrs/srs/pull/4792): Chrome: Control skill and Chrome tests in the Full tier. v8.0.72 (#4792)
+ * v8.0, 2026-10-28, Merge [#4791](https://github.com/ossrs/srs/pull/4791): UTest: Raise C++ utest coverage from 90.75% to 95.6% and fix the bugs it found. v8.0.71 (#4791)
+ * v8.0, 2026-10-25, Merge [#4789](https://github.com/ossrs/srs/pull/4789): RTC: Fix out-of-range read decoding a malformed RTCP report. v8.0.70 (#4789)
+diff --git a/trunk/src/core/srs_core_version8.hpp b/trunk/src/core/srs_core_version8.hpp
+index a13c9c1b30..29ff2ddb4a 100644
+--- a/trunk/src/core/srs_core_version8.hpp
++++ b/trunk/src/core/srs_core_version8.hpp
+@@ -9,6 +9,6 @@
+ 
+ #define VERSION_MAJOR 8
+ #define VERSION_MINOR 0
+-#define VERSION_REVISION 72
++#define VERSION_REVISION 73
+ 
+ #endif
+diff --git a/trunk/src/kernel/srs_kernel_rtc_rtcp.cpp b/trunk/src/kernel/srs_kernel_rtc_rtcp.cpp
+index 6c42611932..06084d29f7 100644
+--- a/trunk/src/kernel/srs_kernel_rtc_rtcp.cpp
++++ b/trunk/src/kernel/srs_kernel_rtc_rtcp.cpp
+@@ -59,6 +59,11 @@ srs_error_t SrsRtcpCommon::decode_header(SrsBuffer *buffer)
+     buffer->read_bytes((char *)(&header_), sizeof(SrsRtcpHeader));
+     header_.length = ntohs(header_.length);
+ 
++    // The length counts the 32-bit words after the first one, so it must cover the SSRC read below.
++    if (header_.length < 1) {
++        return srs_error_new(ERROR_RTC_RTCP, "require length for ssrc, length=%u", header_.length);
++    }
++
+     int payload_len = header_.length * 4;
+     if (payload_len > buffer->left()) {
+         return srs_error_new(ERROR_RTC_RTCP,
+@@ -92,6 +97,9 @@ srs_error_t SrsRtcpCommon::decode(SrsBuffer *buffer)
+     }
+ 
+     payload_len_ = (header_.length + 1) * 4 - sizeof(SrsRtcpHeader) - 4;
++    if (payload_len_ > kRtcpPacketSize) {
++        return srs_error_new(ERROR_RTC_RTCP, "payload len=%d exceeds %d", payload_len_, kRtcpPacketSize);
++    }
+     buffer->read_bytes((char *)payload_, payload_len_);
+ 
+     return err;
+@@ -114,6 +122,7 @@ SrsRtcpApp::SrsRtcpApp()
+     header_.type = SrsRtcpType_app;
+     header_.rc = 0;
+     header_.version = kRtcpVersion;
++    header_.length = 2;
+ }
+ 
+ SrsRtcpApp::~SrsRtcpApp()
+@@ -838,6 +847,9 @@ srs_error_t SrsRtcpTWCC::decode(SrsBuffer *buffer)
+     }
+ 
+     payload_len_ = (header_.length + 1) * 4 - sizeof(SrsRtcpHeader) - 4;
++    if (payload_len_ > kRtcpPacketSize) {
++        return srs_error_new(ERROR_RTC_RTCP, "payload len=%d exceeds %d", payload_len_, kRtcpPacketSize);
++    }
+     buffer->read_bytes((char *)payload_, payload_len_);
+ 
+     return err;
+@@ -1296,6 +1308,9 @@ srs_error_t SrsRtcpNack::decode(SrsBuffer *buffer)
+         return srs_error_wrap(err, "decode header");
+     }
+ 
++    if (header_.length < 2) {
++        return srs_error_new(ERROR_RTC_RTCP, "require length for media ssrc, length=%u", header_.length);
++    }
+     media_ssrc_ = buffer->read_4bytes();
+     char bitmask[20];
+     for (int i = 0; i < (header_.length - 2); i++) {
+@@ -1444,6 +1459,9 @@ srs_error_t SrsRtcpFbCommon::decode(SrsBuffer *buffer)
+         return srs_error_wrap(err, "decode header");
+     }
+ 
++    if (header_.length < 2) {
++        return srs_error_new(ERROR_RTC_RTCP, "require length for media ssrc, length=%u", header_.length);
++    }
+     media_ssrc_ = buffer->read_4bytes();
+     int len = (header_.length + 1) * 4 - 12;
+     buffer->skip(len);
+@@ -1498,6 +1516,9 @@ srs_error_t SrsRtcpPli::decode(SrsBuffer *buffer)
+         return srs_error_wrap(err, "decode header");
+     }
+ 
++    if (header_.length < 2) {
++        return srs_error_new(ERROR_RTC_RTCP, "require length for media ssrc, length=%u", header_.length);
++    }
+     media_ssrc_ = buffer->read_4bytes();
+     return err;
+ }
+@@ -1588,6 +1609,9 @@ srs_error_t SrsRtcpSli::decode(SrsBuffer *buffer)
+         return srs_error_wrap(err, "decode header");
+     }
+ 
++    if (header_.length < 2) {
++        return srs_error_new(ERROR_RTC_RTCP, "require length for media ssrc, length=%u", header_.length);
++    }
+     media_ssrc_ = buffer->read_4bytes();
+     int len = (header_.length + 1) * 4 - 12;
+     buffer->skip(len);
+@@ -1659,6 +1683,9 @@ srs_error_t SrsRtcpRpsi::decode(SrsBuffer *buffer)
+         return srs_error_wrap(err, "decode header");
+     }
+ 
++    if (header_.length < 2) {
++        return srs_error_new(ERROR_RTC_RTCP, "require length for media ssrc, length=%u", header_.length);
++    }
+     media_ssrc_ = buffer->read_4bytes();
+     int len = (header_.length + 1) * 4 - 12;
+     buffer->skip(len);
+diff --git a/trunk/src/utest/srs_utest_ai05.cpp b/trunk/src/utest/srs_utest_ai05.cpp
+index 310dd5f90b..1d8a7f2a0c 100644
+--- a/trunk/src/utest/srs_utest_ai05.cpp
++++ b/trunk/src/utest/srs_utest_ai05.cpp
+@@ -4439,6 +4439,133 @@ VOID TEST(KernelRTCPTest, SrsRtcpCompound_Decode)
+     }
+ }
+ 
++// A peer sends RTCP whose header length is 0, shorter than the SSRC it carries,
++// so the payload length is negative. It must be an error, not abort the server.
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeZeroLengthBye)
++{
++    unsigned char data[] = {
++        0x81, 0xCB, 0x00, 0x00, // V=2, RC=1, PT=203(BYE), length=0
++        0x12, 0x34, 0x56, 0x78  // SSRC
++    };
++    SrsBuffer buffer((char *)data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeZeroLengthTwcc)
++{
++    unsigned char data[] = {
++        0x8F, 0xCD, 0x00, 0x00, // V=2, FMT=15, PT=205(RTPFB), length=0
++        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender
++    };
++    SrsBuffer buffer((char *)data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++// A feedback packet at the end of the compound whose length=1 leaves no room
++// for the media SSRC. It must be an error, not abort the server.
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortFbCommon)
++{
++    unsigned char data[] = {
++        0x83, 0xCD, 0x00, 0x01, // V=2, FMT=3, PT=205(RTPFB), length=1
++        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender
++    };
++    SrsBuffer buffer((char *)data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortNack)
++{
++    unsigned char data[] = {
++        0x81, 0xCD, 0x00, 0x01, // V=2, FMT=1, PT=205(RTPFB), length=1
++        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender
++    };
++    SrsBuffer buffer((char *)data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortPli)
++{
++    unsigned char data[] = {
++        0x81, 0xCE, 0x00, 0x01, // V=2, FMT=1, PT=206(PSFB), length=1
++        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender
++    };
++    SrsBuffer buffer((char *)data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortSli)
++{
++    unsigned char data[] = {
++        0x82, 0xCE, 0x00, 0x01, // V=2, FMT=2, PT=206(PSFB), length=1
++        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender
++    };
++    SrsBuffer buffer((char *)data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeShortRpsi)
++{
++    unsigned char data[] = {
++        0x83, 0xCE, 0x00, 0x01, // V=2, FMT=3, PT=206(PSFB), length=1
++        0x12, 0x34, 0x56, 0x78  // SSRC of packet sender
++    };
++    SrsBuffer buffer((char *)data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++// The UDP read buffer takes up to 64KB, but payload_ holds kRtcpPacketSize
++// bytes. A 2008-byte RTCP packet must be an error, not copied past payload_.
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeOversizedBye)
++{
++    char data[2008];
++    memset(data, 0, sizeof(data));
++    data[0] = (char)0x81; // V=2, RC=1
++    data[1] = (char)0xCB; // PT=203(BYE)
++    data[2] = (char)0x01; // length=501, (501+1)*4=2008 bytes
++    data[3] = (char)0xF5;
++    SrsBuffer buffer(data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
++VOID TEST(KernelRTCPTest, SrsRtcpCompound_DecodeOversizedTwcc)
++{
++    char data[2008];
++    memset(data, 0, sizeof(data));
++    data[0] = (char)0x8F; // V=2, FMT=15
++    data[1] = (char)0xCD; // PT=205(RTPFB)
++    data[2] = (char)0x01; // length=501, (501+1)*4=2008 bytes
++    data[3] = (char)0xF5;
++    SrsBuffer buffer(data, sizeof(data));
++    SrsRtcpCompound compound;
++    srs_error_t err = compound.decode(&buffer);
++    EXPECT_TRUE(err != srs_success);
++    srs_freep(err);
++}
++
+ VOID TEST(KernelRTPTest, srs_global_kbps_update)
+ {
+     // Test srs_global_kbps_update function

@@ -1,0 +1,24 @@
+From fd5cb168efb4b864d33f655174711b2779cef502 Mon Sep 17 00:00:00 2001
+From: Michal Sedlak <sedlakm@cesnet.cz>
+Date: Wed, 14 Oct 2026 14:13:03 +0200
+Subject: [PATCH] TCP input: fix possible buffer overflow in Lz4 decoder
+
+---
+ src/plugins/input/tcp/src/Lz4Decoder.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/plugins/input/tcp/src/Lz4Decoder.cpp b/src/plugins/input/tcp/src/Lz4Decoder.cpp
+index 6598ca5b..7024396d 100644
+--- a/src/plugins/input/tcp/src/Lz4Decoder.cpp
++++ b/src/plugins/input/tcp/src/Lz4Decoder.cpp
+@@ -148,6 +148,10 @@ void Lz4Decoder::decompress() {
+         m_decompressed_pos = 0;
+     }
+ 
++    if (m_decompressed_size > m_decompressed.size() - m_decompressed_pos) {
++        throw std::runtime_error("LZ4 Decoder: invalid decompressed size");
++    }
++
+     int res = LZ4_decompress_safe_continue(
+         m_decoder.get(),
+         reinterpret_cast<char *>(m_compressed.data()),

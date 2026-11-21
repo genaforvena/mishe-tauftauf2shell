@@ -36,8 +36,11 @@ Upstream fix commit
 ```
 
 `len` is `strlen(dir) + 1` after the `snprintf(path, MAXPATHLEN, "%s/", dir)`
-and `len++`; `strlen(path)` is therefore equal to `len`, so the original
-subtraction underflows `size_t` to `SIZE_MAX`. The guard at line 176,
+and `len++`. For `dir_len <= 1022`, `strlen(path)` equals `len` and the
+subtraction underflows `size_t` to `SIZE_MAX`; at the chosen `dir_len=1023`
+the trailing slash is truncated, so `strlen(path)=1023` while `len=1024` and
+`remain=SIZE_MAX-1` (18446744073709551614), as measured by the witness.
+The guard at line 176,
 `if (strlen(de->d_name) > remain)`, can never reject a real filename. Line 181,
 `strcpy(path + len, de->d_name)`, then appends an attacker-chosen directory
 entry name into `char path[MAXPATHLEN + 1]` (1025 bytes) with only two bytes

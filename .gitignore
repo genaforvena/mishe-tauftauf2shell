@@ -11,6 +11,12 @@ lab/node2shell/
 lab/corpus/
 lab/src/
 lab/sessions/
+# ipfixcol2shell bulk: pinned tarball extractions, builds, trace logs
+lab/ipfixcol2shell-src/
+lab/ipfixcol2shell-live/out/
+lab/ipfixcol2shell-live/tarballs/
+lab/ipfixcol2shell-live/v280/
+lab/ipfixcol2shell-live/v290/
 lab/tmp/
 lab/apache2root/run-httpd.conf
 lab/apache2root/logs/

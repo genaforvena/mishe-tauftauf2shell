@@ -1,0 +1,278 @@
+From 1cb2ecc17a0206bc2bed9090d5d7fab121f2798e Mon Sep 17 00:00:00 2001
+From: Rene Cannao <rene@proxysql.com>
+Date: Thu, 14 May 2026 08:56:43 +0000
+Subject: [PATCH] fix(security): bound first-packet recv() in MySQL and PgSQL
+ data streams (GHSA-58ww-865x-grpr)
+
+An unauthenticated client could declare an oversized first-packet length
+in either protocol and ProxySQL would pass that length straight to recv()
+while writing into the fixed 32 KB queueIN buffer, producing an
+out-of-bounds heap write in:
+  - MySQL_Data_Stream::read_from_net (lib/mysql_data_stream.cpp)
+  - PgSQL_Data_Stream::read_from_net (lib/PgSQL_Data_Stream.cpp)
+
+The pre-existing PROXY-protocol prefix check only handled the 'PROX'
+literal variant from sysown/proxysql#5376; the general ordinary
+first-packet path was still vulnerable.
+
+Bound the second recv() against the remaining queueIN capacity and
+shut_soft() the connection when the declared length exceeds the bound.
+For MySQL that bound is queue_available - 4 (header size); for PgSQL it
+is queue_available - 5 (type byte + 4-byte length).
+
+Add a TAP regression test that opens raw sockets to both listeners,
+sends oversized first-packet headers with declared lengths above the
+queue boundary (32765, 65535, 100000, protocol-max), and asserts:
+  - the listener closes the connection promptly
+  - ProxySQL admin remains responsive afterward (no daemon crash)
+
+Run under ASAN to catch any future regression of the bounds check.
+---
+ lib/PgSQL_Data_Stream.cpp                     |  13 +-
+ lib/mysql_data_stream.cpp                     |  10 +
+ test/tap/groups/groups.json                   |   1 +
+ .../tests/reg_test_oversize_first_pkt-t.cpp   | 178 ++++++++++++++++++
+ 4 files changed, 201 insertions(+), 1 deletion(-)
+ create mode 100644 test/tap/tests/reg_test_oversize_first_pkt-t.cpp
+
+diff --git a/lib/PgSQL_Data_Stream.cpp b/lib/PgSQL_Data_Stream.cpp
+index f5a9e0fc64..de2435692e 100644
+--- a/lib/PgSQL_Data_Stream.cpp
++++ b/lib/PgSQL_Data_Stream.cpp
+@@ -530,7 +530,18 @@ int PgSQL_Data_Stream::read_from_net() {
+ 					c = buff[read_pos++];
+ 					d = buff[read_pos++];
+ 					length = (a << 24) | (b << 16) | (c << 8) | d;
+-					
++
++					// GHSA-58ww-865x-grpr: bound the declared packet length by the
++					// remaining capacity of queueIN. Without this check an unauthenticated
++					// client can drive a heap out-of-bounds write into the fixed-size
++					// 32KB input queue by sending an oversized first PostgreSQL packet.
++					if (length > (uint32_t)(s - 5)) {
++						proxy_error("Oversized first packet from PgSQL client: length=%u exceeds queue capacity (%d). Closing fd=%d\n",
++							length, s - 5, fd);
++						shut_soft();
++						return -1;
++					}
++
+ 					r += recv(fd, queue_w_ptr(queueIN) + 5, length, 0);
+ 				}
+ 			}
+diff --git a/lib/mysql_data_stream.cpp b/lib/mysql_data_stream.cpp
+index fcdbfed6b6..4f0845eec5 100644
+--- a/lib/mysql_data_stream.cpp
++++ b/lib/mysql_data_stream.cpp
+@@ -662,6 +662,16 @@ int MySQL_Data_Stream::read_from_net() {
+ 						// let's try to read a whole packet
+ 						mysql_hdr Hdr;
+ 						memcpy(&Hdr,queueIN.buffer,sizeof(mysql_hdr));
++						// GHSA-58ww-865x-grpr: bound the declared packet length by the
++						// remaining capacity of queueIN. Without this check an unauthenticated
++						// client can drive a heap out-of-bounds write into the fixed-size
++						// 32KB input queue by sending an oversized first MySQL packet.
++						if (Hdr.pkt_length > (unsigned int)(s - 4)) {
++							proxy_error("Oversized first packet from client: pkt_length=%u exceeds queue capacity (%d). Closing fd=%d\n",
++								Hdr.pkt_length, s - 4, fd);
++							shut_soft();
++							return -1;
++						}
+ 						r += recv(fd, queue_w_ptr(queueIN)+4, Hdr.pkt_length, 0);
+ 					}
+ 				}
+diff --git a/test/tap/groups/groups.json b/test/tap/groups/groups.json
+index 61949dc951..e65cb84a14 100644
+--- a/test/tap/groups/groups.json
++++ b/test/tap/groups/groups.json
+@@ -267,6 +267,7 @@
+   "reg_test_mariadb_stmt_store_result-t" : [ "legacy-g2","mysql-auto_increment_delay_multiplex=0-g2","mysql-multiplexing=false-g2","mysql-query_digests=0-g2","mysql-query_digests_keep_comment=1-g2","mysql84-g2","mysql90-g2","mysql95-g2" ],
+   "reg_test_mariadb_stmt_store_result_async-t" : [ "legacy-g7","mysql-auto_increment_delay_multiplex=0-g2","mysql-multiplexing=false-g2","mysql-query_digests=0-g2","mysql-query_digests_keep_comment=1-g2","mysql84-g2","mysql90-g2","mysql95-g2" ],
+   "reg_test_mariadb_stmt_store_result_libmysql-t" : [ "legacy-g7","mysql-auto_increment_delay_multiplex=0-g2","mysql-multiplexing=false-g2","mysql-query_digests=0-g2","mysql-query_digests_keep_comment=1-g2","mysql84-g2","mysql90-g2","mysql95-g2" ],
++  "reg_test_oversize_first_pkt-t" : [ "legacy-g7","mysql-auto_increment_delay_multiplex=0-g2","mysql-multiplexing=false-g2","mysql-query_digests=0-g2","mysql-query_digests_keep_comment=1-g2","mysql84-g7","mysql90-g2","mysql95-g2" ],
+   "reg_test_proclist_use_after_free-t" : [ "legacy-g6","mysql-auto_increment_delay_multiplex=0-g1","mysql-multiplexing=false-g1","mysql-query_digests=0-g1","mysql-query_digests_keep_comment=1-g1","mysql84-g6","mysql90-g1","mysql95-g1" ],
+   "reg_test_proxy_protocol_oversized_address-t" : [ "mysql84-g6","mysql95-g1" ],
+   "reg_test_sql_calc_found_rows-t" : [ "legacy-g7","mysql-auto_increment_delay_multiplex=0-g2","mysql-multiplexing=false-g2","mysql-query_digests=0-g2","mysql-query_digests_keep_comment=1-g2","mysql84-g2","mysql90-g2","mysql95-g2" ],
+diff --git a/test/tap/tests/reg_test_oversize_first_pkt-t.cpp b/test/tap/tests/reg_test_oversize_first_pkt-t.cpp
+new file mode 100644
+index 0000000000..5be9a30cb8
+--- /dev/null
++++ b/test/tap/tests/reg_test_oversize_first_pkt-t.cpp
+@@ -0,0 +1,178 @@
++/**
++ * @file reg_test_oversize_first_pkt-t.cpp
++ * @brief Regression test for GHSA-58ww-865x-grpr: pre-authentication
++ *        heap-buffer-overflow in the MySQL and PostgreSQL first-packet
++ *        read paths.
++ * @details An unauthenticated client could declare an oversized first-packet
++ *        length and ProxySQL would pass that length straight to recv() while
++ *        writing into the fixed 32 KB queueIN buffer, producing an
++ *        out-of-bounds heap write in:
++ *          - MySQL_Data_Stream::read_from_net (lib/mysql_data_stream.cpp:665)
++ *          - PgSQL_Data_Stream::read_from_net (lib/PgSQL_Data_Stream.cpp:534)
++ *
++ *        The fix bounds the second recv() against the remaining queueIN
++ *        capacity and shut_soft()'s the connection when the declared length
++ *        exceeds that bound.
++ *
++ *        This test connects raw sockets to the MySQL and PostgreSQL frontend
++ *        listeners, sends only the protocol header with an oversized declared
++ *        length, and asserts:
++ *          1. The server closes the connection promptly.
++ *          2. ProxySQL admin remains responsive afterward (no crash).
++ *
++ *        Under an ASAN-instrumented build, the pre-fix code would crash with
++ *        heap-buffer-overflow on the first iteration; the post-fix code
++ *        passes cleanly.
++ */
++
++#include <arpa/inet.h>
++#include <cerrno>
++#include <cstdint>
++#include <cstdlib>
++#include <cstring>
++#include <netinet/in.h>
++#include <poll.h>
++#include <sys/socket.h>
++#include <unistd.h>
++
++#include <vector>
++
++#include "mysql.h"
++
++#include "tap.h"
++#include "command_line.h"
++#include "utils.h"
++
++static int tcp_connect(const char* host, int port) {
++	int fd = socket(AF_INET, SOCK_STREAM, 0);
++	if (fd < 0) return -1;
++	struct sockaddr_in sa;
++	memset(&sa, 0, sizeof(sa));
++	sa.sin_family = AF_INET;
++	sa.sin_port = htons(port);
++	if (inet_pton(AF_INET, host, &sa.sin_addr) != 1) {
++		close(fd);
++		return -1;
++	}
++	if (connect(fd, reinterpret_cast<struct sockaddr*>(&sa), sizeof(sa)) != 0) {
++		close(fd);
++		return -1;
++	}
++	return fd;
++}
++
++// Returns 1 if the peer closed the socket within timeout_ms, 0 otherwise.
++static int peer_closed_within(int fd, int timeout_ms) {
++	struct pollfd p;
++	p.fd = fd;
++	p.events = POLLIN;
++	p.revents = 0;
++	int pr = poll(&p, 1, timeout_ms);
++	if (pr <= 0) return 0;
++	char buf[64];
++	ssize_t n = recv(fd, buf, sizeof(buf), MSG_DONTWAIT);
++	// EOF (n == 0) or RST (n < 0) both mean the peer is gone.
++	if (n == 0) return 1;
++	if (n < 0) return 1;
++	// Unexpectedly got bytes back; the peer is still talking. Treat as not-closed.
++	return 0;
++}
++
++static int probe_mysql_oversize(const char* host, int port, uint32_t declared_pkt_len) {
++	int fd = tcp_connect(host, port);
++	if (fd < 0) {
++		diag("MySQL probe: connect to %s:%d failed: %s", host, port, strerror(errno));
++		return -1;
++	}
++	unsigned char hdr[4];
++	hdr[0] = declared_pkt_len & 0xff;
++	hdr[1] = (declared_pkt_len >> 8) & 0xff;
++	hdr[2] = (declared_pkt_len >> 16) & 0xff;
++	hdr[3] = 1; // sequence id
++	ssize_t s = send(fd, hdr, sizeof(hdr), MSG_NOSIGNAL);
++	if (s != static_cast<ssize_t>(sizeof(hdr))) {
++		close(fd);
++		return -1;
++	}
++	int closed = peer_closed_within(fd, 3000);
++	close(fd);
++	return closed;
++}
++
++static int probe_pgsql_oversize(const char* host, int port, uint32_t declared_len) {
++	int fd = tcp_connect(host, port);
++	if (fd < 0) {
++		diag("PgSQL probe: connect to %s:%d failed: %s", host, port, strerror(errno));
++		return -1;
++	}
++	// PgSQL_Data_Stream::read_from_net consumes 5 bytes on the first read:
++	//   byte 0     : message type (0 selects the startup-style length layout)
++	//   bytes 1..4 : big-endian 32-bit declared length
++	unsigned char hdr[5];
++	hdr[0] = 0;
++	hdr[1] = (declared_len >> 24) & 0xff;
++	hdr[2] = (declared_len >> 16) & 0xff;
++	hdr[3] = (declared_len >> 8) & 0xff;
++	hdr[4] = declared_len & 0xff;
++	ssize_t s = send(fd, hdr, sizeof(hdr), MSG_NOSIGNAL);
++	if (s != static_cast<ssize_t>(sizeof(hdr))) {
++		close(fd);
++		return -1;
++	}
++	int closed = peer_closed_within(fd, 3000);
++	close(fd);
++	return closed;
++}
++
++int main(int /*argc*/, char** /*argv*/) {
++	CommandLine cl;
++	if (cl.getEnv()) {
++		diag("Failed to get the required environmental variables.");
++		return EXIT_FAILURE;
++	}
++
++	// Each declared length is just above the queueIN capacity boundary,
++	// at common round values, and at the protocol-max for the respective
++	// length field.
++	const std::vector<uint32_t> mysql_lens = { 32765u, 65535u, 100000u, 0x00FFFFFFu };
++	const std::vector<uint32_t> pgsql_lens = { 32765u, 65535u, 100000u, 0xFFFFFFFFu };
++
++	// Probe whether the PgSQL listener is reachable in this infra.
++	int pgsql_probe = tcp_connect(cl.pgsql_host, cl.pgsql_port);
++	const bool have_pgsql = (pgsql_probe >= 0);
++	if (have_pgsql) close(pgsql_probe);
++
++	int planned = static_cast<int>(mysql_lens.size()) + 1; // +1 for admin liveness
++	if (have_pgsql) planned += static_cast<int>(pgsql_lens.size());
++	plan(planned);
++
++	for (uint32_t L : mysql_lens) {
++		int closed = probe_mysql_oversize(cl.host, cl.port, L);
++		ok(closed == 1,
++		   "MySQL listener closed connection on oversize first-packet pkt_length=%u (closed=%d)",
++		   L, closed);
++	}
++
++	if (have_pgsql) {
++		for (uint32_t L : pgsql_lens) {
++			int closed = probe_pgsql_oversize(cl.pgsql_host, cl.pgsql_port, L);
++			ok(closed == 1,
++			   "PgSQL listener closed connection on oversize first-packet length=%u (closed=%d)",
++			   L, closed);
++		}
++	} else {
++		diag("PgSQL listener not reachable at %s:%d; skipping PgSQL probes",
++		     cl.pgsql_host, cl.pgsql_port);
++	}
++
++	// Liveness: a normal admin connection must still succeed after the attacks.
++	MYSQL* admin = mysql_init(NULL);
++	bool admin_ok = mysql_real_connect(admin, cl.admin_host, cl.admin_username,
++	                                   cl.admin_password, NULL, cl.admin_port,
++	                                   NULL, 0) != NULL;
++	ok(admin_ok,
++	   "ProxySQL admin still accepting connections after oversize first-packet attacks");
++	if (admin) mysql_close(admin);
++
++	return exit_status();
++}

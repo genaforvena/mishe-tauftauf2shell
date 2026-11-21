@@ -1,0 +1,51 @@
+freerdp2shell wake 15 — NO unaided post-write log dereference without client timing
+(CVE-2026-114045 / GHSA-3m9q-g533-rqjq)
+
+Question left open by wake 14: its chosen-pointer dereference needed a scratch
+client-side Sleep(2500) so the client's SNDC_QUALITYMODE PDU (and the server's
+WLog_DBG on the clobbered rdpsnd TAG) would land AFTER the synthetic playback
+copy. Does a real client sequence hit a post-write log on that TAG unaided?
+
+Answer: NO, observed in the live stock-allocator build. This is a NEGATIVE.
+
+Setup: pinned FreeRDP 3.32.0 d27a4f7c..., committed wake8 patches in
+/tmp/fr-wake2/src3320, plain no-sanitizer build /tmp/fr-wake7-shadow-build.
+No client timing change: the client is the committed patched sfreerdp with
+only the Sleep(400) between its two SNDC_FORMATS PDUs; no Sleep(2500).
+Scratch-only server change: synthetic playback buffer gets data[8904..8911]
+= 0x41 so the clobbered s_wLog->Names pointer would fault if a post-write log
+dereferenced it. freerdp-shadow-cli on 127.0.0.1:23415, -auth /log-level:DEBUG,
+WLOG_FILTER='com.freerdp.server:TRACE', run under gdb -batch. Sample client
+/sec:rdp /u:test /p:test /sound. No off-loopback probe. Raw logs preserved in
+lab/freerdp2shell-src/verify-live-out/wake15/{server-gdb.log,client.log}.
+Committed replay patches, verify_live.sh and their pinned digests were NOT
+changed; scratch source was restored and rebuilt after capture.
+Observed (timestamps from the raw logs):
+  05:30:34:763 client "[rdpsnd_send_client_audio_formats]: Client Audio Formats"
+  05:30:35:163 client "[rdpsnd_send_quality_mode_pdu]: QualityMode: 2"
+  05:30:35:163 server "[rdpsnd_server_select_format]: realloc failed!"
+  05:30:35:163 server "[rdpsnd_activated]: SelectFormat failed with 12"
+  (untimed)  WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de
+
+The only client PDU after the two format PDUs is SNDC_QUALITYMODE, and it
+arrives at 35:163 — at/before the wrap and copy, not after it. There is no
+SNDC_WAVE to the client and no SNDC_WAVECONFIRM back: format selection failed,
+so the server never sends an audio PDU for the client to confirm. The last
+rdpsnd-TAG server log is the ERROR at 35:163; there is no "message type" DEBUG
+log or any other TAG log after the copy. gdb shows no SIGSEGV and no
+WLog_GetFilterLogLevel frame; registers at inferior exit are rax=0,
+r15=0x7ffff3cd56e0 (not 0x4141414141414141).
+
+What did fault: at client logoff (05:30:59:700, ERRINFO_LOGOFF_BY_USER) the
+stock glibc allocator aborted in _int_free_merge_chunk with
+"double free or corruption (!prev)", freeing a 8832-byte chunk at
+0x7fffe4000ba0 — the same 8820-byte out_buffer corruption as wake 9, not a
+controlled pointer dereference.
+
+Conclusion: wake 14's scratch client delay was necessary, not cosmetic. With
+an unmodified client there is no post-write log on the clobbered rdpsnd TAG in
+this replay; the controlled dereference still needs an instrumented timing
+(or a PDU after the write from some other source). The wake-14 UNKNOWN
+"whether a real server hits a post-write log on this TAG without the lab
+timing" is now answered NO for this client/sequence. Grooming, a real audio
+source and an FFmpeg build remain UNKNOWN.

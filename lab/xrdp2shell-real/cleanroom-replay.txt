@@ -1,0 +1,44 @@
+xrdp2shell clean-room replay 2026-11-21T06:15:43Z
+source commit: 440a538149561ec8e8e57552ab8f2e0e3f273cd5
+source path:   /home/mesh-home/mishe-tauftauf2shell/lab/build/xrdp2shell-live/src
+drivers:
+a05ba8ac19f284755443d65b5c0f9f840cbd9b7767cf35dcbd58d3580672100c  /home/mesh-home/mishe-tauftauf2shell/lab/xrdp2shell-real/real_drdynvc_driver.c
+51fd632401ebd4d70bf62e05dedfbcccb0454331069f7d6c524171b331df23a5  /home/mesh-home/mishe-tauftauf2shell/lab/xrdp2shell-real/wire_drdynvc_driver.c
+ecfe9f7e8e0582fa9ec896d0b0159f64bae06e70745bc182938892dee53320d1  /home/mesh-home/mishe-tauftauf2shell/lab/xrdp2shell-real/chosen_bytes_real_path.c
+
+PASS clean-room ASan build
+ASan libs:
+3319417c89d504e27531887b3622d11c8aa7fca8c3f8b43d59a4e90aa7950177  /tmp/xrdp2shell-cleanroom/build-asan/libxrdp/.libs/libxrdp.a
+9e7b3f84b30f4ad6d0315f768450b9b220647a78eebc9e220b8c6c9e4cc05298  /tmp/xrdp2shell-cleanroom/build-asan/common/.libs/libcommon.a
+PASS both ASan drivers compile clean
+real_8164 rc=0
+real_8165 rc=1
+real_20000 rc=1
+wire_8164 rc=0
+wire_8191 rc=1
+wire_20000 rc=0
+
+PASS real 8164 clean
+PASS real 8164 no ASan
+PASS real 8165 OOB
+PASS real 20000 OOB
+PASS real 20000 chosen marker
+PASS wire 8164 clean
+PASS wire 8164 no ASan
+PASS wire 8191 OOB
+PASS wire 8191 sink stack
+PASS wire 20000 MCS reject
+PASS clean-room plain build
+plain libs:
+961f1fcc502d07a00b7731885ad5b0a07b6409020ee13d03383b11efc2c95541  /tmp/xrdp2shell-cleanroom/build-plain/libxrdp/.libs/libxrdp.a
+93de48b30e4bc063f1516e13e40f8b0f1f1c69421dc956696d0aa7be153a5fb9  /tmp/xrdp2shell-cleanroom/build-plain/common/.libs/libcommon.a
+chosen reader rc=0
+CANARY delta=8208 k1=84 k2=484 m1='DEADBEEF-CR' m2='C0FFEE00-CR'
+rv=0 callback_calls=1 bytes_seen=20000
+CHOSEN_BYTES m1=PASS m2=PASS
+
+PASS chosen canary offsets
+PASS chosen markers readback
+PASS chosen callback seen
+
+TOTAL pass=15 fail=0

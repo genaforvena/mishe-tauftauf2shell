@@ -425,6 +425,37 @@ by the pinned source, the 4-byte stride, the earlier gdb symbolication and the
 clean N=8 control.
 Author report is not acceptance; witness owns replay.
 
+### Why strong rung 4 is unreachable through this primitive (data-flow proof)
+
+Re-examined the pinned source end to end for a content-controlled sink; there is
+none. The OOB loop has exactly one store,
+`posn[i] = GST_AUDIO_CHANNEL_POSITION_NONE` (`upstream/channels.c:308-309`), a
+compile-time constant (-3, `0xfffffffd`). The attacker controls only `channels`,
+hence the count and offsets of the stores, never the stored bytes. Every
+downstream consumer of `info->position[]` in the pinned set_caps/process fails
+to convert that into content control:
+
+- `depay.c:203-207`: `memcpy (info->position, order->pos, …)` runs only under
+  `if (order)`. `gst_rtp_channels_get_by_order (channels, …)` requires
+  `channel_orders[i].channels == channels` over a static table covering only
+  1..8 (`upstream/channels.c:242-244`), so for channels>8 `order` is always NULL
+  and this copy never runs; where it does run the 8-entry copy is in bounds.
+- `depay.c:264-269`: `gst_audio_buffer_reorder_channels (…, info->position,
+  order->pos)` is likewise guarded by `rtpL16depay->order &&`. At high counts
+  the only way this guard becomes true is that the OOB stores themselves corrupt
+  `order` at `info+320` into `0xfffffffd` — a wild-pointer dereference with a
+  fixed value at a count-chosen offset. That is the demonstrated rung-4 effect,
+  not an attacker-chosen pointer or byte.
+- `depay.c:218-219`: `gst_audio_info_to_caps (info)` reads
+  `position[0..channels-1]`, but the loop has already written NONE to each of
+  them, so no adjacent heap content leaks into the emitted caps.
+
+No path reads attacker-influenced data and writes it out of bounds, and no OOB
+store carries attacker data. Chosen-byte or arbitrary-pointer control would
+require a different sink — a neighbouring field whose fixed `-3`/zeroing is
+itself controller-meaningful — which this primitive does not provide. This is
+the recorded reason strong rung 4 stays NOT DEMONSTRATED.
+
 ## Independent witness replay and repair (2026-11-21 ~04:1xZ)
 
 The witness (W31/W32, tape 519) graded the substantive security claim
