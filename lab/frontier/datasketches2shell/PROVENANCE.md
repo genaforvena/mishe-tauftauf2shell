@@ -36,8 +36,10 @@ the first past-end store meets a `PROT_NONE` page. The write being measured
 is always the library's `std::memcpy` at `CouponList-internal.hpp:116`, never
 a harness copy. Seed sketches and the hostile buffer are generated with the
 unmodified pinned 5.2.0 serialization API; only `LIST_COUNT_BYTE` (offset 6)
-is changed from a valid count to the hostile count, and all payload bytes are
-the caller's chosen value.
+is changed from a valid count to the hostile count. `driver.cpp:83` first
+copies the 16-byte valid seed header and two coupons into the buffer, so the
+first 16 bytes are not chosen; every byte at offset 32 and beyond is the
+caller's chosen value, which is the range the chosen-byte observations use.
 
 ## Pinned line numbers (raw bytes)
 
@@ -49,9 +51,10 @@ Affected tag 5.2.0:
   in LIST mode; `:101` reads `couponCount` from `data[6]`; `:102-104` computes
   expected length from that count but never checks capacity; `:110` allocates;
   `:116` `std::memcpy(sketch->coupons_.data(), data + 8, couponCount * 4)`.
-- Stream path `:155` `numToRead = compact ? couponCount : coupons_.size()` and
-  `:159` `read(is, coupons_.data(), numToRead * 4)` — same class, not exercised
-  by this harness.
+- Stream path `:161` `numToRead = compact ? couponCount : coupons_.size()` and
+  `:162` `read(is, coupons_.data(), numToRead * 4)` — same class, not exercised
+  by this harness. Pinned `:155` is the `putOutOfOrderFlag` call and `:159` is
+  a comment.
 - Public caller chain: `HllSketchImplFactory.hpp:101` and
   `HllSketch-internal.hpp:63`.
 
@@ -70,3 +73,13 @@ offsets and byte values only.
 A clean `git archive 818ec4a lab/frontier/datasketches2shell` extraction into
 `/tmp/ds2-archive`, run with absolute outdir `/tmp/ds2-out-clean`, reproduced
 11 PASS / 0 FAIL rc 0 and the same digest in both groups.
+
+Independent witness replay (W71, 2026-11-21 ~12:56Z): clean
+`git archive 434040d lab/frontier/datasketches2shell` into `/tmp/w71-ds-archive`,
+`bash run.sh /tmp/w71-ds-out` -> 11 PASS / 0 FAIL rc 0 with the same digest in
+both five-run groups; `pins.log` all five OK and fresh re-fetches byte-identical
+for both release tarballs, the CVE JSON and the PR 503 diff. The GHSA HTML hash
+differs on re-fetch but the normalized advisory text is identical (5671 chars),
+confirming the snapshot caveat above. W71 found the stream-path citations
+`:155`/`:159` wrong in raw 5.2.0 bytes and corrected here to `:161`/`:162`; no
+code, grade or harness change resulted.

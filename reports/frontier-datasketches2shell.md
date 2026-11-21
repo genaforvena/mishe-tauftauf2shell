@@ -1,14 +1,15 @@
 # Frontier brief — DataSketches HLL CouponList deserialization write (DataSketches2Shell)
 
 **Status: new frontier find, brief + harness COMPLETE (2026-11-21 ~12:49Z) —
-pending independent witness replay and operator admission.** Rungs 1/2/3 are
-ESTABLISHED against the real, verbatim-pinned upstream library compiled with
-ASan; rung 4 shows attacker-chosen bytes at chosen offsets past the 32-byte
-coupon buffer through the library's own `memcpy` and public `deserialize`
-entry point. No deserializing application, network listener, real heap
-neighbour object, pointer, control-flow diversion or execution was observed —
-all stay UNKNOWN. The advisory's "potentially enabling further exploitation"
-is a claim, not a lab result.
+independent witness replay W71 ESTABLISHED AS CLAIMED at this grade; operator
+admission pending.** Rung 3 is ESTABLISHED under ASan against the real,
+verbatim-pinned upstream library; rungs 1/2 are ESTABLISHED on the same pinned
+library built without sanitizers. Rung 4 shows attacker-chosen bytes at chosen
+offsets past the 32-byte coupon buffer through the library's own `memcpy` and
+public `deserialize` entry point. No deserializing application, network
+listener, real heap neighbour object, pointer, control-flow diversion or
+execution was observed — all stay UNKNOWN. The advisory's "potentially enabling
+further exploitation" is a claim, not a lab result.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -27,9 +28,11 @@ is a claim, not a lab result.
   buffer."
 - **Affected/fixed**: Apache DataSketches C++ `1.0.0-incubating` through
   `5.2.0` (CVE `lessThanOrEqual 5.2.0`); fixed in `5.3.0`. Release notes list
-  this as one of five deserialization security fixes. Fix is PR #503
-  ("HLL CouponList validates the coupon count"), which adds a capacity guard
-  to both the byte-buffer and stream constructors and two regression tests.
+  this as one of five deserialization security fixes (release-notes bullet:
+  "HLL CouponList validates the coupon count"). Fix is PR #503, whose GitHub
+  API title is "Fix CouponList deserialization count validation bug"; it adds
+  a capacity guard to both the byte-buffer and stream constructors and two
+  regression tests.
 - **Pins**: `src/cve103501.json`, `src/ghsa-w656-xfm5-jqjh.html`,
   `src/pr503.diff`, and the full `5.2.0` / `5.3.0` release tarballs — five
   SHA-256 pins in `lab/frontier/datasketches2shell/PROVENANCE.md`. The GHSA
@@ -63,9 +66,11 @@ marked fixed.
 4. The public path is real: `HllSketchImplFactory.hpp:101` dispatches a
    `LIST_PREINTS` image to `CouponList::newList`, reached from
    `HllSketch-internal.hpp:63` (`hll_sketch::deserialize(bytes, len)`).
-5. The stream overload has the same defect at `:155`/`:159`
-   (`read(is, coupons_.data(), numToRead * 4)` with `numToRead` from the
-   input when compact); it is source-bound but **not exercised** here.
+5. The stream overload has the same defect at `:161`/`:162`: `:161` sets
+   `numToRead = compact ? couponCount : coupons_.size()` and `:162` executes
+   `read(is, coupons_.data(), numToRead * 4)`. It is source-bound but **not
+   exercised** here. Pinned `:155` is the `putOutOfOrderFlag` call and `:159`
+   is a comment.
 6. Fixed `5.3.0`: `CouponList-internal.hpp:102-108` rejects
    `couponCount >= 8` before allocation in the byte path (guard at `:156-163`
    in the stream path); the surviving copy is at `:123`. Both regression
