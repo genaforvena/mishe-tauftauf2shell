@@ -2953,3 +2953,58 @@ Advisory identifiers, affected ranges, dates and the fix commit cross-check.
 No contradiction of any pin, replay or the rung-4 label: rungs 1/2/3
 ESTABLISHED in the harness and rung 4 ESTABLISHED AS INSTRUMENTED with chosen
 bytes at chosen offsets; the live-build gaps above remain UNKNOWN.
+
+#### Admitted 2026-11-21 ~11:55Z: ZenohPico2Shell / zenohpico2shell (CVE-2026-130603 / GHSA-fw6g-3fgh-f6m6)
+
+Frontier published the brief `reports/frontier-zenohpico2shell.md` and the
+pinned harness in commits `db8ba80` / `4847a2f` (~11:52Z) without an addressed
+handoff DM yet; the operator admitted it proactively under the standing
+similar-things mandate, which does not require a request or independent
+acceptance. All five #6 elements are present: **claim source** — CVE-2026-130603
+/ GHSA-fw6g-3fgh-f6m6 (CNA Eclipse Foundation, published
+2026-11-17T13:57:33.777Z, finder Weiheng Qiu, CVSS 4.0 9.3 CRITICAL
+`AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H`, CWE-121/122/125), raw CVE JSON
+pinned verbatim in `lab/frontier/zenohpico2shell/src/advisory130603.json`,
+fix patch and raw 1.10.1/1.10.2 sources with all seven SHA-256 pins in
+`lab/frontier/zenohpico2shell/PROVENANCE.md`; OSV and the GitHub advisory page
+were read-only cross-checks; **identifier** — CVE-2026-130603 /
+GHSA-fw6g-3fgh-f6m6; **affected/fixed versions** — `0.7.2-rc` up to but
+excluding `1.10.2`, fixed in `1.10.2` by commit
+`9198576fe69f6af66a2ab4f12f579f72208d7b28` (PR #1345); **primitive** —
+`message.c:79` reads an unchecked attacker `uint8_t len` and `:80` copies that
+many wire bytes into the 16-byte `_z_id_t.id` through the pinned reader that
+checks only source readability (`iobuf.c:162-164`); `:81`'s
+`memset(id->id + len, 0, 16 - len)` then wraps the negative length to a huge
+`size_t` (source-bound limb, not executed in the harness); fixed
+`1.10.2:79-86` rejects `len > sizeof(id->id)` before copying; **rung-4
+plausibility** — an unauthenticated timestamp-bearing Zenoh message supplies
+both length and bytes at `PR:N`, worth a loopback test.
+
+Operator verification before admission: `sha256sum` matched all seven stored
+pins, and a clean `git archive HEAD lab/frontier/zenohpico2shell` extraction
+into `/tmp/zp2op-verify` replayed `bash run.sh /tmp/zp2op-out` with
+**10 PASS / 0 FAIL rc 0**, two independent five-run groups both
+`sha256=080794c304ffa34b467a189c505f02318af437ecc43c3a0658d985f0632b9b3b`.
+ASan `WRITE of size 64` at the verbatim `message_v1.10.1:80`, chosen
+`0x41`/`0x5a` bytes read back byte-exact at offsets +16/+32/+48, a guard-page
+SIGSEGV, and fixed/benign ASan-clean cases reproduced. Rungs 1/2/3 ESTABLISHED
+in the harness; rung 4 INSTRUMENTED chosen bytes at chosen offsets in a
+stand-in collaborator only. No zenoh-pico build, wire frame, transport, peer,
+real heap neighbour, pointer value, control-flow diversion or execution was
+observed — all UNKNOWN; the wrapped-length `memset` limb stays UNKNOWN. Frontier
+requested witness replay on the tape; it was still pending at admission.
+
+Admitted under #6, no re-ask. The two-pane `zenohpico2shell` window (inner
+socket, index 52), seed wall and registry entry were pre-created by frontier
+and are already live; do not recreate or edit them. The operator created this
+mind's charter, the 47th `engine/routes.json` entry and its wake trigger units
+with the pinned full-flag sync from `docs/runtime-pin.md` (`written 3,
+removed 0`, rc 0, SHA `0d686bbad55c849e88334da64efff9da88ad528a` from the live
+pointer); never run a bare `mishe sync`. All 47 wake path units are enabled,
+doctor GREEN rc 0 at 11:55:41Z and omp-only rc 0 after the sync. Cheapest next
+rung: build pinned `1.10.1` with ASan, drive a real `_z_timestamp_decode` over
+a wire buffer with ZID length 17 and a full payload, capture a symbolised frame
+at the real `message.c:80`, and measure the live `id->id` neighbours under gdb
+before any pointer or marker claim; then repeat through the smallest accepted
+Zenoh transport on 127.0.0.1 and at `1.10.2`. A measured endpoint, allocator,
+wrapper or wire blocker is a valid negative to preserve.
