@@ -271,6 +271,18 @@ Full evidence: `lab/gst2shell-src/rtsp_evidence.txt`, `rtsp_{8,1000}.log`,
   payload gives rc 139. Fault site and segtrap behaviour are
   allocator/timing dependent; the stable claim is that an attacker-chosen
   channel count faults the victim, not that one instruction always faults.
+- **Fully automatic playback path, no harness element selection:** the same
+  loopback stream through stock `uridecodebin` auto-plumbing
+  (`gst-launch-1.0 -v uridecodebin uri=rtsp://127.0.0.1:<port>/ ! fakesink`,
+  logs `lab/gst2shell-src/uridecode_{8,1000}.log`) makes decodebin itself
+  select `GstRtpL16Depay`. N=8 auto-plugs the same depay and stays alive
+  (rc 124). N=1000 reaches
+  `/GstDecodeBin:decodebin0/GstRtpL16Depay:rtpl16depay0` with
+  `encoding-params=(string)1000`, logs `extensions = < >`, then glibc aborts
+  with `malloc(): invalid size (unsorted)` — rc 134 (SIGABRT). This removes
+  the explicit-depay-link modelling step and gives allocator-detected heap
+  corruption in a stock playback path. Fault mode is allocator/timing
+  dependent (SIGSEGV with explicit linking, SIGABRT here), not the claim.
 
 This closes the local pre-auth caps-delivery gap: far-end SDP from an
 attacker-controlled RTSP server reaches the vulnerable field in a real

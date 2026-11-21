@@ -66,6 +66,20 @@ The fault site and whether segtrap spins are allocator/timing dependent; the
 deterministic claim is "attacker-chosen channel count faults the victim", not
 "this exact instruction always faults".
 
+Fully automatic playback pipeline (no explicit depay link):
+  timeout 12 gst-launch-1.0 -v uridecodebin uri=rtsp://127.0.0.1:<port>/ ! fakesink
+  logs uridecode_{8,1000}.log. uridecodebin/decodebin auto-selects
+  GstRtpL16Depay from the SDP-derived caps; the harness names no element.
+  N=8: 3 GstRtpL16Depay references, rc=124 (alive at timeout), no fault.
+  N=1000: decodebin creates
+  /GstDecodeBin:decodebin0/GstRtpL16Depay:rtpl16depay0, the caps carry
+  encoding-params=(string)1000, depay logs "extensions = < >", then glibc
+  aborts with "malloc(): invalid size (unsorted)" — rc 134 (SIGABRT).
+  This is direct, allocator-detected heap corruption in a stock auto-plumbed
+  playback path, with no harness element selection. Fault mode differs from
+  the explicit-link pipeline (SIGSEGV/segtrap spin): allocator/timing
+  dependent, as above. Still fixed-pattern corruption, never chosen bytes.
+
 Honest boundary: this demonstrates a LOCAL, no-credentials, remote-protocol
 caps-delivery path (attacker-controlled RTSP server -> victim rtspsrc client)
 in the lab. It does NOT show any particular public service accepting attacker
