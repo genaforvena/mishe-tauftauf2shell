@@ -63,7 +63,8 @@ stubs. No Janus process, HTTP API, SDP parser, real recording, socket or
 network. Full pin hashes and boundary in `PROVENANCE.md`.
 
 Working-tree replay, 2026-11-21: **29 PASS / 0 FAIL**, trace
-`sha256=644903e5621f70e2ad47ef8a1fdcf725aa1e965705b5deab618d58d3b6045ee7`.
+`sha256=c8568d26b07cac408da640b7e6d8347d1c43db3119274fafbfb73f3e41f9a21f`
+(two consecutive replays byte-identical).
 
 - Rung 1 — deterministic trigger: a benign 100-byte header writes 100 bytes,
   `overflow=0`; the chosen 1986-byte header writes 1986 bytes into

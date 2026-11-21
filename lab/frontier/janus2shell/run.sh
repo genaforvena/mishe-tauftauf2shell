@@ -141,7 +141,11 @@ need "$out/fixed_benign.out" 'LAYOUT build=fixed mode=benign cap=1500 requested=
   printf 'fixed-chosen: '; cat "$out/fixed.out"; printf '\n'
   printf 'fixed-benign: '; cat "$out/fixed_benign.out"; printf '\n'
   printf 'asan-diagnostic: '
-  grep -E 'ERROR: AddressSanitizer|stack-buffer-overflow|WRITE of size|janus_recordplay.c:70[17]|SUMMARY: AddressSanitizer' "$out/asan.out" | tr '\n' '|'; printf '\n'
+  grep -q 'ERROR: AddressSanitizer: stack-buffer-overflow' "$out/asan.out" && printf 'ERROR=stack-buffer-overflow|'
+  grep -q 'WRITE of size 1986' "$out/asan.out" && printf 'WRITE=1986|'
+  grep -q 'src/plugins/janus_recordplay.c:707' "$out/asan.out" && printf 'FRAME=janus_recordplay.c:707|'
+  grep -q 'SUMMARY: AddressSanitizer: stack-buffer-overflow' "$out/asan.out" && printf 'SUMMARY=stack-buffer-overflow|'
+  printf '\n'
 } >"$out/trace.txt"
 sha256sum "$out/trace.txt" | cut -d' ' -f1 >"$out/trace.sha256"
 printf 'sha256=%s\n' "$(cat "$out/trace.sha256")"
