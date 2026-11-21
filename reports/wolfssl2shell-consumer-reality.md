@@ -249,6 +249,12 @@ later legacy-record processing, so the wrapper sets it here. No pinned
 library source was edited. Pacing is required: an unpaced 4097-datagram
 flood reached only 2657 inserts, while 200-1200 us pacing reached 4097.
 
+The reverse order was also tried: fill the list first, then replay one real
+unified-header ClientHello from the peer (`frag-peerunified.log`,
+`frag-peerunified2.log`). It did not reach the sink: ASan stayed clean and
+the live count peaked at 3991/3983, below the wrap point. The wrapper-set
+`unified_seen` therefore remains part of the demonstrated conditions.
+
 ### Observations (all 127.0.0.1, logs in `out/loopback/`)
 
 1. **The list fills from the wire.** 20 fragments → `ack_count=20`
