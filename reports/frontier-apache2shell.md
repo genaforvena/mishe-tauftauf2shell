@@ -1,6 +1,24 @@
 # Frontier brief: Apache2Shell — CVE-2026-119618
 
-**Verdict: RANKED CANDIDATE #1 (unadmitted), RUNG 0 — claim and source pins verified, no local build or traffic yet.**
+**Verdict: RANKED CANDIDATE #1 (unadmitted), RUNG 1 ESTABLISHED locally —
+reproducible wire trigger of the wrong-pool write; rungs 2/3 NOT established.**
+
+## Local result (W91, 2026-11-21)
+
+I built 2.4.70 and 2.4.71 from SHA256-matched ASF tarballs with locally
+built nghttp2 1.59.0 and ASan-instrumented APR 1.7.4 / APR-util 1.6.3,
+instrumented the one-line fix site, and drove loopback-only h2c traffic.
+With 76 custom headers, `Content-Type` and no `Content-Length`, the stream
+table reaches exactly `nelts=80 nalloc=80` and the vulnerable
+`apr_table_setn()` allocates from the connection's unlocked allocator —
+confirmed on 300/300 and 2000/2000 requests. The fixed build takes the
+`r->headers_in` path (300/300 in the matched control). 2000 full-table
+writes produced 0 ASan reports. One 2000-stream multiplexed burst produced
+a single child `Segmentation fault (11)`; it was not reproduced in a repeat
+or in a matched 300-stream run, so rung 2 stays UNKNOWN. Full evidence,
+negative results and build details: `lab/frontier/apache2shell/OUTCOME.md`;
+drivers `repro-h2c.sh` and `repro-h2c-mux.py`. Instrumentation is a harness
+marker, not an exploitation result; no chosen bytes or RCE are claimed.
 
 ## Verified ground truth
 
@@ -67,24 +85,24 @@ differential plausible.
   MsQuic (deferred): this is the only fresh candidate with a vendor-critical
   network primitive, a tagged fix and a published PoC to replay.
 
-## Cheapest local experiment (next rung)
+## Next bounded experiment (rung 2/3)
 
-1. Build 2.4.70 and 2.4.71 from pinned release tarballs with APR 1.7.4 /
-   APR-util 1.6.3, `--enable-http2=shared`, ASan and a separate TSan build,
-   prefork MPM, `Protocols h2c http/1.1`, bound to 127.0.0.1 only.
-2. Drive the published 79-header, no-body, `Content-Type`, no-
-   `Content-Length` request with a stdlib HTTP/2 client from the public PoC
-   repo, first reading its harness and reimplementing only the request
-   shape — do not trust its verdict strings.
-3. Record vulnerable ASan/TSan reports and fixed-build silence with exact
-   builds, inputs, exit codes and sanitizer text. If rung 3 lands, attempt
-   a benign marker at an overlapping-allocation target; label any in-process
-   marker as rung-4 mechanics, not rung 5.
+The wrong-pool full-table write is reproducible, but the allocator race
+was not: 0 ASan reports across 2000+ full-table writes and one unrepeated
+child SIGSEGV. The missing variable is sustained multiplexed traffic on a
+small set of connections while the connection thread frees socket buckets.
+Next: repeat the 2000-stream/10-connection `repro-h2c-mux.py` burst on
+freshly restarted vulnerable and fixed servers several times, with TSan
+instrumentation on httpd and APR to observe the unsynchronised free-list
+read/write directly. An ASan report or deterministic child crash on the
+vulnerable build with a clean fixed control would establish rungs 2/3;
+label any in-process marker as rung-4 mechanics, not rung 5.
 
 ## Pins and provenance
 
 All bytes in `lab/frontier/apache2shell/src/`; `sha256sum -c SHA256SUMS`
 verifies 6/6. Raw sources were fetched from the Apache httpd Git tags and
 the CVE/OSV APIs on 2026-11-21; the PoC README is an external claim pinned
-for wording only. No build, no traffic and no window have been created by
-this brief.
+for wording only. Release tarballs were SHA256-checked against ASF-published
+checksums. Builds and loopback traffic are recorded in `OUTCOME.md`; no
+window has been created by me.
