@@ -4,7 +4,7 @@ A public research lab that tries to take "X2Shell" runtime vulnerabilities
 all the way to **rung 4 — demonstrated security impact** — and publishes
 every step, including the ones that fail.
 
-It studies fifteen admitted vulnerability families in local, isolated
+It studies sixteen admitted vulnerability families in local, isolated copies
 of the affected software:
 
 - **Ruby2Shell** — CVE-2026-132825, a one-byte heap overflow in Ruby's
@@ -21,8 +21,11 @@ of the affected software:
   case; both have clean fixed controls, and neither claims rung 4. The
   129474 read is invisible to ASan because ZendMM pools the affected memory.
   CVE-2026-129182, a backtrace-global repopulation UAF on 8.5, has a bounded
-  loopback FPM harness; the debug ASan build preserves a negative and the
-  release-ASan replay is still owed, so its grade is UNKNOWN.
+  loopback FPM harness; wake 45 completed the release-ASan FPM replay on
+  8.5.12 — both vendor diagnostics reproduce but `VERDICT=CLEAN_NO_UAF`
+  with zero ASan markers, also with fast shutdown forced, in ZendMM mode and
+  under the control. The grade stays UNKNOWN: the advisory behaviour was not
+  reproduced on this host, and the 8.5.13 fixed release build is unbuilt.
 - **Node2Shell** — CVE-2026-123828, a one-byte heap overflow in Node's
   HTTP/2 `Alt-Svc` handling (admitted by the plant's operator under its
   standing "similar things" mandate).
@@ -73,15 +76,16 @@ of the affected software:
   overwrite. Default posture is post-auth (`PR:L`); only no-auth deployments
   reach the 9.8 ceiling. Admitted 19:32Z under standing approval #6. Rungs
   1-3 and chosen-byte rung 4 are reproduced on source-built FreeRDP 3.32.0
-  library bytes through the real `SNDC_FORMATS` parser and the real
-  `rdpsnd_server_handle_messages()` dispatcher, still in-process with a stub
-  WTS read callback. The stock shadow server's `Activated` callback cannot
-  select the DVI_ADPCM record by default (its format list omits tag `0x11`),
-  so that variant is library-level only; a shadow-compatible
-  WAVE_FORMAT_ADPCM record (tag `0x02`, `nBlockAlign=8`) removes that
-  precondition and wraps `out_frames` to `0xfffffffffffffffc`. A live RDP
-  process, real virtual-channel transport, RDP session, network reachability
-  and the auth gate stay UNKNOWN.
+  library bytes through the real `SNDC_FORMATS` parser, the real
+  `rdpsnd_server_handle_messages()` dispatcher and, in wake 6, libfreerdp's
+  real WTS virtual-channel reader with the shadow `Activated` selection path.
+  Wake 6 also measured the gate: in the FFmpeg-off builds tested the stock
+  server format list is PCM-only, so neither the DVI_ADPCM (tag `0x11`) nor
+  the WAVE_FORMAT_ADPCM (tag `0x02`, `nBlockAlign=8`) wrap-capable record is
+  selectable by default; the positive rung 4 supplies a server ADPCM record
+  through `subsystem->rdpsndFormats`. A live RDP process, real channel
+  transport, RDP session, network reachability, stock heap layout and the
+  auth gate stay UNKNOWN.
 - **Xrdp2Shell** — CVE-2026-44178 / GHSA-hh7r-2rmq-q4g4, a client-controlled
   reassembled DYNVC virtual-channel payload copied into xrdp's fixed
   8192-byte server→chansrv out stream. Default posture is post-auth (`PR:L`)
@@ -93,10 +97,13 @@ of the affected software:
   `channels` value in GStreamer's rtpL16depay caps that over-writes the fixed
   64-entry `GstAudioInfo.position` array. Rungs 1-3 are reproduced in an
   extracted harness (`oob_writes=936`, caps length chooses the clobbered
-  offsets, ASan `WRITE of size 4`, clean fixed control); rung 4 is an honest
-  negative because the sink writes only constant `NONE(0)`, so the bytes are
-  not attacker-controlled. Admitted ~20:52Z under standing approval #6; live
-  caps/RTSP path and allocator layout stay UNKNOWN.
+  offsets, ASan `WRITE of size 4`, clean fixed control). Wake 6 corrected the
+  harness's `NONE=0` model: the pinned enum is `-3`, so index 73 turns a NULL
+  `order` pointer into `0x00000000fffffffd`, faulting at `depay.c:267`; a live
+  GStreamer 1.24.2 ASan instance reproduces that fault and the shipping
+  `rtpL16depay` plugin faults rc 139 on one caps field. This is count-controlled
+  impact, not chosen bytes: strong rung 4, a real SDP/RTSP path and allocator
+  layout stay UNKNOWN. Admitted ~20:52Z under standing approval #6.
 - **Babelfish2Shell** — CVE-2026-119923 / GHSA-vq28-vgj3-r26w / AWS
   2026-166-AWS, an unbounded 16-bit TDS prelogin `length` copied verbatim
   into a fixed 1024-byte `StringInfo` buffer, so both the copy count and the
@@ -136,20 +143,23 @@ is called established.
 | **Freeradius2Shell** | **Rung 4 — demonstrated impact in a standalone harness** | A crafted EAP-FAST ticket writes 208 bytes into a 152-byte stack structure and executes a chosen `verify_marker()` address at rc 42; fixed build rejects the same ticket. Live `radiusd` reachability and key-unknown byte control remain UNKNOWN. [Status](reports/freeradius2shell-status.md) |
 | **Falkordb2Shell** | **Rung 3 — confirmed corruption (standalone harness)** | A masked zero-payload extended-length frame drives 525 out-of-bounds write operations (word XORs plus trailing bytes); chosen mask bytes overwrite a canary at chunk offset 104. ASan reports a heap-buffer-overflow, an 8-byte READ at the `^=` load, under the short-chunk lab layout; witness replay #239 established rungs 1/2/3. Rung 4 is NOT demonstrated because the mask repeats every four bytes. [Status](reports/falkordb2shell-status.md) |
 | **Freeswitch2Shell** | **Rung 4 — chosen-pointer dereference in a live FreeSWITCH process over loopback; sentinel is a value, not code** | A length-127 WebSocket frame in the opt-in `mod_xml_rpc` endpoint decodes `FF FF FF FF` to `plen=-1`, passing the signed guard; ASan reports `WRITE of size 132146` in `ws_raw_read`. An 8-byte chosen value at `offsetof(wsh_t, ssl)=131112` executes a marker at rc 42 in the extracted harness; the fixed build rejects with `rc=-1009`; 5/5 repeats are identical. Unmodified pinned `ws.c` (Abyss type stand-ins only) over a real 127.0.0.1 socket: that all-FF frame gives ASan `negative-size-param (size=-5)` in `memcpy` from `ws_raw_read` (`ws.c:306`) and plain rc 134. A different length, `7F FF FF FF 00 00 00 00`, sets `plen=INT_MAX`, overflows the guard's signed add and takes the normal clamped branch: `bash lab/freeswitch2shell/live/run_pos.sh` places `0x4142434445464748` in `wsh->ssl` (`ssl_bytes=4847464544434241`, `RESULT=PASS`, rc 0), fixed `rc=-1009` with `ssl=(nil)`, ASan `WRITE of size 4096` at the end of the 131136-byte region from `ws_raw_read (ws.c:300)`. A full vulnerable FreeSWITCH then ran in a private netns on 127.0.0.1 with `mod_xml_rpc` + `enable-websocket`: a real WebSocket `101` upgrade delivered the frame and GDB caught the chosen `wsh->ssl` value dereferenced in `SSL_shutdown` from `ws_destroy (ws.c:367)` ← `websocket_hook (mod_xml_rpc.c:703)`; witness replay #338 changed only the 8 chosen bytes and saw the new value at the same fault site. Fixed and in-bounds controls survive. Stock heap layout, external reachability and the opt-in config gate stay in the claim; the sentinel is not executable code. Repaired harness driver prints `ALL CHECKS PASS` (rc 0), sources `ws_overflow.c` `75433b5d…` / `run.sh` `637cfa36…`; its 2928 OOB-write count was corrected to 1464. [Status](reports/freeswitch2shell-status.md) |
-| **Freerdp2Shell** | **Rung 4 — chosen bytes on real library bytes; still in-process** | A crafted `SNDC_FORMATS` record with `nChannels=2, nBlockAlign=4` passes the scalar guard, wraps `out_frames` to `0xfffffffffffffff0` after a failed realloc, and drives sequential client copies past the 8820-byte buffer. ASan reports `WRITE of size 16384` in `rdpsnd_server_send_samples` on source-built 3.32.0; a sanitizer-free replay through the real `rdpsnd_server_recv_formats()` parser places `de` at OOB offset 8820 and `ad` at 21384, with a fixed-guard control at rc 3 and no wrap. Wake 5 also drove a framed PDU through the real `rdpsnd_server_handle_messages()` dispatcher (stub WTS read callback) and corrected the reachability claim: the stock shadow server's `Activated` callback cannot select DVI_ADPCM by default, so that variant is library-level only; a shadow-compatible WAVE_FORMAT_ADPCM record (`nBlockAlign=8`) removes the precondition and wraps `out_frames` to `0xfffffffffffffffc`. Live RDP process, real virtual-channel transport, RDP session, stock allocator layout, network reachability and the auth gate remain UNKNOWN. [Status](reports/freerdp2shell-status.md) |
+| **Freerdp2Shell** | **Rung 4 — chosen bytes on real library bytes; still in-process** | A crafted `SNDC_FORMATS` record with `nChannels=2, nBlockAlign=4` passes the scalar guard, wraps `out_frames` to `0xfffffffffffffff0` after a failed realloc, and drives sequential client copies past the 8820-byte buffer. ASan reports `WRITE of size 16384` in `rdpsnd_server_send_samples` on source-built 3.32.0; a sanitizer-free replay through the real `rdpsnd_server_recv_formats()` parser places `de` at OOB offset 8820 and `ad` at 21384, with a fixed-guard control at rc 3 and no wrap. Wake 5 drove a framed PDU through the real dispatcher; wake 6 replaced its stub WTS reader with libfreerdp's real reader and shadow activation, and measured that FFmpeg-off builds offer PCM only, so the positive case needs a subsystem-supplied ADPCM server record. The ADPCM variant wraps `out_frames` to `0xfffffffffffffffc`. Live RDP, transport, session, network, stock layout and auth gate UNKNOWN. [Status](reports/freerdp2shell-status.md) |
 | **Xrdp2Shell** | **Rung 3 — confirmed corruption; harness-only rung 4** | A 28-byte data-first header plus 20000 client bytes writes `oob_writes=11836` from offset 8192; chosen `ab`/`cd` land at OOB offsets 8228/12028, ASan reports `WRITE of size 20000` 0 bytes after the 8192-byte region, and rung 4 places `de`/`ad` at offsets 8228/12024 across two messages. Exact-size 0.10.6.1 and benign controls are clean, 5/5 traces identical. Live xrdp process, real DYNVC PDU path and the post-auth gate are UNKNOWN. [Status](reports/xrdp2shell-status.md) |
-| **Gst2Shell** | **Rung 3 — confirmed corruption in an extracted harness; rung 4 honest negative** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, 3744 counted zeroed OOB bytes, with the caps value choosing which offsets are clobbered; ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. Rung 4 is NOT demonstrated — the sink writes only constant `NONE(0)`, so the attacker controls the length and offsets, not the bytes. Live GStreamer, SDP/RTSP caps path and allocator layout UNKNOWN. [Status](reports/gst2shell-status.md) |
+| **Gst2Shell** | **Rung 3 confirmed; count-controlled rung-4 effect in live and shipping builds** | Caps `encoding-params=(string)1000` drives `channels=1000` into the fixed 64-entry `GstAudioInfo.position` array: `oob_writes=936 first_oob=256 last_oob=3999`, caps length choosing the clobbered offsets, ASan `WRITE of size 4` 0 bytes after a 256-byte region in `vuln_create_default`, fixed control `oob_writes=0`, 5/5 identical. The harness's `NONE(0)` model was wrong — pinned `NONE=-3` writes `fd ff ff ff`, corrupting `order` to `0x00000000fffffffd`; a live ASan instance faults at `order->pos` and the shipping 1.24.2 plugin faults rc 139 at `encoding-params` 86/87/100/1000. Chosen bytes, arbitrary pointer control, RCE and a real SDP/RTSP path are NOT DEMONSTRATED. [Status](reports/gst2shell-status.md) |
 | **Babelfish2Shell** | **Rungs 1-3 in an extracted harness; harness-only chosen-byte rung 4** | An unbounded 16-bit prelogin `length=4096` copied into a 1024-byte `StringInfo`: `oob_writes=3072 first_oob=1024 last_oob=4095`; lengths 1050/1150/2100 clobber neither/first/both neighbour stamps; ASan `WRITE of size 4096` 0 bytes after a 1024-byte region in `wire_getbytes`; chosen `de ad be ef ca fe ba be` / `41 42 43 44` land byte-exact at OOB offsets 1100/2000; fixed control `rc=0 oob_writes=0`, clean under ASan, 5/5 identical. No live TDS endpoint, `palloc` layout, real neighbour or control-flow effect observed. [Status](reports/babelfish2shell-status.md) |
 | **Bzfs2Shell** | **Rungs 1-3 in an extracted harness; instrumented chosen-value rung 4** | A 1024-byte body writes four sender-chosen bytes past `tcpmsg[1024]` into adjacent `tcplen`: rung 1 `tcplen=-1024` with chosen tail at `tcpmsg+1024`; rung 2 destination 936 bytes before the object, next length 1028; rung 3 ASan `heap-buffer-overflow` `WRITE of size 64` via `recv` → `traced_recv` → `receive_msg`; rung 4 `DEADBEEFCAFEBABE`/`0123456789ABCDEF` read back byte-exact from chosen preceding harness members; fixed controls reject at the first bound, ASan-clean, 5/5 identical. No live bzfs, player socket, real `NetHandler` layout, allocator neighbour or execution. [Status](reports/bzfs2shell-status.md) |
 
 Work is ongoing: PHP's path from constrained placement to pointer control
 (including the reopened session-splice lane, the session-filename UAF, the
-new 8.5 stale-argument read and 129182's release-ASan replay),
+new 8.5 stale-argument read and 129182's clean release-ASan replay),
 Node's path from corruption
 to control, Mosquitto's wire-to-code-execution gap, Dragonfly's stock rung-3/4
 gap, Postgres's wrong `PR:L` pointer identity, Brotli's pointer fields beyond
 index 27, FreeRADIUS's live `radiusd` replay, FalkorDB's four-byte-repeating
-mask, Freeswitch's stock heap layout and any executable sentinel, Xrdp's live loopback DYNVC PDU path and auth gate, and GStreamer's live caps path plus any useful zeroing effect are still open. Apache's
+mask, Freeswitch's stock heap layout and any executable sentinel, Xrdp's live
+loopback DYNVC PDU path and auth gate, GStreamer's real SDP/RTSP caps path and
+symbolication of the shipping-plugin fault, and Freerdp's FFmpeg-enabled or
+subsystem-supplied server format are still open. Apache's
 Stage C route was closed as unreachable in this build on this host and is
 preserved as a negative. Each open question is recorded as an UNKNOWN in its
 status file rather than papered over. Failed hypotheses and negative results

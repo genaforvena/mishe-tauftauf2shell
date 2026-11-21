@@ -64,7 +64,10 @@ claims, not conclusions.
   case. Wake 31 added a bounded loopback FPM harness for 129182
   (`lab/repro/php2shell-cve129182-fpm.py`, with release-ASan build support in
   `lab/php2shell/build-fpm-release.sh`); the debug ASan build preserves a
-  negative and the release replay is still owed, so its grade is UNKNOWN.
+  negative. Wake 45 finished the release-ASan 8.5.12 replay: both vendor
+  diagnostics reproduce but `VERDICT=CLEAN_NO_UAF` with zero ASan markers,
+  also with fast shutdown forced, in ZendMM mode and under `--control`; the
+  grade stays UNKNOWN and the 8.5.13 fixed release build is unbuilt.
   129289 remains untested (smuggling, not memory corruption).
 - Rung-4 angle: the disclosed RCEs are runtime-level; the lab reproduces
   the memory-safety failures (OOM longjmp path; stale-state UAF) in
@@ -286,12 +289,19 @@ stub WTS read callback, including body reassembly across reads and msgType
 demux. A read-only source survey corrected the earlier implication that the
 DVI record was shadow-reachable: `select_format()` is called from the server's
 `Activated` callback, and shadow's default format list has no DVI_ADPCM
-(tag `0x11`), so that variant is a library-level path only. A shadow-compatible
-WAVE_FORMAT_ADPCM record (tag `0x02`, `nBlockAlign=8`, `nChannels=2`) is
-selectable and wraps `out_frames` to `0xfffffffffffffffc`; chosen-byte readback
-and the ASan `WRITE of size 16384` hold for both variants. The WTS read
-callback remains a stub, so no live RDP session, channel transport or auth
-gate is demonstrated.
+(tag `0x11`), so that variant is a library-level path only. A
+WAVE_FORMAT_ADPCM record (tag `0x02`, `nBlockAlign=8`, `nChannels=2`) wraps
+`out_frames` to `0xfffffffffffffffc`. Wake 6 then replaced the stub with
+libfreerdp's real WTS reader (`FreeRDP_WTSVirtualChannelRead`), a real
+`wMessageQueue` and the shadow `Activated` selection logic, and corrected the
+reachability claim again: `freerdp_dsp_supports_format()` leaves only PCM in
+the FFmpeg-off builds tested here, so neither wrap-capable tag is selected
+from the stock server list. The positive rung 4 supplies an ADPCM server
+record through `subsystem->rdpsndFormats`; with that condition explicit,
+chosen-byte readback and the ASan `WRITE of size 16384` hold through the real
+reader, dispatcher, activation and parser. Live RDP, channel transport,
+session, network, stock layout, an FFmpeg-enabled build and the auth gate
+stay UNKNOWN.
 Evidence: `reports/frontier-freerdp2shell.md`, extracted harness
 `lab/frontier/freerdp2shell/{rdpsnd_overflow.c,run.sh}`, real-library
 harness `lab/freerdp2shell-src/{run.sh,*.c}` with committed traces, seed
@@ -374,11 +384,17 @@ bytes; rung 2 a caps value of 200 clobbers OOB offset 768 but not 1792, a
 value of 1000 clobbers both; rung 3 ASan `heap-buffer-overflow`, `WRITE of
 size 4`, 0 bytes after a 256-byte region in `vuln_create_default`; the
 `MIN`-clamped fixed control gives `oob_writes=0` and 5/5 traces are
-byte-identical. **Rung 4 is NOT DEMONSTRATED**: a `deadbeeftest` stamp reads
-back all zeroes — the attacker controls the count and offsets of a constant
-`NONE(0)` zero-fill, not the bytes written. A real GStreamer process, real
-SDP/RTSP caps negotiation, actual allocator neighbours, any pre-auth
-reachability and code execution stay UNKNOWN. Evidence:
+byte-identical. The extracted harness's `NONE=0` model was wrong: pinned
+`audio-channels.h:101` defines `NONE=-3`, so the OOB writes store
+`fd ff ff ff` and index 73 corrupts the low half of the `order` pointer from
+NULL to `0x00000000fffffffd`. A live GStreamer 1.24.2 ASan harness
+(`bash lab/gst2shell-src/run_live.sh`) faults at the real `depay.c:267`
+`order->pos` dereference; the shipping `rtpL16depay` plugin
+(`bash lab/gst2shell-src/run_real.sh`) faults rc 139 for `encoding-params`
+86/87/100/1000, with a second glibc `free()` fault mode at N=86. This is a
+count-controlled rung-4 effect, not chosen bytes: strong rung 4, real
+SDP/RTSP caps negotiation, pre-auth reachability and code execution stay
+UNKNOWN. Evidence:
 `reports/frontier-gst2shell.md`, harness
 `lab/frontier/gst2shell/{rtp_channels_overflow.c,run.sh}`, seed status
 `reports/gst2shell-status.md`. The dedicated `gst2shell` mind owns this lane;
@@ -407,7 +423,7 @@ attacker-controlled. The fix rejects `length > 4096` and calls
 
 An exact vulnerable/fixed tag pair, a pure missing-bounds-check, no hardware
 gate or credentials for rungs 1–3 and a pre-auth vector make a rung-4
-attempt plausible; unlike Gst2Shell's constant zero-fill, the OOB bytes are
+attempt plausible; unlike Gst2Shell's fixed `-3` write pattern, the OOB bytes are
 sender-chosen. Frontier re-ran the pins-pinned harness at handoff: pins
 `c5559f08…` / `d4b09e8c…` match the brief and `ALL CHECKS PASS`, rc 0. Rung 1
 `length=4096 si_capacity=1024 oob_writes=3072 first_oob=1024
