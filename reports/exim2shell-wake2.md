@@ -190,3 +190,67 @@ function. Chosen-byte control at a chosen live allocator-metadata offset is
 lesson applied: measure the actual consumer before investing in grooming.
 The pinned ASan trees were not modified; all new traces live only in the
 gitignored `src/exim-4.99.2-plain/` lab tree. No rung 5 claim.
+
+## Addendum (2026-11-21 21:48Z, wake 4): rung-4 consumer is capped on a stock build
+
+Question: why does the same wire sequence write in the ASan build but never
+reach `tls_ungetc` in the non-ASan build? Answer: the post-close GnuTLS
+receive path on this host differs, and the ASan build's reachability is an
+artifact of the sanitizer preserving the deinitialized session's memory.
+
+Both builds were instrumented with the same lab-only probes (no pinned source
+was edited; the probes live in the gitignored trees
+`src/exim-4.99.2-plain/` and `src/exim-4.99.2-asantrace/`). Loopback only.
+
+Non-ASan 4.99.2, port 25262, `trigger.py 25262 three`
+(`build-4.99.2-plain/plain-trace-w4-final.log`):
+
+```
+PLAIN refill inbytes=0 lwm=1 hwm=1 xerr=0
+PLAIN close free buf=0x61d1d90609f8 lwm=1 hwm=1 ct=(nil) ungetc_fn=0x...0447
+PLAIN call-site nextch=0x4d ungetc_fn=0x...0447        # smtp_ungetc
+PLAIN bdat-getc left=0 ... ungetc=0x...0447
+PLAIN bdat-pop ungetc_fn=0x...6b15 lwr_ungetc_was=(nil) # tls_ungetc restored
+PLAIN tls-getc enter lwm=1 hwm=1 xerr=0
+PLAIN refill inbytes=-1250 lwm=1 hwm=1 xerr=0
+```
+
+`tls_close(NULL, TLS_NO_SHUTDOWN)` overwrites the *top-level*
+`receive_ungetc` with `smtp_ungetc` while the bdat layer is still pushed, so
+the header parser's first post-close ungetc (`receive.c:2141`) is safe. The
+subsequent `bdat_pop_receive_functions()` restores the stale `tls_ungetc`,
+but the very next `tls_getc` needs a refill: `gnutls_record_recv` on the
+deinitialized session returns `-1250`, `xfer_error` becomes TRUE and Exim
+answers `421 lost input connection`. No chosen byte reaches live glibc
+metadata. The same result was obtained with `EXIM2SHELL_TLS12=1`
+(`w4-tls12-three.out`), so this is not a TLS-version effect.
+
+Instrumented ASan copy of the same pinned source, port 25272, identical
+`three` bytes (`build-4.99.2-asantrace/asan-trace.log`): the same free and
+clobber occur, then the pop restores `tls_ungetc` (`base+0x28d3e6`, resolved
+with `nm -an`), but every later `gnutls_record_recv` on the deinitialized
+session returns **0**, not `-1250` (`xerr=0` throughout). `tls_getc` keeps
+falling back to `smtp_getc`, the parser survives to the second message's DATA
+headers, and only then does `receive.c:2141` call the stale `tls_ungetc`
+with `nextch=0x42` (`asan-report.2085297`, WRITE of size 1 in `tls_ungetc`).
+The ASan write is therefore reachable only because ASan quarantines the freed
+GnuTLS session, leaving its contents usable; stock glibc reuses the session
+bytes and the connection dies before the write.
+
+Chosen value and offset **are** observed in the ASan build with a new wire
+sequence, `python3 trigger.py 25272 chosen 8 Q`:
+`asan-chosen8Q-trace.log` shows `lwm=8` at the free and
+`call-site nextch=0x51 ungetc_fn=tls_ungetc`;
+`asan-report.2086793` reports
+`WRITE of size 1 at 0x52100002090f ... located 15 bytes inside of
+4104-byte region [0x521000020900,0x521000021908)`. Since `xfer_buffer =
+malloc+8`, the address is `xfer_buffer[7] = xfer_buffer[N-1]`, and `0x51` is
+the client-chosen `Q` from the second header. Value and offset control are
+now measured, not merely source-bound — but on the ASan build only.
+
+Disposition: rung 3 ESTABLISHED (witness DM #1140) stands; rung 4 is capped
+for the stock non-ASan 4.99.2 build on this host, and rung 5 is not claimed.
+This is the nginx2root lesson applied to the consumer: the one-byte write
+cannot be aimed at live allocator metadata when the consumer's first
+post-free read kills the session before the ungetc. No grooming was attempted
+because the write is unreachable on that build.
