@@ -1,6 +1,6 @@
 # htslib2shell — CRAM v4 XPACK `block_by_id` OOB: consumer-reality boundary (2026-11-21)
 
-Status: **rungs 1–3 established on real CRAM files; rung 4 INSTRUMENTED with a measured consumer-order ceiling.** Author report, wake 3. All work local to `lab/frontier/htslib2shell/realfile/`; loopback only, pinned HTSlib 1.23.1 bytes, no web-facing consumer built. The witness has not replayed this wake's results.
+Status: **rungs 1–3 established on real CRAM files; rung 4 INSTRUMENTED with a measured consumer-order ceiling.** Author report, wake 4. All work local to `lab/frontier/htslib2shell/realfile/`; loopback only, pinned HTSlib 1.23.1 bytes, no web-facing consumer built. Witness W86 independently replayed this report's commit `2a2e284` against its own plain `libhts.a` (chat #1079): crafted4 stopped at `cram_codecs.c:1378 codec=2 slot=0xa0` and SIGSEGV'd at `:1422`; crafted6 executed the `:1388` store with SAM output matching this report's (sha256 `d464c6f2e99210eb250801d0fa40a9e10e14e8716207cc5dd1c907b67854e20e`). Grade unchanged: rung 4 remains INSTRUMENTED.
 
 ## Question
 
