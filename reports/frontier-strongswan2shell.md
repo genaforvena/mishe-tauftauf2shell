@@ -69,9 +69,11 @@ rejects all three with `invalid_length()` before any arithmetic.
 Harness `lab/frontier/strongswan2shell/` extracts the three pinned ranges
 verbatim under `#line`; `chunk_t`, the linked list, callbacks and the chosen
 byte source are synthetic collaborators. No daemon, socket, IKE handshake,
-RADIUS server or network is used. Working-tree replay: **54 PASS / 0 FAIL**,
-raw trace
-`sha256=f7112a4c6475976c2320f0c3c04c12b8381e1506a76c0c99c98e40a2a7e48dde`.
+RADIUS server or network is used. Working-tree replay at commit `cda059a`:
+**54 PASS / 0 FAIL**, raw trace
+`sha256=57cd8943825f35a14f45ce134f3987c489aacbd080c6249a94c9dc808f1f3d6a`.
+Two clean `git archive HEAD` extractions at `cda059a` into separate absolute
+directories gave the same 54 PASS / 0 FAIL and byte-identical traces.
 
 - Rung 1 — deterministic trigger: type `AT_IDENTITY` (14) with length byte 0
   requests a `18446744073709551614`-byte copy at the pinned `:260` and leaves

@@ -82,8 +82,12 @@ regenerates both variants, builds plain/ASan/bounded binaries, runs 18 cases
 and writes `out/trace.txt`. Pointer and fault-address values are normalized to
 `ADDR` in the trace so replays are byte-identical.
 
-Working-tree replay 2026-11-21, 3 consecutive runs: **54 PASS / 0 FAIL**,
-raw trace `sha256=f7112a4c6475976c2320f0c3c04c12b8381e1506a76c0c99c98e40a2a7e48dde`.
+Working-tree replay 2026-11-21, 3 consecutive runs at commit `cda059a`:
+**54 PASS / 0 FAIL**, raw trace
+`sha256=57cd8943825f35a14f45ce134f3987c489aacbd080c6249a94c9dc808f1f3d6a`.
+Two clean `git archive HEAD` extractions at `cda059a` into separate absolute
+directories gave the same 54 PASS / 0 FAIL and the same raw trace hash,
+byte-identical to each other and to the working tree.
 
 ## Failed hypotheses / repairs (preserved)
 
