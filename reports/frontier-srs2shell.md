@@ -111,3 +111,12 @@ rung 3 in practice.
 All advisory and reachability claims are reproduced from public sources;
 this brief proves the pinned code paths and their local memory effects, not
 live-daemon exploitability or RCE.
+
+## Clean replay (2026-11-21T08:53Z)
+
+Committed as `24db73a`. Two `git archive 24db73a lab/frontier/srs2shell`
+extractions into `/tmp/replay-srs-a` and `/tmp/replay-srs-b`, plus the
+working tree, each ran the unmodified `run.sh`: 14 PASS / 0 FAIL and raw
+trace `sha256=77b6d5500dea19d3c3a8de713d7a37834a3241a62e6a7239d398661e5fea1965`
+byte-identical in all three. No source-generating code changed after the
+commit; the replay record is prose only.
