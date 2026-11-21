@@ -61,3 +61,39 @@ In-library ASan evidence (ASan-instrumented libjpeg-turbo 2.1.5.1, `WITH_SIMD=0`
 - `build12ja.log`, `build13ja.log`, `jpeg-cmake.log`, `jpeg-make.log` —
   build records with `JPEG_ROOT=/tmp/pw2-w1/jpegasan` and the instrumented
   libjpeg prefix.
+
+## W2 — plain glibc heap evidence (2026-11-21)
+
+A plain, no-sanitizer Pillow 12.2.0 build (`/tmp/pw2-w2/v12plain`, links host
+`libjpeg.so.8`) makes the tile buffer's `calloc` come from glibc, so the
+past-end bytes hit real heap metadata rather than an ASan redzone. On
+`case64.fpx`:
+
+- `glibc_raw_layout_v12.log` — non-PIE python3.12, brk heap, buffer chunk size
+  field `0x91` (144-byte chunk, 136 usable).
+- `glibc_first_store_v12.log` — hardware watchpoint at `buffer+128` fires with
+  `0x00 -> 90 'Z'` in `libjpeg.so.8`, stack through pinned
+  `ImagingJpegDecode src/libImaging/JpegDecode.c:252`.
+- `glibc_metadata_overwrite_v12.log` — after the row write the next chunk's
+  size field is `0x5a5a5a5a5a5a5a5a` and its user bytes are all `0x5a`.
+- `glibc_live_chunks_v12.log` — the overrun crosses two live chunks (32 bytes
+  at `buffer+144`, 992 bytes at `buffer+176`).
+- `glibc_plain_run_run[1-5].log` — 5/5 runs print `OK (90, 90, 90, 90)` then
+  exit rc 139. `glibc_malloc_check_v12.log` — `MALLOC_CHECK_=3`, rc 134,
+  `corrupted double-linked list`.
+- `glibc_crashbt_v12.log` — SIGSEGV in `PyGC_Collect()` / `Py_FinalizeEx()`.
+- `plain_v13_fixed_control.log` — plain 13.0.0 on the same file raises
+  `OSError` and exits rc 1, no crash. `build12_plain.log`,
+  `build13_plain.log` — build records.
+
+Rebuild the plain case:
+
+```
+python3 -m pip install --no-binary :all: --no-deps \
+  --target /tmp/pw2-w2/v12plain /tmp/pw2-dl/pillow-12.2.0.tar.gz
+PYTHONPATH=/tmp/pw2-w2/v12plain python3 -c \
+  'from PIL import Image; Image.open("case64.fpx").load()'
+```
+
+No pointer, PC or marker control was observed; rung 4 stays at chosen bytes
+plus live heap-metadata corruption and deterministic abort.

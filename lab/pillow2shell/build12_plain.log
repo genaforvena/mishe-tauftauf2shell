@@ -1,0 +1,15 @@
+Processing /tmp/pw2-dl/pillow-12.2.0.tar.gz
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: pillow
+  Building wheel for pillow (pyproject.toml): started
+  Building wheel for pillow (pyproject.toml): finished with status 'done'
+  Created wheel for pillow: filename=pillow-12.2.0-cp312-cp312-linux_x86_64.whl size=1269041 sha256=b7535150a028768656d523daa982380467aed597cd9b221e97aae96a35ef3208
+  Stored in directory: /home/mesh-home/.cache/pip/wheels/a7/d9/51/6c753e825547a9cdefc6d8a5b570a4da6928d6f306a26b4d99
+Successfully built pillow
+Installing collected packages: pillow
+Successfully installed pillow-12.2.0

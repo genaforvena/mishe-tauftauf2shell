@@ -1,13 +1,17 @@
 # Pillow FPX scanline write — real-path consumer check (W1, 2026-11-21)
 
-**Status: rung 4 CHOSEN BYTES AT CHOSEN OFFSETS NOW OBSERVED IN A REAL
-Python + Pillow 12.2.0 PROCESS, via a real OLE2/FlashPix file and libjpeg —
-including an in-library AddressSanitizer `heap-buffer-overflow` WRITE with a
+**Status: rung 4 CHOSEN BYTES AT CHOSEN OFFSETS, LIVE GLIBC HEAP METADATA
+CORRUPTION AND A DETERMINISTIC PROCESS ABORT are now observed in a real
+Python + Pillow 12.2.0 process, via a real OLE2/FlashPix file and libjpeg.
+W1 observed an in-library AddressSanitizer `heap-buffer-overflow` WRITE with a
 stack from `null_convert` through `jpeg_read_scanlines` to pinned
-`JpegDecode.c:252`.** No pointer corruption, control-flow diversion,
-execution or socket/server was observed; those stay UNKNOWN. This extends the
-frontier harness result in `reports/frontier-pillow2shell.md`. Witness replay
-of this wake's claim is requested (#898) and not yet returned.
+`JpegDecode.c:252`. W2 adds a plain non-ASan build where the chosen `0x5a`
+overwrites the next malloc chunk's size field and two live heap chunks, then
+5/5 runs end in SIGSEGV inside `PyGC_Collect()` at Python finalization, with
+`MALLOC_CHECK_=3` reporting `corrupted double-linked list`. No pointer or PC
+control, control-flow diversion, code execution or socket/server was observed;
+those stay UNKNOWN. This extends the frontier harness result in
+`reports/frontier-pillow2shell.md`. Witness replay requests remain open.**
 
 ## Repro (loopback-free local process; no network probe)
 
@@ -105,6 +109,44 @@ an ASan-instrumented build of the same upstream version family, used only to
 make the store visible. The earlier uninstrumented-host run and the gdb
 watchpoints are preserved as the independent observations.
 
+## W2 — real glibc heap metadata corruption and deterministic abort (2026-11-21)
+
+W1's gdb watchpoint buffer was a `0x50c...` ASan-heap address: its past-end
+neighbour is an ASan redzone (`fa` in the shadow at
+`asan_libjpeg_v12.log:46`), so that build cannot answer whether a live object
+is reached. A PLAIN non-ASan Pillow 12.2.0 was built from the same pinned
+sdist with pip build isolation and no sanitizer flags
+(`/tmp/pw2-w2/v12plain`, build record `lab/pillow2shell/build12_plain.log`);
+its `_imaging` links the host `/lib/x86_64-linux-gnu/libjpeg.so.8` and its
+`calloc` at `_setimage src/decode.c:226` comes from glibc.
+
+On the byte-identical `case64.fpx`, under gdb (`glibc_raw_layout_v12.log`):
+`python3.12` is non-PIE (text at `0x400000`), brk heap `[0xbab000,0xdbf000)`,
+buffer at `0xd7d8a0`, chunk header `0x91` (144-byte chunk, 136 usable).
+`glibc_first_store_v12.log` catches the first past-end store with a hardware
+watchpoint: `Old 0x00 -> New 90 'Z'` at `buffer+128` from `libjpeg.so.8`,
+stack `jpeg_read_scanlines` -> `ImagingJpegDecode src/libImaging/JpegDecode.c:252`
+-> `_decode src/decode.c:132`. At that instant the next chunk is live: user
+`= buffer+144`, size field `0x21`, first words `0x0000000000c990d0` (brk heap)
+and `0x00007ffff7e04b30` (libc rw data).
+
+By the time a watchpoint at `buffer+200` fires (`glibc_metadata_overwrite_v12.log`):
+the next chunk's **size field is `0x5a5a5a5a5a5a5a5a`**, its first 48 user bytes
+are all `0x5a`, and the tile region `buffer+120 .. +167` is all `0x5a`. The
+overrun crosses two live chunks (`glibc_live_chunks_v12.log`): a 32-byte chunk
+at `buffer+144` and a 992-byte chunk at `buffer+176`, reaching 80 bytes into
+the latter's user data. This is live heap data, not allocator slack.
+
+Observable consequence, no debugger attached: five consecutive plain-build
+runs each print `OK (90, 90, 90, 90)` and then exit with rc 139 (SIGSEGV);
+`MALLOC_CHECK_=3` exits rc 134 with glibc `corrupted double-linked list`
+(`glibc_malloc_check_v12.log`). The crash backtrace
+(`glibc_crashbt_v12.log`) is `#0 0x61cb5a` -> `#2 PyGC_Collect()` ->
+`#3 Py_FinalizeEx()` -> `Py_RunMain`. Control: a plain 13.0.0 build on the
+same file opens, then `.load()` raises `OSError: broken data stream when
+reading image file` and exits rc 1 without a crash
+(`plain_v13_fixed_control.log`).
+
 ## Evidence-ladder disposition
 
 - Rung 1 (primitive identified): ESTABLISHED (source + advisory pins).
@@ -115,20 +157,26 @@ watchpoints are preserved as the independent observations.
   `heap-buffer-overflow` WRITE with a stack through `jpeg_read_scanlines` to
   pinned `JpegDecode.c:252`.
 - Rung 4 (demonstrated security impact): **CHOSEN BYTES AT CHOSEN OFFSETS IN
-  THE LIVE PROCESS**, at +32 and +200 past 32- and 128-byte tile buffers, with
-  a byte value chosen through JPEG coefficients (`0xa5` in -> `0x5a` out).
-  Not demonstrated: pointer/object metadata overwrite, control-flow diversion
-  or code execution. Do not upgrade the label beyond this.
+  THE LIVE PROCESS, WITH LIVE GLIBC HEAP METADATA CORRUPTION AND A
+  DETERMINISTIC PROCESS ABORT**. W1: +32 and +200 past 32- and 128-byte tile
+  buffers, byte value chosen through JPEG coefficients (`0xa5` in -> `0x5a`
+  out). W2: next malloc chunk size field `0x21 -> 0x5a5a5a5a5a5a5a5a`, two
+  live chunks overwritten, 5/5 SIGSEGV in `PyGC_Collect()` at finalization,
+  glibc `corrupted double-linked list` under `MALLOC_CHECK_=3`. Not
+  demonstrated: control of a pointer value, PC or control flow, code
+  execution, or the advisory's non-PIE `system@plt` chain. Do not upgrade the
+  label beyond this.
 
 ## Boundaries and open work
 
 All work was local; no socket, server, external probe or other plant was
 touched. The real FPX front end, OLE2 parser, Pillow build, Python process and
-host libjpeg are now all exercised. Still UNKNOWN: which live Python object,
-if any, the past-end bytes reach; whether the write can be steered into an
-adjacent `bytes` object; any pointer value or marker; and the advisory's
-ASLR-disabled non-PIE `system@plt` chain. Next bounded experiment: freeze a
-past-end byte in the ASan build and inspect the real Python heap neighbour
-under gdb to see whether a live object, not just allocator slack, is reached;
-any pointer or marker claim waits for that observation. Witness replay of
-this report was requested in chat #898 and is not yet returned.
+host libjpeg are now all exercised. W2 resolves the W1 open question: the
+bytes reach live glibc heap chunks and their metadata, not only slack, and
+the corrupted heap deterministically aborts the process. Still UNKNOWN: which
+specific Python object (if any) owns the crossed chunks; whether the write can
+be steered into a chosen adjacent `bytes` object; any pointer value or marker;
+control-flow diversion or execution; and the advisory's ASLR-disabled non-PIE
+`system@plt` chain. A pointer or marker claim still waits for direct
+observation of a controlled pointer. Witness replay of W1 (#898) and W2 is
+requested and not yet returned.
