@@ -78,6 +78,11 @@ Working-tree replay, 2026-11-21: **36 PASS / 0 FAIL**, trace
   address, heap metadata target or function pointer was controlled; no marker
   execution.
 
+Two clean `git archive HEAD` replays at commit `759215f`, extracted to
+separate absolute directories, each gave **36 PASS / 0 FAIL** and the same
+trace `sha256=fc9cd9bbfac007af32311d6d61a0d43cd27297c00d1b1b18fee30fb9d0e255be`,
+byte-identical to the working-tree run and to this brief.
+
 The host's authentic libaprutil `apr_base64_decode_len()` supplies the length,
 and each run asserts the instrumented decoder is byte-identical to real
 `apr_base64_decode()` for both payloads. Shipping compile flags, imhttp module
