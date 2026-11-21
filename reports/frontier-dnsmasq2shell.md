@@ -41,12 +41,13 @@ log_query(F_NOEXTRA | F_KEYTAG | F_UPSTREAM, name, &a,
 With maximum-width numeric fields the formatted result is 57 bytes plus NUL
 into a 46-byte buffer — 12 bytes past the end. The upstream fix commit
 `36d081e37477027fd721fea498f3760f529034ad` (2026-04-21) removes the suffix
-from the two callers, passes `type=1`, moves the suffix into `log_query()`'s
-separate `extra` pointer, changes `sprintf` to
-`snprintf(daemon->addrbuff, ADDRSTRLEN, ...)`, and adds `F_KEYTAG | F_RR` to the
-earlier `querystr()` guard so a type string cannot be substituted for the
-format. The fix also removes a parallel `F_KEYTAG` `sprintf` path in
-`src/cache.c:2358-2362`.
+from the two callers, passes `!algo_digest_name(algo)` instead of a literal 0,
+moves the suffix into `log_query()`'s separate `extra` pointer, changes
+`sprintf` to `snprintf(daemon->addrbuff, ADDRSTRLEN, ...)`, and adds
+`F_KEYTAG | F_RR` to the earlier `querystr()` guard so a type string cannot be
+substituted for the format. The patch's single removed `F_KEYTAG` `sprintf`
+is at parent line 2358 — the same site as v2.92:2291; the fixed
+`src/cache.c:2358-2362` is the new `snprintf`/`extra` block, not a second path.
 
 **Claim conflict preserved:** the fix commit's first parent
 `8741128120f41cfc0a1fbf6d3e11f94e821f418a` is not reachable in the GitHub
