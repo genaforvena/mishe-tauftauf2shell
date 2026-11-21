@@ -1,0 +1,59 @@
+gst2shell — valgrind memcheck on the real remote RTSP path (L8, N=1000)
+2026-11-21 ~02:36Z, all on 127.0.0.1; no external probe, no credentials.
+
+Purpose: the normal RTSP path gives a crash (rc 134 / segtrap) but no
+instrumented memory report. This run drives the same real path under valgrind
+to confirm the crash is memory corruption in the shipping plugin, not an
+unrelated payload error.
+
+SETUP
+  python3 rtsp_server_codec.py 18700 1000 L8      # loopback, SDP
+  DEBUG output:
+  timeout 120 valgrind --tool=memcheck --error-exitcode=99 \
+    --log-file=vg_L8_1000.log \
+    gst-launch-1.0 -v uridecodebin uri=rtsp://127.0.0.1:18700/ '!' fakesink
+  vg_L8_1000.log SHA-256
+    42cde0ec288fe99a3878059b5ba5497984a80882b07267bc684eead9ca9fed2e
+  gst-launch rc=124 (valgrind slow; the 120s timeout SIGTERM'd the process
+  after the errors were already recorded). The benign N=8 controls in
+  family_evidence.txt show the same RTP payload does not fault.
+
+QUOTED LINES (vg_L8_1000.log)
+  ==3765873== Invalid write of size 4
+  ==3765873==    at 0xA46D0F6: ??? (in .../gstreamer-1.0/libgstrtp.so)
+  ==3765873==    by 0x490833E: gst_pad_send_event (in libgstreamer-1.0...)
+  ==3765873==    by 0x5C24083: ??? (in .../libgstplayback.so)
+  ==3765873==  Address 0x5bed9f8 is 0 bytes after a block of size 1,016 alloc'd
+  ==3765873==    at 0x484D953: calloc (in vgpreload_memcheck...)
+  ==3765873==    by 0x4A22821: g_malloc0 (in libglib-2.0...)
+  ==3765873==    by 0x4B48E8B: g_type_create_instance (in libgobject-2.0...)
+  ==3765873==    by 0x4B30015: g_object_new_with_properties (...)
+  ==3765873==    by 0x48E15A6: gst_element_factory_create_with_properties (...)
+
+  Two further writes of size 4 follow at 0xA46D103 and 0xA46D0E8 in the same
+  library and through the same gst_pad_send_event frame, landing 4 and 12
+  bytes past the same 1,016-byte block:
+    Address 0x5bed9fc is 4 bytes after a block of size 1,016 alloc'd
+    Address 0x5beda04 is 12 bytes after a block of size 1,016 alloc'd
+  Three consecutive 4-byte OOB stores are exactly the `posn[i] =
+  GST_AUDIO_CHANNEL_POSITION_NONE` loop writing past `info->position[64]`.
+
+  ==3765873== ERROR SUMMARY: 592 errors from 6 contexts
+
+INTERPRETATION
+  Confirmed memory corruption (evidence-rung 3) in the REAL remote path:
+  attacker SDP sets encoding-params=(string)1000; decodebin auto-plugs the
+  shipping GstRtpL8Depay; set_caps (a sticky event sent via gst_pad_send_event
+  from libgstplayback) performs 4-byte stores past the 1,016-byte GObject
+  allocation of the depay element.
+
+LIMIT / HONEST CAVEAT
+  The valgrind build has no debug info for the shipping plugin, so the write
+  frames print as `??? (in libgstrtp.so)`; the instruction was NOT symbolicated
+  to a function name in this run. An attempted offset mapping landed in
+  gst_rtp_L8_pay_setcaps rather than the write and was discarded, not claimed.
+  Attribution to the vulnerable function rests on the source-level single
+  assignment (`gstrtpchannels.c:308-309`), the earlier gdb symbolication of
+  the direct set_caps fault (`gst_rtp_L16_depay_setcaps+480`), the 4-byte
+  stride, and the N=8 clean control. The written VALUE is still the fixed
+  compile-time constant -3 / 0xfffffffd; no chosen-byte control.

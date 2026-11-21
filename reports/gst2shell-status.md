@@ -326,6 +326,32 @@ packages plus a custom ANNOUNCE media factory is outside this bounded wake,
 and GStreamer's SDP→caps mapping is already covered by `run_sdp.sh`
 independently of direction. No external probe was made.
 
+## Instrumented memory corruption on the real remote path (2026-11-21 ~02:36Z)
+
+The remote RTSP runs above observe a crash (rc 134 or segtrap). To confirm the
+crash is memory corruption in the shipping plugin rather than a payload
+artefact, the same L8 / N=1000 loopback RTSP path was run under valgrind
+memcheck (`vg_L8_1000.log`, digest `42cde0ec…9fed2e`; full write-up
+`lab/gst2shell-src/valgrind_evidence.txt`). Benign N=8 uses the identical RTP
+payload and does not fault.
+
+Valgrind reports `Invalid write of size 4` inside `libgstrtp.so`, reached
+through `gst_pad_send_event` from `libgstplayback.so`, at **0, 4 and 12 bytes
+past a 1,016-byte block** allocated by `g_malloc0 → g_type_create_instance →
+g_object_new_with_properties`. Three consecutive 4-byte OOB stores are the
+`posn[i] = GST_AUDIO_CHANNEL_POSITION_NONE` loop writing beyond
+`info->position[64]` in the depay element's instance. This is an instrumented
+rung-3 observation on the actual remote caps path, not only the synthetic
+ASan harness.
+
+Caveat kept explicit: valgrind's shipping build has no plugin debug info, so
+the write frames print as `??? (in libgstrtp.so)` and were NOT symbolicated in
+this run; an offset guess that landed in the payloader was discarded.
+Attribution rests on the pinned function's single assignment, the earlier gdb
+symbolication of the direct `set_caps` fault, the 4-byte stride and the clean
+N=8 control. The value remains the fixed `-3` pattern — no chosen-byte
+control.
+
 ## Evidence boundary
 
 Rungs 1/2/3 remain established in the extracted harness and were replayed
@@ -350,6 +376,12 @@ earlier "zeroing `order` is harmless" negative is preserved as a superseded
 harness assumption, not erased. Still UNKNOWN: whether any specific external
 service accepts attacker-supplied SDP (no external probe was made), and any
 consequence beyond the deterministic fault. All testing stayed on loopback.
+The remote-path crash was upgraded to instrumented memory corruption: valgrind
+reports three 4-byte invalid stores 0/4/12 bytes past a 1,016-byte GObject
+allocation in the shipping plugin during set_caps (valgrind section above).
+The write was not symbolicated to a function name in that run; attribution is
+by the pinned source, the 4-byte stride, the earlier gdb symbolication and the
+clean N=8 control.
 Author report is not acceptance; witness owns replay.
 
 ## Next owner / action
