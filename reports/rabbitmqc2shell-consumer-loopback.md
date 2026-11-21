@@ -127,3 +127,52 @@ Verdict: **ESTABLISHED AS CLAIMED** at the grade stated above — rung 4
 demonstrated in the lab build with a synthetic service, simulated address
 disclosure and benign marker; no real application, listener, genuine
 infoleak, native code or exploit. Witness next owner: no replay owed.
+
+## Consumer-reality check: the real high-level publisher is structurally safe
+
+Date 2026-11-21 ~17:20Z. This is a **negative result** that narrows the
+"real forwarding application" UNKNOWN; it does not retract the witness-verified
+rung-4 result for the direct `amqp_send_frame()` harness.
+
+The pinned v0.16.0 tree ships a real publisher, `tools/publish.c`. It reads an
+unbounded stdin body (`publish.c:134` `body_bytes = read_all(0)`;
+`common.c:385-414`, a doubling `read`/`realloc` loop) and forwards it via
+`amqp_basic_publish` (`publish.c:15`, `:139`). syslog-ng's `afamqp` module and
+Ceph RGW (`rgw_amqp.cc`) are other real `amqp_basic_publish` consumers. That
+made the high-level API the natural place to look for a real forwarder.
+
+The source rules it out structurally:
+
+- `amqp_api.c:167-168` sets `usable_body_payload_size = state->frame_max - 12`,
+  and the loop at `:223-241` emits every BODY frame with
+  `body_fragment.len <= usable_body_payload_size`.
+- `amqp_connection.c:108-142` `amqp_tune_connection()` reallocates
+  `state->outbound_buffer` to exactly `frame_max`; login negotiates it from
+  the broker (`amqp_socket.c:1346-1385`), the tool requesting 131072 at
+  `common.c:363`.
+- Therefore the `:467` `memcpy` destination is `outbound+7`, its length is at
+  most `frame_max-12`, and the footer is written at `frame_max-5` — inside
+  the buffer. No `amqp_basic_publish` body can reach `:467` with a length past
+  the buffer.
+
+Dynamic check. `lab/rabbitmqc2shell/run_real_tool.sh
+/tmp/rmq2-real-tool-final`: **11 PASS / 0 FAIL**. It verifies the six source
+pins, provisions popt headers locally, builds pinned v0.16.0 and the real
+`amqp-publish` tool with ASan, then `real_tool_probe.py` runs that *unmodified*
+binary against a loopback-only AMQP 0-9-1 front end (no LD_PRELOAD, no library
+patch). The complete handshake negotiated `frame_max=131072`; the tool sent
+the protocol header `414d515000000901`, start-ok, tune-ok, connection.open,
+channel.open, then a 200000-byte `0x5a` body as **two** BODY frames
+(131060 + 68940 bytes), and closed cleanly with `rc=0`. No AddressSanitizer
+report appeared. Logs: `/tmp/rmq2-real-tool-final/probe.out`, `tool.log`.
+
+Conclusion. The published OOB needs a caller that bypasses the high-level
+chunking and hands `amqp_send_frame()` a body longer than `buffer.len-14`
+— exactly what the frontier harness and the synthetic service do. The
+shipped high-level publisher path is not such a caller. This does not show
+the CVE is unreachable in real deployments: a frame-level proxy or gateway
+calling `amqp_send_frame()` directly remains plausible but **UNPROVEN** here;
+no real application doing that was built or observed, and no real broker was
+contacted. Rung 4 stays "demonstrated in the lab build" by the direct-API
+path. The `amqp_basic_publish` finding is a measured consumer-side blocker,
+preserved as a boundary condition rather than a failed claim.
