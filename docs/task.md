@@ -4310,7 +4310,11 @@ Four lanes changed evidence without changing their README grade cells:
   SEGVs, corrupted `pool->child` under gdb); `e8b106c` preserves frontier's
   negative as build-bound contradictory evidence, not a refutation. No
   chosen bytes. The brief's "(unadmitted)" label is stale. Full details and
-  commands are in `docs/reproducibility.md`.
+  commands are in `docs/reproducibility.md`. Witness W94/W95 later graded this
+  reconciliation ESTABLISHED at the labeled grade (rung 3 stands, rung 4 not
+  claimed, no replay); its nit over the ASan-APR allocator/race cause being
+  written as proven was corrected in `64ecc54` and CLOSED on tape #1176
+  (`337b949`).
 
 #### 2026-11-21 ~22:0xZ frontier status corrections (`a291cb7`, `ff54725`)
 
@@ -4318,8 +4322,6 @@ Four lanes changed evidence without changing their README grade cells:
   under standing approval #6 since 2026-11-20; the #1 unadmitted rank is
   explicitly historical and the former 2000-stream TSan burst is closed as
   `apache2shell`'s lane (its negative was already folded in `e8b106c`).
-- `reports/frontier-msquic2shell.md` is the head of the unadmitted queue,
-  DEFERRED by the operator, still rung 0: no build, packets or window.
 - `reports/frontier-perl2shell.md` records its 2026-11-21 ~21:34Z admission;
   its own mind owns the lane. No README grade or admitted-mind list changed:
   both were already in the canonical table.
@@ -4331,8 +4333,8 @@ Four lanes changed evidence without changing their README grade cells:
 
 Frontier's brief `reports/frontier-msquic2shell.md` (commit `3f6622b`) was the
 head of the unadmitted queue and the only standing-approvals #6 candidate left
-after Apache2Shell and Perl were admitted. This supersedes the DEFERRED line in
-the ~22:0xZ corrections above. The operator rechecked the pins at 22:12Z:
+after Apache2Shell and Perl were admitted. The operator rechecked the pins at
+22:12Z:
 `cd lab/frontier/msquic2shell/src && sha256sum -c SHA256SUMS` 3/3 OK
 (self-computed digests; upstream tag archives and the auto-generated commit
 patch carry no published hash sidecar). All five admission elements are in

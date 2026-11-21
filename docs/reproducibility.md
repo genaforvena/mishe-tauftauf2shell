@@ -220,6 +220,10 @@ containers whose host ports bind only to loopback.
   → 6/6 OK (`ff54725` corrected the broken repo-root command). Driver
   scripts and `OUTCOME.md` are tracked, build trees and `out-*` logs are
   gitignored.
+  Witness W94/W95 later graded the build-bound reconciliation ESTABLISHED at
+  the labeled grade (rung 3 stands, rung 4 not claimed, no replay), after
+  `64ecc54` downgraded the ASan-APR allocator/race cause to a hypothesis;
+  the nit was CLOSED on tape #1176.
 
 - **Memcached2Shell live-daemon chosen bytes (second wake)**: build the non-instrumented pinned parent as in [the report](../reports/memcached2shell-daemon-asan.md) (`./autogen.sh`; `CFLAGS='-g -O1 -fno-omit-frame-pointer'` with empty `LDFLAGS`, `./configure --disable-sasl --disable-enchant`; `make -j2`), then
   `python3 lab/frontier/memcached2shell/daemon/observe_heap.py --port 22142 --keys 8000 --hold 86 --out /tmp/replay.txt`.
