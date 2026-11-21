@@ -1115,6 +1115,53 @@ owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
 `reports/netatalk2shell-status.md` and the pinned hashes in
 `lab/frontier/netatalk2shell/PROVENANCE.md`.
 
+#### Admitted 2026-11-21 ~05:28Z: Iondtn2Shell (GHSA-gmhw-vmwr-wrxh / CVE-2026-123999)
+
+Claim sources: maintainer GHSA-gmhw-vmwr-wrxh (2026-11-07, High 7.5
+`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`) plus a VulnCheck advisory and
+CVE record CVE-2026-123999 (CVSS v4 8.7, also availability-only). The GHSA
+"No known CVE" metadata vs VulnCheck's assignment is a preserved claim
+conflict; neither is a lab observation. Affected `3.6.2 <= 4.2.0`, patched
+`4.2.1-a.2`. Fix `4b158b64211ad399a00be4215dd81de2f4767d1e` changes only
+`nm/mgr/nm_mgr_print.c`. Claimed primitive: in `ui_str_from_ac()`, rendered
+AMP values are appended with two unbounded `strcat()` calls into a
+1024-byte `STAKE` heap allocation (pinned 4.2.0 lines 548 function start,
+550 allocation, 557/558 concatenations); a long or deeply nested value list
+writes past the end. The fix uses `istrlen()`/`istrcat()` capacity checks and
+returns NULL when capacity is exhausted. Reachability gate from the advisory:
+the remote UDP CLA/AMP path needs non-default `-l -r` file and parsed-report
+logging; otherwise only interactive local UI rendering is claimed. Impact
+claimed is availability-only (crash of `nm_mgr`).
+
+Frontier's harness (`lab/frontier/iondtn2shell/run.sh`) extracts the verbatim
+pinned lines 548–563 / 543–588 under `#line` directives with stubbed
+collaborators and reports `ALL CHECKS PASSED rc 0`: rung 1 `18 × 81 = 1458`
+bytes written into a 1024-byte region (`overflow=434`); rung 2 the first byte
+underbound changes and the returned string is longer than the allocation;
+rung 3 ASan `heap-buffer-overflow`, `WRITE of size 81`, frame
+`ui_str_from_ac` at pinned line 557; rung 4 the 8-byte token `ION2SHL!` read
+back byte-exact at chosen write offsets 1024/1088/1152/1280/1408, while the
+patched build returns NULL before overflowing and leaves the neighbour
+unchanged. Rung 4 is INSTRUMENTED only — chosen bytes land in the harness
+allocator's adjacent region; no live `nm_mgr`, socket, UDP CLA/AMP payload,
+UI, useful pointer or execution. Cheapest next rung: build 4.2.0 `nm_mgr`
+under ASan, start loopback-only with `-l -r`, send a deeply nested AMP report
+whose rendered list exceeds 1 KiB, capture the real ASan frame at pinned line
+557 and the wire bytes, then measure real heap adjacency and pointer control.
+Admitted by the operator ~05:28Z under standing approval #6 on the
+`fefc2b7` / `de67924` handoff: the two-pane window (32, inner socket),
+registry entry and seed wall were live from handoff and were capture-verified.
+Operator replay ~05:26Z from a clean `git archive HEAD` extraction of
+`d4267283` into two separate absolute output directories: `ALL CHECKS PASSED
+rc 0` in both, byte-identical trace
+`sha256=e9bc1ffffb7ba2bc39b5c3c26cf29a4c1cf0f8f96160a92cc979326f29d38f71`
+(brief records 26 PASS; the harness printed 27 `PASS` lines including
+`PINNED_SOURCE_BYTES`). Wake trigger units and the presentation entry are
+owed from the person's full-flag sync, never a bare `mishe sync`. Evidence:
+`reports/frontier-iondtn2shell.md`, seed status
+`reports/iondtn2shell-status.md` and the pinned hashes in
+`lab/frontier/iondtn2shell/PROVENANCE.md`.
+
 #### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
 
 Frontier handed this find over on tape #448 after committing
