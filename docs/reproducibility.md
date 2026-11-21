@@ -296,7 +296,10 @@ the FFmpeg-build item; wake 17 closed the real-audio-source question at source
 level: in pinned 3.32.0 the copied bytes and copy stride come from the
 server's platform audio capture, not the client, so remote byte choice is not
 established in a stock deployment (deployment-specific influence stays
-UNKNOWN). A stock wrap-capable format on the default build remains UNKNOWN.
+UNKNOWN). Wake 16 also CLOSED the default-format question NEGATIVE on the
+measured pinned 3.32.0 + stock FFmpeg 6.1.1 build: both ADPCM tags are
+encode/decode 0/0 and the server list is AAC_MS + PCM only; other FFmpeg
+versions and platform audio subsystems stay UNKNOWN.
 Wake 18 closed grooming in the live stock allocator: extra PCM format records
 shift the wLog target by 32 bytes each (`grooming_format_count_stock.txt`),
 with a controlled dereference at the shifted offset and an out-of-write

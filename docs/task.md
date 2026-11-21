@@ -568,9 +568,12 @@ an in-process chosen-byte rung 4 on real library bytes through the real
 parser and dispatcher, on a NON-DEFAULT build — not a live RDP session or an
 over-the-wire PDU, no chosen-byte dereference for tag 2, and the 16384 bytes
 are PoC `0x41` rather than remote audio. Tag 17 has no FFmpeg encoder in
-either build. A wrap-capable format on the default build remains UNKNOWN
-(wake-16 evidence `lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt` and
-`PocAdpcmTag2.c`; the raw ASan log is a gitignored scratch file under `/tmp`).
+either build. On this host's pinned 3.32.0 + stock FFmpeg 6.1.1 build, wake 16
+CLOSED the default-format question NEGATIVE: `ADPCM(2)` and `DVI_ADPCM(17)`
+encode/decode are 0/0 and the server list is AAC_MS + PCM only
+(`lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt`); other FFmpeg versions and
+platform audio subsystems stay UNKNOWN (wake-16 driver `PocAdpcmTag2.c`; the
+raw ASan log is a gitignored scratch file under `/tmp`).
 Wake 17 closed the real-audio-source question at source level in pinned 3.32.0:
 the copied bytes (`buf`, server-side platform capture) and copy stride
 (`src_bytes_per_frame`, from the server's own format list) are set server-side;
