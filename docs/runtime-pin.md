@@ -130,6 +130,16 @@ there is a pin issue, not a missing README row.
   3G slice once, so five is an owner-accepted risk. If it recurs, the
   durable fix is a larger host slice budget (the person's call), not a
   fallback model.
+- 2026-11-22 16:45Z: the same idleness recurred at cap 5 — four wakes
+  stuck in `D (disk sleep)` at `mem_cgroup_handle_over_high`, slice at
+  3.5G against the 3G high, no routing events for ~53 min. With the
+  owner's standing instruction to keep the plant active, the plant's own
+  slice file `~/.config/systemd/user/m2shell-plants.slice` was raised
+  from `MemoryHigh=3G/MemoryMax=5G` to `MemoryHigh=6G/MemoryMax=8G`
+  (CPUQuota 200%, no swap unchanged), followed by `daemon-reload`. The
+  four wakes resumed on hy4-flash within 30 s and two yielded by 16:47.
+  The engine router still enforces `max_parallel: 3` per candidate, so
+  the site cap of 5 admits five wake processes but only three engines.
 - The site-local verified binaries (`bin/mishe-tape`, `mishe-records`,
   `mishe-signal-*`) are byte-identical copies of the upstream plant's
   installed framer binaries, with their `*.install.json` sha256 records
