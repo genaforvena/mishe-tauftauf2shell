@@ -5041,6 +5041,19 @@ further work on this lane (tape #1298).
   request-time call target or code-pointer leak on this build; a boundary
   determination for pinned plain 1.3.9d only, rung 5 still unclaimed and the
   W99/W100 rungs 1–4 verdicts unchanged.
+- **ProFTPD2Shell data-sink and first-loop closure** (commit `f6d0654`): a
+  source-only extension of the 02:44Z boundary, no wire run or grade change.
+  `set_rewritemap()` accepts only `int`, `fifo` and `txt` maps
+  (`mod_rewrite.c:2481-2569`); the FIFO carries the lookup key to an
+  admin-configured reader absent from this tree, and rule flags are only
+  `nocase|NC` and `last|L` (`:488-520`), so no rewrite result selects an
+  executable path: the pinned `execve` sites are config-driven
+  (`mod_exec.c:626,629`, passphrase providers). The first loop writes UCS-4
+  words ≤0x10FFFF at `ucs4_longs+8i` (`:1665-1703`), ending for the
+  2048-code-point key at `0x108920` inside the enumerated `members` array;
+  the next symbol `grpfields` needs ~8700 code points. `nm` identifies that
+  `members` as the `fgetgrent()` array, not a function-pointer table. Rung 5
+  stays UNCLAIMED and CLOSED on this build.
 
 - **Soes2Shell W105 replay verdict** (commit `779a28a`): witness W105 (#1281)
   independently rebuilt all 28 binaries and replayed CVE-2026-129796, 129798,
@@ -5880,11 +5893,36 @@ control with a 0644 secrets file was invalid and is superseded. Two full runs
 gave six identical normalized hashes in `evidence/LIVE_HASHES.txt`. Rungs 3/4
 now hold at live-process wire scope in addition to the direct-call harness,
 but the NAK bytes stay the constrained `03 05 c2 23 <digest>` pattern with a
-chosen digest byte only: no pointer, command, side effect or witness replay,
-so rung 5 stays unclaimed. The non-ASan `.bss` map reaches `sigreceived` near
-offset 1872 at N=374, short of the hook function pointers; a larger negotiated
-MRU and a usable pointer remain open. Raw logs are gitignored under `live/raw/`;
-the report is `reports/pppd2shell-live.md`.
+chosen digest byte only: no pointer, command or side effect, so rung 5 stays
+unclaimed. The non-ASan `.bss` map reaches `sigreceived` near offset 1872 at
+N=374, short of the hook function pointers; a larger negotiated MRU and a
+usable pointer remain open. Raw logs are gitignored under `live/raw/`; the
+report is `reports/pppd2shell-live.md`. Witness replay DM #1625 rebuilt both
+pins from a clean `git archive HEAD` with its own gcc 13.3 ASan and replayed
+`run_matrix.sh`: all six normalized files matched after filtering one
+path-regex artifact, its counterexamples found no alternative sink or
+fixed-pin fault, and rungs 1/2/3 plus live-process rung 4 were graded
+ESTABLISHED at the labeled scope.
+
+W123 (`deaf1b7`) adds author-only chosen-byte control in that live-process setup.
+With the daemon option `escape 00` (`asyncmap = 1`), a peer ASYNCMAP CI whose
+low bit is clear is NAKed with four chosen bytes by
+`PUTLONG(ao->asyncmap | cilong, nakp)` (`lcp.c:1566-1569`); mixing 5-byte PAP
+and 6-byte ASYNCMAP NAKs aligns them on an absolute `.bss` offset inside the
+default MRU. From `live/`, after `run_matrix.sh` has built the ASan pins,
+`bash chosen/run_chosen_matrix.sh` builds a plain vulnerable tree and runs
+five cases with `chosen/chosen_write.py`: `0x50574e33` ("PWN3", bit 0 forced)
+lands at `nak_buffer+1500` (`last_pkts_in`), `+1504` (`ifname`) and in the low
+four bytes of `the_channel` (`+1528`), with the daemon's own ConfNak logging
+`<asyncmap 0x50574e33>`; the vulnerable ASan build faults at
+`lcp_reqci lcp.c:1568`, the fixed 2.5.4 ASan build survives and writes no
+chosen bytes. `sudo gdb -p` only read the globals. Five normalized hashes in
+`chosen/evidence/HASHES.txt` were byte-identical over two full runs; raw logs
+stay in gitignored `live/raw/`. This is four chosen bytes at chosen absolute
+offsets in a live process, including low-32-bit control of a pointer object,
+but no dereference, command, side effect or witness replay of these cases:
+the hook pointers at ~1952+ remain past the 1500-byte MRU's 1870-byte maximum
+amplification, so rung 5 stays unclaimed.
 
 ### 2026-11-22 19:0x–19:1xZ limbs: witness and rung-5 boundary closures
 
@@ -5980,7 +6018,7 @@ W120 screened CVE-2026-130875 / GHSA-v384-f7x8-f7c7 (VulnCheck 2026-11-17, CVSS 
 
 Measured on the real pinned daemon: one crafted AUTHOR packet (body 267, `arg_cnt=255`, table `4` + 254×`0xff`, data `cmd=`) to a plant-started 127.0.0.1 listener passed as fd 0 gives ASan `heap-buffer-overflow READ of size 1`, 243 bytes past a 323-byte `calloc` region, top frames `eval_args author.c:75` → `author :141` → `tac_read packet.c:892`, daemon `rc=-6`; the fixed pin returns a 57-byte rejection and a safe packet an 18-byte reply, both clean and alive. Two in-tree replays gave normalized vuln hash `599ab1f0…` and the empty-log digest for both controls. The verbatim-function harness (`harness/gen.py` extracts all three functions byte-for-byte from the committed `pins/` blobs after `5e72d56`) passes 9/9 with chosen `0x41`/`0x5a` at `cmdline` offsets 0..7, fixed copies nothing, and a 40-byte copy into the 15-byte VLA faults with ASan `dynamic-stack-buffer-overflow`; a clean `git archive 5e72d56` replay with no source clone or `.git` also passed 9/9 with identical PASS lines. Both runners were replayed locally at this fold with the same results.
 
-Grade: rungs 1/2 and 3 at real wire scope, rung 4 chosen bytes at chosen offsets at harness scope only — no daemon-side readback, grooming, pointer control, marker, command or rung 5. The required shared key and permitted user keep this out of the anonymous pre-auth class; the advisory's five-connection `system()`/root chain is claim text, not a lab observation. Stage-only: the two-pane window, charter and seed wall exist but admission remains the operator's; witness replay is owed. Cheapest next experiment from the brief: build the vulnerable pin without ASan (`--debug`, `-g -O0`), break at `author.c:77` after the crafted packet under gdb and read back `cmdline` in the live process, with a two-connection priming variant for `calloc()` reuse; that would move rung 4 from harness to live daemon but still not be rung 5 without a pointer or command side effect.
+Grade: rungs 1/2 and 3 at real wire scope, rung 4 chosen bytes at chosen offsets at harness scope only — no daemon-side readback, grooming, pointer control, marker, command or rung 5. The required shared key and permitted user keep this out of the anonymous pre-auth class; the advisory's five-connection `system()`/root chain is claim text, not a lab observation. The operator admitted the lane at 20:2xZ under standing #6 (see the next limb) and witness W124 (#1648) later replayed both runners from a clean archive with its own clang ASan builds, 9/9 harness and 7/7 wire, no refutation; grade unchanged. Cheapest next experiment from the brief: build the vulnerable pin without ASan (`--debug`, `-g -O0`), break at `author.c:77` after the crafted packet under gdb and read back `cmdline` in the live process, with a two-connection priming variant for `calloc()` reuse; that would move rung 4 from harness to live daemon but still not be rung 5 without a pointer or command side effect.
 
 ### Admitted 2026-11-22 ~20:2xZ: tacplus2shell (operator, standing #6)
 
