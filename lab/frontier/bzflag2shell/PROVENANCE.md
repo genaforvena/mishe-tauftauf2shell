@@ -18,8 +18,7 @@
 0951be0fab88b448b8a38a48b78168ebcdb652fec0d9f9b0840671e9972a3b6b  src/bzflag-2.4.30/include/NetHandler.h
 35df40cab1cea4b1f1db62b64559086219d5d53643060a26465ce6ec5dad98b5  src/bzflag-2.4.30/include/Protocol.h
 32e938657313a08ec8686372dccc4a7b43e73924e9e4e8304b999acad67f0cd8  harness/gen_functions.py
-fa9463800f7f575d7227080965c98f9db32b2ebe98e4beb33edd054b70ebeef7  harness/harness.cpp
-4c58dbda781a0fcc22d1d78069cb4eec158d161ef632b46b6011edb0a83d7653  harness/run.sh
+08d578e314626ebc5ccc6a8629873c93c8fa11c07c954fbe3fb77f61a0c5e487  harness/run.sh
 ```
 
 Pinned constants: `MaxPacketLen = 1024` (`include/Protocol.h:47`),
@@ -53,7 +52,7 @@ reset. Wire stage 2 supplies 64 chosen bytes; the next `tcpReceive()` calls
 - Fixed v2.4.32 build uses the same driver and rejects `len=1024` with
   `ReadHuge`; its second guard also rejects an out-of-range `tcplen`.
 
-## Observed output (2026-11-22 17:39Z, two replays, byte-identical)
+## Observed output (2026-11-22 17:45Z, two replays, byte-identical)
 
 `bash harness/run.sh` rc 0, 14 PASS / 0 FAIL:
 
@@ -72,11 +71,13 @@ Fixed ASan clean rc 0; fixed plain `stage1_status=2 stage1_tcplen=4` and no
 chosen readback.
 
 Normalized hashes (`EVIDENCE_HASHES.txt`):
+Normalization strips PIDs, hex addresses, BuildId and the absolute lab/harness
+path prefixes, so a clean git-archive replay produces the same hashes.
 
 ```
 538c3f33705c51dc51c44e14db7d93283d9ea54b98a9a35428603bcafd7c4ca4  norm-fixed-asan.log
 f66e1bb9636eaf243449c4095ca5311f39bb069f1dc6f0fe5b90aec80dd1638e  norm-fixed-plain.log
-c30556a27ed54ff83ef2b2be7de739130ceb520ef4c7265b3ab78c02d7c418db  norm-vuln-asan.log
+b8d37ca7b25883f85d6a5af5cfa588221d5ee725b8eb44ea12bc7e8fe2ed33f8  norm-vuln-asan.log
 63dd5a864836b4774ff5b84f4a2db6f221e1deeef3a91dcd16e7ee95c2849d48  norm-vuln-plain.log
 ```
 

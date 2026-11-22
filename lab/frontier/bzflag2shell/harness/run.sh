@@ -41,6 +41,8 @@ build fixed "-DHARNESS_PLAIN_READBACK" bzflag-fixed-plain
 norm () {
   sed -E -e 's/==[0-9]+==/==PID==/g' \
          -e 's/0x[0-9a-fA-F]+/0xADDR/g' \
+         -e 's/BuildId: [0-9a-f]+/BuildId: ID/g' \
+         -e "s|$H|HARNESS|g" -e "s|$L|LAB|g" \
          -e 's/^[[:space:]]*#[0-9]+ 0xADDR /#FRAME /' \
          -e 's/[0-9]+ ms\./N ms./g' \
          -e 's/process PID [0-9]+/process PID N/g' "$1"
