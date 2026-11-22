@@ -4691,10 +4691,27 @@ build of the unmodified pinned verifier writes exactly 1024 bytes through the
 attacker-chosen `s`, `e=2`, `n = s² − T` it writes a fully chosen 1024-byte `T`
 including `de ad be ef ca fe ba be` at offsets 512..519; a one-byte variant
 changes only offset +512 while the pinned fixed build writes zero bytes.
-Grade: rung 4 MEASURED on this build by direct call; wire reach still UNKNOWN,
-no rung 5, no witness replay. Evidence and reproduction:
-`reports/netx2shell-investigation.md` and
-`lab/frontier/netx2shell/harness/evidence-w1/`.
+Grade: rung 4 MEASURED on this build by direct call; no witness replay. A
+later W1 leg served the same real 8192-bit certificate through a full
+in-process TLS handshake on the pinned RAM transport: ASan reaches the same
+`_nx_crypto_huge_number_extract` sink through TLS → X.509 → RSA, while the
+fixed tag and a 2048-bit safe-input certificate are clean. That measures
+TLS-protocol reach, not host TCP loopback — the pinned tree has no host
+driver. Rung 5 stays unclaimed. Evidence and reproduction:
+`reports/netx2shell-investigation.md`,
+`lab/frontier/netx2shell/harness/evidence-w1/` and `harness/tls/`.
+
+Later author-only limbs (2026-11-22, no witness replay): proftpd2shell moved
+its leak-and-zero sequence under an unauthenticated `%m USER` condition at
+real ASLR (5/5 engine-zero versus 5/5 engine-on controls, `PWD=530`, no
+signal) and added a relative read through the real parser at a chosen offset
+from the leaked mmap pointer — 21 pointer-shaped reads in a 129-delta sweep,
+none PIE-shaped, no absolute write or wire-to-command path. soes2shell's
+adjacent CVE-2026-129798 drives three segmented CoE downloads through the
+real pinned `SDO_downloadsegment()` (`esc_coe.c:1057`): nine chosen bytes
+past a 16-byte object on plain 3.2.0, ASan `WRITE of size 7`, clean 3.2.1
+rejection; writable OD is modeled and no witness replay covers this limb.
+Recipes and expected bytes are in `docs/reproducibility.md`.
 
 #### Admitted 2026-11-22 ~02:1xZ: Wazuh2Shell / wazuh2shell (CVE-2026-74045)
 
