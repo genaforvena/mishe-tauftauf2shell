@@ -502,3 +502,30 @@ config: a chosen byte at a chosen BSS offset disables rewriting of a later
 unauthenticated command. It is not command execution and not an absolute
 pointer write; the leaked value is an mmap heap pointer and the write keeps
 that value intact. Rung 5 remains UNCLAIMED, author-only pending witness.
+
+## proftpd2shell mind — arbitrary relative read through `substr` (2026-11-22 02:13Z)
+
+Genuinely new primitive, measured this wake: with the leaked eight `substr`
+bytes from the over-read, a 1281-code-point key can write `leaked_pointer +
+DELTA` back into `substr` byte-for-byte under real ASLR. The next parse
+iteration in the same command (`rewrite_parse_map_str`, mod_rewrite.c:686,
+`:1266`) logs `%s` at the redirected address, giving a relative memory read
+rather than only a write. `wire/client11-relative-read.py` implements it;
+no address is computed from a PIE base, only from the leaked heap pointer.
+
+Coarse deltas `0`, `±0x40 … ±0x8000` returned parser strings of 0–954 bytes,
+with no signal. At `DELTA=0x4000` the read was `c05db0e38a5f` — a six-byte
+pointer-shaped value different from the pointer written
+(`e880b1e38a5f`), so it is memory read at the chosen offset, not an echo.
+A finer sweep of 129 deltas from `-0x8000` to `+0x8000` in `0x200` steps
+gave 124 reads, 5 no-read runs (leak or post-write parse missing), and 21
+six-byte pointer-shaped values, all with mmap-heap high bytes (`0x5a`–`0x70`);
+**zero** ended in `55 55`, so no PIE address and no PIE-base leak was found
+in this window. Summary and per-run hex:
+`wire/evidence/relread-sweep-summary.txt`; raw sweep files were pruned and
+the post-rename smoke run is `wire/evidence/relread-smoke-postrename.txt`.
+
+This extends rung 4 (chosen offset, real parser consumer, ASLR-on, PR:N) but
+does not enable an absolute write: the relative read found no code pointer,
+and the earlier call-path analysis found no function reachable from the
+writable globals. No wire-to-command path is claimed; rung 5 UNCLAIMED.
