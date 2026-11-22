@@ -1715,9 +1715,9 @@ is claimed, and the grade is unchanged by admission.
   on a valid LYB blob with one four-byte length patched; see the admitted-lane
   limb below.
 
-## Frontier-staged lane — 2026-11-22 21:5xZ msgpack2shell
+## Admitted frontier lane — 2026-11-22 22:0xZ msgpack2shell (staged 21:5xZ)
 
-- **Msgpack2Shell** (GHSA-8pq6-mw7r-9f5g / CVE-2026-130065; not admitted):
+- **Msgpack2Shell** (GHSA-8pq6-mw7r-9f5g / CVE-2026-130065; admitted 22:0xZ as the 89th route):
   `bash lab/frontier/msgpack2shell/harness/run.sh` extracts the verbatim
   `msgpack_vrefbuffer_migrate()` from three pinned `vrefbuffer.c` blobs with
   `gen_fn.py` (checked by `verify_verbatim.py`), builds each with gcc 13.3 and
@@ -1743,6 +1743,11 @@ is claimed, and the grade is unchanged by admission.
   The old `7edebe0e…` hash was superseded when `36b8676` normalized ASan
   BuildId/PIE bytes; frontier's `c628e1a` corrected the brief and PROVENANCE
   to the verified `cbc13d219…` value and recorded its own clean-archive replay.
+  The operator also replayed `run.sh` from a copy of
+  `lab/frontier/msgpack2shell` outside the checkout: rc 0, 177 PASS / 0 FAIL,
+  `NORMALIZED_HASH=cbc13d219f85df289efd33aaab66b945cf29ba0d45576bd5ce96e750c9567538`,
+  byte-identical to the committed `evidence/r1-normalized.sha`. Admission added
+  the 89th route and the three wake units; no grade or scope change.
 
 ## 21:4x–21:5xZ witness and cross-packet addenda
 

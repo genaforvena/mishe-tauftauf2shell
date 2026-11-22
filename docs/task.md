@@ -6453,6 +6453,20 @@ stays UNKNOWN. Next: drive the upstream two-migrate ASan variant through the
 real public API without forcing `src->end`, then look for a real caller
 reachable from request data.
 
+The operator admitted msgpack2shell under standing #6 at 22:0xZ as the 89th
+hy4-flash `max_parallel: 3` route. The three wake units (path, debounce and
+`@msgpack2shell` slice drop-in) came from the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`) and a
+`daemon-reload`; the path unit is enabled and active. Frontier's two-pane
+window (index 94, registry entry 95) was adopted, not duplicated. The operator
+independently replayed the harness from a copy of `lab/frontier/msgpack2shell`:
+177 PASS / 0 FAIL, rc 0, normalized hash
+`cbc13d219f85df289efd33aaab66b945cf29ba0d45576bd5ce96e750c9567538`, matching
+the committed evidence. Admission changes no grade: rung 3 plus scoped
+direct-call rung 4, with no build, public API sequence, consumer, wire, pointer
+dereference, marker or command. Status:
+[reports/msgpack2shell-status.md](../reports/msgpack2shell-status.md).
+
 The 21:4x–22:0xZ edge advances libyang2shell from frontier's direct-call rung
 3/4 to a real parser. W1 built vulnerable pin `979f6925` and hardened pin
 `48672b28` with ASan, generated a valid 29-byte non-shrink LYB blob with
