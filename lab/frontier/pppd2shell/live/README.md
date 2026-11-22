@@ -64,3 +64,16 @@ command path, vulnerable/fixed/safe controls and independent witness replay.
 
 A confounded early control (`w122-fixed-n301`) used a 0644 secrets file that
 the fixed pin refused; the 0600 rerun above is the valid control.
+
+## W123 extension — chosen bytes at absolute globals
+
+`chosen/` extends the witnessed W122 result with a `CI_ASYNCMAP` NAK primitive
+(`lcp.c:1566-1569`) that writes four attacker-chosen bytes at chosen absolute
+`.bss` offsets in the live daemon. With `escape 00` setting
+`ao->asyncmap=1`, a frame mixing PAP and ASYNCMAP CIs placed `0x50574e33`
+("PWN3") at `nak_buffer+1500` (`last_pkts_in`), `+1504` (`ifname`) and in the
+low four bytes of `the_channel` (`+1528`), observed by `sudo gdb -p` after the
+wire frame. The fixed pin wrote nothing there; the vulnerable ASan build
+faulted at `lcp_reqci lcp.c:1568`. Reproduce with
+`bash chosen/run_chosen_matrix.sh`; details and grade boundary are in
+`chosen/README.md`. Still rung 4: no command, side effect or rung 5.

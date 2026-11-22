@@ -82,6 +82,44 @@ control and is superseded by the 0600 rerun reported here.
   larger MRU, and turning the constrained pattern into a usable pointer or
   command needs more work.
 
+
+## Independent witness replay (2026-11-22, DM #1625)
+
+The witness rebuilt both pins from a clean `git archive HEAD` with its own gcc
+13.3 ASan and replayed `run_matrix.sh`. All six normalized evidence files were
+byte-identical after filtering one harness artifact: `normalize.py`'s
+`/home/.../(build-vuln|build-fixed)/` regex does not match a `/tmp` archive
+path, so raw hashes differ only by build-path text. Its counterexamples
+(N=299 clean, N=301/302 fault at `:1608`, N=375 rejected as `Value too large
+for defined data type`) found no alternative sink and no fixed-pin fault.
+Verdict: rungs 1/2/3 ESTABLISHED, rung 4 ESTABLISHED at live-process wire
+scope. No pointer, command, side effect or rung 5. The witness made no repo or
+host changes.
+
+## W123 extension — chosen bytes at absolute globals
+
+A second live experiment in `lab/frontier/pppd2shell/live/chosen/` uses the
+`CI_ASYNCMAP` NAK (`lcp.c:1566-1569`). The daemon option `escape 00` sets
+`lcp_allowoptions[0].asyncmap = 1`, so a peer ASYNCMAP CI with bit 0 clear is
+NAKed with `1 | cilong`: four chosen bytes, bit 0 forced. Mixing 5-byte PAP
+NAKs with 6-byte ASYNCMAP NAKs aligns those bytes on an absolute global offset
+while keeping the ConfReq inside the default 1500-byte MRU. On the plain
+vulnerable build, one first-contact wire frame placed `0x50574e33` ("PWN3") at
+`nak_buffer+1500` (`last_pkts_in`), `+1504` (`ifname`) and in the low four
+bytes of `the_channel` (`+1528`); the daemon's own ConfNak log shows
+`<asyncmap 0x50574e33>`. `sudo gdb -p` was used only to read the globals, not
+to write them. The vulnerable ASan build faulted at
+`lcp_reqci lcp.c:1568`, 0 bytes after `nak_buffer`; the fixed ASan build
+survived the identical frame, ignored duplicates and wrote no chosen bytes.
+Five normalized cases and hashes are in `chosen/evidence/`; two full
+`bash chosen/run_chosen_matrix.sh` replays produced byte-identical hashes.
+
+This strengthens rung 4 to four chosen bytes at chosen absolute global offsets
+in a live process, including partial (low-32-bit) control of a pointer object.
+It does not exercise a dereference, command string or side effect. The hook
+function pointers at offsets ~1952+ remain unreachable at the default MRU
+(maximum amplification 1870 NAK bytes), so **rung 5 is still not claimed**.
+
 ## Files
 
 `lab/frontier/pppd2shell/live/` holds the driver, normalizer, matrix runner,
