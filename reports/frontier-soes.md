@@ -209,3 +209,42 @@ in `docs/task.md`, `docs/reproducibility.md` and the README. The three SOES
 digests were reported 3/3 OK by frontier at 00:16Z but were not recomputed by
 the operator; recomputing `sha256sum -c SHA256SUMS` is the new mind's first
 bounded action. No witness replay or wire path existed at admission.
+
+## soes2shell first wake (2026-11-22 00:50–01:30Z): real CoE mailbox path to the PDO write
+
+Independent verification first: `sha256sum -c SHA256SUMS` recomputed **3/3 OK**
+on the pinned tarballs and fix diff. `sh harness/build.sh` rebuilt every
+frontier harness; all 12 replay cases reproduced the admitted results under a
+fresh record in `lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/`.
+
+New bounded step — `harness/coe_mailbox_overflow.c` replaces direct OD-array
+installation with crafted CoE mailbox bytes parsed by the **real**
+`ESC_coeprocess()` / `SDO_download()` / `SDO_download_complete_access()` on the
+hash-pinned source:
+
+- One SDO Download Complete Access request to `0x1c12` writes the mapping
+  count and two mapping indexes (`si=2, map1=0x2000, map2=0x2001`) into
+  master-writable OD data buffers. Four expedited SDO-download requests write
+  `0x2000:00`, `0x2000:01`, `0x2001:00`, `0x2001:01`; each mapping value is
+  `(index<<16)|(sub<<8)|255`, i.e. a 255-bit length the master supplies.
+- Vulnerable 3.2.0 plain build: `mailbox -> sizeOfPDO=64 nmappings=2`
+  (`MAX_RXPDO_SIZE=42`), `SMmap2[0].obj` pointer overwritten by the 64-byte
+  process-data read at `rxpdo+56`, verdict
+  `mailbox_size_overflow=1 ptr_overwrite=1 chosen_write=1`. ASan on the same
+  mailbox input: `global-buffer-overflow WRITE of size 64`, 0 bytes after
+  `rxpdo[42]`, 54 bytes before `SMmap2` (`ecat_slv.c:172`).
+- Real fixed 3.2.1 (compiled from the pinned 3.2.1 `esc_coe.c`):
+  `sizeOfPDO=0 nmappings=-1`, no `ESC_SM2_sml` assignment, no overflow, ASan
+  clean. Short-input control (one 255-bit mapping): `sizeOfPDO=32`, no
+  pointer overwrite, both releases clean.
+- Negative preserved: the stock `linux_lan9252demo` object list makes `0x1c12`
+  `ATYPE_RO` with `data=NULL` and maps two 8-bit objects, so that device's own
+  OD does not trigger the bug. The harness uses a device OD with writable
+  mapping data — an explicit modeled precondition, not a claim about the demo.
+
+Grade unchanged: rung 3 confirmed, rung 4 harness-level but now driven from
+crafted CoE mailbox frames through real dispatch functions rather than direct
+array writes. `MBX[]` is filled in-process: no wire input, no HAL, no live
+slave, no leaked address, no benign command side effect. Wire reach stays
+UNKNOWN and rung 5 is not claimed. Build with `sh harness/build.sh`; replay
+`./build/coe_mailbox_3.2.0`, `... safe`, `..._asan_3.2.0` and the 3.2.1 twins.

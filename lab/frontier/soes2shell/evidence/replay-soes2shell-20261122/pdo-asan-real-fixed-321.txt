@@ -1,0 +1,5 @@
+sizeOfPDO=0 nmappings=-1 MAX_RXPDO_SIZE=42
+ESC_SM2_sml=0
+before: SMmap2[0].obj=(nil) target0=00
+after:  SMmap2[0].obj=(nil) target0=00 target_last=00
+verdict: ptr_overwrite=0 chosen_write=0

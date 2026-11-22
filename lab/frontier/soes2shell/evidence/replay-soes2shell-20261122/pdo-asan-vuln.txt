@@ -1,0 +1,46 @@
+=================================================================
+==2911796==ERROR: AddressSanitizer: global-buffer-overflow on address 0x571cb704030a at pc 0x571cb6a9c308 bp 0x7ffd295e9f50 sp 0x7ffd295e9710
+WRITE of size 64 at 0x571cb704030a thread T0
+    #0 0x571cb6a9c307 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/pdo_overflow_asan_3.2.0+0xc3307) (BuildId: 1c4f25274ef2f1267ee23be6bace886d4f8c5489)
+    #1 0x571cb6ad2aa5 in ESC_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/pdo_overflow.c:63:4
+    #2 0x571cb6ad2a44 in RXPDO_update /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:172:7
+    #3 0x571cb6ad2d7f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/pdo_overflow.c:120:14
+    #4 0x77d43b42a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x77d43b42a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x571cb6a05324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/pdo_overflow_asan_3.2.0+0x2c324) (BuildId: 1c4f25274ef2f1267ee23be6bace886d4f8c5489)
+
+0x571cb704030a is located 54 bytes before global variable 'SMmap2' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:18' (0x571cb7040340) of size 48
+0x571cb704030a is located 0 bytes after global variable 'rxpdo' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:26' (0x571cb70402e0) of size 42
+SUMMARY: AddressSanitizer: global-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/pdo_overflow_asan_3.2.0+0xc3307) (BuildId: 1c4f25274ef2f1267ee23be6bace886d4f8c5489) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x571cb7040080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x571cb7040100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x571cb7040180: 00 00 00 00 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x571cb7040200: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 02 f9 f9
+  0x571cb7040280: f9 f9 f9 f9 00 00 00 f9 f9 f9 f9 f9 00 00 00 00
+=>0x571cb7040300: 00[02]f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 f9 f9
+  0x571cb7040380: f9 f9 f9 f9 04 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x571cb7040400: 00 00 00 00 00 00 00 00 f9 f9 f9 f9 00 00 00 00
+  0x571cb7040480: f9 f9 f9 f9 00 00 00 00 f9 f9 f9 f9 00 00 00 00
+  0x571cb7040500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x571cb7040580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2911796==ABORTING
