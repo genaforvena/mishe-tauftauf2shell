@@ -1,0 +1,14 @@
+Breakpoint 1 at 0x1380
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, DecompressRTF (p=0x555555560ee0, size=0x7fffffffcfb8) at ../../../src/ytnef-2.1.2/lib/ytnef.c:1528
+1528	  comp_Prebuf.size = strlen(RTF_PREBUF);
+Breakpoint 2 at 0x7ffff7faa019: file ../../../src/ytnef-2.1.2/lib/ytnef.c, line 1575.
+
+Breakpoint 2, DecompressRTF (p=0x555555560ee0, size=0x7fffffffcfb8) at ../../../src/ytnef-2.1.2/lib/ytnef.c:1575
+1575	    while ((out < (comp_Prebuf.size + uncompressedSize)) && (in < p->size)) {
+OBS out=207 bound=16 compsize=207 uncompressedSize=0xFFFFFF41
+#0  DecompressRTF (p=0x555555560ee0, size=0x7fffffffcfb8) at ../../../src/ytnef-2.1.2/lib/ytnef.c:1575
+#1  0x0000555555555d36 in ProcessTNEF (TNEF=...) at ../../../src/ytnef-2.1.2/ytnef/main.c:202
+#2  0x0000555555555a62 in main (argc=5, argv=0x7fffffffe188) at ../../../src/ytnef-2.1.2/ytnef/main.c:145

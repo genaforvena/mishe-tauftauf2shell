@@ -76,6 +76,11 @@ allocator primitive on any natural layout. They cannot, for this pin:
 3. For every such value the LZFu loop at `:1575` is **skipped**: it starts at
    `out = 207` (`:1574`) and its bound `comp_Prebuf.size + uncompressedSize`
    is exactly the wrapped 0..206. `207 < 0..206` is false.
+   This is observed, not merely derived: a plain v2.1.2 gdb breakpoint at
+   `ytnef.c:1575` on `rtf-wrap16.dat` prints
+   `OBS out=207 bound=16 compsize=207 uncompressedSize=0xFFFFFF41`
+   (`lab/ytnef2shell/evidence/w2-second-caller/v212-plain-gdb-loopbound.out`).
+   The loop condition `out < bound` is `207 < 16`, false.
 4. Consequently the literal write `dst[out++] = src[in++]` (`:1604`, attacker-
    controlled bytes from the property) and the reference copy
    `dst[out++] = dst[offset++]` (`:1597`) never execute in a wrapped case. The
