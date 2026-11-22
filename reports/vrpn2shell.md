@@ -1,11 +1,12 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~01:45Z, author observation (W1). Wire rung 3 is now OBSERVED
-on the live pinned 07.36 ASan server, and a plain-build wire input demonstrably
-changes a saved return address and redirects control. Rung 4 is claimed only at
-that honest boundary: the attacker chooses the **offset** of a fixed NUL byte,
-not the byte value. No command side effect, no chosen-byte control, no rung 5.
-Witness replay is pending, so nothing here is ESTABLISHED.
+Status 2026-11-22 ~02:25Z, author observation (W2). Wire rung 3 is OBSERVED on
+the live pinned 07.36 ASan server through **both** description handlers, and
+plain-build wire input demonstrably changes a saved return address and
+redirects control through both. Rung 4 is claimed only at that honest boundary:
+the attacker chooses the **offset** of a fixed NUL byte, not the byte value. No
+command side effect, no chosen-byte control, no rung 5. Witness replay of the
+wire limbs (W1 and W2) is pending, so nothing here is ESTABLISHED.
 
 ## Claim and pins
 
@@ -121,6 +122,42 @@ compiler/build — no claim of arbitrary control or code execution.
   the write to `sender_name[99]` in-frame.
 - Vulnerable direct-call ASan harness results (`out-direct-01/`) and the
   earlier `out-control-fixed/` remain as admission evidence.
+
+## Second sink — TYPE_DESCRIPTION, wire rung 3 and rung 4 (W2, 2026-11-22 ~02:25Z)
+
+The pinned handler for VRPN message type -2 has the same unchecked index on a
+second 100-byte stack array: `strncpy(type_name, p.buffer + 4, ...)`, then
+`i = ntohl(*(const vrpn_int32 *)p.buffer)` and `type_name[i] = '\0'`
+(`vrpn-07.36/vrpn_Connection.C:4476-4482`). The fixed commit clamps at
+`vrpn-fixed/vrpn_Connection.C:4486`. `wire_inject.py --msgtype -2` sends the
+same 24-byte header with type -2; `--msgtype -1` remains the default, so the
+W1 sender-sink replay commands are unchanged.
+
+- Live ASan server, real loopback TCP index 100, port 13911
+  (`out-type-asan-100/gdb.log`): `WRITE_SITE_HIT i=100 &type_name=...070
+  dest=...0d4`, `type=-2`, frames `getOneTCPMessage:4239` → `dispatch:4331` →
+  `doSystemCallbacksFor:1424/1446` → `handle_type_message:4482`, ASan
+  `stack-buffer-overflow WRITE of size 1` with `sender_name`-equivalent shadow
+  frame `[112, 212) 'type_name'` and access at offset 212.
+- Short input, same build, index 4 (`out-type-asan-4/gdb.log`): `i=4`, in-frame
+  destination, no ASan report.
+- Fixed commit, same wire input, index 100 at fixed `:4486`
+  (`out-type-fixed-100/gdb.log`): `i=100` reaches the clamped write, no ASan
+  report.
+- Plain g++ 13.3.0 `-O0` server, index 120, port 13914
+  (`out-type-plain-rip-120/gdb.log`): `PRE saved_rip=0x555555596d88`,
+  `POST saved_rip=0x555555596d00` (low byte zeroed), then SIGILL at
+  `0x5555555596d00`. Same offset-to-saved-rip mapping as the sender sink.
+- Plain fixed-commit server, index 120 (`out-type-plain-fixed-rip-120/gdb.log`):
+  `PRE`/`POST saved_rip` both `0x555555596d86`, no signal.
+
+Reproduce with `VAR=type_name LINE=4482 MSGTYPE=-2 bash
+lab/frontier/vrpn2shell/probe-gdb.sh <outdir> <port> 100` and
+`VAR=type_name MSGTYPE=-2 LINE_PRE=4482 LINE_POST=4484 bash
+lab/frontier/vrpn2shell/probe-plain-rip.sh <outdir> <port> 120`. Both scripts
+default to the original sender sink and message type, so old commands still
+work. This is a second pre-auth wire path to the same rung-4 boundary, still
+with a fixed NUL, no chosen byte and no command side effect.
 
 ## Limits and next work
 

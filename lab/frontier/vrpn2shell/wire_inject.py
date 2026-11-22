@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Minimal VRPN TCP client: cookie exchange then one SENDER_DESCRIPTION message.
+"""Minimal VRPN TCP client: cookie exchange then one description message.
 
-The payload's first big-endian int32 is the index the server uses for
-`sender_name[i] = '\0'` in vrpn_Connection.C:4554 (v07.36). No external hosts.
+SENDER_DESCRIPTION (type -1) drives `sender_name[i]` at
+`vrpn_Connection.C:4554`; TYPE_DESCRIPTION (type -2) drives the same
+unchecked index into `type_name[i]` at `:4482` (v07.36). No external hosts.
 """
 import argparse
 import socket
@@ -19,6 +20,8 @@ def main():
     ap.add_argument("--port", type=int, default=3893)
     ap.add_argument("--hold", type=float, default=2.0)
     ap.add_argument("--name", default="AAAA")
+    ap.add_argument("--msgtype", type=lambda x: int(x, 0), default=-1,
+                    help="VRPN message type: -1 sender description, -2 type description")
     args = ap.parse_args()
 
     payload = struct.pack(">i", args.index) + args.name.encode()
@@ -28,7 +31,8 @@ def main():
     # alignment slot with seqNo. 6 int32 = 24 bytes, payload starts there.
     # Adding a further 4 NUL bytes shifts the index out of p.buffer[0:4],
     # making the server read i == 0 for every index.
-    msg = struct.pack(">IIIIII", HEADER_LEN + payload_len, 0, 0, 0, 0xFFFFFFFF, 0)
+    msg = struct.pack(">IIIIII", HEADER_LEN + payload_len, 0, 0, 0,
+                      args.msgtype & 0xFFFFFFFF, 0)
     msg += payload + b"\0" * (ceil_len - payload_len)
 
     with socket.create_connection(("127.0.0.1", args.port), timeout=5) as s:
