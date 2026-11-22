@@ -34,6 +34,15 @@ fd 0; `harness/gdb-author.cmd` contains the breakpoints and dumps;
 hashes (`harness/gdb-r1.txt`, `-r2.txt`). Raw `harness/gdb-*.log` and
 `gdb-*.stdout` are local-only replay output.
 
+W122 grooming probe (negative results, see
+`reports/tacplus2shell-status.md`): `harness/gdb-groom.cmd` adds gdb
+breakpoints/dumps for the prime and trigger buffers, `harness/wire2.py` sends
+prime+trigger on one connection, `harness/wire3.py` primes with a large
+AUTHEN START and triggers AUTHOR on seq 3, and `harness/run_gdb2.py` drives
+either client under gdb (`--client wire2.py|wire3.py`). All remain loopback
+only; their `gdb-groom*.log` / `gdb-sameconn*.log` / `gdb-authprime*.log`
+output is local-only evidence.
+
 ## Local artifacts (all under this directory)
 
 - `harness/tac.cfg` — lab config: loopback listener at 127.0.0.1:4949, key

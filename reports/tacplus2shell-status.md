@@ -121,3 +121,62 @@ marker or command was observed. Rung 5 and the advisory's five-connection
 `system()`/root chain remain UNKNOWN / claim text. Replay:
 `bash lab/frontier/tacplus2shell/harness/run_gdb.sh`, then the existing
 `run.sh` and `run_wire.sh`.
+
+## W122 live-daemon grooming probe and consumer check (2026-11-22 21:23Z)
+
+Bounded follow-up to W121, one incident. Source-level consumer checks and four
+live-daemon allocator configurations. Grade is **unchanged**: rung 4
+chosen bytes at chosen offsets at live-daemon scope; rung 5 UNKNOWN.
+
+Consumer check (pinned source, read only): `mem_destroy()` at
+`misc/memops.c:239-253` really calls `m->arr[i].f(m->arr[i].p)` for
+`i < m->arr_count` before freeing `m->arr` and `m`; `struct mem` is
+`{union{list,pool} u; enum mem_type type; u_int arr_count; struct mem_free_s
+*arr;}` with `struct mem_free_s {void(*f)(void*); void *p;}`, and
+`cleanup_session()` (`packet.c:1326`) calls `mem_destroy(session->mem)`. The
+advisory's fake-`mem_t` → `system()` step is therefore a reachable indirect
+call in principle, not a structurally dead consumer — but no pointer,
+`arr_count`, `arr` or `arr[i]` write was observed. `author.c:409-412` passes
+`in_args[i]` through unchanged when it begins `cmd=`/`service=`/`protocol=`,
+and `send_author_reply_final()` (`packet.c:226-228`) puts those in the reply;
+`in_args[i]` is `mem_strndup(session->mem, p, *argsizep)` at `author.c:146`
+with `p` walked out of bounds. So OOB heap bytes can in principle be echoed
+(the advisory's pointer-leak step), but only if the OOB bytes themselves carry
+one of those prefixes. The incidental pointer bytes seen at i=9/i=11 in
+`gdb-prime-1.log` (`0x5555555fdc70`, `0x7fffffffc160`) have no `=`/`*`
+prefix and fail `bad_nas_args()` (`author.c:189-202`); no incidental leak.
+
+Plain build is PIE with **no stack canary** (`nm` has no `__stack_chk_fail`;
+`eval_args` prologue is `push %rbp; mov %rsp,%rbp; sub $0x80,%rsp`, no
+`fs:0x28` load). A stack VLA overflow can therefore reach saved control data
+structurally. But `author_pak_looks_bogus()` only accepts a crafted packet
+when the consumed size sum equals `datalength`, which bounds a single
+in-payload `cmd=` copy below the VLA; reaching past it needs an OOB argument
+whose address begins with `cmd=`. The stack-write path shares the same
+unmet grooming prerequisite as the leak path. No control-flow word was
+observed overwritten with chosen bytes; no rung-5 claim.
+
+Grooming negative results (all loopback, plain vulnerable build under gdb;
+new harness `gdb-groom.cmd`, `wire2.py`, `wire3.py`, `run_gdb2.py`, logs
+`gdb-groom*.log`, `gdb-sameconn*.log`, `gdb-authprime*.log` — local evidence):
+1. Large 255-record `cmd=ZZZZ` prime, tcache disabled (`GLIBC_TUNABLES=
+   glibc.malloc.tcache_count=0`), separate connections: prime `in=0x5fb6f0`,
+   trigger `in=0x5fe080`; no `Z` in the trigger's post-buffer dump.
+2. Gdb `find` at trigger time with tcache disabled: prime `ZZZZ` still intact
+   at `0x5fb827` (prime data not overwritten) but the trigger buffer is in a
+   different region — the freed prime chunk is never reused for the trigger.
+3. Prime and trigger on one TCP connection: the AUTHOR prime's reply calls
+   `cleanup_session()` (`packet.c:1326`), which deletes the session from
+   `ctx->sessions`; a seq-2 packet is then a stray (`packet.c:770-779`) and
+   the connection closes (trigger reply 0 bytes).
+4. Large `cmd=ZZZZ` AUTHEN START prime (session kept alive, 54-byte reply),
+   AUTHOR trigger on seq 3 (18-byte reply, both processed in one context):
+   prime `in=0x5fd350` vs trigger `in=0x5fdbb0` with tcache on, and
+   `0x5fb6f0` vs `0x6145b0` with tcache off. No `ZZZZ` in the trigger's
+   4 KB forward search. Even same-context, same-size-class mismatch keeps
+   the trigger out of the freed prime chunk.
+
+Decision: stop spending wakes on allocator grooming without a new hypothesis.
+Smoke replay after the new files: `bash
+lab/frontier/tacplus2shell/harness/run_gdb.sh` → 8 PASS / 0 FAIL, normalized
+hashes `2072846c…`/`de41ed2a…`/`da7623bf…` unchanged from W121.
