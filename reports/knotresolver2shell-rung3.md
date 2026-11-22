@@ -16,7 +16,9 @@ is ESTABLISHED on its own pinned builds and both benign commands reproduce at
 `argoff 0x300`; the harness default `0x2f0` command limb fails because
 `gnutls_deinit` zeroes the string before dispatch. A wake-13 ASLR-on
 measurement shows the write still reaches the live gnutls cleanup loop but
-gives no chosen control and no address leak; ASLR-on/stock stays UNKNOWN.
+gives no chosen control and no address leak; a wake-14 ASLR-on inventory
+found no live libc/heap pointer in the reachable objects that a partial
+overwrite could retarget. ASLR-on/stock stays UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -643,6 +645,43 @@ contiguous span, so it cannot preserve the unknown high bytes of a live
 pointer; that needs another primitive. Rung 5 stays author-observed at the
 labeled ASLR-off scope only; no stock-build claim.
 
+
+## Partial-overwrite feasibility (wake 14, 2026-11-22 ~21:1xZ) — negative in the reachable objects
+
+One bounded ASLR-on inventory on the pinned 6.4.0 jemalloc/debug build,
+`set disable-randomization off`, loopback only, host sysctl untouched
+(`harness/aslr-pointer-inventory.gdb`, `harness/run_aslr_inventory.sh`,
+`harness/aslr-inventory.gdb.log`, driver log alongside). At the same pre-F6
+`wire_buf_consume` breakpoint as the earlier oracle: `buf=0x7749ca8a8800`,
+`slot1=0x7749ca8aa000`, live extension priv `priv=0x7749ca88e100`,
+`system=0x7749cb458750`. libc text mapped at `0x7749cb428000`–`0x7749cb5b1000`,
+libgnutls text at `0x7749cbc80000`–`0x7749cbdba000`.
+
+Scanning 96 qwords at `slot1` and 96 at `priv` (the two objects the dispatch
+path reads) found:
+
+- no pointer into libc text — in particular the real priv's call target at
+  `priv+0x110` is `0x7749cbd80490`, i.e. libgnutls offset `0x100490`, and its
+  RDI source at `priv+0xb8` is `0x7749ca8c9380`, a heap address outside
+  `slot1`'s 64 KiB region;
+- no pointer into `slot1`'s 64 KiB region (bits 16+ equal `0xca8a`), so no
+  live pointer can be retargeted to the wire bytes at `slot1+0x300` by a
+  two-byte patch;
+- only one pointer sharing `priv`'s high 16 bits: the session's extension slot
+  at `slot1+0x100` itself, which points at `priv`, a different 64 KiB region
+  from the OOB landing zone.
+
+Interpretation: in this run, a low-order partial overwrite of any pointer in
+the reachable objects reaches neither `system` (libc, independently
+randomized base) nor the command string (heap region `0xca8a`). A three-byte
+patch would cross independently randomized library/heap bases, so it does
+not preserve the unknown high bytes either. The bug's contiguous `memcpy`
+starts at the adjacent allocation's first byte, so it also cannot isolate
+the low bytes of a field deeper in the object. This is a bounded negative
+result for this one layout/object set, not a proof for every grooming; a
+different reachable object with a libc pointer, or an information leak, is
+still needed for ASLR-on chosen control. Rung 5 stays author-observed at the
+labeled ASLR-off scope only.
 
 ## Boundaries
 
