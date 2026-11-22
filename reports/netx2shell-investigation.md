@@ -3,8 +3,8 @@
 Status: **rung 4 (chosen bytes at a chosen offset) MEASURED on the pinned
 vulnerable build by direct call and by TLS-protocol-arrived certificate.**
 Host TCP loopback is a structural negative in this tree (no NetX host driver).
-Independent witness replay #1262 returned ESTABLISHED at the claimed scope.
-No rung 5. Build and input pins are in `lab/frontier/netx2shell/PROVENANCE.md`;
+Independent witness replays #1262 (W1/W2) and #1296/W108 (W3) returned
+ESTABLISHED at the claimed scopes. No rung 5. Build and input pins are in `lab/frontier/netx2shell/PROVENANCE.md`;
 the starting rung-3 evidence is in `reports/frontier-netx.md`.
 
 ## What changed this wake
@@ -13,7 +13,7 @@ Frontier left two explicit UNKNOWNs: whether the ASan report's redzone write
 corresponds to attacker-chosen bytes at a chosen `.bss` offset, and whether a
 network-arrived Certificate message reaches the fault. This wake closed the
 first one with a plain (non-ASan) build of the **unmodified** pinned verifier;
-the second is still open.
+the second was closed later in this wake by the TLS-protocol path below.
 
 ### Plain-build readback, real upstream fixture
 
@@ -91,8 +91,10 @@ TLS-protocol reach is measured on the in-process RAM transport; host-socket
 loopback is structurally unavailable in the pinned tree (no driver) and needs
 a new NetX-to-Linux socket/TUN driver — a separate piece of work. No pointer
 control, control-flow hijack, benign marker execution, command execution or
-witness replay is in hand, so rung 5 is not attempted and no ESTABLISHED claim
-is made.
+rung 5 is in hand. Independent witness replay **is** in hand: #1262 (W1/W2)
+and #1296/W108 (W3) both returned ESTABLISHED at the claimed scope, with no
+refutation. Those verdicts cover the rung-4 boundary only; no ESTABLISHED
+claim is made beyond it.
 
 
 ## TLS-protocol path (wake W1 continued, 2026-11-22 ~02:0xZ)
