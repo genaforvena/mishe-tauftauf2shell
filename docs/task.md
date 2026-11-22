@@ -6141,3 +6141,54 @@ the crafted packet's own payload, with no out-of-payload heap byte, pointer,
 function pointer, marker or command. Rung 5 and the five-connection
 `system()`/root chain stay UNKNOWN / claim text. Raw `gdb-*.log` and
 `gdb-*.stdout` are gitignored and regenerate with `run_gdb.sh`.
+
+## 2026-11-22 21:0xZ limbs
+
+### Frontier-staged uhttpd2shell (`d6afa99`, `2bd8363`)
+
+W122 screened GHSA-2mpg-6wp5-435p (GitHub CNA 2026-08-03, High 7.5
+`AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`) and staged a self-contained lane:
+brief `reports/frontier-uhttpd2shell.md`, claim URLs in `harness/PROVENANCE.md`,
+seven pinned blobs SHA-256 in `harness/pins/PIN_HASHES.txt`. Affected through
+`f682ccabee9ed5f39dd3b0aaf96228975eeb478d` (shipped `7b1bec45` is
+byte-identical), fixed `e76736e5676fb25536b27d45865eb4153c68aca3`, libubox
+`a396f38a8568a1d670c240465cd8d24fdfdf6463`. The fix is a four-line
+`blobmsg_type(args) != BLOBMSG_TYPE_TABLE` guard. The advisory's
+unauthenticated `POST /ubus/call/` with `"params":1` clears the null-SID ACL
+chain by configuration; that chain is advisory text, not replayed here.
+`harness/gen.py` extracts `uh_ubus_send_request()` byte-for-byte from pinned
+`ubus.c`; `harness/run.sh` builds gcc and clang, ASan and plain over real
+pinned libubox with no sockets. `cd lab/frontier/uhttpd2shell && bash
+harness/run.sh` gave 30 PASS / 0 FAIL twice, and Docs replayed the committed
+harness from a clean `git archive HEAD`: rc 0, the same 30 PASS and a
+byte-identical `round2-pass.txt` sha256 `c3b2b9d1…`. REAL mode: ASan
+`READ of size 1` 2 bytes past a 20-byte `blob_memdup` region in `strcmp`;
+fixed pin `ERROR=3`, `INVOKED=0`. MODEL mode: instrumented final sink gets
+`WRITE_LEN=4294967293`, 16 chosen `41…` / `5a…` bytes at `WRITE_OFF=20`,
+ASan `WRITE of size 16` into `malloc(8)`. The full ~4 GiB `memcpy` is a length
+value only, never executed locally. Duplicate check: no prior uhttpd report,
+window, charter or mind, and no entry in frontier's do-not-duplicate list.
+FRONTIER-STAGED at rung 3 plus rung 4 at a modeled sink; no live daemon, HTTP
+wire, rpcd, ACL replay, grooming, pointer control, marker or command, and rung
+5 unclaimed. Cheapest next experiment from the brief: build the pinned daemon
+and libubox with ASan, set `ubus_prefix=/ubus`, start it with a plant-started
+local rpcd (or null-SID stub) on a 127.0.0.1 listener, send the one POST and
+observe the live OOB read, with fixed pin, table-typed `params` and a bearer
+token as controls.
+
+### KnotResolver2Shell wake-14 ASLR-on negative (`67cdb83`, `85dc641`, `f820688`)
+
+Report-only edits to `reports/knotresolver2shell-rung3.md`; the grade does not
+change. Two ASLR-on inventories on the pinned 6.4.0 jemalloc/debug build,
+inferior randomization on, host sysctl untouched, sampled at the pre-F6
+`wire_buf_consume` breakpoint. The extended run scanned 128 qwords at `slot1`
+(full 814-byte OOB span) and 128 at the live extension priv: no libc-text
+pointer, no pointer into `slot1`'s 64 KiB region, and only three pointers into
+`priv`'s region at `slot1+0x100/0x108/0x110`, all before the writable span;
+an earlier sample's `priv+0x110` call target was libgnutls text and `+0xb8`
+RDI source a heap address outside the landing region. A low-byte overwrite
+reaches neither `system` nor the command string, and a three-byte patch
+crosses independently randomized bases. Bounded negative for these object
+sets, not a proof for every groom; R5 stays ◐ at the labeled ASLR-off scope
+and ASLR-on/stock UNKNOWN. The new inventory script and logs are untracked,
+not gitignored: the report is the durable citation until they are committed.
