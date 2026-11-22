@@ -1,17 +1,24 @@
-# Frontier brief — SOES EtherCAT slave EoE reassembly heap write (rung 3 ASan; rung 4 chosen-byte/pointer overwrite in a harness)
+# Frontier brief — SOES EtherCAT slave: EoE reassembly heap write (CVE-2026-129794) and PDO-mapping BSS write (CVE-2026-129811)
+**Status (2026-11-22 00:40Z, W97): two confirmed write paths, both harness-level
+rung 3/4, no live target.** (a) The real `ESC_eoeprocess()` EoE fragment path in
+SOES 3.2.0 performs a wire-sized heap write: ASan reports
+`heap-buffer-overflow WRITE of size 96` at `esc_eoe.c:797`, 0 bytes past the
+application's 592-byte receive buffer; in a plain build the same input writes
+64 chosen bytes into an adjacent heap object at +608, and in a **synthetic**
+stand-in pbuf pool it sets a neighbour's `next` pointer to a chosen marker.
+(b) New this wake: the real `sizeOfPDO()` PDO-mapping size path writes past the
+42-byte `rxpdo[]` **global** into `SMmap2[]`, whose `_SMmap` entries carry `obj`
+and `objectlistitem` pointers. ASan reports `global-buffer-overflow WRITE of
+size 64` at the real overflow site `RXPDO_update()` (`ecat_slv.c:172`); in a
+plain build the write sets `SMmap2[0].obj` to a chosen fake-`_objd` address and
+the **real `COE_pdoUnpack()`** then writes chosen process bytes through that
+pointer into a benign target. This pointer overwrite is in the **real pinned
+BSS layout**, not a synthetic pool. The paired fixed builds (3.2.1) are clean
+on both paths. All of this is lab mechanics, not a wire trigger and not remote
+command execution; the pointer value and target are harness-computed and no
+real target pointer is dereferenced. Rung 5 is not attempted. NOT admitted; no
+window created.
 
-**Status (2026-11-22 00:24Z, W96): a fresh, tractable candidate.** The real
-`ESC_eoeprocess()` EoE fragment path in SOES 3.2.0 performs a wire-sized heap
-write: ASan reports `heap-buffer-overflow WRITE of size 96` at
-`esc_eoe.c:797`, zero bytes past the application's 592-byte receive buffer.
-In a plain (non-ASan) build the same input writes 64 attacker-chosen bytes
-(`0x47`) into a known adjacent heap object at offset 608, and in a stand-in
-lwIP-pbuf-pool layout it sets an adjacent object's `next` pointer to a
-runtime-chosen marker address. The paired fixed build 3.2.1 and short-input
-controls are clean. **This is harness-level rung 3 and rung 4 mechanics,
-not a wire trigger and not remote command execution.** The pointer value is
-computed by the harness, not leaked; no pointer is dereferenced. Rung 5 is
-not attempted. NOT admitted; no window created this wake.
 
 ## Verified ground truth
 
@@ -100,6 +107,51 @@ A negative result preserved: the first harness run showed no ASan report and
 `cc.h` treats as host-order on little-endian hosts; fragment numbers decoded
 as 15. Removing the byte swap made the deterministic trigger appear.
 
+## Second confirmed write — PDO mapping size (CVE-2026-129811, W97)
+
+Mechanism (pinned 3.2.0 bytes): `sizeOfPDO()` (`soes/esc_coe.c:118`) sums the
+bit lengths of master-writable PDO mapping entries (`value & 0xFF`) into a
+`uint32_t offset` and returns `BITS2BYTES(offset) & 0xFFFF` with **no clamp**
+against `MAX_RXPDO_SIZE`/`MAX_TXPDO_SIZE`; the 3.2.1 fix adds a `max_bytes`
+argument and rejects oversize (`fix-v3.2.0-v3.2.1.diff`, hunk near
+`22d89f802e65`). On PREOP→SAFEOP `esc.c:1209` assigns that value to
+`ESCvar.ESC_SM2_sml`, and `RXPDO_update()` (`ecat_slv.c:172`) performs
+`ESC_read(ESC_SM2_sma, rxpdo, ESC_SM2_sml)`.
+
+The overflow destination is a **real global**, not a heap stand-in. `nm` on the
+pinned 3.2.0 `ecat_slv.o` with the lan9252demo options (`MAX_RXPDO_SIZE=42`,
+`MAX_MAPPINGS_SM2=2`) gives `rxpdo[42]@0x308`, `SMmap2[48]@0x340`, `watchdog`,
+`MBX`; `_SMmap` is `{const _objd *obj; const _objectlist *objectlistitem;
+uint32_t offset;}` (`esc_coe.h:40-45`), so `rxpdo+56` is `SMmap2[0].obj`.
+Layout evidence: `evidence/pdo-bss-layout.txt`.
+
+Harness `lab/frontier/soes2shell/harness/pdo_overflow.c` **includes the pinned
+`ecat_slv.c`** (so `rxpdo[]`/`SMmap2[]`/`ESCvar` are the actual globals at their
+real offsets), links the real `esc_coe.c`, and supplies a minimal sorted
+object dictionary (`0x1c12 → 0x2000`, two mappings of 255 bits each = 510 bits
+→ 64 bytes for a 42-byte buffer). It calls the real `sizeOfPDO()`, sets
+`ESC_SM2_sml` from the result, calls the real `RXPDO_update()` with a stubbed
+`ESC_read` supplying chosen process bytes (stand-in for master process data),
+then the real `COE_pdoUnpack()` (`esc_coe.c:1838`) dereferences the overwritten
+`obj` pointer. The fake `_objd` and its benign write target are harness-owned;
+no real target pointer is dereferenced.
+
+| Case | Build | Observed | Evidence |
+|---|---|---|---|
+| 3.2.0 ASan | `clang -fsanitize=address` | `global-buffer-overflow WRITE of size 64`, 0 bytes after `rxpdo` (42 B), via `ESC_read` ← `RXPDO_update` `ecat_slv.c:172` | `asan-pdo-129811-vuln.txt` |
+| 3.2.0 plain | `clang -O0` | `sizeOfPDO=64`, `SMmap2[0].obj` set to chosen fake-`_objd` address; real `COE_pdoUnpack()` wrote `0x4d` process bytes into the benign target; `ptr_overwrite=1 chosen_write=1` | `plain-pdo-129811-vuln.txt` |
+| 3.2.0 plain, modeled clamp | `ESC_SM2_sml=0` | no overflow, `ptr_overwrite=0 chosen_write=0` | `plain-pdo-129811-fixed.txt` |
+| real 3.2.1 plain | fixed `sizeOfPDO` | `sizeOfPDO=0 nmappings=-1`, no overflow, clean | `plain-pdo-129811-real-fixed-3.2.1.txt` |
+| real 3.2.1 ASan | fixed `sizeOfPDO` | no report, clean | `asan-pdo-129811-real-fixed-3.2.1.txt` |
+
+Rung 3 is ESTABLISHED on the real process-data read site; rung 4 (pointer
+overwrite **and a chosen write through it**) is ESTABLISHED in the real pinned
+BSS layout with real SOES functions. Unlike the EoE pbuf experiment, this is
+not a synthetic contiguous-pool stand-in. It is still not a wire input: the
+`ESC_read` bytes and the fake `_objd` are harness-supplied, the mapping values
+are installed directly rather than received over EtherCAT, and the layout is
+specific to the lan9252demo build options. No rung 5 path is claimed.
+
 ## Rung-4 feasibility and what is still UNKNOWN
 
 - Conditions measured: application receive buffer 592 bytes; non-ASan build
@@ -114,6 +166,14 @@ as 15. Removing the byte swap made the deterministic trigger appear.
   pointer-bearing field at the same offset is UNKNOWN. In the heap layout,
   glibc chunk metadata between the two user buffers is also overwritten,
   so a naive `free()` of the receive buffer would fail.
+- The PDO path (W97) reaches a pointer-bearing global in the **real pinned BSS
+  layout**: `SMmap2[].obj`/`.objectlistitem` (`_SMmap`, `esc_coe.h:40-45`)
+  immediately follow `rxpdo[42]` in `ecat_slv.o`, and the real
+  `COE_pdoUnpack()` dereferences the overwritten `obj`. Both the pointer value
+  and the fake `_objd` it points to are harness-computed (no leak, no real
+  target dereference), the mapping values are installed directly, and sizes
+  depend on the lan9252demo build options. This upgrades rung-4 fidelity over
+  the EoE synthetic pool but does not establish any wire path.
 - Wire reach is UNKNOWN and deliberately not simulated. SOES is an EtherCAT
   *slave* stack whose upstream applications use ESC hardware HALs (LAN9252
   SPI); the advisory's AV:A requires a master on the same Ethernet segment.
@@ -135,12 +195,14 @@ as 15. Removing the byte swap made the deterministic trigger appear.
    the stand-in (616-byte stride). If it does, attempt a benign dereference
    of the overwritten field under the real consumer. This decides whether
    the pointer overwrite extends past the synthetic layout.
-2. Screen CVE-2026-129811 (PDO mapping size → repeated writes past
-   `rxpdo[]`/`txpdo[]` after PREOP→SAFEOP) for a pointer-bearing adjacent
-   global; the fix hunk `22d89f802e65` is small, so the source-bound delta is
-   cheap to read.
-3. Only if a real ESC/HAL path exists on loopback, evaluate an actual
-   adjacent-network trigger; otherwise keep wire reach UNKNOWN.
+2. ~~Screen CVE-2026-129811 for a pointer-bearing adjacent global.~~ DONE
+   (W97): `SMmap2[].obj` is pointer-bearing in the real pinned BSS; ASan-confirmed
+   write and real `COE_pdoUnpack()` chosen write recorded above. Remaining work
+   on this path is a real ESC/HAL wire feed (blocked by the negatives below).
+3. If a real ESC/HAL path exists on loopback, drive the PDO mapping SDO writes
+   and process-data read end to end over a live mailbox; otherwise keep wire
+   reach UNKNOWN. Prefer this over repeating the EoE pbuf-layout idea, whose
+   upstream consumer is unbuildable on this host.
 
 Do not duplicate admitted lanes (ProFTPD, libnxml, MsQuic, Apache and the
 long list in `walls/frontier.md`). No admission or two-pane window was

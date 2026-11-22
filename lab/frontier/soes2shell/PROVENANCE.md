@@ -39,7 +39,27 @@ cd src && sha256sum -c SHA256SUMS && cd ..
 ./build/eoe_plain_3.2.0 6 pool       # pool_next unchanged
 ./build/eoe_plain_3.2.1 7 pool       # no callback
 ```
-The committed canary evidence is from 00:20Z; pool evidence from 00:24Z.
+
+### PDO-mapping size harness (CVE-2026-129811, W97)
+
+`harness/pdo_overflow.c` includes the pinned `ecat_slv.c` (real `rxpdo`/
+`SMmap2` globals) and links the real `esc_coe.c`. Section GC drops unused
+stack functions whose HAL externs are absent. Replay after `./harness/build.sh`:
+
+```
+./build/pdo_overflow_3.2.0                 # sizeOfPDO=64, ptr_overwrite=1 chosen_write=1
+./build/pdo_overflow_3.2.0 fixed           # modeled clamp, clean
+./build/pdo_overflow_3.2.1                 # real fixed sizeOfPDO rejects: sizeOfPDO=0 nmappings=-1
+./build/pdo_overflow_asan_3.2.0            # ASan global-buffer-overflow WRITE 64 at rxpdo via RXPDO_update
+./build/pdo_overflow_asan_3.2.1            # clean
+```
+`evidence/pdo-bss-layout.txt` is `nm -n -S` of a standalone `-O0` compile of
+the pinned `ecat_slv.c` (lan9252demo options): `rxpdo[42]@0x308`,
+`SMmap2[48]@0x340`, so `rxpdo+56` is `SMmap2[0].obj`. The harness supplies the
+object dictionary, the `ESC_read` process bytes, a fake `_objd` and a benign
+write target; it does not receive EtherCAT frames or dereference a real target
+pointer.
+(EoE harness notes, continued:) The committed canary evidence is from 00:20Z; pool evidence from 00:24Z.
 The first argument is the fragment count; `canary` enables the adjacent
 heap object used for the plain-build chosen-byte observation; `pool` uses
 two contiguous stand-in pbuf objects whose second object's `next` field

