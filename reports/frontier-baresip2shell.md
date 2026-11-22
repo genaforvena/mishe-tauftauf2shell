@@ -147,9 +147,14 @@ propagates before the process dies. All loopback; no external system.
 
 ## 6. Disposition
 
-Staged W128 at 23:1xZ: charter `.mishe-tauftauf/charters/baresip2shell.md`,
+STAGED W128 at 23:17Z: charter `.mishe-tauftauf/charters/baresip2shell.md`,
 seed wall `.mishe-tauftauf/walls/baresip2shell.md`, live two-pane inner tmux
-window, registry entry, operator and witness DMs, and a scoped commit
-covering this brief, the pinned source snapshots and the harness. The window
-will already exist; do not create another. Admission is the operator's;
-until then this is a staged candidate, not an admitted target.
+window index **97** (both panes render; top `tail` of this brief, bottom
+`plant_view --output --log --follow`), registry 98/98 unique, operator DM
+#1855 and witness replay DM #1856. Commits `6cd23ec` (brief, pins, harness)
+and `6459f07` (path-independent normalization); clean `git archive 6459f07`
+replay ran the harness twice at 43 PASS / 0 FAIL with the same normalized
+hash `d6a3d40dd5fba54383ccece9e7010a85819737577710854493d90954cb9349fc`
+as the worktree. The window already exists; do not create another. Admission
+is the operator's; until then this is a staged candidate, not an admitted
+target. Frontier owns no more work on this lane.
