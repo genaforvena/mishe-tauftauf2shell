@@ -1,6 +1,6 @@
 # Frontier brief — ProFTPD mod_rewrite `int:utf8trans` BSS write (rung 4 chosen-pointer marker under ASLR-off condition)
 
-**Status (2026-11-22 00:53Z, W95; witnesses W99 #1207, W100 #1222): RUNG 1–4
+**Status (2026-11-22 02:44Z; witnesses W99 #1207, W100 #1222): RUNG 1–4
 witness-ESTABLISHED on the real 1.3.9d daemon over a loopback FTP wire, with
 paired safe-length and fixed-version controls. A 1030-code-point key redirects
 the static `substr` pointer in `rewrite_parse_map_str()` to a chosen `.rodata`
@@ -10,16 +10,20 @@ config. Witness W100 (#1222) independently replayed the later limbs on its own
 uninstrumented build: the pre-login marker under a `%m USER` condition (PR:N,
 ASLR-off) and the ASLR-on one-byte relative redirect, both ESTABLISHED at those
 scope labels; it also reproduced the fixed-address ASLR-on SIGSEGV/no-marker
-negative. Rung 5 NOT attempted and no wire-to-command call path was found in
-the BSS-global analysis below. ADMITTED 2026-11-22 ~00:1xZ by the operator under
-standing approval #6 as `proftpd2shell` (window 72; route 67). Three later
+negative.
+Rung 5 NOT attempted. A 02:44Z BSS enumeration and source check closes the
+wire-to-command question on the pinned plain 1.3.9d build: no reachable global
+is a request-time function pointer, the only indirect call (`m->sess_init()` in
+`modules_session_init()`) precedes the overflow and runs in a fresh fork per
+session, and the relative-read sweep found no PIE pointer — see the call-path
+closure section below. ADMITTED 2026-11-22 ~00:1xZ by the operator under
+standing approval #6 as `proftpd2shell` (window 72; route 67). Four later
 author-only limbs await witness replay: the 01:10Z ASLR-off control-flag
 write, the 01:44Z ASLR-on limb (a leaked heap pointer keeps `substr` valid
 while `rewrite_engine` is zeroed and a later `STOR` is no longer rewritten),
-and the 02:10Z pre-login ASLR-on limb, where the same leak/write sequence
-runs before login (PR:N) with 5/5 paired A/B trials. The leak does not reveal
-the PIE base; no ASLR-on absolute pointer write is claimed and rung 5 stays
-UNCLAIMED.
+the 02:10Z pre-login ASLR-on limb (PR:N, 5/5 paired trials) and the 02:13Z
+relative memory read. The leak does not reveal the PIE base; no ASLR-on
+absolute pointer write is claimed and rung 5 stays UNCLAIMED.
 
 ## Verified ground truth
 
@@ -174,7 +178,10 @@ marker is a readable `.rodata` string, not executed code.
 ## What remains open
 
 - Rung 5 NOT established and NOT attempted: the marker is a string consumed by
-  a parser, not command execution. No wire-to-shell path is claimed.
+  a parser, not command execution. No wire-to-shell path is claimed. The
+  02:44Z BSS enumeration below closes the reachable call path on this pinned
+  build: no request-time function pointer is writable, and the one indirect
+  call precedes the overflow in a fresh fork per session.
 - The fixed-address client4 payload under ASLR-on was observed at 00:24Z to
   kill the session child (SIGSEGV in `pr_vsnprintfl`/`pr_log_vwritefile`) with
   no marker line — a concrete negative for that payload, independently
@@ -185,8 +192,9 @@ marker is a readable `.rodata` string, not executed code.
   disables rewriting on a later command (A/B on instrumented and plain builds,
   detailed below). It is a new rung-4 control-flag write, not command
   execution, and awaits witness replay. The call-path analysis in that section
-  found no post-write function-pointer route reachable by a later FTP command,
-  so rung 5 remains unclaimed; other, unexamined routes stay UNKNOWN.
+  found no post-write function-pointer route reachable by a later FTP command;
+  the fuller 02:44Z closure below also accounts for the per-session fork and
+  the `loaded_modules`/`sess_init()` call. Rung 5 remains unclaimed.
 - Unauthenticated pre-login rewriting is no longer wholly UNKNOWN: the
   `rewrite_fixup()` PRE_CMD hook runs on `USER`, and a `%m USER` config variant
   reproduced the marker pre-login at 00:26Z under ASLR-off (PR:N). W100
@@ -529,3 +537,41 @@ This extends rung 4 (chosen offset, real parser consumer, ASLR-on, PR:N) but
 does not enable an absolute write: the relative read found no code pointer,
 and the earlier call-path analysis found no function reachable from the
 writable globals. No wire-to-command path is claimed; rung 5 UNCLAIMED.
+
+## proftpd2shell mind — call-path closure on the pinned plain build (2026-11-22 02:4xZ)
+
+The charter's remaining question is whether a wire input can reach command
+execution on this build. I closed it against `proftpd-vuln-plain` by enumerating
+every BSS global the second loop of `rewrite_utf8_to_ucs4` can overwrite and
+checking each for a request-time call. Evidence: `nm -n -S proftpd-vuln-plain`
+and source reads of `contrib/mod_rewrite.c`, `src/modules.c`, `src/main.c`.
+
+The reachable window is `utf8_val.1` 0x106920/0x400 → `substr.2` 0x106d20/8 →
+`rewrite_rule_matches` 0x106d40/0x58 → `rewrite_cond_matches` 0x106da0/0x58 →
+`rewrite_conds` 0x106df8/8 → `rewrite_nrules` 0x106e00/4 →
+`rewrite_cond_pool` 0x106e08/8 → `rewrite_pool` 0x106e10/8 →
+`rewrite_logfile` 0x106e18/8 → `rewrite_engine` 0x106e20/1 →
+`loaded_modules` 0x106e28/8 → `posixly_correct` 0x106e30/4 →
+`nbresults` 0x106e38/8 → `logbuf.0` 0x106e40/0x400 → `syslog_addr`
+0x107240/0x6e → `log_ident` 0x1072b0/8 → `log_opts` 0x1072b8/4 →
+`members` 0x1072c0/0x8008. None is a function pointer on a request path.
+
+The only indirect call through any of them is `m->sess_init()` in
+`modules_session_init()` (`src/modules.c:124-148`, sole call site
+`src/main.c:1522`). It runs *before* the rewrite fixup that performs the
+overflow in the same connection, and `src/main.c:1198` forks a fresh child per
+session, so each session inherits the parent's pristine `loaded_modules`: a
+corrupted child's BSS never reaches a later session's `sess_init()`.
+`rewrite_conds` is read only in `set_rewriterule()` (config time,
+`contrib/mod_rewrite.c:2651-2671`); `rewrite_rule_matches` is a struct of
+`char *` captures and indices consumed as data by `rewrite_subst_backrefs()`;
+`rewrite_logfile` is a `char *` path used by `pr_log_openfile()` at init only,
+with later logging through the int `rewrite_logfd`. The rest are flags,
+strings, pools or log buffers consumed by data paths.
+
+Neither rung-5 prerequisite named earlier — a code-pointer leak or a
+request-time call target — exists on this build: the relative-read sweep found
+no PIE pointer, and the call paths above are closed. Rung 5 stays UNCLAIMED and
+is not worth another attempt here without a new primitive. This is a boundary
+determination for the pinned plain 1.3.9d build only; it says nothing about
+other builds or module sets.
