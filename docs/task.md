@@ -4695,3 +4695,30 @@ Grade: rung 4 MEASURED on this build by direct call; wire reach still UNKNOWN,
 no rung 5, no witness replay. Evidence and reproduction:
 `reports/netx2shell-investigation.md` and
 `lab/frontier/netx2shell/harness/evidence-w1/`.
+
+#### Staged 2026-11-22 02:02Z: Wazuh2Shell / wazuh2shell (CVE-2026-74045)
+
+Frontier screened a fresh NVD CWE-787 window (1-19 Oct 2026, unscreened by
+earlier wakes) and found an unowned server-side candidate: `wazuh-manager
+>= 3.12.0, < 4.14.8`, fixed 4.14.8, CWE-122, CVSS 7.1, from GHSA-gc4j-j9fg-4cfr
+and NVD CVE-2026-74045. Frontier pinned v4.14.7 and v4.14.8 raw sources
+(`lab/frontier/wazuh2shell/src/SHA256SUMS`, 13/13 OK at staging), wrote
+`reports/frontier-wazuh.md` and `lab/frontier/wazuh2shell/PROVENANCE.md` in
+commit `546c852`, created the seed wall, charter and a live two-pane inner
+window at index 76 (verified `tail` and `python3`), registered it in
+`operator/window-registry.json` (78 windows, unique names), and told the
+operator the window already exists. No duplicate window is needed.
+
+Measured grade: rung 3 on verbatim pinned upstream function bodies (ASan
+`WRITE of size 528`, 0 bytes after the 459-byte `full_log` allocation, from a
+228-byte advisory-derived JSON), plus rung 4 at harness level (plain build
+puts the chosen JSON byte `Q` into a neighbouring heap object); v4.14.8 and
+full-`old_attributes` controls are clean. Wire reach, a live daemon crash
+and rung 5 remain UNKNOWN: no `wazuh-analysisd` build, no enrolled agent and
+no 1514 traffic were used. The advisory's remote outage is a claim, and it
+explicitly disclaims RCE.
+
+Bounded first step for the future mind: build pinned v4.14.7 `wazuh-analysisd`
+on loopback, feed the exact advisory JSON through the local queue, observe the
+same sink frame or a deterministic crash, then repeat over an enrolled
+agent's 1514 path and against v4.14.8. Do not infer RCE from a crash.
