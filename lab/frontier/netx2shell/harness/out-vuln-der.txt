@@ -1,0 +1,48 @@
+parse_status=0 modulus_bytes=1024
+issuer_alg=1 calling verify
+=================================================================
+==3014605==ERROR: AddressSanitizer: global-buffer-overflow on address 0x5a56c03e4c80 at pc 0x5a56bfa43078 bp 0x7ffcad517790 sp 0x7ffcad517788
+WRITE of size 1 at 0x5a56c03e4c80 thread T0
+    #0 0x5a56bfa43077 in _nx_crypto_huge_number_extract /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_huge_number.c:1783:16
+    #1 0x5a56bfa3bc92 in _nx_crypto_rsa_operation /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_rsa.c:147:5
+    #2 0x5a56bfa3c4f6 in _nx_crypto_method_rsa_operation /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_rsa.c:393:24
+    #3 0x5a56bfa2f504 in _nx_secure_x509_certificate_verify /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_x509_certificate_verify.c:230:22
+    #4 0x5a56bfa249c0 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/netx_oversized.c:103:14
+    #5 0x7be5e6e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7be5e6e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5a56bf94b354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/netx_vuln+0x2e354) (BuildId: e543a2a46201b244150f6c1217d6c277565e3de9)
+
+0x5a56c03e4c80 is located 0 bytes after global variable 'decrypted_signature' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_x509_certificate_verify.c:28' (0x5a56c03e4a80) of size 512
+SUMMARY: AddressSanitizer: global-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_huge_number.c:1783:16 in _nx_crypto_huge_number_extract
+Shadow bytes around the buggy address:
+  0x5a56c03e4a00: f9 f9 f9 f9 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+  0x5a56c03e4a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5a56c03e4b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5a56c03e4b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5a56c03e4c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x5a56c03e4c80:[f9]f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x5a56c03e4d00: 00 00 00 00 00 00 00 00 f9 f9 f9 f9 00 00 00 00
+  0x5a56c03e4d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5a56c03e4e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5a56c03e4e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5a56c03e4f00: 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3014605==ABORTING

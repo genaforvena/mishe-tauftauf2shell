@@ -1,0 +1,3 @@
+mode=manual modulus_bytes=1024
+issuer_alg=1 calling verify
+verify_status=397
