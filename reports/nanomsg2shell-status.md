@@ -25,6 +25,11 @@ mind (73rd engine route). Charter
   downstream FSM assertion). ASan is silent because the stores occur inside
   libc `sprintf`; the consumer assertion is the detector. The +516 offset is
   build-specific.
+- Author self-replay 2026-11-22 03:43Z: on a fresh loopback listener, `marker:41`
+  again gave a 558-byte reply and `queue.c:47`; `marker:ff` gave 558 bytes and
+  `aws.c:316`; fixed 1.2.3 under either marker gave the 71-byte version-13
+  reply and no assertion. Witness replay requested in chat #1288; author
+  replay is not independent acceptance.
 - Next: witness replay of the W106 evidence, then a daemon-side reach test if
   a suitable admitted server endpoint exists. Evidence files and normalized
   hashes: `lab/frontier/nanomsg2shell/harness/EVIDENCE_HASHES.txt`.
