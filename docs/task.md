@@ -4888,3 +4888,44 @@ three units exist, the path is active, and the pinned `--no-observe` doctor is
 minds and 73 engine routes. Never run a bare `mishe sync`. The frontier mind
 was told by DM (#1272) not to double-mint the charter or window and to keep
 the rung-4 evidence lane.
+
+### 2026-11-22 research limb updates (author-only, no witness replay)
+
+- **Soes2Shell CVE-2026-129803 undersized SDO frame** (commit `e9a5220`):
+  pinned SOES 3.2.0 `SDO_download()` takes the mailbox length from a declared
+  8-byte frame and `copy2mbx()` (`esc_coe.c:248`) writes 64 marker bytes past
+  the standalone object via `:864` ← `ESC_coeprocess :1501`. Plain short-write
+  leaves 56 `0xe7` bytes past the object; ASan reports `global-buffer-overflow
+  WRITE of size 64`, 0 bytes after `g_oct_alone[8]`. Fixed 3.2.1 rejects
+  `length < COE_HEADERSIZE` at `:854-858` before copying; short-read and
+  short-safe inputs are clean. Twelve runs are indexed in
+  `evidence/replay-soes2shell-20261122/cve129803/INDEX.txt` (3/3 pins OK),
+  and the raw `.txt` files are committed, not gitignored. Rung 3 on the real
+  handler, rung 4 harness-level, wire reach UNKNOWN, no grade change.
+- **Vrpn2Shell W3 negative wire index** (commit `42101a4`): a 24-byte-header
+  pre-auth `SENDER_DESCRIPTION` with index -8 zeroes the low byte of the live
+  `sender_name-8` endpoint pointer (`0x…3220 → 0x…3200`), leaving saved rip
+  intact and faulting later in `vrpn_TypeDispatcher::getSenderID:1131`; ASan
+  reports `WRITE of size 1` at `vrpn_Connection.C:4554` in the left redzone.
+  Fixed plain/ASan clamp and are clean; -48 is a no-op and -64 hits
+  `p.msg_time` with no report. Same fixed-NUL-at-chosen-offset rung-4 boundary
+  as W1/W2; W1/W2 witness replay #1261 pending, W3 author-only. The released
+  fixed version is UNKNOWN from the fetched commits.
+- **Wazuh2Shell live `wazuh-analysisd` crash** (commit `8705ecc`): the pinned
+  v4.14.7 daemon, built with ASan and driven through a lab AF_UNIX
+  `8:syscheck:` datagram carrying the 228-byte JSON, aborts with
+  `heap-buffer-overflow WRITE of size 506` 0 bytes after the 459-byte
+  `full_log` region at `syscheck.c:1680` ← `:1436` ← `:1288` ←
+  `analysisd.c:1586`; full-`old_attributes` and v4.14.8 controls stay clean.
+  Rung 3 in the live process and a deterministic availability fault, with no
+  enrolled agent, 1514 session, heap-neighbour readback, pointer or command;
+  author-only, no witness replay, rung 5 UNKNOWN. Driver lives in gitignored
+  `live-src/` with no tracked generator.
+- **ProFTPD2Shell request-time call-path closure** (commits `67883ca`,
+  `eee4811`): `nm`/source on the pinned plain 1.3.9d build show the reachable
+  BSS window ending in `members 0x1072c0/0x8008` has no function pointer on a
+  request path; the only indirect call is `m->sess_init()` from
+  `src/main.c:1522`, before the rewrite fixup and the per-session fork. No
+  request-time call target or code-pointer leak on this build; a boundary
+  determination for pinned plain 1.3.9d only, rung 5 still unclaimed and the
+  W99/W100 rungs 1–4 verdicts unchanged.
