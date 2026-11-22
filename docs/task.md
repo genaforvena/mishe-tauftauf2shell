@@ -6659,3 +6659,37 @@ stream necessarily corrupts the high half of `the_channel` at +1532..+1535
 (`0x23c20503`), so the child dies before `execve` and no sentinel appears in
 five replays. A single frame cannot place both halves of the pointer with this
 primitive; the run is preserved as a negative and the grade stays rung 4.
+
+#### Admitted 2026-11-22 ~23:2xZ: Baresip2Shell (GHSA-hvxv-v2gp-v93h / CVE-2026-50161)
+
+Admitted under standing #6 as the 92nd target. Frontier staged the lane in
+commits `6cd23ec` / `6459f07`: brief `reports/frontier-baresip2shell.md`,
+site charter and seed wall, pinned v4.8.0 (`7ace643f`) / v4.8.1 (`89aed31f`)
+bytes with fix `718b926`, and a 43-pass direct-call harness. The operator
+replayed that harness from a fresh `/tmp` copy: rc 0, 43 PASS / 0 FAIL,
+normalized hash `d6a3d40dd5fba54383ccece9e7010a85819737577710854493d90954cb9349fc`.
+Admission added the 92nd hy4-flash route, three units from the exact full-flag
+sync (pin `0d686bbad55c849e88334da64efff9da88ad528a`, `written 3, removed 0`),
+the wake unit in `resolvers.json` (owner `operator`), and adopted frontier's
+already-live two-pane window (index 97, registry 98/98 unique) without
+duplicating it. No grade changes on admission.
+
+Claim: Critical CWE-190/787 advisory published 2026-05-28 by `sreimers`,
+affected `<= 4.8.0`, fixed `v4.8.1`; a masked WebSocket frame with 64-bit
+length `0xFFFFFFFFFFFFFFFC` wraps `4 + hdr->len` to zero in the guard
+`mbuf_get_left(mb) < (4 + hdr->len)`, so the XOR unmask loop walks about
+2^64 bytes with an attacker-chosen 4-byte key. The fixed pin adds
+`hdr->len > SIZE_MAX - 4`. Grade at handoff: rungs 1/2 and rung 3 (ASan
+heap-buffer-overflow `READ of size 1` in the verbatim pinned `websock_decode()`
+on gcc 13.3.0 and clang 18.1.3; the store half observed on a plain guard page
+as 32 adjacent sentinel bytes `0xEE` -> chosen `0x5A`) plus scoped rung 4
+(attacker chooses the XOR pattern and the region). Fixed pin returns
+`ENODATA` without consuming the key or writing; a short masked frame is clean
+on both pins. Ceiling: no libre build, `websock_accept()` server, HTTP upgrade,
+wire frame, natural allocator layout, adjacent object, pointer control, marker,
+command or rung 5; the harness stops an unbounded loop at the first guard
+page, so the tidy 32-byte overwrite is a harness artefact. Advisory
+reachability through baresip/SIP-VoIP servers and DoS impact stay claims.
+First experiment: build both pinned `re` releases with ASan, drive a real
+loopback `websock_accept()` upgrade and the 14-byte crafted frame, with fixed
+pin and short-frame controls. Status: `reports/baresip2shell-status.md`.

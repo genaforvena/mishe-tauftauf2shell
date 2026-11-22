@@ -2053,3 +2053,52 @@ external contact at replay time.
   its 216 usable bytes and intact header. Per-file offsets, checksums and
   digests are in `lab/ytnef2shell/inputs/MANIFEST.txt`; raw ASan/gdb logs and
   built trees are local-only and regenerate with the two commands above.
+
+## Admitted frontier lane — 2026-11-22 23:2xZ baresip2shell
+
+Frontier staged GHSA-hvxv-v2gp-v93h / CVE-2026-50161 in `6cd23ec` / `6459f07`
+with brief `reports/frontier-baresip2shell.md`; hash-pinned v4.8.0
+(`7ace643f`) and v4.8.1 (`89aed31f`) sources, fix `718b926` and the toolchain
+are in `lab/frontier/baresip2shell/PROVENANCE.md`. All inputs are local; the
+harness opens no socket.
+
+From the repository root, replay from an isolated copy so the staged evidence
+directory is untouched:
+
+```sh
+T=$(mktemp -d /tmp/baresip-replay.XXXXXX)
+cp -a lab/frontier/baresip2shell "$T/lane"
+bash "$T/lane/harness/run.sh"
+```
+
+`run.sh` re-extracts the 54-line vulnerable and 55-line fixed
+`websock_decode()` from the saved pinned `websock.c` with
+`sed -n '/^static int websock_decode/,/^}/p'`, asserts five SHA-256 pins
+(two source files, the fix patch, and both function slices), then builds
+gcc 13.3.0 and clang 18.1.3 ASan variants plus a plain guard-page variant.
+Expect rc 0, `SUMMARY=43 PASS / 0 FAIL` and
+`NORMALIZED_HASH=d6a3d40dd5fba54383ccece9e7010a85819737577710854493d90954cb9349fc`
+over `harness/evidence/*.out` after address/path normalization. The operator
+observed exactly those values on 2026-11-22 at admission, matching frontier's
+clean-archive replay; no witness verdict exists yet.
+
+Expected bytes: crafted frame `CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1
+LENBYTES=fffffffffffffffc KEY=b4b4b4b4`; vulnerable pins report
+`ERROR: AddressSanitizer: heap-buffer-overflow`, `READ of size 1`, `0 bytes
+after 30-byte region`, top frame `websock_decode` (the load half of
+`p[i] = p[i] ^ mkey[i%4]`). The plain run prints
+`REGION_BYTES=30 PAYLOAD_BYTES=16 SENTINEL_BYTES=32 KEY=0xb4`,
+`PLAIN_FIRST_OOB_OFFSET=12`, `PLAIN_FAULT_OFFSET=44` and 32 adjacent sentinel
+bytes changed from `0xEE` to `0x5A`, proving the store. Fixed pin: `RC=61`
+(`ENODATA`), `HDR_LEN=0xfffffffffffffffc`, `PAYLOAD_FIRST=00`, `MKEY=00000000`,
+`CONSUMED=10`, no ASan report; safe 8-byte masked frame `RC=0` with
+`PAYLOAD_FIRST=b4` on both pins.
+
+Boundary: one direct call to the verbatim function with `mbuf_*` stubs; no
+libre build, `websock_accept()` server, HTTP upgrade, wire frame, natural
+allocator layout or adjacent object. The real loop runs about 2^64 times;
+ASan and the PROT_NONE page stop it at the first inaccessible byte, so no
+claim is made about an orderly 32-byte overwrite in a real heap. No pointer
+control, marker, command or rung 5. Admission minted the 92nd hy4-flash route,
+the path/debounce/slice units from the exact full-flag sync, and adopted
+frontier's live window; none of that changes the grade.
