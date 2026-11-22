@@ -5726,11 +5726,12 @@ to `lab/frontier/pppd2shell/EVIDENCE_HASHES.txt`; tracked harness outputs
 stayed clean (git status unchanged). Grade at admission: rungs 1/2/3 and rung
 4 chosen digest bytes at offsets 1504/1509/1514 in a plain readback —
 direct-call scope only. No pppd process, pty, PPP device, wire negotiation,
-pointer control, command or witness replay; the advisory's real-daemon
-ASan crash at N=301/374 remains a claim, and rung 5 is UNKNOWN. Status
-`reports/pppd2shell-status.md`; next bounded experiment is a local pty build
+pointer control, command or witness replay then; the advisory's real-daemon
+ASan crash at N=301/374 was still a claim at admission and is observed by W122
+below. Rung 5 was UNKNOWN then and stays unclaimed. Status
+`reports/pppd2shell-status.md`; the named next experiment — a local pty build
 of pinned 2.5.3 driving one RFC-1662 LCP Configure-Request with N=301 repeated
-PAP CIs.
+PAP CIs — was completed by W122 below.
 
 ### Admitted 2026-11-22 ~19:1xZ: libssh22shell (operator, standing #6)
 
@@ -5836,6 +5837,30 @@ Rung 4 at ASan/abstract scope is unchanged; rung 5 is closed for this build
 and allocator rather than merely UNKNOWN. Probe source, measured output and
 the adjacency caveat are in `reports/libssh22shell-live.md`. Witness #1607's
 replay of the W2 live claim is still owed.
+
+### 2026-11-22 19:5xZ: pppd2shell W122 — live daemon over a local PTY
+
+Commit `32b7ff4` closes the admission's named next experiment without a grade
+change. `bash lab/frontier/pppd2shell/live/run_matrix.sh` (after a local
+`sudo modprobe ppp_async`) builds both pins as gcc-13 ASan `pppd`, starts the
+real daemon as root on a locally created PTY under the 0600 CHAP-only config,
+and sends one escaped RFC-1662 LCP Configure-Request from the master after the
+daemon's own ConfReq. With N=301 repeated PAP AUTHTYPE CIs, 2.5.3 reports
+`global-buffer-overflow WRITE of size 1` at `lcp_reqci lcp.c:1608`, 0 bytes
+after the 1500-byte `.bss` `nak_buffer` and 36 before `last_pkts_in`, along the
+real chain `main:614 → get_input:1207 → lcp_input:509 → fsm_input:365 →
+fsm_rconfreq:436` before authentication; N=374 matches and N=300 reaches the
+second overflow at `:1853` 0 bytes after `inpacket_buf`. Vulnerable N=3 and
+fixed 2.5.4 at N=301/3 stay alive with one CHAP-MD5 NAK; an earlier fixed
+control with a 0644 secrets file was invalid and is superseded. Two full runs
+gave six identical normalized hashes in `evidence/LIVE_HASHES.txt`. Rungs 3/4
+now hold at live-process wire scope in addition to the direct-call harness,
+but the NAK bytes stay the constrained `03 05 c2 23 <digest>` pattern with a
+chosen digest byte only: no pointer, command, side effect or witness replay,
+so rung 5 stays unclaimed. The non-ASan `.bss` map reaches `sigreceived` near
+offset 1872 at N=374, short of the hook function pointers; a larger negotiated
+MRU and a usable pointer remain open. Raw logs are gitignored under `live/raw/`;
+the report is `reports/pppd2shell-live.md`.
 
 ### 2026-11-22 19:0x–19:1xZ limbs: witness and rung-5 boundary closures
 
