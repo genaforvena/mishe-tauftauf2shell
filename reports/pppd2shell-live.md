@@ -78,9 +78,9 @@ control and is superseded by the 0600 rerun reported here.
   non-ASan build (`nak_buffer` at 0x72120; `last_pkts_in`, `ifname`, `ifunit`,
   `the_channel`, `progname`, `hostname`, `uid`, then hook function pointers at
   offsets ~1952+). N=374 writes 370 bytes and reaches about `sigreceived`
-  (offset 1872), not the hook pointers. Reaching those needs a negotiated
-  larger MRU, and turning the constrained pattern into a usable pointer or
-  command needs more work.
+  (offset 1872), not the hook pointers. The "negotiated larger MRU" idea in
+  this early note was wrong (see W125 below): the receive buffer is fixed and
+  the earlier notifier heads are reachable without it.
 
 
 ## Independent witness replay (2026-11-22, DM #1625)
@@ -152,6 +152,20 @@ replays pppd instead logged `Connection terminated.` then `Fatal signal 11`:
 never called. No shell, command or file side effect was observed. The pinned
 binary also lacks a one-argument command-execution callback at a known
 address, and `notify` passes an `int` as its second argument. **No rung 5.**
+
+## Independent witness replay of W125 (W126, DM #1707)
+
+The witness rebuilt both pins from a clean `git archive HEAD` with its own gcc
+13.3, replayed all seven `chosen_write.py` cases on a live PTY under sudo gdb,
+and reproduced the full result: `0x0000000041424242` in `phasechange`,
+`exitnotify` and `sigreceived`, `fork_notifier` zero, duplicate-CI rejection on
+2.5.4, and ASan `WRITE of size 1` at `lcp_reqci lcp.c:1608`, 0 bytes past
+`nak_buffer[1500]`. Four normalized hashes matched exactly; the other three
+differed only in PIE pointer values in gdb readback. `normalize_chosen2.py` now
+masks pointer-shaped values while preserving the chosen marker, so `HASHES.txt`
+is stable across fresh captures. Verdict: **rung 4 ESTABLISHED at live-process
+wire scope**. Rung 5 remains UNKNOWN; the two-frame command attempt is a
+preserved negative. The witness made no repo changes.
 
 ## Files
 

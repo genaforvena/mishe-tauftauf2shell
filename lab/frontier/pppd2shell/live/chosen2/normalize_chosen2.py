@@ -22,6 +22,24 @@ TAGS = [
 ADDR = re.compile(r"0x[0-9a-f]{10,}")
 PATH = re.compile(r"/[^\s]*?/(?:src|raw)/build-(?:vuln|fixed)(?:-plain)?/")
 PID = re.compile(r"process \d+")
+VALUE = re.compile(r"0x[0-9a-f]{16}\b")
+
+
+def is_pie_pointer(value: str) -> bool:
+    """A PIE pointer has its top 16 bits zero and a nonzero high half."""
+    digits = value[2:]
+    return int(digits[:4], 16) == 0 and int(digits[:8], 16) != 0
+
+
+def norm_gdb(line: str) -> str:
+    line = PATH.sub("BUILD/", line.rstrip())
+    line = PID.sub("process PID", line)
+    line = re.sub(r"^0x[0-9a-f]{10,}", "0xADDR", line)
+    # Mask run-varying PIE pointer values, but keep zero-extended chosen
+    # markers (e.g. 0x0000000041424242) and deterministic NAK byte data.
+    return VALUE.sub(
+        lambda m: "0xPTR" if is_pie_pointer(m.group(0)) else m.group(0), line)
+
 
 
 def norm(line: str) -> str:
@@ -60,11 +78,7 @@ def main() -> None:
             if any(k in line for k in (
                     "nak_buffer", "pidchange", "phasechange", "exitnotify",
                     "sigreceived", "fork_notifier", "the_channel", "$1 =")):
-                # Only the leading gdb address is PIE-randomized; the value
-                # after the colon is the deterministic readback.
-                masked = re.sub(r"^0x[0-9a-f]{10,}", "0xADDR",
-                                PID.sub("process PID", PATH.sub("BUILD/", line.rstrip())))
-                lines.append("  " + masked)
+                lines.append("  " + norm_gdb(line))
         text = "\n".join(lines) + "\n"
         (OUT / f"{tag}.txt").write_text(text)
         hashes.append((f"{tag}.txt", hashlib.sha256(text.encode()).hexdigest()))

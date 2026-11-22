@@ -57,7 +57,11 @@ memory only; it wrote nothing.
 | `w125-asan-fixed` | same frame on 2.5.4 ASan: alive, `LCP: ignoring duplicate configuration option(s)`, one ASYNCMAP NAK, chosen bytes absent. |
 
 Normalized files and `HASHES.txt` are in `evidence/`. Raw logs stay in the
-ignored `live/raw/`. Two full `normalize_chosen2.py` runs are byte-identical.
+ignored `live/raw/`. `normalize_chosen2.py` masks build paths, process ids, gdb
+addresses and PIE pointer values; it keeps zero-extended chosen markers such as
+`0x0000000041424242` and deterministic NAK byte data verbatim. Hashes are
+stable across fresh captures whose only difference is PIE randomisation. A
+blanket long-hex mask would erase the marker and was rejected.
 
 ## Failed rung-5 attempt (`rce_attempt.py`, non-PIE build)
 
@@ -95,5 +99,18 @@ even if a callback existed.
 Rung 4 is strengthened: four attacker-chosen bytes at an absolute global in
 a live daemon now include deterministic full 8-byte values in three
 notifier-pointer objects, with vulnerable ASan, fixed and safe-input
-controls. No hook was called with a controlled target, no command, no side
-effect, no witness replay of these W125 cases: **no rung 5**.
+controls. No hook was called with a controlled target, no command or side
+effect. The witness replayed all seven cases (below): **no rung 5**.
+
+## Independent witness replay (W126, 2026-11-22, DM #1707)
+
+The witness rebuilt both pins from a clean `git archive HEAD` tree with its own
+gcc 13.3 (ASan and plain), replayed all seven `chosen_write.py` cases on a live
+PTY under sudo gdb, and reproduced every observation: `0x0000000041424242` in
+`phasechange`, `exitnotify` and `sigreceived`, `fork_notifier` zero, fixed-pin
+duplicate-CI rejection, and the 2.5.3 ASan `WRITE of size 1` at
+`lcp_reqci lcp.c:1608` 0 bytes past `nak_buffer[1500]`. Four normalized hashes
+matched exactly; the other three differed only in PIE pointer values in gdb
+readback, which `normalize_chosen2.py` now masks. Verdict: **rung 4 ESTABLISHED
+at live-process wire scope**. Rung 5 stays UNKNOWN; the two-frame command
+attempt above is a preserved negative. The witness made no repo changes.
