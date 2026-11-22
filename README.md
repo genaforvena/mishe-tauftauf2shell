@@ -151,7 +151,7 @@ a new primitive is needed; no witness replay is owed.
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 63 target
+Each admitted family is its own mind with its own tmux window: 65 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -167,8 +167,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `asn1scc2shell`, `iec618502shell`, `openjpeg2shell`,
 `wolfssl2shell`, `htslib2shell`, `civetweb2shell`,
 `open625412shell`, `knotresolver2shell`, `ats2shell`, `exim2shell`,
-`netty2shell`, `wamr2shell`, `perl2shell`, `msquic2shell` and
-`proftpd2shell`. Each builds
+`netty2shell`, `wamr2shell`, `perl2shell`, `msquic2shell`,
+`proftpd2shell`, `soes2shell` and `vrpn2shell`. Each builds
 affected and fixed versions locally, writes harnesses, drives toward rung 4
 and authors its report under `reports/`.
 

@@ -4584,3 +4584,51 @@ The mind's bounded first step is to recompute the pins, replay the committed
 EoE and PDO harnesses under its own record, then drive CVE-2026-129811 through
 real mailbox dispatch (`ESC_coeprocess`) and look for a loopback slave path
 that does not need AF_PACKET. Never run a bare `mishe sync`.
+
+#### Admitted 2026-11-22 ~01:1xZ: VRPNShell / vrpn2shell (CVE-2026-123200)
+
+Frontier staged a brief (`reports/frontier-vrpn.md`, commit `b5bafdb`), a
+two-pane window (index 74), charter, seed wall and registry entry at ~01:10Z
+and asked for the operator's call under standing approval #6. The operator
+read the brief and recomputed all five SHA-256 digests in
+`lab/frontier/vrpn2shell/PROVENANCE.md` — the CVE record, both upstream fix
+patches, the pinned `vrpn_Connection.C` and the fixed-commit tarball all
+matched. No external trigger was sent; all testing stayed on 127.0.0.1.
+
+**Claim source** — NVD CVE-2026-123200 and the VulnCheck advisory; upstream
+fixes `0da5b0b71e06e8c318a4e674c84caee12251a782` and the 07.39 cookie bump
+`c893b583d928fd17d756b39271b2eae71766e7f2`. **Identifier** —
+CVE-2026-123200, CWE-787, `AV:N`, PR:N after the 24-byte version-cookie
+exchange. **Affected/fixed pin** — tag `v07.36` (commit `79deb000cc0b…`) and
+the fixed-commit tarball; the precise released fixed version is UNKNOWN from
+those commits alone, and the fixed commit is the control. This is recorded as
+an explicit limit, not converted into a guessed release number.
+**Primitive** — a wire-supplied signed 32-bit index is used unchecked for
+`sender_name[i] = '\0'` / `type_name[i] = '\0'` on a 100-byte stack
+`vrpn_CNAME` (`vrpn_Connection.C:4554` / `:4482`). A direct-call ASan harness
+linked to the real pinned `libvrpnserver.a` reports
+`stack-buffer-overflow WRITE of size 1` at `:4554` for indices 100/128/-256;
+the fix clamps with `min(i, sizeof(name)-1)` and is clean at the write site.
+**Rung-4 plausibility** — the byte is a fixed NUL at a chosen offset, so
+impact depends on the stack layout: an index must reach saved frame state or a
+pointer in a plain build; no chosen-byte control is claimed. A real loopback
+TCP message reaches the handler under gdb, while a live-server ASan sweep is
+negative because the server frame layout differs.
+
+At admission: rung 3 on the real pinned library via direct call, wire dispatch
+observed under gdb, wire rung 3 and rung 4 UNKNOWN, no rung 5, no independent
+witness replay. This is a pre-auth network server library, not a web server;
+admission rests on the plant's recorded precedent of taking source-pinned,
+real-write X2Shell-class lanes under #6, with the class boundary stated here
+and in the charter. The operator adopted frontier's already-live window 74 and
+registry entry, added the 69th `engine/routes.json` entry, and ran the pinned
+full-flag sync from `docs/runtime-pin.md` (3 written / 0 removed, 69 wake
+paths); the pinned `--no-observe` doctor read `PASS local plant out of Git` /
+`GREEN`, rc 0. This makes 65 admitted target minds. Never run a bare
+`mishe sync`.
+
+The mind's bounded first step is to break at `vrpn_Connection.C:4553` under
+gdb, print `&sender_name` and `i` in the shipped server frame, pick an index
+whose NUL lands in its real redzone and retry over TCP, then map in a plain
+build what that NUL touches before any marker or pointer claim. Keep the
+fixed-commit and short-input controls throughout.

@@ -1,11 +1,12 @@
 # Frontier brief — VRPN SENDER/TYPE_DESCRIPTION length index (CVE-2026-123200)
 
-**Status (2026-11-22 01:11Z, W98): RUNG 3 in a direct-call harness on the real
-pinned 07.36 library; wire dispatch of the crafted message confirmed under gdb.**
-Rung 4 UNKNOWN, wire ASan negative so far, no rung 5. Staged 01:10Z as target
-`vrpn2shell`: live two-pane window 74, seed wall, charter, registry entry and
-operator DM sent; operator admission pending. Witness replay required for any
-published claim.
+**Status (2026-11-22 ~01:1xZ, operator admission): ADMITTED as `vrpn2shell`
+under standing approval #6.** RUNG 3 in a direct-call harness on the real
+pinned 07.36 library; wire dispatch of the crafted message confirmed under
+gdb. Rung 4 UNKNOWN, wire ASan negative so far, no rung 5. The operator
+adopted frontier's staged two-pane window 74, charter, seed wall and registry
+entry, and added the 69th wake route. Witness replay required for any
+published claim; none in hand at admission.
 
 ## Verified ground truth (primary sources)
 
@@ -110,3 +111,28 @@ is not in scope on this evidence.
 - <https://github.com/vrpn/vrpn/commit/0da5b0b71e06e8c318a4e674c84caee12251a782>
 - <https://github.com/vrpn/vrpn/commit/c893b583d928fd17d756b39271b2eae71766e7f2>
 - <https://www.vulncheck.com/advisories/vrpn-through-07.36-out-of-bounds-write-via-sender-description-type-description-length-index>
+
+## Operator admission (2026-11-22 ~01:1xZ)
+
+Admitted under standing approval #6 with all five elements recorded in
+`.mishe-tauftauf/charters/vrpn2shell.md` and `docs/task.md`: claim source NVD
+CVE-2026-123200 plus the VulnCheck advisory and two upstream fix commits;
+identifier CVE-2026-123200; affected `v07.36` / commit `79deb000…` and
+fixed-commit `0da5b0b…` tarball pins (all five PROVENANCE digests recomputed
+and matched by the operator at admission, while the precise released fixed
+version stays UNKNOWN); primitive = unchecked signed index storing one NUL
+into a 100-byte stack array, observed by ASan at the real
+`vrpn_Connection.C:4554` write site in a direct-call harness on the real
+pinned library with a clean fixed-commit control; rung-4 plausibility =
+layout-dependent NUL at a chosen offset with no chosen-byte control, wire
+dispatch to the handler observed under gdb and a negative live-server ASan
+sweep preserved. Grade at admission: rung 3 on the real library via direct
+call, wire rung 3 and rung 4 UNKNOWN, no rung 5, no witness replay.
+
+This is a pre-auth network server library rather than a web-facing server;
+that class boundary is part of the admission record, not an implied claim.
+The operator adopted the staged two-pane window 74 (no duplicate), registered
+the 69th wake route with the pinned full-flag sync (3 written / 0 removed),
+and the pinned `--no-observe` doctor read `PASS local plant out of Git` /
+`GREEN`, rc 0. Frontier should leave this status block and admission note to
+the operator and keep its own lane work in its other sections.
