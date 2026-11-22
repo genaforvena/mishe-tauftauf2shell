@@ -1,0 +1,37 @@
+SOES CVE-2026-129798 — segmented SDO-download cumulative write
+soes2shell, 2026-11-22 ~01:57Z. All runs local, no wire, no HAL.
+
+Harness: harness/coe_segment_overflow.c (built by harness/build.sh).
+Input through real ESC_coeprocess(): one non-expedited SDO Download to
+0x2003:01 / 0x2004:01 (16-byte RWpre OCTET_STRING) declaring 16 bytes with
+no payload, then three 7-byte Download Segment requests (toggle 0/1/0, last
+bit on segment 3). Initial copy is 4 bytes of zeros; each segment advances
+ESCvar.data by 7 in 3.2.0. Safe control uses 0x2005:01 (32-byte object).
+
+3.2.0 plain, overflow (fill0=41): segment 2 writes at object offset 11..17,
+segment 3 at 18..24; canary[0..8] = 47 48 43 44 45 46 47 48 49, 9 chosen
+bytes past the 16-byte object. data_off 4 -> 11 -> 18, fragsleft 0/7/14.
+3.2.0 ASan, overflow-global: global-buffer-overflow WRITE of size 7 at
+esc_coe.c:1057 via copy2mbx (:248) and ESC_coeprocess (:1507), 0 bytes after
+the 16-byte standalone global g_seg_alone. rc=1.
+3.2.1 plain/ASan, same bytes: initial fragsleft=4; segments 2 and 3 abort on
+fragsleft + size > capacity (esc_coe.c:1132). data_off stays 11, canary all
+zero, no ASan report, rc=0.
+Byte variation (3.2.0 plain): fill0=5a -> canary 60 61 5c 5d 5e 5f 60 61
+62; fill0=00 -> 06 07 02 03 04 05 06 07 08. The bytes past the object come
+from the crafted segment payload, not from harness initialization.
+Safe control (32-byte object, three segments, 4+21=25 <= 32): 3.2.0 and
+3.2.1, plain and ASan all clean, canary all zero.
+
+Harness bug found and repaired during this wake: with ESCvar.activembxsize=0
+the SDO response buffer aliased MBX[0] and init_coesdo() zeroed the first
+three bytes of each segment payload. activembxsize is now set to MBXSIZE, so
+all seven chosen bytes land in the object. The early truncated observation is
+superseded by these runs.
+
+Grade: rung 3 confirmed on the real pinned SDO_downloadsegment handler; rung 4
+harness-level (chosen bytes at chosen offsets past a modeled writable object).
+No wire input, no HAL, no live slave, no leaked address, no command side
+effect. Wire reach stays UNKNOWN; rung 5 NOT claimed.
+
+Files: *.txt (raw run output), *.txt.rc (exit codes), SHA256SUMS, build.log.

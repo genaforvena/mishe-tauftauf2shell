@@ -61,3 +61,18 @@ for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
       -Wl,--gc-sections -o "$ROOT/build/coe_download_asan_$V"
    echo "built $ROOT/build/coe_download_$V and coe_download_asan_$V"
 done
+
+# CVE-2026-129798 triage: real segmented SDO-download writes through
+# ESC_coeprocess(), with the hash-pinned 3.2.1 source as the fixed control.
+for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
+   V=${SPEC%%:*}; DEFINE=${SPEC##*:}
+   SRC="$ROOT/src/SOES-$V"
+   INC="-I$SRC -I$SRC/soes -I$SRC/soes/include/sys/gcc -I$SRC/applications/linux_lan9252demo"
+   clang -g -O0 -Wall -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_segment_overflow.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_segment_$V"
+   clang -g -O0 -fsanitize=address -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_segment_overflow.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_segment_asan_$V"
+   echo "built $ROOT/build/coe_segment_$V and coe_segment_asan_$V"
+done

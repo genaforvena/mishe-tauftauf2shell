@@ -359,3 +359,49 @@ for both writes, and rung 4 harness-level for the copy path (chosen bytes in
 adjacent memory). Witness W102's replay covered only the original 12 cases,
 not this harness. Wire reach remains UNKNOWN and rung 5 is not claimed.
 
+
+
+## Adjacent cluster triage — CVE-2026-129798 (soes2shell, fourth wake, 2026-11-22 ~01:58Z)
+
+Pinned 3.2.0 `SDO_download()` enters segmented mode when a master declares a
+size larger than the bytes actually in the download mailbox
+(`esc_coe.c:852-855`). `SDO_downloadsegment()` then computes the segment size
+from the mailbox length and copies it at `ESCvar.data` without comparing the
+running total to the object's capacity (`copy2mbx(mbxdata, ESCvar.data, size)`,
+`esc_coe.c:1057`; non-last segments advance `ESCvar.data += size`). The pinned
+3.2.1 adds `ESCvar.fragsleft = size` at the segmented branch
+(`esc_coe.c:910`) and rejects `fragsleft + size > max_capacity`
+(`esc_coe.c:1132`), where capacity is the object's declared bit length for a
+normal transfer. This is the 8.8 "segmented download cumulative write" item
+in RRTL-261119-01.
+
+New harness `lab/frontier/soes2shell/harness/coe_segment_overflow.c` (wired
+into `harness/build.sh`) sends one non-expedited SDO Download to a writable
+16-byte `OCTET_STRING` that declares its full size but carries no payload
+(the initial copy is four zero bytes), followed by three seven-byte Download
+Segment mailboxes through the **real** `ESC_coeprocess()` →
+`SDO_downloadsegment()`. The modeled precondition is a writable object with
+RAM storage; the stock demo OD is not claimed writable. `MBX[]` is filled
+in-process: no wire, no HAL, no live slave, no leak, no command side effect.
+
+Evidence:
+`lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/cve129798/INDEX.txt`
+(ten runs, raw output, exit codes, checksums).
+
+| Case | Build | Observed |
+|---|---|---|
+| `overflow` | 3.2.0 plain | `ESCvar.data` offsets 4 → 11 → 18; segment 2 writes at object offsets 11–17 and segment 3 at 18–24; nine chosen bytes past the 16-byte object: `canary[0..8] = 47 48 43 44 45 46 47 48 49` |
+| `overflow-global` | 3.2.0 ASan | `global-buffer-overflow`, `WRITE of size 7` at `esc_coe.c:1057` via `copy2mbx :248` ← `ESC_coeprocess :1507`, 0 bytes after the 16-byte standalone global; exit 1 |
+| `overflow` | real pinned 3.2.1, plain and ASan | `fragsleft=4` after init; segments 2 and 3 abort at `esc_coe.c:1132`, `data_off` stays 11, canary all zero, no ASan report, exit 0 |
+| `overflow` with `fill0=5a` / `0x00` | 3.2.0 plain | `canary[0..8] = 60 61 5c 5d 5e 5f 60 61 62` / `06 07 02 03 04 05 06 07 08`: chosen segment bytes, not harness initialization |
+| `safe` (32-byte object, 4+21=25 bytes total) | 3.2.0 and 3.2.1, plain and ASan | all clean, canary all zero |
+
+Harness artifact found and repaired: with `ESCvar.activembxsize = 0` the SDO
+response buffer aliased `MBX[0]` and `init_coesdo()` zeroed the first three
+bytes of each segment payload; setting `activembxsize = MBXSIZE` gives the
+full seven chosen bytes. The truncated early observation is superseded.
+
+Grade for this adjacent issue: **rung 3 confirmed on the real pinned
+segmented-download handler**, rung 4 harness-level (chosen bytes at chosen
+offsets past a modeled writable object). No witness replay of this harness
+yet. Wire reach stays UNKNOWN and rung 5 is not claimed.

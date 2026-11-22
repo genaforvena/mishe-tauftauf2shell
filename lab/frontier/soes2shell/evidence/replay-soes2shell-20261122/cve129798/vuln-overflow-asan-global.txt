@@ -1,0 +1,51 @@
+=================================================================
+==3110650==ERROR: AddressSanitizer: global-buffer-overflow on address 0x642e29a1d910 at pc 0x642e2946e308 bp 0x7ffff3ae4790 sp 0x7ffff3ae3f50
+WRITE of size 7 at 0x642e29a1d910 thread T0
+    #0 0x642e2946e307 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_segment_asan_3.2.0+0xc3307) (BuildId: 39561752f638f2bfc0064682cd25af35ffacb77e)
+    #1 0x642e294b1164 in copy2mbx /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:248:4
+    #2 0x642e294ac011 in SDO_downloadsegment /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1057:7
+    #3 0x642e294a637b in ESC_coeprocess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1507:13
+    #4 0x642e294a543a in deliver /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_segment_overflow.c:102:4
+    #5 0x642e294a4f98 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_segment_overflow.c:166:4
+    #6 0x733220e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #7 0x733220e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #8 0x642e293d7324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_segment_asan_3.2.0+0x2c324) (BuildId: 39561752f638f2bfc0064682cd25af35ffacb77e)
+
+0x642e29a1d910 is located 48 bytes before global variable 'MBXcontrol' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:17' (0x642e29a1d940) of size 3
+  'MBXcontrol' is ascii string ''
+0x642e29a1d910 is located 16 bytes before global variable 'g_ms3' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_segment_overflow.c:34' (0x642e29a1d920) of size 1
+  'g_ms3' is ascii string ''
+0x642e29a1d910 is located 0 bytes after global variable 'g_seg_alone' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_segment_overflow.c:25' (0x642e29a1d900) of size 16
+SUMMARY: AddressSanitizer: global-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_segment_asan_3.2.0+0xc3307) (BuildId: 39561752f638f2bfc0064682cd25af35ffacb77e) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x642e29a1d680: f9 f9 f9 f9 00 00 00 00 00 02 f9 f9 f9 f9 f9 f9
+  0x642e29a1d700: 00 00 00 00 00 00 f9 f9 f9 f9 f9 f9 04 f9 f9 f9
+  0x642e29a1d780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x642e29a1d800: 00 00 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x642e29a1d880: 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+=>0x642e29a1d900: 00 00[f9]f9 01 f9 f9 f9 03 f9 f9 f9 00 00 00 00
+  0x642e29a1d980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x642e29a1da00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x642e29a1da80: 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+  0x642e29a1db00: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x642e29a1db80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3110650==ABORTING

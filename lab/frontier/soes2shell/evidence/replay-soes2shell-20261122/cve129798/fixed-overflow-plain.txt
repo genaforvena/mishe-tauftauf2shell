@@ -1,0 +1,10 @@
+build: 3.2.1 (hash-pinned fixed source)
+mode: overflow
+fill0: 41
+initial download (declared full size, no payload): index=2003 sub=1 xoe=00 segmented=50 data_off=4 fragsleft=4
+segment 1 (7 bytes): index=2003 sub=1 xoe=00 segmented=50 data_off=11 fragsleft=11
+segment 2 (7 bytes): index=2003 sub=1 xoe=00 segmented=50 data_off=11 fragsleft=11
+segment 3 (7 bytes, last): index=2003 sub=1 xoe=00 segmented=50 data_off=11 fragsleft=11
+seg[0..31]: 00 00 00 00 41 42 43 44 45 46 47 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+canary[0..15]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+verdict: canary_nonzero=0
