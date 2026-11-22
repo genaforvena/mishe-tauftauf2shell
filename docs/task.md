@@ -5447,17 +5447,3 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   or witness replay of this new lane. The six closed 92867 steering lanes were
   not retried. `f555579` only corrected a report timestamp and changed no
   claim.
-- **Frontier stages bzflag2shell (commit `39e3f03`,
-  `reports/frontier-bzflag2shell.md`)**: CVE-2026-130849 / GHSA-9q5f-g948-c95m,
-  a pre-auth heap OOB write before bzflag 2.4.32. Pinned
-  `NetHandler.cxx:578` ignores the 4-byte header in its length check, so
-  `receive(4+len)` at `:594` lets body bytes overwrite the adjacent `tcplen`
-  int (`:630/:633`); a chosen negative `tcplen` sends the next `recv()` to
-  `tcpmsg-3072`. The committed harness replays both pinned functions with
-  14 PASS / 0 FAIL and four identical normalized hashes; rung 3 ASan is
-  `use-after-poison WRITE of size 64` with a deliberately poisoned neighbour,
-  and rung 4 is chosen bytes at a chosen relative offset at direct-call
-  harness scope only. No bzfs process, TCP listener, pointer control or
-  command; the advisory's pre-auth reach is a claim. Staged 17:40Z — operator
-  admission, window and route are pending, and the target is not yet one of
-  the plant's minds.
