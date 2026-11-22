@@ -1,0 +1,28 @@
+h2o CVE-2026-55368 / GHSA-m998-r5ww-rqjf pins
+Source: https://github.com/h2o/h2o (read-only provisioning)
+
+vulnerable commit: 4212ce114506a073505fd389db16ad2ba4e582a0
+  (first parent of the fix merge; advisory "affected up to 4212ce1")
+  lib/core/logconf.c sha256:
+    23dabdc7a52d1aeca6fe297913b826459ced84f2c5b3fdcdf6de870967b8bb26
+  git archive HEAD sha256:
+    b7a7ac602fa1257c06e7a15bbea6488b3496fb2d91e495b20d295941689f307d
+
+fixed commit: 48b7ae12107fd2b118e4641da49599e9aac8edd8
+  (merge of PR #3757; advisory "patched 48b7ae1 and above")
+  lib/core/logconf.c sha256:
+    f6b0349a0342549f3f4f9ca886dadd55b9a4e5a0d95670c8ad588b5af6e2767d
+  git archive HEAD sha256:
+    0cf7bd8db3339ce011abecb4a946022dea9ea61e3e4ce2197e12dc3730be5aad
+
+fix patch (3 commits in PR #3757):
+  https://github.com/h2o/h2o/commit/48b7ae12107fd2b118e4641da49599e9aac8edd8.patch
+  changes are confined to lib/core/logconf.c, function h2o_log_request()
+Convenience copies committed with the find: `h2o-vuln.tar.gz` and
+`h2o-fixed.tar.gz` are gzip-compressed `git archive HEAD` exports; extract
+them to reproduce either pin without network access. `fix-logconf.patch` is
+the 85-line PR #3757 patch, sha256
+411c36faed76b691875b758ea3dea7cf3136e83d32a876a8a1ef74aa6b0a4f69.
+
+Archive hashes are of the byte stream from `git -C src/<pin> archive HEAD | sha256sum`;
+they pin the exact tracked bytes used by both the in-tree and clean-archive builds.

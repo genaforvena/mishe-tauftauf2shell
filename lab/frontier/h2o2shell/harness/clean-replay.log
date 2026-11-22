@@ -1,0 +1,28 @@
+Clean-archive replay — h2o2shell / CVE-2026-55368 (frontier W117, 2026-11-22)
+
+Both pins were re-exported with `git archive HEAD` from their worktrees
+(vulnerable 4212ce114506a073505fd389db16ad2ba4e582a0, fixed
+48b7ae12107fd2b118e4641da49599e9aac8edd8), extracted to a fresh `replay/`
+tree, and both `libh2o.a` builds and all six harness binaries were rebuilt
+there from scratch. Only the harness source was shared with the in-tree run.
+
+In-tree normalized hashes (harness/EVIDENCE_HASHES.txt):
+vuln-asan    sha256=17aa901b32655ddc10258170493729508e2c29428ef881a04d6c92a218a0009b rc=1
+fixed-asan   sha256=fed393d305a11381d2a0ee057f0a08ff3462f6edd638538717dc4ad6a6f5ff9e rc=0
+vuln-plain   sha256=e297be4e388609ba068499c0ef292861794814aa7657e0ed65a83be93289bbf0 rc=0
+fixed-plain  sha256=80602582960573daf6a5a815accb94609791ca5cc1cd1db0d29034f367eaddce rc=0
+vuln-safe    sha256=d30e269f2a31e2d3c662aeed16c82c42dfd1d80d360c5bc3bf486c6d4225e5ae rc=0
+fixed-safe   sha256=d30e269f2a31e2d3c662aeed16c82c42dfd1d80d360c5bc3bf486c6d4225e5ae rc=0
+
+Clean-archive normalized hashes (replay/EVIDENCE_HASHES.txt): identical to the
+six lines above, byte for byte. `cmp` result: REPLAY_IDENTICAL=yes.
+
+Normalization strips PIDs, pc/bp/sp addresses, heap addresses and absolute
+build paths; it keeps observed bytes, sizes, pinned source line numbers and
+exit codes. The initial mismatch on vuln-asan was only the ASan header's
+pc/bp/sp addresses; after normalization all six variants match.
+
+Note: the replay runner originally aborted at the first intentional ASan
+exit (rc=1) under `set -e`; the runner was fixed to capture non-zero codes
+and the run phase was re-executed against the already-built replay binaries.
+No source or pin was changed by that correction.
