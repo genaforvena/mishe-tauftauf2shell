@@ -17,13 +17,16 @@ is a request-time function pointer, the only indirect call (`m->sess_init()` in
 `modules_session_init()`) precedes the overflow and runs in a fresh fork per
 session, and the relative-read sweep found no PIE pointer — see the call-path
 closure section below. ADMITTED 2026-11-22 ~00:1xZ by the operator under
-standing approval #6 as `proftpd2shell` (window 72; route 67). Four later
+standing approval #6 as `proftpd2shell` (window 72; route 67). Six later
 author-only limbs await witness replay: the 01:10Z ASLR-off control-flag
 write, the 01:44Z ASLR-on limb (a leaked heap pointer keeps `substr` valid
 while `rewrite_engine` is zeroed and a later `STOR` is no longer rewritten),
-the 02:10Z pre-login ASLR-on limb (PR:N, 5/5 paired trials) and the 02:13Z
-relative memory read. The leak does not reveal the PIE base; no ASLR-on
-absolute pointer write is claimed and rung 5 stays UNCLAIMED.
+the 02:10Z pre-login ASLR-on limb (PR:N, 5/5 paired trials), the 02:13Z
+relative memory read, the 03:17Z extended over-read (two live match pointers),
+and the 03:40Z ASLR-on chosen-string readback (no setarch: a leaked pointer
+aims `substr` at a caller-chosen repeating key pattern and the real parser
+logs it, 5/5 marker vs 5/5 controls). The leak does not reveal the PIE base;
+no ASLR-on absolute pointer write is claimed and rung 5 stays UNCLAIMED.
 
 ## Verified ground truth
 
@@ -613,3 +616,42 @@ heap, not PIE" wording applies to the ASLR-on observations, not to every
 allocation mode. This is a new author-only rung-4 information-disclosure limb
 (two further live pointers under real ASLR), not command execution, not a call
 target, and not a rung-5 step. It awaits witness replay; rung 5 stays UNCLAIMED.
+
+## proftpd2shell mind — ASLR-on chosen-string readback (2026-11-22 03:40Z)
+
+New author-only limb, NOT witness-replayed. It removes the `setarch -R`
+condition from the chosen-string observation: under real ASLR the attacker
+leaks the static `substr` pointer from the over-read, writes it back with a
+relative delta, and the real parser reads a chosen multi-byte string from the
+attacker's own key buffer. No fixed address, no PIE-base arithmetic, no
+`.rodata` target.
+
+Method (`wire/client13-aslr-marker.py`, pre-login `%m USER` config on port
+21914, `proftpd-vuln-plain`, `randomize_va_space=2`, no setarch):
+
+1. A 1025-code-point `USER` key starting U+00E8 makes the `strlen`-limited
+   `pstrdup(map_pool, utf8_val)` at :2072 over-read the eight `substr` bytes;
+   `rewrite_subst()` logs their low six in `maps subst'd pattern:`.
+2. A 1281-code-point key writes `leaked_ptr + DELTA` back into `substr` via
+   code points 8k, while its remaining code points spell a caller-chosen
+   repeating `PAT`.
+3. `USER labuser` triggers the next `%m USER` rewrite. `rewrite_parse_map_str()`
+   dereferences the redirected pointer and the real RewriteLog records the
+   chosen PAT run in `parsing '...'`.
+
+Replay from `lab/frontier/proftpd2shell/wire` on a free port 21914:
+`PAT='ZZZZZZZZZZZZZZZZNOOP-ASLR-OK!' TAG=m1 python3 client13-aslr-marker.py`;
+control `PAT='ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ' TAG=c1 python3 client13-aslr-marker.py`.
+Observed 03:38–03:40Z: 5/5 marker trials and 5/5 controls clean, all
+`SIGNALS 0`, `NOOP 200`, `PWD 530`, run-varying `PTR_OLD` (e.g.
+`0x62a49b78a0e8`, `0x5bfea73310e8`, `0x61880c1350e8`). Marker trials' wild
+`parsing '...'` read contains `NOOP-ASLR-OK!` at offsets 17–19; controls
+contain only Z filler. Final-client re-verification: 3/3 marker PRESENT,
+3/3 controls absent, `RANDOMIZE_VA 2`, `PAT_HIT` 17–19 vs 0. Raw evidence:
+`wire/evidence/{m,c,wm,wc}-[1-5].txt` and the paired `rewrite-*.log` files,
+uncommitted as with the earlier limbs.
+
+Boundary: chosen bytes at chosen offsets at a leaked per-run address; the
+string is attacker-supplied key content consumed by a parser, never executed.
+No call target, no command side effect, no PIE base. Rung 5 stays UNCLAIMED
+and the 02:44Z call-path closure still holds. Awaits witness replay.
