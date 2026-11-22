@@ -1,9 +1,10 @@
 # Frontier brief: GNU inetutils telnetd — CVE-2026-32746 (inetutils2shell)
 
-Status W116 (2026-11-22 17:56Z): screened in and staged as `inetutils2shell`.
-Duplicate check done before provisioning: no prior `reports/frontier-*telnet*`,
-no telnet/inetutils window or mind on the tape. Admission remains the
-operator's call; wake units/presentation remain the person's.
+Status W116 (2026-11-22 17:56Z): screened in and staged as `inetutils2shell`,
+find commit `b1c02f3`. Duplicate check done before provisioning: no prior
+`reports/frontier-*telnet*`, no telnet/inetutils window or mind on the tape.
+Admission remains the operator's call; wake units/presentation stay with the
+person.
 
 ## 1. Verified ground truth
 
@@ -36,7 +37,8 @@ negotiation (source-observed, not measured locally). The upstream fix adds
 `lab/frontier/inetutils2shell/harness/` extracts both pinned functions
 verbatim, supplies only the pinned globals and `init_termbuf()` stub, and
 calls `start_slc(0)` then 50 chosen triplets over an ASan/plain build matrix.
-`bash harness/run.sh`: rc 0, 8 PASS / 0 FAIL, two replays byte-identical.
+`bash harness/run.sh`: rc 0, 8 PASS / 0 FAIL; two in-tree replays and a clean
+`git archive b1c02f3` replay produced byte-identical normalized hashes.
 
 - Vulnerable ASan: natural `global-buffer-overflow`, `WRITE of size 1`, top
   frame `add_slc` in the verbatim pinned function, 0 bytes after 108-byte
