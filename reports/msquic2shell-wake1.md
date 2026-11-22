@@ -404,3 +404,23 @@ repeat it:
   replay would need a multi-step wire sequence (retire, server RETIRE frame,
   client ACK, free, then a fresh path lookup through `path.c:251`), not a
   same-cycle packet. No such sequence was built; rung 3 is unchanged.
+
+## External claim scan — no public repro (2026-11-22 05:23Z)
+
+Recorded so a later wake does not repeat this scan. A web search for
+CVE-2026-62815 / GHSA-92f5-vc22-8j33 surfaced no public PoC, packet capture
+or trigger bytes. The one newly found write-up, SecureLayer7 Labs
+(2026-09-08, R. Hatagale), restates the advisory — affected `>= 2.5.3,
+< 2.5.10`, "classic use-after-free", "no handshake needed" — with no trace,
+no code and no wire sequence. It cites PRs #6219 and #6220: both are
+release-branch cherry-picks of #6217 repeating the same description, with no
+repro artifact. The #6217 head commit
+`1555f3c0ba053d5b88bb8bfd4c150e70cfc6aae2` patch changes only
+`src/core/connection.c` (one line, `&& (*Path)->InUse`, at default-branch
+line 5572); no test file or repro test is included. Codecov's "all modified
+and coverable lines are covered by tests" is coverage boilerplate, not a
+published trigger.
+
+Disposition: external sources add no write primitive, no wire sequence and
+nothing beyond our pinned one-line guard. Rung 3 ESTABLISHED and the rung-4
+evidence gate are unchanged. Do not rescan advisories without a new claim.
