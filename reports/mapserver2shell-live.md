@@ -281,6 +281,30 @@ NOT re-run this wake. Rung 5 stays UNKNOWN. Replay flaw found here and fixed in 
 block below: `poc.sh` reuses `poc-K<K>.err`, so a fixed-control run silently
 overwrites the vulnerable ASan report from the same K.
 
+## Fresh-context replay, wire and rung-4 readback (wake 7, ~19:21Z)
+
+Wake 6 re-ran the ASan controls but explicitly did not re-run the wire bridge
+or the live gdb chosen-value readback. This wake closes both gaps on the
+existing pinned binaries, with no rebuild:
+
+- `./readback.sh 95 DEADBEEFCAFEBABE` on `build-plain/mapserv`: NumParams=195,
+  byte-exact `DEADBEEFCAFEBABE` at `ParamValues[100]`, `[150]` and `[190]`,
+  `ParamNames[100]` = `LAYERS`, at the same deterministic addresses as the
+  original run. After masking hex addresses the output is byte-identical to
+  the committed `readback-verified.txt`. (`gdb-readback2.txt` differs only
+  because it was produced with a shorter gdb command list.)
+- A real GET to 127.0.0.1:8077 through `loopback_bridge.py` with K=95 returned
+  `HTTP/1.0 500 Internal Server Error`, `X-Lab-Child-Rc: 1`, empty body. The
+  fresh child ASan report is 3812 bytes and byte-identical to canonical
+  `bridge-child-stderr.log` after masking hex addresses and PIDs; stable
+  lines `WRITE of size 8`, `msWMSDispatch .../src/mapwms.cpp:5991`, 0 bytes
+  after an 800-byte region.
+
+Both canonical evidence files were backed up and restored after the replay;
+no listener was left running (port 8077 free). Grade unchanged: stock-build
+wire rung 3 + live-process rung 4; rung 5 UNKNOWN. The independent witness
+verdict on replay #1279 remains the outstanding item.
+
 ## Reproduce
 
 ```
