@@ -338,3 +338,45 @@ control, no side effect. Rung 4 still requires a measured
 attacker-controlled byte/offset effect on a named wire consumer; rung 5
 additionally requires a live wire-pure benign-command side effect with
 vulnerable/fixed/safe-input controls.
+
+## Chosen-byte relocation into the stale active slot (2026-11-22 00:59Z)
+
+To probe the rung-4 gap directly, the crafted PN 101 packet was extended with
+a `PATH_CHALLENGE` frame (`0x1a`, data `de ad be ef 42 43 44 45`) after the
+NCI and PING. Scratch-only prints were added at the write
+(`connection.c:5140`, `WIRECHAL`), after post-processing (`WIREOFF`, with byte
+offsets from the connection base) and at the send consumer
+(`send.c:601`, `WIREPRESP`). The vulnerable pin, two runs
+(`build/srv-presp1.log:139,142,143,152` and `srv-presp2.log`), gives:
+
+```
+WIRECHAL idx=1 data=deadbeef42434445
+WIREPATH post count=1 p0(ID=1 inuse=0 active=1) p1(ID=0 inuse=1 active=0) stale=Paths[0]
+WIREOFF p0resp=532 p1resp=772 p0data=deadbeef42434445 p1data=0000000000000000
+WIREPRESP idx=0 data=deadbeef42434445
+```
+
+The fixed control (`build/srv-prespfix.log:139,142`) decodes the identical
+frame and shows `WIRECHAL idx=1 data=deadbeef42434445`, but no promotion and
+`WIREOFF ... p0data=0000000000000000 p1data=deadbeef42434445`: the chosen
+bytes stay in `Paths[1]`. With only the one-line `&& (*Path)->InUse` guard,
+`Paths[0].Response` (connection-relative offset 532) therefore changes from
+zero to exactly the eight wire-chosen bytes, and `QuicSendWriteFrames`
+echoes them from that slot into a PATH_RESPONSE. The write itself is normal
+frame-handler code; the corruption is the whole-struct relocation of its
+result into the active slot.
+
+Source-bound analysis of the post-swap consumers found only fixed-offset
+field writes: `Response[8]` (`path.h:176`), `Route` (`path.h:147`),
+`SpinBit`, and bounded CID copies into the outgoing header (`packet.h:574`,
+length checks at `:452,:559`). No consumer uses an attacker-supplied value
+as a write address, path index or copy length; `QUIC_CID_*_PATH` bookkeeping
+is `#ifdef DEBUG` only (`cid.h:134-163`) and these builds are Release.
+
+Classification: a measured, causally divergent **chosen value at a fixed
+QUIC_PATH field of the active slot**, not write-what-where. The offset is
+determined by the struct layout, not chosen by the attacker; no pointer
+control, arbitrary offset or side effect was observed. This tightens the
+rung-3 byte-level observable but does **not** meet the plant's rung-4 bar.
+All artifacts remain gitignored scratch. The fixed-control guard was reverted;
+the three printfs above remain only in the scratch tree, never in a commit.
