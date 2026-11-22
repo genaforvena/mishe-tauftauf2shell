@@ -5447,3 +5447,58 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   or witness replay of this new lane. The six closed 92867 steering lanes were
   not retried. `f555579` only corrected a report timestamp and changed no
   claim.
+
+#### 2026-11-22 ~17:5xZ frontier staging: inetutils2shell (CVE-2026-32746)
+
+- **Screened and staged, not admitted** (commit `b1c02f3`,
+  `reports/frontier-inetutils2shell.md`): the CNA MITRE record (CVSS 3.1 9.8,
+  CWE-120), GNU bug report, finder writeup and upstream fix `1ffb28a2…` give
+  an unchecked `add_slc()` in GNU inetutils telnetd through 2.7, writing SLC
+  triplets past the 108-byte `slcbuf[NSLC*6]` global before authentication
+  (source-observed, not measured on a daemon); 2.8 adds the remaining-space
+  guard. Frontier checked for duplicate ownership first: no telnet/inetutils
+  report, window or mind was already on the tape. Both release tarballs
+  (`a156be1c…` / `57b3cf4f…`) and `fix-slc.patch` (`5729c658…`) are
+  SHA-256-pinned in `lab/frontier/inetutils2shell/pins/PIN_HASHES.txt`, with
+  claim URLs and a normalized-evidence manifest in `PROVENANCE.md`.
+- **Measured rung 3/4 at direct-call scope**: `gen_slc.py` extracts
+  `start_slc()`/`add_slc()` verbatim from each pinned `telnetd/slc.c`;
+  `bash harness/run.sh` builds vulnerable/fixed × ASan/plain and asserts
+  8 PASS / 0 FAIL on two in-tree and one clean `git archive b1c02f3` replay
+  (byte-identical normalized hashes). Vulnerable ASan reports
+  `global-buffer-overflow WRITE of size 1` in `add_slc`, 0 bytes past
+  `slcbuf`; fixed 2.8 ASan is clean. Plain vulnerable reports
+  `slcbuf_size=108 slcptr_offset=154` and chosen `42415a42415a42415a`
+  readback after 50 `0x42,0x41,0x5a` triplets; fixed plain has no readback.
+  No telnetd process, LINEMODE/option FSM, socket, allocator neighbour,
+  pointer control or command: no rung 5, pre-auth wire reach and
+  exploitability UNKNOWN, and the finder's observed-64-bit no-RCE conclusion
+  stays a claim. Witness replay is owed.
+- **Cheapest next experiment**: build pinned 2.7 telnetd with ASan and a
+  loopback-only listener, send `IAC DO LINEMODE`, `IAC WILL LINEMODE` and an
+  `IAC SB LINEMODE LM_SLC` subnegotiation long enough to pass 108 bytes, with
+  2.8 and a short subnegotiation as clean controls. Admission (charter, mind
+  window, wake route) remains the operator's call; staged lab files create
+  no mind and no model route.
+
+#### 2026-11-22 ~17:5xZ research limb updates
+
+- **ProFTPD clean-archive fresh build of both pending ASLR-on limbs (commit
+  `9f46d14`, `reports/frontier-proftpd.md`)**: from `git archive HEAD
+  lab/frontier/proftpd2shell` in an empty tree, copy the two pinned tarballs,
+  verify `SHA256SUMS` (3/3 OK) and run
+  `python3 wire/setup-clean-replay.py ARCHIVE_ROOT` to relocate the recorded
+  absolute paths and regenerate the untracked test account. Fresh gcc 13.3.0
+  out-of-tree builds (`configure --with-modules=mod_rewrite
+  --disable-shared`, `make -j2 CFLAGS='-g2 -O2 -Wall
+  -fno-omit-frame-pointer -fno-strict-aliasing'`) kept the static BSS layout
+  (`ucs4_longs 0x104920/0x2000`, `utf8_val 0x106920/0x400`, `substr
+  0x106d20/8`) and write offsets stable. Under real ASLR the `%m USER`
+  chosen-string case logged the caller-chosen `PAT` in a wild `parsing` line
+  (`PAT_HIT 10`, `NOOP=200`, `PWD=530`, `SIGNALS 0`; marker-free control
+  `PAT_HIT 0`), and the relative-pointer case leaked run-varying tails at
+  1056/1152-byte keys (`c0ecdee44a61`, `18044a93685a`; `SIGNALS 0/2/4`).
+  Fresh fixed 1.3.9e gave `LEAK NONE` / `550` with no signals. This is a
+  clean-blob author replay, not an independent verdict (#1330 still open);
+  grades are unchanged, rung 5 remains unclaimed, and no listener was left
+  running. Raw results are in `wire/evidence/clean-*.txt`.
