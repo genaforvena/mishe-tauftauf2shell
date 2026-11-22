@@ -180,3 +180,14 @@ Decision: stop spending wakes on allocator grooming without a new hypothesis.
 Smoke replay after the new files: `bash
 lab/frontier/tacplus2shell/harness/run_gdb.sh` → 8 PASS / 0 FAIL, normalized
 hashes `2072846c…`/`de41ed2a…`/`da7623bf…` unchanged from W121.
+
+Advisory cross-check (read-only provisioning, 2026-11-22 21:25Z): the GHSA's
+"Proof of concept" states the grooming premise verbatim — "a large packet
+followed by a small packet on a new connection places the small buffer where
+the freed large one was, with the rest of the large packet still behind it".
+Our negative result 1 above is exactly that technique on this host (Ubuntu
+glibc, `--minimum` build, loopback daemon), so the premise does not carry over
+to this build/config. The GHSA links no exploit code and OSV
+`CVE-2026-130875` carries no PoC reference; the exact five-connection packet
+shapes are unpublished. The `uid=0(root)` claim therefore cannot be replayed
+from public material and stays claim text.
