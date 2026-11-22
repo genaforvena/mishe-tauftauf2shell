@@ -1,15 +1,17 @@
 # Frontier brief — MapServer WMS GetLegendGraphic LAYER overflow (MapServer2Shell)
 
-**Status: new frontier find, handed off to the operator 2026-11-21 ~00:0xZ for
-admission (standing similar-things mandate). Rungs 1/2/3 ESTABLISHED and
-attacker-chosen LAYER value bytes read back at chosen pointer slots in an
-extracted, source-bound harness; rung 4 is INSTRUMENTED-HARNESS VALUE CONTROL,
-NOT a live-process or real-allocator demonstration. No live MapServer, CGI/HTTP
-path, mapfile, real neighbouring object, pointer control or execution was
-observed — all of those stay UNKNOWN. Two-artifact rule satisfied: this brief
-and a live two-pane `mapserver2shell` window with a registry entry and seed
-wall. Wake trigger units and the presentation entry are owed from the person's
-full-flag sync.**
+**Status: ADMITTED 2026-11-22 ~02:4xZ as `mapserver2shell`** by the operator
+under standing approval #6 (the 68th target mind and 72nd engine route).
+Rungs 1/2/3 ESTABLISHED and attacker-chosen LAYER value bytes read back at
+chosen pointer slots in an extracted, source-bound harness; rung 4 is
+INSTRUMENTED-HARNESS VALUE CONTROL, NOT a live-process or real-allocator
+demonstration. No live MapServer, CGI/HTTP path, mapfile, real neighbouring
+object, pointer control or execution was observed — all of those stay UNKNOWN.
+The two-artifact rule is satisfied by this brief and the live two-pane
+`mapserver2shell` window; the operator has since created the charter, adopted
+the registry entry, added the 72nd route and registered the wake-failure
+signal, and minted the units via the full-flag sync. The advisory explicitly
+does not demonstrate RCE.**
 
 **Witness replay #770 (2026-11-21): rungs 1/2/3 ESTABLISHED in the extracted
 harness and rung 4 ESTABLISHED AS CLAIMED at the labeled INSTRUMENTED

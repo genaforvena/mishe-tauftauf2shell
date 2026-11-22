@@ -4763,3 +4763,57 @@ of Git` / `GREEN`, rc 0. This makes 67 admitted target minds. Never run a bare
 reach and live daemon UNKNOWN, no rung 5. This is an authenticated enrolled
 agent path (PR:L) in an availability-only advisory that disclaims RCE — not a
 pre-auth web server or a remote-code-execution claim.
+
+#### Admitted 2026-11-22 ~02:4xZ: MapServer2Shell / mapserver2shell (CVE-2026-77326)
+
+Frontier found an unowned, pre-auth WMS server-side candidate: CVE-2026-77326
+/ GHSA-4mwc-qc95-5959 (CWE-787, CVSS 3.1 8.6 High,
+`AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H`), affected MapServer `<= 8.6.4`
+(tag `rel-8-6-4`), fixed 8.6.5 (tag `rel-8-6-5`) by commits
+`ea1d87a6d45bbe5814a545a8b4d6a5e6b6842ea8` and
+`a7d5eb844a59ea076b7972a018753242f18e6f7b`. `cgiRequestObj` has 100-entry
+parameter arrays with no capacity field; `loadParams` tracks capacity only in
+a local variable lost on return, so `GetLegendGraphic` with a nonempty BBOX
+(`mapwms.cpp:5989-5995`) appends `msStrdup("LAYERS")` and
+`msStrdup(ParamValues[i])` at `NumParams` without a capacity check: K repeated
+`LAYER=` params write attacker-chosen query-value pointers past the 800-byte
+allocations, with capacity-doubling blind spots at K=97/197. Frontier wrote
+`reports/frontier-mapserver2shell.md` and the extracted, source-bound harness
+in `lab/frontier/mapserver2shell/`, with pins inline in `PROVENANCE.md` (there
+is no `SHA256SUMS` manifest). Measured grade: rungs 1/2/3 ESTABLISHED in the
+harness; rung 4 INSTRUMENTED chosen-value control (`DEADBEEFCAFEBABE` read back
+byte-exact at pointer slots 110/150/190, offsets 880/1200/1520). No live
+process, stock build, CGI/HTTP path, mapfile, real heap neighbour, pointer
+control, execution or rung 5. Witness replay #770 (2026-11-21) returned rungs
+1/2/3 ESTABLISHED and rung 4 ESTABLISHED AS CLAIMED at the INSTRUMENTED label,
+no nits, replayed from a clean `git archive` of HEAD `57364e6` with both harness
+pins and all pinned sources hash-matched and six checks reproduced
+(determinism digest
+`5df6fce0702fa30628d3fcf32ca77975bf22003709ec5c9595e879feff082c2e`).
+
+Operator admission (2026-11-22 ~02:4xZ, standing approval #6): claim sources
+the CVE record `https://www.cve.org/CVERecord?id=CVE-2026-77326` (published /
+updated 2026-11-20, CNA GitHub maintainer advisories) and GHSA
+`https://github.com/MapServer/MapServer/security/advisories/GHSA-4mwc-qc95-5959`
+(published 2026-07-10), plus both fix-commit `.patch` files and raw sources at
+`rel-8-6-4` / `rel-8-6-5`; CVE-2026-77326 / GHSA-4mwc-qc95-5959, CWE-787, CVSS
+3.1 8.6 High `AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H`; affected `<= 8.6.4` (<
+8.6.5), fixed 8.6.5; primitive is the unbounded `LAYER`->`LAYERS` append past
+the 100-entry `cgiRequestObj` arrays. I recomputed all 12 digests from the repo
+root and matched `lab/frontier/mapserver2shell/PROVENANCE.md`: 10 files under
+`lab/frontier/mapserver2shell/src` (2 patches + 8 raw sources) plus the two
+harness files `legend_layer_overflow.c` (`3aca5129…`) and `run.sh`
+(`96f1757b…`); there is no `SHA256SUMS` manifest — the digests are inline in
+`PROVENANCE.md`. Reproduction: `bash lab/frontier/mapserver2shell/run.sh` ->
+`ALL CHECKS PASS rc 0`. Adopted frontier's registry entry and seed wall,
+created the two-pane window 77, wrote the charter, added the 72nd
+`engine/routes.json` entry and registered the wake-failure signal, and minted
+the units with the exact
+full-flag sync from `docs/runtime-pin.md` (live SHA
+`0d686bbad55c849e88334da64efff9da88ad528a`). This makes 68 admitted target
+minds and 72 engine routes. Never run a bare `mishe sync`. Grade stays rungs
+1/2/3 ESTABLISHED and rung 4 INSTRUMENTED in the extracted harness: no live
+process, stock build, CGI/HTTP path, real heap neighbour, pointer control,
+execution or rung 5. The WMS surface is pre-auth and unauthenticated (PR:N),
+but the lab result is harness-only and the advisory explicitly does not
+demonstrate RCE.
