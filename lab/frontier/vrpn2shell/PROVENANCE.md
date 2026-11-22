@@ -17,6 +17,7 @@ tests ran on 127.0.0.1 ports only; no external system received a trigger.
 | `probe-gdb.sh` (W2 env overrides, commit `30b05c1`) | local | `2e2cfe9ac9e3d2b4eceb6385e088729a3cb6beb50673db726cb5732e93272770` |
 | `probe-plain-rip.sh` (W2 env overrides, commit `30b05c1`) | local | `ba08413496f974d5da865a8e8187dae0d769b54ec37260336873acc02a93617a` |
 | `probe-frame-write.sh` (W3, commit `42101a4`) | local | `ff2a7dfa3ca4c04077ad7af6d7fba965b35107d329aeeca04c7ce5ed9e7ef6fe` |
+| `probe-func-dos.sh` (W6) | local | `36d9f8d8c412d506f5a49d92f85480f25cce80102d2b3a8e10549fb0373a262f` |
 
 ## Build and observation records
 
@@ -131,3 +132,28 @@ Read-only upstream metadata check recorded in `UPSTREAM-RELEASE-LOOKUP.md`:
 tags and published releases stop at v07.36, the v07.39 tarball is 404, and
 both fix commits are untagged (2026-10-22). No released fixed version exists;
 the pinned fixed-commit tarball above stays the control. No build change.
+
+## W6 debugger-free functional probe (2026-11-22 ~04:26Z)
+
+`probe-func-dos.sh <outdir> <port> <index>` starts a stock plain server with no
+debugger or sanitizer, injects one correctly framed description message over
+loopback, records the PID's exit status two seconds later, then kills survivors
+for cleanup. `BIN` selects the server, `MSGTYPE` selects the sink (`-1` sender,
+`-2` type). Every run logs binary SHA-256, port, index, message type and status
+in `out-w6-func-*/meta.txt`, with raw client and server output alongside.
+
+- Vulnerable binary `build-plain-07.36/server_src/vrpn_server`, SHA-256
+  `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`
+  (the default `BIN` in the probe; the W4 rebuild's binary hash is
+  `4e462ace33fa1de028b9de25a7474f24e00e72392e235f9166e2e93fe53060a9`).
+- Fixed binary `build-replay-fixed-w4/server_src/vrpn_server`, SHA-256
+  `15111740fd68868c49569570f1f283d4f801e7a4cfd9c988c94497e0c4b791fa`.
+- SENDER -8: exit 139 SIGSEGV at ports 13941 and 13945 (repeat on a fresh port);
+  SENDER 120: exit 132 SIGILL at 13944; TYPE -8: exit 139 at 13948; TYPE 120:
+  exit 132 at 13946. Controls: SENDER 4 at 13942 and fixed SENDER -8 at 13943,
+  fixed TYPE 120 at 13947 all ALIVE after the message, then killed by the probe.
+- Host `randomize_va_space=2` throughout; no per-run addresses were recorded,
+  so address-level ASLR behavior stays UNKNOWN. No external host contacted.
+  Author observation of a deterministic pre-auth remote DoS on this plain
+  `Debug -O0` build, not a witness verdict and not a chosen-byte or
+  command-execution result.

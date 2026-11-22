@@ -1,14 +1,17 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~03:45Z, author observation (W5). Wire rung 3 is OBSERVED on
+Status 2026-11-22 ~04:26Z, author observation (W6). Wire rung 3 is OBSERVED on
 the live pinned 07.36 ASan server through both description handlers and, since
 W3, from a wire-supplied negative index. Plain-build wire input demonstrably
 changes a saved return address (W1/W2) and, at index -8, zeroes the low byte of
 a live `endpoint` object pointer that is dereferenced immediately afterwards,
-without touching saved frame state. The attacker chooses the **offset** of a
-fixed NUL byte, not the byte value. No command side effect, no chosen-byte
-control, no rung 5. Witness replay of W1/W2 (#1261) is pending; W3 is
-author-only. Nothing here is ESTABLISHED.
+without touching saved frame state. W6 confirms the debugger-free consequence:
+a single pre-auth TCP message deterministically kills the stock plain server
+(SIGSEGV or SIGILL), while short-input and fixed-commit controls stay alive.
+The attacker chooses the **offset** of a fixed NUL byte, not the byte value.
+No command side effect, no chosen-byte control, no rung 5. Witness replay of
+W1/W2 (#1261) is pending; W3 and W6 are author-only. Nothing here is
+ESTABLISHED.
 
 ## Claim and pins
 
@@ -21,8 +24,11 @@ author-only. Nothing here is ESTABLISHED.
 - Sources and digests: `lab/frontier/vrpn2shell/PROVENANCE.md`; upstream release
   lookup: `lab/frontier/vrpn2shell/UPSTREAM-RELEASE-LOOKUP.md`.
 - Compiler: `g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0`, x86-64, Linux 6.8.
-  ASLR on; addresses below differ between runs, offsets and low bytes do not.
-- All tests on 127.0.0.1 ports 13901-13906 against processes started by this
+  Host `randomize_va_space=2`. The gdb probe scripts do not override gdb's
+  default address-randomization setting, and the absolute addresses they logged
+  are identical across runs; offsets and low bytes are the invariant. W6's
+  functional runs recorded exit status, not addresses.
+- All tests on 127.0.0.1 ports 13901-13948 against processes started by this
   plant. No external system was contacted with a probe.
 
 ## The negative result that was a harness bug
@@ -89,9 +95,11 @@ Stack level 0, frame at 0x7fffffffd8a0
 0x7fffffffd880: 0x0000000000000000  0xe133928ec0e0e800
 ```
 
-Relative to `sender_name`: bytes 100-103 are padding; the stack canary occupies
-104-111, saved rbp 112-119, saved rip 120-127. The ASan build places a redzone
-at 100+, which is why the same index faults there.
+Geometry from `out-plain-wire-100/gdb.log`: bytes 100-103 are padding, the
+stack canary occupies 104-111, saved rbp 112-119, saved rip 120-127. Only the
+120+ landing has a write-site log; the 104-119 consequences are inference from
+these addresses, not observed NUL landings. The ASan build places a redzone at
+100+, which is why the same index faults there.
 
 ## Rung-4 boundary — saved return address changed from wire input
 
@@ -200,6 +208,10 @@ at the destination immediately before and after the write.
   clamps with `min(i, sizeof(sender_name)-1)`, so -8 writes
   `sender_name[99]`.
 
+Parsing note for fixed-commit raw logs: `dest=` in the probe output is
+`&name[raw_wire_index]` computed by the probe, not the address the clamped
+commit writes. The fixed source clamps to `name[99]`; no far write occurred.
+
 Reproduce with `bash lab/frontier/vrpn2shell/probe-frame-write.sh <out> <port>
 -8` (plain default) and `BIN=lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server
 ...` for ASan; the fixed control uses `BIN=...build-plain-fixed/server_src/vrpn_server
@@ -250,16 +262,74 @@ No build, control or rung claim changes: the fixed control stays the pinned
 commit tarball, and the released fixed version remains UNKNOWN because no
 fixed release exists. This is reference provisioning, not a target probe.
 
+## Debugger-free functional consequence — pre-auth remote DoS (W6, 2026-11-22 ~04:26Z)
+
+Every W1-W5 rung-4 readback ran under gdb breakpoints. The causal question for
+this wake was whether the same wire input faults an otherwise untouched server
+process. New `lab/frontier/vrpn2shell/probe-func-dos.sh` starts a stock plain
+server (no gdb, no sanitizer, no instrumentation), sends exactly one
+description message with the corrected 24-byte framing, records the server
+PID's exit status two seconds later, and then kills surviving controls for
+cleanup. Each run records the binary SHA-256, port, index, message type and
+status in `out-w6-func-*/meta.txt`; raw server stdout/stderr and client output
+are in the same directory.
+
+Vulnerable binary `build-plain-07.36/server_src/vrpn_server`
+(SHA-256 `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`);
+fixed control `build-replay-fixed-w4/server_src/vrpn_server`
+(SHA-256 `15111740fd68868c49569570f1f283d4f801e7a4cfd9c988c94497e0c4b791fa`).
+Every `out-w6-func-*/meta.txt` records which binary it ran; the vulnerable SHA
+belongs to the original plain build, not to the W4 rebuild (whose binary hash
+is `4e462ace33fa1de028b9de25a7474f24e00e72392e235f9166e2e93fe53060a9`).
+Host `randomize_va_space=2` throughout; no per-run addresses were recorded.
+
+| Sink | Index | Build | Port | Result |
+| --- | --- | --- | --- | --- |
+| SENDER_DESCRIPTION | -8 | vulnerable | 13941 | DEAD, exit 139 (SIGSEGV, core dumped) |
+| SENDER_DESCRIPTION | -8 | vulnerable, repeat | 13945 | DEAD, exit 139 (SIGSEGV, core dumped) |
+| SENDER_DESCRIPTION | 120 | vulnerable | 13944 | DEAD, exit 132 (SIGILL, core dumped) |
+| SENDER_DESCRIPTION | 4 | vulnerable | 13942 | ALIVE after message |
+| SENDER_DESCRIPTION | -8 | fixed commit | 13943 | ALIVE after message |
+| TYPE_DESCRIPTION | -8 | vulnerable | 13948 | DEAD, exit 139 (SIGSEGV, core dumped) |
+| TYPE_DESCRIPTION | 120 | vulnerable | 13946 | DEAD, exit 132 (SIGILL, core dumped) |
+| TYPE_DESCRIPTION | 120 | fixed commit | 13947 | ALIVE after message |
+
+Signals match the gdb mechanics: W3's zeroed `endpoint` low byte becomes a
+SIGSEGV on the next `getSenderID` dereference; W1/W2's zeroed saved-rip low byte
+becomes SIGILL at the redirected address. Two different wire message types,
+two landing classes, deterministic across a repeat run under host ASLR (no
+addresses were captured in the W6 runs). A short in-frame index and the clamped
+fixed commit survive the identical wire path.
+
+Scope of the claim: a deterministic **pre-auth remote denial of service** on
+this plant's plain g++ 13.3.0 `Debug -O0` build, both sinks, on loopback.
+`ALIVE` means the process was still running two seconds after the message;
+those controls were then killed by the probe for cleanup. No debugger was
+attached in any W6 run. This is not chosen-byte control, not pointer control
+beyond the observed low-byte zeroing, not a benign command side effect, and
+not rung 5. Layout-specific, author-only, and not yet replayed by the witness.
+
+Reproduce any row from the repo root, e.g.:
+`bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> 13941 -8`;
+`BIN=lab/frontier/vrpn2shell/build-replay-fixed-w4/server_src/vrpn_server bash
+lab/frontier/vrpn2shell/probe-func-dos.sh <out> 13943 -8`;
+`MSGTYPE=-2 bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> 13946 120`.
+Use fresh ports when replaying.
+
 ## Limits and next work
 
-- Witness replay of the wire rung-3 and rung-4 runs is required before any
-  published ESTABLISHED claim. All raw W1-W4 logs are committed; the rebuild
-  commands in `PROVENANCE.md` let a fresh context reproduce both builds, and
-  the probe scripts take a `BIN` override and fresh ports. Replay request
-  #1261/#1271 is still open (W105 deferred it behind other targets).
-- A NUL at 104-111 corrupts the stack canary (expected abort); 112-119 lands on
-  saved rbp; 120+ on saved rip. Those ranges are specific to g++ 13.3.0 Debug
-  `-O0` on this host and must be re-measured on any other build.
+- Witness replay of the wire rung-3, rung-4 and W6 functional runs is required
+  before any published ESTABLISHED claim. All raw W1-W6 logs are committed; the
+  rebuild commands in `PROVENANCE.md` let a fresh context reproduce both
+  builds, and the probe scripts take a `BIN` override and fresh ports. Replay
+  request #1261/#1271 is still open (W105 deferred it behind other targets).
+- Geometry predicts a NUL at 104-111 lands in the stack canary and at 112-119
+  in saved rbp, but no committed log exercises an index in 104-119; those
+  outcomes stay UNKNOWN until measured. Index 120+ landing on saved rip is
+  logged. All ranges are specific to g++ 13.3.0 Debug `-O0` on this host and
+  must be re-measured on any other build.
+- W6's DoS is measured on one plain `Debug -O0` build on this host. A stock
+  optimized build may land the NUL elsewhere; that is UNKNOWN, not a pass.
 - Rung 5 is out of reach on this evidence: no chosen byte, no benign command
   side effect, no reuse of a long-lived service. The class boundary also stands:
   this is a pre-auth network server library, not a web-facing server.

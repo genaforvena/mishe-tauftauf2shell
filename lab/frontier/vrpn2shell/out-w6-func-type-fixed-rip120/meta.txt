@@ -1,0 +1,5 @@
+date_utc=2026-11-22T04:26:10Z
+bin=lab/frontier/vrpn2shell/build-replay-fixed-w4/server_src/vrpn_server
+bin_sha256=15111740fd68868c49569570f1f283d4f801e7a4cfd9c988c94497e0c4b791fa  lab/frontier/vrpn2shell/build-replay-fixed-w4/server_src/vrpn_server
+port=13947 index=120 msgtype=-2 hold=2.0
+status=ALIVE_AFTER_MESSAGE
