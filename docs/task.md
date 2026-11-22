@@ -4929,6 +4929,69 @@ minds and 73 engine routes. Never run a bare `mishe sync`. The frontier mind
 was told by DM (#1272) not to double-mint the charter or window and to keep
 the rung-4 evidence lane.
 
+#### Admitted 2026-11-22 ~04:2xZ: Pgpool2Shell / pgpool2shell (CVE-2026-92867)
+
+Frontier staged a peer-controlled 32-bit write-what-where in Pgpool-II's
+watchdog JSON parser, brief `reports/frontier-pgpool2shell.md`, commit
+`da833f5`. Claim sources: JVN#22475874 (JPCERT/CC CNA, published
+2026-09-29) and the NVD API records for CVE-2026-92867 / -92869 / -92870
+(fetched 2026-11-22T03:55Z, all Awaiting Analysis so the CNA values below are
+Secondary, not NVD-completed). CVE-2026-92867: CWE-787, CNA CVSS 4.0 8.7 HIGH
+`AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N`, CVSS 3.0 8.8,
+authenticated watchdog peer (`PR:L`); the vendor impact field states an
+arbitrary 32-bit value can be written to an arbitrary memory address by a
+malformed watchdog failover request, but no public analysis demonstrates
+address steering. Affected 4.3.0–4.3.20 / 4.4.0–4.4.17 / 4.5.0–4.5.12 /
+4.6.0–4.6.7 / 4.7.0–4.7.2 and EOL 3.5.x–4.2.x, fixed 4.3.21 / 4.4.18 /
+4.5.13 / 4.6.8 / 4.7.3 on 2026-09-29; mitigation `use_watchdog = off` or a
+trusted watchdog network.
+
+Source-bound gate on the pinned tarballs: upstream fix `0388652d` (backport
+`a58fe0c7`) changes one character in
+`src/watchdog/wd_json_data.c:855-859`, `*node_id_set[i]` →
+`(*node_id_set)[i]` at 4.7.2:858 / 4.7.3:897. C precedence makes the
+vulnerable expression `*(node_id_set[i])`: `i == 0` writes into the fresh
+`palloc`'d buffer (why single-node failover stayed latent), while `i >= 1`
+reads the pointer-sized slot past the caller's `int **node_id_set` argument
+and stores a peer-chosen 32-bit `NodeIdList` value through it. The parser
+rejects a `NodeCount`/`NodeIdList` length mismatch at `:847-853`. Two real
+callers pass a stack-local `&node_id_list`:
+`process_failover_command_on_coordinator()` (`watchdog.c:2916`) and
+`process_remote_online_recovery_command()` (`:7558`).
+
+Operator admission (2026-11-22 ~04:2xZ, standing approval #6): pins
+`pgpool-II-4.7.2.tar.gz` `e72b9d0ff3620f7da7e33a58dda44b77919d056752dc9bd86b2985c4988d1938`
+and `pgpool-II-4.7.3.tar.gz`
+`4bf9df3e13feb8e64bee486b4ea54c9076296c2d9406165b0b68d32086fce250` are
+SHA-256-pinned in `lab/frontier/pgpool2shell/src/SHA256SUMS` and were
+recomputed 2/2 OK by the operator at admission. The primitive is the
+bad-index chosen-value write; rung-4 plausibility is measured, not argued:
+`bash lab/frontier/pgpool2shell/harness/run.sh` (operator rc 0) links the
+real pinned 4.7.2 parser object into a direct-call harness and reproduces
+ASan `stack-buffer-overflow READ of size 8` at `wd_json_data.c:858` for
+`NodeCount=2`, clean at 1; plain-build gdb shows `node_id_set[1]` =
+`0x555555564060` (the JSON buffer) with chosen `0x42424242` stored as
+`42 42 42 42` there and the destination's second element still zero; pinned
+4.7.3 is clean and stores both values in the buffer.
+
+Mint: adopted frontier's already-created charter
+`.mishe-tauftauf/charters/pgpool2shell.md`, seed wall and inner two-pane
+window 79 (registry entry 80 windows/unique), did not recreate them, added
+the 74th `engine/routes.json` entry and registered
+`failed-m2shell-wake-pgpool2shell-service` to operator with a 7-day max age
+(backup `signals/registry.json.bak-20261122T0425Z`; 42 -> 43 entries), then
+ran the exact full-flag sync from `docs/runtime-pin.md` with the live SHA
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 90, removed 0`, using
+`python3` because this host has no `python`). The debounce service, `.path`
+and `10-slice.conf` for `pgpool2shell` all exist; the pinned `--no-observe`
+doctor is `PASS local plant out of Git` / `GREEN`, rc 0, and
+`tools/check-omp-only.py` reports `GREEN (74 declared roles)`, rc 0. This
+makes 70 admitted target minds and 74 engine routes. Never run a bare
+`mishe sync`. Grade stays rung 3 real and rung 4 chosen-value write at
+direct-call harness scope: wire reach, address steering and rung 5 remain
+UNKNOWN, and the vendor ACE claim is not established. Frontier owns no
+further work on this lane (tape #1298).
+
 ### 2026-11-22 research limb updates (author-only unless a replay is named)
 
 - **Soes2Shell CVE-2026-129803 undersized SDO frame** (commit `e9a5220`):
