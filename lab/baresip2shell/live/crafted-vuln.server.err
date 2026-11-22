@@ -1,0 +1,60 @@
+=================================================================
+==1460105==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51100000330e at pc 0x5b75c038b4b7 bp 0x7ffd90d65b80 sp 0x7ffd90d65b70
+READ of size 1 at 0x51100000330e thread T0
+    #0 0x5b75c038b4b6 in websock_decode /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c:216
+    #1 0x5b75c038b9d6 in recv_handler /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c:260
+    #2 0x5b75c0382e7b in tcp_recv_handler /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/tcp/tcp.c:461
+    #3 0x5b75c0376de2 in fd_poll /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/main/main.c:926
+    #4 0x5b75c0377676 in re_main /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/main/main.c:1065
+    #5 0x5b75c036fa49 in main /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/live/ws_server.c:78
+    #6 0x7ce1bec2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7ce1bec2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5b75c036f304 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/live/ws_server-vuln+0x10304) (BuildId: 4d7312feb8aa17af157a40016434ff3effaedce2)
+
+0x51100000330e is located 0 bytes after 206-byte region [0x511000003240,0x51100000330e)
+allocated by thread T0 here:
+    #0 0x7ce1bf6fc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x5b75c037c959 in mem_realloc /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/mem/mem.c:254
+    #2 0x5b75c037a0b9 in mbuf_resize /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/mbuf/mbuf.c:153
+    #3 0x5b75c037a209 in mbuf_trim /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/mbuf/mbuf.c:177
+    #4 0x5b75c0382c65 in tcp_recv_handler /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/tcp/tcp.c:442
+    #5 0x5b75c0376de2 in fd_poll /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/main/main.c:926
+    #6 0x5b75c0377676 in re_main /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/main/main.c:1065
+    #7 0x5b75c036fa49 in main /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/live/ws_server.c:78
+    #8 0x7ce1bec2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7ce1bec2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5b75c036f304 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/live/ws_server-vuln+0x10304) (BuildId: 4d7312feb8aa17af157a40016434ff3effaedce2)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c:216 in websock_decode
+Shadow bytes around the buggy address:
+  0x511000003080: 00 00 00 00 00 00 fa fa fa fa fa fa fa fa fa fa
+  0x511000003100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x511000003180: 00 00 00 00 00 00 00 00 00 00 00 00 fa fa fa fa
+  0x511000003200: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x511000003280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x511000003300: 00[06]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000003380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000003400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000003480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000003500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000003580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1460105==ABORTING

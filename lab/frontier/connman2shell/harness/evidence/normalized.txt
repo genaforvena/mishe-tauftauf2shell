@@ -1,0 +1,35 @@
+USEDLEN=2048 LASTJUMP=80 FIRST_OOB_OFFSET=127
+RC=0 LIST_LEN=256
+USEDLEN=8 LASTJUMP=20 FIRST_OOB_OFFSET=-1
+RC=0 LIST_LEN=1
+PLAIN LASTJUMP=80
+CANARY DOTS=69 FIRST=49 LAST=16301 FILLBASE=0xADDR
+PLAIN LASTJUMP=80
+CANARY DOTS=69 FIRST=49 LAST=16301 FILLBASE=0xADDR
+USEDLEN=2048 LASTJUMP=80 FIRST_OOB_OFFSET=127
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:16:15
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:3
+SUMMARY: AddressSanitizer: stack-buffer-overflow PATH/get_domains_fn.inc:16:15 in get_domains
+USEDLEN=2048 LASTJUMP=10 FIRST_OOB_OFFSET=15
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:16
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:3
+SUMMARY: AddressSanitizer: stack-buffer-overflow PATH/get_domains_fn.inc:16 in get_domains
+USEDLEN=2048 LASTJUMP=20 FIRST_OOB_OFFSET=31
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:16
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:3
+SUMMARY: AddressSanitizer: stack-buffer-overflow PATH/get_domains_fn.inc:16 in get_domains
+USEDLEN=2048 LASTJUMP=40 FIRST_OOB_OFFSET=63
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:16
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:3
+SUMMARY: AddressSanitizer: stack-buffer-overflow PATH/get_domains_fn.inc:16 in get_domains
+USEDLEN=2048 LASTJUMP=80 FIRST_OOB_OFFSET=127
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:16
+    #0 0xADDR in get_domains PATH/get_domains_fn.inc:3
+SUMMARY: AddressSanitizer: stack-buffer-overflow PATH/get_domains_fn.inc:16 in get_domains
+USEDLEN=8 LASTJUMP=20 FIRST_OOB_OFFSET=-1
+RC=0 LIST_LEN=1

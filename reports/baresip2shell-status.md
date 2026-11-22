@@ -42,20 +42,54 @@ fallback. Admission changes no grade.
   `PLAIN_FIRST_OOB_OFFSET=12`, `PLAIN_FAULT_OFFSET=44`. Fixed pin returns
   `ENODATA` (61) with no key consumed and no writes; a safe 8-byte masked frame
   is clean on both pins.
-- Grade: rungs 1/2 and rung 3 (ASan-confirmed out-of-bounds access in the
-  verbatim pinned function) plus scoped rung 4: the attacker chooses the XOR
-  key and therefore the pattern applied to adjacent harness bytes. Ceiling:
-  no libre build, `websock_accept()` server, HTTP upgrade, wire frame, natural
-  allocator layout, adjacent heap object, pointer control, marker, command or
-  rung 5. The loop is unbounded in realization; ASan and the guard page stop it
-  at the first inaccessible byte, so the neat 32-byte overwrite is a harness
-  artefact, not a claimed real-world overwrite length. "Chosen" means the
-  pattern applied to bytes already present, not an arbitrary absolute value.
-- Next experiments: build pinned `v4.8.0` and `v4.8.1` `re` with ASan, start a
-  plant-started `websock_accept()` listener on 127.0.0.1, complete the HTTP
-  upgrade and send the exact 14-byte masked binary frame (`82 ff` + eight
-  length bytes ending `fc` + four mask bytes). Record the real ASan frame
-  chain, then run the fixed pin (expect `ENODATA`, no write) and a short masked
-  frame (expect clean unmask). All loopback; no external system. Rung 5 remains
-  additive and per-build.
-- Full stage: `reports/frontier-baresip2shell.md`. No witness verdict yet.
+
+## W1 — real-libre wire experiment (2026-11-22T23:47–23:54Z)
+
+- Provisioning and build: pinned source trees fetched read-only at `7ace643f`
+  and `89aed31f` under `lab/baresip2shell/src/`; their `websock.c` SHA-256
+  values match frontier's saved bytes exactly (`02a4af85...` and
+  `1af5a060...`, full values in `lab/baresip2shell/PROVISIONING.md`). Full
+  static libre builds succeeded with ASan and without it; `-DUSE_OPENSSL=ON`
+  is required (`OFF` fails with `missing HMAC-SHA1 backend`). gcc 13.3.0,
+  cmake 3.28.3, OpenSSL 3.0.13, gdb 15.1.
+- Real caller and wire: `bash lab/baresip2shell/live/run.sh` starts a
+  plant-started `websock_accept()` listener on 127.0.0.1:19015, completes a
+  real HTTP 101 upgrade (`UPGRADE_STATUS=HTTP/1.1 101 Switching Protocols`),
+  then sends the 14-byte frame `82fffffffffffffffffcb4b4b4b4` over the socket.
+  Vulnerable ASan build: `READ of size 1`, `0 bytes after 206-byte region`,
+  top frames `websock_decode` at `websock.c:216`, `recv_handler` at
+  `websock.c:260`, `tcp_recv_handler`, `fd_poll`, `re_main`; server rc 134.
+  The region is allocated by `realloc` in `mem_realloc` -> `mbuf_resize` ->
+  `mbuf_trim` -> `tcp_recv_handler`. Evidence: `live/crafted-vuln.server.out`,
+  `live/crafted-vuln.server.err`, `live/crafted-vuln.client.out`.
+- Controls: fixed pin on the same upgrade and frame gives gdb
+  `SEEN_LEN_HEX=fffffffffffffffc`, `LEFT_BEFORE=4`, `DECODE_RETURN=61`
+  (`ENODATA`) at the new guard, with no ASan report
+  (`live/fixed-enodata.out`, `live/crafted-fixed.*`). A short masked frame on
+  the vulnerable pin reaches `SRV_RECV opcode=2 len=1 first=41` cleanly
+  (`live/short-vuln.*`).
+- Plain-build layout (`live/plain-layout.out`, `live/plain-mem32.out`): no
+  ASan, `mem_header_size=192`, malloc chunk 224 bytes (`usable 216`), mbuf
+  logical size 14, `p = mb->buf+14`, next chunk begins at `p+3`. With mask key
+  `b4b4b4b4`, after 32 XOR iterations the next chunk's size word at `p+10`
+  changes from `0000000000002321` to `b4b4b4b4b4b49795` — chosen-delta
+  corruption of adjacent allocator metadata, not slack inside the frame
+  buffer. The first ASan trap is still the read half; the gdb stop isolates
+  the store.
+- Plain consequence (`live/plain-crash.out`): the unbounded loop reaches
+  SIGSEGV in `websock_decode` at `websock.c:216` with `i=235170` (~229 KiB
+  written), same `recv_handler`/`tcp_recv_handler` chain — a measured DoS on a
+  plant-started process, matching the advisory's stated impact.
+- Grade now: rungs 1/2/3 at real caller and wire scope; rung 4 demonstrated
+  security impact at the labeled scope of a plant-started loopback server
+  being killed with attacker-keyed corruption of adjacent allocator metadata.
+  No pointer control, live-victim object data, benign marker, command or
+  rung 5. Advisory reachability through baresip/SIP clients remains a claim:
+  only `websock_accept()` itself was driven here. "Chosen" still means the
+  XOR delta applied to bytes already in heap memory.
+- Reproduce from the repository root: `bash lab/baresip2shell/live/build.sh`,
+  `bash lab/baresip2shell/live/run.sh`,
+  `bash lab/baresip2shell/live/run-probes.sh`. Source clones, build trees and
+  binaries are gitignored. Frontier brief: `reports/frontier-baresip2shell.md`.
+  Witness #1872 established the earlier direct-call/stub scope only; W1 is
+  author-observed and awaits witness replay.

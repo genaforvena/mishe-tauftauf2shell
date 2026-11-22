@@ -1,0 +1,36 @@
+From 9c2e3f0f85370ecee33e09bfce1b8aa8c1c554d4 Mon Sep 17 00:00:00 2001
+From: Andrei Miu (patch posted to connman list 2026-10-23)
+Subject: [PATCH] gdhcp: fix stack buffer overflow in get_domains()
+
+Fixes: bb06c47101ca24 ("gdhcp: Domain search list DHCPv6 option is checked")
+---
+--- a/gdhcp/client.c
++++ b/gdhcp/client.c
+@@ -2217,13 +2217,25 @@
+ 		return NULL;
+ 
+ 	while (pos < maxlen) {
+-		strncpy(dns_name, (char *)&value[pos], NS_MAXDNAME);
++		int name_len = maxlen - pos;
++		char *name_end;
+ 
++		if (name_len > NS_MAXDNAME)
++			name_len = NS_MAXDNAME;
++
++		memcpy(dns_name, &value[pos], name_len);
++		dns_name[name_len] = '\0';
++
++		name_end = dns_name + name_len;
+ 		c = (unsigned char *)dns_name;
+ 		while (c && *c) {
+ 			int jump;
++			char *label = (char *)c;
++
+ 			jump = *c;
+-			*c = '.';
++			if (label + jump + 1 > name_end)
++				break;
++			*label = '.';
+ 			c += jump + 1;
+ 		}
+ 		list = g_list_prepend(list, g_strdup(&dns_name[1]));

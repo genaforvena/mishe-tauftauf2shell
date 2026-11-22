@@ -1,0 +1,5 @@
+/src/re/
+/src/re-fixed/
+/build/
+/live/ws_server-*
+/live/build-*.log

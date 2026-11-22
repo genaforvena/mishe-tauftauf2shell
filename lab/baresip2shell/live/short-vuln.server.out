@@ -1,0 +1,5 @@
+LISTENING=127.0.0.1:19015
+HTTP_REQ received
+WEBSOCK_ACCEPT_RC=0
+SRV_RECV opcode=2 len=1 first=41
+SRV_CLOSE err=0

@@ -279,3 +279,13 @@ lab/frontier/baresip2shell/harness/a-vuln-gcc
 lab/frontier/baresip2shell/harness/a-vuln-clang
 lab/frontier/baresip2shell/harness/a-fixed-gcc
 lab/frontier/baresip2shell/harness/p-vuln
+
+# connman2shell direct-call harness: generated function include, local
+# binaries and throwaway probes stay local. Pin snapshots, fix patch, runner,
+# driver, provenance and normalized evidence stay tracked.
+lab/frontier/connman2shell/harness/get_domains_fn.inc
+lab/frontier/connman2shell/harness/a-vuln-gcc
+lab/frontier/connman2shell/harness/a-vuln-clang
+lab/frontier/connman2shell/harness/a-fixed-gcc
+lab/frontier/connman2shell/harness/p-vuln
+lab/frontier/connman2shell/harness/probe-*

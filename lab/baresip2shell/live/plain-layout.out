@@ -1,0 +1,17 @@
+Breakpoint 1 at 0x12b84: file /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c, line 216.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING=127.0.0.1:19015
+HTTP_REQ received
+WEBSOCK_ACCEPT_RC=0
+
+Breakpoint 1, websock_decode (hdr=0x7fffffffdde0, mb=0x555555598190) at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c:216
+216				p[i] = p[i] ^ hdr->mkey[i%4];
+P=0x55555559a95e MB_BUF=0x55555559a950 MB_SIZE=14
+MEM_HEADER_SIZE=192
+MALLOC_PTR=0x55555559a890 GLIBC_SIZE_WORD=225 USABLE=216
+NEXT_CHUNK_AT=0x55555559a961 OFF_FROM_P=3
+0x55555559a880:	0xb5b5b5b5b5b5b5b5	0x00000000000000e1
+0x55555559a890:	0x0000000e00000001	0x0000000000000000
+0x55555559a8a0:	0x00000000e7fb9ac4	0x00005555555980e8
+0x55555559a8b0:	0x0000000000000000	0x0000555555591140

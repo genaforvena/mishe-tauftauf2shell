@@ -1,0 +1,50 @@
+USEDLEN=2048 LASTJUMP=80 FIRST_OOB_OFFSET=127
+=================================================================
+==1444187==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x73363b2004a1 at pc 0x5805f19e3be0 bp 0x7ffea0e0a4d0 sp 0x7ffea0e0a4c8
+READ of size 1 at 0x73363b2004a1 thread T0
+    #0 0x5805f19e3bdf in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/frontier/connman2shell/harness/./get_domains_fn.inc:16:15
+    #1 0x5805f19e38b9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/connman2shell/harness/driver.c:98:16
+    #2 0x73363ce2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x73363ce2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5805f190a354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/connman2shell/harness/a-vuln-clang+0x2b354) (BuildId: fc259f13879b7e9c0c2b3458d04b5590170c0380)
+
+Address 0x73363b2004a1 is located in stack of thread T0 at offset 1185 in frame
+    #0 0x5805f19e39ef in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/frontier/connman2shell/harness/./get_domains_fn.inc:3
+
+  This frame has 1 object(s):
+    [32, 1058) 'dns_name' (line 7) <== Memory access at offset 1185 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/connman2shell/harness/./get_domains_fn.inc:16:15 in get_domains
+Shadow bytes around the buggy address:
+  0x73363b200200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200400: 00 00 00 00 02 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x73363b200480: f3 f3 f3 f3[f3]f3 f3 f3 00 00 00 00 00 00 00 00
+  0x73363b200500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73363b200700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1444187==ABORTING

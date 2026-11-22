@@ -1,0 +1,16 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING=127.0.0.1:19015
+HTTP_REQ received
+WEBSOCK_ACCEPT_RC=0
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555555566b8f in websock_decode (hdr=0x7fffffffdde0, mb=0x555555598190) at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c:216
+216				p[i] = p[i] ^ hdr->mkey[i%4];
+STOP_I=235170 P=0x55555559a95e
+#0  0x0000555555566b8f in websock_decode (hdr=0x7fffffffdde0, mb=0x555555598190) at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c:216
+#1  0x0000555555566d42 in recv_handler (mb=0x555555598190, arg=0x555555598660) at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/websock/websock.c:260
+#2  0x000055555556345d in tcp_recv_handler (flags=1, arg=0x555555597f50) at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/tcp/tcp.c:461
+#3  0x000055555555e5e6 in fd_poll (re=0x555555592360) at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/main/main.c:926
+#4  0x000055555555e8f1 in re_main (signalh=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/src/re/src/main/main.c:1065
+#5  0x000055555555b3d7 in main () at /home/mesh-home/mishe-tauftauf2shell/lab/baresip2shell/live/ws_server.c:78
