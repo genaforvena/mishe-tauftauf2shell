@@ -57,3 +57,29 @@ Admission changes no grade.
   well-formed property remain mandatory controls. Rung 5 stays additive and
   per-build.
 - Full stage: `reports/frontier-ytnef2shell.md`. No witness verdict yet.
+
+## W1 update — 2026-11-22T22:57Z
+
+Pinned `v2.1.2` and `v2.1.3` were built with ASan and driven through the
+advisory's named `ytnefprint` -> `MAPIPrint()` caller on real upstream TNEF
+files with a four-byte `uncompressedSize` patch plus repaired TNEF checksum
+(`lab/ytnef2shell/make_inputs.py`, `run_real.sh`, `PROVENANCE.md`).
+Vulnerable pin: ASan `WRITE of size 207`, 0 bytes after a 16-byte region, frame
+chain `DecompressRTF ytnef.c:1573` -> `MAPIPrint :1454` -> `PrintTNEF main.c:172`
+-> `main :87`, allocation at `:1571`; same for 0/206-byte variants and all
+winmail.dat-derived inputs. Fixed pin: rc 0, no ASan, `Corrupted file`;
+unmodified files clean on both pins.
+
+In the non-ASan v2.1.2 build, gdb before/after dumps at `:1573`/`:1574` show the
+following glibc chunk's size field changing from `0x7d1` to the invalid
+`0x7b30323762617466` ("ftab720{") while the current 0x21-byte header is intact;
+execution then aborts with `malloc(): invalid size (unsorted)` (rc 134) in
+`_int_malloc`. That is allocator-metadata corruption on a natural layout, not
+the frontier harness's static arena.
+
+Grade now: rungs 1–3 in a real parse; rung 4 extended to adjacent glibc chunk
+header corruption with chosen length/fixed content. Ceiling unchanged for rung
+5: no pointer control, marker, command, mail delivery, procmail hook or
+control-flow hijack; advisory DoS claim is consistent with observation. Full
+evidence and honest limits in `reports/ytnef2shell-w1.md`. No witness verdict
+yet.

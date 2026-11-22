@@ -261,3 +261,12 @@ lab/frontier/tacplus2shell/conf-fixed-plain.log
 lab/frontier/tacplus2shell/build-fixed-plain.log
 lab/frontier/tacplus2shell/harness/gdb-*.log
 lab/frontier/tacplus2shell/harness/gdb-*.stdout
+
+# ytnef2shell W1: pinned source extractions, local builds and generated binary
+# inputs stay local. Scripts, input manifest, provenance, evidence and reports
+# stay tracked.
+lab/ytnef2shell/src/
+lab/ytnef2shell/build/
+lab/ytnef2shell/inputs/*.dat
+lab/ytnef2shell/evidence/*.out
+lab/ytnef2shell/evidence/*.err

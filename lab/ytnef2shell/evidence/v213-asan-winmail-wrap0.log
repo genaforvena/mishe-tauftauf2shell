@@ -1,0 +1,97 @@
+---> In TNEF1.0 format
+Subject: test_
+Message Priority: normal
+Date Received: Tuesday June 17, 2003 10:23:00 am
+Message Class: IPM.Microsoft Mail.Note
+    MAPI Properties: 39
+   #0: Type: [ BOOLEAN ]  Code: [PR_ALTERNATE_RECIPIENT_ALLOWED]
+    Size: 4    Value: True
+   #1: Type: [ BOOLEAN ]  Code: [PR_ORIGINATOR_DELIVERY_REPORT_REQUESTED]
+    Size: 4    Value: False
+   #2: Type: [  LONG   ]  Code: [PR_PRIORITY]
+    Size: 4    Value: 0
+   #3: Type: [ BOOLEAN ]  Code: [PR_READ_RECEIPT_REQUESTED]
+    Size: 4    Value: False
+   #4: Type: [  LONG   ]  Code: [PR_SENSITIVITY]
+    Size: 4    Value: 0
+   #5: Type: [ STRING8 ]  Code: [PR_CONVERSATION_TOPIC]
+    Size: 5    Value: [test]
+   #6: Type: [ BINARY  ]  Code: [PR_CONVERSATION_INDEX]
+    Size: 22    Value: [..4.p...s,j~O...I....L]
+   #7: Type: [ BINARY  ]  Code: [PR_SENDER_SEARCH_KEY]
+    Size: 26    Value: [SMTP:JGERLAND@SYNACOR.COM.]
+   #8: Type: [ BOOLEAN ]  Code: [PR_DELETE_AFTER_SUBMIT]
+    Size: 4    Value: False
+   #9: Type: [SYS TIME ]  Code: [PR_MESSAGE_DELIVERY_TIME]
+    Size: 8    Value: Tuesday June 17, 2003 3:23:00 pm [HEX:  00 e2 34 56 e4 34 c3 01] (127003369800000000)
+   #10: Type: [ BINARY  ]  Code: [PR_SENTMAIL_ENTRYID]
+    Size: 24    Value: [......3.v#'N..I..G......]
+   #11: Type: [  LONG   ]  Code: [PR_SUBMIT_FLAGS]
+    Size: 4    Value: 0
+   #12: Type: [ BOOLEAN ]  Code: [PR_RTF_IN_SYNC]
+    Size: 4    Value: True
+   #13: Type: [ BINARY  ]  Code: [PR_RTF_COMPRESSED]
+    Size: 217    Detected Compressed RTF. Decompressed text follows
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Corrupted file
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+   #14: Type: [  LONG   ]  Code: [PR_INTERNET_CPID]
+    Size: 4    Value: 20127
+   #15: Type: [  LONG   ]  Code: [PR_MSG_EDITOR_FORMAT]
+    Size: 4    Value: 3
+   #16: Type: [  LONG   ]  Code: [0x6540]
+    Size: 4    Value: 0
+   #17: Type: [ BOOLEAN ]  Code: [UD:x8503]
+    Size: 4    Value: False
+   #18: Type: [  LONG   ]  Code: [UD:x8510]
+    Size: 4    Value: 0
+   #19: Type: [ BOOLEAN ]  Code: [UD:x8514]
+    Size: 4    Value: False
+   #20: Type: [  LONG   ]  Code: [UD:x8552]
+    Size: 4    Value: 102627
+   #21: Type: [  LONG   ]  Code: [UD:x8501]
+    Size: 4    Value: 0
+   #22: Type: [ STRING8 ]  Code: [UD:x8554]
+    Size: 5    Value: [10.0]
+   #23: Type: [ BOOLEAN ]  Code: [UD:x8506]
+    Size: 4    Value: False
+   #24: Type: [ BOOLEAN ]  Code: [UD:x850e]
+    Size: 4    Value: False
+   #25: Type: [  LONG   ]  Code: [UD:x8518]
+    Size: 4    Value: 0
+   #26: Type: [ BOOLEAN ]  Code: [UD:x8582]
+    Size: 4    Value: False
+   #27: Type: [ BINARY  ]  Code: [PR_MAPPING_SIGNATURE]
+    Size: 16    Value: [..3.v#'N..I..G..]
+   #28: Type: [ BINARY  ]  Code: [PR_STORE_RECORD_KEY]
+    Size: 16    Value: [..3.v#'N..I..G..]
+   #29: Type: [ BINARY  ]  Code: [PR_STORE_ENTRYID]
+    Size: 150    Value: [....8...........+*V...mspst.dll.....NITA.......7.n...C:\Documents and Settings\jgerland\Local Settings\Application Data\Microsoft\Outlook\Outlook.pst.]
+   #30: Type: [  LONG   ]  Code: [PR_OBJECT_TYPE]
+    Size: 4    Value: 5
+   #31: Type: [  LONG   ]  Code: [PR_STORE_SUPPORT_MASK]
+    Size: 4    Value: 145405
+   #32: Type: [ BINARY  ]  Code: [PR_MDB_PROVIDER]
+    Size: 16    Value: [NITA.......7.n..]
+   #33: Type: [ BINARY  ]  Code: [PR_TNEF_CORRELATION_KEY]
+    Size: 49    Value: [00000000CFF233DD7623274EB78A4912C247A0E464532700.]
+   #34: Type: [  LONG   ]  Code: [PR_RTF_SYNC_BODY_CRC]
+    Size: 4    Value: 872404792
+   #35: Type: [  LONG   ]  Code: [PR_RTF_SYNC_BODY_COUNT]
+    Size: 4    Value: 90
+   #36: Type: [  LONG   ]  Code: [PR_RTF_SYNC_PREFIX_COUNT]
+    Size: 4    Value: 0
+   #37: Type: [  LONG   ]  Code: [PR_RTF_SYNC_TRAILING_COUNT]
+    Size: 4    Value: 0
+   #38: Type: [ STRING8 ]  Code: [PR_RTF_SYNC_BODY_TAG]
+    Size: 91    Value: [CASDASDFASDFASDCASDASDFASDFASDCASDASDFASDFASDCASDASDFASDFASDCASDASDFASDFASDCASDASDFASDFASD]
+[1] [File      ] ZAPPA_~2.JPG
+    Modified on: Monday April 7, 2003 10:35:38 am
+    MAPI Properties: 18
+    Attachment Size:  2937b
+    File saves as [zappa_av1.jpg]
+[2] [File      ] bookmark.htm
+    Modified on: Tuesday June 17, 2003 10:22:41 am
+    MAPI Properties: 18
+    Attachment Size:  85805b
+    File saves as [bookmark.htm]

@@ -1,0 +1,150 @@
+---> In TNEF1.0 format
+Subject: 
+Message Priority: low
+Date Sent: Thursday October 14, 1999 8:55:44 am
+Message Class: IPM.Microsoft Mail.Note
+Message ID: 4C8701152E82D311A7A50008C71BCA8D
+    MAPI Properties: 70
+   #0: Type: [  LONG   ]  Code: [PR_MESSAGE_CODEPAGE]
+    Size: 4    Value: 1252
+   #1: Type: [ STRING8 ]  Code: [PR_REPLY_RECIPIENT_NAMES]
+    Size: 18    Value: [gallen@numega.com]
+   #2: Type: [ STRING8 ]  Code: [0x3ffc]
+    Size: 18    Value: [gallen@numega.com]
+   #3: Type: [SYS TIME ]  Code: [PR_CLIENT_SUBMIT_TIME]
+    Size: 8    Value: Thursday October 14, 1999 12:55:44 pm [HEX:  00 c8 2d 6d 43 16 bf 01] (125843793440000000)
+   #4: Type: [ STRING8 ]  Code: [0x4031]
+    Size: 18    Value: [gallen@numega.com]
+   #5: Type: [  LONG   ]  Code: [0x401a]
+    Size: 4    Value: 0
+   #6: Type: [ STRING8 ]  Code: [0x4030]
+    Size: 18    Value: [gallen@numega.com]
+   #7: Type: [  LONG   ]  Code: [0x4019]
+    Size: 4    Value: 0
+   #8: Type: [ BOOLEAN ]  Code: [PR_ALTERNATE_RECIPIENT_ALLOWED]
+    Size: 4    Value: True
+   #9: Type: [  LONG   ]  Code: [PR_PRIORITY]
+    Size: 4    Value: 1
+   #10: Type: [  LONG   ]  Code: [PR_SENSITIVITY]
+    Size: 4    Value: 0
+   #11: Type: [ BINARY  ]  Code: [PR_CONVERSATION_INDEX]
+    Size: 22    Value: [...C;x....|.......O_j.]
+   #12: Type: [ BINARY  ]  Code: [PR_RTF_COMPRESSED]
+    Size: 409    Detected Compressed RTF. Decompressed text follows
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Corrupted file
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+   #13: Type: [ BOOLEAN ]  Code: [UD:x8503]
+    Size: 4    Value: False
+   #14: Type: [  LONG   ]  Code: [UD:x8510]
+    Size: 4    Value: 0
+   #15: Type: [  LONG   ]  Code: [UD:x8552]
+    Size: 4    Value: 5603
+   #16: Type: [ STRING8 ]  Code: [UD:x8554]
+    Size: 4    Value: [8.5]
+   #17: Type: [ BOOLEAN ]  Code: [UD:x8506]
+    Size: 4    Value: False
+   #18: Type: [  LONG   ]  Code: [UD:x8501]
+    Size: 4    Value: 0
+   #19: Type: [ BOOLEAN ]  Code: [UD:x850e]
+    Size: 4    Value: False
+   #20: Type: [  LONG   ]  Code: [UD:x8511]
+    Size: 4    Value: 0
+   #21: Type: [  LONG   ]  Code: [UD:x8518]
+    Size: 4    Value: 0
+   #22: Type: [ STRING8 ]  Code: [UD:x8536]
+    Size: 1    Value: []
+   #23: Type: [ STRING8 ]  Code: [UD:x8537]
+    Size: 1    Value: []
+   #24: Type: [ STRING8 ]  Code: [UD:x8538]
+    Size: 1    Value: []
+   #25: Type: [ BOOLEAN ]  Code: [UD:x8582]
+    Size: 4    Value: True
+   #26: Type: [ BOOLEAN ]  Code: [UD:x8800]
+    Size: 4    Value: False
+   #27: Type: [ BOOLEAN ]  Code: [UD:x8805]
+    Size: 4    Value: False
+   #28: Type: [ BOOLEAN ]  Code: [PR_SEND_RICH_INFO]
+    Size: 4    Value: True
+   #29: Type: [  LONG   ]  Code: [PR_INTERNET_CPID]
+    Size: 4    Value: 28591
+   #30: Type: [ STRING8 ]  Code: [PR_CONVERSATION_TOPIC]
+    Size: 1    Value: []
+   #31: Type: [ BOOLEAN ]  Code: [0x10f2]
+    Size: 4    Value: True
+   #32: Type: [ BINARY  ]  Code: [0x3ff3]
+    Size: 0    Value: []
+   #33: Type: [ BINARY  ]  Code: [0x3ff4]
+    Size: 0    Value: []
+   #34: Type: [ BINARY  ]  Code: [PR_RECEIVED_BY_ENTRYID]
+    Size: 81    Value: [......@..B......+/........../O=COMPUWARE/OU=NUMEGA LAB/CN=RECIPIENTS/CN=MSIMPSON.]
+   #35: Type: [ STRING8 ]  Code: [PR_RECEIVED_BY_ADDRTYPE]
+    Size: 5    Value: [SMTP]
+   #36: Type: [ STRING8 ]  Code: [PR_RECEIVED_BY_EMAIL_ADDRESS]
+    Size: 24    Value: [mark.simpson@numega.com]
+   #37: Type: [ STRING8 ]  Code: [PR_RECEIVED_BY_NAME]
+    Size: 14    Value: [Simpson, Mark]
+   #38: Type: [ STRING8 ]  Code: [0x4034]
+    Size: 9    Value: [MSIMPSON]
+   #39: Type: [ BINARY  ]  Code: [PR_RECEIVED_BY_SEARCH_KEY]
+    Size: 56    Value: [EX:/O=COMPUWARE/OU=NUMEGA LAB/CN=RECIPIENTS/CN=MSIMPSON.]
+   #40: Type: [  LONG   ]  Code: [0x401b]
+    Size: 4    Value: 0
+   #41: Type: [ BINARY  ]  Code: [PR_RCVD_REPRESENTING_ENTRYID]
+    Size: 81    Value: [......@..B......+/........../O=COMPUWARE/OU=NUMEGA LAB/CN=RECIPIENTS/CN=MSIMPSON.]
+   #42: Type: [ STRING8 ]  Code: [PR_RCVD_REPRESENTING_ADDRTYPE]
+    Size: 5    Value: [SMTP]
+   #43: Type: [ STRING8 ]  Code: [PR_RCVD_REPRESENTING_EMAIL_ADDRESS]
+    Size: 24    Value: [mark.simpson@numega.com]
+   #44: Type: [ STRING8 ]  Code: [PR_RCVD_REPRESENTING_NAME]
+    Size: 14    Value: [Simpson, Mark]
+   #45: Type: [ STRING8 ]  Code: [0x4035]
+    Size: 9    Value: [MSIMPSON]
+   #46: Type: [ BINARY  ]  Code: [PR_RCVD_REPRESENTING_SEARCH_KEY]
+    Size: 56    Value: [EX:/O=COMPUWARE/OU=NUMEGA LAB/CN=RECIPIENTS/CN=MSIMPSON.]
+   #47: Type: [  LONG   ]  Code: [0x401c]
+    Size: 4    Value: 0
+   #48: Type: [ BOOLEAN ]  Code: [PR_MESSAGE_TO_ME]
+    Size: 4    Value: True
+   #49: Type: [ BOOLEAN ]  Code: [PR_MESSAGE_CC_ME]
+    Size: 4    Value: False
+   #50: Type: [ BOOLEAN ]  Code: [PR_MESSAGE_RECIP_ME]
+    Size: 4    Value: True
+   #51: Type: [ BINARY  ]  Code: [PR_MESSAGE_SUBMISSION_ID]
+    Size: 0    Value: []
+   #52: Type: [SYS TIME ]  Code: [PR_CREATION_TIME]
+    Size: 8    Value: Thursday October 14, 1999 12:52:38 pm [HEX:  ac 2c 87 fe 42 16 bf 01] (125843791583587500)
+   #53: Type: [SYS TIME ]  Code: [PR_LAST_MODIFICATION_TIME]
+    Size: 8    Value: Thursday October 14, 1999 12:52:42 pm [HEX:  0c 61 c3 00 43 16 bf 01] (125843791621087500)
+   #54: Type: [ STRING8 ]  Code: [PR_SUBJECT_PREFIX]
+    Size: 1    Value: []
+   #55: Type: [ STRING8 ]  Code: [PR_NORMALIZED_SUBJECT]
+    Size: 1    Value: []
+   #56: Type: [ BINARY  ]  Code: [0x3fd4]
+    Size: 0    Value: []
+   #57: Type: [ STRING8 ]  Code: [PR_INTERNET_MESSAGE_ID]
+    Size: 50    Value: [<013501bf1643$6d982290$17ce15d1@hornet.vireo.com>]
+   #58: Type: [ STRING8 ]  Code: [0x1039]
+    Size: 1    Value: []
+   #59: Type: [ STRING8 ]  Code: [0x1036]
+    Size: 1    Value: []
+   #60: Type: [ BINARY  ]  Code: [0x4068]
+    Size: 0    Value: []
+   #61: Type: [ BINARY  ]  Code: [0x4069]
+    Size: 0    Value: []
+   #62: Type: [ BOOLEAN ]  Code: [PR_READ_RECEIPT_REQUESTED]
+    Size: 4    Value: False
+   #63: Type: [ BOOLEAN ]  Code: [PR_ORIGINATOR_DELIVERY_REPORT_REQUESTED]
+    Size: 4    Value: False
+   #64: Type: [  LONG   ]  Code: [PR_RTF_SYNC_BODY_CRC]
+    Size: 4    Value: 17973582
+   #65: Type: [  LONG   ]  Code: [PR_RTF_SYNC_BODY_COUNT]
+    Size: 4    Value: 202
+   #66: Type: [  LONG   ]  Code: [PR_RTF_SYNC_PREFIX_COUNT]
+    Size: 4    Value: 0
+   #67: Type: [  LONG   ]  Code: [PR_RTF_SYNC_TRAILING_COUNT]
+    Size: 4    Value: 0
+   #68: Type: [ STRING8 ]  Code: [PR_RTF_SYNC_BODY_TAG]
+    Size: 101    Value: [AAFGAGALGAKGKAGKA;KGAGAF;KAFKKGAHAKGAKGQARJAKMBAHGMPGKJAQPGBMDVBADHGERGTADADFHADHADHB--GREGGREGALLEN]
+   #69: Type: [ BINARY  ]  Code: [PR_TNEF_CORRELATION_KEY]
+    Size: 50    Value: [<013501bf1643$6d982290$17ce15d1@hornet.vireo.com>.]

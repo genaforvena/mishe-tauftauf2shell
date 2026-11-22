@@ -1,0 +1,56 @@
+=================================================================
+==235540==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000001331 at pc 0x7258592fb303 bp 0x7ffdf3ab8ae0 sp 0x7ffdf3ab8288
+WRITE of size 207 at 0x502000001331 thread T0
+    #0 0x7258592fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7258599df661 in DecompressRTF ../../../src/ytnef-2.1.2/lib/ytnef.c:1573
+    #2 0x7258599dea25 in MAPIPrint ../../../src/ytnef-2.1.2/lib/ytnef.c:1454
+    #3 0x58b892eb23c0 in PrintTNEF ../../../src/ytnef-2.1.2/ytnefprint/main.c:172
+    #4 0x58b892eb1738 in main ../../../src/ytnef-2.1.2/ytnefprint/main.c:87
+    #5 0x725858e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x725858e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x58b892eb1384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v212-asan/ytnefprint/.libs/ytnefprint+0x2384) (BuildId: 6b06e25138a5bc1c96c58168196f2894e42797f5)
+
+0x502000001331 is located 0 bytes after 1-byte region [0x502000001330,0x502000001331)
+allocated by thread T0 here:
+    #0 0x7258592fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7258599df610 in DecompressRTF ../../../src/ytnef-2.1.2/lib/ytnef.c:1571
+    #2 0x7258599dea25 in MAPIPrint ../../../src/ytnef-2.1.2/lib/ytnef.c:1454
+    #3 0x58b892eb23c0 in PrintTNEF ../../../src/ytnef-2.1.2/ytnefprint/main.c:172
+    #4 0x58b892eb1738 in main ../../../src/ytnef-2.1.2/ytnefprint/main.c:87
+    #5 0x725858e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x725858e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x58b892eb1384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v212-asan/ytnefprint/.libs/ytnefprint+0x2384) (BuildId: 6b06e25138a5bc1c96c58168196f2894e42797f5)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x502000001080: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 04 fa
+  0x502000001100: fa fa 00 00 fa fa 00 fa fa fa 00 00 fa fa 00 fa
+  0x502000001180: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 04 fa
+  0x502000001200: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 00 00
+  0x502000001280: fa fa 00 00 fa fa 00 00 fa fa 00 00 fa fa 00 00
+=>0x502000001300: fa fa 04 fa fa fa[01]fa fa fa fa fa fa fa fa fa
+  0x502000001380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==235540==ABORTING
