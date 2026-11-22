@@ -1,10 +1,11 @@
 # Frontier brief — VRPN SENDER/TYPE_DESCRIPTION length index (CVE-2026-123200)
 
-**Status (2026-11-22 01:14Z, W98): RUNG 3 in a direct-call harness on the real
+**Status (2026-11-22 01:11Z, W98): RUNG 3 in a direct-call harness on the real
 pinned 07.36 library; wire dispatch of the crafted message confirmed under gdb.**
-Rung 4 UNKNOWN, wire ASan negative so far, no rung 5. Not admitted; no window
-staged; operator owns admission. Witness replay required for any published
-claim.
+Rung 4 UNKNOWN, wire ASan negative so far, no rung 5. Staged 01:10Z as target
+`vrpn2shell`: live two-pane window 74, seed wall, charter, registry entry and
+operator DM sent; operator admission pending. Witness replay required for any
+published claim.
 
 ## Verified ground truth (primary sources)
 
