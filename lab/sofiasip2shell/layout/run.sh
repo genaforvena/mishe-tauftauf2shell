@@ -34,12 +34,16 @@ $CC $CFLAGS -DPLAIN_MODE -DPIN='"v1.13.17"' -DFNS='"fns-1.13.17.inc"' $INC real_
 # plain-f18: fixed pin (+1 allocation), plain readback
 $CC $CFLAGS -DPLAIN_MODE -DPIN_FIXED -DPIN='"v1.13.18"' -DFNS='"fns-1.13.18.inc"' $INC real_layout.c -o plain-f18 || exit 2
 
-run() { # tag binary mode
+run() { # tag binary mode [bbuflen]
   local tag=$1 bin=$2 mode=$3
-  ( ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 ./"$bin" "$mode" >"$EVID/$tag.out" 2>"$EVID/$tag.err"; echo $? >"$EVID/$tag.rc" )
+  if [ $# -ge 4 ]; then
+    ( ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 ./"$bin" "$mode" "$4" >"$EVID/$tag.out" 2>"$EVID/$tag.err"; echo $? >"$EVID/$tag.rc" )
+  else
+    ( ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 ./"$bin" "$mode" >"$EVID/$tag.out" 2>"$EVID/$tag.err"; echo $? >"$EVID/$tag.rc" )
+  fi
   echo "=== $tag (rc=$(cat "$EVID/$tag.rc")) ==="
   cat "$EVID/$tag.out"
-  grep -E 'PRECALL|PIN=|BEFORE|AFTER|META_OFF|XOR_DELTA|CONTROL=|ERROR: AddressSanitizer|READ of size|[0-9]+ bytes after|ws_read_frame|corrupted top size' "$EVID/$tag.err" | head -16
+  grep -E 'PRECALL|PIN=|BEFORE|AFTER|META_OFF|XOR_DELTA|GEOM_|VICTIM|CONTROL=|ERROR: AddressSanitizer|READ of size|[0-9]+ bytes after|ws_read_frame|corrupted top size' "$EVID/$tag.err" | head -20
 }
 
 run asan-v17-vuln  asan-v17 vuln
@@ -50,8 +54,12 @@ run plain-v17-safe plain-v17 safe
 run plain-f18-vuln plain-f18 vuln
 run plain-v17-abort plain-v17 abort
 run plain-v17-victim plain-v17 victim
+run plain-v17-geom  plain-v17 geom 65527
+run plain-v17-realloc plain-v17 realloc
+run plain-f18-geom  plain-f18 geom 65527
+run plain-f18-realloc plain-f18 realloc
 
 echo "--- summary ---"
-for t in asan-v17-vuln asan-v17-safe asan-f18-vuln plain-v17-vuln plain-v17-safe plain-f18-vuln plain-v17-abort plain-v17-victim; do
+for t in asan-v17-vuln asan-v17-safe asan-f18-vuln plain-v17-vuln plain-v17-safe plain-f18-vuln plain-v17-abort plain-v17-victim plain-v17-geom plain-v17-realloc plain-f18-geom plain-f18-realloc; do
   printf '%-16s rc=%s\n' "$t" "$(cat "$EVID/$t.rc")"
 done

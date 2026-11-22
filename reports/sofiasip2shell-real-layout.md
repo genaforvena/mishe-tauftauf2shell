@@ -26,6 +26,17 @@ corruption and process abort on a real allocator layout: a stronger rung 4
 than frontier's controlled-arena readback, but still **not** pointer control,
 marker execution or RCE.
 
+W2 refined the answer with two further **natural** glibc geometries (same
+verbatim pinned function, real loopback wire, no custom allocator). With a
+65527-byte bbuffer request and full payload, the 14-byte extent starts only
+one byte before the next chunk's `size` field, so 5 XOR bytes land in the
+neighbouring object's **user data**. With the default 65536-byte `ws_init`
+bbuffer and a 65544-byte frame, the real `ws.c:1057` realloc fires, the buffer
+stays in place, and 6 XOR bytes land in the neighbour's user data. The
+1.13.18 control leaves that data untouched. The primitive is therefore not
+confined to allocator metadata: it can write a chosen repeating-XOR delta
+into a live neighbouring object's data at chosen offsets.
+
 ## Method
 
 `lab/sofiasip2shell/layout/real_layout.c` includes frontier's verbatim pinned
@@ -105,9 +116,9 @@ The neighbour's user data starts at `bbuffer+65552`; the 14-byte extent ends
 at `bbuffer+65549`, **three bytes short of the object's data**, which is
 unchanged. What is corrupted is the neighbour's chunk `size` field at
 `bbuffer+65544..+65549` (`0x91` -> low bytes `d0 5a 42 43 41 5a`), with the
-same `before ^ mask[i%4]` delta. On this glibc and request size the overrun is
-therefore an allocator-metadata write, not an adjacent-object-data write;
-converting it into object-data control would need different chunk geometry.
+same `before ^ mask[i%4]` delta. On this glibc and *this request size* the
+overrun is an allocator-metadata write, not an adjacent-object-data write;
+the W2 geometries below change that.
 
 ## Controls (layout harness)
 
@@ -121,6 +132,77 @@ converting it into object-data control would need different chunk geometry.
 | `plain-f18-vuln` | v1.13.18 (+1 slot), plain, 65536 payload | 0 | `BEFORE == AFTER`, `CONTROL=FIXED_PIN_UNTOUCHED` |
 | `plain-v17-abort` | v1.13.17, plain, +post-frame malloc | 134 | `malloc(): corrupted top size` |
 | `plain-v17-victim` | v1.13.17, plain, adjacent 128-byte object | 0 | neighbour data unchanged (`0xC3`), neighbour chunk `size` low 6 bytes XOR-corrupted |
+| `plain-v17-geom` | v1.13.17, plain, 65527 bbuffer/payload | 0 | 5 XOR bytes in neighbour user data, 8 in its size field |
+| `plain-v17-realloc` | v1.13.17, plain, 65544 frame on default bbuffer | 0 | real realloc, 6 XOR bytes in neighbour user data |
+| `plain-f18-geom` | v1.13.18, plain, 65527 bbuffer/payload | 0 | neighbour data and size untouched |
+| `plain-f18-realloc` | v1.13.18, plain, 65544 frame | 0 | realloc moves buffer (`SNAPSHOT_VALID=0`); live neighbour object untouched |
+
+## W2: chosen XOR delta in a live neighbour's user data
+
+`real_layout.c` accepts a `geom` mode with an optional bbuffer length and a
+`realloc` mode; the pinned `.inc` files are unchanged and their hashes are
+still asserted by `run.sh`. All byte readbacks are from
+`lab/sofiasip2shell/layout/evidence/`.
+
+### 65527-byte bbuffer (`plain-v17-geom`)
+
+Request 65527 has `malloc_usable_size = 65528`, so glibc's usable slack is
+one byte. The next chunk's `size` field begins at `bbuffer+65528`
+(`META_OFF=+1`) and its user data at `bbuffer+65536`. With `rplen=65527` and
+`datalen=65541`, the unmask loop writes `bbuffer[65527..65540]`:
+
+```
+PRECALL PIN=v1.13.17 MODE=geom PAYLOAD=65527 BBUFLEN=65527 USABLE=65528 MASK=415a4243
+VICTIM_OFF=65536 VICTIM_SIZE_BEFORE=9100000000000000
+VICTIM_DATA_BEFORE=c3c3c3c3c3c3c3c3 VICTIM_DATA_AFTER=8299818082c3c3c3
+VICTIM_SIZE_AFTER=d05a4243415a4243
+META_OFF=+1 NEXT_SIZE_BEFORE=9100000000000000 NEXT_SIZE_AFTER=d05a4243415a4243
+GEOM_VOFF=65536 GEOM_FIRST=9 GEOM_NBYTES=5 GEOM_VICTIM_DELTA_BAD=0
+```
+
+The first 5 victim bytes equal `0xC3 ^ mask[(65527+9+k)%4]` for k=0..4:
+`82 99 81 80 82`. The next 8 bytes corrupt the whole victim chunk `size`;
+the trailing NUL lands inside the bbuffer's usable slack. All 8 bytes of the
+victim's `size` field change because the metadata boundary moved relative to
+the requested length.
+
+### Default bbuffer, real realloc (`plain-v17-realloc`)
+
+A masked BINARY frame with a 65544-byte payload on the default 65536-byte
+`ws_init` bbuffer satisfies `need + blen > bbuflen` at
+`fns-1.13.17.inc:141`, so the pinned code takes the real realloc branch
+(`ws.c:1057`) and grows `bbuflen` to 65544. glibc keeps the same chunk
+(`USABLE=65544` before and after), so the neighbouring object stays at
+`bbuffer+65552`. The unmask loop now runs to `bbuffer+65557`, i.e. 14 bytes
+past the grown `rplen`:
+
+```
+PRECALL PIN=v1.13.17 MODE=realloc PAYLOAD=65544 BBUFLEN=65536 USABLE=65544 MASK=415a4243
+PIN=v1.13.17 MODE=realloc RV=65544 DATALEN=65558 RPLEN=65544 BBLEN=65544 USABLE=65544 OC=2
+VICTIM_OFF=65552 VICTIM_SIZE_BEFORE=9100000000000000
+VICTIM_DATA_BEFORE=c3c3c3c3c3c3c3c3 VICTIM_DATA_AFTER=829981808299c3c3
+VICTIM_SIZE_AFTER=005a4243415a4243
+META_OFF=+8 NEXT_SIZE_BEFORE=9100000000000000 NEXT_SIZE_AFTER=005a4243415a4243
+GEOM_VOFF=65552 GEOM_FIRST=8 GEOM_NBYTES=6 GEOM_VICTIM_DELTA_BAD=0
+```
+
+The first 6 victim bytes equal `0xC3 ^ mask[(65544+8+k)%4]` =
+`82 99 81 80 82 99`. The 8 bytes of the neighbour's `size` field are also
+changed, with the low byte zeroed by the trailing NUL at `p+65544`. This is
+the default library buffer size and the library's own realloc path; no
+non-default allocator or synthetic arena is involved.
+
+### Controls
+
+`plain-f18-geom`: `VICTIM_DATA_BEFORE == VICTIM_DATA_AFTER` (`c3` × 8), size
+field unchanged, `GEOM_VICTIM_UNTOUCHED=1`. `plain-f18-realloc`: the fixed
+pin's `+1` slot makes the 65545-byte realloc cross a chunk boundary and move
+the bbuffer, so the pre-call byte snapshot is invalid
+(`CONTROL=FIXED_PIN_REALLOC_MOVED SNAPSHOT_VALID=0`); the independently
+allocated live 128-byte neighbour object is unchanged
+(`GEOM_VICTIM_UNTOUCHED=1`). These are honest controls for object-data
+corruption, not for a same-address byte-for-byte comparison in the realloc
+case.
 
 ## Full pinned library build (real API, real HTTP upgrade)
 
@@ -157,6 +239,27 @@ writes offset +0 (padding) first, the XOR loop then sets +0..+13, and the
 trailing NUL rewrites +0 to zero. The byte-level metadata conclusion above
 therefore describes the real library's final heap state too.
 
+## Independent witness replay (2026-11-22)
+
+Witness replay of the layout claim is **ESTABLISHED at the labeled scope**.
+From a clean `git archive HEAD` of `lab/sofiasip2shell` and
+`lab/frontier/sofiasip2shell` in `/tmp`, the witness regenerated both pinned
+`fns-*.inc` from the tracked `ws-*.c` and confirmed the required hashes
+`b96477e0` / `42dce55f`, then ran `layout/run.sh` twice: rc 0 both rounds,
+identical per-case rc set (`asan-v17-vuln`=1, all other ASan/plain cases 0,
+`plain-v17-abort`=134). 23 of 24 evidence files were byte-identical to the
+canonical files; the only difference was the ASan log's PID/addresses/build
+paths, which masked to identity. The specific requested checks all passed on
+the witness run: `NEXT_SIZE_BEFORE=710c020000000000` →
+`NEXT_SIZE_AFTER=30564043415a0000` with `XOR_DELTA_BAD=0` and `NUL=00` at
+offset 0, `malloc(): corrupted top size` rc 134, victim `0xC3` data unchanged
+with chunk size `d05a4243415a0000`, 65520-byte short frame untouched, fixed
+pin clean, ASan `READ of size 1` at 0 bytes after the 65536 region in
+`ws_read_frame` at `fns-1.13.17.inc:185`. The witness did **not** independently
+rebuild the full autogen/configure/make library lane (its pin trees are
+gitignored local artifacts); that lane remains author-observed from the
+committed logs, not an independent rebuild. Grade unchanged.
+
 ## Honest grade
 
 - **Rung 1/2**: deterministic real-frame trigger; `datalen=65550` vs
@@ -164,14 +267,17 @@ therefore describes the real library's final heap state too.
 - **Rung 3**: ASan-confirmed out-of-bounds read/write at the real 64 KiB
   region in a full pinned-library build, plus a byte-level readback of changed
   allocator metadata.
-- **Rung 4 (upgraded)**: an attacker-chosen repeating-XOR delta is written to
-  6 bytes of the next chunk's size field on a natural allocator layout, and
-  the next allocation aborts. The chosen *delta* depends on the bytes already
-  present (top-chunk size `0x20c71` here); the attacker controls the 4-byte
-  mask, not arbitrary bytes. With a live neighbour, its data stays intact and
-  only its chunk header changes. Consequence demonstrated: heap corruption and
-  a deterministic process abort (the advisory's "crash takes down the
-  process" claim), not a controlled pointer or executed marker.
+- **Rung 4 (upgraded twice)**: an attacker-chosen repeating-XOR delta is
+  written to 6 bytes of the next chunk's size field at the default geometry
+  and the next allocation aborts. At two other natural layouts the same
+  delta reaches a live neighbouring object's **user data** — 5 bytes with a
+  65527-byte bbuffer, 6 bytes with a 65544-byte frame on the default bbuffer
+  through the library's real realloc path. The chosen *delta* depends on the
+  bytes already present; the attacker controls a 4-byte repeating mask, not
+  arbitrary bytes. No pointer, length or control-flow value was targeted.
+  Consequence demonstrated: heap-metadata corruption, deterministic process
+  abort and chosen-delta corruption of adjacent object data; not a controlled
+  pointer, marker or command.
 - **Rung 5**: not attempted, not implied. No FreeSWITCH SIP `ws-binding` call
   path, no command, no side effect beyond a local abort. The advisory's RCE
   sentence remains a claim.
@@ -184,13 +290,19 @@ therefore describes the real library's final heap state too.
   FreeSWITCH `ws-binding`/SIP call path; the rest of the SIP stack is absent.
 - ASan's allocator gives no usable-size padding (redzone at exactly 65536), so
   the metadata reach is measured only in the plain build.
-- The natural next chunk is the top chunk; `plain-v17-victim` puts a live
-  128-byte object there and confirms the extent stops three bytes before its
-  data. Reaching object data, not just its chunk header, would need different
-  chunk geometry.
-- Only one mask (`415a4243`) and one length value (65536) were tested.
-  Converting the delta into a *useful* heap state (overlapping chunks, pointer
-  control) needs more mask/layout freedom and was not attempted.
+- At the default 65536 request the natural next chunk is the top chunk;
+  `plain-v17-victim` confirms the data gap there. W2's 65527 and 65544
+  geometries close that gap with real glibc allocations, but both still write
+  only a 4-byte repeating XOR delta at fixed offsets, not attacker-chosen
+  absolute values.
+- Only one mask (`415a4243`) was tested; three payload/length configurations
+  (65520, 65527, 65536, 65544) and one neighbour object type (128-byte
+  chunk) were measured. Converting the delta into a *useful* heap state
+  (overlapping chunks, pointer control) was not attempted.
+- The fixed pin's 65544-byte realloc moves the buffer, so that control is a
+  live-object check rather than a same-address byte comparison.
+- Independent replay covers the layout harness only, not the full pinned
+  library build; witness verdict ESTABLISHED is scope-labeled accordingly.
 - Evidence that the fixed pin also faults under this layout, that the bytes
   land only in padding on a different glibc/allocator, or that the `+1` slot
   absorbs the terminator in every natural configuration would change the

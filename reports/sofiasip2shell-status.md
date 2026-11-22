@@ -60,16 +60,40 @@ grade.
 - Adjacent-object control (`plain-v17-victim`): a live 128-byte neighbour at
   `bbuffer+65552` keeps its `0xC3` data intact; the 14-byte extent stops three
   bytes short of its data and corrupts only its chunk `size` header
-  (`0x91` -> `d05a4243415a0000` low bytes). On this glibc and request size the
-  primitive is allocator-metadata corruption, not adjacent-object-data write.
+  (`0x91` -> `d05a4243415a0000` low bytes). On this glibc and the 65536 request
+  size the primitive is allocator-metadata corruption, not object-data write.
+- W2 adjacent-object data write (`plain-v17-geom`, `plain-v17-realloc`): with a
+  65527-byte bbuffer request (usable 65528) 5 XOR bytes land in a live 128-byte
+  neighbour's data at `bbuffer+65536` (`c3c3c3c3...` -> `8299818082...`), and
+  with the default 65536 bbuffer plus a 65544-byte frame the real `ws.c:1057`
+  realloc fires and 6 XOR bytes land in the neighbour's data at
+  `bbuffer+65552` (`c3...` -> `829981808299...`). Both match
+  `before ^ mask[(eff_len + first + k) % 4]` exactly (`GEOM_VICTIM_DELTA_BAD=0`)
+  while corrupting the neighbour's chunk size. v1.13.18 controls leave the live
+  neighbour object untouched; in the realloc control the fixed pin's buffer
+  moves, so its byte snapshot is marked `SNAPSHOT_VALID=0`.
 - Grade: rung 1/2 and rung 3 confirmed at real 64 KiB scale; rung 4 upgraded
-  from frontier's controlled-arena readback to a chosen repeating-XOR delta on
-  6 bytes of the next glibc chunk's size field with a deterministic abort at
-  the next allocation. Still no pointer control, marker, command or rung 5;
-  "chosen" means chosen delta given the bytes already present. The driver's
-  HTTP upgrade is real but no FreeSWITCH SIP `ws-binding` call path was built.
-- Next experiments: a live loopback `ws-binding` SIP call path with vulnerable
-  vs fixed builds, and whether a different chunk geometry lets the delta reach
-  object data rather than only its header. Rung 5 stays additive and per-build
-  and needs independent witness replay.
-- Full stage: `reports/frontier-sofiasip2shell.md`. No witness verdict yet.
+  twice — from frontier's controlled-arena readback to a chosen repeating-XOR
+  delta on 6 bytes of the next glibc chunk's size field with a deterministic
+  abort, and now to chosen-delta corruption of 5/6 bytes of a live neighbour's
+  user data at natural glibc geometries (including the default buffer via the
+  library's real realloc path). Still no pointer control, marker, command or
+  rung 5; "chosen" means chosen delta given the bytes already present. No SIP
+  `ws-binding` call path was built.
+- Next experiment: a live loopback SIP `ws-binding` tport path with vulnerable
+  vs fixed builds; the required `tport_type_ws.c` code is compiled into the
+  pinned static library but no repo binary binds a WS SIP tport, so a new
+  small app is needed. Rung 5 stays additive and per-build and needs a
+  wire-driven benign command plus independent witness replay.
+- Witness #1821 (2026-11-22) replayed the W1 layout claim from a clean
+  `git archive HEAD`, regenerated both pinned `.inc` with matching hashes, and
+  ran `layout/run.sh` twice (rc 0, identical rc set): readback delta,
+  `malloc(): corrupted top size` rc 134, victim data intact with corrupted
+  chunk size, short-frame and fixed-pin controls clean, ASan READ at 0 bytes
+  after the 65536 region. 23/24 evidence files byte-identical; the ASan log
+  differs only in PID/addresses/build paths. Verdict **ESTABLISHED at the
+  labeled scope**. The full autogen/configure/make library lane was not
+  independently rebuilt by the witness and remains author-observed.
+- Full stage: `reports/frontier-sofiasip2shell.md`. W1 verdict ESTABLISHED at
+  its labeled scope; W2 adjacent-object data result is author-observed and
+  awaits witness replay.
