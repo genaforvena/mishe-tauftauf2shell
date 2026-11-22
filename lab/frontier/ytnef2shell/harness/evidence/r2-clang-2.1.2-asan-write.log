@@ -1,0 +1,8 @@
+PRECALL PIN=2.1.2 CASE=write SIZE=20 US_DEC=4294967105 MAGIC_DEC=1967544908 US=0xADDR MAGIC=0xADDR
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 207 at 0xADDR thread T0
+#1 0xADDR in DecompressRTF fns-2.1.2.inc:82:5
+0xADDR is located 0 bytes after 16-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+#1 0xADDR in DecompressRTF fns-2.1.2.inc:80:11
+SUMMARY: AddressSanitizer: heap-buffer-overflow (BINARY) (BUILDID) in __asan_memcpy
