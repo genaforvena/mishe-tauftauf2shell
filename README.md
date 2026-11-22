@@ -21,9 +21,9 @@ The rungs are depth of proof, not boxes to tick:
   request input makes a live target run a lab-chosen benign command, with
   vulnerable, fixed and safe-input controls and an independent witness replay.
   Additive and per-build, never a relabel of a pointer fault or an in-process
-  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. FreeSWITCH and
-  Iec61850 R5 cells are witness-ESTABLISHED under their labeled conditions
-  (#1118, #1127).
+  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. FreeSWITCH,
+  Iec61850 and Ruby R5 cells are witness-ESTABLISHED under their labeled
+  conditions (#1118/#1127; Ruby independent clean-archive replay of `8b9d8f9`).
 
 Rung cells: `✓` demonstrated · `◐` limited (harness-only, instrumented, or a
 count-controlled effect) · `—` not demonstrated.
@@ -39,7 +39,7 @@ independent replay at that scope. Author reports are never acceptance.
 
 | Target | R1 | R2 | R3 | R4 | R5 | Evidence / boundary |
 |---|---|---|---|---|---|---|
-| **Ruby2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE** — chosen bytes at a chosen offset on stock glibc, driven by one multipart POST through default Sinatra and `rails new` before routing/CSRF; Stage C tcache/pointer control in-process. Witness: #51 in-process chain, #65 HTTP request-reachable on both stacks, #89 Stage C pointer control. Not witnessed: control-flow hijack, target chosen from attacker string content, persistence. [Report](reports/ruby2shell-investigation.md) |
+| **Ruby2Shell** | ✓ | ✓ | ✓ | ✓ | ✓ | **LIVE — rung 5 witness-ESTABLISHED at the labeled host/harness conditions.** One multipart POST drives Stage C poisoning into a forged CRuby `T_DATA` finalizer (`dfree=system`, `data=` request command), producing a target-created benign marker; independent clean-archive replay of `8b9d8f9` reproduced two varied-command attacks and safe/fixed controls. Requires custom grooming/GC middleware plus mtrace/ObjectSpace/maps oracles; ASLR stays on, post-response abort remains possible, and stock-app oracle-free RCE/persistence are not claimed. R4 witnesses: #51, #65, #89. [Report](reports/ruby2shell-investigation.md) |
 | **PHP2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE/CODE** — main lane rung 4 CONSTRAINED on CGI and mod_php; wake-56 DOM lane reaches read-side chosen-pointer rung 4 on a plain local CLI (`USE_ZEND_ALLOC=0`, N=88, fault only), no SAPI, arbitrary write or marker there. Witness: #138 CGI and #258 mod_php rung-4 constrained; #126, #208, #287 rung-3 grades; #98/#103/#108 splice rungs 1/2. DOM lane author-observed; FPM stays rung 3. [Status](reports/php2shell-status.md) |
 | **Apache2Root** | ✓ | ✓ | ✓ | — | — | **CODE** — rung 3 chosen-byte placement at a capacity boundary on real ASan httpd 2.4.70 under gdb, fixed control clean; Stage C closed unreachable on this host (wire-byte alphabet, Huffman probe). Adjacent L2–L6 rung 3; L1/L7/L8/L9 rung 1–2 (L9 is auth-state corruption, no confirmed UAF). A 2026-11-21 frontier lane on the brief's CVE-2026-119618 (pinned 2.4.70/2.4.71, locally built **ASan APR**) confirms rung 1 by driving the wrong-pool `apr_table_setn()` marker 300/300 and 2000/2000, but its 2000+ full-table writes give 0 ASan reports and its one child SIGSEGV is unrepeated. That build-bound negative is preserved as contradictory evidence, not a refutation: this plant's rung 3 faults in uninstrumented system libapr with reproducible differential child SEGVs (3 vs 0 at `LogLevel info`) and a corrupted `pool->child` under gdb. Both agree the written value is the fixed string `0` — no chosen byte, pointer control or RCE. Earlier reviews #279 found a probe defect and #294 replayed the repair with no verdict change; witness W94/W95 (tape #1176) then graded this build-bound reconciliation ESTABLISHED at the labeled grade — rung 3 stands, rung 4 unclaimed, no replay — with the ASan-APR allocator/race cause nit corrected in `64ecc54` and CLOSED. Default-MPM RCE stays a claim. [Report](reports/apache2shell-investigation.md) · [CVE-2026-119618 brief](reports/frontier-apache2shell.md) |
 | **Mosquitto2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE** — ASan 256-byte write past a 1-byte region in `net__read_ws`, fixed control clean; Stage A places chosen bytes at a chosen offset. Witness #246 ESTABLISHED the wire-only pre-auth 32 KiB heap read with live pointer disclosure (4/4 fresh brokers). Rung 4 is information disclosure only; enlargement stays layout-dependent and wire-to-code-execution UNVERIFIED. [Status](reports/mosquitto2shell-status.md) |
@@ -216,7 +216,14 @@ indirect call is `m->sess_init()` (`src/modules.c:124-148`), reached from
 so no request-time call target exists on this build.
 Recipes for all four are in [docs/reproducibility.md](docs/reproducibility.md).
 
-**Rung-5 claims and attempts.** FreeSWITCH has an ESTABLISHED R5 cell
+**Rung-5 claims and attempts.** Ruby has an ESTABLISHED R5 cell under its
+labeled conditions: a fresh-context clean-archive replay of `8b9d8f9` produced
+two distinct target-created markers and independently checked target pops,
+with safe/fixed controls clean. The chain uses a forged CRuby `T_DATA`
+finalizer to reach libc `system` with the request's benign `touch` command;
+ASLR remains enabled, but mtrace/ObjectSpace/maps oracles and custom groom/GC
+middleware are required, the process can abort after HTTP 200, and stock-app
+oracle-free execution remains UNKNOWN. FreeSWITCH has an ESTABLISHED R5 cell
 (#1118): the witness replayed commit `462e887` from clean blobs, reproduced
 the target-written marker and a varied command with a distinct side effect,
 and confirmed safe and fixed marker-absent controls. Conditions stay ASLR-off,

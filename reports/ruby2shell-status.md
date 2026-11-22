@@ -5,7 +5,7 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
-- **2026-11-22 — rung 5 AUTHOR-OBSERVED, witness pending.** New committed-candidate
+- **2026-11-22 — rung 5 witness-ESTABLISHED at the labeled conditions.** Candidate
   repro `lab/repro/ruby2shell-rung5-http.{ru,sh}` converts the Stage C HTTP
   poison into a forged untyped CRuby `RData` in a measured 640-byte VWA slot:
   `dfree = libc system`, `data =` the same request's NUL-terminated benign
@@ -23,8 +23,13 @@ byte; attacker controls buffer size via input length). Affected
   and GC-trigger middleware, GC disabled until the forged copy, loopback only.
   Process can abort after the response; no persistence, stock-app wire-only
   reach or portability claim. Full recipe/controls in the investigation
-  report's new "Rung 5 over HTTP" section. Independent witness is the next
-  action; do not mark ESTABLISHED before its clean-commit replay.
+  report's new "Rung 5 over HTTP" section. Independent clean-archive replay of
+  full commit `8b9d8f97f0ec1237fe1fb2bc30339d1a32db1341` returned ESTABLISHED:
+  witness-alpha/beta each had HTTP 200, a distinct target-created marker and
+  exactly one independently scanned target pop; safe/fixed had no marker/pop.
+  Evidence index `lab/build/evidence/w-ruby-r5/tree/lab/build/evidence/
+  witness-verification.json`. No contradiction or code repair; the fixed-vs-
+  attack byte wording now correctly names the identical `_method` payload.
 
 - **Rung:** 3 → **3+ (Stage A: chosen-victim deterministic corruption
   on the production consumer)** (researcher wake 4, 2026-11-20,

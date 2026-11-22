@@ -46,8 +46,9 @@ ASLR-disabled calibration is allowed; final execution must come from the wire
 payload, not debugger writes.
 
 The alternative Datasketches lane has a genuine indirect call, but only in a
-synthetic consumer, so it is not R5. Ruby has stronger address control but no
-natural called target yet. FreeRDP still lacks attacker-chosen playback bytes
+synthetic consumer, so it is not R5. Ruby's natural called target is the
+untyped CRuby `T_DATA` `dfree(data)` finalizer, used by the established lane
+below. FreeRDP still lacks attacker-chosen playback bytes
 and a call site. These remain lower-priority lanes until their named blocker
 changes. The libIEC61850 lane is different: a wire-supplied chain already calls
 real libc `system` in the live unsanitized server with a target-written marker
@@ -65,6 +66,21 @@ left the marker absent. ASLR-off calibration and trigger, opt-in
 127.0.0.1-only traffic remain required; ASLR-on reachability stays UNKNOWN.
 The README R5 cell is filled for this build only. Evidence and recipe in
 `reports/frontier-freeswitch2shell.md` and the 2026-11-21 addenda of
+`docs/reproducibility.md`.
+
+Ruby2Shell is witness-ESTABLISHED at its labeled host/harness conditions:
+commit `8b9d8f97f0ec1237fe1fb2bc30339d1a32db1341` converts the existing
+Sinatra Stage C poison into an untyped CRuby `RData` whose real GC finalizer
+calls libc `system` with the multipart request's benign `touch` command. The
+author's final matrix is 3/3 attacks plus clean safe/fixed controls; a
+fresh-context independent clean-archive replay reproduced two varied-command
+attacks and both controls, independently scanning target pops and checking
+that no harness code directly calls `system` or creates the marker. ASLR stays
+enabled, but mtrace/ObjectSpace.dump//proc/self/maps oracles and custom
+grooming/GC middleware are required; the affected process can abort after the
+HTTP 200/marker, and stock-app oracle-free RCE and persistence remain UNKNOWN.
+Use `bash lab/repro/ruby2shell-rung5-http.sh attack|control|fixed <tag>`;
+evidence and exact conditions are in `reports/ruby2shell-investigation.md` and
 `docs/reproducibility.md`.
 
 The IEC61850 lane is also witness-ESTABLISHED at the labeled conditions

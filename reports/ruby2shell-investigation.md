@@ -43,8 +43,12 @@ the same 0x53/0x73 the overflow wrote and the returned string is correct.
 Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
 
-**Current ladder position: rung 5 — author-observed on 2026-11-22 under
-the labeled lab conditions; independent witness replay is pending.** A single
+**Current ladder position: rung 5 — witness-ESTABLISHED on 2026-11-22 under
+the labeled host- and harness-specific lab conditions.** A fresh-context
+independent replay from clean archive commit
+`8b9d8f97f0ec1237fe1fb2bc30339d1a32db1341` reproduced two distinct-command
+attacks plus safe/fixed controls and returned ESTABLISHED with no
+contradiction. A single
 multipart POST to the live Sinatra/WEBrick target now executes its
 request-carried benign `touch` command through a forged CRuby `T_DATA`
 finalizer. The final matrix produced three distinct target-created markers in
@@ -898,7 +902,7 @@ at f+0x100): the debugger perturbs this request-thread heap layout.
 It is preserved as a negative result and is not counted among the
 three untraced successful runs.
 
-## Rung 5 over HTTP — forged `T_DATA` finalizer executes the request command (author-observed 2026-11-22; witness pending)
+## Rung 5 over HTTP — forged `T_DATA` finalizer executes the request command (witness-ESTABLISHED 2026-11-22)
 
 **Result: working remote command execution in the live loopback target, under
 the conditions below.** The same Stage C request-thread poison now targets a
@@ -925,7 +929,7 @@ bash lab/repro/ruby2shell-rung5-http.sh fixed   r5-final-fixed
 - **Safe input on affected 3.4.12:** HTTP 200, `rce=ABSENT`, no marker and no
   target pop. Safe input is pure `0xDF * 828`, without the leading `a` parity
   flip, so no overflow byte is emitted.
-- **Fixed plain 3.4.13 with the identical malicious multipart bytes:** HTTP
+- **Fixed plain 3.4.13 with the identical malicious `_method` payload:** HTTP
   200, `rce=ABSENT`, no marker and no target pop. The fixed binary reports
   revision `48857d6f2e`; affected 3.4.12 reports `366f5fdc00`.
 - A separate affected run under `strace -f -e trace=execve` returned HTTP 200
@@ -934,6 +938,28 @@ bash lab/repro/ruby2shell-rung5-http.sh fixed   r5-final-fixed
   POST, `execve("/bin/sh", ["sh", "-c", "--", "/usr/bin/touch …"], …)`, then
   `execve("/usr/bin/touch", …)`, with both exiting 0. This is execution
   evidence independent of the harness's file-existence oracle.
+
+**Independent witness: ESTABLISHED.** A fresh-context verifier archived full
+commit `8b9d8f97f0ec1237fe1fb2bc30339d1a32db1341` into
+`lab/build/evidence/w-ruby-r5/tree`, compiled the archived `mtrace.c`, and used
+the shared pinned prebuilt Ruby binaries/gems through `lab/build/plain` (it did
+not rebuild Ruby). From that clean source tree it ran `witness-alpha`,
+`witness-beta`, `witness-control` and `witness-fixed` sequentially. Alpha and
+beta each returned HTTP 200 + `rce=OBSERVED`, created different empty marker
+files and had exactly one independently scanned full-trace target pop; their
+request commands and SHA-256 values differed while their malicious `_method`
+payloads were identical. Control and fixed each returned HTTP 200 +
+`rce=ABSENT`, with no marker and zero full-trace target pops. The fixed and
+attack `_method` payloads were byte-identical. The witness also audited that
+neither Ruby nor the shell/Python driver directly invokes `system`, spawn,
+backticks, `FileUtils.touch` or marker-file writes, and that ASLR is enabled
+(`/proc/sys/kernel/randomize_va_space=2`). Its machine-readable verdict and
+per-run evidence index is
+`lab/build/evidence/w-ruby-r5/tree/lab/build/evidence/witness-verification.json`.
+No contradiction or code repair was found; its sole wording nit — distinguish
+identical `_method` bytes from whole multipart bodies with unique marker paths
+— is folded above. This establishes only the host/harness-specific claim, not
+stock-application wire-only RCE.
 
 Evidence is under gitignored `lab/build/evidence/rung5-http-<tag>.{out,trace,
 server.log,marker}`. The driver exits nonzero unless the response, marker and
@@ -1054,7 +1080,9 @@ negative.
    rung 4 remains witness-ESTABLISHED. With the copy-out lane also
    closed (commit 7c6dfac), no investigation lane is open; wait for
    the Veria PoC signal or the 2026-11-25 dated trigger.
-5. **Open this wake (2026-11-22): independent rung-5 witness.** Replay the
-   committed `ruby2shell-rung5-http` candidate from a clean source checkout,
-   vary the marker command, verify affected/fixed/safe controls and audit the
-   labeled address oracles. Until that verdict, rung 5 is author-observed only.
+5. **Closed this wake (2026-11-22): independent rung-5 witness ESTABLISHED.**
+   The clean-archive replay of `8b9d8f9` reproduced two varied-command attacks
+   and both controls, independently scanned every target pop and audited the
+   address oracles and absence of direct command/marker calls. No repair is
+   owed. Broader request-shaped grooming, oracle-free ASLR reach and process
+   survival remain explicit UNKNOWNs, not silently included in the grade.
