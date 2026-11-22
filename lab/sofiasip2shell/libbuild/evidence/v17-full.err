@@ -1,0 +1,53 @@
+PRECALL PIN=v1.13.17 MODE=full PAYLOAD=65536 CAP=4194304 INIT_RC=0 HANDSHAKE=1 DATALEN=151 BUFFER=0x531000014800 BBUFFER=0x531000028800 BBUFLEN=65536
+=================================================================
+==4068635==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x531000038800 at pc 0x57453f313123 bp 0x7ffc3508d2f0 sp 0x7ffc3508d2e8
+WRITE of size 1 at 0x531000038800 thread T0
+    #0 0x57453f313122 in ws_raw_read /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:427:23
+    #1 0x57453f317f1a in ws_read_frame /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:1073:17
+    #2 0x57453f310e5f in main /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/driver/real_ws_driver.c:167:7
+    #3 0x76f74922a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x76f74922a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x57453f237644 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/driver/v17-driver+0x3c644) (BuildId: e5a1ee13292882d1b0885b29c485a9e99f8e7a8d)
+
+0x531000038800 is located 0 bytes after 65536-byte region [0x531000028800,0x531000038800)
+allocated by thread T0 here:
+    #0 0x57453f2d2493 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/driver/v17-driver+0xd7493) (BuildId: e5a1ee13292882d1b0885b29c485a9e99f8e7a8d)
+    #1 0x57453f315c80 in ws_init /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:744:17
+    #2 0x57453f310d19 in main /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/driver/real_ws_driver.c:152:10
+    #3 0x76f74922a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x76f74922a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x57453f237644 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/driver/v17-driver+0x3c644) (BuildId: e5a1ee13292882d1b0885b29c485a9e99f8e7a8d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:427:23 in ws_raw_read
+Shadow bytes around the buggy address:
+  0x531000038580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000038600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000038680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000038700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000038780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x531000038800:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000038880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000038900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000038980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000038a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000038a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4068635==ABORTING

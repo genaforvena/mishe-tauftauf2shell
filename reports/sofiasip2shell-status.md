@@ -36,15 +36,36 @@ grade.
   `fns-1.13.17.inc:185`; fixed pin is clean with `DATALEN=78 RPLEN=64`. Plain
   build sentinel readback: NUL at offset 64, `0xEE ^ mask[i%4]` at 65..77 for
   mask `415a4243`, offset 78 untouched; fixed pin writes nothing.
-- Grade: rung 1/2 and rung 3 (ASan-confirmed over-read in verbatim pinned code)
-  plus scoped rung 4 (chosen XOR delta at chosen offsets in a controlled plain
-  arena). Ceiling: no sofia-sip build, no real 64 KiB allocator layout, no
-  WebSocket upgrade, listener or wire frame, no adjacent glibc chunk header or
-  object corruption, no pointer control, marker, command or rung 5. "Chosen
-  bytes" means chosen delta given bytes already present past the allocation.
-- Cheapest next experiments: build pinned `v1.13.17` and `v1.13.18`, drive a
-  real masked frame through `ws_read_frame()` with the actual `bbuffer`, then
-  determine whether the overrun reaches a neighbouring object on a natural
-  allocator layout; only then consider a loopback `ws-binding` listener with
-  fixed-pin and short-frame controls. Rung 5 stays additive and per-build.
+- Real-layout evidence (W1, `bash lab/sofiasip2shell/layout/run.sh`; full detail
+  in `reports/sofiasip2shell-real-layout.md`): the verbatim pinned function
+  now runs over a real `malloc(65536)` bbuffer and a real loopback TCP socket
+  feed. Vulnerable pin under ASan: `heap-buffer-overflow`, `READ of size 1`,
+  `0 bytes after 65536-byte region`, `ws_read_frame` at
+  `fns-1.13.17.inc:185`. Plain build, `malloc_usable_size=65544`: BEFORE
+  next-chunk size `710c020000000000`, AFTER `30564043415a0000` — the low 6
+  bytes at bbuffer+65544..+65549 are `before ^ mask[i%4]` for mask
+  `415a4243` (the first 8 OOB bytes and the NUL land in the next chunk's
+  `prev_size`, inside usable padding). The next `malloc()` aborts with
+  `malloc(): corrupted top size` (rc 134). Fixed pin (+1 slot) and a 65520-byte
+  short frame leave the bytes untouched under both ASan and plain builds.
+- Full pinned library build (`lab/sofiasip2shell/libbuild/RESULT.md`): complete
+  ASan `autogen/configure/make` of both tags from `git archive` exports; a
+  driver using the library's own `ws.h` performs a real HTTP 101 upgrade on a
+  loopback socket, then calls the real `ws_init`/`ws_read_frame`. v1.13.17 with
+  a 65536-byte masked frame faults (`WRITE of size 1`, 0 bytes after the 65536
+  region, first in `ws_raw_read` at `ws.c:427` from `ws_read_frame` at
+  `ws.c:1073`; recover-mode surfaces the unmask XOR at `ws.c:1090` and the
+  trailing NUL at `ws.c:1100`). v1.13.18 and the 65520-byte short frame are
+  clean. No SIP/tport `ws-binding` path or rung 5.
+- Grade: rung 1/2 and rung 3 confirmed at real 64 KiB scale; rung 4 upgraded
+  from frontier's controlled-arena readback to a chosen repeating-XOR delta on
+  6 bytes of the next glibc chunk's size field with a deterministic abort at
+  the next allocation. Still no pointer control, marker, command or rung 5;
+  "chosen" means chosen delta given the bytes already present. The driver's
+  HTTP upgrade is real but no FreeSWITCH SIP `ws-binding` call path was built.
+- Next experiments: a live loopback `ws-binding` upgrade with vulnerable vs
+  fixed builds, and whether a different allocation order puts a live object
+  after `bbuffer` so the same 6 bytes corrupt an object rather than the top
+  chunk. Rung 5 stays additive and per-build and needs independent witness
+  replay.
 - Full stage: `reports/frontier-sofiasip2shell.md`. No witness verdict yet.

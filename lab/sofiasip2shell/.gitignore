@@ -1,0 +1,10 @@
+# Compiled experiment binaries; sources and evidence are committed.
+layout/asan-*
+layout/plain-*
+layout/core*
+libbuild/pins/
+libbuild/driver/v17-driver
+libbuild/driver/v18-driver
+libbuild/driver/v17recover-driver
+libbuild/**/core*
+libbuild/core*

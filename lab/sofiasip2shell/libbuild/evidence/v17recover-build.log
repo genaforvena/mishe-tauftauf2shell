@@ -1,0 +1,861 @@
+$ ./autogen.sh  # v1.13.17 = 6198851a, ASan recover variant
++ AUTOMAKE=automake ACLOCAL=aclocal
++ export AUTOMAKE ACLOCAL
++ autoreconf -i
+libtoolize: putting auxiliary files in '.'.
+libtoolize: copying file './ltmain.sh'
+libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, 'm4'.
+libtoolize: copying file 'm4/libtool.m4'
+libtoolize: copying file 'm4/ltoptions.m4'
+libtoolize: copying file 'm4/ltsugar.m4'
+libtoolize: copying file 'm4/ltversion.m4'
+libtoolize: copying file 'm4/lt~obsolete.m4'
+configure.ac:41: warning: The macro `AC_GNU_SOURCE' is obsolete.
+configure.ac:41: You should run autoupdate.
+./lib/autoconf/specific.m4:312: AC_GNU_SOURCE is expanded from...
+configure.ac:41: the top level
+configure.ac:55: warning: The macro `AC_PROG_LIBTOOL' is obsolete.
+configure.ac:55: You should run autoupdate.
+m4/libtool.m4:100: AC_PROG_LIBTOOL is expanded from...
+configure.ac:55: the top level
+configure.ac:93: warning: The macro `AC_HELP_STRING' is obsolete.
+configure.ac:93: You should run autoupdate.
+./lib/autoconf/general.m4:204: AC_HELP_STRING is expanded from...
+./lib/autoconf/general.m4:1534: AC_ARG_ENABLE is expanded from...
+configure.ac:93: the top level
+configure.ac:117: warning: The macro `AC_HEADER_STDC' is obsolete.
+configure.ac:117: You should run autoupdate.
+./lib/autoconf/headers.m4:704: AC_HEADER_STDC is expanded from...
+configure.ac:117: the top level
+configure.ac:125: warning: The macro `AC_TYPE_SIGNAL' is obsolete.
+configure.ac:125: You should run autoupdate.
+./lib/autoconf/types.m4:776: AC_TYPE_SIGNAL is expanded from...
+configure.ac:125: the top level
+configure.ac:227: warning: The macro `AC_HEADER_TIME' is obsolete.
+configure.ac:227: You should run autoupdate.
+./lib/autoconf/headers.m4:743: AC_HEADER_TIME is expanded from...
+configure.ac:227: the top level
+configure.ac:41: installing './compile'
+configure.ac:35: installing './config.guess'
+configure.ac:35: installing './config.sub'
+configure.ac:37: installing './install-sh'
+configure.ac:37: installing './missing'
+libsofia-sip-ua-glib/su-glib/Makefile.am: installing './depcomp'
+parallel-tests: installing './test-driver'
++ find . ( -name run* -o -name *.sh ) -a -type f
++ xargs chmod +x
++ chmod +x scripts/coverage scripts/fix-include-sofia-sip scripts/hide_emails.sh scripts/lcov-report scripts/rpmbuild-snaphot scripts/uncovered
+$ env CC=clang CFLAGS='-O0 -g -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address' LDFLAGS='-fsanitize=address' ./configure --disable-shared --enable-static --disable-stun --prefix=/tmp/sofia-libbuild-v17recover
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... x86_64-pc-linux-gnu
+checking target system type... x86_64-pc-linux-gnu
+checking cached information... ok
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a race-free mkdir -p... /usr/bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking whether make supports the include directive... yes (GNU style)
+checking for gcc... clang
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether the compiler supports GNU C... yes
+checking whether clang accepts -g... yes
+checking for clang option to enable C11 features... none needed
+checking whether clang understands -c and -o together... yes
+checking dependency style of clang... gcc3
+checking for stdio.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for strings.h... yes
+checking for sys/stat.h... yes
+checking for sys/types.h... yes
+checking for unistd.h... yes
+checking for wchar.h... yes
+checking for minix/config.h... no
+checking for sys/time.h... yes
+checking whether it is safe to define __EXTENSIONS__... yes
+checking whether _XOPEN_SOURCE should be defined... no
+checking for compilation environment... 
+checking for gcc... (cached) clang
+checking for gcc... (cached) clang
+checking whether the compiler supports GNU C... (cached) yes
+checking whether clang accepts -g... (cached) yes
+checking for clang option to enable C11 features... (cached) none needed
+checking whether clang understands -c and -o together... (cached) yes
+checking dependency style of clang... (cached) gcc3
+checking for maximum warnings compiler flag... 
+checking how to run the C preprocessor... clang -E
+checking for etags... etags
+checking for ar... ar
+checking for ld... ld
+checking how to print strings... printf
+checking for a sed that does not truncate output... /usr/bin/sed
+checking for grep that handles long lines and -e... /usr/bin/grep
+checking for egrep... /usr/bin/grep -E
+checking for fgrep... /usr/bin/grep -F
+checking for ld used by clang... ld
+checking if the linker (ld) is GNU ld... yes
+checking for BSD- or MS-compatible name lister (nm)... /usr/bin/nm -B
+checking the name lister (/usr/bin/nm -B) interface... BSD nm
+checking whether ln -s works... yes
+checking the maximum length of command line arguments... 1572864
+checking how to convert x86_64-pc-linux-gnu file names to x86_64-pc-linux-gnu format... func_convert_file_noop
+checking how to convert x86_64-pc-linux-gnu file names to toolchain format... func_convert_file_noop
+checking for ld option to reload object files... -r
+checking for file... file
+checking for objdump... objdump
+checking how to recognize dependent libraries... pass_all
+checking for dlltool... no
+checking how to associate runtime and link libraries... printf %s\n
+checking for archiver @FILE support... @
+checking for strip... strip
+checking for ranlib... ranlib
+checking command to parse /usr/bin/nm -B output from clang object... ok
+checking for sysroot... no
+checking for a working dd... /usr/bin/dd
+checking how to truncate binary pipes... /usr/bin/dd bs=4096 count=1
+checking for mt... mt
+checking if mt is a manifest tool... no
+checking for dlfcn.h... yes
+checking for objdir... .libs
+checking if clang supports -fno-rtti -fno-exceptions... yes
+checking for clang option to produce PIC... -fPIC -DPIC
+checking if clang PIC flag -fPIC -DPIC works... yes
+checking if clang static flag -static works... no
+checking if clang supports -c -o file.o... yes
+checking if clang supports -c -o file.o... (cached) yes
+checking whether the clang linker (ld -m elf_x86_64) supports shared libraries... yes
+checking dynamic linker characteristics... GNU/Linux ld.so
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... no
+checking whether to build static libraries... yes
+checking for doxygen... echo
+checking for C compiler vendor... gnu
+checking for egrep... (cached) /usr/bin/grep -E
+checking return type of signal handlers... void
+checking for long long... yes
+checking whether IO functions support C99 size specifiers... yes
+checking for an ANSI C-conforming const... yes
+checking for inline... inline
+checking for inline... (cached) inline
+checking whether byte ordering is bigendian... no
+checking whether clang recognizes __func__... yes
+checking whether clang recognizes __FUNCTION__... yes
+checking whether clang recognizes field names in struct initialization... yes
+checking for size_t... yes
+checking for sa_len... no
+checking /dev/urandom... yes
+checking for clang options needed to detect all undeclared functions... none needed
+checking for sys/types.h... (cached) yes
+checking for stdint.h... (cached) yes
+checking for inttypes.h... (cached) yes
+checking for pthread.h... yes
+checking for stack suitable for tags... no
+checking for graceful free(0)... yes
+checking for sockaddr_in6... yes
+checking for unistd.h... (cached) yes
+checking for sys/time.h... (cached) yes
+checking for fcntl.h... yes
+checking for dirent.h... yes
+checking for winsock2.h... no
+checking for sys/socket.h... yes
+checking for sys/ioctl.h... yes
+checking for sys/filio.h... no
+checking for sys/sockio.h... no
+checking for sys/select.h... yes
+checking for sys/epoll.h... yes
+checking for sys/devpoll.h... no
+checking for netinet/in.h... yes
+checking for arpa/inet.h... yes
+checking for netdb.h... yes
+checking for net/if.h... yes
+checking for net/if_types.h... no
+checking for ifaddr.h... no
+checking for netpacket/packet.h... yes
+checking whether MSG_TRUNC is declared... yes
+checking whether SO_RCVBUFFORCE is declared... yes
+checking whether SO_SNDBUFFORCE is declared... yes
+checking whether IP_ADD_MEMBERSHIP is declared... yes
+checking whether IP_MULTICAST_LOOP is declared... yes
+checking whether IP_MTU_DISCOVER is declared... yes
+checking for struct addrinfo... yes
+checking for struct sockaddr_storage... yes
+checking for field ifr_index in struct ifreq... no
+checking for field ifr_ifindex in struct ifreq... yes
+checking for struct ifconf... yes
+checking for ioctl SIOCGIFNUM... sys/sockio.h missing
+checking for pthread_create in -lpthread... yes
+checking for socketpair in -lsocket... no
+checking for library containing clock_gettime... none required
+checking for clock_gettime... yes
+checking for clock_getcpuclockid... yes
+checking whether CLOCK_MONOTONIC is declared... yes
+checking for pkg-config... /usr/bin/pkg-config
+checking for glib-2.0... yes
+checking GLIB_CFLAGS... -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include 
+checking GLIB_LIBS... -lglib-2.0 
+checking for library containing socket... none required
+checking for library containing inet_ntop... none required
+checking for library containing getipnodebyname... no
+checking for library containing gethostbyname... none required
+checking for library containing getaddrinfo... none required
+checking for working alloca.h... yes
+checking for alloca... yes
+checking for gettimeofday... yes
+checking for strerror... yes
+checking for random... yes
+checking for initstate... yes
+checking for tcsetattr... yes
+checking for flock... yes
+checking for socketpair... yes
+checking for gethostname... yes
+checking for gethostbyname... yes
+checking for getipnodebyname... no
+checking for poll... yes
+checking for epoll_create... yes
+checking for kqueue... no
+checking for select... yes
+checking for if_nameindex... yes
+checking for signal... yes
+checking for alarm... yes
+checking for strnlen... yes
+checking for getaddrinfo... yes
+checking for getnameinfo... yes
+checking for freeaddrinfo... yes
+checking for gai_strerror... yes
+checking for getifaddrs... yes
+checking for getline... yes
+checking for getdelim... yes
+checking for getpass... yes
+checking for memmem... yes
+checking for memccpy... yes
+checking for memspn... no
+checking for memcspn... no
+checking for strtoull... yes
+checking for inet_ntop... yes
+checking for inet_pton... yes
+checking for poll... (cached) yes
+checking whether SIGPIPE is declared... yes
+checking for openssl... yes
+checking openssl_CFLAGS... 
+checking openssl_LIBS... -lssl -lcrypto 
+checking for IP_RECVERR... yes
+checking for IPV6_RECVERR... yes
+checking for netinet/tcp.h... yes
+checking for netinet/sctp.h... yes
+checking for check >= 0.9.4... checking for fnmatch.h... yes
+checking for pthread_setschedparam in -lpthread... yes
+checking for compress in -lz... yes
+checking for dlopen in -ldl... yes
+configure: WARNING: ** STUN support disabled **
+checking that generated files are newer than configure... done
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating packages/Makefile
+config.status: creating packages/sofia-sip-ua.pc
+config.status: creating packages/sofia-sip-ua-glib.pc
+config.status: creating libsofia-sip-ua/Makefile
+config.status: creating libsofia-sip-ua/bnf/Makefile
+config.status: creating libsofia-sip-ua/bnf/Doxyfile
+config.status: creating libsofia-sip-ua/docs/Makefile
+config.status: creating libsofia-sip-ua/docs/Doxyfile
+config.status: creating libsofia-sip-ua/docs/Doxyfile.version
+config.status: creating libsofia-sip-ua/docs/sofia-footer.html
+config.status: creating libsofia-sip-ua/features/Doxyfile
+config.status: creating libsofia-sip-ua/features/Makefile
+config.status: creating libsofia-sip-ua/http/Doxyfile
+config.status: creating libsofia-sip-ua/http/Makefile
+config.status: creating libsofia-sip-ua/ipt/Doxyfile
+config.status: creating libsofia-sip-ua/ipt/Makefile
+config.status: creating libsofia-sip-ua/iptsec/Doxyfile
+config.status: creating libsofia-sip-ua/iptsec/Makefile
+config.status: creating libsofia-sip-ua/msg/Doxyfile
+config.status: creating libsofia-sip-ua/msg/Makefile
+config.status: creating libsofia-sip-ua/nea/Doxyfile
+config.status: creating libsofia-sip-ua/nea/Makefile
+config.status: creating libsofia-sip-ua/nta/Doxyfile
+config.status: creating libsofia-sip-ua/nta/Makefile
+config.status: creating libsofia-sip-ua/nth/Doxyfile
+config.status: creating libsofia-sip-ua/nth/Makefile
+config.status: creating libsofia-sip-ua/nua/Doxyfile
+config.status: creating libsofia-sip-ua/nua/Makefile
+config.status: creating libsofia-sip-ua/sdp/Doxyfile
+config.status: creating libsofia-sip-ua/sdp/Makefile
+config.status: creating libsofia-sip-ua/sip/Doxyfile
+config.status: creating libsofia-sip-ua/sip/Makefile
+config.status: creating libsofia-sip-ua/soa/Doxyfile
+config.status: creating libsofia-sip-ua/soa/Makefile
+config.status: creating libsofia-sip-ua/sresolv/Doxyfile
+config.status: creating libsofia-sip-ua/sresolv/Makefile
+config.status: creating libsofia-sip-ua/stun/Doxyfile
+config.status: creating libsofia-sip-ua/stun/Makefile
+config.status: creating libsofia-sip-ua/su/Doxyfile
+config.status: creating libsofia-sip-ua/su/Makefile
+config.status: creating libsofia-sip-ua/tport/Doxyfile
+config.status: creating libsofia-sip-ua/tport/Makefile
+config.status: creating libsofia-sip-ua/url/Doxyfile
+config.status: creating libsofia-sip-ua/url/Makefile
+config.status: creating libsofia-sip-ua/features/sofia-sip/sofia_features.h
+config.status: creating s2check/Makefile
+config.status: creating libsofia-sip-ua-glib/Makefile
+config.status: creating libsofia-sip-ua-glib/su-glib/Makefile
+config.status: creating libsofia-sip-ua-glib/su-glib/Doxyfile
+config.status: creating utils/Makefile
+config.status: creating utils/Doxyfile
+config.status: creating tests/Makefile
+config.status: creating win32/Makefile
+config.status: creating win32/config.h
+config.status: creating open_c/Makefile
+config.status: creating open_c/config.h
+config.status: creating packages/sofia-sip-1.13.17.spec
+config.status: creating config.h
+config.status: creating libsofia-sip-ua/su/sofia-sip/su_configure.h
+config.status: executing depfiles commands
+config.status: executing libtool commands
+config.status: executing version commands
+$ make -C libsofia-sip-ua -j4 V=1
+make: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua'
+Making built-sources in su
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/su'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1  REF=su_tag_ref.c su_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/su'
+Making built-sources in features
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/features'
+make[1]: Nothing to be done for 'built-sources'.
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/features'
+Making built-sources in bnf
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/bnf'
+make[1]: Nothing to be done for 'built-sources'.
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/bnf'
+Making built-sources in sresolv
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sresolv'
+make[1]: Nothing to be done for 'built-sources'.
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sresolv'
+Making built-sources in ipt
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/ipt'
+make[1]: Nothing to be done for 'built-sources'.
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/ipt'
+Making built-sources in sdp
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sdp'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1  REF=sdp_tag_ref.c sdp_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sdp'
+Making built-sources in url
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/url'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1 DLLREF=1 REF=url_tag_ref.c url_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/url'
+Making built-sources in msg
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/msg'
+LC_ALL=C gawk -f ./msg_parser.awk module=msg_multipart \
+	tprefix=msg prefix=mp MC_HASH_SIZE=127 MC_SHORT_SIZE=26 \
+	PT=msg_mime_table.c TEMPLATE=./msg_mime_table.c.in \
+	./sofia-sip/msg_mime.h
+LC_ALL=C gawk -f ./msg_parser.awk module=msg_test prefix=msg \
+	MC_HASH_SIZE=127 multipart=msg_multipart \
+	PT=test_table.c TEMPLATE=./test_table.c.in ./test_class.h
+LC_ALL=C gawk -f ./msg_parser.awk module=msg NO_FIRST=1 NO_MIDDLE=1 \
+	PR=sofia-sip/msg_protos.h TEMPLATE=./sofia-sip/msg_protos.h.in \
+	./sofia-sip/msg_mime.h
+LC_ALL=C gawk -f ./msg_parser.awk module=msg NO_FIRST=1 NO_LAST=1 \
+	PR=sofia-sip/msg_mime_protos.h TEMPLATE=./sofia-sip/msg_mime_protos.h.in \
+	./sofia-sip/msg_mime.h
+LC_ALL=C gawk -f ./msg_parser.awk module=msg_test NO_MIDDLE=1 NO_LAST=1 \
+	PR=test_protos.h TEMPLATE=./test_protos.h.in ./test_class.h
+multipart mismatch with Recursive multipart ()
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/msg'
+Making built-sources in sip
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sip'
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=sip PR=sofia-sip/sip_hclasses.h TEMPLATE=./sofia-sip/sip_hclasses.h.in \
+	./sofia-sip/sip.h
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=sip PR=sofia-sip/sip_protos.h TEMPLATE=./sofia-sip/sip_protos.h.in \
+	 ./sofia-sip/sip.h
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=sip PR=sofia-sip/sip_tag.h TEMPLATE=./sofia-sip/sip_tag.h.in \
+	./sofia-sip/sip.h
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=sip PR=sofia-sip/sip_extra.h NO_FIRST=1 NO_LAST=1 \
+	PACKAGE_NAME="sofia-sip" \
+	PACKAGE_VERSION="1.13.17" \
+	TEMPLATE1=./sofia-sip/sip_hclasses.h.in \
+	TEMPLATE2=./sofia-sip/sip_protos.h.in \
+	TEMPLATE3=./sofia-sip/sip_tag.h.in \
+	TEMPLATE=./sofia-sip/sip_extra.h.in ./sip_extra_headers.txt
+Suppress-Body-If-Match header is experimental
+Suppress-Notify-If-Match header is experimental
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=sip PR=sip_tag.c TEMPLATE=./sip_tag.c.in \
+	./sofia-sip/sip.h ./sip_extra_headers.txt
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=sip PT=sip_parser_table.c TEMPLATE=./sip_parser_table.c.in \
+	FLAGFILE=./sip_bad_mask \
+	MC_HASH_SIZE=127 MC_SHORT_SIZE=26 \
+	./sofia-sip/sip.h ./sip_extra_headers.txt
+Suppress-Body-If-Match header is experimental
+Suppress-Notify-If-Match header is experimental
+Suppress-Body-If-Match header is experimental
+Suppress-Notify-If-Match header is experimental
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1  REF=sip_tag_ref.c sip_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sip'
+Making built-sources in http
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/http'
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=http PR=http_tag.c TEMPLATE=./http_tag.c.in ./sofia-sip/http.h
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=http PT=http_parser_table.c TEMPLATE=./http_parser_table.c.in \
+	MC_HASH_SIZE=127 ./sofia-sip/http.h
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=http PR=sofia-sip/http_protos.h TEMPLATE=./sofia-sip/http_protos.h.in ./sofia-sip/http.h
+LC_ALL=C gawk -f ./../msg/msg_parser.awk module=http PR=sofia-sip/http_tag.h TEMPLATE=./sofia-sip/http_tag.h.in ./sofia-sip/http.h
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1 DLLREF=1 REF=http_tag_ref.c http_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/http'
+Making built-sources in stun
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/stun'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1 LIST=stun_tag_list REF=stun_tag_ref.c stun_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/stun'
+Making built-sources in soa
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/soa'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1 LIST=soa_tag_list REF=soa_tag_ref.c soa_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/soa'
+Making built-sources in tport
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/tport'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1  REF=tport_tag_ref.c tport_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/tport'
+Making built-sources in nta
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nta'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1 LIST=nta_tag_list REF=nta_tag_ref.c nta_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nta'
+Making built-sources in nth
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nth'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1  REF=nth_tag_ref.c nth_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nth'
+Making built-sources in nea
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nea'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1  REF=nea_tag_ref.c nea_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nea'
+Making built-sources in iptsec
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/iptsec'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1  REF=auth_tag_ref.c auth_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/iptsec'
+Making built-sources in nua
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nua'
+gawk -f ../../libsofia-sip-ua/su/tag_dll.awk NODLL=1 LIST=nua_tag_list REF=nua_tag_ref.c nua_tag.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nua'
+Making built-sources in docs
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/docs'
+gawk 'END { b="\\"; q="\\\""; \
+	print "# Autogenerated aliases for RFCs "from" .. "to ; \
+	print "ALIASES += " b; \
+	for (i=from; i < to; i++) { \
+	  print "RFC"i"=\"<a href="q site i type q">RFC "i"</a>\" "b; \
+	}}' \
+site=http://www.faqs.org/rfcs/rfc type=.html \
+from=700 to=5500 \
+/dev/null > Doxyfile.rfc
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/docs'
+Making all in su
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/su'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/su'
+	 COMPILE addrinfo.o
+	 LTCOMPILE su.lo
+	 LTCOMPILE su_errno.lo
+	 LTCOMPILE su_addrinfo.lo
+	 LTCOMPILE su_alloc.lo
+	 LTCOMPILE su_alloc_lock.lo
+	 LTCOMPILE su_strdup.lo
+	 LTCOMPILE su_sprintf.lo
+	 LTCOMPILE su_strlst.lo
+	 LTCOMPILE su_vector.lo
+	 LTCOMPILE su_time.lo
+	 LTCOMPILE su_time0.lo
+	 LTCOMPILE su_wait.lo
+	 LTCOMPILE su_root.lo
+	 LTCOMPILE su_timer.lo
+	 LTCOMPILE su_port.lo
+	 LTCOMPILE su_base_port.lo
+	 LTCOMPILE su_pthread_port.lo
+	 LTCOMPILE su_socket_port.lo
+	 LTCOMPILE su_poll_port.lo
+	 LTCOMPILE su_epoll_port.lo
+	 LTCOMPILE su_select_port.lo
+	 LTCOMPILE su_kqueue_port.lo
+	 LTCOMPILE su_devpoll_port.lo
+	 LTCOMPILE su_localinfo.lo
+	 LTCOMPILE su_os_nw.lo
+	 LTCOMPILE su_taglist.lo
+	 LTCOMPILE su_tag.lo
+	 LTCOMPILE su_tag_io.lo
+	 LTCOMPILE su_log.lo
+	 LTCOMPILE su_global_log.lo
+	 LTCOMPILE su_default_log.lo
+	 LTCOMPILE su_md5.lo
+	 LTCOMPILE su_uniqueid.lo
+	 LTCOMPILE su_bm.lo
+	 LTCOMPILE smoothsort.lo
+	 LTCOMPILE su_string.lo
+	 LTCOMPILE string0.lo
+	 LTCOMPILE memspn.lo
+	 LTCOMPILE memcspn.lo
+	 COMPILE localinfo.o
+	 LINK libsu.la
+	 LINK addrinfo
+	 LINK localinfo
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/su'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/su'
+Making all in features
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/features'
+	 LTCOMPILE features.lo
+	 LINK libfeatures.la
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/features'
+Making all in bnf
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/bnf'
+	 LTCOMPILE bnf.lo
+	 LINK libbnf.la
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/bnf'
+Making all in sresolv
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sresolv'
+	 LTCOMPILE sres_cache.lo
+	 LTCOMPILE sres.lo
+	 LTCOMPILE sres_blocking.lo
+	 LTCOMPILE sresolv.lo
+	 LTCOMPILE sres_sip.lo
+	 LINK libsresolv.la
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sresolv'
+Making all in ipt
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/ipt'
+	 LTCOMPILE base64.lo
+	 LTCOMPILE token64.lo
+	 LINK libipt.la
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/ipt'
+Making all in sdp
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sdp'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sdp'
+	 LTCOMPILE sdp.lo
+	 LTCOMPILE sdp_parse.lo
+	 LTCOMPILE sdp_print.lo
+	 LTCOMPILE sdp_tag.lo
+	 LTCOMPILE sdp_tag_ref.lo
+	 LINK libsdp.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sdp'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sdp'
+Making all in url
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/url'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/url'
+	 LTCOMPILE url.lo
+	 LTCOMPILE url_tag.lo
+	 LTCOMPILE url_tag_ref.lo
+	 LINK liburl.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/url'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/url'
+Making all in msg
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/msg'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/msg'
+	 COMPILE test_class.o
+	 COMPILE test_table.o
+	 COMPILE test_inlined.o
+	 LTCOMPILE msg.lo
+	 LTCOMPILE msg_tag.lo
+	 LTCOMPILE msg_inlined.lo
+	 LTCOMPILE msg_mime.lo
+	 LTCOMPILE msg_mime_table.lo
+	 LTCOMPILE msg_header_copy.lo
+	 LTCOMPILE msg_header_make.lo
+	 LTCOMPILE msg_parser.lo
+	 LTCOMPILE msg_mclass.lo
+	 LTCOMPILE msg_parser_util.lo
+	 LTCOMPILE msg_basic.lo
+	 LTCOMPILE msg_generic.lo
+	 LTCOMPILE msg_date.lo
+	 LTCOMPILE msg_auth.lo
+rm -f libtest_msg.a
+ar cru libtest_msg.a test_class.o test_table.o test_inlined.o 
+ar: `u' modifier ignored since `D' is the default (see `U')
+ranlib libtest_msg.a
+	 LINK libmsg.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/msg'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/msg'
+Making all in sip
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sip'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sip'
+	 LTCOMPILE sip_parser.lo
+	 LTCOMPILE sip_header.lo
+	 LTCOMPILE sip_util.lo
+	 LTCOMPILE sip_pref_util.lo
+	 LTCOMPILE sip_basic.lo
+	 LTCOMPILE sip_extra.lo
+	 LTCOMPILE sip_feature.lo
+	 LTCOMPILE sip_mime.lo
+sip_basic.c:2885:15: warning: assigning to 'char *' from 'const char *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+ 2885 |           uri = pp + 1;
+      |               ^ ~~~~~~
+sip_basic.c:2905:40: warning: passing 'msg_param_t **' (aka 'const char ***') to parameter of type 'const msg_param_t **' (aka 'const char *const **') discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+ 2905 |           if (msg_params_d(home, &ext, &params) >= 0) {
+      |                                        ^~~~~~~
+./../msg/sofia-sip/msg_parser.h:280:27: note: passing argument to parameter 'return_params' here
+  280 |                                   msg_param_t const **return_params);
+      |                                                       ^
+	 LTCOMPILE sip_security.lo
+	 LTCOMPILE sip_event.lo
+	 LTCOMPILE sip_prack.lo
+2 warnings generated.
+	 LTCOMPILE sip_refer.lo
+	 LTCOMPILE sip_session.lo
+	 LTCOMPILE sip_caller_prefs.lo
+	 LTCOMPILE sip_reason.lo
+	 LTCOMPILE sip_status.lo
+	 LTCOMPILE sip_time.lo
+	 LTCOMPILE sip_tag_class.lo
+	 LTCOMPILE sip_inlined.lo
+	 LTCOMPILE sip_tag.lo
+	 LTCOMPILE sip_parser_table.lo
+	 LTCOMPILE sip_tag_ref.lo
+	 LINK libsip.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sip'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sip'
+Making all in http
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/http'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/http'
+	 LTCOMPILE http_parser.lo
+	 LTCOMPILE http_header.lo
+	 LTCOMPILE http_basic.lo
+	 LTCOMPILE http_extra.lo
+	 LTCOMPILE http_inlined.lo
+	 LTCOMPILE http_status.lo
+	 LTCOMPILE http_tag_class.lo
+	 LTCOMPILE http_tag.lo
+	 LTCOMPILE http_parser_table.lo
+	 LTCOMPILE http_tag_ref.lo
+	 LINK libhttp.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/http'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/http'
+Making all in soa
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/soa'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/soa'
+	 LTCOMPILE soa_static.lo
+	 LTCOMPILE soa.lo
+	 LTCOMPILE soa_tag.lo
+	 LTCOMPILE soa_tag_ref.lo
+	 LINK libsoa.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/soa'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/soa'
+Making all in tport
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/tport'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/tport'
+	 LTCOMPILE tport.lo
+	 LTCOMPILE tport_logging.lo
+	 LTCOMPILE tport_stub_sigcomp.lo
+	 LTCOMPILE tport_type_udp.lo
+	 LTCOMPILE tport_type_tcp.lo
+	 LTCOMPILE tport_type_sctp.lo
+	 LTCOMPILE tport_tag.lo
+	 LTCOMPILE tport_tag_ref.lo
+	 LTCOMPILE tport_type_connect.lo
+	 LTCOMPILE tport_type_ws.lo
+	 LTCOMPILE ws.lo
+	 LTCOMPILE tport_type_tls.lo
+	 LTCOMPILE tport_tls.lo
+ws.c:246:2: warning: 'SHA1_Init' is deprecated [-Wdeprecated-declarations]
+  246 |         SHA1_Init(&sha);
+      |         ^
+/usr/include/openssl/sha.h:49:1: note: 'SHA1_Init' has been explicitly marked deprecated here
+   49 | OSSL_DEPRECATEDIN_3_0 int SHA1_Init(SHA_CTX *c);
+      | ^
+/usr/include/openssl/macros.h:182:49: note: expanded from macro 'OSSL_DEPRECATEDIN_3_0'
+  182 | #   define OSSL_DEPRECATEDIN_3_0                OSSL_DEPRECATED(3.0)
+      |                                                 ^
+/usr/include/openssl/macros.h:62:52: note: expanded from macro 'OSSL_DEPRECATED'
+   62 | #     define OSSL_DEPRECATED(since) __attribute__((deprecated))
+      |                                                    ^
+ws.c:247:2: warning: 'SHA1_Update' is deprecated [-Wdeprecated-declarations]
+  247 |         SHA1_Update(&sha, in, strlen(in));
+      |         ^
+/usr/include/openssl/sha.h:50:1: note: 'SHA1_Update' has been explicitly marked deprecated here
+   50 | OSSL_DEPRECATEDIN_3_0 int SHA1_Update(SHA_CTX *c, const void *data, size_t len);
+      | ^
+/usr/include/openssl/macros.h:182:49: note: expanded from macro 'OSSL_DEPRECATEDIN_3_0'
+  182 | #   define OSSL_DEPRECATEDIN_3_0                OSSL_DEPRECATED(3.0)
+      |                                                 ^
+/usr/include/openssl/macros.h:62:52: note: expanded from macro 'OSSL_DEPRECATED'
+   62 | #     define OSSL_DEPRECATED(since) __attribute__((deprecated))
+      |                                                    ^
+ws.c:248:2: warning: 'SHA1_Final' is deprecated [-Wdeprecated-declarations]
+  248 |         SHA1_Final(digest, &sha);
+      |         ^
+/usr/include/openssl/sha.h:51:1: note: 'SHA1_Final' has been explicitly marked deprecated here
+   51 | OSSL_DEPRECATEDIN_3_0 int SHA1_Final(unsigned char *md, SHA_CTX *c);
+      | ^
+/usr/include/openssl/macros.h:182:49: note: expanded from macro 'OSSL_DEPRECATEDIN_3_0'
+  182 | #   define OSSL_DEPRECATEDIN_3_0                OSSL_DEPRECATED(3.0)
+      |                                                 ^
+/usr/include/openssl/macros.h:62:52: note: expanded from macro 'OSSL_DEPRECATED'
+   62 | #     define OSSL_DEPRECATED(since) __attribute__((deprecated))
+      |                                                    ^
+ws.c:455:23: warning: 'ERR_func_error_string' is deprecated [-Wdeprecated-declarations]
+  455 |                         const char *func = ERR_func_error_string(e);
+      |                                            ^
+/usr/include/openssl/err.h:459:1: note: 'ERR_func_error_string' has been explicitly marked deprecated here
+  459 | OSSL_DEPRECATEDIN_3_0 const char *ERR_func_error_string(unsigned long e);
+      | ^
+/usr/include/openssl/macros.h:182:49: note: expanded from macro 'OSSL_DEPRECATEDIN_3_0'
+  182 | #   define OSSL_DEPRECATEDIN_3_0                OSSL_DEPRECATED(3.0)
+      |                                                 ^
+/usr/include/openssl/macros.h:62:52: note: expanded from macro 'OSSL_DEPRECATED'
+   62 | #     define OSSL_DEPRECATED(since) __attribute__((deprecated))
+      |                                                    ^
+4 warnings generated.
+tport_tls.c:153:26: warning: 'ERR_func_error_string' is deprecated [-Wdeprecated-declarations]
+  153 |       const char *func = ERR_func_error_string(e);
+      |                          ^
+/usr/include/openssl/err.h:459:1: note: 'ERR_func_error_string' has been explicitly marked deprecated here
+  459 | OSSL_DEPRECATEDIN_3_0 const char *ERR_func_error_string(unsigned long e);
+      | ^
+/usr/include/openssl/macros.h:182:49: note: expanded from macro 'OSSL_DEPRECATEDIN_3_0'
+  182 | #   define OSSL_DEPRECATEDIN_3_0                OSSL_DEPRECATED(3.0)
+      |                                                 ^
+/usr/include/openssl/macros.h:62:52: note: expanded from macro 'OSSL_DEPRECATED'
+   62 | #     define OSSL_DEPRECATED(since) __attribute__((deprecated))
+      |                                                    ^
+tport_tls.c:392:16: warning: 'PEM_read_bio_DHparams' is deprecated [-Wdeprecated-declarations]
+  392 |       DH *dh = PEM_read_bio_DHparams(bio, NULL, NULL, NULL);
+      |                ^
+/usr/include/openssl/pem.h:469:21: note: 'PEM_read_bio_DHparams' has been explicitly marked deprecated here
+  469 | DECLARE_PEM_rw_attr(OSSL_DEPRECATEDIN_3_0, DHparams, DH)
+      |                     ^
+/usr/include/openssl/macros.h:182:49: note: expanded from macro 'OSSL_DEPRECATEDIN_3_0'
+  182 | #   define OSSL_DEPRECATEDIN_3_0                OSSL_DEPRECATED(3.0)
+      |                                                 ^
+/usr/include/openssl/macros.h:62:52: note: expanded from macro 'OSSL_DEPRECATED'
+   62 | #     define OSSL_DEPRECATED(since) __attribute__((deprecated))
+      |                                                    ^
+tport_tls.c:404:9: warning: 'DH_free' is deprecated [-Wdeprecated-declarations]
+  404 |         DH_free(dh);
+      |         ^
+/usr/include/openssl/dh.h:204:1: note: 'DH_free' has been explicitly marked deprecated here
+  204 | OSSL_DEPRECATEDIN_3_0 void DH_free(DH *dh);
+      | ^
+/usr/include/openssl/macros.h:182:49: note: expanded from macro 'OSSL_DEPRECATEDIN_3_0'
+  182 | #   define OSSL_DEPRECATEDIN_3_0                OSSL_DEPRECATED(3.0)
+      |                                                 ^
+/usr/include/openssl/macros.h:62:52: note: expanded from macro 'OSSL_DEPRECATED'
+   62 | #     define OSSL_DEPRECATED(since) __attribute__((deprecated))
+      |                                                    ^
+3 warnings generated.
+	 LINK libtport.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/tport'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/tport'
+Making all in nta
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nta'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nta'
+	 LTCOMPILE nta.lo
+	 LTCOMPILE nta_check.lo
+	 LTCOMPILE nta_tag.lo
+	 LTCOMPILE nta_tag_ref.lo
+	 LTCOMPILE sl_utils_print.lo
+	 LTCOMPILE sl_utils_log.lo
+	 LTCOMPILE sl_read_payload.lo
+	 LINK libnta.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nta'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nta'
+Making all in nth
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nth'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nth'
+	 LTCOMPILE nth_client.lo
+	 LTCOMPILE nth_server.lo
+	 LTCOMPILE nth_tag.lo
+	 LTCOMPILE nth_tag_ref.lo
+	 LINK libnth.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nth'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nth'
+Making all in nea
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nea'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nea'
+	 LTCOMPILE nea.lo
+	 LTCOMPILE nea_event.lo
+	 LTCOMPILE nea_server.lo
+	 LTCOMPILE nea_debug.lo
+	 LTCOMPILE nea_tag.lo
+	 LTCOMPILE nea_tag_ref.lo
+	 LINK libnea.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nea'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nea'
+Making all in iptsec
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/iptsec'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/iptsec'
+	 LTCOMPILE auth_digest.lo
+	 LTCOMPILE auth_module.lo
+	 LTCOMPILE auth_client.lo
+	 LTCOMPILE auth_common.lo
+	 LTCOMPILE auth_tag.lo
+	 LTCOMPILE auth_tag_ref.lo
+	 LTCOMPILE auth_plugin.lo
+	 LTCOMPILE auth_plugin_delayed.lo
+	 LTCOMPILE auth_module_sip.lo
+	 LTCOMPILE iptsec_debug.lo
+	 LTCOMPILE auth_module_http.lo
+	 LINK libiptsec.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/iptsec'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/iptsec'
+Making all in nua
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nua'
+make  all-am
+make[2]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nua'
+	 LTCOMPILE nua.lo
+	 LTCOMPILE nua_common.lo
+	 LTCOMPILE nua_stack.lo
+	 LTCOMPILE nua_server.lo
+	 LTCOMPILE nua_client.lo
+	 LTCOMPILE nua_extension.lo
+	 LTCOMPILE nua_dialog.lo
+	 LTCOMPILE outbound.lo
+	 LTCOMPILE nua_params.lo
+	 LTCOMPILE nua_register.lo
+	 LTCOMPILE nua_registrar.lo
+	 LTCOMPILE nua_session.lo
+	 LTCOMPILE nua_options.lo
+	 LTCOMPILE nua_message.lo
+	 LTCOMPILE nua_publish.lo
+	 LTCOMPILE nua_subnotref.lo
+	 LTCOMPILE nua_notifier.lo
+	 LTCOMPILE nua_event_server.lo
+	 LTCOMPILE nua_tag.lo
+	 LTCOMPILE nua_tag_ref.lo
+	 LINK libnua.la
+make[2]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nua'
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nua'
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua'
+/bin/bash ../libtool  --tag=CC   --mode=link clang  -O0 -g -fno-omit-frame-pointer -fsanitize=address -fsanitize-recover=address  -DSU_DEBUG=0  -version-info 6:0:6 -lz -fsanitize=address  -o libsofia-sip-ua.la -rpath /tmp/sofia-libbuild-v17recover/lib  bnf/libbnf.la features/libfeatures.la ipt/libipt.la iptsec/libiptsec.la msg/libmsg.la nea/libnea.la nta/libnta.la nua/libnua.la sdp/libsdp.la sip/libsip.la soa/libsoa.la sresolv/libsresolv.la su/libsu.la tport/libtport.la url/liburl.la  http/libhttp.la nth/libnth.la -lssl -lcrypto  -lpthread 
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libbnf.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/bnf/.libs/libbnf.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libfeatures.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/features/.libs/libfeatures.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libipt.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/ipt/.libs/libipt.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libiptsec.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/iptsec/.libs/libiptsec.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libmsg.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/msg/.libs/libmsg.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libnea.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nea/.libs/libnea.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libnta.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nta/.libs/libnta.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libnua.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nua/.libs/libnua.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libsdp.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sdp/.libs/libsdp.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libsip.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sip/.libs/libsip.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libsoa.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/soa/.libs/libsoa.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libsresolv.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/sresolv/.libs/libsresolv.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libsu.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/su/.libs/libsu.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libtport.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/tport/.libs/libtport.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/liburl.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/url/.libs/liburl.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libhttp.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/http/.libs/libhttp.a")
+libtool: link: (cd .libs/libsofia-sip-ua.lax/libnth.a && ar x "/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua/nth/.libs/libnth.a")
+libtool: link: ar cr .libs/libsofia-sip-ua.a   .libs/libsofia-sip-ua.lax/libbnf.a/bnf.o  .libs/libsofia-sip-ua.lax/libfeatures.a/features.o  .libs/libsofia-sip-ua.lax/libipt.a/base64.o .libs/libsofia-sip-ua.lax/libipt.a/token64.o  .libs/libsofia-sip-ua.lax/libiptsec.a/auth_client.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_common.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_digest.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_module.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_module_http.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_module_sip.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_plugin.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_plugin_delayed.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_tag.o .libs/libsofia-sip-ua.lax/libiptsec.a/auth_tag_ref.o .libs/libsofia-sip-ua.lax/libiptsec.a/iptsec_debug.o  .libs/libsofia-sip-ua.lax/libmsg.a/msg.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_auth.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_basic.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_date.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_generic.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_header_copy.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_header_make.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_inlined.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_mclass.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_mime.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_mime_table.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_parser.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_parser_util.o .libs/libsofia-sip-ua.lax/libmsg.a/msg_tag.o  .libs/libsofia-sip-ua.lax/libnea.a/nea.o .libs/libsofia-sip-ua.lax/libnea.a/nea_debug.o .libs/libsofia-sip-ua.lax/libnea.a/nea_event.o .libs/libsofia-sip-ua.lax/libnea.a/nea_server.o .libs/libsofia-sip-ua.lax/libnea.a/nea_tag.o .libs/libsofia-sip-ua.lax/libnea.a/nea_tag_ref.o  .libs/libsofia-sip-ua.lax/libnta.a/nta.o .libs/libsofia-sip-ua.lax/libnta.a/nta_check.o .libs/libsofia-sip-ua.lax/libnta.a/nta_tag.o .libs/libsofia-sip-ua.lax/libnta.a/nta_tag_ref.o .libs/libsofia-sip-ua.lax/libnta.a/sl_read_payload.o .libs/libsofia-sip-ua.lax/libnta.a/sl_utils_log.o .libs/libsofia-sip-ua.lax/libnta.a/sl_utils_print.o  .libs/libsofia-sip-ua.lax/libnua.a/nua.o .libs/libsofia-sip-ua.lax/libnua.a/nua_client.o .libs/libsofia-sip-ua.lax/libnua.a/nua_common.o .libs/libsofia-sip-ua.lax/libnua.a/nua_dialog.o .libs/libsofia-sip-ua.lax/libnua.a/nua_event_server.o .libs/libsofia-sip-ua.lax/libnua.a/nua_extension.o .libs/libsofia-sip-ua.lax/libnua.a/nua_message.o .libs/libsofia-sip-ua.lax/libnua.a/nua_notifier.o .libs/libsofia-sip-ua.lax/libnua.a/nua_options.o .libs/libsofia-sip-ua.lax/libnua.a/nua_params.o .libs/libsofia-sip-ua.lax/libnua.a/nua_publish.o .libs/libsofia-sip-ua.lax/libnua.a/nua_register.o .libs/libsofia-sip-ua.lax/libnua.a/nua_registrar.o .libs/libsofia-sip-ua.lax/libnua.a/nua_server.o .libs/libsofia-sip-ua.lax/libnua.a/nua_session.o .libs/libsofia-sip-ua.lax/libnua.a/nua_stack.o .libs/libsofia-sip-ua.lax/libnua.a/nua_subnotref.o .libs/libsofia-sip-ua.lax/libnua.a/nua_tag.o .libs/libsofia-sip-ua.lax/libnua.a/nua_tag_ref.o .libs/libsofia-sip-ua.lax/libnua.a/outbound.o  .libs/libsofia-sip-ua.lax/libsdp.a/sdp.o .libs/libsofia-sip-ua.lax/libsdp.a/sdp_parse.o .libs/libsofia-sip-ua.lax/libsdp.a/sdp_print.o .libs/libsofia-sip-ua.lax/libsdp.a/sdp_tag.o .libs/libsofia-sip-ua.lax/libsdp.a/sdp_tag_ref.o  .libs/libsofia-sip-ua.lax/libsip.a/sip_basic.o .libs/libsofia-sip-ua.lax/libsip.a/sip_caller_prefs.o .libs/libsofia-sip-ua.lax/libsip.a/sip_event.o .libs/libsofia-sip-ua.lax/libsip.a/sip_extra.o .libs/libsofia-sip-ua.lax/libsip.a/sip_feature.o .libs/libsofia-sip-ua.lax/libsip.a/sip_header.o .libs/libsofia-sip-ua.lax/libsip.a/sip_inlined.o .libs/libsofia-sip-ua.lax/libsip.a/sip_mime.o .libs/libsofia-sip-ua.lax/libsip.a/sip_parser.o .libs/libsofia-sip-ua.lax/libsip.a/sip_parser_table.o .libs/libsofia-sip-ua.lax/libsip.a/sip_prack.o .libs/libsofia-sip-ua.lax/libsip.a/sip_pref_util.o .libs/libsofia-sip-ua.lax/libsip.a/sip_reason.o .libs/libsofia-sip-ua.lax/libsip.a/sip_refer.o .libs/libsofia-sip-ua.lax/libsip.a/sip_security.o .libs/libsofia-sip-ua.lax/libsip.a/sip_session.o .libs/libsofia-sip-ua.lax/libsip.a/sip_status.o .libs/libsofia-sip-ua.lax/libsip.a/sip_tag.o .libs/libsofia-sip-ua.lax/libsip.a/sip_tag_class.o .libs/libsofia-sip-ua.lax/libsip.a/sip_tag_ref.o .libs/libsofia-sip-ua.lax/libsip.a/sip_time.o .libs/libsofia-sip-ua.lax/libsip.a/sip_util.o  .libs/libsofia-sip-ua.lax/libsoa.a/soa.o .libs/libsofia-sip-ua.lax/libsoa.a/soa_static.o .libs/libsofia-sip-ua.lax/libsoa.a/soa_tag.o .libs/libsofia-sip-ua.lax/libsoa.a/soa_tag_ref.o  .libs/libsofia-sip-ua.lax/libsresolv.a/sres.o .libs/libsofia-sip-ua.lax/libsresolv.a/sres_blocking.o .libs/libsofia-sip-ua.lax/libsresolv.a/sres_cache.o .libs/libsofia-sip-ua.lax/libsresolv.a/sres_sip.o .libs/libsofia-sip-ua.lax/libsresolv.a/sresolv.o  .libs/libsofia-sip-ua.lax/libsu.a/memcspn.o .libs/libsofia-sip-ua.lax/libsu.a/memspn.o .libs/libsofia-sip-ua.lax/libsu.a/smoothsort.o .libs/libsofia-sip-ua.lax/libsu.a/string0.o .libs/libsofia-sip-ua.lax/libsu.a/su.o .libs/libsofia-sip-ua.lax/libsu.a/su_addrinfo.o .libs/libsofia-sip-ua.lax/libsu.a/su_alloc.o .libs/libsofia-sip-ua.lax/libsu.a/su_alloc_lock.o .libs/libsofia-sip-ua.lax/libsu.a/su_base_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_bm.o .libs/libsofia-sip-ua.lax/libsu.a/su_default_log.o .libs/libsofia-sip-ua.lax/libsu.a/su_devpoll_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_epoll_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_errno.o .libs/libsofia-sip-ua.lax/libsu.a/su_global_log.o .libs/libsofia-sip-ua.lax/libsu.a/su_kqueue_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_localinfo.o .libs/libsofia-sip-ua.lax/libsu.a/su_log.o .libs/libsofia-sip-ua.lax/libsu.a/su_md5.o .libs/libsofia-sip-ua.lax/libsu.a/su_os_nw.o .libs/libsofia-sip-ua.lax/libsu.a/su_poll_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_pthread_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_root.o .libs/libsofia-sip-ua.lax/libsu.a/su_select_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_socket_port.o .libs/libsofia-sip-ua.lax/libsu.a/su_sprintf.o .libs/libsofia-sip-ua.lax/libsu.a/su_strdup.o .libs/libsofia-sip-ua.lax/libsu.a/su_string.o .libs/libsofia-sip-ua.lax/libsu.a/su_strlst.o .libs/libsofia-sip-ua.lax/libsu.a/su_tag.o .libs/libsofia-sip-ua.lax/libsu.a/su_tag_io.o .libs/libsofia-sip-ua.lax/libsu.a/su_taglist.o .libs/libsofia-sip-ua.lax/libsu.a/su_time.o .libs/libsofia-sip-ua.lax/libsu.a/su_time0.o .libs/libsofia-sip-ua.lax/libsu.a/su_timer.o .libs/libsofia-sip-ua.lax/libsu.a/su_uniqueid.o .libs/libsofia-sip-ua.lax/libsu.a/su_vector.o .libs/libsofia-sip-ua.lax/libsu.a/su_wait.o  .libs/libsofia-sip-ua.lax/libtport.a/tport.o .libs/libsofia-sip-ua.lax/libtport.a/tport_logging.o .libs/libsofia-sip-ua.lax/libtport.a/tport_stub_sigcomp.o .libs/libsofia-sip-ua.lax/libtport.a/tport_tag.o .libs/libsofia-sip-ua.lax/libtport.a/tport_tag_ref.o .libs/libsofia-sip-ua.lax/libtport.a/tport_tls.o .libs/libsofia-sip-ua.lax/libtport.a/tport_type_connect.o .libs/libsofia-sip-ua.lax/libtport.a/tport_type_sctp.o .libs/libsofia-sip-ua.lax/libtport.a/tport_type_tcp.o .libs/libsofia-sip-ua.lax/libtport.a/tport_type_tls.o .libs/libsofia-sip-ua.lax/libtport.a/tport_type_udp.o .libs/libsofia-sip-ua.lax/libtport.a/tport_type_ws.o .libs/libsofia-sip-ua.lax/libtport.a/ws.o  .libs/libsofia-sip-ua.lax/liburl.a/url.o .libs/libsofia-sip-ua.lax/liburl.a/url_tag.o .libs/libsofia-sip-ua.lax/liburl.a/url_tag_ref.o  .libs/libsofia-sip-ua.lax/libhttp.a/http_basic.o .libs/libsofia-sip-ua.lax/libhttp.a/http_extra.o .libs/libsofia-sip-ua.lax/libhttp.a/http_header.o .libs/libsofia-sip-ua.lax/libhttp.a/http_inlined.o .libs/libsofia-sip-ua.lax/libhttp.a/http_parser.o .libs/libsofia-sip-ua.lax/libhttp.a/http_parser_table.o .libs/libsofia-sip-ua.lax/libhttp.a/http_status.o .libs/libsofia-sip-ua.lax/libhttp.a/http_tag.o .libs/libsofia-sip-ua.lax/libhttp.a/http_tag_class.o .libs/libsofia-sip-ua.lax/libhttp.a/http_tag_ref.o  .libs/libsofia-sip-ua.lax/libnth.a/nth_client.o .libs/libsofia-sip-ua.lax/libnth.a/nth_server.o .libs/libsofia-sip-ua.lax/libnth.a/nth_tag.o .libs/libsofia-sip-ua.lax/libnth.a/nth_tag_ref.o 
+libtool: link: ranlib .libs/libsofia-sip-ua.a
+libtool: link: rm -fr .libs/libsofia-sip-ua.lax
+libtool: link: ( cd ".libs" && rm -f "libsofia-sip-ua.la" && ln -s "../libsofia-sip-ua.la" "libsofia-sip-ua.la" )
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua'
+make: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17recover/libsofia-sip-ua'
