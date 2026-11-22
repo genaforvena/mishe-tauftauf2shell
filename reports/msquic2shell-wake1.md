@@ -171,11 +171,11 @@ only an ordinary, legitimate path promotion in both versions — that result is
 ## Next bounded work
 
 1. Wire-pure QUIC packet sequence on a loopback server (peer-driven
-   NEW_CONNECTION_ID + non-probing frame). Needs a QUIC-capable TLS build
-   (quictls submodule is empty in both pinned archives; CMake FetchContent is
-   configured but libssl/libcrypto are not built) or an equivalent
-   packet-injection seam. Until then, **on-the-wire peer reachability is
-   UNKNOWN** even though frame-layer reachability is demonstrated.
+   NEW_CONNECTION_ID + non-probing frame). A TLS-capable v2.5.9 build now
+   exists in scratch (quictls pinned by the tag) and real handshakes run; the
+   remaining gap is delivery of the crafted retirement frame past the
+   binding/CID lookup, documented in the wire negative below. On-the-wire
+   peer reachability of that frame stays UNKNOWN.
 2. Witness replay of the frame harness — completed, W97 above. A wire replay
    is owed if a wire harness is ever built.
 3. Preserve the Debug negative above; do not retry a failed frame ordering
@@ -207,6 +207,45 @@ such sequence was built or observed, and Debug invariants
 (`QUIC_CID_VALIDATE_NULL`, `Path->DestCid != DestCid`) are designed to reject
 it. Do not promote this to a confirmed finding without a triggered trace.
 
-On-the-wire reachability remains UNKNOWN: the pinned archives have empty
-quictls submodules, no libssl/libcrypto QUIC build exists in this lab, and no
-packet was injected. The frame-layer result is peer-frame-shaped, not wire.
+On-the-wire peer reachability of the retirement frame remains UNKNOWN. A
+QUIC-capable TLS build now exists in lab scratch (below) and plaintext packets
+were injected, but the decisive NEW_CONNECTION_ID packet never reached the
+connection receive path. The frame-layer result is peer-frame-shaped, not wire.
+
+## Wire-pure progression and preserved negative (2026-11-22 00:11Z)
+
+Provisioned the exact quictls submodule commit pinned by the v2.5.9 tag
+(`ff36838bb69801cad56823159a036977bcbe5c75`, gitlink from the msquic v2.5.9
+tree; fetched archive sha256 `0419330d…0150`) into gitignored scratch
+`build/v259-wire/submodules/quictls`. A full Release build with
+`-DQUIC_BUILD_TOOLS=ON` produced `libmsquic.so.2.5.9`, `quicinteropserver`,
+`quicinterop` and `quicsample` (69/69 targets, rc=0). A stock
+`quicsample -server/-client -unsecure -target:127.0.0.1` pair completed a real
+loopback QUIC/TLS handshake, exchanged stream data and shut down on idle: the
+wire crypto path is live in this lab.
+
+Scratch-only instrumentation (not committed) disabled 1-RTT encryption on both
+peers via parameter `0x0500000F`, enabled server migration, printed
+`PathsCount`/`InUse`/`IsActive` in `QuicConnRecvPostProcessing`, and logged
+decoded NEW_CONNECTION_ID frames to a scratch file so a custom UDP client
+(`build/wire_inject.cpp`) could address a live CID. The client completed a
+handshake with the pinned v2.5.9 server, then sent plaintext short-header
+packets from a second loopback source port. **Observed:** a PADDING-only packet
+reached `QuicConnRecvDatagrams`, created `Paths[1]`
+(`count=2 p1(ID=1 inuse=1 active=0)`) and did not promote it
+(`nonprobing=0`). This is a real-wire path-creation observable, but it is not
+the CVE trigger.
+
+**Negative, preserved:** the follow-up crafted packet carrying a real encoded
+NEW_CONNECTION_ID frame (type `0x1a`, sequence 2, retire-prior-to 2, 8-byte CID,
+16-byte token) plus PING was sent (`sendto` reported 43 bytes) but produced no
+`QuicConnRecvDatagrams`, path-selection, frame-decode or drop trace on the
+server. Tried with the latest server-issued CID, the original destination CID
+and the stable active CID; with 50 ms and 400 ms gaps; and with 8-byte and
+64-byte probe packets. The drop therefore occurs before connection receive
+(binding/CID lookup or datapath), and this build has no logging to name it.
+**No wire stale-slot promotion was observed; do not claim rung 4 from this.**
+Next wake should instrument the binding lookup or use the recvfuzz-derived
+plaintext 1-RTT writer (the Windows-only tool needs Linux CMake gating and
+short-header support) before repeating the sequence. All wire artifacts stay in
+scratch; the committed rung-3 evidence is unchanged.
