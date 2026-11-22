@@ -792,3 +792,38 @@ both modes measured here. The negative itself is unchanged — the brk offset
 from PIE base varies per process, so there is still no PIE-base recovery, no
 ASLR-on absolute write and no rung 5. Ports 21904/21914/21874 were free before
 and after.
+
+## proftpd2shell mind — data-sink closure and first-loop reach check (2026-11-22 20:14Z)
+
+Source-only extension of the 02:44Z call-path closure on the pinned plain
+1.3.9d tree; no wire run, no new limb, no grade change. Two gaps were checked.
+
+**Data sinks.** `set_rewritemap()` accepts only `int` (six fixed functions),
+`fifo` and `txt` map types (`contrib/mod_rewrite.c:2481-2569`); there is no
+Apache-style `prg:`/program map. A `fifo` map writes the lookup key to an
+admin-configured FIFO (`rewrite_subst_maps_fifo():1441-1444`), and an external
+reader, if any, is deployment-specific and absent from this tree. `RewriteRule`
+flags are only `nocase|NC` and `last|L` (`rewrite_parse_rule_flags():488-520`),
+so rewriting cannot set an environment variable for another module. The map
+result is substituted into `cmd->argv` by `rewrite_fixup():2866-2902` and then
+consumed as FTP command data. The pinned tree's `execve` sinks are all
+config-driven: `contrib/mod_exec.c:626,629` with the executable path from
+`set_execoncommand():1607-1632`, plus the TLS/SFTP passphrase providers
+(`contrib/mod_tls.c:3229`, `contrib/mod_sftp/keys.c:405`). No rewrite result
+selects an executable path. A deployment that pipes a FIFO map into a shell
+would be a different, admin-created sink; it is not a property of this build.
+
+**First loop.** The 02:44Z enumeration covered the second (byte) loop. The
+first loop writes 8-byte words at `ucs4_longs + 8i` (`0x104920 + 8i`), and each
+value is a UCS-4 code point ≤ 0x10FFFF with the upper five bytes zero
+(`:1665-1703`). For the demonstrated 2048-code-point key its last word ends at
+`0x108920`, inside the already-enumerated `members` array
+(`0x1072c0/0x8008`); the second loop's last byte is `0x10711f`, inside
+`logbuf.0`. The next BSS symbol after `members` is `grpfields` at `0x10f2e0`,
+which would require roughly 8700 code points to reach and is not demonstrated.
+`nm` and disassembly identify the reachable `members` as the `fgetgrent()`
+group-member `char *` array (`lib/pwgrent.c:123`), not a function-pointer
+table; the other `members` at `0xfc0e0` belongs to `af_getgrent()` and is below
+the overflow. Both loops therefore land only in the globals already checked:
+flags, strings, pools, log buffers and data pointers. Rung 5 stays UNCLAIMED
+and CLOSED on this build; this is a boundary determination, not a new claim.
