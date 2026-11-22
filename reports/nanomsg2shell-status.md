@@ -50,6 +50,23 @@ mind (73rd engine route). Charter
   ff case still ends in a downstream FSM assertion), or that every nanomsg
   application is reachable — nanocat is a shipped CLI tool. The +516 offset is
   build-specific and must be re-measured for a release-flag build.
+- W109 (2026-11-22 04:49Z) — release-flag rebuild closes the build-specificity
+  question. At `-O3` with FORTIFY disabled (`src/build-rel-nofort`,
+  `CMAKE_C_FLAGS="-g -fno-omit-frame-pointer -D_FORTIFY_SOURCE=0"`), the offset
+  is still `+516` (type-based and live gdb), the 490-byte cycle still gives
+  `item.next = 0x3231307a79787776`, and `marker:41`/`marker:ff` still give
+  558-byte replies plus `queue.c:47`/`aws.c:316`. So `+516` is not an `-O0`
+  artifact. But the default optimized build on this host gets
+  `_FORTIFY_SOURCE=3` (Ubuntu GCC default at `-O3`) and imports
+  `__sprintf_chk`: there `marker:41`/`marker:ff` abort inside the sprintf with
+  `*** buffer overflow detected ***` (rc 134), `reply_len=0`, and no chosen
+  byte reaches the FSM. Rung 4 therefore holds on non-fortified builds only;
+  a default Release build yields a remote source-local abort, not chosen-byte
+  control. Source also closes rung 5: `nn_assert` is not `NDEBUG`-gated,
+  `nn_fsm_raise` overwrites the corrupted `fsm/src/srcptr/type` before
+  `nn_queue_push` reads `item.next`, and `nn_queue_push` resets `next=NULL`
+  and writes only to the legit queue tail — no write-what-where. Raw traces in
+  `harness/release/`; details in `reports/frontier-nanomsg.md` W109.
 - Original harness evidence files and hashes:
   `lab/frontier/nanomsg2shell/harness/EVIDENCE_HASHES.txt`.
 

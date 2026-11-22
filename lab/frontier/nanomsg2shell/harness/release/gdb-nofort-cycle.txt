@@ -1,0 +1,29 @@
+No source file named ws_handshake.c.
+Breakpoint 1 (ws_handshake.c:1350) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff7bff6c0 (LWP 2505498)]
+bound rc=1
+[Switching to Thread 0x7ffff7bff6c0 (LWP 2505498)]
+
+Thread 2 "ws_server_rel_n" hit Breakpoint 1, nn_ws_handshake_server_reply (self=0x55555555b1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/ws_handshake.c:1350
+1350	        sprintf (self->response,
+=== at sprintf line 1350 ===
+$1 = 516
+PRE item.next = $2 = 0xffffffffffffffff
+Breakpoint 2 at 0x7ffff7fa8728: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/ws_handshake.c, line 1358.
+
+Thread 2 "ws_server_rel_n" hit Breakpoint 2, nn_ws_handshake_server_reply (self=0x55555555b1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/ws_handshake.c:1358
+1358	    response.iov_len = strlen (self->response);
+=== after sprintf, line 1358 ===
+SELF=0x55555555b1e0 RESP=0x55555555c46c DONE=0x55555555c670 DONE_OFFSET=516
+VERSION_LEN=490 RESPONSE_CODE=4
+0x55555555c46c:	"HTTP/1.1 400 Unsupported WebSocket Version\r\nSec-WebSocket-Version: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHI"...
+--- done 40 bytes ---
+0x55555555c670:	80 'P'	81 'Q'	82 'R'	83 'S'	84 'T'	85 'U'	86 'V'	87 'W'
+0x55555555c678:	88 'X'	89 'Y'	90 'Z'	97 'a'	98 'b'	99 'c'	100 'd'	101 'e'
+0x55555555c680:	102 'f'	103 'g'	104 'h'	105 'i'	106 'j'	107 'k'	108 'l'	109 'm'
+0x55555555c688:	110 'n'	111 'o'	112 'p'	113 'q'	114 'r'	115 's'	116 't'	117 'u'
+0x55555555c690:	118 'v'	119 'w'	120 'x'	121 'y'	122 'z'	48 '0'	49 '1'	50 '2'
+POST item.next = $3 = 0x3231307a79787776
+[Inferior 1 (process 2505432) killed]

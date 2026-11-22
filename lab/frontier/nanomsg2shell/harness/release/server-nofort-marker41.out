@@ -1,0 +1,8 @@
+bound rc=1
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(nn_queue_push+0x46)[0x7db20a53a456]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(nn_ctx_leave+0x39)[0x7db20a534c89]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(+0x1913c)[0x7db20a53813c]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(+0x1bb01)[0x7db20a53ab01]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x7db20a29cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x7db20a329e8c]
+Assertion failed: item->next == NN_QUEUE_NOTINQUEUE (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/utils/queue.c:47)

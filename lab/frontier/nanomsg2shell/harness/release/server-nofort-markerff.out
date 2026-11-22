@@ -1,0 +1,8 @@
+bound rc=1
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(+0x2fcce)[0x74ddfa9accce]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(nn_ctx_leave+0x39)[0x74ddfa992c89]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(+0x19058)[0x74ddfa996058]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-rel-nofort/libnanomsg.so.6(+0x1bb01)[0x74ddfa998b01]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x74ddfa69cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x74ddfa729e8c]
+Unexpected source: state=5 source=2573 action=7 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/aws.c:316)

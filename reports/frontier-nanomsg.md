@@ -307,3 +307,53 @@ not rung 5: no command execution or side effect beyond the process's own
 assertion/FSM failure, and the build remains a debug `-g -O0` build whose
 +516 offset must be re-measured for any release-flag build. `nanocat` is a
 shipped CLI tool, not proof that every nanomsg-using daemon is reachable.
+
+## W109 (2026-11-22 04:49Z) — release-flag rebuild: offset holds, FORTIFY changes the effect
+
+All prior rung-4 measurements were `-g -O0 -fno-omit-frame-pointer`. This wake
+rebuilt pinned v1.2.2 with `-DCMAKE_BUILD_TYPE=Release` (`-O3 -DNDEBUG`) and
+re-measured. Two distinct results, both on the real loopback listener:
+
+**1. FORTIFY, not the struct offset, is the build-specific variable.** On this
+host GCC enables `_FORTIFY_SOURCE=3` by default at `-O3`
+(`echo | cc -O3 -dM -E -` → `#define _FORTIFY_SOURCE 3`; `-O0` → none). The
+plain-Release lib `src/build-rel/libnanomsg.so.6` therefore imports
+`__sprintf_chk@GLIBC_2.3.4`, while the `-O0` lib imports plain
+`sprintf@GLIBC_2.2.5`. On a listener linked to the fortified Release lib
+(`harness/ws_server_rel`), `marker:41` and `marker:ff` (489 bytes) both abort
+with `*** buffer overflow detected ***: terminated` (rc 134) *inside the
+sprintf*: `reply_len=0`, no HTTP reply is sent, and no chosen byte reaches the
+FSM event. The 2-byte control stays clean at 71 bytes. So a default optimized
+distro build converts this bug into a remotely-triggerable source-local abort,
+not chosen-byte control of a live pointer.
+
+**2. The `+516` offset and chosen-byte readback are NOT `-O0` artifacts.**
+Rebuilt again at `-O3` with `-D_FORTIFY_SOURCE=0` (`src/build-rel-nofort`,
+confirmed to import plain `sprintf`) and linked `harness/ws_server_rel_nofort`:
+
+- short control: 71-byte reply, clean.
+- `marker:41`: 558-byte reply, `queue.c:47` assertion (rc 134).
+- `marker:ff`: 558-byte reply, `aws.c:316 Unexpected source` (rc 134).
+- Gdb readback on the 490-byte cycle request
+  (`harness/release/gdb-nofort-cycle.txt`): type-based offset `516`, live
+  `DONE_OFFSET=516`, `VERSION_LEN=490`, `RESPONSE_CODE=4`, pre-sprintf
+  `item.next = 0xffffffffffffffff` (initialized `NN_QUEUE_NOTINQUEUE`),
+  post-sprintf `item.next = 0x3231307a79787776` — the same value and indices
+  (481..488) as the `-O0` build. The `done` bytes are `P Q R ... z 0 1 2`.
+
+Raw traces: `harness/release/` (client/server/gdb text, ASLR addresses
+scrubbed only in the quoted values above; addresses present in the raw files).
+Reproduce: `bash` the configure lines in `src/build-rel*-config.log`, then
+`python3 harness/wire_pattern.py 489 marker:41 0` against the chosen listener.
+
+**Source-level rung-5 closure.** `nn_assert` is a custom macro, NOT gated by
+`NDEBUG` (`src/utils/err.h:46-55`), so the queue detector survives Release. The
+corrupted `done` fields `fsm/src/srcptr/type` are overwritten by `nn_fsm_raise`
+(`ws_handshake.c:845`) before `nn_ctx_raise` → `nn_queue_push` reads
+`item.next`; `nn_queue_push` (`queue.c:45-55`) then resets `item->next = NULL`
+and writes only to the legitimate queue tail, never an attacker-chosen
+address. The corrupted value reaches an assert/abort or a downstream FSM
+divergence, not a write-what-where. No command-execution primitive exists in
+any build tested; rung 5 stays closed. W109 adds a build-specificity caveat to
+the rung-4 generality (FORTIFY builds abort before chosen-byte reach) and does
+not refute the witness-verified `-O0` scope.
