@@ -259,3 +259,29 @@ words; it never asks gdb for the optimized-out `&p`.
 Author observation only: deterministic pre-auth remote DoS by canary NUL on
 the stock plain -O2 build, both sinks. No chosen byte, no command side effect,
 no witness verdict. All probes on 127.0.0.1 ports started by this plant.
+
+## W9 — independent witness replay, W8 ESTABLISHED at rung 3 (2026-11-22 ~17:17Z)
+
+Witness W115 verdict DM #1453 on commit 8e24ea2, folded into
+`reports/vrpn2shell.md`. The witness verified 3/3 source pins, copied both
+pinned trees to `/tmp` and built its own `RelWithDebInfo` servers: vulnerable
+SHA prefix `36c715ba...`, fixed `f11cabec...`. Using the committed
+`probe-func-dos.sh` on fresh ports 14021-14030: vulnerable SENDER 102/4 ALIVE,
+105 DEAD exit 134 twice, 111 DEAD exit 134; fixed SENDER 105 ALIVE; vulnerable
+TYPE 105 DEAD exit 134; fixed TYPE 105 ALIVE; every dead run logged
+`*** stack smashing detected ***`. Its gdb probe at 105 measured `i=105`,
+`cdqe` / `mov BYTE PTR [rsp+rax],0` at `handle_sender_message+98/+100`,
+`&sender_name=rsp`, canary at +104, frame #1 `doSystemCallbacksFor :1446`, then
+SIGABRT. Its own ASan pair (vulnerable `ab730d88...`, fixed `7db6a77d...`)
+reported `stack-buffer-overflow WRITE of size 1` at `vrpn_Connection.C:4554`,
+frame offset 217 in `[112,212) 'sender_name'` for vulnerable 105; fixed 105 and
+vulnerable 4 clean. Source lines checked: `:4554` unclamped, fixed `:4558`
+clamped, TYPE `:4482` unclamped.
+
+Verdict: ESTABLISHED at the claimed rung-3 scope; rung unchanged at 3 (fixed
+NUL byte, no chosen byte, no pointer control, no command). The witness could
+not reproduce the two author plain saved-RIP ALIVE rows at 136/139: both were
+DEAD exit 139 on its binary, and it grades those rows UNKNOWN/not reproduced;
+the canary claim is unaffected. W1/W2/W3/W6/W7 remain author-only. No new
+author build, repo edit or host change was needed to fold in the verdict; all
+replay probes were loopback and no `vrpn_server` was left running.

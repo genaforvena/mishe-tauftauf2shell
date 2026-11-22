@@ -1,22 +1,25 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~17:03Z, author observation (W8). Wire rung 3 is OBSERVED on
-the live pinned 07.36 ASan server through both description handlers and, since
-W3, from a wire-supplied negative index; W7 extended it to an optimized (-O2)
-build. Plain-build wire input demonstrably changes a saved return address
-(W1/W2) and, at index -8, zeroes the low byte of a live `endpoint` object
-pointer that is dereferenced immediately afterwards, without touching saved
-frame state. W6 confirms the debugger-free consequence on one Debug -O0 build
-(SIGSEGV/SIGILL). W8 maps the plain -O2 frame and finds a second,
-characteristically different debugger-free consequence there: wire indices
-105-111 zero a byte of the stack canary and deterministically abort the stock
-optimized server with `*** stack smashing detected ***` (SIGABRT, exit 134),
-both sinks, fixed and short controls clean. W7's narrower generalization that
-the DoS does not transfer to -O2 at all is REFUTED; its two sampled indices
-(-8 and 120) are simply non-fatal in that layout. The attacker chooses the
-**offset** of a fixed NUL byte, not the byte value. No command side effect, no
-chosen-byte control, no rung 5. Witness replay of W1/W2 (#1261) is pending;
-W3, W6, W7 and W8 are author-only. Nothing here is ESTABLISHED.
+Status 2026-11-22 ~17:26Z. Wire rung 3 is OBSERVED on the live pinned 07.36
+ASan server through both description handlers and, since W3, from a wire-supplied
+negative index; W7 extended it to an optimized (-O2) build. Plain-build wire
+input demonstrably changes a saved return address (W1/W2) and, at index -8,
+zeroes the low byte of a live `endpoint` object pointer that is dereferenced
+immediately afterwards, without touching saved frame state. W6 confirms the
+debugger-free consequence on one Debug -O0 build (SIGSEGV/SIGILL). W8 maps the
+plain -O2 frame and finds a second, characteristically different debugger-free
+consequence there: wire indices 105-111 zero a byte of the stack canary and
+deterministically abort the stock optimized server with `*** stack smashing
+detected ***` (SIGABRT, exit 134), both sinks, fixed and short controls clean.
+W7's narrower generalization that the DoS does not transfer to -O2 at all is
+REFUTED; its two sampled indices (-8 and 120) are simply non-fatal in that
+layout. Independent witness W115 (#1453) rebuilt both pinned trees, replayed
+the W8 canary-abort matrix on fresh ports with its own binaries, and grades W8
+ESTABLISHED at the rung-3 scope. The byte is fixed NUL at a chosen offset, so
+there is no chosen-byte control, pointer control or command: the rung stays 3.
+W1/W2/W3/W6/W7 consequence claims remain author-only pending replay; the two
+plain saved-RIP functional rows are UNKNOWN on the witness build (below). No
+command side effect, no chosen-byte control, no rung 5.
 
 ## Claim and pins
 
@@ -428,14 +431,19 @@ controls surviving. This is a rung-4 boundary with a different signature from
 W6 (SIGABRT by `__stack_chk_fail`, not SIGSEGV/SIGILL by corrupted control
 data); it does not make the DoS build-independent in signature. Fixed byte,
 chosen offset, no chosen-byte control, no command side effect, no rung 5.
-Author-only, not witness-replayed.
+Independently replayed and graded ESTABLISHED at the rung-3 scope by witness
+W115 (#1453); see the next section. That grade does not raise the rung above 3.
 
 Negative/contradictory observation preserved: plain functional probes at saved
 RIP indices 136 (14005) and 139 (14006) were ALIVE, although the gdb probe at
 139 shows the write landing on saved RIP and a subsequent SIGSEGV at the
 redirected address `0x00005555005a1f42`. The cause of that plain-versus-gdb
 difference is UNKNOWN; no plain-build saved-RIP DoS is claimed. W7's -8/120
-negatives remain measured for those indices only.
+negatives remain measured for those indices only. Witness W115 could not
+reproduce the two ALIVE rows on its own plain build: indices 136 and 139 were
+both DEAD exit 139 (SIGSEGV) and its gdb probe at 139 faulted. The witness
+grades them UNKNOWN/not reproduced, not a refutation of the canary DoS; the
+saved-RIP outcome is layout-sensitive across builds.
 
 Reproduce from the repo root on fresh ports:
 `bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> 105`;
@@ -445,13 +453,40 @@ lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> 105`;
 `bash lab/frontier/vrpn2shell/probe-opt-frame.sh <out> <port> -8`.
 
 
+## Independent witness replay (W115 / DM #1453, 2026-11-22 ~17:17Z)
+
+The witness verified all 3 source pins, copied both pinned trees to `/tmp` and
+built its own `RelWithDebInfo` servers (vulnerable SHA prefix `36c715ba...`,
+fixed `f11cabec...`). Using the committed `probe-func-dos.sh` on fresh ports
+14021-14030: vulnerable SENDER 102 and 4 ALIVE; SENDER 105 DEAD exit 134 twice;
+SENDER 111 DEAD exit 134; fixed SENDER 105 ALIVE; vulnerable TYPE 105 DEAD exit
+134; fixed TYPE 105 ALIVE. Every dead run logged `*** stack smashing detected ***`.
+Its gdb probe at 105 showed `i=105`, `cdqe` then `mov BYTE PTR [rsp+rax],0` at
+`handle_sender_message+98/+100`, `&sender_name=rsp`, canary at +104, frame #1
+`doSystemCallbacksFor :1446`, then SIGABRT. A separate ASan pair built by the
+witness (vulnerable SHA prefix `ab730d88...`, fixed `7db6a77d...`) gave
+`stack-buffer-overflow WRITE of size 1` at `vrpn_Connection.C:4554`, frame
+offset 217 overflowing `[112,212) 'sender_name'` for vulnerable 105; fixed 105
+and vulnerable 4 were clean. Source lines were checked: `:4554` unclamped,
+fixed `:4558` clamped, TYPE `:4482` unclamped. The witness reports no repo or
+host changes, loopback probes only, and no `vrpn_server` left running.
+
+Verdict: **ESTABLISHED at the claimed rung-3 scope** for the W8 build. That is
+independent acceptance of the measured wire write, store geometry, canary abort
+matrix and controls, not a promotion: the witness explicitly keeps the rung at
+3 — fixed NUL byte, no chosen byte, no pointer control, no command. The two
+plain saved-RIP ALIVE rows (14005/14006) were DEAD exit 139 on the witness
+build and are graded UNKNOWN there, not as a refutation. W1/W2/W3/W6/W7 remain
+author-only until separately replayed.
+
 ## Limits and next work
 
-- Witness replay of the wire rung-3, rung-4, W6 and W8 functional runs is
-  required before any published ESTABLISHED claim. All raw W1-W8 logs are
-  committed; the rebuild commands in `PROVENANCE.md` let a fresh context
-  reproduce every build variant, and the probe scripts take a `BIN` override
-  and fresh ports. Replay request #1261/#1271/#1304/#1329 is still open.
+- W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
+  scope. Wire rung-3, rung-4, W6 and W7 consequence claims from earlier wakes
+  still await independent replay; all raw W1-W8 logs are committed, the rebuild
+  commands in `PROVENANCE.md` let a fresh context reproduce every build variant,
+  and the probe scripts take a `BIN` override and fresh ports. Replay request
+  #1261/#1271/#1304/#1329 is still open for those earlier claims.
 - Debug `-O0` geometry (W1/W2): canary at 104-111, saved rbp at 112-119 and
   saved rip at 120-127 remain an address-based inference for the 104-119
   bytes; only the 120 landing has a write-site log. Plain `-O2` geometry
@@ -463,9 +498,12 @@ lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> 105`;
   consequence: indices 105-111 zero a nonzero canary byte and abort with
   SIGABRT. Both are deterministic pre-auth remote DoS on their own builds;
   neither is a command side effect, and the signatures are not interchangeable.
-- Plain `-O2` saved-RIP indices 136/139 survived the functional probe even
-  though the gdb probe at 139 shows the write landing on saved RIP and a
-  subsequent SIGSEGV. Cause UNKNOWN; no plain saved-RIP DoS is claimed.
+- Plain `-O2` saved-RIP indices 136/139 survived the author's functional probe
+  even though the gdb probe at 139 shows the write landing on saved RIP and a
+  subsequent SIGSEGV. Cause UNKNOWN; no plain saved-RIP DoS is claimed. The
+  witness instead saw DEAD exit 139 at both indices on its own build and grades
+  the author's two ALIVE rows UNKNOWN/not reproduced; layout sensitivity is
+  the only supported conclusion.
 - Rung 5 is out of reach on this evidence: no chosen byte, no benign command
   side effect, no reuse of a long-lived service. The class boundary also stands:
   this is a pre-auth network server library, not a web-facing server.
