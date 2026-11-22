@@ -1,0 +1,17 @@
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+F6 buf=0x7ffff68a8800 slot1=0x7ffff68aa000 len=1198
+F6 extptrs:0x7ffff68aa100:	0x00007ffff68aa020	0x0000000000000000
+0x7ffff68aa110:	0x0000000000000000	0x0000000000000000
+F6 fake+0:0x7ffff68aa020:	0xff	0xff
+F6 fake+0xb8:0x7ffff68aa0d8:	0x00007ffff68aa2f0
+F6 fake+0x110:0x7ffff68aa130:	0x4242424242424242
+F6 fake+0x174:0x7ffff68aa194:	0x00000001
+F6 fake+0x2d8:0x7ffff68aa2f8:	0x00000000
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7bee50c in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+STOP: rip=0x7ffff7bee50c

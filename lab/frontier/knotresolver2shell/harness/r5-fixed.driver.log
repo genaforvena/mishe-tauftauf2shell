@@ -1,0 +1,3 @@
+[driver] slot1=0x7ffff68aa000 rip=0x7ffff7458750 cmd=b'touch /tmp/knot-r5-fixed\x00'
+[driver] F6 fired
+[driver] done

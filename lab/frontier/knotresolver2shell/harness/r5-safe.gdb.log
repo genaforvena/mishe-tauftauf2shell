@@ -1,0 +1,28 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000012345678 in ?? ()
+STOP: rip=0x12345678
+rip            0x12345678          0x12345678
+rdi            0x7ffff68aa300      140737329668864
+rsi            0x0                 0
+#0  0x0000000012345678 in ?? ()
+#1  0x00007ffff7bee512 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+#2  0x00007ffff7bee6d4 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+#3  0x00007ffff7bf74fd in gnutls_deinit () from /lib/x86_64-linux-gnu/libgnutls.so.30
+#4  0x0000555555598832 in pl_quic_conn_sess_deinit (session=0x7ffff68beb00, sess_data=0x7ffff68bed00) at ../daemon/quic_conn.c:884
+#5  0x000055555557f13e in session2_free (s=0x7ffff68beb00) at ../daemon/session2.c:940
+#6  0x000055555557c104 in session2_dec_refs (s=0x7ffff68beb00) at ../daemon/session2.h:964
+#7  0x000055555559898e in pl_quic_conn_event_unwrap (event=PROTOLAYER_EVENT_CLOSE, baton=0x7fffffff8630, session=0x7ffff68beb00, sess_data=0x7ffff68bed00) at ../daemon/quic_conn.c:922
+#8  0x0000555555580553 in session2_event_unwrap (s=0x7ffff68beb00, start_ix=0, event=PROTOLAYER_EVENT_CLOSE, baton=0x0) at ../daemon/session2.c:1351
+#9  0x00005555555805ed in session2_event (s=0x7ffff68beb00, event=PROTOLAYER_EVENT_CLOSE, baton=0x0) at ../daemon/session2.c:1381
+#10 0x0000555555593edd in session2_close (s=0x7ffff68beb00) at ../daemon/session2.h:1168
+#11 0x0000555555595831 in pl_quic_demux_event_unwrap (event=PROTOLAYER_EVENT_DISCONNECT, baton=0x7fffffff8740, session=0x7ffff688c000, sess_data=0x7ffff688c1c0) at ../daemon/quic_demux.c:571
+#12 0x0000555555580553 in session2_event_unwrap (s=0x7ffff688c000, start_ix=0, event=PROTOLAYER_EVENT_DISCONNECT, baton=0x7ffff68bed00) at ../daemon/session2.c:1351
+#13 0x00005555555805ed in session2_event (s=0x7ffff688c000, event=PROTOLAYER_EVENT_DISCONNECT, baton=0x7ffff68bed00) at ../daemon/session2.c:1381
+SYSTEM_ADDR=0x7ffff7458750
+From                To                  Syms Read   Shared Object Library
+0x00007ffff7428800  0x00007ffff75b0039  Yes         /lib/x86_64-linux-gnu/libc.so.6

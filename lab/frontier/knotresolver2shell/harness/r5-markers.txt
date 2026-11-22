@@ -1,0 +1,8 @@
+# Observed side effects of the wake-12 rung-5 attempt (2026-11-22, UTC).
+# Both files were absent before their run and were created by the inferior's
+# system() call from F6-supplied bytes; gdb logged a vfork detach in both runs.
+/tmp/knot-r5-established 2026-11-22 09:57:19.302669095 +0000 0
+/tmp/knot-r5-second      2026-11-22 09:58:11.205356738 +0000 0
+# Controls (marker explicitly removed before each run, still absent after):
+#   vulnerable build, chosen RIP 0x12345678: /tmp/knot-r5-safe absent
+#   fixed 6.4.1 build, same wire bytes: /tmp/knot-r5-fixed absent
