@@ -263,6 +263,24 @@ is lab-local: `asan-vuln-K195.err`, `plain-K195.err`, `gdb-deep-K195.txt`,
   obstacles, not claimed and not refuted in general; rungs 3/4 are unchanged.
   No independent witness replay of this report is in hand yet.
 
+## Fresh-context replay (wake 6, 2026-11-22 ~17:08Z)
+
+Re-ran the documented control variants on the existing pinned binaries, with
+no rebuild: vulnerable ASan K=95 rc 1 / 3782-byte stderr; fixed ASan K=95 rc 0
+/ 595-byte XML; vulnerable ASan K=97 rc 0; vulnerable ASan K=195 rc 1 /
+3639-byte stderr; fixed ASan K=195 rc 0. Plain K=195 rc 134 with `double free
+or corruption (!prev)` on stderr and 41-byte stdout. The two fresh vulnerable
+ASan reports are identical to the canonical `asan-vuln-K95.err` and
+`asan-vuln-K195.err` after masking hex addresses and PIDs (the `diff` of
+`sed -E 's/0x[0-9a-f]+/0xADDR/g; s/==[0-9]+==/==PID==/g'` output is empty);
+raw files differ only in those ASLR/PID fields. Stable symbolic lines:
+`WRITE of size 8`, `msWMSDispatch .../src/mapwms.cpp:5991`, 800-byte region at
+K=95 and 1600-byte region at K=195. This re-confirms the rung-3 write and its
+controls on the current tree; the rung-4 gdb readback and the wire bridge were
+NOT re-run this wake. Rung 5 stays UNKNOWN. Replay flaw found here and fixed in the
+block below: `poc.sh` reuses `poc-K<K>.err`, so a fixed-control run silently
+overwrites the vulnerable ASan report from the same K.
+
 ## Reproduce
 
 ```
@@ -289,8 +307,12 @@ cmake --build build-asan2 --target mapserv -j4
 # the bridge): same 8.6.4 source and WITH_* flags, `-B build-plain`, and
 # C/CXX flags '-O0 -g -fno-omit-frame-pointer' with no sanitizer linker flags.
 
-# Drivers (all from lab/mapserver2shell):
+# Drivers (all from lab/mapserver2shell). `poc.sh` writes to
+# poc-K<K>.out/.err, so every later run at the same K overwrites the earlier
+# report. Copy each vulnerable stderr to its canonical cited filename before
+# running the fixed control at that K.
 ./poc.sh 95                              # ASan vulnerable, rc 1
+cp poc-K95.err asan-vuln-K95.err         # preserve cited evidence
 BIN=./build-fixed/mapserv ./poc.sh 95    # fixed control, rc 0
 ./poc.sh 97                              # safe-input control, rc 0
 python3 loopback_bridge.py               # 127.0.0.1:8077 only
@@ -299,6 +321,9 @@ python3 loopback_bridge.py               # 127.0.0.1:8077 only
 ./readback.sh 95                         # live gdb readback of OOB slots
 ./consumer-inspect.sh 95                 # consumer-reality heap dump (rung-5 boundary)
 ./poc.sh 195                             # deeper OOB, rc 1 (1600-byte region)
+cp poc-K195.err asan-vuln-K195.err       # preserve cited evidence
 BIN=./build-fixed/mapserv ./poc.sh 195   # fixed control at K=195, rc 0
 ./poc.sh 197                             # deeper safe-input control, rc 0
+BIN=./build-plain/mapserv ./poc.sh 195   # plain glibc fault, rc 134
+cp poc-K195.err plain-K195.err           # preserve cited plain evidence
 ```
