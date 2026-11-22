@@ -38,6 +38,9 @@ SHA-256 values are in `PIN_HASHES.txt`.
 - `harness/run.sh` is the single replay entry point; it opens no sockets and
   touches only files under this directory. Two consecutive replays produced
   byte-identical PASS lines (`harness/run-final1.txt`, `run-final2.txt`).
+- A clean `git archive f035109` replay of the committed directory reproduced
+  the same 8 PASS / 0 FAIL and identical output hash; pinned blobs were read
+  from the archive, not a live clone.
 - Raw per-case output is in `evidence/`; normalized hashes in
   `EVIDENCE_HASHES.txt`.
 

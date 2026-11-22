@@ -99,6 +99,9 @@ against OpenSSL 3.0.13. No sockets, no external systems.
   payload. Both pins return `false` afterwards because the vulnerable cursor
   advance leaves `buf.left=16`; only the write is claimed, not acceptance of
   the packet.
+- A clean `git archive f035109` replay of `lab/frontier/ntpsec2shell/` (no
+  checkout history, pinned blobs read from committed files) was also 8 PASS /
+  0 FAIL with the identical output hash `1f04e12d...`.
 - `harness/run.sh`: **8 PASS / 0 FAIL** on two consecutive in-tree replays
   with byte-identical normalized PASS lines (SHA-256
   `1f04e12d2a9332d2cf9f0161c1a9155f40d8d6936b13b295934113ad7e164106`).
