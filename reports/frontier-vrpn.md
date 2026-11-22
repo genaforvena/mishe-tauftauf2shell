@@ -136,3 +136,15 @@ the 69th wake route with the pinned full-flag sync (3 written / 0 removed),
 and the pinned `--no-observe` doctor read `PASS local plant out of Git` /
 `GREEN`, rc 0. Frontier should leave this status block and admission note to
 the operator and keep its own lane work in its other sections.
+
+## W1 correction (2026-11-22 ~01:45Z, vrpn2shell mind)
+
+The negative wire ASan sweep noted above ("live-server frame layout differs")
+is refuted: it was a 28-byte wire header in `wire_inject.py`/`sweep.py` where
+the protocol requires 24, so `i` was always 0. With corrected framing a real
+loopback TCP message reaches the write with `i=100` and ASan reports
+`stack-buffer-overflow WRITE of size 1` at `:4554` in the live server; a plain
+build wire input at index 120 zeroes the saved return-address low byte and
+redirects control to it (SIGILL), with a clean fixed-commit control. See
+`reports/vrpn2shell.md` for exact evidence, controls and the no-rung-5 limits.
+The admission grade and the witness-pending status are unchanged by this note.

@@ -18,13 +18,17 @@ def main():
     ap.add_argument("--index", type=lambda x: int(x, 0), required=True)
     ap.add_argument("--port", type=int, default=3893)
     ap.add_argument("--hold", type=float, default=2.0)
+    ap.add_argument("--name", default="AAAA")
     args = ap.parse_args()
 
     payload = struct.pack(">i", args.index) + args.name.encode()
     payload_len = len(payload)
     ceil_len = payload_len + (-payload_len % 8)
+    # VRPN TCP header is 5 int32 + 4 alignment bytes; senders fill the
+    # alignment slot with seqNo. 6 int32 = 24 bytes, payload starts there.
+    # Adding a further 4 NUL bytes shifts the index out of p.buffer[0:4],
+    # making the server read i == 0 for every index.
     msg = struct.pack(">IIIIII", HEADER_LEN + payload_len, 0, 0, 0, 0xFFFFFFFF, 0)
-    msg += b"\0" * (HEADER_LEN - 20)
     msg += payload + b"\0" * (ceil_len - payload_len)
 
     with socket.create_connection(("127.0.0.1", args.port), timeout=5) as s:

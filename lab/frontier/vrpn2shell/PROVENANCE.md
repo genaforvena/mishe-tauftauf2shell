@@ -12,7 +12,10 @@ tests ran on 127.0.0.1 ports only; no external system received a trigger.
 | `src/vrpn-fixed.tar.gz` (fix commit `0da5b0b...`) | <https://github.com/vrpn/vrpn/archive/0da5b0b71e06e8c318a4e674c84caee12251a782.tar.gz> | `b5258e996f295c3310310f4d81096dc03cf1ffbe62d06f26b57c494e431a0643` |
 | `src/vrpn-07.36/` HEAD | shallow clone of tag `v07.36` | `79deb000cc0b47ae49a80c92c78167c02d8a04d8` |
 | `harness/handler_direct.cpp` | local | `db8bbadfae35ba6478c7076baa4a8033b31144d771f8f265d1398b82e2ef5fd8` |
-| `wire_inject.py` | local | `b48c85d3696c0b3ccebd57091e5ee73528c7940e6608749c2846811d0426213c` |
+| `wire_inject.py` | local | `aaceb8a77cc1fa7bbaea7abf6611d497088169eedfae4274dd8bfc53b2774d27` |
+| `sweep.py` | local | `52889f8b93362fcdf3c2652a2ae94c9d0d37c6907672f64e24acebfc0a71e1db` |
+| `probe-gdb.sh` | local | `982408d7f2ba8a73668a19ec182b4ef0697906d5476f337df10389cb996eda42` |
+| `probe-plain-rip.sh` | local | `b376e5d7d8f839fe07ac0bb486ab0a6a905a630aad038ad86ec0576f344748fb` |
 
 ## Build and observation records
 
@@ -28,8 +31,49 @@ tests ran on 127.0.0.1 ports only; no external system received a trigger.
   `out-gdb-wire-100b/gdb.log` (index `100`), both showing handler entry and
   `dispatch` frames from a real TCP message.
 - Wire ASan negative sweep: `out-wire-sweep-02/server.err`, no ASan report.
-- Compiler: system `g++` on this host; exact version not recorded this wake —
-  UNKNOWN, must be recorded before any witness-facing claim of layout detail.
+- Compiler: `g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0`, as reported by
+  `g++ --version` on this host on 2026-11-22 (W1). Witness W103 built with the
+  same version. Earlier UNKNOWN entry retired.
+- W1 builds (2026-11-22): fixed ASan server via
+  `cmake --build build-asan-fixed --target vrpn_server` (`build-fixed-server.log`);
+  plain vulnerable server via `cmake -S src/vrpn-07.36 -B build-plain-07.36
+  -DCMAKE_BUILD_TYPE=Debug` (`cfg-plain.log`, `build-plain.log`, no sanitizer,
+  stack protector active); plain fixed server via the same against
+  `src/vrpn-fixed` (`cfg-plain-fixed.log`, `build-plain-fixed.log`).
+
+## W1 framing repair (2026-11-22 ~01:42Z)
+
+- The earlier wire sweep and gdb wire runs used a 28-byte header: 6 int32 plus
+  a further 4 NUL bytes. Pinned `getOneTCPMessage` (`:4163-4245`) reads a
+  20-byte header plus 4 alignment bytes, and `marshall_message` (`:4377-4458`)
+  places payload at byte 24. The extra 4 bytes put the index at `p.buffer[4:8]`,
+  so `i = ntohl(*p.buffer)` was 0 for every injected index. The negative live
+  ASan sweep is therefore NOT evidence about frame layout; it was a harness
+  bug. `wire_inject.py` and `sweep.py` now send a 24-byte header; hashes updated
+  above. The direct-call harness was unaffected (it builds `p` in memory).
+- Pre-repair `wire_inject.py` hash (the 28-byte-header version used by frontier
+  and witness W103) was
+  `b48c85d3696c0b3ccebd57091e5ee73528c7940e6608749c2846811d0426213c`.
+
+## W1 wire rung 3 and plain-build rung 4 (2026-11-22 ~01:44Z)
+
+- Live ASan server, corrected framing, index 100
+  (`out-probe-gdb-100/gdb.log`): `i=100`, `&sender_name=0x7ffff5181770`,
+  destination `0x7ffff51817d4`, ASan `stack-buffer-overflow WRITE of size 1` at
+  `vrpn_Connection.C:4554` from a real TCP message through `getOneTCPMessage:4239`
+  → `dispatch:4331` → handler. Wire rung 3 OBSERVED. Short-input control index 4
+  (`out-probe-gdb-4/gdb.log`) is clean. Fixed-commit ASan control with index 100
+  (`out-fixed-wire-100/gdb.log`) reaches the clamped write site at fixed `:4558`
+  with no ASan report.
+- Plain-build frame map (`out-plain-wire-100/gdb.log`): `sender_name` at
+  `0x7fffffffd820`; index 100 lands on padding at `0x7fffffffd884`; stack
+  canary at +104, saved rbp at +112, saved rip at +120 relative to the array.
+- Plain-build wire index 120 (`out-plain-rip-120/gdb.log`): saved rip low byte
+  changes `0x...6d88` → `0x...6d00`, execution resumes there and dies SIGILL.
+  Plain fixed-commit server at the same index (`out-plain-fixed-rip-120/gdb.log`)
+  leaves saved rip unchanged (`0x...6d86` before and after) with no signal.
+  Chosen offset, fixed NUL byte; layout-specific to g++ 13.3.0 Debug `-O0`.
+- Full discussion, limits and the no-rung-5 statement: `reports/vrpn2shell.md`.
 
 Screened out this wake (no new source work): JSON::XS CVE-2026-129114
 (one-byte NUL write with no rung-4 route), image/parser-only and closed-source

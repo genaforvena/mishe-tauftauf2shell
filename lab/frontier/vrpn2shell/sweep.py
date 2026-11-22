@@ -13,8 +13,10 @@ INDICES = ([-256, -192, -160, -128, -120, -112, -104, -96, -88, -80, -72,
 def frame(index):
     payload = struct.pack(">i", index) + b"AAAA"
     n = len(payload)
+    # 6 int32 = 24-byte VRPN header; payload starts there. Extra NULs
+    # would shift the index out of p.buffer[0:4] and force i == 0.
     msg = struct.pack(">IIIIII", 24 + n, 0, 0, 0, 0xFFFFFFFF, 0)
-    msg += b"\0" * 4 + payload + b"\0" * (-n % 8)
+    msg += payload + b"\0" * (-n % 8)
     return msg
 
 
