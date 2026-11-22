@@ -212,6 +212,26 @@ containers whose host ports bind only to loopback.
   arbitrary-address steering, command or rung 5 and no witness replay. Raw
   evidence and `EVIDENCE_HASHES.txt` live in `lab/pgpool2shell/config/`.
 
+- **Pgpool2Shell W8 alias analysis (commit `82df143`,
+  `reports/pgpool2shell-alias-w8.md`)**: from `lab/pgpool2shell/config` after
+  `bash run-harness.sh`, run `bash gdb-alias.sh` (~1 s) and the two live-daemon
+  replays `bash gdb-run.sh 0x11111111 gdb-alias-wire.out gdb-alias-wire.peer`
+  and `bash gdb-run.sh 0x11111111 gdb-alias-wire3.out gdb-alias-wire3.peer
+  gdb-alias-wire2.cmd` (ports 19003–19006 free; only the started daemon/peer
+  are killed). Expect the harness OOB store at
+  `&backend_info[128].backend_port` to change a live `json_value` type word
+  `0x3 → 0x42424242` (computed alias index −2767 into `backend_desc`'s
+  `values[]`, so not that array); chosen `0` and `0x11111111` both abort
+  `free(): invalid size` rc 134 there, so the harness abort is
+  value-independent. On the live 4.7.2 watchdog child the OOB slot holds
+  `0x11111111` and `json_value_free_ex` faults at `0x555511111111`; the slot
+  is `json_object_entry.value` of `backend_hostname` (name_length `0x10`).
+  With W7's `0x42424242` → `0x555542424242`, the low 32 bits track the peer
+  value and the high 16 are inherited: no address steering. Fixed 4.7.3 N=129
+  and safe N=128 controls, grade and the unclaimed rung 5 are unchanged;
+  author-only and unwitnessed. New assets and normalized hashes in
+  `lab/pgpool2shell/config/`.
+
 **Earlier post-admission limbs (author-only at admission; four Soes CoE limbs later replayed by W105):**
 - **Netx2Shell W1 chosen-byte and TLS-protocol legs** (commits `3923066`,
   `8f888d2`): from `lab/frontier/netx2shell`, `bash harness/build-plain.sh`

@@ -5440,13 +5440,34 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   packet with N=129 crashes the live 4.7.2 watchdog child, and live gdb sees
   the chosen value at `0x55555591dbe0` from `standard_packet_processor` with
   a following SIGSEGV in `json_value_free_ex` at pointer `0x555542424242`;
-  the clobbered field is UNKNOWN. Fixed 4.7.3 N=129 and safe N=128 controls
-  are clean. Grade: rung 3 plus rung 4 chosen value at a layout-fixed offset
-  including on a live daemon, with `wd_authkey=''` and a configured loopback
-  peer as stated conditions; no arbitrary-address steering, command, rung 5
-  or witness replay of this new lane. The six closed 92867 steering lanes were
-  not retried. `f555579` only corrected a report timestamp and changed no
-  claim.
+  the clobbered field was UNKNOWN at W7; W8 (`82df143`) resolves it (below).
+  Fixed 4.7.3 N=129 and safe N=128 controls are clean. Grade: rung 3 plus
+  rung 4 chosen value at a layout-fixed offset including on a live daemon,
+  with `wd_authkey=''` and a configured loopback peer as stated conditions;
+  no arbitrary-address steering, command, rung 5 or witness replay of this
+  new lane. The six closed 92867 steering lanes were not retried. `f555579`
+  only corrected a report timestamp and changed no claim.
+
+#### 2026-11-22 ~18:0xZ research limb update: pgpool2shell W8 alias analysis
+
+- **W8 resolves the W7 field UNKNOWN (commit `82df143`,
+  `reports/pgpool2shell-alias-w8.md`)**: the operator handed new W7 evidence
+  with a no-rung-5/no-steering-claim boundary. Live gdb before/after mapping
+  on the pinned 4.7.2 watchdog child identifies the OOB slot as
+  `json_object_entry.value` for the `backend_hostname` key (name_length `0x10`)
+  of a peer-supplied backend object; `json_value_free_ex` walks object entries
+  in reverse and faults on that child pointer first. A second chosen value
+  `0x11111111` gives fault pointer `0x555511111111` versus W7's `0x42424242` →
+  `0x555542424242`: low 32 bits track the peer value, high 16 are inherited,
+  so the value→fault link is causal but there is no address steering. In the
+  direct-call harness the store changes a live `json_value` type word from
+  `0x3` to `0x42424242`, not a `backend_desc` `values[]` child; chosen `0` and
+  `0x11111111` both abort `free(): invalid size` rc 134, so that abort is
+  value-independent and its W7 readback remains a genuine chosen-value store.
+  Replays: `bash gdb-alias.sh`, plus two `bash gdb-run.sh 0x11111111 ...`
+  wire runs (ports 19003–19006 free, only the started daemon/peer killed).
+  Grade unchanged: rung 3 + rung 4 at a layout-fixed offset, no command, no
+  rung 5; author-measured only, witness replay of W7/W8 still owed.
 
 #### 2026-11-22 ~17:5xZ frontier staging: inetutils2shell (CVE-2026-32746)
 

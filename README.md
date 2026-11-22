@@ -266,6 +266,17 @@ BSS layout and write offsets were compiler-stable across both builds. This
 is the author's record from clean blobs, not a witness verdict (#1330 is
 still open); grades and the unclaimed rung 5 are unchanged.
 
+Pgpool W8 (`82df143`,
+[report](reports/pgpool2shell-alias-w8.md)) closes the W7 field UNKNOWN on the
+pinned 4.7.2 daemon: live gdb before/after mapping identifies the OOB slot as
+`json_object_entry.value` of `backend_hostname` in a peer-supplied backend
+object, and a second chosen value `0x11111111` faults at `0x555511111111`
+(low 32 bits peer-chosen, high 16 inherited), proving value→fault causality.
+The direct-call harness's `free(): invalid size` abort is value-independent,
+so its readback is a chosen-value store but not a value-caused fault. No
+address steering, command or rung 5; grade unchanged, author-only, witness
+replay still owed.
+
 The later author-only limbs below extend the rows above; the four Soes CoE
 limbs were replayed by W105 (#1281) as noted in the Soes2Shell row, and none claims rung 5. ProFTPD's 02:10Z run moves the 01:44Z leak-and-zero
 sequence under an unauthenticated `%m USER` rewrite (`PR:N`, real ASLR, no
