@@ -1,0 +1,36 @@
+From 718b92615c7963670d26c1a2b246968b58d782e8 Mon Sep 17 00:00:00 2001
+From: Tristan <1075304+TristanInSec@users.noreply.github.com>
+Date: Thu, 28 May 2026 16:32:12 +0200
+Subject: [PATCH] websock: Fix integer overflow in websock_decode() masked
+ frame length check (#1584)
+
+When a masked WebSocket frame uses the 64-bit extended length encoding
+with a value close to UINT64_MAX, the bounds check expression
+(4 + hdr->len) wraps to a small value due to unsigned overflow. This
+causes the check to pass, and the subsequent XOR unmasking loop writes
+past the end of the buffer.
+
+Add an explicit overflow guard before the addition. If hdr->len exceeds
+SIZE_MAX - 4, the frame is rejected as too large before the overflowing
+addition can occur.
+---
+ src/websock/websock.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/websock/websock.c b/src/websock/websock.c
+index 34d2f03..69f60a4 100644
+--- a/src/websock/websock.c
++++ b/src/websock/websock.c
+@@ -204,7 +204,8 @@ static int websock_decode(struct websock_hdr *hdr, struct mbuf *mb)
+ 
+ 	if (hdr->mask) {
+ 
+-		if (mbuf_get_left(mb) < (4 + hdr->len))
++		if (hdr->len > SIZE_MAX - 4 ||
++		    mbuf_get_left(mb) < (4 + hdr->len))
+ 			return ENODATA;
+ 
+ 		hdr->mkey[0] = mbuf_read_u8(mb);
+-- 
+2.43.0
+

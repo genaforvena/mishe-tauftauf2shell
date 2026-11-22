@@ -270,3 +270,12 @@ lab/ytnef2shell/build/
 lab/ytnef2shell/inputs/*.dat
 lab/ytnef2shell/evidence/*.out
 lab/ytnef2shell/evidence/*.err
+
+# baresip2shell direct-call harness: generated function include and local
+# binaries stay local. Pin snapshots, fix patch, runner, driver, provenance
+# and normalized evidence stay tracked.
+lab/frontier/baresip2shell/harness/websock_fn.inc
+lab/frontier/baresip2shell/harness/a-vuln-gcc
+lab/frontier/baresip2shell/harness/a-vuln-clang
+lab/frontier/baresip2shell/harness/a-fixed-gcc
+lab/frontier/baresip2shell/harness/p-vuln

