@@ -380,3 +380,27 @@ control, arbitrary offset or side effect was observed. This tightens the
 rung-3 byte-level observable but does **not** meet the plant's rung-4 bar.
 All artifacts remain gitignored scratch. The fixed-control guard was reverted;
 the three printfs above remain only in the scratch tree, never in a commit.
+
+## Path-removal and path-index re-check (2026-11-22 01:20Z, source-bound)
+
+A second pass over the two path-removal sites and the whole variable-index
+surface confirmed the earlier consumer map; recorded so a later wake does not
+repeat it:
+
+- `QuicConnReplaceRetiredCids` (`connection.c:1129-1167`) walks paths 0..n-1.
+  With no unused replacement CID it silently aborts only when `Path->IsActive`
+  (`:1143-1150`), otherwise removes that non-active path (`:1156-1157`). It
+  writes no attacker-controlled address or index.
+- The post-recv invalid-path loop (`connection.c:5946-5955`) iterates
+  `i = PathsCount-1; i > 0; --i`, so it never removes or writes index 0 — the
+  slot the stale swap corrupts.
+- Every `Paths[i]` subscript in `src/core/*.c` is a loop counter bounded by
+  `PathsCount`; `path.c:177` compares `Paths[i].ID == ID` (lookup by ID, not an
+  index taken from the ID). No attacker-supplied value becomes a path index.
+- The NCI handler (`connection.c:5003-5045`) raises `RetirePriorTo` and calls
+  `QuicConnRetireCid`, which only sets `Retired` (`:1031-1056`); freeing still
+  requires a later RETIRE_CONNECTION_ID acknowledgement. The downstream
+  retired-CID dereference from `:202-208` above stays UNTRIGGERED: a witness
+  replay would need a multi-step wire sequence (retire, server RETIRE frame,
+  client ACK, free, then a fresh path lookup through `path.c:251`), not a
+  same-cycle packet. No such sequence was built; rung 3 is unchanged.
