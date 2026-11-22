@@ -5316,3 +5316,69 @@ read `GREEN (79 declared roles)`, rc 0. Per-build grades and UNKNOWNs are in
 `omp-only` and `signal-coverage` REDs were observed before the routes and units
 existed; the scheduled producers republish them — no failure signal was
 hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
+
+#### 2026-11-22 ~17:1x–17:3xZ research limb updates
+
+- **Pgpool W6 closes the last address-steering lane (commits `8f17c30`,
+  `24411b0`, `reports/pgpool2shell-groom-w6.md`)**: from a rebuilt pinned 4.7.2
+  watchdog on loopback, a type-`f` failover warm-up with `NodeCount=1` and
+  unknown `NO_SUCH_FUNC` runs the parser from
+  `process_failover_command_on_coordinator (watchdog.c:2916)` and leaves
+  `0x8cc59ffa3c9d9b00` in the adjacent slot; 2 s later a type-`r`
+  `START_RECOVERY` trigger comes through `process_remote_online_recovery_command
+  (watchdog.c:7558)` with its frames 0x40 apart, still stores
+  `node_id_set[1]=0x1` and faults at `wd_json_data.c:858`. Cross-command residue
+  cannot occupy the bad index; all steering lanes are negative by measurement
+  and must not be retried. `groom-w6/run.sh` now uses committed `peer.py` /
+  `gdb.cmd` and writes `replay-peer.out` / `replay-gdb.out`. Author-only: W113
+  established only the rung-3 wire scope. No grade change.
+- **MsQuic retired-CID UAF read (commit `8e95f20`,
+  `reports/msquic2shell-wake1.md`)**: wire-pure v2.5.9/quictls Release scratch
+  build with 1-RTT encryption off; after the known stale-path swap, a valid ACK
+  for the server's RETIRE makes `loss_detection.c:614` log
+  `CIDFREE ptr=<P> seq=0`, then a third PADDING-only datagram from a fresh port
+  reads the dangling `Paths[0].DestCid->CID.Length` at `path.c:255` and copies
+  `<P>` into a new path (`PATHADD … count=2`) with identical pointer identity
+  on 3/3 vulnerable runs. Three fixed runs with only `&& (*Path)->InUse` show
+  zero swap/free/post-free-add lines. The UAF write is untriggered, nonzero
+  length grooming is rung 1, instrumentation is gitignored scratch and the
+  guard was reverted. Strengthens rung 3 only; author-only, no rung 4/5.
+- **Vrpn W8 optimized-frame map and canary DoS (commit `8e24ea2`,
+  `reports/vrpn2shell.md`)**: `probe-opt-frame.sh` maps the real O2 frame
+  (canary at `sender_name+104`, saved rbx/rbp/r12 at +112/+120/+128, saved rip
+  at +136); a correctly framed pre-auth message at index 105/111 gives exit
+  134 with `*** stack smashing detected ***`, O2 ASan reports `WRITE of size 1`
+  at `:4554`, and fixed-commit O2 plain/ASan builds plus index 4 stay alive.
+  Author-only, not witness-replayed. **Evidence discrepancy preserved:** the
+  report calls the functional vulnerable binary `-O2 plain`, but its SHA
+  `5cf494…` is the Debug `-O0` build per `PROVENANCE.md` and every
+  `out-w8-*/meta.txt`; the real O2 hash `bfe633…` appears only in the frame
+  map, so the build attribution is UNRESOLVED (fixed controls do use O2).
+  Plain saved-rip indices 136/139 stay alive with cause UNKNOWN.
+- **Soes hook replay self-contained and MapServer fresh replay (commits
+  `2735724`, `fdf5612`)**: a `git archive` clean checkout plus the two
+  untracked SHA-checked pinned tarballs rebuilt 18 binaries and reproduced all
+  six `cve129811-hook-call` cases, including a fresh ASan `WRITE of size 64`
+  from `ecat_slv.c:172`; witness replay still owed, no grade change. MapServer
+  re-ran its committed drivers against the existing pinned binaries: K=95/195
+  vulnerable rc 1 with `WRITE of size 8` at `mapwms.cpp:5991`, fixed and K=97
+  clean, plain K=195 rc 134, normalized stderr identical to the canonical
+  reports. The Reproduce block now preserves the vulnerable `.err` before the
+  fixed-control run overwrote it; rung 4 and the wire bridge were not re-run.
+- **Pnet2Shell staged then admitted (commits `df587c6`, `b10f6a0`,
+  `reports/frontier-pnet2shell.md`)**: CVE-2026-127122, p-net `<1.0.4`; the real
+  pinned `pf_block_reader.c:785-817` writes attacker-chosen scalars and up to
+  240 name bytes through `pf_get_mcr_request()` at 252-byte stride with the
+  caller index `nbr_mcr` unbounded (`PNET_MAX_MC_CR=1`). Vulnerable ASan gives
+  `WRITE of size 2` at `pf_block_reader.c:790`, 0 bytes after a 49600-byte
+  `calloc`, 40 blocks past `pf_ar_t`; fixed v1.0.4 rejects with
+  `WRONG_BLOCK_COUNT`, plain readback shows the chosen bytes at
+  `slot1_offset=252`. `bash harness/run.sh` self-extracts both hash-verified
+  tarballs and gives 11/11 asserts with byte-identical normalized hashes on
+  two replays. Rung 3 on the real pinned writer and rung 4 chosen bytes at a
+  chosen relative index at direct-call scope only; no daemon, wire frame,
+  pointer control or command, ADJACENT pre-auth reach a claim, no rung 5. The
+  operator admitted fastnetmon/pnet/snac at ~17:2xZ (three routes, omp-only
+  GREEN 79 roles); witness replay is owed for all three. The docs budget note
+  (commit `00648ec`) records the final 8G/10G slice budget in
+  `docs/runtime-pin.md`.
