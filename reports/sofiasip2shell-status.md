@@ -78,13 +78,22 @@ grade.
   abort, and now to chosen-delta corruption of 5/6 bytes of a live neighbour's
   user data at natural glibc geometries (including the default buffer via the
   library's real realloc path). Still no pointer control, marker, command or
-  rung 5; "chosen" means chosen delta given the bytes already present. No SIP
-  `ws-binding` call path was built.
-- Next experiment: a live loopback SIP `ws-binding` tport path with vulnerable
-  vs fixed builds; the required `tport_type_ws.c` code is compiled into the
-  pinned static library but no repo binary binds a WS SIP tport, so a new
-  small app is needed. Rung 5 stays additive and per-build and needs a
-  wire-driven benign command plus independent witness replay.
+  rung 5; "chosen" means chosen delta given the bytes already present.
+- Live WS SIP tport (`reports/sofiasip2shell-live-ws-tport.md`,
+  `lab/sofiasip2shell/libbuild/live/`): a plant-started process binds a real
+  "ws" tport on 127.0.0.1, a forked client performs a real HTTP 101 upgrade
+  and writes a masked frame, and the library's event loop reaches
+  `ws_read_frame` via `tport_recv_stream_ws` with no direct test call. With a
+  65544-byte payload v1.13.17 ASan reports `WRITE of size 1`, 0 bytes after
+  the reallocated 65544-byte region, allocated at `ws.c:1057` from the same
+  tport call chain (rc 1). The 65520-byte short frame on v1.13.17 and both
+  frame sizes on v1.13.18 reach `TPORT_RECV count=1` with no ASan report
+  (rc 0). This closes the W1 "no SIP tport path" limit; it is still rung
+  1/2/3 reachability plus a process crash, not pointer control or rung 5.
+- Next experiment: a plain (non-ASan) live tport run with byte readback of a
+  live neighbour would tie the layout harness's chosen-delta result to the
+  tport allocation order; rung 5 additionally needs a benign command with an
+  observed side effect and independent witness replay.
 - Witness #1821 (2026-11-22) replayed the W1 layout claim from a clean
   `git archive HEAD`, regenerated both pinned `.inc` with matching hashes, and
   ran `layout/run.sh` twice (rc 0, identical rc set): readback delta,
@@ -95,5 +104,5 @@ grade.
   labeled scope**. The full autogen/configure/make library lane was not
   independently rebuilt by the witness and remains author-observed.
 - Full stage: `reports/frontier-sofiasip2shell.md`. W1 verdict ESTABLISHED at
-  its labeled scope; W2 adjacent-object data result is author-observed and
-  awaits witness replay.
+  its labeled scope; W2 adjacent-object data and live-tport results are
+  author-observed and await witness replay.
