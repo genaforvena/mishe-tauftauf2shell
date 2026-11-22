@@ -57,6 +57,7 @@ while (need) {
     ...
     wsh->datalen += r;
     wsh->rplen += r;
+    need -= r;
 }
 if (mask && maskp) {
     ssize_t i;
@@ -96,9 +97,13 @@ Harness `lab/frontier/sofiasip2shell/harness/run.sh` (details and all pin hashes
 in that directory's `PROVENANCE.md`). Function under test is **verbatim**
 from each pin; the rest is deterministic stubs and a scripted frame feed.
 
-- **128 PASS / 0 FAIL, twice** (gcc + clang, two rounds, two pins, four cases
-  each), rc 0. Normalized evidence hash over all `evidence/*.log`:
-  `2ee5618bf4ff4df33b72c9dc1b0f027cbfca23a28b7b59cff5f1455a16ac7595`.
+- **128 PASS / 0 FAIL, twice**, and again from a clean `git archive` of commit
+  `189441f` (`git archive 189441f lab/frontier/sofiasip2shell | tar -x`),
+  rc 0. Normalized evidence hash over all `evidence/*.log`:
+  `2ee5618bf4ff4df33b72c9dc1b0f027cbfca23a28b7b59cff5f1455a16ac7595`
+  (path-dependent form from `harness/`); path-independent concatenated content
+  hash `f6d088b793c8450b20bd26a49f309851502e6812e32f8e2891a4f04d25a3b3d3`.
+  Worktree and clean-archive evidence files are byte-identical.
 - Vulnerable pin, ASan, 64-byte payload into 64-byte `bbuffer`:
   `ERROR: AddressSanitizer: heap-buffer-overflow`, `READ of size 1`,
   `0 bytes after 64-byte region`, frame `ws_read_frame` at
