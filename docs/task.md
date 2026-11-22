@@ -5214,3 +5214,44 @@ witness replay and rung 5 stay UNKNOWN for both.
   records for uD3TN (`reports/ud3tn2shell-status.md`) and BACnet
   (`reports/bacnet2shell-status.md`) were added to this file; the README and
   reproducibility rows already carry both targets. No grade change.
+
+#### 2026-11-22 ~09:5x–10:2xZ research limb updates
+
+- **KnotResolver2Shell chosen RIP and benign-command replay (commits
+  `f4f63d0`, `c3c4c62`, `reports/knotresolver2shell-rung3.md`)**: on the pinned
+  6.4.0 jemalloc/debug build on 127.0.0.1:8855 (gdb disables ASLR only for
+  its inferior; host `kernel.randomize_va_space` stayed 2), `harness/r5_dispatch.py`
+  writes a fake gnutls cleanup struct into the 813-byte OOB span:
+  `body[384+0x100] = slot1+0x20`, zeros `+0x108/+0x110/+0x118`, sets fake
+  `+0xb8` to the command address and `+0x110` to the call target, with
+  `cfg.max_datagram_size = 1500` so F6 stays one frame. `harness/r5-trace.gdb`
+  and `r5-syms.gdb` verify the bytes and measure `system` at
+  `0x7ffff7458750`. Non-canonical `0x4242424242424242` faults at the
+  `call *0x110` (`libgnutls 0x7350c`), canonical `0x12345678` gives
+  `rip=0x12345678` — chosen RIP. With `system` at `+0x110`, `touch
+  /tmp/knot-r5-established` and a second distinct `touch` each produce their
+  own marker file and vfork detach; the safe-input RIP and fixed-6.4.1 ASan
+  runs leave their markers absent. **Author-observed rung 5 at the ASLR-off,
+  gdb-parent, jemalloc/debug-build scope; independent witness replay owed, so
+  the README cell is ◐, not ESTABLISHED.** Addresses are host-measured, no
+  wire leak or forced call; ASLR-on/stock exploitability stays UNKNOWN.
+- **FastNetMon CVE-2026-48689 staged (commit `6df55a0`,
+  `reports/frontier-fastnetmon2shell.md`)**: pinned vulnerable header parent
+  `97b04568b6f1` and fix `fa80390ed44`, SHA-256 pins and URLs in
+  `lab/frontier/fastnetmon2shell/pins/PINS.txt`, fix patch alongside.
+  `bash lab/frontier/fastnetmon2shell/harness/run.sh` compiles the real pinned
+  header four ways and replays markers `0x41`/`0x5a`: vulnerable ASan `WRITE
+  of size 1` 0 bytes after a 24-byte region at `vuln.hpp:115`, plain
+  readback of the chosen byte at index 24, fixed pin rejects with no ASan
+  report. Rung 3 confirmed, rung 4 at direct-call harness scope only; no
+  daemon, wire packet or command, so no rung 5 and no admission yet. The
+  first harness build's spurious fixed-control ASan READ was corrected by
+  compiling readback only into the plain build; the replaced hash set is
+  preserved as a noted negative. Pre-auth NetFlow/BGP/IPFIX reach and
+  heap-metadata-to-code-execution are advisory claims, not measurements.
+- **Wake-concurrency recovery (operator docs commit `3d9e35b`)**:
+  `docs/runtime-pin.md` records the 09:37–10:17Z 2026-11-22 memory deadlock
+  under three concurrent hy4-flash wakes, the `SITE/wake-concurrency.json`
+  `max` 3 → 1 recovery, and that no engine route or unit changed; all 76
+  roles still route only to `opencode-go/hy4-flash-free`. Restoring
+  concurrency above 1 needs a larger host slice budget (person's call).
