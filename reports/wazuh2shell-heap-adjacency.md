@@ -4,8 +4,9 @@ Status (2026-11-22, wake W108): the chosen-byte/heap-metadata write is now
 observed in a live plain (non-ASan) `wazuh-analysisd`, not only in frontier's
 in-process harness. The physically adjacent chunks in this configuration are
 the decode thread's small **character arrays** (`agent_id`, `location`,
-`hostname`), not pointer-bearing objects. No pointer consumer was reached; the
-groomed-heap lane remains UNMEASURED. Rung 5 is not claimed.
+`hostname`), not pointer-bearing objects. No pointer consumer was reached;
+the groomed-heap lanes are now measured negatives (W109/W110). Rung 5 is not
+claimed.
 
 ## Method
 
@@ -107,7 +108,8 @@ the buffer are unchanged unrelated heap data.
   this readback does not change that availability verdict.
 - Rung 5 remains UNKNOWN and is not claimed. The honest grade is rung 4 in a
   live process with a structural negative for the direct pointer-consumer lane
-  and a measured negative for the single-event groomed-heap lane (W109).
+  and measured negatives for both the single-event (W109) and multi-event
+  (W110) groomed-heap lanes.
 
 ## W109 measurement: maximized single-event groom, still no pointer chunk
 
@@ -145,6 +147,51 @@ bytes) regardless of single-event input shape. No single event can place a
 cJSON node or the `lf->fields` array inside the write window.
 
 Verdict: the single-event groomed-heap lane is a **measured negative** on
-this build. Multi-event grooming (free a chunk so `full_log` reuses it next
-to a pointer-bearing allocation) remains UNMEASURED; nothing here shows it
-is possible. Rung 5 remains UNKNOWN, not claimed.
+this build; see W110 below for the multi-event lane. A chunk carrying pointer
+fragments can be placed immediately after `full_log` by reuse, but the alert
+tail still writes no chosen pointer value. Rung 5 remains UNKNOWN, not claimed.
+
+## W110 measurement: multi-event reuse changes neighbours, not the write
+
+Hypothesis: if a prior same-size event leaves a freed `full_log` slot whose
+physical neighbour is pointer-bearing, event N+1 might write chosen bytes
+into that pointer. Replay tooling is gitignored under `live-src-plain/`
+(`mk-scanshape.py`, `mk-attrgroom2.py`, `inject-seq.py`, `seq.gdb`,
+`post.gdb`, `run-seq.sh`); raw logs are `readback-seq{2..10}.log` beside it.
+The lab-only `analysisd.syscheck_threads=1` setting makes both events share
+one glibc arena (no source or committed-file change). Event 1 is a 261-byte
+`scan_start` JSON (same `loglen` as the exploit, no alert generated;
+`decode_fim_event` returns 0 and `w_free_event_info` frees `full_log`
+in-thread). Event 2 is the W109 `poc-groom.json` exploit. GDB breaks at
+`syscheck.c:1278` (allocation), `:1680` (pre-sink) and `:1706` (post-sink).
+
+- Default `syscheck_threads=0` (cpu_cores) splits consecutive events across
+  arenas: event 1 F=`0x7fffdc0025f0` LWP ...699, event 2 F=`0x7fffe00025f0`
+  LWP ...700 (seq2). Cross-event tcache reuse cannot work in that default.
+- Forced to one thread, both events allocate `full_log` at the SAME address
+  F=`0x7fffdc0025f0` (seq7): the exploit reuses the freed scan_start slot.
+  A successfully decoded event does not free `full_log` promptly — its
+  eventinfo stays on the output queue — so with 1 s / 10 s gaps the exploit
+  instead got a fresh top chunk at `F1+0x23e0` (seq3/seq5).
+- Forcing an immediate free with malformed attributes instead overflows and
+  aborts the plain daemon at `munmap_chunk(): invalid pointer` / SIGABRT
+  before the exploit is processed (seq4). Measured negative.
+- With long location `[001] (aaaa...) 127.0.0.1->syscheck:`, the chunk
+  immediately after `full_log` (A, `0x25`) holds a pointer fragment at user
+  offset 0: pre-sink word `0x00007ff800313030` (`"001\0"` plus heap high
+  bytes), seq8/seq9. After the sink, A's size word is alert text and A's
+  user is the fixed tail `"tributes were: ''\nNow they are 'a'\n"`; the only
+  attacker byte inside A is that single `a` from `"attributes":"a"`. Chosen
+  `Q` stays at F+526, inside `full_log` (seq9).
+- Extending the chosen `attributes` value to eight bytes while holding the
+  total at 261 (seven other strings emptied) suppresses the changed-attribute
+  comments entirely and produces no overrun (seq10): the alert-format bound
+  still holds, so this is not a longer-write primitive.
+
+Verdict: multi-event grooming is now MEASURED for adjacency — a chunk
+carrying pointer fragments can be placed immediately after `full_log` — but
+not for pointer control. The overrun writes fixed alert-format text with at
+most one attacker byte; the first true pointer array (`lf->fields` at F+640)
+remains about 70 bytes beyond the write end. Rung 5 stays UNKNOWN and is not
+claimed; the net grade is unchanged (rung 4 live-process metadata write, no
+pointer consumer, no command).
