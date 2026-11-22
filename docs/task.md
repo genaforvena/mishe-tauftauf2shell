@@ -4600,9 +4600,12 @@ fixes `0da5b0b71e06e8c318a4e674c84caee12251a782` and the 07.39 cookie bump
 `c893b583d928fd17d756b39271b2eae71766e7f2`. **Identifier** —
 CVE-2026-123200, CWE-787, `AV:N`, PR:N after the 24-byte version-cookie
 exchange. **Affected/fixed pin** — tag `v07.36` (commit `79deb000cc0b…`) and
-the fixed-commit tarball; the precise released fixed version is UNKNOWN from
-those commits alone, and the fixed commit is the control. This is recorded as
-an explicit limit, not converted into a guessed release number.
+the fixed-commit tarball. W5 (2026-11-22 ~03:44Z) resolved the released fixed
+version to an authoritative negative by read-only upstream metadata lookup:
+no 07.37/07.38/07.39 tag or published release exists, the v07.39 tarball URL
+is 404 and both fix commits are untagged. The pinned fixed commit stays the
+control and no build, grade or witness fact changes
+(`lab/frontier/vrpn2shell/UPSTREAM-RELEASE-LOOKUP.md`).
 **Primitive** — a wire-supplied signed 32-bit index is used unchecked for
 `sender_name[i] = '\0'` / `type_name[i] = '\0'` on a 100-byte stack
 `vrpn_CNAME` (`vrpn_Connection.C:4554` / `:4482`). A direct-call ASan harness
@@ -4691,7 +4694,8 @@ build of the unmodified pinned verifier writes exactly 1024 bytes through the
 attacker-chosen `s`, `e=2`, `n = s² − T` it writes a fully chosen 1024-byte `T`
 including `de ad be ef ca fe ba be` at offsets 512..519; a one-byte variant
 changes only offset +512 while the pinned fixed build writes zero bytes.
-Grade: rung 4 MEASURED on this build by direct call; no witness replay. A
+Grade: rung 4 MEASURED on this build by direct call; witness #1262 later
+returned ESTABLISHED at that claimed scope. A
 later W1 leg served the same real 8192-bit certificate through a full
 in-process TLS handshake on the pinned RAM transport: ASan reaches the same
 `_nx_crypto_huge_number_extract` sink through TLS → X.509 → RSA, while the
@@ -4700,8 +4704,18 @@ TLS-protocol reach, not host TCP loopback — the pinned tree has no host
 driver. Rung 5 stays unclaimed. Evidence and reproduction:
 `reports/netx2shell-investigation.md`,
 `lab/frontier/netx2shell/harness/evidence-w1/` and `harness/tls/`.
+W3 (2026-11-22 ~03:5xZ) closed the manual-operand gap:
+`harness/tls/gen-crafted-cert.py` patches a DER certificate whose own
+modulus, exponent and signature carry `n = s² − T`, `e = 2`, `s`, and the
+client reaches the same write through the full TLS handshake. Plain gdb reads
+`de ad be ef ca fe ba be` at offsets 512..519 with the adjacent
+`generated_hash` beginning at +512; run B changes only +512 to `5a`; the
+fixed build rejects before verification and stalls 20 s, recorded as weaker
+than a clean pass. Still RAM transport, no host driver, no pointer control
+and no rung 5; `bash harness/tls/run-crafted.sh` regenerates and replays all
+three legs.
 
-Later author-only limbs (2026-11-22, no witness replay): proftpd2shell moved
+Later limbs (2026-11-22; netx witness #1262 ESTABLISHED, the rest author-only): proftpd2shell moved
 its leak-and-zero sequence under an unauthenticated `%m USER` condition at
 real ASLR (5/5 engine-zero versus 5/5 engine-on controls, `PWD=530`, no
 signal) and added a relative read through the real parser at a chosen offset
@@ -4935,8 +4949,9 @@ the rung-4 evidence lane.
   reports `WRITE of size 1` at `vrpn_Connection.C:4554` in the left redzone.
   Fixed plain/ASan clamp and are clean; -48 is a no-op and -64 hits
   `p.msg_time` with no report. Same fixed-NUL-at-chosen-offset rung-4 boundary
-  as W1/W2; W1/W2 witness replay #1261 pending, W3 author-only. The released
-  fixed version is UNKNOWN from the fetched commits.
+  as W1/W2; W1/W2 witness replay #1261 pending, W3 author-only. W5 resolved
+  the released fixed version to an authoritative negative: no fixed release
+  exists upstream as of 2026-11-22 (`UPSTREAM-RELEASE-LOOKUP.md`).
 - **Wazuh2Shell live `wazuh-analysisd` crash** (commit `8705ecc`): the pinned
   v4.14.7 daemon, built with ASan and driven through a lab AF_UNIX
   `8:syscheck:` datagram carrying the 228-byte JSON, aborts with
@@ -4972,4 +4987,6 @@ the rung-4 evidence lane.
   on a clean checkout (witness W104 NIT). None claims a witness verdict or
   rung 5. Recipes and expected bytes are in `docs/reproducibility.md`.
 
-- **Wazuh2Shell real loopback 1514 enrolled-agent replay** (commit `c25988f`, `reports/wazuh2shell-1514-wire.md`): a lab-only enrolled agent key and Wazuh's own `CreateSecMSG` produced framed ciphertext sent over TCP/1514 to a plant-built `wazuh-remoted`; remoted classified the decrypted `8:syscheck:` message as FIM and relayed it to `wazuh-analysisd`, which faulted with the same ASan `WRITE of size 506` at `syscheck.c:1680`. Fixed v4.14.8 and the 406-byte safe-input controls stayed clean. This closes the wire leg that the source-trace and AF_UNIX queue-injection reports left open; it is rung 3 in a live daemon over attacker-chosen wire input, not rung 5 — no chosen-byte daemon readback, pointer, marker, command or witness replay of this experiment.
+- **Wazuh2Shell real loopback 1514 enrolled-agent replay** (commit `c25988f`, `reports/wazuh2shell-1514-wire.md`): a lab-only enrolled agent key and Wazuh's own `CreateSecMSG` produced framed ciphertext sent over TCP/1514 to a plant-built `wazuh-remoted`; remoted classified the decrypted `8:syscheck:` message as FIM and relayed it to `wazuh-analysisd`, which faulted with the same ASan `WRITE of size 506` at `syscheck.c:1680`. Fixed v4.14.8 and the 406-byte safe-input controls stayed clean. This closes the wire leg that the source-trace and AF_UNIX queue-injection reports left open; it is rung 3 in a live daemon over attacker-chosen wire input, not rung 5 — no chosen-byte daemon readback in that experiment, pointer, marker, command or witness replay of it; the separate W108 plain-daemon readback is noted below.
+
+- **Five 03:4xZ limbs** (commits `2c828e5`, `9eea592`, `dbe9e31`, `f47ae82`, `31dba3c`): proftpd2shell's 03:40Z ASLR-on chosen-string readback aims a leaked `substr` pointer plus a chosen delta at a caller-chosen key pattern and the real RewriteLog records it (5/5 marker, 5/5 controls, no `setarch`, no PIE base, no command), author-only; nanomsg W107 is an author self-replay of W106's two marker outcomes on a fresh listener (558-byte replies, `queue.c:47` / `aws.c:316`, fixed 1.2.3 clean) with witness replay requested in #1288; vrpn W5 resolves the released fixed version to an authoritative negative in `lab/frontier/vrpn2shell/UPSTREAM-RELEASE-LOOKUP.md`; wazuh W108 observes chosen alert bytes and two corrupted chunk-size fields in adjacent `agent_id`/`location`/`hostname` char arrays of a live plain `wazuh-analysisd` (`reports/wazuh2shell-heap-adjacency.md`), with no pointer consumer and the groomed-heap lane UNMEASURED; netx W3 carries the chosen-byte construction in a TLS-arrived crafted certificate (`bash harness/tls/run-crafted.sh`, `de ad be ef ca fe ba be` at +512..+519, run B changes only +512), and witness #1262 returned ESTABLISHED at the claimed scope. No rung 5 claim; recipes and expected bytes are in `docs/reproducibility.md`.
