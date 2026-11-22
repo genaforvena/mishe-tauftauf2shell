@@ -64,6 +64,18 @@ completed admission after re-verifying the pins and replaying the harness.
   `lab/pgpool2shell/wire/`. Grade: rung 3 now wire-confirmed on a real daemon;
   rung 4 remains at direct-call harness scope; address steering and rung 5
   remain UNKNOWN. Wire-scope witness replay is owed.
+- **W2 -O2 build (2026-11-22 ~05:42–05:48Z):** rebuilt pinned 4.7.2 at
+  `-g -O2 -fno-omit-frame-pointer` and replayed the loopback wire. A/B still
+  holds (NodeCount=2 → SIGSEGV, NodeCount=1 → clean), so wire reach is not
+  an O0-layout artifact. gdb on the live O2 watchdog child finds
+  `node_id_set[1] = 0x55555562d742 <read_packet_of_type+402>` — a stale code
+  pointer, unchanged by a safe-N=1 warm-up packet; the chosen value writes
+  into read-only text and faults. Second measured negative for address
+  steering, independent of W1's O0 disassembly/gdb/sweep negatives. Full
+  report: [reports/pgpool2shell-o2-w2.md](pgpool2shell-o2-w2.md). Grade
+  unchanged: rung 3 wire-confirmed on a real daemon in two build layouts;
+  rung 4 only at direct-call harness scope; no chosen-address write, no
+  command, no rung 5. Witness replay of W1 still owed.
 
 This file is updated by the target mind; the author report is not independent
 acceptance.
