@@ -4722,8 +4722,9 @@ Later limbs (2026-11-22; netx witnesses #1262/#1296 and nanomsg W107 ESTABLISHED
 its leak-and-zero sequence under an unauthenticated `%m USER` condition at
 real ASLR (5/5 engine-zero versus 5/5 engine-on controls, `PWD=530`, no
 signal) and added a relative read through the real parser at a chosen offset
-from the leaked mmap pointer — 21 pointer-shaped reads in a 129-delta sweep,
-none PIE-shaped, no absolute write or wire-to-command path. soes2shell's
+from the leaked heap pointer — 21 pointer-shaped reads in a 129-delta sweep,
+none PIE-shaped; a 19:04Z maps correlation places it in brk `[heap]` with a
+run-varying PIE-base delta, so no absolute write or wire-to-command path. soes2shell's
 adjacent CVE-2026-129798 drives three segmented CoE downloads through the
 real pinned `SDO_downloadsegment()` (`esc_coe.c:1057`): nine chosen bytes
 past a 16-byte object on plain 3.2.0, ASan `WRITE of size 7`, clean 3.2.1
@@ -5757,3 +5758,68 @@ service. Status `reports/libssh22shell-status.md`; next bounded experiment
 is a pinned 1.11.1 ASan build driven through a real
 `libssh2_session_handshake()` against a plant-started 127.0.0.1 fake SSH
 server selecting an ETM cipher, then sending one `total_num=28` packet.
+
+### 2026-11-22 19:0x–19:1xZ limbs: witness and rung-5 boundary closures
+
+All six edges below are grade-neutral. Pppd2shell (18:56Z, 82nd route) and
+libssh22shell (19:14Z, 83rd route) were admitted by the operator with their
+achievement rows and admission limbs self-folded; both stay direct-call/stub
+scope with no witness, so only the non-admission limbs are detailed here.
+
+- ProFTPD2Shell (`5595f4d`): `wire/probe-leak-maps.py` keeps the forked child
+  alive after the 1025-code-point `%m USER` leak and reads its
+  `/proc/<pid>/maps` (passwordless `sudo -n cat`, since ProFTPD clears
+  dumpable). Four of five ASLR-on trials and the `setarch -R` trial put the
+  leaked pointer page in brk `[heap]`; `leak - PIE base` was `0x0e3af0e8`,
+  `0x11f670e8`, `0x1831a0e8`, `0x1afaa0e8` and `0x014e0e8`, with two
+  truncated samples preserved as inconclusive. This corrects the earlier
+  "ASLR-on leaked pointers are mmap addresses" wording in the brief and in
+  the docs synthesis; the negative is unchanged — the brk delta varies per
+  process, so there is no PIE-base recovery, absolute write or rung 5.
+  Evidence: `wire/evidence/leak-maps-correlation-20261122T1904Z.txt`.
+- H2o2Shell (`7cf50fd`, `38ba908`, `79717f2`): W2 measured both rung-5
+  routes on the pinned plain and ASan builds. The Apache escaper passes only
+  `0x20-0x21` and `0x23-0x7c` and both configured escape modes escape; a
+  5000-byte loopback request under `live/corrupt-probe.py` and
+  `live/corrupt-layout.gdb` writes `XYZABCDE` into saved RBP and `FGHIJKLM`
+  into saved RIP, but a canary in both real callers reaches
+  `__stack_chk_fail` before `ret` (`live/canary-gdb-transcript.txt`), and a
+  non-gdb run logs `*** stack smashing detected ***`. A heap route bypasses
+  that barrier: format `'%{pad}i %{error}x'` with `python3 live/forced-heap.py
+  1200 10000` grows the log line to an 8192-byte `malloc`, and the
+  unreserved append faults with ASan `WRITE of size 1` at
+  `expand_line_buf logconf.c:549` (`live/asan-forced-heap.1817275`); the
+  smaller `'%s %s %{error}x'` format still faults on the stack. With a 6870
+  byte path the 17-byte overflow lands 16 chosen `A` bytes in free space
+  (`live/forced-heap-gdb-transcript.txt`). W3's `live/heap-groom.py` dumps
+  four layouts (`base`, four short prep requests, a second unfinished
+  header, both combined): every layout carves the log buffer from the heap
+  top with no malloc between allocation and append, the following chunk ends
+  at `[heap]` end `0x5555557e0000`, and the append overwrites only its
+  `prev_size`/`size` with `0x4141414141414141`. Chosen heap *metadata*
+  control is demonstrated; pointer/control-flow control is not. Witness
+  #1583 rebuilt both pins from a clean archive, matched all five hashes,
+  3/3 outcomes and the exact 3958/3959 threshold, and graded rungs 1/2/3
+  live wire and rung 4 live wire-triggered ESTABLISHED. Rung 5 stays UNKNOWN
+  with no demonstrated grooming path on this host's glibc.
+- Inetutils2Shell (`befa1c3`): W2 preserved witness W119's grade and added
+  three measured negatives. At 34 triplets the first ASan fault is
+  `end_slc (slc.c:237)` `sprintf`, `WRITE of size 3` at `slcbuf+108`, not
+  `add_slc` (35+ triplets); locally reproduced with `asan_write1=False`.
+  `func=0x12` at 50 and 200 triplets never faults because valid functions
+  hit the state-equality early return (`slc.c:300-302`), while `0x13` exits
+  -11 on plain 2.7. A witness gdb probe sees transient chosen bytes at
+  `+100/+103/+106/+109` but final `slcptr = slcbuf+154`
+  (`0x00005555555560ba`) canonical, so the static `[func,0,0,…]` byte
+  pattern remains a layout inference, not the final pointer value.
+- MsQuic2Shell (`09ad67e`): a structural read of the pinned v2.5.9
+  instrumented tree, with no new run, closes the last open rung-4 hypothesis.
+  The post-free copy at `path.c:255` copies the pointer already stored in
+  `Paths[0]`, so grooming the freed chunk can only change the `Length` guard
+  and a nonzero length suppresses the copy; `QuicConnRetireCid`
+  (`connection.c:1029-1052`) writes only fixed-offset flags and counters.
+  The wire can allocate nonzero-length CID entries (a different request
+  size), but even a successful same-chunk groom would yield a fixed-value
+  UAF flag write at a fixed offset — still rung 3, not chosen bytes at a
+  chosen offset. The grooming step itself stays UNTESTED and same-size reuse
+  by another allocation stays UNKNOWN; the R4 gate is unchanged.
