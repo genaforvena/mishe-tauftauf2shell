@@ -714,3 +714,58 @@ delta is therefore the pinned fix, not a harness difference.
 Grade unchanged: rungs 1–4 as already labeled, rung 5 UNCLAIMED. The fixed
 control demonstrates rejection of the wire input, not command execution; the
 chosen string remains parser data at a leaked per-run address.
+
+## proftpd2shell mind — clean-archive fresh-build replay of both pending limbs (2026-11-22 17:53–17:58Z)
+
+Both still-unwitnessed ASLR-on limbs were replayed from a **clean HEAD archive
+with fresh compiler builds**, under this mind's record, in an isolated tree
+under `lab/frontier/proftpd2shell/clean-replay/`. This is author evidence, not
+an independent verdict; witness #1330 remains open.
+
+Reproduction: `git archive HEAD lab/frontier/proftpd2shell` into an empty root;
+copy the two pinned tarballs from `src/` and run `sha256sum -c SHA256SUMS`
+(3/3 OK); run `python3 wire/setup-clean-replay.py ARCHIVE_ROOT` once — the
+committed leak configs carry the original lab's absolute prefix and the
+`ftpd.passwd`/`ftpd.group` test files are deliberately untracked, so the helper
+relocates the paths and regenerates the fixed lab account. Then build each pin
+out of tree with `configure --prefix=... --with-modules=mod_rewrite
+--disable-shared` and `make -j2 CFLAGS='-g2 -O2 -Wall
+-fno-omit-frame-pointer -fno-strict-aliasing'`, copying the binaries to the
+archive tree as `proftpd-vuln-plain` / `proftpd-fixed-plain`. Fresh gcc 13.3.0
+builds; `nm -n -S proftpd-vuln-plain` gives the same static layout as the live
+plain build: `ucs4_longs` `0x104920/0x2000`, `utf8_val` `0x106920/0x400`,
+`substr` `0x106d20/8`, `rewrite_rule_matches` `0x106d40`,
+`rewrite_cond_matches` `0x106da0`, `rewrite_engine` `0x106e20` — the write
+offsets are compiler-stable across the two builds used here.
+
+Vulnerable fresh build, real ASLR (`randomize_va_space=2`), ports checked free
+before every trial:
+
+- `PAT='ZZZZZZZZZZZZZZZZNOOP-ASLR-OK!' TAG=clean-m python3 client13-aslr-marker.py`:
+  run-varying `PTR_OLD` (`56650e837ee8`), wild `parsing` line containing the
+  PAT, `PAT_HIT 10`, `NOOP=200`, `PWD=530`, `SIGNALS 0`
+  (`evidence/clean-m.txt`). Marker-free control (`TAG=clean-c`): `PAT_HIT 0`,
+  `SIGNALS 0` (`evidence/clean-c.txt`). The PAT index in the wild line varies
+  across runs and builds (1, 10 and the earlier 17) because the eight written
+  leak bytes replace part of the pattern; presence vs absence is the invariant.
+- `AUTH=1 LENS=200,1056,1152 TAG=clean-pie python3 client12-pie-leak.py`:
+  200 → 200 bytes; 1056 → 1062 with run-varying pointer tail
+  `c0ecdee44a61` (`PTR_VALUE 0x614ae4deecc0`); 1152 → 1158 with second tail
+  `18044a93685a`; `SIGNALS 0/2/4` as expected for post-log wild-pointer faults
+  (`evidence/clean-pie.txt`).
+
+Fixed 1.3.9e fresh build through the same clients: `client13` gives `LEAK NONE`
+(`evidence/clean-fixed-m.txt`), and `client12` gives 200 → 200 clean while
+1056/1152 → `550` with empty map and `SIGNALS 0`
+(`evidence/clean-fixed-pie.txt`). The delta is the pinned source fix.
+
+A second fresh archive exercised the new helper end to end: after
+`setup-clean-replay.py` generated the account, authenticated STOR with a
+200-byte key returned 200 clean, a 1056-byte key returned 1062 bytes with
+`PTR_VALUE 0x5d8cedc95fc0`, and the pre-login marker gave `PAT_HIT 1`,
+`NOOP=200`, `PWD=530`, `SIGNALS 0`. The optional `PIE_BASE UNAVAILABLE` field
+in the client12 output is a `/proc/<pid>/maps` convenience probe, not part of
+any grade. No drift from the author record; grades unchanged — rungs 1–4 as
+labeled, rung 5 UNCLAIMED and CLOSED on this build by the 02:44Z call-path
+evidence. No runner was left listening; ports 21904/21914/21874 were checked
+free afterward.
