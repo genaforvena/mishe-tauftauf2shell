@@ -458,3 +458,78 @@ are `#if DEBUG` only (`cid.h:134-163`) and compile to
 `UNREFERENCED_PARAMETER` in Release, so the retired-CID back-pointer
 inconsistency caused by the swap has no Release consumer. Disposition: rung 4
 evidence gate unchanged; rung 3 ESTABLISHED stands.
+
+## Retired-CID-after-ACK hypothesis triggered — wire-pure UAF read (2026-11-22 16:49–17:01Z)
+
+The one surviving hypothesis from the 01:20Z consumer map is now **triggered and
+observed**, not merely source-inferred. It is a use-after-free **read** of the
+active path's destination CID. It strengthens rung 3; it does not open rung 4.
+
+### Causal chain (all bytes from the pinned v2.5.9 loopback build)
+
+1. The established wire swap puts the stale, `InUse=0` path at `Paths[0]`. Its
+   `DestCid` is the initial zero-length CID (sequence 0), already retired by the
+   crafted NCI `retireprior=2`. Scratch print at `path.c:293-295`:
+   `SWAPDST p0cidptr=<P> len=0`.
+2. `QuicConnRetireCid` (`connection.c:1031-1055`) sets `NeedsToSend`; the server
+   emits `RETIRE_CONNECTION_ID` for seq 0 (`RETIRESEND seq=0`). Because the swap
+   also moved the active route to the injector's second source port, that frame
+   lands on the raw socket, not on the real MsQuic client connection.
+3. The raw injector sniffs the plaintext 1-RTT short-header packets on that
+   socket (1-RTT encryption is disabled by parameter `0x0500000F`, as in the
+   established trigger), parses their packet numbers and sends a single valid
+   ACK frame (`0x02`, largest, delay 0, **additional** range count 0, first
+   range = number of sniffed packets) from the same port. The server processes
+   it (`ACKRETIRE seq=0`) and calls
+   `CXPLAT_FREE(DestCid, QUIC_POOL_CIDLIST)` at `loss_detection.c:614`:
+   `CIDFREE ptr=<P> seq=0 len=0`.
+4. A third PADDING-only short-header datagram from a fresh loopback port makes
+   `QuicConnGetPathForPacket` create a new path. `path.c:255` reads
+   `Connection->Paths[0].DestCid->CID.Length` through the now-freed pointer:
+   `PATHADD p0cidptr=<P> len=0 count=2`, with the **same address `<P>`** as the
+   free. It then copies that dangling pointer into the new path slot
+   (`path.c:256`). Release has none of the `#if DEBUG` back-pointer checks that
+   would have caught this (`loss_detection.c:610` asserts
+   `Path->DestCid != DestCid`, compiled out here).
+
+### Observation and controls
+
+Three vulnerable runs, identical pointer identity in each (`srv-uafv1..v3.log`,
+client `cli-uafv1..v3.log`):
+
+```
+uafv1 SWAPDST p0cidptr=0x78c7e4013fc0  CIDFREE ptr=0x78c7e4013fc0
+      PATHADD p0cidptr=0x78c7e4013fc0 len=0 count=2
+uafv2 SWAPDST p0cidptr=0x72cce8013fc0  CIDFREE ptr=0x72cce8013fc0
+      PATHADD p0cidptr=0x72cce8013fc0 len=0 count=2
+uafv3 SWAPDST p0cidptr=0x72d944013fc0  CIDFREE ptr=0x72d944013fc0
+      PATHADD p0cidptr=0x72d944013fc0 len=0 count=2
+```
+
+Three fixed-control runs (`srv-uaff1..f3.log`), with only the pinned one-line
+`&& (*Path)->InUse` guard added to the promotion condition, still decode the
+same `WIRECID seq=2 retireprior=2 len=8 cid=aaaaaaaaaaaaaaaa` and reach
+`count=1 p1(ID=1 inuse=0)` — but produce **zero** `SWAPDST`, `WIREPATH post`,
+`CIDFREE` and post-free `PATHADD` lines. The divergence is the guard.
+
+### What is and is not established
+
+- Established: a wire-pure, attacker-driven sequence that frees a CID still
+  referenced by the active `QUIC_PATH`, then reads through that freed pointer
+  from a normal Release consumer. Pointer identity across free and later read
+  is measured, not inferred. The freed chunk also retained `Length == 0`, so
+  the read copied a dangling pointer into a second path slot; no value from
+  freed memory was used as an address, index or length.
+- Checked and negative: scratch prints at all four Release write-through sites
+  (`connection.c:1043` retire, `:1089` current-DestCid, `:1164` replace, `:5497`
+  post-processing) show **no write to `<P>` after `CIDFREE`** in `srv-uaf10.log`.
+  `QuicConnRetireCurrentDestCid` returns early on the zero length, so the UAF
+  write reachable at `:1043` stays untriggered. Heap grooming that makes the
+  freed object read nonzero length is untested and remains rung 1.
+- Rung 4 unchanged: no chosen byte at a chosen offset, no pointer control, no
+  benign marker or side effect. Rung 3 ESTABLISHED is strengthened by a second,
+  heap-based corruption mechanism; the earlier whole-struct swap stands.
+
+All instrumentation and logs are gitignored scratch under
+`lab/frontier/msquic2shell/build/`; the guard was reverted after the control.
+Reproduce with `python3 wire_run.py <tag>` after rebuilding `wire_inject.cpp`.
