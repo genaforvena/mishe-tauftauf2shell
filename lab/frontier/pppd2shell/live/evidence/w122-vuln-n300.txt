@@ -1,0 +1,22 @@
+case w122-vuln-n300
+binary=<build-vuln>/pppd/pppd
+n=300
+frame_len=1816
+process_rc=1
+survived_window=False
+using channel N
+Connect: ppp0 <--> /dev/pts/N
+sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0xMAGIC> <pcomp> <accomp>]
+rcvd [LCP ConfReq id=N with 300 PAP AUTHTYPE CIs]
+==PID==ERROR: AddressSanitizer: global-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 1500 at 0xADDR thread T0
+#0 0xADDR in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
+#1 0xADDR in lcp_reqci <build-vuln>/pppd/lcp.c:1853
+#2 0xADDR in fsm_rconfreq <build-vuln>/pppd/fsm.c:436
+#3 0xADDR in fsm_input <build-vuln>/pppd/fsm.c:365
+#4 0xADDR in lcp_input <build-vuln>/pppd/lcp.c:509
+#5 0xADDR in get_input <build-vuln>/pppd/main.c:1207
+0xADDR is located 0 bytes after global variable 'inpacket_buf' defined in 'main.c:187:8' (0xADDR) of size 1504
+0xADDR is located 32 bytes before global variable 'n_children' defined in 'main.c:189:12' (0xADDR) of size 4
+SUMMARY: AddressSanitizer: global-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98 in memmove
+frame_sha256=2470a7afdd0668e858a6e1c996c7e55f4fe30ae5fb4b91a5190c44cb46ac4b3a

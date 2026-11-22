@@ -1,0 +1,15 @@
+case w122-fixed-n301b
+binary=<build-fixed>/pppd/pppd
+n=301
+frame_len=1823
+process_rc=0
+survived_window=True
+using channel N
+Connect: ppp0 <--> /dev/pts/N
+sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0xMAGIC> <pcomp> <accomp>]
+rcvd [LCP ConfReq id=N with 301 PAP AUTHTYPE CIs]
+LCP: ignoring duplicate configuration option(s)
+sent [LCP ConfNak id=0x1 <auth chap MD5>]
+sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0xMAGIC> <pcomp> <accomp>]
+Terminating on signal 15
+frame_sha256=b3ef51e9b7c647d873b72f26082ca919a90ca71f0acf3be0679ddf498222c6a0

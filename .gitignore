@@ -217,6 +217,7 @@ lab/frontier/pppd2shell/harness/inc/
 lab/frontier/pppd2shell/harness/pppd-*
 lab/frontier/pppd2shell/harness/fixed/
 lab/frontier/pppd2shell/evidence/raw-*
+lab/frontier/pppd2shell/live/raw/
 
 # Pnet2shell harness: extracted pinned trees, generated headers, local binaries
 # and raw replay output. Pins, patch, manifest, harness sources, normalized

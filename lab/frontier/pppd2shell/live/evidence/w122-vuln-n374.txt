@@ -1,0 +1,22 @@
+case w122-vuln-n374
+binary=<build-vuln>/pppd/pppd
+n=374
+frame_len=2260
+process_rc=1
+survived_window=False
+using channel N
+Connect: ppp0 <--> /dev/pts/N
+sent [LCP ConfReq id=0x1 <asyncmap 0x0> <magic 0xMAGIC> <pcomp> <accomp>]
+rcvd [LCP ConfReq id=N with 374 PAP AUTHTYPE CIs]
+==PID==ERROR: AddressSanitizer: global-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 1 at 0xADDR thread T0
+#0 0xADDR in lcp_reqci <build-vuln>/pppd/lcp.c:1608
+#1 0xADDR in fsm_rconfreq <build-vuln>/pppd/fsm.c:436
+#2 0xADDR in fsm_input <build-vuln>/pppd/fsm.c:365
+#3 0xADDR in lcp_input <build-vuln>/pppd/lcp.c:509
+#4 0xADDR in get_input <build-vuln>/pppd/main.c:1207
+#5 0xADDR in main <build-vuln>/pppd/main.c:614
+0xADDR is located 0 bytes after global variable 'nak_buffer' defined in 'lcp.c:221:15' (0xADDR) of size 1500
+0xADDR is located 36 bytes before global variable 'last_pkts_in' defined in 'lcp.c:2390:22' (0xADDR) of size 4
+SUMMARY: AddressSanitizer: global-buffer-overflow <build-vuln>/pppd/lcp.c:1608 in lcp_reqci
+frame_sha256=c86d288b241a025a71e6a5b2e02bbe02505164fdf555bea379e6e3543fa7b14b
