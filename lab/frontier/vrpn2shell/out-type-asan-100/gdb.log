@@ -1,0 +1,66 @@
+Breakpoint 1 at 0xeab31: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4482.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+WRITE_SITE_HIT i=100 &type_name=0x7ffff5181070 dest=0x7ffff51810d4 payload_len=8
+0x531000014960:	0x00	0x00	0x00	0x64
+#0  vrpn_Endpoint::handle_type_message (userdata=0x531000014800, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4482
+#1  0x000055555562dc8c in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, p=<error reading variable: Cannot access memory at address 0xfffffffffffffff4>, userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x000055555562d912 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, type=-2, sender=0, time=<error reading variable: Cannot access memory at address 0xffffffffffffffd4>, len=8, buffer=0x531000014960 "", userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+=================================================================
+==3245466==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffff51810d4 at pc 0x55555563eb73 bp 0x7fffffffd290 sp 0x7fffffffd280
+WRITE of size 1 at 0x7ffff51810d4 thread T0
+    #0 0x55555563eb72 in vrpn_Endpoint::handle_type_message(void*, vrpn_HANDLERPARAM) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4482
+    #1 0x55555562dc8b in vrpn_TypeDispatcher::doSystemCallbacksFor(vrpn_HANDLERPARAM, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+    #2 0x55555562d911 in vrpn_TypeDispatcher::doSystemCallbacksFor(int, int, timeval, unsigned int, char const*, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+    #3 0x55555563dfd5 in vrpn_Endpoint::dispatch(int, int, timeval, unsigned int, char*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+    #4 0x55555563d728 in vrpn_Endpoint_IP::getOneTCPMessage(int, char*, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+    #5 0x55555563954c in vrpn_Endpoint_IP::handle_tcp_messages(timeval const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3561
+    #6 0x5555556366bd in vrpn_Endpoint_IP::mainloop(timeval*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3056
+    #7 0x555555647c17 in vrpn_Connection_IP::mainloop(timeval const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:6120
+    #8 0x55555562172b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/server_src/vrpn.C:304
+    #9 0x7ffff702a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7ffff702a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x55555561fdf4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server+0xcbdf4) (BuildId: fd92bcaf1e3bd3ebf4c71eea2d21984286fb9626)
+
+Address 0x7ffff51810d4 is located in stack of thread T0 at offset 212 in frame
+    #0 0x55555563e8d3 in vrpn_Endpoint::handle_type_message(void*, vrpn_HANDLERPARAM) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4463
+
+  This frame has 2 object(s):
+    [32, 72) 'p' (line 4462)
+    [112, 212) 'type_name' (line 4465) <== Memory access at offset 212 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4482 in vrpn_Endpoint::handle_type_message(void*, vrpn_HANDLERPARAM)
+Shadow bytes around the buggy address:
+  0x7ffff5180e00: f1 f1 f1 f1 00 00 f2 f2 00 00 04 f2 f2 f2 f2 f2
+  0x7ffff5180e80: f8 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5180f00: f1 f1 f1 f1 f1 f1 00 00 f2 f2 00 00 00 00 00 f3
+  0x7ffff5180f80: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5181000: f1 f1 f1 f1 00 00 00 00 00 f2 f2 f2 f2 f2 00 00
+=>0x7ffff5181080: 00 00 00 00 00 00 00 00 00 00[04]f3 f3 f3 f3 f3
+  0x7ffff5181100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5181180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5181200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5181280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5181300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3245466==ABORTING
+[Inferior 1 (process 3245466) exited with code 01]

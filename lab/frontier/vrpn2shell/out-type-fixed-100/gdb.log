@@ -1,0 +1,10 @@
+Breakpoint 1 at 0xeab09: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C, line 4486.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+WRITE_SITE_HIT i=100 &type_name=0x7ffff5182b70 dest=0x7ffff5182bd4 payload_len=8
+0x531000014960:	0x00	0x00	0x00	0x64
+#0  vrpn_Endpoint::handle_type_message (userdata=0x531000014800, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C:4486
+#1  0x000055555562dc64 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, p=<error reading variable: Cannot access memory at address 0xfffffffffffffff4>, userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C:1450
+#2  0x000055555562d8ea in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, type=-2, sender=0, time=<error reading variable: Cannot access memory at address 0xffffffffffffffd4>, len=8, buffer=0x531000014960 "", userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C:1428
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

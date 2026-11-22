@@ -12,10 +12,11 @@ tests ran on 127.0.0.1 ports only; no external system received a trigger.
 | `src/vrpn-fixed.tar.gz` (fix commit `0da5b0b...`) | <https://github.com/vrpn/vrpn/archive/0da5b0b71e06e8c318a4e674c84caee12251a782.tar.gz> | `b5258e996f295c3310310f4d81096dc03cf1ffbe62d06f26b57c494e431a0643` |
 | `src/vrpn-07.36/` HEAD | shallow clone of tag `v07.36` | `79deb000cc0b47ae49a80c92c78167c02d8a04d8` |
 | `harness/handler_direct.cpp` | local | `db8bbadfae35ba6478c7076baa4a8033b31144d771f8f265d1398b82e2ef5fd8` |
-| `wire_inject.py` | local | `aaceb8a77cc1fa7bbaea7abf6611d497088169eedfae4274dd8bfc53b2774d27` |
+| `wire_inject.py` (W2 `--msgtype`, commit `30b05c1`) | local | `121978df0f0eb0900972b222bf0bb89626a3d456c1b723adba359b7dc3076cbc` |
 | `sweep.py` | local | `52889f8b93362fcdf3c2652a2ae94c9d0d37c6907672f64e24acebfc0a71e1db` |
-| `probe-gdb.sh` | local | `982408d7f2ba8a73668a19ec182b4ef0697906d5476f337df10389cb996eda42` |
-| `probe-plain-rip.sh` | local | `b376e5d7d8f839fe07ac0bb486ab0a6a905a630aad038ad86ec0576f344748fb` |
+| `probe-gdb.sh` (W2 env overrides, commit `30b05c1`) | local | `2e2cfe9ac9e3d2b4eceb6385e088729a3cb6beb50673db726cb5732e93272770` |
+| `probe-plain-rip.sh` (W2 env overrides, commit `30b05c1`) | local | `ba08413496f974d5da865a8e8187dae0d769b54ec37260336873acc02a93617a` |
+| `probe-frame-write.sh` (W3, commit `42101a4`) | local | `ff2a7dfa3ca4c04077ad7af6d7fba965b35107d329aeeca04c7ce5ed9e7ef6fe` |
 
 ## Build and observation records
 
@@ -74,6 +75,50 @@ tests ran on 127.0.0.1 ports only; no external system received a trigger.
   leaves saved rip unchanged (`0x...6d86` before and after) with no signal.
   Chosen offset, fixed NUL byte; layout-specific to g++ 13.3.0 Debug `-O0`.
 - Full discussion, limits and the no-rung-5 statement: `reports/vrpn2shell.md`.
+
+## W2 second sink (2026-11-22 ~02:25Z)
+
+`wire_inject.py --msgtype -2` and `VAR=type_name LINE=4482 MSGTYPE=-2` on the
+probe scripts reach `type_name[i] = '\0'` at vulnerable `:4482` over loopback
+TCP. Raw logs committed: `out-type-asan-100/` (ASan WRITE of size 1, frame
+`[112,212) 'type_name'`), `out-type-asan-4/` (short-input control, clean),
+`out-type-fixed-100/` (fixed `:4486`, clean), `out-type-plain-rip-120/`
+(saved rip `0x...6d88` → `0x...6d00`, SIGILL) and
+`out-type-plain-fixed-rip-120/` (unchanged, no signal). W2 smoke logs:
+`out-w2-default-smoke/`, `out-w2-default-rip-smoke/`.
+
+## W3 negative index (2026-11-22 ~02:56Z)
+
+`probe-frame-write.sh` dumps frame state before and after the write at a
+chosen signed index. Raw logs committed: `out-w3-endpoint-8-asan/` (write at
+array-8 in ASan left redzone), `out-w3-endpoint-8/` (plain: `&endpoint =
+sender_name-8`, byte `0x20` → `0x00`, saved rip unchanged, SIGSEGV at
+`getSenderID:1131`), `out-w3-neg-ptr-48b/` and `out-w3-neg-asan-64/` (negative
+landing controls), `out-w3-endpoint-8-fixed-asan/` and
+`out-w3-endpoint-8-fixed2/` (fixed-commit controls, clean). Layout is specific
+to g++ 13.3.0 Debug `-O0` on this host.
+
+## W4 clean rebuild and replay (2026-11-22 ~03:26Z)
+
+Both servers were rebuilt from the pinned source trees in NEW build directories
+on this host, then probed on fresh loopback ports:
+
+- `cmake -S src/vrpn-07.36 -B build-replay-w4 -DCMAKE_BUILD_TYPE=Debug` then
+  `cmake --build build-replay-w4 --target vrpn_server -j4`
+  (`cfg-replay-w4.log`, `build-replay-w4.log`). Fresh binary, port 13931,
+  index -8 (`out-w4-rebuild-neg8/gdb.log`): `&endpoint=...d8c8`,
+  `&sender_name=...d8d0`; endpoint `0x...6f3220` → `0x...6f3200` (byte `0x20`
+  → `0x00`), saved rip `0x...6d88` unchanged, SIGSEGV at `getSenderID:1131`.
+  Same offsets and low byte as the original W3 build.
+- `cmake -S src/vrpn-fixed -B build-replay-fixed-w4 -DCMAKE_BUILD_TYPE=Debug`
+  then `cmake --build build-replay-fixed-w4 --target vrpn_server -j4`
+  (`cfg-replay-fixed-w4.log`, `build-replay-fixed-w4.log`). Fresh binary, port
+  13932, index -8 (`out-w4-rebuild-fixed-neg8/gdb.log`): clamped write,
+  canary/rbp/rip unchanged, no signal.
+
+This is author self-replay proving the committed scripts and pinned sources
+reproduce W3 from a clean build, not an independent witness verdict. All ports
+were loopback and all processes were started by this plant.
 
 Screened out this wake (no new source work): JSON::XS CVE-2026-129114
 (one-byte NUL write with no rung-4 route), image/parser-only and closed-source

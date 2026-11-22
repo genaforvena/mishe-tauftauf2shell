@@ -1,0 +1,36 @@
+Breakpoint 1 at 0xeb1a2: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+WRITE_SITE_HIT i=-64 &sender_name=0x7ffff5180f70 dest=0x7ffff5180f30 payload_len=8
+0x531000014960:	0xff	0xff	0xff	0xc0
+#0  vrpn_Endpoint::handle_sender_message (userdata=0x531000014800, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+#1  0x000055555562dc8c in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, p=..., userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x000055555562d912 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, type=-1, sender=0, time=..., len=8, buffer=0x531000014960 "\377\377\377\300AAAA", '\276' <repeats 192 times>..., userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+$1 = 0x7ffff5180f70
+$2 = 0x7ffff5180f20
+$3 = 0x531000014960 "\377\377\377\300AAAA", '\276' <repeats 192 times>...
+$4 = 8
+$5 = 0x7fffffffd288
+$6 = (vrpn_Endpoint *) 0x531000014800
+0x7ffff517dd70:	0x0000000000000000	0x0000000000000000
+0x7ffff517dd80:	0x0000000000000000	0x0000000000000000
+0x7ffff517dd90:	0x0000000000000000	0x0000000000000000
+0x7ffff517dda0:	0x0000000000000000	0x0000000000000000
+0x7ffff517ddb0:	0x0000000000000000	0x0000000000000000
+0x7ffff517ddc0:	0x0000000000000000	0x0000000000000000
+0x7ffff517ddd0:	0x0000000000000000	0x0000000000000000
+0x7ffff517dde0:	0x0000000000000000	0x0000000000000000
+0x7ffff517ddf0:	0x0000000000000000	0x00007ffff4efe7dd
+0x7ffff517de00:	0x0000000045e0360e	0x000055555586b400
+0x7ffff517de10:	0x0000555555637b8a	0x00007fffffffd950
+0x7ffff517de20:	0x0000000000000000	0x0000000000000000
+0x7ffff517de30:	0x0000000000000000	0x0000000000000000
+0x7ffff517de40:	0x0000000000000000	0x0000000000000000
+0x7ffff517de50:	0x0000000000000000	0x0000000000000000
+0x7ffff517de60:	0x0000000000000000	0x0000000000000000
+0x7ffff517de70:	0x0000000000000000	0x0000000000000000
+0x7ffff517de80:	0x0000000000000000	0x0000000000000000
+0x7ffff517de90:	0x0000000000000000	0x0000000000000000
+0x7ffff517dea0:	0x0000000000000000	0x0000000000000000
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

@@ -1,0 +1,10 @@
+Breakpoint 1 at 0xeb180: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C, line 4558.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+WRITE_SITE_HIT i=-8 &sender_name=0x7ffff5184170 dest=0x8000f5184168 payload_len=8
+0x531000014960:	0xff	0xff	0xff	0xf8
+#0  vrpn_Endpoint::handle_sender_message (userdata=0x531000014800, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C:4558
+#1  0x000055555562dc64 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, p=..., userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C:1450
+#2  0x000055555562d8ea in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7ee5800, type=-1, sender=0, time=..., len=8, buffer=0x531000014960 "\377\377\377\370AAAA", '\276' <repeats 192 times>..., userdata=0x531000014800) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C:1428
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

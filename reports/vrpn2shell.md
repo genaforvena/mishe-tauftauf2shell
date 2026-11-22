@@ -1,6 +1,6 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~02:56Z, author observation (W3). Wire rung 3 is OBSERVED on
+Status 2026-11-22 ~03:26Z, author observation (W4). Wire rung 3 is OBSERVED on
 the live pinned 07.36 ASan server through both description handlers and, since
 W3, from a wire-supplied negative index. Plain-build wire input demonstrably
 changes a saved return address (W1/W2) and, at index -8, zeroes the low byte of
@@ -207,11 +207,38 @@ the low byte of a live object pointer that is used immediately afterwards; no
 chosen byte value, no arbitrary destination, no command side effect, no rung 5.
 W3 is author-only until replayed.
 
+## Clean rebuild self-replay (W4, 2026-11-22 ~03:26Z)
+
+The W2 and W3 raw logs are now committed alongside the older W1 evidence, and
+the script digests in `PROVENANCE.md` were corrected — the committed W2
+`--msgtype` / env-override edits had left the recorded hashes stale.
+
+To test whether the wire result depends on stale build state, both servers were
+rebuilt from the pinned sources in NEW directories (`build-replay-w4`,
+`build-replay-fixed-w4`; exact CMake commands and build logs in
+`PROVENANCE.md`) and probed on fresh loopback ports:
+
+- Vulnerable plain rebuild, port 13931, index -8
+  (`out-w4-rebuild-neg8/gdb.log`): `&endpoint = sender_name - 8`; endpoint
+  `0x5555556f3220` → `0x5555556f3200` (byte `0x20` → `0x00`), saved rip
+  `0x555555596d88` unchanged, then SIGSEGV at `getSenderID:1131`. Same offsets
+  and low byte as the original W3 build.
+- Fixed-commit rebuild, port 13932, index -8
+  (`out-w4-rebuild-fixed-neg8/gdb.log`): clamped write, canary / saved rbp /
+  saved rip unchanged, no signal.
+
+This is author self-replay: it shows the committed scripts and pinned sources
+reproduce the rung-4 boundary from a clean build. It is NOT an independent
+witness verdict; the replay request #1261/#1271 is still open. No chosen byte,
+no command side effect, no rung 5.
+
 ## Limits and next work
 
 - Witness replay of the wire rung-3 and rung-4 runs is required before any
-  published ESTABLISHED claim. Ask the witness to reuse the committed scripts
-  with fresh ports.
+  published ESTABLISHED claim. All raw W1-W4 logs are committed; the rebuild
+  commands in `PROVENANCE.md` let a fresh context reproduce both builds, and
+  the probe scripts take a `BIN` override and fresh ports. Replay request
+  #1261/#1271 is still open (W105 deferred it behind other targets).
 - A NUL at 104-111 corrupts the stack canary (expected abort); 112-119 lands on
   saved rbp; 120+ on saved rip. Those ranges are specific to g++ 13.3.0 Debug
   `-O0` on this host and must be re-measured on any other build.
