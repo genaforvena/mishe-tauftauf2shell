@@ -83,6 +83,19 @@ which one. Do not claim arbitrary-address steering from this alone: the write
 offset is fixed by the array layout; the peer chooses the 32-bit value, not
 the destination address.
 
+**W8 addendum (2026-11-22 ~18:0xZ):** the UNKNOWN above is resolved on this
+build by `reports/pgpool2shell-alias-w8.md`. Live gdb before/after mapping
+identifies the slot as `json_object_entry.value` for the `backend_hostname`
+key of a peer-supplied backend object (name length 16 at
+`0x55555591dbd8`, value at `0x55555591dbe0`), and a second chosen value
+`0x11111111` yields fault pointer `0x555511111111`, proving value→fault
+causality. The destination stays layout-fixed and the pointer's upper 16
+bits are inherited, so no address steering is established. The harness's
+own `free(): invalid size` abort is value-independent (chosen `0` and
+`0x11111111` abort identically); the W7 case-G readback of the chosen
+store remains valid. Grade unchanged, witness replay of this lane still
+owed.
+
 ## Grade
 
 - Rung 3: confirmed memory corruption on the real parser (ASan WRITE) and on

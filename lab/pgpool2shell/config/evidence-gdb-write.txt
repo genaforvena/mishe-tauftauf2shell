@@ -15,6 +15,6 @@ $2 = (int *) 0x555555586038
 $3 = 129
 A debugging session is active.
 
-	Inferior 1 [process 3220637] will be killed.
+	Inferior 1 [process 4145132] will be killed.
 
 Quit anyway? (y or n) [answered Y; input not from terminal]

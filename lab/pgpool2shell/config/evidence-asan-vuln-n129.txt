@@ -1,26 +1,26 @@
 ### asan-vuln-n129
 payload_len=6836 backends=129 chosen=0x42424242
 =================================================================
-==3220613==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x53400001c508 at pc 0x555c076f99f2 bp 0x7fffbe3fe810 sp 0x7fffbe3fe800
+==4145117==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x53400001c508 at pc 0x5fe22998e9f2 bp 0x7fff7d695bc0 sp 0x7fff7d695bb0
 WRITE of size 4 at 0x53400001c508 thread T0
-    #0 0x555c076f99f1 in json_get_int_value_for_key utils/json.c:1189
-    #1 0x555c076ec532 in get_pool_config_from_json /tmp/w7-pgpool-asan/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:136
-    #2 0x555c076eba12 in main /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/config/harness.c:81
-    #3 0x7a839742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x7a839742a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x555c076eb684 in _start (/tmp/w7-pgpool-asan/h7-vuln-asan+0x5684) (BuildId: 3f28d4691751684196cc9ae501819a88fead1bff)
+    #0 0x5fe22998e9f1 in json_get_int_value_for_key utils/json.c:1189
+    #1 0x5fe229981532 in get_pool_config_from_json /tmp/w7-pgpool-asan/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:136
+    #2 0x5fe229980a12 in main /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/config/harness.c:81
+    #3 0x773e0542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x773e0542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5fe229980684 in _start (/tmp/w7-pgpool-asan/h7-vuln-asan+0x5684) (BuildId: 3f28d4691751684196cc9ae501819a88fead1bff)
 
 0x53400001c508 is located 256 bytes after 113672-byte region [0x534000000800,0x53400001c408)
 allocated by thread T0 here:
-    #0 0x7a83978fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x555c0770069f in pg_malloc ../../tools/fe_memutils.c:33
-    #2 0x555c07700722 in pg_malloc0 ../../tools/fe_memutils.c:47
-    #3 0x555c07700925 in palloc0 ../../tools/fe_memutils.c:112
-    #4 0x555c076ebd1b in get_pool_config_from_json /tmp/w7-pgpool-asan/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:44
-    #5 0x555c076eba12 in main /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/config/harness.c:81
-    #6 0x7a839742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #7 0x7a839742a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #8 0x555c076eb684 in _start (/tmp/w7-pgpool-asan/h7-vuln-asan+0x5684) (BuildId: 3f28d4691751684196cc9ae501819a88fead1bff)
+    #0 0x773e058fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5fe22999569f in pg_malloc ../../tools/fe_memutils.c:33
+    #2 0x5fe229995722 in pg_malloc0 ../../tools/fe_memutils.c:47
+    #3 0x5fe229995925 in palloc0 ../../tools/fe_memutils.c:112
+    #4 0x5fe229980d1b in get_pool_config_from_json /tmp/w7-pgpool-asan/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:44
+    #5 0x5fe229980a12 in main /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/config/harness.c:81
+    #6 0x773e0542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x773e0542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5fe229980684 in _start (/tmp/w7-pgpool-asan/h7-vuln-asan+0x5684) (BuildId: 3f28d4691751684196cc9ae501819a88fead1bff)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow utils/json.c:1189 in json_get_int_value_for_key
 Shadow bytes around the buggy address:
@@ -54,5 +54,5 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3220613==ABORTING
+==4145117==ABORTING
 rc=1

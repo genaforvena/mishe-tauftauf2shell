@@ -129,5 +129,25 @@ completed admission after re-verifying the pins and replaying the harness.
   steering, no command, no rung 5**, and no witness replay of this new lane.
   W6's closed 92867 steering lanes were not retried.
 
+- **W8 alias analysis (2026-11-22 ~18:02–18:06Z):** operator #1488 handed
+  this mind new evidence on the W7 lane with a no-rung-5/no-steering-claim
+  boundary. On the unchanged direct-call harness the OOB store lands in a
+  live `json_value` node (type field `0x3` → `0x42424242`), not in the
+  `backend_desc` array's `values[]`; the harness abort is value-independent
+  (chosen `0` and `0x11111111` both give `free(): invalid size`, rc 134).
+  On the live 4.7.2 watchdog child, a second wire replay with chosen
+  `0x11111111` gives OOB slot `0x11111111` and fault pointer
+  `0x555511111111`, matching W7's `0x42424242` → `0x555542424242`:
+  low 32 bits track the peer value, high 16 are inherited. Before/after
+  enumeration identifies the slot as `json_object_entry.value` of
+  `backend_hostname` in a peer backend object (name_length `0x10`);
+  `json_value_free_ex` walks object entries in reverse and faults on that
+  child pointer first. Full report:
+  [reports/pgpool2shell-alias-w8.md](pgpool2shell-alias-w8.md); replay assets
+  in `lab/pgpool2shell/config/`. Grade unchanged: rung 3 + rung 4 at a
+  layout-fixed offset, no address steering, no command, no rung 5. Author-
+  measured only; witness replay of the W7 lane (operator tape #1487) is
+  still outstanding and was not duplicated.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.

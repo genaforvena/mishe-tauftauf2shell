@@ -77,12 +77,13 @@ here = pathlib.Path('.')
 patterns = [
     (re.compile(r'0x[0-9a-f]+'), '0xADDR'),
     (re.compile(r'0x[0-9A-F]+'), '0xADDR'),
+    (re.compile(r'process \d+'), 'process PID'),
     (re.compile(r'==\d+=='), '==PID=='),
     (re.compile(r'pid \d+'), 'pid PID'),
     (re.compile(r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d+'), 'TIME'),
 ]
 lines = []
-paths = sorted(here.glob('evidence-*')) + [here / 'gdb-w7.out']
+paths = sorted(here.glob('evidence-*')) + sorted(here.glob('gdb-alias*.out')) + [here / 'gdb-w7.out']
 for p in paths:
     if not p.is_file():
         continue

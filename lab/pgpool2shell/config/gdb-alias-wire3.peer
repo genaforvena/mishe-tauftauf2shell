@@ -1,0 +1,10 @@
+peer listening 127.0.0.1:19005 N=129 chosen=0x11111111 delay=12.0
+peer accepted ('127.0.0.1', 42614)
+peer recv 1 bytes type=b'A'
+peer recv 4 bytes type=b'\x00'
+peer recv 4 bytes type=b'\x00'
+peer recv 332 bytes type=b'{'
+peer sleeping 12.0s so watchdog reaches coordinator
+peer sent type=Z len=6835
+peer recv after send 1024 bytes type=b'I'
+peer: daemon closed connection

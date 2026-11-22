@@ -1,0 +1,61 @@
+Breakpoint 1 at 0x1f16: file wd_json_data.c, line 136.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+payload_len=6836 backends=129 chosen=0x42424242
+
+Breakpoint 1, get_pool_config_from_json (json_data=0x5555555652a0 "{\"listen_backlog_multiplier\":0,\"child_life_time\":0,\"connection_life_time\":0,\"child_max_connections\":0,\"client_idle_limit\":0,\"max_pool\":0,\"num_init_children\":0,\"min_spare_children\":0,\"max_spare_childre"..., data_len=6836) at wd_json_data.c:136
+136			if (json_get_int_value_for_key(arr_value, "backend_port", &config->backend_desc->backend_info[i].backend_port))
+
+=== ALIAS HIT: i=128 before port store ===
+$1 = 128
+$2 = 113672
+$3 = (BackendDesc *) 0x55555556a330
+$4 = (int *) 0x555555586038
+$5 = (json_value *) 0x555555585f40
+$6 = (json_value *) 0x555555586630
+$7 = 129
+$8 = (struct _json_value **) 0x55555558b6b0
+$9 = -2767
+
+=== values[] window BEFORE store ===
+0x555555586008:	0x0000000000000003	0x0000000000000000
+0x555555586018:	0x0000000000000000	0x0000555555586030
+0x555555586028:	0x0000000000000031	0x0000555555585f40
+0x555555586038:	0x0000000000000003	0x0000000000000000
+0x555555586048:	0x0000000000000000	0x0000555555586060
+0x555555586058:	0x0000000000000031	0x0000555555585f40
+0x555555586068:	0x0000000000000003	0x0000000000000000
+0x555555586078:	0x0000000000000000	0x0000555555586090
+$10 = (struct _json_value *) 0x3
+
+=== stepping over line 136 (the port store) ===
+138			ptr = json_get_string_value_for_key(arr_value, "backend_hostname");
+
+=== values[] window AFTER store ===
+0x555555586008:	0x0000000000000003	0x0000000000000000
+0x555555586018:	0x0000000000000000	0x0000555555586030
+0x555555586028:	0x0000000000000031	0x0000555555585f40
+0x555555586038:	0x0000000042424242	0x0000000000000000
+0x555555586048:	0x0000000000000000	0x0000555555586060
+0x555555586058:	0x0000000000000031	0x0000555555585f40
+0x555555586068:	0x0000000000000003	0x0000000000000000
+0x555555586078:	0x0000000000000000	0x0000555555586090
+$11 = (struct _json_value *) 0x42424242
+$12 = (struct _json_value *) 0x3
+
+=== continuing to fault ===
+free(): invalid size
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+
+=== stop reason / backtrace ===
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff7c4527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff7c288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff7c297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff7dcf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x00007ffff7ca90b5 in malloc_printerr (str=str@entry=0x7ffff7dcd68a "free(): invalid size") at ./malloc/malloc.c:5775
+#7  0x00007ffff7cab45c in _int_free (av=<optimized out>, p=<optimized out>, have_lock=0) at ./malloc/malloc.c:4511
