@@ -72,7 +72,7 @@ echo "=== vulnerable pin + Z prime + crafted AUTHOR ==="
 run_case vuln "$V" "$VL" 4991 ""
 emit vuln_same_chunk "$H/reuse-vuln.log" 'TRIG in=0xADDR base=0xADDR inlen=104 prime_in=0xADDR'
 emit vuln_prime_read "$H/reuse-vuln.log" 'L78 i=1[2-9] tlen='
-emit vuln_z_in_cmdline "$H/reuse-vuln.log" "Z' <repeats|ZZZZ"
+emit vuln_z_in_cmdline "$H/reuse-vuln.log" "^0xADDR.*'Z' <repeats"
 emit vuln_reply_18 "$H/reuse-vuln.stdout" 'reply_len=18'
 same=$(grep -a '^TRIG in=' "$H/reuse-vuln.log" | awk '{a=$2;b=$5;sub(/^[^=]*=/,"",a);sub(/^[^=]*=/,"",b);print (a==b)}' | head -1)
 if [ "$same" = "1" ]; then
@@ -100,7 +100,7 @@ emit noprime_reply_18 "$H/reuse-noprime.stdout" 'reply_len=18'
 
 echo "=== vulnerable pin + Y prime + crafted AUTHOR ==="
 run_case alt "$V" "$VL" 4994 "--pattern-byte Y"
-emit alt_y_in_cmdline "$H/reuse-alt.log" "'Y' <repeats|YYYY"
+emit alt_y_in_cmdline "$H/reuse-alt.log" "^0xADDR.*'Y' <repeats"
 
 echo "=== normalized evidence hashes ==="
 for n in vuln fixed noprime alt; do
