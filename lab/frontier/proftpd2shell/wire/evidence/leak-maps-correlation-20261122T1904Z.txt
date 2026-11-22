@@ -1,0 +1,107 @@
+Maps correlation of the leaked static `substr` pointer, 2026-11-22 19:03–19:05Z.
+Author-only observation under this mind's record. Loopback only; pinned
+proftpd-vuln-plain 1.3.9d (lab/frontier/proftpd2shell/src/SHA256SUMS 3/3 OK),
+wire/etc/proftpd-prelogin-leak.conf port 21914, randomize_va_space=2.
+Replay: cd lab/frontier/proftpd2shell/wire && python3 probe-leak-maps.py
+(repeat for more ASLR-on samples). Maps read with sudo -n cat because ProFTPD
+clears the dumpable flag when dropping privileges. No write through the leak.
+
+Five ASLR-on trials (full output from 19:04–19:05Z):
+
+=== trial 1 ===
+MODE ASLR on
+LEAK_KEYLEN 1025
+PARENT 1747094 CHILDREN 1747138
+CHILD 1747138 MAP_LINES 58
+RANDOMIZE_VA 2
+LEAK_RAW8 41414141414141e8
+LEAK 0xe84141414141 PAGE 0xe84141414000
+PARENT_REGION UNMAPPED
+CHILD_REGION  UNMAPPED
+PIE_BASE_PARENT 0x654bf3c06000 PIE_BASE_CHILD 0x654bf3c06000
+LEAK_MINUS_PIE 0x82f54d80e141
+SIGNALS 0
+
+=== trial 2 ===
+MODE ASLR on
+LEAK_KEYLEN 1025
+PARENT 1747802 CHILDREN 1747886
+CHILD 1747886 MAP_LINES 58
+RANDOMIZE_VA 2
+LEAK_RAW8 4141e8301703a156
+LEAK 0x56a1031730e8 PAGE 0x56a103173000
+PARENT_REGION rw-p 00000000 00:00 0 [heap]
+CHILD_REGION  rw-p 00000000 00:00 0 [heap]
+PIE_BASE_PARENT 0x56a0eae59000 PIE_BASE_CHILD 0x56a0eae59000
+LEAK_MINUS_PIE 0x1831a0e8
+SIGNALS 0
+
+=== trial 3 ===
+MODE ASLR on
+LEAK_KEYLEN 1025
+PARENT 1748628 CHILDREN 1748630
+CHILD 1748630 MAP_LINES 58
+RANDOMIZE_VA 2
+LEAK_RAW8 4141e810aac8315b
+LEAK 0x5b31c8aa10e8 PAGE 0x5b31c8aa1000
+PARENT_REGION rw-p 00000000 00:00 0 [heap]
+CHILD_REGION  rw-p 00000000 00:00 0 [heap]
+PIE_BASE_PARENT 0x5b31ba6f2000 PIE_BASE_CHILD 0x5b31ba6f2000
+LEAK_MINUS_PIE 0xe3af0e8
+SIGNALS 0
+
+=== trial 4 ===
+MODE ASLR on
+LEAK_KEYLEN 1025
+PARENT 1748952 CHILDREN 1748955
+CHILD 1748955 MAP_LINES 58
+RANDOMIZE_VA 2
+LEAK_RAW8 4141e830ce6f725d
+LEAK 0x5d726fce30e8 PAGE 0x5d726fce3000
+PARENT_REGION rw-p 00000000 00:00 0 [heap]
+CHILD_REGION  rw-p 00000000 00:00 0 [heap]
+PIE_BASE_PARENT 0x5d7254d39000 PIE_BASE_CHILD 0x5d7254d39000
+LEAK_MINUS_PIE 0x1afaa0e8
+SIGNALS 0
+
+=== trial 5 ===
+MODE ASLR on
+LEAK_KEYLEN 1025
+PARENT 1749447 CHILDREN 1749494
+CHILD 1749494 MAP_LINES 58
+RANDOMIZE_VA 2
+LEAK_RAW8 4141e82062eae760
+LEAK 0x60e7ea6220e8 PAGE 0x60e7ea622000
+PARENT_REGION rw-p 00000000 00:00 0 [heap]
+CHILD_REGION  rw-p 00000000 00:00 0 [heap]
+PIE_BASE_PARENT 0x60e7d86bb000 PIE_BASE_CHILD 0x60e7d86bb000
+LEAK_MINUS_PIE 0x11f670e8
+SIGNALS 0
+
+One `setarch -R` trial (19:04:03Z):
+
+MODE setarch -R
+LEAK_KEYLEN 1025
+PARENT 1732457 CHILDREN 1732467
+CHILD 1732467 MAP_LINES 58
+RANDOMIZE_VA 2
+LEAK_RAW8 4141e8206a555555
+LEAK 0x5555556a20e8 PAGE 0x5555556a2000
+PARENT_REGION rw-p 00000000 00:00 0 [heap]
+CHILD_REGION  rw-p 00000000 00:00 0 [heap]
+PIE_BASE_PARENT 0x555555554000 PIE_BASE_CHILD 0x555555554000
+LEAK_MINUS_PIE 0x14e0e8
+SIGNALS 0
+
+Two earlier ASLR-on attempts (19:03–19:04Z, before the retry loop was added)
+gave truncated leaks ending ...41e890 and ...41e8 with PARENT_REGION UNMAPPED.
+Those are inconclusive samples where pstrdup stopped at a zero in a high
+substr byte; client13 already handles them by retrying key lengths and by
+filtering the last six bytes. They are preserved, not discarded.
+
+Reading: four of five ASLR-on samples and the setarch sample classify as the
+process `[heap]` (brk), not an anonymous mmap region. `leak - PIE base` is
+run-varying (0x0e3af0e8, 0x11f670e8, 0x1831a0e8, 0x1afaa0e8; 0x014e0e8 with
+setarch), so there is still no fixed offset and no PIE-base recovery. No grade
+change: this refines the reason for an existing negative, it does not add a
+write, a call target or command execution.

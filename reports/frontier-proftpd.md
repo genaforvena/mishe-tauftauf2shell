@@ -431,16 +431,17 @@ then logs those bytes. With code point 0's low byte left at its original
 value, `substr` stays a valid pointer; the log line's last six bytes are the
 pointer value. Under `setarch -R` the pointer was
 `0x00005555556a9ae8` (base `0x555555554000` + `0x155ae8`, one calibration),
-under fresh ASLR-on runs it was a randomized mmap address such as
-`0x000056e9a4efeae8` or `0x00005f594f8ee8a4`.
+under fresh ASLR-on runs it was a run-varying address such as
+`0x000056e9a4efeae8` or `0x00005f594f8ee8a4`; the 19:04Z maps correlation
+below identifies its region and PIE-base delta.
 
 **Leak-to-PIE-base negative.** A full 256-byte sweep of the one-byte
 `substr` redirect in a clean ASLR-on server found **no** PIE-shaped pointer
 in the window: zero log strings ending `55 55 55`
-(`wire/evidence/oneserver-aslron-clean.txt`). The leaked pointer is a heap
-mmap address, not a PIE address, so it cannot reveal the PIE base; an
-`LEAK_OFFSET`-based absolute-write attempt therefore has no sound calibration
-under real ASLR (`wire/client-aslr-leak-write.py`). An earlier apparent
+(`wire/evidence/oneserver-aslron-clean.txt`). The leaked pointer is a brk
+`[heap]` address with a run-varying PIE-base delta, so it cannot reveal the
+PIE base; an `LEAK_OFFSET`-based absolute-write attempt therefore has no sound
+calibration under real ASLR (`wire/client-aslr-leak-write.py`). An earlier apparent
 ASLR-on absolute-write success was a **false positive**: a stale `setarch -R`
 child (PID 2999866) still held port 21904 and answered every "fresh" client.
 That is W100's replay caution reproduced again; the stale server was killed
@@ -769,3 +770,25 @@ any grade. No drift from the author record; grades unchanged — rungs 1–4 as
 labeled, rung 5 UNCLAIMED and CLOSED on this build by the 02:44Z call-path
 evidence. No runner was left listening; ports 21904/21914/21874 were checked
 free afterward.
+
+## proftpd2shell mind — maps correlation corrects the leak's address class (2026-11-22 19:04Z)
+
+New author-only observation, not a witness verdict and not a grade change.
+`wire/probe-leak-maps.py` sends the 1025-code-point `%m USER` leak key to the
+pinned plain 1.3.9d build on port 21914, keeps the session open so the forked
+child owning `substr` stays alive, and reads that child's `/proc/<pid>/maps`
+(passwordless `sudo -n cat`: ProFTPD clears the dumpable flag when dropping
+privileges). Five ASLR-on trials and one `setarch -R` trial are recorded in
+`wire/evidence/leak-maps-correlation-20261122T1904Z.txt`.
+
+Result: four of five ASLR-on samples and the `setarch -R` sample place the
+leaked pointer page in the process `[heap]` (rw-p brk), not in an anonymous
+mmap region. `leak - PIE base` was 0x0e3af0e8, 0x11f670e8, 0x1831a0e8 and
+0x1afaa0e8 under ASLR-on, and 0x014e0e8 under `setarch -R`; two further
+ASLR-on samples were truncated because `pstrdup` stopped at a zero high byte
+and are preserved as inconclusive. This corrects the earlier "ASLR-on leaked
+pointers are mmap addresses" wording above: the allocation mode is brk in
+both modes measured here. The negative itself is unchanged — the brk offset
+from PIE base varies per process, so there is still no PIE-base recovery, no
+ASLR-on absolute write and no rung 5. Ports 21904/21914/21874 were free before
+and after.
