@@ -533,3 +533,38 @@ same `WIRECID seq=2 retireprior=2 len=8 cid=aaaaaaaaaaaaaaaa` and reach
 All instrumentation and logs are gitignored scratch under
 `lab/frontier/msquic2shell/build/`; the guard was reverted after the control.
 Reproduce with `python3 wire_run.py <tag>` after rebuilding `wire_inject.cpp`.
+
+## Last open item closed by structural read (2026-11-22 19:11-19:15Z)
+
+No new run this wake. I read the exact post-free sites in the pinned v2.5.9
+instrumented tree to decide whether the untested groom-to-nonzero-length step
+could change the grade. It cannot; the grooming step itself stays UNTESTED.
+
+- The post-free read at `path.c:255` is
+  `if (Connection->Paths[0].DestCid->CID.Length == 0) Path->DestCid =
+  Connection->Paths[0].DestCid;`. The pointer copied is the pointer already
+  stored in the live `Paths[0]` slot (the freed `<P>`); grooming the freed
+  chunk can only change the `Length` guard, and nonzero length *suppresses*
+  the copy. No chosen pointer can be placed in the copied value.
+- The post-free write reachable through `QuicConnRetireCurrentDestCid`
+  (`connection.c:1061-1098`) runs `QuicConnRetireCid` (`:1029-1052`), which
+  sets only `CID.Retired`, `CID.NeedsToSend` and counters at fixed offsets of
+  `QUIC_CID_LIST_ENTRY`. No attacker length, index or address reaches a write.
+  The CLOG byte-array at `:1037-1041` reads `CID.Length`/`CID.Data`; it writes
+  no attacker-addressed memory.
+- The attacker can allocate CID entries by wire: the NCI handler calls
+  `QuicCidNewDestination(Frame.Length, Frame.Buffer)` (`connection.c:5020`),
+  which mallocs `sizeof(QUIC_CID_LIST_ENTRY) + Length` and immediately zeroes
+  the entry and sets `Length = Length` (`cid.h:264-278`). The freed seq-0 CID
+  was allocated with length 0, so a nonzero-length NCI is a different request
+  size. `CxPlatAlloc` is plain `malloc` with the pool tag ignored on this
+  platform (`platform_posix.c:271-286`). [INFERENCE] With glibc bins this
+  makes direct same-chunk reuse by a nonzero-length NCI unlikely; I ran no
+  grooming experiment, so reuse by some other same-size allocation stays
+  UNKNOWN.
+- Even a successful groom to nonzero length would yield a fixed-value UAF flag
+  write at a fixed offset (rung 3), not chosen bytes at a chosen offset,
+  pointer control or a benign marker. **Rung 4 gate unchanged.**
+
+Disposition: no further work on this CVE without a measured chosen-address
+write or a new claim. Rung 3 ESTABLISHED stands.
