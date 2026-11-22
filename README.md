@@ -351,12 +351,12 @@ allocated at `:249` — inside `libssh2_session_handshake()`, before any
 application call. The fixed pin rejects with `LIBSSH2_ERROR_DECRYPT`; wrong
 MAC, safe input and `packet_length=15` are clean, `packet_length=14` faults;
 three fresh-key replays match. gdb readback shows 4 (or 13) directly chosen
-bytes at the sink with the remainder MAC-derived. Rung 5 stays UNKNOWN: no
-grooming, pointer control or command side effect, and the advisory's 32-bit
-tcache/function-pointer story was not reproduced on 64-bit safe-linked glibc
-(1..11-byte overwrite window). Witness replay #1607 is owed; rungs 1-3 are
-unchanged and rung 4 is now established at both direct-call/stub and
-live-process scope.
+bytes at the sink with the remainder MAC-derived. Rung 5 was UNKNOWN at W2's
+time: no grooming, pointer control or command side effect, and the advisory's
+32-bit tcache/function-pointer story was not reproduced on 64-bit safe-linked
+glibc (1..11-byte overwrite window); W3 below closes it on this host. Witness
+replay #1607 is owed; rungs 1-3 are unchanged and rung 4 is now established at
+both direct-call/stub and live-process scope.
 
 Libssh22Shell W3 (`97e777a`) closes rung 5 on this host's allocator without a
 grade change. The vulnerable sink is `ssh2_default_alloc` → `malloc(count)`

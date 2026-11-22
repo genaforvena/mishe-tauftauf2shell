@@ -202,9 +202,10 @@ containers whose host ports bind only to loopback.
   chosen) and `41 42 43 44 … 99 13 00` at 14 (13 directly chosen); the rest
   are MAC-derived, so fully chosen 15 bytes remain a direct-call-only result.
   Rung 4 is now established at live-process scope with witness replay #1607
-  owed; rung 5 stays UNKNOWN — no grooming, pointer control, command side
-  effect, and the advisory's 32-bit tcache/function-pointer path was not
-  reproduced on this 64-bit safe-linked glibc with a 1..11-byte window.
+  owed; rung 5 was UNKNOWN at W2's time — no grooming, pointer control, command
+  side effect, and the advisory's 32-bit tcache/function-pointer path was not
+  reproduced on this 64-bit safe-linked glibc with a 1..11-byte window. The W3
+  bullet below closes it structurally on this host.
 - **Libssh22Shell W3 rung-5 allocator negative (commit `97e777a`,
   `reports/libssh22shell-live.md`)**: compile the probe embedded in the report
   with `gcc -O0 -g` on this host and run it. Expect `malloc(1)` through

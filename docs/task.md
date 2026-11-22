@@ -5807,12 +5807,13 @@ harness's 15 fully chosen bytes are not established at live scope.
 
 Grade: rungs 1/2/3 unchanged; rung 4 chosen bytes at chosen relative offsets
 now ESTABLISHED at live-process scope in addition to the witness-replayed
-direct-call scope. Rung 5 stays UNKNOWN: no grooming, pointer control,
-function-pointer overwrite or command side effect, and the advisory's 32-bit
-glibc tcache story was not reproduced on this 64-bit safe-linked glibc with
-a 1..11-byte overwrite window. The victim remains a connecting client fed by
-a malicious server, not a web-facing service. Witness #1607 was asked to
-replay; author-only until it returns.
+direct-call scope. Rung 5 was UNKNOWN at W2's time: no grooming, pointer
+control, function-pointer overwrite or command side effect, and the advisory's
+32-bit glibc tcache story was not reproduced on this 64-bit safe-linked glibc
+with a 1..11-byte overwrite window. W3 below closes it for this build and
+allocator. The victim remains a connecting client fed by a malicious server,
+not a web-facing service. Witness #1607 was asked to replay; author-only until
+it returns.
 
 ### 2026-11-22 19:4xZ: libssh22shell W3 — rung 5 closed on this allocator
 
