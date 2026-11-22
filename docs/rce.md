@@ -83,6 +83,17 @@ Use `bash lab/repro/ruby2shell-rung5-http.sh attack|control|fixed <tag>`;
 evidence and exact conditions are in `reports/ruby2shell-investigation.md` and
 `docs/reproducibility.md`.
 
+The 2026-11-22 follow-up against unmodified classic Sinatra/Puma is a bounded
+NEGATIVE for stock/oracle-free/persistent RCE. N=828 aborts 3/3 pre-response;
+N=556 completes a later GET in only 2/3 runs and faults on teardown; safe and
+fixed controls survive. Its corrupted chunk is fastbin, not tcache, and the
+0x30→0x50 class change is source-closed for consolidation. Filler/order and
+safe-primer sweeps found no stable valid unsorted expansion, expanded headers
+held invalid Ruby data, and tested multipart errors disclosed no addresses.
+No stock command, oracle, reliable survival or second command was achieved.
+Stock Rails remains UNKNOWN; Veria's PoC is still unpublished. See the Ruby
+report's bounded-negative section and `ruby2shell-stock-baseline.{ru,sh}`.
+
 The IEC61850 lane is also witness-ESTABLISHED at the labeled conditions
 (verdict #1127, W89): `bash lab/frontier/libiec61850/r5_system.sh <abs-outdir>`
 drives a wire-supplied chain through ObtainFile staging to real libc `system`,

@@ -1043,6 +1043,116 @@ slots on both versions; the first execve run hit the driver's former
 30 seconds. Neither is counted as an exploit success or a vulnerability
 negative.
 
+## Stock-application, oracle-free, persistent RCE attempt — bounded NEGATIVE (2026-11-22)
+
+**Owner objective:** remove the custom groom/marker middleware and every
+in-process address oracle, execute on an unmodified stock application, then
+keep that process alive for a second command. Persistence here means a reusable
+live process, not an OS backdoor or restart persistence. **This objective was
+not achieved.** No stock command execution, remote address oracle, reliable
+survival or second-request command is claimed. The witness-established
+host/harness-specific rung-5 result above is unchanged.
+
+### Unmodified baseline and controls
+
+`lab/repro/ruby2shell-stock-baseline.ru` is classic Sinatra 4.2.2 with pinned
+Rack/rackup/WEBrick gems but no routes and no application middleware; the only
+settings are loopback bind/port 4550. Sinatra selects stock Puma 8.1.2.
+`Rack::MethodOverride` handles the multipart `_method` before the default 404.
+The driver runs the plain affected/fixed binaries with no `LD_PRELOAD`,
+ObjectSpace, maps read or debugger. Optional mtrace/GDB scripts below are
+analysis-only and are never part of an oracle-free claim.
+
+```
+RUBY2SHELL_STOCK_N=556 bash lab/repro/ruby2shell-stock-baseline.sh attack stock-n556-attack
+RUBY2SHELL_STOCK_N=556 bash lab/repro/ruby2shell-stock-baseline.sh control stock-final-safe
+RUBY2SHELL_STOCK_N=556 bash lab/repro/ruby2shell-stock-baseline.sh fixed stock-final-fixed
+```
+
+- N=828 attack: **3/3 pre-response SIGABRT** with `malloc(): invalid next size
+  (unsorted)`; no later request is possible. Safe affected and fixed 3.4.13
+  requests return 404 and survive.
+- N=556 attack: **2/3 runs** return the attack 404 and a later GET 404, then
+  print `corrupted size vs. prev_size` during SIGTERM teardown. The other **1/3**
+  aborts before response with `malloc(): mismatching next->prev_size
+  (unsorted)`. This is not reliable persistence. Final safe/fixed N=556
+  controls both return both 404s and terminate normally on SIGTERM (rc 143).
+- N=1292 and the tested expanding filler/order candidates all abort on
+  unsorted next-header integrity checks. The different aborts are preserved in
+  `lab/build/evidence/stock-baseline-*.server.log`.
+
+### Size-field geometry and the N=556 fastbin boundary
+
+For the 24-byte `mapping_buffer` header and `capa=N+20`, the OOB byte reaches
+the next chunk's size qword only for **N ≡ 12 (mod 16)**. Other tested lengths
+hit padding or `prev_size`; they were not treated as equivalent. Since the
+byte is replaced, not ORed, masked-size growth after `0x53` requires original
+low byte `01/11/21/31/41`; for example `0x31 → 0x53` grows `0x30 → 0x50`,
+whereas `0x2f1 → 0x253` shrinks by `0xa0`.
+
+`ruby2shell-stock-size.gdb` breaks before `case_map` with ASLR explicitly left
+enabled and prints the untouched size, links and next header. The N=828 example
+in `stock-first-attack-gdb.log` has untouched size `0x2f1`; after the write the
+shortened `0x253` chunk leads malloc into a non-header. In contrast, the
+post-result N=556 probe (`stock-after-n556-gdb-{2,3}.log`) shows size `0x53`.
+The second qword after that chunk is not `tcache_key`, ruling out the observed
+entry being a tcache member. It is a fastbin-class chunk. glibc's fastbin
+consolidation requires the size's class to match the bin, so a `0x30 → 0x50`
+class change is source-closed as an overlap route. The observed teardown error
+is `corrupted size vs. prev_size`, **not** a demonstrated fastbin overlap or a
+claimed direct observation of a fastbin-index abort.
+
+Reproduction/analysis entry points:
+
+```
+gdb -q -batch -ex 'set $wanted=848' -x lab/repro/ruby2shell-stock-size.gdb \
+  --args lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-stock-baseline.ru
+RUBY2SHELL_STOCK_N=556 RUBY2SHELL_STOCK_TRACE=1 \
+  bash lab/repro/ruby2shell-stock-baseline.sh attack stock-n556-trace
+gdb -q -batch -ex 'set $wanted=576' -x lab/repro/ruby2shell-stock-after.gdb \
+  --args lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-stock-baseline.ru
+```
+
+The driver accepts `RUBY2SHELL_STOCK_N`, `RUBY2SHELL_STOCK_FILL` and
+`RUBY2SHELL_STOCK_ORDER=method-first|filler-first`; these change only wire
+bytes. The mtrace N=556 sequence is request `0x258` (first buffer), `0x242`
+(second), `0x458` (result), followed by the valid case-map frees and the stock
+404. No allocation returns the corrupted neighbor before teardown.
+
+### Unsorted expansion, primers and disclosure negatives
+
+- ASLR-on size sweeps found expanding arena-linked candidates, including
+  N=1292 shapes `0x441 → 0x453` and `0x421 → 0x453`. At the second allocation,
+  however, the expanded next position contains Ruby internal data and invalid
+  sizes (one measured example: `0xffffffff00000001`) rather than a valid fake
+  chunk. Baseline requests abort; no header spray was claimed.
+- Small/large filler lengths and filler-first ordering were swept. Some runs
+  placed `_method` or filler bytes in the original next chunk, but not with a
+  stable expanding size and valid expanded header. N=1292/fill=20 repeated
+  probes produced differing `0x5e1`, `0x611`, `0x421`, `0x181` victims.
+- Persistent GET warm-ups and safe multipart primers did not stabilize an
+  expansion. Primed examples were all shrinking or invalid geometries
+  (`0x2ed1`, `0x3051`, `0xe81`, `0x3081`, `0x6981`, `0xc71`). A spray requiring
+  a fixed `prev_size` would therefore be guessing, not evidence.
+- Sinatra development error pages were tested as a possible remote address
+  channel. Empty multipart produces handled **400**
+  `Rack::Multipart::EmptyContentError` with no object/address dump. Unknown
+  charset falls back to `Encoding::BINARY` and returns 404, also with no debug
+  environment or `Object#inspect` address. No stock exception that reflects
+  native/heap addresses was found on this path.
+- Public research check: Veria's page still schedules its stock-Rails PoC for
+  **2026-11-25** and publishes no exploitation mechanics. This negative
+  Sinatra/Puma investigation neither reproduces nor refutes that separate
+  Rails claim.
+
+**Boundary:** the existing RCE needs its custom layout and in-process oracles.
+The tested stock requests do not supply a stable unsorted expansion with valid
+attacker-controlled next headers, a usable fastbin/tcache overlap, a remote
+address disclosure or reliable cleanup. Stock/oracle-free command execution
+and a second persistent command remain UNKNOWN, not achieved. Reopen on the
+published stock-Rails mechanics or a measured stock first-taker/disclosure and
+survivable allocator layout.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class

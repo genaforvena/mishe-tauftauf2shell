@@ -574,7 +574,13 @@ with safe/fixed controls clean. The chain uses a forged CRuby `T_DATA`
 finalizer to reach libc `system` with the request's benign `touch` command;
 ASLR remains enabled, but mtrace/ObjectSpace/maps oracles and custom groom/GC
 middleware are required, the process can abort after HTTP 200, and stock-app
-oracle-free execution remains UNKNOWN. FreeSWITCH has an ESTABLISHED R5 cell
+oracle-free execution remains UNKNOWN. A follow-up unmodified Sinatra/Puma
+attempt found no stable valid unsorted expansion or remote address channel;
+N=828 aborts 3/3 pre-response, N=556 completes a later GET in only 2/3 runs and
+faults on teardown, and safe/fixed controls survive. Its fastbin class change
+is source-closed, so stock/oracle-free execution and a second persistent
+command remain unachieved; stock Rails awaits the unpublished PoC. FreeSWITCH
+has an ESTABLISHED R5 cell
 (#1118): the witness replayed commit `462e887` from clean blobs, reproduced
 the target-written marker and a varied command with a distinct side effect,
 and confirmed safe and fixed marker-absent controls. Conditions stay ASLR-off,

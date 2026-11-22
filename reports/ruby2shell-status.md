@@ -5,6 +5,21 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-22 — stock/oracle-free/persistent RCE attempt: bounded NEGATIVE.**
+  New `lab/repro/ruby2shell-stock-baseline.{ru,sh}` runs classic Sinatra/Puma
+  with no routes, custom middleware, preload, ObjectSpace, maps or debugger in
+  the request path. N=828 aborts 3/3 pre-response; N=556 completes a later GET
+  in only 2/3 fresh runs and then faults on teardown, while 1/3 aborts earlier;
+  final safe/fixed N=556 controls survive normally. The N=556 corrupted chunk
+  is fastbin (second qword != tcache_key), and its 0x30→0x50 class change is
+  source-closed for consolidation, not an overlap. ASLR-on sweeps, filler/order
+  variants and safe primers produced no stable valid unsorted expansion;
+  expanded headers held invalid Ruby data. Empty multipart/unknown charset gave
+  no address disclosure. No stock command, oracle, reliable survival or second
+  command was achieved; stock Rails remains UNKNOWN pending Veria's unpublished
+  25 Nov mechanics. Existing instrumented rung 5 is unchanged. Full evidence in
+  the investigation report's new bounded-negative section.
+
 - **2026-11-22 — rung 5 witness-ESTABLISHED at the labeled conditions.** Candidate
   repro `lab/repro/ruby2shell-rung5-http.{ru,sh}` converts the Stage C HTTP
   poison into a forged untyped CRuby `RData` in a measured 640-byte VWA slot:
