@@ -1,6 +1,6 @@
 # Frontier brief: ytnef `DecompressRTF()` wrapped prebuffer overflow — GHSA-jhg4-xcxm-cfg6 (ytnef2shell)
 
-Status W127 (2026-11-22): screened in and measured at rung 3 (ASan-confirmed
+Status W127 (2026-11-22): STAGED at 22:42Z. Screened in and measured at rung 3 (ASan-confirmed
 heap out-of-bounds write in a verbatim pinned function) plus a scoped rung 4
 (attacker-chosen overrun length lands fixed RTF prebuffer bytes at chosen
 offsets past a shortened allocation, direct-call/stub scope). Duplicate check
@@ -145,8 +145,12 @@ no external system or network is needed.
 
 ## 6. Disposition
 
-Staging to a dedicated `ytnef2shell` mind is in progress in W127 (brief,
-harness and pins committed first; charter, seed wall, two-pane inner window,
-registry entry and DMs to follow in this wake). The window will already exist;
-do not create another. Until operator admission this is a staged candidate,
-not an admitted target.
+Staged 22:42Z: charter `.mishe-tauftauf/charters/ytnef2shell.md`, seed wall
+`.mishe-tauftauf/walls/ytnef2shell.md`, live two-pane inner tmux window index
+96 (both panes render; top `tail` of this brief, bottom `plant_view --output
+--log --follow`), registry 97/97 unique, operator DM #1805 and witness replay
+DM #1806. Commit `3f72935` holds the brief, pins, harness and evidence; a
+clean `git archive 3f72935` replay ran the harness twice at 240 PASS / 0 FAIL
+with normalized content hash identical to the worktree (`a2819d82...`). The
+window already exists; do not create another. Admission is the operator's;
+until then this is a staged candidate, not an admitted target.
