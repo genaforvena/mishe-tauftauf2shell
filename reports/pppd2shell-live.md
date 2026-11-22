@@ -167,6 +167,33 @@ is stable across fresh captures. Verdict: **rung 4 ESTABLISHED at live-process
 wire scope**. Rung 5 remains UNKNOWN; the two-frame command attempt is a
 preserved negative. The witness made no repo changes.
 
+## W131 — sigreceived-notifier bypass attempt (preserved negative)
+
+The W125 crash was in `link_terminated()` after `new_phase(PHASE_DEAD)`, but
+`notify(sigreceived, sig)` is also called directly from the SIGHUP/SIGTERM
+handlers (`main.c:1568-1600`) and from `bad_signal()` (`:1667-1679`), with no
+`the_channel` dereference on that path. A new driver,
+`live/rce_sigrecv.py`, wrote `sigreceived` (offset +1856) to a fake notifier
+in `inpacket_buf` and set its `func` to pppd's own `device_script()`
+(`main.c:1817`, `0x42c78b` in the `-no-pie` pin), whose child executes
+`execl("/bin/sh", "sh", "-c", program, NULL)` at `:1868`. The extra argument
+`notify()` supplies (the signal number) falls into `device_script`'s ignored
+`in` parameter. A fake zeroed `struct channel` was placed in the same rejected
+body so the child's `the_channel->close` test (`:1747`, field offset 80)
+would read NULL.
+
+Live gdb confirmed the intended pointers and command bytes. The callback was
+reached: pppd logged a forked `Child process <command>`. The child died with
+SIGSEGV before `execve`, and no sentinel file appeared, in five replays.
+The cause is structural: the NAK stream must pass +1532 to reach +1856, so
+the high half of `the_channel` at +1532..+1535 becomes PAP-NAK pattern bytes
+(`0x23c20503`); `the_channel` reads `0x23c20503004688a8`, not the intended
+`0x00000000004688a8`. A single frame cannot place both halves of an
+8-byte pointer at +1528 with this primitive (ASYNCMAP NAK values land six
+bytes apart), and a later frame would rewrite the high half again.
+Grade stays rung 4. Normalized evidence and hashes are in
+`live/sigrecv/evidence/`; raw logs and strace stay in the gitignored `raw/`.
+
 ## Files
 
 `lab/frontier/pppd2shell/live/` holds the driver, normalizer, matrix runner,

@@ -1,0 +1,41 @@
+W131 sigreceived-notifier experiment — normalized observations (2026-11-22 23:00Z)
+Build: pinned vulnerable pppd 2.5.3, -no-pie, live local PTY, escape 09,
+pre-auth LCP ConfReq.  Two wire frames: (1) NAK stream writing the_channel
+low half at nak_buffer+1528 and sigreceived low half at +1856; (2) bad-CI-
+length ConfReq whose body is rejected verbatim into inpacket_buf, holding a
+fake notifier (next=NULL, func=device_script@0x42c78b, arg=command), the
+command string and a zeroed fake struct channel.  Trigger: SIGTERM from the
+local driver.
+
+Live gdb readback before the signal (both halves shown):
+0x468038 <the_channel>:  0x23c20503004688a8  0x05030523c2050305
+0x468180 <sigreceived>:  0x000000000046882c  0x0000000000000000
+0x46882c <inpacket_buf+12>: 0x0000000000000000 0x000000000042c78b
+0x468844 <inpacket_buf+36>: "<benign shell command>"
+
+Because the NAK stream continues past +1532 to reach +1856, the four bytes
+at nak_buffer+1532..+1535 (the high half of the_channel) are PAP-NAK
+pattern bytes 03 05 c2 23, so the_channel reads 0x23c20503004688a8 rather
+than the intended 0x00000000004688a8.
+
+pppd log after the signal (PIDs normalized):
+Fatal signal 11
+Terminating on signal 15
+Child process <benign shell command> (pid <PID>) terminated with signal 11
+Fatal signal 11
+
+The hijacked head was reached: notify(sigreceived, sig) called device_script
+and forked a child.  strace of that child (W131d):
+dup2(15, 0) = -1 EBADF
+dup2(15, 1) = -1 EBADF
+dup2(5, 2) = 2
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SI_KERNEL, si_addr=NULL} ---
+No execve of /bin/sh followed; no sentinel file was created.
+
+Outcome (five replays W131a/b/c/d/final, one with strace):
+process_rc = -11, side_effect_observed = false on every replay.
+Grade: rung 4 unchanged.  Rung 5 is NOT claimed.  Causal finding: reaching
+any notifier head at +1832..+1860 necessarily writes through the_channel
+at +1528; a device_script callback then forks and its child dereferences
+the corrupted the_channel (main.c:1747, struct field offset 80) before
+execl (main.c:1868).  Preserved negative, not a retry target.
