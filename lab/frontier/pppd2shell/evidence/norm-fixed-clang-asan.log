@@ -1,0 +1,2 @@
+rc=3 in=1280 out=5 count=320
+nak_buffer_size=1500

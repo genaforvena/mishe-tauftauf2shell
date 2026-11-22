@@ -1,0 +1,335 @@
+From cc8b00c96646f858fbd4e2699077701c72ef9e1c Mon Sep 17 00:00:00 2001
+From: Paul Mackerras <paulus@ozlabs.org>
+Date: Thu, 20 Aug 2026 20:46:26 +1000
+Subject: [PATCH] pppd: Protect against receiving duplicate configuration
+ options (#611)
+
+This adds checks in the code that parses LCP, IPCP, IPCPv6 and CCP
+configuration requests from the peer.  If more than one instance of a
+given configuration option is seen, the second and subsequent
+instances are completely ignored, and a warning message is logged to
+indicate that has been done.
+
+In none of these protocols is any useful purpose served by giving
+multiple instances of the same configuration option.  The one case
+where there might be some point is the Authentication-Protocol option
+in LCP, but RFC1661 states: "An implementation MUST NOT include
+multiple Authentication-Protocol Configuration Options in its
+Configure-Request packets".  RFC1331 allowed it, but said SHOULD NOT,
+and lcp_reqci() had code to handle it, which is removed here.
+
+Since no useful purpose is served by allowing multiple instances, and
+the design of the option negotiation code implicitly assumes at most
+one of each option (except for Authentication-Protocol), it seems best
+to avoid any possible complications by explicitly skipping duplicates.
+Arguably the whole packet could be dropped when a duplicate is
+detected, but that would perhaps have a slightly higher chance of
+introducing a regression.
+
+Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
+---
+ pppd/ccp.c    | 16 ++++++++++++++++
+ pppd/ipcp.c   | 40 +++++++++++++++++++++++++++++++++++++---
+ pppd/ipv6cp.c | 13 +++++++++++++
+ pppd/lcp.c    | 40 +++++++++++++++++-----------------------
+ pppd/lcp.h    |  2 ++
+ 5 files changed, 85 insertions(+), 26 deletions(-)
+
+diff --git a/pppd/ccp.c b/pppd/ccp.c
+index 732091f60..338783395 100644
+--- a/pppd/ccp.c
++++ b/pppd/ccp.c
+@@ -1067,10 +1067,13 @@ ccp_reqci(fsm *f, u_char *p, int *lenp, int dont_nak)
+     bool rej_for_ci_mppe = 1;	/* Are we rejecting based on a bad/missing */
+ 				/* CI_MPPE, or due to other options?       */
+ #endif
++    int warned = 0;
++    bool seenci[CI_DEFLATE+1];
+ 
+     ret = CONFACK;
+     retp = p0 = p;
+     len = *lenp;
++    BZERO(seenci, sizeof(seenci));
+ 
+     memset(ho, 0, sizeof(ccp_options));
+     ho->method = (len > 0)? p[0]: -1;
+@@ -1086,6 +1089,19 @@ ccp_reqci(fsm *f, u_char *p, int *lenp, int dont_nak)
+ 	    type = p[0];
+ 	    clen = p[1];
+ 
++	    if (type <= CI_DEFLATE) {
++		if (seenci[type]) {
++		    if (!warned) {
++			warn("CCP: ignoring duplicate configuration option(s)");
++			warned = 1;
++		    }
++		    p += clen;
++		    len -= clen;
++		    continue;
++		}
++		seenci[type] = 1;
++	    }
++
+ 	    switch (type) {
+ #ifdef PPP_WITH_MPPE
+ 	    case CI_MPPE:
+diff --git a/pppd/ipcp.c b/pppd/ipcp.c
+index d16dd5df8..e47e66cc7 100644
+--- a/pppd/ipcp.c
++++ b/pppd/ipcp.c
+@@ -1468,11 +1468,15 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+     u_int32_t l = *len;		/* Length left */
+     u_char maxslotindex, cflag;
+     int d;
++    int dup, warned = 0;
++    int seendns[2], seenwins[2];
+ 
+     /*
+      * Reset all his options.
+      */
+     BZERO(ho, sizeof(*ho));
++    seendns[0] = seendns[1] = 0;
++    seenwins[0] = seenwins[1] = 0;
+ 
+     /*
+      * Process all his options.
+@@ -1480,6 +1484,7 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+     next = inp;
+     while (l) {
+ 	orc = CONFACK;			/* Assume success */
++	dup = 0;
+ 	cip = p = next;			/* Remember begining of CI */
+ 	if (l < 2 ||			/* Not enough data for CI header or */
+ 	    p[1] < 2 ||			/*  CI length too small or */
+@@ -1497,6 +1502,11 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+ 
+ 	switch (citype) {		/* Check CI type */
+ 	case CI_ADDRS:
++	    if (ho->old_addrs) {
++		dup = 1;
++		break;
++	    }
++	    ho->old_addrs = 1;
+ 	    if (!ao->old_addrs || ho->neg_addr ||
+ 		cilen != CILEN_ADDRS) {	/* Check CI length */
+ 		orc = CONFREJ;		/* Reject CI */
+@@ -1547,12 +1557,16 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+ 		}
+ 	    }
+ 
+-	    ho->old_addrs = 1;
+ 	    ho->hisaddr = ciaddr1;
+ 	    ho->ouraddr = ciaddr2;
+ 	    break;
+ 
+ 	case CI_ADDR:
++	    if (ho->neg_addr) {
++		dup = 1;
++		break;
++	    }
++	    ho->neg_addr = 1;
+ 	    if (!ao->neg_addr || ho->old_addrs ||
+ 		cilen != CILEN_ADDR) {	/* Check CI length */
+ 		orc = CONFREJ;		/* Reject CI */
+@@ -1584,7 +1598,6 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+ 		break;
+ 	    }
+ 
+-	    ho->neg_addr = 1;
+ 	    ho->hisaddr = ciaddr1;
+ 	    break;
+ 
+@@ -1592,6 +1605,11 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+ 	case CI_MS_DNS2:
+ 	    /* Microsoft primary or secondary DNS request */
+ 	    d = citype == CI_MS_DNS2;
++	    if (seendns[d]) {
++		dup = 1;
++		break;
++	    }
++	    seendns[d] = 1;
+ 
+ 	    /* If we do not have a DNS address then we cannot send it */
+ 	    if (ao->dnsaddr[d] == 0 ||
+@@ -1612,6 +1630,11 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+ 	case CI_MS_WINS2:
+ 	    /* Microsoft primary or secondary WINS request */
+ 	    d = citype == CI_MS_WINS2;
++	    if (seenwins[d]) {
++		dup = 1;
++		break;
++	    }
++	    seenwins[d] = 1;
+ 
+ 	    /* If we do not have a WINS address then we cannot send it */
+ 	    if (ao->winsaddr[d] == 0 ||
+@@ -1629,6 +1652,11 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+             break;
+ 
+ 	case CI_COMPRESSTYPE:
++	    if (ho->neg_vj) {
++		dup = 1;
++		break;
++	    }
++	    ho->neg_vj = 1;
+ 	    if (!ao->neg_vj ||
+ 		(cilen != CILEN_VJ && cilen != CILEN_COMPRESS)) {
+ 		orc = CONFREJ;
+@@ -1642,7 +1670,6 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+ 		break;
+ 	    }
+ 
+-	    ho->neg_vj = 1;
+ 	    ho->vj_protocol = cishort;
+ 	    if (cilen == CILEN_VJ) {
+ 		GETCHAR(maxslotindex, p);
+@@ -1674,6 +1701,13 @@ ipcp_reqci(fsm *f, u_char *inp,	int *len, int reject_if_disagree)
+ 	    orc = CONFREJ;
+ 	    break;
+ 	}
++	if (dup) {
++	    if (!warned) {
++		warn("IPCP: ignoring duplicate configuration option(s)");
++		warned = 1;
++	    }
++	    continue;
++	}
+ endswitch:
+ 	if (orc == CONFACK &&		/* Good CI */
+ 	    rc != CONFACK)		/*  but prior CI wasnt? */
+diff --git a/pppd/ipv6cp.c b/pppd/ipv6cp.c
+index bd05cdfe1..c8d88caa7 100644
+--- a/pppd/ipv6cp.c
++++ b/pppd/ipv6cp.c
+@@ -919,11 +919,13 @@ ipv6cp_reqci(fsm *f, u_char *inp, int *len, int reject_if_disagree)
+     u_char *p;			/* Pointer to next char to parse */
+     u_char *ucp = inp;		/* Pointer to current output char */
+     int l = *len;		/* Length left */
++    bool warned = 0, seenci[CI_COMPRESSTYPE+1];
+ 
+     /*
+      * Reset all his options.
+      */
+     BZERO(ho, sizeof(*ho));
++    BZERO(seenci, sizeof(seenci));
+     
+     /*
+      * Process all his options.
+@@ -946,6 +948,17 @@ ipv6cp_reqci(fsm *f, u_char *inp, int *len, int reject_if_disagree)
+ 	l -= cilen;			/* Adjust remaining length */
+ 	next += cilen;			/* Step to next CI */
+ 
++	if (citype <= CI_COMPRESSTYPE) {
++	    if (seenci[citype]) {
++		if (!warned) {
++		    warn("IPV6CP: ignoring duplicate configuration option(s)");
++		    warned = 1;
++		}
++		continue;
++	    }
++	    seenci[citype] = 1;
++	}
++
+ 	switch (citype) {		/* Check CI type */
+ 	case CI_IFACEID:
+ 	    IPV6CPDEBUG(("ipv6cp: received interface identifier "));
+diff --git a/pppd/lcp.c b/pppd/lcp.c
+index 779d5d6d3..ded94fb1e 100644
+--- a/pppd/lcp.c
++++ b/pppd/lcp.c
+@@ -1497,11 +1497,13 @@ lcp_reqci(fsm *f, u_char *inp, int *lenp, int reject_if_disagree)
+     u_char *rejp;		/* Pointer to next char in reject frame */
+     u_char *nakp;		/* Pointer to next char in Nak frame */
+     int l = *lenp;		/* Length left */
++    bool warned, seenci[CI_LCP_LAST+1];
+ 
+     /*
+      * Reset all his options.
+      */
+     BZERO(ho, sizeof(*ho));
++    BZERO(seenci, sizeof(seenci));
+ 
+     /*
+      * Process all his options.
+@@ -1527,6 +1529,17 @@ lcp_reqci(fsm *f, u_char *inp, int *lenp, int reject_if_disagree)
+ 	l -= cilen;			/* Adjust remaining length */
+ 	next += cilen;			/* Step to next CI */
+ 
++	if (citype <= CI_LCP_LAST) {
++	    if (seenci[citype]) {
++		if (!warned) {
++		    warn("LCP: ignoring duplicate configuration option(s)");
++		    warned = 1;
++		}
++		continue;
++	    }
++	    seenci[citype] = 1;
++	}
++
+ 	switch (citype) {		/* Check CI type */
+ 	case CI_MRU:
+ 	    if (!ao->neg_mru ||		/* Allow option? */
+@@ -1593,19 +1606,13 @@ lcp_reqci(fsm *f, u_char *inp, int *lenp, int reject_if_disagree)
+ 	     * Note: if more than one of ao->neg_upap, ao->neg_chap, and
+ 	     * ao->neg_eap are set, and the peer sends a Configure-Request
+ 	     * with two or more authenticate-protocol requests, then we will
+-	     * reject the second request.
+-	     * Whether we end up doing CHAP, UPAP, or EAP depends then on
+-	     * the ordering of the CIs in the peer's Configure-Request.
++	     * simply ignore the second and following requests, because
++	     * RFC1661 says "An implementation MUST NOT include multiple
++	     * Authentication-Protocol Configuration Options in its
++	     * Configure-Request packets".
+              */
+ 
+ 	    if (cishort == PPP_PAP) {
+-		/* we've already accepted CHAP or EAP */
+-		if (ho->neg_chap || ho->neg_eap ||
+-		    cilen != CILEN_SHORT) {
+-		    LCPDEBUG(("lcp_reqci: rcvd AUTHTYPE PAP, rejecting..."));
+-		    orc = CONFREJ;
+-		    break;
+-		}
+ 		if (!ao->neg_upap) {	/* we don't want to do PAP */
+ 		    orc = CONFNAK;	/* NAK it and suggest CHAP or EAP */
+ 		    PUTCHAR(CI_AUTHTYPE, nakp);
+@@ -1623,13 +1630,6 @@ lcp_reqci(fsm *f, u_char *inp, int *lenp, int reject_if_disagree)
+ 		break;
+ 	    }
+ 	    if (cishort == PPP_CHAP) {
+-		/* we've already accepted PAP or EAP */
+-		if (ho->neg_upap || ho->neg_eap ||
+-		    cilen != CILEN_CHAP) {
+-		    LCPDEBUG(("lcp_reqci: rcvd AUTHTYPE CHAP, rejecting..."));
+-		    orc = CONFREJ;
+-		    break;
+-		}
+ 		if (!ao->neg_chap) {	/* we don't want to do CHAP */
+ 		    orc = CONFNAK;	/* NAK it and suggest EAP or PAP */
+ 		    PUTCHAR(CI_AUTHTYPE, nakp);
+@@ -1659,12 +1659,6 @@ lcp_reqci(fsm *f, u_char *inp, int *lenp, int reject_if_disagree)
+ 		break;
+ 	    }
+ 	    if (cishort == PPP_EAP) {
+-		/* we've already accepted CHAP or PAP */
+-		if (ho->neg_chap || ho->neg_upap || cilen != CILEN_SHORT) {
+-		    LCPDEBUG(("lcp_reqci: rcvd AUTHTYPE EAP, rejecting..."));
+-		    orc = CONFREJ;
+-		    break;
+-		}
+ 		if (!ao->neg_eap) {	/* we don't want to do EAP */
+ 		    orc = CONFNAK;	/* NAK it and suggest CHAP or PAP */
+ 		    PUTCHAR(CI_AUTHTYPE, nakp);
+diff --git a/pppd/lcp.h b/pppd/lcp.h
+index bdf18d03e..c05964507 100644
+--- a/pppd/lcp.h
++++ b/pppd/lcp.h
+@@ -76,6 +76,8 @@ extern "C" {
+ #define CI_I18N		28	/* Internationalization */
+ #define CI_SDL		29	/* Simple Data Link */
+ 
++#define CI_LCP_LAST	CI_SDL	/* update this if any new CIs get added */
++
+ /*
+  * LCP-specific packet types (code numbers).
+  */

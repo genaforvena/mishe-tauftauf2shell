@@ -1,0 +1,46 @@
+From 1baf2ac29e4456f095c4ebe15230881201ce4ffb Mon Sep 17 00:00:00 2001
+From: Paul Mackerras <paulus@ozlabs.org>
+Date: Mon, 31 Aug 2026 17:21:11 +1000
+Subject: [PATCH] pppd: Guard writes to nak_buffer in lcp_reqci (#623)
+
+This adds a check in the main loop in lcp_reqci() to ensure that it
+doesn't overrun nak_buffer.  This could have possibly happened before
+duplicate CIs were ignored, but now should not be possible.  This adds
+the check anyway just to be completely sure.  If nak_buffer gets
+filled to the point where there is not enough room for another NAK, we
+reject the current CI.  Any CI being rejected then causes the nakp
+pointer to be reset each time around the loop so there is no further
+possibility of overflow.
+
+Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
+---
+ pppd/lcp.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/pppd/lcp.c b/pppd/lcp.c
+index ded94fb1..24b73c91 100644
+--- a/pppd/lcp.c
++++ b/pppd/lcp.c
+@@ -1529,6 +1529,9 @@ lcp_reqci(fsm *f, u_char *inp, int *lenp, int reject_if_disagree)
+ 	l -= cilen;			/* Adjust remaining length */
+ 	next += cilen;			/* Step to next CI */
+ 
++	if (rc == CONFREJ)
++	    nakp = nak_buffer;
++
+ 	if (citype <= CI_LCP_LAST) {
+ 	    if (seenci[citype]) {
+ 		if (!warned) {
+@@ -1814,7 +1817,11 @@ lcp_reqci(fsm *f, u_char *inp, int *lenp, int reject_if_disagree)
+ 	    continue;			/* Don't send this one */
+ 
+ 	if (orc == CONFNAK) {		/* Nak this CI? */
+-	    if (reject_if_disagree	/* Getting fed up with sending NAKs? */
++	    /* If we get too many NAK'd CIs, reject instead. */
++	    /* Shouldn't be able to happen */
++	    if (nakp - nak_buffer > PPP_MRU - 8)
++		orc = CONFREJ;
++	    else if (reject_if_disagree	/* Getting fed up with sending NAKs? */
+ 		&& citype != CI_MAGICNUMBER) {
+ 		orc = CONFREJ;		/* Get tough if so */
+ 	    } else {

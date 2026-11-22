@@ -1,0 +1,9 @@
+ppp-2.5.3.tar.gz  96f962b9f9411ee4a75da34e5b6177eaec4dce0527af009891210641e0b74edf
+ppp-2.5.4.tar.gz  379a630a40d858a1347f6592d671791dde12101697a743ef9900012f3765be31
+fix-cc8b00c.patch 8593bced5e3722c53a63922760fc760f59d18072544fae9d0f4046ba036ffaad
+fix-1baf2ac.patch 4fa8b23ad1238a981215c8d9b312d92458146b047d92ca9601e6d81c5a42ac58
+
+Vulnerable pin: upstream ppp-project/ppp `0cfdb73` release tarball, packaged as
+ppp-2.5.3. Fixed pin: upstream ppp-2.5.4 tarball; it contains both fix commits
+cc8b00c (duplicate-CI suppression) and 1baf2ac (nak_buffer bounds guard), each
+also saved as a patch above for source-bound reading.
