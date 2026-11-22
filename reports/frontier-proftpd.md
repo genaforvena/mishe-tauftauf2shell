@@ -12,10 +12,12 @@ ASLR-off) and the ASLR-on one-byte relative redirect, both ESTABLISHED at those
 scope labels; it also reproduced the fixed-address ASLR-on SIGSEGV/no-marker
 negative. Rung 5 NOT attempted and no wire-to-command call path was found in
 the BSS-global analysis below. ADMITTED 2026-11-22 ~00:1xZ by the operator under
-standing approval #6 as `proftpd2shell` (window 72; route 67). The later
-author-only limb (01:10Z) shows attacker bytes reaching `rewrite_engine` past
-`substr` and disabling rewriting for a subsequent command; it awaits witness
-replay.**
+standing approval #6 as `proftpd2shell` (window 72; route 67). Two later
+author-only limbs await witness replay: the 01:10Z ASLR-off control-flag write
+and the 01:44Z ASLR-on limb, where a leaked heap pointer keeps `substr` valid
+while the `rewrite_engine` byte is zeroed and a later `STOR` is no longer
+rewritten. The leak does not reveal the PIE base; no ASLR-on absolute pointer
+write is claimed and rung 5 stays UNCLAIMED.
 
 ## Verified ground truth
 
@@ -398,3 +400,66 @@ the low pointer byte is stable, so no fixed-address route exists. No wire-
 to-command path was found or claimed; rung 5 stays UNCLAIMED and NOT attempted
 beyond this analysis. This is a measured negative for the call paths examined,
 not a proof that no other route can exist.
+
+## proftpd2shell mind — ASLR-on heap-pointer leak and control-flag write (2026-11-22 01:44Z)
+
+A new lane tested the charter's open ASLR-on question on the pinned plain
+1.3.9d build (`wire/../proftpd-vuln-plain`), authenticated `%m STOR`, loopback,
+config `wire/etc/proftpd-leak.conf`, **no `setarch -R`**. Every server was
+started fresh and the listening PID was checked with `fuser -n tcp 21904`
+before interpreting a wire result.
+
+**Leak channel.** `rewrite_map_int_utf8trans` returns
+`pstrdup(map_pool, utf8_val)` (`mod_rewrite.c:2072`). A 1025-code-point key
+leaves `utf8_val[1024]` nonzero, so `pstrdup` reads past the 1024-byte static
+buffer into the eight bytes of `substr` at BSS offset `0x106d20` and copies
+them into the rewritten argument. `rewrite_subst(): maps subst'd pattern:`
+then logs those bytes. With code point 0's low byte left at its original
+value, `substr` stays a valid pointer; the log line's last six bytes are the
+pointer value. Under `setarch -R` the pointer was
+`0x00005555556a9ae8` (base `0x555555554000` + `0x155ae8`, one calibration),
+under fresh ASLR-on runs it was a randomized mmap address such as
+`0x000056e9a4efeae8` or `0x00005f594f8ee8a4`.
+
+**Leak-to-PIE-base negative.** A full 256-byte sweep of the one-byte
+`substr` redirect in a clean ASLR-on server found **no** PIE-shaped pointer
+in the window: zero log strings ending `55 55 55`
+(`wire/evidence/oneserver-aslron-clean.txt`). The leaked pointer is a heap
+mmap address, not a PIE address, so it cannot reveal the PIE base; an
+`LEAK_OFFSET`-based absolute-write attempt therefore has no sound calibration
+under real ASLR (`wire/client-aslr-leak-write.py`). An earlier apparent
+ASLR-on absolute-write success was a **false positive**: a stale `setarch -R`
+child (PID 2999866) still held port 21904 and answered every "fresh" client.
+That is W100's replay caution reproduced again; the stale server was killed
+and the result discarded. No ASLR-on absolute pointer write is claimed.
+
+**New ASLR-on rung-4 limb (no address computation).** The BSS write offsets
+are relative to `substr`, so the `rewrite_engine` flag at `substr+0x100` can
+be zeroed without knowing any address. `wire/client9-engine-aslron.py` first
+leaks the current eight `substr` bytes, then sends a 1281-code-point key that
+writes those same bytes back into `substr` (U+0100 substitutes for zero bytes
+so `strlen` does not truncate the key) and sets code point 1280 to U+0100;
+the second OOB loop lands that zero on `rewrite_engine`. A third, short STOR
+tests the later command.
+
+| run | `executing RewriteRule` | `maps subst'd pattern` | signals | NOOP / PWD |
+|---|---|---|---|---|
+| engine zero (8 of 9 runs) | 2 | 8 | 0 | 200 / 257 |
+| engine on control (5 of 5 runs) | 3 | 11 | 0 | 200 / 257 |
+
+So a later `STOR` in the same authenticated session is no longer rewritten
+when the flag byte is zeroed. This is chosen bytes at a chosen offset with an
+observable effect on a later command under **ASLR on** — rung 4 at the
+labeled conditions (non-default `mod_rewrite`, authenticated `STOR`), not
+command execution. One engine-zero run (`aslron-ab-3-1`) returned the
+control-like count 3 with no signal; the cause is unknown and the negative
+is preserved rather than averaged away. Raw traces:
+`wire/evidence/aslron-ab-*.txt` and `wire/evidence/rewrite-aslron-ab-*.log`.
+
+Rung 5 remains UNCLAIMED. The new call-path check reinforces the earlier
+negative: this build has no `mod_dso` and no `mod_ctrls` (`proftpd -l` lists
+core, xfer, rlimit, auth_unix, auth_file, auth, ls, log, site, delay, facts,
+auth_pam, rewrite), and `modules_list2` is called only from `main.c:2563`
+and `:2745` (startup) and tests, so `loaded_modules` has no post-write wire
+call path. A zeroed module flag and a restored heap pointer are not a shell
+route.
