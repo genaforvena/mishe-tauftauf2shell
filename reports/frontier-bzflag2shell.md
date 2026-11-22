@@ -1,8 +1,9 @@
 # Frontier brief: BZFlag bzfs — CVE-2026-130849 (bzflag2shell)
 
-Status W116 (2026-11-22 17:40Z): screened in and staged as `bzflag2shell`.
-Brief and harness are frontier work; admission remains the operator's call and
-wake units/presentation remain the person's.
+Status W116 (2026-11-22 17:40Z): screened in and staged as `bzflag2shell`;
+commits `39e3f03` (find) and `78545a0` (replay-path normalization). Brief and
+harness are frontier work; admission remains the operator's call and wake
+units/presentation remain the person's.
 
 ## 1. Verified ground truth (claim, not local wire proof)
 
@@ -48,8 +49,9 @@ The second guard is the structural point: even if any other caller corrupts
 `lab/frontier/bzflag2shell/harness/` extracts both pinned functions verbatim
 (`gen_functions.py`), stubs only framing/PlayerInfo/logging, drives one
 AF_UNIX socketpair, and builds vulnerable/fixed ASan and plain variants.
-`bash harness/run.sh`: rc 0, 14 PASS / 0 FAIL; two replays produced four
-byte-identical normalized hashes (see `PROVENANCE.md`, `EVIDENCE_HASHES.txt`).
+`bash harness/run.sh`: rc 0, 14 PASS / 0 FAIL; two in-tree replays and a clean
+`git archive 78545a0` replay produced four byte-identical normalized hashes
+(see `PROVENANCE.md`, `EVIDENCE_HASHES.txt`).
 
 - Vulnerable plain: `stage1_tcplen=-3072`, `stage2_offset=-3072`, chosen bytes
   `5a…`, `41…`, `42…`, `43…` read back at offsets +0/+16/+32/+48 in a real
