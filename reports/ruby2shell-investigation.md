@@ -43,9 +43,18 @@ the same 0x53/0x73 the overflow wrote and the returned string is correct.
 Everything below was reproduced in this plant's lab. External claims are
 cited as claims, not adopted.
 
-**Current ladder position: rung 4 — demonstrated impact in the lab,
-request-reachable over HTTP on BOTH claimed default stacks (2026-11-20,
-wake 8).** The Stage B overlap (wake 6: chosen bytes over a live chunk,
+**Current ladder position: rung 5 — author-observed on 2026-11-22 under
+the labeled lab conditions; independent witness replay is pending.** A single
+multipart POST to the live Sinatra/WEBrick target now executes its
+request-carried benign `touch` command through a forged CRuby `T_DATA`
+finalizer. The final matrix produced three distinct target-created markers in
+3/3 affected runs, with marker-absent safe-input and plain-3.4.13 controls;
+`strace` independently recorded `/bin/sh -c -- /usr/bin/touch …` and the
+resulting `execve("/usr/bin/touch", …)`. See "Rung 5 over HTTP" below for the
+address oracles, custom grooming, exact build and post-response abort boundary.
+
+**Prior rung-4 result: demonstrated impact in the lab, request-reachable over
+HTTP on BOTH claimed default stacks (2026-11-20, wake 8).** The Stage B overlap (wake 6: chosen bytes over a live chunk,
 5/5, control clean; witness verdict ESTABLISHED at rung 4, tape #51) is
 driven from a single multipart HTTP POST through a default-config
 classic Sinatra app (wake 7) and through a default `rails new` app
@@ -889,6 +898,125 @@ at f+0x100): the debugger perturbs this request-thread heap layout.
 It is preserved as a negative result and is not counted among the
 three untraced successful runs.
 
+## Rung 5 over HTTP — forged `T_DATA` finalizer executes the request command (author-observed 2026-11-22; witness pending)
+
+**Result: working remote command execution in the live loopback target, under
+the conditions below.** The same Stage C request-thread poison now targets a
+CRuby VWA object slot rather than a readback string. The second poisoned pop
+copies a forged untyped `RData` into that slot; dropping the original object
+references and running GC reaches `dfree(data) = system(command)`. The command
+arrives in the same multipart request and is restricted by the harness to
+`/usr/bin/touch <unique lab/build/evidence marker>`. No Ruby code in the
+harness calls `Kernel.system`, a marker method, or a debugger write.
+
+Final author matrix, all with ASLR enabled and fresh processes:
+
+```
+bash lab/repro/ruby2shell-rung5-http.sh attack r5-final-attack-1
+bash lab/repro/ruby2shell-rung5-http.sh attack r5-final-attack-2
+bash lab/repro/ruby2shell-rung5-http.sh attack r5-final-attack-3
+bash lab/repro/ruby2shell-rung5-http.sh control r5-final-safe
+bash lab/repro/ruby2shell-rung5-http.sh fixed   r5-final-fixed
+```
+
+- **3/3 affected attacks:** HTTP 200, `rce=OBSERVED`, a unique marker at the
+  request-selected path, and an mtrace `M … 3e9 <target>` pop at the forged
+  VWA address. The three paths and therefore the command strings differ.
+- **Safe input on affected 3.4.12:** HTTP 200, `rce=ABSENT`, no marker and no
+  target pop. Safe input is pure `0xDF * 828`, without the leading `a` parity
+  flip, so no overflow byte is emitted.
+- **Fixed plain 3.4.13 with the identical malicious multipart bytes:** HTTP
+  200, `rce=ABSENT`, no marker and no target pop. The fixed binary reports
+  revision `48857d6f2e`; affected 3.4.12 reports `366f5fdc00`.
+- A separate affected run under `strace -f -e trace=execve` returned HTTP 200
+  and created `rung5-http-r5-dev-strace2.marker`. Its
+  `rung5-http-r5-dev-strace2.execve.log:1118-1122` records, after the trigger
+  POST, `execve("/bin/sh", ["sh", "-c", "--", "/usr/bin/touch …"], …)`, then
+  `execve("/usr/bin/touch", …)`, with both exiting 0. This is execution
+  evidence independent of the harness's file-existence oracle.
+
+Evidence is under gitignored `lab/build/evidence/rung5-http-<tag>.{out,trace,
+server.log,marker}`. The driver exits nonzero unless the response, marker and
+poisoned-pop conditions all match the mode, so a dead server cannot pass a
+control merely by leaving the marker absent.
+
+### Finalizer consumer and payload
+
+`gc.c:1164-1215` reads an untyped data object's `DATA_PTR` at `RData+0x20`
+and `dfree` at `+0x18`; nonzero `dfree` other than the immediate-free cases
+reaches `rb_gc_impl_make_zombie`. `gc/default/default.c:2623-2641` preserves
+those two fields in the zombie, and `run_final` at `:2900-2905` executes
+`RZOMBIE(zombie)->dfree(RZOMBIE(zombie)->data)`. The five qwords forged at
+the victim are:
+
+```
++0x00  0x0c                 RUBY_T_DATA, typed_flag remains zero at +0x10
++0x08  live String class    RBasic.klass
++0x10  0                    untyped; no mark callback
++0x18  libc system address  dfree
++0x20  f_host address       data -> NUL-terminated request command
+```
+
+The victim is a 640-byte VWA slot formerly holding an embedded 615-byte
+String. `ObjectSpace.dump` selects a measured contiguous downward triple and
+reports its class. The poisoned target is the victim address aligned down to
+16 bytes, so the forged object begins at payload offset 0 or 8. The lower
+neighbor's last 16 bytes contain two `0x3f3` qwords; either alignment thus
+presents `target-8 = 0x3f3`. With `IS_MMAPPED` set, glibc 2.39
+`malloc_usable_size` (`malloc.c:5236-5247`) uses that qword without a
+next-chunk read, satisfying CRuby's `objspace_malloc_fixup`. The upper
+neighbor is overwritten as inert untyped `T_DATA` with `data=NULL`, allowing
+the same GC sweep to free it without another call. The rest of each 640-byte
+slot is payload padding, not additional object headers.
+
+The first 0x3f0 pop returns T with its repaired `0x3f1` header. The second is
+`$payload + ''`, forcing a fresh 1001-byte malloc and a 1000-byte chosen-byte
+copy into the aligned VWA target. `$victims` is then cleared; `$ov`, `$z1` and
+`$z2` stay live so their corrupted malloc chunks are not freed before the
+finalizer. GC is re-enabled only at this point, and the harness checks the
+marker after `GC.start`.
+
+### Address provenance and exact conditions
+
+- Source pins remain `ruby-3.4.12.tar.xz` SHA-256
+  `db6c147940d7ad0b706823d42c8e6713c36dec70a1f83f635f1d3a7f0599ec90`
+  and `ruby-3.4.13.tar.xz`
+  `6474dff9c02ea685fc44877a4807a27366bf109b176dad182108bb8c96d09589`.
+  Both plain builds use gcc 13.3.0, default CFLAGS/LDFLAGS and
+  `./configure --disable-install-doc --prefix=<matching -plain prefix>`; no
+  sanitizer, allocator tunable or ASLR disablement. The matching fixed build
+  was made from the pinned tarball with `make -j2 && make install` into
+  `lab/build/plain/ruby-3.4.13-plain`.
+- Host allocator/libc is Ubuntu glibc `2.39-0ubuntu8.12`. `system` is libc
+  offset `0x58750`, measured from the host symbol and confirmed by the execve
+  trace. Ruby reads `/proc/self/maps` and adds that offset. V's buffer and
+  f_host's command address come from the synthetic `mtrace.so` preload;
+  safe-linking uses the observed T entry. VWA addresses and the class pointer
+  come from `ObjectSpace.dump`. These are explicit in-process information
+  capabilities, not wire-only disclosures. ASLR was enabled for every run;
+  exploitability without these oracles remains UNKNOWN.
+- Sinatra 4.2.2, Rack 3.2.8, rackup 2.3.1 and WEBrick 1.9.2 bind only
+  `127.0.0.1:4549`. `Rack::MethodOverride` supplies the pre-route,
+  pre-CSRF/auth ISO-8859-1 upcase. `GroomMiddleware` and `MarkerMiddleware`
+  are lab code: they force multipart parsing, drain the five malloc classes,
+  select the VWA triple, construct the fake object and invoke GC. The command
+  is accepted only when it equals the authorized unique `touch` command.
+  Request-shaped grooming on an unmodified application is not claimed.
+- GC is disabled between the free sweep and forged-object copy, then enabled
+  to reach the real finalizer. No debugger is involved in the final matrix or
+  command execution. The affected process can abort with `corrupted size vs.
+  prev_size` after the HTTP 200 and marker; persistence and clean survival
+  remain unclaimed. The proof is per build and host layout, not a claim of
+  stock Rails RCE or portability to other allocators.
+
+Harness-development negatives are retained in the same evidence namespace:
+the initial four-slot victim pool returned 500 before the trigger on 3.4.13
+(`no contiguous victim triple`), so the committed harness measures twelve
+slots on both versions; the first execve run hit the driver's former
+10-second readiness timeout before WEBrick started, so the allowance is now
+30 seconds. Neither is counted as an exploit success or a vulnerability
+negative.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -926,3 +1054,7 @@ three untraced successful runs.
    rung 4 remains witness-ESTABLISHED. With the copy-out lane also
    closed (commit 7c6dfac), no investigation lane is open; wait for
    the Veria PoC signal or the 2026-11-25 dated trigger.
+5. **Open this wake (2026-11-22): independent rung-5 witness.** Replay the
+   committed `ruby2shell-rung5-http` candidate from a clean source checkout,
+   vary the marker command, verify affected/fixed/safe controls and audit the
+   labeled address oracles. Until that verdict, rung 5 is author-observed only.

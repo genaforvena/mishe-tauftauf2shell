@@ -5,6 +5,27 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-22 — rung 5 AUTHOR-OBSERVED, witness pending.** New committed-candidate
+  repro `lab/repro/ruby2shell-rung5-http.{ru,sh}` converts the Stage C HTTP
+  poison into a forged untyped CRuby `RData` in a measured 640-byte VWA slot:
+  `dfree = libc system`, `data =` the same request's NUL-terminated benign
+  `touch <unique evidence marker>` command. GC's real
+  `rb_data_free → make_zombie → run_final` path executes it; there is no
+  direct Ruby `system` call or debugger write. Final matrix: **3/3 affected
+  attacks** returned HTTP 200 + `rce=OBSERVED`, created three distinct marker
+  files and had the target mtrace pop; **safe affected input** and **identical
+  malicious input on plain fixed 3.4.13** returned HTTP 200 + `rce=ABSENT`,
+  no marker and no target pop. Separate `strace -f -e execve` evidence
+  `rung5-http-r5-dev-strace2.execve.log:1118-1122` shows `/bin/sh -c --
+  /usr/bin/touch …` then `/usr/bin/touch`, both exit 0. Exact conditions:
+  plain 3.4.12/3.4.13, stock glibc 2.39-0ubuntu8.12, ASLR ENABLED but
+  in-process mtrace/ObjectSpace.dump//proc/self/maps oracles, custom grooming
+  and GC-trigger middleware, GC disabled until the forged copy, loopback only.
+  Process can abort after the response; no persistence, stock-app wire-only
+  reach or portability claim. Full recipe/controls in the investigation
+  report's new "Rung 5 over HTTP" section. Independent witness is the next
+  action; do not mark ESTABLISHED before its clean-commit replay.
+
 - **Rung:** 3 → **3+ (Stage A: chosen-victim deterministic corruption
   on the production consumer)** (researcher wake 4, 2026-11-20,
   08:21-08:55Z). Rungs 1-3 unchanged (ASan repro + 3.4.13 negative
