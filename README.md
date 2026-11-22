@@ -123,6 +123,26 @@ independent replay at that scope. Author reports are never acceptance.
 | **Uhttpd2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 21:2xZ under standing #6; CODE/HARNESS rung 3 ASan-confirmed OOB read in a verbatim pinned function over real pinned libubox, rung 4 chosen bytes at a modeled sink (route + units minted; no live daemon)** — GHSA-2mpg-6wp5-435p (GitHub CNA 2026-08-03, CWE-787, CVSS 3.1 7.5 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`), affected through `f682ccab` (shipped `7b1bec45` is byte-identical on `ubus.c`), fixed by `e76736e5` (four-line `params`-type guard). Pins: vulnerable `f682ccabee9ed5f39dd3b0aaf96228975eeb478d`, fixed `e76736e5676fb25536b27d45865eb4153c68aca3`, libubox `a396f38a8568a1d670c240465cd8d24fdfdf6463`; seven blob hashes in `lab/frontier/uhttpd2shell/harness/pins/PIN_HASHES.txt`, claim URL in `harness/PROVENANCE.md`. An unauthenticated `POST /ubus/call/...` with `"params":1` makes the scalar blobmsg be read as a container: `blobmsg_name(cur)` reads 2 bytes past a 20-byte `blob_memdup` allocation (ASan `READ of size 1` in `strcmp`), and the truncated underflowed length reaches the final `memcpy` as `4294967293`. REAL mode faults at the read; the ~4 GiB write is **not** executed locally. MODEL mode substitutes an instrumented sink: 16 chosen `41…`/`5a…` bytes at `WRITE_OFF=20` with `WRITE_LEN=4294967293`, fixed pin rejects before the loop and a well-formed TABLE `params` writes only 4 bytes. `harness/run.sh` is 30 PASS / 0 FAIL twice with identical normalized PASS lines and chosen-byte hashes, plus a clean `git archive d6afa99` replay. Network-facing and unauthenticated in the advisory, but no live uhttpd, HTTP wire, rpcd/ACL replay, grooming, pointer control, command or rung 5; the advisory scores DoS only. [Brief](reports/frontier-uhttpd2shell.md) |
 | **Libvnc2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 21:2xZ under standing #6; CODE/HARNESS rung 3 ASan-confirmed heap OOB write in the verbatim pinned Tight decoder, rung 4 chosen bytes at a chosen offset (route + units minted; no live client)** — GHSA-v9pm-47h4-jcq8 / CVE-2026-50538 (published 2026-05-29 by bk138, High 8.8 `AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H`); libvncclient 0.9.12 through master `5ea5fc30`, introduced by `d7b1462`; vulnerable pin `73352b9de9c0`, fixed pin `540332be3e0a` (10-line pre-write clamp, no release tag — advisory says "Patched versions: None"). Verbatim pinned `HandleTightBPP`/`FilterCopyBPP` over real zlib: ASan `WRITE of size 64`, 0 bytes after a 1024-byte framebuffer, frames `FilterCopy32` → `HandleTight32`; plain build reads back chosen `414243…50` at offset 1024; fixed pin logs the clamp before any write; 16-row safe control clean on both pins. `harness/run.sh` 20 PASS / 0 FAIL twice with byte-identical normalized hashes (gcc 13.3.0 + clang 18.1.3), plus a clean `git archive 0d4103f` replay. Victim is a connecting VNC client (attacker is server/mitm, `UI:R`); no live client, RFB wire, malicious server, callback overwrite, pointer control, marker or command; the advisory control-flow-hijack claim is not reproduced. [Brief](reports/frontier-libvnc2shell.md) |
 
+The 21:1x–21:2xZ batch stages and admits three frontier lanes and closes one
+tacplus boundary. Ntpsec2Shell (CVE-2026-121506), Uhttpd2Shell
+(GHSA-2mpg-6wp5-435p) and Libvnc2Shell (GHSA-v9pm-47h4-jcq8) were staged by
+frontier and admitted under standing #6 at 21:2xZ with routes and units but no
+new windows; each stays code/harness scope (rung 3 ASan corruption plus rung 4
+chosen bytes at a modeled or direct-call sink), with no live daemon, wire,
+pointer, marker or command, and no grade change from admission. Witness W126
+(#1706) independently replayed all three from clean archives — libvnc 20 PASS,
+uhttpd 30 PASS, ntpsec 8 PASS, normalized hashes byte-identical — and graded
+them ESTABLISHED at those labeled scopes. Its minor nit: the fixed libvnc pin
+extracts 285 verbatim lines (vulnerable 275) because of the 10-line clamp, not
+275 each; this document's recipe states both counts.
+Tacplus2Shell W122 (`b404533`, `8d5af1b`) closes the grooming lane negative:
+four live-daemon configurations on the plain vulnerable build never placed
+chosen `cmd=ZZZZ` bytes behind the trigger buffer; the pinned `mem_destroy()`
+indirect call is reachable in source, but no pointer, `arr_count` or `arr`
+write was observed. Rung 4 stays at live-daemon chosen-byte scope and rung 5
+UNKNOWN. Witness W126 (#1708) rebuilt both plain binaries and ESTABLISHED the
+W121 live-daemon rung-4 readback (8 PASS / 0 FAIL). None of these limbs claims
+rung 5.
 The 04:1x–04:3xZ edge batch updates four rows above: nanomsg W107 is an
 independent witness rung-4 ESTABLISHED verdict at the standalone-listener scope
 (the witness rebuilt both pins and its own harness; no refutation or NIT), and

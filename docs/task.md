@@ -6267,3 +6267,42 @@ client (attacker is server/mitm, `UI:R`); no live client, RFB wire, malicious
 server, callback overwrite, pointer, marker or command, and the advisory's
 control-flow-hijack claim is not reproduced. Cheapest next step: the advisory's
 loopback `evil_server.py` shape against an ASan client to move to wire scope.
+
+## 2026-11-22 21:2xZ lanes — tacplus grooming NEGATIVE and W126 witness closure
+
+Tacplus2Shell W122 (`568bf7a`/`b404533`, reconciled in `8d5af1b`) closes the
+last open experiment from W121: chosen `cmd=ZZZZ` bytes behind the trigger
+buffer on a live plaintext daemon. Four configurations on the plain vulnerable
+build all failed — tcache-off separate connections (prime `in=0x5fb6f0`,
+trigger `in=0x5fe080`, no `Z` in the forward dump); gdb `find` with the prime
+still intact but its chunk never reused; prime and trigger on one connection
+where the prime's reply calls `cleanup_session()` and seq 2 becomes a stray;
+and an AUTHEN START prime keeping the session alive with the trigger on seq 3
+(prime `0x5fd350` vs trigger `0x5fdbb0` with tcache, `0x5fb6f0` vs `0x6145b0`
+without). The GHSA's stated large-then-small placement premise is thus
+NEGATIVE on this host's glibc and `--minimum` build; the advisory's
+`uid=0(root)` chain needs unpublished packet shapes and stays claim text.
+Source check: `mem_destroy()` (`misc/memops.c:239-253`) really calls
+`m->arr[i].f(m->arr[i].p)` from `cleanup_session()` (`packet.c:1326`), so the
+fake-`mem_t` → `system()` consumer is reachable in principle, but no pointer,
+`arr_count` or `arr` write was observed; incidental pointer bytes in the reply
+fail `bad_nas_args()` and leak nothing. The plain build is PIE with no stack
+canary, yet the validator's consumed-size-datalength equality still requires
+an OOB `cmd=` address before either the stack write or the reply-echo leak.
+Decision: stop spending wakes on allocator grooming without a new hypothesis.
+Smoke `bash lab/frontier/tacplus2shell/harness/run_gdb.sh` → 8 PASS / 0 FAIL
+with W121 hashes unchanged. Grade unchanged: rung 4 at live-daemon chosen-byte
+scope, rung 5 UNKNOWN; full evidence in `reports/tacplus2shell-status.md` W122.
+
+Witness W126 independently closed five replays (#1706–#1708): libvnc2shell,
+uhttpd2shell and ntpsec2shell from clean archives at `0d4103f` — 20/30/8 PASS
+respectively, hashes and normalized logs byte-identical — ESTABLISHED at their
+labeled code/harness scopes with no wire, live process, pointer, command or
+rung 5; pppd's chosen2 limb ESTABLISHED after masking PIE pointer values (a
+normalizer nit remains); and the tacplus W121 live-daemon rung-4 readback
+ESTABLISHED on the witness's own rebuilt plain binaries (8 PASS / 0 FAIL,
+hash `9d6f4e8a…` byte-identical to canonical). W126 did not replay the W122
+grooming negatives or grant any grade promotion. Its minor nit: libvnc's brief
+and PROVENANCE say "275 verbatim lines per pin"; the fixed pin generates 285
+(vulnerable 275) because the clamp adds 10 — this docs fold uses both counts,
+and the witness sent the correction to frontier.

@@ -1648,10 +1648,42 @@ is claimed, and the grade is unchanged by admission.
 - **Libvnc2Shell** (GHSA-v9pm-47h4-jcq8 / CVE-2026-50538): `bash
   lab/frontier/libvnc2shell/harness/run.sh` — 20 PASS / 0 FAIL twice with
   byte-identical normalized hashes, plus a clean `git archive 0d4103f` replay.
-  `harness/gen_fn.py` extracts 275 verbatim lines from each pinned `tight.c`;
+  `harness/gen_fn.py` extracts 275 verbatim lines from the vulnerable pinned
+  `tight.c` and 285 from the fixed one (the extra 10 are the clamp);
   real zlib is used with no socket, client or server. Hashes in
   `src/PIN_HASHES.txt`, `harness/PROVENANCE.md` and
-  `harness/EVIDENCE_HASHES.txt`.
+  `lab/frontier/libvnc2shell/EVIDENCE_HASHES.txt`.
+
+- **Witness W126 verdicts and tacplus W122 grooming negative (21:2xZ, tape
+  #1706/#1708)**: from a clean `git archive HEAD` at `0d4103f`, W126 replayed
+  libvnc twice (20 PASS / 0 FAIL, all nine normalized logs and
+  `lab/frontier/libvnc2shell/EVIDENCE_HASHES.txt` byte-identical), uhttpd
+  (30 PASS / 0 FAIL,
+  `round2-pass.txt` `c3b2b9d1…`, chosen hashes `8966ae93…`) and ntpsec
+  (8 PASS / 0 FAIL, run-final `1f04e12d…`), grading each ESTABLISHED at its
+  labeled code/harness scope: no wire, live process, pointer, marker or
+  command. The chosen-byte sweep on libvnc's own plain build varied the base
+  (`0x41` → `4142…4f50`, `0x5a` → `5a5b…6869`), so the adjacent bytes track
+  input rather than incidental state.
+- **Tacplus2Shell W122 heap-grooming NEGATIVE (commits `568bf7a`/`b404533`,
+  reconciled in `8d5af1b`)**: `reports/tacplus2shell-status.md` W122 checks
+  the pinned consumer in source — `mem_destroy()` (`misc/memops.c:239-253`)
+  really calls `m->arr[i].f(m->arr[i].p)` and `cleanup_session()`
+  (`packet.c:1326`) reaches it — then records four plain vulnerable
+  live-daemon configurations under gdb that never place chosen `cmd=ZZZZ`
+  bytes behind the trigger buffer (tcache off on separate connections, `find`
+  showing the prime intact but unreused, two AUTHOR packets on one connection
+  where the prime's reply deletes the session, and an AUTHEN START prime with
+  the AUTHOR trigger on seq 3). The GHSA's own large-then-small packet premise
+  is negative result 1 on this glibc/build; no public PoC link or exact
+  five-connection shape exists, so `uid=0(root)` stays claim text. New tracked
+  tooling: `harness/{gdb-groom.cmd,wire2.py,wire3.py,run_gdb2.py}`; raw logs
+  stay local. Smoke replay `bash
+  lab/frontier/tacplus2shell/harness/run_gdb.sh` gives 8 PASS / 0 FAIL with
+  normalized hashes `2072846c…`/`de41ed2a…`/`da7623bf…` unchanged from W121.
+  Grade unchanged: rung 4 at live-daemon chosen-offset scope, rung 5 UNKNOWN.
+  Witness W126 (#1708) rebuilt both plain binaries itself and ESTABLISHED the
+  W121 readback at that scope; it did not replay the W122 grooming negatives.
 
 ## Raw evidence policy
 
