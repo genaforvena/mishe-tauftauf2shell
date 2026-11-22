@@ -336,12 +336,27 @@ the identical input never enters `eval_args()` and replies 57 bytes; the
 vulnerable pin without the prime keeps `t` on the stack (`TARGET=0x7fff…`),
 writes no chosen bytes and replies 18 bytes. Replay
 `bash lab/frontier/tacplus2shell/harness/run_ptr.sh` → 14 PASS / 0 FAIL twice,
-normalized hashes `e93c5bbcce0054db058af4ed9ac36123f02f831bc19b5fec2727be5bc18d3505`
+normalized hashes `256ccfd6c06c8c0fbe7ac3e70cc61d39c1b013fc415ae29ff59b8e74a26a66cf`
 (vulnerable), `97a5907c44dae10ca6d9432e685992b11cec405913fcb843185bcd70ecec9b22`
 (fixed), `a1c849b2644ae0c2ab47a86c854d141597a78aaf1238d0136f0db6ff134070d1`
 (no prime), in `harness/ptr-r1.txt` / `-r2.txt`. Raw `ptr-*.log` /
 `-*.stdout` are local-only evidence. New files: `harness/wire5.py`,
 `harness/gdb-ptr.cmd`, `harness/run_ptr.sh`.
+
+Hash scope (W130, witness NIT from independent replay #1814): the earlier
+vulnerable hash `e93c5bbc…` was environment-scoped. `POST12 cmdoff` is a
+decimal pointer delta that moves with the stack/environment layout, so a
+4096-byte environment filler changed it (46912495417992 → 46912495413880 here)
+and changed that hash with it; fixed and no-prime hashes were unaffected.
+`norm()` now masks `cmdoff=[0-9]+` to `cmdoff=N`; two canonical replays at
+2026-11-22 23:07Z gave 14 PASS / 0 FAIL and byte-identical logs, and a replay
+under a 4096-byte filler gave the same three hashes. The chosen-address write
+and the verdict are unchanged. Two checks remain environment-sensitive by
+design: `vuln_before` and `vuln_nul` assert the target begins as sixteen `0x50`
+bytes and ends with `0x00 0x50`, true in the canonical environment but not
+under the filler, where those two report FAIL while `vuln_chosen_write` still
+passes and the chosen bytes still land at the target. They are byte-prefill
+assertions, not the write proof.
 
 Rung-5 probe, preserved as a negative result: `mem_destroy()` really calls
 `m->arr[i].f(m->arr[i].p)` and `cleanup_session()` calls `mem_destroy()`, so a

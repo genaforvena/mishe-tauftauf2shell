@@ -20,8 +20,10 @@ if [ ! -x "$V" ] || [ ! -x "$F" ]; then
 fi
 
 # Replace only real addresses (12+ hex digits), leaving byte values intact.
+# POST12 cmdoff is a decimal pointer delta that tracks the stack/environment
+# layout; mask it so the evidence hash is portable across environments.
 norm() {
-    sed -E -e 's/0x[0-9a-fA-F]{12,}/0xADDR/g' -e "s#$R#ROOT#g" "$1"
+    sed -E -e 's/0x[0-9a-fA-F]{12,}/0xADDR/g' -e 's/cmdoff=[0-9]+/cmdoff=N/g' -e "s#$R#ROOT#g" "$1"
 }
 
 run_case() {
