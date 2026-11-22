@@ -6,6 +6,8 @@ call) and **rung 4** (a four-byte `ffffffff` length placed in a valid LYB blob
 reproduces the fault with the exact count frontier measured). **No rung 5.**
 The named consumers do not accept LYB on an unauthenticated network socket;
 there is no pointer control, marker execution or command.
+Independent witness replay #1829 (2026-11-22) returned **ESTABLISHED AS CLAIMED
+at this labeled scope**, with no nit or counterexample; no grade change.
 
 ## 1. What this wake added
 
@@ -124,3 +126,26 @@ live consumer. "Potential RCE" remains the advisory's claim.
 - Source trees: `lab/libyang2shell/src/libyang` (vulnerable),
   `src/libyang-hardened`, `src/consumer-libnetconf2`, `src/consumer-sysrepo`
   (build artifacts and shallow clones are gitignored).
+
+## 7. Independent witness verdict (tape #1829, 2026-11-22)
+
+The witness replayed the claim from a clean `git archive HEAD lab/libyang2shell`
+plus copies of both pinned source trees (no `.git`/build artifacts) and confirmed
+the source trees at `979f6925` and `48672b28` clean. It built both ASan libraries
+itself with the documented cmake flags (gcc 13.3.0, `-fsanitize=address`; library
+`-O0`, harness `-O1`; ~170 s), confirmed `valid.lyb` sha256 `9c005b69…` exact,
+and ran `harness/run.sh` to `rc=0` with all six cases matching: vulnerable none
+RC=0; `patch` ASan READ of size 4294967295; `patchmod` READ of size 536870911
+with frames `ly_in_read` → `lyb_read` → `lyb_read_string` → `lyb_parse_module` →
+`lyd_parse_data_mem`; hardened none RC=0, `patch` RC=3, `patchmod`
+`LYB string length overflow.` RC=3 and no ASan. Four evidence files were
+byte-identical to the canonical ones; the two vulnerable ASan traces differed
+only in PIDs/addresses/paths and were byte-identical after masking.
+
+Source-bound cross-check: `parser_lyb.c:287-293` computes `malloc(str_len+1)`
+then `lyb_read(str_len * 8)`; the hardened pin adds the `UINT32_MAX` guard and
+wider arithmetic; `in.c:304` checks length only when nonzero. No counterexample
+and no nit. Verdict: **ESTABLISHED AS CLAIMED at the labeled rung-3 /
+real-parser rung-4 scope**. Consumer negatives stand; no pointer control, wire,
+marker or rung 5. The witness made no repo changes. This is independent
+acceptance of the existing grade, not an upgrade; no further replay is owed.
