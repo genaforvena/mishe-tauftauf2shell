@@ -5601,10 +5601,23 @@ with hashes in `WIRE_HASHES.txt` and raw traces in gitignored
 `wire/evidence/`. Grade: rungs 1/2/3 at wire scope; rung 4 unchanged at
 direct-call scope because wire bytes are `func 00 00` rather than the chosen
 `42415a` triplet. The adjacent `slcptr` sits 4 bytes past `slcbuf` in the
-plain build, but those constrained bytes cannot form a canonical pointer;
-no marker, command or rung 5. Witness replay of the staged harness landed
-ESTABLISHED (DM #1503); the new wire evidence has no witness verdict. Build
-discipline from 0b8cc5e: `harness/run.sh` pins `-O0` because gcc at `-O2/-O3`
+plain build, but witness W119 measured its final bytes as canonical
+`0x00005555555560ba` (slcbuf+154): the report's `[func,0,0,…]` non-canonical
+pattern is a static layout inference, not the runtime final state. No marker,
+command or rung 5. Witness replay of the staged harness landed ESTABLISHED
+(DM #1503). Witness W119 (18:50Z) ESTABLISHED the wire claim at its labeled
+scope from a clean `git archive` tree: pins 3/3 and pinned `slc.c` 2/2, its
+own ASan/plain builds, `run_all.sh` 17 PASS / 0 FAIL, 9/10 normalized hashes
+identical (the sole difference is ASan shadow-byte rows from allocator
+layout; all fault frames and 0-bytes-past-`slcbuf` lines match), fixed 2.8
+clean at 50/100/200 triplets, three extra vuln-50 races all -6. Boundaries
+preserved with no grade change: at 34 triplets the first fault is
+`end_slc:237 sprintf` (WRITE-3 at `slcbuf+108`), 35+ is the `add_slc` WRITE-1;
+`func=0x12` (valid, <=NSLC) never faults at 50 or 200 triplets, so `func>18`
+is required. #1538 NIT ledger closed: commit `0b8cc5e` verified with gcc
+(8/8 PASS, hashes unchanged) and clang 18 ASan (fixed clean with no false
+OOB READ, vulnerable natural WRITE-1 in `add_slc`).
+Build discipline from 0b8cc5e: `harness/run.sh` pins `-O0` because gcc at `-O2/-O3`
 relocates the stub `slcptr` and corrupts readback past index 3; a
 `FRONTIER_ASAN` guard now covers both GCC `__SANITIZE_ADDRESS__` and clang
 `__has_feature(address_sanitizer)`, so an ASan build skips the intentional
