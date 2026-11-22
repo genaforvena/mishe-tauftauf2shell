@@ -1,0 +1,50 @@
+=================================================================
+==400401==ERROR: AddressSanitizer: global-buffer-overflow on address 0x64ab15d18ccc at pc 0x64ab15ce73d9 bp 0x7ffd8c607530 sp 0x7ffd8c607520
+WRITE of size 1 at 0x64ab15d18ccc thread T0
+    #0 0x64ab15ce73d8 in add_slc ../../../src/inetutils-2.7/telnetd/slc.c:172
+    #1 0x64ab15ce7c2e in process_slc ../../../src/inetutils-2.7/telnetd/slc.c:264
+    #2 0x64ab15ce7eea in do_opt_slc ../../../src/inetutils-2.7/telnetd/slc.c:494
+    #3 0x64ab15ce8072 in deferslc ../../../src/inetutils-2.7/telnetd/slc.c:527
+    #4 0x64ab15ce5808 in defer_terminit ../../../src/inetutils-2.7/telnetd/termstat.c:717
+    #5 0x64ab15ce654e in localstat ../../../src/inetutils-2.7/telnetd/termstat.c:371
+    #6 0x64ab15cda14f in telnetd_run ../../../src/inetutils-2.7/telnetd/telnetd.c:611
+    #7 0x64ab15cdae84 in main ../../../src/inetutils-2.7/telnetd/telnetd.c:222
+    #8 0x74765c82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x74765c82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x64ab15cd9084 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/inetutils2shell/build/asan-2.7/telnetd/telnetd+0xf084) (BuildId: 063390e5e0f46c02580ea68d6d2af519d223e7b5)
+
+0x64ab15d18ccc is located 52 bytes before global variable 'slcptr' defined in '../../../src/inetutils-2.7/telnetd/slc.c:58:23' (0x64ab15d18d00) of size 8
+0x64ab15d18ccc is located 0 bytes after global variable 'slcbuf' defined in '../../../src/inetutils-2.7/telnetd/slc.c:59:22' (0x64ab15d18c60) of size 108
+SUMMARY: AddressSanitizer: global-buffer-overflow ../../../src/inetutils-2.7/telnetd/slc.c:172 in add_slc
+Shadow bytes around the buggy address:
+  0x64ab15d18a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x64ab15d18a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x64ab15d18b00: 00 00 00 00 00 00 00 00 f9 f9 f9 f9 00 00 00 00
+  0x64ab15d18b80: 04 f9 f9 f9 f9 f9 f9 f9 04 f9 f9 f9 f9 f9 f9 f9
+  0x64ab15d18c00: 04 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+=>0x64ab15d18c80: 00 00 00 00 00 00 00 00 00[04]f9 f9 f9 f9 f9 f9
+  0x64ab15d18d00: 00 f9 f9 f9 f9 f9 f9 f9 04 f9 f9 f9 f9 f9 f9 f9
+  0x64ab15d18d80: 04 f9 f9 f9 f9 f9 f9 f9 00 f9 f9 f9 f9 f9 f9 f9
+  0x64ab15d18e00: 00 00 00 00 05 f9 f9 f9 f9 f9 f9 f9 00 f9 f9 f9
+  0x64ab15d18e80: f9 f9 f9 f9 00 00 00 00 04 f9 f9 f9 f9 f9 f9 f9
+  0x64ab15d18f00: 00 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 f9 f9 f9
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==400401==ABORTING

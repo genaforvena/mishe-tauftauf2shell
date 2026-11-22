@@ -1,0 +1,11 @@
+telnetd=LAB/build/asan-2.7/telnetd/telnetd
+listen=127.0.0.1:PORT (ephemeral, plant-started)
+argv=LAB/build/asan-2.7/telnetd/telnetd --debug=options=3 -h -E /bin/sleep 300
+triplets=50 triplet=42415a payload_len=156
+exploit_sent=True accepted=True subopts_total=1
+our_bytes_len=N
+daemon_exit=-6 alive_before_terminate=False
+asan_error=True
+asan_global_overflow=True
+asan_write1=True
+add_slc_frame=True
