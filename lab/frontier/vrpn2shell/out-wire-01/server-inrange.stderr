@@ -1,0 +1,3 @@
+vrpn_Generic_Server_Object::vrpn_Generic_Server_Object(): Cannot open config file: No such file or directory
+  (filename vrpn.cfg)
+Could not start generic server, exiting

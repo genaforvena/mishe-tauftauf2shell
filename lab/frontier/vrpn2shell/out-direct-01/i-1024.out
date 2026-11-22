@@ -1,0 +1,15 @@
+calling handle_sender_message index=-1024
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2933987==ERROR: AddressSanitizer: SEGV on unknown address 0x0000000000e0 (pc 0x6300c9f729b1 bp 0x7ffd61329b50 sp 0x7ffd613299f0 T0)
+==2933987==The signal is caused by a READ memory access.
+==2933987==Hint: address points to the zero page.
+    #0 0x6300c9f729b1 in vrpn_Endpoint::handle_sender_message(void*, vrpn_HANDLERPARAM) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4560
+    #1 0x6300c9f5b3dc in main lab/frontier/vrpn2shell/harness/handler_direct.cpp:26
+    #2 0x7d2a6262a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x7d2a6262a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x6300c9f5af64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/harness/handler_direct+0xff64) (BuildId: 28e07b3ea7a25f866181b66d774cd69fcc49e0f9)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4560 in vrpn_Endpoint::handle_sender_message(void*, vrpn_HANDLERPARAM)
+==2933987==ABORTING

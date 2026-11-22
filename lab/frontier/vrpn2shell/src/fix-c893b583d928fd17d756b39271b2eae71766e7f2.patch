@@ -1,0 +1,23 @@
+From c893b583d928fd17d756b39271b2eae71766e7f2 Mon Sep 17 00:00:00 2001
+From: Russ Taylor <russ@reliasolve.com>
+Date: Thu, 22 Oct 2026 10:47:45 -0400
+Subject: [PATCH] Updates minor version to identify that its now has this
+ check.
+
+---
+ vrpn_Connection.C | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/vrpn_Connection.C b/vrpn_Connection.C
+index e816597e4..0092d1e69 100644
+--- a/vrpn_Connection.C
++++ b/vrpn_Connection.C
+@@ -205,7 +205,7 @@ struct timeval;
+ // proposed strategy handles both partial major version compatibility as well
+ // as accidental partial minor version incompatibility.
+ //
+-const char *vrpn_MAGIC = (const char *)"vrpn: ver. 07.38";
++const char *vrpn_MAGIC = (const char *)"vrpn: ver. 07.39";
+ const char *vrpn_FILE_MAGIC = (const char *)"vrpn: ver. 04.00";
+ const int vrpn_MAGICLEN = 16; // Must be a multiple of vrpn_ALIGN bytes!
+ 

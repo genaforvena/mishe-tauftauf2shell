@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/wire_inject.py", line 43, in <module>
+    main()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/wire_inject.py", line 26, in main
+    msg = struct.pack(">IIIIII", HEADER_LEN + payload_len, 0, 0, 0, -1, 0)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct.error: 'I' format requires 0 <= number <= 4294967295
+server_dead_after_underflow
