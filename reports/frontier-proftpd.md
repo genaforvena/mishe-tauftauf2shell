@@ -1,12 +1,14 @@
 # Frontier brief — ProFTPD mod_rewrite `int:utf8trans` BSS write (rung 4 chosen-pointer marker under ASLR-off condition)
 
-**Status (2026-11-22 00:07Z, W95): RUNG 1–4 ESTABLISHED on the real 1.3.9d daemon
-over a loopback FTP wire, with a paired safe-length control. A 1030-code-point
-key redirects the static `substr` pointer in `rewrite_parse_map_str()` to a
-chosen `.rodata` string; the string is consumed by the real parser and the
-session survives. Rung 4 is conditioned on ASLR disabled (`setarch -R`), an
-authenticated `STOR` and a non-default `mod_rewrite` config. Rung 5 NOT
-attempted. NOT admitted, no window.**
+**Status (2026-11-22 00:1xZ, W95; witness W99 #1207): RUNG 1–4
+witness-ESTABLISHED on the real 1.3.9d daemon over a loopback FTP wire, with
+paired safe-length and fixed-version controls. A 1030-code-point key redirects
+the static `substr` pointer in `rewrite_parse_map_str()` to a chosen `.rodata`
+string; the real parser consumes it and the session survives. Rung 4 is
+conditioned on ASLR disabled (`setarch -R`), an authenticated `STOR` and a
+non-default `mod_rewrite` config; ASLR-on and pre-login reach are UNKNOWN.
+Rung 5 NOT attempted. ADMITTED 2026-11-22 ~00:1xZ by the operator under
+standing approval #6 as `proftpd2shell` (window 72; route 67).**
 
 ## Verified ground truth
 
@@ -171,9 +173,11 @@ marker is a readable `.rodata` string, not executed code.
   by frontier this wake; witness W99 independently built it and observed
   rejection (see Witness replay). The 200-byte safe-length control is the
   observed frontier-local negative.
-- Admission: this is now a rung-4 candidate with a wire trigger. Hand to a
-  dedicated mind with a window if the operator admits it; frontier created no
-  admission or window this wake.
+- Admission: the operator admitted this as `proftpd2shell` at ~00:1xZ under
+  standing approval #6, with window 72 already live; the witness verdict W99
+  (#1207) is recorded above. Frontier created the window and seed wall; the
+  operator created the charter, route and trigger units. Plant-level next work
+  belongs to the `proftpd2shell` mind.
 
 ## Witness replay (W99, message #1207, 2026-11-22)
 

@@ -4493,3 +4493,52 @@ surviving wall update; this wake reconciled it instead of repeating it.
   omp-only checkers stayed GREEN and `git diff --check` was clean. The frozen
   `readme-lint` VALUE remains RED on the six-column pin mismatch, not on
   anything in these docs; the resolver is the person's full-flag sync.
+
+#### Admitted 2026-11-22 ~00:1xZ: ProFTPD2Shell / proftpd2shell (CVE-2026-119146)
+
+Frontier's brief `reports/frontier-proftpd.md` (commits `87aa93a`, `3c527a3`,
+`c754960`) and DM #1206 were the trigger. The operator rechecked the pins at
+00:13Z: `cd lab/frontier/proftpd2shell/src && sha256sum -c SHA256SUMS` 3/3 OK
+(self-computed digests; the tagged archives and generated patch have no
+published hash sidecar). All five admission elements are in
+`.mishe-tauftauf/charters/proftpd2shell.md`: **claim source** — GitHub advisory
+`GHSA-wj68-6748-262r` (CNA GitHub_M, published 2026-10-30, CWE-120, CVSS 3.1
+5.6 / CVSS 4.0 6.3), affected `< 1.3.9e` and `< 1.3.10rc5`, fixed in 1.3.9e /
+1.3.10rc5, fix `502d280b8d0ef72e44c6dd0a35a9405af0a1e301`, plus the primary
+research post read as a claim that grades the bug Crash / Not RCE.
+**Identifier** — CVE-2026-119146, `contrib/mod_rewrite.c` in
+`rewrite_map_int_utf8trans` / `rewrite_utf8_to_ucs4` /
+`rewrite_parse_map_str`. **Affected/fixed pin** — tagged 1.3.9d
+(`68b094b1…e84e4ec`) / 1.3.9e (`7db91f22…cfce5eb`) archives and patch
+(`07cc6b25…e01f045e00d79`), git refs recorded for 1.3.9d/1.3.9e/1.3.10rc5.
+**Primitive** — `rewrite_map_int_utf8trans` (`:2037`) never caps
+`strlen(key)` before writing into two function-static 1024-slot BSS buffers:
+`ucs4_longs` gets one 8-byte code point per character (`rewrite_utf8_to_ucs4
+:1670`, ASan `global-buffer-overflow WRITE of size 8` for a 2048-byte key),
+then `utf8_val` gets one attacker-chosen low byte per code point; the next
+static is the `substr` pointer at `0x106d20`, dereferenced by
+`rewrite_parse_map_str:688`. **Rung-4 plausibility** — a 1030-code-point
+authenticated loopback `STOR` key under `setarch -R` sets
+`substr = 0x000055555560d4af`, the `.rodata` string "NOOP command successful";
+`RewriteLog` shows the real parser consuming it, `NOOP=200`, `PWD=257`. The
+200-byte input is clean and the fixed 1.3.9e build rejects the long key.
+
+This admission differs from the usual rung-0 case: witness W99 (message
+#1207, 00:13Z) independently rebuilt both pins from the tarballs with its own
+binaries and replayed rungs 1–4 plus a fixed-version control, verdict ALL
+ESTABLISHED AS CLAIMED at the labeled scope. Rung 5 is NOT claimed — the
+marker is a readable string, not a command — and ASLR-on reach and
+unauthenticated pre-login rewriting stay UNKNOWN. The operator created the
+67th `engine/routes.json` entry, this mind's wake trigger units with the
+pinned full-flag sync from `docs/runtime-pin.md` (3 written / 0 removed, 67
+wake paths present), the charter and seed wall note, and adopted frontier's
+already-live two-pane window (inner socket index 72) and registry entry.
+This makes 63 admitted target minds. Never run a bare `mishe sync`.
+
+The first automatic wake at 00:15:20Z failed with `OMP-ONLY POLICY VIOLATION:
+role 'proftpd2shell' has no hy4-flash route` because the route file was
+written at 00:15:25Z, five seconds after that start; the failure signal is
+handled after the admission is complete, with a retry once routes and units
+are in place. The mind's bounded next step is to re-run the committed replay
+under its own record, then decide whether an ASLR-independent pointer route
+or an unauthenticated pre-login path merits a rung-5 attempt.
