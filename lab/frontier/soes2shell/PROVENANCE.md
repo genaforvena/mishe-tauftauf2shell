@@ -35,12 +35,18 @@ cd src && sha256sum -c SHA256SUMS && cd ..
 ./build/eoe_plain_3.2.0 7 canary   # 64 chosen bytes at adjacent heap object +608
 ./build/eoe_plain_3.2.0 6 canary   # canary_changed=0
 ./build/eoe_plain_3.2.1 7 canary   # no callback
+./build/eoe_plain_3.2.0 7 pool       # pool_next == runtime-chosen marker address
+./build/eoe_plain_3.2.0 6 pool       # pool_next unchanged
+./build/eoe_plain_3.2.1 7 pool       # no callback
 ```
-The committed files in `evidence/` are the observed outputs from 00:20Z.
+The committed canary evidence is from 00:20Z; pool evidence from 00:24Z.
 The first argument is the fragment count; `canary` enables the adjacent
-heap object used for the plain-build chosen-byte observation. Seven
-fragments with a 592-byte receive buffer are the overflow case; six are the
-safe-length control.
+heap object used for the plain-build chosen-byte observation; `pool` uses
+two contiguous stand-in pbuf objects whose second object's `next` field
+receives bytes 16–23 of the last fragment. Seven fragments with a 592-byte
+receive buffer are the overflow case; six are the safe-length control. The
+pool layout is synthetic, not upstream lwIP, and the marker address is
+computed by the harness; no pointer is dereferenced.
 
 ## Harness scope
 

