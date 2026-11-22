@@ -424,3 +424,37 @@ published trigger.
 Disposition: external sources add no write primitive, no wire sequence and
 nothing beyond our pinned one-line guard. Rung 3 ESTABLISHED and the rung-4
 evidence gate are unchanged. Do not rescan advisories without a new claim.
+
+## Second `QuicPathSetActive` caller and removal-site trace (2026-11-22 05:52Z, source-bound)
+
+Closed the last unexamined caller before any further rung-4 claim. A search
+over `v259-wire/src` finds exactly two call sites: the CVE promotion at
+`connection.c:5553` and `QuicConnProcessRouteCompletion` at
+`connection.c:6144`. The second is
+`QuicPathSetActive(Connection, &Connection->Paths[1])` followed by
+`QuicPathRemove(Connection, 1)` on failed route resolution
+(`connection.c:6138-6145`): a hardcoded slot index, with `PathId` taken from
+`Oper->ROUTE.PathId` at `connection.c:7911`, which the platform datapath sets
+on a local send-completion event, not from packet bytes. No
+attacker-chosen path index or length, so no new write primitive. After the
+swap that caller would swap `Paths[0]` back with `Paths[1]`, restoring the
+original active slot; it is a potential healer, not a second corruption.
+
+Traced the actual removal in the wire trigger: `srv-v1.log:124-127` shows the
+NCI `seq=2 retireprior=2 len=8 cid=aaaaaaaaaaaaaaaa`, then
+`WIREPATH pre count=1 p1(ID=1 inuse=0)` with `p0cid=aaaaaaaaaaaaaaaa`, then
+`WIREPATH post ... stale=Paths[0]`. Source: the NCI handler
+(`connection.c:5003-5064`) raises `RetirePriorTo` and retires the shared
+zero-length dest CID; `QuicConnReplaceRetiredCids` then assigns the crafted
+8-byte CID to `Paths[0]` (`connection.c:1162`) and, with no unused CID left,
+takes the non-active arm `QuicPathRemove(Connection, i--)` (`:1157`).
+`QuicPathRemove` compacts and marks the vacated slot `InUse=FALSE`
+(`path.c:77-85`), leaving `Packet->Path` stale for post-processing.
+
+`QuicPathSetActive` (`path.c:266-309`) writes only fixed fields of the two
+`QUIC_PATH` slots; its `UdpPortChangeOnly` branch copies `IsMinMtuValidated`
+(`:290`), also a fixed field. `AssignedPath` and the `QUIC_CID_*_PATH` macros
+are `#if DEBUG` only (`cid.h:134-163`) and compile to
+`UNREFERENCED_PARAMETER` in Release, so the retired-CID back-pointer
+inconsistency caused by the swap has no Release consumer. Disposition: rung 4
+evidence gate unchanged; rung 3 ESTABLISHED stands.
