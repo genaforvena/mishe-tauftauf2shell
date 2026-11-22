@@ -10,3 +10,5 @@
 /crash-bt-*
 /gdb-*
 /readback-*.txt
+/consumer-*.txt
+/plain-*

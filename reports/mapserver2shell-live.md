@@ -212,6 +212,43 @@ layout the OOB slots held valid `msStrdup` heap pointers and the crash was
 chunk-size corruption instead; both are consistent with a second-order
 layout-dependent effect whose exact path remains UNKNOWN.
 
+## Deeper-K reachability (wake 3, 2026-11-22 ~04:36Z)
+
+Wake 2 inspected the first ~800 bytes past the arrays at K=95. K=195 is the
+next parse-time-doubling survivor: `loadParams` reallocs both arrays to 200
+entries (1600 bytes) while parsing 5 fixed + 195 `LAYER=` parameters, then
+the append loop adds 195 slots (`NumParams` 200 -> 395), writing ~1560 bytes
+past each array. This reaches memory the K=95 pass never touched. Evidence
+is lab-local: `asan-vuln-K195.err`, `plain-K195.err`, `gdb-deep-K195.txt`,
+`gdb-deep-pre-K195.txt`.
+
+- Vulnerable ASan, K=195: rc 1, `WRITE of size 8`, `0 bytes after 1600-byte
+  region`, `msWMSDispatch src/mapwms.cpp:5991`, the same stack as K=95. The
+  allocation is now `msSmallRealloc` in `loadParams cgiutil.c:265`, so the
+  parse-time doubling is visible in the report itself.
+- Fixed `rel-8-6-5` ASan at K=195: rc 0, 595-byte static `LayerNotDefined`
+  XML, empty stderr. Vulnerable ASan at K=197 (the next doubling blind spot,
+  cap 400): rc 0, identical clean XML. Both controls preserve the result.
+- Plain stock build, K=195: rc 134, `double free or corruption (!prev)` in
+  `_int_free_merge_chunk(p=ParamNames chunk 0x...a790, size=1616)` at
+  cleanup; the crashing CGI stdout is again the 41-byte Content-Type header
+  only. No fault inside `msWMSLoadGetMapParams`, no early control-flow event.
+- Pre-loop memory the writes will overwrite (two 200-word dumps at
+  `ParamValues+1600` and `ParamNames+1600`): 198 heap pointers, 197 zeros,
+  two glibc chunk-size fields and three attacker-string ASCII words —
+  **zero pointers into PIE text (0x555555556000-0x555555557225), GOT or
+  libc**. Post-loop the same slots hold only `0x55555594f...` `msStrdup`
+  heap pointers.
+- Structural point: both OOB values are `msStrdup` results
+  (`mapwms.cpp:5991-5992`), so the attacker controls the *bytes at* the
+  written pointers, never the pointer values. With PIE + `GNU_STACK RW`
+  (NX), no wire address leak and no function-pointer consumer in the write
+  range, this primitive has no call-through route on these builds.
+- Disposition: the deeper-K pass broadens the wake-2 negative over ~3.2 KB
+  of OOB writes instead of ~1.6 KB. Rung 5 stays UNKNOWN with the same named
+  obstacles, not claimed and not refuted in general; rungs 3/4 are unchanged.
+  No independent witness replay of this report is in hand yet.
+
 ## Reproduce
 
 ```
@@ -224,4 +261,7 @@ python3 loopback_bridge.py               # 127.0.0.1:8077 only
 #   &REQUEST=GetLegendGraphic&BBOX=0,0,1,1 plus 95 '&LAYER=DEADBEEFCAFEBABE'
 ./readback.sh 95                         # live gdb readback of OOB slots
 ./consumer-inspect.sh 95                 # consumer-reality heap dump (rung-5 boundary)
+./poc.sh 195                             # deeper OOB, rc 1 (1600-byte region)
+BIN=./build-fixed/mapserv ./poc.sh 195   # fixed control at K=195, rc 0
+./poc.sh 197                             # deeper safe-input control, rc 0
 ```

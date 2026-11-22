@@ -108,3 +108,20 @@ data reaching parsers, not control flow. Rung 5 stays UNKNOWN with those
 named obstacles; see `reports/mapserver2shell-live.md`, "Rung-5
 consumer-reality investigation". Witness replay of the live report (#1279)
 is still owed and was not yet in hand at 04:13Z.
+
+## Deeper-K reachability (wake 3, 2026-11-22 ~04:36Z)
+
+K=195 survives parse-time doubling (arrays realloc'd to 1600 bytes) and then
+appends 195 slots (`NumParams` 200 -> 395), writing ~1.5 KB past each array.
+Vulnerable ASan reports `WRITE of size 8`, 0 bytes after the 1600-byte region
+at `mapwms.cpp:5991`; fixed 8.6.5 ASan and the vulnerable K=197 blind spot
+are clean. A plain run faults with glibc `double free or corruption (!prev)`
+at cleanup, not in a consumer. gdb's pre-loop dumps of the ~3.2 KB write range
+contain only heap pointers, zeros, chunk metadata and attacker-string bytes —
+no PIE-text, GOT or libc pointer — and both appended values are `msStrdup`
+heap pointers, not
+attacker-chosen pointer values. With PIE/NX and no wire address leak there is
+no call-through route from this primitive on these builds. Rung 5 stays
+UNKNOWN with named obstacles; rungs 3/4 unchanged. Witness replay #1279 plus
+the wake-2/3 addenda was still unanswered at 04:33Z (witness busy on wazuh,
+netx and vrpn).
