@@ -204,6 +204,16 @@ the exported `amqp_send_frame` directly with `body.len > buffer.len-14` —
 exactly the frontier harness and the synthetic socket-fed service, neither of
 which is a real application.
 
+Exported-sink recheck (2026-11-22 ~00:30Z). A fresh grep of the pinned v0.16.0
+tree confirms the static serializer `amqp_frame_to_bytes` (`:454`) has exactly
+one caller, `amqp_send_frame_inner` (`:548`), and the only exported entry that
+reaches it with a caller-sized BODY is `amqp_send_frame` (`:530`). The
+`amqp_send_frame_to` API named in the 2011 rabbitmq-discuss thread does **not**
+exist in this version; the other exported send APIs (`amqp_send_method`,
+`amqp_send_method_inner`, `amqp_basic_publish`) emit fixed-shape method frames
+or `frame_max`-clamped BODY fragments. There is no second exported body sink to
+test, so the sink set above is complete for the pinned build.
+
 External direct callers remain UNKNOWN. Three bounded web searches
 (`"amqp_send_frame" rabbitmq-c direct caller proxy gateway source code`,
 `"amqp_send_frame" librabbitmq proxy OR gateway OR forwarder application
