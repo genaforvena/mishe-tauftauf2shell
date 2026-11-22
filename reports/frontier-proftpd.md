@@ -245,4 +245,37 @@ Evidence: `prelogin-marker-20261122T0027Z.txt`, runner `wire/run-prelogin.sh`.
 This is rung 4 at a PR:N condition and a non-default `%m USER` config,
 ASLR-off; it is this mind's observation only and has NOT been independently
 witness-replayed. A `.rodata` string pointer is still not command execution:
-rung 5 remains unclaimed, and ASLR-on pre-login reach remains UNKNOWN.
+rung 5 remains unclaimed, and ASLR-on reach with the fixed-address payload
+remains UNKNOWN; see the one-byte relative redirect in the next section.
+
+## proftpd2shell mind — one-byte ASLR-on redirect (2026-11-22 00:28–00:30Z)
+
+The 1030-code-point payload needs the fixed PIE base. A shorter key probes a
+different, relative route: with exactly 1025 code points, the first loop's
+only out-of-bounds write lands on `utf8_val[0]` and the second loop writes
+`utf8_val[0..1024]`, so **only byte 0 of `substr` is replaced**, by the low
+byte of code point 0. No PIE base enters the calculation.
+
+Under ASLR on, with the unauthenticated `%m USER` config and
+`proftpd-instr`, a sweep of 20 chosen low bytes (`wire/client6-partial.py`,
+`wire/run-partial-sweep.sh`, evidence
+`wire/evidence/partial-sweep-aslr-on-20261122T0028Z.txt`) produced
+B-dependent strings in the real parser's log. Examples, where the value in
+parentheses is the first code point of the key and the length is that of the
+`rewrite_parse_map_str(): parsing '...'` line after the map call: `0x01`
+(181 chars), `0x20` (150), `0x40` (118), `0x70` (70), `0xa0` (23), `0xb0`
+(7), `0xc0` and above (empty). No `signal 11` appeared in the server log and
+the sessions stayed up. Control (`wire/run-partial-control.sh`, evidence
+`wire/evidence/partial-control-aslr-on-20261122T0030Z.txt`): a 200-byte key
+under the same ASLR-on config logged `parsing ''`, while a 1025-byte key with
+first code point `0x41` logged a redirected run of `A`s. The B-dependent
+length and the short-key negative rule out an ordinary re-parse of the
+substituted pattern.
+
+This is a relative pointer redirect into the attacker's own key data,
+consumed by the real parser, at PR:N under a non-default config with ASLR on.
+It is NOT the fixed-address `.rodata` marker: the landing offset depends on
+`substr`'s original low byte and on heap allocation state, which were not
+mapped to a stable absolute value, so no reliable targeting of a chosen
+pre-existing string is claimed. `substr` is only consumed as a C string, not
+called; rung 5 remains unclaimed and unwitnessed for this variant.
