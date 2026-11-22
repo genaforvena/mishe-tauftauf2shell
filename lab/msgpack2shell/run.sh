@@ -17,7 +17,7 @@ rc0() { if [ "$1" -eq 0 ]; then ok "$2"; else bad "$2"; fi; }
 
 rm -f evidence/raw-* evidence/api-* evidence/canary-* evidence/summary.txt
 
-sha256sum src/vrefbuffer-*.c src/vrefbuffer.h > evidence/pin-hashes.txt
+sha256sum src/vrefbuffer-*.c include/msgpack/vrefbuffer.h include/msgpack/zone.h > evidence/pin-hashes.txt || exit 2
 
 : > evidence/summary.txt
 for cc in gcc clang; do

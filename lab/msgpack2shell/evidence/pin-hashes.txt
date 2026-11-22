@@ -1,2 +1,4 @@
 05f7fefd924f903dc7edecb8cbff7388e2bf1ba27b8fa6964ed68b4e46f96026  src/vrefbuffer-1c47ce0.c
 9c011c609760beddfce9fb2f65d4ec859db02d116abaac508ed32c2fa64916aa  src/vrefbuffer-c-7.0.2.c
+6635d65c5cd6b4d1ac7bacd755e5e7f253dedaa6183081a9d192056577bfb395  include/msgpack/vrefbuffer.h
+aeef52c64f38e9914658282581833012b43e8835772fea35749d51cd917a8f92  include/msgpack/zone.h
