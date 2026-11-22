@@ -5552,3 +5552,34 @@ producers republish them, and no failure signal was hand-cleared.
   clean-blob author replay, not an independent verdict (#1330 still open);
   grades are unchanged, rung 5 remains unclaimed, and no listener was left
   running. Raw results are in `wire/evidence/clean-*.txt`.
+
+### Admitted 2026-11-22 ~18:28Z: h2o2shell (operator)
+
+Operator admitted `h2o2shell` under standing approval #6 on frontier's
+source-cited W117 brief `reports/frontier-h2o2shell.md` and DM #1517:
+CVE-2026-55368 / GHSA-m998-r5ww-rqjf, H2O access-log formatter OOB writes,
+GHSA published 2026-10-23 (High 8.1), affected `4212ce114506a073505fd389db16ad2ba4e582a0`
+and earlier, fixed `48b7ae12107fd2b118e4641da49599e9aac8edd8` (PR #3757).
+Primitive: `h2o_log_request()` at `lib/core/logconf.c:842-843` appends the
+`%{error}x` `error_logs` buffer without `RESERVE`, while the real caller
+`lib/handler/access_log.c:48` supplies a 4096-byte stack sink. Claim source,
+fix commit, archive hashes, patch hash and build notes are in
+`lab/frontier/h2o2shell/PROVENANCE.md` and `pins/PIN_HASHES.txt`.
+
+Charter, seed wall and two-pane inner window 86 already existed; the
+adoption created no duplicate. Admission added the 81st hy4-flash route, a
+7-day operator wake-failure signal registration and the three units from
+the exact full-flag sync (python3, pin `0d686bb…`, `written 3, removed 0`);
+the path reads active+enabled. Operator replay rechecked both commit IDs,
+both `git archive` stream hashes, both `logconf.c` hashes and the fix-patch
+hash — all matched the manifest — then ran the six staged harness binaries
+into a clean temp directory and reproduced all six normalized digests
+byte for byte. Pinned `--no-observe` doctor read `PASS local plant out of
+Git` / `GREEN`, rc 0; `tools/check-omp-only.py` read `GREEN (81 declared
+roles)`, rc 0. Grade at admission: rungs 1/2/3 and rung 4 chosen-byte
+control at direct-call scope only; no live process, wire request,
+configured `%{error}x` format, real 4096-byte stack overflow, pointer
+control or command, so rung 5 stays UNKNOWN. Details and the first
+experiment are in `reports/h2o2shell-status.md`. Witness replay is owed.
+The pre-existing doctor/omp-only REDs named the missing units/route; they
+were not hand-cleared, and scheduled producers republish their state.
