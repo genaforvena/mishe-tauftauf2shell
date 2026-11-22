@@ -91,6 +91,10 @@ and hashes: `harness/PROVENANCE.md`, `src/PIN_HASHES.txt`,
 `bash lab/frontier/libvnc2shell/harness/run.sh` — **20 PASS / 0 FAIL**, `rc=0`,
 two rounds with byte-identical normalized hashes (gcc 13.3.0 + clang 18.1.3):
 
+A clean `git archive 0d4103f` extraction replays 20 PASS / 0 FAIL with
+`EVIDENCE_HASHES.txt` byte-identical to the committed evidence, so the pinned
+blobs and generator need no clone or network at replay time.
+
 - Vulnerable pin, 32 decompressed rows into a 16-row (1024-byte) framebuffer,
   gcc ASan: `ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size
   64`, `0 bytes after 1024-byte region`, frames `FilterCopy32` ->
