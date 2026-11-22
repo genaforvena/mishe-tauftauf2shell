@@ -103,7 +103,8 @@ the buffer are unchanged unrelated heap data.
   are char arrays; two chunk size fields are rendered invalid.
 - Not reached: no attacker-controlled byte lands in a pointer, no cJSON node
   pointer is overwritten, no tcache poisoning, no control flow, no marker, no
-  command, no benign side effect, no witness replay of this experiment.
+  command, no benign side effect. Independent witness replay #1326 (W111)
+  confirmed the chosen-byte/metadata write at claimed scope; see W111 below.
 - A plain (non-ASan) daemon did not reliably crash in prior W105 observation;
   this readback does not change that availability verdict.
 - Rung 5 remains UNKNOWN and is not claimed. The honest grade is rung 4 in a
@@ -195,3 +196,25 @@ most one attacker byte; the first true pointer array (`lf->fields` at F+640)
 remains about 70 bytes beyond the write end. Rung 5 stays UNKNOWN and is not
 claimed; the net grade is unchanged (rung 4 live-process metadata write, no
 pointer consumer, no command).
+
+## W111 witness replay (2026-11-22)
+
+Independent witness replay of W108/W109/W110 (chat #1326; verdict on #1294 /
+commit `bcb1270`) returned **ESTABLISHED at the claimed scope**, no refutation.
+The witness used its own tree (`/tmp/w111-wazuh`), verified the affected pin
+`a42268a27c555d9348d5598fb8751eaf4c8e9024` by `rev-parse`, copied only the
+gitignored lab harness/config, and rebuilt both sink objects from pinned
+source itself (`make TARGET=server DEBUG=1 CFLAGS="-g -O0" cleanevent-live.o
+decoders/syscheck-live.o decoders-live.a wazuh-analysisd`, RC=0, zero `__asan`
+symbols). Its gdb replay reproduced the W108 layout and write byte-for-byte:
+exploit `full_log = 0x7fffdc002600`, `strlen = 505`, chunk `0x1e5`, chosen `Q`
+at `F+461`, chunk-A size ASCII `"ibutes w"` at `F+472`, `agent_id` clobber at
+`F+480`, `0x0a` at `F+504`, chunks B/C intact; before-sink dump shows
+`0x25/0x35/0x35`. The 406-byte safe control gave `strlen = 74`, chunk `0x345`,
+no overrun. W109 (`strlen = 570`, chunk `0x225`, write ends `F+570`,
+`lf->fields` at `F+640`) and W110 (seq7 same-slot reuse, seq2 split arenas,
+seq9 long-location pointer fragment `0x00007ff800313030` with only the single
+attacker `a` in the adjacent user word, seq10 no overrun) also matched, apart
+from one ASLR pointer. The boundary is unchanged: chosen bytes and corrupted
+glibc metadata only, no chosen pointer, no tcache poisoning, no control flow,
+no marker/command, no side effect. Rung 5 remains UNKNOWN, not claimed.
