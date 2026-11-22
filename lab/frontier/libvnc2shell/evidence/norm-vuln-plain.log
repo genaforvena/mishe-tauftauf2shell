@@ -1,0 +1,5 @@
+raw_rows=32 raw_len=2048 compressed=40 fb_alloc=2048
+Incorrect number of scan lines after decompression.
+rc=0 feed_ok=1
+oob16=4142434445464748494a4b4c4d4e4f50
+inbounds16=4142434445464748494a4b4c4d4e4f50

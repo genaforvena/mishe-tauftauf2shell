@@ -1,0 +1,3 @@
+raw_rows=32 raw_len=2048 compressed=40 fb_alloc=1024
+Tight: too many scan lines after decompression.
+rc=0 feed_ok=1

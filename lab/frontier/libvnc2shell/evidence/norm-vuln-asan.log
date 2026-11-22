@@ -1,0 +1,26 @@
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 64 at 0xADDR thread T0
+#0 0xADDR in memcpy ..PATH:115
+#1 0xADDR in FilterCopy32 PATH:273
+#2 0xADDR in HandleTight32 PATH:212
+#3 0xADDR in main PATH:208
+#4 0xADDR in __libc_start_call_main ..PATH:58
+#5 0xADDR in __libc_start_main_impl ..PATH:360
+#6 0xADDR in _start (PATH) (BuildId: ID)
+0xADDR is located 0 bytes after 1024-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+#0 0xADDR in malloc ..PATH:69
+#1 0xADDR in main PATH:174
+#2 0xADDR in __libc_start_call_main ..PATH:58
+#3 0xADDR in __libc_start_main_impl ..PATH:360
+#4 0xADDR in _start (PATH) (BuildId: ID)
+SUMMARY: AddressSanitizer: heap-buffer-overflow ..PATH:115 in memcpy
+Freed heap region: fd
+Stack after return: f5
+Stack use after scope: f8
+Global init order: f6
+Container overflow: fc
+Array cookie: ac
+ASan internal: fe
+==PID==ABORTING
