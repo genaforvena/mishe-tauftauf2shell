@@ -84,11 +84,11 @@ gdb-alias-wire3.peer gdb-alias-wire2.cmd` (same controls):
   the last entry of each backend object.
 - Fault chain: `json_value_free (value=root)` →
   `json_value_free_ex`, whose object case walks
-  `values[--length].value` in reverse (`utils/json.c:1098`). It therefore
-  loads the corrupted `backend_hostname` child pointer first and faults at
-  `value->parent = 0` (`utils/json.c:1079`) with
-  `value=0x555511111111`. This matches both the identified field and the
-  observed pointer.
+  `values[--length].value` in reverse (`utils/json.c:1100`). It therefore
+  loads the corrupted `backend_hostname` child pointer first. gdb reports the
+  fault PC at `utils/json.c:1079` (`switch (value->type)`) with
+  `value=0x555511111111`; the `value->parent = 0` assignment in that block is
+  at `utils/json.c:1075`. This matches the identified field and the pointer.
 
 ## Grade and limits
 

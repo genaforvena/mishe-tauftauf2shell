@@ -145,9 +145,33 @@ completed admission after re-verifying the pins and replaying the harness.
   child pointer first. Full report:
   [reports/pgpool2shell-alias-w8.md](pgpool2shell-alias-w8.md); replay assets
   in `lab/pgpool2shell/config/`. Grade unchanged: rung 3 + rung 4 at a
-  layout-fixed offset, no address steering, no command, no rung 5. Author-
-  measured only; witness replay of the W7 lane (operator tape #1487) is
-  still outstanding and was not duplicated.
+  layout-fixed offset, no address steering, no command, no rung 5. Witness
+  replay was outstanding at measurement time; its verdict is recorded below.
+
+- **Independent witness replay W118 (DM #1531, 2026-11-22 ~18:25–18:5xZ):**
+  the witness returned ESTABLISHED **as labeled** for W7/W8. From a clean
+  git-archive replay with its own pinned plain/ASan builds (SHA256SUMS 2/2
+  OK): harness A–G as claimed; ASan WRITE of size 4 at `utils/json.c:1189`
+  from `wd_json_data.c:136`, 256 bytes past the 113672-byte `BackendDesc`;
+  9/10 normalized hashes identical (the ASan-file difference is only its
+  build paths/BuildId/PC, same fault address and frames). Harness alias idx
+  `-2767`, word `0x3` → `0x42424242`; abort value-independent at chosen
+  `0`, `0x11111111`, `0x33333333`. On its own live 4.7.2 build, wire
+  `0x11111111` at `0x55555591dbc0` → SIGSEGV at `0x555511111111`,
+  `0x33333333` → `0x555533333333` at the same slot; backtrace
+  `get_pool_config_from_json` ← `standard_packet_processor:4472` ←
+  `watchdog_main`. `run.sh` A/B/C: safe N=128 clean, vulnerable N=129
+  faults, fixed 4.7.3 rejects with `invalid watchdog JSON payload`. Ports
+  19003–19006 free before and after; only its own children killed; no repo
+  edits. Counter-observation, no grade change: its absolute slot
+  `...dbc0` differs from the author's `...dbe0` by `0x20`, but both are
+  `+0x1bd08` from `backend_desc` — relative offset is layout-fixed,
+  absolute base is build-dependent. Its two NITs were checked against the
+  pinned 4.7.2 tarball and fixed in
+  [reports/pgpool2shell-alias-w8.md](pgpool2shell-alias-w8.md): reverse
+  object walk is `utils/json.c:1100`, `value->parent = 0` is `:1075`, and
+  `:1079` is the `switch (value->type)` PC gdb reports. Grade unchanged:
+  no address steering, no command, no rung 5. W9 was not replayed.
 
 - **W9 `wd_nodes` branch (2026-11-22 ~18:3xZ):** a distinct unchecked array
   in the same peer config parser — 4.7.2 `wd_json_data.c:189-202` copies the
