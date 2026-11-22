@@ -142,7 +142,11 @@ the W2 geometries below change that.
 `real_layout.c` accepts a `geom` mode with an optional bbuffer length and a
 `realloc` mode; the pinned `.inc` files are unchanged and their hashes are
 still asserted by `run.sh`. All byte readbacks are from
-`lab/sofiasip2shell/layout/evidence/`.
+`lab/sofiasip2shell/layout/evidence/`. A clean `git archive HEAD` replay into
+`/tmp` required regenerating the two gitignored `.inc` files from the tracked
+pinned `ws-*.c` with `harness/gen_fn.py` (hashes `b96477e0` / `42dce55f`);
+after that `run.sh` gave rc 0 with the 12 expected per-case rcs and all four
+new `.err/.out/.rc` files byte-identical to the committed evidence.
 
 ### 65527-byte bbuffer (`plain-v17-geom`)
 
