@@ -155,6 +155,63 @@ with a corrupted chunk size in `_int_free_merge_chunk`
   separately ESTABLISHED at their INSTRUMENTED label; nothing here revises
   that verdict, and this report has not yet been replayed by the witness.
 
+## Rung-5 consumer-reality investigation (wake 2, 2026-11-22 ~04:15Z)
+
+The plant's standing lesson is to establish the consumer's actual behavior
+before investing in exploitation mechanics. A bounded gdb pass on the plain
+stock build with K=95 answers where the OOB pointer writes land and what reads
+them afterwards. Evidence: `lab/mapserver2shell/consumer-inspect.sh` (run it
+as `./consumer-inspect.sh 95` to reproduce the dump at `mapwms.cpp:6017`),
+`crash-bt-K100.txt`, the wire response bodies, and `readelf`/`ldd` output for
+the plain binary.
+
+**Heap layout at the post-overflow breakpoint** (one representative run):
+
+- `ParamNames` user base `0x5555555b3450`, `ParamValues` user base
+  `0x5555555b3780`; delta **816** (800-byte array + 16-byte chunk header), so
+  the two arrays are adjacent and their malloc chunks are contiguous.
+- `ParamNames[100]` and `[101]` (the first two OOB appends) land at
+  `0x...3770`/`0x...3778` — exactly the `prev_size` and `size` fields of the
+  **ParamValues chunk header** — and hold the heap pointers returned by
+  `msStrdup("LAYERS")`. `ParamNames[102..194]` then overwrite
+  `ParamValues[0..92]`.
+- `ParamValues[100..194]` write from `0x...3aa0` to `0x...3da0`, i.e. past the
+  end of its own chunk into subsequent heap chunks. The dump there shows only
+  heap pointers (`0x...8f....` string buffers, `0x...5d....` map-owned
+  objects) and zeros — **no code, PLT/GOT or vtable pointer** in the written
+  range.
+
+**Consumers.** The only post-overflow readers of these slots are
+`msWMSLoadGetMapParams` (`mapwms.cpp:6017`), which treats each
+`ParamNames[i]`/`ParamValues[i]` as a C string, and the cleanup
+`msFreeCharArray(..., NumParams)` -> `free()` (`cgiutil.c:517-518`,
+`mapfile.c:194`). No slot is used as an indirect-call target. The observed
+fault is glibc detecting the corrupted ParamValues chunk size at cleanup:
+`double free or corruption (out)` in `_int_free_merge_chunk` via
+`msFreeCharArray(..., num_items=205)` (`crash-bt-K100.txt`). That is heap
+metadata corruption / DoS, not control-flow redirection.
+
+**No wire address leak.** The HTTP response on the crashing path is only
+`Content-Type: text/xml; charset=UTF-8` (41 bytes, no body); the normal path
+is a static `LayerNotDefined` XML document. Pointer-looking hex appears only
+in the lab-local ASan stderr, never in attacker-visible output. The plain
+binary is PIE with `GNU_STACK RW` (NX), on glibc 2.39 with tcache keys and
+safe-linking.
+
+**Disposition.** The observed path gives attacker-chosen *string contents*
+through string parsers and attacker-influenced *heap metadata* to `free()`,
+but no call-through of a corrupted pointer and no address leak to defeat
+ASLR/PIE. A benign-command side effect would additionally require a
+function-pointer consumer in the write range or a heap arbitrary-write plus
+a leak; neither was found in this bounded pass. **Rung 5 is therefore left
+UNKNOWN, with these named obstacles**, not claimed and not refuted in
+general. This does not revise the rung-3/rung-4 findings above. One nuance
+recorded for the witness: the rung-4 "free() argument equals the chosen
+bytes" observation is heap-layout-dependent — in this wake's clean K=95
+layout the OOB slots held valid `msStrdup` heap pointers and the crash was
+chunk-size corruption instead; both are consistent with a second-order
+layout-dependent effect whose exact path remains UNKNOWN.
+
 ## Reproduce
 
 ```
@@ -166,4 +223,5 @@ python3 loopback_bridge.py               # 127.0.0.1:8077 only
 # then send GET /mapserv?map=$PWD/legend.map&SERVICE=WMS&VERSION=1.3.0\
 #   &REQUEST=GetLegendGraphic&BBOX=0,0,1,1 plus 95 '&LAYER=DEADBEEFCAFEBABE'
 ./readback.sh 95                         # live gdb readback of OOB slots
+./consumer-inspect.sh 95                 # consumer-reality heap dump (rung-5 boundary)
 ```

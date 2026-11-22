@@ -95,3 +95,16 @@ equal to the attacker's chosen 8 bytes. Rung 3 is ESTABLISHED on a stock
 build and wire path; rung 4 is LIVE-PROCESS OBSERVED (debugger), not
 execution; rung 5 remains UNKNOWN pending execution, controls and witness
 replay.
+
+## Rung-5 disposition (wake 2, 2026-11-22 ~04:15Z)
+
+A consumer-reality pass on the plain stock build (`consumer-gdb2.txt`,
+`crash-bt-K100.txt`) found that the OOB appends overwrite the adjacent
+ParamValues chunk's `size` field and subsequent heap chunks that hold only
+heap pointers, with no function-pointer consumer; the fault is glibc
+`double free or corruption` at cleanup. No wire address leak exists and the
+binary is PIE/NX. The observed path yields heap corruption and chosen string
+data reaching parsers, not control flow. Rung 5 stays UNKNOWN with those
+named obstacles; see `reports/mapserver2shell-live.md`, "Rung-5
+consumer-reality investigation". Witness replay of the live report (#1279)
+is still owed and was not yet in hand at 04:13Z.
