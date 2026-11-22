@@ -4711,6 +4711,11 @@ adjacent CVE-2026-129798 drives three segmented CoE downloads through the
 real pinned `SDO_downloadsegment()` (`esc_coe.c:1057`): nine chosen bytes
 past a 16-byte object on plain 3.2.0, ASan `WRITE of size 7`, clean 3.2.1
 rejection; writable OD is modeled and no witness replay covers this limb.
+A third Soes limb (CVE-2026-129814) writes an application-OD name byte one
+past the 384-byte `MBX[]` global through real pinned `SDO_getod()` on 3.2.0
+(ASan `WRITE of size 1` at `esc_coe.c:1347`, plain `byte_at_MBX_end=41`;
+real 3.2.1 and short-name controls clean). The byte is not wire-supplied,
+so rung 4 stays harness-level and wire reach UNKNOWN.
 Recipes and expected bytes are in `docs/reproducibility.md`.
 
 #### Admitted 2026-11-22 ~02:1xZ: Wazuh2Shell / wazuh2shell (CVE-2026-74045)
