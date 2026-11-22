@@ -155,8 +155,19 @@ the unreserved error append exists only for `%{error}x`
    does not grow the buffer and still faults on the stack
    (`live/asan-heap-sink.1770799`).
 
+3. **Heap neighbour is free space in the un-groomed plain build.** With the
+   same forced-heap config, a 6870-byte path gives `ERROR_SIZE=7007` and a
+   8209-byte total line in an 8192-byte `malloc`, i.e. a 17-byte overflow.
+   gdb on the pinned plain binary (`python3 live/forced-heap-gdb.py 1200 6870`,
+   transcript `live/forced-heap-gdb-transcript.txt`) shows 16 chosen `A`
+   bytes followed by the `\n` suffix at `line_end`, then all zeros; with a
+   10000-byte path the first 256 bytes past `line_end` are still chosen `A`
+   bytes. The plain process stays alive after the overflow. No pointer-bearing
+   object was reached in the un-groomed heap; heap grooming remains untested.
+
 **Grade unchanged:** rungs 1-4 remain live and wire-triggered; rung 5 stays
 UNKNOWN. The stack saved-RIP route to control flow is closed on the pinned
 build; the heap route is an open research question, not a demonstration. No
 chosen pointer, control-flow transfer, lab command or side effect was
 observed in W2.
+

@@ -11,6 +11,7 @@ ROOT = "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell"
 PORT = 17999
 header_len = int(sys.argv[1]) if len(sys.argv) > 1 else 1200
 path_len = int(sys.argv[2]) if len(sys.argv) > 2 else 10000
+BIN = os.environ.get("H2O_BIN", f"{ROOT}/src/vuln/build-asan/h2o")
 FORMAT = "%{pad}i %{error}x"
 conf = f"{ROOT}/live/forced-heap.conf"
 with open(conf, "w") as f:
@@ -39,7 +40,7 @@ for p in (f"{ROOT}/live/forced-heap-access.log",):
 outpath = f"{ROOT}/live/forced-heap.out"
 with open(outpath, "wb") as out:
     proc = subprocess.Popen(
-        [f"{ROOT}/src/vuln/build-asan/h2o", "-c", conf],
+        [BIN, "-c", conf],
         stdout=out, stderr=subprocess.STDOUT,
         env={**os.environ, "ASAN_OPTIONS": f"detect_leaks=0:abort_on_error=0:log_path={ROOT}/live/asan-forced-heap"},
     )
