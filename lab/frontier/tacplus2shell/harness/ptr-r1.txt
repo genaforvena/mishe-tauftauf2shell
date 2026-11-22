@@ -1,0 +1,25 @@
+=== vulnerable pin + chosen-address write ===
+case=vuln runner_rc=0
+PASS vuln_eval
+PASS vuln_t_slot
+PASS vuln_t_redirect
+PASS vuln_before
+PASS vuln_chosen_write
+PASS vuln_nul
+PASS vuln_heap_target
+PASS vuln_reply_18
+=== fixed pin + same wire input ===
+case=fixed runner_rc=0
+PASS fixed_no_eval
+PASS fixed_reply_57
+=== vulnerable pin + no prime ===
+case=noprime runner_rc=0
+PASS noprime_no_redirect
+PASS noprime_stack_target
+PASS noprime_no_write
+PASS noprime_reply_18
+=== normalized evidence hashes ===
+vuln e93c5bbcce0054db058af4ed9ac36123f02f831bc19b5fec2727be5bc18d3505
+fixed 97a5907c44dae10ca6d9432e685992b11cec405913fcb843185bcd70ecec9b22
+noprime a1c849b2644ae0c2ab47a86c854d141597a78aaf1238d0136f0db6ff134070d1
+FAILURES=0

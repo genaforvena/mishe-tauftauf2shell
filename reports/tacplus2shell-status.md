@@ -298,3 +298,61 @@ FAIL twice, normalized hashes `f76aeb15…` (vulnerable), `6499bb53…` (fixed),
 `harness/overflow-*.log` and `-*.stdout` are local-only evidence. New files:
 `harness/gdb-overflow.cmd`, `harness/run_overflow.sh`. Canonical
 `run_reuse.sh` and `run_gdb.sh` were not modified.
+
+## W129 live-daemon write-what-where via the `t` stack slot (2026-11-22 22:39Z)
+
+The saved-control-word overwrite in W128 faults before the epilogue because
+the copy crosses every live local. A different target fixes that: in the
+plain `-O0` build, `eval_args()`'s destination cursor `t` lives at `rbp-0x48`
+(`cmdline+168`), while `i` is at `cmdline+160` and `p`/`argsizep` at
+`cmdline+224`/`+216`. The `memcpy` branch reloads `t` from its stack slot
+after the call (`d272: mov -0x28(%rbp),%rax; add -0x48(%rbp),%rax;
+mov %rax,-0x48(%rbp)`), so a copy landing exactly at `cmdline+168` replaces
+`t` with chosen bytes and the next copy goes to `(chosen + len)`.
+
+Wire construction (`harness/wire5.py`): the same seq-3 AUTHEN/CONT prime and
+seq-1 AUTHOR trigger as W127/W128, but the surviving prime plaintext at
+`in+1156` now holds three chosen records. `i=12` (`l=140`) copies 136 bytes to
+`cmdline+32..+167`; two live frame slots in that span are restored through
+the source bytes — copied index 104 holds the target address for the saved
+`cmdline` VLA pointer at `cmdline+136`, and index 128 holds `12` for the loop
+counter at `cmdline+160`, so the loop's `i++` lands on 13. `i=13` (`l=12`)
+copies 8 bytes into `t`'s own slot; `i=14` (`l=21`) copies the chosen 16-byte
+payload plus a NUL to the resulting address.
+
+Live observation (plain `929671c` under gdb, `ptr-vuln.log`): `EVALARGS
+in=0x5555555fdad0 base=0x5555555fdb18 inlen=104`; `PRE13 t=0x7fffffffdd08
+tslot=0x7fffffffdd08` (i.e. `cmdline+168`); `POST13 t=0x5555555fe1d0`;
+`PRE14 i=14 l=21 ... t=0x5555555fe1d8 TARGET=0x5555555fe1d8`, with `i=14`,
+`p` and `argsizep` still live. Target bytes before were sixteen `0x50`; after
+they are `50 57 4e 33` four times — the chosen `PWN3PWN3PWN3PWN3` — followed
+by `0x00`. The daemon did not fault: the trigger reply was 18 bytes.
+
+This is **rung 4 pointer control at live-daemon scope**: chosen bytes at a
+chosen address, with the address carried in the crafted prime as wire data.
+The address is fixed only because the lab daemon runs under gdb, which
+disables ASLR; no attacker-side address leak is claimed. Fixed `d8493e0` with
+the identical input never enters `eval_args()` and replies 57 bytes; the
+vulnerable pin without the prime keeps `t` on the stack (`TARGET=0x7fff…`),
+writes no chosen bytes and replies 18 bytes. Replay
+`bash lab/frontier/tacplus2shell/harness/run_ptr.sh` → 14 PASS / 0 FAIL twice,
+normalized hashes `e93c5bbcce0054db058af4ed9ac36123f02f831bc19b5fec2727be5bc18d3505`
+(vulnerable), `97a5907c44dae10ca6d9432e685992b11cec405913fcb843185bcd70ecec9b22`
+(fixed), `a1c849b2644ae0c2ab47a86c854d141597a78aaf1238d0136f0db6ff134070d1`
+(no prime), in `harness/ptr-r1.txt` / `-r2.txt`. Raw `ptr-*.log` /
+`-*.stdout` are local-only evidence. New files: `harness/wire5.py`,
+`harness/gdb-ptr.cmd`, `harness/run_ptr.sh`.
+
+Rung-5 probe, preserved as a negative result: `mem_destroy()` really calls
+`m->arr[i].f(m->arr[i].p)` and `cleanup_session()` calls `mem_destroy()`, so a
+fake destructor entry is structurally reachable. Measured live
+`session->mem=0x5555555fd680`, `type=1`, `arr_count=0`, adjacent `memlist`
+at `m+32`, and `system=0x7ffff7c58750` (gdb, ASLR disabled). `harness/wire6.py`
+aimed the write at `m+12` to install `arr_count=1`, `arr` and a `{system,
+command}` entry. First layout (`arr=m+24`) crashed in `memlist_add()` because
+it clobbered the adjacent live `memlist`; second layout (`arr=m+48`, chunk
+header preserved, `memlist` count zeroed) wrote the intended `arr` and entry
+bytes but glibc aborted with `free(): invalid next size (fast)` before the
+fake destructor fired. No `system()` call with the chosen command, no marker
+file, no command side effect. Rung 5 stays UNKNOWN; the advisory's
+`system()`/root chain remains claim text.
