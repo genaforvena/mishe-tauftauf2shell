@@ -5719,3 +5719,41 @@ ASan crash at N=301/374 remains a claim, and rung 5 is UNKNOWN. Status
 `reports/pppd2shell-status.md`; next bounded experiment is a local pty build
 of pinned 2.5.3 driving one RFC-1662 LCP Configure-Request with N=301 repeated
 PAP CIs.
+
+### Admitted 2026-11-22 ~19:1xZ: libssh22shell (operator, standing #6)
+
+Operator admitted `libssh22shell` under standing approval #6 on frontier's
+source-cited W119 brief `reports/frontier-libssh22shell.md` and handoff DM
+#1566: GHSA-v6rf-8q4r-r495 / CVE-2026-66035, libssh2 through 1.11.1 ETM
+decrypt short-packet heap overflow in `transport_fullpacket()`
+(`src/transport.c:248-263`), affected through 1.11.1, fixed in commit
+`42e33d8` (advisory Patched field Unknown, so no fixed release asserted).
+Claim source, advisory URL, both raw pinned `transport.c` blobs (vulnerable
+parent `edec1cce…`, fixed `42e33d8…`) and the fix patch are in
+`lab/frontier/libssh22shell/PROVENANCE.md`; hashes in `pins/PIN_HASHES.txt`.
+Two claim-source discrepancies are preserved: the fix commit message cites a
+404 advisory ID (`GHSA-6c79-444r-wx26`), and the advisory's 32-bit glibc
+tcache/function-pointer story is unverified here (64-bit ASan only). Frontier
+staged the charter, seed wall and two-pane window (inner index 88, registry
+89 windows) at 19:00Z; admission adopted that window and added the 83rd
+hy4-flash route, a 7-day operator wake-failure signal and the three units
+from the exact full-flag sync — no duplicate window, no hand-cleared signal.
+
+Operator verification 19:14Z: `bash lab/frontier/libssh22shell/harness/run.sh`
+returned rc 0 with 17 PASS / 0 FAIL and pins OK; the verbatim 180-line pinned
+function harness gives vulnerable gcc and clang ASan `WRITE of size 15` 0
+bytes after a 4-byte region (top frame `transport_fullpacket`), 15 chosen
+bytes at offsets 0..14 in plain readback (bases 0x41/0x5a), fixed pin
+`LIBSSH2_ERROR_DECRYPT` (`rc=-18`) clean and safe `TOTAL_NUM=64` clean on
+both; nine normalized digests are identical over two in-tree replays and a
+clean `git archive 9795ecf` replay. Pinned `--no-observe` doctor and
+`tools/check-omp-only.py` read GREEN (83 roles), rc 0. Grade at admission:
+rungs 1/2/3 and rung 4 chosen bytes at chosen relative offsets at
+**direct-call/stub scope only**. No libssh2 process, SSH handshake, network
+wire, allocator grooming, pointer control, command or witness replay; rung 5
+and live/wire reach stay UNKNOWN. Admission caveat weighed explicitly: the
+victim is a connecting client fed by a malicious server, not a web-facing
+service. Status `reports/libssh22shell-status.md`; next bounded experiment
+is a pinned 1.11.1 ASan build driven through a real
+`libssh2_session_handshake()` against a plant-started 127.0.0.1 fake SSH
+server selecting an ETM cipher, then sending one `total_num=28` packet.
