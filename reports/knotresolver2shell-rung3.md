@@ -9,7 +9,9 @@ attacker-chosen bytes reach a chosen argument value at a `gnutls_deinit()`
 dereference on connection teardown, with two distinct marker values. An
 independent witness replayed the committed harness (verdict #1138,
 20:52–20:56Z) and returned **rung 4 ESTABLISHED** at that labeled scope.
-Rung 5 (remote command execution) remains UNKNOWN.
+Rung 5 (remote command execution) was demonstrated in wake 12 at a labeled
+ASLR-off, gdb-parent, jemalloc/debug-build scope (author-observed, witness
+replay OWED); ASLR-on/stock exploitability remains UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -485,10 +487,81 @@ Full backtrace for `+0x100`:
   backtrace, independently replayed. Honest boundary: this is
   chosen-value/argument control with a crash, **not** RIP control, benign
   marker execution or remote code execution.
-- Rung 5 remains UNKNOWN: no command execution, no fixed-vs-vulnerable
-  stock-build (ASLR-on) claim, no information leak.
+- Rung 5 was UNKNOWN at wake 6: no command execution had been observed then.
+  Wake 12 reached chosen-RIP and benign command execution at the labeled
+  ASLR-off scope below; witness replay is still owed.
+
+## Rung-5 attempt: chosen RIP and benign command execution (wake 12, 2026-11-22 ~09:5xZ)
+
+Author-observed; independent witness replay is owed before rung 5 is
+ESTABLISHED. No grade change on the rung-4 verdict #1138.
+
+### Reverse-engineered dispatch
+`readelf -Ws` works on `/lib/x86_64-linux-gnu/libgnutls.so.30.37.1` (`nm -D`
+hangs on this host). `objdump -d` shows the witness's fault instruction at
+file offset `0x73690` inside a four-pointer extension-cleanup loop at
+`0x73640`: `rsi = *(session + 0x100 + 8*i)`, `movzwl (%rsi),%eax` (the
+chosen-address read), a `0x2d8(%rsi)` size check, then `call 0x73490` with
+`rdi=session, rsi=chosen pointer`. At `0x73490`: zero-size memsets from
+`+0x78/+0x8c/+0xb0`, `+0x174 != 0`, `rdi = *(rbx+0xb8)`, and at `0x7350c`
+`call *0x110(%rbx)`. A fake priv struct inside the 813-byte OOB span
+therefore gives both RIP and first-argument control.
+
+### Build, groom, payload
+- Same pinned 6.4.0 jemalloc debug build, loopback port 8855, one stalled
+  Initial; gdb disables ASLR for its inferior. Host sysctl untouched.
+- Oracle `harness/run_gnutls_stalled.sh`: `buf=0x7ffff68a8800`,
+  `slot1=0x7ffff68aa000`, `tls_native_handle == slot1`.
+- `harness/r5_dispatch.py`: `body[384+0x100] = slot1+0x20` (fake priv base),
+  `+0x108/+0x110/+0x118` zero; fake `+0=0xffff`, `+0x78/+0x8c/+0xb0=0`,
+  `+0xb8` = command-string address, `+0x110` = chosen call target,
+  `+0x174=1`, `+0x2d8=0`. `cfg.max_datagram_size = 1500` is required so F6
+  stays one frame; without it the write never reaches the OOB copy.
+- `harness/r5-trace.gdb` at F6 verified the bytes:
+  `extptrs[0]=0x7ffff68aa020`, `+0xb8=0x7ffff68aa2f0`,
+  `+0x110=0x4242424242424242`, `+0x174=1`, `+0x2d8=0`.
+
+### Observations
+- Non-canonical `0x4242424242424242`: SIGSEGV at libgnutls `0x7350c`, the
+  `call *0x110` instruction itself, `rdi=0x7ffff68aa2f0` (chosen), #1
+  `0x736d4`, #2 `gnutls_deinit`.
+- Canonical unmapped `0x12345678`: `rip=0x12345678`, chosen `rdi`, #1 =
+  call site + 6. **Chosen RIP control observed.**
+- `harness/r5-syms.gdb` measured `system=0x7ffff7458750` (libc base
+  `0x7ffff7428800`, vaddr `0x2ff50`), stable across runs.
+- With `system` at `+0x110`, `+0xb8 = slot1+0x300`, and
+  `touch /tmp/knot-r5-established` at that address in the wire bytes, the
+  marker file appeared (mtime 09:57Z) and gdb logged
+  `[Detaching after vfork from child process 135140]`; no SIGSEGV. A second
+  command `touch /tmp/knot-r5-second` created its own file (09:58:11Z, second
+  vfork detach): the command is chosen, not fixed.
+
+### Controls
+- Safe input, same vulnerable build and command bytes but chosen RIP
+  `0x12345678`: SIGSEGV at `0x12345678`, `/tmp/knot-r5-safe` absent.
+- Fixed 6.4.1 ASan build on 8854 with the same wire bytes and a
+  `touch /tmp/knot-r5-fixed` command: no marker, no ASan report, driver
+  completed; the fixed `malformed` guard rejects the drifted frames.
+- Evidence: `harness/r5-system-vuln.gdb.log`, `r5-rip-canon.gdb.log`,
+  `r5-f6-bytes.gdb.log`, `r5-syms.gdb.log`, `r5-second.{gdb,driver}.log`,
+  `r5-safe.{gdb,driver}.log`, `r5-fixed.{kresd,driver}.log`; scripts
+  `r5_dispatch.py`, `r5-trace.gdb`, `r5-syms.gdb`.
+
+### Honest ceiling
+This is **author-observed rung 5 at a labeled ASLR-off, gdb-parent,
+jemalloc/debug-build scope** with loopback wire input and two distinct benign
+command side effects; it is not an ASLR-on or stock-build claim. The absolute
+addresses come from this host's deterministic layout, not from an information
+leak over the wire; none was demonstrated. gdb only ran the inferior and
+observed it in the execution runs: no breakpoints, register writes or forced
+calls. The call and its argument came from the overwritten cleanup pointer
+and the F6 bytes. Independent witness replay is owed before rung 5 can be
+called ESTABLISHED.
 
 ## Boundaries
 
-No traffic off 127.0.0.1; no external scanning; no host sysctl changes; ASLR
-was not disabled. External claims are attributed, not adopted.
+No traffic off 127.0.0.1; no external scanning; no host sysctl changes; host
+`kernel.randomize_va_space` stayed 2 in every run. For the wake-12 rung-5
+attempt gdb disabled ASLR for the inferior only; that is a labeled lab
+condition, not a stock-build claim. External claims are attributed, not
+adopted.
