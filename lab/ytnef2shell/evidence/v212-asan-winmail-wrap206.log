@@ -1,25 +1,25 @@
 =================================================================
-==235689==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51100000038e at pc 0x7b92bfefb303 bp 0x7fff6a47dbb0 sp 0x7fff6a47d358
+==395689==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51100000038e at pc 0x7bd58d4fb303 bp 0x7ffe8fb06190 sp 0x7ffe8fb05938
 WRITE of size 207 at 0x51100000038e thread T0
-    #0 0x7b92bfefb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x7b92c05f7661 in DecompressRTF ../../../src/ytnef-2.1.2/lib/ytnef.c:1573
-    #2 0x7b92c05f6a25 in MAPIPrint ../../../src/ytnef-2.1.2/lib/ytnef.c:1454
-    #3 0x5f1a304843c0 in PrintTNEF ../../../src/ytnef-2.1.2/ytnefprint/main.c:172
-    #4 0x5f1a30483738 in main ../../../src/ytnef-2.1.2/ytnefprint/main.c:87
-    #5 0x7b92bfa2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x7b92bfa2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x5f1a30483384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v212-asan/ytnefprint/.libs/ytnefprint+0x2384) (BuildId: 6b06e25138a5bc1c96c58168196f2894e42797f5)
+    #0 0x7bd58d4fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7bd58db2d661 in DecompressRTF ../../../src/ytnef-2.1.2/lib/ytnef.c:1573
+    #2 0x7bd58db2ca25 in MAPIPrint ../../../src/ytnef-2.1.2/lib/ytnef.c:1454
+    #3 0x5908e8da63c0 in PrintTNEF ../../../src/ytnef-2.1.2/ytnefprint/main.c:172
+    #4 0x5908e8da5738 in main ../../../src/ytnef-2.1.2/ytnefprint/main.c:87
+    #5 0x7bd58d02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7bd58d02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5908e8da5384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v212-asan/ytnefprint/.libs/ytnefprint+0x2384) (BuildId: 6b06e25138a5bc1c96c58168196f2894e42797f5)
 
 0x51100000038e is located 0 bytes after 206-byte region [0x5110000002c0,0x51100000038e)
 allocated by thread T0 here:
-    #0 0x7b92bfefd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
-    #1 0x7b92c05f7610 in DecompressRTF ../../../src/ytnef-2.1.2/lib/ytnef.c:1571
-    #2 0x7b92c05f6a25 in MAPIPrint ../../../src/ytnef-2.1.2/lib/ytnef.c:1454
-    #3 0x5f1a304843c0 in PrintTNEF ../../../src/ytnef-2.1.2/ytnefprint/main.c:172
-    #4 0x5f1a30483738 in main ../../../src/ytnef-2.1.2/ytnefprint/main.c:87
-    #5 0x7b92bfa2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x7b92bfa2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x5f1a30483384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v212-asan/ytnefprint/.libs/ytnefprint+0x2384) (BuildId: 6b06e25138a5bc1c96c58168196f2894e42797f5)
+    #0 0x7bd58d4fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7bd58db2d610 in DecompressRTF ../../../src/ytnef-2.1.2/lib/ytnef.c:1571
+    #2 0x7bd58db2ca25 in MAPIPrint ../../../src/ytnef-2.1.2/lib/ytnef.c:1454
+    #3 0x5908e8da63c0 in PrintTNEF ../../../src/ytnef-2.1.2/ytnefprint/main.c:172
+    #4 0x5908e8da5738 in main ../../../src/ytnef-2.1.2/ytnefprint/main.c:87
+    #5 0x7bd58d02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7bd58d02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5908e8da5384 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v212-asan/ytnefprint/.libs/ytnefprint+0x2384) (BuildId: 6b06e25138a5bc1c96c58168196f2894e42797f5)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
@@ -53,4 +53,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==235689==ABORTING
+==395689==ABORTING
