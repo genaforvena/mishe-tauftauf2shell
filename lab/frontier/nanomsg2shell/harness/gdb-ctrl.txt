@@ -1,0 +1,15 @@
+No symbol table is loaded.  Use the "file" command.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+process 3438814 is executing new program: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/harness/ws_server_clang
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff47ff6c0 (LWP 3438822)]
+bound rc=1
+[Thread 0x7ffff47ff6c0 (LWP 3438822) exited]
+==3438814==LeakSanitizer has encountered a fatal error.
+==3438814==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==3438814==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+[Inferior 1 (process 3438814) exited with code 01]
+harness/gdb.cmd:5: Error in sourced command file:
+The program is not being run.

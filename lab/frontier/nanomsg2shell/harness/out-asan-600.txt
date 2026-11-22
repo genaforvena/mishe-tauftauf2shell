@@ -1,0 +1,16 @@
+bound rc=1
+src/nanomsg-1.2.2/libnanomsg.so.6(nn_backtrace_print+0xbb)[0x7c50d882cdb8]
+src/nanomsg-1.2.2/libnanomsg.so.6(nn_queue_push+0x54)[0x7c50d882f9cc]
+src/nanomsg-1.2.2/libnanomsg.so.6(nn_ctx_raise+0x2f)[0x7c50d881d9c8]
+src/nanomsg-1.2.2/libnanomsg.so.6(nn_fsm_raise+0x1bc)[0x7c50d881ec79]
+src/nanomsg-1.2.2/libnanomsg.so.6(+0x94d52)[0x7c50d887fd52]
+src/nanomsg-1.2.2/libnanomsg.so.6(+0x94837)[0x7c50d887f837]
+src/nanomsg-1.2.2/libnanomsg.so.6(nn_fsm_feed+0x9e)[0x7c50d881dcf6]
+src/nanomsg-1.2.2/libnanomsg.so.6(nn_fsm_event_process+0x117)[0x7c50d881dc55]
+src/nanomsg-1.2.2/libnanomsg.so.6(nn_ctx_leave+0xe7)[0x7c50d881d6d9]
+src/nanomsg-1.2.2/libnanomsg.so.6(+0x3eac3)[0x7c50d8829ac3]
+src/nanomsg-1.2.2/libnanomsg.so.6(+0x45e77)[0x7c50d8830e77]
+/lib/x86_64-linux-gnu/libasan.so.8(+0x5ea42)[0x7c50d805ea42]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x7c50d7c9cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x7c50d7d29e8c]
+Assertion failed: item->next == NN_QUEUE_NOTINQUEUE (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/utils/queue.c:47)

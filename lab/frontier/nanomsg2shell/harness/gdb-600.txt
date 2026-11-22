@@ -1,0 +1,38 @@
+No symbol table is loaded.  Use the "file" command.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+process 3436854 is executing new program: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/harness/ws_server_clang
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff47ff6c0 (LWP 3436949)]
+bound rc=1
+src/build-clang/libnanomsg.so.6(nn_backtrace_print+0x188)[0x7ffff7f29a38]
+src/build-clang/libnanomsg.so.6(nn_queue_push+0x5b)[0x7ffff7f2cc6b]
+src/build-clang/libnanomsg.so.6(nn_ctx_raise+0x25)[0x7ffff7f17fa5]
+src/build-clang/libnanomsg.so.6(nn_fsm_raise+0x1ff)[0x7ffff7f18f9f]
+src/build-clang/libnanomsg.so.6(+0xa60e7)[0x7ffff7f8b0e7]
+src/build-clang/libnanomsg.so.6(+0xa146a)[0x7ffff7f8646a]
+src/build-clang/libnanomsg.so.6(nn_fsm_feed+0xab)[0x7ffff7f183bb]
+src/build-clang/libnanomsg.so.6(nn_fsm_event_process+0x1d0)[0x7ffff7f18300]
+src/build-clang/libnanomsg.so.6(nn_ctx_leave+0x13c)[0x7ffff7f17cac]
+src/build-clang/libnanomsg.so.6(+0x411a7)[0x7ffff7f261a7]
+src/build-clang/libnanomsg.so.6(+0x499d4)[0x7ffff7f2e9d4]
+harness/ws_server_clang(+0xc4ccd)[0x555555618ccd]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x7ffff7a9cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x7ffff7b29e8c]
+Assertion failed: item->next == NN_QUEUE_NOTINQUEUE (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/utils/queue.c:47)
+
+Thread 2 "ws_server_clang" received signal SIGABRT, Aborted.
+[Switching to Thread 0x7ffff47ff6c0 (LWP 3436949)]
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+[Thread 0x7ffff47ff6c0 (LWP 3436949) exited]
+warning: error removing breakpoint 0 at 0x555555597914
+warning: error removing breakpoint 0 at 0x555555597919
+warning: error removing breakpoint 0 at 0x555555597923
+warning: error removing breakpoint 0 at 0x555555597919
+warning: error removing breakpoint 0 at 0x555555597923
+warning: error removing breakpoint 0 at 0x555555597923
+Command aborted, thread exited.
+harness/gdb.cmd:6: Error in sourced command file:
+'self' has unknown type; cast it to its declared type

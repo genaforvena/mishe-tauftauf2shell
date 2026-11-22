@@ -120,3 +120,32 @@ Alternates if the live wire path fails: Pgpool-II CVE-2026-92867/92869/92870
 (authenticated OOB write, unowned), Corosync CVE-2026-81665 (totempg fragment
 reassembly heap overflow), Fluent Bit CVE-2026-61674 (rejected: attacker is a
 malicious server, victim is a client).
+
+## Observed live wire results (W105, after the brief was committed)
+
+Not advisory prose: measured on pinned raw sources via a loopback
+`nn_bind("ws://127.0.0.1:28765")` listener and a raw HTTP Upgrade client
+(`harness/wire_inject.py`). Gdb was not needed for the primary observation.
+
+- v1.2.2, `Sec-WebSocket-Version: ` + 600 × `Q`: reply is 669 bytes, beginning
+  `HTTP/1.1 400 Unsupported WebSocket Version\r\nSec-WebSocket-Version: QQQ...`
+  (`harness/client-600.txt`). The prefix is ~69 bytes, so ~88 chosen `Q`
+  bytes were written past `response[512]` into the adjacent `done` FSM event.
+  The standalone server aborts with
+  `Assertion failed: item->next == NN_QUEUE_NOTINQUEUE (.../src/utils/queue.c:47)`
+  in both the GCC-ASan (`harness/out-asan-600.txt`) and clang-ASan
+  (`harness/out-clang-600.txt`) builds. Live wire rung 3: observed corruption
+  of a pointer-bearing neighbour, not merely a crash.
+- v1.2.2 short-header control (2 × `Q`): 71-byte reply, zero assertions
+  (`harness/client-gdb-ctrl.txt`, `harness/gdb-ctrl.txt`).
+- v1.2.3 fixed control under the identical 600-byte request: 71-byte reply
+  with hardcoded `Sec-WebSocket-Version: 13`, zero assertions and no ASan
+  report (`harness/client-fixed-600.txt`, `harness/out-fixed-600.txt`).
+- ASan alone does not flag this overflow: `sprintf` writes happen inside libc,
+  so there is no instrumented store; the clang field-padding build
+  (`-fsanitize-address-field-padding=2`) was also silent. Detection is the
+  real consumer's queue assertion. Preserved as a negative observation.
+
+Grade: wire-reachable rung 3 confirmed. Rung 4 chosen-byte-at-a-measured-
+offset is strongly indicated (the assertion names the corrupted `item.next`)
+but the exact offset was not dumped; no rung 5 claim.
