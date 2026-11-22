@@ -1,0 +1,11 @@
+IN[0]=4141414141414141/5a5a5a5a5a5a5a5a
+IN[1]=4141414141414141/5a5a5a5a5a5a5a5a
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 320 at 0xADDR thread T0
+#0 0xADDR in memcpy ..sanitizer_common_interceptors_memintrinsics.inc:115
+#1 0xADDR in msgpack_vrefbuffer_migrate fns-8a34070b.inc:46
+#2 0xADDR in run_vuln harness.c:121
+0xADDR is located 0 bytes after 128-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+#2 0xADDR in run_vuln harness.c:103
+SUMMARY: AddressSanitizer: heap-buffer-overflow ..sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy

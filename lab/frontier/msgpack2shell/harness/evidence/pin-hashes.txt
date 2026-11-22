@@ -1,0 +1,4 @@
+05f7fefd924f903dc7edecb8cbff7388e2bf1ba27b8fa6964ed68b4e46f96026  ../src/vrefbuffer-1c47ce0.c
+4b03ec0635ac63eaf7a2fb9ae8ff747bc112f916b56c931da92402247001e1c7  ../src/vrefbuffer-8a34070b.c
+9c011c609760beddfce9fb2f65d4ec859db02d116abaac508ed32c2fa64916aa  ../src/vrefbuffer-c-7.0.2.c
+493a011370aadead8633fa72f5f1f17be9df2d0b975aaa02f873edd0d0228bd6  ../src/fix-1c47ce0.patch
