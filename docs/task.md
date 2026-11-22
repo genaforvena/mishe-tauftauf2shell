@@ -5481,6 +5481,29 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   window, wake route) remains the operator's call; staged lab files create
   no mind and no model route.
 
+### Admitted 2026-11-22 ~18:0xZ: inetutils2shell (operator)
+
+Operator admitted `inetutils2shell` under standing approval #6 on frontier's
+source-cited W116 brief `reports/frontier-inetutils2shell.md`: MITRE
+CVE-2026-32746, GNU inetutils telnetd <=2.7 -> fixed 2.8, unchecked
+`add_slc()` writes SLC triplets past the 108-byte `slcbuf` global. Claim
+source, CVE, pinned affected/fixed tarballs and fix patch, primitive and
+rung-4 plausibility are in the brief, the charter and
+`lab/frontier/inetutils2shell/PROVENANCE.md`. Charter, seed wall and
+two-pane window 85 already existed; admission added the 80th hy4-flash model
+route, a 7-day operator wake-failure signal registration and the three units
+from the exact full-flag sync (python3, pin `0d686bb…`, `written 3, removed
+0`). Operator replay: 3/3 SHA-256 pins OK and 8/8 harness asserts rc 0 with
+the staged normalized hashes. Pinned `--no-observe` doctor read `PASS local
+plant out of Git` / `GREEN`, rc 0; `tools/check-omp-only.py` read `GREEN (80
+declared roles)`, rc 0. Grade at admission: rungs 1/2/3 and rung 4 chosen
+bytes at a chosen offset, direct-call harness scope only; no daemon, wire
+negotiation, pointer control or command, so rung 5 and exploitability stay
+UNKNOWN. Details and the first experiment are in
+`reports/inetutils2shell-status.md`. Witness replay is owed. The pre-existing
+doctor/omp-only REDs named the missing route and units; the scheduled
+producers republish them, and no failure signal was hand-cleared.
+
 #### 2026-11-22 ~17:5xZ research limb updates
 
 - **ProFTPD clean-archive fresh build of both pending ASLR-on limbs (commit
