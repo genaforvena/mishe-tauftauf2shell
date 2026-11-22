@@ -46,3 +46,12 @@ layout, with fixed-3.2.1 and safe-input controls clean. Still rung 4: the fake
 _objd address and marker addresses are harness-computed (no leak), MBX and
 process bytes are seeded in-process, and there is no wire, no HAL, no live
 slave and no command side effect. Rung 5 NOT claimed; wire reach UNKNOWN.
+
+Clean-checkout reproducibility (soes2shell, wake 12, 2026-11-22 ~17:0xZ):
+`clean-checkout.txt` records a replay from `git archive HEAD
+lab/frontier/soes2shell` with only the two SHA-checked pinned tarballs added
+(source tarballs and extracted trees are untracked by design).
+`sh harness/build.sh` built 18 binaries from the archived tree; all six hook
+cases reproduced the verdicts above and the 3.2.0 ASan attack again reports
+`WRITE of size 64` 0 bytes after `rxpdo` from `RXPDO_update()` at
+`ecat_slv.c:172`. No untracked harness file is needed for the witness replay.

