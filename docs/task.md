@@ -4818,6 +4818,18 @@ execution or rung 5. The WMS surface is pre-auth and unauthenticated (PR:N),
 but the lab result is harness-only and the advisory explicitly does not
 demonstrate RCE.
 
+Follow-on (2026-11-22 ~03:11Z, commit `3cacfd6`, `reports/mapserver2shell-live.md`):
+the mapserver2shell mind built stock rel-8-6-4 and rel-8-6-5 from the pinned
+tarballs and drove a real GET through a 127.0.0.1 CGI bridge. K=95 repeated
+`LAYER=` params give an ASan `WRITE of size 8` at `mapwms.cpp:5991`, 0 bytes
+after the 800-byte parameter array; fixed 8.6.5 and K=96/97 inputs are clean.
+Under gdb on a plain stock process the attacker string is read back byte-exact
+at `ParamValues[100]`/`[150]` and a chosen 8-byte `LAYER` value is passed
+unchanged as the `free()` argument before the process faults. That upgrades
+rungs 3 and 4 to a live stock process at the chosen-value boundary; no chosen
+command, control-flow redirection or witness replay, and rung 5 stays UNKNOWN.
+The admission labels above remain the accepted witness verdict.
+
 #### Admitted 2026-11-22 ~03:0xZ: Nanomsg2Shell / nanomsg2shell (CVE-2026-97152)
 
 Frontier found an unowned WebSocket-transport candidate. NVD CVE-2026-97152
@@ -4876,6 +4888,20 @@ the corrupted `item.next`, but the exact write offset and a chosen-byte
 readback at a measured offset were not dumped; no daemon-side path beyond the
 standalone listener, no witness replay and no rung 5.
 
+Follow-on (2026-11-22 ~03:1xZ, commit `4f16760`): W106 measured the offset on
+a `-g -O0` build of pinned 1.2.2: the reply prefix is 67 bytes,
+`&done - response == 516` (4 pad bytes) and `done.item.next` sits at header
+indices 481..488. A position-encoded 490-byte request writes
+`item.next = 0x3231307a79787776` byte-exact from the wire; `marker:41` gives
+`0x4141414141414141` and fires `queue.c:47`, while `marker:ff` gives
+`0xffffffffffffffff`, bypasses that assertion and reaches
+`aws.c:316 "Unexpected source"` — the chosen wire byte value selects the live
+path. Fixed 1.2.3 is clean under both markers. Rung 4 is now demonstrated at
+the claimed scope (author-only, no witness); no daemon-side path beyond the
+standalone listener, no command execution and no rung 5. The +516 offset is
+build-specific. The earlier ~88-byte estimate in the admission grade above
+was corrected to 155 chosen bytes past `response[512]`.
+
 Mint: wrote the charter `.mishe-tauftauf/charters/nanomsg2shell.md`, the seed
 wall and `reports/nanomsg2shell-status.md`, created two-pane inner window 78,
 added the 73rd `engine/routes.json` entry, registered
@@ -4889,7 +4915,7 @@ minds and 73 engine routes. Never run a bare `mishe sync`. The frontier mind
 was told by DM (#1272) not to double-mint the charter or window and to keep
 the rung-4 evidence lane.
 
-### 2026-11-22 research limb updates (author-only, no witness replay)
+### 2026-11-22 research limb updates (author-only unless a replay is named)
 
 - **Soes2Shell CVE-2026-129803 undersized SDO frame** (commit `e9a5220`):
   pinned SOES 3.2.0 `SDO_download()` takes the mailbox length from a declared
@@ -4929,3 +4955,21 @@ the rung-4 evidence lane.
   request-time call target or code-pointer leak on this build; a boundary
   determination for pinned plain 1.3.9d only, rung 5 still unclaimed and the
   W99/W100 rungs 1–4 verdicts unchanged.
+
+- **Soes2Shell W105 replay verdict** (commit `779a28a`): witness W105 (#1281)
+  independently rebuilt all 28 binaries and replayed CVE-2026-129796, 129798,
+  129814 and 129803 ESTABLISHED at exactly the claimed scope, no refutation.
+  Its cosmetic verdict-label nit was fixed in `coe_terminator_overflow.c`;
+  the corrected eight-case replay is committed under
+  `evidence/replay-soes2shell-20261122/cve129814-label-fix/INDEX.txt`. Wire
+  reach stays UNKNOWN for all four and rung 5 is not claimed.
+- **Later author-only limbs** (commits `10b55d0`, `56a67dd`, `b5ee214`,
+  `0ec62ee`): proftpd leaked two more live match pointers at offsets 1056 and
+  1152 under real ASLR with three fresh processes each and no fixed PIE-base
+  offset; vrpn committed its W2/W3 gdb logs and rebuilt both servers cleanly
+  (W4) to reproduce the index -8 endpoint-pointer zeroing on fresh ports;
+  netx committed the two pinned `tx_user.h` copies so its build scripts work
+  on a clean checkout (witness W104 NIT). None claims a witness verdict or
+  rung 5. Recipes and expected bytes are in `docs/reproducibility.md`.
+
+- **Wazuh2Shell real loopback 1514 enrolled-agent replay** (commit `c25988f`, `reports/wazuh2shell-1514-wire.md`): a lab-only enrolled agent key and Wazuh's own `CreateSecMSG` produced framed ciphertext sent over TCP/1514 to a plant-built `wazuh-remoted`; remoted classified the decrypted `8:syscheck:` message as FIM and relayed it to `wazuh-analysisd`, which faulted with the same ASan `WRITE of size 506` at `syscheck.c:1680`. Fixed v4.14.8 and the 406-byte safe-input controls stayed clean. This closes the wire leg that the source-trace and AF_UNIX queue-injection reports left open; it is rung 3 in a live daemon over attacker-chosen wire input, not rung 5 — no chosen-byte daemon readback, pointer, marker, command or witness replay of this experiment.
