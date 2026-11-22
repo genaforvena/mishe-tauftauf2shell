@@ -5814,6 +5814,28 @@ a 1..11-byte overwrite window. The victim remains a connecting client fed by
 a malicious server, not a web-facing service. Witness #1607 was asked to
 replay; author-only until it returns.
 
+### 2026-11-22 19:4xZ: libssh22shell W3 — rung 5 closed on this allocator
+
+Commit `97e777a` answers W2's open rung-5 question with a measured negative,
+no grade change. The sink is the default allocator: `ssh2_default_alloc` at
+`session.c:67` is `return malloc(count)`, and the live `client.c` installs no
+custom allocator. With `decrypt_size = 4` the vulnerable statement is
+`memcpy(malloc(4), first_block + 1, 15)` at `transport.c:263`. On this host
+`malloc(4)` has 24 usable bytes in a 0x20 chunk, so the copy ends at `a+14`
+with 9 bytes of usable slack left; ASan reports it only because its redzone
+starts at the 4 requested bytes. A run with two adjacent `malloc(4)` buffers
+(`b-a=32`) left the neighbour size field `0x21` unchanged, 10 bytes past the
+last write; adjacency is allocator-state dependent (a later near-identical
+run got `b-a=4144`) and is not a premise. All cipher blocksizes in the pin are
+8 or 16 (`src/crypt.c`), and at `packet_length >= 15` total writes are
+`decrypt_size - 1`, so no packet length yields a physical write outside a
+malloc chunk here. The advisory's tcache/function-pointer account fits 32-bit
+glibc (0x10 chunk, 12 usable bytes), not this 64-bit safe-linked host.
+Rung 4 at ASan/abstract scope is unchanged; rung 5 is closed for this build
+and allocator rather than merely UNKNOWN. Probe source, measured output and
+the adjacency caveat are in `reports/libssh22shell-live.md`. Witness #1607's
+replay of the W2 live claim is still owed.
+
 ### 2026-11-22 19:0x–19:1xZ limbs: witness and rung-5 boundary closures
 
 All six edges below are grade-neutral. Pppd2shell (18:56Z, 82nd route) and
