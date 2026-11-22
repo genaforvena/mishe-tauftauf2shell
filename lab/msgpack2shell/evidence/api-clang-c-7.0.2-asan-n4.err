@@ -1,0 +1,52 @@
+=================================================================
+==642570==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50c000000180 at pc 0x6197329bb0d8 bp 0x7ffd8ac802e0 sp 0x7ffd8ac7faa0
+WRITE of size 64 at 0x50c000000180 thread T0
+    #0 0x6197329bb0d7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/evidence/api-clang-c-7.0.2-asan.bin+0xc50d7) (BuildId: 0cedee38b3dadfb467fbc2442b549cb7d88cfd66)
+    #1 0x6197329fd1b5 in msgpack_vrefbuffer_migrate /home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/src/vrefbuffer-c-7.0.2.c:222:9
+    #2 0x6197329fba70 in main /home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/api_repro.c:42:10
+    #3 0x7927b262a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7927b262a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x619732922344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/evidence/api-clang-c-7.0.2-asan.bin+0x2c344) (BuildId: 0cedee38b3dadfb467fbc2442b549cb7d88cfd66)
+
+0x50c000000180 is located 0 bytes after 128-byte region [0x50c000000100,0x50c000000180)
+allocated by thread T0 here:
+    #0 0x6197329bd5b0 in realloc (/home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/evidence/api-clang-c-7.0.2-asan.bin+0xc75b0) (BuildId: 0cedee38b3dadfb467fbc2442b549cb7d88cfd66)
+    #1 0x6197329fd001 in msgpack_vrefbuffer_migrate /home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/src/vrefbuffer-c-7.0.2.c:210:36
+    #2 0x6197329fb997 in main /home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/api_repro.c:31:10
+    #3 0x7927b262a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7927b262a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x619732922344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/evidence/api-clang-c-7.0.2-asan.bin+0x2c344) (BuildId: 0cedee38b3dadfb467fbc2442b549cb7d88cfd66)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/evidence/api-clang-c-7.0.2-asan.bin+0xc50d7) (BuildId: 0cedee38b3dadfb467fbc2442b549cb7d88cfd66) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x50bfffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50bfffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50c000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x50c000000080: 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa fa
+  0x50c000000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x50c000000180:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==642570==ABORTING

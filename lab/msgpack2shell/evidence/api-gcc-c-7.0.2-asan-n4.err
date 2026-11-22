@@ -1,0 +1,52 @@
+=================================================================
+==640610==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50c000000180 at pc 0x7c2772afb303 bp 0x7ffd9a8d03c0 sp 0x7ffd9a8cfb68
+WRITE of size 64 at 0x50c000000180 thread T0
+    #0 0x7c2772afb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x60e7777b7734 in msgpack_vrefbuffer_migrate src/vrefbuffer-c-7.0.2.c:222
+    #2 0x60e7777b6756 in main /home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/api_repro.c:42
+    #3 0x7c277262a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7c277262a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x60e7777b6244 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/evidence/api-gcc-c-7.0.2-asan.bin+0x1244) (BuildId: cf1fc888753043a27af29e769b238e05b51379e0)
+
+0x50c000000180 is located 0 bytes after 128-byte region [0x50c000000100,0x50c000000180)
+allocated by thread T0 here:
+    #0 0x7c2772afc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x60e7777b75fb in msgpack_vrefbuffer_migrate src/vrefbuffer-c-7.0.2.c:210
+    #2 0x60e7777b65df in main /home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/api_repro.c:31
+    #3 0x7c277262a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7c277262a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x60e7777b6244 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/msgpack2shell/evidence/api-gcc-c-7.0.2-asan.bin+0x1244) (BuildId: cf1fc888753043a27af29e769b238e05b51379e0)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x50bfffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50bfffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50c000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x50c000000080: 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa fa
+  0x50c000000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x50c000000180:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==640610==ABORTING

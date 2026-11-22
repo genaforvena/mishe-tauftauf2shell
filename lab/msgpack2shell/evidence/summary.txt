@@ -1,0 +1,12 @@
+gcc c-7.0.2 asan n4 rc=134 asan=WRITE64:0after128:migrate
+gcc c-7.0.2 plain n4 rc=134 glibc=invalid-size
+canary gcc c-7.0.2 rc=134 corrupted=yes
+gcc 1c47ce0 asan n4 rc=0 grew=16 asan=no
+gcc 1c47ce0 plain n4 rc=0 grew=16 asan=no
+canary gcc 1c47ce0 rc=0 intact=yes
+clang c-7.0.2 asan n4 rc=134 asan=WRITE64:0after128:migrate
+clang c-7.0.2 plain n4 rc=134 glibc=invalid-size
+canary clang c-7.0.2 rc=134 corrupted=yes
+clang 1c47ce0 asan n4 rc=0 grew=16 asan=no
+clang 1c47ce0 plain n4 rc=0 grew=16 asan=no
+canary clang 1c47ce0 rc=0 intact=yes

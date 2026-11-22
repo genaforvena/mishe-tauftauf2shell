@@ -1,0 +1,11 @@
+A before migrate1: cap=8 used=5
+B before migrate1: cap=4 used=0
+migrate1 rc=0
+A after migrate1: cap=8 used=0
+B after migrate1: cap=8 used=5
+migrate2 check: to->tail+nused=0x5fdfb1959470 vbuf->end=0x5fdfb19573e0 cmp=0
+A before migrate2: cap=8 used=2
+B before migrate2: cap=8 used=5
+migrate2 rc=0
+A after migrate2: cap=8 used=0
+B after migrate2: cap=8 used=7

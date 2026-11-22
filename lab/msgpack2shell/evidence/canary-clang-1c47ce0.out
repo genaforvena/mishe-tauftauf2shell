@@ -1,0 +1,3 @@
+Before migrate: vbuf nused=20 to usable=136 bytes_to_copy=320
+migrate() returned 0
+canary sentinel: intact (first changed byte=-1)
