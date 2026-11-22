@@ -195,3 +195,16 @@ lab/frontier/fastnetmon2shell/harness/poc-fixed-asan
 lab/frontier/fastnetmon2shell/harness/poc-vuln-plain
 lab/frontier/fastnetmon2shell/harness/poc-fixed-plain
 lab/frontier/fastnetmon2shell/out-*/
+
+# Snac2shell harness: extracted pinned trees, local binaries and raw replay output.
+# Pin tarballs, fix patch, manifest, harness sources, normalized evidence and hashes stay tracked.
+lab/frontier/snac2shell/src/
+lab/frontier/snac2shell/out/
+lab/frontier/snac2shell/harness/out-*/
+lab/frontier/snac2shell/harness/parse-vuln-asan
+lab/frontier/snac2shell/harness/parse-fixed-asan
+lab/frontier/snac2shell/harness/parse-vuln-plain
+lab/frontier/snac2shell/harness/parse-fixed-plain
+
+# Pppd2shell: parked candidate pins from W112, no harness built yet.
+lab/frontier/pppd2shell/

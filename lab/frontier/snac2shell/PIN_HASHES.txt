@@ -1,0 +1,3 @@
+015bf03d0e01cacd6d117b88fab06ed2548bf95e75deedfaf1fe489dfc3d3bd9  fix-ec2c5c20.patch
+cc3d7edb2b960f34c925c00b20553c0c13dbfd65fb5b85765a701c57d0004fa6  snac-2.92.tar.gz
+cf27b88ea11699e6ec71a29efc457af9ec4dd1ff3470321c6a7d58d807ebb602  snac-2.93.tar.gz

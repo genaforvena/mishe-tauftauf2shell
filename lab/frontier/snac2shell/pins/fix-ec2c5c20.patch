@@ -1,0 +1,23 @@
+From ec2c5c2046e0381bc942ec5d0d05ec861fe377e7 Mon Sep 17 00:00:00 2001
+From: grunfink <grunfink@comam.es>
+Date: Thu, 25 Jun 2026 18:36:11 +0200
+Subject: [PATCH] Fixed JSON parser to correctly convert u0000 to the Unicode
+ representation.
+
+---
+ xs_json.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xs_json.h b/xs_json.h
+index 6f42eabd..b503ed87 100644
+--- a/xs_json.h
++++ b/xs_json.h
+@@ -281,7 +281,7 @@ static xs_val *_xs_json_load_lexer(FILE *f, js_type *t)
+                     }
+ 
+                     /* replace dangerous control codes with their visual representations */
+-                    if (cp < ' ' && !strchr("\r\n\t", cp))
++                    if (cp == 0 || (cp < ' ' && !strchr("\r\n\t", cp)))
+                         cp += 0x2400;
+ 
+                     break;
