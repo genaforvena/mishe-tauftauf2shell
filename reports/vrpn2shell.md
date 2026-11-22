@@ -1,12 +1,14 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~02:25Z, author observation (W2). Wire rung 3 is OBSERVED on
-the live pinned 07.36 ASan server through **both** description handlers, and
-plain-build wire input demonstrably changes a saved return address and
-redirects control through both. Rung 4 is claimed only at that honest boundary:
-the attacker chooses the **offset** of a fixed NUL byte, not the byte value. No
-command side effect, no chosen-byte control, no rung 5. Witness replay of the
-wire limbs (W1 and W2) is pending, so nothing here is ESTABLISHED.
+Status 2026-11-22 ~02:56Z, author observation (W3). Wire rung 3 is OBSERVED on
+the live pinned 07.36 ASan server through both description handlers and, since
+W3, from a wire-supplied negative index. Plain-build wire input demonstrably
+changes a saved return address (W1/W2) and, at index -8, zeroes the low byte of
+a live `endpoint` object pointer that is dereferenced immediately afterwards,
+without touching saved frame state. The attacker chooses the **offset** of a
+fixed NUL byte, not the byte value. No command side effect, no chosen-byte
+control, no rung 5. Witness replay of W1/W2 (#1261) is pending; W3 is
+author-only. Nothing here is ESTABLISHED.
 
 ## Claim and pins
 
@@ -158,6 +160,52 @@ lab/frontier/vrpn2shell/probe-plain-rip.sh <outdir> <port> 120`. Both scripts
 default to the original sender sink and message type, so old commands still
 work. This is a second pre-auth wire path to the same rung-4 boundary, still
 with a fixed NUL, no chosen byte and no command side effect.
+
+## Negative wire indices — pointer landing without saved-state damage (W3, 2026-11-22 ~02:56Z)
+
+Frontier's negative sweep predates the 24-byte framing fix and never reached
+`i`; no negative index had been exercised over the wire. `wire_inject.py` packs
+a signed int32 and vulnerable `sender_name[i] = '\0'` has no lower bound (the
+check at `:4541` caps only payload_len). Reused `probe-gdb.sh` and added
+`probe-frame-write.sh`, which prints `&p`, `&p.buffer`, `&endpoint` and the byte
+at the destination immediately before and after the write.
+
+- ASan v07.36, index -8, port 13915 (`out-w3-endpoint-8-asan/gdb.log`):
+  `sender_name` at `0x7ffff5184670`, write at `...4668` (array-8), shadow
+  `[f2]` poisoned in the left redzone. ASan `stack-buffer-overflow WRITE of
+  size 1` at `:4554`, frames `getOneTCPMessage:4239` → `dispatch:4331` →
+  `doSystemCallbacksFor:1446` → handler. Same rung-3 class as the positive
+  indices, now from a wire-supplied negative index.
+- Plain g++ 13.3.0 `-O0`, index -8, port 13914 (`out-w3-endpoint-8/gdb.log`):
+  the layout differs from ASan — `&endpoint` is `sender_name - 8`, while `&p`
+  is `sender_name + 128`. PRE `endpoint=0x5555556f3220`, byte at dest `0x20`;
+  POST `endpoint=0x5555556f3200`, byte `0x00`. saved_rip `0x555555596d88`
+  unchanged and the PRE/POST frame dumps differ only in that byte. Execution
+  then faults at `vrpn_TypeDispatcher::getSenderID:1131` with
+  `this=0x5555556f1150`, read through the corrupted
+  `endpoint->d_dispatcher` — SIGSEGV, with no saved-frame damage.
+- The landing is build-specific: in this plain build `&endpoint =
+  sender_name-8`, `&p.payload_len = sender_name+152`, `&p.buffer =
+  sender_name+160`. Index -48 (`out-w3-neg-ptr-48b/gdb.log`) hit a byte already
+  `0x00` (no-op); index -64 in the ASan build (`out-w3-neg-asan-64/gdb.log`)
+  hit `p.msg_time` with no ASan report and no effect. The pointer landing is a
+  property of this plain build on this host, not of the source primitive.
+- Fixed-commit controls at the same wire index -8: ASan at fixed `:4558`
+  (`out-w3-endpoint-8-fixed-asan/gdb.log`) reaches the clamped write with no
+  ASan report; plain at fixed `:4558`/`:4560`
+  (`out-w3-endpoint-8-fixed2/gdb.log`) leaves canary, saved_rbp and saved_rip
+  unchanged and survives. The fixed handler declares `i` as `vrpn_uint32` and
+  clamps with `min(i, sizeof(sender_name)-1)`, so -8 writes
+  `sender_name[99]`.
+
+Reproduce with `bash lab/frontier/vrpn2shell/probe-frame-write.sh <out> <port>
+-8` (plain default) and `BIN=lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server
+...` for ASan; the fixed control uses `BIN=...build-plain-fixed/server_src/vrpn_server
+LINE_PRE=4558 LINE_POST=4560 bash lab/frontier/vrpn2shell/probe-plain-rip.sh
+<out> <port> -8`. Honest rung: a wire-chosen offset deterministically zeroes
+the low byte of a live object pointer that is used immediately afterwards; no
+chosen byte value, no arbitrary destination, no command side effect, no rung 5.
+W3 is author-only until replayed.
 
 ## Limits and next work
 
