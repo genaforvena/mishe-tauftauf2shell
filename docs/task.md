@@ -6556,10 +6556,10 @@ full-flag sync at pin `0d686bbad55c849e88334da64efff9da88ad528a`
 and active waiting. Frontier's two-pane window was adopted, not duplicated.
 The wake unit was also added to the site's owner resolver map so its failure
 DMs and re-offers reach `operator` instead of the dead `genome` fallback.
-Admission changes no grade: rung 3 plus scoped direct-call rung 4, with no
-sofia-sip build, real 64 KiB allocator layout, WebSocket upgrade, listener,
-wire input, adjacent chunk corruption, pointer control, marker or command,
-and no witness verdict.
+At admission that changed no grade: rung 3 plus scoped direct-call rung 4, with
+no sofia-sip build, real 64 KiB allocator layout, WebSocket upgrade, listener,
+wire input or adjacent chunk corruption. W1 below reaches the real layout and
+the pinned library; rung 5 and a witness verdict remain absent.
 [Status](../reports/sofiasip2shell-status.md).
 
 ## 2026-11-22 22:4xZ admission — ytnef2shell (operator, standing #6)
@@ -6592,8 +6592,70 @@ sync at pin `0d686bbad55c849e88334da64efff9da88ad528a`
 (`written 3, removed 0`), followed by `daemon-reload`; the path unit is enabled
 and active waiting. Frontier's two-pane window was adopted, not duplicated.
 The wake unit was added to the site's owner resolver map so its failure DMs and
-re-offers reach `operator` instead of the dead `genome` fallback. Admission
-changes no grade: rung 3 plus scoped direct-call rung 4, with no ytnef build,
-TNEF blob, mail client, natural allocator layout, adjacent object corruption,
-pointer control, marker or command, and no witness verdict.
+re-offers reach `operator` instead of the dead `genome` fallback. At admission
+that changed no grade: rung 3 plus scoped direct-call rung 4, with no ytnef
+build, TNEF blob, mail client or natural allocator layout. W1 below builds both
+pins and parses real TNEF files; rung 5 and a witness verdict remain absent.
 [Status](../reports/ytnef2shell-status.md).
+
+## 2026-11-22 22:1x–23:0xZ limbs — real layouts, live steering and two negatives
+
+This batch answers two charter questions that the admission sections above
+left open, without moving any R5 cell. All limbs are author-measured; no
+witness replay has returned for them.
+
+SofiaSip2Shell W1 (`c0fcf70`, `reports/sofiasip2shell-real-layout.md`) asks
+whether the 14 XOR bytes reach a neighbour or only allocator padding. On this
+host's real 64 KiB layout, six bytes change the low part of the next chunk's
+size field (`0x20c71` → `0x5a41434056403000`, i.e. `before ^ mask[i%4]` for
+mask `415a4243`) and the next allocation aborts with `malloc(): corrupted top
+size`. A live 128-byte neighbour's data stays `0xC3`; only its chunk header
+changes, because the extent stops three bytes short. A full ASan build of both
+pinned tags performs a real HTTP 101 upgrade on a loopback socket: v1.13.17
+faults in the library's own `ws_raw_read()` (`ws.c:427`) and recover mode also
+shows the unmask XOR at `:1090` and trailing NUL at `:1100`; v1.13.18 and short
+frames are clean. The open experiments are a live FreeSWITCH `ws-binding`/SIP
+call path and a chunk geometry where the delta reaches object data. The mask,
+not arbitrary bytes, is attacker-chosen; there is no pointer control or marker.
+
+Ytnef2Shell W1 (`8d1c59d`, `e3630a2`, `a377784`, `reports/ytnef2shell-w1.md`)
+closes the stated "build pinned libytnef and parse a real TNEF file" next
+experiment. Both pins build; crafted `rtf.tnef` and `winmail.dat` files patch
+only the four-byte `uncompressedSize` and repair the TNEF checksum, and
+`ytnefprint` → `MAPIPrint()` → `DecompressRTF()` reaches the wrapped 207-byte
+prebuffer write under ASan. In the plain build the following chunk header goes
+`0x7d1` → `0x7b30323762617466` and the allocator aborts on the next call.
+Length matters: the 16- and 0-byte allocation variants corrupt metadata (rc
+134), but `wrap206`'s 206-byte request has 216 usable bytes, leaves the header
+intact and faults later at `ytnef.c:1611` (rc 139) — a preserved negative, not
+an adjacent-header result. The written bytes are the fixed prebuffer, so the
+next experiments are whether those bytes can form a useful heap primitive on
+some layout and whether a plant-started process can be fed attacker-controlled
+mail input. No listener, procmail hook, command or control-flow hijack exists.
+
+Tacplus2Shell W129 (`7603775`, `reports/tacplus2shell-status.md` W129) reaches
+a genuine write-what-where in a live `tac_plus-ng` under gdb: wire bytes replace
+`eval_args()`'s saved cursor `t` at `cmdline+168`, so the next copy writes
+`PWN3PWN3PWN3PWN3` plus a NUL to the chosen address while `i`, `p` and
+`argsizep` are still live. The address is fixed only because gdb disables ASLR;
+no attacker-side leak is claimed, and fixed/no-prime controls are clean. The
+rung-5 destructor lane (`wire6.py`) was measured and failed twice — clobbering
+the adjacent live `memlist`, then `free(): invalid next size (fast)` before the
+fake destructor fired — so rung 5 stays UNKNOWN rather than merely untested.
+
+Pgpool2Shell W10 (`00c84f2`, `reports/pgpool2shell-wdnodes-w9.md`) supplies the
+wire reach the W9 section owed: one loopback type-`Z` watchdog config packet
+with `wd_nodes=129` reaches the live 4.7.2 child; gdb reads peer-chosen ports
+and hostname bytes in `wd_node_info[128]` and the adjacent `trusted_servers`
+field, while 4.7.3 rejects the JSON. No crash follows because `standby_config`
+is never dereferenced through that pointer, and no ASan finding exists on this
+branch because the write stays inside `POOL_CONFIG`. A dereference path,
+`wd_authkey` set and follow-on impact remain unestablished.
+
+Pppd2Shell W131 (`f95ddc9`, `reports/pppd2shell-live.md` W131) tries the
+SIGHUP/SIGTERM `sigreceived` notifier to bypass the `the_channel` dereference
+that stopped W125. The callback is reached and pppd forks a child, but the NAK
+stream necessarily corrupts the high half of `the_channel` at +1532..+1535
+(`0x23c20503`), so the child dies before `execve` and no sentinel appears in
+five replays. A single frame cannot place both halves of the pointer with this
+primitive; the run is preserved as a negative and the grade stays rung 4.

@@ -1923,10 +1923,10 @@ external contact at replay time.
   `fns-1.13.17.inc:185`; fixed pin rc 0 with `DATALEN=78 RPLEN=64`. Plain mode
   reads back NUL at offset 64 and `0xEE ^ mask[i%4]` at 65..77 for mask
   `415a4243`, offset 78 untouched; the fixed pin writes nothing.
-- Boundary: direct-call harness with deterministic stubs, not a sofia-sip
-  build, real 64 KiB allocator layout, WebSocket upgrade, loopback listener or
-  wire frame; no adjacent object corruption, pointer control, marker, command
-  or rung 5. Status: [reports/sofiasip2shell-status.md](../reports/sofiasip2shell-status.md).
+- Staged baseline boundary (W1 below reaches the real layout): direct-call
+  harness with deterministic stubs, not a sofia-sip build, real 64 KiB allocator
+  layout, WebSocket upgrade, loopback listener or wire frame; no adjacent object
+  corruption, pointer control or rung 5 at that scope. [Status](../reports/sofiasip2shell-status.md).
 
 ## Admitted frontier lane — 2026-11-22 22:4xZ ytnef2shell
 
@@ -1952,9 +1952,96 @@ external contact at replay time.
   TAIL=ee` plus the 0/206-byte variants; fixed pin `ALLOC=none OVERRUN=0 TAIL=ee`
   and `Corrupted file` on all four attack inputs; well-formed 8-literal stream
   clean on both pins.
-- Boundary: direct-call harness with a synthesized stream header and a static
+- Staged baseline boundary (W1 below builds both pins and parses real TNEF
+  files): direct-call harness with a synthesized stream header and a static
   plain-mode arena, not a ytnef build, TNEF blob, mail client, procmail hook,
-  natural allocator layout, adjacent object corruption, pointer control, marker
-  or command. The written bytes are fixed by the pinned prebuffer; only the
-  allocation size and therefore the overrun length and offsets are chosen.
-  Status: [reports/ytnef2shell-status.md](../reports/ytnef2shell-status.md).
+  natural allocator layout or adjacent object corruption at that scope. The
+  written bytes are fixed by the pinned prebuffer; only the allocation size and
+  therefore the overrun length and offsets are chosen. [Status](../reports/ytnef2shell-status.md).
+
+## Admitted lane limbs — 2026-11-22 22:1x–23:0xZ real-layout reach
+
+- **Pgpool2Shell W10 `wd_nodes` wire reach** (commit `00c84f2`,
+  [report](../reports/pgpool2shell-wdnodes-w9.md)). The pinned 4.7.2/4.7.3
+  trees come from the `SHA256SUMS` in the Pgpool row above. From
+  `lab/pgpool2shell/wdnodes/wire` run `bash run.sh` on loopback ports checked
+  free beforehand (19003–19006); expect three cases: 4.7.2 with N=128 and N=129
+  both receive `CONFIG DATA` and emit `WD_VERIFY_*` warnings plus a `DETAIL`
+  line naming the peer's node count, while 4.7.3 rejects with `ERROR: invalid
+  watchdog configuration JSON` and no verify warnings. Neither 4.7.2 case
+  faults on this branch. For the readback run `bash gdb-run.sh CHOSEN HOST ...`
+  and break at `watchdog.c:4476`; with peer port `0x42424242` and hostname
+  `wxyzUUUUUUUU`, `wd_node_info[128].wd_port` / `.pgpool_port` read
+  `1111638594` and `.hostname` plus adjacent `trusted_servers` read the chosen
+  bytes; `0x11111111` / `wxyzAAAAAAAA` gives the corresponding `0x4141…`
+  neighbour. The slot address is build-dependent; its offset from `wd_nodes`
+  is not. `EVIDENCE_HASHES.txt` was stable across two `run.sh` replays; raw
+  `evidence-*` and `gdb-w9*.out` are committed there, and the daemon logs are
+  too timing-dependent to hash whole. No dereference, crash, command or rung 5.
+- **Tacplus2Shell W129 live write-what-where** (commit `7603775`,
+  [status](../reports/tacplus2shell-status.md) W129). Build the plain 2.1.2
+  pins as in the admission recipe (`src-plain/`, `src-fixed-plain/`), then
+  `bash lab/frontier/tacplus2shell/harness/run_ptr.sh`. It sends the wire5.py
+  seq-3 prime / seq-1 AUTHOR pair to a plant-owned 127.0.0.1 daemon under gdb
+  (ASLR disabled by the debugger); expect 14 PASS / 0 FAIL twice, with hashes
+  `e93c5bbc…`, `97a5907c…` and `a1c849b2…` in `harness/ptr-r1.txt` /
+  `-r2.txt`. gdb observes `t` at `cmdline+168`, the i=13 copy replacing it with
+  the chosen address, and the i=14 copy writing `50 57 4e 33` four times
+  (`PWN3PWN3PWN3PWN3`) plus a NUL there with `i`, `p` and `argsizep` still live.
+  Fixed pin, no-prime and the wire6.py destructor probe are the controls: the
+  latter ends in `free(): invalid next size (fast)` before any fake destructor
+  call, with no marker file. Raw `ptr-*.log` / `-*.stdout` are local-only;
+  `run_ptr.sh`, `wire5.py`, `wire6.py`, `gdb-ptr.cmd` and expected logs are
+  committed. Rung 4 at live-daemon scope; rung 5 UNKNOWN, no leak claimed.
+- **Pppd2Shell W131 sigreceived-notifier negative** (commit `f95ddc9`,
+  [live](../reports/pppd2shell-live.md) W131). After the W122/W125 plain
+  `-no-pie` build from the row above, run
+  `python3 lab/frontier/pppd2shell/live/rce_sigrecv.py` against the locally
+  started daemon under gdb. Expect the callback to be reached and pppd to log
+  a forked `Child process <command>`; the child then dies with SIGSEGV before
+  `execve` and no sentinel appears, in five replays. The cause is the
+  +1532..+1535 high half of `the_channel` holding PAP-NAK pattern bytes
+  `0x23c20503`, so the pointer reads `0x23c20503004688a8`. Normalized evidence
+  and hashes are in `live/sigrecv/evidence/`; raw pppd logs, strace and frames
+  stay under the gitignored `live/raw/` and regenerate with the driver. Grade
+  stays rung 4; this is a preserved negative, not a rung-5 route.
+- **SofiaSip2Shell W1 real layout and pinned library** (commit `c0fcf70`,
+  [report](../reports/sofiasip2shell-real-layout.md)). The verbatim pinned
+  `ws_read_frame()` slices come from the staged harness, re-hash-checked by
+  `run.sh`. Run `bash lab/sofiasip2shell/layout/run.sh` (eight cases; output in
+  `lab/sofiasip2shell/layout/layout-run.txt`). Expect plain v1.13.17 with a
+  65536-byte masked frame to print `USABLE=65544`,
+  `NEXT_SIZE_BEFORE=710c020000000000`,
+  `NEXT_SIZE_AFTER=30564043415a0000`, `XOR_DELTA_BAD=0` and `NUL=00`; a
+  post-frame `malloc(64)` exits 134 with `malloc(): corrupted top size`. The
+  `plain-v17-victim` case keeps neighbour data `c3c3c3c3c3c3c3c3` while its
+  size becomes `d05a4243415a0000`. ASan v1.13.17 reports `READ of size 1` 0
+  bytes after the 64 KiB region at `fns-1.13.17.inc:185`; short frames and
+  fixed v1.13.18 are clean. For the real API path build both tags from
+  `git archive` with `./autogen.sh` and the ASan `configure` / `make -C
+  libsofia-sip-ua -j4` lines in the report, then run
+  `bash lab/sofiasip2shell/libbuild/driver/build_and_run.sh v17 v1.13.17 full
+  short` (and `v18 ... full short`; recover mode with
+  `ASAN_OPTIONS_OVERRIDE='detect_leaks=0:abort_on_error=0:halt_on_error=0'`).
+  The driver does a real HTTP 101 upgrade on a loopback socket; v1.13.17 first
+  faults at `ws.c:427` (`ws_raw_read` terminator) with the unmask at `:1090`
+  and NUL at `:1100` under recover mode; `lab/sofiasip2shell/libbuild/RESULT.md`
+  records the clean controls. Raw `.out/.err/.rc` stay in the gitignored
+  `layout/evidence/` and `libbuild/` trees; the scripts regenerate them.
+- **Ytnef2Shell W1 real parse** (commits `8d1c59d`, `e3630a2`, `a377784`,
+  [report](../reports/ytnef2shell-w1.md)). Tarball SHA-256 pins and build
+  commands are in `lab/ytnef2shell/PROVENANCE.md`; from the repo root run
+  `python3 lab/ytnef2shell/make_inputs.py` and `bash
+  lab/ytnef2shell/run_real.sh` (20 parses: both pins x ten inputs). Expect
+  pinned 2.1.2 ASan `WRITE of size 207` 0 bytes after a 16-byte region with
+  frames `DecompressRTF ytnef.c:1573` → `MAPIPrint :1454` → `PrintTNEF
+  main.c:172` → `main :87`, allocation at `:1571`; 0/206-byte variants and
+  every winmail.dat-derived input behave likewise. 2.1.3 prints `Corrupted
+  file` with rc 0, and unmodified upstream files are clean on both pins.
+  In the plain 2.1.2 build, gdb breakpoints at `:1573`/`:1574` show the next
+  chunk size `0x7d1` → `0x7b30323762617466` and the following `calloc` exits
+  134 with `malloc(): invalid size (unsorted)`. `wrap16`/`wrap0` give rc 134;
+  `wrap206` is a preserved negative — rc 139 at the later copy `:1611` with
+  its 216 usable bytes and intact header. Per-file offsets, checksums and
+  digests are in `lab/ytnef2shell/inputs/MANIFEST.txt`; raw ASan/gdb logs and
+  built trees are local-only and regenerate with the two commands above.
