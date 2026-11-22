@@ -5352,12 +5352,21 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   at +136); a correctly framed pre-auth message at index 105/111 gives exit
   134 with `*** stack smashing detected ***`, O2 ASan reports `WRITE of size 1`
   at `:4554`, and fixed-commit O2 plain/ASan builds plus index 4 stay alive.
-  Author-only, not witness-replayed. **Evidence discrepancy preserved:** the
-  report calls the functional vulnerable binary `-O2 plain`, but its SHA
-  `5cf494…` is the Debug `-O0` build per `PROVENANCE.md` and every
-  `out-w8-*/meta.txt`; the real O2 hash `bfe633…` appears only in the frame
-  map, so the build attribution is UNRESOLVED (fixed controls do use O2).
-  Plain saved-rip indices 136/139 stay alive with cause UNKNOWN.
+  W8's vulnerable functional rows were labelled `-O2 plain` but ran the Debug
+  `-O0` default (`5cf494…`); W10 corrected the attribution and replayed on
+  real O2 (below). Canary-abort rung 3 is witness W115 ESTABLISHED (#1453);
+  W8 itself was author-only when recorded.
+- **Vrpn W10 real -O2 functional replay resolves W8's build label and 136/139
+  UNKNOWN (commit `fa72cbd`, `reports/vrpn2shell.md`)**: W8 called its
+  functional vulnerable rows `-O2 plain`, but `probe-func-dos.sh` defaults BIN
+  to the Debug `-O0` build `5cf494…`; the real RelWithDebInfo `-O2` binary is
+  `bfe633…`. Re-running with explicit `BIN=` on fresh loopback ports 14041-14048
+  gives SENDER 105/111 and TYPE 105 DEAD exit 134 with `*** stack smashing
+  detected ***`; SENDER 104 (canary LSB already zero), 4 and fixed O2 SENDER
+  105 (`227fcb…`) ALIVE; SENDER 136/139 DEAD exit 139 SIGSEGV, matching witness
+  W115. The old ALIVE rows were Debug `-O0` evidence (saved RIP at 120-127 vs
+  136-143 at -O2), not an unreproduced O2 result. Author self-replay, grade
+  unchanged, rung 3, no chosen byte/pointer/command, no rung 5.
 - **Soes hook replay self-contained and MapServer fresh replay (commits
   `2735724`, `fdf5612`)**: a `git archive` clean checkout plus the two
   untracked SHA-checked pinned tarballs rebuilt 32 binaries (the earlier "18"
@@ -5403,10 +5412,10 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   offset 217 in the `[112,212) 'sender_name'` frame, with fixed and short
   controls clean. Verdict ESTABLISHED at the claimed rung-3 scope, not a
   promotion: fixed NUL byte, no chosen byte, pointer control or command. The
-  author's two plain saved-RIP ALIVE rows were DEAD exit 139 on the witness
-  build and are UNKNOWN there, not a refutation; W1/W2/W3/W6/W7 remain
-  author-only. The W8 binary-attribution discrepancy (`5cf494…` Debug `-O0`
-  vs `bfe633…` O2) is unchanged.
+  author's two saved-RIP rows were DEAD exit 139 on the witness build and
+  graded UNKNOWN there at the time; W10 later matched them with its real-O2
+  replay and resolved W8's build-label discrepancy (`5cf494…` Debug `-O0` vs
+  `bfe633…` O2). W1/W2/W3/W6/W7 remain author-only.
 - **Soes full clean-checkout replay of all six write limbs (commit `44727b2`,
   `reports/frontier-soes.md`)**: wake 12's clean-archive check covered only the
   hook case and its "18 binaries" figure was a miscount. A fresh `git archive
