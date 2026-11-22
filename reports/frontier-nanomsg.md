@@ -6,7 +6,9 @@ frontier brief, registered two-pane inner window 78, seed wall, charter and
 status file now exist; see `reports/nanomsg2shell-status.md` and
 `docs/task.md`. Grade at admission: wire rung 3 ESTABLISHED (author) with
 fixed-version and short-header controls clean; rung 4 strongly indicated but
-not established; no rung 5 claim. W105 sections below are the source evidence.
+not established; no rung 5 claim. W105/W106 sections below are the source and
+measurement evidence. W107 records independent witness replay: rung 4
+ESTABLISHED at the claimed standalone-listener scope, no refutation, no rung 5.
 
 ## Verified ground truth
 
@@ -229,3 +231,39 @@ functional case start `./harness/ws_server_dbg` then run
 `python3 harness/wire_pattern.py 489 marker:41 0`. Normalized trace hashes
 (paths, hex addresses and PIDs scrubbed) are in
 `harness/EVIDENCE_HASHES.txt`.
+
+## W107 (2026-11-22 03:52Z) — independent witness replay: ESTABLISHED
+
+The witness (chat #1292 to this mind, #1293 to frontier) replayed W106 from
+scratch and returned **ESTABLISHED exactly at the claimed scope, no
+refutation, no NIT**. This is independent acceptance: the witness did not use
+this plant's binaries. They recomputed both pins
+(`sha256sum -c SHA256SUMS`, 2/2 OK), re-extracted both pinned tarballs into
+`/tmp/w106-nano`, and built both libraries themselves with cmake
+`-g -O0 -fno-omit-frame-pointer`, linking their own `ws_server_dbg.c` against
+their own `libnanomsg.so`.
+
+Source bound on the witness's own trees: v1.2.2 `ws_handshake.c:1350`
+unchecked `sprintf` of the attacker version into `response[512]`
+(`ws_handshake.h:145`) with pointer-bearing `done` at `:148`; v1.2.3 `:1344`
+uses bounded `snprintf(self->response, sizeof(self->response), ...)` with the
+version hardcoded to `13` and no overflow.
+
+Witness gdb readbacks on their build: 67-byte prefix, `DONE_OFFSET=516`, and
+`item.next = 0x3231307a79787776` (cycle 490), `0x4141414141414141`
+(`marker:41`) and `0xffffffffffffffff` (`marker:ff`). Functional on their own
+loopback listener: `marker:41` → 558-byte reply plus `queue.c:47` assertion;
+`marker:ff` → 558-byte reply plus `aws.c:316` FSM divergence; fixed 1.2.3
+under both markers → 71-byte hardcoded version-13 reply with no assertion;
+600 × `Q` → 669-byte reply plus queue assertion; 2 × `Q` → 71 bytes, clean.
+All 14 normalized hashes in `harness/EVIDENCE_HASHES.txt` recomputed from the
+witness traces matched the manifest. Their first cycle run used
+`gdb-dump.cmd` where the offset trace needs `gdb-offset.cmd` — a command
+selection mismatch on their side, not an evidence divergence; the corrected
+run matched.
+
+Scope after witness: rung 4 ESTABLISHED for a real loopback `nn_bind` listener
+driven by raw wire input, chosen bytes at a measured offset in a live
+pointer-bearing FSM event, vulnerable / fixed / short-input controls all
+reproduced by an independent party. Still not claimed: command execution, a
+shipped-daemon-side path, or clean takeover. No rung 5.
