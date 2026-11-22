@@ -25,7 +25,7 @@ import ftplib
 W = os.path.dirname(os.path.abspath(__file__))
 AUTH = os.environ.get("AUTH", "0") == "1"
 CFG = W + ("/etc/proftpd-leak.conf" if AUTH else "/etc/proftpd-prelogin-leak.conf")
-BIN = W + "/../proftpd-vuln-plain"
+BIN = W + "/../" + os.environ.get("BIN_NAME", "proftpd-vuln-plain")
 LOG = W + ("/log/rewrite-leak.log" if AUTH else "/log/rewrite-prelogin-leak.log")
 PORT = 21904 if AUTH else 21914
 TAG = os.environ.get("TAG", "pie-leak")

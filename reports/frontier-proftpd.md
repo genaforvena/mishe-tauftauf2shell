@@ -656,11 +656,12 @@ string is attacker-supplied key content consumed by a parser, never executed.
 No call target, no command side effect, no PIE base. Rung 5 stays UNCLAIMED
 and the 02:44Z call-path closure still holds. Awaits witness replay.
 
-## proftpd2shell mind — fixed-version rejection control for the ASLR-on chosen-string limb (2026-11-22 05:36Z)
+## proftpd2shell mind — fixed-version rejection controls for the ASLR-on limbs (2026-11-22 05:36–05:38Z)
 
-Companion control for the 03:40Z limb, still AUTHOR-ONLY and awaiting the
-same witness replay (#1287). W99's earlier fixed-version control covered the
-ASLR-off marker; this one covers the ASLR-on leak-and-redirect sequence.
+Companion controls for the 03:17Z extended-over-read and 03:40Z
+ASLR-on chosen-string limbs, still AUTHOR-ONLY and awaiting witness replay
+(#1287). W99's earlier fixed-version control covered the ASLR-off marker;
+these cover the two ASLR-on wire sequences.
 
 The fixed tree is the pinned `proftpd-1.3.9e` source under
 `lab/frontier/proftpd2shell/src/` (SHA-256 in `src/SHA256SUMS`). Built
@@ -668,8 +669,8 @@ out-of-tree into `build-fixed-plain` with
 `../src/proftpd-1.3.9e/configure --prefix=.../inst-fixed-plain
 --with-modules=mod_rewrite --disable-shared` and
 `CFLAGS='-g2 -O2 -Wall -fno-omit-frame-pointer -fno-strict-aliasing' make -j2`
-(46 s, no source patch); binary copied to `proftpd-fixed-plain`. The client
-now takes `BIN_NAME` (default `proftpd-vuln-plain`, so earlier replays are
+(46 s, no source patch); binary copied to `proftpd-fixed-plain`. Both clients
+now take `BIN_NAME` (default `proftpd-vuln-plain`, so earlier replays are
 unchanged).
 
 From `lab/frontier/proftpd2shell/wire`, port 21914 free, `randomize_va_space=2`:
@@ -689,6 +690,26 @@ Vulnerable-build control through the same edited client: `PTR_OLD
 584ab05830e8`, `PTR_NEW 584ab05830e8`, `WILD_LEN 109`, `PAT_HIT 17`,
 `NOOP 200`, `PWD 530`, `SIGNALS 0` (`evidence/vulnctl.txt`). The delta is the
 pinned source fix, not a client or configuration difference.
+
+The same control was applied to the 03:17Z extended-over-read limb with
+`BIN_NAME` added to `client12-pie-leak.py` (default unchanged). From the same
+wire directory, authenticated `STOR` on port 21904, ASLR on:
+
+```
+AUTH=1 LENS=200,1056,1152 TAG=fixed-pie BIN_NAME=proftpd-fixed-plain python3 client12-pie-leak.py
+AUTH=1 LENS=200,1056,1152 TAG=vuln-pie  BIN_NAME=proftpd-vuln-plain  python3 client12-pie-leak.py
+```
+
+Fixed build (`evidence/fixed-pie.txt`): the 200-byte key returns 200 bytes
+cleanly; 1056- and 1152-byte keys get `550` on `STOR`, map result length 0,
+`SIGNALS 0`. `evidence/rewrite-fixed-pie-{1056,1152}.log` shows
+`utf8trans: key '...' length (1056/1152 bytes) exceeds maximum allowed length
+(1024 bytes), rejecting`. Vulnerable build (`evidence/vuln-pie.txt`) on the
+same three lengths: 200 → 200 bytes; 1056 → 1062 bytes with tail
+`80cfbbe0745d` (`PTR_VALUE 0x5d74e0bbcf80`); 1152 → 1158 bytes with
+`COND_PTR d8c6567f6f58`. The only signals are the expected post-log child
+faults from the wild `substr` dereference (`SIGNALS 2`/`4`). Both limbs'
+delta is therefore the pinned fix, not a harness difference.
 
 Grade unchanged: rungs 1–4 as already labeled, rung 5 UNCLAIMED. The fixed
 control demonstrates rejection of the wire input, not command execution; the
