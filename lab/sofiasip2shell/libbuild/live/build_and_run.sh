@@ -9,11 +9,13 @@ LABEL=$2
 PORT=${3:-18857}
 SAN=${SAN:-asan}
 SUFFIX=
+RUN_PREFIX=()
 if [ "$SAN" = plain ]; then
   SAN_FLAGS=
   SUFFIX=-plain
 else
   SAN_FLAGS='-fsanitize=address'
+  RUN_PREFIX=(env ASAN_OPTIONS=detect_leaks=0:abort_on_error=0)
 fi
 P="$BASE/pins/$PIN"
 EVID="$BASE/evidence"
@@ -35,11 +37,11 @@ echo "LIVE_COMPILE_OK $EVID/$PIN-live$SUFFIX-compile.log"
 
 for mode in full short; do
   tag="$PIN-live$SUFFIX-$mode"
-  run="$BASE/live/$PIN-live$SUFFIX $PORT $mode"
+  run="${RUN_PREFIX[*]} $BASE/live/$PIN-live$SUFFIX $PORT $mode"
   {
     echo "\$ $run"
   } > "$EVID/$tag.cmd"
-  "$BASE/live/$PIN-live$SUFFIX" "$PORT" "$mode" \
+  "${RUN_PREFIX[@]}" "$BASE/live/$PIN-live$SUFFIX" "$PORT" "$mode" \
     > "$EVID/$tag.out" 2> "$EVID/$tag.err"
   echo $? > "$EVID/$tag.rc"
   echo "=== $tag rc=$(cat "$EVID/$tag.rc") ==="

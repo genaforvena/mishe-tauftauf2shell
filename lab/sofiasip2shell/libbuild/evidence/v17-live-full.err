@@ -1,42 +1,42 @@
-SERVER_READY PIN=v1.13.17 MODE=full PAYLOAD=65544 PORT=18857
+SERVER_READY PIN=v1.13.17 MODE=full PAYLOAD=65544 PORT=18867
 CLIENT_UPGRADE_101
 CLIENT_FRAME_SENT payload=65544
 =================================================================
-==1028803==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x53100004c808 at pc 0x60a156899b03 bp 0x7fffc8a98f70 sp 0x7fffc8a98f68
+==1185517==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x53100004c808 at pc 0x5f9d0d292b03 bp 0x7ffe096fa2b0 sp 0x7ffe096fa2a8
 WRITE of size 1 at 0x53100004c808 thread T0
-    #0 0x60a156899b02 in ws_raw_read /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:427:23
-    #1 0x60a15689e8fa in ws_read_frame /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:1073:17
-    #2 0x60a1568948b2 in tport_recv_stream_ws /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport_type_ws.c:217:7
-    #3 0x60a156860202 in tport_recv_data /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2890:10
-    #4 0x60a15685fcf7 in tport_recv_event /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2904:13
-    #5 0x60a15685ed68 in tport_base_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2828:5
-    #6 0x60a15684c44b in tport_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2807:13
-    #7 0x60a15692754e in su_epoll_port_wait_events /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_epoll_port.c:510:5
-    #8 0x60a156923d90 in su_base_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_base_port.c:467:7
-    #9 0x60a156839707 in su_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/./su_port.h:340:10
-    #10 0x60a156839672 in su_root_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_root.c:858:10
-    #11 0x60a1567fc52e in main /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/live_ws_tport.c:207:3
-    #12 0x71babd62a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #13 0x71babd62a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #14 0x60a156722b74 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17-live+0x62b74) (BuildId: 9be1328a72b4877dab7608af4ab030821974277c)
+    #0 0x5f9d0d292b02 in ws_raw_read /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:427:23
+    #1 0x5f9d0d2978fa in ws_read_frame /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:1073:17
+    #2 0x5f9d0d28d8b2 in tport_recv_stream_ws /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport_type_ws.c:217:7
+    #3 0x5f9d0d259202 in tport_recv_data /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2890:10
+    #4 0x5f9d0d258cf7 in tport_recv_event /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2904:13
+    #5 0x5f9d0d257d68 in tport_base_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2828:5
+    #6 0x5f9d0d24544b in tport_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2807:13
+    #7 0x5f9d0d32054e in su_epoll_port_wait_events /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_epoll_port.c:510:5
+    #8 0x5f9d0d31cd90 in su_base_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_base_port.c:467:7
+    #9 0x5f9d0d232707 in su_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/./su_port.h:340:10
+    #10 0x5f9d0d232672 in su_root_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_root.c:858:10
+    #11 0x5f9d0d1f552e in main /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/live_ws_tport.c:238:3
+    #12 0x736d6e42a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #13 0x736d6e42a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #14 0x5f9d0d11bb74 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17-live+0x62b74) (BuildId: 5f49890231cab4bca1b65210e38b922d8acf1880)
 
 0x53100004c808 is located 0 bytes after 65544-byte region [0x53100003c800,0x53100004c808)
 allocated by thread T0 here:
-    #0 0x60a1567bdde0 in realloc (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17-live+0xfdde0) (BuildId: 9be1328a72b4877dab7608af4ab030821974277c)
-    #1 0x60a15689e5d0 in ws_read_frame /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:1057:16
-    #2 0x60a1568948b2 in tport_recv_stream_ws /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport_type_ws.c:217:7
-    #3 0x60a156860202 in tport_recv_data /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2890:10
-    #4 0x60a15685fcf7 in tport_recv_event /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2904:13
-    #5 0x60a15685ed68 in tport_base_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2828:5
-    #6 0x60a15684c44b in tport_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2807:13
-    #7 0x60a15692754e in su_epoll_port_wait_events /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_epoll_port.c:510:5
-    #8 0x60a156923d90 in su_base_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_base_port.c:467:7
-    #9 0x60a156839707 in su_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/./su_port.h:340:10
-    #10 0x60a156839672 in su_root_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_root.c:858:10
-    #11 0x60a1567fc52e in main /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/live_ws_tport.c:207:3
-    #12 0x71babd62a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #13 0x71babd62a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #14 0x60a156722b74 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17-live+0x62b74) (BuildId: 9be1328a72b4877dab7608af4ab030821974277c)
+    #0 0x5f9d0d1b6de0 in realloc (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17-live+0xfdde0) (BuildId: 5f49890231cab4bca1b65210e38b922d8acf1880)
+    #1 0x5f9d0d2975d0 in ws_read_frame /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:1057:16
+    #2 0x5f9d0d28d8b2 in tport_recv_stream_ws /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport_type_ws.c:217:7
+    #3 0x5f9d0d259202 in tport_recv_data /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2890:10
+    #4 0x5f9d0d258cf7 in tport_recv_event /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2904:13
+    #5 0x5f9d0d257d68 in tport_base_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2828:5
+    #6 0x5f9d0d24544b in tport_wakeup /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/tport.c:2807:13
+    #7 0x5f9d0d32054e in su_epoll_port_wait_events /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_epoll_port.c:510:5
+    #8 0x5f9d0d31cd90 in su_base_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_base_port.c:467:7
+    #9 0x5f9d0d232707 in su_port_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/./su_port.h:340:10
+    #10 0x5f9d0d232672 in su_root_step /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/su/su_root.c:858:10
+    #11 0x5f9d0d1f552e in main /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/live_ws_tport.c:238:3
+    #12 0x736d6e42a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #13 0x736d6e42a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #14 0x5f9d0d11bb74 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17-live+0x62b74) (BuildId: 5f49890231cab4bca1b65210e38b922d8acf1880)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/pins/v17/libsofia-sip-ua/tport/ws.c:427:23 in ws_raw_read
 Shadow bytes around the buggy address:
@@ -70,4 +70,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1028803==ABORTING
+==1185517==ABORTING
