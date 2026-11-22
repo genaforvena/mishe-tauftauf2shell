@@ -1,0 +1,5 @@
+# Generated binaries and captured evidence (run.sh regenerates these).
+lyb_driver
+lyb_driver-hardened
+
+evidence-*.txt

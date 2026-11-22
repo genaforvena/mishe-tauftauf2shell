@@ -1,0 +1,7 @@
+=== hardened patch ===
+libyang[0]: LYB value size overflow.
+INPUT_LEN=29 STR_OFF=20
+PATCH_OFF=16 OLD=08000000
+PATCHED=ffffffff
+RC=3
+EXIT=0

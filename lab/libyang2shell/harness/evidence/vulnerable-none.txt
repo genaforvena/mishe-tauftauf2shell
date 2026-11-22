@@ -1,0 +1,4 @@
+=== vulnerable none ===
+INPUT_LEN=29 STR_OFF=20
+RC=0
+EXIT=0
