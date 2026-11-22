@@ -575,3 +575,41 @@ no PIE pointer, and the call paths above are closed. Rung 5 stays UNCLAIMED and
 is not worth another attempt here without a new primitive. This is a boundary
 determination for the pinned plain 1.3.9d build only; it says nothing about
 other builds or module sets.
+
+## proftpd2shell mind — extended over-read reaches two more live pointers (2026-11-22 03:17Z)
+
+A bounded new probe re-examined the "8-byte leak" claim. The leak is
+`pstrdup(map_pool, utf8_val)` at `mod_rewrite.c:2072`, so its length is whatever
+`strlen(utf8_val)` reaches, not a fixed eight bytes. `nm -n -S` shows a 32-byte
+BSS gap between `substr.2` (`0x106d20`, bytes 1024–1031 of `utf8_val`) and
+`rewrite_rule_matches` (`0x106d40`, bytes 1056+). With a 1032-code-point key the
+gap's zeros stop the leak at 1032 (observed return length 1032). A 1056-code-
+point all-`A` key fills the gap through code points 64, 72, …, 248 while the
+second loop stops before byte 1056; the returned string then has length 1062,
+and its last six bytes are the live `rewrite_rule_matches.match_string` pointer.
+A 1152-code-point key likewise leaks the six bytes of
+`rewrite_cond_matches.match_string` at offset 1152.
+
+Plain pinned 1.3.9d, `etc/proftpd-leak.conf`, authenticated `STOR`, real ASLR,
+no `setarch`; runner `wire/client12-pie-leak.py`, raw output
+`wire/evidence/pietest{3,4,6}.txt`. Three fresh processes per length gave leak
+bytes `30 ff 3f c5 08 62`, `30 df b3 c4 0c 61`, `30 ff a9 42 f4 58` at offset
+1056 (pointers `0x6208c53fff30`, `0x610c40b3df30`, `0x58f442a9ff30`) and
+`b8 f6 61 5b 3c 5f`, `b8 36 17 c6 45 62`, `b8 a6 22 e2 d1 5c` at offset 1152
+(pointers `0x5f3c5b61f6b8`, `0x6245c61736b8`, `0x5cd1e222a6b8`). Per site the
+low 12 bits stayed fixed (`0xf60` / `0x6b8`) while the randomized high bytes
+changed every process. The 200-byte control returned exactly 200 bytes with no
+signal; the long keys logged the leak at `mod_rewrite.c:1307` and then lost the
+session child (SIGSEGV) when the next `rewrite_parse_map_str()` call at :1266
+dereferenced the now-wild `substr`. The log line is written before that fault.
+
+Classification control under `setarch x86_64 -R` (`pietest5`) gave
+`0x00005555556a4f80` at 1056 and `0x00005555556a66d8` at 1152: the objects can
+live in the PIE brk region when randomization is disabled. A gdb-launched run
+with PIE base `0x555555554000` and `randomize_va_space=2` instead leaked
+`0x5a1ebc757c60` at 1056. There is therefore no demonstrated fixed offset from
+these pointers to the PIE base, and no PIE-base recovery: the earlier "mmap
+heap, not PIE" wording applies to the ASLR-on observations, not to every
+allocation mode. This is a new author-only rung-4 information-disclosure limb
+(two further live pointers under real ASLR), not command execution, not a call
+target, and not a rung-5 step. It awaits witness replay; rung 5 stays UNCLAIMED.
