@@ -5262,3 +5262,36 @@ witness replay and rung 5 stay UNKNOWN for both.
   `max` 3 → 1 recovery, and that no engine route or unit changed; all 76
   roles still route only to `opencode-go/hy4-flash-free`. Restoring
   concurrency above 1 needs a larger host slice budget (person's call).
+
+#### 2026-11-22 ~11:1x–11:5xZ research limb updates
+
+- **Pgpool2Shell witness W113 (report commit `ffe4f88`)**: the witness's own
+  wall records ESTABLISHED at the rung-3 wire scope — 2/2 pins, 4.7.2/4.7.3
+  built itself at `-g -O0`, A/B/C on its own ports 29003–29005 with its own
+  config (counters 1/1, 1/0, 1/0), live gdb frame at `wd_json_data.c:858` from
+  `process_remote_online_recovery_command()`. It excludes chosen-address
+  write, command and rung 5; the warm-up steering negative was not replayed.
+  No verdict DM reached this role's dossier — cite the witness wall, not a
+  delivered message. Rung 3 with independent replay, rung 4 author-only.
+- **Snac2 CVE-2026-112021 staged (commit `87d9fec`,
+  `reports/frontier-snac2shell.md`)**: pinned 2.92 (`3d2af2ef…`) / 2.93
+  (`795355ac…`), fix `ec2c5c20…`, tarballs and patch SHA-256-pinned under
+  `lab/frontier/snac2shell/`. `bash harness/run.sh` compiles the real
+  single-header parser four ways; vulnerable ASan gives `WRITE of size 1` 0
+  bytes after a 32-byte region at `xs_insert_m (xs.h:469)`, fixed is clean,
+  and plain gdb reads chosen `0x41`/`0x5a` at offsets 40..85 (usable 40).
+  Rung 3 on the real parser, rung 4 direct-call harness only; no daemon, HTTP
+  request or command, so the source-visible pre-auth POST reach stays a claim
+  and RCE is not warranted. Staged frontier target, not an admitted mind.
+- **Soes real hook-slot reach — measured layout, execution stalled (commit
+  `7b4bfca`, `reports/frontier-soes.md`)**: real BSS layout puts `ESCvar` at
+  0x8038, `rxpdo` at 0x82f8, `SMmap2` at 0x8330, `MBX` at 0x8440 with
+  `rxpdo_override` at offset 112; a 64-byte `ESC_read` cannot reach `ESCvar`
+  directly, but a forged `_objd` aims real `COE_pdoUnpack()` at the live slot
+  and real `RXPDO_update()` calls it the next cycle. Binary execution stalled
+  from ~11:35Z, so the repaired `coe_hook_call.c` was never rebuilt or run: an
+  UNVALIDATED draft, no verdict. Grade unchanged, wire reach UNKNOWN.
+- **MapServer W5 (commit `fa53b82`)**: only a reproducibility repair — the
+  live report's Reproduce block now extracts both pinned tarballs and gives
+  the exact cmake lines for the ASan vulnerable, ASan fixed and plain builds
+  before the drivers. No new claim and no grade change.
