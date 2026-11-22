@@ -1,0 +1,2 @@
+Warning: failed to load the default certificates file at /usr/local/share/h2o/ca-bundle.crt. Proxying to HTTPS servers may fail.
+[INFO] raised RLIMIT_NOFILE to 1048576

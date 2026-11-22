@@ -1,0 +1,3 @@
+h2o server (pid:2459235) is ready to serve requests with 1 threads
+[lib/handler/redirect.c] in request:127.0.0.1:17999/AAAAAAAA:failed to resolve internal redirect url for dest://:/AAAAAAAA
+[lib/handler/redirect.c] in request:127.0.0.1:17999/AAAAAAAA:failed to resolve internal redirect url for dest://:/AAAAAAAA

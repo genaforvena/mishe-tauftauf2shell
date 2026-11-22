@@ -212,3 +212,31 @@ on the pinned build for these sequences. An allocator implementation other
 than this host's glibc, or an object-placement primitive not driven by these
 wire sequences, would be a different claim and needs fresh measurement.
 
+## W4 corrupted-top reuse is a structural negative (2026-11-22 19:35Z)
+
+The one hypothesis W3 left open was House-of-Force-like reuse of the corrupted
+top size: if a later allocation carved from the top whose size the overflow
+rewrote to `0x4141414141414141`, a pointer/control-flow primitive might follow.
+A bounded two-request experiment on the pinned plain build closes it.
+`live/top-reuse.py` sends the forced-heap overflow request (1200-byte `pad`
+header, 6870-byte path) then a short loopback request on 127.0.0.1:17999; a
+`control` run sends two short requests. Full console output:
+`live/top-reuse-{overflow,control}.out`.
+
+Overflow run: req1 returns 503 and the process stays alive (top now corrupted);
+req2 times out and the h2o error log records `free(): invalid next size (normal)`
+followed by `received fatal signal 6` (SIGABRT) — evidence
+`live/top-reuse-overflow-errlog.txt`. Control run: both short requests return
+normal 503s with no allocator diagnostic
+(`live/top-reuse-control-errlog.txt`). Reproduced twice with identical outcome.
+
+This is glibc's allocator integrity check detecting the corrupted metadata on
+the first request cycle after the overflow. The Apache escaper emits only
+0x20-0x21 and 0x23-0x7c (`logconf.c:437`), so the rewritten top size always has
+its high bytes set and can never be a valid small size with zeroed high bytes;
+the next malloc/free aborts instead of returning a controllable pointer. With
+W2's canary barrier, rung 5 on the pinned plain build is now structurally closed
+on both the stack and heap paths for these wire sequences. Grade unchanged:
+rungs 1-4 live and wire-triggered, rung 5 UNKNOWN with no demonstrated path.
+A different allocator, or an object-placement primitive not driven by these
+wire sequences, would be a separate claim needing fresh measurement.
