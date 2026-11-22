@@ -1,0 +1,181 @@
+2026-11-22 22:25:56.105: main pid 3629487: WARNING:  logdir is changed to work_dir
+2026-11-22 22:25:56.105: main pid 3629487: DETAIL:  if logdir is specified, the value will be set to work_dir
+2026-11-22 22:25:56.105: main pid 3629487: DEBUG:  read pgpool node id file /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/wdnodes/wire/pgpool_node_id
+2026-11-22 22:25:56.105: main pid 3629487: DETAIL:  pgpool node id: 0
+2026-11-22 22:25:56.106: main pid 3629487: DEBUG:  initializing pool configuration
+2026-11-22 22:25:56.106: main pid 3629487: DETAIL:  num_backends: 1 total_weight: 1.000000
+2026-11-22 22:25:56.106: main pid 3629487: DEBUG:  initializing pool configuration
+2026-11-22 22:25:56.106: main pid 3629487: DETAIL:  backend 0 weight: 2147483647.000000 flag: 0000
+2026-11-22 22:25:56.107: main pid 3629487: LOG:  Backend status file /tmp/pgpool_status discarded
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  BackendDesc: 113672 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  pool_coninfo_size: num_init_children (1) * max_pool (1) * MAX_NUM_BACKENDS (128) * sizeof(ConnectionInfo) (416) = 53248 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  ProcessInfo: num_init_children (1) * sizeof(ProcessInfo) (2152) = 2152 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  UserSignalSlot: 24 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  POOL_REQUEST_INFO: 5352 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  stat_shared_memory_size: 9216 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  SI_ManageInfo: 24 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  memcache blocks :64
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  shared_memory_cache_size: 67108864
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  shared_memory_fsmm_size: 64
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  pool_hash_size: 67108880
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  POOL_QUERY_CACHE_STATS: 24 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: DEBUG:  watchdog: 56 bytes requested for shared memory
+2026-11-22 22:25:56.107: main pid 3629487: LOG:  allocating shared memory segment of size: 134414144 
+2026-11-22 22:25:56.398: main pid 3629487: DEBUG:  pool_coninfo_size: num_init_children (1) * max_pool (1) * MAX_NUM_BACKENDS (128) * sizeof(ConnectionInfo) (416) = 53248 bytes requested for shared memory
+2026-11-22 22:25:56.398: main pid 3629487: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 22:25:56.398: main pid 3629487: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 22:25:56.398: main pid 3629487: DEBUG:  memcache blocks :64
+2026-11-22 22:25:56.398: main pid 3629487: DEBUG:  shared_memory_cache_size: 67108864
+2026-11-22 22:25:56.398: main pid 3629487: DEBUG:  memory cache request size : 67108864
+2026-11-22 22:25:56.398: main pid 3629487: DEBUG:  shared_memory_fsmm_size: 64
+2026-11-22 22:25:56.400: main pid 3629487: LOG:  pool_discard_oid_maps: discarded memqcache oid maps
+2026-11-22 22:25:56.409: main pid 3629487: LOG:  waiting for watchdog to initialize
+2026-11-22 22:25:56.409: watchdog pid 3629696: LOG:  setting the local watchdog node name to "127.0.0.1:19003 Linux mesh-home"
+2026-11-22 22:25:56.409: watchdog pid 3629696: LOG:  watchdog cluster is configured with 1 remote nodes
+2026-11-22 22:25:56.409: watchdog pid 3629696: LOG:  watchdog remote node:0 on 127.0.0.1:19005
+2026-11-22 22:25:56.409: watchdog pid 3629696: LOG:  interface monitoring is disabled in watchdog
+2026-11-22 22:25:56.409: watchdog pid 3629696: LOG:  setting up watchdog receive socket for 127.0.0.1:19004
+2026-11-22 22:25:56.409: watchdog pid 3629696: INFO:  IPC socket path: "/tmp/.s.PGPOOLWD_CMD.19004"
+2026-11-22 22:25:56.409: watchdog pid 3629696: LOG:  watchdog node state changed from [DEAD] to [LOADING]
+2026-11-22 22:25:56.409: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = LOADING
+2026-11-22 22:25:56.409: watchdog pid 3629696: LOG:  new outbound connection to 127.0.0.1:19005 
+2026-11-22 22:25:56.409: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = NEW OUTBOUND_CONNECTION Current State = LOADING
+2026-11-22 22:25:56.409: watchdog pid 3629696: DEBUG:  sending packet, watchdog node:[] command id:[4] type:[ADD NODE] state:[LOADING]
+2026-11-22 22:25:56.409: watchdog pid 3629696: DEBUG:  sending watchdog packet to socket:7, type:[A], command ID:4, data Length:332
+2026-11-22 22:26:01.477: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = TIMEOUT Current State = LOADING
+2026-11-22 22:26:01.477: watchdog pid 3629696: LOG:  watchdog node state changed from [LOADING] to [JOINING]
+2026-11-22 22:26:01.477: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = JOINING
+2026-11-22 22:26:01.477: watchdog pid 3629696: DEBUG:  sending packet, watchdog node:[] command id:[6] type:[NODE INFO] state:[JOINING]
+2026-11-22 22:26:01.477: watchdog pid 3629696: DEBUG:  sending watchdog packet to socket:7, type:[I], command ID:6, data Length:332
+2026-11-22 22:26:05.481: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = COMMAND FINISHED Current State = JOINING
+2026-11-22 22:26:05.481: watchdog pid 3629696: LOG:  watchdog node state changed from [JOINING] to [INITIALIZING]
+2026-11-22 22:26:05.481: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = INITIALIZING
+2026-11-22 22:26:05.481: watchdog pid 3629696: DEBUG:  sending packet, watchdog node:[] command id:[7] type:[NODE INFO] state:[INITIALIZING]
+2026-11-22 22:26:05.481: watchdog pid 3629696: DEBUG:  sending watchdog packet to socket:7, type:[I], command ID:7, data Length:332
+2026-11-22 22:26:06.482: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = TIMEOUT Current State = INITIALIZING
+2026-11-22 22:26:06.482: watchdog pid 3629696: LOG:  I am the only alive node in the watchdog cluster
+2026-11-22 22:26:06.482: watchdog pid 3629696: HINT:  skipping stand for coordinator state
+2026-11-22 22:26:06.482: watchdog pid 3629696: LOG:  watchdog node state changed from [INITIALIZING] to [LEADER]
+2026-11-22 22:26:06.482: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = LEADER
+2026-11-22 22:26:06.482: watchdog pid 3629696: LOG:  Setting failover command timeout to 0
+2026-11-22 22:26:06.482: watchdog pid 3629696: LOG:  I am announcing my self as leader/coordinator watchdog node
+2026-11-22 22:26:06.482: watchdog pid 3629696: DEBUG:  sending packet, watchdog node:[] command id:[9] type:[NODE INFO] state:[LEADER]
+2026-11-22 22:26:06.482: watchdog pid 3629696: DEBUG:  sending watchdog packet to socket:7, type:[I], command ID:9, data Length:333
+2026-11-22 22:26:08.910: watchdog pid 3629696: DEBUG:  received watchdog packet type:Z
+2026-11-22 22:26:08.910: watchdog pid 3629696: DEBUG:  reading packet type Z of length 8129
+2026-11-22 22:26:08.910: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = PACKET RECEIVED Current State = LEADER
+2026-11-22 22:26:08.910: watchdog pid 3629696: DEBUG:  received packet, watchdog node:[] command id:[1] type:[CONFIG DATA] state:[LEADER]
+2026-11-22 22:26:08.911: watchdog pid 3629696: ERROR:  invalid watchdog configuration JSON
+2026-11-22 22:26:08.911: watchdog pid 3629696: DETAIL:  wd_nodes array length 129 exceeds MAX_WATCHDOG_NUM (128)
+2026-11-22 22:26:10.912: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = COMMAND FINISHED Current State = LEADER
+2026-11-22 22:26:10.912: watchdog pid 3629696: DEBUG:  declare coordinator command finished with status:[COMMAND TIMED OUT]
+2026-11-22 22:26:10.912: watchdog pid 3629696: DETAIL:  The command was sent to 0 nodes and 0 nodes replied to it
+2026-11-22 22:26:10.912: watchdog pid 3629696: LOG:  I am the cluster leader node
+2026-11-22 22:26:10.912: watchdog pid 3629696: DETAIL:  our declare coordinator message is accepted by all nodes
+2026-11-22 22:26:10.912: watchdog pid 3629696: LOG:  setting the local node "127.0.0.1:19003 Linux mesh-home" as watchdog cluster leader
+2026-11-22 22:26:10.912: watchdog pid 3629696: LOG:  signal_user1_to_parent_with_reason(1)
+2026-11-22 22:26:10.912: watchdog pid 3629696: DEBUG:  sending signal:10 to the parent process with PID:3629487
+2026-11-22 22:26:10.912: watchdog pid 3629696: LOG:  I am the cluster leader node but we do not have enough nodes in cluster
+2026-11-22 22:26:10.912: watchdog pid 3629696: DETAIL:  waiting for the quorum to start escalation process
+2026-11-22 22:26:10.912: main pid 3629487: LOG:  watchdog process is initialized
+2026-11-22 22:26:10.912: main pid 3629487: DETAIL:  watchdog messaging data version: 1.2
+2026-11-22 22:26:10.913: main pid 3629487: LOG:  Pgpool-II parent process received SIGUSR1
+2026-11-22 22:26:10.913: main pid 3629487: LOG:  Pgpool-II parent process received watchdog state change signal from watchdog
+2026-11-22 22:26:10.913: watchdog pid 3629696: DEBUG:  new IPC connection received
+2026-11-22 22:26:10.913: life_check pid 3635961: DEBUG:  I am watchdog lifecheck child with pid:3635961
+2026-11-22 22:26:10.913: watchdog pid 3629696: DEBUG:  sending watchdog packet to socket:8, type:[7], command ID:0, data Length:34
+2026-11-22 22:26:10.913: watchdog pid 3629696: DEBUG:  new IPC connection received
+2026-11-22 22:26:10.913: main pid 3629487: LOG:  create socket files[0]: /tmp/.s.PGSQL.19003
+2026-11-22 22:26:10.913: watchdog pid 3629696: DEBUG:  sending watchdog packet to socket:8, type:[7], command ID:0, data Length:654
+2026-11-22 22:26:10.913: main pid 3629487: LOG:  listen address[0]: 127.0.0.1
+2026-11-22 22:26:10.913: life_check pid 3635961: LOG:  2 watchdog nodes are configured for lifecheck
+2026-11-22 22:26:10.913: life_check pid 3635961: LOG:  watchdog nodes ID:0 Name:"127.0.0.1:19003 Linux mesh-home"
+2026-11-22 22:26:10.913: life_check pid 3635961: DETAIL:  Host:"127.0.0.1" WD Port:19004 pgpool-II port:19003
+2026-11-22 22:26:10.913: main pid 3629487: LOG:  Setting up socket for 127.0.0.1:19003
+2026-11-22 22:26:10.913: life_check pid 3635961: LOG:  watchdog nodes ID:1 Name:"Not_Set"
+2026-11-22 22:26:10.913: life_check pid 3635961: DETAIL:  Host:"127.0.0.1" WD Port:19005 pgpool-II port:19013
+2026-11-22 22:26:10.913: life_check pid 3635961: WARNING:  watchdog life checking, wd_lifecheck_user is empty
+2026-11-22 22:26:10.913: life_check pid 3635961: DEBUG:  watchdog checking life check is ready
+2026-11-22 22:26:10.913: life_check pid 3635961: DETAIL:  pgpool:0 at "127.0.0.1:19003" has not started yet
+2026-11-22 22:26:10.913: life_check pid 3635961: WARNING:  watchdog life checking, wd_lifecheck_user is empty
+2026-11-22 22:26:10.913: life_check pid 3635961: DEBUG:  watchdog checking life check is ready
+2026-11-22 22:26:10.913: life_check pid 3635961: DETAIL:  pgpool:1 at "127.0.0.1:19013" has not started yet
+2026-11-22 22:26:10.913: main pid 3629487: DEBUG:  Spawning 1 child processes
+2026-11-22 22:26:10.914: main pid 3629487: LOG:  find_primary_node_repeatedly: waiting for finding a primary node
+2026-11-22 22:26:10.914: child pid 3635962: DEBUG:  initializing backend status
+2026-11-22 22:26:10.914: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:10.914: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:10.914: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:10.914: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:10.914: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:10.914: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:10.914: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:11.913: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = TIMEOUT Current State = LEADER
+2026-11-22 22:26:11.913: watchdog pid 3629696: LOG:  read from socket failed, remote end closed the connection
+2026-11-22 22:26:11.913: watchdog pid 3629696: LOG:  client socket of  is closed
+2026-11-22 22:26:11.914: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:11.914: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:11.914: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:11.914: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:11.914: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:11.914: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:11.914: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:12.915: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:12.915: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:12.915: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:12.915: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:12.915: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:12.915: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:12.915: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:13.916: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:13.916: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:13.916: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:13.916: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:13.916: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:13.916: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:13.916: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:14.917: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:14.917: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:14.917: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:14.917: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:14.917: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:14.917: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:14.917: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:15.918: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:15.918: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:15.918: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:15.918: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:15.918: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:15.918: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:15.918: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:16.919: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:16.919: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:16.919: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:16.919: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:16.919: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:16.919: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:16.919: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:16.972: watchdog pid 3629696: DEBUG:  STATE MACHINE INVOKED WITH EVENT = COMMAND FINISHED Current State = LEADER
+2026-11-22 22:26:16.972: watchdog pid 3629696: DEBUG:  I am the cluster leader node command finished with status:[COMMAND TIMED OUT] which is success
+2026-11-22 22:26:16.972: watchdog pid 3629696: DETAIL:  The command was sent to 0 nodes and 0 nodes replied to it
+2026-11-22 22:26:17.173: main pid 3629487: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 22:26:17.173: main pid 3629487: DETAIL:  Operation now in progress
+2026-11-22 22:26:17.173: main pid 3629487: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 22:26:17.173: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 22:26:17.173: main pid 3629487: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 22:26:17.173: main pid 3629487: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 22:26:17.173: main pid 3629487: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 22:26:17.173: main pid 3629487: LOG:  exit handler called (signal: 15)
+2026-11-22 22:26:17.173: main pid 3629487: LOG:  shutting down by signal 15
+2026-11-22 22:26:17.173: main pid 3629487: LOG:  terminating all child processes
+2026-11-22 22:26:17.173: watchdog pid 3629696: LOG:  Watchdog is shutting down
+2026-11-22 22:26:17.173: life_check pid 3635961: WARNING:  watchdog life checking, wd_lifecheck_user is empty
+2026-11-22 22:26:17.173: life_check pid 3635961: DEBUG:  watchdog checking life check is ready
+2026-11-22 22:26:17.173: life_check pid 3635961: DETAIL:  pgpool:0 at "127.0.0.1:19003" has not started yet
+2026-11-22 22:26:17.173: life_check pid 3635961: WARNING:  watchdog life checking, wd_lifecheck_user is empty
+2026-11-22 22:26:17.173: life_check pid 3635961: DEBUG:  watchdog checking life check is ready
+2026-11-22 22:26:17.173: life_check pid 3635961: DETAIL:  pgpool:1 at "127.0.0.1:19013" has not started yet
+2026-11-22 22:26:17.173: life_check pid 3635961: DEBUG:  lifecheck child receives shutdown request signal 15, forwarding to all children
+2026-11-22 22:26:17.173: life_check pid 3635961: DEBUG:  lifecheck child receives smart shutdown request
+2026-11-22 22:26:17.174: main pid 3629487: LOG:  Pgpool-II system is shutdown

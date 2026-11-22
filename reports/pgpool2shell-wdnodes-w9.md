@@ -48,13 +48,74 @@ B/C show peer-chosen 32-bit port values; F/G show peer-chosen hostname bytes
 setting all eight bytes of the adjacent pointer field. The destination is a
 layout-fixed field of the config object; this is **not** an attacker-selected
 write address. ASan does not flag this branch, so rung 3 is **not** claimed
-for it. No follow-on dereference of the corrupted `trusted_servers` pointer
-was attempted and no wire reach was measured on this branch.
+for it. At the 18:3xZ direct-call stage no follow-on dereference had been
+attempted and no wire reach had been measured; W10 below supplies the wire measurement.
 
-## Grade
+## Grade at direct-call scope (superseded by W10 below)
 
 Rung 4 at direct-call scope only: chosen-value and chosen-byte writes to an
 adjacent struct field on the real pinned 4.7.2 parser object, with N=128 and
 fixed-4.7.3 controls. No rung 3 by ASan on this branch, no wire, no chosen
 address, no command execution, no rung 5. Independent replay not requested;
-W118 is replaying W7/W8 only.
+W118 is replaying W7/W8 only. W10 below adds wire reach.
+
+## W10 — `wd_nodes` wire reach (22:18-22:22Z, author-measured)
+
+The wall left "W9 wire reach" unmeasured. It is now measured. Assets in
+`lab/pgpool2shell/wdnodes/wire/` (`gen_config_json.py`, `peer.py`,
+`pgpool-w9.conf`, `run.sh`, `gdb-w9.cmd`, `gdb-w9-post.cmd`, `gdb-run.sh`,
+`hash-evidence.sh`, raw `evidence-*` / `gdb-w9*.out` and
+`EVIDENCE_HASHES.txt`). One loopback type-`Z` `WD_POOL_CONFIG_DATA` packet
+with `wd_nodes` length 129 and `backend_desc` length 1; no non-loopback
+address, ports 19003-19006 checked free before each run. `hash-evidence.sh`
+hashes decisive extracted lines (full daemon logs carry ephemeral ports,
+PIDs and timing-dependent line counts); verified stable across two independent
+`run.sh` replays. The two gdb traces were each captured once.
+
+### Three-case wire replay (`bash run.sh`, 67 s, rc 0)
+
+| Case | Build / input | Observed |
+| --- | --- | --- |
+| A | 4.7.2, N=128 | no segfault; `CONFIG DATA` received; verify warnings; `DETAIL: this node has 2 watchdog nodes while "" is configured with 128 watchdog nodes` |
+| B | 4.7.2, N=129 | no segfault; `CONFIG DATA` received; verify warnings; `DETAIL: ... configured with 129 watchdog nodes` |
+| C | 4.7.3, N=129 | no segfault; `ERROR: invalid watchdog configuration JSON` — parser rejected, no verify warnings |
+
+The 4.7.2/4.7.3 differential proves the peer-controlled `wd_nodes` length
+reaches `get_pool_config_from_json()` in a live watchdog child. Neither 4.7.2
+case faults on this branch — unlike W7's `backend_desc` branch, where a type-`Z`
+packet crashed the child in `json_value_free_ex`.
+
+### Live-daemon readback (`bash gdb-run.sh CHOSEN HOST ...`)
+
+Break at `watchdog.c:4476` in `standard_packet_processor` on the forked
+watchdog child, after `get_pool_config_from_json()` returned, reading the
+parsed `standby_config`. Two peer values:
+
+| Peer port | Peer hostname | `num_wd` | `wd_node_info[128].wd_port` / `.pgpool_port` | `.hostname` | adjacent `trusted_servers` |
+| --- | --- | --- | --- | --- | --- |
+| `0x42424242` | `wxyzUUUUUUUU` | 129 | 1111638594 / 1111638594 (`0x42424242`) | `wxyzUUUUUUUU` | `0x5555555555555555` |
+| `0x11111111` | `wxyzAAAAAAAA` | 129 | 286331153 / 286331153 (`0x11111111`) | `wxyzAAAAAAAA` | `0x4141414141414141` |
+
+Backtrace: `standard_packet_processor` ← `watchdog_state_machine_coordinator`
+← `watchdog_state_machine` ← `read_sockets` ← `watchdog_main`. The
+`trusted_servers` value is the peer hostname's bytes 4..11, matching the
+direct-call W9 cases F/G; the slot address `0x7fffeed18a08` is build-dependent
+but the offset from `wd_nodes` is layout-fixed.
+
+No crash follows: the corrupted pointer lives in `standby_config`, which
+`watchdog.c:4472-4478` never frees and never passes to a `trusted_servers`
+dereference — `verify_pool_configurations()` and `update_failover_timeout()`
+read only scalar and `backend_desc` fields. The daemon-side
+`wd_initialize_trusted_servers_list()` / `wd_lifecheck()` `strlen()` path uses
+the live `pool_config`, not this leaked standby copy.
+
+### Grade after W10
+
+W9's `wd_nodes` branch is now **wire-reachable with peer-chosen value and
+byte control observed on a live daemon**, still at a layout-fixed destination:
+rung 4 at wire scope for chosen-value/byte control, no ASan finding (write
+stays inside `POOL_CONFIG`) so no rung 3 on this branch, no crash, no chosen
+address, no command, no rung 5. Author-measured only; no independent replay
+was requested or performed for this branch. `WD_VERIFY_*` warnings are the
+only wire log consequence. Not established: any dereference of the corrupted
+pointer, `wd_authkey` set, or a follow-on impact path.

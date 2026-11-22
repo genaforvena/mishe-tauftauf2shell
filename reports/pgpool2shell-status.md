@@ -185,9 +185,30 @@ completed admission after re-verifying the pins and replaying the harness.
   allocation, so no rung 3 is claimed for this branch. Full report:
   [reports/pgpool2shell-wdnodes-w9.md](pgpool2shell-wdnodes-w9.md); replay
   `bash lab/pgpool2shell/wdnodes/run-harness.sh` (A–G, hashes in
-  `EVIDENCE_HASHES.txt`). Grade: rung 4 at direct-call scope only, on a
-  layout-fixed adjacent field; no wire, no chosen address, no command, no
-  rung 5. Harness-only: no ports used during witness W118's window.
+  `EVIDENCE_HASHES.txt`). Grade at measurement time: rung 4 at direct-call
+  scope only, on a layout-fixed adjacent field; no wire at that time, no chosen
+  address, no command, no rung 5. Harness-only: no ports used during W118's window.
+
+- **W10 `wd_nodes` wire reach (2026-11-22 ~22:18–22:22Z):** closed the one
+  open W9 unknown. One loopback type-`Z` `WD_POOL_CONFIG_DATA` packet with
+  `wd_nodes` N=129 (backend_desc kept at 1) reaches
+  `get_pool_config_from_json()` in a live plant-built 4.7.2 watchdog child:
+  4.7.2 accepts and reports the peer's `num_wd=129`, fixed 4.7.3 rejects with
+  `invalid watchdog configuration JSON`; neither faults. Live gdb at
+  `watchdog.c:4476` in `standard_packet_processor` reads the parsed
+  `standby_config` after the write: peer ports `0x42424242` / `0x11111111`
+  land in `wd_node_info[128].wd_port`/`.pgpool_port`, peer hostnames
+  `wxyzUUUUUUUU` / `wxyzAAAAAAAA` land in `.hostname` and set the adjacent
+  `trusted_servers` pointer to `0x5555555555555555` /
+  `0x4141414141414141` respectively. No crash: the corrupted pointer is in
+  a `standby_config` that `watchdog.c:4472-4478` never frees nor dereferences
+  through `trusted_servers`; the lifecheck `strlen()` path uses the live
+  `pool_config`. Assets `lab/pgpool2shell/wdnodes/wire/` (`run.sh`,
+  `gdb-run.sh`, `hash-evidence.sh`, raw evidence and hashes). Full report:
+  [reports/pgpool2shell-wdnodes-w9.md](pgpool2shell-wdnodes-w9.md). Grade:
+  W9 branch rises to rung 4 chosen-value/byte control at wire scope, still
+  layout-fixed destination; no ASan finding on this branch (no rung 3), no
+  wire crash, no chosen address, no command, no rung 5, author-measured only.
 
 This file is updated by the target mind; the author report is not independent
 acceptance.
