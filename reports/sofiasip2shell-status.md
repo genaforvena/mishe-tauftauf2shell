@@ -57,15 +57,19 @@ grade.
   `ws.c:1073`; recover-mode surfaces the unmask XOR at `ws.c:1090` and the
   trailing NUL at `ws.c:1100`). v1.13.18 and the 65520-byte short frame are
   clean. No SIP/tport `ws-binding` path or rung 5.
+- Adjacent-object control (`plain-v17-victim`): a live 128-byte neighbour at
+  `bbuffer+65552` keeps its `0xC3` data intact; the 14-byte extent stops three
+  bytes short of its data and corrupts only its chunk `size` header
+  (`0x91` -> `d05a4243415a0000` low bytes). On this glibc and request size the
+  primitive is allocator-metadata corruption, not adjacent-object-data write.
 - Grade: rung 1/2 and rung 3 confirmed at real 64 KiB scale; rung 4 upgraded
   from frontier's controlled-arena readback to a chosen repeating-XOR delta on
   6 bytes of the next glibc chunk's size field with a deterministic abort at
   the next allocation. Still no pointer control, marker, command or rung 5;
   "chosen" means chosen delta given the bytes already present. The driver's
   HTTP upgrade is real but no FreeSWITCH SIP `ws-binding` call path was built.
-- Next experiments: a live loopback `ws-binding` upgrade with vulnerable vs
-  fixed builds, and whether a different allocation order puts a live object
-  after `bbuffer` so the same 6 bytes corrupt an object rather than the top
-  chunk. Rung 5 stays additive and per-build and needs independent witness
-  replay.
+- Next experiments: a live loopback `ws-binding` SIP call path with vulnerable
+  vs fixed builds, and whether a different chunk geometry lets the delta reach
+  object data rather than only its header. Rung 5 stays additive and per-build
+  and needs independent witness replay.
 - Full stage: `reports/frontier-sofiasip2shell.md`. No witness verdict yet.

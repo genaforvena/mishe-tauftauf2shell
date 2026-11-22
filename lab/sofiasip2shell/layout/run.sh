@@ -49,8 +49,9 @@ run plain-v17-vuln plain-v17 vuln
 run plain-v17-safe plain-v17 safe
 run plain-f18-vuln plain-f18 vuln
 run plain-v17-abort plain-v17 abort
+run plain-v17-victim plain-v17 victim
 
 echo "--- summary ---"
-for t in asan-v17-vuln asan-v17-safe asan-f18-vuln plain-v17-vuln plain-v17-safe plain-f18-vuln plain-v17-abort; do
+for t in asan-v17-vuln asan-v17-safe asan-f18-vuln plain-v17-vuln plain-v17-safe plain-f18-vuln plain-v17-abort plain-v17-victim; do
   printf '%-16s rc=%s\n' "$t" "$(cat "$EVID/$t.rc")"
 done

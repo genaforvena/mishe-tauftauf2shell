@@ -18,10 +18,13 @@ field.** The other 8 bytes (including the trailing NUL) land in the next
 chunk's `prev_size`, which is inside malloc's guaranteed usable space for a
 65536-byte request (65544 usable bytes on this glibc). With the natural
 allocation order the next chunk is the **top chunk**; the corrupted size makes
-the very next `malloc()` abort with `malloc(): corrupted top size`. That is a
-deterministic, attacker-influenced process abort on a real allocator layout —
-a stronger rung 4 than frontier's controlled-arena readback, but still **not**
-pointer control, marker execution or RCE.
+the very next `malloc()` abort with `malloc(): corrupted top size`. When a live
+object occupies that neighbouring chunk instead, its **data is untouched** —
+the extent stops three bytes short of it — and only its chunk `size` header is
+corrupted. This is a deterministic, attacker-influenced heap-metadata
+corruption and process abort on a real allocator layout: a stronger rung 4
+than frontier's controlled-arena readback, but still **not** pointer control,
+marker execution or RCE.
 
 ## Method
 
@@ -83,6 +86,29 @@ The same abort is what a first post-frame stdout allocation triggers in the
 instrumented variant; the final harness captures the readback into a stack
 buffer first so the metadata can be measured before the abort.
 
+## Adjacent live object: data untouched, chunk header corrupted
+
+`plain-v17-victim` allocates a 128-byte object filled with `0xC3`
+**after** `bbuffer`, so it is the natural neighbouring chunk
+(`evidence/plain-v17-victim.err`):
+
+```
+VICTIM_OFF=65552 VICTIM_SIZE_BEFORE=9100000000000000
+VICTIM_DATA_BEFORE=c3c3c3c3c3c3c3c3 VICTIM_DATA_AFTER=c3c3c3c3c3c3c3c3
+VICTIM_SIZE_AFTER=d05a4243415a0000
+...
+AFTER  00 5a 42 43 41 5a 42 43 d0 5a 42 43 41 5a 00 00 c3 c3 c3 ...
+XOR_DELTA_BAD=0 NUL=00
+```
+
+The neighbour's user data starts at `bbuffer+65552`; the 14-byte extent ends
+at `bbuffer+65549`, **three bytes short of the object's data**, which is
+unchanged. What is corrupted is the neighbour's chunk `size` field at
+`bbuffer+65544..+65549` (`0x91` -> low bytes `d0 5a 42 43 41 5a`), with the
+same `before ^ mask[i%4]` delta. On this glibc and request size the overrun is
+therefore an allocator-metadata write, not an adjacent-object-data write;
+converting it into object-data control would need different chunk geometry.
+
 ## Controls (layout harness)
 
 | Case | Build | rc | Observation |
@@ -94,6 +120,7 @@ buffer first so the metadata can be measured before the abort.
 | `plain-v17-safe` | v1.13.17, plain, 65520 payload | 0 | `BEFORE == AFTER`, `CONTROL=SHORT_FRAME_UNTOUCHED` |
 | `plain-f18-vuln` | v1.13.18 (+1 slot), plain, 65536 payload | 0 | `BEFORE == AFTER`, `CONTROL=FIXED_PIN_UNTOUCHED` |
 | `plain-v17-abort` | v1.13.17, plain, +post-frame malloc | 134 | `malloc(): corrupted top size` |
+| `plain-v17-victim` | v1.13.17, plain, adjacent 128-byte object | 0 | neighbour data unchanged (`0xC3`), neighbour chunk `size` low 6 bytes XOR-corrupted |
 
 ## Full pinned library build (real API, real HTTP upgrade)
 
@@ -141,9 +168,10 @@ therefore describes the real library's final heap state too.
   6 bytes of the next chunk's size field on a natural allocator layout, and
   the next allocation aborts. The chosen *delta* depends on the bytes already
   present (top-chunk size `0x20c71` here); the attacker controls the 4-byte
-  mask, not arbitrary bytes. Consequence demonstrated: heap corruption and a
-  deterministic process abort (the advisory's "crash takes down the process"
-  claim), not a controlled pointer or executed marker.
+  mask, not arbitrary bytes. With a live neighbour, its data stays intact and
+  only its chunk header changes. Consequence demonstrated: heap corruption and
+  a deterministic process abort (the advisory's "crash takes down the
+  process" claim), not a controlled pointer or executed marker.
 - **Rung 5**: not attempted, not implied. No FreeSWITCH SIP `ws-binding` call
   path, no command, no side effect beyond a local abort. The advisory's RCE
   sentence remains a claim.
@@ -156,9 +184,10 @@ therefore describes the real library's final heap state too.
   FreeSWITCH `ws-binding`/SIP call path; the rest of the SIP stack is absent.
 - ASan's allocator gives no usable-size padding (redzone at exactly 65536), so
   the metadata reach is measured only in the plain build.
-- The next chunk here is the top chunk; a different allocation order could put
-  a live object after `bbuffer`, in which case the same 6 bytes would corrupt
-  that object's size field instead. This was not exercised.
+- The natural next chunk is the top chunk; `plain-v17-victim` puts a live
+  128-byte object there and confirms the extent stops three bytes before its
+  data. Reaching object data, not just its chunk header, would need different
+  chunk geometry.
 - Only one mask (`415a4243`) and one length value (65536) were tested.
   Converting the delta into a *useful* heap state (overlapping chunks, pointer
   control) needs more mask/layout freedom and was not attempted.
@@ -171,7 +200,7 @@ therefore describes the real library's final heap state too.
 
 ```
 bash lab/frontier/sofiasip2shell/harness/run.sh          # frontier baseline: PASS=128 FAIL=0
-bash lab/sofiasip2shell/layout/run.sh                     # layout harness, seven cases
+bash lab/sofiasip2shell/layout/run.sh                     # layout harness, eight cases
 bash lab/sofiasip2shell/libbuild/driver/build_and_run.sh v17 v1.13.17 full short
 bash lab/sofiasip2shell/libbuild/driver/build_and_run.sh v18 v1.13.18 full short
 ASAN_OPTIONS_OVERRIDE='detect_leaks=0:abort_on_error=0:halt_on_error=0' \
