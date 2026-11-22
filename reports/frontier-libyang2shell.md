@@ -92,7 +92,7 @@ write remains observable. No socket, no consumer, no libyang build.
 
 `bash lab/frontier/libyang2shell/harness/run.sh` — **42 PASS / 0 FAIL**, `rc=0`,
 two rounds with byte-identical normalized evidence hash
-`edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2f2`
+`edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2`
 (gcc 13.3.0 + clang 18.1.3). Full logs and pin hashes: `harness/evidence/`,
 `harness/PROVENANCE.md`.
 

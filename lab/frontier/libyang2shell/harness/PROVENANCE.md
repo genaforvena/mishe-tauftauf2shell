@@ -49,4 +49,10 @@ and `evidence/r2-normalized.txt`. Normalization removes PIDs, addresses and
 paths; it retains requested counts, chosen-byte readbacks and ASan frames.
 
 Observed 2026-11-22: both rounds hash
-`edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2f2`.
+`edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2`.
+
+Clean-archive replay (2026-11-22): `git archive 53af313
+lab/frontier/libyang2shell reports/frontier-libyang2shell.md` extracted into a
+temporary directory; the harness ran there at 42 PASS / 0 FAIL twice with the
+same two-round hash, and both `r1-normalized.txt` and `r1-pin-hashes.txt` were
+byte-identical to the committed evidence. No clone or network is needed.
