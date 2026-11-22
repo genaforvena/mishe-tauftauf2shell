@@ -1,0 +1,40 @@
+MAP
+  NAME "legendpoc"
+  EXTENT 0 0 10 10
+  SIZE 400 400
+  PROJECTION
+    "init=epsg:4326"
+  END
+  WEB
+    METADATA
+      "wms_title" "legend poc"
+      "wms_enable_request" "GetLegendGraphic GetMap"
+      "wms_srs" "EPSG:4326"
+    END
+  END
+  LAYER
+    NAME "layer0"
+    TYPE POINT
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "legend poc layer"
+      "wms_enable_request" "GetLegendGraphic GetMap"
+      "wms_srs" "EPSG:4326"
+    END
+    FEATURE
+      POINTS
+        5 5
+      END
+    END
+    CLASS
+      NAME "legendsymbol"
+      STYLE
+        COLOR 255 0 0
+        SIZE 12
+      END
+    END
+  END
+END

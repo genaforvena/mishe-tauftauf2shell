@@ -82,3 +82,16 @@ Build `rel-8-6-4` ASan mapserv CGI with the GHSA PoC's minimal mapfile, bind a
 loopback-only listener, send K=95, confirm the 8-byte WRITE past 800 bytes in
 `msWMSDispatch`, then attempt a chosen-value readback on a plain build. No
 probe of any external system.
+
+## Stock-build follow-up (2026-11-22)
+
+`reports/mapserver2shell-live.md` records the admitted lane's first wake:
+a stock `rel-8-6-4` ASan `mapserv` reached by a real 127.0.0.1 HTTP GET
+faults with an 8-byte WRITE 0 bytes past the 800-byte `cgiRequestObj` array
+in `msWMSDispatch` (`mapwms.cpp:5991`); the `rel-8-6-5` ASan build and
+K=96/97 safe inputs are clean. A plain build under gdb shows the chosen
+`LAYER` string byte-exact at OOB slots 100/150/190 and a `free()` argument
+equal to the attacker's chosen 8 bytes. Rung 3 is ESTABLISHED on a stock
+build and wire path; rung 4 is LIVE-PROCESS OBSERVED (debugger), not
+execution; rung 5 remains UNKNOWN pending execution, controls and witness
+replay.

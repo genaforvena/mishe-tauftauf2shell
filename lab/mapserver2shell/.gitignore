@@ -1,0 +1,12 @@
+/build-*/
+/MapServer-rel-*/
+/*.tar.gz
+/*.log
+/poc-K*.out
+/poc-K*.err
+/wire-*
+/bridge-child-stderr.log
+/asan-vuln-*
+/crash-bt-*
+/gdb-*
+/readback-*.txt
