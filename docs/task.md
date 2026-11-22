@@ -5990,7 +5990,12 @@ omp-only checks are recorded below. Grade at admission: rungs 1/2/3 at
 real-daemon wire scope, rung 4 chosen bytes at chosen offsets at
 **verbatim-harness scope only** — no live-daemon readback, grooming, pointer,
 marker, command or rung 5; the required shared key and permitted user keep it
-out of the anonymous pre-auth class. Status `reports/tacplus2shell-status.md`;
-witness replay owed. Next bounded experiment: plain `--debug` build plus gdb
-break at `author.c:77` to read back `cmdline` in the live daemon, with a
-two-connection priming variant for the advisory's `calloc()`-reuse claim.
+out of the anonymous pre-auth class. Status `reports/tacplus2shell-status.md`.
+Witness W124 (20:19Z, tape #1648) closed the owed replay from a clean
+`git archive f6d0654` with its own clang ASan builds: 9/9 harness and 7/7 wire
+PASS, the same READ-1 and controls, `599ab1f0…` reproduced after path
+normalization, ESTABLISHED at the labeled scope with no refutation (minor NIT
+on a volatile PID/stack address in one PASS line). Grade unchanged. Next
+bounded experiment: plain `--debug` build plus gdb break at `author.c:77` to
+read back `cmdline` in the live daemon, with a two-connection priming variant
+for the advisory's `calloc()`-reuse claim.

@@ -55,11 +55,23 @@ the exact full-flag sync — no duplicate window, no hand-cleared signal.
   is required, but this is not anonymous pre-auth. The advisory's
   five-connection heap-leak / `system()` / root chain remains **claim text**,
   not a lab observation.
-- Witness replay owed. From the repo root:
+- Witness replay **CLOSED** (W124, 2026-11-22 20:19Z, tape #1648): ESTABLISHED
+  at the labeled scope. From a clean `git archive` of HEAD `f6d0654` the
+  witness hash-verified the raw `929671c`/`d8493e0` blobs against
+  `PIN_HASHES.txt` (checked-out `*.c` hashes differ only from `$Id$`
+  expansion by `.gitattributes`), built both pins with its own clang ASan,
+  and got 9 PASS / 0 FAIL from `run.sh` and 7 PASS / 0 FAIL from
+  `run_wire.sh`: the same READ-1 at `eval_args author.c:75` with fixed and
+  safe controls clean. Its raw vulnerable-log digest differed only because
+  `norm()` hardcodes the `/home` prefix; with `/tmp` substitution and the
+  compile-time source path it reproduced `599ab1f0…` byte-for-byte, controls
+  `e3b0c442…`. Source-bound at `packet.c:523,538` and `author.c:75,77`.
+  No refutation; rung 5 still UNKNOWN. Minor NIT to the harness author:
+  the `stack_overflow` PASS line embeds a volatile ASan PID/stack address,
+  so "identical PASS lines" is not literal across replays (all nine
+  substantive checks match). Replay commands remain:
   `bash lab/frontier/tacplus2shell/harness/run.sh` then
-  `bash lab/frontier/tacplus2shell/harness/run_wire.sh`; compare the nine PASS
-  lines, the wire PASS lines, `lab/frontier/tacplus2shell/EVIDENCE_HASHES.txt`
-  and `harness/wire-r{1,2}.txt`. Full stage:
+  `bash lab/frontier/tacplus2shell/harness/run_wire.sh`; full stage
   `reports/frontier-tacplus2shell.md`.
 - Next bounded experiment to move up a rung: build the vulnerable pin without
   ASan (`./configure --debug --minimum tac_plus-ng mavis`), start it on a
