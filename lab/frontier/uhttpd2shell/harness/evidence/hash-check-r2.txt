@@ -1,0 +1,7 @@
+vuln_fn.inc: OK
+fixed_fn.inc: OK
+blob.c: OK
+blobmsg.c: OK
+blob.h: OK
+blobmsg.h: OK
+utils.h: OK

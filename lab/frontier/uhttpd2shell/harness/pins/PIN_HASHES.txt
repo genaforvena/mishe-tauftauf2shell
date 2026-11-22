@@ -1,0 +1,12 @@
+# uhttpd GHSA-2mpg-6wp5-435p harness pin hashes
+# uhttpd vuln pin: f682ccabee9ed5f39dd3b0aaf96228975eeb478d
+# uhttpd fixed pin: e76736e5676fb25536b27d45865eb4153c68aca3
+# libubox pin: a396f38a8568a1d670c240465cd8d24fdfdf6463
+# All hashes are sha256 of the exact bytes used by the build.
+8442ab8d703fd9fe759e4b48d4f254ef31b63500b5e1a097eb902be6b9235b74  vuln_fn.inc
+70e3891260cdf9dba60a8fa69b32b808ae457eed6267031a54602bce3cf3fb0a  fixed_fn.inc
+52f37a35d3319502b85c3853fe0803fd609003e6b6cb7500faf5b99e8f86e770  blob.c
+0b6f1b90454e3a308fca03dc1064e2031382f33323f9f3268269f9645f57123e  blobmsg.c
+115ad0e346735e26ca4c118bc08807b5544c8a456a21f3f627b23dafa0d39ec4  blob.h
+94bbad2ec2977829de44eedd182f025ebfcf2288a29f44cca45c60b2b5f899f1  blobmsg.h
+924b7d261c407be0cb780ed180ba195e94d8f0ba048df2778deabf5fb6ffc5b4  utils.h

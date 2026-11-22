@@ -1,0 +1,17 @@
+PASS pin-sha-vuln sha256=8442ab8d703fd9fe759e4b48d4f254ef31b63500b5e1a097eb902be6b9235b74
+PASS pin-sha-fixed sha256=70e3891260cdf9dba60a8fa69b32b808ae457eed6267031a54602bce3cf3fb0a
+PASS pin-hash-files sha256sum -c OK
+PASS real-vuln-asan rc=1
+PASS real-fixed-asan rc=0
+PASS model-vuln-41-asan rc=1
+PASS model-fixed-41-asan rc=0
+PASS model-vuln-41-plain rc=0
+PASS model-vuln-5a-plain rc=0
+PASS model-fixed-5a-plain rc=0
+PASS safe-vuln-asan rc=0
+PASS safe-fixed-asan rc=0
+PASS clang-real-vuln-asan rc=1
+PASS clang-build-asan rc=0
+PASS deterministic-pass-lines identical across 2 rounds
+PASS deterministic-chosen-hashes identical across 2 rounds
+TOTAL pass=30 fail=0

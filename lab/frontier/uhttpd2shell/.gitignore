@@ -1,0 +1,14 @@
+# Source clones are provisioning, not evidence; pinned blobs live in harness/pins/.
+src/
+
+# Build outputs and the regenerated active include; all are rebuilt by run.sh.
+harness/build/
+harness/fn.inc
+
+# Superseded in-wake replays; round{1,2}-* and raw-r2-* are canonical.
+harness/evidence/raw-r1-*.txt
+harness/evidence/hash-check-r1.txt
+harness/evidence/round1-*.txt
+harness/evidence/run-stdout-A.txt
+harness/evidence/run-stdout-final.txt
+harness/evidence/verify-*-r1.txt
