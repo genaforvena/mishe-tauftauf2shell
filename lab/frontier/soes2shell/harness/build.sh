@@ -46,3 +46,18 @@ for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
       -Wl,--gc-sections -o "$ROOT/build/coe_mailbox_asan_$V"
    echo "built $ROOT/build/coe_mailbox_$V and coe_mailbox_asan_$V"
 done
+
+# CVE-2026-129796 triage: real SDO_download() flexible-object writes through
+# ESC_coeprocess(), with the hash-pinned 3.2.1 source as the fixed control.
+for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
+   V=${SPEC%%:*}; DEFINE=${SPEC##*:}
+   SRC="$ROOT/src/SOES-$V"
+   INC="-I$SRC -I$SRC/soes -I$SRC/soes/include/sys/gcc -I$SRC/applications/linux_lan9252demo"
+   clang -g -O0 -Wall -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_download_overflow.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_download_$V"
+   clang -g -O0 -fsanitize=address -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_download_overflow.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_download_asan_$V"
+   echo "built $ROOT/build/coe_download_$V and coe_download_asan_$V"
+done

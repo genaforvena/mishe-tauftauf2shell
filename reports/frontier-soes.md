@@ -314,3 +314,48 @@ live affected target's real input path, so it cannot by itself earn rung 5. No
 emulator was built: wire reach stays UNKNOWN, rung 5 is not claimed, and the
 CoE mailbox harness remains rung-4 mechanics even though it drives real
 dispatch.
+
+## Adjacent cluster triage — CVE-2026-129796 (soes2shell, third wake, 2026-11-22 ~01:40Z)
+
+Advisory technical detail was read from
+<https://docs.rt-labs.com/security/advisories/rrtl-261119-01.html> this wake.
+On pinned 3.2.0 `soes/esc_coe.c:795-864`, `SDO_download()` accepts a
+master-declared `size` from the mailbox without comparing it to the object's
+`actsize`: for `DTYPE_VISIBLE_STRING` it computes
+`memset(data + size, 0, actsize - size)` (unsigned underflow when `size >
+actsize`, at `:827`), and for flexible types it later calls
+`copy2mbx(mbxdata, data, size)` into the object buffer with no `actsize` bound
+(at `:864`, after the mailbox-length clamp). The fixed 3.2.1 source rejects
+`size > actsize` with `ABORT_TYPEMISMATCH` and aborts downloads to entries
+with `data == NULL` (`fix-v3.2.0-v3.2.1.diff:186-213`).
+
+New harness `lab/frontier/soes2shell/harness/coe_download_overflow.c` builds
+non-expedited SDO-download mailboxes and drives both paths through the **real**
+`ESC_coeprocess()` → `SDO_download()` → `memset`/`copy2mbx()` on both pinned
+releases. Its OD has writable 8-byte VISIBLE_STRING and OCTET_STRING entries
+with RAM storage; that is a **modeled precondition** — the stock
+`linux_lan9252demo` VISIBLE_STRING entries are `ATYPE_RO`, so this does not
+claim the shipped demo OD is writable. `MBX[]` is filled in-process: no wire,
+no HAL, no live slave, no leak and no command side effect.
+
+Evidence: `lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/cve129796/`
+(`INDEX.txt` lists all 20 runs and exit codes).
+
+| Case | Build | Observed |
+|---|---|---|
+| `memset` | 3.2.0 ASan | `AddressSanitizer: SEGV`, "caused by a WRITE memory access", stack `__asan_memset` ← `SDO_download esc_coe.c:827` ← `ESC_coeprocess :1501`; exit 1 |
+| `memset` | 3.2.0 plain | SIGSEGV, exit 139 (wild multi-GB memset) |
+| `copy-global` | 3.2.0 ASan | `global-buffer-overflow`, `WRITE of size 64`, `copy2mbx esc_coe.c:248` ← `SDO_download :864` ← `ESC_coeprocess :1501`, 0 bytes after the 8-byte `g_oct_alone` global; exit 1 |
+| `copy` | 3.2.0 plain | 8-byte object filled with chosen `0x5a`; final dump `canary[0..15]: 5a …`, `oct_canary_bytes=56` past the object; safe-input control `0` |
+| both malicious modes | real pinned 3.2.1, ASan and plain | no write, `str_canary_bytes=0 oct_canary_bytes=0`, exit 0 |
+
+One transient read of `canary[0]` printed `0x90` inside `deliver()` while the
+final hex dump shows `5a`; the cause of that read was not investigated and is
+not offered as evidence of a different write source. The chosen-byte claim
+rests on the final dump and the 56-byte past-object count.
+
+Grade for this adjacent issue: **rung 3 confirmed on real pinned functions**
+for both writes, and rung 4 harness-level for the copy path (chosen bytes in
+adjacent memory). Witness W102's replay covered only the original 12 cases,
+not this harness. Wire reach remains UNKNOWN and rung 5 is not claimed.
+

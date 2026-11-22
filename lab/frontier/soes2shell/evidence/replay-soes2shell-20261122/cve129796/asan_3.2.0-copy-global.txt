@@ -1,0 +1,47 @@
+=================================================================
+==3069314==ERROR: AddressSanitizer: global-buffer-overflow on address 0x56fd1e308c48 at pc 0x56fd1dd592f8 bp 0x7ffdd4ddece0 sp 0x7ffdd4dde4a0
+WRITE of size 64 at 0x56fd1e308c48 thread T0
+    #0 0x56fd1dd592f7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_download_asan_3.2.0+0xc32f7) (BuildId: f1d8877209519a74239acca6fa53ce2aa7536b6e)
+    #1 0x56fd1dd9bf74 in copy2mbx /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:248:4
+    #2 0x56fd1dd9655b in SDO_download /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:864:16
+    #3 0x56fd1dd9111d in ESC_coeprocess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1501:16
+    #4 0x56fd1dd904ce in deliver /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_download_overflow.c:90:4
+    #5 0x56fd1dd8ff2e in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_download_overflow.c:134:7
+    #6 0x76269ca2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #7 0x76269ca2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #8 0x56fd1dcc2314 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_download_asan_3.2.0+0x2c314) (BuildId: f1d8877209519a74239acca6fa53ce2aa7536b6e)
+
+0x56fd1e308c48 is located 0 bytes after global variable 'g_oct_alone' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_download_overflow.c:22' (0x56fd1e308c40) of size 8
+SUMMARY: AddressSanitizer: global-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_download_asan_3.2.0+0xc32f7) (BuildId: f1d8877209519a74239acca6fa53ce2aa7536b6e) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x56fd1e308980: 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9 f9 f9 f9
+  0x56fd1e308a00: 01 f9 f9 f9 01 f9 f9 f9 03 f9 f9 f9 00 00 00 00
+  0x56fd1e308a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56fd1e308b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56fd1e308b80: 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+=>0x56fd1e308c00: f9 f9 f9 f9 f9 f9 f9 f9 00[f9]f9 f9 00 00 00 00
+  0x56fd1e308c80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56fd1e308d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56fd1e308d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56fd1e308e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56fd1e308e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3069314==ABORTING

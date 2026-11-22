@@ -1,0 +1,17 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3069293==ERROR: AddressSanitizer: SEGV on unknown address 0x5ea76b763880 (pc 0x7d691ed8984a bp 0x7ffffd5f0810 sp 0x7ffffd5effd8 T0)
+==3069293==The signal is caused by a WRITE memory access.
+    #0 0x7d691ed8984a in __memset_avx2_unaligned_erms string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:328
+    #1 0x5ea76b1b33ae in __asan_memset (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_download_asan_3.2.0+0xc33ae) (BuildId: f1d8877209519a74239acca6fa53ce2aa7536b6e)
+    #2 0x5ea76b1eff8c in SDO_download /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:827:19
+    #3 0x5ea76b1eb11d in ESC_coeprocess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1501:16
+    #4 0x5ea76b1ea4ce in deliver /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_download_overflow.c:90:4
+    #5 0x5ea76b1e9ea2 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_download_overflow.c:125:7
+    #6 0x7d691ec2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #7 0x7d691ec2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #8 0x5ea76b11c314 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_download_asan_3.2.0+0x2c314) (BuildId: f1d8877209519a74239acca6fa53ce2aa7536b6e)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:328 in __memset_avx2_unaligned_erms
+==3069293==ABORTING
