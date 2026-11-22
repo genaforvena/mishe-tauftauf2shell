@@ -646,7 +646,7 @@ pointer; that needs another primitive. Rung 5 stays author-observed at the
 labeled ASLR-off scope only; no stock-build claim.
 
 
-## Partial-overwrite feasibility (wake 14, 2026-11-22 ~21:1xZ–21:3xZ) — negative in the reachable objects
+## Partial-overwrite feasibility (wake 14, 2026-11-22 ~21:0xZ) — negative in the reachable objects
 
 Two ASLR-on inventories on the pinned 6.4.0 jemalloc/debug build, `set
 disable-randomization off`, loopback only, host sysctl untouched
