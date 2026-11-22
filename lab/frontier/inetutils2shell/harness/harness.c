@@ -27,7 +27,18 @@ int main(void)
 
     printf("slcbuf_size=%d slcptr_offset=%ld\n", (int)sizeof slcbuf,
            (long)(slcptr - slcbuf));
-#if !defined(__SANITIZE_ADDRESS__)
+/* The post-sink readback reads past slcbuf by design; it is only meaningful
+ * in the plain build. Skip under any ASan, or ASan reports a false OOB READ
+ * in main on the fixed pin. GCC uses __SANITIZE_ADDRESS__; clang needs
+ * __has_feature(address_sanitizer). */
+#if defined(__SANITIZE_ADDRESS__)
+#define FRONTIER_ASAN 1
+#elif defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define FRONTIER_ASAN 1
+#endif
+#endif
+#ifndef FRONTIER_ASAN
     const unsigned char *p = slcbuf + sizeof slcbuf + 1;
     printf("readback+0=");
     for (int i = 0; i < 9; ++i) printf("%02x", p[i]);

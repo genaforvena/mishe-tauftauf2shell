@@ -39,6 +39,14 @@ verbatim, supplies only the pinned globals and `init_termbuf()` stub, and
 calls `start_slc(0)` then 50 chosen triplets over an ASan/plain build matrix.
 `bash harness/run.sh`: rc 0, 8 PASS / 0 FAIL; two in-tree replays and a clean
 `git archive b1c02f3` replay produced byte-identical normalized hashes.
+Build discipline: `run.sh` pins `-O0`. At `-O2/-O3` gcc relocates the stub
+`slcptr` and clobbers plain readback bytes past index 3, so the chosen-byte
+check is only valid at `-O0`. The readback is compiled only in non-ASan builds
+via a `FRONTIER_ASAN` guard covering both GCC `__SANITIZE_ADDRESS__` and clang
+`__has_feature(address_sanitizer)`; without the clang arm a clang ASan build
+reports a false OOB READ in `main` on the fixed pin. Verified W118 with gcc 13
+and clang 18 on both pins; published hashes are unchanged (the guard sits after
+all line-numbered frames).
 
 - Vulnerable ASan: natural `global-buffer-overflow`, `WRITE of size 1`, top
   frame `add_slc` in the verbatim pinned function, 0 bytes after 108-byte
