@@ -78,6 +78,7 @@ the first-block stub and the driver are local. Full inventory in
 `PROVENANCE.md`. `bash harness/run.sh`: rc 0, **17 PASS / 0 FAIL**, nine
 normalized logs.
 
+
 - Vulnerable gcc and clang ASan, `TOTAL_NUM=28`, `mac_len=20`, `blocksize=16`
   (so `decrypt_size=4`, copy 15): `heap-buffer-overflow`, `WRITE of size 15`,
   0 bytes after a 4-byte region, top frame `transport_fullpacket` in the
@@ -90,8 +91,9 @@ normalized logs.
   firing; ASan clean, no readback. Fixed plain agrees.
 - Safe-input control, `TOTAL_NUM=64` (`decrypt_size=40`, copy fits): clean under
   ASan on both pins.
-- Nine normalized hashes in `EVIDENCE_HASHES.txt`; two in-tree replays produced
-  byte-identical logs. Normalization strips PID, addresses, paths, BuildId and
+- Nine normalized hashes in `EVIDENCE_HASHES.txt`; two in-tree replays and a
+  clean `git archive 9795ecf` replay produced byte-identical logs (17/17 PASS
+  in the archive too). Normalization strips PID, paths, addresses, BuildId and
   allocator shadow-byte rows.
 
 ## 4. Rung-4 feasibility and honest ceiling
