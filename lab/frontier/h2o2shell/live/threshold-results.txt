@@ -1,0 +1,8 @@
+len=3900 ASAN=no
+len=3950 ASAN=no
+len=3958 ASAN=no
+len=3959 ASAN=YES WRITE of size 1 at stack frame offset 4160
+len=3960 ASAN=YES
+len=3962 ASAN=YES
+len=4000 ASAN=YES
+Overhead prefix+module+fmt = 137 bytes; error_logs size = path_len + 137; newline suffix adds 1 byte; first OOB write is that 1-byte newline at buf+4096 when path_len=3959.

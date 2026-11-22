@@ -93,7 +93,14 @@ Both pins now build as real `h2o` executables out-of-tree with ASan
    Short request on the vulnerable pin (17894) was clean and left it alive.
    `bash live/replay-live.sh` reproduces all three cases: `vuln-short:
    ASAN=no`, `vuln-long: ASAN=YES` (offset 4160), `fixed-long: ASAN=no`.
-5. **Additional-wire-path observation.** A lab fake FastCGI upstream
+5. **Exact threshold.** With the same minimal config, path lengths 3900/3950/
+   3958 are ASan-clean; 3959, 3960, 3962 and 4000 fault. The error-log
+   overhead is 137 bytes for long paths (gdb `ERROR_SIZE=5137` at path
+   5000), so a 3959-byte path makes `error_logs` exactly 4096 bytes and the
+   one-byte `\n` suffix is the first write past `buf`; that is the observed
+   `WRITE of size 1`. Evidence: `live/threshold-results.txt` and
+   `live/asan-threshold-3959.1162820`.
+6. **Additional-wire-path observation.** A lab fake FastCGI upstream
    (`live/fcgi_payload.py`, type-7 FCGI_STDERR with 5000 bytes) also produced
    a live ASan stack overflow (`live/asan-fcgi.840789`), but its long bytes
    came from a local upstream, not the HTTP request; the redirect path above
