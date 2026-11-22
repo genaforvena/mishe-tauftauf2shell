@@ -1,0 +1,99 @@
+SOES RRTL-261119-01 / CVE-2026-129803 — undersized SDO Download frame
+soes2shell sixth wake, 2026-11-22 ~02:58Z. All runs in-process, loopback lab.
+
+PIN CHECK
+  cd lab/frontier/soes2shell/src && sha256sum -c SHA256SUMS
+  soes-v3.2.0.tar.gz: OK / soes-v3.2.1.tar.gz: OK / fix-v3.2.0-v3.2.1.diff: OK (3/3)
+
+
+EXIT CODES (replay driver, 12 cases)
+  plain 3.2.0 short-read rc=0 / short-write rc=0 / short-safe rc=0
+  ASan  3.2.0 short-read rc=0 / short-write rc=1 / short-safe rc=0
+  plain 3.2.1 short-read rc=0 / short-write rc=0 / short-safe rc=0
+  ASan  3.2.1 short-read rc=0 / short-write rc=0 / short-safe rc=0
+
+BUILD
+  cd lab/frontier/soes2shell && sh harness/build.sh
+  New targets: build/coe_shortframe_{3.2.0,3.2.1,asan_3.2.0,asan_3.2.1}
+  clang -g -O0 [-fsanitize=address] -ffunction-sections -fdata-sections
+  -Wl,--gc-sections; linked with each pinned tree's real soes/esc_coe.c.
+  No warnings in final build.
+
+SOURCE MECHANISM (hash-pinned 3.2.0 vs 3.2.1, soes/esc_coe.c)
+  ESC_coeprocess :1450 accepts a CoE frame whose length is >= COE_MINIMUM_LENGTH
+  (8). SDO_download :813 reads the master-declared 16-bit size. At :849-850
+  3.2.0 clamps size to `mbxheader.length - COE_HEADERSIZE` (COE_HEADERSIZE=10).
+  With length 8 or 9 that subtraction is NEGATIVE int; promoted to uint32 for
+  the comparison with `size`, it becomes ~0, so the clamp never fires.
+  copy2mbx at :864 then memcpy's `size` bytes at esc_coe.c:248.
+  Fixed 3.2.1 rejects length < COE_HEADERSIZE at :854-858 before any copy.
+
+INPUT
+  harness/coe_shortframe_overflow.c includes pinned ecat_slv.c for the real
+  MBX/MBXcontrol/ESCvar globals and stubs unrelated HAL externs. One
+  non-expedited SDO Download request in MBX[0]: mbxtype=MBXCOE, length=8
+  (trigger) or 22 (control), service=COE_SDOREQUEST<<12, command=DOWNLOADREQUEST,
+  subindex=1, declared size=64 (trigger) or 8 (control). Bytes at MBX+14..+77
+  are physically present but OUTSIDE the declared 8-byte frame and are all
+  0xe7. Object 0x2003 is a writable 64-byte OCTET_STRING (actsize 64) with a
+  64-byte canary after it; object 0x2002 is a writable 8-byte OCTET_STRING
+  whose data is a standalone global with a 96-byte canary after it. The stock
+  lan9252demo strings are ATYPE_RO; writable flexible objects are a modeled
+  precondition, stated openly.
+
+CASES (raw output in this directory; exit codes in the first block below)
+  case                                   rc  observation
+  plain 3.2.0 short-read                   0  object[0]=object[8]=object[63]=e7,
+                                             canary clean: 56 bytes past the
+                                             declared frame read into the object
+  plain 3.2.0 short-write                  0  write canary 56 bytes = e7,
+                                             canary[0]=canary[55]=e7: chosen
+                                             bytes past the 8-byte object
+  plain 3.2.0 short-safe                   0  object[0]=e7 (declared payload),
+                                             object[8]/[63] zero; write canary 0
+  ASan 3.2.0 short-read                    0  clean by design: source and
+                                             destination are both inside globals
+  ASan 3.2.0 short-write                   1  global-buffer-overflow WRITE of
+                                             size 64 at esc_coe.c:248 via
+                                             SDO_download :864 via ESC_coeprocess
+                                             :1501; 0 bytes after g_oct_alone[8]
+  ASan 3.2.0 short-safe                    0  no ASan report
+  plain real 3.2.1 short-read              0  object all zero: :854 guard rejects
+  plain real 3.2.1 short-write             0  write canary 0: :854 guard rejects
+  plain real 3.2.1 short-safe              0  clean
+  ASan real 3.2.1 short-read               0  no ASan report
+  ASan real 3.2.1 short-write              0  no ASan report
+  ASan real 3.2.1 short-safe               0  no ASan report
+
+SCOUT CLAIM REVISED (negative, preserved)
+  A read-only scout ranked 129803 first as a "deterministic chosen-byte write"
+  and cited an existing 129796 ASan trace as proof. That conflates two fixes:
+  the :864 copy sink and the 129796 missing size>actsize check are the same
+  sink already witnessed at cve129796/. Isolating 129803 with a size-matched
+  64-byte object gives a past-FRAME read into an in-bounds object (no ASan
+  report, because MBX[] is 384 bytes), not a new OOB write. The short-write
+  mode here does reach the same :864 write, now through the undersized-length
+  trigger, and 3.2.1's new :854 guard rejects it. Both consequences are
+  reported separately above; no new write primitive is claimed for 129803.
+
+GRADE
+  Real pinned ESC_coeprocess()/SDO_download() handler: rung 3.
+  Past-frame mailbox bytes copied into a modeled writable object, and the
+  shared :864 chosen-byte write through a distinct undersized-length trigger:
+  rung 4 harness-level only. Bytes come from an in-process MBX[] seed; no
+  wire, no HAL, no live slave, no address leak, no command side effect.
+  Rung 5 NOT claimed; wire reach stays UNKNOWN.
+
+EVIDENCE CHECKSUMS (sha256sum of the 12 case files plus this index)
+feb08e94352ef37b237d72a584f7299df8efcf819a99e1e21206c0c9fadc0127  asan_3.2.0_short-read.txt
+0a675a36c557e504d7bd5e8c5cb8fdcffbbba7d6c8623c74a48a56772ed2f90f  asan_3.2.0_short-safe.txt
+6e7c77e2bd882d98f3974a17208a78fd366ec73ee04a755b2bd47429663d58e8  asan_3.2.0_short-write.txt
+c91c9c637775cbea96e1bd739fde7fae05d227211249618171351eb320cfa775  asan_3.2.1_short-read.txt
+3cc9ad9a79354df8801f459ab3ddd0d6ef75850eb167ddaf59626fb803c4d536  asan_3.2.1_short-safe.txt
+86e2d958a78ef4ca68e4ab6b22c5e0602b7ccfdd5189d5d632c9546be9fc0085  asan_3.2.1_short-write.txt
+feb08e94352ef37b237d72a584f7299df8efcf819a99e1e21206c0c9fadc0127  plain_3.2.0_short-read.txt
+0a675a36c557e504d7bd5e8c5cb8fdcffbbba7d6c8623c74a48a56772ed2f90f  plain_3.2.0_short-safe.txt
+8ecf5c9c7d109d72b266a847e4d457efb1b98ec6bb61b6504fd99ad75b07d23e  plain_3.2.0_short-write.txt
+c91c9c637775cbea96e1bd739fde7fae05d227211249618171351eb320cfa775  plain_3.2.1_short-read.txt
+3cc9ad9a79354df8801f459ab3ddd0d6ef75850eb167ddaf59626fb803c4d536  plain_3.2.1_short-safe.txt
+86e2d958a78ef4ca68e4ab6b22c5e0602b7ccfdd5189d5d632c9546be9fc0085  plain_3.2.1_short-write.txt

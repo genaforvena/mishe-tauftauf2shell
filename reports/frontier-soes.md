@@ -453,3 +453,49 @@ UNKNOWN and rung 5 is not claimed. The advisory lists 21 CVEs total; five now
 have local harness coverage (129794 / 129796 / 129798 / 129811 / 129814),
 leaving 16 untested issues with source-bound candidates (ranked shortlist on
 this mind's wall).
+
+## Adjacent cluster triage — CVE-2026-129803 (soes2shell, sixth wake, 2026-11-22 ~02:59Z)
+
+Pinned 3.2.0 `ESC_coeprocess()` accepts a CoE frame with length as small as
+`COE_MINIMUM_LENGTH` (8), while `COE_HEADERSIZE` is 10. In `SDO_download()` the
+3.2.0 clamp at `esc_coe.c:849-850` computes
+`mbxheader.length - COE_HEADERSIZE` as a negative `int`, promoted to a huge
+`uint32` for the comparison with the master-declared size; it therefore never
+clamps. Fixed 3.2.1 rejects `length < COE_HEADERSIZE` at `esc_coe.c:854-858`
+before any copy.
+
+New harness `lab/frontier/soes2shell/harness/coe_shortframe_overflow.c`
+(wired into `harness/build.sh`) sends one non-expedited SDO Download through
+the **real** `ESC_coeprocess()` → `SDO_download()` path, declaring an 8-byte
+frame while 64 marker bytes (`0xe7`) are physically present in `MBX[]` past
+the declared frame. Writable flexible objects with RAM data are a modeled
+precondition; the stock demo strings are `ATYPE_RO`. `MBX[]` is seeded
+in-process: no wire, no HAL, no live slave, no leak, no command side effect.
+
+| Case | Build | Observed |
+|---|---|---|
+| `short-read` (64-byte object, declared 64) | 3.2.0 plain and ASan | object `[0]`/`[8]`/`[63]` all `e7`, its canary clean: 56 bytes past the declared frame read into an in-bounds object; ASan clean by design (both arrays are inside globals) |
+| `short-write` (8-byte object, declared 64) | 3.2.0 plain | 56 `e7` bytes past the standalone 8-byte object; `write_canary[0]=write_canary[55]=e7` |
+| `short-write` | 3.2.0 ASan | `global-buffer-overflow`, `WRITE of size 64` at `esc_coe.c:248` in `copy2mbx` via `SDO_download :864` via `ESC_coeprocess :1501`, 0 bytes after `g_oct_alone[8]`; exit 1 |
+| `short-read`, `short-write` | real pinned 3.2.1, plain and ASan | object and write canary all zero, no ASan report, exit 0 — the new `:854` guard rejects the frame |
+| `short-safe` (normal length 22, declared 8) | both releases, plain and ASan | only the 8 declared bytes land; canaries clean, no ASan report |
+
+Evidence:
+`lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/cve129803/INDEX.txt`
+(12 runs, exit codes, raw output and checksums; `sha256sum -c SHA256SUMS`
+recomputed 3/3 OK).
+
+Correction preserved as a negative: a read-only scout ranked 129803 first as
+a *new* chosen-byte write and cited the earlier 129796 ASan trace as proof.
+Those are the same `:864` copy sink. Isolating 129803 with a size-matched
+object shows a past-frame **read** into an in-bounds object (no ASan report),
+not a new OOB write. The `short-write` case reaches the shared sink through a
+distinct undersized-length trigger, which 3.2.1's new guard blocks.
+
+Grade: **rung 3 confirmed on the real pinned `SDO_download()` handler**;
+rung 4 harness-level only (past-frame mailbox bytes in a modeled object, and
+the shared chosen-byte write via a distinct trigger). No witness replay yet.
+Wire reach stays UNKNOWN and rung 5 is not claimed. Six advisory issues now
+have local harness coverage (129794 / 129796 / 129798 / 129803 / 129811 /
+129814), leaving 15 untested.
+

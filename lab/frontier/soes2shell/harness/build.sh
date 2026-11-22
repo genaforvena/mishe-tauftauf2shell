@@ -91,3 +91,18 @@ for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
       -Wl,--gc-sections -o "$ROOT/build/coe_terminator_asan_$V"
    echo "built $ROOT/build/coe_terminator_$V and coe_terminator_asan_$V"
 done
+
+# CVE-2026-129803 triage: undersized mailbox length defeats the 3.2.0 clamp;
+# real ESC_coeprocess()/SDO_download() with the hash-pinned 3.2.1 guard.
+for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
+   V=${SPEC%%:*}; DEFINE=${SPEC##*:}
+   SRC="$ROOT/src/SOES-$V"
+   INC="-I$SRC -I$SRC/soes -I$SRC/soes/include/sys/gcc -I$SRC/applications/linux_lan9252demo"
+   clang -g -O0 -Wall -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_shortframe_overflow.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_shortframe_$V"
+   clang -g -O0 -fsanitize=address -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_shortframe_overflow.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_shortframe_asan_$V"
+   echo "built $ROOT/build/coe_shortframe_$V and coe_shortframe_asan_$V"
+done
