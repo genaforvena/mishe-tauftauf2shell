@@ -1,0 +1,56 @@
+=================================================================
+==3371650==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51500073024b at pc 0x74e1870ce693 bp 0x74e178280ad0 sp 0x74e178280260
+WRITE of size 506 at 0x51500073024b thread T11
+    #0 0x74e1870ce692 in vsnprintf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1652
+    #1 0x74e1870d0786 in snprintf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1723
+    #2 0x586def2c40f4 in fim_generate_alert analysisd/decoders/syscheck.c:1680
+    #3 0x586def2bf85b in fim_process_alert analysisd/decoders/syscheck.c:1436
+    #4 0x586def2bd956 in decode_fim_event analysisd/decoders/syscheck.c:1288
+    #5 0x586def29cf9c in w_decode_syscheck_thread analysisd/analysisd.c:1586
+    #6 0x74e18705ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #7 0x74e185e9cb63 in start_thread nptl/pthread_create.c:447
+    #8 0x74e185f29e8b in clone3 ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+0x51500073024b is located 0 bytes after 459-byte region [0x515000730080,0x51500073024b)
+allocated by thread T11 here:
+    #0 0x74e1870fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x586def276511 in OS_CleanMSG analysisd/cleanevent.c:62
+    #2 0x586def29ce57 in w_decode_syscheck_thread analysisd/analysisd.c:1567
+
+Thread T11 created by T0 here:
+    #0 0x74e1870f51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x586def330eb2 in CreateThreadJoinable shared/pthreads_op.c:47
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1652 in vsnprintf
+Shadow bytes around the buggy address:
+  0x51500072ff80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000730000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000730080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000730100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000730180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x515000730200: 00 00 00 00 00 00 00 00 00[03]fa fa fa fa fa fa
+  0x515000730280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000730300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000730380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000730400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000730480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3371650==ABORTING

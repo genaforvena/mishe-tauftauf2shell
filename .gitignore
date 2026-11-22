@@ -157,3 +157,6 @@ lab/frontier/soes2shell/build/
 lab/frontier/wazuh2shell/out-direct/build/
 lab/frontier/wazuh2shell/extracted.inc
 lab/frontier/wazuh2shell/trace-src/
+lab/frontier/wazuh2shell/live-src/
+
+lab/frontier/wazuh2shell/live-src-748/

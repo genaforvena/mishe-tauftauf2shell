@@ -1,12 +1,14 @@
 # wazuh2shell — source-level wire reach of the CVE-2026-74045 FIM sink
 
 Status (2026-11-22, wake W105): **wire reach CONFIRMED at source level on the
-pinned v4.14.7 bytes**. The sink `snprintf(lf->full_log, OS_MAXSTR, ...)` in
-`fim_generate_alert()` is on the path that handles an enrolled agent's syscheck
-event received on the encrypted 1514 channel. This does **not** upgrade the
-grade: no live `wazuh-analysisd` was built or run, no daemon crash was observed,
-and rung 5 remains UNKNOWN. One graded fact is retired: "wire reach UNKNOWN"
-is now "wire path source-confirmed; live observation UNKNOWN".
+pinned v4.14.7 bytes**, and the queue-to-sink leg was subsequently observed in
+a live locally built daemon — see `reports/wazuh2shell-live-crash.md` for the
+ASan heap-buffer-overflow at `fim_generate_alert` with the 459-byte
+`OS_CleanMSG` allocation. The sink `snprintf(lf->full_log, OS_MAXSTR, ...)` is
+on the path that handles an enrolled agent's syscheck event received on the
+encrypted 1514 channel. The 1514 leg itself remains source-confirmed only:
+no enrolled agent or TLS session was run. Rung 5 stays UNKNOWN; a daemon
+overflow is not RCE.
 
 ## Provenance of the newly fetched bytes
 
