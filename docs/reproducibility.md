@@ -2102,3 +2102,75 @@ claim is made about an orderly 32-byte overwrite in a real heap. No pointer
 control, marker, command or rung 5. Admission minted the 92nd hy4-flash route,
 the path/debounce/slice units from the exact full-flag sync, and adopted
 frontier's live window; none of that changes the grade.
+
+## Admitted lane limbs — 2026-11-22 23:0x–23:3xZ public API, live tport, chosen call
+
+- **Msgpack2Shell W1 real public-API two-migrate reproducer** (commit `7145879`,
+  [report](../reports/msgpack2shell-realapi.md)): `bash lab/msgpack2shell/run.sh`
+  builds vulnerable `c-7.0.2` and fixed `1c47ce0` pinned C libraries with gcc
+  13.3.0 and clang 18.1.3, then drives only `msgpack_vrefbuffer_init`,
+  `append_ref` and `migrate` through upstream #1197's two-migrate sequence (5
+  refs → migrate → 4 refs → migrate) with no forced `src->end`. Expect rc 0,
+  74 PASS / 0 FAIL, summary hash
+  `b8c96187de5cbf66bc53cc1b350d977eab95e5cda5351875c992136880bca022`: on the
+  vulnerable pin both compilers report ASan `heap-buffer-overflow WRITE of
+  size 64`, 0 bytes after a 128-byte region at `vrefbuffer.c:222` (allocation
+  from the prior migrate's `realloc` at `:210`), the plain build aborts
+  `free(): invalid size`, and the upstream single-migrate canary PoC is
+  `CORRUPTED`; fixed and equal-capacity safe controls stay clean and grow B to
+  16 slots. Instrumentation prints `cmp=0` on every variant. Rung 4 through the
+  real public API of a built library; consumer and wire reach are UNKNOWN with
+  a negative — the only in-tree caller in `c-7.0.2` is
+  `test/msgpack_c.cpp:1570`. No serialized input, socket, live process,
+  dereference of a copied `iov_base`, marker, command or rung 5. Evidence files
+  under `lab/msgpack2shell/evidence/` are tracked; build trees stay gitignored.
+- **SofiaSip2Shell W2 chosen-delta neighbour data and live WS SIP tport**
+  (commits `df6fb42`, `32b6757`, `620ce97`;
+  [layout](../reports/sofiasip2shell-real-layout.md),
+  [live](../reports/sofiasip2shell-live-ws-tport.md)): after the W1 recipe in
+  the lane limbs above, `bash lab/sofiasip2shell/layout/run.sh` adds two
+  natural glibc geometries — `plain-v17-geom` (65527-byte bbuffer, 5 chosen
+  XOR bytes in a live neighbour's user data) and `plain-v17-realloc` (65544-byte
+  frame on the default bbuffer, the library's real `ws.c:1057` realloc, 6 bytes
+  in neighbour data) — with `plain-f18-*` fixed-pin controls leaving that data
+  untouched. A clean `git archive HEAD` replay regenerated the two gitignored
+  `.inc` files from tracked `ws-*.c` (hashes `b96477e0` / `42dce55f`) and
+  reproduced all 12 per-case rcs and the four new evidence files byte-for-byte.
+  The live tport lane links against the same full pinned-library static builds:
+  `bash lab/sofiasip2shell/libbuild/live/build_and_run.sh v17 'v1.13.17' 18857`
+  (and `v18 ... 18858`; `SAN=plain` variants on 18859/18860) starts a raw `ws`
+  tport on 127.0.0.1 and forks a client that waits for the library's real HTTP
+  `101 Switching Protocols` before sending a masked 65544-byte BINARY frame.
+  Expect the ASan vulnerable pin to fault at `ws_read_frame ws.c:1073` ←
+  `tport_recv_stream_ws tport_type_ws.c:217`, the plain vulnerable pin to abort
+  `corrupted size vs. prev_size` with `NEXT_SIZE_BEFORE=1101000000000000` →
+  `NEXT_SIZE_AFTER=005b4243415a4243`, and the fixed pin and short frames clean.
+  No pointer, marker, command or rung 5; gitignored pin trees and raw logs
+  regenerate with the committed scripts.
+- **Pppd2Shell W132 chosen function call with chosen argument** (commit
+  `740b6fd`, [live](../reports/pppd2shell-live.md) W132): after the W131
+  `-no-pie` plain build from the Pppd lane row, run the driver against that
+  binary with a fresh marker and normalization:
+  `python3 lab/frontier/pppd2shell/live/rce_call.py --binary "$PWD/lab/frontier/pppd2shell/live/raw/build-vuln-nopie/pppd/pppd" --marker <unique> --mode attack [--strace]`
+  then `python3 lab/frontier/pppd2shell/live/call/normalize_call.py`.
+  `notify()` calls `(*np->func)(np->arg, val)`, so a one-argument
+  `unlink@plt` stub receives the attacker-chosen sentinel path in `rdi` while
+  the signal number is ignored; the same 1498-byte ConfReq writes the fake
+  notifier at `sigreceived`. Expect a live strace line
+  `unlink("/tmp/pppd2shell-r5-…-victim") = 0` and the sentinel file gone, with
+  two normalized replays byte-identical in `live/call/evidence/HASHES.txt`.
+  Short safe frames, `func=NULL` and the fixed 2.5.4 pin leave the sentinel
+  intact; the process later faults in shutdown on the corrupted `the_channel`,
+  after the observed call. `unlink` is a libc call, not a command, so this stays
+  rung 4 with an observed filesystem side effect; the pin imports no
+  `system`/`popen`. Raw strace and logs in gitignored `live/raw/`.
+- **Tacplus2Shell W130 environment-scoped hash normalization** (commit
+  `f2aac1c`, [status](../reports/tacplus2shell-status.md) W130): witness #1814
+  found that `POST12 cmdoff` is a decimal pointer delta that varies with stack
+  and environment layout. `harness/run_ptr.sh` now masks `cmdoff=[0-9]+` to
+  `cmdoff=N`; two canonical replays at 2026-11-22 23:07Z give 14 PASS / 0 FAIL
+  and byte-identical logs, and a 4096-byte environment filler leaves the three
+  hashes unchanged, while the fixed/no-prime hashes and the write-what-where
+  verdict are unaffected. Two byte-prefill checks remain environment-sensitive
+  and report FAIL under the filler; they are byte-prefill assertions, not the
+  write proof. Replay: `bash lab/frontier/tacplus2shell/harness/run_ptr.sh`.

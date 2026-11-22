@@ -6693,3 +6693,65 @@ reachability through baresip/SIP-VoIP servers and DoS impact stay claims.
 First experiment: build both pinned `re` releases with ASan, drive a real
 loopback `websock_accept()` upgrade and the 14-byte crafted frame, with fixed
 pin and short-frame controls. Status: `reports/baresip2shell-status.md`.
+
+### 2026-11-22 23:0x–23:3xZ limbs — public API, live WS tport, a chosen call and a hash-scope repair
+
+Msgpack2Shell W1 (`7145879`, `reports/msgpack2shell-realapi.md`) closes the
+admission's "no public API sequence / natural layout" boundary. Both `c-7.0.2`
+and fixed `1c47ce0` build as real C libraries; `bash lab/msgpack2shell/run.sh`
+calls only `init`, `append_ref` and `migrate` through upstream #1197's
+two-migrate sequence, with no forced `src->end`. On a natural two-allocation
+layout B sits above A, so the comparison skips realloc and the vulnerable pin
+faults under gcc and clang ASan (`WRITE of size 64`, 0 bytes after a 128-byte
+region), aborts under plain glibc and corrupts the upstream canary. 74 PASS /
+0 FAIL; fixed and equal-capacity controls clean. This is rung 4 through the
+real public API of a built library, not a harness forcing the pointer relation.
+Consumer reach stays UNKNOWN with one negative: `c-7.0.2` has no production
+in-tree caller of `migrate()` — only a unit-test assertion. No socket, request
+input, live process, pointer dereference or command; rung 5 is not claimed.
+The next experiment is a downstream caller that reaches unequal-size migrate
+with attacker-sized buffers, then a plant-started loopback replay.
+
+SofiaSip2Shell W2 (`df6fb42`, `32b6757`, `reports/sofiasip2shell-real-layout.md`)
+answers the W1 object-data question with two natural glibc geometries. With a
+65527-byte bbuffer the 14-byte XOR extent starts one byte before the next
+chunk's size field, so 5 chosen-delta bytes land in the live neighbour's user
+data (`c3` → `82 99 81 80 82`). With a 65544-byte frame on the default bbuffer
+the pinned `ws.c:1057` realloc fires, glibc keeps the same chunk and 6 delta
+bytes land in neighbour data; the fixed pin leaves it untouched. The clean
+archive replay regenerated the gitignored `.inc` files and matched the four new
+evidence files byte-for-byte. The second W2 lane (`620ce97`,
+`reports/sofiasip2shell-live-ws-tport.md`) reaches the overflow from a live
+plant-started sofia-sip process's own SIP-over-WebSocket tport: a forked client
+waits for the library's real HTTP 101 before writing a masked 65544-byte frame,
+and the library's event loop calls `ws_read_frame()` from
+`tport_recv_stream_ws()`. The plain run corrupts the next chunk's size and
+glibc aborts `corrupted size vs. prev_size`. Rung 5 stays blocked because the
+terminator clears `PREV_INUSE` before the next allocator operation; no fake
+chunk, overlapping allocation or pointer was measured. A full FreeSWITCH SIP
+dialog is still absent.
+
+Pppd2Shell W132 (`740b6fd`, `reports/pppd2shell-live.md` W132) strengthens rung
+4 after the W131 negative. W131's two-argument `device_script()` callback was
+reached but its forked child died because the overflow had corrupted the high
+half of `the_channel`. W132 instead points `sigreceived` at a fake notifier
+whose `func` is one-argument `unlink@plt` and whose `arg` is a chosen path;
+`notify()` passes the signal number as the ignored second argument. Live strace
+shows `unlink("/tmp/pppd2shell-r5-…-victim") = 0` and the sentinel disappears,
+with fixed, short-frame and `func=NULL` controls clean. The process faults
+later in shutdown, after the call. This is a chosen function call with a chosen
+string argument and an observed filesystem side effect in a live process — a
+stronger rung 4, but `unlink` is a libc call and not a command, so rung 5 is
+unchanged. The pin imports no `system`/`popen` and its exec sites need a
+fork/child path this write cannot provide.
+
+Tacplus2Shell W130 (`f2aac1c`, `reports/tacplus2shell-status.md` W130) is a
+grade-neutral hash-scope repair following witness #1814. `POST12 cmdoff` is a
+decimal pointer delta that moves with the stack/environment layout; a 4096-byte
+environment filler changed it and the old "portable" vulnerable hash. The
+normalizer now masks `cmdoff=[0-9]+` to `cmdoff=N`; two canonical replays are
+byte-identical and a filler run produces the same three hashes. Fixed and
+no-prime hashes and the write-what-where verdict are unchanged. Two byte-prefill
+checks remain environment-sensitive and are reported as FAIL under the filler;
+they assert byte prefill rather than the chosen write and are not part of the
+grade. No new experiment or rung-5 claim.
