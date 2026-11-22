@@ -47,25 +47,32 @@ and three units, not a duplicate window.
   hashes in `EVIDENCE_HASHES.txt` reproduced over two in-tree replays and a
   clean `git archive 9795ecf` replay. Operator replay 19:14Z: rc 0, 17 PASS,
   pins OK, unchanged tracked files.
-- Grade: rungs 1/2/3 and rung 4 chosen bytes at chosen relative offsets at
-  **direct-call / stub scope only**. No libssh2 process, SSH handshake,
-  network wire, allocator grooming, pointer control, command or witness
-  replay: **no rung 5**. Copy content is constrained by the decrypted-first-
-  block stub; arbitrary bytes at arbitrary heap offsets are not established.
-  Admission caveat weighed explicitly: the victim is a **connecting client**
-  fed by a malicious server, not a web-facing server; live/wire reach stays
-  UNKNOWN regardless of the advisory's pre-auth framing.
-- Witness replay owed. Replay from the repo root:
-  `bash lab/frontier/libssh22shell/harness/run.sh`, then compare
-  `lab/frontier/libssh22shell/EVIDENCE_HASHES.txt` (nine digests) and the 17
-  PASS lines. Full stage: `reports/frontier-libssh22shell.md`.
-- Next bounded experiment to move up a rung: build pinned libssh2 1.11.1 with
-  ASan and drive a real `libssh2_session_handshake()` against a plant-started
-  127.0.0.1 fake SSH server that completes KEX, selects an ETM cipher
-  (`aes128-ctr` + `hmac-sha1-etm@openssh.com`) and then sends one short
-  encrypted packet with `total_num=28` and a valid ETM MAC. Controls: the same
-  handshake with `total_num>=40` stays clean; the patched commit rejects with
-  `LIBSSH2_ERROR_DECRYPT`; safe input leaves the client alive. A successful
-  replay upgrades rung 4 from direct-call to a live client process; it still
-  needs chosen-pointer or command side effects for rung 5. All bind to
-  loopback only.
+- Grade at admission: rungs 1/2/3 and rung 4 chosen bytes at chosen relative
+  offsets at **direct-call / stub scope only**, with no libssh2 process, SSH
+  handshake, network wire, allocator grooming, pointer control or command at
+  that time. Copy content was constrained by the decrypted-first-block stub;
+  arbitrary bytes at arbitrary heap offsets were not established. No rung 5
+  then or now. This admission-time grade is superseded by W2/W3 and witness
+  W123 below: rung 4 is ESTABLISHED at live-process scope and rung 5 is closed
+  on this host.
+  Admission caveat that still holds: the victim is a **connecting client** fed
+  by a malicious server, not a web-facing service. Live loopback reach was
+  UNKNOWN at admission; W2 established it on this host, witness W123 confirmed
+  it, and rung 5 remains structurally closed here.
+- Witness replay: W121 independently replayed the direct-call harness from a
+  clean archive (17/17 PASS, 9/9 hashes). Witness W123 (#1628) replayed the W2
+  live claim from a clean `git archive HEAD` with its own pinned builds,
+  controls and gdb readback, grading rungs 1/2/3 and live-process rung 4
+  ESTABLISHED with no refutation or NIT; rung 5 stays NOT ESTABLISHED and
+  structurally closed on this x86-64 glibc. This page predates W2/W3; current
+  scope and controls are in `reports/libssh22shell-live.md`. The staged
+  harness replay remains at `bash lab/frontier/libssh22shell/harness/run.sh`,
+  comparing `EVIDENCE_HASHES.txt` (nine digests) and the 17 PASS lines.
+- Completed experiment (W2/W3, `reports/libssh22shell-live.md`): the pinned
+  client drove a real `libssh2_session_handshake()` against a plant-started
+  127.0.0.1 fake server through KEX and `aes128-ctr` +
+  `hmac-sha1-etm@openssh.com`, sending one short ETM packet with a valid MAC;
+  fixed, wrong-MAC and safe-input controls were clean. W3 measured the
+  allocator geometry that closes rung 5 on this host. No further bounded
+  experiment is owed; rung 5 needs a 32-bit build or a different
+  consumer/allocator, neither a live X2Shell path here.

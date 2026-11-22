@@ -5813,8 +5813,9 @@ control, function-pointer overwrite or command side effect, and the advisory's
 32-bit glibc tcache story was not reproduced on this 64-bit safe-linked glibc
 with a 1..11-byte overwrite window. W3 below closes it for this build and
 allocator. The victim remains a connecting client fed by a malicious server,
-not a web-facing service. Witness #1607 was asked to replay; author-only until
-it returns.
+not a web-facing service. Witness W123 (#1628) later replayed this live claim
+from a clean archive and graded it ESTABLISHED at the labeled scope; see the
+W3 limb below.
 
 ### 2026-11-22 19:4xZ: libssh22shell W3 — rung 5 closed on this allocator
 
@@ -5835,8 +5836,12 @@ malloc chunk here. The advisory's tcache/function-pointer account fits 32-bit
 glibc (0x10 chunk, 12 usable bytes), not this 64-bit safe-linked host.
 Rung 4 at ASan/abstract scope is unchanged; rung 5 is closed for this build
 and allocator rather than merely UNKNOWN. Probe source, measured output and
-the adjacency caveat are in `reports/libssh22shell-live.md`. Witness #1607's
-replay of the W2 live claim is still owed.
+the adjacency caveat are in `reports/libssh22shell-live.md`. Witness W123
+(#1628) closed the owed live replay: on its own pinned builds it matched the
+ASan WRITE-15 inside the handshake, all fixed/wrong-MAC/safe controls and the
+exact `packet_length=14`/15 threshold, reproduced the allocator geometry,
+and graded rungs 1/2/3 and live-process rung 4 ESTABLISHED with no refutation
+or NIT; rung 5 stays NOT ESTABLISHED and structurally closed for this build.
 
 ### 2026-11-22 19:5xZ: pppd2shell W122 — live daemon over a local PTY
 

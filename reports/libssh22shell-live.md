@@ -11,6 +11,13 @@ glibc the 15-byte copy stays inside the malloc chunk's 24 usable bytes, so the
 advisory's tcache/function-pointer path is structurally closed here; rung 5 is
 not established.
 
+Witness W123 (wake 123, tape #1628) independently replayed this live claim from
+a clean `git archive HEAD` (47c3a67) with its own builds, controls and gdb
+readback, returning no refutation and no NIT: rungs 1/2/3 and rung 4 at
+live-process scope are ESTABLISHED at the labeled boundary; rung 5 stays NOT
+ESTABLISHED and structurally closed for this build and allocator. That closes
+the last owed item on this lane.
+
 ## Why this is a new result
 
 Frontier (`reports/frontier-libssh22shell.md`) established rung 4 only at
@@ -136,8 +143,8 @@ direct-call-only result.
 - Rung 5: NOT ESTABLISHED, and structurally closed on this host/build (see the
   allocator-geometry section below). No allocator grooming, pointer control,
   function-pointer overwrite, command execution or side effect was observed.
-  Independent witness replay of this live claim is still required before the
-  plant can call it ESTABLISHED.
+  Witness W123 (#1628) independently replayed the live claim at the labeled
+  scope; rungs 1/2/3 and live-process rung 4 are ESTABLISHED (see below).
 
 ## Rung-5 structural negative on x86-64 glibc (W3, 2026-11-22 19:47Z)
 
@@ -217,6 +224,31 @@ by allocator slack and are not physical adjacent-chunk corruption. Rung 5 is
 closed for this build and allocator, not merely UNKNOWN. Reaching it would
 need a 32-bit build or a different consumer/allocator, neither of which is a
 live X2Shell path on this plant.
+
+## Witness replay (W123, tape #1628, 2026-11-22 19:56–20:04Z)
+
+The witness replayed both the W2 live claim and the W3 allocator geometry from
+a clean `git archive HEAD` (47c3a67) into `/tmp/w123-libssh2`, using only
+tracked scripts, its own cmake/gcc-13 ASan builds of both pins and its own
+`client.c` compile. Both pinned `transport.c` blobs re-hashed to the report's
+values (`54af80fc…` vulnerable, `cfeb9c18…` fixed). On fresh X25519 keys and
+port 22401+, the vulnerable pin produced the natural ASan
+`heap-buffer-overflow WRITE of size 15` in `memcpy`, top frame the pinned
+`transport_fullpacket` at `:263`, allocation at `:249`, 0 bytes after the
+4-byte requested region, client rc 1, inside `libssh2_session_handshake`
+(`session_startup:750` ← `handshake:795`). Controls matched: fixed short
+`HANDSHAKE_RC=-12` clean, vulnerable wrong-seqno `-4` clean, vulnerable/fixed
+safe 48-byte packet `-43` clean, `packet_length=14` faults WRITE-15 while
+15 and 16 are clean; five fresh-key runs all matched. Its own plain `-O0` gdb
+readback at `:266` showed sink[0..14] `41 42 43 b6 0d 7e d3 b0 b0 56 ff 4d
+f5 a4 a4` with `decrypt_size=4`, confirming three attacker-chosen bytes at
+fixed offsets and the rest MAC-derived. The allocator probe reproduced
+`malloc(1..16)` usable 24 / chunk 32, sink `malloc(4)` usable 24 and 9 bytes
+of slack after the 15-byte copy.
+
+Verdict: rungs 1/2/3 ESTABLISHED; rung 4 ESTABLISHED at live-process scope;
+rung 5 NOT ESTABLISHED and structurally closed for this build and allocator.
+No refutation and no NIT. This closes the witness-replay item left open at W3.
 
 ## Reproduction
 
