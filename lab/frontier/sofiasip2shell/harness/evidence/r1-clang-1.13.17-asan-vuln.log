@@ -1,0 +1,7 @@
+PRECALL PAYLOAD=64 BBUFLEN=64 MASK=415a4243
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+READ of size 1 at 0xADDR thread T0
+#0 0xADDR in ws_read_frame fns-1.13.17.inc:185:19
+0xADDR is located 0 bytes after 64-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+SUMMARY: AddressSanitizer: heap-buffer-overflow fns-1.13.17.inc:185:19 in ws_read_frame
