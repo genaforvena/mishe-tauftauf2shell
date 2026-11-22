@@ -6195,3 +6195,75 @@ and ASLR-on/stock UNKNOWN. The inventory script, its runner script and the
 logs were untracked when docs folded this limb; author committed the cited
 `aslr-pointer-inventory.gdb`, `run_aslr_inventory.sh`, `aslr-inventory.gdb.log`
 and `aslr-inventory.driver.log` in `9b5c988`, closing the reproducibility gap.
+
+## 2026-11-22 21:2xZ admissions (operator, standing #6)
+
+Ntpsec2Shell, Uhttpd2Shell and Libvnc2Shell were admitted from frontier staging;
+no window was created because frontier had already made indices 90/91/92 at
+20:40/21:01/21:17Z with both panes rendering. Each staged brief
+(`reports/frontier-*.md`) records the claim source, CVE/GHSA, affected and fixed
+pins, the claimed primitive, a rung-3 ASan observation plus scoped rung-4 chosen
+bytes with fixed and safe controls, an honest ceiling and duplicate screening.
+The operator added three hy4-flash `max_parallel: 3` routes to
+`.mishe-tauftauf/engine/routes.json` (84 → 87 roles) and ran the exact full-flag
+sync from `docs/runtime-pin.md:96-102` with pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 9, removed 0`), then
+`systemctl --user daemon-reload`. All nine path/debounce/slice units exist and
+the three path units are `enabled`. Pinned `doctor` and
+`python3 tools/check-omp-only.py .mishe-tauftauf .` are GREEN (87 declared
+roles); `check-readme.py` and `check-reproducibility.py` stay GREEN.
+
+### Ntpsec2Shell — CVE-2026-121506 (admitted)
+
+GitLab CNA 2026-11-03, CWE-787, CVSS 3.1 7.4
+`AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H`; affected 1.1.4 up to 1.2.5, fixed in
+1.2.5. Vulnerable tag `NTPsec_1_2_4` `a9e66af44c0be…`, fixed tag
+`NTPsec_1_2_5` `42b5703303c8…`, fix `0a36941e…`; pinned blobs and hashes in
+`lab/frontier/ntpsec2shell/PIN_HASHES.txt`. An unchecked declared AEEF
+`noncelen` in verbatim `extens_client_recv()` hands a chosen-offset `plaintext`
+pointer to `AES_SIV_Decrypt()`: ASan `WRITE of size 40`, 8 bytes past a 128-byte
+region with a modeled consumer; the pinned real AES-SIV writes 16 lab-chosen
+bytes `414243…50` at offset 328. Fixed pin rejects before the write; 8 PASS /
+0 FAIL twice and a clean `git archive f035109` replay. The victim is an **NTS
+client** fed server-mode replies, not a server; no ntpd process, NTP wire,
+NTS-KE handshake, disclosed key, pointer or command, and the advisory's
+auth-bypass/time-setting chain is a claim. Cheapest next step from the brief:
+build 1.2.4 ntpd with NTS and replay the crafted AEEF record over a
+plant-started loopback NTS-KE + NTP server pair, with 1.2.5 and well-formed
+replies as controls.
+
+### Uhttpd2Shell — GHSA-2mpg-6wp5-435p (admitted)
+
+GitHub CNA 2026-08-03, High 7.5 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`; affected
+through `f682ccabee9ed5f39dd3b0aaf96228975eeb478d` (shipped `7b1bec45` is
+byte-identical), fixed `e76736e5676fb25536b27d45865eb4153c68aca3` (four-line
+`params`-type guard), libubox `a396f38a8568a1d670c240465cd8d24fdfdf6463`. An
+unauthenticated `POST /ubus/call/...` with `"params":1` makes the scalar blobmsg
+be read as a container: `blobmsg_name(cur)` reads 2 bytes past a 20-byte
+`blob_memdup` region (ASan `READ of size 1` in `strcmp`) and the truncated
+underflowed length reaches the final `memcpy` as `4294967293`. REAL mode faults
+at the read; the ~4 GiB write is never executed locally. MODEL mode substitutes
+an instrumented sink: 16 chosen `41…`/`5a…` bytes at `WRITE_OFF=20`, fixed pin
+rejects before the loop; 30 PASS / 0 FAIL twice with a clean `git archive
+d6afa99` replay. Network-facing and unauthenticated in the advisory, but no
+live daemon, HTTP wire, rpcd/ACL replay, grooming, pointer or command; the
+advisory scores DoS only. Cheapest next step: pinned ASan uhttpd + libubox on a
+127.0.0.1 listener with a plant-started rpcd/null-SID stub, then a bounded
+grooming probe for attacker-influenced bytes at the source pointer.
+
+### Libvnc2Shell — GHSA-v9pm-47h4-jcq8 / CVE-2026-50538 (admitted)
+
+Published 2026-05-29 by bk138, High 8.8 `AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H`;
+libvncclient 0.9.12 through master `5ea5fc30`, introduced by `d7b1462`.
+Vulnerable pin `73352b9de9c0`, fixed pin `540332be3e0a` (10-line pre-write
+clamp); the advisory says "Patched versions: None" because no release tag
+carries the fix — recorded as a discrepancy. Verbatim pinned `HandleTightBPP` /
+`FilterCopyBPP` over real zlib: ASan `WRITE of size 64`, 0 bytes after a
+1024-byte framebuffer, frames `FilterCopy32` → `HandleTight32`; plain build
+reads back chosen `414243…50` at offset 1024; fixed pin logs the clamp before
+any write; safe control clean on both pins. 20 PASS / 0 FAIL twice (gcc and
+clang) plus a clean `git archive 0d4103f` replay. Victim is a connecting VNC
+client (attacker is server/mitm, `UI:R`); no live client, RFB wire, malicious
+server, callback overwrite, pointer, marker or command, and the advisory's
+control-flow-hijack claim is not reproduced. Cheapest next step: the advisory's
+loopback `evil_server.py` shape against an ASan client to move to wire scope.

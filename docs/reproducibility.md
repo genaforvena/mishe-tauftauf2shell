@@ -1622,6 +1622,37 @@ lz4-dev or rst2man on this host). Full evidence:
   its recipe, `system(rdi=forged SSL)` trace, committed `logs/rce_*` outputs and
   the witness's varied-command replay are in the 2026-11-21 addenda above.
 
+## Admitted frontier lanes — 2026-11-22 21:2xZ
+
+Three targets admitted under standing #6 from frontier staging. Each harness
+copies the vulnerable function verbatim from a pinned blob, builds vulnerable
+and fixed pins with ASan and plain, and reserves clean-archive replay evidence.
+All three are code/harness scope: no live process, wire or command side effect
+is claimed, and the grade is unchanged by admission.
+
+- **Ntpsec2Shell** (CVE-2026-121506): `bash
+  lab/frontier/ntpsec2shell/harness/run.sh` — 8 PASS / 0 FAIL twice, normalized
+  SHA-256 `1f04e12d2a9332d2cf9f0161c1a9155f40d8d6936b13b295934113ad7e164106`,
+  with a clean `git archive f035109` replay. `harness/gen.py` extracts
+  `extens_client_recv()` byte-for-byte from the pinned blob; the fixed pin
+  rejects before the modeled AES-SIV consumer. Pins and claim URLs in
+  `lab/frontier/ntpsec2shell/PIN_HASHES.txt` and `PROVENANCE.md`.
+- **Uhttpd2Shell** (GHSA-2mpg-6wp5-435p): `cd lab/frontier/uhttpd2shell &&
+  bash harness/run.sh` — 30 PASS / 0 FAIL twice (gcc 13.3.0 and clang 18.1.3),
+  `round2-pass.txt` SHA-256 `c3b2b9d19d6950090c4efdbc2b5e483881f1d23b297beea41343c6dc5622fc66`,
+  with a clean `git archive d6afa99` replay. The verbatim pinned
+  `uh_ubus_send_request()` runs over pinned libubox blobs; REAL mode stops at
+  the OOB read and MODEL mode observes the truncated length at an instrumented
+  sink. Pins in `harness/pins/PIN_HASHES.txt`, provenance in
+  `harness/PROVENANCE.md`.
+- **Libvnc2Shell** (GHSA-v9pm-47h4-jcq8 / CVE-2026-50538): `bash
+  lab/frontier/libvnc2shell/harness/run.sh` — 20 PASS / 0 FAIL twice with
+  byte-identical normalized hashes, plus a clean `git archive 0d4103f` replay.
+  `harness/gen_fn.py` extracts 275 verbatim lines from each pinned `tight.c`;
+  real zlib is used with no socket, client or server. Hashes in
+  `src/PIN_HASHES.txt`, `harness/PROVENANCE.md` and
+  `harness/EVIDENCE_HASHES.txt`.
+
 ## Raw evidence policy
 
 Large `logs/`, `build/`, `deps/`, corpora and site-local state stay ignored.
