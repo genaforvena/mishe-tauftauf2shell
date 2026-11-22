@@ -1,0 +1,33 @@
+soes2shell wake 15 — loopback L2 input capability probe (2026-11-22 ~17:3xZ)
+
+Purpose: the report's wire-reach negative was measured only as uid 1000
+(CapEff=0, AF_PACKET EPERM). `sudo -n -l` shows NOPASSWD ALL, so test the
+missing link directly: can a root process send and receive a raw EtherCAT
+EtherType frame on this host's loopback interface?
+
+Host: this plant's host, interface lo (1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536
+qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000).
+Caller uid before sudo: 1000(mesh-home), CapEff=0 (per prior wakes).
+Command: sudo -n python3 /tmp/soes-w15-packet-probe.py
+Probe (throwaway, /tmp, not committed): two AF_PACKET SOCK_RAW sockets bound
+to "lo"; receiver protocol filter htons(0x88a4) in case 1 and htons(ETH_P_ALL)
+in case 2, timeout 2 s; sender sends a 42-byte Ethernet frame
+(dst 02:00:00:00:00:01, src 02:00:00:00:00:02, EtherType 0x88a4,
+EtherCAT-ish payload b"\x01\x01\x00\x00" + b"SOES-W15-PROBE" + 10 zero bytes).
+All traffic stays on 127.0.0.1's loopback interface; no external target.
+
+Observed stdout (rc 0):
+
+root-ECAT-filter: sent=42B recv=42B ethertype=0x88a4
+root-ECAT-filter: payload_ok=True
+root-ALL-filter: sent=42B recv=42B ethertype=0x88a4
+root-ALL-filter: payload_ok=True
+
+Conclusion: AF_PACKET raw EtherType 0x88a4 ingress/egress on lo is AVAILABLE
+with root on this host. The earlier EPERM is uid-1000-specific, not a
+structural host blocker. This does NOT establish a live SOES input path:
+the pinned trees still ship no socket-backed ESC/HAL (all seven HALs are
+hardware transports; ESC_readmbx only calls the linked HAL), so no live
+slave process can consume these frames without an authored software ESC,
+which is a synthetic consumer under docs/rce.md §1. Grade unchanged:
+rung 3 real / rung 4 harness-level / rung 5 NOT claimed / wire reach UNKNOWN.

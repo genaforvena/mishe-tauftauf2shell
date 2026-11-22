@@ -321,6 +321,15 @@ emulator was built: wire reach stays UNKNOWN, rung 5 is not claimed, and the
 CoE mailbox harness remains rung-4 mechanics even though it drives real
 dispatch.
 
+Wake 15 later measured the root L2 link this paragraph only inferred: with
+`sudo -n`, AF_PACKET raw sockets on `lo` send and receive an EtherType
+`0x88a4` frame intact (42 B, payload preserved, both ECAT-specific and
+`ETH_P_ALL` filters). The 00:23Z EPERM is therefore uid-1000-specific, not a
+host-wide L2 blocker. The consumer gap in this paragraph is unchanged: no
+pinned HAL can feed those frames to `ESC_readmbx`, so wire reach stays UNKNOWN
+and an authored software ESC remains a synthetic consumer under `docs/rce.md`
+§1. Raw probe output: `evidence/wake15-loopback-afpacket.txt`.
+
 ## Adjacent cluster triage — CVE-2026-129796 (soes2shell, third wake, 2026-11-22 ~01:40Z)
 
 Advisory technical detail was read from
@@ -696,3 +705,26 @@ command side effect, and the witness has not ruled on replay #1438. The
 replay is useful to the witness precisely because it depends on no untracked
 harness file and no plant-side build artifact.
 
+
+## Root loopback L2 probe (soes2shell, fifteenth wake, 2026-11-22 ~17:3xZ)
+
+No new exploit primitive or grade change. The existing wire-reach negative
+was measured only as uid 1000 (`CapEff=0`, AF_PACKET EPERM); this wake tests
+the missing link with the passwordless root access already recorded on the
+report. A throwaway Python probe opened two `AF_PACKET`/`SOCK_RAW` sockets
+bound to `lo` under `sudo -n`, then sent a 42-byte Ethernet frame with
+EtherType `0x88a4` and a unique `SOES-W15-PROBE` payload. Both the
+ECAT-specific receiver (`htons(0x88a4)`) and the `ETH_P_ALL` receiver got the
+full 42 bytes back with the payload intact (`payload_ok=True`), rc 0, no
+external traffic.
+
+This corrects the earlier negative: raw EtherCAT EtherType ingress and egress
+on loopback are available to a root process on this host. It does not open a
+live SOES input path. The pinned trees still ship no socket-backed ESC or
+HAL — all seven transports are hardware, and `ESC_readmbx` only calls the
+linked HAL — so a frame has nowhere to go without an authored software ESC,
+which `docs/rce.md` §1 treats as a synthetic consumer, not a live affected
+target's real input path. Evidence:
+`lab/frontier/soes2shell/evidence/wake15-loopback-afpacket.txt`. Grade stands:
+rung 3 real / rung 4 harness-level / rung 5 NOT claimed / wire reach UNKNOWN.
+Still owed: the witness verdict on replay #1438 (author-only until then).
