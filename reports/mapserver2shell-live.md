@@ -191,6 +191,20 @@ fault is glibc detecting the corrupted ParamValues chunk size at cleanup:
 `msFreeCharArray(..., num_items=205)` (`crash-bt-K100.txt`). That is heap
 metadata corruption / DoS, not control-flow redirection.
 
+**Source-bound closure of the dispatch chain (wake 4).** After the append
+loop `msWMSDispatch` passes the corrupted arrays first to
+`msWMSLoadGetMapParams` (`mapwms.cpp:6012-6019`, reached via
+`isContentDependentLegend`) and then to `msWMSGetContentDependentLegend`
+(`mapwms.cpp:6041-6044`), which forwards them unchanged to
+`msWMSLegendGraphic` (`mapwms.cpp:5572-5597`, call at :5588). Reading those
+loops on the pinned vulnerable source (`mapwms.cpp:1023-1337` in
+`msWMSLoadGetMapParams`, :5275-5312 in `msWMSLegendGraphic`), `names[i]` and
+`values[i]` are used only for `strcasecmp`/`strcmp`, `msStringSplit`,
+`atoi`/`atof`/`strtol`, `strlen` and `msStrdup`; neither array element is
+passed as a printf-style format string or as a function-pointer value on this
+request path. This closes the format-string and call-through alternatives at
+source level; the grade is unchanged.
+
 **No wire address leak.** The HTTP response on the crashing path is only
 `Content-Type: text/xml; charset=UTF-8` (41 bytes, no body); the normal path
 is a static `LayerNotDefined` XML document. Pointer-looking hex appears only
