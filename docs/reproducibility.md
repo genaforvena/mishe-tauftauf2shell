@@ -1850,3 +1850,51 @@ overflow.` with RC=3 and no ASan. The hardened driver sets
 `LY_TEST_SEARCHDIR` to its `modules/` directory because that pin loads
 internal YANG modules from files rather than embedding them. No listener or
 external contact at replay time.
+
+## Admitted lane limbs — 2026-11-22 22:0x–22:1xZ tacplus W128 and vrpn W11
+
+- **Tacplus2Shell W128** (commit `3f7a3b1`,
+  [report](../reports/tacplus2shell-status.md) W128). The runner needs the
+  plain trees from the admission recipe: vulnerable `929671c` in `src-plain/`
+  and fixed `d8493e0` in `src-fixed-plain/`, each built with
+  `./configure --debug --minimum tac_plus-ng mavis && make -j4` (exact logs and
+  pins in `lab/frontier/tacplus2shell/PROVENANCE.md`). Then from the repo root
+  run `bash lab/frontier/tacplus2shell/harness/run_overflow.sh`; it starts
+  plant-owned 127.0.0.1 listeners under gdb via `run_gdb2.py` and
+  `harness/gdb-overflow.cmd`, with `wire4.py --skips 8,9,10,11,12` on the
+  seq-1 trigger of the reused seq-3 prime. Expect 9 PASS / 0 FAIL twice;
+  normalized hashes `f76aeb15…` (vulnerable), `6499bb53…` (fixed, 57-byte
+  rejection) and `664aa0ce…` (no prime, 18-byte reply) in
+  `harness/overflow-r1.txt` / `-r2.txt`. Live readback: `cmdline` at
+  `0x7fffffffdca0`, the prime's `5a 5a 5a 5a 63 6d 64 3d` bytes at
+  `cmdline+28` onward, and both saved RBP and saved RIP equal
+  `0x3d646d635a5a5a5a` before the fault at `author.c:92`. The 104-byte VLA is
+  followed by live locals, so the epilogue is never reached with intact loop
+  state: no pointer, marker, command or rung 5. Raw `harness/overflow-*.log`
+  and `-*.stdout` are gitignored; runner, gdb command and expected logs are
+  committed.
+- **Vrpn2Shell W11** (commit `ed4094f`, [report](../reports/vrpn2shell.md)
+  W11). Build both pinned trees from `lab/frontier/vrpn2shell/src/vrpn-07.36`
+  with `cmake -S <src> -B <out> -DCMAKE_BUILD_TYPE=Debug
+  -DCMAKE_CXX_FLAGS='-fno-stack-protector -fno-pie -falign-functions=256'
+  -DCMAKE_EXE_LINKER_FLAGS='-no-pie'`; vulnerable binary SHA-256
+  `1cd5404e1b45358091e37aaa53cbf95891c370644173a5ecb6f4e6137b917fcd`, fixed
+  `20d2da0907bcd01c69447bad0999cbea6ffa1799bcdbed23a79fc287a0e92359`. Patch
+  a copy with `python3 lab/frontier/vrpn2shell/install_marker_patch.py
+  <out>/server_src/vrpn_server <out>/server_src/vrpn_server-marked --target
+  0x413d00 --ret 0x413dda --cave 0x40be40` (patched SHA-256 `45b33f20…`,
+  patched fixed `a8f2ebf4…`); the source is unmodified. Run
+  `BIN=<out>/server_src/vrpn_server-marked bash
+  lab/frontier/vrpn2shell/probe-func-dos.sh <outdir> <port> 136` on fresh
+  loopback ports: SENDER and TYPE vulnerable rows stay ALIVE with
+  `VRPN2SHELL_MARKER` on server stderr; index 4, the patched fixed binary and
+  the unpatched vulnerable binary (exit 139) are the controls.
+  `lab/frontier/vrpn2shell/out-w11-final-gdb/gdb.log` shows the stub entered
+  by the corrupted return; `out-w11-marked-*` and `out-w11-marked2-*` are
+  preserved wrong-stub negatives. Target/return/cave addresses are
+  build-specific — `probe-marker-frame.sh` and `probe-marker-stub.sh`
+  remeasure them. Source pins and configure logs are in
+  `lab/frontier/vrpn2shell/PROVENANCE.md`; raw logs for reported rows are
+  committed, two superseded stub iterations and two configure logs are not.
+  The marker bytes come from the binary patch, not wire input, and stock
+  builds stay at witness W115's rung 3; no command or rung 5 is claimed.

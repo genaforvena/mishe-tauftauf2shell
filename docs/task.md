@@ -6483,3 +6483,43 @@ LYB input is local shared-memory/pipe IPC, so no unauthenticated network
 consumer accepts LYB. Grade: rung 3 + real-parser rung 4, no rung 5, no
 consumer, pointer control, marker or command, no witness verdict.
 [Report](../reports/libyang2shell.md).
+
+## 2026-11-22 22:0x–22:1xZ limbs — live saved control words and a lab marker
+
+Tacplus W128 (commit `3f7a3b1`, `reports/tacplus2shell-status.md` W128) closes
+the gate W127 left open with one bounded experiment on the pinned plain
+`929671c` daemon under gdb. The W127 prime is unchanged; five size-table
+entries set to 255 make the validator stop at index 8, so `eval_args()` walks
+1084 bytes to the surviving `cmd=ZZZZ` pattern at body offset 1112 and copies
+251 bytes into the 104-byte stack VLA `cmdline` (`author.c:69`). Live readback
+shows the chosen `5a 5a 5a 5a 63 6d 64 3d` bytes at `cmdline+28` and both
+saved RBP and saved RIP equal to `0x3d646d635a5a5a5a`; the process then faults
+at `author.c:92` with clobbered loop state. The structural ceiling is measured:
+live locals occupy `cmdline+160` through `+232` and the saved control words
+sit at `+240`/`+248`, so this single copy cannot reach the epilogue with
+intact loop state. No failed-prime pattern at body offset 857 survives the
+trigger; offset 1112 remains the reliable location. Fixed `d8493e0` never
+enters `eval_args()` (57-byte reply) and the no-prime control copies no
+control words (18-byte reply); `run_overflow.sh` gives 9 PASS / 0 FAIL twice.
+Grade: rung 4 extended to attacker-chosen bytes over saved control words at
+live-daemon scope. Rung 5 stays UNKNOWN — no epilogue, pointer-derived write,
+ROP chain, marker or command, and the advisory's `system()`/root chain is
+still unpublished claim text.
+
+Vrpn W11 (commit `ed4094f`, `reports/vrpn2shell.md` W11) tests whether the
+wire-selected saved-RIP NUL can reach a valid function entry instead of
+unmapped memory. Both pinned trees rebuild unmodified with `Debug`,
+`-fno-stack-protector -fno-pie -falign-functions=256` and `-no-pie`: saved RIP
+is array offset 136 and `0x413d00` is a 256-byte-aligned function entry.
+`install_marker_patch.py` installs a 91-byte `.text` stub that distinguishes
+normal calls by their in-range `[rsp]` return address and, on the corrupted
+return, calls `write(2, "VRPN2SHELL_MARKER\n", 18)` before resuming. The
+debugger-free matrix gives ALIVE plus marker on both SENDER and TYPE index
+136, and ALIVE without marker on the patched fixed build and the short index;
+unpatched vulnerable builds die with exit 139. Two earlier stub versions
+routed normal or low out-of-range returns to the marker and are preserved as
+negatives; only the two-sided range test matches the controls. This is a
+rung-4 mechanic in a lab-patched build only: the marker bytes are installed
+by the patch, not supplied by the wire, no attacker-chosen command exists,
+stock builds remain at witness W115's rung 3, and the claim is author-only
+pending a witness replay with its own request. No rung 5.
