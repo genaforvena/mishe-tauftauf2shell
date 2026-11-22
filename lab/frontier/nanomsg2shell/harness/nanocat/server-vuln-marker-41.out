@@ -1,0 +1,14 @@
+src/build-dbg/libnanomsg.so.6(nn_queue_push+0x2f)[0x745a6e398da7]
+src/build-dbg/libnanomsg.so.6(nn_ctx_raise+0x2f)[0x745a6e390e6d]
+src/build-dbg/libnanomsg.so.6(nn_fsm_raise+0x65)[0x745a6e3915c7]
+src/build-dbg/libnanomsg.so.6(+0x44b9f)[0x745a6e3bdb9f]
+src/build-dbg/libnanomsg.so.6(+0x44961)[0x745a6e3bd961]
+src/build-dbg/libnanomsg.so.6(nn_fsm_feed+0x4a)[0x745a6e390fdb]
+src/build-dbg/libnanomsg.so.6(nn_fsm_event_process+0x6b)[0x745a6e390f8e]
+src/build-dbg/libnanomsg.so.6(nn_ctx_leave+0x60)[0x745a6e390d15]
+src/build-dbg/libnanomsg.so.6(+0x1d367)[0x745a6e396367]
+src/build-dbg/libnanomsg.so.6(+0x2060f)[0x745a6e39960f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x745a6e09cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x745a6e129e8c]
+Assertion failed: item->next == NN_QUEUE_NOTINQUEUE (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/utils/queue.c:47)
+timeout: the monitored command dumped core

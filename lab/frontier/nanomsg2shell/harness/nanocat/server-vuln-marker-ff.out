@@ -1,0 +1,10 @@
+src/build-dbg/libnanomsg.so.6(+0x3bc6a)[0x7945f8896c6a]
+src/build-dbg/libnanomsg.so.6(nn_fsm_feed+0x4a)[0x7945f8872fdb]
+src/build-dbg/libnanomsg.so.6(nn_fsm_event_process+0x6b)[0x7945f8872f8e]
+src/build-dbg/libnanomsg.so.6(nn_ctx_leave+0x60)[0x7945f8872d15]
+src/build-dbg/libnanomsg.so.6(+0x1d3dc)[0x7945f88783dc]
+src/build-dbg/libnanomsg.so.6(+0x2060f)[0x7945f887b60f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x7945f869cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x7945f8729e8c]
+Unexpected source: state=5 source=2573 action=7 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/aws.c:316)
+timeout: the monitored command dumped core

@@ -1,0 +1,1 @@
+mode=q n=2 reply_len=71 reply_head=b'HTTP/1.1 400 Unsupported WebSocket Version\r\nSec-WebSocket-Version: QQ\r\n'

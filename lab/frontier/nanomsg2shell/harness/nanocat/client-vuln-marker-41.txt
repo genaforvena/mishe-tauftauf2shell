@@ -1,0 +1,1 @@
+mode=marker:41 n=489 reply_len=558 reply_head=b'HTTP/1.1 400 Unsupported WebSocket Version\r\nSec-WebSocket-Version: QQQQQQQQQQQQQQQQQQQQQQQQQQQQQ'

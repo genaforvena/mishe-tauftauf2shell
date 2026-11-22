@@ -39,12 +39,18 @@ mind (73rd engine route). Charter
   normalized evidence hashes matched from their traces. Details in
   `reports/frontier-nanomsg.md` W107. Author replay is not the acceptance;
   this witness replay is.
-- Not claimed after witness: rung 5 (no command execution), a shipped-daemon
-  path beyond the standalone listener, or clean takeover (the ff case still
-  ends in a downstream FSM assertion). The +516 offset is build-specific.
-- Next: bounded reach test for a shipped nanomsg process (e.g. `nanocat`
-  binding `ws://`) against the same sink; re-measure its build offset before
-  any claim. Evidence files and hashes:
+- W108 (2026-11-22 04:16Z) — shipped-process reach: `nanocat` from both pinned
+  trees binds `ws://127.0.0.1:28765` directly. On 1.2.2 the short control is
+  clean, `marker:41` gives a 558-byte reply plus `queue.c:47`, `marker:ff` gives
+  558 bytes plus `aws.c:316`; fixed 1.2.3 gives 71 bytes under both markers.
+  Gdb inside `nanocat` reads `DONE_OFFSET=516` and `item.next` equal to the
+  chosen 8 bytes for both markers. Reproduce with
+  `bash harness/nanocat_reach.sh`; raw traces in `harness/nanocat/`.
+- Not claimed after W108: rung 5 (no command execution), clean takeover (the
+  ff case still ends in a downstream FSM assertion), or that every nanomsg
+  application is reachable — nanocat is a shipped CLI tool. The +516 offset is
+  build-specific and must be re-measured for a release-flag build.
+- Original harness evidence files and hashes:
   `lab/frontier/nanomsg2shell/harness/EVIDENCE_HASHES.txt`.
 
 This file is updated by the target mind; the author report is not independent

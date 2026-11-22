@@ -267,3 +267,43 @@ driven by raw wire input, chosen bytes at a measured offset in a live
 pointer-bearing FSM event, vulnerable / fixed / short-input controls all
 reproduced by an independent party. Still not claimed: command execution, a
 shipped-daemon-side path, or clean takeover. No rung 5.
+
+## W108 (2026-11-22 04:16Z) — shipped-process reach on loopback
+
+The witness noted that W106/W107 stop at a standalone harness listener. This
+wake tested the smallest step past that boundary that the pinned trees allow:
+`nanocat`, the command-line tool shipped inside both pinned nanomsg source
+trees, bound directly to `ws://127.0.0.1:28765` with `nn_bind` inside a real
+process (`src/build-dbg/nanocat --rep --bind ws://127.0.0.1:28765`, linked to
+the same `src/build-dbg/libnanomsg.so.6` as `ws_server_dbg`). No harness source
+was involved in the listener: `harness/wire_pattern.py` only sends the raw
+HTTP Upgrade request.
+
+Observed on that shipped process, pinned v1.2.2 `-g -O0` build
+(`harness/nanocat/`):
+
+- Short-header control (2 × `Q`): 71-byte reply, server silent.
+- `marker:41`: 558-byte reply; server aborts at `queue.c:47`
+  `Assertion failed: item->next == NN_QUEUE_NOTINQUEUE`.
+- `marker:ff`: 558-byte reply; assertion bypassed, server reaches
+  `aws.c:316 Unexpected source: state=5 source=2573 action=7`.
+- Fixed 1.2.3 `nanocat` (`src/build-fixed-clang/nanocat`) under either marker:
+  71-byte hardcoded version-13 reply, no assertion.
+- Gdb readback inside the running `nanocat` process, breakpoint at the
+  post-`sprintf` line: `VERSION_LEN=489`, `RESPONSE_CODE=4`,
+  `DONE_OFFSET=516`, `item.next = 0x4141414141414141` for `marker:41` and
+  `0xffffffffffffffff` for `marker:ff`. The +516 offset is unchanged because
+  the overflowed struct lives in the same library binary; it was nevertheless
+  measured in the shipped process, not assumed.
+
+Reproduce with `bash harness/nanocat_reach.sh` from
+`lab/frontier/nanomsg2shell`; raw client, server and gdb traces are in
+`harness/nanocat/`. Those traces contain ASLR addresses and PIDs and are
+deliberately outside `EVIDENCE_HASHES.txt`.
+
+This upgrades the rung-4 host from a purpose-built harness binary to a process
+built and shipped by the project itself, still on a raw wire request. It is
+not rung 5: no command execution or side effect beyond the process's own
+assertion/FSM failure, and the build remains a debug `-g -O0` build whose
++516 offset must be re-measured for any release-flag build. `nanocat` is a
+shipped CLI tool, not proof that every nanomsg-using daemon is reachable.
