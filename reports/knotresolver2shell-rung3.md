@@ -9,9 +9,13 @@ attacker-chosen bytes reach a chosen argument value at a `gnutls_deinit()`
 dereference on connection teardown, with two distinct marker values. An
 independent witness replayed the committed harness (verdict #1138,
 20:52–20:56Z) and returned **rung 4 ESTABLISHED** at that labeled scope.
-Rung 5 (remote command execution) was demonstrated in wake 12 at a labeled
-ASLR-off, gdb-parent, jemalloc/debug-build scope (author-observed, witness
-replay OWED); ASLR-on/stock exploitability remains UNKNOWN.
+Rung 5 (remote command execution) was reached in wake 12 at a labeled
+ASLR-off, gdb-parent, jemalloc/debug-build scope (author-observed). Witness
+W114 (verdict #1376) returned **MIXED**: chosen-RIP/chosen-argument dispatch
+is ESTABLISHED on its own pinned builds and both benign commands reproduce at
+`argoff 0x300`; the harness default `0x2f0` command limb fails because
+`gnutls_deinit` zeroes the string before dispatch. ASLR-on/stock stays
+UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -493,8 +497,8 @@ Full backtrace for `+0x100`:
 
 ## Rung-5 attempt: chosen RIP and benign command execution (wake 12, 2026-11-22 ~09:5xZ)
 
-Author-observed; independent witness replay is owed before rung 5 is
-ESTABLISHED. No grade change on the rung-4 verdict #1138.
+Author-observed; independent witness replay W114 returned **MIXED** (section
+below). No grade change on the rung-4 verdict #1138.
 
 ### Reverse-engineered dispatch
 `readelf -Ws` works on `/lib/x86_64-linux-gnu/libgnutls.so.30.37.1` (`nm -D`
@@ -517,9 +521,18 @@ therefore gives both RIP and first-argument control.
   `+0xb8` = command-string address, `+0x110` = chosen call target,
   `+0x174=1`, `+0x2d8=0`. `cfg.max_datagram_size = 1500` is required so F6
   stays one frame; without it the write never reaches the OOB copy.
+- Exact command-run invocations (both marker runs):
+  `python3 harness/r5_dispatch.py 8855 0x7ffff68aa000 0x7ffff7458750 0x300 'touch /tmp/knot-r5-established'`
+  and the same with `'touch /tmp/knot-r5-second'`. `argv[4]=0x300` is the
+  command-string offset (`+0xb8 = slot1+0x300`) and `argv[5]` the command.
+  The built-in `argoff` default `0x2F0` is for the no-command RIP traces
+  only: W114's hardware watchpoint showed `gnutls_deinit` zeroes
+  `slot1+0x2F0` before dispatch, leaving an empty string at that offset.
 - `harness/r5-trace.gdb` at F6 verified the bytes:
   `extptrs[0]=0x7ffff68aa020`, `+0xb8=0x7ffff68aa2f0`,
   `+0x110=0x4242424242424242`, `+0x174=1`, `+0x2d8=0`.
+- This RIP trace used the default `0x2F0` and no command string; the
+  `0x12345678`/`0x4242424242424242` results above are not command runs.
 
 ### Observations
 - Non-canonical `0x4242424242424242`: SIGSEGV at libgnutls `0x7350c`, the
@@ -555,8 +568,45 @@ addresses come from this host's deterministic layout, not from an information
 leak over the wire; none was demonstrated. gdb only ran the inferior and
 observed it in the execution runs: no breakpoints, register writes or forced
 calls. The call and its argument came from the overwritten cleanup pointer
-and the F6 bytes. Independent witness replay is owed before rung 5 can be
-called ESTABLISHED.
+and the F6 bytes. Witness W114 independently confirmed the dispatch and the
+command side effect at `argoff 0x300`, but refuted the harness-default
+`0x2F0` as a command-string location; rung 5 is therefore not
+witness-ESTABLISHED verbatim at the default invocation, and no
+ASLR-on/stock claim is made.
+
+## Witness W114 rung-5 replay — MIXED (verdict #1376, 2026-11-22 10:14Z)
+
+A fresh witness replayed the claim in its own `/tmp/w114-knot` tree with its
+own pinned 6.4.0/6.4.1 jemalloc/debug builds (3/3 pins OK, build-tree
+`quic_conn.c` SHA `3d992921…` identical to this lab's tree) on ports
+18855/18854, with no repository edits.
+
+- **ESTABLISHED on the witness binary**: oracle `buf=0x7ffff68a8800`,
+  `slot1=0x7ffff68aa000`, `tls_native_handle==slot1`; `objdump` shows
+  `call *0x110(%rbx)` at libgnutls `0x7350c` with the RDI load at `0x73500`.
+  Chosen RIP `0x12345678` faults with `rdi=slot1+0x2f0`, frame 3
+  `gnutls_deinit`, `quic_conn.c:884`; `system=0x7ffff7458750`.
+- **CONTRADICTED at the harness default `argoff 0x2f0`**: the F6 bytes were
+  correct at the breakpoint (fake `+0xb8=slot1+0x2f0`, `+0x110=system`,
+  command intact), but a hardware watchpoint caught `gnutls_deinit` zeroing
+  `slot1+0x2f0` before dispatch. At `system` entry RDI still pointed there
+  but the string was empty: vfork detach, no marker, for both commands.
+- **ESTABLISHED at corrected `argoff 0x300`** (inside the same 813-byte
+  span): `system` received the intact string and created two distinct
+  markers `/tmp/w114-r5-o300` and `/tmp/w114-r5-second300` with vfork
+  detach. Safe control (chosen RIP `0x12345678`, same bytes at `0x300`)
+  SIGSEGV with chosen RDI and no marker; the witness's fixed 6.4.1:18854
+  with the same wires completed with no marker.
+
+Resolution of the MIXED verdict: the author's two marker runs used explicit
+`argv[4]=0x300` (recorded above as `+0xb8 = slot1+0x300`); the `0x2f0`
+value belongs to the no-command RIP trace only. W114 therefore refutes using
+the harness default `0x2f0` for command strings, not the reported command
+runs. Command execution is witness-observed at `0x300` only. The witness's
+fault backtrace has one fewer libgnutls frame than the author's (frame 2 vs
+frame 3 `gnutls_deinit`), a likely cleanup-order difference preserved as an
+open detail. No stock or ASLR-on rung-5 claim is contradicted or
+established; the host sysctl was untouched on both sides.
 
 ## Boundaries
 

