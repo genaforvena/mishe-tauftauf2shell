@@ -1,0 +1,46 @@
+=================================================================
+==2771469==ERROR: AddressSanitizer: global-buffer-overflow on address 0x5fda587e730a at pc 0x5fda58243308 bp 0x7ffe16a00cb0 sp 0x7ffe16a00470
+WRITE of size 64 at 0x5fda587e730a thread T0
+    #0 0x5fda58243307 in __asan_memcpy (/tmp/soes-clean-w14/lab/frontier/soes2shell/build/pdo_overflow_asan_3.2.0+0xc3307) (BuildId: 581bd7bce6ff69eaab72950553dab1788c2d1f16)
+    #1 0x5fda58279aa5 in ESC_read /tmp/soes-clean-w14/lab/frontier/soes2shell/harness/pdo_overflow.c:63:4
+    #2 0x5fda58279a44 in RXPDO_update /tmp/soes-clean-w14/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:172:7
+    #3 0x5fda58279d7f in main /tmp/soes-clean-w14/lab/frontier/soes2shell/harness/pdo_overflow.c:120:14
+    #4 0x777499a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x777499a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5fda581ac324 in _start (/tmp/soes-clean-w14/lab/frontier/soes2shell/build/pdo_overflow_asan_3.2.0+0x2c324) (BuildId: 581bd7bce6ff69eaab72950553dab1788c2d1f16)
+
+0x5fda587e730a is located 54 bytes before global variable 'SMmap2' defined in '/tmp/soes-clean-w14/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:18' (0x5fda587e7340) of size 48
+0x5fda587e730a is located 0 bytes after global variable 'rxpdo' defined in '/tmp/soes-clean-w14/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:26' (0x5fda587e72e0) of size 42
+SUMMARY: AddressSanitizer: global-buffer-overflow (/tmp/soes-clean-w14/lab/frontier/soes2shell/build/pdo_overflow_asan_3.2.0+0xc3307) (BuildId: 581bd7bce6ff69eaab72950553dab1788c2d1f16) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x5fda587e7080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fda587e7100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fda587e7180: 00 00 00 00 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x5fda587e7200: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 02 f9 f9
+  0x5fda587e7280: f9 f9 f9 f9 00 00 00 f9 f9 f9 f9 f9 00 00 00 00
+=>0x5fda587e7300: 00[02]f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 f9 f9
+  0x5fda587e7380: f9 f9 f9 f9 04 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x5fda587e7400: 00 00 00 00 00 00 00 00 f9 f9 f9 f9 00 00 00 00
+  0x5fda587e7480: f9 f9 f9 f9 00 00 00 00 f9 f9 f9 f9 00 00 00 00
+  0x5fda587e7500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fda587e7580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2771469==ABORTING

@@ -1,0 +1,5 @@
+build: 3.2.0 (hash-pinned vulnerable source)
+mode: short-read
+undersized length 8, declared 64, 64-byte object: frame_len=8
+  -> xoe=00 read0=e7 read8=e7 read63=e7 canary_nonzero=0 oct0=00
+verdict: read_payload_e7=1 read_body_e7=1 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00

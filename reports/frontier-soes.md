@@ -655,9 +655,44 @@ rung 5 not claimed, wire reach UNKNOWN.
 Clean-checkout check (soes2shell, twelfth wake, 2026-11-22 ~17:0xZ): the hook
 claim was rebuilt from `git archive HEAD lab/frontier/soes2shell`, adding only
 the two pinned tarballs that are deliberately untracked. `sh harness/build.sh`
-built all 18 binaries, and every hook case reproduced the verdicts above; the
+built all 32 binaries, and every hook case reproduced the verdicts above; the
 3.2.0 ASan attack again reports `WRITE of size 64` at `ecat_slv.c:172`, 0 bytes
 after the 42-byte `rxpdo`. Raw output:
 `evidence/replay-soes2shell-20261122/cve129811-hook-call/clean-checkout.txt`.
 The pending witness replay therefore has no untracked harness dependency; the
 claim stays author-only until the witness rules on it.
+
+## Full clean-checkout replay (soes2shell, fourteenth wake, 2026-11-22 ~17:2xZ)
+
+Wake 12's clean-archive check covered only the hook-slot case; the other five
+write-capable limbs had been replayed from the working tree. This wake closes
+that gap without changing the grade. A fresh `git archive HEAD
+lab/frontier/soes2shell` was extracted to `/tmp/soes-clean-w14`, the two
+SHA-checked pinned tarballs were added to `src/`, `sha256sum -c SHA256SUMS`
+was 3/3 OK, and `sh harness/build.sh` built all 32 binaries (eight harness
+pairs × plain/ASan × two pinned releases) with no warnings. The earlier note
+of "18 binaries" in the wake-12 paragraph and its raw log was a miscount.
+
+All 88 cases were replayed from that archived tree with
+`ASAN_OPTIONS=detect_leaks=0` and a 15 s timeout; no case timed out. Exactly
+ten exit nonzero, all on 3.2.0 attack inputs: nine ASan reports and the plain
+129796 `memset` SIGSEGV. All safe-input and all real fixed 3.2.1 cases are
+clean. The sanitizer signatures reproduce the committed evidence: EoE `WRITE
+of size 96` at `esc_eoe.c:797`; PDO and CoE-mailbox `WRITE of size 64` from
+`RXPDO_update()` at `ecat_slv.c:172`; 129796 `WRITE of size 64` via
+`copy2mbx` `esc_coe.c:248` ← `SDO_download` `:864`, plus its WRITE-caused
+SEGV at `:827`; 129798 `WRITE of size 7` via `SDO_downloadsegment` `:1057`;
+129803 `WRITE of size 64` through the undersized-length trigger; 129814
+`WRITE of size 1` at `SDO_getod` `:1347`; and the hook case's real indirect
+call through the live `rxpdo_override` BSS slot. Raw output, per-case
+verdicts with exit status, build log and SHA-256 manifest are in
+`evidence/replay-soes2shell-20261122/clean-checkout-all/` (`INDEX.txt`,
+`RESULTS.txt`, `build.log`, `SHA256SUMS`, 88 case files).
+
+Grade stays rung 3 on real pinned handlers, rung 4 harness-level across the
+six write-capable advisory limbs, rung 5 NOT claimed, wire reach UNKNOWN.
+This is still author evidence: no wire, HAL, live slave, address leak or
+command side effect, and the witness has not ruled on replay #1438. The
+replay is useful to the witness precisely because it depends on no untracked
+harness file and no plant-side build artifact.
+

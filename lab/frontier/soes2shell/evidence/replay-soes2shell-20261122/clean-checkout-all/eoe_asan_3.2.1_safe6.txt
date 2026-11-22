@@ -1,0 +1,1 @@
+canary_changed=0 canary_offset=-687194767424 first_bytes=4343434343434343

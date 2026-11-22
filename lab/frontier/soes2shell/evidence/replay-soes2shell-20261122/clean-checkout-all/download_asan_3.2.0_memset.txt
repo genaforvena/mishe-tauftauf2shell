@@ -1,0 +1,17 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2771844==ERROR: AddressSanitizer: SEGV on unknown address 0x5603298f2880 (pc 0x76dd3d58984a bp 0x7ffddae62a70 sp 0x7ffddae62238 T0)
+==2771844==The signal is caused by a WRITE memory access.
+    #0 0x76dd3d58984a in __memset_avx2_unaligned_erms string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:328
+    #1 0x5603293423ae in __asan_memset (/tmp/soes-clean-w14/lab/frontier/soes2shell/build/coe_download_asan_3.2.0+0xc33ae) (BuildId: 358178be198e5864cf1bfe926cb046312ebb5c80)
+    #2 0x56032937ef8c in SDO_download /tmp/soes-clean-w14/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:827:19
+    #3 0x56032937a11d in ESC_coeprocess /tmp/soes-clean-w14/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1501:16
+    #4 0x5603293794ce in deliver /tmp/soes-clean-w14/lab/frontier/soes2shell/harness/coe_download_overflow.c:90:4
+    #5 0x560329378ea2 in main /tmp/soes-clean-w14/lab/frontier/soes2shell/harness/coe_download_overflow.c:125:7
+    #6 0x76dd3d42a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #7 0x76dd3d42a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #8 0x5603292ab314 in _start (/tmp/soes-clean-w14/lab/frontier/soes2shell/build/coe_download_asan_3.2.0+0x2c314) (BuildId: 358178be198e5864cf1bfe926cb046312ebb5c80)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:328 in __memset_avx2_unaligned_erms
+==2771844==ABORTING

@@ -1,0 +1,69 @@
+SOES2SHELL — full six-limb clean-checkout replay (wake 14, 2026-11-22 ~17:2xZ)
+
+Purpose: wake 12 proved only the hook-slot case (cve129811-hook-call) from a
+clean archive; the other five write-capable advisory limbs had been replayed
+only in the working tree. This directory closes that verifiability gap. No
+grade changes and no new claim: every case here is a replay of a committed
+harness against the same hash-pinned sources.
+
+CLEAN TREE
+  git archive HEAD lab/frontier/soes2shell extracted under /tmp/soes-clean-w14.
+  Only the two pinned tarballs were added to src/ (deliberately untracked);
+  both were copied from the committed source area and extracted there.
+  sha256sum -c SHA256SUMS in the archived src/: 3/3 OK.
+  sh harness/build.sh: rc=0, 32 binaries (eight harness pairs, plain + ASan
+  for each of 3.2.0 and 3.2.1). No compiler warnings in the captured log.
+  Raw transcript: build.log. clang 18.1.3.
+
+RUNS
+  88 cases, each with ASAN_OPTIONS=detect_leaks=0 and a 15 s timeout. Raw
+  stdout+stderr per case in *.txt; one-line verdict / sanitizer summary with
+  exit status for every case in RESULTS.txt. No case timed out. Exactly ten
+  cases exit nonzero, all 3.2.0 attacks: nine ASan reports above plus the
+  plain-build 129796 memset SIGSEGV (rc=-11). Every safe-input case and every
+  real fixed 3.2.1 case exits rc=0 with no sanitizer report.
+
+SIGNATURES REPRODUCED (3.2.0 attack cases)
+  eoe_asan_3.2.0_vuln7: heap-buffer-overflow WRITE of size 96, EOE_receive_fragment
+    at soes/esc_eoe.c:797 via ESC_eoeprocess at :1027.
+  eoe_plain_3.2.0_vuln7: canary_changed=64 at payload+608; pool_next matches
+    the chosen marker. Six-fragment safe input changes no canary.
+  pdo_asan_3.2.0_attack and mailbox_asan_3.2.0_attack: global-buffer-overflow
+    WRITE of size 64 from RXPDO_update at soes/ecat_slv.c:172.
+  pdo_plain_3.2.0_attack: ptr_overwrite=1 chosen_write=1; clamp control and
+    all 3.2.1 cases zero.
+  mailbox_plain_3.2.0_attack: real ESC_coeprocess -> mapping install ->
+    mailbox_size_overflow=1 ptr_overwrite=1 chosen_write=1; safe input zero.
+  download_asan_3.2.0_memset: ASan SEGV caused by a WRITE in SDO_download at
+    soes/esc_coe.c:827 via ESC_coeprocess at :1501 — same signature as the
+    canonical cve129796/asan_3.2.0-memset.txt (this limb faults rather than
+    producing a bounds report; do not relabel it as an ASan OOB).
+  download_asan_3.2.0_copy-global: global-buffer-overflow WRITE of size 64,
+    copy2mbx esc_coe.c:248 via SDO_download :864 via ESC_coeprocess :1501.
+  segment_asan_3.2.0_overflow-global: WRITE of size 7, copy2mbx :248 via
+    SDO_downloadsegment :1057 via ESC_coeprocess :1507; plain overflow writes
+    canary_nonzero=9, and fill0=5a / 0x00 vary the past-object bytes.
+  shortframe_asan_3.2.0_short-write: WRITE of size 64, copy2mbx :248 via
+    SDO_download :864; plain short-write sets 56 canary bytes to e7.
+  terminator_asan_3.2.0_long: WRITE of size 1, SDO_getod esc_coe.c:1347 via
+    ESC_coeprocess :1524, one byte past the 384-byte MBX global; plain build
+    observes byte_at_MBX_end=41 ('A' from the OD name).
+  hook_plain_3.2.0_default / _b: hook_written=1 indirect_call=1 with MARKER_A
+    (hits=1) / MARKER_B; real fixed 3.2.1 and safe inputs give zero.
+
+CONTROLS
+  Every attack case has a short/safe-input control and a real hash-pinned
+  3.2.1 control. All safe and all 3.2.1 cases are clean on the measured
+  verdicts and sanitizer reports. No new limb, no new primitive.
+
+GRADE
+  Unchanged: rung 3 on real pinned handlers, rung 4 harness-level across the
+  six write-capable advisory limbs including the live BSS hook-slot indirect
+  call; rung 5 NOT claimed, wire reach UNKNOWN. All inputs are in-process MBX
+  or frame seeds; no wire, no HAL, no live slave, no address leak, no command
+  side effect. This is author evidence until the witness rules on replay #1438.
+
+Preserved negatives: 129803 short-read is a past-frame READ into an in-bounds
+object, not a second write; the 129796 memset limb is a WRITE-caused SEGV, not
+a bounds report; stock lan9252demo strings are ATYPE_RO, so writable flexible
+OD objects remain a modeled precondition.

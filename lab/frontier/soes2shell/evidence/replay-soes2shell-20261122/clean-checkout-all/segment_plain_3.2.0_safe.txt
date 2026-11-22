@@ -1,0 +1,10 @@
+build: 3.2.0 (hash-pinned vulnerable source)
+mode: safe
+fill0: 41
+initial download (declared full size, no payload): index=2005 sub=1 xoe=00 segmented=50 data_off=148 fragsleft=0
+segment 1 (7 bytes): index=2005 sub=1 xoe=00 segmented=50 data_off=155 fragsleft=7
+segment 2 (7 bytes): index=2005 sub=1 xoe=00 segmented=50 data_off=162 fragsleft=14
+segment 3 (7 bytes, last): index=2005 sub=1 xoe=00 segmented=00 data_off=162 fragsleft=0
+seg[0..31]: 00 00 00 00 41 42 43 44 45 46 47 42 43 44 45 46 47 48 43 44 45 46 47 48 49 00 00 00 00 00 00 00
+canary[0..15]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+verdict: canary_nonzero=0

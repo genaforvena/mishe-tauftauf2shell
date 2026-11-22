@@ -1,0 +1,5 @@
+sizeOfPDO=64 nmappings=2 MAX_RXPDO_SIZE=42
+ESC_SM2_sml=0
+before: SMmap2[0].obj=0x5877991cc0c0 target0=00
+after:  SMmap2[0].obj=0x5877991cc0c0 target0=00 target_last=00
+verdict: ptr_overwrite=0 chosen_write=0

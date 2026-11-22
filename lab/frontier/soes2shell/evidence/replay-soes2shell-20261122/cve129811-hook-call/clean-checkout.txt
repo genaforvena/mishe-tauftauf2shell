@@ -7,7 +7,7 @@ soes-v3.2.1.tar.gz: OK
 fix-v3.2.0-v3.2.1.diff: OK
 
 Step 2: sh harness/build.sh from the archived tree
-build rc=0, binaries built: 18
+build rc=0, binaries built: 32 (eight harness pairs × plain/ASan × two releases); earlier "18" was a miscount
 
 Step 3: hook cases (exact observed stdout)
 --- ./build/coe_hook_call_3.2.0 

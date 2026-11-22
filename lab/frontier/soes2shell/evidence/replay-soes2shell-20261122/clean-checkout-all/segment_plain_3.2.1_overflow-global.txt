@@ -1,0 +1,9 @@
+build: 3.2.1 (hash-pinned fixed source)
+mode: overflow-global
+fill0: 41
+initial download (declared full size, no payload): index=2004 sub=1 xoe=00 segmented=50 data_off=308 fragsleft=4
+segment 1 (7 bytes): index=2004 sub=1 xoe=00 segmented=50 data_off=315 fragsleft=11
+segment 2 (7 bytes): index=2004 sub=1 xoe=00 segmented=50 data_off=315 fragsleft=11
+segment 3 (7 bytes, last): index=2004 sub=1 xoe=00 segmented=50 data_off=315 fragsleft=11
+seg[0..31]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+verdict: standalone global target (ASan reports bounds)

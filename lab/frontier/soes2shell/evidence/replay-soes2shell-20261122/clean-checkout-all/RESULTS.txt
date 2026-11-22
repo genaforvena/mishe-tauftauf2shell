@@ -1,0 +1,88 @@
+download_asan_3.2.0_copy-global            rc=1   ==2810145==ERROR: AddressSanitizer: global-buffer-overflow on address 0x583577039c48 at pc 0x583576a8a2f8 bp 0x7ffd6184fe80 sp 0x7ffd6184f640
+download_asan_3.2.0_copy-safe              rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=5a
+download_asan_3.2.0_copy                   rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=56 str_tail=00 oct_tail=5a
+download_asan_3.2.0_memset-safe            rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=5a oct_tail=00
+download_asan_3.2.0_memset                 rc=1   ==2810733==ERROR: AddressSanitizer: SEGV on unknown address 0x5bcc5e3bd880 (pc 0x79d37538984a bp 0x7ffef1897550 sp 0x7ffef1896d18 T0)
+download_asan_3.2.1_copy-global            rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00
+download_asan_3.2.1_copy-safe              rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=5a
+download_asan_3.2.1_copy                   rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00
+download_asan_3.2.1_memset-safe            rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=5a oct_tail=00
+download_asan_3.2.1_memset                 rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00
+download_plain_3.2.0_copy-global           rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00
+download_plain_3.2.0_copy-safe             rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=5a
+download_plain_3.2.0_copy                  rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=56 str_tail=00 oct_tail=5a
+download_plain_3.2.0_memset-safe           rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=5a oct_tail=00
+download_plain_3.2.0_memset                rc=-11 (no verdict line)
+download_plain_3.2.1_copy-global           rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00
+download_plain_3.2.1_copy-safe             rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=5a
+download_plain_3.2.1_copy                  rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00
+download_plain_3.2.1_memset-safe           rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=5a oct_tail=00
+download_plain_3.2.1_memset                rc=0   verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00
+eoe_asan_3.2.0_pool7                       rc=0   pool_next=0x55d85adf4d00 marker=0x55d85adf4d00 match=1
+eoe_asan_3.2.0_safe6                       rc=0   canary_changed=0 canary_offset=-687194767424 first_bytes=4343434343434343
+eoe_asan_3.2.0_vuln7                       rc=1   ==2811238==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5160000002d0 at pc 0x5646072a60d8 bp 0x7ffd331a0aa0 sp 0x7ffd331a0260
+eoe_asan_3.2.1_pool7                       rc=0   pool_next=(nil) marker=0x635245e54d00 match=0
+eoe_asan_3.2.1_safe6                       rc=0   canary_changed=0 canary_offset=-687194767424 first_bytes=4343434343434343
+eoe_asan_3.2.1_vuln7                       rc=0   (no verdict line)
+eoe_plain_3.2.0_pool7                      rc=0   pool_next=0x617492d6b090 marker=0x617492d6b090 match=1
+eoe_plain_3.2.0_safe6                      rc=0   canary_changed=0 canary_offset=608 first_bytes=4343434343434343
+eoe_plain_3.2.0_vuln7                      rc=0   canary_changed=64 canary_offset=608 first_bytes=4747474747474747
+eoe_plain_3.2.1_pool7                      rc=0   pool_next=(nil) marker=0x56c8aa12d090 match=0
+eoe_plain_3.2.1_safe6                      rc=0   canary_changed=0 canary_offset=608 first_bytes=4343434343434343
+eoe_plain_3.2.1_vuln7                      rc=0   (no verdict line)
+hook_asan_3.2.0_attack                     rc=1   ==2811726==ERROR: AddressSanitizer: global-buffer-overflow on address 0x6320b1ea37ca at pc 0x6320b18f3308 bp 0x7fff229ed830 sp 0x7fff229ecff0
+hook_asan_3.2.0_safe                       rc=0   verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+hook_asan_3.2.1_attack                     rc=0   verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+hook_asan_3.2.1_safe                       rc=0   verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+hook_plain_3.2.0_b                         rc=0   MARKER_B: varied byte selected a different called function | verdict: hook_written=1 indirect_call=1 marker_a=0 marker_b=1
+hook_plain_3.2.0_default                   rc=0   MARKER_A: real RXPDO_update called the chosen rxpdo_override | verdict: hook_written=1 indirect_call=1 marker_a=1 marker_b=0
+hook_plain_3.2.0_safe                      rc=0   verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+hook_plain_3.2.1_b                         rc=0   verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+hook_plain_3.2.1_default                   rc=0   verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+hook_plain_3.2.1_safe                      rc=0   verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0
+mailbox_asan_3.2.0_attack                  rc=1   ==2812031==ERROR: AddressSanitizer: global-buffer-overflow on address 0x62c466f3580a at pc 0x62c466985308 bp 0x7fffffa28cd0 sp 0x7fffffa28490
+mailbox_asan_3.2.0_safe                    rc=0   verdict: mailbox_size_overflow=0 ptr_overwrite=0 chosen_write=0
+mailbox_asan_3.2.1_attack                  rc=0   verdict: mailbox_size_overflow=0 ptr_overwrite=0 chosen_write=0
+mailbox_asan_3.2.1_safe                    rc=0   verdict: mailbox_size_overflow=0 ptr_overwrite=0 chosen_write=0
+mailbox_plain_3.2.0_attack                 rc=0   verdict: mailbox_size_overflow=1 ptr_overwrite=1 chosen_write=1
+mailbox_plain_3.2.0_safe                   rc=0   verdict: mailbox_size_overflow=0 ptr_overwrite=0 chosen_write=0
+mailbox_plain_3.2.1_attack                 rc=0   verdict: mailbox_size_overflow=0 ptr_overwrite=0 chosen_write=0
+mailbox_plain_3.2.1_safe                   rc=0   verdict: mailbox_size_overflow=0 ptr_overwrite=0 chosen_write=0
+pdo_asan_3.2.0_attack                      rc=1   ==2812618==ERROR: AddressSanitizer: global-buffer-overflow on address 0x62b290d1330a at pc 0x62b29076f308 bp 0x7ffe38762050 sp 0x7ffe38761810
+pdo_asan_3.2.0_safe                        rc=0   verdict: ptr_overwrite=0 chosen_write=0
+pdo_asan_3.2.1_attack                      rc=0   verdict: ptr_overwrite=0 chosen_write=0
+pdo_plain_3.2.0_attack                     rc=0   verdict: ptr_overwrite=1 chosen_write=1
+pdo_plain_3.2.0_safe                       rc=0   verdict: ptr_overwrite=0 chosen_write=0
+pdo_plain_3.2.1_attack                     rc=0   verdict: ptr_overwrite=0 chosen_write=0
+segment_asan_3.2.0_overflow-global         rc=1   ==2813208==ERROR: AddressSanitizer: global-buffer-overflow on address 0x5c931afbd910 at pc 0x5c931aa0e308 bp 0x7ffca3361640 sp 0x7ffca3360e00
+segment_asan_3.2.0_overflow                rc=0   verdict: canary_nonzero=9
+segment_asan_3.2.0_safe                    rc=0   verdict: canary_nonzero=0
+segment_asan_3.2.1_overflow-global         rc=0   verdict: standalone global target (ASan reports bounds)
+segment_asan_3.2.1_overflow                rc=0   verdict: canary_nonzero=0
+segment_asan_3.2.1_safe                    rc=0   verdict: canary_nonzero=0
+segment_plain_3.2.0_overflow-global        rc=0   verdict: standalone global target (ASan reports bounds)
+segment_plain_3.2.0_overflow               rc=0   verdict: canary_nonzero=9
+segment_plain_3.2.0_safe                   rc=0   verdict: canary_nonzero=0
+segment_plain_3.2.1_overflow-global        rc=0   verdict: standalone global target (ASan reports bounds)
+segment_plain_3.2.1_overflow               rc=0   verdict: canary_nonzero=0
+segment_plain_3.2.1_safe                   rc=0   verdict: canary_nonzero=0
+shortframe_asan_3.2.0_short-read           rc=0   verdict: read_payload_e7=1 read_body_e7=1 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_asan_3.2.0_short-safe           rc=0   verdict: read_payload_e7=1 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_asan_3.2.0_short-write          rc=1   ==2813733==ERROR: AddressSanitizer: global-buffer-overflow on address 0x57f5172a8728 at pc 0x57f516cf92f8 bp 0x7ffc01720240 sp 0x7ffc0171fa00
+shortframe_asan_3.2.1_short-read           rc=0   verdict: read_payload_e7=0 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_asan_3.2.1_short-safe           rc=0   verdict: read_payload_e7=1 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_asan_3.2.1_short-write          rc=0   verdict: read_payload_e7=0 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_plain_3.2.0_short-read          rc=0   verdict: read_payload_e7=1 read_body_e7=1 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_plain_3.2.0_short-safe          rc=0   verdict: read_payload_e7=1 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_plain_3.2.0_short-write         rc=0   verdict: read_payload_e7=0 read_body_e7=0 canary_clean=1 write_canary_bytes=56 write_canary0=e7 write_canary55=e7
+shortframe_plain_3.2.1_short-read          rc=0   verdict: read_payload_e7=0 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_plain_3.2.1_short-safe          rc=0   verdict: read_payload_e7=1 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+shortframe_plain_3.2.1_short-write         rc=0   verdict: read_payload_e7=0 read_body_e7=0 canary_clean=1 write_canary_bytes=0 write_canary0=00 write_canary55=00
+terminator_asan_3.2.0_long                 rc=1   ==2814269==ERROR: AddressSanitizer: global-buffer-overflow on address 0x583449cdc680 at pc 0x58344976e261 bp 0x7ffe03fbb420 sp 0x7ffe03fbb418
+terminator_asan_3.2.0_safe                 rc=0   verdict: safe-name run completed; write evidence is the ASan report above, if any
+terminator_asan_3.2.1_long                 rc=0   verdict: long-name run completed; write evidence is the ASan report above, if any
+terminator_asan_3.2.1_safe                 rc=0   verdict: safe-name run completed; write evidence is the ASan report above, if any
+terminator_plain_3.2.0_long                rc=0   byte_at_MBX_end=41 | verdict: long-name terminator written at MBX+384 (observed byte 41)
+terminator_plain_3.2.0_safe                rc=0   byte_at_MBX_end=00 | verdict: safe-name terminator not written at MBX+384 (observed byte 00)
+terminator_plain_3.2.1_long                rc=0   byte_at_MBX_end=00 | verdict: long-name terminator not written at MBX+384 (observed byte 00)
+terminator_plain_3.2.1_safe                rc=0   byte_at_MBX_end=00 | verdict: safe-name terminator not written at MBX+384 (observed byte 00)

@@ -1,0 +1,6 @@
+build: 3.2.0 (hash-pinned vulnerable source)
+mode: copy-global
+octet-string 64 bytes into standalone 8-byte global: len=78 xoe(before)=00
+  -> xoe=00 str0=00 oct0=00 canary_str=0 canary_oct=0
+canary_oct[0..15]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+verdict: str_canary_bytes=0 oct_canary_bytes=0 str_tail=00 oct_tail=00

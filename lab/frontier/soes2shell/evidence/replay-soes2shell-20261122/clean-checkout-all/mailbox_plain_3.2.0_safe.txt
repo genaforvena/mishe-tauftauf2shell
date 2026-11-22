@@ -1,0 +1,17 @@
+deliver: idx=1c12 sub=0 cmd=30 len=18 type=3 run=1 al=02
+  -> xoe=00 ms0=0 ms1=0
+after 1C12 CA: si=1 map1=2000 map2=0000
+deliver: idx=2000 sub=0 cmd=2e len=14 type=3 run=1 al=02
+  -> xoe=00 ms0=1 ms1=0
+deliver: idx=2000 sub=1 cmd=22 len=14 type=3 run=1 al=02
+  -> xoe=00 ms0=1 ms1=0
+deliver: idx=2001 sub=0 cmd=2e len=14 type=3 run=1 al=02
+  -> xoe=00 ms0=1 ms1=1
+deliver: idx=2001 sub=1 cmd=22 len=14 type=3 run=1 al=02
+  -> xoe=00 ms0=1 ms1=1
+after 2000/2001: ms0=1 val0=700001ff ms1=1 val1=700001ff
+mailbox -> sizeOfPDO=32 nmappings=1 MAX_RXPDO_SIZE=42
+SMmap2[0].obj after sizeOfPDO=0x61b42b50fd40 (od_7000[1]=0x61b42b50fd40)
+diag: &g_fake_obj=0x61b42b5103f8 fake.data=0x61b42b510420 fake.bitlen=128 map0.offset=0 process0=4d process56=f8
+after RXPDO_update: SMmap2[0].obj=0x61b42b50fd40 target0=00 target_last=00
+verdict: mailbox_size_overflow=0 ptr_overwrite=0 chosen_write=0
