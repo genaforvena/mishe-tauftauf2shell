@@ -5,9 +5,10 @@ witness-ESTABLISHED on the real 1.3.9d daemon over a loopback FTP wire, with
 paired safe-length and fixed-version controls. A 1030-code-point key redirects
 the static `substr` pointer in `rewrite_parse_map_str()` to a chosen `.rodata`
 string; the real parser consumes it and the session survives. Rung 4 is
-conditioned on ASLR disabled (`setarch -R`), an authenticated `STOR` and a
-non-default `mod_rewrite` config; ASLR-on and pre-login reach are UNKNOWN.
-Rung 5 NOT attempted. ADMITTED 2026-11-22 ~00:1xZ by the operator under
+conditioned on ASLR disabled (`setarch -R`) and a non-default `mod_rewrite`
+config. The proftpd2shell mind later observed the same marker pre-login under
+a `%m USER` condition (witness replay pending) and a SIGSEGV/no-marker negative
+with ASLR on. Rung 5 NOT attempted. ADMITTED 2026-11-22 ~00:1xZ by the operator under
 standing approval #6 as `proftpd2shell` (window 72; route 67).**
 
 ## Verified ground truth
@@ -164,11 +165,15 @@ marker is a readable `.rodata` string, not executed code.
 
 - Rung 5 NOT established and NOT attempted: the marker is a string consumed by
   a parser, not command execution. No wire-to-shell path is claimed.
-- ASLR-on reach is UNKNOWN: the partial overwrite preserves the high 32 bits,
-  so an address leak or a brute-force repeat would be needed. No such leak was
-  observed or sought this wake.
-- Unauthenticated pre-login rewriting (advisory claim) is UNKNOWN; the lab
-  config uses `RewriteCondition %m STOR` after login.
+- The fixed-address client4 payload under ASLR-on was observed at 00:24Z to
+  kill the session child (SIGSEGV in `pr_vsnprintfl`/`pr_log_vwritefile`) with
+  no marker line — a concrete negative for that payload. Other ASLR-on routes
+  (leak, brute force, partial low-byte redirect) remain UNKNOWN.
+- Unauthenticated pre-login rewriting is no longer wholly UNKNOWN: the
+  `rewrite_fixup()` PRE_CMD hook runs on `USER`, and a `%m USER` config variant
+  reproduced the marker pre-login at 00:26Z under ASLR-off (PR:N). This mind's
+  observation only; witness replay pending. The default lab config still uses
+  `%m STOR` after login.
 - The fixed 1.3.9e control was pinned and hash-checked but not built locally
   by frontier this wake; witness W99 independently built it and observed
   rejection (see Witness replay). The 200-byte safe-length control is the
@@ -200,3 +205,44 @@ Fixed-version control supplied by W99: own v1.3.9e ASan build rejects the
 2048-byte key with RewriteLog `length (2048 bytes) exceeds maximum allowed
 length (1024 bytes), rejecting`, 550 reply, session alive, no fresh ASan file.
 Rung 5 stays UNKNOWN/not attempted; ASLR-on and pre-login reach remain UNKNOWN.
+
+## proftpd2shell mind — replay, ASLR-on negative, pre-login extension (2026-11-22 00:23–00:26Z)
+
+All three observations are on this plant's pinned 1.3.9d `proftpd-instr`
+binary over 127.0.0.1, with raw output kept under
+`lab/frontier/proftpd2shell/wire/evidence/` and not committed.
+
+**Replay (00:23Z).** `CLIENT=client4.py bash run-marker.sh ../proftpd-instr`
+reproduced W99 with no drift: `KEY_CODEPOINTS=1030 KEY_BYTES=1032`,
+`NOOP=200 NOOP command successful`, `PWD=257`, `FRONTIER_INSTR
+keylen=1032 ucs4strlen=1030`, and RewriteLog
+`rewrite_parse_map_str(): parsing 'NOOP command successful'`. Evidence:
+`w99-replay-proftpd2shell-20261122T0023Z.txt`.
+
+**ASLR-on negative (00:24Z).** Same client, same config, binary launched
+without `setarch -R`: `LOGIN_OK`, then `STOR_SUBSTR_FAIL EOFError`,
+`NOOP_FAIL EOFError`, `PWD_FAIL BrokenPipeError`. Server log:
+`FRONTIER_INSTR keylen=1032 ... rule=90d883f3d45d0000` (PIE base changed),
+stack trace through `pr_vsnprintfl`/`pr_log_vwritefile`, `ProFTPD terminating
+(signal 11)`; RewriteLog stops after `maps subst'd pattern: 'STOR'` with no
+marker line. This is a concrete failure of the fixed-address payload under
+ASLR, not proof that all ASLR-on routes fail. Evidence:
+`aslr-on-client4-20261122T0025Z.txt`, `marker-server-aslr-on-20261122T0025Z.out`,
+`rewrite-marker-aslr-on-20261122T0025Z.log`.
+
+**Unauthenticated pre-login trigger (00:26Z).** Source check: `rewrite_fixup`
+is registered `PRE_CMD, C_ANY` (`mod_rewrite.c:3158`), so it runs on `USER`
+before login. Config variant `wire/etc/proftpd-prelogin.conf` uses
+`RewriteCondition %m USER` (same map and rule, ports 21884–21890, separate
+logs); client `wire/client5-prelogin.py` sends the same 1030-code-point key as
+the `USER` argument and sends no `PASS`. Observed with `setarch x86_64 -R`:
+banner, `USER` → `501 Login incorrect`, `NOOP` → `200 NOOP command
+successful`, `PWD` → `530 Please login with USER and PASS` (correct pre-login
+state); the session stayed up. RewriteLog shows the condition evaluated on
+`USER` (`condition met`), the map invoked with the 1032-byte key, then
+`rewrite_parse_map_str(): parsing 'NOOP command successful'`; no signal 11.
+Evidence: `prelogin-marker-20261122T0027Z.txt`, runner `wire/run-prelogin.sh`.
+This is rung 4 at a PR:N condition and a non-default `%m USER` config,
+ASLR-off; it is this mind's observation only and has NOT been independently
+witness-replayed. A `.rodata` string pointer is still not command execution:
+rung 5 remains unclaimed, and ASLR-on pre-login reach remains UNKNOWN.
