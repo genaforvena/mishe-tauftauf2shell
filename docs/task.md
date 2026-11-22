@@ -5428,12 +5428,14 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   3.2.1 cases clean. `INDEX.txt`, `RESULTS.txt`, `build.log` and `SHA256SUMS`
   are under
   `lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/clean-checkout-all/`;
-  The witness dispositioned the replay request (#1466, the full-replay
+  The witness first dispositioned the replay request (#1466, the full-replay
   follow-up to #1438) DEFERRED at W116 (17:47-17:51Z), reason "author-only
   clean-archive replay, grade unchanged"; W102 and W105 had already
-  independently ESTABLISHED the grade-changing claims, so the hook-call and
-  clean-checkout addenda stay author-measured. No grade change and wire
-  reach UNKNOWN.
+  independently ESTABLISHED the grade-changing claims. Witness W124 (#1653)
+  later replayed all 88 cases from its own clean-archive clang build and
+  ESTABLISHED them at exactly the labeled harness scope (0 rc and 0
+  sink-signature mismatches, ten nonzero exits all 3.2.0 attacks), no
+  refutation or NIT. No grade change and wire reach UNKNOWN.
 - **Soes root loopback L2 probe (commit `5b925ab`,
   `reports/frontier-soes.md`)**: with passwordless `sudo -n`, a throwaway
   Python probe opened two `AF_PACKET`/`SOCK_RAW` sockets bound to `lo` and a
@@ -5444,8 +5446,25 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   is available here. It opens no live SOES input path — the pinned trees ship
   no socket-backed ESC or HAL and `ESC_readmbx` only calls the linked HAL, so
   an authored software ESC stays a synthetic consumer under `docs/rce.md` §1.
-  Grade unchanged; wire reach UNKNOWN; witness replay #1438 deferred at W116
-  (#1466, grade-unchanged full replay).
+  Grade unchanged; wire reach UNKNOWN. Witness W116 first deferred the
+  full-replay follow-up #1438 as #1466; W124 later replayed it independently
+  and ESTABLISHED all 88 cases at the labeled rung-3/rung-4 harness scope.
+- **Soes W124 full-suite witness replay (DM #1653, `reports/frontier-soes.md`)**:
+  from `git archive HEAD lab/frontier/soes2shell` into `/tmp/w124-soes` plus
+  the two local SHA-pinned tarballs (pin check 3/3 OK), the witness rebuilt
+  all 32 binaries with its own clang invocation of `harness/build.sh` (rc 0,
+  16 s) and reconstructed the 88 invocations from harness argv parsing and
+  `RESULTS.txt` labels, since no run-all script is committed. Because raw
+  case hashes embed PID, address and path, comparison used rc plus stable
+  ASan/sink lines: 88 cases, 0 rc mismatches, 0 signature mismatches, ten
+  nonzero exits all 3.2.0 attacks (nine ASan reports and the plain 129796
+  memset SIGSEGV rc -11), all safe and real fixed 3.2.1 cases clean. Sink
+  lines matched `INDEX.txt` (EoE `esc_eoe.c:797`; PDO/mailbox/hook
+  `ecat_slv.c:172`; copy-global `esc_coe.c:248` ← `:864` ← `:1501`; segment
+  `:1057`; short-frame `:864`; terminator `:1347`) and the rung-4 verdicts
+  matched. Verdict ESTABLISHED at the labeled scope, no refutation or NIT,
+  no repo or host changes; grade stands rung 3 real / rung 4 harness-level /
+  rung 5 NOT claimed / wire reach UNKNOWN.
 - **Pgpool2Shell W7 adjacent lane, CVE-2026-92869 (commit `dd0cb2d`,
   `reports/pgpool2shell-config-w7.md`)**: under operator DM #1462 ("do NOT
   retire; mine an adjacent same-target lane"), the 4.7.2→4.7.3 fix adds

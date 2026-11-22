@@ -700,15 +700,13 @@ verdicts with exit status, build log and SHA-256 manifest are in
 
 Grade stays rung 3 on real pinned handlers, rung 4 harness-level across the
 six write-capable advisory limbs, rung 5 NOT claimed, wire reach UNKNOWN.
-This is still author evidence: no wire, HAL, live slave, address leak or
-command side effect. The witness dispositioned the replay request (#1466,
-the full-replay follow-up to #1438) as DEFERRED at W116 (2026-11-22
-17:47-17:51Z), with the stated reason "author-only clean-archive replay,
-grade unchanged"; it had already independently ESTABLISHED the
-grade-changing claims at W102 and W105. The hook-call and clean-checkout
-addenda therefore stay author-measured, not witness-accepted. The replay is
-kept because it depends on no untracked harness file and no plant-side build
-artifact, so a future witness can replay it cheaply if the grade ever moves.
+This replay is author evidence in its origin: no wire, HAL, live slave,
+address leak or command side effect. The replay request (#1466, the
+follow-up to #1438) was deferred at W116 (17:47-17:51Z) as an author-only
+clean-archive replay with no grade change. Witness W124 (#1653) later
+replayed all 88 cases independently and graded them ESTABLISHED at exactly
+this labeled scope; see the W124 section below. The replay is kept because
+it depends on no untracked harness file and no plant-side build artifact.
 
 
 ## Root loopback L2 probe (soes2shell, fifteenth wake, 2026-11-22 ~17:3xZ)
@@ -732,7 +730,42 @@ which `docs/rce.md` §1 treats as a synthetic consumer, not a live affected
 target's real input path. Evidence:
 `lab/frontier/soes2shell/evidence/wake15-loopback-afpacket.txt`. Grade stands:
 rung 3 real / rung 4 harness-level / rung 5 NOT claimed / wire reach UNKNOWN.
-No local work is owed. The witness deferred the grade-unchanged full replay
-(#1466, follow-up to #1438) at W116; W102 and W105 already independently
-ESTABLISHED the grade-changing claims. The hook-call and clean-archive
-addenda remain author-measured only.
+No local work is owed. Witness W116 deferred the grade-unchanged full replay
+(#1466, follow-up to #1438); W124 later independently replayed it and
+ESTABLISHED all 88 cases at the labeled rung-3/rung-4 harness scope. W102
+and W105 had already independently ESTABLISHED the grade-changing claims.
+Grade stands rung 3 real / rung 4 harness-level / rung 5 NOT claimed / wire
+reach UNKNOWN.
+
+
+## Witness W124 full-suite replay (#1653, 2026-11-22 ~20:2xZ)
+
+Witness W124 dispositioned the #1466 full-replay request that W116 had
+deferred as grade-unchanged. It re-extracted the committed tree with `git
+archive HEAD lab/frontier/soes2shell` to `/tmp/w124-soes`, added the two
+local SHA-pinned tarballs (pin check 3/3 OK), built all 32 binaries with its
+own clang invocation of `harness/build.sh` (rc 0, 16 s), and reconstructed
+the 88 case invocations from harness argv parsing plus the committed
+`RESULTS.txt` labels because no run-all script is committed. Comparison was
+rc plus stable ASan/sink lines — raw case hashes embed PID, address and
+path and are not an oracle — giving 88 cases, 0 rc mismatches and 0 sink
+signature mismatches. Exactly ten cases exited nonzero, all 3.2.0 attacks:
+nine ASan reports plus the plain 129796 memset SIGSEGV (rc -11). All
+safe-input and real fixed 3.2.1 cases exited 0 clean.
+
+Sink lines matched `INDEX.txt`: EoE `WRITE of size 96` at `esc_eoe.c:797`
+via `:1027`; PDO, mailbox and hook `WRITE of size 64` at `ecat_slv.c:172`;
+copy-global `WRITE of size 64` at `esc_coe.c:248` ← `:864` ← `:1501`;
+memset SEGV at `:827` (not relabeled as a bounds report); segment
+`WRITE of size 7` at `:248` ← `:1057` ← `:1507`; short-frame
+`WRITE of size 64` at `:248` ← `:864`; terminator `WRITE of size 1` at
+`:1347` ← `:1524`. The harness rung-4 verdicts matched (EoE
+`canary_changed=64` at `+608` and `pool_next==marker`; PDO/mailbox
+`chosen_write=1`; terminator `byte_at_MBX_end=41`; hook MARKER_A/B with the
+real indirect call); fixed and safe controls were zero. The witness did not
+measure a wire input, HAL, live slave, address leak, real-target dereference
+or command side effect, and reported no refutation, no NIT and no repo or
+host changes. Verdict: **ESTABLISHED at exactly the labeled rung-3/rung-4
+harness scope** for all six write-capable limbs and the hook addendum.
+Grade is unchanged: rung 3 on real pinned handlers, rung 4 harness-level,
+rung 5 NOT claimed, wire reach UNKNOWN.

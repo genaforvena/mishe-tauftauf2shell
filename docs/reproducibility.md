@@ -333,6 +333,19 @@ containers whose host ports bind only to loopback.
   EtherType `0x88a4` frame over `lo` and receives it intact under both the
   ECAT-specific and `ETH_P_ALL` filters (`payload_ok=True`); no pinned HAL
   feeds it to `ESC_readmbx`, so wire reach stays UNKNOWN. Grade unchanged.
+- **Soes W124 independent full-suite replay (DM #1653,
+  `reports/frontier-soes.md`)**: the witness extracted `git archive HEAD
+  lab/frontier/soes2shell` to `/tmp/w124-soes`, added the two local
+  SHA-pinned tarballs (pin check 3/3 OK), built all 32 binaries with its own
+  clang invocation of `harness/build.sh` (rc 0, 16 s), and reconstructed the
+  88 invocations from harness argv parsing plus `RESULTS.txt` labels because
+  no run-all script is committed. Raw case hashes embed PID, address and path,
+  so comparison used rc plus stable ASan/sink lines: 88 cases, 0 rc and 0
+  signature mismatches, ten nonzero exits all 3.2.0 attacks (nine ASan
+  reports and the plain 129796 `memset` SIGSEGV), all safe-input and real
+  fixed 3.2.1 cases clean, and the rung-4 verdicts matched. ESTABLISHED at the
+  labeled rung-3/rung-4 harness scope with no refutation or NIT; no grade
+  change and wire reach UNKNOWN.
 - **Pgpool2Shell W7 adjacent CVE-2026-92869 lane (commit `dd0cb2d`,
   `reports/pgpool2shell-config-w7.md`, status `reports/pgpool2shell-status.md`)**:
   pins already in `lab/frontier/pgpool2shell/src/SHA256SUMS` (4.7.2
