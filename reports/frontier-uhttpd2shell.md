@@ -143,6 +143,10 @@ with gcc 13.3.0 and clang 18.1.3: **30 PASS / 0 FAIL**, `rc=0`.
   (vulnerable) and `70e38912...` (fixed), rechecked with `sha256sum -c` on
   every run; full hashes and the libubox pin are in `harness/PROVENANCE.md`
   and `harness/pins/PIN_HASHES.txt`.
+- A clean `git archive d6afa99` replay of `lab/frontier/uhttpd2shell/` with no
+  source clones and no network was also 30 PASS / 0 FAIL, with a byte-identical
+  `round2-pass.txt` sha256 `c3b2b9d19d6950090c4efdbc2b5e483881f1d23b297beea41343c6dc5622fc66`.
+  The committed pinned `ubus.c` blobs make the harness self-contained.
 
 ## 4. Rung-4 feasibility and honest ceiling
 
