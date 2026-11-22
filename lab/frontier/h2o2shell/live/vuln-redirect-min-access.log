@@ -1,0 +1,2 @@
+[lib/handler/redirect.c] in request:127.0.0.1:17894/safe:failed to resolve internal redirect url for dest://:/safe
+[lib/handler/redirect.c] in request:127.0.0.1:17894/zz:failed to resolve internal redirect url for dest://:/zz

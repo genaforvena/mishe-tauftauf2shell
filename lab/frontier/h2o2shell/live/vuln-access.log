@@ -1,0 +1,1 @@
+127.0.0.1 - - [22/Nov/2026:18:35:46 +0000] "GET /testpath HTTP/1.1" 502 18 "[lib/core/proxy.c] in request:127.0.0.1:17890/testpath:connection refused"
