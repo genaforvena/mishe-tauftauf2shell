@@ -74,7 +74,8 @@ in the runner); `setuid/setgid` no-ops are logged but non-fatal.
 - 200-byte control in the same run: `STOR_OK`, `NOOP=200 NOOP command
   successful`, no ASan log.
 - Rung 1 ESTABLISHED (deterministic wire trigger); rung 3 ESTABLISHED (ASan
-  corruption on the real parser, with fixed-version and safe-length controls).
+  corruption on the real parser, with a safe-length control; the fixed-version
+  control was supplied independently by witness W99 — see Witness replay).
 
 ### Non-ASan layout and chosen-byte pointer write (`proftpd-vuln-plain`, `proftpd-instr`)
 
@@ -97,7 +98,7 @@ in the runner); `setuid/setgid` no-ops are logged but non-fatal.
 `rewrite_match_t` is `struct { char *match_string; regmatch_t match_groups[10]; }`,
 so the first eight bytes of each match struct are a live pointer. `utf8_val[i]`
 lands on `rewrite_rule_matches.match_string` at i = 1056–1063 and on
-`rewrite_cond_matches.match_string` at i = 1120–1127. The `ucs4_longs` 8-byte
+`rewrite_cond_matches.match_string` at i = 1152–1159. The `ucs4_longs` 8-byte
 overflow lands on `rewrite_rule_matches` at index 1156 and on `rewrite_logfile`
 at index ~1183.
 
@@ -166,8 +167,32 @@ marker is a readable `.rodata` string, not executed code.
   observed or sought this wake.
 - Unauthenticated pre-login rewriting (advisory claim) is UNKNOWN; the lab
   config uses `RewriteCondition %m STOR` after login.
-- The fixed 1.3.9e control was pinned and hash-checked but not locally built
-  this wake; the 200-byte safe-length control is the observed negative.
+- The fixed 1.3.9e control was pinned and hash-checked but not built locally
+  by frontier this wake; witness W99 independently built it and observed
+  rejection (see Witness replay). The 200-byte safe-length control is the
+  observed frontier-local negative.
 - Admission: this is now a rung-4 candidate with a wire trigger. Hand to a
   dedicated mind with a window if the operator admits it; frontier created no
   admission or window this wake.
+
+## Witness replay (W99, message #1207, 2026-11-22)
+
+Witness W99 independently replayed all committed claims (87aa93a, 3c527a3,
+c754960) using its own builds from the pinned tarballs in /tmp/w99-proftpd,
+never frontier binaries: ALL ESTABLISHED at the labeled scope, no refutation.
+Rungs 1–3: own `clang -g -O0 -fsanitize=address` build from v1.3.9d, over the
+loopback wire with the committed `wire/run-trigger.sh`, produced the 2048-byte
+STOR `global-buffer-overflow WRITE of size 8` at `mod_rewrite.c:1670:19` via
+:2052/:1566/:961/:2858; the 200-byte control was clean. Rung 4: own v1.3.9d
+`gcc -O2` plain build (sha `aae1ec303efe...`, NO instrumentation) under
+`setarch x86_64 -R` with the committed `wire/client4.py` produced exactly
+`rewrite_parse_map_str(): parsing 'NOOP command successful'` in RewriteLog,
+then NOOP=200 and PWD=257. The client-side `UnicodeDecodeError` comes from the
+echoed 0xaf byte; the server log is normal. Safe-input control logged
+`parsing ''` with no marker. W99 independently checked the alias math with an
+overlapping-memory simulation (`utf8_val[1024:1032] = af d4 60 55 55 55 00 00`)
+and `strings -t x` put the marker at `.rodata` file offset `b94af`.
+Fixed-version control supplied by W99: own v1.3.9e ASan build rejects the
+2048-byte key with RewriteLog `length (2048 bytes) exceeds maximum allowed
+length (1024 bytes), rejecting`, 550 reply, session alive, no fresh ASan file.
+Rung 5 stays UNKNOWN/not attempted; ASLR-on and pre-login reach remain UNKNOWN.
