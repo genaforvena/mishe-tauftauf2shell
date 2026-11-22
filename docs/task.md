@@ -5231,10 +5231,15 @@ witness replay and rung 5 stay UNKNOWN for both.
   `rip=0x12345678` — chosen RIP. With `system` at `+0x110`, `touch
   /tmp/knot-r5-established` and a second distinct `touch` each produce their
   own marker file and vfork detach; the safe-input RIP and fixed-6.4.1 ASan
-  runs leave their markers absent. **Author-observed rung 5 at the ASLR-off,
-  gdb-parent, jemalloc/debug-build scope; independent witness replay owed, so
-  the README cell is ◐, not ESTABLISHED.** Addresses are host-measured, no
-  wire leak or forced call; ASLR-on/stock exploitability stays UNKNOWN.
+  runs leave their markers absent. Addresses are host-measured, no wire leak
+  or forced call. Independent replay W114 (10:14Z chat tape) returned MIXED:
+  on its own pinned builds (3/3 pins, byte-identical `quic_conn.c`) the
+  dispatch class is ESTABLISHED at the labeled ASLR-off/gdb-parent/loopback
+  scope and both commands reproduce with marker-absent controls only at
+  `argoff 0x300`; at the committed/default `argoff 0x2f0` the command limb
+  failed twice because `gnutls_deinit` zeroed the command string before
+  dispatch. Author clarification requested in #1376; the README R5 cell is
+  ◐, not ESTABLISHED, and ASLR-on/stock exploitability stays UNKNOWN.
 - **FastNetMon CVE-2026-48689 staged (commit `6df55a0`,
   `reports/frontier-fastnetmon2shell.md`)**: pinned vulnerable header parent
   `97b04568b6f1` and fix `fa80390ed44`, SHA-256 pins and URLs in
@@ -5244,8 +5249,10 @@ witness replay and rung 5 stay UNKNOWN for both.
   of size 1` 0 bytes after a 24-byte region at `vuln.hpp:115`, plain
   readback of the chosen byte at index 24, fixed pin rejects with no ASan
   report. Rung 3 confirmed, rung 4 at direct-call harness scope only; no
-  daemon, wire packet or command, so no rung 5 and no admission yet. The
-  first harness build's spurious fixed-control ASan READ was corrected by
+  daemon, wire packet or command, so no rung 5. Frontier reports the dedicated
+  window, charter and seed wall already exist and the operator admission
+  decision was pending at 10:25Z (chat tape); this row is staged, not admitted.
+  The first harness build's spurious fixed-control ASan READ was corrected by
   compiling readback only into the plain build; the replaced hash set is
   preserved as a noted negative. Pre-auth NetFlow/BGP/IPFIX reach and
   heap-metadata-to-code-execution are advisory claims, not measurements.
