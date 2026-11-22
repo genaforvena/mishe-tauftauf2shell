@@ -1,0 +1,53 @@
+PRE cap=24 shift=24 chosen=0x41
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 1 at 0xADDR thread T0
+    #FRAME 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #FRAME 0xADDR in dynamic_binary_buffer_t::append_data_as_pointer(void const*, unsigned long) ../pins/dynamic_binary_buffer.vuln.hpp:115
+    #FRAME 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fastnetmon2shell/harness/poc.cpp:55
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fastnetmon2shell/harness/poc-vuln-asan+0x22c4) (BuildId: 2eb59f0c6b2ec34094e4a15ac1bb62dc79cd9275)
+
+0xADDR is located 0 bytes after 24-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #FRAME 0xADDR in operator new[](unsigned long, std::nothrow_t const&) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:104
+    #FRAME 0xADDR in dynamic_binary_buffer_t::set_maximum_buffer_size_in_bytes(long) ../pins/dynamic_binary_buffer.vuln.hpp:35
+    #FRAME 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fastnetmon2shell/harness/poc.cpp:34
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fastnetmon2shell/harness/poc-vuln-asan+0x22c4) (BuildId: 2eb59f0c6b2ec34094e4a15ac1bb62dc79cd9275)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR: fa fa 00 00 00 fa fa fa 00 00 00[fa]fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING

@@ -187,3 +187,11 @@ lab/frontier/bacnet2shell/harness/poc-global-plain
 lab/frontier/bacnet2shell/harness/poc-global-fixed
 lab/frontier/bacnet2shell/out-*/
 lab/frontier/bacnet2shell/harness/build-*.log
+
+# Fastnetmon2shell harness: local binaries and raw replay output.
+# Pin manifest, fix patch, harness sources, normalized evidence and hashes stay tracked.
+lab/frontier/fastnetmon2shell/harness/poc-vuln-asan
+lab/frontier/fastnetmon2shell/harness/poc-fixed-asan
+lab/frontier/fastnetmon2shell/harness/poc-vuln-plain
+lab/frontier/fastnetmon2shell/harness/poc-fixed-plain
+lab/frontier/fastnetmon2shell/out-*/

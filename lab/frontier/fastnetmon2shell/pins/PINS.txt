@@ -1,0 +1,36 @@
+CVE-2026-48689 — FastNetMon Community Edition, dynamic_binary_buffer_t off-by-one
+
+CLAIM SOURCES (read-only provisioning)
+  Debian tracker : https://security-tracker.debian.org/tracker/CVE-2026-48689
+  Research blog  : https://lorikeetsecurity.com/blog/fastnetmon-cve-2026-48689-dynamic-buffer-off-by-one
+  Fix PR         : https://github.com/pavel-odintsov/fastnetmon/pull/1051
+
+GIT PINS (full hashes resolved on primary sources)
+  vulnerable parent : 97b04568b6f12977aedb9682fcd9ca7ca952e84a
+                      (2026-05-24T13:19:05Z, "Reworked ExaBGP message crafting logic...")
+  fix commit        : fa80390ed446f887ca6fa39c9e5b6fff8846e822
+                      (2026-05-27T08:55:02Z, "Addressed CVE vulnerability in dynamic_buffer_t...")
+  introduced by     : 7836db2091522831c703c5a9dc3f39be9f12def5 (v1.2.6) — claim from
+                      Debian tracker notes, not independently pinned this wake
+  fixed release     : 2.0.380 (blog claim); Debian 1.2.9-0+deb13u1 backport (tracker)
+
+PINNED RAW BYTES (fetched this wake; hashes are sha256 of local files)
+  dynamic_binary_buffer.vuln.hpp
+    URL : https://raw.githubusercontent.com/pavel-odintsov/fastnetmon/97b04568b6f1/src/dynamic_binary_buffer.hpp
+    sha : f85e000c05fc52a9f3db7bc8fff16cd326754c6a0d87d884d0785666f6b5e876
+  dynamic_binary_buffer.fixed.hpp
+    URL : https://raw.githubusercontent.com/pavel-odintsov/fastnetmon/fa80390ed446/src/dynamic_binary_buffer.hpp
+    sha : f2a78368ee35c3a9706777043c62ebd9e2c2be0c44eb6ad996a7fd0604ddac5e
+  fix-48689.patch
+    URL : https://patch-diff.githubusercontent.com/raw/pavel-odintsov/fastnetmon/pull/1051.patch
+    sha : 872bd1a38d56480ea4f863557c900d9b3b609ca1c45c594e7a8491a3496196cc
+
+SOURCE-BOUND FIX (src/dynamic_binary_buffer.hpp, vulnerable :115)
+  BEFORE: if (internal_data_shift + length > maximum_internal_storage_size + 1) {
+  AFTER : if (internal_data_shift + length > internal_storage_size) {
+  Same +1 removal in append_dynamic_buffer, append_data_as_pointer,
+  append_data_as_object_ptr, memcpy_from_ptr, memcpy_from_object_ptr; the fix
+  also renames the size field and removes the two low-level memcpy helpers.
+  append_byte uses the CORRECT bound in the vulnerable pin (> max - 1), which is
+  why the harness fills the valid region with append_byte and overflows via
+  append_data_as_pointer.

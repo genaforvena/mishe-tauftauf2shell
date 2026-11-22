@@ -1,0 +1,353 @@
+From 38aae6fdac8d702d0085e19204f7a146ff03ed62 Mon Sep 17 00:00:00 2001
+From: Pavel Odintsov <pavel.odintsov@gmail.com>
+Date: Wed, 27 May 2026 11:54:07 +0300
+Subject: [PATCH] Addressed CVE vulnerability in dynamic_buffer_t,
+ CVE-2026-48689
+
+---
+ src/bgp_protocol.cpp              |  6 +--
+ src/bgp_protocol.hpp              |  8 +--
+ src/bgp_protocol_flow_spec.cpp    | 10 ++--
+ src/dynamic_binary_buffer.hpp     | 81 ++++++++-----------------------
+ src/gobgp_client/gobgp_client.cpp |  8 +--
+ 5 files changed, 37 insertions(+), 76 deletions(-)
+
+diff --git a/src/bgp_protocol.cpp b/src/bgp_protocol.cpp
+index ff7fd7a3..b890e137 100644
+--- a/src/bgp_protocol.cpp
++++ b/src/bgp_protocol.cpp
+@@ -319,7 +319,7 @@ bool decode_attribute(int len, char* value, IPv4UnicastAnnounce& unicast_ipv4_an
+ bool encode_ipv6_announces_into_bgp_mp_reach_attribute_internal(const IPv6UnicastAnnounce& ipv6_announce,
+                                                                 dynamic_binary_buffer_t& bgp_mp_reach_ipv6_attribute) {
+     // Create internal content of IPv6 MP Reach NLRI
+-    bgp_mp_reach_ipv6_attribute.set_maximum_buffer_size_in_bytes(2048);
++    bgp_mp_reach_ipv6_attribute.set_buffer_size_in_bytes(2048);
+ 
+     /*
+         +---------------------------------------------------------+
+@@ -419,7 +419,7 @@ bool encode_ipv6_announces_into_bgp_mp_reach_attribute(const IPv6UnicastAnnounce
+     bgp_attribute_multiprotocol_extensions_t bgp_attribute_multiprotocol_extensions;
+     bgp_attribute_multiprotocol_extensions.attribute_length = mp_nlri_binary_buffer.get_used_size();
+ 
+-    bgp_mp_reach_ipv6_attribute.set_maximum_buffer_size_in_bytes(2048);
++    bgp_mp_reach_ipv6_attribute.set_buffer_size_in_bytes(2048);
+ 
+     bgp_mp_reach_ipv6_attribute.append_data_as_object_ptr(&bgp_attribute_multiprotocol_extensions);
+     bgp_mp_reach_ipv6_attribute.append_dynamic_buffer(mp_nlri_binary_buffer);
+@@ -449,7 +449,7 @@ bool encode_bgp_subnet_encoding(const subnet_cidr_mask_t& prefix, dynamic_binary
+     // full_nlri_length << " bytes in buffer"
+     //         ;
+ 
+-    bool allocation_result = dynamic_binary_buffer.set_maximum_buffer_size_in_bytes(full_nlri_length);
++    bool allocation_result = dynamic_binary_buffer.set_buffer_size_in_bytes(full_nlri_length);
+ 
+     if (!allocation_result) {
+         logger << log4cpp::Priority::WARN << "Allocation error";
+diff --git a/src/bgp_protocol.hpp b/src/bgp_protocol.hpp
+index a3c57f3b..68016adc 100644
+--- a/src/bgp_protocol.hpp
++++ b/src/bgp_protocol.hpp
+@@ -574,7 +574,7 @@ class IPv4UnicastAnnounce {
+         // std::endl;
+ 
+         dynamic_binary_buffer_t origin_as_binary_array;
+-        origin_as_binary_array.set_maximum_buffer_size_in_bytes(sizeof(origin_attr));
++        origin_as_binary_array.set_buffer_size_in_bytes(sizeof(origin_attr));
+         origin_as_binary_array.append_data_as_object_ptr(&origin_attr);
+ 
+         bgp_attribute_next_hop_ipv4 next_hop_attr(next_hop);
+@@ -584,7 +584,7 @@ class IPv4UnicastAnnounce {
+         // std::endl;
+ 
+         dynamic_binary_buffer_t next_hop_as_binary_array;
+-        next_hop_as_binary_array.set_maximum_buffer_size_in_bytes(sizeof(next_hop_attr));
++        next_hop_as_binary_array.set_buffer_size_in_bytes(sizeof(next_hop_attr));
+         next_hop_as_binary_array.append_data_as_object_ptr(&next_hop_attr);
+ 
+         // Vector should be ordered in ascending order of attribute types
+@@ -610,7 +610,7 @@ class IPv4UnicastAnnounce {
+             logger << log4cpp::Priority::DEBUG << "AS_PATH attribute full length: " << as_path_attribute_full_length;
+ 
+             dynamic_binary_buffer_t as_path_as_binary_array;
+-            as_path_as_binary_array.set_maximum_buffer_size_in_bytes(as_path_attribute_full_length);
++            as_path_as_binary_array.set_buffer_size_in_bytes(as_path_attribute_full_length);
+ 
+             // Append attribute header
+             as_path_as_binary_array.append_data_as_object_ptr(&bgp_attribute_as_path);
+@@ -657,7 +657,7 @@ class IPv4UnicastAnnounce {
+             uint32_t community_attribute_full_length = sizeof(bgp_attribute_community_t) + bgp_attribute_community.attribute_length;
+ 
+             dynamic_binary_buffer_t communities_list_as_binary_array;
+-            communities_list_as_binary_array.set_maximum_buffer_size_in_bytes(community_attribute_full_length);
++            communities_list_as_binary_array.set_buffer_size_in_bytes(community_attribute_full_length);
+ 
+             communities_list_as_binary_array.append_data_as_object_ptr(&bgp_attribute_community);
+ 
+diff --git a/src/bgp_protocol_flow_spec.cpp b/src/bgp_protocol_flow_spec.cpp
+index d5628ecd..f6b91afc 100644
+--- a/src/bgp_protocol_flow_spec.cpp
++++ b/src/bgp_protocol_flow_spec.cpp
+@@ -218,7 +218,7 @@ std::vector<dynamic_binary_buffer_t> build_attributes_for_flowspec_announce(flow
+     bgp_attribute_origin origin_attr;
+ 
+     dynamic_binary_buffer_t origin_as_binary_array;
+-    origin_as_binary_array.set_maximum_buffer_size_in_bytes(sizeof(origin_attr));
++    origin_as_binary_array.set_buffer_size_in_bytes(sizeof(origin_attr));
+     origin_as_binary_array.append_data_as_object_ptr(&origin_attr);
+ 
+     dynamic_binary_buffer_t bgp_mp_ext_flow_spec_header_as_binary_array;
+@@ -287,7 +287,7 @@ std::vector<dynamic_binary_buffer_t> build_attributes_for_flowspec_announce(flow
+ 
+ // Encode flow spec elements into MP NLRI
+ bool encode_bgp_flow_spec_elements_as_mp_nlri(const flow_spec_rule_t& flow_spec_rule, dynamic_binary_buffer_t& mp_nlri_flow_spec) {
+-    mp_nlri_flow_spec.set_maximum_buffer_size_in_bytes(2048);
++    mp_nlri_flow_spec.set_buffer_size_in_bytes(2048);
+ 
+     // Encode IPv4 destination prefix
+     if (flow_spec_rule.destination_subnet_ipv4_used) {
+@@ -549,7 +549,7 @@ bool encode_bgp_flow_spec_elements_into_bgp_mp_attribute(const flow_spec_rule_t&
+     logger << log4cpp::Priority::DEBUG
+            << "BGP MP reach attribute length: " << int(bgp_attribute_multiprotocol_extensions.attribute_length);
+     // Prepare flow spec MP Extenstion attribute
+-    bgp_mp_ext_flow_spec_header_as_binary_array.set_maximum_buffer_size_in_bytes(2048);
++    bgp_mp_ext_flow_spec_header_as_binary_array.set_buffer_size_in_bytes(2048);
+ 
+     bgp_mp_ext_flow_spec_header_t bgp_mp_ext_flow_spec_header;
+     bgp_mp_ext_flow_spec_header.host_byte_order_to_network_byte_order();
+@@ -578,7 +578,7 @@ bool encode_bgp_flow_spec_action_as_extended_attribute(const bgp_flow_spec_actio
+     // We use two kind of structures here:
+     // bgp_extended_community_element_flow_spec_rate_t and bgp_extended_community_element_flow_spec_redirect_2_octet_as_4_octet_value_t_t
+     // As they have same size we use size from one of them
+-    extended_attributes_as_binary_array.set_maximum_buffer_size_in_bytes(
++    extended_attributes_as_binary_array.set_buffer_size_in_bytes(
+         sizeof(bgp_extended_community_attribute_t) + 1 * sizeof(bgp_extended_community_element_flow_spec_rate_t));
+ 
+     bgp_extended_community_attribute_t bgp_extended_community_attribute;
+@@ -628,7 +628,7 @@ bool encode_bgp_flow_spec_next_hop_as_extended_attribute(uint32_t next_hop_ipv4,
+                                                          dynamic_binary_buffer_t& extended_attributes_as_binary_array) {
+ 
+     // Allocate buffer
+-    extended_attributes_as_binary_array.set_maximum_buffer_size_in_bytes(
++    extended_attributes_as_binary_array.set_buffer_size_in_bytes(
+         sizeof(bgp_extended_community_attribute_t) + sizeof(bgp_extended_community_element_flow_spec_ipv4_next_hop_t));
+ 
+     bgp_extended_community_attribute_t bgp_extended_community_attribute;
+diff --git a/src/dynamic_binary_buffer.hpp b/src/dynamic_binary_buffer.hpp
+index b75725f2..40d50c59 100644
+--- a/src/dynamic_binary_buffer.hpp
++++ b/src/dynamic_binary_buffer.hpp
+@@ -4,28 +4,27 @@
+ 
+ class dynamic_binary_buffer_t {
+     public:
+-    dynamic_binary_buffer_t() : byte_storage(nullptr), maximum_internal_storage_size(0) {
++    dynamic_binary_buffer_t() : byte_storage(nullptr), internal_storage_size(0) {
+         // std::cout << "Default constructor called" << std::endl;
+     }
+ 
+     dynamic_binary_buffer_t(dynamic_binary_buffer_t&& source) noexcept {
+         // Just copy all field values from source and zeroify it
+-        this->internal_data_shift = source.internal_data_shift;
++        this->internal_data_shift  = source.internal_data_shift;
+         source.internal_data_shift = 0;
+ 
+-        this->byte_storage = source.byte_storage;
++        this->byte_storage  = source.byte_storage;
+         source.byte_storage = nullptr;
+ 
+-        this->maximum_internal_storage_size = source.maximum_internal_storage_size;
+-        source.maximum_internal_storage_size = 0;
++        this->internal_storage_size  = source.internal_storage_size;
++        source.internal_storage_size = 0;
+ 
+-        this->errors_occured = source.errors_occured;
++        this->errors_occured  = source.errors_occured;
+         source.errors_occured = false;
+     }
+ 
+-    // We should set maximum buffer size here.
+-    // TODO: add ability to relocate memory of we need more memory
+-    bool set_maximum_buffer_size_in_bytes(ssize_t size) {
++    // We should set buffer size here.
++    bool set_buffer_size_in_bytes(ssize_t size) {
+         // Already allocated
+         if (byte_storage) {
+             return false;
+@@ -35,7 +34,7 @@ class dynamic_binary_buffer_t {
+         byte_storage = new (std::nothrow) uint8_t[size];
+ 
+         if (byte_storage) {
+-            maximum_internal_storage_size = size;
++            internal_storage_size = size;
+             return true;
+         } else {
+             return false;
+@@ -48,7 +47,7 @@ class dynamic_binary_buffer_t {
+         if (byte_storage) {
+             delete[] byte_storage;
+             byte_storage                  = nullptr;
+-            maximum_internal_storage_size = 0;
++            internal_storage_size = 0;
+         }
+     }
+ 
+@@ -57,7 +56,7 @@ class dynamic_binary_buffer_t {
+     // perfectly:
+     // https://en.wikipedia.org/wiki/Return_value_optimization
+     dynamic_binary_buffer_t(const dynamic_binary_buffer_t& that) {
+-        this->maximum_internal_storage_size = that.maximum_internal_storage_size;
++        this->internal_storage_size = that.internal_storage_size;
+ 
+         // Copy internal pointer too! It's very important!
+         this->internal_data_shift = that.internal_data_shift;
+@@ -69,11 +68,11 @@ class dynamic_binary_buffer_t {
+         // std::endl;
+ 
+         // We are copying all memory (unused too)
+-        if (this->maximum_internal_storage_size > 0) {
++        if (this->internal_storage_size > 0) {
+             // Allocate memory for new instance
+-            this->set_maximum_buffer_size_in_bytes(this->maximum_internal_storage_size);
++            this->set_buffer_size_in_bytes(this->internal_storage_size);
+ 
+-            memcpy(this->byte_storage, that.byte_storage, that.maximum_internal_storage_size);
++            memcpy(this->byte_storage, that.byte_storage, that.internal_storage_size);
+         }
+     }
+ 
+@@ -83,8 +82,8 @@ class dynamic_binary_buffer_t {
+     // They are very similar to std::stringstream but for binary data only
+ 
+     bool append_byte(uint8_t byte_value) {
+-        // Do bounds check
+-        if (internal_data_shift > maximum_internal_storage_size - 1) {
++        // Do bounds check to ensure that we have enough space for one more byte
++        if (internal_data_shift + sizeof(uint8_t) > internal_storage_size) {
+             errors_occured = true;
+             return false;
+         }
+@@ -97,8 +96,7 @@ class dynamic_binary_buffer_t {
+     // Use reference as argument
+     bool append_dynamic_buffer(dynamic_binary_buffer_t& dynamic_binary_buffer) {
+         // In this case we are copying only used memory
+-        // TODO: Why +1?
+-        if (internal_data_shift + dynamic_binary_buffer.get_used_size() > maximum_internal_storage_size + 1) {
++        if (internal_data_shift + dynamic_binary_buffer.get_used_size() > internal_storage_size) {
+             errors_occured = true;
+             return false;
+         }
+@@ -107,7 +105,7 @@ class dynamic_binary_buffer_t {
+     }
+ 
+     bool append_data_as_pointer(const void* ptr, size_t length) {
+-        if (internal_data_shift + length > maximum_internal_storage_size + 1) {
++        if (internal_data_shift + length > internal_storage_size) {
+             errors_occured = true;
+             return false;
+         }
+@@ -118,7 +116,7 @@ class dynamic_binary_buffer_t {
+     }
+ 
+     template <typename src_type> bool append_data_as_object_ptr(src_type* ptr) {
+-        if (internal_data_shift + sizeof(src_type) > maximum_internal_storage_size + 1) {
++        if (internal_data_shift + sizeof(src_type) > internal_storage_size) {
+             errors_occured = true;
+             return false;
+         }
+@@ -129,46 +127,9 @@ class dynamic_binary_buffer_t {
+         return true;
+     }
+ 
+-    // All functions below DO NOT CHANGE internal buffer position! They are very
+-    // low level and
+-    // should be avoided!
+-
+-    // We could set arbitrary byte with this function
+-    bool set_byte(uint32_t byte_number, uint8_t byte_value) {
+-        // Do bounds check
+-        if (byte_number > maximum_internal_storage_size - 1) {
+-            errors_occured = true;
+-            return false;
+-        }
+-
+-        byte_storage[byte_number] = byte_value;
+-        return true;
+-    }
+-
+-    bool memcpy_from_ptr(uint32_t shift, const void* ptr, uint32_t length) {
+-        if (shift + length > maximum_internal_storage_size + 1) {
+-            errors_occured = true;
+-            return false;
+-        }
+-
+-        memcpy(byte_storage + shift, ptr, length);
+-        return true;
+-    }
+-
+-    // More user friendly version of previous function
+-    template <typename src_type> bool memcpy_from_object_ptr(uint32_t shift, src_type* ptr) {
+-        if (shift + sizeof(src_type) > maximum_internal_storage_size + 1) {
+-            errors_occured = true;
+-            return false;
+-        }
+-
+-        memcpy(byte_storage + shift, ptr, sizeof(src_type));
+-        return true;
+-    }
+-
+     // Return full size (with non initialized data region too)
+     uint32_t get_full_size() const {
+-        return maximum_internal_storage_size;
++        return internal_storage_size;
+     }
+ 
+     // Return only used memory region
+@@ -188,7 +149,7 @@ class dynamic_binary_buffer_t {
+     private:
+     size_t internal_data_shift            = 0;
+     uint8_t* byte_storage                 = nullptr;
+-    ssize_t maximum_internal_storage_size = 0;
++    ssize_t internal_storage_size = 0;
+     // If any errors occurred in any time when we used this buffer
+     bool errors_occured = false;
+ };
+diff --git a/src/gobgp_client/gobgp_client.cpp b/src/gobgp_client/gobgp_client.cpp
+index b2b91ed9..fea036b4 100644
+--- a/src/gobgp_client/gobgp_client.cpp
++++ b/src/gobgp_client/gobgp_client.cpp
+@@ -167,7 +167,7 @@ bool GrpcClient::AnnounceUnicastPrefixLowLevelIPv6(const IPv6UnicastAnnounce& un
+     // https://github.com/osrg/gobgp/blob/master/pkg/packet/bgp/bgp.go#L1440
+ 
+     dynamic_binary_buffer_t ipv6_nlri{};
+-    ipv6_nlri.set_maximum_buffer_size_in_bytes(256);
++    ipv6_nlri.set_buffer_size_in_bytes(256);
+ 
+     if (!encode_ipv6_prefix(unicast_ipv6_announce.get_prefix(), ipv6_nlri)) {
+         logger << log4cpp::Priority::ERROR << "Cannot encode prefix for IPv6 NLRI";
+@@ -194,7 +194,7 @@ bool GrpcClient::AnnounceUnicastPrefixLowLevelIPv6(const IPv6UnicastAnnounce& un
+     bgp_attribute_origin origin_attr;
+ 
+     dynamic_binary_buffer_t origin_as_binary_array;
+-    origin_as_binary_array.set_maximum_buffer_size_in_bytes(sizeof(origin_attr));
++    origin_as_binary_array.set_buffer_size_in_bytes(sizeof(origin_attr));
+     origin_as_binary_array.append_data_as_object_ptr(&origin_attr);
+ 
+     // It has attribute #1 and will be first in all the cases
+@@ -218,7 +218,7 @@ bool GrpcClient::AnnounceUnicastPrefixLowLevelIPv6(const IPv6UnicastAnnounce& un
+         logger << log4cpp::Priority::DEBUG << "AS_PATH attribute full length: " << as_path_attribute_full_length;
+ 
+         dynamic_binary_buffer_t as_path_as_binary_array;
+-        as_path_as_binary_array.set_maximum_buffer_size_in_bytes(as_path_attribute_full_length);
++        as_path_as_binary_array.set_buffer_size_in_bytes(as_path_attribute_full_length);
+ 
+         // Append attribute header
+         as_path_as_binary_array.append_data_as_object_ptr(&bgp_attribute_as_path);
+@@ -263,7 +263,7 @@ bool GrpcClient::AnnounceUnicastPrefixLowLevelIPv6(const IPv6UnicastAnnounce& un
+         uint32_t community_attribute_full_length = sizeof(bgp_attribute_community_t) + bgp_attribute_community.attribute_length;
+ 
+         dynamic_binary_buffer_t communities_list_as_binary_array;
+-        communities_list_as_binary_array.set_maximum_buffer_size_in_bytes(community_attribute_full_length);
++        communities_list_as_binary_array.set_buffer_size_in_bytes(community_attribute_full_length);
+ 
+         communities_list_as_binary_array.append_data_as_object_ptr(&bgp_attribute_community);
+ 
