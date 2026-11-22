@@ -1,0 +1,4 @@
+### oob-host-u
+payload_len=8127 nodes=129 chosen=0x11111111 hostname=wxyzUUUUUUUU
+ num_wd=129 sizeof_node=264 pgport_off=256 wdport_off=260 trusted_minus_slot=4 hostname_slot=7778797a555555555555555500000000 port_slot=1111111111111111 trusted_servers=0x5555555555555555
+rc=0

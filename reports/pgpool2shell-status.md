@@ -149,5 +149,21 @@ completed admission after re-verifying the pins and replaying the harness.
   measured only; witness replay of the W7 lane (operator tape #1487) is
   still outstanding and was not duplicated.
 
+- **W9 `wd_nodes` branch (2026-11-22 ~18:3xZ):** a distinct unchecked array
+  in the same peer config parser — 4.7.2 `wd_json_data.c:189-202` copies the
+  peer-set `wd_nodes` length into the 128-entry `WdNodesConfig.wd_node_info`
+  with no cap; 4.7.3 adds an explicit `MAX_WATCHDOG_NUM` rejection at
+  `:215-219`. On the real pinned 4.7.2 parser object at N=129, chosen
+  32-bit ports land at `wd_node_info[128]` offsets +256/+260 and a 12-byte
+  peer hostname sets the adjacent `trusted_servers` pointer field to
+  `0x5555555555555555` or `0x4141414141414141`; N=128 and fixed 4.7.3 are
+  clean. ASan is clean because the write stays inside the `POOL_CONFIG`
+  allocation, so no rung 3 is claimed for this branch. Full report:
+  [reports/pgpool2shell-wdnodes-w9.md](pgpool2shell-wdnodes-w9.md); replay
+  `bash lab/pgpool2shell/wdnodes/run-harness.sh` (A–G, hashes in
+  `EVIDENCE_HASHES.txt`). Grade: rung 4 at direct-call scope only, on a
+  layout-fixed adjacent field; no wire, no chosen address, no command, no
+  rung 5. Harness-only: no ports used during witness W118's window.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.

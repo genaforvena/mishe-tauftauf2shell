@@ -1,0 +1,4 @@
+### fixed-n129
+payload_len=8125 nodes=129 chosen=0x42424242 hostname=PEERHOST
+ERROR: pid 803701: invalid watchdog configuration JSON
+rc=0

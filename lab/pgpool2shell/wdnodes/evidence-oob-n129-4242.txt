@@ -1,0 +1,4 @@
+### oob-n129-4242
+payload_len=8125 nodes=129 chosen=0x42424242 hostname=PEERHOST
+ num_wd=129 sizeof_node=264 pgport_off=256 wdport_off=260 trusted_minus_slot=4 hostname_slot=50454552484f53540000000000000000 port_slot=4242424242424242 trusted_servers=0x54534f48
+rc=0

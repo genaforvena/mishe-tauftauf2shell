@@ -1,0 +1,4 @@
+### safe-n128
+payload_len=8055 nodes=128 chosen=0x42424242 hostname=SAFE
+ num_wd=128 sizeof_node=264 pgport_off=256 wdport_off=260 trusted_minus_slot=4 hostname_slot=00000000000000000000000000000000 port_slot=0000000000000000 trusted_servers=(nil)
+rc=0
