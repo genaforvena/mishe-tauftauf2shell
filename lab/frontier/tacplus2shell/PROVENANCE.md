@@ -56,6 +56,16 @@ and records normalized hashes in `harness/reuse-r1.txt` / `-r2.txt`. Raw
 `reports/tacplus2shell-status.md` section "W127 cross-packet chosen-byte
 readback at live-daemon scope".
 
+W128 stack-overflow probe (same plain trees, no rebuild): `wire4.py
+--skips 8,9,10,11,12` makes table index 12 a 255-byte OOB `cmd=` argument that
+reads W127's surviving prime pattern; `harness/gdb-overflow.cmd` records the
+pre-copy frame/locals, the 251-byte copy, the overwritten saved RBP/RIP and the
+fault at `author.c:92`. `harness/run_overflow.sh` runs vulnerable/fixed/
+no-prime cases and records normalized hashes in `harness/overflow-r1.txt` /
+`-r2.txt`; raw `harness/overflow-*.log` and `overflow-*.stdout` are local-only
+evidence. Details in `reports/tacplus2shell-status.md` section "W128
+chosen-byte overflow of the live daemon stack".
+
 ## Local artifacts (all under this directory)
 
 - `harness/tac.cfg` — lab config: loopback listener at 127.0.0.1:4949, key

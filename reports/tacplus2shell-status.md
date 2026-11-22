@@ -245,3 +245,56 @@ the remainder-chunk header and the new `tac_session` struct (bytes at
 trigger must open a new session (seq 1, different id) on the same connection.
 The advisory's five-connection `system()`/root chain still has unpublished
 packet shapes and stays claim text.
+
+## W128 chosen-byte overflow of the live daemon stack (2026-11-22 22:09Z)
+
+One bounded experiment, closing the W127 gate. Grade: rung 4 extended to
+**attacker-chosen bytes overwriting saved control words at live-daemon scope**.
+Rung 5 remains UNKNOWN: control flow never reaches the function epilogue, and
+no command, marker execution or side effect was observed.
+
+Primitive and exact trigger. W127's prime is unchanged: seq-3 AUTHEN/CONT, body
+2000, pattern `cmd=ZZZZ`×40 at body offset 1112, sent on a plant-started
+127.0.0.1 listener with the pinned MD5 pad. The AUTHOR trigger keeps arg_cnt 20
+and the eight in-payload `cmd=AAAA` … `cmd=HHHH` records, but five table entries
+(indices 8-12) are set to 255 via `wire4.py --skips 8,9,10,11,12`. The validator
+stops at index 8 (`len` reaches `datalength=92`), so indices 8-19 are unchecked.
+`eval_args()` advances `p` 8×8 + 4×255 = 1084 bytes from the argument base
+(`in+72`) to `in+1156`, where the prime's `cmd=` survives; at i=12 it copies
+`l-4 = 251` bytes with no bound into `cmdline`, a 104-byte stack VLA
+(`char cmdline[session->ctx->in->length]`, `author.c:69`).
+
+Live observation (`overflow-vuln.log`, plain `929671c` under gdb):
+`PRIME in=0x5555555fda30 len=2012`, trigger reuses the same chunk,
+`base=0x5555555fda78`, `inlen=104`. The prime's `63 6d 64 3d 5a 5a 5a 5a`
+is intact at `p+1080`. Before the copy, `PRE i=12 l=255 a=0x5555555fdeb4`,
+`rbp=0x7fffffffdd90`, `saved_rbp=0x7fffffffde10`,
+`saved_rip=0x555555561789`, `cmdline=0x7fffffffdca0` (so saved RIP sits at
+`cmdline+248`). After the copy, `cmdline+28` onward is repeated prime data,
+saved RBP and saved RIP both equal `0x3d646d635a5a5a5a` — the little-endian
+bytes `5a 5a 5a 5a 63 6d 64 3d`, precisely the chosen prime pattern — and
+`i`, `tlen`, `t`, `p`, `argsizep` and `session` are clobbered to the same value.
+The inferior then faults at `author.c:92` (`p += *argsizep`), with
+`rip=0x5555555613fc` in `eval_args`; trigger reply 0 bytes.
+
+Structural ceiling found here: the VLA ends at `cmdline+104`, while the live
+locals occupy `cmdline+160` through `cmdline+232` and saved RBP/RIP sit at
+`+240`/`+248`. Any copy that reaches saved control data must first overwrite
+every live local, so this single memcpy cannot reach the epilogue with intact
+loop state. No pointer-derived write, ROP chain, function-pointer overwrite,
+marker execution or command was observed; the advisory's `system()`/root
+chain is still unpublished claim text.
+
+Controls: fixed `d8493e0` with the identical wire input never enters
+`eval_args()` and replies 57 bytes; vulnerable pin without the prime makes no
+251-byte copy, writes no control words and replies 18 bytes. A prime pattern at
+body offset 857 (`in+901`) is overwritten at trigger time — the surviving
+plaintext region was previously bounded only at `in+864`; offset 1112 remains
+the measured reliable location.
+
+Replay `bash lab/frontier/tacplus2shell/harness/run_overflow.sh` → 9 PASS / 0
+FAIL twice, normalized hashes `f76aeb15…` (vulnerable), `6499bb53…` (fixed),
+`664aa0ce…` (no prime) in `harness/overflow-r1.txt` / `-r2.txt`. Raw logs
+`harness/overflow-*.log` and `-*.stdout` are local-only evidence. New files:
+`harness/gdb-overflow.cmd`, `harness/run_overflow.sh`. Canonical
+`run_reuse.sh` and `run_gdb.sh` were not modified.

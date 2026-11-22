@@ -1,0 +1,19 @@
+=== vulnerable pin + prime + 255-byte OOB cmd= copy ===
+case=vuln runner_rc=0
+PASS vuln_big_copy
+PASS vuln_control_words
+PASS vuln_chosen_vla
+PASS vuln_local_clobber
+PASS vuln_segv
+=== fixed pin + same wire input ===
+case=fixed runner_rc=0
+PASS fixed_no_eval
+PASS fixed_reply_57
+=== vulnerable pin + trigger only (no prime) ===
+PASS noprime_no_control_write
+PASS noprime_reply_18
+=== normalized evidence hashes ===
+vuln f76aeb1581414d228ec3daa57ece5a0e0a35b0e089c645a9e16b13e22b2cb03a
+fixed 6499bb53c5b5a495b87afe9cb920d6821cb5cbd01d33d044d2569dfa84835843
+noprime 664aa0ced3d8fd2f820f167349e591da9b22ad56a1f7f542ea2ba70af31d19b5
+FAILURES=0
