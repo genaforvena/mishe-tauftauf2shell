@@ -205,6 +205,57 @@ Four fresh build dirs from the same pinned sources (`src/vrpn-07.36`,
   binary fails before `run`: gdb `Can't take address of "p" which isn't an
   lvalue` (by-value `HANDLERPARAM` optimized out). No frame geometry claimed.
 
-Result: the unchecked wire write (rung 3) survives optimization, the W6 DoS
-does not. Author observation, not a witness verdict; no chosen byte and no
-command side effect. All probes on 127.0.0.1 only.
+Result at the two sampled indices: the unchecked wire write (rung 3) survives
+optimization, but -8 and 120 are non-fatal in the plain -O2 frame. W7's
+generalization that the DoS does not transfer to -O2 was REFUTED by W8 below.
+Author observation, not a witness verdict; no chosen byte and no command side
+effect. All probes on 127.0.0.1 only.
+
+## W8 optimized-frame map and canary DoS (2026-11-22 ~17:03Z)
+
+No new build: the four W7 binaries were reused with their recorded SHA-256
+digests (see W7 above). New `probe-opt-frame.sh`
+(SHA-256 `9204317d4e838f189aa645c3d8724ac47011e62912899a810596212f67602675`)
+breaks at `vrpn_Connection.C:4554` and prints registers, disassembly and frame
+words; it never asks gdb for the optimized-out `&p`.
+
+- `out-w8-opt-frame--8`: port 14001, sender -8, vulnerable -O2 plain.
+  `gdb.log`: `rbp=rsp=&sender_name`, `i=-8`, `cdqe` then
+  `mov BYTE PTR [rsp+rax*1],0x0` at `handle_sender_message+98/+100`.
+- `out-w8-opt-frame--8/objdump.txt`: exact `objdump -d -M intel
+  --disassemble=...handle_sender_message...` on the same binary, captured after
+  its SHA was confirmed. It records:
+  `push r12; push rbp; push rbx; sub rsp,0x70`, canary
+  `mov QWORD PTR [rsp+0x68],rax`, store `[rsp+rax]`, epilogue
+  `add rsp,0x70; pop rbx; pop rbp; pop r12; ret`. Frame offsets from
+  `sender_name`: 0-99 array, 100-103 padding, 104-111 canary, 112 saved rbx,
+  120 saved rbp, 128 saved r12, 136-143 saved RIP.
+- `out-w8-opt-frame-139`: port 14012, sender 139. Frame words at the store:
+  `+104=0x8b85bb73d2fe1a00`, `+112=0xffffffff`, `+120=0x5555556a7220`,
+  `+128=(nil)`, `+136=0x5555555a1f42` (matches backtrace frame #1
+  `doSystemCallbacksFor :1446`). Under gdb the continue reaches SIGSEGV at
+  `0x00005555005a1f42`.
+
+`probe-func-dos.sh` functional runs (per-run SHA in each `meta.txt`):
+
+- `out-w8-opt-vuln-102` port 14015 (padding) and `out-w8-opt-vuln-104` port
+  14002 (canary LSB already `00`): ALIVE.
+- `out-w8-opt-vuln-105` port 14003, `out-w8-opt-vuln-111` port 14004, repeat
+  `out-w8-opt-vuln-105-repeat` port 14009: DEAD exit 134, `*** stack smashing
+  detected ***` in `server.err`.
+- `out-w8-opt-vuln-4` port 14007 (short): ALIVE.
+- `out-w8-opt-fixed-105` port 14008 and TYPE `out-w8-opt-type-fixed-105` port
+  14011 (fixed plain): ALIVE.
+- `out-w8-opt-type-vuln-105` port 14010 (`MSGTYPE=-2`, vulnerable plain):
+  DEAD exit 134, same abort.
+- `out-w8-optasan-vuln-105` port 14013 (vulnerable -O2 ASan): DEAD exit 1,
+  `stack-buffer-overflow WRITE of size 1` at `:4554`, frame offset 217
+  overflowing `[112,212) 'sender_name'`.
+- `out-w8-optasan-fixed-105` port 14014 (fixed -O2 ASan): ALIVE, 0 errors.
+- `out-w8-opt-vuln-136` port 14005 and `out-w8-opt-vuln-139` port 14006
+  (saved-RIP offsets, vulnerable plain): ALIVE. Cause of the plain-versus-gdb
+  difference at 139 is UNKNOWN; no plain saved-RIP claim.
+
+Author observation only: deterministic pre-auth remote DoS by canary NUL on
+the stock plain -O2 build, both sinks. No chosen byte, no command side effect,
+no witness verdict. All probes on 127.0.0.1 ports started by this plant.

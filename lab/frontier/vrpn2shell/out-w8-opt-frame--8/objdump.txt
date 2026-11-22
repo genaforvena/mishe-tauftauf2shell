@@ -1,0 +1,100 @@
+$ objdump -d -M intel --disassemble=_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server
+
+
+lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .plt.got:
+
+Disassembly of section .plt.sec:
+
+Disassembly of section .text:
+
+00000000000509d0 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM>:
+   509d0:	f3 0f 1e fa          	endbr64
+   509d4:	41 54                	push   r12
+   509d6:	55                   	push   rbp
+   509d7:	53                   	push   rbx
+   509d8:	48 83 ec 70          	sub    rsp,0x70
+   509dc:	48 63 94 24 a8 00 00 	movsxd rdx,DWORD PTR [rsp+0xa8]
+   509e3:	00 
+   509e4:	4c 8b a4 24 b0 00 00 	mov    r12,QWORD PTR [rsp+0xb0]
+   509eb:	00 
+   509ec:	64 48 8b 04 25 28 00 	mov    rax,QWORD PTR fs:0x28
+   509f3:	00 00 
+   509f5:	48 89 44 24 68       	mov    QWORD PTR [rsp+0x68],rax
+   509fa:	31 c0                	xor    eax,eax
+   509fc:	48 83 fa 64          	cmp    rdx,0x64
+   50a00:	0f 87 9a 00 00 00    	ja     50aa0 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0xd0>
+   50a06:	48 89 e5             	mov    rbp,rsp
+   50a09:	b9 64 00 00 00       	mov    ecx,0x64
+   50a0e:	48 89 fb             	mov    rbx,rdi
+   50a11:	48 83 ea 04          	sub    rdx,0x4
+   50a15:	49 8d 74 24 04       	lea    rsi,[r12+0x4]
+   50a1a:	48 89 ef             	mov    rdi,rbp
+   50a1d:	e8 fe b3 fe ff       	call   3be20 <__strncpy_chk@plt>
+   50a22:	41 8b 04 24          	mov    eax,DWORD PTR [r12]
+   50a26:	48 8b bb e0 00 00 00 	mov    rdi,QWORD PTR [rbx+0xe0]
+   50a2d:	48 89 ee             	mov    rsi,rbp
+   50a30:	0f c8                	bswap  eax
+   50a32:	48 98                	cdqe
+   50a34:	c6 04 04 00          	mov    BYTE PTR [rsp+rax*1],0x0
+   50a38:	e8 63 cc ff ff       	call   4d6a0 <_ZN19vrpn_TypeDispatcher11getSenderIDEPKc>
+   50a3d:	89 c1                	mov    ecx,eax
+   50a3f:	83 f8 ff             	cmp    eax,0xffffffff
+   50a42:	74 3c                	je     50a80 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0xb0>
+   50a44:	8b 94 24 94 00 00 00 	mov    edx,DWORD PTR [rsp+0x94]
+   50a4b:	48 89 ee             	mov    rsi,rbp
+   50a4e:	48 89 df             	mov    rdi,rbx
+   50a51:	e8 6a ff ff ff       	call   509c0 <_ZN13vrpn_Endpoint15newRemoteSenderEPcii>
+   50a56:	83 f8 ff             	cmp    eax,0xffffffff
+   50a59:	74 6c                	je     50ac7 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0xf7>
+   50a5b:	31 c0                	xor    eax,eax
+   50a5d:	48 8b 54 24 68       	mov    rdx,QWORD PTR [rsp+0x68]
+   50a62:	64 48 2b 14 25 28 00 	sub    rdx,QWORD PTR fs:0x28
+   50a69:	00 00 
+   50a6b:	75 7c                	jne    50ae9 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0x119>
+   50a6d:	48 83 c4 70          	add    rsp,0x70
+   50a71:	5b                   	pop    rbx
+   50a72:	5d                   	pop    rbp
+   50a73:	41 5c                	pop    r12
+   50a75:	c3                   	ret
+   50a76:	66 2e 0f 1f 84 00 00 	cs nop WORD PTR [rax+rax*1+0x0]
+   50a7d:	00 00 00 
+   50a80:	48 8b bb f0 00 00 00 	mov    rdi,QWORD PTR [rbx+0xf0]
+   50a87:	48 85 ff             	test   rdi,rdi
+   50a8a:	74 b8                	je     50a44 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0x74>
+   50a8c:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+   50a8f:	48 89 ee             	mov    rsi,rbp
+   50a92:	ff 50 28             	call   QWORD PTR [rax+0x28]
+   50a95:	89 c1                	mov    ecx,eax
+   50a97:	eb ab                	jmp    50a44 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0x74>
+   50a99:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+   50aa0:	48 8b 05 c1 b4 0e 00 	mov    rax,QWORD PTR [rip+0xeb4c1]        # 13bf68 <stderr@GLIBC_2.2.5>
+   50aa7:	ba 42 00 00 00       	mov    edx,0x42
+   50aac:	be 01 00 00 00       	mov    esi,0x1
+   50ab1:	48 8d 3d 68 c2 08 00 	lea    rdi,[rip+0x8c268]        # dcd20 <_IO_stdin_used+0x1d20>
+   50ab8:	48 8b 08             	mov    rcx,QWORD PTR [rax]
+   50abb:	e8 60 bb fe ff       	call   3c620 <fwrite@plt>
+   50ac0:	b8 ff ff ff ff       	mov    eax,0xffffffff
+   50ac5:	eb 96                	jmp    50a5d <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0x8d>
+   50ac7:	48 8b 05 9a b4 0e 00 	mov    rax,QWORD PTR [rip+0xeb49a]        # 13bf68 <stderr@GLIBC_2.2.5>
+   50ace:	48 89 e9             	mov    rcx,rbp
+   50ad1:	be 02 00 00 00       	mov    esi,0x2
+   50ad6:	48 8d 15 8b c2 08 00 	lea    rdx,[rip+0x8c28b]        # dcd68 <_IO_stdin_used+0x1d68>
+   50add:	48 8b 38             	mov    rdi,QWORD PTR [rax]
+   50ae0:	31 c0                	xor    eax,eax
+   50ae2:	e8 e9 b9 fe ff       	call   3c4d0 <__fprintf_chk@plt>
+   50ae7:	eb d7                	jmp    50ac0 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+0xf0>
+   50ae9:	e8 82 b6 fe ff       	call   3c170 <__stack_chk_fail@plt>
+
+Disassembly of section .fini:
+
+Frame mapping: after `push r12; push rbp; push rbx; sub rsp,0x70`,
+`sender_name == rbp == rsp` (gdb log out-w8-opt-frame--8/gdb.log). Canary at
+[rsp+0x68] = sender_name+104; saved rbx +112, saved rbp +120, saved r12 +128,
+saved RIP +136. Store at sender_name+i is `mov BYTE PTR [rsp+rax*1],0x0`.
