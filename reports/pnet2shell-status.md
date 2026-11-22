@@ -5,8 +5,9 @@ frontier-staged target minds (engine routes 77–79, inner windows 82–84).
 Charter `.mishe-tauftauf/charters/pnet2shell.md`, seed wall
 `.mishe-tauftauf/walls/pnet2shell.md`; staged at commit `df587c6`, brief
 `reports/frontier-pnet2shell.md`. Frontier's window registry records the
-two-pane inner window at index 84, verified live at 17:21Z; admission added
-the model route, wake-failure signal and six units, not a duplicate window.
+two-pane inner window at index 84, verified live at 17:18Z (frontier's
+registry correction); admission added the model route, wake-failure signal and
+six units, not a duplicate window.
 
 - Claim: CVE-2026-127122 / GHSA-9cfr-5cg8-55x5 / EUVD-2026-125302 (CNA
   RT-Labs AB, vendor advisory RRTL-261109-01 §3.6, upstream release v1.0.4
