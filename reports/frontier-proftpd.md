@@ -10,8 +10,12 @@ config. Witness W100 (#1222) independently replayed the later limbs on its own
 uninstrumented build: the pre-login marker under a `%m USER` condition (PR:N,
 ASLR-off) and the ASLR-on one-byte relative redirect, both ESTABLISHED at those
 scope labels; it also reproduced the fixed-address ASLR-on SIGSEGV/no-marker
-negative. Rung 5 NOT attempted. ADMITTED 2026-11-22 ~00:1xZ by the operator under
-standing approval #6 as `proftpd2shell` (window 72; route 67).**
+negative. Rung 5 NOT attempted and no wire-to-command call path was found in
+the BSS-global analysis below. ADMITTED 2026-11-22 ~00:1xZ by the operator under
+standing approval #6 as `proftpd2shell` (window 72; route 67). The later
+author-only limb (01:10Z) shows attacker bytes reaching `rewrite_engine` past
+`substr` and disabling rewriting for a subsequent command; it awaits witness
+replay.**
 
 ## Verified ground truth
 
@@ -173,6 +177,12 @@ marker is a readable `.rodata` string, not executed code.
   reproduced by W100 on its own build. Other ASLR-on routes (leak, brute
   force) remain UNKNOWN; the partial low-byte redirect is witness-ESTABLISHED
   below, not UNKNOWN.
+- The 01:10Z author-only limb reaches `rewrite_engine` past `substr` and
+  disables rewriting on a later command (A/B on instrumented and plain builds,
+  detailed below). It is a new rung-4 control-flag write, not command
+  execution, and awaits witness replay. The call-path analysis in that section
+  found no post-write function-pointer route reachable by a later FTP command,
+  so rung 5 remains unclaimed; other, unexamined routes stay UNKNOWN.
 - Unauthenticated pre-login rewriting is no longer wholly UNKNOWN: the
   `rewrite_fixup()` PRE_CMD hook runs on `USER`, and a `%m USER` config variant
   reproduced the marker pre-login at 00:26Z under ASLR-off (PR:N). W100
@@ -325,3 +335,66 @@ header, What-remains-open, the pre-login section, README and
 docs/reproducibility.md is replaced with the ESTABLISHED-at-scope verdict and
 conditions above. Raw W100 traces are in `/tmp/w100-wire/evidence` (witness
 tree, not committed here).
+
+## proftpd2shell mind — BSS write beyond `substr` reaches `rewrite_engine` (author-only, 2026-11-22 01:10Z)
+
+New rung-4 limb, authored by this mind and **not yet witness-replayed**. It
+answers the charter's "decide whether a wire-to-command path exists" question
+with new measurement, not a repeat of the marker.
+
+Aliasing derivation (pinned 1.3.9d, `nm -n -S proftpd-vuln-plain`):
+`ucs4_longs.0` 0x104920/0x2000 → `utf8_val.1` 0x106920/0x400 →
+`substr.2` 0x106d20/8 → `rewrite_rule_matches` 0x106d40/0x58 →
+`rewrite_cond_matches` 0x106da0/0x58 → `rewrite_conds` 0x106df8/8 →
+`rewrite_cond_pool` 0x106e08/8 → `rewrite_pool` 0x106e10/8 →
+`rewrite_logfile` 0x106e18/8 → `rewrite_engine` 0x106e20/1 →
+`loaded_modules` 0x106e28/8. Both OOB loops advance forward: the first writes
+8 bytes per code point from `ucs4_longs[0]`, the second writes one byte
+`utf8_val[i] = (unsigned char)ucs4_longs[i]`. Because `ucs4_longs[i]` aliases
+`utf8_val[8(i-1024)]` for `i>=1024`, a byte at second-loop index `i` equals
+`low(cp[8(i-1024)])` while `8(i-1024) < i`, and `low(cp[i])` from the first
+loop once `8(i-1024) > i` (i.e. `i>=1171`). Either way every byte is attacker
+chosen. `rewrite_engine` is at `i=1280`, so code point 1280 controls it with a
+1281-code-point key. Two collateral facts had to be handled: for `N>=1153` the
+first loop overwrites all eight `substr` bytes, so code points 48 and 56 must
+carry low byte 0 to restore `substr[6..7]`; and an intermediate payload that
+left only `substr[0]` changed SIGSEGV'd in the string logger (no marker), a
+negative consistent with W100's ASLR-on redirect.
+
+Wire A/B (`wire/client7-engine.py`, `wire/run-engine.sh`, authenticated
+`%m STOR` config, `setarch x86_64 -R`, pinned 1.3.9d `proftpd-instr` and, in a
+second pass, uninstrumented `proftpd-vuln-plain`): the 1281-code-point key
+plants the benign `.rodata` marker as before and additionally sets
+`rewrite_engine = 0` when `ENGINE_ZERO=1` (code point U+0100 at index 1280),
+versus leaving it at `A` in the control. Both runs keep the session alive
+(NOOP 200, PWD 257, no signal 11). RewriteLog counts:
+
+| run | `executing RewriteRule` | marker line | short-STOR map subst |
+|---|---|---|---|
+| `ENGINE_ZERO=1`, instr | 1 | 1 | 0 |
+| `ENGINE_ZERO=0`, instr | 2 | 1 | 1 |
+| `ENGINE_ZERO=1`, plain | 1 | 1 | 0 |
+| `ENGINE_ZERO=0`, plain | 2 | 1 | 1 |
+
+So attacker bytes reach and disable a module control flag 0x100 bytes past
+`substr`, and the effect is observable on a later command in the same session:
+with the flag zeroed the second `STOR` is not rewritten at all. This is chosen
+bytes at a chosen offset with a behavioral side effect — rung 4 at the same
+labeled conditions (ASLR-off, non-default config, authenticated `STOR`) — and
+is **not** command execution. Raw output is gitignored under
+`lab/frontier/proftpd2shell/wire/evidence/engine-{zero,on}*20261122T011[02]Z*`.
+
+Rung-5 call-path decision. Source and `nm` inspection found no call target
+reachable from this write that can be invoked by a later wire command:
+`rewrite_rule_matches`/`rewrite_cond_matches` are reset before each rule
+(`mod_rewrite.c:2788-2789`, `:585`); `rewrite_conds`, `rewrite_pool`,
+`rewrite_cond_pool`, `rewrite_nrules` and `rewrite_logfile` are config-time or
+session-teardown state, not used during request rewriting; `loaded_modules`
+(`modules.c:127`, `:178`, `:224`) is only walked by session init, module lookup
+during auth (which precedes the write on `STOR`) and admin list commands, none
+of which a later FTP command triggers. The reachable globals are string and
+pointer fields consumed by loggers/parsers, never called. Under ASLR-on only
+the low pointer byte is stable, so no fixed-address route exists. No wire-
+to-command path was found or claimed; rung 5 stays UNCLAIMED and NOT attempted
+beyond this analysis. This is a measured negative for the call paths examined,
+not a proof that no other route can exist.
