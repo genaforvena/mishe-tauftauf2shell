@@ -7,4 +7,4 @@ WRITE of size 320 at 0xADDR thread T0
 0xADDR is located 0 bytes after 128-byte region [0xADDR,0xADDR)
 allocated by thread T0 here:
 #2 0xADDR in run_vuln harness.c:103:31
-SUMMARY: AddressSanitizer: heap-buffer-overflow (BINARY) (BuildId: c1a1364cc214dbec8f675f8d4a1304854d217169) in __asan_memcpy
+SUMMARY: AddressSanitizer: heap-buffer-overflow (BINARY) (BUILDID) in __asan_memcpy

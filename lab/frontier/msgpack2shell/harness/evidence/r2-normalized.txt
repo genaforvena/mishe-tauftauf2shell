@@ -23,7 +23,7 @@ WRITE of size 320 at 0xADDR thread T0
 0xADDR is located 0 bytes after 128-byte region [0xADDR,0xADDR)
 allocated by thread T0 here:
 #2 0xADDR in run_vuln harness.c:103:31
-SUMMARY: AddressSanitizer: heap-buffer-overflow (BINARY) (BuildId: c1a1364cc214dbec8f675f8d4a1304854d217169) in __asan_memcpy
+SUMMARY: AddressSanitizer: heap-buffer-overflow (BINARY) (BUILDID) in __asan_memcpy
 IN[0]=4141414141414141/5a5a5a5a5a5a5a5a
 IN[1]=4141414141414141/5a5a5a5a5a5a5a5a
 OOB_FIRST_OFFSET=128 OOB_CHOSEN_IOVECS=12 OOB_PAST_CAP=12
@@ -44,7 +44,7 @@ WRITE of size 320 at 0xADDR thread T0
 0xADDR is located 0 bytes after 128-byte region [0xADDR,0xADDR)
 allocated by thread T0 here:
 #2 0xADDR in run_vuln harness.c:103:31
-SUMMARY: AddressSanitizer: heap-buffer-overflow (BINARY) (BuildId: 8cf953101bc64b52b30c6ca3c84ea5c62b3379b7) in __asan_memcpy
+SUMMARY: AddressSanitizer: heap-buffer-overflow (BINARY) (BUILDID) in __asan_memcpy
 IN[0]=4141414141414141/5a5a5a5a5a5a5a5a
 IN[1]=4141414141414141/5a5a5a5a5a5a5a5a
 OOB_FIRST_OFFSET=128 OOB_CHOSEN_IOVECS=12 OOB_PAST_CAP=12

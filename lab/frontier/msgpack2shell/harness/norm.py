@@ -12,8 +12,8 @@ KEEP = (
 )
 RULES = (
     (re.compile(r"0x[0-9a-fA-F]+"), "0xADDR"),
+    (re.compile(r"\(BuildId:? [0-9a-fA-F]+\)"), "(BUILDID)"),
     (re.compile(r"==\d+=="), "==PID=="),
-    (re.compile(r"\(BuildId [0-9a-f]+\)"), "(BUILDID)"),
     (re.compile(r"/[^\s:()]*/([^\s:()/]+\.(?:c|inc|h|cpp))"), r"\1"),
     (re.compile(r"/[^\s()]+/([^\s()]+)(?:\+0xADDR)?"), r"BINARY"),
     (re.compile(r"\s+"), " "),
