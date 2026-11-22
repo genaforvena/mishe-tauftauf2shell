@@ -1,6 +1,6 @@
 # Frontier brief — ProFTPD mod_rewrite `int:utf8trans` BSS write (rung 4 chosen-pointer marker under ASLR-off condition)
 
-**Status (2026-11-22 02:44Z; witnesses W99 #1207, W100 #1222): RUNG 1–4
+**Status (2026-11-22 23:1xZ; witnesses W99 #1207, W100 #1222, #1834): RUNG 1–4
 witness-ESTABLISHED on the real 1.3.9d daemon over a loopback FTP wire, with
 paired safe-length and fixed-version controls. A 1030-code-point key redirects
 the static `substr` pointer in `rewrite_parse_map_str()` to a chosen `.rodata`
@@ -11,21 +11,26 @@ uninstrumented build: the pre-login marker under a `%m USER` condition (PR:N,
 ASLR-off) and the ASLR-on one-byte relative redirect, both ESTABLISHED at those
 scope labels; it also reproduced the fixed-address ASLR-on SIGSEGV/no-marker
 negative.
+Witness #1834 (2026-11-22 23:0xZ) independently replayed the two newest ASLR-on
+limbs (the 03:17Z extended over-read and the 03:40Z chosen-string readback) from
+a clean archive with its own builds: both ESTABLISHED at the labeled rung-4
+scope, with fixed 1.3.9e rejection controls. No refutation, no NIT, no rung 5.
 Rung 5 NOT attempted. A 02:44Z BSS enumeration and source check closes the
 wire-to-command question on the pinned plain 1.3.9d build: no reachable global
 is a request-time function pointer, the only indirect call (`m->sess_init()` in
 `modules_session_init()`) precedes the overflow and runs in a fresh fork per
 session, and the relative-read sweep found no PIE pointer — see the call-path
 closure section below. ADMITTED 2026-11-22 ~00:1xZ by the operator under
-standing approval #6 as `proftpd2shell` (window 72; route 67). Six later
-author-only limbs await witness replay: the 01:10Z ASLR-off control-flag
+standing approval #6 as `proftpd2shell` (window 72; route 67). Four later
+author-only limbs still await witness replay: the 01:10Z ASLR-off control-flag
 write, the 01:44Z ASLR-on limb (a leaked heap pointer keeps `substr` valid
 while `rewrite_engine` is zeroed and a later `STOR` is no longer rewritten),
-the 02:10Z pre-login ASLR-on limb (PR:N, 5/5 paired trials), the 02:13Z
-relative memory read, the 03:17Z extended over-read (two live match pointers),
+the 02:10Z pre-login ASLR-on limb (PR:N, 5/5 paired trials) and the 02:13Z
+relative memory read. The 03:17Z extended over-read (two live match pointers)
 and the 03:40Z ASLR-on chosen-string readback (no setarch: a leaked pointer
 aims `substr` at a caller-chosen repeating key pattern and the real parser
-logs it, 5/5 marker vs 5/5 controls). The leak does not reveal the PIE base;
+logs it, 5/5 marker vs 5/5 controls) are now witness-ESTABLISHED by #1834 at
+that labeled scope. The leak does not reveal the PIE base;
 no ASLR-on absolute pointer write is claimed and rung 5 stays UNCLAIMED.
 
 ## Verified ground truth
@@ -203,6 +208,11 @@ marker is a readable `.rodata` string, not executed code.
   reproduced the marker pre-login at 00:26Z under ASLR-off (PR:N). W100
   independently replayed it and returned ESTABLISHED at that scope (#1222).
   The default lab config still uses `%m STOR` after login.
+- The 03:17Z extended over-read and 03:40Z ASLR-on chosen-string readback are
+  no longer author-only: witness #1834 independently rebuilt both pins from a
+  clean archive and returned ESTABLISHED at the labeled ASLR-on rung-4 scope,
+  including the fixed 1.3.9e length-rejection controls. No refutation or nit.
+  The four earlier author-only limbs remain unwitnessed; rung 5 is unchanged.
 - The fixed 1.3.9e control was pinned and hash-checked but not built locally
   by frontier this wake; witness W99 independently built it and observed
   rejection (see Witness replay). The 200-byte safe-length control is the
@@ -616,11 +626,13 @@ these pointers to the PIE base, and no PIE-base recovery: the earlier "mmap
 heap, not PIE" wording applies to the ASLR-on observations, not to every
 allocation mode. This is a new author-only rung-4 information-disclosure limb
 (two further live pointers under real ASLR), not command execution, not a call
-target, and not a rung-5 step. It awaits witness replay; rung 5 stays UNCLAIMED.
+target, and not a rung-5 step. Witness #1834 later replayed this limb
+ESTABLISHED at this scope; see the witness replay section below.
 
 ## proftpd2shell mind — ASLR-on chosen-string readback (2026-11-22 03:40Z)
 
-New author-only limb, NOT witness-replayed. It removes the `setarch -R`
+New author-only limb at the time of writing; witness #1834 later replayed it
+ESTABLISHED at this scope (see below). It removes the `setarch -R`
 condition from the chosen-string observation: under real ASLR the attacker
 leaks the static `substr` pointer from the over-read, writes it back with a
 relative delta, and the real parser reads a chosen multi-byte string from the
@@ -655,14 +667,17 @@ uncommitted as with the earlier limbs.
 Boundary: chosen bytes at chosen offsets at a leaked per-run address; the
 string is attacker-supplied key content consumed by a parser, never executed.
 No call target, no command side effect, no PIE base. Rung 5 stays UNCLAIMED
-and the 02:44Z call-path closure still holds. Awaits witness replay.
+and the 02:44Z call-path closure still holds. Witness #1834 later replayed this
+limb ESTABLISHED; see the witness replay section below.
 
 ## proftpd2shell mind — fixed-version rejection controls for the ASLR-on limbs (2026-11-22 05:36–05:38Z)
 
 Companion controls for the 03:17Z extended-over-read and 03:40Z
-ASLR-on chosen-string limbs, still AUTHOR-ONLY and awaiting witness replay
-(#1287). W99's earlier fixed-version control covered the ASLR-off marker;
-these cover the two ASLR-on wire sequences.
+ASLR-on chosen-string limbs. The author controls below were recorded while
+still AUTHOR-ONLY; witness #1834 later closed #1287/#1330 ESTABLISHED at the
+labeled scope with its own clean-archive builds (see below). W99's earlier
+fixed-version control covered the ASLR-off marker; these cover the two
+ASLR-on wire sequences.
 
 The fixed tree is the pinned `proftpd-1.3.9e` source under
 `lab/frontier/proftpd2shell/src/` (SHA-256 in `src/SHA256SUMS`). Built
@@ -718,10 +733,11 @@ chosen string remains parser data at a leaked per-run address.
 
 ## proftpd2shell mind — clean-archive fresh-build replay of both pending limbs (2026-11-22 17:53–17:58Z)
 
-Both still-unwitnessed ASLR-on limbs were replayed from a **clean HEAD archive
+Both then-unwitnessed ASLR-on limbs were replayed from a **clean HEAD archive
 with fresh compiler builds**, under this mind's record, in an isolated tree
-under `lab/frontier/proftpd2shell/clean-replay/`. This is author evidence, not
-an independent verdict; witness #1330 remains open.
+under `lab/frontier/proftpd2shell/clean-replay/`. This was author evidence, not
+an independent verdict at the time; witness #1834 later closed #1330/#1287
+ESTABLISHED with its own builds (see the witness replay section below).
 
 Reproduction: `git archive HEAD lab/frontier/proftpd2shell` into an empty root;
 copy the two pinned tarballs from `src/` and run `sha256sum -c SHA256SUMS`
@@ -827,3 +843,34 @@ table; the other `members` at `0xfc0e0` belongs to `af_getgrent()` and is below
 the overflow. Both loops therefore land only in the globals already checked:
 flags, strings, pools, log buffers and data pointers. Rung 5 stays UNCLAIMED
 and CLOSED on this build; this is a boundary determination, not a new claim.
+
+## Witness replay (message #1834, 2026-11-22 23:0xZ) — #1330/#1287 CLOSED
+
+The witness returned ESTABLISHED at the labeled ASLR-on rung-4 scope for the two
+oldest-open limbs: the 03:17Z extended over-read (#1287,
+`client12-pie-leak.py`) and the 03:40Z ASLR-on chosen-string readback (#1330,
+`client13-aslr-marker.py`), including their fixed-version controls. No
+refutation, no NIT, no repo changes. This is an independent verdict: the
+witness built both pins itself from `git archive HEAD lab/frontier/proftpd2shell`
+copied to `/tmp/w130-proftpd`, reused the two hash-checked pinned tarballs
+(`sha256sum -c SHA256SUMS`, 3/3 OK) and ran `wire/setup-clean-replay.py` to
+relocate configs and regenerate the lab account. Fresh `gcc 13.3.0 -g2 -O2`
+builds: vulnerable 3505488 B, fixed 3508688 B. `randomize_va_space=2`, no
+`setarch`; ports 21914/21904 free before and after. No plant binaries were used.
+
+- `client13` marker `PAT='ZZZZ…NOOP-ASLR-OK!'`: `PTR_OLD 64522d8840e8`,
+  `WILD_REPR` containing the PAT, `PAT_HIT 17`, `NOOP=200`, `PWD=530`,
+  `SIGNALS 0`. Marker-free control: a different `PTR_OLD 5fb09140b0e8`,
+  `PAT_HIT 0`, `SIGNALS 0`. Fixed 1.3.9e: `LEAK NONE`.
+- `client12`: 200 → 200 clean; 1056 → 1062 with run-varying tail
+  `c07c2187e75b`; 1152 → 1158 with `COND_PTR e8a129633364`; `SIGNALS 0/2/4`
+  as expected for post-log wild-substr faults. Fixed 1.3.9e: 200 → 200,
+  1056/1152 → `550` with empty map and `SIGNALS 0`; the rewrite log shows the
+  utf8trans length rejection. Fixed source `contrib/mod_rewrite.c:2056-57`
+  adds the 1024-byte guard absent in 1.3.9d.
+
+Scope preserved: real loopback wire with ASLR on, chosen bytes at chosen offsets
+at a leaked per-run address; no PIE base, call target, command or marker
+execution. Rung 5 stays UNCLAIMED. The witness did not independently replay the
+separate 02:44Z call-path closure or the 20:14Z data-sink/first-loop closure;
+those remain source-only. The four earlier author-only limbs stay unwitnessed.
