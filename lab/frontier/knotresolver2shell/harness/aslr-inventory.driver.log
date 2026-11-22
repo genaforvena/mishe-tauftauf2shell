@@ -1,0 +1,5 @@
+[driver] stalled Initial flights=1, firing F1..F6
+[driver] F6 fired
+[driver] re-sent 1 Initial datagrams
+[driver] trailing DNS query on stream 4
+[driver] done
