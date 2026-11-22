@@ -343,20 +343,26 @@ normalized hashes `256ccfd6c06c8c0fbe7ac3e70cc61d39c1b013fc415ae29ff59b8e74a26a6
 `-*.stdout` are local-only evidence. New files: `harness/wire5.py`,
 `harness/gdb-ptr.cmd`, `harness/run_ptr.sh`.
 
-Hash scope (W130, witness NIT from independent replay #1814): the earlier
-vulnerable hash `e93c5bbc…` was environment-scoped. `POST12 cmdoff` is a
-decimal pointer delta that moves with the stack/environment layout, so a
-4096-byte environment filler changed it (46912495417992 → 46912495413880 here)
-and changed that hash with it; fixed and no-prime hashes were unaffected.
-`norm()` now masks `cmdoff=[0-9]+` to `cmdoff=N`; two canonical replays at
-2026-11-22 23:07Z gave 14 PASS / 0 FAIL and byte-identical logs, and a replay
-under a 4096-byte filler gave the same three hashes. The chosen-address write
-and the verdict are unchanged. Two checks remain environment-sensitive by
-design: `vuln_before` and `vuln_nul` assert the target begins as sixteen `0x50`
-bytes and ends with `0x00 0x50`, true in the canonical environment but not
-under the filler, where those two report FAIL while `vuln_chosen_write` still
-passes and the chosen bytes still land at the target. They are byte-prefill
-assertions, not the write proof.
+Hash scope (W130 + W132, witness NITs from independent replays #1814 and
+#1884): the earlier vulnerable hash `e93c5bbc…` was environment-scoped.
+`POST12 cmdoff` is a decimal pointer delta that moves with the stack/environment
+layout, so a 4096-byte environment filler changed it (46912495417992 →
+46912495413880 here) and changed that hash with it; fixed and no-prime hashes
+were unaffected. `norm()` masks `cmdoff=[0-9]+` to `cmdoff=N`, which closed
+that dependency. W132 closed a second one: witness #1884's filler produced a
+`Program received` gdb SIGSEGV line in `io_sched_exec` and different pre-write
+bytes at the target, so the old `vuln_before` / `vuln_nul` assertions pinned
+incidental heap prefill and the extra stop line entered the evidence hash.
+Those two assertions are replaced by `vuln_target_changed` (the normalized
+pre/post `x/20bx` target blocks differ) and `vuln_written_nul` (byte 16 after
+the write is the chosen NUL terminator); both are environment-independent.
+`extract()` now allowlists only the pointer/control lines and excludes gdb stop
+lines and raw dump lines. Three replays at 2026-11-22 23:41Z — normal env plus
+4096-byte `A` and `z` fillers — each give 14 PASS / 0 FAIL and the same three
+hashes; appending a synthetic SIGSEGV line and frame to a log leaves the hash
+unchanged. Canonical `ptr-r1.txt` / `-r2.txt` are byte-identical. The
+chosen-address write, the fixed/no-prime controls and the verdict are unchanged
+by either NIT.
 
 Rung-5 probe, preserved as a negative result: `mem_destroy()` really calls
 `m->arr[i].f(m->arr[i].p)` and `cleanup_session()` calls `mem_destroy()`, so a

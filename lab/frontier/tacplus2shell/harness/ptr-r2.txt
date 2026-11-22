@@ -3,9 +3,9 @@ case=vuln runner_rc=0
 PASS vuln_eval
 PASS vuln_t_slot
 PASS vuln_t_redirect
-PASS vuln_before
+PASS vuln_target_changed
 PASS vuln_chosen_write
-PASS vuln_nul
+PASS vuln_written_nul
 PASS vuln_heap_target
 PASS vuln_reply_18
 === fixed pin + same wire input ===
