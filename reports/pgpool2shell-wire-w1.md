@@ -110,14 +110,26 @@ lab/pgpool2shell/wire/gdb-watchdog.cmd
 /tmp/w108-pgpool-replay/pgpool-II-4.7.2/src/pgpool`, while
 `lab/pgpool2shell/wire/peer_delayed.py` listens on 127.0.0.1:19005.
 
+## Warm-up / grooming negative (address steering)
+
+Tested whether a prior peer packet can place a peer-influenced pointer in the
+stale adjacent slot. With no warm-up packet the slot is `0x1`. After one
+`NodeCount=1` warm-up recovery packet on the same connection it becomes
+`0x5560cc4d` (a non-canonical, non-writable value — the fault still occurs at
+`wd_json_data.c:858`). Four warm-up variants (small `NodeIdList`, `Flags=255`,
+64-byte overlong `Function`, `NodeCount=3`) all produced the **same**
+`0x5560cc4d`; the value did not track any peer-controlled field. Conclusion
+on this build: the adjacent slot is a fixed stack artifact of the process
+state, not a steerable write address. No chosen-address write was obtained.
+
 ## Honest boundary
 
 - Established: rung 3 at wire scope on pinned 4.7.2; vulnerable/fixed/safe
   controls; the faulting instruction and call chain in a live daemon.
 - NOT established: a chosen-address write through a wire-controlled pointer,
   any control-flow hijack, command execution, or rung 5. The `what` is chosen
-  by the peer; the `where` here is `0x1` and is not steerable by another JSON
-  field on this build.
+  by the peer; the `where` is `0x1` (or `0x5560cc4d` after a warm-up packet)
+  and did not track any peer-controlled field across four warm-up variants.
 - Lab precondition: `wd_authkey=''` and control of the configured remote
   watchdog endpoint (here the plant's own listener). The CNA's PR:L reflects
   a configured shared key; a malicious authenticated peer would satisfy it.
