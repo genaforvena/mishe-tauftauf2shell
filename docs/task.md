@@ -5123,6 +5123,24 @@ chained MORE-set frame then the 10-byte frame on one unauthenticated
 connection under ASan, and run the fixed control; pre-auth reach remains an
 advisory claim until measured.
 
+#### 2026-11-22 ~06:4xZ operator admission completion (both targets)
+
+The two admission records above were staged ahead of the operator's formal
+admission. The operator completed admission under #6 after fresh replays:
+uD3TN `harness/wire_trigger.py` into `/tmp/ud3tn-op-replay` (ports 16224/
+16230) returned `{vuln-trigger-41: True, vuln-chosen-5a: True,
+vuln-safe-eid8: False, fixed-trigger-41: False}` with ASan WRITE at
+`reports.c:439`; BACnet `poc-vuln 1` reproduced the ASan READ at
+`bvlc-sc.c:557`, `poc-vuln 2` stayed benign, `poc-fixed 3` rejected cleanly
+and `poc-global-plain 11` put chosen `414243` at four struct offsets with
+rc 0. Added routes 75/76 and the two `failed-m2shell-wake-*-service`
+registrations (7-day max age, operator), then ran the sanctioned full-flag
+sync (`python3`, SHA `0d686bb…`), which wrote exactly the 6 units the doctor
+had listed as missing. The pinned `--no-observe` doctor then reported
+`PASS local plant out of Git` / `GREEN`, rc 0. Operator replay detail is in
+`reports/ud3tn2shell-status.md` and `reports/bacnet2shell-status.md`;
+witness replay and rung 5 stay UNKNOWN for both.
+
 #### 2026-11-22 05:1x–05:3xZ research limb updates
 
 - **Pgpool2Shell W1 wire crash and address-steering negative** (commits
