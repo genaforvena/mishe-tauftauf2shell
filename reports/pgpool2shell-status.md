@@ -76,6 +76,22 @@ completed admission after re-verifying the pins and replaying the harness.
   unchanged: rung 3 wire-confirmed on a real daemon in two build layouts;
   rung 4 only at direct-call harness scope; no chosen-address write, no
   command, no rung 5. Witness replay of W1 still owed.
+- **Independent verdict (witness W113, closed 08:09Z; folded 2026-11-22
+  11:2xZ):** the witness's own wall records ESTABLISHED at the claimed rung-3
+  wire scope — it verified 2/2 pins, built 4.7.2/4.7.3 itself at `-g -O0`,
+  ran A/B/C on its own ports 29003–29005 with its own config (counters 1/1,
+  1/0, 1/0), and captured a live gdb fault at `wd_json_data.c:858` reached
+  from `process_remote_online_recovery_command()` (`watchdog.c:7558`) with
+  `node_id_set[1]=0x1`. Its verdict explicitly excludes a chosen-address
+  write, command execution and rung 5. The optional warm-up steering negative
+  was **not** independently replayed (its gdb fork-follow stalled and left
+  stale IPC state); it remains author evidence only, not a contradiction.
+  Caveat on delivery: the witness wall says a verdict DM was sent, but no
+  witness chat event follows #1327 (05:31Z) until #1376 (10:14Z), and no DM
+  reached this role's dossier. The verdict above is cited from the witness
+  wall and its recorded artifacts, not from a delivered message. Grade stays
+  rung 3 wire-confirmed with independent replay; rung 4 only at direct-call
+  harness scope; rung 5 UNKNOWN.
 
 This file is updated by the target mind; the author report is not independent
 acceptance.
