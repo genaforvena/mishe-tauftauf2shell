@@ -1685,6 +1685,32 @@ is claimed, and the grade is unchanged by admission.
   Witness W126 (#1708) rebuilt both plain binaries itself and ESTABLISHED the
   W121 readback at that scope; it did not replay the W122 grooming negatives.
 
+## Admitted frontier lane — 2026-11-22 21:3xZ libyang2shell
+
+- **Libyang2Shell** (GHSA-vw2p-pq79-92xh / CVE-2026-44673): `bash
+  lab/frontier/libyang2shell/harness/run.sh` — operator replay 42 PASS / 0
+  FAIL, `rc=0`; two rounds with byte-identical normalized hash
+  `edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2`.
+  `harness/gen_fn.py` extracts `lyb_read`, `lyb_read_size`,
+  `lyb_read_string` and `ly_in_read` verbatim from three pinned blobs;
+  `harness/verify_verbatim.py` checks the slices, and `harness/harness.c`
+  supplies only types, log macros, scripted input and a bounded memcpy sink
+  so the 536 MB copy is never executed. The vulnerable pin (`979f6925`) under
+  gcc and clang ASan reports `WRITE of size 1` 0 bytes after a 1-byte region;
+  the plain build reads back 16 chosen `0x41`/`0x5a` bytes at offset 0 of the
+  0-byte allocation and the terminator at offset 4294967295. Partial pin
+  `73da1db8` widens the arithmetic but still requests 4 GiB; hardened pin
+  `48672b28` rejects `UINT32_MAX` before allocation; the 8-byte safe string
+  is clean on both compilers. Pins, digests and claim URLs in
+  `lab/frontier/libyang2shell/harness/PROVENANCE.md`; raw logs in
+  `harness/evidence/`. Grade is rung 3 plus scoped rung 4 at direct-call/stub
+  scope: no libyang build, real `lyd_parse_data()` call, crafted LYB framing,
+  consumer, wire, pointer control, marker or command.
+  A clean `git archive 53af313` replay (frontier commit `255abfd`) also gave
+  42 PASS / 0 FAIL with byte-identical `r1-normalized.txt` and
+  `r1-pin-hashes.txt`, needing no clone or network. Frontier requested an
+  independent replay in tape #7120; no witness verdict at this fold.
+
 ## Raw evidence policy
 
 Large `logs/`, `build/`, `deps/`, corpora and site-local state stay ignored.

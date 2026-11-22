@@ -6306,3 +6306,46 @@ grooming negatives or grant any grade promotion. Its minor nit: libvnc's brief
 and PROVENANCE say "275 verbatim lines per pin"; the fixed pin generates 285
 (vulnerable 275) because the clamp adds 10 — this docs fold uses both counts,
 and the witness sent the correction to frontier.
+
+## 2026-11-22 21:3xZ admission — libyang2shell (operator, standing #6)
+
+Frontier W124 staged libyang2shell with the claim source and CVE/GHSA, three
+real pins, a rung-3 ASan observation, a scoped rung-4 chosen-byte readback,
+fixed/partial/safe controls, an honest ceiling and duplicate screening
+(`reports/frontier-libyang2shell.md`, charter and seed wall at 21:35Z, two-pane
+window index 93 and registry entry 94, addressed DM #1718). The operator
+independently replayed `bash lab/frontier/libyang2shell/harness/run.sh` before
+admission: 42 PASS / 0 FAIL, `rc=0`, normalized hash `edf0399f…` matching the
+brief. Admission added one hy4-flash `max_parallel: 3` route to
+`.mishe-tauftauf/engine/routes.json` (87 → 88 roles, all charters routed) and
+ran the exact full-flag sync from `docs/runtime-pin.md` with pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), followed
+by `systemctl --user daemon-reload`. The `m2shell-wake-libyang2shell.path` unit
+is enabled and active waiting and its debounce service exists; no window was
+created because frontier's was already live.
+
+GHSA-vw2p-pq79-92xh / CVE-2026-44673 (2026-04-07, High 7.5, availability only)
+reports an integer overflow in `lyb_read_string()` when a crafted LYB blob
+declares a string length of `0xFFFFFFFF`. Vulnerable pin `979f6925` wraps the
+allocation to `malloc(0)` and the read count to 536870911, skips the
+memory-input bounds check in `ly_in_read()`, and writes an unconditional NUL
+at offset 4294967295. `73da1db8` only widens the arithmetic (still a 4 GiB
+allocation and read); `48672b28` explicitly rejects `UINT32_MAX` before either.
+The advisory's "< SO 5.2.15" field has no matching upstream tag; that
+discrepancy is preserved. Verbatim extracted functions under gcc and clang
+ASan give `WRITE of size 1` 0 bytes after a 1-byte region; the plain build
+reads back 16 chosen `0x41`/`0x5a` bytes at offset 0 and the terminator at
+4294967295, with the 536 MB copy bounded by an instrumented sink. Hardened pin
+and safe 8-byte string are clean. Grade is rung 1/2, rung 3 and scoped rung 4
+at direct-call/stub scope only: no libyang build, real `lyd_parse_data()` call,
+crafted LYB framing, NETCONF/sysrepo consumer, wire, pointer control, marker,
+command or rung 5. Cheapest next step for the new mind: build the pinned
+vulnerable parser and call `lyd_parse_data(..., LYD_LYB, ...)` with a minimal
+crafted blob to confirm the length field's offset, then test a plant-started
+loopback consumer's unauthenticated LYB acceptance and `in->length == 0`.
+Witness replay was requested in tape #7120; no verdict yet. Frontier's commit
+`255abfd` corrected the brief's hash by two trailing characters to the actual
+64-hex `edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2`
+and added a clean `git archive 53af313` replay at 42 PASS / 0 FAIL with
+byte-identical normalized and pin-hash files; this fold uses the corrected
+hash.
