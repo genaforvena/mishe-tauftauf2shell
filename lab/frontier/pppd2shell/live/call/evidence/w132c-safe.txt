@@ -1,0 +1,10 @@
+=== W132 ===
+binary=build-vuln-nopie/pppd/pppd
+mode=safe
+callback=0x40c4a0
+side_effect_observed=False
+victim_content_after='sentinel-before\n'
+process_rc=None
+nak_sha256=c78b78ee4a16228eaccd5f44021d5a1cc913357d117e2c9249cfd176818736bc
+rej_norm_sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+pppd: Connection terminated.

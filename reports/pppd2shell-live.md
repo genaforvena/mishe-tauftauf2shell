@@ -194,9 +194,41 @@ bytes apart), and a later frame would rewrite the high half again.
 Grade stays rung 4. Normalized evidence and hashes are in
 `live/sigrecv/evidence/`; raw logs and strace stay in the gitignored `raw/`.
 
+## W132 — controlled call with a chosen argument (rung 4 strengthened)
+
+W131's callback reached `notify()` but died in `device_script`'s forked child
+because the overflow had corrupted `the_channel`. W132 keeps the same
+`sigreceived` write but uses a one-argument callback: `notify()` calls
+`(*np->func)(np->arg, val)` (`main.c:2155-2163`), so a one-arg libc PLT stub
+gets the attacker-chosen `arg` in `rdi` and ignores the signal number. The
+fake notifier in `inpacket_buf` is `next=NULL, func=unlink@plt (0x40c4a0 in
+the -no-pie pin), arg=<sentinel path>`; the same 1498-byte ConfReq from W131
+sets `sigreceived` to that notifier's address. On SIGTERM, `term()`
+(`main.c:1593-1600`) calls `notify(sigreceived, sig)` directly, with no
+`the_channel` dereference on that path.
+
+Live strace of the target PID shows
+`unlink("/tmp/pppd2shell-r5-…-victim") = 0` and the sentinel file disappears.
+The process still faults later in shutdown on the corrupted `the_channel`
+(rc -11); that happens after the call and does not remove its effect.
+Controls: short safe ConfReq on the vulnerable pin leaves the sentinel intact
+and the daemon alive; `func=NULL` faults without a deletion; the fixed 2.5.4
+pin given identical frames logs `LCP: ignoring duplicate configuration
+option(s)` and leaves the sentinel intact. Two straced attack replays are
+byte-identical after normalization (`live/call/evidence/HASHES.txt`).
+
+Grade: **rung 4**, strengthened from chosen bytes and pointers to a chosen
+function call with a chosen string argument and an observed filesystem side
+effect in a live process. `unlink` is a libc call, not a command, so this is
+**not rung 5**. The pin imports no `system` or `popen`; its only exec sites
+(`device_script`, `run_program`) require a fork/child path or a stack frame
+this write primitive cannot provide.
+
 ## Files
 
 `lab/frontier/pppd2shell/live/` holds the driver, normalizer, matrix runner,
-README, tracked normalized evidence and hashes. Raw pppd logs, ASan reports
-and frame bytes stay in the gitignored `live/raw/`. `reports/frontier-pppd2shell.md`
-is frontier's earlier direct-call brief and is unchanged here.
+README, tracked normalized evidence and hashes. `live/rce_call.py` and
+`live/call/` hold the W132 controlled-call driver, normalizer, README and
+evidence. Raw pppd logs, ASan reports, frames and strace output stay in the
+gitignored `live/raw/`. `reports/frontier-pppd2shell.md` is frontier's earlier
+direct-call brief and is unchanged here.

@@ -1,0 +1,12 @@
+=== W132 ===
+binary=build-fixed/pppd/pppd
+mode=attack
+callback=0x40c4a0
+side_effect_observed=False
+victim_content_after='sentinel-before\n'
+process_rc=None
+nak_sha256=ef76d22ebd852ca3ad1877f6095e3f0420c3103e38cf42ccb238228097f3f878
+rej_norm_sha256=067513bb0b55082d42d8249ca2c06fb1ceef2c422ee194d61621818806009a65
+sigreceived=0x46882c
+pppd: LCP: ignoring duplicate configuration option(s)
+pppd: Connection terminated.

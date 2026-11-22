@@ -1,0 +1,13 @@
+=== W132 ===
+binary=build-vuln-nopie/pppd/pppd
+mode=attack
+callback=0x40c4a0
+side_effect_observed=True
+victim_content_after=''
+process_rc=-11
+nak_sha256=ef76d22ebd852ca3ad1877f6095e3f0420c3103e38cf42ccb238228097f3f878
+rej_norm_sha256=b09ca72ccc469443922a66d6acdb2cfcd2d21625d82e94c3609ba3794204727a
+sigreceived=0x46882c
+strace: PID unlink("/tmp/MARKER") = 0
+strace: PID unlink("/tmp/MARKER") = -1 ENOENT (No such file or directory)
+pppd: Fatal signal 11

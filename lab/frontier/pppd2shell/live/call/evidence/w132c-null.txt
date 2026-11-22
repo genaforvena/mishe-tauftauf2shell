@@ -1,0 +1,15 @@
+=== W132 ===
+binary=build-vuln-nopie/pppd/pppd
+mode=attack
+callback=0x0
+side_effect_observed=False
+victim_content_after='sentinel-before\n'
+process_rc=-11
+nak_sha256=ef76d22ebd852ca3ad1877f6095e3f0420c3103e38cf42ccb238228097f3f878
+rej_norm_sha256=8bf7abd07d32a5ec4c3450727028266db54432220bf4c25489af54e394611656
+sigreceived=0x46882c
+pppd: Fatal signal 11
+gdb: 0x468180 <sigreceived>:	0x000000000046882c	0x0000000000000000
+gdb: 0x46882c <inpacket_buf+12>:	0x0000000000000000	0x0000000000000000
+gdb: 0x46883c <inpacket_buf+28>:	0x0000000000468844
+gdb: 0x468844 <inpacket_buf+36>:	"/tmp/pppd2shell-r5-w132c-null-victim"
