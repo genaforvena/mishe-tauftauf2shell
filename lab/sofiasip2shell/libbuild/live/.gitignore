@@ -1,1 +1,4 @@
 *-live
+*-live-plain
+*-live-victim
+libvictim.so

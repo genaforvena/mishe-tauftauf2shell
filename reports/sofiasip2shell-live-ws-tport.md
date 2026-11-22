@@ -74,17 +74,67 @@ bbuffer and exercise the real `ws.c:1057` realloc branch, matching the
 the XOR loop. The layout harness's plain build is what measures the XOR
 bytes' final offsets on glibc's natural usable-size padding.
 
+
+## Plain (non-ASan) live tport: natural glibc abort and byte readback
+
+Full non-ASan `autogen/configure/make` builds of both tags were exported from
+the pinned commit hashes into `libbuild/pins/v17plain` and `v18plain`
+(`ws.c` SHA-256 `90ef747f…` / `7c0b8b55…`); build logs are in
+`libbuild/evidence/v{17,18}plain-{autogen,configure,make}.log`. The same live
+driver was rebuilt without ASan with `SAN=plain`:
+
+```
+SAN=plain bash lab/sofiasip2shell/libbuild/live/build_and_run.sh v17plain 'v1.13.17-plain' 18859
+SAN=plain bash lab/sofiasip2shell/libbuild/live/build_and_run.sh v18plain 'v1.13.18-plain' 18860
+```
+
+| case | rc | observation |
+|---|---|---|
+| `v17plain-live-plain-full` | 134 | `TPORT_RECV count=1`, then glibc `corrupted size vs. prev_size` (SIGABRT) |
+| `v17plain-live-plain-short` | 0 | `TPORT_RECV count=1`, clean |
+| `v18plain-live-plain-full` | 0 | `TPORT_RECV count=1`, clean |
+| `v18plain-live-plain-short` | 0 | `TPORT_RECV count=1`, clean |
+
+`libbuild/live/victim_preload.c` plus `run_victim.sh` add an `LD_PRELOAD`
+`realloc` shim that records the next chunk's size field when the pinned
+`ws.c:1057` realloc occurs, and the driver reads it back in the tport receive
+callback. On v1.13.17 full (`v17plain-live-victim-full`, rc 134):
+
+```
+NEXT_SIZE_BEFORE=1101000000000000 NEXT_SIZE_AFTER=005b4243415a4243
+LIVE_META_DELTA_BAD=0
+corrupted size vs. prev_size
+```
+
+Bytes 1..5 equal `before ^ mask[k%4]` for mask `415a4243`; byte 0 is the
+terminating NUL. The fixed pin produces no such readback and stays clean.
+The shim's separate 128-byte object landed 312 bytes past the buffer
+(`VICTIM_OFF=65856`), so its `0xC3` data was untouched — an honest negative
+about placement inside this tport allocation order, not a contradiction of
+the layout harness's controlled adjacent-object cases.
+
+**Why this does not continue to rung 5.** The first byte of the adjacent
+`size` field is overwritten by the terminator (0x00 in the realloc case,
+even `0xd0` in the 65527 case). That clears the `PREV_INUSE` bit before any
+later allocator operation; glibc detects it and aborts
+(`corrupted size vs. prev_size`, or `malloc(): corrupted top size` in the
+layout harness). No useful fake-chunk state, overlapping allocation or
+pointer value was measured, so no exploitation mechanics were built on this
+path. This is a host-specific glibc consumer check, not a claim about other
+allocators or builds.
+
 ## Honest grade and limits
 
 - **Rung 1/2/3**: confirmed through a real loopback WS SIP tport, live HTTP
   101 upgrade, attacker-written wire frame, and the library's own receive
   event loop. Vulnerable/fixed and full/short controls are clean as labeled.
-- **Rung 4**: still carried by the layout harness's byte readback (chosen
-  repeating-XOR delta in allocator metadata and in a live neighbour's data).
-  This live run adds reachability and a process-level crash, not new byte
-  placement.
-- **Rung 5**: not attempted, not implied. No benign command, no marker, no
-  pointer control. The advisory's RCE sentence remains a claim.
+- **Rung 4**: the plain live tport shows the natural glibc abort and a
+  byte-exact chosen-delta write to the next chunk's size field from the
+  library's own receive path. Byte placement into a live neighbour's *data*
+  is still carried by the layout harness's controlled geometries.
+- **Rung 5**: not attempted, not implied. The measured corruption clears
+  `PREV_INUSE` and glibc aborts at the next allocator operation; no benign
+  command, marker or pointer control was achieved.
 - The test app binds a raw `ws` tport with a trivial stack class; it does not
   build a full SIP dialog, SDP, authentication, or FreeSWITCH. It uses a
   forked client in the same process tree, both constrained to 127.0.0.1.

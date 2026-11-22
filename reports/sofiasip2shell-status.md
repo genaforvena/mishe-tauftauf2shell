@@ -88,12 +88,20 @@ grade.
   the reallocated 65544-byte region, allocated at `ws.c:1057` from the same
   tport call chain (rc 1). The 65520-byte short frame on v1.13.17 and both
   frame sizes on v1.13.18 reach `TPORT_RECV count=1` with no ASan report
-  (rc 0). This closes the W1 "no SIP tport path" limit; it is still rung
-  1/2/3 reachability plus a process crash, not pointer control or rung 5.
-- Next experiment: a plain (non-ASan) live tport run with byte readback of a
-  live neighbour would tie the layout harness's chosen-delta result to the
-  tport allocation order; rung 5 additionally needs a benign command with an
-  observed side effect and independent witness replay.
+  (rc 0). Full non-ASan builds of both tags (`SAN=plain`) confirm the natural
+  consequence: v1.13.17 + 65544 aborts with `corrupted size vs. prev_size`
+  (rc 134) while its short frame and both v1.13.18 cases are clean. An
+  `LD_PRELOAD` readback on that live path shows the next chunk's size bytes
+  1..5 equal `before ^ mask[k%4]` (`LIVE_META_DELTA_BAD=0`); the shim's own
+  victim landed 312 bytes away and stayed untouched, an honest placement
+  negative. This closes the W1 "no SIP tport path" limit.
+- The corruption's first byte is zeroed by the terminator (or even `0xd0` in
+  the 65527 case), clearing glibc's `PREV_INUSE` bit; the next allocator
+  operation aborts. No useful fake-chunk state, overlap or pointer control
+  was measured, so rung 5 mechanics were not built on this path.
+- Next experiment: an allocator configuration where `PREV_INUSE` survives,
+  or a different consumer, would be needed before any rung-5 attempt; rung 5
+  also needs a benign command with an observed side effect and witness replay.
 - Witness #1821 (2026-11-22) replayed the W1 layout claim from a clean
   `git archive HEAD`, regenerated both pinned `.inc` with matching hashes, and
   ran `layout/run.sh` twice (rc 0, identical rc set): readback delta,

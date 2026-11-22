@@ -32,6 +32,12 @@
 #define PIN_LABEL "unknown"
 #endif
 
+#ifdef LIVE_VICTIM
+extern void *g_ws_realloc_ret;
+extern void *g_ws_victim;
+extern unsigned long long g_next_size_before;
+#endif
+
 static const uint8_t mask4[4] = { 0x41, 0x5a, 0x42, 0x43 };
 
 typedef struct live_stack {
@@ -48,7 +54,32 @@ static void live_recv(tp_stack_t *stack, tport_t *tp, msg_t *msg,
 	(void)tp; (void)magic; (void)now;
 	ls->received++;
 	fprintf(stderr, "TPORT_RECV count=%d\n", ls->received);
-	msg_destroy(msg);
+#ifdef LIVE_VICTIM
+	if (g_ws_victim && g_ws_realloc_ret) {
+		int k;
+		fprintf(stderr, "VICTIM_OFF=%td VICTIM_DATA_BEFORE=c3c3c3c3c3c3c3c3 VICTIM_DATA_AFTER=",
+			(char *)g_ws_victim - (char *)g_ws_realloc_ret);
+		for (k = 0; k < 8; k++)
+			fprintf(stderr, "%02x", ((uint8_t *)g_ws_victim)[k]);
+		fprintf(stderr, "\n");
+	}
+	if (g_ws_realloc_ret) {
+		uint8_t *sz = (uint8_t *)g_ws_realloc_ret + 65544;
+		uint8_t before[8], after[8];
+		int k, bad = 0;
+		memcpy(before, &g_next_size_before, 8);
+		memcpy(after, sz, 8);
+		fprintf(stderr, "NEXT_SIZE_BEFORE=");
+		for (k = 0; k < 8; k++) fprintf(stderr, "%02x", before[k]);
+		fprintf(stderr, " NEXT_SIZE_AFTER=");
+		for (k = 0; k < 8; k++) fprintf(stderr, "%02x", after[k]);
+		fprintf(stderr, "\n");
+		for (k = 1; k <= 5; k++)
+			if (after[k] != (uint8_t)(before[k] ^ mask4[k % 4])) bad = 1;
+		if (after[0] != 0) bad = 1;
+		fprintf(stderr, "LIVE_META_DELTA_BAD=%d\n", bad);
+	}
+#endif
 }
 
 static void live_error(tp_stack_t *stack, tport_t *tp, int errcode,
