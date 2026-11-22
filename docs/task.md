@@ -4684,3 +4684,14 @@ two signatures differing in one chosen byte, then a loopback TLS client
 presenting the real 8192-bit certificate as a server chain to see whether the
 same fault frame is reachable from a network-arrived Certificate message.
 Keep the fixed-version and safe-input controls on both paths.
+
+Wake W1 (2026-11-22 ~01:5xZ) closed the first UNKNOWN: a plain (non-ASan)
+build of the unmodified pinned verifier writes exactly 1024 bytes through the
+512-byte `decrypted_signature` on the real upstream 8192-bit fixture, and with
+attacker-chosen `s`, `e=2`, `n = s² − T` it writes a fully chosen 1024-byte `T`
+including `de ad be ef ca fe ba be` at offsets 512..519; a one-byte variant
+changes only offset +512 while the pinned fixed build writes zero bytes.
+Grade: rung 4 MEASURED on this build by direct call; wire reach still UNKNOWN,
+no rung 5, no witness replay. Evidence and reproduction:
+`reports/netx2shell-investigation.md` and
+`lab/frontier/netx2shell/harness/evidence-w1/`.

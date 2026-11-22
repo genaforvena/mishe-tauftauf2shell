@@ -1,0 +1,95 @@
+# netx2shell — CVE-2026-93475 investigation (wake W1, 2026-11-22)
+
+Status: **rung 4 (chosen bytes at a chosen offset) measured on the pinned
+vulnerable build by direct call.** Wire reach remains UNKNOWN; no rung 5. No
+independent witness replay yet. Build and input pins are in
+`lab/frontier/netx2shell/PROVENANCE.md`; the starting rung-3 evidence is in
+`reports/frontier-netx.md`.
+
+## What changed this wake
+
+Frontier left two explicit UNKNOWNs: whether the ASan report's redzone write
+corresponds to attacker-chosen bytes at a chosen `.bss` offset, and whether a
+network-arrived Certificate message reaches the fault. This wake closed the
+first one with a plain (non-ASan) build of the **unmodified** pinned verifier;
+the second is still open.
+
+### Plain-build readback, real upstream fixture
+
+`harness/build-plain.sh` compiles the same source list as the committed ASan
+harness with `-g -O0 -fno-omit-frame-pointer -no-pie` and no sanitizer, for
+both pins. The `decrypted_signature[512]` static at
+`nx_secure_x509_certificate_verify.c:28` resolves as a gdb debug symbol; no
+library or harness source was patched for the readback.
+
+With the real upstream 8192-bit DER fixture, the plain vulnerable build writes
+**exactly 1024 bytes** at `decrypted_signature+0 .. +1023` (1017 non-zero),
+leaving byte 1024 and beyond at their pre-verification value (zero). The ASan
+redzone boundary at +512 is therefore a real 512-byte overwrite of adjacent
+`.bss`, not a sanitizer artifact: the neighbouring `decrypted_signature[512]`
+of `nx_secure_x509_crl_verify.c` begins at +576 and is inside the overwritten
+range. Evidence: `harness/evidence-w1/vuln-fixture-bss-before-after.txt`.
+
+### Chosen-byte control
+
+All three operands of the RSA operation are attacker-supplied in the advisory's
+pre-auth model (peer certificate's modulus and exponent, child certificate's
+signature). The plain harness's existing `manual` mode already lets them be
+set directly, and gdb's `restore` writes the three byte arrays into the
+harness's own buffers after `main`'s memset — again with no source patch.
+
+Construction: choose a 512-byte signature `s = 0x40 || ff*511`, exponent
+`e = 2`, and a fully chosen 1024-byte output `T`; set the modulus to
+`n = s² − T`. Then `s² mod n == T` exactly, so the vulnerable
+`_nx_crypto_huge_number_extract` writes the chosen `T` into the destination.
+
+- Run A: `T[512:520] = de ad be ef ca fe ba be`. Observed 1024 output bytes
+  match `T` byte for byte (`A exact`).
+- Run B changes only the chosen byte at offset 512 to `5a`. Observed output
+  differs from A in **exactly one byte**: offset +512, `de` → `5a`; offset +511
+  and +513 and every other byte are unchanged (`B exact`, one diff).
+- Offset +512 is the first byte past the declared 512-byte
+  `decrypted_signature` array; this is chosen-byte-at-chosen-offset on the
+  plain build, not a redzone read.
+- The same crafted inputs on the pinned **fixed** build produce an all-zero
+  buffer and `verify_status=131074`: its RSA-init modulus-length guard rejects
+  the 8192-bit key before the operation. The real fixture still rejects at
+  parse on that build (`parse_status=418`), so both fix hunks are exercised.
+- The same crafted inputs on the existing ASan vulnerable build fault in the
+  same frame as frontier's fixture run
+  (`_nx_crypto_huge_number_extract` at `nx_crypto_huge_number.c:1783`,
+  `WRITE of size 1` 0 bytes after `decrypted_signature`).
+- A 1-byte exponent `e = 1` control writes only 512 bytes and produces no
+  overflow: negative control, kept as evidence that the chosen-byte result is
+  not an artifact of the harness.
+
+Raw logs and the deterministic generator/runner:
+`lab/frontier/netx2shell/harness/evidence-w1/` (`gen-crafted.py`, `run.sh`,
+`mod.bin`/`sig.bin`/`exp.bin` for A and `b/`, and the five gdb/ASan logs).
+`bash harness/evidence-w1/run.sh` regenerates all of them in ~4 s.
+
+## Honest boundary
+
+- This is a **direct call** into the real pinned verifier. `manual` mode sets
+  the issuer's key fields directly; it does not parse a DER certificate, and
+  there is no TLS/DTLS session or network-arrived Certificate message. Wire
+  reach stays UNKNOWN.
+- Exponent `e = 2` is a legal but unusual RSA public exponent. It is used here
+  to make the chosen-byte construction exact and deterministic. A real peer
+  chain with this exponent has not been built or served.
+- The overwritten neighbour is the CRL verifier's separate static buffer at
+  +576; nothing in this harness dereferences it after the write. No pointer
+  control, control-flow hijack, benign marker execution or command execution
+  is claimed. Rung 5 is not attempted.
+- Plain-build `.bss` layout is specific to this clang 18 `-O0 -no-pie` build;
+  no claim is made about other compilers, optimiser levels or embedded link
+  scripts.
+
+## Next experiment
+
+Build a loopback TLS client against the pinned vulnerable NetX Secure, serve
+the real 8192-bit certificate from a local peer, and determine whether a
+network-arrived Certificate message reaches
+`_nx_secure_x509_certificate_verify` and the same write. Repeat the fixed-tag
+and safe-input controls through that path. Wire reach is the only remaining
+blocker to calling this a pre-auth network-reachable rung 4.

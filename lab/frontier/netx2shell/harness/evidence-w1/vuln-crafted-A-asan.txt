@@ -1,0 +1,59 @@
+Breakpoint 1 at 0x10782d: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/netx_oversized.c, line 65.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=2, argv=0x7fffffffe248) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/netx_oversized.c:65
+65	    if (manual)
+Restoring binary file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/evidence-w1/mod.bin into memory (0x5555560163e0 to 0x5555560167e0)
+Restoring binary file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/evidence-w1/sig.bin into memory (0x555556016100 to 0x555556016300)
+Restoring binary file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/evidence-w1/exp.bin into memory (0x5555556bfb60 to 0x5555556bfb63)
+mode=manual modulus_bytes=1024
+issuer_alg=1 calling verify
+=================================================================
+==3105200==ERROR: AddressSanitizer: global-buffer-overflow on address 0x55555601bc80 at pc 0x55555567a078 bp 0x7fffffffd7f0 sp 0x7fffffffd7e8
+WRITE of size 1 at 0x55555601bc80 thread T0
+[Detaching after fork from child process 3105207]
+    #0 0x55555567a077 in _nx_crypto_huge_number_extract /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_huge_number.c:1783:16
+    #1 0x555555672c92 in _nx_crypto_rsa_operation /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_rsa.c:147:5
+    #2 0x5555556734f6 in _nx_crypto_method_rsa_operation /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_rsa.c:393:24
+    #3 0x555555666504 in _nx_secure_x509_certificate_verify /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_x509_certificate_verify.c:230:22
+    #4 0x55555565b9c0 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/netx_oversized.c:103:14
+    #5 0x7ffff7c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7ffff7c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x555555582354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/harness/netx_vuln+0x2e354) (BuildId: e543a2a46201b244150f6c1217d6c277565e3de9)
+
+0x55555601bc80 is located 0 bytes after global variable 'decrypted_signature' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_x509_certificate_verify.c:28' (0x55555601ba80) of size 512
+SUMMARY: AddressSanitizer: global-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/crypto_libraries/src/nx_crypto_huge_number.c:1783:16 in _nx_crypto_huge_number_extract
+Shadow bytes around the buggy address:
+  0x55555601ba00: f9 f9 f9 f9 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+  0x55555601ba80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55555601bb00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55555601bb80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55555601bc00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x55555601bc80:[f9]f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x55555601bd00: 00 00 00 00 00 00 00 00 f9 f9 f9 f9 00 00 00 00
+  0x55555601bd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55555601be00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55555601be80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55555601bf00: 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3105200==ABORTING
+[Inferior 1 (process 3105200) exited with code 01]
