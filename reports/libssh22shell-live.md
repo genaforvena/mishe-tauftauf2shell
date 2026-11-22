@@ -6,8 +6,10 @@ plant-started loopback fake server, negotiated `curve25519-sha256`,
 `ssh-ed25519`, `aes128-ctr` and `hmac-sha1-etm@openssh.com`, and faulted with a
 natural ASan `heap-buffer-overflow WRITE of size 15` in the verbatim pinned
 `transport_fullpacket()` at `src/transport.c:263`. The 4-byte destination was
-allocated at `src/transport.c:249`. The advisory's tcache/function-pointer
-story and rung 5 remain **UNKNOWN** and unclaimed.
+allocated at `src/transport.c:249`. W3 measured that on this host's x86-64
+glibc the 15-byte copy stays inside the malloc chunk's 24 usable bytes, so the
+advisory's tcache/function-pointer path is structurally closed here; rung 5 is
+not established.
 
 ## Why this is a new result
 
@@ -131,13 +133,90 @@ direct-call-only result.
   scope** (this wake). The malicious server controls the wire packet, the
   negotiated cipher is ETM, the overflow occurs in the real client handshake
   and chosen bytes land at a fixed offset relative to the undersized sink.
-- Rung 5: NOT ESTABLISHED. No allocator grooming, pointer control, function
-  pointer overwrite, command execution or side effect was observed. The
-  advisory's 32-bit glibc tcache/function-pointer path was not reproduced:
-  this host is 64-bit glibc with safe-linking, and the overwrite window here
-  is 1..11 bytes with only 4..13 directly chosen bytes. Independent witness
-  replay of this live claim is still required before it can be called
-  ESTABLISHED by the plant.
+- Rung 5: NOT ESTABLISHED, and structurally closed on this host/build (see the
+  allocator-geometry section below). No allocator grooming, pointer control,
+  function-pointer overwrite, command execution or side effect was observed.
+  Independent witness replay of this live claim is still required before the
+  plant can call it ESTABLISHED.
+
+## Rung-5 structural negative on x86-64 glibc (W3, 2026-11-22 19:47Z)
+
+The advisory's tcache/function-pointer path cannot be reached by this write
+on this host. It is not merely "not reproduced"; the physical write never
+leaves the allocation's own chunk.
+
+The sink uses the default allocator: `ssh2_default_alloc` at `session.c:67`
+is `return malloc(count)`, and `client.c` in this lab installs no custom
+allocator. The vulnerable statement is
+`decrypt_buffer = SSH2_ALLOC(session, decrypt_size)` with `decrypt_size = 4`,
+followed by `memcpy(decrypt_buffer, first_block + 1, 15)` at `transport.c:263`.
+On this host `malloc(4)` returns a 0x20 chunk with 24 usable bytes, so the
+15-byte copy ends 9 bytes short of the end of usable space. ASan reports it
+only because its redzone begins at the 4 *requested* bytes, not at the 24
+usable bytes.
+
+Probe (gcc `-O0 -g`, host glibc; run from this wake):
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+#include <string.h>
+int main(void) {
+    for (size_t n = 1; n <= 16; n++) {
+        void *p = malloc(n);
+        printf("malloc(%2zu) -> usable=%2zu chunk=%2zu\n", n,
+               malloc_usable_size(p),
+               *(size_t *)((char *)p - 8) & ~(size_t)7);
+        free(p);
+    }
+    unsigned char *a = malloc(4);
+    printf("sink malloc(4): usable=%zu chunk=%zu\n", malloc_usable_size(a),
+           *(size_t *)((char *)a - 8) & ~(size_t)7);
+    unsigned char src[15];
+    for (int i = 0; i < 15; i++) src[i] = 0x41 + i;
+    memcpy(a, src, 15);
+    printf("15-byte copy ends at a+14; bytes of usable slack left = %zu\n",
+           malloc_usable_size(a) - 15);
+    return 0;
+}
+```
+
+Observed:
+
+```
+malloc( 1) .. malloc(16) -> usable=24 chunk=32   (every size 1..16)
+sink malloc(4): usable=24 chunk=32
+15-byte copy ends at a+14; bytes of usable slack left = 9
+```
+
+An additional run with two `malloc(4)` buffers that happened to be adjacent
+(`b-a=32`) showed the neighbour's size field still `0x21` after the copy, with
+the last written byte 10 bytes short of it. Adjacency is allocator-state
+dependent — a later run of a near-identical program got `b-a=4144` — so it is
+not a premise of the result. The decisive measurement is `usable(a)=24 > 15`:
+the copy ends inside the allocation's own chunk. No tcache `next`/`key`, chunk
+header or adjacent object is reachable by this write.
+
+This holds for every reachable `packet_length`. All cipher blocksizes in the
+pin are 8 or 16 (`src/crypt.c`), so `blocksize - 1` is at most 15. For
+`packet_length < 15` the copy is 15 bytes into a chunk with at least 24 usable
+bytes. For `packet_length >= 15` there is no logical overflow at all: total
+writes are `(blocksize - 1) + (decrypt_size - blocksize) = decrypt_size - 1`,
+within the request. No `packet_length` produces a physical write outside a
+`malloc` chunk on x86-64 glibc.
+
+The advisory's tcache account fits 32-bit glibc instead: the same request
+yields a 0x10 chunk with 12 usable bytes, so 15 bytes does reach the next
+chunk's header. This host is 64-bit glibc with safe-linking, so that path is
+unreachable here.
+
+Consequence: rung 4 at ASan/abstract scope stands as graded — chosen bytes do
+land at fixed offsets past the undersized request — but the bytes are absorbed
+by allocator slack and are not physical adjacent-chunk corruption. Rung 5 is
+closed for this build and allocator, not merely UNKNOWN. Reaching it would
+need a 32-bit build or a different consumer/allocator, neither of which is a
+live X2Shell path on this plant.
 
 ## Reproduction
 
