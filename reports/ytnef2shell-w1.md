@@ -119,6 +119,24 @@ Causal chain: before/after dumps in the same process, same breakpoint pair.
 Attacker control is over the overrun length and therefore which prebuffer
 bytes land at which offsets; the bytes themselves are fixed by `RTF_PREBUF`.
 
+Plain-build impact is length-dependent (all four crafted files plus safe
+controls, rc and first stderr line):
+
+| input | rc | observed |
+| --- | --- | --- |
+| `rtf-safe.dat`, `winmail-safe.dat` | 0 | clean |
+| `rtf-wrap16.dat`, `winmail-wrap16.dat` | 134 | `malloc(): invalid size (unsorted)` |
+| `rtf-wrap0.dat`, `winmail-wrap0.dat` | 134 | `malloc(): invalid size (unsorted)` |
+| `rtf-wrap206.dat`, `winmail-wrap206.dat` | 139 | SIGSEGV, not metadata corruption |
+
+The 1-byte-overrun `wrap206` case is a deliberate negative nuance: its 206-byte
+request yields a 0xe1 chunk (216 usable bytes), so the 207-byte prebuffer write
+stays inside usable space and the following chunk header is intact at
+`ytnef.c:1574` (`evidence/v212-plain-gdb-wrap206.log`). Its SIGSEGV is at
+`DecompressRTF ytnef.c:1611`, the later `memcpy(dst, src+207, 0xFFFFFF41)`, not
+at the prebuffer write. Adjacent metadata corruption is established for the
+16- and 0-byte allocation variants only.
+
 ## 5. Honest grade
 
 - Rung 1/2: deterministic real-file trigger; the wrapped allocation and

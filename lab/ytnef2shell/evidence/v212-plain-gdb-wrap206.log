@@ -1,0 +1,27 @@
+Function "DecompressRTF" not defined.
+Breakpoint 1 (DecompressRTF) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, DecompressRTF (p=0x55555555bee0, size=0x7fffffffd668) at ../../../src/ytnef-2.1.2/lib/ytnef.c:1528
+1528	  comp_Prebuf.size = strlen(RTF_PREBUF);
+Breakpoint 2 at 0x7ffff7faa013: file ../../../src/ytnef-2.1.2/lib/ytnef.c, line 1574.
+
+Breakpoint 2, DecompressRTF (p=0x55555555bee0, size=0x7fffffffd668) at ../../../src/ytnef-2.1.2/lib/ytnef.c:1574
+1574	    out = comp_Prebuf.size;
+
+=== wrap206 AFTER memcpy dst=0x55555555a6c0 ===
+0x55555555a6b0:	0x0000000000000000	0x00000000000000e1
+0x55555555a6c0:	0x615c316674725c7b	0x5c63616d5c69736e
+0x55555555a6d0:	0x65645c3066666564	0x7b30323762617466
+
+=== CONTINUE ===
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7d89320 in __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:833
+warning: 833	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+#0  0x00007ffff7d89320 in __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:833
+#1  0x00007ffff7faa215 in DecompressRTF (p=0x55555555bee0, size=0x7fffffffd668) at ../../../src/ytnef-2.1.2/lib/ytnef.c:1611
+#2  0x00007ffff7fa9a85 in MAPIPrint (p=0x7fffffffdfb8) at ../../../src/ytnef-2.1.2/lib/ytnef.c:1454
+#3  0x0000555555555936 in PrintTNEF (TNEF=...) at ../../../src/ytnef-2.1.2/ytnefprint/main.c:172
+#4  0x000055555555550d in main (argc=2, argv=0x7fffffffe1c8) at ../../../src/ytnef-2.1.2/ytnefprint/main.c:87
