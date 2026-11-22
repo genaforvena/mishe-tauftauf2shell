@@ -1,0 +1,13 @@
+bf7ece739405bf94382907a23b6fbc44e20332f213fd551eab869c65c4dd0f75  lab/frontier/wazuh2shell/src/CVE-2026-74045.json
+02efdf88808ef4145075deddfdf2b475569a1aab78a244677858d35fedf62252  lab/frontier/wazuh2shell/src/GHSA-gc4j-j9fg-4cfr.html
+c01a8ca5609bb2c956dd1ae836d5d926ec68153ecebc5a75ea0febc2e076da8d  lab/frontier/wazuh2shell/src/cJSON.h
+bdb537181a19caf3e55f809bb36686445e7f8d91f2e3eaeb7ac7d131b2defcd6  lab/frontier/wazuh2shell/src/cleanevent.c.v4.14.7
+bdb537181a19caf3e55f809bb36686445e7f8d91f2e3eaeb7ac7d131b2defcd6  lab/frontier/wazuh2shell/src/cleanevent.c.v4.14.8
+7c1f285078c395a4aedf6301abd904b60b6f11a7c4b8e387f45b868e24ed8f32  lab/frontier/wazuh2shell/src/defs.h
+924d6ba7dc3097ad08e54a27ff9840abd94af29e1eaf38f1c4dec94bdf71b743  lab/frontier/wazuh2shell/src/eventinfo.h
+7b3b7c666c5e9dde0d843efb2de37b99b51664bb30b8dda6841e3af8f0f1cadc  lab/frontier/wazuh2shell/src/syscheck.c.v4.14.7
+365542f76b9d3279cdb8cbc450a5b3f3adb1afa80cd1e0786879a3f79fb540b1  lab/frontier/wazuh2shell/src/syscheck.c.v4.14.8
+49d55bd71f2ad36c45aad5220054cc1a3919c0d7dacaf18184bc552f16312be1  lab/frontier/wazuh2shell/src/syscheck_op.h
+afba91075ffe546d39e04fd58d95449f795cf8a67806db6ba9ccd68192172d8a  lab/frontier/wazuh2shell/src/syscheck_op.v4.14.8.h
+a819c7c0e3fdcc450e0651cb07fb62a109dfa9523d0bf89db0f6b5f83aecb109  lab/frontier/wazuh2shell/harness.c
+7fbfe48db0ac16a89a14541c4e55dee99d8d6e82e214a93a1c3387f98bc7f47a  lab/frontier/wazuh2shell/run.sh

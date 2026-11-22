@@ -152,3 +152,7 @@ lab/frontier/proftpd2shell/src/mod_rewrite.c.orig
 lab/frontier/soes2shell/src/SOES-*/
 lab/frontier/soes2shell/src/*.tar.gz
 lab/frontier/soes2shell/build/
+
+# Wazuh2shell harness: pinned source files, harness, runner and logs stay tracked.
+lab/frontier/wazuh2shell/out-direct/build/
+lab/frontier/wazuh2shell/extracted.inc

