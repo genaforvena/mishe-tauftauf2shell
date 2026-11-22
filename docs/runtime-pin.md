@@ -106,9 +106,9 @@ there is a pin issue, not a missing README row.
   guard admission, slices and memory/start limits to all `m2shell-*`
   service units.
 - This plant runs in its own workload budget: `m2shell-plants.slice`
-  (MemoryHigh 3G / MemoryMax 5G / no swap / CPUQuota 200%), created by
-  the main plant's operator at the owner's request on 2026-11-20 and
-  applied to all `m2shell-*` service units through the prefix drop-in
+  (now MemoryHigh 8G / MemoryMax 10G / no swap / CPUQuota 200%; originally
+  3G/5G), created by the main plant's operator at the owner's request on
+  2026-11-20 and applied to all `m2shell-*` service units through the prefix drop-in
   `m2shell-.service.d/zzzz-own-slice.conf` — that file is the live
   carrier: a `Slice=` line must never carry an inline `#` comment
   (systemd rejects the whole name, observed 2026-11-20 08:48Z, journal
@@ -134,12 +134,16 @@ there is a pin issue, not a missing README row.
   stuck in `D (disk sleep)` at `mem_cgroup_handle_over_high`, slice at
   3.5G against the 3G high, no routing events for ~53 min. With the
   owner's standing instruction to keep the plant active, the plant's own
-  slice file `~/.config/systemd/user/m2shell-plants.slice` was raised
-  from `MemoryHigh=3G/MemoryMax=5G` to `MemoryHigh=6G/MemoryMax=8G`
-  (CPUQuota 200%, no swap unchanged), followed by `daemon-reload`. The
-  four wakes resumed on hy4-flash within 30 s and two yielded by 16:47.
-  The engine router still enforces `max_parallel: 3` per candidate, so
-  the site cap of 5 admits five wake processes but only three engines.
+  slice file `~/.config/systemd/user/m2shell-plants.slice` was raised in
+  two steps to `MemoryHigh=8G/MemoryMax=10G` (CPUQuota 200%, no swap
+  unchanged), each followed by `daemon-reload`. The four wakes resumed
+  on hy4-flash within 30 s and two yielded by 16:47. Self-healing
+  producers also returned (next-due-armed exit 0 at 16:48). A 30-minute
+  check from 16:49 to 17:19Z recorded 9 yields, 0 timeouts, max yield
+  gap 344 s, and peak memory 6.441G against the then-6G high; the extra
+  headroom to 8G/10G was added because that left no margin. The engine
+  router still enforces `max_parallel: 3` per candidate, so the site
+  cap of 5 admits five wake processes but only three engines.
 - The site-local verified binaries (`bin/mishe-tape`, `mishe-records`,
   `mishe-signal-*`) are byte-identical copies of the upstream plant's
   installed framer binaries, with their `*.install.json` sha256 records
