@@ -70,10 +70,9 @@ Raw logs and the deterministic generator/runner:
 
 ## Honest boundary
 
-- This is a **direct call** into the real pinned verifier. `manual` mode sets
-  the issuer's key fields directly; it does not parse a DER certificate, and
-  there is no TLS/DTLS session or network-arrived Certificate message. Wire
-  reach stays UNKNOWN.
+- The chosen-byte control is a **direct call** into the real pinned verifier:
+  `manual` mode sets the issuer's key fields directly and does not parse a DER
+  certificate. The separate TLS section below covers protocol-arrived bytes.
 - Exponent `e = 2` is a legal but unusual RSA public exponent. It is used here
   to make the chosen-byte construction exact and deterministic. A real peer
   chain with this exponent has not been built or served.
@@ -85,11 +84,54 @@ Raw logs and the deterministic generator/runner:
   no claim is made about other compilers, optimiser levels or embedded link
   scripts.
 
-## Next experiment
+## Remaining gaps
 
-Build a loopback TLS client against the pinned vulnerable NetX Secure, serve
-the real 8192-bit certificate from a local peer, and determine whether a
-network-arrived Certificate message reaches
-`_nx_secure_x509_certificate_verify` and the same write. Repeat the fixed-tag
-and safe-input controls through that path. Wire reach is the only remaining
-blocker to calling this a pre-auth network-reachable rung 4.
+TLS-protocol reach is measured on the in-process RAM transport; host-socket
+loopback is structurally unavailable in the pinned tree (no driver) and needs
+a new NetX-to-Linux socket/TUN driver — a separate piece of work. No pointer
+control, control-flow hijack, benign marker execution, command execution or
+witness replay is in hand, so rung 5 is not attempted and no ESTABLISHED claim
+is made.
+
+
+## TLS-protocol path (wake W1 continued, 2026-11-22 ~02:0xZ)
+
+The pinned tree has **no host-network driver**: `ports/linux/gnu/` is a port
+header plus an empty CMake target; the available transports are the in-process
+RAM driver and a libpcap raw-Ethernet driver that cannot carry traffic on
+Linux `lo`. The fixture has no private key, so an external openssl peer cannot
+present it. A host-socket loopback path therefore does not exist in this tree
+without writing a new driver — recorded as a structural negative.
+
+The reachable step above the direct call is an in-process TLS handshake.
+`harness/tls/tls_ram.c` is the upstream
+`samples/demo_netx_secure_tls.c` with one change to the server's identity: it
+sends the same real 8192-bit DER from the fixture. Two NX_IP instances talk
+over `_nx_ram_network_driver`; `NX_SECURE_ALLOW_SELF_SIGNED_CERTIFICATES`
+makes the self-signed remote certificate verify against itself. The client
+thread faults under ASan with the full protocol stack intact:
+
+`nx_secure_tls_session_start` → `nx_secure_tls_handshake_process` →
+`nx_secure_tls_session_receive_records` → `nx_secure_tls_process_record` →
+`nx_secure_tls_client_handshake` → `nx_secure_tls_process_remote_certificate`
+→ `nx_secure_tls_remote_certificate_verify` → `nx_secure_remote_certificate_verify`
+→ `nx_secure_x509_certificate_chain_verify` → `nx_secure_x509_certificate_verify`
+→ `_nx_crypto_method_rsa_operation` → `_nx_crypto_rsa_operation` →
+`_nx_crypto_huge_number_extract` → `global-buffer-overflow WRITE of size 1`,
+0 bytes after `decrypted_signature`. Full stack in
+`harness/tls/run-vuln.txt`.
+
+Controls, same harness and build flags:
+
+- pinned **fixed** tag (`harness/tls/run-fixed.txt`): no ASan report; the
+  oversized certificate never completes verification.
+- **safe input on the vulnerable build** (`harness/tls/run-vuln_safe.txt`):
+  the server presents the sample's ordinary 2048-bit certificate; the client
+  prints `REMOTE_CERT_CALLBACK len=702`, proving remote Certificate processing
+  and verification completed, with no ASan report.
+- `bash harness/tls/run.sh` rebuilds and replays all three in ~3 min.
+
+This is a network-protocol-arrived Certificate message, not a direct call, so
+wire reach at the TLS protocol layer is MEASURED. It is **not** host TCP
+loopback: the transport is the in-process RAM driver, and no rung-5 claim is
+made. No witness replay yet.
