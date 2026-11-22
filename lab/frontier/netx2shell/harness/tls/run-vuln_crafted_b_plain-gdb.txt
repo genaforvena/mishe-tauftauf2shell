@@ -1,0 +1,19 @@
+Breakpoint 1 at 0x440e78: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_x509_certificate_verify.c, line 270.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff7bff6c0 (LWP 891186)]
+[New Thread 0x7ffff73fe6c0 (LWP 891187)]
+[New Thread 0x7ffff6bfd6c0 (LWP 891188)]
+[New Thread 0x7ffff63fc6c0 (LWP 891189)]
+[New Thread 0x7ffff5bfb6c0 (LWP 891190)]
+[New Thread 0x7ffff53fa6c0 (LWP 891191)]
+[Switching to Thread 0x7ffff5bfb6c0 (LWP 891190)]
+=== CRAFTED TLS VERIFY HIT (post-RSA) ===
+#0  _nx_secure_x509_certificate_verify (store=0x498678 <client_tls_session+1472>, certificate=0x4a6900 <tls_packet_buffer_client+39424>, issuer_certificate=0x4a6900 <tls_packet_buffer_client+39424>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_x509_certificate_verify.c:270
+#1  0x000000000043f93c in _nx_secure_x509_certificate_chain_verify (store=0x498678 <client_tls_session+1472>, certificate=0x4a6900 <tls_packet_buffer_client+39424>, current_time=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_x509_certificate_chain_verify.c:126
+#2  0x000000000042e7e3 in _nx_secure_remote_certificate_verify (store=0x498678 <client_tls_session+1472>, certificate=0x4a6900 <tls_packet_buffer_client+39424>, current_time=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/netx2shell/src/netxduo-6.5.1.202602_rel/nx_secure/src/nx_secure_remote_certificate_verify.c:74
+parsed modulus_length=1024 exponent_length=3 sig_length=1024
+bytes 504..527 of decrypted_signature (512 = first past the array):
+0x4b7328 <decrypted_signature+504>:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x4b7330 <generated_hash>:	0x5a	0xad	0xbe	0xef	0xca	0xfe	0xba	0xbe
+0x4b7338 <generated_hash+8>:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00

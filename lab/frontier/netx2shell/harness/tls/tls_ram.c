@@ -21,6 +21,11 @@
 #include "nx_secure_tls_api.h"
 #include "nx_secure_x509.h"
 #include "nx_oversized_key_test_data.h"
+#ifdef CRAFTED_CERT
+#include "nx_crafted_key_test_data.h"
+#define oversized_cert_der crafted_cert_der
+#define oversized_cert_der_len crafted_cert_der_len
+#endif
 
 #define     DEMO_STACK_SIZE         4096
 
