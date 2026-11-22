@@ -5804,6 +5804,27 @@ scope with no witness, so only the non-admission limbs are detailed here.
   3/3 outcomes and the exact 3958/3959 threshold, and graded rungs 1/2/3
   live wire and rung 4 live wire-triggered ESTABLISHED. Rung 5 stays UNKNOWN
   with no demonstrated grooming path on this host's glibc.
+
+- H2o2Shell W4 (`c360f20`, `reports/h2o2shell-status.md`): closes the last
+  hypothesis W3 left open — House-of-Force-like reuse of the heap top whose
+  `size` the overflow rewrites to `0x4141414141414141`. On the pinned plain
+  build, `python3 live/top-reuse.py overflow` sends a 1200-byte `pad` header
+  and a 6870-byte path to 127.0.0.1:17999 (17 bytes past the 8192-byte log
+  line), waits, then sends a short request; `control` sends two short requests.
+  Overflow req1 returns 503 with the process still alive, req2 times out and
+  the error log records `free(): invalid next size (normal)` followed by
+  `received fatal signal 6` (SIGABRT); the control returns two normal 503s
+  with no allocator diagnostic. Repeated twice with identical outcomes;
+  committed artifacts are `live/top-reuse-{overflow,control}.out` and
+  `live/top-reuse-{overflow,control}-errlog.txt`. Because the Apache escaper
+  emits only 0x20-0x21 and 0x23-0x7c (`logconf.c:437`), the rewritten size
+  always has its high bytes set and can never be a valid small size, so glibc's
+  integrity check aborts on the first reuse instead of yielding a controllable
+  pointer. With W2's canary barrier, rung 5 is structurally closed on both
+  stack and heap paths for these wire sequences; a different allocator or an
+  object-placement primitive not driven by them would be a new claim. Grade
+  unchanged (rungs 1-4 live and wire-triggered, rung 5 UNKNOWN), author-only,
+  witness replay still owed.
 - Inetutils2Shell (`befa1c3`): W2 preserved witness W119's grade and added
   three measured negatives. At 34 triplets the first ASan fault is
   `end_slc (slc.c:237)` `sprintf`, `WRITE of size 3` at `slcbuf+108`, not
