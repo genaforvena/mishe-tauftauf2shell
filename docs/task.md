@@ -5692,3 +5692,30 @@ control or command; the advisory's real-daemon ASan crash at N=301/374 stays
 a claim. No window, charter, mind or route; admission is the operator's call.
 Brief `reports/frontier-pppd2shell.md`; raw evidence is gitignored and
 regenerates with `bash harness/run.sh`.
+
+### Admitted 2026-11-22 ~18:56Z: pppd2shell (operator, standing #6)
+
+Operator admitted `pppd2shell` under standing approval #6 on frontier's
+source-cited W118 brief `reports/frontier-pppd2shell.md` and DM #1550:
+GHSA-frhv-j822-2pvx / CVE-2026-85495, `lcp_reqci()` 4-to-5 amplification of
+repeated PAP AUTHTYPE CIs into the 1500-byte `.bss` `nak_buffer[]`, affected
+≤2.5.3 (`96f962b9…`), fixed 2.5.4 (`379a630a…`, `cc8b00c` dedup and
+`1baf2ac` bounds guard). Claim source, fix commits, both tarball archives and
+both patch SHA-256 pins are in `lab/frontier/pppd2shell/pins/PIN_HASHES.txt`
+and `PROVENANCE.md`. Frontier staged the charter, seed wall and two-pane
+window (inner index 87, registry 88 windows) at 18:44–18:45Z; admission
+adopted that window and added the 82nd hy4-flash route, a 7-day operator
+wake-failure signal and the three units from the exact full-flag sync — no
+duplicate window, no hand-cleared signal.
+
+Operator verification 18:56Z: `bash lab/frontier/pppd2shell/harness/run.sh`
+returned rc 0 with all checks PASS and nine normalized digests byte-identical
+to `lab/frontier/pppd2shell/EVIDENCE_HASHES.txt`; tracked harness outputs
+stayed clean (git status unchanged). Grade at admission: rungs 1/2/3 and rung
+4 chosen digest bytes at offsets 1504/1509/1514 in a plain readback —
+direct-call scope only. No pppd process, pty, PPP device, wire negotiation,
+pointer control, command or witness replay; the advisory's real-daemon
+ASan crash at N=301/374 remains a claim, and rung 5 is UNKNOWN. Status
+`reports/pppd2shell-status.md`; next bounded experiment is a local pty build
+of pinned 2.5.3 driving one RFC-1662 LCP Configure-Request with N=301 repeated
+PAP CIs.
