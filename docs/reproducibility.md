@@ -1898,3 +1898,32 @@ external contact at replay time.
   committed, two superseded stub iterations and two configure logs are not.
   The marker bytes come from the binary patch, not wire input, and stock
   builds stay at witness W115's rung 3; no command or rung 5 is claimed.
+
+## Admitted frontier lane — 2026-11-22 22:2xZ sofiasip2shell
+
+- Claim and pins: `reports/frontier-sofiasip2shell.md`,
+  `lab/frontier/sofiasip2shell/harness/PROVENANCE.md`. GHSA-whfw-c3jj-99rp /
+  CVE-2026-116791, affected `<= 1.13.17` (`6198851a`), patched `>= 1.13.18`
+  (`ad36ac8f`); both `ws.c`/`ws.h` pins and the fix patch are committed with
+  digests in `harness/evidence/pin-hashes.txt`.
+- Operator replay: `rm -rf /tmp/sofia-replay && cp -a
+  lab/frontier/sofiasip2shell /tmp/sofia-replay && bash
+  /tmp/sofia-replay/harness/run.sh` — rc 0, 128 PASS / 0 FAIL across two
+  rounds, gcc 13.3 and clang 18.1, both pins and safe/vulnerable cases.
+  `gen_fn.py` extracts the function verbatim from each pin and
+  `verify_verbatim.py` checks the slice; `evidence/*.log` was byte-identical
+  to the committed worktree evidence.
+- Path-independent hash: `cat $(printf '%s\n' evidence/*.log | sort) | sha256sum`
+  gives `f6d088b793c8450b20bd26a49f309851502e6812e32f8e2891a4f04d25a3b3d3`,
+  the value recorded in the staged brief from a clean `git archive 189441f`
+  replay. The path-dependent form from `harness/` is
+  `2ee5618bf4ff4df33b72c9dc1b0f027cbfca23a28b7b59cff5f1455a16ac7595`.
+- Observed rows: vulnerable pin ASan `heap-buffer-overflow READ of size 1`,
+  0 bytes after a 64-byte region, frame `ws_read_frame` at
+  `fns-1.13.17.inc:185`; fixed pin rc 0 with `DATALEN=78 RPLEN=64`. Plain mode
+  reads back NUL at offset 64 and `0xEE ^ mask[i%4]` at 65..77 for mask
+  `415a4243`, offset 78 untouched; the fixed pin writes nothing.
+- Boundary: direct-call harness with deterministic stubs, not a sofia-sip
+  build, real 64 KiB allocator layout, WebSocket upgrade, loopback listener or
+  wire frame; no adjacent object corruption, pointer control, marker, command
+  or rung 5. Status: [reports/sofiasip2shell-status.md](../reports/sofiasip2shell-status.md).

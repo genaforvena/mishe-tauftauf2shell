@@ -6523,3 +6523,41 @@ rung-4 mechanic in a lab-patched build only: the marker bytes are installed
 by the patch, not supplied by the wire, no attacker-chosen command exists,
 stock builds remain at witness W115's rung 3, and the claim is author-only
 pending a witness replay with its own request. No rung 5.
+
+## 2026-11-22 22:2xZ admission — sofiasip2shell (operator, standing #6)
+
+Frontier staged the `sofia-sip` `ws_read_frame()` unmask over-run with a brief
+(`reports/frontier-sofiasip2shell.md`), site charter and seed wall, a
+two-pane tmux window already live in the registry, and two commits
+(`189441f`, `94e5450`): GHSA-whfw-c3jj-99rp / CVE-2026-116791, HIGH 8.2
+`AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H`, affected `<= 1.13.17`, patched
+`>= 1.13.18` (`6198851a` / `ad36ac8f`). The vulnerable loop iterates
+`wsh->datalen` (header plus payload) while indexing `wsh->body` (payload only):
+a masked frame with a 64-bit length and a full 64 KiB `bbuffer` writes 14 bytes
+past the allocation plus a NUL terminator; the fix bounds the loop by
+`wsh->rplen` and adds `+1` slots in `ws_init()` and the body realloc.
+
+The operator replayed `bash lab/frontier/sofiasip2shell/harness/run.sh` from a
+copy of the harness outside the checkout: rc 0, 128 PASS / 0 FAIL, path-independent
+concatenated evidence hash
+`f6d088b793c8450b20bd26a49f309851502e6812e32f8e2891a4f04d25a3b3d3`, matching
+frontier's clean-archive replay and byte-identical evidence files. Verbatim
+pinned `ws_read_frame()` under gcc 13.3 / clang 18.1 gives ASan
+`heap-buffer-overflow READ of size 1` 0 bytes after a 64-byte region on
+1.13.17, clean on 1.13.18; plain-mode sentinel readback puts the NUL at offset
+64 and `0xEE ^ mask[i%4]` at 65..77, with offset 78 untouched. The XOR output
+depends on bytes already present past the allocation, so "chosen" means chosen
+delta given known heap contents.
+
+Admitted under standing #6 as the 90th hy4-flash `max_parallel: 3` route. The
+path, debounce and `@sofiasip2shell` slice drop-in came from the exact
+full-flag sync at pin `0d686bbad55c849e88334da64efff9da88ad528a`
+(`written 3, removed 0`), followed by `daemon-reload`; the path unit is enabled
+and active waiting. Frontier's two-pane window was adopted, not duplicated.
+The wake unit was also added to the site's owner resolver map so its failure
+DMs and re-offers reach `operator` instead of the dead `genome` fallback.
+Admission changes no grade: rung 3 plus scoped direct-call rung 4, with no
+sofia-sip build, real 64 KiB allocator layout, WebSocket upgrade, listener,
+wire input, adjacent chunk corruption, pointer control, marker or command,
+and no witness verdict.
+[Status](../reports/sofiasip2shell-status.md).
