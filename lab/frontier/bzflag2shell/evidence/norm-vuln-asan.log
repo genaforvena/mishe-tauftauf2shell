@@ -1,0 +1,52 @@
+=================================================================
+==PID==ERROR: AddressSanitizer: use-after-poison on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 64 at 0xADDR thread T0
+#FRAME in recv ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:6722
+#FRAME in NetHandler::receive(unsigned long, bool*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/bzflag2shell/harness/gen-vuln/net_functions.inc:69
+#FRAME in NetHandler::tcpReceive() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/bzflag2shell/harness/gen-vuln/net_functions.inc:7
+#FRAME in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/bzflag2shell/harness/harness.cpp:114
+#FRAME in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+#FRAME in __libc_start_main_impl ../csu/libc-start.c:360
+#FRAME in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/bzflag2shell/harness/bzflag-vuln-asan+0xADDR) (BuildId: 03d8b51ab2c2d2af59ebbf40c673ff1b4c812c3e)
+
+0xADDR is located 1024 bytes inside of 8192-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+#FRAME in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+#FRAME in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/bzflag2shell/harness/harness.cpp:84
+#FRAME in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+#FRAME in __libc_start_main_impl ../csu/libc-start.c:360
+#FRAME in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/bzflag2shell/harness/bzflag-vuln-asan+0xADDR) (BuildId: 03d8b51ab2c2d2af59ebbf40c673ff1b4c812c3e)
+
+SUMMARY: AddressSanitizer: use-after-poison ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:6722 in recv
+Shadow bytes around the buggy address:
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+=>0xADDR:[f7]f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+  0xADDR: f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7 f7
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING

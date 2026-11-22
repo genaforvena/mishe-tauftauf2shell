@@ -1,0 +1,7 @@
+stage1_status=1 stage1_tcplen=-3072
+stage2_status=1 stage2_tcplen=-3008 stage2_offset=-3072
+stage2_errno=0
+readback+0=5a5a5a5a5a5a5a5a
+readback+16=4141414141414141
+readback+32=4242424242424242
+readback+48=4343434343434343

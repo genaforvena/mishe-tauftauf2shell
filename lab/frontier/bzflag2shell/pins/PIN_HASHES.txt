@@ -1,0 +1,4 @@
+# BZFlag CVE-2026-130849 pins (see PROVENANCE.md for source-file and harness hashes)
+29b3b97fa240b2aa681e7935afb3a8aa65831ea7e669813730acfa25810926fb  bzflag-v2.4.30.tar.gz
+86a5ded5a039185fee76e6ad65a68554e40cfe7cad5acbd9b1635821a546a7b7  bzflag-v2.4.32.tar.gz
+441efea0348adde9f074af5a3b224c0db9c136a53097f0685996e260d875205a  fix-8e501d6.patch
