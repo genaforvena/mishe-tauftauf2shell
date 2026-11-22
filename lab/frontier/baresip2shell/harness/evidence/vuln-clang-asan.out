@@ -1,20 +1,20 @@
 CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1 LENBYTES=fffffffffffffffc KEY=b4b4b4b4
 =================================================================
-==846853==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50300000005e at pc 0x6427d041cbd0 bp 0x7ffe02a4ffe0 sp 0x7ffe02a4ffd8
+==1006390==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50300000005e at pc 0x6363e29f0bd0 bp 0x7ffeab4c1120 sp 0x7ffeab4c1118
 READ of size 1 at 0x50300000005e thread T0
-    #0 0x6427d041cbcf in websock_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/./websock_fn.inc:46:11
-    #1 0x6427d041bfa0 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/driver.c:89:11
-    #2 0x72614da2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #3 0x72614da2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #4 0x6427d0342354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/a-vuln-clang+0x2c354) (BuildId: 14768859dc0fd06c0952fd146be6b20bc11e65f1)
+    #0 0x6363e29f0bcf in websock_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/./websock_fn.inc:46:11
+    #1 0x6363e29effa0 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/driver.c:89:11
+    #2 0x7edaaf02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7edaaf02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x6363e2916354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/a-vuln-clang+0x2c354) (BuildId: 14768859dc0fd06c0952fd146be6b20bc11e65f1)
 
 0x50300000005e is located 0 bytes after 30-byte region [0x503000000040,0x50300000005e)
 allocated by thread T0 here:
-    #0 0x6427d03dd1a3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/a-vuln-clang+0xc71a3) (BuildId: 14768859dc0fd06c0952fd146be6b20bc11e65f1)
-    #1 0x6427d041b906 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/driver.c:74:16
-    #2 0x72614da2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #3 0x72614da2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #4 0x6427d0342354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/a-vuln-clang+0x2c354) (BuildId: 14768859dc0fd06c0952fd146be6b20bc11e65f1)
+    #0 0x6363e29b11a3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/a-vuln-clang+0xc71a3) (BuildId: 14768859dc0fd06c0952fd146be6b20bc11e65f1)
+    #1 0x6363e29ef906 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/driver.c:74:16
+    #2 0x7edaaf02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7edaaf02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x6363e2916354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/a-vuln-clang+0x2c354) (BuildId: 14768859dc0fd06c0952fd146be6b20bc11e65f1)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/baresip2shell/harness/./websock_fn.inc:46:11 in websock_decode
 Shadow bytes around the buggy address:
@@ -48,4 +48,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==846853==ABORTING
+==1006390==ABORTING
