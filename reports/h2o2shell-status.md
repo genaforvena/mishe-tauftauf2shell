@@ -37,12 +37,12 @@ wake-failure signal and three units, not a duplicate window.
   at 16; the fixed pin expands and is ASan-clean; safe 8-byte inputs are
   clean on both pins. The 64-byte sink is a harness choice, not the stock
   4096-byte stack array.
-- RESOLVED in W1: live process, loopback socket, wire request, configured
-  `%{error}x` format, `error_logs` >4096 bytes, and chosen bytes reaching a
-  control-flow-relevant stack slot (section below). Still UNKNOWN: command
-  execution and rung 5, allocator-neighbour object control beyond that frame,
-  live-process proof for the other two advisory cases, and independent
-  witness replay.
+- RESOLVED in W1 and by witness #1583: live process, loopback socket, wire
+  request, configured `%{error}x` format, `error_logs` >4096 bytes, chosen
+  bytes reaching a control-flow-relevant stack slot, and independent witness
+  replay (own clean-tree builds, 3/3 outcomes and the exact threshold). Still
+  UNKNOWN: command execution and rung 5, allocator-neighbour object control
+  beyond that frame, and live-process proof for the other two advisory cases.
 - First bounded experiment: build the pinned vulnerable `h2o` binary
   out-of-tree with ASan, configure an affected access-log format, drive a
   loopback-only request producing a long error log and observe whether the
@@ -170,4 +170,45 @@ UNKNOWN. The stack saved-RIP route to control flow is closed on the pinned
 build; the heap route is an open research question, not a demonstration. No
 chosen pointer, control-flow transfer, lab command or side effect was
 observed in W2.
+
+## W3 independent replay and heap-grooming negatives (2026-11-22 19:17Z)
+
+Witness #1583 closed the outstanding replay control. With its own builds in a
+clean git-archive tree it matched all five pin hashes and the committed
+`live/replay-live.sh`, reproduced 3/3 outcomes (vuln-short clean, vuln-long
+WRITE-1 at frame offset 4160 in `log_access buf` [64,4160), fixed-long clean),
+reproduced the exact 3958-clean / 3959-fault threshold, and independently saw
+saved RBP `XYZABCDE` and saved RIP `FGHIJKLM` overwritten on a plain build,
+plus the same `__stack_chk_fail` barrier and forced-heap ASan fault. Its grade:
+rungs 1/2/3 ESTABLISHED on a live wire-reached pinned daemon, rung 4
+ESTABLISHED at live wire-triggered chosen-byte scope. Independent replay is no
+longer UNKNOWN.
+
+A bounded heap-grooming attempt (`live/heap-groom.py`, `live/heap-groom.gdb`)
+produced a structural negative on the forced-heap path. On the pinned plain
+build at 127.0.0.1:18011 with format `'%{pad}i %{error}x'`, a 1200-byte `pad`
+header and a 6870-byte path give `ERROR_SIZE=7007`, capacity 8192 and
+`LEN=8209`. A conditional breakpoint at `logconf.c:843` dumps the malloc chunk
+headers in four layouts: baseline; four preceding short pad requests; a second
+connection holding a 4000-byte unfinished header; and both combined. In every
+case the 8192-byte log buffer sits at the heap top: the chunk at `line-8` has
+size 8209 (`0x2010 | PREV_INUSE`), and the chunk at `line+8192` has size 39105,
+30897, 29249 or 21041 respectively — each ending exactly at the `[heap]`
+mapping end `0x5555557e0000`. Transcripts:
+`live/heap-groom-{base,prep,live,mix}.out`.
+
+After the append, the 17-byte stop overwrites the top chunk's `prev_size` and
+`size` fields with 16 chosen `A` bytes (`0x4141414141414141` twice at
+`line+8192`) and writes the `\n` suffix at `line+8208` (baseline transcript).
+No live object, function pointer or callback table was adjacent in any layout:
+the log buffer is carved from the top at log time, after request allocations,
+and no malloc occurs between that allocation and the unreserved append.
+
+**Verdict:** chosen-byte control over heap *metadata* is demonstrated, but
+pointer/control-flow control is not. Top-chunk corruption alone is not rung 5;
+the stack saved-RIP route stays blocked by the canary. Grade unchanged: rungs
+1-4 live and wire-triggered, rung 5 UNKNOWN with no demonstrated grooming path
+on the pinned build for these sequences. An allocator implementation other
+than this host's glibc, or an object-placement primitive not driven by these
+wire sequences, would be a different claim and needs fresh measurement.
 
