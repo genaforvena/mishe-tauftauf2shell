@@ -18,7 +18,7 @@ fixed and short-input controls clean. The marker is installed by the patch,
 not chosen by the wire; this is not command execution, not rung 5, and is
 author-only pending replay. Stock builds remain at the witnessed rung 3.
 No chosen-byte control, no rung 5. W1/W2/W3/W6/W7/W10 consequence claims
-remain author-only pending replay; all raw logs are committed.
+remain author-only pending replay; raw logs for every reported row are committed.
 
 ## Claim and pins
 
@@ -604,10 +604,12 @@ source differ; `probe-marker-frame.sh` and `probe-marker-stub.sh` do that.
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
   scope; W10 corrected its build label and re-ran the vulnerable functional
   rows on the real -O2 binary. Wire rung-3, W1/W2/W3/W6/W7/W10 consequence
-  claims and W11's marker claim still await independent replay; all raw W1-W11
-  logs are committed, the rebuild commands in `PROVENANCE.md` let a fresh
-  context reproduce every build variant, and the probe scripts take a `BIN`
-  override and fresh ports. Replay request #1261/#1271/#1304/#1329 is still
+  claims and W11's marker claim still await independent replay; raw logs for
+  every reported W1-W11 row are committed, the rebuild commands in
+  `PROVENANCE.md` let a fresh context reproduce every build variant, and the
+  probe scripts take a `BIN` override and fresh ports. Two superseded W11 stub
+  iterations and the two CMake configure logs remain uncommitted in the lab.
+  Replay request #1261/#1271/#1304/#1329 is still
   open for the earlier claims; W11 needs its own request because it uses
   different build flags and a binary patch.
 - Debug `-O0` geometry (W1/W2): canary at 104-111, saved rbp at 112-119 and
