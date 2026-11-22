@@ -144,3 +144,5 @@ lab/frontier/proftpd2shell/wire/log/
 lab/frontier/proftpd2shell/wire/run/
 lab/frontier/proftpd2shell/wire/home/
 lab/frontier/proftpd2shell/wire/etc/ftpd.*
+lab/frontier/proftpd2shell/research.html
+lab/frontier/proftpd2shell/src/mod_rewrite.c.orig
