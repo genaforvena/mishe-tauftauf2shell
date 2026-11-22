@@ -1,0 +1,41 @@
+=== vuln gcc plain, chosen base 0x41 ===
+datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=0
+cmdline_len=8 cmdline=AAAAAAAA
+PASS vuln_validator :: datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=0
+PASS vuln_chosen_A :: cmdline_len=8 cmdline=AAAAAAAA
+=== vuln gcc plain, chosen base 0x5a ===
+datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=0
+cmdline_len=8 cmdline=ZZZZZZZZ
+PASS vuln_chosen_Z :: cmdline_len=8 cmdline=ZZZZZZZZ
+=== fixed gcc plain, same packet ===
+datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=1
+cmdline_len=0 cmdline=
+PASS fixed_rejects :: datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=1
+PASS fixed_no_copy :: cmdline_len=0 cmdline=
+=== vuln gcc ASan, chosen base 0x5a ===
+datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=0
+cmdline_len=8 cmdline=ZZZZZZZZ
+PASS asan_chosen :: cmdline_len=8 cmdline=ZZZZZZZZ
+=== fixed gcc ASan, same packet ===
+datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=1
+cmdline_len=0 cmdline=
+PASS fixed_asan_clean :: cmdline_len=0 cmdline=
+=== vuln clang ASan, chosen base 0x5a ===
+datalength=15 arg_cnt=3 size_table=4,12,0 validator_bogus=0
+cmdline_len=8 cmdline=ZZZZZZZZ
+PASS clang_chosen :: cmdline_len=8 cmdline=ZZZZZZZZ
+=== vuln gcc ASan, 40-byte oversized copy into 15-byte cmdline ===
+=================================================================
+==3479734==ERROR: AddressSanitizer: dynamic-stack-buffer-overflow on address 0x7ffea40b4a6f at pc 0x74559a6fb303 bp 0x7ffea40b4a30 sp 0x7ffea40b41d8
+WRITE of size 36 at 0x7ffea40b4a6f thread T0
+    #0 0x74559a6fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5cbc3b8dff00 in eval_args /home/mesh-home/mishe-tauftauf2shell/lab/frontier/tacplus2shell/harness/fn.inc:43
+    #2 0x5cbc3b8e0b29 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/tacplus2shell/harness/harness.c:108
+    #3 0x74559a22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x74559a22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5cbc3b8df424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tacplus2shell/harness/v-asan+0x2424) (BuildId: 654f491f8352b11d60372ceee47718fb7b0f1a16)
+
+Address 0x7ffea40b4a6f is located in stack of thread T0
+SUMMARY: AddressSanitizer: dynamic-stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+PASS stack_overflow :: ==3479734==ERROR: AddressSanitizer: dynamic-stack-buffer-overflow on address 0x7ffea40b4a6f at pc 0x74559a6fb303 bp 0x7ffea40b4a30 sp 0x7ffea40b41d8
+FAILURES=0

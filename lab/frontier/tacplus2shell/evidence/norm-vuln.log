@@ -1,0 +1,73 @@
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+READ of size 1 at 0xADDR thread T0
+    #0 0xADDR in strncmp (ROOT/src/build/linux-6.8.0-149-generic-x86_64/tac_plus-ng/tac_plus-ng+0xADDR) (BuildId: ID)
+    #1 0xADDR in eval_args ROOT/src/tac_plus-ng/author.c:75:17
+    #2 0xADDR in author ROOT/src/tac_plus-ng/author.c:141:5
+    #3 0xADDR in tac_read ROOT/src/tac_plus-ng/packet.c:892:3
+    #4 0xADDR in accept_control_final ROOT/src/tac_plus-ng/main.c:2229:5
+    #5 0xADDR in complete_host_mavis ROOT/src/tac_plus-ng/main.c:1867:5
+    #6 0xADDR in accept_control_common ROOT/src/tac_plus-ng/main.c:1828:5
+    #7 0xADDR in accept_control_raw ROOT/src/tac_plus-ng/main.c:590:5
+    #8 0xADDR in accept_control_singleprocess ROOT/src/tac_plus-ng/main.c:577:2
+    #9 0xADDR in fakescm_send_msg ROOT/src/mavis/scm.c:127:2
+    #10 0xADDR in spawnd_accepted ROOT/src/mavis/spawnd_accepted.c:346:2
+    #11 0xADDR in io_poll ROOT/src/misc/io_sched.c:392:7
+    #12 0xADDR in io_main ROOT/src/misc/io_sched.c:1879:2
+    #13 0xADDR in main ROOT/src/tac_plus-ng/main.c:409:5
+    #14 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #15 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #16 0xADDR in _start (ROOT/src/build/linux-6.8.0-149-generic-x86_64/tac_plus-ng/tac_plus-ng+0xADDR) (BuildId: ID)
+
+0xADDR is located 243 bytes after 323-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #0 0xADDR in calloc (ROOT/src/build/linux-6.8.0-149-generic-x86_64/tac_plus-ng/tac_plus-ng+0xADDR) (BuildId: ID)
+    #1 0xADDR in mem_alloc ROOT/src/misc/memops.c:229:15
+    #2 0xADDR in tac_read ROOT/src/tac_plus-ng/packet.c:725:12
+    #3 0xADDR in accept_control_final ROOT/src/tac_plus-ng/main.c:2229:5
+    #4 0xADDR in complete_host_mavis ROOT/src/tac_plus-ng/main.c:1867:5
+    #5 0xADDR in accept_control_common ROOT/src/tac_plus-ng/main.c:1828:5
+    #6 0xADDR in accept_control_raw ROOT/src/tac_plus-ng/main.c:590:5
+    #7 0xADDR in accept_control_singleprocess ROOT/src/tac_plus-ng/main.c:577:2
+    #8 0xADDR in fakescm_send_msg ROOT/src/mavis/scm.c:127:2
+    #9 0xADDR in spawnd_accepted ROOT/src/mavis/spawnd_accepted.c:346:2
+    #10 0xADDR in io_poll ROOT/src/misc/io_sched.c:392:7
+    #11 0xADDR in io_main ROOT/src/misc/io_sched.c:1879:2
+    #12 0xADDR in main ROOT/src/tac_plus-ng/main.c:409:5
+    #13 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #14 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #15 0xADDR in _start (ROOT/src/build/linux-6.8.0-149-generic-x86_64/tac_plus-ng/tac_plus-ng+0xADDR) (BuildId: ID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (ROOT/src/build/linux-6.8.0-149-generic-x86_64/tac_plus-ng/tac_plus-ng+0xADDR) (BuildId: ID) in strncmp
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 03 fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+ABORTING

@@ -1,0 +1,13 @@
+CVE-2026-130875 / GHSA-v384-f7x8-f7c7 — tac_plus-ng pinned blobs
+repo: https://github.com/tacplus-ng/event-driven-servers
+
+vulnerable 929671c22ff9f390f22decd7eb97dffaece8aebe (2026-11-13, advisory PoC base)
+  tac_plus-ng/packet.c  a0c911f8f6868886630ca63435b5f6a4886c1834d92ebe3540a73218e9022d57
+  tac_plus-ng/author.c  bc36763f7c282a10ebb16bf2af14abefe0831009e485c3682a0bb5ecff84eccf
+
+fixed d8493e0d6420b91737fa34c2cd7bbd365d023b5b (2026-11-17)
+  tac_plus-ng/packet.c  4f3174de7a83efc343d708a036fc490938358aa2292461aa2c027b9edd22dde8
+  tac_plus-ng/author.c  bc36763f7c282a10ebb16bf2af14abefe0831009e485c3682a0bb5ecff84eccf
+
+author.c is identical on both pins; the entire fix is the two parenthesized
+return statements in packet.c:523 and :538.

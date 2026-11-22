@@ -1,0 +1,32 @@
+=== vuln pin + crafted AUTHOR packet ===
+/usr/lib/python3.12/subprocess.py:849: RuntimeWarning: pass_fds overriding close_fds.
+  warnings.warn("pass_fds overriding close_fds.", RuntimeWarning)
+daemon_alive_at_trigger=True daemon_rc=-6
+client[0]: sent=279 reply_len=0 reply=
+log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tacplus2shell/harness/w-vuln.log
+PASS vuln_asan
+vuln_asan 599ab1f0d59faa209f09b721079467df6f363d46a69859797f8ecfeca583b78c
+PASS vuln_frame
+vuln_frame 599ab1f0d59faa209f09b721079467df6f363d46a69859797f8ecfeca583b78c
+PASS vuln_region
+vuln_region 599ab1f0d59faa209f09b721079467df6f363d46a69859797f8ecfeca583b78c
+daemon_alive_at_trigger=True daemon_rc=-6
+=== fixed pin + same packet ===
+/usr/lib/python3.12/subprocess.py:849: RuntimeWarning: pass_fds overriding close_fds.
+  warnings.warn("pass_fds overriding close_fds.", RuntimeWarning)
+daemon_alive_at_trigger=True daemon_rc=0
+client[0]: sent=279 reply_len=57 reply=c0020200112233440000002d4cd07e1a7584d2a3f933b1fc16ed07815732fb980b9776c9c85457445dd456218ef2b1d61e1605e668aa737af7
+log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tacplus2shell/harness/w-fixed.log
+PASS fixed_no_asan
+fixed_log e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+PASS fixed_daemon_alive
+=== vuln pin + safe packet (table sums to payload) ===
+/usr/lib/python3.12/subprocess.py:849: RuntimeWarning: pass_fds overriding close_fds.
+  warnings.warn("pass_fds overriding close_fds.", RuntimeWarning)
+daemon_alive_at_trigger=True daemon_rc=0
+client[0]: sent=25 reply_len=18 reply=c002020011223344000000064dd07e3d7584
+log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tacplus2shell/harness/w-safe.log
+PASS safe_no_asan
+safe_log e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+PASS safe_daemon_alive
+FAILURES=0
