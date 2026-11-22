@@ -1,0 +1,92 @@
+[Sun Nov 22 05:14:09 2026] [INFO] INIT: uD3TN starting up... [components/ud3tn/init.c:39]
+[Sun Nov 22 05:14:09 2026] [INFO] INIT: Configured to use EID "dtn://ud3tn.dtn/" and BPv6 [components/ud3tn/init.c:61]
+[Sun Nov 22 05:14:09 2026] [WARNING] AgentManager: No AAP 2.0 secret specified - all clients can dispatch and control the FIB! [components/ud3tn/agent_manager.c:60]
+[Sun Nov 22 05:14:09 2026] [INFO] BundleProcessor: BPA initialized for "dtn://ud3tn.dtn/", status reports disabled [components/ud3tn/bundle_processor.c:258]
+[Sun Nov 22 05:14:09 2026] [INFO] AgentManager: Agent for receiving ADUs registered for sink_id echo with no. 1 [components/ud3tn/agent_manager.c:227]
+[Sun Nov 22 05:14:09 2026] [INFO] TCP: CLA mtcp is now listening on [127.0.0.1]:17224 [components/cla/posix/cla_tcp_common.c:180]
+[Sun Nov 22 05:14:09 2026] [DEBUG] CLA: Activated CLA "mtcp". [components/cla/cla.c:119]
+[Sun Nov 22 05:14:09 2026] [INFO] AppAgent: Listening on /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/out-w4/vuln-trigger-41.aap.sock [components/agents/posix/application_agent.c:668]
+[Sun Nov 22 05:14:09 2026] [INFO] AAP2Agent: Listening on /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/out-w4/vuln-trigger-41.aap2.sock [components/aap2/aap2_agent.c:1701]
+[Sun Nov 22 05:14:09 2026] [INFO] AgentManager: Agent for receiving ADUs registered for sink_id config with no. 2 [components/ud3tn/agent_manager.c:227]
+[Sun Nov 22 05:14:09 2026] [INFO] AgentManager: Agent for receiving FIB entries registered with no. 2 [components/ud3tn/agent_manager.c:253]
+[Sun Nov 22 05:14:09 2026] [INFO] AgentManager: Agent for dispatching bundles registered with no. 2 [components/ud3tn/agent_manager.c:301]
+[Sun Nov 22 05:14:09 2026] [INFO] AgentManager: Agent for modifying FIB entries registered with no. 3 [components/ud3tn/agent_manager.c:253]
+[Sun Nov 22 05:14:09 2026] [INFO] AgentManager: Agent for dispatch RPC registered with no. 3 [components/ud3tn/agent_manager.c:301]
+[Sun Nov 22 05:14:09 2026] [INFO] TCP: Connection accepted from 127.0.0.1:51944 (via CLA mtcp)! [components/cla/posix/cla_tcp_common.c:225]
+[Sun Nov 22 05:14:09 2026] [DEBUG] CLA: Received new bundle 0x511000000040 from "dtn://attacker.dtn/app" to "dtn://ud3tn.dtn/app" via CLA mtcp [components/cla/cla_contact_rx_task.c:41]
+[Sun Nov 22 05:14:09 2026] [DEBUG] BundleProcessor: Dispatching bundle 0x511000000040 (from = "dtn://attacker.dtn/app", to = "dtn://ud3tn.dtn/app") [components/ud3tn/bundle_processor.c:768]
+=================================================================
+==3202439==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000001131 at pc 0x5b3ac28971d8 bp 0x7a9ad7ffe500 sp 0x7a9ad7ffe4f0
+WRITE of size 1 at 0x502000001131 thread T1
+    #0 0x5b3ac28971d7 in record_parser_read_byte components/bundle6/reports.c:439
+    #1 0x5b3ac28979a4 in bundle6_parse_administrative_record components/bundle6/reports.c:469
+    #2 0x5b3ac2867908 in parse_administrative_record components/ud3tn/report_manager.c:115
+    #3 0x5b3ac285f8cc in bundle_deliver_adu components/ud3tn/bundle_processor.c:1370
+    #4 0x5b3ac285ce70 in bundle_deliver_local components/ud3tn/bundle_processor.c:1132
+    #5 0x5b3ac285a812 in bundle_dispatch components/ud3tn/bundle_processor.c:776
+    #6 0x5b3ac285c570 in bundle_receive components/ud3tn/bundle_processor.c:1034
+    #7 0x5b3ac285615f in handle_signal components/ud3tn/bundle_processor.c:284
+    #8 0x5b3ac2855fd7 in bundle_processor_task components/ud3tn/bundle_processor.c:269
+    #9 0x5b3ac28e037b in execute_pthread_compat components/platform/posix/hal_task.c:39
+    #10 0x7a9adba5ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #11 0x7a9adb69cb63 in start_thread nptl/pthread_create.c:447
+    #12 0x7a9adb729e8b in clone3 ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+0x502000001131 is located 0 bytes after 1-byte region [0x502000001130,0x502000001131)
+allocated by thread T1 here:
+    #0 0x7a9adbafd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5b3ac2896c40 in record_parser_read_byte components/bundle6/reports.c:430
+    #2 0x5b3ac28979a4 in bundle6_parse_administrative_record components/bundle6/reports.c:469
+    #3 0x5b3ac2867908 in parse_administrative_record components/ud3tn/report_manager.c:115
+    #4 0x5b3ac285f8cc in bundle_deliver_adu components/ud3tn/bundle_processor.c:1370
+    #5 0x5b3ac285ce70 in bundle_deliver_local components/ud3tn/bundle_processor.c:1132
+    #6 0x5b3ac285a812 in bundle_dispatch components/ud3tn/bundle_processor.c:776
+    #7 0x5b3ac285c570 in bundle_receive components/ud3tn/bundle_processor.c:1034
+    #8 0x5b3ac285615f in handle_signal components/ud3tn/bundle_processor.c:284
+    #9 0x5b3ac2855fd7 in bundle_processor_task components/ud3tn/bundle_processor.c:269
+    #10 0x5b3ac28e037b in execute_pthread_compat components/platform/posix/hal_task.c:39
+    #11 0x7a9adba5ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #12 0x7a9adb69cb63 in start_thread nptl/pthread_create.c:447
+
+Thread T1 created by T0 here:
+    #0 0x7a9adbaf51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x5b3ac28e0802 in hal_task_create components/platform/posix/hal_task.c:80
+    #2 0x5b3ac2845238 in start_tasks components/ud3tn/init.c:107
+    #3 0x5b3ac283a1c5 in main components/daemon/main.c:9
+    #4 0x7a9adb62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7a9adb62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5b3ac283a0c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/src/ud3tn-v0.15.1/build/posix/ud3tn+0x18e0c4) (BuildId: ec741c45aa044b67babbbb9d358f55c5a173ffef)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow components/bundle6/reports.c:439 in record_parser_read_byte
+Shadow bytes around the buggy address:
+  0x502000000e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000f00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001000: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fd
+  0x502000001080: fa fa fd fd fa fa fd fd fa fa fd fd fa fa 00 07
+=>0x502000001100: fa fa 04 fa fa fa[01]fa fa fa fa fa fa fa fa fa
+  0x502000001180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000001380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3202439==ABORTING

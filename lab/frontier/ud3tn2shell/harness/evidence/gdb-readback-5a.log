@@ -1,0 +1,39 @@
+Breakpoint 1 at 0x1ba96: file components/bundle6/reports.c, line 440.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Sun Nov 22 05:15:08 2026] [INFO] INIT: uD3TN starting up... [components/ud3tn/init.c:39]
+[Sun Nov 22 05:15:08 2026] [INFO] INIT: Configured to use EID "dtn://ud3tn.dtn/" and BPv6 [components/ud3tn/init.c:61]
+[Sun Nov 22 05:15:08 2026] [WARNING] AgentManager: No AAP 2.0 secret specified - all clients can dispatch and control the FIB! [components/ud3tn/agent_manager.c:60]
+[New Thread 0x7ffff7adf6c0 (LWP 3216524)]
+[Sun Nov 22 05:15:08 2026] [INFO] BundleProcessor: BPA initialized for "dtn://ud3tn.dtn/", status reports disabled [components/ud3tn/bundle_processor.c:258]
+[Sun Nov 22 05:15:08 2026] [INFO] AgentManager: Agent for receiving ADUs registered for sink_id echo with no. 1 [components/ud3tn/agent_manager.c:227]
+[Sun Nov 22 05:15:08 2026] [INFO] TCP: CLA mtcp is now listening on [127.0.0.1]:18224 [components/cla/posix/cla_tcp_common.c:180]
+[New Thread 0x7ffff72de6c0 (LWP 3216525)]
+[Sun Nov 22 05:15:08 2026] [DEBUG] CLA: Activated CLA "mtcp". [components/cla/cla.c:119]
+[Sun Nov 22 05:15:08 2026] [INFO] AppAgent: Listening on /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/out-readback/readback.aap.sock [components/agents/posix/application_agent.c:668]
+[New Thread 0x7ffff6add6c0 (LWP 3216526)]
+[Sun Nov 22 05:15:08 2026] [INFO] AAP2Agent: Listening on /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/out-readback/readback.aap2.sock [components/aap2/aap2_agent.c:1701]
+[New Thread 0x7ffff62dc6c0 (LWP 3216527)]
+[New Thread 0x7ffff5adb6c0 (LWP 3216528)]
+[Sun Nov 22 05:15:08 2026] [INFO] AgentManager: Agent for receiving ADUs registered for sink_id config with no. 2 [components/ud3tn/agent_manager.c:227]
+[Sun Nov 22 05:15:08 2026] [INFO] AgentManager: Agent for receiving FIB entries registered with no. 2 [components/ud3tn/agent_manager.c:253]
+[Sun Nov 22 05:15:08 2026] [INFO] AgentManager: Agent for dispatching bundles registered with no. 2 [components/ud3tn/agent_manager.c:301]
+[Sun Nov 22 05:15:08 2026] [INFO] AgentManager: Agent for modifying FIB entries registered with no. 3 [components/ud3tn/agent_manager.c:253]
+[Sun Nov 22 05:15:08 2026] [INFO] AgentManager: Agent for dispatch RPC registered with no. 3 [components/ud3tn/agent_manager.c:301]
+[Sun Nov 22 05:15:08 2026] [INFO] TCP: Connection accepted from 127.0.0.1:51586 (via CLA mtcp)! [components/cla/posix/cla_tcp_common.c:225]
+[New Thread 0x7ffff52da6c0 (LWP 3216531)]
+[New Thread 0x7ffff4ad96c0 (LWP 3216532)]
+[Sun Nov 22 05:15:08 2026] [DEBUG] CLA: Received new bundle 0x7fffd8000c20 from "dtn://attacker.dtn/app" to "dtn://ud3tn.dtn/app" via CLA mtcp [components/cla/cla_contact_rx_task.c:41]
+[Sun Nov 22 05:15:08 2026] [INFO] TCP: A peer (via CLA mtcp) has disconnected gracefully! [components/cla/posix/cla_tcp_common.c:119]
+[Sun Nov 22 05:15:08 2026] [DEBUG] BundleProcessor: Dispatching bundle 0x7fffd8000c20 (from = "dtn://attacker.dtn/app", to = "dtn://ud3tn.dtn/app") [components/ud3tn/bundle_processor.c:768]
+[Sun Nov 22 05:15:08 2026] [INFO] MTCP: Terminating contact link manager for "127.0.0.1:51586" [components/cla/posix/cla_mtcp.c:135]
+[Thread 0x7ffff4ad96c0 (LWP 3216532) exited]
+[Thread 0x7ffff52da6c0 (LWP 3216531) exited]
+[Switching to Thread 0x7ffff7adf6c0 (LWP 3216524)]
+READBACK hits=20 index=20 remaining=65516 ptr=0x7ffff0001120
+0x7ffff0001120:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x7ffff0001128:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x7ffff0001130:	0x5a	0x5a	0x5a	0x5a	0x00	0x00	0x00	0x00
+0x7ffff0001138:	0xd1	0xfe	0x01	0x00	0x00	0x00	0x00	0x00
+READBACK_DONE
+[Inferior 1 (process 3216512) killed]

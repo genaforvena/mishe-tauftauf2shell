@@ -1,0 +1,31 @@
+vuln-trigger-41: rc=-6 asan=True wire=157B log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/replay-final/vuln-trigger-41.log
+    ==3236634==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000001131 at pc 0x64af065101d8 bp 0x784a691fe500 sp 0x784a691fe4f0
+    WRITE of size 1 at 0x502000001131 thread T1
+        #1 0x64af065109a4 in bundle6_parse_administrative_record components/bundle6/reports.c:469
+        #2 0x64af064e0908 in parse_administrative_record components/ud3tn/report_manager.c:115
+        #2 0x64af065109a4 in bundle6_parse_administrative_record components/bundle6/reports.c:469
+        #3 0x64af064e0908 in parse_administrative_record components/ud3tn/report_manager.c:115
+    SUMMARY: AddressSanitizer: heap-buffer-overflow components/bundle6/reports.c:439 in record_parser_read_byte
+vuln-chosen-5a: rc=-6 asan=True wire=157B log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/replay-final/vuln-chosen-5a.log
+    ==3236765==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000001131 at pc 0x62095c4231d8 bp 0x702aae1fe500 sp 0x702aae1fe4f0
+    WRITE of size 1 at 0x502000001131 thread T1
+        #1 0x62095c4239a4 in bundle6_parse_administrative_record components/bundle6/reports.c:469
+        #2 0x62095c3f3908 in parse_administrative_record components/ud3tn/report_manager.c:115
+        #2 0x62095c4239a4 in bundle6_parse_administrative_record components/bundle6/reports.c:469
+        #3 0x62095c3f3908 in parse_administrative_record components/ud3tn/report_manager.c:115
+    SUMMARY: AddressSanitizer: heap-buffer-overflow components/bundle6/reports.c:439 in record_parser_read_byte
+vuln-safe-eid8: rc=0 asan=False wire=157B log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/replay-final/vuln-safe-eid8.log
+    [Sun Nov 22 05:18:56 2026] [DEBUG] BundleProcessor: Received administrative record we cannot parse, discarding. [components/ud3tn/bundle_processor.c:1377]
+fixed-trigger-41: rc=0 asan=False wire=157B log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/replay-final/fixed-trigger-41.log
+    [Sun Nov 22 05:18:59 2026] [DEBUG] BundleProcessor: Received administrative record we cannot parse, discarding. [components/ud3tn/bundle_processor.c:1393]
+RESULTS {'vuln-trigger-41': True, 'vuln-chosen-5a': True, 'vuln-safe-eid8': False, 'fixed-trigger-41': False}
+sent=True wire=157B rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ud3tn2shell/replay-final-gdb/gdb-readback.log
+    Breakpoint 1 at 0x1ba96: file components/bundle6/reports.c, line 440.
+    [Thread 0x7ffff52da6c0 (LWP 3237217) exited]
+    [Thread 0x7ffff4ad96c0 (LWP 3237218) exited]
+    READBACK hits=20 index=20 remaining=65516 ptr=0x7ffff0001120
+    0x7ffff0001120:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+    0x7ffff0001128:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+    0x7ffff0001130:	0x5a	0x5a	0x5a	0x5a	0x00	0x00	0x00	0x00
+    READBACK_DONE
+marker 0x5a

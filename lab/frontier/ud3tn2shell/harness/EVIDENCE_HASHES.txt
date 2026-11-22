@@ -1,0 +1,19 @@
+Normalized sha256 of harness/evidence logs, verified 2026-11-22 W109 by a
+clean replay into replay-final/ and replay-final-gdb/ (5/5 MATCH, see
+replay-final-summary.txt). Normalization, in order:
+
+  1. wall-clock timestamps -> [TIME]
+  2. ==PID== and "process N" -> placeholders
+  3. 0x... hex tokens -> 0xADDR (this also erases the marker byte value;
+     the raw logs carry the 0x5a / 0x43 readback distinction)
+  4. absolute /home/... paths -> /PATH
+  5. LWP numbers, 127.0.0.1:PORT and ]:PORT -> placeholders
+  6. sort lines before joining (threaded shutdown logs have a benign
+     line-order race)
+
+fcda86c63596ef3ab60075dbd9319b2cd0c71bfb82c56fe82193ff21376bd338  asan-chosen-5a.log
+fcda86c63596ef3ab60075dbd9319b2cd0c71bfb82c56fe82193ff21376bd338  asan-trigger-41.log
+d310cde7ee34944925ac52d7ee3e18829a4e776aa625ab244004d4d3a5548b2f  fixed-trigger-41.log
+e50f6e3c1699c5a8203ab0c0d3e8379ccdfc86dc8899d3a442b3fc1196550102  gdb-readback-43.log
+e50f6e3c1699c5a8203ab0c0d3e8379ccdfc86dc8899d3a442b3fc1196550102  gdb-readback-5a.log
+0ee28f4d16f605d5ea2559eaeb1a56259975252df15d1237e30752d04a2df5c7  plain-safe-eid8.log

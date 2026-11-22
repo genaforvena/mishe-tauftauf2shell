@@ -1,0 +1,23 @@
+µD3TN pins verified locally on 2026-11-22 (frontier W109).
+
+Affected tag v0.15.1
+  tag object    d967c64585638db1ccb87decc2c4d48aa5b5c09f
+  commit        00b2fbefcb0f0f22bb1b8695fd2ce583fbb401fc
+  reports.c     e722cddc61429bb6d8c5e6f874210ed2cf6736265ef04cb871c073659144aff7
+
+Fixed tag v0.15.2
+  tag object    5ffce64bd5fe00c0a64756f3f73b2a88af9c3b39
+  commit        6b18b267ce79ac0c8d8f7dbce5389f2acef0ca40
+  reports.c     ea68a68d46b6b01f34cd76e64265cf4fd9c7ea6bf8d79ad6b37c68bc5ed96ad5
+
+Defect fix commit (in v0.15.2)
+  09f18b9c42c88977462ce6c3ad2dfe280fde89b4  "bundle6: reports: Prevent index wrap-around on zero EID length"
+
+Submodule gitlinks (identical at both tags)
+  external/nanopb   cad3c18ef15a663e30e3e43e3a752b66378adec1
+  external/tinycbor c0aad2fb2137a31b9845fbaae3653540c410f215
+
+Verification: `git -C repo rev-list -n1 v0.15.1` and `... v0.15.2` returned
+the commit SHAs above; `sha256sum ud3tn-v0.15.*/components/bundle6/reports.c`
+returned the file hashes. Archive tarballs were unavailable (HTTP 429); their
+hashes are UNKNOWN, not inferred.

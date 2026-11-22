@@ -166,3 +166,12 @@ lab/frontier/wazuh2shell/live-src-748/
 lab/frontier/pgpool2shell/src/pgpool-II-*/
 lab/frontier/pgpool2shell/src/*.tar.gz
 lab/frontier/pgpool2shell/build-*/
+
+# Ud3tn2shell harness: pinned source trees, git clone, submodules, builds and
+# replay output. Pin manifest, fix patch, harness scripts and evidence stay tracked.
+lab/frontier/ud3tn2shell/src/repo/
+lab/frontier/ud3tn2shell/src/ud3tn-*/
+lab/frontier/ud3tn2shell/src/nanopb-src/
+lab/frontier/ud3tn2shell/src/tinycbor-src/
+lab/frontier/ud3tn2shell/out-*/
+lab/frontier/ud3tn2shell/replay*/

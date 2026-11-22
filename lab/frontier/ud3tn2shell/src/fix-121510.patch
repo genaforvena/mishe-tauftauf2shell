@@ -1,0 +1,24 @@
+From 09f18b9c42c88977462ce6c3ad2dfe280fde89b4 Mon Sep 17 00:00:00 2001
+From: uD3TN maintainer
+Date: 2026-10-21
+Subject: [PATCH] bundle6: reports: Prevent index wrap-around on zero EID length
+
+Fixes: #289
+Verified against the raw bytes of pinned v0.15.1 and v0.15.2 reports.c:
+v0.15.1 lines 422-443 have no zero-length check; v0.15.2 lines 435-437 add
+exactly the three lines below. The copy stage is unchanged.
+---
+diff --git a/components/bundle6/reports.c b/components/bundle6/reports.c
+index 29845e68..fa588c65 100644
+--- a/components/bundle6/reports.c
++++ b/components/bundle6/reports.c
+@@ -432,6 +432,9 @@ static void record_parser_read_byte(struct record_parser *parser, uint8_t byte)
+ 				parser->status = PARSER_STATUS_ERROR;
+ 			parser->current_index = 0;
+ 			parser->bytes_remaining = parser->record_bundle_source_str_length;
++			// Zero EID length is invalid
++			if (parser->bytes_remaining == 0)
++				parser->status = PARSER_STATUS_ERROR;
+ 		}
+ 		break;
+ 	case RP_EXPECT_BUNDLE_SOURCE_EID:
