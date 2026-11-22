@@ -538,7 +538,7 @@ does not enable an absolute write: the relative read found no code pointer,
 and the earlier call-path analysis found no function reachable from the
 writable globals. No wire-to-command path is claimed; rung 5 UNCLAIMED.
 
-## proftpd2shell mind — call-path closure on the pinned plain build (2026-11-22 02:4xZ)
+## proftpd2shell mind — call-path closure on the pinned plain build (2026-11-22 02:44Z)
 
 The charter's remaining question is whether a wire input can reach command
 execution on this build. I closed it against `proftpd-vuln-plain` by enumerating
