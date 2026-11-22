@@ -1,0 +1,61 @@
+=================================================================
+==1770799==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ebe60c01040 at pc 0x5ff108d1e8a8 bp 0x7ffcad5349f0 sp 0x7ffcad5349e0
+WRITE of size 1 at 0x7ebe60c01040 thread T0
+    #0 0x5ff108d1e8a7 in append_unsafe_string_apache /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/core/logconf.c:438
+    #1 0x5ff108d27287 in h2o_log_request /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/core/logconf.c:843
+    #2 0x5ff108d48726 in log_access /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/handler/access_log.c:53
+    #3 0x5ff108d3aaaa in h2o_dispose_request /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/core/request.c:334
+    #4 0x5ff108da6639 in close_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/http1.c:144
+    #5 0x5ff108da66fc in cleanup_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/http1.c:154
+    #6 0x5ff108dad17b in on_send_complete /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/http1.c:910
+    #7 0x5ff108cd23e8 in on_write_complete /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/common/socket.c:996
+    #8 0x5ff108ccbe2a in run_socket /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/common/socket/evloop.c.h:869
+    #9 0x5ff108ccbfe8 in run_pending /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/common/socket/evloop.c.h:886
+    #10 0x5ff108ccc43c in h2o_evloop_run /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/common/socket/evloop.c.h:935
+    #11 0x5ff108edf63d in run_loop /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/src/main.c:4640
+    #12 0x5ff108ee4c41 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/src/main.c:5524
+    #13 0x7ebe6262a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #14 0x7ebe6262a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #15 0x5ff108b5c274 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/build-asan/h2o+0x91274) (BuildId: a698aa476e4065e7ad27a0dfa2d9283a932d6380)
+
+Address 0x7ebe60c01040 is located in stack of thread T0 at offset 4160 in frame
+    #0 0x5ff108d4859a in log_access /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/handler/access_log.c:45
+
+  This frame has 2 object(s):
+    [32, 40) 'len' (line 49)
+    [64, 4160) 'buf' (line 48) <== Memory access at offset 4160 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/core/logconf.c:438 in append_unsafe_string_apache
+Shadow bytes around the buggy address:
+  0x7ebe60c00d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ebe60c00e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ebe60c00e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ebe60c00f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ebe60c00f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7ebe60c01000: 00 00 00 00 00 00 00 00[f3]f3 f3 f3 f3 f3 f3 f3
+  0x7ebe60c01080: f3 f3 f3 f3 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x7ebe60c01100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ebe60c01180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ebe60c01200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ebe60c01280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1770799==ABORTING

@@ -1,0 +1,29 @@
+REQUEST_FAILED <HTTPError 503: 'Internal Server Error'>
+Breakpoint 1 at 0xe8b81: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/handler/access_log.c, line 45.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Warning: failed to load the default certificates file at /usr/local/share/h2o/ca-bundle.crt. Proxying to HTTPS servers may fail.
+[INFO] raised RLIMIT_NOFILE to 1048576
+[Detaching after fork from child process 1839711]
+[New Thread 0x7ffff73ff6c0 (LWP 1839712)]
+
+Thread 1 "h2o" hit Breakpoint 1, log_access (_self=0x5555557c4110, req=0x555555792c78) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/handler/access_log.c:45
+45	{
+RBP=0x7fffffffd840 CANARY_SLOT=0x7fffffffd838 CANARY_BEFORE=0x7fffffffd838:	0x0000555555792fd8
+SAVED_RIP_SLOT=0x7fffffffd848 SAVED_RIP_BEFORE=0x7fffffffd848:	0x0000555555636c98
+Breakpoint 2 at 0x7ffff75380e0: file ./debug/stack_chk_fail.c, line 23.
+
+Thread 1 "h2o" hit Breakpoint 2, __stack_chk_fail () at ./debug/stack_chk_fail.c:23
+warning: 23	./debug/stack_chk_fail.c: No such file or directory
+HIT_STACK_CHK_FAIL
+#0  __stack_chk_fail () at ./debug/stack_chk_fail.c:23
+#1  0x000055555563cc3f in log_access (_self=0x5555557c4110, req=0x555555792c78) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/h2o2shell/src/vuln/lib/handler/access_log.c:61
+#2  0x4d4c4b4a49484746 in ?? ()
+#3  0x5554535251504f4e in ?? ()
+#4  0x4342415a59585756 in ?? ()
+#5  0x4b4a494847464544 in ?? ()
+#6  0x535251504f4e4d4c in ?? ()
+#7  0x415a595857565554 in ?? ()
+CANARY_AT_FAILURE=0x7fffffffd838:	0x5756555453525150
+SAVED_RIP_AT_FAILURE=0x7fffffffd848:	0x4d4c4b4a49484746
+

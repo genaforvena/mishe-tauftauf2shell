@@ -112,4 +112,51 @@ is NOT claimed. The Apache escaper expands any byte outside 0x20..0x7c
 (`"` included) to four ASCII bytes, so raw pointer bytes containing NULs or
 high bytes cannot be written through `%{error}x` directly; partial overwrite
 needs a gadget whose address bytes are all printable, plus argument control.
-That feasibility analysis is the next bounded step, not an observed result.
+That analysis is now completed in the W2 section below; the stack path is
+blocked by the canary and the heap path remains open.
+
+## W2 rung-5 feasibility (2026-11-22 19:15–19:20Z)
+
+No independent witness replay has returned; that control is still UNKNOWN.
+The Apache escaper (`logconf.c:431-448`, condition at `:437`) passes only
+`0x20-0x21` and `0x23-0x7c` verbatim and rewrites every other byte to four
+ASCII characters `\xHH`. Config offers only `apache` and `json` escape modes
+(`include/h2o.h:1966`, `configurator/access_log.c:45,53-63`), both escaping;
+the unreserved error append exists only for `%{error}x`
+(`logconf.c:841-844`). No raw-byte path exists.
+
+1. **Stack saved-RIP path is blocked by the compiler canary.** The pinned
+   plain build has a stack protector in `log_access`
+   (`log_access+0xaa` reads `fs:0x28`, `+0xcf` calls `__stack_chk_fail`
+   before `leave; ret`). A single 5000-byte loopback request under gdb
+   (`python3 live/corrupt-probe.py 5000`, script `live/corrupt-layout.gdb`,
+   transcript `live/canary-gdb-transcript.txt`) shows, in the `log_access`
+   frame with rbp `0x7fffffffd840` and `buf` at rbp-0x1010: canary slot
+   rbp-8 `0x...d838` changed from `0x0000555555792fd8` to
+   `0x5756555453525150` (`PQRSTUVW`), saved RIP slot rbp+8 `0x...d848`
+   changed from `0x0000555555636c98` to `0x4d4c4b4a49484746`
+   (`FGHIJKLM`). A breakpoint on `__stack_chk_fail` was reached from
+   `access_log.c:61` before the return; later unwound frames are bogus ASCII.
+   A non-gdb plain run logged `*** stack smashing detected ***: terminated`
+   in `live/plain-redirect-error.log`. Both callers of `h2o_log_request`
+   (`access_log.c:53` and `status/requests.c:43`) are compiled with a canary.
+   The escaper cannot emit the canary's zero bytes, so this path cannot reach
+   a `ret` on the pinned build. A `-fno-stack-protector` rebuild would be a
+   different build and is not rung 5.
+2. **A heap path exists and bypasses that barrier.** Format
+   `'%{pad}i %{error}x'` in `live/forced-heap.conf` (port 17999) plus one wire
+   request carrying a 1200-byte `pad` header and a 10000-byte path makes an
+   earlier element's `RESERVE` grow the log line to an 8192-byte heap buffer
+   (`expand_line_buf logconf.c:549` from `logconf.c:780`); the unreserved
+   error append then faults with a live ASan `heap-buffer-overflow`,
+   `WRITE of size 1`, 0 bytes after that allocation. Command:
+   `python3 live/forced-heap.py 1200 10000`; evidence
+   `live/asan-forced-heap.1817275`. The smaller format `'%s %s %{error}x'`
+   does not grow the buffer and still faults on the stack
+   (`live/asan-heap-sink.1770799`).
+
+**Grade unchanged:** rungs 1-4 remain live and wire-triggered; rung 5 stays
+UNKNOWN. The stack saved-RIP route to control flow is closed on the pinned
+build; the heap route is an open research question, not a demonstration. No
+chosen pointer, control-flow transfer, lab command or side effect was
+observed in W2.
