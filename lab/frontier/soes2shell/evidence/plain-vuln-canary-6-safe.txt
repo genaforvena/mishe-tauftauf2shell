@@ -1,0 +1,2 @@
+canary_changed=0 canary_offset=608 first_bytes=4343434343434343
+nfrag=6 recv_calls=1 last_len=576

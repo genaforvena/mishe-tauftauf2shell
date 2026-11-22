@@ -1,0 +1,625 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aee3159..54a4540 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,7 +7,7 @@ project (SOES)
+ 
+ set (SOES_VERSION_MAJOR 3)
+ set (SOES_VERSION_MINOR 2)
+-set (SOES_VERSION_PATCH 0)
++set (SOES_VERSION_PATCH 1)
+ 
+ # Generate version numbers
+ configure_file (
+diff --git a/soes/esc.c b/soes/esc.c
+index d2bd86a..9575f19 100644
+--- a/soes/esc.c
++++ b/soes/esc.c
+@@ -420,6 +420,8 @@ void ESC_stopmbx (void)
+    ESCvar.segmented = 0;
+    ESCvar.frags = 0;
+    ESCvar.fragsleft = 0;
++   ESCvar.odfrags = 0;
++   ESCvar.odfragsleft = 0;
+    ESCvar.txcue = 0;
+    ESCvar.index = 0;
+    ESCvar.subindex = 0;
+@@ -1207,7 +1209,8 @@ void ESC_state (void)
+       case SAFEOP_TO_SAFEOP:
+       {
+          ESCvar.ESC_SM2_sml = sizeOfPDO (RX_PDO_OBJIDX, &ESCvar.sm2mappings,
+-                                         SMmap2, MAX_MAPPINGS_SM2);
++                                         SMmap2, MAX_MAPPINGS_SM2,
++                                         MAX_RXPDO_SIZE);
+          if (ESCvar.sm2mappings < 0)
+          {
+             an = ESCpreop | ESCerror;
+@@ -1216,7 +1219,8 @@ void ESC_state (void)
+          }
+ 
+          ESCvar.ESC_SM3_sml = sizeOfPDO (TX_PDO_OBJIDX, &ESCvar.sm3mappings,
+-                                         SMmap3, MAX_MAPPINGS_SM3);
++                                         SMmap3, MAX_MAPPINGS_SM3,
++                                         MAX_TXPDO_SIZE);
+          if (ESCvar.sm3mappings < 0)
+          {
+             an = ESCpreop | ESCerror;
+diff --git a/soes/esc.h b/soes/esc.h
+index ad1a55f..d163763 100644
+--- a/soes/esc.h
++++ b/soes/esc.h
+@@ -491,6 +491,8 @@ typedef struct
+    uint16_t entries;
+    uint32_t frags;
+    uint32_t fragsleft;
++   uint32_t odfrags;
++   uint32_t odfragsleft;
+    uint16_t index;
+    uint8_t subindex;
+    uint16_t flags;
+diff --git a/soes/esc_coe.c b/soes/esc_coe.c
+index 90bca16..98892ba 100644
+--- a/soes/esc_coe.c
++++ b/soes/esc_coe.c
+@@ -87,7 +87,10 @@ int32_t SDO_findobject (uint16_t index)
+    {
+       n++;
+    }
+-   if (SDOobjects[n].index != index)
++   /* Reject if not found, or if the matched object is the 0xFFFF sentinel, or has no descriptor */
++   if ((SDOobjects[n].index != index) ||
++         (SDOobjects[n].index == 0xFFFF) ||
++         (SDOobjects[n].objdesc == NULL))
+    {
+       return -1;
+    }
+@@ -113,10 +116,11 @@ int32_t SDO_findobject (uint16_t index)
+  *   mapping is invalid
+  * @param[out] mappings = list of mapped objects in SM
+  * @param[out] max_mappings = max number of mapped objects in SM
++ * @param[in] max_bytes = size of the process data buffer the SM fills
+  * @return size of RxPDO or TxPDOs in Bytes.
+  */
+ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
+-                    int max_mappings)
++                    int max_mappings, uint16_t max_bytes)
+ {
+    uint32_t offset = 0;
+    uint16_t hobj;
+@@ -140,6 +144,11 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
+    objd1c1x = SDOobjects[nidx].objdesc;
+ 
+    si = OBJ_VALUE_FETCH (si, objd1c1x[0]);
++   if (si > SDOobjects[nidx].maxsub)
++   {
++      si = SDOobjects[nidx].maxsub;
++   }
++
+    if (si)
+    {
+       for (sic = 1; sic <= si; sic++)
+@@ -152,6 +161,10 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
+ 
+             objd = SDOobjects[nidx].objdesc;
+             maxsub = OBJ_VALUE_FETCH (maxsub, objd[0]);
++            if (maxsub > SDOobjects[nidx].maxsub)
++            {
++               maxsub = SDOobjects[nidx].maxsub;
++            }
+ 
+             for (c = 1; c <= maxsub; c++)
+             {
+@@ -197,6 +210,12 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
+                         }
+ 
+                         mapping = &SDOobjects[nidx].objdesc[nsub];
++
++                        if (mapping->data == NULL)
++                        {
++                           *nmappings = -1;
++                           return 0;
++                        }
+                      }
+                      else
+                      {
+@@ -225,6 +244,12 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
+       }
+    }
+ 
++   if (BITS2BYTES (offset) > max_bytes)
++   {
++      *nmappings = -1;
++      return 0;
++   }
++
+    if (max_mappings > 0)
+    {
+       *nmappings = mapIx;
+@@ -234,7 +259,7 @@ uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * mappings,
+       *nmappings = 0;
+    }
+ 
+-   return BITS2BYTES (offset) & 0xFFFF;
++   return (uint16_t)BITS2BYTES (offset);
+ }
+ 
+ /** Copy to mailbox.
+@@ -384,6 +409,11 @@ static void SDO_upload (void)
+             else
+             {
+                /* normal response i.e. length>4 bytes */
++               if ((objd + nsub)->data == NULL)
++               {
++                  set_state_idle (MBXout, index, subindex, ABORT_GENERALERROR);
++                  return;
++               }
+                abort = ESC_upload_pre_objecthandler (index, subindex,
+                      (objd + nsub)->data, (size_t *)&size, (objd + nsub)->flags);
+                if (abort == 0)
+@@ -527,8 +557,11 @@ static uint32_t complete_access_subindex_loop(const _objd *objd,
+                   memset(&mbxdata[BITS2BYTES(size)], 0, BITS2BYTES(bitlen));
+                }
+             }
+-            /* download of RO objects shall be ignored */
+-            else if (WRITE_ACCESS(access, state))
++            /* download of RO objects, and of objects without storage,
++             * shall be ignored
++             */
++            else if (WRITE_ACCESS(access, state) &&
++                  ((objd + nsub)->data != NULL))
+             {
+                memcpy((objd + nsub)->data, &mbxdata[BITS2BYTES(size)],
+                      BITS2BYTES(bitlen));
+@@ -801,6 +834,12 @@ static void SDO_download (void)
+          uint8_t state = ESCvar.ALstatus & 0x0f;
+          if (WRITE_ACCESS(access, state))
+          {
++            if ((objd + nsub)->data == NULL)
++            {
++               /* an entry can be writable and still have no storage */
++               set_state_idle (0, index, subindex, ABORT_READONLY);
++               return;
++            }
+             /* expedited? */
+             if (coesdo->command & COE_EXPEDITED_INDICATOR)
+             {
+@@ -809,12 +848,24 @@ static void SDO_download (void)
+             }
+             else
+             {
+-               /* normal download */
++               /* normal download: reject frames too short to carry the full
++                * SDO header, which would cause copy2mbx to read past the
++                * actual mailbox payload */
++               if (etohs (coesdo->mbxheader.length) < COE_HEADERSIZE)
++               {
++                  set_state_idle (0, index, subindex, ABORT_TYPEMISMATCH);
++                  return;
++               }
+                size = (etohl (coesdo->size) & 0xffff);
+                mbxdata = (&(coesdo->size)) + 1;
+             }
+             actsize = BITS2BYTES((objd + nsub)->bitlength);
+-            if (actsize != size)
++            if (size > actsize)
++            {
++               set_state_idle (0, index, subindex, ABORT_TYPEMISMATCH);
++               return;
++            }
++            if (size < actsize)
+             {
+                /* entries with data types VISIBLE_STRING, OCTET_STRING,
+                 * UNICODE_STRING, ARRAY_OF_INT, ARRAY_OF_SINT,
+@@ -856,6 +907,7 @@ static void SDO_download (void)
+                   ESCvar.index = index;
+                   ESCvar.subindex = subindex;
+                   ESCvar.flags = (objd + nsub)->flags;
++                  ESCvar.fragsleft = size;
+                }
+                else
+                {
+@@ -1053,6 +1105,36 @@ static void SDO_downloadsegment (void)
+       command |= command2;
+       init_coesdo(coeres, COE_SDORESPONSE, command, 0, 0);
+ 
++      uint32_t max_capacity = 0u;
++      if (ESCvar.flags == COMPLETE_ACCESS_FLAG)
++      {
++         max_capacity = ESCvar.frags;
++      }
++      else
++      {
++         int32_t nidx = SDO_findobject(ESCvar.index);
++         if (nidx < 0)
++         {
++            set_state_idle (0, ESCvar.index, ESCvar.subindex, ABORT_NOOBJECT);
++            return;
++         }
++         int16_t nsub = SDO_findsubindex(nidx, ESCvar.subindex);
++         if (nsub < 0)
++         {
++            set_state_idle (0, ESCvar.index, ESCvar.subindex, ABORT_NOSUBINDEX);
++            return;
++         }
++         const _objd *objd = SDOobjects[nidx].objdesc;
++         max_capacity = BITS2BYTES((objd + nsub)->bitlength);
++      }
++
++      /* Abort if cumulative size exceeds object capacity or declared complete access size */
++      if (ESCvar.fragsleft + size > max_capacity)
++      {
++         set_state_idle (0, ESCvar.index, ESCvar.subindex, ABORT_TYPEMISMATCH);
++         return;
++      }
++
+       void *mbxdata = &(coesdo->index);  /* data pointer */
+       copy2mbx (mbxdata, ESCvar.data, size);
+ 
+@@ -1191,8 +1273,8 @@ static void SDO_getodlist (void)
+          coel->infoheader.fragmentsleft = htoes (0);
+          MBXcontrol[0].state = MBXstate_idle;
+          ESCvar.xoe = 0;
+-         ESCvar.frags = frags;
+-         ESCvar.fragsleft = frags - 1;
++         ESCvar.odfrags = frags;
++         ESCvar.odfragsleft = frags - 1;
+          p = &(coel->datatype);
+          *p = htoes (entries);
+          p++;
+@@ -1222,9 +1304,9 @@ static void SDO_getodlist (void)
+             n = entries;
+          }
+          coel->infoheader.reserved = 0x00;
+-         ESCvar.frags = frags;
+-         ESCvar.fragsleft = frags - 1;
+-         coel->infoheader.fragmentsleft = htoes (ESCvar.fragsleft);
++         ESCvar.odfrags = frags;
++         ESCvar.odfragsleft = frags - 1;
++         coel->infoheader.fragmentsleft = htoes (ESCvar.odfragsleft);
+          coel->index = htoes (0x01);
+ 
+          p = &(coel->datatype);
+@@ -1257,8 +1339,9 @@ static void SDO_getodlistcont (void)
+       coel->coeheader.numberservice =
+          htoes (COE_SDOINFORMATION << 12);
+       coel->infoheader.opcode = COE_GETODLISTRESPONSE;
+-      s = (uint16_t)((ESCvar.frags - ESCvar.fragsleft) * (ODLISTSIZE >> 1));
+-      if (ESCvar.fragsleft > 1)
++      s = (uint16_t)((ESCvar.odfrags - ESCvar.odfragsleft) *
++            (ODLISTSIZE >> 1));
++      if (ESCvar.odfragsleft > 1)
+       {
+          coel->infoheader.incomplete = 1;
+          n = (uint16_t)(s + (ODLISTSIZE >> 1));
+@@ -1271,8 +1354,8 @@ static void SDO_getodlistcont (void)
+          n = ESCvar.entries;
+       }
+       coel->infoheader.reserved = 0x00;
+-      ESCvar.fragsleft--;
+-      coel->infoheader.fragmentsleft = htoes ((uint16_t)ESCvar.fragsleft);
++      ESCvar.odfragsleft--;
++      coel->infoheader.fragmentsleft = htoes ((uint16_t)ESCvar.odfragsleft);
+       /* pointer 2 bytes back to exclude index */
+       p = &(coel->index);
+       for (i = s; i < n; i++)
+@@ -1322,12 +1405,16 @@ static void SDO_getod (void)
+             coel->datatype = htoes ((objd + nsub)->datatype);
+             coel->maxsub = SDOobjects[nidx].maxsub;
+          }
+-         else if (SDOobjects[nidx].objtype == OTYPE_ARRAY)
++         else if ((SDOobjects[nidx].objtype == OTYPE_ARRAY) ||
++                  (SDOobjects[nidx].objtype == OTYPE_RECORD))
+          {
+             int32_t nsub = SDO_findsubindex (nidx, 0);
+             const _objd *objd = SDOobjects[nidx].objdesc;
++            uint8_t maxsub;
++
++            maxsub = OBJ_VALUE_FETCH (maxsub, objd[nsub]);
+             coel->datatype = htoes ((objd + nsub)->datatype);
+-            coel->maxsub = (uint8_t)SDOobjects[nidx].objdesc->value;
++            coel->maxsub = maxsub;
+          }
+          else
+          {
+@@ -1337,7 +1424,7 @@ static void SDO_getod (void)
+          coel->objectcode = (uint8_t)SDOobjects[nidx].objtype;
+          s = (uint8_t *) SDOobjects[nidx].name;
+          d = (uint8_t *) &(coel->name);
+-         while (*s && (n < (ESC_MBXDSIZE - 0x0c)))
++         while (*s && (n < (ESC_MBXDSIZE - 0x0c - 1)))
+          {
+             *d = *s;
+             n++;
+@@ -1403,7 +1490,7 @@ static void SDO_geted (void)
+             coel->access = htoes ((objd + nsub)->flags);
+             s = (uint8_t *) (objd + nsub)->name;
+             d = (uint8_t *) &(coel->name);
+-            while (*s && (n < (ESC_MBXDSIZE - 0x10)))
++            while (*s && (n < (ESC_MBXDSIZE - 0x10 - 1)))
+             {
+                *d = *s;
+                n++;
+@@ -1501,7 +1588,8 @@ void ESC_coeprocess (void)
+                SDO_download ();
+             }
+          }
+-         else if (SDO_COMMAND(coesdo->command) == COE_COMMAND_DOWNLOADSEGREQ)
++         else if ((SDO_COMMAND(coesdo->command) == COE_COMMAND_DOWNLOADSEGREQ)
++               && (ESCvar.segmented == MBXSED))
+          {
+             /* SDO download segment request */
+             SDO_downloadsegment ();
+diff --git a/soes/esc_coe.h b/soes/esc_coe.h
+index 6223909..d47ad8a 100644
+--- a/soes/esc_coe.h
++++ b/soes/esc_coe.h
+@@ -114,7 +114,8 @@ typedef struct
+ void ESC_coeprocess (void);
+ int16_t SDO_findsubindex (int32_t nidx, uint8_t subindex);
+ int32_t SDO_findobject (uint16_t index);
+-uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * sm, int max_mappings);
++uint16_t sizeOfPDO (uint16_t index, int * nmappings, _SMmap * sm,
++                    int max_mappings, uint16_t max_bytes);
+ void COE_initDefaultValues (void);
+ 
+ void COE_pdoPack (uint8_t * buffer, int nmappings, _SMmap * sm);
+diff --git a/soes/esc_eoe.c b/soes/esc_eoe.c
+index ae0d526..0f9273d 100644
+--- a/soes/esc_eoe.c
++++ b/soes/esc_eoe.c
+@@ -648,6 +648,11 @@ static void EOE_set_ip (void)
+    port_ix = EOE_PORT_INDEX(port);
+    if(flags & EOE_PARAM_MAC_INCLUDE)
+    {
++      if ((data_offset + EOE_ETHADDR_LENGTH) > eoedatasize)
++      {
++         result = MBXERR_SIZETOOSHORT;
++         goto eoe_set_ip_respond;
++      }
+       memcpy(&nic_ports[port_ix].mac.addr,
+             &eoembx->data[data_offset],
+             EOE_ETHADDR_LENGTH);
+@@ -658,6 +663,11 @@ static void EOE_set_ip (void)
+    /* ip included in set ip request? */
+    if(flags & EOE_PARAM_IP_INCLUDE)
+    {
++      if ((data_offset + EOE_IP4_LENGTH) > eoedatasize)
++      {
++         result = MBXERR_SIZETOOSHORT;
++         goto eoe_set_ip_respond;
++      }
+       EOE_ip_byte_to_uint32(&eoembx->data[data_offset],
+             &nic_ports[port_ix].ip);
+       nic_ports[port_ix].ip_set = 1;
+@@ -667,6 +677,11 @@ static void EOE_set_ip (void)
+    /* subnet included in set ip request? */
+    if(flags & EOE_PARAM_SUBNET_IP_INCLUDE)
+    {
++      if ((data_offset + EOE_IP4_LENGTH) > eoedatasize)
++      {
++         result = MBXERR_SIZETOOSHORT;
++         goto eoe_set_ip_respond;
++      }
+       EOE_ip_byte_to_uint32(&eoembx->data[data_offset],
+             &nic_ports[port_ix].subnet);
+       nic_ports[port_ix].subnet_set = 1;
+@@ -676,6 +691,11 @@ static void EOE_set_ip (void)
+    /* default gateway included in set ip request? */
+    if(flags & EOE_PARAM_DEFAULT_GATEWAY_INCLUDE)
+    {
++      if ((data_offset + EOE_IP4_LENGTH) > eoedatasize)
++      {
++         result = MBXERR_SIZETOOSHORT;
++         goto eoe_set_ip_respond;
++      }
+       EOE_ip_byte_to_uint32(&eoembx->data[data_offset],
+             &nic_ports[port_ix].default_gateway);
+       nic_ports[port_ix].default_gateway_set = 1;
+@@ -685,6 +705,11 @@ static void EOE_set_ip (void)
+    /* dns ip included in set ip request? */
+    if(flags & EOE_PARAM_DNS_IP_INCLUDE)
+    {
++      if ((data_offset + EOE_IP4_LENGTH) > eoedatasize)
++      {
++         result = MBXERR_SIZETOOSHORT;
++         goto eoe_set_ip_respond;
++      }
+       EOE_ip_byte_to_uint32(&eoembx->data[data_offset],
+             &nic_ports[port_ix].dns_ip);
+       nic_ports[port_ix].dns_ip_set = 1;
+@@ -694,6 +719,11 @@ static void EOE_set_ip (void)
+    /* dns name included in set ip request? */
+    if(flags & EOE_PARAM_DNS_NAME_INCLUDE)
+    {
++      if (data_offset >= eoedatasize)
++      {
++         result = MBXERR_SIZETOOSHORT;
++         goto eoe_set_ip_respond;
++      }
+       uint32_t dns_len = MIN((eoedatasize - data_offset), EOE_DNS_NAME_LENGTH);
+       memcpy(nic_ports[port_ix].dns_name,
+             &eoembx->data[data_offset],
+@@ -719,6 +749,7 @@ static void EOE_set_ip (void)
+          result = EOE_RESULT_NO_IP_SUPPORT;
+       }
+    }
++eoe_set_ip_respond:
+    frameinfo1 = EOE_HDR_FRAME_PORT_SET(port);
+    frameinfo1 |= EOE_INIT_RESP;
+    frameinfo1 |= EOE_HDR_LAST_FRAGMENT;
+@@ -759,7 +790,11 @@ static void EOE_receive_fragment (void)
+ 
+       if(EOEvar.rxebuf.payload != NULL)
+       {
+-         EOEvar.rxebuf.len = EOEvar.rxframesize;
++         /* Limit frame size to the real buffer capacity */
++         if (EOEvar.rxframesize > EOEvar.rxebuf.len)
++         {
++            EOEvar.rxframesize = EOEvar.rxebuf.len;
++         }
+          EOEvar.rxframeoffset = 0;
+          EOEvar.rxframeno = EOE_HDR_FRAME_NO_GET(frameinfo2);
+       }
+@@ -812,13 +847,22 @@ static void EOE_receive_fragment (void)
+       /* Remove time stamp, TODO support for time stamp? */
+       if(EOE_HDR_TIME_APPEND_GET(frameinfo1))
+       {
++         if (EOEvar.rxframeoffset < 4U)
++         {
++            DPRINT("Invalid EoE timestamp length\n");
++            EOE_init_rx();
++            return;
++         }
+          EOEvar.rxframeoffset -= 4U;
+       }
+       EOEvar.rxebuf.len =  EOEvar.rxframeoffset;
+-      eoe_cfg->handle_recv_buffer(EOE_HDR_FRAME_PORT_GET(frameinfo1),
+-            &EOEvar.rxebuf);
+-      /* Pass ownership of buf to receive function */
+-      EOEvar.rxebuf.payload = NULL;
++      if(eoe_cfg->handle_recv_buffer != NULL)
++      {
++         eoe_cfg->handle_recv_buffer(EOE_HDR_FRAME_PORT_GET(frameinfo1),
++               &EOEvar.rxebuf);
++         /* Pass ownership of buf to receive function */
++         EOEvar.rxebuf.payload = NULL;
++      }
+       EOE_init_rx ();
+    }
+ }
+@@ -838,6 +882,10 @@ static void EOE_send_fragment ()
+    /* Do we have a current transfer on-going */
+    if(EOEvar.txebuf.payload == NULL)
+    {
++      if(eoe_cfg->fetch_send_buffer == NULL)
++      {
++         return;
++      }
+       /* Fetch a buffer if available */
+       len = eoe_cfg->fetch_send_buffer(0, &EOEvar.txebuf);
+       if(len > 0)
+@@ -999,6 +1047,13 @@ void ESC_eoeprocess (void)
+    {
+       return;
+    }
++   if (eoe_cfg == NULL)
++   {
++      /* EoE is built in but the application never configured it. Leave
++       * the mailbox for ESC_xoeprocess to reject as unsupported.
++       */
++      return;
++   }
+    if (!ESCvar.xoe && (MBXcontrol[0].state == MBXstate_inclaim))
+    {
+       mbh = (_MBXh *) &MBX[0];
+@@ -1067,7 +1122,7 @@ void ESC_eoeprocess (void)
+  */
+ void ESC_eoeprocess_tx (void)
+ {
+-   if (ESCvar.MBXrun == 0)
++   if ((ESCvar.MBXrun == 0) || (eoe_cfg == NULL))
+    {
+       return;
+    }
+diff --git a/soes/esc_foe.c b/soes/esc_foe.c
+index 7c1bac5..94b129f 100644
+--- a/soes/esc_foe.c
++++ b/soes/esc_foe.c
+@@ -50,10 +50,18 @@ static _FOEvar FOEvar;
+  * @return 0= if we succeed, FOE_ERR_NOTFOUND something wrong with filename or
+  * password
+  */
+-static uint32_t FOE_fopen (char *name, uint8_t num_chars, uint32_t pass, uint8_t op)
++static uint32_t FOE_fopen (char *name, uint32_t num_chars, uint32_t pass, uint8_t op)
+ {
+    uint32_t i;
+ 
++   /* A request without a file name matches any registered file, because
++    * strncmp with a length of zero always reports equal.
++    */
++   if (num_chars == 0)
++   {
++      return FOE_ERR_NOTFOUND;
++   }
++
+    /* Unpack the file name into characters we can look at. */
+    if (num_chars > FOE_FN_MAX)
+    {
+@@ -83,6 +91,13 @@ static uint32_t FOE_fopen (char *name, uint8_t num_chars, uint32_t pass, uint8_t
+             return FOE_ERR_NOTINBOOTSTRAP;
+          }
+ 
++         /* write_function is optional, so the file can be read only */
++         if ((op == FOE_OP_WRQ) &&
++             (foe_cfg->files[i].write_function == NULL))
++         {
++            return FOE_ERR_ACCESS;
++         }
++
+          foe_file = &foe_cfg->files[i];
+          foe_file->address_offset = 0;
+          foe_file->total_size = 0;
+@@ -318,7 +333,7 @@ static void FOE_read ()
+    _FOE *foembx;
+    uint32_t password;
+    uint32_t res;
+-   uint8_t data_len;
++   uint32_t data_len;
+ 
+    if (FOEvar.foestate != FOE_READY)
+    {
+@@ -329,7 +344,7 @@ static void FOE_read ()
+    FOE_init ();
+    foembx = (_FOE *) &MBX[0];
+    /* Get the length of the file name in octets. */
+-   data_len = (uint8_t)(etohs (foembx->mbxheader.length) - ESC_FOEHSIZE);
++   data_len = etohs (foembx->mbxheader.length) - ESC_FOEHSIZE;
+    password = etohl (foembx->foeheader.password);
+ 
+    res = FOE_fopen (foembx->filename, data_len, password, FOE_OP_RRQ);
+@@ -395,7 +410,7 @@ static void FOE_write ()
+    _FOE *foembx;
+    uint32_t password;
+    uint32_t res;
+-   uint8_t data_len;
++   uint32_t data_len;
+ 
+    if (FOEvar.foestate != FOE_READY)
+    {
+@@ -405,7 +420,7 @@ static void FOE_write ()
+ 
+    FOE_init ();
+    foembx = (_FOE *) &MBX[0];
+-   data_len = (uint8_t)(etohs (foembx->mbxheader.length) - ESC_FOEHSIZE);
++   data_len = etohs (foembx->mbxheader.length) - ESC_FOEHSIZE;
+    password = etohl (foembx->foeheader.password);
+ 
+    /* Get an address we can write the file to, if possible. */
+@@ -449,6 +464,13 @@ static void FOE_data ()
+    data_len = etohs(foembx->mbxheader.length) - ESC_FOEHSIZE;
+    packet = etohl(foembx->foeheader.packetnumber);
+ 
++   if (data_len > ESC_FOE_DATA_SIZE)
++   {
++      DPRINT("FOE_data payload length exceeds mailbox capacity\n");
++      FOE_abort (FOE_ERR_PROGERROR);
++      return;
++   }
++
+    if (packet != FOEvar.foepacket)
+    {
+       DPRINT("FOE_data packet error, packet: %"PRIu32", foeheader.packet: %"PRIu32"\n",
+@@ -563,6 +585,13 @@ void ESC_foeprocess (void)
+    {
+       return;
+    }
++   if ((foe_cfg == NULL) || (foe_cfg->fbuffer == NULL))
++   {
++      /* FoE is built in but the application never configured it. Leave
++       * the mailbox for ESC_xoeprocess to reject as unsupported.
++       */
++      return;
++   }
+    if (!ESCvar.xoe && (MBXcontrol[0].state == MBXstate_inclaim))
+    {
+       mbh = (_MBXh *) &MBX[0];

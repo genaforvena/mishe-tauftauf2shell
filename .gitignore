@@ -146,3 +146,9 @@ lab/frontier/proftpd2shell/wire/home/
 lab/frontier/proftpd2shell/wire/etc/ftpd.*
 lab/frontier/proftpd2shell/research.html
 lab/frontier/proftpd2shell/src/mod_rewrite.c.orig
+
+# SOES2shell harness: pinned tarballs, extracted trees and binaries.
+# Pins, fix diff, harness sources and small evidence files stay tracked.
+lab/frontier/soes2shell/src/SOES-*/
+lab/frontier/soes2shell/src/*.tar.gz
+lab/frontier/soes2shell/build/
