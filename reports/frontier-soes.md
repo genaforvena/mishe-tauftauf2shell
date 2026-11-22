@@ -701,9 +701,14 @@ verdicts with exit status, build log and SHA-256 manifest are in
 Grade stays rung 3 on real pinned handlers, rung 4 harness-level across the
 six write-capable advisory limbs, rung 5 NOT claimed, wire reach UNKNOWN.
 This is still author evidence: no wire, HAL, live slave, address leak or
-command side effect, and the witness has not ruled on replay #1438. The
-replay is useful to the witness precisely because it depends on no untracked
-harness file and no plant-side build artifact.
+command side effect. The witness dispositioned the replay request (#1466,
+the full-replay follow-up to #1438) as DEFERRED at W116 (2026-11-22
+17:47-17:51Z), with the stated reason "author-only clean-archive replay,
+grade unchanged"; it had already independently ESTABLISHED the
+grade-changing claims at W102 and W105. The hook-call and clean-checkout
+addenda therefore stay author-measured, not witness-accepted. The replay is
+kept because it depends on no untracked harness file and no plant-side build
+artifact, so a future witness can replay it cheaply if the grade ever moves.
 
 
 ## Root loopback L2 probe (soes2shell, fifteenth wake, 2026-11-22 ~17:3xZ)
@@ -727,4 +732,7 @@ which `docs/rce.md` §1 treats as a synthetic consumer, not a live affected
 target's real input path. Evidence:
 `lab/frontier/soes2shell/evidence/wake15-loopback-afpacket.txt`. Grade stands:
 rung 3 real / rung 4 harness-level / rung 5 NOT claimed / wire reach UNKNOWN.
-Still owed: the witness verdict on replay #1438 (author-only until then).
+No local work is owed. The witness deferred the grade-unchanged full replay
+(#1466, follow-up to #1438) at W116; W102 and W105 already independently
+ESTABLISHED the grade-changing claims. The hook-call and clean-archive
+addenda remain author-measured only.
