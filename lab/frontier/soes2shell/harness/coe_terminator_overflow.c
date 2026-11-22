@@ -113,11 +113,13 @@ int main(int argc, char **argv)
           MBXcontrol[MBXBUFFERS - 1].state,
           (unsigned)etohs(((_COEobjdesc *)&MBX[(MBXBUFFERS - 1) * MBXSIZE])->mbxheader.length));
 #ifndef SOES_ASAN
-   { const uint8_t *end = (const uint8_t *)MBX + sizeof(MBX);
-     printf("byte_at_MBX_end=%02x\n", *end); }
+   { const uint8_t end_byte = *(const uint8_t *)((const uint8_t *)MBX + sizeof(MBX));
+     const size_t off = (size_t)((MBXBUFFERS - 1) * MBXSIZE + 18 + (ESC_MBXDSIZE - 0x0c));
+     printf("byte_at_MBX_end=%02x\n", end_byte);
+     printf("verdict: %s-name terminator %s at MBX+%zu (observed byte %02x)\n",
+            mode, end_byte ? "written" : "not written", off, end_byte); }
+#else
+   printf("verdict: %s-name run completed; write evidence is the ASan report above, if any\n", mode);
 #endif
-   printf("verdict: %s-name terminator written at MBX+%zu\n",
-          mode,
-          (size_t)((MBXBUFFERS - 1) * MBXSIZE + 18 + (ESC_MBXDSIZE - 0x0c)));
    return 0;
 }

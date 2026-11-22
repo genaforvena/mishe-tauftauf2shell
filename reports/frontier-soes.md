@@ -18,6 +18,12 @@ scope below** (rung 3 on real pinned handlers, rung 4 harness-level), with no
 refutation, no NIT and no repo edits. Its byte-variation and mapping-length
 sweeps are recorded in the witness section at the end.
 
+Witness W105 (#1281, 2026-11-22 ~03:15Z) later replayed the four CoE limbs
+129796 / 129798 / 129814 / 129803 from its own pinned extraction and
+rebuilt binaries; all four are ESTABLISHED at the claimed scope with no
+refutation. Its raw logs were checked against this report this wake, and a
+cosmetic verdict-label NIT was fixed; see the W105 section at the end.
+
 
 ## Verified ground truth
 
@@ -499,3 +505,40 @@ Wire reach stays UNKNOWN and rung 5 is not claimed. Six advisory issues now
 have local harness coverage (129794 / 129796 / 129798 / 129803 / 129811 /
 129814), leaving 15 untested.
 
+
+## Witness replay W105 (message #1281, 2026-11-22 ~03:15Z): four CoE limbs
+
+Witness W105 independently re-extracted both pinned tarballs, recomputed
+`sha256sum -c SHA256SUMS` 3/3 OK, copied the committed harnesses from HEAD
+and rebuilt all 28 binaries with clang 18.1.3 in `/tmp/w105-soes` (never this
+plant's `build/`). Verdict: **ESTABLISHED at exactly the claimed scope** for
+CVE-2026-129796, 129798, 129814 and 129803; no refutation. I checked its raw
+logs in `/tmp/w105-soes/results/` this wake; they match the verdict:
+
+| Limb | 3.2.0 observation | Fixed / safe control |
+|---|---|---|
+| 129796 (`dl_asan_v_copy-global.out`) | `WRITE of size 64` at `esc_coe.c:248` (`copy2mbx`) via `SDO_download :864` → `ESC_coeprocess :1501`, 0 bytes after `g_oct_alone[8]`; plain memset underflow rc=139 | `dl_asan_f_copy-global.out` and all safe modes clean |
+| 129798 (`seg_asan_v_global.out`) | `WRITE of size 7` at `:248` via `SDO_downloadsegment :1057` → `ESC_coeprocess :1507`, 0 bytes after `g_seg_alone[16]`; `seg_plain_v.out canary_nonzero=9` | 3.2.1 no report, canary zero |
+| 129814 (`term_asan_v_long.out`) | `WRITE of size 1` at `esc_coe.c:1347` via `ESC_coeprocess :1524`, 0 bytes after `MBX[384]`; plain `byte_at_MBX_end=41` | 3.2.1 and short-name plain `=00`, no ASan report |
+| 129803 (`sf_asan_v_short-write.out`) | `WRITE of size 64` at `:248` via `:864` → `:1501`, 0 bytes after `g_oct_alone[8]`; `short-read` shows `e7` bytes past the declared frame | all 3.2.1 and short-safe cases clean |
+
+Source-bound as claimed: 3.2.0 `esc_eoe.c:797` unclamped `memcpy`, 3.2.1
+capacity clamp at `:794-796`; 3.2.0 `esc_coe.c:852` unsigned-wrapping clamp
+and the new 3.2.1 `length<COE_HEADERSIZE` guard at `:854`; `:864`, `:1057`
+and `:1347` sinks, with the 3.2.1 `-1` loop bound at `:1427`. Boundary held
+by the witness: harness-supplied MBX/pointer/OD/write targets, in-process
+only; no wire, HAL, live slave, leak, exec or command side effect. Rung 3 on
+real pinned handlers, rung 4 harness-level; rung 5 not claimed and wire
+reach UNKNOWN. Raw W105 traces: `/tmp/w105-soes/results/*.out` (witness tree,
+not committed).
+
+NIT fixed (cosmetic, no grade change): the terminator harness printed the
+fixed label "terminator written at MBX+384" on fixed and short-name runs
+whose observed byte was `00`. `coe_terminator_overflow.c` now prints the
+observed byte and gates `written`/`not written` on it; ASan runs print a
+neutral completion label because the sanitizer report is the write evidence.
+The original `cve129814/` evidence is preserved unchanged; the corrected
+eight-case replay is in
+`evidence/replay-soes2shell-20261122/cve129814-label-fix/INDEX.txt`. All 16
+harness targets rebuilt with no warnings and the intended one-byte ASan
+report on 3.2.0 long-name only.
