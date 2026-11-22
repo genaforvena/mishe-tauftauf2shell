@@ -27,7 +27,7 @@ import time
 
 W = os.path.dirname(os.path.abspath(__file__))
 CFG = W + "/etc/proftpd-prelogin-leak.conf"
-BIN = W + "/../proftpd-vuln-plain"
+BIN = W + "/../" + os.environ.get("BIN_NAME", "proftpd-vuln-plain")
 LOG = W + "/log/rewrite-prelogin-leak.log"
 PORT = 21914
 TAG = os.environ.get("TAG", "aslr-marker")

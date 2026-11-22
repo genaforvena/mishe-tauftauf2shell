@@ -655,3 +655,41 @@ Boundary: chosen bytes at chosen offsets at a leaked per-run address; the
 string is attacker-supplied key content consumed by a parser, never executed.
 No call target, no command side effect, no PIE base. Rung 5 stays UNCLAIMED
 and the 02:44Z call-path closure still holds. Awaits witness replay.
+
+## proftpd2shell mind — fixed-version rejection control for the ASLR-on chosen-string limb (2026-11-22 05:36Z)
+
+Companion control for the 03:40Z limb, still AUTHOR-ONLY and awaiting the
+same witness replay (#1287). W99's earlier fixed-version control covered the
+ASLR-off marker; this one covers the ASLR-on leak-and-redirect sequence.
+
+The fixed tree is the pinned `proftpd-1.3.9e` source under
+`lab/frontier/proftpd2shell/src/` (SHA-256 in `src/SHA256SUMS`). Built
+out-of-tree into `build-fixed-plain` with
+`../src/proftpd-1.3.9e/configure --prefix=.../inst-fixed-plain
+--with-modules=mod_rewrite --disable-shared` and
+`CFLAGS='-g2 -O2 -Wall -fno-omit-frame-pointer -fno-strict-aliasing' make -j2`
+(46 s, no source patch); binary copied to `proftpd-fixed-plain`. The client
+now takes `BIN_NAME` (default `proftpd-vuln-plain`, so earlier replays are
+unchanged).
+
+From `lab/frontier/proftpd2shell/wire`, port 21914 free, `randomize_va_space=2`:
+
+```
+TAG=fixedctl BIN_NAME=proftpd-fixed-plain python3 client13-aslr-marker.py
+TAG=vulnctl  BIN_NAME=proftpd-vuln-plain  python3 client13-aslr-marker.py
+```
+
+Fixed build at 05:36:20Z: `LEAK NONE` (`evidence/fixedctl.txt`). Its
+`evidence/rewrite-fixedctl-0.log` rejects every 1025–1028-code-point key with
+`utf8trans: key '...' length (1026 bytes) exceeds maximum allowed length
+(1024 bytes), rejecting` (1027/1028 likewise); the internal map returns `''`,
+`rewrite_fixup()` reports `generated empty command argument`, no map result
+contains the leaked pointer, no wild `parsing '...'` deref and no signal.
+Vulnerable-build control through the same edited client: `PTR_OLD
+584ab05830e8`, `PTR_NEW 584ab05830e8`, `WILD_LEN 109`, `PAT_HIT 17`,
+`NOOP 200`, `PWD 530`, `SIGNALS 0` (`evidence/vulnctl.txt`). The delta is the
+pinned source fix, not a client or configuration difference.
+
+Grade unchanged: rungs 1–4 as already labeled, rung 5 UNCLAIMED. The fixed
+control demonstrates rejection of the wire input, not command execution; the
+chosen string remains parser data at a leaked per-run address.
