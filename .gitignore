@@ -238,3 +238,14 @@ lab/frontier/inetutils2shell/harness/gen-*/
 lab/frontier/inetutils2shell/harness/slc-*-asan
 lab/frontier/inetutils2shell/harness/slc-*-plain
 lab/frontier/inetutils2shell/evidence/raw-*
+
+# Libssh2shell live: pinned tarballs, extracted trees, local builds, binaries
+# and raw logs stay local. client.c, fake_server.py and run_live.sh stay tracked.
+lab/libssh22shell-live/src/
+lab/libssh22shell-live/build*/
+lab/libssh22shell-live/client-vuln
+lab/libssh22shell-live/client-fixed
+lab/libssh22shell-live/client-vuln-plain
+lab/libssh22shell-live/*.log
+lab/libssh22shell-live/*.rc
+lab/libssh22shell-live/core*
