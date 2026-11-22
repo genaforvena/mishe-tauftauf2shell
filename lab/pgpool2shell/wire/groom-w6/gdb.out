@@ -1,0 +1,219 @@
+Breakpoint 1 at 0x1521ed: file watchdog.c, line 1239.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+2026-11-22 16:57:42.786: main pid 2094569: WARNING:  logdir is changed to work_dir
+2026-11-22 16:57:42.786: main pid 2094569: DETAIL:  if logdir is specified, the value will be set to work_dir
+2026-11-22 16:57:42.786: main pid 2094569: DEBUG:  read pgpool node id file /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/wire/pgpool_node_id
+2026-11-22 16:57:42.786: main pid 2094569: DETAIL:  pgpool node id: 0
+2026-11-22 16:57:42.786: main pid 2094569: DEBUG:  initializing pool configuration
+2026-11-22 16:57:42.786: main pid 2094569: DETAIL:  num_backends: 1 total_weight: 1.000000
+2026-11-22 16:57:42.786: main pid 2094569: DEBUG:  initializing pool configuration
+2026-11-22 16:57:42.786: main pid 2094569: DETAIL:  backend 0 weight: 2147483647.000000 flag: 0000
+2026-11-22 16:57:42.787: main pid 2094569: LOG:  Backend status file /tmp/pgpool_status discarded
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  BackendDesc: 113672 bytes requested for shared memory
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  pool_coninfo_size: num_init_children (1) * max_pool (1) * MAX_NUM_BACKENDS (128) * sizeof(ConnectionInfo) (416) = 53248 bytes requested for shared memory
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  ProcessInfo: num_init_children (1) * sizeof(ProcessInfo) (2152) = 2152 bytes requested for shared memory
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  UserSignalSlot: 24 bytes requested for shared memory
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  POOL_REQUEST_INFO: 5352 bytes requested for shared memory
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  stat_shared_memory_size: 9216 bytes requested for shared memory
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  SI_ManageInfo: 24 bytes requested for shared memory
+2026-11-22 16:57:42.787: main pid 2094569: DEBUG:  memcache blocks :64
+2026-11-22 16:57:42.788: main pid 2094569: DEBUG:  shared_memory_cache_size: 67108864
+2026-11-22 16:57:42.788: main pid 2094569: DEBUG:  shared_memory_fsmm_size: 64
+2026-11-22 16:57:42.788: main pid 2094569: DEBUG:  pool_hash_size: 67108880
+2026-11-22 16:57:42.788: main pid 2094569: DEBUG:  POOL_QUERY_CACHE_STATS: 24 bytes requested for shared memory
+2026-11-22 16:57:42.788: main pid 2094569: DEBUG:  watchdog: 56 bytes requested for shared memory
+2026-11-22 16:57:42.788: main pid 2094569: LOG:  allocating shared memory segment of size: 134414144 
+2026-11-22 16:57:42.973: main pid 2094569: DEBUG:  pool_coninfo_size: num_init_children (1) * max_pool (1) * MAX_NUM_BACKENDS (128) * sizeof(ConnectionInfo) (416) = 53248 bytes requested for shared memory
+2026-11-22 16:57:42.973: main pid 2094569: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 16:57:42.973: main pid 2094569: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 16:57:42.973: main pid 2094569: DEBUG:  memcache blocks :64
+2026-11-22 16:57:42.973: main pid 2094569: DEBUG:  shared_memory_cache_size: 67108864
+2026-11-22 16:57:42.973: main pid 2094569: DEBUG:  memory cache request size : 67108864
+2026-11-22 16:57:42.973: main pid 2094569: DEBUG:  shared_memory_fsmm_size: 64
+[Detaching after vfork from child process 2094784]
+2026-11-22 16:57:42.975: main pid 2094569: LOG:  pool_discard_oid_maps: discarded memqcache oid maps
+
+Breakpoint 1, fork_watchdog_child () at watchdog.c:1239
+1239		pid = fork();
+
+=== at fork_watchdog_child, following child ===
+[Attaching after Thread 0x7ffff6d9e940 (LWP 2094569) fork to child process 2094787]
+[New inferior 2 (process 2094787)]
+[Detaching after fork from parent process 2094569]
+[Inferior 1 (process 2094569) detached]
+2026-11-22 16:57:42.984: main pid 2094569: LOG:  waiting for watchdog to initialize
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Switching to Thread 0x7ffff6d9e940 (LWP 2094787)]
+fork_watchdog_child () at watchdog.c:1241
+1241		if (pid == 0)
+1243			on_exit_reset();
+
+=== in watchdog child, setting parser breakpoint ===
+Breakpoint 2 at 0x17426f: wd_json_data.c:858. (2 locations)
+2026-11-22 16:57:43.006: watchdog pid 2094787: LOG:  setting the local watchdog node name to "127.0.0.1:19003 Linux mesh-home"
+2026-11-22 16:57:43.006: watchdog pid 2094787: LOG:  watchdog cluster is configured with 1 remote nodes
+2026-11-22 16:57:43.006: watchdog pid 2094787: LOG:  watchdog remote node:0 on 127.0.0.1:19005
+2026-11-22 16:57:43.006: watchdog pid 2094787: LOG:  interface monitoring is disabled in watchdog
+2026-11-22 16:57:43.006: watchdog pid 2094787: LOG:  setting up watchdog receive socket for 127.0.0.1:19004
+2026-11-22 16:57:43.006: watchdog pid 2094787: INFO:  IPC socket path: "/tmp/.s.PGPOOLWD_CMD.19004"
+2026-11-22 16:57:43.006: watchdog pid 2094787: LOG:  watchdog node state changed from [DEAD] to [LOADING]
+2026-11-22 16:57:43.006: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = LOADING
+2026-11-22 16:57:43.006: watchdog pid 2094787: LOG:  new outbound connection to 127.0.0.1:19005 
+2026-11-22 16:57:43.006: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = NEW OUTBOUND_CONNECTION Current State = LOADING
+2026-11-22 16:57:43.006: watchdog pid 2094787: DEBUG:  sending packet, watchdog node:[] command id:[4] type:[ADD NODE] state:[LOADING]
+2026-11-22 16:57:43.006: watchdog pid 2094787: DEBUG:  sending watchdog packet to socket:7, type:[A], command ID:4, data Length:332
+2026-11-22 16:57:48.011: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = TIMEOUT Current State = LOADING
+2026-11-22 16:57:48.011: watchdog pid 2094787: LOG:  watchdog node state changed from [LOADING] to [JOINING]
+2026-11-22 16:57:48.011: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = JOINING
+2026-11-22 16:57:48.011: watchdog pid 2094787: DEBUG:  sending packet, watchdog node:[] command id:[6] type:[NODE INFO] state:[JOINING]
+2026-11-22 16:57:48.011: watchdog pid 2094787: DEBUG:  sending watchdog packet to socket:7, type:[I], command ID:6, data Length:332
+2026-11-22 16:57:52.015: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = COMMAND FINISHED Current State = JOINING
+2026-11-22 16:57:52.015: watchdog pid 2094787: LOG:  watchdog node state changed from [JOINING] to [INITIALIZING]
+2026-11-22 16:57:52.015: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = INITIALIZING
+2026-11-22 16:57:52.015: watchdog pid 2094787: DEBUG:  sending packet, watchdog node:[] command id:[7] type:[NODE INFO] state:[INITIALIZING]
+2026-11-22 16:57:52.015: watchdog pid 2094787: DEBUG:  sending watchdog packet to socket:7, type:[I], command ID:7, data Length:332
+2026-11-22 16:57:53.016: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = TIMEOUT Current State = INITIALIZING
+2026-11-22 16:57:53.016: watchdog pid 2094787: LOG:  I am the only alive node in the watchdog cluster
+2026-11-22 16:57:53.016: watchdog pid 2094787: HINT:  skipping stand for coordinator state
+2026-11-22 16:57:53.016: watchdog pid 2094787: LOG:  watchdog node state changed from [INITIALIZING] to [LEADER]
+2026-11-22 16:57:53.016: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = LEADER
+2026-11-22 16:57:53.016: watchdog pid 2094787: LOG:  Setting failover command timeout to 0
+2026-11-22 16:57:53.016: watchdog pid 2094787: LOG:  I am announcing my self as leader/coordinator watchdog node
+2026-11-22 16:57:53.016: watchdog pid 2094787: DEBUG:  sending packet, watchdog node:[] command id:[9] type:[NODE INFO] state:[LEADER]
+2026-11-22 16:57:53.016: watchdog pid 2094787: DEBUG:  sending watchdog packet to socket:7, type:[I], command ID:9, data Length:333
+2026-11-22 16:57:57.020: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = COMMAND FINISHED Current State = LEADER
+2026-11-22 16:57:57.020: watchdog pid 2094787: DEBUG:  declare coordinator command finished with status:[COMMAND TIMED OUT]
+2026-11-22 16:57:57.020: watchdog pid 2094787: DETAIL:  The command was sent to 0 nodes and 0 nodes replied to it
+2026-11-22 16:57:57.020: watchdog pid 2094787: LOG:  I am the cluster leader node
+2026-11-22 16:57:57.020: watchdog pid 2094787: DETAIL:  our declare coordinator message is accepted by all nodes
+2026-11-22 16:57:57.020: watchdog pid 2094787: LOG:  setting the local node "127.0.0.1:19003 Linux mesh-home" as watchdog cluster leader
+2026-11-22 16:57:57.020: watchdog pid 2094787: LOG:  signal_user1_to_parent_with_reason(1)
+2026-11-22 16:57:57.020: watchdog pid 2094787: DEBUG:  sending signal:10 to the parent process with PID:2094569
+2026-11-22 16:57:57.020: watchdog pid 2094787: LOG:  I am the cluster leader node but we do not have enough nodes in cluster
+2026-11-22 16:57:57.020: watchdog pid 2094787: DETAIL:  waiting for the quorum to start escalation process
+2026-11-22 16:57:57.020: main pid 2094569: LOG:  watchdog process is initialized
+2026-11-22 16:57:57.020: main pid 2094569: DETAIL:  watchdog messaging data version: 1.2
+2026-11-22 16:57:57.020: watchdog pid 2094787: DEBUG:  received watchdog packet type:f
+2026-11-22 16:57:57.020: watchdog pid 2094787: DEBUG:  reading packet type f of length 77
+2026-11-22 16:57:57.020: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = PACKET RECEIVED Current State = LEADER
+2026-11-22 16:57:57.020: watchdog pid 2094787: DEBUG:  received packet, watchdog node:[] command id:[1] type:[FAILOVER FUNCTION COMMAND] state:[LEADER]
+2026-11-22 16:57:57.020: watchdog pid 2094787: LOG:  watchdog received the failover command from remote pgpool-II node ""
+
+=== HIT wd_json_data.c:858 ===
+$1 = 2026-11-22 16:57:57.021: main pid 2094569: LOG:  Pgpool-II parent process received SIGUSR1
+2026-11-22 16:57:57.021: main pid 2094569: LOG:  Pgpool-II parent process received watchdog state change signal from watchdog
+2026-11-22 16:57:57.021: life_check pid 2100332: DEBUG:  I am watchdog lifecheck child with pid:2100332
+0
+$2 = 1
+$3 = (int **) 0x7fffffff0f90
+$4 = (int *) 0x8cc59ffa3c9d9b00
+-- backtrace --
+#0  parse_wd_node_function_json (json_data=0x555555900168 "{\"Function\":\"NO_SUCH_FUNC\",\"Flags\":0,\"NodeCount\":1,\"NodeIdList\":[1094795585]}sr/sbin/nologin\nsystemd-resolve:x:992:992:systemd Resolver:/:/usr/sbin/nologin\npollinate:x:102:1::/var/cache/pollinate:/bin"..., data_len=77, func_name=0x7fffffff0f88, node_id_set=0x7fffffff0f90, count=0x7fffffff0f6c, flags=0x7fffffff0f6a "") at wd_json_data.c:858
+#1  0x00005555556ab82a in process_failover_command_on_coordinator (ipcCommand=0x555555900058) at watchdog.c:2916
+#2  0x00005555556aad0d in process_remote_failover_command_on_coordinator (wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58) at watchdog.c:2689
+#3  0x00005555556b3714 in wd_commands_packet_processor (event=WD_EVENT_PACKET_RCV, wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58) at watchdog.c:5536
+2026-11-22 16:57:57.023: watchdog pid 2094787: DEBUG:  sending packet, watchdog node:[] command id:[1] type:[COMMAND REPLY IN DATA] state:[LEADER]
+2026-11-22 16:57:57.023: watchdog pid 2094787: DEBUG:  sending watchdog packet to socket:7, type:[-], command ID:1, data Length:54
+2026-11-22 16:57:57.023: watchdog pid 2094787: DEBUG:  new IPC connection received
+2026-11-22 16:57:57.023: watchdog pid 2094787: DEBUG:  new IPC connection received
+2026-11-22 16:57:57.023: watchdog pid 2094787: DEBUG:  sending watchdog packet to socket:8, type:[7], command ID:0, data Length:34
+2026-11-22 16:57:57.023: watchdog pid 2094787: DEBUG:  sending watchdog packet to socket:9, type:[7], command ID:0, data Length:654
+2026-11-22 16:57:57.023: main pid 2094569: LOG:  create socket files[0]: /tmp/.s.PGSQL.19003
+2026-11-22 16:57:57.023: main pid 2094569: LOG:  listen address[0]: 127.0.0.1
+2026-11-22 16:57:57.023: life_check pid 2100332: LOG:  2 watchdog nodes are configured for lifecheck
+2026-11-22 16:57:57.023: main pid 2094569: LOG:  Setting up socket for 127.0.0.1:19003
+2026-11-22 16:57:57.023: life_check pid 2100332: LOG:  watchdog nodes ID:0 Name:"127.0.0.1:19003 Linux mesh-home"
+2026-11-22 16:57:57.023: life_check pid 2100332: DETAIL:  Host:"127.0.0.1" WD Port:19004 pgpool-II port:19003
+2026-11-22 16:57:57.023: life_check pid 2100332: LOG:  watchdog nodes ID:1 Name:"Not_Set"
+2026-11-22 16:57:57.023: life_check pid 2100332: DETAIL:  Host:"127.0.0.1" WD Port:19005 pgpool-II port:19013
+2026-11-22 16:57:57.023: main pid 2094569: DEBUG:  Spawning 1 child processes
+2026-11-22 16:57:57.023: life_check pid 2100332: WARNING:  watchdog life checking, wd_lifecheck_user is empty
+2026-11-22 16:57:57.023: life_check pid 2100332: DEBUG:  watchdog checking life check is ready
+2026-11-22 16:57:57.023: life_check pid 2100332: DETAIL:  pgpool:0 at "127.0.0.1:19003" has not started yet
+2026-11-22 16:57:57.023: life_check pid 2100332: WARNING:  watchdog life checking, wd_lifecheck_user is empty
+2026-11-22 16:57:57.023: life_check pid 2100332: DEBUG:  watchdog checking life check is ready
+2026-11-22 16:57:57.023: life_check pid 2100332: DETAIL:  pgpool:1 at "127.0.0.1:19013" has not started yet
+2026-11-22 16:57:57.023: main pid 2094569: LOG:  find_primary_node_repeatedly: waiting for finding a primary node
+2026-11-22 16:57:57.023: child pid 2100333: DEBUG:  initializing backend status
+2026-11-22 16:57:57.024: main pid 2094569: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 16:57:57.024: main pid 2094569: DETAIL:  Operation now in progress
+2026-11-22 16:57:57.024: main pid 2094569: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 16:57:57.024: main pid 2094569: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 16:57:57.024: main pid 2094569: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 16:57:57.024: main pid 2094569: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 16:57:57.024: main pid 2094569: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 16:57:58.023: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = TIMEOUT Current State = LEADER
+2026-11-22 16:57:58.024: main pid 2094569: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 16:57:58.024: main pid 2094569: DETAIL:  Operation now in progress
+2026-11-22 16:57:58.024: main pid 2094569: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+2026-11-22 16:57:58.024: main pid 2094569: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 16:57:58.024: main pid 2094569: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+2026-11-22 16:57:58.024: main pid 2094569: DEBUG:  verify_backend_node_status: there's no primary node
+2026-11-22 16:57:58.024: main pid 2094569: DEBUG:  pool_release_follow_primary_lock called
+2026-11-22 16:57:59.025: watchdog pid 2094787: DEBUG:  received watchdog packet type:r
+2026-11-22 16:57:59.025: watchdog pid 2094787: DEBUG:  reading packet type r of length 90
+2026-11-22 16:57:59.025: watchdog pid 2094787: DEBUG:  STATE MACHINE INVOKED WITH EVENT = PACKET RECEIVED Current State = LEADER
+2026-11-22 16:57:59.025: watchdog pid 2094787: DEBUG:  received packet, watchdog node:[] command id:[1] type:[ONLINE RECOVERY REQUEST] state:[LEADER]
+2026-11-22 16:57:59.025: watchdog pid 2094787: LOG:  watchdog received online recovery request from ""
+
+=== HIT wd_json_data.c:858 ===
+$5 = 0
+$6 = 2
+2026-11-22 16:57:59.025: main pid 2094569: LOG:  failed to connect to PostgreSQL server on "127.0.0.1:15432", getsockopt() failed
+2026-11-22 16:57:59.025: main pid 2094569: DETAIL:  Operation now in progress
+$7 = 2026-11-22 16:57:59.026: main pid 2094569: LOG:  find_primary_node: make_persistent_db_connection_noerror failed on node 0
+(2026-11-22 16:57:59.026: main pid 2094569: DEBUG:  pool_acquire_follow_primary_lock: lock was not held by anyone
+2026-11-22 16:57:59.026: main pid 2094569: DEBUG:  pool_acquire_follow_primary_lock: succeeded in acquiring lock
+int *2026-11-22 16:57:59.026: main pid 2094569: DEBUG:  verify_backend_node_status: there's no primary node
+*) 2026-11-22 16:57:59.026: main pid 2094569: DEBUG:  pool_release_follow_primary_lock called
+0x7fffffff0fd0
+$8 = (int *) 0x1
+-- backtrace --
+#0  parse_wd_node_function_json (json_data=0x5555558c3b88 "{\"Function\":\"START_RECOVERY\",\"Flags\":0,\"NodeCount\":2,\"NodeIdList\":[1094795585,1111638594]}", data_len=90, func_name=0x7fffffff0fc8, node_id_set=0x7fffffff0fd0, count=0x7fffffff0fb4, flags=0x7fffffff0fb3 "") at wd_json_data.c:858
+#1  0x00005555556b8508 in process_remote_online_recovery_command (wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58) at watchdog.c:7558
+#2  0x00005555556b373c in wd_commands_packet_processor (event=WD_EVENT_PACKET_RCV, wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58) at watchdog.c:5542
+#3  0x00005555556b448c in watchdog_state_machine (event=WD_EVENT_PACKET_RCV, wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58, clusterCommand=0x0) at watchdog.c:5811
+
+=== HIT wd_json_data.c:858 ===
+$9 = 1
+$10 = 2
+$11 = (int **) 0x7fffffff0fd0
+$12 = (int *) 0x1
+-- backtrace --
+#0  parse_wd_node_function_json (json_data=0x5555558c3b88 "{\"Function\":\"START_RECOVERY\",\"Flags\":0,\"NodeCount\":2,\"NodeIdList\":[1094795585,1111638594]}", data_len=90, func_name=0x7fffffff0fc8, node_id_set=0x7fffffff0fd0, count=0x7fffffff0fb4, flags=0x7fffffff0fb3 "") at wd_json_data.c:858
+#1  0x00005555556b8508 in process_remote_online_recovery_command (wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58) at watchdog.c:7558
+#2  0x00005555556b373c in wd_commands_packet_processor (event=WD_EVENT_PACKET_RCV, wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58) at watchdog.c:5542
+#3  0x00005555556b448c in watchdog_state_machine (event=WD_EVENT_PACKET_RCV, wdNode=0x7ffff6d86c60, pkt=0x5555558c3b58, clusterCommand=0x0) at watchdog.c:5811
+
+Thread 2.1 "pgpool" received signal SIGSEGV, Segmentation fault.
+0x00005555556c82a4 in parse_wd_node_function_json (json_data=0x5555558c3b88 "{\"Function\":\"START_RECOVERY\",\"Flags\":0,\"NodeCount\":2,\"NodeIdList\":[1094795585,1111638594]}", data_len=90, func_name=0x7fffffff0fc8, node_id_set=0x7fffffff0fd0, count=0x7fffffff0fb4, flags=0x7fffffff0fb3 "") at wd_json_data.c:858
+858			*node_id_set[i] = value->u.array.values[i]->u.integer;
+2026-11-22 16:57:59.028: main pid 2094569: DEBUG:  reaper handler
+2026-11-22 16:57:59.028: main pid 2094569: WARNING:  watchdog child process with pid: 2094787 was terminated by sigkill
+2026-11-22 16:57:59.029: main pid 2094569: DEBUG:  fork a new watchdog child process with pid: 2100968
+2026-11-22 16:57:59.029: main pid 2094569: DEBUG:  reaper handler: exiting normally
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  setting the local watchdog node name to "127.0.0.1:19003 Linux mesh-home"
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  watchdog cluster is configured with 1 remote nodes
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  watchdog remote node:0 on 127.0.0.1:19005
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  interface monitoring is disabled in watchdog
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  watchdog is recovering from the crash of watchdog process
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  setting up watchdog receive socket for 127.0.0.1:19004
+2026-11-22 16:57:59.029: watchdog pid 2100968: INFO:  IPC socket path: "/tmp/.s.PGPOOLWD_CMD.19004"
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  watchdog node state changed from [DEAD] to [LOADING]
+2026-11-22 16:57:59.029: watchdog pid 2100968: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = LOADING
+2026-11-22 16:57:59.029: watchdog pid 2100968: LOG:  new outbound connection to 127.0.0.1:19005 
+2026-11-22 16:57:59.029: watchdog pid 2100968: DEBUG:  STATE MACHINE INVOKED WITH EVENT = NEW OUTBOUND_CONNECTION Current State = LOADING
+2026-11-22 16:57:59.029: watchdog pid 2100968: DEBUG:  sending packet, watchdog node:[] command id:[4] type:[ADD NODE] state:[LOADING]
+2026-11-22 16:57:59.029: watchdog pid 2100968: DEBUG:  sending watchdog packet to socket:11, type:[A], command ID:4, data Length:332
+2026-11-22 16:57:59.030: watchdog pid 2100968: LOG:  read from socket failed with error :"Connection reset by peer"
+2026-11-22 16:57:59.030: watchdog pid 2100968: LOG:  client socket of  is closed
+2026-11-22 16:57:59.100: main pid 2094569: LOG:  exit handler called (signal: 15)
+2026-11-22 16:57:59.100: main pid 2094569: LOG:  shutting down by signal 15
+2026-11-22 16:57:59.100: main pid 2094569: LOG:  terminating all child processes
+2026-11-22 16:57:59.100: life_check pid 2100332: DEBUG:  lifecheck child receives shutdown request signal 15, forwarding to all children
+2026-11-22 16:57:59.100: watchdog pid 2100968: LOG:  Watchdog is shutting down
+2026-11-22 16:57:59.100: life_check pid 2100332: DEBUG:  lifecheck child receives smart shutdown request
+2026-11-22 16:57:59.101: main pid 2094569: LOG:  Pgpool-II system is shutdown

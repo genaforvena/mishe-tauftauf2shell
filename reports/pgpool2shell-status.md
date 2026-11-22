@@ -93,5 +93,19 @@ completed admission after re-verifying the pins and replaying the harness.
   rung 3 wire-confirmed with independent replay; rung 4 only at direct-call
   harness scope; rung 5 UNKNOWN.
 
+- **W6 cross-command grooming negative (2026-11-22 ~16:57Z):** at low host
+  load gdb was responsive, so the previously stalled lane was replayed. The
+  local node was allowed to reach LEADER state; one benign type-`f` failover
+  packet (`NodeCount=1`, matching one-element list) executed the parser in the
+  failover caller's frame (`0x7fffffff0f90`), then a type-`r` `NodeCount=2`
+  trigger still read `node_id_set[1]=0x1` in the recovery caller's frame
+  (`0x7fffffff0fd0`, 0x40 away) and SIGSEGV'd at `wd_json_data.c:858`. The
+  last open address-steering lane is closed by measurement; all six attempted
+  lanes are now negatives. Full report:
+  [reports/pgpool2shell-groom-w6.md](pgpool2shell-groom-w6.md); replay assets
+  in `lab/pgpool2shell/wire/groom-w6/`. Grade unchanged: rung 3 wire-confirmed
+  with independent replay; rung 4 only at direct-call harness scope; no
+  chosen-address write on a real daemon, no command, no rung 5.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.

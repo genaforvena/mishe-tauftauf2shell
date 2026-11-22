@@ -1,0 +1,21 @@
+peer listening 127.0.0.1:19005 warm_delay=14.0 gap=2.0
+peer accepted ('127.0.0.1', 34672)
+peer recv 1 bytes type=b'A'
+peer recv 4 bytes type=b'\x00'
+peer recv 4 bytes type=b'\x00'
+peer recv 332 bytes type=b'{'
+peer recv 1 bytes type=b'I'
+peer recv 8 bytes type=b'\x00'
+peer recv 332 bytes type=b'{'
+peer recv 1 bytes type=b'I'
+peer recv 8 bytes type=b'\x00'
+peer recv 332 bytes type=b'{'
+peer recv 1 bytes type=b'I'
+peer recv 341 bytes type=b'\x00'
+peer sending WARM type=f N=1 at t=14.0s
+peer recv 1 bytes type=b'-'
+peer recv 4 bytes type=b'\x00'
+peer recv 4 bytes type=b'\x00'
+peer recv 54 bytes type=b'{'
+peer sending TRIG type=r N=2 at t=16.0s
+peer: connection closed by daemon
