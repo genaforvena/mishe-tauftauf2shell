@@ -213,6 +213,26 @@ containers whose host ports bind only to loopback.
   with `sha256sum -c SHA256SUMS` 3/3 OK; the INDEX and its 12 raw `.txt` files
   are committed in-tree here, not gitignored. Rung 3 on the real handler, rung
   4 harness-level, wire reach UNKNOWN, later replayed by W105 (#1281) ESTABLISHED at that scope.
+- **Four 06:3x–06:5xZ grade-neutral edges** (commits `cc5e018`, `ee020ad`,
+  `540b339`, `08b13df`): Pgpool W2 (`../reports/pgpool2shell-o2-w2.md`)
+  rebuilds pinned 4.7.2 at `-g -O2 -fno-omit-frame-pointer` with
+  `bash lab/pgpool2shell/wire/build-o2.sh` then `run-o2.sh`; expect SIGSEGV
+  only at `NodeCount=2`, and `node_id_set[1] =
+  0x55555562d742 <read_packet_of_type+402>` under `gdb-o2-run.sh`, unchanged
+  by `gdb-o2-warm.sh`. Pgpool W3 (`../reports/pgpool2shell-n3-w3.md`) sends
+  `NodeCount=3` and faults at `i=1` before `i=2` (`w3-n3-{peer.out,
+  gdb-trace.out}`), refuting multi-slot steering. The regenerated
+  `evidence-o2-*` files were overwritten by a witness port collision on
+  19003–19005 and are deliberately uncommitted: use the hashes quoted in the
+  W2 report from the clean 05:50Z run, not the on-disk bytes. Soes advisory
+  write-set closure re-reads the primary CSAF (`../reports/frontier-soes.md`):
+  six write-capable limbs (129794/129796/129798/129803/129811/129814) are
+  exactly those already harnessed; 15 read/NULL/length CVEs remain, the
+  `esc_eoe.c:812-817` timestamp underflow has no SOES-side write and its
+  consumer is unbuildable here, so no new harness. uD3TN/BACnet admission
+  completion (`../reports/ud3tn2shell-status.md`,
+  `../reports/bacnet2shell-status.md`) only completes `docs/task.md`; their
+  recipes are already in the rows above.
 - **Vrpn2Shell W3 negative wire index** (commit `42101a4`,
   `reports/vrpn2shell.md`): `bash lab/frontier/vrpn2shell/probe-frame-write.sh
   <out> <port> -8` (ports 13914 plain / 13915 ASan) sends a 24-byte-header

@@ -5180,3 +5180,37 @@ witness replay and rung 5 stay UNKNOWN for both.
   survives indices -8 and 120, so W6's DoS is a Debug `-O0` layout effect, not
   a build-independent consequence; the -O2 gdb frame probe has no lvalue `p`,
   and no O2 geometry is claimed. Author-only, no rung 5.
+
+#### 2026-11-22 ~06:3x–06:5xZ research limb updates
+
+- **Pgpool2Shell W2 −O2 wire replay and second steering negative** (commit
+  `cc5e018`, `reports/pgpool2shell-o2-w2.md`): pinned 4.7.2 rebuilt at
+  `-g -O2 -fno-omit-frame-pointer`; `bash lab/pgpool2shell/wire/build-o2.sh`
+  then `run-o2.sh` still gives SIGSEGV only at `NodeCount=2`, so wire reach
+  is not an O0-layout artifact. gdb on the live child finds
+  `node_id_set[1] = 0x55555562d742 <read_packet_of_type+402>` — a stale PIE
+  code pointer, unchanged by a safe-N=1 warm-up — so the chosen value writes
+  read-only text and faults. Second measured steering negative, independent
+  of W1. Regenerated `evidence-o2-*` files were overwritten by a witness port
+  collision on 19003–19005 and are deliberately uncommitted; the cited
+  hashes come from the clean 05:50Z run. Grade unchanged.
+- **Pgpool2Shell W3 multi-slot hypothesis refuted** (commit `08b13df`,
+  `reports/pgpool2shell-n3-w3.md`): `NodeCount=3` with three distinct chosen
+  values breaks at `wd_json_data.c:858` with `i=1`, `node_id_set[1] =
+  0x5560cc4d` (unmapped), then SIGSEGV; `i=2` never executes, so no farther
+  caller stack slot is reachable. Combined with W1/W2, address steering is
+  refuted at `i=1` on both layouts and at `i>=2` by short-circuit. Grade
+  unchanged: rung 3 wire-confirmed, rung 4 direct-call harness only.
+- **Soes2Shell advisory write-set closure** (commit `540b339`,
+  `reports/frontier-soes.md`): all 21 CSAF CVE IDs enumerated; the six
+  write-capable limbs are exactly the six already covered (129794, 129796,
+  129798, 129803, 129811, 129814), the other 15 are reads/NULL/length/state.
+  The remaining underflow candidate `esc_eoe.c:812-817` wraps `rxframeoffset`
+  on a timestamped last fragment but performs no SOES-side write; the
+  RT-Kernel/lwIP EoE consumer is unbuildable here. FoE 129801 is an advisory
+  out-of-bounds read through the application's `FOE_fwrite()`. No new harness
+  or grade change; witness replay of W1 wire scope is still owed (#1322/1323).
+- **Docs admission completion** (commit `ee020ad`): the operator's admission
+  records for uD3TN (`reports/ud3tn2shell-status.md`) and BACnet
+  (`reports/bacnet2shell-status.md`) were added to this file; the README and
+  reproducibility rows already carry both targets. No grade change.
