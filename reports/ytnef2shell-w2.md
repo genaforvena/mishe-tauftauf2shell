@@ -32,7 +32,7 @@ No nit. The W1 grade is therefore not merely author-claimed: rung 1–3
 (chosen-length overwrite of adjacent glibc chunk metadata with fixed prebuffer
 bytes, followed by allocator detection) are independently established.
 
-## 2. Second advisory-named caller observed
+## 2. Second and third advisory-named callers observed
 
 The charter names `ytnefprint`/`MAPIPrint()` and the `ytnef` RTF/calendar paths.
 W1 covered the former. This wake drives the latter with the same crafted inputs.
@@ -52,11 +52,30 @@ ASan v2.1.2 on `rtf-wrap16.dat` (`v212-asan-ytnef-F-wrap16.err`), rc 1:
 `WRITE of size 207`, `0 bytes after 16-byte region`, chain
 `memcpy` → `DecompressRTF ytnef.c:1573` → `ProcessTNEF ytnef/main.c:202` →
 `main ytnef/main.c:145`; allocation `calloc` → `DecompressRTF :1571`, same chain.
-`main.c:202` is the `IPM.Microsoft Mail.Note` / `saveRTF` branch. The calendar
-path is also source-reachable: `ytnef/vcal.c:405-408` calls `DecompressRTF`
-whenever a `PR_RTF_COMPRESSED` property is present, but this input's
-`messageClass` routes to the Note branch, so the calendar branch was not
-separately exercised. Both callers reach the same sink with the same outcome.
+`main.c:202` is the `IPM.Microsoft Mail.Note` / `saveRTF` branch.
+
+The third named caller, `SaveVCalendar()`, was exercised too. All upstream
+inputs carry `messageClass = "IPM.Microsoft Mail.Note"`, so a synthetic
+`rtf-wrap16-cal.dat` was made by replacing the same 23 attribute bytes with
+`"IPM.Appointment"` plus NUL padding (`strcmp` stops at the first NUL) and
+recomputing the attribute checksum; sizes and all other bytes are unchanged.
+Plain v2.1.2 rc 134 `malloc(): invalid size (unsorted)`. ASan v2.1.2 rc 1,
+`WRITE of size 207`, `0 bytes after 16-byte region`, chain
+`DecompressRTF ytnef.c:1573` → `SaveVCalendar ytnef/vcal.c:408` →
+`ProcessTNEF ytnef/main.c:179` → `main :145`. This observes the advisory's
+calendar caller reaching the same sink.
+
+**Confounder, preserved.** On the fixed v2.1.3 pin this synthetic hybrid input
+does *not* cleanly reject: ASan reports an unrelated `READ of size 8` at
+`SaveVCalendar vcal.c:489` (`v213-asan-cal.err`), where an 8-byte `DDWORD` is
+read from a 4-byte `PT_BOOLEAN` property `0x8506` allocated in `TNEFFillMapi`.
+That is a pre-existing bug in the calendar printer exposed by dressing a Note
+file as an Appointment; it is not the target primitive and not a fixed-pin
+regression. This synthetic input is therefore **not** a valid fixed-pin control
+for the target claim. The clean fixed controls remain the W1 inputs and the
+`ytnef -F` probe above, where v2.1.3 prints `Detected Compressed RTF` /
+`Corrupted file` with no ASan. All three named callers reach `DecompressRTF`;
+only the first two have clean paired controls.
 
 ## 3. Structural ceiling: only fixed bytes reach the overflow
 

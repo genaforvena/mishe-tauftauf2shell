@@ -1,0 +1,55 @@
+=================================================================
+==1330279==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5020000004b0 at pc 0x5e94ed57496b bp 0x7ffda1785a80 sp 0x7ffda1785a70
+READ of size 8 at 0x5020000004b0 thread T0
+    #0 0x5e94ed57496a in SaveVCalendar ../../../src/ytnef-2.1.3/ytnef/vcal.c:489
+    #1 0x5e94ed56e5e2 in ProcessTNEF ../../../src/ytnef-2.1.3/ytnef/main.c:179
+    #2 0x5e94ed56e0c1 in main ../../../src/ytnef-2.1.3/ytnef/main.c:145
+    #3 0x76f5ede2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x76f5ede2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5e94ed56d724 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v213-asan/ytnef/.libs/ytnef+0x5724) (BuildId: 1b770161939bef16fdb6aa590a3d58fda1458d65)
+
+0x5020000004b4 is located 0 bytes after 4-byte region [0x5020000004b0,0x5020000004b4)
+allocated by thread T0 here:
+    #0 0x76f5ee2fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x76f5eea377bb in TNEFFillMapi ../../../src/ytnef-2.1.3/lib/ytnef.c:576
+    #2 0x76f5eea35efd in TNEFMapiProperties ../../../src/ytnef-2.1.3/lib/ytnef.c:410
+    #3 0x76f5eea3f9a2 in TNEFParse ../../../src/ytnef-2.1.3/lib/ytnef.c:1229
+    #4 0x76f5eea3e3be in TNEFParseFile ../../../src/ytnef-2.1.3/lib/ytnef.c:1086
+    #5 0x5e94ed56dfd7 in main ../../../src/ytnef-2.1.3/ytnef/main.c:140
+    #6 0x76f5ede2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x76f5ede2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5e94ed56d724 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/ytnef2shell/build/v213-asan/ytnef/.libs/ytnef+0x5724) (BuildId: 1b770161939bef16fdb6aa590a3d58fda1458d65)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../src/ytnef-2.1.3/ytnef/vcal.c:489 in SaveVCalendar
+Shadow bytes around the buggy address:
+  0x502000000200: fa fa 04 fa fa fa 00 00 fa fa 00 00 fa fa 04 fa
+  0x502000000280: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 04 fa
+  0x502000000300: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 00 00
+  0x502000000380: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 04 fa
+  0x502000000400: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 05 fa
+=>0x502000000480: fa fa 00 00 fa fa[04]fa fa fa 00 00 fa fa 04 fa
+  0x502000000500: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 04 fa
+  0x502000000580: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 02 fa
+  0x502000000600: fa fa 00 00 fa fa 02 fa fa fa 00 00 fa fa 02 fa
+  0x502000000680: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 04 fa
+  0x502000000700: fa fa 00 00 fa fa 04 fa fa fa 00 00 fa fa 04 fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1330279==ABORTING
