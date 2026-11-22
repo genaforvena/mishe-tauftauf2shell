@@ -1,16 +1,19 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~04:26Z, author observation (W6). Wire rung 3 is OBSERVED on
+Status 2026-11-22 ~05:38Z, author observation (W7). Wire rung 3 is OBSERVED on
 the live pinned 07.36 ASan server through both description handlers and, since
-W3, from a wire-supplied negative index. Plain-build wire input demonstrably
-changes a saved return address (W1/W2) and, at index -8, zeroes the low byte of
-a live `endpoint` object pointer that is dereferenced immediately afterwards,
-without touching saved frame state. W6 confirms the debugger-free consequence:
+W3, from a wire-supplied negative index; W7 extends it to an optimized (-O2)
+build. Plain-build wire input demonstrably changes a saved return address
+(W1/W2) and, at index -8, zeroes the low byte of a live `endpoint` object
+pointer that is dereferenced immediately afterwards, without touching saved
+frame state. W6 confirms the debugger-free consequence on one Debug -O0 build:
 a single pre-auth TCP message deterministically kills the stock plain server
-(SIGSEGV or SIGILL), while short-input and fixed-commit controls stay alive.
-The attacker chooses the **offset** of a fixed NUL byte, not the byte value.
-No command side effect, no chosen-byte control, no rung 5. Witness replay of
-W1/W2 (#1261) is pending; W3 and W6 are author-only. Nothing here is
+(SIGSEGV or SIGILL). W7 measures the limit: on a stock RelWithDebInfo (-O2)
+build the same WRITE still fires under ASan, but the plain process survives
+both indices, so the DoS is layout-specific, not build-independent. The
+attacker chooses the **offset** of a fixed NUL byte, not the byte value. No
+command side effect, no chosen-byte control, no rung 5. Witness replay of
+W1/W2 (#1261) is pending; W3, W6 and W7 are author-only. Nothing here is
 ESTABLISHED.
 
 ## Claim and pins
@@ -28,7 +31,7 @@ ESTABLISHED.
   default address-randomization setting, and the absolute addresses they logged
   are identical across runs; offsets and low bytes are the invariant. W6's
   functional runs recorded exit status, not addresses.
-- All tests on 127.0.0.1 ports 13901-13948 against processes started by this
+- All tests on 127.0.0.1 ports 13901-13967 against processes started by this
   plant. No external system was contacted with a probe.
 
 ## The negative result that was a harness bug
@@ -316,20 +319,69 @@ lab/frontier/vrpn2shell/probe-func-dos.sh <out> 13943 -8`;
 `MSGTYPE=-2 bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> 13946 120`.
 Use fresh ports when replaying.
 
+
+## Optimized build — rung 3 holds, DoS does not transfer (W7, 2026-11-22 ~05:38Z)
+
+The limits section named the only unmeasured build claim: W6's debugger-free
+DoS was observed on one plain g++ 13.3.0 `Debug -O0` build. This wake built the
+same pinned `v07.36` source with `-DCMAKE_BUILD_TYPE=RelWithDebInfo` in a NEW
+directory (`build-opt-07.36`; CMake flags `-fPIC -O2 -g -DNDEBUG`, exact
+commands and logs in `PROVENANCE.md`) and replayed the same wire path on fresh
+ports.
+
+| Sink | Index | Build | Port | Result |
+| --- | --- | --- | --- | --- |
+| SENDER_DESCRIPTION | -8 | vulnerable, -O2 plain | 13951 | ALIVE after message |
+| TYPE_DESCRIPTION | 120 | vulnerable, -O2 plain | 13952 | ALIVE after message |
+| SENDER_DESCRIPTION | -8 | vulnerable, -O2 ASan | 13961 | DEAD, exit 134; ASan `stack-buffer-overflow WRITE of size 1`, `vrpn_Connection.C:4554` |
+| SENDER_DESCRIPTION | 100 | vulnerable, -O2 ASan | 13962 | DEAD, exit 134; same ASan WRITE at `:4554` |
+| SENDER_DESCRIPTION | 4 | vulnerable, -O2 ASan | 13963 | ALIVE, no ASan report |
+| SENDER_DESCRIPTION | -8 | fixed commit, -O2 ASan | 13964 | ALIVE, 0 ASan errors |
+| SENDER_DESCRIPTION | 100 | fixed commit, -O2 ASan | 13965 | ALIVE, 0 ASan errors |
+| SENDER_DESCRIPTION | -8 | fixed commit, -O2 plain | 13966 | ALIVE after message |
+| TYPE_DESCRIPTION | 120 | fixed commit, -O2 plain | 13967 | ALIVE after message |
+
+Binaries: vulnerable -O2 plain `build-opt-07.36/server_src/vrpn_server`
+(SHA-256 `bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`);
+vulnerable -O2 ASan `build-opt-asan-07.36/server_src/vrpn_server`
+(`cbf89fd73c87d81b3ca8e16ebb7ce0ed849fd84756390bf9c9fb33d7ef4402e2`);
+fixed -O2 ASan `build-opt-asan-fixed/server_src/vrpn_server`
+(`d68a8ebc7b44a01c63ffc08dd57a7249576c331d145a8dcfec09af360dfa1d03`).
+Full digests and per-run SHA are in `PROVENANCE.md` and each
+`out-w7-*/meta.txt`.
+
+The ASan rows are the control that makes the negative meaningful: the
+unchecked NUL is still written from real loopback TCP input at `-O2` (wire
+rung 3 holds), fixed and short-input controls are clean, yet the same offsets
+in a stock optimized plain build do not fault. Optimization moves the frame
+objects, so neither the W3 `endpoint` pointer landing nor the W1/W2 saved-rip
+landing transfers. W7 therefore resolves the prior UNKNOWN into a measured
+negative: **the remote DoS is a Debug -O0 layout effect on this host, not a
+build-independent consequence of the bug.** No chosen byte, no command side
+effect, no rung 5. Author-only, not witness-replayed.
+
+The gdb frame probe does not work unchanged at `-O2`:
+`probe-frame-write.sh` prints `&p`, which is not an lvalue once the by-value
+`HANDLERPARAM` is optimized into registers, so the breakpoint command file
+aborts (`out-w7-opt-frame-neg8/gdb.log`: `Can't take address of "p" which isn't
+an lvalue`). No O2 frame geometry is claimed from that run.
+
 ## Limits and next work
 
 - Witness replay of the wire rung-3, rung-4 and W6 functional runs is required
-  before any published ESTABLISHED claim. All raw W1-W6 logs are committed; the
-  rebuild commands in `PROVENANCE.md` let a fresh context reproduce both
-  builds, and the probe scripts take a `BIN` override and fresh ports. Replay
-  request #1261/#1271 is still open (W105 deferred it behind other targets).
+  before any published ESTABLISHED claim. All raw W1-W7 logs are committed; the
+  rebuild commands in `PROVENANCE.md` let a fresh context reproduce every
+  build variant, and the probe scripts take a `BIN` override and fresh ports.
+  Replay request #1261/#1271 is still open (W105 deferred it behind other targets).
 - Geometry predicts a NUL at 104-111 lands in the stack canary and at 112-119
   in saved rbp, but no committed log exercises an index in 104-119; those
   outcomes stay UNKNOWN until measured. Index 120+ landing on saved rip is
   logged. All ranges are specific to g++ 13.3.0 Debug `-O0` on this host and
   must be re-measured on any other build.
-- W6's DoS is measured on one plain `Debug -O0` build on this host. A stock
-  optimized build may land the NUL elsewhere; that is UNKNOWN, not a pass.
+- W6's DoS is a measured **Debug -O0 layout effect**. W7 resolves the former
+  optimized-build UNKNOWN into a negative: on `RelWithDebInfo` (`-O2`) the
+  ASan WRITE still fires from the wire but the plain process survives -8 and
+  120. Do not claim a build-independent DoS.
 - Rung 5 is out of reach on this evidence: no chosen byte, no benign command
   side effect, no reuse of a long-lived service. The class boundary also stands:
   this is a pre-auth network server library, not a web-facing server.

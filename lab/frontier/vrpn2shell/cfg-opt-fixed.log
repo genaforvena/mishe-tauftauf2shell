@@ -1,0 +1,89 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMake Warning (dev) at cmake/GetCompilerInfoString.cmake:125 (exec_program):
+  Policy CMP0153 is not set: The exec_program command should not be called.
+  Run "cmake --help-policy CMP0153" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  Use execute_process() instead.
+Call Stack (most recent call first):
+  cmake/GetCompilerInfoString.cmake:105 (get_gcc_version)
+  cmake/CreateDashboardScripts.cmake:40 (get_compiler_info_string)
+  CMakeLists.txt:36 (include)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Configuring the VRPN suite version 07.38 using the CMake-based build system
+
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Now searching for auto-configurable optional packages...
+
+-- Checking for module 'libusb-1.0'
+--   Package 'libusb-1.0', required by 'virtual:world', not found
+-- Could NOT find Libusb1 (missing: LIBUSB1_LIBRARY LIBUSB1_INCLUDE_DIR) 
+-- Local HIDAPI submodule not found. To download with Git, run git submodule update --init
+-- Local JSONCPP submodule not found. To download with Git, run git submodule update --init
+-- Could NOT find SWIG (missing: SWIG_EXECUTABLE SWIG_DIR) 
+-- Found Python: /usr/include/python3.12 (found version "3.12.3") found components: Development Development.Module Development.Embed 
+-- Found Java: /usr/bin/java (found version "17.0.21") found components: Development 
+-- Could NOT find JNI (missing: AWT) 
+-- Checking for module 'mpi-c'
+--   Package 'mpi-c', required by 'virtual:world', not found
+-- Could NOT find MPI_C (missing: MPI_C_LIB_NAMES MPI_C_HEADER_DIR MPI_C_WORKS) 
+-- Checking for module 'mpi-cxx'
+--   Package 'mpi-cxx', required by 'virtual:world', not found
+-- Could NOT find MPI_CXX (missing: MPI_CXX_LIB_NAMES MPI_CXX_HEADER_DIR MPI_CXX_WORKS) 
+-- Could NOT find MPI (missing: MPI_C_FOUND MPI_CXX_FOUND) 
+-- Could NOT find Modbus (missing: MODBUS_LIBRARY MODBUS_INCLUDE_DIR) 
+-- Checking for module 'libusb-1.0'
+--   Package 'libusb-1.0', required by 'virtual:world', not found
+-- Could NOT find Libusb1 (missing: LIBUSB1_LIBRARY LIBUSB1_INCLUDE_DIR) 
+-- Could NOT find HIDAPI (missing: HIDAPI_LIBRARY HIDAPI_INCLUDE_DIR) 
+-- Could NOT find OpenHaptics (missing: HDAPI_LIBRARY HDAPI_INCLUDE_DIR HDAPI_HDU_INCLUDE_DIR HDAPI_HDU_LIBRARY HLAPI_INCLUDE_DIR HLAPI_LIBRARY HLAPI_HLU_INCLUDE_DIR HLAPI_HLU_LIBRARY HDAPI_PHANToMIO_LIBRARY HDAPI_HDU_SOURCE_DIR HLAPI_HLU_SOURCE_DIR) 
+-- Could NOT find GHOST (missing: GHOST_LIBRARY GHOST_INCLUDE_DIR) 
+-- Found I2CDEV: /usr/include  
+-- Could NOT find WiiUse (missing: WIIUSE_LIBRARY WIIUSE_INCLUDE_DIR) 
+-- Could NOT find JsonCpp (missing: JsonCpp_INCLUDE_DIR JsonCpp_LIBRARY) 
+-- Could NOT find LibNifalcon (missing: LIBNIFALCON_LIBRARY LIBNIFALCON_INCLUDE_DIR LIBNIFALCON_LIBUSB1_LIBRARY LIBNIFALCON_LIBUSB1_INCLUDE_DIR) 
+-- Could NOT find GPM (missing: GPM_LIBRARY GPM_INCLUDE_DIR) 
+-- Could NOT find InterSense (missing: INTERSENSE_LIBRARY INTERSENSE_INCLUDE_DIR) 
+-- Could NOT find NIDAQmx (missing: NIDAQMX_LIBRARY NIDAQMX_INCLUDE_DIR) 
+-- Could NOT find ViewPoint (missing: VIEWPOINT_LIBRARY VIEWPOINT_INCLUDE_DIR) 
+-- Looking for C++ include linux/joystick.h
+-- Looking for C++ include linux/joystick.h - found
+-- Looking for C++ include linux/input.h
+-- Looking for C++ include linux/input.h - found
+-- Found Perl: /usr/bin/perl (found version "5.38.2") 
+-- Checking for perl module Parse::RecDescent
+-- Checking for perl module Parse::RecDescent - failed
+-- Could NOT find PerlModules (missing: PERLMODULES_PARSE_RECDESCENT_MODULE) 
+-- Could NOT find LibFreespace (missing: LIBFREESPACE_LIBRARY LIBFREESPACE_INCLUDE_DIR) 
+-- Found quatlib: quat  
+-- Could NOT find ColibriApi (missing: COLIBRIAPI_LIBRARY COLIBRIAPI_INCLUDE_DIR CMAKE_HAVE_THREADS_LIBRARY) 
+-- Could NOT find GLUT (missing: GLUT_glut_LIBRARY GLUT_INCLUDE_DIR) 
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libGL.so   
+-- Dashboard scripts have been generated for automatic nightly and continuous builds.
+-- You can add these sample lines to your crontab:
+-- 
+
+15 0 * * * "/usr/bin/ctest" -S "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/build-opt-fixed/Dashboards-mesh-home-mesh-home/runNightly.cmake" 
+15 * * * * "/usr/bin/ctest" -S "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/build-opt-fixed/Dashboards-mesh-home-mesh-home/runContinuous.cmake" 
+
+or run this command for an one-off experimental test build:
+"/usr/bin/ctest" -S "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/build-opt-fixed/Dashboards-mesh-home-mesh-home/runExperimental.cmake" -VV
+
+-- 
+-- Configuring done (1.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/build-opt-fixed

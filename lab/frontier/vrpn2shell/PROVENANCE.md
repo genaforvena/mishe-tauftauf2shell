@@ -157,3 +157,54 @@ in `out-w6-func-*/meta.txt`, with raw client and server output alongside.
   Author observation of a deterministic pre-auth remote DoS on this plain
   `Debug -O0` build, not a witness verdict and not a chosen-byte or
   command-execution result.
+
+## W7 optimized (`-O2`) build and replay (2026-11-22 ~05:38Z)
+
+Four fresh build dirs from the same pinned sources (`src/vrpn-07.36`,
+`src/vrpn-fixed`), all from the repo-root `lab/frontier/vrpn2shell/` cwd:
+
+- Vulnerable plain: `cmake -S src/vrpn-07.36 -B build-opt-07.36
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo` then `cmake --build build-opt-07.36
+  --target vrpn_server -j4` (`cfg-opt.log`, `build-opt.log`). Compiler flags
+  `-fPIC -O2 -g -DNDEBUG`. Binary `build-opt-07.36/server_src/vrpn_server`
+  SHA-256 `bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`.
+- Vulnerable ASan: `cmake -S src/vrpn-07.36 -B build-opt-asan-07.36
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS='-fsanitize=address
+  -fno-omit-frame-pointer'` (`cfg-opt-asan.log`, `build-opt-asan.log`). Flags
+  `-fsanitize=address -fno-omit-frame-pointer -fPIC -O2 -g -DNDEBUG`. Binary
+  SHA-256 `cbf89fd73c87d81b3ca8e16ebb7ce0ed849fd84756390bf9c9fb33d7ef4402e2`.
+- Fixed ASan: `cmake -S src/vrpn-fixed -B build-opt-asan-fixed
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS='-fsanitize=address
+  -fno-omit-frame-pointer'` (`cfg-opt-asan-fixed.log`,
+  `build-opt-asan-fixed.log`). Binary SHA-256
+  `d68a8ebc7b44a01c63ffc08dd57a7249576c331d145a8dcfec09af360dfa1d03`.
+- Fixed plain: `cmake -S src/vrpn-fixed -B build-opt-fixed
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo` (`cfg-opt-fixed.log`,
+  `build-opt-fixed.log`). Binary SHA-256
+  `227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`.
+
+`probe-func-dos.sh` replay, each run's binary SHA in its own `meta.txt`:
+
+- `out-w7-opt-vuln-neg8`: port 13951, sender -8, vulnerable -O2 plain →
+  `ALIVE_AFTER_MESSAGE`.
+- `out-w7-opt-vuln-rip120`: port 13952, `MSGTYPE=-2`, index 120, vulnerable
+  -O2 plain → `ALIVE_AFTER_MESSAGE`.
+- `out-w7-optasan-vuln--8`: port 13961, sender -8, vulnerable -O2 ASan,
+  `ASAN_OPTIONS=abort_on_error=1:detect_leaks=0` → exit 134,
+  `stack-buffer-overflow WRITE of size 1` at `vrpn_Connection.C:4554`, frame
+  offset 104 for a 100-byte `sender_name`.
+- `out-w7-optasan-vuln-100`: port 13962, sender 100, vulnerable -O2 ASan →
+  exit 134, same WRITE at `:4554`, frame offset 212.
+- `out-w7-optasan-vuln-4`: port 13963, sender 4, vulnerable -O2 ASan → ALIVE,
+  0 ASan errors.
+- `out-w7-optasan-fixed--8` / `-100`: ports 13964/13965, fixed -O2 ASan →
+  ALIVE, 0 ASan errors each.
+- `out-w7-opt-fixed-neg8` / `out-w7-opt-fixed-rip120`: ports 13966/13967,
+  fixed -O2 plain, sender -8 and TYPE 120 → ALIVE after message.
+- `out-w7-opt-frame-neg8`: port 13953, `probe-frame-write.sh` on the -O2 plain
+  binary fails before `run`: gdb `Can't take address of "p" which isn't an
+  lvalue` (by-value `HANDLERPARAM` optimized out). No frame geometry claimed.
+
+Result: the unchecked wire write (rung 3) survives optimization, the W6 DoS
+does not. Author observation, not a witness verdict; no chosen byte and no
+command side effect. All probes on 127.0.0.1 only.

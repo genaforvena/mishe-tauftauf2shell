@@ -1,0 +1,57 @@
+=================================================================
+==3330276==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x70b1cab94a68 at pc 0x638f4c83274f bp 0x7fffb4ad9790 sp 0x7fffb4ad9780
+WRITE of size 1 at 0x70b1cab94a68 thread T0
+    #0 0x638f4c83274e in vrpn_Endpoint::handle_sender_message(void*, vrpn_HANDLERPARAM) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+    #1 0x638f4c829edd in vrpn_TypeDispatcher::doSystemCallbacksFor(vrpn_HANDLERPARAM, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+    #2 0x638f4c82a212 in vrpn_TypeDispatcher::doSystemCallbacksFor(int, int, timeval, unsigned int, char const*, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+    #3 0x638f4c82f836 in vrpn_Endpoint::dispatch(int, int, timeval, unsigned int, char*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+    #4 0x638f4c83496d in vrpn_Endpoint_IP::getOneTCPMessage(int, char*, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+    #5 0x638f4c835000 in vrpn_Endpoint_IP::handle_tcp_messages(timeval const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3561
+    #6 0x638f4c836676 in vrpn_Endpoint_IP::mainloop(timeval*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3056
+    #7 0x638f4c83b791 in vrpn_Connection_IP::mainloop(timeval const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:6120
+    #8 0x638f4c81a96e in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/server_src/vrpn.C:304
+    #9 0x70b1cca2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x70b1cca2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x638f4c81c644 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/build-opt-asan-07.36/server_src/vrpn_server+0x84644) (BuildId: 77b6c2e37bf877ad8c72570297bb1f1e084a9697)
+
+Address 0x70b1cab94a68 is located in stack of thread T0 at offset 104 in frame
+    #0 0x638f4c83247f in vrpn_Endpoint::handle_sender_message(void*, vrpn_HANDLERPARAM) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4535
+
+  This frame has 2 object(s):
+    [32, 72) 'p' (line 4534)
+    [112, 212) 'sender_name' (line 4537) <== Memory access at offset 104 underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554 in vrpn_Endpoint::handle_sender_message(void*, vrpn_HANDLERPARAM)
+Shadow bytes around the buggy address:
+  0x70b1cab94780: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x70b1cab94800: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x70b1cab94880: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00
+  0x70b1cab94900: f1 f1 f1 f1 00 00 f2 f2 00 00 04 f2 f2 f2 f2 f2
+  0x70b1cab94980: f8 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x70b1cab94a00: f1 f1 f1 f1 00 00 00 00 00 f2 f2 f2 f2[f2]00 00
+  0x70b1cab94a80: 00 00 00 00 00 00 00 00 00 00 04 f3 f3 f3 f3 f3
+  0x70b1cab94b00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x70b1cab94b80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x70b1cab94c00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x70b1cab94c80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3330276==ABORTING
