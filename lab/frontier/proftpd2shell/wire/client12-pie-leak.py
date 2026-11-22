@@ -34,6 +34,11 @@ SETARCH = os.environ.get("SETARCH", "0") == "1"
 
 
 def run_once(n):
+    # A previous trial's parent can keep the RewriteLog fd open and write at
+    # an old offset after truncation, producing stale returned-string lines.
+    subprocess.run(["fuser", "-k", LOG], capture_output=True)
+    subprocess.run(["fuser", "-k", "-n", "tcp", str(PORT)], capture_output=True)
+    open(LOG, "wb").close()
     argv = ([BIN] if not SETARCH else ["setarch", "x86_64", "-R", BIN])
     srv = subprocess.Popen(argv + ["-n", "-c", CFG], cwd=W,
                            stdout=open(W + "/log/" + TAG + "-server.out", "ab"),
