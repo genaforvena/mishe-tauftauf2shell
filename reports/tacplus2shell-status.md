@@ -73,11 +73,51 @@ the exact full-flag sync — no duplicate window, no hand-cleared signal.
   `bash lab/frontier/tacplus2shell/harness/run.sh` then
   `bash lab/frontier/tacplus2shell/harness/run_wire.sh`; full stage
   `reports/frontier-tacplus2shell.md`.
-- Next bounded experiment to move up a rung: build the vulnerable pin without
-  ASan (`./configure --debug --minimum tac_plus-ng mavis`), start it on a
-  plant-started loopback listener and break at `author.c:77` under gdb after
-  the crafted packet to dump the `memcpy()` source and `cmdline`, with a
-  two-connection priming variant testing the advisory's `calloc()`-reuse
-  claim. Fixed pin and safe packet stay as controls; a live-daemon readback
-  would promote rung 4 from harness to live process but still would not be
-  rung 5 without a pointer or command side effect.
+- Previous next experiment — plain build plus gdb readback, fixed and safe
+  controls, plus a two-connection grooming probe — is **done**; see the W121
+  section below for the result, replay and the still-open rung-5 ceiling.
+
+## W121 live-daemon chosen-byte readback (2026-11-22 20:51Z)
+
+The owed plain-build + gdb experiment is done. Both pins were rebuilt without
+ASan from the same pins into separate lab trees: `cd src-plain && ./configure
+--debug --minimum tac_plus-ng mavis && make -j4` (vulnerable `929671c`) and the
+same in `src-fixed-plain` (fixed `d8493e0`); `clang -O0 -g -ggdb -DDEBUG`,
+no `-fsanitize` in either `build-plain.log` or `build-fixed-plain.log`.
+`harness/run_gdb_case.py` launches the binary under gdb 15.1 with a
+plant-created 127.0.0.1 listening socket as fd 0 (`ptrace_scope=1` requires
+gdb to be the parent). `harness/gdb-author.cmd` breaks at `author.c:72`,
+`:75` (only for `a - base >= 64`), `:77` and `:78` and prints the `cmdline`
+VLA after each `memcpy()`.
+
+The live trigger is a compact AUTHOR packet: body 92 bytes, `arg_cnt=20`,
+size table `8` + 19×`8`, payload eight 8-byte records `cmd=AAAA` … `cmd=HHHH`.
+The validator stops at `i=1` with `len == datalength` (8+20+8), accepts on the
+vulnerable pin, and `eval_args()` copies each record's chosen four bytes.
+Observed in the live process at `author.c:78`, final `cmdline` string:
+`"AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH"`; the 12 remaining declared arguments
+reach `off=64` through `off=160` from the argument base (payload is 64 bytes),
+and `L75OOB i=8 … off=64 l=8` through `i=19 … off=160` are the past-payload
+reads that ASan previously reported at `author.c:75`. Fixed pin with the same
+packet never enters `eval_args()` and replies 57 bytes; vulnerable pin with a
+safe packet (`arg_cnt=1`, table `4`, payload `cmd=`) enters once, no OOB read,
+18-byte reply.
+
+`bash lab/frontier/tacplus2shell/harness/run_gdb.sh` gives 8 PASS / 0 FAIL,
+twice, with normalized evidence hashes `2072846c…` (vulnerable),
+`de41ed2a…` (fixed) and `da7623bf…` (safe) in `harness/gdb-r1.txt` and
+`gdb-r2.txt`. Two further bounded attempts are preserved as negative results:
+(a) placing `cmd=ZZZZ` in the packet's username field put that allocation
+~6 KB *before* the packet buffer, so the forward OOB walk cannot reach it;
+(b) a 255-record priming packet followed by the short trigger left the trigger
+buffer in a different heap region (`0x…600250` vs `0x…5fd330`), with no
+marker in its 192-byte post-buffer dump. No allocator grooming was achieved.
+
+Grade: rung 4 chosen bytes at chosen offsets is now **live-daemon scope**,
+not only verbatim-harness scope, with fixed-pin and safe-packet controls.
+The chosen bytes come from the crafted packet's own payload, read through the
+buggy argument walk; no out-of-payload heap byte, pointer, function pointer,
+marker or command was observed. Rung 5 and the advisory's five-connection
+`system()`/root chain remain UNKNOWN / claim text. Replay:
+`bash lab/frontier/tacplus2shell/harness/run_gdb.sh`, then the existing
+`run.sh` and `run_wire.sh`.

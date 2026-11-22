@@ -18,6 +18,22 @@ mavis && make -j4`, producing clang `-fsanitize=address -g -O0` binaries at
 `--minimum` disables curl/TLS/SSL/crypto/ares/SCTP/zlib; PCRE2, crypt and PAM
 remain. No system install was performed.
 
+### Plain (non-ASan) builds for live-daemon gdb readback
+
+The ASan trees above were copied to `src-plain/` (vulnerable `929671c`) and
+`src-fixed-plain/` (fixed `d8493e0` worktree) and rebuilt in place with
+`./configure --debug --minimum tac_plus-ng mavis && make -j4`, logs
+`conf-plain.log` / `build-plain.log` and `conf-fixed-plain.log` /
+`build-fixed-plain.log`. Both compile with `clang -O0 -g -ggdb -DDEBUG` and
+no `-fsanitize`; binaries live at
+`src-plain/build/<os>/tac_plus-ng/tac_plus-ng` and
+`src-fixed-plain/build/<os>/tac_plus-ng/tac_plus-ng`. `harness/run_gdb_case.py`
+launches those binaries under gdb with a plant-created 127.0.0.1 listener as
+fd 0; `harness/gdb-author.cmd` contains the breakpoints and dumps;
+`harness/run_gdb.sh` runs vulnerable/fixed/safe cases and reports normalized
+hashes (`harness/gdb-r1.txt`, `-r2.txt`). Raw `harness/gdb-*.log` and
+`gdb-*.stdout` are local-only replay output.
+
 ## Local artifacts (all under this directory)
 
 - `harness/tac.cfg` — lab config: loopback listener at 127.0.0.1:4949, key

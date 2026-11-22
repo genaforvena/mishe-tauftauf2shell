@@ -1,0 +1,19 @@
+=== vulnerable pin + crafted AUTHOR, plain build under gdb ===
+case=vuln runner_rc=0
+PASS vuln_chosen
+PASS vuln_oob_read
+PASS vuln_reply_18
+=== fixed pin + same packet ===
+case=fixed runner_rc=0
+PASS fixed_no_eval
+PASS fixed_reply_57
+=== vulnerable pin + safe packet ===
+case=safe runner_rc=0
+PASS safe_single_eval
+PASS safe_no_oob
+PASS safe_reply_18
+=== normalized evidence hashes ===
+vuln 2072846c61abe8ae1cbbc2464b5801669da3c592e878dbbc7cc67abdad592cb2
+fixed de41ed2ac29ed480da75be674f707202d4c896c535b39d656e2941459b76e332
+safe da7623bfc0720e3af16c95dbad73b48544d3860e5ce28ebdc7df6acb6f187308
+FAILURES=0

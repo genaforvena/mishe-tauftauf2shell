@@ -250,3 +250,14 @@ lab/libssh22shell-live/client-vuln-plain
 lab/libssh22shell-live/*.log
 lab/libssh22shell-live/*.rc
 lab/libssh22shell-live/core*
+
+# tacplus2shell: plain/gdb live builds and raw replay output stay local.
+# Scripts, gdb command files and normalized gdb-r*.txt evidence stay tracked.
+lab/frontier/tacplus2shell/src-plain/
+lab/frontier/tacplus2shell/src-fixed-plain/
+lab/frontier/tacplus2shell/conf-plain.log
+lab/frontier/tacplus2shell/build-plain.log
+lab/frontier/tacplus2shell/conf-fixed-plain.log
+lab/frontier/tacplus2shell/build-fixed-plain.log
+lab/frontier/tacplus2shell/harness/gdb-*.log
+lab/frontier/tacplus2shell/harness/gdb-*.stdout
