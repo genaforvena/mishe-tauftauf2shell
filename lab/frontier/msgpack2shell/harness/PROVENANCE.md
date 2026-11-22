@@ -55,4 +55,11 @@ and `evidence/r2-normalized.txt`. Normalization keeps ASan frames and chosen
 bytes while erasing PIDs, addresses, paths and build IDs.
 
 Observed 2026-11-22: both rounds hash
-`7edebe0e03a6244e0c659c99763fbf39e3420cd71b0b55e2961e51cb16c9b794`.
+`cbc13d219f85df289efd33aaab66b945cf29ba0d45576bd5ce96e750c9567538`.
+
+Clean-archive replay (2026-11-22): `git archive 36b8676
+lab/frontier/msgpack2shell reports/frontier-msgpack2shell.md` extracted into a
+temporary directory; the harness ran there at 177 PASS / 0 FAIL with the same
+two-round hash, and both `r1-normalized.txt` and `r2-normalized.txt` were
+byte-identical to the committed evidence. An earlier replay exposed ASan
+`(BuildId: ...)` bytes in the normalized hash; `norm.py` now erases them.

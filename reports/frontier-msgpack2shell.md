@@ -82,15 +82,16 @@ the function byte-for-byte from each pin into three `.inc` files verified by
 `harness/verify_verbatim.py`. `harness/harness.c` supplies only the pinned
 struct layout, a scripted 20-iovec source (`iov_base=0x4141414141414141`,
 `iov_len=0x5a5a5a5a5a5a5a5a`), an 8-slot destination, and a plain-mode arena
-that makes the bytes past the real 128-byte allocation readable. `src->end` is
-set to `dst->array` to force the buggy comparison false — the advisory's
-"destination above source" layout; the pointer is compared, never read through.
+that makes bytes past the real 128-byte allocation readable. No msgpack build,
+no public API sequence, no socket, no consumer.
 
 `bash lab/frontier/msgpack2shell/harness/run.sh` — **177 PASS / 0 FAIL**, `rc=0`,
 two rounds with byte-identical normalized hash
-`7edebe0e03a6244e0c659c99763fbf39e3420cd71b0b55e2961e51cb16c9b794`
-(gcc 13.3.0 + clang 18.1.3). Full logs and pin hashes: `harness/evidence/`,
-`harness/PROVENANCE.md`.
+`cbc13d219f85df289efd33aaab66b945cf29ba0d45576bd5ce96e750c9567538`
+(gcc 13.3.0 + clang 18.1.3). A replay from `git archive 36b8676` in a clean
+directory reproduced 177 PASS / 0 FAIL with both `r1-normalized.txt` and
+`r2-normalized.txt` byte-identical to the committed evidence. Full logs and pin
+hashes: `harness/evidence/`, `harness/PROVENANCE.md`.
 
 - Vulnerable pins (`c-7.0.2`, `8a34070b`), both compilers: ASan
   `heap-buffer-overflow`, `WRITE of size 320`, `0 bytes after 128-byte region`,
