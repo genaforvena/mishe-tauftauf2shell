@@ -381,7 +381,7 @@ So attacker bytes reach and disable a module control flag 0x100 bytes past
 with the flag zeroed the second `STOR` is not rewritten at all. This is chosen
 bytes at a chosen offset with a behavioral side effect — rung 4 at the same
 labeled conditions (ASLR-off, non-default config, authenticated `STOR`) — and
-is **not** command execution. Raw output is gitignored under
+is **not** command execution. Raw output is untracked (not committed) under
 `lab/frontier/proftpd2shell/wire/evidence/engine-{zero,on}*20261122T011[02]Z*`.
 
 Rung-5 call-path decision. Source and `nm` inspection found no call target
