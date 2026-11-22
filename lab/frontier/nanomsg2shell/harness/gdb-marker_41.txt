@@ -1,0 +1,29 @@
+Function "nn_ws_handshake_server_reply" not defined.
+Breakpoint 1 (nn_ws_handshake_server_reply) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff7bff6c0 (LWP 3871936)]
+bound rc=1
+[Switching to Thread 0x7ffff7bff6c0 (LWP 3871936)]
+
+Thread 2 "ws_server_dbg" hit Breakpoint 1, nn_ws_handshake_server_reply (self=0x55555555b1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/ws_handshake.c:1281
+1281	{
+Breakpoint 2 at 0x7ffff7fa9479: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/ws_handshake.c, line 1355.
+
+Thread 2 "ws_server_dbg" hit Breakpoint 2, nn_ws_handshake_server_reply (self=0x55555555b1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/ws_handshake.c:1355
+1355	        nn_free (version);
+VERSION_LEN=489 RESPONSE_CODE=4
+SELF=0x55555555b1e0 RESP=0x55555555c46c DONE=0x55555555c670 DONE_OFFSET=516
+--- done (40 bytes) ---
+0x55555555c670:	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'
+0x55555555c678:	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'
+0x55555555c680:	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'
+0x55555555c688:	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'	81 'Q'
+0x55555555c690:	65 'A'	65 'A'	65 'A'	65 'A'	65 'A'	65 'A'	65 'A'	65 'A'
+--- done as words ---
+0x55555555c670:	0x5151515151515151	0x5151515151515151
+0x55555555c680:	0x5151515151515151	0x5151515151515151
+0x55555555c690:	0x4141414141414141
+--- item.next ---
+$1 = 0x4141414141414141
+[Inferior 1 (process 3871928) killed]

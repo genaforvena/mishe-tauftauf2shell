@@ -1,0 +1,27 @@
+Normalized SHA-256 (first 16 hex) of W106 evidence, computed 2026-11-22T03:13Z.
+Normalization: replace "/home/mesh-home/mishe-tauftauf2shell" with "SITE",
+all "0x[hex]" with "0xADDR", "LWP <n>" with "LWP PID", "process <n>" with
+"process PID", "Thread <n>" with "Thread N". Raw files are under harness/.
+
+413aca617e028f00  gdb-offset-cycle.txt          2474  cycle pattern, done at +516
+6bced490331e364d  client-cycle-490.txt             44  gdb stops before reply
+fd9885925c1ac973  gdb-marker_ff.txt              1731  item.next=0xffffffffffffffff
+0a658a84e5bb920b  gdb-marker_41.txt              1707  item.next=0x4141414141414141
+0108840760c1876c  client-marker_ff.txt             48  gdb stops before reply
+f4dddd599ab5e5b9  client-marker_41.txt             48  gdb stops before reply
+fc519c55d794ca76  out-standalone-marker_ff.txt   1042  queue assertion bypassed
+ad99b0a7563f9a93  out-standalone-marker_41.txt   1547  queue.c:47 assertion fires
+a741a9198587305b  client-standalone-marker_ff.txt 148  558-byte reply
+68a9c276e2251ebd  client-standalone-marker_41.txt 148  558-byte reply
+6c7160d6f455b24f  out-fixed-marker_ff.txt          11  fixed, no assertion
+6c7160d6f455b24f  out-fixed-marker_41.txt          11  fixed, no assertion
+3ffe04ec74efa4d4  client-fixed-marker_ff.txt      124  fixed 71-byte reply
+42b2c13e87dce95b  client-fixed-marker_41.txt      124  fixed 71-byte reply
+
+Rebuild inputs: src/nanomsg-1.2.2 tarball pinned in src/SHA256SUMS (2/2).
+Debug build: cmake -S nanomsg-1.2.2 -B build-dbg -DCMAKE_BUILD_TYPE=Debug
+  -DCMAKE_C_FLAGS="-g -O0 -fno-omit-frame-pointer"
+Servers: harness/ws_server_dbg.c (v1.2.2), harness/ws_server.c (v1.2.2 ASan),
+  harness/ws_server_fixed (v1.2.3 clang-ASan, in harness/).
+Injectors: harness/wire_pattern.py, harness/wire_inject.py.
+Drivers: harness/run_gdb_case.sh, harness/gdb_dump.cmd, harness/gdb_offset.cmd.

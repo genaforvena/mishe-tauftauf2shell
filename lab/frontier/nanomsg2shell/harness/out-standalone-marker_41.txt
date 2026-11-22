@@ -1,0 +1,14 @@
+bound rc=1
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_queue_push+0x2f)[0x7dd4e3721da7]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_ctx_raise+0x2f)[0x7dd4e3719e6d]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_fsm_raise+0x65)[0x7dd4e371a5c7]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(+0x44b9f)[0x7dd4e3746b9f]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(+0x44961)[0x7dd4e3746961]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_fsm_feed+0x4a)[0x7dd4e3719fdb]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_fsm_event_process+0x6b)[0x7dd4e3719f8e]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_ctx_leave+0x60)[0x7dd4e3719d15]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(+0x1d367)[0x7dd4e371f367]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(+0x2060f)[0x7dd4e372260f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x7dd4e349cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x7dd4e3529e8c]
+Assertion failed: item->next == NN_QUEUE_NOTINQUEUE (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/utils/queue.c:47)

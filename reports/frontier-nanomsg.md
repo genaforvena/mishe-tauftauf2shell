@@ -134,8 +134,9 @@ Not advisory prose: measured on pinned raw sources via a loopback
 
 - v1.2.2, `Sec-WebSocket-Version: ` + 600 × `Q`: reply is 669 bytes, beginning
   `HTTP/1.1 400 Unsupported WebSocket Version\r\nSec-WebSocket-Version: QQQ...`
-  (`harness/client-600.txt`). The prefix is ~69 bytes, so ~88 chosen `Q`
-  bytes were written past `response[512]` into the adjacent `done` FSM event.
+  (`harness/client-600.txt`). The reply prefix is exactly 67 bytes and the
+  `sprintf` wrote 155 chosen `Q` bytes past `response[512]` into the adjacent
+  `done` FSM event (W106 below locates `done` at +516, after 4 pad bytes).
   The standalone server aborts with
   `Assertion failed: item->next == NN_QUEUE_NOTINQUEUE (.../src/utils/queue.c:47)`
   in both the GCC-ASan (`harness/out-asan-600.txt`) and clang-ASan
@@ -151,6 +152,80 @@ Not advisory prose: measured on pinned raw sources via a loopback
   (`-fsanitize-address-field-padding=2`) was also silent. Detection is the
   real consumer's queue assertion. Preserved as a negative observation.
 
-Grade: wire-reachable rung 3 confirmed. Rung 4 chosen-byte-at-a-measured-
-offset is strongly indicated (the assertion names the corrupted `item.next`)
-but the exact offset was not dumped; no rung 5 claim.
+Grade at that point: wire-reachable rung 3 confirmed. Rung 4 was indicated
+but the exact offset was not yet measured; W106 below closes that gap.
+No rung 5 claim.
+
+## W106 (2026-11-22 03:1xZ) — measured offset, chosen-byte readback, rung 4
+
+Built a `-g -O0` debug library from pinned 1.2.2 (`src/build-dbg`,
+`cmake -S nanomsg-1.2.2 -B build-dbg -DCMAKE_BUILD_TYPE=Debug
+-DCMAKE_C_FLAGS="-g -O0 -fno-omit-frame-pointer"`) and linked
+`harness/ws_server_dbg.c`: the same real `nn_bind("ws://127.0.0.1:28765")`
+listener with a longer lifetime. On that real wire path a gdb pending
+breakpoint on `nn_ws_handshake_server_reply` plus a line breakpoint at
+`ws_handshake.c:1355` (immediately after the `sprintf`) yields full type info
+for `self`. W105's gdb attempt failed only because a line breakpoint was set
+before the shared library loaded; the symbol breakpoint fixes that.
+
+Measured layout (x86-64, `harness/gdb-offset-cycle.txt`): the reply prefix
+`"HTTP/1.1 400 Unsupported WebSocket Version\r\nSec-WebSocket-Version: "` is
+67 bytes; `&self->done - self->response == 516`, not 512 — the compiler puts
+4 alignment pad bytes between `response[512]` and the pointer-bearing
+`struct nn_fsm_event`. Header byte k lands at `response + 67 + k`:
+
+| field | `done` offset | header index k |
+|---|---|---|
+| `done.fsm` | +0..7 | 449..456 |
+| `done.src` | +8..11 | 457..460 |
+| pad | +12..15 | 461..464 |
+| `done.srcptr` | +16..23 | 465..472 |
+| `done.type` | +24..27 | 473..476 |
+| pad | +28..31 | 477..480 |
+| `done.item.next` | +32..39 | 481..488 |
+
+Position-encoded readback: a 490-byte version of the 62-char printable cycle
+`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789` places
+`CYCLE[k % 62]` at header index k. The dumped `done` bytes are
+`P Q R S T U V W X Y Z a b ... z 0 1 2` and `item.next` is
+`0x3231307a79787776` — little-endian bytes `76 77 78 79 7a 30 31 32`
+(`v w x y z 0 1 2`) = `CYCLE[47..54]` = header indices 481..488, because
+481 % 62 = 47. Byte-exact wire-to-live-pointer mapping, not a crash signature.
+
+Chosen-value readback at that offset (489-byte version, 8 chosen bytes at
+k=481..488; `harness/gdb-marker_ff.txt`, `harness/gdb-marker_41.txt`):
+
+- 8 × `0xff` → `item.next = 0xffffffffffffffff`, exactly
+  `NN_QUEUE_NOTINQUEUE ((struct nn_queue_item *)-1)`.
+- 8 × `0x41` → `item.next = 0x4141414141414141`.
+
+Functional consequence on the same real listener, no gdb
+(`harness/out-standalone-marker_*.txt`):
+
+- `marker:41` → `Assertion failed: item->next == NN_QUEUE_NOTINQUEUE
+  (queue.c:47)` — the W105 crash.
+- `marker:ff` → that assertion is **bypassed**; the corrupted event is queued
+  and the FSM advances to a different failure,
+  `Unexpected source: state=5 source=2573 action=7 (aws.c:316)`. The chosen
+  byte value at a measured offset selects which live control-flow path runs.
+
+Fixed control (`harness/ws_server_fixed`, pinned 1.2.3): under both markers
+the reply is the 71-byte hardcoded `Sec-WebSocket-Version: 13` and the server
+records no assertion (`harness/client-fixed-marker_*.txt`,
+`harness/out-fixed-marker_*.txt`). The W105 short-header control is also clean.
+
+Grade: **rung 4 demonstrated at claimed scope** — attacker-chosen wire bytes
+at measured offsets overwrite a live pointer-bearing FSM event in a real
+loopback `nn_bind` listener, and the chosen value changes the executed path.
+Not rung 5: no command execution, no daemon-side path beyond the standalone
+listener, and the ff case still ends in a downstream FSM assertion. ASan
+remains silent (stores are inside libc `sprintf`); the consumer assertion is
+the detector. The +516 offset is build-specific and must be re-measured for
+any other compiler or flags.
+
+Replay from the lab root: `bash harness/run_gdb_case.sh marker:ff` and
+`bash harness/run_gdb_case.sh marker:41` for the gdb readbacks; for the
+functional case start `./harness/ws_server_dbg` then run
+`python3 harness/wire_pattern.py 489 marker:41 0`. Normalized trace hashes
+(paths, hex addresses and PIDs scrubbed) are in
+`harness/EVIDENCE_HASHES.txt`.

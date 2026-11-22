@@ -1,0 +1,10 @@
+bound rc=1
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(+0x3bc6a)[0x72566cb44c6a]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_fsm_feed+0x4a)[0x72566cb20fdb]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_fsm_event_process+0x6b)[0x72566cb20f8e]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(nn_ctx_leave+0x60)[0x72566cb20d15]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(+0x1d367)[0x72566cb26367]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/build-dbg/libnanomsg.so.6(+0x2060f)[0x72566cb2960f]
+/lib/x86_64-linux-gnu/libc.so.6(+0x9cb64)[0x72566c89cb64]
+/lib/x86_64-linux-gnu/libc.so.6(+0x129e8c)[0x72566c929e8c]
+Unexpected source: state=5 source=2573 action=7 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomsg2shell/src/nanomsg-1.2.2/src/transports/ws/aws.c:316)
