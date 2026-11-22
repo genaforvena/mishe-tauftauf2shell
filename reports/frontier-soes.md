@@ -577,3 +577,42 @@ Grade unchanged: rung 3 on real pinned handlers, rung 4 harness-level only,
 rung 5 not claimed, wire reach UNKNOWN. No new harness is owed by this
 advisory; only a real wire consumer could change that, and the source-level
 wire negatives above still hold.
+
+## Real hook-slot reach — layout measured, execution blocked (soes2shell,
+tenth wake, 2026-11-22 11:11–11:4xZ)
+
+Pins recomputed 3/3 OK. The wake reopened the report's ranked experiment 3 at
+the *call* level: can the already-established chosen write through the forged
+`_objd` reach a function pointer that real pinned code actually calls?
+
+Measured, not inferred: `nm -n build/coe_mailbox_3.2.0` places `ESCvar` at
+0x8038, `rxpdo` at 0x82f8, `SMmap2` at 0x8330 and `MBX` at 0x8440 in the
+non-PIE harness. `gdb ptype /o ESCvar` puts `rxpdo_override` at struct offset
+112 and `txpdo_override` at 120. A 64-byte `ESC_read` into `rxpdo`
+(0x82f8–0x8337) therefore overwrites only the first 8 bytes of
+`SMmap2[0].obj` — it cannot reach `ESCvar` directly. The route to a hook is
+the existing second step: real `COE_pdoUnpack()` (`esc_coe.c:1844-1857`)
+`memcpy`s `BITS2BYTES(obj->bitlength)` process bytes to `obj->data`, so a
+forged `_objd` with `data = &ESCvar.rxpdo_override` aims that real write at
+the live slot. Real `RXPDO_update()` (`ecat_slv.c:161-177`) calls
+`ESCvar.rxpdo_override()` at `:166-168`, before its own `ESC_read`, so a
+pointer installed in one cycle would be invoked on the next cycle.
+
+A harness for that two-cycle observation was drafted as
+`harness/coe_hook_call.c` with `build.sh` rules. Its first version crashed
+with SIGSEGV in `COE_pdoUnpack`'s `memcpy` (`esc_coe.c:1853`) because the
+second mapping's OD `data` was NULL; that was repaired to a valid target.
+**The repaired harness was not rebuilt or executed.** From ~11:35Z onward
+binary execution in this wake stalled: `timeout 3
+./build/coe_mailbox_3.2.0` (a previously replaying committed harness) exited
+124, clang rebuilds and program runs exceeded 120–300 s tool deadlines, while
+`date`/`echo` remained responsive. No post-repair vulnerable, fixed, safe or
+byte-varied observation exists. The drafted harness is UNVALIDATED and
+uncommitted; it is not evidence and no verdict is drawn from it.
+
+Grade unchanged: rung 3 on real pinned handlers, rung 4 harness-level, rung 5
+not claimed, wire reach UNKNOWN. Rung 5 would still require a live wire path
+and a command side effect; neither is observed. Next wake: rebuild and replay
+the repaired harness with vulnerable (two marker targets), fixed 3.2.1 and
+short-input controls, or record the execution stall as a lasting negative.
+
