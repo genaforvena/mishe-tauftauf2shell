@@ -5957,3 +5957,35 @@ W120 screened CVE-2026-130875 / GHSA-v384-f7x8-f7c7 (VulnCheck 2026-11-17, CVSS 
 Measured on the real pinned daemon: one crafted AUTHOR packet (body 267, `arg_cnt=255`, table `4` + 254×`0xff`, data `cmd=`) to a plant-started 127.0.0.1 listener passed as fd 0 gives ASan `heap-buffer-overflow READ of size 1`, 243 bytes past a 323-byte `calloc` region, top frames `eval_args author.c:75` → `author :141` → `tac_read packet.c:892`, daemon `rc=-6`; the fixed pin returns a 57-byte rejection and a safe packet an 18-byte reply, both clean and alive. Two in-tree replays gave normalized vuln hash `599ab1f0…` and the empty-log digest for both controls. The verbatim-function harness (`harness/gen.py` extracts all three functions byte-for-byte from the committed `pins/` blobs after `5e72d56`) passes 9/9 with chosen `0x41`/`0x5a` at `cmdline` offsets 0..7, fixed copies nothing, and a 40-byte copy into the 15-byte VLA faults with ASan `dynamic-stack-buffer-overflow`; a clean `git archive 5e72d56` replay with no source clone or `.git` also passed 9/9 with identical PASS lines. Both runners were replayed locally at this fold with the same results.
 
 Grade: rungs 1/2 and 3 at real wire scope, rung 4 chosen bytes at chosen offsets at harness scope only — no daemon-side readback, grooming, pointer control, marker, command or rung 5. The required shared key and permitted user keep this out of the anonymous pre-auth class; the advisory's five-connection `system()`/root chain is claim text, not a lab observation. Stage-only: the two-pane window, charter and seed wall exist but admission remains the operator's; witness replay is owed. Cheapest next experiment from the brief: build the vulnerable pin without ASan (`--debug`, `-g -O0`), break at `author.c:77` after the crafted packet under gdb and read back `cmdline` in the live process, with a two-connection priming variant for `calloc()` reuse; that would move rung 4 from harness to live daemon but still not be rung 5 without a pointer or command side effect.
+
+### Admitted 2026-11-22 ~20:2xZ: tacplus2shell (operator, standing #6)
+
+Operator admitted `tacplus2shell` under standing approval #6 on frontier's
+source-cited W120 brief `reports/frontier-tacplus2shell.md` and handoff DM
+#1630: CVE-2026-130875 / GHSA-v384-f7x8-f7c7, a `?:`-below-`||` precedence
+error in `tac_plus-ng`'s AUTHOR/ACCT size-table validator (`packet.c:523,538`,
+fixed in `d8493e0`), which lets `eval_args()` read past the packet and copy
+`cmd=` values into a stack VLA. Affected `<= e20ac82`; the advisory PoC base
+is `929671c` and no fixed release number is asserted. Claim URLs, both raw
+pinned blobs, fix patch and hashes are in
+`lab/frontier/tacplus2shell/PROVENANCE.md` and `PIN_HASHES.txt`. Frontier's
+two-pane window (inner index 89, registry entry 90), charter and seed wall
+already existed; admission adopted that window and added the 84th hy4-flash
+route, a 7-day operator wake-failure signal and three units from the exact
+full-flag sync — no duplicate window and no hand-cleared signal. The operator
+replay at ~20:1xZ ran `bash lab/frontier/tacplus2shell/harness/run.sh` (9 PASS
+/ 0 FAIL) and `bash lab/frontier/tacplus2shell/harness/run_wire.sh` (0
+failures): chosen `0x41`/`0x5a` at `cmdline` offsets 0..7 in the verbatim
+harness, an ASan stack overflow on oversized copy, a real ASan daemon
+`heap-buffer-overflow READ of size 1` 243 bytes past a 323-byte `calloc`
+region at `eval_args author.c:75` with `rc=-6`, and clean fixed-rejection and
+safe-packet controls (57- and 18-byte replies). Vulnerable wire hash
+`599ab1f0…` matched both frontier replays; pinned `--no-observe` doctor and
+omp-only checks are recorded below. Grade at admission: rungs 1/2/3 at
+real-daemon wire scope, rung 4 chosen bytes at chosen offsets at
+**verbatim-harness scope only** — no live-daemon readback, grooming, pointer,
+marker, command or rung 5; the required shared key and permitted user keep it
+out of the anonymous pre-auth class. Status `reports/tacplus2shell-status.md`;
+witness replay owed. Next bounded experiment: plain `--debug` build plus gdb
+break at `author.c:77` to read back `cmdline` in the live daemon, with a
+two-connection priming variant for the advisory's `calloc()`-reuse claim.
