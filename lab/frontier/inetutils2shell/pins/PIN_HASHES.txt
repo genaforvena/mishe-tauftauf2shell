@@ -1,0 +1,4 @@
+# GNU inetutils telnetd CVE-2026-32746 pins (see PROVENANCE.md)
+a156be1cde3c5c0ffefc262180d9369a60484087907aa554c62787d2f40ec086  inetutils-2.7.tar.gz
+57b3cf4f77555992881e5ba2a09a63b05aa2c56342a60ed4305b5f45938390b5  inetutils-2.8.tar.gz
+5729c658790c422e5b1301f14de046f791a2ad56ab8368d45e9784fcf891d988  fix-slc.patch

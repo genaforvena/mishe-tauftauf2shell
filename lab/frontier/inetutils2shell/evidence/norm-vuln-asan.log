@@ -1,0 +1,43 @@
+=================================================================
+==PID==ERROR: AddressSanitizer: global-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 1 at 0xADDR thread T0
+#FRAME in add_slc HARNESS/gen-vuln/slc_functions.inc:24
+#FRAME in main HARNESS/harness.c:26
+#FRAME in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+#FRAME in __libc_start_main_impl ../csu/libc-start.c:360
+#FRAME in _start (HARNESS/slc-vuln-asan+0xADDR) (BuildId: ID)
+
+0xADDR is located 0 bytes after global variable 'slcbuf' defined in 'HARNESS/harness.c:16:22' (0xADDR) of size 108
+SUMMARY: AddressSanitizer: global-buffer-overflow HARNESS/gen-vuln/slc_functions.inc:24 in add_slc
+Shadow bytes around the buggy address:
+  0xADDR: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0xADDR: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0xADDR: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 f9 f9 f9
+  0xADDR: f9 f9 f9 f9 04 f9 f9 f9 f9 f9 f9 f9 04 f9 f9 f9
+  0xADDR: f9 f9 f9 f9 00 f9 f9 f9 f9 f9 f9 f9 00 00 00 00
+=>0xADDR: 00 00 00 00 00 00 00 00 00[04]f9 f9 f9 f9 f9 f9
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
