@@ -1,0 +1,5 @@
+peer listening 19005, delay=3.0, N=3
+peer accepted ('127.0.0.1', 40026)
+peer recv 341 bytes type=b'A'
+peer sleeping 3.0s before trigger
+peer sent trigger type=r len=99 payload={"Function":"START_RECOVERY","Flags":0,"NodeCount":3,"NodeIdList":[1094795585,1111638594,11259375]}
