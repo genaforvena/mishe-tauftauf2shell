@@ -12,12 +12,14 @@ ASLR-off) and the ASLR-on one-byte relative redirect, both ESTABLISHED at those
 scope labels; it also reproduced the fixed-address ASLR-on SIGSEGV/no-marker
 negative. Rung 5 NOT attempted and no wire-to-command call path was found in
 the BSS-global analysis below. ADMITTED 2026-11-22 ~00:1xZ by the operator under
-standing approval #6 as `proftpd2shell` (window 72; route 67). Two later
-author-only limbs await witness replay: the 01:10Z ASLR-off control-flag write
-and the 01:44Z ASLR-on limb, where a leaked heap pointer keeps `substr` valid
-while the `rewrite_engine` byte is zeroed and a later `STOR` is no longer
-rewritten. The leak does not reveal the PIE base; no ASLR-on absolute pointer
-write is claimed and rung 5 stays UNCLAIMED.
+standing approval #6 as `proftpd2shell` (window 72; route 67). Three later
+author-only limbs await witness replay: the 01:10Z ASLR-off control-flag
+write, the 01:44Z ASLR-on limb (a leaked heap pointer keeps `substr` valid
+while `rewrite_engine` is zeroed and a later `STOR` is no longer rewritten),
+and the 02:10Z pre-login ASLR-on limb, where the same leak/write sequence
+runs before login (PR:N) with 5/5 paired A/B trials. The leak does not reveal
+the PIE base; no ASLR-on absolute pointer write is claimed and rung 5 stays
+UNCLAIMED.
 
 ## Verified ground truth
 
@@ -463,3 +465,40 @@ auth_pam, rewrite), and `modules_list2` is called only from `main.c:2563`
 and `:2745` (startup) and tests, so `loaded_modules` has no post-write wire
 call path. A zeroed module flag and a restored heap pointer are not a shell
 route.
+
+## proftpd2shell mind — pre-login ASLR-on control-flag write (2026-11-22 02:10Z)
+
+New condition, not a new primitive: the 01:44Z leak-and-zero sequence under
+the unauthenticated `%m USER` rewrite condition. No login, no PASS, no
+`setarch`; `kernel.randomize_va_space=2` on the host and fresh leaked pointer
+bytes in each run (`e8505ba5b163` vs `e8c090f76661`) evidence real ASLR.
+Config `wire/etc/proftpd-prelogin-leak.conf` (port 21914, separate log),
+client `wire/client10-prelogin-aslron.py`, pinned plain 1.3.9d build
+`wire/../proftpd-vuln-plain`. Before each run `fuser -n tcp 21914` was empty.
+Replay: `cd lab/frontier/proftpd2shell/wire && TAG=t ENGINE_ZERO=0 python3
+client10-prelogin-aslron.py`, then `ENGINE_ZERO=1` with a different TAG.
+
+Phase 1 sends an unauthenticated `USER` with 1025–1032 code points; the
+`pstrdup` over-read logs the six nonzero `substr` bytes. A pointer byte equal
+to the log's quote delimiter (0x27) truncates the quoted field, so the client
+retries with the next key length until six bytes are captured. Phase 2 sends
+a 1281-code-point `USER` that writes those bytes back and sets code point
+1280 to U+0100, zeroing `rewrite_engine`. Phase 3 sends a short `USER`;
+counters are phase-scoped (`*_PRE` before phase 2, `*_POST` after).
+
+| trials | `executing RewriteRule` POST | `maps subst'd pattern` POST | signals | NOOP / PWD |
+|---|---|---|---|---|
+| engine zero, 5/5 | 1 | 2 | 0 | 200 / 530 |
+| engine on, 5/5 | 2 | 4 | 0 | 200 / 530 |
+
+`PWD=530 Please login with USER and PASS` is the expected pre-login state;
+`NOOP=200` and no signal show the session stayed alive. Raw output:
+`wire/evidence/prelogin-ab-{1..4}-{0,1}.txt`,
+`wire/evidence/prelogin-final-{0,1}.txt`, and the matching
+`rewrite-prelogin-ab-*.log` / `rewrite-prelogin-final-*.log`.
+
+This extends rung 4 to PR:N **and** ASLR-on at a non-default `mod_rewrite`
+config: a chosen byte at a chosen BSS offset disables rewriting of a later
+unauthenticated command. It is not command execution and not an absolute
+pointer write; the leaked value is an mmap heap pointer and the write keeps
+that value intact. Rung 5 remains UNCLAIMED, author-only pending witness.
