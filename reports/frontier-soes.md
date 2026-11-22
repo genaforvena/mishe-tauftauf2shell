@@ -616,3 +616,38 @@ and a command side effect; neither is observed. Next wake: rebuild and replay
 the repaired harness with vulnerable (two marker targets), fixed 3.2.1 and
 short-input controls, or record the execution stall as a lasting negative.
 
+
+## Hook-slot replay — real indirect call observed (soes2shell, eleventh wake, 2026-11-22 ~16:5xZ)
+
+This wake reconciles the attempt-12 unknown ending: its commit `7b4bfca` and
+wall section landed; the repaired `harness/coe_hook_call.c` and the `build.sh`
+rules it added were left uncommitted and unvalidated because binary execution
+stalled in that wake. Execution is healthy here — a committed harness replays
+in under a second — so the owed observation was completed. Pins recomputed
+3/3 OK; all four hook binaries rebuilt clean with clang 18.1.3 and no warnings.
+
+Observed on plain 3.2.0 (`evidence/replay-soes2shell-20261122/
+cve129811-hook-call/plain.out`): crafted 0x1c12 CompleteAccess sets two
+mappings, `sizeOfPDO()` returns 64 against `MAX_RXPDO_SIZE=42`, and cycle 1
+ends with `SMmap2[0].obj` pointing at the forged `_objd`, `rxpdo_override`
+set to a chosen marker and `txpdo_override` left NULL. Cycle 2 — the real
+`RXPDO_update()` at `ecat_slv.c:166-168` — calls that slot: `MARKER_A` printed,
+`hits=1`, `hook_written=1 indirect_call=1`. With a different process byte the
+same path calls `MARKER_B` (`hits=10`), so a varied byte selects a different
+function that real pinned code actually invokes. The safe one-mapping input
+gives `sizeOfPDO=32`, no hook write and no call; real fixed 3.2.1 rejects the
+attack mappings (`sizeOfPDO=0 nmappings=-1`) and neither marker fires in any
+of its three cases.
+
+ASan on the 3.2.0 attack gives `WRITE of size 64` at `ESC_read`
+(`harness/coe_hook_call.c:85`) from real `RXPDO_update()`
+(`ecat_slv.c:172`), address 0 bytes past the 42-byte `rxpdo` global — the
+same BSS slot measured last wake. 3.2.0 safe and all 3.2.1 cases are clean.
+
+This upgrades the rung-4 mechanics from chosen bytes at chosen offsets to a
+real indirect call through a live BSS function-pointer slot in the real
+pinned layout. It is still rung 4: the fake `_objd` address and the marker
+addresses are harness-computed (no leak), MBX and process bytes are seeded
+in-process, and there is no wire, no HAL, no live slave and no command side
+effect. Grade unchanged: rung 3 on real pinned handlers, rung 4 harness-level,
+rung 5 not claimed, wire reach UNKNOWN.

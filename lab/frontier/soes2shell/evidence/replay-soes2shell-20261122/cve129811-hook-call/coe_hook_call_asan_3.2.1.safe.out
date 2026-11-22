@@ -1,0 +1,9 @@
+deliver: idx=1c12 sub=0 cmd=30 len=18
+deliver: idx=2000 sub=0 cmd=2e len=14
+deliver: idx=2000 sub=1 cmd=22 len=14
+deliver: idx=2001 sub=0 cmd=2e len=14
+deliver: idx=2001 sub=1 cmd=22 len=14
+sizeOfPDO=32 nmappings=1 MAX_RXPDO_SIZE=42
+after cycle1: obj=0x5de5c4b1cc40 rxpdo_override=(nil) txpdo_override=(nil) hits=0
+after cycle2: hits=0 chosen=0x5de5c4ada2b0
+verdict: hook_written=0 indirect_call=0 marker_a=0 marker_b=0

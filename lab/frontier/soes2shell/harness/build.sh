@@ -106,3 +106,19 @@ for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
       -Wl,--gc-sections -o "$ROOT/build/coe_shortframe_asan_$V"
    echo "built $ROOT/build/coe_shortframe_$V and coe_shortframe_asan_$V"
 done
+
+# Real indirect call through the overwritten BSS hook slot: the crafted
+# process-data write targets ESCvar.rxpdo_override, which the real
+# RXPDO_update() calls on the next cycle. Pinned 3.2.1 control.
+for SPEC in "3.2.0:" "3.2.1:-DSOES_FIXED_VERSION"; do
+   V=${SPEC%%:*}; DEFINE=${SPEC##*:}
+   SRC="$ROOT/src/SOES-$V"
+   INC="-I$SRC -I$SRC/soes -I$SRC/soes/include/sys/gcc -I$SRC/applications/linux_lan9252demo"
+   clang -g -O0 -Wall -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_hook_call.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_hook_call_$V"
+   clang -g -O0 -fsanitize=address -ffunction-sections -fdata-sections $DEFINE $INC \
+      "$ROOT/harness/coe_hook_call.c" "$SRC/soes/esc_coe.c" \
+      -Wl,--gc-sections -o "$ROOT/build/coe_hook_call_asan_$V"
+   echo "built $ROOT/build/coe_hook_call_$V and coe_hook_call_asan_$V"
+done
