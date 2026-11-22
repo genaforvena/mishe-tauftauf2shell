@@ -6450,3 +6450,20 @@ dereference of the chosen pointer, marker or command — consumer/wire reach
 stays UNKNOWN. Next: drive the upstream two-migrate ASan variant through the
 real public API without forcing `src->end`, then look for a real caller
 reachable from request data.
+
+The 21:4x–22:0xZ edge advances libyang2shell from frontier's direct-call rung
+3/4 to a real parser. W1 built vulnerable pin `979f6925` and hardened pin
+`48672b28` with ASan, generated a valid 29-byte non-shrink LYB blob with
+libyang's own `lyd_print_fd`, patched a four-byte length field to `ffffffff`
+and called `lyd_parse_data_mem(..., LYD_LYB, ...)`. The module-name patch faults
+in `lyb_read_string` with ASan `READ of size 536870911` — frontier's exact count
+— through `lyb_parse_module` → `lyd_parse_lyb` → `lyd_parse_data_mem`; the leaf
+value patch faults in `lyb_read_value` with a 4 GiB read. The hardened pin logs
+`LYB string length overflow.` and returns RC=3 with no ASan; the valid blob is
+clean on both. The real path is unbounded because `ly_in_new_memory()` leaves
+`in->length == 0`, skipping `ly_in_read()`'s bounds check. Consumer reach is a
+preserved negative: libnetconf2 parses NETCONF RPCs as `LYD_XML`, and sysrepo's
+LYB input is local shared-memory/pipe IPC, so no unauthenticated network
+consumer accepts LYB. Grade: rung 3 + real-parser rung 4, no rung 5, no
+consumer, pointer control, marker or command, no witness verdict.
+[Report](../reports/libyang2shell.md).

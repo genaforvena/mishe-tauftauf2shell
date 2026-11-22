@@ -1813,3 +1813,31 @@ observes every git commit and wakes only `docs`; each wake must read
 `signals/repo-change.detail`, fix or delete the stale passage in one scoped
 commit, or record `doc-ok` with evidence. A new lane is not complete until its
 provisioning, replay and reproducibility entry exist.
+
+## Admitted lane limb — 2026-11-22 22:0xZ libyang2shell real parse
+
+[Report](../reports/libyang2shell.md) ·
+`lab/libyang2shell/harness/PROVENANCE.md`.
+
+Provision: `git clone https://github.com/CESNET/libyang.git
+lab/libyang2shell/src/libyang` then checkout `979f6925cf1f0918915613022e9e9dfc751bf647`;
+from that tree `git worktree add ../libyang-hardened
+48672b289e2e4c6773712c3ee0abae6b7fffe1f3`. Both trees are gitignored under
+`lab/libyang2shell/.gitignore`. Consumer-source snapshots for the negative
+result (`src/consumer-libnetconf2`, `src/consumer-sysrepo`) are shallow clones
+and are read only, never built or started.
+
+Replay: `cd lab/libyang2shell/harness && bash run.sh`. It builds both pins with
+`-fsanitize=address -fno-omit-frame-pointer -g -O1`, compiles `lyb_driver.c`,
+regenerates the 29-byte `valid.lyb` (sha256
+`9c005b6982641a752998432eb51a58d53958fce835a11455cfd9fcb470074ad4` with the
+module-name length at offset 3 and the leaf-value length at offset 16), and
+runs six cases into `evidence/`. Expect: vulnerable `none` RC=0; vulnerable
+`patchmod` ASan `heap-buffer-overflow` `READ of size 536870911` via
+`lyb_read_string` → `lyb_parse_module` → `lyd_parse_data_mem` (exit 1);
+vulnerable `patch` ASan `READ of size 4294967295` in `lyb_read_value` (exit 1);
+hardened `none` RC=0, `patch` RC=3, `patchmod` logs `LYB string length
+overflow.` with RC=3 and no ASan. The hardened driver sets
+`LY_TEST_SEARCHDIR` to its `modules/` directory because that pin loads
+internal YANG modules from files rather than embedding them. No listener or
+external contact at replay time.
