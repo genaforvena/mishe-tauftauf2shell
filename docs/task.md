@@ -4817,3 +4817,74 @@ process, stock build, CGI/HTTP path, real heap neighbour, pointer control,
 execution or rung 5. The WMS surface is pre-auth and unauthenticated (PR:N),
 but the lab result is harness-only and the advisory explicitly does not
 demonstrate RCE.
+
+#### Admitted 2026-11-22 ~03:0xZ: Nanomsg2Shell / nanomsg2shell (CVE-2026-97152)
+
+Frontier found an unowned WebSocket-transport candidate. NVD CVE-2026-97152
+(MITRE CNA, published 2026-09-24) describes a remotely exploitable buffer
+overflow in Nanomsg 0.5-beta through 1.x before 1.2.3, in the WebSocket
+transport's unchecked copy of the `Sec-WebSocket-Version` header through
+`sprintf`. Severity is CVSS 4.0 8.6 High
+`AV:N/AC:L/AT:N/PR:L/UI:N/VI:H/VA:H/SC:H/SI:H/SA:H`; CWE-120 on the CNA record
+and CWE-787 on the NVD secondary analysis. References on the record: fix PR
+`nanomsg/nanomsg#1130`, release 1.2.3 and nanomsg.org. Affected `0.5-beta`
+through 1.x before 1.2.3; fixed 1.2.3. The PR diff touches one logic file,
+`src/transports/ws/ws_handshake.c`: the failure branch of
+`nn_ws_handshake_server_reply()` previously allocated a copy of the client's
+version string and `sprintf`ed it into `self->response`; the fix deletes the
+copy, replaces `sprintf` with `snprintf(..., sizeof(self->response), ...)`
+and hardcodes `Sec-WebSocket-Version: 13`. The success branch gets the same
+bounded-format treatment for the echoed `Sec-WebSocket-Protocol`.
+
+Source-bound gate on pinned v1.2.2 raw source: `ws_handshake.h:145` declares
+`char response[512]`; `:49` sets `NN_WS_HANDSHAKE_MAX_SIZE 4096` and `:89`
+declares `char opening_hs[4096]`. The parser at `ws_handshake.c:958-961`
+stores the raw version value and `version_len` with no length cap; `:1006-1009`
+sets `WSVERSION` on mismatch, and the reply at `:1344-1353` copies the whole
+attacker string into a fresh buffer and `sprintf`s it into `response[512]`.
+The field's neighbour in the same struct is the pointer-bearing
+`struct nn_fsm_event done` (`ws_handshake.h:148`), so an overflow reaches live
+FSM state.
+
+Operator admission (2026-11-22 ~03:0xZ, standing approval #6): claim source
+is the NVD CVE API record for CVE-2026-97152 fetched from the public advisory
+feed during provisioning, plus the public fix PR #1130 and the 1.2.3 release
+tag; identifier CVE-2026-97152 (CWE-120/CWE-787, CVSS 4.0 8.6); affected /
+fixed pins are the release tarballs `nanomsg-1.2.2.tar.gz` (`3ffeafa93352…`)
+and `nanomsg-1.2.3.tar.gz` (`aa3f501a5843…`), SHA-256-pinned in
+`lab/frontier/nanomsg2shell/src/SHA256SUMS` and verified 2/2 by the operator
+from that directory with `sha256sum -c SHA256SUMS`. The primitive is the
+unbounded, attacker-content `sprintf` into `response[512]` on the server
+reply path; rung-4 plausibility is measured, not just argued (below).
+
+Grade at admission: wire-reachable **rung 3 confirmed** on a standalone
+loopback `nn_bind("ws://127.0.0.1:28765")` listener driven by the raw HTTP
+Upgrade client `lab/frontier/nanomsg2shell/harness/wire_inject.py`. Pinned
+v1.2.2 with `Sec-WebSocket-Version:` + 600 `Q` bytes replies 669 bytes
+(`harness/client-600.txt`), so ~88 chosen bytes pass `response[512]` into
+`done`; the server aborts on queue assertion
+`item->next == NN_QUEUE_NOTINQUEUE` in both GCC-ASan (`out-asan-600.txt`) and
+clang-ASan (`out-clang-600.txt`) builds. Controls: a 2-byte version on v1.2.2
+gives a 71-byte reply with no assertion (`client-gdb-ctrl.txt`), and v1.2.3
+under the identical 600-byte request gives a 71-byte reply with hardcoded
+version 13, no assertion and no ASan report (`client-fixed-600.txt`,
+`out-fixed-600.txt`). ASan does not instrument the store because `sprintf`
+writes inside libc; the clang field-padding build is also silent. That
+negative is preserved: the detector is the real consumer's queue assertion.
+Rung 4 is **strongly indicated but NOT established** — the assertion names
+the corrupted `item.next`, but the exact write offset and a chosen-byte
+readback at a measured offset were not dumped; no daemon-side path beyond the
+standalone listener, no witness replay and no rung 5.
+
+Mint: wrote the charter `.mishe-tauftauf/charters/nanomsg2shell.md`, the seed
+wall and `reports/nanomsg2shell-status.md`, created two-pane inner window 78,
+added the 73rd `engine/routes.json` entry, registered
+`failed-m2shell-wake-nanomsg2shell-service` to operator with a 7-day max age
+(backup `signals/registry.json.bak-20261122T0305Z`; 41 -> 42 entries), and
+ran the exact full-flag sync from `docs/runtime-pin.md` with the live SHA
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`). All
+three units exist, the path is active, and the pinned `--no-observe` doctor is
+`PASS local plant out of Git` / `GREEN`, rc 0. This makes 69 admitted target
+minds and 73 engine routes. Never run a bare `mishe sync`. The frontier mind
+was told by DM (#1272) not to double-mint the charter or window and to keep
+the rung-4 evidence lane.

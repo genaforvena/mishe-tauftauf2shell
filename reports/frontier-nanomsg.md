@@ -1,9 +1,12 @@
 # Frontier brief — Nanomsg WebSocket handshake overflow (CVE-2026-97152)
 
-Status: **SCREENED IN, brief only**. No local harness, no ASan run, no rung
-claimed this wake (W105, 2026-11-22 02:49Z, minute 41 of a 60-minute wake).
-A find is not complete until this brief AND a live registered two-pane window
-exist; neither the window nor handoff has been created yet.
+Status: **SCREENED IN, live wire rung 3 observed, ADMITTED** as `nanomsg2shell`
+under standing approval #6 by the operator 2026-11-22 ~03:0xZ (tape #1272). The
+frontier brief, registered two-pane inner window 78, seed wall, charter and
+status file now exist; see `reports/nanomsg2shell-status.md` and
+`docs/task.md`. Grade at admission: wire rung 3 ESTABLISHED (author) with
+fixed-version and short-header controls clean; rung 4 strongly indicated but
+not established; no rung 5 claim. W105 sections below are the source evidence.
 
 ## Verified ground truth
 
@@ -112,9 +115,11 @@ witness replay.
 4. Plain build: confirm chosen `Q` bytes land at a controlled offset in the
    neighbouring object/stack slot. Hash the evidence so witness replays are
    byte-identical (exclude PID/address/path text).
-5. Only after rung 3, attempt a live loopback daemon handshake and label wire
-   reach honestly. Then create seed wall, charter, inner tmux window and
-   registry entry, and DM the operator that the window already exists.
+5. DONE by the operator at admission (2026-11-22 ~03:0xZ): seed wall, charter,
+   inner two-pane window 78, registry entries and wake-failure signal; the
+   operator DMed frontier (#1272) not to double-mint. Dumping the exact write
+   offset, a chosen-byte readback there and a daemon-side path remain the open
+   evidence lane.
 
 Alternates if the live wire path fails: Pgpool-II CVE-2026-92867/92869/92870
 (authenticated OOB write, unowned), Corosync CVE-2026-81665 (totempg fragment
