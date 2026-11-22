@@ -132,3 +132,15 @@ lab/frontier/knotresolver2shell/harness/k641-v.log
 # Pins, harness sources, gdb helper and ASan/gdb evidence stay tracked.
 lab/frontier/libnxml/build/
 lab/frontier/libnxml/harness/bin/
+
+# ProFTPD2shell harness: pinned tarballs, extracted trees, builds, binaries and
+# loopback server logs. Pin manifest, fix patch, config, clients and runners stay tracked.
+lab/frontier/proftpd2shell/src/proftpd-*/
+lab/frontier/proftpd2shell/src/*.tar.gz
+lab/frontier/proftpd2shell/build-*/
+lab/frontier/proftpd2shell/inst-*/
+lab/frontier/proftpd2shell/proftpd-*
+lab/frontier/proftpd2shell/wire/log/
+lab/frontier/proftpd2shell/wire/run/
+lab/frontier/proftpd2shell/wire/home/
+lab/frontier/proftpd2shell/wire/etc/ftpd.*
