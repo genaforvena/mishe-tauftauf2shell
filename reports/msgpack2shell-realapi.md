@@ -54,27 +54,62 @@ The single-migrate plain-glibc canary PoC from the upstream issue also
 reproduces here: `vbuf nused=20`, `to usable=136`, `bytes_to_copy=320`,
 canary `CORRUPTED`, `free(): invalid size`. The fixed pin leaves it intact.
 
-## Consumer reach — still UNKNOWN, with one negative result
+## Consumer reach — measured NEGATIVE in indexed public source (2026-11-22)
 
-In the pinned `c-7.0.2` tree the only call site of
-`msgpack_vrefbuffer_migrate()` outside its own definition and public header is
-`test/msgpack_c.cpp:1570` (a unit test asserting a `-1` return). No production
-in-tree caller exists in this release. A bounded web query for downstream
-callers returned advisories, API documentation and a vendored copy of the
-source, but no identified wire-facing caller. Consumer and wire reach remain
-UNKNOWN; the local/high-complexity CVSS vector in the advisory is unchanged.
+Two independent searches answer the consumer question negatively:
+
+1. **In-tree:** in pinned `c-7.0.2`, the only `msgpack_vrefbuffer_migrate()`
+   call site outside its definition and public header is `test/msgpack_c.cpp:1570`,
+   a unit test asserting a `-1` return. No production caller in the release.
+2. **Downstream:** GitHub code search (authenticated `gh api search/code`) for
+   `msgpack_vrefbuffer_migrate` returned 658 indexed files. Paginating all 700
+   collected matches and filtering out the definition files (`vrefbuffer.c/.h`)
+   left 113 paths; every source-code path among them is one of: the upstream
+   unit test `test/msgpack_c.cpp` (in vendored msgpack-c copies); an OLD
+   standalone C definition of the same function (`vrefbuffer.cpp/.cc` in
+   HighwayFlocking, moon9, cchelp, aerys/minko, marvinguo/liangshi) — the
+   definition, not a caller; or advisory/OSV/NVD databases, exported-symbol
+   lists, dSYM dumps and notes. The same search for `msgpack_vrefbuffer_init`
+   (592 indexed, 666 collected) has the identical shape: no production user of
+   the API at all.
+3. The vendored copy surfaced in W1, `TEN-framework/ten-framework`, has zero
+   vrefbuffer references outside its `third_party/msgpack/` tree, in both a
+   sparse and a full checkout.
+4. The only `->migrate(&` + msgpack hit, `frsyuki/ccf src/ccf/session.h:186`, is
+   `core::xfer::migrate`, an unrelated transfer-object method. The C++
+   `msgpack::vrefbuffer` wrapper route is gone in the vulnerable pin:
+   `include/msgpack/vrefbuffer.hpp` returns HTTP 404 on tag `c-7.0.2`.
+5. Issue #1197's "Impact" section names no application. Its claim that "any
+   application calling `msgpack_vrefbuffer_migrate()` ... with imbalanced
+   buffer sizes is affected" is generic conditional prose, not a demonstrated
+   caller or a request/wire path.
+
+Limit: GitHub code search indexes public source only. An unindexed private or
+out-of-tree caller remains UNKNOWN, not disproved; wire reach stays UNKNOWN.
+
+Also checked: no fixed C release exists. The newest C tag is `c-7.0.2` and the
+fix commit `1c47ce0` (2026-10-29) is master-only, so the advisory's missing
+patched-version field is correct.
+
+Disposition: with no identified consumer to receive request data, there is no
+loopback replay to run and no exploit mechanics to attempt. The measurement
+stops at rung 4 — a wire path would have to be manufactured. Reopen only on
+evidence of a real caller of the C vrefbuffer API in a request-serving process;
+keep the fixed pin and the equal-capacity 2-ref control as differential
+controls in any such replay.
 
 ## Honest ceiling
 
 Reached: rung 3 (ASan-confirmed corruption in verbatim pinned code, frontier)
 and rung 4 through the **real public API** of a built pinned library, with
-differential fixed/safe controls. Not reached: no application consumer, no
-serialized or request input, no socket, no plant-started loopback instance, no
-dereference of a copied `iov_base`, no marker execution, no command, no rung 5.
+differential fixed/safe controls and a measured negative on consumer reach.
+Not reached: no application consumer, no serialized or request input, no
+socket, no plant-started loopback instance, no dereference of a copied
+`iov_base`, no marker execution, no command, no rung 5.
 
-Next: look for a downstream caller that reaches unequal-size `migrate()` from
-request data; only then consider a plant-started loopback replay. A chosen
-`iov_base` landing on a pointer-bearing field of an adjacent object remains
-unmeasured. Mind-changers: a fixed pin faulting on a natural layout, a caller
-that reaches unequal-size migrate with attacker-sized buffers, or chosen bytes
-that turn out incidental.
+Disposition: stopped at rung 4. Reopen only if a real caller of the C
+vrefbuffer API in a request-serving process is found (an unindexed private
+fork remains UNKNOWN). Mind-changers: a fixed C release tag, such a caller
+reaching unequal-size migrate with attacker-sized buffers, the fixed pin
+faulting on a natural layout, or chosen bytes that turn out incidental. A
+successful sample alone never resolves a cause.
