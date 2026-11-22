@@ -1,0 +1,17 @@
+=== w125-asan-fixed ===
+binary=build-fixed/pppd/pppd
+target_offset=1856
+pap_cis=366 async_cis=5
+info_len=1498 nak_bytes=1860
+ci_value=41414140 expected_nak_value=41414141
+process_rc=None survived_window=True
+frame_sha256=7702a21fc7767f0365019eaf1399d18eb750cf480108755f9181e2036867d9d8
+asan/control: LCP: ignoring duplicate configuration option(s)
+gdb_memory:
+  0xADDR <the_channel>:	0x000064c523450be0
+  0xADDR <pidchange>:	0x00005030000195a0
+  0xADDR <phasechange>:	0x0000000000000000
+  0xADDR <exitnotify>:	0x0000000000000000
+  0xADDR <sigreceived>:	0x0000000000000000
+  0xADDR <fork_notifier>:	0x0000000000000000
+  $1 = 0x1

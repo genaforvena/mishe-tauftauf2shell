@@ -1,0 +1,18 @@
+=== w125-hook-t1840 ===
+binary=build-vuln-plain/pppd/pppd
+target_offset=1840
+pap_cis=352 async_cis=14
+info_len=1496 nak_bytes=1844
+ci_value=42424240 expected_nak_value=42424241
+process_rc=None survived_window=True
+frame_sha256=db5cb35822fe6bf169005085714643c23431c0689a01259fb223b393f21dd852
+gdb_memory:
+  0xADDR <pidchange>:	0x02	0x06	0x42	0x42	0x42	0x41	0x02	0x06
+  0xADDR <phasechange>:	0x42	0x42	0x42	0x41
+  0xADDR <the_channel>:	0x030523c205030523
+  0xADDR <pidchange>:	0x0602414242420602
+  0xADDR <phasechange>:	0x0000000041424242
+  0xADDR <exitnotify>:	0x0000000000000000
+  0xADDR <sigreceived>:	0x0000000000000000
+  0xADDR <fork_notifier>:	0x0000000000000000
+  $1 = 0x1

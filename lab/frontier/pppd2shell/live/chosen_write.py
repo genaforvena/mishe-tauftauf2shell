@@ -117,6 +117,11 @@ def gdb_read(pid: int, target: int) -> str:
         f"x/4xb &nak_buffer[{target}]",
         "x/16xb &ifname[0]",
         "x/gx &the_channel",
+        "x/gx &pidchange",
+        "x/gx &phasechange",
+        "x/gx &exitnotify",
+        "x/gx &sigreceived",
+        "x/gx &fork_notifier",
         "print/x lcp_allowoptions[0].asyncmap",
         "detach",
     ]

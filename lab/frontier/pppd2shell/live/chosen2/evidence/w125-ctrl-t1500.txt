@@ -1,0 +1,17 @@
+=== w125-ctrl-t1500 ===
+binary=build-vuln-plain/pppd/pppd
+target_offset=1500
+pap_cis=8 async_cis=244
+info_len=1500 nak_bytes=1504
+ci_value=50574e32 expected_nak_value=50574e33
+process_rc=None survived_window=True
+frame_sha256=a882cf149e3130942919064834e096a54fbcd77247ee0b7347f4a53fbd58e048
+gdb_memory:
+  0xADDR <nak_buffer+1492>:	0x02	0x06	0x50	0x57	0x4e	0x33	0x02	0x06
+  0xADDR <the_channel>:	0x0000594c9cc55660
+  0xADDR <pidchange>:	0x0000594ca4c17480
+  0xADDR <phasechange>:	0x0000000000000000
+  0xADDR <exitnotify>:	0x0000000000000000
+  0xADDR <sigreceived>:	0x0000000000000000
+  0xADDR <fork_notifier>:	0x0000000000000000
+  $1 = 0x1

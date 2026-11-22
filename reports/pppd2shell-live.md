@@ -120,6 +120,39 @@ It does not exercise a dereference, command string or side effect. The hook
 function pointers at offsets ~1952+ remain unreachable at the default MRU
 (maximum amplification 1870 NAK bytes), so **rung 5 is still not claimed**.
 
+## W125 extension — reachable notifier pointers, failed rung-5 attempt
+
+The W123 note's "hooks at ~1952+ are out of reach" was incomplete. Symbol
+offsets from the plain 2.5.3 build put the notifier heads `pidchange +1832`,
+`phasechange +1840`, `exitnotify +1848` and `sigreceived +1856` inside the
+~1875-byte amplification reach; only `fork_notifier +1864` and the later
+`holdoff_hook`/`new_phase_hook`/`snoop_*` hooks are beyond it. No negotiated
+MRU or multi-step handshake is needed: the receive buffer is a fixed
+`inpacket_buf[PPP_MRU+PPP_HDRLEN]`, so no larger frame exists.
+
+`PUTLONG` writes network byte order. For a chosen little-endian pointer the
+request CI must carry the byte-swapped value with the `escape NN` forced bit
+cleared; `escape 00` forced bit 0 and produced a byte-reversed pointer in the
+first attempt. With `escape 09`, live gdb readback on the plain vulnerable
+daemon shows full deterministic values `phasechange = 0x0000000041424242`,
+`exitnotify = 0x0000000041424242` and `sigreceived = 0x0000000041424242`,
+while `fork_notifier` stays zero. `pidchange` starts as a PIE heap pointer, so
+only its low half is controlled. The identical frame faults the 2.5.3 ASan
+build at `lcp_reqci lcp.c:1608`, 0 bytes past `nak_buffer[1500]`, and is clean
+on 2.5.4 with duplicate-option rejection. Seven normalized cases and hashes
+are in `live/chosen2/evidence/`.
+
+A two-frame attempt at command execution (`live/rce_attempt.py`, `-no-pie`
+build) failed. A rejected LCP ConfReq body can write a fake notifier struct
+verbatim into `inpacket_buf`, and a SIGTERM should reach
+`new_phase(PHASE_DEAD)` -> `notify(phasechange, 0)` -> `execl@plt`. In three
+replays pppd instead logged `Connection terminated.` then `Fatal signal 11`:
+`link_terminated()` (`auth.c:717-768`) dereferences the overflow-corrupted
+`the_channel` before the final phase transition, so the controlled hook is
+never called. No shell, command or file side effect was observed. The pinned
+binary also lacks a one-argument command-execution callback at a known
+address, and `notify` passes an `int` as its second argument. **No rung 5.**
+
 ## Files
 
 `lab/frontier/pppd2shell/live/` holds the driver, normalizer, matrix runner,

@@ -1,0 +1,14 @@
+=== w125-asan-vuln ===
+binary=build-vuln/pppd/pppd
+target_offset=1856
+pap_cis=366 async_cis=5
+info_len=1498 nak_bytes=1860
+ci_value=41414140 expected_nak_value=41414141
+process_rc=1 survived_window=False
+frame_sha256=7702a21fc7767f0365019eaf1399d18eb750cf480108755f9181e2036867d9d8
+asan/control: ==PID==ERROR: AddressSanitizer: global-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+asan/control: WRITE of size 1 at 0xADDR thread T0
+asan/control:     #0 0xADDR in lcp_reqci BUILD/pppd/lcp.c:1608
+asan/control: 0xADDR is located 0 bytes after global variable 'nak_buffer' defined in 'lcp.c:221:15' (0xADDR) of size 1500
+asan/control: SUMMARY: AddressSanitizer: global-buffer-overflow BUILD/pppd/lcp.c:1608 in lcp_reqci
+gdb_memory:

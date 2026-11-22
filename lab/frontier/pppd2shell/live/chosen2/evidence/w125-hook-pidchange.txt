@@ -1,0 +1,17 @@
+=== w125-hook-pidchange ===
+binary=build-vuln-plain/pppd/pppd
+target_offset=1832
+pap_cis=342 async_cis=21
+info_len=1498 nak_bytes=1836
+ci_value=41414140 expected_nak_value=41414141
+process_rc=None survived_window=True
+frame_sha256=b34534503a1ddc1af196390dba547c51d65f970a30e572dea26e3705a9cc2cfa
+gdb_memory:
+  0xADDR <pidchange>:	0x41	0x41	0x41	0x41
+  0xADDR <the_channel>:	0x030523c205030523
+  0xADDR <pidchange>:	0x00005a9041414141
+  0xADDR <phasechange>:	0x0000000000000000
+  0xADDR <exitnotify>:	0x0000000000000000
+  0xADDR <sigreceived>:	0x0000000000000000
+  0xADDR <fork_notifier>:	0x0000000000000000
+  $1 = 0x1
