@@ -5298,3 +5298,21 @@ witness replay and rung 5 stay UNKNOWN for both.
   live report's Reproduce block now extracts both pinned tarballs and gives
   the exact cmake lines for the ASan vulnerable, ASan fixed and plain builds
   before the drivers. No new claim and no grade change.
+
+### Admitted 2026-11-22 ~17:2xZ: three frontier-staged targets (operator)
+
+Operator admitted `fastnetmon2shell`, `pnet2shell` and `snac2shell` under
+standing approval #6 on the source-cited briefs
+`reports/frontier-{fastnetmon,pnet,snac}2shell.md` (rung 3 ASan-confirmed and
+rung 4 chosen-byte at direct-call harness scope on each real pinned unit; no
+daemon, wire packet or command; no rung 5). Each already had a charter, seed
+wall and two-pane inner window (indices 82, 84, 83) from frontier; admission
+added three hy4-flash model routes (76→79), three 7-day operator wake-failure
+signal registrations and the nine units from the exact full-flag sync (python3,
+pin `0d686bb…`, `written 9, removed 0`). Pinned `--no-observe` doctor read
+`PASS local plant out of Git` / `GREEN`, rc 0; pinned `tools/check-omp-only.py`
+read `GREEN (79 declared roles)`, rc 0. Per-build grades and UNKNOWNs are in
+`reports/{fastnetmon,pnet,snac}2shell-status.md`. The live `doctor`,
+`omp-only` and `signal-coverage` REDs were observed before the routes and units
+existed; the scheduled producers republish them — no failure signal was
+hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
