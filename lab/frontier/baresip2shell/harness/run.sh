@@ -118,7 +118,7 @@ hasnt "$E/plain-guard.out" "UNEXPECTED_RETURN" "plain-loop-did-not-return"
 # --- path-independent normalized content hash -----------------------------
 cat "$E"/*.out 2>/dev/null \
   | grep -E '^(MODE=|CRAFT_|HDR_LEN|RC=|PAYLOAD_FIRST=|PAYLOAD_LAST=|CONSUMED=|REGION_BYTES=|PLAIN_|UNEXPECTED_RETURN|ERROR: AddressSanitizer:|WRITE of size|READ of size|[0-9]+ bytes after|SUMMARY: AddressSanitizer:|    #[0-9]+ .* websock_decode)' \
-  | sed -E 's/0x[0-9a-f]{6,}/0xADDR/g' > "$E/normalized.txt"
+  | sed -E -e 's/0x[0-9a-f]{6,}/0xADDR/g' -e 's#/[^ ]*(websock_fn\.inc|driver\.c)#PATH/\1#g' > "$E/normalized.txt"
 HASH=$(sha256sum "$E/normalized.txt" | cut -d' ' -f1)
 printf 'NORMALIZED_HASH=%s\n' "$HASH"
 printf 'SUMMARY=%d PASS / %d FAIL\n' "$PASS" "$FAIL"

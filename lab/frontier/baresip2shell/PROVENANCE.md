@@ -44,7 +44,7 @@ clang 18.1.3 (`Ubuntu clang version 18.1.3 (1ubuntu1)`), `-g -O0
 -fno-omit-frame-pointer -fsanitize=address` for ASan variants; plain guard-page
 variant compiled without ASan. 43 PASS / 0 FAIL on two consecutive runs,
 path-independent normalized content hash
-`f0eb31725d4125505767c80c12e1d31cdc6edefcbb14950264ba23f4f123f483`
+`d6a3d40dd5fba54383ccece9e7010a85819737577710854493d90954cb9349fc`
 over `harness/evidence/*.out` filtered by `run.sh`.
 
 ## Instrumentation boundary

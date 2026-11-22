@@ -85,7 +85,7 @@ re-extracted from saved pinned bytes and SHA-256-asserted on every run.
 
 - **43 PASS / 0 FAIL twice**, gcc 13.3.0 and clang 18.1.3; path-independent
   normalized content hash
-  `f0eb31725d4125505767c80c12e1d31cdc6edefcbb14950264ba23f4f123f483`.
+  `d6a3d40dd5fba54383ccece9e7010a85819737577710854493d90954cb9349fc`.
 - Vulnerable pin, crafted frame printed before the call:
   `CRAFT_B0=82 CRAFT_B1=ff MASKBIT=1 LENBYTES=fffffffffffffffc KEY=b4b4b4b4`.
   Both compilers report `ERROR: AddressSanitizer: heap-buffer-overflow`,
