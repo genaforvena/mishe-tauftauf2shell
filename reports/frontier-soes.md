@@ -107,17 +107,21 @@ as 15. Removing the byte swap made the deterministic trigger appear.
   *slave* stack whose upstream applications use ESC hardware HALs (LAN9252
   SPI); the advisory's AV:A requires a master on the same Ethernet segment.
   Feeding crafted EtherCAT frames from an AF_PACKET socket on loopback into
-  this harness would be a synthetic consumer, not evidence of a live target,
-  and no CAP_NET_RAW capability or real HAL was exercised this wake.
+  this harness would be a synthetic consumer, not evidence of a live target.
+  Measured negative (00:23Z): this process runs as uid 1000 with
+  `CapEff: 0000000000000000`, so AF_PACKET raw sockets are unavailable; the
+  upstream `applications/rtl_lwip_eoe/main.c` includes `<kern.h>`, `<xmc4.h>`
+  and lwIP RT-Kernel headers and cannot be built as-is on this Linux host.
+  No real HAL or wire trigger was available this wake.
 - No rung 5 path is claimed: there is no observed command execution, side
   effect or wire-to-shell chain.
 
 ## Cheapest next experiments (ranked by tractability)
 
-1. Build the upstream `applications/rtl_lwip_eoe` sample with ASan and drive
-   `ESC_eoeprocess()` from a real mailbox buffer; check whether the lwIP
-   `pbuf` adjacent to the 592-byte payload has a pointer-bearing field in
-   range. This is the cheapest route to decide whether rung 4 extends past
+1. Port the upstream `applications/rtl_lwip_eoe` callbacks to a Linux lwIP
+   build or reimplement their `pbuf` allocation in the harness, then check
+   whether the object adjacent to the 592-byte receive payload has a
+   pointer-bearing field in range. This decides whether rung 4 extends past
    the synthetic canary.
 2. Screen CVE-2026-129811 (PDO mapping size → repeated writes past
    `rxpdo[]`/`txpdo[]` after PREOP→SAFEOP) for a pointer-bearing adjacent
