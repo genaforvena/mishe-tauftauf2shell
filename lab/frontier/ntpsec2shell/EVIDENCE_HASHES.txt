@@ -1,0 +1,7 @@
+# Two consecutive in-tree replays, 2026-11-22 (sha256sum of run output)
+1f04e12d2a9332d2cf9f0161c1a9155f40d8d6936b13b295934113ad7e164106  harness/run-final1.txt
+1f04e12d2a9332d2cf9f0161c1a9155f40d8d6936b13b295934113ad7e164106  harness/run-final2.txt
+
+# Sink evidence: ASan WRITE of size 40, 8 bytes after a 128-byte region,
+# frames AES_SIV_Decrypt (modeled) -> extens_client_recv -> stub_case;
+# real-crypto chosen plaintext 414243...50 at offset 328.

@@ -1,0 +1,19 @@
+# Generated at build time by harness/run.sh; regenerable from pins/.
+harness/aes_siv_obj.o
+harness/fn.inc
+harness/r-fixed
+harness/r-vuln
+harness/r-manual
+harness/s-fixed-asan
+harness/s-fixed-plain
+harness/s-vuln-asan
+harness/s-vuln-plain
+
+# Superseded in-wake replays; run-final{1,2}.txt are the canonical replays.
+harness/run1.txt
+harness/run2.txt
+harness/run3.txt
+harness/run4.txt
+harness/run5.txt
+harness/run6.txt
+harness/run7.txt

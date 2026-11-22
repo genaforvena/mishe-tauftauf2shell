@@ -1,0 +1,9 @@
+PASS stub-asan-vuln-write rc=1
+PASS fixed-rejects-n64 rc=1
+PASS chosen-41 rc=1
+PASS chosen-5a rc=1
+PASS safe-vuln rc=1
+PASS safe-fixed rc=1
+PASS real-crypto-chosen rc=1
+PASS real-crypto-fixed rc=1
+TOTAL pass=8 fail=0

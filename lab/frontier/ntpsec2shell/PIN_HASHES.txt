@@ -1,0 +1,8 @@
+# SHA-256 of pinned blobs and upstream patch (sha256sum, 2026-11-22)
+4fa50ff894a33edf303fca812648d826e5e486622accf045a5dc8ca6130ca02d  pins/aes_siv.c
+0b2d1b5e8adb5f966bf6837b5e1b59b91d5e393ae620ad6d432ff0a0f94269b0  pins/aes_siv.h
+d2ae1f775253b79407e96dc18e25fb4368c7be1337f8208e64eb3b08c2362d9b  pins/fix-0a36941e.patch
+9be81ea6e72df53563e539d42f722d42161097a09664080f95daab779b266132  pins/nts-vuln.c
+aea3f12fed276895680c22e597c4a5eda0d74cb40e9c12b513b2d5aa0a57df4e  pins/nts.h-vuln.h
+a75c80c6a1f8a6f315a9d4acfffae1eb27ef9c81f82a2a3d938469a9f6958be0  pins/nts_extens-fixed.c
+1dbea7b7f7a7e1fc4ee752fa6063bf3db5d89f9d4bb1e53530155e4283da71dd  pins/nts_extens-vuln.c
