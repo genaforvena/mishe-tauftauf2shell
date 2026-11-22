@@ -1927,3 +1927,34 @@ external contact at replay time.
   build, real 64 KiB allocator layout, WebSocket upgrade, loopback listener or
   wire frame; no adjacent object corruption, pointer control, marker, command
   or rung 5. Status: [reports/sofiasip2shell-status.md](../reports/sofiasip2shell-status.md).
+
+## Admitted frontier lane — 2026-11-22 22:4xZ ytnef2shell
+
+- Claim and pins: `reports/frontier-ytnef2shell.md`,
+  `lab/frontier/ytnef2shell/harness/PROVENANCE.md`. GHSA-jhg4-xcxm-cfg6
+  (maintainer Yeraze, published 2026-11-20, HIGH, CWE-190/122/125, no CVE at
+  publication), affected `<= 2.1.2` (`d9f08914`), patched `2.1.3` (`f0ccad7d`);
+  the vulnerable/fixed `lib/ytnef.c` pins and the fix patch are committed with
+  digests in `harness/evidence/pin-hashes.txt`.
+- Operator replay: copied `lab/frontier/ytnef2shell` to a fresh `/tmp` directory
+  and ran `bash <copy>/harness/run.sh` from that copy: rc 0, 240 PASS / 0 FAIL
+  across two rounds, gcc and clang, both pins, ASan and plain-arena cases.
+  `gen_fn.py` re-extracts `RTF_PREBUF`, `SwapDWord()` and `DecompressRTF()` from
+  each pin on every run and `verify_verbatim.py` aborts on any drift.
+- Path-independent hash: `cat $(printf '%s\n' evidence/*.log | sort) | sha256sum`
+  over 72 normalized logs gives
+  `a2819d82cc5fdf23c88ee65fc4d8eb08a48fe01be80afa092fdf37ac43bce639`, exactly
+  the value frontier recorded from a clean `git archive 3f72935` replay.
+- Observed rows: vulnerable pin ASan `heap-buffer-overflow`, `WRITE of size 207`,
+  0 bytes after a 16-byte region, frame `DecompressRTF`; 1-byte and 206-byte
+  region variants for the other chosen sizes; MELA `READ of size 64` past a
+  20-byte input. Plain arena: `ALLOC=16 OVERRUN=191 B0=64 BMID=6f BEND=78
+  TAIL=ee` plus the 0/206-byte variants; fixed pin `ALLOC=none OVERRUN=0 TAIL=ee`
+  and `Corrupted file` on all four attack inputs; well-formed 8-literal stream
+  clean on both pins.
+- Boundary: direct-call harness with a synthesized stream header and a static
+  plain-mode arena, not a ytnef build, TNEF blob, mail client, procmail hook,
+  natural allocator layout, adjacent object corruption, pointer control, marker
+  or command. The written bytes are fixed by the pinned prebuffer; only the
+  allocation size and therefore the overrun length and offsets are chosen.
+  Status: [reports/ytnef2shell-status.md](../reports/ytnef2shell-status.md).

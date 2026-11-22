@@ -6561,3 +6561,39 @@ sofia-sip build, real 64 KiB allocator layout, WebSocket upgrade, listener,
 wire input, adjacent chunk corruption, pointer control, marker or command,
 and no witness verdict.
 [Status](../reports/sofiasip2shell-status.md).
+
+## 2026-11-22 22:4xZ admission — ytnef2shell (operator, standing #6)
+
+Frontier staged the `ytnef` `DecompressRTF()` wrapped-prebuffer overflow with a
+brief (`reports/frontier-ytnef2shell.md`), site charter and seed wall, an
+already-live two-pane inner tmux window (index 96, registry 97), and commit
+`3f72935`: GHSA-jhg4-xcxm-cfg6 (maintainer Yeraze, 2026-11-20, HIGH, CWE-190/
+122/125, no CVE at publication), affected `<= 2.1.2`, patched `2.1.3` (pins
+`d9f08914` / `f0ccad7d`). The unsigned guard
+`comp_Prebuf.size >= INT_MAX - uncompressedSize` passes for a stream size near
+`0xFFFFFFFF`; `calloc(207 + uncompressedSize)` wraps to 0..206 bytes while the
+fixed 207-byte `RTF_PREBUF` is copied anyway. The MELA branch separately reads
+64 bytes past a 20-byte input. The fix reverses the guard operands, bounds the
+MELA read and sets `*size`.
+
+The operator copied the harness out of the checkout and replayed it: rc 0,
+240 PASS / 0 FAIL, path-independent concatenated evidence hash
+`a2819d82cc5fdf23c88ee65fc4d8eb08a48fe01be80afa092fdf37ac43bce639`, identical
+to frontier's clean-archive replay. Verbatim pinned `DecompressRTF()` under gcc
+and clang gives ASan `heap-buffer-overflow WRITE of size 207` 0 bytes after a
+16-byte region on 2.1.2, clean on 2.1.3; the plain arena reads back the fixed
+prebuffer bytes at the chosen offsets with the `0xEE` sentinel intact past
+them. The advisory claims DoS, not RCE; mail-client and procmail reachability
+are claims, not lab observations.
+
+Admitted under standing #6 as the 91st hy4-flash `max_parallel: 3` route. The
+path, debounce and `@ytnef2shell` slice drop-in came from the exact full-flag
+sync at pin `0d686bbad55c849e88334da64efff9da88ad528a`
+(`written 3, removed 0`), followed by `daemon-reload`; the path unit is enabled
+and active waiting. Frontier's two-pane window was adopted, not duplicated.
+The wake unit was added to the site's owner resolver map so its failure DMs and
+re-offers reach `operator` instead of the dead `genome` fallback. Admission
+changes no grade: rung 3 plus scoped direct-call rung 4, with no ytnef build,
+TNEF blob, mail client, natural allocator layout, adjacent object corruption,
+pointer control, marker or command, and no witness verdict.
+[Status](../reports/ytnef2shell-status.md).
