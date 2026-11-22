@@ -5061,4 +5061,104 @@ further work on this lane (tape #1298).
 - **Five 04:1x–04:3xZ edges** (commits `6604be6`, `945bf01`, `595db99`, `0bf836d`, `31b6036`): nanomsg W107 is an independent witness rung-4 ESTABLISHED verdict at the standalone-listener scope — the witness rebuilt both pins and its own harness and reproduced the 67-byte prefix, `DONE_OFFSET=516`, all three chosen-pointer readbacks, both FSM divergences, fixed clean controls and 14 hashes, no refutation or NIT; W108 reaches the same sink from the shipped `nanocat` CLI on loopback (`bash harness/nanocat_reach.sh`: short 71 bytes clean, `marker:41` 558 + `queue.c:47`, `marker:ff` 558 + `aws.c:316`, fixed 71 bytes, gdb reads the chosen `item.next`), still no command, clean takeover or rung 5. MapServer's consumer-reality pass (`./consumer-inspect.sh 95`) found OOB appends overwriting the adjacent ParamValues chunk header and heap chunks holding only pointers, with C-string and `free()` consumers, a glibc double-free fault, no call-through or wire address leak on PIE/NX glibc 2.39; rung 5 stays UNKNOWN with named obstacles and the live-limb `free()` readback is layout-dependent, witness #1279 still owed at 04:13Z. Netx W3 gained witness #1296/W108 alongside #1262. Vrpn W6 kills an untouched plain stock server with one pre-auth message (`probe-func-dos.sh`: SENDER -8 SIGSEGV 139, 120 SIGILL 132, TYPE -8/120 likewise, index 4 and fixed builds ALIVE), author-only, layout-specific, no chosen-byte control or rung 5. Pgpool2Shell was admitted with its own row and repro recipe (`30ccfc3`). Recipes and expected bytes for all five are in `docs/reproducibility.md`.
 - **MapServer2Shell deeper-K reachability** (commit `b5e3f2a`, `reports/mapserver2shell-live.md`): K=195 survives parse-time doubling (arrays realloc'd to 1600 bytes) and appends 195 slots (`NumParams` 200 → 395), so `./poc.sh 195` writes ~1.5 KB past each array: vulnerable ASan `WRITE of size 8` 0 bytes after the 1600-byte region at `mapwms.cpp:5991` (rc 1), fixed 8.6.5 and the K=197 blind spot clean (rc 0, 595-byte LayerNotDefined XML). Plain K=195 faults with glibc `double free or corruption (!prev)` at cleanup, not inside a consumer. gdb dumps of ~3.2 KB past both arrays show only heap pointers, zeros, chunk metadata and attacker-string bytes — no PIE-text, GOT or libc pointers — and both appended values are `msStrdup` pointers, so the attacker controls bytes at pointers, never pointer values. With PIE/NX and no wire address leak there is no call-through route on these builds; rung 5 stays UNKNOWN with the same named obstacles, rungs 3/4 unchanged, and no independent witness replay of the wake-2/3 addenda is in hand (#1279 still owed at 04:33Z).
 - **Nanomsg2Shell W109 release rebuild** (commit `303396d`, `reports/frontier-nanomsg.md`): at `-O3` with FORTIFY disabled the offset is still `+516` (type-based and live gdb), the 490-byte cycle writes `item.next = 0x3231307a79787776`, and `marker:41`/`marker:ff` still give 558-byte replies plus `queue.c:47`/`aws.c:316`. A default `-O3` build gets `_FORTIFY_SOURCE=3` and `__sprintf_chk` and aborts inside the `sprintf` (rc 134, `reply_len=0`), so rung 4 holds only on non-fortified builds. Source closure (`nn_assert` not `NDEBUG`-gated, `nn_fsm_raise` overwrites the corrupted fields, `nn_queue_push` resets `next=NULL`) leaves rung 5 UNKNOWN; raw traces in `harness/release/`, author-only.
-- **Wazuh2Shell W109 single-event groom negative** (commit `da58464`, `reports/wazuh2shell-heap-adjacency.md`): a maximized 261-byte JSON grows the alert and `full_log` together, so the overrun stays ~35 bytes, ends 70 bytes short of the `lf->fields` pointer array and only clobbers adjacent char chunks; source bounds (`alert_len ≈ 2.18*loglen` against `usable ≈ 2*loglen`) make that constant across single-event shapes. Multi-event grooming stays UNMEASURED, rung 5 stays UNKNOWN, author-only.
+- **Wazuh2Shell W109 single-event groom negative** (commit `da58464`, `reports/wazuh2shell-heap-adjacency.md`): a maximized 261-byte JSON grows the alert and `full_log` together, so the overrun stays ~35 bytes, ends 70 bytes short of the `lf->fields` pointer array and only clobbers adjacent char chunks; source bounds (`alert_len ≈ 2.18*loglen` against `usable ≈ 2*loglen`) make that constant across single-event shapes. Multi-event grooming is no longer UNMEASURED: W110 measured it and W111 (#1326) witnessed that scope, as recorded below; rung 5 stays UNKNOWN.
+
+### Admitted 2026-11-22 ~05:1xZ: Ud3tn2Shell / ud3tn2shell (CVE-2026-121510)
+
+Frontier screened in a pre-auth BPv6 administrative-record heap overwrite and
+staged `reports/frontier-ud3tn2shell.md`, pinned trees in
+`lab/frontier/ud3tn2shell/src/`, the fix hunk, wire trigger and gdb readback
+scripts in `harness/`, and normalized logs with `EVIDENCE_HASHES.txt`. The
+charter (`.mishe-tauftauf/charters/ud3tn2shell.md`) and seed wall exist; the
+window registry records the inner two-pane window. Claim source: GitLab CNA
+CVE-2026-121510 / GHSA-96mh-pq33-phch, CWE-787, CVSS 3.1 7.5
+`AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`; µD3TN `<0.15.2` affected, 0.15.2 fixed.
+Tag commits `00b2fbefcb0f0f22bb1b8695fd2ce583fbb401fc` (v0.15.1) and
+`6b18b267ce79ac0c8d8f7dbce5389f2acef0ca40` (v0.15.2), defect fix
+`09f18b9c42c88977462ce6c3ad2dfe280fde89b4`; raw `reports.c` hashes and
+submodule gitlinks in `src/PINS.txt`. GitLab archive endpoints returned 429,
+so both trees were produced with `git archive` at the pinned tags.
+
+Source mechanism: a zero source-EID-length SDNV makes `malloc(1)` and sets
+`bytes_remaining = 0`; `record_parser_read_byte()` decrements before the
+`== 0` test, so `reports.c:439` stores up to 65536 peer-chosen bytes at
+sequential offsets. v0.15.2 rejects zero length before the copy. Frontier
+measured rung 3 on a live 127.0.0.1 MTCP daemon (ASan `WRITE of size 1` at
+`reports.c:439`, rc=-6, markers `41` and `5a`; length-8 and fixed-build
+controls clean) and rung 4 on a plain daemon under gdb (20 `5a` or `43` bytes
+at offsets 0..19, `index=20`, `bytes_remaining=65516`). No pointer control,
+command, witness replay or rung 5; the advisory's code-execution hedge is not
+a lab result. First step for the mind: replay `harness/wire_trigger.py` and
+`harness/gdb_readback.py` with fresh ports, then map the one-byte chunk's
+plain-daemon neighbours over repeated bundles; smtcp/TCPCLv3 and BPv7 are
+UNKNOWN. The published PoC's stale creation timestamp needs the harness's
+5-byte SDNV refresh; the earlier stale-CBOR/expiry failures are preserved as
+negatives in the brief.
+
+### Admitted 2026-11-22 ~05:3xZ: Bacnet2Shell / bacnet2shell (CVE-2026-97692)
+
+Frontier staged `reports/frontier-bacnet2shell.md`, vulnerable and fixed pins
+with the fix hunk in `lab/frontier/bacnet2shell/pins/PINS.txt` /
+`pins/fix-97692.patch`, and the advisory plus server-shaped harnesses with
+normalized logs in `harness/` and `evidence/`. Charter
+`.mishe-tauftauf/charters/bacnet2shell.md` and seed wall exist; the window
+registry records the inner two-pane window. Claim source: GHSA-gr74-333w-7wg8
+/ CVE-2026-97692, CNA GitHub 2026-10-04, High 7.7
+`CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:H/A:H`; affected `bacnet-stack
+<= 1.5.0` plus the audited `1.6.0-rc1`, patched 1.4.6/1.5.2/1.6.1/1.7.0.
+Audit commit `1068250f197c0cc78b6357374d8be5df7d94b3cc`, fix PR #1435 merged
+as `37b081d0ebb2b92ca5297a5073850a467fa0e9c9`. Pins live outside the nested
+clone after commit `2e7bbdd`.
+
+The trailing-MORE option walk passes `&option_array[i]` past the four-entry
+array; the fix adds a final-MORE check and an `i < BVLC_SC_HEADER_OPTION_MAX`
+bound. Frontier measured rung 3 on the real pinned decoder (10-byte frame,
+ASan `READ of size 1` at `bvlc-sc.c:557` and `WRITE of size 8` at `:601`,
+`global-buffer-overflow` past the 432-byte file-static `g_dm`) and rung 4 in a
+server-shaped direct-call harness (chosen `41 42 43` at offsets 304/344/384/
+424, `bf` at 248/288/328/368/408; fixed cases reject with `header options is
+truncated`). No daemon, no wire packet, no witness and no rung 5. First step:
+bind the pinned vulnerable BACnet/SC WebSocket server on 127.0.0.1, send the
+chained MORE-set frame then the 10-byte frame on one unauthenticated
+connection under ASan, and run the fixed control; pre-auth reach remains an
+advisory claim until measured.
+
+#### 2026-11-22 05:1x–05:3xZ research limb updates
+
+- **Pgpool2Shell W1 wire crash and address-steering negative** (commits
+  `8ca2b18`, `4699b74`, `reports/pgpool2shell-wire-w1.md`): a plant-owned peer
+  on 127.0.0.1:19005 sends one `WD_IPC_ONLINE_RECOVERY_COMMAND` to a real
+  4.7.2 watchdog child; `NodeCount=2` SIGSEGVs, `NodeCount=1` and fixed 4.7.3
+  stay up, and gdb breaks at the exact `wd_json_data.c:858` write with
+  `node_id_set[1] = 0x1`. Four warm-up packet variants leave `0x5560cc4d`, so
+  the adjacent stack slot does not track peer fields. Rung 3 at wire scope,
+  rung 4 still direct-call harness only, witness replay owed, no rung 5.
+- **MapServer2Shell W4 consumer closure** (commit `61994b6`): reading the
+  pinned request path, the corrupted arrays reach only string comparisons,
+  `atoi`/`atof`/`strtol`, `strlen` and `msStrdup` in `msWMSLoadGetMapParams`
+  and `msWMSLegendGraphic`; no format-string or function-pointer consumer on
+  this build, grade unchanged, rung 5 still UNKNOWN.
+- **MsQuic2Shell external claim scan** (commit `14c1485`): no public PoC,
+  capture or trigger bytes for CVE-2026-62815 / GHSA-92f5-vc22-8j33; the
+  SecureLayer7 write-up and PRs #6219/#6220 repeat the advisory, and #6217's
+  one-line fix patch has no repro test. Rung 3 ESTABLISHED and the rung-4 gate
+  unchanged; do not rescan without a new claim.
+- **Wazuh2Shell W110 and W111** (commits `bcb1270`, `3c9f057`): multi-event
+  grooming now has a measured adjacency result — one thread reuses the
+  `full_log` slot and a pointer-fragment chunk can sit next to it, but the
+  overrun writes fixed alert text with at most one attacker byte and
+  `lf->fields` stays ~70 bytes beyond the write end. W111 (#1326) is an
+  independent witness replay of W108/W109/W110, ESTABLISHED at that scope
+  with no refutation; the earlier UNMEASURED labels are superseded, rung 5
+  still UNKNOWN.
+- **ProFTPD2Shell fixed-build controls** (commits `dc3d3a2`, `584bbce`):
+  pinned 1.3.9e rejects both ASLR-on wire shapes — `LEAK NONE` for the
+  03:40Z chosen-string client and `550` on `STOR` with 1056/1152-byte keys for
+  the extended over-read — while the vulnerable builds leak pointers. Both
+  limbs remain author-only behind #1287; no command, no rung 5.
+- **Vrpn2Shell W7 optimized-build limit** (commit `48a4162`): a fresh
+  `RelWithDebInfo` (`-O2`) build of pinned v07.36 still reports the wire-driven
+  ASan `WRITE of size 1` at `vrpn_Connection.C:4554`, but the plain process
+  survives indices -8 and 120, so W6's DoS is a Debug `-O0` layout effect, not
+  a build-independent consequence; the -O2 gdb frame probe has no lvalue `p`,
+  and no O2 geometry is claimed. Author-only, no rung 5.
