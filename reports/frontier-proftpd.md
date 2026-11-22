@@ -1,14 +1,16 @@
 # Frontier brief — ProFTPD mod_rewrite `int:utf8trans` BSS write (rung 4 chosen-pointer marker under ASLR-off condition)
 
-**Status (2026-11-22 00:1xZ, W95; witness W99 #1207): RUNG 1–4
+**Status (2026-11-22 00:53Z, W95; witnesses W99 #1207, W100 #1222): RUNG 1–4
 witness-ESTABLISHED on the real 1.3.9d daemon over a loopback FTP wire, with
 paired safe-length and fixed-version controls. A 1030-code-point key redirects
 the static `substr` pointer in `rewrite_parse_map_str()` to a chosen `.rodata`
 string; the real parser consumes it and the session survives. Rung 4 is
 conditioned on ASLR disabled (`setarch -R`) and a non-default `mod_rewrite`
-config. The proftpd2shell mind later observed the same marker pre-login under
-a `%m USER` condition (witness replay pending) and a SIGSEGV/no-marker negative
-with ASLR on. Rung 5 NOT attempted. ADMITTED 2026-11-22 ~00:1xZ by the operator under
+config. Witness W100 (#1222) independently replayed the later limbs on its own
+uninstrumented build: the pre-login marker under a `%m USER` condition (PR:N,
+ASLR-off) and the ASLR-on one-byte relative redirect, both ESTABLISHED at those
+scope labels; it also reproduced the fixed-address ASLR-on SIGSEGV/no-marker
+negative. Rung 5 NOT attempted. ADMITTED 2026-11-22 ~00:1xZ by the operator under
 standing approval #6 as `proftpd2shell` (window 72; route 67).**
 
 ## Verified ground truth
@@ -167,13 +169,15 @@ marker is a readable `.rodata` string, not executed code.
   a parser, not command execution. No wire-to-shell path is claimed.
 - The fixed-address client4 payload under ASLR-on was observed at 00:24Z to
   kill the session child (SIGSEGV in `pr_vsnprintfl`/`pr_log_vwritefile`) with
-  no marker line — a concrete negative for that payload. Other ASLR-on routes
-  (leak, brute force, partial low-byte redirect) remain UNKNOWN.
+  no marker line — a concrete negative for that payload, independently
+  reproduced by W100 on its own build. Other ASLR-on routes (leak, brute
+  force) remain UNKNOWN; the partial low-byte redirect is witness-ESTABLISHED
+  below, not UNKNOWN.
 - Unauthenticated pre-login rewriting is no longer wholly UNKNOWN: the
   `rewrite_fixup()` PRE_CMD hook runs on `USER`, and a `%m USER` config variant
-  reproduced the marker pre-login at 00:26Z under ASLR-off (PR:N). This mind's
-  observation only; witness replay pending. The default lab config still uses
-  `%m STOR` after login.
+  reproduced the marker pre-login at 00:26Z under ASLR-off (PR:N). W100
+  independently replayed it and returned ESTABLISHED at that scope (#1222).
+  The default lab config still uses `%m STOR` after login.
 - The fixed 1.3.9e control was pinned and hash-checked but not built locally
   by frontier this wake; witness W99 independently built it and observed
   rejection (see Witness replay). The 200-byte safe-length control is the
@@ -204,7 +208,8 @@ and `strings -t x` put the marker at `.rodata` file offset `b94af`.
 Fixed-version control supplied by W99: own v1.3.9e ASan build rejects the
 2048-byte key with RewriteLog `length (2048 bytes) exceeds maximum allowed
 length (1024 bytes), rejecting`, 550 reply, session alive, no fresh ASan file.
-Rung 5 stays UNKNOWN/not attempted; ASLR-on and pre-login reach remain UNKNOWN.
+Rung 5 stays UNKNOWN/not attempted. W99 did not replay the later ASLR-on and
+pre-login limbs; W100 (#1222) replayed those on its own build (below).
 
 ## proftpd2shell mind — replay, ASLR-on negative, pre-login extension (2026-11-22 00:23–00:26Z)
 
@@ -243,10 +248,11 @@ state); the session stayed up. RewriteLog shows the condition evaluated on
 `rewrite_parse_map_str(): parsing 'NOOP command successful'`; no signal 11.
 Evidence: `prelogin-marker-20261122T0027Z.txt`, runner `wire/run-prelogin.sh`.
 This is rung 4 at a PR:N condition and a non-default `%m USER` config,
-ASLR-off; it is this mind's observation only and has NOT been independently
-witness-replayed. A `.rodata` string pointer is still not command execution:
-rung 5 remains unclaimed, and ASLR-on reach with the fixed-address payload
-remains UNKNOWN; see the one-byte relative redirect in the next section.
+ASLR-off. W100 (#1222) independently replayed it on its own uninstrumented
+build with a 200-character USER control (`parsing ''`, no marker) and returned
+ESTABLISHED at that scope. A `.rodata` string pointer is still not command
+execution: rung 5 remains unclaimed, and ASLR-on reach with the fixed-address
+payload remains a concrete negative; see the one-byte relative redirect next.
 
 ## proftpd2shell mind — one-byte ASLR-on redirect (2026-11-22 00:28–00:30Z)
 
@@ -278,4 +284,44 @@ It is NOT the fixed-address `.rodata` marker: the landing offset depends on
 `substr`'s original low byte and on heap allocation state, which were not
 mapped to a stable absolute value, so no reliable targeting of a chosen
 pre-existing string is claimed. `substr` is only consumed as a C string, not
-called; rung 5 remains unclaimed and unwitnessed for this variant.
+called; rung 5 remains unclaimed. W100 (#1222) independently replayed this
+variant and returned ESTABLISHED at the labeled scope (below).
+
+## Witness replay (W100, message #1222, 2026-11-22)
+
+Witness W100 replayed the three later limbs (#1214 commit 022e416, #1215 commit
+b17d3c6, plus the fixed-address ASLR-on negative) with its own `gcc -g2 -O2`
+uninstrumented build from the pinned 1.3.9d tarball (sha `aae1ec303efe...`),
+in an isolated harness at `/tmp/w100-wire` (all config and log paths off this
+plant's lab tree), loopback only, never this plant's binaries. Verdict: BOTH
+new claims ESTABLISHED at the scope labeled; no refutation.
+
+- Pre-login marker: the committed 1030-code-point `USER` with no `PASS` and the
+  `%m USER` config, under `setarch x86_64 -R`, gave `501 Login incorrect`,
+  `NOOP=200 NOOP command successful`, `PWD=530 Please login with USER and
+  PASS`, session alive, and RewriteLog `rewrite_parse_map_str(): parsing
+  'NOOP command successful'`; no signal 11. A 200-character `USER` control
+  logged `parsing ''` with no marker. W100 checked `mod_rewrite.c:3158` is
+  PRE_CMD/C_ANY. Scope: PR:N, non-default config, ASLR-off, `.rodata` string
+  pointer consumed by the parser — not command execution.
+- ASLR-on one-byte redirect (no `setarch`): W100's 20-byte sweep gave A-run
+  lengths 245, 230, 214, 198, 182, 181, 166, 150, 134, 119, 103, 87, 71, 55,
+  39, 23, 7, empty, empty for B=0x01..0xff in `client6-partial.py` order
+  (approximately 246−B), with 0 signal 11; the 200-byte key logged `parsing
+  ''`. Its inferred original `substr` low byte ~0xf7 versus this plant's
+  ~0xb7 confirms the heap-state dependence; no stable absolute landing
+  target and no chosen fixed string is claimed. `substr` remains a string
+  consumed by the parser, not called; rung 5 unclaimed.
+- Fixed-address ASLR-on negative: W100 independently saw the child SIGSEGV in
+  `pr_vsnprintfl` with no marker. Its first attempt was a FALSE contradiction
+  caused by a stale `setarch` server answering after the new server failed to
+  bind (`Address already in use`); a clean PID-tracked restart reproduced the
+  negative. Preserved as a replay-method caution: check the PID and bind
+  before interpreting a wire result.
+
+NITs from W100 are folded in this commit: the "witness replay pending" /
+"author-only" / "partial low-byte remains UNKNOWN" wording in the status
+header, What-remains-open, the pre-login section, README and
+docs/reproducibility.md is replaced with the ESTABLISHED-at-scope verdict and
+conditions above. Raw W100 traces are in `/tmp/w100-wire/evidence` (witness
+tree, not committed here).
