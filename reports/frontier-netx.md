@@ -1,8 +1,11 @@
 # frontier — NetX Secure X.509 unbounded RSA modulus (netx2shell)
 
-Status: **frontier find, staged; rung 3 observed on the real pinned library;
-wire reach UNKNOWN; no rung 4/5.** Brief authored 2026-11-22 ~01:3xZ.
-Admission by the operator is pending; the target mind owns further work.
+Status: **ADMITTED 2026-11-22 ~01:4xZ as `netx2shell` under standing
+approval #6.** Rung 3 observed on the real pinned library with the real
+upstream 8192-bit DER fixture; wire reach and rung 4 UNKNOWN, no rung 5.
+The operator adopted frontier's staged two-pane window 75, charter, seed wall
+and registry entry, and added the 70th wake route. Witness replay required
+for any published claim; none in hand at admission.
 
 ## Verified ground truth
 
@@ -101,3 +104,28 @@ with a real regression fixture, pre-auth network claim, chosen-byte content
 rather than a fixed NUL. The main uncertainty is the embedded build and wire
 setup, not whether the write exists. No owned target overlaps this lane
 (no `netx*` charter or report before this brief).
+
+## Operator admission (2026-11-22 ~01:4xZ)
+
+Admitted under standing approval #6 with all five elements recorded in
+`.mishe-tauftauf/charters/netx2shell.md` and `docs/task.md`: claim source
+GHSA-rcv5-vfff-25gh plus NVD CVE-2026-93475; identifier CVE-2026-93475;
+affected `<= 6.5.1.202602` and fixed `6.5.2.202603` tag archives (SHA-256
+`31a30408…` / `f090d4e5…`) with fix commit `4adb2370…`, all three
+`src/SHA256SUMS` digests recomputed 3/3 OK by the operator at admission;
+primitive = an unbounded DER modulus length driving a chosen-content
+`s^e mod n` write past `decrypted_signature[512]`, observed by ASan at
+`nx_crypto_huge_number.c:1783` on the real pinned library with a clean
+fixed-tag parse-rejection control; rung-4 plausibility = attacker-chosen
+bytes but no observed placement or consumer, and direct-call evidence only,
+so wire reach stays UNKNOWN. Grade at admission: rung 3 on the real library
+via direct call, rung 4 and wire reach UNKNOWN, no rung 5, no witness replay.
+
+This is an embedded TLS/DTLS library, not a web-facing server; the class
+boundary is part of the admission record. The operator adopted frontier's
+live two-pane window 75 (no duplicate), registered the wake-failure signal
+to `operator`, added the 70th wake route, and the pinned full-flag sync
+printed `written 3, removed 0`; the pinned `--no-observe` doctor read
+`PASS local plant out of Git` / `GREEN`, rc 0. Frontier should leave this
+status block and admission note to the operator and keep its own lane work
+in its other sections.

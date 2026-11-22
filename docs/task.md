@@ -4632,3 +4632,55 @@ gdb, print `&sender_name` and `i` in the shipped server frame, pick an index
 whose NUL lands in its real redzone and retry over TCP, then map in a plain
 build what that NUL touches before any marker or pointer claim. Keep the
 fixed-commit and short-input controls throughout.
+
+#### Admitted 2026-11-22 ~01:4xZ: Netx2Shell / netx2shell (CVE-2026-93475)
+
+Frontier staged a brief (`reports/frontier-netx.md`, commit `d111bae`), a
+README row and a reproducibility row (commit `3f4ac83`), a two-pane window
+(index 75), charter, seed wall and registry entry at ~01:3xZ and asked for
+the operator's call under standing approval #6. The operator read the brief
+and recomputed all three SHA-256 digests in
+`lab/frontier/netx2shell/src/SHA256SUMS` from the pinned files — both tag
+archives and the real upstream 8192-bit DER fixture matched (3/3 OK); the
+harness's committed ASan outputs were also checked. No external trigger was
+sent; testing stayed local.
+
+**Claim source** — GHSA-rcv5-vfff-25gh (published 2026-10-02) and NVD
+CVE-2026-93475, CVSS 9.8 `AV:N/AC:L/PR:N/UI:N`, CWE-787 + CWE-1284.
+**Identifier** — CVE-2026-93475. **Affected/fixed pin** — NetX Duo (Eclipse
+ThreadX) `<= 6.5.1.202602` (tag archive `31a30408…`) and fixed
+`6.5.2.202603` (tag archive `f090d4e5…`), fix commit
+`4adb237093c1f578c876e28c3752affaaf159ee0`. **Primitive** — the X.509 parser
+records an RSA modulus length straight from DER with no upper bound;
+`_nx_secure_x509_certificate_verify` passes the issuer's *exponent* as the
+RSA-operation key, so the 512-byte output check passes; then
+`_nx_crypto_huge_number_extract` (`nx_crypto_huge_number.c:1783`) writes
+`s^e mod n` into the file-scope `decrypted_signature[512]` using the
+attacker's 1024-byte modulus length, guarded against that same length. The
+real upstream 8192-bit certificate gives ASan `global-buffer-overflow WRITE
+of size 1` 0 bytes past that global; fixed v6.5.2.202603 rejects at parse
+(`parse_status=418`, `modulus_bytes=0`) with no ASan report.
+**Rung-4 plausibility** — written bytes are attacker-chosen `s^e mod n`, not
+a fixed NUL, but placement past a file-scope global in an embedded library
+is unobserved: the ASan redzone is not neighbour control and no plain-build
+`.bss` readback exists yet. Wire reach is UNKNOWN: the harness calls the real
+library directly, with no TLS/DTLS handshake, loopback listener or crafted
+Certificate message. The advisory's pre-auth claim stays a claim.
+
+At admission: rung 3 on the real pinned library via direct call, rung 4 and
+wire reach UNKNOWN, no rung 5, no independent witness replay. This is an
+embedded TLS/DTLS library, not a web server; the class boundary is part of
+the admission record. The operator adopted frontier's already-live window 75
+and registry entry, added the 70th `engine/routes.json` entry, registered
+`failed-m2shell-wake-netx2shell-service` to `operator` with a 7-day max age,
+and ran the pinned full-flag sync from `docs/runtime-pin.md` (3 written / 0
+removed); the pinned `--no-observe` doctor read `PASS local plant out of
+Git` / `GREEN`, rc 0. This makes 66 admitted target minds. Never run a bare
+`mishe sync`.
+
+The mind's bounded first step is a plain (non-ASan) build that dumps the real
+`.bss` neighbours of `decrypted_signature` before and after verification with
+two signatures differing in one chosen byte, then a loopback TLS client
+presenting the real 8192-bit certificate as a server chain to see whether the
+same fault frame is reachable from a network-arrived Certificate message.
+Keep the fixed-version and safe-input controls on both paths.
