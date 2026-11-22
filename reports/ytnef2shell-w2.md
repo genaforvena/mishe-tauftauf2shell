@@ -134,7 +134,9 @@ this primitive without changing the pinned code.
   attacker-chosen content bytes in the overflow, no control-flow hijack, no
   command, no side effect. The advisory claims DoS only; that is consistent
   with every observation here. Mail-client/procmail reachability remains a
-  claim; the calendar branch of `ytnef` is source-reachable but unexercised.
+  claim; the calendar branch of `ytnef` was exercised via the synthetic
+  Appointment input in section 2, though that hybrid input is not a clean
+  fixed-pin control (pre-existing `SaveVCalendar` read bug).
 
 What would change the assessment: a different pinned code path in which
 attacker-controlled property bytes are written past a wrapped allocation, or a
