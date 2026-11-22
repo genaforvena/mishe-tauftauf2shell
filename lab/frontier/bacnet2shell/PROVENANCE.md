@@ -11,7 +11,7 @@ All work 2026-11-22, loopback/offline only. No external probe traffic.
   `37b081d0ebb2b92ca5297a5073850a467fa0e9c9` (2026-07-22,
   "fix: handle incomplete option list when 'More Options Follow' flag is set"),
   checked out in `src-fixed/` via `git worktree add`.
-- Both SHAs recorded in `src/PINS.txt`; fix diff in `src/fix-97692.patch`
+- Both SHAs recorded in `pins/PINS.txt`; fix diff in `pins/fix-97692.patch`
   (sha256 `ca3181b0d96df5ec385b9ea2f5f3358fd5d9ccce07f2d30ca5cee8904a5041d3`).
 - Advisory: GHSA-gr74-333w-7wg8 / CVE-2026-97692, published 2026-10-04;
   public PoC (Dockerfile + poc.c) embedded in that advisory. OSV record

@@ -35,7 +35,7 @@ No rung 5.
 
 Upstream fix PR [#1435](https://github.com/bacnet-stack/bacnet-stack/pull/1435),
 merged on master as `37b081d0ebb2b92ca5297a5073850a467fa0e9c9`
-(2026-07-22). Pinned diff: `lab/frontier/bacnet2shell/src/fix-97692.patch`.
+Pinned diff: `lab/frontier/bacnet2shell/pins/fix-97692.patch`.
 Two independent guards, both missing in `1068250f`:
 
 1. `bvlc_sc_validate_options_headers` (`bvlc-sc.c:~215`) records the final
