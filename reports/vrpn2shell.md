@@ -1,6 +1,6 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~03:26Z, author observation (W4). Wire rung 3 is OBSERVED on
+Status 2026-11-22 ~03:45Z, author observation (W5). Wire rung 3 is OBSERVED on
 the live pinned 07.36 ASan server through both description handlers and, since
 W3, from a wire-supplied negative index. Plain-build wire input demonstrably
 changes a saved return address (W1/W2) and, at index -8, zeroes the low byte of
@@ -15,9 +15,11 @@ author-only. Nothing here is ESTABLISHED.
 - CVE-2026-123200 (CNA VulnCheck), CWE-787, pre-auth network write.
 - Vulnerable: tag `v07.36`, commit `79deb000cc0b47ae49a80c92c78167c02d8a04d8`.
 - Fixed control: commit `0da5b0b71e06e8c318a4e674c84caee12251a782`, which clamps
-  the index with `min(i, sizeof(name) - 1)`. The precise released fixed version
-  is UNKNOWN from the fetched commits; the fixed commit is the control.
-- Sources and digests: `lab/frontier/vrpn2shell/PROVENANCE.md`.
+  the index with `min(i, sizeof(name) - 1)`. No released fixed version exists to
+  name (W5 lookup: upstream tags and published releases stop at v07.36; the
+  fix commits are untagged). The pinned fixed commit is the control.
+- Sources and digests: `lab/frontier/vrpn2shell/PROVENANCE.md`; upstream release
+  lookup: `lab/frontier/vrpn2shell/UPSTREAM-RELEASE-LOOKUP.md`.
 - Compiler: `g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0`, x86-64, Linux 6.8.
   ASLR on; addresses below differ between runs, offsets and low bytes do not.
 - All tests on 127.0.0.1 ports 13901-13906 against processes started by this
@@ -232,6 +234,22 @@ reproduce the rung-4 boundary from a clean build. It is NOT an independent
 witness verdict; the replay request #1261/#1271 is still open. No chosen byte,
 no command side effect, no rung 5.
 
+## Released fixed version — authoritative negative (W5, 2026-11-22 ~03:44Z)
+
+The charter and W1-W4 left the released fixed version UNKNOWN because the two
+pinned fix commits do not name a release. A read-only metadata lookup now
+resolves that into a precise negative: upstream `git ls-remote --tags` has 35
+refs and no 07.37/07.38/07.39 tag; the GitHub releases API lists v07.36
+(published 2025-06-28) as the newest release; the v07.39 tarball URL is 404;
+the clamp commit `0da5b0b71e06` and cookie bump `c893b583d928` are both
+untagged commits dated 2026-10-22. `07.39` is the version *string* written by
+the second commit, not a released version. Exact commands and output:
+`lab/frontier/vrpn2shell/UPSTREAM-RELEASE-LOOKUP.md`.
+
+No build, control or rung claim changes: the fixed control stays the pinned
+commit tarball, and the released fixed version remains UNKNOWN because no
+fixed release exists. This is reference provisioning, not a target probe.
+
 ## Limits and next work
 
 - Witness replay of the wire rung-3 and rung-4 runs is required before any
@@ -245,5 +263,5 @@ no command side effect, no rung 5.
 - Rung 5 is out of reach on this evidence: no chosen byte, no benign command
   side effect, no reuse of a long-lived service. The class boundary also stands:
   this is a pre-auth network server library, not a web-facing server.
-- The precise released fixed version remains UNKNOWN; only the fixed commit is
-  a control.
+- No fixed release exists upstream as of 2026-11-22 (W5); the fixed commit is
+  the only fixed control. Do not infer that 07.37-07.39 are released fixes.

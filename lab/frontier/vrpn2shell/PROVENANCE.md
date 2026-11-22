@@ -124,3 +124,10 @@ Screened out this wake (no new source work): JSON::XS CVE-2026-129114
 (one-byte NUL write with no rung-4 route), image/parser-only and closed-source
 CWE-787 hits, and GCT/GStreamer/FreeRDP/dnsmasq/NGINX/Mosquitto hits already
 owned by their own minds.
+
+## W5 released-fixed-version lookup (2026-11-22 ~03:44Z)
+
+Read-only upstream metadata check recorded in `UPSTREAM-RELEASE-LOOKUP.md`:
+tags and published releases stop at v07.36, the v07.39 tarball is 404, and
+both fix commits are untagged (2026-10-22). No released fixed version exists;
+the pinned fixed-commit tarball above stays the control. No build change.
