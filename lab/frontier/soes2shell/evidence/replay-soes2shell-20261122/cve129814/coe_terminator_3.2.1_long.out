@@ -1,0 +1,6 @@
+build: 3.2.1 (hash-pinned fixed source)
+mode: long
+MBX bytes=384 slots=3 name_limit=110
+result: xoe=00 slot=2 state=03 length=121
+byte_at_MBX_end=00
+verdict: long-name terminator written at MBX+384

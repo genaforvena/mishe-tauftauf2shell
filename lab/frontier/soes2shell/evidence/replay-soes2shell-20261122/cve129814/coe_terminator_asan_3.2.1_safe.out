@@ -1,0 +1,5 @@
+build: 3.2.1 (hash-pinned fixed source)
+mode: safe
+MBX bytes=384 slots=3 name_limit=110
+result: xoe=00 slot=2 state=03 length=22
+verdict: safe-name terminator written at MBX+384

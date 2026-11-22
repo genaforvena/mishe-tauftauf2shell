@@ -405,3 +405,51 @@ Grade for this adjacent issue: **rung 3 confirmed on the real pinned
 segmented-download handler**, rung 4 harness-level (chosen bytes at chosen
 offsets past a modeled writable object). No witness replay of this harness
 yet. Wire reach stays UNKNOWN and rung 5 is not claimed.
+
+## Adjacent cluster triage — CVE-2026-129814 (soes2shell, fifth wake, 2026-11-22 ~02:34Z)
+
+The hash-pinned fix diff changes one loop bound in each of the two SDO
+information handlers: pinned 3.2.0 `SDO_getod()` copies an object name with
+`while (*s && (n < (ESC_MBXDSIZE - 0x0c)))` and then stores `*d = *s`
+(`esc_coe.c:1340`, `:1347`); pinned 3.2.1 uses `n < (ESC_MBXDSIZE - 0x0c - 1)`
+(`esc_coe.c:1427`). With the demo's 128-byte mailbox and three slots, a name of
+111 bytes fills the last slot's name area starting at mailbox offset 18 so
+that the 3.2.0 terminator lands at `MBX+384`, one byte past the whole `MBX[]`
+global. This is the one-byte mailbox terminator write in RRTL-261119-01.
+
+New harness `lab/frontier/soes2shell/harness/coe_terminator_overflow.c`
+(wired into `harness/build.sh`) sends one crafted SDO Information Get Object
+Description mailbox request through the **real** `ESC_coeprocess()` →
+`SDO_getod()` path, with `ESC_claimbuffer()` returning the last mailbox slot.
+Its modeled precondition is an object dictionary with an over-long name; the
+written byte is the next name byte from the application OD, **not** a byte
+chosen by the master on the wire. `MBX[]` is filled in-process: no wire, no
+HAL, no live slave, no leak, no command side effect.
+
+Evidence:
+`lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/cve129814/INDEX.txt`
+(eight runs, raw output, exit codes, SHA-256 checksums; `sha256sum -c
+SHA256SUMS` was recomputed 3/3 OK).
+
+| Case | Build | Observed |
+|---|---|---|
+| `long` | 3.2.0 plain | `byte_at_MBX_end=41` (the OD name's `A`), response length 122 |
+| `long` | 3.2.0 ASan | `global-buffer-overflow`, `WRITE of size 1` at `esc_coe.c:1347` in `SDO_getod` via `ESC_coeprocess :1524`, 0 bytes after the 384-byte `MBX[]` global; exit 1 |
+| `long` | real pinned 3.2.1, plain and ASan | `byte_at_MBX_end=00`, length 121, no ASan report, exit 0 |
+| `safe` (10-byte name) | 3.2.0 and 3.2.1, plain and ASan | `byte_at_MBX_end=00`, length 22, no ASan report, exit 0 |
+
+Harness artifact found and repaired: the plain-build observation initially
+used `__SANITIZE_ADDRESS__`, which this clang does not define, so ASan builds
+reported a harness-local read of the same out-of-bounds byte. Replaced with
+`__has_feature(address_sanitizer)`; the final eight cases above are the
+replay, and the early reports are preserved in the evidence index, not offered
+as evidence.
+
+Grade for this adjacent issue: **rung 3 confirmed on the real pinned SDO
+information handler**, rung 4 harness-level (one byte at a chosen offset past
+the real `MBX[]` global, but the byte comes from application configuration,
+not wire input). No witness replay of this harness yet. Wire reach stays
+UNKNOWN and rung 5 is not claimed. The advisory lists 21 CVEs total; five now
+have local harness coverage (129794 / 129796 / 129798 / 129811 / 129814),
+leaving 16 untested issues with source-bound candidates (ranked shortlist on
+this mind's wall).

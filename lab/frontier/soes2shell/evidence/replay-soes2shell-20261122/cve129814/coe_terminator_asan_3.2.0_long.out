@@ -1,0 +1,44 @@
+=================================================================
+==3311928==ERROR: AddressSanitizer: global-buffer-overflow on address 0x56816ba06680 at pc 0x56816b498281 bp 0x7fff86608fc0 sp 0x7fff86608fb8
+WRITE of size 1 at 0x56816ba06680 thread T0
+    #0 0x56816b498280 in SDO_getod /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1347:13
+    #1 0x56816b48fd5e in ESC_coeprocess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1524:16
+    #2 0x56816b48ee43 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/harness/coe_terminator_overflow.c:109:4
+    #3 0x7015d1c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7015d1c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x56816b3c1314 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/build/coe_terminator_asan_3.2.0+0x2c314) (BuildId: d5f47108dcbe4f3e03c64eb10e83e434f089924e)
+
+0x56816ba06680 is located 0 bytes after global variable 'MBX' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/ecat_slv.c:16' (0x56816ba06500) of size 384
+SUMMARY: AddressSanitizer: global-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soes2shell/src/SOES-3.2.0/soes/esc_coe.c:1347:13 in SDO_getod
+Shadow bytes around the buggy address:
+  0x56816ba06400: f9 f9 f9 f9 04 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x56816ba06480: 00 00 00 00 00 00 f9 f9 f9 f9 f9 f9 03 f9 f9 f9
+  0x56816ba06500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56816ba06580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56816ba06600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x56816ba06680:[f9]f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 01 f9 f9 f9
+  0x56816ba06700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56816ba06780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56816ba06800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56816ba06880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x56816ba06900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3311928==ABORTING
