@@ -6018,7 +6018,7 @@ W120 screened CVE-2026-130875 / GHSA-v384-f7x8-f7c7 (VulnCheck 2026-11-17, CVSS 
 
 Measured on the real pinned daemon: one crafted AUTHOR packet (body 267, `arg_cnt=255`, table `4` + 254×`0xff`, data `cmd=`) to a plant-started 127.0.0.1 listener passed as fd 0 gives ASan `heap-buffer-overflow READ of size 1`, 243 bytes past a 323-byte `calloc` region, top frames `eval_args author.c:75` → `author :141` → `tac_read packet.c:892`, daemon `rc=-6`; the fixed pin returns a 57-byte rejection and a safe packet an 18-byte reply, both clean and alive. Two in-tree replays gave normalized vuln hash `599ab1f0…` and the empty-log digest for both controls. The verbatim-function harness (`harness/gen.py` extracts all three functions byte-for-byte from the committed `pins/` blobs after `5e72d56`) passes 9/9 with chosen `0x41`/`0x5a` at `cmdline` offsets 0..7, fixed copies nothing, and a 40-byte copy into the 15-byte VLA faults with ASan `dynamic-stack-buffer-overflow`; a clean `git archive 5e72d56` replay with no source clone or `.git` also passed 9/9 with identical PASS lines. Both runners were replayed locally at this fold with the same results.
 
-Grade: rungs 1/2 and 3 at real wire scope, rung 4 chosen bytes at chosen offsets at harness scope only — no daemon-side readback, grooming, pointer control, marker, command or rung 5. The required shared key and permitted user keep this out of the anonymous pre-auth class; the advisory's five-connection `system()`/root chain is claim text, not a lab observation. The operator admitted the lane at 20:2xZ under standing #6 (see the next limb) and witness W124 (#1648) later replayed both runners from a clean archive with its own clang ASan builds, 9/9 harness and 7/7 wire, no refutation; grade unchanged. Cheapest next experiment from the brief: build the vulnerable pin without ASan (`--debug`, `-g -O0`), break at `author.c:77` after the crafted packet under gdb and read back `cmdline` in the live process, with a two-connection priming variant for `calloc()` reuse; that would move rung 4 from harness to live daemon but still not be rung 5 without a pointer or command side effect.
+Grade: rungs 1/2 and 3 at real wire scope, rung 4 chosen bytes at chosen offsets at harness scope only at staging (W121 later promoted it to live-daemon scope); no grooming, pointer control, marker, command or rung 5. The required shared key and permitted user keep this out of the anonymous pre-auth class; the advisory's five-connection `system()`/root chain is claim text, not a lab observation. The operator admitted the lane at 20:2xZ under standing #6 (see the next limb) and witness W124 (#1648) later replayed both runners from a clean archive with its own clang ASan builds, 9/9 harness and 7/7 wire, no refutation; grade unchanged. The brief's next experiment — a plain `--debug` build with a gdb break at `author.c:77` to read back `cmdline` in the live process, plus a two-connection `calloc()`-reuse priming variant — was completed in W121 (`5833ad2`); it moved rung 4 from harness to live daemon but still produced no pointer or command side effect.
 
 ### Admitted 2026-11-22 ~20:2xZ: tacplus2shell (operator, standing #6)
 
@@ -6052,7 +6052,92 @@ Witness W124 (20:19Z, tape #1648) closed the owed replay from a clean
 `git archive f6d0654` with its own clang ASan builds: 9/9 harness and 7/7 wire
 PASS, the same READ-1 and controls, `599ab1f0…` reproduced after path
 normalization, ESTABLISHED at the labeled scope with no refutation (minor NIT
-on a volatile PID/stack address in one PASS line). Grade unchanged. Next
-bounded experiment: plain `--debug` build plus gdb break at `author.c:77` to
-read back `cmdline` in the live daemon, with a two-connection priming variant
-for the advisory's `calloc()`-reuse claim.
+on a volatile PID/stack address in one PASS line). Grade unchanged. The owed
+plain-build + gdb readback was completed in W121 (`5833ad2`): chosen
+`AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH` read from the live `cmdline` VLA under gdb,
+fixed and safe controls clean, and a priming variant tested with no adjacency;
+see the last section of this file.
+
+## 2026-11-22 20:4x–20:5xZ limbs
+
+### Frontier-staged ntpsec2shell (`f035109`, `8aa2904`)
+
+W121 screened CVE-2026-121506 (GitLab CNA 2026-11-03, CWE-787, CVSS 3.1 7.4
+`AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:H`) and staged a two-pinned NTPsec lane:
+brief `reports/frontier-ntpsec2shell.md`, claim URLs in `PROVENANCE.md`,
+seven pinned blobs and the fix patch SHA-256 in `PIN_HASHES.txt`. Affected
+1.1.4 up to (excluding) 1.2.5, fixed 1.2.5; vulnerable tag `NTPsec_1_2_4` =
+`a9e66af44c0be47e8e32a972b3f3fb7cea65f808`, fixed `NTPsec_1_2_5` =
+`42b5703303c8c7e6513f3a119cfab670924dd7be`, fix `0a36941e499d…` (8+/4−).
+The victim is an **NTS client ntpd fed server-mode replies**, not an NTP
+server. No length check on the declared AEEF `noncelen` in
+`extens_client_recv()` lets the decrypt `plaintext` pointer be moved past the
+received data. `harness/gen.py` copies that function byte-for-byte from the
+pinned `nts_extens-{vuln,fixed}.c` plus two buffer helpers from pinned
+`nts-vuln.c`; `harness/run.sh` builds gcc `-O0 -g` ASan/plain variants and
+links pinned 1.2.4 `aes_siv.c` against OpenSSL 3.0.13, opening no sockets.
+`cd lab/frontier/ntpsec2shell && bash harness/run.sh` gave 8 PASS / 0 FAIL:
+ASan `WRITE of size 40` 8 bytes past a 128-byte region with a modeled
+consumer, plain readback of 16 chosen `41…`/`5a…` at offset 136, and the real
+pinned decryptor writing `414243…50` at offset 328 with a lab-chosen key;
+fixed 1.2.5 rejects before the consumer. Normalized hash `1f04e12d…`
+identical over two in-tree and one clean `git archive f035109` replays; raw
+per-case output in gitignored `evidence/` regenerates from the pins.
+Duplicate check found no prior ntp target or window/charter/mind; adjacent
+PHP-CGI CVE-2026-129538 was rejected as `php2shell`-owned. FRONTIER-STAGED:
+rung 3 plus scoped rung 4 only — no ntpd process, NTP/UDP wire, NTS-KE
+handshake, disclosed key, pointer control or command; the advisory's
+auth-bypass/time-setting chain stays a claim and rung 5 is unclaimed.
+
+### Pppd2shell W125 — reachable notifier pointers, failed rung-5 attempt (`ef19d07`)
+
+Extension of W123 at unchanged rung 4; `lab/frontier/pppd2shell/live/chosen2/README.md`.
+`nm -n -S` on the plain 2.5.3 build puts `pidchange +1832`, `phasechange
++1840`, `exitnotify +1848`, `sigreceived +1856` inside the ~1875-byte NAK
+amplification of the fixed `inpacket_buf[PPP_MRU+PPP_HDRLEN]`; `fork_notifier
++1864` and the `+1952..` hooks are out of reach. `PUTLONG` is big-endian, so
+a chosen little-endian pointer must be byte-swapped in the request CI with
+the `escape NN` forced bit cleared (`escape 00` reversed the pointer,
+`escape 09` works). With the plain daemon on a local PTY as in W122,
+`sudo -n gdb -p` readback at the target offsets shows `phasechange =
+exitnotify = sigreceived = 0x0000000041424242` and `pidchange` low half only
+(PIE heap high half); safe offset 1500 leaves all pointers normal. The same
+frame faults 2.5.3 ASan at `lcp_reqci lcp.c:1608`, 0 bytes past
+`nak_buffer[1500]`, and 2.5.4 rejects duplicate options. Seven normalized
+cases and hashes in `live/chosen2/evidence/HASHES.txt` were byte-identical
+over two normalizer runs; raw logs stay in gitignored `live/raw/`.
+`live/rce_attempt.py` tried a two-frame, `-no-pie` callback: a rejected
+ConfReq body writes a fake `struct notifier` (`func=execl@plt`,
+`arg="/bin/sh"`) verbatim into `inpacket_buf`, and SIGTERM should reach
+`new_phase(PHASE_DEAD)` → `notify(phasechange,0)`. Three replays instead
+logged `Connection terminated.` then `Fatal signal 11`: `link_terminated()`
+(`auth.c:717-768`) dereferences the overflow-corrupted `the_channel` before
+the phase transition, so the hook was never called. No shell, command or
+file side effect; rung 5 unclaimed, cases author-only, no witness replay.
+
+### Tacplus2shell W121 — live-daemon chosen-byte readback (`5833ad2`)
+
+Closes the owed plain-build + gdb experiment. Both pins were rebuilt without
+ASan from the same committed blobs into gitignored `src-plain/` (vulnerable
+`929671c22ff9…`) and `src-fixed-plain/` (fixed `d8493e0d6420…`) with
+`./configure --debug --minimum tac_plus-ng mavis && make -j4`,
+`clang -O0 -g -ggdb -DDEBUG`. `harness/run_gdb_case.py` launches each binary
+under gdb with a plant-created 127.0.0.1 listener as fd 0 (`ptrace_scope=1`
+requires gdb to be the parent); `harness/gdb-author.cmd` breaks at
+`author.c:72`, `:75` (when `a - base >= 64`), `:77`, `:78`.
+`bash harness/run_gdb.sh` gave 8 PASS / 0 FAIL twice: the vulnerable crafted
+AUTHOR (body 92, `arg_cnt=20`, table `8` + 19×`8`, eight `cmd=AAAA`…
+`cmd=HHHH` records) reaches `eval_args()` and the final `cmdline` VLA holds
+the chosen `AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH` with 12 past-payload reads at
+`off=64..160`; the fixed pin never enters `eval_args()` and replies 57 bytes;
+a vulnerable safe packet enters once with no OOB read and an 18-byte reply.
+Normalized hashes `2072846c…` / `de41ed2a…` / `da7623bf…` in `gdb-r1.txt`
+and `gdb-r2.txt`. Two grooming negatives: `cmd=ZZZZ` in the username field
+landed ~6 KB before the packet buffer, and a 255-record priming packet left
+the trigger buffer in a different heap region with no marker. Grade:
+rung 4 chosen bytes at chosen offsets now holds at live-daemon scope with
+fixed and safe controls, not only the verbatim harness; the bytes come from
+the crafted packet's own payload, with no out-of-payload heap byte, pointer,
+function pointer, marker or command. Rung 5 and the five-connection
+`system()`/root chain stay UNKNOWN / claim text. Raw `gdb-*.log` and
+`gdb-*.stdout` are gitignored and regenerate with `run_gdb.sh`.
