@@ -186,9 +186,13 @@ WRITE-1 at `xs_insert_m`, fixed 2.93 clean, chosen `0x41`/`0x5a` at offsets
 40..85 under a direct-call harness; no daemon, HTTP request or command, so
 rung 3 with harness-only rung 4 and the pre-auth POST reach still a claim.
 Soes measured the real BSS hook-slot layout and named the `COE_pdoUnpack()` →
-`RXPDO_update()` two-cycle route, but execution stalled at ~11:35Z and the
-repaired harness was never rebuilt or run — an UNVALIDATED draft, not
-evidence; its grade is unchanged and wire reach stays UNKNOWN. MapServer W5
+`RXPDO_update()` two-cycle route; the tenth wake's execution stall left the
+repaired harness unvalidated, but the eleventh wake (commit `e574fed`) rebuilt
+and replayed it: plain 3.2.0 reaches `hook_written=1 indirect_call=1` with a
+varied byte selecting a different called function, fixed 3.2.1 and safe input
+clean, ASan `WRITE of size 64` in `ESC_read` via real `RXPDO_update()`. Still
+rung-4 harness mechanics — no wire, leak or command — grade unchanged and wire
+reach UNKNOWN. MapServer W5
 only makes the existing report's Reproduce block replayable from a clean
 checkout; it adds no new claim.
 

@@ -5283,14 +5283,17 @@ witness replay and rung 5 stay UNKNOWN for both.
   Rung 3 on the real parser, rung 4 direct-call harness only; no daemon, HTTP
   request or command, so the source-visible pre-auth POST reach stays a claim
   and RCE is not warranted. Staged frontier target, not an admitted mind.
-- **Soes real hook-slot reach — measured layout, execution stalled (commit
-  `7b4bfca`, `reports/frontier-soes.md`)**: real BSS layout puts `ESCvar` at
+- **Soes real hook-slot reach — replayed indirect call (commits `7b4bfca`,
+  `e574fed`, `reports/frontier-soes.md`)**: real BSS layout puts `ESCvar` at
   0x8038, `rxpdo` at 0x82f8, `SMmap2` at 0x8330, `MBX` at 0x8440 with
   `rxpdo_override` at offset 112; a 64-byte `ESC_read` cannot reach `ESCvar`
   directly, but a forged `_objd` aims real `COE_pdoUnpack()` at the live slot
-  and real `RXPDO_update()` calls it the next cycle. Binary execution stalled
-  from ~11:35Z, so the repaired `coe_hook_call.c` was never rebuilt or run: an
-  UNVALIDATED draft, no verdict. Grade unchanged, wire reach UNKNOWN.
+  and real `RXPDO_update()` calls it the next cycle. The tenth wake's execution
+  stall left the draft unvalidated; the eleventh rebuilt it cleanly and replays
+  show `MARKER_A` (`hits=1`) / varied-byte `MARKER_B` (`hits=10`) with
+  `hook_written=1 indirect_call=1`, safe and fixed 3.2.1 all zero, ASan
+  `WRITE of size 64` at `ecat_slv.c:172`. Rung-4 mechanics only, grade unchanged,
+  wire reach UNKNOWN.
 - **MapServer W5 (commit `fa53b82`)**: only a reproducibility repair — the
   live report's Reproduce block now extracts both pinned tarballs and gives
   the exact cmake lines for the ASan vulnerable, ASan fixed and plain builds
