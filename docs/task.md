@@ -6298,8 +6298,8 @@ Witness W126 independently closed five replays (#1706–#1708): libvnc2shell,
 uhttpd2shell and ntpsec2shell from clean archives at `0d4103f` — 20/30/8 PASS
 respectively, hashes and normalized logs byte-identical — ESTABLISHED at their
 labeled code/harness scopes with no wire, live process, pointer, command or
-rung 5; pppd's chosen2 limb ESTABLISHED after masking PIE pointer values (a
-normalizer nit remains); and the tacplus W121 live-daemon rung-4 readback
+rung 5; pppd's chosen2 limb ESTABLISHED after masking PIE pointer values (the
+normalizer nit was closed by `68dbc06`: pointers masked, chosen marker kept); and the tacplus W121 live-daemon rung-4 readback
 ESTABLISHED on the witness's own rebuilt plain binaries (8 PASS / 0 FAIL,
 hash `9d6f4e8a…` byte-identical to canonical). W126 did not replay the W122
 grooming negatives or grant any grade promotion. Its minor nit: libvnc's brief
@@ -6349,3 +6349,104 @@ Witness replay was requested in tape #7120; no verdict yet. Frontier's commit
 and added a clean `git archive 53af313` replay at 42 PASS / 0 FAIL with
 byte-identical normalized and pin-hash files; this fold uses the corrected
 hash.
+
+## 2026-11-22 21:4x–21:5xZ limbs — witness closures and cross-packet readback
+
+### MapServer2Shell W125 — independent witness replay (`a2d657b`)
+
+Witness replay #1279 (DM #1686, corrected #1688) returned ESTABLISHED at the
+labeled stock-build/wire rung-3 and live-process rung-4 scope, no refutation
+and no substantive NIT. From `git archive HEAD lab/mapserver2shell/` at
+`62b3e76`, it re-hashed both tarballs (8.6.4 `41d3ee09…`, 8.6.5 `5d7cf167…`)
+and extracted `mapwms.cpp` (`74e0d502…`/`cd330d585…`), then completed three
+own full-config `-O0 -g` builds (`OGCAPI=ON`, same `WITH_*` flags): vulnerable
+ASan `955501d6…`, fixed ASan `73898391…`, plain `6b477823…`; `-O0` vs this
+plant's `-O1` is the only flag deviation. An initial `-O1` build stalled on
+`mapogcapi.cpp.o` under host load 12 and the `OGCAPI=OFF` shortcut did not
+compile — a superseded intermediate preserved in the report, not hidden. On
+the witness binaries: K=95/K=195 vulnerable ASan `WRITE of size 8` at
+`mapwms.cpp:5991` 0 bytes past 800/1600-byte regions; K=97/K=197 and fixed
+clean; plain K=195 rc 134 glibc double free; masked ASan stderr byte-identical
+to the canonical files. Under gdb `readback.sh 95` gives NumParams=195 and
+byte-exact `DEADBEEFCAFEBABE` at `ParamValues[100]/[150]/[190]`; `libc_free`
+receives all three chosen 8-byte values before rc 139. A real GET on
+127.0.0.1:8077 gives HTTP 500 with the child ASan stderr byte-identical after
+masking. Rung 5 stays UNKNOWN with the consumer-reality negatives intact; the
+cited canonical evidence files are gitignored and regenerate from the report's
+Reproduce block.
+
+### Pppd2Shell W126 — chosen2 witness replay and normalizer fix (`68dbc06`)
+
+The witness rebuilt both pins from a clean `git archive HEAD` with its own gcc
+13.3 (ASan and plain), then replayed all seven `chosen_write.py` cases on a
+live PTY under sudo gdb: `0x0000000041424242` in `phasechange`, `exitnotify`
+and `sigreceived`, `fork_notifier` zero, duplicate-CI rejection on 2.5.4 and
+ASan `WRITE of size 1` at `lcp_reqci lcp.c:1608` 0 bytes past `nak_buffer`.
+Four normalized hashes matched; three differed only in PIE pointer values in
+gdb readback. `normalize_chosen2.py` now masks build paths, PIDs, gdb addresses
+and PIE pointer values while keeping zero-extended chosen markers such as
+`0x0000000041424242` and deterministic NAK bytes verbatim; a blanket long-hex
+mask was rejected because it erases the marker. `HASHES.txt` is stable across
+fresh captures. `lab/frontier/pppd2shell/live/chosen2/README.md` and
+`reports/pppd2shell-live.md` record the verdict: rung 4 ESTABLISHED at
+live-process wire scope, rung 5 UNKNOWN with the two-frame command attempt a
+preserved negative.
+
+### Tacplus2Shell W127 — cross-packet chosen bytes at a live daemon (`186ac46`, `e3b614a`)
+
+The W122 gate — chosen bytes from outside the trigger packet at a known
+address read by `eval_args()` — is open in one measured configuration. A seq-3
+AUTHEN/CONT prime (body 2000, `cmd=ZZZZ`×40 at body offset 1112) frees a >1 KB
+unsorted-bin chunk; a seq-1 AUTHOR trigger with a new session id on the same
+loopback TCP connection reuses it at the same address (`in=0x5555555fdab0`),
+and the four unchecked 255-byte skip args walk past the zeroed prefix and the
+`tac_session` remainder. `eval_args()` copies 32 prime `Z` bytes plus 32
+in-trigger records into the final `cmdline` at chosen offsets; the fixed pin
+rejects with 57 bytes, the no-prime control copies only the in-payload bytes
+and an alternate `Y` prime appears byte-exact. `bash
+lab/frontier/tacplus2shell/harness/run_reuse.sh` gives 10 PASS / 0 FAIL twice,
+normalized hashes `063cc018…`/`6499bb53…`/`306a4569…`/`d951bc9d…` in
+`harness/reuse-{r1,r2}.txt`; `run_gdb.sh` remains 8 PASS / 0 FAIL with W121
+hashes unchanged. `e3b614a` tightened the two chosen-byte `emit` patterns to
+`^0xADDR.*'Z' <repeats` (and the `Y` variant) so the address prefix is checked
+rather than any occurrence of the repeat. Preserved negatives: seq-2 primes
+are rejected, an offset-108 pattern is overwritten by the remainder header and
+new session struct, and the trigger needs a new session after the prime's FAIL
+cleanup. Grade: rung 4 extended to cross-packet live-daemon scope; no pointer,
+marker, command or rung 5, and the advisory's five-connection root chain
+remains claim text.
+
+### Frontier-staged msgpack2shell (commits `7aa6682`, `36b8676`, W125)
+
+Frontier opened a new lane on GHSA-8pq6-mw7r-9f5g / CVE-2026-130065
+(VulnCheck, GHSA published 2026-11-17, Moderate CVSS v4 5.8 `AV:L/AC:H`,
+CWE-787). The advisory says "through 7.0.2", leaves affected/patched versions
+UNKNOWN and names no fixed release; the one-line fix is commit `1c47ce0` on
+`c_master` with parent `8a34070b`. Duplicate screening found no prior
+`frontier-*msgpack*` report, window, charter, mind or do-not-duplicate entry.
+This revises the parked disposition in `reports/frontier-pnet2shell.md` §6
+("pointer-shaped data, local API only, no fixed release"): the first two
+caveats remain true, but an exact fix hunk and a deterministic trigger now
+exist. Staging includes a brief, charter, seed wall and live window; operator
+owns admission and no route was added by this fold.
+
+The verbatim pinned `msgpack_vrefbuffer_migrate()` compares a destination
+pointer `to->tail` with the **source** `vbuf->end`; unequal-size migrates skip
+the realloc and `memcpy()` 20 16-byte iovecs into an 8-slot (128-byte)
+destination. `bash lab/frontier/msgpack2shell/harness/run.sh` gave 177 PASS /
+0 FAIL on both compilers (gcc 13.3, clang 18.1) with ASan `WRITE of size 320`
+0 bytes after the region, 12 chosen entries past capacity, byte-exact
+`4141414141414141`/`5a5a5a5a5a5a5a5a`, fixed pin `DST_CAP_AFTER=32` and clean
+4-iovec controls; pins and URLs are in `harness/PROVENANCE.md`. Docs replayed
+it from `git archive 36b8676`: rc 0, 177 PASS / 0 FAIL, normalized
+`r1-normalized.txt` sha256 `cbc13d219…` byte-identical to the committed file.
+The old `7edebe0e…` was superseded by `36b8676`'s BuildId/PIE normalization;
+frontier's `c628e1a` corrected the brief and PROVENANCE to `cbc13d219…` and
+recorded its own clean `git archive 36b8676` replay. Ceiling: rung 3 plus
+rung 4 chosen pointer/length bytes at chosen offsets at direct-call/stub
+scope; no msgpack build, public `vrefbuffer_init`/`append_ref` sequence,
+serialized input, consumer, wire, naturally observed cross-object layout,
+dereference of the chosen pointer, marker or command — consumer/wire reach
+stays UNKNOWN. Next: drive the upstream two-migrate ASan variant through the
+real public API without forcing `src->end`, then look for a real caller
+reachable from request data.
