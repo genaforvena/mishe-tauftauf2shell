@@ -33,6 +33,7 @@ def main():
     ap.add_argument("--rest", type=int, default=19)
     ap.add_argument("--rest-byte", type=int, default=8)
     ap.add_argument("--start-wait", type=float, default=3.0)
+    ap.add_argument("--client-args", default="")
     ap.add_argument("--end-wait", type=float, default=1.0)
     args = ap.parse_args()
 
@@ -62,6 +63,8 @@ def main():
                       "--prime-rest-byte", str(args.prime_rest_byte)]
     wire_args += ["--data", args.data, "--arg0", str(args.arg0),
                   "--rest", str(args.rest), "--rest-byte", str(args.rest_byte)]
+    if args.client_args:
+        wire_args += args.client_args.split()
     r = subprocess.run(wire_args, capture_output=True, text=True, timeout=20)
     print(f"client_rc={r.returncode} stdout=[{r.stdout.strip()}] stderr=[{r.stderr.strip()}]")
     time.sleep(args.end_wait)

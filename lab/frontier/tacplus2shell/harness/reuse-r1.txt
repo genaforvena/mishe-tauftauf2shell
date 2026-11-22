@@ -1,0 +1,24 @@
+=== vulnerable pin + Z prime + crafted AUTHOR ===
+case=vuln runner_rc=0
+PASS vuln_same_chunk
+PASS vuln_prime_read
+PASS vuln_z_in_cmdline
+PASS vuln_reply_18
+PASS same_chunk_address
+=== fixed pin + same prime and trigger ===
+case=fixed runner_rc=0
+PASS fixed_no_eval
+PASS fixed_reply_57
+=== vulnerable pin + trigger only (no prime) ===
+case=noprime runner_rc=0
+PASS noprime_no_prime_read
+PASS noprime_reply_18
+=== vulnerable pin + Y prime + crafted AUTHOR ===
+case=alt runner_rc=0
+PASS alt_y_in_cmdline
+=== normalized evidence hashes ===
+vuln 063cc018696e22edb5af474757c5ee46de493c7e5e4ec0ac721595acc36688f2
+fixed 6499bb53c5b5a495b87afe9cb920d6821cb5cbd01d33d044d2569dfa84835843
+noprime 306a4569a5214cbc4a4a02b377118a392756a2321cd1acbaf1e064231ead928e
+alt d951bc9d58c42b8da8ef5e6d23b61f0c30c36d6a915c7710d22cad13794c488e
+FAILURES=0

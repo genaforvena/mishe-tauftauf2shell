@@ -191,3 +191,57 @@ to this build/config. The GHSA links no exploit code and OSV
 `CVE-2026-130875` carries no PoC reference; the exact five-connection packet
 shapes are unpublished. The `uid=0(root)` claim therefore cannot be replayed
 from public material and stays claim text.
+
+## W127 cross-packet chosen-byte readback at live-daemon scope (2026-11-22 21:46Z)
+
+The W122 gate — get chosen `cmd=` bytes from *outside* the trigger packet to a
+known address read by `eval_args()` — is now open in one specific, reproducible
+configuration. Grade: rung 4 extended to **cross-packet, live-daemon scope**.
+Rung 5 remains UNKNOWN; no pointer, function pointer, marker or command.
+
+Hypothesis and why it works here: `tac_read()` allocates `ctx->in` with
+`calloc(1, sizeof(tac_pak)+data_len)` (`packet.c:725`); a seq-1 packet detaches
+its buffer into `session->mem` (`packet.c:772`), but a seq>=2 packet's buffer is
+freed back to the context allocator at `packet.c:917`. A large seq>=2 prime
+frees a >1 KB unsorted-bin chunk immediately before a small trigger allocates
+its ~148-byte `ctx->in`, which is carved from that same chunk at the *same
+address*. `calloc` zeroes only the requested size, so the prime's decrypted
+plaintext survives behind the zeroed prefix and behind the session struct that
+reuses the chunk remainder.
+
+Packet shapes (plain vulnerable `929671c`, loopback daemon under gdb):
+- Prime: seq 3 AUTHEN/CONT, body 2000, `user_msg_len=0`,
+  `user_data_len=1995`, data bytes `P` except `cmd=ZZZZ`×40 starting at body
+  offset 1112. AUTHEN reply is status 2 (FAIL) and `cleanup_session()` runs.
+- Trigger: seq 1, **new session id** `aabbccdd` on the same TCP connection,
+  AUTHOR body 92, `arg_cnt=20`, size table `8` + four unchecked `255` entries
+  (indices 8-11) + `8`×8, payload eight 8-byte records `cmd=AAAA` … `cmd=HHHH`.
+  The four 255-byte skip args walk `p` past the calloc-zeroed prefix and the
+  `tac_session` struct written into the chunk remainder; their `strncmp` finds
+  no `cmd=` prefix, so they copy nothing.
+
+Observed in the live process: prime `in=0x5555555fdab0`, trigger `in=` the same
+address, argument base `in+72`; the prime's `ZZZZ` records are intact at
+`in+1156` at trigger time. `eval_args()` copies at `i=12` … `i=19` and the
+final stack `cmdline` is `AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH` followed by 32
+bytes of `Z` — 32 chosen bytes from the *prime* packet, 64 chosen bytes total
+at chosen offsets. Fixed pin: no `eval_args` entry, 57-byte rejection. No-prime
+control: only 8 copies (the 32 in-payload bytes), no prime read. Alternate
+pattern byte `Y`: 32 `Y` bytes in `cmdline`, confirming the bytes are the
+attacker's prime data rather than incidental heap contents. Trigger reply is
+18 bytes in every vulnerable case.
+
+Replay: `bash lab/frontier/tacplus2shell/harness/run_reuse.sh` → 10 PASS / 0
+FAIL twice, normalized hashes `063cc018…`/`6499bb53…`/`306a4569…`/`d951bc9d…`
+in `harness/reuse-r1.txt` and `-r2.txt`. Canonical
+`bash lab/frontier/tacplus2shell/harness/run_gdb.sh` → 8 PASS / 0 FAIL, hashes
+`2072846c…`/`de41ed2a…`/`da7623bf…` unchanged.
+
+Preserved negatives from this wake: seq 2 (even) prime is rejected as an
+illegal sequence number; a prime pattern at body offset 108 is overwritten by
+the remainder-chunk header and the new `tac_session` struct (bytes at
+`in+152`…`in+864`), which is why the surviving pattern is placed at offset
+1112; an AUTHEN/CONT prime whose reply is FAIL cleans up its session, so the
+trigger must open a new session (seq 1, different id) on the same connection.
+The advisory's five-connection `system()`/root chain still has unpublished
+packet shapes and stays claim text.

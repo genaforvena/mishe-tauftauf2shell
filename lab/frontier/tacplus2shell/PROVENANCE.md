@@ -43,6 +43,19 @@ either client under gdb (`--client wire2.py|wire3.py`). All remain loopback
 only; their `gdb-groom*.log` / `gdb-sameconn*.log` / `gdb-authprime*.log`
 output is local-only evidence.
 
+W127 cross-packet readback (plain vulnerable/fixed trees above, no rebuild):
+`harness/wire4.py` sends a seq-3 large AUTHEN/CONT prime with a chosen
+`cmd=`-pattern payload and a seq-1 AUTHOR trigger in a new session on the same
+loopback connection; `harness/gdb-reuse.cmd` records the prime and trigger
+buffer addresses, the surviving prime plaintext and each `eval_args()` copy;
+`harness/run_gdb2.py --client wire4.py --client-args=...` drives either case
+(the `--client-args` passthrough was added in W127);
+`harness/run_reuse.sh` runs vulnerable/fixed/no-prime/alternate-pattern cases
+and records normalized hashes in `harness/reuse-r1.txt` / `-r2.txt`. Raw
+`harness/reuse-*.log` and `reuse-*.stdout` are local-only evidence. Details in
+`reports/tacplus2shell-status.md` section "W127 cross-packet chosen-byte
+readback at live-daemon scope".
+
 ## Local artifacts (all under this directory)
 
 - `harness/tac.cfg` — lab config: loopback listener at 127.0.0.1:4949, key
