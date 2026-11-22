@@ -5583,3 +5583,99 @@ control or command, so rung 5 stays UNKNOWN. Details and the first
 experiment are in `reports/h2o2shell-status.md`. Witness replay is owed.
 The pre-existing doctor/omp-only REDs named the missing units/route; they
 were not hand-cleared, and scheduled producers republish their state.
+
+## 2026-11-22 18:2x–18:4xZ limbs
+
+### Inetutils2Shell W1 — telnetd wire overflow (6bb732b, 0b8cc5e)
+
+The staged direct-call claim is now backed by a real daemon reached over TCP:
+a plant-started 127.0.0.1 listener accepts one connection and execs pinned
+telnetd with that socket on fd 0. The raw client answers LINEMODE negotiation
+and sends `IAC WILL LINEMODE` plus `IAC SB LINEMODE LM_SLC` with 50 triplets
+(156-byte suboption) before authentication. Pinned 2.7 ASan aborts with
+`global-buffer-overflow WRITE of size 1` 0 bytes past the 108-byte `slcbuf`,
+top frame `add_slc (slc.c:172)` through `process_slc`/`do_opt_slc`; pinned 2.8
+and a 5-triplet input stay clean; plain 2.7 with 100 triplets dies SIGSEGV.
+`bash lab/frontier/inetutils2shell/wire/run_all.sh` gives 17 PASS / 0 FAIL,
+with hashes in `WIRE_HASHES.txt` and raw traces in gitignored
+`wire/evidence/`. Grade: rungs 1/2/3 at wire scope; rung 4 unchanged at
+direct-call scope because wire bytes are `func 00 00` rather than the chosen
+`42415a` triplet. The adjacent `slcptr` sits 4 bytes past `slcbuf` in the
+plain build, but those constrained bytes cannot form a canonical pointer;
+no marker, command or rung 5. Witness replay of the staged harness landed
+ESTABLISHED (DM #1503); the new wire evidence has no witness verdict. Build
+discipline from 0b8cc5e: `harness/run.sh` pins `-O0` because gcc at `-O2/-O3`
+relocates the stub `slcptr` and corrupts readback past index 3; a
+`FRONTIER_ASAN` guard now covers both GCC `__SANITIZE_ADDRESS__` and clang
+`__has_feature(address_sanitizer)`, so an ASan build skips the intentional
+post-sink read instead of reporting a false OOB READ on the fixed pin.
+
+### H2o2Shell W1 — live wire-triggered stack overflow (2ea38bf, a5f2cc9)
+
+Both pins build out-of-tree as real ASan `h2o` executables
+(`2.3.0-DEV@4212ce114` / `2.3.0-DEV@48b7ae121`), all traffic loopback-only.
+`live/vuln-redirect.conf` with the minimal `'%{error}x'` format and a single
+`GET /AAAA…` (5000 bytes) against a local redirect failure faults the live
+vulnerable process with `AddressSanitizer: stack-buffer-overflow`, `WRITE of
+size 1`, frame object `buf` [64,4160), overflow at 4160; frames
+`append_unsafe_string_apache logconf.c:438` ← `h2o_log_request :843` ←
+`log_access access_log.c:53` ← `h2o_dispose_request request.c:334`. A full
+format containing `%r` is ASan-clean because its `RESERVE` doubles the sink
+to heap first, so the minimal format is what keeps `line == buf` on the stack.
+Plain-binary gdb (`live/inspect-run.gdb`, `live/gdb-transcript.txt`) shows
+`ERROR_SIZE=5137`, `LINE==POS==buf`, chosen request bytes at `buf+4064`
+(offsets 0..31 past the 4096-byte buffer) and ASCII `FGHIJKLM` at the saved
+frame slot. Fixed pin and short request stay alive and clean;
+`bash live/replay-live.sh` reproduces `vuln-short: ASAN=no`, `vuln-long:
+ASAN=YES`, `fixed-long: ASAN=no`. Exact threshold: path lengths 3900/3950/3958
+are clean, 3959/3960/3962/4000 fault; the 137-byte error-log overhead makes
+`error_logs` exactly 4096 at path 3959 and the one-byte `\n` the first OOB
+write (`live/threshold-results.txt`, `live/asan-threshold-3959.1162820`).
+A fake FastCGI upstream also faults but its bytes are not request-derived, so
+the redirect path is the stronger purely wire-driven result. Grade: rungs 1/2,
+3 and 4 at live-process, wire-triggered scope with chosen bytes in a
+control-flow-relevant stack slot; rung 5 NOT claimed because the Apache
+escaper expands bytes outside 0x20..0x7c, so raw pointer bytes cannot be
+written through `%{error}x`. Unknown: allocator-neighbour control beyond the
+frame, the advisory's other two cases at live scope, and witness replay.
+Staging and admission (`4cf9784`, `15abd26`) are recorded above.
+
+### Pgpool2Shell W9 — `wd_nodes` branch (322f5d5)
+
+A distinct unchecked array in the same peer config parser: 4.7.2
+`wd_json_data.c:189-202` copies the peer-set `wd_nodes` length into the
+128-entry `WdNodesConfig.wd_node_info` with no cap, while 4.7.3 adds an
+explicit `MAX_WATCHDOG_NUM` rejection at `:215-219`. On the real pinned 4.7.2
+parser object at N=129, chosen 32-bit ports land at `wd_node_info[128]`
+offsets +256/+260 and a 12-byte peer hostname sets the adjacent
+`trusted_servers` pointer to `0x5555555555555555` or `0x4141414141414141`;
+N=128 and fixed 4.7.3 are clean. ASan is clean because the write stays inside
+the `POOL_CONFIG` allocation, so no rung 3 is claimed for this branch. Replay
+`bash lab/pgpool2shell/wdnodes/run-harness.sh` (A–G, hashes in
+`lab/pgpool2shell/wdnodes/EVIDENCE_HASHES.txt`); full report
+`reports/pgpool2shell-wdnodes-w9.md`. Rung 4 at direct-call scope only on a
+layout-fixed adjacent field — no wire, no chosen address, no dereference of
+the corrupted pointer, no command, no rung 5; harness-only, so witness W118's
+replay window was left untouched.
+
+### Frontier-staged pppd2shell (b3ec18d, f7eb33d)
+
+W118 screened GHSA-frhv-j822-2pvx / CVE-2026-85495 (pppd `lcp_reqci()` writes
+a 5-byte NAK per 4-byte repeated PAP AUTHTYPE CI into 1500-byte
+`nak_buffer[]`; CHAP-only `refuse-pap refuse-eap require-chap` configuration;
+affected ≤2.5.3, fixed 2.5.4 via `cc8b00c` dedup and `1baf2ac` reject guard),
+checked for duplicate ownership (no prior pppd target — only a parked W112
+candidate with pins), and staged `lab/frontier/pppd2shell` with hash-pinned
+2.5.3/2.5.4 tarballs and both fix patches. The harness extracts verbatim
+pinned `lcp_reqci()`, builds gcc/clang ASan and plain variants and asserts:
+vulnerable ASan `global-buffer-overflow WRITE of size 1` 0 bytes after
+`nak_buffer`; plain readback `0305c223800305c2238…` with chosen digest byte
+`0x80` (or `0x05` with `CHOSEN_MDTYPE=MDTYPE_MD5`) at offsets 1504/1509/1514…;
+fixed ASan clean and `out=5`; safe CI_COUNT=2 clean. 12 PASS / 0 FAIL, nine
+normalized hashes, two in-tree and one clean `git archive b3ec18d` replay
+identical. Grade: rung 3 plus rung 4 chosen byte at a chosen relative offset,
+direct-call scope only — no daemon, pty, PPP device, wire negotiation, pointer
+control or command; the advisory's real-daemon ASan crash at N=301/374 stays
+a claim. No window, charter, mind or route; admission is the operator's call.
+Brief `reports/frontier-pppd2shell.md`; raw evidence is gitignored and
+regenerates with `bash harness/run.sh`.
