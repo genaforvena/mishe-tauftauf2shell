@@ -249,3 +249,59 @@ Next wake should instrument the binding lookup or use the recvfuzz-derived
 plaintext 1-RTT writer (the Windows-only tool needs Linux CMake gating and
 short-header support) before repeating the sequence. All wire artifacts stay in
 scratch; the committed rung-3 evidence is unchanged.
+
+## Wire-pure stale-slot promotion — negative overturned (2026-11-22 00:31Z)
+
+Binding/CID instrumentation on the same scratch v2.5.9 tree overturned the
+00:11Z wire negative. It was three harness defects, not a protocol barrier;
+all three were observed with named drop points before the trigger was retried:
+
+1. **Stale CID.** The scratch NCI writer only saved a CID when
+   `RetirePriorTo == 1`; this connection's client learned only seq 1/2/3 with
+   `retireprior=0`, so the raw client injected a CID from a dead earlier
+   connection. `srv-r15.log:79-86` shows both injected datagrams reaching
+   `QuicBindingReceive` with `found=0` and taking the
+   `QuicBindingQueueStatelessReset` drop. Writing every learned NCI fixed it.
+2. **50 ms gap.** The server tore the connection down between the probe and
+   the follow-up: `srv-r18.log:120-123` shows four bulk `WIRELOOKUP remove`
+   events (no single-CID removal wrapper), and the client's transport shutdown
+   preceded the second `sendto`. Removing the delay kept the connection live
+   (`srv-r19.log`).
+3. **Wrong frame type.** This pin defines `QUIC_FRAME_NEW_CONNECTION_ID = 0x18`
+   (`src/core/frame.h:145`); `0x1a` is PATH_CHALLENGE. The `0x1a` packet decoded
+   as an 8-byte challenge and then misparsed an `0xaa` CID byte as a frame
+   type: `srv-r20.log:124-125` records
+   `WIREFRAMES unknown-frame type=715827712 off=13`, so `QuicConnRecvFrames`
+   returned FALSE and post-processing was skipped. Emitting `0x18` decodes the
+   frame (`srv-r21.log:125`).
+
+**Wire-pure trigger, pinned v2.5.9.** A real loopback QUIC/TLS handshake
+between `quicinteropserver` and `wire_inject` with 1-RTT encryption disabled
+on both peers (`0x0500000F`) then two plaintext short-header datagrams from a
+second loopback UDP source port:
+
+- PN 100, 78 bytes, PADDING-only (`srv-v1.log`): reaches
+  `QuicConnRecvDatagrams`, creates `Paths[1]`
+  (`count=2 p1(ID=1 inuse=1 active=0)`), no promotion (`nonprobing=0`).
+- PN 101, 43 bytes, `NEW_CONNECTION_ID(seq=2, retireprior=2, CID=aa*8,
+  token=0*16) + PING`: decoded (`WIRECID seq=2 retireprior=2 len=8`), path
+  removed (`count=1 p1(ID=1 inuse=0 active=0)`), then the stale pointer is
+  promoted. Decisive line, identical in all five runs:
+  `WIREPATH post count=1 p0(ID=1 inuse=0 active=1) p1(ID=0 inuse=1 active=0) stale=Paths[0]`.
+
+`QuicPathSetActive` (`src/core/path.c:266-295`) assigns whole `QUIC_PATH`
+structs, so a removed, `InUse=0` path with a cleared CID ownership is left
+active at `Paths[0]`. **5/5 vulnerable runs** (`srv-v1..v5.log`) produced
+exactly one `WIREPATH post`. **5/5 fixed-control runs** (`srv-f1..f5.log`),
+with only the pinned one-line `&& (*Path)->InUse` guard added to the promotion
+condition, produced zero `WIREPATH post` while still decoding the same NCI
+frame. The guard was then reverted in scratch.
+
+Scope: this upgrades the rung-3 reproduction from a direct-frame harness to a
+**wire-pure, attacker-driven packet sequence on a live loopback server**, with
+a vulnerable/fixed control. It is still **rung 3**: the corruption is a
+whole-struct swap with no attacker-chosen byte at a chosen memory offset, no
+pointer control, no benign marker execution and no side effect. The
+structural rung-4 boundary recorded earlier stands. All wire artifacts
+(`build/v259-wire`, `wire_inject.cpp`, `wire_run.py`, `srv-*.log`, `cli-*.log`)
+remain gitignored scratch. Independent witness replay is owed.
