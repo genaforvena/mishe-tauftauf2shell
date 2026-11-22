@@ -107,5 +107,27 @@ completed admission after re-verifying the pins and replaying the harness.
   with independent replay; rung 4 only at direct-call harness scope; no
   chosen-address write on a real daemon, no command, no rung 5.
 
+- **W7 adjacent lane — CVE-2026-92869 (2026-11-22 ~17:26–17:3xZ):** under
+  operator DM #1462 ("do NOT retire; mine an adjacent same-target lane"),
+  the 4.7.2→4.7.3 fix series was checked against upstream release notes and
+  the pinned parser diff. A genuinely different primitive was measured:
+  unbounded peer-controlled `backend_desc` array length in
+  `get_pool_config_from_json()` (`wd_json_data.c:130-142`), fixed by
+  `parse_peer_count()` in 4.7.3. Direct call on the real 4.7.2 parser: ASan
+  heap-buffer-overflow **WRITE of size 4** 256 bytes past the palloc'd
+  `BackendDesc`; gdb readback at `i=128` shows chosen `0x42424242` written at
+  the OOB slot; safe N=128 and fixed 4.7.3 N=129 are clean. On a real daemon,
+  one loopback type-`Z` `WD_POOL_CONFIG_DATA` packet with N=129 crashes the
+  4.7.2 watchdog child while N=128 and fixed 4.7.3 do not; live gdb caught
+  the chosen value at `0x55555591dbe0` from `standard_packet_processor`
+  (`watchdog.c:4472`) and a following SIGSEGV in `json_value_free_ex` with
+  pointer `0x555542424242` (low 32 bits equal the chosen value).
+  Full report: [reports/pgpool2shell-config-w7.md](pgpool2shell-config-w7.md);
+  assets in `lab/pgpool2shell/config/`. Grade for this lane: rung 3 ASan
+  corruption and wire crash, rung 4 chosen-value write at a layout-fixed
+  offset including on a live daemon via wire input; **no arbitrary-address
+  steering, no command, no rung 5**, and no witness replay of this new lane.
+  W6's closed 92867 steering lanes were not retried.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.

@@ -1,0 +1,58 @@
+### asan-vuln-n129
+payload_len=6836 backends=129 chosen=0x42424242
+=================================================================
+==3220613==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x53400001c508 at pc 0x555c076f99f2 bp 0x7fffbe3fe810 sp 0x7fffbe3fe800
+WRITE of size 4 at 0x53400001c508 thread T0
+    #0 0x555c076f99f1 in json_get_int_value_for_key utils/json.c:1189
+    #1 0x555c076ec532 in get_pool_config_from_json /tmp/w7-pgpool-asan/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:136
+    #2 0x555c076eba12 in main /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/config/harness.c:81
+    #3 0x7a839742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7a839742a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x555c076eb684 in _start (/tmp/w7-pgpool-asan/h7-vuln-asan+0x5684) (BuildId: 3f28d4691751684196cc9ae501819a88fead1bff)
+
+0x53400001c508 is located 256 bytes after 113672-byte region [0x534000000800,0x53400001c408)
+allocated by thread T0 here:
+    #0 0x7a83978fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x555c0770069f in pg_malloc ../../tools/fe_memutils.c:33
+    #2 0x555c07700722 in pg_malloc0 ../../tools/fe_memutils.c:47
+    #3 0x555c07700925 in palloc0 ../../tools/fe_memutils.c:112
+    #4 0x555c076ebd1b in get_pool_config_from_json /tmp/w7-pgpool-asan/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:44
+    #5 0x555c076eba12 in main /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/config/harness.c:81
+    #6 0x7a839742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7a839742a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x555c076eb684 in _start (/tmp/w7-pgpool-asan/h7-vuln-asan+0x5684) (BuildId: 3f28d4691751684196cc9ae501819a88fead1bff)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow utils/json.c:1189 in json_get_int_value_for_key
+Shadow bytes around the buggy address:
+  0x53400001c280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x53400001c300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x53400001c380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x53400001c400: 00 fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x53400001c480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x53400001c500: fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x53400001c580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x53400001c600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x53400001c680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x53400001c700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x53400001c780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3220613==ABORTING
+rc=1

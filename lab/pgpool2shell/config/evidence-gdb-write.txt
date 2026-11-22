@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x1f16: file wd_json_data.c, line 136.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+payload_len=6836 backends=129 chosen=0x42424242
+
+Breakpoint 1, get_pool_config_from_json (json_data=0x5555555652a0 "{\"listen_backlog_multiplier\":0,\"child_life_time\":0,\"connection_life_time\":0,\"child_max_connections\":0,\"client_idle_limit\":0,\"max_pool\":0,\"num_init_children\":0,\"min_spare_children\":0,\"max_spare_childre"..., data_len=6836) at wd_json_data.c:136
+136			if (json_get_int_value_for_key(arr_value, "backend_port", &config->backend_desc->backend_info[i].backend_port))
+
+Breakpoint 1, get_pool_config_from_json (json_data=0x5555555652a0 "{\"listen_backlog_multiplier\":0,\"child_life_time\":0,\"connection_life_time\":0,\"child_max_connections\":0,\"client_idle_limit\":0,\"max_pool\":0,\"num_init_children\":0,\"min_spare_children\":0,\"max_spare_childre"..., data_len=6836) at wd_json_data.c:136
+136			if (json_get_int_value_for_key(arr_value, "backend_port", &config->backend_desc->backend_info[i].backend_port))
+$1 = 128
+$2 = (int *) 0x555555586038
+138			ptr = json_get_string_value_for_key(arr_value, "backend_hostname");
+0x555555586038:	0x42424242
+$3 = 129
+A debugging session is active.
+
+	Inferior 1 [process 3220637] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]
