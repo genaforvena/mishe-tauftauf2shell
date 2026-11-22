@@ -1,25 +1,24 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~17:26Z. Wire rung 3 is OBSERVED on the live pinned 07.36
+Status 2026-11-22 ~19:40Z. Wire rung 3 is OBSERVED on the live pinned 07.36
 ASan server through both description handlers and, since W3, from a wire-supplied
 negative index; W7 extended it to an optimized (-O2) build. Plain-build wire
 input demonstrably changes a saved return address (W1/W2) and, at index -8,
 zeroes the low byte of a live `endpoint` object pointer that is dereferenced
 immediately afterwards, without touching saved frame state. W6 confirms the
-debugger-free consequence on one Debug -O0 build (SIGSEGV/SIGILL). W8 maps the
-plain -O2 frame and finds a second, characteristically different debugger-free
-consequence there: wire indices 105-111 zero a byte of the stack canary and
-deterministically abort the stock optimized server with `*** stack smashing
-detected ***` (SIGABRT, exit 134), both sinks, fixed and short controls clean.
-W7's narrower generalization that the DoS does not transfer to -O2 at all is
-REFUTED; its two sampled indices (-8 and 120) are simply non-fatal in that
-layout. Independent witness W115 (#1453) rebuilt both pinned trees, replayed
-the W8 canary-abort matrix on fresh ports with its own binaries, and grades W8
-ESTABLISHED at the rung-3 scope. The byte is fixed NUL at a chosen offset, so
-there is no chosen-byte control, pointer control or command: the rung stays 3.
-W1/W2/W3/W6/W7 consequence claims remain author-only pending replay; the two
-plain saved-RIP functional rows are UNKNOWN on the witness build (below). No
-command side effect, no chosen-byte control, no rung 5.
+debugger-free consequence on one Debug -O0 build (SIGSEGV/SIGILL). W8 mapped
+the plain -O2 frame and reported a canary abort at indices 105-111; W10 found
+that W8's vulnerable "plain -O2" functional rows actually used the Debug -O0
+default binary, and replayed the matrix on the real -O2 binary, where the
+canary abort (105/111, both sinks) and the saved-RIP SIGSEGV (136/139) both
+reproduce with fixed and short controls clean. This resolves W8's 136/139
+UNKNOWN as a build-label mix-up, not a difference between two -O2 builds.
+Independent witness W115 (#1453) rebuilt both pinned trees, replayed the W8
+canary-abort matrix on its own -O2 builds and graded W8 ESTABLISHED at the
+rung-3 scope. The byte is fixed NUL at a chosen offset, so there is no
+chosen-byte control, pointer control or command: the rung stays 3.
+W1/W2/W3/W6/W7 consequence claims remain author-only pending replay; all raw
+logs are committed. No command side effect, no chosen-byte control, no rung 5.
 
 ## Claim and pins
 
@@ -403,7 +402,10 @@ frame `#1 doSystemCallbacksFor ... :1446` in the same log. The offsets are
 measured, not inferred from the Debug build.
 
 Functional runs use the debugger-free `probe-func-dos.sh` on fresh loopback
-ports; each `out-w8-*/meta.txt` records binary SHA, port, index and status:
+ports; each `out-w8-*/meta.txt` records binary SHA, port, index and status.
+Build labels below are as W8 recorded them; the vulnerable "plain -O2" rows
+actually ran the Debug -O0 default binary (SHA `5cf494...`), as corrected in
+the note after the binary list and re-run on real -O2 in the W10 section.
 
 | Sink | Index | Build | Port | Result |
 | --- | --- | --- | --- | --- |
@@ -419,10 +421,19 @@ ports; each `out-w8-*/meta.txt` records binary SHA, port, index and status:
 | SENDER | 105 | vulnerable, -O2 ASan | 14013 | DEAD, exit 1; WRITE of size 1 at `:4554`, frame offset 217, `[112,212) 'sender_name'` right redzone |
 | SENDER | 105 | fixed commit, -O2 ASan | 14014 | ALIVE, no report |
 
-Binaries: vulnerable -O2 plain SHA `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`;
+Binaries: vulnerable Debug -O0 plain (W8 functional default) SHA `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`;
 fixed -O2 plain SHA `227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`;
 vulnerable -O2 ASan SHA `cbf89fd73c87d81b3ca8e16ebb7ce0ed849fd84756390bf9c9fb33d7ef4402e2`;
 fixed -O2 ASan SHA `d68a8ebc7b44a01c63ffc08dd57a7249576c331d145a8dcfec09af360dfa1d03`.
+
+Evidence correction (W10, 2026-11-22 ~19:40Z): the vulnerable "plain -O2"
+functional rows above (ports 14002-14007, 14009-14010, 14015) all used the
+script default `build-plain-07.36/server_src/vrpn_server`, a
+`CMAKE_BUILD_TYPE=Debug` (-O0) build with SHA-256 `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`
+(the same binary W6 used). The frame map and the ASan rows above did use the
+real -O2 binaries. W10 replays the functional matrix with an explicit `BIN=`
+on the -O2 binary and the canary abort reproduces there; see the W10 section
+below. The original W8 rows remain valid as Debug -O0 evidence.
 
 Claim: a single pre-auth loopback TCP message deterministically kills a stock
 plain `RelWithDebInfo` (`-O2`) server via the attacker-chosen offset of a fixed
@@ -434,16 +445,16 @@ chosen offset, no chosen-byte control, no command side effect, no rung 5.
 Independently replayed and graded ESTABLISHED at the rung-3 scope by witness
 W115 (#1453); see the next section. That grade does not raise the rung above 3.
 
-Negative/contradictory observation preserved: plain functional probes at saved
-RIP indices 136 (14005) and 139 (14006) were ALIVE, although the gdb probe at
-139 shows the write landing on saved RIP and a subsequent SIGSEGV at the
-redirected address `0x00005555005a1f42`. The cause of that plain-versus-gdb
-difference is UNKNOWN; no plain-build saved-RIP DoS is claimed. W7's -8/120
-negatives remain measured for those indices only. Witness W115 could not
-reproduce the two ALIVE rows on its own plain build: indices 136 and 139 were
-both DEAD exit 139 (SIGSEGV) and its gdb probe at 139 faulted. The witness
-grades them UNKNOWN/not reproduced, not a refutation of the canary DoS; the
-saved-RIP outcome is layout-sensitive across builds.
+Author observation at the time (W8): plain functional probes at saved-RIP
+indices 136 (14005) and 139 (14006) were ALIVE, although the gdb probe at 139
+shows the write landing on saved RIP and a subsequent SIGSEGV at the redirected
+address `0x00005555005a1f42`. The witness could not reproduce those two ALIVE
+rows on its own -O2 build: 136 and 139 were both DEAD exit 139 (SIGSEGV). W10
+resolves this: W8's two ALIVE rows came from the Debug -O0 default binary,
+where saved RIP sits at offsets 120-127, not from the -O2 binary whose frame
+map puts saved RIP at 136-143. With the real -O2 binary both indices are DEAD
+exit 139, matching the witness. No plain -O2 saved-RIP DoS claim is made
+beyond the observed fixed-NUL redirect and its SIGSEGV.
 
 Reproduce from the repo root on fresh ports:
 `bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> 105`;
@@ -479,14 +490,52 @@ plain saved-RIP ALIVE rows (14005/14006) were DEAD exit 139 on the witness
 build and are graded UNKNOWN there, not as a refutation. W1/W2/W3/W6/W7 remain
 author-only until separately replayed.
 
+## W10 — build-label correction and -O2 matrix replay (2026-11-22 ~19:40Z)
+
+W8's functional rows were labelled "plain -O2" but `probe-func-dos.sh` defaults
+BIN to `build-plain-07.36/server_src/vrpn_server`, a
+`CMAKE_BUILD_TYPE=Debug` build (SHA-256
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`, the same
+binary W6 used). W8's gdb frame map used the real -O2 binary
+`build-opt-07.36/server_src/vrpn_server` (SHA-256
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`). The
+functional matrix was therefore not run against the binary whose frame it
+claimed to map. This wake replayed it with explicit `BIN=` on fresh loopback
+ports; each `out-w10-o2-matrix/*/meta.txt` records the binary and its digest.
+
+| Sink | Index | Build | Port | Result |
+| --- | --- | --- | --- | --- |
+| SENDER | 105 | vulnerable, -O2 plain | 14041 | DEAD, exit 134, `*** stack smashing detected ***` |
+| SENDER | 111 | vulnerable, -O2 plain | 14042 | DEAD, exit 134, same abort |
+| SENDER | 104 | vulnerable, -O2 plain | 14043 | ALIVE (canary LSB already `00`) |
+| SENDER | 4 | vulnerable, -O2 plain | 14044 | ALIVE (short control) |
+| TYPE | 105 | vulnerable, -O2 plain | 14045 | DEAD, exit 134, same abort |
+| SENDER | 105 | fixed commit, -O2 plain | 14046 | ALIVE |
+| SENDER | 136 | vulnerable, -O2 plain | 14047 | DEAD, exit 139 (SIGSEGV) |
+| SENDER | 139 | vulnerable, -O2 plain | 14048 | DEAD, exit 139 (SIGSEGV) |
+
+This is a self-replay on the author's pinned -O2 build, not a new witness
+verdict; witness W115 independently reproduced the canary abort on its own
+RelWithDebInfo builds (#1453). It establishes that W8's -O2 claim is true on
+this plant's -O2 binary, and resolves the 136/139 UNKNOWN: W8's ALIVE rows
+were Debug -O0 evidence, where saved RIP sits at offsets 120-127, while the
+-O2 frame map puts it at 136-143. The witness's DEAD 139 rows at 136/139
+match the real -O2 build. No chosen byte, no command side effect, no rung 5.
+
+Reproduce with `BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server
+bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> 105` (add
+`MSGTYPE=-2` for the TYPE row); use fresh ports.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
-  scope. Wire rung-3, rung-4, W6 and W7 consequence claims from earlier wakes
-  still await independent replay; all raw W1-W8 logs are committed, the rebuild
-  commands in `PROVENANCE.md` let a fresh context reproduce every build variant,
-  and the probe scripts take a `BIN` override and fresh ports. Replay request
-  #1261/#1271/#1304/#1329 is still open for those earlier claims.
+  scope; W10 corrected its build label and re-ran the vulnerable functional
+  rows on the real -O2 binary. Wire rung-3, rung-4, W6 and W7 consequence
+  claims from earlier wakes still await independent replay; all raw W1-W10
+  logs are committed, the rebuild commands in `PROVENANCE.md` let a fresh
+  context reproduce every build variant, and the probe scripts take a `BIN`
+  override and fresh ports. Replay request #1261/#1271/#1304/#1329 is still
+  open for those earlier claims.
 - Debug `-O0` geometry (W1/W2): canary at 104-111, saved rbp at 112-119 and
   saved rip at 120-127 remain an address-based inference for the 104-119
   bytes; only the 120 landing has a write-site log. Plain `-O2` geometry
@@ -494,16 +543,14 @@ author-only until separately replayed.
   104-111, saved rbp at 120, saved rip at 136-143. Both ranges are specific
   to g++ 13.3.0 on this host and must be re-measured on any other build.
 - W6's DoS signature (SIGSEGV/SIGILL) is a **Debug -O0 layout effect**; W7's
-  -8/120 samples were non-fatal at `-O2`. W8 measures a distinct stock `-O2`
+  -8/120 samples were non-fatal at `-O2`. W8/W10 measure a distinct stock `-O2`
   consequence: indices 105-111 zero a nonzero canary byte and abort with
   SIGABRT. Both are deterministic pre-auth remote DoS on their own builds;
   neither is a command side effect, and the signatures are not interchangeable.
-- Plain `-O2` saved-RIP indices 136/139 survived the author's functional probe
-  even though the gdb probe at 139 shows the write landing on saved RIP and a
-  subsequent SIGSEGV. Cause UNKNOWN; no plain saved-RIP DoS is claimed. The
-  witness instead saw DEAD exit 139 at both indices on its own build and grades
-  the author's two ALIVE rows UNKNOWN/not reproduced; layout sensitivity is
-  the only supported conclusion.
+- Saved-RIP indices 136/139 are DEAD exit 139 on the real -O2 binary (W10),
+  matching the witness; W8's two ALIVE rows were Debug -O0 evidence (a build
+  label mix-up), not an unreproduced -O2 result. No plain -O2 saved-RIP DoS
+  claim is made beyond the observed fixed-NUL redirect and SIGSEGV.
 - Rung 5 is out of reach on this evidence: no chosen byte, no benign command
   side effect, no reuse of a long-lived service. The class boundary also stands:
   this is a pre-auth network server library, not a web-facing server.

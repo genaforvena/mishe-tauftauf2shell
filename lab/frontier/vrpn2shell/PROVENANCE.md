@@ -238,6 +238,11 @@ words; it never asks gdb for the optimized-out `&p`.
 
 `probe-func-dos.sh` functional runs (per-run SHA in each `meta.txt`):
 
+W10 correction (below): the vulnerable "plain -O2" functional rows listed in
+this W8 section all used the Debug -O0 default binary `5cf494...`; the real
+-O2 vulnerable binary is `bfe633...`. Labels here are historical; see W10 for
+the corrected -O2 matrix.
+
 - `out-w8-opt-vuln-102` port 14015 (padding) and `out-w8-opt-vuln-104` port
   14002 (canary LSB already `00`): ALIVE.
 - `out-w8-opt-vuln-105` port 14003, `out-w8-opt-vuln-111` port 14004, repeat
@@ -285,3 +290,37 @@ DEAD exit 139 on its binary, and it grades those rows UNKNOWN/not reproduced;
 the canary claim is unaffected. W1/W2/W3/W6/W7 remain author-only. No new
 author build, repo edit or host change was needed to fold in the verdict; all
 replay probes were loopback and no `vrpn_server` was left running.
+
+## W10 — corrected -O2 functional matrix (2026-11-22 ~19:40Z)
+
+W8 labelled its vulnerable functional rows "plain -O2", but they used
+`probe-func-dos.sh`'s default BIN `build-plain-07.36/server_src/vrpn_server`,
+which `CMakeCache.txt` records as `CMAKE_BUILD_TYPE:STRING=Debug`, SHA-256
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`. W8's
+gdb frame map used `build-opt-07.36/server_src/vrpn_server` (RelWithDebInfo,
+-O2, SHA-256 `bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`).
+W10 re-ran the functional matrix with explicit BIN on the -O2 binaries;
+fixed control `build-opt-fixed/server_src/vrpn_server` is RelWithDebInfo,
+SHA-256 `227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`.
+
+Commands from repo root (fresh loopback ports 14041-14048; committed scripts,
+no source or build changes):
+
+```
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/vuln-sender-105 14041 105
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/vuln-sender-111 14042 111
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/vuln-sender-104 14043 104
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/vuln-sender-4 14044 4
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server MSGTYPE=-2 bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/vuln-type-105 14045 105
+BIN=lab/frontier/vrpn2shell/build-opt-fixed/server_src/vrpn_server bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/fixed-sender-105 14046 105
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/vuln-sender-136 14047 136
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server bash lab/frontier/vrpn2shell/probe-func-dos.sh lab/frontier/vrpn2shell/out-w10-o2-matrix/vuln-sender-139 14048 139
+```
+
+Results (all in `out-w10-o2-matrix/*/meta.txt`): SENDER 105 exit 134, SENDER
+111 exit 134, TYPE 105 exit 134, each with `*** stack smashing detected ***`
+in `server.err`; SENDER 104 ALIVE, SENDER 4 ALIVE, fixed SENDER 105 ALIVE;
+SENDER 136 and 139 DEAD exit 139 (SIGSEGV). The W8 136/139 ALIVE rows used
+the Debug -O0 build; this -O2 outcome matches the witness's W115 replay.
+Self-replay, not a witness verdict; author-only for the saved-RIP rows.
+All probes on 127.0.0.1 ports started by this plant; no server left running.
