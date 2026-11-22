@@ -1,0 +1,22 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000076d87bf2f690 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+ASLR_ON_STOP: rip=0x76d87bf2f690
+rip            0x76d87bf2f690      0x76d87bf2f690
+rdi            0x76d87aa1eb10      130672142445328
+rsi            0x7ffff68aa020      140737329668128
+#0  0x000076d87bf2f690 in ?? () from /lib/x86_64-linux-gnu/libgnutls.so.30
+#1  0x000076d87bf384fd in gnutls_deinit () from /lib/x86_64-linux-gnu/libgnutls.so.30
+#2  0x00005cb1f4e87832 in pl_quic_conn_sess_deinit (session=0x76d87aabdc00, sess_data=0x76d87aabde00) at ../daemon/quic_conn.c:884
+#3  0x00005cb1f4e6e13e in session2_free (s=0x76d87aabdc00) at ../daemon/session2.c:940
+#4  0x00005cb1f4e6b104 in session2_dec_refs (s=0x76d87aabdc00) at ../daemon/session2.h:964
+#5  0x00005cb1f4e8798e in pl_quic_conn_event_unwrap (event=PROTOLAYER_EVENT_CLOSE, baton=0x7ffe99b3bb20, session=0x76d87aabdc00, sess_data=0x76d87aabde00) at ../daemon/quic_conn.c:922
+#6  0x00005cb1f4e6f553 in session2_event_unwrap (s=0x76d87aabdc00, start_ix=0, event=PROTOLAYER_EVENT_CLOSE, baton=0x0) at ../daemon/session2.c:1351
+#7  0x00005cb1f4e6f5ed in session2_event (s=0x76d87aabdc00, event=PROTOLAYER_EVENT_CLOSE, baton=0x0) at ../daemon/session2.c:1381
+ASLR_ON_SYSTEM=0x76d87b658750
+From                To                  Syms Read   Shared Object Library
+0x000076d87b628800  0x000076d87b7b0039  Yes         /lib/x86_64-linux-gnu/libc.so.6

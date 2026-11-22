@@ -1,0 +1,19 @@
+[driver] slot1=0x7ffff68aa000 rip=0x7ffff7458750 cmd=b'touch /tmp/knot-r5-aslr-on\x00'
+[driver] F6 fired
+Exception ignored in: <function StreamWriter.__del__ at 0x7cbea4109f80>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/streams.py", line 415, in __del__
+    self.close()
+  File "/usr/lib/python3.12/asyncio/streams.py", line 358, in close
+    return self._transport.close()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 272, in close
+    self.write_eof()
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/asyncio/protocol.py", line 267, in write_eof
+    self.protocol._quic.send_stream_data(self.stream_id, b"", end_stream=True)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/connection.py", line 1475, in send_stream_data
+    stream.sender.write(data, end_stream=end_stream)
+  File "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/knotresolver2shell/poc/venv/lib/python3.12/site-packages/aioquic/quic/stream.py", line 492, in write
+    raise StreamStateError("Cannot send data after FIN")
+aioquic.quic.exceptions.StreamStateError: Cannot send data after FIN
+[driver] done

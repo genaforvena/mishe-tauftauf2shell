@@ -14,8 +14,9 @@ ASLR-off, gdb-parent, jemalloc/debug-build scope (author-observed). Witness
 W114 (verdict #1376) returned **MIXED**: chosen-RIP/chosen-argument dispatch
 is ESTABLISHED on its own pinned builds and both benign commands reproduce at
 `argoff 0x300`; the harness default `0x2f0` command limb fails because
-`gnutls_deinit` zeroes the string before dispatch. ASLR-on/stock stays
-UNKNOWN.
+`gnutls_deinit` zeroes the string before dispatch. A wake-13 ASLR-on
+measurement shows the write still reaches the live gnutls cleanup loop but
+gives no chosen control and no address leak; ASLR-on/stock stays UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -607,6 +608,41 @@ fault backtrace has one fewer libgnutls frame than the author's (frame 2 vs
 frame 3 `gnutls_deinit`), a likely cleanup-order difference preserved as an
 open detail. No stock or ASLR-on rung-5 claim is contradicted or
 established; the host sysctl was untouched on both sides.
+
+## ASLR-on measurement (wake 13, 2026-11-22 ~18:5xZ) — reachability yes, control no
+
+Two bounded probes on the pinned 6.4.0 jemalloc/debug build, both with
+`set disable-randomization off` for the gdb inferior and host
+`kernel.randomize_va_space` untouched.
+
+- **Layout oracle** (`harness/gnutls-owner-aslr.gdb`,
+  `harness/run_gnutls_aslr.sh`, logs `aslr-on-{1,2,3}.gdb.log`): three
+  independently randomized runs gave `slot1 = 0x78f3e5caa000`,
+  `0x73807d4aa000`, `0x70b73e8aa000`; all share low 20 bits `0xaa000`.
+  `system` moved (`0x78f3e6858750`, `0x73807e058750`, `0x70b73f458750`) but
+  all three share low 20 bits `0x58750`. The low 16 bits — and here even the
+  low 20 bits — of the heap and libc addresses are stable; only the high
+  bits are unknown.
+- **Stale-address control** (`harness/r5-syms-aslr.gdb`,
+  `harness/run_r5_aslr_control.sh`, `r5-aslr-on.{gdb,driver}.log`): the
+  wake-12 command payload carrying the ASLR-off absolute addresses
+  (`slot1=0x7ffff68aa000`, `system=0x7ffff7458750`) was sent to an
+  ASLR-on inferior. No marker at `/tmp/knot-r5-aslr-on`. It still faulted
+  in the same teardown path — `gnutls_deinit` → libgnutls `0x73690`, the
+  chosen-address read — with `rsi = 0x7ffff68aa020` (the stale pointer
+  written by the F6 bytes) and `rdi` a real heap pointer. In that run
+  libgnutls base was `0x76d87bf21000` (`rip - 0x73690`) and libc
+  `system = 0x76d87b658750`.
+
+Interpretation: the OOB write and its reach into the live gnutls cleanup
+loop are ASLR-independent; the stale pointer still steers the loop to a
+fault. Chosen RIP/argument and command execution were **not** observed with
+ASLR on — no address leak, no chosen control. The stable low bits make a
+two-byte partial overwrite attractive, but this bug's `memcpy` writes a
+contiguous span, so it cannot preserve the unknown high bytes of a live
+pointer; that needs another primitive. Rung 5 stays author-observed at the
+labeled ASLR-off scope only; no stock-build claim.
+
 
 ## Boundaries
 

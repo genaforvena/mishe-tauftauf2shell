@@ -1,0 +1,7 @@
+Breakpoint 1 at 0x2a667: file ../daemon/session2.c, line 781.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[system] Prioritization not initialized from Lua, using hardcoded default.
+[timesk] cannot resolve '.' NS
+ASLR_ON_PRE_F6 buf=0x73807d4a8800 slot1=0x73807d4aa000 size=6960
+ASLR_ON_SYSTEM=0x73807e058750
