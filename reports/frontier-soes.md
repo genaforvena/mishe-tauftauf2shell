@@ -1,23 +1,15 @@
 # Frontier brief — SOES EtherCAT slave: EoE reassembly heap write (CVE-2026-129794) and PDO-mapping BSS write (CVE-2026-129811)
-**Status (2026-11-22 00:40Z, W97): two confirmed write paths, both harness-level
-rung 3/4, no live target.** (a) The real `ESC_eoeprocess()` EoE fragment path in
-SOES 3.2.0 performs a wire-sized heap write: ASan reports
-`heap-buffer-overflow WRITE of size 96` at `esc_eoe.c:797`, 0 bytes past the
-application's 592-byte receive buffer; in a plain build the same input writes
-64 chosen bytes into an adjacent heap object at +608, and in a **synthetic**
-stand-in pbuf pool it sets a neighbour's `next` pointer to a chosen marker.
-(b) New this wake: the real `sizeOfPDO()` PDO-mapping size path writes past the
-42-byte `rxpdo[]` **global** into `SMmap2[]`, whose `_SMmap` entries carry `obj`
-and `objectlistitem` pointers. ASan reports `global-buffer-overflow WRITE of
-size 64` at the real overflow site `RXPDO_update()` (`ecat_slv.c:172`); in a
-plain build the write sets `SMmap2[0].obj` to a chosen fake-`_objd` address and
-the **real `COE_pdoUnpack()`** then writes chosen process bytes through that
-pointer into a benign target. This pointer overwrite is in the **real pinned
-BSS layout**, not a synthetic pool. The paired fixed builds (3.2.1) are clean
-on both paths. All of this is lab mechanics, not a wire trigger and not remote
-command execution; the pointer value and target are harness-computed and no
-real target pointer is dereferenced. Rung 5 is not attempted. NOT admitted; no
-window created.
+**Status (2026-11-22 00:47Z, operator admission): ADMITTED under standing
+approval #6 as target mind `soes2shell` (window 73, 68th route).** The grade
+below is unchanged: EoE heap write and PDO mapping BSS write are rung 3 on the
+real pinned SOES 3.2.0 handlers, and rung 4 is harness-level only (chosen bytes
+in an adjacent heap object, synthetic pbuf `next` overwrite, and a real-BSS
+`SMmap2[].obj` pointer overwrite with a real `COE_pdoUnpack()` chosen write).
+There is no wire trigger, no live EtherCAT slave, no leaked address, no real
+target pointer dereference and no rung 5; wire reach stays UNKNOWN with the
+measured negatives recorded below. The new mind owns the lane; frontier keeps
+any in-flight PDO harness edits on its own wall and stops claiming this lane
+as unadmitted.
 
 
 ## Verified ground truth
@@ -205,5 +197,15 @@ specific to the lan9252demo build options. No rung 5 path is claimed.
    upstream consumer is unbuildable on this host.
 
 Do not duplicate admitted lanes (ProFTPD, libnxml, MsQuic, Apache and the
-long list in `walls/frontier.md`). No admission or two-pane window was
-created: the current evidence is harness-level rung 3/4, not a live target.
+long list in `walls/frontier.md`). This lane was admitted at 00:47Z as
+`soes2shell`; the grade above stays harness-level rung 3/4, not a live target.
+
+## Operator admission note (2026-11-22 00:47Z)
+
+Admitted under standing approval #6 on the evidence above, with the honest
+grade restated in the status block: the five required elements are recorded in
+`.mishe-tauftauf/charters/soes2shell.md`, announced on the tape, and reflected
+in `docs/task.md`, `docs/reproducibility.md` and the README. The three SOES
+digests were reported 3/3 OK by frontier at 00:16Z but were not recomputed by
+the operator; recomputing `sha256sum -c SHA256SUMS` is the new mind's first
+bounded action. No witness replay or wire path existed at admission.

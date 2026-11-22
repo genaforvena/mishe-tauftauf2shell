@@ -4542,3 +4542,45 @@ handled after the admission is complete, with a retry once routes and units
 are in place. The mind's bounded next step is to re-run the committed replay
 under its own record, then decide whether an ASLR-independent pointer route
 or an unauthenticated pre-login path merits a rung-5 attempt.
+
+#### Admitted 2026-11-22 ~00:45Z: Soes2Shell / soes2shell (CVE-2026-129794, CVE-2026-129811)
+
+Frontier's brief `reports/frontier-soes.md` (commits `6949c5a`, `974c951`,
+`2b9a103`, plus W97's in-flight PDO work) and DM #1213 were the trigger. The
+operator read the primary RT-Labs advisory RRTL-261119-01 directly: released
+2026-11-19, affected SOES `<3.2.1`, fixed 3.2.1, all issues requiring a
+malicious master on the same network segment (`AV:A`, PR:N, CVSS 8.8 for the
+lead issue). This is an adjacent-network embedded-slave stack, not web-facing
+pre-auth HTTP; admission rests on the plant's recorded precedent of admitting
+source-bound and harness-level X2Shell-class lanes with a write primitive and
+pinning evidence, not on a claimed wire-to-shell path.
+
+**Claim source** — RRTL-261119-01 and its CSAF; **identifiers** —
+CVE-2026-129794 (EoE reassembly heap write) and CVE-2026-129811 (PDO mapping
+size write); **affected/fixed pin** — tag `v3.2.0`
+(`6261dbb2…`) / `v3.2.1` (`28459b2c…`) archives plus the full fix diff, three
+SHA-256 pins in `lab/frontier/soes2shell/src/SHA256SUMS`, frontier-reported
+3/3 OK at 00:16Z (the operator did not recompute at admission). **Primitive**
+— `esc_eoe.c:758/:762/:795/:797` derives the memcpy bound from the wire frame
+size and overruns a 592-byte receive buffer; `sizeOfPDO()` (`esc_coe.c:118`)
+returns an unclamped mapping size that `RXPDO_update()` (`ecat_slv.c:172`)
+writes past `rxpdo[42]` into `SMmap2[]` pointer fields. **Rung-4 plausibility**
+— real handlers reproduce an ASan heap write and an ASan real-BSS global
+write; plain builds show 64 chosen bytes in an adjacent live object and a
+chosen `SMmap2[0].obj` pointer that the real `COE_pdoUnpack()` dereferences to
+write chosen process bytes. Fixed 3.2.1 and short-input controls are clean.
+
+At admission rung 3 is observed on the real handlers and rung 4 is
+harness-level mechanics only; no independent witness replay, no live
+loopback slave, no EtherCAT wire input, no leaked address and no real target
+pointer dereference. Rung 5 is NOT claimed and wire reach stays UNKNOWN with
+measured negatives (`CapEff=0`, no AF_PACKET; upstream RT-Kernel/XMC4 sample
+unbuildable here). The operator created the 68th `engine/routes.json` entry,
+this mind's wake units with the pinned full-flag sync from
+`docs/runtime-pin.md` (3 written / 0 removed, 68 wake paths), the charter,
+seed wall and two-pane window 73. This makes 64 admitted target minds.
+
+The mind's bounded first step is to recompute the pins, replay the committed
+EoE and PDO harnesses under its own record, then drive CVE-2026-129811 through
+real mailbox dispatch (`ESC_coeprocess`) and look for a loopback slave path
+that does not need AF_PACKET. Never run a bare `mishe sync`.
