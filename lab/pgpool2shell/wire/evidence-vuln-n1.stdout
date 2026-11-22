@@ -1,0 +1,63 @@
+2026-11-22 05:21:00.489: main pid 3266539: WARNING:  logdir is changed to work_dir
+2026-11-22 05:21:00.489: main pid 3266539: DETAIL:  if logdir is specified, the value will be set to work_dir
+2026-11-22 05:21:00.489: main pid 3266539: DEBUG:  read pgpool node id file /home/mesh-home/mishe-tauftauf2shell/lab/pgpool2shell/wire/pgpool_node_id
+2026-11-22 05:21:00.489: main pid 3266539: DETAIL:  pgpool node id: 0
+2026-11-22 05:21:00.489: main pid 3266539: DEBUG:  initializing pool configuration
+2026-11-22 05:21:00.489: main pid 3266539: DETAIL:  num_backends: 1 total_weight: 1.000000
+2026-11-22 05:21:00.489: main pid 3266539: DEBUG:  initializing pool configuration
+2026-11-22 05:21:00.489: main pid 3266539: DETAIL:  backend 0 weight: 2147483647.000000 flag: 0000
+2026-11-22 05:21:00.490: main pid 3266539: LOG:  Backend status file /tmp/pgpool_status discarded
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  BackendDesc: 113672 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  pool_coninfo_size: num_init_children (1) * max_pool (1) * MAX_NUM_BACKENDS (128) * sizeof(ConnectionInfo) (416) = 53248 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  ProcessInfo: num_init_children (1) * sizeof(ProcessInfo) (2152) = 2152 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  UserSignalSlot: 24 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  POOL_REQUEST_INFO: 5352 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  stat_shared_memory_size: 9216 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  SI_ManageInfo: 24 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  memcache blocks :64
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  shared_memory_cache_size: 67108864
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  shared_memory_fsmm_size: 64
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  pool_hash_size: 67108880
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  POOL_QUERY_CACHE_STATS: 24 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: DEBUG:  watchdog: 56 bytes requested for shared memory
+2026-11-22 05:21:00.490: main pid 3266539: LOG:  allocating shared memory segment of size: 134414144 
+2026-11-22 05:21:00.687: main pid 3266539: DEBUG:  pool_coninfo_size: num_init_children (1) * max_pool (1) * MAX_NUM_BACKENDS (128) * sizeof(ConnectionInfo) (416) = 53248 bytes requested for shared memory
+2026-11-22 05:21:00.687: main pid 3266539: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 05:21:00.687: main pid 3266539: DEBUG:  health_check_stats_shared_memory_size: requested size: 12288
+2026-11-22 05:21:00.687: main pid 3266539: DEBUG:  memcache blocks :64
+2026-11-22 05:21:00.687: main pid 3266539: DEBUG:  shared_memory_cache_size: 67108864
+2026-11-22 05:21:00.687: main pid 3266539: DEBUG:  memory cache request size : 67108864
+2026-11-22 05:21:00.687: main pid 3266539: DEBUG:  shared_memory_fsmm_size: 64
+2026-11-22 05:21:00.688: main pid 3266539: LOG:  pool_discard_oid_maps: discarded memqcache oid maps
+2026-11-22 05:21:00.700: main pid 3266539: LOG:  waiting for watchdog to initialize
+2026-11-22 05:21:00.700: watchdog pid 3266567: LOG:  setting the local watchdog node name to "127.0.0.1:19003 Linux mesh-home"
+2026-11-22 05:21:00.700: watchdog pid 3266567: LOG:  watchdog cluster is configured with 1 remote nodes
+2026-11-22 05:21:00.700: watchdog pid 3266567: LOG:  watchdog remote node:0 on 127.0.0.1:19005
+2026-11-22 05:21:00.700: watchdog pid 3266567: LOG:  interface monitoring is disabled in watchdog
+2026-11-22 05:21:00.700: watchdog pid 3266567: LOG:  setting up watchdog receive socket for 127.0.0.1:19004
+2026-11-22 05:21:00.700: watchdog pid 3266567: INFO:  IPC socket path: "/tmp/.s.PGPOOLWD_CMD.19004"
+2026-11-22 05:21:00.700: watchdog pid 3266567: LOG:  watchdog node state changed from [DEAD] to [LOADING]
+2026-11-22 05:21:00.700: watchdog pid 3266567: DEBUG:  STATE MACHINE INVOKED WITH EVENT = STATE CHANGED Current State = LOADING
+2026-11-22 05:21:00.700: watchdog pid 3266567: LOG:  new outbound connection to 127.0.0.1:19005 
+2026-11-22 05:21:00.700: watchdog pid 3266567: DEBUG:  STATE MACHINE INVOKED WITH EVENT = NEW OUTBOUND_CONNECTION Current State = LOADING
+2026-11-22 05:21:00.700: watchdog pid 3266567: DEBUG:  sending packet, watchdog node:[] command id:[4] type:[ADD NODE] state:[LOADING]
+2026-11-22 05:21:00.700: watchdog pid 3266567: DEBUG:  sending watchdog packet to socket:7, type:[A], command ID:4, data Length:332
+2026-11-22 05:21:01.701: watchdog pid 3266567: DEBUG:  received watchdog packet type:r
+2026-11-22 05:21:01.701: watchdog pid 3266567: DEBUG:  reading packet type r of length 90
+2026-11-22 05:21:01.701: watchdog pid 3266567: DEBUG:  STATE MACHINE INVOKED WITH EVENT = PACKET RECEIVED Current State = LOADING
+2026-11-22 05:21:01.701: watchdog pid 3266567: DEBUG:  received packet, watchdog node:[] command id:[1] type:[ONLINE RECOVERY REQUEST] state:[LOADING]
+2026-11-22 05:21:01.701: watchdog pid 3266567: LOG:  watchdog received online recovery request from ""
+2026-11-22 05:21:01.701: watchdog pid 3266567: WARNING:  invalid json data
+2026-11-22 05:21:01.701: watchdog pid 3266567: DETAIL:  NodeIdList array contains 0 nodes while expecting 1
+2026-11-22 05:21:01.701: watchdog pid 3266567: LOG:  watchdog failed to process online recovery request
+2026-11-22 05:21:01.701: watchdog pid 3266567: DETAIL:  invalid data in online recovery request from ""
+2026-11-22 05:21:01.701: watchdog pid 3266567: DEBUG:  sending packet, watchdog node:[] command id:[1] type:[ERROR] state:[LOADING]
+2026-11-22 05:21:01.701: watchdog pid 3266567: DEBUG:  sending watchdog packet to socket:7, type:[E], command ID:1, data Length:0
+2026-11-22 05:21:04.704: watchdog pid 3266567: LOG:  read from socket failed, remote end closed the connection
+2026-11-22 05:21:04.704: watchdog pid 3266567: LOG:  client socket of  is closed
+2026-11-22 05:21:05.491: main pid 3266539: LOG:  exit handler called (signal: 15)
+2026-11-22 05:21:05.491: main pid 3266539: LOG:  shutting down by signal 15
+2026-11-22 05:21:05.491: main pid 3266539: LOG:  terminating all child processes
+2026-11-22 05:21:05.491: watchdog pid 3266567: LOG:  Watchdog is shutting down
+2026-11-22 05:21:05.492: main pid 3266539: LOG:  Pgpool-II system is shutdown

@@ -53,5 +53,17 @@ completed admission after re-verifying the pins and replaying the harness.
   a second peer-controlled JSON field steers the write address. Witness replay
   is owed at the claimed direct-call scope; none has been requested yet.
 
+- **W1 wire result (2026-11-22 ~05:18Z):** a synthetic loopback watchdog peer
+  reaches `process_remote_online_recovery_command()` in a real, plant-built
+  `pgpool` watchdog child and crashes it with the vulnerable parser. A/B/C:
+  4.7.2 `NodeCount=2` → SIGSEGV; 4.7.2 `NodeCount=1` → clean; 4.7.3
+  `NodeCount=2` → clean. gdb on the live child caught the fault at
+  `wd_json_data.c:858` with `node_id_set[1] = 0x1`, confirming the adjacent
+  slot is not a peer-steerable pointer on this build. Full report:
+  [reports/pgpool2shell-wire-w1.md](pgpool2shell-wire-w1.md); replay assets in
+  `lab/pgpool2shell/wire/`. Grade: rung 3 now wire-confirmed on a real daemon;
+  rung 4 remains at direct-call harness scope; address steering and rung 5
+  remain UNKNOWN. Wire-scope witness replay is owed.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.

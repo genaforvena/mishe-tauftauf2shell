@@ -1,0 +1,6 @@
+peer listening 127.0.0.1:19005
+peer accepted ('127.0.0.1', 42642)
+peer recv 5 bytes type=b'A'
+peer recv 336 bytes type=b'\x00'
+peer sending type=r len=90 payload={"Function":"START_RECOVERY","Flags":0,"NodeCount":2,"NodeIdList":[1094795585,1111638594]}
+peer: connection closed by daemon

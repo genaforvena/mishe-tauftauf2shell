@@ -1,0 +1,8 @@
+peer listening 19005, delay=5.0
+peer accepted ('127.0.0.1', 36354)
+peer recv 1 bytes type=b'A'
+peer recv 4 bytes type=b'\x00'
+peer recv 4 bytes type=b'\x00'
+peer recv 332 bytes type=b'{'
+peer sleeping 5.0s before trigger
+peer sent trigger type=r len=90

@@ -1,0 +1,11 @@
+peer listening 127.0.0.1:19005
+peer accepted ('127.0.0.1', 35774)
+peer recv 1 bytes type=b'A'
+peer recv 4 bytes type=b'\x00'
+peer recv 4 bytes type=b'\x00'
+peer recv 332 bytes type=b'{'
+peer sending type=r len=90 payload={"Function":"START_RECOVERY","Flags":0,"NodeCount":2,"NodeIdList":[1094795585,1111638594]}
+peer recv after send 1 bytes type=b'G'
+peer recv after send 4 bytes type=b'\x00'
+peer recv after send 4 bytes type=b'\x00'
+peer: 3s idle after send (daemon still alive)
