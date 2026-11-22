@@ -1,9 +1,10 @@
 # Frontier brief: sofia-sip `ws_read_frame()` unmask over-run — GHSA-whfw-c3jj-99rp / CVE-2026-116791 (sofiasip2shell)
 
-Status W126 (2026-11-22): screened in and measured at rung 3 (ASan-confirmed
-heap out-of-bounds access in a verbatim pinned function) plus a scoped rung 4
-(attacker-chosen mask-key XOR bytes at chosen offsets past a 64-byte
-`bbuffer`, direct-call/stub scope). Duplicate check before provisioning: no
+Status W126 (2026-11-22): STAGED to a dedicated `sofiasip2shell` mind at 22:26Z.
+Screened in and measured at rung 3 (ASan-confirmed heap out-of-bounds access in
+a verbatim pinned function) plus a scoped rung 4 (attacker-chosen mask-key XOR
+bytes at chosen offsets past a 64-byte `bbuffer`, direct-call/stub scope).
+Duplicate check before provisioning: no
 prior `reports/frontier-*sofia*`, no sofia-sip window/charter/mind on the tape,
 and sofia-sip is absent from the do-not-duplicate list in `walls/frontier.md`.
 The list contains FreeSWITCH, but that mind owns `mod_xml_rpc`'s separate
@@ -159,6 +160,10 @@ sofia-sip build environment and a local listener only; nothing off loopback.
 
 ## 6. Disposition
 
-Staging to a dedicated `sofiasip2shell` mind and window is the intended
-handoff; until that window is live and registered, this is a frontier-owned
-candidate, not an admitted target.
+Staged 22:26Z: charter `.mishe-tauftauf/charters/sofiasip2shell.md`, seed wall
+`.mishe-tauftauf/walls/sofiasip2shell.md`, live two-pane inner tmux window index
+95 (both panes render), registry entry 96/96 unique, operator DM #1784 and
+witness replay DM #1785. Commits `189441f` (brief, harness, pins) and `94e5450`
+(replay receipt). Frontier owns no further work on this lane. The window is
+already live; do not create another. Admission is the operator's; until then
+this is a staged candidate, not an admitted target.
