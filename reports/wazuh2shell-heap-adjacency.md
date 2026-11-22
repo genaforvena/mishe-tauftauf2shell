@@ -107,4 +107,44 @@ the buffer are unchanged unrelated heap data.
   this readback does not change that availability verdict.
 - Rung 5 remains UNKNOWN and is not claimed. The honest grade is rung 4 in a
   live process with a structural negative for the direct pointer-consumer lane
-  and an unmeasured groomed-heap lane.
+  and a measured negative for the single-event groomed-heap lane (W109).
+
+## W109 measurement: maximized single-event groom, still no pointer chunk
+
+Hypothesis: the write could reach a pointer-bearing chunk if the generated
+alert were maximized and the `OS_CleanMSG` location minimized, since
+`full_log = malloc(2*loglen+1)` while every change comment carries a fixed
+prefix. Replay: `bash live-src-plain/run-groom.sh [before.gdb]`; payload
+`live-src-plain/poc-groom.json` (261-byte JSON, three `9e18` numerics plus
+all nine string fields that emit comments), injector
+`live-src-plain/inject-groom.py` (shortest valid location
+`[001] (a) 1->syscheck:`); logs `readback-groom-{readback-groom,before}.log`.
+Live plain v4.14.7 daemon under gdb, same breakpoints as above.
+
+- `full_log = 0x7fffdc0025f0`, own chunk size word `0x225` (544-byte chunk,
+  536 usable); generated alert `strlen = 570`, plus NUL = 571 bytes.
+  Overrun = 35 bytes past usable, 46 past the request — no worse than the
+  advisory payload's 34/47, because the alert and `loglen` grow together.
+- Before the sink: A = `0x25` chunk at `F+536`, user `"001"` (`agent_id`);
+  B = `0x25` at `F+568`, user `"(a) 1->syscheck"` (`location`); C = `0x25`
+  at `F+600`, user `"a 1->syscheck"` (`hostname`); D = `0x115` at `F+632`,
+  user at `F+640` = `0x000000006b02740d`, the `lf->fields` array whose
+  entries hold `key`/`value` pointers.
+- After the sink: A's size word is ASCII `"ributes "` and its user is
+  clobbered; B's size word becomes `0xa27` (the last two alert bytes plus
+  NUL); C and D are byte-for-byte intact. The attacker's `Q` marker sits at
+  `F+526`, still inside `full_log`'s own usable space. The write ends at
+  `F+570`, 70 bytes short of the first pointer-bearing chunk.
+
+Source-side bound: only twelve attributes emit comments. String values copy
+1:1; numeric values expand from a 4-byte `9e18` to a 19-digit long, and
+`old_attributes` adds more to `loglen` (and therefore the allocation) than
+to the generated text. With those fixed factors `alert_len ≈ 2.18*loglen`
+against `usable ≈ 2*loglen`, keeping the overrun a small constant (~35-46
+bytes) regardless of single-event input shape. No single event can place a
+cJSON node or the `lf->fields` array inside the write window.
+
+Verdict: the single-event groomed-heap lane is a **measured negative** on
+this build. Multi-event grooming (free a chunk so `full_log` reuses it next
+to a pointer-bearing allocation) remains UNMEASURED; nothing here shows it
+is possible. Rung 5 remains UNKNOWN, not claimed.
