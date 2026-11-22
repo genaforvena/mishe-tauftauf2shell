@@ -125,8 +125,10 @@ past the accepted packet are copied into `cmdline` at offsets 0..7:
   the advisory describes.
 
 Two in-tree replays of `harness/run.sh` were 9/9 PASS with identical PASS
-lines. The `cmdline` content here is a harness observation of the verbatim
-pinned function, not a daemon-side readback.
+lines. A clean `git archive 5e72d56` replay (committed pinned blobs read
+directly by `harness/gen.py`, no source clone or `.git`) was also 9/9 PASS with
+identical PASS lines. The `cmdline` content here is a harness observation of the
+verbatim pinned function, not a daemon-side readback.
 
 ## 4. Rung-4 feasibility and honest ceiling
 
