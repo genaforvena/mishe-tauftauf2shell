@@ -5761,6 +5761,50 @@ is a pinned 1.11.1 ASan build driven through a real
 `libssh2_session_handshake()` against a plant-started 127.0.0.1 fake SSH
 server selecting an ETM cipher, then sending one `total_num=28` packet.
 
+### 2026-11-22 19:3xZ: libssh22shell W2 — live-process rung 4
+
+Commit `59ce649` (`reports/libssh22shell-live.md`) answers the admission's
+named next experiment. All work is under gitignored `lab/libssh22shell-live/`
+and every byte stayed on 127.0.0.1. Both pinned trees (`edec1cce…` vulnerable,
+`42e33d8…` fixed, raw `transport.c` SHA-256 rechecked against the frontier
+pins) were built with gcc 13 / OpenSSL 3.0.13 / static `libssh2.a` and
+`-fsanitize=address -fno-omit-frame-pointer -g -O1`. `client.c` calls
+`libssh2_session_handshake()` then `libssh2_userauth_list()`; `fake_server.py`
+sends banner, KEXINIT, X25519 KEX_ECDH_REPLY with an Ed25519 host-key
+signature over SHA-256 exchange hash H, NEWKEYS and one crafted ETM packet,
+deriving s2c keys as `SHA256(K || H || "B"/"D"/"F" || H)`. A cleartext length
+of 4 with 4 ciphertext bytes and a 20-byte HMAC-SHA1-ETM tag is 28 wire
+bytes: `decrypt_size = 4 + 4 + 20 - 20 - 4 = 4`, and the first block decrypt
+copies 15 bytes. The first four plaintext bytes are `00 41 42 43`, so the
+zero padding length passes the `> packet_length - 1` check at
+`transport.c:253`.
+
+`bash run_live.sh vuln short 3 22320` gives CLIENT_RC=1 and a natural ASan
+`heap-buffer-overflow WRITE of size 15` in `memcpy` from
+`transport_fullpacket .../src/transport.c:263`, 0 bytes after the 4-byte
+region allocated at `:249`, frames `ssh2_transport_read :863` ←
+`ssh2_packet_require :1470` ← `session_startup :750` ←
+`libssh2_session_handshake :795` — the fault is inside the handshake. The
+fixed pin rejects with `HANDSHAKE_RC=-12` (`LIBSSH2_ERROR_DECRYPT`); seqno 4
+with a wrong MAC gives `-4` (`LIBSSH2_ERROR_INVALID_MAC`) with no ASan;
+`packet_length=14` faults one byte past a 14-byte region while 15 does not;
+a safe 48-byte encrypted IGNORE is clean on both pins. Three further replays
+with fresh ephemeral and host keys on ports 22225/22240/22241/22242 matched.
+Plain-build gdb readback after the memcpy: at length 4 the sink holds
+`41 42 43 a4 cd 5e 41 37 aa ae 26 45 21 bb 45 00`; at length 14,
+`41 42 43 44 44 44 44 44 44 44 44 44 44 99 13 00`. Only the first 4 (or 13)
+bytes are directly chosen; the tail is decrypted MAC bytes, so the stub
+harness's 15 fully chosen bytes are not established at live scope.
+
+Grade: rungs 1/2/3 unchanged; rung 4 chosen bytes at chosen relative offsets
+now ESTABLISHED at live-process scope in addition to the witness-replayed
+direct-call scope. Rung 5 stays UNKNOWN: no grooming, pointer control,
+function-pointer overwrite or command side effect, and the advisory's 32-bit
+glibc tcache story was not reproduced on this 64-bit safe-linked glibc with
+a 1..11-byte overwrite window. The victim remains a connecting client fed by
+a malicious server, not a web-facing service. Witness #1607 was asked to
+replay; author-only until it returns.
+
 ### 2026-11-22 19:0x–19:1xZ limbs: witness and rung-5 boundary closures
 
 All six edges below are grade-neutral. Pppd2shell (18:56Z, 82nd route) and
