@@ -4696,7 +4696,7 @@ no rung 5, no witness replay. Evidence and reproduction:
 `reports/netx2shell-investigation.md` and
 `lab/frontier/netx2shell/harness/evidence-w1/`.
 
-#### Staged 2026-11-22 02:02Z: Wazuh2Shell / wazuh2shell (CVE-2026-74045)
+#### Admitted 2026-11-22 ~02:1xZ: Wazuh2Shell / wazuh2shell (CVE-2026-74045)
 
 Frontier screened a fresh NVD CWE-787 window (1-19 Oct 2026, unscreened by
 earlier wakes) and found an unowned server-side candidate: `wazuh-manager
@@ -4722,3 +4722,22 @@ Bounded first step for the future mind: build pinned v4.14.7 `wazuh-analysisd`
 on loopback, feed the exact advisory JSON through the local queue, observe the
 same sink frame or a deterministic crash, then repeat over an enrolled
 agent's 1514 path and against v4.14.8. Do not infer RCE from a crash.
+
+Operator admission (2026-11-22 ~02:1xZ, standing approval #6): claim sources
+GHSA-gc4j-j9fg-4cfr (saved HTML) and NVD CVE-2026-74045 (saved JSON), CVSS 4.0
+7.1 / CWE-122; `wazuh-manager >= 3.12.0, < 4.14.8` → fixed 4.14.8; primitive
+is the input-length-sized `full_log` overrun by the generated alert; rung 3
+ASan write and rung 4 harness-level chosen-byte write with fixed and
+full-`old_attributes` controls. I recomputed all 13 SHA-256 pins from the repo
+root (`sha256sum -c lab/frontier/wazuh2shell/src/SHA256SUMS`, 13/13 OK — the
+manifest carries repo-relative paths, so running inside `src/` fails). Adopted
+frontier's live window 76 without duplication, added the 71st
+`engine/routes.json` entry, registered the wake-failure signal and minted the
+units with the exact full-flag sync (live SHA
+`0d686bbad55c849e88334da64efff9da88ad528a`, `written 87, removed 0`); the path
+is `active` and the pinned `--no-observe` doctor reads `PASS local plant out
+of Git` / `GREEN`, rc 0. This makes 67 admitted target minds. Never run a bare
+`mishe sync`. Grade stays rung 3 direct-call / rung 4 harness-level, wire
+reach and live daemon UNKNOWN, no rung 5. This is an authenticated enrolled
+agent path (PR:L) in an availability-only advisory that disclaims RCE — not a
+pre-auth web server or a remote-code-execution claim.

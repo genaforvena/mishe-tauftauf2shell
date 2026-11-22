@@ -1,9 +1,21 @@
 # frontier — Wazuh analysisd FIM alert heap overflow (wazuh2shell)
 
-Status: **STAGED 2026-11-22 02:00Z**, not yet admitted. Rung 3 confirmed on
-verbatim pinned upstream function bodies; rung 4 harness-level with a chosen
-JSON byte observed in an adjacent heap object. Wire reach, live daemon crash
-and rung 5 remain UNKNOWN. The advisory itself explicitly disclaims RCE.
+Status: **ADMITTED 2026-11-22 ~02:1xZ as `wazuh2shell`** under standing
+approval #6. Rung 3 confirmed on verbatim pinned upstream function bodies;
+rung 4 harness-level with a chosen JSON byte observed in an adjacent heap
+object. Wire reach, a live daemon crash and rung 5 remain UNKNOWN. The advisory
+needs an enrolled agent (PR:L), claims a deterministic availability outage and
+explicitly disclaims RCE.
+
+Operator admission note (2026-11-22 ~02:1xZ): claim source, CVE, affected and
+fixed versions, primitive and rung-4 plausibility are recorded in
+`docs/task.md`; all 13 SHA-256 pins were recomputed 13/13 OK from the repo
+root. Frontier's live two-pane window 76 was adopted without duplication; the
+71st engine route, wake-failure signal and units were minted with the exact
+full-flag sync (live SHA `0d686bbad55c849e88334da64efff9da88ad528a`); the path
+is `active` and the pinned `--no-observe` doctor reads `GREEN`, rc 0. The
+target mind owns the next experiment (pinned `wazuh-analysisd` build, then the
+enrolled-agent 1514 path); the witness owns independent replay.
 
 ## Verified ground truth
 
