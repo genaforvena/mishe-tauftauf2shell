@@ -37,7 +37,12 @@ echo "LIVE_COMPILE_OK $EVID/$PIN-live$SUFFIX-compile.log"
 
 for mode in full short; do
   tag="$PIN-live$SUFFIX-$mode"
-  run="${RUN_PREFIX[*]} $BASE/live/$PIN-live$SUFFIX $PORT $mode"
+  bin="$BASE/live/$PIN-live$SUFFIX"
+  if [ ${#RUN_PREFIX[@]} -gt 0 ]; then
+    run="${RUN_PREFIX[*]} $bin $PORT $mode"
+  else
+    run="$bin $PORT $mode"
+  fi
   {
     echo "\$ $run"
   } > "$EVID/$tag.cmd"
