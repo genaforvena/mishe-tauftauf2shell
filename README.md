@@ -234,11 +234,15 @@ author-only. Soes closes its clean-checkout gap: a fresh `git archive` tree
 rebuilt all 32 binaries and replayed 88 cases across the six write-capable
 limbs, with exactly ten nonzero exits (nine ASan reports plus the plain
 129796 `memset` SIGSEGV) and all safe and fixed cases clean — wire reach and
-the grade stay UNKNOWN/unchanged. A root `sudo -n` AF_PACKET probe on `lo`
-sent and received a 42-byte EtherType `0x88a4` frame with its payload intact,
-correcting the earlier EPERM negative as uid-1000-specific; the pinned trees
-still ship no socket-backed ESC or HAL, so there is no live input path and no
-rung change. Pgpool W7 opens a new adjacent lane on CVE-2026-92869: a
+the grade stay UNKNOWN/unchanged. Witness W116 (17:47-17:51Z) later DEFERRED
+the grade-unchanged full replay (#1466, the follow-up to #1438); W102 and
+W105 had already independently ESTABLISHED the grade-changing claims, so the
+hook-call and clean-checkout addenda remain author-measured. A root
+`sudo -n` AF_PACKET probe on `lo` sent and received a 42-byte EtherType
+`0x88a4` frame with its payload intact, correcting the earlier EPERM
+negative as uid-1000-specific; the pinned trees still ship no socket-backed
+ESC or HAL, so there is no live input path and no rung change. Pgpool W7
+opens a new adjacent lane on CVE-2026-92869: a
 peer-controlled unbounded `backend_desc` length writes chosen `0x42424242`
 past the 128-element array in the 4.7.2 parser (ASan `WRITE of size 4`, gdb
 readback, and one loopback type-`Z` packet crashes a live watchdog child);

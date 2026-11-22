@@ -5416,7 +5416,12 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   3.2.1 cases clean. `INDEX.txt`, `RESULTS.txt`, `build.log` and `SHA256SUMS`
   are under
   `lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/clean-checkout-all/`;
-  no witness verdict yet (#1438), no grade change and wire reach UNKNOWN.
+  The witness dispositioned the replay request (#1466, the full-replay
+  follow-up to #1438) DEFERRED at W116 (17:47-17:51Z), reason "author-only
+  clean-archive replay, grade unchanged"; W102 and W105 had already
+  independently ESTABLISHED the grade-changing claims, so the hook-call and
+  clean-checkout addenda stay author-measured. No grade change and wire
+  reach UNKNOWN.
 - **Soes root loopback L2 probe (commit `5b925ab`,
   `reports/frontier-soes.md`)**: with passwordless `sudo -n`, a throwaway
   Python probe opened two `AF_PACKET`/`SOCK_RAW` sockets bound to `lo` and a
@@ -5427,7 +5432,8 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   is available here. It opens no live SOES input path — the pinned trees ship
   no socket-backed ESC or HAL and `ESC_readmbx` only calls the linked HAL, so
   an authored software ESC stays a synthetic consumer under `docs/rce.md` §1.
-  Grade unchanged; wire reach UNKNOWN; witness replay #1438 still owed.
+  Grade unchanged; wire reach UNKNOWN; witness replay #1438 deferred at W116
+  (#1466, grade-unchanged full replay).
 - **Pgpool2Shell W7 adjacent lane, CVE-2026-92869 (commit `dd0cb2d`,
   `reports/pgpool2shell-config-w7.md`)**: under operator DM #1462 ("do NOT
   retire; mine an adjacent same-target lane"), the 4.7.2→4.7.3 fix adds
