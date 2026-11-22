@@ -1,0 +1,13 @@
+    #0 0xADDR in bvlc_sc_decode_proprietary_option {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c:601:27
+    #1 0xADDR in bvlc_sc_decode_header_options {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c:1848:13
+    #2 0xADDR in bvlc_sc_decode_message {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c
+    #3 0xADDR in main {REPO}/harness/poc_global.c:56:14
+    #4 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0xADDR in _start ({REPO}/harness/poc-global-asan+0xADDR) (BuildId: 13e5a6ddac34c38fa7bb21cda6478b443ae87d37)
+0xADDR is located 0 bytes after global variable 'g_dm' defined in '{REPO}/harness/poc_global.c:18' (0xADDR) of size 432
+==== BOUNDED ASAN (full chain) ====
+=================================================================
+==PID==ERROR: AddressSanitizer: global-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+SUMMARY: AddressSanitizer: global-buffer-overflow {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c:601:27 in bvlc_sc_decode_proprietary_option
+rc=134

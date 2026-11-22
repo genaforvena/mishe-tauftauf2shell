@@ -175,3 +175,14 @@ lab/frontier/ud3tn2shell/src/nanopb-src/
 lab/frontier/ud3tn2shell/src/tinycbor-src/
 lab/frontier/ud3tn2shell/out-*/
 lab/frontier/ud3tn2shell/replay*/
+
+# Bacnet2shell harness: pinned git clone/worktree, local binaries and raw logs.
+# Pin manifest, fix patch, harness sources, normalized evidence and hashes stay tracked.
+lab/frontier/bacnet2shell/src/src/
+lab/frontier/bacnet2shell/src-fixed/
+lab/frontier/bacnet2shell/harness/poc-vuln
+lab/frontier/bacnet2shell/harness/poc-fixed
+lab/frontier/bacnet2shell/harness/poc-global-asan
+lab/frontier/bacnet2shell/harness/poc-global-plain
+lab/frontier/bacnet2shell/harness/poc-global-fixed
+lab/frontier/bacnet2shell/out-*/

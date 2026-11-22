@@ -1,0 +1,5 @@
+  [survived, no abort]
+  decode returned 0 (ec=147 ecl=7 desc=header options is truncated)
+==== FIXED CASE 2 ====
+[case2] PRODUCTION-like: 1500-byte RX buffer, msg_len=10, slack ZEROED
+rc=0

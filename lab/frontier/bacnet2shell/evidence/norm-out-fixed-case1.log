@@ -1,0 +1,5 @@
+  [survived, no abort]
+  decode returned 0 (ec=147 ecl=7 desc=header options is truncated)
+==== FIXED CASE 1 ====
+[case1] EXACT-size 10-byte buffer (what the shipped PoC uses)
+rc=0

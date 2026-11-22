@@ -1,0 +1,19 @@
+    #0 0xADDR in bvlc_sc_decode_option_hdr {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c:557:43
+    #0 0xADDR in malloc ({REPO}/harness/poc-vuln+0xADDR) (BuildId: 4de4afa5d0dd57a7a82f3961b4559113150e4115)
+    #1 0xADDR in bvlc_sc_decode_header_options {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c:1841:9
+    #1 0xADDR in main {REPO}/harness/poc.c:28:22
+    #2 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #2 0xADDR in bvlc_sc_decode_message {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c
+    #3 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #3 0xADDR in decode {REPO}/harness/poc.c:20:14
+    #4 0xADDR in _start ({REPO}/harness/poc-vuln+0xADDR) (BuildId: 4de4afa5d0dd57a7a82f3961b4559113150e4115)
+    #4 0xADDR in main {REPO}/harness/poc.c:28:52
+    #5 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0xADDR in _start ({REPO}/harness/poc-vuln+0xADDR) (BuildId: 4de4afa5d0dd57a7a82f3961b4559113150e4115)
+0xADDR is located 0 bytes after 10-byte region [0xADDR,0xADDR)
+==== CASE 1 ====
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+SUMMARY: AddressSanitizer: heap-buffer-overflow {REPO}/src/src/bacnet/datalink/bsc/bvlc-sc.c:557:43 in bvlc_sc_decode_option_hdr
+rc=134

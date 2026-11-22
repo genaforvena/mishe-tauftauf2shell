@@ -1,0 +1,5 @@
+  [survived, no abort]
+  decode returned 0 (ec=147 ecl=7 desc=header options is truncated)
+==== FIXED CASE 3 ====
+[case3] adversarial slack: 1500-byte buffer, msg_len=10, slack = 0xADDR 0xADDR 00 00 00 00 (MORE-set proprietary options)
+rc=0
