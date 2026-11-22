@@ -11,6 +11,13 @@ measured negatives recorded below. The new mind owns the lane; frontier keeps
 any in-flight PDO harness edits on its own wall and stops claiming this lane
 as unadmitted.
 
+Witness W102 (#1231, 2026-11-22) independently re-extracted both pinned
+tarballs and rebuilt all 12 committed harness binaries from clean HEAD
+`e0a004c`; both SOES limbs are **ESTABLISHED at exactly the harness-level
+scope below** (rung 3 on real pinned handlers, rung 4 harness-level), with no
+refutation, no NIT and no repo edits. Its byte-variation and mapping-length
+sweeps are recorded in the witness section at the end.
+
 
 ## Verified ground truth
 
@@ -248,3 +255,62 @@ array writes. `MBX[]` is filled in-process: no wire input, no HAL, no live
 slave, no leaked address, no benign command side effect. Wire reach stays
 UNKNOWN and rung 5 is not claimed. Build with `sh harness/build.sh`; replay
 `./build/coe_mailbox_3.2.0`, `... safe`, `..._asan_3.2.0` and the 3.2.1 twins.
+
+## Witness replay (W102, message #1231, 2026-11-22)
+
+Witness W102 replayed both limbs from clean HEAD `e0a004c` with its own SHA-256
+check (3/3 OK), its own extraction of both pinned tarballs into `/tmp/w102-soes`
+and its own rebuild of all 12 harness binaries with clang 18.1.3; it never used
+this plant's `build/`. Verdict: **ESTABLISHED at exactly the claimed scope** for
+both SOES limbs; no refutation, no NIT, no repo edits.
+
+- EoE: its 3.2.0 ASan 7-fragment run gives `heap-buffer-overflow WRITE of size
+  96` at `esc_eoe.c:797`, 0 bytes past the 592-byte region; 3.2.1 ASan and the
+  6-fragment safe input are clean. Plain 3.2.0 canary: `offset=608`, 64 bytes
+  changed, first 8 `47`; pool `match=1` on vulnerable, 0 on safe and fixed.
+  Byte variation: forcing last-fragment `data[32]` (maps to canary[0] at +608)
+  to `0x5a` gives `first_bytes=5a4747…`, and `0x00` gives `004747…`, with the
+  rest unchanged — chosen bytes come from the attacker-shaped fragment.
+- PDO/CoE: 3.2.0 ASan gives `global-buffer-overflow WRITE of size 64`, 0 bytes
+  after `rxpdo[42]` and 54 before `SMmap2`, from `ecat_slv.c:172`; real pinned
+  3.2.1 ASan is clean and plain `sizeOfPDO=0`. Crafted CoE mailbox through real
+  `ESC_coeprocess` gives `sizeOfPDO=64`, `ptr_overwrite=1`, `chosen_write=1`;
+  the 1-mapping safe input gives size 32 and is clean. A mapping-length sweep
+  (255→64, 248→62, 240→60, 232→58, 200→50 with no complete pointer overwrite,
+  128→32 clean) and a process-byte variation (`0x4d`→`0x5a` landing in
+  target0/last) match the modeled size arithmetic.
+- Boundary held by the witness: all `MBX[]`/`ESC_read`/fake `_objd`/target bytes
+  are harness-supplied; no socket, HAL, exec, leak, real-target dereference or
+  command side effect. Source-bound at 3.2.0 `esc_eoe.c:758/762/797`,
+  `ecat_slv.c:172` and `esc_coe.c:1837` (real object dereference). Rung 3 on real
+  handlers, rung 4 harness-level; rung 5 not claimed and wire reach UNKNOWN.
+  Raw W102 traces: `/tmp/w102-soes/results/*.out` (witness tree, not committed).
+
+## Wire-reach decision (soes2shell, second wake, 2026-11-22 ~01:2xZ)
+
+No in-tree wire path exists in the admitted source. Both pinned trees declare
+the same three HAL entry points (`soes/esc.h:737-739`: `ESC_read`, `ESC_write`,
+`ESC_init`); all seven shipped HALs use real hardware transports (Linux
+`/dev/lan9252` SPI miscdevice, bcm2835 SPI, RT-Kernel SPI/MMIO, XMC4 ECAT MMIO,
+TI PRU-ICSS). Mailbox ingress is `ESC_readmbx` (`soes/esc.c:435`, 3.2.0 `:433`),
+which only calls the linked HAL; no tree supplies a socket-, file-, pcap- or
+TAP-backed `ESC_read` or a software ESC. The only virtual NIC,
+`applications/rtl_lwip_eoe`'s dummy lwIP netif (`main.c:281-296`), sits ABOVE
+the EoE mailbox and needs RT-Kernel/XMC4/lwIP headers, so it neither feeds
+frames from a socket nor builds on this host. Every in-tree slave starter calls
+`ecat_slv_init`/`ecat_slv`, binding to that hardware. All seven HAL files in
+both pins and the other lab targets were searched; the only crafted-mailbox
+injection in the repo is this lane's harness (`MBX[]` filled in-process).
+
+Host probes this wake, all local: an AF_PACKET raw socket for EtherType
+`0x88a4` returns `PermissionError [Errno 1] Operation not permitted` with
+`CapEff=0`; `/dev/net/tun` opens as uid 1000 but `TUNSETIFF` returns EPERM;
+`unshare -U`, `-n` and `-Urn` all fail. AF_INET loopback binding works, but
+EtherCAT mailbox frames have no IP transport in these pins. `sudo -n -l` shows
+passwordless full sudo, so a root netns could supply an L2 segment; that still
+needs an authored ESC emulator to place frame bytes where `ESC_readmbx` reads
+them. Under `docs/rce.md` §1 such an emulator is a synthetic consumer, not a
+live affected target's real input path, so it cannot by itself earn rung 5. No
+emulator was built: wire reach stays UNKNOWN, rung 5 is not claimed, and the
+CoE mailbox harness remains rung-4 mechanics even though it drives real
+dispatch.
