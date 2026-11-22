@@ -1,12 +1,12 @@
-# Frontier brief — ProFTPD mod_rewrite `int:utf8trans` BSS write (rung 3 wire-reproduced; chosen-byte pointer control measured, rung 4 open)
+# Frontier brief — ProFTPD mod_rewrite `int:utf8trans` BSS write (rung 4 chosen-pointer marker under ASLR-off condition)
 
-**Status (2026-11-22 00:03Z, W95): RUNG 1–3 ESTABLISHED on the real 1.3.9d daemon
-over a loopback FTP wire with a paired safe-length control. Rung 2 (cross-request
-state corruption) and a chosen-byte overwrite of two live pointer fields are
-observed in a non-ASan instrumented build. Rung 4 is NOT established: no benign
-marker has been executed at a chosen target. NOT admitted, no window.** Requires
-non-default `mod_rewrite` config; the lab trigger is an authenticated `STOR`
-(PR:L), so the advisory's unauthenticated reach is UNKNOWN here.
+**Status (2026-11-22 00:07Z, W95): RUNG 1–4 ESTABLISHED on the real 1.3.9d daemon
+over a loopback FTP wire, with a paired safe-length control. A 1030-code-point
+key redirects the static `substr` pointer in `rewrite_parse_map_str()` to a
+chosen `.rodata` string; the string is consumed by the real parser and the
+session survives. Rung 4 is conditioned on ASLR disabled (`setarch -R`), an
+authenticated `STOR` and a non-default `mod_rewrite` config. Rung 5 NOT
+attempted. NOT admitted, no window.**
 
 ## Verified ground truth
 
@@ -114,30 +114,60 @@ both match structs without dereferencing them. Observed over the loopback wire:
 | 2048 | `4141414141414141` | `4141414141414141` | SIGSEGV, pr_log_vwritefile |
 
 This is byte-granular chosen control of two live pointer fields, including a
-partial 1060-byte overwrite that preserves the PIE high 32 bits. Each corrupted
-case dies immediately afterwards with SIGSEGV in
-`pr_vsnprintfl` → `pr_log_vwritefile` → the module-call chain. That crash is
-*consistent with* a `%s` log path dereferencing a corrupted `match_string`, but
-the stack trace alone does not prove which corrupted global was dereferenced;
-that attribution stays UNKNOWN. Rung 2 is observed as cross-request static-state
-corruption (these fields persist between commands in the same session).
+partial 1060-byte overwrite that preserves the PIE high 32 bits. Those
+cumulative-length cases crash; `addr2line` on the plain build resolves the
+dominant crash frame to `rewrite_parse_map_str` at `mod_rewrite.c:688` — the
+static `substr` pointer at utf8_val index 1024–1031, not the match structs.
+Rung 2 is observed as cross-request static-state corruption (these fields
+persist between commands in the same session).
 
-## Rung-4 feasibility and the cheapest next experiment
+## Rung 4 — chosen-pointer dereference with a benign marker (ESTABLISHED, ASLR-off condition)
 
-- Rung 4 NOT established. There is no benign-marker execution at a chosen
-  address: the two demonstrated pointer values are non-canonical or unmapped,
-  and the PIE base is unknown at key-construction time. Chosen bytes at chosen
-  offsets and pointer-field control are real; a *controlled dereference to a
-  chosen target* is not yet shown.
-- Cheapest next step: keep the 1060-byte partial overwrite (preserves the high
-  32 bits), run under `setarch "$(uname -m)" -R` to fix the PIE base, compute a
-  `.rodata` string's low-32 address from the instrumented binary's symbols, and
-  encode that value into the key using the one-byte-per-code-point mapping
-  (2-byte UTF-8 encodings for bytes ≥ 0x80). Then send a second command and look
-  for that string in `RewriteLog` or the FTP reply. A clean marker makes rung 4;
-  a crash at the chosen address without a marker stays pointer control only.
-- If that fails, the write may only ever reach `%s` log formatting before a
-  useful consumer; record the ceiling and do not retry into existence.
-- Admission: this is a stronger candidate than libnxml (wire trigger plus a
-  chosen-byte pointer field), but still short of rung 4. Stage it only after the
-  marker experiment, with a dedicated mind and window at that point.
+`rewrite_parse_map_str()` (`mod_rewrite.c:671`) keeps a file-static
+`char *substr` at `0x106d20`, eight bytes past the end of `utf8_val`; it is
+dereferenced on every map substitution (`addr2line` puts the crash frame at
+`:688`). The alias structure of the two overlapping loops makes the bytes at
+`utf8_val[1024+k]` equal the low byte of code point `8*k`, so a 1030-code-point
+key sets the low six bytes of `substr` while its top two zero bytes survive
+untouched.
+
+`wire/client4.py` sends 1030 code points whose 0th, 8th, 16th, 24th, 32nd and
+40th values are U+00AF, U+01D4, '`', 'U', 'U', 'U' (bytes `af d4 60 55 55 55`).
+Under `setarch "$(uname -m)" -R` the PIE base is `0x555555554000` and this makes
+`substr = 0x000055555560d4af`, the address of the `.rodata` string
+"NOOP command successful" (file offset `0xb94af`). Runner:
+`wire/run-marker.sh` with `CLIENT=client4.py`.
+
+Observed at 00:06:40Z on the instrumented plain build (the instrumentation only
+dumps the two match structs; it does not alter the write):
+
+- STOR dispatch completes; `RewriteLog` gains the line
+  `rewrite_parse_map_str(): parsing 'NOOP command successful'` — the chosen
+  string was consumed by the real downstream consumer.
+- The session survives: `NOOP=200 NOOP command successful`,
+  `PWD=257 "..." is the current directory`, no signal 11.
+- The Python client reports `UnicodeDecodeError` decoding the STOR reply (the
+  reply echoes a raw 0xaf byte). That is a client-side decoding artifact, not a
+  server fault; the server log shows the session closing normally.
+
+This is rung 4 at the stated condition: chosen bytes at chosen offsets, a live
+pointer redirected to a chosen address, and an observed benign marker side
+effect in the real daemon. Conditions for witness replay: ASLR disabled
+(`setarch -R`) so the PIE base and target address are fixed; authenticated
+`STOR` (PR:L) with non-default `mod_rewrite` config; plain non-ASan build;
+marker is a readable `.rodata` string, not executed code.
+
+## What remains open
+
+- Rung 5 NOT established and NOT attempted: the marker is a string consumed by
+  a parser, not command execution. No wire-to-shell path is claimed.
+- ASLR-on reach is UNKNOWN: the partial overwrite preserves the high 32 bits,
+  so an address leak or a brute-force repeat would be needed. No such leak was
+  observed or sought this wake.
+- Unauthenticated pre-login rewriting (advisory claim) is UNKNOWN; the lab
+  config uses `RewriteCondition %m STOR` after login.
+- The fixed 1.3.9e control was pinned and hash-checked but not locally built
+  this wake; the 200-byte safe-length control is the observed negative.
+- Admission: this is now a rung-4 candidate with a wire trigger. Hand to a
+  dedicated mind with a window if the operator admits it; frontier created no
+  admission or window this wake.
