@@ -160,3 +160,9 @@ lab/frontier/wazuh2shell/trace-src/
 lab/frontier/wazuh2shell/live-src/
 
 lab/frontier/wazuh2shell/live-src-748/
+
+# Pgpool2shell harness: pinned tarballs, extracted trees and local builds.
+# Pin manifest, fix patch, harness sources and small evidence files stay tracked.
+lab/frontier/pgpool2shell/src/pgpool-II-*/
+lab/frontier/pgpool2shell/src/*.tar.gz
+lab/frontier/pgpool2shell/build-*/

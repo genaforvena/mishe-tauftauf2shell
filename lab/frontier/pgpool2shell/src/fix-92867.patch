@@ -1,0 +1,48 @@
+From 0388652d1b6f970a18c0b8ccaae9d9c79cece3c9 Mon Sep 17 00:00:00 2001
+From: Taiki Koshino <koshino@sraoss.co.jp>
+Date: Sun, 20 Sep 2026 12:37:42 +0900
+Subject: [PATCH] Fix operator precedence in parse_wd_node_function_json
+ NodeIdList write.
+
+In src/watchdog/wd_json_data.c parse_wd_node_function_json(), the loop
+body wrote
+
+    *node_id_set[i] = value->u.array.values[i]->u.integer;
+
+which by C precedence parses as *(node_id_set[i]). node_id_set is an
+int ** that aliases the caller's &node_id_list pointer. For i == 0 the
+write happens to land on the palloc'd destination buffer; for i >= 1 the
+indexing walks sizeof(int*) * i bytes past the int ** parameter into
+adjacent memory, dereferences the resulting garbage pointer, and stores
+a peer-controlled 32-bit integer there.
+
+Add the missing parentheses so the subscript applies to the dereferenced
+array: (*node_id_set)[i] = ...
+
+This is almost certainly the original intent - the single-node
+failover path (the common production case) hits only i == 0 and so the
+bug has not been observed in normal operation. Any NodeIdList of length
+two or more immediately fires the misbehaviour.
+
+Reported-by: Emond Papegaaij <emond.papegaaij@topicus.nl>
+Reported-by: Claude
+Author: Bo Peng <pengbo@sraoss.co.jp>
+CVE-2026-92867
+Backpatch-through: v4.3
+---
+ src/watchdog/wd_json_data.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/watchdog/wd_json_data.c b/src/watchdog/wd_json_data.c
+index 26ebd4b5e..41ac92e7c 100644
+--- a/src/watchdog/wd_json_data.c
++++ b/src/watchdog/wd_json_data.c
+@@ -857,7 +857,7 @@ parse_wd_node_function_json(char *json_data, int data_len, char **func_name, int
+ 	*node_id_set = palloc(sizeof(int) * node_count);
+ 	for (i = 0; i < node_count; i++)
+ 	{
+-		*node_id_set[i] = value->u.array.values[i]->u.integer;
++		(*node_id_set)[i] = value->u.array.values[i]->u.integer;
+ 	}
+ 	json_value_free(root);
+ 	return true;

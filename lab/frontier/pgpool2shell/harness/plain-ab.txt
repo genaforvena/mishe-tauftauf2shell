@@ -1,0 +1,12 @@
+### C: 4.7.2 plain NodeCount=1
+payload={"Function":"DEGENERATE_REQUEST","Flags":0,"NodeCount":1,"NodeIdList":[286331153]}
+&node_id_list=0x7fff268fc268  next_slot=0x7fff268fc270
+returned: func=DEGENERATE_REQUEST count=1 list=0x58b3023484b0 values=11111111,00000000
+### D: 4.7.2 plain NodeCount=2
+payload={"Function":"DEGENERATE_REQUEST","Flags":0,"NodeCount":2,"NodeIdList":[1094795585,1111638594]}
+&node_id_list=0x7ffff14c9ea8  next_slot=0x7ffff14c9eb0
+returned: func=DEGENERATE_REQUEST count=2 list=0x6029a44254e0 values=41414141,00000000
+### E: 4.7.3 fixed NodeCount=2
+payload={"Function":"DEGENERATE_REQUEST","Flags":0,"NodeCount":2,"NodeIdList":[1094795585,1111638594]}
+&node_id_list=0x7ffc274dc1a8  next_slot=0x7ffc274dc1b0
+returned: func=DEGENERATE_REQUEST count=2 list=0x564fec35a4e0 values=41414141,42424242

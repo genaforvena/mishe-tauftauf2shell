@@ -1,0 +1,16 @@
+Breakpoint 1 at 0x4ad3: file wd_json_data.c, line 897.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+payload={"Function":"DEGENERATE_REQUEST","Flags":0,"NodeCount":2,"NodeIdList":[1094795585,1111638594]}
+&node_id_list=0x7fffffffe178  next_slot=0x7fffffffe180
+
+Breakpoint 1, parse_wd_node_function_json (json_data=0x555555564060 <buf> "{\"Function\":\"DEGENERATE_REQUEST\",\"Flags\":0,\"NodeCount\":2,\"NodeIdList\":[1094795585,1111638594]}", data_len=94, func_name=0x7fffffffe170, node_id_set=0x7fffffffe178, count=0x7fffffffe160, flags=0x7fffffffe15f "") at wd_json_data.c:897
+897			(*node_id_set)[i] = value->u.array.values[i]->u.integer;
+i=0 node_id_set[0]=0x5555555654e0
+895		for (i = 0; i < node_count; i++)
+buffer after write: 41414141 00000000
+A debugging session is active.
+
+	Inferior 1 [process 1270197] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]
