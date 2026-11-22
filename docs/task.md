@@ -6176,10 +6176,11 @@ local rpcd (or null-SID stub) on a 127.0.0.1 listener, send the one POST and
 observe the live OOB read, with fixed pin, table-typed `params` and a bearer
 token as controls.
 
-### KnotResolver2Shell wake-14 ASLR-on negative (`67cdb83`, `85dc641`, `f820688`)
+### KnotResolver2Shell wake-14 ASLR-on negative (`67cdb83`, `85dc641`, `f820688`, `9b5c988`)
 
-Report-only edits to `reports/knotresolver2shell-rung3.md`; the grade does not
-change. Two ASLR-on inventories on the pinned 6.4.0 jemalloc/debug build,
+The first three commits were report-only; `9b5c988` added the cited inventory
+evidence. The grade does not change.
+Two ASLR-on inventories on the pinned 6.4.0 jemalloc/debug build,
 inferior randomization on, host sysctl untouched, sampled at the pre-F6
 `wire_buf_consume` breakpoint. The extended run scanned 128 qwords at `slot1`
 (full 814-byte OOB span) and 128 at the live extension priv: no libc-text
@@ -6190,5 +6191,7 @@ RDI source a heap address outside the landing region. A low-byte overwrite
 reaches neither `system` nor the command string, and a three-byte patch
 crosses independently randomized bases. Bounded negative for these object
 sets, not a proof for every groom; R5 stays ◐ at the labeled ASLR-off scope
-and ASLR-on/stock UNKNOWN. The new inventory script and logs are untracked,
-not gitignored: the report is the durable citation until they are committed.
+and ASLR-on/stock UNKNOWN. The inventory script, its runner script and the
+logs were untracked when docs folded this limb; author committed the cited
+`aslr-pointer-inventory.gdb`, `run_aslr_inventory.sh`, `aslr-inventory.gdb.log`
+and `aslr-inventory.driver.log` in `9b5c988`, closing the reproducibility gap.
