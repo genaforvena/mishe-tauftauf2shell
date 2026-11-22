@@ -26,9 +26,10 @@ external system.
   **chosen bytes at a chosen offset and chosen-value control of a pointer
   argument in a live stock process**, not a harness marker.
 - **Rung 5 remains UNKNOWN**: no lab-chosen command was executed, no code
-  execution or control-flow redirection was observed, and there has been no
-  independent witness replay of this wake's results. The debugger is an
-  observation tool, not execution. Do not relabel this as RCE.
+  execution or control-flow redirection was observed. The debugger is an
+  observation tool, not execution. Do not relabel this as RCE. Independent
+  witness replay of rungs 3/4 came back ESTABLISHED on a fresh clean rebuild
+  (W125, below); the witness also finds rung 5 UNKNOWN.
 
 ## Build provenance
 
@@ -147,13 +148,20 @@ with a corrupted chunk size in `_int_free_merge_chunk`
   debugger, with a stock build and a real wire trigger. It is **not** a
   demonstration of arbitrary code execution, a benign command side effect,
   or reliable control-flow redirection. Rung 5 requires all of those plus
-  independent witness replay; none is claimed.
+  independent witness replay; none is claimed. Witness W125 independently
+  replayed rungs 3/4 and agreed rung 5 stays UNKNOWN.
 - The HTTP bridge is a lab CGI adapter, not a production web server. It is
   sufficient to show that request bytes reach `msWMSDispatch`, not to claim
   exploitability behind a particular deployment's CGI configuration.
 - Frontier's rung 1/2/3/4 harness evidence and witness replay #770 remain
   separately ESTABLISHED at their INSTRUMENTED label; nothing here revises
-  that verdict, and this report has not yet been replayed by the witness.
+  that verdict. This report was independently replayed by witness W125
+  (below) and is ESTABLISHED at the labeled rung-3/rung-4 scope.
+- The cited canonical evidence files (`asan-vuln-K95.err`, `asan-vuln-K195.err`,
+  `plain-K195.err`, `bridge-child-stderr.log`, `readback-verified.txt` and the
+  gdb/consumer dumps) are gitignored lab artifacts, not git-tracked. The
+  witness compared against the live copies in this lab; a reader must
+  regenerate them with the Reproduce block to check byte equality.
 
 ## Rung-5 consumer-reality investigation (wake 2, 2026-11-22 ~04:15Z)
 
@@ -261,7 +269,8 @@ is lab-local: `asan-vuln-K195.err`, `plain-K195.err`, `gdb-deep-K195.txt`,
 - Disposition: the deeper-K pass broadens the wake-2 negative over ~3.2 KB
   of OOB writes instead of ~1.6 KB. Rung 5 stays UNKNOWN with the same named
   obstacles, not claimed and not refuted in general; rungs 3/4 are unchanged.
-  No independent witness replay of this report is in hand yet.
+  No witness replay was in hand at this wake; W125 closed that gap later
+  (below).
 
 ## Fresh-context replay (wake 6, 2026-11-22 ~17:08Z)
 
@@ -303,7 +312,51 @@ existing pinned binaries, with no rebuild:
 Both canonical evidence files were backed up and restored after the replay;
 no listener was left running (port 8077 free). Grade unchanged: stock-build
 wire rung 3 + live-process rung 4; rung 5 UNKNOWN. The independent witness
-verdict on replay #1279 remains the outstanding item.
+verdict on replay #1279 arrived in W125 and is recorded below.
+
+## Independent witness replay (W125, 2026-11-22)
+
+Witness replay #1279 (DMs #1686 and correcting #1688) returned **ESTABLISHED
+at the labeled scope**: rung 3 stock-build/wire write and rung 4 live-process
+chosen-value control, with rung 5 still UNKNOWN. No refutation and no
+substantive NIT.
+
+- Clean extraction: `git archive HEAD lab/mapserver2shell/` to `/tmp/w125-map`
+  at HEAD `62b3e76`; both tarballs re-hashed to the Build provenance values
+  (8.6.4 `41d3ee09…`, 8.6.5 `5d7cf167…`); extracted `mapwms.cpp` hashes
+  `74e0d502…` (vuln) / `cd330d585…` (fixed). Source-bound check confirms the
+  unbounded append at `mapwms.cpp:5991-5992`, no append loop in 8.6.5 and the
+  800-byte `msSmallMalloc(100*8)` at `cgiutil.c:498-500`.
+- Initial build gap, then closed: #1686 recorded that the `-O1` ASan
+  full-config build stalled ~20 min on `mapogcapi.cpp.o` under host load 12
+  (killed at the 300 s and 1200 s tool caps), and that an `OGCAPI=OFF`
+  shortcut does not compile (`mapogcapi.cpp` needs `getRequestParameter`);
+  that pass was a replay of this plant's pinned binaries. #1688 then
+  completed three **independent clean builds** on the witness's own tree —
+  full-config `-O0 -g` with `OGCAPI=ON`, same `WITH_*` flags and SHA-verified
+  tarballs: vulnerable ASan `955501d6…`, fixed ASan `73898391…`, plain debug
+  `6b477823…`. `-O0` vs this plant's `-O1` is the only flag deviation.
+- On those witness-built binaries: vulnerable ASan K=95 rc 1 with
+  `WRITE of size 8`, `mapwms.cpp:5991`, 0 bytes after an 800-byte region;
+  K=195 rc 1, 0 after a 1600-byte region; K=97/K=197 rc 0; fixed K=95/K=195
+  rc 0 with 595-byte XML; plain K=195 rc 134 `double free or corruption
+  (!prev)`. Both fresh ASan reports are byte-identical to the canonical
+  K95/K195 files after masking addresses, PIDs, paths, binary name and
+  BuildId.
+- Live rung 4 on the witness's plain build: `readback.sh 95` gives
+  NumParams=195 and byte-exact `DEADBEEFCAFEBABE` at `ParamValues[100]`,
+  `[150]`, `[190]`, masked output byte-identical to `readback-verified.txt`;
+  `libc_free` receives `mem=0x4141414141414141`, `0x4542414245464143` and
+  `0x5a5a5a5a5a5a5a5a` for the three chosen 8-byte payloads, backtrace
+  `CoordinateSystemAxis::~` → `CoordinateSystem::~` in libproj, rc 139 for
+  all three.
+- Wire: real GET on 127.0.0.1:8077 → HTTP 500 `X-Lab-Child-Rc: 1`, empty
+  body; 3812-byte child ASan stderr byte-identical to the canonical file
+  after masking. Bridge killed, 8077 free.
+- Grade after W125: rungs 3/4 ESTABLISHED independently of this plant's
+  binaries; rung 5 UNKNOWN with the consumer-reality negatives intact. The
+  "OWN BUILD GAP" from #1686 is a superseded intermediate state, preserved
+  here rather than hidden; the independent rebuild is no longer unverified.
 
 ## Reproduce
 

@@ -93,8 +93,8 @@ K=96/97 safe inputs are clean. A plain build under gdb shows the chosen
 `LAYER` string byte-exact at OOB slots 100/150/190 and a `free()` argument
 equal to the attacker's chosen 8 bytes. Rung 3 is ESTABLISHED on a stock
 build and wire path; rung 4 is LIVE-PROCESS OBSERVED (debugger), not
-execution; rung 5 remains UNKNOWN pending execution, controls and witness
-replay.
+execution; rung 5 remains UNKNOWN pending execution and controls. Independent
+witness replay of rungs 3/4 later arrived as W125 (below).
 
 ## Rung-5 disposition (wake 2, 2026-11-22 ~04:15Z)
 
@@ -125,3 +125,23 @@ no call-through route from this primitive on these builds. Rung 5 stays
 UNKNOWN with named obstacles; rungs 3/4 unchanged. Witness replay #1279 plus
 the wake-2/3 addenda was still unanswered at 04:33Z (witness busy on wazuh,
 netx and vrpn).
+
+## Independent witness replay (W125, 2026-11-22)
+
+Witness verdict on the live report (#1279 with the wake-2/3/4/6 addenda
+#1301/#1309/#1324/#1451): **ESTABLISHED at the labeled rung-3/rung-4 scope,
+no refutation, no substantive NIT**. The witness re-hashed the SHA-pinned
+tarballs and extracted sources from a clean `git archive`, confirmed the
+unbounded append at `mapwms.cpp:5991-5992`, then completed three of its own
+full-config `-O0 -g` builds (`OGCAPI=ON`, same `WITH_*` flags): vulnerable ASan
+`955501d6…`, fixed ASan `73898391…`, plain debug `6b477823…`. On those
+binaries all controls matched (vuln K=95/K=195 ASan WRITE past 800/1600 bytes,
+fixed and K=97/K=197 clean, plain K=195 glibc double free), the ASan stderr
+was byte-identical to the canonical files after masking, the gdb readback gave
+byte-exact chosen bytes and `libc_free` arguments, and a real 127.0.0.1 GET
+reproduced the write. Rung 5 stays UNKNOWN with the consumer-reality negatives
+intact. An initial `-O1` ASan build gap (mapogcapi.cpp.o under load 12) was
+closed by the `-O0` rebuild; the only flag deviation from this plant is
+`-O0` vs `-O1`. Full detail in `reports/mapserver2shell-live.md`,
+"Independent witness replay". The cited canonical evidence files are
+gitignored lab artifacts, not git-tracked.
