@@ -1,38 +1,24 @@
 #!/usr/bin/env python3
 """Extract verbatim pinned functions into an include file for the C harness.
 
-Line ranges are checked against the pinned blobs (git show <pin>:<path>); the
-extracted text is emitted byte-for-byte, never retyped.
+Reads the committed pinned blobs in ../pins/ so the harness is self-contained in
+a clean git archive (no source clone or .git needed). Line ranges are checked
+against those blobs; extracted text is emitted byte-for-byte, never retyped.
 """
-import subprocess
+import os
 import sys
 
-ROOT = __import__("os").path.dirname(__import__("os").path.dirname(
-    __import__("os").path.abspath(__file__)))
-SRC = ROOT + "/src"
+HERE = os.path.dirname(os.path.abspath(__file__))
+PINS = os.path.join(os.path.dirname(HERE), "pins")
 
 CASES = {
-    "vuln": "929671c22ff9f390f22decd7eb97dffaece8aebe",
-    "fixed": "d8493e0d6420b91737fa34c2cd7bbd365d023b5b",
-}
-
-EXPECT = {
-    "tac_plus-ng/author.c": (66, 97),
+    "vuln": ("packet-vuln.c", "author-vuln.c"),
+    "fixed": ("packet-fixed.c", "author-fixed.c"),
 }
 
 # validator functions: author 511-524, accounting 526-539
-RANGES = {
-    "vuln": {
-        "tac_plus-ng/packet.c": [(511, 524), (526, 539)],
-    },
-    "fixed": {
-        "tac_plus-ng/packet.c": [(511, 524), (526, 539)],
-    },
-}
-
-
-def blob(pin, path):
-    return subprocess.check_output(["git", "-C", SRC, "show", f"{pin}:{path}"]).decode()
+PACKET_RANGES = [(511, 524), (526, 539)]
+AUTHOR_RANGE = (66, 97)
 
 
 def extract(text, start, end):
@@ -42,17 +28,18 @@ def extract(text, start, end):
 
 def main():
     case = sys.argv[1]
-    pin = CASES[case]
+    packet_file, author_file = CASES[case]
     out = []
-    for path, ranges in RANGES[case].items():
-        text = blob(pin, path)
-        for a, b in ranges:
-            out.append(f"/* verbatim {pin}:{path}:{a}-{b} */")
-            out.append(extract(text, a, b))
-    text = blob(pin, "tac_plus-ng/author.c")
-    a, b = EXPECT["tac_plus-ng/author.c"]
-    out.append(f"/* verbatim {pin}:tac_plus-ng/author.c:{a}-{b} */")
-    out.append(extract(text, a, b))
+    with open(os.path.join(PINS, packet_file)) as f:
+        packet = f.read()
+    with open(os.path.join(PINS, author_file)) as f:
+        author = f.read()
+    for a, b in PACKET_RANGES:
+        out.append(f"/* verbatim {case}:tac_plus-ng/packet.c:{a}-{b} */")
+        out.append(extract(packet, a, b))
+    a, b = AUTHOR_RANGE
+    out.append(f"/* verbatim {case}:tac_plus-ng/author.c:{a}-{b} */")
+    out.append(extract(author, a, b))
     sys.stdout.write("\n".join(out) + "\n")
 
 
