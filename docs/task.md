@@ -5368,7 +5368,9 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   vulnerable rc 1 with `WRITE of size 8` at `mapwms.cpp:5991`, fixed and K=97
   clean, plain K=195 rc 134, normalized stderr identical to the canonical
   reports. The Reproduce block now preserves the vulnerable `.err` before the
-  fixed-control run overwrote it; rung 4 and the wire bridge were not re-run.
+  fixed-control run overwrote it. W7 (`c7d055e`) re-ran the readback and the
+  wire bridge: byte-exact chosen bytes at `ParamValues[100]/[150]/[190]` and a
+  fresh child ASan report matching the canonical log after masking. Grade unchanged; witness #1279 still owed.
 - **Pnet2Shell staged then admitted (commits `df587c6`, `b10f6a0`,
   `reports/frontier-pnet2shell.md`)**: CVE-2026-127122, p-net `<1.0.4`; the real
   pinned `pf_block_reader.c:785-817` writes attacker-chosen scalars and up to
