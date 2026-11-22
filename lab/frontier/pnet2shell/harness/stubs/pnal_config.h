@@ -1,0 +1,3 @@
+#ifndef HARNESS_PNAL_CONFIG_H
+#define HARNESS_PNAL_CONFIG_H
+#endif

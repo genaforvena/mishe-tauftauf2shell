@@ -1,0 +1,4 @@
+sizeof(pf_ar_t)=49600 sizeof(pf_multicast_cr_t)=252 PNET_MAX_MC_CR=1 blocks=2
+reject: block 1, nbr_mcr=1, WRONG_BLOCK_COUNT
+accepted=1 nbr_mcr=1
+readback: slot1_offset=252 iocr=0000 protocol=00 resolution=00 timeout=0000 namelen=0 name=00000000a14b01000000000000000000

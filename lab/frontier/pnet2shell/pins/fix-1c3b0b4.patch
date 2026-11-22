@@ -1,0 +1,2815 @@
+diff --git a/src/common/pf_alarm.c b/src/common/pf_alarm.c
+index 6803cd9d..0e895b9d 100644
+--- a/src/common/pf_alarm.c
++++ b/src/common/pf_alarm.c
+@@ -749,6 +749,8 @@ static int pf_alarm_apmr_frame_handler (
+    pf_get_info_t get_info;
+    pf_ar_t * ar;
+    uint16_t alarm_endpoint;
++   uint16_t source_endpoint;
++   pnet_ethaddr_t source_mac;
+    uint16_t pos;
+    int ret;
+ 
+@@ -772,6 +774,7 @@ static int pf_alarm_apmr_frame_handler (
+ 
+       pos = frame_id_pos + sizeof (uint16_t); /* Skip frame_id. */
+       alarm_endpoint = pf_get_uint16(&get_info, &pos);
++      source_endpoint = pf_get_uint16 (&get_info, &pos);
+ 
+       if (
+          (alarm_endpoint > 0) && (alarm_endpoint <= PNET_MAX_AR) &&
+@@ -780,6 +783,30 @@ static int pf_alarm_apmr_frame_handler (
+          ar = net->alarm_endpoint[alarm_endpoint - 1].ar;
+       }
+ 
++      /* Only accept alarm frames from the alarm endpoint of the IO-controller
++         of the AR */
++      if (ar != NULL)
++      {
++         pos = sizeof (pnet_ethaddr_t); /* Skip destination address */
++         pf_get_mem (&get_info, &pos, sizeof (source_mac), &source_mac);
++         if (
++            (get_info.result != PF_PARSE_OK) ||
++            (memcmp (
++                &source_mac,
++                &ar->apmx[priority].da,
++                sizeof (source_mac)) != 0) ||
++            (source_endpoint != ar->apmx[priority].dst_ref))
++         {
++            LOG_WARNING (
++               PF_ALARM_LOG,
++               "Alarm(%d): Incoming %s prio alarm frame is not from the "
++               "alarm endpoint of the IO-controller of the AR.\n",
++               __LINE__,
++               priority ? "high" : "low");
++            ar = NULL;
++         }
++      }
++
+       if (
+          (ar != NULL) && (pf_alarm_receive_queue_post (
+                              &ar->apmx[priority].alarm_receive_q,
+@@ -1812,10 +1839,32 @@ static int pf_alarm_apmr_a_data_ind (
+          if (p_fixed->send_seq_num == p_apmx->exp_seq_count)
+          {
+             pf_get_block_header (p_get_info, &pos, &block_header);
++            if (p_get_info->result != PF_PARSE_OK)
++            {
++               LOG_ERROR (
++                  PF_ALARM_LOG,
++                  "Alarm(%d): Failed to parse block header\n",
++                  __LINE__);
++               ret = -1; /* Frame is dropped, no state is changed */
++               break;
++            }
++
+             if (block_header.block_type == p_apmx->block_type_alarm_ack)
+             {
+                /* This message is an Alarm ACK PDU. Parse it and deliver to
+                 * ALPMI. */
++               pf_get_alarm_ack (p_get_info, &pos, &alarm_data);
++               pf_get_pnio_status (p_get_info, &pos, &pnio_status);
++               if (p_get_info->result != PF_PARSE_OK)
++               {
++                  LOG_ERROR (
++                     PF_ALARM_LOG,
++                     "Alarm(%d): Error parsing Alarm ACK\n",
++                     __LINE__);
++                  ret = -1; /* Frame is dropped, no state is changed */
++                  break;
++               }
++
+                LOG_DEBUG (
+                   PF_ALARM_LOG,
+                   "Alarm(%d): The incoming Alarm DATA message is an ACK PDU. "
+@@ -1836,7 +1885,6 @@ static int pf_alarm_apmr_a_data_ind (
+ 
+                   /* APMR: A_Data_cnf is triggered here*/
+ 
+-                  pf_get_pnio_status (p_get_info, &pos, &pnio_status);
+                   ret = pf_alarm_alpmi_apmr_a_data_ind (
+                      net,
+                      p_apmx,
+@@ -1851,6 +1899,22 @@ static int pf_alarm_apmr_a_data_ind (
+             {
+                /* This message is an Alarm Notification PDU. Parse it and
+                 * deliver to ALPMR. */
++               uint8_t data[PF_MAX_ALARM_PAYLOAD_DATA_SIZE];
++
++               pf_get_alarm_data (p_get_info, &pos, &alarm_data);
++               data_usi = pf_get_uint16 (p_get_info, &pos);
++               data_len -= (pos - start_pos);
++               pf_get_mem_s (p_get_info, &pos, data_len, data, sizeof (data));
++               if (p_get_info->result != PF_PARSE_OK)
++               {
++                  LOG_ERROR (
++                     PF_ALARM_LOG,
++                     "Alarm(%d): Error parsing Alarm notification\n",
++                     __LINE__);
++                  ret = -1; /* Frame is dropped, no state is changed */
++                  break;
++               }
++
+                LOG_DEBUG (
+                   PF_ALARM_LOG,
+                   "Alarm(%d): The incoming Alarm DATA message is an alarm "
+@@ -1867,35 +1931,18 @@ static int pf_alarm_apmr_a_data_ind (
+                ret = pf_alarm_apmr_send_ack (net, p_apmx);
+                if (ret == 0)
+                {
+-                  uint8_t data[PF_MAX_ALARM_PAYLOAD_DATA_SIZE];
+-
+                   p_apmx->apmr_state = PF_APMR_STATE_WCNF;
+ 
+                   /* APMR: A_Data_cnf is triggered here*/
+ 
+-                  pf_get_alarm_data (p_get_info, &pos, &alarm_data);
+-                  data_usi = pf_get_uint16 (p_get_info, &pos);
+-                  data_len -= (pos - start_pos);
+-                  pf_get_mem_s (p_get_info, &pos, data_len, data, sizeof (data));
+-                  if (p_get_info->result == PF_PARSE_OK)
+-                  {
+-                     ret = pf_alarm_alpmr_apmr_a_data_ind (
+-                        net,
+-                        p_apmx,
+-                        p_fixed,
+-                        &alarm_data,
+-                        data_len,
+-                        data_usi,
+-                        data); /* APMR: APMR_A_Data.ind */
+-                  }
+-                  else
+-                  {
+-                     LOG_ERROR (
+-                        PF_ALARM_LOG,
+-                        "Alarm(%d): Error parsing Alarm notification\n",
+-                        __LINE__);
+-                     ret = -1;
+-                  }
++                  ret = pf_alarm_alpmr_apmr_a_data_ind (
++                     net,
++                     p_apmx,
++                     p_fixed,
++                     &alarm_data,
++                     data_len,
++                     data_usi,
++                     data); /* APMR: APMR_A_Data.ind */
+                   if (ret == 0)
+                   {
+                      p_apmx->apmr_state = PF_APMR_STATE_OPEN;
+diff --git a/src/device/pf_block_writer.c b/src/device/pf_block_writer.c
+index 873a4a57..72877d60 100644
+--- a/src/device/pf_block_writer.c
++++ b/src/device/pf_block_writer.c
+@@ -1527,6 +1527,29 @@ void pf_put_dce_rpc_header (
+    pf_put_byte (p_rpc->serial_low, res_len, p_bytes, p_pos);
+ }
+ 
++void pf_put_dce_rpc_cancel_ack (
++   const pf_rpc_header_t * p_rpc_req,
++   uint16_t res_len,
++   uint8_t * p_bytes,
++   uint16_t * p_pos)
++{
++   pf_rpc_header_t rpc = *p_rpc_req;
++   uint16_t pos_body_len;
++
++   rpc.packet_type = PF_RPC_PT_CANCEL_ACK;
++   rpc.flags.last_fragment = false;
++   rpc.flags.fragment = false;
++   rpc.flags.no_fack = true;
++   rpc.flags.maybe = false;
++   rpc.flags.idempotent = true;
++   rpc.flags.broadcast = false;
++   rpc.flags2.cancel_pending = false;
++   rpc.length_of_body = 0;
++   rpc.fragment_nmb = 0;
++
++   pf_put_dce_rpc_header (&rpc, res_len, p_bytes, p_pos, &pos_body_len);
++}
++
+ void pf_put_record_data_read (
+    bool is_big_endian,
+    pf_block_type_values_t block_type,
+diff --git a/src/device/pf_block_writer.h b/src/device/pf_block_writer.h
+index f9092b89..f31d366a 100644
+--- a/src/device/pf_block_writer.h
++++ b/src/device/pf_block_writer.h
+@@ -479,6 +479,25 @@ void pf_put_dce_rpc_header (
+    uint16_t * p_pos,
+    uint16_t * p_pos_body_len);
+ 
++/**
++ * Insert a connectionless DCE RPC cancel_ack PDU into a buffer.
++ *
++ * The header is derived from the cancel PDU that is answered, so the activity,
++ * sequence number and endianness are the same. The PDU has no body, which
++ * acknowledges that the call is orphaned and not processed any further.
++ * See DCE 1.1: RPC, 12.5.3.2.
++ *
++ * @param p_rpc_req        In:   The DCE RPC header of the cancel PDU.
++ * @param res_len          In:   Size of destination buffer.
++ * @param p_bytes          Out:  Destination buffer.
++ * @param p_pos            InOut:Position in destination buffer.
++ */
++void pf_put_dce_rpc_cancel_ack (
++   const pf_rpc_header_t * p_rpc_req,
++   uint16_t res_len,
++   uint8_t * p_bytes,
++   uint16_t * p_pos);
++
+ /**
+  * Insert a write result into a buffer.
+  * @param is_big_endian    In:   Endianness of the destination buffer.
+diff --git a/src/device/pf_cmina.c b/src/device/pf_cmina.c
+index 1289ab2d..fa511120 100644
+--- a/src/device/pf_cmina.c
++++ b/src/device/pf_cmina.c
+@@ -653,6 +653,12 @@ int pf_cmina_dcp_set_ind (
+    bool temp = ((block_qualifier & 1) == 0);
+    uint16_t reset_mode = 0;
+ 
++   /* To restore the IP suites if the request is refused */
++   pf_full_ip_suite_t current_ip_suite =
++      net->cmina_current_dcp_ase.full_ip_suite;
++   pf_full_ip_suite_t nonvolatile_ip_suite =
++      net->cmina_nonvolatile_dcp_ase.full_ip_suite;
++
+    /* Stop sending Hello packets */
+    pf_scheduler_remove_if_running (net, &net->cmina_hello_timeout);
+ 
+@@ -916,9 +922,6 @@ int pf_cmina_dcp_set_ind (
+    /* Use parsed DCP SET request, depending on actual CMINA state */
+    if (ret == 0)
+    {
+-      /* Save to file */
+-      (void)pf_bg_worker_start_job (net, PF_BGJOB_SAVE_ASE_NVM_DATA);
+-
+       /* Evaluate what we have and where to go */
+       have_name = (strlen (net->cmina_current_dcp_ase.station_name) > 0);
+       have_ip =
+@@ -1080,6 +1083,18 @@ int pf_cmina_dcp_set_ind (
+          }
+          break;
+       }
++
++      if (ret == 0)
++      {
++         /* The request is accepted. Save to file */
++         (void)pf_bg_worker_start_job (net, PF_BGJOB_SAVE_ASE_NVM_DATA);
++      }
++      else
++      {
++         /* The request is refused, so it shall not change anything */
++         net->cmina_current_dcp_ase.full_ip_suite = current_ip_suite;
++         net->cmina_nonvolatile_dcp_ase.full_ip_suite = nonvolatile_ip_suite;
++      }
+    }
+ 
+    /*
+diff --git a/src/device/pf_cmrpc.c b/src/device/pf_cmrpc.c
+index 355febdb..6f11e7af 100644
+--- a/src/device/pf_cmrpc.c
++++ b/src/device/pf_cmrpc.c
+@@ -72,6 +72,22 @@
+    (PF_CMRPC_MUST_RECV_FRAG_SIZE - PF_CMRPC_PDU_HEADER_SIZE)
+ #define PF_CMRPC_EPM_SESSION_TMO_IN_US (5000000)
+ 
++/* Timeout for a partially received, fragmented request on a session of a
++   controller without an AR. It is restarted for every fragment that is
++   received, and the session is released when it expires.
++
++   The sender of a fragment repeats it up to three times, after 2 s each,
++   if it is not acknowledged (Timeout FRAG, PN-AL-protocol, 4.10.5.2). If no
++   fragment has been received within 4 * 2 s = 8 s, the sender has given up
++   the call. The CallTimer that detects a partial request for RSI uses the
++   same value (PN-AL-protocol, Table 304). DCE 1.1: RPC aborts a call that
++   is not completed within TIMEOUT_IDLE (CL_SERVER, 10.2), but that value is
++   not used for PROFINET (4.10.5.2).
++
++   A session with an AR is monitored by the AR instead, and the fragments of
++   a call that is given up are dropped when the next call starts. */
++#define PF_CMRPC_CALL_TMO_IN_US (4 * 2000000)
++
+ static const pf_uuid_t implicit_ar = {0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}};
+ 
+ static const pf_uuid_t uuid_epmap_interface = {
+@@ -526,6 +542,7 @@ static int pf_session_allocate (pnet_t * net, pf_session_info_t ** pp_sess)
+       p_sess->ix = ix;
+       pf_scheduler_init_handle (&p_sess->resend_timeout, "rpc");
+       pf_scheduler_init_handle (&p_sess->epm_timeout, "rpc-lookup");
++      pf_scheduler_init_handle (&p_sess->call_timeout, "rpc-call");
+ 
+       /* Set activity UUID. Will be overwritten for incoming requests. */
+       pf_generate_uuid (
+@@ -574,6 +591,7 @@ static void pf_session_release (pnet_t * net, pf_session_info_t * p_sess)
+ 
+          pf_scheduler_remove_if_running (net, &p_sess->resend_timeout);
+          pf_scheduler_remove_if_running (net, &p_sess->epm_timeout);
++         pf_scheduler_remove_if_running (net, &p_sess->call_timeout);
+ 
+          LOG_DEBUG (
+             PF_RPC_LOG,
+@@ -615,6 +633,95 @@ static void pf_session_epm_timeout (
+    pf_session_release (net, p_session);
+ }
+ 
++/**
++ * @internal
++ *
++ * The rest of a fragmented request was not received in time on a session of
++ * a controller without an AR. Release the session, as it is not used for
++ * anything else.
++ *
++ * @param net              InOut: The p-net stack instance
++ * @param arg              InOut: The session instance.
++ * @param current_time     In: Time when the timeout function was scheduled
++ */
++static void pf_session_call_timeout (
++   pnet_t * net,
++   void * arg,
++   uint32_t current_time)
++{
++   struct pf_session_info * p_session = (struct pf_session_info *)arg;
++
++   LOG_DEBUG (
++      PF_RPC_LOG,
++      "CMRPC(%d): Fragmented request not completed in time on session %u\n",
++      __LINE__,
++      (unsigned)p_session->ix);
++
++   pf_session_release (net, p_session);
++}
++
++/**
++ * @internal
++ * Check if something releases the session later.
++ *
++ * A session that the device has created is released by the device. A session
++ * of a controller is released when its AR is aborted, or by the timeout of an
++ * EPM lookup sequence, of a fragmented request or of the resends of a
++ * fragmented response.
++ *
++ * @param p_sess           In:    The session.
++ * @return  true  if something releases the session later.
++ */
++static bool pf_session_is_monitored (const pf_session_info_t * p_sess)
++{
++   return p_sess->from_me || (p_sess->p_ar != NULL) ||
++          pf_scheduler_is_running (&p_sess->epm_timeout) ||
++          pf_scheduler_is_running (&p_sess->call_timeout) ||
++          pf_scheduler_is_running (&p_sess->resend_timeout);
++}
++
++/**
++ * @internal
++ * Check if a PDU is the answer to the call that the device has sent last.
++ *
++ * A call is identified by the activity UUID and the sequence number
++ * (DCE 1.1: RPC, 9.5.3). The device sends one call at a time in a session that
++ * it has created, and the sequence number of the call that was sent last is
++ * one less than the next to send.
++ *
++ * @param p_sess           In:    The session found by the activity UUID.
++ * @param p_rpc            In:    The RPC header of the PDU.
++ * @return  true  if the PDU is the answer to the call that was sent last.
++ */
++static bool pf_cmrpc_is_answer_to_call (
++   const pf_session_info_t * p_sess,
++   const pf_rpc_header_t * p_rpc)
++{
++   return p_sess->from_me && (p_sess->p_ar != NULL) &&
++          (p_rpc->sequence_nmb == (p_sess->sequence_nmb_send - 1));
++}
++
++/**
++ * @internal
++ * Check if a PDU concerns the call that the device has received last.
++ *
++ * A call is identified by the activity UUID and the sequence number
++ * (DCE 1.1: RPC, 9.5.3). A session of a controller, where the device is the
++ * server, stores the sequence number of the last request that was received
++ * from it.
++ *
++ * @param p_sess           In:    The session found by the activity UUID.
++ * @param p_rpc            In:    The RPC header of the PDU.
++ * @return  true  if the PDU concerns the call that was received last.
++ */
++static bool pf_cmrpc_is_received_call (
++   const pf_session_info_t * p_sess,
++   const pf_rpc_header_t * p_rpc)
++{
++   return !p_sess->from_me &&
++          (p_rpc->sequence_nmb == p_sess->sequence_nmb_recv);
++}
++
+ /**
+  * @internal
+  * Find a session (in use) by its activity UUID.
+@@ -1136,6 +1243,20 @@ static void pf_cmrpc_send_with_timeout (
+                p_sess->socket = -1;
+             }
+          }
++         else if (p_sess->p_ar == NULL)
++         {
++            /* No reaction to sent fragment, on a session that is not linked
++               to an AR. Only a Connect links its session to the AR, also when
++               a later request on another activity is for the AR. There is no
++               AR to abort, and the session is not used for anything else. */
++            LOG_ERROR (
++               PF_RPC_LOG,
++               "CMRPC(%d): Fragment has been sent, but timing out due to lack "
++               "of incoming message. Releasing session %u.\n",
++               __LINE__,
++               (unsigned)p_sess->ix);
++            pf_session_release (p_net, p_sess);
++         }
+          else
+          {
+             /* Error: No reaction to sent fragment */
+@@ -1538,37 +1659,62 @@ static int pf_cmrpc_rm_connect_interpret_ind (
+ #endif
+ #if PNET_OPTION_MC_CR
+          case PF_BT_MCR_REQ:
+-            pf_get_mcr_request (&p_sess->get_info, p_pos, p_ar->nbr_mcr, p_ar);
+-            if (p_sess->get_info.result != PF_PARSE_OK)
+-            {
+-               pf_set_error (
+-                  &p_sess->rpc_result,
+-                  PNET_ERROR_CODE_CONNECT,
+-                  PNET_ERROR_DECODE_PNIO,
+-                  PNET_ERROR_CODE_1_CONN_FAULTY_MCR_BLOCK_REQ,
+-                  PNET_ERROR_CODE_2_FAULTY_MCR_BLOCK_REQ_WRONG_NAME_LENGTH);
+-               ret = -1;
+-            }
+-            else if (p_ar->ar_param.ar_properties.device_access == true)
++            /* The number of MCR blocks that fit is a limit of the AR
++               (mcr_request[]), not something the parser can know about. */
++            if (!(p_ar->nbr_mcr < PNET_MAX_MC_CR))
+             {
++               LOG_ERROR (
++                  PF_RPC_LOG,
++                  "CMRPC(%d): Too many MCR given. Max %u MCR per AR "
++                  "supported\n",
++                  __LINE__,
++                  PNET_MAX_MC_CR);
+                pf_set_error (
+                   &p_sess->rpc_result,
+                   PNET_ERROR_CODE_CONNECT,
+                   PNET_ERROR_DECODE_PNIO,
+                   PNET_ERROR_CODE_1_CMRPC,
+-                  PNET_ERROR_CODE_2_CMRPC_UNKNOWN_BLOCKS);
++                  PNET_ERROR_CODE_2_CMRPC_WRONG_BLOCK_COUNT);
+                ret = -1;
+             }
+             else
+             {
+-               ret = pf_check_block_header (
+-                  (*p_pos - data_pos) + 2,
+-                  &block_header,
+-                  PNET_ERROR_CODE_1_CONN_FAULTY_MCR_BLOCK_REQ,
+-                  &p_sess->rpc_result);
+-               if (ret == 0)
++               pf_get_mcr_request (
++                  &p_sess->get_info,
++                  p_pos,
++                  p_ar->nbr_mcr,
++                  p_ar);
++               if (p_sess->get_info.result != PF_PARSE_OK)
+                {
+-                  p_ar->nbr_mcr++;
++                  pf_set_error (
++                     &p_sess->rpc_result,
++                     PNET_ERROR_CODE_CONNECT,
++                     PNET_ERROR_DECODE_PNIO,
++                     PNET_ERROR_CODE_1_CONN_FAULTY_MCR_BLOCK_REQ,
++                     PNET_ERROR_CODE_2_FAULTY_MCR_BLOCK_REQ_WRONG_NAME_LENGTH);
++                  ret = -1;
++               }
++               else if (p_ar->ar_param.ar_properties.device_access == true)
++               {
++                  pf_set_error (
++                     &p_sess->rpc_result,
++                     PNET_ERROR_CODE_CONNECT,
++                     PNET_ERROR_DECODE_PNIO,
++                     PNET_ERROR_CODE_1_CMRPC,
++                     PNET_ERROR_CODE_2_CMRPC_UNKNOWN_BLOCKS);
++                  ret = -1;
++               }
++               else
++               {
++                  ret = pf_check_block_header (
++                     (*p_pos - data_pos) + 2,
++                     &block_header,
++                     PNET_ERROR_CODE_1_CONN_FAULTY_MCR_BLOCK_REQ,
++                     &p_sess->rpc_result);
++                  if (ret == 0)
++                  {
++                     p_ar->nbr_mcr++;
++                  }
+                }
+             }
+             break;
+@@ -3291,8 +3437,8 @@ static int pf_cmrpc_perform_one_write (
+          1);
+    }
+    else if (
+-      (*p_req_pos + p_write_request->record_data_length) <=
+-      p_sess->get_info.len)
++      p_write_request->record_data_length <=
++      (uint32_t)(p_sess->get_info.len - *p_req_pos))
+    {
+       if (p_write_request->index <= PF_IDX_USER_MAX)
+       {
+@@ -3321,7 +3467,8 @@ static int pf_cmrpc_perform_one_write (
+                2);
+          }
+       }
+-      else
++      else if (
++         p_write_request->record_data_length >= sizeof (pf_block_header_t))
+       {
+          /*
+           * Write requests are special: There are so many different block types
+@@ -3355,15 +3502,26 @@ static int pf_cmrpc_perform_one_write (
+                2);
+          }
+       }
++      else
++      {
++         /* The record data must contain the block header */
++         pf_set_error (
++            p_stat,
++            PNET_ERROR_CODE_WRITE,
++            PNET_ERROR_DECODE_PNIORW,
++            PNET_ERROR_CODE_1_ACC_WRITE_LENGTH_ERROR,
++            0);
++      }
+    }
+    else
+    {
++      /* The record data does not fit in the request */
+       pf_set_error (
+          p_stat,
+          PNET_ERROR_CODE_WRITE,
+-         PNET_ERROR_DECODE_PNIORW,
+-         PNET_ERROR_CODE_1_ACC_INVALID_AREA_API,
+-         4);
++         PNET_ERROR_DECODE_PNIO,
++         PNET_ERROR_CODE_1_CMRPC,
++         PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
+    }
+ 
+    if (ret != 0)
+@@ -3421,11 +3579,34 @@ static int pf_cmrpc_rm_write_ind (
+     * It might be the only one, but that will be dealt with below.
+     */
+    req_start_pos = req_pos; /* Start of request blocks */
+-   ret = pf_cmrpc_rm_write_interpret_ind (
+-      &p_sess->get_info,
+-      &write_request,
+-      &req_pos,
+-      &p_sess->rpc_result);
++
++   /* The arguments are the rest of the request, as in the other operations. */
++   if (
++      p_sess->ndr_data.args_length !=
++      (uint32_t)(p_sess->get_info.len - req_start_pos))
++   {
++      ret = -1;
++   }
++   else
++   {
++      ret = pf_cmrpc_rm_write_interpret_ind (
++         &p_sess->get_info,
++         &write_request,
++         &req_pos,
++         &p_sess->rpc_result);
++   }
++
++   if (ret != 0)
++   {
++      /* The arguments are not in the request, or the request header is not
++         within them. Keep an error from an unknown block. */
++      pf_set_error_if_not_already_set (
++         &p_sess->rpc_result,
++         PNET_ERROR_CODE_WRITE,
++         PNET_ERROR_DECODE_PNIO,
++         PNET_ERROR_CODE_1_CMRPC,
++         PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++   }
+ 
+    /*
+     * Prepare the response buffer by writing dummy data and recording their
+@@ -3548,14 +3729,34 @@ static int pf_cmrpc_rm_write_ind (
+          }
+          else /* single write */
+          {
+-            /* Do the write, and store the corresponding response block */
+-            ret = pf_cmrpc_perform_one_write (
+-               net,
+-               p_sess,
+-               &write_request,
+-               &write_result,
+-               &p_sess->rpc_result,
+-               &req_pos);
++            if (
++               write_request.record_data_length !=
++               (uint32_t)(p_sess->get_info.len - req_pos))
++            {
++               /* The record shall be the rest of the arguments, as the
++                  ArgsLength is the length of the request header and the
++                  record data. This is checked before the header of the
++                  request is used. */
++               pf_set_error (
++                  &p_sess->rpc_result,
++                  PNET_ERROR_CODE_WRITE,
++                  PNET_ERROR_DECODE_PNIO,
++                  PNET_ERROR_CODE_1_CMRPC,
++                  PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++               write_result.pnio_status = p_sess->rpc_result.pnio_status;
++               ret = -1;
++            }
++            else
++            {
++               /* Do the write, and store the corresponding response block */
++               ret = pf_cmrpc_perform_one_write (
++                  net,
++                  p_sess,
++                  &write_request,
++                  &write_result,
++                  &p_sess->rpc_result,
++                  &req_pos);
++            }
+             pf_put_write_result (
+                p_sess->get_info.is_big_endian,
+                &write_result,
+@@ -4349,6 +4550,7 @@ int pf_cmrpc_dce_packet (
+    bool is_new_session = false;
+    uint32_t fault_code = 0;
+    uint32_t reject_code = 0;
++   bool reject_call = false;
+    bool set_state_paramend = false;
+ 
+    get_info.result = PF_PARSE_OK;
+@@ -4372,8 +4574,63 @@ int pf_cmrpc_dce_packet (
+       rpc_req.flags.last_fragment ? "Set" : "Not set",
+       rpc_req.flags.no_fack ? "Set" : "Not set");
+ 
+-   /* Find the session (by RPC activity UUID) or allocate a new session */
++   /* Find the session (by RPC activity UUID) */
+    pf_session_locate_by_uuid (net, &rpc_req.activity_uuid, &p_sess);
++
++   /*
++    * Reject, fault and cancel PDUs are not requests. A reject and a fault are
++    * sent by a server to a client as the answer to a call, and a cancel by a
++    * client to a server. See DCE 1.1: RPC, 12.5.3.3, 12.5.3.5 and 12.5.3.8.
++    *
++    * A cancel concerns one call and not the activity. The server answers a
++    * cancel for the call that was received last in the session with a
++    * cancel_ack (12.5.3.2, and the CL_SERVER machine in 10.2). The device can
++    * not cancel the processing of a call, so the cancel_ack has no body, which
++    * acknowledges that the call is orphaned. A cancel for another call, or
++    * another activity, is silently dropped.
++    *
++    * A reject and a fault are handled by the client part, for the CControl
++    * call that the device has sent. They are otherwise silently dropped,
++    * without allocating or changing any session.
++    */
++   if (rpc_req.packet_type == PF_RPC_PT_CL_CANCEL)
++   {
++      if ((p_sess == NULL) || !pf_cmrpc_is_received_call (p_sess, &rpc_req))
++      {
++         LOG_DEBUG (
++            PF_RPC_LOG,
++            "CMRPC(%d): Dropping a cancel that is not for the call that was "
++            "received last\n",
++            __LINE__);
++         return 0;
++      }
++
++      LOG_DEBUG (PF_RPC_LOG, "CMRPC(%d): Cancel ack\n", __LINE__);
++      pf_put_dce_rpc_cancel_ack (&rpc_req, *p_res_len, p_res, &res_pos);
++
++      p_sess->ip_addr = ip_addr;
++      p_sess->port = port;
++      pf_cmrpc_send_once_from_buffer (net, p_sess, p_res, res_pos, "cancel ack");
++      return 0;
++   }
++
++   if (
++      (rpc_req.packet_type == PF_RPC_PT_REJECT) ||
++      (rpc_req.packet_type == PF_RPC_PT_FAULT))
++   {
++      if ((p_sess == NULL) || !pf_cmrpc_is_answer_to_call (p_sess, &rpc_req))
++      {
++         LOG_DEBUG (
++            PF_RPC_LOG,
++            "CMRPC(%d): Dropping a PDU of type %u that is not the answer to "
++            "a call of the device\n",
++            __LINE__,
++            (unsigned)rpc_req.packet_type);
++         return 0;
++      }
++   }
++
++   /* Use the session, or allocate a new session */
+    if (p_sess == NULL)
+    {
+       (void)pf_session_allocate (net, &p_sess);
+@@ -4400,6 +4657,10 @@ int pf_cmrpc_dce_packet (
+    {
+       p_sess->get_info = get_info;
+       memset (&p_sess->rpc_result, 0, sizeof (p_sess->rpc_result));
++      if (rpc_req.packet_type == PF_RPC_PT_REQUEST)
++      {
++         p_sess->sequence_nmb_recv = rpc_req.sequence_nmb;
++      }
+ 
+       if (rpc_req.length_of_body > PF_CMRPC_MAX_PDU_BODY_SIZE)
+       {
+@@ -4409,11 +4670,14 @@ int pf_cmrpc_dce_packet (
+             " Check the conformance of the controller (PLC).\n",
+             __LINE__,
+             rpc_req.length_of_body);
++         reject_call = true;
+       }
+       else if (rpc_req.flags.fragment == false)
+       {
+          /* Incoming message is a request or response contained entirely in one
+           * frame */
++         /* It ends a transfer of fragments that is in progress */
++         pf_scheduler_remove_if_running (net, &p_sess->call_timeout);
+          p_sess->in_buf_len = 0;
+          p_sess->ip_addr = ip_addr;
+          p_sess->port = port;
+@@ -4429,6 +4693,20 @@ int pf_cmrpc_dce_packet (
+           * Collect all fragments into the session buffer and
+           * proceed only when the last fragment has been received.
+           */
++
++         if (!p_sess->from_me && (p_sess->p_ar == NULL))
++         {
++            /* Wait for the next fragment, also after a fragment that is not
++               accepted, so that no session without an AR waits forever. The
++               timer is stopped when the request is complete. */
++            (void)pf_scheduler_restart (
++               net,
++               PF_CMRPC_CALL_TMO_IN_US,
++               pf_session_call_timeout,
++               (void *)p_sess,
++               &p_sess->call_timeout);
++         }
++
+          if (rpc_req.fragment_nmb == 0)
+          {
+             /* This is the first incoming fragment. */
+@@ -4442,33 +4720,6 @@ int pf_cmrpc_dce_packet (
+             p_sess->in_fragment_nbr = 0;
+             p_sess->kill_session = false;
+          }
+-         else
+-         {
+-            /* Intermediate or last incoming fragment. */
+-            if (p_sess->is_big_endian != rpc_req.is_big_endian)
+-            {
+-               /* Endianness differs. All fragments must have same endianness in
+-                * this implementation */
+-               LOG_ERROR (
+-                  PF_RPC_LOG,
+-                  "CMRPC(%d): Endianness differs in incoming fragments\n",
+-                  __LINE__);
+-               pf_set_error (
+-                  &p_sess->rpc_result,
+-                  PNET_ERROR_CODE_CONNECT,
+-                  PNET_ERROR_DECODE_PNIO,
+-                  PNET_ERROR_CODE_1_CMRPC,
+-                  PNET_ERROR_CODE_2_CMRPC_STATE_CONFLICT);
+-
+-               /* Release and kill session */
+-               if (p_sess->p_ar != NULL)
+-               {
+-                  pf_ar_release (net, p_sess->p_ar);
+-                  p_sess->p_ar = NULL;
+-               }
+-               p_sess->kill_session = true;
+-            }
+-         }
+ 
+          /* Fragment validation */
+          /* Enter here _even_if_ an error is already detected because we need to
+@@ -4489,6 +4740,19 @@ int pf_cmrpc_dce_packet (
+                PNET_ERROR_CODE_1_CMRPC,
+                PNET_ERROR_CODE_2_CMRPC_STATE_CONFLICT);
+          }
++         else if (p_sess->is_big_endian != rpc_req.is_big_endian)
++         {
++            /* The data representation format label (DCE 1.1: RPC, 12.4.3)
++             * differs from the one of the first fragment of the call. This
++             * implementation can not combine fragments with different
++             * endianness, so the call is rejected. The fragment is not
++             * added. An AR of the session is not affected. */
++            LOG_ERROR (
++               PF_RPC_LOG,
++               "CMRPC(%d): Endianness differs in incoming fragments\n",
++               __LINE__);
++            reject_call = true;
++         }
+          else if (
+             (p_sess->in_buf_len + rpc_req.length_of_body) >
+             sizeof (p_sess->in_buffer))
+@@ -4531,6 +4795,9 @@ int pf_cmrpc_dce_packet (
+ 
+             if (rpc_req.flags.last_fragment == true)
+             {
++               /* The request is complete */
++               pf_scheduler_remove_if_running (net, &p_sess->call_timeout);
++
+                /* Re-route the parser to use the session buffer */
+                req_pos = 0;
+                p_sess->get_info.p_buf = p_sess->in_buffer;
+@@ -4545,10 +4812,10 @@ int pf_cmrpc_dce_packet (
+       /* Decide what to do with incoming message */
+       /* Enter here _even_if_ an error is already detected because we may need
+        * to generate an error response. */
+-      if (rpc_req.length_of_body > PF_CMRPC_MAX_PDU_BODY_SIZE)
++      if (reject_call)
+       {
+          /* The specifications do not clearly state what the response should
+-          * be in this case. The current best guess is to send a Reject PDU.
++          * be in these cases. The current best guess is to send a Reject PDU.
+           */
+ 
+          /* Prepare the response */
+@@ -4628,7 +4895,8 @@ int pf_cmrpc_dce_packet (
+                res_pos,
+                "PING response");
+ 
+-            p_sess->kill_session = is_new_session;
++            /* Release a session that nothing monitors after the response */
++            p_sess->kill_session = !pf_session_is_monitored (p_sess);
+             break;
+          case PF_RPC_PT_REQUEST:
+             LOG_INFO (
+@@ -4851,6 +5119,12 @@ int pf_cmrpc_dce_packet (
+             {
+                pf_cmdev_state_ind (net, p_sess->p_ar, PNET_EVENT_PRMEND);
+             }
++
++            /* Release a session that nothing monitors after the response */
++            if (!pf_session_is_monitored (p_sess))
++            {
++               p_sess->kill_session = true;
++            }
+             break;
+          case PF_RPC_PT_FRAG_ACK:
+             /* Handle fragment acknowledgment from the controller. */
+@@ -5011,6 +5285,13 @@ int pf_cmrpc_dce_packet (
+                p_sess->out_buf_send_len = 0;
+                p_sess->out_fragment_nbr = 0;
+                res_pos = 0; /* Nothing more to do */
++
++               /* Release a session that nothing monitors after the
++                  response */
++               if (!pf_session_is_monitored (p_sess))
++               {
++                  p_sess->kill_session = true;
++               }
+             }
+             break;
+          case PF_RPC_PT_RESPONSE:
+@@ -5073,25 +5354,12 @@ int pf_cmrpc_dce_packet (
+                }
+             }
+             break;
+-         case PF_RPC_PT_CL_CANCEL:
+-            /*
+-             * Cancel requests may be sent from the controller to the device.
+-             * The ProfiNet spec say little about how to handle these packets.
+-             * The DCE RPC spec says to cancel the connection.
+-             */
+-            LOG_INFO (PF_RPC_LOG, "CMRPC(%d): CANCEL received\n", __LINE__);
+-
+-            (void)pf_cmdev_cm_abort (net, p_sess->p_ar);
+-
+-            *p_close_socket = p_sess->from_me;
+-            p_sess->kill_session = true;
+-            res_pos = 0; /* Send nothing in response */
+-            ret = 0;
+-            break;
+          case PF_RPC_PT_FAULT:
+             /*
+              * Faults occur for any number of reasons.
+-             * They are detected by the controller and sent to the device.
++             * They are detected by the controller and sent to the device, as
++             * the answer to a call of the device. Other faults are dropped
++             * above.
+              * The DCE RPC spec says to go to the fault state.
+              * Lets just cancel the connection.
+              */
+@@ -5113,7 +5381,9 @@ int pf_cmrpc_dce_packet (
+          case PF_RPC_PT_REJECT:
+             /*
+              * Rejects occur for any number of reasons.
+-             * They are detected by the controller and sent to the device.
++             * They are detected by the controller and sent to the device, as
++             * the answer to a call of the device. Other rejects are dropped
++             * above.
+              * The ProfiNet spec say little about how to handle these packets
+              * but at least some controllers restart the entire connection.
+              */
+@@ -5139,6 +5409,9 @@ int pf_cmrpc_dce_packet (
+                __LINE__,
+                rpc_req.packet_type);
+             res_pos = 0; /* Nothing more to do */
++
++            /* Release a session that nothing monitors */
++            p_sess->kill_session = !pf_session_is_monitored (p_sess);
+             break;
+          }
+       }
+diff --git a/src/pf_types.h b/src/pf_types.h
+index 2e4afa4d..f19d1abd 100644
+--- a/src/pf_types.h
++++ b/src/pf_types.h
+@@ -2106,6 +2106,8 @@ typedef struct pf_session_info
+    pnal_ipport_t port; /* Source port on incoming message, destination port on
+                         outgoing message */
+    uint32_t sequence_nmb_send; /* rm_ccontrol_req */
++   uint32_t sequence_nmb_recv; /* Sequence number of the last request that
++                                  was received */
+ 
+    /*
+     * Small devices should be able to cope with a single Ethernet frame.
+@@ -2144,6 +2146,9 @@ typedef struct pf_session_info
+    /* This timer is used to handle ccontrol and fragment re-transmissions */
+    pf_scheduler_handle_t resend_timeout;
+    uint32_t resend_counter;
++
++   /* Timeout for a partially received, fragmented message */
++   pf_scheduler_handle_t call_timeout;
+ } pf_session_info_t;
+ 
+ #define PF_AR_PLUG_MAX_QUEUE (PNET_MAX_API * PNET_MAX_SLOTS * PNET_MAX_SUBSLOTS)
+diff --git a/test/mocks.cpp b/test/mocks.cpp
+index 00977899..659e1aa9 100644
+--- a/test/mocks.cpp
++++ b/test/mocks.cpp
+@@ -19,6 +19,8 @@
+ 
+ #include "mocks.h"
+ 
++#include <stdio.h>
++#include <stdlib.h>
+ #include <string.h>
+ 
+ struct pnal_eth_handle
+@@ -35,6 +37,7 @@ mock_os_data_t mock_os_data;
+ mock_lldp_data_t mock_lldp_data;
+ mock_file_data_t mock_file_data;
+ mock_fspm_data_t mock_fspm_data;
++mock_bg_worker_data_t mock_bg_worker_data;
+ pnal_eth_handle_t mock_eth_handle;
+ 
+ void mock_clear (void)
+@@ -43,6 +46,7 @@ void mock_clear (void)
+    memset (&mock_lldp_data, 0, sizeof (mock_lldp_data));
+    memset (&mock_file_data, 0, sizeof (mock_file_data));
+    memset (&mock_fspm_data, 0, sizeof (mock_fspm_data));
++   memset (&mock_bg_worker_data, 0, sizeof (mock_bg_worker_data));
+    mock_os_data.eth_status[1].operational_mau_type =
+       PNAL_ETH_MAU_COPPER_100BaseTX_FULL_DUPLEX;
+    mock_os_data.eth_status[1].running = true;
+@@ -169,6 +173,12 @@ int mock_pnal_udp_sendto (
+    int size)
+ {
+    mock_os_data.udp_sendto_len = size;
++   if (size < 0 || size > (int)sizeof (mock_os_data.udp_sendto_buffer))
++   {
++      fprintf (stderr, "mock_pnal_udp_sendto: invalid size %d\n", size);
++      abort();
++   }
++   memcpy (mock_os_data.udp_sendto_buffer, data, size);
+    mock_os_data.udp_sendto_count++;
+ 
+    return size;
+@@ -508,5 +518,10 @@ void mock_pf_bg_worker_init (pnet_t * net)
+ 
+ int mock_pf_bg_worker_start_job (pnet_t * net, pf_bg_job_t job_id)
+ {
++   if (job_id == PF_BGJOB_SAVE_ASE_NVM_DATA)
++   {
++      mock_bg_worker_data.save_ase_nvm_data_count++;
++   }
++
+    return 0;
+ }
+diff --git a/test/mocks.h b/test/mocks.h
+index c4f167e4..264c90af 100644
+--- a/test/mocks.h
++++ b/test/mocks.h
+@@ -42,6 +42,7 @@ typedef struct mock_os_data_obj
+ 
+    uint16_t udp_sendto_len;
+    uint16_t udp_sendto_count;
++   uint8_t udp_sendto_buffer[PF_FRAME_BUFFER_SIZE];
+ 
+    uint8_t udp_recvfrom_buffer[PF_FRAME_BUFFER_SIZE];
+    uint16_t udp_recvfrom_length;
+@@ -86,10 +87,16 @@ typedef struct mock_fspm_data
+    char im_location[PNET_LOCATION_MAX_SIZE];
+ } mock_fspm_data_t;
+ 
++typedef struct mock_bg_worker_data
++{
++   uint16_t save_ase_nvm_data_count; /* Number of started save jobs */
++} mock_bg_worker_data_t;
++
+ extern mock_os_data_t mock_os_data;
+ extern mock_lldp_data_t mock_lldp_data;
+ extern mock_file_data_t mock_file_data;
+ extern mock_fspm_data_t mock_fspm_data;
++extern mock_bg_worker_data_t mock_bg_worker_data;
+ 
+ uint32_t mock_os_get_current_time_us (void);
+ uint32_t mock_pnal_get_system_uptime_10ms (void);
+diff --git a/test/test_cmrpc.cpp b/test/test_cmrpc.cpp
+index 9d1e2c7f..eeafece4 100644
+--- a/test/test_cmrpc.cpp
++++ b/test/test_cmrpc.cpp
+@@ -353,6 +353,106 @@ static uint8_t data_packet[] =
+ 
+ // clang-format on
+ 
++/**
++ * High priority RTA alarm notification frame (raw Ethernet), sent to the
++ * first AR. The source MAC is the initiator MAC of connect_req, and the source
++ * alarm reference is the local alarm reference of its AlarmCRBlockReq.
++ */
++// clang-format off
++static uint8_t alarm_notification_frame[] =
++{
++   // Ethernet header
++   0x02, 0x67, 0x00, 0x00, 0x00, 0x01, // [00-05] Destination MAC address
++   0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++   0x88, 0x92,                         // [12-13] EtherType: PROFINET
++   // RTA header
++   0xfc, 0x01,                         // [14-15] Frame ID: Alarm, high priority
++   0x00, 0x01,                         // [16-17] Destination alarm reference: 1 (IO-device)
++   0x00, 0x02,                         // [18-19] Source alarm reference: 2 (IO-controller)
++   0x11,                               // [20]    PDU type: DATA, version 1
++   0x10,                               // [21]    Add flags: Window size 0, TACK
++   0xff, 0xff,                         // [22-23] Send sequence number
++   0x00, 0x00,                         // [24-25] Ack sequence number
++   0x00, 0x20,                         // [26-27] Variable part length: 32 bytes
++   // Alarm notification block
++   0x00, 0x01,                         // [28-29] Block type: Alarm notification high
++   0x00, 0x1c,                         // [30-31] Block length: 28
++   0x01, 0x00,                         // [32-33] Block version: 1.0
++   0x00, 0x01,                         // [34-35] Alarm type: Diagnosis
++   0x00, 0x00, 0x00, 0x00,             // [36-39] API
++   0x00, 0x00,                         // [40-41] Slot number
++   0x00, 0x00,                         // [42-43] Subslot number
++   0x00, 0x00, 0x00, 0x00,             // [44-47] Module ident number
++   0x00, 0x00, 0x00, 0x00,             // [48-51] Submodule ident number
++   0x00, 0x00,                         // [52-53] Alarm specifier
++   0x00, 0x01,                         // [54-55] User structure identifier: 1
++   0x44, 0x45, 0x4d, 0x4f              // [56-59] Alarm data: "DEMO"
++};
++// clang-format on
++
++/**
++ * High priority RTA alarm ERROR frame (raw Ethernet), sent to the first AR.
++ * The source MAC is the initiator MAC of connect_req, and the source alarm
++ * reference is the local alarm reference of its AlarmCRBlockReq.
++ */
++// clang-format off
++static uint8_t alarm_error_frame[] =
++{
++   // Ethernet header
++   0x02, 0x67, 0x00, 0x00, 0x00, 0x01, // [00-05] Destination MAC address
++   0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++   0x88, 0x92,                         // [12-13] EtherType: PROFINET
++   // RTA header
++   0xfc, 0x01,                         // [14-15] Frame ID: Alarm, high priority
++   0x00, 0x01,                         // [16-17] Destination alarm reference: 1 (IO-device)
++   0x00, 0x02,                         // [18-19] Source alarm reference: 2 (IO-controller)
++   0x14,                               // [20]    PDU type: ERROR, version 1
++   0x10,                               // [21]    Add flags: Window size 0, TACK
++   0xff, 0xff,                         // [22-23] Send sequence number
++   0x00, 0x00,                         // [24-25] Ack sequence number
++   0x00, 0x04,                         // [26-27] Variable part length: 4 bytes
++   // PNIO status
++   0xcf,                               // [28]    Error code
++   0x81,                               // [29]    Error decode
++   0x00,                               // [30]    Error code 1
++   0x01,                               // [31]    Error code 2
++   // Padding to minimum Ethernet frame size
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // [32-39]
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // [40-47]
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // [48-55]
++   0x00, 0x00, 0x00, 0x00                          // [56-59]
++};
++// clang-format on
++
++/* Offsets of fields in the frames */
++#define ALARM_FRAME_SRC_MAC_POS  6
++#define ALARM_FRAME_SRC_REF_POS  18
++
++/**
++ * Hand an alarm frame to the stack, as if received on the Ethernet port.
++ *
++ * @param net              InOut: The p-net stack instance
++ * @param frame            In:    The frame
++ * @param len              In:    Length of the frame
++ */
++static void receive_alarm_frame (
++   pnet_t * net,
++   const uint8_t * frame,
++   uint16_t len)
++{
++   pnal_buf_t * p_buf = pnal_buf_alloc (len);
++
++   ASSERT_NE (p_buf, nullptr);
++   memcpy (p_buf->payload, frame, len);
++   p_buf->len = len;
++
++   /* The buffer is owned by the alarm queue if the frame was handled */
++   if (pf_eth_recv (NULL, net, p_buf) == 0)
++   {
++      pnal_buf_free (p_buf);
++   }
++}
++
+ static struct
+ {
+    uint8_t block_type[2];
+@@ -740,6 +840,1458 @@ TEST_F (CmrpcTest, CmrpcConnectReleaseIOSAR_DA)
+    EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_ABORT);
+ }
+ 
++/**
++ * Set the station name with DCP, so that the device has both a name and an IP
++ * address, and waits for a connection.
++ */
++static void set_station_name (pnet_t * net)
++{
++   const char name[] = "rt-labs-dev";
++   uint8_t block_error = 0;
++
++   ASSERT_EQ (
++      0,
++      pf_cmina_dcp_set_ind (
++         net,
++         PF_DCP_OPT_DEVICE_PROPERTIES,
++         PF_DCP_SUB_DEV_PROP_NAME,
++         1, /* Permanent */
++         strlen (name),
++         (const uint8_t *)name,
++         &block_error));
++   ASSERT_EQ (PF_CMINA_STATE_W_CONNECT, net->cmina_state);
++}
++
++/**
++ * A DCP Set of the IP address is refused while there is an active AR. It must
++ * not change the IP suites, and must not be saved. See "Case 26" in the CMINA
++ * state table of PN-AL-protocol, as referred to in pf_cmina_dcp_set_ind().
++ */
++TEST_F (CmrpcTest, CmrpcDcpSetIpRefusedWithActiveAr)
++{
++   pf_ip_suite_t ip_suite;
++   pf_full_ip_suite_t current_ip_suite;
++   pf_full_ip_suite_t nonvolatile_ip_suite;
++   uint8_t block_error = 0;
++
++   set_station_name (net);
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++
++   memset (&ip_suite, 0, sizeof (ip_suite));
++   ip_suite.ip_addr = PNAL_MAKEU32 (192, 168, 1, 199);
++   ip_suite.ip_mask = PNAL_MAKEU32 (255, 255, 255, 0);
++   ip_suite.ip_gateway = PNAL_MAKEU32 (192, 168, 1, 1);
++   current_ip_suite = net->cmina_current_dcp_ase.full_ip_suite;
++   nonvolatile_ip_suite = net->cmina_nonvolatile_dcp_ase.full_ip_suite;
++   mock_bg_worker_data.save_ase_nvm_data_count = 0;
++
++   /* The request is refused every time it is received */
++   for (int ix = 0; ix < 2; ix++)
++   {
++      EXPECT_NE (
++         0,
++         pf_cmina_dcp_set_ind (
++            net,
++            PF_DCP_OPT_IP,
++            PF_DCP_SUB_IP_PAR,
++            1, /* Permanent */
++            sizeof (ip_suite),
++            (const uint8_t *)&ip_suite,
++            &block_error));
++      EXPECT_EQ (
++         0,
++         memcmp (
++            &current_ip_suite,
++            &net->cmina_current_dcp_ase.full_ip_suite,
++            sizeof (current_ip_suite)));
++      EXPECT_EQ (
++         0,
++         memcmp (
++            &nonvolatile_ip_suite,
++            &net->cmina_nonvolatile_dcp_ase.full_ip_suite,
++            sizeof (nonvolatile_ip_suite)));
++      EXPECT_EQ (mock_bg_worker_data.save_ase_nvm_data_count, 0);
++   }
++}
++
++/**
++ * A DCP Set of the IP address is accepted when there is no active AR. The IP
++ * suites are changed and saved.
++ */
++TEST_F (CmrpcTest, CmrpcDcpSetIpAcceptedWithoutAr)
++{
++   pf_ip_suite_t ip_suite;
++   uint8_t block_error = 0;
++
++   set_station_name (net);
++
++   memset (&ip_suite, 0, sizeof (ip_suite));
++   ip_suite.ip_addr = PNAL_MAKEU32 (192, 168, 1, 199);
++   ip_suite.ip_mask = PNAL_MAKEU32 (255, 255, 255, 0);
++   ip_suite.ip_gateway = PNAL_MAKEU32 (192, 168, 1, 1);
++   mock_bg_worker_data.save_ase_nvm_data_count = 0;
++
++   EXPECT_EQ (
++      0,
++      pf_cmina_dcp_set_ind (
++         net,
++         PF_DCP_OPT_IP,
++         PF_DCP_SUB_IP_PAR,
++         1, /* Permanent */
++         sizeof (ip_suite),
++         (const uint8_t *)&ip_suite,
++         &block_error));
++   EXPECT_EQ (
++      0,
++      memcmp (
++         &ip_suite,
++         &net->cmina_current_dcp_ase.full_ip_suite.ip_suite,
++         sizeof (ip_suite)));
++   EXPECT_EQ (
++      0,
++      memcmp (
++         &ip_suite,
++         &net->cmina_nonvolatile_dcp_ase.full_ip_suite.ip_suite,
++         sizeof (ip_suite)));
++   EXPECT_EQ (mock_bg_worker_data.save_ase_nvm_data_count, 1);
++}
++
++/**
++ * An alarm channel is addressed by source node, destination node, source SAP
++ * and destination SAP, see PN-AL-protocol (IEC 61158-6-10) 4.8.4.1. The nodes
++ * are identified by the interface MAC address, which is also the
++ * CMInitiatorMacAdd of the connect request (4.2.2.2 table 16). The SAPs are the
++ * alarm references exchanged in the connect request and response (4.8.2.1.1).
++ */
++TEST_F (CmrpcTest, CmrpcAlarmFromOtherSourceIsIgnored)
++{
++   uint8_t error_frame[sizeof (alarm_error_frame)];
++   uint8_t frame[sizeof (alarm_notification_frame)];
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++
++   /* An alarm ERROR frame from another MAC address must not abort the AR */
++   memcpy (error_frame, alarm_error_frame, sizeof (error_frame));
++   error_frame[ALARM_FRAME_SRC_MAC_POS] ^= 0xff;
++   receive_alarm_frame (net, error_frame, sizeof (error_frame));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++
++   /* Neither must one from another source alarm reference */
++   memcpy (error_frame, alarm_error_frame, sizeof (error_frame));
++   error_frame[ALARM_FRAME_SRC_REF_POS + 1] ^= 0xff;
++   receive_alarm_frame (net, error_frame, sizeof (error_frame));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++
++   /* An alarm notification from another MAC address must not reach the
++      application */
++   memcpy (frame, alarm_notification_frame, sizeof (frame));
++   frame[ALARM_FRAME_SRC_MAC_POS] ^= 0xff;
++   receive_alarm_frame (net, frame, sizeof (frame));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.alarm_calls, 0);
++
++   /* Neither must one from another source alarm reference */
++   memcpy (frame, alarm_notification_frame, sizeof (frame));
++   frame[ALARM_FRAME_SRC_REF_POS + 1] ^= 0xff;
++   receive_alarm_frame (net, frame, sizeof (frame));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.alarm_calls, 0);
++
++   /* The same alarm notification from the IO-controller is accepted */
++   receive_alarm_frame (
++      net,
++      alarm_notification_frame,
++      sizeof (alarm_notification_frame));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.alarm_calls, 1);
++}
++
++/**
++ * Create a write request to PDPortDataCheck (not a user specific index) from
++ * write_req, with the record data replaced by the given number of bytes.
++ *
++ * The fields that are changed, compared to write_req:
++ *
++ *   [74]       RPC body length: NDR header (20), IODWriteReq header (64) and
++ *              the record data
++ *   [84]       NDR args length: IODWriteReq header (64) and the record data
++ *   [96]       NDR actual count, same as the args length
++ *   [134-135]  Index: 0x802b, PDPortDataCheck
++ *   [136-139]  Record data length, which is not necessarily the number of
++ *              record data bytes in the request
++ *
++ * @param req              Out:   Buffer for the request. Must be able to hold
++ *                                the request, which is 164 bytes plus the
++ *                                record data.
++ * @param record_data_length In:  The value of the record data length field
++ * @param data_len         In:    Number of record data bytes in the request
++ * @return the length of the request
++ */
++static uint16_t create_write_req (
++   uint8_t * req,
++   uint32_t record_data_length,
++   uint16_t data_len)
++{
++   memset (req, 0, 164 + data_len);
++   memcpy (req, write_req, 164);
++   req[74] = 84 + data_len;
++   req[84] = 64 + data_len;
++   req[96] = 64 + data_len;
++   req[134] = 0x80;
++   req[135] = 0x2b;
++   req[136] = (uint8_t)(record_data_length >> 24);
++   req[137] = (uint8_t)(record_data_length >> 16);
++   req[138] = (uint8_t)(record_data_length >> 8);
++   req[139] = (uint8_t)record_data_length;
++
++   return 164 + data_len;
++}
++
++/**
++ * The record data length is consistent with the ArgsLength, but the record
++ * data is too short to contain the block header of the record. This is
++ * reported as an access error with the error code "write length error".
++ * See PN-AL-protocol (IEC 61158-6-10) 5.2.6.4.2, table 714.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteRecordShorterThanBlockHeader)
++{
++   uint8_t req[164 + sizeof (pf_block_header_t)];
++   const uint32_t lengths[] = {0, sizeof (pf_block_header_t) - 1};
++   uint16_t len;
++   uint32_t ix;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   for (ix = 0; ix < sizeof (lengths) / sizeof (lengths[0]); ix++)
++   {
++      len = create_write_req (req, lengths[ix], lengths[ix]);
++      mock_set_pnal_udp_recvfrom_buffer (req, len);
++      run_stack (TEST_UDP_DELAY);
++      EXPECT_EQ (mock_os_data.udp_sendto_count, 2 + ix);
++
++      /* PNIO status follows the 80 byte RPC header in the response */
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIORW);
++      EXPECT_EQ (
++         mock_os_data.udp_sendto_buffer[82],
++         PNET_ERROR_CODE_1_ACC_WRITE_LENGTH_ERROR);
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[83], 0);
++   }
++}
++
++/**
++ * The record data length is larger than the record data in the request, so it
++ * is not consistent with the ArgsLength, which shall be the length of the
++ * IODWriteReq header plus the record data length. This is reported as
++ * "CMRPC: ArgsLength invalid". See PN-AL-protocol (IEC 61158-6-10) 5.8.10.1,
++ * table 1367, and 5.2.6.4.3.2, table 721.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteRecordLongerThanRequest)
++{
++   uint8_t req[164 + sizeof (pf_block_header_t)];
++   /* The request has 6 bytes of record data. The second length would wrap
++      around if it was added to the position. */
++   const uint32_t lengths[] = {6 + 1, 0xffffffff};
++   uint16_t len;
++   uint32_t ix;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   for (ix = 0; ix < sizeof (lengths) / sizeof (lengths[0]); ix++)
++   {
++      len = create_write_req (req, lengths[ix], sizeof (pf_block_header_t));
++      mock_set_pnal_udp_recvfrom_buffer (req, len);
++      run_stack (TEST_UDP_DELAY);
++      EXPECT_EQ (mock_os_data.udp_sendto_count, 2 + ix);
++
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIO);
++      EXPECT_EQ (
++         mock_os_data.udp_sendto_buffer[82],
++         PNET_ERROR_CODE_1_CMRPC);
++      EXPECT_EQ (
++         mock_os_data.udp_sendto_buffer[83],
++         PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++   }
++}
++
++/**
++ * Create a multiple write request with one write to PDPortDataCheck (not a user
++ * specific index) from write_req, with 4 bytes of record data.
++ *
++ * The request is:
++ *
++ *   [000-079]  RPC header
++ *   [080-099]  NDR header
++ *   [100-163]  IODWriteReq header of the multiple write, index 0xe040
++ *   [164-227]  IODWriteReq header of the write, index 0x802b
++ *   [228-231]  Record data of the write
++ *
++ * Other fields than in write_req:
++ *
++ *   [74]       RPC body length: NDR header (20) and 2 headers (128) and the
++ *              record data (4)
++ *   [84]       NDR args length: 2 headers and the record data
++ *   [96]       NDR actual count, same as the args length
++ *   [134-135]  Index of the multiple write: 0xe040
++ *   [136-139]  Record data length of the multiple write: header and data
++ *   [198-199]  Index of the write: 0x802b
++ *   [200-203]  Record data length of the write
++ *
++ * The result of the write is the second block of the response, after the
++ * 80 byte RPC header, 4 byte PNIO status and NDR header (together 100 bytes)
++ * and the result block of the multiple write (64 bytes). The PNIO status of the
++ * write is in its result block at offset 44, so at 208 to 211.
++ *
++ * @param req              Out:   Buffer for the request, 232 bytes
++ * @param record_data_length In:  The record data length of the write
++ */
++static void create_write_multiple_req (
++   uint8_t * req,
++   uint32_t record_data_length)
++{
++   memset (req, 0, 232);
++   memcpy (req, write_req, 164);
++   req[74] = 20 + 64 + 64 + 4;
++   req[84] = 64 + 64 + 4;
++   req[96] = 64 + 64 + 4;
++   req[134] = 0xe0;
++   req[135] = 0x40;
++   req[139] = 64 + 4;
++   memcpy (&req[164], &write_req[100], 64);
++   req[198] = 0x80;
++   req[199] = 0x2b;
++   req[200] = (uint8_t)(record_data_length >> 24);
++   req[201] = (uint8_t)(record_data_length >> 16);
++   req[202] = (uint8_t)(record_data_length >> 8);
++   req[203] = (uint8_t)record_data_length;
++}
++
++/**
++ * A write in a multiple write where the record data is too short to contain the
++ * block header of the record. See CmrpcIodWriteRecordShorterThanBlockHeader.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteMultipleRecordShorterThanBlockHeader)
++{
++   uint8_t req[232];
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   create_write_multiple_req (req, 4);
++   mock_set_pnal_udp_recvfrom_buffer (req, sizeof (req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 2);
++
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[208], PNET_ERROR_CODE_WRITE);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[209], PNET_ERROR_DECODE_PNIORW);
++   EXPECT_EQ (
++      mock_os_data.udp_sendto_buffer[210],
++      PNET_ERROR_CODE_1_ACC_WRITE_LENGTH_ERROR);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[211], 0);
++}
++
++/**
++ * A write in a multiple write where the record data length is larger than the
++ * rest of the request. The second length would wrap around if it was added to
++ * the position. See CmrpcIodWriteRecordLongerThanRequest, and table 1373 in
++ * 5.8.12.1 for multiple writes.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteMultipleRecordLongerThanRequest)
++{
++   uint8_t req[232];
++   const uint32_t lengths[] = {4 + 1, 0xffffffff};
++   uint32_t ix;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   for (ix = 0; ix < sizeof (lengths) / sizeof (lengths[0]); ix++)
++   {
++      create_write_multiple_req (req, lengths[ix]);
++      mock_set_pnal_udp_recvfrom_buffer (req, sizeof (req));
++      run_stack (TEST_UDP_DELAY);
++      EXPECT_EQ (mock_os_data.udp_sendto_count, 2 + ix);
++
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[208], PNET_ERROR_CODE_WRITE);
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[209], PNET_ERROR_DECODE_PNIO);
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[210], PNET_ERROR_CODE_1_CMRPC);
++      EXPECT_EQ (
++         mock_os_data.udp_sendto_buffer[211],
++         PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++   }
++}
++
++/**
++ * The record data length is smaller than the record data in the request, so it
++ * is not consistent with the ArgsLength, which shall be the length of the
++ * IODWriteReq header plus the record data length. This is reported as
++ * "CMRPC: ArgsLength invalid", also if the record is too short to contain the
++ * block header. See PN-AL-protocol (IEC 61158-6-10) 5.8.10.1, table 1367.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteRecordShorterThanRequest)
++{
++   uint8_t req[164 + sizeof (pf_block_header_t)];
++   const uint32_t lengths[] = {0, sizeof (pf_block_header_t) - 1};
++   uint16_t len;
++   uint32_t ix;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   for (ix = 0; ix < sizeof (lengths) / sizeof (lengths[0]); ix++)
++   {
++      len = create_write_req (req, lengths[ix], sizeof (pf_block_header_t));
++      mock_set_pnal_udp_recvfrom_buffer (req, len);
++      run_stack (TEST_UDP_DELAY);
++      EXPECT_EQ (mock_os_data.udp_sendto_count, 2 + ix);
++
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIO);
++      EXPECT_EQ (mock_os_data.udp_sendto_buffer[82], PNET_ERROR_CODE_1_CMRPC);
++      EXPECT_EQ (
++         mock_os_data.udp_sendto_buffer[83],
++         PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++   }
++}
++
++/**
++ * The ArgsLength is shorter than the IODWriteReq header, so the arguments end
++ * before the position where the record data starts. The number of bytes from
++ * there to the end is then negative, which as an unsigned number is the
++ * record data length of the request. This is reported as
++ * "CMRPC: ArgsLength invalid".
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteArgsLengthShorterThanHeader)
++{
++   uint8_t req[164 + sizeof (pf_block_header_t)];
++   const uint16_t args_length = 10;
++   uint16_t len;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   /* 64 bytes header, ends 54 bytes before the position after the header */
++   len = create_write_req (
++      req,
++      (uint32_t)(args_length - 64),
++      sizeof (pf_block_header_t));
++   req[84] = args_length; /* NDR args length */
++   req[96] = args_length; /* NDR actual count */
++   mock_set_pnal_udp_recvfrom_buffer (req, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 2);
++
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIO);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[82], PNET_ERROR_CODE_1_CMRPC);
++   EXPECT_EQ (
++      mock_os_data.udp_sendto_buffer[83],
++      PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++}
++
++/**
++ * The ArgsLength is checked before the header of the request, so a record data
++ * length that is not consistent with it is reported as "CMRPC: ArgsLength
++ * invalid" also if the AR UUID is unknown. With a consistent record data
++ * length the unknown AR UUID is reported. See PN-AL-protocol (IEC 61158-6-10)
++ * 5.8.10, where table 1367 says "check IODWriteReq-PDU" for a valid ArgsLength.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteArgsLengthCheckedBeforeArUuid)
++{
++   uint8_t req[164 + sizeof (pf_block_header_t)];
++   uint16_t len;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   /* Record data length larger than the record data in the request */
++   len = create_write_req (req, 7, sizeof (pf_block_header_t));
++   req[108] ^= 0xff; /* AR UUID of the IODWriteReq header */
++   mock_set_pnal_udp_recvfrom_buffer (req, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 2);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIO);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[82], PNET_ERROR_CODE_1_CMRPC);
++   EXPECT_EQ (
++      mock_os_data.udp_sendto_buffer[83],
++      PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++
++   /* Consistent record data length */
++   len = create_write_req (req, 4, 4);
++   req[108] ^= 0xff;
++   mock_set_pnal_udp_recvfrom_buffer (req, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 3);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIO);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[82], PNET_ERROR_CODE_1_CMRPC);
++   EXPECT_EQ (
++      mock_os_data.udp_sendto_buffer[83],
++      PNET_ERROR_CODE_2_CMRPC_AR_UUID_UNKNOWN);
++}
++
++/**
++ * A write in a multiple write must be within the arguments of the request,
++ * which end at the end of the request. The ArgsLength is the same as for
++ * create_write_multiple_req().
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteMultipleRecordBeyondArguments)
++{
++   uint8_t req[232];
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   /* The record data length is one more than the record data in the
++      arguments */
++   create_write_multiple_req (req, 4 + 1);
++   mock_set_pnal_udp_recvfrom_buffer (req, sizeof (req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 2);
++
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[208], PNET_ERROR_CODE_WRITE);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[209], PNET_ERROR_DECODE_PNIO);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[210], PNET_ERROR_CODE_1_CMRPC);
++   EXPECT_EQ (
++      mock_os_data.udp_sendto_buffer[211],
++      PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++}
++
++/**
++ * The ArgsLength is larger than the request, so the arguments are not in the
++ * request. This is reported as "CMRPC: ArgsLength invalid", and nothing is
++ * written.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteArgsLengthLongerThanRequest)
++{
++   uint8_t req[164 + sizeof (pf_block_header_t)];
++   uint16_t len;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   len = create_write_req (req, 4, 4);
++   req[80] = 250; /* NDR args maximum */
++   req[84] = 200; /* NDR args length */
++   req[88] = 250; /* NDR maximum count */
++   req[96] = 200; /* NDR actual count */
++   mock_set_pnal_udp_recvfrom_buffer (req, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 2);
++   EXPECT_EQ (appdata.call_counters.write_calls, 0);
++
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIO);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[82], PNET_ERROR_CODE_1_CMRPC);
++   EXPECT_EQ (
++      mock_os_data.udp_sendto_buffer[83],
++      PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++}
++
++/**
++ * The ArgsLength is smaller than the request, so the request has bytes after
++ * the arguments. This is reported as "CMRPC: ArgsLength invalid", and nothing
++ * is written.
++ */
++TEST_F (CmrpcTest, CmrpcIodWriteArgsLengthShorterThanRequest)
++{
++   uint8_t req[164 + sizeof (pf_block_header_t)];
++   uint16_t len;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 1);
++
++   len = create_write_req (req, 4, 4);
++   req[84] = 64 + 4 - 1; /* NDR args length, one byte less than the request */
++   req[96] = 64 + 4 - 1; /* NDR actual count */
++   mock_set_pnal_udp_recvfrom_buffer (req, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, 2);
++   EXPECT_EQ (appdata.call_counters.write_calls, 0);
++
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], PNET_ERROR_CODE_WRITE);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], PNET_ERROR_DECODE_PNIO);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[82], PNET_ERROR_CODE_1_CMRPC);
++   EXPECT_EQ (
++      mock_os_data.udp_sendto_buffer[83],
++      PNET_ERROR_CODE_2_CMRPC_ARGSLENGTH_INVALID);
++}
++
++/**
++ * A received alarm that cannot be parsed is dropped before it is acknowledged.
++ * The APMR must not move to WCNF, where it waits for the confirmation of an
++ * acknowledge, as nothing leaves WCNF other than that confirmation. See the
++ * APMR state table, rows 7, 16 and 17, in PN-AL-protocol (IEC 61158-6-10)
++ * 4.8.4.3.5.
++ */
++TEST_F (CmrpcTest, CmrpcAlarmAfterMalformedAlarm)
++{
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++
++   /* An alarm notification that is cut off in the variable part is dropped */
++   receive_alarm_frame (net, alarm_notification_frame, 50);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.alarm_calls, 0);
++
++   /* The complete alarm notification, with the same sequence number as it is
++      when retransmitted, must still be accepted */
++   receive_alarm_frame (
++      net,
++      alarm_notification_frame,
++      sizeof (alarm_notification_frame));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.alarm_calls, 1);
++}
++
++#if PNET_OPTION_MC_CR
++/**
++ * pf_ar_t has room for PNET_MAX_MC_CR MCR_REQ blocks (mcr_request[]). A
++ * Connect request with more MCR_REQ blocks (type 0x0106) than that must be
++ * rejected, instead of writing past the array.
++ */
++TEST_F (CmrpcTest, CmrpcConnectTooManyMcrBlocks)
++{
++   /* Two minimal MCR_REQ blocks (no provider station name) */
++   const uint8_t mcr_block[14] = {
++      0x01,
++      0x06,
++      0x00,
++      0x0a,
++      0x01,
++      0x00,
++      0x00,
++      0x01,
++      0x00,
++      0x01,
++      0x00,
++      0x01,
++      0x00,
++      0x00};
++   uint8_t req[sizeof (connect_req) + (PNET_MAX_MC_CR + 1) * sizeof (mcr_block)];
++   uint16_t extra = (PNET_MAX_MC_CR + 1) * sizeof (mcr_block);
++   uint16_t ix;
++
++   memcpy (req, connect_req, sizeof (connect_req));
++   for (ix = 0; ix < PNET_MAX_MC_CR + 1; ix++)
++   {
++      memcpy (
++         &req[sizeof (connect_req) + ix * sizeof (mcr_block)],
++         mcr_block,
++         sizeof (mcr_block));
++   }
++   req[74] = (uint8_t) (req[74] + extra); /* RPC body length */
++   req[84] = (uint8_t) (req[84] + extra); /* NDR args length */
++   req[96] = (uint8_t) (req[96] + extra); /* NDR actual count */
++
++   mock_set_pnal_udp_recvfrom_buffer (req, sizeof (req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 0);
++}
++#endif
++
++/* Offset of the activity UUID in the RPC header */
++#define RPC_ACTIVITY_UUID_POS 40
++
++/**
++ * Create a connectionless RPC PDU of another type from the RPC header of a
++ * request or response, with a body of 8 bytes.
++ *
++ *   [01]       Packet type
++ *   [64-67]    Sequence number
++ *   [74-75]    Length of body: 8
++ *
++ * @param pdu              Out:   Buffer for the PDU, 88 bytes
++ * @param header           In:    The first 80 bytes are the RPC header
++ * @param packet_type      In:    The packet type
++ * @param sequence_nmb     In:    The sequence number
++ * @return the length of the PDU
++ */
++static uint16_t create_rpc_pdu (
++   uint8_t * pdu,
++   const uint8_t * header,
++   uint8_t packet_type,
++   uint32_t sequence_nmb)
++{
++   memset (pdu, 0, 88);
++   memcpy (pdu, header, 80);
++   pdu[1] = packet_type;
++   pdu[64] = (uint8_t)sequence_nmb;
++   pdu[65] = (uint8_t)(sequence_nmb >> 8);
++   pdu[66] = (uint8_t)(sequence_nmb >> 16);
++   pdu[67] = (uint8_t)(sequence_nmb >> 24);
++   pdu[74] = 8;
++   pdu[75] = 0;
++
++   return 88;
++}
++
++/**
++ * Reject, fault and cancel PDUs concern one call, which is identified by the
++ * activity UUID and the sequence number. They are only handled for the call
++ * that the device has sent, which is the application ready request, and
++ * abort the AR then. See DCE 1.1: RPC, 9.5.3, 12.5.3.3, 12.5.3.5 and
++ * 12.5.3.8.
++ */
++TEST_F (CmrpcTest, CmrpcRejectForCallOfDevice)
++{
++   uint8_t pdu[88];
++   uint16_t len;
++   int ret;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   mock_set_pnal_udp_recvfrom_buffer (prm_end_req, sizeof (prm_end_req));
++   run_stack (TEST_UDP_DELAY);
++   ret = pnet_application_ready (net, appdata.main_arep);
++   EXPECT_EQ (ret, 0);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_APPLRDY);
++
++   /* Another call than the application ready request (sequence number 0) */
++   len = create_rpc_pdu (pdu, appl_rdy_rsp, PF_RPC_PT_REJECT, 1);
++   mock_set_pnal_udp_recvfrom_buffer (pdu, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_APPLRDY);
++
++   len = create_rpc_pdu (pdu, appl_rdy_rsp, PF_RPC_PT_FAULT, 1);
++   mock_set_pnal_udp_recvfrom_buffer (pdu, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_APPLRDY);
++
++   /* A cancel never aborts the AR */
++   len = create_rpc_pdu (pdu, appl_rdy_rsp, PF_RPC_PT_CL_CANCEL, 0);
++   mock_set_pnal_udp_recvfrom_buffer (pdu, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_APPLRDY);
++
++   /* A reject of the application ready request aborts the AR */
++   len = create_rpc_pdu (pdu, appl_rdy_rsp, PF_RPC_PT_REJECT, 0);
++   mock_set_pnal_udp_recvfrom_buffer (pdu, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_ABORT);
++}
++
++TEST_F (CmrpcTest, CmrpcFaultForCallOfDevice)
++{
++   uint8_t pdu[88];
++   uint16_t len;
++   int ret;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   mock_set_pnal_udp_recvfrom_buffer (prm_end_req, sizeof (prm_end_req));
++   run_stack (TEST_UDP_DELAY);
++   ret = pnet_application_ready (net, appdata.main_arep);
++   EXPECT_EQ (ret, 0);
++
++   len = create_rpc_pdu (pdu, appl_rdy_rsp, PF_RPC_PT_FAULT, 0);
++   mock_set_pnal_udp_recvfrom_buffer (pdu, len);
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_ABORT);
++}
++
++/**
++ * The session of the connect request is the session of the requests of the
++ * controller. The device has not sent any call in it, so a reject, fault or
++ * cancel for it does not abort the AR, and the session is still used.
++ */
++TEST_F (CmrpcTest, CmrpcRejectOnSessionOfController)
++{
++   uint8_t pdu[88];
++   uint16_t len;
++   const uint8_t types[] =
++      {PF_RPC_PT_REJECT, PF_RPC_PT_FAULT, PF_RPC_PT_CL_CANCEL};
++   uint32_t ix;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++
++   /* The sequence number is 0 for the first request, and 0xffffffff is the
++      one that the device would have sent last in a session of its own */
++   for (ix = 0; ix < sizeof (types); ix++)
++   {
++      len = create_rpc_pdu (pdu, connect_req, types[ix], 0);
++      mock_set_pnal_udp_recvfrom_buffer (pdu, len);
++      run_stack (TEST_UDP_DELAY);
++      EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++
++      len = create_rpc_pdu (pdu, connect_req, types[ix], 0xffffffff);
++      mock_set_pnal_udp_recvfrom_buffer (pdu, len);
++      run_stack (TEST_UDP_DELAY);
++      EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++   }
++
++   mock_set_pnal_udp_recvfrom_buffer (write_req, sizeof (write_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.write_calls, 1);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++}
++
++/**
++ * Reject, fault and cancel PDUs that are not the answer to a call of the device
++ * are silently dropped. No session is allocated for them, and no session is
++ * changed, also not the address of the session of the call of the device.
++ */
++TEST_F (CmrpcTest, CmrpcRejectDroppedWithoutChangingSessions)
++{
++   const uint32_t foreign_ip = PNAL_MAKEU32 (192, 168, 1, 172);
++   const uint16_t foreign_port = 4321;
++   const uint8_t types[] =
++      {PF_RPC_PT_REJECT, PF_RPC_PT_FAULT, PF_RPC_PT_CL_CANCEL};
++   uint8_t pdu[88];
++   uint8_t res[1500];
++   uint16_t res_len = sizeof (res);
++   bool close_socket = false;
++   pf_session_info_t * p_call_sess = NULL;
++   uint16_t sessions;
++   uint16_t sent;
++   uint16_t len;
++   uint32_t ix;
++   uint32_t iy;
++   int ret;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   mock_set_pnal_udp_recvfrom_buffer (prm_end_req, sizeof (prm_end_req));
++   run_stack (TEST_UDP_DELAY);
++   ret = pnet_application_ready (net, appdata.main_arep);
++   EXPECT_EQ (ret, 0);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_APPLRDY);
++
++   sessions = 0;
++   for (iy = 0; iy < PF_MAX_SESSION; iy++)
++   {
++      if (net->cmrpc_session_info[iy].in_use)
++      {
++         sessions++;
++         if (net->cmrpc_session_info[iy].from_me)
++         {
++            p_call_sess = &net->cmrpc_session_info[iy];
++         }
++      }
++   }
++   ASSERT_NE (p_call_sess, nullptr);
++   const uint32_t call_ip = p_call_sess->ip_addr;
++   const uint16_t call_port = p_call_sess->port;
++
++   for (ix = 0; ix < sizeof (types); ix++)
++   {
++      /* With the activity UUID of the call of the device, but another
++         sequence number */
++      len = create_rpc_pdu (pdu, appl_rdy_rsp, types[ix], 1);
++      ret = pf_cmrpc_dce_packet (
++         net,
++         foreign_ip,
++         foreign_port,
++         pdu,
++         len,
++         res,
++         &res_len,
++         &close_socket);
++      EXPECT_EQ (ret, 0);
++      EXPECT_EQ (p_call_sess->ip_addr, call_ip);
++      EXPECT_EQ (p_call_sess->port, call_port);
++      EXPECT_TRUE (p_call_sess->in_use);
++
++      /* With an activity UUID that is not used */
++      len = create_rpc_pdu (pdu, appl_rdy_rsp, types[ix], 0);
++      pdu[40] ^= 0xff;
++      ret = pf_cmrpc_dce_packet (
++         net,
++         foreign_ip,
++         foreign_port,
++         pdu,
++         len,
++         res,
++         &res_len,
++         &close_socket);
++      EXPECT_EQ (ret, 0);
++   }
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_APPLRDY);
++
++   iy = 0;
++   for (ix = 0; ix < PF_MAX_SESSION; ix++)
++   {
++      iy += net->cmrpc_session_info[ix].in_use ? 1 : 0;
++   }
++   EXPECT_EQ (iy, sessions);
++
++   /* The cancel is dropped also for the call of the device, without a
++      cancel_ack, as the device is the client in that session */
++   sent = mock_os_data.udp_sendto_count;
++   len = create_rpc_pdu (pdu, appl_rdy_rsp, PF_RPC_PT_CL_CANCEL, 0);
++   ret = pf_cmrpc_dce_packet (
++      net,
++      call_ip,
++      call_port,
++      pdu,
++      len,
++      res,
++      &res_len,
++      &close_socket);
++   EXPECT_EQ (ret, 0);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, sent);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_APPLRDY);
++}
++
++/**
++ * A server answers a cancel for the call that it received last with a
++ * cancel_ack. The device can not cancel the processing of a call, so the
++ * cancel_ack has no body, which acknowledges that the call is orphaned. A
++ * cancel for another call, another activity or a session of the device is
++ * silently dropped. See DCE 1.1: RPC, 12.5.3.2 and 10.2.
++ */
++TEST_F (CmrpcTest, CmrpcCancelAck)
++{
++   const uint32_t ip = PNAL_MAKEU32 (192, 168, 1, 170);
++   const uint16_t port = 49152;
++   uint8_t pdu[88];
++   uint8_t res[1500];
++   uint16_t res_len;
++   bool close_socket = false;
++   uint16_t len;
++   uint16_t sent;
++   int ret;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   sent = mock_os_data.udp_sendto_count;
++
++   /* The call that was received last has the sequence number 0 */
++   len = create_rpc_pdu (pdu, connect_req, PF_RPC_PT_CL_CANCEL, 0);
++   memset (res, 0xee, sizeof (res));
++   res_len = sizeof (res);
++   ret = pf_cmrpc_dce_packet (
++      net,
++      ip,
++      port,
++      pdu,
++      len,
++      res,
++      &res_len,
++      &close_socket);
++   EXPECT_EQ (ret, 0);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, sent + 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_len, 80); /* The header only */
++   EXPECT_EQ (res[1], PF_RPC_PT_CANCEL_ACK);
++   EXPECT_EQ (res[74], 0); /* No body */
++   EXPECT_EQ (res[75], 0);
++   EXPECT_EQ (0, memcmp (&res[40], &connect_req[40], 16)); /* Activity UUID */
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++
++   /* Another call */
++   len = create_rpc_pdu (pdu, connect_req, PF_RPC_PT_CL_CANCEL, 1);
++   res_len = sizeof (res);
++   ret = pf_cmrpc_dce_packet (
++      net,
++      ip,
++      port,
++      pdu,
++      len,
++      res,
++      &res_len,
++      &close_socket);
++   EXPECT_EQ (ret, 0);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, sent + 1);
++
++   /* Another activity */
++   len = create_rpc_pdu (pdu, connect_req, PF_RPC_PT_CL_CANCEL, 0);
++   pdu[RPC_ACTIVITY_UUID_POS] ^= 0xff;
++   res_len = sizeof (res);
++   ret = pf_cmrpc_dce_packet (
++      net,
++      ip,
++      port,
++      pdu,
++      len,
++      res,
++      &res_len,
++      &close_socket);
++   EXPECT_EQ (ret, 0);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, sent + 1);
++
++   /* The session is still used, and the AR is not aborted */
++   mock_set_pnal_udp_recvfrom_buffer (write_req, sizeof (write_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.write_calls, 1);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++}
++
++/**
++ * Hand a fragment that is not the first one to the stack, with the RPC header
++ * of connect_req but the opposite endianness, and an 8 byte body.
++ *
++ * The fields that are changed, compared to connect_req:
++ *
++ *   [02]       Flags: fragment, not the last fragment
++ *   [04]       RPCDRep.IntegerEncoding: big endian instead of little endian
++ *   [40-47]    Activity UUID: Data1, Data2 and Data3 byte swapped, so that it
++ *              is the same UUID in the new endianness
++ *   [74-75]    Length of body: 8, big endian
++ *   [76-77]    Fragment number: 1, big endian
++ *
++ * @param net              InOut: The p-net stack instance
++ */
++static void receive_fragment_with_other_endianness (pnet_t * net)
++{
++   uint8_t pdu[88];
++   uint8_t res[1500];
++   uint16_t res_len = sizeof (res);
++   bool close_socket = false;
++   uint8_t t;
++
++   memset (pdu, 0, sizeof (pdu));
++   memcpy (pdu, connect_req, 80);
++   pdu[2] |= (1 << PF_RPC_F_FRAGMENT);
++   pdu[2] &= ~(uint8_t)(1 << PF_RPC_F_LAST_FRAGMENT);
++   pdu[4] ^= 0x10;
++   t = pdu[40];
++   pdu[40] = pdu[43];
++   pdu[43] = t;
++   t = pdu[41];
++   pdu[41] = pdu[42];
++   pdu[42] = t;
++   t = pdu[44];
++   pdu[44] = pdu[45];
++   pdu[45] = t;
++   t = pdu[46];
++   pdu[46] = pdu[47];
++   pdu[47] = t;
++   pdu[74] = 0;
++   pdu[75] = 8;
++   pdu[76] = 0;
++   pdu[77] = 1;
++
++   (void)pf_cmrpc_dce_packet (
++      net,
++      PNAL_MAKEU32 (192, 168, 1, 170),
++      49152,
++      pdu,
++      sizeof (pdu),
++      res,
++      &res_len,
++      &close_socket);
++}
++
++/**
++ * A fragment with another endianness than the first fragment of the call is
++ * not supported, so the call is rejected with nca_proto_error and the fragment
++ * is not added. The AR of the session is not affected, so a PDU like this can
++ * not remove an AR.
++ */
++TEST_F (CmrpcTest, CmrpcFragmentEndiannessMismatchKeepsAr)
++{
++   uint16_t sent;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++
++   /* The first fragment of a request on the session of the AR, with the
++      header of connect_req and an 8 byte body. The fragment with the other
++      endianness has the next fragment number. */
++   {
++      uint8_t pdu[88];
++      uint8_t res[1500];
++      uint16_t res_len = sizeof (res);
++      bool close_socket = false;
++
++      memset (pdu, 0, sizeof (pdu));
++      memcpy (pdu, connect_req, 80);
++      pdu[2] |= (1 << PF_RPC_F_FRAGMENT);
++      pdu[2] &= ~(uint8_t)(1 << PF_RPC_F_LAST_FRAGMENT);
++      pdu[74] = 8; /* Length of body */
++      pdu[75] = 0;
++      (void)pf_cmrpc_dce_packet (
++         net,
++         PNAL_MAKEU32 (192, 168, 1, 170),
++         49152,
++         pdu,
++         sizeof (pdu),
++         res,
++         &res_len,
++         &close_socket);
++   }
++   EXPECT_EQ (net->cmrpc_session_info[0].in_buf_len, 8u);
++   sent = mock_os_data.udp_sendto_count;
++
++   receive_fragment_with_other_endianness (net);
++   EXPECT_EQ (mock_os_data.udp_sendto_count, sent + 1);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[1], PF_RPC_PT_REJECT);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[80], 0x0B); /* nca_proto_error */
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[81], 0x00);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[82], 0x01);
++   EXPECT_EQ (mock_os_data.udp_sendto_buffer[83], 0x1C);
++   EXPECT_EQ (net->cmrpc_session_info[0].in_buf_len, 8u);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++   EXPECT_TRUE (net->cmrpc_ar[0].in_use);
++
++   /* The session of the AR is still used */
++   mock_set_pnal_udp_recvfrom_buffer (write_req, sizeof (write_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.write_calls, 1);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++}
++
++/**
++ * Hand a fragment of a request to the stack, with the RPC header of
++ * connect_req and an 8 byte body.
++ *
++ * The fields that are changed, compared to connect_req:
++ *
++ *   [02]       Flags: fragment, and last fragment if last is set
++ *   [40]       First octet of the activity UUID, if activity is not 0
++ *   [74-75]    Length of body: 8
++ *   [76-77]    Fragment number
++ *
++ * @param net              InOut: The p-net stack instance
++ * @param activity         In:    First octet of the activity UUID, or 0 to
++ *                                keep the one of connect_req.
++ * @param fragment_nmb     In:    The fragment number
++ * @param last             In:    true if this is the last fragment
++ */
++static void receive_request_fragment (
++   pnet_t * net,
++   uint8_t activity,
++   uint16_t fragment_nmb,
++   bool last)
++{
++   uint8_t pdu[88];
++   uint8_t res[1500];
++   uint16_t res_len = sizeof (res);
++   bool close_socket = false;
++
++   memset (pdu, 0, sizeof (pdu));
++   memcpy (pdu, connect_req, 80);
++   pdu[2] |= (1 << PF_RPC_F_FRAGMENT);
++   if (last)
++   {
++      pdu[2] |= (1 << PF_RPC_F_LAST_FRAGMENT);
++   }
++   else
++   {
++      pdu[2] &= ~(uint8_t)(1 << PF_RPC_F_LAST_FRAGMENT);
++   }
++   if (activity != 0)
++   {
++      pdu[40] = activity;
++   }
++   pdu[74] = 8;
++   pdu[75] = 0;
++   pdu[76] = (uint8_t)fragment_nmb;
++   pdu[77] = (uint8_t)(fragment_nmb >> 8);
++
++   (void)pf_cmrpc_dce_packet (
++      net,
++      PNAL_MAKEU32 (192, 168, 1, 170),
++      49152,
++      pdu,
++      sizeof (pdu),
++      res,
++      &res_len,
++      &close_socket);
++}
++
++static unsigned sessions_in_use (pnet_t * net)
++{
++   unsigned in_use = 0;
++   unsigned ix;
++
++   for (ix = 0; ix < PF_MAX_SESSION; ix++)
++   {
++      in_use += net->cmrpc_session_info[ix].in_use;
++   }
++   return in_use;
++}
++
++/**
++ * The first fragment of a request for an unknown activity UUID allocates a
++ * session. If the rest of the request is not received in time, the session
++ * is released, as it has no AR. Otherwise PF_MAX_SESSION such fragments
++ * would leave no session for a Connect.
++ *
++ * The timeout is 8 s, 4 * Timeout FRAG (PN-AL-protocol, 4.10.5.2), and it
++ * is restarted for every fragment.
++ */
++TEST_F (CmrpcTest, CmrpcSessionReleasedIfFirstRequestIsNotCompleted)
++{
++   uint8_t ix;
++
++   for (ix = 0; ix < PF_MAX_SESSION; ix++)
++   {
++      receive_request_fragment (net, (uint8_t)(0x40 + ix), 0, false);
++   }
++   EXPECT_EQ (sessions_in_use (net), PF_MAX_SESSION);
++
++   /* The next fragment restarts the timeout */
++   run_stack (6 * 1000 * 1000);
++   receive_request_fragment (net, 0x40, 1, false);
++   run_stack (3 * 1000 * 1000);
++   EXPECT_EQ (sessions_in_use (net), 1u);
++
++   run_stack (6 * 1000 * 1000);
++   EXPECT_EQ (sessions_in_use (net), 0u);
++
++   /* A Connect is now answered */
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++}
++
++/**
++ * A fragment that is not accepted, here one that is not the first fragment
++ * of a request for an unknown activity UUID, also allocates a session. It
++ * must be released in the same way.
++ */
++TEST_F (CmrpcTest, CmrpcSessionReleasedAfterUnexpectedFragment)
++{
++   receive_request_fragment (net, 0x40, 1, false);
++   EXPECT_EQ (sessions_in_use (net), 1u);
++
++   run_stack (9 * 1000 * 1000);
++   EXPECT_EQ (sessions_in_use (net), 0u);
++}
++
++/**
++ * The timer for the rest of a fragmented request is stopped when the request
++ * is complete, here a Connect request in two fragments.
++ */
++TEST_F (CmrpcTest, CmrpcSessionTimerStoppedWhenRequestIsComplete)
++{
++   pf_session_info_t * p_sess = &net->cmrpc_session_info[0];
++
++   mock_set_pnal_udp_recvfrom_buffer (
++      connect_frag_1_req,
++      sizeof (connect_frag_1_req));
++   run_stack (TEST_UDP_DELAY);
++   ASSERT_TRUE (p_sess->in_use);
++   EXPECT_TRUE (pf_scheduler_is_running (&p_sess->call_timeout));
++
++   mock_set_pnal_udp_recvfrom_buffer (
++      connect_frag_2_req,
++      sizeof (connect_frag_2_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_TRUE (p_sess->in_use);
++   EXPECT_FALSE (pf_scheduler_is_running (&p_sess->call_timeout));
++}
++
++/**
++ * The session of an EPM lookup is kept for the next lookup request of the
++ * sequence, as the EPM timeout releases it.
++ */
++TEST_F (CmrpcTest, CmrpcSessionOfEpmLookupKept)
++{
++   /* An ept_lookup request, with the RPC header of connect_req */
++   const uint8_t epmap_interface[] = {
++      0x08, 0x83, 0xAF, 0xE1, 0x1F, 0x5D, 0xC9, 0x11,
++      0x91, 0xA4, 0x08, 0x00, 0x2B, 0x14, 0xA0, 0xFA};
++   uint8_t pdu[80 + 76];
++   uint8_t res[1500];
++   uint16_t res_len = sizeof (res);
++   bool close_socket = false;
++   pf_session_info_t * p_sess = &net->cmrpc_session_info[0];
++
++   memset (pdu, 0, sizeof (pdu));
++   memcpy (pdu, connect_req, 80);
++   pdu[2] = 0;  /* Flags */
++   memcpy (&pdu[24], epmap_interface, sizeof (epmap_interface));
++   pdu[40] = 0x40; /* Activity UUID */
++   pdu[68] = 2;    /* Opnum ept_lookup */
++   pdu[69] = 0;
++   pdu[74] = 76; /* Length of body */
++   pdu[75] = 0;
++   pdu[80 + 72] = 1; /* max_ents */
++   (void)pf_cmrpc_dce_packet (
++      net,
++      PNAL_MAKEU32 (192, 168, 1, 170),
++      49152,
++      pdu,
++      sizeof (pdu),
++      res,
++      &res_len,
++      &close_socket);
++   ASSERT_TRUE (p_sess->in_use);
++   EXPECT_TRUE (pf_scheduler_is_running (&p_sess->epm_timeout));
++}
++
++/**
++ * Receive a PDU without a body, in the activity of connect_req.
++ *
++ * @param net              InOut: The p-net stack instance
++ * @param activity         In:    The first byte of the activity UUID.
++ * @param packet_type      In:    The packet type.
++ */
++static void receive_pdu_without_body (
++   pnet_t * net,
++   uint8_t activity,
++   uint8_t packet_type)
++{
++   uint8_t pdu[80];
++   uint8_t res[1500];
++   uint16_t res_len = sizeof (res);
++   bool close_socket = false;
++
++   memcpy (pdu, connect_req, sizeof (pdu));
++   pdu[1] = packet_type;
++   pdu[2] = 0;           /* Flags */
++   pdu[40] = activity;   /* Activity UUID */
++   pdu[74] = 0;          /* Length of body */
++   pdu[75] = 0;
++   (void)pf_cmrpc_dce_packet (
++      net,
++      PNAL_MAKEU32 (192, 168, 1, 170),
++      49152,
++      pdu,
++      sizeof (pdu),
++      res,
++      &res_len,
++      &close_socket);
++}
++
++/**
++ * A PDU of another type than a request, here an ack, on a new activity does
++ * not leave a session behind.
++ */
++TEST_F (CmrpcTest, CmrpcNoSessionKeptAfterOtherPduOnNewActivity)
++{
++   receive_pdu_without_body (net, 0x40, PF_RPC_PT_ACK);
++   EXPECT_EQ (sessions_in_use (net), 0u);
++}
++
++/**
++ * A PDU that is not a fragment ends the request that is received. A session
++ * without an AR is then not monitored, so it is released after a ping or a
++ * PDU of another type.
++ */
++TEST_F (CmrpcTest, CmrpcSessionWithoutArReleasedAfterPingOrOtherPdu)
++{
++   receive_request_fragment (net, 0x40, 0, false);
++   ASSERT_EQ (sessions_in_use (net), 1u);
++   receive_pdu_without_body (net, 0x40, PF_RPC_PT_PING);
++   EXPECT_EQ (sessions_in_use (net), 0u);
++
++   receive_request_fragment (net, 0x40, 0, false);
++   ASSERT_EQ (sessions_in_use (net), 1u);
++   receive_pdu_without_body (net, 0x40, PF_RPC_PT_ACK);
++   EXPECT_EQ (sessions_in_use (net), 0u);
++}
++
++/**
++ * A session that does not get an AR is released after the response, as it is
++ * not monitored by an AR. Otherwise PF_MAX_SESSION requests, each with a
++ * distinct activity UUID, would leave no session for a Connect.
++ */
++TEST_F (CmrpcTest, CmrpcSessionWithoutArReleasedAfterResponse)
++{
++   uint8_t pdu[88];
++   uint8_t res[1500];
++   uint16_t res_len;
++   bool close_socket = false;
++   uint8_t ix;
++
++   for (ix = 0; ix < PF_MAX_SESSION; ix++)
++   {
++      /* A request with an unknown operation number, in one PDU */
++      memset (pdu, 0, sizeof (pdu));
++      memcpy (pdu, connect_req, 80);
++      pdu[40] = (uint8_t)(0x40 + ix); /* Activity UUID */
++      pdu[68] = 0x55;                  /* Operation number */
++      pdu[74] = 8;                     /* Length of body */
++      res_len = sizeof (res);
++      (void)pf_cmrpc_dce_packet (
++         net,
++         PNAL_MAKEU32 (192, 168, 1, 170),
++         49152,
++         pdu,
++         sizeof (pdu),
++         res,
++         &res_len,
++         &close_socket);
++   }
++   EXPECT_EQ (sessions_in_use (net), 0u);
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (sessions_in_use (net), 1u);
++}
++
++/**
++ * A session with an AR is not timed out if the rest of a fragmented request
++ * is not received, as it is monitored by the AR. The fragments that were
++ * received are dropped when the next call starts.
++ */
++TEST_F (CmrpcTest, CmrpcSessionWithArNotTimedOut)
++{
++   pf_session_info_t * p_sess = NULL;
++   unsigned ix;
++
++   mock_set_pnal_udp_recvfrom_buffer (connect_req, sizeof (connect_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.connect_calls, 1);
++   EXPECT_EQ (sessions_in_use (net), 1u);
++   for (ix = 0; ix < PF_MAX_SESSION; ix++)
++   {
++      if (net->cmrpc_session_info[ix].in_use)
++      {
++         p_sess = &net->cmrpc_session_info[ix];
++      }
++   }
++   ASSERT_NE (p_sess, nullptr);
++
++   /* The first fragment of a request on the session of the Connect */
++   receive_request_fragment (net, 0, 0, false);
++   EXPECT_EQ (p_sess->in_fragment_nbr, 1u);
++   EXPECT_FALSE (pf_scheduler_is_running (&p_sess->call_timeout));
++
++   run_stack (9 * 1000 * 1000);
++   EXPECT_TRUE (p_sess->in_use);
++   EXPECT_NE (p_sess->p_ar, nullptr);
++   EXPECT_EQ (appdata.cmdev_state, PNET_EVENT_STARTUP);
++
++   /* The next call */
++   mock_set_pnal_udp_recvfrom_buffer (write_req, sizeof (write_req));
++   run_stack (TEST_UDP_DELAY);
++   EXPECT_EQ (appdata.call_counters.write_calls, 1);
++   EXPECT_EQ (p_sess->in_fragment_nbr, 0u);
++}
++
+ TEST_F (CmrpcTest, CmrpcImplicitRmReadInd)
+ {
+    static pf_session_info_t session_info;
+diff --git a/test/test_dcp.cpp b/test/test_dcp.cpp
+index c441c0b1..2898311b 100644
+--- a/test/test_dcp.cpp
++++ b/test/test_dcp.cpp
+@@ -267,11 +267,27 @@ TEST_F (DcpTest, DcpSetLastBlockAtEndOfFrame)
+ {
+    /* The only block ends at the very end of the frame. There is no room for
+     * a next block header, which must not be read. */
++   // clang-format off
+    uint8_t req[] = {
+-      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, 0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf,
+-      0x88, 0x92, 0xfe, 0xfd, 0x04, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+-      0x00, 0x10, 0x02, 0x02, 0x00, 0x0c, 0x00, 0x00, 0x72, 0x74, 0x2d, 0x6c,
+-      0x61, 0x62, 0x73, 0x2d, 0x64, 0x65};
++      // Ethernet header
++      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, // [00-05] Destination MAC address
++      0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++      0x88, 0x92,                         // [12-13] EtherType: PROFINET
++      // DCP header
++      0xfe, 0xfd,                         // [14-15] Frame ID: DCP Get/Set
++      0x04,                               // [16]    Service ID: Set
++      0x00,                               // [17]    Service type: Request
++      0x00, 0x00, 0x00, 0x03,             // [18-21] Xid
++      0x00, 0x00,                         // [22-23] Response delay
++      0x00, 0x10,                         // [24-25] DCP data length: 16 bytes
++      // DCP block: Name of station
++      0x02, 0x02,                         // [26-27] Option: Device props, Name of station
++      0x00, 0x0c,                         // [28-29] Block length: 12 (qualifier, name)
++      0x00, 0x00,                         // [30-31] Block qualifier: Temporary
++      0x72, 0x74, 0x2d, 0x6c, 0x61,       // [32-36] Name: "rt-la"
++      0x62, 0x73, 0x2d, 0x64, 0x65        // [37-41] Name: "bs-de"
++   };
++   // clang-format on
+ 
+    mock_clear();
+    EXPECT_EQ (receive_frame (net, req, sizeof (req)), 1);
+@@ -282,11 +298,28 @@ TEST_F (DcpTest, DcpSetTruncatedBlockHeader)
+ {
+    /* DCP data length claims 1 byte after the first block, which is not
+     * enough for a block header. The first block is still handled. */
++   // clang-format off
+    uint8_t req[] = {
+-      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, 0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf,
+-      0x88, 0x92, 0xfe, 0xfd, 0x04, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+-      0x00, 0x11, 0x02, 0x02, 0x00, 0x0c, 0x00, 0x00, 0x72, 0x74, 0x2d, 0x6c,
+-      0x61, 0x62, 0x73, 0x2d, 0x64, 0x65, 0x00};
++      // Ethernet header
++      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, // [00-05] Destination MAC address
++      0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++      0x88, 0x92,                         // [12-13] EtherType: PROFINET
++      // DCP header
++      0xfe, 0xfd,                         // [14-15] Frame ID: DCP Get/Set
++      0x04,                               // [16]    Service ID: Set
++      0x00,                               // [17]    Service type: Request
++      0x00, 0x00, 0x00, 0x03,             // [18-21] Xid
++      0x00, 0x00,                         // [22-23] Response delay
++      0x00, 0x11,                         // [24-25] DCP data length: 17 bytes
++      // DCP block: Name of station
++      0x02, 0x02,                         // [26-27] Option: Device props, Name of station
++      0x00, 0x0c,                         // [28-29] Block length: 12 (qualifier, name)
++      0x00, 0x00,                         // [30-31] Block qualifier: Temporary
++      0x72, 0x74, 0x2d, 0x6c, 0x61,       // [32-36] Name: "rt-la"
++      0x62, 0x73, 0x2d, 0x64, 0x65,       // [37-41] Name: "bs-de"
++      0x00                                // [42]    Extra byte, too short for block header
++   };
++   // clang-format on
+ 
+    mock_clear();
+    EXPECT_EQ (receive_frame (net, req, sizeof (req)), 1);
+@@ -297,10 +330,26 @@ TEST_F (DcpTest, DcpSetBlockShorterThanQualifier)
+ {
+    /* Signal block with block length 1, which is too short to hold the block
+     * qualifier. It must be rejected, so the LED is not flashed. */
++   // clang-format off
+    uint8_t req_len_1[] = {
+-      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, 0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf,
+-      0x88, 0x92, 0xfe, 0xfd, 0x04, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00,
+-      0x00, 0x06, 0x05, 0x03, 0x00, 0x01, 0x00, 0x00};
++      // Ethernet header
++      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, // [00-05] Destination MAC address
++      0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++      0x88, 0x92,                         // [12-13] EtherType: PROFINET
++      // DCP header
++      0xfe, 0xfd,                         // [14-15] Frame ID: DCP Get/Set
++      0x04,                               // [16]    Service ID: Set
++      0x00,                               // [17]    Service type: Request
++      0x00, 0x00, 0x00, 0x04,             // [18-21] Xid
++      0x00, 0x00,                         // [22-23] Response delay
++      0x00, 0x06,                         // [24-25] DCP data length: 6 bytes
++      // DCP block: Signal
++      0x05, 0x03,                         // [26-27] Option: Control, suboption: Signal
++      0x00, 0x01,                         // [28-29] Block length: 1 (no room for qualifier)
++      0x00,                               // [30]    Block value
++      0x00                                // [31]    Padding
++   };
++   // clang-format on
+ 
+    mock_clear();
+    EXPECT_EQ (receive_frame (net, req_len_1, sizeof (req_len_1)), 1);
+@@ -311,10 +360,22 @@ TEST_F (DcpTest, DcpSetBlockShorterThanQualifier)
+ TEST_F (DcpTest, DcpSetTooShortFrames)
+ {
+    /* Frames that end inside the DCP header or the first block header */
++   // clang-format off
+    uint8_t req[30] = {
+-      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, 0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf,
+-      0x88, 0x92, 0xfe, 0xfd, 0x04, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
++      // Ethernet header
++      0x12, 0x34, 0x00, 0x78, 0x90, 0xab, // [00-05] Destination MAC address
++      0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++      0x88, 0x92,                         // [12-13] EtherType: PROFINET
++      // DCP header
++      0xfe, 0xfd,                         // [14-15] Frame ID: DCP Get/Set
++      0x04,                               // [16]    Service ID: Set
++      0x00,                               // [17]    Service type: Request
++      0x00, 0x00, 0x00, 0x03,             // [18-21] Xid
++      0x00, 0x00,                         // [22-23] Response delay
++      0x00, 0x00,                         // [24-25] DCP data length: 0 bytes
++      0x00, 0x00, 0x00, 0x00              // [26-29] First block header (frame is cut off)
++   };
++   // clang-format on
+    uint16_t len;
+ 
+    for (len = 16; len < sizeof (req); len++)
+@@ -327,10 +388,22 @@ TEST_F (DcpTest, DcpSetTooShortFrames)
+ TEST_F (DcpTest, DcpIdentifyTooShortFrames)
+ {
+    /* Frames that end inside the DCP header or the first block header */
++   // clang-format off
+    uint8_t req[30] = {
+-      0x01, 0x0e, 0xcf, 0x00, 0x00, 0x00, 0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf,
+-      0x88, 0x92, 0xfe, 0xfe, 0x05, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
+-      0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
++      // Ethernet header
++      0x01, 0x0e, 0xcf, 0x00, 0x00, 0x00, // [00-05] Destination MAC: Identify multicast
++      0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++      0x88, 0x92,                         // [12-13] EtherType: PROFINET
++      // DCP header
++      0xfe, 0xfe,                         // [14-15] Frame ID: DCP Identify request
++      0x05,                               // [16]    Service ID: Identify
++      0x00,                               // [17]    Service type: Request
++      0x00, 0x00, 0x00, 0x02,             // [18-21] Xid
++      0x00, 0x01,                         // [22-23] Response delay factor
++      0x00, 0x00,                         // [24-25] DCP data length: 0 bytes
++      0x00, 0x00, 0x00, 0x00              // [26-29] First block header (frame is cut off)
++   };
++   // clang-format on
+    uint16_t len;
+ 
+    for (len = 16; len < sizeof (req); len++)
+@@ -343,11 +416,26 @@ TEST_F (DcpTest, DcpIdentifyTooShortFrames)
+ TEST_F (DcpTest, DcpIdentifyLastBlockAtEndOfFrame)
+ {
+    /* Name of station filter ends at the very end of the frame */
++   // clang-format off
+    uint8_t req[] = {
+-      0x01, 0x0e, 0xcf, 0x00, 0x00, 0x00, 0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf,
+-      0x88, 0x92, 0xfe, 0xfe, 0x05, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
+-      0x00, 0x10, 0x02, 0x02, 0x00, 0x0c, 0x72, 0x74, 0x2d, 0x6c, 0x61, 0x62,
+-      0x73, 0x2d, 0x64, 0x65, 0x6d, 0x6f};
++      // Ethernet header
++      0x01, 0x0e, 0xcf, 0x00, 0x00, 0x00, // [00-05] Destination MAC: Identify multicast
++      0xc8, 0x5b, 0x76, 0xe6, 0x89, 0xdf, // [06-11] Source MAC address
++      0x88, 0x92,                         // [12-13] EtherType: PROFINET
++      // DCP header
++      0xfe, 0xfe,                         // [14-15] Frame ID: DCP Identify request
++      0x05,                               // [16]    Service ID: Identify
++      0x00,                               // [17]    Service type: Request
++      0x00, 0x00, 0x00, 0x02,             // [18-21] Xid
++      0x00, 0x01,                         // [22-23] Response delay factor
++      0x00, 0x10,                         // [24-25] DCP data length: 16 bytes
++      // DCP block: Name of station
++      0x02, 0x02,                         // [26-27] Option: Device props, Name of station
++      0x00, 0x0c,                         // [28-29] Block length: 12 (name)
++      0x72, 0x74, 0x2d, 0x6c, 0x61, 0x62, // [30-35] Name: "rt-lab"
++      0x73, 0x2d, 0x64, 0x65, 0x6d, 0x6f  // [36-41] Name: "s-demo"
++   };
++   // clang-format on
+ 
+    /* Set the name that the request is looking for */
+    EXPECT_EQ (receive_frame (net, set_name_req, sizeof (set_name_req)), 1);
+diff --git a/test/utils_for_testing.cpp b/test/utils_for_testing.cpp
+index 1a079595..70b512d5 100644
+--- a/test/utils_for_testing.cpp
++++ b/test/utils_for_testing.cpp
+@@ -165,7 +165,10 @@ int my_alarm_ind (
+    uint16_t data_usi,
+    const uint8_t * p_data)
+ {
++   app_data_for_testing_t * p_appdata = (app_data_for_testing_t *)arg;
++
+    TEST_TRACE ("Callback on alarm\n");
++   p_appdata->call_counters.alarm_calls++;
+    return 0;
+ }
+ 
+diff --git a/test/utils_for_testing.h b/test/utils_for_testing.h
+index cb5848a2..b4c0d442 100644
+--- a/test/utils_for_testing.h
++++ b/test/utils_for_testing.h
+@@ -98,6 +98,7 @@ typedef struct call_counters_obj
+    uint16_t ccontrol_calls;
+    uint16_t read_calls;
+    uint16_t write_calls;
++   uint16_t alarm_calls;
+    uint16_t led_on_calls;
+    uint16_t led_off_calls;
+    uint16_t scheduler_callback_a_calls;

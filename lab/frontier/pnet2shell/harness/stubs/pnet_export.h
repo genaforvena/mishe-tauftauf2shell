@@ -1,0 +1,4 @@
+#ifndef HARNESS_PNET_EXPORT_H
+#define HARNESS_PNET_EXPORT_H
+#define PNET_EXPORT
+#endif

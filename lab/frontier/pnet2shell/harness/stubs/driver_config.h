@@ -1,0 +1,3 @@
+#ifndef HARNESS_DRIVER_CONFIG_H
+#define HARNESS_DRIVER_CONFIG_H
+#endif

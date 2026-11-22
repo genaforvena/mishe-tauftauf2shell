@@ -208,3 +208,14 @@ lab/frontier/snac2shell/harness/parse-fixed-plain
 
 # Pppd2shell: parked candidate pins from W112, no harness built yet.
 lab/frontier/pppd2shell/
+
+# Pnet2shell harness: extracted pinned trees, generated headers, local binaries
+# and raw replay output. Pins, patch, manifest, harness sources, normalized
+# evidence and hashes stay tracked.
+lab/frontier/pnet2shell/src/
+lab/frontier/pnet2shell/harness/gen-*/
+lab/frontier/pnet2shell/harness/pnet-vuln-asan
+lab/frontier/pnet2shell/harness/pnet-fixed-asan
+lab/frontier/pnet2shell/harness/pnet-vuln-plain
+lab/frontier/pnet2shell/harness/pnet-fixed-plain
+lab/frontier/pnet2shell/evidence/raw-*
