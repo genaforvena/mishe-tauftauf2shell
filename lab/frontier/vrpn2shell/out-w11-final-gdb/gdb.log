@@ -1,0 +1,21 @@
+Breakpoint 1 at 0x40be40: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/server_src/vrpn.C, line 50.
+Breakpoint 2 at 0x413dda: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 1446.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+STUB_HIT rsp=0x7fffffffd9b8 ret_at_rsp=0x413c04
+#0  0x000000000040be40 in ?? () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/server_src/vrpn.C:50
+#1  0x0000000000413c04 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, type=-1, sender=0, time=..., len=8, buffer=0x5ee380 "", userdata=0x5ee220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#2  0x000000000041c3f3 in vrpn_Endpoint::dispatch (this=0x5ee220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x5ee380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#3  0x000000000041c084 in vrpn_Endpoint_IP::getOneTCPMessage (this=0x5ee220, fd=6, buf=0x5ee380 "", buflen=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+STUB_HIT rsp=0x7fffffffd950 ret_at_rsp=0xffffffff
+#0  0x000000000040be40 in ?? () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/server_src/vrpn.C:50
+#1  0x00000000ffffffff in ?? ()
+#2  0x0000000000000000 in ?? ()
+VRPN2SHELL_MARKER
+RESUME_413DDA rsp=0x7fffffffd950
+#0  0x0000000000413dda in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, p=..., userdata=0x5ee220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#1  0x0000000000413c04 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, type=-1, sender=0, time=..., len=8, buffer=0x5ee380 "", userdata=0x5ee220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#2  0x000000000041c3f3 in vrpn_Endpoint::dispatch (this=0x5ee220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x5ee380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+vrpn_TypeDispatcher::doSystemCallbacksFor:  Nonzero system handler return.
+vrpn_Endpoint::dispatch:  Nonzero system return
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

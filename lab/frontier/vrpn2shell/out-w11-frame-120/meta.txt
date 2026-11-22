@@ -1,0 +1,4 @@
+date_utc=2026-11-22T22:02:57Z
+bin=lab/frontier/vrpn2shell/build-marker-07.36/server_src/vrpn_server
+bin_sha256=1cd5404e1b45358091e37aaa53cbf95891c370644173a5ecb6f4e6137b917fcd  lab/frontier/vrpn2shell/build-marker-07.36/server_src/vrpn_server
+port=14102 index=120 msgtype=-1 line=4554

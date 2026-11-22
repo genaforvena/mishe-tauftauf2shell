@@ -1,0 +1,37 @@
+Breakpoint 1 at 0x41cc8c: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+HIT-REGS pc=0x41cc8c rbp=0x7fffffffd950 rsp=0x7fffffffd8c0 rdi=0x78000000 rsi=0x41414141 rdx=0x3 rcx=0x20 rax=0x78 rbx=0x8
+   0x41cc74 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+116>:	mov    rdi,rax
+   0x41cc77 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+119>:	call   0x40af40 <strncpy@plt>
+   0x41cc7c <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+124>:	mov    rax,QWORD PTR [rbp+0x30]
+   0x41cc80 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+128>:	mov    eax,DWORD PTR [rax]
+   0x41cc82 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+130>:	mov    edi,eax
+   0x41cc84 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+132>:	call   0x40b4a0 <ntohl@plt>
+   0x41cc89 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+137>:	mov    DWORD PTR [rbp-0x14],eax
+=> 0x41cc8c <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+140>:	mov    eax,DWORD PTR [rbp-0x14]
+   0x41cc8f <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+143>:	cdqe
+   0x41cc91 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+145>:	mov    BYTE PTR [rbp+rax*1-0x80],0x0
+   0x41cc96 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+150>:	mov    rax,QWORD PTR [rbp-0x10]
+   0x41cc9a <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+154>:	mov    rax,QWORD PTR [rax+0xe0]
+rax            0x78                120
+rbx            0x8                 8
+rcx            0x20                32
+rdx            0x3                 3
+rsi            0x41414141          1094795585
+rdi            0x78000000          2013265920
+rbp            0x7fffffffd950      0x7fffffffd950
+rsp            0x7fffffffd8c0      0x7fffffffd8c0
+r8             0x0                 0
+r9             0x8                 8
+r10            0x41c300            4309760
+r11            0x246               582
+HIT-VAR i=120 &sender_name=0x7fffffffd8d0
+HIT-WORDS +104=0x7800000000 +112=0x5ee220 +120=0x700000000 +128=0x7fffffffd9c0 +136=0x413dda
+#0  vrpn_Endpoint::handle_sender_message (userdata=0x5ee220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+#1  0x0000000000413dda in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, p=..., userdata=0x5ee220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x0000000000413c04 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, type=-1, sender=0, time=..., len=8, buffer=0x5ee380 "", userdata=0x5ee220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x000000000041c3f3 in vrpn_Endpoint::dispatch (this=0x5ee220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x5ee380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#4  0x000000000041c084 in vrpn_Endpoint_IP::getOneTCPMessage (this=0x5ee220, fd=6, buf=0x5ee380 "", buflen=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

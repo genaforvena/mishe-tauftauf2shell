@@ -324,3 +324,39 @@ SENDER 136 and 139 DEAD exit 139 (SIGSEGV). The W8 136/139 ALIVE rows used
 the Debug -O0 build; this -O2 outcome matches the witness's W115 replay.
 Self-replay, not a witness verdict; author-only for the saved-RIP rows.
 All probes on 127.0.0.1 ports started by this plant; no server left running.
+
+## W11 — no-canary marker build and binary patch (2026-11-22 ~22:12Z)
+
+Both pinned sources were rebuilt with identical flags in new directories; no
+source file was edited. Build logs: `build-marker.log`,
+`build-marker-fixed.log`; the exact configure commands are recorded below.
+
+```
+cmake -S lab/frontier/vrpn2shell/src/vrpn-07.36 -B lab/frontier/vrpn2shell/build-marker-07.36 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fno-stack-protector -fno-pie -falign-functions=256' -DCMAKE_C_FLAGS='-fno-stack-protector -fno-pie -falign-functions=256' -DCMAKE_EXE_LINKER_FLAGS='-no-pie'
+cmake --build lab/frontier/vrpn2shell/build-marker-07.36 --target vrpn_server -j4
+cmake -S lab/frontier/vrpn2shell/src/vrpn-fixed -B lab/frontier/vrpn2shell/build-marker-fixed -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fno-stack-protector -fno-pie -falign-functions=256' -DCMAKE_C_FLAGS='-fno-stack-protector -fno-pie -falign-functions=256' -DCMAKE_EXE_LINKER_FLAGS='-no-pie'
+cmake --build lab/frontier/vrpn2shell/build-marker-fixed --target vrpn_server -j4
+python3 lab/frontier/vrpn2shell/install_marker_patch.py lab/frontier/vrpn2shell/build-marker-07.36/server_src/vrpn_server lab/frontier/vrpn2shell/build-marker-07.36/server_src/vrpn_server-marked3 --target 0x413d00 --ret 0x413dda --cave 0x40be40
+python3 lab/frontier/vrpn2shell/install_marker_patch.py lab/frontier/vrpn2shell/build-marker-fixed/server_src/vrpn_server lab/frontier/vrpn2shell/build-marker-fixed/server_src/vrpn_server-marked3 --target 0x413d00 --ret 0x413dda --cave 0x40be40
+```
+
+Binary digests (SHA-256): vulnerable unpatched
+`1cd5404e1b45358091e37aaa53cbf95891c370644173a5ecb6f4e6137b917fcd`; fixed
+unpatched `20d2da0907bcd01c69447bad0999cbea6ffa1799bcdbed23a79fc287a0e92359`;
+vulnerable patched `45b33f20c923016cba3e03852e2dc8d79adc86aa8b7a5614d28f27d6ed4873bb`;
+fixed patched `a8f2ebf407d7d69b1f52cb0dd9402a268e8cd2686300348397e3ee147fde5651`.
+Patch records: `out-w11-patch-record.txt`, `out-w11-patch-record-fixed.txt`.
+The patcher records source/destination digests, `.text` range, target, return
+address, cave and displaced prologue; the stub is 91 bytes including the
+18-byte `VRPN2SHELL_MARKER\n` message.
+
+Frame measurement: `out-w11-frame-120/gdb.log` shows `&sender_name=rbp-0x80`
+and the store `mov BYTE PTR [rbp+rax-0x80],0x0`; `out-w11-map-136b/gdb.log`
+shows saved RIP `0x413dda -> 0x413d00`. Final gdb trace
+`out-w11-final-gdb/gdb.log` shows the normal entry, the corrupted-return entry
+(`[rsp]=0xffffffff`), the marker and the resume at `0x413dda`. Functional rows
+and controls are in `out-w11-marked3-*`, `out-w11-fixed-marked3-*`,
+`out-w11-unpatched2-136`, `out-w11-unpatched-type-136` (fresh ports 14112,
+14115-14117, 14119-14121). Earlier wrong stub versions are preserved in
+`out-w11-marked-*` and `out-w11-marked2-*` as negative results. All probes were
+on 127.0.0.1 ports started by this plant; no server was left running.

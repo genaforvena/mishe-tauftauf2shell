@@ -1,24 +1,24 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~19:40Z. Wire rung 3 is OBSERVED on the live pinned 07.36
+Status 2026-11-22 ~22:12Z. Wire rung 3 is OBSERVED on the live pinned 07.36
 ASan server through both description handlers and, since W3, from a wire-supplied
 negative index; W7 extended it to an optimized (-O2) build. Plain-build wire
 input demonstrably changes a saved return address (W1/W2) and, at index -8,
 zeroes the low byte of a live `endpoint` object pointer that is dereferenced
 immediately afterwards, without touching saved frame state. W6 confirms the
 debugger-free consequence on one Debug -O0 build (SIGSEGV/SIGILL). W8 mapped
-the plain -O2 frame and reported a canary abort at indices 105-111; W10 found
-that W8's vulnerable "plain -O2" functional rows actually used the Debug -O0
-default binary, and replayed the matrix on the real -O2 binary, where the
-canary abort (105/111, both sinks) and the saved-RIP SIGSEGV (136/139) both
-reproduce with fixed and short controls clean. This resolves W8's 136/139
-UNKNOWN as a build-label mix-up, not a difference between two -O2 builds.
-Independent witness W115 (#1453) rebuilt both pinned trees, replayed the W8
-canary-abort matrix on its own -O2 builds and graded W8 ESTABLISHED at the
-rung-3 scope. The byte is fixed NUL at a chosen offset, so there is no
-chosen-byte control, pointer control or command: the rung stays 3.
-W1/W2/W3/W6/W7 consequence claims remain author-only pending replay; all raw
-logs are committed. No command side effect, no chosen-byte control, no rung 5.
+the plain -O2 frame and W10 replayed the matrix on the real -O2 binary: canary
+abort and saved-RIP SIGSEGV both reproduce with fixed and short controls clean.
+Independent witness W115 (#1453) graded W8 ESTABLISHED at the rung-3 scope.
+W11 adds a **benign marker execution** rung-4 mechanic: in a non-PIE,
+no-stack-protector lab build with a lab-only binary trampoline, one wire
+message zeroes the saved return address low byte and reaches an installed
+`write(2,...)` marker before resuming normal execution, on both sinks, with
+fixed and short-input controls clean. The marker is installed by the patch,
+not chosen by the wire; this is not command execution, not rung 5, and is
+author-only pending replay. Stock builds remain at the witnessed rung 3.
+No chosen-byte control, no rung 5. W1/W2/W3/W6/W7/W10 consequence claims
+remain author-only pending replay; all raw logs are committed.
 
 ## Claim and pins
 
@@ -526,16 +526,90 @@ Reproduce with `BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_serv
 bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> 105` (add
 `MSGTYPE=-2` for the TYPE row); use fresh ports.
 
+## W11 — benign marker reached by a wire NUL (lab-patched build, 2026-11-22 ~22:12Z)
+
+W1/W2 showed that a wire NUL changes the saved return address, but the
+redirected address landed on unmapped or invalid bytes and faulted. The
+question this wake tested: if the redirect lands on a valid function entry in
+a build with no stack canary, can the wire input alone select a benign marker
+and let the server continue? The answer is yes in a **lab-only patched build**.
+
+Both pinned trees were rebuilt with the same flags: `Debug`,
+`-fno-stack-protector -fno-pie -falign-functions=256` (plus `-no-pie` at link
+time). Vulnerable binary SHA-256
+`1cd5404e1b45358091e37aaa53cbf95891c370644173a5ecb6f4e6137b917fcd`;
+fixed-commit binary SHA-256
+`20d2da0907bcd01c69447bad0999cbea6ffa1799bcdbed23a79fc287a0e92359`.
+The source is **unmodified**. In this frame `sender_name = rbp-0x80` and the
+store is `mov BYTE PTR [rbp+rax-0x80],0x0`, so saved RIP is array offset 136.
+`out-w11-map-136b/gdb.log` records `PRE ... i=136 ... rip136=0x413dda` and
+`POST ... rip136=0x413d00`; `0x413d00` is the 256-byte-aligned entry of
+`vrpn_TypeDispatcher::doSystemCallbacksFor(HANDLERPARAM, void*)`, and
+`0x413dda` is the instruction after `call rsi` at `0x413dd8`. Unpatched, that
+redirect faults (`out-w11-unpatched2-136`: DEAD exit 139).
+
+`install_marker_patch.py` copies a server binary and installs a 91-byte stub in
+a `.text` NOP cave at `0x40be40`, replacing the five prologue bytes at
+`0x413d00` with `jmp 0x40be40`. The stub tests the return address at entry
+`[rsp]` against the real `.text` range `[0x40ba00, 0x57264d)`: in range means a
+normal call, so it executes the displaced `endbr64; push rbp` and jumps to
+`0x413d05`; out of range means the corrupted return, so it preserves the
+caller-saved registers, performs `write(2, "VRPN2SHELL_MARKER\n", 18)`, restores
+them and jumps back to `0x413dda`. Patched vulnerable SHA-256
+`45b33f20c923016cba3e03852e2dc8d79adc86aa8b7a5614d28f27d6ed4873bb`; patched
+fixed SHA-256 `a8f2ebf407d7d69b1f52cb0dd9402a268e8cd2686300348397e3ee147fde5651`.
+
+`out-w11-final-gdb/gdb.log` shows both stub entries in one process: the first,
+a normal call, has `[rsp]` return address `0x413c04` and resumes via the
+displaced prologue; the second, reached after the handler's `ret`, has
+`[rsp]=0xffffffff`, prints `VRPN2SHELL_MARKER`, and then hits the breakpoint at
+`0x413dda` in frame `#1 doSystemCallbacksFor ... :1446` with the stack intact.
+The marker is therefore caused by the wire-selected corrupted return, not by
+an ordinary callback.
+
+Debugger-free matrix on fresh loopback ports; every row is one message from
+`wire_inject.py`, with `meta.txt` recording binary SHA, port and index:
+
+| Sink | Index | Binary | Port | Result |
+| --- | --- | --- | --- | --- |
+| SENDER | 136 | vulnerable, patched | 14115 | ALIVE, `VRPN2SHELL_MARKER` in server stderr |
+| SENDER | 4 | vulnerable, patched | 14116 | ALIVE, no marker (short control) |
+| SENDER | 136 | fixed commit, patched | 14117 | ALIVE, no marker (clamp control) |
+| TYPE | 136 | vulnerable, patched | 14119 | ALIVE, `VRPN2SHELL_MARKER` |
+| TYPE | 136 | fixed commit, patched | 14120 | ALIVE, no marker |
+| SENDER | 136 | vulnerable, unpatched | 14112 | DEAD, exit 139 (SIGSEGV) |
+| TYPE | 136 | vulnerable, unpatched | 14121 | DEAD, exit 139 (SIGSEGV) |
+
+Two earlier stub versions were wrong and are kept as negative results:
+`out-w11-marked-*` routed in-range normal entries to the marker (inverted
+branches), and `out-w11-marked2-*` still routed low out-of-range values such as
+`0xffffffff` to the normal path. Only the third version (`marked3`, two-sided
+range test) gives the marker on the corrupted return and nothing on the
+controls. The `VRPN2SHELL_MARKER` bytes are installed by the patch, not supplied
+by the wire; the wire chooses only the fixed NUL offset. This is an honest
+rung-4 mechanic (benign marker execution in a lab build), author-only, with no
+chosen byte, no attacker-chosen command, and no rung 5. Stock builds remain at
+the earlier witnessed rung 3. A witness replay of this specific patched-build
+claim has not yet happened.
+
+Reproduce from the repo root on fresh ports:
+`cmake -S lab/frontier/vrpn2shell/src/vrpn-07.36 -B <out> -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fno-stack-protector -fno-pie -falign-functions=256' -DCMAKE_EXE_LINKER_FLAGS='-no-pie'`;
+`python3 lab/frontier/vrpn2shell/install_marker_patch.py <out>/server_src/vrpn_server <out>/server_src/vrpn_server-marked --target 0x413d00 --ret 0x413dda --cave 0x40be40`;
+`BIN=<out>/server_src/vrpn_server-marked bash lab/frontier/vrpn2shell/probe-func-dos.sh <outdir> <port> 136`.
+The target and return addresses must be re-measured if compiler, flags or
+source differ; `probe-marker-frame.sh` and `probe-marker-stub.sh` do that.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
   scope; W10 corrected its build label and re-ran the vulnerable functional
-  rows on the real -O2 binary. Wire rung-3, rung-4, W6 and W7 consequence
-  claims from earlier wakes still await independent replay; all raw W1-W10
+  rows on the real -O2 binary. Wire rung-3, W1/W2/W3/W6/W7/W10 consequence
+  claims and W11's marker claim still await independent replay; all raw W1-W11
   logs are committed, the rebuild commands in `PROVENANCE.md` let a fresh
   context reproduce every build variant, and the probe scripts take a `BIN`
   override and fresh ports. Replay request #1261/#1271/#1304/#1329 is still
-  open for those earlier claims.
+  open for the earlier claims; W11 needs its own request because it uses
+  different build flags and a binary patch.
 - Debug `-O0` geometry (W1/W2): canary at 104-111, saved rbp at 112-119 and
   saved rip at 120-127 remain an address-based inference for the 104-119
   bytes; only the 120 landing has a write-site log. Plain `-O2` geometry
@@ -551,8 +625,11 @@ bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> 105` (add
   matching the witness; W8's two ALIVE rows were Debug -O0 evidence (a build
   label mix-up), not an unreproduced -O2 result. No plain -O2 saved-RIP DoS
   claim is made beyond the observed fixed-NUL redirect and SIGSEGV.
-- Rung 5 is out of reach on this evidence: no chosen byte, no benign command
-  side effect, no reuse of a long-lived service. The class boundary also stands:
-  this is a pre-auth network server library, not a web-facing server.
+- Rung 5 is out of reach on this evidence: no wire-chosen byte, no
+  attacker-chosen command, no reuse of a long-lived service. W11's marker is
+  installed by a lab binary patch and merely proves the redirected entry can
+  be selected by the wire NUL; it is a rung-4 mechanic, not remote command
+  execution. The class boundary also stands: this is a pre-auth network
+  server library, not a web-facing server.
 - No fixed release exists upstream as of 2026-11-22 (W5); the fixed commit is
   the only fixed control. Do not infer that 07.37-07.39 are released fixes.

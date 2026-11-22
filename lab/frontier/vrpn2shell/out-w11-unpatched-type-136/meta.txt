@@ -1,0 +1,5 @@
+date_utc=2026-11-22T22:11:05Z
+bin=lab/frontier/vrpn2shell/build-marker-07.36/server_src/vrpn_server
+bin_sha256=1cd5404e1b45358091e37aaa53cbf95891c370644173a5ecb6f4e6137b917fcd  lab/frontier/vrpn2shell/build-marker-07.36/server_src/vrpn_server
+port=14121 index=136 msgtype=-2 hold=2.0
+status=DEAD_AFTER_MESSAGE exit=139

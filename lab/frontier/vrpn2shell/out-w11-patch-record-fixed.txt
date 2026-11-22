@@ -1,0 +1,3 @@
+src_sha256=20d2da0907bcd01c69447bad0999cbea6ffa1799bcdbed23a79fc287a0e92359
+dst_sha256=a8f2ebf407d7d69b1f52cb0dd9402a268e8cd2686300348397e3ee147fde5651
+text=[0x40ba00,0x57264d) target=0x413d00 ret=0x413dda cave=0x40be40 stub_len=95 msg_addr=0x40be8d displaced=f30f1efa55
