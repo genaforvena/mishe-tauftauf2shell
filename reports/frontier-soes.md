@@ -542,3 +542,38 @@ eight-case replay is in
 `evidence/replay-soes2shell-20261122/cve129814-label-fix/INDEX.txt`. All 16
 harness targets rebuilt with no warnings and the intended one-byte ASan
 report on 3.2.0 long-name only.
+
+## Advisory write-set closure (soes2shell, ninth wake, 2026-11-22 ~06:5xZ)
+
+Re-read the primary CSAF
+(`https://docs.rt-labs.com/security/csaf/2026/rrtl-261119-01.json`) and
+enumerated all 21 CVE IDs/titles. The "16 untested" figure in the wake-5
+section predates the 129803 limb; 15 remain. The question was whether any
+untested limb could add a new rung-4 WRITE. Answer: no. The six write-capable limbs are
+exactly the six already covered here and in the committed harnesses —
+CVE-2026-129794 (EoE reassembly `memcpy`), 129796 (SDO download flexible
+length), 129798 (segmented download cumulative), 129803 (undersized-frame
+download, write mode through the shared `:864` sink), 129811 (PDO mapping
+size) and 129814 (OD-name terminator). The other fifteen are titled as reads,
+NULL dereferences, length/state logic or filename truncation
+(129795, 129797, 129799, 129800, 129801, 129802, 129804–129810,
+129812, 129813).
+
+Checked the only remaining integer-underflow candidate at source level:
+3.2.0 `esc_eoe.c:812-817` subtracts 4 from `rxframeoffset` when the last
+fragment carries the timestamp flag, with no lower bound; `rxebuf.len` then
+takes the wrapped value. The 3.2.1 fix (`fix-v3.2.0-v3.2.1.diff`, hunk
+`@@ -812,13 +847,22 @@`) rejects `rxframeoffset < 4` and returns. In 3.2.0 the
+wrapped length is passed to `handle_recv_buffer` and immediately followed by
+`EOE_init_rx()`; SOES itself performs no write after the subtraction, so any
+consequence is consumer-dependent. The RT-Kernel/lwIP EoE consumer is
+unbuildable on this host (recorded above); no rung-4 write follows from this
+limb on the pinned bytes. FoE CVE-2026-129801 likewise has no SOES-side write:
+`FOE_data()` bounds the cumulative file position and copies through the
+application's `FOE_fwrite()`, and the advisory labels it an out-of-bounds
+read.
+
+Grade unchanged: rung 3 on real pinned handlers, rung 4 harness-level only,
+rung 5 not claimed, wire reach UNKNOWN. No new harness is owed by this
+advisory; only a real wire consumer could change that, and the source-level
+wire negatives above still hold.
