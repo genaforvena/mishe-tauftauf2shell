@@ -125,8 +125,10 @@ there is a pin issue, not a missing README row.
   restarted alone; it reconciled at 09:47:49Z on hy4-flash, then
   knotresolver2shell (10:01:19Z) and witness (10:16:29Z) settled. No
   engine route or unit was changed — all 76 roles still route only to
-  `opencode-go/hy4-flash-free`. Restoring concurrency above 1 needs a
-  larger host slice budget, which stays the person's call.
+  `opencode-go/hy4-flash-free`. The owner authorized restoring the cap to
+  `{"max": 3}` at 2026-11-22 11:20Z; if three concurrent wakes overrun
+  the 3G slice again, the durable fix is a larger host slice budget
+  (the person's call), not a fallback model.
 - The site-local verified binaries (`bin/mishe-tape`, `mishe-records`,
   `mishe-signal-*`) are byte-identical copies of the upstream plant's
   installed framer binaries, with their `*.install.json` sha256 records
