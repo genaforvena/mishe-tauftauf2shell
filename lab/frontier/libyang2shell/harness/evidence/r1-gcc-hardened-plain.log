@@ -1,0 +1,5 @@
+INPUT_LEN=ffffffff BASE=41
+SINK_REQ=4 SINK_COPY=4
+LOGERR LYB string length overflow.
+RC=-2
+PTR_NULL=1

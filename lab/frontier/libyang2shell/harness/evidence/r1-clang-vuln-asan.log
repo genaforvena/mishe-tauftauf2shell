@@ -1,0 +1,58 @@
+INPUT_LEN=ffffffff BASE=41
+SINK_REQ=4 SINK_COPY=4
+MALLOC_REQ=0
+=================================================================
+==2276589==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000011 at pc 0x5cdf67191ad6 bp 0x7fff1efbc260 sp 0x7fff1efbc258
+WRITE of size 1 at 0x502000000011 thread T0
+    #0 0x5cdf67191ad5 in instrumented_memcpy /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/harness.c:59:29
+    #1 0x5cdf6719198d in ly_in_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/./fns-vuln.inc:169:9
+    #2 0x5cdf67192a12 in lyb_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/./fns-vuln.inc:18:9
+    #3 0x5cdf671922b7 in lyb_read_string /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/./fns-vuln.inc:140:9
+    #4 0x5cdf67191f96 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/harness.c:138:10
+    #5 0x758b96e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x758b96e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5cdf670b8354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/r1-clang-vuln-asan+0x2c354) (BuildId: 8ad7bb6e9093233a429cac59de0883bfbe0c9232)
+
+0x502000000011 is located 0 bytes after 1-byte region [0x502000000010,0x502000000011)
+allocated by thread T0 here:
+    #0 0x5cdf671531a3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/r1-clang-vuln-asan+0xc71a3) (BuildId: 8ad7bb6e9093233a429cac59de0883bfbe0c9232)
+    #1 0x5cdf671927e6 in logging_malloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/harness.c:72:12
+    #2 0x5cdf671921cd in lyb_read_string /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/./fns-vuln.inc:135:12
+    #3 0x5cdf67191f96 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/harness.c:138:10
+    #4 0x758b96e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x758b96e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5cdf670b8354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/r1-clang-vuln-asan+0x2c354) (BuildId: 8ad7bb6e9093233a429cac59de0883bfbe0c9232)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libyang2shell/harness/harness.c:59:29 in instrumented_memcpy
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa[01]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2276589==ABORTING
