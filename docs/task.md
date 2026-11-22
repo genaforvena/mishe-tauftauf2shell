@@ -4573,9 +4573,11 @@ write chosen process bytes. Fixed 3.2.1 and short-input controls are clean.
 At admission rung 3 is observed on the real handlers and rung 4 is
 harness-level mechanics only; no independent witness replay, no live
 loopback slave, no EtherCAT wire input, no leaked address and no real target
-pointer dereference. Rung 5 is NOT claimed and wire reach stays UNKNOWN with
-measured negatives (`CapEff=0`, no AF_PACKET; upstream RT-Kernel/XMC4 sample
-unbuildable here). The operator created the 68th `engine/routes.json` entry,
+pointer dereference. Rung 5 is NOT claimed and wire reach stays UNKNOWN. The
+uid-1000 `CapEff=0` / AF_PACKET EPERM negative was measured, but wake 15's
+root `sudo -n` probe showed EtherType `0x88a4` frames round-trip on `lo`; no
+pinned HAL feeds them to `ESC_readmbx`, and the upstream RT-Kernel/XMC4 sample
+is unbuildable here. The operator created the 68th `engine/routes.json` entry,
 this mind's wake units with the pinned full-flag sync from
 `docs/runtime-pin.md` (3 written / 0 removed, 68 wake paths), the charter,
 seed wall and two-pane window 73. This makes 64 admitted target minds.
@@ -5357,7 +5359,8 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   Plain saved-rip indices 136/139 stay alive with cause UNKNOWN.
 - **Soes hook replay self-contained and MapServer fresh replay (commits
   `2735724`, `fdf5612`)**: a `git archive` clean checkout plus the two
-  untracked SHA-checked pinned tarballs rebuilt 18 binaries and reproduced all
+  untracked SHA-checked pinned tarballs rebuilt 32 binaries (the earlier "18"
+  was a miscount) and reproduced all
   six `cve129811-hook-call` cases, including a fresh ASan `WRITE of size 64`
   from `ecat_slv.c:172`; witness replay still owed, no grade change. MapServer
   re-ran its committed drivers against the existing pinned binaries: K=95/195
@@ -5382,3 +5385,65 @@ hand-cleared. Witness replay is owed for all three; rung 5 stays UNKNOWN.
   GREEN 79 roles); witness replay is owed for all three. The docs budget note
   (commit `00648ec`) records the final 8G/10G slice budget in
   `docs/runtime-pin.md`.
+
+#### 2026-11-22 ~17:2x–17:4xZ research limb updates
+
+- **Witness W115 grades vrpn W8 ESTABLISHED at rung 3 (commit `7690cb9`, DM
+  #1453, `reports/vrpn2shell.md`)**: the witness recomputed all three source
+  pins, copied both pinned trees to `/tmp` and built its own `RelWithDebInfo`
+  servers (vulnerable `36c715ba…`, fixed `f11cabec…`), then replayed
+  `probe-func-dos.sh` on fresh ports 14021–14030. Vulnerable SENDER 102 and 4
+  stayed alive; SENDER 105 DEAD exit 134 twice, 111 DEAD exit 134, TYPE 105
+  DEAD exit 134; fixed SENDER/TYPE 105 alive; every dead run logged `*** stack
+  smashing detected ***`. Its own ASan pair (`ab730d88…` / `7db6a77d…`) gave
+  `stack-buffer-overflow WRITE of size 1` at `vrpn_Connection.C:4554`, frame
+  offset 217 in the `[112,212) 'sender_name'` frame, with fixed and short
+  controls clean. Verdict ESTABLISHED at the claimed rung-3 scope, not a
+  promotion: fixed NUL byte, no chosen byte, pointer control or command. The
+  author's two plain saved-RIP ALIVE rows were DEAD exit 139 on the witness
+  build and are UNKNOWN there, not a refutation; W1/W2/W3/W6/W7 remain
+  author-only. The W8 binary-attribution discrepancy (`5cf494…` Debug `-O0`
+  vs `bfe633…` O2) is unchanged.
+- **Soes full clean-checkout replay of all six write limbs (commit `44727b2`,
+  `reports/frontier-soes.md`)**: wake 12's clean-archive check covered only the
+  hook case and its "18 binaries" figure was a miscount. A fresh `git archive
+  HEAD lab/frontier/soes2shell` extracted to `/tmp/soes-clean-w14`, the two
+  SHA-checked untracked pinned tarballs added to `src/`, `sha256sum -c
+  SHA256SUMS` 3/3 OK, and `sh harness/build.sh` built all 32 binaries with no
+  warnings. All 88 cases were replayed with `ASAN_OPTIONS=detect_leaks=0` and
+  a 15 s timeout; none timed out, exactly ten exited nonzero (nine ASan
+  reports plus the plain 129796 `memset` SIGSEGV), all safe and all real fixed
+  3.2.1 cases clean. `INDEX.txt`, `RESULTS.txt`, `build.log` and `SHA256SUMS`
+  are under
+  `lab/frontier/soes2shell/evidence/replay-soes2shell-20261122/clean-checkout-all/`;
+  no witness verdict yet (#1438), no grade change and wire reach UNKNOWN.
+- **Soes root loopback L2 probe (commit `5b925ab`,
+  `reports/frontier-soes.md`)**: with passwordless `sudo -n`, a throwaway
+  Python probe opened two `AF_PACKET`/`SOCK_RAW` sockets bound to `lo` and a
+  42-byte EtherType `0x88a4` frame with a `SOES-W15-PROBE` payload was received
+  intact by both the ECAT-specific and `ETH_P_ALL` receivers
+  (`payload_ok=True`, rc 0, no external traffic). This corrects the earlier
+  uid-1000-only EPERM negative: root raw EtherCAT ingress/egress on loopback
+  is available here. It opens no live SOES input path — the pinned trees ship
+  no socket-backed ESC or HAL and `ESC_readmbx` only calls the linked HAL, so
+  an authored software ESC stays a synthetic consumer under `docs/rce.md` §1.
+  Grade unchanged; wire reach UNKNOWN; witness replay #1438 still owed.
+- **Pgpool2Shell W7 adjacent lane, CVE-2026-92869 (commit `dd0cb2d`,
+  `reports/pgpool2shell-config-w7.md`)**: under operator DM #1462 ("do NOT
+  retire; mine an adjacent same-target lane"), the 4.7.2→4.7.3 fix adds
+  `parse_peer_count()` capping the peer-controlled `backend_desc` length at
+  `MAX_NUM_BACKENDS=128`. The 4.7.2 loop at `wd_json_data.c:130-142` writes
+  past the fixed array: on the real parser ASan reports `heap-buffer-overflow
+  WRITE of size 4` at `utils/json.c:1189` ← `wd_json_data.c:136`, 256 bytes
+  past the palloc'd `BackendDesc`; gdb at `i=128` reads back the chosen
+  `0x42424242` at the OOB slot. One loopback type-`Z` `WD_POOL_CONFIG_DATA`
+  packet with N=129 crashes the live 4.7.2 watchdog child, and live gdb sees
+  the chosen value at `0x55555591dbe0` from `standard_packet_processor` with
+  a following SIGSEGV in `json_value_free_ex` at pointer `0x555542424242`;
+  the clobbered field is UNKNOWN. Fixed 4.7.3 N=129 and safe N=128 controls
+  are clean. Grade: rung 3 plus rung 4 chosen value at a layout-fixed offset
+  including on a live daemon, with `wd_authkey=''` and a configured loopback
+  peer as stated conditions; no arbitrary-address steering, command, rung 5
+  or witness replay of this new lane. The six closed 92867 steering lanes were
+  not retried. `f555579` only corrected a report timestamp and changed no
+  claim.

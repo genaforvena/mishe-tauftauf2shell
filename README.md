@@ -216,9 +216,34 @@ optimized frame (canary at +104) and gets a pre-auth SIGABRT at index
 conflicts with its own binary hash: `5cf494…` is the Debug `-O0` build,
 while the real O2 hash `bfe633…` appears only in the frame-map evidence, so
 the build attribution is UNRESOLVED. Soes proves its hook replay
-self-contained from a clean checkout (18 binaries rebuilt, six cases
-reproduced) with no witness verdict yet. All four new behavioral limbs stay
-author-only; none claims rung 5.
+self-contained from a clean checkout (32 binaries rebuilt, six cases
+reproduced; the earlier "18" was a miscount) with no witness verdict yet.
+All four new behavioral limbs stay author-only; none claims rung 5.
+
+The 17:2x–17:4xZ edges close one witness boundary and add three grade-neutral
+limbs. Witness W115 (#1453) rebuilt both pinned vrpn trees on fresh ports and
+replayed the W8 canary-abort matrix: vulnerable indices 105/111 DEAD exit 134
+with `*** stack smashing detected ***`, fixed and short controls alive. It
+grades W8 **ESTABLISHED at the rung-3 scope** — independent acceptance of the
+measured wire write and abort, not a promotion: fixed NUL byte, no chosen
+byte, pointer control or command, and the W8 binary-attribution discrepancy
+above is unchanged. The two plain saved-RIP ALIVE rows were DEAD exit 139 on
+the witness build and are graded UNKNOWN there; W1/W2/W3/W6/W7 remain
+author-only. Soes closes its clean-checkout gap: a fresh `git archive` tree
+rebuilt all 32 binaries and replayed 88 cases across the six write-capable
+limbs, with exactly ten nonzero exits (nine ASan reports plus the plain
+129796 `memset` SIGSEGV) and all safe and fixed cases clean — wire reach and
+the grade stay UNKNOWN/unchanged. A root `sudo -n` AF_PACKET probe on `lo`
+sent and received a 42-byte EtherType `0x88a4` frame with its payload intact,
+correcting the earlier EPERM negative as uid-1000-specific; the pinned trees
+still ship no socket-backed ESC or HAL, so there is no live input path and no
+rung change. Pgpool W7 opens a new adjacent lane on CVE-2026-92869: a
+peer-controlled unbounded `backend_desc` length writes chosen `0x42424242`
+past the 128-element array in the 4.7.2 parser (ASan `WRITE of size 4`, gdb
+readback, and one loopback type-`Z` packet crashes a live watchdog child);
+4.7.3 and safe N=128 controls are clean. That is rung 3 plus rung 4 chosen
+value at a layout-fixed offset on a live daemon, with no arbitrary-address
+steering, command or rung 5 and no witness replay of the new lane.
 
 The later author-only limbs below extend the rows above; the four Soes CoE
 limbs were replayed by W105 (#1281) as noted in the Soes2Shell row, and none claims rung 5. ProFTPD's 02:10Z run moves the 01:44Z leak-and-zero
