@@ -266,7 +266,30 @@ is lab-local: `asan-vuln-K195.err`, `plain-K195.err`, `gdb-deep-K195.txt`,
 ## Reproduce
 
 ```
+# One-time provisioning. The tarballs, extracted trees and build dirs are
+# gitignored, so a clean checkout cannot run the drivers below until they
+# exist. Tarball hashes are in the Build provenance table above.
 cd lab/mapserver2shell
+tar xzf mapserver-8.6.4.tar.gz     # -> MapServer-rel-8-6-4/
+tar xzf mapserver-8.6.5.tar.gz     # -> MapServer-rel-8-6-5/
+# Vulnerable ASan build (default BIN of poc.sh and loopback_bridge.py):
+cmake -S MapServer-rel-8-6-4 -B build-asan2 \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer -O1 -g' \
+  -DCMAKE_CXX_FLAGS='-fsanitize=address -fno-omit-frame-pointer -O1 -g' \
+  -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address \
+  -DCMAKE_SHARED_LINKER_FLAGS=-fsanitize=address \
+  -DWITH_WMS=ON -DWITH_LIBXML2=ON -DWITH_OGCAPI=ON -DWITH_WFS=ON \
+  -DWITH_WCS=ON -DWITH_GEOS=ON -DWITH_FCGI=ON -DWITH_FRIBIDI=ON \
+  -DWITH_HARFBUZZ=ON -DWITH_CAIRO=ON -DWITH_CURL=OFF \
+  -DWITH_POSTGIS=OFF -DWITH_PROTOBUFC=OFF -DWITH_PYTHON=OFF -DBUILD_TESTING=OFF
+cmake --build build-asan2 --target mapserv -j4
+# Fixed ASan control: same cmake command with `rel-8-6-5` source and
+# `-B build-fixed`. Plain build (used by readback.sh, consumer-inspect.sh and
+# the bridge): same 8.6.4 source and WITH_* flags, `-B build-plain`, and
+# C/CXX flags '-O0 -g -fno-omit-frame-pointer' with no sanitizer linker flags.
+
+# Drivers (all from lab/mapserver2shell):
 ./poc.sh 95                              # ASan vulnerable, rc 1
 BIN=./build-fixed/mapserv ./poc.sh 95    # fixed control, rc 0
 ./poc.sh 97                              # safe-input control, rc 0
