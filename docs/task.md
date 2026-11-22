@@ -6339,10 +6339,12 @@ reads back 16 chosen `0x41`/`0x5a` bytes at offset 0 and the terminator at
 and safe 8-byte string are clean. Grade is rung 1/2, rung 3 and scoped rung 4
 at direct-call/stub scope only: no libyang build, real `lyd_parse_data()` call,
 crafted LYB framing, NETCONF/sysrepo consumer, wire, pointer control, marker,
-command or rung 5. Cheapest next step for the new mind: build the pinned
-vulnerable parser and call `lyd_parse_data(..., LYD_LYB, ...)` with a minimal
-crafted blob to confirm the length field's offset, then test a plant-started
-loopback consumer's unauthenticated LYB acceptance and `in->length == 0`.
+command or rung 5. That next step was carried out at 22:0xZ (section below):
+W1 built both pins and reached the fault through real
+`lyd_parse_data_mem(..., LYD_LYB, ...)` on a valid 29-byte LYB blob with one
+four-byte length patched. The consumer leg stays a preserved negative:
+libnetconf2 parses RPCs as `LYD_XML` and sysrepo's LYB input is local IPC,
+so no unauthenticated network consumer accepts LYB.
 Witness replay was requested in tape #7120; no verdict yet. Frontier's commit
 `255abfd` corrected the brief's hash by two trailing characters to the actual
 64-hex `edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2`

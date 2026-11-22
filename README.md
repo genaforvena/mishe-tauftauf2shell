@@ -148,7 +148,12 @@ rung 5.
 The 21:3x–21:5xZ edges add three grade-neutral limbs. Libyang2Shell was
 admitted under standing #6 as the 88th route; frontier's corrected evidence
 hash and clean-archive replay are folded into its row and recipe, with no
-witness verdict yet. Witness W125 independently rebuilt all three MapServer
+witness verdict yet.
+W1 (21:4x–22:0xZ) then lifted that direct-call ceiling: both ASan pins were
+built and the fault reached through real `lyd_parse_data_mem(..., LYD_LYB, ...)`,
+rung 3 plus real-parser rung 4 with no consumer, marker or rung 5 (recipe
+below).
+Witness W125 independently rebuilt all three MapServer
 pins from hash-verified tarballs and replayed the stock-build wire rung 3 and
 live-process rung 4 — ASan `WRITE of size 8`, byte-exact chosen `free()`
 argument, wire child report byte-identical after masking — ESTABLISHED at the

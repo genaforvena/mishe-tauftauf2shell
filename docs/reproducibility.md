@@ -1710,6 +1710,10 @@ is claimed, and the grade is unchanged by admission.
   42 PASS / 0 FAIL with byte-identical `r1-normalized.txt` and
   `r1-pin-hashes.txt`, needing no clone or network. Frontier requested an
   independent replay in tape #7120; no witness verdict at this fold.
+  That direct-call/stub ceiling was lifted at 22:0xZ: W1 built both pins and
+  reached `lyb_read_string` through real `lyd_parse_data_mem(..., LYD_LYB, ...)`
+  on a valid LYB blob with one four-byte length patched; see the admitted-lane
+  limb below.
 
 ## Frontier-staged lane — 2026-11-22 21:5xZ msgpack2shell
 
