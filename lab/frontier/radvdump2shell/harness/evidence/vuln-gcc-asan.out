@@ -1,16 +1,16 @@
 ENTER_ROUTE_CASE ri_len=33 optlen=264 orig_len=264
 =================================================================
-==2353047==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x78b21eb00030 at pc 0x78b2210fb303 bp 0x7fff09efbbd0 sp 0x7fff09efb378
-WRITE of size 256 at 0x78b21eb00030 thread T0
-    #0 0x78b2210fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x635ca412cd80 in route_case /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b:380
-    #2 0x635ca412d694 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/driver.c:183
-    #3 0x78b220c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x78b220c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x635ca412c364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/a-vuln-gcc+0x2364) (BuildId: 15f67ea12749c5a6c63818938e1e6495bc3dc90e)
+==2396352==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x707a0df00030 at pc 0x707a104fb303 bp 0x7ffd3af04bb0 sp 0x7ffd3af04358
+WRITE of size 256 at 0x707a0df00030 thread T0
+    #0 0x707a104fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5780ff9a0d80 in route_case /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b:380
+    #2 0x5780ff9a1694 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/driver.c:183
+    #3 0x707a1002a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x707a1002a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5780ff9a0364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/a-vuln-gcc+0x2364) (BuildId: 15f67ea12749c5a6c63818938e1e6495bc3dc90e)
 
-Address 0x78b21eb00030 is located in stack of thread T0 at offset 48 in frame
-    #0 0x635ca412cab6 in route_case /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/driver.c:102
+Address 0x707a0df00030 is located in stack of thread T0 at offset 48 in frame
+    #0 0x5780ff9a0ab6 in route_case /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/driver.c:102
 
   This frame has 1 object(s):
     [32, 48) 'addr' <== Memory access at offset 48 overflows this variable
@@ -18,17 +18,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
-  0x78b21eaffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eaffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eaffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eafff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eafff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x78b21eb00000: f1 f1 f1 f1 00 00[f3]f3 00 00 00 00 00 00 00 00
-  0x78b21eb00080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eb00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eb00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eb00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78b21eb00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0deffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0deffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0deffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0defff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0defff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x707a0df00000: f1 f1 f1 f1 00 00[f3]f3 00 00 00 00 00 00 00 00
+  0x707a0df00080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0df00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0df00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0df00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x707a0df00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -48,4 +48,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==2353047==ABORTING
+==2396352==ABORTING
