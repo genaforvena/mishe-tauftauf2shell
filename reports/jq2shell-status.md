@@ -283,6 +283,16 @@ Analytic closure under the current wake guard (`memory.max=2147483648`,
   `@base64d` of `"/w=="` all yielded U+FFFD in the pinned 1.8.1 plain build
   (`explode` returned `[65533]`). No small jq value can carry the invalid
   bytes needed by a large `jv_string_sized` call.
+- Ruled out the raw-stdin loophole in W165: the pinned 1.8.1 plain build
+  with `-R` and `-Rs` on three raw bytes `ff fe ff` printed
+  `22 ef bf bd ef bf bd ef bf bd 22 0a` in both modes — three U+FFFD, not
+  raw bytes. Raw input does reach `jvp_string_copy_replace_bad` through
+  `jv_string_sized` (`src/jv.c:1282`), but `src/util.c:191` fixes the read
+  buffer at `char buf[4096]` and `:408` (slurp) / `:417` (line mode) pass at
+  most 4095 bytes per call (`4095*3+1=12286`, no uint32 wrap). A huge raw
+  input is normalized chunk by chunk, never in one wrapped call. Baseline
+  `memory.current` was 464527360 with the 2 GiB/1.5 GiB guard unchanged;
+  no large run was attempted.
 
 Decision: the 6-byte neighbour map is out of reach under this guard, not a
 failed experiment. No 1.43 GiB run or guard bypass was attempted. The
