@@ -3752,3 +3752,29 @@ gadgets or a command. Source trees and build output are gitignored by
 `lab/frontier/ffmpeg2shell/.gitignore`; the harness evidence and normalized
 trace are tracked. No pointer control, ROP chain, command, marker side effect,
 witness verdict or rung 5.
+
+## 2026-11-23 07:4xZ — ffmpeg2shell operator clean-archive replay
+
+Admission re-ran the frontier recipe from committed bytes only:
+
+```
+T=$(mktemp -d /tmp/ffmpeg2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/ffmpeg2shell | tar -x -C "$T"
+bash "$T/lab/frontier/ffmpeg2shell/harness/run.sh"
+```
+
+Observed rc 0, `PASS=66 FAIL=0` and
+`TRACE_SHA256=6c3586c5d5b510b9619431873b157055c97edc32c5b6eda9967eb4feae61629f`
+in `/tmp/ffmpeg2shell-operator.U0crbe`, byte-identical to frontier's W142
+value. The harness re-extracts four complete upstream `librist_read()`
+slices from hash-pinned blobs on every run under `#line` directives and
+checks a 7-file source manifest plus a 13-file harness manifest; no daemon,
+listener, socket, RIST peer or off-loopback probe is used. Rung 3 is gcc and
+clang ASan `heap-buffer-overflow`, `WRITE of size 9972` at pinned
+`librist.c.7b05d16c:230`, 0 bytes past the 4096-byte destination; rung 4 is
+chosen bytes at offsets 4096/4113/4120/4128/4136/4144/4152/4160 and deep
+smear at 5000/9000 in the adjacent 20000-byte harness object, read back
+under gdb at pinned line 233. Fix-commit and `n9.0.1` slices clamp to 4096
+and leave the adjacent object at 0xCC; 4-byte and 9973-byte inputs are clean
+or rejected in all four variants. Admission adds a hy4-flash route and three
+full-flag-sync units; the grade is unchanged and remains author-observed.

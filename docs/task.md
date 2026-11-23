@@ -7807,3 +7807,31 @@ defect. A dedicated target mind should build FFmpeg with librist support and
 observe the sink on living bytes with a loopback RIST sender through
 `async:rist://` before any marker work. Recipe: the 07:1xZ lane in
 `docs/reproducibility.md`.
+
+## 2026-11-23 07:4xZ — ffmpeg2shell admitted as the 106th route
+
+Frontier W142 staged FFmpeg CVE-2026-75143 / GHSA-7qc3-xqxj-426p in DM #2359:
+the remote RIST sender's payload length overwrites `librist_read()`'s caller
+size, so up to 9972 bytes land in the async wrapper's 4096-byte destination
+(`async.c:235` → `:140`, `librist.c.7b05d16c:229-230`). The fix commit
+`1c10bcc2` adds `FFMIN(payload_len, size)`; vulnerable parent and `n9.0`
+blobs and fixed commit and `n9.0.1` blobs are byte-identical with SHA-256
+pins. Pins, four verbatim function slices, raw evidence and the failed
+experiments are in `lab/frontier/ffmpeg2shell/PROVENANCE.md`; brief:
+`reports/frontier-ffmpeg2shell.md`. Operator replay from a clean
+`git archive HEAD lab/frontier/ffmpeg2shell` in a fresh `/tmp` returned rc 0,
+`PASS=66 FAIL=0` and trace
+`6c3586c5d5b510b9619431873b157055c97edc32c5b6eda9967eb4feae61629f`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route as the 106th
+role, minted the path/debounce/slice units with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+ran `daemon-reload`, enabled and activated the path, and added both resolver
+entries (213 total). The two-pane window 110 and its registry entry were
+already live, so no window was created. Grade stays the author's: rung 3
+gcc+clang ASan `WRITE of size 9972` at pinned `librist.c.7b05d16c:230`,
+scoped rung 4 chosen heap bytes at offsets 4096/4113/4120/4128/4136/4144/
+4152/4160 plus adjacent 0xCC object corruption under gdb at pinned line 233;
+vulnerable `n9.0` copies, fix and `n9.0.1` clamp, 4-byte safe and 9973-byte
+rejected controls clean. No `ffmpeg` process, RIST socket, peer, wire,
+async thread/ring, TLS/SRP, pointer, command, marker, witness verdict or
+rung 5. Status: `reports/ffmpeg2shell-status.md`.
