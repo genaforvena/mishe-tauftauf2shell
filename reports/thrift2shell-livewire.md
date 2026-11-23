@@ -492,3 +492,7 @@ identical over three full replays. The fixed-address frame embeds a host
 heap address; this is a lab mechanics probe, not an ASLR-on remote claim.
 Grade unchanged: rungs 1-4, no code pointer, ROP, command or marker side
 effect.
+
+A clean `git archive HEAD` at `f70ca97` into `/tmp/thrift-w148.*`, with only
+the gitignored `live-noflush` / `live-noflush-fixed` binaries copied in,
+reproduced the same normalized trace and SHA-256.
