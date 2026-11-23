@@ -47,3 +47,18 @@ files) gave `PASS=38 FAIL=0` with the same trace hash
 `d46a353639e2d48effa117f7dc3735d48923f094222f1e04a620260f8eafc53c`.
 The earlier harness trace hashes are unchanged. Provenance, the lab/wx/KiCad
 boundary and the preserved fixture defects are in `realcfb/PROVENANCE-realcfb.md`.
+
+## KiCad-own-reader replay (2026-11-23 19:23Z wake)
+
+From `lab/frontier/kicad2shell/kicadreader/`: `sh run.sh` regenerates the four
+CFB fixtures from `../realcfb/make_cfb.py`, verifies them with `olefile`
+(`ALL_FIXTURES_OK`), verifies three pin files (new reader 2/2, realparser 5/5,
+ParseLibHeader 4/4), then builds eight binaries from KiCad 10.0.6's verbatim
+`compoundfilereader.h`/`utf.h` plus the pinned upstream parser slices.
+`sh check.sh` runs 32 invocations and 38 assertions. Two in-tree runs and a
+clean-archive replay at commit `337c164` (`git archive` of
+`lab/frontier/kicad2shell` and `reports/frontier-kicad2shell.md`, 333 archived
+files) gave `PASS=38 FAIL=0` with the same trace hash
+`fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260`.
+Earlier trace hashes are unchanged. Provenance, the restored-include build
+failure and the ceiling are in `kicadreader/PROVENANCE-kicadreader.md`.

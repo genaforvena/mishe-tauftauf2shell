@@ -169,7 +169,9 @@ Plain builds print `rc=0 size=1 first=72 GUARD7=11111111` and then abort with
 exit 0 with the intact vector and no ASan report. `kicadreader/check.sh`:
 **38 PASS / 0 FAIL** twice, trace hash
 `fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260`.
-Provenance, the restored-include build failure and the ceiling are in
+A clean-archive replay at commit `337c164` (333 archived files) matched
+exactly: `PASS=38 FAIL=0`, same trace hash (`REPLAY.md`). Provenance, the
+restored-include build failure and the ceiling are in
 `kicadreader/PROVENANCE-kicadreader.md`.
 
 ## 8. Cheapest next rung move
