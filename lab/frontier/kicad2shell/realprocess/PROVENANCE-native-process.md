@@ -84,6 +84,18 @@ are `provisioned/gui-<tag>.{log,png}`. Coordinates are specific to the
   The vendor kiface has no debug symbols, so those frames are not symbolized;
   the causal attribution rests on the pinned harness evidence plus the
   safe-input control, not on a gdb function name.
+- **Second hostile patch** — `vendor/mounting_holes-size0.SchLib` (one-byte
+  patch at file offset 650, `|Size1=10|` → `|Size0=99|`; sha256 recorded in
+  `vendor/PINS-vendor.sha256`). With a freshly reset empty target library the
+  real process died with `Segmentation fault (core dumped)`, exit **139**
+  (`gui-crash-size0-rc.rc`, stderr empty). This matches the harness's distinct
+  first-sorting-key fault mode (null-adjacent store), whereas the later-sorting
+  `SizeZ` key corrupts malloc metadata: both predictions from the pinned
+  harness were observed in a real KiCad process. The `SizeZ` abort also
+  reproduced from a freshly reset target library (`gui-crash-fresh.log`,
+  sha256 `ad7d25253d0821de30d58bc35ecdf0639ea0de6186822d2afb0780c325917dbe`).
+  The `SizeZ` replay also recorded exit **134** (`gui-crash-sizez-rc.rc`,
+  stderr `double free or corruption (out)`), matching the harness's glibc abort.
 - The released binary has **no ASan**. A clean exit would not have been a
   pass; the observed abort is a real crash in a real KiCad 8.0.8 process.
 

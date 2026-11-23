@@ -324,6 +324,13 @@ pinned harness plus the safe-input control. Full hashes, exact environment,
 driver coordinates and the ceiling are in
 `lab/frontier/kicad2shell/realprocess/PROVENANCE-native-process.md`.
 
+The other one-byte patch (offset 650, `Size1=10` → `Size0=99`, which sorts
+before the valid key) makes the same real process exit **139** with
+`Segmentation fault` from a freshly reset target library; the `SizeZ` replay
+exits **134**. Both distinct fault modes predicted by the pinned harness were
+therefore observed in a real KiCad process (`gui-crash-size0-rc.rc` and
+`gui-crash-sizez-rc.rc`).
+
 This upgrades real-process reachability from UNKNOWN to a deterministic crash
 in a real KiCad process. Still no ASan build, fixed-build control in this
 process, consumer read, wire delivery, pointer/control-flow target, marker or

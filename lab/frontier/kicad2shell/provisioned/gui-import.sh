@@ -32,7 +32,7 @@ xdotool mousemove 330 239 click 1; sleep 4
 xdotool key ctrl+l; sleep 1
 xdotool type --delay 20 "$FILE"; sleep 1
 xdotool key Return; sleep 10
-import -window root -silent "$P/gui-$TAG.png" 2>/dev/null
+if ! kill -0 "$EE" 2>/dev/null; then wait "$EE"; RC=$?; echo "$RC" > "$P/gui-$TAG.rc"; echo "RC=$RC"; else echo alive > "$P/gui-$TAG.rc"; fi
 echo "TAG=$TAG FILE=$FILE MODE=$MODE DISPLAY=$DISP EE=$EE"
 ps -p "$EE" -o pid,stat,wchan:20,etime 2>/dev/null || echo "EE_GONE"
 echo "--- log tail:"
