@@ -85,5 +85,9 @@ mixed file with rc 2 "All frames of a sequence must have the size of the
 first frame" and no ASan report. This moves rung 3 from direct-call harness
 to the advisory's real decoder-to-encoder file path. Still absent: wire or
 remote input, live process, pointer/control-flow target, command or marker,
-and witness replay of this new lane. Rung 5 remains UNKNOWN. The advisory's
-36,879-byte allocation and release-build SIGSEGV are still claims.
+and witness replay of this new lane. Rung 5 remains UNKNOWN. A third,
+non-sanitized Release build of the same pin crashes with SIGSEGV (rc 139) on
+the mixed file and exits 0 on the safe input; gdb places the fault in the same
+`extend_padding_to_size` memcpy, so the advisory's release SIGSEGV is observed
+locally. Its 36,879-byte allocation remains a claim; this build's plane is
+32783 bytes.

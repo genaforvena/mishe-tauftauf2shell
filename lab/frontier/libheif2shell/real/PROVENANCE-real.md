@@ -91,6 +91,22 @@ before the padding call. `rebuild_and_run.sh SOURCE BUILD OUT all` replays all
 three cases; it was run on both builds after the driver was corrected to print
 encode failures accurately.
 
+## Release-build control (advisory SIGSEGV claim)
+
+Third build of the same pinned source, `/tmp/libheif2shell-vuln-plain`,
+`-DCMAKE_BUILD_TYPE=Release -O2`, no sanitizer. Same driver compiled without
+ASan. Mixed input: rc 139 (SIGSEGV) after `frame 1 decoded: 64x512 stride=64`
+(`evidence/plain-mixed-sigsegv.out`); same-size input: rc 0
+(`evidence/plain-safe.out`). gdb batch (`evidence/plain-gdb-backtrace.out`)
+shows `Thread 1 received signal SIGSEGV` in
+`__memcpy_avx_unaligned_erms`, called from
+`HeifPixelImage::extend_padding_to_size` ->
+`heif_image_extend_padding_to_size` -> `x265_encode_sequence_frame` ->
+`Encoder_HEVC::encode_sequence_frame` -> `Track_Visual::encode_image` ->
+`heif_track_encode_sequence_image` -> driver `:62`. The advisory's
+release-build SIGSEGV is therefore observed in this build, with the caveat
+that this application is a local re-encode driver, not a remote consumer.
+
 ## Preserved negatives and discarded paths
 
 - A hand-built ISO BMFF container with a `jpeg` sample entry was rejected:
@@ -115,5 +131,6 @@ JPEG-derived decoded frame, not from a harness-injected buffer. Still absent:
 network/wire input, a live server process, a chosen-pointer or control-flow
 target, a benign command/marker side effect, and an independent witness
 verdict of this new lane. Rung 5 remains UNKNOWN. The advisory's 36,879-byte
-allocation and release-build SIGSEGV remain claims; this build reports a
-32783-byte ASan region and was not tested in a release build at this point.
+allocation remains an untested claim from a different build; this build
+reports a 32783-byte ASan region. The release-build SIGSEGV claim is now
+observed locally (above), not just quoted from the advisory.

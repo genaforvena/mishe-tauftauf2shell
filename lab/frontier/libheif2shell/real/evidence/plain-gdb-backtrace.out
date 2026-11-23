@@ -1,0 +1,35 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+[New Thread 0x7ffff61ff6c0 (LWP 1116265)]
+[New Thread 0x7ffff59fe6c0 (LWP 1116266)]
+[New Thread 0x7ffff51fd6c0 (LWP 1116267)]
+[New Thread 0x7ffff49fc6c0 (LWP 1116268)]
+[New Thread 0x7fffe7fff6c0 (LWP 1116269)]
+[New Thread 0x7fffe77fe6c0 (LWP 1116270)]
+[New Thread 0x7fffe6ffd6c0 (LWP 1116271)]
+[New Thread 0x7fffe67fc6c0 (LWP 1116272)]
+[New Thread 0x7fffe5ffb6c0 (LWP 1116273)]
+[New Thread 0x7fffe57fa6c0 (LWP 1116274)]
+[New Thread 0x7fffe4ff96c0 (LWP 1116275)]
+[New Thread 0x7fffc7fff6c0 (LWP 1116276)]
+[New Thread 0x7fffc77fe6c0 (LWP 1116277)]
+[New Thread 0x7fffc6ffd6c0 (LWP 1116278)]
+[New Thread 0x7fffc67fc6c0 (LWP 1116279)]
+[New Thread 0x7fffc5ffb6c0 (LWP 1116280)]
+[New Thread 0x7fffc57fa6c0 (LWP 1116281)]
+frame 0 encoded
+frame 1 decoded: 64x512 stride=64
+
+Thread 1 "libheif2shell-r" received signal SIGSEGV, Segmentation fault.
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:271
+warning: 271	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:271
+#1  0x0000555555662774 in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) ()
+#2  0x0000555555590f58 in heif_image_extend_padding_to_size ()
+#3  0x00005555556d734b in x265_encode_sequence_frame(void*, heif_image const*, unsigned long) [clone .part.0] ()
+#4  0x00005555556f4722 in Encoder_HEVC::encode_sequence_frame(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const&, heif_image_input_class, unsigned int, unsigned int, unsigned long) ()
+#5  0x0000555555604202 in Track_Visual::encode_image(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const*, heif_image_input_class) ()
+#6  0x0000555555599f62 in heif_track_encode_sequence_image ()
+#7  0x000055555558f61d in main (argc=3, argv=0x7fffffffe2c8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/real/reencode_sequence.cc:62
