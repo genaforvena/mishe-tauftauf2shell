@@ -231,3 +231,53 @@ in a real heap consumer, but **no observed command side effect**. This is a
 rung-5 negative for this application shape, not a witness verdict and not
 evidence against another consumer with less collateral state. Rung 5 remains
 UNKNOWN.
+
+## W4 — command execution through real libuv dispatch, under stated lab conditions (2026-11-23 06:2xZ, author-only)
+
+W3's `uv_run()` fault was collateral, not the rewritten callback: under gdb the
+faulting heap object at `$rsi=0x46ac78` held random peer bytes (`$pc` reads
+`0x8(%rsi)` as `0x5eaded98cf5f6d32`); raw registers, mappings and backtrace in
+`harness/uv-snap-evidence/collateral-diag.txt`. To separate the two effects,
+`harness/capture_uv_snapshot.py` stops a plant-started loopback server at
+`gzwrite.c:394` under `setarch -R` and dumps the 293865-byte pre-memmove
+destination image (`avail_in=0x47be9`) from `state->in`. `uv_probe.py --snapshot`
+feeds those bytes back at the stale source offset 65535, so the copy is a
+no-op except for the crafted `handle->data` command and `async_cb` pointer at
+offset 96. The exploit runs themselves have **no debugger attached** and use
+libuv's own `uv_async_send()` / `uv_run()` dispatch, not a synthetic callback
+or a debugger-forced call.
+
+`bash harness/run_uv_snap.sh` rebuilds the pinned vulnerable and fixed
+non-PIE servers, captures the image, and runs six cases on a plant-started
+127.0.0.1 listener. Two clean replays produced the same trace hash
+`1d0b5122c8f45d6f5a1acdab8da6d4a90c00609c2ae28912e8e9461a3abb8611`
+(`harness/uv-snap-evidence/trace.txt`, 2575 bytes).
+
+- Vulnerable + ASLR-off snapshot + `id>a`: `WRITTEN=65535`, `PRINTF_RC=-5`
+  (the documented Z_BUF_ERROR from the stall), `UV_SENT=1`, `UV_RAN=1`,
+  `SERVER_DONE=1`, rc 0, `MARKER=1` with `id` output in file `a`. Same with
+  `id>b` writes file `b` with `id` output — the command is peer-chosen.
+- Fixed + same snapshot: `PRINTF_RC=1`, `UV_RAN=1`, `MARKER=0`, rc 0.
+- Vulnerable + snapshot with original `async_cb` kept (`KEEP_CB=1`):
+  `MARKER=0`, `UV_RAN=1`, rc 0 — the marker depends on the rewritten pointer.
+- Vulnerable + snapshot with ASLR on: printed `system@plt` changes and the
+  snapshot's libc pointers are stale; `MARKER=0`, `SERVER_RC=-11`.
+- Vulnerable + draining peer: `WRITTEN=359400`, `UV_RAN=1`, `MARKER=0`, rc 0.
+
+Exact conditions: pinned 1.3.2 tarball with only `gzwrite.c.parent` swapped;
+`gcc -g -O0 -fno-stack-protector -no-pie`; system `libuv.so.1.0.0`;
+`setarch -R` (ASLR off); gdb-derived heap image of the same build layout;
+`state->in -> handle` delta 293440; `system@plt` `0x7ffff7c58750`; 359400-byte
+stalled request; first-connection `accept()`, no authentication; benign
+`id > file` commands only; no external systems contacted. **Not wire-only**:
+the peer must know a 293865-byte image of the target's memory, obtained here
+with gdb, and ASLR must be off. This is an observed command side effect in a
+live process under stated lab conditions, author-only: a witness replay is
+still required before any ESTABLISHED rung-5 label.
+
+A partial minimization attempt (throwaway driver, raw
+`minimization-{loose,tight}.txt`) found the first 4096 bytes of the image
+individually necessary in a leave-one-4-KiB-block sweep, but a prefix-only
+image aborts with rc -6 and no single 64-byte slice is individually critical:
+the collateral damage is distributed. No smaller or wire-derivable payload
+was established; W3's wider caveat and the W2 heap-layout negative remain.

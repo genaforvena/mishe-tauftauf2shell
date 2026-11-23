@@ -167,3 +167,32 @@ rc 0, no marker); trace hash
 The payload also depends on gdb-derived build-specific heap offsets to keep
 zlib's allocator from aborting; it is not a wire-only exploit. Author-side
 negative, no witness replay owed. Rung 5 remains UNKNOWN.
+
+## W4 — observed command through real libuv dispatch (2026-11-23 06:2xZ, author-only)
+
+W3 showed a peer-chosen `async_cb` rewrite but died before dispatch. The
+crash was collateral heap corruption: the faulting object held random peer
+bytes. `harness/capture_uv_snapshot.py` now captures the 293865-byte
+pre-memmove destination image under gdb with ASLR disabled, and
+`uv_probe.py --snapshot` replays it as request bytes at the stale source
+offset, leaving only the chosen command and callback pointer changed.
+`bash harness/run_uv_snap.sh` rebuilds from the pin and produces trace hash
+`1d0b5122c8f45d6f5a1acdab8da6d4a90c00609c2ae28912e8e9461a3abb8611`
+stable across two clean replays; raw output in
+`lab/frontier/zlib2shell/harness/uv-snap-evidence/`.
+
+In the vulnerable build the peer's `id>a` and `id>b` both produce `MARKER=1`
+with `id` output in the corresponding file, `UV_RAN=1` and rc 0, with no
+debugger attached to the exploit run: libuv's own `uv_run()` calls the
+rewritten `async_cb`. Fixed build: `MARKER=0`, `PRINTF_RC=1`, `UV_RAN=1`.
+Vulnerable with the original callback kept: `MARKER=0`. Vulnerable with ASLR
+on: `MARKER=0`, `SERVER_RC=-11`. Vulnerable with a draining peer: no overflow,
+`MARKER=0`.
+
+Ceiling: **command execution observed in a live loopback process under
+explicit lab conditions** — -no-pie plain build, ASLR off, gdb-captured heap
+image replayed by the peer, fixed heap delta and printable `system@plt`.
+The peer does not need to invent the command or pointer, but it does need a
+memory image unavailable from the wire in this experiment, so this is not a
+wire-only exploit. Author-only: independent witness replay is owed before an
+ESTABLISHED rung-5 label. The older rung-4 ESTABLISHED claims are unchanged.

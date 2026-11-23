@@ -1,0 +1,28 @@
+Breakpoint 1 at 0x404bed: file gzwrite.c, line 394.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=36187
+SYSTEM_ADDR=0x7ffff7c58750
+ASYNC_ADDR=0x46ae30
+LOOP_ADDR=0x7ffff7fa7180
+HANDLE_SIZE=128
+ASYNC_CB_OFF=96
+HANDLE_HEX=00000000000000008071faf7ff7f0000010000000000000000000000000000009071faf7ff7f00005072faf7ff7f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000c00000000000000a6154000000000003073faf7ff7f00009872faf7ff7f00000000000000000000
+REQ_BYTES=359400
+WRITTEN=65535
+
+Breakpoint 1, gz_vacate (state=0x4232d0) at gzwrite.c:394
+394	    memmove(state->in, strm->next_in, strm->avail_in);
+$1 = 0x47be9
+munmap_chunk(): invalid pointer
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+
+Program terminated with signal SIGABRT, Aborted.
+The program no longer exists.
+394	    memmove(state->in, strm->next_in, strm->avail_in);
+$1 = 0x47be9
+SNAPSHOT_BYTES=293865
+SERVER_RC=0

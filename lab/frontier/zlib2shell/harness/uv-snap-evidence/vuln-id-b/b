@@ -1,0 +1,1 @@
+uid=1000(mesh-home) gid=1000(mesh-home) groups=1000(mesh-home),4(adm),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),101(lxd),112(docker),988(ollama),996(input)

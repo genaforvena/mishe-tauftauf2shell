@@ -1,0 +1,11 @@
+SNAPSHOT=snapshot.bin LEN=293865
+CRAFT_SRC=358975 HANDLE_OFF=96 SYSTEM_ADDR=0x7ffff7c58750 DELTA=293440 CMD=id>b
+HEADER_BYTES=10
+MARKER=1 MARKER_BODY=b'uid=1000(mesh-home) gid=1000(mesh-home) groups=1000(mesh-home),4(adm),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),101(lxd),112(docker),988(ollama),996(input)\n'
+REQ_BYTES=359400
+WRITTEN=65535
+PRINTF_RC=-5
+UV_SENT=1
+UV_RAN=1
+SERVER_DONE=1
+SERVER_RC=0
