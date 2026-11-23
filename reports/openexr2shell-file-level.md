@@ -227,3 +227,36 @@ the ceiling section above: the out-of-bounds bytes are allocator-derived;
 the file controls length and destination offset. Rung 5 remains UNKNOWN:
 the callers were purpose-built local-path C/C++ programs, with no
 application process, wire, pointer target, command or marker.
+
+## W163: file-byte control of the overrun — negative (2026-11-23)
+
+Prediction: if bytes from the crafted EXR's ZSTD pixel payload supplied the
+bytes copied past the 64-byte destination, changing those bytes would change
+the measured overrun region. `cases/make_poc.py` now accepts an optional fifth
+argument for the pixel fill byte (default `0x41`, preserving the committed
+PoC byte-for-byte). Regenerating with `0x5a` produced another 692-byte file,
+same `packed=52` frame and same forged `S=1024, U=64` grid; sha256
+`283cec0e18532c500495e71496145832d36dbfc502e44f490e09114661ab37ce`
+(default) and `17f3752e95e35d70c454368789a8dd163938f03a6fe0784a1bee5ecab347ea8e`
+(variant).
+
+Both files were replayed under `bin-vuln-plain/guarded_harness`. Both printed
+`DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA`,
+`GUARD-CHANGE alloc=23 size=64 changed=4032 first=+0 expected=0xa1
+actual@first=0x57` and `GUARD-TOTAL post-decode changed=4032`; only the path
+and heap addresses differ. Evidence: `evidence/guarded-pixel-41.out` and
+`evidence/guarded-pixel-5a.out`. The changed file bytes did not reach the
+overrun.
+
+Source flow explains it: the ZSTD decoder allocates a 64-byte
+`scratch_buffer_1` at `internal_zstd.c:1335-1340` and unshuffles exactly
+`uncompressed_size` bytes into it at `:1344-1355`; the all-FLOAT one-channel
+grid gives `writeIndex=0` and `split=0`, so the `:472` sink copies
+`bitSize=4096` from scratch offsets 0..4095 into the 64-byte
+`decode.unpacked_buffer` (`decoding.c:81`). File-derived bytes occupy only
+source offsets 0..63, which land in the in-bounds part of the destination;
+source offsets 64..4095 are past the scratch allocation. The 4032 out-of-bounds
+bytes therefore read adjacent heap, matching `0x57` as the complement of
+allocation 25's `0xa8` fill. Disposition: keep the negative. The file controls
+copy length and destination allocation, not the overflow byte values. No grade
+change: file-level rungs 1-4 remain as before; rung 5 stays UNKNOWN.
