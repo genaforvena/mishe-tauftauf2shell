@@ -205,15 +205,20 @@ chunk size `0x61`, bytes 32..39 set the live object's vptr to `obj+8`,
 and bytes 56..63 hold `abort@plt` (`0x555555561f70`), the server answers
 `OK` to `QTDPsrc` and `E01` to `qGetTLSAddr`, then dies with `SIGABRT`
 (`SERVER_RC=134`) with no debugger. Short N=8 and well-formed N=16 exit
-0. Under this exact invocation and environment the object address is
-stable at `0x55555561c430` (`src=xmalloc(2)` at `0x...c410`); a sweep of
+0. Under this exact invocation, shell and parent environment the object
+address was `0x55555561c430` (`src=xmalloc(2)` at `0x...c410`); a sweep of
 candidate object addresses `0x...c430` to `0x...c4a0` in `0x10` steps
 gave `134` only at `0x...c430` and `139` at all seven others, so the
 chosen address is measured, not guessed. This removes the debugger
 condition from the W2/W3 chosen-function marker: the load base and heap
 address are fixed by ASLR-off plus the recorded invocation, not by gdb.
-The payload is still build- and environment-specific and still a marker:
-`abort()` is not a command, so this is not rung 5.
+The environment is part of the condition, not incidental: witness W139
+measured the same pinned binary's object at `0x...c460` from a bash
+parent and `0x...c420` from a Python parent, a 0x30 shift from the parent
+environment alone. A re-witness must re-derive the object address in its
+own invocation rather than trust `0x...c430`. The payload is still
+build- and environment-specific and still a marker: `abort()` is not a
+command, so this is not rung 5.
 
 Rung-5 feasibility produced negative evidence, preserved here. The plain
 build is PIE and carries CET `IBT, SHSTK` properties. It imports no
@@ -236,4 +241,71 @@ strengthened to wire-only chosen-function control under a deterministic
 configuration; rung 5 untouched. Evidence:
 `rsp/evidence/aslr-off-{abort-marker,short-8,safe-16}.{log,client.out}`,
 the `sweep-*.log` files, and `PROVENANCE.md`.
+
+## Witness W139 replay of W4 (2026-11-23T03:20Z, tape #2134)
+
+W139 rebuilt the same `633ae02` pin from a clean git archive of `2411b93`
+and replayed W4 independently: verdict ESTABLISHED at the labeled scope,
+no rung 5. My exact wire bytes SIGSEGVed on its binary; the object was at
+`0x...c460` when started from a bash parent and `0x...c420` from a Python
+parent, confirming the environment sensitivity recorded above. With only
+the vptr field changed to `obj+8 = 0x...c468` (`68c4615555550000`), two
+runs gave 3 PASS / 0 FAIL and client transcripts byte-identical to the
+canonical ones (`eb3890a9...`, `3a51892c...`, `56ecff2d...`). W139 also
+verified the rung-5 negatives on its own binary: CET IBT, SHSTK; only
+`execvp` imported, one call at `0x52a04` in `fork_inferior`; `call *%rax`
+at `0x2d4bf` with `rdi=rbx`; bytes `c3 90` at `0x2d4de/0x2d4df`. The
+bare-`ret` SIGILL cause therefore remains honestly UNKNOWN. No grade
+change; the NIT is folded in.
+
+## Wire-only rung 5 demonstration: libc system() (2026-11-23T03:35Z)
+
+Earlier "no command function" negatives covered imported symbols only.
+libc's `system` is not imported by the plain build, but under `setarch -R`
+its address is fixed: libc base `0x00007ffff7800000`, `system` offset
+`0x58750` (entry `endbr64`, so the CET IBT indirect-call check is met),
+address `0x7ffff7858750`. New `rsp/r5_system_verify.sh` puts that address
+in the forged fake-vtable slot. The destructor's `call *%rax` at `0x2d4bf`
+passes `rdi=object`; the object's first bytes are the vptr value, so the
+C string handed to `system()` is the vptr's little-endian bytes up to the
+first NUL — `8\xc4aUUU` for vptr `0x55555561c438`. A lab-installed
+executable of that exact six-byte name in a lab PATH directory is the
+lab-chosen benign command; it writes `R5_SYSTEM_MARKER=1` to a marker file.
+
+The harness derives the heap address instead of trusting one: phase 1
+sweeps candidate objects `0x...c400`..`0x...c4c0` with `abort@plt` in the
+slot and takes the one returning 134; here that is `0x...c430` (vptr
+`0x...c438`). PATH is replaced by a same-length value starting with the
+lab command directory, so environment size, and hence heap layout, is
+unchanged within a run. Consecutive runs gave **4 PASS / 0 FAIL** each:
+
+- vulnerable + system slot: server rc 0, `MARKER=1` with content
+  `R5_SYSTEM_MARKER=1`; wire `OK`, `qGetTLSAddr` `E01`;
+- vulnerable + `abort@plt`: rc 134, no marker — this same-length control
+  distinguishes a real call to `system` from the earlier abort marker;
+- fixed build + system slot: `E01`, rc 0, no marker;
+- vulnerable + well-formed `SLEN=16`: rc 0, no marker.
+
+Normalized hash of the four client transcripts and four marker records:
+`9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`.
+Evidence: `rsp/evidence/r5-system-*.{log,client.out,marker}`, including
+the address sweep.
+
+Rung-5 negatives preserved and extended: all 195 `.plt.sec` stubs begin
+with `endbr64`; no imported `system`, `popen`, `execve` or `posix_spawn`,
+only two-argument `execvp`; at the corrupted call `rdx` is a constant and
+`rsi` is clobbered by the preceding `operator delete`. An `env -i` sweep
+over objects `0x...c400`..`0x...c4b0` produced SIGSEGV at every candidate:
+a minimal environment is not a portable substitute for the recorded one,
+and the address must be derived per invocation.
+
+Grade: locally **rung 5 demonstrated** — wire-only, no debugger, live
+plant-started process, a real command-execution function, a lab-chosen
+benign command with an observed side effect, and vulnerable, fixed,
+safe-input and marker controls. Conditions: ASLR off, exact build,
+measured libc and heap addresses, same-length PATH, and a pre-staged
+command whose name is forced by the heap address. Independent witness
+replay is still required for ESTABLISHED; until then this is a claim, not
+acceptance. The earlier rung-4 ESTABLISHED scope stands; this result does
+not retroactively inflate it.
 

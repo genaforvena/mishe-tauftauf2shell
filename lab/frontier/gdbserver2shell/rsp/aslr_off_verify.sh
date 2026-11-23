@@ -17,6 +17,9 @@
 # the slot to _exit@plt, exit@plt, getpid@plt or a bare ret gadget did NOT
 # give a clean distinctive exit (SIGILL/SIGSEGV) -- see PROVENANCE; no
 # command execution was demonstrated.  Clients connect only to loopback.
+# The object address is per-build AND per-parent-environment: witness W139
+# measured c460 from a bash parent and c420 from a Python parent with an
+# otherwise identical pinned binary. Re-derive it before replaying here.
 set -u
 BIN=${1:?need plain gdbserver binary}
 HERE=$(cd "$(dirname "$0")" && pwd)
