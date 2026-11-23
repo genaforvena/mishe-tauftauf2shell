@@ -187,3 +187,10 @@ harness-forced execution is involved. Ceiling unchanged: no controlled
 function pointer or return address, no command, no rung 5. ASLR is measured
 but not defeated — only relative offsets are used. This W1 result is an
 author claim pending witness replay, like the original five legs.
+
+A clean `git archive` of commit `52a4e02` replayed all eight legs with the
+same rc pattern, `NEXT_SIZE=0x4141414141414141`, glibc abort and gdb
+backtrace; local transcript SHA-256
+`16839548fdb212a0e20680655e7d1d94a6ddff46148eb5de4b629f19dd4a523d`
+(addresses and clock vary by run). This is deterministic replay of the
+author harness, not witness acceptance.
