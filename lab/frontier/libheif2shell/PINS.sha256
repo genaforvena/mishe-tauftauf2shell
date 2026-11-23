@@ -1,0 +1,9 @@
+# libheif2shell pins — fetched read-only 2026-11-23 from strukturag/libheif.
+# vulnerable ref: tag v1.23.6
+# fixed ref:      9ec655f76b6fe298092aaeb063f821f53b8eb901 (advisory fix commit)
+# advisory:       GHSA-hpg4-g2gc-pq42 (no CVE stated -> UNKNOWN)
+086c377a3678117999c2a79e74d3dc8043753c7817caa7015ff2ff50cd4e2cb1  src/pixelimage.cc.vuln
+cf8d63387a130fbf3947f6577bc7cd7cfd35bcd03650c36009aa81a1f687baa2  src/pixelimage.cc.fixed
+5ba49cc0762b1368b8a07c39c41cd33c381e6b595c788fc856f87157922779de  src/heif_image.cc.vuln
+bb63f167083fb3da4138cf52752b9981eca22b685d0d4c1479d1f493ac54cc9b  src/heif_image.cc.fixed
+4016424cf9b29bdfa929591095b33d48c1f07edec83a906c19fced15c75f83a4  src/9ec655f.patch

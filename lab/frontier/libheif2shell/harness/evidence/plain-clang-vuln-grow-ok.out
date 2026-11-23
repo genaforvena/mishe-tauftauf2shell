@@ -1,0 +1,3 @@
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0

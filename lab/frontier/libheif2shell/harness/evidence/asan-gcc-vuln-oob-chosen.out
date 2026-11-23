@@ -1,0 +1,56 @@
+=================================================================
+==3130039==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d000008400 at pc 0x7b008f4fb303 bp 0x7ffd6ef22db0 sp 0x7ffd6ef22558
+WRITE of size 64 at 0x52d000008400 thread T0
+    #0 0x7b008f4fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x59af37c5717a in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/pixelimage.cc.vuln:644
+    #2 0x59af37c579a8 in heif_image_extend_padding_to_size(heif_image*, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/heif_image.cc.vuln:403
+    #3 0x59af37c580f6 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp:1032
+    #4 0x7b008ec2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7b008ec2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x59af37c56524 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/bin-gcc-vuln-asan+0x2524) (BuildId: f52de6fad5d33fbcb615f28ed4b547f62c653c1d)
+
+0x52d000008400 is located 0 bytes after 32768-byte region [0x52d000000400,0x52d000008400)
+allocated by thread T0 here:
+    #0 0x7b008f4fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x59af37c58f11 in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_datatype, int, int, heif_security_limits const*, heif_memory_handle&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-vuln.cpp:76
+    #2 0x59af37c56f2e in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/pixelimage.cc.vuln:629
+    #3 0x59af37c579a8 in heif_image_extend_padding_to_size(heif_image*, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/heif_image.cc.vuln:403
+    #4 0x59af37c580f6 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp:1032
+    #5 0x7b008ec2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7b008ec2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x59af37c56524 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/bin-gcc-vuln-asan+0x2524) (BuildId: f52de6fad5d33fbcb615f28ed4b547f62c653c1d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x52d000008180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x52d000008400:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3130039==ABORTING
+EXIT=1

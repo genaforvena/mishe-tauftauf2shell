@@ -1,0 +1,654 @@
+From 9ec655f76b6fe298092aaeb063f821f53b8eb901 Mon Sep 17 00:00:00 2001
+From: Dirk Farin <dirk.farin@gmail.com>
+Date: Sun, 25 Oct 2026 00:27:32 +0200
+Subject: [PATCH] Reject shrinking padding and mixed-size sequence frames
+ [GHSA-hpg4-g2gc-pq42]
+
+---
+ libheif/api/libheif/heif_image.cc     |   6 ++
+ libheif/api/libheif/heif_image.h      |   5 +-
+ libheif/image/pixelimage.cc           |  27 +++++-
+ libheif/plugins/encoder_aom.cc        |  11 +++
+ libheif/plugins/encoder_input_check.h |  17 ++++
+ libheif/plugins/encoder_kvazaar.cc    |   9 ++
+ libheif/plugins/encoder_rav1e.cc      |   9 ++
+ libheif/plugins/encoder_svt.cc        |   9 ++
+ libheif/plugins/encoder_uvg266.cc     |   9 ++
+ libheif/plugins/encoder_vvenc.cc      |  12 +++
+ libheif/plugins/encoder_x264.cc       |   9 ++
+ libheif/plugins/encoder_x265.cc       |   9 ++
+ tests/CMakeLists.txt                  |   1 +
+ tests/extend_to_size_checks.cc        |  82 +++++++++++++++++
+ tests/sequence_mixed_frame_size.cc    | 126 ++++++++++++++++++++++++++
+ 15 files changed, 338 insertions(+), 3 deletions(-)
+ create mode 100644 tests/sequence_mixed_frame_size.cc
+
+diff --git a/libheif/api/libheif/heif_image.cc b/libheif/api/libheif/heif_image.cc
+index 144b07c942..d61b7904bf 100644
+--- a/libheif/api/libheif/heif_image.cc
++++ b/libheif/api/libheif/heif_image.cc
+@@ -400,6 +400,12 @@ int heif_image_is_premultiplied_alpha(heif_image* image)
+ 
+ heif_error heif_image_extend_padding_to_size(heif_image* image, int min_physical_width, int min_physical_height)
+ {
++  if (min_physical_width < 0 || min_physical_height < 0) {
++    return Error{heif_error_Usage_error,
++                 heif_suberror_Invalid_parameter_value,
++                 "Cannot extend padding to a negative size."}.error_struct(image->image.get());
++  }
++
+   Error err = image->image->extend_padding_to_size(min_physical_width, min_physical_height, false, nullptr);
+   if (err) {
+     return err.error_struct(image->image.get());
+diff --git a/libheif/api/libheif/heif_image.h b/libheif/api/libheif/heif_image.h
+index 30d6822b7f..ce2393f7bf 100644
+--- a/libheif/api/libheif/heif_image.h
++++ b/libheif/api/libheif/heif_image.h
+@@ -426,8 +426,9 @@ int heif_image_is_premultiplied_alpha(heif_image* image);
+ // This function extends the padding of the image so that it has at least the given physical size.
+ // The padding border is filled with the pixels along the right/bottom border.
+ // This function may be useful if you want to process the image, but have some external padding requirements.
+-// The image size will not be modified if it is already larger/equal than the given physical size.
+-// I.e. you cannot assume that after calling this function, the stride will be equal to min_physical_width.
++// Each requested dimension must be at least as large as the corresponding image dimension;
++// otherwise an error is returned. The logical image size is not modified.
++// Existing padding may be larger, so the stride need not equal min_physical_width.
+ LIBHEIF_API
+ heif_error heif_image_extend_padding_to_size(heif_image* image,
+                                              int min_physical_width, int min_physical_height);
+diff --git a/libheif/image/pixelimage.cc b/libheif/image/pixelimage.cc
+index 7c57a1c334..0ed8e6f2df 100644
+--- a/libheif/image/pixelimage.cc
++++ b/libheif/image/pixelimage.cc
+@@ -608,7 +608,15 @@ Error HeifPixelImage::ComponentStorage::alloc(uint32_t width, uint32_t height, h
+ Error HeifPixelImage::extend_padding_to_size(uint32_t width, uint32_t height, bool adjust_size,
+                                              const heif_security_limits* limits)
+ {
+-  for (auto& component : m_storage) {
++  if (width < m_width || height < m_height) {
++    return Error{heif_error_Usage_error,
++                 heif_suberror_Invalid_parameter_value,
++                 "Cannot extend padding to a size smaller than the image."};
++  }
++
++  // Check every plane before changing any of them. In particular, the new
++  // allocation must fit the old plane in both directions before it is copied.
++  for (const auto& component : m_storage) {
+     // get_subsampled_size() only adjusts the size for Cb/Cr; for every other
+     // channel it assumes the component has the full logical image size. We
+     // cannot compute a correct padded size for a non-Cb/Cr component that does
+@@ -622,6 +630,19 @@ Error HeifPixelImage::extend_padding_to_size(uint32_t width, uint32_t height, bo
+                    "Cannot extend padding for an image with non-uniform component sizes."};
+     }
+ 
++    uint32_t subsampled_width, subsampled_height;
++    get_subsampled_size(width, height, component.m_channel, m_chroma,
++                        &subsampled_width, &subsampled_height);
++
++    if (subsampled_width < component.m_width ||
++        subsampled_height < component.m_height) {
++      return Error{heif_error_Usage_error,
++                   heif_suberror_Invalid_parameter_value,
++                   "Cannot extend padding to a size smaller than an existing plane."};
++    }
++  }
++
++  for (auto& component : m_storage) {
+     uint32_t subsampled_width, subsampled_height;
+     get_subsampled_size(width, height, component.m_channel, m_chroma,
+                         &subsampled_width, &subsampled_height);
+@@ -663,6 +684,10 @@ Error HeifPixelImage::extend_padding_to_size(uint32_t width, uint32_t height, bo
+       std::free(component.allocated_mem);
+ 
+       component = newPlane;
++      // alloc() set the logical plane size to the allocation size. Growing
++      // padding alone must not change the plane's visible dimensions.
++      component.m_width = old_width;
++      component.m_height = old_height;
+     }
+ 
+     // extend plane size
+diff --git a/libheif/plugins/encoder_aom.cc b/libheif/plugins/encoder_aom.cc
+index d891a353a6..5a5eae3ab7 100644
+--- a/libheif/plugins/encoder_aom.cc
++++ b/libheif/plugins/encoder_aom.cc
+@@ -100,6 +100,8 @@ struct encoder_struct_aom
+ 
+   // bit depth the codec was initialized with, to check the later frames of a sequence against
+   int bit_depth = 8;
++  int input_width = 0;
++  int input_height = 0;
+ 
+   // --- input
+ 
+@@ -936,6 +938,8 @@ static heif_error aom_start_sequence_encoding_intern(void* encoder_raw, const he
+ 
+   const int source_width = heif_image_get_width(image, heif_channel_Y);
+   const int source_height = heif_image_get_height(image, heif_channel_Y);
++  encoder->input_width = source_width;
++  encoder->input_height = source_height;
+ 
+   const heif_chroma chroma = heif_image_get_chroma_format(image);
+ 
+@@ -1285,6 +1289,13 @@ static heif_error aom_encode_sequence_frame(void* encoder_raw, const heif_image*
+     return input_error;
+   }
+ 
++  // libaom can change resolution after reconfiguring the encoder. This plugin
++  // does not do that yet; lift this check when we support mixed-size sequences.
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
++
+   heif_error err;
+ 
+   const int source_width = heif_image_get_width(image, heif_channel_Y);
+diff --git a/libheif/plugins/encoder_input_check.h b/libheif/plugins/encoder_input_check.h
+index 127fd7621a..71278f0748 100644
+--- a/libheif/plugins/encoder_input_check.h
++++ b/libheif/plugins/encoder_input_check.h
+@@ -160,4 +160,21 @@ static inline heif_error check_sequence_frame_bit_depth(const heif_image* image,
+   return heif_error_ok;
+ }
+ 
++
++// These plugins open one encoder instance with dimensions taken from the first
++// frame. Reject later frames of a different size before handing their planes
++// to an encoder configured for the old size.
++static inline heif_error check_sequence_frame_size(const heif_image* image,
++                                                   int configured_width, int configured_height)
++{
++  if (heif_image_get_width(image, heif_channel_Y) != configured_width ||
++      heif_image_get_height(image, heif_channel_Y) != configured_height) {
++    return heif_error{heif_error_Invalid_input,
++                      heif_suberror_Unspecified,
++                      "All frames of a sequence must have the size of the first frame"};
++  }
++
++  return heif_error_ok;
++}
++
+ #endif // LIBHEIF_ENCODER_INPUT_CHECK_H
+diff --git a/libheif/plugins/encoder_kvazaar.cc b/libheif/plugins/encoder_kvazaar.cc
+index dcad1eb88c..b62e7bd3f3 100644
+--- a/libheif/plugins/encoder_kvazaar.cc
++++ b/libheif/plugins/encoder_kvazaar.cc
+@@ -59,6 +59,8 @@ struct encoder_struct_kvazaar
+   const kvz_api* api = nullptr;
+   kvz_config* config = nullptr;
+   kvz_encoder* kvzencoder = nullptr;
++  int input_width = 0;
++  int input_height = 0;
+ 
+   // --- output
+ 
+@@ -518,6 +520,8 @@ static heif_error kvazaar_start_sequence_encoding_intern(void* encoder_raw, cons
+ 
+   int input_width = heif_image_get_width(image, heif_channel_Y);
+   int input_height = heif_image_get_height(image, heif_channel_Y);
++  encoder->input_width = input_width;
++  encoder->input_height = input_height;
+ 
+   uint32_t encoded_width, encoded_height;
+   kvazaar_query_encoded_size(encoder_raw, input_width, input_height, &encoded_width, &encoded_height);
+@@ -684,6 +688,11 @@ static heif_error kvazaar_encode_sequence_frame(void* encoder_raw, const heif_im
+ 
+   encoder_struct_kvazaar* encoder = (encoder_struct_kvazaar*) encoder_raw;
+ 
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
++
+   // Note: it is ok to cast away the const, as the image content is not changed.
+   // However, we have to guarantee that there are no plane pointers or stride values kept over calling the svt_encode_image() function.
+   /*
+diff --git a/libheif/plugins/encoder_rav1e.cc b/libheif/plugins/encoder_rav1e.cc
+index f834e525eb..106362d3d0 100644
+--- a/libheif/plugins/encoder_rav1e.cc
++++ b/libheif/plugins/encoder_rav1e.cc
+@@ -63,6 +63,8 @@ struct encoder_struct_rav1e
+ 
+   // bit depth the context was created with, to check the later frames of a sequence against
+   int bit_depth = 8;
++  int input_width = 0;
++  int input_height = 0;
+ 
+   // --- output
+ 
+@@ -609,6 +611,8 @@ heif_error rav1e_start_sequence_encoding_intern(void* encoder_raw, const heif_im
+   if (rav1e_config_parse_int(rav1eConfig.get(), "height", heif_image_get_height(image, heif_channel_Y)) == -1) {
+     return heif_error_codec_library_error;
+   }
++  encoder->input_width = heif_image_get_width(image, heif_channel_Y);
++  encoder->input_height = heif_image_get_height(image, heif_channel_Y);
+   if (rav1e_config_parse_int(rav1eConfig.get(), "threads", encoder->threads) == -1) {
+     return heif_error_codec_library_error;
+   }
+@@ -699,6 +703,11 @@ heif_error rav1e_encode_sequence_frame(void* encoder_raw, const heif_image* imag
+     return input_error;
+   }
+ 
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
++
+   int bitDepth = heif_image_get_bits_per_pixel_range(image, heif_channel_Y);
+ 
+   int yShift = encoder->yShift;
+diff --git a/libheif/plugins/encoder_svt.cc b/libheif/plugins/encoder_svt.cc
+index 4ce65970f2..bcec56845f 100644
+--- a/libheif/plugins/encoder_svt.cc
++++ b/libheif/plugins/encoder_svt.cc
+@@ -90,6 +90,8 @@ struct encoder_struct_svt
+ 
+   EbComponentType* svt_encoder = nullptr;
+   EbSvtAv1EncConfiguration svt_config{}; // value-initialized: svt_encode_sequence_frame() reads encoder_bit_depth from it
++  int input_width = 0;
++  int input_height = 0;
+   EbBufferHeaderType input_buffer;
+ 
+   bool still_image_mode = false;
+@@ -747,6 +749,8 @@ static heif_error svt_start_sequence_encoding_intern(void* encoder_raw, const he
+ 
+   int w = heif_image_get_width(image, heif_channel_Y);
+   int h = heif_image_get_height(image, heif_channel_Y);
++  encoder->input_width = w;
++  encoder->input_height = h;
+ 
+   uint32_t encoded_width, encoded_height;
+   svt_query_encoded_size(encoder_raw, w, h, &encoded_width, &encoded_height);
+@@ -1042,6 +1046,11 @@ static heif_error svt_encode_sequence_frame(void* encoder_raw, const heif_image*
+     return input_error;
+   }
+ 
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
++
+   int w = heif_image_get_width(image, heif_channel_Y);
+   int h = heif_image_get_height(image, heif_channel_Y);
+   const heif_chroma chroma = heif_image_get_chroma_format(image);
+diff --git a/libheif/plugins/encoder_uvg266.cc b/libheif/plugins/encoder_uvg266.cc
+index f6559ff0d9..5809328b5c 100644
+--- a/libheif/plugins/encoder_uvg266.cc
++++ b/libheif/plugins/encoder_uvg266.cc
+@@ -62,6 +62,8 @@ struct encoder_struct_uvg266
+   int chroma_height_shift = 0;
+   int input_chroma_width = 0;
+   int input_chroma_height = 0;
++  int input_width = 0;
++  int input_height = 0;
+ 
+   // --- output data
+ 
+@@ -522,6 +524,8 @@ static heif_error uvg266_start_sequence_encoding_intern(void* encoder_raw, const
+ 
+   int input_width = heif_image_get_width(image, heif_channel_Y);
+   int input_height = heif_image_get_height(image, heif_channel_Y);
++  encoder->input_width = input_width;
++  encoder->input_height = input_height;
+ 
+   if (isGreyscale) {
+     config->input_format = UVG_FORMAT_P400;
+@@ -672,6 +676,11 @@ static heif_error uvg266_encode_sequence_frame(void* encoder_raw, const heif_ima
+ 
+   encoder_struct_uvg266* encoder = (encoder_struct_uvg266*) encoder_raw;
+ 
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
++
+   bool isGreyscale = (heif_image_get_colorspace(image) == heif_colorspace_monochrome);
+ 
+   int input_width = heif_image_get_width(image, heif_channel_Y);
+diff --git a/libheif/plugins/encoder_vvenc.cc b/libheif/plugins/encoder_vvenc.cc
+index 6e1f83059f..d80584e5dd 100644
+--- a/libheif/plugins/encoder_vvenc.cc
++++ b/libheif/plugins/encoder_vvenc.cc
+@@ -54,6 +54,8 @@ struct encoder_struct_vvenc
+   vvencEncoder* vvencoder = nullptr;
+   vvencChromaFormat vvencChroma;
+   uint32_t encoded_width=0, encoded_height=0;
++  int input_width = 0;
++  int input_height = 0;
+ 
+   // --- output
+ 
+@@ -455,6 +457,8 @@ static heif_error vvenc_start_sequence_encoding_intern(void* encoder_raw, const
+ 
+   int input_width = heif_image_get_width(image, heif_channel_Y);
+   int input_height = heif_image_get_height(image, heif_channel_Y);
++  encoder->input_width = input_width;
++  encoder->input_height = input_height;
+ 
+   vvenc_query_encoded_size(encoder_raw, input_width, input_height,
+     &encoder->encoded_width, &encoder->encoded_height);
+@@ -566,6 +570,14 @@ static heif_error vvenc_encode_sequence_frame(void* encoder_raw, const heif_imag
+   }
+ 
+   encoder_struct_vvenc* encoder = (encoder_struct_vvenc*) encoder_raw;
++
++  // VVenC supports resolution changes with suitable maximum picture-size
++  // configuration. This plugin does not set that up yet; lift this check when
++  // we support mixed-size sequences.
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
+   vvencEncoder* vvencoder = encoder->vvencoder;
+ 
+   bool isGreyscale = (heif_image_get_colorspace(image) == heif_colorspace_monochrome);
+diff --git a/libheif/plugins/encoder_x264.cc b/libheif/plugins/encoder_x264.cc
+index fea7696ba0..5ce024b659 100644
+--- a/libheif/plugins/encoder_x264.cc
++++ b/libheif/plugins/encoder_x264.cc
+@@ -96,6 +96,8 @@ struct encoder_struct_x264
+ 
+   uintptr_t out_frameNr = 0;
+   int bit_depth = 0;
++  int input_width = 0;
++  int input_height = 0;
+ 
+   heif_chroma chroma;
+ 
+@@ -927,6 +929,8 @@ static heif_error x264_start_sequence_encoding_intern(void* encoder_raw, const h
+ 
+   param.i_width = heif_image_get_width(image, heif_channel_Y);
+   param.i_height = heif_image_get_height(image, heif_channel_Y);
++  encoder->input_width = param.i_width;
++  encoder->input_height = param.i_height;
+   //param->internalBitDepth = bit_depth;
+ 
+   param.i_width = rounded_size(param.i_width);
+@@ -1015,6 +1019,11 @@ static heif_error x264_encode_sequence_frame(void* encoder_raw, const heif_image
+     return input_error;
+   }
+ 
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
++
+   heif_error err;
+ 
+   // Note: it is ok to cast away the const, as the image content is not changed.
+diff --git a/libheif/plugins/encoder_x265.cc b/libheif/plugins/encoder_x265.cc
+index 87e2a03a98..35aa120b54 100644
+--- a/libheif/plugins/encoder_x265.cc
++++ b/libheif/plugins/encoder_x265.cc
+@@ -64,6 +64,8 @@ struct encoder_struct_x265
+   x265_param* param = nullptr;
+ 
+   int bit_depth = 0;
++  int input_width = 0;
++  int input_height = 0;
+ 
+   heif_chroma chroma;
+ 
+@@ -1038,6 +1040,8 @@ static heif_error x265_start_sequence_encoding_intern(void* encoder_raw, const h
+ 
+   param->sourceWidth = heif_image_get_width(image, heif_channel_Y);
+   param->sourceHeight = heif_image_get_height(image, heif_channel_Y);
++  encoder->input_width = param->sourceWidth;
++  encoder->input_height = param->sourceHeight;
+   param->internalBitDepth = bit_depth;
+ 
+   param->sourceWidth = rounded_size(param->sourceWidth);
+@@ -1130,6 +1134,11 @@ static heif_error x265_encode_sequence_frame(void* encoder_raw, const heif_image
+     return input_error;
+   }
+ 
++  input_error = check_sequence_frame_size(image, encoder->input_width, encoder->input_height);
++  if (input_error.code != heif_error_Ok) {
++    return input_error;
++  }
++
+   const x265_api* api = encoder->api;
+ 
+   heif_error err;
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 802753854b..8ece62759a 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -108,6 +108,7 @@ add_libheif_test(clap_decode)
+ add_libheif_test(encode)
+ add_libheif_test(encode_grid)
+ add_libheif_test(encode_hevc_bitdepth)
++add_libheif_test(sequence_mixed_frame_size)
+ add_libheif_test(entity_groups)
+ add_libheif_test(extended_type)
+ add_libheif_test(zero_length_memcpy)
+diff --git a/tests/extend_to_size_checks.cc b/tests/extend_to_size_checks.cc
+index 44090dcc7e..9229823280 100644
+--- a/tests/extend_to_size_checks.cc
++++ b/tests/extend_to_size_checks.cc
+@@ -26,6 +26,9 @@
+ 
+ #include "image/pixelimage.h"
+ #include "catch_amalgamated.hpp"
++#include "libheif/heif.h"
++
++#include <algorithm>
+ 
+ // Regression tests for HeifPixelImage::extend_to_size_with_zero().
+ //
+@@ -113,3 +116,82 @@ TEST_CASE("extend_to_size_with_zero accepts an unchanged size") {
+   REQUIRE(image->get_width() == 8);
+   REQUIRE(image->get_height() == 8);
+ }
++
++
++static void check_smaller_padding_request(uint32_t width, uint32_t height,
++                                          uint32_t requested_width, uint32_t requested_height)
++{
++  auto* limits = heif_get_global_security_limits();
++  auto image = std::make_shared<HeifPixelImage>();
++  image->create(width, height, heif_colorspace_monochrome, heif_chroma_monochrome);
++  REQUIRE(image->add_channel(heif_channel_Y, width, height, 8, limits).error_code == heif_error_Ok);
++
++  size_t stride;
++  uint8_t* pixels = image->get_channel_memory(heif_channel_Y, &stride);
++  pixels[(height - 1) * stride + width - 1] = 0x5a;
++
++  Error err = image->extend_padding_to_size(requested_width, requested_height, false, limits);
++  REQUIRE(err.error_code == heif_error_Usage_error);
++  REQUIRE(err.sub_error_code == heif_suberror_Invalid_parameter_value);
++  REQUIRE(image->get_width() == width);
++  REQUIRE(image->get_height() == height);
++  REQUIRE(image->get_width(heif_channel_Y) == width);
++  REQUIRE(image->get_height(heif_channel_Y) == height);
++  REQUIRE(pixels[(height - 1) * stride + width - 1] == 0x5a);
++}
++
++
++TEST_CASE("extend_padding_to_size rejects a smaller height even when the width grows") {
++  check_smaller_padding_request(64, 128, 128, 64);
++}
++
++
++TEST_CASE("extend_padding_to_size rejects a smaller width even when the height grows") {
++  check_smaller_padding_request(128, 64, 64, 128);
++}
++
++
++TEST_CASE("heif_image_extend_padding_to_size rejects negative dimensions") {
++  heif_image* image = nullptr;
++  REQUIRE(heif_image_create(64, 64, heif_colorspace_monochrome,
++                            heif_chroma_monochrome, &image).code == heif_error_Ok);
++  REQUIRE(heif_image_add_plane(image, heif_channel_Y, 64, 64, 8).code == heif_error_Ok);
++
++  heif_error err = heif_image_extend_padding_to_size(image, -1, 64);
++  REQUIRE(err.code == heif_error_Usage_error);
++  REQUIRE(err.subcode == heif_suberror_Invalid_parameter_value);
++  heif_image_release(image);
++}
++
++
++TEST_CASE("extend_padding_to_size grows padding without changing the visible plane") {
++  auto* limits = heif_get_global_security_limits();
++  auto image = std::make_shared<HeifPixelImage>();
++  image->create(64, 64, heif_colorspace_monochrome, heif_chroma_monochrome);
++  REQUIRE(image->add_channel(heif_channel_Y, 64, 64, 8, limits).error_code == heif_error_Ok);
++
++  size_t stride;
++  uint8_t* pixels = image->get_channel_memory(heif_channel_Y, &stride);
++  for (uint32_t y = 0; y < 64; y++) {
++    for (uint32_t x = 0; x < 64; x++) {
++      pixels[y * stride + x] = static_cast<uint8_t>(x + y);
++    }
++  }
++
++  REQUIRE(image->extend_padding_to_size(128, 64, false, limits).error_code == heif_error_Ok);
++  REQUIRE(image->get_width(heif_channel_Y) == 64);
++  REQUIRE(image->get_height(heif_channel_Y) == 64);
++  REQUIRE(image->extend_padding_to_size(128, 128, false, limits).error_code == heif_error_Ok);
++  REQUIRE(image->get_width() == 64);
++  REQUIRE(image->get_height() == 64);
++  REQUIRE(image->get_width(heif_channel_Y) == 64);
++  REQUIRE(image->get_height(heif_channel_Y) == 64);
++
++  pixels = image->get_channel_memory(heif_channel_Y, &stride);
++  REQUIRE(stride >= 128);
++  for (uint32_t y = 0; y < 128; y++) {
++    for (uint32_t x = 0; x < 128; x++) {
++      REQUIRE(pixels[y * stride + x] == static_cast<uint8_t>(std::min(x, 63U) + std::min(y, 63U)));
++    }
++  }
++}
+diff --git a/tests/sequence_mixed_frame_size.cc b/tests/sequence_mixed_frame_size.cc
+new file mode 100644
+index 0000000000..d51bea6749
+--- /dev/null
++++ b/tests/sequence_mixed_frame_size.cc
+@@ -0,0 +1,126 @@
++/*
++  libheif unit tests
++
++  MIT License
++
++  Copyright (c) 2026 Dirk Farin <dirk.farin@gmail.com>
++
++  Permission is hereby granted, free of charge, to any person obtaining a copy
++  of this software and associated documentation files (the "Software"), to deal
++  in the Software without restriction, including without limitation the rights
++  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++  copies of the Software, and to permit persons to whom the Software is
++  furnished to do so, subject to the following conditions:
++
++  The above copyright notice and this permission notice shall be included in all
++  copies or substantial portions of the Software.
++
++  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++  SOFTWARE.
++*/
++
++#include "catch_amalgamated.hpp"
++#include "libheif/heif.h"
++#include "libheif/heif_sequences.h"
++
++#include <cstdint>
++#include <cstring>
++#include <utility>
++
++namespace {
++
++heif_image* make_frame(uint32_t width, uint32_t height)
++{
++  heif_image* image = nullptr;
++  REQUIRE(heif_image_create(width, height, heif_colorspace_YCbCr, heif_chroma_420, &image).code == heif_error_Ok);
++  REQUIRE(image != nullptr);
++
++  for (heif_channel channel : {heif_channel_Y, heif_channel_Cb, heif_channel_Cr}) {
++    const uint32_t plane_width = channel == heif_channel_Y ? width : width / 2;
++    const uint32_t plane_height = channel == heif_channel_Y ? height : height / 2;
++    REQUIRE(heif_image_add_plane(image, channel, plane_width, plane_height, 8).code == heif_error_Ok);
++
++    size_t stride = 0;
++    uint8_t* pixels = heif_image_get_plane2(image, channel, &stride);
++    REQUIRE(pixels != nullptr);
++    for (uint32_t y = 0; y < plane_height; y++) {
++      std::memset(pixels + y * stride, 0x80, plane_width);
++    }
++  }
++
++  heif_image_set_duration(image, 1000);
++  return image;
++}
++
++heif_error append_frame(heif_track* track, heif_encoder* encoder, uint32_t width, uint32_t height)
++{
++  heif_image* image = make_frame(width, height);
++  heif_error err = heif_track_encode_sequence_image(track, image, encoder, nullptr);
++  heif_image_release(image);
++  return err;
++}
++
++} // namespace
++
++TEST_CASE("encoders configured from the first frame reject mixed frame sizes")
++{
++  bool tested_encoder = false;
++  for (const auto& [format, encoder_name] : {
++         std::pair{heif_compression_AVC, "x264"},
++         std::pair{heif_compression_HEVC, "x265"},
++         std::pair{heif_compression_HEVC, "kvazaar"},
++         std::pair{heif_compression_VVC, "uvg266"},
++         std::pair{heif_compression_VVC, "vvenc"},
++         std::pair{heif_compression_AV1, "aom"},
++         std::pair{heif_compression_AV1, "rav1e"},
++         std::pair{heif_compression_AV1, "svt"}}) {
++    const heif_encoder_descriptor* descriptor = nullptr;
++    if (heif_get_encoder_descriptors(format, encoder_name, &descriptor, 1) == 0) {
++      continue;
++    }
++
++    tested_encoder = true;
++    INFO("encoder: " << encoder_name);
++    heif_context* context = heif_context_alloc();
++    REQUIRE(context != nullptr);
++
++    heif_encoder* encoder = nullptr;
++    REQUIRE(heif_context_get_encoder(context, descriptor, &encoder).code == heif_error_Ok);
++    REQUIRE(encoder != nullptr);
++
++    heif_track* track = nullptr;
++    REQUIRE(heif_context_add_visual_sequence_track(context, 128, 64, heif_track_type_video,
++                                                   nullptr, nullptr, &track).code == heif_error_Ok);
++    REQUIRE(track != nullptr);
++
++    heif_error err = append_frame(track, encoder, 128, 64);
++    INFO("first frame: " << (err.message ? err.message : ""));
++    REQUIRE(err.code == heif_error_Ok);
++
++    for (const auto& [width, height] : {std::pair{64U, 64U}, std::pair{128U, 128U},
++                                        std::pair{64U, 128U}}) {
++      err = append_frame(track, encoder, width, height);
++      REQUIRE(err.code == heif_error_Invalid_input);
++      REQUIRE(err.message != nullptr);
++      REQUIRE(std::strstr(err.message, "size of the first frame") != nullptr);
++    }
++
++    // A rejected frame must not prevent a later frame of the correct size.
++    err = append_frame(track, encoder, 128, 64);
++    INFO("matching frame after rejection: " << (err.message ? err.message : ""));
++    REQUIRE(err.code == heif_error_Ok);
++
++    REQUIRE(heif_track_encode_end_of_sequence(track, encoder).code == heif_error_Ok);
++    heif_encoder_release(encoder);
++    heif_context_free(context);
++  }
++
++  if (!tested_encoder) {
++    SKIP("Skipping test because no fixed-size sequence encoder is available.");
++  }
++}

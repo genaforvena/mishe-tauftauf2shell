@@ -1,0 +1,3 @@
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0

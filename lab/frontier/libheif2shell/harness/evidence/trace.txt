@@ -1,0 +1,213 @@
+=== plain-gcc-vuln-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== plain-gcc-vuln-oob-chosen ===
+GUARD scenario=oob-chosen req=512x64 plane=64x65 rc=0 msg=-
+CASE scenario=oob-chosen guard=absent stride=512 b32768=5a b32769=5a b32770=5a b32771=5a
+EXIT=0
+=== plain-gcc-vuln-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== asan-gcc-vuln-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== asan-gcc-vuln-oob-chosen ===
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 64 at 0xADDR thread T0
+    #0 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0xADDR in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) LAB/harness/pixelimage.cc.vuln:644
+    #2 0xADDR in heif_image_extend_padding_to_size(heif_image*, int, int) LAB/harness/heif_image.cc.vuln:403
+    #3 0xADDR in main LAB/harness/driver-main.cpp:1032
+    #4 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0xADDR in _start (LAB/harness/bin-gcc-vuln-asan+0x2524) (BuildId: ID)
+
+0xADDR is located 0 bytes after 32768-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #0 0xADDR in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0xADDR in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_datatype, int, int, heif_security_limits const*, heif_memory_handle&) LAB/harness/driver-vuln.cpp:76
+    #2 0xADDR in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) LAB/harness/pixelimage.cc.vuln:629
+    #3 0xADDR in heif_image_extend_padding_to_size(heif_image*, int, int) LAB/harness/heif_image.cc.vuln:403
+    #4 0xADDR in main LAB/harness/driver-main.cpp:1032
+    #5 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0xADDR in _start (LAB/harness/bin-gcc-vuln-asan+0x2524) (BuildId: ID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+EXIT=1
+=== asan-gcc-vuln-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== plain-gcc-fixed-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== plain-gcc-fixed-oob-chosen ===
+GUARD scenario=oob-chosen req=512x64 plane=64x65 rc=2 msg=Cannot extend padding to a size smaller than the image.
+CASE scenario=oob-chosen guard=reject rc=2 copies=0
+EXIT=0
+=== plain-gcc-fixed-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== asan-gcc-fixed-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== asan-gcc-fixed-oob-chosen ===
+GUARD scenario=oob-chosen req=512x64 plane=64x65 rc=2 msg=Cannot extend padding to a size smaller than the image.
+CASE scenario=oob-chosen guard=reject rc=2 copies=0
+EXIT=0
+=== asan-gcc-fixed-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== plain-clang-vuln-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== plain-clang-vuln-oob-chosen ===
+GUARD scenario=oob-chosen req=512x64 plane=64x65 rc=0 msg=-
+CASE scenario=oob-chosen guard=absent stride=512 b32768=5a b32769=5a b32770=5a b32771=5a
+EXIT=0
+=== plain-clang-vuln-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== asan-clang-vuln-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== asan-clang-vuln-oob-chosen ===
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 64 at 0xADDR thread T0
+    #0 0xADDR in __asan_memcpy (LAB/harness/bin-clang-vuln-asan+0xc51c7) (BuildId: ID)
+    #1 0xADDR in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) LAB/harness/pixelimage.cc.vuln:644:9
+    #2 0xADDR in heif_image_extend_padding_to_size(heif_image*, int, int) LAB/harness/heif_image.cc.vuln:403:29
+    #3 0xADDR in main LAB/harness/driver-main.cpp:1032:20
+    #4 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0xADDR in _start (LAB/harness/bin-clang-vuln-asan+0x2c434) (BuildId: ID)
+
+0xADDR is located 0 bytes after 32768-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #0 0xADDR in malloc (LAB/harness/bin-clang-vuln-asan+0xc7283) (BuildId: ID)
+    #1 0xADDR in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_datatype, int, int, heif_security_limits const*, heif_memory_handle&) LAB/harness/driver-vuln.cpp:76:48
+    #2 0xADDR in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) LAB/harness/pixelimage.cc.vuln:629:31
+    #3 0xADDR in heif_image_extend_padding_to_size(heif_image*, int, int) LAB/harness/heif_image.cc.vuln:403:29
+    #4 0xADDR in main LAB/harness/driver-main.cpp:1032:20
+    #5 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0xADDR in _start (LAB/harness/bin-clang-vuln-asan+0x2c434) (BuildId: ID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (LAB/harness/bin-clang-vuln-asan+0xc51c7) (BuildId: ID) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+EXIT=1
+=== asan-clang-vuln-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== plain-clang-fixed-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== plain-clang-fixed-oob-chosen ===
+GUARD scenario=oob-chosen req=512x64 plane=64x65 rc=2 msg=Cannot extend padding to a size smaller than the image.
+CASE scenario=oob-chosen guard=reject rc=2 copies=0
+EXIT=0
+=== plain-clang-fixed-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== asan-clang-fixed-baseline ===
+GUARD scenario=baseline req=64x65 plane=64x65 rc=0 msg=-
+CASE scenario=baseline guard=absent copy=completed
+EXIT=0
+=== asan-clang-fixed-oob-chosen ===
+GUARD scenario=oob-chosen req=512x64 plane=64x65 rc=2 msg=Cannot extend padding to a size smaller than the image.
+CASE scenario=oob-chosen guard=reject rc=2 copies=0
+EXIT=0
+=== asan-clang-fixed-grow-ok ===
+GUARD scenario=grow-ok req=512x128 plane=64x64 rc=0 msg=-
+CASE scenario=grow-ok guard=absent copy=completed
+EXIT=0
+=== gdb-chosen ===
+Breakpoint 1 at 0x1a57: file LAB/harness/driver-main.cpp, line 1000.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, heif_dbg_mark () at LAB/harness/driver-main.cpp:1000
+warning: 1000	LAB/harness/driver-main.cpp: No such file or directory
+#1  0xADDR in main (argc=2, argv=0xADDR) at LAB/harness/driver-main.cpp:1033
+1033	in LAB/harness/driver-main.cpp
+DBG rc=0 stride=512
+0xADDR:	0x5a	0x5a	0x5a	0x5a

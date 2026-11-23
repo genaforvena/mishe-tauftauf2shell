@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x1a57: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp, line 1000.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, heif_dbg_mark () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp:1000
+warning: 1000	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp: No such file or directory
+#1  0x0000555555555cdf in main (argc=2, argv=0x7fffffffe258) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp:1033
+1033	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp
+DBG rc=0 stride=512
+0x55555557a3c0:	0x5a	0x5a	0x5a	0x5a

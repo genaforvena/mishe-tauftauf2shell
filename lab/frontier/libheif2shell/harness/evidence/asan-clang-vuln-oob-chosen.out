@@ -1,0 +1,56 @@
+=================================================================
+==3130057==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d000008400 at pc 0x62a0358011c8 bp 0x7ffe08294230 sp 0x7ffe082939f0
+WRITE of size 64 at 0x52d000008400 thread T0
+    #0 0x62a0358011c7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/bin-clang-vuln-asan+0xc51c7) (BuildId: 2453a1eb35d009627c211520114501a6de659877)
+    #1 0x62a035844859 in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/pixelimage.cc.vuln:644:9
+    #2 0x62a0358451e6 in heif_image_extend_padding_to_size(heif_image*, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/heif_image.cc.vuln:403:29
+    #3 0x62a0358457f1 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp:1032:20
+    #4 0x77aeae22a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x77aeae22a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x62a035768434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/bin-clang-vuln-asan+0x2c434) (BuildId: 2453a1eb35d009627c211520114501a6de659877)
+
+0x52d000008400 is located 0 bytes after 32768-byte region [0x52d000000400,0x52d000008400)
+allocated by thread T0 here:
+    #0 0x62a035803283 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/bin-clang-vuln-asan+0xc7283) (BuildId: 2453a1eb35d009627c211520114501a6de659877)
+    #1 0x62a035846dfc in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_datatype, int, int, heif_security_limits const*, heif_memory_handle&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-vuln.cpp:76:48
+    #2 0x62a0358445a6 in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/pixelimage.cc.vuln:629:31
+    #3 0x62a0358451e6 in heif_image_extend_padding_to_size(heif_image*, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/heif_image.cc.vuln:403:29
+    #4 0x62a0358457f1 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/driver-main.cpp:1032:20
+    #5 0x77aeae22a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x77aeae22a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x62a035768434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/bin-clang-vuln-asan+0x2c434) (BuildId: 2453a1eb35d009627c211520114501a6de659877)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/harness/bin-clang-vuln-asan+0xc51c7) (BuildId: 2453a1eb35d009627c211520114501a6de659877) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x52d000008180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x52d000008400:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3130057==ABORTING
+EXIT=1

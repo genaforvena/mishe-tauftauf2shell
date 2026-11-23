@@ -1,0 +1,3 @@
+GUARD scenario=oob-chosen req=512x64 plane=64x65 rc=0 msg=-
+CASE scenario=oob-chosen guard=absent stride=512 b32768=5a b32769=5a b32770=5a b32771=5a
+EXIT=0
