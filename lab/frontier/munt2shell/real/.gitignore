@@ -1,0 +1,8 @@
+# Regenerable from the pinned tarball, pinned fix.patch and the scripts here.
+src/
+build/
+driver-vuln-2_8_3-*
+driver-fixed-1749f7f-*
+*.o
+core
+core.*

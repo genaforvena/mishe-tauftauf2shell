@@ -1,0 +1,2 @@
+mode=default-attack len=40001 parsed=default
+alloc32768=0 tail_bytes=00000000000000000000000000000000 tail_0x5a=0/0

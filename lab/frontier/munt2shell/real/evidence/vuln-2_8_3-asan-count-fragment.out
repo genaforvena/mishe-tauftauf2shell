@@ -1,0 +1,2 @@
+mode=count-fragment len=101 sysex=0 lastlen=0 short=0 realtime=0 debug=0
+tail_probe=disabled(ASan)

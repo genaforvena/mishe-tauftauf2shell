@@ -1,0 +1,2 @@
+mode=count-attack-complete len=40001 sysex=0 lastlen=0 short=0 realtime=0 debug=1
+alloc32768=1 tail_bytes=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a tail_0x5a=7233/16384

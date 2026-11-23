@@ -116,3 +116,39 @@ build the pinned 2.8.3 library, feed a single oversized SysEx block through
 corrupted heap region is subsequently used before aborts; a rung-5 path would
 then need a network-facing host that forwards untrusted bulk SysEx dumps.
 Rung 5 is UNKNOWN, not established.
+
+## 6. Real-library confirmation (munt2shell W160, 2026-11-23)
+
+The staged stubbed harness has been reproduced on the **real library**. The
+pinned `libmt32emu_2_8_3` tarball (sha256
+`81f8c462f46bc8901618762ae34cf9de93894ff81f41db73c79472fa3baef875`) hashes
+its three `PINS.sha256` files exactly; applying the pinned `fix.patch` to a
+copy yields the pinned fixed cpp hash `6031e579…108612268cf0c3a`. Both are
+built by upstream CMake as a static `mt32emu` target. The driver in
+`lab/frontier/munt2shell/real/` constructs a real `Synth`, a real
+`DefaultMidiStreamParser` and the real C API context; nothing in the parser
+or its types is stubbed. Commands:
+`cd lab/frontier/munt2shell/real && ./build_and_run.sh && ./build_clang_asan.sh`.
+Details and raw outputs: `real/REAL_EVIDENCE.md` and `real/evidence/`.
+
+gcc and clang ASan both report `heap-buffer-overflow`, `WRITE of size 40001`,
+0 bytes after a real 32768-byte region, at the unmodified upstream
+`MidiStreamParser.cpp:250`; allocation at `:137` from `:249`, stack through
+`parseStream :106`. The C API stack adds `mt32emu_parse_stream` at
+`c_interface.cpp:760`, i.e. the public ABI forwards the caller's block
+without a size bound. In plain builds a harness readback tail past the real
+32768-byte allocation holds exactly 7233 chosen `0x5a` bytes (`40001-32768`);
+the pinned-fixed build allocates no 32768-byte buffer, writes no chosen
+bytes and returns 0 in all scenarios. Terminated and short-fragment controls
+behave as in the staged harness.
+
+Post-write consumer probe: feeding `0xF7` after the oversized slice produces
+no SysEx dispatch and one overrun debug report. `parseSysexFragment()` sees
+capacity already at `MAX_STREAM_BUFFER_SIZE`, discards, and the only later
+buffer read is `streamBuffer[0]`. libmt32emu itself does not consume the
+overwritten bytes on this path — a negative result for an in-library live
+consumer, not proof an application cannot be affected. No host application,
+MIDI file/device/port, socket, wire input, grooming into a live object,
+pointer control, command, marker side effect or witness replay was measured;
+the issue's network narrative stays a claim. **Grade: real-library rungs 1-4;
+rung 5 UNKNOWN.**
