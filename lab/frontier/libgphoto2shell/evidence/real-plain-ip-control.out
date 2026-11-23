@@ -92,3 +92,8 @@ to the reply: the heap copy's consumer still aborts on the corrupted top
 chunk. No wire/USB transport, remote request, camera consumer, socket,
 witness replay or benign command side effect. Rung 4 control-flow target
 execution is local and unwitnessed; rung 5 stays UNKNOWN.
+
+# Replay artifacts: the local-only reply modes are preserved as
+# evidence/replay-vusb-local-modes.patch (apply on top of the committed
+# live/vusb-jl2005.patch in a plain-build source tree) and the driver source
+# as evidence/replay-two_stage_probe.c. Build command is in that file's header.
