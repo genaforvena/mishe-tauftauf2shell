@@ -465,3 +465,9 @@ supplies a lazily backed image buffer can still reach the same rung-4
 negative write. The victim is explicit grooming and holds anonymous bytes —
 no pointer, control-flow datum, wire/request input, command or marker side
 effect. Grade unchanged: rungs 1-4; rung 5 UNKNOWN.
+
+Clean `git archive HEAD` replay at commit `c8550f8`, with the gitignored
+pinned source and plain/ASan build trees symlinked in, returned:
+`real/run-external.sh` 12/12 PASS, `RESULT fail=0`; `real/run-consumer.sh`
+21/21 PASS, rc 0; `real/run-neighbour.sh` 14/14 PASS, `RESULT fail=0`.
+All three process rc 0.

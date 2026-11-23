@@ -345,3 +345,7 @@ pages at the image area writable, and passes the pointer to the public
 Grade unchanged: rungs 1-4. The neighbour is explicit grooming and holds
 anonymous bytes; no pointer target, control-flow datum, wire/request input,
 command or marker side effect. Rung 5 remains UNKNOWN.
+
+From a clean `git archive HEAD` at commit `c8550f8` with the gitignored pinned
+source and build trees symlinked in, `run-external.sh` returned 12/12 PASS,
+`run-consumer.sh` 21/21 PASS and `run-neighbour.sh` 14/14 PASS, all rc 0.
