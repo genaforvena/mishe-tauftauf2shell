@@ -9218,3 +9218,29 @@ plain canary/no-canary faults preserved as negatives. No SDL/SDL_mixer build,
 real WAV, decoder consumer, socket, wire, pointer control, command, witness
 verdict or rung 5. Status: `reports/sdlmixer2shell-status.md`; recipe:
 `docs/reproducibility.md`.
+
+## 2026-11-23 18:18Z — kicad2shell W174 real compound-file stream and fixed release
+
+Three edges (`455d92e`, `562be97`, `36d3e62`) advance the admitted kicad2shell
+lane without moving the row grade or mind count. The earlier real-parser lane
+handed hand-built bytes to the verbatim parser through a shim; W174's
+`lab/frontier/kicad2shell/realcfb/` writes four v3 MS-CFB/OLE2 containers with
+a `FileHeader` stream, reads each back with `olefile` 0.46 and walks
+header → DIFAT → FAT → directory → miniFAT → mini stream in lab C++ code before
+the unchanged pinned parser sees the bytes. In-tree runs and a clean
+`git archive 455d92e` (246 files) both returned `PASS=38 FAIL=0` with trace
+`d46a3536…c53c`: vulnerable gcc/clang ASan `WRITE of size 4` four bytes before
+the 4-byte region at pinned `:5919`, plain glibc `double free or corruption
+(out)`, fixed runs clean; `attackneg` and `attackfar` boundary cases preserved.
+This is a delivery-boundary limb, not KiCad's own compound-file reader: the
+container is synthetic, wxWidgets and KiCad are absent, no vendor `.SchLib`, no
+downstream `aFontSizes` consumer, socket, wire, pointer control, command or
+witness verdict; rung 5 remains UNKNOWN. The four pinned-source `aFontSizes`
+reads stay in-bounds guarded.
+
+GitLab primary-source reads map the first stable fixed release to KiCad 10.0.7
+(10.0.7-rc1 first pre-release; backport `4fdd1270…`; 10.0.6 and 9.0.x lack the
+guard; empty `/refs?type=tag` result discarded as a negative). No 10.0.7 build
+was exercised and no rung or trace changed. Recipe and hashes:
+`docs/reproducibility.md`; evidence: `realcfb/PROVENANCE-realcfb.md`,
+`FIXED-RELEASE.md` and `REPLAY.md` under `lab/frontier/kicad2shell/`.
