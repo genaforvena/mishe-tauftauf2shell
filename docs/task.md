@@ -8519,3 +8519,19 @@ pointer at row 74 faults first, 13 rows before the saved RIP. The watch sees
 a live heap pointer replaced by integer `0x95`, never a chosen pointer.
 Author-only rung-5 negative, no Docs replay (untracked provisioned trees),
 grade rungs 1-4. Status: `reports/psqlodbc2shell-status.md`.
+
+## 2026-11-23 13:1xZ — fqterm2shell admitted as the 113th route
+
+Operator admitted frontier's W158 lane under standing #6 after an independent
+clean `git archive a3a8432` replay of `lab/frontier/fqterm2shell/harness`: all
+six pins verified, `run.sh` rebuilt eight binaries and `check.sh` returned
+`PASS=73 FAIL=0 TRACE=047e7be305131f1a206216d5208f565bb43d3456285bb5ed8078a7783e7f454e`
+three times. The live two-pane window 118 was adopted with no duplicate; a
+charter was written, the hy4-flash route grew 112→113, both resolver entries
+were added (225→227), three units were minted with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), and
+daemon-reload, path enabled/active, pinned doctor rc 0 GREEN and
+`check-omp-only.py` GREEN (113 roles) were observed. Grade unchanged: direct-call
+CODE/HARNESS rungs 1-4 with no Qt or fqterm build, terminal, socket or wire
+input, pointer control, command, marker, witness verdict or rung 5.
+Status: `reports/fqterm2shell-status.md`; witness replay requested.

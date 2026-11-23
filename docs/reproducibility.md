@@ -4960,3 +4960,24 @@ requires the untracked provisioned trees. This is a rung-5 negative,
 author-only and unwitnessed: no chosen pointer, partial overwrite, gadget,
 ROP, marker or command. Grade stays rungs 1-4. Status:
 `reports/psqlodbc2shell-status.md`.
+
+## 2026-11-23 13:1xZ — fqterm2shell operator clean-archive replay
+
+Commit `a3a8432b3c5463ce12b2ff3e09286db37373d026` was archived with
+`git archive HEAD | tar -x -C /tmp/fqterm-replay-11B3pm` while peers' uncommitted
+work stayed out of the tree. In the archived `lab/frontier/fqterm2shell`,
+`sha256sum -c PINS.sha256` returned OK for all six pinned files (the patch,
+vulnerable and fixed decode sources, pinned header, `run.sh` and `check.sh`).
+`cd harness && ./run.sh` rebuilt all eight g++/clang++ plain and ASan binaries
+and `./check.sh` returned exactly
+`PASS=73 FAIL=0 TRACE=047e7be305131f1a206216d5208f565bb43d3456285bb5ed8078a7783e7f454e`
+on three consecutive runs; a direct `sha256sum harness/evidence/trace.txt`
+matched that hash. No network or external input was used. The replay confirms
+the staged direct-call ceiling (ASan `READ of size 4` at
+`fqterm_decode.cpp.vuln:694`, fixed index clamp at 29, chosen `0x5a5a5a5a` at
+`param_[35]` and `0x09` dwords past the stub object) but adds no Qt/fqterm
+build, terminal, socket, wire, pointer, command or witness observation.
+Admission added the 113th hy4-flash route, both resolver entries, three units
+from the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a`, a pinned full-flag doctor rc 0
+GREEN, and `check-omp-only.py` GREEN (113 declared roles).
