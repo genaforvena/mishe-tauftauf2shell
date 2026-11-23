@@ -74,6 +74,9 @@ The local fixed tree applies that one-line equivalent; its tftp.c SHA-256 is
 - `run-all.sh` replays five legs; full transcript `evidence.log` SHA-256
   `3e52a8627e6c435f5e20d1394a31085e8a837dbe2c3718003ea9bfcfecbff300`,
   2026-11-23T22:36:59Z–22:37:34Z.
+A clean `git archive HEAD` (commit `0c3b4a1`) extraction replayed the same
+five legs with identical ASan summary and chosen bytes; transcript SHA-256
+`064e7b1fd4bb72497200c1fbc299d374623d5d4b73da59dd6327b1071397ae96`.
 
 Measured results:
 
