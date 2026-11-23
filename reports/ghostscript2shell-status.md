@@ -120,7 +120,7 @@ performs the writeup's benign `path_control_active` `1 -> 0` write:
 `harness/run-safer.sh`: 9 PASS / 0 FAIL ×3. No `%pipe%`, no command, no benign
 file marker, no application or network chain was attempted.
 
-## Current grade
+## Current grade — 2026-11-23T05:2xZ
 
 Rungs 3 + 4: instrumented `heap-use-after-free` (rung 3); a stable,
 bidirectional, chosen-byte read/write through a dangling systemdict reference;
@@ -129,16 +129,30 @@ to `path_control_active` with an observed state change, and retargets one
 operator dispatch for a single call; and a measured state-level `-dSAFER`
 boundary flip (`path_control_active 1 -> 0`, `.currentpathcontrolstate true ->
 false`) on real gs 10.07.0 shipped bytes with vulnerable, fixed and safe-input
-controls. Honest ceiling: this is native state control, not command execution —
-no `%pipe%`, no application or network chain, no independent witness verdict.
-Rung 5 remains a separate claim.
+controls. W141 replayed all four rung classes at the labeled build scope.
+
+Rung 5 at lab-app scope: attacker-controlled bytes sent in an HTTP POST to a
+loopback-only upload service are saved and run by a live gs child under
+`-dSAFER`; the UAF-forged ref clears `path_control_active` and a chosen
+`%pipe%` command writes a marker file with `GS_R5_OK`. Vulnerable + injected
+gives the command side effect; fixed `1484854e` + injected and vulnerable +
+safe font both give `NO_STALE_REF` and no marker. `harness/run-r5.sh`:
+`PASS=14 FAIL=0` three times, trace
+`ddd635b2e607150af1180cc07554183ac79fd1025a79c00af28fbf923bf09957`.
+
+Honest ceiling: the lab app deliberately permits its upload directory and
+templates the saved paths into the gs command line; this is not a demonstration
+of the writeup's CUPS/Roundcube/WordPress delivery claims, does not change the
+CVE's AV:L vector, and uses no external host. The command is a benign `echo`
+into a marker file. Independent witness replay of this rung-5 chain has not
+happened, so ESTABLISHED is not claimed.
 
 ## Next bounded experiment
 
-A rung-5 attempt needs a wire/request-delivered document reaching a live
-`-dSAFER` target, a chosen benign command, an observed side effect, vulnerable,
-fixed and safe controls and witness replay. The remaining local gap is the
-application delivery chain and the additional PostScript-side permission writes
-the writeup used for `%pipe%` (`PermitFileWriting`, `LockFilePermissions`);
-none were attempted. Until then preserve rungs 3/4 and never relabel these
-mechanics as RCE.
+Request an independent witness replay of `harness/run-r5.sh` from a clean
+archive, including the two controls and the marker side effect. If it holds,
+author the durable report section for the rung-5 lab-app scope. Local work
+beyond that would be a real application delivery chain (CUPS IPP, a mail
+thumbnailer or a web uploader) with its own configuration and controls; treat
+each as a separate claim, not a consequence of this one. Preserve rungs 3/4 and
+never relabel the mechanics as public-network RCE.
