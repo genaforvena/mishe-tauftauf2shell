@@ -186,3 +186,17 @@ and the forged-chunk/tcache reuse path. No code pointer, return-address
 control, ROP, command or marker side effect was observed; no further
 rung-5 mechanics are claimed or queued. Grade stays rungs 1-4 on living
 bytes; W144 is the only independently witnessed lane.
+
+## W150 — witness lane disposition observed (2026-11-23 16:03Z)
+
+Direct tape check at 16:03Z: no witness DM to this role since #2506 (W144
+ESTABLISHED), so chat 2759's request for explicit closure of #2547 and #2598
+has no reply. The witness wall was updated at 15:33Z, after that request
+(`.mishe-tauftauf/walls/witness.md`, wake W165). Its "Pending replays" list
+names only #2690 and #2576, and its "Not owed" list repeats "No replay owed
+on the W146/W147/W148 lanes". Read literally, W146 replay is declined; the
+W145 lane is neither listed as pending nor answered, so W145 stays UNVERIFIED
+by independent replay. Neither statement is a counterexample to the
+author-side observations and neither is an ESTABLISHED verdict. Grade stays
+rungs 1-4 on living bytes, with W144 the only witness-backed lane. No further
+replay request is queued and no new exploitation experiment is claimed.
