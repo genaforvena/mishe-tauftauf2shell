@@ -3277,3 +3277,40 @@ and a recorder; the exact-size heap token is an instrument, not a measured APR
 allocation. Only the NUL offset is chosen, never its value, and ASan faults on
 the read before the write, so there is no ASan WRITE observation. No pointer
 control, command, witness verdict or rung 5.
+
+## 2026-11-23 06:4xZ — radvdump2shell
+
+CVE-2026-48715 / GHSA-52px-gh9p-m379, radvd `<= 2.20`, fixed in `2.21` by
+`068bde13`. Claim URLs, the six byte-exact SHA-256 pins (vulnerable `878ca6b`
+and `v2.20` identical, fix `068bde13` and `v2.21` identical), the four
+verbatim `print_ff()` case slices and the raw evidence are in
+`lab/frontier/radvdump2shell/PROVENANCE.md`. The brief is
+`reports/frontier-radvdump2shell.md`; status is
+`reports/radvdump2shell-status.md`. `harness/run.sh` re-extracts the four case
+bodies from the pinned blobs on every run under `#line` directives, checks a
+6-file source manifest and a 12-file harness manifest, and builds four plain
+and four sanitizer binaries. No daemon, raw socket, listener or off-loopback
+probe is used.
+
+```
+T=$(mktemp -d /tmp/radvdump2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/radvdump2shell | tar -x -C "$T"
+bash "$T/lab/frontier/radvdump2shell/harness/run.sh"
+```
+
+Expect rc 0, `PASS=67 FAIL=0` and
+`TRACE_SHA256=cf327179a2abca7647a1a8bd3b58259a398c7de94f24a27910f3a356d8d3788a`.
+ASan on the vulnerable slice reports `stack-buffer-overflow`, `WRITE of size
+256` at pinned `radvdump.c.878ca6b:380` in `route_case`, with gcc and clang in
+agreement; the fixed-commit and 2.21 slices log
+`Invalid Route Information option length 33` and never copy, and an
+RFC-conformant length-2 option is clean on all six ASan/plain variants. The
+plain build places chosen bytes at copy offsets 17/24/33/40/63 past the
+16-byte object and gdb reads `saved rip = 0x414141414141417b` at pinned line
+381.
+
+Boundaries: the case body is direct-called with stubbed `flog`, `addrtostr`
+and `print_preferences`; plain builds use `-O0 -g -fno-stack-protector`
+because Ubuntu's default stack protector aborts before observation. There is
+no live `radvdump`, raw socket, IPv6 neighbour or RA, no ROP chain, pointer
+control beyond one saved-RIP byte, command, witness verdict or rung 5.

@@ -7574,3 +7574,30 @@ gcc and clang, scoped rung 4 one-byte NUL at offsets 31/47/63, fix and release
 blobs clean and well-formed token clean. No Apache/APR pool, request object,
 listener, socket or wire; no pointer control, command, witness verdict or rung
 5. Status: `reports/modauthoidc2shell-status.md`.
+
+## 2026-11-23 06:4xZ — radvdump2shell admitted as the 104th route
+
+Frontier W140 staged radvd `CVE-2026-48715 / GHSA-52px-gh9p-m379` in commits
+`a514b30` and `2352d04`: a crafted ICMPv6 Router Advertisement Route
+Information option carries a length byte up to 255, so the verbatim
+`print_ff()` case copies `(len - 1) * 8` attacker bytes into a 16-byte stack
+`struct in6_addr`. The brief is `reports/frontier-radvdump2shell.md`; the
+byte-exact pins for vulnerable `878ca6b`/`v2.20`, fix `068bde13`/release
+`v2.21`, verbatim slices and raw evidence are in
+`lab/frontier/radvdump2shell/PROVENANCE.md`. Operator replay from
+`git archive HEAD lab/frontier/radvdump2shell` in a fresh `/tmp` directory
+returned rc 0, `PASS=67 FAIL=0` and trace
+`cf327179a2abca7647a1a8bd3b58259a398c7de94f24a27910f3a356d8d3788a`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route as the 104th
+role, minted the path/debounce/slice units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (209 total). The pinned full-flag doctor returned rc 0 `GREEN` and
+`check-omp-only.py` GREEN with 104 declared roles. The two-pane window 108 and
+its registry entry were already live, so no window was created.
+Grade stays the author's: rung 3 ASan `WRITE of size 256` at pinned
+`radvdump.c.878ca6b:380` with gcc and clang, scoped rung 4 chosen bytes at
+offsets 17/24/33/40/63 plus a chosen saved-RIP byte under gdb; fix and 2.21
+slices and RFC-conformant input clean. No live `radvdump`, raw socket,
+IPv6 neighbour or RA, no ROP chain, command, witness verdict or rung 5.
+Status: `reports/radvdump2shell-status.md`.
