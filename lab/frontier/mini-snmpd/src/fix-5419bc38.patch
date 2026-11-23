@@ -1,0 +1,48 @@
+From 5419bc3816a09b7a2ca38c47f0888ad01c8fe897 Mon Sep 17 00:00:00 2001
+From: Joachim Wiberg <troglobit@gmail.com>
+Date: Sun, 21 Jun 2026 07:25:16 +0200
+Subject: [PATCH] Align underflow checks across decode helpers
+
+decode_str(), decode_oid() and decode_ptr() guarded the length only
+with the *pos check; bring them in line with decode_int()/decode_cnt()
+which also reject len > size.
+
+Signed-off-by: Joachim Wiberg <troglobit@gmail.com>
+---
+ protocol.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/protocol.c b/protocol.c
+index f6cf601..81093d0 100644
+--- a/protocol.c
++++ b/protocol.c
+@@ -174,7 +174,7 @@ static int decode_cnt(const unsigned char *packet, size_t size, size_t *pos, siz
+ /* Fetch the value as C string (user must have made sure the length is ok) */
+ static int decode_str(const unsigned char *packet, size_t size, size_t *pos, size_t len, char *str, size_t str_len)
+ {
+-	if (*pos >= (size - len + 1)) {
++	if (len > size || *pos >= (size - len + 1)) {
+ 		logit(LOG_DEBUG, 0, "underflow for string");
+ 		errno = EINVAL;
+ 		return -1;
+@@ -189,7 +189,7 @@ static int decode_str(const unsigned char *packet, size_t size, size_t *pos, siz
+ /* Fetch the value as C string (user must have made sure the length is ok) */
+ static int decode_oid(const unsigned char *packet, size_t size, size_t *pos, size_t len, oid_t *value)
+ {
+-	if (*pos >= (size - len + 1)) {
++	if (len > size || *pos >= (size - len + 1)) {
+ 		logit(LOG_DEBUG, 0, "underflow for oid");
+ 		errno = EINVAL;
+ 		return -1;
+@@ -256,9 +256,9 @@ static int decode_oid(const unsigned char *packet, size_t size, size_t *pos, siz
+ }
+ 
+ /* Fetch the value as pointer (user must make sure not to overwrite packet) */
+-static int decode_ptr(const unsigned char UNUSED(*packet), size_t size, size_t *pos, int len)
++static int decode_ptr(const unsigned char UNUSED(*packet), size_t size, size_t *pos, size_t len)
+ {
+-	if (*pos >= (size - len + 1)) {
++	if (len > size || *pos >= (size - len + 1)) {
+ 		logit(LOG_DEBUG, 0, "underflow for ptr");
+ 		errno = EINVAL;
+ 		return -1;

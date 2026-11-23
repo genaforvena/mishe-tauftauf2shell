@@ -1,0 +1,53 @@
+CALL_SIZE=2048
+CALL_LEN=4000
+CALL_POS=8
+=================================================================
+==4076022==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51d000000880 at pc 0x575ca7009e0e bp 0x7ffeb42047f0 sp 0x7ffeb42047e8
+READ of size 1 at 0x51d000000880 thread T0
+    #0 0x575ca7009e0d in decode_oid /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mini-snmpd/harness/protocol.c.b5322437:239:61
+    #1 0x575ca700905b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mini-snmpd/harness/driver.c:97:14
+    #2 0x746c3822a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x746c3822a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x575ca6f2f354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mini-snmpd/harness/a-vuln-clang+0x2c354) (BuildId: 55ec41e5c6c55e6aa194d0a1578369b06982a9f8)
+
+0x51d000000880 is located 0 bytes after 2048-byte region [0x51d000000080,0x51d000000880)
+allocated by thread T0 here:
+    #0 0x575ca6fca38d in calloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mini-snmpd/harness/a-vuln-clang+0xc738d) (BuildId: 55ec41e5c6c55e6aa194d0a1578369b06982a9f8)
+    #1 0x575ca7008f7f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mini-snmpd/harness/driver.c:92:28
+    #2 0x746c3822a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x746c3822a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x575ca6f2f354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mini-snmpd/harness/a-vuln-clang+0x2c354) (BuildId: 55ec41e5c6c55e6aa194d0a1578369b06982a9f8)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mini-snmpd/harness/protocol.c.b5322437:239:61 in decode_oid
+Shadow bytes around the buggy address:
+  0x51d000000600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000000800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x51d000000880:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000000900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000000980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000000a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000000a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000000b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4076022==ABORTING

@@ -1,0 +1,7 @@
+driver.c:3:19: warning: '/*' within block comment [-Wcomment]
+    3 |  * bytes into vuln/*.inc and fixed/*.inc by run.sh. No daemon, no listener,
+      |                   ^
+driver.c:3:35: warning: '/*' within block comment [-Wcomment]
+    3 |  * bytes into vuln/*.inc and fixed/*.inc by run.sh. No daemon, no listener,
+      |                                   ^
+2 warnings generated.

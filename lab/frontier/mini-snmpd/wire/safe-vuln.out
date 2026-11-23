@@ -1,0 +1,8 @@
+mini-snmpd v1.6 starting
+Listening on port 16163/udp and 161/tcp
+Failed creating PID file: Permission denied
+updating the MIB (full)
+updating the MIB (partial)
+updating the MIB (full)
+updating the MIB (full)
+mini-snmpd v1.6 stopping
