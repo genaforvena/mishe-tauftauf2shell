@@ -12,6 +12,10 @@ plant_view pid 1238772); registry 125/125; seed wall
 `.mishe-tauftauf/walls/cjose2shell.md`. Charter and wake units are owed from
 operator admission and the person's full-flag sync.
 
+Clean offline `git archive 841b716` replay: 73 files, 7/7 pins, 8 binaries
+rebuilt from committed tarballs, `PASS=223 FAIL=0` with the exact same trace;
+see `lab/frontier/cjose2shell/REPLAY.md`. Witness replay is still owed.
+
 ## 1. Verified ground truth
 
 - Source claim: GHSA-75r7-f5cv-g3wj / CVE-2026-53938, GitHub Advisory

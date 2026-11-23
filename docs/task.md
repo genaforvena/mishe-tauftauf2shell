@@ -9244,3 +9244,162 @@ guard; empty `/refs?type=tag` result discarded as a negative). No 10.0.7 build
 was exercised and no rung or trace changed. Recipe and hashes:
 `docs/reproducibility.md`; evidence: `realcfb/PROVENANCE-realcfb.md`,
 `FIXED-RELEASE.md` and `REPLAY.md` under `lab/frontier/kicad2shell/`.
+
+## 2026-11-23 — munt W175 and vrpn W21/W21-correction folds (author-only)
+
+`a37acbf` (munt W175) source-enumerated every bulk-SysEx consumer in pinned
+`libmt32emu_2_8_3`: all large-SysEx paths call `playSysex()`/`playSysexNow()`
+and bypass `parseStream()`; the only Linux `parseStream()` caller is the ALSA
+sequencer at `alsadrv.cpp:1182` with a 5572-byte cap, smf2wav still calls
+`playSysex()`, and the public C API `mt32emu_parse_stream` (`c_interface.cpp:760`)
+is an unclamped forward for third-party hosts. No host was built. `d79c99a`
+(vrpn W21) swept wire indices on the plain `-O0` build: index 512 changes an
+outer-frame saved rbp from `0x…dbc0` to `0x…db00` at `vrpn_Connection.C:4554`
+and enters `__stack_chk_fail` from `getOneTCPMessage:4246`; 512-517 are DEAD,
+518/519 ALIVE, 520 DEAD, 16384/32768/65536 exit 139, while fixed 512, short 4
+and `-O2` 256/384/512 stay ALIVE with only the NUL at the chosen offset.
+`e41b2da` marked the large-index exit-139 cause **UNKNOWN** (no gdb landing
+mapped), superseding the W21 explanation; an older "outside the mapped stack"
+phrase still survives in the report's Limits section. Both limbs are
+author-only with no chosen byte, command or rung 5 and no grade change.
+
+## 2026-11-23 — libheif W176 and munt W176 source/ceiling negatives
+
+`d12d823` (libheif W176) tried to close the arbitrary-byte ceiling and
+preserved two negatives: an AV1 lossless mixed 512x64 + 64x65 sequence is
+refused (`frame1: rc=8 sub=5002 ... Image size must match encoder init
+configuration size`; `heif-enc -A -L -S` also refuses), and JPEG constant 8x8
+blocks round-trip byte-exact but the SOF-patched OOB row is not independent
+(`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so arbitrary-byte
+control stays UNKNOWN and W162's position-dependent 8-byte runs remain the
+chosen-byte lane. The six-case `real/run_wire.sh` replay and both checkers
+PASS; witnesses #2752/#2869/#2897 are still queued. `144f371` (munt W176)
+added third-party source negatives with fetched bytes for DOSBox Staging,
+86Box and DOSBox-X (`e061f43f…`/`a9b4c625…`/`fe0fa4ca…`): Staging and 86Box
+call `playSysex` without parseStream, DOSBox-X's vendored copy is already
+fixed at `:136`/`:253-254`, and the hackmd PoC is still HTTP 404. No host was
+built or run, so this narrows but does not prove the third-party-host
+question; rung 5 stays UNKNOWN.
+
+## 2026-11-23 — libfontenc W177: witness #2914 at availability-only scope
+
+`c83d597` folded witness #2914, verbatim "ESTABLISHED at the labeled
+availability-only scope." From a clean `git archive HEAD` at `3f44109` it
+rebuilt the four out-plain libraries (built `encparse.c` hashes matching
+`PINS.sha256` vuln `79e2381b` / fixed `91c81398`), ran its own `xfon-load` and
+reproduced all nine `SIZE 256 1024` matrix lines with an empty data-line diff;
+the faulting instruction is the chosen store `mov %dx,(%rax)` at
+`encparse.c:495`. Its first `LD_PRELOAD` setup under `realpath/` silently
+missed and SYSTEM libfontenc crashed every variant including fixed; diagnosed
+from the backtrace DSO and rebuilt at the correct BASE with PRELOAD_OK, that
+failed setup is preserved as a negative. No pointer, command, wire or rung 5;
+`SIZE 256 258` plain impact is still NOT demonstrated and the grade is
+unchanged.
+
+## 2026-11-23 — kicad W178 KiCad-own reader and operator clean-archive replay
+
+`337c164` compiles KiCad 10.0.6's verbatim `thirdparty/compoundfilereader`
+headers (pins `223e8b03…`/`d72da151…`) and drives them through a lab
+`ALTIUM_COMPOUND_FILE` wrapper using real `EnumFiles`/`IsStream`/`ReadFile` on
+the four `realcfb` `.SchLib` fixtures: `stream=107`, `real-reader: bytes=107
+props=3 parse_error=0`, `real-key: SIZEZ=84215045`, pinned-parent ASan `WRITE
+of size 4` four bytes before the 4-byte region at `sch_io_altium.cpp.vuln:5919`
+(plain `double free or corruption (out)`), `attackneg` SEGV, `attackfar`
+8-byte before-region write and all fixed runs clean. `3d90217` recorded two
+in-tree runs and a clean `git archive` at `337c164` (333 files) with 32
+invocations/38 assertions, `PASS=38 FAIL=0` and trace `fffe7341…6260`; that
+replay is author/operator-performed, NOT a witness verdict. Fixtures remain
+synthetic, chosen bytes land in the ASan left redzone (plain: malloc
+metadata), no wxWidgets/KiCad build or eeschema, and the ZDI RCE claim stays
+UNKNOWN.
+
+## 2026-11-23 — thrift W152 witness-cap disposition (author-only)
+
+`25133a3` records that the cap blocking W145/W146 cleared: other-lane verdicts
+landed at 19:20Z and the wall was stamped W175 19:23Z, but the 19:27Z tape
+check found no DM to the role since #2533 for the W144 rungs 1-4 ESTABLISHED
+verdict (W149-W151 name #2506 for the same verdict) and the #2759 closure
+request for #2547/#2598 unanswered. Wall line 171 still says `No replay owed
+on the W146/W147/W148 lanes` and names neither in pending, so W146's replay
+is declined and W145 unanswered/not queued. Both remain UNVERIFIED — not
+refuted, not ESTABLISHED, not a counterexample; W151's scheduling explanation
+is stale as current state, no new experiment was run and the disposition and
+grade are unchanged.
+
+## 2026-11-23 — libgphoto2 W165: witness #2892 rung 3 only, plain RIP negative
+
+`82c12a1` folded tape #2892 (2026-11-23): from a clean `/tmp/w173-lgp` archive
+with four pins and the tarball/patch hashes matched, the witness reproduced
+three ASan reports at count 1022 with `halt_on_error=0` (rc 0) — stack WRITE
+16384 at real `:152`, stack READ 16848 and heap WRITE 16848 at real `:154`,
+0 bytes past the 16448-byte `camera_init` region — with 100/1021 clean, fix
+`4fdaf4b1…` suppressing, reversing restoring and 65535 faulting then SEGV.
+Verdict: ESTABLISHED at **rung 3 at the real heap destination only**, NOT rung
+4 impact; rung 5 UNKNOWN. Harness #2763 also closed at 146 PASS / 0 FAIL with
+trace `e364f756…c6c98`. `4c5dd7a` added an author-only plain-build probe:
+rc 134 `*** stack smashing detected ***` at count 1022 and gdb at
+`__stack_chk_fail` showing device-chosen `0x5a5a5a5a5a5a5a5a` in both the
+canary and saved RIP of `jl2005c_init` — chosen bytes at a real control-flow
+slot, but the protector aborts before `ret`, so no chosen target executes; no
+witness retry, synthetic vusb only.
+
+## 2026-11-23 — ndpi W162 real build, fixed 6.0 and key-reachability closure
+
+`37fd092` built the full pinned vulnerable tree (serializer sha256
+`4840fb41…9ad5`) with clang 18 ASan. All in-tree escape callers pass
+`dst_max_len = buffer.size - size_used`, and the VALUE caller at `:1296-1310`
+pre-extends by `24 + slen*2`, so 145 crafted cases gave zero ASan reports —
+a measured VALUE-path negative. Three weak KEY callers
+(`binary_boolean :2181`, `start_of_list_binary :2245`,
+`start_of_block_binary :2328`) compute `needed = klen + 16` while the key
+expands to `2*klen+3`: a 128-byte `/` key overflows at `:107` and klen 256
+adds an off-by-one NUL at `:163`; klen 16/64 are clean and 128..2048 overflow
+on all three. `52ea294` added the fixed-commit control (`0aa83a83…92fd`) with
+rc 0 and zero ASan; callers still ignore `-1` so `size_used` can decrement —
+a separate correctness issue, not memory corruption observed here. `eaf6c25`
+resolved the fixed release from UNKNOWN to **6.0** by ancestry
+(`6.0~14`, tag `1a529339…a3af`, 2026-08-28). `44be53e` closed wire
+reachability for this tree as a NEGATIVE: the TLV clones are cited only by the
+API declaration, serializer definitions and fuzz/unit tests, other keys are
+≤10-byte decimals, and the loopback pcap reader reaches no weak KEY caller
+(560 `\/` escapes, zero ASan). R5 stays UNKNOWN and unreachable via this
+primitive; all four edges are author-only.
+
+## 2026-11-23 — sdlmixer W179 real-caller lane and witness #2942
+
+Following the 18:3xZ sdlmixer admission record above, `307a2b6` added a
+real-caller SDL3 lane: pinned `release-3.2.4` tarball SHA
+`0fc1d23e…d07e5c`, verbatim slices (types `:41-230`, channel mask `:828-843`,
+`ParseFMT :845-978`, `FetchXLaw`+wrappers `:750-772`, caller `:1654-1679`,
+fixed `:1666-1691`), real SDL IO and `SDL_CreateAudioStream`, 12 binaries and
+`PASS=96 FAIL=0` with trace `934e8337…60c0`; gdb `i=1` sees
+`buffer+1020..1027 = ff 7f 00 00 5a 5a 5a 5a`, fixed/safe/badfmt/pcm8 are
+clean, and clang++ plain plus all nossp edge/ulaw rc 139 while g++ plain
+aborts rc 134 are preserved. Witness #2942 is ESTABLISHED at the labeled
+direct-call lab scope, rungs 1-4 only, explicitly not rung 5; W179 itself is
+author-only and awaits replay. No SDL_mixer build, full dispatcher, decoder
+consumer, wire, pointer or command follows and RCE stays UNKNOWN. `a8b9c91`
+only inlined the SDL3 tarball SHA check in `realcaller/run.sh` so clean replay
+no longer depends on the local `deps/SDL3.sha256`; no report or grade changed.
+
+## 2026-11-23 20:0xZ — cjose2shell W180 staged (AES Key Wrap heap overflow)
+
+Frontier staged GHSA-75r7-f5cv-g3wj / CVE-2026-53938 (HIGH 8.2,
+CWE-122/787; cjose <=0.6.2.4, patched >=0.6.2.5 by commit `8c51d245`).
+The advisory's AES-KW JWE decryption path writes an attacker-sized
+`encrypted_key` into a fixed 32-byte heap CEK. Unlike a sliced harness, the
+lab builds the real cjose library from pinned v0.6.2.4 bytes (plus a fixed
+tree carrying only the security hunk) and drives real `cjose_jwe_import()`
+and `cjose_jwe_decrypt()` with a real compact JWE and real OpenSSL
+wrap/unwrap. gcc+clang ASan report `heap-buffer-overflow WRITE of size 40`
+and `1016`; gdb at the library call sees chosen "MISHE-OO" bytes at
+`cek+32..39`; the fixed tree rejects with `INVALID_ARG` and is ASan-clean;
+plain large wrap aborts in glibc `free(): invalid pointer`. 223 PASS / 0 FAIL
+on three in-tree runs and on a clean offline git-archive replay at `841b716`
+(73 files, 7/7 pins, 8 binaries rebuilt), trace
+`455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`.
+Window 124, seed wall, brief, pins, provenance and replay record exist; the
+operator owns admission and the person owns wake units and full-flag sync.
+Grade: direct-call rungs 1-4 only, unwitnessed; no server, socket, wire,
+pointer control, command or rung 5. Brief:
+`reports/frontier-cjose2shell.md`.

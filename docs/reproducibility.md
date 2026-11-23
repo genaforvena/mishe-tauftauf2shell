@@ -85,7 +85,7 @@ containers whose host ports bind only to loopback.
 | Imgproxy2Shell | [brief](../reports/frontier-imgproxy2shell.md) | CVE record `CVE-2026-123614` (`ab297c9d…`), GHSA-hff9-5pqw-6w9f (`d6de60b2…`), fix `a821b6a4…` (patch `c5db17e9…`), vulnerable `icoload.c` v4.0.15 (`2eabd58d…`) / fixed v4.0.16 (`67b4a9c2…`); every URL and hash in `lab/frontier/imgproxy2shell/PROVENANCE.md` | `bash lab/frontier/imgproxy2shell/run.sh <outdir>` — `gen_driver.py` verifies every pin and copies the affected (`:154-164`) and fixed (`:162-185`) loader statements verbatim under `#line`, then builds vulnerable, fixed and ASan drivers; gcc `-O0 -g` | Operator admission replay ~10:53Z from a clean `git archive HEAD` extraction: 10 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`, two independent five-run groups both `sha256=6b0391599520bc899f169268e08699155888f0018274f9c2a2e12bcd31c2dad5`; rungs 1/2/3 ESTABLISHED, rung 4 INSTRUMENTED; witness #813/#814 independent clean-archive replay ESTABLISHED AS CLAIMED, grade unchanged (10 PASS / 0 FAIL, same digest) |
 | Firebird2Shell | [brief](../reports/frontier-firebird2shell.md) | CVE record `CVE-2026-33337` (`b6ac3a4f…`), GHSA-89mq-229g-x47p (`451f9b62…`), master fix `2a5303dc…` / v5.0.4 fix `62fc37ed…`, vulnerable `xdr.cpp` v5.0.3 (`b28b1aaa…`, blob `555e6e1f…`) / fixed v5.0.4 (`426a7a07…`, blob `a5698288…`), plus `protocol.cpp` / `dsc.h` pins; every URL and hash in `lab/frontier/firebird2shell/PROVENANCE.md` | `bash lab/frontier/firebird2shell/run.sh <outdir>` — pins are recorded with SHA-256 in `PROVENANCE.md` and copied lines are verbatim (witness #818); `gen_driver.py` does not itself hash-check the pinned files. It copies the `dtype_cstring` cases (`:206-221` affected, `:206-223` fixed) verbatim under `#line`, then builds vulnerable, fixed and ASan drivers; gcc | Operator admission replay ~11:08Z from a clean `git archive HEAD` at `4592fbf`: 10 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`, two independent five-run groups both `sha256=807b47150a58fe88094966b0affed9b35604a7b3730c68f53eeaa61057a25fbf` — rung 1 `copy_len=60000` unclamped into a 32-byte slot, rung 2 chosen bytes at `buffer+40` / `+100`, rung 3 ASan `WRITE of size 60000` at `xdr_v5.0.3:216`, rung 4 instrumented `0x5a5b5c5d…` readback and `PROT_NONE` guard fault; fixed v5.0.4 clamps to 31 and is ASan-clean on hostile and benign inputs. No live `fbserver`, wire packet, stock neighbour, pointer or execution; witness #818 independent clean-archive replay ESTABLISHED AS CLAIMED, grade unchanged (10 PASS / 0 FAIL, same digest). |
 | Rtp2httpd2Shell | [brief](../reports/frontier-rtp2httpd2shell.md) | GHSA-35fv-hf3m-2pqc advisory (`eb55aed5…`, no CVE), signed fix `f0fcfc19…`, raw `rtsp.c` at v3.14.1 (`96eb3b4a…`, affected) / v3.14.2 (`b355f4af…`, fixed) plus `rtsp.h`, `buffer_pool.{c,h}` and `zerocopy.c`; every URL and hash in `lab/frontier/rtp2httpd2shell/PROVENANCE.md` | `bash lab/frontier/rtp2httpd2shell/run.sh <outdir>` — `gen_driver.py` hash-checks all eight pins and copies the fault lines verbatim under `#line`, then builds vulnerable, fixed and ASan drivers; gcc `-O0 -g` | Operator replay 11:26Z from committed HEAD: 10 PASS / 0 FAIL rc 0, two five-run groups both `sha256=11a76ab0bcb678868229982cb64a826f0367f29d8c4b3daf9eb84eb5804ceb13`; all eight pins matched by SHA-256 and the `:1800` / `:1825` / fixed `:1801` lines read directly. Witness #831 independently replayed from a clean `bb00268a` archive with the same digest and returned ESTABLISHED AS CLAIMED, grade unchanged; its three supporting citation-line nits were folded into the brief/PROVENANCE at `0a7e96a`. |
-| Vrpn2Shell | [brief](../reports/frontier-vrpn.md), [wire rung-3 / rung-4 report](../reports/vrpn2shell.md) | CVE record `CVE-2026-123200` (`f4ee3212…`), fix commits `0da5b0b…` / `c893b58…`, pinned `vrpn_Connection.C` at `79deb000…` (`9eaa1045…`), fix-commit tarball (`b5258e99…`); every URL and hash in `lab/frontier/vrpn2shell/PROVENANCE.md`, including the superseded 28-byte header hash; W5 read-only upstream release lookup in `lab/frontier/vrpn2shell/UPSTREAM-RELEASE-LOOKUP.md` | `bash lab/frontier/vrpn2shell/run.sh <outdir>` and `gdb-wire.sh <outdir> <port> <index>` now send the required 24-byte header (the old 28-byte header pinned `i=0` for every index); live wire ASan: `bash lab/frontier/vrpn2shell/probe-gdb.sh <outdir> 13901 100`, expect `WRITE_SITE_HIT i=100` and ASan `stack-buffer-overflow WRITE of size 1` at real `vrpn_Connection.C:4554` in the plant-started loopback server; plain saved-rip: `bash lab/frontier/vrpn2shell/probe-plain-rip.sh <outdir> 13905 120`, expect `saved_rip` low byte `0x…88 → 0x…00` and SIGILL with canary and rbp intact; second sink TYPE_DESCRIPTION (message type -2): `VAR=type_name LINE=4482 MSGTYPE=-2 bash lab/frontier/vrpn2shell/probe-gdb.sh <outdir> 13911 100`, expect `WRITE_SITE_HIT i=100` at `handle_type_message:4482` and ASan `WRITE of size 1` with shadow frame `[112,212) 'type_name'` and access at offset 212 (short index 4 and fixed `:4486` at index 100 are clean controls); plain: `VAR=type_name MSGTYPE=-2 LINE_PRE=4482 LINE_POST=4484 bash lab/frontier/vrpn2shell/probe-plain-rip.sh <outdir> 13914 120`, expect `saved_rip 0x…d88 → 0x…d00` and SIGILL (fixed plain 120 clean). `--msgtype` defaults to -1, so W1 commands are unchanged; gitignored `out-type-*` gdb logs regenerate with those two commands. Direct ASan harness: `g++ -fsanitize=address -fno-omit-frame-pointer -g -I lab/frontier/vrpn2shell/src/vrpn-07.36 lab/frontier/vrpn2shell/harness/handler_direct.cpp lab/frontier/vrpn2shell/build-asan-07.36/libvrpnserver.a -o handler_direct` then `handler_direct 100` | Observed W98: ASan `WRITE of size 1` at real `vrpn_Connection.C:4554` for indices 100/128/-256; fixed commit has no write-site fault; gdb proves a real TCP message reaches `:4535`. W1 author-only correction: the earlier "live-server sweep negative, different frame layout" was the injector's 28-byte header; wire rung 3 and the plain-build saved-rip rung-4 boundary are now observed at the labeled g++ 13.3.0 Debug layout. W2 (author-only) repeats both limbs over real loopback TCP through type -2 into `type_name[i] = '\0'` at `:4482`: index 100 ASan fault in `handle_type_message`, index 120 plain saved-rip zeroing and SIGILL, with short-input, fixed-commit and fixed-plain controls clean. Byte is a fixed NUL at a chosen offset, no chosen byte or pointer control, no command side effect, no rung 5. Admitted under standing #6 (~01:1xZ in task.md); witness replay of both wire limbs (W1 and W2) pending. W5 resolves the released-fixed UNKNOWN to an authoritative negative by read-only metadata lookup: `git ls-remote --tags` has 35 refs with no 07.37/07.38/07.39 tag, the GitHub releases API lists v07.36 (2025-06-28) as newest, the v07.39 tarball URL is 404, and both fix commits are untagged 2026-10-22 master commits; the fixed control stays the pinned commit tarball and no build, grade or witness fact changes. |
+| Vrpn2Shell | [brief](../reports/frontier-vrpn.md), [wire rung-3 / rung-4 report](../reports/vrpn2shell.md) | CVE record `CVE-2026-123200` (`f4ee3212…`), fix commits `0da5b0b…` / `c893b58…`, pinned `vrpn_Connection.C` at `79deb000…` (`9eaa1045…`), fix-commit tarball (`b5258e99…`); every URL and hash in `lab/frontier/vrpn2shell/PROVENANCE.md`, including the superseded 28-byte header hash; W5 read-only upstream release lookup in `lab/frontier/vrpn2shell/UPSTREAM-RELEASE-LOOKUP.md` | `bash lab/frontier/vrpn2shell/run.sh <outdir>` and `gdb-wire.sh <outdir> <port> <index>` now send the required 24-byte header (the old 28-byte header pinned `i=0` for every index); live wire ASan: `bash lab/frontier/vrpn2shell/probe-gdb.sh <outdir> 13901 100`, expect `WRITE_SITE_HIT i=100` and ASan `stack-buffer-overflow WRITE of size 1` at real `vrpn_Connection.C:4554` in the plant-started loopback server; plain saved-rip: `bash lab/frontier/vrpn2shell/probe-plain-rip.sh <outdir> 13905 120`, expect `saved_rip` low byte `0x…88 → 0x…00` and SIGILL with canary and rbp intact; second sink TYPE_DESCRIPTION (message type -2): `VAR=type_name LINE=4482 MSGTYPE=-2 bash lab/frontier/vrpn2shell/probe-gdb.sh <outdir> 13911 100`, expect `WRITE_SITE_HIT i=100` at `handle_type_message:4482` and ASan `WRITE of size 1` with shadow frame `[112,212) 'type_name'` and access at offset 212 (short index 4 and fixed `:4486` at index 100 are clean controls); plain: `VAR=type_name MSGTYPE=-2 LINE_PRE=4482 LINE_POST=4484 bash lab/frontier/vrpn2shell/probe-plain-rip.sh <outdir> 13914 120`, expect `saved_rip 0x…d88 → 0x…d00` and SIGILL (fixed plain 120 clean). `--msgtype` defaults to -1, so W1 commands are unchanged; gitignored `out-type-*` gdb logs regenerate with those two commands. Direct ASan harness: `g++ -fsanitize=address -fno-omit-frame-pointer -g -I lab/frontier/vrpn2shell/src/vrpn-07.36 lab/frontier/vrpn2shell/harness/handler_direct.cpp lab/frontier/vrpn2shell/build-asan-07.36/libvrpnserver.a -o handler_direct` then `handler_direct 100`. W21 outer-frame sweep (author-only, plain `-O0` server): `bash lab/frontier/vrpn2shell/probe-w21-large.sh <outdir> <port> 512` (gdb PRE/POST at `vrpn_Connection.C:4554`) and `bash lab/frontier/vrpn2shell/probe-w21-smash.sh <outdir> <port> 512` (identifies `__stack_chk_fail`), both calling `python3 lab/frontier/vrpn2shell/wire_inject.py --index <index> --port <port>`; coarse and fine sweeps use the same injector with indices 320..8192 and 512..520, with fixed/`-O2` binaries passed as the optional `BIN` argument to `probe-w21-large.sh` | Observed W98: ASan `WRITE of size 1` at real `vrpn_Connection.C:4554` for indices 100/128/-256; fixed commit has no write-site fault; gdb proves a real TCP message reaches `:4535`. W1 author-only correction: the earlier "live-server sweep negative, different frame layout" was the injector's 28-byte header; wire rung 3 and the plain-build saved-rip rung-4 boundary are now observed at the labeled g++ 13.3.0 Debug layout. W2 (author-only) repeats both limbs over real loopback TCP through type -2 into `type_name[i] = '\0'` at `:4482`: index 100 ASan fault in `handle_type_message`, index 120 plain saved-rip zeroing and SIGILL, with short-input, fixed-commit and fixed-plain controls clean. Byte is a fixed NUL at a chosen offset, no chosen byte or pointer control, no command side effect, no rung 5. W21 expects index 512 DEAD rc 134 with `*** stack smashing detected ***`, 512-517 DEAD / 518-519 ALIVE / 520 DEAD, TYPE 512 rc 134, fixed 512, short 4 and `-O2` 256/384/512 ALIVE, and 16384/32768/65536 DEAD rc 139 with cause **UNKNOWN** (no gdb landing mapped; e41b2da); outer-frame saved rbp changes `0x…dbc0` → `0x…db00` and the fixed build writes only the NUL at the chosen offset — author-only, no grade change. Admitted under standing #6 (~01:1xZ in task.md); witness replay of both wire limbs (W1 and W2) pending. W5 resolves the released-fixed UNKNOWN to an authoritative negative by read-only metadata lookup: `git ls-remote --tags` has 35 refs with no 07.37/07.38/07.39 tag, the GitHub releases API lists v07.36 (2025-06-28) as newest, the v07.39 tarball URL is 404, and both fix commits are untagged 2026-10-22 master commits; the fixed control stays the pinned commit tarball and no build, grade or witness fact changes. |
 | Zephyr2Shell | [brief](../reports/frontier-zephyr2shell.md) | CVE-2026-82391 / GHSA-8jrg-wx88-g75j OSV record (`3a792897…`), fix `4e0a5f38b14d…` (PR #117267, patch `65d08ea8…`), raw `http_server_http2.c` at v4.4.0 (`35c7a3bf…`, affected) / v4.5.0 (`578c7c3f…`, fixed) plus `http_server_core.c` (`f400c114…`), `server.h` (`43c0522d…`) and `Kconfig` (`17360698…`); all seven SHA-256 pins and URLs in `lab/frontier/zephyr2shell/PROVENANCE.md` (the api.github.com advisory endpoint 404s, so advisory HTML and the CVE/OSV records are pinned) | `bash lab/frontier/zephyr2shell/run.sh <outdir>` — `gen_driver.py` hash-checks all seven pins (exit 3 on drift) and copies the fault statements verbatim under `#line`, then builds v4.4.0, v4.5.0 and ASan drivers; gcc `-O0 -g` | Operator replay ~11:42Z from a clean `git archive 0ccfdba lab/frontier/zephyr2shell` extraction: 10 PASS / 0 FAIL rc 0, two five-run groups both `sha256=48568d4883dd3ca4125fc0dbb6371aa886fc3e9ed3d7362f778815cd3201f0e0`. ASan `WRITE of size 1024`, 0 bytes after a 256-byte region, fault frame `core_v4.4.0:565`; chosen `0x5a5b5c5d` byte-exact at offsets 300/500/900, guard page rc 139, fixed v4.5.0 and benign-file cases ASan-clean. Rungs 1/2/3 ESTABLISHED in the harness, rung 4 INSTRUMENTED chosen bytes in a stand-in collaborator; no Zephyr build, HTTP/2 wire traffic, real client struct neighbours, pointer control or execution. Witness W64/#847 independently replayed from a `5e68ea6` clean archive with the same digest and returned ESTABLISHED AS CLAIMED, grade unchanged; its one observation (OSV JSON key order is not byte-stable) is non-load-bearing. |
 | ZenohPico2Shell | [brief](../reports/frontier-zenohpico2shell.md) | CVE-2026-130603 / GHSA-fw6g-3fgh-f6m6 CVE JSON (`37929f8a…`), fix `9198576fe69f6af66a2ab4f12f579f72208d7b28` (PR #1345, patch `43f15d14…`), raw `message.c` at 1.10.1 (`38ce4cef…`, affected) / 1.10.2 (`ab9045e1…`, fixed) plus `core.h`, `iobuf.{c,h}` pins; all seven SHA-256 pins and URLs in `lab/frontier/zenohpico2shell/PROVENANCE.md`; OSV and GitHub advisory cross-checks | `bash lab/frontier/zenohpico2shell/run.sh <outdir>` — `gen_driver.py` hash-checks all seven pins (exit 3 on drift) and copies the fault statements verbatim under `#line`, then builds vulnerable, fixed, ASan, guard and collaborator drivers; gcc `-O0 -g` | Operator admission replay ~11:54Z from a clean `git archive HEAD lab/frontier/zenohpico2shell` at 34c818e into `/tmp/zp2op-verify`, output `/tmp/zp2op-out`: 10 PASS / 0 FAIL rc 0, two five-run groups both `sha256=080794c304ffa34b467a189c505f02318af437ecc43c3a0658d985f0632b9b3b`; all seven pins matched the stored SHA-256. Rungs 1/2/3 harness ESTABLISHED, rung 4 INSTRUMENTED chosen bytes at chosen offsets; wrapped-length `memset` limb and live transport UNKNOWN. Witness #861 (2026-11-21 ~12:01Z) replayed from a clean `git archive HEAD lab/frontier/zenohpico2shell` (`8ae0e88`) into `/tmp/w65-zp-archive`: 10 PASS / 0 FAIL rc 0, both five-run groups byte-identical, seven pins byte-identical to fresh raw-GitHub/CVEAWG fetches, a tampered core pin failed generation rc 3 `PIN DRIFT`; grade unchanged, wording NITs folded into the brief. |
 | Libwebsockets2Shell | [brief](../reports/frontier-libwebsockets2shell.md) | CVE-2026-19773 / ZDI-26-590 CVE JSON (`ae98ef58…`) and ZDI advisory HTML (`86eed822…`), affected upstream commit `b4b5aed3903eaff09cd76a410f69bbe5dff66f8e`, fix `824151862f37bc72f46d9a3e01d5b9408d313a0b` with pinned patch (`c8dab882…`), raw `hpack.c` at v4.3.10 (`5ce2d424…`, affected) / v5.0.0 (`9232db68…`, fixed); all five SHA-256 pins and URLs in `lab/frontier/libwebsockets2shell/PROVENANCE.md` | `bash lab/frontier/libwebsockets2shell/run.sh <outdir>` — `gen_driver.py` re-verifies all five source pins on every run (exit 2 on drift) and copies the fault statements verbatim under `#line`, then builds vulnerable, fixed, ASan and guard-page drivers; gcc `-O0 -g` | Operator admission replay ~12:22Z from a clean `git archive HEAD lab/frontier/libwebsockets2shell` extraction into `/tmp/lws-op-verify`: 10 PASS / 0 FAIL, `ALL CHECKS PASS rc 0`, both five-run groups `sha256=45cd97c83c032f5ff9217e568225ea95441df31480495b72cb944d3b3f798833`; all five pins and four harness/script digests matched `PROVENANCE.md` by SHA-256. ASan `WRITE of size 1` at `hpack_v4.3.10:277`, chosen `0x5a`/`0xa5` at limits 16/32/48, guard rc 139, fixed/benign ASan-clean. Witness W68 on #868 returned ESTABLISHED AS CLAIMED at the labeled grade (no grade change); citation and NUL-numbering NITs folded into the brief. W1/#874's naive long-`:path` on a real v4.3.10 H2 server was a measured route-specific NEGATIVE — all stores stayed inside the arena — and is preserved; real-path reachability is no longer UNKNOWN. W2 drives one unauthenticated loopback HTTP/2 HEADERS frame with a literal `&`, `;` or `?` delimiter in `:path` using `python3 h2client-delim.py <port> <prefix 30-or-31> <delim> <marker 5a, 37 or a5>` against the ASan v4.3.10 server built per `lab/libwebsockets2shell/README.md` (`max_http_header_data=32`): six cases fault with `WRITE of size 1` at raw `hpack.c:277` from `:1168`, gdb records entry `pos=32 c=0x37 max=32`, prefix 30/31 chooses offset 32/33, a non-ASan build reads back chosen `0x37`/`0x5a` byte-exact at `data[32]`, and the same frame on v5.0.0 gives no report. Witness W72 independently replayed W2 ESTABLISHED AS CLAIMED at the labeled grade; pointer, control-flow diversion and execution stay UNKNOWN. |
@@ -130,7 +130,14 @@ containers whose host ports bind only to loopback.
 | Erlang2Shell | [brief](../reports/frontier-erlang2shell.md), [status](../reports/erlang2shell-status.md) | CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA 2026-07-27, MEDIUM 5.1 CVSS4 AV:L, CWE-195+CWE-787); affected OTP 25.0+ before 27.3.4.15 / 28.5.0.4 / 29.0.4, fix `c5210b42`; pinned `external.c` / `erl_term.h` blobs and the five-line patch SHA-256 in `lab/frontier/erlang2shell/PROVENANCE.md` | `harness/run.sh` re-extracts four verbatim pinned slices, asserts source/patch/slice/driver SHA-256 pins, builds gcc and clang ASan plus plain-canary variants; opens no socket, VM or BEAM build | `T=$(mktemp -d /tmp/erlang-replay.XXXXXX); cp -a lab/frontier/erlang2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `PASS=60 FAIL=0`, `TRACE_SHA256=8517d3e1…c88` |
 | MiniSnmpd2Shell | [brief](../reports/frontier-minisnmpd2shell.md), [status](../reports/minisnmpd2shell-status.md) | CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed `5419bc38` / release `6894e33e`; pinned vulnerable `protocol.c` `b5322437` (`4bd06467…`), fixed `5419bc38` (`eeb05d95…`), patch `fac30b06…`; five blob/driver hashes in `lab/frontier/mini-snmpd/PROVENANCE.md`, URLs there and in `src/SHA256SUMS` | `harness/run.sh` re-extracts verbatim `decode_oid` (190–256) and `decode_str` (175–187) from both pinned files, asserts five source/patch/driver and four slice SHA-256 pins, builds gcc/clang ASan plus plain variants; opens no socket | `cd lab/frontier/mini-snmpd && bash harness/run.sh` → `PASS=43 FAIL=0`, normalized trace SHA-256 `0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`; ASan `READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`, fixed/safe clean. `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte GET with declared OID length 0xffff; `run_fixed_wire.sh` uses 16162 and `run_safe_wire.sh` the 35-byte control. Full staging recipe below |
 | Ettercap2Shell | [brief](../reports/frontier-ettercap.md), [status](../reports/ettercap2shell-status.md), [live dissector](../reports/ettercap2shell-livedissector.md) | CVE-2026-125401 / GHSA-vrjv-f8gv-2h35 (GitHub CNA 2026-11-06, HIGH 8.1 `CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-131+CWE-787; OSV CVSS4 also AV:A), affected `<=0.8.4.1`, patched `0.8.5.1`, fix `1d8badb7`; pinned vulnerable `3548c10c` and PR-head fix `a8c1a50` (byte-identical to merged/released 0.8.5.1), six blobs in `lab/frontier/ettercap2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | `cd lab/frontier/ettercap2shell && bash harness/run.sh` re-extracts the verbatim pinned `gg_get_version()` slices, asserts source/patch/tag/slice/driver SHA-256 pins, builds plain plus gcc/clang ASan variants; opens no socket. Real dissector: build both pinned tags with clang ASan and drive a crafted TCP/8074 frame from a pcap and from `lo` (recipe below) | operator clean `/tmp` replay: rc 0, `PASS=58 FAIL=0`, normalized trace SHA-256 `d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`; gcc/clang ASan `WRITE of size 13`, 0 bytes after a 30-byte region in `gg_get_version`; fixed and small-version controls clean. Real dissector gives the same `WRITE of size 13` at `gg_get_version:673` via `dissector_gg:360` offline and live; extent, safe, wrong-type, server-direction and fixed controls as recorded below. Full admission recipe below |
-| Libheif2Shell | [brief](../reports/frontier-libheif2shell.md), [status](../reports/libheif2shell-status.md) | GHSA-hpg4-g2gc-pq42, vulnerable tag `v1.23.6` (`f81f28ac…421a`), fix `9ec655f76b6fe298092aaeb063f821f53b8eb901`; five direct-call pins in `lab/frontier/libheif2shell/PINS.sha256`, real-file pins and URLs in `lab/frontier/libheif2shell/real/` and `PROVENANCE.md` | `cd lab/frontier/libheif2shell/harness && ./run.sh && ./check.sh` (stubbed direct call); real-file lane: `bash lab/frontier/libheif2shell/real/rebuild_and_run.sh SOURCE BUILD OUT [decode-only|mixed|safe|all]` (CMake/Ninja Debug, x265+JPEG plugins, ASan, driver rebuilt from pinned `reencode_sequence.cc`) | Direct-call clean archive at `366690f`: `PASS=101 FAIL=0`, trace `9468b510…e38b43`; W159/#2626 ESTABLISHED rungs 1-4 at labeled CODE/HARNESS scope. W161 real-build mixed-MJPEG file lane author-only: ASan `WRITE of size 64` past a 32783-byte plane, Release SIGSEGV on mixed input, fixed rc 2; no witness verdict there, 36,879-byte allocation untested, rung 5 UNKNOWN |
+| Libheif2Shell | [brief](../reports/frontier-libheif2shell.md), [status](../reports/libheif2shell-status.md) | GHSA-hpg4-g2gc-pq42, vulnerable tag `v1.23.6` (`f81f28ac…421a`), fix `9ec655f76b6fe298092aaeb063f821f53b8eb901`; five direct-call pins in `lab/frontier/libheif2shell/PINS.sha256`, real-file pins and URLs in `lab/frontier/libheif2shell/real/` and `PROVENANCE.md` | `cd lab/frontier/libheif2shell/harness && ./run.sh && ./check.sh` (stubbed direct call); real-file lane: `bash lab/frontier/libheif2shell/real/rebuild_and_run.sh SOURCE BUILD OUT [decode-only|mixed|safe|all]` (CMake/Ninja Debug, x265+JPEG plugins, ASan, driver rebuilt from pinned `reencode_sequence.cc`); W176 ceiling probes: compile `real/avif_lossless_probe.cc` against the pinned plain Release tree with the exact g++ command in that file's header (needs `ninja -C "$B" -t commands examples/heif-enc` for `$LIBS`), then `/tmp/avif_lossless_probe make/check /tmp/avif-mixed.avif`; re-run the wire lane with `bash real/run_wire.sh /tmp/w176-wire-replay` | Direct-call clean archive at `366690f`: `PASS=101 FAIL=0`, trace `9468b510…e38b43`; W159/#2626 ESTABLISHED rungs 1-4 at labeled CODE/HARNESS scope. W161 real-build mixed-MJPEG file lane author-only: ASan `WRITE of size 64` past a 32783-byte plane, Release SIGSEGV on mixed input, fixed rc 2; no witness verdict there, 36,879-byte allocation untested, rung 5 UNKNOWN. W176 (author-only negatives): AV1 lossless mixed-size frame 1 is refused with `rc=8 sub=5002 ... Image size must match encoder init configuration size` and `heif-enc -A -L -S` refuses too; JPEG constant 8x8 blocks round-trip byte-exact but the SOF-patched OOB row is not independent (`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so arbitrary-byte control stays UNKNOWN; the six wire cases and both checkers PASS, witnesses #2752/#2869/#2897 still queued with no verdict |
+| Munt2Shell | [brief](../reports/frontier-munt2shell.md), [status](../reports/munt2shell-status.md) | pinned `libmt32emu_2_8_3` tarball and third-party bytes in `lab/frontier/munt2shell/PROVENANCE.md` and `real/thirdparty/NOTES.md` | `lab/frontier/munt2shell/harness/run.sh`; `real/` CMake builds | W175/W176 source-negative folds below; witness #2781 real-library rungs 1-4; no third-party host built |
+| Thrift2Shell | [status](../reports/thrift2shell-status.md), [live wire](../reports/thrift2shell-livewire.md) | pinned v0.23.0/v0.24.0 bytes and URLs in `lab/frontier/thrift2shell/PROVENANCE.md` | `lab/frontier/thrift2shell/harness/run.sh`; `live/build.sh` | W152 cap-cleared disposition below; W145/W146 UNVERIFIED, W144 the only witness-backed lane |
+| Libfontenc2Shell | [brief](../reports/frontier-libfontenc2shell.md), [status](../reports/libfontenc2shell-status.md) | four out-plain revs and `PINS.sha256` in `lab/frontier/libfontenc2shell/PROVENANCE.md` | `sh realpath/xlive/run-plain-crash.sh` from `lab/frontier/libfontenc2shell` | W177 witness #2914 clean-archive nine-line matrix below; availability-only ESTABLISHED |
+| Libgphoto2Shell | [brief](../reports/frontier-libgphoto2shell.md), [status](../reports/libgphoto2shell-status.md) | four pins, tarball and patch hashes in `lab/frontier/libgphoto2shell/PINS.sha256` and `REAL-BUILD.md` | from-scratch ASan 2.5.34 and plain real-library builds per `REAL-BUILD.md`; harness `run.sh`/`check.sh` | witness #2892 rung-3-only verdict and #2763 146/0 below; W165 plain RIP probe author-only |
+| Kicad2Shell | [brief](../reports/frontier-kicad2shell.md), [status](../reports/kicad2shell-status.md) | pins in `lab/frontier/kicad2shell/PINS*.sha256` and `kicadreader/PINS-kicadreader.sha256` | `cd lab/frontier/kicad2shell/kicadreader && sh run.sh` | `sh check.sh` 38/38 trace `fffe7341…6260`, clean `git archive 337c164`; operator replay, not witness |
+| Ndpi2Shell | [brief](../reports/frontier-ndpi2shell.md), [status](../reports/ndpi2shell-status.md) | pins and fixed-release ancestry in `lab/frontier/ndpi2shell/PINS.sha256` and `PROVENANCE.md` | `cd lab/frontier/ndpi2shell/realbuild && ./run.sh`; `harness/run.sh`/`check.sh` | W162 real-build VALUE-negative/KEY-positive, fixed 6.0 and tree-local key-reachability negative below |
+| Sdlmixer2Shell | [brief](../reports/frontier-sdlmixer2shell.md), [status](../reports/sdlmixer2shell-status.md) | four pins in `lab/frontier/sdlmixer2shell/PINS.sha256`; SDL3 tarball SHA in `PROVENANCE.md` | `cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh` | 96/0 trace `934e8337…60c0`; witness #2942 direct-call rungs 1-4 only; W179 author-only |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -6103,7 +6110,12 @@ regenerated by the named scripts.
   sweep; ASan-silent rows 512/16384 are not passes: a gdb breakpoint at `:495`
   and `__asan_describe_address(*enc + index)` report `wild memory access
   suspected`, no live object or pointer (`gdb-asan-destination.txt`). The
-  row-1024 crash is not witness-replayed.
+  row-1024 crash was unwitnessed when W172 recorded it; witness #2914
+  (W177, 2026-11-23) later replayed it from a clean `git archive HEAD` at
+  `3f44109` and returned ESTABLISHED at the labeled availability-only scope
+  (nine matrix lines, faulting store `mov %dx,(%rax)` at `encparse.c:495`). See
+  the 2026-11-23 W177 section below; the failed `LD_PRELOAD` setup there is a
+  preserved negative, not a result.
 - **Libheif W172 loopback wire lane** (`c34f357`, `lab/frontier/libheif2shell/real/run_wire.sh`).
   Requires the three pinned W161 build trees under `/tmp` (no new libheif
   build). `bash real/run_wire.sh /tmp/libheif-wire-replay` recompiles the two
@@ -6126,7 +6138,9 @@ pinned `src/lib/ndpi_serializer.c` bytes at `94e82c1^` and `94e82c1` are sliced
 under `#line` by `harness/run.sh` and checked against four digests in
 `lab/frontier/ndpi2shell/PINS.sha256`. The once-per-source-byte guard
 `j < dst_max_len` permits multi-byte stores and an unchecked closing quote and
-NUL; no nDPI build, serializer struct, packet or wire is present.
+NUL; no nDPI build, serializer struct, packet or wire is present **at this
+W161 staging point**. W162 later added a full pinned ASan library build and
+real-caller probes; see the 2026-11-23 W162 section below.
 
 ```
 T=$(mktemp -d /tmp/operator-ndpi-replay.XXXXXX)
@@ -6153,7 +6167,9 @@ Verbatim pinned vulnerable `release-3.2.4` and fixed `df966f6`
 `src/decoder_wav.c` lines 750-762 are sliced under `#line` by
 `harness/run.sh` and verified against four digests in `PINS.sha256`. The
 doubled 4-byte stride writes past the caller's 1024-byte stack buffer; no SDL
-build, real WAV, decoder dispatch or wire is present.
+build, real WAV, decoder dispatch or wire is present **at this W173 staging
+point**. W179 later added a real-SDL-caller lane; see the 2026-11-23 W179
+section below.
 
 ```
 T=$(mktemp -d /tmp/operator-sdlmixer-replay.XXXXXX)
@@ -6169,6 +6185,201 @@ route, both wake resolver entries and three full-flag-sync units at pin
 `0d686bb…` (`written 3, removed 0`), then daemon-reload, path enabled/active,
 a pinned full-flag doctor rc 0 GREEN and `check-omp-only.py` GREEN 119. The
 registered two-pane window 123 was adopted after both panes were verified live;
-no duplicate was created. The grade is unchanged direct-call rungs 1-4,
-unwitnessed, rung 5 UNKNOWN. Brief: `reports/frontier-sdlmixer2shell.md`;
+no duplicate was created. The grade statement in this admission record is
+historical: witness #2942 later ESTABLISHED the direct-call lab scope at rungs
+1-4 only, explicitly not rung 5; W179's real-caller lane is author-only. See
+the 2026-11-23 W179 section below. Brief:
+`reports/frontier-sdlmixer2shell.md`;
 status: `reports/sdlmixer2shell-status.md`.
+
+## 2026-11-23 W175–W179 — folds after a8b9c91
+
+These sections cover commits `a37acbf`..`a8b9c91`. Witness-ESTABLISHED verdicts
+are named with their tape numbers; author-only probes and operator clean-archive
+replays are explicitly not witness acceptance. No grade changed.
+
+### Vrpn W21 (`d79c99a`, `e41b2da`; author-only)
+
+From the repo root with the pinned plain `-O0` server built by `run.sh`, map the
+outer-frame landing and canary frame:
+
+```
+bash lab/frontier/vrpn2shell/probe-w21-large.sh /tmp/w21-large 13921 512
+bash lab/frontier/vrpn2shell/probe-w21-smash.sh /tmp/w21-smash 13922 512
+python3 lab/frontier/vrpn2shell/wire_inject.py --index 16384 --port 13923
+```
+
+Expect index 512 DEAD rc 134 `*** stack smashing detected ***`, a PRE→POST
+outer-frame saved rbp change `0x00007fffffffdbc0` → `0x00007fffffffdb00` at
+`vrpn_Connection.C:4554` and `__stack_chk_fail` from `getOneTCPMessage:4246`;
+fine 512-517 DEAD / 518-519 ALIVE / 520 DEAD, TYPE 512 rc 134; fixed 512, short
+4 and `-O2` 256/384/512 ALIVE. Indices 16384/32768/65536 exit 139 with the
+cause **UNKNOWN** — `e41b2da` corrected the W21 explanation, although the
+report's Limits section still carries an older "outside the mapped stack"
+phrase. No chosen byte, command or rung 5; author-only.
+
+### Libheif W176 (`d12d823`; author-only negatives)
+
+Build `lab/frontier/libheif2shell/real/avif_lossless_probe.cc` with the exact
+command in its header against the pinned plain Release tree
+(`SRC=lab/frontier/libheif2shell/src/libheif-v1.23.6`,
+`B=/tmp/libheif2shell-vuln-plain`), then `make` and `check`. Frame 1
+(512x64 then 64x65, `lossless=1`) is refused with
+`rc=8 sub=5002 ... Image size must match encoder init configuration size`;
+`heif-enc -A -L -S` refuses too. JPEG constant 8x8 blocks round-trip
+byte-exact but the SOF-patched OOB row is not independent
+(`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so arbitrary-byte
+control stays UNKNOWN. `bash real/run_wire.sh /tmp/w176-wire-replay` replays
+six cases with both checkers PASS. Witnesses #2752/#2869/#2897 remain queued.
+
+### Libfontenc W177 (`c83d597`; witness #2914 ESTABLISHED)
+
+From `lab/frontier/libfontenc2shell`, `sh realpath/xlive/run-plain-crash.sh`
+regenerates `realpath/evidence/plain-crash.txt`. The witness worked from a
+clean `git archive HEAD` at `3f44109` in `/tmp/w174-lfe`, rebuilt the four
+out-plain libraries (built `encparse.c` hashes match `PINS.sha256` vuln
+`79e2381b`, fixed `91c81398`) and used its own `xfon-load`: all nine matrix
+lines matched (vuln 256/258/512 rc 0 + alive, vuln 1024 a/b/c rc 1 with
+`xdpyinfo` rc 1 and `server_alive=NO`, fixed `5920c6e` and 1.1.10 rc 0 + alive,
+1.1.9 rc 1 + abort), the data-line diff was empty, and the faulting instruction
+is the chosen store `mov %dx,(%rax)` at `encparse.c:495` (signal 11). Its first
+setup installed libs under `realpath/`, so `LD_PRELOAD` silently missed and
+SYSTEM libfontenc crashed every variant including fixed; that setup was
+diagnosed from the backtrace DSO and rebuilt at the correct BASE with
+PRELOAD_OK — preserved as a negative. Verdict: ESTABLISHED at the labeled
+availability-only scope; no pointer, command, wire or rung 5; `SIZE 256 258`
+plain impact is still NOT demonstrated.
+
+### Kicad W178 and clean-archive replay (`337c164`, `3d90217`; author/operator)
+
+```
+cd lab/frontier/kicad2shell/kicadreader
+sh run.sh && sh check.sh
+```
+
+The wrapper compiles KiCad 10.0.6's verbatim `compoundfilereader.h` /
+`utf.h` (pins `223e8b03…` / `d72da151…`) and calls real `EnumFiles`, `IsStream`
+and `ReadFile` on the four `realcfb` `.SchLib` fixtures; expect
+`kicad-cfb: ... stream=107`, `real-reader: bytes=107 props=3 parse_error=0`,
+`real-key: SIZEZ=84215045`, ASan `WRITE of size 4` four bytes before the 4-byte
+region at `sch_io_altium.cpp.vuln:5919` (resize at `:5915`), plain
+`double free or corruption (out)`, `attackneg` SEGV and `attackfar` 8-byte
+before-region write, with all fixed runs clean. `check.sh` runs 32 invocations
+and 38 assertions; expect `PASS=38 FAIL=0` and trace
+`fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260`. Two
+in-tree runs and a clean `git archive` at `337c164` (333 files) matched; the
+fixtures are synthetic, there is no wxWidgets/KiCad build or eeschema and
+chosen bytes land in the ASan redzone (plain: malloc metadata) — operator
+replay, not a witness verdict.
+
+### Thrift W152 (`25133a3`; author-only disposition)
+
+No new experiment. The witness cap cleared with other-lane verdicts at 19:20Z
+and a wall stamp of W175 19:23Z; the 19:27Z tape check found no DM to the role
+since #2533 for W144 rungs 1-4 (earlier W149-W151 name #2506 for that verdict),
+and the #2759 closure request for #2547/#2598 unanswered. Wall line 171 says
+`No replay owed on the W146/W147/W148 lanes` and names neither in pending:
+W146 replay declined, W145 unanswered/not queued. Both remain UNVERIFIED —
+not refuted, not ESTABLISHED, not a counterexample; W151's cap explanation is
+stale and the disposition/grade are unchanged.
+
+### Munt W175/W176 (`a37acbf`, `144f371`; author-only source negatives)
+
+No host was built or run. W175 enumerates the pinned `libmt32emu_2_8_3`
+bulk-SysEx consumers: all large-SysEx paths call `playSysex()`/`playSysexNow()`
+and bypass `parseStream()`; the only Linux `parseStream()` caller is the ALSA
+sequencer at `alsadrv.cpp:1182` (5572-byte cap), and the public C API
+`mt32emu_parse_stream` (`c_interface.cpp:760`) is an unclamped forward. W176
+adds fetched third-party bytes in `lab/frontier/munt2shell/real/thirdparty/`
+(DOSBox Staging `:781-786` and 86Box `:308-311` call `playSysex`;
+DOSBox-X's vendored copy is already fixed at `:136`/`:253-254`; hashes
+`e061f43f…`/`a9b4c625…`/`fe0fa4ca…`), with the hackmd PoC still HTTP 404.
+This narrows but does not prove the third-party-host question; real-library
+rungs 1-4 remain witness #2781, rung 5 UNKNOWN.
+
+### Libgphoto2 W165 (`82c12a1`, `4c5dd7a`; witness #2892 rung 3 only)
+
+Witness tape #2892 (2026-11-23) replayed the real 2.5.34 ASan build from a
+clean `/tmp/w173-lgp` archive with pins and tarball/patch hashes matched:
+three reports at count 1022 with `halt_on_error=0` (rc 0) — stack WRITE 16384
+at real `:152`, stack READ 16848 and heap WRITE 16848 at real `:154`, 0 bytes
+past the 16448-byte `camera_init` region; 100/1021 controls clean, fix
+`4fdaf4b1…` suppresses, reversing restores, 65535 faults then SEGV. Verdict:
+ESTABLISHED at **rung 3 at the real heap destination only**, NOT rung 4 impact;
+rung 5 UNKNOWN. Harness #2763 also closed at 146/0 trace `e364f756…c6c98`.
+The separate plain build aborts rc 134 with `*** stack smashing detected ***`
+and gdb shows chosen `0x5a5a5a5a5a5a5a5a` in both canary and saved RIP of
+`jl2005c_init` — chosen bytes at a control-flow slot, but the protector aborts
+before `ret`; author-only, no witness retry, synthetic vusb.
+
+### Ndpi W162 (`37fd092`, `52ea294`, `eaf6c25`, `44be53e`; author-only)
+
+```
+cd lab/frontier/ndpi2shell/realbuild && ./run.sh
+```
+
+`run.sh` provisions the pinned vulnerable tree from `94e82c1^` if absent,
+verifies `ndpi_serializer.c` sha256 `4840fb41…9ad5`, links `driver.c` against
+the real ASan `libndpi.a` and runs the direct/real/weakone modes; expect
+ASan `WRITE of size 1` at `:107` from the three weak KEY callers
+(`binary_boolean :2181`, `start_of_list_binary :2245`,
+`start_of_block_binary :2328`) at klen≥128, with klen 16/64 clean and 145
+VALUE cases producing zero ASan reports (`{"key":"\/"}` proves the escape ran).
+The fixed tree (`0aa83a83…92fd`) gives rc 0 and zero ASan in
+`fixed-{direct,real,weakkey}.out`; callers still ignore `-1` so `size_used`
+can decrement — a separate correctness issue, not memory corruption observed
+here. Fixed release is now KNOWN **6.0** (`git tag --contains` → 6.0 and
+6.1-qubitowl, `git describe` → `6.0~14`; tag `1a529339…a3af`, 2026-08-28).
+The loopback pcap reader control (`reader-longhost.*`) is rc 0 with zero ASan
+and 560 `\/` escapes and never reaches the weak KEY callers; a full-tree grep
+finds TLV-clone references only in the API declaration, the serializer
+definitions and fuzz/unit tests, so a >128-byte key is not wire-reachable in
+this tree. R5 remains UNKNOWN and unreachable via this primitive.
+
+### Sdlmixer W179 (`307a2b6`, `a8b9c91`; witness #2942 direct-call only)
+
+```
+cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh
+```
+
+`run.sh` verifies `PINS.sha256` and the inline SDL3 tarball hash
+`0fc1d23e225e2a098976571bf5d62b6d81e0ae84ff3d82a35a3d19ab04d07e5c`
+(the `a8b9c91` change removed the dependency on the local `deps/SDL3.sha256`),
+then builds 12 binaries from verbatim pinned slices using real SDL IO and
+`SDL_CreateAudioStream`/`SDL_PutAudioStreamData`. Expect ASan
+`stack-buffer-overflow WRITE of size 4` at pinned `:759`, the `i=1` gdb probe
+showing `buffer+1020..1027 = ff 7f 00 00 5a 5a 5a 5a`, fixed/safe/badfmt/pcm8
+clean, clang++ plain and all nossp edge/ulaw rc 139 while g++ plain aborts
+rc 134, and `PASS=96 FAIL=0` with trace
+`934e83379c7b6d771269a96035a54480a9c5ab9dcaf5a169db6a6916ce2160c0`.
+Witness #2942 is ESTABLISHED at the labeled direct-call lab scope, rungs 1-4
+only, explicitly not rung 5; W179 itself is author-only and awaits replay.
+No SDL_mixer build, full WAV dispatcher, decoder consumer, wire, pointer or
+command follows; file-path reachability and RCE stay UNKNOWN.
+
+## 2026-11-23 20:0xZ — cjose2shell W180 staged, clean archive replay
+
+CVE-2026-53938 / GHSA-75r7-f5cv-g3wj (HIGH 8.2, CWE-122/787), cjose
+`<=0.6.2.4` fixed `>=0.6.2.5` by `8c51d245`. Pinned v0.6.2.4 and a fixed
+tree differing only by the security hunk; real library build, real
+`cjose_jwe_import()` / `cjose_jwe_decrypt()`, real compact JWE, real OpenSSL
+AES key wrap/unwrap.
+
+```
+T=$(mktemp -d /tmp/operator-cjose-replay.XXXXXX)
+git archive 841b716 reports/frontier-cjose2shell.md lab/frontier/cjose2shell | tar -x -C "$T"
+cd "$T/lab/frontier/cjose2shell" && sha256sum -c PINS.sha256
+cd harness && ./bootstrap.sh > bootstrap.log 2>&1 && ./check.sh
+```
+
+`bootstrap.sh` rebuilds jansson and six cjose library variants offline from
+the committed tarballs; no network. Observed from archive
+`/tmp/operator-cjose-replay.iUe7Iq`: 73 files, 7/7 pins, 8 binaries rebuilt,
+`PASS=223 FAIL=0`, trace
+`455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7` exact
+against the three in-tree runs. gcc+clang ASan: heap-buffer-overflow WRITE
+of size 40/1016 into the 32-byte CEK; gdb chosen-byte probe and negatives in
+`harness/evidence/gdb-chosen.out`. Window 124 adopted live, registry
+125/125; grade direct-call rungs 1-4 only, unwitnessed, rung 5 UNKNOWN.
+Brief: `reports/frontier-cjose2shell.md`; recipe and hashes:
+`lab/frontier/cjose2shell/PROVENANCE.md`, `REPLAY.md`.
