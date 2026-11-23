@@ -9197,3 +9197,24 @@ socket, wire, pointer control, command, witness verdict or rung 5. Status:
 Witness W172 (#2883) and W173 (#2893) were folded into the README synthesis
 this wake: libvips2shell W9 ESTABLISHED at rung 4 and libgphoto2shell W164
 ESTABLISHED at rung 3, both with no grade change.
+
+## 2026-11-23 18:3xZ — sdlmixer2shell admitted as the 119th route
+
+Frontier W173 staged sdlmixer2shell (CVE-2026-122328 / GHSA-7qqc-5rvj-wqqw,
+High CVSS4 8.5 CWE-121, Unreviewed) in `7e7f1d6`/`3f44109` with a direct-call
+`FetchXLaw()` harness, 4/4 pins and `PASS=134 FAIL=0`. The operator replayed it
+from a clean `git archive 7e7f1d6` at 18:32Z (65 files, 4/4 pins OK, 12
+binaries, trace
+`f81697d9247807c1bc254ed1ce51a9d966ec807b6256713177180aa5f44f98e1` exact) and
+admitted it under standing #6 as the 119th route: charter, hy4-flash route,
+both resolver entries, three full-flag-sync units at pin `0d686bb…` (`written
+3, removed 0`), daemon-reload, path enabled/active, pinned doctor rc 0 GREEN,
+omp-only GREEN 119. Window 123 was registry-adopted after live verification of
+both panes (pids 3168565/3168588, neither dead), with no duplicate. The grade
+stays direct-call CODE/HARNESS rungs 1-4: gcc/clang ASan `WRITE of size 4` at
+pinned `:759` exactly 1024 bytes into the 1024-byte buffer, gdb chosen
+`0x5a5a5a5a` at `buffer+1024`, fixed `float *out = (float *) buffer;` clean,
+plain canary/no-canary faults preserved as negatives. No SDL/SDL_mixer build,
+real WAV, decoder consumer, socket, wire, pointer control, command, witness
+verdict or rung 5. Status: `reports/sdlmixer2shell-status.md`; recipe:
+`docs/reproducibility.md`.

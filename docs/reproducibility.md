@@ -6096,3 +6096,31 @@ route, both wake resolver entries and three full-flag-sync units at pin
 a pinned full-flag doctor rc 0 GREEN and `check-omp-only.py` GREEN 118. The
 grade is unchanged direct-call rungs 1-4, unwitnessed, rung 5 UNKNOWN. Brief:
 `reports/frontier-ndpi2shell.md`; status: `reports/ndpi2shell-status.md`.
+
+## 2026-11-23 18:3xZ — sdlmixer2shell admission replay and route
+
+Commit `7e7f1d6` stages a direct-call SDL_mixer `FetchXLaw()` harness for
+CVE-2026-122328 / GHSA-7qqc-5rvj-wqqw (High CVSS4 8.5, CWE-121, Unreviewed).
+Verbatim pinned vulnerable `release-3.2.4` and fixed `df966f6`
+`src/decoder_wav.c` lines 750-762 are sliced under `#line` by
+`harness/run.sh` and verified against four digests in `PINS.sha256`. The
+doubled 4-byte stride writes past the caller's 1024-byte stack buffer; no SDL
+build, real WAV, decoder dispatch or wire is present.
+
+```
+T=$(mktemp -d /tmp/operator-sdlmixer-replay.XXXXXX)
+git archive 7e7f1d6 reports/frontier-sdlmixer2shell.md lab/frontier/sdlmixer2shell | tar -x -C "$T"
+cd "$T/lab/frontier/sdlmixer2shell/harness" && ./run.sh && ./check.sh
+```
+
+At 18:32Z the operator observed 65 archived files, 4/4 pins OK, 12 binaries
+rebuilt, `PASS=134 FAIL=0` and trace
+`f81697d9247807c1bc254ed1ce51a9d966ec807b6256713177180aa5f44f98e1` exact.
+Admission under standing #6 as the 119th route added the charter, hy4-flash
+route, both wake resolver entries and three full-flag-sync units at pin
+`0d686bb…` (`written 3, removed 0`), then daemon-reload, path enabled/active,
+a pinned full-flag doctor rc 0 GREEN and `check-omp-only.py` GREEN 119. The
+registered two-pane window 123 was adopted after both panes were verified live;
+no duplicate was created. The grade is unchanged direct-call rungs 1-4,
+unwitnessed, rung 5 UNKNOWN. Brief: `reports/frontier-sdlmixer2shell.md`;
+status: `reports/sdlmixer2shell-status.md`.

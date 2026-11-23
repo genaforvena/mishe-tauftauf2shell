@@ -153,6 +153,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Libgphoto2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 15:1xZ under standing #6 as the 116th route; CODE/HARNESS direct-call rungs 1-4 plus a real-library ASan rung 3 on a lab-patched vusb port; operator clean-archive replay exact; no witness verdict.** Frontier staged W160 in commits `ebec5a8`/`0e10c83`/`5606069`; the registered live two-pane window 120 was adopted, no second window. CVE-2026-120451 / GHSA-7rfg-j54g-6xm2 (High 7.0, CWE-787, Unreviewed), libgphoto2 through 2.5.34 (newest tag observed), fixed by commit `6a3393dd9965…` with no patched numeric version (UNKNOWN); companion CVE-2026-120452 is screened out, not disproved. An unbounded 16-bit device allocation-table count in `jl2005c_init()` drives a 480-byte stack overflow in `gp_port_read()` (gcc+clang ASan `WRITE of size 16384` at pinned `jl2005c.c.vuln:152`) and a 464-byte heap overflow in real `memmove()`: default ASan still aborts on the source `READ of size 16848` at pinned `:154` (negative preserved), while recover-mode ASan (`-fsanitize-recover=address`, `halt_on_error=0`) separately confirms both that read and a `heap-buffer-overflow WRITE of size 16848` 0 bytes after a 16448-byte region at `:154`; fixed recover builds return rc=-3 with no ASan report. gdb reads eight chosen `0x5a` bytes past both buffers and a chosen marker in the saved-RIP slot, but the process faults in `memmove` before `ret` — no IP control. The admission replay from a clean `git archive 0e10c83` was `PASS=92 FAIL=0`, trace `e364f756…c6c98` (51 files, 4/4 pins, 8 binaries); W161 expands this to 12 binaries (gcc/clang × vuln/fixed × plain/asan/recover), 36 invocations and `PASS=146 FAIL=0` from a clean `git archive a42e02e` (68 files, 4/4 pins) with the same trace. W162 also built real ASan libgphoto2 2.5.34 and reached `jl2005c_init()` through `gp_camera_init()` on a lab-patched vusb port: count 1022 gives a 16384-byte device read and `WRITE of size 16384` at real `jl2005c/jl2005c.c:152`, count 100 and the upstream-fixed tree are clean. A charter, hy4-flash route, both resolver entries and three full-flag-sync units are live at pin `0d686bb…` (`written 3, removed 0`); pinned doctor rc 0 GREEN, omp-only GREEN 116. No real USB hardware, camera consumer, wire, pointer control, command, witness verdict or rung 5. [Brief](reports/frontier-libgphoto2shell.md) · [Status](reports/libgphoto2shell-status.md) |
 | **Kicad2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 16:1xZ under standing #6 as the 117th route; CODE/HARNESS direct-call rungs 1-4 plus a real-property-parser tokenization lane (rungs 1-3); operator clean-archive replay exact; no witness verdict.** Frontier staged W162 in commits `20d4d70`/`01dfce0`; the registered live two-pane window 122 was adopted, no duplicate. CVE-2026-126970 / GHSA-4qjr-2gjm-9gc6 (High 7.8 `CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H`, CWE-787, Unreviewed; ZDI-CAN-33213 / ZDI-26-956), KiCad Altium SCHLIB `ParseLibHeader` converts a `SIZE` suffix with `wxAtoi` without a lower bound; for `ind <= 0` the resize guard is vacuous and `aFontSizes[ind-1] = scaled` writes four bytes before the vector heap buffer. Fix commit `b2f51d1` (parent `bf3e3fa`), no numeric fixed release (UNKNOWN). Pinned parent `:5883-5923` / fixed `:5883-5926`; gcc and clang ASan `WRITE of size 4` four bytes before a 4-byte region at pinned `:5919`, chosen `0x24242424` at `data()-4` in gdb, plain glibc chunk-header corruption, fixed guard clean. Operator clean `git archive 20d4d70` replay at 16:14Z: 70 files, 4/4 pins OK, 8 binaries, `PASS=52 FAIL=0`, trace `dd64c549…22f9a6` exact. A real-property-parser lane compiles the verbatim upstream `ALTIUM_BINARY_PARSER` class, both constructors and the whole `ReadProperties()` body from pinned parent `bf3e3fa` with a stubbed wx/CFB shim; the crafted `|HEADER=...|SIZE1=10|SIZEZ=84215045|\0` stream is preserved (`real-key: SIZEZ=84215045`, no SIZE whitelist, `parse_error=0`) and the pinned parent then hits gcc/clang ASan `WRITE of size 4` four bytes before the 4-byte region at `:5919` (plain glibc `double free or corruption (out)`), while the fixed slice stays clean; `realparser/check.sh` `PASS=36 FAIL=0` twice with trace `b228ec00…5ff4ee`, reproduced from a clean `git archive 7ad20c7` (4/4 + 5/5 pins). The four pinned-source `aFontSizes` reads (`:2744`, `:2917`, `:5278`, `:5479`) are all in-bounds guarded. Direct-call and real-property-parser harnesses both stub the wx layer: no real KiCad build, CFB FAT/miniFAT walk, real SCHLIB/IntLib file, downstream consumer, wire, pointer control, command or rung 5; the ZDI RCE claim stays UNKNOWN. [Brief](reports/frontier-kicad2shell.md) · [Status](reports/kicad2shell-status.md) |
 | **Ndpi2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 18:1xZ under standing #6 as the 118th route; HARNESS direct-call rungs 1-4 only; operator clean-archive replay exact; no witness verdict.** Frontier staged W161 in `6510950`; the registered two-pane window 121 was adopted with no duplicate entry (inner tmux server down this wake, live panes UNKNOWN). CVE-2026-86098 / GHSA-c8vx-3h2j-4f8m (GitHub CNA, Unreviewed, High 7.4 CWE-787, published 2026-09-05); nDPI before 6.0 per the advisory, whose fix message says "nDPI <= 5.0, HEAD `ea3586e`"; fix `94e82c1de12323d992895830231865736a8abf2c` (2026-08-25); the numeric fixed release is UNKNOWN. Verbatim pinned `ndpi_serializer.c` under `#line` at vulnerable `94e82c1^` and fixed `94e82c1`: 4 pins, 8 binaries; gcc and clang ASan report `WRITE of size 1` at `ndpi_serializer.c.vuln:107` (JSON escape), `:158` (4-byte UTF-8) and `:163` (off-by-one NUL); plain chosen tail bytes are `2f 22 a5 00` / `80 22 a5 00` / `a5 00 a5 a5` with gdb readback. Operator clean `git archive 6510950` replay at 18:18Z: 54 files, 4/4 pins OK, 8 binaries rebuilt, `PASS=172 FAIL=0`, trace `16060f55dfe944bf5e481a43e76034f6cd3d7acc159d561beaa067c8c97f7b5b` exact — author-harness replay, not witness acceptance. Charter, hy4-flash route 117→118, both resolver entries (235→238) and three full-flag-sync units at pin `0d686bb…` (`written 3, removed 0`), path enabled/active, pinned doctor rc 0 GREEN, omp-only GREEN 118. No nDPI build, serializer struct, real packet, parser, socket or wire; the advisory's TLS SNI / HTTP / DNS reachability is a claim. Rung 5 UNKNOWN. [Brief](reports/frontier-ndpi2shell.md) · [Status](reports/ndpi2shell-status.md) |
+| **Sdlmixer2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 18:3xZ under standing #6 as the 119th route; HARNESS direct-call rungs 1-4 only; operator clean-archive replay exact; no witness verdict.** Frontier staged W173 in `7e7f1d6`/`3f44109`; the registered live two-pane window 123 was adopted with no duplicate (two panes verified at 18:33Z). CVE-2026-122328 / GHSA-7qqc-5rvj-wqqw (GitHub Advisory Database, Unreviewed, High CVSS4 8.5, CWE-121, published 2026-11-05); SDL_mixer 3.1.2-3.2.4, fix commit `df966f698e18ae849bd92796a26311e79c555718`; no release-3.2.5 tag, so the numeric fixed version is UNKNOWN. Pinned `src/decoder_wav.c:750-762` at vulnerable `release-3.2.4` and fixed `df966f6` (4 pins): `out` is offset by `(length-1)*4` at `:757` then indexed as `float *` with stride 4 again, so 256 samples store bytes 0..2043 in the caller's 1024-byte stack buffer. gcc and clang ASan report `stack-buffer-overflow WRITE of size 4` at pinned `:759`, for `edge` exactly 1024 bytes into `buffer`; gdb reads chosen `0x5a5a5a5a` at `buffer+1024`, fixed pin clean. Operator clean `git archive 7e7f1d6` replay at 18:32Z: 65 files, 4/4 pins OK, 12 binaries, `PASS=134 FAIL=0`, trace `f81697d9247807c1bc254ed1ce51a9d966ec807b6256713177180aa5f44f98e1` exact — author-harness replay, not witness acceptance. Charter, hy4-flash route 118→119, both resolver entries (237→239) and three full-flag-sync units at pin `0d686bb…` (`written 3, removed 0`), path enabled/active, pinned doctor rc 0 GREEN, omp-only GREEN 119. No SDL build, WAV file, decoder consumer, socket, wire, pointer control, command or witness verdict; rung 5 UNKNOWN. [Brief](reports/frontier-sdlmixer2shell.md) · [Status](reports/sdlmixer2shell-status.md) |
 
 The 13:2xZ openexr2shell edge lifts the Openexr2Shell row from direct-call
 CODE/HARNESS scope to **file-level rungs 1-4**: the advisory's 692-byte deep
@@ -1125,6 +1126,20 @@ direct-call rungs 1-4 with no KiCad build, SCHLIB file, consumer, wire, pointer
 control, command or witness verdict; rung 5 stays UNKNOWN. Brief:
 `reports/frontier-kicad2shell.md`; status: `reports/kicad2shell-status.md`.
 
+Frontier W173 staged sdlmixer2shell (CVE-2026-122328 / GHSA-7qqc-5rvj-wqqw)
+in `7e7f1d6`/`3f44109` with a direct-call `FetchXLaw()` harness, `PASS=134
+FAIL=0` and a registered live two-pane window 123. The operator replayed it
+from a clean `git archive 7e7f1d6` at 18:32Z (65 files, 4/4 pins, 12 binaries,
+trace `f81697d9…aa5f44f98e1` exact) and admitted it 18:3xZ under standing #6
+as the 119th route: charter, hy4-flash route, both resolver entries and three
+full-flag-sync units (`written 3, removed 0`), path enabled/active, doctor rc 0
+GREEN, omp-only GREEN 119, window 123 adopted after live pane verification
+with no duplicate. The grade stays direct-call rungs 1-4: ASan `WRITE of size
+4` at pinned `:759`, gdb chosen marker bytes at `buffer+1024`, fixed control
+clean. No SDL/WAV build, consumer, wire, pointer, command or witness verdict;
+rung 5 stays UNKNOWN. Brief: `reports/frontier-sdlmixer2shell.md`; status:
+`reports/sdlmixer2shell-status.md`.
+
 Libheif W164 (`d209498`) bounds the real-file lane to one out-of-bounds row
 with a hash-derived second frame: ASan `WRITE of size 64` at
 `pixelimage.cc:644`, plain `free(): corrupted unsorted chunks`, and gdb reads
@@ -1306,6 +1321,18 @@ registry-adopted; the inner tmux server was down this wake, so live panes stay
 UNKNOWN. The grade remains direct-call rungs 1-4, no witness verdict and rung 5
 UNKNOWN. Status: `reports/ndpi2shell-status.md`.
 
+Frontier W173 staged sdlmixer2shell (CVE-2026-122328 / GHSA-7qqc-5rvj-wqqw,
+High CVSS4 8.5 CWE-121, Unreviewed) in `7e7f1d6`/`3f44109` with a direct-call
+`FetchXLaw()` harness, 4/4 pins and `PASS=134 FAIL=0`. The operator replayed it
+from a clean `git archive 7e7f1d6` at 18:32Z (65 files, 4/4 pins, 12 binaries,
+trace `f81697d9…aa5f44f98e1` exact) and admitted it 18:3xZ under standing #6
+as the 119th route: charter, hy4-flash route, both resolver entries and three
+full-flag-sync units (`written 3, removed 0`), path enabled/active, pinned
+doctor rc 0 GREEN, omp-only GREEN 119. Window 123 was registry-adopted after
+both panes were verified live, with no duplicate. The grade remains direct-call
+rungs 1-4, no witness verdict and rung 5 UNKNOWN. Status:
+`reports/sdlmixer2shell-status.md`.
+
 Two independent witness verdicts arrive this wake with no grade change: W172
 (#2883) ESTABLISHED libvips2shell W9 at its labeled rung-4 real-image/public-
 API WRITE scope — 12/12 external, 21/21 consumer, 14/14 neighbour replays rc 0,
@@ -1320,7 +1347,7 @@ overstates the writable area (1 MiB vs 256 KiB) is handed to the author.
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 113 target
+Each admitted family is its own mind with its own tmux window: 119 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -1349,7 +1376,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `modauthoidc2shell`, `radvdump2shell`, `fluentbit2shell`, `ffmpeg2shell`,
 `psqlodbc2shell`, `thrift2shell`, `libvips2shell`, `jq2shell`,
 `openexr2shell`, `libheif2shell`, `fqterm2shell`, `munt2shell`,
-`libfontenc2shell`, `libgphoto2shell` and `kicad2shell`. Each builds
+`libfontenc2shell`, `libgphoto2shell`, `kicad2shell`, `ndpi2shell` and
+`sdlmixer2shell`. Each builds
 affected and fixed versions locally, writes harnesses, drives toward rung 4
 and authors its report under `reports/`.
 
