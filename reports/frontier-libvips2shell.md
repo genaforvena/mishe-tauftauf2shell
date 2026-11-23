@@ -188,3 +188,31 @@ through a real operation. The negative-offset **write** still rests on the
 W2 direct call. The geometry is set programmatically rather than decoded
 from the TIFF; no pointer or control-flow datum, wire, command, marker or
 witness verdict. Rung 5 remains UNKNOWN; the vendor's RCE disclaimer stands.
+
+## 9. W4 addendum — negative-offset WRITE through a public API on a real image
+
+The W2 write used a direct call on a synthetic setbuf image; W3 added only a
+read on real bytes. W4 closes that gap. `vips_region_paint()` is an exported
+public API (`region.c:909`): for an integer image it `memset`s each line at
+`VIPS_REGION_ADDR(reg,x,y)` and advances `q` by `VIPS_REGION_LSKIP(reg)`
+(`region.c:922-923`), the same truncated-`bpl` path as the pinned
+`vips_region_paint_pel()` slice.
+
+- `real/consumer.c` `paint` mode reuses the W3 real memory image and calls
+  `vips_region_prepare()` for `r={0,0,4,2}`, then
+  `vips_region_paint(reg, &r, 0x5a)` — chosen ink through a public API.
+- Vulnerable tree: `PAINT_PREPARE=0`, `bpl=-7296`,
+  `lskip=18446744073709544320`, `VIPS_REGION_ADDR(reg,0,1)=data-7296`; ASan
+  reports `heap-buffer-overflow`, `WRITE of size 160000`, through `memset`
+  into `vips_region_paint ... region.c:922`. The reported address is the
+  first poisoned byte, 6144 bytes before the live 8,589,920,000-byte
+  allocation; the memset itself starts at `data-7296` in an addressable
+  neighbour before that redzone.
+- Fixed tree rejects the same geometry with `image: dimension overflow`
+  before any paint call; no ASan error (`consumer-fixed-paint.out`).
+- `real/run-consumer.sh` now checks 23 assertions (12/12 at W3 → 23/23).
+
+Grade: rung 4 for a chosen-byte negative-offset **write** on living bytes
+through an ordinary public libvips API, with vulnerable/fixed/safe-input
+controls. No pointer target, saved return address, control-flow datum, wire,
+request, command, marker side effect or witness verdict. Rung 5 UNKNOWN.

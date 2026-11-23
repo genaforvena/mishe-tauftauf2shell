@@ -224,3 +224,39 @@ negative-offset WRITE still rests on the W2 direct call. No pointer, saved
 return address, control-flow datum, wire, command, marker or witness verdict
 was observed. Rung 4 on living bytes for the negative-offset address; rung 5
 remains UNKNOWN.
+
+## W4 — public-API WRITE on a real image (2026-11-23 target mind)
+
+`vips_region_paint()` (`libvips/iofuncs/region.c:909`, exported) is an
+ordinary public API. For integer images it takes the same broken address
+path as the pinned `vips_region_paint_pel()` slice:
+`q = VIPS_REGION_ADDR(reg, clipped.left, clipped.top)` at `:915`,
+`ls = VIPS_REGION_LSKIP(reg)` at `:916` and
+`memset((char *) q, value, wd); q += ls;` at `:922-923` inside a loop over
+`clipped.height`. With `bpl=-7296` the second line is `data + (2^64-7296) =
+data-7296`.
+
+`real/consumer.c` gained a `paint` mode on the W3 real memory image:
+
+- `vips_region_prepare(reg, {0,0,4,2})` → `PAINT_PREPARE=0`,
+  `data=0x777819602810 bpl=-7296 lskip=18446744073709544320`,
+  `valid={0,0,4,2}`; instrumented `PAINT_ADDR0=0x777819602810 ADDR1=0x777819600b90`
+  confirms `ADDR1 = data - 7296`.
+- `vips_region_paint(reg, &r, 0x5a)` with `wd = 4 * 40000 = 160000` gives
+  ASan `heap-buffer-overflow`, `WRITE of size 160000`, frame
+  `#1 vips_region_paint ... region.c:922` via the `memset` interceptor
+  (`real/consumer-paint.out`). ASan names the *first poisoned byte*,
+  `0x777819601000` = allocation base `0x777819602800` minus 6144; the
+  memset starts at `data-7296`, which sits in the addressable neighbour
+  below that redzone (shadow dump: `00` below `0x...1000`, `[fa]` at it).
+  The 6144 figure is the redzone boundary, not `bpl`.
+- Fixed tree: `PREPARE=ERR msg=image: dimension overflow`; no paint, no ASan
+  (`real/consumer-fixed-paint.out`).
+
+`real/run-consumer.sh` now runs 23 assertions (was 12); both the vulnerable
+and fixed paint controls are included. `real/consumer-paint.out` and
+`real/consumer-fixed-paint.out` are new committed evidence. The W2 direct
+call on the synthetic image remains the chosen-byte placement demonstration;
+W4 adds a real allocation and an unmodified public entry point. No pointer,
+return address, control-flow datum, wire, command, marker or witness verdict.
+Rung 4 stands for a negative-offset write on living bytes; rung 5 UNKNOWN.

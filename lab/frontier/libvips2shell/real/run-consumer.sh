@@ -33,6 +33,8 @@ run() {
 
 run "$VULN_LIB" consumer-vuln consumer-region.out region || true
 run "$VULN_LIB" consumer-vuln consumer-extract.out extract || true
+run "$VULN_LIB" consumer-vuln consumer-paint.out paint || true
+run "$FIXED_LIB" consumer-fixed consumer-fixed-paint.out paint || true
 run "$FIXED_LIB" consumer-fixed consumer-fixed-extract.out extract || true
 
 fail=0
@@ -66,6 +68,20 @@ check consumer-extract.out 'heap-buffer-overflow'
 check consumer-extract.out 'READ of size 160000'
 check consumer-extract.out 'vips_region_copy ../src/libvips-8.18.2/libvips/iofuncs/region.c:1090'
 check consumer-extract.out '6144 bytes before 8589920016-byte region'
+
+# Public-API WRITE on a real memory image: vips_region_paint() memsets the
+# second line at bpl=-7296 through the pinned VIPS_REGION_ADDR/LSKIP path.
+check consumer-paint.out 'PAINT_PREPARE=0'
+check consumer-paint.out 'bpl=-7296 lskip=18446744073709544320'
+check consumer-paint.out 'PAINT_CALL value=0x5a wd=160000'
+check consumer-paint.out 'heap-buffer-overflow'
+check consumer-paint.out 'WRITE of size 160000'
+check consumer-paint.out 'vips_region_paint ../src/libvips-8.18.2/libvips/iofuncs/region.c:922'
+check consumer-paint.out '6144 bytes before 8589920016-byte region'
+
+# Fixed tree rejects the geometry before any public paint API runs.
+check consumer-fixed-paint.out 'PREPARE=ERR msg=image: dimension overflow'
+absent consumer-fixed-paint.out 'heap-buffer-overflow'
 
 # Fixed tree: same geometry rejected before any consumer runs.
 check consumer-fixed-extract.out 'PREPARE=ERR msg=image: dimension overflow'

