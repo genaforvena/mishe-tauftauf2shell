@@ -70,3 +70,14 @@ Additional gdb transcripts for rungs 2 and 4 were observed live this wake and
 are quoted in the brief; no synthetic consumer or wire endpoint was used.
 
 Rebuild and replay from `REPLAY.md`.
+
+## Clean offline replay (2026-11-23 21:5xZ)
+
+`git archive 4c4f8f8` extracted to `/tmp/thorvg-replay`; extraction of the two
+pinned tarballs recreated the gitignored source trees, `sha256sum -c
+PINS.sha256` passed all 21 pins, all three generators reproduced their JPEGs,
+11 binaries were rebuilt, and `harness/run_matrix.sh` produced 88 cases with
+the exact trace
+`6c78e7a5b6b008c125cefba80088004beea368a67bb11e7911dc6f51b12b998d`,
+identical to the working tree. The gdb chosen-byte check also reproduced
+`58 00`/`68 00`/`78 00` at byte offsets 128/256/384 in the clean replay.
