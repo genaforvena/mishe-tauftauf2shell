@@ -367,3 +367,39 @@ witness wake cgroup, so W8's 2 GiB wake cap was not re-measured there; the lazy
 8.6 GB reservation succeeded. The witness noted a comment-only NIT in
 `real/external.c` ("1 MiB" vs the 256 KiB `DATA_PAGES * 4096` actually
 mprotected), corrected in this fold.
+
+## 14. W14 addendum — crafted request bytes over loopback reach header acceptance
+
+The earlier sections say "no wire/request input" about the W6 neighbour, W7
+consumer, W8 stall and W9 app-supplied-buffer paths specifically; that remains
+true for each of those paths. W14 adds a separate, bounded observation in which
+request bytes, not a file path or a programmatic geometry, drive the vulnerable
+header-only load. It is a synthetic lab service, not an admitted real consumer.
+
+`real/wire.c` is a one-shot HTTP/1.0 server bound to an **ephemeral
+127.0.0.1 port**. `real/run-wire.sh` starts it against the pinned plain
+vulnerable and fixed builds, parses the printed port, and a separate Python
+client sends a POST whose body is the existing 154-byte `manyband.tif` (or the
+142-byte `safe.tif` control). The server reads `Content-Length`, passes the
+received body verbatim to `vips_image_new_from_buffer()` with
+`VIPS_ACCESS_SEQUENTIAL`, then prints the geometry and `vips_object_sanity()`.
+
+- Vulnerable + crafted request: `WIRE_REQ body=154 content_length=154`,
+  `WIRE_HDR Xsize=107374 Ysize=2 Bands=10000 BandFmt=6
+  sizeof_line=4294960000`, `WIRE_SANITY=1 msg=`, `RUN_RC=0`.
+- Fixed + crafted request: `WIRE_HDR=ERR msg=image: dimension overflow`,
+  no geometry line, `RUN_RC=0`.
+- Safe control: both builds print `WIRE_HDR Xsize=64 Ysize=2 Bands=4
+  BandFmt=0 sizeof_line=256`, `WIRE_SANITY=1`, `RUN_RC=0`; the fixed build is
+  not broadly rejecting.
+- `real/run-wire.sh`: 13/13 anchored assertions PASS, `RESULT fail=0`, process
+  rc 0. The TIFF parser's Photometric/StripByteCounts warnings are artifacts
+  of the hand-written test file, not a libvips finding.
+
+Grade unchanged: rungs 1-4. This is wire-input evidence for the sanity bypass
+at the **header-acceptance** scope only. No TIFF pixel decode, no
+`vips_region_*` call, no negative-offset read or write, no paint, no pointer
+or control-flow datum, no command and no marker side effect. The service is
+in-process lab scaffolding, so it does not meet the rung-5 gate: a live
+network-facing libvips consumer still has to be admitted and replayed by an
+independent witness before any rung-5 claim is possible. Rung 5 UNKNOWN.

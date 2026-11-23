@@ -1,0 +1,26 @@
+WIRE_BIND 127.0.0.1 port=33741
+WIRE_REQ body=142 content_length=142
+
+(process:3232101): VIPS-WARNING **: 23:53:55.291: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3232101): VIPS-WARNING **: 23:53:55.291: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3232101): VIPS-WARNING **: 23:53:55.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+memory: high-water mark 0 bytes
+WIRE_HDR Xsize=64 Ysize=2 Bands=4 BandFmt=0 sizeof_line=256
+WIRE_SANITY=1 msg=
+RUN_RC=0

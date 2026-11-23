@@ -489,3 +489,61 @@ cgroup, so W8's 2 GiB wake cap was not re-measured; the lazy 8.6 GB reservation
 succeeded there. The witness's comment-only NIT — `external.c:7` claiming a
 1 MiB image area where `DATA_PAGES * 4096` is 256 KiB — is corrected in this
 fold; no probe behavior changed.
+
+## W14 — crafted request bytes over loopback to header acceptance (2026-11-23)
+
+One bounded experiment closing the "no wire/request input" evidence gap at the
+header-acceptance scope only. No grade change, no rung-5 claim.
+
+### Materials
+
+- `real/wire.c`: one-shot HTTP/1.0 server, `AF_INET` / `SOCK_STREAM`, bound to
+  `INADDR_LOOPBACK` with an **ephemeral port** (`sin_port = 0`), `listen(1)`,
+  one `accept()`. Reads at most 1 MiB, finds the `\r\n\r\n` header terminator
+  with `memmem`, parses `Content-Length`, then calls
+  `vips_image_new_from_buffer(body, len, "", "access",
+  VIPS_ACCESS_SEQUENTIAL, NULL)` and prints `WIRE_HDR`, `WIRE_SANITY`, or
+  `WIRE_HDR=ERR`. This is the same header-only load as W2 `part_a`
+  (`vips_image_new_from_file` with `VIPS_ACCESS_SEQUENTIAL`), fed request bytes
+  instead of a filename. No pixel decode, region, paint or command.
+- `real/run-wire.sh`: compiles `wire-plain` / `wire-fixed` against the existing
+  gitignored `build-vuln-plain` / `build-fixed-plain` trees with the same
+  flags as `run-external.sh`, runs four legs (vulnerable/fixed ×
+  `manyband.tif`/`safe.tif`), starts the server in the background, waits for
+  its printed port, and uses a separate `python3` process to send the POST
+  over a real 127.0.0.1 socket. No external address, no fixed port.
+
+### Observations (13/13 anchored assertions PASS, `RESULT fail=0`, rc 0)
+
+- Vulnerable + 154-byte crafted request: `WIRE_REQ body=154
+  content_length=154`, `WIRE_HDR Xsize=107374 Ysize=2 Bands=10000 BandFmt=6
+  sizeof_line=4294960000`, `WIRE_SANITY=1 msg=`, `RUN_RC=0`
+  (`wire-vuln-crafted.out`).
+- Fixed + same request: `WIRE_HDR=ERR msg=image: dimension overflow`, no
+  `WIRE_HDR Xsize=` line, `RUN_RC=0` (`wire-fixed-crafted.out`).
+- Safe 142-byte request under both builds: `WIRE_HDR Xsize=64 Ysize=2
+  Bands=4 BandFmt=0 sizeof_line=256`, `WIRE_SANITY=1`, `RUN_RC=0`
+  (`wire-vuln-safe.out`, `wire-fixed-safe.out`).
+- Ports were ephemeral and differ between legs (39215, 33741, 44731, 36491 in
+  the canonical run); assertions match the `WIRE_BIND 127.0.0.1 port=` prefix,
+  not a port value.
+
+### Negative results and scope limits
+
+- The hand-written TIFF emits repeated `VIPS-WARNING` lines about Photometric
+  channels and `StripByteCounts`; they appear in every leg, including safe,
+  and are input-file artifacts. No libvips change in response.
+- The crafted request reaches only header acceptance and
+  `vips_object_sanity()` on the vulnerable build. It never reaches a TIFF
+  scanline read, the truncated `bpl`, `vips_region_*`, a negative-offset
+  access or a chosen-byte write. W7/W8's loader-to-pixel stall is unchanged.
+- The service is lab scaffolding started by the probe, not a real-world
+  network-facing consumer. Per the rung-5 gate this stays UNKNOWN: a live
+  consumer must be admitted as its own target, the write must be reached on
+  its living bytes, and an independent witness verdict is required.
+- Earlier "no wire/request input" statements in sections W6, W7, W8 and W9
+  describe those paths; they are not retracted, and W14 adds wire input only
+  to this new header-acceptance path.
+
+Grade unchanged: rungs 1-4; rung 5 UNKNOWN. No witness verdict requested for
+this scope.

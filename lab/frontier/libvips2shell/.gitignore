@@ -30,3 +30,5 @@ real/downstream-plain
 real/external-plain
 real/external-fixed
 real/memlimit
+real/wire-plain
+real/wire-fixed
