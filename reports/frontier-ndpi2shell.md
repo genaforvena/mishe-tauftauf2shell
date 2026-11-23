@@ -129,8 +129,12 @@ This moves rungs 3 and 4 from a stub harness to a REAL nDPI caller and
 library build. It is still a local library-API result: the probe supplies the
 long key, in-tree call sites mostly pass constant field-name keys, and no
 packet, socket, pointer control, command or witness replay was exercised.
-Whether attacker-controlled network data can become such a key is UNKNOWN;
-the advisory's wire-reachability claim is unproven and rung 5 stays UNKNOWN.
+The key-reachability lane is closed for this tree: the only callers of the
+TLV-to-JSON clone are the fuzz and unit harnesses, and every other key passed
+to the weak functions is a literal field name or a decimal number of at most
+10 bytes. No network path in this build can supply the >128-byte key the
+overflow needs, so the advisory's wire-reachability claim is unsupported for
+this tree. Rung 5 is UNKNOWN and unreachable via this primitive.
 
 An end-to-end control was also run on loopback-local pcaps with the ASan
 reader (`-k ... -K json`): a stock DNS pcap and a generated HTTP GET whose

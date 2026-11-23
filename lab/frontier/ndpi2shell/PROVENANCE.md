@@ -207,3 +207,14 @@ The fix commit (2026-08-25) is an ancestor of tag `6.0`; only tags `6.0` and
 `6.1-qubitowl` contain it, and the only 5.x tag `5.0` does not. The advisory's
 numeric fixed release "6.0" is therefore confirmed by tag ancestry, replacing
 the earlier UNKNOWN. This does not change the rung grade.
+
+Key-reachability lane closed for this tree: grep for
+`ndpi_deserialize_clone_all` / `ndpi_deserialize_clone_item` across the full
+source tree finds only the declaration in `ndpi_api.h:1891-1892`, the
+definitions in `ndpi_serializer.c:3000,3048`, `fuzz/fuzz_serialization.cpp:156,170`
+and `tests/unit/unit.c:247`. No reader, dissector or daemon calls the TLV
+clone. Every other key passed to the three weak callers is a literal field
+name or a decimal number of at most 10 bytes (`ndpi_serializer.c:2374-2383`).
+So no network path in this build can supply a >128-byte key to the overflow;
+wire reachability of the KEY overflow is a negative for this tree, not merely
+UNKNOWN. Rung 5 remains UNKNOWN and unreachable via this primitive.
