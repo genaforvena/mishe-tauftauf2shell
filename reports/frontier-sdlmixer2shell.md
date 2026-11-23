@@ -16,7 +16,7 @@ ESTABLISHED at the same rungs, explicitly not rung 5.
 
 A real SDL_mixer 3.2.4 build fed a crafted on-disk A-law WAV now demonstrates
 file-path reachability to the vulnerable store (W180, author-observed,
-independent witness replay requested).
+independent witness replay requested on tape #3053).
 
 ## 1. Verified ground truth
 

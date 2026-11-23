@@ -143,8 +143,8 @@ and gdb reports back to pinned upstream lines.
   address: corrupted control-flow state, not pointer/IP control.
 - Ceiling: real build, real WAV, real decoder callbacks, but no wire/request
   input, attacker-chosen pointer, instruction-pointer control, benign marker
-  or command. Author-observed only; witness replay requested on tape. Advisory
-  RCE and network reachability remain UNKNOWN; rung 5 not attempted.
+  or command. Author-observed only; witness replay requested on tape #3053.
+  Advisory RCE and network reachability remain UNKNOWN; rung 5 not attempted.
 
 ## Verification
 
