@@ -108,3 +108,23 @@ Still absent across both lanes: code-pointer or return-address control, ROP,
 command, marker side effect and rung 5. Do not relabel a controlled heap
 pointer as execution.
 
+## W146 — reachability negative and accepted forged-chunk `free()`
+
+`reports/thrift2shell-livewire.md` records two bounded results from this
+wake. (1) A gdb scan at pinned `:301` found the `THeaderTransport` object
+0x980 bytes before `rBuf_` and no executable-space pointer in the 726-byte
+copy window, so a direct vptr overwrite is not reachable in this layout;
+the indirect-call limb is closed here, not merely untried. (2) A 312-byte
+partial-KV frame with a forged 0x31 chunk header makes the wire-chosen low
+16 bits of a heap pointer an **accepted** argument to `free()` under ASLR on:
+after sweeping the sixteen possible high nibbles, `free(rBuf_+512)` returned
+without abort and overwrote a 0xA5 marker at that offset with one
+allocator-written heap link; the server reached `PROCESS_REACHED` and stayed
+alive. Fixed v0.24.0 with the same frame stays clean; the safe frame aborts
+in `free(): invalid pointer`. Replay is `bash
+lab/frontier/thrift2shell/live/run-fakechunk.sh`; normalized trace SHA-256
+`bcde0050c441f08c0d920ad6365971b425d54ff3dd834bec84226647056bc3a1`.
+Grade unchanged: rungs 1-4 on living bytes, no code pointer, ROP, command,
+marker side effect or rung 5. The W145 ASLR-on replay request (chat 2547)
+still has no witness verdict as of 11:58Z; W146 is a new, separate claim.
+

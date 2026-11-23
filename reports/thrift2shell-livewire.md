@@ -309,3 +309,66 @@ are chosen; the high bits come from the process. No code pointer, return
 address, ROP, command, marker side effect or witness verdict is present.
 The no-flush harness change is disclosed and affects only teardown writes,
 not the vulnerable read/copy path.
+
+## W146 — vptr negative result and accepted forged-chunk `free()` (2026-11-23)
+
+First, a bounded reachability check for an indirect call. Under the plain
+no-flush server and `kvbase160.bin`, a gdb break at pinned `:301` showed
+`this=0x5555555b3870`, `rBuf_=0x5555555b41f0`, `tBuf_=0x5555555b4760`,
+`sz=726`. The `THeaderTransport` object holding the vptr is 0x980 bytes
+**before** `rBuf_`, outside the 726-byte copy window; a scan of the dump from
+`rBuf_` to `rBuf_+1100` found no qword pointing into the executable mappings
+of the binary, libstdc++, libc or libz. In this layout there is no live vptr
+to overwrite, so the direct vptr/indirect-call limb is **not available** and
+was not pursued further. This is a negative result, not a failed exploit.
+
+The remaining rung-4 primitive was upgraded instead. `make-kv-frame.py`
+generates the 312-byte partial frame from `kv-ptr14.bin` with five patches:
+message length at decompressed offset 21 (`0000011c`), pointer low word at
+310, a forged 0x31 chunk size at 214 (`rBuf_+0x1f0`), a 0x21 next-chunk size
+at 278 (`rBuf_+0x230`), and sixteen 0xA5 marker bytes at 230
+(`rBuf_+0x200`). ASLR randomizes heap bits 12-15, so
+`live/run-fakechunk.sh` sweeps the sixteen low words `0x?3f0`, repeating up
+to six rounds until one matches the run's heap page; the matching frame
+makes the wire-chosen pointer equal `rBuf_+0x200`. In one ASLR-on run
+the breakpoint showed `rBuf_=0x643a1b8731f0` and
+`__GI___libc_free(mem=0x643a1b8733f0)` — exactly `rBuf_+512`. Comparing the
+1024-byte window dumps taken immediately before that free and before the
+next free showed one changed qword: `rBuf_+0x200` went from
+`0xa5a5a5a5a5a5a5a5` to `0x0000643c58268cc3`, a heap-link value written by
+the allocator. The server printed `PROCESS_REACHED name=attack seqid=1` and
+survived until the debugger was stopped after the evidence was captured.
+A deterministic ASLR-off replay gave the same single-qword write at
+`rBuf_+0x200` (`mem=0x5555555b43f0`, `rBuf_=0x5555555b41f0`).
+
+Replay and normalized evidence:
+
+```sh
+cd lab/frontier/thrift2shell/live
+bash run-fakechunk.sh
+# requires the gitignored live-noflush / live-noflush-fixed binaries;
+# build commands are in the Build and provenance section above.
+```
+
+`results/fakechunk-normalized.txt` is address-free and hashable:
+`CHOSEN_FREE_DELTA_FROM_RBUF=+512`,
+`FREED_CHUNK_ACCEPTED=1`, `MARKER_OVERWRITTEN=1`,
+`CHANGED_QWORDS_IN_WINDOW=1`, `CHANGED_OFFSETS=+512`,
+`PROCESS_REACHED_VULN=1`, `ABORT_VULN=0`,
+`PROCESS_REACHED_FIXED=1`, `ABORT_FIXED=0`,
+`PROCESS_REACHED_SAFE=1`, `ABORT_SAFE=1`. Two consecutive committed-script
+replays returned the identical normalized trace (winning low words `0x83f0`
+and `0x73f0`); SHA-256
+`bcde0050c441f08c0d920ad6365971b425d54ff3dd834bec84226647056bc3a1`.
+Raw gdb logs and heap dumps are gitignored. The fixed v0.24.0 control uses
+the winning frame and stays clean; the safe control is `kv-partial-safe.bin`
+on v0.23.0 and aborts in `free(): invalid pointer` without the chosen
+address.
+
+Ceiling: this is still rung 4 on living bytes. The wire chooses the low 16
+bits of a heap pointer and the forged chunk makes `free()` **accept** it and
+write one allocator-chosen link value into a chosen heap offset; the written
+value is not attacker-chosen. The low-word sweep assumes the fixed low 12
+bits of this build's `rBuf_` layout. No vptr, code pointer, return address,
+ROP, command, marker side effect or witness verdict is present. The
+advisory's `AV:N` remains the lab's loopback wire path only.
