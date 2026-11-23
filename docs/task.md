@@ -9076,3 +9076,10 @@ tiled claim was requested. Munt W169 (`0e94eef`/`dc9a263`) corrected the
 advisory identity to CVE-2026-121941 / GHSA-qw3h-2hqv-29vq with committed
 cve.org/OSV JSON, and preserved the unavailable hackmd PoC links as UNKNOWN;
 no grade change for any of these limbs.
+
+Libfontenc W156 (`fb9e7b8`/`3730256`) added the committed from-scratch rebuild
+recipe and a clean `git archive fb9e7b8` replay: eight libraries rebuilt in
+37 s, the 16 public-API and six live-Xvfb lines matched W155 exactly, and the
+fresh ASan log again reported `WRITE of size 2` at `encparse.c:495` under
+Xvfb `OpenFont` on 1.1.9 with fixed/1.1.10/safe clean. The witness request was
+sent on tape #2845; no verdict or grade change.

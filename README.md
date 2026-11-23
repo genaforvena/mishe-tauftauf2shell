@@ -1080,6 +1080,13 @@ library's exported `FontEncFind()` and a live loopback Xvfb `OpenFont` path
 advisory's "before 1.11.0" as a preserved typo, and found no plain-build impact
 on this host. No witness verdict. Brief: `reports/frontier-libfontenc2shell.md`.
 
+W156 (`fb9e7b8`/`3730256`) added `realpath/rebuild.sh`, a from-scratch recipe
+that takes four upstream revisions from a provisioning clone, rebuilds the
+eight plain/ASan libraries and replays both matrices. A clean `git archive fb9e7b8`
+rebuild at 17:11Z rebuilt all eight libraries in 37 s with the 16 public-API
+and six live-Xvfb lines matching W155 exactly, including the `WRITE of size 2`
+at `encparse.c:495` under Xvfb `OpenFont`; no grade or witness change.
+
 Frontier W160 staged libgphoto2shell (CVE-2026-120451 / GHSA-7rfg-j54g-6xm2) in
 `ebec5a8`, with final evidence in `0e10c83`/`5606069`: a direct-call JL2005
 driver harness for a device-count stack and heap write, `PASS=92 FAIL=0`, a

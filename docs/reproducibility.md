@@ -5876,6 +5876,17 @@ bytes. No new route or witness verdict was created by these commits.
   crash; the default glibc allocation is an mmap chunk with the write inside
   usable slack. Rung 3 in the live ASan process, rung 4 only at the earlier
   local chosen-store scope, rung 5 UNKNOWN, no witness verdict.
+  **W156 clean rebuild** (`fb9e7b8`/`3730256`): from a fresh tree,
+  `git archive fb9e7b8 lab/frontier/libfontenc2shell | tar -x -C /tmp/w156-clean`
+  and `cd /tmp/w156-clean/lab/frontier/libfontenc2shell/realpath && sh ./rebuild.sh`.
+  The committed script requires a read-only provisioning clone at `$LF2S_SRC`
+  (default `/tmp/libfontenc-src`) with the four pinned revisions and
+  `/usr/share/fonts/X11/Type1/NimbusMonoPS-Regular.pfb` (sha256
+  `49d0a528…005dc1`), refuses to overwrite build directories, and runs both
+  matrices. At `fb9e7b8` all eight libraries rebuilt in 37 s with 16/16
+  public-API and 6/6 live-Xvfb lines matching W155; the fresh ASan log again
+  shows `WRITE of size 2` at `../src/encparse.c:495`, 508 bytes past the
+  131072-byte region, with 1.1.9 vulnerable and fixed/1.1.10/safe clean.
 - **Openexr W164 deep-tiled path** (`0b61b94`,
   `reports/openexr2shell-file-level.md` § W164). From `lab/openexr2shell-real`,
   build the gitignored trees with `./harness/build.sh build-vuln-asan
