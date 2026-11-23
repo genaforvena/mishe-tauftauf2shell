@@ -66,3 +66,23 @@ ASan reproduced the 40001-byte overflow at upstream
 `MidiStreamParser.cpp:250`. Verdict ESTABLISHED at real-library rungs 1-4,
 NOT rung 5. Raw author outputs: `real/evidence/`; analysis:
 `real/REAL_EVIDENCE.md`.
+
+## Author clean-archive replay at commit 7423dc6 (2026-11-23 W167)
+
+From `git archive HEAD lab/frontier/munt2shell` into `/tmp/w167-munt`, with
+the provisioned tarball copied to `real/src/` (that ignored directory and
+tarball are not in the archive):
+
+- `harness/check.sh`: `PASS=129 FAIL=0 TRACE=735c136e1c6740ca…ac0d1146f`.
+- `real/prepare_src.sh`: tarball hash OK; three pinned files verified in both
+  regenerated trees; no working-tree-only file needed.
+- `real/build_and_run.sh`: all 32 rc lines match the committed matrix
+  case-for-case (compared programmatically against
+  `real/evidence/results.txt`, first 32 lines).
+- `real/build_clang_asan.sh`: vulnerable C API attack `rc=1`, fixed `rc=0`.
+- Fresh ASan output again shows `WRITE of size 40001`, 0 bytes after a
+  32768-byte region at upstream `MidiStreamParser.cpp:250` (gcc and clang);
+  the plain C API attack reads back `tail_0x5a=7233/16384`.
+
+Replay artifacts were left in `/tmp/w167-munt`, not committed; the committed
+sources, pins, scripts and raw author evidence remain the durable record.

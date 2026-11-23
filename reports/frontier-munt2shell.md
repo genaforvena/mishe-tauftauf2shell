@@ -131,7 +131,7 @@ built by upstream CMake as a static `mt32emu` target. The driver in
 `lab/frontier/munt2shell/real/` constructs a real `Synth`, a real
 `DefaultMidiStreamParser` and the real C API context; nothing in the parser
 or its types is stubbed. Commands:
-`cd lab/frontier/munt2shell/real && ./build_and_run.sh && ./build_clang_asan.sh`.
+`cd lab/frontier/munt2shell/real && ./prepare_src.sh && ./build_and_run.sh && ./build_clang_asan.sh`.
 Details and raw outputs: `real/REAL_EVIDENCE.md` and `real/evidence/`.
 
 gcc and clang ASan both report `heap-buffer-overflow`, `WRITE of size 40001`,
@@ -148,6 +148,7 @@ behave as in the staged harness.
 Post-write consumer probe: feeding `0xF7` after the oversized slice produces
 no SysEx dispatch and one overrun debug report. `parseSysexFragment()` sees
 capacity already at `MAX_STREAM_BUFFER_SIZE`, discards, and the only later
+buffer read is `streamBuffer[0]`. libmt32emu itself does not consume the
 overwritten bytes on this path — a negative result for an in-library live
 consumer, not proof that no host is affected.
 
@@ -209,7 +210,8 @@ normalized-identical (path, PID, address and build id aside).
 - Abort order (the witness's answer to follow-up #2768): a real-allocator
   plain build without the tail probe aborts `rc=134` with
   `malloc(): corrupted top size`, but gdb places that abort in `printf` at
-  `driver.cpp:105`, after `mt32emu_parse_stream` returned at `:104`. No
+  `driver.cpp:105`, after `mt32emu_parse_stream` returned at `:104` (line
+  numbers in the witness's copy before the W167 comment fix added one line).
   abort precedes the out-of-bounds store.
 - In-library consumer negative rechecked in source: after the overflow
   `streamBufferSize = 40001` exceeds capacity, so
