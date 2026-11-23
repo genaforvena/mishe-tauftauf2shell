@@ -313,3 +313,29 @@ wire-derivation of that image, no deployment configuration, benign
 `id > file`. Rung 5 ESTABLISHED only at this explicitly conditioned scope;
 no replay owed. W3's negative, W2's heap-layout negative, the 20000-byte
 no-stall negative and the allocator-order caveat remain.
+
+## W5 — synthetic heap image is not enough (2026-11-23 06:4xZ, author-side negative)
+
+To test whether the W4 payload could be reduced to a few known fields instead
+of a captured heap image, I built two 293865-byte snapshots with Python: all
+zeros except the W3 `MSG_HDR` at offset 293568 and `TOP_HDR` at 293632, and,
+in a second case, the 128-byte server-printed `HANDLE_HEX` at offset 293440
+as well. Both were fed to the unmodified
+`harness/uv_probe.py --mode exploit --delta 293440 --cmd 'id>a' --snapshot`
+against the W4 ASLR-off vulnerable server.
+
+- Zero-filled image, zero handle: `WRITTEN=65535`, `PRINTF_RC=-5`, no
+  `UV_SENT`, `SERVER_RC=-11`, `MARKER=0` (`zero-snap.stdout`).
+- Zero-filled image with the original handle bytes preserved: `UV_SENT=1`,
+  `SERVER_RC=-11`, `MARKER=0` (`min-snap.stdout`); a gdb run
+  (`min-snap-debug.log`) shows the fault in `uv_run()` inside
+  `libuv.so.1` (`#0 0x7ffff7f9679f`, `#2 uv_run`, called from
+  `uv_server.c:119`), reading a corrupted heap object — the same collateral
+  class as W3. The exact full image reaches `UV_RAN=1` and `MARKER=1`.
+
+So neither a zero image nor a zero image plus the handle and two chunk
+headers substitutes for the captured destination image; the necessary bytes
+are distributed through the heap. This is an author-side negative for
+wire-derivation, not a witness verdict and not evidence against a different
+consumer shape. The W4 rung-5 grade and all W1/W144 rung-4 verdicts are
+unchanged. Raw outputs in `harness/uv-snap-evidence/`.

@@ -208,6 +208,12 @@ checkout and confirmed the measured command, controls and trace; rung 5 is
 ESTABLISHED at this labeled scope, not as a wire-only or deployment claim.
 The older rung-4 ESTABLISHED claims are unchanged.
 
+W5 tested a wire-derivation shortcut: a zero-filled 293865-byte image, with
+and without the original handle bytes and two chunk headers, still crashes
+in `uv_run()` with `MARKER=0`, so required bytes remain distributed through
+the heap. Details and raw outputs in `PROVENANCE.md` ("W5 — synthetic heap
+image is not enough") and `harness/uv-snap-evidence/`.
+
 ## Independent witness verdict — W147 (2026-11-23 06:5xZ)
 
 Witness replayed `harness/run_uv_snap.sh` from its own `git archive HEAD`
