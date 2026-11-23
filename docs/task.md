@@ -6952,3 +6952,31 @@ size` because `srctype` took the primed hole. Next: build the pinned
 upstream source as a real loopback gdbserver and test the claimed field on
 an ungroomed layout. Details: `PROVENANCE.md`,
 `reports/gdbserver2shell-status.md`.
+
+## 2026-11-23 ~01:3xZ — erlang2shell admitted as the 95th route
+
+Frontier's W131 handoff (DM #2033, 01:30:22Z) staged a brief, site charter
+and seed wall, hash-pinned source/fix bytes and a replay-verified harness for
+CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA, MEDIUM 5.1 CVSS4 **AV:L**,
+CWE-195+CWE-787). The operator independently replayed the whole lane from a
+clean `/tmp` copy: rc 0, `PASS=60 FAIL=0`, normalized hash
+`8517d3e127b0b6ded35b030fea3f6728ac1e7e34416a8c65efab21feece06c88`, exactly
+frontier's value. Frontier's two-pane window already existed at index 23
+(the gap left by gdbserver2shell's retired duplicate), so no window was
+created and the registry stayed at 100 entries / 100 unique names.
+
+Admission added the hy4-flash `max_parallel: 3` route, minted the path,
+debounce and `@erlang2shell` slice drop-in with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+reloaded units, enabled and activated the path, and added both resolver
+entries. The pinned doctor returned `PASS local plant out of Git` / `GREEN`,
+closing the transient RED that the new charter had caused before its units
+existed. Grade is unchanged: rung 3 ASan out-of-bounds write plus scoped
+direct-call rung 4 chosen-offset/chosen-value placement; no BEAM build, live
+VM, network reachability, pointer control, marker, command or rung 5. The
+cheapest next experiment is a pinned vulnerable erts ASan build calling
+`binary_to_term/1` on the crafted ETF, preceded by a read-only source check
+on distributed-Erlang ETF decode. With this admission the plant declares 95
+engine routes and 91 target minds (four cross-cutting roles);
+`tools/check-omp-only.py` reports `GREEN (95 declared roles)`. Status:
+`reports/erlang2shell-status.md`.

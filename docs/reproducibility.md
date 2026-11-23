@@ -127,6 +127,7 @@ containers whose host ports bind only to loopback.
 | Ntpsec2Shell | [brief](../reports/frontier-ntpsec2shell.md) | CVE-2026-121506 (GitLab CNA 2026-11-03, CWE-787, CVSS 3.1 7.4), affected 1.1.4 up to (excluding) 1.2.5, fixed 1.2.5; vulnerable tag `NTPsec_1_2_4` `a9e66af44c0be…`, fixed `NTPsec_1_2_5` `42b5703303c8…`, fix `0a36941e…`; seven pinned blobs and the fix patch SHA-256 in `lab/frontier/ntpsec2shell/PIN_HASHES.txt`, claim URLs in `PROVENANCE.md` | `harness/gen.py` copies `extens_client_recv()` byte-for-byte from the pinned `nts_extens-{vuln,fixed}.c` into `fn.inc` with two buffer helpers from pinned `nts-vuln.c`; `harness/run.sh` builds gcc `-O0 -g` ASan/plain variants of both pins and links pinned 1.2.4 `aes_siv.c` against OpenSSL 3.0.13, opening no sockets | `cd lab/frontier/ntpsec2shell && bash harness/run.sh` — expect 8 PASS / 0 FAIL: ASan `WRITE of size 40`, 8 bytes after a 128-byte region, frames `AES_SIV_Decrypt` (modeled) ← `extens_client_recv` (verbatim pinned) ← `stub_case` on the vulnerable pin with noncelen=64, fixed pin rejects before the consumer (`WRITE_OFF=-1`); plain build reads back 16 chosen `41…`/`5a…` bytes at offset 136, real pinned AES-SIV writes `414243…50` at offset 328; normalized PASS-line hash `1f04e12d…` identical over two in-tree replays and a clean `git archive f035109` replay. Raw per-case output in `evidence/`, regenerable from the pinned blobs and `run.sh`. FRONTIER-STAGED: rung 3 plus scoped rung 4, no ntpd process, NTP wire, NTS-KE handshake, disclosed key, pointer control or command. |
 | Uhttpd2Shell | [brief](../reports/frontier-uhttpd2shell.md) | GHSA-2mpg-6wp5-435p (GitHub CNA 2026-08-03, CVSS 3.1 7.5 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`); affected through `f682ccabee9ed5f39dd3b0aaf96228975eeb478d` (shipped `7b1bec45` byte-identical), fixed `e76736e5676fb25536b27d45865eb4153c68aca3`, libubox `a396f38a8568a1d670c240465cd8d24fdfdf6463`; seven pinned blobs SHA-256 in `lab/frontier/uhttpd2shell/harness/pins/PIN_HASHES.txt`, claim URLs in `harness/PROVENANCE.md` | `harness/gen.py` extracts `uh_ubus_send_request()` verbatim from pinned `ubus.c` with only the function name changed; `harness/run.sh` builds gcc/clang, ASan/plain against pinned libubox `blob.c` / `blobmsg.c`, checks seven SHA-256 pins and opens no sockets | `cd lab/frontier/uhttpd2shell && bash harness/run.sh` — two full rounds, 30 PASS / 0 FAIL rc 0; expect REAL ASan `READ of size 1` 2 bytes after a 20-byte region in `strcmp`, fixed `ERROR=3 INVOKED=0`, MODEL `WRITE_LEN=4294967293` with 16 chosen `41…` / `5a…` bytes at `WRITE_OFF=20` (hash lines `dbe5197f…` / `56c26e93…`), and both determinism diffs empty. `round2-pass.txt` sha256 `c3b2b9d19d6950090c4efdbc2b5e483881f1d23b297beea41343c6dc5622fc66`, reproduced from a clean `git archive d6afa99` with no source clones or network. Raw per-case logs under gitignored `harness/build/` and `harness/evidence/raw-r1-*`; canonical normalized and raw-r2 files are tracked and regenerate with `run.sh`. No live daemon or wire; the ~4 GiB memcpy is not executed. |
 | Gdbserver2Shell | [brief](../reports/frontier-gdbserver2shell.md), [status](../reports/gdbserver2shell-status.md) | CVE-2026-121997 / GHSA-jq36-9pw3-8r4v (Red Hat 2026-11-05, HIGH 8.1, CWE-122); upstream HEAD `633ae02c4ea8f87c670f7192804349860cfa291d` still vulnerable, fix is a posted-but-unmerged gdb-patches hunk; vulnerable `tracepoint-633ae02.cc` SHA-256 `942306a5…`, derived fixed `c3aa8ac2…`, fix patch `5b8bc3cb…` in `lab/frontier/gdbserver2shell/PROVENANCE.md` | `harness/run.sh` re-extracts verbatim pinned `cmd_qtdpsrc()` slices and helpers, asserts eight SHA-256 pins and builds gcc/clang ASan plus plain-canary variants; opens no socket | `T=$(mktemp -d /tmp/gdb-replay.XXXXXX); cp -a lab/frontier/gdbserver2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `SUMMARY=60 PASS / 0 FAIL`, `NORMALIZED_HASH=0c9b837e…1c1db73`; attack packet `QTDPsrc:1:0:cond:0:1:<hex>` with N=8/32/64/128 gives ASan `WRITE of size 1` 0 bytes after a 2-byte region; full recipe in the lane section below |
+| Erlang2Shell | [brief](../reports/frontier-erlang2shell.md), [status](../reports/erlang2shell-status.md) | CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA 2026-07-27, MEDIUM 5.1 CVSS4 AV:L, CWE-195+CWE-787); affected OTP 25.0+ before 27.3.4.15 / 28.5.0.4 / 29.0.4, fix `c5210b42`; pinned `external.c` / `erl_term.h` blobs and the five-line patch SHA-256 in `lab/frontier/erlang2shell/PROVENANCE.md` | `harness/run.sh` re-extracts four verbatim pinned slices, asserts source/patch/slice/driver SHA-256 pins, builds gcc and clang ASan plus plain-canary variants; opens no socket, VM or BEAM build | `T=$(mktemp -d /tmp/erlang-replay.XXXXXX); cp -a lab/frontier/erlang2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `PASS=60 FAIL=0`, `TRACE_SHA256=8517d3e1…c88` |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -2393,3 +2394,40 @@ LIST_LEN=1` on both pins, with no ASan report. The `hex2bin` decoder is a
 faithful reimplementation, not verbatim GDB source; all allocation and length
 decisions come from the verbatim slices. No pointer, marker, command or rung
 5 is claimed. Status: `reports/gdbserver2shell-status.md`.
+
+## Admitted frontier lane — 2026-11-23 01:3xZ erlang2shell
+
+Frontier handed over W131 at 01:30:22Z (DM #2033) with brief
+`reports/frontier-erlang2shell.md`, site charter and seed wall, and pinned
+vulnerable/fixed `external.c` plus fix patch in
+`lab/frontier/erlang2shell/PROVENANCE.md`. Its two-pane inner tmux window
+already existed at index 23, reusing the gap left by gdbserver2shell's
+retired duplicate; admission created no second window.
+
+From the repository root, replay from an isolated copy so staged evidence is
+untouched:
+
+```sh
+T=$(mktemp -d /tmp/erlang-replay.XXXXXX)
+cp -a lab/frontier/erlang2shell/. "$T/"
+bash "$T/harness/run.sh"
+```
+
+`run.sh` re-extracts four verbatim pinned slices and asserts all source,
+patch, slice and driver SHA-256 pins before compiling gcc 13.3.0 and clang
+ASan variants plus plain-canary variants. Expect rc 0, `PASS=60 FAIL=0` and
+`TRACE_SHA256=8517d3e127b0b6ded35b030fea3f6728ac1e7e34416a8c65efab21feece06c88`.
+The operator observed exactly those values at admission on 2026-11-23 from a
+fresh `/tmp` copy, matching frontier's clean-archive replay. No witness
+verdict exists yet.
+
+Expected bytes: wire arity `0x80000000` validates as 2147483648 and decodes
+as −2147483648, so the modelled `hp += n` moves the heap pointer backwards by
+17,179,869,184 bytes; vulnerable validation returns 2147483649 words while
+the fixed variant rejects with −1. Both compilers report
+`AddressSanitizer: heap-buffer-overflow`, `WRITE of size 8`, `8 bytes before
+64-byte region` in the modelled consumer. High-bit arities −2/−3/−4/−8 words
+place chosen `0x4141414141414141` byte-exact at negative offsets
+32760/32752/32744/32712. Fixed rejects and skips the write; safe arity 3
+stays in bounds. No BEAM build, VM call, network, pointer, marker or rung 5
+is claimed; status is `reports/erlang2shell-status.md`.
