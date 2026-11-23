@@ -1,0 +1,5 @@
+rc=0 scenario=oob-chosen paramIndex=59 p0=9 p29=9
+sizeof_obj=280 off_param=60 off_end=280
+slot35=5a5a5a5a
+canary: 09 00 00 00 09 00 00 00 09 00 00 00 09 00 00 00
+EXIT=0

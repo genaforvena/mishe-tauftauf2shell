@@ -1,0 +1,11 @@
+# fqterm2shell pins — fetched read-only 2026-11-23 from mytbk/fqterm.
+# vulnerable ref: parent 079b6d58c036e4260c5f2c0be48a43e2c2f297a8 of the fix
+# fixed ref:      e340b62dcb6e70271459a3665f5b6699b54daebd (advisory fix commit)
+# advisory:       CVE-2026-131875 / GHSA-8m6p-6hq3-xcx4
+# fix:            https://github.com/mytbk/fqterm/commit/e340b62dcb6e70271459a3665f5b6699b54daebd.patch
+079f66831c617f89774458bfc7a5e3762271bb8d75c7c2eb4aa73ceeea919401  src/e340b62.patch
+1660d4633784ef23db2894a03e948461c066d0dc069381943254fe746d896822  src/fqterm_decode.cpp.fixed
+1106af798ad6f9cb07e826416500b15bdad12d266e72557a3a76f978a5fdbdf4  src/fqterm_decode.cpp.vuln
+887703aaea174897181bc8e14cbeed7e5c55adc9826c55406feae3de2bd21210  src/fqterm_decode.h.fixed
+f0058c3c5aa3fd450e4fc9a65105029b2e4bee7c9c226a58fd37f67dde5c6bf8  harness/run.sh
+a2474fa37f22bb887fe99e1a92ceb53d7915a643b54ec5c3029d94acc8304e54  harness/check.sh

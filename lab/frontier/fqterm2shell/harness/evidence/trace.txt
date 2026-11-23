@@ -1,0 +1,19 @@
+plain-g++-vuln-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|slot35=00000000|canary: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00|EXIT=0|
+plain-g++-vuln-oob-chosen rc=0 scenario=oob-chosen paramIndex=59 p0=9 p29=9|sizeof_obj=280 off_param=60 off_end=280|slot35=5a5a5a5a|canary: 09 00 00 00 09 00 00 00 09 00 00 00 09 00 00 00|EXIT=0|
+asan-g++-vuln-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|EXIT=0|
+asan-g++-vuln-oob-chosen EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|READ of size 4|fqterm_decode.cpp.vuln:694|0 bytes after 280-byte region|fqterm_decode.cpp.vuln:694|
+plain-g++-fixed-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|slot35=00000000|canary: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00|EXIT=0|
+plain-g++-fixed-oob-chosen rc=0 scenario=oob-chosen paramIndex=29 p0=9 p29=989855743|sizeof_obj=280 off_param=60 off_end=280|slot35=00000000|canary: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00|EXIT=0|
+asan-g++-fixed-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|EXIT=0|
+asan-g++-fixed-oob-chosen rc=0 scenario=oob-chosen paramIndex=29 p0=9 p29=989855743|sizeof_obj=280 off_param=60 off_end=280|EXIT=0|
+plain-clang++-vuln-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|slot35=00000000|canary: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00|EXIT=0|
+plain-clang++-vuln-oob-chosen rc=0 scenario=oob-chosen paramIndex=59 p0=9 p29=9|sizeof_obj=280 off_param=60 off_end=280|slot35=5a5a5a5a|canary: 09 00 00 00 09 00 00 00 09 00 00 00 09 00 00 00|EXIT=0|
+asan-clang++-vuln-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|EXIT=0|
+asan-clang++-vuln-oob-chosen EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|READ of size 4|fqterm_decode.cpp.vuln:694|0 bytes after 280-byte region|fqterm_decode.cpp.vuln:694|
+plain-clang++-fixed-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|slot35=00000000|canary: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00|EXIT=0|
+plain-clang++-fixed-oob-chosen rc=0 scenario=oob-chosen paramIndex=29 p0=9 p29=989855743|sizeof_obj=280 off_param=60 off_end=280|slot35=00000000|canary: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00|EXIT=0|
+asan-clang++-fixed-baseline rc=0 scenario=baseline paramIndex=2 p0=1 p29=0|sizeof_obj=280 off_param=60 off_end=280|EXIT=0|
+asan-clang++-fixed-oob-chosen rc=0 scenario=oob-chosen paramIndex=29 p0=9 p29=989855743|sizeof_obj=280 off_param=60 off_end=280|EXIT=0|
+$1 = 0x5a5a5a5a
+0x55555556b3c8:	0x09	0x00	0x00	0x00	0x09	0x00	0x00	0x00
+0x55555556b3d0:	0x09	0x00	0x00	0x00	0x09	0x00	0x00	0x00

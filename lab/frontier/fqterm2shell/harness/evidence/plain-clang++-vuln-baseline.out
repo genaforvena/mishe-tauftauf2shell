@@ -1,0 +1,5 @@
+rc=0 scenario=baseline paramIndex=2 p0=1 p29=0
+sizeof_obj=280 off_param=60 off_end=280
+slot35=00000000
+canary: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+EXIT=0

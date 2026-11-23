@@ -1,0 +1,37 @@
+From e340b62dcb6e70271459a3665f5b6699b54daebd Mon Sep 17 00:00:00 2001
+From: Deus Rex research team <research@deusrex.ai>
+Date: Mon, 9 Nov 2026 12:00:00 +0000
+Subject: [PATCH] decode: bound the CSI parameter index
+
+FQTermDecode::nextParam() incremented paramIndex_ on every ';' with no
+upper bound. param_ is a fixed table of 30 ints, so a CSI sequence with
+30 or more separators made paramDigit() write past the table and the
+CSI handlers that loop up to paramIndex_ read past it. Any host the
+user connects to (telnet, SSH, BBS) controls this byte stream.
+
+Stop advancing the index at the last slot of param_; further separators
+are dropped.
+
+Reported-by: Deus Rex research team <research@deusrex.ai>
+---
+ src/terminal/internal/fqterm_decode.cpp | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/terminal/internal/fqterm_decode.cpp b/src/terminal/internal/fqterm_decode.cpp
+index 707204f..ccc5459 100644
+--- a/src/terminal/internal/fqterm_decode.cpp
++++ b/src/terminal/internal/fqterm_decode.cpp
+@@ -696,7 +696,12 @@ void FQTermDecode::paramDigit() {
+ 
+ void FQTermDecode::nextParam() {
+   FQ_FUNC_TRACE("ansi", 9);
+-  paramIndex_++;
++  // Bound the parameter index to the fixed param_[30] table. Further separators
++  // are dropped rather than walking the index out of bounds. This one clamp
++  // closes both the out-of-bounds write in paramDigit() and the out-of-bounds
++  // reads in the CSI handlers that iterate to paramIndex_ inclusive.
++  if (paramIndex_ < 30 - 1)
++    paramIndex_++;
+ }
+ 
+ void FQTermDecode::saveCursor() {

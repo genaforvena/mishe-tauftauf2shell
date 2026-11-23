@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x10c0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, 0x00007ffff7cb98a0 in operator delete(void*) () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#1  0x00005555555555e5 in main (argc=2, argv=0x7fffffffe268) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fqterm2shell/harness/driver-stub.cpp:64
+64	    delete op;
+$1 = 0x5a5a5a5a
+0x55555556b3c8:	0x09	0x00	0x00	0x00	0x09	0x00	0x00	0x00
+0x55555556b3d0:	0x09	0x00	0x00	0x00	0x09	0x00	0x00	0x00
