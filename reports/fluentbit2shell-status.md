@@ -110,3 +110,17 @@ Rung 5 stays UNKNOWN.
   forward destination versus a forwarding agent.
 - Next: a real no-canary 5.0.7 process under gdb to see the chosen RIP taken,
   then witness replay; do not upgrade this row before that observation.
+
+### No-canary follow-up — 2026-11-23 07:47Z
+
+- Real `-fno-stack-protector` 5.0.7 binary (SHA
+  `060b41249115344ba6c4dc6df8a94d1b74d266a5ed6c78077c2e3d5c5656a18e`)
+  driven by the same loopback PONG: after the memcpy the saved-RIP slot holds
+  `0x414141414141417b`, but the process faults inside
+  `secure_forward_pong` at line 574 with `rip` still in the function,
+  `$rbp = 0x4141414141414142` and frame 1 equal to the chosen value.
+- Actual transfer to the chosen address was NOT observed in any live build;
+  no benign marker or command ran. Rung 5 stays UNKNOWN. Next blocker is the
+  pre-return fault at line 574, not the canary alone; report and harness
+  updated (`reports/fluentbit2shell-livewire.md`,
+  `lab/fluentbit2shell/gdb_nocanary.sh`).

@@ -78,6 +78,7 @@ ports 20253/20254; generated evidence is gitignored under
 | attack, plain build, port 20252 | 1000-byte reason | `*** stack smashing detected ***: terminated`, rc 134 (default build keeps a stack canary) |
 | gdb, ASan build with `replace_intrin=0`, port 20250 | same attack | breakpoint at `forward.c:568` in T3: chosen bytes at `msg` offsets 0=41, 17=5a, 24=7a, 40=7b, 48=42, 56=7b, 63=41 |
 | gdb, plain build, port 20251 | same attack | `&msg = …6ca0`, `$rbp = …6cd0`, `$rbp - &msg = 0x30`; `x/gx $rbp+8` and `x/gx msg+56` = `0x414141414141417b`; backtrace frame 1 = `0x414141414141417b` |
+| gdb, `-fno-stack-protector` build, port 20255 | same attack | after memcpy `$rbp+8` = `0x414141414141417b`; process faults at `forward.c:574` with `$rbp = 0x4141414141414142`, `$rsp` at the saved-RIP slot and frame 1 = the chosen value; `rip` stays in `secure_forward_pong` — no transfer to the chosen address |
 
 The full ASan report and gdb transcripts were captured in the gitignored site
 lab `evidence/v507-attack3.asan.3493173`, `gdb-live.out`, `gdb-plain.out`;
@@ -96,11 +97,15 @@ sink.
 - **Rung 4 (chosen bytes / pointer control):** met in the frame of the real
   flushing thread. The plain-build gdb observation places the chosen bytes at
   both saved-RBP (offset 48) and saved-RIP (offset 56), with the corrupted
-  return address visible as backtrace frame 1. **Caveat:** the default build's
-  stack canary aborts at function return, so this build never transfers
-  control to the chosen address; the frontier's separate direct-call harness
-  with `-fno-stack-protector` observed execution reaching the chosen RIP.
-  No benign marker or command was executed here.
+  return address visible as backtrace frame 1.
+- **Control transfer: NOT observed.** A real `-fno-stack-protector` build
+  (SHA-256 `060b41249115344ba6c4dc6df8a94d1b74d266a5ed6c78077c2e3d5c5656a18e`,
+  same attack, port 20255) faults at `secure_forward_pong` line 574 with
+  `$rbp = 0x4141414141414142`, `$rsp` at the saved-RIP slot and frame 1 =
+  `0x414141414141417b`, but `rip` stays inside the function. The stock build
+  instead aborts at return via its stack canary. In neither live build did
+  execution reach the chosen address; no benign marker or command ran. This
+  is a negative result, not a rung-5 step.
 - **Rung 5:** UNKNOWN. No ROP chain, command, side effect, persistent control,
   or independent witness. The advisory's `system()`→root and `--supervisor`
   BROP claims remain claims.
@@ -111,7 +116,8 @@ configured. This is not an unauthenticated inbound listener bug.
 
 ## 6. Next bounded work
 
-1. Build a real 5.0.7 binary with `-fno-stack-protector` and repeat the gdb
-   frame test to see the chosen RIP actually taken in a live process; record
-   whether any benign marker can be placed and reached without ASan.
-2. Only after (1), consider a witness replay and any rung-5 claim.
+1. Determine which smashed local causes the pre-return fault at line 574
+   (plain and no-canary builds) and whether a reason layout can preserve it
+   long enough to reach the chosen return address.
+2. Only after (1), consider a benign marker at the taken address and then a
+   witness replay. Do not upgrade the rung-5 row before those observations.
