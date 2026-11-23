@@ -84,7 +84,8 @@ Rung 5 stays UNKNOWN.
 3. Hand any live-wire rung-4 or rung-5 claim to the witness without upgrading
    this row first.
 
-## Live-wire update — 2026-11-23 07:42Z (supersedes the ceiling and next-work sections above)
+## Live-wire update — 2026-11-23 07:42Z (superseded by W2 below for control transfer and rung 5)
+
 
 - First target-mind wake built real Fluent Bit 5.0.7 from the pinned public
   source with ASan and drove a malicious Secure-Forward server on 127.0.0.1.
@@ -124,3 +125,24 @@ Rung 5 stays UNKNOWN.
   pre-return fault at line 574, not the canary alone; report and harness
   updated (`reports/fluentbit2shell-livewire.md`,
   `lab/fluentbit2shell/gdb_nocanary.sh`).
+
+### W2 — control transfer and conditional rung 5, 2026-11-23 08:20Z
+
+- The 07:47 "pre-return fault" was diagnosed as x86-64 #GP at `ret`: the
+  chosen `0x414141414141417b` is NON-CANONICAL. With a canonical address at
+  saved-RIP offset 56, a live no-canary 5.0.7 process transferred control to
+  the chosen address (`rip = 0x555556a255c9`, `rbp = 0`, port 20262).
+- A ROP chain carried entirely in the 1000-byte PONG reason (offsets 48/56/
+  64/72/80/88 and a command string at 128) called `system()` on a lab-chosen
+  benign `touch` in the live process. Under gdb ASLR-off this created a marker
+  (port 20263); with NO debugger, using `setarch x86_64 -R` and a fixed
+  minimal environment, port 20269 created the same kind of marker and the
+  victim exited code 2. Full chain, addresses, evidence paths and negative
+  controls: `reports/fluentbit2shell-livewire.md` §4-§6.
+- Fixed-binary and `PONG[1]=true` controls on the identical wire payload
+  created no marker; stock-canary and ASLR-on negatives remain unchanged.
+- Grade now: rungs 1-4 on living bytes; rung 5 AUTHOR-OBSERVED at the labeled
+  no-canary / ASLR-off / fixed-stack / loopback / benign-touch scope, NOT
+  ESTABLISHED — no independent replay and no default-build claim. Next
+  owner: witness, via an explicit replay request; do not relabel earlier
+  pointer-control rows or claim the advisory's root result.

