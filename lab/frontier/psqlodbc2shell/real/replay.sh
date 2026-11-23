@@ -1,7 +1,7 @@
 #!/bin/sh
 # Rebuild pinned psqlODBC tags from provisioned source, link real upstream
-# objects against real-driver.c, and run the two bounded CVE-2026-120061
-# scenarios. Lab-local only; no network, no server, no external probe.
+# objects against real-driver.c, and run the bounded CVE-2026-120061
+# scenarios (including the 16-argument boundary resolved in W146).
 set -eu
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 LAB=$(CDPATH= cd -- "$HERE/.." && pwd)
@@ -43,14 +43,18 @@ build_tree plain-vuln vuln-src gcc "$P0" ''
 build_tree plain-fixed fixed-src gcc "$P0" ''
 build_tree default-vuln vuln-src gcc '-g -O2' ''
 build_tree clang-vuln vuln-src clang "$P0" ''
+build_tree clang-fixed fixed-src clang "$P0" ''
+build_tree clang-asan-vuln vuln-src clang "$A0" '-fsanitize=address'
 
 mkdir -p "$B/evidence"
+args16=$(printf '1,%.0s' $(seq 1 16))
+fn16="{fn CONCAT(${args16%,})}"
 args24=$(printf '1,%.0s' $(seq 1 24))
 fn24="{fn CONCAT(${args24%,})}"
 body200=$(printf '1%.0s' $(seq 1 200))
 date200="{d ${body200}}"
-for cfg in asan-vuln asan-fixed plain-vuln plain-fixed default-vuln clang-vuln; do
-  for spec in "fn24:$fn24" "date200:$date200" "safe_fn:{fn CONCAT(1,2)}"; do
+for cfg in asan-vuln asan-fixed plain-vuln plain-fixed default-vuln clang-vuln clang-fixed clang-asan-vuln; do
+  for spec in "fn16:$fn16" "fn24:$fn24" "date200:$date200" "safe_fn:{fn CONCAT(1,2)}"; do
     tag=${spec%%:*}; sql=${spec#*:}
     out="$B/evidence/replay-$cfg-$tag.out"
     ASAN_OPTIONS=detect_leaks=0 "$B/real-$cfg" "$sql" >"$out" 2>&1 || true

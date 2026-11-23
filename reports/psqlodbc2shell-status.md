@@ -125,14 +125,52 @@ but no PostgreSQL server, DSN, socket or ODBC driver-manager path either.
   observed. At -O2 the functions are inlined; ASan's frame still places
   `param_pos [624,880)` next to `sqltype`, `keyword`, `key`, `relcnv`,
   `buf_small`, `buf`, not next to a saved pointer. clang -O0 rejects the
-  16-argument case with `processParameters closing ) not found` (3x, cause
-  UNKNOWN) and faults at n>=64.
+  16-argument case with `processParameters closing ) not found` (3x);
+  cause was UNKNOWN at W145, resolved in W146 below.
 
 Grade unchanged: rungs 1-4 on real-object layout evidence, no rung 5. Still
-UNKNOWN: live ODBC/SQLPrepare or wire reachability (no local PostgreSQL
-server), pointer control, chosen-offset control-flow datum, ASLR/grooming,
-marker side effect and witness verdict. The advisory's AV:N vector and the
-uninitialized-array limb remain claims, not lab observations.
+UNKNOWN at W145: live ODBC/SQLPrepare or wire reachability (no local
+PostgreSQL server), pointer control, chosen-offset control-flow datum,
+ASLR/grooming, marker side effect and witness verdict. The advisory's AV:N
+vector and the uninitialized-array limb remain claims, not lab observations.
 
-Next: hand to operator/witness for replay; a live-wire claim requires a
-loopback PostgreSQL server and an independently witnessed trigger.
+Next at W145: hand to operator/witness for replay; a live-wire claim requires
+a loopback PostgreSQL server and an independently witnessed trigger.
+
+## Sixteen-argument boundary and clang divergence (2026-11-23 W146, target mind)
+
+Replay driver: `real/replay.sh` now builds eight trees (adds `clang-fixed`
+and `clang-asan-vuln`) and runs the 16-argument boundary case; the full 8x4
+matrix was executed after the edit with rc=0
+(`build/evidence/w146-replay.out`). Raw W146 output:
+`build/evidence/w146-asan-n16.out`, `w146-gdb-clang-n16.out`,
+`w146-gdb-gcc-n16.out`, `w146-clang-asan-n16.out`.
+
+- The first out-of-bounds write occurs at **16 arguments**, not above 16.
+  In `processParameters` the closing `)` at `param_count=15` increments to
+  16 and writes `param_pos[16][0] = param_pos[16][1] = -1` (pinned
+  `convert.c:5656-5657`), one `SQLLEN` past the 16-entry array. gcc and
+  clang ASan both report `WRITE of size 8` at `:5657` for
+  `{fn CONCAT(1,...,16)}`; 15 arguments are clean on both.
+- The clang -O0 rejection at exactly 16 arguments is a stack-layout alias,
+  not a parse difference. gdb at `:5671` shows `param_count=16`,
+  `innerParenthesis=0`; on clang `&param_pos[16][0]` equals the value of the
+  `output_count` argument (`0x7fffffffd4b0`), i.e. `param_consumed` in the
+  caller's `convert_escape` frame. The parser's `-1` write at `:5657` is
+  therefore overwritten by the legitimate `*output_count = F_NewPos(qb)`
+  at `:5660`; the terminator check reads `40 >= 0` and returns
+  "processParameters closing ) not found". On gcc -O0 the same row lands in
+  unused padding (`&param_pos[16]=...d160`, no neighbouring local), the `-1`
+  survives and the query is accepted. 17 arguments are accepted by both
+  plain builds because the terminator check then reads row 17.
+- Fixed tag (gcc and clang, plain and ASan) rejects 16+ arguments before
+  either write with "too many parameters in the escape function call"; the
+  fix also initializes all 16 rows to -1 at
+  `fixed-src/convert.c:5881-5882`.
+- No pointer, saved return address or gadget was written in any measured
+  frame. The clang case shows the OOB row reaching a real caller local, but
+  the legitimate write masks it and the only observed effect is a rejected
+  query. Grade unchanged: rungs 1-4 on real-object evidence, no rung 5.
+  The advisory's AV:N vector and the separate CWE-457 uninitialized-read
+  limb remain claims; W146 observes the OOB terminator row and its
+  layout-dependent alias, not an uninitialized read.
