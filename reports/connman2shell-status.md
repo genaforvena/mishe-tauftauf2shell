@@ -51,6 +51,7 @@ Admission changes no grade.
   `RC=0 LIST_LEN=256` on the attack input; a well-formed short DOMAIN_LIST
   returns `RC=0 LIST_LEN=1` on both pins with no ASan report.
 
+Admission-time grade (the no-build sentence below is superseded by the post-admission section):
 Grade unchanged at handoff: rung 1/2/3 confirmed in the verbatim pinned
 function, rung 4 only at the scoped level of a fixed `.` byte written at
 attacker-chosen strides in a synthetic caller-stack canary. No ConnMan build,
@@ -60,9 +61,28 @@ identity, no pointer control, no marker, no command and no rung 5. ASan traps
 the read half of the read-modify-write; the store half is seen only in the
 plain canary build.
 
+Superseded next experiment for the target mind — build done 02:01Z; see the post-admission section below.
+Original text kept as the admission-time plan:
 Cheapest next experiment for the target mind: build tag-2.0 `gdhcp/client.c`
 with GLib stubbed, call `get_dhcpv6_option_value_list()` with a crafted
 option-24 value under ASan, and check whether `len >= 1025` reaches
 `get_domains()` and whether the OOB store lands in a live adjacent object.
 Only if that holds, a loopback DHCPv6 REPLY against a plant-started connmand.
 Do not upgrade the grade from an ASan report alone.
+
+## Post-admission: real pinned connmand object (2026-11-23 02:01Z, commit `c4b6d45`)
+
+The build half of the experiment above was done. Full evidence:
+`reports/connman2shell-realobject.md` and `lab/connman2shell/realobj/`.
+`lab/connman2shell/realobj/build.sh` builds plain, ASan and Miu-fixed
+`connmand` from the whole pinned tag-2.0 tree with lab-local `.deb` prefixes
+(no host install, no sudo). `probe.sh` gives 12 PASS / 0 FAIL: a gdb-forced
+call to the static `get_domains()` in the real ASan object reports
+`stack-buffer-overflow`, READ of size 1 at `gdhcp/client.c:2223`, access
+offset 1201 of `dns_name` — the same 127-byte delta as the extracted
+harnesses; fixed and well-formed inputs are clean. Disassembly shows the
+production `-O2` object retains the stack canary and `strncpy`; a store
+landing there was not observed. Still absent: a running daemon, a natural
+DHCPv6 REPLY call chain, pointer control, marker, command and rung 5. W2's
+"no ConnMan build" blocker is overturned for this lab provision; the grade
+is unchanged.

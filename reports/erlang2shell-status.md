@@ -53,12 +53,15 @@ appearing before its units. Admission changes no grade.
   write and is ASan-clean; a small positive arity 3 writes in bounds, leaves
   the canary intact and is ASan-clean on both builds.
 
+Admission-time grade (the BEAM-build sentence below is superseded by the post-admission section):
 Grade stays rung 3 ASan-confirmed out-of-bounds write plus rung 4 only at
 direct-call chosen-offset/chosen-value scope. No BEAM build, no live VM, no
 `binary_to_term/1` caller, no network input, no pointer control, no marker,
 no command and no rung 5. The CNA's local vector means network relevance is
 not assumed.
 
+Superseded first experiment — completed 01:5xZ; see the post-admission section below.
+Original text kept as the admission-time plan:
 Next bounded experiment: build a pinned vulnerable-tag OTP erts with ASan
 and call `binary_to_term/1` from an Erlang driver on the crafted ETF (using
 the compressed envelope for the padding), checking whether ASan sees the
@@ -70,3 +73,21 @@ compressed-wire and reachability language as claims until measured. No rung
 5 without a live plant-started process, attacker wire input, a chosen benign
 command, an observed side effect, vulnerable/fixed/safe controls and witness
 replay.
+
+## Post-admission: real erts build and binary_to_term/1 driver (2026-11-23 01:36–01:5xZ, commit `276a200`)
+
+The first experiment above was run. Full evidence: `reports/erlang2shell.md`
+and `lab/erlang2shell/evidence/{real-vm-summary.txt,real-vm-opt.out,real-vm-asan.out}`.
+The pinned vulnerable fix parent `c388a2d1…` built `beam.smp` and an ASan
+`beam.asan.emu` (13 `__asan_*` symbols). A real `binary_to_term/1` driver
+returned `badarg` for `small_80000000`, `small_fffffffe` and
+`forged_compressed`, and `ok TERM={1,2,3}` for the safe term, on both
+emulators, with no ASan log. In real `external.c`, `decoded_size()` checks
+arity against the actual buffer end and the compressed path verifies the
+inflated size, so small ETFs never reach `dec_term()`; the advisory arity
+would need ≥2 GiB of real inflated bytes plus ~17 GiB of process heap. That
+natural-layout case was not run (host-guard risk) and stays UNKNOWN. The
+read-only distributed-decode source review found the same CHKSIZE gate and
+no small-message remote trigger; CNA AV:L stands. Harness rungs 1–4 are
+unchanged: no live-VM corruption, no adjacent object, no pointer, marker or
+command, no rung 5.
