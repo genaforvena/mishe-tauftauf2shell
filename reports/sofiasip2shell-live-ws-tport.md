@@ -273,8 +273,10 @@ Vulnerable full case (`SIA_DEEP_EXTRA=60`, port 19301, rc 134): the shim again
 identifies the physical neighbour as the 528-byte `timers_alloc` array
 (`su_timer.c:201`, `DELTA=0`); the 19-byte allocation at `neighbor+544` is
 `sub_alloc` at `su_alloc.c:500`. The receive callback performs 95 timer adds
-(`_used` 30 -> 125) and overwrites **16 consecutive qwords at array offsets
-520 through +640** with live timer pointers spaced `0x50` bytes apart. Before
+(`_used` 30 -> 125) and overwrites 16 consecutive qwords at array offsets
++520 through +640 with live timer pointers spaced `0x50` bytes apart. Only
++520 lies inside the 528-byte allocation; the 15 qwords from +528 through
++640 are out of bounds and cross the next chunk's header and beyond. Before
 the adds, `+536` was the next chunk's `size` word `0x21`, `+544` and `+552`
 held the 19-byte string's data (`ws\0.127.0` / `.0.1363\0`), `+568` was
 `0x391`, `+576` was `0x388`, and `+584` held an existing heap pointer. After
