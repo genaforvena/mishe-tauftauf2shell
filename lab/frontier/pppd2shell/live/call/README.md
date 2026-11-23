@@ -50,7 +50,7 @@ path or stack-frame state this primitive cannot supply. Normalized evidence and
 hashes are in `evidence/`; raw logs, frames and strace stay in gitignored
 `../raw/`.
 
-## W133 — dlopen constructor from wire bytes (rung 5 candidate)
+## W133 — dlopen constructor from wire bytes (rung 5 ESTABLISHED at labeled scope)
 
 The W132 statement that the pin has no reachable command path is superseded
 for this build: `nm -D` shows `dlopen@GLIBC_2.34`, PLT `0x40cd70`. With
@@ -79,9 +79,14 @@ attacks are byte-identical after normalization (`evidence/HASHES_DLOPEN.txt`,
 `6a8ed407…`). Fixed 2.5.4, short-safe and NULL-callback controls create no
 sentinel and exec no shell.
 
-Grade: observed command execution in a live daemon from attacker wire bytes —
-a rung 5 candidate, **not ESTABLISHED** until independent witness replay;
-the staged-payload precondition must be reported with it.
+Grade: observed command execution in a live daemon from attacker wire bytes
+with vulnerable, fixed, safe-input and NULL-callback controls. Independent
+witness replay (DM #1966, clean `git archive ea972d2`, own rebuild of both
+pins, all six normalized hashes exact, same trace and controls) makes this
+**ESTABLISHED at rung 5 for the pinned non-PIE 2.5.3 lab build only**. Always
+carry the preconditions: pre-staged `.so`, fixed addresses, ASLR left on,
+local PTY; no file-staging primitive or natural daemon layout proven, so no
+stock/PIE-build RCE claim. Details: `reports/pppd2shell-live.md` W133 section.
 
 Changing only the wire command (w133g) with the same staged object changes the
 sentinel content to `PPPD2SHELL_W133_SECOND_COMMAND\n`, confirming the command
