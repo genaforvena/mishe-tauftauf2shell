@@ -9,7 +9,8 @@ from one RFC-1662 HDLC-framed LCP Configure-Request sent by a local PTY peer
 before authentication. The pinned fixed build survives the identical frame.
 This moves rung 3/4 from frontier's verbatim-function direct call to
 **live-process wire scope**. No pointer control, chosen global, command or
-side effect was observed: **rung 5 is not claimed**.
+side effect was observed in this W122 run: **rung 5 is not claimed here**.
+The later W133 section establishes a scoped rung 5 after witness replay.
 
 ## Exact build and setup
 
@@ -300,11 +301,45 @@ wire command bytes; the sentinel and the `/bin/sh` argument changed with them.
 
 Grade: attacker wire input makes a live, plant-started pppd execute a
 lab-chosen benign command with an observed side effect, with vulnerable,
-fixed and safe-input controls. The command bytes come from the wire frame.
-This is a **rung 5 candidate, not yet ESTABLISHED**: independent witness
-replay is owed, and the staged `.so` precondition must be carried with any
-claim. Raw logs and frames stay in the gitignored `live/raw/`; normalized
-evidence and hashes are in `live/call/evidence/HASHES_DLOPEN.txt`.
+fixed, safe-input and NULL-callback controls. The command bytes come from the
+wire frame. This is **ESTABLISHED at rung 5 for this pinned non-PIE 2.5.3 lab
+build**, after the witness replay below. The claim must always travel with
+its material preconditions: a lab-built `.so` pre-staged at a known path on
+the target, fixed `-no-pie` global addresses, library/stack ASLR left on, a
+local PTY, no demonstrated file-staging primitive and no natural daemon layout
+proven. It is not a stock/PIE-build RCE claim. Raw logs and frames stay in the
+gitignored `live/raw/`; normalized evidence and hashes are in
+`live/call/evidence/HASHES_DLOPEN.txt`.
+
+## Witness replay of W133 (DM #1966, 00:29Z)
+
+The witness replayed from its own clean `git archive ea972d2` (which includes
+`cb1da9e`), with no shared-repo edits; tarball and patch SHA-256 matched the
+committed pins. It rebuilt both pins itself: vulnerable 2.5.3 with
+`-no-pie` via `autogen.sh`/`configure`/`make`, fixed 2.5.4 with ASan, and
+confirmed `dlopen@plt 0x40cd70`, `unlink@plt 0x40c4a0`, `nak_buffer 0x467a40`,
+`sigreceived 0x468180`, `inpacket_buf 0x468820` and the wire-command slot
+`0x468888`. Its payload `.so` was compiled from `call/payload.c` with
+`-DWIRE_CMD -DCMD_ADDR=0x468888UL`. All six normalized hashes in
+`HASHES_DLOPEN.txt` were byte-identical to the canonical ones: w133d/e
+`6a8ed407…`, w133f `10f17039…`, w133n `a0a9d62c…`, w133s `5a0512a5…`, w133g
+`f2caa221…`.
+
+On the live plant-started PTY daemon its trace showed `SIGINT`, then
+`openat(payload.so) = 12`, `execve("/bin/sh", ["sh", "-c", "--", "echo
+PPPD2SHELL_W133_WIRE_COMMAN"…])` in a child, then
+`openat(victim, O_WRONLY|O_CREAT|O_TRUNC) = 3`; the sentinel held exactly the
+wire-command string. The w133g causal case changed only the wire bytes with
+the same `.so`, and both the sentinel and the `/bin/sh` argument changed with
+them. Fixed 2.5.4 ignored the duplicate, opened no object, ran no shell and
+left no sentinel; short-safe and NULL-callback runs had no sentinel or exec.
+The chain is source-bound at `term()` (`main.c:1593-1600`) ->
+`notify()` (`main.c:2154-2163`, calling `(*np->func)(np->arg, val)`), with the
+fixed duplicate suppression at `lcp.c:1535-1543`. ASLR state 2, no external
+or network contact, no pppd left running; the later `rc -11` happens after
+the command on the corrupted `the_channel`. No counterexample found.
+Verdict: ESTABLISHED at the exact labeled per-build rung-5 scope, with all
+preconditions above attached.
 
 ## Files
 

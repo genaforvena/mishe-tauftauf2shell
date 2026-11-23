@@ -39,20 +39,27 @@ a duplicate window.
   by two in-tree and one clean `git archive b3ec18d` replay. Operator replay
   18:56Z: rc 0, all checks PASS, nine hashes byte-identical, tracked outputs
   unchanged.
-- Grade: rungs 1/2/3 and rung 4 chosen digest byte at a chosen relative offset
-  at **direct-call scope only**. No pppd process, pty, kernel PPP device, wire
-  negotiation, pointer control or command execution: **no rung 5**. Content is
-  constrained to the repeating `03 05 c2 23 <digest>` pattern by the NAK
-  builder; arbitrary bytes at arbitrary offsets are not established.
-- Witness replay owed. Replay from the repo root:
-  `bash lab/frontier/pppd2shell/harness/run.sh`, then compare
-  `lab/frontier/pppd2shell/EVIDENCE_HASHES.txt` (nine digests) and the 12 PASS
-  lines. Full stage: `reports/frontier-pppd2shell.md`.
-- Next bounded experiment to move up a rung: build pinned 2.5.3 pppd with
-  ASan, spawn it on a local pty slave with the CHAP-only config and an explicit
-  `chap-secrets`, and send one RFC-1662 HDLC-framed LCP Configure-Request with
-  N=301 repeated PAP AUTHTYPE options from the master side. Controls: N=3
-  gives a normal 19-byte CONFNAK with pppd alive; pinned 2.5.4 stays clean;
-  N=300 should expose the second `BCOPY` overflow. All on the local pty. A
-  successful replay upgrades rung 4 from direct-call to a real process; it is
-  still not rung 5 without a chosen pointer or command side effect.
+- Current grade (W133, witness ESTABLISHED 2026-11-23T00:29Z): wire bytes
+  drive a live, plant-started, pinned 2.5.3 `-no-pie` pppd through
+  `fsm_input -> lcp_reqci` into a fake `sigreceived` notifier whose function
+  is `dlopen@plt`; a staged lab `.so` constructor reads the command from the
+  second wire frame and calls `system()`, creating an observed sentinel file.
+  Vulnerable, fixed, safe-input, NULL-callback and causal wire-command-change
+  controls were replayed independently from a clean archive; all six
+  normalized hashes matched. This is **rung 5 for that exact lab build only**.
+  Required preconditions: pre-staged `.so`, fixed `-no-pie` addresses, ASLR
+  left on for library/stack, local PTY; no file-staging primitive or natural
+  daemon layout proven, so no stock/PIE-build RCE claim. Earlier W122 wire
+  reproduction and the W123/W125/W126 chosen-pointer work are rungs 3/4;
+  W132's chosen-argument `unlink` call is rung 4, not a command. Details and
+  witness evidence: `reports/pppd2shell-live.md` (W133 sections).
+- Grade at admission (superseded): direct-call rungs 1/2/3 and rung 4 chosen
+  digest byte at a chosen relative offset, no process, pty, wire negotiation
+  or command. The harness evidence itself is unchanged: 12 PASS / 0 FAIL,
+  nine normalized hashes stable over three replays, witness replayed the
+  frontier claim.
+- Further work (not owed): the rung-5 claim is scoped to the pinned lab
+  build. Establishing a natural daemon layout, a file-staging primitive or a
+  PIE build would be a new claim requiring its own evidence and witness
+  replay. See reports/frontier-pppd2shell.md for the original direct-call
+  stage and reports/pppd2shell-live.md for the live stages.
