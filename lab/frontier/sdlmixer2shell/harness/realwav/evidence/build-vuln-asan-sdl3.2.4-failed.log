@@ -1,0 +1,243 @@
+[1/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_au.c.o
+[2/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_drmp3.c.o
+[3/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_flac.c.o
+[4/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_fluidsynth.c.o
+[5/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_opus.c.o
+[6/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_stb_vorbis.c.o
+[7/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_voc.c.o
+[8/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_aiff.c.o
+[9/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_mpg123.c.o
+[10/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_drflac.c.o
+[11/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_gme.c.o
+[12/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_vorbis.c.o
+[13/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_timidity.c.o
+[14/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_wavpack.c.o
+[15/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_xmp.c.o
+[16/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_sinewave.c.o
+FAILED: [code=1] CMakeFiles/SDL3_mixer-static.dir/src/decoder_sinewave.c.o 
+/usr/bin/clang -DBUILD_SDL -DDECODER_WAV -DSDL_BUILD_MAJOR_VERSION=3 -DSDL_BUILD_MICRO_VERSION=4 -DSDL_BUILD_MINOR_VERSION=2 -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/include -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/codecs -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/build/include-revision -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/include -fsanitize=address -fno-omit-frame-pointer -g -O0 -g -fPIC -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -MD -MT CMakeFiles/SDL3_mixer-static.dir/src/decoder_sinewave.c.o -MF CMakeFiles/SDL3_mixer-static.dir/src/decoder_sinewave.c.o.d -o CMakeFiles/SDL3_mixer-static.dir/src/decoder_sinewave.c.o -c /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_sinewave.c
+In file included from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_sinewave.c:32:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected parameter declarator
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:22: note: to match this '('
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                      ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:26: error: expected ';' at end of declaration list
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                          ^
+      |                          ;
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:11: error: field 'SDL_ALIGNED' declared as a function
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |           ^
+4 errors generated.
+[17/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_raw.c.o
+FAILED: [code=1] CMakeFiles/SDL3_mixer-static.dir/src/decoder_raw.c.o 
+/usr/bin/clang -DBUILD_SDL -DDECODER_WAV -DSDL_BUILD_MAJOR_VERSION=3 -DSDL_BUILD_MICRO_VERSION=4 -DSDL_BUILD_MINOR_VERSION=2 -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/include -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/codecs -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/build/include-revision -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/include -fsanitize=address -fno-omit-frame-pointer -g -O0 -g -fPIC -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -MD -MT CMakeFiles/SDL3_mixer-static.dir/src/decoder_raw.c.o -MF CMakeFiles/SDL3_mixer-static.dir/src/decoder_raw.c.o.d -o CMakeFiles/SDL3_mixer-static.dir/src/decoder_raw.c.o -c /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_raw.c
+In file included from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_raw.c:24:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected parameter declarator
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:22: note: to match this '('
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                      ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:26: error: expected ';' at end of declaration list
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                          ^
+      |                          ;
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:11: error: field 'SDL_ALIGNED' declared as a function
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |           ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_raw.c:96:9: error: call to undeclared function 'SDL_PutAudioStreamDataNoCopy'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+   96 |         SDL_PutAudioStreamDataNoCopy(stream, tdata->const_data + tdata->position, (int) readlen, NULL, NULL);
+      |         ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_raw.c:96:9: note: did you mean 'SDL_PutAudioStreamData'?
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/include/SDL3/SDL_audio.h:1415:34: note: 'SDL_PutAudioStreamData' declared here
+ 1415 | extern SDL_DECLSPEC bool SDLCALL SDL_PutAudioStreamData(SDL_AudioStream *stream, const void *buf, int len);
+      |                                  ^
+5 errors generated.
+[18/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_wav.c.o
+FAILED: [code=1] CMakeFiles/SDL3_mixer-static.dir/src/decoder_wav.c.o 
+/usr/bin/clang -DBUILD_SDL -DDECODER_WAV -DSDL_BUILD_MAJOR_VERSION=3 -DSDL_BUILD_MICRO_VERSION=4 -DSDL_BUILD_MINOR_VERSION=2 -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/include -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/codecs -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/build/include-revision -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/include -fsanitize=address -fno-omit-frame-pointer -g -O0 -g -fPIC -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -MD -MT CMakeFiles/SDL3_mixer-static.dir/src/decoder_wav.c.o -MF CMakeFiles/SDL3_mixer-static.dir/src/decoder_wav.c.o.d -o CMakeFiles/SDL3_mixer-static.dir/src/decoder_wav.c.o -c /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c
+In file included from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:24:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected parameter declarator
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:22: note: to match this '('
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                      ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:26: error: expected ';' at end of declaration list
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                          ^
+      |                          ;
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:11: error: field 'SDL_ALIGNED' declared as a function
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |           ^
+4 errors generated.
+[19/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_spatialization.c.o
+FAILED: [code=1] CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_spatialization.c.o 
+/usr/bin/clang -DBUILD_SDL -DDECODER_WAV -DSDL_BUILD_MAJOR_VERSION=3 -DSDL_BUILD_MICRO_VERSION=4 -DSDL_BUILD_MINOR_VERSION=2 -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/include -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/codecs -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/build/include-revision -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/include -fsanitize=address -fno-omit-frame-pointer -g -O0 -g -fPIC -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -MD -MT CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_spatialization.c.o -MF CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_spatialization.c.o.d -o CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_spatialization.c.o -c /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c
+In file included from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:22:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected parameter declarator
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:22: note: to match this '('
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                      ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:26: error: expected ';' at end of declaration list
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                          ^
+      |                          ;
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:11: error: field 'SDL_ALIGNED' declared as a function
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |           ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:198:32: error: expected parameter declarator
+  198 | static const float SDL_ALIGNED(16) listener_at[4] = { 0.0f, 0.0, -1.0f, 0.0f };  // default "at" for OpenAL listener orientation matrix.
+      |                                ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:198:32: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:198:31: note: to match this '('
+  198 | static const float SDL_ALIGNED(16) listener_at[4] = { 0.0f, 0.0, -1.0f, 0.0f };  // default "at" for OpenAL listener orientation matrix.
+      |                               ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:198:36: error: expected function body after function declarator
+  198 | static const float SDL_ALIGNED(16) listener_at[4] = { 0.0f, 0.0, -1.0f, 0.0f };  // default "at" for OpenAL listener orientation matrix.
+      |                                    ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:199:32: error: expected parameter declarator
+  199 | static const float SDL_ALIGNED(16) listener_up[4] = { 0.0f, 1.0, 0.0f, 0.0f };  // default "up" for OpenAL listener orientation matrix.
+      |                                ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:199:32: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:199:31: note: to match this '('
+  199 | static const float SDL_ALIGNED(16) listener_up[4] = { 0.0f, 1.0, 0.0f, 0.0f };  // default "up" for OpenAL listener orientation matrix.
+      |                               ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:199:36: error: expected function body after function declarator
+  199 | static const float SDL_ALIGNED(16) listener_up[4] = { 0.0f, 1.0, 0.0f, 0.0f };  // default "up" for OpenAL listener orientation matrix.
+      |                                    ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:293:39: error: use of undeclared identifier 'listener_at'
+  293 |     const __m128 at_sse = _mm_load_ps(listener_at);
+      |                                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:294:39: error: use of undeclared identifier 'listener_up'
+  294 |     const __m128 up_sse = _mm_load_ps(listener_up);
+      |                                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:377:28: error: use of undeclared identifier 'listener_at'
+  377 |     SDL_assert( (((size_t) listener_at) % 16) == 0 );  // must be aligned for SIMD access.
+      |                            ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_spatialization.c:378:28: error: use of undeclared identifier 'listener_up'
+  378 |     SDL_assert( (((size_t) listener_up) % 16) == 0 );  // must be aligned for SIMD access.
+      |                            ^
+14 errors generated.
+[20/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_metadata_tags.c.o
+FAILED: [code=1] CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_metadata_tags.c.o 
+/usr/bin/clang -DBUILD_SDL -DDECODER_WAV -DSDL_BUILD_MAJOR_VERSION=3 -DSDL_BUILD_MICRO_VERSION=4 -DSDL_BUILD_MINOR_VERSION=2 -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/include -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/codecs -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/build/include-revision -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/include -fsanitize=address -fno-omit-frame-pointer -g -O0 -g -fPIC -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -MD -MT CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_metadata_tags.c.o -MF CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_metadata_tags.c.o.d -o CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_metadata_tags.c.o -c /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_metadata_tags.c
+In file included from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_metadata_tags.c:28:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected parameter declarator
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:22: note: to match this '('
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                      ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:26: error: expected ';' at end of declaration list
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                          ^
+      |                          ;
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:11: error: field 'SDL_ALIGNED' declared as a function
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |           ^
+4 errors generated.
+[21/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer.c.o
+FAILED: [code=1] CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer.c.o 
+/usr/bin/clang -DBUILD_SDL -DDECODER_WAV -DSDL_BUILD_MAJOR_VERSION=3 -DSDL_BUILD_MICRO_VERSION=4 -DSDL_BUILD_MINOR_VERSION=2 -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/include -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/codecs -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/build/include-revision -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL-release-3.2.4/include -fsanitize=address -fno-omit-frame-pointer -g -O0 -g -fPIC -fvisibility=hidden -Wall -Wextra -Wno-unused-parameter -MD -MT CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer.c.o -MF CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer.c.o.d -o CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer.c.o -c /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c
+In file included from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:24:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected parameter declarator
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                       ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:23: error: expected ')'
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:22: note: to match this '('
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                      ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:26: error: expected ';' at end of declaration list
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |                          ^
+      |                          ;
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:140:11: error: field 'SDL_ALIGNED' declared as a function
+  140 |     float SDL_ALIGNED(16) position3d[4];   // we only need the X, Y, and Z coords, but the 4th element makes this SIMD-friendly.
+      |           ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:211:66: error: no member named 'position3d' in 'struct MIX_Track'; did you mean 'position'?
+  211 |                     MIX_Spatialize(&track->mixer->vbap2d, track->position3d, track->spatialization_panning, track->spatialization_speakers);
+      |                                                                  ^~~~~~~~~~
+      |                                                                  position
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:161:12: note: 'position' declared here
+  161 |     Uint64 position;   // sample frames played from start of file.
+      |            ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:850:66: error: use of undeclared identifier 'SDL_PROP_AUDIOSTREAM_AUTO_CLEANUP_BOOLEAN'
+  850 |     SDL_SetBooleanProperty(SDL_GetAudioStreamProperties(stream), SDL_PROP_AUDIOSTREAM_AUTO_CLEANUP_BOOLEAN, false);
+      |                                                                  ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:1451:80: error: use of undeclared identifier 'SDL_PROP_AUDIOSTREAM_AUTO_CLEANUP_BOOLEAN'
+ 1451 |     SDL_SetBooleanProperty(SDL_GetAudioStreamProperties(track->output_stream), SDL_PROP_AUDIOSTREAM_AUTO_CLEANUP_BOOLEAN, false);
+      |                                                                                ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:1620:86: error: use of undeclared identifier 'SDL_PROP_AUDIOSTREAM_AUTO_CLEANUP_BOOLEAN'
+ 1620 |         SDL_SetBooleanProperty(SDL_GetAudioStreamProperties(track->internal_stream), SDL_PROP_AUDIOSTREAM_AUTO_CLEANUP_BOOLEAN, false);
+      |                                                                                      ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2812:12: error: no member named 'position3d' in 'struct MIX_Track'; did you mean 'position'?
+ 2812 |     track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |            ^~~~~~~~~~
+      |            position
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:161:12: note: 'position' declared here
+  161 |     Uint64 position;   // sample frames played from start of file.
+      |            ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2812:22: error: subscripted value is not an array, pointer, or vector
+ 2812 |     track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |     ~~~~~~~~~~~~~~~~~^~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2812:35: error: no member named 'position3d' in 'struct MIX_Track'; did you mean 'position'?
+ 2812 |     track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                                   ^~~~~~~~~~
+      |                                   position
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:161:12: note: 'position' declared here
+  161 |     Uint64 position;   // sample frames played from start of file.
+      |            ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2812:45: error: subscripted value is not an array, pointer, or vector
+ 2812 |     track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                            ~~~~~~~~~~~~~~~~~^~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2812:58: error: no member named 'position3d' in 'struct MIX_Track'; did you mean 'position'?
+ 2812 |     track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                                                          ^~~~~~~~~~
+      |                                                          position
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:161:12: note: 'position' declared here
+  161 |     Uint64 position;   // sample frames played from start of file.
+      |            ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2812:68: error: subscripted value is not an array, pointer, or vector
+ 2812 |     track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                                                   ~~~~~~~~~~~~~~~~~^~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2852:16: error: no member named 'position3d' in 'struct MIX_Track'; did you mean 'position'?
+ 2852 |         track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                ^~~~~~~~~~
+      |                position
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:161:12: note: 'position' declared here
+  161 |     Uint64 position;   // sample frames played from start of file.
+      |            ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2852:26: error: subscripted value is not an array, pointer, or vector
+ 2852 |         track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |         ~~~~~~~~~~~~~~~~~^~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2852:39: error: no member named 'position3d' in 'struct MIX_Track'; did you mean 'position'?
+ 2852 |         track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                                       ^~~~~~~~~~
+      |                                       position
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:161:12: note: 'position' declared here
+  161 |     Uint64 position;   // sample frames played from start of file.
+      |            ^
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2852:49: error: subscripted value is not an array, pointer, or vector
+ 2852 |         track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                                ~~~~~~~~~~~~~~~~~^~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:2852:62: error: no member named 'position3d' in 'struct MIX_Track'; did you mean 'position'?
+ 2852 |         track->position3d[0] = track->position3d[1] = track->position3d[2] = 0.0f;
+      |                                                              ^~~~~~~~~~
+      |                                                              position
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer_internal.h:161:12: note: 'position' declared here
+  161 |     Uint64 position;   // sample frames played from start of file.
+      |            ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+ninja: build stopped: subcommand failed.

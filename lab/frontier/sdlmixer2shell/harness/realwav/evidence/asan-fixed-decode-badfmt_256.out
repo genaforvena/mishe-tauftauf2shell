@@ -1,0 +1,2 @@
+MODE=decode PATH=badfmt_256.wav AUDIO_DRIVER=dummy MIX_DECODERS=3
+RESULT=LOAD_ERROR ERROR=Audio data is in unknown/unsupported/corrupt format

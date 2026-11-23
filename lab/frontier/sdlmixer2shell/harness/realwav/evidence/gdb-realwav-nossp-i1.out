@@ -1,0 +1,62 @@
+Breakpoint 1 at 0x163a6: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c, line 759.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+MODE=decode PATH=alaw256.wav AUDIO_DRIVER=dummy MIX_DECODERS=3
+SPEC freq=8000 format=33056 channels=1 framesize=4
+
+Breakpoint 1, FetchXLaw (tdata=0x555555583ef0, buffer=0x7fffffffdb70 "UVWXYZ[\\]^_`abcd"..., buflen=1024, lut=0x55555556e080 <MIX_alawToFloat>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:759
+759	        out[i] = lut[buffer[i]];
+FIRST_OOB i=255 length=256 buffer=0x7fffffffdb70 out=0x7fffffffdf6c
+LUT_INDEX=148 LUT_BITS=0x$1 = 0x3d8c0118
+BASE=0x7fffffffdb70
+0x7fffffffe368:	0xa9	0xeb	0xff	0xff	0xff	0x7f	0x00	0x00
+0x7fffffffdf6c:	0x00	0x00	0x00	0x00	0x00	0x04	0x00	0x00
+0x7fffffffdfd8:	0x0000555555560a60
+#2  0x00005555555681db in WAV_decode (track_userdata=0x555555583ef0, stream=0x555555583f70) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:1668
+1668	    const int br = tdata->adata->fetch(tdata, buffer, buflen);  // this will deal with different formats that might need decompression or conversion.
+Stack level 2, frame at 0x7fffffffdfe0:
+ rip = 0x5555555681db in WAV_decode (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:1668); saved rip = 0x555555560a60
+ called by frame at 0x7fffffffe020, caller of frame at 0x7fffffffdb50
+ source language c.
+ Arglist at 0x7fffffffdfd0, args: track_userdata=0x555555583ef0, stream=0x555555583f70
+ Locals at 0x7fffffffdfd0, Previous frame's sp is 0x7fffffffdfe0
+ Saved registers:
+  rbp at 0x7fffffffdfd0, rip at 0x7fffffffdfd8
+$2 = (Uint8 (*)[1024]) 0x7fffffffdb70
+
+Breakpoint 1, FetchXLaw (tdata=0x555555583ef0, buffer=0x7fffffffdb70 "UVWXYZ[\\]^_`abcd"..., buflen=1024, lut=0x55555556e080 <MIX_alawToFloat>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:759
+759	        out[i] = lut[buffer[i]];
+AT_I1 i=1 length=256 buffer=0x7fffffffdb70 out=0x7fffffffdf6c
+LUT_INDEX=86 LUT_BITS=0x$3 = 0xbae001c0
+BASE=0x7fffffffdb70
+0x7fffffffdf6c:	0x00	0x00	0x00	0x00	0x00	0x04	0x00	0x00
+0x7fffffffdfd8:	0x58	0x01	0xac	0xbc
+#0  FetchXLaw (tdata=0x555555583ef0, buffer=0x7fffffffdb70 "UVWXYZ[\\]^_`abcd"..., buflen=1024, lut=0x55555556e080 <MIX_alawToFloat>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:759
+#1  0x0000555555569afa in FetchALaw (tdata=0x555555583ef0, buffer=0x7fffffffdb70 "UVWXYZ[\\]^_`abcd"..., buflen=1024) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:771
+#2  0x00005555555681db in WAV_decode (track_userdata=0xbd7401e8bd7c01f8, stream=0xbd6401c8bd6c01d8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:1668
+#3  0xbca40148bcac0158 in ?? ()
+#2  0x00005555555681db in WAV_decode (track_userdata=0xbd7401e8bd7c01f8, stream=0xbd6401c8bd6c01d8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:1668
+1668	    const int br = tdata->adata->fetch(tdata, buffer, buflen);  // this will deal with different formats that might need decompression or conversion.
+Stack level 2, frame at 0x7fffffffdfe0:
+ rip = 0x5555555681db in WAV_decode (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:1668); saved rip = 0xbca40148bcac0158
+ called by frame at 0x7fffffffdfe8, caller of frame at 0x7fffffffdb50
+ source language c.
+ Arglist at 0x7fffffffdfd0, args: track_userdata=0xbd7401e8bd7c01f8, stream=0xbd6401c8bd6c01d8
+ Locals at 0x7fffffffdfd0, Previous frame's sp is 0x7fffffffdfe0
+ Saved registers:
+  rbp at 0x7fffffffdfd0, rip at 0x7fffffffdfd8
+sdl_assert_data = {always_ignore = false, trigger_count = 0, condition = 0x55555556da61 "tdata->current_i"..., filename = 0x0, linenum = 0, function = 0x0, next = 0x0}
+sdl_assert_data = {always_ignore = false, trigger_count = 0, condition = 0x55555556daa5 "tdata->current_i"..., filename = 0x0, linenum = 0, function = 0x0, next = 0x0}
+sdl_assert_data = {always_ignore = false, trigger_count = 0, condition = 0x55555556dad7 "tdata->seekblock"..., filename = 0x0, linenum = 0, function = 0x0, next = 0x0}
+sdl_assert_data = {always_ignore = false, trigger_count = 0, condition = 0x55555556daf5 "tdata->current_i"..., filename = 0x0, linenum = 0, function = 0x0, next = 0x0}
+sdl_assert_data = {always_ignore = false, trigger_count = 0, condition = 0x55555556db23 "tdata->current_i"..., filename = 0x0, linenum = 0, function = 0x0, next = 0x0}
+sdl_assert_data = {always_ignore = false, trigger_count = 0, condition = 0x55555556cc5a "buflen > 0", filename = 0x0, linenum = 0, function = 0x0, next = 0x0}
+sdl_assert_data = {always_ignore = false, trigger_count = 0, condition = 0x55555556da61 "tdata->current_i"..., filename = 0x0, linenum = 0, function = 0x0, next = 0x0}
+tdata = 0xbd140128bd1c0138
+seekblock = 0xbd040108bd0c0118
+decoded_framesize = -1143471696
+available_bytes = 13447749861717836800
+buffer = "UVWXYZ[\\]^_`abcd"...
+buflen = 1024
+mod = 0
+br = 1

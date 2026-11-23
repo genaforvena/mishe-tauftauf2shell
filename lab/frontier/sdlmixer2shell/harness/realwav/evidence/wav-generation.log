@@ -1,0 +1,10 @@
+alaw256.wav: tag=6 data=256 bytes size=300
+ulaw256.wav: tag=7 data=256 bytes size=300
+alaw8.wav: tag=6 data=8 bytes size=52
+pcm8_256.wav: tag=1 data=256 bytes size=300
+badfmt_256.wav: tag=4660 data=256 bytes size=300
+alaw256.wav sha256 b180dc1e14ad783dec2f62e403359b8614b9b94a1365b32a23d9f65de56173bb
+ulaw256.wav sha256 e8a2af618e3888f494886007921a1f25bc78ef220c127a7430dd33241f99a966
+alaw8.wav sha256 f7ade48bf269ae88a9bda1e69bea1f42dcfe32f6bcb0720678f724d1b572a158
+pcm8_256.wav sha256 251e07868a875209e6321385d0b0cea6ed5ede4e7e8dba90e4905d794ecbbf0c
+badfmt_256.wav sha256 03764bdbdaba43aa9fca9071213645a83e1de93dd10b97e3e63e761c665db658

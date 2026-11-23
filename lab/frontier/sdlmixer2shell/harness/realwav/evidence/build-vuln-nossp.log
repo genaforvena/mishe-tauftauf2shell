@@ -1,0 +1,22 @@
+[1/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_flac.c.o
+[2/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_stb_vorbis.c.o
+[3/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_drflac.c.o
+[4/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_drmp3.c.o
+[5/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_gme.c.o
+[6/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_mpg123.c.o
+[7/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_opus.c.o
+[8/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_aiff.c.o
+[9/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_au.c.o
+[10/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_fluidsynth.c.o
+[11/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_vorbis.c.o
+[12/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_timidity.c.o
+[13/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_voc.c.o
+[14/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_wavpack.c.o
+[15/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_xmp.c.o
+[16/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_sinewave.c.o
+[17/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_metadata_tags.c.o
+[18/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_wav.c.o
+[19/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer_spatialization.c.o
+[20/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_raw.c.o
+[21/22] Building C object CMakeFiles/SDL3_mixer-static.dir/src/SDL_mixer.c.o
+[22/22] Linking C static library libSDL3_mixer.a

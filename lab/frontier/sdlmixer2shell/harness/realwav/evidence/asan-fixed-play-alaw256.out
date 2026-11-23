@@ -1,0 +1,3 @@
+MODE=play PATH=alaw256.wav AUDIO_DRIVER=dummy MIX_DECODERS=3
+PLAY started=1
+RESULT=OK still_playing=0
