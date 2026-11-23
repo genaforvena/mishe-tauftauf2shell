@@ -153,7 +153,7 @@ FAIL with trace `e364f756…c6c98`.
 
 ## Plain-build saved-RIP probe (W165, 2026-11-23)
 
-The remaining bounded lane is closed with a negative. A separate plain
+One bounded lane was closed with a negative. A separate plain
 (no-ASan) real-library build with the distro's default stack protector was
 made from the same lab-patched source (`src/libgphoto2-2.5.34-plain`,
 `CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer'`, installdir-plain, driver
@@ -167,3 +167,26 @@ chosen control-flow target executes. Grade unchanged: rung 4 chosen bytes
 at a real control-flow slot, not IP control; no rung 5. Raw output and build
 recipe: `evidence/real-plain-gdb-rip.out`. The build tree and driver are
 local lab artifacts, not committed.
+
+## Partial-reply / canary-leak lane (W166, 2026-11-23)
+
+The remaining idea was to separate the stack write from the heap source
+over-read with a short device reply, preserving the canary while still
+reaching a control-flow slot or heap metadata. Measured on the plain build,
+it fails structurally, not by chance. At the `:154` breakpoint `info` starts
+at `rbp-16440`: buffer end `info+0x4020`, canary `info+0x4028`, the source
+byte that lands on the next chunk's size field `info+0x4030`, saved RIP
+`info+0x4038`. Any write that reaches the metadata or RIP source must pass
+the canary; any write that stops before it leaves those bytes uncontrolled.
+With a full reply the top size becomes `0x5a5a…` but the process aborts at
+`__stack_chk_fail` (`rc=134`). With a reply capped at `0x3E28` bytes the
+process survives (`gp_camera_init rc=0`) and the source over-read copies the
+live canary into `priv->table+0x3FF8` — verified equal to `rbp-8` in gdb,
+randomized between runs — while the top size becomes a leftover stack
+pointer. The next real consumer allocation aborts:
+`gp_camera_file_get()` for the table entry holding the canary ends in
+`malloc(): corrupted top size` (`rc=134`), so the copy is not
+consumer-visible. `table` is followed by the top chunk (original size
+`0x129d1`), not a live pointer. Grade unchanged; pins, committed vusb patch,
+harness and witness verdict untouched. Commands, local-only patch recipe and
+raw output: `evidence/real-plain-partial-write.out`.

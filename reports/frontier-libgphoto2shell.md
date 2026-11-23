@@ -21,7 +21,10 @@ owns no further work on this target.
   `jl2005c.c:152`. Treated as a claim and reproduced locally below.
 - Affected: libgphoto2 through 2.5.34, the newest tag observed. The advisory's
   affected/patched version fields are Unknown; the fix is commit-only as of
-  this wake, so the numeric fixed version is **UNKNOWN**.
+  this wake, so the numeric fixed version is **UNKNOWN**. Rechecked
+  2026-11-23: `git ls-remote --tags` still ends at v2.5.34 and the GHSA is
+  unchanged since 2026-11-02; advisory commit `af3b8e9` is the merge of the
+  two already-tracked fixes.
 - Fix: commit `6a3393dd996502457ab965432cf0b2035278825e` (2026-10-28,
   "jl2005c: reject an allocation table that does not fit the buffers"), with a
   separate commit `30bf7ace6d47cfe1232ea73bde2aceb95aba4bfb` for issue
@@ -166,3 +169,17 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   before `ret`, so no chosen control-flow target executes. This is chosen
   bytes at a real control-flow slot, not IP control; rung 5 stays UNKNOWN.
   Raw: `lab/frontier/libgphoto2shell/evidence/real-plain-gdb-rip.out`.
+
+- Partial-reply / canary-leak lane (W166): on the plain build, `info` starts
+  at `rbp-16440`; the canary is at `info+0x4028`, the memmove source byte
+  that lands on the next chunk's size field at `info+0x4030`, saved RIP at
+  `info+0x4038`. A device reply capped at 0x3E28 bytes preserves the canary
+  (`gp_camera_init rc=0`) and the source over-read copies the live canary
+  into `priv->table+0x3FF8` (gdb-verified equal, randomized per run), but the
+  same copy overwrites the heap top size with a leftover stack pointer. A
+  real `gp_camera_file_get()` of the entry holding the canary dies at
+  `malloc(): corrupted top size` (`rc=134`) before returning bytes. A full
+  reply controls the top size but destroys the canary. No device-only write
+  can reach either target while preserving the canary; grade unchanged.
+  Raw output and local-only patch recipe:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-partial-write.out`.
