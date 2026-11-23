@@ -75,11 +75,14 @@ no source or build change, daemon killed by gdb's `quit`.
   `size=2048`, `*pos=2066`, `len=63509`, `subid_list_length=20`;
   `packet == g_udp_client.packet` evaluated to 1.
 - `&g_udp_client.packet[2048]=0x55555558995e` and
-  `&g_udp_client.size=0x555555589960` identify the first bytes past the
-  logical packet as the global client's `size_t size` field (2048 → little
-  endian `00 08 00 00 ...`). The `0x08` at logical offset 2051 is that
-  field's second byte and lands byte-exact in `subid_list[5] = 8`; the other
-  OOB-fed subids are 0 from the zero pad after the struct.
+  `&g_udp_client.size=0x555555589960` put two alignment padding bytes at
+  logical offsets 2048..2049, followed by the global client's `size_t size`
+  field from offset 2050 (2048 → little endian `00 08 00 00 00 00 00 00`).
+  The `0x08` at logical offset 2051 is that field's second byte and lands
+  byte-exact in `subid_list[5] = 8`; the other OOB-fed subids are 0 from the
+  padding and the zeroed bytes after the struct. The gdb `x` label in the
+  transcript calls the whole dump "g_udp_client.size"; the address pair above
+  is the precise boundary.
 - This is the harness's scoped rung 4 reproduced in the real daemon: an
   attacker-chosen declared length drives the walk 18 bytes past
   `client->packet` and mixes adjacent global-struct bytes into the parsed OID.
@@ -93,7 +96,7 @@ no source or build change, daemon killed by gdb's `quit`.
   `size-len+1` is still `2`, `1`, `0`. Declared `2050` and `65535` wrap the
   bound to `SIZE_MAX` and both produce `oob=18 pos=2066 subids=20 subid5=8`.
   The read extent saturates at 18 bytes for every bypassing length: the
-  adjacent bytes are the size field and zero padding, none are ASN.1
+  adjacent bytes are zero padding then the size field, none are ASN.1
   continuation bytes, so `MAX_NR_SUBIDS=20` always stops the walk at offset
   2066. This is the measured answer to "how much adjacent memory can an
   attacker-chosen BER length read in the natural layout".
@@ -108,11 +111,33 @@ ESTABLISHED in the real plant-started daemon — a crafted loopback GET reads
 guard boundary at declared length 2049/2050. No wire-level ASan report, no
 adjacent-object identity proof, no pointer control, no marker, no command and
 no rung 5. Frontier's fixed-build and safe-input controls still stand; they
-were not re-run under gdb. No independent witness verdict exists yet.
+were not re-run under gdb.
 
-Next: witness replay of `wire/gdb/run_gdb.sh` and `wire/gdb/run_sweep.sh`. A
-wire-level ASan report would require a heap-packet variant — a separate
-bounded change that must be labeled instrumented, not verbatim upstream bytes.
-Any disclosure beyond the demonstrated byte stays a claim. No rung 5 without
-a live wire-only trigger, chosen benign command, observed side effect,
+Witness W138 (2026-11-23) replayed the claim from `git archive 4096b47` in a
+fresh `/tmp` build of the pinned tarball: harness rc 0, PASS=43 FAIL=0,
+TRACE_SHA256 `0146b9b5...e9859` byte-identical to canonical;
+`wire/gdb/run_gdb.sh` reproduced all 18 OOB reads at offsets 2048..2065, the
+cap dump (`size=2048`, `*pos=2066`, `len=63509`, subids=20, `subid_list[5]=8`,
+`packet == g_udp_client.packet`) and the whole `gdb.out` byte-identically
+except the stack `value` address; `run_sweep.sh` and the earlier
+2008/2009/2010 negatives also reproduced. A debugger-only mutation of size at
+`decode_oid` entry changed the adjacent bytes byte-exact, supporting rather
+than contradicting the read claim; it is not a wire-only control. Verdict:
+ESTABLISHED at the labeled scope, no grade change, no rung 5.
+
+Next: no heap-packet rebuild. The 2048-byte heap harness already gives the
+ASan rung-3 crossing; the live daemon's natural layout is a global struct with
+no redzone, and an instrumented heap-packet daemon would be an artificial
+layout that cannot raise the grade beyond a wire-level rung-3 report. Any
+disclosure beyond the demonstrated byte stays a claim. No rung 5 without a
+live wire-only trigger, chosen benign command, observed side effect,
 vulnerable/fixed/safe controls and witness replay.
+
+Lab scope note: the upstream daemon binds INADDR_ANY for both UDP
+(`mini-snmpd.c:575`) and TCP (`:626`), despite every probe being sent to
+127.0.0.1; the witness flagged this as a no-grade NIT. The pinned `-I lo`
+option (SO_BINDTODEVICE) was tested working on 2026-11-23 (port 16191, daemon
+logged "on interface lo"), but is not applied to the canonical scripts here:
+it would change transcripts the witness already replayed byte-for-byte. Add
+`-I lo` to the five plant-started daemon scripts at the next evidence
+regeneration and re-witness the changed transcripts.
