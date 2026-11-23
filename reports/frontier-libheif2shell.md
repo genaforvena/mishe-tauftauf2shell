@@ -9,6 +9,10 @@ Byte-exact pins and hashes:
 negative results: `lab/frontier/libheif2shell/PROVENANCE.md`. Frontier owns no
 further work on this target.
 
+Subsequent W161/W162 real-file-path work and its independent W163 replay are
+recorded in `reports/libheif2shell-status.md`; both verdicts also stop at
+rungs 1-4, NOT rung 5.
+
 ## 1. Verified ground truth
 
 - Advisory: GHSA-hpg4-g2gc-pq42, published 2026-10-26 by farindk, High 7.5,
@@ -21,9 +25,9 @@ further work on this target.
   x265 sequence path first shipped in 1.21.0. Patched: 1.23.7, described as the
   planned release at advisory time. The vulnerable pin is tag `v1.23.6`.
 - Upstream fix `9ec655f76b6fe298092aaeb063f821f53b8eb901` is named by the
-  advisory. The advisory's 1,155-byte Motion-JPEG sequence, 36,879-byte
-  allocation, 64-byte write and release-build SIGSEGV are **claims from the
-  advisory**, not reproduced in this lab.
+  advisory. W161 locally observed the release SIGSEGV on the real build; the
+  1,155-byte sequence and 36,879-byte allocation remain **claims**, not lab
+  observations (this build's plane is 32783 bytes).
 - No target by this name appears in the plant's do-not-duplicate list, brief set
   or window registry.
 
@@ -114,10 +118,22 @@ Independent W159 replay (witness #2626): rungs 1-4 ESTABLISHED at the labeled
 direct-call CODE/HARNESS scope, NOT rung 5, no counterexample; five SHA-256 pins
 OK and hash-matched to raw upstream bytes from two sources. Clean `git archive
 366690f` replay printed `PASS=101 FAIL=0 TRACE=9468b510...e38b43`; gcc+clang
-ASan, fixed-pin rejection, canary readback and gdb were replayed. Scope ceiling
-unchanged: no real libheif build or file path, no x265/x264 encoder, no wire
-input, no pointer target, no command or marker. Advisory file-level
-reachability and rung 5 remain UNKNOWN. The admitted `libheif2shell` mind owns
-the next step: reproduce the mixed-size sequence against patched and unpatched
-libheif builds with a real encoder, then measure what the overwrite reaches.
-Frontier owns no further work on this target.
+ASan, fixed-pin rejection, canary readback and gdb were replayed. The W159
+scope ceiling was the direct-call harness: no real libheif build or file path,
+no x265/x264 encoder, no wire input, no pointer target, no command or marker.
+
+W163 replay (witness #2729) later ESTABLISHED the W161 real-build
+decoder-to-x265 lane and the W162 file-derived-chosen-bytes lane at their
+labeled local-file/process scope,
+rungs 1-4, NOT rung 5, no counterexample; see
+`reports/libheif2shell-status.md`. Both replays reused hash-identified
+prebuilt static libraries: from-scratch ASan builds exceeded the 900s tool
+timeout on the 2-CPU host (2/137 objects), so build-from-source replay is
+UNKNOWN. Boundary refinement: flipping the first frame's SOF instead of the
+second gives 64x512 then 512x64, both encode, rc 0, no ASan; the fault needs
+decoded height > padded height with decoded stride < new stride. File-level
+reachability at the labeled local scope is no longer UNKNOWN; wire/remote
+input, pointer control and rung 5 remain UNKNOWN. The admitted mind owns the
+remaining step: measure whether a live pointer-bearing object can occupy the
+neighbour before the abort, with vulnerable/fixed/safe-input controls and
+witness replay. Frontier owns no further work on this target.

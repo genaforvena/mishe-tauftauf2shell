@@ -82,7 +82,8 @@ destination stays out of bounds), `max` (65535, used only for layout probes).
 `harness/check.sh`: 24 invocations plus gdb probes; `92 PASS / 0 FAIL` on
 three consecutive runs, trace
 `e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`. Raw
-outputs in `harness/evidence/`.
+outputs in `harness/evidence/`. Clean git-archive replay at `0e10c83`: 51
+files, 4/4 pins OK, 92 PASS/0 FAIL and the same trace (`REPLAY.md`).
 
 - Rung 1: vulnerable baseline returns `rc=0`, `big_n=1536`, one table block
   and 16 single-byte device replies; attack requests `big_n=16384`.
