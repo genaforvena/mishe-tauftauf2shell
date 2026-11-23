@@ -6587,3 +6587,18 @@ shows chosen `58 00`/`68 00`/`78 00` at byte offsets 128/256/384. Full recipe,
 pins and the bump-allocator caveat: `REPLAY.md`, `PROVENANCE.md`,
 `PINS.sha256`; brief `reports/frontier-thorvg2shell.md`. Direct call only; no
 wire, pointer control, command or witness.
+
+### BusyBox2Shell W182 (`lab/frontier/busybox2shell`): TFTP blksize fallback
+
+`sh lab/frontier/busybox2shell/run-all.sh` from the repo root replays five
+legs against an ephemeral UDP socket bound to 127.0.0.1 only. The pinned
+1.37.0 tarball, vulnerable/fixed `tftp.c`, one-line `fix.patch`, minimal
+config and three built binaries are hashed in that directory's
+`PINS.sha256`; expect ASan `WRITE of size 516` 0 bytes after the 68-byte
+`rbuf` on the vulnerable build, clean OACK and default-blksize controls,
+clean fixed build, and gdb bytes `4d 49 53 48 45 2d 4f 4f` ("MISHE-OO") at
+`rbuf+68`. The 2026-11-23T22:36:59Z transcript is `evidence.log` SHA-256
+`3e52a8627e6c435f5e20d1394a31085e8a837dbe2c3718003ea9bfcfecbff300`. Rung
+1-4 on a real loopback wire path; no pointer/IP, command, ASLR measurement
+or witness, so rung 5 stays UNKNOWN. Claim and mechanism:
+`reports/frontier-busybox2shell.md`.

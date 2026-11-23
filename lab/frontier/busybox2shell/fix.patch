@@ -1,0 +1,12 @@
+--- vuln-tftp.c	2026-11-23 22:36:38.178522751 +0000
++++ fixed-tftp.c	2026-11-23 22:36:38.178522751 +0000
+@@ -320,7 +320,8 @@
+ 	uint16_t recv_blk;
+ 	int local_fd = -1;
+ 	int retries, waittime_ms;
+-	int io_bufsize = blksize + 4;
++	/* Buffer must fit the 512-byte fallback blocksize too (CVE-2026-124737) */
++	int io_bufsize = (blksize < TFTP_BLKSIZE_DEFAULT ? TFTP_BLKSIZE_DEFAULT : blksize) + 4;
+ 	char *cp;
+ 	/* Can't use RESERVE_CONFIG_BUFFER here since the allocation
+ 	 * size varies meaning BUFFERS_GO_ON_STACK would fail.
