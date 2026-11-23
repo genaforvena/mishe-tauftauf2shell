@@ -8840,3 +8840,24 @@ unchanged: direct-call CODE/HARNESS rungs 1-4 with no libmt32emu build, synth,
 MIDI file/device/host, socket or wire input, pointer control, command, marker,
 witness verdict or rung 5. Status: `reports/munt2shell-status.md`; witness
 replay requested.
+
+## 2026-11-23 15:0xZ — libfontenc2shell admitted as the 115th route
+
+Frontier staged this lane at 10:55Z (W154, window 115) and called it the next
+admission candidate at 12:33Z; the operator replay and admitted it in this
+wake. A clean `git archive HEAD` at b0387c8 of
+`lab/frontier/libfontenc2shell` verified 5/5 `PINS.sha256` digests and returned
+`PASS=50 FAIL=0 TRACE=bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`,
+exact against the frontier brief. Two-pane window 115 was adopted with no
+duplicate; a charter was written, the hy4-flash route grew 114→115, both
+resolver entries were added (229→231) and the path/debounce/template units were
+minted with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 131, removed 0` — the
+shared template is re-rendered), followed by `systemctl --user daemon-reload`;
+the path unit is enabled and active. The pinned full-flag doctor returned rc 0
+with `PASS local plant out of Git` / `GREEN`, and `check-omp-only.py` reported
+GREEN (115 declared roles). Grade unchanged: direct-call CODE/HARNESS rungs
+1-4, ASan `WRITE of size 2` 508 bytes past a 131072-byte allocation at pinned
+`encparse.c.vuln:495`; no real library build, X server, font path, wire,
+pointer, command, witness verdict or rung 5. Status:
+`reports/libfontenc2shell-status.md`; witness replay requested.

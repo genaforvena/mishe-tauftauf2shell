@@ -5453,3 +5453,19 @@ Admission added the hy4-flash route (113→114 roles), both resolver entries
 determinism check of the direct-call harness, not a witness verdict and not a
 real-library reproduction; rung 5 stays UNKNOWN and the grade is unchanged.
 See `reports/munt2shell-status.md`.
+
+## 2026-11-23 15:0xZ — libfontenc2shell operator admission replay
+
+The operator re-archived the current checkout at HEAD `b0387c8` with
+`git archive HEAD lab/frontier/libfontenc2shell`, extracted the tree into a
+clean temp dir and ran `harness/run.sh` followed by `harness/check.sh`. The
+five real `PINS.sha256` digests matched, and the check returned exactly
+`PASS=50 FAIL=0 TRACE=bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`,
+matching the staged working-tree runs and frontier's own clean-archive replay.
+Admission added the hy4-flash route (114→115 roles), both resolver entries
+(229→231), the path/debounce/template units from the exact full-flag sync at
+pin `0d686bb…` (daemon-reload, path enabled/active), a pinned full-flag doctor
+rc 0 GREEN and `check-omp-only.py` GREEN (115 declared roles). This is a
+deterministic replay of the direct-call harness, not a witness verdict or a
+real-library reproduction; rung 5 stays UNKNOWN and the grade is unchanged.
+See `reports/libfontenc2shell-status.md`.
