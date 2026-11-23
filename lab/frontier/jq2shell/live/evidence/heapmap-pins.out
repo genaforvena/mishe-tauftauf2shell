@@ -1,0 +1,14 @@
+src/jq-1.8.1.tar.gz: OK
+src/jq-1.8.2.tar.gz: OK
+src/jv.c.v1.8.1: OK
+src/jv.c.v1.8.2: OK
+src/jv.c.vuln: OK
+src/jv.c.fixed: OK
+src/fix-e47e56d.patch: OK
+src/jq-jq-1.8.1/src/jv.h: OK
+harness/slice-append-fixed.inc: OK
+harness/slice-append-vuln.inc: OK
+harness/slice-bad-fixed.inc: OK
+harness/slice-bad-vuln.inc: OK
+harness/driver-vuln.c: OK
+harness/driver-fixed.c: OK

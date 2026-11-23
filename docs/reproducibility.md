@@ -4594,6 +4594,47 @@ stay UNKNOWN and are not passes. W160's clean replay returned rc 0 in 65 s
 with byte-identical normalized logs; see `reports/jq2shell-status.md`.
 Do not report the stalled runs as passes.
 
+## 2026-11-23 13:4xZ — jq2shell live heap neighbour map
+
+From the repo root run `bash lab/frontier/jq2shell/live/heapmap.sh`. It
+verifies the 14 pins, builds hash-pinned **plain** (no `--enable-asan`) jq
+1.8.1 and 1.8.2 with `-g -O0 -fno-omit-frame-pointer` under gitignored
+`build/heapmap/`, then drives
+`("ABCD"*268435456) as $s | ($s+$s) | length` under gdb in the real glibc
+allocator. The record cgroup guard
+(`memory.max=2147483648`, `memory.high=1610612736`) is unchanged; the single
+aliased ~1 GiB string is inside it. Expected `HEAPMAP-PASS`, rc 0:
+
+- The 208-byte `struct jv_parser` from `src/jv_parse.c:711` ← `main.c:652` is
+  the chunk immediately after the 49-byte undersized string allocation
+  (`jvp_string_alloc(32)` → `sizeof(jvp_string)+32+1 = 49` → 64-byte glibc
+  chunk; next chunk's size field at `data+40`, user data at `data+48`).
+- `APPEND currlen=1073741824 len=1073741824 allocsz=32`,
+  `ADJACENT chunk_size=225`. Letting the real ~1 GiB memcpy fault naturally
+  at the end of `[heap]` leaves the chosen `41 42 43 44` pattern repeating in
+  the neighbour's first 64 bytes.
+- Controls: plain 1.8.2 rejects with rc 5 `String too long`; vulnerable 1.8.1
+  with `("x"*1000) as $s | ($s+$s) | length` takes the same slow path with
+  `allocsz=4000`, prints `2000` and does not fault.
+
+Evidence: `live/evidence/heapmap-{vuln,safe,summary,pins,guard}.out`. Two
+consecutive runs were byte-identical: `heapmap-vuln.out`
+`f5b939bc6a470261f0a2ce4bfe2e89c2f6d96abe68b41043593bdb9ddec4322a`,
+`heapmap-safe.out`
+`6585e60cce4b4c06ec3ddba4ab509c173d676cd68fa4afd48c1b6ca59fd0b6f7`,
+`heapmap-summary.out`
+`22b9c5d8df1618b3b8a787af6c23d32eff5fc2d99823b29048a2e105a3367981`.
+Raw gdb transcripts and both ignored build trees stay under `build/heapmap/`.
+The bytes are chosen data in a live heap object under a debugger; no code
+runs between the overwrite and the fault, so this is rung-4 mechanics, not
+rung 5. A witness replay from a clean archive is still pending.
+
+Replay needs a low baseline: three later attempts in the same wake stalled
+before the first breakpoint while creating the 1 GiB string, with
+`memory.current` near 550 MB and several peer 1 GiB jobs on the host; a direct
+1 GiB repeat timed out at 40 s in that window. Those are preserved UNKNOWN
+guard/contention observations, not passes and not code failures.
+
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 
 W17 extends the `-O2` saved-RIP byte map two caller frames deeper on the

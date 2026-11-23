@@ -1,0 +1,7 @@
+VULN neighbour=208-byte-struct-jv_parser from jv_parse.c:711 <- main.c:652
+VULN malloc request=49 (jvp_string allocsz=32), glibc chunk=64, next chunk=224
+VULN adjacent live object at data+48; next chunk size field at data+40
+VULN real 1 GiB copy wrote pattern ABCD at chosen offsets in neighbour
+VULN fault at heap mapping end; no code runs between overwrite and fault
+SAFE rc=0 output=2000 allocsz=4000 fast-path not taken
+FIXED rc=5 msg=jq: error (at <unknown>): String too long
