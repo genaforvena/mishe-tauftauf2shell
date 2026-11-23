@@ -7,6 +7,9 @@ p-release
 vuln/*.inc
 fixed/*.inc
 release/*.inc
+evidence/build-*.log
+evidence/run4-console.txt
+evidence/run5-console.txt
 evidence/sweep.txt
 evidence/read-vuln-*.txt
 evidence/run1-console.txt
