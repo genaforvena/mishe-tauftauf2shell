@@ -75,6 +75,11 @@ files in `harness/evidence/`.
 - Determinism: `PASS=50 FAIL=0`,
   `TRACE=bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`
   on three consecutive runs.
+  A clean `git archive 64e3c54 lab/frontier/libfontenc2shell` replay in
+  `/tmp/lf2s-replay` regenerated all eight binaries and reproduced
+  `PASS=50 FAIL=0` with the identical trace; all five `PINS.sha256` digests
+  verified there. The same recipe is recorded in
+  `docs/reproducibility.md`.
 - Negative result: the advisory's impact is local and conditional (injecting
   enc files into the X server); no X server, `.enc` file delivery path, real
   font backend, allocator steering, pointer control, ROP, command or witness

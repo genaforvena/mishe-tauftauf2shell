@@ -4453,3 +4453,22 @@ no-ops; stale-word indices 296/304/328/336/344/392/408 leave the process
 alive, and fixed and short-input controls are clean. No grade change:
 author-only, unwitnessed, no chosen byte, command or rung 5. Raw logs and
 frames: `lab/frontier/vrpn2shell/out-w17-*/` and `reports/vrpn2shell.md`.
+
+## 2026-11-23 10:5xZ — libfontenc2shell staged by frontier W154 (not admitted)
+
+`git archive 64e3c54 lab/frontier/libfontenc2shell | tar -x -C "$T"` from a
+fresh temporary directory, then `bash "$T/lab/frontier/libfontenc2shell/harness/run.sh"`
+and `bash "$T/lab/frontier/libfontenc2shell/harness/check.sh"` reproduce
+`PASS=50 FAIL=0` with normalized trace
+`bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`, identical
+to three working-tree runs; all five `PINS.sha256` digests verify. The harness
+includes complete pinned `encparse.c` at parent `7418fa7` and fix `5920c6e`
+under `#line` control, with allocator/callback stubs and real zlib parsing of
+a temporary crafted `.enc` file. gcc and clang ASan report `WRITE of size 2`
+508 bytes past a 131072-byte region at pinned `encparse.c.vuln:495`; fixed
+builds are clean. gdb readback shows attacker-chosen `0x5a5a` at the
+out-of-bounds index and the fixed guard rejecting at `encparse.c.fixed:461`.
+Brief: `reports/frontier-libfontenc2shell.md`; pins, raw evidence and preserved
+negatives: `lab/frontier/libfontenc2shell/PROVENANCE.md`. Grade is direct-call
+rungs 1-4 only: no real X server, font path, X protocol, allocator study,
+pointer control, command or witness verdict; rung 5 UNKNOWN.

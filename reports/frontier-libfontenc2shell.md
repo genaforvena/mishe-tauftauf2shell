@@ -86,6 +86,9 @@ objects lie 508 bytes past this allocation, remain UNKNOWN.
   `bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`
   (PID, address, absolute path and build id excluded). Raw outputs in
   `lab/frontier/libfontenc2shell/harness/evidence/`.
+- A clean `git archive 64e3c54` replay of the staged paths reproduced
+  `PASS=50 FAIL=0` and the same trace with five `PINS.sha256` digests verified;
+  recipe in `docs/reproducibility.md`.
 - Rung 1/2: vulnerable `oob-chosen ok=1 row=258 first=254 len=1
   chosen=0x5a5a`; fixed `first=0 len=0 chosen=0x0000`. Range and undefine
   controls also separate vulnerable from fixed (`first=0 len=0` vs
