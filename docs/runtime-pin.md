@@ -52,8 +52,8 @@ so the detector is frozen while its input changes. The current pin
 "Evidence / boundary")`, matching the six-column table that shipped until
 2026-11-21. On 2026-11-21 the owner added rung 5: the repo's own
 `tools/check-readme.py` and the live README table now use seven columns
-(`"R5"` inserted before `"Evidence / boundary"`), with every R5 cell `—`
-because no target has a witness-accepted R5 result. The frozen pin still has
+(`"R5"` inserted before `"Evidence / boundary"`); R5 cells now vary by
+target. The frozen pin still has
 six columns, so until the unit is re-pointed the producer can read RED from
 that detector/input mismatch; re-pointing stays reserved to the person under
 the full-flag sync below. If the signal is RED, compare the pinned checker's
