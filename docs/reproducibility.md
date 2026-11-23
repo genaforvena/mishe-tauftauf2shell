@@ -599,10 +599,14 @@ containers whose host ports bind only to loopback.
   `harness/aslr-inventory.gdb.log`), `readelf --dyn-syms -W LIB | grep ' UND ' |
   grep -E '(system|popen|exec[lvpe]*|posix_spawn|dlopen)'` returns no matches,
   and `objdump -d LIB | grep p11_kit_module_load@plt` finds `0x34da0`, but wake
-  14 found no live libgnutls pointer in the 128 qwords at `slot1` or `priv` to
-  patch to it, so the staged-`.so` route has no reachable pointer on this
-  geometry. Static, deterministic negative for this library and sampled
-  layout; no grade change, ASLR-on/stock chosen control stays UNKNOWN.
+  14 found no live libgnutls *text* pointer in the final 128-qword inventory
+  at `slot1` or `priv`; an earlier sample did have one at `priv+0x110`, but its
+  mapping base was unrecorded, so the staged-`.so` route's reachability is
+  UNKNOWN, not refuted. Wake 18 (`c371100`) measured bits 20-23 varying across
+  three committed ASLR layouts (`c/4/8` heap, `8/0/4` libc): low 20 bits are
+  stable but a 3-byte patch must write the varying nibble, so it is not
+  deterministic; guessed-nibble repeats (1-in-16 per layout) stay UNKNOWN.
+  Static import-check negative only; no grade change, ASLR-on/stock UNKNOWN.
 - **Frontier staging of minisnmpd2shell (commit `02bb46a`, W132; FRONTIER-STAGED, no route at 02:2xZ)**: brief `reports/frontier-minisnmpd2shell.md`. CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed commit `5419bc38` and release `6894e33e`; five blob/patch hashes in `lab/frontier/mini-snmpd/PROVENANCE.md` and `src/SHA256SUMS`. In the pinned vulnerable `protocol.c` the decode helpers guard with `*pos >= (size - len + 1)` without `len > size`, so a declared BER length above the 2048-byte datagram wraps the bound; the fix adds `len > size ||` and widens `decode_ptr`'s `int len`. `cd lab/frontier/mini-snmpd && bash harness/run.sh` re-extracts the verbatim `decode_oid`/`decode_str` slices on every run and asserts the pins; expect `PASS=43 FAIL=0` with normalized trace SHA-256 `0146b9b5…9859` from three working-tree runs plus a clean `/tmp` replay. gcc and clang ASan report `heap-buffer-overflow READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`; fixed and in-bounds safe inputs are clean. Rung 4 is scoped: the declared length chooses the read extent and 0x5a/0x3c canary bytes at offset 2048 read back byte-exact in the direct-call plain workspace (`POS_AFTER=4007`, fixed `RC=-1`). `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte SNMP GET declaring OID length 0xffff: vulnerable logs `overflow for OID byte`, fixed rejects with `underflow for oid` via `run_fixed_wire.sh` on 16162, and a 35-byte in-bounds GET is clean on both. No wire-level ASan report — `client->packet` sits inside a larger global struct and a 20-subid cap stops the walk — so the daemon observation is rung-2 reachability only, and pre-auth parsing order is advisory text. No pointer, marker, command or rung 5; charter and two-pane window are prepared but no route or admission record exists at 02:2xZ, so the target stays staged and is not in the mind list.
 
 
@@ -2244,6 +2248,24 @@ consumers are UNKNOWN; no marker, command or rung 5. Admission minted the
   archive and returned ESTABLISHED at that labeled rung-4 scope, no nit or
   grade change. No marker, command or rung 5;
   gitignored pin trees and raw logs regenerate with the committed scripts.
+
+W11 (`cbda94a`) measures a second-order timer-heap write in the live plain v17
+tport, with no grade change and no witness verdict. Build and run with
+`bash lab/sofiasip2shell/libbuild/live/run_timer_probe.sh`; evidence is in
+`lab/sofiasip2shell/libbuild/evidence/w11/`. Thirty pre-queued timers keep the
+timer heap array at its initial 30-slot capacity; a tport-internal timer then
+resizes it to 528 bytes (63 slots) between setup and frame, and the LD_PRELOAD
+shim confirms `TIMER_Q_PTR == SHIM_NEIGHBOR`, `DELTA=0`, caller symbolized to
+pinned `timers_alloc` at `su_timer.c:201`. Vulnerable full (`v17plain-full`,
+ports 18901 and replay 19011, rc 134) reads `TIMER_Q_BEFORE
+size=99236347796094 used=30 boundary_off=528`, i.e. 63 XORed with repeating
+mask `41 5a 42 43` over six bytes; 35 `su_timer_set()` calls through
+`timers_add()` move `_used` 30 -> 65 and the last writes a live `su_timer_t *`
+at `heap+528`, 0 bytes past the array, before glibc aborts. Fixed pin, short
+frame and port-shifted replay behave as labeled. The value is a heap pointer,
+not an attacker-chosen address or payload; no callback, callable field, marker
+or command, and rung 5 stays UNKNOWN.
+
 - **Pppd2Shell W132 chosen function call with chosen argument** (commit
   `740b6fd`, [live](../reports/pppd2shell-live.md) W132): after the W131
   `-no-pie` plain build from the Pppd lane row, run the driver against that
@@ -4695,6 +4717,18 @@ the `@base64d` path (`builtin.c:754-755`, `:787`, `jv.c.vuln:1511`) at that
 length, above the 2147483648-byte guard. Conclusion and limits in
 `reports/jq2shell-status.md`.
 
+W165 rules out the raw-stdin loophole under the same guard, with no large run.
+The pinned 1.8.1 plain build with `-R` and `-Rs` on three raw bytes
+`ff fe ff` prints `22 ef bf bd ef bf bd ef bf bd 22 0a` in both modes — three
+U+FFFD bytes, not raw bytes. A gdb breakpoint during `-Rs` confirms
+`jvp_string_copy_replace_bad(data="\377\376\377", length=3)` at
+`src/jv.c:1113`, frames `jv_string_sized:1282` <-
+`jq_util_input_next_input:408`. `src/util.c:191` fixes `char buf[4096]` and
+`:408` (slurp) / `:417` (line mode) pass at most 4095 bytes per call
+(`4095*3+1=12286`, no uint32 wrap), so a large raw input is normalized chunk
+by chunk. Baseline `memory.current` was 464527360 with the 2 GiB/1.5 GiB guard
+unchanged; no 1.43 GiB run or guard bypass. The neighbour stays UNKNOWN.
+
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 
 W17 extends the `-O2` saved-RIP byte map two caller frames deeper on the
@@ -5166,6 +5200,27 @@ Evidence: `real/evidence/vuln-real-asan.out`, `plain-mixed-sigsegv.out`,
 generated replay binaries from `real/evidence` (text/input only — rebuild the
 driver). Rung 5 is UNKNOWN on this new lane: no witness verdict, consumer
 process, socket, wire path, pointer control, command or side effect.
+
+## 2026-11-23 14:4xZ — libheif2shell W162 file-derived chosen bytes
+
+No new route or grade; the real-build file lane stays author-only and
+unwitnessed. On the pinned Release build's plain driver, gdb breaks on
+`calloc(1,32783)` and on each 64-byte row copy at or past `plane+32768`: the
+first neighbours are a malloc chunk header and a **free** chunk. The committed
+generator `lab/frontier/libheif2shell/real/neighbour/make_pattern_sequence.py`
+makes `real/neighbour/pattern-mixed.heif` (SHA-256
+`8f09b93c85341e9e120e75304379a79df11518cb7def4cc2fc6cdee7da151c1c`), whose
+second JPEG decodes to `74*8 82*8 8e*8 9c*8 a8*8 b6*8 c2*8 1a*8`. From the
+repo root run `python3 lab/frontier/libheif2shell/real/neighbour/check_neighbour.py
+lab/frontier/libheif2shell/real/neighbour/evidence/gdb-neighbour.out`; PASS
+asserts the byte match at `plane+32768`/`+33280` and the free-chunk size change
+`0x3b41` -> `0x9c9c9c9c9c9c9c9c`. The input and generator are committed; the
+gdb log is gitignored raw evidence. This is rung 4 on the real decoder-to-
+encoder file path at file-derived bytes and chosen offsets in malloc metadata,
+not a live pointer; the process faults after ~16 KB more row copies. No wire
+input, server, pointer target, grooming, marker or command; rung 5 stays
+UNKNOWN and no witness verdict has returned.
+
 
 ## 2026-11-23 12:4xZ — fqterm2shell staged by frontier W158 (admitted 13:1xZ)
 

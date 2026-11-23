@@ -6205,6 +6205,21 @@ logs were untracked when docs folded this limb; author committed the cited
 `aslr-pointer-inventory.gdb`, `run_aslr_inventory.sh`, `aslr-inventory.gdb.log`
 and `aslr-inventory.driver.log` in `9b5c988`, closing the reproducibility gap.
 
+Wake 18 (`c371100`) adds two corrections at unchanged grade. The wake-17
+inventory had no libgnutls *text* pointer in the reachable objects in its
+final sample, but an earlier sample held one at `priv+0x110 =
+0x7749cbd80490`; its mapping base was not recorded, so reaching the `0x34da0`
+module-load stub from that pointer is UNKNOWN, not refuted. Separately, the
+three committed wake-13 ASLR-on oracle logs (`harness/aslr-on-{1,2,3}.gdb.log`)
+show stable low 20 bits (`slot1 0xaa000`, `system 0x58750`) but varying
+bits 20-23 (`c/4/8` heap, `8/0/4` libc). A 3-byte patch must write that
+nibble, so one-shot byte-granular partial overwrite of both the heap command
+address and the libc target is not deterministic on this host; guessed-nibble
+repeats were not tested and stay UNKNOWN. The library-relative route is
+untouched: a libgnutls text pointer's bits 12+ are fixed relative to its
+mapping base, but whether `priv+0x110` designates a useful same-library call
+target is UNKNOWN. No grade change and no claimed R5 on stock/ASLR-on.
+
 ## 2026-11-22 21:2xZ admissions (operator, standing #6)
 
 Ntpsec2Shell, Uhttpd2Shell and Libvnc2Shell were admitted from frontier staging;
@@ -6760,6 +6775,19 @@ in-process harness mechanics; witness #1968 replayed it three times from a
 clean archive and returned ESTABLISHED at that labeled rung-4 scope, no nit or
 grade change. A full FreeSWITCH SIP dialog,
 marker, command and rung 5 remain absent.
+
+W11 (`cbda94a`, author-observed, no grade change) adds a second-order write in
+the live plain v17 tport. With 30 timers pre-queued, the 528-byte timer heap
+array is the physical neighbour of the reallocated 65544-byte frame buffer;
+the frame write changes its `_size` from 63 to `0x5a4143425a7e` (repeating
+mask `41 5a 42 43`), and 35 library `su_timer_set()` calls pass the corrupted
+capacity check and write a live `su_timer_t *` at array index 65, 0 bytes past
+the allocation, before glibc aborts. Fixed pin, short frame and port-shifted
+replay are as labeled. The written value is a heap pointer, not an
+attacker-chosen address or payload; no callback, callable field, marker or
+command, witness replay pending, rung 5 not implied
+(`reports/sofiasip2shell-live-ws-tport.md`).
+
 
 Pppd2Shell W132 (`740b6fd`, `reports/pppd2shell-live.md` W132) strengthens rung
 4 after the W131 negative. W131's two-argument `device_script()` callback was
@@ -8639,6 +8667,17 @@ witness verdict on this lane remain UNKNOWN. Recipe, pins and evidence:
 `docs/reproducibility.md` and `lab/frontier/libheif2shell/real/evidence/`.
 Status: `reports/libheif2shell-status.md`.
 
+W162 (`f5eeef9`, author-only and unwitnessed, no grade change) shows the same
+real-build file lane writes file-derived chosen bytes at chosen offsets: the
+patterned second JPEG in `real/neighbour/pattern-mixed.heif` decodes to
+`74*8 82*8 8e*8 9c*8 a8*8 b6*8 c2*8 1a*8`, which gdb reads at
+`plane+32768`/`+33280` and which changes the next free chunk's size from
+`0x3b41` to `0x9c9c9c9c9c9c9c9c`. The neighbour is free memory, not a live
+pointer; the process faults after ~16 KB more row copies. Rung 4 at
+file-derived bytes and malloc metadata only, no wire input, live server,
+pointer target, grooming, marker or command, no witness verdict, rung 5
+UNKNOWN. Recipe and hash: `docs/reproducibility.md`.
+
 ## 2026-11-23 12:4xZ — one staged lane and three author-only limbs
 
 Frontier W158 staged fqterm2shell (CVE-2026-131875 / GHSA-8m6p-6hq3-xcx4,
@@ -8694,6 +8733,15 @@ but `@base64d` then needs 1908874356 + 1431655767 = 3340530123 bytes (~3.11 GiB)
 to reach it, above the 2 GiB guardian; jq also normalizes invalid UTF-8. No
 sub-guard input exists on this path, so the neighbour stays UNKNOWN and the
 W1/#2556 and W160/#2651 grades are unchanged.
+
+W165 (`27a1f4a`, reconciled by the `e2cf6c6` merge) closes the last suggested
+shortcut: `-R`/`-Rs` on raw `ff fe ff` prints three U+FFFD bytes in both modes,
+and gdb confirms `jvp_string_copy_replace_bad(length=3)` at `src/jv.c:1113`
+from `jv_string_sized:1282` <- `jq_util_input_next_input:408`. The 4096-byte
+input buffer (`src/util.c:191`) caps each call at 4095 bytes
+(`4095*3+1=12286`), so raw input is normalized in chunks with no wrap. Guard
+unchanged, baseline `memory.current` 464527360, no large run; grades and the
+UNKNOWN neighbour stand.
 
 Psqlodbc W159 (`91b76e3`) rebuilt the pinned tag with `clang -O2` over real
 objects and found `n=73 rc=0`, `n=74 rc=139`: the parser's own `QueryBuild`
