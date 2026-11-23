@@ -190,3 +190,35 @@ consumer-visible. `table` is followed by the top chunk (original size
 `0x129d1`), not a live pointer. Grade unchanged; pins, committed vusb patch,
 harness and witness verdict untouched. Commands, local-only patch recipe and
 raw output: `evidence/real-plain-partial-write.out`.
+
+## Chosen control-flow target executes (W167, 2026-11-23)
+
+W165 stopped at "the protector aborts". That is true when the reply fills
+both slots with `0x5a`, but the canary is a per-process value and the same
+oversized `:152` read writes both `rbp-8` and `rbp+8`. With a LOCAL-ONLY vusb
+mode `c` that places the driver's own canary at bulk-reply offset `0x3E28`
+(`info+0x4028` = `rbp-8`) and a chosen marker address at `0x3E38`
+(`info+0x4038` = `rbp+8`), the real plain build executes the chosen target:
+`M2SHELL_IP_CONTROL_MARKER`, `RC=0`. gdb at pinned `:154` shows
+`canary=0x84d0d965013e3700 savedrip=0x5555555553c4` (the reported `&marker`)
+in the real `jl2005c_init` frame, and breaks in `marker()` with a `0x5a...`
+caller chain; `marker` writes its byte and `_exit(0)`s before any unwind.
+
+Controls: count 100 — no marker; wrong canary — stack smashing, `RC=134`;
+correct canary with `0x5a...` RIP — `RC=139`; all-`0x5a` reply — stack
+smashing, `RC=134`. With `pins/fix-6a3393d.patch` applied and the camlib
+rebuilt, no marker and `jl2005c_init` returns `-102`
+(`GP_ERROR_CORRUPTED_DATA`); reversing the patch and rebuilding restores the
+marker. `gp_camera_init rc=0` is not the discriminator: `camera_init` at
+`library.c:489` still falls through to `GP_OK` in the fixed build.
+
+Honest limit: the driver reads the canary from its own `%fs:0x28` and gives it
+to the virtual device. This proves the protector is not a structural barrier
+once the canary is known and W166 observed the canary copied into the heap,
+but it does not show a device-only path that recovers the canary from that
+heap copy — its consumer aborts on the corrupted top chunk. No bus or wire,
+no remote request, no witness replay, no command side effect. Rung 4 now
+includes a local chosen-target execution; rung 5 stays UNKNOWN. Raw output,
+commands, local patch recipe and limits:
+`evidence/real-plain-ip-control.out`. Pins, committed vusb patch and harness
+are unchanged.

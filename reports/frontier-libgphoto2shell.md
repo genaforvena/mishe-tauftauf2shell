@@ -6,7 +6,10 @@ live registered two-pane window (inner socket index 120, name
 registry entry and staging DM are in place. Operator admission is complete
 (#2738, corrected #2742). An independent witness replay closed 2026-11-23
 (tape #2892): ESTABLISHED at the labeled scope — rung 3 at the real heap
-destination, NOT rung 4 impact, rung 5 UNKNOWN. Byte-exact pins and hashes:
+destination, NOT rung 4 impact, rung 5 UNKNOWN. W167 adds a local,
+unwitnessed rung-4 control-flow-target execution in the plain real build,
+conditional on the device knowing the process canary; the witness verdict
+above remains scoped to what it actually replayed. Byte-exact pins and hashes:
 `lab/frontier/libgphoto2shell/PINS.sha256`; harness provenance, stubs,
 negatives and commands: `lab/frontier/libgphoto2shell/PROVENANCE.md`. Frontier
 owns no further work on this target.
@@ -99,7 +102,8 @@ compiles with `-fsanitize-recover=address` and runs with
   the saved return-address slot is at `info+16472`; a chosen device marker at
   offset `0x3e58` lands there byte-for-byte (`41 42 43 44 45 46 47 48`).
   The process faults inside `memmove` before `ret`, so IP control is NOT
-  demonstrated — chosen bytes at the saved-RIP slot only.
+  demonstrated in the pin-based harness — chosen bytes at the saved-RIP slot
+  only. W167 adds chosen-target execution in the real plain build (below).
 - `146 PASS / 0 FAIL` over 36 runs plus gdb probes; the normalized trace is
   unchanged at
   `e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`.
@@ -117,7 +121,8 @@ is reached through `gp_camera_init()` with libgphoto2's own `vusb` virtual USB
 port, patched in the lab to answer the JL2005 handshake with chosen bytes; see
 `lab/frontier/libgphoto2shell/REAL-BUILD.md`. No real USB hardware, physical
 camera enumeration, gvfs/digiKam consumer, socket, network wire,
-pointer-control chain, benign marker execution or command execution.
+pointer-control chain, marker execution outside the local driver, witness-verified
+impact or command execution.
 The malicious-USB-device attacker model is a claim carried by a
 synthetic transport here. A rung-5 path would still need a network-facing host
 that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
@@ -167,7 +172,8 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   shows the real `jl2005c_init` frame with its canary and saved RIP both
   equal to the device-chosen `0x5a5a5a5a5a5a5a`; the protector aborts
   before `ret`, so no chosen control-flow target executes. This is chosen
-  bytes at a real control-flow slot, not IP control; rung 5 stays UNKNOWN.
+  bytes at a real control-flow slot, not IP control in that all-`0x5a` case;
+  W167 below bypasses the protector with the correct canary. Rung 5 stays UNKNOWN.
   Raw: `lab/frontier/libgphoto2shell/evidence/real-plain-gdb-rip.out`.
 
 - Partial-reply / canary-leak lane (W166): on the plain build, `info` starts
@@ -183,3 +189,20 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   can reach either target while preserving the canary; grade unchanged.
   Raw output and local-only patch recipe:
   `lab/frontier/libgphoto2shell/evidence/real-plain-partial-write.out`.
+
+- Chosen control-flow target executes (W167): in the real plain 2.5.34 build,
+  a local-only vusb reply places the process canary at bulk offset `0x3E28`
+  (`info+0x4028` = `rbp-8`) and a chosen marker address at `0x3E38`
+  (`info+0x4038` = `rbp+8`). The oversized `:152` read writes both slots, the
+  canary check passes, and `jl2005c_init` returns to the marker:
+  `M2SHELL_IP_CONTROL_MARKER`, `RC=0`. gdb at pinned `:154` shows the fed
+  canary and the saved RIP equal to `&marker`, then breaks in `marker()` with
+  a `0x5a...` caller chain. Controls: count 100 no marker; wrong canary
+  stack smashing `RC=134`; correct canary with `0x5a...` RIP `RC=139`;
+  all-`0x5a` reply stack smashing `RC=134`; fixed camlib returns `-102` with
+  no marker, and reversing the fix restores the marker. The driver reads the
+  canary from its own `%fs:0x28`, so this shows the protector is not a
+  structural barrier once the canary is known, not a device-only recovery
+  path — W166's heap copy is not consumer-visible. No wire transport, remote
+  request, witness replay or command side effect. Raw output, commands and
+  local patch recipe: `lab/frontier/libgphoto2shell/evidence/real-plain-ip-control.out`.

