@@ -29,6 +29,22 @@ class ReadOnceProcessor : public TProcessor {
     TMessageType type;
     int32_t seqid = 0;
     in->readMessageBegin(name, type, seqid);
+    std::string structName;
+    in->readStructBegin(structName);
+    std::string fieldName;
+    TType fieldType;
+    int16_t fieldId = 0;
+    in->readFieldBegin(fieldName, fieldType, fieldId);
+    if (fieldType == T_STRING) {
+      std::string value;
+      in->readString(value);
+    } else {
+      in->skip(fieldType);
+    }
+    in->readFieldEnd();
+    in->readFieldBegin(fieldName, fieldType, fieldId);
+    in->readStructEnd();
+    in->readMessageEnd();
     std::cout << "PROCESS_REACHED name=" << name << " seqid=" << seqid << std::endl;
     return true;
   }
@@ -81,7 +97,7 @@ int main(int argc, char** argv) {
       server.serve();
       return 0;
     }
-    if (mode == "client" || mode == "client-safe") {
+    if (mode == "client" || mode == "client-safe" || mode == "client-multi") {
       auto sock = std::make_shared<TSocket>("127.0.0.1", port);
       sock->open();
       auto tap = std::make_shared<TapTransport>(sock);
@@ -89,22 +105,28 @@ int main(int argc, char** argv) {
       trans->setProtocolId(T_BINARY_PROTOCOL);
       trans->setTransform(THeaderTransport::ZLIB_TRANSFORM);
       TBinaryProtocol proto(trans);
-      const std::string payload = (mode == "client-safe") ? std::string(4, 0x42) : attackPayload();
-      proto.writeMessageBegin("attack", T_CALL, 1);
-      proto.writeStructBegin("args");
-      proto.writeFieldBegin("payload", T_STRING, 1);
-      proto.writeString(payload);
-      proto.writeFieldEnd();
-      proto.writeFieldStop();
-      proto.writeStructEnd();
-      proto.writeMessageEnd();
-      trans->flush();
+      auto sendMessage = [&](const std::string& payload, int32_t seqid) {
+        proto.writeMessageBegin("attack", T_CALL, seqid);
+        proto.writeStructBegin("args");
+        proto.writeFieldBegin("payload", T_STRING, 1);
+        proto.writeString(payload);
+        proto.writeFieldEnd();
+        proto.writeFieldStop();
+        proto.writeStructEnd();
+        proto.writeMessageEnd();
+        trans->flush();
+      };
+      if (mode == "client-multi") {
+        sendMessage(std::string(4, 0x42), 1);
+        sendMessage(attackPayload(), 2);
+      } else {
+        sendMessage((mode == "client-safe") ? std::string(4, 0x42) : attackPayload(), 1);
+      }
       const char* wirePath = (mode == "client-safe") ? "wire-safe.bin" : "wire.bin";
       std::ofstream wire(wirePath, std::ios::binary | std::ios::trunc);
       wire.write(reinterpret_cast<const char*>(tap->bytes().data()),
                  static_cast<std::streamsize>(tap->bytes().size()));
-      std::cout << "SENT uncompressed_payload=" << payload.size()
-                << " transform=ZLIB wire_bytes=" << tap->bytes().size()
+      std::cout << "SENT mode=" << mode << " wire_bytes=" << tap->bytes().size()
                 << " file=" << wirePath << std::endl;
       return 0;
     }

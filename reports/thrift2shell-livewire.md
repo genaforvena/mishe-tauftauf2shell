@@ -113,6 +113,29 @@ the write — and the corrupted chunk size later aborts the process in
 `munmap_chunk()`. This is the measured behavior of the actual consumer on
 this host, not an inference from the harness sink.
 
+## Persistent connection: receive buffer reallocated after the transform buffer
+
+`live/live.cpp` also has a `client-multi` mode: a small safe frame followed
+by the attack frame on the **same** socket, with the processor consuming each
+message completely. `live/run-multi.sh` replays it against the plain build
+under gdb. Both `untransform()` calls hit the pinned breakpoints:
+
+- frame 1: `sz=30`, `rbuf=rbuf1`, `tbuf=rbuf1+64`, no overflow;
+- frame 2: `sz=726`, `rbuf` is a **new** 68-byte allocation, now *after* the
+  persistent transform buffer (`tbuf = rbuf - 1040`, i.e. tBuf ends 16 bytes
+  before the new rBuf). The copy no longer touches tBuf; it runs into the
+  heap region following rBuf and the server aborts with
+  `malloc(): corrupted top size`.
+
+Observed trace: `live/results/gdb-multi.log`. The neighbor order changes with
+connection lifetime, but this run still reaches only heap metadata: no code
+pointer or return address lies in the written range. For the single-frame
+layout, observed `tbuf - rbuf` was 64-80 bytes; the transform gate caps the
+decompressed length below 1024, so the write ends around `rbuf+1037` — inside
+the 1024-byte tBuf user region. Reaching an object past tBuf would require a
+different allocation order or a second allocation inside the copy window,
+which was not produced here.
+
 ## Grade and ceiling
 
 New evidence supports rungs 1-3 on living bytes (ASan write and a plain
