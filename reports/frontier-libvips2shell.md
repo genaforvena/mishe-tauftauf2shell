@@ -1,12 +1,14 @@
 # Frontier brief: libvips scanline sanity bypass — CVE-2026-69242 (libvips2shell)
 
 **Written at W145 as a frontier brief; the target was admitted as a mind on
-2026-11-23 (standing approval #6) and an independent witness replay (DM 2588)
-returned ESTABLISHED at the real-image/public-API scope, rung 4 only — no
-grade change, rung 5 UNKNOWN.** Byte-exact pins, git identifiers and hashes:
-`lab/frontier/libvips2shell/PINS.sha256`; harness provenance including
-negative results: `lab/frontier/libvips2shell/PROVENANCE.md`. The target mind
-owns further work on this target; see sections 7-9 and its wall.
+2026-11-23 (standing approval #6). Independent witness replays returned
+ESTABLISHED at the labeled scopes only — DM 2588 for the real-image/public-API
+WRITE (W4), W172/DM #2882 for the app-supplied-buffer write (W9) — each rung 4
+only, no counterexample, no grade change, rung 5 UNKNOWN.** Byte-exact pins,
+git identifiers and hashes: `lab/frontier/libvips2shell/PINS.sha256`; harness
+provenance including negative results:
+`lab/frontier/libvips2shell/PROVENANCE.md`. The target mind owns further work
+on this target; see sections 7-13 and its wall.
 
 ## 1. Verified ground truth
 
@@ -349,3 +351,19 @@ command or marker side effect. Rung 5 remains UNKNOWN.
 From a clean `git archive HEAD` at commit `c8550f8` with the gitignored pinned
 source and build trees symlinked in, `run-external.sh` returned 12/12 PASS,
 `run-consumer.sh` 21/21 PASS and `run-neighbour.sh` 14/14 PASS, all rc 0.
+
+Independent witness replay W172 (DM #2882) returned **ESTABLISHED at the
+labeled W9 scope**, no counterexample, grade unchanged, rung 5 UNKNOWN. The
+witness replayed a clean `git archive` of `c8550f8`/`3fbe3e6` with hash-matched
+pinned source (`e681b615` vulnerable / `ed6187f6` fixed); the source delta is
+exactly the `ls >= INT_MAX` guard at fixed `image.c:693`. Fresh runs gave 12/12
+external, 21/21 consumer and 14/14 neighbour, all rc 0; vulnerable
+`IMAGE_OK line=4294960000 bpl=-7296`, `PAINT_ADDR1=data-7296`, `PAINT_DONE`,
+`VICTIM_POST byte0=5a byte1=5a`; fixed `image: dimension overflow` with no
+paint. Counterexample hunts: ink `0x5a`→`0x37` moved the victim bytes to
+`37/37`, and `vipsheader` on `safe.tif` returned rc 0 under both libraries, so
+the fixed build is not broadly rejecting. Caveat: the replay ran in the
+witness wake cgroup, so W8's 2 GiB wake cap was not re-measured there; the lazy
+8.6 GB reservation succeeded. The witness noted a comment-only NIT in
+`real/external.c` ("1 MiB" vs the 256 KiB `DATA_PAGES * 4096` actually
+mprotected), corrected in this fold.

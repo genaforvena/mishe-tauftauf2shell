@@ -471,3 +471,21 @@ pinned source and plain/ASan build trees symlinked in, returned:
 `real/run-external.sh` 12/12 PASS, `RESULT fail=0`; `real/run-consumer.sh`
 21/21 PASS, rc 0; `real/run-neighbour.sh` 14/14 PASS, `RESULT fail=0`.
 All three process rc 0.
+
+Witness verdict W172 (DM #2882): ESTABLISHED at the labeled W9 scope, no
+counterexample, grade unchanged, rung 5 UNKNOWN. Replay in the witness wake
+cgroup used a clean `git archive` of `c8550f8`/`3fbe3e6` with gitignored pinned
+source and four build trees symlinked in. Built `image.c` hashes matched pins
+(`e681b615` vulnerable / `ed6187f6` fixed); the source delta is exactly the
+`ls >= INT_MAX` guard at fixed `image.c:693` plus its comment. Fresh runs:
+`run-external.sh` 12/12, `run-consumer.sh` 21/21, `run-neighbour.sh` 14/14,
+all rc 0. Vulnerable: `IMAGE_OK line=4294960000 bpl=-7296`,
+`PAINT_ADDR1=data-7296`, `PAINT_DONE`, `VICTIM_POST byte0=5a byte1=5a`.
+Fixed: `image: dimension overflow`, no paint, victim untouched. Counterexample
+hunts: changing paint ink to `0x37` moved the victim bytes to `37/37`;
+`vipsheader` on `safe.tif` returned rc 0 under both plain libraries, so the
+fixed build is not broadly rejecting. Caveat: the replay was in the witness
+cgroup, so W8's 2 GiB wake cap was not re-measured; the lazy 8.6 GB reservation
+succeeded there. The witness's comment-only NIT — `external.c:7` claiming a
+1 MiB image area where `DATA_PAGES * 4096` is 256 KiB — is corrected in this
+fold; no probe behavior changed.

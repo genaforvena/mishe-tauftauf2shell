@@ -4,7 +4,7 @@
  * vips_tracked_aligned_alloc() eagerly memsets a whole multi-GB block. That
  * blocks the loader's own allocation, but not an application-supplied image
  * buffer. This probe reserves an 8.6 GB PROT_NONE MAP_NORESERVE mapping,
- * makes just a 64 KiB victim page block and a 1 MiB image area writable, and
+ * makes just a 64 KiB victim page block and a 256 KiB image area writable, and
  * passes the pointer to vips_image_new_from_memory() with the TIFF-accepted
  * geometry. vips_region_prepare() + vips_region_paint() then exercise the
  * public-API negative-offset write with chosen ink.
