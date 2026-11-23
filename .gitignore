@@ -316,3 +316,4 @@ lab/frontier/thrift2shell/live/live-noflush-fixed
 # jq2shell real-jq lane: pinned tarball extractions and autotools build
 # output stay local. Runner, geometry summary and small evidence stay tracked.
 lab/frontier/jq2shell/build/
+lab/frontier/jq2shell/live/evidence/*.raw
