@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x2519: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln, line 495.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, setCode (from=65280, to=23130, row_size=258, first=0x7fffffffdefc, last=0x7fffffffdf00, encsize=0x7fffffffdf04, enc=0x7fffffffdf18) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:495
+warning: 495	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln: No such file or directory
+FROM=65280 TO=5a5a INDEX=65790 ENCSIZE=65536 DELTA_SHORTS=255 DELTA_BYTES=510
+0x555555585eaa:	0x00	0x00	0x00	0x00
+496	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln
+0x555555585eaa:	0x00	0x00	0x5a	0x5a
+0x555555585eac:	0x5a	0x5a
+#0  setCode (from=65280, to=23130, row_size=258, first=0x7fffffffdefc, last=0x7fffffffdf00, encsize=0x7fffffffdf04, enc=0x7fffffffdf18) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:496
+#1  0x0000555555556c71 in parseEncodingFile (f=0x55555555c2a0, headerOnly=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:672

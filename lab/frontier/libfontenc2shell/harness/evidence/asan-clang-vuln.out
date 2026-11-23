@@ -1,0 +1,58 @@
+=================================================================
+==2070847==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x761f3406b9fc at pc 0x598dd5d6ad78 bp 0x7ffc0346c7b0 sp 0x7ffc0346c7a8
+WRITE of size 2 at 0x761f3406b9fc thread T0
+    #0 0x598dd5d6ad77 in setCode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:495:19
+    #1 0x598dd5d67d4f in parseEncodingFile /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:672:13
+    #2 0x598dd5d6c45b in parse_enc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/driver-harness.c:1130:11
+    #3 0x598dd5d691a2 in report /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/driver-harness.c:1162:24
+    #4 0x598dd5d69146 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/driver-harness.c:1185:5
+    #5 0x761f33e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x761f33e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x598dd5c8c3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/bin-clang-vuln-asan+0x2c3c4) (BuildId: 6808809c3468cfaffb89ecd23b0dc0ea6a1b36ed)
+
+0x761f3406b9fc is located 508 bytes after 131072-byte region [0x761f3404b800,0x761f3406b800)
+allocated by thread T0 here:
+    #0 0x598dd5d27630 in realloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/bin-clang-vuln-asan+0xc7630) (BuildId: 6808809c3468cfaffb89ecd23b0dc0ea6a1b36ed)
+    #1 0x598dd5d690a4 in lf2s_reallocarray /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/stub/reallocarray.h:13:12
+    #2 0x598dd5d6a4f7 in setCode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:469:16
+    #3 0x598dd5d67d4f in parseEncodingFile /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:672:13
+    #4 0x598dd5d6c45b in parse_enc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/driver-harness.c:1130:11
+    #5 0x598dd5d691a2 in report /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/driver-harness.c:1162:24
+    #6 0x598dd5d69146 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/driver-harness.c:1185:5
+    #7 0x761f33e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x761f33e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x598dd5c8c3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/bin-clang-vuln-asan+0x2c3c4) (BuildId: 6808809c3468cfaffb89ecd23b0dc0ea6a1b36ed)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/harness/encparse.c.vuln:495:19 in setCode
+Shadow bytes around the buggy address:
+  0x761f3406b700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761f3406b780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761f3406b800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x761f3406b880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x761f3406b900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x761f3406b980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x761f3406ba00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x761f3406ba80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x761f3406bb00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x761f3406bb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x761f3406bc00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2070847==ABORTING

@@ -1,0 +1,7 @@
+CASE normal ok=1 row=0 first=0 len=0 chosen=0x0000
+CASE rowsize ok=1 row=128 first=1 len=1 chosen=0x0041
+CASE boundary257 ok=1 row=257 first=65278 len=1 chosen=0x0041
+CASE boundary256max ok=1 row=256 first=65535 len=1 chosen=0x0041
+CASE oob-chosen ok=1 row=258 first=254 len=1 chosen=0x5a5a
+CASE range-bug ok=1 row=4 first=0 len=0 chosen=0x0000
+CASE undefine-bug ok=1 row=4 first=0 len=1 chosen=0x0041

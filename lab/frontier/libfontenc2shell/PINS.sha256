@@ -1,0 +1,12 @@
+# libfontenc2shell — pinned upstream bytes (sha256, then REF provenance).
+# Sources fetched from https://gitlab.freedesktop.org/xorg/lib/libfontenc.git
+# (read-only provisioning) on 2026-11-23; no probing of external systems.
+79e2381b78b6b54b9e4dd4e667e8a2f3680aa65de8e5a19ee3890ff2bce944fb  src/encparse.c.vuln
+91c81398e217e59821f27c349286eb71e7b793a075d1d78b1814805ebec27230  src/encparse.c.fixed
+dde47d1d2e99d00a5eb6c918b2417edd4062a7b2c80d57c3c44dbb573b7bd0e9  src/fontencI.h
+9bf7a328b4abec9297089a23dcfd35e203ff2ed29e0ae15d8fd373765ff7cddc  src/X11/fonts/fontenc.h
+6439b171374dc4994a9d7fe1f019e93d226b10e7c1c9258bfe61a28da9da13e8  src/5920c6e.patch
+REF vulnerable-parent 7418fa7a77d1faf795ae40ea92f9ec2828e2a0b9
+REF fix 5920c6ee144fffff84b62f5b479171f734f15316
+REF upstream-test be6a0eb5e3e0a8bc53a2abf14ee5403d6bd3043c
+TAG libfontenc-1.1.10 (contains fix; advisory text says "before 1.11.0" — discrepancy preserved)
