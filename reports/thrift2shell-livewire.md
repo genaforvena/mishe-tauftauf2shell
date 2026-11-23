@@ -263,6 +263,10 @@ used for the earlier evidence is untouched. Frame generation and replay:
 
 ```sh
 cd lab/frontier/thrift2shell/live
+g++ -std=c++17 -g -O1 -I thrift-0.23.0/lib/cpp/src -I build-plain-023 \
+  live-noflush.cpp build-plain-023/lib/libthriftzd.a build-plain-023/lib/libthriftd.a \
+  -lz -lpthread -o live-noflush
+# fixed control: same flags with thrift-0.24.0 / build-plain-024 -> live-noflush-fixed
 python3 make-kv-frame.py kv-partial-4240.bin --base kv-ptr14.bin \
   --plain-len 312 --patch 21=0000011c --patch 310=4042 --pad-compressed 160
 NOFLUSH_SERVER=./live-noflush ./run-kv-noflush.sh \
