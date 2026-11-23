@@ -1,25 +1,25 @@
 DBG LEN=2147483646 ALLOC=2147483647 REM=1 COUNT=1
 =================================================================
-==1448889==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x506000000051 at pc 0x7b5e478fb303 bp 0x7ffe71486b20 sp 0x7ffe714862c8
+==1496683==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x506000000051 at pc 0x7cf9ceefb303 bp 0x7ffe0461cf90 sp 0x7ffe0461c738
 WRITE of size 48 at 0x506000000051 thread T0
-    #0 0x7b5e478fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x5b570af38340 in jvp_string_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1191
-    #2 0x5b570af38971 in run_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1235
-    #3 0x5b570af38cec in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1277
-    #4 0x7b5e4742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #5 0x7b5e4742a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #6 0x5b570af373a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
+    #0 0x7cf9ceefb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5de9c7862340 in jvp_string_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1191
+    #2 0x5de9c7862971 in run_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1235
+    #3 0x5de9c7862cec in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1277
+    #4 0x7cf9cea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7cf9cea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5de9c78613a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
 
 0x506000000051 is located 0 bytes after 49-byte region [0x506000000020,0x506000000051)
 allocated by thread T0 here:
-    #0 0x7b5e478fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x5b570af3789e in jvp_string_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:76
-    #2 0x5b570af382ad in jvp_string_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1189
-    #3 0x5b570af38971 in run_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1235
-    #4 0x5b570af38cec in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1277
-    #5 0x7b5e4742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x7b5e4742a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x5b570af373a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
+    #0 0x7cf9ceefd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5de9c786189e in jvp_string_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:76
+    #2 0x5de9c78622ad in jvp_string_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1189
+    #3 0x5de9c7862971 in run_append /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1235
+    #4 0x5de9c7862cec in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1277
+    #5 0x7cf9cea2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7cf9cea2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5de9c78613a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
@@ -53,4 +53,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1448889==ABORTING
+==1496683==ABORTING

@@ -1,23 +1,23 @@
 =================================================================
-==1449192==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000056 at pc 0x58445cffde69 bp 0x7ffd5e930240 sp 0x7ffd5e930230
+==1496971==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000056 at pc 0x5e41818aee69 bp 0x7ffd25b3c140 sp 0x7ffd25b3c130
 WRITE of size 3 at 0x503000000056 thread T0
-    #0 0x58445cffde68 in jvp_string_copy_replace_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1126
-    #1 0x58445cffeb8c in run_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1261
-    #2 0x58445cffecf1 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1278
-    #3 0x709e8602a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x709e8602a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x58445cffd3a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
+    #0 0x5e41818aee68 in jvp_string_copy_replace_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1126
+    #1 0x5e41818afb8c in run_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1261
+    #2 0x5e41818afcf1 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1278
+    #3 0x70903a82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x70903a82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5e41818ae3a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
 
 0x503000000057 is located 0 bytes after 23-byte region [0x503000000040,0x503000000057)
 allocated by thread T0 here:
-    #0 0x709e864fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x58445cffd89e in jvp_string_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:76
-    #2 0x58445cffdd59 in jvp_string_copy_replace_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1118
-    #3 0x58445cffeb8c in run_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1261
-    #4 0x58445cffecf1 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1278
-    #5 0x709e8602a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x709e8602a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x58445cffd3a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
+    #0 0x70903acfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5e41818ae89e in jvp_string_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:76
+    #2 0x5e41818aed59 in jvp_string_copy_replace_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1118
+    #3 0x5e41818afb8c in run_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1261
+    #4 0x5e41818afcf1 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1278
+    #5 0x70903a82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x70903a82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5e41818ae3a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-gcc-vuln-asan+0x23a4) (BuildId: eac6bdfe9b68b456340a92ffc04e446742ce9fd9)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1126 in jvp_string_copy_replace_bad
 Shadow bytes around the buggy address:
@@ -51,4 +51,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1449192==ABORTING
+==1496971==ABORTING

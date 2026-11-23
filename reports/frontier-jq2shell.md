@@ -83,8 +83,10 @@ cause; no vendor RCE claim exists.
 ## 5. Observations
 
 - Harness `PASS=64 FAIL=0` three times in the working tree; normalized trace
-  `7b2f8c336b3a960341b15b872e94a52cc14fe65fe3cc4324b155a05cccca7529` (no
+  `8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7` (no
   PID, address, path or build id).
+  A clean `git archive HEAD` replay of the staged paths at commit `c040c1e`
+  reproduced `PASS=64 FAIL=0` and the same trace.
 - Rung 1/2: vulnerable `APPEND ALLOC=32 REQ1=2147483646 REQ2=2` and
   `BAD ALLOC=6 U8CALLS=16`; fixed runs report `APPEND REJECT=1` and
   `BAD REJECT=1`.

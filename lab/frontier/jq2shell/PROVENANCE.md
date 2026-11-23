@@ -78,8 +78,11 @@ allocation and past the 6-byte allocation (`APPEND SINK=5a...`,
 ## Results and negative results preserved
 
 - `PASS=64 FAIL=0` three consecutive working-tree runs; normalized trace
-  `7b2f8c336b3a960341b15b872e94a52cc14fe65fe3cc4324b155a05cccca7529` in all
+  `8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7` in all
   three (PIDs, addresses, paths, build ids excluded). Raw runs in `evidence/`.
+  A clean `git archive HEAD lab/frontier/jq2shell reports/frontier-jq2shell.md`
+  replay at commit `c040c1e` rebuilt and ran `PASS=64 FAIL=0` with the same
+  normalized trace; replay evidence was not committed back to the tree.
 - First draft set `alloc_length = 8`, so the unsigned subtraction in
   `jvp_string_remaining_space()` wrapped above `len` and the verbatim code
   took the fast path at `:1181`, producing a SEGV instead of the wrap path.
