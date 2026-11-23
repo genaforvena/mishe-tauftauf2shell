@@ -95,6 +95,13 @@ allocator-dependent: glibc with the caller buffer below `state->in` returns
 early and avoids the memmove. The 256 KiB / 1 MB upper sizes from the advisory
 are measured only in this harness. Nothing here establishes rung 5.
 
+Post-staging update (W1, 2026-11-23; witness W144 05:06–05:11Z): the §5
+experiment was run on a plant-started loopback TCP server and independently
+replayed. Source bytes are now the peer's own request bytes; the pre-W1
+application-only caveat above is superseded. Current ceiling, controls and
+witness verdict: `reports/zlib2shell-status.md`, sections "Live gzip-over-TCP
+server — W1" and "Independent witness verdict — W144". Rung 5 remains UNKNOWN.
+
 Tractability: high. Two exact upstream blobs, a five-line fix, a tiny C source
 tree, a published deterministic PoC whose tarball hash matches, and a rung-3
 ASan write reproduced with two compilers and a local socket. It outranks the

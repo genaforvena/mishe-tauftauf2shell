@@ -42,7 +42,17 @@ to the site's owner resolver map (now 201 entries). Admission changes no grade.
   `WRITE_SIZE=1048576`, `WRITTEN=65535` on the vulnerable build and
   `PRINTF_RC=1` on the fixed build.
 
-## Current grade — 04:4xZ (author-only, no witness verdict)
+## Current grade — 05:11Z (witness ESTABLISHED at labeled scope)
+
+Witness W144 (2026-11-23 05:06–05:11Z) replayed both harnesses from its own
+clean `git archive` of HEAD (`1d09288`; target tree unchanged `beab687..HEAD`)
+with its own builds at a different `/tmp` path: base `run.sh` rc 0,
+`PASS=31 FAIL=0` (plus `REPLAY=1` `PASS=30 FAIL=0`) and trace hash exactly
+`28bbacf46cc178ebea825bfc57bcc83564607b4c8a32c52d7531a2d1524d7a89`; W1
+`run_tcp.sh` rc 0, `PASS=14 FAIL=0` twice and trace hash exactly
+`3ae896390ce28d6ec551dbac3e8e6473fd7ae923be9cb7f42762721dbdd78d02`. No
+counterexample. Both claims are ESTABLISHED at the rung-4 scope labeled below;
+rung 5 remains UNKNOWN. Details in "Independent witness verdict" at the end.
 
 Rung 3 is confirmed in the pinned harness: gcc and clang ASan both report
 `heap-buffer-overflow`, `WRITE of size 983041` in `gz_vacate()` at
@@ -68,7 +78,7 @@ are the measured triggers. With the caller buffer allocated before
 the memmove; the post-init allocation order is part of the primitive, not a
 hidden precondition.
 
-## Ceiling after W1 (still author-only, no witness verdict)
+## Ceiling after W1 (witness ESTABLISHED at labeled scope)
 
 The handoff ceiling (application-chosen source bytes, no server) is superseded
 by the live loopback server result below. The source bytes are now the peer's
@@ -76,8 +86,9 @@ own request bytes and the trigger is TCP flow control, but the sink remains an
 unbounded `memmove`: no pointer redirect, no control-flow hijack, no command,
 no remote client beyond the plant's own loopback process. `AV:N` still carries
 `AC:H` and allocator-dependent guard behavior. Nothing here establishes rung
-5, which remains UNKNOWN. Independent witness replay is owed before any
-stronger claim.
+5, which remains UNKNOWN. Witness W144 replayed both harnesses independently
+and found no counterexample; both claims are ESTABLISHED at this labeled
+rung-4 scope, with no replay owed.
 
 ## Live gzip-over-TCP server — W1 (2026-11-23 05:0xZ)
 
@@ -103,3 +114,22 @@ This upgrades rung 4 from "application-chosen bytes in a harness" to
 "peer-chosen bytes in a live loopback server", not to rung 5. Full pins, raw
 evidence, failed control configurations and negatives are in
 `lab/frontier/zlib2shell/PROVENANCE.md`.
+
+## Independent witness verdict — W144 (2026-11-23 05:06–05:11Z)
+
+Witness replayed from its own clean `git archive` of HEAD (`1d09288`; target
+tree unchanged `beab687..HEAD`) with its own builds at a different `/tmp`
+source path. Base harness: `REPLAY=1` `run.sh` rc 0 `PASS=30 FAIL=0`, full
+`run.sh` rc 0 `PASS=31 FAIL=0`, trace
+`28bbacf46cc178ebea825bfc57bcc83564607b4c8a32c52d7531a2d1524d7a89` exactly.
+W1: `run_tcp.sh` rc 0 `PASS=14 FAIL=0` twice, trace
+`3ae896390ce28d6ec551dbac3e8e6473fd7ae923be9cb7f42762721dbdd78d02` exactly.
+Raw ASan: `WRITE of size 34465` in `gz_vacate` at `gzwrite.c:394`, 0 bytes
+after the 16384-byte region; fixed pin and 1 MiB drain ASan-clean
+`PRINTF_RC=1`; 4 KiB slowdrain also overflows. gdb: `avail_in=34465`, source
+base 65535, `state->in[0]=b3`, `[17]=87`, `[16384]=86`, each equal to the
+peer's bytes at offsets 65535/65552/81919 (`PEER_BYTE_CHECK=PASS`). Source
+bound checked: pinned parent `:234`/`:245-246`/`:386-388`/`:394`; fixed blob
+differs by exactly the published +4/-1 hunk. No counterexample. Both claims
+ESTABLISHED at the labeled rung-4 scope: no pointer redirect, no control flow,
+no command, so rung 5 remains UNKNOWN. No replay owed.
