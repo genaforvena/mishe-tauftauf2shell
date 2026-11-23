@@ -1,0 +1,12 @@
+vuln-plain-all-7f rc=0
+vuln-plain-status80-at-32768 rc=0
+vuln-plain-status85-at-32768 rc=0
+vuln-plain-f7-at-32768 rc=0
+vuln-plain-f8-at-32768 rc=0
+vuln-plain-status80-at-32769 rc=0
+vuln-plain-7f-at-32768 rc=0
+vuln-asan-all-7f rc=1
+vuln-asan-status80-at-32768 rc=0
+vuln-asan-f7-at-32768 rc=0
+vuln-asan-7f-at-32768 rc=1
+fixed-asan-all-7f rc=0

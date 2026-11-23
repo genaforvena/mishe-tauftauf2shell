@@ -60,8 +60,13 @@ copies `sysexLength` bytes into `streamBuffer` with `memcpy` at `:250`.
 the default 1000-byte capacity (`SYSEX_BUFFER_SIZE`, `globals.h:127,148`) a
 single 40001-byte incomplete SysEx triggers the grow to 32768 and a 40001-byte
 copy: 7233 chosen bytes land past the allocation. The copy length comes from
-the caller's byte block; the overflow bytes are 7-bit SysEx data (0x5a in the
-harness), so both content and length are input-controlled.
+the caller's byte block. W170 measured the write alphabet on the real library:
+only bytes `< 0x80` reach the `memcpy` at `:250` (all-`0x6a` block writes 7233
+bytes; a `0x7f` at offset 32768 is written as the first tail byte). A status
+byte `0x80`-`0xF6` returns at `:243` before any copy, `0xF7` dispatches from
+the caller buffer with no copy, and `0xF8`-`0xFF` ends the copy before the
+realtime byte; see `real/ALPHABET.md`. Content (7-bit only) and length are
+input-controlled, but no byte with the high bit set can be written.
 
 Fix `1749f7f` changes two places: `checkStreamBufferCapacity()` now requires
 `streamBufferSize < MAX_STREAM_BUFFER_SIZE` in the grow branch
@@ -312,3 +317,31 @@ Both hackmd references were unreachable from this host at
 2026-11-23T16:58Z (HTTP 404 for the original issue write-up, HTTP 403 for
 the CISA-tagged link), so that "exploit"/PoC metadata supplied no bytes and
 its contents remain UNKNOWN here.
+
+## 11. Write-alphabet bound (W170, 2026-11-23)
+
+A second bounded experiment on the real library measures what the overflow
+can write, not just how far. One `parseStream()` call carries a 40001-byte
+incomplete SysEx (`0xF0` + 40000 `0x6a` bytes) with one byte varied. Plain
+builds read back chosen bytes past the real 32768-byte allocation; ASan
+builds use the real allocator. Replay: `./alphabet_probe.sh` in
+`lab/frontier/munt2shell/real/`; raw outputs in `real/evidence/alphabet-*`,
+interpretation in `real/ALPHABET.md`.
+
+- All-`0x6a` input: `tail_0x6a=7233/16384`, gcc ASan `WRITE of size 40001`
+  at `MidiStreamParser.cpp:250`; pinned-fixed ASan control rc=0.
+- `0x7f` at offset 32768: written as the first tail byte, ASan still rc=1.
+- `0x80`/`0x85` at offset 32768 (or `0x80` at 32769): no 32768-byte
+  allocation and no copy at all; the parser reports the illegal status and
+  continues with short messages; ASan rc=0.
+- `0xf7` at offset 32768: dispatches a 32769-byte SysEx from the caller
+  buffer with no `streamBuffer` copy; ASan rc=0.
+- `0xf8` at offset 32768: realtime handled, copy ends before that byte and
+  fits exactly in 32768 bytes; tail readback zero.
+
+The write primitive is therefore limited to bytes `0x00-0x7F`: no byte with
+the high bit set can be placed past the allocation. This is a bound on the
+primitive, not an exploit result; it does not supply the missing consumer or
+wire path. An initial hypothesis that a status byte merely truncates the
+copy was disproved — the early return skips the copy entirely. Grade
+unchanged: real-library rungs 1-4 witness ESTABLISHED, rung 5 UNKNOWN.

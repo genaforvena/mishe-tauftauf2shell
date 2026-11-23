@@ -1,0 +1,2 @@
+mode=status80-at-32769 len=40001 offset=32769 byte=0x80 sysex=0 lastlen=0 short=3615 realtime=0 debug=1
+alloc32768=0 tail_0x6a=0/0 tail_bytes=00000000000000000000000000000000 alloc_trace=40001,1000,

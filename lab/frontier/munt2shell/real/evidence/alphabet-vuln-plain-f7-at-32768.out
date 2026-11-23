@@ -1,0 +1,2 @@
+mode=f7-at-32768 len=40001 offset=32768 byte=0xf7 sysex=1 lastlen=32769 short=0 realtime=0 debug=7232
+alloc32768=0 tail_0x6a=0/0 tail_bytes=00000000000000000000000000000000 alloc_trace=40001,1000,

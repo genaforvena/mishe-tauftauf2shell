@@ -9,3 +9,5 @@ core.*
 alsa_probe
 frag-*-asan
 frag-*-plain
+alphabet-*-asan
+alphabet-*-plain
