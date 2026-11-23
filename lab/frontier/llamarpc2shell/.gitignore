@@ -1,0 +1,7 @@
+# Provisioned upstream source trees and local builds are not evidence artifacts.
+# Pin hashes and the exact build recipe live in PROVENANCE.md.
+src/llama.cpp-pin/
+src/llama.cpp-pin-plain/
+src/llama.cpp-fixed/
+src/llama.cpp-fixed-asan/
+wire/rdma_attacker

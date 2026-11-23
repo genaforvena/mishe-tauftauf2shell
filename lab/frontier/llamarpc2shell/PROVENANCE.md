@@ -52,12 +52,43 @@ Normalized trace hash (identical in all three runs and the replay):
 - Host: uid 1000, passwordless `sudo -n`; `/usr/include/infiniband/verbs.h`
   and `/usr/bin/rdma` present; `/sys/class/infiniband` initially empty.
   `sudo -n modprobe rdma_rxe`, `sudo -n rdma link add rxe0 type rxe netdev lo`
-  and `rdma link show` succeeded (link ACTIVE / LINK_UP on `lo`); the device was
-  removed with `sudo -n rdma link del rxe0` immediately. No build or wire client
-  was run, so live-server reachability stays UNKNOWN.
+  and `rdma link show` succeeded (link ACTIVE / LINK_UP on `lo`). At staging no
+  build or wire client was run; this wake built the server and drove a full
+  HELLO/caps + RC SEND exchange over `rxe0`, so live reachability is now
+  OBSERVED on loopback with `AT:P` still applying to real deployments.
 - The advisory's `transport.cpp#L510-L528` and the fix hunk's `@@ -517` are
   consistent with the pinned blob's `rdma_recv` at 510–528 and `memcpy` at 520;
   the 6-line offset is recorded, not silently normalized.
-- Only `got=43` was exercised. The 256 KiB upper bound and any control-flow
-  impact are unmeasured claims. No saved-frame overwrite, pointer control or
-  command execution was observed or claimed.
+- The slice harness still exercises only `got=43`; the live wire experiment
+  exercised 1, 43 and 3593 bytes. The advisory's 256 KiB upper bound remains
+  unmeasured. Saved-frame data was overwritten in the live non-ASan Debug
+  build (see below); no pointer redirect, ROP, command or RCE was observed.
+
+## Live wire experiment — 2026-11-23 (this wake)
+
+Full report: `reports/llamarpc2shell.md`. Provisioned source trees are listed
+in `lab/frontier/llamarpc2shell/.gitignore` and are not committed (304 MiB +
+182 MiB upstream trees plus build output). Verified source-state hashes:
+`transport.cpp` `a5a6774d…e8957e34` (vulnerable) and `cd61f2ec…da43` (upstream
+fixed worktree at `9a0fde99…`). Built server hashes are in the report.
+
+- `wire/rdma_attacker.cpp` (sha `5dbb9573…e14bb9e6`): raw TCP HELLO/caps
+  ({qpn, psn, gid}, 24 bytes) then RC QP RTR/RTS and one SEND; GID index 1 on
+  `rxe0` is `::ffff:127.0.0.1`, RoCEv2, MTU 4096.
+- `wire/run.sh` (sha `1daa391a…54f35d3c46bc`): `safe` (1 byte), `attack`
+  (43 bytes, ASan), `fixed` (43 bytes, upstream fixed ASan server via
+  `SERVER_BIN`). Creates/deletes `rxe0` when it was absent.
+- `wire/run-gdb.sh` (sha `6bdf0864…bc23de72dbb5`) plus `gdb-frame.cmd`,
+  `gdb-rip.cmd`, `gdb-crash.cmd`: plain Debug server under gdb; break in
+  `socket_t::impl::rdma_recv`, three `finish` commands, dump the live
+  `rpc_serve_client` frame.
+- Raw logs: `wire/evidence/{client,server}-{safe,attack,fixed}.log`,
+  `gdb-attack.log`, `gdb-rip.log`, `gdb-crash.log` and matching client logs.
+
+Observed: live ASan `WRITE of size 43` into `[48,49) 'cmd'` at
+`transport.cpp:520` called from `ggml-rpc.cpp:2475`; gdb frame dump shows
+payload byte `+0 = 0x0f`, `+11 = 0x5a`, `+18 = 0x44`, other bytes `0x41`
+through `+42`; 3593-byte payload puts `0x4242424242424242` in the saved RIP
+slot at `&cmd + 3585`, and the no-breakpoint run takes SIGSEGV with that value
+in backtrace frame #2. Fixed server logs `RDMA recv overrun: got=43 rem=1` and
+is ASan-clean; 1-byte input on the vulnerable server is ASan-clean.

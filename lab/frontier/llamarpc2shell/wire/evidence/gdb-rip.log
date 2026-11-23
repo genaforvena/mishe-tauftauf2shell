@@ -1,0 +1,48 @@
+Function "socket_t::impl::rdma_recv" not defined.
+Breakpoint 1 (socket_t::impl::rdma_recv) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+register_backend: registered backend RPC (0 devices)
+register_backend: registered backend CPU (1 devices)
+register_device: registered device CPU (AMD Ryzen 7 5700X 8-Core Processor)
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-rpc.so
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-cpu.so
+Starting RPC server v8.0.0
+  endpoint       : 127.0.0.1:53055
+  local cache    : n/a
+Devices:
+  CPU: AMD Ryzen 7 5700X 8-Core Processor (32019 MiB, 32019 MiB free)
+  transport      : TCP (RDMA auto-negotiate enabled)
+Accepted client connection
+RDMA probed: dev=rxe0 gid=1 RoCEv2 qpn=34 inline=256
+RDMA activated: qpn=34->33 mtu=4096 rx_depth=24
+
+Breakpoint 1, socket_t::impl::rdma_recv (this=0x5555555c7620, data=0x7fffffffcf87, size=1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/transport.cpp:510
+510	bool socket_t::impl::rdma_recv(void * data, size_t size) {
+=== HIT rdma_recv ===
+socket_t::impl::recv_data (this=0x5555555c7620, data=0x7fffffffcf87, size=1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/transport.cpp:567
+567	        return rdma_recv(data, size);
+Value returned is $1 = false
+socket_t::recv_data (this=0x5555555ce4d0, data=0x7fffffffcf87, size=1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/transport.cpp:672
+672	}
+Value returned is $2 = false
+0x00007ffff7b962ce in rpc_serve_client (backends=std::vector of length 1, capacity 1 = {...}, cache_dir=0x0, sock=std::shared_ptr<socket_t> (use count 2, weak count 0) = {...}) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/ggml-rpc.cpp:2475
+2475	        if (!sock->recv_data(&cmd, 1)) {
+Value returned is $3 = false
+=== after three finishes: saved-RIP probe ===
+#0  0x00007ffff7b962ce in rpc_serve_client (backends=std::vector of length 1, capacity 1 = {...}, cache_dir=0x0, sock=std::shared_ptr<socket_t> (use count 2, weak count 0) = {...}) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/ggml-rpc.cpp:2475
+#1  0x4242424242424242 in ?? ()
+#2  0x00007fffffffddb0 in ?? ()
+#3  0x00005555555c6a10 in ?? ()
+cmd address: 0x7fffffffcf87
+saved RIP slot at &cmd+3585:
+0x7fffffffdd88:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+0x7fffffffdd88:	0x4242424242424242
+first 48 bytes of cmd sink:
+0x7fffffffcf87:	0x0f	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffcf8f:	0x41	0x41	0x41	0x5a	0x41	0x41	0x41	0x41
+0x7fffffffcf97:	0x41	0x41	0x44	0x41	0x41	0x41	0x41	0x41
+0x7fffffffcf9f:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffcfa7:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffcfaf:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+[Inferior 1 (process 846433) killed]

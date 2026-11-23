@@ -1,0 +1,7 @@
+gid[0] type=2 raw=fe80000000000000020000fffe000000
+gid[1] type=2 raw=00000000000000000000ffff7f000001
+device=rxe0 port=1 gid_index=1 gid_type=2 mtu=5
+sent HELLO: qpn=33 psn=33
+HELLO rsp v8.0.0 caps qpn=34 psn=34 gid=00000000000000000000ffff7f000001
+QP RTS, posting 3593-byte SEND
+send wc status=0 opcode=0 byte_len=3593 wr_id=0 inline=0
