@@ -6980,3 +6980,26 @@ on distributed-Erlang ETF decode. With this admission the plant declares 95
 engine routes and 91 target minds (four cross-cutting roles);
 `tools/check-omp-only.py` reports `GREEN (95 declared roles)`. Status:
 `reports/erlang2shell-status.md`.
+
+## 2026-11-23 ~01:31Z — gdbserver2shell W1b: real pinned gdbserver build, live RSP overflow
+
+`lab/frontier/gdbserver2shell/rsp/{build-gdbserver.sh,live_probe.py,live_run.sh,live_verify.sh}`
+provision the exact 633ae02 HEAD pin, build a gdbserver-only ASan binary
+plus a fixed control, and send checksummed RSP packets from a loopback
+client with correct acknowledgements. `live_verify.sh` produced
+**16 PASS / 0 FAIL** twice, normalized hash
+`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+On the real plant-started gdbserver, `QTDP:1:0:E:0:0` created a tracepoint
+and `QTDPsrc:1:0:cond:0:1:` with 64 chosen bytes produced ASan
+`heap-buffer-overflow`, `WRITE of size 1`, `0 bytes after a 2-byte region`,
+frames `hex2bin (gdbsupport/common-utils.cc:465)` ->
+`cmd_qtdpsrc (gdbserver/tracepoint.cc:2547)`, exit 134. A well-formed
+`SLEN=16` packet replied `OK` cleanly; the fixed binary replied `E01`
+cleanly. A first client without RSP acks never reached the handler and is
+kept as a negative. Rung 3 is now confirmed in a real pinned process on a
+live wire path; rung 4 stays scoped to the harness's groomed chosen-byte
+placement and rung 5 is untouched: the ASan process aborts at the first
+overflow, so no chosen-byte readback, no forged `thread_db` call, no
+`qGetTLSAddr` RIP control and no command were observed. Evidence and full
+commands: `lab/frontier/gdbserver2shell/PROVENANCE.md`,
+`reports/gdbserver2shell-status.md`.

@@ -1,0 +1,16 @@
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/rsp/live_run.sh: line 25: 3234020 Aborted                 (core dumped) ASAN_OPTIONS=abort_on_error=1:detect_leaks=0 "$BIN" --once --debug=remote "127.0.0.1:$PORT" /bin/true > "$LOG" 2>&1
+CLIENT_RC=0 SERVER_RC=134
+--- client ---
+INITIAL=
+QTDP_ACK=+ QTDP_REPLY=OK
+QTDPsrc_LEN=149 DECLARED=1 USEDLEN=64
+QTDPsrc_ACK=+
+QTDPsrc_REPLY=
+GETTLS_ACK=EOF GETTLS_REPLY=
+--- server markers ---
+==3234020==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5020000009d2 at pc 0x5fcc3ca85218 bp 0x7ffd50d46fe0 sp 0x7ffd50d46fd0
+WRITE of size 1 at 0x5020000009d2 thread T0
+    #0 0x5fcc3ca85217 in hex2bin(char const*, unsigned char*, int) ../../../src/binutils-gdb-633ae02/gdbsupport/common-utils.cc:465
+    #1 0x5fcc3c9ff3bf in cmd_qtdpsrc ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:2547
+    #2 0x5fcc3c9ff3a3 in cmd_qtdpsrc ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:2546
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../src/binutils-gdb-633ae02/gdbsupport/common-utils.cc:465 in hex2bin(char const*, unsigned char*, int)

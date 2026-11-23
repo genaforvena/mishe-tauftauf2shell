@@ -134,3 +134,45 @@ full gdbserver build, no marker, no command and no rung-5 claim. The
 natural (ungroomed) layout was tried first and aborted with
 `malloc(): corrupted top size` because `srctype` took the primed hole — a
 recorded negative that motivated the two-hole ordering.
+
+## Real pinned gdbserver build and wire replay (W1b, 2026-11-23T01:31Z)
+
+`rsp/build-gdbserver.sh` clones sourceware `binutils-gdb` at the exact
+pin `633ae02c4ea8f87c670f7192804349860cfa291d` (verified by `rev-parse`
+and by a clean source tree at the end), configures a gdbserver-only build
+with `-fsanitize=address` in CFLAGS/CXXFLAGS/LDFLAGS, builds the vulnerable
+binary, applies the saved fix hunk, rebuilds and saves `gdbserver-fixed`,
+then reverses the patch and restores the vulnerable binary. Only 127.0.0.1
+is used at run time; fetching and building are local provisioning.
+
+`rsp/live_probe.py` speaks RSP from a Python client with correct `+` acks
+on both directions; `rsp/live_run.sh` starts the plant-built gdbserver
+with `--once --debug=remote 127.0.0.1:PORT /bin/true`;
+`rsp/live_verify.sh` runs three cases. Result: **16 PASS / 0 FAIL** twice,
+path-independent normalized hash
+`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+
+Observed on the vulnerable build: the client creates tracepoint 1 with
+`QTDP:1:0:E:0:0` (`OK`), then sends `QTDPsrc:1:0:cond:0:1:` plus 64 chosen
+bytes. The server's `--debug=remote` log records the exact incoming
+packet, then ASan reports `heap-buffer-overflow`, `WRITE of size 1`,
+`0 bytes after a 2-byte region`, frames
+`hex2bin (gdbsupport/common-utils.cc:465)` ->
+`cmd_qtdpsrc (gdbserver/tracepoint.cc:2547)`, exit 134. The well-formed
+`SLEN=16` packet on the same build replies `OK` and exits 0 with no ASan;
+the fixed binary rejects the same attack with `E01` and exits 0 with no
+ASan. A following `qGetTLSAddr` on the safe case reaches the dispatcher
+and returns `E01` (no thread_db loaded).
+
+Recorded negative: the first live client did not ack the server's reply,
+so gdbserver kept resending `OK` and never parsed the `QTDPsrc` frame;
+there was no ASan report. The client was corrected to ack every received
+packet before the successful replay above.
+
+Boundary: this is a real pinned gdbserver process fed attacker-controlled
+loopback wire input, but the ASan build aborts at the first overflow. No
+chosen-byte readback inside that process, no `qGetTLSAddr` call through a
+forged pointer, no non-ASan live layout measurement, no marker, no
+command and no rung 5. The advisory's live `process_info_private::thread_db`
+overwrite remains a claim; the harness limb above only shows placement
+feasibility in a groomed object.

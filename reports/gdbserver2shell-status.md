@@ -90,3 +90,31 @@ is reachable on an ungroomed process layout. Until then the `thread_db`
 overwrite and RIP chain stay advisory claims. Keep rung 3 plus scoped
 rung 4; no rung 5 without a live plant-started build, chosen benign
 command, controls and witness replay.
+
+## Real pinned gdbserver build (2026-11-23T01:31Z)
+
+`rsp/build-gdbserver.sh` provisioned the exact HEAD pin and built a
+gdbserver-only ASan binary plus a fixed control (same tree plus the saved
+fix hunk). `rsp/live_verify.sh` sent real RSP packets from a loopback
+Python client to a plant-started gdbserver: **16 PASS / 0 FAIL** twice,
+normalized hash
+`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+After `QTDP:1:0:E:0:0` created a tracepoint, the `QTDPsrc` packet with
+declared `SLEN=1` and 64 chosen bytes produced `heap-buffer-overflow`,
+`WRITE of size 1`, `0 bytes after a 2-byte region`, frames
+`hex2bin (gdbsupport/common-utils.cc:465)` ->
+`cmd_qtdpsrc (gdbserver/tracepoint.cc:2547)`, exit 134. The well-formed
+`SLEN=16` packet returned `OK` with no ASan; the fixed binary returned
+`E01` with no ASan. An initial client that failed to ack RSP replies
+desynced the session and reached no handler; it was corrected before the
+successful replay and is preserved as a negative in `PROVENANCE.md`.
+
+Grade: rung 3 is now confirmed in a real pinned gdbserver process on a
+live loopback wire path. Rung 4 remains scoped to the harness's chosen
+bytes in a groomed adjacent object; the real ASan build aborts at the
+first overflow, so no chosen-byte readback, no forged `thread_db` call,
+no `qGetTLSAddr` RIP control and no command were observed there. Rung 5
+untouched. Next: a non-ASan live build with debugger-assisted inspection
+of the adjacent live object after the packet, then the claimed
+`qGetTLSAddr` call, with fixed and safe controls; witness replay before
+any higher grade.
