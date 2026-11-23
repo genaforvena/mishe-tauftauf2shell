@@ -22,7 +22,9 @@ variants. `retarget.sh` drives gdb watchpoints.
 
 ## Observed
 
-`bash lab/connman2shell/callpath/run.sh` → `39 PASS / 0 FAIL`.
+`bash lab/connman2shell/callpath/run.sh` → `37 PASS / 0 FAIL`. The plain
+outcome mix is printed as `OBS`, not a pass criterion: a 12-run ASLR sample
+can legitimately contain no store or no crash.
 
 - **Reachability** (K=0x80, ASan): `stack-buffer-overflow`, `READ of size 1`
   in `get_domains`, with the full stack `get_domains` ←

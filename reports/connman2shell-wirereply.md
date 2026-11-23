@@ -36,8 +36,8 @@ used by frontier.
 
 ## Observed
 
-`bash lab/connman2shell/wirereply/run.sh` → `30 PASS / 0 FAIL`; repeated
-three times with the same result.
+`bash lab/connman2shell/wirereply/run.sh` → `29 PASS / 0 FAIL`; repeated
+three times with the same result. Plain outcome counts are informational.
 
 - **Real parser delivery**: `WIREPARSE OLEN=2048 COUNT=1 OFFSET=8`, i.e. the
   verbatim `dhcpv6_get_option()` accepts the REPLY-shaped option and hands

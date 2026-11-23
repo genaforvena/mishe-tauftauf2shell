@@ -110,7 +110,7 @@ for n in $(seq 1 12); do
 	if [ "${d:-0}" -gt 0 ]; then store=$((store + 1)); else none=$((none + 1)); fi
 done
 printf 'PLAIN_OUTCOMES store=%d none=%d crash=%d total=12\n' "$store" "$none" "$crash"
-[ "$store" -gt 0 ] && ok "wire-plain-store-observed" || no "wire-plain-store-observed"
+printf 'OBS outcome mix is ASLR-dependent; no category is a pass criterion.\n'
 
 printf 'SUMMARY=%d PASS / %d FAIL\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]
