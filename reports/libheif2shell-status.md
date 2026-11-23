@@ -26,8 +26,10 @@ Admission changes no grade.
   the planned patched release); vulnerable pin tag `v1.23.6`, fixed by
   `9ec655f`. The advisory's 1,155-byte Motion-JPEG sequence, 36,879-byte
   allocation, 64-byte write and release-build SIGSEGV were staging claims;
-  W161/W162 locally observed the 64-byte write and the Release SIGSEGV, while
-  the 1,155-byte sequence and 36,879-byte allocation remain untested.
+  W161/W162 locally observed the 64-byte write and the Release SIGSEGV. W181
+  reproduces the 36,879-byte allocation and 64-byte write from a different
+  crafted file (see below); the advisory's exact 1,155-byte sequence and its
+  "pointer later used by x265" remain untested.
   The AV:N vector is advisory text, not a lab result.
 - Primitive: `HeifPixelImage::extend_padding_to_size()` at
   `pixelimage.cc.vuln:623-624` reallocates when either memory dimension is
@@ -507,3 +509,34 @@ both frames encode. `real/neighbour/check_uncompressed.py` PASS=10 FAIL=0.
 This closes W178's explicit "no ASan run on this build" gap; it confirms
 rung 3 on that lane and adds no consumer, pointer, command or witness
 verdict. Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5.
+
+## W181 advisory allocation size matched on a single crafted file (2026-11-23)
+
+The advisory's 36,879-byte allocation was an untested claim. Re-read from
+GitHub at 23:38Z: 36,879 = 512*72 + 15, the same 16-byte alignment overhead as
+this lab's 32,783-byte planes. Using the existing pinned v1.23.6 ASan build
+and the committed `real/reencode_sequence.cc` driver, W181 patched only the
+SOF0 dimensions of the committed reference MJPEG: frame 0 becomes 512x72,
+frame 1 becomes 64x512. The first file frame, not a harness-created image,
+sizes the x265 encoder.
+
+Attack (SHA-256
+`d749c1bd05264319a26449eeb73bccd771c0eb327524f27c658ac679f4ce79fe`, 4,262
+bytes) rc 1 with ASan `heap-buffer-overflow`, `WRITE of size 64`, 0 bytes
+after a **36,879-byte region** at pinned `pixelimage.cc:644` via
+`heif_image.cc:403` and `encoder_x265.cc:1139`. Decode-only rc 0 shows both
+mixed sizes. Safe control (both frames 512x72, SHA-256
+`fe3b4d4da5ef0a762a78263dc03fbb7da8e77e2b40bb8abd6917ffa38e029419`) rc 0,
+no ASan, both frames encoded. Fixed pin `9ec655f` on the same attack file rc
+0 with `encode: rc=2 ... All frames of a sequence must have the size of the
+first frame`, no ASan. `real/neighbour/check_advisory_size.py` PASS=11
+FAIL=0; generator, commands and logs are in `real/PROVENANCE-real.md` W181
+section and `real/neighbour/evidence/advisory-size/`.
+
+This matches the advisory's allocation-size and write claims at the labeled
+local file/decoder-to-x265-encoder scope, with a different input: the
+advisory's 1,155-byte file and its "pointer later used by x265" remain
+untested, and the first frame's rows 64..71 are libjpeg filler because the
+entropy stream holds only 64 rows. Grade UNCHANGED: rung 3 plus rung 4, NOT
+rung 5. No pointer, command, real consumer, ASLR study or witness verdict;
+author observation only.

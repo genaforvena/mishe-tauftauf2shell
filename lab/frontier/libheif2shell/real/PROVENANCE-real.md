@@ -659,3 +659,72 @@ pointer, command, ASLR-independent address or witness verdict. Grade stays
 rung 3 plus rung 4, NOT rung 5. ASLR was not disabled here; no pointer was
 written by this leg (ASan traps at the first OOB store). This is an author
 observation, not independent acceptance.
+
+## W181 advisory allocation size reproduced from a single crafted file (2026-11-23)
+
+The advisory's 36,879-byte allocation was previously called untested in this
+report. This wake re-read
+`https://github.com/strukturag/libheif/security/advisories/GHSA-hpg4-g2gc-pq42`
+at 23:38Z: it claims a 1,155-byte Motion-JPEG sequence, 512x64 then 64x512,
+ASan `WRITE of size 64` just past a 36,879-byte allocation and a Release
+SIGSEGV through a pointer later used by x265. The same advisory says code
+execution was not demonstrated. 36,879 = 512*72 + 15, the same 16-byte
+alignment overhead seen in the 32,783-byte planes of W161/W180.
+
+No libheif rebuild this wake. The W161 vulnerable and fixed ASan build trees
+`/tmp/libheif2shell-vuln-asan` and `/tmp/libheif2shell-fixed-asan` (pinned
+v1.23.6 / pinned 9ec655f patch, flags in the W161 section above) were still
+present. The committed `real/reencode_sequence.cc` driver was relinked to
+`/tmp/w181-size/driver` and `/tmp/w181-size/fixed-driver` with the exact W161
+command (`g++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer
+-I<src>/libheif/api -I<build> reencode_sequence.cc libheif/libheif.a <absolute
+codec libraries from ninja -t commands examples/heif-enc> -ldl`).
+
+Input generator: `neighbour/make_advisory_size_sequence.py` patches only the
+SOF0 dimensions of the two 1,138-byte JPEG samples in the committed
+`evidence/reference-same-size.heif` (SHA-256
+`4da16469703ce5cbc48f7a64f430fb7b1898279df3fcbbca0aa02a5cf583f8dc`). The
+attack file declares frame 0 as 512x72 and frame 1 as 64x512, SHA-256
+`d749c1bd05264319a26449eeb73bccd771c0eb327524f27c658ac679f4ce79fe`; the safe
+control declares both frames 512x72, SHA-256
+`fe3b4d4da5ef0a762a78263dc03fbb7da8e77e2b40bb8abd6917ffa38e029419`. Both are
+4,262 bytes. The generator reproduces both hashes exactly. Entropy-coded bytes
+are untouched; libjpeg reports "premature end of data segment" for the 72-row
+SOF, so rows 64..71 of frame 0 are decoder filler. That does not affect the
+overflow, whose OOB source row comes from frame 1.
+
+Commands and saved results (all `ASAN_OPTIONS=detect_leaks=0`, 120s timeout,
+evidence under `neighbour/evidence/advisory-size/`):
+
+```
+./driver advisory.heif attack.heif            # advisory.out, advisory.rc=1
+./driver safe72.heif safe.heif                # safe72.out, safe72.rc=0
+./driver advisory.heif ignored.heif decode-only  # decode.out, decode.rc=0
+./fixed-driver advisory.heif fixed.heif       # fixed.out, fixed.rc=0
+```
+
+Observed on the vulnerable build: the track still declares 512x64, but the
+first file frame decodes 512x72 and the second 64x512. x265 takes its coded
+size from that first file frame, so no harness-created sizing image is
+involved. ASan reports `heap-buffer-overflow`, `WRITE of size 64`, 0 bytes
+after a **36,879-byte region** allocated at `pixelimage.cc:571` via `:631`,
+with the pinned store at `pixelimage.cc:644` via `heif_image.cc:403`,
+`encoder_x265.cc:1139`, `hevc_enc.cc:189`, `track_visual.cc:620` and the
+driver's `reencode_sequence.cc:62`. Decode-only reads both frames and exits
+cleanly. The safe 512x72/512x72 input decodes and encodes both frames with no
+ASan report. The fixed pin decodes the same attack file, then rejects frame 1
+at encode with `rc=2 ... All frames of a sequence must have the size of the
+first frame` and no ASan report.
+
+`neighbour/check_advisory_size.py` PASS=11 FAIL=0 over the two input hashes
+and the four runs. This matches the advisory's allocation-size and 64-byte
+write claims on this local decoder-to-x265-encoder path, using a different
+crafted file (4,262 bytes, first frame 512x72) than the advisory's claimed
+1,155-byte file (first frame 512x64). The 1,155-byte file itself is still not
+tested. The advisory's "pointer later used by x265" was not observed here:
+ASan traps on the first OOB store. No consumer, command, pointer control,
+ASLR study or witness verdict. Grade unchanged: rung 3 plus rung 4, NOT rung
+5. Author observation, not independent acceptance.
+The committed `advisory.out` has one trailing space removed from ASan's
+"Partially addressable" legend line to satisfy `git diff --check`; all
+diagnostic lines are otherwise verbatim.
