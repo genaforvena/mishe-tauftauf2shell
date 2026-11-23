@@ -9,6 +9,24 @@ mkdir -p "$OUT"
 INC="-I/usr/include/apache2 $(pkg-config --cflags apr-1)"
 LIB="$(pkg-config --libs apr-1 apr-util-1)"
 
+# Re-extract the verbatim parser slices from the pinned blobs so a clean
+# git-archive replay needs no artifacts from realobj/run.sh.
+V=../src/state.c.4301b536
+F=../src/state.c.8017478
+R=../src/state.c.v2.4.19.4
+mkdir -p vuln fixed release
+(cd ../src && sha256sum -c SHA256SUMS) > "$OUT/pin-hashes.txt" 2>&1 \
+  || { echo PIN_HASH_FAIL; exit 1; }
+{ echo '#line 105 "state.c.4301b536"'; sed -n '105,110p' "$V"; } > vuln/state_struct.inc
+{ echo '#line 204 "state.c.4301b536"'; sed -n '204,223p' "$V"; } > vuln/parse_token.inc
+{ echo '#line 105 "state.c.8017478"'; sed -n '105,110p' "$F"; } > fixed/state_struct.inc
+{ echo '#line 204 "state.c.8017478"'; sed -n '204,226p' "$F"; } > fixed/parse_token.inc
+{ echo '#line 105 "state.c.v2.4.19.4"'; sed -n '105,110p' "$R"; } > release/state_struct.inc
+{ echo '#line 204 "state.c.v2.4.19.4"'; sed -n '204,226p' "$R"; } > release/parse_token.inc
+: > "$OUT/raw-by-trial.txt"
+: > "$OUT/wellformed.txt"
+: > "$OUT/asan.txt"
+
 for v in vuln fixed release; do
   D="" ; [ "$v" = fixed ] && D="-DFIXED_VARIANT" ; [ "$v" = release ] && D="-DRELEASE_VARIANT"
   gcc -O0 -g -std=gnu11 $D $INC -o "pl-$v" driver_long.c $LIB \
