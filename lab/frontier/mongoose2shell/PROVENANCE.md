@@ -94,7 +94,9 @@ drives the **real Mongoose stack** from the byte-exact pinned trees:
 `./run.sh`: **29 PASS / 0 FAIL** three consecutive times,
 `TRACE_SHA256=bfa4fa5fbc842e7f8cf85e4d10b96774e116d7f8a22c42f6369b083709a8fce3`
 (252-line normalized trace in `live/evidence/trace.txt`; raw per-mode outputs
-in `live/evidence/raw/`).
+in `live/evidence/raw/`). A clean `git archive HEAD lab/frontier/mongoose2shell`
+replay in `/tmp/m2s-replay2` (auto-provisioning both pinned worktrees from
+GitHub) returned `PASS=29 FAIL=0` and exactly the same trace hash.
 
 - Reachability: `info` prints `FRAMESIZE=1504 TX_LEN=1504 OVERFLOW_65535=64031`;
   `lcp` prints `LCP_GATE_AFTER=1` after one Configure-ACK; `nolcp` leaves
