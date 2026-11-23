@@ -8396,3 +8396,55 @@ frontier's value. Grade stays the author's: rung 3 gcc+clang ASan
 image consumer, process, socket, wire, pointer control, command, marker or
 witness verdict. Advisory file-level reachability and rung 5 stay UNKNOWN.
 Status: `reports/openexr2shell-status.md`.
+
+## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
+
+Frontier W157 staged GHSA-hpg4-g2gc-pq42 in commit `366690f`: libheif
+>=1.15.0 <1.23.7 (advisory calls 1.23.7 the planned patched release; fixed
+bytes are commit `9ec655f76b6fe298092aaeb063f821f53b8eb901`, no CVE stated),
+a direct-call harness over verbatim pinned `pixelimage.cc` and `heif_image.cc`
+slices at vulnerable tag `v1.23.6`. `extend_padding_to_size()` allocates the
+new plane at the requested subsampled dimensions, then copies every old row
+at the new stride; a 64x65 -> 512x64 request writes chosen bytes from offset
+32768 into a 32768-byte plane. gcc+clang ASan `WRITE of size 64` at pinned
+`:644`, fixed rc 2 with no copy, scoped rung-4 chosen-byte readback under gdb.
+
+Duplicate screen: no libheif target in the plant's routes or charters; the
+tacplus brief only ranks this advisory below its own find as unprovisioned.
+A two-pane window 117 and seed wall exist, registered as STAGED; the operator
+has not admitted a route, charter or wake units, `check-omp-only.py` still
+reports 111 roles, and no witness verdict exists. Grade stays CODE/HARNESS
+rungs 1-4; no libheif build, HEIF/MJPEG file, encoder plugin, consumer,
+process, socket, wire, pointer control, command or rung 5. The advisory's
+mixed-size Motion-JPEG file path stays a claim; a dedicated mind would need
+real v1.23.6/1.23.7 builds with x265 and a measured post-overwrite consumer.
+
+Docs replay from `git archive 366690f lab/frontier/libheif2shell` in
+`/tmp/docs-libheif.7ISRoZ` returned rc 0 and
+`PASS=101 FAIL=0 TRACE=9468b5109099f1810c4cef5dbe6e1c064495b180c57f6e2844a20f2580e38b43`,
+matching the brief. Brief: `reports/frontier-libheif2shell.md`; pins and
+preserved negatives: `lab/frontier/libheif2shell/PINS.sha256` and
+`PROVENANCE.md`.
+
+## 2026-11-23 12:1xZ — thrift2shell W146 vptr negative and accepted forged-chunk `free()`
+
+Commit `cd54f25` closes one limb and upgrades another in the 108th route; no
+admission, route, mind or grade change. A gdb scan at pinned
+`THeaderTransport.cpp:301` found the object 0x980 bytes before `rBuf_`,
+outside the 726-byte copy window, with no executable-mapping pointer in the
+swept span: the direct vptr/indirect-call limb is unavailable in this layout,
+a negative result, not a failed exploit. The accepted-free limb uses a
+312-byte partial-KV frame with a forged 0x31 chunk header; because ASLR
+randomizes heap bits 12-15, `live/run-fakechunk.sh` sweeps sixteen low words
+until `free()` receives `rBuf_+512`. The accepted free overwrites one 0xA5
+marker qword at that offset with an allocator-written link; fixed v0.24.0 is
+clean and the safe frame aborts in `free(): invalid pointer`.
+
+Docs replayed the committed script at `cd54f25` in the working tree with the
+gitignored lab binaries: rc 0, winner `0x13f0`, normalized SHA-256
+`bcde0050c441f08c0d920ad6365971b425d54ff3dd834bec84226647056bc3a1`, matching
+the report. Wire-chosen bits are 16, the written value is not chosen, and
+there is no vptr, code pointer, command, marker side effect or witness verdict.
+W145's ASLR-on replay request (#2547) is still unanswered; W146 is a separate
+author-only claim and rung 5 stays UNKNOWN. Writeup:
+`reports/thrift2shell-livewire.md`; status: `reports/thrift2shell-status.md`.

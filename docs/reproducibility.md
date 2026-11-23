@@ -4689,3 +4689,90 @@ The operator replay at 11:54Z used `/tmp/openexr-replay.592N1Q` and matched
 the trace exactly. This is direct-call CODE/HARNESS evidence only: no EXR
 header or chunk parsing, ZSTD frame, codec build, process, socket or wire;
 the advisory's file-level reachability remains a claim, and rung 5 is UNKNOWN.
+
+## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
+
+GHSA-hpg4-g2gc-pq42 (High 7.5, no CVE stated, CWE-122) affects libheif
+>=1.15.0, <1.23.7; the advisory describes 1.23.7 as the planned patched
+release. Claim:
+https://github.com/strukturag/libheif/security/advisories/GHSA-hpg4-g2gc-pq42
+Vulnerable bytes are tag `v1.23.6`; fixed bytes are upstream commit
+`9ec655f76b6fe298092aaeb063f821f53b8eb901`. All five fetched files and their
+SHA-256 pins are in `lab/frontier/libheif2shell/PINS.sha256`; verbatim slices,
+declared stubs, commands and preserved negatives are in
+`lab/frontier/libheif2shell/PROVENANCE.md`. Brief:
+`reports/frontier-libheif2shell.md`. No status report or admission replay
+exists: window 117 is registered but there is no charter, route or mind.
+
+No upstream fetch is needed. Docs observed this replay from the committed
+tree at `366690f` into `/tmp/docs-libheif.7ISRoZ`:
+
+```
+T=$(mktemp -d /tmp/docs-libheif-replay.XXXXXX)
+git archive 366690f lab/frontier/libheif2shell | tar -x -C "$T"
+cd "$T/lab/frontier/libheif2shell/harness"
+./run.sh && ./check.sh
+```
+
+Expect rc 0 from both scripts and exactly
+`PASS=101 FAIL=0 TRACE=9468b5109099f1810c4cef5dbe6e1c064495b180c57f6e2844a20f2580e38b43`
+(101 assertions over 24 runs, three repeats plus a clean-archive replay by
+frontier). gcc and clang ASan classify the store as `heap-buffer-overflow`,
+`WRITE of size 64`, 0 bytes after a 32768-byte region at pinned
+`pixelimage.cc.vuln:644`, with the caller frame at
+`heif_image.cc.vuln:403`; the fixed pin rejects the same request with rc 2
+and copies nothing. Plain builds and gdb read back four chosen `0x5a` bytes
+at offset 32768 against a `0xa5` canary.
+
+This is direct-call CODE/HARNESS evidence only: the method and public wrapper
+are pinned upstream bytes, but the surrounding types and allocator are stubs;
+the allocator omits the real `alloc()` alignment shift. No HEIF or Motion-JPEG
+file, decoder, x265/x264 encoder plugin, libheif build, image consumer,
+process, socket or wire input. The advisory's 1,155-byte sequence,
+36,879-byte allocation and release SIGSEGV are advisory claims not reproduced
+here. Preserved negatives (C-compiler link errors, LeakSanitizer noise, a
+too-small canary tail that broke `free`, a wrong-frame gdb probe) are in
+`PROVENANCE.md`. Rung 5 is UNKNOWN; no pointer or control-flow corruption,
+command execution or witness verdict.
+
+## 2026-11-23 12:1xZ — thrift2shell W146 accepted forged-chunk `free()` replay
+
+This fold covers commit `cd54f25`, two bounded results in an already admitted
+route (no new mind, route or grade). Status:
+`reports/thrift2shell-status.md`; full writeup and build commands:
+`reports/thrift2shell-livewire.md`, sections "W146". The replay scripts and
+address-free evidence are `lab/frontier/thrift2shell/live/run-fakechunk.sh`,
+`gdb-fakechunk.gdb`, `normalize-fakechunk.py` and
+`results/fakechunk-normalized.txt`; raw gdb logs and 1 KiB heap dumps are
+gitignored. The script needs the gitignored `live-noflush` and
+`live-noflush-fixed` binaries; their build commands are in the livewire
+report, so a clean archive alone is not a complete replay.
+
+Docs observed this replay in the working tree at `cd54f25` (binaries already
+built by the lab mind):
+
+```
+cd lab/frontier/thrift2shell/live
+bash run-fakechunk.sh
+sha256sum results/fakechunk-normalized.txt
+```
+
+rc 0, winner low word `0x13f0`, and normalized SHA-256
+`bcde0050c441f08c0d920ad6365971b425d54ff3dd834bec84226647056bc3a1`, matching
+the report's two author replays. The address-free output records
+`CHOSEN_FREE_DELTA_FROM_RBUF=+512`, `FREED_CHUNK_ACCEPTED=1`,
+`MARKER_OVERWRITTEN=1`, `CHANGED_QWORDS_IN_WINDOW=1`, `CHANGED_OFFSETS=+512`,
+`PROCESS_REACHED_VULN=1`, `ABORT_VULN=0`, fixed reached clean with
+`ABORT_FIXED=0`, and safe `ABORT_SAFE=1` (the expected `free(): invalid
+pointer` control). The safe control's abort message is printed by the server
+and is not a failed replay.
+
+The vptr limb is a negative result: under the plain no-flush server the
+`THeaderTransport` object is 0x980 bytes before `rBuf_`, outside the 726-byte
+copy window, and no qword in the swept span points into an executable mapping;
+no indirect call was exercised. The accepted-free limb stays rung 4 on living
+bytes: the wire chooses the low 16 bits, ASLR supplies the high bits, and the
+written value is an allocator-chosen heap link, not attacker bytes. No vptr,
+code pointer, return address, ROP, command, marker side effect or witness
+verdict. The W145 ASLR-on replay request (#2547) remains unanswered; W146 is
+author-only and rung 5 stays UNKNOWN.
