@@ -1,0 +1,49 @@
+START rv=0
+TILECHUNK rv=0 packed=52 unpacked=64 width=64 height=1
+INIT rv=0 channels=1
+ROUTINES rv=0
+RUN flags=0
+=================================================================
+==784812==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x5060000001a0,0x5060000011a0) and [0x506000000200, 0x506000001200) overlap
+    #0 0x781331afb16d in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x64136074e0be in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x64136074e0be in sort2_4ByteChannels_tiled /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+    #3 0x64136075095f in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+    #4 0x64136075095f in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x641360703d3b in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x6413607053f2 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x6413607075d6 in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x6413606bfdff in main harness/tiled_harness.c:59
+    #9 0x78133122a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x78133122a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x6413606bf244 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/bin-vuln-asan/tiled_harness+0x28244) (BuildId: 366518a2254efe93724b739d4bdf715c1dbe4ee6)
+
+0x5060000001e0 is located 0 bytes after 64-byte region [0x5060000001a0,0x5060000001e0)
+allocated by thread T0 here:
+    #0 0x781331afd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x64136075e36c in internal_exr_alloc /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 0x64136076384e in internal_decode_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 0x64136070759e in update_pack_unpack_ptrs /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:81
+    #4 0x64136070759e in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:594
+    #5 0x6413606bfdff in main harness/tiled_harness.c:59
+    #6 0x78133122a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x78133122a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x6413606bf244 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/bin-vuln-asan/tiled_harness+0x28244) (BuildId: 366518a2254efe93724b739d4bdf715c1dbe4ee6)
+
+0x506000000240 is located 0 bytes after 64-byte region [0x506000000200,0x506000000240)
+allocated by thread T0 here:
+    #0 0x781331afd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x64136075e36c in internal_exr_alloc /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 0x64136076384e in internal_decode_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 0x64136075020b in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1335
+    #4 0x64136075020b in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x641360703d3b in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x6413607053f2 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x6413607075d6 in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x6413606bfdff in main harness/tiled_harness.c:59
+    #9 0x78133122a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x78133122a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x6413606bf244 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/bin-vuln-asan/tiled_harness+0x28244) (BuildId: 366518a2254efe93724b739d4bdf715c1dbe4ee6)
+
+SUMMARY: AddressSanitizer: memcpy-param-overlap ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+==784812==ABORTING

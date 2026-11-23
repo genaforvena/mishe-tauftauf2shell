@@ -97,14 +97,17 @@ main (int argc, char** argv)
 
     setvbuf (stdout, NULL, _IONBF, 0);
     if (argc < 2) {
-        fprintf (stderr, "usage: %s file.exr\n", argv[0]);
+        fprintf (stderr, "usage: %s file.exr [tile]\n", argv[0]);
         return 2;
     }
     exr_set_default_memory_routines (guarded_alloc, guarded_free);
 
     rv = exr_start_read (&ctxt, argv[1], &cxt_init);
     if (rv != EXR_ERR_SUCCESS) return 3;
-    rv = exr_read_scanline_chunk_info (ctxt, 0, 0, &cinfo);
+    if (argc > 2 && strcmp (argv[2], "tile") == 0)
+        rv = exr_read_tile_chunk_info (ctxt, 0, 0, 0, 0, 0, &cinfo);
+    else
+        rv = exr_read_scanline_chunk_info (ctxt, 0, 0, &cinfo);
     if (rv != EXR_ERR_SUCCESS) return 4;
     rv = exr_decoding_initialize (ctxt, 0, &cinfo, &decode);
     if (rv != EXR_ERR_SUCCESS) return 5;

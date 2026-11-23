@@ -114,7 +114,8 @@ The same file also reproduces through the advisory's C++
 ASan build (`cpp-vuln-poc.out`: `memcpy-param-overlap` at pinned
 `internal_zstd.c:472`; baseline `READPIXELS ok rv=0`), while the pinned 3.5.3
 build throws `Unable to run decoder` with no ASan report
-(`cpp-fixed-poc.out`). Deep-tiled, OpenImageIO and aarch64 remain untested.
+(`cpp-fixed-poc.out`). Deep-tiled was confirmed in W164 below; OpenImageIO and
+aarch64 remain untested.
 
 ## Witness verdict W161 (2026-11-23)
 
@@ -163,3 +164,18 @@ socket wrapper around the harness would be a synthetic consumer under
 `docs/rce.md:12-15`, so none was built; no pointer, command or marker work
 was attempted. Rung 5 remains UNKNOWN with a named blocker: a live affected
 application process accepting wire/request input.
+
+## W164: deep-tiled claim confirmed (2026-11-23)
+
+A second part type reaches the same pinned sink. A 64x1 DEEPTILE+ZSTD FLOAT
+baseline was forged into a 728-byte PoC using the same technique as the
+scanline file: raw cumulative sample table with totsamp=1024,
+`unpacked_size=64`, 52-byte ZSTD-EXR frame. Through
+`exr_read_tile_chunk_info` + `exr_decoding_run()` the vulnerable 3.5.2 ASan
+build reports `memcpy-param-overlap` with two 4096-byte ranges at pinned
+`internal_zstd.c:472`; the fixed 3.5.3 build rejects with
+`EXR_ERR_CORRUPT_CHUNK` (rv 23). The guarded allocator measures a completed
+4032-byte overwrite of the 64-byte destination in 3/3 runs versus 0 on the
+baseline. Grade unchanged: file-level rungs 1-4, witness-ESTABLISHED at the
+scanline CODE/CONSUMER scope from W161, rung 5 UNKNOWN. Full evidence and
+hashes: `reports/openexr2shell-file-level.md` W164 section.

@@ -186,12 +186,13 @@ input.
   file-chosen. In W161, changing the harness fill pattern changed the first
   overwritten byte while the 4032-byte length and zero-byte baseline stayed
   fixed.
-- The advisory's deep-tiled, OpenImageIO and aarch64 claims were not tested.
-  Its no-`-c` `exrcheck` and `exrinfo -v` observations were not rerun; this
-  wake tested `exrcheck -c` and `exrinfo -` instead. The advisory's 4032-byte
-  length and 692-byte file size were independently observed here; its
-  `malloc(): invalid size (unsorted)` abort text differs from this host's
-  `free(): invalid pointer`.
+- The advisory's OpenImageIO and aarch64 claims were not tested; its deep-tiled
+  claim was later confirmed in W164 below. Its no-`-c` `exrcheck` and
+  `exrinfo -v` observations were not rerun; this wake tested `exrcheck -c` and
+  `exrinfo -` instead. The advisory's 4032-byte length and 692-byte file size
+  were independently observed here; its `malloc(): invalid size (unsorted)`
+  abort text differs from this host's `free(): invalid pointer`.
+
 - Build negatives: the C consumer needed `-lstdc++`, `-ldeflate` and explicit
   static-library order; the C++ generator needed Imath config/include paths.
   The first ASan report is `memcpy-param-overlap` rather than
@@ -260,3 +261,56 @@ bytes therefore read adjacent heap, matching `0x57` as the complement of
 allocation 25's `0xa8` fill. Disposition: keep the negative. The file controls
 copy length and destination allocation, not the overflow byte values. No grade
 change: file-level rungs 1-4 remain as before; rung 5 stays UNKNOWN.
+
+## W164: deep-tiled Core path — advisory claim confirmed (2026-11-23)
+
+Prediction: the advisory's untested deep-tiled reproduction reaches the same
+pinned sink. Added `cases/gen_baseline_tiled.cpp` (DEEPTILE, 64x1, one 64x1
+tile, ZSTD, one FLOAT channel) and `cases/make_poc_tiled.py`. The deep-tile
+chunk leader is 40 bytes — tilex, tiley, levelx, levely as four int32, then
+sample_table_size, packed_size, unpacked_size as three int64 (confirmed against
+pinned `chunk.c`) — and the mutator forges it exactly as `make_poc.py` forges
+the 36-byte scanline leader: a raw 256-byte cumulative sample table with
+totsamp=1024, `unpacked_size=64`, and a 52-byte ZSTD-EXR v1 frame packing 64
+pixel bytes. `harness/tiled_harness.c` calls
+`exr_read_tile_chunk_info(ctxt,0,0,0,0,0,&cinfo)` then the unchanged decode
+sequence; `guarded_harness.c` gained an optional `tile` argument using that
+same chunk-info call. `harness/build.sh` builds both new binaries without
+dropping any prior target.
+
+Artifacts are gitignored EXRs, reproducible from committed sources:
+`cases/baseline_tiled.exr` 581 bytes sha256
+`6a7a76a6789d35ad826a61a5d877632ebdb7c42130cc2d7698a2ca2f979af49e`;
+`cases/poc_tiled.exr` 728 bytes sha256
+`aa9dba1f009d80a8accecea6531ebfcd4c15f2fe6e2cad0b4ec4df6d92a41ccc`.
+Regenerating both from the rebuilt generator reproduced those hashes byte-for-
+byte, and the regenerated PoC replayed the same sink.
+
+Observations:
+
+- Vulnerable plain, baseline: `DECODE rv=0`, clean. Vulnerable plain, PoC:
+  `DECODE rv=31` then `free(): invalid pointer`, rc 134.
+- Vulnerable ASan, baseline: clean, rc 0. Vulnerable ASan, PoC:
+  `AddressSanitizer: memcpy-param-overlap`, two 4096-byte ranges, frame
+  `sort2_4ByteChannels_tiled internal_zstd.c:472` -> `exr_undo_zstd_v1 :1373`
+  -> `decompress_data compression.c:706` -> `exr_decoding_run decoding.c:602`
+  -> `tiled_harness.c:59`. Both ranges start in 64-byte
+  `internal_decode_alloc_buffer` allocations from `decoding.c:81` and
+  `internal_zstd.c:1335`. Evidence `evidence/tiled-va-{baseline,poc}.out`.
+- Fixed ASan, PoC: `(EXR_ERR_CORRUPT_CHUNK) Unable to decompress w 13 image
+  data 52 -> 64, got 256`, `DECODE rv=23`, no ASan report
+  (`evidence/tiled-fa-poc.out`).
+- Guarded allocator, baseline: `GUARD-TOTAL changed=0`; PoC:
+  `alloc=25 size=64 changed=4032 first=+0 expected=0x57 actual@first=0x0d`,
+  `GUARD-TOTAL changed=4032`, identical in 3/3 repeats. The scanline
+  regression is unchanged at `changed=4032` with `actual@first=0x57`.
+  The different first byte on the tiled path is another instance of W163's
+  allocator-derived, not file-chosen, overrun. Evidence
+  `evidence/tiled-guard-{baseline,poc}.out`,
+  `evidence/tiled-scanline-regress.out`.
+
+Disposition: the advisory's deep-tiled claim is confirmed at the same labeled
+file-level CODE/CONSUMER scope. No grade change: this is still a purpose-built
+local-path C consumer, with no wire, socket, pointer target, command or marker;
+rung 5 stays UNKNOWN. The advisory's OpenImageIO and aarch64 claims remain
+untested.
