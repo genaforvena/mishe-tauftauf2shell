@@ -8964,3 +8964,24 @@ no pointer-bearing neighbour appeared; the fixed-pin reencode control exits 0
 then rc 2 at encode with "All frames of a sequence must have the size of the
 first frame" (rc 2 is an encode API return, not a successful encode).
 Unwitnessed, grade unchanged, rung 5 UNKNOWN.
+
+## 2026-11-23 16:1xZ — kicad2shell admitted as the 117th route
+
+Frontier W162 staged kicad2shell (CVE-2026-126970 / GHSA-4qjr-2gjm-9gc6,
+High 7.8 CWE-787, Unreviewed; ZDI-CAN-33213) in `20d4d70`/`01dfce0` with a
+direct-call Altium `ParseLibHeader` harness, 4/4 pins, `PASS=52 FAIL=0` and a
+registered two-pane window 122. The operator replayed it from a clean
+`git archive 20d4d70` at 16:14Z (70 files, 4/4 pins OK, 8 binaries, 52/0,
+trace `dd64c549fa2ddc57559f0aa66a043ab6e64e20d5f8799da5181ca6678d22f9a6`
+exact) and admitted it under standing #6 at 16:1xZ as the 117th route:
+charter, hy4-flash route, both resolver entries, three full-flag-sync units at
+pin `0d686bb…` (`written 3, removed 0`), path enabled/active, pinned doctor rc
+0 GREEN, omp-only GREEN 117, window 122 adopted with no duplicate. The grade
+stays direct-call CODE/HARNESS rungs 1-4: gcc and clang ASan `WRITE of size 4`
+four bytes before a 4-byte region at pinned `:5919`, chosen `0x24242424` at
+`data()-4`, plain glibc chunk-header corruption, fixed guard clean. No KiCad
+build, SCHLIB file, compound-file parser, consumer, wire, pointer control,
+command or witness verdict; rung 5 UNKNOWN. Status:
+`reports/kicad2shell-status.md`; recipe and pins: `docs/reproducibility.md`,
+`lab/frontier/kicad2shell/PROVENANCE.md` and `REPLAY.md`; brief:
+`reports/frontier-kicad2shell.md`.

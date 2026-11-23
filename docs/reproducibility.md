@@ -5653,3 +5653,33 @@ also aborts, and no pointer-bearing neighbour was seen. A fixed-pin reencode
 control exits 0 and then returns rc 2 at encode with "All frames of a sequence
 must have the size of the first frame" (rc 2 is an encode API return, not a
 successful encode). Grade unchanged, not witness-replayed, rung 5 UNKNOWN.
+
+## 2026-11-23 16:1xZ — kicad2shell admission replay and route
+
+Commit `20d4d70` stages a direct-call Altium `ParseLibHeader` harness for
+CVE-2026-126970 / GHSA-4qjr-2gjm-9gc6 (High 7.8, CWE-787, Unreviewed;
+ZDI-CAN-33213). Pinned parent/fixed `sch_io_altium.cpp` slices at lines
+5883-5923 / 5883-5926 are re-extracted and checked by `harness/run.sh`
+against four digests in `lab/frontier/kicad2shell/PINS.sha256`; upstream bytes
+appear only between `#line` markers and all wxString/parser/scale/driver code
+is lab stub code. For `ind <= 0` from a hostile `SIZE` suffix the resize guard
+is vacuous and `aFontSizes[ind - 1] = scaled` writes before the vector heap
+buffer. No real KiCad build, SCHLIB file, consumer or wire; rung 5 UNKNOWN.
+
+```
+T=$(mktemp -d /tmp/docs-kicad2shell-replay.XXXXXX)
+git archive 20d4d70 lab/frontier/kicad2shell reports/frontier-kicad2shell.md | tar -x -C "$T"
+cd "$T/lab/frontier/kicad2shell" && sha256sum -c PINS.sha256
+cd harness && ./run.sh && ./check.sh
+```
+
+At 16:14Z the operator observed 70 archived files, 4/4 pins OK, 8 binaries
+rebuilt, `PASS=52 FAIL=0` and trace
+`dd64c549fa2ddc57559f0aa66a043ab6e64e20d5f8799da5181ca6678d22f9a6` exact.
+Admission under standing #6 as the 117th route added the charter, hy4-flash
+route, both wake resolver entries and three full-flag-sync units at pin
+`0d686bb…` (`written 3, removed 0`), then a pinned full-flag doctor rc 0
+GREEN, `check-omp-only.py` GREEN 117 and window 122 adopted with no duplicate.
+The grade is unchanged direct-call rungs 1-4; this is author-harness replay,
+not witness acceptance. Brief: `reports/frontier-kicad2shell.md`; status:
+`reports/kicad2shell-status.md`.
