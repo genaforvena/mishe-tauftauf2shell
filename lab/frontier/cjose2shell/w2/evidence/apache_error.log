@@ -1,0 +1,170 @@
+[Mon Nov 23 22:14:49.685952 2026] [watchdog:debug] [pid 799410] mod_watchdog.c(445): AH010033: Watchdog: Running with WatchdogInterval 1000ms
+[Mon Nov 23 22:14:49.685993 2026] [watchdog:debug] [pid 799410] mod_watchdog.c(454): AH02974: Watchdog: found parent providers.
+[Mon Nov 23 22:14:49.685997 2026] [watchdog:debug] [pid 799410] mod_watchdog.c(500): AH02977: Watchdog: found child providers.
+[Mon Nov 23 22:14:49.686000 2026] [watchdog:debug] [pid 799410] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_singleton_).
+[Mon Nov 23 22:14:49.686002 2026] [watchdog:debug] [pid 799410] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_default_).
+[Mon Nov 23 22:14:49.686005 2026] [auth_openidc:info] [pid 799410] mod_auth_openidc-2.4.15.1 - init - cjose 0.6.2.4, openssl-3.0.13, EC=yes, GCM=yes, Memcache=yes, Redis=no, JQ=no
+[Mon Nov 23 22:14:49.686191 2026] [auth_openidc:debug] [pid 799410] src/config.c(2389): oidc_config_check_vhost_config: enter
+[Mon Nov 23 22:14:49.686197 2026] [auth_openidc:warn] [pid 799410] oidc_check_config_openid_openidc: the URL scheme (http) of the configured OIDCRedirectURI SHOULD be "https" for security reasons (moreover: some Providers may reject non-HTTPS URLs)
+[Mon Nov 23 22:14:49.686376 2026] [watchdog:debug] [pid 799410] mod_watchdog.c(559): AH02980: Watchdog: nothing configured?
+[Mon Nov 23 22:14:54.912474 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40206] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:14:54.912493 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40206] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:14:54.912502 2026] [core:info] [pid 799410] [client 127.0.0.1:40206] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:14:55.976396 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40220] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:14:55.976421 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40220] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:14:55.976430 2026] [core:info] [pid 799410] [client 127.0.0.1:40220] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:14:57.007606 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40222] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:14:57.007628 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40222] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:14:57.007636 2026] [core:info] [pid 799410] [client 127.0.0.1:40222] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:14:58.079742 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40226] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:14:58.079765 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40226] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:14:58.079775 2026] [core:info] [pid 799410] [client 127.0.0.1:40226] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:14:59.111152 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40236] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:14:59.111174 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40236] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:14:59.111183 2026] [core:info] [pid 799410] [client 127.0.0.1:40236] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:00.178994 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40240] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:00.179048 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40240] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:00.179061 2026] [core:info] [pid 799410] [client 127.0.0.1:40240] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:01.204584 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40248] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:01.204608 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40248] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:01.204615 2026] [core:info] [pid 799410] [client 127.0.0.1:40248] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:02.284218 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40254] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:02.284236 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40254] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:02.284245 2026] [core:info] [pid 799410] [client 127.0.0.1:40254] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:03.311674 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40256] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:03.311688 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:40256] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:03.311695 2026] [core:info] [pid 799410] [client 127.0.0.1:40256] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:04.376416 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58974] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:04.376440 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58974] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:04.376452 2026] [core:info] [pid 799410] [client 127.0.0.1:58974] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:05.406472 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58984] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:05.406491 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58984] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:05.406500 2026] [core:info] [pid 799410] [client 127.0.0.1:58984] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:06.432843 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58994] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:06.432876 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58994] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:06.432889 2026] [core:info] [pid 799410] [client 127.0.0.1:58994] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:07.496205 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58996] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:07.496224 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:58996] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:07.496233 2026] [core:info] [pid 799410] [client 127.0.0.1:58996] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:08.526790 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59006] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:08.526817 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59006] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:08.526830 2026] [core:info] [pid 799410] [client 127.0.0.1:59006] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:09.597014 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59014] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:09.597032 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59014] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:09.597040 2026] [core:info] [pid 799410] [client 127.0.0.1:59014] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:10.621639 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59018] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:10.621670 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59018] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:10.621684 2026] [core:info] [pid 799410] [client 127.0.0.1:59018] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:11.690169 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59028] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:11.690189 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59028] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:11.690197 2026] [core:info] [pid 799410] [client 127.0.0.1:59028] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:12.778320 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59038] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:12.778336 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59038] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:12.778346 2026] [core:info] [pid 799410] [client 127.0.0.1:59038] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:13.814870 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59054] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:13.814892 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:59054] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:13.814901 2026] [core:info] [pid 799410] [client 127.0.0.1:59054] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:14.900465 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:43428] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:14.900486 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:43428] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:14.900497 2026] [core:info] [pid 799410] [client 127.0.0.1:43428] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:21.081878 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:43444] AH01626: authorization result of Require valid-user : denied (no authenticated user yet)
+[Mon Nov 23 22:15:21.081906 2026] [authz_core:debug] [pid 799410] mod_authz_core.c(815): [client 127.0.0.1:43444] AH01626: authorization result of <RequireAny>: denied (no authenticated user yet)
+[Mon Nov 23 22:15:21.081912 2026] [auth_openidc:debug] [pid 799410] src/mod_auth_openidc.c(4276): [client 127.0.0.1:43444] oidc_check_user_id: incoming request: "/redirect_uri?logout=backchannel", ap_is_initial_req(r)=1
+[Mon Nov 23 22:15:21.081921 2026] [auth_openidc:debug] [pid 799410] src/util.c(113): [client 127.0.0.1:43444] oidc_util_generate_random_bytes: oidc_util_random_bytes [apr] call for 20 bytes
+[Mon Nov 23 22:15:21.081925 2026] [auth_openidc:debug] [pid 799410] src/util.c(115): [client 127.0.0.1:43444] oidc_util_generate_random_bytes: oidc_util_random_bytes returned: 1
+[Mon Nov 23 22:15:21.081930 2026] [auth_openidc:debug] [pid 799410] src/util.c(1520): [client 127.0.0.1:43444] oidc_util_get_cookie: returning "mod_auth_openidc_session" = <null>
+[Mon Nov 23 22:15:21.081935 2026] [auth_openidc:debug] [pid 799410] src/util.c(1666): [client 127.0.0.1:43444] oidc_util_request_matches_url: comparing "/redirect_uri"=="/redirect_uri"
+[Mon Nov 23 22:15:21.082205 2026] [auth_openidc:debug] [pid 799410] src/mod_auth_openidc.c(3326): [client 127.0.0.1:43444] oidc_handle_logout: enter (url=backchannel)
+[Mon Nov 23 22:15:53.206196 2026] [watchdog:debug] [pid 826531] mod_watchdog.c(445): AH010033: Watchdog: Running with WatchdogInterval 1000ms
+[Mon Nov 23 22:15:53.206228 2026] [watchdog:debug] [pid 826531] mod_watchdog.c(454): AH02974: Watchdog: found parent providers.
+[Mon Nov 23 22:15:53.206232 2026] [watchdog:debug] [pid 826531] mod_watchdog.c(500): AH02977: Watchdog: found child providers.
+[Mon Nov 23 22:15:53.206235 2026] [watchdog:debug] [pid 826531] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_default_).
+[Mon Nov 23 22:15:53.206238 2026] [watchdog:debug] [pid 826531] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_singleton_).
+[Mon Nov 23 22:15:53.206241 2026] [auth_openidc:info] [pid 826531] mod_auth_openidc-2.4.15.1 - init - cjose 0.6.2.4, openssl-3.0.13, EC=yes, GCM=yes, Memcache=yes, Redis=no, JQ=no
+[Mon Nov 23 22:15:53.206397 2026] [auth_openidc:debug] [pid 826531] src/config.c(2389): oidc_config_check_vhost_config: enter
+[Mon Nov 23 22:15:53.206402 2026] [auth_openidc:warn] [pid 826531] oidc_check_config_openid_openidc: the URL scheme (http) of the configured OIDCRedirectURI SHOULD be "https" for security reasons (moreover: some Providers may reject non-HTTPS URLs)
+[Mon Nov 23 22:15:53.206576 2026] [watchdog:debug] [pid 826531] mod_watchdog.c(559): AH02980: Watchdog: nothing configured?
+[Mon Nov 23 22:15:53.805762 2026] [authz_core:debug] [pid 826531] mod_authz_core.c(815): [client 127.0.0.1:34758] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:53.805781 2026] [authz_core:debug] [pid 826531] mod_authz_core.c(815): [client 127.0.0.1:34758] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:53.805789 2026] [core:info] [pid 826531] [client 127.0.0.1:34758] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:15:57.743841 2026] [authz_core:debug] [pid 826531] mod_authz_core.c(815): [client 127.0.0.1:54716] AH01626: authorization result of Require all granted: granted
+[Mon Nov 23 22:15:57.743869 2026] [authz_core:debug] [pid 826531] mod_authz_core.c(815): [client 127.0.0.1:54716] AH01626: authorization result of <RequireAny>: granted
+[Mon Nov 23 22:15:57.743881 2026] [core:info] [pid 826531] [client 127.0.0.1:54716] AH00129: Attempt to serve directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/html/
+[Mon Nov 23 22:16:14.095372 2026] [auth_openidc:info] [pid 826531] mod_auth_openidc-2.4.15.1 - shutdown
+[Mon Nov 23 22:16:16.976752 2026] [watchdog:debug] [pid 836677] mod_watchdog.c(445): AH010033: Watchdog: Running with WatchdogInterval 1000ms
+[Mon Nov 23 22:16:16.976787 2026] [watchdog:debug] [pid 836677] mod_watchdog.c(454): AH02974: Watchdog: found parent providers.
+[Mon Nov 23 22:16:16.976798 2026] [watchdog:debug] [pid 836677] mod_watchdog.c(500): AH02977: Watchdog: found child providers.
+[Mon Nov 23 22:16:16.976801 2026] [watchdog:debug] [pid 836677] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_singleton_).
+[Mon Nov 23 22:16:16.976803 2026] [watchdog:debug] [pid 836677] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_default_).
+[Mon Nov 23 22:16:16.976806 2026] [auth_openidc:info] [pid 836677] mod_auth_openidc-2.4.15.1 - init - cjose 0.6.2.4, openssl-3.0.13, EC=yes, GCM=yes, Memcache=yes, Redis=no, JQ=no
+[Mon Nov 23 22:16:16.976989 2026] [auth_openidc:debug] [pid 836677] src/config.c(2389): oidc_config_check_vhost_config: enter
+[Mon Nov 23 22:16:16.976994 2026] [auth_openidc:warn] [pid 836677] oidc_check_config_openid_openidc: the URL scheme (http) of the configured OIDCRedirectURI SHOULD be "https" for security reasons (moreover: some Providers may reject non-HTTPS URLs)
+[Mon Nov 23 22:16:16.977003 2026] [core:warn] [pid 836677] AH00098: pid file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/apache.pid overwritten -- Unclean shutdown of previous Apache run?
+[Mon Nov 23 22:16:16.977247 2026] [watchdog:debug] [pid 836677] mod_watchdog.c(559): AH02980: Watchdog: nothing configured?
+[Mon Nov 23 22:16:22.839640 2026] [authz_core:debug] [pid 836677] mod_authz_core.c(815): [client 127.0.0.1:50332] AH01626: authorization result of Require valid-user : denied (no authenticated user yet)
+[Mon Nov 23 22:16:22.839660 2026] [authz_core:debug] [pid 836677] mod_authz_core.c(815): [client 127.0.0.1:50332] AH01626: authorization result of <RequireAny>: denied (no authenticated user yet)
+[Mon Nov 23 22:16:22.839667 2026] [auth_openidc:debug] [pid 836677] src/mod_auth_openidc.c(4276): [client 127.0.0.1:50332] oidc_check_user_id: incoming request: "/redirect_uri?logout=backchannel", ap_is_initial_req(r)=1
+[Mon Nov 23 22:16:22.839678 2026] [auth_openidc:debug] [pid 836677] src/util.c(113): [client 127.0.0.1:50332] oidc_util_generate_random_bytes: oidc_util_random_bytes [apr] call for 20 bytes
+[Mon Nov 23 22:16:22.839683 2026] [auth_openidc:debug] [pid 836677] src/util.c(115): [client 127.0.0.1:50332] oidc_util_generate_random_bytes: oidc_util_random_bytes returned: 1
+[Mon Nov 23 22:16:22.839690 2026] [auth_openidc:debug] [pid 836677] src/util.c(1520): [client 127.0.0.1:50332] oidc_util_get_cookie: returning "mod_auth_openidc_session" = <null>
+[Mon Nov 23 22:16:22.839695 2026] [auth_openidc:debug] [pid 836677] src/util.c(1666): [client 127.0.0.1:50332] oidc_util_request_matches_url: comparing "/redirect_uri"=="/redirect_uri"
+[Mon Nov 23 22:16:22.839759 2026] [auth_openidc:debug] [pid 836677] src/mod_auth_openidc.c(3326): [client 127.0.0.1:50332] oidc_handle_logout: enter (url=backchannel)
+[Mon Nov 23 22:16:22.840325 2026] [auth_openidc:debug] [pid 836677] src/mod_auth_openidc.c(3156): [client 127.0.0.1:50332] oidc_handle_logout_backchannel: enter
+[Mon Nov 23 22:16:22.840333 2026] [auth_openidc:debug] [pid 836677] src/util.c(2780): [client 127.0.0.1:50332] oidc_util_hdr_in_get: Content-Type=application/x-www-form-urlencoded
+[Mon Nov 23 22:16:22.840360 2026] [auth_openidc:debug] [pid 836677] src/util.c(2013): [client 127.0.0.1:50332] oidc_util_read_form_encoded_params: read: logout_token=eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.4ZWnxSh0qLdmMOM23WrgQ9qgpdDtmIew0G1LffMb-OI3Na8mosQYwRLmAAhZ9qyq78yljZGPBq0.VGs_o7rumx7D2-f1_zRGyw.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI
+[Mon Nov 23 22:16:22.840365 2026] [auth_openidc:debug] [pid 836677] src/util.c(2017): [client 127.0.0.1:50332] oidc_util_read_form_encoded_params: parsed: 272 bytes into 1 elements
+[Mon Nov 23 22:16:52.199510 2026] [watchdog:debug] [pid 852538] mod_watchdog.c(445): AH010033: Watchdog: Running with WatchdogInterval 1000ms
+[Mon Nov 23 22:16:52.199717 2026] [watchdog:debug] [pid 852538] mod_watchdog.c(454): AH02974: Watchdog: found parent providers.
+[Mon Nov 23 22:16:52.199722 2026] [watchdog:debug] [pid 852538] mod_watchdog.c(500): AH02977: Watchdog: found child providers.
+[Mon Nov 23 22:16:52.199730 2026] [watchdog:debug] [pid 852538] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_default_).
+[Mon Nov 23 22:16:52.199732 2026] [watchdog:debug] [pid 852538] mod_watchdog.c(508): AH02978: Watchdog: Looking for child (_singleton_).
+[Mon Nov 23 22:16:52.199735 2026] [auth_openidc:info] [pid 852538] mod_auth_openidc-2.4.15.1 - init - cjose 0.6.2.4, openssl-3.0.13, EC=yes, GCM=yes, Memcache=yes, Redis=no, JQ=no
+[Mon Nov 23 22:16:52.199895 2026] [auth_openidc:debug] [pid 852538] src/config.c(2389): oidc_config_check_vhost_config: enter
+[Mon Nov 23 22:16:52.199899 2026] [auth_openidc:warn] [pid 852538] oidc_check_config_openid_openidc: the URL scheme (http) of the configured OIDCRedirectURI SHOULD be "https" for security reasons (moreover: some Providers may reject non-HTTPS URLs)
+[Mon Nov 23 22:16:52.199906 2026] [core:warn] [pid 852538] AH00098: pid file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/apache.pid overwritten -- Unclean shutdown of previous Apache run?
+[Mon Nov 23 22:16:52.200098 2026] [watchdog:debug] [pid 852538] mod_watchdog.c(559): AH02980: Watchdog: nothing configured?
+[Mon Nov 23 22:16:56.452404 2026] [authz_core:debug] [pid 852538] mod_authz_core.c(815): [client 127.0.0.1:38422] AH01626: authorization result of Require valid-user : denied (no authenticated user yet)
+[Mon Nov 23 22:16:56.452423 2026] [authz_core:debug] [pid 852538] mod_authz_core.c(815): [client 127.0.0.1:38422] AH01626: authorization result of <RequireAny>: denied (no authenticated user yet)
+[Mon Nov 23 22:16:56.452429 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(4276): [client 127.0.0.1:38422] oidc_check_user_id: incoming request: "/redirect_uri?logout=backchannel", ap_is_initial_req(r)=1
+[Mon Nov 23 22:16:56.452440 2026] [auth_openidc:debug] [pid 852538] src/util.c(113): [client 127.0.0.1:38422] oidc_util_generate_random_bytes: oidc_util_random_bytes [apr] call for 20 bytes
+[Mon Nov 23 22:16:56.452445 2026] [auth_openidc:debug] [pid 852538] src/util.c(115): [client 127.0.0.1:38422] oidc_util_generate_random_bytes: oidc_util_random_bytes returned: 1
+[Mon Nov 23 22:16:56.452451 2026] [auth_openidc:debug] [pid 852538] src/util.c(1520): [client 127.0.0.1:38422] oidc_util_get_cookie: returning "mod_auth_openidc_session" = <null>
+[Mon Nov 23 22:16:56.452457 2026] [auth_openidc:debug] [pid 852538] src/util.c(1666): [client 127.0.0.1:38422] oidc_util_request_matches_url: comparing "/redirect_uri"=="/redirect_uri"
+[Mon Nov 23 22:16:56.452505 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(3326): [client 127.0.0.1:38422] oidc_handle_logout: enter (url=backchannel)
+[Mon Nov 23 22:16:56.453057 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(3156): [client 127.0.0.1:38422] oidc_handle_logout_backchannel: enter
+[Mon Nov 23 22:16:56.453065 2026] [auth_openidc:debug] [pid 852538] src/util.c(2780): [client 127.0.0.1:38422] oidc_util_hdr_in_get: Content-Type=application/x-www-form-urlencoded
+[Mon Nov 23 22:16:56.453087 2026] [auth_openidc:debug] [pid 852538] src/util.c(2013): [client 127.0.0.1:38422] oidc_util_read_form_encoded_params: read: logout_token=eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.4ZWnxSh0qLdmMOM23WrgQ9qgpdDtmIew0G1LffMb-OI3Na8mosQYwRLmAAhZ9qyq78yljZGPBq0.kcPRgK08KJ5toTUCIwyZVw.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI
+[Mon Nov 23 22:16:56.453091 2026] [auth_openidc:debug] [pid 852538] src/util.c(2017): [client 127.0.0.1:38422] oidc_util_read_form_encoded_params: parsed: 272 bytes into 1 elements
+[Mon Nov 23 22:16:56.453372 2026] [auth_openidc:error] [pid 852538] [client 127.0.0.1:38422] oidc_handle_logout_backchannel: oidc_jwt_parse failed: [src/jose.c:753: oidc_jwe_decrypt_impl]: encrypted JWT could not be decrypted with any of the 1 keys: error for last tried key is: \xe0\xd0aUUU [file: \xc0\xd6bUUU, function: \xa0CcUUU, line: 93824993054816]
+[Mon Nov 23 22:16:56.453378 2026] [auth_openidc:debug] [pid 852538] src/util.c(2852): [client 127.0.0.1:38422] oidc_util_hdr_err_out_add: Cache-Control: no-cache, no-store
+[Mon Nov 23 22:16:56.453388 2026] [auth_openidc:debug] [pid 852538] src/util.c(2852): [client 127.0.0.1:38422] oidc_util_hdr_err_out_add: Pragma: no-cache
+[Mon Nov 23 22:16:56.587987 2026] [authz_core:debug] [pid 852538] mod_authz_core.c(815): [client 127.0.0.1:38424] AH01626: authorization result of Require valid-user : denied (no authenticated user yet)
+[Mon Nov 23 22:16:56.588000 2026] [authz_core:debug] [pid 852538] mod_authz_core.c(815): [client 127.0.0.1:38424] AH01626: authorization result of <RequireAny>: denied (no authenticated user yet)
+[Mon Nov 23 22:16:56.588005 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(4276): [client 127.0.0.1:38424] oidc_check_user_id: incoming request: "/redirect_uri?logout=backchannel", ap_is_initial_req(r)=1
+[Mon Nov 23 22:16:56.588013 2026] [auth_openidc:debug] [pid 852538] src/util.c(113): [client 127.0.0.1:38424] oidc_util_generate_random_bytes: oidc_util_random_bytes [apr] call for 20 bytes
+[Mon Nov 23 22:16:56.588017 2026] [auth_openidc:debug] [pid 852538] src/util.c(115): [client 127.0.0.1:38424] oidc_util_generate_random_bytes: oidc_util_random_bytes returned: 1
+[Mon Nov 23 22:16:56.588023 2026] [auth_openidc:debug] [pid 852538] src/util.c(1520): [client 127.0.0.1:38424] oidc_util_get_cookie: returning "mod_auth_openidc_session" = <null>
+[Mon Nov 23 22:16:56.588027 2026] [auth_openidc:debug] [pid 852538] src/util.c(1666): [client 127.0.0.1:38424] oidc_util_request_matches_url: comparing "/redirect_uri"=="/redirect_uri"
+[Mon Nov 23 22:16:56.588044 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(3326): [client 127.0.0.1:38424] oidc_handle_logout: enter (url=backchannel)
+[Mon Nov 23 22:16:56.588760 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(3156): [client 127.0.0.1:38424] oidc_handle_logout_backchannel: enter
+[Mon Nov 23 22:16:56.588768 2026] [auth_openidc:debug] [pid 852538] src/util.c(2780): [client 127.0.0.1:38424] oidc_util_hdr_in_get: Content-Type=application/x-www-form-urlencoded
+[Mon Nov 23 22:16:56.588782 2026] [auth_openidc:debug] [pid 852538] src/util.c(2013): [client 127.0.0.1:38424] oidc_util_read_form_encoded_params: read: logout_token=eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoidzItcnNhLWtpZCJ9.4ZWnxSh0qLdmMOM23WrgQ9qgpdDtmIew0G1LffMb-OI3Na8mosQYwRLmAAhZ9qyq78yljZGPBq0.QbqqvfEFahDDnCx-ACqdHg.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI
+[Mon Nov 23 22:16:56.588785 2026] [auth_openidc:debug] [pid 852538] src/util.c(2017): [client 127.0.0.1:38424] oidc_util_read_form_encoded_params: parsed: 297 bytes into 1 elements
+[Mon Nov 23 22:16:56.594352 2026] [auth_openidc:error] [pid 852538] [client 127.0.0.1:38424] oidc_handle_logout_backchannel: oidc_jwt_parse failed: [src/jose.c:727: oidc_jwe_decrypt_impl]: encrypted JWT could not be decrypted with kid w2-rsa-kid: invalid argument [file: jwe.c, function: _cjose_jwe_decrypt_ek_aes_kw, line: 577]
+[Mon Nov 23 22:16:56.594362 2026] [auth_openidc:debug] [pid 852538] src/util.c(2852): [client 127.0.0.1:38424] oidc_util_hdr_err_out_add: Cache-Control: no-cache, no-store
+[Mon Nov 23 22:16:56.594365 2026] [auth_openidc:debug] [pid 852538] src/util.c(2852): [client 127.0.0.1:38424] oidc_util_hdr_err_out_add: Pragma: no-cache
+[Mon Nov 23 22:16:56.715174 2026] [authz_core:debug] [pid 852538] mod_authz_core.c(815): [client 127.0.0.1:38440] AH01626: authorization result of Require valid-user : denied (no authenticated user yet)
+[Mon Nov 23 22:16:56.715185 2026] [authz_core:debug] [pid 852538] mod_authz_core.c(815): [client 127.0.0.1:38440] AH01626: authorization result of <RequireAny>: denied (no authenticated user yet)
+[Mon Nov 23 22:16:56.715189 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(4276): [client 127.0.0.1:38440] oidc_check_user_id: incoming request: "/redirect_uri?logout=backchannel", ap_is_initial_req(r)=1
+[Mon Nov 23 22:16:56.715197 2026] [auth_openidc:debug] [pid 852538] src/util.c(113): [client 127.0.0.1:38440] oidc_util_generate_random_bytes: oidc_util_random_bytes [apr] call for 20 bytes
+[Mon Nov 23 22:16:56.715205 2026] [auth_openidc:debug] [pid 852538] src/util.c(115): [client 127.0.0.1:38440] oidc_util_generate_random_bytes: oidc_util_random_bytes returned: 1
+[Mon Nov 23 22:16:56.715210 2026] [auth_openidc:debug] [pid 852538] src/util.c(1520): [client 127.0.0.1:38440] oidc_util_get_cookie: returning "mod_auth_openidc_session" = <null>
+[Mon Nov 23 22:16:56.715213 2026] [auth_openidc:debug] [pid 852538] src/util.c(1666): [client 127.0.0.1:38440] oidc_util_request_matches_url: comparing "/redirect_uri"=="/redirect_uri"
+[Mon Nov 23 22:16:56.715228 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(3326): [client 127.0.0.1:38440] oidc_handle_logout: enter (url=backchannel)
+[Mon Nov 23 22:16:56.715776 2026] [auth_openidc:debug] [pid 852538] src/mod_auth_openidc.c(3156): [client 127.0.0.1:38440] oidc_handle_logout_backchannel: enter
+[Mon Nov 23 22:16:56.715781 2026] [auth_openidc:debug] [pid 852538] src/util.c(2780): [client 127.0.0.1:38440] oidc_util_hdr_in_get: Content-Type=application/x-www-form-urlencoded
+[Mon Nov 23 22:16:56.715798 2026] [auth_openidc:debug] [pid 852538] src/util.c(2013): [client 127.0.0.1:38440] oidc_util_read_form_encoded_params: read: logout_token=eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoidzItcnNhLWtpZCJ9.ptNdR5v-xDI1eIOgS6TqfNyGfc_GJTcHTwZQIcqKFUu4Z9XVh2Wz9w.Vh6qSJFYSyp8WtpbuI7fOw.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI
+[Mon Nov 23 22:16:56.715803 2026] [auth_openidc:debug] [pid 852538] src/util.c(2017): [client 127.0.0.1:38440] oidc_util_read_form_encoded_params: parsed: 276 bytes into 1 elements
+[Mon Nov 23 22:16:56.717266 2026] [auth_openidc:error] [pid 852538] [client 127.0.0.1:38440] oidc_handle_logout_backchannel: oidc_jwt_parse failed: [src/jose.c:727: oidc_jwe_decrypt_impl]: encrypted JWT could not be decrypted with kid w2-rsa-kid: invalid argument [file: jwe.c, function: _cjose_jwe_decrypt_ek_aes_kw, line: 577]
+[Mon Nov 23 22:16:56.717271 2026] [auth_openidc:debug] [pid 852538] src/util.c(2852): [client 127.0.0.1:38440] oidc_util_hdr_err_out_add: Cache-Control: no-cache, no-store
+[Mon Nov 23 22:16:56.717273 2026] [auth_openidc:debug] [pid 852538] src/util.c(2852): [client 127.0.0.1:38440] oidc_util_hdr_err_out_add: Pragma: no-cache

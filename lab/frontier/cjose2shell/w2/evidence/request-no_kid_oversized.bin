@@ -1,0 +1,8 @@
+POST /redirect_uri?logout=backchannel HTTP/1.1
+Host: 127.0.0.1:18443
+User-Agent: w2-loopback-probe
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 272
+Connection: close
+
+logout_token=eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.4ZWnxSh0qLdmMOM23WrgQ9qgpdDtmIew0G1LffMb-OI3Na8mosQYwRLmAAhZ9qyq78yljZGPBq0.kcPRgK08KJ5toTUCIwyZVw.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI

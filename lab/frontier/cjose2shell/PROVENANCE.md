@@ -200,14 +200,57 @@ advisory's pre-auth shape but do not replace a running deployment or witness
 replay. In a real deployment the KEK is secret, so only the write length is
 attacker-chosen; byte values are not.
 
+## W184 — real mod_auth_openidc consumer (2026-11-23 22:10-22:18Z)
+
+Built a real Apache module against the pinned vulnerable library and measured
+the backchannel-logout POST from the source claim above. Everything is in
+`w2/`; replay commands, hashes, raw request/response bytes, tokens, gdb log
+and limitations are in `w2/README.md` and `w2/evidence/SHA256SUMS`.
+
+- `w2/build.sh` copies the pinned trees, rebuilds cjose v0.6.2.4 with
+  `-g -O0 -fPIC -fno-omit-frame-pointer` against the harness jansson 2.14
+  prefix, writes local `jansson.pc`/`cjose.pc`, and builds mod_auth_openidc
+  2.4.15.1 with `/usr/bin/apxs`. Static library SHA-256
+  `6801ddac35126f61e0eb160c212597c66a1ce85c6e5743eac5f196c1b179581d`;
+  module SHA-256 `f1be85cfaf9e2db3935bd5a775bd8e76406e64817a46be72e6517cd1fd6b24cd`.
+  Startup log: `mod_auth_openidc-2.4.15.1 - init - cjose 0.6.2.4, openssl-3.0.13`.
+- Private Apache `127.0.0.1:18443` only, `Listen` bound to loopback,
+  `OIDCPrivateKeyFiles` loading a generated RSA key under kid `w2-rsa-kid`.
+  `probe.py` sends three raw POSTs to `/redirect_uri?logout=backchannel` with
+  compact JWE encrypted_key raw lengths 56, 56 with kid, and 40 with kid;
+  lab KEK `dfddb556b3b94eb2ef3d0f8d14b96085`. All returned HTTP 400; the
+  instance was stopped and the port verified free.
+- gdb breakpoints (module loaded as gdb's child, Yama ptrace_scope blocks
+  attach) logged `W2_BACKCHANNEL_HIT`; `W2_OIDC_JWE_DECRYPT_IMPL_REACHED` in
+  all three; `W2_CJOSE_JWE_DECRYPT_REACHED jwk_kty=1` and
+  `W2_AES_KW_DECRYPT_REACHED raw_len=56/40 cek_len=0 jwk_kty=1` only with a
+  matching kid; no `W2_AES_UNWRAP_KEY_REACHED` in any scenario.
+  `CJOSE_JWK_KTY_RSA = 1` (cjose/include/cjose/jwk.h:32): the configured key
+  is RSA, so cjose rejects it at `jwe.c:577` before the vulnerable copy.
+- `apache_error.log` confirms the two kid cases failed with
+  `invalid argument [file: jwe.c, function: _cjose_jwe_decrypt_ek_aes_kw,
+  line: 577]` for both 56 and 40 bytes, and the no-kid case with
+  `jose.c:753` "could not be decrypted with any of the 1 keys". The 40-byte
+  control shows the rejection is key type, not length. No fixed-cjose build
+  was needed: the precondition for reaching `AES_unwrap_key()` was never met.
+
+Verdict: measured negative for AES-KW through the default backchannel
+logout key configuration. The attacker-supplied oversized length reaches the
+vulnerable helper, but no OCT KEK is configured on this path, so no overflow
+occurred. Unauthenticated reachability of the corruption in a real deployment
+stays UNKNOWN; the id_token path (proto.c:1426-1434) with an OCT JWK from
+client_secret is an unmeasured source-level follow-up. No witness verdict,
+pointer/IP control, rung 5 or module patch.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
 and a lab KEK. Attacker-controlled segment length is carried by a real HTTP
 request into the real import/decrypt path; ASan and plain glibc corruption
 are measured, including the exact object adjacent to the CEK. No deployed
-consumer was built or exercised, no credential, pointer/IP control, shell
-command or witness replay. The chosen bytes are the plaintext of a
+consumer was exercised; a real loopback mod_auth_openidc build reached the
+vulnerable helper but not the copy (W184). No credential, pointer/IP control,
+shell command or witness replay. The chosen bytes are the plaintext of a
 lab-generated RFC 3394 wrap under a lab-known key; in a real deployment the
 recipient KEK is secret, so only the write length is attacker-chosen. The
 advisory's deployed pre-auth reachability and code-execution claim remain

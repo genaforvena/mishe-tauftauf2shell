@@ -1,0 +1,2 @@
+SCENARIO=no_kid_oversized EK_RAW_LEN=56 TOKEN_LEN=259
+RESPONSE=b'HTTP/1.1 400 Bad Request\r\nDate: Mon, 23 Nov 2026 22:16:56 GMT\r\nServer: Apache/2.4.58 (Ubuntu)\r\nCache-Control: no-cache, no-store\r\nPragma: no-cache\r\nContent-Length: 226\r\nConnection: close\r\nContent-Type'

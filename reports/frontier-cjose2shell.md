@@ -169,6 +169,22 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   an unbuilt consumer: no running deployment, witness replay or byte-value
   claim; in a real deployment the KEK is secret, so only length is
   attacker-chosen.
+- W184 measured negative for that real consumer (`lab/frontier/cjose2shell/w2/`):
+  a real mod_auth_openidc 2.4.15.1 Apache module, built against pinned
+  vulnerable cjose v0.6.2.4 and run on 127.0.0.1:18443, was sent an
+  unauthenticated backchannel-logout POST with a 56-byte raw `encrypted_key`
+  (`raw_len=56 > cek_len+8=40`). With a `kid` matching the configured PEM RSA
+  key, gdb logs `W2_CJOSE_JWE_DECRYPT_REACHED jwk_kty=1` and
+  `W2_AES_KW_DECRYPT_REACHED raw_len=56 cek_len=0 jwk_kty=1`, but no
+  `AES_unwrap_key()` breakpoint hit: cjose rejects the non-OCT JWK at
+  `jwe.c:577` before the vulnerable copy. Without `kid`, no decrypt call
+  occurs. A 40-byte correct-length control is rejected at the same `jwe.c:577`
+  line, so the rejection is key type, not length; all three POSTs returned
+  HTTP 400. Exact module/library hashes, request/response bytes, Apache log
+  and replay commands are in `w2/README.md` and `w2/evidence/`. This is a
+  measured negative for AES-KW on the default backchannel key configuration,
+  not a witness verdict and not a rung-5 result; the id_token path with an
+  OCT JWK from `client_secret` remains an unmeasured source-level follow-up.
 
 ## 6. Honest ceiling
 
@@ -178,8 +194,12 @@ are measured. The witness independently replayed both lanes from a clean
 git archive: rungs 1-4 ESTABLISHED at the labeled direct-call real-library
 scope, and rungs 1-3 plus byte-control mechanics ESTABLISHED at the labeled
 synthetic 127.0.0.1 consumer scope (the 56-byte wording contradiction from
-that replay is amended and its cause measured in section 5). No deployed
-server, credential, pointer/IP control or shell command. Advisory pre-authentication
+that replay is amended and its cause measured in section 5). W184 built and
+ran a real mod_auth_openidc module on loopback: the oversized AES-KW
+encrypted_key reaches the vulnerable helper but the key-type precondition
+for the copy is absent in that path (section 5), so it is a measured
+negative, not deployed reachability of the corruption. No deployed server,
+credential, pointer/IP control or shell command. Advisory pre-authentication
 reachability in a real deployment and any RCE claim remain **UNKNOWN**;
 rung 5 not attempted and not established. A pointer or control-flow target
 in a real consuming process is the prerequisite for any benign-marker

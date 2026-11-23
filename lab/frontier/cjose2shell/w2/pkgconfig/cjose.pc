@@ -1,0 +1,8 @@
+prefix=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/cjose-vuln
+libdir=${prefix}/src/.libs
+includedir=${prefix}/include
+Name: cjose
+Description: pinned vulnerable cjose v0.6.2.4, PIC static build
+Version: 0.6.2.4
+Libs: -L${libdir} -lcjose -L/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-prefix/lib -ljansson -lcrypto -lm
+Cflags: -I${includedir} -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-prefix/include
