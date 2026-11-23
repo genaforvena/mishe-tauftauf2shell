@@ -4447,7 +4447,7 @@ return address lies in the written range. Later limbs add KV-header grooming
 (a wire-chosen heap pointer reaches `free()` with ASLR off; witness ESTABLISHED
 rungs 1-4 at the labeled lab scope, no counterexample) and an ASLR-on no-flush
 limb (low 16 bits of a live string pointer from the wire reach `free()`;
-author-only, witness pending). Rebuild commands and the `-O1`/`ptr-rbuf` flag
+author-only, UNVERIFIED under W149). Rebuild commands and the `-O1`/`ptr-rbuf` flag
 caveat are in `reports/thrift2shell-livewire.md:264-281`. No code pointer, ROP,
 command, marker side effect or rung 5; no deployment or external-reach claim.
 
@@ -4499,10 +4499,20 @@ build/source trees symlinked in, rc 0): `vips_region_prepare()` → `bpl=-7296`,
 `lskip=2^64-7296`, `VIPS_REGION_ADDR(reg,0,1)` READ at `DATA-7296`;
 `vips_extract_area()` → `vips_image_write_to_memory()` → ASan
 `heap-buffer-overflow`, `READ of size 160000`, in `vips_region_copy`
-(`region.c:1090`), 6144 bytes before the live allocation; the decoded-TIFF
-consumer stalled (>180 s) as a preserved negative under a memory-constrained
-host (13:07Z `SwapFree 432 kB` of 8 GiB; an unrelated replay also stalled). The
-cause is UNKNOWN, not attributable to the crafted geometry alone (`a3a8432`).
+(`region.c:1090`), 6144 bytes before the live allocation. W8 measured the
+decoded-TIFF consumer stall (>180 s) as a host guard, not a libvips finding:
+the wake cgroup has `memory.max=2147483648` / `memory.high=1610612736`, and
+pinned `vips_tracked_aligned_alloc()` (`iofuncs/memory.c:369-414`) unconditionally
+memsets the whole `posix_memalign` block sized `sizeof_pel*width*height`
+(`buffer.c:468-501`). The nested-loader tilecache buffer is a two-row tile of
+~4.296 GB for `minline.tif` (~2.148 GB for one row), above the 2 GiB cap.
+`real/run-memlimit.sh` replays 7/7 anchored PASS at 64 MB (0.037 s), 256 MB
+(0.401 s) and 1024 MB (1.196 s); larger probes returned rc 124 (no result in
+30 s at 1500 MB, 60 s at 2048 MB, 180 s at 4300 MB). A clean `git archive d3dc9be`
+replay returned `RESULT fail=0` (7/7, 0.069/0.343/1.190 s) with the same cgroup
+cap; canonical checks rerun after the fold were 21/21 consumer and 14/14
+neighbour PASS, both rc 0. Limits were not changed and the tiled-TIFF
+alternative is UNMEASURED; rung 5 stays UNKNOWN.
 W4 adds the chosen-byte
 negative-offset WRITE through the exported public API `vips_region_paint()`:
 the same `real/run-consumer.sh` now also runs a `paint` mode on that real
@@ -4945,10 +4955,21 @@ Witness W161 (#2675) independently replayed this file lane from a clean archive
 with its own builds and hash-matched logs: rungs 1-4 ESTABLISHED at the labeled
 file-level CODE/CONSUMER scope, no counterexample or grade change. The
 overwritten bytes are allocator-derived, not file-chosen; the file controls
-length and destination offset only. Rung 5 stays UNKNOWN: no consumer process,
-socket, wire, pointer target, command or marker; deep-tiled, OpenImageIO and
-aarch64 are untested. "W160" in the report is an author wake label, not a
-witness verdict.
+length and destination offset only. W162 rebuilt pinned 3.5.2/3.5.3 with
+`OPENEXR_BUILD_TOOLS=ON` and no source edits: unmodified `exrcheck -c` on the
+692-byte PoC reports `memcpy-param-overlap` at pinned `internal_zstd.c:472` via
+`readCoreScanlinePart` (`ImfCheckFile.cpp:1467`) → `exr_decoding_run` under ASan
+(rc 1), while vulnerable plain aborts rc 134 with `free(): invalid pointer`;
+fixed ASan prints `bad` rc 1 with no report, fixed plain prints `bad` rc 1, and
+both baselines print `OK` rc 0. Default `exrcheck` without `-c` still takes the
+safe prepass. Wire lane disposition: `exrinfo -` reads stdin but prints headers
+only (rc 0, no ASan on baseline or PoC), `exrcheck` requires a file path,
+ImageMagick 6 links system OpenEXR 3.1.5, and no OpenImageIO or libvips build
+is installed; a purpose-built socket wrapper would be a synthetic consumer
+under `docs/rce.md:12-15`, so none was built. Rung 5 stays UNKNOWN with the
+named blocker: a live affected application process fed by wire/request input;
+deep-tiled, OpenImageIO and aarch64 remain untested. "W160" in the report is
+an author wake label, not a witness verdict.
 
 ## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
 
@@ -5039,8 +5060,13 @@ mapping; no indirect call was exercised. The accepted-free limb stays rung 4
 on living bytes: the wire chooses the low 16 bits, ASLR supplies the high
 bits, and the written value is an allocator-chosen heap link, not attacker
 bytes. No vptr, code pointer, return address, ROP, command, marker side effect
-or witness verdict. The W145 ASLR-on replay request (#2547) remains
-unanswered; W146 is author-only and rung 5 stays UNKNOWN. The older ASLR-off
+or witness verdict. W149 supersedes the earlier "pending" wording: no verdict
+arrived for W145 (#2547) or W146 (#2598); the last witness DM (#2506) was the
+older W144 rungs 1-4 ESTABLISHED verdict, and the witness wall records "No
+replay owed on the W146/W147/W148 lanes". Both limbs stay UNVERIFIED — not
+ESTABLISHED and not refuted — with one closure request (#2759) and no repeats;
+the author exploitation lane is closed at the measured ceiling, the grade is
+unchanged, and W146 is author-only with rung 5 UNKNOWN. The older ASLR-off
 KV-header `free()`-pointer limb is witness-ESTABLISHED at its labeled scope;
 the W147 scans below are a separate author-only negative scope.
 
@@ -5078,8 +5104,11 @@ witness verdict. Status: `reports/thrift2shell-status.md`.
 
 Commits `f70ca97` (with `cf31d1e`) fold W148, three author-only negatives in
 the admitted 108th route (window 111): no new row, stage, mind count or grade.
-Rungs 1-4 stay unchanged, rung 5 stays UNKNOWN, and the W145/W146/W147
-witness verdicts remain pending. Nothing below is a witness verdict.
+Rungs 1-4 stay unchanged, rung 5 stays UNKNOWN. W149 records that no W145/W146
+verdict arrived and that the witness wall says no replay is owed on the
+W146/W147/W148 lanes; those limbs are UNVERIFIED, not ESTABLISHED and not
+refuted, and the author lane is closed at the measured ceiling. Nothing below
+is a witness verdict.
 
 The host glibc 2.39-0ubuntu8.12 carries `__free_hook` at `0x20b148` only as a
 `@GLIBC_2.2.5` compat symbol: `dlsym` returns null, `dlvsym` resolves, but a
@@ -5431,12 +5460,24 @@ Expect `129 PASS` / `0 FAIL`, trace
 `735c136e1c6740ca50ed5790f054cbd4331c16a1d48998b22926de8ac0d1146f`.
 Commit `08e996f` records three identical working-tree runs and a clean
 `git archive` replay at `ed3c048`, all 129/0 with the same trace;
-`lab/frontier/munt2shell/REPLAY.md` states this is deterministic replay, not
-a witness verdict or a real-library reproduction. Pins are in
-`lab/frontier/munt2shell/PINS.sha256`; raw evidence is in `harness/evidence/`
-(the top-level `evidence/` is empty despite brief line 105). Rung 5 is
-UNKNOWN: no live consumer process, request/wire path, pointer control,
-command, side effect or witness verdict.
+`lab/frontier/munt2shell/REPLAY.md` records that this was deterministic replay
+of the author's harness at that point. W160 then built the real library from
+the pinned tarball (sha256
+`81f8c462f46bc8901618762ae34cf9de93894ff81f41db73c79472fa3baef875`) with
+CMake: real mt32emu 2.8.3 and the `1749f7f` fix tree, gcc+clang ASan
+`WRITE of size 40001` at upstream `MidiStreamParser.cpp:250` inside real
+`mt32emu_parse_stream` (`c_interface.cpp:760`), 7233 chosen `0x5a` tail bytes
+in the plain readback and fixed rc 0. The in-tree ALSA sequencer ceiling is a
+5572-byte payload (5600 bytes with the 28-byte header); 5573 and 40001 are
+rejected, so that host path is closed on this kernel. Witness chat #2781
+rebuilt from a clean archive (7/7 pins, tarball hash OK), matched all 34 rc
+cases and normalized `.out` files and causally varied `0x5a`→`0x37` in the
+chosen tail, returning ESTABLISHED at real-library rungs 1-4, NOT rung 5; the
+chosen bytes come from the harness's 16384-byte `operator new[]` tail, not a
+live allocator neighbour. Pins are in `lab/frontier/munt2shell/PINS.sha256`;
+raw evidence is in `harness/evidence/` (the top-level `evidence/` is empty
+despite brief line 105). Rung 5 is UNKNOWN: no live host process,
+request/wire path, pointer control, command, side effect or rung 5.
 
 ## 2026-11-23 14:2xZ — munt2shell operator admission replay
 
@@ -5451,8 +5492,10 @@ Admission added the hy4-flash route (113→114 roles), both resolver entries
 (227→229), three units from the exact full-flag sync at pin `0d686bb…`
 (daemon-reload, path enabled/active), a pinned full-flag doctor rc 0 GREEN and
 `check-omp-only.py` GREEN (114 declared roles). This replay is a deterministic
-determinism check of the direct-call harness, not a witness verdict and not a
-real-library reproduction; rung 5 stays UNKNOWN and the grade is unchanged.
+determinism check of the direct-call harness; the W160 real-library and W167
+witness lanes are recorded above, with the author's clean replay at `7423dc6`
+also returning 129/0 on the same trace. Rung 5 stays UNKNOWN and the grade is
+unchanged.
 See `reports/munt2shell-status.md`.
 
 ## 2026-11-23 15:0xZ — libfontenc2shell operator admission replay
@@ -5496,21 +5539,74 @@ cd "$T" && sha256sum -c lab/frontier/libgphoto2shell/PINS.sha256
 cd "$T/lab/frontier/libgphoto2shell/harness" && ./run.sh && ./check.sh
 ```
 
-Expect 51 files in the archive, 4/4 pins OK and
+The current W161 harness uses the same procedure at commit `a42e02e`:
+
+```
+T=$(mktemp -d /tmp/docs-libgphoto2-w161.XXXXXX)
+git archive a42e02e reports/frontier-libgphoto2shell.md lab/frontier/libgphoto2shell | tar -x -C "$T"
+cd "$T" && sha256sum -c lab/frontier/libgphoto2shell/PINS.sha256
+cd "$T/lab/frontier/libgphoto2shell/harness" && ./run.sh && ./check.sh
+```
+
+Expect 51 files in the admission archive `0e10c83`, 4/4 pins OK and
 `PASS=92 FAIL=0 TRACE=e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`.
+The current `a42e02e` archive has 68 files, 4/4 pins OK, 12 binaries
+(gcc/clang × vuln/fixed × plain/asan/recover), 36 invocations and
+`PASS=146 FAIL=0` on that same trace; the recover-mode outputs are regenerated
+from pinned source with real libc `memmove`.
 GCC and clang ASan report `WRITE of size 16384` at pinned `jl2005c.c.vuln:152`;
-the short-reply heap variant first reports `READ of size 16848` at pinned
-`:154`, so the heap destination write is not separately ASan-confirmed — the
-negative is preserved in `PROVENANCE.md`. The fixed build returns `rc=-3` for
-attack and heap inputs. gdb reads eight chosen `0x5a` bytes 24 bytes past the
+default ASan on the short-reply heap variant still aborts on the source `READ
+of size 16848` at pinned `:154` (negative preserved in `PROVENANCE.md`).
+Recover mode (`-fsanitize-recover=address`, `ASAN_OPTIONS=halt_on_error=0`)
+reports both that read and a `heap-buffer-overflow WRITE of size 16848`, 0
+bytes after the 16448-byte region, in real `memmove` at `:154`; the fixed
+recover build returns `rc=-3` with no ASan report, as do fixed attack/heap
+inputs.
+gdb reads eight chosen `0x5a` bytes 24 bytes past the
 stack buffer and at `priv->table+0x4000`, plus a chosen marker in the saved-RIP
 slot at `info+16472`; the process faults in `memmove` before `ret`, so IP
 control is NOT demonstrated. `lab/frontier/libgphoto2shell/REPLAY.md` records
-the clean archive replay at `0e10c83`; it is deterministic replay of the
-author's harness, not witness acceptance. Raw outputs are in
+both clean-archive replays (`0e10c83` and `a42e02e`); they are deterministic
+replay of the author's harness, not witness acceptance. Raw outputs are in
 `harness/evidence/`; no libgphoto2 build, USB/libusb, camera consumer, socket,
 wire, marker or command is tested. Grade is direct-call rungs 1-4; rung 5 stays
 UNKNOWN.
+
+## 2026-11-23 W161 — ndpi2shell FRONTIER-STAGED replay (not admitted)
+
+CVE-2026-86098 / GHSA-c8vx-3h2j-4f8m (Unreviewed High 7.4, CWE-787, published
+2026-09-05) claims a heap overflow in nDPI's `ndpi_json_string_escape()` via
+crafted TLS SNI, HTTP header or DNS name strings in nDPI before 6.0. The
+advisory and fix `94e82c1de12323d992895830231865736a8abf2c` (2026-08-25)
+were fetched read-only; the fix message says "nDPI <= 5.0, HEAD `ea3586e`",
+and the numeric fixed release is UNKNOWN. Vulnerable pin `94e82c1^`, fixed
+pin `94e82c1`; byte-exact pins are in `lab/frontier/ndpi2shell/PINS.sha256`,
+provenance and negatives in `PROVENANCE.md`, brief in
+`reports/frontier-ndpi2shell.md`. Window 121 is registered; staging added no
+route, charter, wake units, admission or mind, so the count stays 116.
+
+```
+T=$(mktemp -d /tmp/docs-ndpi2shell-replay.XXXXXX)
+git archive 6510950 reports/frontier-ndpi2shell.md lab/frontier/ndpi2shell | tar -x -C "$T"
+cd "$T/lab/frontier/ndpi2shell" && sha256sum -c PINS.sha256
+cd harness && ./run.sh && ./check.sh
+```
+
+Expect 54 files in the archive, 4/4 pins OK, eight binaries rebuilt from the
+archived pinned bytes and generated drivers, and
+`PASS=172 FAIL=0 TRACE=16060f55dfe944bf5e481a43e76034f6cd3d7acc159d561beaa067c8c97f7b5b`.
+Run `sha256sum -c` from the `ndpi2shell` root: the manifest is relative to it,
+and running it from the archive root gives four missing-file errors (a replay
+command error preserved in `lab/frontier/ndpi2shell/REPLAY.md`). gcc+clang
+ASan report `WRITE of size 1` at pinned `ndpi_serializer.c.vuln:107` (escape),
+`:158` (4-byte UTF-8) and `:163` (off-by-one NUL); plain tail bytes are
+`2f 22 a5 00` / `80 22 a5 00` / `a5 00 a5 a5`, with gdb readback at `:107`.
+Unlike most lanes, the eight binaries and normalized `harness/evidence/*.out`
+outputs are committed and regenerable by `run.sh`/`check.sh` here (they are
+not gitignored); no raw gdb logs or source tree are needed. This is a replay
+of the author's harness, not witness acceptance. No nDPI build, serializer
+struct, real packet, parser, socket or wire; TLS SNI / HTTP / DNS reachability
+is a claim and rung 5 is UNKNOWN.
 
 ## 2026-11-23 15:0xZ — libheif W164 one-row bound (no grade change)
 
@@ -5530,3 +5626,18 @@ the adjacent free chunk. Evidence: `evidence/one-row-*` and
 file pixels alone give no clean-return primitive; no grooming or forgery was
 attempted. W164 was not witness-replayed; W163's ESTABLISHED verdict and the
 grade are unchanged, rung 5 UNKNOWN.
+
+W166 (`reports/libheif2shell-status.md`, same admission, unwitnessed) adds a
+genuine 64x65 frame-1 JPEG, `controlled-size.heif` (SHA-256
+`062301dfe33e91eeef27441f794a41644e3f9e841282fde6892b7b41b2bc7550`), on the
+pinned plain/ASan builds: plain rc 134 `free(): corrupted unsorted chunks`,
+ASan rc 1 `WRITE of size 64` at `pixelimage.cc:644` 0 bytes after the
+32783-byte region, retained-frame rc 134. gdb reads the chosen row at
+`plane+32768` and the neighbouring top size `0x3821` →
+`0x000500000500021e` at `plane+32792`; retaining frame 0 makes that neighbour
+a top chunk (size `0x2b61`) that aborts with `malloc(): corrupted top size`.
+Negatives: JPEG DCT changed the intended `0x21` bytes, a uniform `0x40` row
+also aborts, and no pointer-bearing neighbour was seen. A fixed-pin reencode
+control exits 0 and then returns rc 2 at encode with "All frames of a sequence
+must have the size of the first frame" (rc 2 is an encode API return, not a
+successful encode). Grade unchanged, not witness-replayed, rung 5 UNKNOWN.
