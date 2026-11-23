@@ -142,10 +142,16 @@ removed the early strcmp fault in all 60 runs, including the 5 where `enc`
 was the adjacent object; all 60 then aborted in `munmap_chunk()` because the
 chunk size at `cek+40..47` stays corrupted. This is chosen-byte control of a
 live jansson object's metadata in the real decrypt path, not pointer control:
-the object's value pointer at +16 is past the 56-byte write. Why the two
-same-size strings swap identity with an identical allocation ring remains
-UNKNOWN (jansson hash-seed-dependent insertion order is an untested
-inference). No control-flow target; security grade unchanged. This is a
+the object's value pointer at +16 is past the 56-byte write. Pinning jansson's
+per-process `hashtable_seed` with the public `json_object_seed()` setter
+(`w1/evidence/wrappedN56-hashseed-w183.log`) makes the outcome deterministic
+per seed: across 40 pinned seed values, seeds 19, 27 and 30 gave 6/6 rc 139
+with the `enc` object adjacent, while the other 37 seeds gave rc 0 with it
+elsewhere. Jansson auto-seeds from /dev/urandom at the first `json_object()`
+(`deps/jansson-build/src/hashtable_seed.c`, `value.c:69-72`), so that random
+seed is the switch selecting which same-size string occupies `cek+48`; the
+crash fraction is the share of seeds in the first class, not a race, ASLR or
+token randomness. No control-flow target; security grade unchanged. This is a
 preserved contradiction, now causally explained, not an escalation.
 
 Heap geometry in the plain vulnerable process (`w1-plain-vuln.wrapped.log`):

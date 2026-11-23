@@ -143,9 +143,11 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   `strcmp`. Chosen bytes `02 00 00 00 01 00 00 00` (valid type and refcount)
   removed that fault in all 60 runs, but all then aborted in `munmap_chunk()`
   because the chunk size at `cek+40..47` is still corrupted. Fixed-IV and
-  ASLR-off batches still vary, so neither token randomness nor ASLR explains
-  it; why the two same-size strings swap identity stays UNKNOWN. No pointer or
-  control-flow target; security grade and rung 1-4 ceiling unchanged.
+  ASLR-off batches still vary. Pinning jansson's per-process hash seed makes
+  the outcome deterministic per seed (`w1/evidence/wrappedN56-hashseed-w183.log`):
+  seeds 19, 27 and 30 gave rc 139 in 6/6 runs each with `enc` adjacent; the
+  other 37 tested seeds gave rc 0 with it elsewhere. No pointer or control-flow
+  target; security grade and rung 1-4 ceiling unchanged.
 - Heap map: the CEK is a 48-byte glibc chunk; the adjacent object is a
   25-byte jansson `jsonp_malloc` string at `cek+48`, preceded by its size
   field at `cek+40`. Further neighbors come from jansson, `_decode`,

@@ -1,0 +1,29 @@
+W183 follow-up — the remaining UNKNOWN is closed: jansson's per-process hash
+seed selects the adjacent object, 2026-11-23 21:33-21:37Z.
+
+Throwaway instrumented server (same one that produced
+wrappedN56-cause-w183.log) with an added `json_object_seed(N)` call before any
+cjose call, fixed IV, one loopback request per fresh process. The pinned
+jansson auto-seeds `hashtable_seed` from /dev/urandom (or time+pid) on the
+first `json_object()` (`deps/jansson-build/src/hashtable_seed.c`,
+`value.c:69-72`, `hashtable.c:38`); `json_object_seed()` is the public setter.
+
+  seed 1:   60 runs -> 60 rc 0,  0 enc-adjacent
+  seeds 2,3,4: 30 runs each -> 30/30 rc 0 each, 0 enc-adjacent
+  seeds 5..40: 6 runs each (216 runs)
+      seeds 19, 27, 30 -> 6/6 rc 139 each, all enc-adjacent
+      the other 33 seeds -> 6/6 rc 0 each, none enc-adjacent
+
+So across 40 distinct pinned seed values the outcome is deterministic per
+seed: a seed either always puts the 13-byte `enc` json_string_t at cek+48
+(early strcmp NULL deref) or always puts the 6-byte `alg` string there (clean
+ERRCODE=4 return). The roughly 8-20% crash rate with an unpinned seed is the
+fraction of random seeds in the first class, not a race, not ASLR and not
+token randomness. Representative raw logs:
+  wrappedN56-seed19-crash-w183.log   (seed 19, rc 139, enc adjacent)
+  wrappedN56-seed1-survive-w183.log  (seed 1, rc 0, enc elsewhere)
+
+No change to grade or rung 1-4 ceiling; still no pointer/IP control. The
+chosen-byte result in wrappedN56-cause-w183.log is unchanged: valid
+type/refcount bytes remove the early fault but leave the corrupted chunk size,
+so all such runs abort later in munmap_chunk().
