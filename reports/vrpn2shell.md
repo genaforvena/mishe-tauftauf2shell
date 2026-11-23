@@ -977,6 +977,46 @@ faults. No surviving modified control flow, no chosen byte, no command side
 effect, no rung 5, grade unchanged. Author self-observation. All ports were
 loopback and were freed; no server left running. Raw evidence in `out-w20-*/`.
 
+## W21 — large positive wire indices reach an outer frame (2026-11-23 ~19:10Z)
+
+Every earlier wire index on the plain Debug `-O0` server was <= 127 (plus the
+negative set), and the widest `-O2` map (W20) stopped at +319. This wake sweeps
+untested indices above 319 with the existing debugger-free `probe-func-dos.sh`
+on the stock plain `-O0` server (SHA-256 `5cf4945768615a55da3401c7608f4223...`,
+`build-plain-07.36`), loopback ports 15001-15017 and 15101-15220.
+
+Coarse sweep: indices 320, 384, 448, 640, 768, 1024, 1280, 1536, 2048, 3072,
+4096, 6144 and 8192 are `ALIVE_AFTER_MESSAGE`; 16384, 32768 and 65536 are
+`DEAD_AFTER_MESSAGE exit=139` (the write leaves the mapped stack). Index 512
+alone is `DEAD_AFTER_MESSAGE exit=134` with `*** stack smashing detected ***`
+in `server.err` (`out-w21-o0-512/`). The same index on the TYPE sink is also
+134 with the same stderr (`out-w21-o0--2-512/`); the fixed commit is ALIVE
+(`out-w21-fixed-512b/`) as is the vulnerable short index 4
+(`out-w21-short-4/`). Stock `-O2` indices 256/384/512 are ALIVE on the
+`bfe63334...` build, so the landing is a `-O0` layout property.
+
+Fine sweep 504-520 (`out-w21-o0-n-*/`): 512-517 DEAD, 518/519 ALIVE, 520 DEAD.
+This matches the byte pattern of the quadword at `sender_name+512` in
+`out-w21-gdb-512b/gdb.log`: `0x00007fffffffdbc0` (six nonzero bytes) becomes
+`0x00007fffffffdb00` across the write at `:4554`, while the next quadword
+`0x000055555559d4f2` has a nonzero low byte at +520.
+
+`out-w21-smash-512/gdb.log` pins the consequence. The backtrace at the write
+site is handler -> `doSystemCallbacksFor:1446/:1424` -> `dispatch:4331` ->
+`getOneTCPMessage:4239` -> `handle_tcp_messages:3561`. After the write,
+`__stack_chk_fail` is entered from `getOneTCPMessage:4246` with
+`rbp=0x7fffffffdb00` — exactly the corrupted value — and the process aborts.
+So a wire-chosen offset 512 zeroes a live saved-frame-pointer word in an outer
+caller frame, and the following canary check fails. The expected canary slot
+is not independently pinned (the check reads `[rbp-8]` at the corrupted rbp),
+so the causal detail beyond the observed corrupted rbp is UNKNOWN.
+
+This extends the observed rung-4 boundary to a larger, outer-frame offset on
+one build. It is still a single fixed NUL at a chosen offset: no chosen byte,
+no control-flow redirect to a chosen target, no command side effect, no rung
+5, grade unchanged. Author self-observation, not independently replayed.
+Every port was loopback and was freed; no server was left running.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
@@ -1011,6 +1051,14 @@ loopback and were freed; no server left running. Raw evidence in `out-w20-*/`.
   exit 132 has an UNKNOWN cause (under gdb it lands at `0x...5a0059` and
   faults SIGSEGV); no signal-specific claim rests on that row. Do not resweep
   TYPE `-O2` 136-143 / 200-207 / 312-319 on the same build.
+- W21 covers the large positive indices on the stock `-O0` build: 504-520
+  (512-517 DEAD with canary abort, 518/519 already-zero no-ops, 520 DEAD)
+  and the coarse samples 320-8192 (ALIVE), 16384-65536 (fault outside the
+  mapped stack). Do not resweep those points on the same `-O0` binary. The
+  `-O2` samples 256/384/512 are ALIVE there as well. The claimed landing is
+  one live saved-frame-pointer word at `sender_name+512`; the causal step
+  from the corrupted rbp to `__stack_chk_fail` is UNKNOWN beyond the observed
+  `rbp=0x...db00` at the failing check, and no chosen byte or command follows.
 - W6's DoS signature (SIGSEGV/SIGILL) is a **Debug -O0 layout effect**; W7's
   -8/120 samples were non-fatal at `-O2`. W8/W10 measure a distinct stock `-O2`
   consequence: indices 105-111 zero a nonzero canary byte and abort with

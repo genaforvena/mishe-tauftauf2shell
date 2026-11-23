@@ -619,3 +619,41 @@ loopback ports 14636-14819: TYPE indices 136-141, 200-205 and 312-317 DEAD
 14911-14914 ALIVE. Each `meta.txt` records binary SHA, port, index and status.
 All ports were loopback and were freed; no server left running. Author
 self-observation; grade unchanged, no chosen byte, no command, no rung 5.
+
+## W21 — large positive wire indices (2026-11-23 ~19:10Z)
+
+No build change. Reused vulnerable plain `-O0`
+`build-plain-07.36/server_src/vrpn_server` (SHA-256
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`), fixed
+plain `build-plain-fixed/server_src/vrpn_server` (SHA-256
+`10e581e895c25f39bea153b4d5ce1014796190fb9bd5f901693115d176ea2f45`) and stock
+`-O2` `build-opt-07.36/server_src/vrpn_server` (SHA-256
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`). Reused
+`probe-func-dos.sh` and `wire_inject.py` unchanged; added two throwaway gdb
+command generators this wake: `probe-w21-large.sh` (PRE/POST quadword window
+and `__stack_chk_fail` backtrace) and `probe-w21-smash.sh` (frame backtrace at
+the write plus rbp and the failed canary slot). Both are committed with the
+raw evidence; neither changes a build.
+
+Coarse debugger-free sweep on plain `-O0`, ports 15001-15017: 320/384/448/
+640/768/1024/1280/1536/2048/3072/4096/6144/8192 ALIVE; 16384/32768/65536
+DEAD exit 139; 512 DEAD exit 134 with `*** stack smashing detected ***`
+(`out-w21-o0-*/meta.txt`, `out-w21-o0-512/server.err`). Fine sweep 504-520 on
+ports 15111-15127 (`out-w21-o0-n-*/`): 512-517 DEAD, 518/519 ALIVE, 520 DEAD.
+TYPE sink index 512 (`out-w21-o0--2-512/`, port 15220) is DEAD 134 with the
+same stderr. Fixed index 512 (`out-w21-fixed-512b/`, port 15103) and short
+index 4 (`out-w21-short-4/`, port 15104) are ALIVE. Stock `-O2` indices
+256/384/512 (`out-w21-opt-*`) are ALIVE.
+
+`out-w21-gdb-512b/gdb.log`: at `:4554`, `sender_name=0x7fffffffd910`, dest
+`0x7fffffffdb10`; the quadword there goes `0x00007fffffffdbc0` ->
+`0x00007fffffffdb00` across the write, matching the six DEAD / two ALIVE
+bytes at 512-519. `out-w21-smash-512/gdb.log`: backtrace at the write is
+handler -> `doSystemCallbacksFor:1446` -> `:1424` -> `dispatch:4331` ->
+`getOneTCPMessage:4239` -> `handle_tcp_messages:3561`; `__stack_chk_fail` is
+entered from `getOneTCPMessage:4246` with `rbp=0x7fffffffdb00`, the corrupted
+value. The expected canary slot is not independently pinned, so the last
+causal step is UNKNOWN. Grade unchanged; fixed NUL at a chosen offset, no
+chosen byte, no command, no rung 5. All ports loopback and freed; no
+`vrpn_server` left running (`pgrep` and `ss -ltn` checked). Author
+self-observation, not independently replayed.

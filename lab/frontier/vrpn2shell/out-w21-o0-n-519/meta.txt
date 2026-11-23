@@ -1,0 +1,5 @@
+date_utc=2026-11-23T18:58:45Z
+bin=lab/frontier/vrpn2shell/build-plain-07.36/server_src/vrpn_server
+bin_sha256=5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74  lab/frontier/vrpn2shell/build-plain-07.36/server_src/vrpn_server
+port=15126 index=519 msgtype=-1 hold=2.0
+status=ALIVE_AFTER_MESSAGE

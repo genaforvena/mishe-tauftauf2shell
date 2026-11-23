@@ -1,0 +1,24 @@
+Breakpoint 1 at 0x49dad: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+Breakpoint 2 at 0x3d380
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=512 name=0x7fffffffd910 dest=0x7fffffffdb10 bt_follows
+#0  vrpn_Endpoint::handle_sender_message (userdata=0x5555556f3220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+#1  0x0000555555596d88 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, p=..., userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x0000555555596c8f in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, type=-1, sender=0, time=..., len=8, buffer=0x5555556f3380 "", userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x000055555559d835 in vrpn_Endpoint::dispatch (this=0x5555556f3220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x5555556f3380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#4  0x000055555559d4f2 in vrpn_Endpoint_IP::getOneTCPMessage (this=0x5555556f3220, fd=6, buf=0x5555556f3380 "", buflen=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+#5  0x000055555559bbd5 in vrpn_Endpoint_IP::handle_tcp_messages (this=0x5555556f3220, timeout=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3561
+#6  0x000055555559a9d0 in vrpn_Endpoint_IP::mainloop (this=0x5555556f3220, timeout=0x7fffffffded0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3056
+#7  0x00005555555a16a5 in vrpn_Connection_IP::mainloop (this=0x5555556ef320, pTimeout=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:6120
+SMASH rbp=0x7fffffffdb00 rsp=0x7fffffffdb28
+0x7fffffffdaf0:	0xffffffff00000000	0x00005555556f3220
+0x7fffffffdb00:	0x00005555556f0a80	0x0000000000000000
+#0  __stack_chk_fail () at ./debug/stack_chk_fail.c:23
+#1  0x000055555559d51f in vrpn_Endpoint_IP::getOneTCPMessage (this=0x8, fd=0, buf=0x0, buflen=4294967295) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4246
+Backtrace stopped: previous frame inner to this frame (corrupt stack?)
+*** stack smashing detected ***: terminated
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
