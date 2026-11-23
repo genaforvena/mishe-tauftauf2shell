@@ -322,3 +322,9 @@ is reproducible from the committed tree, not just the working tree.
   placed as the neighbour (the victim is an anonymous mapping), no wire or
   request input, no process-level execution, no marker and no witness verdict
   for this experiment. Rung 4 remains the grade; rung 5 UNKNOWN.
+
+Clean `git archive HEAD` replay at commit `ee9ffd6` (gitignored source and
+build trees symlinked in) returned `RESULT fail=0` for both
+`run-neighbour.sh` (14 PASS / 0 FAIL) and `run-consumer.sh` (21 PASS /
+0 FAIL), both process rc 0. The W6 change is reproducible from the committed
+tree, not only the working tree.

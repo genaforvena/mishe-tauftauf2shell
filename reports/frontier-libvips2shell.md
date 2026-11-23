@@ -253,3 +253,8 @@ layout crashes, and no pointer, vtable, saved return address, wire input,
 command or marker side effect was observed. On this host and glibc layout
 the negative write is structurally an availability primitive; reaching a
 control-flow datum would require a different, unmeasured allocator layout.
+
+From a clean `git archive HEAD` at commit `ee9ffd6` with the gitignored
+pinned source and build trees symlinked in, `real/run-neighbour.sh` returned
+`RESULT fail=0` (14/14) and `real/run-consumer.sh` returned `RESULT fail=0`
+(21/21); both process rc 0.
