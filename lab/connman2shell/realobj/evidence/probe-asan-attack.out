@@ -1,0 +1,59 @@
+Breakpoint 1 at 0x9a280: file /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-buildsrc/src/main.c, line 1169.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=2, argv=0x7fffffffe238) at /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-buildsrc/src/main.c:1169
+1169	{
+$1 = (void *) 0x51d000000a80
+$2 = 0x80
+=================================================================
+==3823681==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffff4a004b1 at pc 0x5555555f3e3b bp 0x7fffffffdb20 sp 0x7fffffffdb10
+READ of size 1 at 0x7ffff4a004b1 thread T0
+    #0 0x5555555f3e3a in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-buildsrc/gdhcp/client.c:2223
+    #1 0x7fffffffe08e  ([stack]+0x2008e)
+
+Address 0x7ffff4a004b1 is located in stack of thread T0 at offset 1201 in frame
+    #0 0x5555555f3bef in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-buildsrc/gdhcp/client.c:2210
+
+  This frame has 1 object(s):
+    [48, 1074) 'dns_name' (line 2214) <== Memory access at offset 1201 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-buildsrc/gdhcp/client.c:2223 in get_domains
+Shadow bytes around the buggy address:
+  0x7ffff4a00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00400: 00 00 00 00 00 00 02 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x7ffff4a00480: f3 f3 f3 f3 f3 f3[f3]f3 00 00 00 00 00 00 00 00
+  0x7ffff4a00500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff4a00700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3823681==ABORTING
+[Inferior 1 (process 3823681) exited with code 01]
+The program being debugged exited while in a function called from GDB.
+Evaluation of the expression containing the function
+(get_domains) will be abandoned.
+The program is not being run.

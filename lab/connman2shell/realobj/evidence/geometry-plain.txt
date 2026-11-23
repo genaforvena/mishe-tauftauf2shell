@@ -1,0 +1,86 @@
+
+build-plain/src/connmand:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .plt.got:
+
+Disassembly of section .plt.sec:
+
+Disassembly of section .text:
+
+0000000000024c70 <get_domains>:
+   24c70:	41 57                	push   %r15
+   24c72:	41 56                	push   %r14
+   24c74:	41 55                	push   %r13
+   24c76:	41 54                	push   %r12
+   24c78:	55                   	push   %rbp
+   24c79:	53                   	push   %rbx
+   24c7a:	48 81 ec 28 04 00 00 	sub    $0x428,%rsp
+   24c81:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+   24c88:	00 00 
+   24c8a:	48 89 84 24 18 04 00 	mov    %rax,0x418(%rsp)
+   24c91:	00 
+   24c92:	31 c0                	xor    %eax,%eax
+   24c94:	48 85 f6             	test   %rsi,%rsi
+   24c97:	0f 84 af 00 00 00    	je     24d4c <get_domains+0xdc>
+   24c9d:	41 89 ff             	mov    %edi,%r15d
+   24ca0:	83 ff 02             	cmp    $0x2,%edi
+   24ca3:	0f 8e a3 00 00 00    	jle    24d4c <get_domains+0xdc>
+   24ca9:	48 8d 44 24 11       	lea    0x11(%rsp),%rax
+   24cae:	49 89 f6             	mov    %rsi,%r14
+   24cb1:	45 31 e4             	xor    %r12d,%r12d
+   24cb4:	31 ed                	xor    %ebp,%ebp
+   24cb6:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+   24cbb:	4c 8d 6c 24 10       	lea    0x10(%rsp),%r13
+   24cc0:	49 63 f4             	movslq %r12d,%rsi
+   24cc3:	ba 01 04 00 00       	mov    $0x401,%edx
+   24cc8:	4c 89 ef             	mov    %r13,%rdi
+   24ccb:	4c 01 f6             	add    %r14,%rsi
+   24cce:	e8 5d ca ff ff       	call   21730 <strncpy@plt>
+   24cd3:	0f b6 44 24 10       	movzbl 0x10(%rsp),%eax
+   24cd8:	84 c0                	test   %al,%al
+   24cda:	74 6c                	je     24d48 <get_domains+0xd8>
+   24cdc:	4c 89 eb             	mov    %r13,%rbx
+   24cdf:	90                   	nop
+   24ce0:	c6 03 2e             	movb   $0x2e,(%rbx)
+   24ce3:	48 8d 5c 03 01       	lea    0x1(%rbx,%rax,1),%rbx
+   24ce8:	0f b6 03             	movzbl (%rbx),%eax
+   24ceb:	84 c0                	test   %al,%al
+   24ced:	75 f1                	jne    24ce0 <get_domains+0x70>
+   24cef:	44 29 eb             	sub    %r13d,%ebx
+   24cf2:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+   24cf7:	45 8d 64 1c 01       	lea    0x1(%r12,%rbx,1),%r12d
+   24cfc:	e8 7f cc ff ff       	call   21980 <g_strdup@plt>
+   24d01:	48 89 ef             	mov    %rbp,%rdi
+   24d04:	48 89 c6             	mov    %rax,%rsi
+   24d07:	e8 c4 d3 ff ff       	call   220d0 <g_list_prepend@plt>
+   24d0c:	48 89 c5             	mov    %rax,%rbp
+   24d0f:	45 39 e7             	cmp    %r12d,%r15d
+   24d12:	7f ac                	jg     24cc0 <get_domains+0x50>
+   24d14:	48 89 c7             	mov    %rax,%rdi
+   24d17:	e8 64 c2 ff ff       	call   20f80 <g_list_reverse@plt>
+   24d1c:	48 8b 94 24 18 04 00 	mov    0x418(%rsp),%rdx
+   24d23:	00 
+   24d24:	64 48 2b 14 25 28 00 	sub    %fs:0x28,%rdx
+   24d2b:	00 00 
+   24d2d:	75 21                	jne    24d50 <get_domains+0xe0>
+   24d2f:	48 81 c4 28 04 00 00 	add    $0x428,%rsp
+   24d36:	5b                   	pop    %rbx
+   24d37:	5d                   	pop    %rbp
+   24d38:	41 5c                	pop    %r12
+   24d3a:	41 5d                	pop    %r13
+   24d3c:	41 5e                	pop    %r14
+   24d3e:	41 5f                	pop    %r15
+   24d40:	c3                   	ret
+   24d41:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+   24d48:	31 db                	xor    %ebx,%ebx
+   24d4a:	eb a6                	jmp    24cf2 <get_domains+0x82>
+   24d4c:	31 c0                	xor    %eax,%eax
+   24d4e:	eb cc                	jmp    24d1c <get_domains+0xac>
+   24d50:	e8 4b d3 ff ff       	call   220a0 <__stack_chk_fail@plt>
+
+Disassembly of section .fini:

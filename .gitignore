@@ -289,3 +289,11 @@ lab/frontier/connman2shell/harness/a-vuln-clang
 lab/frontier/connman2shell/harness/a-fixed-gcc
 lab/frontier/connman2shell/harness/p-vuln
 lab/frontier/connman2shell/harness/probe-*
+
+# connman2shell real-object build: provisioned debs, copied pinned trees and
+# local build output stay local. Scripts, geometry summary and probe evidence
+# stay tracked.
+lab/connman2shell/deps/
+lab/connman2shell/build*/
+lab/connman2shell/realobj/deps/
+lab/connman2shell/realobj/build-*/

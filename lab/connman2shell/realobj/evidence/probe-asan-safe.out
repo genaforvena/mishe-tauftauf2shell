@@ -1,0 +1,27 @@
+Breakpoint 1 at 0x9a280: file /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-buildsrc/src/main.c, line 1169.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=2, argv=0x7fffffffe238) at /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-buildsrc/src/main.c:1169
+1169	{
+$1 = (void *) 0x503000001390
+Usage:
+  connmand [OPTION?]
+
+Help Options:
+  -h, --help                  Show help options
+
+Application Options:
+  -c, --config=FILE           Load the specified configuration file instead of /usr/local/etc/connman/main.conf
+  -d, --debug=DEBUG           Specify debug options to enable
+  -i, --device=DEV,...        Specify networking devices or interfaces
+  -I, --nodevice=DEV,...      Specify networking interfaces to ignore
+  -p, --plugin=NAME,...       Specify plugins to load
+  -P, --noplugin=NAME,...     Specify plugins not to load
+  -W, --wifi=NAME             Specify driver for WiFi/Supplicant
+  -n, --nodaemon              Don't fork daemon to background
+  -r, --nodnsproxy            Don't support DNS resolving
+  --nobacktrace               Don't print out backtrace information
+  -v, --version               Show version information and exit
+
+[Inferior 1 (process 3823996) exited normally]

@@ -1,0 +1,5 @@
+   24c7a:	48 81 ec 28 04 00 00 	sub    $0x428,%rsp
+   24c81:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+   24cce:	e8 5d ca ff ff       	call   21730 <strncpy@plt>
+   24ce0:	c6 03 2e             	movb   $0x2e,(%rbx)
+   24d24:	64 48 2b 14 25 28 00 	sub    %fs:0x28,%rdx
