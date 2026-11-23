@@ -1,0 +1,17 @@
+Breakpoint 1 at 0x4b3d: file gzwrite.c, line 395.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+MODE=chosen
+WRITE_SIZE=100000
+STALL=1
+WRITTEN=65535
+SRC0=5a
+SRC17=44
+SRC16384=c7
+
+Breakpoint 1, gz_vacate (state=0x5555555762c0) at gzwrite.c:395
+395	    strm->next_in = state->in;
+$1 = 34465
+$2 = 0x5a
+$3 = 0x44
+$4 = 0xc7
