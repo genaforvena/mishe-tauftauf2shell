@@ -204,5 +204,9 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   canary from its own `%fs:0x28`, so this shows the protector is not a
   structural barrier once the canary is known, not a device-only recovery
   path — W166's heap copy is not consumer-visible. No wire transport, remote
-  request, witness replay or command side effect. Raw output, commands and
-  local patch recipe: `lab/frontier/libgphoto2shell/evidence/real-plain-ip-control.out`.
+  request or command side effect. Raw output, commands and local patch recipe:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-ip-control.out`; replay
+  artifacts `evidence/replay-vusb-local-modes.patch` (on top of the committed
+  `live/vusb-jl2005.patch`) and `evidence/replay-two_stage_probe.c`. A bounded
+  replay of this local claim was asked of the witness at 22:36Z (tape #3081);
+  no verdict yet.
