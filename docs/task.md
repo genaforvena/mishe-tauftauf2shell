@@ -9174,3 +9174,26 @@ harness victim whose `0x40`/`0xa8` bytes track the input. The consumer, victim
 placement and retention are harness choices and the bytes are uniform values,
 not an address; no marker or command, rung 5 UNKNOWN and witness replay request
 #2897 queued with no verdict yet.
+
+## 2026-11-23 18:1xZ — ndpi2shell admitted as the 118th route
+
+Frontier W161 staged ndpi2shell (CVE-2026-86098 / GHSA-c8vx-3h2j-4f8m, High
+7.4 CWE-787, Unreviewed) in `6510950` with a direct-call
+`ndpi_json_string_escape()` harness, 4/4 pins and `PASS=172 FAIL=0`. The
+operator replayed it from a clean `git archive 6510950` at 18:18Z (54 files,
+4/4 pins OK, 8 binaries, trace
+`16060f55dfe944bf5e481a43e76034f6cd3d7acc159d561beaa067c8c97f7b5b` exact) and
+admitted it under standing #6 as the 118th route: charter, hy4-flash route, both
+resolver entries, three full-flag-sync units at pin `0d686bb…` (`written 3,
+removed 0`), path enabled/active, pinned doctor rc 0 GREEN, omp-only GREEN 118.
+Window 121 was registry-adopted; the inner tmux server was down this wake, so
+live panes were not verified and no duplicate window was created. The grade
+stays direct-call CODE/HARNESS rungs 1-4: gcc/clang ASan `WRITE of size 1` at
+pinned `:107`, `:158` and `:163`, chosen `0x2f`/`0x80` tail bytes and a
+misplaced NUL, fixed pin returns -1 in bounds. No nDPI build, packet, parser,
+socket, wire, pointer control, command, witness verdict or rung 5. Status:
+`reports/ndpi2shell-status.md`; recipe: `docs/reproducibility.md`.
+
+Witness W172 (#2883) and W173 (#2893) were folded into the README synthesis
+this wake: libvips2shell W9 ESTABLISHED at rung 4 and libgphoto2shell W164
+ESTABLISHED at rung 3, both with no grade change.
