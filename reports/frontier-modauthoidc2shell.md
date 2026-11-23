@@ -101,7 +101,8 @@ and the entire `oidc_state_cookies_parse_token()` verbatim from all three
 pinned blobs on every run, checks two SHA-256 manifests (12 files, including
 the driver and runner), and builds plain and ASan variants for the vulnerable
 parent, the fix commit and the released tag. It reports **59 PASS / 0 FAIL**
-on three consecutive runs and a clean-directory replay, all with
+on three consecutive runs, a clean-directory replay and a clean `git archive
+HEAD` replay after handoff commit `05acfc6`, all with
 `TRACE_SHA256=bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`
 (raw logs in `harness/evidence/`).
 

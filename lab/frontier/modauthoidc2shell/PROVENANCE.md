@@ -52,10 +52,13 @@ logic is reimplemented.
   three consecutive runs, identical
   `TRACE_SHA256=bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`
   (`evidence/run1.txt`..`run3.txt`, raw modes in `evidence/*.out`).
-- Clean-directory replay (`cp` of `src/` plus the two harness sources to a fresh
-  `/tmp` directory, no repository context): `PASS=59 FAIL=0`, same hash
-  (`evidence/replay.txt`, `evidence/replay-normalized.txt`). A `git archive HEAD`
-  replay after the handoff commit is recorded in the same log.
+- Clean-directory replay (`cp` of `src/` plus `driver.c`, `run.sh` and
+  `SHA256SUMS` to a fresh `/tmp` directory, no repository context):
+  `PASS=59 FAIL=0`, same hash (`evidence/replay.txt`,
+  `evidence/replay-normalized.txt`).
+- Clean `git archive HEAD lab/frontier/modauthoidc2shell` replay after handoff
+  commit `05acfc6`: `PASS=59 FAIL=0`, same hash
+  (`evidence/git-archive-replay.txt`).
 - Rung 1: advisory arithmetic with no vulnerable call — prefix, valueless
   token, dead NULL test, NUL index 30, predicted write offset 47.
 - Rung 2: the vulnerable slice scans past the token, overwrites the adjacent
