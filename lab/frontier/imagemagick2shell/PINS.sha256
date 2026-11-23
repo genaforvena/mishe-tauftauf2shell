@@ -1,0 +1,5 @@
+f5163a573a1c1bff16358d0a592b2fb168ad0fd3b9dc5ff57dc7820eebc5cf79  ImageMagick-7.1.2-34.tar.gz
+40b6fefa88fe16ca5a4b3d3db5133eaebfb0157f21f98530bde8aec5dd5b0776  ImageMagick-7.1.2-35.tar.gz
+9be21f3a466f0ba78f0cedd7fbc61ac058636de364132dba738f72dcc89b3def  vuln/MagickCore/stream.c
+505dbe515ad8077bb96d9d90daa59e51ce963931a7ea7669246c1f186ee5d442  fixed/MagickCore/stream.c
+28de6e8cb31f5f6adcb088b88a6477ffea58812c3010fd73f1fd15a15c4a5340  harness.c

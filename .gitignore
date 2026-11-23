@@ -46,6 +46,17 @@ lab/frontier/brotli2shell/*.bin
 lab/frontier/brotli2shell/*.out
 lab/frontier/brotli2shell/poc.py
 
+# ImageMagick2Shell bulk: pinned release extractions and local builds.
+# The harness, replay script and evidence stay tracked.
+lab/frontier/imagemagick2shell/vuln/
+lab/frontier/imagemagick2shell/fixed/
+lab/frontier/imagemagick2shell/plain-src/
+lab/frontier/imagemagick2shell/*-build/
+lab/frontier/imagemagick2shell/harness-asan
+lab/frontier/imagemagick2shell/harness-fixed
+lab/frontier/imagemagick2shell/harness-plain
+lab/frontier/imagemagick2shell/.case.out
+
 # Freeradius2shell standalone harness build output (scripts stay tracked)
 lab/frontier/freeradius2shell/vuln
 lab/frontier/freeradius2shell/fixed
