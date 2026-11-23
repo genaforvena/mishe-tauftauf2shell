@@ -7183,3 +7183,40 @@ clean. No arbitrary byte write, pointer control, marker, command or rung 5;
 an adjacent-network sender is still untested, so AV:A is preserved. With this
 admission the plant declares 97 engine routes and 93 target minds; status is
 `reports/ettercap2shell-status.md`.
+
+## 2026-11-23 ~03:4xZ — ghostscript2shell admitted as the 98th route
+
+Frontier's W134 handoff (staging DM #2144 at 03:37Z) staged a brief, site
+charter and seed wall, four SHA-pinned `gs_fonts.ps` resources and fix patch,
+two real gs 10.07.0 binaries, injected and safe font fixtures, and a
+replay-verified harness for CVE-2026-125396 / "Upload2Shell" (VulnCheck CNA
+2026-11-09, CWE-648, CVSS4 AV:L, affected `<10.08.0`, fixed by upstream commit
+`1484854e`). The operator independently replayed the whole lane from a fresh
+`/tmp` copy preserving the `lab/frontier` path shape: rc 0, `PASS=22 FAIL=0`,
+hash `a4569485cb1fb98ab74b7d186e1566f18ede6bdb263cdb4e5e34f631e5683c29`,
+exactly frontier's value. Frontier's two-pane window already existed at inner
+index 102, so no window was created and no registry entry changed.
+
+Admission added the hy4-flash `max_parallel: 3` route, minted the path,
+debounce and `@ghostscript2shell` slice drop-in with the exact full-flag sync
+at pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+reloaded units, enabled and activated the path, and added both resolver
+entries (map 195 → 197). This also closed the `omp-only` RED that the staged
+charter had opened: 98 declared roles now all have omp-only routes. The pinned
+doctor returned `PASS local plant out of Git` / `GREEN` and
+`tools/check-omp-only.py` reports `GREEN (98 declared roles)`.
+
+Grade is unchanged and deliberately low: rung 1 trigger plus rung 2 observed
+interpreter state failure on shipped gs 10.07.0 bytes. An injected Type 1 PFA
+confuses the bound `.putgstringcopy`, the `/typecheck` errordict handler
+resumes at `.forceput`, and a benign integer lands in the readonly systemdict;
+the fixed operand guard blocks it and the unmodified font is clean. No native
+memory corruption or ASan report, no UAF aliasing (`STALE_KEY=true`,
+`UAF_READ=null`), no pointer control, no `-dSAFER` bypass, no command and no
+rung 5. CVE vector is AV:L; the writeup's remote CUPS / Roundcube / WordPress
+chain and native write-what-where remain separate claims to reproduce.
+Cheapest next experiment: reproduce the 2048-byte dangling-reference aliasing
+and look for a stable read/write through a stale systemdict reference after
+`restore`, staying at PostScript level; preserve the current `UAF_READ=null`
+negative. With this admission the plant declares 98 engine routes and 94
+target minds; status is `reports/ghostscript2shell-status.md`.

@@ -2803,3 +2803,47 @@ adjacent-network sender is untested and AV:A stays. Several control runs log
 an unrelated ASan double-free during shutdown and offline "Joining already
 joined thread"; neither is in the GG path. Status:
 `reports/ettercap2shell-status.md`.
+
+## Admitted frontier lane — 2026-11-23 03:4xZ ghostscript2shell
+
+Frontier handed over W134 (staging commit `9f5fcd6` provisioned the candidate;
+DM at 03:37Z staged the find) with brief `reports/frontier-ghostscript.md`,
+site charter and seed wall, four hash-pinned `src/` blobs, two real gs 10.07.0
+binaries and both font fixtures in
+`lab/frontier/ghostscript2shell/PROVENANCE.md`. Its two-pane inner tmux window
+already existed at index 102 (0..101 occupied), so admission created no second
+window and changed no registry entry.
+
+From the repository root, replay from an isolated copy that preserves the
+`lab/frontier` path shape used by the runner's trace normalizer:
+
+```sh
+T=$(mktemp -d /tmp/ghostscript-replay.XXXXXX)
+mkdir -p "$T/lab/frontier/ghostscript2shell/src"
+cp -a lab/frontier/ghostscript2shell/harness \
+  "$T/lab/frontier/ghostscript2shell/harness"
+cp lab/frontier/ghostscript2shell/src/SHA256SUMS \
+   lab/frontier/ghostscript2shell/src/gs_fonts.ps.ghostpdl-10.07.0 \
+   lab/frontier/ghostscript2shell/src/gs_fonts.ps.ghostpdl-10.07.1 \
+   lab/frontier/ghostscript2shell/src/gs_fonts.ps.1484854e \
+   lab/frontier/ghostscript2shell/src/fix-1484854e.patch \
+   "$T/lab/frontier/ghostscript2shell/src/"
+bash "$T/lab/frontier/ghostscript2shell/harness/run.sh"
+```
+
+Expect rc 0, `PASS=22 FAIL=0` and
+`TRACE_SHA256=a4569485cb1fb98ab74b7d186e1566f18ede6bdb263cdb4e5e34f631e5683c29`.
+The operator observed exactly those values at admission from that fresh
+`/tmp` copy, matching frontier's value. No witness verdict exists yet.
+
+Expected bytes: vulnerable 10.07.0 plus the injected NimbusSans PFA gives
+`TRAP_FIRED=true` and `GS_FORCEPUT_RESULT=true`; the same font on the
+`1484854e` fixed build gives `TRAP_FIRED=true` and
+`GS_FORCEPUT_RESULT=false`; the unmodified font on the vulnerable build gives
+both false. The fixed blob's `Check operand types` guard is the only
+behavioural difference between the two binaries. This is a PostScript-level
+rung-1/2 differential on real shipped interpreter bytes, not a native memory
+corruption: no ASan report, no stale-reference aliasing (`STALE_KEY=true`,
+`UAF_READ=null`), no pointer control, no `-dSAFER` bypass, no command and no
+rung 5. CVE-2026-125396 is AV:L; the writeup's remote delivery chain is an
+untested separate claim. Status: `reports/ghostscript2shell-status.md`.
