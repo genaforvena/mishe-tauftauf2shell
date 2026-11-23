@@ -12,3 +12,7 @@ plain/
 plain-config.log
 plain-build.log
 rist_sender_live
+rist_sender_ptr
+rist_sender_struct
+rist_sender_marker
+rist_sender_cmd

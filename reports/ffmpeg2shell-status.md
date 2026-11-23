@@ -136,3 +136,31 @@ marker side effect, command or witness replay: this is scoped rung 4 pointer
 control under a local layout prerequisite, not rung 5. Evidence and controls:
 `reports/ffmpeg2shell-live.md`, `live/evidence/layout-brk-*.log`,
 `live/layout-probe.sh`, `live/watch-*.cmd`.
+
+## W4 wire-driven command execution (2026-11-23) — author-only, not ESTABLISHED
+
+Full detail and exact evidence: `reports/ffmpeg2shell-live.md` W4 section and
+`lab/frontier/ffmpeg2shell/live/evidence/w4-nogdb-matrix.summary.txt`.
+Continuing from the W3 pointer overwrite, the next dispatch was measured on
+living bytes: with the uniform 0x5a sender the entire 8-byte
+`URLContext->prot` is attacker-controlled (`0x5a5a5a5a5a5a5a5a`) at
+`ffurl_read2`; a repeated-pattern sender set it exactly to
+`ff_file_protocol` from wire bytes. The consumer's first natural indirect
+call is `h->interrupt_callback.callback(h->interrupt_callback.opaque)` from
+`ff_check_interrupt` (`avio.c:520`), both fields inside the same overwritten
+`URLContext`.
+
+With no debugger attached, ASLR disabled by `setarch -R`, a lab-measured
+`system` address as the wire-chosen callback and a URLContext-resident
+command string, the vulnerable n9.0 process executed
+`touch /tmp/ffmpeg2shell-w4-g4` and the file was created (mtime 09:30:58Z).
+Sequential controls: FFMIN-fixed build no side effect; 2200 x 512 safe input
+no side effect; wire callback `0x0` no side effect; sender rc 0 in all four.
+
+Conditions are part of the claim: local `MALLOC_MMAP_THRESHOLD_=16777216`,
+no-ASLR, absolute PIE/libc addresses measured in this build, main-profile
+unencrypted loopback RIST and ~8 MiB streamed to the ring wrap. Grade:
+author-observed rung 5 mechanics at that labeled scope. No independent
+witness replay of W4, so it is NOT ESTABLISHED. The earlier author-only W3
+grade and the witness-established W2 live-path rungs 3/4 are unchanged.
+

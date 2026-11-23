@@ -242,3 +242,80 @@ The built artifacts and scripts live in
 against already-built binaries; rebuilding from source needs the fetches and
 configure/make commands quoted above. Check: vuln ASan `WRITE of size 9968`
 at `librist.c:230`, fixed and safe clean.
+
+## W4 — wire-driven control transfer and benign command (2026-11-23)
+
+W3 left one question open: is the overwritten pointer merely evidence of
+corruption, or does the consumer actually use a wire-chosen value? It uses
+it. This section records a live, no-debugger command execution through the
+overflow, with its prerequisites stated explicitly.
+
+### What the consumer does with the overflow bytes
+
+With the plain n9.0 build and `MALLOC_MMAP_THRESHOLD_=16777216` (the W3 brk
+layout), the ring-wrap `memcpy` at `librist.c:230` reaches both the `AVFifo`
+at `buffer+0x800060` and the wrapped librist `URLContext` at
+`buffer+0x8000a0`. Measured from committed W3 evidence
+(`layout-brk-watch-prot2.log`): overflow `dest=0x5555560d0a50`,
+`URLContext=0x5555560d2080`, `prot` field at `dest+0x1638`.
+
+- `evidence/reach-plain.log`: with the uniform 0x5a sender, at the *natural*
+  next `ffurl_read2` (`avio.c:555`) the whole 8-byte `URLContext->prot` reads
+  `0x5a5a5a5a5a5a5a5a`. W3 observed only a low-byte change at the first store;
+  the complete pointer is attacker-controlled by the next dispatch.
+- `evidence/pc-file.log`: a sender whose repeated 8-byte fill equals
+  `&ff_file_protocol` sets `prot` to exactly `0x55555584f5a0` from wire bytes
+  (`New value = ... <ff_file_protocol>`), no debugger write involved.
+- The first natural indirect call is not through `prot->url_read`: it is
+  `h->interrupt_callback.callback(h->interrupt_callback.opaque)`, invoked by
+  `ff_check_interrupt` at `avio.c:520` in `retry_transfer_wrapper`. Both
+  fields are in the same overwritten `URLContext` (`+0x30` and `+0x38`).
+  `evidence/sc-file.log` shows it reached: with a sane `AVFifo` carried in
+  the same payload, RIP entered the wire-chosen address from `avio.c:520`.
+
+### Benign marker and command
+
+`evidence/mc-puts.log`: callback `0x7ffff7a87cc0` (`puts`), opaque
+`0x5555560d20d0`, string carried at `URLContext+0x50`. gdb hit
+`__GI__IO_puts (str=0x5555560d20d0 "FFMPEG2SHELL_WIRE_MARKER\n")` and the
+marker appeared in the receiver output. The FFMIN-fixed build produced 0
+watch hits and 0 markers (`mc-fixed.log`).
+
+`evidence/w4-nogdb-matrix.summary.txt` is the authoritative result: no
+debugger attached, ASLR disabled with `setarch -R` so the lab-measured
+absolute addresses hold, callback `0x7ffff7a58750` (`system`), opaque pointing
+at the URLContext-resident command string, sender `rist_sender_cmd` (SHA-256
+`deca9946…b8ee`). Four sequential cases, each 2200 blocks, 0 sender failures:
+
+| Case | Build / wire | Receiver | Marker side effect |
+|---|---|---|---|
+| ng-v4 | vulnerable, 2200 x 9968, cb=system | `double free or corruption`, rc 134 | `/tmp/ffmpeg2shell-w4-g4` CREATED, mtime 09:30:58Z |
+| ng-f4 | FFMIN-fixed, same wire | rc 124 (timeout) | absent |
+| ng-s4 | vulnerable, 2200 x 512 | rc 124 | absent |
+| ng-n4 | vulnerable, 9968, cb=0 | rc 134 | absent |
+
+The vulnerable process aborts from heap corruption *after* the command ran;
+the side effect is the file, not the exit code. `system()` under gdb is flaky
+because gdb holds the forked shell, so the no-debugger matrix is the evidence
+used here. Full packet captures stay in the local lab tree; replay with
+`live/no-gdb-case.sh`.
+
+### Conditions and grade
+
+Required and measured: local `MALLOC_MMAP_THRESHOLD_=16777216`; ASLR disabled
+with `setarch -R`; PIE and libc absolute addresses measured in this build
+(`ff_file_protocol 0x55555584f5a0`, `ff_async_protocol 0x2fb420`,
+`ff_pipe_protocol 0x2fb4e0`, `ff_librist_protocol 0x2fbea0`, `puts
+0x7ffff7a87cc0`, `system 0x7ffff7a58750`); main-profile unencrypted RIST on
+loopback; ~8 MiB streamed to walk the ring write pointer to the wrap. The
+command is lab-chosen and benign; the callback address is a lab-measured
+absolute value, not a leaked or brute-forced one.
+
+Grade: author-observed rung 5 mechanics at the labeled loopback / no-ASLR /
+brk-layout / known-address scope. No independent witness replay of W4 yet, so
+it is **not ESTABLISHED**; the default-mmap read-only ceiling from W2 remains
+valid. Two earlier script defects were found and corrected: the structured
+sender wrote past a 512-byte `malloc` in one safe case, and an early
+`no-gdb-case.sh` edit dropped the command argument and overrode the callback.
+Those void runs are not evidence and are not cited.
+
