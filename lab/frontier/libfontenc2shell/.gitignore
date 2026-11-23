@@ -7,3 +7,5 @@ realpath/bin-*
 realpath/xlive/fonts/
 realpath/xlive/logs/
 realpath/xlive/xfon-load
+realpath/xlive/fontenc-trace.so
+realpath/xlive/type1fonts/
