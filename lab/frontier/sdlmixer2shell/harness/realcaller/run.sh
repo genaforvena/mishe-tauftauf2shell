@@ -18,7 +18,7 @@ SDLINC="-I$SDLROOT/include -I$SDLROOT/build/include-config-release -I$SDLROOT/bu
 mkdir -p "$HERE/evidence"
 
 (cd "$ROOT" && sha256sum -c PINS.sha256 >/dev/null)
-(cd "$DEPS" && sha256sum -c SDL3.sha256 >/dev/null)
+(cd "$DEPS" && printf '%s  %s\n' '0fc1d23e225e2a098976571bf5d62b6d81e0ae84ff3d82a35a3d19ab04d07e5c' 'SDL3-release-3.2.4.tar.gz' | sha256sum -c - >/dev/null)
 test -f "$SDLLIB/libSDL3.so" || { echo "build SDL3 first (see PROVENANCE.md)" >&2; exit 1; }
 
 gen_driver() { # vuln|fixed
