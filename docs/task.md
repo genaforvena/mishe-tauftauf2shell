@@ -8165,10 +8165,14 @@ resolved clang -O0's rejection as a `param_consumed` layout alias, not a parse
 difference; `real/live-replay.sh` then drove `SQLExecDirect` through unixODBC
 against a fake PG v3 handshake on 127.0.0.1:59432 to the same sink (fixed
 `rc=-1`, safe `rc=0`, `SQLPrepare` alone sends no Parse — all preserved results).
-No real psqlODBC build, driver manager, PostgreSQL server or application SQL
-path, pointer control, chosen-offset control-flow datum, marker, command,
-witness verdict or rung 5; real application reachability UNKNOWN, AV:N and
-CWE-457 stay claim/source-only. Status: `reports/psqlodbc2shell-status.md`.
+Pointer control, a chosen-offset control-flow datum, marker, command,
+witness verdict and rung 5 remain absent. W147 drove the pinned ASan driver
+against a real loopback PostgreSQL 16.4 server (127.0.0.1:59433) with valid
+application SQL `SELECT {fn CONCAT(1,...,16)}` through unixODBC: 3/3 rc 0,
+vuln ASan `WRITE of size 8` at `convert.c:5657`, fixed `rc=-1`, safe `rc=0`;
+the grade stays rungs 1-4 because the OOB values are parser integers and no
+control-flow datum is reached. AV:N and CWE-457 stay claim/source-only.
+Status: `reports/psqlodbc2shell-status.md`.
 
 ## 2026-11-23 09:5xZ — thrift2shell admitted as the 108th route
 
@@ -8246,10 +8250,13 @@ limbs: W2 built both pinned tags with ASan and loaded a crafted many-band TIFF
 (the `BPL=-256` write is the synthetic staged shape; the TIFF-accepted geometry
 has `bpl=-7296`), and W3 drove real region/consumer APIs on a real 8.6 GB buffer
 — `READ of size 160000` in `vips_region_copy` 6144 bytes before the allocation,
-with the decoded-TIFF consumer stall preserved as a negative and the
-negative-offset WRITE still resting on W2. No pointer target, wire, command,
-witness verdict or rung 5; network-service reachability UNKNOWN. Status:
-`reports/libvips2shell-status.md`.
+with the decoded-TIFF consumer stall preserved as a negative. W4 then observed
+a chosen-byte negative-offset WRITE through the exported public API
+`vips_region_paint()` on that real image (ASan `WRITE of size 160000` at
+`region.c:922`, fixed rejects `image: dimension overflow`; clean-archive
+replay rc 0, 21 PASS checks, `RESULT fail=0`). No pointer target, wire,
+command, witness verdict or rung 5; network-service reachability UNKNOWN.
+Status: `reports/libvips2shell-status.md`.
 
 ## 2026-11-23 10:3xZ — jq2shell staged by frontier W146 (not admitted)
 
@@ -8275,7 +8282,9 @@ rung 5; real-pipeline reachability and heap-neighbour identity UNKNOWN.
 Cheapest next experiment: build pinned 1.8.1/1.8.2, drive both advisory
 expressions under ASan, then measure real heap overlap before any pointer
 test. Staging adds no route, wake units, charter or new window; admission and
-witness verdict remain pending.
+witness verdict remain pending. Witness W1 (#2556) later ESTABLISHED rungs
+1-4 at the labeled direct-call scope; the real-build and guard-blocked PoC
+outcomes are recorded in `docs/reproducibility.md`.
 
 ## 2026-11-23 10:5xZ — libfontenc2shell staged by frontier W154 (not admitted)
 
@@ -8323,10 +8332,16 @@ entries (221 total). The pinned full-flag doctor returned rc 0 `GREEN` and
 the live window name to `jq2shell`, and created no window. Grade stays the
 author's: rung 3 gcc+clang ASan `WRITE-48` at pinned `:1191` and `WRITE-3` at
 `:1126`; scoped rung 4 places chosen `0x5a` bytes past the 32-byte and 6-byte
-buffers with gdb readback. No jq build, JSON input, process, socket, wire,
-real allocator study, pointer control, command, witness verdict or rung 5.
-Status: `reports/jq2shell-status.md`; hand the replay to witness for an
-independent verdict.
+buffers with gdb readback. No real-process overflow, pointer control, command or rung 5. Witness W1
+(#2556) replayed the direct-call lane from a clean archive (`PASS=64 FAIL=0`,
+same trace, 14 pins OK, independent gdb readback) and returned rungs 1-4
+ESTABLISHED at that labeled scope, not rung 5. Real pinned jq 1.8.1/1.8.2
+ASan builds (`lab/frontier/jq2shell/live/real-jq.sh`) confirmed the caller
+frames with small programs; the advisory's full PoCs remain guard-blocked
+(`memory.max=2147483648`, `memory.high=1610612736` against a 2 GiB operand;
+ASan rc=124 after 300 s, no guard bypass attempted). Heap-neighbour overlap,
+real-pipeline reachability and command execution stay UNKNOWN.
+Status: `reports/jq2shell-status.md`.
 
 ## 2026-11-23 11:3xZ — openexr2shell staged by frontier W155 (not admitted)
 

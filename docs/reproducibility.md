@@ -4317,10 +4317,23 @@ first OOB write at 16 arguments (`convert.c:5657`) and explains clang -O0's
 16-arg rejection as a layout alias onto `param_consumed`; W146's
 `real/live-replay.sh` drives `SQLExecDirect` through unixODBC to
 `processParameters:5657` with a fake v3 handshake on 127.0.0.1:59432
-(fixed/safe clean; `SQLPrepare` alone negative). No real PostgreSQL server,
-application SQL path, pointer control, chosen-offset control-flow datum,
-marker, command, witness verdict or rung 5; AV:N and CWE-457 remain
-claim/source-only.
+(fixed/safe clean; `SQLPrepare` alone negative). W147 adds a real-server
+limb: after the ASan trees are built, run
+`bash lab/frontier/psqlodbc2shell/real/pg-replay.sh`. It initializes a lab
+PGDATA under the gitignored `build/w147-pgdata`, binds only 127.0.0.1:59433
+and stops the server on exit; the DSN names the pinned ASan `.so` by absolute
+path and the harness is the W146 unixODBC program. Expect rc 0 with
+`vuln-fn16 WRITE of size 8`, `fixed-fn16 EXECDIRECT rc=-1` (diag `too many
+parameters in the escape function call`) and `vuln-safe EXECDIRECT rc=0`,
+using SQL `SELECT {fn CONCAT(1,...,16)}`. A bare escape as the whole
+statement gave a server syntax error (harness form error, corrected). A
+clean `git archive HEAD` replay at `0a79294` with the driver build tree and
+the plant's PostgreSQL install symlinked in returned exactly those three
+lines, rc 0. Grade unchanged: the OOB stores are integer `SQLLEN` values,
+`F_ExtractOldTo` writes one NUL without a length sweep, and the terminator
+scan cannot be walked past row 16 on the measured layouts (source reasoning,
+not an executed limb). No pointer/control-flow datum, marker, command,
+witness verdict or rung 5; AV:N and CWE-457 remain claim/source-only.
 
 ## 2026-11-23 09:5xZ — thrift2shell admission replay
 
@@ -4420,12 +4433,23 @@ build/source trees symlinked in, rc 0): `vips_region_prepare()` → `bpl=-7296`,
 `vips_extract_area()` → `vips_image_write_to_memory()` → ASan
 `heap-buffer-overflow`, `READ of size 160000`, in `vips_region_copy`
 (`region.c:1090`), 6144 bytes before the live allocation; the decoded-TIFF
-consumer stalls (>180 s) as a preserved negative. Grade stays rungs 1-4: W3 is
-a negative-offset READ through real consumer APIs; the negative-offset WRITE
-still rests on the W2 direct call. No pointer target, process, socket, wire,
-command, marker side effect, witness verdict or rung 5. The advisory's attack
-vector is local and RCE is explicitly unproven there; downstream
-network-service reachability is UNKNOWN.
+consumer stalls (>180 s) as a preserved negative. W4 adds the chosen-byte
+negative-offset WRITE through the exported public API `vips_region_paint()`:
+the same `real/run-consumer.sh` now also runs a `paint` mode on that real
+image (`vips_region_prepare({0,0,4,2})`, then `vips_region_paint(reg,&r,0x5a)`),
+expecting `PAINT_PREPARE=0`, `bpl=-7296 lskip=18446744073709544320`,
+`PAINT_CALL value=0x5a wd=160000`, ASan `WRITE of size 160000` at
+`vips_region_paint .../region.c:922`, the first poisoned byte 6144 before the
+live 8,589,920,000-byte allocation, and fixed `PREPARE=ERR msg=image:
+dimension overflow` with no ASan report. A clean `git archive HEAD` replay at
+`22278cb` with the gitignored build/source trees symlinked in returned rc 0,
+21 PASS checks and `RESULT fail=0`; the report's "23/23" label overcounts the
+script's 21 `check`/`absent` assertions by two — use the observed count.
+Grade stays rungs 1-4: W3/W4 are negative-offset READ/WRITE through real
+consumer APIs; no pointer target, process, socket, wire, command, marker
+side effect, witness verdict or rung 5. The advisory's attack vector is
+local and RCE is explicitly unproven there; downstream network-service
+reachability is UNKNOWN.
 
 ## 2026-11-23 10:3xZ — jq2shell staged by frontier W146 (not admitted)
 
@@ -4438,17 +4462,20 @@ CVE-2026-32316 / GHSA-q3h9-m34w-h76f (published 2026-04-13, High 8.2,
 `reports/frontier-jq2shell.md`; byte-exact pins and tag refs:
 `lab/frontier/jq2shell/PINS.sha256`; provenance and preserved negatives:
 `lab/frontier/jq2shell/PROVENANCE.md`. A two-pane window (inner socket index
-114, `jq2shell`) is claimed in the brief, but no route, charter admission or
-witness verdict exists; staging adds no omp-only route, wake units, charter,
-presentation entry or new window.
+114, `jq2shell`) is claimed in the brief; at staging there was no route,
+charter admission or witness verdict, and staging added no omp-only route,
+wake units, charter, presentation entry or new window. The 11:2xZ admission
+and W1 (#2556) verdict are recorded below.
 
 No upstream fetch is needed at replay time: both tarballs, the extracted
 pinned `jv.c`/`jv.h`, the fix patch, four slices, two generated drivers and
 eight gcc/clang plain/ASan binaries are committed under
 `lab/frontier/jq2shell/`. The real-jq lane's tarball extractions and
-autotools builds are ignored by `lab/frontier/jq2shell/build/`; its runner,
-pin check and small evidence logs are tracked; only `.mishe-tauftauf/`,
-`lab/build/` and `lab/src/` are otherwise generically ignored. `run.sh`
+autotools builds are ignored by `lab/frontier/jq2shell/build/`, its raw gdb
+transcripts by `lab/frontier/jq2shell/live/evidence/*.raw` (regenerate with
+`bash lab/frontier/jq2shell/live/real-jq.sh`); its runner, pin check and
+small normalized evidence logs stay tracked, as do the generic
+`.mishe-tauftauf/`, `lab/build/` and `lab/src/` ignores. `run.sh`
 re-extracts `jvp_string_copy_replace_bad()` (vuln
 lines 1113-1134 / fixed 1112-1138) and `jvp_string_append()` (vuln 1174-1198 /
 fixed 1178-1206) under `#line` directives and rebuilds the drivers and
