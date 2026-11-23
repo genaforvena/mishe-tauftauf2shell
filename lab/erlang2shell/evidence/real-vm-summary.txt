@@ -1,0 +1,13 @@
+MODE=opt ARGS= RC=0
+small_80000000 RC=badarg
+small_fffffffe RC=badarg
+forged_compressed RC=badarg
+safe_positive_3 RC=ok TERM={1,2,3}
+MODE=asan ARGS=-emu_type asan -emu_flavor emu RC=0
+small_80000000 RC=badarg
+small_fffffffe RC=badarg
+forged_compressed RC=badarg
+safe_positive_3 RC=ok TERM={1,2,3}
+--- asan reports ---
+### /home/mesh-home/mishe-tauftauf2shell/lab/erlang2shell/evidence/real-vm-asan.out
+(clean: no ASan report)

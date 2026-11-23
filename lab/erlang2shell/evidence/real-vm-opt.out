@@ -1,0 +1,4 @@
+small_80000000 RC=badarg
+small_fffffffe RC=badarg
+forged_compressed RC=badarg
+safe_positive_3 RC=ok TERM={1,2,3}
