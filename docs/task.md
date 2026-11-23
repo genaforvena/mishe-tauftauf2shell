@@ -7601,3 +7601,32 @@ offsets 17/24/33/40/63 plus a chosen saved-RIP byte under gdb; fix and 2.21
 slices and RFC-conformant input clean. No live `radvdump`, raw socket,
 IPv6 neighbour or RA, no ROP chain, command, witness verdict or rung 5.
 Status: `reports/radvdump2shell-status.md`.
+
+## 2026-11-23 07:0xZ — fluentbit2shell admitted as the 105th route
+
+Frontier W141 staged Fluent Bit CVE-2026-61674 / GHSA-jrp8-r9hx-gf73 in
+commits `d695504` and `0bcddf8`: the server-controlled `PONG[2]` reason in a
+Secure-Forward exchange is copied by the verbatim pinned
+`secure_forward_pong()` into a 32-byte stack `char msg[32]` without a type or
+length gate (`forward.c.47db630c:567`). Affected `>= 0.11.0, < 5.0.8`, fixed
+in 5.0.8 by `45486556`; the vulnerable parent and v5.0.7 blobs and the fix
+and v5.0.8 blobs are byte-identical with SHA-256 pins. Brief:
+`reports/frontier-fluentbit2shell.md`; pins, four verbatim slices, harness
+and raw evidence: `lab/frontier/fluentbit2shell/PROVENANCE.md`. Operator
+replay from `git archive HEAD lab/frontier/fluentbit2shell` in a fresh `/tmp`
+returned rc 0, `PASS=65 FAIL=0` and trace
+`35e7c470871e94379158696aa6899f13db4413b61153d53c4df6296f04061d96`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route as the 105th
+role, minted the path/debounce/slice units with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (211 total). The pinned full-flag doctor returned rc 0 `GREEN`, the
+doctor service was restarted to rc 0, and `check-omp-only.py` returned GREEN
+with 105 declared roles. The two-pane window 109 and its registry entry were
+already live, so no window was created.
+Grade stays the author's: rung 3 ASan `WRITE of size 1000` at pinned line 567
+with gcc and clang, scoped rung 4 chosen bytes at offsets 0/17/24/33/40/48/
+56/63 plus a chosen saved-RIP byte under gdb at line 568; fix, v5.0.8 and
+safe-input slices clean. No real Fluent Bit process, socket, TLS/SRP
+handshake or PONG wire exchange, no canary, ROP chain, command, witness
+verdict or rung 5. Status: `reports/fluentbit2shell-status.md`.

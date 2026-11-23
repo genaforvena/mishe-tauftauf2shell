@@ -3314,3 +3314,40 @@ and `print_preferences`; plain builds use `-O0 -g -fno-stack-protector`
 because Ubuntu's default stack protector aborts before observation. There is
 no live `radvdump`, raw socket, IPv6 neighbour or RA, no ROP chain, pointer
 control beyond one saved-RIP byte, command, witness verdict or rung 5.
+
+## 2026-11-23 07:0xZ — fluentbit2shell
+
+CVE-2026-61674 / GHSA-jrp8-r9hx-gf73, Fluent Bit `>= 0.11.0, < 5.0.8`, fixed
+in 5.0.8 by `45486556`. Claim URLs, the pinned blobs (vulnerable `47db630c`
+and `v5.0.7` identical, fix `45486556` and `v5.0.8` identical), the fix patch,
+the four verbatim `secure_forward_pong()` slices and the raw evidence are in
+`lab/frontier/fluentbit2shell/PROVENANCE.md`. The brief is
+`reports/frontier-fluentbit2shell.md`; status is
+`reports/fluentbit2shell-status.md`. `harness/run.sh` re-extracts each complete
+function body from the pinned blobs on every run under `#line` directives,
+checks a 6-file source manifest and a 12-file harness manifest, builds plain
+and ASan variants with gcc and clang, and drives rungs 1–4. No daemon,
+listener, socket, TLS handshake or off-loopback probe is used.
+
+```
+T=$(mktemp -d /tmp/fluentbit2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/fluentbit2shell | tar -x -C "$T"
+bash "$T/lab/frontier/fluentbit2shell/harness/run.sh"
+```
+
+Expect rc 0, `PASS=65 FAIL=0` and
+`TRACE_SHA256=35e7c470871e94379158696aa6899f13db4413b61153d53c4df6296f04061d96`.
+ASan on the vulnerable slice reports `stack-buffer-overflow`, `WRITE of size
+1000` at pinned `forward.c.47db630c:567` in `secure_forward_pong`, with gcc
+and clang in agreement; the fix-commit and v5.0.8 slices reject the 1000-byte
+reason and NUL-terminate at byte 31, and a 4-byte reason is clean on all
+seven plain/sanitizer variants. The plain build places chosen bytes at copy
+offsets 0/17/24/33/40/48/56/63 and gdb reads
+`saved rip = 0x414141414141417b` at pinned line 568 before the fault at line
+574.
+
+Boundaries: the function is direct-called with stubbed msgpack and flb
+plumbing; plain builds use `-O0 -g -fno-stack-protector` because Ubuntu's
+default stack protector aborts before observation. There is no real Fluent
+Bit process, socket, TLS/SRP handshake, HELO/PONG wire exchange, canary, ROP
+chain, pointer redirect, command, witness verdict or rung 5.
