@@ -1,0 +1,37 @@
+[rist @ 0x605fa89ba040] Starting in Main Profile Mode
+[rist @ 0x605fa89ba040] RIST Receiver Library version:a911bee 
+[rist @ 0x605fa89ba040] Starting in receiver mode
+[rist @ 0x605fa89ba040] Encryption is disabled for this peer
+[rist @ 0x605fa89ba040] URL parsed successfully: Host 0.0.0.0, Port 5004
+[rist @ 0x605fa89ba040] Starting in URL listening mode (socket# 3)
+[rist @ 0x605fa89ba040] Configured the starting socket receive buffer size to 419430 Bytes.
+[rist @ 0x605fa89ba040] Configured the starting socket send buffer size to 419430 Bytes.
+[rist @ 0x605fa89ba040] Peer cname is mesh-home
+[rist @ 0x605fa89ba040] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+[rist @ 0x605fa89ba040] New peer with id #0 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x605fa89ba040] Initialized Receiver Peer, listening mode ...
+[rist @ 0x605fa89ba040] Active Peer Information, IP:Port => 0.0.0.0:5004 (1), id: 1, ports: 5004->1969
+[rist @ 0x605fa89ba040] Starting receiver protocol loop with 5 ms timer
+Input #0, data, from 'async:rist://@:5004':
+  Duration: N/A, start: 0.000000, bitrate: N/A
+  Stream #0:0: Data: none
+Unsupported codec with id 0 for input stream 0
+Processing read interval id:0 start:N/A end:N/A
+[rist @ 0x605fa89ba040] New peer with id #2 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x605fa89ba040] Enabling keepalive for peer 2
+[rist @ 0x605fa89ba040] New keepalive received. MAC: 34:5a:60:7c:10:21 X: 0 R: 0 B: 1 A: 0 P: 0 E: 1 L: 0: N: 1 D: 1 T: 0 V: 0: J: 1 F: 0
+[rist @ 0x605fa89ba040] New RTCP peer connecting, flow_id 3919700130, peer_id 2, ports 0 <- 7133
+[rist @ 0x605fa89ba040] Updating peer virt dst port to match remote source port: 32768
+[rist @ 0x605fa89ba040] Peer 2 receiver name is now: mesh-home
+[rist @ 0x605fa89ba040] FLOW #3919700130 created (short=1)
+[rist @ 0x605fa89ba040] Peer with id #2 associated with flow #3919700130
+[rist @ 0x605fa89ba040] Flow #3919700130 has now 1 peers.
+[rist @ 0x605fa89ba040] Successfully Authenticated peer 2
+[rist @ 0x605fa89ba040] Authenticated RTCP peer 2 and flow 3919700130 for connection with cname: mesh-home
+[rist @ 0x605fa89ba040] Peer 2 receiver with name mesh-home reconnected
+[rist @ 0x605fa89ba040] Failed to set data output thread to RR scheduler with prio of 99
+[rist @ 0x605fa89ba040] Starting data output thread with 5 ms max output jitter
+[rist @ 0x605fa89ba040] Authenticated RTP peer 2 and ssrc 3919700130 for connection with flowid 3919700130
+[rist @ 0x605fa89ba040] Storing first packet seq 0, idx 0, 158266367918013, offset -2085779428261 ms, output_idx 0
+timeout: the monitored command dumped core
+ffprobe rc=139

@@ -1,0 +1,66 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff6ff16c0 (LWP 183813)]
+[New Thread 0x7fffee5ff6c0 (LWP 183814)]
+[New Thread 0x7ffff67f06c0 (LWP 184404)]
+
+Thread 3 "async" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fffee5ff6c0 (LWP 183814)]
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+warning: 660	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+process 183793
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555587000    0x33000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe_g
+      0x555555587000     0x5555557ec000   0x265000    0x33000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe_g
+      0x5555557ec000     0x555555846000    0x5a000   0x298000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe_g
+      0x555555846000     0x55555587f000    0x39000   0x2f2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe_g
+      0x55555587f000     0x555555880000     0x1000   0x32b000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe_g
+      0x555555880000     0x5555558cd000    0x4d000        0x0  rw-p   
+      0x5555558cd000     0x5555558ee000    0x21000        0x0  rw-p   [heap]
+      0x7fffe0000000     0x7fffe0021000    0x21000        0x0  rw-p   
+      0x7fffe0021000     0x7fffe4000000  0x3fdf000        0x0  ---p   
+      0x7fffe8000000     0x7fffe8021000    0x21000        0x0  rw-p   
+      0x7fffe8021000     0x7fffec000000  0x3fdf000        0x0  ---p   
+      0x7fffeddff000     0x7fffede00000     0x1000        0x0  ---p   
+      0x7fffede00000     0x7fffee600000   0x800000        0x0  rw-p   
+      0x7ffff0000000     0x7ffff034c000   0x34c000        0x0  rw-p   
+      0x7ffff034c000     0x7ffff4000000  0x3cb4000        0x0  ---p   
+      0x7ffff5ff0000     0x7ffff5ff1000     0x1000        0x0  ---p   
+      0x7ffff5ff1000     0x7ffff67f1000   0x800000        0x0  rw-p   
+      0x7ffff67f1000     0x7ffff67f2000     0x1000        0x0  ---p   
+      0x7ffff67f2000     0x7ffff6ff2000   0x800000        0x0  rw-p   
+      0x7ffff6ff2000     0x7ffff7a00000   0xa0e000        0x0  rw-p   
+      0x7ffff7a00000     0x7ffff7a28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7a28000     0x7ffff7bb1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7bb1000     0x7ffff7c00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c00000     0x7ffff7c04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c04000     0x7ffff7c06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c06000     0x7ffff7c13000     0xd000        0x0  rw-p   
+      0x7ffff7d08000     0x7ffff7d8b000    0x83000        0x0  rw-p   
+      0x7ffff7d8b000     0x7ffff7d96000     0xb000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7d96000     0x7ffff7e87000    0xf1000     0xb000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7e87000     0x7ffff7eb5000    0x2e000    0xfc000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7eb5000     0x7ffff7ebb000     0x6000   0x12a000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7ebb000     0x7ffff7ebc000     0x1000   0x130000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7ebc000     0x7ffff7ebf000     0x3000        0x0  rw-p   
+      0x7ffff7ebf000     0x7ffff7ecf000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7ecf000     0x7ffff7f4e000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f4e000     0x7ffff7fa6000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7fa6000     0x7ffff7fa7000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7fa7000     0x7ffff7fa8000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7fbd000     0x7ffff7fbf000     0x2000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+#1  0x00005555555ee7b9 in memcpy (__len=<optimized out>, __src=<optimized out>, __dest=0x7ffff79fda80) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  librist_read (h=<optimized out>, buf=0x7ffff79fda80 'Z' <repeats 200 times>..., size=9968) at libavformat/librist.c:230
+#3  0x00005555555ca498 in retry_transfer_wrapper (cbuf=<optimized out>, read=<optimized out>, size_min=<optimized out>, size=<optimized out>, buf=<optimized out>, h=<optimized out>) at libavformat/avio.c:522

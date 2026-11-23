@@ -8,4 +8,7 @@ config-asan.log
 build-asan.log
 build-fixed-live.log
 build-restore.log
+plain/
+plain-config.log
+plain-build.log
 rist_sender_live

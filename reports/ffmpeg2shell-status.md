@@ -102,3 +102,13 @@ also caps payloads at 9968 bytes, four below FFmpeg's 9972 receive gate. The
 frontier's 9972-vs-4096 overflow is a harness model of the intended window.
 Still not claimed: pointer control, command, marker side effect, useful
 neighbour mapping, or an independent witness verdict on this live work.
+
+Plain-build ceiling (same host, 2026-11-23 08:14Z): a non-ASan FFmpeg n9.0
+build driven with the identical 2200 x 9968 loopback stream exits SIGSEGV
+(`rc=139`) at the ring wrap. Under gdb the faulting `memcpy` has
+`buf=0x7ffff79fda80` and length 9968; the write crosses the end of an
+anonymous `rw-p` region at `0x7ffff7a00000`, where libc is mapped `r--p`.
+No writable adjacent object is reachable at the wrap on this build, so
+pointer control or a benign marker through this path stays structurally
+blocked; other allocator/map orders were not measured. Logs:
+`lab/frontier/ffmpeg2shell/live/evidence/live-plain-*.log`.

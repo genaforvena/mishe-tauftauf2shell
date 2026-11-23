@@ -127,6 +127,23 @@ for 4096 bytes, and the live ring holds the attacker's bytes well past that
 window. This is placement in a real consumer's memory, not in the harness's
 20000-byte sink. It is still byte placement, not a pointer or a command.
 
+## Plain-build structural ceiling (host-specific negative)
+
+A second FFmpeg n9.0 build without ASan (`live/plain/src`, same configure
+minus `--toolchain=clang-asan`) was driven with the identical 2200 x 9968
+loopback stream. It exits SIGSEGV (`rc=139`,
+`live/evidence/live-plain-sigsegv.log`) at the wrap. Under gdb
+(`live-plain-gdb-dest.log`, `live-plain-gdb-mappings.log`) the fault is in
+`__memcpy_avx_unaligned_erms`, called from `memcpy` at
+`libavformat/librist.c:230` with `buf=0x7ffff79fda80` and length 9968. The
+write crosses the end of an anonymous `rw-p` region at `0x7ffff7a00000`, where
+`/usr/lib/x86_64-linux-gnu/libc.so.6` is mapped `r--p`; the first bytes past
+the ring hit a read-only mapping and fault before any writable neighbour can
+be reached. On this host and build the wrap path offers no adjacent writable
+object to groom, so pointer control or a benign marker through it is
+structurally blocked. Other glibc versions, allocator states or map orders
+were not measured; this is a negative for the tested build only.
+
 ## Ceiling / not claimed
 
 - No pointer control, ROP, function-pointer overwrite, chosen-address write

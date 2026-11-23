@@ -1,0 +1,26 @@
+Function "__memcpy_avx_unaligned_erms" not defined.
+Make breakpoint pending on future shared library load? (y or [n]) [answered N; input not from terminal]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff6ff16c0 (LWP 176610)]
+[New Thread 0x7ffff67f06c0 (LWP 176611)]
+[New Thread 0x7ffff5fef6c0 (LWP 177710)]
+
+Thread 3 "async" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffff67f06c0 (LWP 176611)]
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+warning: 660	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+MEMCPY_DST=0x7ffff7a00000 SRC=0x7ffff01eaca0 LEN=9968
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+#1  0x00005555555ee7b9 in memcpy (__len=<optimized out>, __src=<optimized out>, __dest=0x7ffff79fda80) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  librist_read (h=<optimized out>, buf=0x7ffff79fda80 'Z' <repeats 200 times>..., size=9968) at libavformat/librist.c:230
+#3  0x00005555555ca498 in retry_transfer_wrapper (cbuf=<optimized out>, read=<optimized out>, size_min=<optimized out>, size=<optimized out>, buf=<optimized out>, h=<optimized out>) at libavformat/avio.c:522
+#4  ffurl_read2 (urlcontext=0x5555558d2040, buf=0x7ffff79fda80 'Z' <repeats 200 times>..., size=5520) at libavformat/avio.c:560
+[Thread 0x7ffff5fef6c0 (LWP 177710) exited]
+[Thread 0x7ffff67f06c0 (LWP 176611) exited]
+[Thread 0x7ffff6ff16c0 (LWP 176610) exited]
+
+Program terminated with signal SIGSEGV, Segmentation fault.
+The program no longer exists.
+/tmp/ffmpeg2shell-live/gdb-plain2.txt:7: Error in sourced command file:
+No stack.
