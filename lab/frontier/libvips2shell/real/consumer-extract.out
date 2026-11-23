@@ -1,0 +1,81 @@
+IMAGE Xsize=107374 Ysize=2 Bands=10000 BandFmt=4 sizeof_line=4294960000 sizeof_image=8589920000 data=0x75b177402810
+EXTRACT=OK Xsize=4 Ysize=2 Bands=10000 sizeof_line=160000
+=================================================================
+==2452424==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x75b177401000 at pc 0x75b37c8fb42e bp 0x75b176dfe740 sp 0x75b176dfdee8
+READ of size 160000 at 0x75b177401000 thread T1
+    #0 0x75b37c8fb42d in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x75b37c28a019 in vips_region_copy ../src/libvips-8.18.2/libvips/iofuncs/region.c:1090
+    #2 0x75b37c29c2b1 in vips_region_prepare_to_generate ../src/libvips-8.18.2/libvips/iofuncs/region.c:1745
+    #3 0x75b37c29d0ec in vips_region_prepare_to ../src/libvips-8.18.2/libvips/iofuncs/region.c:1876
+    #4 0x75b37c2696ab in sink_memory_area_work_fn ../src/libvips-8.18.2/libvips/iofuncs/sinkmemory.c:264
+    #5 0x75b37c21f9f7 in vips_worker_work_unit ../src/libvips-8.18.2/libvips/iofuncs/threadpool.c:368
+    #6 0x75b37c21fb9d in vips_thread_main_loop ../src/libvips-8.18.2/libvips/iofuncs/threadpool.c:393
+    #7 0x75b37c21e01b in vips_threadset_work ../src/libvips-8.18.2/libvips/iofuncs/threadset.c:187
+    #8 0x75b37c21d1fb in vips_thread_run ../src/libvips-8.18.2/libvips/iofuncs/thread.c:108
+    #9 0x75b37bd430e1  (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x8c0e1) (BuildId: 32e71bdc4300e9f407c74441d1b02d962c8af007)
+    #10 0x75b37c85ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #11 0x75b37ba9cb63 in start_thread nptl/pthread_create.c:447
+    #12 0x75b37bb29e8b in clone3 ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+0x75b177401000 is located 6144 bytes before 8589920016-byte region [0x75b177402800,0x75b3773fef10)
+allocated by thread T0 here:
+    #0 0x75b37c8fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x75b37c271913 in vips_tracked_malloc ../src/libvips-8.18.2/libvips/iofuncs/memory.c:314
+    #2 0x75b37c2562e3 in vips_image_write_prepare ../src/libvips-8.18.2/libvips/iofuncs/image.c:3157
+    #3 0x5dc8ec009698 in make_image /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer.c:34
+    #4 0x5dc8ec009c0b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer.c:58
+    #5 0x75b37ba2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x75b37ba2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5dc8ec009424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer-vuln+0x2424) (BuildId: 441f56ec6a51488d622ac9608285337eaaf704dc)
+
+Thread T1 created by T0 here:
+    #0 0x75b37c8f51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x75b37bd72a8e  (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0xbba8e) (BuildId: 32e71bdc4300e9f407c74441d1b02d962c8af007)
+    #2 0x75b37c21d3c2 in vips_g_thread_new ../src/libvips-8.18.2/libvips/iofuncs/thread.c:140
+    #3 0x75b37c21e28a in vips_threadset_add_thread ../src/libvips-8.18.2/libvips/iofuncs/threadset.c:238
+    #4 0x75b37c21e581 in vips_threadset_run ../src/libvips-8.18.2/libvips/iofuncs/threadset.c:320
+    #5 0x75b37c21eae9 in vips_thread_execute ../src/libvips-8.18.2/libvips/iofuncs/threadpool.c:151
+    #6 0x75b37c21fec8 in vips_worker_new ../src/libvips-8.18.2/libvips/iofuncs/threadpool.c:434
+    #7 0x75b37c2209a4 in vips_threadpool_run ../src/libvips-8.18.2/libvips/iofuncs/threadpool.c:654
+    #8 0x75b37c269dd7 in vips_sink_memory ../src/libvips-8.18.2/libvips/iofuncs/sinkmemory.c:335
+    #9 0x75b37c25e8eb in vips_image_generate ../src/libvips-8.18.2/libvips/iofuncs/generate.c:764
+    #10 0x75b37c2548f0 in vips_image_write ../src/libvips-8.18.2/libvips/iofuncs/image.c:2651
+    #11 0x75b37c2558c9 in vips_image_write_to_memory ../src/libvips-8.18.2/libvips/iofuncs/image.c:2910
+    #12 0x5dc8ec00a580 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer.c:103
+    #13 0x75b37ba2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #14 0x75b37ba2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #15 0x5dc8ec009424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer-vuln+0x2424) (BuildId: 441f56ec6a51488d622ac9608285337eaaf704dc)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x75b177400d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75b177400e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75b177400e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75b177400f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75b177400f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x75b177401000:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x75b177401080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x75b177401100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x75b177401180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x75b177401200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x75b177401280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2452424==ABORTING

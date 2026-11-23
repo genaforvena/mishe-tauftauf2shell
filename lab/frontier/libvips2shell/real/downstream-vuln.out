@@ -1,0 +1,33 @@
+
+(process:2206532): VIPS-WARNING **: 11:01:36.541: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.541: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:2206532): VIPS-WARNING **: 11:01:36.548: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.548: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:2206532): VIPS-WARNING **: 11:01:36.548: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.548: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+DOWNLOAD=OK Xsize=107374 Ysize=2 Bands=10000 BandFmt=6 sizeof_line=4294960000 sizeof_image=8589920000
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.549: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:2206532): VIPS-WARNING **: 11:01:36.550: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:2206532): VIPS-WARNING **: 11:01:36.550: Bogus "StripByteCounts" field, ignoring and calculating from imagelength

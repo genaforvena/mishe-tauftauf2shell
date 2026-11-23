@@ -143,13 +143,48 @@ results are in `PROVENANCE.md` under "W2 real pinned builds".
   `VIPS_MAX_COORD=100,000,000`. The many-band geometry is the route that
   passes at default limits.
 - On the vulnerable build, real `vips_region_image()` truncates the 64-bit
-  scanline to `bpl=-256`; a two-line `vips_region_paint_pel()` gives ASan
+  scanline of the **synthetic** staged geometry (`Xsize=1073741760`,
+  `Bands=4`) to `bpl=-256`; a two-line `vips_region_paint_pel()` gives ASan
   `heap-buffer-overflow`, `WRITE of size 16`, at
   `iofuncs/region.c:1004` and address `DATA-0x100`. A placement control
   observes the chosen `0x5a` ink at exactly 256 bytes before the region base.
+  The TIFF-accepted many-band geometry has `bpl=-7296` instead.
 
 Ceiling unchanged in kind: the sink is a direct API call on a setbuf-equivalent
 image with a small lab buffer. No real TIFF pixel decode, no downstream
 operation reaching `paint_pel` from the loader, no pointer or control-flow
 datum, no wire, no command, no marker side effect, no witness. Rung 5 stays
 UNKNOWN and the vendor's "RCE not proven" statement stands.
+
+## 8. W3 addendum — negative-offset access through real consumer APIs
+
+`real/run-consumer.sh` reproduces these controls on the pinned ASan builds;
+12/12 assertions pass. Detail and negative results: `PROVENANCE.md` §W3.
+
+- Structural cause: `VIPS_REGION_LSKIP` is `(size_t) ((R)->bpl)`
+  (`region.h:198`) and `VIPS_REGION_ADDR` adds `(y - valid.top) * LSKIP`
+  (`region.h:220`), so a negative `int bpl` makes line 1 address before the
+  buffer. `vips_region_buffer()` sets `bpl` from the tile width, so only
+  `vips_region_image()` on a memory/mmap image carries the truncated line.
+- `real/consumer.c` creates a real `vips_image_new_memory()` image with the
+  geometry the TIFF loader accepted (`Xsize=107374`, `Ysize=2`,
+  `Bands=10000`, 32-bit samples) and allocates the real 8,589,920,000-byte
+  buffer with `vips_image_write_prepare()`.
+- Public region API: `vips_region_prepare()` reported `bpl=-7296`,
+  `lskip=2^64-7296`; `VIPS_REGION_ADDR(reg,0,1)` faulted with a READ at
+  exactly `DATA-7296`.
+- Public operation: `vips_extract_area()` then `vips_image_write_to_memory()`
+  produced ASan `heap-buffer-overflow`, `READ of size 160000`, in
+  `vips_region_copy` (`region.c:1090`) via `vips_region_prepare_to_generate`
+  and `sink_memory_area_work_fn`, 6144 bytes before the live allocation.
+- Fixed tree: the same geometry is rejected by `vips_image_write_prepare()`
+  with `image: dimension overflow`; no consumer runs.
+- Negative result: `real/downstream.c` on the decoded TIFF stalls in a
+  CPU-bound userspace loop (`vips_region_prepare` never returns within
+  180 s), so no loader-to-consumer observation exists.
+
+Ceiling: rung 4 for a negative-offset **read** on a living libvips buffer
+through a real operation. The negative-offset **write** still rests on the
+W2 direct call. The geometry is set programmatically rather than decoded
+from the TIFF; no pointer or control-flow datum, wire, command, marker or
+witness verdict. Rung 5 remains UNKNOWN; the vendor's RCE disclaimer stands.

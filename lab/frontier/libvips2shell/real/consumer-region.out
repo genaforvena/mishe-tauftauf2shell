@@ -1,0 +1,14 @@
+IMAGE Xsize=107374 Ysize=2 Bands=10000 BandFmt=4 sizeof_line=4294960000 sizeof_image=8589920000 data=0x7698d0002810
+REGION_PREPARE=0 data=0x7698d0002810 bpl=-7296 lskip=18446744073709544320 valid={0,0,4,2} msg=
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2452420==ERROR: AddressSanitizer: SEGV on unknown address 0x7698d0000b90 (pc 0x5b8b8b378212 bp 0x7ffca493eef0 sp 0x7ffca493edd0 T0)
+==2452420==The signal is caused by a READ memory access.
+    #0 0x5b8b8b378212 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer.c:82
+    #1 0x769ad482a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #2 0x769ad482a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #3 0x5b8b8b377424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer-vuln+0x2424) (BuildId: 441f56ec6a51488d622ac9608285337eaaf704dc)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/consumer.c:82 in main
+==2452420==ABORTING

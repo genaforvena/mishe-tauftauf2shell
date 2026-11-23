@@ -164,3 +164,60 @@ decode, no downstream operation reaching `paint_pel` from the loader, no
 pointer/control-flow datum, no mmap-grooming study, no socket/wire, no
 command, no marker side effect and no witness verdict. Rung 5 remains
 UNKNOWN; `0x5a` bytes are still not execution.
+
+## W3 real-consumer path (2026-11-23 target mind)
+
+### Structural map
+
+`VIPS_REGION_LSKIP(R)` is `(size_t) ((R)->bpl)` (pinned `region.h:198`) and
+`VIPS_REGION_ADDR` adds `((y) - valid.top) * LSKIP` (pinned `region.h:220`),
+so a negative `int bpl` makes line 1 and later address before the buffer.
+In-tree callers of `vips_region_paint_pel()` on output regions are
+`embed.c:297` (EXTEND_BACKGROUND borders), `insert.c:211`, `mapim.c:376` and
+`affine.c:314`. `vips_region_buffer()` (pinned `region.c:530`) sets `bpl`
+from the tile width, so generated/partial output images do **not** carry the
+truncated line size; only `vips_region_image()` (pinned `region.c:637`) on a
+memory or mmap image does. The loader's full memory image is therefore the
+path to the bug, not an embed output tile.
+
+### Negative result: consumer on the decoded TIFF
+
+`real/downstream.c` loads `manyband.tif` through the real loader and calls
+`vips_region_prepare()` + `VIPS_REGION_ADDR(reg,0,1)` on that image. The load
+succeeds (`DOWNLOAD=OK ... sizeof_line=4294960000`), but the consumer never
+returns within 180 s and prints no `REGION_PREPARE` line. A 15 s `strace -c`
+(`real/diag-strace.txt`) accounted for only 0.01 s of syscalls (226 reads,
+427 mmaps): the stall is CPU-bound in userspace. An ASan SIGABRT stack
+capture also stalled during symbolisation. No region access to decoded
+TIFF pixels was observed. Preserved as a negative result; do not claim a
+loader-to-consumer observation.
+
+### Positive result: real libvips buffer and real consumer
+
+`real/consumer.c` builds a real `vips_image_new_memory()` image with the
+geometry the real TIFF loader accepted (`Xsize=107374`, `Ysize=2`,
+`Bands=10000`, `VIPS_FORMAT_UINT`), allocates the real 8,589,920,000-byte
+buffer with `vips_image_write_prepare()`, and drives public APIs under ASan:
+
+- `region` mode: `vips_region_prepare()` reported `bpl=-7296`,
+  `lskip=18446744073709544320`; `VIPS_REGION_ADDR(reg,0,1)` faulted with a
+  READ SEGV at exactly `DATA-7296` (`real/consumer-region.out`).
+- `extract` mode: `vips_extract_area(im,&out,0,0,4,2)` followed by
+  `vips_image_write_to_memory(out)` produced ASan `heap-buffer-overflow`,
+  `READ of size 160000`, frame `vips_region_copy ... region.c:1090`, entered
+  via `vips_region_prepare_to_generate` (`region.c:1745`) and
+  `sink_memory_area_work_fn` (`sinkmemory.c:264`); the address was 6144
+  bytes before the 8.6 GB allocation made by `vips_image_write_prepare`
+  (`real/consumer-extract.out`).
+- Fixed tree, same geometry: `vips_image_write_prepare()` returned
+  `image: dimension overflow`; no consumer ran and no ASan error occurred
+  (`real/consumer-fixed-extract.out`, rc 0).
+
+`real/run-consumer.sh` rebuilds both probes and checks 12 assertions;
+`RESULT fail=0` at W3. The consumer is a real libvips operation on a real
+allocation, but the geometry is set programmatically rather than decoded
+from the TIFF, and the observed fault is a READ, not a write. The
+negative-offset WRITE still rests on the W2 direct call. No pointer, saved
+return address, control-flow datum, wire, command, marker or witness verdict
+was observed. Rung 4 on living bytes for the negative-offset address; rung 5
+remains UNKNOWN.

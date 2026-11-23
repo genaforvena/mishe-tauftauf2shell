@@ -11,3 +11,10 @@ build-fixed-asan.log
 real/probe-vuln
 real/probe-fixed
 real/probe
+real/consumer-vuln
+real/consumer-fixed
+real/downstream-vuln
+real/diag-gdb.txt
+real/diag-abrt.out
+real/diag-run.out
+real/embed-vuln
