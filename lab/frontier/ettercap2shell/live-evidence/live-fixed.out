@@ -1,0 +1,28 @@
+
+[1mettercap 0.8.5.1[0m copyright 2001-2026 Ettercap Development Team
+
+Listening on:
+    lo -> 00:00:00:00:00:00
+	  127.0.0.1/255.0.0.0
+	  ::1/128
+
+Privileges dropped to EUID 1000 EGID 1000...
+
+   0 plugins (disabled by configure...)
+  42 protocol dissectors
+  56 ports monitored
+38702 mac vendor fingerprint
+1766 tcp OS fingerprint
+2182 known services
+
+Starting Unified sniffing...
+
+
+Text only Interface activated...
+Hit 'h' for inline help
+
+
+
+ Shutting down ettercap (received SIGNAL: 15)
+
+

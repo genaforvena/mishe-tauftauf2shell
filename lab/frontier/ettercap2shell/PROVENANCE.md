@@ -92,13 +92,19 @@ addresses, source paths and frame numbers.
   the full 43 in a 64-byte object, and is ASan-clean in both; vulnerable
   helper with safe version `0x2a` writes 3 chars and is ASan-clean.
 
-## Cheapest next experiment for the admitted mind
+## Live experiment (done 2026-11-23, ettercap2shell wake 02:57Z)
 
-Build ettercap v0.8.4.1 with ASan on loopback, capture or synthesize a TCP
-8074 Gadu-Gadu `GG_LOGIN50_CMD` packet whose `version` field is
-`0x44000042`, and check whether `dissector_gg()` calls `gg_get_version()`
-before any length rejection (the source calls it at lines 361/385/411, before
-the per-message length guards). If a live ASan report appears, preserve the
-exact pcap, build flags and log; if not, record which guard rejects first and
-do not relabel the direct-call result as a wire result. No pointer control or
-rung 5 is in scope for this candidate.
+The cheapest next experiment was completed on the same day. Real ettercap
+`v0.8.4.1` (HEAD `0dc8409`, `ec_gg.c` hash `a97a0984...` — the same bytes as
+the pinned blob above) and `v0.8.5.1` (HEAD `832524f3`, `a516ce05...`) were
+built with clang ASan. A crafted `GG_LOGIN50_CMD` packet with
+`version=0x44000042` reaches `gg_get_version()` from `dissector_gg:360`
+**before** the length guard at `ec_gg.c:361`, both in offline pcap replay and
+as a live frame injected on loopback. ASan reports `WRITE of size 13`,
+`0 bytes after 30-byte region`, allocation `dissector_gg:356`; extent controls
+give `WRITE of size 12` at line 676. Safe version, wrong type, server-side
+direction and the fixed build are all clean. See
+`reports/ettercap2shell-livedissector.md` and `live-evidence/` for exact build
+flags, pcap bytes, stack traces and the rung labels. Rung 3 now holds on the
+real wire-parsing path; rung 4 remains scoped and partial; no rung 5, AV:A
+unchanged.

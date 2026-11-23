@@ -1,0 +1,75 @@
+
+[1mettercap 0.8.4.1[0m copyright 2001-2026 Ettercap Development Team
+
+Listening on:
+    lo -> 00:00:00:00:00:00
+	  127.0.0.1/255.0.0.0
+	  ::1/128
+
+Privileges dropped to EUID 1000 EGID 1000...
+
+   0 plugins (disabled by configure...)
+  42 protocol dissectors
+  56 ports monitored
+38702 mac vendor fingerprint
+1766 tcp OS fingerprint
+2182 known services
+
+Starting Unified sniffing...
+
+
+Text only Interface activated...
+Hit 'h' for inline help
+
+GG : 192.168.1.10:12345 -> 192.168.1.20:8074 - WELCOME  SEED: 0x00001000 (4096)
+
+
+ Shutting down ettercap (received SIGNAL: 15)
+
+=================================================================
+==538725==ERROR: AddressSanitizer: attempting double-free on 0x503000004660 in thread T0:
+    #0 0x56531a19437a in free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xca37a) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+    #1 0x76c1fa064a42 in pcap_freealldevs (/lib/x86_64-linux-gnu/libpcap.so.0.8+0xda42) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #2 0x76c1fa89e9f3 in capture_freeifs /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_capture.c:199:7
+    #3 0x76c1fa8cf27f in ec_globals_free /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_globals.c:74:4
+    #4 0x76c1f9c47a75 in __run_exit_handlers stdlib/exit.c:108:8
+    #5 0x76c1f9c47bbd in exit stdlib/exit.c:138:3
+    #6 0x76c1fa8bd749 in clean_exit /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_exit.c:61:4
+    #7 0x76c1fa9081d8 in signal_TERM /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_signals.c:235:4
+    #8 0x76c1f9c4532f  (/lib/x86_64-linux-gnu/libc.so.6+0x4532f) (BuildId: 8cebda42d140fc2b09639f8b13a5d5f2e617ef09)
+    #9 0x76c1f9d1b75c in __poll io/../sysdeps/unix/sysv/linux/poll.c:29:10
+    #10 0x56531a13ac3f in poll (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0x70c3f) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+    #11 0x76c1fa8ea7ae in ec_poll_in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_poll.c:56:18
+    #12 0x76c1fa0f45ab in text_interface /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/interfaces/text/ec_text.c:326:11
+    #13 0x76c1fa923aed in ui_start /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_ui.c:63:7
+    #14 0x76c1fa8d7908 in libettercap_ui_start /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_libettercap.c:60:4
+    #15 0x56531a1d772f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_main.c:201:4
+    #16 0x76c1f9c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #17 0x76c1f9c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #18 0x56531a0f97c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0x2f7c4) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+
+0x503000004660 is located 0 bytes inside of 27-byte region [0x503000004660,0x50300000467b)
+freed by thread T0 here:
+    #0 0x56531a19437a in free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xca37a) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+    #1 0x76c1fa89e819 in capture_freeifs /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_capture.c:193:7
+    #2 0x76c1fa8cf27f in ec_globals_free /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_globals.c:74:4
+    #3 0x76c1f9c47a75 in __run_exit_handlers stdlib/exit.c:108:8
+    #4 0x76c1f9c47bbd in exit stdlib/exit.c:138:3
+    #5 0x76c1fa8bd749 in clean_exit /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_exit.c:61:4
+    #6 0x76c1fa9081d8 in signal_TERM /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_signals.c:235:4
+    #7 0x76c1f9c4532f  (/lib/x86_64-linux-gnu/libc.so.6+0x4532f) (BuildId: 8cebda42d140fc2b09639f8b13a5d5f2e617ef09)
+    #8 0x56531a13ac3f in poll (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0x70c3f) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+
+previously allocated by thread T0 here:
+    #0 0x56531a17c31e in strdup (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xb231e) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+    #1 0x76c1fa064092  (/lib/x86_64-linux-gnu/libpcap.so.0.8+0xd092) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #2 0x76c1fa06450b  (/lib/x86_64-linux-gnu/libpcap.so.0.8+0xd50b) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #3 0x76c1fa064ddf in pcap_findalldevs (/lib/x86_64-linux-gnu/libpcap.so.0.8+0xdddf) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #4 0x76c1fa89da69 in capture_getifs /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_capture.c:116:8
+    #5 0x56531a1d6a35 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_main.c:94:4
+    #6 0x76c1f9c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #7 0x76c1f9c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #8 0x56531a0f97c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0x2f7c4) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+
+SUMMARY: AddressSanitizer: double-free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xca37a) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7) in free
+==538725==ABORTING

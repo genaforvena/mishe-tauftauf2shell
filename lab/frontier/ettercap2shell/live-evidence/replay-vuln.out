@@ -1,0 +1,93 @@
+
+[1mettercap 0.8.4.1[0m copyright 2001-2026 Ettercap Development Team
+
+Reading from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/../../gg-vuln.pcap
+Libnet failed IPv4 initialization. Don't send IPv4 packets.
+   0 plugins (disabled by configure...)
+  42 protocol dissectors
+  56 ports monitored
+38702 mac vendor fingerprint
+1766 tcp OS fingerprint
+2182 known services
+
+Starting Unified sniffing...
+
+=================================================================
+==485672==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5030002cf09e at pc 0x63f6296c151e bp 0x77729daf2860 sp 0x77729daf2000
+WRITE of size 13 at 0x5030002cf09e thread T2
+    #0 0x63f6296c151d in strcat (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xb151d) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+    #1 0x7772a3492b06 in gg_get_version /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/dissectors/ec_gg.c:673:4
+    #2 0x7772a348e4bc in dissector_gg /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/dissectors/ec_gg.c:360:4
+    #3 0x7772a340c11e in decode_data /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_decode.c:305:10
+    #4 0x7772a34ee7a7 in decode_tcp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/protocols/ec_tcp.c:295:4
+    #5 0x7772a34e6228 in decode_ip /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/protocols/ec_ip.c:232:4
+    #6 0x7772a34e24d8 in decode_eth /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/protocols/ec_eth.c:81:4
+    #7 0x7772a340aa36 in ec_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_decode.c:187:4
+    #8 0x7772a2be063e  (/lib/x86_64-linux-gnu/libpcap.so.0.8+0x2d63e) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #9 0x7772a2bc18e7 in pcap_loop (/lib/x86_64-linux-gnu/libpcap.so.0.8+0xe8e7) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #10 0x7772a33fc4ad in capture /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_capture.c:90:10
+    #11 0x63f6296d80fc in asan_thread_start(void*) asan_interceptors.cpp.o
+    #12 0x7772a269cb63 in start_thread nptl/pthread_create.c:447:8
+    #13 0x7772a2729e8b in clone3 misc/../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+0x5030002cf09e is located 0 bytes after 30-byte region [0x5030002cf080,0x5030002cf09e)
+allocated by thread T2 here:
+    #0 0x63f6296da7fd in calloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xca7fd) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+    #1 0x7772a348e213 in dissector_gg /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/dissectors/ec_gg.c:356:4
+    #2 0x7772a340c11e in decode_data /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_decode.c:305:10
+    #3 0x7772a34ee7a7 in decode_tcp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/protocols/ec_tcp.c:295:4
+    #4 0x7772a34e6228 in decode_ip /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/protocols/ec_ip.c:232:4
+    #5 0x7772a34e24d8 in decode_eth /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/protocols/ec_eth.c:81:4
+    #6 0x7772a340aa36 in ec_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_decode.c:187:4
+    #7 0x7772a2be063e  (/lib/x86_64-linux-gnu/libpcap.so.0.8+0x2d63e) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #8 0x7772a2bc18e7 in pcap_loop (/lib/x86_64-linux-gnu/libpcap.so.0.8+0xe8e7) (BuildId: 68d38ae78eb5091406d47d7f7beab8634a3c6c64)
+    #9 0x7772a33fc4ad in capture /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_capture.c:90:10
+    #10 0x63f6296d80fc in asan_thread_start(void*) asan_interceptors.cpp.o
+
+Thread T2 created by T0 here:
+    #0 0x63f6296bff85 in pthread_create (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xaff85) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+    #1 0x7772a3480c18 in ec_thread_new_detached /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_threads.c:221:16
+    #2 0x7772a348090f in ec_thread_new /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_threads.c:196:11
+    #3 0x7772a33fc340 in capture_start /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_capture.c:53:4
+    #4 0x7772a346f3b2 in start_unified_sniff /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_sniff_unified.c:62:4
+    #5 0x7772a31c3196 in text_interface /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/interfaces/text/ec_text.c:294:4
+    #6 0x7772a3482aed in ui_start /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_ui.c:63:7
+    #7 0x7772a3436908 in libettercap_ui_start /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_libettercap.c:60:4
+    #8 0x63f62971d72f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/ec_main.c:201:4
+    #9 0x7772a262a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #10 0x7772a262a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #11 0x63f62963f7c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0x2f7c4) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan/src/ettercap+0xb151d) (BuildId: 567139cc38bb64e768b3f95fe5c0ab774d8618c7) in strcat
+Shadow bytes around the buggy address:
+  0x5030002cee00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cee80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cef00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cef80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fd fd
+  0x5030002cf000: fd fd fa fa fd fd fd fd fa fa 00 00 00 01 fa fa
+=>0x5030002cf080: 00 00 00[06]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cf100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cf180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cf200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cf280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5030002cf300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==485672==ABORTING
