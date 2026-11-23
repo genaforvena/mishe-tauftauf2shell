@@ -1,0 +1,125 @@
+VARIANT=vuln-47db630c MODE=arith ATTACK_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+VARIANT=vuln-47db630c MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+FLB_ERROR_CALLS=1 MSG_BYTE31=41 OBS_OFFSET_0=41 OBS_OFFSET_17=5a OBS_OFFSET_24=7a OBS_OFFSET_33=3c OBS_OFFSET_40=7b OBS_OFFSET_48=42 OBS_OFFSET_56=7b OBS_OFFSET_63=41
+VARIANT=fixed-45486556 MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+FLB_ERROR_CALLS=1 MSG_BYTE31=00
+RET=-1 ERROR_CALLS=1 REASON_SIZE=1000
+VARIANT=release-v5.0.7 MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+FLB_ERROR_CALLS=1 MSG_BYTE31=41 OBS_OFFSET_0=41 OBS_OFFSET_17=5a OBS_OFFSET_24=7a OBS_OFFSET_33=3c OBS_OFFSET_40=7b OBS_OFFSET_48=42 OBS_OFFSET_56=7b OBS_OFFSET_63=41
+VARIANT=release-v5.0.8 MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+FLB_ERROR_CALLS=1 MSG_BYTE31=00
+RET=-1 ERROR_CALLS=1 REASON_SIZE=1000
+VARIANT=vuln-47db630c MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+=================================================================
+==PID==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 1000 at 0xADDR thread T0
+    #FRAME 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #FRAME 0xADDR in secure_forward_pong HARNESS/forward.c.47db630c:567
+    #FRAME 0xADDR in main HARNESS/driver.c:193
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-gcc+0xADDR) (BuildId: BUILDID)
+
+Address 0xADDR is located in stack of thread T0 at offset 288 in frame
+    #FRAME 0xADDR in secure_forward_pong HARNESS/forward.c.47db630c:524
+
+  This frame has 5 object(s):
+    [32, 40) 'off' (line 527)
+    [64, 88) 'root' (line 529)
+    [128, 152) 'o' (line 530)
+    [192, 224) 'result' (line 528)
+    [256, 288) 'msg' (line 526) <== Memory access at offset 288 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: f1 f1 f1 f1 00 f2 f2 f2 00 00 00 f2 f2 f2 f2 f2
+  0xADDR: 00 00 00 f2 f2 f2 f2 f2 00 00 00 00 f2 f2 f2 f2
+=>0xADDR: 00 00 00 00[f3]f3 f3 f3 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+VARIANT=vuln-47db630c MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+=================================================================
+==PID==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 1000 at 0xADDR thread T0
+    #FRAME 0xADDR in __asan_memcpy (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+    #FRAME 0xADDR in secure_forward_pong HARNESS/forward.c.47db630c:567:9
+    #FRAME 0xADDR in main HARNESS/driver.c:193:11
+    #FRAME 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #FRAME 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+
+Address 0xADDR is located in stack of thread T0 at offset 64 in frame
+    #FRAME 0xADDR in secure_forward_pong HARNESS/forward.c.47db630c:524
+
+  This frame has 3 object(s):
+    [32, 64) 'msg' (line 526)
+    [96, 104) 'off' (line 527) <== Memory access at offset 64 partially underflows this variable
+    [128, 160) 'result' (line 528) <== Memory access at offset 64 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR: f1 f1 f1 f1 00 00 00 00[f2]f2 f2 f2 00 f2 f2 f2
+  0xADDR: 00 00 00 00 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+VARIANT=fixed-45486556 MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+FLB_ERROR_CALLS=1 MSG_BYTE31=00
+RET=-1 ERROR_CALLS=1 REASON_SIZE=1000
+VARIANT=release-v5.0.8 MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+FLB_ERROR_CALLS=1 MSG_BYTE31=00
+RET=-1 ERROR_CALLS=1 REASON_SIZE=1000

