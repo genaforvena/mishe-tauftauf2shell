@@ -47,7 +47,8 @@ the exact full-flag sync — no duplicate window, no hand-cleared signal.
   at `cmdline` offsets 0..7 under gcc and clang; fixed rejects with
   `cmdline_len=0`; a 40-byte copy into the 15-byte VLA gives ASan
   `dynamic-stack-buffer-overflow`.
-- Grade: rungs 1/2 and 3 at **real-daemon wire scope**; rung 4 chosen bytes at
+- Grade at admission (superseded by W135/W136; final grade at the end of this
+  file): rungs 1/2 and 3 at **real-daemon wire scope**; rung 4 chosen bytes at
   chosen offsets at **verbatim-harness scope only**. No daemon-side readback,
   allocator grooming, pointer control, function-pointer overwrite, marker,
   command or rung 5. The attacker must hold the configured shared key (or use
@@ -509,9 +510,10 @@ precedes the abort. gdb's vfork detach line is independent corroboration that
 
 Controls and replay. `bash lab/frontier/tacplus2shell/harness/run_rce.sh`:
 vulnerable pin marker present, eval_args/write/destructor/command lines
-observed, 18-byte trigger reply; fixed `d8493e0` with identical wire input
-never enters `eval_args`, replies 57 bytes, no marker; vulnerable with no
-prime has no chosen source, replies 18 bytes, no marker. 14 PASS / 0 FAIL in
+observed, no trigger reply (daemon aborts after the side effect); fixed
+`d8493e0` with identical wire input never enters `eval_args`, replies 57
+bytes, no marker; vulnerable with no prime has no chosen source, replies 18
+bytes, no marker. 14 PASS / 0 FAIL in
 two byte-identical replays (`harness/rce-r1.txt`, `harness/rce-r2.txt`);
 normalized evidence hashes vulnerable `d316b431f00ce51c488fc79391b687afdea
 16fbfa596e3ccbb612e12fb539436`, fixed
@@ -529,13 +531,50 @@ shell before the three cases, and carries the measured addresses in wire data.
 This is still a build/config-scoped observation with gdb-measured addresses,
 not an attacker-side address leak.
 
-Grade: **rung 5 OBSERVED at the labeled build scope** — attacker-controlled
+Grade: **rung 5 ESTABLISHED at the labeled build scope** — attacker-controlled
 wire input makes a live plant-started loopback daemon execute a lab-chosen
 benign command with an observed file side effect, with vulnerable, fixed and
-no-prime controls and two identical replays. Conditions: vulnerable
-`929671c` plain `-O0` build, gdb parent with ASLR off, configured shared key,
-permitted user, cross-packet prime and one AUTHOR trigger. **ESTABLISHED
-requires independent witness replay**, which is outstanding; author replay is
-not acceptance. The advisory's five-connection `system()`/root chain remains
-claim text: this is a different, shorter chain, and no privilege change was
-measured. Rungs 1-4 and all earlier negative results stand unchanged.
+no-prime controls, two identical author replays and an independent witness
+replay from a clean archive (W136 below). Conditions: vulnerable `929671c`
+plain `-O0` build, gdb parent with ASLR off, configured shared key, permitted
+user, cross-packet prime and one AUTHOR trigger. No privilege change was
+measured; the gdb-measured heap/libc addresses are carried in wire data, not
+leaked to the attacker. The advisory's five-connection `system()`/root chain
+remains claim text: this is a different, shorter chain. Rungs 1-4 and all
+earlier negative results stand unchanged.
+
+## W136 independent witness replay — rung 5 ESTABLISHED (2026-11-23 01:58Z)
+
+Witness verdict #2049 (tape 2018 answered) CLOSED at the labeled rung-5 build
+scope. From a clean `git archive` of commit `32b53e9` into `/tmp/w136-tac` with
+no shared-repo writes, the witness hash-verified both pinned source blobs
+(`929671c` `packet.c a0c911f8…`/`author.c bc36763f…`, fixed `d8493e0`
+`packet.c 4f3174de…`/`author.c bc36763f…`; the working-tree hash difference is
+`$Id$` ident expansion only), built both plain binaries itself
+(`./configure --debug --minimum tac_plus-ng mavis && make -j4`, vulnerable
+`82872dcf…`, fixed `5d8844a0…`; digests differ from the author's because of
+the `/tmp` build path), and replayed `run_rce.sh` twice: rc 0, 14 PASS / 0 FAIL
+each time, three normalized hashes exactly `d316b431…` / `88754a15…` /
+`ee3c069a…`, and byte-identical replay files apart from the caller-dependent
+measured heap line (`in=0x5555555fd9e0 mem=0x5555555fd590` vs canonical
+`0x…faf0` / `0x…f6a0`). Its gdb trace showed `EVAL`, `POST14`, `DESTROY
+type=0 count=1 arr=…`, `ARR0 f=0x7ffff7c58750`, `x/s "touch
+/tmp/tacplus-rce-marker"`, `[Detaching after vfork …]` and the expected
+`free()` abort; fixed 57-byte reject/no eval/no marker and no-prime 18-byte
+reply/no marker both held. It confirmed `0x7ffff7c58750` is `__libc_system`
+on this host, gdb's `disable-randomization` default is on, and source-bound
+the chain to `memops.c:239-251`, `packet.c:523,538`, `author.c:141,78`.
+
+Causal control beyond the author's runner: the witness changed only
+`--marker` to `/tmp/w136-causal-marker` in `wire9.py`'s wire args in its
+throwaway `/tmp` tree; the new marker appeared, the default stayed absent,
+and gdb printed `touch /tmp/w136-causal-marker`. `wire9.py` contains no file
+write: the command bytes are assembled by the client and carried in the
+AUTHOR packet. That closes wire control of the command, not a fixed harness
+string. No counterexample or left-over daemon/occupied port was found.
+
+W136 wording NIT (no grade impact), fixed in this report: the vulnerable
+trigger has no reply because the daemon aborts after the side effect; the
+18-byte reply belongs to the no-prime control. The old "18-byte trigger
+reply" phrase in the controls paragraph above is replaced with the observed
+fact.
