@@ -5,8 +5,8 @@ live registered two-pane window (inner socket index 119, name `munt2shell`) all
 exist; seed wall `.mishe-tauftauf/walls/munt2shell.md`, registry entry and
 staging DM #2682 are in place. Independent witness replay (chat #2781) is
 ESTABLISHED at the labeled real-library rungs 1-4, not rung 5; operator
-admission and presentation activation remain owed. No CVE or GHSA number was
-found for this issue: **UNKNOWN**.
+admission and presentation activation remain owed. The issue now carries
+CVE-2026-121941 / GHSA-qw3h-2hqv-29vq (§10); the grade below is unchanged.
 Byte-exact pins and hashes: `lab/frontier/munt2shell/PINS.sha256`; harness
 provenance including stubs, negatives and commands:
 `lab/frontier/munt2shell/PROVENANCE.md`. Frontier owns no further work on this
@@ -34,9 +34,11 @@ target.
   namespaces differ: raw `MidiStreamParser.cpp` at `munt_2_8_3` already contains
   the fix; the vulnerable release tag named by the issue is the **library**
   tag `libmt32emu_2_8_3`. This discrepancy is recorded, not smoothed over.
-- No advisory index entry, CVSS score or CVE identifier was found for this
-  issue in the GitHub advisory database feed; all are UNKNOWN. The issue's
-  write-up link (hackmd) is a claim and was not needed for the mechanism read.
+- Advisory identity (corrected W169, §10): CVE-2026-121941 was published
+  2026-11-04 and maps to GHSA-qw3h-2hqv-29vq. Earlier wakes found no entry
+  and recorded UNKNOWN; that was an observation gap in the feed check, not an
+  absent identifier. The issue's write-up link (hackmd) is a claim and was
+  not needed for the mechanism read.
 
 ## 2. Source-bound mechanism and fix
 
@@ -267,3 +269,41 @@ network input; this host has no `/dev/midi*` devices, Qt5 is unavailable, and
 the measured ALSA event cap is 5572 bytes. Third-party C-API users remain a
 claim. Grade unchanged: real-library rungs 1-4 witness ESTABLISHED, rung 5
 UNKNOWN.
+
+## 10. Advisory record and its limits (W169, 2026-11-23)
+
+The cve.org record for **CVE-2026-121941** is PUBLISHED: CNA VulnCheck,
+reserved 2026-11-04T12:05:50.249Z, published 2026-11-04T12:31:19.851Z,
+updated 2026-11-04T20:18:07.407Z, title "libmt32emu before 2.8.4 Heap Buffer
+Overflow via MidiStreamParserImpl::parseSysex". Its sole problem type is
+CWE-122 (the issue also claims CWE-787 and CWE-131). The affected range is
+libmt32emu from 0 before 2.8.4; the finder credit is HaiND. Scores:
+CVSS 4.0 8.5 HIGH
+`CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N` and
+CVSS 3.1 7.8 HIGH `CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H`. Both score
+the attack vector **LOCAL**. The GitHub Advisory Database maps the same CVE
+to **GHSA-qw3h-2hqv-29vq**, labeled "Unreviewed", with no package listed and
+affected/patched versions shown as Unknown; OSV lists the same ID, CWE-122
+and the `1749f7f` fix commit. Sources:
+<https://cve.org/CVERecord?id=CVE-2026-121941>,
+<https://cveawg.mitre.org/api/cve/CVE-2026-121941>,
+<https://api.osv.dev/v1/vulns/CVE-2026-121941> and
+<https://github.com/advisories/GHSA-qw3h-2hqv-29vq>. The authoritative JSON
+is preserved in `lab/frontier/munt2shell/evidence/` as
+`advisory-CVE-2026-121941.json` (sha256
+`63498b559689d8ba7867473fa13585136e3e03a9714e14e36bb423cd5be909f1`) and
+`advisory-OSV-CVE-2026-121941.json` (sha256
+`a77bc69fc9fcba7bd000cbadfaaf815d61e05fdac030729564c14d9ed28a097a`),
+fetched 2026-11-23T16:56Z. GitHub's advisory API returned HTTP 504 twice,
+so the GHSA facts above come from the advisory page itself, not a saved JSON.
+
+These are advisory *claims*, not lab observations. The description says
+"more than 32768 SysEx data bytes through the mt32emu_parse_stream API via
+MIDI files, ports, or sequencer clients"; no file, port or client was wired
+to a live process here, and the one in-tree sequencer host measured is
+capped at 5572 bytes (§7). CISA's ADP container adds a hackmd reference
+tagged "exploit" and SSVC `Exploitation: poc`, `Automatable: no`,
+`Technical Impact: total`; that metadata is not a reproduction, and no PoC
+bytes, wire input, pointer control or command side effect was measured in
+this plant. The identifier correction does not move the grade: real-library
+rungs 1-4 witness ESTABLISHED, rung 5 UNKNOWN.
