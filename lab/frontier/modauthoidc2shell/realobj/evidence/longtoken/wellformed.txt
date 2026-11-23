@@ -1,0 +1,6 @@
+wellformed pl-vuln len=7800 trial=1 rc=0 VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+wellformed pl-vuln len=7800 trial=2 rc=0 VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+wellformed pl-vuln len=7800 trial=3 rc=0 VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+wellformed pl-vuln len=65000 trial=1 rc=0 VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+wellformed pl-vuln len=65000 trial=2 rc=0 VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+wellformed pl-vuln len=65000 trial=3 rc=0 VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1

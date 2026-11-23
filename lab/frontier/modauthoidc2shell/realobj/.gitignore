@@ -15,3 +15,7 @@ evidence/read-vuln-*.txt
 evidence/run1-console.txt
 evidence/run2-console.txt
 evidence/run3-console.txt
+pl-vuln
+pl-fixed
+pl-release
+al-vuln

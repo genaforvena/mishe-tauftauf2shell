@@ -1,0 +1,10 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555555555563 in oidc_state_cookies_parse_token (r=0x7ffff7fb70a0, c=0x0, cookie=0x7ffff7f62388 "=", currentCookieName=0x0, first=0x0, last=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219
+warning: 219	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536: No such file or directory
+#0  0x0000555555555563 in oidc_state_cookies_parse_token (r=0x7ffff7fb70a0, c=0x0, cookie=0x7ffff7f62388 "=", currentCookieName=0x0, first=0x0, last=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219
+#1  0x0000555555555815 in parse (r=0x7ffff7fb70a0, cookies=0x7ffff7f3f028 "mod_auth_openidc_state_", 'a' <repeats 177 times>...) at driver_long.c:94
+#2  0x00005555555559b4 in do_read (fill=0) at driver_long.c:121
+#3  0x0000555555555ed2 in main (argc=3, argv=0x7fffffffe228) at driver_long.c:190

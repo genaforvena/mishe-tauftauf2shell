@@ -389,3 +389,22 @@ bytes and clean fixed/well-formed controls stand; the availability effect is
 NOT demonstrated on a production allocator. No grade change.
 Raw capture and detail: `full/evidence/w14-buildstack/raw.txt` and
 `full/evidence/w14-buildstack/README.md`.
+
+## Long value-less token faults a non-ASan real-APR process (2026-11-23 W14)
+
+`realobj/probe-long-token.sh` adds `driver_long.c` (driver.c plus
+`MO_TOKEN_LEN` / `MO_TOKEN_EQ` env controls; pinned parser slice unchanged) and
+builds a genuinely non-ASan driver: gcc without `-fsanitize`, system
+APR/APR-util, no libasan in `ldd`. With a value-less token, `pl-vuln` returns
+rc 0 and dispatches in 5/5 trials at 30/7800/16000/20000/24000/28000 bytes,
+is 4/5 faulting at 29000/30000/31000 and 5/5 faulting (rc 139 = SIGSEGV 11)
+at 32000/48000/65000/100000. Fixed (`8017478`) and release (`v2.4.19.4`)
+drivers are rc 0 with `PROCESS_CALLS=0` in 5/5 trials at every length; the
+well-formed `=1` control on the vulnerable slice is 3/3 clean and dispatched
+at 7800 and 65000. `gdb` on the plain 65000 run caught the native SIGSEGV at
+pinned `state.c.4301b536:219` — the NUL **store**, stack `parse` → `do_read`
+→ `main`, no libasan, no preload, no signal shim. This is harness-only
+availability (no full module, listener, socket or wire) and does not upgrade
+W13's full-module claim. Grade unchanged: rung 4 scoped, no chosen byte,
+pointer target, consumer dereference, command or rung 5. Driver sha, raw
+transcripts, gdb trace and limits: `realobj/evidence/longtoken/`.
