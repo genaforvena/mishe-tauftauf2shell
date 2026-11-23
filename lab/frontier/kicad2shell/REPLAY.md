@@ -33,3 +33,17 @@ The archive replay checked both `../PINS.sha256` (4/4) and
 The raw upstream parser files and three verbatim slice hashes are pinned in
 `PINS-realparser.sha256`; provenance and the lab/wx/CFB boundary are in
 `PROVENANCE-realparser.md`.
+
+## Real-compound-file replay (2026-11-23 18:18Z wake)
+
+From `lab/frontier/kicad2shell/realcfb/`: `sh run.sh` regenerates the four CFB
+fixtures, verifies them with `olefile` 0.46 (`ALL_FIXTURES_OK`), checks both
+pin files (5/5 and 4/4), then builds 8 binaries from the same verbatim upstream
+slices plus a real header → DIFAT → FAT → directory → miniFAT → mini-stream
+walk. `sh check.sh` runs 32 invocations and 38 assertions. Two in-tree runs
+and a clean-archive replay at commit `455d92e` (`git archive` of
+`lab/frontier/kicad2shell` and `reports/frontier-kicad2shell.md`, 246 archived
+files) gave `PASS=38 FAIL=0` with the same trace hash
+`d46a353639e2d48effa117f7dc3735d48923f094222f1e04a620260f8eafc53c`.
+The earlier harness trace hashes are unchanged. Provenance, the lab/wx/KiCad
+boundary and the preserved fixture defects are in `realcfb/PROVENANCE-realcfb.md`.

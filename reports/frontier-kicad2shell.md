@@ -133,6 +133,8 @@ under ASan. All fixed-slice runs: `rc=0 size=1 first=72 GUARD7=11111111`, clean
 ASan; baseline has no ASan report. `realcfb/check.sh`: **38 PASS / 0 FAIL** on
 two identical runs, trace hash
 `d46a353639e2d48effa117f7dc3735d48923f094222f1e04a620260f8eafc53c`.
+A clean-archive replay at commit `455d92e` (246 files) matched exactly:
+`PASS=38 FAIL=0`, same trace hash; see `REPLAY.md`.
 Fixture/reader defects found and corrected during this lane (mini-stream
 sector padding, directory field offsets, `ENDOFCHAIN` terminal test) are
 recorded in `realcfb/PROVENANCE-realcfb.md`; none changed upstream bytes or the
