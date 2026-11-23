@@ -32,8 +32,9 @@ Admission changes no grade.
   * 2`; with `currlen = 0x7ffffffe` and `len = 2` the product is `0x1_00000000`,
   truncated to 0 and clamped to 32, then two copies write `0x7ffffffe` and 2
   bytes at pinned `jv.c.vuln:1191-1192`. `jvp_string_copy_replace_bad()`
-  computes `uint32_t maxlength = length * 3 + 1`; `length = 0x5555555b`
-  truncates `4294967302` to 6 and the loop at `:1126` writes three bytes per
+  computes `uint32_t maxlength = length * 3 + 1`; `length = 0x55555557`
+  (decimal 1431655767, the harness's value) truncates `4294967302` to 6
+  and the loop at `:1126` writes three bytes per
   invalid UTF-8 byte. The fixed slices use `uint64_t` arithmetic and reject
   both geometries before allocating.
 - Evidence: `lab/frontier/jq2shell/harness/run.sh` regenerates four verbatim
@@ -126,7 +127,7 @@ the same binary returned lengths for `n=10^6` (0.02s), `10^8` (0.46s),
 host guard, not a source claim: `memory.max=2147483648` (2 GiB) and
 `memory.high=1610612736` (1.5 GiB) on this cgroup, while the PoC's first
 operand alone needs a 2 GiB jv string plus allocator shadow. The second
-PoC's wrapped `length=0x5555555b` likewise needs ~1.43 GiB decoded bytes
+PoC's wrapped `length=0x55555557` likewise needs ~1.43 GiB decoded bytes
 from a ~1.9 GiB base64 string. Both exceed the guard; no attempt was made
 to raise or bypass it. This is a negative result, not a successful trigger.
 
@@ -249,3 +250,43 @@ Those attempts are preserved UNKNOWN observations under the unchanged
 byte-identical successful runs above stand as the result. Schedule a replay
 only when the wake slice's baseline memory is low and no peer 1 GiB job is
 running.
+
+## 2026-11-23 14:4xZ — 6-byte geometry has no sub-guard input (lane closed)
+
+Constant correction: the harness passes `1431655767u`
+(`harness/driver-vuln.c:235`), i.e. `0x55555557`;
+`3*1431655767+1 = 4294967302 = 0x1_00000006` truncates to 6. Earlier text
+labelled it `0x5555555b`, which would truncate to 18. The decimal product
+was correct; only the hex label was wrong. Harness source is untouched
+because `harness/driver-*.c` are pinned in `PINS.sha256`.
+
+Analytic closure under the current wake guard (`memory.max=2147483648`,
+`memory.high=1610612736`):
+
+- `jvp_string_copy_replace_bad()` receives `uint32_t length`. Through
+  `jv_string_sized(const char*, int len)` (pinned `jv.c.vuln:1278-1282`),
+  the smallest positive `len` whose product wraps (`len*3+1 >= 2^32`) and
+  truncates to at most 32 is `0x55555555` (1431655765 bytes, product
+  `2^32`, `maxlength=0`). No shorter positive string wraps, and the refcount
+  alias trick cannot help: the function scans a contiguous `data[0..length)`
+  buffer.
+- The jq path observed calling the vulnerable function with raw decoded
+  bytes is `@base64d`: `builtin.c:754-755` allocates `3*len/4` bytes,
+  `:787` calls `jv_string_sized(result, ri)`, and invalid UTF-8 in `result`
+  reaches `jv.c.vuln:1511`. For `ri = 1431655767`, the encoded operand is
+  exactly `477218589*4 = 1908874356` bytes. Both buffers are live at `:787`
+  (`input` is freed only at `:788`): `1908874356 + 1431655767 =
+  3340530123` bytes (3.11 GiB, 1.56x the guard). Aliasing cannot shrink the
+  encoded physical buffer because the decoder reads one contiguous string.
+- jq normalizes invalid UTF-8 at its public string entry points: a raw 0xFF
+  in JSON input, unpaired `\uD800`/`\uDC00` escapes, `implode([55296])` and
+  `@base64d` of `"/w=="` all yielded U+FFFD in the pinned 1.8.1 plain build
+  (`explode` returned `[65533]`). No small jq value can carry the invalid
+  bytes needed by a large `jv_string_sized` call.
+
+Decision: the 6-byte neighbour map is out of reach under this guard, not a
+failed experiment. No 1.43 GiB run or guard bypass was attempted. The
+neighbour object stays UNKNOWN and this escalation lane is closed unless a
+new claim supplies a genuinely sub-guard path or a larger memory envelope.
+W1/W160 grades, append heap-map evidence and the rung-5 non-claim are
+unchanged.

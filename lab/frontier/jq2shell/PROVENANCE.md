@@ -37,9 +37,12 @@ Everything else is harness scaffolding: pinned `jv`, `jvp_string` and
 refcount/string helpers, a bounded `jvp_utf8_next()` (16 iterations), a
 three-byte chosen-byte `jvp_utf8_encode()` macro, and allocator stubs. The
 crafted geometry is `currlen = 0x7ffffffe`, `len = 2` (append) and
-`length = 0x5555555b` (copy_replace_bad). `NDEBUG` models a release build:
-the pinned `assert(out < s->data + maxlength)` at `jv.c.vuln:1127` would abort
-a debug build before the write is observable.
+`length = 0x55555557` (decimal 1431655767, copy_replace_bad). The harness
+comment says `0x5555555b`, a label typo: that value would wrap to 18, not 6.
+The harness comment is left in place because the harness sources are pinned
+in `PINS.sha256`. `NDEBUG` models a release build: the pinned
+`assert(out < s->data + maxlength)` at `jv.c.vuln:1127` would abort a debug
+build before the write is observable.
 
 The `memcpy` macro records the *requested* length from the verbatim expression
 and caps the *executed* copy at 48 bytes at the pinned call site, so a 2 GiB
@@ -60,8 +63,8 @@ cd lab/frontier/jq2shell/harness
 Rung 1/2: vulnerable append reports
 `APPEND ALLOC=32 REQ1=2147483646 REQ2=2` — the pinned product wraps to 0 and
 clamps to 32; both fixed guards report `APPEND REJECT=1` / `BAD REJECT=1`.
-Vulnerable copy_replace_bad reports `BAD ALLOC=6` — `0x5555555b*3+1` wraps to
-6 — with 16 chosen-byte writes.
+Vulnerable copy_replace_bad reports `BAD ALLOC=6` — `0x55555557*3+1 =
+4294967302 = 0x1_00000006` truncates to 6 — with 16 chosen-byte writes.
 
 Rung 3: gcc and clang ASan both report `heap-buffer-overflow`, `WRITE of size
 48`, frame `jvp_string_append ... jv.c.vuln:1191`. An isolated `bad` argument

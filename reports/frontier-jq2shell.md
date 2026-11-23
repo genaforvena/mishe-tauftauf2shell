@@ -50,7 +50,8 @@ invalid string before allocating.
 
 Vulnerable `jvp_string_copy_replace_bad()` (pinned `jv.c.vuln:1113-1134`)
 computes `uint32_t maxlength = length * 3 + 1` at `:1117`. For
-`length = 0x5555555b` the true product is `4294967302`, truncated to 6; the
+`length = 0x55555557` (the harness passes decimal 1431655767) the true
+product is `4294967302 = 0x1_00000006`, truncated to 6; the
 loop at `:1126` encodes each invalid byte into three bytes, writing about
 4.3 GiB into the six-byte buffer. The pinned `assert` at `:1127` aborts debug
 builds; `NDEBUG` models the release build. The fix computes `maxlength` in
