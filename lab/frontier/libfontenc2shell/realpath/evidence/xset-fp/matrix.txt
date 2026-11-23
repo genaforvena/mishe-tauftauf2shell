@@ -1,0 +1,8 @@
+2026-11-23T20:54:51Z runtime font-path injection matrix
+vuln vend-no-xset client_rc=1 new_asan_logs=0 
+vuln vend-safe-after-xset client_rc=0 new_asan_logs=0 
+vuln vend-attack-after-write client_rc=1 new_asan_logs=1 
+fixed fend-no-xset client_rc=1 new_asan_logs=0 
+fixed fend-safe-after-xset client_rc=0 new_asan_logs=0 
+fixed fend-attack-after-write client_rc=0 new_asan_logs=0 
+ASan log prefixes under /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/evidence/xset-fp; 258 input = 508 bytes past the buffer

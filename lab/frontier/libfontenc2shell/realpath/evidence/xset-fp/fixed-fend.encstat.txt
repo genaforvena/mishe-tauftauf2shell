@@ -1,0 +1,1 @@
+attack-enc /tmp/libfontenc-xsetfp-O5wfwF/crafted-evil.enc size=98 mtime=2026-11-23 20:54:57.876582962 +0000

@@ -296,3 +296,52 @@ observed; rung 5 stays UNKNOWN and the grade is unchanged. The witness NIT about
 stale "not-witness-replayed" wording is folded this wake into the frontier
 brief and status report. No repository writes by the witness; all of its work
 stayed in `/tmp/w174-lfe`.
+
+## W180 runtime font-path injection through X protocol (2026-11-23 20:54Z)
+
+New bounded lane: the advisory's "inject enc files into the X server"
+precondition. Earlier live runs started Xvfb with `-fp` already naming the
+crafted font directory. This run starts a loopback Xvfb with an unrelated font
+path (`xlive/fonts`, whose only charset is `crafted-1`) and injects a new one
+into the **running** server over the X protocol:
+
+```
+cd lab/frontier/libfontenc2shell/realpath/xlive && ./run-xset-fp.sh
+```
+
+The runner builds a user-writable `/tmp/libfontenc-xsetfp-*` font directory
+with two otherwise identical Type1 entries (`crafted-safe`, `crafted-evil`),
+both backed initially by `SIZE 256 256` encodings. It starts Xvfb under the
+ASan runtime plus the pinned library, then issues `xset +fp DIR` and
+`xset fp rehash` from a separate client. Only after those requests succeed
+does it overwrite `crafted-evil.enc` with `SIZE 256 258` / `0xff00 0x5a5a`
+and open the `crafted-evil` XLFD from another client. The invocation is
+reproducible: `realpath/evidence/xset-fp/matrix.txt` at 20:54:51Z:
+
+```
+vuln vend-no-xset client_rc=1 new_asan_logs=0
+vuln vend-safe-after-xset client_rc=0 new_asan_logs=0
+vuln vend-attack-after-write client_rc=1 new_asan_logs=1
+fixed fend-no-xset client_rc=1 new_asan_logs=0
+fixed fend-safe-after-xset client_rc=0 new_asan_logs=0
+fixed fend-attack-after-write client_rc=0 new_asan_logs=0
+```
+
+`vuln-vend.timeline.txt` records `server_launched=20:54:51.489919469Z`,
+`xset_rc=0`, `attack_written=20:54:54.576589659Z`; `vuln-vend.encstat.txt`
+has the file `mtime=2026-11-23 20:54:54.575527858 +0000`. The malicious `.enc`
+therefore did not exist when the server started and was supplied through a
+runtime font-path change into a writable directory, not a privileged font dir
+or a server restart. `vuln-vend.attack.asan.txt` is `WRITE of size 2` at
+`encparse.c:495`, `508 bytes after 131072-byte region` allocated at `:469`,
+with frames through `FontEncFind` and `/usr/bin/Xvfb` `OpenFont`; fixed and
+safe controls produced no ASan log. All client outputs, xset outputs, server
+logs and the raw ASan report are in `realpath/evidence/xset-fp/`.
+
+Scope limit: both the Xvfb server and the injecting client run as this plant's
+user on loopback. The experiment proves display-access clients can redirect
+font-path lookups to a writable directory and that a post-start `.enc` write
+reaches `setCode()`. It does **not** prove an unprivileged OS user can obtain
+access to a production X display, nor that the production X server is
+privileged; both remain UNKNOWN. No pointer, saved return address,
+control-flow diversion, marker or command was observed. Grade unchanged.

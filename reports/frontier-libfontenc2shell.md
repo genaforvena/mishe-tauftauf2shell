@@ -136,10 +136,31 @@ suspected" — no live object, pointer or control-flow target
 (`realpath/evidence/gdb-asan-destination.txt`). Those cases stay UNKNOWN,
 not rung 4 object control and not passes.
 
+### 3.5 W180 runtime font-path injection (X protocol)
+
+The earlier live matrix configured the crafted font directory with `-fp` at
+server startup. `realpath/xlive/run-xset-fp.sh` instead starts a loopback Xvfb
+with an unrelated font path, injects a writable temp font directory into the
+running server with `xset +fp` and `xset fp rehash`, and only then writes the
+malicious `crafted-evil.enc` (`SIZE 256 258` / `0xff00 0x5a5a`). Opening the
+corresponding Type1 font from another X client produces the same ASan
+`WRITE of size 2` at `encparse.c:495`, 508 bytes past the 131072-byte region,
+through `FontEncFind` and `OpenFont`. The vulnerable build's no-xset and safe
+controls and both fixed controls produce no ASan report. Timeline, matrix,
+client outputs, xset outputs and raw ASan log are in
+`realpath/evidence/xset-fp/`; exact commands and scope limits are in
+`PROVENANCE.md` W180. This establishes runtime injection into an already
+running X server from a writable directory without a server restart; it does
+not establish that an unprivileged OS user can access a production X display
+or that the production server is privileged — both stay UNKNOWN.
+
 ## 4. Feasibility, constraints and preserved negative results
 
-- The advisory's vector is local. No remote wire delivery, font-server
-  protocol or unprivileged path to write the font path was exercised.
+- The advisory's vector is local. No remote wire delivery was exercised. A
+  display-access X client can inject a font path into a running server and
+  supply a post-start `.enc` from a writable directory (§3.5); whether an
+  unprivileged OS user can reach a production X display, and whether that
+  server is privileged, remain UNKNOWN.
 - **Plain-build impact for the upstream regression input (`SIZE 256 258`) is
   not demonstrated**: the uninstrumented vulnerable Xvfb keeps running and
   `xdpyinfo` answers (`realpath/evidence/live/client-plain-vuln.out`). W172
@@ -184,7 +205,9 @@ Next bounded experiment: only on an observed saved pointer or control-flow
 target, consider a benign marker with vulnerable, fixed and safe-input
 controls. Alternative evidence: find a production X configuration whose
 allocator places a live object past this allocation before the store, or
-prove the local font-path write precondition on a real deployment. Neither is
-assumed here. Both witness verdicts are folded; the witness owes no further
+establish the OS-level unprivileged-to-privileged X display precondition on a
+real deployment (W180 established runtime X-protocol injection only). Neither
+is assumed here. Both witness verdicts are folded; the witness owes no further
 evidence on the earlier scopes or the row-1024 matrix. Full commands, negatives
-and the setup-error counterexample are in `PROVENANCE.md` W155/W156/W172.
+and the setup-error counterexample are in `PROVENANCE.md`
+W155/W156/W172/W180.

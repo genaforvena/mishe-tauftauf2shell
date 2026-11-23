@@ -1,0 +1,2 @@
+server_launched=2026-11-23T20:54:54.791263047Z first_client_after_start=2026-11-23T20:54:57.792899150Z xset_rc=0 attack_written=2026-11-23T20:54:57.878047282Z crafted_dir=/tmp/libfontenc-xsetfp-O5wfwF
+attack-enc-written-after-server-start

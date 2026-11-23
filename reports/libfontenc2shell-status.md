@@ -54,10 +54,23 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   witness replayed all nine lines from a clean archive at `3f44109`; the
   faulting instruction is `mov %dx,(%rax)` at `encparse.c:495` (signal 11), not
   a downstream consumer.
-- Ceiling: no remote wire delivery, font-server protocol, unprivileged path
-  to write the font path, pointer control, allocator grooming toward a live
-  object, control-flow diversion, marker side effect, ROP or command was
-  observed. The `0x5a5a` bytes are chosen data, not execution; the 16-bit
+- Runtime injection (W180): `realpath/xlive/run-xset-fp.sh` starts Xvfb with an
+  unrelated font path, injects a writable temp font dir into the running server
+  with `xset +fp` / `xset fp rehash`, then writes the malicious `SIZE 256 258`
+  `.enc` **after** server start (timeline: launch 20:54:51.489Z, attack write
+  20:54:54.576Z). Vulnerable build: no-xset and safe-after-xset clean,
+  attack-after-write `WRITE of size 2` at `encparse.c:495`, 508 bytes past the
+  region; fixed build clean in all three cases. Matrix and logs:
+  `realpath/evidence/xset-fp/`, details in `PROVENANCE.md` W180 and report §3.5.
+  This proves the injection can target a running server through a writable
+  directory without a privileged font dir; OS-level unprivileged X display
+  access and server privilege remain UNKNOWN. No grade change.
+- Ceiling: no remote wire delivery, OS-level unprivileged X display access,
+  pointer control, allocator grooming toward a live object, control-flow
+  diversion, marker side effect, ROP or command was observed. X-protocol font
+  path injection into a running server is demonstrated (W180); privileged
+  font-dir write is not required in that model.
+  The `0x5a5a` bytes are chosen data, not execution; the 16-bit
   `sm->first` truncates 65790 to 254, so only the chosen value survives.
   **For `SIZE 256 258` there is still no plain-build crash**: the vulnerable
   Xvfb keeps running and `xdpyinfo` answers, as the witness replayed. The
@@ -68,6 +81,8 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
 Next for the target mind: only on an observed saved pointer or control-flow
 target, attempt a bounded benign marker with vulnerable, fixed and safe-input
 controls. Alternative evidence: a production X configuration whose allocator
-places a live object at the destination before the store, or a proven local
-font-path write precondition. Neither is assumed. Both witness verdicts are
-folded; the witness owes no further evidence on any measured scope.
+places a live object at the destination before the store, or the OS-level
+unprivileged-to-privileged X display precondition (W180 covers runtime
+injection, not display access or server privilege). Neither is assumed. Both
+witness verdicts are folded; the witness owes no further evidence on any
+measured scope.
