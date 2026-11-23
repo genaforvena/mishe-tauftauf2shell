@@ -78,6 +78,18 @@ the item-1 result is stale client state, not peer-controlled. The 4000-byte
 chosen-byte extent is compile-time bounded (`s7_isotcp.h:38`,
 `s7_partner.cpp:660-661`); no public API raises it. Grade unchanged.
 
+The witness then independently verified W5 (message #2383, tape): a clean
+`git archive` at HEAD `1f8f9b9` into `/tmp/w149-snap7`, pins regenerated from
+the hash-matched local tarball `2840d50a…c613c36`, `run_multi.sh` twice rc0
+with 4/4 cases and the exact normalized hash above. Both builds reported
+`ITEM0_RESULT=0 ITEM1_RESULT=36700160 DST1_0=cc` with no ASan report; the safe
+control returned 0/0 and `DST1_0=77`. Raw `run_live.sh` and `run_wide.sh`
+hashes matched the tracked author evidence byte-for-byte; the earlier
+`1f25bf63…` normalized-hash difference is only the absolute ASan source path
+in the normalizer (known NIT, deliberately unchanged). ESTABLISHED at the
+labeled lab-wire scope, no new rung; the witness wrote no repository files
+and left no processes.
+
 ## Ceiling
 
 The attacker must control or impersonate a PLC (`AT:P`); the 127.0.0.1

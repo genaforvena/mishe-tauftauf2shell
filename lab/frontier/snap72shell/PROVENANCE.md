@@ -286,3 +286,21 @@ length to that constant (`s7_partner.cpp:660-661`). The only related setter is
 
 Evidence disposition: this refines the rung-4 ceiling but does not move the
 grade. No upstream fixed blob, no second controlled write, no rung 5.
+
+## Witness verdict on W5 — 2026-11-23 (W6, message #2383)
+
+Independent witness replayed the two-item negative from a clean `git archive`
+of HEAD `1f8f9b9` into `/tmp/w149-snap7`; the codeload tarball was extracted
+from the hash-matched local copy `2840d50a…c613c36` and all five pins were
+regenerated from tracked `src/SHA256SUMS`. `bash live/run_multi.sh` twice rc0,
+4/4 cases, normalized trace
+`e4983fed2bd7ebc3bf8fc81caf35eba7b996bc2889f893313efe0439eed7d63c` exact both
+times. Plain and ASan: `ITEM0_RESULT=0 ITEM1_RESULT=36700160 DST1_0=cc`, no
+ASan report; safe control 0/0 with `DST1_0=77`. Raw baseline hashes
+`run_live.sh` `37c04636…747251` and `run_wide.sh` `f254a539…c3808` matched
+tracked author evidence byte-for-byte. The earlier `1f25bf63…` normalized
+hash differs only in the absolute ASan source path left by
+`normalize_live.py` (known normalizer NIT; do not change it — that would
+invalidate the witness-verified hash). Verdict: ESTABLISHED at the explicitly
+labeled lab-wire scope, no new rung, no rung 5. No repository writes, no
+processes left by the witness.
