@@ -3,3 +3,5 @@
 *-live-victim
 libvictim.so
 libneighbor_probe.so
+*-live-timers
+libtimer_probe.so

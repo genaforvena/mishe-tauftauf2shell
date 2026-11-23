@@ -174,3 +174,11 @@ grade.
 - Full stage: `reports/frontier-sofiasip2shell.md`. W1, W2 layout, W2 live
   tport, W3 and W4 are ESTABLISHED at their labeled scopes (W4 witness #1968).
   Rung 5 not implied.
+- W11 (2026-11-23, author-observed, no grade change): with 30 timers pre-queued
+  in the live plain v17 tport, the physical neighbour is the 528-byte timer
+  heap array; the frame write changes its `_size` from 63 to
+  `0x5a4143425a7e` (repeating-mask XOR), and 35 subsequent library
+  `su_timer_set()` calls write a timer pointer exactly 0 bytes past the array
+  before glibc aborts. Fixed pin, short frame and port-shifted replay behave
+  as labeled (`reports/sofiasip2shell-live-ws-tport.md`, W11). Witness replay
+  pending; rung 5 still not implied.

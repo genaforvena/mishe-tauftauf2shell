@@ -187,3 +187,48 @@ the identity measurement at this labeled scope: clean `git archive 709a34c`,
 hash-checked pins, three runs (full rc 134 with matching neighbour fields,
 short rc 0, port-shifted structurally identical), all caller offsets symbolized
 to the pinned sources, no counterexample and no grade change.
+
+## W11: second-order timer-heap write from corrupted `_size` (2026-11-23)
+
+W8's wall left one question open: the live neighbour's `_size` is in the
+5/6-byte XOR reach, but source alone did not indicate a secondary execution
+path. W11 measures it in the live plain tport. Three new source files under
+`lab/sofiasip2shell/libbuild/live/` implement it:
+`live_ws_timers.c` (proven live driver plus timer setup and readback),
+`timer_probe.c` (LD_PRELOAD shim exporting the neighbour pointer and its
+allocation size), and `run_timer_probe.sh` (build and four loopback cases).
+Evidence is in `lab/sofiasip2shell/libbuild/evidence/w11/`.
+
+The driver pre-queues 30 long-lived timers on the root task before the
+upgrade, so the timer heap array is live and at its initial 30-slot capacity.
+A tport-internal timer then resizes that array to 528 bytes (63 slots) between
+setup and frame; the shim confirms the array is the physical neighbour of the
+reallocated 65544-byte frame buffer (`TIMER_Q_PTR == SHIM_NEIGHBOR`, `DELTA=0`)
+and symbolizes its caller to pinned `timers_alloc` at `su_timer.c:201`.
+
+Vulnerable full case (`v17plain-full`, ports 18901 and replay 19011, rc 134):
+`TIMER_Q_BEFORE size=99236347796094 used=30 boundary_off=528`. The size is
+`0x005a4143425a7e` — the original 63 (`0x3f`) XORed with repeating mask
+`41 5a 42 43` over six bytes, i.e. an attacker-chosen inflation to a huge
+capacity. The receive callback then performs 35 `su_timer_set()` calls through
+the library's own `timers_add()` (`TIMER_ADDS n=35 last_rc=0`, `_used`
+30 -> 65). All 35 pass the corrupted capacity check; the final one writes at
+array index 65, exactly 0 bytes past the 528-byte allocation. Readback at
+`heap+528` changes from `0000000000000000` to a live `su_timer_t *`
+(`00005f910e67bf10`, replay `00006459a72d1f60`); the following chunk's size
+word at `heap+536` stays `0x21`. The process then aborts with
+`corrupted size vs. prev_size`.
+
+Controls: v1.13.17 with the 65520-byte short frame (rc 0) never fires the
+realloc probe, keeps `_size=63`, and makes only two in-bounds adds; both
+v1.13.18 full and short cases (rc 0) are identical to the short control.
+The port-shifted vulnerable replay reproduces every field structurally.
+
+This is a **new author-observed rung-4 observation, not rung 5 and not yet
+witness-backed**. The write value is a heap pointer to a timer object, not an
+attacker-chosen address or payload; it lands in the next chunk's `prev_size`,
+and glibc's abort is still driven by the header corrupted by the original
+frame write. No callback, callable field, marker or command was obtained.
+It requires a timer-heavy live application with the measured neighbour
+geometry, and it needs an independent witness replay before it can be called
+ESTABLISHED. It does not change the lane's overall grade.
