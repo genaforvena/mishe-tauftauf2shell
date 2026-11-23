@@ -1,0 +1,61 @@
+W170 2026-11-23 23:3xZ — plain glibc allocator, real OpenEXRCore v3.5.2,
+deterministic sink dump. Purpose: test W163's "file never controls OOB bytes"
+outside the guarded allocator, using the real process that aborts.
+
+Inputs (sha256):
+  283cec0e18532c500495e71496145832d36dbfc502e44f490e09114661ab37ce  cases/poc.exr (pixel 0x41)
+  17f3752e95e35d70c454368789a8dd163938f03a6fe0784a1bee5ecab347ea8e  cases/poc5a.exr (pixel 0x5a)
+poc5a regenerated with: python3 cases/make_poc.py cases/baseline.exr \
+  cases/poc5a.exr 1024 64 0x5a
+
+gdb -q -batch -x bin-vuln-plain/gdb-oob-src.cmd \
+  --args ./bin-vuln-plain/flat_harness
+Breakpoint 1 at 0x5870 (252 locations)
+Breakpoint 1.254, __memcpy_avx_unaligned_erms ()
+SINK n=4096 dst=0x5555556e2100 src=0x5555556e2230
+#2  sort2_4ByteChannels_tiled (...) internal_zstd.c:472
+#3  exr_undo_zstd_v1 (...) internal_zstd.c:1373
+#4  internal_exr_undo_zstd (decode=..., uncompressed_size=64) internal_zstd.c:1416
+#5  exr_uncompress_chunk (decode=...) compression.c:786
+#6  exr_decoding_run (...) decoding.c:602
+#7  main (...) harness/flat_harness.c:60
+
+Dump command at the same breakpoint:
+  dump binary memory .../oob-src.bin $rsi $rsi+4096
+  dump binary memory .../oob-src5a.bin $rsi $rsi+4096
+  (repeat of poc.exr -> oob-src-r2.bin)
+sha256:
+  cce94d1891bc9682bdff607adb9b3b3321f61e1286c0dfe6dca448ddcc0ab12f  oob-src.bin
+  bd1edd84b3096cfc93ccbe62266c5710192a8a3696958c78badd186983c8f342  oob-src-r2.bin
+  6ec71481b84e786e35007d06ad5fd71c22bcff3534fefd6c6a50f97140f5be93  oob-src5a.bin
+
+Byte comparison (4096-byte source regions):
+  src[0..63]  = 64 x 0x41 for poc.exr; 64 x 0x5a for poc5a.exr (in-bounds, file pixels).
+  src[64..4095] vs same-input repeat: differ at 8 offsets only: 3448..3455.
+  src[64..4095] vs pixel-variant:     differ at the same 8 offsets only: 3448..3455.
+  Example 3448..3455: 39 90 f8 7d 05 b9 63 a1 (run 1),
+                      32 f7 c7 0a b4 7a ff 6b,
+                      pixel-5a = 12 fd 63 4d 56 19 91 aa.
+  Histogram of src[64..4095] run 1: 3528 zero bytes, 201 x 0x55, rest heap metadata
+  and parsed-header residue; 0x41 occurs 3 times, none a contiguous file string.
+  16-byte runs of poc.exr found in src[64..] are zero/header-field coincidences;
+  no 24-byte or 32-byte run of the file occurs there.
+
+Conclusion: in the real allocator the copied OOB bytes are allocator/heap
+metadata, not attacker-chosen file bytes. The only run-varying 8-byte window
+(3448..3455) varies on a same-input repeat, so it is not file-controlled.
+Structural ceiling from W163/W164 holds on the aborting plain build too:
+the file sets the copy length (4096) and destination offset, not OOB contents.
+
+Deterministic replay from the lab root (tracked recipe, gitignored binaries):
+  sh harness/oob-source-check.sh
+SINK n=4096 dst=0x5555556e20c0 src=0x5555556e21f0   (all three runs)
+PASS inbounds-r1-0x41
+PASS inbounds-p5a-0x5a
+PASS repeat-oob-diff-window n=8 window=(3448, 3455)
+PASS pixel-oob-diff-window n=8 window=(3448, 3455)
+PASS same-oob-diff-window repeat=(3448, 3455) pixel=(3448, 3455)
+PASS oob-not-file-chosen
+RESULT PASS
+Tracked files: harness/gdb-oob-src.cmd, harness/gdb-oob-src5a.cmd,
+harness/analyze_oob_source.py, harness/oob-source-check.sh.

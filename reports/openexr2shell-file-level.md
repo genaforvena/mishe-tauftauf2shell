@@ -185,13 +185,16 @@ input.
   overrun; the out-of-bounds bytes themselves are allocator-derived, not
   file-chosen. In W161, changing the harness fill pattern changed the first
   overwritten byte while the 4032-byte length and zero-byte baseline stayed
-  fixed.
-- The advisory's OpenImageIO and aarch64 claims were not tested; its deep-tiled
-  claim was later confirmed in W164 below. Its no-`-c` `exrcheck` and
-  `exrinfo -v` observations were not rerun; this wake tested `exrcheck -c` and
-  `exrinfo -` instead. The advisory's 4032-byte length and 692-byte file size
-  were independently observed here; its `malloc(): invalid size (unsorted)`
-  abort text differs from this host's `free(): invalid pointer`.
+  fixed. W170 confirmed the same negative in the aborting plain glibc build:
+  changing the file pixel byte changed only the in-bounds 64 bytes, while the
+  OOB region differed solely in an 8-byte window that also varies on a
+  same-input repeat.
+- The advisory's OpenImageIO claim was not tested; its deep-tiled and aarch64
+  claims were later confirmed in W164 and W169 below. Its no-`-c` `exrcheck`
+  and `exrinfo -v` observations were not rerun; this wake tested `exrcheck -c`
+  and `exrinfo -` instead. The advisory's 4032-byte length and 692-byte file
+  size were independently observed here; its `malloc(): invalid size
+  (unsorted)` abort text differs from this host's `free(): invalid pointer`.
 
 - Build negatives: the C consumer needed `-lstdc++`, `-ldeflate` and explicit
   static-library order; the C++ generator needed Imath config/include paths.
@@ -388,3 +391,54 @@ host, ASan on aarch64, wire input, pointer target, command or marker. Rung 5
 stays UNKNOWN. The aarch64 runtime is a newer libzstd/libdeflate than the x86
 build; the pinned decoder source, not the compression backend, supplies the
 faulty copy.
+
+## W170: OOB source bytes in the real allocator — file control still false (2026-11-23)
+
+W163 tested file-byte control with the guarded allocator, which paints each
+allocation with a distinct pattern. That leaves one gap: in the aborting plain
+glibc build, does a file-derived buffer happen to sit behind
+`decode.scratch_buffer_1`, making the 4096-byte source copy carry attacker
+bytes? This wake measured the actual source operand of the sink in the
+**plain** v3.5.2 build (`bin-vuln-plain/flat_harness`) under gdb.
+
+Recipe: `harness/gdb-oob-src.cmd` breaks on `memcpy` with `$rdx == 4096` (the
+sink compiles to the fortified PLT call; a breakpoint on source line 472
+resolves to line 474 and never hits). It dumps the 4096 bytes at `$rsi` and
+`$rdi`. `harness/gdb-oob-src5a.cmd` repeats for the 0x5a-pixel forge;
+`harness/oob-source-check.sh` regenerates that file, runs three dumps and
+calls `harness/analyze_oob_source.py`. Raw transcript:
+`evidence/plain-oob-source.out`; check output:
+`bin-vuln-plain/oob-source-check.out` (gitignored, reproducible).
+
+Observed stack at the sink: `sort2_4ByteChannels_tiled
+internal_zstd.c:472` <- `exr_undo_zstd_v1 :1373` <-
+`internal_exr_undo_zstd :1416` <- `exr_uncompress_chunk compression.c:786`
+<- `exr_decoding_run decoding.c:602`. `n=4096`, and `dst`/`src` are 304 bytes
+apart in this build. The source's first 64 bytes are the file's pixel byte
+(0x41 in `poc.exr`, 0x5a in the regenerated
+`17f3752e...` variant); the remaining 4032 are heap metadata. In run 1,
+3528 of those bytes are zero and 201 are 0x55 (pointer high bytes); no
+24-byte or 32-byte run from the 692-byte file occurs past offset 64.
+
+Determinism test: a same-input repeat (`oob-src-r2.bin`) and the pixel variant
+(`oob-src5a.bin`) each differ from run 1 in **only** the same eight offsets
+3448..3455, within the 4032-byte OOB region. Those eight bytes also change
+on a same-input repeat, so they are allocator/ASLR residue, not file data.
+The deterministic check reports:
+
+```
+SINK n=4096 dst=0x5555556e20c0 src=0x5555556e21f0   (all three runs)
+PASS inbounds-r1-0x41
+PASS inbounds-p5a-0x5a
+PASS repeat-oob-diff-window n=8 window=(3448, 3455)
+PASS pixel-oob-diff-window n=8 window=(3448, 3455)
+PASS same-oob-diff-window
+PASS oob-not-file-chosen
+RESULT PASS
+```
+
+Disposition: W163's structural ceiling holds on the aborting plain build as
+well — the file sets the copy length and destination offset, not the
+out-of-bounds bytes. The 8-byte nondeterministic window is a caveat for any
+future chosen-byte claim, not a control channel. No pointer, command, marker
+or wire work; no grade change, rung 5 still UNKNOWN.
