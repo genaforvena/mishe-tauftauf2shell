@@ -374,3 +374,60 @@ value is not attacker-chosen. The low-word sweep assumes the fixed low 12
 bits of this build's `rBuf_` layout. No vptr, code pointer, return address,
 ROP, command, marker side effect or witness verdict is present. The
 advisory's `AV:N` remains the lab's loopback wire path only.
+
+## W147 — post-copy code-pointer reachability sweep (2026-11-23)
+
+W146 scanned the 1024-byte window at `untransform()`'s copy line and found
+no executable-space pointer. That left open the possibility that a later
+stage allocates a virtual object or shared-pointer control block into the
+same window. `live/gdb-codescan.gdb` now anchors on `rBuf_` at pinned
+`:301` and rescans the window after `processor->process()` returns, at
+`TConnectedClient.cpp:64`. It maps the inferior's `/proc/PID/maps`, reads
+1024 bytes at `rBuf_` and reports every 8-byte-aligned qword that points
+into an executable mapping (plus heap pointers for context). ASLR is on;
+the script never writes process memory.
+
+Five vulnerable-layout frames were generated with `make-kv-frame.py` from
+the captured 726-byte payload: `kvbase160.bin` (4 KV/32-byte strings),
+`kv-scan-kv0.bin`, `kv-scan-kv2.bin`, `kv-scan-kv8.bin` and
+`kv-scan-kv4x64.bin` (4 KV/64-byte strings). All pad the compressed
+section to 160 bytes; each replay printed `SCAN_ANCHOR ... sz=726` and
+`PROCESS_REACHED name=attack seqid=1` before the scan. The fixed v0.24.0
+no-flush control with `kvbase160.bin` printed `sz=160` and reached the
+same scan point. Commands:
+
+```sh
+cd lab/frontier/thrift2shell/live
+python3 make-kv-frame.py kv-scan-kv0.bin --kv 0 --pad-compressed 160
+# likewise kv2, kv8, kv4x64 with --kv/--klen/--vlen as named
+for f in kvbase160 kv-scan-kv0 kv-scan-kv2 kv-scan-kv8 kv-scan-kv4x64; do
+  NOFLUSH_SERVER=./live-noflush ./run-kv-noflush.sh \
+    "$f.bin" gdb-codescan.gdb PORT 1
+done
+NOFLUSH_SERVER=./live-noflush-fixed ./run-kv-noflush.sh \
+  kvbase160.bin gdb-codescan.gdb PORT 1
+python3 normalize-codescan.py \
+  results/kv-noflush-live-noflush-kvbase160.log \
+  results/kv-noflush-live-noflush-kv-scan-kv0.log \
+  results/kv-noflush-live-noflush-kv-scan-kv2.log \
+  results/kv-noflush-live-noflush-kv-scan-kv8.log \
+  results/kv-noflush-live-noflush-kv-scan-kv4x64.log \
+  results/kv-noflush-live-noflush-fixed-kvbase160.log \
+  > results/codescan-normalized.txt
+```
+
+`results/codescan-normalized.txt` is address-free: five vulnerable
+windows have `EXEC_QWORDS=0` (nonzero counts 115/128/128/128/128) and the
+fixed window also has `EXEC_QWORDS=0` (98 nonzero). The only heap pointer
+inside a vulnerable window was at `+1008`, outside the 726-byte copy;
+no code pointer, vptr or function-pointer-shaped value lay in any window
+after processing. SHA-256 of the normalized file:
+`295b2ffbcba420af65f22a0d6fa13ecd52abcec10fa997a071f0ae210794c6bb`.
+Raw gdb logs and generated frame files are committed alongside it; the
+usual post-overflow metadata faults (SIGABRT/SIGBUS) happened only after
+the scan point and are visible in the raw logs.
+
+This is a negative reachability result for the post-copy indirect-call
+limb across these five header layouts, not a failed exploit. It leaves the
+grade unchanged: rungs 1-4 on living bytes, no code pointer, ROP, command
+or marker side effect, and no rung 5.

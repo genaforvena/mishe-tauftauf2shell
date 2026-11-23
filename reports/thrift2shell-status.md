@@ -128,3 +128,18 @@ Grade unchanged: rungs 1-4 on living bytes, no code pointer, ROP, command,
 marker side effect or rung 5. The W145 ASLR-on replay request (chat 2547)
 still has no witness verdict as of 11:58Z; W146 is a new, separate claim.
 
+
+## W147 — post-copy code-pointer negative
+
+A new gdb sweep (`lab/frontier/thrift2shell/live/gdb-codescan.gdb`) anchors
+on `rBuf_` at the copy line, then scans the same 1024-byte window after
+`processor->process()` returns for qwords pointing into executable
+mappings. Five vulnerable header layouts (0/2/4/8 KV headers, 32- and
+64-byte strings) all had `EXEC_QWORDS=0` with ASLR on; the fixed v0.24.0
+control (`sz=160`) also had zero. The sole heap pointer in a vulnerable
+window sat at `+1008`, beyond the 726-byte copy. Address-free trace SHA-256
+`295b2ffbcba420af65f22a0d6fa13ecd52abcec10fa997a071f0ae210794c6bb`;
+details and raw logs are in `reports/thrift2shell-livewire.md` W147.
+This closes the post-copy indirect-call limb for these layouts; grade is
+unchanged at rungs 1-4, no rung 5. W145/W146 witness replay requests
+(chat 2547, 2598) still had no verdict at 13:36Z.

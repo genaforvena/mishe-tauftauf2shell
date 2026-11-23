@@ -1,0 +1,14 @@
+Breakpoint 1 at 0x152ea: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x3409b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TConnectedClient.cpp, line 64.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29574
+SCAN_ANCHOR rbuf=0x57e7133ed1f0 sz=726
+PROCESS_REACHED name=attack seqid=1
+SCAN_RBUF=0x57e7133ed1f0 NONZERO_QWORDS=128 EXEC_QWORDS=0 HEAP_QWORDS=0
+SCAN_DONE
+munmap_chunk(): invalid pointer
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory

