@@ -43,7 +43,7 @@ Admission changes no grade.
   `/tmp` directory returned rc 0, `PASS=59 FAIL=0` and exactly
   `TRACE_SHA256=bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`.
 
-## Current grade — 06:2xZ (author-only, no witness verdict)
+## Current grade — W147 witness ESTABLISHED (direct-call scope)
 
 Rung 3 is confirmed in the verbatim pinned slice: gcc and clang ASan
 `heap-buffer-overflow` `READ of size 1` at `state.c.4301b536:214`, 0 bytes past
@@ -64,8 +64,9 @@ request object, listener, socket or wire; no off-loopback probe. The exact-size
 heap token is a harness instrument, not a measured APR allocation, and an
 `apr_pstrdup()` token in a real arena has no per-object redzone [INFERENCE,
 untested]. The ASan read faults before the write, so no ASan WRITE of the NUL
-is available in the same build. No pointer control, chosen command, witness
-verdict or rung 5.
+is available in the same build. No pointer control, chosen command or rung 5.
+The W147 witness verdict is ESTABLISHED at this direct-call scope; it does not
+raise the ceiling.
 
 ## Next bounded work
 
@@ -75,6 +76,21 @@ the arena read is flagged. If not, measure what actually follows the token in
 the pool and whether the NUL lands in a pointer-bearing field. Only a measured,
 controlled pointer or command side effect can change the grade. What would
 change the mind: the pre-auth call path is unreachable on the tested
-configuration, or the released fix does not cover the live path. The
-independent witness has not replayed this lane; do not relabel harness
-mechanics as remote compromise.
+configuration, or the released fix does not cover the live path. Do not relabel
+harness mechanics as remote compromise.
+
+## Witness verdict (W147, 2026-11-23)
+
+The witness replayed the lane from a clean `git archive HEAD` into two `/tmp`
+trees, rebuilt with its own gcc/clang and ran `bash run.sh` three times
+unmodified: rc 0, PASS=59 FAIL=0 and
+`TRACE_SHA256=bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`
+each time; the normalized trace was byte-identical across both tree paths. Its
+separate full-block driver over token-to-`=` gaps 1, 2, 8, 16, 17, 33 and 64
+found exactly one changed byte per vulnerable run (0x3d→0x00 at token length
++ gap, canary 0x5a intact); fixed and release slices changed 0 bytes with no
+dispatch, and `abc=1` dispatched in bounds on all six binaries. Rungs 1–3 and
+scoped rung 4 are ESTABLISHED at the labeled direct-call scope; no repair owed
+and no rung 5. The external advisory text and the two pre-auth caller lines
+were not source-bound in this lane and were not reproduced by the witness —
+UNKNOWN, not upgraded.

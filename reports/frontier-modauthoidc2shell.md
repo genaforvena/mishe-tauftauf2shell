@@ -1,8 +1,8 @@
 # Frontier brief: mod_auth_openidc — CVE-2026-54789 (modauthoidc2shell)
 
-**STAGED 2026-11-23 W139 — harness evidence and a live two-pane target window
-exist; no operator admission yet.** Prepared in W138 from public advisory and
-upstream fix pins; the harness, measurements and handoff were added in W139.
+**STAGED 2026-11-23 W139, admitted 06:2xZ; W147 witness replay ESTABLISHED.**
+Prepared in W138 from public advisory and upstream fix pins; the harness,
+measurements and handoff were added in W139.
 Pins are byte-exact and hash-verified; full raw evidence is in
 `lab/frontier/modauthoidc2shell/PROVENANCE.md`. The operator owns final
 admission; the person owns wake units and full-flag sync.
@@ -123,7 +123,9 @@ HEAD` replay after handoff commit `05acfc6`, all with
 Ceiling: no Apache/APR pool, request object, listener, socket or wire; scanner
 called directly with stubbed config and a recorder for the downstream cookie
 processor. The exact-size heap token is an instrument; a real APR arena has no
-per-object redzone [INFERENCE, untested]. No pointer control, chosen command or
-independent witness verdict. Rung 5 must not be inferred from this.
+per-object redzone [INFERENCE, untested]. No pointer control or chosen command.
+W147 independently replayed the lane: rungs 1–3 and scoped rung 4 ESTABLISHED at
+the direct-call scope, no repair owed; no rung 5. Rung 5 must not be inferred
+from this.
 
 No external system was probed; all URLs above were read for provisioning only.
