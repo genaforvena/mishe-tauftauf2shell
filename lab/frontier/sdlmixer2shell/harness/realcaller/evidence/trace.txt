@@ -1,0 +1,60 @@
+g++-vuln-plain-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+g++-vuln-plain-edge|134|
+g++-vuln-plain-ulaw|134|
+g++-vuln-plain-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+g++-vuln-plain-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+g++-vuln-asan-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+g++-vuln-asan-edge|1|==NUM==ERROR: AddressSanitizer: stack-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+g++-vuln-asan-ulaw|1|==NUM==ERROR: AddressSanitizer: stack-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+g++-vuln-asan-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+g++-vuln-asan-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+g++-vuln-nossp-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+g++-vuln-nossp-edge|139|
+g++-vuln-nossp-ulaw|139|
+g++-vuln-nossp-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+g++-vuln-nossp-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+g++-fixed-plain-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+g++-fixed-plain-edge|0|scenario=edge encoding=6 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=256
+g++-fixed-plain-ulaw|0|scenario=ulaw encoding=7 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchULaw remaining=256
+g++-fixed-plain-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+g++-fixed-plain-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+g++-fixed-asan-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+g++-fixed-asan-edge|0|scenario=edge encoding=6 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=256
+g++-fixed-asan-ulaw|0|scenario=ulaw encoding=7 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchULaw remaining=256
+g++-fixed-asan-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+g++-fixed-asan-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+g++-fixed-nossp-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+g++-fixed-nossp-edge|0|scenario=edge encoding=6 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=256
+g++-fixed-nossp-ulaw|0|scenario=ulaw encoding=7 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchULaw remaining=256
+g++-fixed-nossp-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+g++-fixed-nossp-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+clang++-vuln-plain-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+clang++-vuln-plain-edge|139|
+clang++-vuln-plain-ulaw|139|
+clang++-vuln-plain-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+clang++-vuln-plain-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+clang++-vuln-asan-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+clang++-vuln-asan-edge|1|==NUM==ERROR: AddressSanitizer: stack-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+clang++-vuln-asan-ulaw|1|==NUM==ERROR: AddressSanitizer: stack-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+clang++-vuln-asan-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+clang++-vuln-asan-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+clang++-vuln-nossp-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+clang++-vuln-nossp-edge|139|
+clang++-vuln-nossp-ulaw|139|
+clang++-vuln-nossp-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+clang++-vuln-nossp-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+clang++-fixed-plain-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+clang++-fixed-plain-edge|0|scenario=edge encoding=6 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=256
+clang++-fixed-plain-ulaw|0|scenario=ulaw encoding=7 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchULaw remaining=256
+clang++-fixed-plain-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+clang++-fixed-plain-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+clang++-fixed-asan-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+clang++-fixed-asan-edge|0|scenario=edge encoding=6 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=256
+clang++-fixed-asan-ulaw|0|scenario=ulaw encoding=7 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchULaw remaining=256
+clang++-fixed-asan-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+clang++-fixed-asan-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8
+clang++-fixed-nossp-safe|0|scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8
+clang++-fixed-nossp-edge|0|scenario=edge encoding=6 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=256
+clang++-fixed-nossp-ulaw|0|scenario=ulaw encoding=7 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchULaw remaining=256
+clang++-fixed-nossp-badfmt|0|scenario=badfmt parse=REJECTED framesize=0 fetch_set=0
+clang++-fixed-nossp-pcm8|0|scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8

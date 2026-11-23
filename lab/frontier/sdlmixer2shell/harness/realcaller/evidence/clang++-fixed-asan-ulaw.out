@@ -1,0 +1,1 @@
+scenario=ulaw encoding=7 n=256 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchULaw remaining=256

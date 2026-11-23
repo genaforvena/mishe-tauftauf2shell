@@ -1,0 +1,1 @@
+scenario=safe encoding=6 n=8 parse=OK framesize=1 decoded_framesize=4 rc=1 fetch=FetchALaw remaining=8

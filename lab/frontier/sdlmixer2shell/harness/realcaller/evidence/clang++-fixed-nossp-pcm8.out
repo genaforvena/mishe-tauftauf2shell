@@ -1,0 +1,1 @@
+scenario=pcm8 encoding=1 n=8 parse=OK framesize=1 decoded_framesize=1 rc=0 fetch=other remaining=8

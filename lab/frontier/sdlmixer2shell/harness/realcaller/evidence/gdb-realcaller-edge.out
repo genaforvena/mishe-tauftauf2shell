@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x14dc: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln, line 759.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, FetchXLaw (tdata=0x7fffffffdfb0, buffer=0x7fffffffdb50 '\200' <repeats 200 times>..., buflen=1024, lut=0x555555559100 <g_lab_lut>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:759
+warning: 759	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln: No such file or directory
+I=255 BUFFER=0x7fffffffdb50 OUT=0x7fffffffdf4c LUT=5a5a5a5a
+758	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln
+0x7fffffffdf4c:	0xff	0x7f	0x00	0x00	0x24	0xe0	0xff	0xff
+#0  FetchXLaw (tdata=0x7fffffffdfb0, buffer=0x7fffffffdb50 '\200' <repeats 200 times>..., buflen=1024, lut=0x555555559100 <g_lab_lut>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:758
+#1  0x0000555555555590 in FetchALaw (tdata=0x7fffffffdfb0, buffer=0x7fffffffdb50 '\200' <repeats 200 times>..., buflen=1024) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:771
+#2  0x0000555555555bd2 in RealGetAudio (tdata=0x7fffffffdfb0, stream=0x555555566920, seekblock=0x7fffffffdf90) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:1668
+#3  0x0000555555556056 in main (argc=2, argv=0x7fffffffe238) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:1741

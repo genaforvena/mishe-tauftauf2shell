@@ -1,6 +1,6 @@
 # Frontier brief: SDL_mixer `FetchXLaw()` doubled output stride (sdlmixer2shell)
 
-**STAGED 2026-11-23 W173** — this brief, a direct-call rung-1..4 harness and a
+**STAGED 2026-11-23 W173; advanced W179** — this brief, a direct-call rung-1..4 harness and a
 registered two-pane window exist. Clean git-archive replay at commit `7e7f1d6`
 (65 files, 4/4 pins, 12 binaries, exact trace) is in
 `lab/frontier/sdlmixer2shell/REPLAY.md`. Byte-exact pins and hashes:
@@ -8,8 +8,8 @@ registered two-pane window exist. Clean git-archive replay at commit `7e7f1d6`
 and commands: `lab/frontier/sdlmixer2shell/PROVENANCE.md`. Window 123, inner
 socket, two live panes verified at 18:26Z; registry 124/124, seed wall
 `.mishe-tauftauf/walls/sdlmixer2shell.md`, staging DM #2907. Operator admission
-and an independent witness replay are pending. Frontier owns no further work
-on this target.
+and an independent witness replay are complete: witness #2942 graded ESTABLISHED
+at the labeled direct-call lab scope, rungs 1-4 only, explicitly not rung 5.
 
 ## 1. Verified ground truth
 
@@ -91,22 +91,60 @@ a gdb chosen-byte probe and prints a normalized trace hash.
 - `harness/check.sh`: **134 PASS / 0 FAIL** on three identical runs, trace
   `f81697d9247807c1bc254ed1ce51a9d966ec807b6256713177180aa5f44f98e1`.
 
-## 5. Cheapest next rung move
+## 4b. Real-caller replay (W179, 2026-11-23)
 
-The obvious next distinct slice is the real caller at pinned `:1654-1679`:
-compile verbatim `FetchXLaw` plus the real `WAV_GetAudio`/fetch-dispatch types
-with a synthetic A-law/mu-law WAV stream, so the attacker-controlled sample
-count comes through the real `SDL_ReadIO` and `framesize` setup rather than a
-lab stub. Beyond that, a real SDL_mixer build and an actual WAV file path stay
-UNKNOWN. No pointer-sizing primitive was demonstrated: the conversion output
-is a float bit pattern chosen here as a marker, not an address read from the
-input.
+`lab/frontier/sdlmixer2shell/harness/realcaller/` compiles verbatim pinned
+slices for the WAV fetch-dispatch types (`:41-230`),
+`StandardSDLWavChannelMask` (`:828-843`), `ParseFMT` (`:845-978`),
+`FetchXLaw`/`FetchULaw`/`FetchALaw` (`:750-772`) and the real caller's fetch
+block (`:1654-1679`; fixed tree `:1666-1691`). SDL3 `release-3.2.4`
+(tarball SHA-256 `0fc1d23e...`, pinned in `deps/SDL3.sha256`) supplies real
+`SDL_IOFromMem`/`SDL_ReadIO`, real `ParseFMT` sets `framesize=1` and
+`decoded_framesize=4` from a synthetic mono 8-bit A-law/mu-law fmt chunk, and
+the caller consumes through real `SDL_CreateAudioStream`/`SDL_PutAudioStreamData`.
+The conversion LUT arrays and the seekblock/tooling around the caller remain
+lab code; there is no SDL_mixer build or full WAV chunk dispatcher.
+
+- gcc and clang ASan on `edge` (256-byte A-law data payload) and `ulaw`
+  report `stack-buffer-overflow`, `WRITE of size 4`, top frame
+  `decoder_wav.c.vuln:759`, then `FetchALaw:771` / `FetchULaw:766` and real
+  caller `:1668`. ASan places `buffer` at `[32,1056)` in `RealGetAudio` and
+  the access at offset 1180 (124 bytes past the object at the first reported
+  store, `i=255`; later stores walk back toward offset 1024).
+- gdb on `g++-vuln-nossp edge`, breakpoint `:759 if i == 1`, reads `I=1`,
+  `OUT=buffer+1020`, LUT bit pattern `0x5a5a5a5a`; after the store
+  `buffer+1020..1027 = ff 7f 00 00 5a 5a 5a 5a` — four chosen bytes at the
+  first in-range out-of-bounds offset, reached through the real dispatch.
+- Fixed-tree ASan runs are clean with `rc=1`, all scenarios; `safe` (8-byte
+  data), `badfmt` (4-byte fmt chunk, parser rejects) and `pcm8` (PCM dispatch,
+  `decoded_framesize=1`, no `FetchXLaw`) are negatives with no false ASan
+  report.
+- `harness/realcaller/check.sh`: **PASS=96 FAIL=0**, trace
+  `934e83379c7b6d771269a96035a54480a9c5ab9dcaf5a169db6a6916ce2160c0`
+  over 12 binaries x 5 scenarios; evidence in `harness/realcaller/evidence/`.
+
+
+## 5. Next distinct rung move
+
+The real-caller slice above is now measured; the sample count comes from real
+SDL IO and real `ParseFMT`, not a lab stub. The next distinct slice is a real
+SDL_mixer build fed an actual WAV file, to learn whether a crafted fmt/data
+chunk reaches `FetchXLaw()` with attacker-controlled length and what adjacent
+object the 1020-byte store hits. Beyond that, a consumer path, socket/wire
+delivery and pointer/IP control remain UNKNOWN. No pointer-sizing primitive
+was demonstrated: the written value is a float bit pattern chosen as a marker,
+not an address read from the input.
+
 
 ## 6. Honest ceiling
 
-Direct call with a 1024-byte stack buffer shaped like the real caller; all
-surrounding types, IO and the conversion LUT are lab stubs. No SDL or SDL_mixer
-build, no real WAV file, no decoder/format-chunk setup, no consumer executed,
-no socket or wire, no pointer/IP control, no command execution and no witness
-verdict. File reachability from the advisory and the claimed code execution
-are claims, **UNKNOWN** here. Rung 5 not attempted.
+Direct call and real-caller slice, both against pinned source bytes, with a
+1024-byte stack buffer matching the real caller. The real-caller harness uses
+real SDL3 IO, real `ParseFMT` and a real SDL audio stream, but the conversion
+LUT and the seekblock/tooling are lab code. No SDL_mixer build, no real WAV
+file or full chunk dispatcher, no decoder-owned consumer path, no socket or
+wire, no pointer/IP control, no command execution. Witness #2942 graded the
+direct-call evidence ESTABLISHED at rungs 1-4 only; the W179 real-caller
+evidence is author-produced and awaits independent replay. Advisory file-path
+reachability and the claimed code execution remain **UNKNOWN**. Rung 5 not
+attempted.

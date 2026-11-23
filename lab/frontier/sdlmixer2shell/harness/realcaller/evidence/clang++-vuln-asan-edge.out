@@ -1,0 +1,51 @@
+=================================================================
+==762027==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b03fc20049c at pc 0x59854a545265 bp 0x7ffc863b5be0 sp 0x7ffc863b5bd8
+WRITE of size 4 at 0x7b03fc20049c thread T0
+    #0 0x59854a545264 in FetchXLaw(WAV_TrackData*, unsigned char*, int, float const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:759:16
+    #1 0x59854a544e09 in FetchALaw(WAV_TrackData*, unsigned char*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:771:12
+    #2 0x59854a544b6a in RealGetAudio(WAV_TrackData*, SDL_AudioStream*, WAVSeekBlock const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:1668:20
+    #3 0x59854a5432a3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:1741:21
+    #4 0x7b03fde2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b03fde2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x59854a467434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/clang++-vuln-asan+0x2d434) (BuildId: 316094f79700a748867d18eadc01d9cf3e86a3bc)
+
+Address 0x7b03fc20049c is located in stack of thread T0 at offset 1180 in frame
+    #0 0x59854a5447af in RealGetAudio(WAV_TrackData*, SDL_AudioStream*, WAVSeekBlock const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:982
+
+  This frame has 1 object(s):
+    [32, 1056) 'buffer' (line 1658) <== Memory access at offset 1180 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realcaller/decoder_wav.c.vuln:759:16 in FetchXLaw(WAV_TrackData*, unsigned char*, int, float const*)
+Shadow bytes around the buggy address:
+  0x7b03fc200200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200400: 00 00 00 00 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x7b03fc200480: f3 f3 f3[f3]00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b03fc200700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==762027==ABORTING

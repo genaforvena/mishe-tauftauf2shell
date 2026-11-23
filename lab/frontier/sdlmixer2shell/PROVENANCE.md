@@ -59,9 +59,42 @@ and gdb reports back to pinned upstream lines.
 - Rung 4 chosen bytes were observed with gdb at the first out-of-bounds
   store, not in a post-return exploit path. The written value is a float bit
   pattern, not pointer-derived; no pointer or instruction-pointer control.
-- No real SDL/SDL_mixer build, WAV parsing, decoder dispatch, consumer,
-  socket/wire, command execution or witness replay. Advisory file-path
-  reachability and RCE claim remain UNKNOWN.
+- At W173 no witness replay existed; witness #2942 later graded the
+  direct-call evidence ESTABLISHED at the labeled rungs 1-4 only, explicitly
+  NOT rung 5. Advisory file-path reachability and the RCE claim remain UNKNOWN.
+
+## Real-caller harness (W179, 2026-11-23)
+
+- Provisioning: SDL3 `release-3.2.4` tarball
+  `deps/SDL3-release-3.2.4.tar.gz`, SHA-256
+  `0fc1d23e225e2a098976571bf5d62b6d81e0ae84ff3d82a35a3d19ab04d07e5c`,
+  from <https://github.com/libsdl-org/SDL/archive/refs/tags/release-3.2.4.tar.gz>.
+  Built headless with `-DSDL_UNIX_CONSOLE_BUILD=ON -DSDL_SHARED=ON`, X11,
+  Wayland, audio backends, joystick/haptic, video and render disabled; output
+  `deps/SDL-release-3.2.4/build/libSDL3.so`. Fetch only, no external probe.
+- Verbatim pinned slices with `#line` mapping: types `:41-230`, channel-mask
+  helper `:828-843`, `ParseFMT` `:845-978`, `FetchXLaw`/wrappers `:750-772`
+  and the caller `:1654-1679` (fixed tree `:1666-1691`). The generated driver
+  is `harness/realcaller/real-driver-{vuln,fixed}.cpp`.
+- Lab code: conversion LUT arrays with chosen bit pattern `0x5a5a5a5a`,
+  sibling fetcher stubs referenced by verbatim `ParseFMT`, synthetic WAV
+  fmt/data bytes, seekblock and driver main. Real SDL3 IO, real `ParseFMT`
+  framesize setup and real `SDL_CreateAudioStream`/`SDL_PutAudioStreamData`.
+- Scenarios: `safe` 8-byte A-law data; `edge` 256 bytes A-law; `ulaw` 256
+  bytes mu-law; `badfmt` 4-byte fmt chunk (parser rejects); `pcm8` PCM_CODE
+  (dispatch to sibling fetcher, `decoded_framesize=1`). 12 binaries:
+  g++/clang++ x vuln/fixed x plain/asan/nossp.
+- `cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh`
+  → `PASS=96 FAIL=0`, trace
+  `934e83379c7b6d771269a96035a54480a9c5ab9dcaf5a169db6a6916ce2160c0`.
+  ASan reports `WRITE of size 4` at pinned `:759` via `FetchALaw:771` or
+  `FetchULaw:766` and caller `:1668`; fixed-tree and negative runs are clean.
+  gdb on `g++-vuln-nossp edge` at `:759 if i == 1`: LUT `0x5a5a5a5a`,
+  `buffer+1020..1027 = ff 7f 00 00 5a 5a 5a 5a` (four chosen bytes at the
+  first in-range OOB offset). Evidence under `harness/realcaller/evidence/`.
+- Ceiling: no SDL_mixer build, real WAV file/full chunk dispatcher,
+  decoder-owned consumer, socket/wire, pointer/IP control or command. The
+  W179 evidence is author-produced and awaits independent witness replay.
 - Sibling candidate screened out this wake for scope: CVE-2026-133274
   (THC-Hydra Set-Cookie negative `strncpy`, fix `6ab9ad8`) — tractable but a
   different target; not staged. Scout shortlist for later wakes: ThorVG
