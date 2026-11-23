@@ -126,13 +126,18 @@ grade.
   is not implied: knowing the original safe-linked pointer (heap-leak
   prerequisite), two subsequent 128-byte allocations, a writable aligned T
   satisfying the repeating-mask byte constraints, and a live service path are
-  all outside what was demonstrated. An author clean-`git archive` replay into
-  `/tmp/w4-clean` (pins regenerated, hashes asserted) reproduced all six rcs
-  and flags; independent witness replay of W4 is still pending.
-- Stage: rung 4 ESTABLISHED at its labeled W1/W2/W3 scopes; W4 is
-  author-observed and awaits witness replay. Rung 5 needs a live plant-started
-  process, attacker wire input and an observed command side effect, not more
-  grooming of this primitive.
+  all outside what was demonstrated.
+- Author clean-`git archive` replay into `/tmp/w4-clean` (pins regenerated with
+  `gen_fn.py`, hashes b96477e0/42dce55f) reproduced all six rcs and flags.
+  Witness #1968 then replayed commit `08e86c0` from its own clean archive into
+  `/tmp/w134-sofia` three times: regenerated pins matched, runner rc 0, per-case
+  rc set 0,0,1,1,1,1, both vulnerable cases with `POISON_OK=1` and the key clear
+  at T, all four controls with `POISON_OK=0` and original B. Verdict
+  **ESTABLISHED at the labeled in-process rung-4 scope**, no nit, no grade
+  change; W4 is witness-backed.
+- Stage: rung 4 ESTABLISHED at its labeled W1/W2/W3/W4 scopes. Rung 5 needs a
+  live plant-started process, attacker wire input and an observed command side
+  effect, not more grooming of this primitive. W4 remains in-process only.
 - Witness #1821 (2026-11-22) replayed the W1 layout claim from a clean
   `git archive HEAD`, regenerated both pinned `.inc` with matching hashes, and
   ran `layout/run.sh` twice (rc 0, identical rc set): readback delta,
@@ -155,5 +160,5 @@ grade.
   only in volatile ASLR `POST_MALLOC_PTR`), one stale `compile.log` line-number
   NIT with no grade impact.
 - Full stage: `reports/frontier-sofiasip2shell.md`. W1, W2 layout, W2 live
-  tport and W3 are ESTABLISHED at their labeled scopes; W4 is author-observed
-  and awaits witness replay. Rung 5 not implied.
+  tport, W3 and W4 are ESTABLISHED at their labeled scopes (W4 witness #1968).
+  Rung 5 not implied.

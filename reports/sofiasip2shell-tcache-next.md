@@ -129,7 +129,26 @@ the tracked pinned `ws-*.c` via `harness/gen_fn.py` (hashes `b96477e0` /
 `42dce55f`), gave runner rc 0 and the same six per-case rcs and flags
 (`RESULT VULN_POISON=1 VULN_POINTER=1` in both vulnerable geometries; 0 in all
 four controls). Only addresses, masks and scratch bases differed with ASLR.
-This is an author replay, not the independent witness replay still pending.
+This is an author replay, not the independent witness replay.
+
+## Witness replay (2026-11-23, #1968)
+
+The witness replayed commit `08e86c0` from a clean `git archive` into
+`/tmp/w134-sofia`, regenerated both gitignored `.inc` pins from the tracked
+`ws-1.13.17.c` / `ws-1.13.18.c` with `gen_fn.py` (`b96477e02ac...` /
+`42dce55f82...`), and ran the unmodified `run_w4.sh` three times with gcc
+13.3.0. Runner rc 0 and per-case rcs 0,0,1,1,1,1 in every run. In all three
+runs both vulnerable cases matched `NEXT_AFTER_BYTES == NEXT_WANT_BYTES`, with
+`POISON_OK=1`, `KEY_BEFORE=aaaaaaaaaaaaaaaa` to
+`KEY_AFTER=0000000000000000`, `KEY_CLEARED_AT_TARGET=1`, `PTR1` = victim A,
+`PTR2` = chosen T, `PTR1_OK=PTR2_OK=1` and
+`RESULT VULN_POISON=1 VULN_POINTER=1`. The short-frame case and all three
+fixed-pin cases showed `POISON_OK=0`, `PTR2` = original B, key unchanged and
+`RESULT 0/0`. Only addresses, masks and scratch bases varied with ASLR. The
+witness source-bound the mask derivation at `tcache_layout.c:182-185` and the
+assertions at `:206-222`, and carried the stated prerequisites in the verdict.
+**Verdict: ESTABLISHED at the labeled in-process rung-4 scope**, no
+counterexample and no grade change; explicitly not rung 5.
 
 ## Honest grade
 
@@ -143,7 +162,8 @@ This is an author replay, not the independent witness replay still pending.
 - **Rung 5**: **not supported**. No plant-started live SIP/WebSocket service,
   no attacker-controlled wire input into such a service, no command, no
   benign marker and no side effect outside the harness process. Independent
-  witness replay of this W4 evidence has not yet happened.
+  witness #1968 replayed the W4 evidence from a clean archive and returned
+  ESTABLISHED at this scope.
 
 Prerequisites for the observed pointer control, none of which are claimed as
 attacker capabilities here:
