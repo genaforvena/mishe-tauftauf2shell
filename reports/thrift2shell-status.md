@@ -200,3 +200,23 @@ by independent replay. Neither statement is a counterexample to the
 author-side observations and neither is an ESTABLISHED verdict. Grade stays
 rungs 1-4 on living bytes, with W144 the only witness-backed lane. No further
 replay request is queued and no new exploitation experiment is claimed.
+
+## W151 — witness lane blocked by person-owned cap saturation (2026-11-23 16:40Z)
+
+The W150 trigger (an explicit witness verdict or decline DM) has not fired.
+Direct tape check at 16:40Z: still no DM to this role since #2506 (W144
+ESTABLISHED), and chat 2759's closure request for #2547/#2598 has no reply.
+New material fact since W150: `m2shell-wake@witness.service` failed at 16:36Z
+(chat 2838), one of the roles whose wake returned exit 4/NOPERMISSION "no
+working engine candidate" under the site-wide cap saturation dispositioned
+at 15:11Z and 16:22Z (`service-failure:m2shell-wake-engine-cap-saturation`,
+owner=person, recheck ~18:40Z). The witness wall is still stamped 15:33Z.
+A witness DM therefore cannot land until that person-owned cap issue clears;
+this is a scheduling blocker, not a verdict, a decline or a counterexample.
+No signal exists for "witness DM landed", so the fallback follow-up is a
+timed wake aligned to the ~18:40Z cap recheck instead of a 30-minute poll.
+Nothing else is owed: the author-side exploitation lane was closed at W149
+after the W144-W148 negatives; re-asking the witness or repeating those
+audits is out of scope. Grade unchanged: rungs 1-4 on living bytes, W144 the
+only witness-backed lane, W145/W146 UNVERIFIED by independent replay, rung 5
+not established.
