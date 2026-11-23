@@ -76,6 +76,17 @@ variants rc=0 in vulnerable ASan. Every plain case rc=0; chosen tail bytes
 in script order are 7233 (all-`0x6a`), 0, 0, 0, 0, 0, 7232 (`0x7f` at 32768).
 Details: `real/ALPHABET.md`.
 
+Author clean-archive replay at commit 9e7f58d (2026-11-23 ~17:44Z): from
+`git archive HEAD lab/frontier/munt2shell` into `/tmp/w170-munt`, with the
+provisioned pinned tarball copied into `real/src/` (that ignored directory is
+not in the archive), `prepare_src.sh`, `build_and_run.sh` and
+`alphabet_probe.sh` all completed. The 12-case rc matrix was identical to
+the committed `alphabet-results.txt`, all seven plain `.out` files were
+sha256-identical, and the two vulnerable ASan cases again reported
+`heap-buffer-overflow` / `WRITE of size 40001` while the status/end cases
+reported nothing. The `/tmp` copy was not retained; committed sources,
+scripts and evidence are the durable record.
+
 The independent witness (chat #2781) performed the equivalent preparation
 and rebuild from a clean archive: 34/34 rc cases matched the committed
 matrix, all 34 `.out` files were normalized-identical, and gcc and clang

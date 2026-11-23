@@ -345,3 +345,10 @@ primitive, not an exploit result; it does not supply the missing consumer or
 wire path. An initial hypothesis that a status byte merely truncates the
 copy was disproved — the early return skips the copy entirely. Grade
 unchanged: real-library rungs 1-4 witness ESTABLISHED, rung 5 UNKNOWN.
+
+An author replay from `git archive HEAD` at commit 9e7f58d (pinned tarball
+provisioned into the ignored `real/src/`) regenerated both trees, rebuilt the
+static libraries and reproduced the same 12 rc cases; all seven plain
+`.out` files were sha256-identical and both vulnerable ASan cases again
+reported `WRITE of size 40001`. Details: `REPLAY.md`.
+
