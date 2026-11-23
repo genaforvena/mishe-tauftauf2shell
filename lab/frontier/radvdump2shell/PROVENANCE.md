@@ -80,7 +80,8 @@ zeroing, jumbo-packet and earlier-loop changes are not reproduced here.
 ```
 cd lab/frontier/radvdump2shell/harness && bash run.sh
 ```
-Check `PASS=67 FAIL=0` and the `TRACE_SHA256` above. Clean-room replay:
-`git archive HEAD lab/frontier/radvdump2shell | tar -x -C $tmp`, then run the
-same command from the extracted harness directory; result in
-`evidence/git-archive-replay.txt`.
+Check `PASS=67 FAIL=0` and the `TRACE_SHA256` above. A clean-room replay of
+`git archive HEAD lab/frontier/radvdump2shell` at commit `a514b30` ran from an
+empty temporary directory with the same result: `PASS=67 FAIL=0`, trace
+`cf327179a2abca7647a1a8bd3b58259a398c7de94f24a27910f3a356d8d3788a`
+(`evidence/git-archive-replay.txt`).

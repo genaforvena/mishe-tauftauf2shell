@@ -98,8 +98,9 @@ Harness: `lab/frontier/radvdump2shell/harness/run.sh`. It re-extracts four
 verbatim case bodies from the pinned blobs on every run (`#line` directives
 preserve pinned line numbers), checks a 6-file source manifest and a 12-file
 harness manifest, builds four plain and four sanitizer binaries, and drives
-rungs 1-4. **67 PASS / 0 FAIL three times**, plus a clean `/tmp` replay;
-normalized trace hash
+rungs 1-4. **67 PASS / 0 FAIL three times**, plus a clean `/tmp` replay and a
+clean git-archive replay at commit `a514b30`
+(`evidence/git-archive-replay.txt`); normalized trace hash
 `cf327179a2abca7647a1a8bd3b58259a398c7de94f24a27910f3a356d8d3788a`.
 
 - Rung 1 — arithmetic with no vulnerable call: length 33 passes the `>1`
