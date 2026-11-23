@@ -89,3 +89,50 @@ untrusted SQL text to this parser, and the real stack layout after
    pointer or control-flow datum sits adjacent before considering a marker.
 3. Hand any live-wire rung-4 or rung-5 claim to the witness without upgrading
    this row first.
+
+## Real-object build and layout (2026-11-23 W145, target mind)
+
+Frontier's ceiling ("no real psqlODBC build, real stack layout after
+`param_pos` UNKNOWN") is now partly retired by a lab-local build of the
+pinned tags, but the live-wire ceiling is unchanged. Replay:
+`lab/frontier/psqlodbc2shell/real/replay.sh` builds worktrees for
+`REL-18_00_0005` / `REL-18_00_0006` from the provisioned `src/repo`, compiles
+the real driver with autotools (unixODBC sentinel
+`--with-unixodbc=__without_odbc_config` because `odbc_config` is absent),
+and links `real/real-driver.c` against the real upstream objects. The driver
+calls upstream `prepareParametersNoDesc()` with a zeroed StatementClass /
+ConnectionClass and four allocated descriptors: no stubs, no copied slices,
+but no PostgreSQL server, DSN, socket or ODBC driver-manager path either.
+
+- ASan vulnerable, 24-argument `{fn CONCAT(1,...)}`:
+  `WRITE of size 8` at `../vuln-src/convert.c:5637` in `processParameters`,
+  called from real `convert_escape:5864` -> `inner_process_tokens:3865` ->
+  `prepareParametersNoDesc:2928`. The 200-byte `{d}` body gives
+  `WRITE of size 1` at `convert.c:5786` (`F_ExtractOldTo` invocation; macro
+  defined at `:2424`). Fixed build rejects 24 args with
+  `RC=-1 ERRNUM=1 ERRMSG=too many parameters in the escape function call`
+  and is clean on the date body; safe inputs are clean on both tags.
+- Real gcc -O0 frame, measured under gdb: `param_pos` ends at `...d100`,
+  `nqb` at `...d420`, `key` at `...d4a0`, `buf_small` at `...d4f0`, saved
+  RIP at `...daf8` — 2808 bytes past the array, with locals in between.
+  The 200-byte `{d}` NUL lands in `buf[0]`, which immediately follows
+  `buf_small`. Larger `{fn}` inputs first corrupt `nqb->query_statement`
+  (SIGSEGV in `inner_process_tokens:4167`) before any saved pointer.
+- gcc -O2 with Ubuntu defaults: canary fires at 96 args
+  (`*** stack smashing detected ***`), n>=128 SIGSEGV with `$rbp=0xc3` and
+  small-integer backtrace frames — optimized frame data is corrupted, but
+  no isolated saved-RIP write, chosen pointer or control diversion was
+  observed. At -O2 the functions are inlined; ASan's frame still places
+  `param_pos [624,880)` next to `sqltype`, `keyword`, `key`, `relcnv`,
+  `buf_small`, `buf`, not next to a saved pointer. clang -O0 rejects the
+  16-argument case with `processParameters closing ) not found` (3x, cause
+  UNKNOWN) and faults at n>=64.
+
+Grade unchanged: rungs 1-4 on real-object layout evidence, no rung 5. Still
+UNKNOWN: live ODBC/SQLPrepare or wire reachability (no local PostgreSQL
+server), pointer control, chosen-offset control-flow datum, ASLR/grooming,
+marker side effect and witness verdict. The advisory's AV:N vector and the
+uninitialized-array limb remain claims, not lab observations.
+
+Next: hand to operator/witness for replay; a live-wire claim requires a
+loopback PostgreSQL server and an independently witnessed trigger.
