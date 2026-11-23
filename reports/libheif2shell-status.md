@@ -25,8 +25,10 @@ Admission changes no grade.
   (UNKNOWN). Affected libheif >= 1.15.0, < 1.23.7 (the advisory calls 1.23.7
   the planned patched release); vulnerable pin tag `v1.23.6`, fixed by
   `9ec655f`. The advisory's 1,155-byte Motion-JPEG sequence, 36,879-byte
-  allocation, 64-byte write and release-build SIGSEGV are claims, not lab
-  observations. The AV:N vector is advisory text, not a lab result.
+  allocation, 64-byte write and release-build SIGSEGV were staging claims;
+  W161/W162 locally observed the 64-byte write and the Release SIGSEGV, while
+  the 1,155-byte sequence and 36,879-byte allocation remain untested.
+  The AV:N vector is advisory text, not a lab result.
 - Primitive: `HeifPixelImage::extend_padding_to_size()` at
   `pixelimage.cc.vuln:623-624` reallocates when either memory dimension is
   smaller than the requested subsampled one; the replacement plane at `:629`
@@ -84,13 +86,21 @@ Observed: vulnerable build aborts with ASan `heap-buffer-overflow`,
 mixed file with rc 2 "All frames of a sequence must have the size of the
 first frame" and no ASan report. This moves rung 3 from direct-call harness
 to the advisory's real decoder-to-encoder file path. Still absent: wire or
-remote input, live process, pointer/control-flow target, command or marker,
-and witness replay of this new lane. Rung 5 remains UNKNOWN. A third,
-non-sanitized Release build of the same pin crashes with SIGSEGV (rc 139) on
-the mixed file and exits 0 on the safe input; gdb places the fault in the same
-`extend_padding_to_size` memcpy, so the advisory's release SIGSEGV is observed
-locally. Its 36,879-byte allocation remains a claim; this build's plane is
-32783 bytes.
+remote input, live process, pointer/control-flow target, command or marker.
+Rung 5 remains UNKNOWN. Independent W163 replay (witness #2729) ESTABLISHED
+this lane at the labeled local-file/process decoder-to-x265-encoder scope,
+rungs 1-4, no counterexample: 5/5 pins OK, byte-exact source and input/driver
+identity, mixed rc=1 ASan log normalized-identical, decode-only / vuln-safe /
+fixed-mixed / fixed-safe byte-identical, Release rc=139 SIGSEGV with the same
+8-frame gdb chain. Caveat: the witness reused hash-identified prebuilt static
+libraries after two from-scratch 137-object ASan builds were killed at 900s
+with 2/137 objects on the 2-CPU host; replay was input/driver and source
+identity, not a build-from-source replay (which remains UNKNOWN).
+A third, non-sanitized Release build of the same pin crashes with SIGSEGV
+(rc 139) on the mixed file and exits 0 on the safe input; gdb places the fault
+in the same `extend_padding_to_size` memcpy, so the advisory's release SIGSEGV
+is observed locally. Its 36,879-byte allocation remains a claim; this build's
+plane is 32783 bytes.
 
 ## W162 file-derived chosen bytes on the real file path (2026-11-23)
 
@@ -114,5 +124,20 @@ This is rung 4 on the real decoder-to-encoder file path, limited to file-
 derived chosen bytes at chosen offsets and malloc-metadata corruption. The
 neighbour is free memory, not a live pointer; the process faults after
 ~16 KB of further row copies. No wire input, live server, pointer target,
-grooming, marker or command. No independent witness verdict on this new lane
-yet; rung 5 remains UNKNOWN. A replay request is on the chat tape.
+grooming, marker or command. Rung 5 remains UNKNOWN. Independent W163 replay
+(witness #2729) ESTABLISHED this lane at the same labeled local-file/process
+scope, rungs 1-4, no counterexample: the committed generator reproduces the
+input byte-exact, the plain driver plus committed gdb commands and
+check_neighbour.py PASS with the exact file-derived bytes and free-chunk
+metadata overwrite, and the uniform-JPEG control gives uniform 0x40.
+Neighbour is still free memory, not a live pointer.
+
+## W163 witness boundary refinement (2026-11-23)
+
+The witness flipped the first frame's SOF instead of the second
+(`2615d5d0...`): decoding 64x512 then 512x64 made both frames encode, rc 0,
+no ASan report. The fault therefore needs decoded height > padded height with
+decoded stride < new stride — the `pixelimage.cc:643-646` copy pattern — not
+merely any dimension mismatch. This refines the boundary; it does not
+contradict the mechanism. Advisory 36,879-byte allocation is still untested
+(this build's plane is 32783).
