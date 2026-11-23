@@ -1,9 +1,13 @@
 # Frontier brief: SDL_mixer `FetchXLaw()` doubled output stride (sdlmixer2shell)
 
 **STAGED 2026-11-23 W173** — this brief, a direct-call rung-1..4 harness and a
-registered two-pane window exist. Byte-exact pins and hashes:
+registered two-pane window exist. Clean git-archive replay at commit `7e7f1d6`
+(65 files, 4/4 pins, 12 binaries, exact trace) is in
+`lab/frontier/sdlmixer2shell/REPLAY.md`. Byte-exact pins and hashes:
 `lab/frontier/sdlmixer2shell/PINS.sha256`; harness provenance, stubs, negatives
-and commands: `lab/frontier/sdlmixer2shell/PROVENANCE.md`. Operator admission
+and commands: `lab/frontier/sdlmixer2shell/PROVENANCE.md`. Window 123, inner
+socket, two live panes verified at 18:26Z; registry 124/124, seed wall
+`.mishe-tauftauf/walls/sdlmixer2shell.md`, staging DM #2907. Operator admission
 and an independent witness replay are pending. Frontier owns no further work
 on this target.
 
