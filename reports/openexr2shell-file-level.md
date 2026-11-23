@@ -312,5 +312,70 @@ Observations:
 Disposition: the advisory's deep-tiled claim is confirmed at the same labeled
 file-level CODE/CONSUMER scope. No grade change: this is still a purpose-built
 local-path C consumer, with no wire, socket, pointer target, command or marker;
-rung 5 stays UNKNOWN. The advisory's OpenImageIO and aarch64 claims remain
-untested.
+rung 5 stays UNKNOWN. The advisory's aarch64 claim was later confirmed in
+W169 below; OpenImageIO remains untested.
+
+## W169: aarch64 claim confirmed under qemu-user (2026-11-23)
+
+Prediction: the advisory's aarch64 reproduction reaches the same pinned sink
+and the same 4032-byte completed overwrite. This wake cross-built OpenEXRCore
+from the same two pinned release trees and ran the committed EXRs under
+`qemu-aarch64-static` 8.2.2 (user mode, x86 host).
+
+Build (committed recipe `lab/openexr2shell-real/aarch64/build-cross.sh`):
+`aarch64-linux-gnu-gcc` 13 for the 41 Core C sources, `clang` 18 with
+`--target=aarch64-linux-gnu` and host libstdc++ headers for the three Core C++
+translation units (`internal_ht.cpp`, `internal_ht_common.cpp` and 21 generic
+OpenJPH sources plus `ojph_mem_c.c`; SSE/AVX/VSX/WASM variants excluded).
+Generated headers (`OpenEXRConfig.h`, Imath config/compat) come from the
+existing x86 `build-vuln-plain` / `build-fixed-plain` trees. Runtime libraries
+are Ubuntu arm64 debs extracted into `lab/openexr2shell-real/aarch64/sysroot`:
+`libzstd1` 1.5.7+dfsg-4, `libdeflate0` 1.25-1ubuntu1 and `zlib1g`
+1.3.dfsg+really1.3.2-3ubuntu1.1, sha256 `4a3c2990...`, `8481b306...` and
+`796469a4...` (full values in `aarch64/debs/`). The full-file `internal_zstd.c`
+hashes were re-read from both source trees and matched the W160 pins exactly
+(`736dad69...` for 3.5.2, `0a2fe719...` for 3.5.3); the EXR hashes matched
+`283cec0e...` (scanline) and `aa9dba1f...` (tiled). This is a cross-built
+library, not a native aarch64 machine or an ASan build: the deviation from the
+x86 CMake build is the cross toolchain, the newer arm64 compression runtimes,
+and the manual inclusion of the single C/OpenJPH objects that CMake normally
+selects; no project source was edited.
+
+Commands (from `lab/openexr2shell-real`):
+
+```
+./aarch64/build-cross.sh 3.5.2 build-vuln-plain vuln
+./aarch64/build-cross.sh 3.5.3 build-fixed-plain fixed
+export LD_LIBRARY_PATH=$PWD/aarch64/sysroot/usr/lib/aarch64-linux-gnu
+qemu-aarch64-static -L /usr/aarch64-linux-gnu aarch64/flat_harness-vuln cases/poc.exr
+qemu-aarch64-static -L /usr/aarch64-linux-gnu aarch64/guarded_harness-vuln cases/poc.exr
+```
+
+Observations:
+
+- Scanline, vulnerable 3.5.2: baseline `DECODE rv=0` (rc 0,
+  `aarch64/evidence/flat-vuln-baseline.out`); PoC `DECODE rv=31`, then
+  `free(): invalid pointer` and qemu signal 6, rc 134
+  (`flat-vuln-poc.out`) — the same abort shape as the x86 plain build.
+- Scanline, fixed 3.5.3: PoC `EXR_ERR_CORRUPT_CHUNK ... got 256`,
+  `DECODE rv=23`, rc 1 (`flat-fixed-poc.out`); baseline clean, rc 0.
+- Guarded allocator, vulnerable 3.5.2: baseline `GUARD-TOTAL changed=0`;
+  PoC `BUFFERS ... alloc=23 size=64`,
+  `GUARD-CHANGE alloc=23 size=64 changed=4032 first=+0 expected=0xa1
+  actual@first=0x57`, `GUARD-TOTAL changed=4032`
+  (`guard-vuln-baseline.out`, `guard-vuln-poc.out`). The first overwritten byte
+  matches the x86 scanline observation; the copy length and destination
+  allocation match exactly.
+- Guarded allocator, fixed 3.5.3: PoC `DECODE rv=23`, no scratch allocation,
+  `GUARD-TOTAL changed=0` (`guard-fixed-poc.out`).
+- Tiled, vulnerable 3.5.2: baseline `rv=0`; PoC `rv=31` then
+  `free(): invalid pointer`, rc 134 (`tiled-vuln-{baseline,poc}.out`).
+  Fixed 3.5.3 tiled PoC: `rv=23`, rc 1 (`tiled-fixed-poc.out`).
+
+Disposition: the advisory's aarch64 claim is confirmed at the same file-level
+CODE/CONSUMER scope for both chunk shapes. No grade change: these are
+purpose-built local-path consumers under an emulator, with no native aarch64
+host, ASan on aarch64, wire input, pointer target, command or marker. Rung 5
+stays UNKNOWN. The aarch64 runtime is a newer libzstd/libdeflate than the x86
+build; the pinned decoder source, not the compression backend, supplies the
+faulty copy.

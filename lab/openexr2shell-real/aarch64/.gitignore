@@ -1,0 +1,7 @@
+# Cross-build products and provisioned arm64 runtime packages are not evidence.
+/debs/
+/sysroot/
+/core-vuln/
+/core-fixed/
+/*-vuln
+/*-fixed

@@ -1,0 +1,10 @@
+START rv=0
+TILECHUNK rv=0 packed=52 unpacked=64 width=64 height=1
+INIT rv=0 channels=1
+ROUTINES rv=0
+RUN flags=0
+cases/poc_tiled.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample count table
+cases/poc_tiled.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Decode pipeline unable to unpack deep sample table
+DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA
+free(): invalid pointer
+qemu: uncaught target signal 6 (Aborted) - core dumped
