@@ -214,9 +214,12 @@ buffer with `vips_image_write_prepare()`, and drives public APIs under ASan:
   (`real/consumer-fixed-extract.out`, rc 0).
 
 `real/run-consumer.sh` rebuilds both probes and checks 12 assertions;
-`RESULT fail=0` at W3. The consumer is a real libvips operation on a real
-allocation, but the geometry is set programmatically rather than decoded
-from the TIFF, and the observed fault is a READ, not a write. The
+`RESULT fail=0` at W3 in the working tree and again from a clean
+`git archive HEAD lab/frontier/libvips2shell` extraction at commit `937e07d`
+with the two gitignored build/source trees symlinked in (`rc 0`, 12/12).
+The consumer is a real libvips operation on a real allocation, but the
+geometry is set programmatically rather than decoded from the TIFF, and the
+observed fault is a READ, not a write. The
 negative-offset WRITE still rests on the W2 direct call. No pointer, saved
 return address, control-flow datum, wire, command, marker or witness verdict
 was observed. Rung 4 on living bytes for the negative-offset address; rung 5
