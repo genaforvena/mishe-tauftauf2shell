@@ -40,6 +40,13 @@ illegal instruction. TYPE sink reproduces it, the fixed binary is clean and a
 debugger-free run dies too. No surviving modified control flow, no chosen byte,
 no command, no rung 5, no grade change.
 
+W19 (2026-11-23 ~13:20Z) closes the last unmeasured nonzero caller-local words
+in the stock `-O2` frame. The wire NUL does modify pointer copies at offsets
++176/+240/+320/+384 (message buffer) and +328/+392 (endpoint), but the live
+caller arguments are unchanged at the return and every sampled landing
+survives: these are dead by-value stack slots, not new control-flow targets.
+Grade and rung unchanged; no chosen byte, no command, no rung 5.
+
 ## Claim and pins
 
 - CVE-2026-123200 (CNA VulnCheck), CWE-787, pre-auth network write.
@@ -893,6 +900,45 @@ landing. No chosen byte, no surviving modified control flow, no command side
 effect, no rung 5, grade unchanged. Raw evidence in `out-w18-*/`; script
 `probe-opt-neg.sh` takes `BIN`, `MSGTYPE`, `LINE_PRE`, `LINE_POST` and `VAR`.
 
+## W19 — caller-local pointer words are dead copies (2026-11-23 ~13:20Z)
+
+No build change: the same vulnerable `build-opt-07.36/server_src/vrpn_server`
+(SHA-256 `bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`)
+and fixed `build-opt-fixed/server_src/vrpn_server` (SHA-256
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`) were
+reused. W16-W18 closed the canary, saved-register, saved-RIP and red-zone
+landings; the nonzero words between and beyond the caller saved RIPs were
+unmeasured. `out-w19-frame/gdb.log` dumps 48 quadwords from `&sender_name+128`
+at the SENDER store with a harmless index 4. Relative to the array: `+136`,
+`+200` and `+312` are the three saved RIPs already mapped; `+144`/`+264` are
+`0xffffffff`, `+168`/`+232`/`+280` are `8`, `+376` is `6`, `+400` is `0x20`;
+and `+176`/`+240`/`+320`/`+384` are `0x5555556a7380` (the incoming message
+buffer), `+328`/`+392` are `0x5555556a7220` (the endpoint), and `+408` is a
+return address. The pointer words are by-value `HANDLERPARAM.buffer` /
+`userdata` copies in the unoptimized caller frames, not the live arguments.
+
+Debugger-free `probe-func-dos.sh` with explicit `BIN=` on loopback ports
+14410-14428: indices 144, 168, 176-183, 240, 320, 328, 376, 384, 392 and 400
+all `ALIVE_AFTER_MESSAGE`; fixed-commit index 176 and vulnerable short index 4
+are also ALIVE. ALIVE alone does not prove the write landed, so
+`out-w19-gdb-176/gdb.log` traces a breakpoint at the store and a second one at
+the caller's `vrpn_Connection.C:1447`: slot `+176` goes from `0x5555556a7380`
+to `0x5555556a7300` (low byte `0x80` -> `0x00`), while the live `buffer=` shown
+in frames `#1` (`doSystemCallbacksFor :1424`), `#2` (`dispatch :4331`) and `#3`
+(`getOneTCPMessage :4239`) stays `0x5555556a7380`. That matches the pinned
+source: `doSystemCallbacksFor :1446-1452`, `dispatch :4331-4339` and
+`getOneTCPMessage :4239-4245` return without re-reading `p.buffer`; only the
+handler itself uses it, before the write.
+
+This closes the remaining nonzero caller-local words as a *negative* result:
+wire input does modify a live-looking pointer value at a chosen offset, but
+the modified stack slot is never consumed, so it is not a new rung-4 boundary,
+pointer control with downstream effect, command side effect or rung 5. Grade
+unchanged; raw logs, client output, server stderr and per-run `meta.txt`
+(binary SHA, port, index, status) are in `out-w19-*/`. All ports were loopback
+and were freed; no server left running. Author self-observation, not
+independently replayed.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
@@ -914,6 +960,13 @@ effect, no rung 5, grade unchanged. Raw evidence in `out-w18-*/`; script
   104-111, saved rbp at 120, saved rip at 136-143, with two further live
   caller returns at +200 and +312 (W17). All ranges are specific to g++
   13.3.0 on this host and must be re-measured on any other build.
+- W19 closes the remaining nonzero caller-local words (144-199, 208-311)
+  at `-O2`: the `+176`/`+240`/`+320`/`+384` buffer-pointer and
+  `+328`/`+392` endpoint copies are modified by the wire NUL but are dead
+  by-value slots, with the live caller arguments unchanged at `:1447`. Every
+  sampled landing there survives. No new control-flow target, pointer effect
+  with downstream use, command side effect or rung 5; do not resweep this
+  region on the same build.
 - W6's DoS signature (SIGSEGV/SIGILL) is a **Debug -O0 layout effect**; W7's
   -8/120 samples were non-fatal at `-O2`. W8/W10 measure a distinct stock `-O2`
   consequence: indices 105-111 zero a nonzero canary byte and abort with

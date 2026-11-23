@@ -561,3 +561,33 @@ index and status. All ports were freed; no server left running. Author
 self-observation; grade unchanged, no chosen byte, no command side effect, no
 rung 5.
 
+## W19 — caller-local frame words at -O2 (2026-11-23 ~13:20Z)
+
+No build change: vulnerable `build-opt-07.36/server_src/vrpn_server` (SHA-256
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`) and fixed
+`build-opt-fixed/server_src/vrpn_server` (SHA-256
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`) reused.
+Two throwaway gdb command files were written for this wake and preserved with
+the raw evidence: `out-w19-frame/gdb.cmd` dumps 48 quadwords from
+`&sender_name+128` at SENDER `:4554`; `out-w19-gdb-176/gdb.cmd` breaks at the
+store and again at caller line 1447, recording slot PRE/POST and a backtrace.
+Both used the existing `wire_inject.py` framing and loopback port 14400 /
+14430 respectively.
+
+`out-w19-frame/gdb.log` (harmless index 4) measures nonzero caller-local words
+relative to `sender_name`: +144/+264 `0xffffffff`, +168/+232/+280 `8`, +376
+`6`, +400 `0x20`; buffer-pointer copies `0x5555556a7380` at +176/+240/+320/
++384; endpoint copies `0x5555556a7220` at +328/+392; plus the mapped saved
+RIPs at +136/+200/+312 and a return word at +408.
+
+Debugger-free `probe-func-dos.sh` with explicit `BIN=` on loopback ports
+14410-14428: vulnerable indices 144, 168, 176-183, 240, 320, 328, 376, 384,
+392 and 400, fixed index 176, and vulnerable short index 4 all
+`ALIVE_AFTER_MESSAGE`. `out-w19-gdb-176/gdb.log` proves the write landed:
+slot +176 `0x5555556a7380` -> `0x5555556a7300` at line 1447 while live
+`buffer=0x5555556a7380` is unchanged in backtrace frames #1-#3. Pinned source
+`:1446-1452`, `:4331-4339`, `:4239-4245` shows the caller never re-reads those
+copies. Each `out-w19-sweep-*/meta.txt` and `out-w19-ctl-*/meta.txt` records
+binary SHA, port, index and status. All ports were freed; no server left
+running. Author self-observation, grade unchanged, no chosen byte, no command,
+no rung 5.

@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x50a32: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+Breakpoint 2 at 0x4df42: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 1447.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=176 array=0x7fffffffd990
+PRE slot176=0x5555556a7380 slot328=0x5555556a7220
+POST-RETURN line1447 slot176=0x5555556a7300 slot328=0x5555556a7220
+#0  vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, p=..., userdata=userdata@entry=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1447
+#1  0x00005555555a200d in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, type=-1, sender=0, time=..., len=8, buffer=0x5555556a7380 "", userdata=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#2  0x00005555555a4059 in vrpn_Endpoint::dispatch (this=0x5555556a7220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x5555556a7380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#3  0x00005555555a553a in vrpn_Endpoint_IP::getOneTCPMessage (this=this@entry=0x5555556a7220, fd=6, buf=0x5555556a7380 "", buflen=buflen@entry=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)
