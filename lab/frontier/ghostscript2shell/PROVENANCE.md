@@ -80,12 +80,14 @@ the same PFA with no injected lines.
 Real interpreter, real Type 1 font loader, real bound helper, real `.forceput`.
 Not a C slice over stubs. `systemdict` is a genuinely readonly global dict;
 the observed write is a privileged store performed by the interpreter's own
-`.forceput`, with the writeup's five-pop `/typecheck` handler. The marker value
-is a benign integer; no local object was stored into a surviving global dict,
-so no UAF was demonstrated. The fixed control changes only the shipped
-`gs_fonts.ps` operand-type guard. No ASan build, no native memory inspection,
-no pointer chain, no `-dSAFER` bypass, no `%pipe%` command, no network or
-application chain.
+`.forceput`, with the writeup's five-pop `/typecheck` handler. This section
+records the baseline rung-1/2 finding only. Later sections supersede its
+ceiling: a local object was stored into a surviving global dict and a UAF was
+demonstrated (rung 4), an ASan build confirmed the corruption (rung 3), and
+native pointer-chain writes plus a state-level `-dSAFER` flip were measured.
+The fixed control changes only the shipped `gs_fonts.ps` operand-type guard.
+Still absent: any `%pipe%` command, benign command execution, or network /
+application delivery — rung 5 remains a separate claim.
 
 ## Verification
 

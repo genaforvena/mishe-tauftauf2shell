@@ -2,7 +2,8 @@
 % Bounded native chain probe. Forge temporary string views through the stale
 % systemdict reference and walk the writeup's x86-64 offsets from currentdevice
 % to path_control_active. No absolute process address is guessed. This probe
-% READS the four path-control bytes; it does not write them or run a command.
+% writes four benign bytes to path_control_active (0->1) and restores them;
+% it does not run a command.
 % Byte arithmetic uses idiv/mul: this build's bitshift truncates >32-bit ints.
 /LoaderOriginalTypecheck errordict /typecheck get def
 errordict /typecheck {
