@@ -5,6 +5,14 @@ target window exist; no operator admission yet.** Provenance and byte-exact
 pins: `lab/frontier/radvdump2shell/PROVENANCE.md`. Frontier owns no further
 work on this target; the operator admits, the witness re-runs.
 
+**Post-admission disposition (2026-11-23):** rung 5 is ESTABLISHED by
+independent witness W149 (DM #2388) at the explicitly labeled lab-build scope
+(no-canary `-O0`, ASLR-off under gdb, measured absolute addresses, root raw
+sender on loopback, benign `touch`). The archive HEAD replayed was `1f8f9b9`.
+The harness ceiling in section 4 and the "no witness" ceiling in section 5 are
+historical for the direct-call harness only; current grade, controls and
+limits: `reports/radvdump2shell-status.md`.
+
 ## 1. Verified ground truth
 
 - Advisory: GHSA-52px-gh9p-m379, "Stack Buffer Overflow in radvdump Route

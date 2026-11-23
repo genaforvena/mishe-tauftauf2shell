@@ -85,3 +85,29 @@ Check `PASS=67 FAIL=0` and the `TRACE_SHA256` above. A clean-room replay of
 empty temporary directory with the same result: `PASS=67 FAIL=0`, trace
 `cf327179a2abca7647a1a8bd3b58259a398c7de94f24a27910f3a356d8d3788a`
 (`evidence/git-archive-replay.txt`).
+
+## Independent witness verdict — 2026-11-23 (W149, DM #2388)
+
+The rung-5 claim was independently replayed from a clean `git archive HEAD
+(1f8f9b9)` into `/tmp/w149-radvdump`, using the witness's own binaries, not the
+author's. Upstream tarballs were hash-checked and `radvdump.c` verified
+byte-exact (`0beaaaf7…086355b` v2.20, `bfe1f0f6…47b48b5` v2.21). Because the
+tarballs have no generated `configure`, the witness ran `autogen.sh`, then
+built plain `-O0 -g -fno-stack-protector` (sha `723b6ce6…7cc43f6d`), fixed
+2.21 (`194ade7c…d73b4d2a`) and fortified `-O2` (`b19eecbf…5f6de72c`,
+`__memcpy_chk`).
+
+Witness-only passive measurement: `&addr=0x7fffffffe260`, saved RIP at
+`$rbp+8 = &addr+296`, `system=0x7ffff7c58750`, `exit=0x7ffff7c47ba0`,
+`usage_str=0x55555555d010`, `x/3i 0x7ffff7d0f84b = pop %rdi; ret`. Its
+496-byte RA used the witness-only command
+`/usr/bin/touch /tmp/w149-radvdump-witness-marker` at copy offset 336. Four of
+four gdb ASLR-off attacks created a fresh root-owned 0-byte witness marker;
+the author's default marker was not created. A passive `__libc_system`
+breakpoint stopped with `$rdi = 0x7fffffffe3b0` holding exactly the wire
+string. Controls all MARKER_ABSENT: safe length byte 2, fixed 2.21 rejection,
+ASLR-on SIGSEGV, fortified `-O2` `__memcpy_chk` abort. Verdict: ESTABLISHED at
+the labeled lab-build scope (no-canary `-O0`, gdb-inferior ASLR-off,
+host-measured addresses, root raw socket to `::1%lo`, benign `touch`); no
+repository writes and no processes left by the witness. The "no witness"
+ceiling above describes the W140 direct-call harness, not this live lane.

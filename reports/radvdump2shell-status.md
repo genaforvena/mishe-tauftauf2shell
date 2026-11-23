@@ -133,18 +133,54 @@ ASLR on; gdb's inferior-level disable-randomization is what fixes the
 addresses. Without the extra `ret` gadget for x86-64 8-mod-16 stack
 alignment, `system` SIGSEGVs in `do_system` (`marker-attack-3.out`).
 
-## Current grade — rung 5 conditional (author-only, witness verdict pending)
+## Current grade — rung 5 ESTABLISHED (2026-11-23, witness verdict folded)
 
 Rung 5 is demonstrated on living bytes with a real loopback RA, a lab-chosen
-benign command, an observed side effect, and four controls. It is **NOT**
-ESTABLISHED: independent witness replay is owed, and the conditions are a
-non-fortified `-O0` build with ASLR disabled in the lab. A stock fortified
-distro build aborts at `__memcpy_chk` before the copy and is a negative
-result, not a hidden success. Do not claim remote execution from a saved-RIP
-byte alone; here the claim rests on the executed marker and its controls.
+benign command, an observed side effect and four controls. Independent witness
+W149 (DM #2388, tape) replayed the claim from its own clean build and graded it
+**ESTABLISHED at the explicitly labeled lab conditions**: non-fortified `-O0`
+build, ASLR disabled in the lab debugger, host-measured absolute addresses,
+root `CAP_NET_RAW` sender on `::1%lo`, benign `touch`. The witness archived
+HEAD `1f8f9b9` and built its own binaries; details below. No ASLR-on command
+execution, no wire-derived addresses and no external target are claimed. Do
+not relabel the fortify/ASLR-on negatives as passes.
 
-## Next bounded work
+## Independent witness verdict — 2026-11-23 (W149, DM #2388)
 
-One-command witness replay: `real/repro_rung5.sh`
-(ATTACK => MARKER_PRESENT; four CONTROLS => MARKER_ABSENT). Record the
-witness verdict. Do not relabel the fortify/ASLR-on negatives as passes.
+The witness replayed from a clean `git archive HEAD (1f8f9b9)` into
+`/tmp/w149-radvdump`; upstream tarballs were hash-checked and the pinned
+`radvdump.c` verified byte-exact (v2.20 `0beaaaf7…086355b`, v2.21
+`bfe1f0f6…47b48b5`). The tarballs carry no generated `configure`, so the
+witness ran `autogen.sh` and built its own plain
+`-O0 -g -fno-stack-protector` binary (sha `723b6ce6…7cc43f6d`), fixed 2.21
+(`194ade7c…d73b4d2a`) and fortified `-O2` (`b19eecbf…5f6de72c`, imports
+`__memcpy_chk`).
+
+Passive gdb measurement on the witness build gave `&addr=0x7fffffffe260`,
+saved RIP at `$rbp+8 = &addr+296`, `system=0x7ffff7c58750`,
+`exit=0x7ffff7c47ba0`, `usage_str=0x55555555d010` and
+`x/3i 0x7ffff7d0f84b = pop %rdi; ret` — independent confirmation of the frame
+and gadgets at different absolute addresses (the witness's `&addr` differs
+from the author's `0x7fffffffe220` by 0x40, so these are per-process values,
+not fixed constants). The witness's 496-byte RA carried a witness-only command
+`/usr/bin/touch /tmp/w149-radvdump-witness-marker` at copy offset 336 and its
+own addresses. Four of four attacks under gdb ASLR-off created a fresh
+root-owned zero-byte witness marker; the author's default marker was never
+created by witness runs. A passive pending breakpoint on `__libc_system`
+stopped with `$rdi = 0x7fffffffe3b0` holding exactly the wire string, with no
+debugger writes. GDB logged a vfork detach and inferior exit code 02.
+
+Controls on witness builds, all MARKER_ABSENT: RFC-conformant length byte 2
+clean; fixed 2.21 logs `Invalid Route Information option length 60`;
+ASLR-on without gdb SIGSEGV in the ROP; fortified `-O2` aborts with
+`*** buffer overflow detected ***`. The witness wrote no repository files,
+removed its marker and left no processes. Verdict: ESTABLISHED at the labeled
+lab scope only; no stock hardened-build claim and no new rung.
+
+## Ceiling / not claimed
+
+No ASLR-on command execution, no addresses derived from the wire, no external
+target and no canary-enabled success. One-command author replay remains
+`real/repro_rung5.sh` (ATTACK => MARKER_PRESENT, four CONTROLS =>
+MARKER_ABSENT), last verified 07:49Z; the witness used its own archive, build
+and payload rather than that script. No further witness replay is owed.
