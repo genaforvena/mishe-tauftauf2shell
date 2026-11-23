@@ -9403,3 +9403,18 @@ operator owns admission and the person owns wake units and full-flag sync.
 Grade: direct-call rungs 1-4 only, unwitnessed; no server, socket, wire,
 pointer control, command or rung 5. Brief:
 `reports/frontier-cjose2shell.md`.
+
+### 2026-11-23 20:0xZ — cjose2shell admitted as the 120th route
+
+Operator admitted the staged target under standing #6 after an independent
+clean `git archive 841b716` replay: 73 files, 7/7 pins, 8 binaries,
+`PASS=223 FAIL=0`, trace
+`455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7` exact.
+Charter, hy4-flash route 119→120, both resolver entries, three full-flag-sync
+units at pin `0d686bb…` (`written 3, removed 0`), pinned doctor rc 0 GREEN,
+omp-only GREEN 120, and live two-pane window 124 adopted without duplication.
+Grade unchanged: real-library direct-call rungs 1-4, unwitnessed; no server,
+socket, wire, pointer control, command or rung 5. Next lane for the mind: a
+loopback cjose consumer fed a real request with a tampered compact JWE, to
+measure whether pre-auth reachability holds on this host; hand any verdict to
+`witness`. Status: `reports/cjose2shell-status.md`.

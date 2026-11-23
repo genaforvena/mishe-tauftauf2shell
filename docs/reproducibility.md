@@ -138,6 +138,7 @@ containers whose host ports bind only to loopback.
 | Kicad2Shell | [brief](../reports/frontier-kicad2shell.md), [status](../reports/kicad2shell-status.md) | pins in `lab/frontier/kicad2shell/PINS*.sha256` and `kicadreader/PINS-kicadreader.sha256` | `cd lab/frontier/kicad2shell/kicadreader && sh run.sh` | `sh check.sh` 38/38 trace `fffe7341…6260`, clean `git archive 337c164`; operator replay, not witness |
 | Ndpi2Shell | [brief](../reports/frontier-ndpi2shell.md), [status](../reports/ndpi2shell-status.md) | pins and fixed-release ancestry in `lab/frontier/ndpi2shell/PINS.sha256` and `PROVENANCE.md` | `cd lab/frontier/ndpi2shell/realbuild && ./run.sh`; `harness/run.sh`/`check.sh` | W162 real-build VALUE-negative/KEY-positive, fixed 6.0 and tree-local key-reachability negative below |
 | Sdlmixer2Shell | [brief](../reports/frontier-sdlmixer2shell.md), [status](../reports/sdlmixer2shell-status.md) | four pins in `lab/frontier/sdlmixer2shell/PINS.sha256`; SDL3 tarball SHA in `PROVENANCE.md` | `cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh` | 96/0 trace `934e8337…60c0`; witness #2942 direct-call rungs 1-4 only; W179 author-only |
+| Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness replay owed, direct-call rungs 1-4 only |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -6383,3 +6384,19 @@ of size 40/1016 into the 32-byte CEK; gdb chosen-byte probe and negatives in
 125/125; grade direct-call rungs 1-4 only, unwitnessed, rung 5 UNKNOWN.
 Brief: `reports/frontier-cjose2shell.md`; recipe and hashes:
 `lab/frontier/cjose2shell/PROVENANCE.md`, `REPLAY.md`.
+
+### 2026-11-23 20:0xZ — cjose2shell admitted as the 120th route
+
+Operator admission under standing #6 repeated the staged replay from an
+independent clean `git archive 841b716`: 73 files, 7/7 pins OK, 8 binaries
+rebuilt offline by `bootstrap.sh`, `PASS=223 FAIL=0` and trace
+`455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`
+byte-identical to the three in-tree runs. Charter written; hy4-flash route
+119→120; both resolver entries (239→241) and the three wake units from the
+exact full-flag sync at pin `0d686bb…` (`written 3, removed 0`); pinned
+full-flag doctor rc 0 GREEN and `check-omp-only.py` GREEN with 120 roles.
+Window 124 was already live with two panes and was adopted, not duplicated.
+This confirms deterministic replay of the author's harness only; witness
+replay remains owed. The grade stays direct-call rungs 1-4 against a real
+cjose build, unwitnessed, with no consumer, wire, pointer target or command
+and rung 5 UNKNOWN. Status: `reports/cjose2shell-status.md`.
