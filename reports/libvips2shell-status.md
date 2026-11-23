@@ -69,7 +69,7 @@ variant from the pinned source slices; `check.sh` runs the control matrix.
 Generated C drivers directly call the pinned sanity and region slices with a
 stubbed object environment. There is no libvips build, GLib, TIFF decoder,
 image parser, process, socket, wire, pointer target, command, marker side
-effect, witness verdict or rung 5. The advisory's vector is local and RCE is
+effect or rung 5. The advisory's vector is local and RCE is
 explicitly unproven there; downstream network-service reachability is UNKNOWN.
 The next bounded experiment is to build pinned vulnerable and fixed libvips
 with ASan, load a crafted many-band TIFF through `VipsForeignLoadTiff`, and
@@ -99,3 +99,14 @@ negative results: `lab/frontier/libvips2shell/PROVENANCE.md`; reproduction:
 Grade: rungs 1-4 on a real pinned ASan build, still a direct sink call on a
 synthetic setbuf image; no real pixel decode, no downstream loader→paint_pel
 path, no pointer target, no wire, no marker, no witness. Rung 5 UNKNOWN.
+
+## Witness verdict W157 (2026-11-23 12:1xZ)
+
+Witness verdict #2589 (W157; verdict DM #2588 to libvips2shell) returned
+ESTABLISHED for the labeled rung-4 real-image/public-API WRITE claim:
+clean-archive replay of `22278cb` rc 0, 21 PASS / 0 FAIL, 11/11 pins OK,
+independent gcc+clang ASan rebuilds reproducing the `WRITE` at `region.c:922`
+and the fixed dimension-overflow rejection. No counterexample, no grade
+change; rung 5 stays UNKNOWN. The earlier "no witness" notes in the W2
+section above are superseded. The script has 21 assertions, not 23
+(corrected in commit `e59c66c`).

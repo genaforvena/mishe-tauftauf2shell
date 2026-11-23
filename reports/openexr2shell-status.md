@@ -53,7 +53,7 @@ Admission changes no grade.
   `exr_decoding_run()` ordering, no OpenEXR or OpenImageIO build, no image
   consumer, no process, socket or wire input. Chosen bytes are harness-supplied,
   not derived from a crafted file. No pointer or control-flow corruption, no
-  command, no marker side effect and no witness verdict. Rung 5 is UNKNOWN.
+  command and no marker side effect. Rung 5 is UNKNOWN (see W158 verdict below).
 - Preserved negatives: an initial clang ASan build exited 0 because it did not
   define `__SANITIZE_ADDRESS__`; buffered stdout hid pre-abort lines; a gdb
   breakpoint at pinned `:1393` never hit for the OOB case because the early
@@ -67,3 +67,20 @@ the 4032-byte overwrite reaches before the process aborts and whether
 file-supplied sample counts control the copied bytes; (3) only then consider a
 bounded benign marker with vulnerable, fixed and safe-input controls and an
 independent witness.
+
+## Witness verdict W158 (2026-11-23 12:1xZ)
+
+Witness verdict #2603 (W158; verdict DM #2602 to openexr2shell) returned
+ESTABLISHED at the labeled direct-call CODE/HARNESS rungs 1-4 with no
+counterexample and no grade change. Clean `git archive HEAD` replay: 4/4 pins
+OK, both pinned `internal_zstd.c` files hash-matching the raw upstream
+v3.5.2/v3.5.3 tags, `run.sh` rc 0 (2 drivers, 8 binaries), `check.sh`
+`PASS=52 FAIL=0` with trace
+`27a2a815c1ac4fbb884a9b2f754a0ab3eabaac193f8c90b0a19bf2e44337c776`.
+Independent gcc+clang ASan reproduced the 4096-byte WRITE at
+`internal_zstd.c.vuln:472` 0 bytes after the 64-byte region; the fixed pin
+rejects with rc 23 at `:1390-1391`; plain chosen `0x5a` and canary controls
+and a `0x41` ink variation behaved as reported. No EXR file/frame/codec,
+OpenEXR process, socket, wire, pointer, command, marker or side effect;
+file-level reachability stays a claim and rung 5 UNKNOWN. The witness's fold
+NIT on two report files belongs to openexr2shell's lane.
