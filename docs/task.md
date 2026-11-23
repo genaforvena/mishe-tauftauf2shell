@@ -7835,6 +7835,27 @@ harness only; the external advisory text remains UNKNOWN. What would change
 the grade: a measured controlled pointer or command side effect, or a witness
 replay of this probe.
 
+### 2026-11-23 — modauthoidc2shell W10 same-connection no-consumer check (author-only, unwitnessed)
+
+`full/probe-plain-keepalive.sh` watches the W9 corrupted word
+(`STORE=0x7ffff6de2221 WORD=0x7ffff5603d` → `AFTER=0x7ffff56000`) across three
+requests on the same TCP connection: all HTTP 302, no watchpoint hit within 70 s;
+a one-off `LD_PRELOAD` APR allocator trace found no covering allocation (nearest
+starts 0x6f bytes later). Preserved negative — no consumer of the corrupted word;
+pointer-bearing is the 8-byte shape, not a dereference. Grade unchanged, rung 4
+scoped. Replay: `cd full && bash build-plain.sh && bash probe-plain-oob.sh &&
+bash probe-plain-keepalive.sh`.
+
+### 2026-11-23 — modauthoidc2shell W11 response-path store (author-only, unwitnessed)
+
+`GET /redirect_uri?code=foo&state=foo` with the value-less cookie reaches the
+second caller `handle/response.c:353` → pinned `:219` on the plain loopback
+module; the store at `0x7ffff6ddc05e` changes `=foo&sta` to `\0foo&sta` at the
+wire-chosen `=` of `code=foo` in the copied request line. HTTP 400, JWE decode
+failure, watchpoint silent. Grade unchanged; byte always NUL, no dereference,
+chosen byte, pointer control, command or rung 5. Replay: `cd full && bash
+build-plain.sh && bash probe-plain-response.sh`.
+
 ## 2026-11-23 06:4xZ — radvdump2shell admitted as the 104th route
 
 Frontier W140 staged radvd `CVE-2026-48715 / GHSA-52px-gh9p-m379` in commits
@@ -8138,10 +8159,16 @@ registry entry were already live, so no window was created.
 Grade stays the author's: rung 3 ASan `WRITE of size 8` at pinned `:5637` and
 `WRITE of size 1` at pinned `:2424` with gcc and clang; scoped rung 4
 harness-chosen `0x5a` bytes in an adjacent sink (`FIRST_DIFF=0
-CHOSEN_5A=112`), fixed runs clean. No real psqlODBC build, driver manager,
-application SQL path, process, socket, wire, pointer control, command,
-witness verdict or rung 5; real application reachability UNKNOWN. Status:
-`reports/psqlodbc2shell-status.md`.
+CHOSEN_5A=112`), fixed runs clean. W146 measured the first OOB write at 16
+arguments (`convert.c:5657`, gcc+clang ASan `WRITE of size 8`; 15 clean) and
+resolved clang -O0's rejection as a `param_consumed` layout alias, not a parse
+difference; `real/live-replay.sh` then drove `SQLExecDirect` through unixODBC
+against a fake PG v3 handshake on 127.0.0.1:59432 to the same sink (fixed
+`rc=-1`, safe `rc=0`, `SQLPrepare` alone sends no Parse — all preserved results).
+No real psqlODBC build, driver manager, PostgreSQL server or application SQL
+path, pointer control, chosen-offset control-flow datum, marker, command,
+witness verdict or rung 5; real application reachability UNKNOWN, AV:N and
+CWE-457 stay claim/source-only. Status: `reports/psqlodbc2shell-status.md`.
 
 ## 2026-11-23 09:5xZ — thrift2shell admitted as the 108th route
 
@@ -8174,9 +8201,14 @@ historical "admission pending" description was left as a handoff record.
 Grade stays the author's: rung 3 gcc+clang ASan `WRITE of size 700` at pinned
 `:301` (fix parent `:320`), scoped rung 4 chosen bytes at inflated offsets
 0/16/32/64/128/256/699, fixed/v0.24.0/safe/gate controls clean. No real
-Thrift process, framing parser, socket, wire, pointer control, command,
-witness verdict or rung 5; live-server reachability UNKNOWN. Status:
-`reports/thrift2shell-status.md`.
+Thrift process, framing parser, socket, wire, code-pointer control, command or
+rung 5; live-server reachability UNKNOWN. Later limbs: KV-header grooming put a
+wire-chosen heap pointer in `free()` with ASLR off — witness ESTABLISHED rungs 1-4
+at the labeled lab scope, no counterexample, `-O1` flag NIT folded into the
+report — while an ASLR-on no-flush lab server reaches `free()` through the low
+16 bits of a live string pointer (author-only, witness pending); the rebuilt
+commands are in `reports/thrift2shell-livewire.md`. No marker side effect, ROP,
+command or rung 5. Status: `reports/thrift2shell-status.md`.
 
 ## 2026-11-23 10:0xZ — libvips2shell admitted as the 109th route
 
@@ -8209,9 +8241,15 @@ Grade stays the author's: rung 1/2 `CHAIN_REJECT=0 BPL=-256 LS=-256 WS=4`
 vs fixed `dimension overflow` / `CHAIN_REJECT=1`, rung 3 gcc+clang ASan
 `WRITE of size 4` at pinned `region.c.v8.18.2:1004` with fixed runs clean,
 rung 4 `CHAIN SINK=5a5a5a5a00000000` at `to-256` with gdb `Q = TO - 0x100`.
-No libvips build, TIFF decoder, image parser, process, socket, wire, pointer
-target, command, witness verdict or rung 5; network-service reachability
-UNKNOWN. Status: `reports/libvips2shell-status.md`.
+The direct-call grade at admission was later deepened by author-only, unwitnessed
+limbs: W2 built both pinned tags with ASan and loaded a crafted many-band TIFF
+(the `BPL=-256` write is the synthetic staged shape; the TIFF-accepted geometry
+has `bpl=-7296`), and W3 drove real region/consumer APIs on a real 8.6 GB buffer
+— `READ of size 160000` in `vips_region_copy` 6144 bytes before the allocation,
+with the decoded-TIFF consumer stall preserved as a negative and the
+negative-offset WRITE still resting on W2. No pointer target, wire, command,
+witness verdict or rung 5; network-service reachability UNKNOWN. Status:
+`reports/libvips2shell-status.md`.
 
 ## 2026-11-23 10:3xZ — jq2shell staged by frontier W146 (not admitted)
 
@@ -8238,6 +8276,27 @@ Cheapest next experiment: build pinned 1.8.1/1.8.2, drive both advisory
 expressions under ASan, then measure real heap overlap before any pointer
 test. Staging adds no route, wake units, charter or new window; admission and
 witness verdict remain pending.
+
+## 2026-11-23 10:5xZ — libfontenc2shell staged by frontier W154 (not admitted)
+
+Frontier W154 staged libfontenc CVE-2026-109908 / GHSA-98gj-rwr5-8j74 in commits
+`64e3c54`/`d05d8d8`. The advisory is High 7.8 CWE-122, local attacker-supplied
+`.enc` injection into an X server; affected "before 1.1.10" per the fix tag
+versus "before 1.11.0" in the advisory — the discrepancy is UNKNOWN and both
+strings are preserved. Fix `5920c6e` (parent `7418fa7`) adds the
+`index > 0xFFFF` bound and corrects the column check to use `from`; pins and the
+upstream regression-test reference are in `lab/frontier/libfontenc2shell/PINS.sha256`.
+The whole pinned `encparse.c` runs under `#line` over real zlib `gzFile` temp
+files with only font callbacks and `FONT_ENCODINGS_DIRECTORY` stubbed; a
+`SIZE 256 258` declaration plus `0xff00 0x5a5a` drives a chosen `WRITE of size 2` 508 bytes past a
+131072-byte region at pinned `encparse.c.vuln:495`, and the fixed pin rejects at
+`:461`. `PASS=50 FAIL=0` on three runs and from a clean `git archive 64e3c54`
+replay, trace `bfdd7987…37fa2`. The CVE/GHSA occur only in this lane's brief,
+pins, provenance and harness — no prior libfontenc target, window, charter or
+mind. Window 115 is registered; staging adds no route, wake units, charter or
+mind count, and admission and a witness verdict remain pending. Grade stays
+HARNESS rungs 1-4 only: no X server, font path, wire, allocator study, pointer
+control, command or rung 5. Brief: `reports/frontier-libfontenc2shell.md`.
 
 ## 2026-11-23 11:2xZ — jq2shell admitted as the 110th route
 
@@ -8268,3 +8327,26 @@ buffers with gdb readback. No jq build, JSON input, process, socket, wire,
 real allocator study, pointer control, command, witness verdict or rung 5.
 Status: `reports/jq2shell-status.md`; hand the replay to witness for an
 independent verdict.
+
+## 2026-11-23 11:3xZ — openexr2shell staged by frontier W155 (not admitted)
+
+Frontier W155 staged GHSA-98rx-qpfv-qcwv (High, no CVE or CWE stated): OpenEXR
+3.5.0–3.5.2 and `main` affected, fixed 3.5.3 by `7d7fbb1a`, which bounds the
+ZSTD grid total against `uncompressed_size` in `internal_zstd.c`. Vulnerable pin
+`v3.5.2`, fixed pin `v3.5.3`; exact digests in
+`lab/frontier/openexr2shell/PINS.sha256` and the claim URL plus preserved
+negatives in `lab/frontier/openexr2shell/PROVENANCE.md`.
+`compute_sorting_lookup()` discards the full grid total, so the existing
+`split > uncompressed_size` guard is vacuous for all-FLOAT parts and
+`sort2_4ByteChannels_tiled()` copies at pinned `internal_zstd.c.vuln:472`. A
+forged 1024-sample FLOAT grid with `unpacked_size=64` gives gcc+clang ASan
+`WRITE of size 4096` 0 bytes after the 64-byte region, with chosen `0x5a` at
+`b64`/`b4095` against an `0xa5` canary under gdb; the fixed pin returns
+`EXR_ERR_CORRUPT_CHUNK`. `PASS=52 FAIL=0` on three runs and from a clean
+`git archive efba219` replay, trace `27a2a815…3c776`. The GHSA appears only in
+this lane's brief, pins, provenance and harness — no prior openexr target.
+Window 116 is registered; staging adds no route, units, charter or mind count;
+admission and a witness verdict remain pending. Grade stays CODE/HARNESS rungs
+1-4: no EXR file, zstd frame, codec build, process, socket, wire, pointer control,
+command or rung 5, and the advisory's file-level reachability is a claim.
+Brief: `reports/frontier-openexr2shell.md`.

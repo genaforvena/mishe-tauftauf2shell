@@ -3753,6 +3753,33 @@ covers the direct-call harness only. Raw gdb captures and the exact `-ex`
 command lists are tracked under `full/evidence/store/` and `full/probe-gdb.sh`;
 no upstream fetch is needed if the W6 module builds are present.
 
+### W10 same-connection consumer check — 2026-11-23 (author-only, unwitnessed)
+
+Re-run from `lab/frontier/modauthoidc2shell/full`: `bash build-plain.sh && bash
+probe-plain-oob.sh && bash probe-plain-keepalive.sh`. Expect
+`STORE=0x7ffff6de2221 WORD=0x7ffff5603d` and `AFTER=0x7ffff56000`, three HTTP
+302 replies on one TCP connection, and no watchpoint hit, `Old value`/`New
+value` or watch-stop backtrace before the 70 s timeout
+(`evidence/plain-oob/keepalive/`). The one-off `LD_PRELOAD` trace
+(`evidence/plain-oob/alloc-trace/`) found no allocation covering the word
+(nearest starts 0x6f bytes later; intra-libapr calls bypass interposition).
+Both are negatives: no consumer of the corrupted word was observed. Grade
+unchanged, rung 4 scoped, byte always NUL.
+
+### W11 response-path store — 2026-11-23 (author-only, unwitnessed)
+
+Re-run: `cd lab/frontier/modauthoidc2shell/full && bash build-plain.sh && bash
+probe-plain-response.sh`. With `GET /redirect_uri?code=foo&state=foo` and the
+value-less state cookie, gdb at pinned `state.c:219` shows
+`oidc_response_proto_state_restore` (`handle/response.c:353`), the second
+pre-auth caller; expect `STORE=0x7ffff6ddc05e WORD=0x617473266f6f663d`
+(`=foo&sta`) → `AFTER=0x617473266f6f6600` (`\0foo&sta`), the wire-chosen `=` of
+`code=foo` in the copied request line. Expect HTTP 400, the adjacent
+request-line text dispatched to `oidc_state_cookies_process_one` with JWE
+decode failure, and no watchpoint read/write of the word
+(`evidence/plain-oob/response/`). Grade unchanged: rung 4 scoped, byte always
+NUL, no dereference, chosen byte, pointer control, command or rung 5.
+
 ## 2026-11-23 06:4xZ — radvdump2shell
 
 CVE-2026-48715 / GHSA-52px-gh9p-m379, radvd `<= 2.20`, fixed in `2.21` by
@@ -4285,11 +4312,15 @@ objects: ASan `WRITE of size 8` at `convert.c:5637` through real
 frame: `param_pos` ends `...d100`, saved RIP `...daf8` (2808 bytes past), NUL
 in `buf[0]` after `buf_small`; larger inputs corrupt `nqb->query_statement`
 (SIGSEGV `inner_process_tokens:4167`) before a saved pointer. At `-O2` the
-canary trips at 96 args and n>=128 SIGSEGV with `$rbp=0xc3`; clang `-O0`
-rejects 16 args (cause UNKNOWN). Still no DSN, ODBC driver manager, application
-SQL path, PostgreSQL server, SQLPrepare/wire path, socket, isolated saved-RIP
-write, pointer control, ROP chain, command, marker side effect, witness verdict
-or rung 5. The CWE-457 uninitialized-array limb stays source-only.
+canary trips at 96 args and n>=128 SIGSEGV with `$rbp=0xc3`; W146 measures the
+first OOB write at 16 arguments (`convert.c:5657`) and explains clang -O0's
+16-arg rejection as a layout alias onto `param_consumed`; W146's
+`real/live-replay.sh` drives `SQLExecDirect` through unixODBC to
+`processParameters:5657` with a fake v3 handshake on 127.0.0.1:59432
+(fixed/safe clean; `SQLPrepare` alone negative). No real PostgreSQL server,
+application SQL path, pointer control, chosen-offset control-flow datum,
+marker, command, witness verdict or rung 5; AV:N and CWE-457 remain
+claim/source-only.
 
 ## 2026-11-23 09:5xZ — thrift2shell admission replay
 
@@ -4332,9 +4363,13 @@ chosen markers in the adjacent `tBuf` chunk header; fixed and 4-byte safe input
 clean. On the persistent-connection limb frame 2 gets a fresh 68-byte `rBuf_`
 after the transform buffer (`tbuf = rbuf - 1040`), so the copy no longer hits
 `tBuf` and aborts with `malloc(): corrupted top size`; no code pointer or
-return address lies in the written range. No ASLR/grooming study, code-pointer
-placement, ROP, command, marker side effect, witness verdict or rung 5;
-author-only.
+return address lies in the written range. Later limbs add KV-header grooming
+(a wire-chosen heap pointer reaches `free()` with ASLR off; witness ESTABLISHED
+rungs 1-4 at the labeled lab scope, no counterexample) and an ASLR-on no-flush
+limb (low 16 bits of a live string pointer from the wire reach `free()`;
+author-only, witness pending). Rebuild commands and the `-O1`/`ptr-rbuf` flag
+caveat are in `reports/thrift2shell-livewire.md:264-281`. No code pointer, ROP,
+command, marker side effect or rung 5; no deployment or external-reach claim.
 
 ## 2026-11-23 10:0xZ — libvips2shell admission replay
 
@@ -4370,16 +4405,27 @@ pinned sanity and region slices with a stubbed object environment. A later
 real-build limb is replayed by `bash lab/frontier/libvips2shell/real/run.sh`:
 it builds pinned v8.18.2/v8.18.3 with ASan (433/433 targets) and loads a
 154-byte crafted many-band TIFF (10000 32-bit bands, width 107374, height 2)
-through real `VipsForeignLoadTiff`, reporting `TIFF_SANITY=1`, `BPL=-256` and
-ASan `WRITE of size 16` at `iofuncs/region.c:1004` at `DATA-0x100` with chosen
-`0x5a` ink; fixed rejects `image: dimension overflow`. The staged
-`Bands=4/Xsize=1073741760` shape is rejected by the real loader
-(`VIPS_MAX_COORD`) as a preserved negative. Grade stays rungs 1-4 on a real
-pinned ASan build with a direct sink call on a synthetic setbuf image: there
-is no real pixel decode or downstream loader-to-`paint_pel` path, no pointer
-target, process, socket, wire, command, marker side effect, witness verdict or
-rung 5. The advisory's attack vector is local and RCE is explicitly unproven
-there; downstream network-service reachability is UNKNOWN.
+through real `VipsForeignLoadTiff`, reporting `TIFF_SANITY=1` and `bpl=-7296`
+for the TIFF-accepted geometry; the `BPL=-256` truncation and the ASan
+`WRITE of size 16` at `iofuncs/region.c:1004`, `DATA-0x100`, with chosen `0x5a` ink
+belong to the synthetic `Bands=4/Xsize=1073741760` staged shape in that same
+real build; fixed rejects `image: dimension overflow`. The staged shape is
+rejected by the real loader (`VIPS_MAX_COORD`) as a preserved negative. W3 adds
+real consumer APIs on a real 8,589,920,000-byte `vips_image_write_prepare()`
+buffer, replayed by `bash lab/frontier/libvips2shell/real/run-consumer.sh`
+(12/12 assertions, `RESULT fail=0` in the working tree and again from
+`git archive HEAD lab/frontier/libvips2shell` at 937e07d with the two gitignored
+build/source trees symlinked in, rc 0): `vips_region_prepare()` → `bpl=-7296`,
+`lskip=2^64-7296`, `VIPS_REGION_ADDR(reg,0,1)` READ at `DATA-7296`;
+`vips_extract_area()` → `vips_image_write_to_memory()` → ASan
+`heap-buffer-overflow`, `READ of size 160000`, in `vips_region_copy`
+(`region.c:1090`), 6144 bytes before the live allocation; the decoded-TIFF
+consumer stalls (>180 s) as a preserved negative. Grade stays rungs 1-4: W3 is
+a negative-offset READ through real consumer APIs; the negative-offset WRITE
+still rests on the W2 direct call. No pointer target, process, socket, wire,
+command, marker side effect, witness verdict or rung 5. The advisory's attack
+vector is local and RCE is explicitly unproven there; downstream
+network-service reachability is UNKNOWN.
 
 ## 2026-11-23 10:3xZ — jq2shell staged by frontier W146 (not admitted)
 
@@ -4507,3 +4553,36 @@ mapping in plain builds. No jq build, JSON input, jq process, socket, wire,
 real allocator study, ASLR study, pointer control, command, marker side effect,
 witness verdict or rung 5. Real-pipeline reachability and heap-neighbour
 identity stay UNKNOWN.
+
+## 2026-11-23 11:3xZ — openexr2shell staged by frontier W155 (not admitted)
+
+GHSA-98rx-qpfv-qcwv (High, no CVE or CWE stated): OpenEXR 3.5.0, 3.5.1, 3.5.2
+and `main` affected, fixed 3.5.3 by `7d7fbb1a` (grid-total bound in
+`internal_zstd.c`); vulnerable pin `v3.5.2`, fixed pin `v3.5.3`, exact digests
+in `lab/frontier/openexr2shell/PINS.sha256`, claim URL and preserved negatives
+in `lab/frontier/openexr2shell/PROVENANCE.md`. The advisory's 692-byte PoC,
+4032-byte overrun and OpenImageIO reproduction are claims, not lab results.
+
+Replay from a fresh temporary directory:
+`git archive efba219 lab/frontier/openexr2shell | tar -x -C "$T"`, then
+`cd "$T/lab/frontier/openexr2shell/harness && ./run.sh && ./check.sh`. Expect
+`PASS=52 FAIL=0` and normalized trace
+`27a2a815c1ac4fbb884a9b2f754a0ab3eabaac193f8c90b0a19bf2e44337c776`, matching
+three working-tree runs and the clean-archive replay. Two generated drivers
+embed verbatim `internal_zstd.c.{vuln,fixed}` under `#line`; the only stub
+reduces `exr_coding_channel_info_t` to `bytes_per_element`. gcc and clang ASan
+report `heap-buffer-overflow`, `WRITE of size 4096`, 0 bytes after a 64-byte
+region at pinned `internal_zstd.c.vuln:472`; plain gdb sees chosen `0x5a` at
+`b64` and `b4095` against a `0xa5` canary; the fixed pin returns
+`EXR_ERR_CORRUPT_CHUNK`. Preserved negatives: an early clang ASan build that
+did not define `__SANITIZE_ADDRESS__`, buffered stdout hiding pre-abort lines,
+and a fixed-pin breakpoint at `:1393` that never fires because the earlier
+return at `:1391` fires first.
+
+Ceiling: direct call with a stubbed channel struct. No EXR header or chunk
+parsing, sample-count table, ZSTD frame, codec build, `exr_decoding_run()`
+ordering, image consumer, process, socket or wire input; chosen bytes are
+harness-supplied, not file-derived; no pointer control, command, marker side
+effect, witness verdict or rung 5. Window 116 is registered but there is no
+charter, route or admission, so this staging adds no mind. Brief:
+`reports/frontier-openexr2shell.md`.
