@@ -176,3 +176,19 @@ forged pointer, no non-ASan live layout measurement, no marker, no
 command and no rung 5. The advisory's live `process_info_private::thread_db`
 overwrite remains a claim; the harness limb above only shows placement
 feasibility in a groomed object.
+
+## Non-ASan live outcome (2026-11-23T01:44Z)
+
+A third local build (`lab/build/gdbserver-633ae02-plain`, same pin,
+default CFLAGS) was started with the same loopback client. With the
+`SLEN=1`, N=64 attack the process replied `OK` to `QTDPsrc`, then `E01`
+to a following `qGetTLSAddr`, and died with SIGSEGV (exit 139) during
+connection teardown after client EOF. The well-formed `SLEN=16` packet
+replied `OK` and exited 0. Evidence:
+`rsp/evidence/live-plain-attack-64.{log,client.out}` and
+`live-plain-safe-16.{log,client.out}`. This is a delayed process failure
+on the natural allocator layout, not a forged-pointer call or command:
+no chosen-byte readback was attempted in the live process, and
+`qGetTLSAddr` returned `E01` because no thread_db was loaded, not because
+an indirect call happened. The ASan build's first-write abort and this
+plain build's teardown crash are the two observed live outcomes.

@@ -1,0 +1,18 @@
+Process /bin/true created; pid = 3450400
+Listening on port 34590
+Remote debugging from host 127.0.0.1, port 39490
+[remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:1:4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f604142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("qGetTLSAddr:1:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$E01#a6"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] readchar: readchar: Got EOF
+[remote] getpkt: [getpkt: discarding char 'ÿ']
+Killing process(es): 3450400

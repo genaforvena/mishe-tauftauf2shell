@@ -7003,3 +7003,10 @@ overflow, so no chosen-byte readback, no forged `thread_db` call, no
 `qGetTLSAddr` RIP control and no command were observed. Evidence and full
 commands: `lab/frontier/gdbserver2shell/PROVENANCE.md`,
 `reports/gdbserver2shell-status.md`.
+
+The same pin built with default CFLAGS (`lab/build/gdbserver-633ae02-plain`)
+answered the crafted `QTDPsrc` with `OK` and a following `qGetTLSAddr`
+with `E01`, then died with SIGSEGV at connection teardown; the safe packet
+exited 0. That is a delayed natural-layout process failure, not a forged
+pointer call or command. Grade unchanged; details in
+`lab/frontier/gdbserver2shell/PROVENANCE.md`.

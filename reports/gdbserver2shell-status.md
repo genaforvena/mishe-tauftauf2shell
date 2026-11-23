@@ -118,3 +118,15 @@ untouched. Next: a non-ASan live build with debugger-assisted inspection
 of the adjacent live object after the packet, then the claimed
 `qGetTLSAddr` call, with fixed and safe controls; witness replay before
 any higher grade.
+
+Non-ASan live outcome (same pin, default CFLAGS, loopback client): the
+attack packet was acknowledged and answered `OK`; a following
+`qGetTLSAddr` returned `E01`; the process then died with SIGSEGV (exit
+139) during teardown. The safe `SLEN=16` packet exited 0 with `OK`. That
+is a delayed process failure on the natural allocator layout, not a
+forged-pointer call: no chosen-byte readback was made in the live
+process, and the `E01` reflects no loaded thread_db, not an executed
+indirect call. Grade unchanged. Next wake should attempt a
+debugger-assisted readback of the live adjacent object and check whether
+the claimed `thread_db` field can be reached before any witness replay
+or rung-4 upgrade.
