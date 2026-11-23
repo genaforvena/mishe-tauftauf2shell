@@ -4778,3 +4778,43 @@ written value is an allocator-chosen heap link, not attacker bytes. No vptr,
 code pointer, return address, ROP, command, marker side effect or witness
 verdict. The W145 ASLR-on replay request (#2547) remains unanswered; W146 is
 author-only and rung 5 stays UNKNOWN.
+
+## 2026-11-23 12:3xZ — libheif2shell admitted (112th route)
+
+The staged direct-call harness at `366690f` was replayed by the operator from
+a clean committed tree, with no upstream fetch:
+
+```
+T=$(mktemp -d /tmp/omp-libheif-replay.XXXXXX)
+cd /home/mesh-home/mishe-tauftauf2shell
+git archive 366690f lab/frontier/libheif2shell | tar -x -C "$T"
+cd "$T/lab/frontier/libheif2shell/harness"
+./run.sh && ./check.sh
+```
+
+Both scripts returned rc 0 and `check.sh` printed exactly
+`PASS=101 FAIL=0 TRACE=9468b5109099f1810c4cef5dbe6e1c064495b180c57f6e2844a20f2580e38b43`
+(101 assertions over three scenarios plus repeats). The generated drivers
+include verbatim pinned slices of `pixelimage.cc.vuln` (tag `v1.23.6`) and
+`pixelimage.cc.fixed` / `heif_image.cc.fixed` (commit `9ec655f`) under `#line`
+control, with declared stubs for the surrounding enums, value types and exact
+or canary-backed plane allocator. gcc and clang ASan report
+`heap-buffer-overflow`, `WRITE of size 64`, 0 bytes after a 32768-byte region
+at pinned `pixelimage.cc.vuln:644`, called through `heif_image.cc.vuln:403`;
+the fixed pin rejects the 64x65 -> 512x64 request with rc 2 and copies
+nothing. Plain builds and gdb read back four chosen `0x5a` bytes at offset
+32768 against a `0xa5` canary. No HEIF/MJPEG file, decoder, x265/x264 encoder
+plugin, libheif build, image consumer, process, socket or wire input; the
+advisory's 1,155-byte Motion-JPEG sequence, 36,879-byte allocation and release
+SIGSEGV are claims not reproduced here. Preserved negatives (C-compiler link
+errors, LeakSanitizer noise, an undersized canary tail that broke `free`, a
+wrong-frame gdb probe) are in `lab/frontier/libheif2shell/PROVENANCE.md`.
+Grade is direct-call CODE/HARNESS rungs 1-4 only; rung 5 is UNKNOWN.
+
+Admission added the hy4-flash `max_parallel: 3` route as the 112th role, minted
+the three units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), reloaded
+systemd, enabled and activated `m2shell-wake-libheif2shell.path`, and added
+both resolver entries (225 total). The pinned full-flag doctor returned rc 0
+`GREEN`; `python3 tools/check-omp-only.py .mishe-tauftauf .` returned
+`GREEN (112 declared roles)`. Status: `reports/libheif2shell-status.md`.

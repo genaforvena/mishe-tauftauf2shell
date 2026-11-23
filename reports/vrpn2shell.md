@@ -851,6 +851,48 @@ lab-patched marker, no chosen byte, no command side effect, no rung 5, no
 grade change. Ports 14200-14241, all loopback, were freed; no server left
 running. Raw evidence in `out-w17-*/`.
 
+## Negative wire indices at -O2 — red-zone, no live-state landing (W18, 2026-11-23 ~12:32Z)
+
+W3's live-pointer landing was measured only on the Debug -O0 build, where
+`&endpoint = sender_name - 8`. The stock -O2 binary has
+`rsp == rbp == &sender_name` at the `:4554` store, so a negative index must
+write below `rsp`. This wake measured that class on the same vulnerable
+`build-opt-07.36` server (SHA `bfe63334...`) and the fixed
+`build-opt-fixed` control (SHA `227fcb55...`), with no build change.
+
+SENDER sink, index -8 (`out-w18-gdb-neg-8b/gdb.log`): `dest = name-8 = rsp-8`,
+PRE byte `0x22`, POST byte `0x00` between breakpoints at source lines 4554 and
+4560. The only change in a 20-word dump below `rsp` is the stale return word
+`0x5555555a4a22 -> 0x5555555a4a00` left at `rsp-8` by the preceding
+`__strncpy_chk` call (`0x...4a1d` in the disassembly); the eight words at
+`rsp+128` (live caller frame, including the saved return `0x...5a1f42`) are
+byte-identical PRE/POST, and no signal is raised. Indices -64 and -128
+(`out-w18-gdb-neg-{64,128}/gdb.log`) land on bytes already `0x00` and change
+nothing. TYPE sink index -8 (`out-w18-gdb-type-neg-8/gdb.log`, breakpoints at
+4482/4488, `VAR=type_name`) shows the same pattern: stale return
+`0x5555555a48f1 -> 0x5555555a4800` below `rsp`, no frame word changed, no
+signal. Why the stale byte has no functional effect is not measured here; the
+next instruction at `$pc+6` calls `getSenderID`, which would reuse that stack
+slot — disassembly-level inference, not an observed dump.
+
+Debugger-free `-O2` runs (`probe-func-dos.sh`) all report
+`ALIVE_AFTER_MESSAGE`: vulnerable SENDER indices -1, -8, -16, -64, -128,
+-129 and -79 (the last hits a nonzero byte in a stale canary-looking word),
+vulnerable TYPE -8, fixed SENDER -8, and short in-frame index 4. Ports
+14310-14318 and 14326, all loopback, were freed. The optimized ASan control
+is the exception that proves the store is real: vulnerable index -8 is DEAD
+exit 1 with `stack-buffer-overflow WRITE of size 1` at `:4554`
+(`out-w18-asan-func-neg-8/server.err`); fixed -8 and vulnerable short 4 are
+ALIVE with zero ASan reports. An earlier gdb attempt using `probe-gdb.sh` at
+-O2 failed because `p.payload_len` is optimized out
+(`out-w18-asan-neg-8{,b}/gdb.log`); the debugger-free ASan control replaced it.
+
+Conclusion: negative indices corrupt only red-zone bytes in both stock -O2
+handlers; they do not reach live frame state, unlike W3's -O0 endpoint
+landing. No chosen byte, no surviving modified control flow, no command side
+effect, no rung 5, grade unchanged. Raw evidence in `out-w18-*/`; script
+`probe-opt-neg.sh` takes `BIN`, `MSGTYPE`, `LINE_PRE`, `LINE_POST` and `VAR`.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3

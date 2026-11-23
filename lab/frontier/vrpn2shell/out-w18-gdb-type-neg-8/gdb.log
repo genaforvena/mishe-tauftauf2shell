@@ -1,0 +1,48 @@
+Breakpoint 1 at 0x50901: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4482.
+Breakpoint 2 at 0x50907: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4488.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE pc=0x5555555a4901 rsp=0x7fffffffd930 rbp=0x7fffffffd930 rbx=0x5555556a7220 i=-8 dest=0x7fffffffd928 byte=0xf1
+PRE-REDZONE from rsp-128:
+0x7fffffffd8b0:	0x0000000000000000	0x0000000000000000
+0x7fffffffd8c0:	0x0000000000000000	0x0000000000000000
+0x7fffffffd8d0:	0x0000000000000000	0x0000000000000000
+0x7fffffffd8e0:	0x0000000000000000	0x1c98dc0ba5532100
+0x7fffffffd8f0:	0x0000000000000000	0x00007fffffffdb80
+0x7fffffffd900:	0x0000000000000000	0x00007fffffffdb90
+0x7fffffffd910:	0x0000000000000000	0x00007fffffffdc10
+0x7fffffffd920:	0x00007fffffffdaa0	0x00005555555a48f1
+0x7fffffffd930:	0x0000000041414141	0x00007fffffffda20
+0x7fffffffd940:	0x00007fffffffd9a0	0x00007fffffffdb80
+PRE-FRAME from rsp+128:
+0x7fffffffd9b0:	0x0000000000000000	0x00005555555a1f42
+0x7fffffffd9c0:	0x00000000fffffffe	0x0000000000000000
+0x7fffffffd9d0:	0x0000000000000000	0x0000000000000008
+0x7fffffffd9e0:	0x00005555556a7380	0x0000000000000000
+#0  vrpn_Endpoint::handle_type_message (userdata=0x5555556a7220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4482
+#1  0x00005555555a1f42 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, p=..., userdata=userdata@entry=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x00005555555a200d in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, type=-2, sender=0, time=..., len=8, buffer=0x5555556a7380 "\377\377\377\370AAAAt\t0\tHOPOPT\t\t# IPv6 Hop-by-Hop Option [RFC1883]\nicmp\t1\tICMP\t\t# internet control message protocol\nigmp\t2\tIGMP\t\t# Internet Group Management\nggp\t3\tGGP\t\t# gateway-gateway protocol\nipencap\t4\tIP-ENCA"..., userdata=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x00005555555a4059 in vrpn_Endpoint::dispatch (this=0x5555556a7220, type=-2, sender=0, time=..., payload_len=8, bufptr=0x5555556a7380 "\377\377\377\370AAAAt\t0\tHOPOPT\t\t# IPv6 Hop-by-Hop Option [RFC1883]\nicmp\t1\tICMP\t\t# internet control message protocol\nigmp\t2\tIGMP\t\t# Internet Group Management\nggp\t3\tGGP\t\t# gateway-gateway protocol\nipencap\t4\tIP-ENCA"...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#4  0x00005555555a553a in vrpn_Endpoint_IP::getOneTCPMessage (this=this@entry=0x5555556a7220, fd=6, buf=0x5555556a7380 "\377\377\377\370AAAAt\t0\tHOPOPT\t\t# IPv6 Hop-by-Hop Option [RFC1883]\nicmp\t1\tICMP\t\t# internet control message protocol\nigmp\t2\tIGMP\t\t# Internet Group Management\nggp\t3\tGGP\t\t# gateway-gateway protocol\nipencap\t4\tIP-ENCA"..., buflen=buflen@entry=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+POST pc=0x5555555a4907 byte=0x0
+POST-REDZONE from rsp-128:
+0x7fffffffd8b0:	0x0000000000000000	0x0000000000000000
+0x7fffffffd8c0:	0x0000000000000000	0x0000000000000000
+0x7fffffffd8d0:	0x0000000000000000	0x0000000000000000
+0x7fffffffd8e0:	0x0000000000000000	0x1c98dc0ba5532100
+0x7fffffffd8f0:	0x0000000000000000	0x00007fffffffdb80
+0x7fffffffd900:	0x0000000000000000	0x00007fffffffdb90
+0x7fffffffd910:	0x0000000000000000	0x00007fffffffdc10
+0x7fffffffd920:	0x00007fffffffdaa0	0x00005555555a4800
+0x7fffffffd930:	0x0000000041414141	0x00007fffffffda20
+0x7fffffffd940:	0x00007fffffffd9a0	0x00007fffffffdb80
+POST-FRAME from rsp+128:
+0x7fffffffd9b0:	0x0000000000000000	0x00005555555a1f42
+0x7fffffffd9c0:	0x00000000fffffffe	0x0000000000000000
+0x7fffffffd9d0:	0x0000000000000000	0x0000000000000008
+0x7fffffffd9e0:	0x00005555556a7380	0x0000000000000000
+#0  vrpn_Endpoint::handle_type_message (userdata=0x5555556a7220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4488
+#1  0x00005555555a1f42 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, p=..., userdata=userdata@entry=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x00005555555a200d in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, type=-2, sender=0, time=..., len=8, buffer=0x5555556a7380 "\377\377\377\370AAAAt\t0\tHOPOPT\t\t# IPv6 Hop-by-Hop Option [RFC1883]\nicmp\t1\tICMP\t\t# internet control message protocol\nigmp\t2\tIGMP\t\t# Internet Group Management\nggp\t3\tGGP\t\t# gateway-gateway protocol\nipencap\t4\tIP-ENCA"..., userdata=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

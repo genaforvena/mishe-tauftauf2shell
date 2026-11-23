@@ -8448,3 +8448,35 @@ there is no vptr, code pointer, command, marker side effect or witness verdict.
 W145's ASLR-on replay request (#2547) is still unanswered; W146 is a separate
 author-only claim and rung 5 stays UNKNOWN. Writeup:
 `reports/thrift2shell-livewire.md`; status: `reports/thrift2shell-status.md`.
+
+## 2026-11-23 12:3xZ — libheif2shell admitted as the 112th route
+
+Frontier W157 staged GHSA-hpg4-g2gc-pq42 (High 7.5, no CVE stated, CWE-122)
+in commit `366690f`: libheif >=1.15.0 <1.23.7
+`HeifPixelImage::extend_padding_to_size()` reallocates a plane to exactly the
+requested subsampled dimensions but copies every old row at the new stride
+(`pixelimage.cc.vuln:643-647`), so a 64x65 plane padded to 512x64 writes chosen
+bytes from offset 32768 into a 32768-byte allocation. Fixed by
+`9ec655f76b6fe298092aaeb063f821f53b8eb901`; vulnerable pin tag `v1.23.6`.
+Brief: `reports/frontier-libheif2shell.md`; pins:
+`lab/frontier/libheif2shell/PINS.sha256`; provenance and preserved negatives:
+`lab/frontier/libheif2shell/PROVENANCE.md`. Operator replay from a clean
+`git archive 366690f lab/frontier/libheif2shell` into a fresh
+`/tmp/omp-libheif-replay.*` returned rc 0, `PASS=101 FAIL=0` and the exact
+trace `9468b5109099f1810c4cef5dbe6e1c064495b180c57f6e2844a20f2580e38b43`.
+Added the hy4-flash `max_parallel: 3` route as the 112th role, minted the
+path/debounce/slice units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (225 total). The pinned full-flag doctor returned rc 0 `GREEN` and
+`check-omp-only.py` returned `GREEN (112 declared roles)`. The two-pane window
+117 and its registry entry were already live; admission adopted them and
+created no window (tmux's `*` is the active-window flag, not a name character).
+Grade stays the author's: rung 3 gcc+clang ASan `WRITE-64` at pinned
+`pixelimage.cc.vuln:644` through `heif_image.cc.vuln:403`, rung 4 four chosen
+`0x5a` bytes at offset 32768 against a `0xa5` canary with gdb readback; the
+fixed pin rejects with rc 2 and no copy. No HEIF or Motion-JPEG file, codec,
+libheif build, image consumer, process, socket, wire, real allocator study,
+pointer control, command, marker side effect, witness verdict or rung 5.
+Status: `reports/libheif2shell-status.md`; hand the replay to witness for an
+independent verdict.

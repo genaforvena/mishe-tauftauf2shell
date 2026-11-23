@@ -1,0 +1,5 @@
+Breakpoint 1 at 0x9a5e6: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+WRITE_SITE_HIT i=-8 &name=0x7ffff7212b80 dest=0x7ffff7212b78 payload_len=lab/frontier/vrpn2shell/out-w18-asan-neg-8b/gdb.cmd:12: Error in sourced command file:
+value has been optimized out

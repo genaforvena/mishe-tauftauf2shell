@@ -533,3 +533,31 @@ wrapper left a server on 14221, which was force-killed and the port verified
 free. Raw logs, client output and `meta.txt` (binary SHA, port, index, status)
 are in `out-w17-*/`. Author self-observation; grade unchanged, no chosen byte,
 no command side effect, no rung 5.
+
+## W18 — negative indices at -O2 stay in the red zone (2026-11-23 ~12:32Z)
+
+No build change: vulnerable `build-opt-07.36/server_src/vrpn_server`
+(SHA-256 `bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`),
+fixed `build-opt-fixed/server_src/vrpn_server` (SHA-256
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`), and the
+optimized ASan pair `build-opt-asan-07.36` / `build-opt-asan-fixed`. New probe
+`probe-opt-neg.sh` dumps 20 words below and 8 words above `rsp` at source-line
+breakpoints 4554/4560 (SENDER) or 4482/4488 (TYPE, `VAR=type_name`).
+
+`out-w18-gdb-neg-8b/gdb.log`: SENDER index -8, `dest=name-8=rsp-8`, PRE byte
+`0x22` -> POST `0x00`; only the stale return word `0x...5a4a22 -> 0x...5a4a00`
+changes, and the live frame words at `rsp+128` are identical. `out-w18-gdb-neg-64/`
+and `out-w18-gdb-neg-128/` hit bytes already `00`. `out-w18-gdb-type-neg-8/`:
+TYPE index -8, stale return `0x...5a48f1 -> 0x...5a4800`, frame unchanged, no
+signal. Debugger-free `probe-func-dos.sh` on loopback ports 14310-14318 and
+14326: vulnerable SENDER -1/-8/-16/-64/-128/-129/-79, vulnerable TYPE -8,
+fixed SENDER -8 and short 4 all `ALIVE_AFTER_MESSAGE`. Optimized ASan control
+on ports 14322-14324: vulnerable -8 DEAD exit 1 with
+`stack-buffer-overflow WRITE of size 1` at `:4554`; fixed -8 and vulnerable
+short 4 ALIVE with zero ASan reports. `out-w18-asan-neg-8{,b}/gdb.log` preserve
+the failed gdb variant (`p.payload_len` optimized out at -O2), superseded by
+the debugger-free ASan control. Each `meta.txt` carries binary SHA, port,
+index and status. All ports were freed; no server left running. Author
+self-observation; grade unchanged, no chosen byte, no command side effect, no
+rung 5.
+
