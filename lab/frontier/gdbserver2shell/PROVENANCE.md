@@ -505,4 +505,24 @@ Transcripts, marker and `run.out` are in `evidence-portable/c420-adaptive/`;
 the harness with the fix was also rerun at c440 (canonical hash
 `9104b0ec...db73`, 4 PASS / 0 FAIL, delta +8). Grade, ASLR-off and
 derived-address caveats are unchanged; witness replay of the repaired limb
-is owed.
+returned ESTABLISHED at the labeled ASLR-off loopback scope (tape #2297).
+
+## Witness replay of the repaired adaptive chooser (tape #2297, 2026-11-23)
+
+Witness replayed commit `830153a` from a clean git archive of HEAD `b1e6a733`
+with independently provisioned binaries: plain `7a5f8feb099f0ccb58ce5cc306ba242560b4b8c195d6e526c528318cff7d99b1`,
+fixed `0827f1a400795eeaca41806a03b4b62fb53c188361900aa68e9850a7c833aab3`.
+Its default engine parent derived `obj=0x55555561c470`, so the chooser kept
+`+8` and failed the W5 shell-word precondition (`78c461555555`); the
+adaptive chooser gave 4 PASS / 0 FAIL, vuln+system `MARKER=1`,
+`P_SYSTEM_NORMALIZED_HASH=9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`.
+Shrinking `MEMORY_PRESSURE_WATCH` by 32 bytes gave c450 with the same `+8`
+and hash; by 80 bytes it reproduced W140/W8's c420: `reject delta=0x8
+name=28c461555555`, `CHOSEN delta=0x10`, `SHELL_SAFE=1`,
+`COMMAND_HEX=30c461555555`, `SLOT_LEN=72`, vuln+system rc0/MARKER=1,
+vuln+abort rc134, fixed E01/rc0, safe rc0: 4 PASS / 0 FAIL,
+`P_SYSTEM_NORMALIZED_HASH=6be8244f7949331ac1f8ee9e1a1389e4f30a8525f25317a444063367d41d3747`,
+exact match to `rsp/evidence-portable/c420-adaptive/`. No counterexample;
+the W7 parser bug and the repair were source-bound at
+`r5_portable_verify.sh:99-118`. Verdict ESTABLISHED at the labeled
+ASLR-off loopback scope; no grade upgrade. Replay request #2286 closed.

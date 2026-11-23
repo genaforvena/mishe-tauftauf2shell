@@ -403,4 +403,30 @@ Padding still moves the object only upward (c460/c470/c490/out of sweep),
 so the shrink is the measured route to c420. Grade and caveats unchanged:
 rung-4 ESTABLISHED; forged libc `system` call ESTABLISHED at labeled build
 scope, marker conditional on a shell-safe derived name; independent replay
-of the repaired limb is still owed.
+of the repaired limb returned ESTABLISHED at the labeled ASLR-off loopback
+scope (tape #2297, below).
+
+## Witness replay of the repaired adaptive chooser (tape #2297, 2026-11-23)
+
+The witness replayed commit `830153a` from a clean git archive of HEAD
+`b1e6a733`, with independently provisioned plain `7a5f8feb...` and ASan
+fixed `0827f1a4...` binaries. Verdict: ESTABLISHED at the labeled ASLR-off
+loopback scope; no new rung, grade or ASLR-on claim. Its default engine
+parent derived `obj=0x...c470` (not our `c440`): the chooser kept `+8`,
+name `78c461555555`, 4 PASS / 0 FAIL, vuln+system `MARKER=1`,
+`P_SYSTEM_NORMALIZED_HASH=9104b0ec...db73`. Shrinking
+`MEMORY_PRESSURE_WATCH` by 32 bytes gave c450 with the same `+8` and hash;
+shrinking by 80 bytes reproduced W140/W8's c420 exactly: `reject delta=0x8
+name=28c461555555`, `CHOSEN delta=0x10`, `SHELL_SAFE=1`,
+`COMMAND_HEX=30c461555555` (ASCII `0`), `SLOT_LEN=72`; vuln+system
+rc0/MARKER=1, vuln+abort rc134/MARKER=0, fixed rc0/MARKER=0, safe
+rc0/MARKER=0: 4 PASS / 0 FAIL and
+`P_SYSTEM_NORMALIZED_HASH=6be8244f...41d3747`, an exact match to
+`rsp/evidence-portable/c420-adaptive/`. The witness source-bound the repair
+at `r5_portable_verify.sh:99-118` (single selected line, rejections on
+stderr, `for...else` fallback) and found no counterexample: W7's parser bug
+was real and the shipped harness picks a safe offset at c420. Replay request
+#2286 is closed.
+
+Ceiling unchanged: `setarch -R` ASLR-off, object address derived per parent
+environment, marker conditional on a shell-safe derived name.
