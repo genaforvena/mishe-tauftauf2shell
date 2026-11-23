@@ -1,0 +1,14 @@
+CGROUP=/user.slice/user-1000.slice/user@1000.service/m2shell.slice/m2shell-plants.slice/m2shell-wake@libvips2shell.service
+memory.max=2147483648
+memory.high=1610612736
+memory.current=451108864
+PROBE=gcc -O0 memlimit.c; posix_memalign(16,N MiB)+memset(0,N MiB)
+--- 64MB timeout 30 ---
+memset 64 MB in 0.037 s (1741.1 MB/s)
+RC=0
+--- 256MB timeout 30 ---
+memset 256 MB in 0.401 s (639.2 MB/s)
+RC=0
+--- 1024MB timeout 30 ---
+memset 1024 MB in 1.196 s (856.5 MB/s)
+RC=0

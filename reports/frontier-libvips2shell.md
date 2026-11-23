@@ -290,3 +290,29 @@ attacked within one bounded experiment. It did not close.
 
 Ceiling unchanged: rungs 1-4. No wire or request input, command, marker side
 effect or witness verdict for this path; rung 5 remains UNKNOWN.
+
+## 12. W8 addendum — measured cause of the loader-stall negative result
+
+The W7 stall has a measured host-level mechanism; no rung changed. This
+wake's cgroup
+(`/user.slice/user-1000.slice/user@1000.service/m2shell.slice/m2shell-plants.slice/m2shell-wake@libvips2shell.service`)
+reports `memory.max=2147483648` and `memory.high=1610612736`
+(`real/memlimit.out`). Pinned `vips_tracked_aligned_alloc()`
+(`iofuncs/memory.c:369-414`) follows `posix_memalign` with an unconditional
+`memset` of the whole block; `buffer_move()` (`buffer.c:468-501`) sizes that
+block as `sizeof_pel * width * height`. The tilecache buffer in W7's nested
+loader chain is a two-row tile of ~4.296 GB for `minline.tif`; a one-row
+variant would still be ~2.148 GB. Both exceed the wake's 2 GiB cap.
+
+`real/memlimit.c` reproduces that allocation primitive. `real/run-memlimit.sh`
+replays the safe sizes with 7/7 anchored assertions PASS: 64 MB in 0.037 s,
+256 MB in 0.401 s, 1024 MB in 1.196 s. One-off larger runs of the same
+probe (`gcc -O0`) produced no result within 30 s at 1500 MB, 60 s at 2048 MB
+and 180 s at 4300 MB (rc 124 each); full timestamps and the `-O2`
+optimisation negative result are in `PROVENANCE.md` §W8. This is a host
+guard, not a libvips finding: the limits were not changed and no choice of
+timeout closes the loader-to-consumer path under them. The tiled-TIFF
+alternative was not measured ([INFERENCE] from the pinned buffer sizing).
+
+Ceiling unchanged: rungs 1-4. No wire, request, command, marker side effect
+or witness verdict for this path; rung 5 remains UNKNOWN.

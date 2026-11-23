@@ -377,3 +377,47 @@ acceptance of the crafted header (W2) and the negative-offset write on a
 programmatically created real image (W4/W6) are unchanged. No pointer,
 control-flow datum, wire input, command, marker or witness verdict. Grade
 remains rungs 1-4; rung 5 UNKNOWN.
+
+## W8 — W7 stall mechanism: wake cgroup eager-zero-fill limit (2026-11-23)
+
+W7 left the file-to-consumer stall labeled UNKNOWN under host swap pressure.
+One bounded incident measured the mechanism. No rung changed.
+
+- The wake runs in cgroup
+  `/user.slice/user-1000.slice/user@1000.service/m2shell.slice/m2shell-plants.slice/m2shell-wake@libvips2shell.service`
+  with `memory.max=2147483648` (2 GiB), `memory.high=1610612736` (1.5 GiB)
+  and `memory.current` between 4.3e8 and 4.5e8 bytes during the measurement
+  (`real/memlimit.out`, `cat /sys/fs/cgroup/.../memory.{max,high,current}`).
+  The parent `m2shell-plants.slice` reads `memory.max=10737418240`,
+  `memory.high=8589934598`, `memory.current=8133783552` at 15:39Z.
+- `real/memlimit.c` is the exact allocation primitive of pinned
+  `vips_tracked_aligned_alloc()` (`iofuncs/memory.c:369-414`):
+  `posix_memalign(16, N MiB)` followed by an unconditional `memset(buf, 0, N)`.
+  `real/run-memlimit.sh` replays only safe sizes: 64 MB in 0.037 s, 256 MB in
+  0.401 s, 1024 MB in 1.196 s, all rc 0, 7/7 anchored assertions PASS.
+- One-off larger sizes, same probe (`gcc -O0`, `timeout`): 1500 MB produced no
+  line in 30 s (rc 124, 15:39:22-15:39:52Z); 2048 MB none in 60 s
+  (rc 124, 15:38:01-15:39:03Z); 4300 MB none in 180 s
+  (rc 124, 15:34:37-15:37:43Z). A `-O2` build printed a fictitious
+  "4300 MB in 0.000 s" because the unused memset was optimized away; do not
+  reuse that build.
+- Pinned `buffer_move()` (`buffer.c:468-501`) computes
+  `new_bsize = sizeof_pel * area.width * area.height` before that call. The
+  W7 gdb trace (`real/gdb-stall-buffer.out`) shows five distinct nested
+  `vips_buffer_new()` frames in the foreign-load → image-write → sequential →
+  tilecache chain. For `minline.tif` the tilecache buffer is one two-row
+  tile of ~4.296 GB (`rtiff_read_stripwise` sets
+  `vips_sequential(tile_height=2)`, `tiff2vips.c:2949-2985`); a one-row
+  variant would still be ~2.148 GB. Both exceed this wake's 2 GiB
+  `memory.max`. The stall therefore has a measured host-level cause: eager
+  zero-filling above the cgroup high watermark, not a demonstrated libvips
+  loop and not evidence of crafted-geometry-specific misbehaviour.
+
+Disposition: file-to-consumer stays a negative result, now with a concrete
+mechanism. Host memory limits are a protected guard and were not changed;
+no longer timeout can close this path under the current wake cgroup, and a
+tiled-TIFF variant was not attempted because its aggregate tile buffers also
+scale with the crafted line size ([INFERENCE] from `buffer.c` and
+`tiff2vips.c:2614-2666`, not measured). The host swap condition from W7 is
+preserved. Grade unchanged: rungs 1-4. No wire, request, command, marker or
+witness verdict. Rung 5 UNKNOWN.
