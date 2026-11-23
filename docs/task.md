@@ -9276,7 +9276,8 @@ refused (`frame1: rc=8 sub=5002 ... Image size must match encoder init
 configuration size`; `heif-enc -A -L -S` also refuses), and JPEG constant 8x8
 blocks round-trip byte-exact but the SOF-patched OOB row is not independent
 (`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so arbitrary-byte
-control stays UNKNOWN and W162's position-dependent 8-byte runs remain the
+control stayed UNKNOWN on those codecs and W162's position-dependent 8-byte runs
+remain the
 chosen-byte lane. The six-case `real/run_wire.sh` replay and both checkers
 PASS; witnesses #2752/#2869/#2897 are still queued. `144f371` (munt W176)
 added third-party source negatives with fetched bytes for DOSBox Staging,
@@ -9285,6 +9286,31 @@ call `playSysex` without parseStream, DOSBox-X's vendored copy is already
 fixed at `:136`/`:253-254`, and the hackmd PoC is still HTTP 404. No host was
 built or run, so this narrows but does not prove the third-party-host
 question; rung 5 stays UNKNOWN.
+
+## 2026-11-23 21:3xZ — libheif W178 byte-exact OOB row at a labeled codec scope
+
+`613de0b` closes the arbitrary-byte ceiling W176 left UNKNOWN, on a separate
+pinned v1.23.6 build configured with `-DWITH_UNCOMPRESSED_CODEC=ON` (flags and
+the build-stall negative in `real/PROVENANCE-real.md`). Two cheap variants were
+falsified first: 420/444/native decode of the W177 JPEG file all returned the
+same distorted row and mono failed `rc=4 sub=3003`; a mixed 512x64/64x65
+uncompressed sequence encoded but frame 1 would not decode (`rc=2 sub=100
+Requested data range exceeds the sample data`), and patching the sample entry
+to 512x64 did not help. Positive: `real/uncompressed_mixed.cc` writes 64x65
+ISO/IEC 23001-17 frames whose 64 chosen bytes `11 22 33 44 55 66 77 88` x8
+decode byte-exact, and `real/reencode_chroma.cc` sizes x265 with one
+harness-created 512x64 frame before the file-derived frames, using
+`SYNTH_FIRST=1 TW=512 TH=64`. gdb on the pinned plain build breaks at the
+64-byte `memcpy`, reads `OOB dest_off=32768` and the exact chosen bytes at the
+source and at `plane+32768`; the plain run aborts rc 134 with
+`double free or corruption (out)`. Input SHA-256
+`b585565b5ca9af5860880c2102ae124749f298a5a3319e08a24e57cb8ca3a249`. Docs
+replayed the committed evidence: the hash matched and `check_uncompressed.py`
+returned PASS=5 FAIL=0. This is rung 4 with arbitrary 64-byte file-derived
+control at the OOB row at that labeled build/codec scope, not one uncompressed
+file driving the size mismatch; no pointer, marker, command, network consumer,
+witness replay or rung 5. Independent witness replay was requested; the grade
+stays rung 3 + rung 4.
 
 ## 2026-11-23 — libfontenc W177: witness #2914 at availability-only scope
 
@@ -9446,9 +9472,15 @@ with `ERRCODE=1`. Plain outcomes are rc 0 at 40, rc 134 at 48 and rc 139 at
 1016; the 56-byte case is unstable (author W182 2/12 plain and 1/12 trace
 rc 139, witness 10/10 plain rc 0 and 2/10 trace rc 139, one crash through
 `__strcmp_avx2` ← `_cjose_jwe_calc_auth_tag:1098` on a corrupted jansson
-string), so the earlier clean-exit wording was corrected at `8326d8b` and the
-cause stays UNKNOWN. The adjacent object is a jansson string at `cek+48`, and
-a source-only read of an unbuilt mod_auth_openidc 2.4.15.1 finds a pre-auth
+string), so the earlier clean-exit wording was corrected at `8326d8b`. W183
+(`a93cbcb`/`7798711`) measured the cause in the
+`w1/evidence/wrappedN56-*-w183.log` logs: the 25-byte object at `cek+48` is a
+jansson `json_string_t` that is either the 13-byte `enc` or the 6-byte `alg`
+string by allocation ring; chosen type/refcount bytes remove the early fault
+but all runs then abort on the corrupt chunk size, and pinning jansson's hash
+seed makes the outcome deterministic per seed (19/27/30 rc 139, the other 37
+tested seeds rc 0) with no pointer or IP control. Separately, a source-only
+read of an unbuilt mod_auth_openidc 2.4.15.1 finds a pre-auth
 backchannel-logout path to the same calls. Docs replayed all 28 wire cases from
 a copied tree and matched the RC pattern and the N48 ASan/C-CEK lines;
 whole-log hashes vary with ports, pointers and fresh token IVs. A witness
@@ -9477,3 +9509,17 @@ controls are clean. This establishes X-protocol font-path injection into a
 running server without a privileged font dir; whether an unprivileged OS user
 can reach a production X display, and whether that server is privileged, stay
 UNKNOWN. No grade change, no pointer, marker or command.
+
+## 2026-11-23 21:4xZ — frontier W181 staged thorvg2shell (direct-call rungs 1-4)
+
+GHSA-mw4c-w54x-248r / CVE-2026-123367 (HIGH 7.4, CWE-787): ThorVG <=1.1.1
+jpgd accepts duplicate SOS component selectors, so a grayscale frame whose
+buffers are sized for one block decodes with `m_blocks_per_mcu=4`.
+`lab/frontier/thorvg2shell/` pins v1.1.1/v1.1.2 and the fix patch; the
+decoder-only harness calls real `jpgdHeader`/`jpgdDecompress`. 88 cases: gcc
+and clang ASan show WRITE-2 0 bytes past the 128-byte coefficient allocation
+(allocator-instrumented copy), a pristine-source 2048x2048 crafted frame
+faults at pinned `tvgJpgd.cpp:733`, gdb places chosen halfwords at offsets
+128/256/384, fixed tree rejects. No renderer, wire, pointer/IP, command or
+witness; RCE UNKNOWN. Brief `reports/frontier-thorvg2shell.md`; live
+two-pane window 125 exists, no duplicate needed.

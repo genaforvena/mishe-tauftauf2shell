@@ -130,7 +130,7 @@ containers whose host ports bind only to loopback.
 | Erlang2Shell | [brief](../reports/frontier-erlang2shell.md), [status](../reports/erlang2shell-status.md) | CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA 2026-07-27, MEDIUM 5.1 CVSS4 AV:L, CWE-195+CWE-787); affected OTP 25.0+ before 27.3.4.15 / 28.5.0.4 / 29.0.4, fix `c5210b42`; pinned `external.c` / `erl_term.h` blobs and the five-line patch SHA-256 in `lab/frontier/erlang2shell/PROVENANCE.md` | `harness/run.sh` re-extracts four verbatim pinned slices, asserts source/patch/slice/driver SHA-256 pins, builds gcc and clang ASan plus plain-canary variants; opens no socket, VM or BEAM build | `T=$(mktemp -d /tmp/erlang-replay.XXXXXX); cp -a lab/frontier/erlang2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `PASS=60 FAIL=0`, `TRACE_SHA256=8517d3e1…c88` |
 | MiniSnmpd2Shell | [brief](../reports/frontier-minisnmpd2shell.md), [status](../reports/minisnmpd2shell-status.md) | CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed `5419bc38` / release `6894e33e`; pinned vulnerable `protocol.c` `b5322437` (`4bd06467…`), fixed `5419bc38` (`eeb05d95…`), patch `fac30b06…`; five blob/driver hashes in `lab/frontier/mini-snmpd/PROVENANCE.md`, URLs there and in `src/SHA256SUMS` | `harness/run.sh` re-extracts verbatim `decode_oid` (190–256) and `decode_str` (175–187) from both pinned files, asserts five source/patch/driver and four slice SHA-256 pins, builds gcc/clang ASan plus plain variants; opens no socket | `cd lab/frontier/mini-snmpd && bash harness/run.sh` → `PASS=43 FAIL=0`, normalized trace SHA-256 `0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`; ASan `READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`, fixed/safe clean. `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte GET with declared OID length 0xffff; `run_fixed_wire.sh` uses 16162 and `run_safe_wire.sh` the 35-byte control. Full staging recipe below |
 | Ettercap2Shell | [brief](../reports/frontier-ettercap.md), [status](../reports/ettercap2shell-status.md), [live dissector](../reports/ettercap2shell-livedissector.md) | CVE-2026-125401 / GHSA-vrjv-f8gv-2h35 (GitHub CNA 2026-11-06, HIGH 8.1 `CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-131+CWE-787; OSV CVSS4 also AV:A), affected `<=0.8.4.1`, patched `0.8.5.1`, fix `1d8badb7`; pinned vulnerable `3548c10c` and PR-head fix `a8c1a50` (byte-identical to merged/released 0.8.5.1), six blobs in `lab/frontier/ettercap2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | `cd lab/frontier/ettercap2shell && bash harness/run.sh` re-extracts the verbatim pinned `gg_get_version()` slices, asserts source/patch/tag/slice/driver SHA-256 pins, builds plain plus gcc/clang ASan variants; opens no socket. Real dissector: build both pinned tags with clang ASan and drive a crafted TCP/8074 frame from a pcap and from `lo` (recipe below) | operator clean `/tmp` replay: rc 0, `PASS=58 FAIL=0`, normalized trace SHA-256 `d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`; gcc/clang ASan `WRITE of size 13`, 0 bytes after a 30-byte region in `gg_get_version`; fixed and small-version controls clean. Real dissector gives the same `WRITE of size 13` at `gg_get_version:673` via `dissector_gg:360` offline and live; extent, safe, wrong-type, server-direction and fixed controls as recorded below. Full admission recipe below |
-| Libheif2Shell | [brief](../reports/frontier-libheif2shell.md), [status](../reports/libheif2shell-status.md) | GHSA-hpg4-g2gc-pq42, vulnerable tag `v1.23.6` (`f81f28ac…421a`), fix `9ec655f76b6fe298092aaeb063f821f53b8eb901`; five direct-call pins in `lab/frontier/libheif2shell/PINS.sha256`, real-file pins and URLs in `lab/frontier/libheif2shell/real/` and `PROVENANCE.md` | `cd lab/frontier/libheif2shell/harness && ./run.sh && ./check.sh` (stubbed direct call); real-file lane: `bash lab/frontier/libheif2shell/real/rebuild_and_run.sh SOURCE BUILD OUT [decode-only|mixed|safe|all]` (CMake/Ninja Debug, x265+JPEG plugins, ASan, driver rebuilt from pinned `reencode_sequence.cc`); W176 ceiling probes: compile `real/avif_lossless_probe.cc` against the pinned plain Release tree with the exact g++ command in that file's header (needs `ninja -C "$B" -t commands examples/heif-enc` for `$LIBS`), then `/tmp/avif_lossless_probe make/check /tmp/avif-mixed.avif`; re-run the wire lane with `bash real/run_wire.sh /tmp/w176-wire-replay` | Direct-call clean archive at `366690f`: `PASS=101 FAIL=0`, trace `9468b510…e38b43`; W159/#2626 ESTABLISHED rungs 1-4 at labeled CODE/HARNESS scope. W161 real-build mixed-MJPEG file lane author-only: ASan `WRITE of size 64` past a 32783-byte plane, Release SIGSEGV on mixed input, fixed rc 2; no witness verdict there, 36,879-byte allocation untested, rung 5 UNKNOWN. W176 (author-only negatives): AV1 lossless mixed-size frame 1 is refused with `rc=8 sub=5002 ... Image size must match encoder init configuration size` and `heif-enc -A -L -S` refuses too; JPEG constant 8x8 blocks round-trip byte-exact but the SOF-patched OOB row is not independent (`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so arbitrary-byte control stays UNKNOWN; the six wire cases and both checkers PASS, witnesses #2752/#2869/#2897 still queued with no verdict |
+| Libheif2Shell | [brief](../reports/frontier-libheif2shell.md), [status](../reports/libheif2shell-status.md) | GHSA-hpg4-g2gc-pq42, vulnerable tag `v1.23.6` (`f81f28ac…421a`), fix `9ec655f76b6fe298092aaeb063f821f53b8eb901`; five direct-call pins in `lab/frontier/libheif2shell/PINS.sha256`, real-file pins and URLs in `lab/frontier/libheif2shell/real/` and `PROVENANCE.md` | `cd lab/frontier/libheif2shell/harness && ./run.sh && ./check.sh` (stubbed direct call); real-file lane: `bash lab/frontier/libheif2shell/real/rebuild_and_run.sh SOURCE BUILD OUT [decode-only|mixed|safe|all]` (CMake/Ninja Debug, x265+JPEG plugins, ASan, driver rebuilt from pinned `reencode_sequence.cc`); W176 ceiling probes: compile `real/avif_lossless_probe.cc` against the pinned plain Release tree with the exact g++ command in that file's header (needs `ninja -C "$B" -t commands examples/heif-enc` for `$LIBS`), then `/tmp/avif_lossless_probe make/check /tmp/avif-mixed.avif`; re-run the wire lane with `bash real/run_wire.sh /tmp/w176-wire-replay`. W178 uncompressed lane: configure pinned v1.23.6 with `-DWITH_UNCOMPRESSED_CODEC=ON -DWITH_X265=ON` and `-DCMAKE_CXX_FLAGS_RELEASE='-O0 -DNDEBUG'`, `ninja -j1 libheif.a`, then `SYNTH_FIRST=1 TW=512 TH=64 /tmp/w178-reencode-unci real/neighbour/evidence/uncompressed/byte-exact.heif /tmp/w178-unci-out.heif`; `gdb -q -batch -x real/neighbour/gdb_uncompressed.cmd /tmp/w178-reencode-unci`; `python3 real/neighbour/check_uncompressed.py` | Direct-call clean archive at `366690f`: `PASS=101 FAIL=0`, trace `9468b510…e38b43`; W159/#2626 ESTABLISHED rungs 1-4 at labeled CODE/HARNESS scope. W161 real-build mixed-MJPEG file lane author-only: ASan `WRITE of size 64` past a 32783-byte plane, Release SIGSEGV on mixed input, fixed rc 2; no witness verdict there, 36,879-byte allocation untested, rung 5 UNKNOWN. W176 (author-only negatives): AV1 lossless mixed-size frame 1 is refused with `rc=8 sub=5002 ... Image size must match encoder init configuration size` and `heif-enc -A -L -S` refuses too; JPEG constant 8x8 blocks round-trip byte-exact but the SOF-patched OOB row is not independent (`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so on those codecs arbitrary-byte control stayed UNKNOWN; the six wire cases and both checkers PASS, witnesses #2752/#2869/#2897 still queued with no verdict. W178 (author-only, separate build/codec) closes that ceiling: 64 chosen bytes `11 22 33 44 55 66 77 88` x8 decode byte-exact through ISO/IEC 23001-17 and land at `plane+32768` under gdb (input SHA-256 `b585565b…a249`, `check_uncompressed.py` PASS=5 FAIL=0, plain rc 134 `double free or corruption (out)`); rung 4 at that labeled scope, first encoder-sizing frame harness-created, no witness replay or rung 5 |
 | Munt2Shell | [brief](../reports/frontier-munt2shell.md), [status](../reports/munt2shell-status.md) | pinned `libmt32emu_2_8_3` tarball and third-party bytes in `lab/frontier/munt2shell/PROVENANCE.md` and `real/thirdparty/NOTES.md` | `lab/frontier/munt2shell/harness/run.sh`; `real/` CMake builds | W175/W176 source-negative folds below; witness #2781 real-library rungs 1-4; no third-party host built |
 | Thrift2Shell | [status](../reports/thrift2shell-status.md), [live wire](../reports/thrift2shell-livewire.md) | pinned v0.23.0/v0.24.0 bytes and URLs in `lab/frontier/thrift2shell/PROVENANCE.md` | `lab/frontier/thrift2shell/harness/run.sh`; `live/build.sh` | W152 cap-cleared disposition below; W145/W146 UNVERIFIED, W144 the only witness-backed lane |
 | Libfontenc2Shell | [brief](../reports/frontier-libfontenc2shell.md), [status](../reports/libfontenc2shell-status.md) | four out-plain revs and `PINS.sha256` in `lab/frontier/libfontenc2shell/PROVENANCE.md` | `sh realpath/xlive/run-plain-crash.sh` from `lab/frontier/libfontenc2shell`; runtime X-protocol lane `sh realpath/xlive/run-xset-fp.sh` | W177 witness #2914 clean-archive nine-line matrix below; availability-only ESTABLISHED; W180 runtime font-path injection into a running Xvfb (author-only) below |
@@ -138,7 +138,7 @@ containers whose host ports bind only to loopback.
 | Kicad2Shell | [brief](../reports/frontier-kicad2shell.md), [status](../reports/kicad2shell-status.md) | pins in `lab/frontier/kicad2shell/PINS*.sha256` and `kicadreader/PINS-kicadreader.sha256` | `cd lab/frontier/kicad2shell/kicadreader && sh run.sh`; `sh chosen-value.sh 84215045` for the file-controlled byte probe | `sh check.sh` 38/38 trace `fffe7341…6260`, clean `git archive 337c164`; witness #2996 replayed 38/38 from clean `3d90217`, ESTABLISHED rungs 1-4 at the labeled KiCad-own-reader scope, NOT rung 5; W179 chosen-value recipe below |
 | Ndpi2Shell | [brief](../reports/frontier-ndpi2shell.md), [status](../reports/ndpi2shell-status.md) | pins and fixed-release ancestry in `lab/frontier/ndpi2shell/PINS.sha256` and `PROVENANCE.md` | `cd lab/frontier/ndpi2shell/realbuild && ./run.sh`; `harness/run.sh`/`check.sh` | W162 real-build VALUE-negative/KEY-positive, fixed 6.0 and tree-local key-reachability negative below |
 | Sdlmixer2Shell | [brief](../reports/frontier-sdlmixer2shell.md), [status](../reports/sdlmixer2shell-status.md) | four pins in `lab/frontier/sdlmixer2shell/PINS.sha256`; SDL3 tarball SHA in `PROVENANCE.md` | `cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh` | 96/0 trace `934e8337…60c0`; witness #2942 direct-call rungs 1-4 only; W179 author-only |
-| Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh`; loopback wire lane `cd ../w1 && sh build.sh && bash run.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness verdicts recorded: rungs 1-4 direct-call, rungs 1-3 plus byte-control synthetic consumer, NOT rung 5; W181/W182 wire outcomes and 56-byte instability below |
+| Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh`; loopback wire lane `cd ../w1 && sh build.sh && bash run.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness verdicts recorded: rungs 1-4 direct-call, rungs 1-3 plus byte-control synthetic consumer, NOT rung 5; W181/W182 wire outcomes and 56-byte instability below; W183 jansson-object identity and hash-seed cause below |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -6239,9 +6239,45 @@ command in its header against the pinned plain Release tree
 `rc=8 sub=5002 ... Image size must match encoder init configuration size`;
 `heif-enc -A -L -S` refuses too. JPEG constant 8x8 blocks round-trip
 byte-exact but the SOF-patched OOB row is not independent
-(`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so arbitrary-byte
-control stays UNKNOWN. `bash real/run_wire.sh /tmp/w176-wire-replay` replays
+(`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so on those codecs
+arbitrary-byte control stayed UNKNOWN (W178 closes it on another build below).
+`bash real/run_wire.sh /tmp/w176-wire-replay` replays
 six cases with both checkers PASS. Witnesses #2752/#2869/#2897 remain queued.
+
+### Libheif W178 (`613de0b`; author-only byte-exact OOB row)
+
+A separate pinned v1.23.6 build with `WITH_UNCOMPRESSED_CODEC=ON` (exact CMake
+flags and the host-build stall negative in
+`lab/frontier/libheif2shell/real/PROVENANCE-real.md`, W178 section) makes the
+OOB row byte-exact. `real/uncompressed_mixed.cc` writes a 64x65 ISO/IEC
+23001-17 sequence whose 64 chosen Y-row bytes are `11 22 33 44 55 66 77 88`
+x8; raw samples decode byte-exact. That codec cannot itself carry the mixed
+512x64/64x65 sizes (frame 1 decode fails `rc=2 sub=100 Requested data range
+exceeds the sample data`, a preserved negative), so `real/reencode_chroma.cc`
+with `SYNTH_FIRST=1 TW=512 TH=64` supplies one harness-created 512x64 frame to
+size the x265 encoder before the file-derived frames.
+
+With `/tmp/libheif2shell-unci` and `/tmp/w178-reencode-unci` built as in the
+provenance, from the repo root:
+
+```
+SYNTH_FIRST=1 TW=512 TH=64 /tmp/w178-reencode-unci \
+  lab/frontier/libheif2shell/real/neighbour/evidence/uncompressed/byte-exact.heif /tmp/w178-unci-out.heif
+gdb -q -batch -x lab/frontier/libheif2shell/real/neighbour/gdb_uncompressed.cmd /tmp/w178-reencode-unci
+python3 lab/frontier/libheif2shell/real/neighbour/check_uncompressed.py
+```
+
+Docs replay of the committed evidence at 21:4xZ: input SHA-256
+`b585565b5ca9af5860880c2102ae124749f298a5a3319e08a24e57cb8ca3a249`,
+`PASS=5 FAIL=0` (hash, dest offset 32768, 64-byte source row, landed bytes,
+plain abort); gdb reads `OOB dest_off=32768` and the AFTER dump is
+`0x8877665544332211` x8 at `plane+32768`; the plain run aborts rc 134
+`double free or corruption (out)`. This is rung 4 with arbitrary 64-byte
+file-derived control at the OOB row at that labeled build/codec scope,
+superseding the earlier one-uniform-value ceiling. The first encoder-sizing
+frame is harness-created, so this is not one uncompressed file driving the
+mismatch; no pointer, marker, command, network consumer, ASan run on this
+build, witness replay or rung 5.
 
 ### Libfontenc W177 (`c83d597`; witness #2914 ESTABLISHED)
 
@@ -6471,8 +6507,8 @@ repeats and an independent witness saw both rc 0 and rc 139 (W182's
 witness: 10/10 plain rc 0 and 2/10 trace rc 139, with one crash in
 `__strcmp_avx2` from `_cjose_jwe_calc_auth_tag:1098` via
 `_cjose_jwe_decrypt_dat_aes_cbc:1400` and `enc=0x0`), so the earlier "clean
-exit" wording was corrected by the author at `8326d8b`; the cause of the
-variation stays UNKNOWN. Whole-log hashes are not stable across replays
+exit" wording was corrected by the author at `8326d8b`; the cause is measured
+in W183 below. Whole-log hashes are not stable across replays
 (ephemeral PORT, CEK pointer, ASan PID/addresses and locally generated token
 IV differ); compare semantic lines. The 25-byte jansson neighbour at `cek+48`
 and the source-only unbuilt mod_auth_openidc 2.4.15.1 pre-auth path are
@@ -6483,6 +6519,29 @@ scope and rungs 1-3 plus byte-control mechanics ESTABLISHED at the labeled
 synthetic 127.0.0.1 consumer scope, NOT rung 5. No deployed server,
 credential, pointer target or command; pre-auth reachability in a real
 deployment and RCE stay UNKNOWN.
+
+### Cjose W183 (`a93cbcb`, `7798711`): 56-byte variation cause measured
+
+The throwaway instrumented loopback server from W181/W182 (not committed) dumps
+the 25-byte jansson object at `cek+48`. It is a `json_string_t` (type at +0,
+refcount at +8, value pointer at +16, length at +24); with an identical
+allocation ring it is either the 13-byte `enc` value or the 6-byte `alg` value.
+In a 40-run batch all four rc 139 crashes had `json_object_get(hdr,"enc")`
+returning that object, all 36 rc 0 survivors had it elsewhere; the chosen
+`0x5a` replaces its type so `json_string_value()` returns NULL and the real
+decrypt path faults in `__strcmp_avx2` via `_cjose_jwe_calc_auth_tag:1098`.
+Chosen type/refcount bytes `02 00 00 00 01 00 00 00` removed that fault in all
+60 runs, which then aborted in `munmap_chunk()` from the still-corrupt chunk
+size at `cek+40..47` (`w1/evidence/wrappedN56-cause-w183.log`).
+
+Pinning jansson's per-process hash seed before any cjose call with
+`json_object_seed(N)` makes the outcome deterministic per seed
+(`w1/evidence/wrappedN56-hashseed-w183.log`): seeds 19, 27 and 30 gave rc 139
+in 6/6 runs each with `enc` adjacent, the other 37 tested seeds rc 0 with it
+elsewhere; the roughly 8-20% unpinned crash rate is the fraction of random
+seeds in the first class. Fixed IV and ASLR-off batches still vary. Why two
+same-size strings swap identity stays UNKNOWN. No pointer or IP control;
+grade and the rung 1-4 ceiling are unchanged.
 
 ### Psqlodbc W166 (`d8a4e1b`, report-only negative)
 
