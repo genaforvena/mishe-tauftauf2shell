@@ -1,0 +1,53 @@
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -153,7 +153,31 @@
+ static int
+ gp_port_vusb_read(GPPort *port, char *bytes, int size)
+ {
++	const char *m2 = getenv("M2SHELL_JL2005_VUSB");
++	if (getenv("M2SHELL_DEBUG")) fprintf(stderr, "VUSB_READ size=%d\n", size);
+ 	gp_log(GP_LOG_DEBUG,__FUNCTION__,"(%d)", size);
++
++	/* Lab-only virtual JL2005 device: replies are chosen bytes, the
++	 * vulnerable camlib below this port is the unmodified v2.5.34 code. */
++	if (m2 && *m2) {
++		const char *cs = getenv("M2SHELL_JL2005_COUNT");
++		int count = cs ? atoi(cs) : 1022;
++		if (size == 1) { bytes[0] = 0; return 1; }
++		if (size == 0x200) {
++			memset(bytes, 0, (size_t)size);
++			memcpy(bytes, "JL2005", 6);
++			bytes[6] = 0x43;
++			bytes[12] = (char)((count >> 8) & 0xff);
++			bytes[13] = (char)(count & 0xff);
++			return size;
++		}
++		{
++			int n = size;
++			if (m2[0] == 's' && n > 0x3E20) n = 0x3E20;
++			memset(bytes, 0x5a, (size_t)n);
++			return n;
++		}
++	}
+ 	return port->pl->vcamera->read(port->pl->vcamera, 0x81, (unsigned char*)bytes, size);
+ }
+ 
+@@ -286,6 +310,18 @@
+ static int
+ gp_port_vusb_find_device_lib(GPPort *port, int idvendor, int idproduct)
+ {
++
++	/* Lab-only virtual JL2005 identity; real camlib ID from library.c. */
++	if (getenv("M2SHELL_JL2005_VUSB") && idvendor == 0x0979 && idproduct == 0x0227) {
++		port->settings.usb.config = 1;
++		port->settings.usb.interface = 1;
++		port->settings.usb.altsetting = 1;
++		port->settings.usb.inep = 0x81;
++		port->settings.usb.outep = 0x02;
++		port->settings.usb.intep = 0x83;
++		port->settings.usb.maxpacketsize = 512;
++		return GP_OK;
++	}
+ #ifdef FUZZ_PTP
+ 	if ((idvendor == 0x04b0) && (idproduct == 0x0437)) { /* Nikon D750 */
+ #else

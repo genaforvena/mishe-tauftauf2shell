@@ -106,18 +106,26 @@ compiles with `-fsanitize-recover=address` and runs with
 
 ## 5. Ceiling and cheapest next rung
 
-Direct calls with stubbed gphoto plumbing and emulated device replies. No
-libgphoto2 build, USB/libusb, camera enumeration, gvfs/digiKam consumer,
-socket, wire, pointer-control chain, benign marker execution, command
-execution or witness replay. The malicious-USB-device attacker model is a
-claim. The cheapest move toward a real consumer is to build libgphoto2
-2.5.34 with ASan, register the JL2005 camlib USB id and feed the handshake
-from a loopback-controlled USB/IP or usbvirt device; the next question is
-whether the corrupted frame is used before abort. On this host that lane is
-not yet actionable without host-level provisioning: `pkg-config --modversion
-libusb-1.0` reports the package missing, and the lab has no USB/IP or usbvirt
-device. A rung-5 path would still need a network-facing host that processes
-untrusted camera data automatically. Rung 5 is UNKNOWN, not established.
+The deterministic pin-based evidence is direct calls with stubbed gphoto
+plumbing. W162 adds a real ASan libgphoto2 2.5.34 build whose `jl2005c` camlib
+is reached through `gp_camera_init()` with libgphoto2's own `vusb` virtual USB
+port, patched in the lab to answer the JL2005 handshake with chosen bytes; see
+`lab/frontier/libgphoto2shell/REAL-BUILD.md`. No real USB hardware, physical
+camera enumeration, gvfs/digiKam consumer, socket, network wire,
+pointer-control chain, benign marker execution, command execution or witness
+replay. The malicious-USB-device attacker model is a claim carried by a
+synthetic transport here. A rung-5 path would still need a network-facing host
+that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
+
+- Real-library replay (W162): on the 2.5.34 release build, count 100 gives
+  `gp_camera_init rc=0` with no ASan report; count 1022 makes the virtual
+  device receive a 16384-byte read request and ASan report
+  `stack-buffer-overflow`, `WRITE of size 16384`, at the real
+  `jl2005c/jl2005c.c:152` in `jl2005c_init`, reached from `camera_init` and
+  `gp_camera_init`. With the upstream fix applied to the same tree the device
+  sees no oversized request and no ASan report; the vulnerable build was
+  restored afterwards. Recipe, patch, controls and raw outputs:
+  `lab/frontier/libgphoto2shell/REAL-BUILD.md`.
 
 - Measured ceiling on this path (W162): gdb at pinned `:154` puts the `priv`,
   `port` and `camera` argument slots at `info+16432/16440/16448` and saved
@@ -130,4 +138,4 @@ untrusted camera data automatically. Rung 5 is UNKNOWN, not established.
   — the chosen heap bytes are the harness canary, not an observed real
   neighbour. Details and raw gdb output in `PROVENANCE.md`, section
   "Measured frame layout and structural ceiling". This is a negative at the
-  direct-call scope only; the real-device path remains untested.
+  direct-call scope only; real USB hardware and wire remain untested.

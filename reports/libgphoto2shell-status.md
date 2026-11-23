@@ -34,17 +34,20 @@ Admission adds no grade.
   same trace; see `lab/frontier/libgphoto2shell/REPLAY.md` for the current
   clean-archive replay. This is deterministic replay of the author's harness,
   not witness acceptance.
-- Ceiling: direct-call CODE/HARNESS rungs 1-4 only. gdb reads eight chosen
-  `0x5a` bytes past both buffers and a chosen marker at clang's saved-RIP slot
-  `info+16472`, but the process faults inside `memmove` before `ret`, so IP
-  control is not demonstrated. No libgphoto2 build, USB/libusb device, camera
-  consumer, socket, wire, pointer-control chain, command, marker side effect,
-  witness verdict or rung 5. Rung 5 UNKNOWN.
+- Ceiling: direct-call CODE/HARNESS rungs 1-4 plus a real-library rung-3
+  replay. gdb reads eight chosen `0x5a` bytes past both buffers and a chosen
+  marker at clang's saved-RIP slot `info+16472`, but the direct-call process
+  faults inside `memmove` before `ret`, so IP control is not demonstrated.
+  W162 added a real ASan libgphoto2 2.5.34 build reached through
+  `gp_camera_init()` with a lab-patched `vusb` virtual USB device: count 1022
+  produces ASan `WRITE of size 16384` at real `jl2005c/jl2005c.c:152`; the
+  fixed build makes no oversized device request. No real USB hardware, wire,
+  camera consumer, socket, pointer-control chain, command, marker side effect
+  or witness verdict. Rung 5 UNKNOWN.
 
-Next for the target mind: build libgphoto2 2.5.34 under ASan, register the
-JL2005 camlib USB id and drive the handshake from a loopback-controlled USB/IP
-or usbvirt device; determine whether the corrupted frame is used before abort
-and whether a controlled pointer survives. That lane needs provisioning first:
-libusb-1.0 development headers are absent on this host and no lab USB/IP or
-usbvirt device exists. Hand any new claim to `witness` — the author report is
-not acceptance.
+Next for the target mind: replay the virtual-port lane independently
+(`lab/frontier/libgphoto2shell/REAL-BUILD.md`) and hunt counterexamples to the
+real-library ASan claim; then look for a controlled pointer surviving the
+write in the real allocator. A physical/wire path (USB/IP or usbvirt) is still
+not available on this host. Hand any new claim to `witness` — the author
+report is not acceptance.

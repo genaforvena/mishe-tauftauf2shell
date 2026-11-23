@@ -153,13 +153,41 @@ assertions or its trace), measured the frame slots relative to `info`:
   this harness and blocked here without a libgphoto2/USB device path.
 
 These are negatives for rung 5 at the direct-call scope, not a claim that the
-real-device path is unreachable; that path remains UNTESTED.
+real-device path is unreachable. The virtual-port path below was subsequently
+tested; real USB hardware and wire remain UNTESTED.
+
+## Real-library replay (W162)
+
+A real ASan build of the 2.5.34 release source, its real `jl2005c` camlib,
+`gp_camera_init()` dispatch and real `gp_port_read()` was driven from
+libgphoto2's `vusb` port with a lab-patched JL2005 device model. Full recipe,
+patch, raw outputs and scope limits are in `REAL-BUILD.md`; the patch is
+`live/vusb-jl2005.patch` and the driver `live/real_init.c`. No pinned source
+slice or stub gphoto API is involved in this lane.
+
+- Count 100: `gp_camera_init rc=0`, no ASan report; device sees 16 single-byte
+  replies and one 512-byte table block (`evidence/real-lib-asan-baseline.out`).
+- Count 1022: device sees a 16384-byte read request; ASan reports
+  `stack-buffer-overflow`, `WRITE of size 16384`, at real
+  `jl2005c/jl2005c.c:152` on the stack frame of `jl2005c_init`, reached through
+  `camera_init` (`jl2005c/library.c:487`) and `gp_camera_init`
+  (`evidence/real-lib-asan-attack.out`). Process exits 1.
+- Fixed control with `pins/fix-6a3393d.patch` applied to the same release tree:
+  the device sees only the 16 single-byte replies and the 512-byte block, no
+  oversized request and no ASan report (`evidence/real-lib-fixed-reads.out`);
+  the patch was reversed and the vulnerable build restored afterwards.
+
+Only the device is synthetic. This is rung 3 on a real library build, not a
+wire-level trigger, pointer-control chain or rung 5.
 
 ## Ceiling
 
-Direct calls only. No libgphoto2 build, USB/gp_port driver, libusb, camera
-enumeration, gvfs/digiKam consumer, socket, network wire, pointer-control
-chain, benign marker execution, command execution or witness replay. The
-issue's "malicious USB camera on connect" attacker model is a claim. Rung 5
-is UNKNOWN. Finding 3 (thumbnail decompressor) is screened out here, not
-disproved.
+Direct calls with stubbed gphoto plumbing and emulated device replies are the
+deterministic pin-based evidence set. Additionally, a real ASan libgphoto2
+2.5.34 build reaches the same stack write through `gp_camera_init()` with a
+lab-patched virtual USB port (section above). No real USB hardware, camera
+enumeration from a physical device, gvfs/digiKam consumer, socket, network
+wire, pointer-control chain, benign marker execution, command execution or
+witness replay. The issue's "malicious USB camera on connect" attacker model
+remains a claim on a synthetic transport here. Rung 5 is UNKNOWN. Finding 3
+(thumbnail decompressor) is screened out here, not disproved.
