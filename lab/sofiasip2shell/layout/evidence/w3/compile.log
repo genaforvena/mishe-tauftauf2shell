@@ -1,0 +1,4 @@
+real_layout.c: In function ‘main’:
+real_layout.c:257:11: warning: unused variable ‘orig_bbuffer’ [-Wunused-variable]
+  257 |     char *orig_bbuffer = wsh->bbuffer;
+      |           ^~~~~~~~~~~~

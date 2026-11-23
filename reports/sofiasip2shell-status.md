@@ -95,13 +95,24 @@ grade.
   1..5 equal `before ^ mask[k%4]` (`LIVE_META_DELTA_BAD=0`); the shim's own
   victim landed 312 bytes away and stayed untouched, an honest placement
   negative. This closes the W1 "no SIP tport path" limit.
-- The corruption's first byte is zeroed by the terminator (or even `0xd0` in
-  the 65527 case), clearing glibc's `PREV_INUSE` bit; the next allocator
-  operation aborts. No useful fake-chunk state, overlap or pointer control
-  was measured, so rung 5 mechanics were not built on this path.
-- Next experiment: an allocator configuration where `PREV_INUSE` survives,
-  or a different consumer, would be needed before any rung-5 attempt; rung 5
-  also needs a benign command with an observed side effect and witness replay.
+- W3 mask/slack sweep (`reports/sofiasip2shell-real-layout.md`, W3 section;
+  raw cases in `lab/sofiasip2shell/layout/evidence/w3/`): the earlier claim
+  that the first corrupted byte clears `PREV_INUSE` is scope-limited to the
+  tested odd mask `415a4243` and to the realloc geometry, not structural.
+  With `SIA_MASK=405a4243` (even `mask[0]`) the default and 65527 geometries
+  show `PREV_INUSE_BEFORE=1 PREV_INUSE_AFTER=1`, yet the default case still
+  aborts with `malloc(): corrupted top size` (rc 134): the same nonzero mask
+  turns the original size's zero high bytes into `43 41 5a`, giving an
+  implausible size. The only masks that survive the post-frame allocation are
+  those leaving the high bytes zero (`00000000`, `00000100`), which collapse
+  the corruption to padding plus at most one low size byte. Request-size slack
+  >= 14 (65529/65530) keeps the whole extent inside usable padding with
+  `NEXT_SIZE` untouched; slack 0/13 clears PREV_INUSE. No mask or geometry
+  produced a fake chunk, overlap or pointer.
+- Stage: rung 4 ESTABLISHED at its labeled scope; rung 5 needs a different
+  write mechanism, not further grooming of this primitive. A rung-5 claim
+  would still require a benign command with an observed side effect and
+  witness replay.
 - Witness #1821 (2026-11-22) replayed the W1 layout claim from a clean
   `git archive HEAD`, regenerated both pinned `.inc` with matching hashes, and
   ran `layout/run.sh` twice (rc 0, identical rc set): readback delta,
@@ -111,6 +122,12 @@ grade.
   differs only in PID/addresses/build paths. Verdict **ESTABLISHED at the
   labeled scope**. The full autogen/configure/make library lane was not
   independently rebuilt by the witness and remains author-observed.
-- Full stage: `reports/frontier-sofiasip2shell.md`. W1 verdict ESTABLISHED at
-  its labeled scope; W2 adjacent-object data and live-tport results are
-  author-observed and await witness replay.
+- Witness #1877 (W2 layout object-data) and #1903 (W2 live WS tport, ASan and
+  plain) both returned **ESTABLISHED at the labeled scope** from clean
+  archives (df6fb42 / b723615), with byte-identical `.out/.rc` evidence and
+  diffs limited to path/PID/pointers in ASan logs. No nit from either. The
+  witness did not rebuild the full autogen/configure/make library lane; that
+  lane stays author-observed.
+- Full stage: `reports/frontier-sofiasip2shell.md`. W1, W2 layout and W2 live
+  tport are ESTABLISHED at their labeled scopes; W3 mask/slack decision is
+  author-observed and awaits witness replay. Rung 5 not implied.

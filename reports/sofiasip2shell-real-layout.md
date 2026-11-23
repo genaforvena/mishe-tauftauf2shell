@@ -298,11 +298,12 @@ committed logs, not an independent rebuild. Grade unchanged.
   `plain-v17-victim` confirms the data gap there. W2's 65527 and 65544
   geometries close that gap with real glibc allocations, but both still write
   only a 4-byte repeating XOR delta at fixed offsets, not attacker-chosen
-  absolute values.
-- Only one mask (`415a4243`) was tested; three payload/length configurations
-  (65520, 65527, 65536, 65544) and one neighbour object type (128-byte
-  chunk) were measured. Converting the delta into a *useful* heap state
-  (overlapping chunks, pointer control) was not attempted.
+  absolute values. Four payload/length configurations (65520, 65527, 65536,
+  65544) and one neighbour object type (128-byte chunk) were measured.
+- W3 varied the 4-byte mask (`00000000`, `00000100`, `405a4243`, `415a4243`)
+  and the bbuffer request size (65528–65536). Converting the delta into a
+  *useful* heap state (overlapping chunks, pointer control) was not achieved;
+  see the W3 section below.
 - The fixed pin's 65544-byte realloc moves the buffer, so that control is a
   live-object check rather than a same-address byte comparison.
 - Independent replay covers the layout harness only, not the full pinned
@@ -322,3 +323,65 @@ bash lab/sofiasip2shell/libbuild/driver/build_and_run.sh v18 v1.13.18 full short
 ASAN_OPTIONS_OVERRIDE='detect_leaks=0:abort_on_error=0:halt_on_error=0' \
   bash lab/sofiasip2shell/libbuild/driver/build_and_run.sh v17recover v1.13.17-recover full short
 ```
+
+## W3: PREV_INUSE survival is mask-dependent but buys no usable heap state
+
+W2's "the first corrupted byte clears PREV_INUSE" is true for the tested mask
+`415a4243` and for the realloc geometry, but it is **not structural**. The
+verbatim pinned loop writes 14 bytes as `old ^ mask[(rplen+k)%4]` for k=0..13
+and then rewrites byte k=0 with a fixed NUL. Whether the next chunk's `size`
+low byte is hit by the XOR or by the NUL, and whether it survives, depends on
+glibc's usable slack (`malloc_usable_size - request`) and on the mask.
+
+W3 added a `SIA_MASK=hex8` override to `real_layout.c` (frame bytes and the
+readback check both use it; the pinned `.inc` files and `run.sh` hashes are
+untouched) and an explicit `PREV_INUSE_BEFORE/AFTER` print. Raw cases are in
+`lab/sofiasip2shell/layout/evidence/w3/`; the mask-capable binary is
+`plain-mask`. Every delta check still passes (`XOR_DELTA_BAD=0`).
+
+| Case | mask | `NEXT_SIZE_BEFORE` -> `AFTER` | PREV_INUSE | rc |
+|---|---|---|---|---|
+| default 65536, +malloc | `415a4243` | `710c020000000000` -> `30564043415a0000` | 1 -> 0 | 134 |
+| default 65536, +malloc | `405a4243` | `710c020000000000` -> `31564043405a0000` | **1 -> 1** | **134** |
+| geom 65527 | `415a4243` | `9100000000000000` -> `d05a4243415a4243` | 1 -> 0 | 0 |
+| geom 65527 | `405a4243` | `9100000000000000` -> `d15a4243405a4243` | **1 -> 1** | 0 |
+| realloc 65544 | either | `9100000000000000` -> `005a4243415a4243` | 1 -> 0 | 0 |
+
+An even `mask[0]` does preserve PREV_INUSE at the default and 65527
+geometries (the XOR, not the NUL, writes that byte there). It **does not buy
+survival**: the same run still aborts with `malloc(): corrupted top size`
+(rc 134). Reason, visible in the bytes above: the 14-byte extent covers six
+low bytes of the size field, and original size bytes 3, 4 and 5 are zero; a
+nonzero `mask[3]`, `mask[0]` or `mask[1]` turns them into `43 41 5a`, making
+the top size `0x5a4043405631` — an implausible value that glibc rejects on the
+next allocation irrespective of PREV_INUSE. In the realloc geometry the fixed
+NUL lands on the size low byte itself, so PREV_INUSE is cleared for every mask.
+
+Masks that leave those high bytes zero behave as expected:
+`00000000` leaves the size unchanged; `00000100` changes only one plausible
+size byte (`710c020000000000` -> `710c030000000000`); both survive the
+post-frame `malloc(64)` (rc 0) with PREV_INUSE intact. The surviving masks are
+exactly those that collapse the corruption to usable padding plus at most one
+low size byte — no fake chunk, overlap or pointer.
+
+A request-size slack sweep closes the other branch. With a 65529- or
+65530-byte bbuffer request (`malloc_usable_size = 65544`, slack 15/14) the
+whole 14-byte extent stays inside usable padding: `NEXT_SIZE_BEFORE ==
+NEXT_SIZE_AFTER`, PREV_INUSE 1 -> 1, no corruption at all. Slack 0 (65528) is
+the NUL-on-size-low-byte case (1 -> 0); slack 13 (65531) lets only the last
+XOR byte touch size byte 0 (`91` -> `d0`, 1 -> 0). These configurations
+either erase the primitive or keep it caught — none yields a controllable
+fake chunk.
+
+**Decision**: no tested mask/geometry combination turns PREV_INUSE survival
+into a usable allocator state. Preserving the bit removes one abort message
+but leaves an implausible size; restoring a plausible size removes the useful
+corruption. Rung 5 on this primitive needs a different write mechanism, not
+more grooming of this one. No pointer, marker, command or side effect was
+measured; grade unchanged. W3 is author-observed and awaits witness replay.
+
+Reproduce the W3 cases with
+`bash lab/sofiasip2shell/layout/run_w3.sh` (rebuilds the plain harness,
+re-asserts the pinned SHA-256, and writes `.out/.err/.rc` for all 15 cases to
+`lab/sofiasip2shell/layout/evidence/w3/`). The canonical `run.sh` evidence is
+unchanged: its only rerun diff is volatile ASan PID/addresses/build paths.
