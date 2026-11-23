@@ -1,0 +1,23 @@
+=== W133 dlopen wire command ===
+binary=build-fixed/pppd/pppd
+mode=attack
+callback=0x40cd70
+signal=INT
+expect=created
+side_effect_observed=False
+victim_content_after=''
+process_rc=None
+nak_sha256=ef76d22ebd852ca3ad1877f6095e3f0420c3103e38cf42ccb238228097f3f878
+rej_norm_sha256=72ca05339da58c243e47090f3dbb7e37ff97029730e4a2be4c0528ed73d475c4
+layout.callback=0x40cd70
+layout.path=/tmp/MARKER-payload.so
+layout.wire_cmd=echo PPPD2SHELL_W133_WIRE_COMMAND_RAN > /tmp/MARKER-victim
+layout.cmd_ptr=0x468888
+layout.path_ptr=0x468844
+layout.notifier_ptr=0x46882c
+layout.sigreceived_offset=1856
+the_channel=0x4688a8
+sigreceived=0x46882c
+strace: PID --- SIGINT {si_signo=SIGINT, si_code=SI_USER, si_pid=PID, si_uid=0} ---
+pppd: LCP: ignoring duplicate configuration option(s)
+pppd: Terminating on signal 2

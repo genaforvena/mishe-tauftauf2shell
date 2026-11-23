@@ -1,0 +1,13 @@
+=== W133 dlopen wire command ===
+binary=build-vuln-nopie/pppd/pppd
+mode=safe
+callback=0x40cd70
+signal=INT
+expect=created
+side_effect_observed=False
+victim_content_after=''
+process_rc=None
+nak_sha256=c78b78ee4a16228eaccd5f44021d5a1cc913357d117e2c9249cfd176818736bc
+rej_norm_sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+strace: PID --- SIGINT {si_signo=SIGINT, si_code=SI_USER, si_pid=PID, si_uid=0} ---
+pppd: Terminating on signal 2

