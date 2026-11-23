@@ -52,6 +52,7 @@ cd real
 ./build_clang_asan.sh    # clang ASan: C API attack, vuln and fixed
 ./frag_probe.sh          # W168: uses the static libs above, no source rebuild
 ./alphabet_probe.sh      # W170: same static libs, write-alphabet matrix
+```
 
 `prepare_src.sh` refuses a tarball whose sha256 differs from
 `81f8c462f46bc8901618762ae34cf9de93894ff81f41db73c79472fa3baef875`, refuses
@@ -114,3 +115,27 @@ tarball are not in the archive):
 
 Replay artifacts were left in `/tmp/w167-munt`, not committed; the committed
 sources, pins, scripts and raw author evidence remain the durable record.
+
+## Author clean-archive replay at commit b80ccf1 (2026-11-23 W171)
+
+Wire-input lane (`real/wire_probe.sh`), from `git archive HEAD
+lab/frontier/munt2shell` into `/tmp/w171-munt` with the provisioned pinned
+tarball copied into the ignored `real/src/`:
+
+```
+cd /tmp/w171-munt/lab/frontier/munt2shell/real
+./prepare_src.sh
+./build_and_run.sh
+sh wire_probe.sh
+sh normalize_wire.sh | sha256sum
+```
+
+`prepare_src.sh` verified the tarball and all six pinned files; both pinned
+static-library variants rebuilt from source. All 8 rc cases matched the
+committed `wire-results.txt`, and the normalized digest was
+`857c13a634fb8c53f1347ae1b51d70e53bf58073d75beace897bd8133da03a65`, equal
+to two consecutive working-tree runs. `normalize_wire.sh` folds ephemeral
+ports, ASan PIDs/ASLR addresses, the checkout prefix and ELF build IDs; the
+build ID legitimately differs between checkout paths. The `/tmp` copy was
+not retained; committed evidence is the record. Details and grade limits:
+`real/WIRE_INPUT.md`, report §12.

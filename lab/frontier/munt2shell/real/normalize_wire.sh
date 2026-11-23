@@ -16,5 +16,6 @@ for f in evidence/wire-server-*.out evidence/wire-client-*.out; do
 		-e 's/ptr=0x[0-9a-f]+/ptr=PTR/g' \
 		-e 's@[^ ]*lab/frontier/munt2shell/@LAB/@g' \
 		-e 's/0x[0-9a-f]+/0xADDR/g' \
+		-e 's/BuildId: [0-9a-f]+/BuildId: ID/g' \
 		"$f"
 done

@@ -92,11 +92,20 @@ sh normalize_wire.sh | sha256sum
 ```
 
 Two consecutive full replays produced the same normalized digest
-`e5ad6f58067e0b272a61b599b6810d515294a374bd97ec7fe1c44e4ac247c404`.
+`857c13a634fb8c53f1347ae1b51d70e53bf58073d75beace897bd8133da03a65`.
 `normalize_wire.sh` removes ephemeral TCP ports, ASan PIDs/ASLR addresses,
-the absolute checkout prefix and the victim's ASLR pointer, while keeping
-the intact magic and the `0x6a` overwrite fields comparable. Raw evidence is
-in `evidence/wire-*`.
+the absolute checkout prefix, ELF build IDs and the victim's ASLR pointer,
+while keeping the intact magic and the `0x6a` overwrite fields comparable.
+Raw evidence is in `evidence/wire-*`.
+
+A clean-archive replay from commit b80ccf1 (`git archive HEAD
+lab/frontier/munt2shell` into `/tmp/w171-munt`, pinned tarball copied into the
+ignored `real/src/`, then `prepare_src.sh`, `build_and_run.sh` and
+`wire_probe.sh`) rebuilt both pinned static-library variants and matched all
+8 rc cases plus the same normalized digest. The build ID differs between
+checkouts, so `normalize_wire.sh` also folds ELF build IDs. The `/tmp` copy
+was not retained; committed sources, pins, scripts and evidence are the
+durable record.
 
 ## What this does not establish
 
