@@ -284,11 +284,14 @@ Source analysis of the pinned vulnerable tree, not a fresh run.
   execution of that limb.
 - Witness status: the public-ODBC limb (event 2562, commit `87f8bb8`) is
   ESTABLISHED at the labeled harness scope by witness #2572 (details in
-  W146 above); no counterexample and no grade change. The witness wake
-  signal was RED under the standing person-owned engine-cap disposition
-  (tape 11:26Z) when W147 was written; the slice limb (09:50Z), W145
-  real-object limb (11:25Z) and W147 real-PG limb have no witness verdict
-  yet. No witness has claimed pointer control, command, marker or rung 5.
+  W146 above); no counterexample and no grade change. The date-escape
+  real-server limb (W161, commit `6d3bb49`) is ESTABLISHED at its labeled
+  scope by witness #2689 / W162 (details in W161 below); no counterexample
+  and no grade change. The witness wake signal was RED under the standing
+  person-owned engine-cap disposition (tape 11:26Z) when W147 was written;
+  the slice limb (09:50Z), W145 real-object limb (11:25Z), W147 real-PG
+  limb (#2576) and W160 clang -O2 control remain unwitnessed. No witness
+  has claimed pointer control, command, marker or rung 5.
 
 Decision: keep the grade at rungs 1-4 (slice, real-object and live-server
 evidence) with no rung 5. A benign marker or ROP attempt is unjustified
@@ -372,15 +375,17 @@ remained after the runs.
 
 `SELECT {d '<200 A>'}` through `SQLDriverConnect` then `SQLExecDirect`
 gives, on the vulnerable tag, ASan `stack-buffer-overflow` / `WRITE of
-size 1` at pinned `convert.c:5786` in `convert_escape`, exactly the
-`F_ExtractOldTo` NUL store from macro line `:2424`. Frames:
+size 1` at pinned `convert.c:5786` in `convert_escape` — the
+`F_ExtractOldTo` NUL store (`buf[c] = '\0'` at pinned `:2435`, macro
+defined at `:2424`), which ASan attributes to the call site. Frames:
 `inner_process_tokens:3865` -> `copy_statement_with_parameters:3256` ->
 `Exec_with_parameters_resolved:498` -> `PGAPI_Execute:1250` ->
 `PGAPI_ExecDirect:207` -> driver `SQLExecDirect:322` ->
 `libodbc.so.2 SQLExecDirect` -> harness main. ASan places the access at
 offset 992, one past `buf_small [864,992)` in the `convert_escape` frame.
-The fixed tag reports `EXECDIRECT rc=-1` with PG state 42601
-(`unterminated quoted string`) and no ASan finding; the short safe input
+The fixed tag reports `EXECDIRECT rc=-1` with PG rejection
+(`unterminated quoted string` at 126 A's; `syntax error at or near }` at
+200, both SQLSTATE 42601) and no ASan finding; the short safe input
 `SELECT {d '2000-01-01'}` returns `rc=0` ASan-clean on the vulnerable tag.
 
 A body-length sweep on the same path puts the first overflow at 126 A's:
@@ -407,5 +412,25 @@ not change. The stored byte is always NUL, the fixed macro guard at
 `:2429` prevents the write, PG rejects the truncated date, and no stack
 datum adjacent to `buf_small` was shown to be a pointer or control-flow
 value. No chosen byte, pointer control, marker, command, ROP or rung 5.
-W161 is author-only and unwitnessed; the W147 real-PG verdict (#2576)
-remains pending.
+W161 is ESTABLISHED at its labeled scope by witness verdict #2689 / W162
+(2026-11-23T14:01Z): rung 3 on the full public-ODBC -> real loopback
+PostgreSQL path, no counterexample, no grade change, not rung 5. The
+witness re-extracted commit `6d3bb49` with a clean `git archive` into
+`/tmp/w162-psqlodbc` (6/6 pins OK, tag blobs match the pinned
+`829071f0...` / `c0a295d9...`, built `convert.c` files hash-match
+`27fc049b...` / `19253432...`), cloned and built its own asan-vuln and
+asan-fixed trees from the pinned source (bootstrap/configure/make OK;
+`.so` hashes differ as expected from path and timestamp), and replayed
+`date-replay.sh` on private loopback port 59437 with rc=0. It reproduced
+the whole matrix: vulnerable long ASan, fixed long `rc=-1`, vulnerable
+safe `rc=0`, L124/L125 clean, L126-200 vulnerable ASan and fixed clean;
+ASan reported `WRITE of size 1` at `convert.c:5786`, offset 992 in
+`buf_small [864,992)`, with the full `SQLExecDirect` chain. As an
+independent variation, the witness's 250-byte `{t}` and `{ts}` bodies
+faulted at their sibling call sites `:5794` and `:5802`, while fixed
+`{t}` and safe inputs were clean — the frame tracks the real call path.
+Witness ceiling: stored byte always NUL, loop caps `c` at 128 so only one
+byte crosses into the redzone, no adjacent object written, no chosen
+byte, pointer, marker, command, ROP or rung 5; its loopback PG was stopped
+and the port verified closed. The W147 real-PG verdict (#2576) remains
+pending.
