@@ -175,8 +175,9 @@ evidence and limits in `full/evidence/store/README.md`.
 
 ## 8. Pointer-bearing OOB store in the plain full module (2026-11-23 W9)
 
-The earlier "no pointer-bearing target" line applies to W8's **in-bounds**
-header-copy store. A non-ASan build of the same pinned module
+The earlier "no pointer-bearing target" line applies to W8's **in-bounds** header-copy store.
+A `build-plain.sh` build of the same pinned module (labelled "plain"; see the
+W14 build-stack correction at the end of this section)
 (`full/build-plain.sh`, module sha256
 `008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654`,
 plain httpd 2.4.70 / APR, 127.0.0.1:18090) allows the **out-of-bounds** scan
@@ -279,3 +280,12 @@ without the shim. Byte always NUL; no chosen byte, pointer target, consumer
 dereference, command or rung 5. Replay: `cd lab/frontier/modauthoidc2shell/full
 && bash probe-plain-native.sh`; raw transcripts and limits in
 `full/evidence/w13-native/README.md`.
+
+**W14 build-stack correction.** The W9-W13 "non-ASan plain build" label is
+wrong: `ldd` on the pinned module `00899061…5654` and the serving httpd shows
+`libasan.so.8`, apxs injected `-fsanitize=address` into the compile, and
+`nm -D` shows ASan report calls. W13's fault had no added shim or preload but
+ran the ASan runtime; `ASAN_OPTIONS=detect_leaks=0` altered that allocator's
+layout. The SIGSEGV and controls stand, but no availability effect is shown
+on a production allocator. Grade unchanged; detail in `PROVENANCE.md` §
+"Build-stack correction (2026-11-23 W14)".

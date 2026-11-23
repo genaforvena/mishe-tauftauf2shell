@@ -57,6 +57,23 @@ Under the same `detect_leaks=0` env, across independent fresh starts:
   is set (`Max core file size 0` in the live child `/proc/<pid>/limits`), and
   `kernel.core_pattern` pipes to apport, so no usable core was produced.
 
+## Build-stack correction (W14, 2026-11-23)
+
+This run had no *added* shim, `LD_PRELOAD` or ptrace, but "plain" is a build
+label, not a non-ASan process. `ldd` on the exact pinned module
+`00899061…5654` and on `httpd-2.4.70-install/bin/httpd` lists `libasan.so.8`;
+`evidence/plain-module-build.log` shows apxs injecting `-fsanitize=address`
+into the `state.c` compile; `nm -D` on the module shows
+`__asan_report_load1`/`store1` and the state-cookie caller has ASan check
+calls. Other lab httpd builds checked (2.4.70/2.4.71 in apache2shell and
+apache2root, 2.4.69) also link libasan. So `ASAN_OPTIONS=detect_leaks=0`
+switches the behaviour of the ASan allocator that was running all along — a
+direct explanation of the per-start bimodality. The observed `AH00051` signal
+11, the store bytes from W8-W10 and the clean well-formed/fixed controls
+stand; what is NOT established is the same availability effect on a
+production (non-ASan) allocator. No grade change.
+Raw capture: `../w14-buildstack/raw.txt`; detail: `../w14-buildstack/README.md`.
+
 ## Grade and limits
 
 Unchanged: rung 3 confirmed on the live pre-auth wire path, rung 4 scoped and

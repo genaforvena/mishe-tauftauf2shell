@@ -194,9 +194,10 @@ bash probe-gdb.sh`.
 
 ## Live pointer-bearing OOB NUL store (2026-11-23 W9)
 
-A non-ASan full module (`build-plain.sh`, module sha256
+A full module from `build-plain.sh` (labelled "plain"; **not** non-ASan — see
+the W14 build-stack correction below), module sha256
 `008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654`,
-pinned `state.c` unchanged) was built against the plain httpd 2.4.70 / APR
+with pinned `state.c` unchanged, was built against the httpd 2.4.70 / APR
 stack and started only on 127.0.0.1:18090 (`httpd-plain.conf`). A value-less
 state cookie has no `=` after its NUL, so the pinned `:214` scan runs out of
 the header copy until it meets a `0x3d` byte in adjacent pool memory.
@@ -368,3 +369,23 @@ Grade unchanged: rung 3 confirmed on a live pre-auth wire path, rung 4 scoped
 and unwitnessed there. Native availability effect only; byte always NUL, no
 chosen byte, pointer target, consumer dereference, command or rung 5. Raw
 transcripts, limits and replay: `full/evidence/w13-native/README.md`.
+
+## Build-stack correction (2026-11-23 W14)
+
+The W9-W13 label "plain"/"non-ASan full module" is factually wrong. On the
+exact pinned module `00899061…5654`, `ldd` lists `libasan.so.8`;
+`full/evidence/plain-module-build.log` shows apxs injecting
+`-fsanitize=address` into the `state.c` compile despite my explicit `CFLAGS`;
+`nm -D` has `__asan_report_load1`/`store1`, and the inlined
+`oidc_state_cookies_clean_expired` caller contains ASan check calls. The
+serving `httpd-2.4.70-install/bin/httpd` also links `libasan.so.8` (as do the
+other lab httpd builds checked). "Plain" therefore means no explicit
+`-fsanitize` in my CFLAGS plus plain-prefix jansson/cjose, not a non-ASan
+process. W13's "no shim, no `LD_PRELOAD`, no ptrace" remains true of *added*
+instrument, but the ASan runtime and allocator were active:
+`ASAN_OPTIONS=detect_leaks=0` changed that allocator's layout, which explains
+the per-start bimodality. The measured SIGSEGV (AH00051 exit signal 11), store
+bytes and clean fixed/well-formed controls stand; the availability effect is
+NOT demonstrated on a production allocator. No grade change.
+Raw capture and detail: `full/evidence/w14-buildstack/raw.txt` and
+`full/evidence/w14-buildstack/README.md`.

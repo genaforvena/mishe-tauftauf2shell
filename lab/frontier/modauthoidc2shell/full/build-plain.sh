@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Build a NON-ASan full module to observe the OOB NUL store on the live wire.
+# Build the "plain" full module to observe the OOB NUL store on the live wire.
+# W14: apxs from this ASan httpd injects -fsanitize=address, so the module is
+# ASan-instrumented and links libasan; "plain" is only a build label.
 # Reuses the pinned sources and the plain httpd 2.4.70 / APR stack. Loopback only.
 set -eu
 HERE="$(cd "$(dirname "$0")" && pwd)"

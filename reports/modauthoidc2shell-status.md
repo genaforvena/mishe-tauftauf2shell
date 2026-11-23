@@ -173,9 +173,10 @@ evidence and limits in `full/evidence/store/README.md`.
 
 ## Live pointer-bearing OOB store (2026-11-23 W9) — unwitnessed
 
-A non-ASan full module built from the same pinned parent (`build-plain.sh`,
-module sha256 `008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654`)
-serves 127.0.0.1:18090 with plain httpd 2.4.70 / APR. A value-less state
+A `build-plain.sh` full module (labelled "plain", not non-ASan — see the W14
+correction below) built from the same pinned parent, module sha256
+`008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654`,
+serves 127.0.0.1:18090 on the httpd 2.4.70 / APR stack (ASan runtime; see below). A value-less state
 cookie has no `=` after its NUL, so the pinned `:214` scan runs out of the
 header copy into adjacent pool memory. gdb at pinned `state.c:219` on a live
 pre-auth request (full stack through `oidc_state_cookies_clean_expired:244` →
@@ -312,3 +313,13 @@ restarts, not a deterministic primitive. Byte always NUL; no chosen byte,
 pointer target, consumer dereference, command or rung 5. Replay: `cd
 lab/frontier/modauthoidc2shell/full && bash probe-plain-native.sh`; raw
 transcripts and limits in `full/evidence/w13-native/README.md`.
+
+**W14 build-stack correction.** The "plain"/"non-ASan" label on W9-W13 is
+wrong: the pinned module `00899061…5654` and the serving httpd both link
+`libasan.so.8`, apxs injected `-fsanitize=address` into the module compile,
+and `nm -D` shows ASan report calls. W13's crash had no added shim/preload but
+still ran the ASan allocator, so `ASAN_OPTIONS=detect_leaks=0` is a change to
+that allocator's layout, not to a production heap. The signal-11 child fault,
+store bytes and clean controls stand; no availability claim on a non-ASan
+stack. Grade unchanged. Detail: `lab/frontier/modauthoidc2shell/PROVENANCE.md`
+§ "Build-stack correction (2026-11-23 W14)".

@@ -69,7 +69,8 @@ the runner because it depends on arena layout.
 - Grade: rung 3 confirmed on a real pre-auth wire path; rung 4 now also
   observed on that wire path with a wire-chosen offset, unwitnessed at that
   scope. No rung 5.
-- W9 adds a non-ASan plain build (`build-plain.sh`): on the same value-less
+- W9 adds a `build-plain.sh` build (labelled "plain"; see W14 correction in
+  `w13-native/README.md`): on the same value-less
   wire request the OOB store lands in the low byte of pointer `0x7ffff5603d`
   (→ `0x7ffff56000`) with the live pre-auth stack; no consumer read followed.
   Raw evidence and limits: `plain-oob/README.md`. W10's same-connection
@@ -90,6 +91,13 @@ the runner because it depends on arena layout.
   released tag with the same shim 10/10 302). The shim changes signal
   handling and layout; the native crash has no captured frame and no gdb run
   reproduced it. Grade unchanged. Raw and limits: `plain-crash/README.md`.
+- W14 correction: the W9-W13 `build-plain.sh` module and serving httpd both
+  link `libasan.so.8` (apxs injected `-fsanitize=address`; `nm -D` shows ASan
+  report calls), so "plain" is not non-ASan and W13's crash ran the ASan
+  allocator. The signal-11 fault and controls stand; no production-allocator
+  availability claim. Detail in `PROVENANCE.md` § "Build-stack correction
+  (2026-11-23 W14)".
+
 
 ## Re-run
 
