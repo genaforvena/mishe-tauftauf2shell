@@ -1,0 +1,118 @@
+-- Found LIBDE265 
+-- Found X265 
+CMake Warning at cmake/modules/LibFindMacros.cmake:267 (message):
+  WARNING: MISSING PACKAGE
+
+  We could not find development headers for X264.  Do you have the necessary
+  dev package installed? This package is NOT REQUIRED and you may ignore this
+  warning but by doing so you may miss some functionality of libheif.
+
+  Relevant CMake configuration variables:
+
+    X264_INCLUDE_DIR=<not found>
+    X264_LIBRARY=<not found>
+
+  You may use CMake GUI, cmake -D or ccmake to modify the values.  Delete
+  CMakeCache.txt to discard all values and force full re-detection if
+  necessary.
+
+Call Stack (most recent call first):
+  cmake/modules/FindX264.cmake:17 (libfind_process)
+  CMakeLists.txt:205 (find_package)
+
+
+-- Could NOT find X264 (missing: X264_INCLUDE_DIR X264_LIBRARIES) 
+CMake Warning at cmake/modules/LibFindMacros.cmake:267 (message):
+  WARNING: MISSING PACKAGE
+
+  We could not find development headers for OpenH264.  Do you have the
+  necessary dev package installed? This package is NOT REQUIRED and you may
+  ignore this warning but by doing so you may miss some functionality of
+  libheif.
+
+  Relevant CMake configuration variables:
+
+    OpenH264_INCLUDE_DIR=<not found>
+    OpenH264_LIBRARY=<not found>
+
+  You may use CMake GUI, cmake -D or ccmake to modify the values.  Delete
+  CMakeCache.txt to discard all values and force full re-detection if
+  necessary.
+
+Call Stack (most recent call first):
+  cmake/modules/FindOpenH264.cmake:19 (libfind_process)
+  CMakeLists.txt:213 (find_package)
+
+
+-- Could NOT find OpenH264 (missing: OpenH264_INCLUDE_DIR OpenH264_LIBRARIES) 
+-- Found AOM 
+
+=== Summary of compiled codecs ===
+libde265 HEVC decoder                 : + built-in
+FFMPEG HEVC decoder (HW acc)          : - disabled
+WebCodecs HEVC decoder (experimental) : - disabled
+x265 HEVC encoder                     : + built-in
+Kvazaar HEVC encoder                  : - disabled
+AOM AV1 decoder                       : + built-in
+AOM AV1 encoder                       : + built-in
+Dav1d AV1 decoder                     : - disabled
+SVT AV1 encoder                       : - disabled
+Rav1e AV1 encoder                     : - disabled
+JPEG decoder                          : + built-in
+JPEG encoder                          : + built-in
+x264 AVC encoder                      : - not found
+OpenH264 decoder                      : - not found
+OpenJPEG J2K decoder                  : - disabled
+OpenJPEG J2K encoder                  : - disabled
+OpenJPH HT-J2K encoder                : - disabled
+uvg266 VVC encoder                    : - disabled
+vvenc VVC encoder                     : - disabled
+vvdec VVC decoder                     : - disabled
+
+=== Supported formats ===
+format        decoding   encoding
+AVC             NO         NO 
+AVIF            YES        YES
+HEIC            YES        YES
+JPEG            YES        YES
+JPEG2000        NO         NO 
+JPEG2000-HT     NO         NO 
+Uncompressed    NO         NO 
+VVC             NO         NO 
+
+libsharpyuv: disabled
+-- Found WebP (CONFIG): /usr/lib/x86_64-linux-gnu/cmake/WebP
+
+=== Active input formats for heif-enc ===
+JPEG: active
+PNG:  active
+WEBP:  active
+TIFF: active
+GeoTIFF: ------ (WITH_GEOTIFF=OFF)
+
+-- Could NOT find SDL2 (missing: SDL2_DIR)
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+Doxygen tool needs to be installed to generate the API documentation
+Compiling 'x265' as built-in backend
+Compiling 'libde265' as built-in backend
+Not compiling 'dav1d' backend
+Compiling 'aomdec' as built-in backend
+Compiling 'aomenc' as built-in backend
+Not compiling 'svtenc' backend
+Not compiling 'rav1e' backend
+Compiling 'jpegdec' as built-in backend
+Compiling 'jpegenc' as built-in backend
+Not compiling 'j2kdec' backend
+Not compiling 'j2kenc' backend
+Not compiling 'kvazaar' backend
+Not compiling 'ffmpegdec' backend
+Not compiling 'jphenc' backend
+Not compiling 'uvg266' backend
+Not compiling 'vvdec' backend
+Not compiling 'vvenc' backend
+Not compiling 'x264' backend
+Not compiling 'openh264dec' backend
+Not compiling 'libsharpyuv'
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/libheif2shell-fixed-asan

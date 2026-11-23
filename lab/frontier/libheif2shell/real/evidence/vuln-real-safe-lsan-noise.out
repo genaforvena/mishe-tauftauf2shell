@@ -1,0 +1,24 @@
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+frame 0 encoded
+frame 1 decoded: 512x64 stride=512
+frame 1 encoded
+
+=================================================================
+==1010362==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 1168 byte(s) in 1 object(s) allocated from:
+    #0 0x7f47feafcf1d in posix_memalign ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:145
+    #1 0x7f47fdb27ddb in x265::x265_malloc(unsigned long) (/lib/x86_64-linux-gnu/libx265.so.199+0x127ddb) (BuildId: 6163f4896930752408771e62b52f6ccd6b4e4190)
+    #2 0x7f47fdad71f5 in x265_encoder_open_199 (/lib/x86_64-linux-gnu/libx265.so.199+0xd71f5) (BuildId: 6163f4896930752408771e62b52f6ccd6b4e4190)
+    #3 0x5a8d8a85f495 in x265_start_sequence_encoding_intern /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/plugins/encoder_x265.cc:1065
+    #4 0x5a8d8a85fb9c in x265_start_sequence_encoding /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/plugins/encoder_x265.cc:1097
+    #5 0x5a8d8a8b9dd6 in Encoder_HEVC::encode_sequence_frame(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const&, heif_image_input_class, unsigned int, unsigned int, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/codecs/hevc_enc.cc:168
+    #6 0x5a8d8a546942 in Track_Visual::encode_image(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const*, heif_image_input_class) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/sequences/track_visual.cc:620
+    #7 0x5a8d8a3a8611 in heif_track_encode_sequence_image /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_sequences.cc:622
+    #8 0x5a8d8a376926 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/real/reencode_sequence.cc:62
+    #9 0x7f47fcc2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7f47fcc2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x5a8d8a375d34 in _start (/tmp/libheif2shell-reencode-vuln+0x90d34) (BuildId: 3f390e9f688c193588cc6eabb2f2f69e0375c961)
+
+SUMMARY: AddressSanitizer: 1168 byte(s) leaked in 1 allocation(s).

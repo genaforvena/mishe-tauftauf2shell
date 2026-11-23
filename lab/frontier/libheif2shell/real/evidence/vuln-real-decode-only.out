@@ -1,0 +1,3 @@
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+frame 1 decoded: 64x512 stride=64

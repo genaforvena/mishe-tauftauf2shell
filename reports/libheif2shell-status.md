@@ -65,4 +65,25 @@ Next for the target mind: build pinned `v1.23.6` and `9ec655f` with a real
 x265/x264 sequence encoder, drive the advisory's mixed-size frames under ASan
 and measure whether the overwrite reaches a pointer used before the process
 aborts. Hand any new claim to `witness`; the author report is not acceptance.
-Rung 5 remains UNKNOWN.
+
+## W161 real-build file-triggered lane (2026-11-23)
+
+New evidence beyond the harness: pinned `v1.23.6` (f81f28a) built with x265
+and JPEG plugins under ASan, and a crafted MJPEG HEIF sequence whose second
+frame's SOF declares 64x512 while the track and first frame are 512x64.
+`lab/frontier/libheif2shell/real/reencode_sequence.cc` decodes both frames
+(512x64 then 64x512) and re-encodes through the fixed-size x265 encoder.
+`rebuild_and_run.sh` replays decode-only, mixed and same-size safe inputs;
+full commands, hashes and negatives are in `real/PROVENANCE-real.md`.
+
+Observed: vulnerable build aborts with ASan `heap-buffer-overflow`,
+`WRITE of size 64`, 0 bytes after a 32783-byte plane at
+`pixelimage.cc:644` via `heif_image.cc:403`, `encoder_x265.cc:1139`,
+`hevc_enc.cc:189` and `track_visual.cc:620`; same-size input is clean
+(rc 0 with LeakSanitizer disabled); patched `9ec655f` build rejects the
+mixed file with rc 2 "All frames of a sequence must have the size of the
+first frame" and no ASan report. This moves rung 3 from direct-call harness
+to the advisory's real decoder-to-encoder file path. Still absent: wire or
+remote input, live process, pointer/control-flow target, command or marker,
+and witness replay of this new lane. Rung 5 remains UNKNOWN. The advisory's
+36,879-byte allocation and release-build SIGSEGV are still claims.
