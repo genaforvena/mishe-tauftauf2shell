@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x1e8dc: file protocol.c, line 239.
+Breakpoint 2 at 0x1e852: file protocol.c, line 233.
+Breakpoint 3 at 0x1ea90: file protocol.c, line 243.
+Breakpoint 4 at 0x1eba2: file protocol.c, line 255.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+mini-snmpd v1.6 starting
+Listening on port 16172/udp and 161/tcp
+Failed creating PID file: Permission denied
+updating the MIB (full)
+updating the MIB (partial)
+underflow for OID byte
+RESULT oob=0 pos=2047 len=0 subids=2 subid5=0 subid6=0

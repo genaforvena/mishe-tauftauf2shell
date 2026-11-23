@@ -1,0 +1,57 @@
+Breakpoint 1 at 0x1e8dc: file protocol.c, line 239.
+Breakpoint 2 at 0x1e7bc: file protocol.c, line 230.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+mini-snmpd v1.6 starting
+Listening on port 16171/udp and 161/tcp
+Failed creating PID file: Permission denied
+updating the MIB (full)
+updating the MIB (full)
+updating the MIB (partial)
+OOB_READ pos=2048 byte=00 addr=0x55555558995e packet=0x55555558915e packet_end=0x55555558995e delta=0
+OOB_READ pos=2049 byte=00 addr=0x55555558995f packet=0x55555558915e packet_end=0x55555558995e delta=1
+OOB_READ pos=2050 byte=00 addr=0x555555589960 packet=0x55555558915e packet_end=0x55555558995e delta=2
+OOB_READ pos=2051 byte=08 addr=0x555555589961 packet=0x55555558915e packet_end=0x55555558995e delta=3
+OOB_READ pos=2052 byte=00 addr=0x555555589962 packet=0x55555558915e packet_end=0x55555558995e delta=4
+OOB_READ pos=2053 byte=00 addr=0x555555589963 packet=0x55555558915e packet_end=0x55555558995e delta=5
+OOB_READ pos=2054 byte=00 addr=0x555555589964 packet=0x55555558915e packet_end=0x55555558995e delta=6
+OOB_READ pos=2055 byte=00 addr=0x555555589965 packet=0x55555558915e packet_end=0x55555558995e delta=7
+OOB_READ pos=2056 byte=00 addr=0x555555589966 packet=0x55555558915e packet_end=0x55555558995e delta=8
+OOB_READ pos=2057 byte=00 addr=0x555555589967 packet=0x55555558915e packet_end=0x55555558995e delta=9
+OOB_READ pos=2058 byte=00 addr=0x555555589968 packet=0x55555558915e packet_end=0x55555558995e delta=10
+OOB_READ pos=2059 byte=00 addr=0x555555589969 packet=0x55555558915e packet_end=0x55555558995e delta=11
+OOB_READ pos=2060 byte=00 addr=0x55555558996a packet=0x55555558915e packet_end=0x55555558995e delta=12
+OOB_READ pos=2061 byte=00 addr=0x55555558996b packet=0x55555558915e packet_end=0x55555558995e delta=13
+OOB_READ pos=2062 byte=00 addr=0x55555558996c packet=0x55555558915e packet_end=0x55555558995e delta=14
+OOB_READ pos=2063 byte=00 addr=0x55555558996d packet=0x55555558915e packet_end=0x55555558995e delta=15
+OOB_READ pos=2064 byte=00 addr=0x55555558996e packet=0x55555558915e packet_end=0x55555558995e delta=16
+OOB_READ pos=2065 byte=00 addr=0x55555558996f packet=0x55555558915e packet_end=0x55555558995e delta=17
+
+Breakpoint 2, decode_oid (packet=0x55555558915e <g_udp_client+30> "0\202\a\374\002\001", size=2048, pos=0x7ffff5400340, len=63509, value=0x7ffffffc1138) at protocol.c:230
+230			if (value->subid_list_length >= MAX_NR_SUBIDS) {
+=== CAP_BRANCH_REACHED ===
+$1 = 2048
+$2 = 2066
+$3 = 63509
+$4 = 20
+$5 = {{0x1, 0x3, 0x0, 0x0, 0x0, 0x8, 0x0 <repeats 14 times>}, {0x14, 0x0, 0x3, 0x0 <repeats 17 times>}, {0x0 <repeats 20 times>} <repeats 18 times>}
+$6 = 0x55555558915e
+$7 = 0x55555558995e
+$8 = 1
+$9 = 2048
+$10 = 0
+$11 = 0x555555589140
+$12 = 0x55555558915e
+$13 = 0x55555558995e
+$14 = 0x555555589960
+$15 = 0x555555589968
+bytes at logical packet end (g_udp_client.size, little endian):
+0x55555558995e <g_udp_client+2078>:	0x00	0x00	0x00	0x08	0x00	0x00	0x00	0x00
+0x555555589966 <g_udp_client+2086>:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+last in-bounds bytes (offset 2032..2047):
+0x55555558994e <g_udp_client+2062>:	0x80	0x80	0x80	0x80	0x80	0x80	0x80	0x80
+0x555555589956 <g_udp_client+2070>:	0x80	0x80	0x80	0x80	0x80	0x80	0x80	0x80
+bytes at offset 2064 onward:
+0x55555558996e <g_udp_client+2094>:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555589976:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+=== END_CAP_DUMP ===

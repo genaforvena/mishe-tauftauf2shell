@@ -58,16 +58,61 @@ grade.
   walk. The direct-call harness uses a heap packet of exactly 2048 bytes to
   expose the redzone crossing.
 
-Grade: rungs 1/2/3 ESTABLISHED in the extracted harness and scoped rung 4
-(chosen read extent, chosen adjacent bytes recovered) there; a real loopback
-daemon reaches the vulnerable branch (rung 2 reachability). No wire-level
-ASan report, no adjacent-object identity proof, no pointer control, no
-marker, no command and no rung 5. No independent witness verdict exists yet.
+## W1 — gdb on the plant-started vulnerable daemon (2026-11-23T02:47Z)
 
-Next bounded experiment: run gdb on a plant-started vulnerable daemon to read
-`pos` and the first bytes past `client->packet` at the subid-cap branch,
-proving a chosen datagram reads a chosen offset into adjacent struct memory.
-A heap-packet variant would be instrumented, not verbatim upstream bytes, and
-must be labeled as such; any disclosure beyond the demonstrated byte stays a
-claim. No rung 5 without a live wire-only trigger, chosen benign command,
-observed side effect, vulnerable/fixed/safe controls and witness replay.
+The pinned, unmodified vulnerable tree was started under `gdb -batch` by this
+plant on 127.0.0.1:16171 (`-n -p 16171 -l debug`, ASan still enabled) and sent
+the staged 2048-byte GET declaring OID length `0xffff`. Scripts and full
+transcript: `lab/frontier/mini-snmpd/wire/gdb/{cmd.gdb,run_gdb.sh,gdb.out}`;
+no source or build change, daemon killed by gdb's `quit`.
+
+- A conditional breakpoint at `protocol.c:239` (the `packet[*pos]` read in
+  `decode_oid`) with `*pos >= size` fired **18 times** at logical offsets
+  **2048..2065** (`packet=0x55555558915e`, `packet+size=0x55555558995e`,
+  deltas 0..17). Bytes in order: `00 00 00 08 00 00 00 00 00 00 00 00 00 00
+  00 00 00 00`.
+- The `overflow for OID byte` branch breakpoint at `protocol.c:230` hit with
+  `size=2048`, `*pos=2066`, `len=63509`, `subid_list_length=20`;
+  `packet == g_udp_client.packet` evaluated to 1.
+- `&g_udp_client.packet[2048]=0x55555558995e` and
+  `&g_udp_client.size=0x555555589960` identify the first bytes past the
+  logical packet as the global client's `size_t size` field (2048 → little
+  endian `00 08 00 00 ...`). The `0x08` at logical offset 2051 is that
+  field's second byte and lands byte-exact in `subid_list[5] = 8`; the other
+  OOB-fed subids are 0 from the zero pad after the struct.
+- This is the harness's scoped rung 4 reproduced in the real daemon: an
+  attacker-chosen declared length drives the walk 18 bytes past
+  `client->packet` and mixes adjacent global-struct bytes into the parsed OID.
+  The natural-layout ceiling is `MAX_NR_SUBIDS=20`, which stops at offset
+  2066; adjacent bytes are struct fields/padding, not attacker-controlled
+  heap and not an ASan redzone.
+
+- Declared-length boundary sweep (`wire/gdb/{mksweep.py,cmd_sweep.gdb,run_sweep.sh}`,
+  same daemon and loopback port): declared `2047`, `2048`, `2049` each reject
+  at the guard with `pos=40`, zero OOB reads, zero subids — because
+  `size-len+1` is still `2`, `1`, `0`. Declared `2050` and `65535` wrap the
+  bound to `SIZE_MAX` and both produce `oob=18 pos=2066 subids=20 subid5=8`.
+  The read extent saturates at 18 bytes for every bypassing length: the
+  adjacent bytes are the size field and zero padding, none are ASN.1
+  continuation bytes, so `MAX_NR_SUBIDS=20` always stops the walk at offset
+  2066. This is the measured answer to "how much adjacent memory can an
+  attacker-chosen BER length read in the natural layout".
+  An earlier probe set at declared 2008/2009/2010 is kept in the same
+  directory: 2008 walked to `pos=2047` and rejected with `underflow for OID
+  byte`, 2009/2010 were rejected by the guard — all with zero OOB reads.
+
+Grade: rungs 1/2/3 ESTABLISHED in the extracted harness; scoped rung 4 now
+ESTABLISHED in the real plant-started daemon — a crafted loopback GET reads
+18 bytes past the logical 2048-byte packet and recovers the adjacent
+`g_udp_client.size` byte `0x08` byte-exact into `subid_list[5]`, with a clean
+guard boundary at declared length 2049/2050. No wire-level ASan report, no
+adjacent-object identity proof, no pointer control, no marker, no command and
+no rung 5. Frontier's fixed-build and safe-input controls still stand; they
+were not re-run under gdb. No independent witness verdict exists yet.
+
+Next: witness replay of `wire/gdb/run_gdb.sh` and `wire/gdb/run_sweep.sh`. A
+wire-level ASan report would require a heap-packet variant — a separate
+bounded change that must be labeled instrumented, not verbatim upstream bytes.
+Any disclosure beyond the demonstrated byte stays a claim. No rung 5 without
+a live wire-only trigger, chosen benign command, observed side effect,
+vulnerable/fixed/safe controls and witness replay.
