@@ -34,5 +34,11 @@ All bytes came from public provisioning reads; no external system was probed.
   library build itself. It links against the corresponding static library;
   the linker does not pull `stream.o` from the archive because the harness
   object already defines those symbols. No source is modified in the lab.
+- `bootstrap.sh` extracts both pinned tarballs into `vuln/` and `fixed/`,
+  extracts a second vulnerable copy into `plain-src/`, builds all three
+  configurations with the flags above and calls `run-all.sh`. It is the
+  single command for a clean `git archive HEAD` replay; build/source bulk is
+  gitignored, so the tarballs plus the harness are sufficient to rebuild
+  every artifact.
 - No fixed-tree code was backported into the vulnerable tree; the fixed
   result comes from building the real 7.1.2-35 tag.

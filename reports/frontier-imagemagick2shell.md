@@ -70,6 +70,12 @@ records `stream_info->length=length` after allocation. The pinned 7.1.2-35
   chosen-byte read on the plain attack. Transcript `evidence.log` SHA-256
   `e5f2c27bc021ab1e96b35db04ca9425758ba69ffc8bc04fa65e34879644028d5`,
   2026-11-23T23:05:32Z. All five pins pass `sha256sum -c`.
+- `bootstrap.sh` extracts the tarballs, builds all three configurations and
+  calls `run-all.sh`. A clean `git archive HEAD` (commit `7873caf`) replay
+  passed all pins, reproduced the same vulnerable ASan `WRITE of size 1`,
+  both controls and the fixed attack rc 0 clean, and the same gdb byte
+  sequence `41 41 41 42 42 42 ... 48 48 48`. Transcript `REPLAY.log` SHA-256
+  `385bbe95d648dd19981d0d42df483c9ebeb619bb078fd3a2a2c9789bac01667a`.
 
 Measured:
 

