@@ -6572,3 +6572,18 @@ ASan logs: `realpath/evidence/xset-fp/`; exact commands and limits:
 X-protocol injection into a running server from a writable directory without
 a privileged font dir; OS-level unprivileged X-display access and server
 privilege stay UNKNOWN. No grade change.
+
+### ThorVG2Shell W181 (`lab/frontier/thorvg2shell`): jpgd duplicate-SOS write
+
+`python3 poc/make_poc.py && python3 poc/make_large.py &&
+python3 poc/make_marker.py && sh harness/build.sh && sh harness/run_matrix.sh`
+rebuilds 11 binaries from pinned v1.1.1/v1.1.2 and runs 88 cases (per-case
+transcripts in `harness/evidence/`). Crafted SOS `Ns=4` repeats the one
+grayscale component; controls decode rc 0, fixed binaries reject crafted rc 6.
+Allocator-instrumented gcc/clang ASan reports `WRITE of size 2` 0 bytes after
+the 128-byte `m_pMCU_coefficients` region; pristine-source 2048x2048 crafted
+frame faults at `tvgJpgd.cpp:733` (rc 139 plain). gdb with `marker_dup4.jpg`
+shows chosen `58 00`/`68 00`/`78 00` at byte offsets 128/256/384. Full recipe,
+pins and the bump-allocator caveat: `REPLAY.md`, `PROVENANCE.md`,
+`PINS.sha256`; brief `reports/frontier-thorvg2shell.md`. Direct call only; no
+wire, pointer control, command or witness.

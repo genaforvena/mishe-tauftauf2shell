@@ -1,0 +1,58 @@
+header: decoder=0x527000000100 width=16 height=16
+=================================================================
+==4127763==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50c000000180 at pc 0x5a1acf8bc37e bp 0x7fff5a7903b0 sp 0x7fff5a7903a0
+WRITE of size 2 at 0x50c000000180 thread T0
+    #0 0x5a1acf8bc37d in jpeg_decoder::decode_next_row() harness/tvgJpgd_directalloc.cpp:1453
+    #1 0x5a1acf8bf24a in jpeg_decoder::decode(void const**) harness/tvgJpgd_directalloc.cpp:1715
+    #2 0x5a1acf8c657b in jpgdDecompress(jpeg_decoder*) harness/tvgJpgd_directalloc.cpp:2486
+    #3 0x5a1acf8b5b0e in main harness/jpgd_asan.cpp:34
+    #4 0x7ba01e82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7ba01e82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5a1acf8b5564 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/harness/bin/g-vuln-allocinstr-asan+0x2564) (BuildId: 9b8279743a732a26dbe209dd7ef78924c4388ca9)
+
+0x50c000000180 is located 0 bytes after 128-byte region [0x50c000000100,0x50c000000180)
+allocated by thread T0 here:
+    #0 0x7ba01f0fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5a1acf8b7495 in jpeg_decoder::alloc(unsigned long, bool) harness/tvgJpgd_directalloc.cpp:809
+    #2 0x5a1acf8c29c5 in jpeg_decoder::init_frame() harness/tvgJpgd_directalloc.cpp:2019
+    #3 0x5a1acf8c5633 in jpeg_decoder::decode_start() harness/tvgJpgd_directalloc.cpp:2305
+    #4 0x5a1acf8c57b6 in jpeg_decoder::begin_decoding() harness/tvgJpgd_directalloc.cpp:2328
+    #5 0x5a1acf8c648a in jpgdDecompress(jpeg_decoder*) harness/tvgJpgd_directalloc.cpp:2474
+    #6 0x5a1acf8b5b0e in main harness/jpgd_asan.cpp:34
+    #7 0x7ba01e82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7ba01e82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x5a1acf8b5564 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/harness/bin/g-vuln-allocinstr-asan+0x2564) (BuildId: 9b8279743a732a26dbe209dd7ef78924c4388ca9)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow harness/tvgJpgd_directalloc.cpp:1453 in jpeg_decoder::decode_next_row()
+Shadow bytes around the buggy address:
+  0x50bfffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50bfffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50c000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x50c000000080: 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa fa
+  0x50c000000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x50c000000180:[fa]fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x50c000000200: 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa fa
+  0x50c000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4127763==ABORTING

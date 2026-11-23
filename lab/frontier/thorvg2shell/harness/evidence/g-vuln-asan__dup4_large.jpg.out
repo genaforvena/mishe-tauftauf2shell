@@ -1,0 +1,17 @@
+header: decoder=0x527000000100 width=2048 height=2048
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==4128997==ERROR: AddressSanitizer: SEGV on unknown address 0x52d14561d9e8 (pc 0x642f43ffd88d bp 0x7ffdea29f520 sp 0x7ffdea29f4e0 T0)
+==4128997==The signal is caused by a READ memory access.
+    #0 0x642f43ffd88d in jpeg_decoder::huff_decode(jpeg_decoder::huff_tables*, int&) src/vuln/src/loaders/jpg/tvgJpgd.cpp:733
+    #1 0x642f43ff1305 in jpeg_decoder::decode_next_row() src/vuln/src/loaders/jpg/tvgJpgd.cpp:1461
+    #2 0x642f43ff4446 in jpeg_decoder::decode(void const**) src/vuln/src/loaders/jpg/tvgJpgd.cpp:1728
+    #3 0x642f43ffb777 in jpgdDecompress(jpeg_decoder*) src/vuln/src/loaders/jpg/tvgJpgd.cpp:2499
+    #4 0x642f43feab0e in main harness/jpgd_asan.cpp:34
+    #5 0x7b3c4102a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7b3c4102a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x642f43fea564 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/harness/bin/g-vuln-asan+0x2564) (BuildId: b3237d1f5c4236da261a259135592e823a001648)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV src/vuln/src/loaders/jpg/tvgJpgd.cpp:733 in jpeg_decoder::huff_decode(jpeg_decoder::huff_tables*, int&)
+==4128997==ABORTING

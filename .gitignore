@@ -33,6 +33,10 @@ lab/frontier/*/run/
 lab/frontier/*/htdocs/
 lab/frontier/*/cgi-bin/
 
+# ThorVG2Shell bulk: extracted release trees, reproducible from pinned tarballs
+lab/frontier/thorvg2shell/src/vuln/
+lab/frontier/thorvg2shell/src/fixed/
+
 # Brotli2shell bulk: upstream clone, instrumented copy, build output, corpora
 lab/frontier/brotli2shell/brotli-src/
 lab/frontier/brotli2shell/brotli-instr/

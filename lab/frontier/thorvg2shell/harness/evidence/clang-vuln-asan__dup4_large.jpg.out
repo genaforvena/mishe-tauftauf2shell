@@ -1,0 +1,17 @@
+header: decoder=0x527000000100 width=2048 height=2048
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==4129065==ERROR: AddressSanitizer: SEGV on unknown address 0x52d14561d9e8 (pc 0x59f06b6c5f6d bp 0x7fff90183e50 sp 0x7fff90183d70 T0)
+==4129065==The signal is caused by a READ memory access.
+    #0 0x59f06b6c5f6d in jpeg_decoder::huff_decode(jpeg_decoder::huff_tables*, int&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/src/vuln/src/loaders/jpg/tvgJpgd.cpp:733:22
+    #1 0x59f06b6afd1d in jpeg_decoder::decode_next_row() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/src/vuln/src/loaders/jpg/tvgJpgd.cpp:1461:17
+    #2 0x59f06b6b380f in jpeg_decoder::decode(void const**) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/src/vuln/src/loaders/jpg/tvgJpgd.cpp:1728:19
+    #3 0x59f06b6bd07b in jpgdDecompress(jpeg_decoder*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/src/vuln/src/loaders/jpg/tvgJpgd.cpp:2499:22
+    #4 0x59f06b6a8152 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/harness/jpgd_asan.cpp:34:29
+    #5 0x7d097fa2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7d097fa2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x59f06b5cc3d4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/harness/bin/clang-vuln-asan+0x2d3d4) (BuildId: b0553cf4b96105616c365e60ee6c155e80803676)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thorvg2shell/src/vuln/src/loaders/jpg/tvgJpgd.cpp:733:22 in jpeg_decoder::huff_decode(jpeg_decoder::huff_tables*, int&)
+==4129065==ABORTING

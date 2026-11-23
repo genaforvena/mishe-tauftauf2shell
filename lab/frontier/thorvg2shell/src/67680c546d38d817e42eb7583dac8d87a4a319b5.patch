@@ -1,0 +1,32 @@
+From 67680c546d38d817e42eb7583dac8d87a4a319b5 Mon Sep 17 00:00:00 2001
+From: Nor-s <soongeon@lottiefiles.com>
+Date: Wed, 9 Sep 2026 18:34:56 +0900
+Subject: [PATCH] loader/jpg: reject duplicate scan components
+
+Duplicate component selectors in an SOS header cause the same
+component to be counted repeatedly when building MCU blocks.
+This can exceed buffers sized from the frame components.
+
+Reject duplicate components during SOS parsing before registering
+them in the scan component list.
+
+issue: https://github.com/thorvg/thorvg/security/advisories/GHSA-mw4c-w54x-248r
+---
+ src/loaders/jpg/tvgJpgd.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/loaders/jpg/tvgJpgd.cpp b/src/loaders/jpg/tvgJpgd.cpp
+index e90cf1fdd0..1ba076c378 100644
+--- a/src/loaders/jpg/tvgJpgd.cpp
++++ b/src/loaders/jpg/tvgJpgd.cpp
+@@ -1015,6 +1015,10 @@ bool jpeg_decoder::read_sos_marker()
+ 
+         if (ci >= m_comps_in_frame) return stop_decoding(JPGD_BAD_SOS_COMP_ID);
+ 
++        for (auto j = 0; j < i; ++j) {
++            if (m_comp_list[j] == ci) return stop_decoding(JPGD_BAD_SOS_COMP_ID);
++        }
++
+         m_comp_list[i]    = ci;
+         m_comp_dc_tab[ci] = (c >> 4) & 15;
+         m_comp_ac_tab[ci] = (c & 15) + (JPGD_MAX_HUFF_TABLES >> 1);

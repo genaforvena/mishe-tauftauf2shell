@@ -1,0 +1,3 @@
+header: decoder=0x5cbd5bab5660 width=16 height=16
+decompress: pixels=0x5cbd5bab44b0
+pixel0: 5e 5e 5e ff
