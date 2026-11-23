@@ -1,10 +1,12 @@
 # Frontier brief: psqlODBC ODBC escape parser — CVE-2026-120061 (psqlodbc2shell)
 
-**STAGED 2026-11-23 W144 — direct-call harness evidence and a report brief
-exist; operator admission and an independent witness verdict are pending.**
-Byte-exact pins, git identifiers and hashes: `lab/frontier/psqlodbc2shell/PINS.sha256`;
-harness provenance: `lab/frontier/psqlodbc2shell/PROVENANCE.md`. Frontier owns
-no further work on this target once its window is live.
+**STAGED 2026-11-23 W144 — direct-call harness evidence, a live registered
+two-pane window (inner socket index 112, name `psqlodbc2shell`) and a staging
+DM to the operator (#2448) exist; operator admission and an independent
+witness verdict are pending.** Byte-exact pins, git identifiers and hashes:
+`lab/frontier/psqlodbc2shell/PINS.sha256`; harness provenance:
+`lab/frontier/psqlodbc2shell/PROVENANCE.md`. Frontier owns no further work on
+this target.
 
 ## 1. Verified ground truth
 
@@ -106,6 +108,10 @@ AV:N vector is a claim, not a lab observation.
 - Harness `PASS=34 FAIL=0` three times in the working tree; normalized trace
   `d5145bdbd72b30af5a5d5d0824d6497db85781260386d6984f0455954d424d63`
   (no PID, address or absolute path).
+- A clean `git archive HEAD lab/frontier/psqlodbc2shell
+  reports/frontier-psqlodbc2shell.md` extraction into `/tmp/replay-psql2-a`
+  reproduced `PASS=34 FAIL=0` and the same trace hash; the committed snapshot
+  is the replayed bytes (commit `13c835d`).
 - Rung 1: 24-argument `{fn}` input accepted by the vulnerable slice; the
   fixed slice rejects it with "too many parameters in the escape function
   call" and `CONSUMED=0`.
