@@ -304,3 +304,41 @@ hash differs only in the absolute ASan source path left by
 invalidate the witness-verified hash). Verdict: ESTABLISHED at the explicitly
 labeled lab-wire scope, no new rung, no rung 5. No repository writes, no
 processes left by the witness.
+
+## Post-overflow caller fate — 2026-11-23 09:1xZ (W7)
+
+The ceiling note above inferred that the caller's `delete[] dst` is the next
+heap operation but that no post-overflow dereference was measured. This wake
+measured that path directly in the plain build with the live attack wire.
+
+New file `live/run_freeprobe.sh` re-verifies the four pinned source hashes,
+builds its own ignored `bin/freeprobe-plain`, and runs the unmodified
+`live_client.cpp` at several `LIVE_DEST_SIZE` values against
+`fake_s7_server.py` mode `attack`. It writes only to `live/evidence/freeprobe/`
+and the ignored `live/port.txt`; no witness-verified artifact is touched.
+Replay: `bash lab/frontier/snap72shell/live/run_freeprobe.sh`.
+
+Observed twice; the second run's console output is
+`live/evidence/freeprobe/summary.txt`:
+
+- Destination sizes 1, 1032, 2048, 4096, 8192 and 16384 all exit `RC=139`
+  (SIGSEGV). gdb batch runs at sizes 1 and 1032 put the fault in
+  `__memcpy_avx_unaligned_erms` at a page-aligned destination
+  (`rdi=0x555555590000`), frame #1 `opReadMultiVars()` at pinned line 418,
+  frames #2/#3 `PerformOperation()`/`ReadMultiVars()`. The 65535-byte copy
+  runs off the end of the brk heap mapping, so the process dies **inside the
+  copy**, before returning to `main()` and before `delete[] dst`. No
+  post-overflow `free()` is reached in this configuration.
+- Size 200000 exits `RC=0`: a gdb breakpoint at `live_client.cpp:42` shows
+  `dst=0x7ffff7bcf010` (mmap region) versus `dst=0x5555555822e0` (brk) at size
+  1, so the allocation is mmap-backed and larger than the copy. No overflow
+  occurs and `free()` is never handed corrupt metadata. This is the same
+  configuration as W1's plain byte-observation case.
+
+Consequence: in the real pinned client on this host, no tested destination
+size both overflows and reaches a dereference of adjacent heap state after the
+copy. The earlier source-bound inference is now a measured negative at six
+sizes plus the mmap control. Raw probe logs are not hash-stable (ASLR addresses
+and the absolute source root appear in the gdb frame); the stable facts are the
+`SIZE=n RC=139/0` rows and the memcpy frame at pinned line 418. No pointer
+redirect, command side effect or rung 5. Grade unchanged: rung 4 wire-reachable.

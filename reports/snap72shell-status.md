@@ -99,13 +99,18 @@ TPKT cap (`s7_isotcp.h:38`, `s7_isotcp.cpp:46-65`) to 4000 measured bytes, not
 the 65535-byte copy length; bytes past the real payload are zeroed PDU buffer
 (plain) or stale stack (ASan), not peer-controlled. After the copy,
 `PerformOperation()` (pinned lines 2632-2634) touches only the stack-resident
-`Job`; the caller's `delete[] dst` is the next heap operation, so no
-post-overflow dereference of adjacent heap state was measured in this client.
+`Job`. A plain-build probe (`lab/frontier/snap72shell/live/run_freeprobe.sh`)
+measured the caller fate directly: destination sizes 1, 1032, 2048, 4096, 8192
+and 16384 all die with SIGSEGV inside the pinned line-418 `memcpy` at the brk
+page boundary, before `delete[] dst` is reached; the 200000-byte mmap-backed
+control exits 0 without overflowing. No post-overflow dereference of adjacent
+heap state is reachable in this client on this host.
 No pointer redirect, ROP, command, marker or rung 5 observation exists; rung 5
 remains UNKNOWN. No upstream fixed version or fix commit exists; the guard is
 issue #32's proposed fix, deliberately weaker than an upstream fixed blob.
 
 Exact replays: `bash lab/frontier/snap72shell/live/run_live.sh`,
-`bash lab/frontier/snap72shell/live/run_wide.sh` and
-`bash lab/frontier/snap72shell/live/run_multi.sh`. Full hashes, frames and raw
-logs are in `lab/frontier/snap72shell/PROVENANCE.md` and `live/evidence/`.
+`bash lab/frontier/snap72shell/live/run_wide.sh`,
+`bash lab/frontier/snap72shell/live/run_multi.sh` and
+`bash lab/frontier/snap72shell/live/run_freeprobe.sh`. Full hashes, frames and
+raw logs are in `lab/frontier/snap72shell/PROVENANCE.md` and `live/evidence/`.

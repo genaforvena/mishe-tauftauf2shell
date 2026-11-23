@@ -1,0 +1,15 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CLIENT_CONNECT_BEGIN addr=127.0.0.1 port=44627
+CLIENT_CONNECT_RC=0
+CLIENT_READ_BEGIN amount=1 dest_size=1
+
+Program received signal SIGSEGV, Segmentation fault.
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+warning: 660	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+#1  0x0000555555557cdc in TSnap7MicroClient::opReadMultiVars (this=0x7ffffffecf40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/snap7-30f37da3114024a71ba93f7fd855c680b97a406f/src/core/s7_micro_client.cpp:418
+#2  0x000055555555dbe0 in TSnap7MicroClient::PerformOperation (this=0x7ffffffecf40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/snap7-30f37da3114024a71ba93f7fd855c680b97a406f/src/core/s7_micro_client.cpp:2554
+#3  0x000055555555e4b7 in TSnap7MicroClient::ReadMultiVars (this=0x7ffffffecf40, Item=0x7ffffffecf20, ItemsCount=1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/snap7-30f37da3114024a71ba93f7fd855c680b97a406f/src/core/s7_micro_client.cpp:2808
+rdi            0x555555590000      93824992477184
+rsi            0x7fffffffadfd      140737488334333

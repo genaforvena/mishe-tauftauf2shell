@@ -1,0 +1,20 @@
+lab/frontier/snap72shell/live/run_freeprobe.sh: line 41: 505698 Segmentation fault      (core dumped) LIVE_DEST_SIZE=$size "$BIN/freeprobe-plain" "$port" > "$OUT/sweep-$size-client.log" 2>&1
+SIZE=1 RC=139
+lab/frontier/snap72shell/live/run_freeprobe.sh: line 41: 505743 Segmentation fault      (core dumped) LIVE_DEST_SIZE=$size "$BIN/freeprobe-plain" "$port" > "$OUT/sweep-$size-client.log" 2>&1
+SIZE=1032 RC=139
+lab/frontier/snap72shell/live/run_freeprobe.sh: line 41: 505787 Segmentation fault      (core dumped) LIVE_DEST_SIZE=$size "$BIN/freeprobe-plain" "$port" > "$OUT/sweep-$size-client.log" 2>&1
+SIZE=2048 RC=139
+lab/frontier/snap72shell/live/run_freeprobe.sh: line 41: 505847 Segmentation fault      (core dumped) LIVE_DEST_SIZE=$size "$BIN/freeprobe-plain" "$port" > "$OUT/sweep-$size-client.log" 2>&1
+SIZE=4096 RC=139
+lab/frontier/snap72shell/live/run_freeprobe.sh: line 41: 505895 Segmentation fault      (core dumped) LIVE_DEST_SIZE=$size "$BIN/freeprobe-plain" "$port" > "$OUT/sweep-$size-client.log" 2>&1
+SIZE=8192 RC=139
+lab/frontier/snap72shell/live/run_freeprobe.sh: line 41: 505931 Segmentation fault      (core dumped) LIVE_DEST_SIZE=$size "$BIN/freeprobe-plain" "$port" > "$OUT/sweep-$size-client.log" 2>&1
+SIZE=16384 RC=139
+SIZE=200000 RC=0
+Program received signal SIGSEGV, Segmentation fault.
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+#1  0x0000555555557cdc in TSnap7MicroClient::opReadMultiVars (this=0x7ffffffecf40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/snap7-30f37da3114024a71ba93f7fd855c680b97a406f/src/core/s7_micro_client.cpp:418
+#2  0x000055555555dbe0 in TSnap7MicroClient::PerformOperation (this=0x7ffffffecf40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/snap7-30f37da3114024a71ba93f7fd855c680b97a406f/src/core/s7_micro_client.cpp:2554
+#3  0x000055555555e4b7 in TSnap7MicroClient::ReadMultiVars (this=0x7ffffffecf40, Item=0x7ffffffecf20, ItemsCount=1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/snap7-30f37da3114024a71ba93f7fd855c680b97a406f/src/core/s7_micro_client.cpp:2808
+rdi            0x555555590000      93824992477184
+rsi            0x7fffffffadfd      140737488334333

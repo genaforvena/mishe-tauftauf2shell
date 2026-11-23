@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x2a54: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/live_client.cpp, line 42.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CLIENT_CONNECT_BEGIN addr=127.0.0.1 port=36139
+CLIENT_CONNECT_RC=0
+CLIENT_READ_BEGIN amount=1 dest_size=1
+
+Breakpoint 1, main (argc=2, argv=0x7fffffffe248) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/live/live_client.cpp:42
+42	    int read_rc = client.ReadMultiVars(&item, 1);
+$1 = (unsigned char *) 0x5555555822e0 ""
