@@ -108,7 +108,7 @@ cases gave the pinned ASan `WRITE of size 9968`, fixed and 512-byte safe cases
 stayed clean (`rc=124`), and its own gdb saw the same chosen bytes. Rungs 3
 and 4 are ESTABLISHED at the labeled live-loopback / ASan / ~8 MiB ring-wrap
 scope; its own plain build reproduced the read-only-mapping ceiling. No new
-rung. The W3 pointer result below is author-only, not covered by #2428.
+rung. The W3 pointer result below was later witness-ESTABLISHED by #2444.
 
 Plain-build ceiling on the default mmap layout (same host, 08:14Z):
 A non-ASan FFmpeg n9.0 build driven with the identical 2200 x 9968 loopback
@@ -121,7 +121,7 @@ pointer control or a benign marker through this path stays structurally
 blocked in that layout. Logs:
 `lab/frontier/ffmpeg2shell/live/evidence/live-plain-*.log`.
 
-Brk-layout pointer overwrite (W3, 09:03Z, author-only): setting glibc
+Brk-layout pointer overwrite (W3, 09:03Z, witness-ESTABLISHED at its scope): setting glibc
 `MALLOC_MMAP_THRESHOLD_=16777216` locally puts the 8 MiB FIFO buffer on
 `[heap]` at `0x5555558d1fe0`; `av_fifo_alloc2` places its `AVFifo` struct at
 `buffer+0x800060` and the wrapped librist `URLContext` at `buffer+0x8000a0`.
@@ -131,11 +131,13 @@ Hardware watchpoints in the async-thread `librist_read` `memcpy`
 (`ff_librist_protocol …fea0` → `…fe5a`); the main thread then dereferences
 the corrupted buffer pointer at `fifo.c:226` with `rsi=0x5a5a…`. A plain
 FFMIN-fixed binary built from the same source survives the same stream and
-neither watchpoint fires. No chosen target address, control transfer,
-marker side effect, command or witness replay: this is scoped rung 4 pointer
-control under a local layout prerequisite, not rung 5. Evidence and controls:
-`reports/ffmpeg2shell-live.md`, `live/evidence/layout-brk-*.log`,
-`live/layout-probe.sh`, `live/watch-*.cmd`.
+neither watchpoint fires. No chosen target address, control transfer, marker
+side effect or command at W3's time; W152 verdict #2444 (09:24Z) replayed the
+same geometry and both low-byte rewrites on its own builds with clean
+fixed/safe/default-mmap controls and ESTABLISHED rung 3 plus scoped rung 4
+pointer control under the local layout prerequisite. It withheld control
+transfer and rung 5. Evidence and controls: `reports/ffmpeg2shell-live.md`,
+`live/evidence/layout-brk-*.log`, `live/layout-probe.sh`, `live/watch-*.cmd`.
 
 ## W4 wire-driven command execution (2026-11-23) — author-only, not ESTABLISHED
 
@@ -161,6 +163,6 @@ Conditions are part of the claim: local `MALLOC_MMAP_THRESHOLD_=16777216`,
 no-ASLR, absolute PIE/libc addresses measured in this build, main-profile
 unencrypted loopback RIST and ~8 MiB streamed to the ring wrap. Grade:
 author-observed rung 5 mechanics at that labeled scope. No independent
-witness replay of W4, so it is NOT ESTABLISHED. The earlier author-only W3
-grade and the witness-established W2 live-path rungs 3/4 are unchanged.
+witness replay of W4, so it is NOT ESTABLISHED. W3 is now witness-ESTABLISHED
+(#2444) at its brk-layout scope; the W2 live-path rungs 3/4 are unchanged.
 

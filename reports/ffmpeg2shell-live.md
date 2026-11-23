@@ -171,13 +171,12 @@ and neither watchpoint fires (`evidence/layout-brk-watch-fixed.summary.txt`,
 vulnerable run). The default mmap layout still faults at the read-only libc
 mapping as described in the next section.
 
-**Ceiling.** Only the low byte of each pointer was observed changed, to the
-sender's uniform 0x5a fill; a chosen target address, chosen-byte control at a
-specific pointer field, control transfer through the corrupted `prot` table,
-a benign marker side effect, a command and an independent witness are all
-not demonstrated. The layout tweak is local. Grade: rung 3 on live bytes plus
-scoped rung 4 pointer control of live consumer state under that local layout;
-not rung 5.
+**Ceiling of W3 itself.** At the time of that experiment only the low byte of
+each pointer was observed changed, to the sender's uniform 0x5a fill; no
+chosen target, control transfer, marker or command was demonstrated there.
+The layout tweak is local. W152 later ESTABLISHED rung 3 plus scoped rung 4
+pointer control of live consumer state at that brk-layout scope. W4 below
+goes further on the same layout and is a separate, author-only claim.
 
 ## Plain-build structural ceiling (host-specific negative)
 
@@ -201,16 +200,22 @@ were not measured; this is a negative for the tested build only.
 - On the default mmap layout: no pointer control, ROP, function-pointer
   overwrite or chosen-address write; the ring's neighbours were unmapped or
   read-only. The brk-layout section above records scoped pointer overwrite
-  only; no control transfer, marker side effect or command was demonstrated
-  in either layout.
+  only, now witness-ESTABLISHED at that scope; W4 below adds control transfer
+  and a command under additional no-ASLR / known-address conditions.
 - Witness W151 verdict #2428 (2026-11-23 09:04Z) independently replayed the
   W2 live path from `git archive HEAD cbeeafa` with its own builds and port
   5514: both vulnerable cases gave the pinned ASan `WRITE of size 9968`,
   fixed and safe inputs stayed clean, and its gdb saw the same chosen bytes.
   Rungs 3 and 4 are ESTABLISHED at the labeled live-loopback / ASan / ~8 MiB
   ring-wrap scope; its plain build also reproduced the read-only ceiling.
-  The W3 brk-layout pointer overwrite above is author-only and not covered
-  by this verdict.
+  Witness W152 verdict #2444 (2026-11-23 09:24Z) independently replayed the
+  W3 brk-layout claim from `git archive HEAD abf314d` with its own builds and
+  port 5614: the same buffer/AVFifo/URLContext geometry, both low-byte
+  pointer rewrites (`…1fe0`→`…1f5a`, `…fea0`→`…fe5a`) inside the
+  `librist.c:230` memcpy, the same main-thread `fifo_peek_common` fault on
+  `rsi=0x5a5a…`, and clean fixed/safe/default-mmap controls. Rungs 3 and 4
+  are ESTABLISHED at that labeled brk-layout scope; the witness explicitly
+  withheld any control transfer or rung-5 grade.
 - Main profile without encryption was used because FFmpeg does not expose
   its `rist_profile` AVOption through the URL query (librist's own parser
   reports `Unknown or invalid parameter rist_profile`); the receive path and
