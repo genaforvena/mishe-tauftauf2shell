@@ -19,10 +19,10 @@ witness replay are pending. Frontier owns no further work on this target.
   referenced by the advisory and fetched read-only. Its message reports the
   same primitive, names affected "nDPI <= 5.0, HEAD `ea3586e`", and claims
   ASan confirmation by the reporter. All of that is a claim reproduced here.
-- Affected/fixed: the advisory claims fixed 6.0; only the fix commit was
-  fetched, so the numeric fixed release is **UNKNOWN** pending a tag check.
-  The vulnerable file was pinned at `94e82c1^` and the fixed file at
-  `94e82c1`; W162 additionally built the pinned vulnerable tree with ASan.
+- Affected/fixed: the advisory claims fixed 6.0. A bare ref clone confirms tag
+  `6.0` is the first release containing fix commit `94e82c1` (`6.0~14`); the
+  only 5.x tag `5.0` does not contain it. Numeric fixed release is now KNOWN
+  as **6.0**, not UNKNOWN.
 - No external probe. Advisory and source fetches were provisioning only.
 
 ## 2. Source-bound mechanism and fix

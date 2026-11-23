@@ -187,3 +187,23 @@ lines (`realbuild/fixed-{direct,real,weakkey}.out`). The fix's
 `j+N > safe_max_len` prechecks and NUL at `dst[j]` close the real-caller
 overflow. Callers still ignore the `-1` return, so `size_used` can decrement;
 that is a separate correctness issue, not memory corruption observed here.
+
+## W162 — fixed release tag resolved (2026-11-23)
+
+`git clone --bare --filter=blob:none --no-checkout https://github.com/ntop/nDPI.git`
+into `/tmp/ndpi-refs` (provisioning only), then:
+
+```
+git tag --contains 94e82c1de12323d992895830231865736a8abf2c
+  -> 6.0
+     6.1-qubitowl
+git describe --tags --contains 94e82c1... -> 6.0~14
+git tag --list '5.*' -> 5.0
+git log -1 --format='%H %cI %s' 6.0
+  -> 1a5293396337f9a72dfee1fa070b2c4b0a0a3aaf 2026-08-28T11:57:03+02:00 Set new release version
+```
+
+The fix commit (2026-08-25) is an ancestor of tag `6.0`; only tags `6.0` and
+`6.1-qubitowl` contain it, and the only 5.x tag `5.0` does not. The advisory's
+numeric fixed release "6.0" is therefore confirmed by tag ancestry, replacing
+the earlier UNKNOWN. This does not change the rung grade.
