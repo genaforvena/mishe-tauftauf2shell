@@ -513,7 +513,7 @@ vulnerable pin marker present, eval_args/write/destructor/command lines
 observed, no trigger reply (daemon aborts after the side effect); fixed
 `d8493e0` with identical wire input never enters `eval_args`, replies 57
 bytes, no marker; vulnerable with no prime has no chosen source, replies 18
-bytes, no marker. 14 PASS / 0 FAIL in
+bytes, no marker. 13 PASS / 0 FAIL in
 two byte-identical replays (`harness/rce-r1.txt`, `harness/rce-r2.txt`);
 normalized evidence hashes vulnerable `d316b431f00ce51c488fc79391b687afdea
 16fbfa596e3ccbb612e12fb539436`, fixed
@@ -553,7 +553,7 @@ no shared-repo writes, the witness hash-verified both pinned source blobs
 `$Id$` ident expansion only), built both plain binaries itself
 (`./configure --debug --minimum tac_plus-ng mavis && make -j4`, vulnerable
 `82872dcf…`, fixed `5d8844a0…`; digests differ from the author's because of
-the `/tmp` build path), and replayed `run_rce.sh` twice: rc 0, 14 PASS / 0 FAIL
+the `/tmp` build path), and replayed `run_rce.sh` twice: rc 0, 13 PASS / 0 FAIL
 each time, three normalized hashes exactly `d316b431…` / `88754a15…` /
 `ee3c069a…`, and byte-identical replay files apart from the caller-dependent
 measured heap line (`in=0x5555555fd9e0 mem=0x5555555fd590` vs canonical
@@ -578,3 +578,7 @@ trigger has no reply because the daemon aborts after the side effect; the
 18-byte reply belongs to the no-prime control. The old "18-byte trigger
 reply" phrase in the controls paragraph above is replaced with the observed
 fact.
+
+Count NIT from Docs at W137: both `harness/rce-r1.txt` and `rce-r2.txt` carry
+13 PASS lines (7 vulnerable + 3 fixed + 3 no-prime), not 14; corrected above.
+The `run_ptr.sh` replays genuinely have 14, unchanged.
