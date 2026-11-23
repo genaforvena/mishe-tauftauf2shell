@@ -1,0 +1,5 @@
+kicad-cfb: file=evidence/FileHeader-chosen-925327927.SchLib stream=108
+real-reader: bytes=108 props=3 parse_error=0
+real-key: SIZE1=10
+real-key: SIZEZ=925327927
+rc=0 size=1 first=72 GUARD7=11111111

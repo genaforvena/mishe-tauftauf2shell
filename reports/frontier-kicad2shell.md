@@ -1,18 +1,19 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
-**STAGED 2026-11-23 W162; UPDATED 2026-11-23 19:21Z wake** — this brief, a
+**STAGED 2026-11-23 W162; UPDATED 2026-11-23 20:40Z wake** — this brief, a
 direct-call rung-1..4 harness, a real-property-parser reachability harness, a
 real-compound-file reachability lane, a lane driven by KiCad's own
 `compoundfilereader` header and a live registered two-pane window (inner
 socket index 122, name `kicad2shell`) exist; seed wall
 `.mishe-tauftauf/walls/kicad2shell.md`, registry entry and staging DM are in
-place. Operator admission and an independent witness replay are pending.
+place. Operator admission is complete; an independent witness replay
+(message #2996) ESTABLISHED rungs 1-4 at the labeled scope, NOT rung 5.
 Byte-exact pins: `lab/frontier/kicad2shell/PINS.sha256`,
 `realparser/PINS-realparser.sha256` and `kicadreader/PINS-kicadreader.sha256`;
 provenance, stubs, negatives and commands: `PROVENANCE.md`,
 `realparser/PROVENANCE-realparser.md`, `realcfb/PROVENANCE-realcfb.md` and
 `kicadreader/PROVENANCE-kicadreader.md`. The fixed release is mapped in
-`lab/frontier/kicad2shell/FIXED-RELEASE.md`. Frontier owns no further work.
+`lab/frontier/kicad2shell/FIXED-RELEASE.md`. The target mind owns further work.
 
 ## 1. Verified ground truth
 
@@ -192,8 +193,39 @@ Direct call, real property parser, real compound-file stream and KiCad's own
 compound-file reader, all with a stubbed wx support layer; no real wxWidgets,
 vendor `.SchLib`, full KiCad build or `eeschema`, no downstream consumer
 executed in any lane, no socket or wire, no pointer/IP control, no command
-execution, no witness verdict. The fixed release is mapped (10.0.7), but no
-KiCad build at that release was exercised here. The chosen bytes still land in
+execution. The witness verdict (message #2996) covers rungs 1-4 only; rung 5
+has no verdict here. The fixed release is mapped (10.0.7), but no KiCad build
+at that release was exercised here. The chosen bytes still land in
 ASan's left redzone (plain build: malloc metadata), not an adjacent live
 object. End-to-end file reachability through KiCad and the ZDI RCE claim are
 claims, **UNKNOWN** here. Rung 5 not attempted.
+
+## 10. Independent witness and chosen-value counterexample (20:36Z wake)
+
+Message #2996 replays W178 from clean archive `3d90217`: 11/11 pins OK,
+`sh kicadreader/check.sh` `PASS=38 FAIL=0` with trace
+`fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260` exact,
+fresh g++ ASan `WRITE of size 4` four bytes before the region at `:5919`, and
+clean fixed controls. Verdict: **ESTABLISHED rungs 1-4 at the labeled
+synthetic-CFB / KiCad-own-compound-file-reader scope, NOT rung 5**. The witness
+also varied the CFB `SIZEZ` value and observed the OOB store value change.
+
+That counterexample was repeated in this repository with
+`lab/frontier/kicad2shell/kicadreader/chosen-value.sh`. Two real CFB fixtures
+built through the committed `realcfb/make_cfb.py:build` were verified by
+`olefile` and delivered through KiCad 10.0.6's verbatim compound-file reader.
+gdb at pinned `:5919` (skipping the valid `SIZE1` hit) observed:
+`SIZEZ=84215045` → `IND=0 SCALED=0x24242424`, four bytes `24 24 24 24` at
+`data()-4`; `SIZEZ=925327927` (`0x37373737`) → `SCALED=0x80000000`, four bytes
+`00 00 00 80`. Both fixed builds returned `rc=0 size=1 first=72
+GUARD7=11111111` with no ASan report. The chosen file bytes therefore
+determine the four-byte value written at the chosen offset. Outputs and the
+unchanged ceiling are in `kicadreader/PROVENANCE-chosen-value.md`. No pin,
+`check.sh` assertion or trace hash changed.
+
+A source-bound check at the same parent commit also confirmed that the real
+`ALTIUM_COMPOUND_FILE` (in `common/io/altium/altium_binary_parser.cpp:158,173,319-329`)
+uses the same `EnumFiles`/`IsStream`/`ReadFile` API the lab wrapper models;
+the stream-read constructor is already pinned verbatim. No real build was
+run. Hashes, 404/401 negatives and the exact comparison are in
+`kicadreader/PROVENANCE-chosen-value.md`.

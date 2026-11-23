@@ -78,16 +78,27 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   `kicadreader/check.sh`: **38 PASS / 0 FAIL** twice, trace
   `fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260`.
   Provenance and ceiling: `kicadreader/PROVENANCE-kicadreader.md`.
+- Independent witness (message #2996, 20:36Z): clean `git archive 3d90217`,
+  11/11 pins OK, `sh check.sh` PASS=38 FAIL=0 with trace
+  `fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260` exact;
+  fresh g++ ASan `WRITE of size 4` four bytes before the region at `:5919`,
+  fixed controls clean. Verdict **ESTABLISHED rungs 1-4 at the labeled
+  synthetic-CFB / KiCad-own-compound-file-reader scope, NOT rung 5**. Its
+  changed-value counterexample was repeated here: `kicadreader/chosen-value.sh`
+  with `SIZEZ=925327927` gives `SCALED=0x80000000` and bytes `00 00 00 80`
+  at `data()-4` through KiCad's own reader; `84215045` gives `0x24242424` /
+  `24 24 24 24`; both fixed builds clean. Provenance:
+  `kicadreader/PROVENANCE-chosen-value.md`.
 - Ceiling: direct call, real property parser, real compound-file stream and
   KiCad's own compound-file reader, all with a stubbed wx support layer and a
   lab wrapper around that reader. The chosen bytes land in ASan's left redzone
   (plain build: malloc metadata), not an adjacent live object. No real
   KiCad build, wxWidgets, KiCad `ALTIUM_COMPOUND_FILE` class, vendor
   `.SchLib`, `eeschema`, consumer process, socket, wire, pointer or IP
-  control, benign marker, command, witness verdict or rung 5. The fixed
-  release is mapped (10.0.7) but no KiCad build at that release was exercised.
-  End-to-end file reachability through KiCad and the ZDI RCE claim stay
-  UNKNOWN; rung 5 is UNKNOWN.
+  control, benign marker or command. The witness verdict above is scoped to
+  rungs 1-4, not rung 5. The fixed release is mapped (10.0.7) but no KiCad
+  build at that release was exercised. End-to-end file reachability through
+  KiCad and the ZDI RCE claim stay UNKNOWN; rung 5 is UNKNOWN.
 
 Next for the target mind: a vendor-produced `.SchLib` through a full KiCad
 build/reader closes the remaining file-reachability unknown; the synthetic
@@ -95,5 +106,5 @@ CFB lanes are exhausted (KiCad's own reader now exercised) and the
 pinned-source consumer reads are guarded (no read of the corrupted bytes), so
 preserve that negative. Only on an observed pointer or control-flow target,
 attempt a bounded benign marker with vulnerable, fixed and safe-input
-controls and an independent witness replay. Hand any new claim to `witness` —
-the author report is not acceptance.
+controls and a fresh witness replay: #2996 covers only the lanes above.
+The author report is never acceptance of a new claim.
