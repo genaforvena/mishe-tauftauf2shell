@@ -19,7 +19,9 @@ measurement shows the write still reaches the live gnutls cleanup loop but
 gives no chosen control and no address leak; a wake-14 ASLR-on inventory
 found no live libc/heap pointer in the reachable objects that a partial
 overwrite could retarget; a wake-17 static check found no direct
-command-execution import in the mapped libgnutls. ASLR-on/stock stays UNKNOWN.
+command-execution import in the mapped libgnutls; a wake-18 three-layout
+measurement found entropy in address bits 20–23, so even a 3-byte partial
+overwrite is not deterministic. ASLR-on/stock stays UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -698,11 +700,44 @@ dpkg `libgnutls30t64 3.8.3-1.1ubuntu3.6`), confirmed in
 `harness/aslr-inventory.gdb.log`. On that exact file:
 
 - `readelf --dyn-syms -W LIB | grep ' UND ' | grep -E '(system|popen|exec[lvpe]*|posix_spawn|dlopen)'` → no matches: no direct command-execution import to retarget to.
-- `objdump -d LIB | grep p11_kit_module_load@plt` → `0x34da0`; a module-load stub exists, but wake 14 found no live libgnutls pointer anywhere in the 128 qwords at `slot1` or `priv`, so there is no high-byte-preserved pointer to patch to it. The staged `.so` idea therefore has no reachable pointer on this geometry.
+- `objdump -d LIB | grep p11_kit_module_load@plt` → `0x34da0`; a module-load stub exists in the library, but the final 128-qword inventory has no libgnutls *text* pointer in the reachable objects to patch to it. Correction (wake 18): wake 14's earlier sample did have a libgnutls text pointer at `priv+0x110 = 0x7749cbd80490`; its mapping base was not recorded, so reachability of the stub from that pointer is UNKNOWN, not refuted.
 
-This is a static, deterministic negative for this library and the sampled
-geometry; it changes no grade. ASLR-on chosen control stays UNKNOWN.
+The import check is a static negative for this library; the pointer-reachability
+limb is UNKNOWN (correction above). No grade changed.
 
+
+## ASLR nibble entropy across layouts (wake 18, 2026-11-23 ~14:5xZ) — 3-byte patch not deterministic
+
+Wake 14's partial-overwrite negative was object-specific. A stronger property
+is measurable from the three committed ASLR-on oracle logs
+(`harness/aslr-on-{1,2,3}.gdb.log`, wake 13); each records the pre-F6 `slot1`
+and `system` in the same inferior:
+
+| layout | slot1 | low 20 | bits 20–23 | system | low 20 | bits 20–23 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `0x78f3e5caa000` | `0xaa000` | `0xc` | `0x78f3e6858750` | `0x58750` | `0x8` |
+| 2 | `0x73807d4aa000` | `0xaa000` | `0x4` | `0x73807e058750` | `0x58750` | `0x0` |
+| 3 | `0x70b73e8aa000` | `0xaa000` | `0x8` | `0x70b73f458750` | `0x58750` | `0x4` |
+
+The low 20 bits are stable (slot1 `0xaa000`, `system` `0x58750`), which is
+what made a 20-bit partial overwrite look plausible. Bits 20–23 are not:
+`c/4/8` for the heap and `8/0/4` for libc across the three layouts (their
+difference is a constant 4, but the absolute nibble is not fixed). A 2-byte
+patch writes only known bits 0–15 and inherits the source pointer's differing
+bits 16+; wake 14 measured no live pointer in the writable span sharing
+slot1's bits 16+ (`0x48aa`). A 3-byte patch must also write bits 16–23,
+including the varying nibble, so it cannot be deterministic; a 4-byte patch
+destroys the unknown high bytes. This closes byte-granular partial overwrite
+of both the heap command address and the libc call target on this host as a
+one-shot deterministic move, independently of which objects are sampled.
+Repeated attempts with a guessed nibble (1-in-16 per fresh layout) were not
+tested and stay UNKNOWN.
+
+The library-relative route survives this measurement: a libgnutls text
+pointer's bits 12+ are fixed relative to its mapping base, so a low-16-bit
+patch stays inside the same 64 KiB region. Whether the earlier sample's
+`priv+0x110` pointer designates a function whose region holds a useful
+same-library call target is UNKNOWN (base unrecorded); no grade changed.
 
 ## Boundaries
 
