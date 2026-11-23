@@ -646,11 +646,11 @@ marker survives a fresh build and by stating its build precondition.
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
   scope; W10 corrected its build label and re-ran the vulnerable functional
   rows on the real -O2 binary. Wire rung-3, W1/W2/W3/W6/W7/W10 consequence
-  claims and W11's marker claim still await independent replay; raw logs for
-  every reported W1-W11 row are committed, the rebuild commands in
+  claims and W11's/W12's marker claim still await independent replay; raw logs
+  for every reported W1-W12 row are committed, the rebuild commands in
   `PROVENANCE.md` let a fresh context reproduce every build variant, and the
   probe scripts take a `BIN` override and fresh ports. Two superseded W11 stub
-  iterations and the two CMake configure logs remain uncommitted in the lab.
+  iterations and the W11/W12 CMake configure logs remain uncommitted in the lab.
   Replay request #1261/#1271/#1304/#1329 is still
   open for the earlier claims; W11 needs its own request because it uses
   different build flags and a binary patch.
