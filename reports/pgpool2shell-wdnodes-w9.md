@@ -118,4 +118,40 @@ stays inside `POOL_CONFIG`) so no rung 3 on this branch, no crash, no chosen
 address, no command, no rung 5. Author-measured only; no independent replay
 was requested or performed for this branch. `WD_VERIFY_*` warnings are the
 only wire log consequence. Not established: any dereference of the corrupted
-pointer, `wd_authkey` set, or a follow-on impact path.
+pointer or a follow-on impact path. W11 below measures the `wd_authkey` set
+condition.
+
+## W11 — `wd_authkey` set does not gate the type-`Z` parse (00:00-00:02Z, author-measured)
+
+The W10 grade note left `wd_authkey` set as an unmeasured condition. It is now
+measured with one bounded loopback probe. Assets in
+`lab/pgpool2shell/wdnodes/wire/`: `auth-probe.sh`, `pgpool-w9-auth.conf`
+(identical to `pgpool-w9.conf` except `wd_authkey = 'labsecret'` and distinct
+log/pid names), and raw `evidence-auth-n129.*`. Ports 19003-19006 were checked
+free before the run; only the runner's own child PIDs were killed; ports were
+free after.
+
+The peer sends the same one type-`Z` `WD_POOL_CONFIG_DATA` packet as W10
+(`wd_nodes` N=129, `backend_desc` N=1, chosen `0x42424242`, hostname
+`wxyzUUUUUUUU`) with **no auth key in the packet**. Observed on the pinned 4.7.2
+daemon: `type:[CONFIG DATA]` received; verify warnings read `this node has 2
+watchdog nodes while "" is configured with 129 watchdog nodes`;
+`invalid watchdog JSON payload` = 0; auth-rejection lines = 0; segfault = 0.
+`hash-evidence.sh` shows the normalized decisive-line hashes of
+`evidence-auth-n129.stdout` / `.peer` are byte-identical to W10's
+`evidence-wire-vuln-n129.stdout` / `.peer`: setting the key changed none of the
+measured outcome. At startup the daemon logs `watchdog is configured to use
+authentication, but pgpool-II is built without SSL support` (weak auth in this
+build), but the peer never supplies a key and the parse still proceeds.
+
+Source agrees with the observation: in 4.7.2 `standard_packet_processor`
+(`watchdog.c:4467-4472`) calls `get_pool_config_from_json(pkt->data, pkt->len)`
+with no `verify_authhash` on that branch. Auth verification is on the node-info
+path (`parse_node_info_message` at `:4490-4493`, `verify_authhash_for_node` at
+`:1745`) and on heartbeat packets, not on type `Z`.
+
+Grade unchanged: this refines the reproduction condition — a
+non-authenticating loopback peer still drives the W9 OOB parse when
+`wd_authkey` is configured — but adds no rung, no crash, no chosen address and
+no command. Author-measured only; no independent replay; no follow-on
+dereference established.

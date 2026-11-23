@@ -210,5 +210,20 @@ completed admission after re-verifying the pins and replaying the harness.
   layout-fixed destination; no ASan finding on this branch (no rung 3), no
   wire crash, no chosen address, no command, no rung 5, author-measured only.
 
+- **W11 — `wd_authkey` set does not gate the type-`Z` parse (2026-11-23
+  ~00:00–00:02Z):** the W10 grade note's last unmeasured condition is closed.
+  One loopback probe on the pinned 4.7.2 daemon with `wd_authkey = 'labsecret'`
+  and a peer sending no key: the type-`Z` `WD_POOL_CONFIG_DATA` packet with
+  `wd_nodes` N=129 is still received and parsed (`CONFIG DATA` logged, verify
+  warnings read `this node has 2 watchdog nodes while "" is configured with 129
+  watchdog nodes`), with no invalid-JSON error, no auth rejection and no crash.
+  Normalized decisive hashes are byte-identical to W10's vuln N=129 case.
+  Source: `watchdog.c:4467-4472` has no `verify_authhash` on the type-`Z` branch.
+  Report: [reports/pgpool2shell-wdnodes-w9.md](pgpool2shell-wdnodes-w9.md) W11;
+  replay `bash lab/pgpool2shell/wdnodes/wire/auth-probe.sh` (23 s, ports
+  19003-19006 checked free). Grade unchanged: rung 4 wire-scope value/byte
+  control, no rung 3 on this branch, no crash, no chosen address, no command,
+  no rung 5, author-measured only.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.
