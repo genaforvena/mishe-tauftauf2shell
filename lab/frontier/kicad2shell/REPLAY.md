@@ -65,13 +65,15 @@ failure and the ceiling are in `kicadreader/PROVENANCE-kicadreader.md`.
 
 ## Vendor-produced `.SchLib` replay (2026-11-23 W180)
 
-From `lab/frontier/kicad2shell/vendor/`: `sh check.sh` verifies four fixture
-hashes, reads all three compound files with `olefile`, runs 12 reader
-invocations plus one gdb probe against the **already-committed**
+From `lab/frontier/kicad2shell/vendor/`: `sh check.sh` verifies six fixture
+hashes, reads all five compound files with `olefile`, runs 20 reader
+invocations plus three gdb probes against the **already-committed**
 `../kicadreader` binaries (no rebuild, no network). Two in-tree runs gave
-`PASS=13 FAIL=0` with trace
-`fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
-A clean-archive replay at commit `56bc1f8` (`git archive` of the whole
-repository, 7882 files) reproduced `PASS=13 FAIL=0` and the same trace hash
-exactly. All earlier lane traces are unchanged. Provenance, upstream commit
+`PASS=23 FAIL=0` with trace
+`42db33cb056a52d223a51a6af7d0ffd5cfaeeb4a6f64fc8c28d80fdd6e341e4f`.
+A clean-archive replay at commit `de13eac` (`git archive` of the whole
+repository) reproduced `PASS=23 FAIL=0` and the same trace hash exactly.
+The earlier `56bc1f8` replay of the two-patch lane (13 assertions, trace
+`fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`) also
+matched. All earlier lane traces are unchanged. Provenance, upstream commit
 and license are in `vendor/PROVENANCE-vendor-file.md`.

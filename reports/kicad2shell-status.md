@@ -105,7 +105,7 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   `42db33cb056a52d223a51a6af7d0ffd5cfaeeb4a6f64fc8c28d80fdd6e341e4f`.
   Same-offset `SizeZ=9/7/1` patches give gdb words `0x40/0x32/0x07` at
   `data()-4`; fixed builds clean on all three.
-  Clean-archive replay at `56bc1f8` (7882 files) matched exactly (`REPLAY.md`).
+  Clean-archive replay at `de13eac` matched exactly (`REPLAY.md`).
   Provenance, hashes and offsets: `vendor/PROVENANCE-vendor-file.md`.
 - Ceiling: direct call, real property parser, real compound-file stream,
   KiCad's own compound-file reader and a real vendor-produced `.SchLib` with

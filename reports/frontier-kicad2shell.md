@@ -262,8 +262,7 @@ on the patched vendor file reads `IND=0 SCALED=0x00000040` and bytes
 `42db33cb056a52d223a51a6af7d0ffd5cfaeeb4a6f64fc8c28d80fdd6e341e4f`.
 Three same-offset patches (`SizeZ=9/7/1`) give gdb words `0x40/0x32/0x07`
 at `data()-4`; fixed builds are clean on all three byte sets.
-A clean-archive replay at commit `56bc1f8` (7882 files) matched exactly;
-see `REPLAY.md`.
+A clean-archive replay at commit `de13eac` matched exactly; see `REPLAY.md`.
 Fixture hashes, license, exact offsets and the ceiling are in
 `vendor/PROVENANCE-vendor-file.md`. This closes fixture provenance, not the
 full path: no wxWidgets, full KiCad build/GUI import, consumer, wire,
