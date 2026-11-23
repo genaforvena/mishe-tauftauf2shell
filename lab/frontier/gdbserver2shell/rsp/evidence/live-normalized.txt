@@ -12,7 +12,7 @@ QTDPsrc_ACK=+
 QTDPsrc_REPLY=
 ==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
 WRITE of size 1 at 0xADDR thread T0
-SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../src/binutils-gdb-633ae02/gdbsupport/common-utils.cc:465 in hex2bin(char const*, unsigned char*, int)
+SUMMARY: AddressSanitizer: heap-buffer-overflow SRC/common-utils.cc:465 in hex2bin(char const*, unsigned char*, int)
 CLIENT_RC=0 SERVER_RC=0
 INITIAL=
 QTDP_ACK=+ QTDP_REPLY=OK
@@ -32,7 +32,7 @@ QTDPsrc_REPLY=OK
 [remote] getpkt: [sent ack]
 ==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
 WRITE of size 1 at 0xADDR thread T0
-SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../src/binutils-gdb-633ae02/gdbsupport/common-utils.cc:465 in hex2bin(char const*, unsigned char*, int)
+SUMMARY: AddressSanitizer: heap-buffer-overflow SRC/common-utils.cc:465 in hex2bin(char const*, unsigned char*, int)
 [remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
 [remote] getpkt: [sent ack]
 [remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:10:4142434445464748494a4b4c4d4e4f50");  [sending ack]

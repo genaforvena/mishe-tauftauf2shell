@@ -98,7 +98,12 @@ gdbserver-only ASan binary plus a fixed control (same tree plus the saved
 fix hunk). `rsp/live_verify.sh` sent real RSP packets from a loopback
 Python client to a plant-started gdbserver: **16 PASS / 0 FAIL** twice,
 normalized hash
-`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+`5701a8746f6b5ed7dc43eadef6b4b938f85af6410a44e5d2105537929687de42`.
+W3 added compile-time source-path normalization to `live_verify.sh` after
+witness W137 (tape #2078) observed that the earlier value
+`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`
+differed across build directories; the current hash is now independent of
+both the replay archive path and the build directory.
 After `QTDP:1:0:E:0:0` created a tracepoint, the `QTDPsrc` packet with
 declared `SLEN=1` and 64 chosen bytes produced `heap-buffer-overflow`,
 `WRITE of size 1`, `0 bytes after a 2-byte region`, frames

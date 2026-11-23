@@ -48,10 +48,15 @@ has "$f" "QTDPsrc_REPLY=E01" "live-fixed-rejects-attack"
 has "$f" "SERVER_RC=0" "live-fixed-clean-exit"
 hasnt "$E/live-live-fixed-attack-64.log" "AddressSanitizer" "live-fixed-no-asan"
 
+# The ASan SUMMARY: line embeds the compile-time source path, which differs
+# between build directories (../../../src/... here vs an absolute path in a
+# replay tree). Collapse everything before the source basename so the hash is
+# independent of both the replay archive path and the build directory.
 cat "$E"/verify-*.out "$E"/live-live-*.log 2>/dev/null \
   | grep -aE '^(CLIENT_RC=|QTDP|INITIAL=|==[0-9]+==ERROR:|WRITE of size|SUMMARY: AddressSanitizer:|\[remote\] getpkt)' \
   | sed -E -e 's/==[0-9]+==/==PID==/g' -e 's/0x[0-9a-f]{6,}/0xADDR/g' \
            -e 's/port [0-9]+/port PORT/g' \
+           -e 's#^(SUMMARY: AddressSanitizer: [^ ]+ ).*/([^ /]+\.cc:[0-9]+ in .*)$#\1SRC/\2#' \
   > "$E/live-normalized.txt"
 printf 'LIVE_NORMALIZED_HASH=%s\n' \
   "$(sha256sum "$E/live-normalized.txt" | cut -d' ' -f1)"

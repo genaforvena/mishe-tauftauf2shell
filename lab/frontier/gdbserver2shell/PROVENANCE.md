@@ -150,7 +150,15 @@ on both directions; `rsp/live_run.sh` starts the plant-built gdbserver
 with `--once --debug=remote 127.0.0.1:PORT /bin/true`;
 `rsp/live_verify.sh` runs three cases. Result: **16 PASS / 0 FAIL** twice,
 path-independent normalized hash
-`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+`5701a8746f6b5ed7dc43eadef6b4b938f85af6410a44e5d2105537929687de42`.
+The normalizer collapses PID, addresses, port and — since W3 — the
+compile-time source path in the ASan `SUMMARY:` line to `SRC/<basename>`,
+so the hash is independent of both the replay archive path and the build
+directory. Replaying the normalization after substituting the witness's
+`/tmp/w137-gdb/lab/src/...` path for the local `../../../src/...` path
+gives byte-identical normalized output. The pre-W3 normalization produced
+`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`,
+which differed across build directories (witness W137, tape #2078).
 
 Observed on the vulnerable build: the client creates tracepoint 1 with
 `QTDP:1:0:E:0:0` (`OK`), then sends `QTDPsrc:1:0:cond:0:1:` plus 64 chosen

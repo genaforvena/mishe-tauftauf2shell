@@ -3,9 +3,9 @@ warning: Found custom handler for signal 8 (Floating point exception) preinstall
 warning: Found custom handler for signal 11 (Segmentation fault) preinstalled.
 Some signal dispositions inherited from the environment (SIG_DFL/SIG_IGN)
 won't be propagated to spawned programs.
-Process /bin/true created; pid = 3234026
+Process /bin/true created; pid = 198209
 Listening on port 34581
-Remote debugging from host 127.0.0.1, port 40940
+Remote debugging from host 127.0.0.1, port 39690
 [remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
 [remote] getpkt: [sent ack]
 [remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
@@ -13,42 +13,42 @@ Remote debugging from host 127.0.0.1, port 40940
 [remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:1:4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f604142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60");  [sending ack]
 [remote] getpkt: [sent ack]
 =================================================================
-==3234020==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5020000009d2 at pc 0x5fcc3ca85218 bp 0x7ffd50d46fe0 sp 0x7ffd50d46fd0
+==198202==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5020000009d2 at pc 0x574ed3639218 bp 0x7ffdea3d4400 sp 0x7ffdea3d43f0
 WRITE of size 1 at 0x5020000009d2 thread T0
-    #0 0x5fcc3ca85217 in hex2bin(char const*, unsigned char*, int) ../../../src/binutils-gdb-633ae02/gdbsupport/common-utils.cc:465
-    #1 0x5fcc3c9ff3bf in cmd_qtdpsrc ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:2547
-    #2 0x5fcc3c9ff3bf in handle_tracepoint_general_set(char*) ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:3888
-    #3 0x5fcc3c9caa9b in handle_general_set ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:871
-    #4 0x5fcc3c9dacad in process_serial_event ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4828
-    #5 0x5fcc3c9dacad in handle_serial_event(int, void*) ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:5191
-    #6 0x5fcc3ca8ed29 in handle_file_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:551
-    #7 0x5fcc3ca8f97a in gdb_wait_for_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:672
-    #8 0x5fcc3ca91bc2 in gdb_do_one_event(int) ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:263
-    #9 0x5fcc3c9c740e in start_event_loop ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:3967
-    #10 0x5fcc3c9c740e in captured_main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4640
-    #11 0x5fcc3c9c82e0 in main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4727
-    #12 0x71dd13e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #13 0x71dd13e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #14 0x5fcc3c986e54 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver+0x51e54) (BuildId: 489488226f34f1c3eb3d839191e89473d11808a5)
+    #0 0x574ed3639217 in hex2bin(char const*, unsigned char*, int) ../../../src/binutils-gdb-633ae02/gdbsupport/common-utils.cc:465
+    #1 0x574ed35b33bf in cmd_qtdpsrc ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:2547
+    #2 0x574ed35b33bf in handle_tracepoint_general_set(char*) ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:3888
+    #3 0x574ed357ea9b in handle_general_set ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:871
+    #4 0x574ed358ecad in process_serial_event ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4828
+    #5 0x574ed358ecad in handle_serial_event(int, void*) ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:5191
+    #6 0x574ed3642d29 in handle_file_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:551
+    #7 0x574ed364397a in gdb_wait_for_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:672
+    #8 0x574ed3645bc2 in gdb_do_one_event(int) ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:263
+    #9 0x574ed357b40e in start_event_loop ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:3967
+    #10 0x574ed357b40e in captured_main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4640
+    #11 0x574ed357c2e0 in main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4727
+    #12 0x7d50a5a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7d50a5a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x574ed353ae54 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver+0x51e54) (BuildId: 489488226f34f1c3eb3d839191e89473d11808a5)
 
 0x5020000009d2 is located 0 bytes after 2-byte region [0x5020000009d0,0x5020000009d2)
 allocated by thread T0 here:
-    #0 0x71dd146fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x5fcc3c986f3c in xmalloc ../../../src/binutils-gdb-633ae02/gdbserver/../gdb/alloc.c:52
-    #2 0x5fcc3c9ff3a3 in cmd_qtdpsrc ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:2546
-    #3 0x5fcc3c9ff3a3 in handle_tracepoint_general_set(char*) ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:3888
-    #4 0x5fcc3c9caa9b in handle_general_set ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:871
-    #5 0x5fcc3c9dacad in process_serial_event ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4828
-    #6 0x5fcc3c9dacad in handle_serial_event(int, void*) ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:5191
-    #7 0x5fcc3ca8ed29 in handle_file_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:551
-    #8 0x5fcc3ca8f97a in gdb_wait_for_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:672
-    #9 0x5fcc3ca91bc2 in gdb_do_one_event(int) ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:263
-    #10 0x5fcc3c9c740e in start_event_loop ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:3967
-    #11 0x5fcc3c9c740e in captured_main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4640
-    #12 0x5fcc3c9c82e0 in main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4727
-    #13 0x71dd13e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #14 0x71dd13e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #15 0x5fcc3c986e54 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver+0x51e54) (BuildId: 489488226f34f1c3eb3d839191e89473d11808a5)
+    #0 0x7d50a62fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x574ed353af3c in xmalloc ../../../src/binutils-gdb-633ae02/gdbserver/../gdb/alloc.c:52
+    #2 0x574ed35b33a3 in cmd_qtdpsrc ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:2546
+    #3 0x574ed35b33a3 in handle_tracepoint_general_set(char*) ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc:3888
+    #4 0x574ed357ea9b in handle_general_set ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:871
+    #5 0x574ed358ecad in process_serial_event ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4828
+    #6 0x574ed358ecad in handle_serial_event(int, void*) ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:5191
+    #7 0x574ed3642d29 in handle_file_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:551
+    #8 0x574ed364397a in gdb_wait_for_event ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:672
+    #9 0x574ed3645bc2 in gdb_do_one_event(int) ../../../src/binutils-gdb-633ae02/gdbsupport/event-loop.cc:263
+    #10 0x574ed357b40e in start_event_loop ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:3967
+    #11 0x574ed357b40e in captured_main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4640
+    #12 0x574ed357c2e0 in main ../../../src/binutils-gdb-633ae02/gdbserver/server.cc:4727
+    #13 0x7d50a5a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #14 0x7d50a5a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #15 0x574ed353ae54 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver+0x51e54) (BuildId: 489488226f34f1c3eb3d839191e89473d11808a5)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../src/binutils-gdb-633ae02/gdbsupport/common-utils.cc:465 in hex2bin(char const*, unsigned char*, int)
 Shadow bytes around the buggy address:
@@ -82,4 +82,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3234020==ABORTING
+==198202==ABORTING
