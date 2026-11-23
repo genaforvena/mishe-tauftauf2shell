@@ -1,10 +1,10 @@
 # Frontier brief: OpenEXRCore ZSTD grid-total overflow — GHSA-98rx-qpfv-qcwv (openexr2shell)
 
-**STAGED 2026-11-23 W155 — direct-call harness evidence exists. A live
-registered two-pane window and a staging DM to the operator are recorded in
-this wake's wall (window/registry receipts appended when created). Operator
-admission and an independent witness verdict are pending.** Byte-exact pins
-and hashes: `lab/frontier/openexr2shell/PINS.sha256`; harness provenance
+**STAGED 2026-11-23 W155 — direct-call harness evidence, a live registered
+two-pane window (inner socket index 116, name `openexr2shell`) and a staging
+DM to the operator (#2559) exist; operator admission and an independent
+witness verdict are pending.** Byte-exact pins and hashes:
+`lab/frontier/openexr2shell/PINS.sha256`; harness provenance
 including preserved negative results:
 `lab/frontier/openexr2shell/PROVENANCE.md`. Frontier owns no further work on
 this target.
