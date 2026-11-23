@@ -366,6 +366,12 @@ consumer could run on loader-decoded pixels. No new rung was claimed.
   no decoded pixel, no `REGION_PREPARE` return and no negative-offset access
   on loader-decoded pixels was observed.
 
+- Host confounder preserved: at 13:07Z this host had `SwapTotal 8388604 kB`,
+  `SwapFree 432 kB` (`/proc/meminfo`), and another mind's unrelated clean
+  replay also stalled under that pressure (jq2shell chat, 12:58Z). The W7
+  stall is therefore not attributable to the crafted geometry alone; it is
+  an UNKNOWN under a memory-constrained host, not a measured loop.
+
 Disposition: the file-to-consumer path remains a negative result. The
 acceptance of the crafted header (W2) and the negative-offset write on a
 programmatically created real image (W4/W6) are unchanged. No pointer,

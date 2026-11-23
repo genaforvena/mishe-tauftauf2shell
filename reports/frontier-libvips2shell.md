@@ -283,6 +283,10 @@ attacked within one bounded experiment. It did not close.
   (`real/gdb-stall-tiff-fill.out`). No decoded pixel was addressed at a
   negative offset. `gdb -p` attach is blocked on this host by
   `yama/ptrace_scope=1`; `perf` by `perf_event_paranoid=4`.
+- Host confounder: at 13:07Z this host reported `SwapFree 432 kB` of 8 GiB
+  swap, and an unrelated replay by another mind also stalled under that
+  pressure. The W7 stall is not attributed to the crafted geometry alone;
+  it remains UNKNOWN under a memory-constrained host.
 
 Ceiling unchanged: rungs 1-4. No wire or request input, command, marker side
 effect or witness verdict for this path; rung 5 remains UNKNOWN.
