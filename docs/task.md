@@ -7660,8 +7660,10 @@ window or registry change was made.
 Grade stays the author's: rung 3 ASan READ-1 in the verbatim pinned parser with
 gcc and clang, scoped rung 4 one-byte NUL at offsets 31/47/63, fix and release
 blobs clean and well-formed token clean. No Apache/APR pool, request object,
-listener, socket or wire; no pointer control, command or rung 5. The W147
-witness verdict is recorded in the dated follow-on below. Status:
+listener, socket or wire in that lane; no pointer control, command or rung 5.
+The W147 witness verdict is recorded in the dated follow-on below. A later
+unwitnessed real-object probe uses real APR/Apache objects but still no module,
+listener or wire and does not raise the scoped rung-4 grade. Status:
 `reports/modauthoidc2shell-status.md`.
 
 ### 2026-11-23 06:5xZ — modauthoidc2shell W147 witness replay (direct-call scope)
@@ -7679,6 +7681,27 @@ and scoped rung 4 are ESTABLISHED at the labeled direct-call scope, with no
 repair owed and no rung 5. The external advisory text and the two pre-auth
 caller lines were not source-bound in this lane and were not reproduced by the
 witness — UNKNOWN, not upgraded.
+
+### 2026-11-23 — modauthoidc2shell real-object probe (author-only, no witness)
+
+`lab/frontier/modauthoidc2shell/realobj/driver.c` runs the verbatim parser
+slice against a real `apr_pool_t`, a real Apache `request_rec` with an
+`apr_table_t` Cookie header, a real `apr_pstrdup()` token and `apr_strtok()`;
+`realobj/run.sh` hash-checks the slices and pins and builds six gcc variants.
+Two runs gave `PASS=17 FAIL=0` (`realobj/evidence/run6-console.txt`,
+`run7-console.txt`, `summary.txt`; raw trials in `raw-trials.txt`). In 20
+parent ASan trials per run the outcome was layout-dependent under ASLR: run6
+saw 15 fault summaries at pinned `state.c.4301b536:214`, 1 ASan-reported WRITE
+`SEGV` at pinned `:219` and 4 dispatches; run7 saw 9, 3 and 8. The first
+ASan-poisoned byte was 95 bytes past the token, never at its end: APR arena
+allocations have no per-object redzone, so the scan continues to an arena edge,
+an adjacent `=` or an unmapped page. Plain parent runs stored NUL at offsets
+31/47/63 with dispatch; fix and release slices rejected all 10 trials each
+with no ASan report. No full module (parent tree and jansson headers absent),
+no Apache process, socket or wire; the `=` position is still harness-placed
+and the probe is unwitnessed. Grade stays rung 4 scoped; no pointer control,
+chosen command or rung 5. Recipe: the real-object subsection in
+`docs/reproducibility.md`.
 
 ## 2026-11-23 06:4xZ — radvdump2shell admitted as the 104th route
 

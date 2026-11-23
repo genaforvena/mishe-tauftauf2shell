@@ -3505,11 +3505,13 @@ Both fixed slices reject the value-less token with `RC=0` and `PROCESS_CALLS=0`,
 and a well-formed `mod_auth_openidc_state_abc=1` token is clean on all six
 binaries.
 
-Boundaries: the parser is direct-called with stubbed request/config pointers
-and a recorder; the exact-size heap token is an instrument, not a measured APR
+Boundaries of the direct-call lane: stubbed request/config pointers and a
+recorder; its exact-size heap token is an instrument, not a measured APR
 allocation. Only the NUL offset is chosen, never its value, and ASan faults on
-the read before the write, so there is no ASan WRITE observation. No pointer
-control, chosen command or rung 5. Witness W147 replayed the lane from a clean
+the read before the write, so there is no ASan WRITE observation in that build.
+No pointer control, chosen command or rung 5. A separate unwitnessed
+real-object probe is in the subsection below.
+Witness W147 replayed the lane from a clean
 `git archive HEAD` into two `/tmp` trees, rebuilt with its own gcc/clang and
 ran `bash run.sh` three times unmodified: rc 0, `PASS=59 FAIL=0` and
 `TRACE_SHA256=bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`
@@ -3522,6 +3524,37 @@ the labeled direct-call scope, with no repair owed and no rung 5. The external
 advisory text and the two pre-auth caller lines were not source-bound in this
 lane and were not reproduced by the witness — UNKNOWN, not upgraded. Status:
 `reports/modauthoidc2shell-status.md`.
+
+### Real-object probe — 2026-11-23 (author-only, no witness)
+
+`lab/frontier/modauthoidc2shell/realobj/driver.c` runs the verbatim parser
+slice against a real `apr_pool_t`, a real Apache `request_rec` with an
+`apr_table_t` Cookie header, a real `apr_pstrdup()` token and `apr_strtok()`.
+`realobj/run.sh` re-extracts and hash-checks the slices and pins on every run
+and builds six gcc variants; two consecutive runs gave `PASS=17 FAIL=0`
+(`realobj/evidence/run6-console.txt`, `run7-console.txt`, `summary.txt`; raw
+trials in `realobj/evidence/raw-trials.txt`). In 20 parent ASan trials per run
+the outcome was layout-dependent under ASLR: run6 saw 15 fault summaries at
+pinned `state.c.4301b536:214`, one ASan-reported WRITE `SEGV` at pinned `:219`,
+and 4 dispatches; run7 saw 9, 3 and 8. The first ASan-poisoned byte was 95
+bytes past the token, never at its end: APR arena allocations have no
+per-object redzone, so the scan continues to an arena edge, an adjacent `=` or
+an unmapped page. Plain-build parent runs stored NUL at offsets 31, 47 and 63
+with dispatch; fix and release slices rejected all 10 trials each with no ASan
+report. No full module (the parent tree and jansson headers are absent), no
+Apache process, socket or wire; the `=` position is still harness-placed and
+the probe has no witness verdict. Grade stays rung 4 scoped, with no pointer
+control, chosen command or rung 5. From an isolated copy:
+
+```
+T=$(mktemp -d /tmp/modauthoidc-realobj.XXXXXX)
+git archive HEAD lab/frontier/modauthoidc2shell | tar -x -C "$T"
+bash "$T/lab/frontier/modauthoidc2shell/realobj/run.sh"
+```
+
+The pinned upstream trees and build output are gitignored by
+`lab/frontier/modauthoidc2shell/realobj/.gitignore`; the pins, hashes and raw
+evidence are tracked. Status: `reports/modauthoidc2shell-status.md`.
 
 ## 2026-11-23 06:4xZ — radvdump2shell
 
