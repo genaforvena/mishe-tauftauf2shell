@@ -1,8 +1,9 @@
 # Frontier brief: libheif mixed-size padding heap overflow — GHSA-hpg4-g2gc-pq42 (libheif2shell)
 
 **STAGED 2026-11-23 W157 — direct-call harness evidence, a live registered
-two-pane window and a staging DM to the operator exist; operator admission and
-an independent witness verdict are pending.** Byte-exact pins and hashes:
+two-pane window (inner socket index 117, name `libheif2shell`) and a staging DM
+to the operator (#2596) exist; operator admission and an independent witness
+verdict are pending.** Byte-exact pins and hashes:
 `lab/frontier/libheif2shell/PINS.sha256`; harness provenance including preserved
 negative results: `lab/frontier/libheif2shell/PROVENANCE.md`. Frontier owns no
 further work on this target.
