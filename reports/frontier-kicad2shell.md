@@ -1,6 +1,6 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
-**STAGED 2026-11-23 W162; UPDATED 2026-11-23 W180** — this brief, a
+**STAGED 2026-11-23 W162; UPDATED 2026-11-23 W182** — this brief, a
 direct-call rung-1..4 harness, a real-property-parser reachability harness, a
 real-compound-file reachability lane, a lane driven by KiCad's own
 `compoundfilereader` header and a live registered two-pane window (inner
@@ -293,3 +293,39 @@ No real importer execution, consumer, wire, pointer/control-flow target,
 marker or command. The committed rungs 1-4 evidence and witness #2996 are
 unaffected; rung 5 stays UNKNOWN. Exact commands, hashes, matrix and the
 ceiling: `lab/frontier/kicad2shell/realprocess/PROVENANCE-realprocess.md`.
+
+
+## 13. Native KiCad 8.0.8 GUI import reaches the bug (W182, 23:25-23:43Z)
+
+W181's AppImage route was replaced by a locally extracted **native KiCad
+8.0.8** (Ubuntu pool deb sha256
+`ba875b23de8c4259c04f60906aa7a3c80dd0dd77abf2973ef16ac5b155b9c3bd`,
+`kicad-cli version` → 8.0.8), with wxWidgets 3.2, libpython3.13 and the other
+runtime pieces extracted locally — no root, no FUSE, no window manager. Source
+tag 8.0.8 (`sch_io_altium.cpp`, sha256
+`874481b47dbc2cb2aab51e4a19872b210158dde7243a8884aec37cee96ed0e39`) has the
+unbounded `wxAtoi`/`aFontSizes[ind-1]` sequence at lines 4491-4498; 7.0.11 has
+no Altium plugin and was recorded as a negative.
+
+The Symbol Editor's `File > Import > Symbol...` was driven under Xvfb against
+a locally registered `local` library (`provisioned/gui-import.sh`). The
+**unmodified** vendor `.SchLib` (sha256
+`b510e91114cb2365117e01ece6c9709a11e0f1eaf1b016bef38419aa9beb56a0`) imported
+`MH M2.5 Mounting hole` successfully; screenshot and empty stderr are in
+`gui-control-orig.png`/`.log`. That is direct evidence the real importer and
+`ParseLibHeader` were reached, which W181 lacked. The one-byte `Size2` → `SizeZ`
+patch (offset 685, sha256
+`09ebf2aa9ca5dc9a52aa1edec4f55d5ca56913bd567114a127472ff90b286d23`, `ind=0`)
+aborted the same real process on two runs: `double free or corruption (out)`;
+gdb shows SIGABRT in glibc `_int_free_merge_chunk` with a corrupted chunk size
+`69818988363808` and five frames in KiCad's `_eeschema.kiface`. The vendor
+kiface has no debug symbols, so attribution of those frames relies on the
+pinned harness plus the safe-input control. Full hashes, exact environment,
+driver coordinates and the ceiling are in
+`lab/frontier/kicad2shell/realprocess/PROVENANCE-native-process.md`.
+
+This upgrades real-process reachability from UNKNOWN to a deterministic crash
+in a real KiCad process. Still no ASan build, fixed-build control in this
+process, consumer read, wire delivery, pointer/control-flow target, marker or
+witness replay of this lane. Rungs 1-4 remain as previously established;
+**rung 5 stays UNKNOWN**.
