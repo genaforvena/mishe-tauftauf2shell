@@ -2255,7 +2255,8 @@ consumers are UNKNOWN; no marker, command or rung 5. Admission minted the
   `src-fixed-plain/build/`, plus gdb). Expect a measured `in=`/`mem=` pair,
   `DESTROY … type=0 count=1 arr=…`, `ARR0 f=… p=…`, the quoted
   `touch /tmp/tacplus-rce-marker` command string, a vfork-detach line and
-  `FAILURES=0` over 14 PASS / 0 FAIL. The vulnerable case creates
+  `FAILURES=0` over 13 PASS / 0 FAIL (both committed replay files contain 13
+  PASS lines; the status report's "14" is a count NIT). The vulnerable case creates
   `/tmp/tacplus-rce-marker` (cleared by the script per case); fixed `d8493e0`
   with the same wire input replies 57 bytes with no marker, and vulnerable
   with no prime replies 18 bytes with no marker. Two committed replays
@@ -2265,6 +2266,32 @@ consumers are UNKNOWN; no marker, command or rung 5. Admission minted the
   and regenerate with the script. gdb-disabled ASLR plus addresses measured by
   a benign prime in the same shell are preconditions; this is rung 5 OBSERVED
   at that build scope with no independent witness verdict.
+- **Tacplus2Shell W136 independent witness verdict (commit `1e23aec`,
+  [status](../reports/tacplus2shell-status.md) W136, verdict #2049)**: from a
+  clean `git archive 32b53e9` into a throwaway `/tmp` tree with no shared
+  checkout writes, the witness hash-verified both pinned `packet.c`/`author.c`
+  blobs (working-tree digests differ only by `$Id$` expansion), built plain
+  vulnerable `929671c` and fixed `d8493e0` binaries itself and replayed
+  `bash lab/frontier/tacplus2shell/harness/run_rce.sh` twice: rc 0 and
+  `FAILURES=0` both times, with 13 PASS lines emitted and exactly three
+  normalized hashes —
+  `d316b431f00ce51c488fc79391b687afdea16fbfa596e3ccbb612e12fb539436`
+  (vulnerable), `88754a15124254c2b88eb6851cb762d2f64232edb6b9bcc1cc72cb9550d4de6f`
+  (fixed) and `ee3c069a0b4d5de24ebf810d5bb6dd2d6e0249cae7564a4e296520e5201b96ee`
+  (no prime). Its gdb trace showed `EVAL`, `POST14`, `DESTROY type=0 count=1`,
+  `ARR0 f=0x7ffff7c58750`, `x/s "touch /tmp/tacplus-rce-marker"`, the
+  vfork-detach line and the expected `free()` abort; the fixed pin rejected
+  with 57 bytes and the no-prime control replied 18 bytes, both without a
+  marker. The witness changed only `--marker` in the throwaway tree's wire
+  arguments: a different marker appeared while the default stayed absent, so
+  the command bytes are wire-controlled, not a fixed harness string. No
+  counterexample or leftover daemon/port was found. Grade: rung 5
+  **ESTABLISHED** at the labeled build scope (plain `-O0`, gdb parent, ASLR
+  off, configured shared key, permitted user, cross-packet prime, one AUTHOR
+  trigger). No privilege change was measured; the advisory's five-connection
+  `system()`/root chain stays claim text. Rungs 1-4 and all preserved
+  negatives stand unchanged. A docs replay of the repo-root harness observed
+  the same three hashes, 13 PASS lines and the same marker/control behavior.
 
 ## Admitted frontier lane — 2026-11-23 00:1xZ connman2shell
 
@@ -2396,6 +2423,45 @@ marker or command; grade stays rung 3 plus scoped rung 4. The lane's
 `.gitignore` keeps generated slices, binaries and build logs out of Git; the
 `.out` files are tracked.
 
+## Admitted lane limb — 2026-11-23 02:0xZ connman2shell W5 real object
+
+`reports/connman2shell-realobject.md` removes the earlier "full build is
+blocked by missing dbus-1/libmnl dev packages" caveat: that was true of the
+unprovisioned host, not of a lab-local dependency prefix. From the repo root,
+`bash lab/connman2shell/realobj/build.sh` asserts the three frontier pin
+hashes, `apt-get download`s eight `.deb` files (no install, no sudo),
+extracts them under `lab/connman2shell/realobj/deps/`, copies the pinned tree
+into that ignored prefix, runs `autoreconf -fi` on the copy and configures
+three out-of-tree builds (plain, ASan, fixed ASan). Configure found dbus-1
+1.14.10, libmnl 1.0.5, xtables 1.8.10 and libnftnl 1.2.6; `make -j2` linked
+`src/connmand` plain 1,319,488 B (`5aee902c…fec1c`), ASan 7,309,184 B
+(`d5aeb7ee…2ec`) and fixed ASan 7,309,848 B (`96521172…779e`). The pinned
+tree is never modified; the Miu-patched file used for the fixed build is
+SHA-asserted (`d252cf01…5c0e`).
+
+`bash lab/connman2shell/realobj/probe.sh` → rc 0, `PROBE TOTAL 12 PASS /
+0 FAIL`. It prints `BIN asan sha256=d5aeb7ee9d6d4819b176256208030165eeb7ddd210a5a48485d873536005b2ec`
+and `BIN fixed sha256=96521172de5e15e11d2c21e3810d635ededd6bcf703d9096a7eee4555058779e`,
+then the four probes `asan attack rc=1` (expected ASan abort), `asan safe
+rc=0`, `fixed attack rc=0`, `fixed safe rc=0`. The attack allocates a
+2048-byte value of `0xff` with `value[1024]=0x80` in the inferior and calls
+the static `get_domains()` under gdb; expect `AddressSanitizer:
+stack-buffer-overflow`, `READ of size 1`, top frame `get_domains …
+gdhcp/client.c:2223`, object `'dns_name' (line 2214)` at `[48, 1074)` and
+`Memory access at offset 1201` — the same 127-byte delta as every earlier
+harness, now in the linked object. Fixed ASan and both well-formed 8-byte
+DOMAIN_LIST cases have no ASan report. The plain `-O2` disassembly summary
+in `evidence/geometry-summary.txt` shows `strncpy@plt` and `fs:0x28`
+(stack canary); whether a given K corrupts or skips the canary was not
+observed, because the plain binary was disassembled, not run with a daemon.
+
+This is a debugger-forced call: no running daemon, natural DHCPv6 REPLY call
+chain, observed store in the production object, pointer, marker, command or
+rung 5. Root-service impact stays an advisory claim. Scripts, geometry
+summary and `evidence/probe-*.out` are tracked; `deps/`, `build-*/` and the
+copied source tree are gitignored and regenerate with `build.sh`. A docs
+replay observed the 12 PASS result and both binary hashes above.
+
 ## Admitted frontier lane — 2026-11-23 01:0xZ gdbserver2shell
 
 Frontier re-opened the previously held gdbserver lane at 01:01Z with brief
@@ -2523,5 +2589,52 @@ the fixed variant rejects with −1. Both compilers report
 64-byte region` in the modelled consumer. High-bit arities −2/−3/−4/−8 words
 place chosen `0x4141414141414141` byte-exact at negative offsets
 32760/32752/32744/32712. Fixed rejects and skips the write; safe arity 3
-stays in bounds. No BEAM build, VM call, network, pointer, marker or rung 5
-is claimed; status is `reports/erlang2shell-status.md`.
+stays in bounds. At admission no BEAM build or VM call was claimed; the
+real-VM limb below adds built emulators but no live-VM corruption or rung 5.
+Status: `reports/erlang2shell-status.md`.
+
+## Admitted lane limb — 2026-11-23 02:0xZ erlang2shell real VM
+
+`reports/erlang2shell.md` adds a real pinned erts build to the harness lane.
+From `lab/erlang2shell/otp-vuln`, checked out at the vulnerable fix parent
+`c388a2d1b3f9918652276d4798692dd4d8ef97fc`, configure with
+`./configure --prefix=$PWD/install --without-javac --without-odbc
+--without-wx --without-ssl`, then `make -j2 TYPE=asan FLAVOR=emu` for
+`bin/x86_64-pc-linux-gnu/beam.asan.emu` (SHA-256 prefix `10c41dc9…`, 13
+`__asan_*` symbols, links `libasan.so.8`) and `make -j2` for `beam.smp`
+(prefix `25e53242…`, no ASan symbols). The default build stops at
+`lib/debugger` because `--without-wx` leaves `wx_object` undefined; the
+emulator, `bootstrap/bin/start.boot` and the preloaded `ebin` trees are all
+the driver needs. From the repo root, `bash lab/erlang2shell/run-real.sh`
+compiles `lab/erlang2shell/b2t_driver.erl` and runs both emulators through
+`erlexec` with no listener, network or large allocation; expect:
+
+```
+MODE=opt ARGS= RC=0
+small_80000000 RC=badarg
+small_fffffffe RC=badarg
+forged_compressed RC=badarg
+safe_positive_3 RC=ok TERM={1,2,3}
+MODE=asan ARGS=-emu_type asan -emu_flavor emu RC=0
+(same four case lines)
+--- asan reports ---
+(clean: no ASan report)
+```
+
+The attack ETFs are `<<131,105,128,0,0,0,97,42>>` (advisory arity), the same
+term with harness arity `0xfffffffe`, and a COMPRESSED envelope declaring
+`dest_len=0x80000000` around the six-word safe term. In the pinned
+`external.c` `decoded_size()` applies `CHKSIZE(n)` against the real buffer
+end (lines 6041–6051), so every negative-as-int32 arity is rejected before
+`dec_term`; `binary2term_prepare()` (1767–1783) requires a declared
+compressed length equal to the measured inflated size, so the forged header
+is badarg too. The advisory route would need ≥2 GiB of *real* inflated bytes
+and, via `HAlloc(p, size)` at `erl_message.c:1193`, ~17 GiB of process heap
+before `dec_term`; that allocation was deliberately not attempted on this
+shared host and the outcome stays UNKNOWN, not a pass. The harness rungs 1–4
+and its 60 PASS / 0 FAIL replay stand unchanged; no adjacent-object identity,
+pointer control, marker, command or rung 5. The `otp-vuln/` tree and `*.beam`
+are gitignored and rebuild with the configure/make commands above; the driver
+and runner are tracked and the four result lines are regenerated by
+`run-real.sh`. A docs replay observed both emulator modes, all four case
+lines and no ASan report.

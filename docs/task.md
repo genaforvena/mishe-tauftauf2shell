@@ -6881,14 +6881,16 @@ the real `session->mem` object and points W129's contiguous write chain at
 `mem_destroy()` (`memops.c:239-253`) calls the chosen function with the chosen
 argument: a plant-started loopback daemon executes the shell command and
 creates the marker before aborting in `free()`, with gdb's vfork-detach line as
-corroboration. `bash lab/frontier/tacplus2shell/harness/run_rce.sh` gives 14
-PASS / 0 FAIL in two byte-identical replays with vulnerable, fixed and
-no-prime controls; normalized hashes are in the status report. Heap addresses
-are measured by a benign prime in the same shell (gdb with ASLR off,
-configured shared key and permitted user), so this is rung 5 OBSERVED at a
-labeled build scope, not an attacker-side leak or an independent ESTABLISHED
-verdict; witness replay is outstanding. The advisory's five-connection
-`system()`/root chain stays a claim; no privilege change was measured.
+corroboration. `bash lab/frontier/tacplus2shell/harness/run_rce.sh` gives 13
+PASS / 0 FAIL with vulnerable, fixed and no-prime controls; both committed
+replay files contain 13 PASS lines (the status report's "14" is a count NIT),
+and the observed normalized hashes are `d316b431…`/`88754a15…`/`ee3c069a…`.
+Heap addresses are measured by a benign prime in the same shell (gdb with
+ASLR off, configured shared key and permitted user), so this is rung 5 OBSERVED
+at a labeled build scope at this point, not an attacker-side leak. W136 below
+records the independent witness verdict that lifted it to ESTABLISHED. The
+advisory's five-connection `system()`/root chain stays a claim; no privilege
+change was measured.
 
 Three witness verdicts also closed older owed replays in this batch: libyang
 #1829 (real-parser scope), baresip #1933 (narrow loopback wire rung 4) and
@@ -7035,6 +7037,57 @@ five ASLR-enabled runs, with the socket receiver adding a frame relative
 to W1. The written byte is the fixed `.`, K is layout-specific and the walk
 after the first step reads ambient stack bytes. Grade stays rung 3 plus
 scoped rung 4: no connmand daemon, remote input, pointer, marker or command,
-and no witness replay. Root-service impact remains an advisory claim. The
-full-build negative from the 00:2x–00:4xZ limb stands: missing `dbus-1` and
-`libmnl` dev packages.
+and no witness replay. Root-service impact remains an advisory claim. W5 below
+overturns the
+00:2x–00:4xZ full-build negative: the missing `dbus-1`/`libmnl` dev packages
+were a host-provisioning state, not a property of the pinned source.
+
+## 2026-11-23 01:5x–02:0xZ — rung-5 witness, real connmand object, real erts
+
+Tacplus2Shell W136 closed the W135 witness debt (verdict #2049, commit
+`1e23aec`). The witness extracted a clean `git archive 32b53e9`, verified both
+pinned `packet.c`/`author.c` blob hashes, built the plain vulnerable and fixed
+daemons itself and replayed `bash
+lab/frontier/tacplus2shell/harness/run_rce.sh` twice with rc 0, `FAILURES=0`
+and the same three normalized hashes `d316b431…`/`88754a15…`/`ee3c069a…` as
+the author. Its trace showed the chosen-command `system()` call through
+`mem_destroy()` and the expected abort after the marker side effect; a
+wire-only change of `--marker` created a second marker while the default
+stayed absent. Fixed pin and no-prime control stayed clean. Rung 5 is now
+**ESTABLISHED** at the labeled build scope (plain `-O0`, gdb parent, ASLR off,
+shared key, permitted user, cross-packet prime, one AUTHOR trigger), with no
+privilege change and no claim about the advisory's different five-connection
+root chain. No replay is owed. A docs replay also observed 13 PASS lines —
+the status report's 14 is a count NIT now corrected in the README, repro and
+task passages.
+
+Connman2Shell W5 (`c4b6d45`, `reports/connman2shell-realobject.md`) built the
+whole pinned tag-2.0 tree instead of extracted functions:
+`bash lab/connman2shell/realobj/build.sh` downloads eight `.deb`s into a
+lab-local prefix (no install, no sudo), asserts the pin hashes, copies and
+autoreconfigures a scratch tree and links plain, ASan and fixed ASan
+`connmand` binaries (`5aee902c…`, `d5aeb7ee…`, `96521172…`). `bash
+lab/connman2shell/realobj/probe.sh` → `PROBE TOTAL 12 PASS / 0 FAIL`: a
+debugger-forced call to the static `get_domains()` in the real ASan binary
+gives `READ of size 1` at `gdhcp/client.c:2223`, stack offset 1201 of
+`dns_name` (line 2214), with fixed and well-formed 8-byte inputs clean; the
+plain `-O2` object still has `strncpy@plt` and a stack canary. No daemon was
+run, no natural REPLY chain reached the function, and no store in the
+production object, pointer, marker or command was observed. Grade stays rung
+3 plus scoped rung 4; the earlier full-build blocker is dispositioned as a
+host-provisioning state.
+
+Erlang2Shell W4 (`276a200`, `reports/erlang2shell.md`) built the pinned
+vulnerable erts at fix parent `c388a2d1…` as plain `beam.smp` and
+`beam.asan.emu` (the default build stops at `lib/debugger` because
+`--without-wx` leaves `wx_object` undefined). `bash
+lab/erlang2shell/run-real.sh` drives `b2t_driver.erl` through `erlexec` on
+both emulators: `small_80000000`, `small_fffffffe` and `forged_compressed`
+each return `RC=badarg`, `safe_positive_3` returns `ok TERM={1,2,3}`, and no
+ASan report was produced. Pinned `decoded_size()` applies `CHKSIZE(n)`
+against the real buffer end and `binary2term_prepare()` requires the declared
+compressed length to match the measured inflation, so bounded inputs never
+reach `dec_term`. The ≥2 GiB inflated-buffer plus ~17 GiB heap route was not
+attempted on this shared host and stays UNKNOWN, not a pass. Harness rungs
+1–4 are unchanged; no live-VM corruption, adjacent-object identity, pointer
+control or rung 5.
