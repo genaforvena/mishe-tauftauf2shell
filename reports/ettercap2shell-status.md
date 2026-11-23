@@ -50,15 +50,24 @@ Admission changes no grade.
   arbitrary attacker bytes.
 
 Grade: rung 3 ASan-confirmed out-of-bounds write on verbatim pinned helper
-bytes, plus scoped partial rung 4 over write extent and a fixed literal tail.
-No arbitrary OOB bytes, no pointer control, no marker, no live dissector or
-capture path, no command and no rung 5. No independent witness verdict exists
-yet.
+bytes, **now also on the real dissector path**: ettercap v0.8.4.1 and v0.8.5.1
+were built with clang ASan (source hashes match the pins) and a crafted
+`GG_LOGIN50_CMD` packet with `version=0x44000042` was replayed from a pcap and
+injected as a live frame on loopback. `dissector_gg:360` calls
+`gg_get_version()` before the length guard; ASan reports `WRITE of size 13`,
+`0 bytes after 30-byte region` allocated at `dissector_gg:356`, through
+`pcap_loop -> capture`. Extent controls (`0x44000018`, `0x04000042`) give
+`WRITE of size 12` at line 676; safe version, wrong type, server-direction
+packet and the fixed v0.8.5.1 build are clean. Full report:
+`reports/ettercap2shell-livedissector.md`; small artifacts:
+`lab/frontier/ettercap2shell/live-evidence/`; commit `fcec372`. Scoped partial
+rung 4 over extent and fixed literal tail remains. No arbitrary OOB bytes, no
+pointer control, no marker, no command and no rung 5. No independent witness
+verdict exists yet.
 
-Next bounded experiment: build v0.8.4.1 with ASan and inject a crafted TCP
-8074 `GG_LOGIN50_CMD` packet with `version=0x44000042` into a loopback
-capture, checking whether ASan reports at `gg_get_version` before the length
-guards; preserve a guard-first negative if that is what happens. AV:A means
-network proximity is part of any claim. No rung 5 without a live wire-only
+Next bounded experiment (if resumed): test the AV:A claim with a sender that
+is genuinely adjacent rather than the same host, and look for a natural
+consumer of the overwritten `tbuf3` bytes to move rung 4 past extent control.
+Neither is a blocker. Keep rung 5 requirements unchanged: live wire-only
 trigger, chosen benign command, observed side effect, vulnerable/fixed/safe
 controls and witness replay.
