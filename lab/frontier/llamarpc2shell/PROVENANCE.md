@@ -141,3 +141,37 @@ the witness-verified `37da4e6` bytes (client `f8491730…8798fa5`, server
 `76bec3c7…86b6a30`) and the 4608-byte pair is kept as
 `wire/evidence/{client,server}-rce-4608.log` (`d7a88a75…fbcab58`,
 `a5151d09…bbb1fe`). No grade change.
+
+## Rung-5 wire-only observation — 2026-11-23 third wake (local, replay owed)
+
+Decisive artifacts (all loopback-only; full narrative in
+`reports/llamarpc2shell.md`):
+
+- `wire/make-repair-payload.py` sha256
+  `192a037a8b803d9a1c0c88c4af436b5af63fc44b32eb9c78f6bcc166b42f87eb`,
+  `wire/run-repair.sh` sha256
+  `b84e292a27b51c1fed778fcc5b85bb38e0f846bfdc09043f66f04830ddb2a3c1`.
+  Layout gdb commands: `wire/gdb-layout-repair.cmd`,
+  `wire/gdb-measure-noaslr.cmd`, `wire/gdb-observe-repair.cmd`,
+  `wire/gdb-r5-system.cmd`, `wire/gdb-env-inspect.cmd`.
+- Payload `wire/evidence/r5-payload.bin` sha256
+  `96c92e9f462d43e1744e19093f42bf26a978684364b55ee50c383dcf80ed304e`
+  (1024 bytes). Three runs `r5-run{1,2,3}` have identical server logs
+  (`76b75f22…194885`) and client logs (`3e71980f…bc9ae1ab8d`), each with a
+  zero-byte `/tmp/llamarpc2shell-r5-marker` side effect. Passive breakpoint at
+  libc `system`: `wire/evidence/r5-system-obs.log`
+  (`022a306b…a67c57b1e5`). Controls: `r5-safe.log` (`ee57a281…546710`) and
+  `r5-fixed.log` (`375665bf…faf25` with `RDMA recv overrun: got=1024 rem=1`).
+- Environment: no-canary pin server sha
+  `3fb0d4bff4ae699088cd20f81f575b0399f1fe797ae2ec87979c100ea7599959`,
+  `setarch x86_64 -R`, `env -i PATH=/usr/bin:/bin HOME=/home/mesh-home
+  TERM=dumb LINES=24 COLUMNS=80`, loopback `rxe0` port 53060, stack
+  `&cmd = 0x7fffffffe50f`, libc base `0x7ffff7200000`. gdb measurement of the
+  same fixed environment adds `LINES`/`COLUMNS` itself and reports
+  `&cmd = 0x7fffffffe4df`; the debugger-free address was found by bounded
+  16-byte probing, then repeated deterministically.
+
+This is a per-build, ASLR-disabled observation. It does not upgrade the
+W142/W143 rung-4 verdict and is not ESTABLISHED until the witness replays this
+build, payload, environment and marker side effect.
+

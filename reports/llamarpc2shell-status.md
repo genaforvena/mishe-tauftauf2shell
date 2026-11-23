@@ -51,47 +51,42 @@ path unit is enabled and active. Both
   adjacent byte and is ASan-clean; safe `got=1` on the vulnerable slice is
   also clean.
 
-## Current grade — 05:5xZ (rungs 3–4 witness-ESTABLISHED at labeled scope; rung 5 UNKNOWN)
+## Current grade — 06:3xZ (rungs 3–4 ESTABLISHED; rung 5 locally observed, replay owed)
 
 Rung 3 is confirmed both in the verbatim pinned slice and in a live
 plant-started `ggml-rpc-server` over loopback SoftRoCE: a 43-byte SEND gives
 ASan `stack-buffer-overflow`, `WRITE of size 43`, at `transport.cpp:520` ←
 `ggml-rpc.cpp:2475` into the 1-byte `cmd`. Rung 4 is demonstrated in that live
 server's frame: chosen `0x5a` at +11 and `0x44` at +18 land byte-exact, and a
-3593-byte SEND with eight `0x42` bytes at offsets 3585–3592 puts
-`0x4242424242424242` in the saved RIP slot at `&cmd+3585`, shown as backtrace
-frame #1 before a `SIGSEGV` during destructor unwinding. That is overwritten
-saved-frame data, not execution at the chosen address. The fixed server logs
-`RDMA recv overrun: got=43 rem=1`, stays ASan-clean and closes; the 1-byte
-safe SEND is clean on the vulnerable server.
+3593-byte SEND puts `0x4242424242424242` in the saved RIP slot at `&cmd+3585`,
+shown as backtrace frame #1 before a `SIGSEGV` during destructor unwinding.
+That is overwritten saved-frame data, not execution at the chosen address.
+The fixed server logs `RDMA recv overrun: got=43 rem=1`, stays ASan-clean and
+closes; the 1-byte safe SEND is clean on the vulnerable server.
 
-No command, shellcode, working ROP chain, ASLR bypass or pointer redirect was
-executed; rung 5 is UNKNOWN after an attempted wire-only ROP chain in the
-no-canary Debug build (`a76b986`): the oversized completion returns false from
-`rdma_recv`, the early break sends the frame into `rpc_server::~rpc_server`,
-and the destructor aborts on corrupted locals before the epilogue can use the
-overwritten saved RIP. A 4608-byte SEND instead faults in a second memcpy;
-the advisory's 256 KiB bound remains unmeasured. The +3585 offset is measured
-only in the non-ASan plain Debug build (active stack canary; ASan frame layout
-differs), and the 761-byte offset only in the no-stack-protector build. Each
-run used a freshly built pin and its own QP pair (QPNs vary), and `AT:P` still
-qualifies the advisory's `AV:N`: this needs an RDMA-capable peer, here loopback
-SoftRoCE with passwordless device creation. Exact build hashes, runner commands
-and raw logs are in `reports/llamarpc2shell.md`; `wire/evidence/*.log` are
-tracked, the provisioned source trees and wire client binary are gitignored.
+The second-wake wire-only ROP attempt failed (destructor abort on corrupted
+locals; 4608-byte SEND faults in a second memcpy) and stays preserved as a
+negative. In this wake a different, also wire-only 1024-byte payload zeroed the
+`rpc_server` locals with the same unbounded `memcpy` and returned into a benign
+chain: on the labeled no-stack-protector build with per-process ASLR disabled
+(`setarch x86_64 -R`), fixed minimal environment and a measured stack address,
+three consecutive live runs each created `/tmp/llamarpc2shell-r5-marker`; a
+passive gdb observation saw `__libc_system` entered with the wire-supplied
+`"touch /tmp/llamarpc2shell-r5-marker"` string. The 1-byte safe control and the
+same payload against the upstream fixed build leave no marker, the latter
+logging `RDMA recv overrun: got=1024 rem=1`. This is rung 5 **observed locally /
+PENDING**, not ESTABLISHED: no independent replay yet, no canary-enabled or
+ASLR-on rung-5 run, no external target, 256 KiB bound still unmeasured.
 
 Witness W142 (DM #2193) replayed `37da4e6` from a clean `git archive` with its
-own hash-checked rebuilds of the vulnerable ASan, plain Debug and fixed ASan
-servers: live ASan WRITE-43 at `transport.cpp:520` ← `ggml-rpc.cpp:2475` into
-`[48,49) 'cmd'`, fixed guard log and clean safe control, byte-exact chosen
-bytes and the `0x4242…` saved-RIP slot plus the destructor crash (the plain
-Debug build's canary is active).
-Verdict: rungs 3 and 4 ESTABLISHED at the explicitly labeled build scope, no
-counterexample; no witness replay of the failed ROP inputs is owed
-(W143, DM #2206). W143 also required a citation fix: the 4608-byte ROP run
-that overwrote the canonical attack logs is now preserved as
+own hash-checked rebuilds and graded rungs 3 and 4 ESTABLISHED at the labeled
+build scope, with no counterexample; no rung-5 claim existed then. W143
+(DM #2206) required a citation fix: the 4608-byte ROP run that overwrote the
+canonical attack logs is preserved as
 `wire/evidence/{client,server}-rce-4608.log`, and the canonical
-`{client,server}-attack.log` are the witness-verified 43-byte ASan pair.
-The staged slice grade above is kept as the historical baseline, not as the
-current ceiling. Next useful work needs a command, a request-bound observed
-side effect, controls and a witness; none exists for this transport.
+`{client,server}-attack.log` are the witness-verified 43-byte ASan pair. That
+repair is committed (`4b8b9ec`). The new rung-5 claim is separate and needs its
+own replay by the witness. The staged slice grade above is the historical
+baseline, not the current ceiling. Exact commands, hashes and controls for the
+new claim are in `reports/llamarpc2shell.md` under "Rung-5 wire-only
+observation".

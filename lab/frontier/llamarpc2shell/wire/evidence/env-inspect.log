@@ -1,0 +1,29 @@
+No source file named ggml-rpc.cpp.
+Breakpoint 1 (ggml-rpc.cpp:2476) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+register_backend: registered backend RPC (0 devices)
+register_backend: registered backend CPU (1 devices)
+register_device: registered device CPU (AMD Ryzen 7 5700X 8-Core Processor)
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-nocanary/bin/libggml-rpc.so
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-nocanary/bin/libggml-cpu.so
+Starting RPC server v8.0.0
+  endpoint       : 127.0.0.1:53060
+  local cache    : n/a
+Devices:
+  CPU: AMD Ryzen 7 5700X 8-Core Processor (32019 MiB, 32019 MiB free)
+  transport      : TCP (RDMA auto-negotiate enabled)
+Accepted client connection
+RDMA probed: dev=rxe0 gid=1 RoCEv2 qpn=18 inline=256
+RDMA activated: qpn=18->17 mtu=4096 rx_depth=24
+
+Breakpoint 1, rpc_serve_client (backends=std::vector of length 1, capacity 1 = {...}, cache_dir=0x0, sock=std::shared_ptr<socket_t> (use count 2, weak count 0) = {...}) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/ggml-rpc.cpp:2476
+2476	            break;
+=== HIT rdma_recv ===
+cmd address: 0x7fffffffe4df
+PATH=/usr/bin:/bin
+HOME=/home/mesh-home
+TERM=dumb
+LINES=24
+COLUMNS=80
+[Inferior 1 (process 2289261) killed]
