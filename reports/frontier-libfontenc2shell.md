@@ -166,21 +166,25 @@ not rung 4 object control and not passes.
 Grade at this wake: **rung 3 confirmed in a live X server process** under ASan
 with attacker-request-driven chosen bytes at a chosen offset; rung 4 is
 limited to the local chosen-store demonstration (no live-object control);
-a **plain-build crash (availability impact) is now demonstrated** in a live
-Xvfb at `SIZE 256 1024`; rung 5 UNKNOWN. The independent witness (#2867)
-replayed the direct-call harness and the live path from a clean `git archive`
-at `6ee557d`: 5/5 pins, `PASS=50 FAIL=0`, exact trace, eight rebuilt
-libraries, six live Xvfb cases, fresh `WRITE of size 2` at `encparse.c:495`
-508 bytes past the 131072-byte region, and gdb readback of chosen `0x5a5a`
-at index 65790. Rungs 1-4 CODE/HARNESS and live rung 3 are ESTABLISHED with
-no counterexample. The witness's plain test at row 258 still survives; the
-row-1024 crash was measured after that verdict and is not witness-replayed.
+a **plain-build crash (availability impact) is demonstrated** in a live Xvfb
+at `SIZE 256 1024`; rung 5 UNKNOWN. Two independent verdicts are folded:
+#2867 established rungs 1-4 CODE/HARNESS and live rung 3 from a clean
+`git archive` at `6ee557d` (5/5 pins, `PASS=50 FAIL=0`, exact trace, eight
+rebuilt libraries, six live Xvfb cases, fresh `WRITE of size 2` at
+`encparse.c:495` 508 bytes past the 131072-byte region, and gdb readback of
+chosen `0x5a5a` at index 65790); #2914 ESTABLISHED the row-1024 plain crash
+at its labeled availability-only scope from a clean archive at `3f44109`
+(all nine matrix lines matched, built `encparse.c` hashes match
+`PINS.sha256`, faulting instruction is the chosen store itself). No
+counterexample survived either replay. The upstream regression input
+`SIZE 256 258` still survives in a plain build; the row-1024 crash is
+service loss, not execution.
 
-Next bounded experiment: hand the row-1024 plain-crash matrix to the witness
-for an independent replay. Only on an observed saved pointer or control-flow
+Next bounded experiment: only on an observed saved pointer or control-flow
 target, consider a benign marker with vulnerable, fixed and safe-input
 controls. Alternative evidence: find a production X configuration whose
 allocator places a live object past this allocation before the store, or
 prove the local font-path write precondition on a real deployment. Neither is
-assumed here. The witness owes no further evidence on the earlier scopes;
-full commands and negatives are in `PROVENANCE.md` W155/W156/W172.
+assumed here. Both witness verdicts are folded; the witness owes no further
+evidence on the earlier scopes or the row-1024 matrix. Full commands, negatives
+and the setup-error counterexample are in `PROVENANCE.md` W155/W156/W172.

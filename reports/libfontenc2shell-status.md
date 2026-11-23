@@ -42,15 +42,18 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   and gdb readback. Rungs 1-4 at CODE/HARNESS scope and rung 3 on the live
   ASan `OpenFont` path are ESTABLISHED with no counterexample; no grade
   change, and no further evidence owed by the witness.
-- Plain-build crash (W172, not yet witness-replayed): a single mapping skips
-  the identity ramp, so a larger `SIZE` row count moves the chosen `0x5a5a`
-  store far past the buffer. `SIZE 256 1024` (index 261120) faults in
-  `setCode()` in the **uninstrumented** vulnerable Xvfb, 3/3 repeats, with
-  `client_rc=1`, `xdpyinfo_rc=1` and server abort; 1.1.9 crashes likewise,
-  while `5920c6e`, 1.1.10 and safe input survive. The 258-input plain
-  survival still stands. Evidence: `realpath/evidence/plain-crash.txt`,
-  `plain-crash-backtrace.txt` and `row-sweep.txt`; regenerate with
-  `realpath/xlive/run-plain-crash.sh`.
+- Plain-build crash (W172; witness #2914 ESTABLISHED at the labeled
+  availability-only scope): a single mapping skips the identity ramp, so a
+  larger `SIZE` row count moves the chosen `0x5a5a` store far past the buffer.
+  `SIZE 256 1024` (index 261120) faults in `setCode()` in the **uninstrumented**
+  vulnerable Xvfb, 3/3 repeats, with `client_rc=1`, `xdpyinfo_rc=1` and server
+  abort; 1.1.9 crashes likewise, while `5920c6e`, 1.1.10 and safe input survive.
+  The 258-input plain survival still stands. Evidence:
+  `realpath/evidence/plain-crash.txt`, `plain-crash-backtrace.txt` and
+  `row-sweep.txt`; regenerate with `realpath/xlive/run-plain-crash.sh`. The
+  witness replayed all nine lines from a clean archive at `3f44109`; the
+  faulting instruction is `mov %dx,(%rax)` at `encparse.c:495` (signal 11), not
+  a downstream consumer.
 - Ceiling: no remote wire delivery, font-server protocol, unprivileged path
   to write the font path, pointer control, allocator grooming toward a live
   object, control-flow diversion, marker side effect, ROP or command was
@@ -62,10 +65,9 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   object lies at the 508-byte destination (mmap usable slack by default, brk
   top chunk with a raised mmap threshold). Rung 5 UNKNOWN.
 
-Next for the target mind: hand the row-1024 plain-crash matrix to the witness
-for independent replay. Only on an observed saved pointer or control-flow
+Next for the target mind: only on an observed saved pointer or control-flow
 target, attempt a bounded benign marker with vulnerable, fixed and safe-input
 controls. Alternative evidence: a production X configuration whose allocator
 places a live object at the destination before the store, or a proven local
-font-path write precondition. Neither is assumed. The earlier witness verdict
-is folded; this new crash result is not yet independently replayed.
+font-path write precondition. Neither is assumed. Both witness verdicts are
+folded; the witness owes no further evidence on any measured scope.

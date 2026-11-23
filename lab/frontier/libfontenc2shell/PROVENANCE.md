@@ -258,8 +258,7 @@ No Xvfb was left running. This changes one earlier negative: the advisory's
 **crash** claim is now demonstrated in an uninstrumented live X server, but
 only for the larger row count; the upstream regression input `SIZE 256 258`
 still survives plain and must stay labeled that way. The crash is
-availability impact, not pointer control, a marker, a command or rung 5, and
-this matrix has not yet been independently replayed by the witness.
+availability impact, not pointer control, a marker, a command or rung 5.
 
 Final W172 probe: a gdb breakpoint at `encparse.c:495` in the ASan build,
 calling `__asan_describe_address(*enc + index)`, describes the in-bounds row
@@ -268,3 +267,32 @@ access suspected" for both silent OOB rows 512 and 16384. Full output is in
 `realpath/evidence/gdb-asan-destination.txt`. No live object, pointer or
 control-flow target was found at either destination; those silent cases stay
 UNKNOWN, not rung 4 object control and not passes.
+
+## W172 witness verdict #2914 folded (2026-11-23 18:37:36Z)
+
+Verbatim scope: "ESTABLISHED at the labeled availability-only scope." The
+witness worked from a clean `git archive HEAD` at `3f44109` into
+`/tmp/w174-lfe`, rebuilt the four out-plain libraries from the exact pinned
+revs (built `encparse.c` hashes match `PINS.sha256`: vuln `79e2381b`, fixed
+`91c81398`) and compiled its own `xfon-load`. A fresh
+`realpath/xlive/run-plain-crash.sh` at 18:35Z reproduced all nine matrix lines:
+vuln rows 256/258/512 rc=0 + server alive; vuln 1024 a/b/c rc=1, xdpyinfo
+rc=1, `server_alive=NO`; fixed `5920c6e` and 1.1.10 at row 1024 rc=0 + alive;
+1.1.9 rc=1 + abort. The data-line diff against committed `plain-crash.txt` was
+empty. Backtrace frames came from the pinned build-vuln `.so` (`setCode+0x214`,
+`parseEncodingFile+0x73b`, `FontEncReallyReallyLoad+0x26c`, `FontEncFind+0xc4`),
+signal 11; disassembly at `setCode+0x214` is `mov %dx,(%rax)`, addr2line
+`encparse.c:495` — the chosen 2-byte OOB store itself faults, not a downstream
+consumer. No stray Xvfb was left.
+
+Counterexample found and repaired by the witness: its first attempt installed
+the libraries under `realpath/`, but the runner resolves `xlive/../..` to
+`libfontenc2shell/`, so `LD_PRELOAD` silently missed and the SYSTEM libfontenc
+crashed every variant, including fixed and 1.1.10. It diagnosed this from the
+backtrace DSO name, rebuilt at the correct BASE with a PRELOAD_OK check, and
+the controls then passed. This failed setup is preserved as a negative, not a
+result. No saved pointer, control-flow datum, marker, command or wire path was
+observed; rung 5 stays UNKNOWN and the grade is unchanged. The witness NIT about
+stale "not-witness-replayed" wording is folded this wake into the frontier
+brief and status report. No repository writes by the witness; all of its work
+stayed in `/tmp/w174-lfe`.
