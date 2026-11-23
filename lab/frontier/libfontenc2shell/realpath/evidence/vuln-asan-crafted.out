@@ -1,45 +1,45 @@
 PUBLIC-API-DRIVER charset=crafted filename=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts/dummy.pcf envdir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts dir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts
 =================================================================
-==519391==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7304fdb219fc at pc 0x7304fdbaae3b bp 0x7fffe774aaf0 sp 0x7fffe774aae0
-WRITE of size 2 at 0x7304fdb219fc thread T0
-    #0 0x7304fdbaae3a in setCode ../src/encparse.c:495
-    #1 0x7304fdbac1ee in parseEncodingFile ../src/encparse.c:672
-    #2 0x7304fdbadbba in FontEncReallyReallyLoad ../src/encparse.c:941
-    #3 0x7304fdbadd94 in FontEncReallyLoad ../src/encparse.c:962
-    #4 0x7304fdbaf51b in FontEncLoad ../src/fontenc.c:780
-    #5 0x7304fdbaf311 in FontEncFind ../src/fontenc.c:738
-    #6 0x59a6e11dc3c3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/load_via_public_api.c:28
-    #7 0x7304fd02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #8 0x7304fd02a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #9 0x59a6e11dc1c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-asan+0x11c4) (BuildId: da1e980d1376a25846c21a9c0f3e1ea729805a12)
+==743478==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7a47feaa59fc at pc 0x7a47ff3ece3b bp 0x7fffa6cfbfa0 sp 0x7fffa6cfbf90
+WRITE of size 2 at 0x7a47feaa59fc thread T0
+    #0 0x7a47ff3ece3a in setCode ../src/encparse.c:495
+    #1 0x7a47ff3ee1ee in parseEncodingFile ../src/encparse.c:672
+    #2 0x7a47ff3efbba in FontEncReallyReallyLoad ../src/encparse.c:941
+    #3 0x7a47ff3efd94 in FontEncReallyLoad ../src/encparse.c:962
+    #4 0x7a47ff3f151b in FontEncLoad ../src/fontenc.c:780
+    #5 0x7a47ff3f1311 in FontEncFind ../src/fontenc.c:738
+    #6 0x638cf57593c3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/load_via_public_api.c:28
+    #7 0x7a47fe82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7a47fe82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x638cf57591c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-asan+0x11c4) (BuildId: da1e980d1376a25846c21a9c0f3e1ea729805a12)
 
-0x7304fdb219fc is located 508 bytes after 131072-byte region [0x7304fdb01800,0x7304fdb21800)
+0x7a47feaa59fc is located 508 bytes after 131072-byte region [0x7a47fea85800,0x7a47feaa5800)
 allocated by thread T0 here:
-    #0 0x7304fd4fc91d in reallocarray ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:92
-    #1 0x7304fdbaa9bb in setCode ../src/encparse.c:469
-    #2 0x7304fdbac1ee in parseEncodingFile ../src/encparse.c:672
-    #3 0x7304fdbadbba in FontEncReallyReallyLoad ../src/encparse.c:941
-    #4 0x7304fdbadd94 in FontEncReallyLoad ../src/encparse.c:962
-    #5 0x7304fdbaf51b in FontEncLoad ../src/fontenc.c:780
-    #6 0x7304fdbaf311 in FontEncFind ../src/fontenc.c:738
-    #7 0x59a6e11dc3c3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/load_via_public_api.c:28
-    #8 0x7304fd02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #9 0x7304fd02a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #10 0x59a6e11dc1c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-asan+0x11c4) (BuildId: da1e980d1376a25846c21a9c0f3e1ea729805a12)
+    #0 0x7a47fecfc91d in reallocarray ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:92
+    #1 0x7a47ff3ec9bb in setCode ../src/encparse.c:469
+    #2 0x7a47ff3ee1ee in parseEncodingFile ../src/encparse.c:672
+    #3 0x7a47ff3efbba in FontEncReallyReallyLoad ../src/encparse.c:941
+    #4 0x7a47ff3efd94 in FontEncReallyLoad ../src/encparse.c:962
+    #5 0x7a47ff3f151b in FontEncLoad ../src/fontenc.c:780
+    #6 0x7a47ff3f1311 in FontEncFind ../src/fontenc.c:738
+    #7 0x638cf57593c3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/load_via_public_api.c:28
+    #8 0x7a47fe82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7a47fe82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x638cf57591c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-asan+0x11c4) (BuildId: da1e980d1376a25846c21a9c0f3e1ea729805a12)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../src/encparse.c:495 in setCode
 Shadow bytes around the buggy address:
-  0x7304fdb21700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7304fdb21780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7304fdb21800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7304fdb21880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7304fdb21900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-=>0x7304fdb21980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
-  0x7304fdb21a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7304fdb21a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7304fdb21b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7304fdb21b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
-  0x7304fdb21c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7a47feaa5700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7a47feaa5780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7a47feaa5800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7a47feaa5880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7a47feaa5900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x7a47feaa5980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x7a47feaa5a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7a47feaa5a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7a47feaa5b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7a47feaa5b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7a47feaa5c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -59,6 +59,6 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==519391==ABORTING
+==743478==ABORTING
 
 RC=1
