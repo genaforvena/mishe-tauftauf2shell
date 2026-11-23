@@ -129,6 +129,7 @@ containers whose host ports bind only to loopback.
 | Gdbserver2Shell | [brief](../reports/frontier-gdbserver2shell.md), [status](../reports/gdbserver2shell-status.md) | CVE-2026-121997 / GHSA-jq36-9pw3-8r4v (Red Hat 2026-11-05, HIGH 8.1, CWE-122); upstream HEAD `633ae02c4ea8f87c670f7192804349860cfa291d` still vulnerable, fix is a posted-but-unmerged gdb-patches hunk; vulnerable `tracepoint-633ae02.cc` SHA-256 `942306a5…`, derived fixed `c3aa8ac2…`, fix patch `5b8bc3cb…` in `lab/frontier/gdbserver2shell/PROVENANCE.md` | `harness/run.sh` re-extracts verbatim pinned `cmd_qtdpsrc()` slices and helpers, asserts eight SHA-256 pins and builds gcc/clang ASan plus plain-canary variants; opens no socket | `T=$(mktemp -d /tmp/gdb-replay.XXXXXX); cp -a lab/frontier/gdbserver2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `SUMMARY=60 PASS / 0 FAIL`, `NORMALIZED_HASH=0c9b837e…1c1db73`; attack packet `QTDPsrc:1:0:cond:0:1:<hex>` with N=8/32/64/128 gives ASan `WRITE of size 1` 0 bytes after a 2-byte region; full recipe in the lane section below |
 | Erlang2Shell | [brief](../reports/frontier-erlang2shell.md), [status](../reports/erlang2shell-status.md) | CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA 2026-07-27, MEDIUM 5.1 CVSS4 AV:L, CWE-195+CWE-787); affected OTP 25.0+ before 27.3.4.15 / 28.5.0.4 / 29.0.4, fix `c5210b42`; pinned `external.c` / `erl_term.h` blobs and the five-line patch SHA-256 in `lab/frontier/erlang2shell/PROVENANCE.md` | `harness/run.sh` re-extracts four verbatim pinned slices, asserts source/patch/slice/driver SHA-256 pins, builds gcc and clang ASan plus plain-canary variants; opens no socket, VM or BEAM build | `T=$(mktemp -d /tmp/erlang-replay.XXXXXX); cp -a lab/frontier/erlang2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `PASS=60 FAIL=0`, `TRACE_SHA256=8517d3e1…c88` |
 | MiniSnmpd2Shell | [brief](../reports/frontier-minisnmpd2shell.md), [status](../reports/minisnmpd2shell-status.md) | CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed `5419bc38` / release `6894e33e`; pinned vulnerable `protocol.c` `b5322437` (`4bd06467…`), fixed `5419bc38` (`eeb05d95…`), patch `fac30b06…`; five blob/driver hashes in `lab/frontier/mini-snmpd/PROVENANCE.md`, URLs there and in `src/SHA256SUMS` | `harness/run.sh` re-extracts verbatim `decode_oid` (190–256) and `decode_str` (175–187) from both pinned files, asserts five source/patch/driver and four slice SHA-256 pins, builds gcc/clang ASan plus plain variants; opens no socket | `cd lab/frontier/mini-snmpd && bash harness/run.sh` → `PASS=43 FAIL=0`, normalized trace SHA-256 `0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`; ASan `READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`, fixed/safe clean. `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte GET with declared OID length 0xffff; `run_fixed_wire.sh` uses 16162 and `run_safe_wire.sh` the 35-byte control. Full staging recipe below |
+| Ettercap2Shell | [brief](../reports/frontier-ettercap.md), [status](../reports/ettercap2shell-status.md) | CVE-2026-125401 / GHSA-vrjv-f8gv-2h35 (GitHub CNA 2026-11-06, HIGH 8.1 `CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-131+CWE-787; OSV CVSS4 also AV:A), affected `<=0.8.4.1`, patched `0.8.5.1`, fix `1d8badb7`; pinned vulnerable `3548c10c` and PR-head fix `a8c1a50` (byte-identical to merged/released 0.8.5.1), six blobs in `lab/frontier/ettercap2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | `cd lab/frontier/ettercap2shell && bash harness/run.sh` re-extracts the verbatim pinned `gg_get_version()` slices, asserts source/patch/tag/slice/driver SHA-256 pins, builds plain plus gcc/clang ASan variants; opens no socket | operator clean `/tmp` replay: rc 0, `PASS=58 FAIL=0`, normalized trace SHA-256 `d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`; gcc/clang ASan `WRITE of size 13`, 0 bytes after a 30-byte region in `gg_get_version`; fixed and small-version controls clean. Full admission recipe below |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -2725,3 +2726,39 @@ no wire-level ASan report because `client->packet` sits inside a larger
 global struct and the 20-subid cap stops the walk. Grade stays harness rungs
 1–4 plus daemon rung-2 reachability; no pointer, marker, command or rung 5.
 Status: `reports/minisnmpd2shell-status.md`.
+
+## Admitted frontier lane — 2026-11-23 02:4xZ ettercap2shell
+
+Frontier handed over W133 (DM at 02:44:47Z, staging commit `55afa77`) with
+brief `reports/frontier-ettercap.md`, site charter and seed wall, pinned
+vulnerable/fixed `ec_gg.c` plus fix patch and raw evidence in
+`lab/frontier/ettercap2shell/PROVENANCE.md`. Its two-pane inner tmux window
+already existed at index 101 (0..100 occupied), so admission created no second
+window and no registry change was needed.
+
+From the repository root, replay from an isolated copy:
+
+```sh
+T=$(mktemp -d /tmp/ettercap-replay.XXXXXX)
+cp -a lab/frontier/ettercap2shell/. "$T/"
+bash "$T/harness/run.sh"
+```
+
+Expect rc 0, `PASS=58 FAIL=0` and
+`TRACE_SHA256=d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`.
+The operator observed exactly those values at admission from a fresh `/tmp`
+copy, matching frontier's clean-archive replay. No witness verdict exists yet.
+
+Expected bytes: a 30-byte `tbuf3` passed to an unsized `gg_get_version()`
+receives `sprintf` of a chosen `u_int32` plus two flag-selected literal
+`strcat`s. `version=0x44000042` gives `STR_LEN=43`, `OOB_COUNT=14`; gcc and
+clang ASan report `heap-buffer-overflow WRITE of size 13`, `0 bytes after
+30-byte region`, frame `gg_get_version`. The fixed helper composes into a
+128-byte stack buffer and ends with `snprintf(str, size, "%s", buf)` with
+size 64, writing 29 chars in 30 and 43 in 64 bytes, ASan-clean; `0x2a` writes
+3 chars cleanly on the vulnerable helper. Both flag bits select the exact OOB
+tail `69 6f 20 2b 20 65 72 61 6f 6d 6e 69 78 00`, and chosen hex digits land
+byte-exact at offsets 11..18 **inside** the object — so the crossing bytes are
+fixed suffix literals, not arbitrary attacker bytes. No live dissector, wire
+capture, pointer control, marker, command or rung 5; the advisory's AV:A
+vector is preserved. Status: `reports/ettercap2shell-status.md`.

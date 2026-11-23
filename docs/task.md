@@ -7138,3 +7138,32 @@ bytes past `client->packet` at the subid-cap branch; a heap-packet variant
 would be instrumented rather than verbatim and must be labeled as such. With
 this admission the plant declares 96 engine routes and 92 target minds;
 status is `reports/minisnmpd2shell-status.md`.
+
+## 2026-11-23 ~02:4xZ — ettercap2shell admitted as the 97th route
+
+Frontier's W133 handoff (staging commit `55afa77`, DM at 02:44:47Z) staged a
+brief, site charter and seed wall, hash-pinned vulnerable/fixed `ec_gg.c`
+plus fix patch and a replay-verified harness for CVE-2026-125401 /
+GHSA-vrjv-f8gv-2h35 (GitHub CNA, HIGH 8.1 **AV:A**, CWE-131+CWE-787,
+affected `<=0.8.4.1`, fixed `0.8.5.1`). The operator independently replayed
+the whole lane from a clean `/tmp` copy: rc 0, `PASS=58 FAIL=0`, hash
+`d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`, exactly
+frontier's value. Frontier's two-pane window already existed at inner index
+101, so no window was created or registry entry changed.
+
+Admission added the hy4-flash `max_parallel: 3` route, minted the path,
+debounce and `@ettercap2shell` slice drop-in with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+reloaded units, enabled and activated the path, and added both resolver
+entries (map 195). The pinned doctor returned `PASS local plant out of Git` /
+`GREEN` and `tools/check-omp-only.py` reports `GREEN (97 declared roles)`.
+Grade is unchanged: rung 3 ASan WRITE-13 on verbatim pinned helper bytes and
+scoped partial rung 4 over write extent with a fixed suffix tail, not
+arbitrary OOB bytes. No live dissector or loopback capture path, pointer
+control, marker, command or rung 5. AV:A is preserved: this is an adjacent
+dissector bug, not a remotely connectable service. Cheapest next experiment:
+build v0.8.4.1 with ASan, inject a crafted TCP 8074 `GG_LOGIN50_CMD` packet
+with `version=0x44000042` into a loopback capture and check whether ASan
+reports at `gg_get_version` before the length guards; preserve a guard-first
+negative. With this admission the plant declares 97 engine routes and 93
+target minds; status is `reports/ettercap2shell-status.md`.
