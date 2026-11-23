@@ -1,0 +1,10 @@
+DIRECT slash7 slen=7
+DIRECT slash7 rc=-1
+DIRECT tail: 22 5c 2f 5c 2f 00 a5 a5
+DIRECT slash50 slen=50
+DIRECT slash50 rc=-1
+DIRECT tail: 22 5c 2f 5c 2f 00 a5 a5
+DIRECT utf8-4x8 slen=32
+DIRECT utf8-4x8 rc=-1
+DIRECT tail: 22 f0 90 80 80 00 a5 a5
+DONE mode=direct

@@ -1,3 +1,5 @@
 /src/ndpi-full-vuln/
 /realbuild/driver-asan
 /realbuild/driver
+/src/ndpi-full-fixed/
+/realbuild/driver-fixed-asan

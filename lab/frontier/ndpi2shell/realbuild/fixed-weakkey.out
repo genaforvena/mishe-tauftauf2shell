@@ -1,0 +1,73 @@
+WEAK weak klen=32 bufsize=256 which=0
+WEAK weak klen=32 rc=0
+WEAK weak klen=32 bufsize=256 which=1
+WEAK weak klen=32 rc=0
+WEAK weak klen=32 bufsize=256 which=2
+WEAK weak klen=32 rc=0
+WEAK weak klen=256 bufsize=256 which=0
+WEAK weak klen=256 rc=0
+WEAK weak klen=256 bufsize=256 which=1
+WEAK weak klen=256 rc=0
+WEAK weak klen=256 bufsize=256 which=2
+WEAK weak klen=256 rc=0
+WEAK weak klen=1024 bufsize=256 which=0
+WEAK weak klen=1024 rc=0
+WEAK weak klen=1024 bufsize=256 which=1
+WEAK weak klen=1024 rc=0
+WEAK weak klen=1024 bufsize=256 which=2
+WEAK weak klen=1024 rc=0
+WEAK weak klen=1400 bufsize=256 which=0
+WEAK weak klen=1400 rc=0
+WEAK weak klen=1400 bufsize=256 which=1
+WEAK weak klen=1400 rc=0
+WEAK weak klen=1400 bufsize=256 which=2
+WEAK weak klen=1400 rc=0
+WEAK weak klen=2048 bufsize=256 which=0
+WEAK weak klen=2048 rc=0
+WEAK weak klen=2048 bufsize=256 which=1
+WEAK weak klen=2048 rc=0
+WEAK weak klen=2048 bufsize=256 which=2
+WEAK weak klen=2048 rc=0
+WEAK weak klen=8192 bufsize=256 which=0
+WEAK weak klen=8192 rc=0
+WEAK weak klen=8192 bufsize=256 which=1
+WEAK weak klen=8192 rc=0
+WEAK weak klen=8192 bufsize=256 which=2
+WEAK weak klen=8192 rc=0
+WEAK weak klen=32 bufsize=1024 which=0
+WEAK weak klen=32 rc=0
+WEAK weak klen=32 bufsize=1024 which=1
+WEAK weak klen=32 rc=0
+WEAK weak klen=32 bufsize=1024 which=2
+WEAK weak klen=32 rc=0
+WEAK weak klen=256 bufsize=1024 which=0
+WEAK weak klen=256 rc=0
+WEAK weak klen=256 bufsize=1024 which=1
+WEAK weak klen=256 rc=0
+WEAK weak klen=256 bufsize=1024 which=2
+WEAK weak klen=256 rc=0
+WEAK weak klen=1024 bufsize=1024 which=0
+WEAK weak klen=1024 rc=0
+WEAK weak klen=1024 bufsize=1024 which=1
+WEAK weak klen=1024 rc=0
+WEAK weak klen=1024 bufsize=1024 which=2
+WEAK weak klen=1024 rc=0
+WEAK weak klen=1400 bufsize=1024 which=0
+WEAK weak klen=1400 rc=0
+WEAK weak klen=1400 bufsize=1024 which=1
+WEAK weak klen=1400 rc=0
+WEAK weak klen=1400 bufsize=1024 which=2
+WEAK weak klen=1400 rc=0
+WEAK weak klen=2048 bufsize=1024 which=0
+WEAK weak klen=2048 rc=0
+WEAK weak klen=2048 bufsize=1024 which=1
+WEAK weak klen=2048 rc=0
+WEAK weak klen=2048 bufsize=1024 which=2
+WEAK weak klen=2048 rc=0
+WEAK weak klen=8192 bufsize=1024 which=0
+WEAK weak klen=8192 rc=0
+WEAK weak klen=8192 bufsize=1024 which=1
+WEAK weak klen=8192 rc=0
+WEAK weak klen=8192 bufsize=1024 which=2
+WEAK weak klen=8192 rc=0
+DONE mode=weakkey

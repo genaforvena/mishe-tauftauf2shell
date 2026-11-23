@@ -1,0 +1,506 @@
+REAL slash bufsize=8 slen=1 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=12
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 22 7d
+REAL slash bufsize=8 slen=2 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 22 7d
+REAL slash bufsize=8 slen=4 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=8 slen=8 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=8 slen=16 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=8 slen=32 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=8 slen=64 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=138
+REAL slash bufsize=8 slen=128 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=266
+REAL slash bufsize=8 slen=256 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=522
+REAL slash bufsize=8 slen=512 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=1034
+REAL slash bufsize=8 slen=1024 use_len=1
+REAL slash bufsize=8 rc=0
+REAL slash outlen=2058
+REAL slash bufsize=16 slen=1 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=12
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 22 7d
+REAL slash bufsize=16 slen=2 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 22 7d
+REAL slash bufsize=16 slen=4 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=16 slen=8 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=16 slen=16 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=16 slen=32 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=16 slen=64 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=138
+REAL slash bufsize=16 slen=128 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=266
+REAL slash bufsize=16 slen=256 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=522
+REAL slash bufsize=16 slen=512 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=1034
+REAL slash bufsize=16 slen=1024 use_len=1
+REAL slash bufsize=16 rc=0
+REAL slash outlen=2058
+REAL slash bufsize=32 slen=1 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=12
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 22 7d
+REAL slash bufsize=32 slen=2 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 22 7d
+REAL slash bufsize=32 slen=4 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=32 slen=8 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=32 slen=16 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=32 slen=32 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=32 slen=64 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=138
+REAL slash bufsize=32 slen=128 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=266
+REAL slash bufsize=32 slen=256 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=522
+REAL slash bufsize=32 slen=512 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=1034
+REAL slash bufsize=32 slen=1024 use_len=1
+REAL slash bufsize=32 rc=0
+REAL slash outlen=2058
+REAL slash bufsize=64 slen=1 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=12
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 22 7d
+REAL slash bufsize=64 slen=2 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 22 7d
+REAL slash bufsize=64 slen=4 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=64 slen=8 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=64 slen=16 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=64 slen=32 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=64 slen=64 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=138
+REAL slash bufsize=64 slen=128 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=266
+REAL slash bufsize=64 slen=256 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=522
+REAL slash bufsize=64 slen=512 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=1034
+REAL slash bufsize=64 slen=1024 use_len=1
+REAL slash bufsize=64 rc=0
+REAL slash outlen=2058
+REAL slash bufsize=128 slen=1 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=12
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 22 7d
+REAL slash bufsize=128 slen=2 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 22 7d
+REAL slash bufsize=128 slen=4 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=128 slen=8 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=128 slen=16 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=128 slen=32 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 5c 2f 22 7d
+REAL slash bufsize=128 slen=64 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=138
+REAL slash bufsize=128 slen=128 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=266
+REAL slash bufsize=128 slen=256 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=522
+REAL slash bufsize=128 slen=512 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=1034
+REAL slash bufsize=128 slen=1024 use_len=1
+REAL slash bufsize=128 rc=0
+REAL slash outlen=2058
+REAL utf8 bufsize=8 slen=4 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 22 7d
+REAL utf8 bufsize=8 slen=8 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=8 slen=16 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=8 slen=32 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=8 slen=64 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=8 slen=128 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=138
+REAL utf8 bufsize=8 slen=256 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=266
+REAL utf8 bufsize=8 slen=512 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=522
+REAL utf8 bufsize=8 slen=1024 use_len=1
+REAL utf8 bufsize=8 rc=0
+REAL utf8 outlen=1034
+REAL utf8 bufsize=16 slen=4 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 22 7d
+REAL utf8 bufsize=16 slen=8 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=16 slen=16 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=16 slen=32 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=16 slen=64 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=16 slen=128 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=138
+REAL utf8 bufsize=16 slen=256 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=266
+REAL utf8 bufsize=16 slen=512 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=522
+REAL utf8 bufsize=16 slen=1024 use_len=1
+REAL utf8 bufsize=16 rc=0
+REAL utf8 outlen=1034
+REAL utf8 bufsize=32 slen=4 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 22 7d
+REAL utf8 bufsize=32 slen=8 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=32 slen=16 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=32 slen=32 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=32 slen=64 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=32 slen=128 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=138
+REAL utf8 bufsize=32 slen=256 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=266
+REAL utf8 bufsize=32 slen=512 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=522
+REAL utf8 bufsize=32 slen=1024 use_len=1
+REAL utf8 bufsize=32 rc=0
+REAL utf8 outlen=1034
+REAL utf8 bufsize=64 slen=4 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 22 7d
+REAL utf8 bufsize=64 slen=8 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=64 slen=16 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=64 slen=32 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=64 slen=64 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=64 slen=128 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=138
+REAL utf8 bufsize=64 slen=256 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=266
+REAL utf8 bufsize=64 slen=512 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=522
+REAL utf8 bufsize=64 slen=1024 use_len=1
+REAL utf8 bufsize=64 rc=0
+REAL utf8 outlen=1034
+REAL utf8 bufsize=128 slen=4 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=14
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 22 7d
+REAL utf8 bufsize=128 slen=8 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=18
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=128 slen=16 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=26
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=128 slen=32 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=42
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=128 slen=64 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=74
+REAL out: 7b 22 6b 65 79 22 3a 22 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 f0 90 80 80 22 7d
+REAL utf8 bufsize=128 slen=128 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=138
+REAL utf8 bufsize=128 slen=256 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=266
+REAL utf8 bufsize=128 slen=512 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=522
+REAL utf8 bufsize=128 slen=1024 use_len=1
+REAL utf8 bufsize=128 rc=0
+REAL utf8 outlen=1034
+REAL mixed bufsize=8 slen=9 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=24
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=8 slen=18 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=38
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=8 slen=36 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=66
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=8 slen=72 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=122
+REAL mixed bufsize=8 slen=144 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=234
+REAL mixed bufsize=8 slen=288 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=458
+REAL mixed bufsize=8 slen=576 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=906
+REAL mixed bufsize=8 slen=1152 use_len=1
+REAL mixed bufsize=8 rc=0
+REAL mixed outlen=1802
+REAL mixed bufsize=16 slen=9 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=24
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=16 slen=18 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=38
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=16 slen=36 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=66
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=16 slen=72 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=122
+REAL mixed bufsize=16 slen=144 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=234
+REAL mixed bufsize=16 slen=288 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=458
+REAL mixed bufsize=16 slen=576 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=906
+REAL mixed bufsize=16 slen=1152 use_len=1
+REAL mixed bufsize=16 rc=0
+REAL mixed outlen=1802
+REAL mixed bufsize=32 slen=9 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=24
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=32 slen=18 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=38
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=32 slen=36 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=66
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=32 slen=72 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=122
+REAL mixed bufsize=32 slen=144 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=234
+REAL mixed bufsize=32 slen=288 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=458
+REAL mixed bufsize=32 slen=576 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=906
+REAL mixed bufsize=32 slen=1152 use_len=1
+REAL mixed bufsize=32 rc=0
+REAL mixed outlen=1802
+REAL mixed bufsize=64 slen=9 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=24
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=64 slen=18 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=38
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=64 slen=36 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=66
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=64 slen=72 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=122
+REAL mixed bufsize=64 slen=144 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=234
+REAL mixed bufsize=64 slen=288 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=458
+REAL mixed bufsize=64 slen=576 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=906
+REAL mixed bufsize=64 slen=1152 use_len=1
+REAL mixed bufsize=64 rc=0
+REAL mixed outlen=1802
+REAL mixed bufsize=128 slen=9 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=24
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=128 slen=18 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=38
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=128 slen=36 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=66
+REAL out: 7b 22 6b 65 79 22 3a 22 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 5c 2f 5c 22 5c 5c 5c 6e 5c 74 f0 90 80 80 22 7d
+REAL mixed bufsize=128 slen=72 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=122
+REAL mixed bufsize=128 slen=144 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=234
+REAL mixed bufsize=128 slen=288 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=458
+REAL mixed bufsize=128 slen=576 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=906
+REAL mixed bufsize=128 slen=1152 use_len=1
+REAL mixed bufsize=128 rc=0
+REAL mixed outlen=1802
+REAL strlen bufsize=8 slen=1000 use_len=0
+REAL strlen bufsize=8 rc=0
+REAL strlen outlen=1566
+REAL strlen bufsize=16 slen=1000 use_len=0
+REAL strlen bufsize=16 rc=0
+REAL strlen outlen=1566
+REAL strlen bufsize=32 slen=1000 use_len=0
+REAL strlen bufsize=32 rc=0
+REAL strlen outlen=1566
+REAL strlen bufsize=64 slen=1000 use_len=0
+REAL strlen bufsize=64 rc=0
+REAL strlen outlen=1566
+REAL strlen bufsize=128 slen=1000 use_len=0
+REAL strlen bufsize=128 rc=0
+REAL strlen outlen=1566
+DONE mode=real

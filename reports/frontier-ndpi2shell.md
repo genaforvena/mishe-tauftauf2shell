@@ -139,3 +139,8 @@ JSON contains the untrusted value as 560 `\/` escapes, proving the real
 packet-to-serializer-to-escape path executed. It does not reach the weak-key
 callers, whose keys are constant field names. `realbuild/reader-*` holds the
 outputs; `realbuild/mk_longhost_pcap.py` regenerates the crafted pcap.
+
+Fixed-control: the fixed commit tree (source sha256 `0aa83a83...92fd`, matching
+the pin) was built with the same ASan flags and driven with the same probe;
+`direct`, `real` and all `weakkey` cases returned rc=0 with zero ASan reports
+(`realbuild/fixed-*.out`). The fix's prechecks close the real-caller overflow.

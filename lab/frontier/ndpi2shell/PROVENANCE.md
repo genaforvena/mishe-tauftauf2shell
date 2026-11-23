@@ -172,3 +172,18 @@ packet-to-serializer-to-escape path ran without overflow. Outputs saved as
 This is a real packet-path negative for SNI/HTTP/DNS-as-VALUE. It does not
 reach the weak-key callers: their keys are constant field names in the reader
 and dissectors. Wire reachability of the KEY overflow stays UNKNOWN.
+
+## W162 — fixed-commit control (2026-11-23)
+
+Fetched the fixed commit tree
+`https://codeload.github.com/ntop/nDPI/tar.gz/94e82c1de12323d992895830231865736a8abf2c`
+(HTTP 200); its `src/lib/ndpi_serializer.c` sha256
+`0aa83a8317beb2f84a0d5c23016e9b4cfb5edb81f70c9aac3d1c13609aee92fd` matches
+the pinned fixed file exactly. Built it with the same clang ASan flags in
+`src/ndpi-full-fixed/build-asan/` and linked the same `driver.c` against its
+`libndpi.a`. Modes `direct`, `real` and `weakkey` (all key lengths and all
+three weak callers) returned rc=0 with **zero** `ERROR: AddressSanitizer`
+lines (`realbuild/fixed-{direct,real,weakkey}.out`). The fix's
+`j+N > safe_max_len` prechecks and NUL at `dst[j]` close the real-caller
+overflow. Callers still ignore the `-1` return, so `size_used` can decrement;
+that is a separate correctness issue, not memory corruption observed here.
