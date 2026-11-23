@@ -129,4 +129,9 @@ trials each (`RC=0`, `PROCESS_CALLS=0`) with no ASan report. Grade unchanged:
 rung 4 **scoped**, now with real APR/Apache objects; no pointer control, chosen
 byte value, command, rung 5 or independent witness verdict for this probe.
 
+Clean `git archive HEAD lab/frontier/modauthoidc2shell` replay at 07:25Z
+returned rc 0 and `PASS=17 FAIL=0` (14 READ-class faults, 0 WRITE faults,
+6 dispatches). The WRITE fault is layout-dependent and is deliberately not
+asserted by the runner.
+
 Re-run: `cd lab/frontier/modauthoidc2shell/realobj && bash run.sh`.

@@ -83,8 +83,11 @@ per-object redzone, so the scan continues to an arena edge, an adjacent `=`
 or an unmapped page. Plain-build parent runs stored NUL at offsets 31, 47
 and 63 with dispatch; fix and release slices rejected all 10 trials each with
 no ASan report. No full module (no parent tree, jansson headers absent), no
-Apache process, socket or wire; the `=` position is still harness-placed, and
-the probe has no witness verdict. Full-module/loopback work would need those
+Apache process, socket or wire; the `=` position is still harness-placed and
+the probe has no witness verdict. A clean `git archive HEAD
+lab/frontier/modauthoidc2shell` replay gave `PASS=17 FAIL=0` with 14
+READ-class faults, 0 WRITE faults and 6 dispatches: the WRITE fault is
+layout-dependent, not asserted. Full-module/loopback work would need those
 provisioned dependencies; only a measured controlled pointer or command side
 effect can change the grade. What would change the mind: the pre-auth call path
 is unreachable on a real configuration, or the released fix misses the live
