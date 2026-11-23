@@ -24,8 +24,8 @@ Admission changes no grade.
 - Claim: GHSA-98rx-qpfv-qcwv, published 2026-10-31 by cary-ilm, High. No CVE
   number and no CWE are stated by the advisory (both UNKNOWN). Affected
   OpenEXR 3.5.0, 3.5.1, 3.5.2 and `main`; patched in 3.5.3. The advisory's
-  692-byte file PoC, 4032-byte overrun and OpenImageIO flat-path reproduction
-  are claims, not lab observations.
+  692-byte file PoC and 4032-byte overrun were reproduced here in W160/W161;
+  its OpenImageIO flat-path reproduction remains an untested claim.
 - Mechanism in pinned bytes: `compute_sorting_lookup()` returns the 2-byte
   channel subtotal as `splitPoint` and discards the full grid total.
   `sort2_4ByteChannels_tiled()` recomputes that total per row and runs
@@ -53,8 +53,9 @@ Admission changes no grade.
   `exr_decoding_run()` ordering, no OpenEXR or OpenImageIO build, no image
   consumer, no process, socket or wire input. Chosen bytes are harness-supplied,
   not derived from a crafted file. No pointer or control-flow corruption, no
-  command and no marker side effect. Witness W158 returned ESTABLISHED at this
-  labeled scope; file-level reachability stays a claim and rung 5 is UNKNOWN.
+  command and no marker side effect. Witness W158 returned ESTABLISHED at
+  this direct-call scope; W161 below covers the later file-level scope; rung
+  5 stays UNKNOWN.
 - Preserved negatives: an initial clang ASan build exited 0 because it did not
   define `__SANITIZE_ADDRESS__`; buffered stdout hid pre-abort lines; a gdb
   breakpoint at pinned `:1393` never hit for the OOB case because the early
@@ -82,9 +83,10 @@ Independent gcc+clang ASan reproduced the 4096-byte WRITE at
 `internal_zstd.c.vuln:472` 0 bytes after the 64-byte region; the fixed pin
 rejects with rc 23 at `:1390-1391`; plain chosen `0x5a` and canary controls
 and a `0x41` ink variation behaved as reported. No EXR file/frame/codec,
-OpenEXR process, socket, wire, pointer, command, marker or side effect;
-file-level reachability stays a claim and rung 5 UNKNOWN. The witness's fold
-NIT on two report files belongs to openexr2shell's lane.
+OpenEXR process, socket, wire, pointer, command, marker or side effect. At
+that verdict file-level reachability was still a claim and rung 5 UNKNOWN;
+W160/W161 later established the file-level rungs 1-4 at the CODE/CONSUMER
+scope. The witness's fold NIT was applied in W160.
 
 ## W160 file-level result (2026-11-23 13:2xZ)
 
@@ -102,9 +104,10 @@ allocator measures the completed overwrite: the 64-byte
 `decode.unpacked_buffer` receives 4032 changed guard bytes starting at +0,
 4/4 runs; the valid baseline changes 0 guard bytes in 3/3 runs. The plain
 vulnerable build returns rv=31 and then aborts with `free(): invalid pointer`
-in a separate run. This is file-level rungs 1-4, author-only pending witness:
-no consumer process, socket, wire, pointer target, command or marker, so
-rung 5 stays UNKNOWN.
+in a separate run. This is file-level rungs 1-4; witness W161 (#2675)
+returned ESTABLISHED at that labeled file-level CODE/CONSUMER scope with
+no counterexample. No consumer process, socket, wire, pointer target,
+command or marker, so rung 5 stays UNKNOWN.
 
 The same file also reproduces through the advisory's C++
 `DeepScanLineInputFile::readPixels()` single-pass path on the vulnerable
@@ -112,3 +115,25 @@ ASan build (`cpp-vuln-poc.out`: `memcpy-param-overlap` at pinned
 `internal_zstd.c:472`; baseline `READPIXELS ok rv=0`), while the pinned 3.5.3
 build throws `Unable to run decoder` with no ASan report
 (`cpp-fixed-poc.out`). Deep-tiled, OpenImageIO and aarch64 remain untested.
+
+## Witness verdict W161 (2026-11-23)
+
+Witness message #2675 returned ESTABLISHED for commits `0d67933` and
+`5374791` (`reports/openexr2shell-file-level.md`) at the labeled file-level
+CODE/CONSUMER scope: rungs 1-4 with a real pinned OpenEXR 3.5.2 static
+library and the crafted 692-byte local EXR, no counterexample, no grade
+change, not rung 5. The witness replayed from a clean `git archive HEAD`
+into `/tmp/w161-openexr`, re-hashed both tarballs and both full-file
+`internal_zstd.c` pins, built its own vuln-asan, fixed-asan and vuln-plain
+trees and compiled all harnesses. Its regenerated baseline and PoC
+hash-matched `07edcb58...` and `283cec0e...`, and all six committed
+observation logs matched after normalizing paths, PIDs, addresses and build
+IDs (`va-poc 5134d652...`, `fa-poc 4866ac4d...`, `vp-guard-poc 8bc5f7eb...`,
+`cpp-va-poc 1790cdeb...`, `va-baseline 34a6ee75...`,
+`vp-guard-baseline 2a4967a9...`). Counterexamples were sought and not
+found: S=512 scales the ASan ranges to 2048 bytes and `changed` to 1984,
+and altering the harness fill pattern changes the first overwritten byte
+without changing the 4032-byte length or the zero-byte baseline. Per the
+witness caveat, the out-of-bounds bytes are allocator-derived, not
+file-chosen; the file controls the length and destination offset. No
+application process, wire, pointer target, command or marker was exercised.

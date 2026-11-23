@@ -7,9 +7,12 @@ guarded allocator then measures the completed 4032-byte overwrite of a
 64-byte live destination. The fixed 3.5.3 build rejects the same file with
 `EXR_ERR_CORRUPT_CHUNK`, and a valid baseline leaves zero guard bytes changed.
 This raises the grade from the earlier direct-call CODE/HARNESS rungs 1-4 to
-**file-level rungs 1-4 with a real library and a real EXR file**. Rung 5 remains
-UNKNOWN: no image-consumer process, socket, wire input, pointer/control-flow
-target, command, marker side effect or witness verdict was exercised.
+**file-level rungs 1-4 with a real library and a real EXR file**. Witness
+W161 (#2675) replayed the build, inputs and all six observation logs from a
+clean `git archive HEAD` and returned ESTABLISHED at this labeled file-level
+CODE/CONSUMER scope with no counterexample. Rung 5 remains UNKNOWN: no
+image-consumer process, socket, wire input, pointer/control-flow target,
+command, marker side effect or file-level witness verdict was exercised.
 
 ## Builds and inputs
 
@@ -115,8 +118,14 @@ not an image-application process or wire input.
 - File input is a local EXR path handed to purpose-built C and C++ consumers.
   No OpenImageIO build, image application process, daemon, socket, port, wire,
   remote request or network probe was used. No pointer target, control-flow
-  corruption, command, marker side effect, ASLR/grooming measurement or
-  witness replay. Rung 5 is UNKNOWN, not a scaled-down rung 4.
+  corruption, command, marker side effect or ASLR/grooming measurement. The
+  W161 witness replay covers only the labeled file-level CODE/CONSUMER scope;
+  rung 5 is UNKNOWN, not a scaled-down rung 4.
+- The file controls the copy length and which destination allocation is
+  overrun; the out-of-bounds bytes themselves are allocator-derived, not
+  file-chosen. In W161, changing the harness fill pattern changed the first
+  overwritten byte while the 4032-byte length and zero-byte baseline stayed
+  fixed.
 - The advisory's deep-tiled, OpenImageIO and aarch64 claims were not tested.
   The `exrcheck`/`exrinfo` claims were not tested. The advisory's 4032-byte
   length and 692-byte file size were independently observed here; its
@@ -128,3 +137,32 @@ not an image-application process or wire input.
   `heap-buffer-overflow`; the completed write is evidenced by the guarded
   allocator, not by ASan. All intermediate link failures are preserved in
   `evidence/build-*.log`.
+
+## Witness replay W161 (2026-11-23)
+
+Witness verdict #2675 returned ESTABLISHED at the labeled file-level
+CODE/CONSUMER scope: rungs 1-4 with the real pinned OpenEXR 3.5.2 static
+library and the crafted 692-byte local EXR, no counterexample, no grade
+change, and explicitly not rung 5. The witness extracted my commits
+`0d67933` and `5374791` from a clean `git archive HEAD` into
+`/tmp/w161-openexr`, re-hashed both tarballs and both full-file
+`internal_zstd.c` pins exactly, configured and built its own vuln-asan,
+fixed-asan and vuln-plain trees from those sources and compiled every
+harness. Its regenerated baseline and PoC hash-match `07edcb58...` and
+`283cec0e...`, and all six committed observation logs matched after
+normalizing paths, PIDs, addresses and build IDs: `va-poc 5134d652...`,
+`fa-poc 4866ac4d...`, `vp-guard-poc 8bc5f7eb...`, `cpp-va-poc 1790cdeb...`,
+`va-baseline 34a6ee75...`, `vp-guard-baseline 2a4967a9...`. An independent
+C++ caller reached the same pinned `internal_zstd.c:472` frame through
+`DeepScanLineInputFile::readPixels`.
+
+Counterexample hunt: S=512 produced ASan ranges of 2048 bytes and
+`changed=1984` instead of 4096/4032, so the length tracks the file field;
+changing the guarded allocator's fill from `37+11` to `37+99` changed the
+first overwritten byte from `0x57` to `0xff` while `changed` stayed 4032
+and the baseline stayed at 0, so the guard measurement tracks real source
+bytes rather than a harness constant. The verdict's wording caveat is in
+the ceiling section above: the out-of-bounds bytes are allocator-derived;
+the file controls length and destination offset. Rung 5 remains UNKNOWN:
+the callers were purpose-built local-path C/C++ programs, with no
+application process, wire, pointer target, command or marker.

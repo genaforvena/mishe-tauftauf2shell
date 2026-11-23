@@ -2,11 +2,12 @@
 
 **STAGED 2026-11-23 W155 — direct-call harness evidence, a live registered
 two-pane window (inner socket index 116, name `openexr2shell`) and a staging
-DM to the operator (#2559) exist. The witness returned ESTABLISHED at the
-direct-call CODE/HARNESS rungs 1-4 in W158 (#2602/#2603); file-level
-reachability and rung 5 remain UNKNOWN.** Byte-exact pins and hashes:
-`lab/frontier/openexr2shell/PINS.sha256`; harness provenance
-including preserved negative results:
+DM to the operator (#2559) exist. Witness W158 (#2602/#2603) returned
+ESTABLISHED at the direct-call CODE/HARNESS rungs 1-4; witness W161 (#2675)
+returned ESTABLISHED at the later file-level CODE/CONSUMER rungs 1-4 with a
+real pinned 3.5.2 library and a 692-byte EXR. Rung 5 remains UNKNOWN.**
+Byte-exact pins and hashes: `lab/frontier/openexr2shell/PINS.sha256`;
+harness provenance including preserved negative results:
 `lab/frontier/openexr2shell/PROVENANCE.md`. Frontier owns no further work on
 this target.
 
@@ -20,8 +21,10 @@ this target.
   stated either; the described primitive is an out-of-bounds heap write.
 - Affected: OpenEXR 3.5.0, 3.5.1, 3.5.2 and `main`; patched: 3.5.3. The
   advisory says 3.4.x and earlier have no ZSTD codec and are unaffected;
-  that and its 692-byte file PoC, 4032-byte overrun and OpenImageIO flat-path
-  reproduction are **claims from the advisory**, not reproduced in this lab.
+  that and its OpenImageIO flat-path reproduction are **claims from the
+  advisory**, not reproduced in this lab. The 692-byte file PoC and
+  4032-byte overrun were later reproduced by the target mind (W160/W161);
+  see `reports/openexr2shell-file-level.md`.
 - Upstream fix `7d7fbb1a5cf637ede04dae51123aff02d89c2b5c` (2026-10-06,
   "bound the ZSTD grid total against uncompressed_size (#2713)") adds the
   grid-total check. The vulnerable pin is tag `v3.5.2`; the fixed pin is
@@ -84,8 +87,9 @@ Limits: the harness calls the two pinned functions directly. There is no EXR
 header or chunk parsing, no sample-count table decoding, no ZSTD frame, no
 `exr_decoding_run()` ordering, no OpenEXR or OpenImageIO build, no image
 consumer, and no process, socket or wire input. The advisory's file-level
-reachability, including the flat-scanline path, is a claim this wake did not
-test. Chosen bytes are harness-supplied source bytes, not bytes derived from
+reachability, including the flat-scanline path, was a claim this wake did
+not test; the target mind later tested it against real builds (W160/W161).
+Chosen bytes are harness-supplied source bytes, not bytes derived from
 a crafted file. No pointer or control-flow corruption was exercised.
 
 ## 5. Observations
@@ -109,11 +113,13 @@ a crafted file. No pointer or control-flow corruption was exercised.
 
 ## 6. Ceiling / handoff
 
-Ceiling measured: direct-call CODE/HARNESS rungs 1-4 only. Witness verdict
-W158: ESTABLISHED at that labeled scope, no counterexample, no grade change.
-No live decode path, no file or wire input, no pointer control, no command
-execution. Rung 5 is UNKNOWN and unproven. A dedicated `openexr2shell` mind
-would need to reproduce the advisory's crafted EXR against a real patched and
-unpatched OpenEXR build, then measure whether the 4032-byte overwrite reaches
-an allocation whose contents are usable before the process aborts. Frontier
-owns no further work on this target.
+Ceiling measured for this frontier brief: direct-call CODE/HARNESS rungs 1-4
+only. Witness verdict W158: ESTABLISHED at that labeled scope, no
+counterexample, no grade change. The dedicated `openexr2shell` mind then
+reproduced the advisory's crafted EXR against real patched and unpatched
+OpenEXR builds and measured the 4032-byte overwrite into a live 64-byte
+destination; witness W161 (#2675) returned ESTABLISHED at that file-level
+CODE/CONSUMER scope, no counterexample, not rung 5. Full evidence:
+`reports/openexr2shell-file-level.md`. No wire input, application process,
+pointer control or command execution was exercised at either scope. Rung 5
+is UNKNOWN and unproven; frontier owns no further work on this target.
