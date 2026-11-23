@@ -1,0 +1,12 @@
+# libfontenc2shell plain-build Xvfb matrix, 2026-11-23T18:10:36Z
+# loopback-only Xvfb; no ASan; font path /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/xlive/type1fonts; client XLFD registry crafted-1
+# inputs: SIZE 256 ROW / mapping 0xff00 0x5a5a (safe case uses 0x00ff)
+vuln safe row=256 index=65280 client_rc=0 xdpyinfo_rc=0 server_alive=YES 
+vuln near row=258 index=65790 client_rc=0 xdpyinfo_rc=0 server_alive=YES 
+vuln far512 row=512 index=130560 client_rc=0 xdpyinfo_rc=0 server_alive=YES 
+vuln far1024-a row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO Fatal server error:
+vuln far1024-b row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO Fatal server error:
+vuln far1024-c row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO Fatal server error:
+fixed far1024 row=1024 index=261120 client_rc=0 xdpyinfo_rc=0 server_alive=YES 
+1.1.9 far1024 row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO Fatal server error:
+1.1.10 far1024 row=1024 index=261120 client_rc=0 xdpyinfo_rc=0 server_alive=YES 

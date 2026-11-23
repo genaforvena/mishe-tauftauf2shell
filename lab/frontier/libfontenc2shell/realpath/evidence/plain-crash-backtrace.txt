@@ -1,0 +1,20 @@
+Source: xlive/logs/plain-vuln-far1024-a.out, live loopback Xvfb with the
+uninstrumented pinned vulnerable libfontenc preloaded, SIZE 256 1024,
+mapping 0xff00 0x5a5a, 2026-11-23T18:10:36Z. Addresses vary per run; the
+symbol frames and faulting signal are the evidence. Full raw server logs live
+in the gitignored xlive/logs/ directory; run xlive/run-plain-crash.sh to
+regenerate them.
+
+(EE) Backtrace:
+(EE) 2: .../build-vuln/out-plain/libfontenc.so.1.0.0 (setCode+0x214) [0x7d6abaafe47d]
+(EE) 3: .../build-vuln/out-plain/libfontenc.so.1.0.0 (parseEncodingFile+0x73b) [0x7d6abaafebc2]
+(EE) 4: .../build-vuln/out-plain/libfontenc.so.1.0.0 (FontEncReallyReallyLoad+0x26c) [0x7d6abaaff92c]
+(EE) 5: .../build-vuln/out-plain/libfontenc.so.1.0.0 (FontEncReallyLoad+0x76) [0x7d6abaaff9ee]
+(EE) 6: .../build-vuln/out-plain/libfontenc.so.1.0.0 (FontEncLoad+0x27) [0x7d6abab006b3]
+(EE) 7: .../build-vuln/out-plain/libfontenc.so.1.0.0 (FontEncFind+0xc4) [0x7d6abab005a2]
+(EE) 8: /lib/x86_64-linux-gnu/libXfont2.so.2 (xfont2_init+0x154b) [0x7d6aba7fe94b]
+(EE) 13: Xvfb (OpenFont+0x16b) [0x5fdfb39ba96b]
+(EE) Segmentation fault at address 0x5fdfd24dc8d0
+(EE)
+Fatal server error:
+(EE) Caught signal 11 (Segmentation fault). Server aborting

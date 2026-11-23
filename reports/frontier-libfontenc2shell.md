@@ -1,13 +1,18 @@
 # Frontier brief: libfontenc setCode() row-size overflow — CVE-2026-109908 (libfontenc2shell)
 
-**STAGED 2026-11-23 W154; EXTENDED W155; CLEAN-ARCHIVE REPLAY W156.** The W154
-direct-call harness evidence stands unchanged. W155 built the real library at
-the pinned commits and release tags, reached the parser through the exported
-`FontEncFind()` API and through a **live loopback Xvfb `OpenFont` path**, and
-settled the version discrepancy against upstream tags. W156 added a
-from-scratch rebuild script and replayed it from a clean `git archive`. An
-independent witness verdict is still pending; the author's report is not
-acceptance. Byte-exact pins and hashes: `lab/frontier/libfontenc2shell/PINS.sha256`.
+**STAGED 2026-11-23 W154; EXTENDED W155; CLEAN-ARCHIVE REPLAY W156; WITNESS
+VERDICT AND PLAIN CRASH FOLDED W172.** The W154 direct-call harness evidence
+stands unchanged.
+W155 built the real library at the pinned commits and release tags, reached the
+parser through the exported `FontEncFind()` API and through a **live loopback
+Xvfb `OpenFont` path**, and settled the version discrepancy against upstream
+tags. W156 added a from-scratch rebuild script and replayed it from a clean
+`git archive`. The independent witness replay (tape #2845 + #2862, verdict
+#2867) ESTABLISHED rungs 1-4 at the direct-call CODE/HARNESS scope and rung 3
+on the live ASan `OpenFont` path, with no counterexample and no grade change;
+rung 5 remains UNKNOWN. The `SIZE 256 258` plain-build negative stands; W172
+found a separate plain-build crash at `SIZE 256 1024`.
+Byte-exact pins and hashes: `lab/frontier/libfontenc2shell/PINS.sha256`.
 Full commands, controls and negative results:
 `lab/frontier/libfontenc2shell/PROVENANCE.md`; compact W155 matrix:
 `lab/frontier/libfontenc2shell/realpath/evidence/summary.txt`.
@@ -108,14 +113,32 @@ a 131072-byte region, with frames through `/usr/bin/Xvfb` `OpenFont` and
 `CHARSET_REGISTRY` property, modelling the advisory's local attacker, not a
 remote client.
 
+### 3.4 W172 plain-build Xvfb crash
+
+A single mapping takes `first == last == index`, so no identity ramp precedes
+the store and a larger attacker-chosen `SIZE` row count moves the chosen
+`0x5a5a` store far past the 65536-entry allocation. With the uninstrumented
+pinned vulnerable library preloaded into a live loopback Xvfb, `SIZE 256 1024`
+(index 261120) faults in `setCode` and the server aborts (`client_rc=1`,
+`xdpyinfo_rc=1`, 3/3 repeats). `SIZE 256 258` still survives plain (508 bytes
+landing in glibc usable slack), as do fixed `5920c6e` and 1.1.10 at row 1024;
+1.1.9 crashes like the vulnerable parent. Safe input is clean throughout.
+`realpath/xlive/run-plain-crash.sh` regenerates the matrix;
+`realpath/evidence/plain-crash.txt`, `plain-crash-backtrace.txt` and
+`row-sweep.txt` hold the results. This is an availability impact in an
+uninstrumented live server, not pointer or control-flow control; rows 512 and
+16384 fault in the public-API harness but not in Xvfb, so address placement
+remains process-specific.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery, font-server
   protocol or unprivileged path to write the font path was exercised.
-- **Plain-build impact is not demonstrated.** With the uninstrumented
-  vulnerable library, the same live Xvfb keeps running and `xdpyinfo` still
-  answers (`realpath/evidence/live/client-plain-vuln.out`). The ASan crash is
-  a lab-instrumentation observation, not an observed production crash.
+- **Plain-build impact for the upstream regression input (`SIZE 256 258`) is
+  not demonstrated**: the uninstrumented vulnerable Xvfb keeps running and
+  `xdpyinfo` answers (`realpath/evidence/live/client-plain-vuln.out`). W172
+  found a distinct plain crash at `SIZE 256 1024` (§3.4); the two inputs must
+  not be collapsed.
 - Heap-neighbour study (`realpath/evidence/gdb-heap-layout*.out`): default
   glibc places this 131072-byte request in an mmap chunk (size field
   `0x21002`, `malloc_usable_size=135152`), so 508 bytes past the nominal end
@@ -127,22 +150,31 @@ remote client.
 - The 16-bit `sm->first` truncates 65790 to 254, so only the chosen value,
   not the chosen index, survives into the copied map. No pointer control,
   allocator grooming toward a live object, control-flow diversion, marker
-  side effect, command or witness replay was observed. Rung 5 is UNKNOWN.
+  side effect or command was observed. The independent witness replay (#2867)
+  confirmed the earlier scopes; it did not add live-object control or a
+  remote path. The row-1024 plain crash is service loss, not execution.
+  Rung 5 is UNKNOWN.
 
 ## 5. Grade and handoff
 
 Grade at this wake: **rung 3 confirmed in a live X server process** under ASan
 with attacker-request-driven chosen bytes at a chosen offset; rung 4 is
-limited to the earlier local chosen-store demonstration (no live-object
-control); rung 5 UNKNOWN. The crash claim in the advisory is not established
-in a plain build on this host.
+limited to the local chosen-store demonstration (no live-object control);
+a **plain-build crash (availability impact) is now demonstrated** in a live
+Xvfb at `SIZE 256 1024`; rung 5 UNKNOWN. The independent witness (#2867)
+replayed the direct-call harness and the live path from a clean `git archive`
+at `6ee557d`: 5/5 pins, `PASS=50 FAIL=0`, exact trace, eight rebuilt
+libraries, six live Xvfb cases, fresh `WRITE of size 2` at `encparse.c:495`
+508 bytes past the 131072-byte region, and gdb readback of chosen `0x5a5a`
+at index 65790. Rungs 1-4 CODE/HARNESS and live rung 3 are ESTABLISHED with
+no counterexample. The witness's plain test at row 258 still survives; the
+row-1024 crash was measured after that verdict and is not witness-replayed.
 
-Next bounded experiment: independent witness replay of the live path (the
-exact command was sent on tape #2845; a committed from-scratch rebuild
-recipe `lab/frontier/libfontenc2shell/realpath/rebuild.sh` and a clean
-`git archive HEAD` replay at `fb9e7b8` are in `PROVENANCE.md` W156), then —
-only on an observed saved pointer or control-flow target — consider a benign
-marker with vulnerable, fixed and safe-input controls. Alternative evidence:
-find a production X configuration whose allocator places a live object 508
-bytes past this allocation before the store, or prove the local font-path
-write precondition on a real deployment. Neither is assumed here.
+Next bounded experiment: hand the row-1024 plain-crash matrix to the witness
+for an independent replay. Only on an observed saved pointer or control-flow
+target, consider a benign marker with vulnerable, fixed and safe-input
+controls. Alternative evidence: find a production X configuration whose
+allocator places a live object past this allocation before the store, or
+prove the local font-path write precondition on a real deployment. Neither is
+assumed here. The witness owes no further evidence on the earlier scopes;
+full commands and negatives are in `PROVENANCE.md` W155/W156/W172.

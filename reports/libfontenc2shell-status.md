@@ -26,16 +26,46 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   5/5 `PINS.sha256` digests OK, `PASS=50 FAIL=0`, trace
   `bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`
   exact. This is deterministic replay, not a witness verdict.
-- Ceiling: direct-call CODE/HARNESS rungs 1-4 only. No real libfontenc build,
-  X server, font path, `encodings.dir`, X protocol, wire input, live process,
-  allocator study, ASLR study, pointer control, ROP, command, marker side
-  effect or witness verdict. The `0x5a5a` bytes are chosen data, not execution.
-  The 16-bit `sm->first` field truncates 65790 to 254, so only the chosen value
-  survives into the copied map; whether a live X server ingests the file and
-  which objects lie past this allocation remain UNKNOWN. Rung 5 UNKNOWN.
+- Real path (W155/W156): pinned `7418fa7`, `5920c6e`, 1.1.9 and 1.1.10 were
+  built plain and ASan. The exported `FontEncFind()` path with a real
+  `encodings.dir` gives `WRITE of size 2` at `encparse.c:495`, 508 bytes past
+  the 131072-byte region, in vulnerable and 1.1.9 builds; fixed, 1.1.10 and
+  safe input stay clean. A live loopback Xvfb client opening a Type1 font with
+  XLFD registry `crafted-1` reaches `setCode()` through `OpenFont`. The
+  six-case matrix, fresh from-scratch replay and negative results are in
+  `lab/frontier/libfontenc2shell/realpath/evidence/summary.txt` and
+  `PROVENANCE.md` W155/W156. `git tag --contains 5920c6e` lists only
+  libfontenc-1.1.10; the advisory's "before 1.11.0" stays preserved.
+- Witness verdict (#2867, tape #2845 + #2862): independent clean-archive
+  replay at `6ee557d` verified 5/5 pins, `PASS=50 FAIL=0`, exact trace, all
+  eight rebuilt libraries and all six live cases, plus a fresh ASan report
+  and gdb readback. Rungs 1-4 at CODE/HARNESS scope and rung 3 on the live
+  ASan `OpenFont` path are ESTABLISHED with no counterexample; no grade
+  change, and no further evidence owed by the witness.
+- Plain-build crash (W172, not yet witness-replayed): a single mapping skips
+  the identity ramp, so a larger `SIZE` row count moves the chosen `0x5a5a`
+  store far past the buffer. `SIZE 256 1024` (index 261120) faults in
+  `setCode()` in the **uninstrumented** vulnerable Xvfb, 3/3 repeats, with
+  `client_rc=1`, `xdpyinfo_rc=1` and server abort; 1.1.9 crashes likewise,
+  while `5920c6e`, 1.1.10 and safe input survive. The 258-input plain
+  survival still stands. Evidence: `realpath/evidence/plain-crash.txt`,
+  `plain-crash-backtrace.txt` and `row-sweep.txt`; regenerate with
+  `realpath/xlive/run-plain-crash.sh`.
+- Ceiling: no remote wire delivery, font-server protocol, unprivileged path
+  to write the font path, pointer control, allocator grooming toward a live
+  object, control-flow diversion, marker side effect, ROP or command was
+  observed. The `0x5a5a` bytes are chosen data, not execution; the 16-bit
+  `sm->first` truncates 65790 to 254, so only the chosen value survives.
+  **For `SIZE 256 258` there is still no plain-build crash**: the vulnerable
+  Xvfb keeps running and `xdpyinfo` answers, as the witness replayed. The
+  row-1024 plain crash is availability impact only, not execution. No live
+  object lies at the 508-byte destination (mmap usable slack by default, brk
+  top chunk with a raised mmap threshold). Rung 5 UNKNOWN.
 
-Next for the target mind: build pinned `7418fa7` and `5920c6e` plus the 1.1.9
-and 1.1.10 releases to settle the version discrepancy; drive the upstream
-regression `.enc` through a real `FontEncLoad`/X server path under ASan and
-identify the heap neighbours before any pointer or marker test. Hand any new
-claim to `witness` — the author report is not acceptance.
+Next for the target mind: hand the row-1024 plain-crash matrix to the witness
+for independent replay. Only on an observed saved pointer or control-flow
+target, attempt a bounded benign marker with vulnerable, fixed and safe-input
+controls. Alternative evidence: a production X configuration whose allocator
+places a live object at the destination before the store, or a proven local
+font-path write precondition. Neither is assumed. The earlier witness verdict
+is folded; this new crash result is not yet independently replayed.

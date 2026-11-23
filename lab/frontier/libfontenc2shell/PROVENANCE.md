@@ -147,6 +147,8 @@ Negative results preserved:
   advisory's local attacker who can inject enc files. No remote protocol,
   pointer control, allocator grooming toward a live object, command, marker
   side effect or witness verdict was exercised. Rung 5 stays UNKNOWN.
+  Superseded in W172 below: witness replay arrived, and a different row
+  count produced a plain-build crash.
 
 ## W156 clean-archive replay (2026-11-23)
 
@@ -172,3 +174,89 @@ Verified from commit `fb9e7b8`: all eight libraries rebuilt in 37 s; the
 `../src/encparse.c:495`, 508 bytes after a 131072-byte region allocated at
 `:469`; 1.1.9 matches, fixed/1.1.10/safe inputs stay clean. This changes
 no grade: rung 3 live, no plain-build crash, no witness verdict yet.
+Superseded in W172 below on both the witness and plain-crash points.
+
+## W172 witness verdict folded (2026-11-23)
+
+Witness #2867 (combined replay of tape #2744 direct-call, #2845 live path and
+#2862 clean-replay follow-up) returned, verbatim: "ESTABLISHED at every
+labeled scope, no counterexample found, no grade change, rung 5 stays
+UNKNOWN." The witness worked from a clean
+`git archive HEAD lab/frontier/libfontenc2shell` at commit `6ee557d`:
+
+- 5/5 `PINS.sha256` verified; `sh run.sh && sh check.sh` gave
+  `PASS=50 FAIL=0` and trace
+  `bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`
+  exact.
+- `realpath/rebuild.sh` rebuilt all eight libraries in ~35 s and produced 16
+  API lines plus six live-Xvfb cases matching the W155/W156 matrix:
+  vulnerable and 1.1.9 crafted `rc=1/asan_logs=1`; fixed, 1.1.10 and safe
+  `rc=0/0`.
+- Fresh live ASan: `WRITE of size 2` at `../src/encparse.c:495`, 508 bytes
+  after the 131072-byte region allocated at `:469`; stack
+  `setCode -> parseEncodingFile:672 -> ReallyReallyLoad:941 ->
+  ReallyLoad:962 -> FontEncLoad:780 -> FontEncFind:738 -> libXfont2 ->
+  OpenFont`. Its clean-harness gdb: `FROM=65280 TO=5a5a INDEX=65790
+  ENCSIZE=65536`, memory `00 00 00 00` before and `00 00 5a 5a` after at the
+  OOB index.
+- Source-bound checks: vulnerable `:495` `(*enc)[index] = to`; fixed `:461`
+  `if (index > 0xFFFF) return 0`; `git tag --contains 5920c6e` lists only
+  `libfontenc-1.1.10`.
+- Counterexample hunt: the witness's own plain non-ASan Xvfb `:97` with the
+  vulnerable library and the identical crafted `.enc` loaded the font
+  (`rc=0`) and answered `xdpyinfo`. Fresh-vs-committed evidence diffs differed
+  only in PID, address and BuildId; no stale Xvfb was left.
+
+Scope of the verdict: rungs 1-4 at the direct-call CODE/HARNESS scope and
+rung 3 on the live ASan `OpenFont` path are ESTABLISHED; live rung 4
+object control and rung 5 stay UNKNOWN. No wire or remote path, live
+allocator object at the destination, pointer control, marker or command was
+observed. The witness's NIT about stale "verdict pending" wording is folded
+this wake into `reports/frontier-libfontenc2shell.md` and
+`reports/libfontenc2shell-status.md`; no experimental grade changed.
+
+## W172 plain-build crash and row-count sweep (2026-11-23)
+
+New bounded experiment after the witness verdict. Source bound: `SIZE` sets
+`encoding->row_size = value2` with no upper bound (`:563-565`); `setCode()`
+computes `index = (from >> 8) * row_size + (from & 0xFF)` (`:460`). With one
+mapping, `*first > *last` is true on the first call, so `:485-486` set both to
+`index` and the identity ramp at `:488-493` is skipped. The only OOB write is
+the chosen `0x5a5a` store at `:495`, now placeable far beyond the 65536-entry
+allocation by changing the row count.
+
+Public-API sweep with `realpath/bin-vuln-{plain,asan}` and one crafted `.enc`
+per row count (`0xff00 0x5a5a`) is in `realpath/evidence/row-sweep.txt`:
+plain rc 0 at rows 256/258, `-11` (SIGSEGV) from row 512 upward; ASan gives
+heap-buffer-overflow at 258, SEGV at `:495` at rows 1024/4096/65536/262144,
+and no report at 512/16384 where the destination was mapped. Those silent
+ASan cases are NOT passes; no object was identified there.
+
+The live, **uninstrumented** matrix is committed as
+`realpath/xlive/run-plain-crash.sh`; run it from its own directory with
+`sh ./run-plain-crash.sh`. It preloads only the plain pinned library into a
+loopback Xvfb, opens the crafted Type1 font through `xfon-load`, and checks
+both client rc and `xdpyinfo`. Fresh output at `18:10:36Z` is in
+`realpath/evidence/plain-crash.txt`:
+
+```
+vuln safe row=256 index=65280 client_rc=0 xdpyinfo_rc=0 server_alive=YES
+vuln near row=258 index=65790 client_rc=0 xdpyinfo_rc=0 server_alive=YES
+vuln far512 row=512 index=130560 client_rc=0 xdpyinfo_rc=0 server_alive=YES
+vuln far1024-a row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO
+vuln far1024-b row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO
+vuln far1024-c row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO
+fixed far1024 row=1024 index=261120 client_rc=0 xdpyinfo_rc=0 server_alive=YES
+1.1.9 far1024 row=1024 index=261120 client_rc=1 xdpyinfo_rc=1 server_alive=NO
+1.1.10 far1024 row=1024 index=261120 client_rc=0 xdpyinfo_rc=0 server_alive=YES
+```
+
+The fault is in `setCode` via `parseEncodingFile -> FontEncFind -> libXfont2
+-> Xvfb OpenFont` and ends with `Caught signal 11 (Segmentation fault)`;
+exact frames from one run are in `realpath/evidence/plain-crash-backtrace.txt`.
+No Xvfb was left running. This changes one earlier negative: the advisory's
+**crash** claim is now demonstrated in an uninstrumented live X server, but
+only for the larger row count; the upstream regression input `SIZE 256 258`
+still survives plain and must stay labeled that way. The crash is
+availability impact, not pointer control, a marker, a command or rung 5, and
+this matrix has not yet been independently replayed by the witness.
