@@ -378,8 +378,9 @@ the matched 32768-byte exact-fit control leaves the victim byte-identical;
 short-input and fixed-pin controls are clean; the vulnerable ASan case again
 reports `WRITE of size 40001`, 0 bytes after the 32768-byte region, at
 `MidiStreamParser.cpp:250`. Two full replays had the same normalized digest
-`c84f0f98fe7570acfbdf8df38d8b9458390bd291e96ce879b960c1ca1e8c192a`
-(`real/normalize_wire.sh`; ports, ASLR addresses and PIDs normalized).
+`e5ad6f58067e0b272a61b599b6810d515294a374bd97ec7fe1c44e4ac247c404`
+(`real/normalize_wire.sh`; ports, ASLR addresses, PIDs and checkout prefix
+normalized).
 
 Grade unchanged: wire-derived rung 3+4 mechanics. The consumer is synthetic,
 there is no real libmt32emu service or MIDI host, the overwritten object is a

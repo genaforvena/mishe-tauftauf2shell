@@ -58,7 +58,7 @@ Quoted raw lines from `evidence/wire-server-vuln-plain-attack.out`:
 ```
 wire_bytes=40001 first=f0 last=6a
 parse sysex=0 lastlen=0 short=0 realtime=0 debug=0
-initial_victim prefix=1111 ptr=0x00005b84886e85e0 magic=0xcafebabe suffix=2222
+initial_victim prefix=1111 ptr=0x000059b5061af5e0 magic=0xcafebabe suffix=2222
 after_victim prefix=6a6a ptr=0x6a6a6a6a6a6a6a6a magic=0x6a6a6a6a suffix=6a6a
 ```
 
@@ -92,10 +92,11 @@ sh normalize_wire.sh | sha256sum
 ```
 
 Two consecutive full replays produced the same normalized digest
-`c84f0f98fe7570acfbdf8df38d8b9458390bd291e96ce879b960c1ca1e8c192a`.
-`normalize_wire.sh` removes ephemeral TCP ports, ASan PIDs/ASLR addresses
-and the victim's ASLR pointer, while keeping the intact magic and the
-`0x6a` overwrite fields comparable. Raw evidence is in `evidence/wire-*`.
+`e5ad6f58067e0b272a61b599b6810d515294a374bd97ec7fe1c44e4ac247c404`.
+`normalize_wire.sh` removes ephemeral TCP ports, ASan PIDs/ASLR addresses,
+the absolute checkout prefix and the victim's ASLR pointer, while keeping
+the intact magic and the `0x6a` overwrite fields comparable. Raw evidence is
+in `evidence/wire-*`.
 
 ## What this does not establish
 

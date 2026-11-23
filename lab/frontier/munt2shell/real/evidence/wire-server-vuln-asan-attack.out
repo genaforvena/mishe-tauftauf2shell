@@ -1,27 +1,27 @@
-listen=127.0.0.1:32993
+listen=127.0.0.1:39531
 wire_bytes=40001 first=f0 last=6a
 =================================================================
-==3100492==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d000012400 at pc 0x79a6284fb303 bp 0x7ffd209b0470 sp 0x7ffd209afc18
+==3167217==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d000012400 at pc 0x752c788fb303 bp 0x7ffc04d1c050 sp 0x7ffc04d1b7f8
 WRITE of size 40001 at 0x52d000012400 thread T0
-    #0 0x79a6284fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x600113a2b7e2 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
-    #2 0x600113a2b7e2 in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:250
-    #3 0x600113a2bdbd in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
-    #4 0x600113a29075 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire_driver.cpp:164
-    #5 0x79a627c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x79a627c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x600113a278a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire-vuln-asan+0xf8a4) (BuildId: 9bdad1df925a37ec3d752b08b18251bc5e0bc8bd)
+    #0 0x752c788fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5903f52687e2 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x5903f52687e2 in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:250
+    #3 0x5903f5268dbd in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
+    #4 0x5903f5266075 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire_driver.cpp:164
+    #5 0x752c7802a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x752c7802a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5903f52648a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire-vuln-asan+0xf8a4) (BuildId: 9bdad1df925a37ec3d752b08b18251bc5e0bc8bd)
 
 0x52d000012400 is located 0 bytes after 32768-byte region [0x52d00000a400,0x52d000012400)
 allocated by thread T0 here:
-    #0 0x79a6284fe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
-    #1 0x600113a2a850 in MT32Emu::MidiStreamParserImpl::checkStreamBufferCapacity(bool) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:137
-    #2 0x600113a2b640 in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:249
-    #3 0x600113a2bdbd in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
-    #4 0x600113a29075 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire_driver.cpp:164
-    #5 0x79a627c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x79a627c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x600113a278a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire-vuln-asan+0xf8a4) (BuildId: 9bdad1df925a37ec3d752b08b18251bc5e0bc8bd)
+    #0 0x752c788fe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x5903f5267850 in MT32Emu::MidiStreamParserImpl::checkStreamBufferCapacity(bool) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:137
+    #2 0x5903f5268640 in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:249
+    #3 0x5903f5268dbd in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
+    #4 0x5903f5266075 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire_driver.cpp:164
+    #5 0x752c7802a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x752c7802a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5903f52648a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/wire-vuln-asan+0xf8a4) (BuildId: 9bdad1df925a37ec3d752b08b18251bc5e0bc8bd)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
@@ -55,4 +55,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3100492==ABORTING
+==3167217==ABORTING
