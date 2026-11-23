@@ -56,7 +56,7 @@ canary `CORRUPTED`, `free(): invalid size`. The fixed pin leaves it intact.
 
 ## Consumer reach — measured NEGATIVE in indexed public source (2026-11-22)
 
-Two independent searches answer the consumer question negatively:
+Independent searches answer the consumer question negatively:
 
 1. **In-tree:** in pinned `c-7.0.2`, the only `msgpack_vrefbuffer_migrate()`
    call site outside its definition and public header is `test/msgpack_c.cpp:1570`,
@@ -83,9 +83,23 @@ Two independent searches answer the consumer question negatively:
    application calling `msgpack_vrefbuffer_migrate()` ... with imbalanced
    buffer sizes is affected" is generic conditional prose, not a demonstrated
    caller or a request/wire path.
+6. W134 independent cross-check (2026-11-23). Sourcegraph public code search
+   for `msgpack_vrefbuffer_migrate` returned 53 exhaustive matches in 29 repos
+   (default index) and 44 with `archived:yes fork:yes`. Every match is a
+   vendored `vrefbuffer.c` definition, a `vrefbuffer.h` declaration, the
+   upstream unit test, or a CVE/advisory database. That includes the official
+   `msgpack/msgpack-node` and `msgpack/msgpack-objectivec` bindings and
+   request-serving vendors (fluent-bit, griddb, OpenNJet, ytsaurus, Firefox /
+   gecko-dev); a scoped query on those two bindings found only the definition
+   and declaration. Excluding paths containing `vrefbuffer` leaves only
+   advisory JSON/YAML. grep.app returned HTTP 429 and Debian Code Search's
+   fetched page showed no results, so neither contributed evidence. Upstream
+   tags rechecked the same day: newest C tag is still `c-7.0.2`; issue #1197 has
+   two comments, neither naming a consumer or a fixed release.
 
-Limit: GitHub code search indexes public source only. An unindexed private or
-out-of-tree caller remains UNKNOWN, not disproved; wire reach stays UNKNOWN.
+Limit: both GitHub and Sourcegraph code search index public source only. An
+unindexed private or out-of-tree caller remains UNKNOWN, not disproved; wire
+reach stays UNKNOWN.
 
 Also checked: no fixed C release exists. The newest C tag is `c-7.0.2` and the
 fix commit `1c47ce0` (2026-10-29) is master-only, so the advisory's missing
