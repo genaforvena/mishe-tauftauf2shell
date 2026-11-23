@@ -89,22 +89,40 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   at `data()-4` through KiCad's own reader; `84215045` gives `0x24242424` /
   `24 24 24 24`; both fixed builds clean. Provenance:
   `kicadreader/PROVENANCE-chosen-value.md`.
-- Ceiling: direct call, real property parser, real compound-file stream and
-  KiCad's own compound-file reader, all with a stubbed wx support layer and a
-  lab wrapper around that reader. The chosen bytes land in ASan's left redzone
-  (plain build: malloc metadata), not an adjacent live object. No real
-  KiCad build, wxWidgets, KiCad `ALTIUM_COMPOUND_FILE` class, vendor
-  `.SchLib`, `eeschema`, consumer process, socket, wire, pointer or IP
-  control, benign marker or command. The witness verdict above is scoped to
-  rungs 1-4, not rung 5. The fixed release is mapped (10.0.7) but no KiCad
+- Vendor-produced `.SchLib` (W180): `lab/frontier/kicad2shell/vendor/`
+  pins a real Altium schematic library from KiCad's own QA data (upstream
+  commit `0f4d229ea6df8247929bd61e159efa6530cf5e2c`, CERN-OHL-S v2, third-
+  party test data, not CC0). Its vendor-authored `Size1=10`/`Size2=9` keys
+  are uppercased by the verbatim parser and parse clean (negative control).
+  Two same-length in-place key patches (`Size1`→`Size0=99` at byte 650;
+  `Size2`→`SizeZ=9` at byte 685) make `ind=0`. The first sorts before the
+  valid key and gives vulnerable plain `rc=139` / ASan SEGV at `:5919`
+  (null-adjacent store); the second sorts after it and gives vulnerable
+  plain `rc=134` glibc abort and ASan `WRITE of size 4` four bytes before
+  the 4-byte region at `:5919`. Both fixed binaries clean. gdb reads
+  `IND=0 SCALED=0x00000040`, bytes `40 00 00 00` at `data()-4`.
+  `vendor/check.sh`: **13 PASS / 0 FAIL** twice, trace
+  `fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
+  Provenance, hashes and offsets: `vendor/PROVENANCE-vendor-file.md`.
+- Ceiling: direct call, real property parser, real compound-file stream,
+  KiCad's own compound-file reader and a real vendor-produced `.SchLib` with
+  a one-key patch, all with a stubbed wx support layer and a lab wrapper
+  around that reader. The chosen bytes land in ASan's left redzone (plain
+  build: malloc metadata), not an adjacent live object. No real KiCad build,
+  wxWidgets, KiCad `ALTIUM_COMPOUND_FILE` class, `eeschema`, GUI import,
+  consumer process, socket, wire, pointer or IP control, benign marker or
+  command.
+  The witness verdict above is scoped to rungs 1-4, not rung 5. The fixed
+  release is mapped (10.0.7) but no KiCad
   build at that release was exercised. End-to-end file reachability through
   KiCad and the ZDI RCE claim stay UNKNOWN; rung 5 is UNKNOWN.
 
-Next for the target mind: a vendor-produced `.SchLib` through a full KiCad
-build/reader closes the remaining file-reachability unknown; the synthetic
-CFB lanes are exhausted (KiCad's own reader now exercised) and the
-pinned-source consumer reads are guarded (no read of the corrupted bytes), so
-preserve that negative. Only on an observed pointer or control-flow target,
+Next for the target mind: a full KiCad build/GUI import of a vendor
+`.SchLib` closes the remaining file-reachability unknown; the synthetic CFB
+lanes and the vendor-file patch lane through KiCad's own reader are
+exhausted, and the pinned-source consumer reads are guarded (no read of the
+corrupted bytes), so preserve that negative.
+Only on an observed pointer or control-flow target,
 attempt a bounded benign marker with vulnerable, fixed and safe-input
 controls and a fresh witness replay: #2996 covers only the lanes above.
 The author report is never acceptance of a new claim.

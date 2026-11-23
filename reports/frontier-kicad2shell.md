@@ -1,6 +1,6 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
-**STAGED 2026-11-23 W162; UPDATED 2026-11-23 20:40Z wake** — this brief, a
+**STAGED 2026-11-23 W162; UPDATED 2026-11-23 W180** — this brief, a
 direct-call rung-1..4 harness, a real-property-parser reachability harness, a
 real-compound-file reachability lane, a lane driven by KiCad's own
 `compoundfilereader` header and a live registered two-pane window (inner
@@ -11,8 +11,9 @@ place. Operator admission is complete; an independent witness replay
 Byte-exact pins: `lab/frontier/kicad2shell/PINS.sha256`,
 `realparser/PINS-realparser.sha256` and `kicadreader/PINS-kicadreader.sha256`;
 provenance, stubs, negatives and commands: `PROVENANCE.md`,
-`realparser/PROVENANCE-realparser.md`, `realcfb/PROVENANCE-realcfb.md` and
-`kicadreader/PROVENANCE-kicadreader.md`. The fixed release is mapped in
+`realparser/PROVENANCE-realparser.md`, `realcfb/PROVENANCE-realcfb.md`,
+`kicadreader/PROVENANCE-kicadreader.md` and
+`vendor/PROVENANCE-vendor-file.md`. The fixed release is mapped in
 `lab/frontier/kicad2shell/FIXED-RELEASE.md`. The target mind owns further work.
 
 ## 1. Verified ground truth
@@ -182,18 +183,20 @@ parent source (`:2744`, `:2917`, `:5278`, `:5479`) are all guarded by
 `fontId > 0 && fontId <= aFontSizes.size()`; they read in-bounds elements and
 do not read the four bytes written before `data()`. No consumer of the
 corrupted malloc metadata or ASan redzone was identified in this source.
-A vendor-produced `.SchLib` and a full KiCad build remain the file-reachability
-unknown. Only an observed pointer or control-flow target would justify a
-bounded benign-marker attempt with vulnerable, fixed and safe-input controls
-plus a witness replay.
+A vendor-produced `.SchLib` has now been driven through the reader lane with
+a one-key byte patch (section 11); a full KiCad/`eeschema` build and GUI
+import remain the file-reachability unknown. Only an observed pointer or
+control-flow target would justify a bounded benign-marker attempt with
+vulnerable, fixed and safe-input controls plus a witness replay.
 
 ## 9. Honest ceiling
 
-Direct call, real property parser, real compound-file stream and KiCad's own
-compound-file reader, all with a stubbed wx support layer; no real wxWidgets,
-vendor `.SchLib`, full KiCad build or `eeschema`, no downstream consumer
-executed in any lane, no socket or wire, no pointer/IP control, no command
-execution. The witness verdict (message #2996) covers rungs 1-4 only; rung 5
+Direct call, real property parser, real compound-file stream, KiCad's own
+compound-file reader and a real vendor-produced `.SchLib` (one-key patch),
+all with a stubbed wx support layer; no real wxWidgets, full KiCad build or
+`eeschema`, no downstream consumer executed in any lane, no socket or wire,
+no pointer/IP control, no command execution. The witness verdict (message
+#2996) covers rungs 1-4 only at the synthetic-CFB scope; rung 5
 has no verdict here. The fixed release is mapped (10.0.7), but no KiCad build
 at that release was exercised here. The chosen bytes still land in
 ASan's left redzone (plain build: malloc metadata), not an adjacent live
@@ -229,3 +232,36 @@ uses the same `EnumFiles`/`IsStream`/`ReadFile` API the lab wrapper models;
 the stream-read constructor is already pinned verbatim. No real build was
 run. Hashes, 404/401 negatives and the exact comparison are in
 `kicadreader/PROVENANCE-chosen-value.md`.
+
+## 11. Vendor-produced `.SchLib` (W180, 22:0xZ wake)
+
+The synthetic-CFB fixtures were replaced by a real Altium schematic library
+from KiCad's own QA data (`issue22943/mounting_holes.SchLib`, upstream commit
+`0f4d229ea6df8247929bd61e159efa6530cf5e2c`, CERN-OHL-S v2 — third-party test
+data, not CC0). Its `FileHeader` carries vendor-authored mixed-case `Size1=10`
+and `Size2=9` keys; the verbatim `ReadProperties()` uppercases them, so the
+pinned `ParseLibHeader` really processes them. The unmodified file is a clean
+negative: all four reader binaries print `real-key: SIZE1=10`,
+`real-key: SIZE2=9`, `rc=0 size=2 first=72 GUARD7=11111111`, no ASan report.
+
+Two same-length in-place key patches drive the vulnerable path from the real
+file: byte 650 `|Size1=10|` → `|Size0=99|`, and byte 685 `|Size2=9|` →
+`|SizeZ=9|`. `olefile` re-verifies both as valid compound files with unchanged
+551-byte `FileHeader` streams. The first sorts before the valid key: the
+vector is still empty, so vulnerable plain SEGVs (`rc=139`) and ASan reports
+`SEGV` at pinned `:5919` (null-adjacent store, preserved as a distinct fault
+mode). The second sorts after it: vulnerable plain aborts with glibc
+`double free or corruption (out)` (`rc=134`) and gcc ASan reports
+`heap-buffer-overflow`, `WRITE of size 4`, four bytes before the 4-byte region,
+top frame `:5919`, allocation from `resize` at `:5915`. Both fixed binaries
+exit 0 with the intact vector and no ASan report on the same file bytes. gdb
+on the patched vendor file reads `IND=0 SCALED=0x00000040` and bytes
+`40 00 00 00` at `data()-4`.
+
+`vendor/check.sh`: **13 PASS / 0 FAIL** twice, trace
+`fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
+Fixture hashes, license, exact offsets and the ceiling are in
+`vendor/PROVENANCE-vendor-file.md`. This closes fixture provenance, not the
+full path: no wxWidgets, full KiCad build/GUI import, consumer, wire,
+pointer/control-flow target or marker. No new witness verdict; rung 5 UNKNOWN.
+

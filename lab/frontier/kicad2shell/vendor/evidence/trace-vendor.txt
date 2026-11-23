@@ -1,0 +1,13 @@
+PASS vendor-unmodified g++-vuln-plain rc=0 size=2 no-ASan
+PASS vendor-unmodified g++-vuln-asan rc=0 size=2 no-ASan
+PASS vendor-unmodified g++-fixed-plain rc=0 size=2 no-ASan
+PASS vendor-unmodified g++-fixed-asan rc=0 size=2 no-ASan
+PASS vendor-size0 vuln-plain rc=139 null-adjacent store
+PASS vendor-size0 vuln-asan SEGV at pinned :5919
+PASS vendor-size0 fixed g++-fixed-plain rc=0 size=2 intact
+PASS vendor-size0 fixed g++-fixed-asan rc=0 size=2 intact
+PASS vendor-sizez vuln-plain rc=134 glibc chunk corruption
+PASS vendor-sizez vuln-asan WRITE 4 before 4-byte region at :5919
+PASS vendor-sizez fixed g++-fixed-plain rc=0 size=1 intact
+PASS vendor-sizez fixed g++-fixed-asan rc=0 size=1 intact
+PASS vendor-gdb ind=0 scaled=0x40 bytes=40 00 00 00 at data()-4

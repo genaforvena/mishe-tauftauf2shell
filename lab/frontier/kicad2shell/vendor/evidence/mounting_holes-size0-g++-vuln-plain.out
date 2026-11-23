@@ -1,0 +1,5 @@
+kicad-cfb: file=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/vendor/mounting_holes-size0.SchLib stream=551
+real-reader: bytes=551 props=30 parse_error=0
+real-key: SIZE0=99
+real-key: SIZE2=9
+Segmentation fault (core dumped)
