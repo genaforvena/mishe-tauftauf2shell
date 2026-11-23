@@ -7210,7 +7210,7 @@ Admission added the hy4-flash `max_parallel: 3` route, minted the path,
 debounce and `@llamarpc2shell` slice drop-in with the exact full-flag sync at
 pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
 reloaded units, enabled and activated the path, and added both resolver
-entries (map 197 → 199). The plant now declares 99 engine routes and 95
+entries (map 197 → 199). The plant now declares 101 engine routes and 97
 target minds. No witness verdict existed at admission; W142 (#2193) later
 ESTABLISHED the live-wire scope below. Admission changed no grade.
 
@@ -7349,13 +7349,41 @@ from a fresh `/tmp` copy with the permit path adapted; no trace hash is
 published for SAFER.
 
 Grade now rung 3 + rung 4 on real shipped interpreter bytes with vulnerable,
-fixed and safe-input controls, all author-only: no `%pipe%`, command, benign
-file marker, application or network chain, and no independent witness verdict.
-Rung 5 remains a separate claim. The next gap is request/wire delivery to a
+fixed and safe-input controls. Witness W141 (#2149) independently replayed the
+baseline, UAF and native lanes from clean archives with its own rebuilt
+binaries (22/0 `a4569485…3c29`, 21/0 `bd4e4b4c…f85a7cb`, 17/0
+`b53abad2…b682e87`) and returned ESTABLISHED for rungs 1–4 at the explicitly
+labeled build scope, no counterexample; the `-dSAFER` flip and delivery chain
+remain author-only. No `%pipe%`, command, benign file marker, application or
+network chain; rung 5 remains a separate claim. The next gap is request/wire
+delivery to a
 live `-dSAFER` target plus the PostScript permission writes used for
 `%pipe%` (`PermitFileWriting`, `LockFilePermissions`); none was attempted.
 Recipes and hashes: `docs/reproducibility.md` and
 `reports/ghostscript2shell-status.md`.
+
+### 2026-11-23 ~05:2xZ — ghostscript2shell W8: rung 5 at the permissive lab-app scope
+
+A preserved negative opened this wake: forging `i_ctx_p+196` cleared
+`LockFilePermissions` but `%pipe%` stayed blocked, because that userparam
+already reads false in both SAFER and NOSAFER builds. The live gate is
+`pipe_fopen` → `gp_validate_path`, which returns 0 once
+`gs_lib_ctx.core->path_control_active` is cleared — exactly the rung-4 forged
+write at `CORE+156`. `exp/command-safer.ps` (sha256
+`66cc77fb…67fc8`) clears that field, opens
+`%pipe%/bin/sh -c "echo GS_R5_OK > <marker>"`, then restores native state and
+the aliased slot. `live/r5_server.py` / `live/r5_request.py` run a lab-only
+127.0.0.1 `/upload` service that saves document+font bytes from a JSON POST
+and spawns the pinned gs under `-dSAFER` with
+`--permit-file-read=<upload>/*`; a bare-directory permit was a negative because
+the saved font was unreadable. `harness/run-r5.sh` gives 14 PASS / 0 FAIL three
+times, trace `ddd635b2e607150af1180cc07554183ac79fd1025a79c00af28fbf923bf09957`:
+vulnerable+injected writes `GS_R5_OK` and shows `PIPE_OPENED=true`,
+`PATH_CONTROL_BYTES_AFTER=0`, `CLEAN_VALUE=12345`; fixed+injected and
+vulnerable+safe-font give `NO_STALE_REF` and no marker. The app's permit and
+path templating are harness configuration, not request-controlled; no writeup
+delivery chain, external host or AV:L change is claimed, and witness replay is
+owed before ESTABLISHED. Previous rung-4 ESTABLISHED scope is unchanged.
 
 ## 2026-11-23 ~03:3xZ — gdbserver2shell W5: wire-only libc `system()` reaches local rung 5
 
@@ -7394,6 +7422,30 @@ forced by the heap address. Independent witness replay is still required for
 ESTABLISHED; the earlier rung-4 ESTABLISHED scope is not retroactively
 inflated. Status: `reports/gdbserver2shell-status.md`.
 
+## 2026-11-23 ~05:0xZ — gdbserver2shell W7: shell-safe command name as a measured offset choice
+
+W5's command name was forced by the fixed fake-vtable offset `obj+8`, so a heap
+object whose low bytes began with a shell metacharacter could not run the
+staged command. W7 (`a978d80` harness and evidence, `1801d95` comment) treats
+the offset as attacker-chosen: `rsp/r5_portable_verify.sh` derives the object
+with `abort@plt`, then chooses the smallest offset in
+`{+8,+0x10,+0x18,+0x20,+0x28,+0x30}` whose vptr bytes pass the literal-word
+whitelist and `sh -n -c`, placing libc `system` at `vptr+0x10` with
+`N=64+delta-8` and the largest write through `obj+0x47` inside the measured
+0x58-byte usable chunk. The current environment kept `+8` (obj `0x...c440`,
+name `48c461555555`, 4 PASS / 0 FAIL, hash
+`9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`); a
+scratch forced `+0x10` run gave `50c461555555`, `SLOT_LEN=72`, `MARKER=1`,
+abort rc134, fixed `E01`, safe clean, 4 PASS / 0 FAIL, hash
+`6be8244f7949331ac1f8ee9e1a1389e4f30a8525f25317a444063367d41d3747`. A sweep
+over object low bytes `0x00`–`0xc0` found a safe offset for every case; W140's
+`0x20` selects `+0x10` (`30c461555555`, ASCII `0`), but its exact parent
+environment was not reproduced here and that replay is still owed. This is
+additive rung-4 mechanics: W4's ESTABLISHED verdict and W6's labeled rung-5
+scope are unchanged, and no new command, pointer control or rung 5 is claimed.
+Recipes and evidence: `docs/reproducibility.md` and
+`reports/gdbserver2shell-status.md`.
+
 ## 2026-11-23 04:4xZ — zlib2shell admitted as the 100th route
 
 Frontier W136 staged `zlib2shell` (DM #2188) after finding CVE-2026-85091,
@@ -7418,12 +7470,30 @@ Added the hy4-flash `max_parallel: 3` route, minted the path/debounce/slice
 units with the exact full-flag sync at pin
 `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
 `daemon-reload`, enabled and activated the path, added both resolver entries
-(now 201), and got the pinned full-flag doctor rc 0 `GREEN`. Grade stays the
-author's: rung 3 ASan WRITE-983041 with two compilers and a loopback
-socketpair, scoped rung 4 chosen-byte readback at offsets 0/17/16384, fixed
-and safe controls clean; no live server, peer-chosen source bytes, pointer
-redirect, command, witness verdict or rung 5. Status:
+(now 201), and got the pinned full-flag doctor rc 0 `GREEN`. Grade: base rung
+3 ASan WRITE-983041 with two compilers and a loopback socketpair plus scoped
+rung 4 chosen-byte readback at 0/17/16384 stays; W1 (05:0xZ) adds a live
+loopback gzip server whose flow control makes `gz_vacate()` copy the peer's own
+request bytes past the 16384-byte object (14 PASS / 0 FAIL, trace
+`3ae896390ce28d6ec551dbac3e8e6473fd7ae923be9cb7f42762721dbdd78d02`; ASan
+`WRITE of size 34465`, `WRITTEN=65535`; fixed and 1 MiB-drain controls clean;
+gdb `0xb3`/`0x87`/`0x86` equal to peer bytes at source offsets 65535/65552/
+81919). Rung 4 is strengthened to peer-chosen bytes, not rung 5: no pointer
+redirect, command or remote client. Witness W144 (#2198/#2221) replayed both
+harnesses from a clean archive and returned ESTABLISHED for base rung 3/4 and
+W1 rung 4 at the labeled build scope, no counterexample. Status:
 `reports/zlib2shell-status.md`.
+
+### W1 replay limb — 2026-11-23 05:0xZ zlib2shell live gzip-over-TCP
+
+`bash lab/frontier/zlib2shell/harness/run_tcp.sh` builds the pinned server with
+only `gzwrite.c` swapped and drives five cases on a plant-started 127.0.0.1
+listener: vulnerable-stall and 4 KiB slowdrain overflow with ASan `WRITE of
+size 34465` at `gzwrite.c:394`, fixed-stall and 1 MiB-drain are rc 0 /
+`PRINTF_RC=1` / ASan-clean, and the plain gdb case reads the peer's own bytes at
+destination offsets 0/17/16384. Expect 14 PASS / 0 FAIL and the trace hash
+above; raw evidence is `lab/frontier/zlib2shell/harness/tcp-evidence/` and pins
+in `lab/frontier/zlib2shell/PROVENANCE.md`.
 
 ## 2026-11-23 05:1xZ — snap72shell admitted as the 101st route
 

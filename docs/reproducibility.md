@@ -2651,6 +2651,35 @@ locally rung 5 demonstrated with a live plant-started process on loopback and
 an observed benign side effect, but witness replay is required for
 ESTABLISHED; the earlier rung-4 ESTABLISHED scope is unchanged. Status:
 `reports/gdbserver2shell-status.md`.
+### Admitted lane limb — 2026-11-23 05:0xZ gdbserver2shell W7 portable command name
+
+`rsp/r5_portable_verify.sh` removes W5's fixed `obj+8` assumption. It first
+derives the live object with `abort@plt`, then picks the smallest offset in
+`{+8,+0x10,+0x18,+0x20,+0x28,+0x30}` whose vptr bytes pass the literal-word
+whitelist and `sh -n -c`; libc `system` sits at `vptr+0x10` and the payload
+grows to `N=64+delta-8`, with the largest write through `obj+0x47` inside the
+measured 0x58-byte usable chunk. From the repository root:
+
+```sh
+bash lab/frontier/gdbserver2shell/rsp/r5_portable_verify.sh \
+  $PWD/lab/build/gdbserver-633ae02-plain/gdbserver/gdbserver \
+  $PWD/lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver-fixed
+```
+
+Expect the default object `0x...c440`, `delta=8`, name `48c461555555`,
+4 PASS / 0 FAIL,
+`P_SYSTEM_NORMALIZED_HASH=9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`.
+A scratch forced-`+0x10` variant gave `50c461555555`, `SLOT_LEN=72`,
+`MARKER=1`, abort rc134, fixed `E01`, safe clean, 4 PASS / 0 FAIL, hash
+`6be8244f7949331ac1f8ee9e1a1389e4f30a8525f25317a444063367d41d3747`
+(evidence in `rsp/evidence-portable/forced-0x10/`). A sweep of object low
+bytes `0x00`–`0xc0` found a safe offset for every case; W140's `0x20` picks
+`+0x10` (`30c461555555`, ASCII `0`), but that exact parent environment was not
+reproduced locally. Generated `r5-bin-portable/` trees are gitignored; pins
+and raw logs are in `lab/frontier/gdbserver2shell/PROVENANCE.md`. No grade
+change: rung-4 ESTABLISHED and W6's labeled rung-5 scope stand, and W140's
+replay of the W6 harness remains owed. Status:
+`reports/gdbserver2shell-status.md`.
 
 ## Admitted frontier lane — 2026-11-23 01:3xZ erlang2shell
 
@@ -2870,7 +2899,13 @@ bash "$T/lab/frontier/ghostscript2shell/harness/run.sh"
 Expect rc 0, `PASS=22 FAIL=0` and
 `TRACE_SHA256=a4569485cb1fb98ab74b7d186e1566f18ede6bdb263cdb4e5e34f631e5683c29`.
 The operator observed exactly those values at admission from that fresh
-`/tmp` copy, matching frontier's value. No witness verdict exists yet.
+`/tmp` copy, matching frontier's value. Witness W141 (#2149) independently
+replayed that baseline from a clean archive with its own rebuilt binaries:
+22 PASS / 0 FAIL, trace
+`a4569485cb1fb98ab74b7d186e1566f18ede6bdb263cdb4e5e34f631e5683c29`,
+ESTABLISHED at the labeled rung-1/2 scope, no counterexample. Its UAF lane
+(21/0, `bd4e4b4c…f85a7cb`) and native lane (17/0, `b53abad2…b682e87`) were
+likewise ESTABLISHED for rung 3 and rung 4 at the labeled build scope.
 
 Expected bytes: vulnerable 10.07.0 plus the injected NimbusSans PFA gives
 `TRAP_FIRED=true` and `GS_FORCEPUT_RESULT=true`; the same font on the
@@ -2881,6 +2916,29 @@ behavioural difference between the two binaries. That is the admission-time
 PostScript-level rung-1/2 differential only; the later author wakes raised its
 grade (addendum below). CVE-2026-125396 is AV:L; the writeup's remote delivery
 chain is an untested separate claim. Status: `reports/ghostscript2shell-status.md`.
+
+### Rung-5 lab chain over loopback HTTP — 05:2xZ (author-only, witness owed)
+
+`bash lab/frontier/ghostscript2shell/harness/run-r5.sh` runs three cases
+through a plant-started 127.0.0.1 upload service (`live/r5_server.py`,
+`live/r5_request.py`): vulnerable gs with the injected font, fixed `1484854e`
+with the injected font, and vulnerable gs with the unmodified font. Expect
+rc 0, `PASS=14 FAIL=0` three times and normalized trace
+`ddd635b2e607150af1180cc07554183ac79fd1025a79c00af28fbf923bf09957`.
+Vulnerable+injected gives `PATH_CONTROL_BYTES_BEFORE=1`,
+`PATH_CONTROL_BYTES_AFTER=0`, `PIPE_OPENED=true`,
+`PATH_CONTROL_BYTES_RESTORED=1`, `CLEAN_VALUE=12345` and a marker file
+containing `GS_R5_OK`; both controls give `NO_STALE_REF` and `MARKER=NONE`.
+`exp/command-safer.ps` (sha256
+`66cc77fb2f354f67ac46d6b94a1533fa2db0dad67b7ddb855671a63604b67fc8`) clears
+`path_control_active` and opens `%pipe%/bin/sh -c "echo GS_R5_OK > <marker>"`;
+a bare directory permit without `/*` was a preserved negative. The lab app
+explicitly permits its upload directory and templates saved paths into the gs
+command line, so this is rung 5 only at that labeled lab-app scope: no CUPS,
+mail or web delivery claim, unchanged AV:L, no external host, and no
+ESTABLISHED verdict until independent replay. Status and pins:
+`reports/ghostscript2shell-status.md`,
+`lab/frontier/ghostscript2shell/PROVENANCE.md`.
 
 ### Post-admission native and `-dSAFER` addendum — 04:2xZ (author-only)
 
@@ -3089,11 +3147,22 @@ gcc and clang ASan report `heap-buffer-overflow`, `WRITE of size 983041` in
 `gz_vacate()` at `gzwrite.c:394`, 0 bytes after the 16384-byte `state->in`
 region; a plant-started loopback `socketpair` with a 4 KiB receive buffer
 gives the same write. Fixed and safe inputs are ASan-clean on both
-transports. Boundaries: the source bytes are the application's compression
-input rather than peer bytes, the guard is allocator-dependent (buffer must
-be allocated after `gz_init()` for the readback), a 20000-byte stalled write
-does not trigger, there is no live gzip server or witness verdict, and rung
-5 stays UNKNOWN. Status: `reports/zlib2shell-status.md`.
+transports. The base harness's source bytes are the application's compression
+input; the guard is allocator-dependent (the caller buffer must be allocated
+after `gz_init()` for the readback), and a 20000-byte stalled write does not
+trigger. W1 adds `bash harness/run_tcp.sh` on a plant-started 127.0.0.1 gzip
+listener (expect rc 0, `PASS=14 FAIL=0`,
+`TCP_TRACE_SHA256=3ae896390ce28d6ec551dbac3e8e6473fd7ae923be9cb7f42762721dbdd78d02`):
+vulnerable-stall and 4 KiB slowdrain peers give ASan `WRITE of size 34465`
+in `gz_vacate` (`gzwrite.c:394`) 0 bytes after 16384, `WRITTEN=65535`;
+fixed-stall and 1 MiB-drain controls are rc 0 / `PRINTF_RC=1` / ASan-clean;
+gdb readback `avail_in=34465`, `state->in[0]=0xb3`, `[17]=0x87`,
+`[16384]=0x86` matches peer bytes at source offsets 65535, 65552 and 81919.
+Rung 4 is strengthened to peer-chosen bytes in a live loopback server; no
+pointer redirect, control flow, command or remote client beyond loopback,
+and rung 5 stays UNKNOWN. Witness W144 independently replayed both harnesses
+from a clean archive and returned ESTABLISHED for base rung 3/4 and W1 rung 4
+at the labeled build scope. Status: `reports/zlib2shell-status.md`.
 
 ## Admitted frontier lane — 2026-11-23 05:1xZ snap72shell
 
