@@ -4759,7 +4759,9 @@ sha256sum results/fakechunk-normalized.txt
 
 rc 0, winner low word `0x13f0`, and normalized SHA-256
 `bcde0050c441f08c0d920ad6365971b425d54ff3dd834bec84226647056bc3a1`, matching
-the report's two author replays. The address-free output records
+the report's three committed-script replays: two in-tree (winners `0x83f0`,
+`0x73f0`) and one clean-archive replay at `cd54f25` with only the gitignored
+no-flush binaries copied in (winner `0x53f0`). The address-free output records
 `CHOSEN_FREE_DELTA_FROM_RBUF=+512`, `FREED_CHUNK_ACCEPTED=1`,
 `MARKER_OVERWRITTEN=1`, `CHANGED_QWORDS_IN_WINDOW=1`, `CHANGED_OFFSETS=+512`,
 `PROCESS_REACHED_VULN=1`, `ABORT_VULN=0`, fixed reached clean with
