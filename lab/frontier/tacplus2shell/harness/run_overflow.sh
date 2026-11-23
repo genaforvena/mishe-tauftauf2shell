@@ -100,6 +100,7 @@ absent fixed_no_eval "$H/overflow-fixed.log" '^EVALARGS '
 emit fixed_reply_57 "$H/overflow-fixed.stdout" 'reply_len=57'
 
 echo "=== vulnerable pin + trigger only (no prime) ==="
+run_case noprime "$V" "$VL" 5001 "--no-prime"
 absent_raw noprime_no_control_write "$H/overflow-noprime.log" '^POST saved_rbp=0x3d646d635a5a5a5a'
 emit noprime_reply_18 "$H/overflow-noprime.stdout" 'reply_len=18'
 

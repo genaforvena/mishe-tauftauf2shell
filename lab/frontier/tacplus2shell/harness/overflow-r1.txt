@@ -10,6 +10,7 @@ case=fixed runner_rc=0
 PASS fixed_no_eval
 PASS fixed_reply_57
 === vulnerable pin + trigger only (no prime) ===
+case=noprime runner_rc=0
 PASS noprime_no_control_write
 PASS noprime_reply_18
 === normalized evidence hashes ===

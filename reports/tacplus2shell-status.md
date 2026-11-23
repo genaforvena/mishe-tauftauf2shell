@@ -294,9 +294,18 @@ the measured reliable location.
 
 Replay `bash lab/frontier/tacplus2shell/harness/run_overflow.sh` → 9 PASS / 0
 FAIL twice, normalized hashes `f76aeb15…` (vulnerable), `6499bb53…` (fixed),
-`664aa0ce…` (no prime) in `harness/overflow-r1.txt` / `-r2.txt`. Raw logs
-`harness/overflow-*.log` and `-*.stdout` are local-only evidence. New files:
-`harness/gdb-overflow.cmd`, `harness/run_overflow.sh`. Canonical
+`664aa0ce…` (no prime) in `harness/overflow-r1.txt` / `-r2.txt`. The runner
+generates all three cases itself (`run_gdb2.py --client wire4.py` with
+`--skips 8,9,10,11,12`, plus `--no-prime` for the third), so a clean archive
+needs no pre-existing `overflow-*.log` / `-*.stdout` files; those raw logs are
+local-only evidence. Witness #1906 independently CLOSED ESTABLISHED this at
+the labeled live-daemon rung-4 scope from a clean archive of `3f7a3b1`, with
+the same nine checks and three exact hashes; it flagged that the runner had
+only checked pre-existing noprime logs. That gap was fixed in W133: the runner
+now executes the noprime case on ports 4999/5000/5001 and the canonical
+`overflow-r1.txt` / `-r2.txt` include its `case=noprime runner_rc=0` line.
+No control-flow transfer, command or rung-5 claim follows from this replay.
+New files: `harness/gdb-overflow.cmd`, `harness/run_overflow.sh`. Canonical
 `run_reuse.sh` and `run_gdb.sh` were not modified.
 
 ## W129 live-daemon write-what-where via the `t` stack slot (2026-11-22 22:39Z)
