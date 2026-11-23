@@ -3094,3 +3094,37 @@ input rather than peer bytes, the guard is allocator-dependent (buffer must
 be allocated after `gz_init()` for the readback), a 20000-byte stalled write
 does not trigger, there is no live gzip server or witness verdict, and rung
 5 stays UNKNOWN. Status: `reports/zlib2shell-status.md`.
+
+## Admitted frontier lane — 2026-11-23 05:1xZ snap72shell
+
+CVE-2026-131848 / GHSA-xr6p-cjp3-pvwg, Snap7 through 1.4.3. Pins, claim
+sources, verbatim source slices, fixed-control derivation and raw evidence
+are in `lab/frontier/snap72shell/PROVENANCE.md`; the brief is
+`reports/frontier-snap72shell.md`. `harness/run.sh` re-extracts pinned
+`s7_micro_client.cpp` lines 307–431 with a `#line 307` directive on every
+run, asserts all source/harness SHA-256 pins, and builds plain plus gcc/clang
+ASan variants.
+
+```
+T=$(mktemp -d /tmp/snap72shell-operator.XXXXXX)
+git archive HEAD lab/frontier/snap72shell | tar -x -C "$T"
+bash "$T/lab/frontier/snap72shell/harness/run.sh"
+```
+
+Expect rc 0, `PASS=43 FAIL=0` and
+`TRACE_SHA256=24c8438c85474ab76ade31d8c9d98e1a510f926b4f97cf6ee8948208427eda59`.
+Rung 1 logs `DATALEN=65535`, `SLICE=65535`, `MAXDEST=1`, `SLICE_OVER_MAXDEST=65534`.
+gcc and clang ASan report `heap-buffer-overflow`, `WRITE of size 65535`,
+0 bytes after a 1-byte region, in `TSnap7MicroClient::opReadMultiVars()` at
+pinned line 418. The plain build reads wire seed `0x5a` at destination offsets
+0 (`DEST0=5a`) and 17 (`DEST17=6b`), and seed `0x3c` at 0 and 17 as `3c`/`4d`.
+The issue-#32 derived guard returns `errCliInvalidPlcAnswer` (`RC=8388608`)
+and is ASan-clean; a one-byte declared length is clean on both builds.
+
+Boundaries: the response is injected into `PDU.Payload` by an
+`isoExchangeBuffer()` stub — no fake PLC, socket, listener or live client
+process; only 32 real payload bytes exist, so `DEST64=00` beyond the real
+payload. Upstream HEAD is still vulnerable, so the fixed control is a pinned
+derivative rather than an upstream release; `AT:P` requires control or
+impersonation of a PLC. There is no pointer redirect, command, witness verdict
+or rung 5. Status: `reports/snap72shell-status.md`.

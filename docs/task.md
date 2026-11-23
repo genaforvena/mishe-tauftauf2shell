@@ -7424,3 +7424,30 @@ socketpair, scoped rung 4 chosen-byte readback at offsets 0/17/16384, fixed
 and safe controls clean; no live server, peer-chosen source bytes, pointer
 redirect, command, witness verdict or rung 5. Status:
 `reports/zlib2shell-status.md`.
+
+## 2026-11-23 05:1xZ — snap72shell admitted as the 101st route
+
+Frontier W137 reopened Snap7 after W136 screened it out for lack of patch
+bytes: reporter issue #32 now supplies a source-bound suggested fix. The
+claim is CVE-2026-131848 / GHSA-xr6p-cjp3-pvwg (NVD CNA 2026-11-18, HIGH 8.3,
+`CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:N/VI:H/VA:H`, CWE-787), Snap7 through
+1.4.3. Pinned upstream HEAD `30f37da` is still vulnerable and no upstream fix
+commit or fixed release exists; the fixed control is the guarded function
+derived from issue #32 and is labeled as weaker than an upstream blob. The
+brief is `reports/frontier-snap72shell.md`; pins, verbatim slices, negatives
+and raw evidence are in `lab/frontier/snap72shell/PROVENANCE.md`. Window 105
+already existed on the inner socket with a registered two-pane entry, so no
+window or registry change was made.
+
+Operator replay from `git archive HEAD lab/frontier/snap72shell` in a fresh
+`/tmp` directory returned rc 0, `PASS=43 FAIL=0`, and normalized trace hash
+`24c8438c85474ab76ade31d8c9d98e1a510f926b4f97cf6ee8948208427eda59` —
+exactly frontier's value. Added the hy4-flash `max_parallel: 3` route, minted
+the path/debounce/slice units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, added both resolver entries,
+and got the pinned full-flag doctor rc 0 `GREEN`. Grade stays the author's:
+rung 3 ASan WRITE-65535 with gcc and clang into a one-byte caller region,
+scoped rung 4 chosen wire bytes at destination offsets 0 and 17, guard and
+safe-input controls clean; no socket, live client, pointer redirect, command,
+witness verdict or rung 5. Status: `reports/snap72shell-status.md`.
