@@ -84,9 +84,11 @@ sanitizers. The precondition is LCP completion (`s_lcpup`), which the harness
 does not model. The ceiling is explicit: this is a direct-call harness with a
 stubbed `ppp_tx_frame_header()`/`ppp_tx_frame_trailer()` and recording
 transmit buffer — **no real PPP/PPPoE link, no socket, no live `mg_tcpip_if`,
-no pointer control and no command execution**. No rung 5 is claimed. Witness
-should replay `./run.sh` from a clean tree and check the fixed blob, not a
-report.
+no pointer control and no command execution**. No rung 5 is claimed. The witness
+independently replayed both this harness and the later real-stack harness on
+2026-11-23 (tape #2287): verdict ESTABLISHED at both explicitly labeled scopes,
+with this ceiling upheld. See `reports/mongoose2shell-status.md` and
+`lab/frontier/mongoose2shell/PROVENANCE.md`.
 
 ## 5. Next step for the target mind
 
@@ -96,5 +98,10 @@ into a plant-started `mg_tcpip_if`, and measure whether LCP is reachable
 without authentication and whether the frame reaches `ppp_handle_ipv6cp()`
 with a short `pay->len`. If that path is confirmed, re-measure rung 4 with a
 real `tx.buf` of `framesize` bytes. Never probe outside loopback.
+
+This step was completed by mongoose2shell W1: the real-stack harness measured
+the LCP gate (one unauthenticated CFG-ACK) and the real 1504-byte `framesize`,
+and the witness replayed it (tape #2287). A live wire/socket driver remains
+unmeasured and is not claimed.
 
 Detailed per-file provenance: `lab/frontier/mongoose2shell/PROVENANCE.md`.

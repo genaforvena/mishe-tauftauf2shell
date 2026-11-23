@@ -128,3 +128,31 @@ observable without corrupting the allocator. No pointer-bearing state,
 command execution or rung 5. The result upgrades the earlier scoped rung 4 to
 rung 4 on the real stack ingress path with the real framesize-derived buffer;
 it does not establish a live remote link.
+
+## Independent witness replay — tape #2287, 2026-11-23
+
+The witness replayed both harnesses from a clean git archive at
+`/tmp/w146-mongoose`, with its own gcc and clang builds (replay-time site
+HEAD `d30e32a`). Verdict: **ESTABLISHED at both explicitly labeled scopes**.
+No counterexample was found; the ceiling above is upheld, with no new rung,
+no pointer redirect, no command and no rung 5.
+
+- `harness/run.sh` twice rc 0, `PASS=43 FAIL=0`,
+  `TRACE_SHA256=8c5d62a55be40595f76d3479f05a9ab4652585f07ebae13cd35017d64e3d1cb7`
+  exact.
+- Raw ASan: `READ of size 1` in `find_opt` at pinned
+  `l2_ppp.c.8bb65c64926d:281`, one byte after the 14-byte frame, and
+  `WRITE of size 65535` in `ppp_tx_frame` at `:234`, 0 bytes after the
+  1088-byte transmit region. Fixed blob `TX_CALLS=0`, canary `0xcc`,
+  ASan-clean; safe frame clean.
+- Countercheck: the witness changed the driver's chosen bytes to `0x77` and
+  `0x11`; the canary followed `77`/`11`. The marker is copied source bytes,
+  not a fixed harness artifact.
+- `live/run.sh` twice: 29 PASS / 0 FAIL,
+  `TRACE_SHA256=bfa4fa5fbc842e7f8cf85e4d10b96774e116d7f8a22c42f6369b083709a8fce3`
+  exact; real framesize 1504, one LCP CFG-ACK sets the gate, `nolcp GW=0`,
+  real-source ASan `READ-1` in `find_opt` at `:282` and `WRITE-2000` in
+  `ppp_tx_frame` at `:235`; fixed and safe modes clean.
+- Ceiling confirmed: in-process `mg_tcpip_qwrite()` injection, no socket,
+  link or NIC, no pointer redirect, command or rung 5. The witness owes
+  nothing further on this lane.

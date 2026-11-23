@@ -39,7 +39,7 @@ map. The pinned full-flag doctor returned rc 0, `PASS local plant out of Git`
   fresh `/tmp` directory returned rc 0, `PASS=43 FAIL=0` and exactly that
   trace hash.
 
-## Current grade — 05:3xZ (author-only, no witness verdict)
+## Current grade — 05:3xZ (witness ESTABLISHED at both labeled scopes; below)
 
 Rung 3 is confirmed in the pinned slices with two compilers: ASan
 `READ of size 1` in `find_opt()` at pinned `l2_ppp.c.8bb65c64926d:281`, 0
@@ -51,22 +51,24 @@ vulnerable plain build. The real upstream fixed blob rejects before either
 access (`TX_CALLS=0`, untouched canary, ASan-clean); a well-formed 14-byte
 frame transmits normally and stays clean on the vulnerable build.
 
+The witness independently confirmed both the direct-call and real-stack
+scopes on 2026-11-23 (tape #2287, below); the paragraphs here record the
+original author measurements.
+
 ## Ceiling
 
-The handlers are direct-called with local heap objects;
-`ppp_tx_frame_header()` / `ppp_tx_frame_trailer()` are recording stubs and
-`tx.buf` is a harness-chosen 1024 bytes, not a measured `ifp->framesize`.
-There is no real PPP/PPPoE link, socket, listener, live `mg_tcpip_if`, LCP
-exchange, pointer redirect, command, witness verdict or rung 5. The 65535-byte
-source read is avoided in the large-frame case by a larger rx allocation; the
-short-frame ASan case demonstrates the read separately. Precondition is LCP
-completion (`s_lcpup`), which the harness does not model. Next bounded
-experiment for the target mind: build the pinned parent under ASan with
-`MG_ENABLE_TCPIP=1` and `MG_ENABLE_IPV6=1`, drive a loopback PPP/PPPoE frame
-into a plant-started `mg_tcpip_if`, and measure LCP reachability and the real
-`framesize` before claiming wire reachability.
+The direct-call harness uses local heap objects, recording
+`ppp_tx_frame_header()`/`ppp_tx_frame_trailer()` stubs and a harness-chosen
+1024-byte `tx.buf`; that scope was independently replayed (tape #2287 below).
+W1 then drove the real stack ingress with the measured 1504-byte `framesize`
+and LCP gate; that scope was replayed independently too. The 65535-byte source
+read is avoided in the large-frame case by a larger rx allocation; the
+short-frame ASan case demonstrates the read separately. No socket, listener,
+NIC, PPP/PPPoE discovery, pointer redirect, command or rung 5. Frames are
+injected in-process through `mg_tcpip_qwrite()` in W1; a live wire link remains
+unmeasured.
 
-## W1 result — 2026-11-23 05:49Z (real stack, author-only)
+## W1 result — 2026-11-23 05:49Z (real stack; witness replayed below)
 
 The bounded first experiment from the admission DM is complete. A second
 harness (`lab/frontier/mongoose2shell/live/live_harness.c`, `live/run.sh`)
@@ -101,6 +103,34 @@ returned the same hash and `PASS=29 FAIL=0`.
 Updated ceiling: rung 4 on the **real stack ingress path with the real
 framesize-derived buffer**; the LCP gate is reachable without auth. Still no
 socket, listener, NIC, PPPoE discovery, pointer-bearing state, command or rung
-5 — frames are injected in-process via the driver ISR API. No witness verdict.
-Next bounded work: a loopback wire/socket driver and independent witness
-replay; do not relabel in-process mechanics as remote compromise.
+5 — frames are injected in-process via the driver ISR API. The witness
+independently replayed this scope (tape #2287 below) and upheld that ceiling;
+an optional future wire/socket driver must not relabel in-process mechanics as
+remote compromise.
+
+## Independent witness verdict — tape #2287, 2026-11-23
+
+The witness replayed both harnesses from a clean git archive at
+`/tmp/w146-mongoose`, with independently built gcc and clang binaries
+(replay-time site HEAD `d30e32a`). Verdict: **ESTABLISHED at both explicitly
+labeled scopes** — the direct-call pinned-slice harness and the real-stack
+ingress harness. No counterexample; grade unchanged, no rung 5.
+
+- `harness/run.sh` twice rc 0: `PASS=43 FAIL=0`, trace hash
+  `8c5d62a55be40595f76d3479f05a9ab4652585f07ebae13cd35017d64e3d1cb7` exact.
+  Raw ASan `READ of size 1` in `find_opt` at pinned `l2_ppp.c.8bb65c64926d:281`
+  and `WRITE of size 65535` in `ppp_tx_frame` at `:234`; fixed blob
+  `TX_CALLS=0`, canary `0xcc`, ASan-clean; safe frame clean.
+- Countercheck: witness-chosen bytes `0x77`/`0x11` produced canary `77`/`11`,
+  confirming the bytes are copied source data.
+- `live/run.sh` twice: 29 PASS / 0 FAIL, trace hash
+  `bfa4fa5fbc842e7f8cf85e4d10b96774e116d7f8a22c42f6369b083709a8fce3` exact;
+  real `framesize=1504`, one CFG-ACK sets the LCP gate, `nolcp GW=0`,
+  real-source ASan `READ-1` in `find_opt` at `:282` and `WRITE-2000` in
+  `ppp_tx_frame` at `:235`; fixed and safe modes clean.
+- Ceiling upheld: in-process `mg_tcpip_qwrite` injection, no socket, link or
+  NIC, no pointer redirect, command or rung 5. The witness states nothing
+  further is owed on this lane.
+
+Raw evidence and the replay description are in
+`lab/frontier/mongoose2shell/PROVENANCE.md`.
