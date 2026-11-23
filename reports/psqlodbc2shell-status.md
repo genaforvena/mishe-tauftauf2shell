@@ -174,3 +174,32 @@ matrix was executed after the edit with rc=0
   The advisory's AV:N vector and the separate CWE-457 uninitialized-read
   limb remain claims; W146 observes the OOB terminator row and its
   layout-dependent alias, not an uninitialized read.
+
+## Public ODBC API reachability (2026-11-23 W146, target mind)
+
+Tracked replay: `real/live-replay.sh` (uses `real/odbc-harness.c` and
+`real/fakepg.py`); it compiles an ASan harness against unixODBC, registers
+the pinned ASan driver `.so` in lab-local `odbc.ini`/`odbcinst.ini`, starts a
+minimal fake PostgreSQL v3 handshake on 127.0.0.1:59432, and runs three
+cases. Its executed output:
+vulnerable driver + 16-argument escape gives `WRITE of size 8` at
+`convert.c:5657`; fixed driver gives `EXECDIRECT rc=-1` with no ASan report;
+safe input gives `EXECDIRECT rc=0` with no ASan report.
+
+- The full report chain starts outside the driver: `SQLExecDirect` in
+  `libodbc.so.2` -> driver `SQLExecDirect` (`odbcapi.c:322`) ->
+  `PGAPI_ExecDirect` (`execute.c:207`) -> `PGAPI_Execute` (`:1250`) ->
+  `Exec_with_parameters_resolved` (`:498`) ->
+  `copy_statement_with_parameters` (`convert.c:3256`) ->
+  `inner_process_tokens` -> `convert_escape` -> `processParameters:5657`.
+  ASan places `param_pos [272,528)` and the access at offset 536 in the
+  `convert_escape` frame.
+- `SQLPrepare` alone returned `rc=0` on the vulnerable driver and sent no
+  Parse message: the conversion is reached at execution time, not at
+  prepare time. This is a negative result, preserved.
+- The fake server answers the startup handshake only; it is not a
+  PostgreSQL server and no application that forwards untrusted SQL to ODBC
+  was exercised. Still UNKNOWN: real PostgreSQL server interaction, pointer
+  control, chosen-offset control-flow datum, command, marker side effect and
+  witness verdict. This retires the "no public ODBC path" half of the W145
+  ceiling; it does not establish AV:N or rung 5.
