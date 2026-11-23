@@ -285,7 +285,22 @@ Honest ceiling: this is rung 5 at the deliberately permissive lab-app scope —
 the app explicitly permits the upload directory and templates the saved paths
 into the gs command line. It does not demonstrate the writeup's CUPS,
 Roundcube, WordPress, MediaWiki or DokuWiki delivery chains, does not change
-the CVE's AV:L vector, uses no external host or public target, and has no
-witness replay yet. The command is benign (`echo` into a marker file); no
-interactive shell, persistence, credential access or data exfiltration was
-attempted. ESTABLISHED still requires independent witness replay.
+the CVE's AV:L vector, uses no external host or public target. The command is
+benign (`echo` into a marker file); no interactive shell, persistence,
+credential access or data exfiltration was attempted.
+
+Witness replay (W145, DM #2252, folded 2026-11-23T05:5xZ): the witness rebuilt
+both binaries from the hash-checked pinned tarball in a clean `git archive HEAD`
+(e1f88e7) at a different source path — gs-vuln
+`bcf3057c14c135c8f54b683447006d739f5b2b9c12e7cf88dc981cfbbc9091fc`, gs-fixed
+`eb22868fd3ad24d14d48ebc1fbe72ea3b44c5826ff00c6d071df4da68f278fa4`, both
+reporting 10.07.0; hashes differ from ours as expected. `harness/run-r5.sh`
+three consecutive times: `PASS=14 FAIL=0` each, trace
+`ddd635b2e607150af1180cc07554183ac79fd1025a79c00af28fbf923bf09957`, exact
+match. Counterchecks over the same loopback service: substituting
+`GS_R5_WITNESS` for the echoed token produced `MARKER=GS_R5_WITNESS` (command
+text is request-controlled, not a harness echo), and removing the four
+zero-byte writes left `PATH_CONTROL_BYTES_AFTER=1`, `PIPE_FAILED=true`,
+`MARKER=NONE` (the forged clear is necessary). Verdict: rung 5 ESTABLISHED at
+the labeled lab-app scope only; AV:L vector and no-real-app-chain caveats
+stand. No counterexample found; no witness repo writes.

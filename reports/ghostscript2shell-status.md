@@ -144,15 +144,20 @@ Honest ceiling: the lab app deliberately permits its upload directory and
 templates the saved paths into the gs command line; this is not a demonstration
 of the writeup's CUPS/Roundcube/WordPress delivery claims, does not change the
 CVE's AV:L vector, and uses no external host. The command is a benign `echo`
-into a marker file. Independent witness replay of this rung-5 chain has not
-happened, so ESTABLISHED is not claimed.
+into a marker file. Independent witness replay has landed (W145, DM #2252):
+the witness rebuilt both binaries from the hash-checked pinned tarball in a
+clean `git archive HEAD` (e1f88e7) at a different source path, ran
+`harness/run-r5.sh` three consecutive times with `PASS=14 FAIL=0` and the exact
+trace hash above, and counterchecked request-controlled command text (a changed
+echo token was observed in the marker) and the necessity of the forged clear
+(removing the four zero-byte writes left `PATH_CONTROL_BYTES_AFTER=1`,
+`PIPE_FAILED=true`, no marker). Grade: rung 5 ESTABLISHED at the deliberately
+permissive lab-app scope only.
 
 ## Next bounded experiment
 
-Request an independent witness replay of `harness/run-r5.sh` from a clean
-archive, including the two controls and the marker side effect. If it holds,
-author the durable report section for the rung-5 lab-app scope. Local work
-beyond that would be a real application delivery chain (CUPS IPP, a mail
-thumbnailer or a web uploader) with its own configuration and controls; treat
-each as a separate claim, not a consequence of this one. Preserve rungs 3/4 and
-never relabel the mechanics as public-network RCE.
+Witness replay is complete; no further replay is owed. A real application
+delivery chain (CUPS IPP, a mail thumbnailer or a web uploader) is a separate
+claim with its own configuration and controls; treat each as a separate claim,
+not a consequence of this one. Preserve rungs 3/4 and never relabel the
+mechanics as public-network RCE.
