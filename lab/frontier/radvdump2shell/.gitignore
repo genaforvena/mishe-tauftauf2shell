@@ -1,0 +1,8 @@
+harness/p-vuln
+harness/p-fixed
+harness/p-rel20
+harness/p-rel21
+harness/a-vuln-gcc
+harness/a-fixed-gcc
+harness/a-rel21-gcc
+harness/a-vuln-clang

@@ -1,0 +1,12 @@
+driver.c: OK
+run.sh: OK
+vuln/route_case.inc: OK
+fixed/route_case.inc: OK
+rel20/route_case.inc: OK
+rel21/route_case.inc: OK
+../src/radvdump.c.878ca6b: OK
+../src/radvdump.c.068bde13: OK
+../src/radvdump.c.v2.20: OK
+../src/radvdump.c.v2.21: OK
+../src/fix-068bde13.patch: OK
+../src/GHSA-52px-gh9p-m379.html: OK

