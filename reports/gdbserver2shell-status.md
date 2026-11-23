@@ -130,3 +130,47 @@ indirect call. Grade unchanged. Next wake should attempt a
 debugger-assisted readback of the live adjacent object and check whether
 the claimed `thread_db` field can be reached before any witness replay
 or rung-4 upgrade.
+
+## Plain-build rung 4: live adjacent object and forged call (2026-11-23T02:13Z)
+
+`rsp/plain_verify.sh` replays the plant-started, non-ASan pinned gdbserver
+three ways from loopback: **6 PASS / 0 FAIL** twice, normalized hash
+`f8bb0fd0692a906dcde774bbc1f9de86a117ac8f7991c6aa6347eb9dcf451de9`.
+With `SLEN=1`/N=64 the server answers `OK` to `QTDPsrc` and `E01` to
+`qGetTLSAddr`, then dies with SIGSEGV (`SERVER_RC=139`) at teardown; the
+well-formed `SLEN=16`/N=16 packet and the short `SLEN=1`/N=8 packet both
+exit 0. No debugger is involved in these three cases.
+
+`rsp/gdb_heap_probe.sh` reads the same process under gdb 15.1 without
+forcing the call. On the natural layout `src=xmalloc(2)` is at
+`...61c460` (chunk header `0x21` at `...61c450`); the following chunk at
+`...61c478` is in use, size `0x61`, and its data at `...61c480` is a live
+`tdesc_feature`, whose first word `0x00005555555f8520` resolves to
+`vtable for tdesc_feature + 16` (`0xa4520` in the binary). The 64 chosen
+bytes turn that word into `0x4847464544434241` and the next chunk size
+into `0x605f5e5d5c5b5a59`. N=8 leaves the object intact; N=32 rewrites
+only its chunk size and also faults. Full dumps and the SIGSEGV stack
+(delete of `0x55555561c480` from `target_desc`'s feature vector) are in
+`rsp/evidence/gdb-heap-*.log`.
+
+`rsp/gdb_marker_probe.sh` goes one step further. A second wire packet
+carries 64 exact bytes that preserve the chunk size, set the live
+object's vptr to an address inside that same object and place
+`abort@plt` (`0x555555561f70`) in the fake vtable's `+0x10` slot. The
+process's devirtualizing destructor reads `[vptr+0x10]`, sees a value
+other than `tdesc_feature`'s deleting destructor, and takes
+`call *%rax` with the object as `$rdi`: two replays gave `SIGABRT` with
+`abort()` in the stack. A same-length control carrying the object's
+original four words exited normally. Evidence:
+`rsp/evidence/marker-marker-{1,2}.log`, `marker-control-3.log`.
+
+Grade: rung 3 confirmed in the real pinned build; rung 4 now demonstrated
+security impact and chosen-function control-flow hijack inside a real
+process on a natural layout, labeled with its condition — gdb fixed the
+load address for the forged pointer. The identical payload under
+`setarch -R` without gdb did **not** reproduce the abort (addresses
+differ), and the well-formed control is clean. `qGetTLSAddr` still
+replies `E01` in every case because no `thread_db` agent is loaded; the
+advisory's `process_info_private::thread_db` overwrite and RIP chain
+remain claims. No lab-chosen command, no observed side effect from a
+wire-only attacker, no witness replay and no rung 5.

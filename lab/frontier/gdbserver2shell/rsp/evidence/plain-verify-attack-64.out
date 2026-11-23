@@ -1,0 +1,10 @@
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/rsp/live_run.sh: line 27: 3949330 Segmentation fault      (core dumped) ASAN_OPTIONS=abort_on_error=1:detect_leaks=0 "$BIN" --once --debug=remote "127.0.0.1:$PORT" /bin/true > "$LOG" 2>&1
+CLIENT_RC=0 SERVER_RC=139
+--- client ---
+INITIAL=
+QTDP_ACK=+ QTDP_REPLY=OK
+QTDPsrc_LEN=149 DECLARED=1 USEDLEN=64
+QTDPsrc_ACK=+
+QTDPsrc_REPLY=OK
+GETTLS_ACK=+ GETTLS_REPLY=E01
+--- server markers ---

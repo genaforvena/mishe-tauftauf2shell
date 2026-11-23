@@ -1,0 +1,40 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after fork from child process 3984013]
+[Detaching after fork from child process 3984021]
+[Detaching after vfork from child process 3984022]
+Process /bin/true created; pid = 3984022
+Listening on port 34620
+Remote debugging from host 127.0.0.1, port 32868
+[remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:1:414141414141414141414141414141414141414141414141610000000000000088c461555555000042424242424242424242424242424242701f565555550000");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("qGetTLSAddr:1:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$E01#a6"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] readchar: readchar: Got EOF
+[remote] getpkt: [getpkt: discarding char 'ÿ']
+Killing process(es): 3984022
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+
+=== AFTER_RUN ===
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff784527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff78288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00005555555814c1 in std::default_delete<tdesc_feature>::operator() (__ptr=0x55555561c480, this=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:99
+#6  std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >::~unique_ptr (this=0x55555561d120, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:404
+#7  std::_Destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > (__pointer=0x55555561d120) at /usr/include/c++/13/bits/stl_construct.h:151
+rip            0x7ffff789ebec      0x7ffff789ebec <__GI___pthread_kill+284>
+rax            0x0                 0
+rdi            0x3cc9ce            3983822

@@ -1,0 +1,7 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after fork from child process 4038256]
+[Detaching after fork from child process 4038257]
+[Detaching after vfork from child process 4038259]
+Process /bin/true created; pid = 4038259
+Listening on port 34625

@@ -7091,3 +7091,19 @@ reach `dec_term`. The ≥2 GiB inflated-buffer plus ~17 GiB heap route was not
 attempted on this shared host and stays UNKNOWN, not a pass. Harness rungs
 1–4 are unchanged; no live-VM corruption, adjacent-object identity, pointer
 control or rung 5.
+
+Gdbserver2Shell W2 (this wake) moved rung 4 into the real pinned plain
+build. `rsp/plain_verify.sh` replayed the loopback wire three ways twice
+(6 PASS / 0 FAIL, hash
+`f8bb0fd0692a906dcde774bbc1f9de86a117ac8f7991c6aa6347eb9dcf451de9`):
+`SLEN=1`/N=64 answers `OK` then SIGSEGVs at teardown, while safe N=16
+and short N=8 exit 0. Under gdb the 64 chosen bytes overwrite the vptr
+of a live adjacent `tdesc_feature` (`vtable for tdesc_feature + 16`),
+and a second exact-byte packet forges that vtable so the destructor's
+indirect call reaches `abort()` (SIGABRT, twice) while a same-length
+original-object control exits normally. The forged address needs gdb's
+fixed load address; the same payload under `setarch -R` without gdb
+exited 0. No command, no wire-only side effect, no `thread_db` call and
+no witness replay: rung 4 demonstrated with recorded conditions, rung 5
+untouched. Details: `reports/gdbserver2shell-status.md`,
+`lab/frontier/gdbserver2shell/PROVENANCE.md`.

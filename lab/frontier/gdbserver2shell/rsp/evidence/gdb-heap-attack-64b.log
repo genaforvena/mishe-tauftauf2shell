@@ -1,0 +1,115 @@
+Breakpoint 1 at 0x37354: file ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc, line 2547.
+Breakpoint 2 at 0x3735e: file ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc, line 2547.
+Breakpoint 3 at 0x3736a: file ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc, line 2551.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after fork from child process 3918931]
+[Detaching after fork from child process 3918932]
+[Detaching after vfork from child process 3918933]
+Process /bin/true created; pid = 3918933
+Listening on port 34607
+Remote debugging from host 127.0.0.1, port 54202
+[remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:1:4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f604142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60");  [sending ack]
+[remote] getpkt: [sent ack]
+
+=== BP_CALL src=0x55555561c460 count=64 ===
+0x55555561c450:	0x0000000000000000	0x0000000000000021
+0x55555561c460:	0x000055500034ad7c	0x0000000000000000
+0x55555561c470:	0x0000000000000000	0x0000000000000061
+0x55555561c478:	0x0000000000000061	0x00005555555f8520
+0x55555561c488:	0x000055555561c500	0x0000000000000015
+0x55555561c498:	0x0000000000000015	0x0000000000000000
+0x55555561c4a8:	0x000055555561b840	0x000055555561b940
+0x55555561c4b8:	0x000055555561b940	0x000055555561c580
+0x55555561c4c8:	0x000055555561c588	0x000055555561c588
+0x55555561c460:	0x7c	0xad	0x34	0x00	0x50	0x55	0x00	0x00
+0x55555561c468:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c470:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c478:	0x61	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c480:	0x20	0x85	0x5f	0x55	0x55	0x55	0x00	0x00
+0x55555561c488:	0x00	0xc5	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c490:	0x15	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c498:	0x15	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c4a0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c4a8:	0x40	0xb8	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b0:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b8:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+
+=== BP_RET src=0x55555561c460 nbytes=64 ===
+0x55555561c450:	0x0000000000000000	0x0000000000000021
+0x55555561c460:	0x4847464544434241	0x504f4e4d4c4b4a49
+0x55555561c470:	0x5857565554535251	0x605f5e5d5c5b5a59
+0x55555561c478:	0x605f5e5d5c5b5a59	0x4847464544434241
+0x55555561c488:	0x504f4e4d4c4b4a49	0x5857565554535251
+0x55555561c498:	0x605f5e5d5c5b5a59	0x0000000000000000
+0x55555561c4a8:	0x000055555561b840	0x000055555561b940
+0x55555561c4b8:	0x000055555561b940	0x000055555561c580
+0x55555561c4c8:	0x000055555561c588	0x000055555561c588
+0x55555561c460:	0x41	0x42	0x43	0x44	0x45	0x46	0x47	0x48
+0x55555561c468:	0x49	0x4a	0x4b	0x4c	0x4d	0x4e	0x4f	0x50
+0x55555561c470:	0x51	0x52	0x53	0x54	0x55	0x56	0x57	0x58
+0x55555561c478:	0x59	0x5a	0x5b	0x5c	0x5d	0x5e	0x5f	0x60
+0x55555561c480:	0x41	0x42	0x43	0x44	0x45	0x46	0x47	0x48
+0x55555561c488:	0x49	0x4a	0x4b	0x4c	0x4d	0x4e	0x4f	0x50
+0x55555561c490:	0x51	0x52	0x53	0x54	0x55	0x56	0x57	0x58
+0x55555561c498:	0x59	0x5a	0x5b	0x5c	0x5d	0x5e	0x5f	0x60
+0x55555561c4a0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c4a8:	0x40	0xb8	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b0:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b8:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+
+=== BP_NEWLAST newlast=0x55555561fb60 chunkhdr: ===
+0x55555561fb50:	0x0000000000000000	0x0000000000000021
+0x55555561fb60:	0x000000055555561f	0x0000000000000000
+0x55555561fb70:	0x0000000000000000	0x00000000000000f1
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("qGetTLSAddr:1:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$E01#a6"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] readchar: readchar: Got EOF
+[remote] getpkt: [getpkt: discarding char 'ÿ']
+Killing process(es): 3918933
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000055555558132f in std::default_delete<tdesc_feature>::operator() (__ptr=0x55555561c480, this=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:93
+93	      operator()(_Tp* __ptr) const
+
+=== AFTER_RUN ===
+#0  0x000055555558132f in std::default_delete<tdesc_feature>::operator() (__ptr=0x55555561c480, this=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:93
+#1  std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >::~unique_ptr (this=0x55555561d120, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:404
+#2  std::_Destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > (__pointer=0x55555561d120) at /usr/include/c++/13/bits/stl_construct.h:151
+#3  std::_Destroy_aux<false>::__destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >*> (__last=0x55555561d138, __first=0x55555561d120) at /usr/include/c++/13/bits/stl_construct.h:163
+#4  std::_Destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >*> (__last=0x55555561d138, __first=<optimized out>) at /usr/include/c++/13/bits/stl_construct.h:196
+#5  std::_Destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >*, std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > (__last=0x55555561d138, __first=<optimized out>) at /usr/include/c++/13/bits/alloc_traits.h:948
+#6  std::vector<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >, std::allocator<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > >::~vector (this=0x55555561c3e8, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/stl_vector.h:735
+#7  0x00005555555844db in target_desc::~target_desc (this=0x55555561c3c0, __in_chrg=<optimized out>) at ../../../src/binutils-gdb-633ae02/gdbserver/tdesc.h:31
+#8  target_desc_deleter::operator() (this=<optimized out>, target_desc=0x55555561c3c0) at ../../../src/binutils-gdb-633ae02/gdbserver/tdesc.cc:110
+#9  0x00005555555b48e2 in std::unique_ptr<target_desc const, target_desc_deleter>::~unique_ptr (this=0x555555617fb8, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:404
+#10 std::pair<unsigned long, std::unique_ptr<target_desc const, target_desc_deleter> >::~pair (this=0x555555617fb0, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/stl_pair.h:187
+#11 std::_Destroy<std::pair<unsigned long, std::unique_ptr<target_desc const, target_desc_deleter> > > (__pointer=0x555555617fb0) at /usr/include/c++/13/bits/stl_construct.h:151
+rip            0x55555558132f      0x55555558132f <std::vector<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >, std::allocator<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > >::~vector()+79>
+rdi            0x55555561c3e8      93824993051624
+rsi            0x55555561f280      93824993063552
+   0x555555581317 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+55>:	add    %cl,-0x75(%rcx)
+   0x55555558131a <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+58>:	sbb    $0x24,%al
+   0x55555558131c <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+60>:	test   %rbx,%rbx
+   0x55555558131f <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+63>:	je     0x555555581477 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+407>
+   0x555555581325 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+69>:	mov    (%rbx),%rax
+   0x555555581328 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+72>:	lea    -0x63f(%rip),%rdx        # 0x555555580cf0 <_ZN13tdesc_featureD0Ev>
+=> 0x55555558132f <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+79>:	mov    0x10(%rax),%rax
+   0x555555581333 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+83>:	cmp    %rdx,%rax
+   0x555555581336 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+86>:	jne    0x5555555814b8 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+472>
+   0x55555558133c <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+92>:	mov    0x48(%rbx),%rbp
+   0x555555581340 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+96>:	mov    0x40(%rbx),%r14
+   0x555555581344 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+100>:	lea    0x771d5(%rip),%rax        # 0x5555555f8520 <_ZTV13tdesc_feature+16>
+   0x55555558134b <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+107>:	mov    %rax,(%rbx)
+   0x55555558134e <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+110>:	cmp    %r14,%rbp
+   0x555555581351 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+113>:	je     0x555555581373 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+147>
+   0x555555581353 <_ZNSt6vectorISt10unique_ptrI13tdesc_featureSt14default_deleteIS1_EESaIS4_EED2Ev+115>:	nopl   0x0(%rax,%rax,1)
+$1 = 0xf3

@@ -1,0 +1,28 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after fork from child process 4060114]
+[Detaching after fork from child process 4060115]
+[Detaching after vfork from child process 4060116]
+Process /bin/true created; pid = 4060116
+Listening on port 34626
+Remote debugging from host 127.0.0.1, port 48378
+[remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:1:414141414141414141414141414141414141414141414141610000000000000020855f555555000000c561555555000015000000000000001500000000000000");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("qGetTLSAddr:1:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$E01#a6"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] readchar: readchar: Got EOF
+[remote] getpkt: [getpkt: discarding char 'ÿ']
+Killing process(es): 4060116
+[Inferior 1 (process 4060100) exited normally]
+
+=== AFTER_RUN ===
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/rsp/evidence/marker-control-3.cmd:6: Error in sourced command file:
+No stack.

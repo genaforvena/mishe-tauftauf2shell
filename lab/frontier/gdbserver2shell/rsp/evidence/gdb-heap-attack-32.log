@@ -1,0 +1,97 @@
+Breakpoint 1 at 0x37354: file ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc, line 2547.
+Breakpoint 2 at 0x3735e: file ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc, line 2547.
+Breakpoint 3 at 0x3736a: file ../../../src/binutils-gdb-633ae02/gdbserver/tracepoint.cc, line 2551.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after fork from child process 3900737]
+[Detaching after fork from child process 3900738]
+[Detaching after vfork from child process 3900739]
+Process /bin/true created; pid = 3900739
+Listening on port 34606
+Remote debugging from host 127.0.0.1, port 52924
+[remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:1:4142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f60");  [sending ack]
+[remote] getpkt: [sent ack]
+
+=== BP_CALL src=0x55555561c460 count=32 ===
+0x55555561c450:	0x0000000000000000	0x0000000000000021
+0x55555561c460:	0x000055500034ad7c	0x0000000000000000
+0x55555561c470:	0x0000000000000000	0x0000000000000061
+0x55555561c478:	0x0000000000000061	0x00005555555f8520
+0x55555561c488:	0x000055555561c500	0x0000000000000015
+0x55555561c498:	0x0000000000000015	0x0000000000000000
+0x55555561c4a8:	0x000055555561b840	0x000055555561b940
+0x55555561c4b8:	0x000055555561b940	0x000055555561c580
+0x55555561c4c8:	0x000055555561c588	0x000055555561c588
+0x55555561c460:	0x7c	0xad	0x34	0x00	0x50	0x55	0x00	0x00
+0x55555561c468:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c470:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c478:	0x61	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c480:	0x20	0x85	0x5f	0x55	0x55	0x55	0x00	0x00
+0x55555561c488:	0x00	0xc5	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c490:	0x15	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c498:	0x15	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c4a0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c4a8:	0x40	0xb8	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b0:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b8:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+
+=== BP_RET src=0x55555561c460 nbytes=32 ===
+0x55555561c450:	0x0000000000000000	0x0000000000000021
+0x55555561c460:	0x4847464544434241	0x504f4e4d4c4b4a49
+0x55555561c470:	0x5857565554535251	0x605f5e5d5c5b5a59
+0x55555561c478:	0x605f5e5d5c5b5a59	0x00005555555f8520
+0x55555561c488:	0x000055555561c500	0x0000000000000015
+0x55555561c498:	0x0000000000000015	0x0000000000000000
+0x55555561c4a8:	0x000055555561b840	0x000055555561b940
+0x55555561c4b8:	0x000055555561b940	0x000055555561c580
+0x55555561c4c8:	0x000055555561c588	0x000055555561c588
+0x55555561c460:	0x41	0x42	0x43	0x44	0x45	0x46	0x47	0x48
+0x55555561c468:	0x49	0x4a	0x4b	0x4c	0x4d	0x4e	0x4f	0x50
+0x55555561c470:	0x51	0x52	0x53	0x54	0x55	0x56	0x57	0x58
+0x55555561c478:	0x59	0x5a	0x5b	0x5c	0x5d	0x5e	0x5f	0x60
+0x55555561c480:	0x20	0x85	0x5f	0x55	0x55	0x55	0x00	0x00
+0x55555561c488:	0x00	0xc5	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c490:	0x15	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c498:	0x15	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c4a0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x55555561c4a8:	0x40	0xb8	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b0:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+0x55555561c4b8:	0x40	0xb9	0x61	0x55	0x55	0x55	0x00	0x00
+
+=== BP_NEWLAST newlast=0x55555561fb60 chunkhdr: ===
+0x55555561fb50:	0x0000000000000000	0x0000000000000021
+0x55555561fb60:	0x000000055555561f	0x0000000000000000
+0x55555561fb70:	0x0000000000000000	0x00000000000000f1
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("qGetTLSAddr:1:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$E01#a6"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] readchar: readchar: Got EOF
+[remote] getpkt: [getpkt: discarding char 'ÿ']
+Killing process(es): 3900739
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000000000 in ?? ()
+
+=== AFTER_RUN ===
+#0  0x0000000000000000 in ?? ()
+#1  0x00005555555814c1 in std::default_delete<tdesc_feature>::operator() (__ptr=0x55555561c480, this=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:99
+#2  std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >::~unique_ptr (this=0x55555561d120, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:404
+#3  std::_Destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > (__pointer=0x55555561d120) at /usr/include/c++/13/bits/stl_construct.h:151
+#4  std::_Destroy_aux<false>::__destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >*> (__last=0x55555561d138, __first=0x55555561d120) at /usr/include/c++/13/bits/stl_construct.h:163
+#5  std::_Destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >*> (__last=0x55555561d138, __first=<optimized out>) at /usr/include/c++/13/bits/stl_construct.h:196
+#6  std::_Destroy<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >*, std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > (__last=0x55555561d138, __first=<optimized out>) at /usr/include/c++/13/bits/alloc_traits.h:948
+#7  std::vector<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> >, std::allocator<std::unique_ptr<tdesc_feature, std::default_delete<tdesc_feature> > > >::~vector (this=0x55555561c3e8, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/stl_vector.h:735
+#8  0x00005555555844db in target_desc::~target_desc (this=0x55555561c3c0, __in_chrg=<optimized out>) at ../../../src/binutils-gdb-633ae02/gdbserver/tdesc.h:31
+#9  target_desc_deleter::operator() (this=<optimized out>, target_desc=0x55555561c3c0) at ../../../src/binutils-gdb-633ae02/gdbserver/tdesc.cc:110
+#10 0x00005555555b48e2 in std::unique_ptr<target_desc const, target_desc_deleter>::~unique_ptr (this=0x555555617fb8, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/unique_ptr.h:404
+#11 std::pair<unsigned long, std::unique_ptr<target_desc const, target_desc_deleter> >::~pair (this=0x555555617fb0, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/stl_pair.h:187
+rip            0x0                 0x0
+rdi            0x55555561c480      93824993051776
+rsi            0x55555561f280      93824993063552

@@ -192,3 +192,56 @@ no chosen-byte readback was attempted in the live process, and
 `qGetTLSAddr` returned `E01` because no thread_db was loaded, not because
 an indirect call happened. The ASan build's first-write abort and this
 plain build's teardown crash are the two observed live outcomes.
+
+## Plain-build readback and forged-vtable marker (W2, 2026-11-23T02:13Z)
+
+New files: `rsp/gdb_heap_probe.sh`, `rsp/live_probe_hex.py`,
+`rsp/gdb_marker_probe.sh`, `rsp/plain_verify.sh`, and the evidence under
+`rsp/evidence/`. All use the same plant-built plain binary at
+`lab/build/gdbserver-633ae02-plain/gdbserver/gdbserver` (pin 633ae02,
+default CFLAGS) and the same loopback-only Python client pattern.
+
+`plain_verify.sh`: attack N=64 (`SERVER_RC=139`, wire `OK`, `qGetTLSAddr`
+`E01`), safe N=16 (`SERVER_RC=0`, `OK`) and short attack N=8
+(`SERVER_RC=0`, `OK`) twice: 6 PASS / 0 FAIL each time, normalized hash
+`f8bb0fd0692a906dcde774bbc1f9de86a117ac8f7991c6aa6347eb9dcf451de9`.
+
+`gdb_heap_probe.sh` breaks at `handle_tracepoint_general_set+1988` (the
+inlined `hex2bin` call at `tracepoint.cc:2547`), `+1998` (its return) and
+`+2010` (the `XNEW(source_string)` result), saves `$rsi` as `$src` and
+dumps the heap before and after the write. Measured natural layout:
+`src=0x55555561c460`, header `0x21` at `...450`; next chunk header
+`0x61` at `...478`; live `tdesc_feature` at `...480` with vptr
+`0x00005555555f8520` = `vtable for tdesc_feature + 16` (binary offset
+`0xa4520`, verified with `gdb info symbol`). Attack N=64 changes the
+next size to `0x605f5e5d5c5b5a59` and the vptr to
+`0x4847464544434241`; teardown SIGSEGVs in
+`std::default_delete<tdesc_feature>::operator()` deleting
+`0x55555561c480` from `target_desc`'s feature vector. N=8 and safe
+N=16 exit normally; N=32 corrupts only the next size and also faults.
+Disassembly of the faulting instruction shows
+`mov 0x10(%rax),%rax` on the overwritten vptr; a mismatch with the
+known deleting destructor branches to `mov %rbx,%rdi; call *%rax`.
+
+`live_probe_hex.py` sends an exact decoded payload with checksummed RSP
+framing. `gdb_marker_probe.sh` uses 64 bytes: bytes 0..23 filler inside
+`src`, 24..31 preserve the next size as `0x61`, 32..39 set the live
+object's vptr to `0x55555561c488` (object+8), 40..55 fill the first two
+fake-vtable slots, 56..63 put `abort@plt` (`0x555555561f70`) in slot
+`+0x10`. Two replays: `QTDPsrc_REPLY=OK`, `GETTLS_REPLY=E01`, then
+`SIGABRT` with `__GI_abort()` reached from
+`std::default_delete<tdesc_feature>::operator()` at line 99. A
+same-length control that restores the object's original four words
+(vptr `0x00005555555f8520`, `0x000055555561c500`, `0x15`, `0x15`) exits
+normally. An earlier control that merely preserved the vptr but filled
+the remaining object words still SIGSEGVed; that negative is kept as
+`marker-control-{1,2}.log`. A run with `setarch -R` and no gdb using the
+forged payload exited 0 — the gdb-fixed address did not transfer; this
+is why the marker is labeled debugger-assisted and is not rung 5.
+
+Boundary: gdb only reads memory and fixes the load address; it never
+forces the indirect call. No benign command, no side effect from a
+wire-only attacker, no `thread_db` pointer, no `qGetTLSAddr` call through
+a forged pointer and no witness replay. The marker shows chosen-function
+control-flow hijack in a live process under recorded conditions, not
+remote command execution.

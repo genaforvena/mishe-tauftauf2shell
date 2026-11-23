@@ -1,0 +1,40 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after fork from child process 4032315]
+[Detaching after fork from child process 4032316]
+[Detaching after vfork from child process 4032317]
+Process /bin/true created; pid = 4032317
+Listening on port 34624
+Remote debugging from host 127.0.0.1, port 51266
+[remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("QTDPsrc:1:0:cond:0:1:414141414141414141414141414141414141414141414141610000000000000020855f5555550000424242424242424242424242424242424343434343434343");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] getpkt: getpkt ("qGetTLSAddr:1:0:0");  [sending ack]
+[remote] getpkt: [sent ack]
+[remote] putpkt_binary_1: putpkt ("$E01#a6"); [looking for ack]
+[remote] putpkt_binary_1: [received '+' (0x2b)]
+[remote] readchar: readchar: Got EOF
+[remote] getpkt: [getpkt: discarding char 'ÿ']
+Killing process(es): 4032317
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff78ade35 in __GI___libc_free (mem=0x4242424242424242) at ./malloc/malloc.c:3375
+warning: 3375	./malloc/malloc.c: No such file or directory
+
+=== AFTER_RUN ===
+#0  0x00007ffff78ade35 in __GI___libc_free (mem=0x4242424242424242) at ./malloc/malloc.c:3375
+#1  0x000055555558146a in std::__new_allocator<char>::deallocate (this=0x55555561c488, __n=<optimized out>, __p=<optimized out>) at /usr/include/c++/13/bits/new_allocator.h:172
+#2  std::allocator_traits<std::allocator<char> >::deallocate (__n=<optimized out>, __p=<optimized out>, __a=...) at /usr/include/c++/13/bits/alloc_traits.h:517
+#3  std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_destroy (__size=<optimized out>, this=0x55555561c488) at /usr/include/c++/13/bits/basic_string.h:289
+#4  std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose (this=0x55555561c488) at /usr/include/c++/13/bits/basic_string.h:283
+#5  std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string (this=0x55555561c488, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/basic_string.h:804
+#6  tdesc_feature::~tdesc_feature (this=0x55555561c480, __in_chrg=<optimized out>) at ../../../src/binutils-gdb-633ae02/gdbserver/../gdbsupport/tdesc.h:292
+#7  tdesc_feature::~tdesc_feature (this=0x55555561c480, __in_chrg=<optimized out>) at ../../../src/binutils-gdb-633ae02/gdbserver/../gdbsupport/tdesc.h:292
+rip            0x7ffff78ade35      0x7ffff78ade35 <__GI___libc_free+37>
+rax            0x4343434343434343  4846791580151137091
+rdi            0x4242424242424242  4774451407313060418
