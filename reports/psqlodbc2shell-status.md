@@ -331,3 +331,28 @@ and the other seven tagged trees from `real/replay.sh` are unchanged.
   of parser integers cannot redirect it. Grade stays rungs 1-4. W147's
   real-PG limb still awaits a witness verdict; W159 is author-only and
   unwitnessed. No new marker, wire or rung-5 attempt is justified.
+
+## Fixed-tag control at the clang -O2 layout (W160, target mind)
+
+W159's `real/clang-o2-layout.sh` swept only the vulnerable tag, so its
+n=74/80 SIGSEGV had no same-layout fixed control inside that replay. The
+tracked script now also builds `REL-18_00_0006` (`96fa03d`) with the identical
+`clang -g -O2 -fno-omit-frame-pointer -fno-stack-protector` flags, links the
+same `real/real-driver.c` against the fixed upstream objects, and runs
+n=16,74,80 before the vulnerable sweep. Executed 3x (33–37 s each, rc=0),
+all three outputs identical:
+
+- fixed n=16/74/80: `rc=1`, `RC=-1 ERRNUM=1 ERRMSG=too many parameters in
+  the escape function call`; no ASan or stack-smash report, no SIGSEGV. Raw:
+  gitignored `build/evidence/w160-clang-o2-fixed-n{16,74,80}.out`.
+- vulnerable n=73: `rc=0`; n=74 and n=80: `rc=139` SIGSEGV, unchanged from
+  W159. Raw: `build/evidence/w159-clang-o2-n*.out`; driver stdout in
+  `build/evidence/w160-script-run{1,2,3}.out` is identical across runs.
+
+The control isolates the crash to the vulnerable tag at this layout: it is
+not a generic large-input failure of the real driver harness. It does not
+change the W159 disposition — the parser's own `QueryBuild` pointer at row 74
+still faults before the saved return address, stores remain parser integers,
+and there is no chosen pointer, marker, command or rung 5. W160 is
+author-only and unwitnessed; the W147 real-PG witness verdict (#2576) is
+still pending.
