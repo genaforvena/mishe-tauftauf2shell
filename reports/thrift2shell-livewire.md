@@ -273,6 +273,13 @@ NOFLUSH_SERVER=./live-noflush ./run-kv-noflush.sh \
   kv-partial-4240.bin gdb-kv-partial.gdb PORT 1
 ```
 
+Compiler-flag note from the witness's independent replay of the earlier lane
+(chat 2533): the committed `live-plain` DWARF records `-g -O0`; their `-O1`
+plain rebuild shifted `rbuf` by `0x8000` and missed the frame. The no-flush
+binaries used here were compiled `-O1` against `build-plain-023` and matched
+this frame. Layout is flag-sensitive: verify `ptr-rbuf` at `:301` before
+reusing the decompressed offsets.
+
 `gdb-kv-partial.gdb` sets `disable-randomization off`, so ASLR is on. The
 frame contains no absolute address for the target pointer: the copy ends at
 `rbuf+594`, inside the 8-byte string pointer at `rbuf+592`, so its high six

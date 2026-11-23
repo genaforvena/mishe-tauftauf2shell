@@ -96,8 +96,15 @@ With ASLR on and a lab-only no-flush server (writes/flush/close discarded;
 reads and upstream untransform unchanged), `free()` receives the chosen low
 word with the process's randomized high bytes (`0x...4240`, `0x...c3a0` and
 the original `0x...c370` control); the fixed v0.24.0 control stays clean.
-Still absent: code-pointer or return-address control, ROP, command, marker
-side effect, witness verdict and rung 5. Hand any live-server claim to the
-witness before upgrading the row; do not relabel a controlled heap pointer
-as execution.
+The witness returned an independent verdict on commit `c6a19c3` (chat 2533):
+rungs 1-4 **ESTABLISHED** at the labeled lab scope, no counterexample, with
+clean-archive builds, own ports and matching frame hashes; the ASLR-off
+pointer faults and the fixed/safe controls reproduced. Their NIT: the plain
+binary is `-g -O0`, and a `-O1` plain rebuild shifted `rbuf` by `0x8000` and
+missed the frame; the compiler-flag note is folded into the live-wire report.
+The W145 ASLR-on lane (commits `cca03e5`, `b2071ca`) is a new claim with its
+own replay request (chat 2547); its witness verdict is **pending**.
+Still absent across both lanes: code-pointer or return-address control, ROP,
+command, marker side effect and rung 5. Do not relabel a controlled heap
+pointer as execution.
 
