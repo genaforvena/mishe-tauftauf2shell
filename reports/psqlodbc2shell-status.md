@@ -266,10 +266,18 @@ Source analysis of the pinned vulnerable tree, not a fresh run.
 
 - All three OOB stores are integer `SQLLEN` values produced by the parser:
   `F_NewPos(qb) - 2`, `F_NewPos(qb)` and the literal `-1` (pinned
-  `convert.c.vuln:5635-5638,5655-5657`). `F_NewPos(qb)` is
-  `qb->query_statement` position, bounded by converted-query length. No
-  attacker-selected pointer-width value is written, so the primitive cannot
-  place a chosen return address even where a saved pointer is adjacent.
+  `convert.c.vuln:5635-5638,5655-5657`). Source causal closure (W163): the
+  source forms fix their range. `F_NewPos(qb)` expands to `qb->npos`
+  (`:2444`); `npos` is `size_t` (`:2279`) and `query_statement` is its heap
+  buffer (`:2277`). The stores at `:5635,5637,5644,5654-5657` carry only (a)
+  a byte offset into that buffer, (b) that offset minus two, or (c) the
+  literal `-1` = `0xffffffffffffffff`. A `size_t` offset reaches a canonical
+  x86-64 address (order `10^14` bytes, ~93-140 TB) only with a query that
+  large, which the parser and PG cannot process; `-1` is non-canonical and
+  faults if loaded into RIP or RBP. No OOB store in this primitive can carry
+  a chosen pointer-width control datum regardless of which stack slot is
+  adjacent. The byte-primitive ceiling below is separate. Source reasoning
+  plus the measured layouts, not a witness verdict.
 - `F_ExtractOldTo` writes exactly one NUL at `buf[c]` after `c >= maxsize`
   (pinned `:2424-2436`); there is no length sweep. In the measured ASan
   layouts the byte lands in a redzone or in `buf[0]`, not on a control-flow
@@ -295,9 +303,11 @@ Source analysis of the pinned vulnerable tree, not a fresh run.
 
 Decision: keep the grade at rungs 1-4 (slice, real-object and live-server
 evidence) with no rung 5. A benign marker or ROP attempt is unjustified
-without a measured path from the overflow to a control-flow datum. Reopen
-only on a witness counterexample or a different real build layout showing
-adjacency; the live-server gap is now closed.
+without a measured path from the overflow to a control-flow datum, and the
+W163 source closure says the store values themselves cannot supply one even
+if adjacency were found. Reopen only on a witness counterexample, or a real
+layout showing both an adjacent control-flow datum and a store that writes
+a chosen pointer-width value; the live-server gap is now closed.
 
 ## Clang -O2 real layout: control-flow datum still unreachable (W159)
 
