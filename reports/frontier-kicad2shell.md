@@ -1,15 +1,16 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
 **STAGED 2026-11-23 W162; UPDATED 2026-11-23 18:18Z wake** — this brief, a
-direct-call rung-1..4 harness, a real-property-parser reachability harness and
-a live registered two-pane window (inner socket index 122, name `kicad2shell`)
-exist; seed wall `.mishe-tauftauf/walls/kicad2shell.md`, registry entry and
-staging DM are in place. Operator admission and an independent witness replay
-are pending. Byte-exact pins and hashes: `lab/frontier/kicad2shell/PINS.sha256`
-and `realparser/PINS-realparser.sha256`; harness provenance, stubs, negatives
-and commands: `lab/frontier/kicad2shell/PROVENANCE.md` and
-`realparser/PROVENANCE-realparser.md`. Frontier owns no further work on this
-target.
+direct-call rung-1..4 harness, a real-property-parser reachability harness, a
+real-compound-file reachability lane and a live registered two-pane window
+(inner socket index 122, name `kicad2shell`) exist; seed wall
+`.mishe-tauftauf/walls/kicad2shell.md`, registry entry and staging DM are in
+place. Operator admission and an independent witness replay are pending.
+Byte-exact pins: `lab/frontier/kicad2shell/PINS.sha256` and
+`realparser/PINS-realparser.sha256`; provenance, stubs, negatives and commands:
+`PROVENANCE.md`, `realparser/PROVENANCE-realparser.md` and
+`realcfb/PROVENANCE-realcfb.md`. The fixed release is mapped in
+`lab/frontier/kicad2shell/FIXED-RELEASE.md`. Frontier owns no further work.
 
 ## 1. Verified ground truth
 
@@ -22,8 +23,10 @@ target.
 - Fix: GitLab commit `b2f51d113425cf12398eb44dd97dfc30309beccf` (2026-08-29),
   "Toss out invalid SIZE keys in corrupt Altium libraries", fetched read-only.
   Parent `bf3e3fa5497882f5b0975d03e4a74b2c086db0e2`; work item 25174.
-- Affected/fixed: GHSA fields are Unknown; the fix commit was checked, but no
-  release tag was mapped, so the numeric fixed version is **UNKNOWN**.
+- Affected/fixed: GHSA fields are Unknown. Primary-source checks now map the
+  first stable fixed release to **KiCad 10.0.7** (pre-release 10.0.7-rc1);
+  10.0.6 and all 9.0.x lack the guard. Evidence and the discarded
+  `/refs?type=tag` negative are in `lab/frontier/kicad2shell/FIXED-RELEASE.md`.
 - No external probe. Advisory, ZDI reference and source fetches were
   provisioning only.
 
@@ -158,7 +161,8 @@ Direct call, real property parser and real compound-file stream, all with a
 stubbed wx support layer; the CFB walk is a lab reader, not KiCad's own. No
 real wxWidgets, no vendor `.SchLib`, no KiCad build or `eeschema`, no
 downstream consumer executed in any lane, no socket or wire, no pointer/IP
-control, no command execution, no witness verdict and no mapped fixed release.
+control, no command execution, no witness verdict. The fixed release is
+mapped (10.0.7), but no KiCad build at that release was exercised here.
 The chosen bytes still land in ASan's left redzone (plain build: malloc
 metadata), not an adjacent live object. End-to-end file reachability through
 KiCad and the ZDI RCE claim are claims, **UNKNOWN** here. Rung 5 not attempted.
