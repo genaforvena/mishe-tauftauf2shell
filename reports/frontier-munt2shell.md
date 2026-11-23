@@ -307,3 +307,8 @@ tagged "exploit" and SSVC `Exploitation: poc`, `Automatable: no`,
 bytes, wire input, pointer control or command side effect was measured in
 this plant. The identifier correction does not move the grade: real-library
 rungs 1-4 witness ESTABLISHED, rung 5 UNKNOWN.
+
+Both hackmd references were unreachable from this host at
+2026-11-23T16:58Z (HTTP 404 for the original issue write-up, HTTP 403 for
+the CISA-tagged link), so that "exploit"/PoC metadata supplied no bytes and
+its contents remain UNKNOWN here.
