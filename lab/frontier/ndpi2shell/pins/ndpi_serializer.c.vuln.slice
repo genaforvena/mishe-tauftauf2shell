@@ -1,0 +1,77 @@
+int ndpi_json_string_escape(const char *src, int src_len, char *dst, int dst_max_len) {
+  u_char c = 0;
+  int i, j = 0;
+
+  dst[j++] = '"';
+
+  for(i = 0; i < src_len && j < dst_max_len; i++) {
+
+    c = (u_char) src[i];
+
+    if (c <= 0x7E) {
+      // ASCII character (escape if required by JSON)
+      switch (c) {
+      case '\\':
+      case '"':
+      case '/':
+        dst[j++] = '\\';
+        dst[j++] = c;
+        break;
+      case '\b':
+        dst[j++] = '\\';
+        dst[j++] = 'b';
+        break;
+      case '\t':
+        dst[j++] = '\\';
+        dst[j++] = 't';
+        break;
+      case '\n':
+        dst[j++] = '\\';
+        dst[j++] = 'n';
+        break;
+      case '\f':
+        dst[j++] = '\\';
+        dst[j++] = 'f';
+        break;
+      case '\r':
+        dst[j++] = '\\';
+        dst[j++] = 'r';
+        break;
+      default:
+        if (c < 0x20 /* ' ' */)
+          ; // Other non-printable ASCII character (skip)
+        else
+          dst[j++] = c; // Printable ASCII character not requiring escape
+      }
+
+    } else if (c == 0x7F) {
+      ; // Non-printable ASCII character (skip)
+    } else if ((c >= 0xC2 && c <= 0xDF) && (src_len - i) >= 2 && 
+               ((u_char) src[i+1] >= 0x80 && (u_char) src[i+1] <= 0xBF)) {
+      // 2-byte sequence (U+0080 to U+07FF)
+      dst[j++] = c;
+      dst[j++] = src[++i];
+    } else if ((c >= 0xE0 && c <= 0xEF) && (src_len - i) >= 3 &&
+               ((u_char) src[i+1] >= 0x80 && (u_char) src[i+1] <= 0xBF) &&
+               ((u_char) src[i+2] >= 0x80 && (u_char) src[i+2] <= 0xBF)) {
+      // 3-byte sequence (U+0800 to U+FFFF)
+      dst[j++] = c;
+      dst[j++] = src[++i];
+      dst[j++] = src[++i];
+    } else if ((c >= 0xF0 && c <= 0xF4) && (src_len - i) >= 4 &&
+               ((u_char) src[i+1] >= 0x80 && (u_char) src[i+1] <= 0xBF) &&
+               ((u_char) src[i+2] >= 0x80 && (u_char) src[i+2] <= 0xBF) &&
+               ((u_char) src[i+3] >= 0x80 && (u_char) src[i+3] <= 0xBF)) {
+      // 4-byte sequence (U+10000 to U+10FFiFF)
+      dst[j++] = c;
+      dst[j++] = src[++i];
+      dst[j++] = src[++i];
+      dst[j++] = src[++i];
+    }
+  }
+
+  dst[j++] = '"';
+  dst[j+1] = '\0';
+
+  return(j);
+}

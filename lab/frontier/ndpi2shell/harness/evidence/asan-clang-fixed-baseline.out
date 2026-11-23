@@ -1,0 +1,2 @@
+scenario=baseline variant=fixed dst_max_len=32 rc=5
+EXIT=0

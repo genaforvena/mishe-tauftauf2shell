@@ -1,0 +1,4 @@
+4840fb417e420f3821746635f72ad2755d9f802a6ceb041450efb8efe9779ad5  src/ndpi_serializer.c.vuln
+0aa83a8317beb2f84a0d5c23016e9b4cfb5edb81f70c9aac3d1c13609aee92fd  src/ndpi_serializer.c.fixed
+89363a057e8c19dfb3dc637597505fcd8574c1f22f9dc4520646334e21fee601  pins/ndpi_serializer.c.vuln.slice
+c5ff69a9a3ff4142d6b71b024e03ff6d7cb83378b210f48467124d30942cfd70  pins/ndpi_serializer.c.fixed.slice

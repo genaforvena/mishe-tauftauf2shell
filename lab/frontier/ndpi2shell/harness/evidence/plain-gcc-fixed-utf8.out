@@ -1,0 +1,3 @@
+scenario=utf8 variant=fixed dst_max_len=8 rc=-1
+tail=a5 a5 a5 a5 a5 a5 a5 a5
+EXIT=0

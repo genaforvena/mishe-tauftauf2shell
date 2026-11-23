@@ -1,0 +1,2 @@
+scenario=nul variant=fixed dst_max_len=8 rc=-1
+EXIT=0

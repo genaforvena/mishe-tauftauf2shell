@@ -1,0 +1,3 @@
+scenario=escape variant=vuln dst_max_len=8 rc=10
+tail=2f 22 a5 00 a5 a5 a5 a5
+EXIT=0

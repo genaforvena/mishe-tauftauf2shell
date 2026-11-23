@@ -1,0 +1,7 @@
+Breakpoint 1 at 0x131b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/harness/ndpi_serializer.c.vuln, line 107.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ndpi_json_string_escape (src=0x555555558040 <g_src> "AAAAAA/", src_len=7, dst=0x5555555592a0 "\"AAAAAA\\", '\245' <repeats 32 times>, "A\r\002", dst_max_len=8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/harness/ndpi_serializer.c.vuln:107
+warning: 107	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/harness/ndpi_serializer.c.vuln: No such file or directory
+J=8 C=0x2f

@@ -1,0 +1,34 @@
+plain-gcc-vuln-baseline scenario=baseline variant=vuln dst_max_len=32 rc=5|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-gcc-vuln-escape scenario=escape variant=vuln dst_max_len=8 rc=10|tail=2f 22 a5 00 a5 a5 a5 a5|EXIT=0|
+plain-gcc-vuln-utf8 scenario=utf8 variant=vuln dst_max_len=8 rc=10|tail=80 22 a5 00 a5 a5 a5 a5|EXIT=0|
+plain-gcc-vuln-nul scenario=nul variant=vuln dst_max_len=8 rc=8|tail=a5 00 a5 a5 a5 a5 a5 a5|EXIT=0|
+asan-gcc-vuln-baseline scenario=baseline variant=vuln dst_max_len=32 rc=5|EXIT=0|
+asan-gcc-vuln-escape EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 1|ndpi_serializer.c.vuln:107|ndpi_serializer.c.vuln:107|
+asan-gcc-vuln-utf8 EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 1|ndpi_serializer.c.vuln:158|ndpi_serializer.c.vuln:158|
+asan-gcc-vuln-nul EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 1|ndpi_serializer.c.vuln:163|ndpi_serializer.c.vuln:163|
+plain-gcc-fixed-baseline scenario=baseline variant=fixed dst_max_len=32 rc=5|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-gcc-fixed-escape scenario=escape variant=fixed dst_max_len=8 rc=-1|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-gcc-fixed-utf8 scenario=utf8 variant=fixed dst_max_len=8 rc=-1|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-gcc-fixed-nul scenario=nul variant=fixed dst_max_len=8 rc=-1|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+asan-gcc-fixed-baseline scenario=baseline variant=fixed dst_max_len=32 rc=5|EXIT=0|
+asan-gcc-fixed-escape scenario=escape variant=fixed dst_max_len=8 rc=-1|EXIT=0|
+asan-gcc-fixed-utf8 scenario=utf8 variant=fixed dst_max_len=8 rc=-1|EXIT=0|
+asan-gcc-fixed-nul scenario=nul variant=fixed dst_max_len=8 rc=-1|EXIT=0|
+plain-clang-vuln-baseline scenario=baseline variant=vuln dst_max_len=32 rc=5|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-clang-vuln-escape scenario=escape variant=vuln dst_max_len=8 rc=10|tail=2f 22 a5 00 a5 a5 a5 a5|EXIT=0|
+plain-clang-vuln-utf8 scenario=utf8 variant=vuln dst_max_len=8 rc=10|tail=80 22 a5 00 a5 a5 a5 a5|EXIT=0|
+plain-clang-vuln-nul scenario=nul variant=vuln dst_max_len=8 rc=8|tail=a5 00 a5 a5 a5 a5 a5 a5|EXIT=0|
+asan-clang-vuln-baseline scenario=baseline variant=vuln dst_max_len=32 rc=5|EXIT=0|
+asan-clang-vuln-escape EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 1|ndpi_serializer.c.vuln:107|ndpi_serializer.c.vuln:107|
+asan-clang-vuln-utf8 EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 1|ndpi_serializer.c.vuln:158|ndpi_serializer.c.vuln:158|
+asan-clang-vuln-nul EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 1|ndpi_serializer.c.vuln:163|ndpi_serializer.c.vuln:163|
+plain-clang-fixed-baseline scenario=baseline variant=fixed dst_max_len=32 rc=5|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-clang-fixed-escape scenario=escape variant=fixed dst_max_len=8 rc=-1|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-clang-fixed-utf8 scenario=utf8 variant=fixed dst_max_len=8 rc=-1|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+plain-clang-fixed-nul scenario=nul variant=fixed dst_max_len=8 rc=-1|tail=a5 a5 a5 a5 a5 a5 a5 a5|EXIT=0|
+asan-clang-fixed-baseline scenario=baseline variant=fixed dst_max_len=32 rc=5|EXIT=0|
+asan-clang-fixed-escape scenario=escape variant=fixed dst_max_len=8 rc=-1|EXIT=0|
+asan-clang-fixed-utf8 scenario=utf8 variant=fixed dst_max_len=8 rc=-1|EXIT=0|
+asan-clang-fixed-nul scenario=nul variant=fixed dst_max_len=8 rc=-1|EXIT=0|
+J=8 C=0x2f
+HEAP: 0x2f	0x22	0xa5	0x00	0xa5	0xa5	0xa5	0xa5
