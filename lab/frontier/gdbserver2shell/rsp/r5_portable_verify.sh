@@ -103,9 +103,13 @@ for delta in (8, 0x10, 0x18, 0x20, 0x28, 0x30):
                             stdin=subprocess.DEVNULL,
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL).returncode == 0
-    print("%d %s %s" % (delta, 1 if ok else 0, name.hex()))
-    if ok:
-        break
+    if not ok:
+        sys.stderr.write("reject delta=0x%x name=%s\n" % (delta, name.hex()))
+        continue
+    print("%d 1 %s" % (delta, name.hex()))
+    break
+else:
+    print("0 0 ")
 PYEOF
 )
 DELTA=${CHOICE%% *}

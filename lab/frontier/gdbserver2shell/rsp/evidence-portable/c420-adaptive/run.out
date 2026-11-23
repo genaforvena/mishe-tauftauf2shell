@@ -1,0 +1,17 @@
+LIBC=/lib/x86_64-linux-gnu/libc.so.6 BASE=0x00007ffff7800000 OFFSET=0000000000058750 SYSTEM=0x7ffff7858750 SLOT_HEX=508785f7ff7f0000
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/rsp/r5_portable_verify.sh: line 64: 2148736 Segmentation fault      (core dumped) env PATH="$NEWPATH" "$SETARCH" -R "$bin" --once --debug=remote "127.0.0.1:$PORT" /bin/true > "$log" 2>&1
+sweep obj=0x55555561c400 rc=139
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/rsp/r5_portable_verify.sh: line 64: 2149306 Segmentation fault      (core dumped) env PATH="$NEWPATH" "$SETARCH" -R "$bin" --once --debug=remote "127.0.0.1:$PORT" /bin/true > "$log" 2>&1
+sweep obj=0x55555561c410 rc=139
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/rsp/r5_portable_verify.sh: line 64: 2150395 Aborted                 (core dumped) env PATH="$NEWPATH" "$SETARCH" -R "$bin" --once --debug=remote "127.0.0.1:$PORT" /bin/true > "$log" 2>&1
+sweep obj=0x55555561c420 rc=134
+DERIVED obj=0x55555561c420
+reject delta=0x8 name=28c461555555
+CHOSEN delta=0x10 SHELL_SAFE=1 COMMAND_HEX=30c461555555
+PASS vuln-system SERVER_RC=0 MARKER=1 SLOT_LEN=72
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/rsp/r5_portable_verify.sh: line 64: 2151275 Aborted                 (core dumped) env PATH="$NEWPATH" "$SETARCH" -R "$bin" --once --debug=remote "127.0.0.1:$PORT" /bin/true > "$log" 2>&1
+PASS vuln-abort SERVER_RC=134 MARKER=0 SLOT_LEN=72
+PASS fixed-system SERVER_RC=0 MARKER=0 SLOT_LEN=72
+PASS vuln-safe SERVER_RC=0 MARKER=0 SLOT_LEN=16
+P_SYSTEM_NORMALIZED_HASH=6be8244f7949331ac1f8ee9e1a1389e4f30a8525f25317a444063367d41d3747
+TOTAL FAIL=0

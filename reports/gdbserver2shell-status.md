@@ -383,12 +383,24 @@ the staged command. Running the chooser over object low bytes `0x00` to
 W140's `0x20` it rejects `+8` (`28c4...`) and picks `+0x10` (`30c4...`,
 ASCII `0`).
 
-Not directly replayed: W140's exact parent environment. Local pad
-variables moved the object up (`c460`/`c470`/`c480`) and a minimal
-environment moved it outside the `c380..c600` derivation sweep, so the
-unsafe-byte case remains a witness-side check. The precondition is now a
-measured choice, not an environment surprise; ASLR off, exact build,
-derived heap/libc addresses, pre-staged command and independent replay
-still apply. W4's rung-4 ESTABLISHED verdict and W6's labeled rung-5 scope
-are unchanged. W140 replay of the W6 harness requested at tape #2167 is
-still owed.
+## W8 — W140's object reproduced locally; chooser parser repaired (2026-11-23T06:1xZ)
+
+W7's preserved negative is closed and its claim corrected. A controlled
+parent-env shrink of 32 bytes reproduced W140's object exactly,
+`DERIVED obj=0x...c420`. With W7's shipped script that environment failed:
+`CHOSEN delta=0x8 SHELL_SAFE=0 COMMAND_HEX=28c461555555` then
+`FAIL no shell-safe fake-vtable offset` (also at c410/c400). The Python
+chooser printed every candidate but the shell parser read only the first
+line, discarding the safe `+0x10` candidate. W7's "chooser picks +0x10 at
+c420" described the predicate, not the shipped harness.
+
+Fix: the chooser emits only the selected line, logs rejections on stderr,
+and prints `0 0 ` if none pass. Full rerun at c420: `reject delta=0x8`,
+`CHOSEN delta=0x10`, name `30c461555555`, `SLOT_LEN=72`, vuln+system rc0
+with MARKER=1, vuln+abort rc134, fixed E01, safe clean: 4 PASS / 0 FAIL,
+hash `6be8244f...41d3747`; evidence in `rsp/evidence-portable/c420-adaptive/`.
+Padding still moves the object only upward (c460/c470/c490/out of sweep),
+so the shrink is the measured route to c420. Grade and caveats unchanged:
+rung-4 ESTABLISHED; forged libc `system` call ESTABLISHED at labeled build
+scope, marker conditional on a shell-safe derived name; independent replay
+of the repaired limb is still owed.

@@ -473,3 +473,36 @@ object to `c460/c460/c470/c480`; unsetting two long variables and a
 minimal `env -i` run found no abort in `c380..c600`. The unsafe-byte case
 is therefore verified by the chooser computation plus the forced-offset
 marker run, not by a replay in W140's environment.
+
+## W8 — c420 reproduced locally; chooser parser repaired (2026-11-23T06:1xZ)
+
+W7's "not directly replayed" negative is closed, and its portability claim
+is corrected. A controlled parent-env shrink (delete 32 bytes from one long
+variable, here `MEMORY_PRESSURE_WATCH`) reproduced W140's derived object:
+`DERIVED obj=0x55555561c420`. The baseline bash or Python parent still
+derives c440, and padding the parent env by 16/32/64/128 bytes moves the
+object up to c460/c470/c490/outside the derivation sweep; shrinking is the
+only route to c420 measured here.
+
+With W7's shipped script that c420 environment produced
+`CHOSEN delta=0x8 SHELL_SAFE=0 COMMAND_HEX=28c461555555` followed by
+`FAIL no shell-safe fake-vtable offset`, likewise at c410 and c400. Cause:
+the Python chooser printed one line per candidate (`8 0 28c4...`,
+`16 1 30c4...`, ...) but the shell assigned `DELTA`/`SAFE`/`NAME_HEX` from
+only the first line, discarding the safe candidate. W7's enumeration was a
+correct predicate computation, but not the behavior of the shipped harness.
+
+Repair in `rsp/r5_portable_verify.sh`: the chooser prints only the selected
+`DELTA 1 NAME_HEX` line, logs rejected candidates on stderr, and emits
+`0 0 ` via `for...else` when none pass. Full four-case rerun in the same
+c420 environment (unmodified binaries, plain `7a5f8feb...`, ASan fixed
+`0827f1a4...`, libc base `0x7ffff7800000`, system offset `0x58750`):
+`reject delta=0x8 name=28c461555555`, `CHOSEN delta=0x10`,
+`COMMAND_HEX=30c461555555`, `SLOT_LEN=72`, vuln+system rc0/MARKER=1,
+vuln+abort rc134, fixed E01/rc0, safe16 rc0: 4 PASS / 0 FAIL,
+`P_SYSTEM_NORMALIZED_HASH=6be8244f7949331ac1f8ee9e1a1389e4f30a8525f25317a444063367d41d3747`.
+Transcripts, marker and `run.out` are in `evidence-portable/c420-adaptive/`;
+the harness with the fix was also rerun at c440 (canonical hash
+`9104b0ec...db73`, 4 PASS / 0 FAIL, delta +8). Grade, ASLR-off and
+derived-address caveats are unchanged; witness replay of the repaired limb
+is owed.
