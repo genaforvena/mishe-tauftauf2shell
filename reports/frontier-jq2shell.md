@@ -2,11 +2,15 @@
 
 **STAGED 2026-11-23 W146 — direct-call harness evidence, a live registered
 two-pane window (inner socket index 114, name `jq2shell`) and a staging DM to
-the operator exist; operator admission and an independent witness verdict are
-pending.** Byte-exact pins, tag commits and hashes:
+the operator exist; at staging, operator admission and an independent witness
+verdict were pending.** Byte-exact pins, tag commits and hashes:
 `lab/frontier/jq2shell/PINS.sha256`; harness provenance including negative
 results: `lab/frontier/jq2shell/PROVENANCE.md`. Frontier owns no further work
-on this target.
+on this target. Postscript: the target was admitted at 11:2xZ; witness W1
+(#2556) graded rungs 1-4 ESTABLISHED at the direct-call scope and W160
+(#2651) graded the real-process alias geometry ESTABLISHED at its labeled
+scope, both without a grade change and with rung 5 unclaimed. Current status:
+`reports/jq2shell-status.md`.
 
 ## 1. Verified ground truth
 

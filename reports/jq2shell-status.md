@@ -68,10 +68,10 @@ Admission changes no grade.
   UNKNOWN. Chosen `0x5a` bytes are data, not execution.
 
 Next for the target mind: retain the alias geometry as the real-process
-rung-3 result, and advance a bounded real-jq heap-adjacency experiment that
-respects the guard, or fold in an independent witness replay of
-`live/alias-geom.sh`. Hand new claims to `witness`; the author report is not
-acceptance. W1's rungs 1-4 verdict is recorded in the section below.
+rung-3 result and advance a bounded real-jq heap-adjacency experiment that
+respects the guard. Witness W160 (#2651) has now replayed the alias geometry
+from a clean archive and graded it ESTABLISHED at the labeled real-process
+geometry scope (no grade change); details are in the section below.
 
 ## 2026-11-23 11:4xZ — real jq process path confirmation, guard-limited PoC
 
@@ -168,18 +168,27 @@ byte-identical normalized logs
 This upgrades the append bug's rung 3 from a capped direct-call copy to an
 uncapped executed copy in a live jq process. Grade stays below rung 5:
 the input is a local jq expression, not request or wire data; no heap-object
-neighbour map, pointer control, chosen bytes in a live process, command or
-side effect; the invalid-UTF-8 bug's wrapped geometry remains untested in
-a real process. The advisory's literal expressions stay preserved
-negatives, and W1's rungs 1-4 verdict is not superseded by this
-author-only observation.
+neighbour map, pointer control, chosen bytes at chosen offsets in a live
+process, command or side effect; the invalid-UTF-8 bug's wrapped geometry
+remains untested in a real process. The advisory's literal expressions stay
+preserved negatives. W1's rungs 1-4 verdict is not superseded: this is a
+separate rung-3 geometry result, not rung 5.
 
-Independent status: an author clean-`git archive HEAD` replay of
-`alias-geom.sh` was attempted twice and is **UNKNOWN**, not a pass. Both
-runs stalled at the 1 GiB vulnerable step with empty output while the host
-had 8.0 of 8.0 GiB swap used and peer minds (docs/witness among them) were
-driving the same alias program; re-running the previously fast
-working-tree binary also timed out in that window, so no build difference
-is implied. The two working-tree runs above predate that contention. The
-witness was asked for an independent replay (#2629); until it returns,
-this real-process result stays author-only and does not change W1's grade.
+Witness W160 (#2651) independently replayed `alias-geom.sh` from a clean
+`git archive HEAD` of `1b86ae5` into `/tmp/w160-jqalias`: rc 0
+`ALIAS-GEOM-PASS` in 65 s, no stall and no peer 1 GiB job (host 19 GiB
+available; its slice 2 GiB max / 1.5 GiB high), 14/14 pins OK. Its three
+normalized logs are byte-identical to the hashes above. It observed the
+same ASan `WRITE of size 1073741824` at `src/jv.c:1191` via
+`jv_string_concat:1501` / `binop_plus:96` in a 49-byte region (rc 134), gdb
+`currlen=len=1073741824, allocsz=0`, fixed 1.8.2 rc 5 `String too long`,
+and a clean small-input alias. In its archive only, inking the fill byte to
+`A` still read `s->data[0]=0x41` at `src/jv.c:1189` with unchanged geometry,
+and `length=1073741825` produced `WRITE of size 1073741825` with the same
+49-byte region and pinned frame: the copy tracks the operands, not a
+harness constant. Verdict: ESTABLISHED at the labeled real-process geometry
+scope, **no grade change**. Rung 5 stays unclaimed: local expression, no
+wire/request input, heap-neighbour map, destination-offset or pointer
+control, command or side effect. The two author clean-replay attempts above
+stay preserved UNKNOWN observations, not passes; W160's clean replay
+supersedes their unresolved verification status.

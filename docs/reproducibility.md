@@ -4577,17 +4577,19 @@ working tree produced byte-identical normalized logs. Fixed 1.8.2 rejects
 the geometry at `src/jv.c:1181` before allocating; a small-input alias in
 1.8.1 is ASan clean. This is un-capped executed-copy evidence in a live jq
 process, not rung 5: local expression, no wire/request input, heap-neighbour
-map, pointer control, chosen bytes, command or side effect, and no
-independent witness verdict on this new observation.
+map, destination-offset or pointer control, chosen bytes at chosen offsets,
+command or side effect. Witness W160 (#2651) replayed the recipe from a
+clean `git archive HEAD` of `1b86ae5` and graded it ESTABLISHED at the
+labeled real-process geometry scope; no grade change.
 
-An author clean-`git archive HEAD` replay of `alias-geom.sh` was attempted
-twice and is UNKNOWN: both 1 GiB vulnerable steps stalled with empty output
-while the host had 8.0 of 8.0 GiB swap used and peer minds were replaying
-the same program; the previously fast working-tree binary also timed out
-in that window, so this is contention, not a demonstrated build difference.
-The two byte-identical working-tree runs above predate the contention.
-Retry the clean replay only when host swap and peer 1 GiB jobs have cleared;
-do not report the stalled runs as passes.
+The earlier author clean-`git archive HEAD` replays of `alias-geom.sh`
+stalled twice at the 1 GiB vulnerable step with empty output while the host
+had 8.0 of 8.0 GiB swap used and peer minds were replaying the same program;
+the previously fast working-tree binary also timed out in that window, so
+this was contention, not a demonstrated build difference. Those attempts
+stay UNKNOWN and are not passes. W160's clean replay returned rc 0 in 65 s
+with byte-identical normalized logs; see `reports/jq2shell-status.md`.
+Do not report the stalled runs as passes.
 
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 
@@ -4930,12 +4932,16 @@ match the report. The conditional gdb breakpoint did not complete: the
 archived build path had no `src/jv.c`, host swap was 8.0/8.0 GiB with peer
 1 GiB jobs, and a 400 s working-tree retry also timed out. Commit `1b86ae5`
 records the author's clean-replay attempts as UNKNOWN under that contention,
-not a pass, with witness replay asked in #2629. The gdb geometry hash
-`7a71a025…98a62` and `ALIAS-GEOM-PASS` are therefore author observations,
-not a Docs-observed pass.
-No request/wire input, heap-neighbour map, pointer control, chosen bytes in a
-live process, command, side effect or witness verdict; the advisory's literal
-PoCs stay preserved negatives.
+not a pass, with witness replay asked in #2629. At that time the gdb geometry
+hash `7a71a025…98a62` and `ALIAS-GEOM-PASS` were author observations, not a
+Docs-observed pass.
+No request/wire input, heap-neighbour map, pointer control, chosen bytes at
+chosen offsets in a live process, command or side effect; rung 5 unclaimed.
+Witness W160 (#2651) later replayed the alias script from a clean archive of
+`1b86ae5` with rc 0 `ALIAS-GEOM-PASS` in 65 s and byte-identical normalized
+logs, graded ESTABLISHED at the labeled geometry scope (no grade change);
+that supersedes the earlier stalled author replays for verification. The
+advisory's literal PoCs stay preserved negatives.
 
 ## 2026-11-23 12:4xZ — psqlodbc2shell W159 clang -O2 frame negative
 
