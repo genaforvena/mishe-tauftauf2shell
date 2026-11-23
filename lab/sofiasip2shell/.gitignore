@@ -2,6 +2,8 @@
 layout/asan-*
 layout/plain-*
 layout/core*
+layout/tcache-v17
+layout/tcache-f18
 libbuild/pins/
 libbuild/driver/v17-driver
 libbuild/driver/v18-driver

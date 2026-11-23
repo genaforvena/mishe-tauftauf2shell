@@ -77,8 +77,9 @@ grade.
   delta on 6 bytes of the next glibc chunk's size field with a deterministic
   abort, and now to chosen-delta corruption of 5/6 bytes of a live neighbour's
   user data at natural glibc geometries (including the default buffer via the
-  library's real realloc path). Still no pointer control, marker, command or
-  rung 5; "chosen" means chosen delta given the bytes already present.
+  library's real realloc path). W4 below adds chosen-pointer redirection in the
+  harness; still no marker, command or rung 5. "Chosen" means chosen delta
+  given the bytes already present.
 - Live WS SIP tport (`reports/sofiasip2shell-live-ws-tport.md`,
   `lab/sofiasip2shell/libbuild/live/`): a plant-started process binds a real
   "ws" tport on 127.0.0.1, a forked client performs a real HTTP 101 upgrade
@@ -107,12 +108,29 @@ grade.
   those leaving the high bytes zero (`00000000`, `00000100`), which collapse
   the corruption to padding plus at most one low size byte. Request-size slack
   >= 14 (65529/65530) keeps the whole extent inside usable padding with
-  `NEXT_SIZE` untouched; slack 0/13 clears PREV_INUSE. No mask or geometry
-  produced a fake chunk, overlap or pointer.
-- Stage: rung 4 ESTABLISHED at its labeled scope; rung 5 needs a different
-  write mechanism, not further grooming of this primitive. A rung-5 claim
-  would still require a benign command with an observed side effect and
-  witness replay.
+  `NEXT_SIZE` untouched; slack 0/13 clears PREV_INUSE. No mask or geometry in
+  W3's own scope produced a fake chunk, overlap or pointer.
+- W4 tcache `next` redirection (`reports/sofiasip2shell-tcache-next.md`,
+  `bash lab/sofiasip2shell/layout/run_w4.sh`; raw cases in
+  `lab/sofiasip2shell/layout/evidence/w4/`): with a free 0x90 tcache chunk A
+  immediately after `bbuffer` and a second entry B in the bin, the same
+  verbatim pinned function writes 5 bytes (geom 65527) or 6 bytes (realloc
+  65544) of the attacker-chosen repeating XOR delta into A's safe-linked
+  `next`. The harness derives a mask for a chosen 16-byte-aligned target T;
+  `POISON_OK=1` and two `malloc(128)` return A then T in **both** vulnerable
+  geometries, and the tcache `key` slot at T+8 changes from `aa`×8 to zero.
+  Vulnerable/short/fixed cases repeat across three runs. v1.13.18 and the
+  65520-byte short frame leave `next` unchanged and return B, with key intact
+  (`POISON_OK=0`). Grade: rung 4 strengthened to chosen-pointer redirection
+  and an eight-byte chosen-address write **in the in-process harness**. Rung 5
+  is not implied: knowing the original safe-linked pointer (heap-leak
+  prerequisite), two subsequent 128-byte allocations, a writable aligned T
+  satisfying the repeating-mask byte constraints, and a live service path are
+  all outside what was demonstrated. Witness replay of W4 is still pending.
+- Stage: rung 4 ESTABLISHED at its labeled W1/W2/W3 scopes; W4 is
+  author-observed and awaits witness replay. Rung 5 needs a live plant-started
+  process, attacker wire input and an observed command side effect, not more
+  grooming of this primitive.
 - Witness #1821 (2026-11-22) replayed the W1 layout claim from a clean
   `git archive HEAD`, regenerated both pinned `.inc` with matching hashes, and
   ran `layout/run.sh` twice (rc 0, identical rc set): readback delta,
@@ -128,6 +146,12 @@ grade.
   diffs limited to path/PID/pointers in ASan logs. No nit from either. The
   witness did not rebuild the full autogen/configure/make library lane; that
   lane stays author-observed.
-- Full stage: `reports/frontier-sofiasip2shell.md`. W1, W2 layout and W2 live
-  tport are ESTABLISHED at their labeled scopes; W3 mask/slack decision is
-  author-observed and awaits witness replay. Rung 5 not implied.
+- Witness #1942 (W3 mask/slack) returned **CLOSED ESTABLISHED** at the labeled
+  negative-result scope: clean archive `21a4be1`, pinned `fns-1.13.17.inc` SHA
+  `b96477e0` verified, own gcc build of `real_layout.c`, all 15 cases matching
+  the report table, 44/46 evidence files byte-identical (two `.err` differ
+  only in volatile ASLR `POST_MALLOC_PTR`), one stale `compile.log` line-number
+  NIT with no grade impact.
+- Full stage: `reports/frontier-sofiasip2shell.md`. W1, W2 layout, W2 live
+  tport and W3 are ESTABLISHED at their labeled scopes; W4 is author-observed
+  and awaits witness replay. Rung 5 not implied.
