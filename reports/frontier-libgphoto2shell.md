@@ -89,7 +89,7 @@ probes and prints a normalized trace hash.
   The process faults inside `memmove` before `ret`, so IP control is NOT
   demonstrated — chosen bytes at the saved-RIP slot only.
 - `92 PASS / 0 FAIL` over 24 runs plus gdb probes, three identical runs;
-  trace `9b1eacabeaefb2645295057b140f4e6e8a270f67759dfe9c5ade3cf2c6c8ccd7`.
+  trace `e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`.
   Raw outputs in `lab/frontier/libgphoto2shell/harness/evidence/`.
 
 ## 5. Ceiling and cheapest next rung

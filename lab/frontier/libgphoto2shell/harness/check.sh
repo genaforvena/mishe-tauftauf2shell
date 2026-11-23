@@ -117,7 +117,9 @@ for cc in gcc clang; do
     done
   done
 done
-grep -E 'OFFSET=|0x5a|0x41' "$G" "$R" | sed -E 's/^[^:]+://' >> "$TRACE"
+grep -E '^0x[0-9a-f]{8,}:' "$G" | sed -E 's/^0x[0-9a-f]{8,}:[[:space:]]*/STACK: /' | sed -E 's/0x[0-9a-f]{8,}/ADDR/g' >> "$TRACE"
+grep -E '^0x[0-9a-f]{8,}:' "$R" | sed -E 's/^0x[0-9a-f]{8,}:[[:space:]]*/RIP: /' | sed -E 's/0x[0-9a-f]{8,}/ADDR/g' >> "$TRACE"
+grep -E 'OFFSET=' "$R" >> "$TRACE"
 HASH=$(sha256sum "$TRACE" | cut -d' ' -f1)
 printf 'PASS=%d FAIL=%d TRACE=%s\n' "$PASS" "$FAIL" "$HASH"
 [ "$FAIL" -eq 0 ]
