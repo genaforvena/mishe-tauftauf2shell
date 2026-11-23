@@ -1,0 +1,252 @@
+=== live-asan-fixed-read.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=read
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+LCP_GATE_AFTER=1
+READ_DRIVER_DONE
+=== live-asan-fixed-write.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=write
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+LCP_GATE_AFTER=1
+WRITE_DRIVER_DONE
+GW_BEFORE=0000000000000000
+GW_AFTER=0000000000000000
+=== live-asan-fixed-write-small.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=write-small
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+LCP_GATE_AFTER=1
+WRITE_SMALL_DRIVER_DONE
+GW_BEFORE=0000000000000000
+GW_AFTER=0000000000000000
+=== live-asan-read.out ===
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+READ of size 1 at 0xADDR thread T0
+    [FRAME] 0xADDR in find_opt src/l2_ppp.c:282
+    [FRAME] 0xADDR in ppp_handle_ipv6cp src/l2_ppp.c:367
+    [FRAME] 0xADDR in ppp_rx src/l2_ppp.c:440
+    [FRAME] 0xADDR in mg_l2_ppp_rx src/l2_ppp.c:485
+    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:131
+    [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+
+0xADDR is located 1 bytes after 20-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    [FRAME] 0xADDR in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:122
+    [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow src/l2_ppp.c:282 in find_opt
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR: fa fa 00 00 00 fa fa fa 00 00[04]fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+=== live-asan-safe.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=safe
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+SAFE_DRIVER_DONE
+GW_BEFORE=0000000000000000
+GW_AFTER=2222222222222222
+=== live-asan-write.out ===
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+READ of size 65535 at 0xADDR thread T0
+    [FRAME] 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    [FRAME] 0xADDR in ppp_tx_frame src/l2_ppp.c:235
+    [FRAME] 0xADDR in ppp_handle_ipv6cp src/l2_ppp.c:375
+    [FRAME] 0xADDR in ppp_rx src/l2_ppp.c:440
+    [FRAME] 0xADDR in mg_l2_ppp_rx src/l2_ppp.c:485
+    [FRAME] 0xADDR in mg_l2_rx src/l2.c:116
+    [FRAME] 0xADDR in mg_tcpip_rx src/net_builtin.c:1863
+    [FRAME] 0xADDR in mg_tcpip_poll src/net_builtin.c:2020
+    [FRAME] 0xADDR in mg_mgr_poll src/net_builtin.c:2241
+    [FRAME] 0xADDR in inject /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:87
+    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:165
+    [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+
+0xADDR is located 0 bytes after 8192-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    [FRAME] 0xADDR in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    [FRAME] 0xADDR in mg_calloc src/util.c:231
+    [FRAME] 0xADDR in mg_tcpip_init src/net_builtin.c:2091
+    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:102
+    [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+=== live-asan-write-small.out ===
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 2000 at 0xADDR thread T0
+    [FRAME] 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    [FRAME] 0xADDR in ppp_tx_frame src/l2_ppp.c:235
+    [FRAME] 0xADDR in ppp_handle_ipv6cp src/l2_ppp.c:375
+    [FRAME] 0xADDR in ppp_rx src/l2_ppp.c:440
+    [FRAME] 0xADDR in mg_l2_ppp_rx src/l2_ppp.c:485
+    [FRAME] 0xADDR in mg_l2_rx src/l2.c:116
+    [FRAME] 0xADDR in mg_tcpip_rx src/net_builtin.c:1863
+    [FRAME] 0xADDR in mg_tcpip_poll src/net_builtin.c:2020
+    [FRAME] 0xADDR in mg_mgr_poll src/net_builtin.c:2241
+    [FRAME] 0xADDR in inject /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:87
+    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:172
+    [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+
+0xADDR is located 0 bytes after 1504-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    [FRAME] 0xADDR in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    [FRAME] 0xADDR in mg_calloc src/util.c:231
+    [FRAME] 0xADDR in mg_tcpip_init src/net_builtin.c:2087
+    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:102
+    [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00[fa]fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+=== live-plain-canary.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=canary
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+LCP_GATE_AFTER=1
+CANARY_MODE=canary FRAMESIZE=1504 PEER_LEN=2000
+CAN0=5a CAN17=3c GW=2222222222222222
+=== live-plain-fixed-canary.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=canary
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+LCP_GATE_AFTER=1
+CANARY_MODE=canary FRAMESIZE=1504 PEER_LEN=2000
+CAN0=cc CAN17=cc GW=0000000000000000
+=== live-plain-fixed-write-small.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=write-small
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+LCP_GATE_AFTER=1
+WRITE_SMALL_DRIVER_DONE
+GW_BEFORE=0000000000000000
+GW_AFTER=0000000000000000
+=== live-plain-info.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=info
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+=== live-plain-lcp.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=lcp
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+LCP_GATE_AFTER=1 NRECV=1
+=== live-plain-nolcp.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=nolcp
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+NOLCP_DRIVER_DONE
+GW_BEFORE=0000000000000000
+GW_AFTER=0000000000000000
+=== live-plain-safe.out ===
+BUILD=pinned-parent-8bb65c64926d MODE=safe
+FRAMESIZE=1504 TX_LEN=1504 L2TYPE=1 GATE_BEFORE=0
+OVERFLOW_65535=64031
+SAFE_DRIVER_DONE
+GW_BEFORE=0000000000000000
+GW_AFTER=2222222222222222

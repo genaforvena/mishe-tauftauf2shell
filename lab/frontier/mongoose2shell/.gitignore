@@ -3,3 +3,12 @@ harness/p-fixed
 harness/a-vuln-gcc
 harness/a-vuln-clang
 harness/a-fixed-gcc
+live/mongoose/
+live/mongoose-fixed/
+live/live-plain
+live/live-asan
+live/live-plain-fixed
+live/live-asan-fixed
+live/*.log
+live/*.out
+live/evidence/raw/

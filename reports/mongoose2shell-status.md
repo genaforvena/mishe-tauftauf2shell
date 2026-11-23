@@ -65,3 +65,40 @@ experiment for the target mind: build the pinned parent under ASan with
 `MG_ENABLE_TCPIP=1` and `MG_ENABLE_IPV6=1`, drive a loopback PPP/PPPoE frame
 into a plant-started `mg_tcpip_if`, and measure LCP reachability and the real
 `framesize` before claiming wire reachability.
+
+## W1 result — 2026-11-23 05:49Z (real stack, author-only)
+
+The bounded first experiment from the admission DM is complete. A second
+harness (`lab/frontier/mongoose2shell/live/live_harness.c`, `live/run.sh`)
+builds the byte-exact parent and the upstream fix worktrees with
+`MG_ENABLE_TCPIP=1 MG_ENABLE_IPV6=1`, creates a real `mg_mgr` + `mg_tcpip_if`
+(PPP), and injects peer frames through the public `mg_tcpip_qwrite()` +
+`mg_mgr_poll()` ingress into `mg_l2_ppp_rx()` -> `ppp_rx()` ->
+`ppp_handle_ipv6cp()`. `./run.sh`: **29 PASS / 0 FAIL** three times,
+`TRACE_SHA256=fc85570efeb6fb1c07ae35f5fce070fd1d06f9211c77481d60a78cccebf4b6d6`.
+
+- **Reachability (source + measured):** one unauthenticated peer LCP
+  Configure-ACK sets `s_lcpup` (`LCP_GATE_AFTER=1`); PAP/CHAP are never
+  handled. Without it the IPv6CP frame does not reach the handler
+  (`GW_AFTER=0000000000000000`). The gate is real but trivial.
+- **Real framesize:** `mg_tcpip_init()` allocates `tx.buf = framesize = 1504`
+  for PPP, so the `len=65535` copy overflows by 64031 bytes, not the harness's
+  64515 past 1024.
+- **Rung 3 on the real source:** ASan `READ of size 1` in `find_opt`
+  (`l2_ppp.c:282`, 1 byte past a 20-byte heap frame); `WRITE of size 2000` in
+  `ppp_tx_frame` (`l2_ppp.c:235`, 0 bytes past the real 1504-byte `tx.buf`);
+  and a real-stack-only `READ of size 65535` in `ppp_tx_frame` from the
+  8192-byte RX queue (memcpy source read beats the write at full `len`).
+- **Rung 4 on the real framesize:** chosen source bytes at frame offsets 1504
+  and 1521 land byte-exact at canary offsets 0 and 17
+  (`CAN0=5a CAN17=3c`) with `GW=2222222222222222`.
+- **Fixed control:** upstream `751f1474` is ASan-clean on write/read at the
+  same real path, rejects with `GW_AFTER=0000000000000000` and leaves the
+  canary at `cc`; the well-formed 14-byte frame still transits normally.
+
+Updated ceiling: rung 4 on the **real stack ingress path with the real
+framesize-derived buffer**; the LCP gate is reachable without auth. Still no
+socket, listener, NIC, PPPoE discovery, pointer-bearing state, command or rung
+5 — frames are injected in-process via the driver ISR API. No witness verdict.
+Next bounded work: a loopback wire/socket driver and independent witness
+replay; do not relabel in-process mechanics as remote compromise.
