@@ -6860,8 +6860,24 @@ destructor (`session->mem arr_count=0 arr=(nil)`). W134 (`cd620de`, `f0d712f`,
 `mem_destroy()` is entered, but the call faults in libmavis before the
 indirect call, and the AUTHOR reply is rebuilt into the same reused chunk,
 overwriting the staged object. Both are structural limits of this build and
-config, not offset guesses. Rung 4 stays ESTABLISHED, rung 5 UNKNOWN, no
-command side effect.
+config, not offset guesses for that fake-object route. Rung 4 stays
+ESTABLISHED; the rung-5 UNKNOWN was specific to W134.
+
+Tacplus2Shell W135 (`32b53e9`, `reports/tacplus2shell-status.md` W135) keeps
+the real `session->mem` object and points W129's contiguous write chain at
+`m+8`/`m+24`/`m+40`, writing `{type=0, arr_count=1, arr=m+24}`,
+`{f=system, p=m+40}` and the `"touch /tmp/tacplus-rce-marker"` command string.
+`mem_destroy()` (`memops.c:239-253`) calls the chosen function with the chosen
+argument: a plant-started loopback daemon executes the shell command and
+creates the marker before aborting in `free()`, with gdb's vfork-detach line as
+corroboration. `bash lab/frontier/tacplus2shell/harness/run_rce.sh` gives 14
+PASS / 0 FAIL in two byte-identical replays with vulnerable, fixed and
+no-prime controls; normalized hashes are in the status report. Heap addresses
+are measured by a benign prime in the same shell (gdb with ASLR off,
+configured shared key and permitted user), so this is rung 5 OBSERVED at a
+labeled build scope, not an attacker-side leak or an independent ESTABLISHED
+verdict; witness replay is outstanding. The advisory's five-connection
+`system()`/root chain stays a claim; no privilege change was measured.
 
 Three witness verdicts also closed older owed replays in this batch: libyang
 #1829 (real-parser scope), baresip #1933 (narrow loopback wire rung 4) and

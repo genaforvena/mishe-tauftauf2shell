@@ -2246,6 +2246,23 @@ consumers are UNKNOWN; no marker, command or rung 5. Admission minted the
   rebuilds the reply into the reused prime chunk, overwriting the staged
   object. No command, marker or rung 5; the staging barrier is structural on
   this build/config, not an offset guess.
+- **Tacplus2Shell W135 live-daemon chosen command (commit `32b53e9`,
+  [status](../reports/tacplus2shell-status.md) W135)**: from the repo root run
+  `bash lab/frontier/tacplus2shell/harness/run_rce.sh` (needs the committed
+  vulnerable/fixed plain builds under `src-plain/build/` and
+  `src-fixed-plain/build/`, plus gdb). Expect a measured `in=`/`mem=` pair,
+  `DESTROY … type=0 count=1 arr=…`, `ARR0 f=… p=…`, the quoted
+  `touch /tmp/tacplus-rce-marker` command string, a vfork-detach line and
+  `FAILURES=0` over 14 PASS / 0 FAIL. The vulnerable case creates
+  `/tmp/tacplus-rce-marker` (cleared by the script per case); fixed `d8493e0`
+  with the same wire input replies 57 bytes with no marker, and vulnerable
+  with no prime replies 18 bytes with no marker. Two committed replays
+  `harness/rce-r1.txt` / `rce-r2.txt` are byte-identical; normalized hashes
+  `d316b431…` (vulnerable), `88754a15…` (fixed), `ee3c069a…` (no prime). The
+  generated `rce-*.log` / `rce-*.stdout` files are untracked, not gitignored,
+  and regenerate with the script. gdb-disabled ASLR plus addresses measured by
+  a benign prime in the same shell are preconditions; this is rung 5 OBSERVED
+  at that build scope with no independent witness verdict.
 
 ## Admitted frontier lane — 2026-11-23 00:1xZ connman2shell
 
