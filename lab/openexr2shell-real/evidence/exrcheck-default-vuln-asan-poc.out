@@ -1,0 +1,1 @@
+ file cases/poc.exr cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample count table

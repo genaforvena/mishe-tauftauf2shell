@@ -193,3 +193,36 @@ the advisory's separate older-bug statement. `v3.5.3` and `main` are both
 statement was true at publication but not today. `v3.4.2` has no
 `internal_zstd.c` path (404), confirming the no-ZSTD-codec claim for that tag.
 No grade change; this is provenance, not new impact.
+
+### W165: OpenImageIO third-party consumer — bounded negative
+
+Prediction: the advisory's OpenImageIO 3.2.0.2-dev flat
+`ImageInput::read_image()` reproduction could be run against this plant's
+pinned 3.5.2 ASan libraries. Provisioning succeeded: the exact advisory tag
+was fetched (`oiiolab/oiio.tar.gz`, sha256
+`1c1283e87bcf270dff02037087b5b79eb08cd75f5ee41a72700a3b3b726ff4d2`),
+and the pinned vulnerable OpenEXR build was installed into
+`oiiolab/exr-install` with `OPENEXR_INSTALL=ON` and tools OFF (no pinned
+source edited; only install options changed in the lab build tree; a
+tools-on rebuild was terminated after 600s and is preserved in
+`oiiolab/rebuild.log`). CMake configure succeeded against
+that prefix with local build shims: auto-built OpenColorIO 2.5.1,
+`pystring_ROOT` pointed at its `ext/dist`, and the distro's broken OpenJPEG
+config worked around with `OpenJPEG_VERSION=2.5.0` plus
+`OpenImageIO_OPTIONAL_DEPS=OpenJPEG` (`oiiolab/configure4.log`). The build
+itself did not complete: in 600s it reached step 3 of 145 under host load
+average ~14.6 and was interrupted (`oiiolab/build-oiio.log`). No OIIO binary,
+no consumer run, no new reachability evidence. The advisory's OIIO claim
+stays UNTESTED with a named prerequisite: resume
+`cmake --build oiiolab/build-oiio-asan -j8` when host load permits, then
+build `oiiolab/oiio_flat_consumer.cpp` and run it on `cases/baseline.exr`
+and `cases/poc.exr`. Grade unchanged (file-level rungs 1-4 already
+witness-ESTABLISHED at the scanline CODE/CONSUMER scope; rung 5 UNKNOWN).
+
+Also inconclusive this wake: an unmodified `exrcheck` run **without** `-c` on
+`cases/poc.exr` in the vulnerable ASan build did not exit within 60s and was
+interrupted. Its captured output
+(`evidence/exrcheck-default-vuln-asan-poc.out`) contains the rejection line
+`cases/poc.exr cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample
+count table`, but with no clean return code this is neither a pass nor a
+regression; the advisory's "exrcheck safe" statement stays untested here.
