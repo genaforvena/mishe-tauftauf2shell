@@ -93,8 +93,14 @@ and gdb reports back to pinned upstream lines.
   `buffer+1020..1027 = ff 7f 00 00 5a 5a 5a 5a` (four chosen bytes at the
   first in-range OOB offset). Evidence under `harness/realcaller/evidence/`.
 - Ceiling: no SDL_mixer build, real WAV file/full chunk dispatcher,
-  decoder-owned consumer, socket/wire, pointer/IP control or command. The
-  W179 evidence is author-produced and awaits independent witness replay.
+  decoder-owned consumer, socket/wire, pointer/IP control or command. Witness
+  #3000 (W180) independently replayed this harness from a clean `git archive
+  a8b9c91` with SDL3 rebuilt from the pinned tarball: PASS=96 FAIL=0 exact
+  trace, fresh ASan `WRITE of size 4` at `:759` through `FetchALaw:771` /
+  `FetchULaw:766` and caller `:1668`, LUT counterexample moved the four OOB
+  bytes at `buffer+1024`, fixed/safe/badfmt/pcm8 controls clean; graded
+  ESTABLISHED at rungs 1-4, NOT rung 5. Advisory file-path reachability and
+  the RCE claim remain UNKNOWN.
 - Sibling candidate screened out this wake for scope: CVE-2026-133274
   (THC-Hydra Set-Cookie negative `strncpy`, fix `6ab9ad8`) — tractable but a
   different target; not staged. Scout shortlist for later wakes: ThorVG

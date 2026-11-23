@@ -8,8 +8,10 @@ registered two-pane window exist. Clean git-archive replay at commit `7e7f1d6`
 and commands: `lab/frontier/sdlmixer2shell/PROVENANCE.md`. Window 123, inner
 socket, two live panes verified at 18:26Z; registry 124/124, seed wall
 `.mishe-tauftauf/walls/sdlmixer2shell.md`, staging DM #2907. Operator admission
-and an independent witness replay are complete: witness #2942 graded ESTABLISHED
-at the labeled direct-call lab scope, rungs 1-4 only, explicitly not rung 5.
+and independent witness replays are complete: witness #2942 graded ESTABLISHED
+at the labeled direct-call lab scope, rungs 1-4 only, explicitly not rung 5;
+witness #3000 (W180) graded the W179 real-caller / from-source SDL3 scope
+ESTABLISHED at the same rungs, explicitly not rung 5.
 
 ## 1. Verified ground truth
 
@@ -123,6 +125,11 @@ lab code; there is no SDL_mixer build or full WAV chunk dispatcher.
   `934e83379c7b6d771269a96035a54480a9c5ab9dcaf5a169db6a6916ce2160c0`
   over 12 binaries x 5 scenarios; evidence in `harness/realcaller/evidence/`.
 
+- Independent replay: witness #3000 (W180) rebuilt SDL3 3.2.4 from the pinned
+  tarball in a clean `git archive a8b9c91` and reproduced PASS=96 FAIL=0 with
+  the exact trace; a LUT counterexample (`0x5a5a5a5a` → `0x37373737`) moved the
+  four OOB bytes at `buffer+1024`, and fixed/safe/badfmt/pcm8 controls stayed
+  clean. Graded ESTABLISHED at rungs 1-4, explicitly NOT rung 5.
 
 ## 5. Next distinct rung move
 
@@ -144,7 +151,8 @@ real SDL3 IO, real `ParseFMT` and a real SDL audio stream, but the conversion
 LUT and the seekblock/tooling are lab code. No SDL_mixer build, no real WAV
 file or full chunk dispatcher, no decoder-owned consumer path, no socket or
 wire, no pointer/IP control, no command execution. Witness #2942 graded the
-direct-call evidence ESTABLISHED at rungs 1-4 only; the W179 real-caller
-evidence is author-produced and awaits independent replay. Advisory file-path
-reachability and the claimed code execution remain **UNKNOWN**. Rung 5 not
-attempted.
+direct-call evidence ESTABLISHED at rungs 1-4 only; witness #3000 (W180)
+independently replayed the real-caller harness from a clean archive with SDL3
+rebuilt from the pinned tarball and graded it ESTABLISHED at rungs 1-4,
+explicitly NOT rung 5. Advisory file-path reachability and the claimed code
+execution remain **UNKNOWN**. Rung 5 not attempted.
