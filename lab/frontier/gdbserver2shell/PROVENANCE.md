@@ -243,9 +243,10 @@ same-length control that restores the object's original four words
 (vptr `0x00005555555f8520`, `0x000055555561c500`, `0x15`, `0x15`) exits
 normally. An earlier control that merely preserved the vptr but filled
 the remaining object words still SIGSEGVed; that negative is kept as
-`marker-control-{1,2}.log`. A run with `setarch -R` and no gdb using the
-forged payload exited 0 — the gdb-fixed address did not transfer; this
-is why the marker is labeled debugger-assisted and is not rung 5.
+`marker-control-{1,2}.log`. The gdb-fixed address from W2 did not transfer
+to a plain `setarch -R` run and that run exited 0; W4 below re-derived the
+address for that configuration. The marker was labeled debugger-assisted
+at W2 and is not rung 5.
 
 Boundary: gdb only reads memory and fixes the load address; it never
 forces the indirect call. No benign command, no side effect from a
@@ -269,3 +270,41 @@ reproducible across independently built binaries. Condition refined: the
 wire payload must be re-derived per build for both the gdb-fixed load base
 and the heap object offset. W137 agreed no wire-only rung 5, no command
 and no side effect without gdb-fixed addresses; no grade change.
+
+## Wire-only deterministic replay and rung-5 negatives (W4, 2026-11-23T03:04Z)
+
+New file `rsp/aslr_off_verify.sh`, evidence `rsp/evidence/aslr-off-*`
+and `sweep-*`. The plant-built plain pinned binary is started under
+`setarch -R` (ASLR off) at a loopback port with the exact invocation
+`--once --debug=remote 127.0.0.1:PORT /bin/true`; no debugger is present.
+Under that invocation and this shell environment `src=xmalloc(2)` is at
+`0x55555561c410` and the adjacent live `tdesc_feature` is at
+`0x55555561c430`. A gdb-under-`setarch -R` measurement put the object at
+`0x...c470` instead, so gdb's inferior environment shifts the heap by
+0x40; addresses must be measured in the exact target configuration.
+
+The 64-byte `SLEN=1` payload keeps the next chunk size at `0x61`, sets
+the object vptr to `obj+8 = 0x55555561c438`, and puts `abort@plt`
+(`0x555555561f70`) in fake slot `+0x10`. Server: `OK` to `QTDPsrc`,
+`E01` to `qGetTLSAddr`, then SIGABRT (`SERVER_RC=134`). Short N=8 and
+well-formed N=16 exit 0. Two consecutive runs: 3 PASS / 0 FAIL each.
+An address sweep over candidate objects `0x...c430`..`0x...c4a0` in 0x10
+steps produced 134 only at `0x...c430`, 139 at all seven others; the
+successful address is measured, not a lucky guess. This removes the
+debugger condition from the chosen-function marker; `abort()` is a
+marker, not a command, so the grade is unchanged.
+
+Rung-5 negatives, all preserved. `readelf -n` reports CET `IBT, SHSTK`;
+the plain binary is PIE. Undefined symbols contain no `system`,
+`popen` or `execve`; the only command primitive is `execvp`, invoked
+once at `0x52a04` inside `fork_inferior` with a multi-argument setup.
+The corrupted vcall is `0x2d4bf call rax` with `%rdi = %rbx = object`,
+so file and argv alias one pointer and no argv is set up. Disassembly
+of the whole `.text` yields no `mov rsp,rdi/rbx`, `xchg rsp,*` or
+`pop rsp; ret`; only `pop rdi/rsi/rdx; ret` and `leave; ret` exist.
+Forged slot retargets under the same wire-only ASLR-off setup:
+`_exit@plt` (`0x555555564640`) and a bare `ret` (`0x55555557d4de`)
+gave SIGILL (132), `exit@plt` (`0x555555564380`) and `getpid@plt`
+(`0x555555564540`) gave SIGSEGV (139). No clean distinctive exit,
+no command, no side effect. `qGetTLSAddr` is `E01` in every case.
+

@@ -192,3 +192,48 @@ live heap corruption are reproducible across independently built binaries.
 Condition refined: the wire payload must be re-derived per build for both
 the gdb-fixed load base and the heap object offset. No wire-only rung 5,
 no command, no side effect without gdb-fixed addresses; no grade change.
+
+## Wire-only forged call under deterministic addresses (2026-11-23T03:04Z)
+
+One bounded experiment from the wall's Next item: can the forged-call
+marker run without a debugger, and can the destructor's indirect call be
+turned into a command? New `rsp/aslr_off_verify.sh` replays the
+plant-started plain pinned gdbserver under `setarch -R` (ASLR off) from a
+loopback client: **3 PASS / 0 FAIL** on each of two consecutive runs.
+With a 64-byte `SLEN=1` packet whose bytes 24..31 preserve the next
+chunk size `0x61`, bytes 32..39 set the live object's vptr to `obj+8`,
+and bytes 56..63 hold `abort@plt` (`0x555555561f70`), the server answers
+`OK` to `QTDPsrc` and `E01` to `qGetTLSAddr`, then dies with `SIGABRT`
+(`SERVER_RC=134`) with no debugger. Short N=8 and well-formed N=16 exit
+0. Under this exact invocation and environment the object address is
+stable at `0x55555561c430` (`src=xmalloc(2)` at `0x...c410`); a sweep of
+candidate object addresses `0x...c430` to `0x...c4a0` in `0x10` steps
+gave `134` only at `0x...c430` and `139` at all seven others, so the
+chosen address is measured, not guessed. This removes the debugger
+condition from the W2/W3 chosen-function marker: the load base and heap
+address are fixed by ASLR-off plus the recorded invocation, not by gdb.
+The payload is still build- and environment-specific and still a marker:
+`abort()` is not a command, so this is not rung 5.
+
+Rung-5 feasibility produced negative evidence, preserved here. The plain
+build is PIE and carries CET `IBT, SHSTK` properties. It imports no
+`system`, `popen` or `execve`; its only command-execution import is
+`execvp`, called once at `0x52a04` deep inside `fork_inferior` with a
+multi-argument stack setup, not through a controllable one-argument
+wrapper. The corrupted call site is `0x2d4bf` (`call rax`) with
+`%rdi = %rbx = object`, i.e. no argv setup and the file and argv
+registers aliased to the same pointer. Disassembly shows no
+`mov rsp,rdi/rbx`, `xchg rsp,*` or `pop rsp; ret` gadget; the available
+ROP material is `pop rdi/rsi/rdx; ret` and `leave; ret` only. Retargeting
+the forged slot to `_exit@plt` or a bare `ret` gadget gave `SIGILL` (132),
+and to `exit@plt` or `getpid@plt` gave `SIGSEGV` (139): none produced a
+clean distinctive exit or a command side effect. No leak or usable
+existing vtable slot was found; `qGetTLSAddr` remains `E01` in every
+case.
+
+Grade unchanged: rung 3 confirmed in the real pinned process; rung 4
+strengthened to wire-only chosen-function control under a deterministic
+configuration; rung 5 untouched. Evidence:
+`rsp/evidence/aslr-off-{abort-marker,short-8,safe-16}.{log,client.out}`,
+the `sweep-*.log` files, and `PROVENANCE.md`.
+
