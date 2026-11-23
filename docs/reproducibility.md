@@ -4553,7 +4553,32 @@ rc=124 after 300s with no ASan report; `n=10^9` completed in 4.66s. The
 second PoC likewise needs ~1.43 GiB decoded bytes from ~1.9 GiB of base64.
 No guard bypass was attempted. Heap-neighbour overlap in a real jq process,
 pointer control and command execution stay UNKNOWN; the grade remains W1's
-rungs 1-4.
+rungs 1-4. A later wake reaches the wrapped append arithmetic inside that
+same guard by aliasing one 1 GiB string (section below); the literal PoC
+negative above is preserved, not superseded.
+
+## 2026-11-23 12:3xZ — jq2shell real-process wrapped append geometry
+
+From the repo root run `bash lab/frontier/jq2shell/live/alias-geom.sh`. It
+calls `real-jq.sh` to verify pins and rebuild both hash-pinned trees if
+needed, then drives
+`jq -n '("x"*1073741824) as $s | ($s+$s) | length'` in the real ASan 1.8.1
+process. jq strings are refcounted, so the single 1 GiB jv string supplies
+both `currlen` and `len` to `jvp_string_append`: the physical footprint is
+~1 GiB, inside the unchanged 2 GiB cgroup. Expect rc 0,
+`ALIAS-GEOM-PASS`, `SAFE len=2000`, `VULN rc=134`,
+`FIXED rc=5 msg=String too long`, six normalized ASan lines including
+`WRITE of size 1073741824` and `jvp_string_append src/jv.c:1191`, and gdb
+`GEOM ALIAS currlen=1073741824 len=1073741824 allocsz=0` with the real
+`jv_string_concat`/`binop_plus` frames. The normalized outputs are
+`live/evidence/alias-{summary,asan,gdb}.out`; raw ASan and gdb transcripts
+stay gitignored under `lab/frontier/jq2shell/build/alias/`. Two runs in the
+working tree produced byte-identical normalized logs. Fixed 1.8.2 rejects
+the geometry at `src/jv.c:1181` before allocating; a small-input alias in
+1.8.1 is ASan clean. This is un-capped executed-copy evidence in a live jq
+process, not rung 5: local expression, no wire/request input, heap-neighbour
+map, pointer control, chosen bytes, command or side effect, and no
+independent witness verdict on this new observation.
 
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 

@@ -1,0 +1,6 @@
+ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 1073741824
+jvp_string_append src/jv.c:1191
+jv_string_concat src/jv.c:1501
+binop_plus src/builtin.c:96
+49-byte region

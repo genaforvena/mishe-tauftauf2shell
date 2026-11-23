@@ -1,0 +1,6 @@
+GEOM ALIAS currlen=1073741824 len=1073741824 allocsz=0
+#0  jvp_string_append (string=..., data=<optimized out>, len=len@entry=1073741824) at src/jv.c:1189
+#1  0xADDR in jv_string_concat (a=..., b=...) at src/jv.c:1501
+#2  0xADDR in binop_plus (a=..., b=...) at src/builtin.c:96
+#3  0xADDR in f_plus (jq=<optimized out>, input=..., a=..., b=...) at src/builtin.c:45
+#4  0xADDR in jq_next (jq=jq@entry=0xADDR) at src/execute.c:919
