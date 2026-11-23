@@ -435,3 +435,21 @@ Verdict unchanged: rung 4 ESTABLISHED at labeled live-daemon scope, rung 5
 UNKNOWN. The pointer write is new rung-4 mechanics (a chosen heap address
 carrying a chosen fake object), still fixed only by gdb-disabled ASLR.
 
+Causal diagnosis of the fault (guarded destructor-entry dump,
+`harness/gdb-fake2.cmd`, `harness/fakemem-map.log`): at `author.c:141` the fake
+`mem_t`, `arr[0].f` and `arr[0].p` are intact in the prime plaintext, and the
+i=14 write lands (`POST14 smem_val=0x5555555fe160`). By `cleanup_session()` the
+same region is **reply data**: `send_author_reply_final()` builds the AUTHOR
+reply into the reused prime chunk before `mem_destroy()`, replacing the fake
+object with size-table entries and `cmd=AAAA` / `cmd=BBBB` … strings. The entry
+dump therefore reads `type=0, arr_count=0, arr=nil` at the chosen address and
+the destructor loop faults on the nil `arr`. A second layout placing the fake
+at `in+1856` reads all zeros for the same reason — the prime plaintext beyond
+the reply region does not survive either. This is a structural barrier for
+staging a fake `mem_t` in the reused `in` chunk on this build/config, not a
+failed guess about offsets; the write primitive itself is proven by `POST14`
+and the changed `session->mem` at cleanup. The real `session->mem` object lives
+in a separate allocation (`0x5555555fd5d0`) that is not overwritten, but the
+earlier W129 attempt to edit its `arr_count`/`arr` in place aborted in glibc
+metadata. No rung-5 claim.
+
