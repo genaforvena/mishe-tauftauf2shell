@@ -103,3 +103,16 @@ up and left no marker. Evidence hashes and runner commands are in
 `reports/llamarpc2shell.md` under "256 KiB SEND upper bound" and in
 `lab/frontier/llamarpc2shell/PROVENANCE.md` under "256 KiB upper bound".
 Rung-5 replay is still owed; no new primitive and no grade change here.
+
+Fifth wake (2026-11-23): the open canary-enabled question is now a measured
+negative. On the vulnerable plain Debug build (canary active, server sha
+`dc368c89…7eb7`) with ASLR off and the same loopback wire path, a 3716-byte
+SEND carrying the chain at the measured `&cmd + 3585` slot aborts with
+`*** stack smashing detected ***` and leaves no marker; a 1-byte SEND on the
+same server closes cleanly. The generator gained optional layout flags but its
+default payload is byte-identical to the established r5 evidence. Logs and
+hashes are in `reports/llamarpc2shell.md` under "Canary-enabled build" and in
+`PROVENANCE.md`. No grade change: rung 5 remains locally observed / PENDING
+on the no-canary build, rungs 3-4 stay witness-ESTABLISHED. Rung-5 replay #2315
+is still owed; its blocker is engine-side (witness dispatch `state=failed`,
+"no working engine candidate for witness"), not a missing request.

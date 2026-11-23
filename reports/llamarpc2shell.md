@@ -229,8 +229,8 @@ bundle regression is repaired here with no grade change and no new replay owed.
   observed marker and controls (section above); it is one ASLR-off,
   no-stack-protector build with a measured absolute stack address, and its
   independent replay is still owed, so the grade is locally observed /
-  PENDING rather than ESTABLISHED. No ASLR-on or canary-enabled rung-5 run
-  exists.
+  PENDING rather than ESTABLISHED. A canary-enabled variant is now measured as
+  a negative (fifth wake below); no ASLR-on rung-5 run exists.
 - The 3585-byte offset is measured in the non-ASan Debug build only; the ASan
   build has different frame layout. Saved-RIP overwrite was not reproduced
   under ASan. The 761-byte offset is measured in the separate no-stack-protector
@@ -277,3 +277,47 @@ then the same with `SERVER=$PWD/lab/frontier/llamarpc2shell/src/llama.cpp-fixed-
 This closes the "largest SEND 4608 bytes" gap; it does not change any grade.
 No core file was retained; no independent replay is owed for this observation
 because it adds no new primitive.
+
+## Canary-enabled build: measured negative (2026-11-23 fifth wake)
+
+The open question from the third wake — does the wire-only r5 chain survive a
+stack-protector build? — was tested with the same runner and the same
+loopback `rxe0:53060`, `setarch x86_64 -R` and fixed minimal environment.
+Server: vulnerable pin plain Debug build, sha256
+`dc368c89eac8a56f3358ccc4768069c235d76a0743404a34763ffe111c3d7eb7`
+(the build that imports `__stack_chk_fail`), not the no-canary build.
+
+- `MODE=measure` with that server (43-byte SEND, `gdb-measure-noaslr.cmd`)
+  reported `cmd address 0x7fffffffda97`, `saved rip slot 0x7fffffffe898`
+  (`&cmd + 3585`, the same offset as the earlier plain Debug layout),
+  `server.buffers &cmd + 105`, `sock &cmd + 3721`, libc base
+  `0x7ffff7200000`: `wire/evidence/canary-layout1.log`
+  (`3fcdbae9dc7b5919a02bd3377bc31c3f7931ce3c346432fe414ece13924c8ba4`).
+- `wire/make-repair-payload.py` gained optional `--saved-rip`, `--string-off`,
+  `--length` and `--command` flags; its default invocation still reproduces
+  `wire/evidence/r5-payload.bin` byte-for-byte (sha256
+  `96c92e9f462d43e1744e19093f42bf26a978684364b55ee50c383dcf80ed304e`).
+  The variant payload `wire/evidence/r5-canary.bin` (3716 bytes, sha256
+  `4e0943a748caf44ef19644992d11ceb9cf57517512f22ceec13fdf081fbd32df`)
+  carries the chain at `&cmd + 3585`, a command string at `+3660`, and stops
+  before `sock` at `+3721`. The debugger-free `&cmd` was taken as the gdb value
+  plus the previously measured 48-byte debugger-environment delta; the canary
+  result does not depend on that address being exact.
+- `MODE=attack` with that payload: client `wc status=0 byte_len=3716`; server
+  printed `*** stack smashing detected ***` and aborted; the benign
+  `/tmp/llamarpc2shell-canary-marker` was absent. Logs:
+  `wire/evidence/canary-attack1.log`
+  (`92519f51622dd33fc8688c74ade657accc055268a771798cf72df841b485b28b`) and
+  `client-canary-attack1.log`
+  (`07c807484aec102c31b4200fa1211f6d13a4db923517e4616fa9035b03448251`).
+- Control: a 1-byte SEND on the same canary build closed cleanly
+  (`Client connection closed`, no abort, no marker):
+  `wire/evidence/canary-safe.log`
+  (`095e0e6adba7c8402c5c631b3c32b6144643bfc59139b493448b5980c2642329`).
+
+Interpretation is bounded: on this build, ASLR-off, with a wire-only SEND that
+reaches the saved-frame slot, the active canary aborts before any command runs.
+The abort site was not source-bound by a debugger here. This does not negate
+the no-canary marker observation, does not establish ASLR-on behavior, and
+changes no grade. No independent replay is owed for a negative with no new
+primitive.

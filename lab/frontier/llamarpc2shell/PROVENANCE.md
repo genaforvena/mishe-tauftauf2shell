@@ -148,7 +148,9 @@ Decisive artifacts (all loopback-only; full narrative in
 `reports/llamarpc2shell.md`):
 
 - `wire/make-repair-payload.py` sha256
-  `192a037a8b803d9a1c0c88c4af436b5af63fc44b32eb9c78f6bcc166b42f87eb`,
+  `c8b218e32eb225534e3541d7536637244eeebf849e6d830e676279e64fdc11c6`
+  (fifth wake: optional `--saved-rip`, `--string-off`, `--length`, `--command`;
+  the default invocation still produces `r5-payload.bin` byte-for-byte),
   `wire/run-repair.sh` sha256
   `b84e292a27b51c1fed778fcc5b85bb38e0f846bfdc09043f66f04830ddb2a3c1`.
   Layout gdb commands: `wire/gdb-layout-repair.cmd`,
@@ -195,3 +197,27 @@ build, payload, environment and marker side effect.
   `RDMA recv overrun: got=262144 rem=1`, no crash, no marker.
 - Both used `MODE=attack` on `wire/run-repair.sh` over loopback `rxe0:53060`
   with `setarch -R`; only `SERVER` and `TAG` differed. No core file retained.
+
+## Canary-enabled negative — 2026-11-23 fifth wake
+
+- Server: vulnerable pin plain Debug build (canary active), sha256
+  `dc368c89eac8a56f3358ccc4768069c235d76a0743404a34763ffe111c3d7eb7`.
+  `MODE=measure` layout: `cmd 0x7fffffffda97`, saved RIP `&cmd + 3585`,
+  `sock &cmd + 3721`, libc base `0x7ffff7200000`; log
+  `wire/evidence/canary-layout1.log`
+  `3fcdbae9dc7b5919a02bd3377bc31c3f7931ce3c346432fe414ece13924c8ba4`.
+- Wire input `wire/evidence/r5-canary.bin` (3716 bytes)
+  `4e0943a748caf44ef19644992d11ceb9cf57517512f22ceec13fdf081fbd32df`;
+  chain at `+3585`, command string at `+3660`, ends before `sock` at `+3721`.
+- Attack: `wire/evidence/canary-attack1.log`
+  `92519f51622dd33fc8688c74ade657accc055268a771798cf72df841b485b28b` and
+  `client-canary-attack1.log`
+  `07c807484aec102c31b4200fa1211f6d13a4db923517e4616fa9035b03448251`:
+  client `byte_len=3716`, server `*** stack smashing detected ***`, marker
+  absent. Safe 1-byte control `wire/evidence/canary-safe.log`
+  `095e0e6adba7c8402c5c631b3c32b6144643bfc59139b493448b5980c2642329`
+  closes cleanly, marker absent.
+- All runs used `MODE=attack|measure ... bash wire/run-repair.sh` over loopback
+  `rxe0:53060` with `setarch -R`; only `SERVER`, `TAG`, payload and marker path
+  differed. Abort site was not source-bound; no new primitive, no grade change,
+  no replay owed for this negative.

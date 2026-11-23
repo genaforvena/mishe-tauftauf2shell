@@ -1,0 +1,212 @@
+No source file named ggml-rpc.cpp.
+Breakpoint 1 (ggml-rpc.cpp:2476) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+register_backend: registered backend RPC (0 devices)
+register_backend: registered backend CPU (1 devices)
+register_device: registered device CPU (AMD Ryzen 7 5700X 8-Core Processor)
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-rpc.so
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-cpu.so
+Starting RPC server v8.0.0
+  endpoint       : 127.0.0.1:53060
+  local cache    : n/a
+Devices:
+  CPU: AMD Ryzen 7 5700X 8-Core Processor (32019 MiB, 32019 MiB free)
+  transport      : TCP (RDMA auto-negotiate enabled)
+Accepted client connection
+RDMA probed: dev=rxe0 gid=1 RoCEv2 qpn=18 inline=256
+RDMA activated: qpn=18->17 mtu=4096 rx_depth=24
+
+Breakpoint 1, rpc_serve_client (backends=std::vector of length 1, capacity 1 = {...}, cache_dir=0x0, sock=std::shared_ptr<socket_t> (use count 2, weak count 0) = {...}) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/ggml-rpc.cpp:2476
+2476	            break;
+=== HIT rdma_recv ===
+cmd address: 0x7fffffffda97
+rpc rbp: 0x7fffffffe890
+saved rip slot: 0x7fffffffe898
+server.buffers address: 0x7fffffffdb00
+sock address: 0x7fffffffe920
+process 3476453
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555563000     0xf000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/ggml-rpc-server
+      0x555555563000     0x555555599000    0x36000     0xf000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/ggml-rpc-server
+      0x555555599000     0x5555555b0000    0x17000    0x45000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/ggml-rpc-server
+      0x5555555b0000     0x5555555b1000     0x1000    0x5c000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/ggml-rpc-server
+      0x5555555b1000     0x5555555b2000     0x1000    0x5d000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/ggml-rpc-server
+      0x5555555b2000     0x5555555ef000    0x3d000        0x0  rw-p   [heap]
+      0x7ffff6bfe000     0x7ffff7200000   0x602000        0x0  rw-p   
+      0x7ffff7200000     0x7ffff7228000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7228000     0x7ffff73b1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff73b1000     0x7ffff7400000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7400000     0x7ffff7404000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7404000     0x7ffff7406000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7406000     0x7ffff7413000     0xd000        0x0  rw-p   
+      0x7ffff7418000     0x7ffff745a000    0x42000        0x0  rw-p   
+      0x7ffff745a000     0x7ffff745c000     0x2000     0xb000  rw-s   /dev/infiniband/uverbs0
+      0x7ffff745c000     0x7ffff745e000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libhns-rdmav34.so
+      0x7ffff745e000     0x7ffff7467000     0x9000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libhns-rdmav34.so
+      0x7ffff7467000     0x7ffff7469000     0x2000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libhns-rdmav34.so
+      0x7ffff7469000     0x7ffff746a000     0x1000     0xc000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libhns-rdmav34.so
+      0x7ffff746a000     0x7ffff746b000     0x1000     0xd000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libhns-rdmav34.so
+      0x7ffff746b000     0x7ffff7472000     0x7000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libmlx5.so.1.24.50.0
+      0x7ffff7472000     0x7ffff74e1000    0x6f000     0x7000  r-xp   /usr/lib/x86_64-linux-gnu/libmlx5.so.1.24.50.0
+      0x7ffff74e1000     0x7ffff74ee000     0xd000    0x76000  r--p   /usr/lib/x86_64-linux-gnu/libmlx5.so.1.24.50.0
+      0x7ffff74ee000     0x7ffff74f0000     0x2000    0x82000  r--p   /usr/lib/x86_64-linux-gnu/libmlx5.so.1.24.50.0
+      0x7ffff74f0000     0x7ffff74f1000     0x1000    0x84000  rw-p   /usr/lib/x86_64-linux-gnu/libmlx5.so.1.24.50.0
+      0x7ffff74f1000     0x7ffff74f3000     0x2000        0x0  rw-p   
+      0x7ffff74f3000     0x7ffff74f5000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libhfi1verbs-rdmav34.so
+      0x7ffff74f5000     0x7ffff74f7000     0x2000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libhfi1verbs-rdmav34.so
+      0x7ffff74f7000     0x7ffff74f8000     0x1000     0x4000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libhfi1verbs-rdmav34.so
+      0x7ffff74f8000     0x7ffff74f9000     0x1000     0x5000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libhfi1verbs-rdmav34.so
+      0x7ffff74f9000     0x7ffff74fa000     0x1000     0x6000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libhfi1verbs-rdmav34.so
+      0x7ffff74fa000     0x7ffff74fc000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libbnxt_re-rdmav34.so
+      0x7ffff74fc000     0x7ffff7502000     0x6000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libbnxt_re-rdmav34.so
+      0x7ffff7502000     0x7ffff7503000     0x1000     0x8000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libbnxt_re-rdmav34.so
+      0x7ffff7503000     0x7ffff7504000     0x1000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libbnxt_re-rdmav34.so
+      0x7ffff7504000     0x7ffff7505000     0x1000     0xa000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libbnxt_re-rdmav34.so
+      0x7ffff7505000     0x7ffff7507000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libmlx4.so.1.0.50.0
+      0x7ffff7507000     0x7ffff7510000     0x9000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libmlx4.so.1.0.50.0
+      0x7ffff7510000     0x7ffff7512000     0x2000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libmlx4.so.1.0.50.0
+      0x7ffff7512000     0x7ffff7513000     0x1000     0xc000  r--p   /usr/lib/x86_64-linux-gnu/libmlx4.so.1.0.50.0
+      0x7ffff7513000     0x7ffff7514000     0x1000     0xd000  rw-p   /usr/lib/x86_64-linux-gnu/libmlx4.so.1.0.50.0
+      0x7ffff7514000     0x7ffff7516000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libcxgb4-rdmav34.so
+      0x7ffff7516000     0x7ffff751d000     0x7000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libcxgb4-rdmav34.so
+      0x7ffff751d000     0x7ffff751f000     0x2000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libcxgb4-rdmav34.so
+      0x7ffff751f000     0x7ffff7520000     0x1000     0xa000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libcxgb4-rdmav34.so
+      0x7ffff7520000     0x7ffff7521000     0x1000     0xb000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libcxgb4-rdmav34.so
+      0x7ffff7521000     0x7ffff7523000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libefa.so.1.3.50.0
+      0x7ffff7523000     0x7ffff752a000     0x7000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libefa.so.1.3.50.0
+      0x7ffff752a000     0x7ffff752c000     0x2000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libefa.so.1.3.50.0
+      0x7ffff752c000     0x7ffff752d000     0x1000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libefa.so.1.3.50.0
+      0x7ffff752d000     0x7ffff752e000     0x1000     0xc000  rw-p   /usr/lib/x86_64-linux-gnu/libefa.so.1.3.50.0
+      0x7ffff752e000     0x7ffff7530000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/librxe-rdmav34.so
+      0x7ffff7530000     0x7ffff7534000     0x4000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/librxe-rdmav34.so
+      0x7ffff7534000     0x7ffff7535000     0x1000     0x6000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/librxe-rdmav34.so
+      0x7ffff7535000     0x7ffff7536000     0x1000     0x7000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/librxe-rdmav34.so
+      0x7ffff7536000     0x7ffff7537000     0x1000     0x8000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/librxe-rdmav34.so
+      0x7ffff7537000     0x7ffff7539000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libirdma-rdmav34.so
+      0x7ffff7539000     0x7ffff7540000     0x7000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libirdma-rdmav34.so
+      0x7ffff7540000     0x7ffff7542000     0x2000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libirdma-rdmav34.so
+      0x7ffff7542000     0x7ffff7543000     0x1000     0xa000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libirdma-rdmav34.so
+      0x7ffff7543000     0x7ffff7544000     0x1000     0xb000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libirdma-rdmav34.so
+      0x7ffff7544000     0x7ffff7546000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libsiw-rdmav34.so
+      0x7ffff7546000     0x7ffff7549000     0x3000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libsiw-rdmav34.so
+      0x7ffff7549000     0x7ffff754a000     0x1000     0x5000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libsiw-rdmav34.so
+      0x7ffff754a000     0x7ffff754b000     0x1000     0x6000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libsiw-rdmav34.so
+      0x7ffff754b000     0x7ffff754c000     0x1000     0x7000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libsiw-rdmav34.so
+      0x7ffff754c000     0x7ffff754e000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libqedr-rdmav34.so
+      0x7ffff754e000     0x7ffff7555000     0x7000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libqedr-rdmav34.so
+      0x7ffff7555000     0x7ffff7558000     0x3000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libqedr-rdmav34.so
+      0x7ffff7558000     0x7ffff7559000     0x1000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libqedr-rdmav34.so
+      0x7ffff7559000     0x7ffff755a000     0x1000     0xc000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libqedr-rdmav34.so
+      0x7ffff755a000     0x7ffff755c000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libvmw_pvrdma-rdmav34.so
+      0x7ffff755c000     0x7ffff755f000     0x3000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libvmw_pvrdma-rdmav34.so
+      0x7ffff755f000     0x7ffff7560000     0x1000     0x5000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libvmw_pvrdma-rdmav34.so
+      0x7ffff7560000     0x7ffff7561000     0x1000     0x5000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libvmw_pvrdma-rdmav34.so
+      0x7ffff7561000     0x7ffff7562000     0x1000     0x6000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libvmw_pvrdma-rdmav34.so
+      0x7ffff7562000     0x7ffff7564000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/liberdma-rdmav34.so
+      0x7ffff7564000     0x7ffff7567000     0x3000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/liberdma-rdmav34.so
+      0x7ffff7567000     0x7ffff7568000     0x1000     0x5000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/liberdma-rdmav34.so
+      0x7ffff7568000     0x7ffff7569000     0x1000     0x5000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/liberdma-rdmav34.so
+      0x7ffff7569000     0x7ffff756a000     0x1000     0x6000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/liberdma-rdmav34.so
+      0x7ffff756a000     0x7ffff756c000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libipathverbs-rdmav34.so
+      0x7ffff756c000     0x7ffff756e000     0x2000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libipathverbs-rdmav34.so
+      0x7ffff756e000     0x7ffff756f000     0x1000     0x4000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libipathverbs-rdmav34.so
+      0x7ffff756f000     0x7ffff7570000     0x1000     0x5000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libipathverbs-rdmav34.so
+      0x7ffff7570000     0x7ffff7571000     0x1000     0x6000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libipathverbs-rdmav34.so
+      0x7ffff7571000     0x7ffff758e000    0x1d000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libnl-route-3.so.200.26.0
+      0x7ffff758e000     0x7ffff75d5000    0x47000    0x1d000  r-xp   /usr/lib/x86_64-linux-gnu/libnl-route-3.so.200.26.0
+      0x7ffff75d5000     0x7ffff75f5000    0x20000    0x64000  r--p   /usr/lib/x86_64-linux-gnu/libnl-route-3.so.200.26.0
+      0x7ffff75f5000     0x7ffff75f8000     0x3000    0x84000  r--p   /usr/lib/x86_64-linux-gnu/libnl-route-3.so.200.26.0
+      0x7ffff75f8000     0x7ffff75fd000     0x5000    0x87000  rw-p   /usr/lib/x86_64-linux-gnu/libnl-route-3.so.200.26.0
+      0x7ffff75fd000     0x7ffff7600000     0x3000        0x0  rw-p   
+      0x7ffff7600000     0x7ffff769d000    0x9d000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff769d000     0x7ffff77e5000   0x148000    0x9d000  r-xp   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff77e5000     0x7ffff786c000    0x87000   0x1e5000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff786c000     0x7ffff7877000     0xb000   0x26b000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff7877000     0x7ffff787a000     0x3000   0x276000  rw-p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff787a000     0x7ffff787e000     0x4000        0x0  rw-p   
+      0x7ffff787f000     0x7ffff7880000     0x1000     0xd000  rw-s   /dev/infiniband/uverbs0
+      0x7ffff7880000     0x7ffff7882000     0x2000     0x9000  rw-s   /dev/infiniband/uverbs0
+      0x7ffff7882000     0x7ffff7884000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libmana.so.1.0.50.0
+      0x7ffff7884000     0x7ffff788a000     0x6000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libmana.so.1.0.50.0
+      0x7ffff788a000     0x7ffff788c000     0x2000     0x8000  r--p   /usr/lib/x86_64-linux-gnu/libmana.so.1.0.50.0
+      0x7ffff788c000     0x7ffff788d000     0x1000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libmana.so.1.0.50.0
+      0x7ffff788d000     0x7ffff788e000     0x1000     0xa000  rw-p   /usr/lib/x86_64-linux-gnu/libmana.so.1.0.50.0
+      0x7ffff788e000     0x7ffff7891000     0x3000        0x0  rw-p   
+      0x7ffff7891000     0x7ffff78a1000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff78a1000     0x7ffff7920000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7920000     0x7ffff7978000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7978000     0x7ffff7979000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7979000     0x7ffff797a000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff797a000     0x7ffff79ba000    0x40000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-base.so.0.27.0
+      0x7ffff79ba000     0x7ffff7a81000    0xc7000    0x40000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-base.so.0.27.0
+      0x7ffff7a81000     0x7ffff7ac7000    0x46000   0x107000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-base.so.0.27.0
+      0x7ffff7ac7000     0x7ffff7ac8000     0x1000   0x14d000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-base.so.0.27.0
+      0x7ffff7ac8000     0x7ffff7acc000     0x4000   0x14e000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-base.so.0.27.0
+      0x7ffff7acc000     0x7ffff7acd000     0x1000        0x0  rw-p   
+      0x7ffff7acd000     0x7ffff7b6f000    0xa2000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-rpc.so.0.27.0
+      0x7ffff7b6f000     0x7ffff7bd2000    0x63000    0xa2000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-rpc.so.0.27.0
+      0x7ffff7bd2000     0x7ffff7bf8000    0x26000   0x105000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-rpc.so.0.27.0
+      0x7ffff7bf8000     0x7ffff7bf9000     0x1000   0x12b000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-rpc.so.0.27.0
+      0x7ffff7bf9000     0x7ffff7c00000     0x7000   0x12c000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-rpc.so.0.27.0
+      0x7ffff7c00000     0x7ffff7c20000    0x20000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-cpu.so.0.27.0
+      0x7ffff7c20000     0x7ffff7dd8000   0x1b8000    0x20000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-cpu.so.0.27.0
+      0x7ffff7dd8000     0x7ffff7e28000    0x50000   0x1d8000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-cpu.so.0.27.0
+      0x7ffff7e28000     0x7ffff7e2a000     0x2000   0x228000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-cpu.so.0.27.0
+      0x7ffff7e2a000     0x7ffff7e2c000     0x2000   0x22a000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml-cpu.so.0.27.0
+      0x7ffff7e2c000     0x7ffff7eb1000    0x85000        0x0  rw-p   
+      0x7ffff7eb1000     0x7ffff7eb3000     0x2000     0x7000  rw-s   /dev/infiniband/uverbs0
+      0x7ffff7eb3000     0x7ffff7eb5000     0x2000        0x0  rw-p   
+      0x7ffff7eb5000     0x7ffff7ebd000     0x8000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libnl-3.so.200.26.0
+      0x7ffff7ebd000     0x7ffff7ecc000     0xf000     0x8000  r-xp   /usr/lib/x86_64-linux-gnu/libnl-3.so.200.26.0
+      0x7ffff7ecc000     0x7ffff7ed4000     0x8000    0x17000  r--p   /usr/lib/x86_64-linux-gnu/libnl-3.so.200.26.0
+      0x7ffff7ed4000     0x7ffff7ed6000     0x2000    0x1e000  r--p   /usr/lib/x86_64-linux-gnu/libnl-3.so.200.26.0
+      0x7ffff7ed6000     0x7ffff7ed7000     0x1000    0x20000  rw-p   /usr/lib/x86_64-linux-gnu/libnl-3.so.200.26.0
+      0x7ffff7ed7000     0x7ffff7ed9000     0x2000        0x0  rw-p   
+      0x7ffff7ed9000     0x7ffff7edf000     0x6000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs.so.1.14.50.0
+      0x7ffff7edf000     0x7ffff7ef5000    0x16000     0x6000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs.so.1.14.50.0
+      0x7ffff7ef5000     0x7ffff7efa000     0x5000    0x1c000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs.so.1.14.50.0
+      0x7ffff7efa000     0x7ffff7efb000     0x1000    0x20000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs.so.1.14.50.0
+      0x7ffff7efb000     0x7ffff7efc000     0x1000    0x21000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs.so.1.14.50.0
+      0x7ffff7efc000     0x7ffff7f07000     0xb000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+      0x7ffff7f07000     0x7ffff7f43000    0x3c000     0xb000  r-xp   /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+      0x7ffff7f43000     0x7ffff7f50000     0xd000    0x47000  r--p   /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+      0x7ffff7f50000     0x7ffff7f51000     0x1000    0x54000  r--p   /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+      0x7ffff7f51000     0x7ffff7f52000     0x1000    0x55000  rw-p   /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+      0x7ffff7f52000     0x7ffff7f56000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7f56000     0x7ffff7f7a000    0x24000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7f7a000     0x7ffff7f7e000     0x4000    0x28000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7f7e000     0x7ffff7f7f000     0x1000    0x2b000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7f7f000     0x7ffff7f80000     0x1000    0x2c000  rw-p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff7f80000     0x7ffff7f82000     0x2000        0x0  rw-p   
+      0x7ffff7f82000     0x7ffff7f84000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libocrdma-rdmav34.so
+      0x7ffff7f84000     0x7ffff7f89000     0x5000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libocrdma-rdmav34.so
+      0x7ffff7f89000     0x7ffff7f8a000     0x1000     0x7000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libocrdma-rdmav34.so
+      0x7ffff7f8a000     0x7ffff7f8b000     0x1000     0x8000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libocrdma-rdmav34.so
+      0x7ffff7f8b000     0x7ffff7f8c000     0x1000     0x9000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libocrdma-rdmav34.so
+      0x7ffff7f8c000     0x7ffff7f8e000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libmthca-rdmav34.so
+      0x7ffff7f8e000     0x7ffff7f94000     0x6000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libibverbs/libmthca-rdmav34.so
+      0x7ffff7f94000     0x7ffff7f95000     0x1000     0x8000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libmthca-rdmav34.so
+      0x7ffff7f95000     0x7ffff7f96000     0x1000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libibverbs/libmthca-rdmav34.so
+      0x7ffff7f96000     0x7ffff7f97000     0x1000     0xa000  rw-p   /usr/lib/x86_64-linux-gnu/libibverbs/libmthca-rdmav34.so
+      0x7ffff7f97000     0x7ffff7fa4000     0xd000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml.so.0.27.0
+      0x7ffff7fa4000     0x7ffff7fb4000    0x10000     0xd000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml.so.0.27.0
+      0x7ffff7fb4000     0x7ffff7fbb000     0x7000    0x1d000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml.so.0.27.0
+      0x7ffff7fbb000     0x7ffff7fbc000     0x1000    0x23000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml.so.0.27.0
+      0x7ffff7fbc000     0x7ffff7fbd000     0x1000    0x24000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin-plain/bin/libggml.so.0.27.0
+      0x7ffff7fbd000     0x7ffff7fbf000     0x2000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+#0  rpc_serve_client (backends=std::vector of length 1, capacity 1 = {...}, cache_dir=0x0, sock=std::shared_ptr<socket_t> (use count 2, weak count 0) = {...}) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/ggml-rpc.cpp:2476
+#1  0x00007ffff7b97def in ggml_backend_rpc_start_server (endpoint=0x7fffffffea40 "127.0.0.1:53060", cache_dir=0x0, n_threads=8, n_devices=1, devices=0x5555555ce260) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/ggml/src/ggml-rpc/ggml-rpc.cpp:2824
+#2  0x0000555555565c0b in main (argc=5, argv=0x7fffffffec98) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/src/llama.cpp-pin/tools/rpc/rpc-server.cpp:266
+[Inferior 1 (process 3476453) killed]
