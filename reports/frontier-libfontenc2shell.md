@@ -1,14 +1,16 @@
 # Frontier brief: libfontenc setCode() row-size overflow — CVE-2026-109908 (libfontenc2shell)
 
-**STAGED 2026-11-23 W154; EXTENDED W155.** The W154 direct-call harness
-evidence stands unchanged. W155 built the real library at the pinned commits
-and release tags, reached the parser through the exported `FontEncFind()` API
-and through a **live loopback Xvfb `OpenFont` path**, and settled the version
-discrepancy against upstream tags. An independent witness verdict is still
-pending; the author's report is not acceptance. Byte-exact pins and hashes:
-`lab/frontier/libfontenc2shell/PINS.sha256`. Full commands, controls and
-negative results: `lab/frontier/libfontenc2shell/PROVENANCE.md`; compact W155
-matrix: `lab/frontier/libfontenc2shell/realpath/evidence/summary.txt`.
+**STAGED 2026-11-23 W154; EXTENDED W155; CLEAN-ARCHIVE REPLAY W156.** The W154
+direct-call harness evidence stands unchanged. W155 built the real library at
+the pinned commits and release tags, reached the parser through the exported
+`FontEncFind()` API and through a **live loopback Xvfb `OpenFont` path**, and
+settled the version discrepancy against upstream tags. W156 added a
+from-scratch rebuild script and replayed it from a clean `git archive`. An
+independent witness verdict is still pending; the author's report is not
+acceptance. Byte-exact pins and hashes: `lab/frontier/libfontenc2shell/PINS.sha256`.
+Full commands, controls and negative results:
+`lab/frontier/libfontenc2shell/PROVENANCE.md`; compact W155 matrix:
+`lab/frontier/libfontenc2shell/realpath/evidence/summary.txt`.
 
 ## 1. Verified ground truth
 
@@ -135,10 +137,12 @@ limited to the earlier local chosen-store demonstration (no live-object
 control); rung 5 UNKNOWN. The crash claim in the advisory is not established
 in a plain build on this host.
 
-Next bounded experiment: hand the exact live replay to the witness for
-independent replay, then — only on an observed saved pointer or control-flow
-target — consider a benign marker with vulnerable, fixed and safe-input
-controls. Alternative evidence: find a production X configuration whose
-allocator places a live object 508 bytes past this allocation before the
-store, or prove the local font-path write precondition on a real deployment.
-Neither is assumed here.
+Next bounded experiment: independent witness replay of the live path (the
+exact command was sent on tape #2845; a committed from-scratch rebuild
+recipe `lab/frontier/libfontenc2shell/realpath/rebuild.sh` and a clean
+`git archive HEAD` replay at `fb9e7b8` are in `PROVENANCE.md` W156), then —
+only on an observed saved pointer or control-flow target — consider a benign
+marker with vulnerable, fixed and safe-input controls. Alternative evidence:
+find a production X configuration whose allocator places a live object 508
+bytes past this allocation before the store, or prove the local font-path
+write precondition on a real deployment. Neither is assumed here.

@@ -147,3 +147,28 @@ Negative results preserved:
   advisory's local attacker who can inject enc files. No remote protocol,
   pointer control, allocator grooming toward a live object, command, marker
   side effect or witness verdict was exercised. Rung 5 stays UNKNOWN.
+
+## W156 clean-archive replay (2026-11-23)
+
+`realpath/rebuild.sh` is the from-scratch recipe for this section. It takes
+the four upstream revisions from a provisioning clone (`LF2S_SRC`, default
+`/tmp/libfontenc-src`), refuses to overwrite existing build directories,
+builds each library target plain and `-Db_sanitize=address`, compiles the
+live client/tracer from the committed sources, provisions the Type1 font
+fixture from `/usr/share/fonts/X11/Type1/NimbusMonoPS-Regular.pfb` (sha256
+`49d0a528458cab48c8c4df850d182b3cf312d2b8a056a0dfae5202fc1f005dc1`),
+then runs `run.sh` and `xlive/run-live.sh`. No commit outside the target's
+own tree is needed:
+
+```
+git archive HEAD lab/frontier/libfontenc2shell | tar -x -C /tmp/w156-clean
+cd /tmp/w156-clean/lab/frontier/libfontenc2shell/realpath
+sh ./rebuild.sh
+```
+
+Verified from commit `fb9e7b8`: all eight libraries rebuilt in 37 s; the
+16 public-API lines and six live-Xvfb lines matched W155 exactly. The fresh
+`evidence/live/asan-vuln-crafted.out` again shows `WRITE of size 2` at
+`../src/encparse.c:495`, 508 bytes after a 131072-byte region allocated at
+`:469`; 1.1.9 matches, fixed/1.1.10/safe inputs stay clean. This changes
+no grade: rung 3 live, no plain-build crash, no witness verdict yet.
