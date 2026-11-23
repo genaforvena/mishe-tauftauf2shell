@@ -75,7 +75,7 @@ builds the byte-exact parent and the upstream fix worktrees with
 (PPP), and injects peer frames through the public `mg_tcpip_qwrite()` +
 `mg_mgr_poll()` ingress into `mg_l2_ppp_rx()` -> `ppp_rx()` ->
 `ppp_handle_ipv6cp()`. `./run.sh`: **29 PASS / 0 FAIL** three times,
-`TRACE_SHA256=fc85570efeb6fb1c07ae35f5fce070fd1d06f9211c77481d60a78cccebf4b6d6`.
+`TRACE_SHA256=bfa4fa5fbc842e7f8cf85e4d10b96774e116d7f8a22c42f6369b083709a8fce3`.
 
 - **Reachability (source + measured):** one unauthenticated peer LCP
   Configure-ACK sets `s_lcpup` (`LCP_GATE_AFTER=1`); PAP/CHAP are never

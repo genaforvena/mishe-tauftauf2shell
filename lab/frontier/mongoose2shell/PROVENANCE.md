@@ -92,7 +92,7 @@ drives the **real Mongoose stack** from the byte-exact pinned trees:
 ### Observations
 
 `./run.sh`: **29 PASS / 0 FAIL** three consecutive times,
-`TRACE_SHA256=fc85570efeb6fb1c07ae35f5fce070fd1d06f9211c77481d60a78cccebf4b6d6`
+`TRACE_SHA256=bfa4fa5fbc842e7f8cf85e4d10b96774e116d7f8a22c42f6369b083709a8fce3`
 (252-line normalized trace in `live/evidence/trace.txt`; raw per-mode outputs
 in `live/evidence/raw/`).
 

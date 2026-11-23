@@ -28,18 +28,18 @@ READ of size 1 at 0xADDR thread T0
     [FRAME] 0xADDR in ppp_handle_ipv6cp src/l2_ppp.c:367
     [FRAME] 0xADDR in ppp_rx src/l2_ppp.c:440
     [FRAME] 0xADDR in mg_l2_ppp_rx src/l2_ppp.c:485
-    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:131
+    [FRAME] 0xADDR in main lab/frontier/mongoose2shell/live/live_harness.c:131
     [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+    [FRAME] 0xADDR in _start (lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: HASH)
 
 0xADDR is located 1 bytes after 20-byte region [0xADDR,0xADDR)
 allocated by thread T0 here:
     [FRAME] 0xADDR in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:122
+    [FRAME] 0xADDR in main lab/frontier/mongoose2shell/live/live_harness.c:122
     [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+    [FRAME] 0xADDR in _start (lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: HASH)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow src/l2_ppp.c:282 in find_opt
 Shadow bytes around the buggy address:
@@ -94,21 +94,21 @@ READ of size 65535 at 0xADDR thread T0
     [FRAME] 0xADDR in mg_tcpip_rx src/net_builtin.c:1863
     [FRAME] 0xADDR in mg_tcpip_poll src/net_builtin.c:2020
     [FRAME] 0xADDR in mg_mgr_poll src/net_builtin.c:2241
-    [FRAME] 0xADDR in inject /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:87
-    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:165
+    [FRAME] 0xADDR in inject lab/frontier/mongoose2shell/live/live_harness.c:87
+    [FRAME] 0xADDR in main lab/frontier/mongoose2shell/live/live_harness.c:165
     [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+    [FRAME] 0xADDR in _start (lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: HASH)
 
 0xADDR is located 0 bytes after 8192-byte region [0xADDR,0xADDR)
 allocated by thread T0 here:
     [FRAME] 0xADDR in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
     [FRAME] 0xADDR in mg_calloc src/util.c:231
     [FRAME] 0xADDR in mg_tcpip_init src/net_builtin.c:2091
-    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:102
+    [FRAME] 0xADDR in main lab/frontier/mongoose2shell/live/live_harness.c:102
     [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+    [FRAME] 0xADDR in _start (lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: HASH)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
@@ -156,21 +156,21 @@ WRITE of size 2000 at 0xADDR thread T0
     [FRAME] 0xADDR in mg_tcpip_rx src/net_builtin.c:1863
     [FRAME] 0xADDR in mg_tcpip_poll src/net_builtin.c:2020
     [FRAME] 0xADDR in mg_mgr_poll src/net_builtin.c:2241
-    [FRAME] 0xADDR in inject /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:87
-    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:172
+    [FRAME] 0xADDR in inject lab/frontier/mongoose2shell/live/live_harness.c:87
+    [FRAME] 0xADDR in main lab/frontier/mongoose2shell/live/live_harness.c:172
     [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+    [FRAME] 0xADDR in _start (lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: HASH)
 
 0xADDR is located 0 bytes after 1504-byte region [0xADDR,0xADDR)
 allocated by thread T0 here:
     [FRAME] 0xADDR in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
     [FRAME] 0xADDR in mg_calloc src/util.c:231
     [FRAME] 0xADDR in mg_tcpip_init src/net_builtin.c:2087
-    [FRAME] 0xADDR in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live_harness.c:102
+    [FRAME] 0xADDR in main lab/frontier/mongoose2shell/live/live_harness.c:102
     [FRAME] 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     [FRAME] 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    [FRAME] 0xADDR in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: 1b790bec1474db6cdb781f13358ff3fd302aaaa1)
+    [FRAME] 0xADDR in _start (lab/frontier/mongoose2shell/live/live-asan+0xADDR) (BuildId: HASH)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:

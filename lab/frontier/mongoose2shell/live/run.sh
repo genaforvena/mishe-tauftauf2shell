@@ -116,7 +116,7 @@ has "$E/raw/live-plain-fixed-canary.out" 'CAN0=cc CAN17=cc' 'fixed-canary-intact
 {
   for f in "$E"/raw/live-*.out; do
     printf '=== %s ===\n' "$(basename "$f")"
-    sed -E 's/0x[0-9a-f]+/0xADDR/g; s/==[0-9]+==/==PID==/g; s/#[0-9]+ 0xADDR/[FRAME] 0xADDR/g' "$f"
+    sed -E 's#/[^ ]*/lab/frontier#lab/frontier#g; s/BuildId: [0-9a-f]+/BuildId: HASH/g; s/0x[0-9a-f]+/0xADDR/g; s/==[0-9]+==/==PID==/g; s/#[0-9]+ 0xADDR/[FRAME] 0xADDR/g' "$f"
   done
 } | grep -vE 'MG_IO_SIZE|Network is down|All connections closed|IPV6CP cfg' \
   > "$E/trace.txt"
