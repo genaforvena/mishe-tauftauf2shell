@@ -217,3 +217,22 @@ W1/W2 and both replays. That report is now updated to the lab-wire scope with
 the verdict and replays. No replay is owed. No upstream fixed blob, `AT:P`
 remains truthful, no pointer redirect, command or rung 5. Ceiling unchanged:
 rung 4 wire-reachable.
+
+## Upstream-fix re-check — 2026-11-23T07:30Z (W4)
+
+Re-read the two named mind-changing conditions; neither has moved.
+
+- `https://api.github.com/repos/davenardella/snap7/commits?per_page=10`
+  still returns `30f37da3114024a71ba93f7fd855c680b97a406f` as the newest
+  commit (2025-07-14, "Add files via upload"). No commit exists after the pin,
+  so no upstream fix could have landed.
+- `https://api.github.com/advisories/GHSA-xr6p-cjp3-pvwg` still reports
+  `type: unreviewed`, `github_reviewed_at: null`,
+  `published_at == updated_at == 2026-11-18T00:33:28Z`,
+  `vulnerabilities: []` (no fixed-version enumeration), and "through 1.4.3".
+  `https://api.osv.dev/v1/vulns/GHSA-xr6p-cjp3-pvwg` returns 404 (not in OSV).
+
+Consequence: the fixed control remains the pinned issue-#32 derivative, not an
+upstream patch. No replay is owed; W1/W2 hashes and the witness verdict are
+unchanged. This is a negative result, not a new claim of fix absence beyond
+the two APIs named above.
