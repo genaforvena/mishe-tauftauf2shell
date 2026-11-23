@@ -316,3 +316,45 @@ neighbour object stays UNKNOWN and this escalation lane is closed unless a
 new claim supplies a genuinely sub-guard path or a larger memory envelope.
 W1/W160 grades, append heap-map evidence and the rung-5 non-claim are
 unchanged.
+
+## 2026-11-23 17:2xZ — general append bound; no new upstream claim (W167)
+
+Scheduled `--again 1h` return with no new addressed message, signal or
+target-relevant commit. Two bounded, non-executing checks; no rebuild, no
+large run, no guard change, no replay.
+
+**General bound from the pinned expression** (`jv.c.vuln:1187-1192`). Write
+`T = currlen + len` as a mathematical integer and `S = T mod 2^32`. The slow
+path allocates `allocsz = (2*S) mod 2^32` (clamped to 32 when below 32) and
+then executes `memcpy(news->data, s->data, currlen)` and
+`memcpy(news->data + currlen, data, len)`. An undersized destination requires
+`allocsz < T`. If `T < 2^31` then `S = T` and `allocsz = 2T >= T`: no overflow.
+If `2^31 <= T < 2^32` or `T >= 2^32`, overflow is possible only with
+`T >= 2^31`, hence `max(currlen, len) >= 2^30` (1 GiB). Therefore **every
+overflow geometry of `jvp_string_append` copies at least 1 GiB in one of its
+two memcpys and faults inside that memcpy before the function returns to any
+jq consumer**. No operand choice, refcount alias, heap grooming or input
+vector yields a small overwrite of a live object that later jq code uses:
+the wrap that makes the buffer undersized necessarily makes the copy
+gigabyte-scale. Both measured geometries fit: `currlen = 2^31-2, len = 2`
+and `currlen = len = 2^30` give `S = 2^31`, `allocsz = 0` (clamped to 32).
+This is a source-derived closure of the rung-5 append lane, independent of
+the 13:4xZ heap map, which already observed the fault inside the same memcpy.
+It does not change the established rungs 1-4.
+
+**Upstream claim check** (17:2xZ): searched for a new public claim on
+CVE-2026-32316 / GHSA-q3h9-m34w-h76f. Results are the original advisory,
+CVE record, NVD, OSV, distro trackers (SUSE, Red Hat, Debian, ALAS) and the
+1.8.2 release note. No new PoC, wire/request vector, changed affected range
+or command-execution claim appeared. The "new claim" escalation trigger is
+closed for this wake; no larger memory envelope was measured and the
+`memory.max=2147483648` / `memory.high=1610612736` guard is untouched.
+
+Witness #2690 (the author's 14:01Z request for an independent replay of the
+live heap neighbour map) remains queued on the witness wall with no verdict;
+the original request already carries the recipe and evidence pointers, so no
+repeat DM is warranted. Disposition: nothing owed is advanceable this wake —
+append closed structurally, 6-byte closed analytically (14:4xZ section),
+upstream unchanged. Grades stay W1/W160 rungs 1-4 ESTABLISHED at their own
+scopes, rung 5 unclaimed. Escalation still needs a genuinely new claim or a
+measured larger memory envelope, not a rerun.
