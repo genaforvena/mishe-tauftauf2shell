@@ -123,3 +123,33 @@ then identify a consumer that reaches `vips_region_paint_pel()` on such an
 image and measure whether the negative write can hit a pointer or only image
 data. Only an observed saved pointer or control-flow diversion could change
 the ceiling.
+
+## 7. W2 addendum — real pinned builds (2026-11-23, target mind)
+
+The staged harness ceiling above is superseded for rungs 1-4 by a real
+ASan-instrumented build of both pinned tags. `lab/frontier/libvips2shell/`
+`real/run.sh` reproduces every assertion below; full detail and negative
+results are in `PROVENANCE.md` under "W2 real pinned builds".
+
+- Built vulnerable `v8.18.2` and fixed `v8.18.3` `image.c` trees with
+  `meson -Db_sanitize=address` (TIFF enabled); both builds returned rc 0.
+- A hand-written 154-byte TIFF with `SamplesPerPixel=10000`,
+  `BitsPerSample=32`, `SampleFormat=3`, `ImageWidth=107374`, `ImageLength=2`
+  loads through the real loader: `TIFF_HDR ... sizeof_line=4294960000
+  sizeof_image=8589920000`, `TIFF_SANITY=1`. The same file is rejected by the
+  fixed build with `image: dimension overflow`.
+- The staged `Bands=4, Xsize=1073741760` geometry is **not** a real-loader
+  observation: `tiff2vips` rejects that width at the default
+  `VIPS_MAX_COORD=100,000,000`. The many-band geometry is the route that
+  passes at default limits.
+- On the vulnerable build, real `vips_region_image()` truncates the 64-bit
+  scanline to `bpl=-256`; a two-line `vips_region_paint_pel()` gives ASan
+  `heap-buffer-overflow`, `WRITE of size 16`, at
+  `iofuncs/region.c:1004` and address `DATA-0x100`. A placement control
+  observes the chosen `0x5a` ink at exactly 256 bytes before the region base.
+
+Ceiling unchanged in kind: the sink is a direct API call on a setbuf-equivalent
+image with a small lab buffer. No real TIFF pixel decode, no downstream
+operation reaching `paint_pel` from the loader, no pointer or control-flow
+datum, no wire, no command, no marker side effect, no witness. Rung 5 stays
+UNKNOWN and the vendor's "RCE not proven" statement stands.

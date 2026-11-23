@@ -1,0 +1,58 @@
+
+(process:1550078): VIPS-WARNING **: 10:34:31.329: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550078): VIPS-WARNING **: 10:34:31.329: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550078): VIPS-WARNING **: 10:34:31.336: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+TIFF_LOAD=OK filename=manyband.tif
+TIFF_HDR Xsize=107374 Ysize=2 Bands=10000 BandFmt=6 sizeof_line=4294960000 sizeof_image=8589920000
+TIFF_SANITY=1 msg=
+CRAFT256 LINE=4294967040 BPL=-256 LSKIP=18446744073709551360 DATA=0x521000015710
+CRAFT256 AFTER byte[0]=11 byte[1]=11 byte[256]=5a
+CRAFT1 LINE=4294967295 BPL=-1 LSKIP=18446744073709551615 DATA=0x521000016b10
+=================================================================
+==1550078==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x521000016b0f,0x521000016b1b) and [0x521000016b10, 0x521000016b1c) overlap
+    #0 0x7e182acfb16d in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7e182a6898ac in vips_region_paint_pel ../src/libvips-8.18.2/libvips/iofuncs/region.c:1004
+    #2 0x5a307263d049 in part_b /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe.c:83
+    #3 0x5a307263d40f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe.c:107
+    #4 0x7e1829e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7e1829e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5a307263c4c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe-vuln+0x24c4) (BuildId: fee8288f3b975dda2a23c804317a6e94800666e8)
+
+0x521000016b0f is located 527 bytes inside of 4112-byte region [0x521000016900,0x521000017910)
+allocated by thread T0 here:
+    #0 0x7e182acfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7e182a671913 in vips_tracked_malloc ../src/libvips-8.18.2/libvips/iofuncs/memory.c:314
+    #2 0x5a307263ca92 in part_b /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe.c:50
+    #3 0x5a307263d40f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe.c:107
+    #4 0x7e1829e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7e1829e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5a307263c4c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe-vuln+0x24c4) (BuildId: fee8288f3b975dda2a23c804317a6e94800666e8)
+
+0x521000016b10 is located 528 bytes inside of 4112-byte region [0x521000016900,0x521000017910)
+allocated by thread T0 here:
+    #0 0x7e182acfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7e182a671913 in vips_tracked_malloc ../src/libvips-8.18.2/libvips/iofuncs/memory.c:314
+    #2 0x5a307263ca92 in part_b /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe.c:50
+    #3 0x5a307263d40f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe.c:107
+    #4 0x7e1829e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7e1829e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5a307263c4c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe-vuln+0x24c4) (BuildId: fee8288f3b975dda2a23c804317a6e94800666e8)
+
+SUMMARY: AddressSanitizer: memcpy-param-overlap ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+==1550078==ABORTING

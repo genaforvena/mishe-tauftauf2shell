@@ -1,0 +1,78 @@
+
+(process:1457158): VIPS-WARNING **: 10:30:03.447: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1457158): VIPS-WARNING **: 10:30:03.448: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1457158): VIPS-WARNING **: 10:30:03.472: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+TIFF_LOAD=OK filename=manyband.tif
+TIFF_HDR Xsize=107374 Ysize=2 Bands=10000 BandFmt=6 sizeof_line=4294960000 sizeof_image=8589920000
+TIFF_SANITY=1 msg=
+CRAFT256 LINE=4294967040 BPL=-256 LSKIP=18446744073709551360 DATA=0x521000015510
+=================================================================
+==1457158==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000015410 at pc 0x7e9a6d0fb303 bp 0x7ffda59b7220 sp 0x7ffda59b69c8
+WRITE of size 16 at 0x521000015410 thread T0
+    #0 0x7e9a6d0fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7e9a6ca898ac in vips_region_paint_pel ../src/libvips-8.18.2/libvips/iofuncs/region.c:1004
+    #2 0x5c955eac8fa2 in part_b real/probe.c:84
+    #3 0x5c955eac92c4 in main real/probe.c:102
+    #4 0x7e9a6c22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7e9a6c22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5c955eac8464 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe+0x2464) (BuildId: 6ef2145276b3b7076184ff9a4d8930ddbe610e33)
+
+0x521000015410 is located 240 bytes before 4112-byte region [0x521000015500,0x521000016510)
+allocated by thread T0 here:
+    #0 0x7e9a6d0fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x7e9a6ca71913 in vips_tracked_malloc ../src/libvips-8.18.2/libvips/iofuncs/memory.c:314
+    #2 0x5c955eac89f8 in part_b real/probe.c:50
+    #3 0x5c955eac92c4 in main real/probe.c:102
+    #4 0x7e9a6c22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7e9a6c22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5c955eac8464 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/real/probe+0x2464) (BuildId: 6ef2145276b3b7076184ff9a4d8930ddbe610e33)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x521000015180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x521000015400: fa fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000015580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000015600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000015680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1457158==ABORTING

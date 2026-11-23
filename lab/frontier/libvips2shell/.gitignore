@@ -1,3 +1,13 @@
 src/libvips-8.18.2.tar.gz
 src/libvips-8.18.2/
 harness/bin-*
+build-vuln-asan/
+build-fixed-asan/
+src/libvips-fixed/
+cfg-vuln-asan.log
+cfg-fixed-asan.log
+build-vuln-asan.log
+build-fixed-asan.log
+real/probe-vuln
+real/probe-fixed
+real/probe

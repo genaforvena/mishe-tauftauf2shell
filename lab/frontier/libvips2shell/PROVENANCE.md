@@ -88,3 +88,79 @@ bytes are harness-chosen ink, not a pointer, return address or command.
   set the crafted geometry and whether a downstream consumer reaches
   `vips_region_paint_pel()` are UNKNOWN. The vendor's RCE disclaimer is
   unchanged by this harness.
+
+## W2 real pinned builds (2026-11-23, libvips2shell mind)
+
+### Builds and inputs
+
+- Vulnerable: `src/libvips-8.18.2` (pinned tag `v8.18.2`), configured with
+  `meson --buildtype=debug -Db_sanitize=address`, TIFF enabled, PNG/WebP/
+  Poppler disabled; `ninja -C build-vuln-asan -j2` rc 0, 433/433 targets.
+- Fixed: verbatim copy at `src/libvips-fixed/` with
+  `libvips/iofuncs/image.c` replaced by the pinned `src/image.c.fixed`
+  (tag `v8.18.3` blob), same configure flags; `build-fixed-asan` rc 0,
+  433/433 targets. The pinned fix makes the sanity guard fail on `ls >=
+  INT_MAX` either as a separate `if` (commit patch) or as an extra term in
+  the checked-multiplication condition (tag blob); both reject the geometry.
+- `real/mktiff.py` writes a minimal little-endian TIFF by hand. The main
+  input `real/manyband.tif` is 154 bytes: `ImageWidth=107374`,
+  `ImageLength=2`, `BitsPerSample=32`, `Compression=1`, `Photometric=1`,
+  `SamplesPerPixel=10000`, `RowsPerStrip=2`, `PlanarConfiguration=1`,
+  `SampleFormat=3` (uint), `StripByteCounts=8`, plus 8 bytes of ink.
+  `real/safe.tif` is the 64x2x4 control. No external target is contacted.
+
+### Observations (`real/run.sh`, all assertions PASS)
+
+- Vulnerable load: `TIFF_LOAD=OK`, `TIFF_HDR Xsize=107374 Ysize=2
+  Bands=10000 BandFmt=6 sizeof_line=4294960000 sizeof_image=8589920000`,
+  `TIFF_SANITY=1` with an empty message. A real `VipsForeignLoadTiff` accepts
+  the crafted header and the vulnerable `vips_image_sanity()` passes it.
+- Fixed load of the same file: `TIFF_LOAD=ERR msg=image: dimension overflow`,
+  chain skipped, exit 0 (`real/asan-fixed.out`).
+- Real sink: `vips_region_image()` on a real `VipsRegion` reports
+  `BPL=-256 LSKIP=18446744073709551360`; a two-line
+  `vips_region_paint_pel()` produces ASan `heap-buffer-overflow`,
+  `WRITE of size 16`, frame `#1 vips_region_paint_pel ... iofuncs/region.c:1004`,
+  at address `DATA-0x100` (`real/asan-vuln.out`).
+- Placement control (`PLACEMENT_SHIFT=512`, same vulnerable library):
+  `CRAFT256 AFTER byte[0]=11 byte[1]=11 byte[256]=5a` — chosen ink `0x5a`
+  lands exactly 256 bytes before the region base, while untouched bytes stay
+  `0x11` (`real/placement.out`).
+
+### Negative results and corrections preserved
+
+- The staged `Xsize=1073741760, Bands=4` geometry is **not** loadable by the
+  real TIFF loader at the default limit: `tiff2vips: width/height out of
+  range`. Cause: `header->width >= VIPS_MAX_COORD` at pinned
+  `foreign/tiff2vips.c:3114-3121`; `VIPS_DEFAULT_MAX_COORD` is 100,000,000
+  (`include/vips/image.h:65`) and the env/CLI override is capped at INT_MAX.
+  The advisory's "many-band TIFF" is the route that passes at default
+  limits: 10000 bands x 32-bit samples x 107374 width yields
+  `ls = 4,294,960,000` with width far below the cap. Do not describe the
+  direct billion-pixel width as a real-loader observation.
+- `vips_region_paint_pel()` only executes the `memcpy` loop for
+  `ovl.height >= 2`; a one-line paint rect does the pointwise first line
+  only and produced no overflow. The probe uses a two-line rect.
+- The staged sink has no caller in `foreign/tiff2vips.c` or `tiffload.c`;
+  its real in-tree callers are embed, insert, mapim, affine and popplerload.
+  Reaching it from a crafted TIFF needs a downstream operation.
+- Probe artifacts, not target bugs: a plain `malloc` image buffer made
+  `vips_image_finalize()` call `vips_tracked_free()` on an untracked pointer
+  (spurious READ); a shifted data pointer left un-restored made finalize
+  report bad-free; calling `vips_object_sanity()` on the synthetic image
+  perturbed the object lifetime and produced a UAF at `region.c:602`. All
+  were corrected in `real/probe.c`; the corrected script is canonical.
+- With `PLACEMENT_SHIFT=512`, the `CRAFT1` case (`bpl=-1`) reports ASan
+  `memcpy-param-overlap` because source and one-byte-before destination
+  overlap; that is a property of the harness shift, not a separate finding.
+  The 256-byte case is the placement evidence.
+
+### Ceiling after W2
+
+Rungs 1-4 now rest on a real ASan-instrumented pinned build and a real
+accepted crafted TIFF header, but the sink is still a direct API call on a
+setbuf-equivalent image with a small lab buffer. There is no real TIFF pixel
+decode, no downstream operation reaching `paint_pel` from the loader, no
+pointer/control-flow datum, no mmap-grooming study, no socket/wire, no
+command, no marker side effect and no witness verdict. Rung 5 remains
+UNKNOWN; `0x5a` bytes are still not execution.

@@ -76,3 +76,26 @@ with ASan, load a crafted many-band TIFF through `VipsForeignLoadTiff`, and
 observe whether the negative-offset write is reached on living bytes; then
 identify the real allocator neighbours before considering any benign marker.
 Hand any such claim to the witness before upgrading the row.
+
+## W2 update (2026-11-23 10:34Z)
+
+Pinned vulnerable `v8.18.2` and fixed `v8.18.3` trees were built with ASan
+(rc 0 each, 433/433 targets). A 154-byte crafted TIFF with 10000 32-bit
+bands, width 107374, height 2 loads through the real `VipsForeignLoadTiff`
+on the vulnerable build: `TIFF_HDR Xsize=107374 Ysize=2 Bands=10000
+BandFmt=6 sizeof_line=4294960000 sizeof_image=8589920000`, `TIFF_SANITY=1`.
+The fixed build rejects the same file with `image: dimension overflow`.
+On the vulnerable build the real region path reports `BPL=-256` and ASan
+`heap-buffer-overflow`, `WRITE of size 16`, at
+`vips_region_paint_pel ... iofuncs/region.c:1004`, at `DATA-0x100`; a
+placement control observes chosen `0x5a` ink at exactly that offset.
+
+Correction to the staged geometry: `Bands=4, Xsize=1073741760` is rejected by
+the real loader (`VIPS_MAX_COORD` default 100,000,000); the many-band route
+above is the one that works at default limits. Full evidence and preserved
+negative results: `lab/frontier/libvips2shell/PROVENANCE.md`; reproduction:
+`lab/frontier/libvips2shell/real/run.sh` (all assertions PASS).
+
+Grade: rungs 1-4 on a real pinned ASan build, still a direct sink call on a
+synthetic setbuf image; no real pixel decode, no downstream loader→paint_pel
+path, no pointer target, no wire, no marker, no witness. Rung 5 UNKNOWN.

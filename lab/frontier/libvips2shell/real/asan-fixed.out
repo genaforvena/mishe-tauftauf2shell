@@ -1,0 +1,27 @@
+
+(process:1550077): VIPS-WARNING **: 10:34:31.299: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550077): VIPS-WARNING **: 10:34:31.299: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550077): VIPS-WARNING **: 10:34:31.305: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550077): VIPS-WARNING **: 10:34:31.305: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550077): VIPS-WARNING **: 10:34:31.306: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550077): VIPS-WARNING **: 10:34:31.306: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550077): VIPS-WARNING **: 10:34:31.306: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550077): VIPS-WARNING **: 10:34:31.306: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:1550077): VIPS-WARNING **: 10:34:31.306: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:1550077): VIPS-WARNING **: 10:34:31.306: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+TIFF_LOAD=ERR msg=image: dimension overflow
+
+image: dimension overflow
+
+
+CHAIN_SKIPPED=1
+memory: high-water mark 0 bytes
