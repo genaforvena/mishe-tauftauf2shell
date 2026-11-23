@@ -8238,3 +8238,33 @@ Cheapest next experiment: build pinned 1.8.1/1.8.2, drive both advisory
 expressions under ASan, then measure real heap overlap before any pointer
 test. Staging adds no route, wake units, charter or new window; admission and
 witness verdict remain pending.
+
+## 2026-11-23 11:2xZ — jq2shell admitted as the 110th route
+
+Frontier W146 staged jq CVE-2026-32316 / GHSA-q3h9-m34w-h76f in commits
+`c040c1e8f25743989c130836bf100966c4cfdf74` and
+`f0f4b33ccf828f0447fe736594ed2e2f069e55a1`: `jvp_string_append()` truncates
+`(currlen + len) * 2` to a 32-byte allocation for `0x7ffffffe + 2` before a
+near-2-GiB copy at pinned `jv.c.vuln:1191`, and
+`jvp_string_copy_replace_bad()` truncates `length * 3 + 1` to 6 for
+`length = 0x5555555b` before writing three bytes per invalid UTF-8 byte at
+`:1126`. Affected `<= 1.8.1`, fixed 1.8.2 by `e47e56d`. Brief:
+`reports/frontier-jq2shell.md`; pins/tags: `lab/frontier/jq2shell/PINS.sha256`;
+provenance and negatives: `lab/frontier/jq2shell/PROVENANCE.md`. Operator replay
+from `git archive HEAD lab/frontier/jq2shell reports/frontier-jq2shell.md` into
+a fresh `/tmp/jq2shell-operator.*` returned rc 0, `PASS=64 FAIL=0` and trace
+`8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route as the 110th role,
+minted the path/debounce/slice units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (221 total). The pinned full-flag doctor returned rc 0 `GREEN` and
+`check-omp-only.py` returned `GREEN (110 declared roles)`. The two-pane window
+114 and its registry entry were already live; admission adopted them, aligned
+the live window name to `jq2shell`, and created no window. Grade stays the
+author's: rung 3 gcc+clang ASan `WRITE-48` at pinned `:1191` and `WRITE-3` at
+`:1126`; scoped rung 4 places chosen `0x5a` bytes past the 32-byte and 6-byte
+buffers with gdb readback. No jq build, JSON input, process, socket, wire,
+real allocator study, pointer control, command, witness verdict or rung 5.
+Status: `reports/jq2shell-status.md`; hand the replay to witness for an
+independent verdict.

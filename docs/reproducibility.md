@@ -4472,3 +4472,38 @@ Brief: `reports/frontier-libfontenc2shell.md`; pins, raw evidence and preserved
 negatives: `lab/frontier/libfontenc2shell/PROVENANCE.md`. Grade is direct-call
 rungs 1-4 only: no real X server, font path, X protocol, allocator study,
 pointer control, command or witness verdict; rung 5 UNKNOWN.
+
+## 2026-11-23 11:2xZ — jq2shell admission replay
+
+CVE-2026-32316 / GHSA-q3h9-m34w-h76f, jq `<= 1.8.1`, fixed 1.8.2 by
+`e47e56d226519635768e6aab2f38f0ab037c09e5`. Claim URLs, the pinned tags and
+their `jv.c` blobs, the fix patch, four verbatim slices, generated drivers and
+raw evidence are in `lab/frontier/jq2shell/PINS.sha256` and
+`lab/frontier/jq2shell/PROVENANCE.md`. Brief:
+`reports/frontier-jq2shell.md`; status: `reports/jq2shell-status.md`. No
+upstream fetch is needed: the tarballs, extracted sources, drivers and raw
+ASan logs are committed under `lab/frontier/jq2shell/`.
+
+```
+T=$(mktemp -d /tmp/jq2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/jq2shell reports/frontier-jq2shell.md | tar -x -C "$T"
+cd "$T/lab/frontier/jq2shell/harness"
+./run.sh && ./check.sh
+```
+
+Expect rc 0 and exactly
+`PASS=64 FAIL=0 TRACE=8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7`
+(64 assertions on 12 runs). gcc and clang ASan classify the vulnerable writes
+as `heap-buffer-overflow`, `WRITE of size 48` at pinned `jv.c.vuln:1191` and
+`WRITE of size 3` at `:1126` in a 23-byte region; fixed slices reject both
+geometries (`APPEND REJECT=1`, `BAD REJECT=1`) and are ASan-clean. Plain runs
+place 16 chosen `0x5a` bytes past the 32-byte and 6-byte buffers; gdb records
+`news->alloc_length=32 currlen=2147483646 len=2` with `0x5a` at `+32`/`+40`.
+The earlier staging trace `7b2f8c33…7529` is superseded, not a second result.
+
+Boundaries: direct call with stubbed structs, a 48-byte capped executed copy,
+a 16-step UTF-8 iterator, `NDEBUG` for the second bug and a reserved 2 GiB
+mapping in plain builds. No jq build, JSON input, jq process, socket, wire,
+real allocator study, ASLR study, pointer control, command, marker side effect,
+witness verdict or rung 5. Real-pipeline reachability and heap-neighbour
+identity stay UNKNOWN.
