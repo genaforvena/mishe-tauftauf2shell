@@ -97,3 +97,63 @@ in all three runs and in the replay:
 - No live gzip server, no remote client process, no pointer redirect, no ROP,
   no command and no rung-5 claim. Source bytes are supplied by the calling
   application, not directly by the stalled network peer. W136 harness only.
+
+## Live gzip-over-TCP server experiment — W1 (2026-11-23 05:0xZ)
+
+New files, all re-hashed on every run by `harness/run_tcp.sh`:
+
+| file | sha256 |
+|---|---|
+| `harness/tcp_server.c` | `6acbfd28ab5e19b58078dbb4829df035dd989e64c9b4f16ab72c17b033b2af58` |
+| `harness/tcp_probe.py` | `4de435162e7e48797b68f47215dd0a0253f1d6d0f891b9213925fb9c5abcae6c` |
+| `harness/run_tcp.sh` | `a08850ab26416355cca6bf0a8ac8409b04273a48579a8f48140f829cf03dba2b` |
+
+Command: `cd lab/frontier/zlib2shell && bash harness/run_tcp.sh`. Two in-tree
+runs and one clean `/tmp` replay each gave **14 PASS / 0 FAIL**; normalized
+trace hash
+`3ae896390ce28d6ec551dbac3e8e6473fd7ae923be9cb7f42762721dbdd78d02`.
+
+Design: the server binds a plant-started 127.0.0.1 ephemeral listener, accepts
+one client, sets the accepted fd non-blocking with a 4 KiB `SO_SNDBUF`
+(overridable through `TCP_SNDBUF`), `gzdopen()`s it, writes a 1-byte probe and
+`Z_SYNC_FLUSH` so `gz_init()` allocates `state->in` before the caller buffer
+(the documented glibc guard caveat), then `malloc()`s 100000 bytes, reads the
+client's own incompressible request into them, `gzwrite()`s those same peer
+bytes back, `gzclearerr()`s and calls `gzprintf("x")`. The Python client sets
+`SO_RCVBUF` 4096 for stall/slowdrain/gdb and 1 MiB for the clean drain control,
+sends the 100000-byte payload, reads only the 10-byte gzip header and holds the
+socket open. No zlib source is edited; only `gzwrite.c` is swapped from the
+pinned parent/fixed blobs.
+
+Observed:
+
+- Vulnerable pin, stalled peer: ASan `heap-buffer-overflow`, `WRITE of size
+  34465`, `gz_vacate` at `gzwrite.c:394`, 0 bytes after the 16384-byte region;
+  stack `gzprintf :494 → gzvprintf :439 → gz_vacate :394`; `WRITTEN=65535`.
+  Raw output `harness/tcp-evidence/vuln-stall.txt`.
+- Vulnerable pin, peer draining through a 4 KiB window (`slowdrain`): the same
+  overflow. The peer need not stop reading entirely; falling behind suffices.
+- Fixed pin, stalled peer: rc 0, `PRINTF_RC=1`, ASan-clean.
+- Vulnerable pin, peer draining with 1 MiB send and receive buffers: rc 0,
+  `WRITTEN=100000`, `PRINTF_RC=1`, ASan-clean.
+- Plain build under gdb, breakpoint after the memmove (`gzwrite.c:395`):
+  `avail_in=34465`, source base offset 65535; `state->in[0]=0xb3`, `[17]=0x87`,
+  `[16384]=0x86`, each equal to `payload[65535+offset]` from the bytes the peer
+  actually sent — peer-supplied bytes at chosen destinations, the last one one
+  byte past the object. Raw output `harness/tcp-evidence/vuln-gdb.txt`.
+
+Control tuning negatives preserved: with the client's default ~128 KiB receive
+window the whole 100 KiB response fit and no EAGAIN occurred (all modes
+`WRITTEN=98304`, no ASan); with a 4 KiB client window but a 4 KiB server send
+buffer, even the "draining" client hit EAGAIN and overflowed — that
+configuration is now the positive `slowdrain` case, and the clean drain
+control raises both buffers; in the first plain build the request buffer was
+allocated before the first `gzwrite()`, so `state->in` did not exist yet,
+glibc placed the request below it, the guard returned early and the breakpoint
+was never hit. The server now forces `gz_init()` before that allocation.
+
+Ceiling: a live loopback gzip server whose heap write is triggered by the
+peer's flow-control behaviour and whose copied bytes are the peer's own
+request bytes. Still rung 4: no pointer redirect, no control-flow hijack, no
+command, no remote client beyond the plant's own loopback process. Rung 5
+remains UNKNOWN.

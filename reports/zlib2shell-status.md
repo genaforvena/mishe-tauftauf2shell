@@ -68,18 +68,38 @@ are the measured triggers. With the caller buffer allocated before
 the memmove; the post-init allocation order is part of the primitive, not a
 hidden precondition.
 
-The ceiling is low. The copied source bytes are the application's
-compression input, not bytes the stalled peer directly chooses; no gzip
-server, remote client process, pointer redirect, ROP or command was built or
-executed. `AV:N` carries `AC:H` and allocator-dependent guard behavior.
-Nothing here establishes rung 5, which remains UNKNOWN. This is an author
-report: independent witness replay is owed before any stronger claim.
+## Ceiling after W1 (still author-only, no witness verdict)
 
-Next useful experiment: build a minimal ASan gzip-over-TCP server from the
-vulnerable pin on a plant-started 127.0.0.1 listener, `gzdopen()` the accepted
-socket, set it non-blocking, have a local client stop reading after the gzip
-header, then `gzwrite()` incompressible application bytes, `gzclearerr()` and
-`gzprintf()`. Expect the ASan write inside `gz_vacate()` in the server
-process; controls are the fixed pin and a peer that keeps draining. Full raw
-evidence, negative results and pins are in
+The handoff ceiling (application-chosen source bytes, no server) is superseded
+by the live loopback server result below. The source bytes are now the peer's
+own request bytes and the trigger is TCP flow control, but the sink remains an
+unbounded `memmove`: no pointer redirect, no control-flow hijack, no command,
+no remote client beyond the plant's own loopback process. `AV:N` still carries
+`AC:H` and allocator-dependent guard behavior. Nothing here establishes rung
+5, which remains UNKNOWN. Independent witness replay is owed before any
+stronger claim.
+
+## Live gzip-over-TCP server — W1 (2026-11-23 05:0xZ)
+
+`harness/run_tcp.sh` builds the server from the pinned tarball with only
+`gzwrite.c` swapped and drives five cases on a plant-started 127.0.0.1
+listener: 14 PASS / 0 FAIL twice plus a clean `/tmp` replay; trace hash
+`3ae896390ce28d6ec551dbac3e8e6473fd7ae923be9cb7f42762721dbdd78d02`. The
+server `gzdopen()`s the accepted non-blocking socket, compresses the client's
+own 100000 request bytes, then `gzclearerr()` / `gzprintf()`.
+
+- Vulnerable pin, peer reads only the gzip header: ASan `heap-buffer-overflow`,
+  `WRITE of size 34465` in `gz_vacate` (`gzwrite.c:394`), 0 bytes after 16384;
+  `WRITTEN=65535`. A peer that keeps draining through a 4 KiB window also
+  overflows — falling behind is enough.
+- Fixed pin with the stalled peer, and vulnerable pin with a draining peer on
+  1 MiB buffers: rc 0, `PRINTF_RC=1`, ASan-clean (`WRITTEN=100000` on drain).
+- Plain build under gdb: `avail_in=34465`; `state->in[0]=0xb3`, `[17]=0x87`,
+  `[16384]=0x86`, each equal to the peer's bytes at source offsets 65535,
+  65552 and 81919 — peer-chosen content at chosen destinations, one past the
+  object.
+
+This upgrades rung 4 from "application-chosen bytes in a harness" to
+"peer-chosen bytes in a live loopback server", not to rung 5. Full pins, raw
+evidence, failed control configurations and negatives are in
 `lab/frontier/zlib2shell/PROVENANCE.md`.
