@@ -1,0 +1,58 @@
+CLI SENT=2056 PKTLEN=2056 DST=127.0.0.1:54171
+SRV BOUND=127.0.0.1:54171 RECV=2056
+WIREPARSE OLEN=2048 COUNT=1 OFFSET=8
+WIRE MODE=attack PKTLEN=2056 LASTJUMP=80
+=================================================================
+==3246036==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7c85e30004b1 at pc 0x5a96980790e8 bp 0x7ffc4c518520 sp 0x7ffc4c518510
+READ of size 1 at 0x7c85e30004b1 thread T0
+    #0 0x5a96980790e7 in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_domains_fn.inc:16
+    #1 0x5a969807933c in get_dhcpv6_option_value_list /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_ov_list_fn.inc:44
+    #2 0x5a9698079544 in get_dhcpv6_request /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_request_fn.inc:21
+    #3 0x5a96980799f8 in run_chain /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/driver.c:180
+    #4 0x5a969807a126 in server_body /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/driver.c:240
+    #5 0x5a969807a463 in main /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/driver.c:259
+    #6 0x7c85e4c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7c85e4c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5a96980786a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/a-loop+0x26a4) (BuildId: 4ca7ff8977bca0a99192b0cc94826f6c2eaf1a31)
+
+Address 0x7c85e30004b1 is located in stack of thread T0 at offset 1201 in frame
+    #0 0x5a9698078f0f in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_domains_fn.inc:3
+
+  This frame has 1 object(s):
+    [48, 1074) 'dns_name' (line 7) <== Memory access at offset 1201 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_domains_fn.inc:16 in get_domains
+Shadow bytes around the buggy address:
+  0x7c85e3000200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000400: 00 00 00 00 00 00 02 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x7c85e3000480: f3 f3 f3 f3 f3 f3[f3]f3 00 00 00 00 00 00 00 00
+  0x7c85e3000500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c85e3000700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3246036==ABORTING
+SRV EXIT=1 SIGNALED=0

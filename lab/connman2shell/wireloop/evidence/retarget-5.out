@@ -1,0 +1,28 @@
+Breakpoint 1 at 0x1935: file /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_domains_fn.inc, line 3.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Attaching after Thread 0x71058d3f2740 (LWP 3247572) fork to child process 3247588]
+[New inferior 2 (process 3247588)]
+[Detaching after fork from parent process 3247572]
+[Inferior 1 (process 3247572) detached]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CLI SENT=2056 PKTLEN=2056 DST=127.0.0.1:54340
+SRV BOUND=127.0.0.1:54340 RECV=2056
+WIREPARSE OLEN=2048 COUNT=1 OFFSET=8
+WIRE MODE=attack PKTLEN=2056 LASTJUMP=67
+[Switching to Thread 0x71058d3f2740 (LWP 3247588)]
+
+Thread 2.1 "p-loop" hit Breakpoint 1, get_domains (maxlen=2048, value=0x7ffcb433ebc8 '\377' <repeats 200 times>...) at /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_domains_fn.inc:3
+3	{
+WATCH RET_SLOT=0x7ffcb433aa98 BEFORE=ae
+Hardware watchpoint 2: *(unsigned char *)$ret_slot
+
+Thread 2.1 "p-loop" hit Hardware watchpoint 2: *(unsigned char *)$ret_slot
+
+Old value = 174 '\256'
+New value = 46 '.'
+get_domains (maxlen=2048, value=0x7ffcb433ebc8 '\377' <repeats 200 times>...) at /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wireloop/get_domains_fn.inc:20
+20				c += jump + 1;
+WATCH HIT NOW=2e
+SRV EXIT=-1 SIGNALED=9
