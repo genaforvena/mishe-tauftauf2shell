@@ -1,6 +1,6 @@
-Process /bin/true created; pid = 718363
+Process /bin/true created; pid = 801543
 Listening on port 35043
-Remote debugging from host 127.0.0.1, port 50776
+Remote debugging from host 127.0.0.1, port 48448
 [remote] getpkt: getpkt ("QTDP:1:0:E:0:0");  [sending ack]
 [remote] getpkt: [sent ack]
 [remote] putpkt_binary_1: putpkt ("$OK#9a"); [looking for ack]
@@ -15,4 +15,4 @@ Remote debugging from host 127.0.0.1, port 50776
 [remote] putpkt_binary_1: [received '+' (0x2b)]
 [remote] readchar: readchar: Got EOF
 [remote] getpkt: [getpkt: discarding char 'ÿ']
-Killing process(es): 718363
+Killing process(es): 801543
