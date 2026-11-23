@@ -79,23 +79,36 @@ stale string; cleanup restores byte `120`. Deterministic 5/5 direct runs and
 Controls: `gs-fixed` + injected and `gs-vuln` + safe font both give
 `SV_PRESENT=false`, `NO_STALE_REF`. Full record in `PROVENANCE.md`.
 
+### ASan confirmation (same wake)
+
+Out-of-tree ASan build in `src/asan-build` (`CFLAGS=-fsanitize=address -g -O1`,
+`LDFLAGS=-fsanitize=address`, 1016 instrumented compile commands):
+`harness/bin/gs-vuln-asan` sha256 `7ee7b87e...eddc12fc20`. `harness/uaf.ps`
+reports `ERROR: AddressSanitizer: heap-use-after-free`, `READ of size 1` in
+`zget` at `psi/zgeneric.c:183`, 14792 bytes inside a 20048-byte region allocated
+by `gs_heap_alloc_bytes` (`base/gsmalloc.c:192`) and freed by
+`gs_heap_free_object` (`base/gsmalloc.c:366`). Evidence
+`harness/evidence/uaf-asan-vuln-injected.out`, sha `d3adbb8c...`.
+`gs-fixed-asan` (resource-only swap to `1484854e`): `SV_PRESENT=false`,
+`NO_STALE_REF`, rc 0, no report. Source tree restored to the vulnerable pin.
+
 ## Current grade
 
-Rung 4 (demonstrated security impact, PostScript level): a dangling reference
-in the surviving global systemdict gives a stable, bidirectional, chosen-byte
-read/write into a live interpreter object after `restore`, with vulnerable,
-fixed and safe-input controls, on real gs 10.07.0 shipped bytes. Honest ceiling:
-no native address, no ASan report, no forged ref, no pointer-chain walk, no
-`path_control_active` write, no `-dSAFER` bypass, no command, no application or
-network chain, no witness verdict. Rung 5 remains a separate claim.
+Rungs 3 + 4: instrumented `heap-use-after-free` (rung 3) plus a stable,
+bidirectional, chosen-byte read/write through a dangling systemdict reference
+into a live interpreter object after `restore` (rung 4), on real gs 10.07.0
+shipped bytes with vulnerable, fixed and safe-input controls. Honest ceiling:
+no native pointer chain, no forged ref, no `path_control_active` write, no
+`-dSAFER` bypass, no command, no application or network chain, no witness
+verdict. Rung 5 remains a separate claim.
 
 ## Next bounded experiment
 
-Charter option 2: build from the pinned tree with ASan
-(`CFLAGS='-fsanitize=address -g'`), swap in the vulnerable `gs_fonts.ps`, run
-`harness/uaf.ps`, and check whether the PostScript allocator's reuse yields an
-instrumented heap-use-after-free. If Ghostscript suballocates and ASan is
-inconclusive, preserve that negative; do not start the native ref-forging
-chain without it. Rung 5 requirements unchanged: a live wire-only trigger, a
-chosen benign command, an observed side effect, vulnerable/fixed/safe controls
-and witness replay.
+Charter option 3 is now reachable (aliasing and ASan both hold): attempt a
+bounded native ref-forging probe — place `currentdevice` in the overlapping
+array slot, read its pointer through the stale string, forge a temporary string
+view, and walk the documented offsets toward `path_control_active` with a
+benign marker. Stop and preserve a negative if offsets or ref layout differ on
+this build. Rung 5 requirements unchanged: a live wire-only trigger, a chosen
+benign command, an observed side effect, vulnerable/fixed/safe controls and
+witness replay.

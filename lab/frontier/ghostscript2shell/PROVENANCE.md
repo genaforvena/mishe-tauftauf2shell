@@ -133,12 +133,44 @@ pointer-chain walk, no `path_control_active` write, no `-dSAFER` bypass, no
 command, no application/network chain. The handoff `UAF_READ=null` negative
 is preserved as the failed single-reuse hypothesis.
 
+## ASan confirmation — 2026-11-23 (rung 3)
+
+Built a third binary from the same pinned tree, out-of-tree in `src/asan-build`
+with `CFLAGS='-fsanitize=address -g -O1' LDFLAGS='-fsanitize=address'`,
+`../ghostpdl-ghostpdl-10.07.0/configure --without-x --disable-cups` and
+`make -j2 gs`. 1016 compile commands carry `-fsanitize=address`; 39 `__asan_*`
+symbols. `harness/bin/gs-vuln-asan` sha256
+`7ee7b87ec079bfafcc17e994b9fb57a496143eff6bd6d9011f9d48eddc12fc20`
+(108,852,384 bytes). A fixed control `gs-fixed-asan` was built by swapping only
+`Resource/Init/gs_fonts.ps` to `gs_fonts.ps.1484854e`, rebuilding and
+restoring the source tree to the vulnerable pin (`844ca0cb...`).
+
+`harness/uaf.ps` on `gs-vuln-asan` (`harness/evidence/uaf-asan-vuln-injected.out`,
+sha256 `d3adbb8caef37beac5745b174874bd75c6108a45612651725899693940c33387`,
+`ASAN_OPTIONS=detect_leaks=0`) reports:
+`ERROR: AddressSanitizer: heap-use-after-free`, `READ of size 1` in `zget` at
+`psi/zgeneric.c:183`, 14792 bytes inside a 20048-byte region allocated by
+`gs_heap_alloc_bytes` (`base/gsmalloc.c:192`) and freed by
+`gs_heap_free_object` (`base/gsmalloc.c:366`). This is an instrumented report
+on the stale systemdict string — rung 3 (confirmed memory corruption), not a
+bare crash.
+
+`gs-fixed-asan` + injected font: `SV_PRESENT=false`, `NO_STALE_REF`, rc 0, no
+ASan report (`harness/evidence/uaf-asan-fixed-injected.out`). No absolute
+address was guessed; no native pointer chain, forged ref, `-dSAFER` bypass or
+command was exercised.
+
 ## Preserved negatives
 
 - Host gs 10.02.1 is patched and hides `.forceput`, `.forcebind`,
   `.currentglobal`, `.undefinternalnames`; direct-call harness impossible.
 - `-I` resource override loses to ROMFS; fixed control needs a rebuild.
 - Wrong first stack-surgery rolls (`2 1 roll`) left the filename a string.
-- Naive save/restore UAF probe: `STALE_KEY=true`, `UAF_READ=null` — no
-  allocation aliasing; 2048-byte-string marker scan not attempted.
-- No ASan, no pointer control, no command, no rung 5.
+- Naive save/restore UAF probe: `STALE_KEY=true`, `UAF_READ=null` — a single
+  fresh `8 array` did not reuse the freed block; later marker scan found
+  aliasing with 96 fresh arrays (see rung-4 section).
+- Under local `-dSAFER`, the injected font cleartext did not execute and no
+  stale ref appeared (with a literal font path and a fresh HOME). Cause not
+  isolated — font resolution/caching is a candidate. Not used for any claim.
+- ASan now exercised (rung 3). Still no native pointer control, no forged ref,
+  no `path_control_active` write, no `-dSAFER` bypass, no command, no rung 5.

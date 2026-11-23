@@ -1,0 +1,72 @@
+DEPTH2_BEFORE=stringtype
+DEPTH2_AFTER=arraytype
+GS_SURGERY_DONE count=10
+SV_PRESENT=true
+SV_TYPE=stringtype
+SV_LEN=2048
+PRE_ALL_MARK=true
+=================================================================
+==818749==ERROR: AddressSanitizer: heap-use-after-free on address 0x52a000207bc8 at pc 0x61bd7c714b8d bp 0x7fff11e33be0 sp 0x7fff11e33bd0
+READ of size 1 at 0x52a000207bc8 thread T0
+    #0 0x61bd7c714b8c in zget ../ghostpdl-ghostpdl-10.07.0/psi/zgeneric.c:183
+    #1 0x61bd7c6d90b6 in interp ../ghostpdl-ghostpdl-10.07.0/psi/interp.c:1494
+    #2 0x61bd7c6d90b6 in gs_call_interp ../ghostpdl-ghostpdl-10.07.0/psi/interp.c:535
+    #3 0x61bd7c6dd495 in gs_interpret ../ghostpdl-ghostpdl-10.07.0/psi/interp.c:488
+    #4 0x61bd7c6b571d in gs_main_interpret ../ghostpdl-ghostpdl-10.07.0/psi/imain.c:257
+    #5 0x61bd7c6b571d in gs_main_run_string_end ../ghostpdl-ghostpdl-10.07.0/psi/imain.c:945
+    #6 0x61bd7c6b5814 in gs_main_run_string_with_length ../ghostpdl-ghostpdl-10.07.0/psi/imain.c:889
+    #7 0x61bd7c6b5859 in gs_main_run_string ../ghostpdl-ghostpdl-10.07.0/psi/imain.c:870
+    #8 0x61bd7c6bc227 in run_string ../ghostpdl-ghostpdl-10.07.0/psi/imainarg.c:1198
+    #9 0x61bd7c6bc6c7 in runarg ../ghostpdl-ghostpdl-10.07.0/psi/imainarg.c:1157
+    #10 0x61bd7c6bccdc in argproc ../ghostpdl-ghostpdl-10.07.0/psi/imainarg.c:1076
+    #11 0x61bd7c6c105e in gs_main_init_with_args01 ../ghostpdl-ghostpdl-10.07.0/psi/imainarg.c:257
+    #12 0x61bd7c6c12e7 in gs_main_init_with_args ../ghostpdl-ghostpdl-10.07.0/psi/imainarg.c:311
+    #13 0x61bd7c6c3f3f in psapi_init_with_args ../ghostpdl-ghostpdl-10.07.0/psi/psapi.c:294
+    #14 0x61bd7c977b3a in gsapi_init_with_args ../ghostpdl-ghostpdl-10.07.0/psi/iapi.c:253
+    #15 0x61bd7b8e5d2c in main ../ghostpdl-ghostpdl-10.07.0/psi/gs.c:104
+    #16 0x768e5402a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x768e5402a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x61bd7b8e5a44 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ghostscript2shell/harness/bin/gs-vuln-asan+0x336a44) (BuildId: 22173d22ee21170737220937f1986176630bc144)
+
+0x52a000207bc8 is located 14792 bytes inside of 20048-byte region [0x52a000204200,0x52a000209050)
+freed by thread T0 here:
+    #0 0x768e544fc4d8 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0x61bd7c35a2f0 in gs_heap_free_object ../ghostpdl-ghostpdl-10.07.0/base/gsmalloc.c:366
+
+previously allocated by thread T0 here:
+    #0 0x768e544fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x61bd7c35a458 in gs_heap_alloc_bytes ../ghostpdl-ghostpdl-10.07.0/base/gsmalloc.c:192
+
+SUMMARY: AddressSanitizer: heap-use-after-free ../ghostpdl-ghostpdl-10.07.0/psi/zgeneric.c:183 in zget
+Shadow bytes around the buggy address:
+  0x52a000207900: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207980: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207a00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207a80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207b00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+=>0x52a000207b80: fd fd fd fd fd fd fd fd fd[fd]fd fd fd fd fd fd
+  0x52a000207c00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207c80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207d00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207d80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x52a000207e00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==818749==ABORTING
