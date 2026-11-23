@@ -316,3 +316,23 @@ no chosen byte, pointer target, consumer dereference, command or rung 5.
 Author-only and unwitnessed at this scope. Detail: `PROVENANCE.md` §
 "Non-ASan full-module crash on the wire (2026-11-23 W15)" and
 `full/evidence/sys-native/README.md`.
+
+**Native faulting PC on the non-ASan full module (2026-11-23 W16).** W15's
+production-allocator crash had only Apache's `AH00051` signal line: children
+have `RLIMIT_CORE=0` and core_pattern pipes to apport.
+`full/probe-sys-gdb.sh` attaches gdb **only to observe** (no shim,
+`LD_PRELOAD` or `ASAN_OPTIONS`; ASLR left on) to the same system httpd /
+non-ASan module stack on 127.0.0.1:18091. A bare
+`Cookie: mod_auth_openidc_state_<7800 a>` on each fresh start stopped on
+SIGSEGV in **4/4** vulnerable starts (first request per start); controls
+were 6/6 HTTP 302 each with no catch. All four stops are at pinned
+`state.c:219` (`*cookie = '\0'`), instruction `movb $0x0,(%rax)`, with the
+live pre-auth stack `ap_run_check_user_id` → `oidc_check_user_id` →
+`handle/request.c:132` → `state.c:244` → `:219`. The PC is native but observed
+with a debugger attached; W15's non-debugger crashes remain the availability
+claim. The `=` stop byte is in read-only library pages or unmapped gaps past
+a writable/shm mapping, chosen by adjacent memory, not the client. Byte
+always NUL, no chosen byte, pointer control, consumer dereference, command or
+rung 5; grade unchanged, author-only/unwitnessed. Raw:
+`full/evidence/sys-gdb/README.md`; replay `cd
+lab/frontier/modauthoidc2shell/full && bash probe-sys-gdb.sh`.

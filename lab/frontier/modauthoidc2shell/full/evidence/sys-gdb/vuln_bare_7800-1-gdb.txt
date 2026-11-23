@@ -1,0 +1,322 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Attaching after Thread 0x791adda23780 (LWP 2586936) fork to child process 2587377]
+[New inferior 2 (process 2587377)]
+[Detaching after fork from parent process 2586936]
+[Inferior 1 (process 2586936) detached]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Thread 2.1 "apache2" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x791adda23780 (LWP 2587377)]
+oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x791add51637c "=@!", c=<optimized out>, r=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/state.c:219
+219		*cookie = '\0';
+
+STOP_PC=0x791add749bc2
+#0  oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x791add51637c "=@!", c=<optimized out>, r=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/state.c:219
+#1  oidc_state_cookies_clean_expired (r=0x791add70f0a0, c=0x791add720380, currentCookieName=0x0, delete_oldest=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/state.c:244
+#2  0x0000791add75dd1a in oidc_request_authorization_set_cookie (proto_state=0x641458d54a60, state=0x791add709850 "LNlV5cxaCeOGkauW8d2n_VuQK18", c=0x791add720380, r=0x791add70f0a0) at handle/request.c:132
+#3  oidc_request_authenticate_user (r=0x791add70f0a0, c=0x791add720380, provider=<optimized out>, original_url=0x791add708f40 "http://127.0.0.1:18091/protected", login_hint=0x0, id_token_hint=0x0, prompt=0x0, auth_request_params=0x0, path_scope=0x0) at handle/request.c:239
+#4  0x0000791add745744 in oidc_handle_unauthenticated_user (r=r@entry=0x791add70f0a0, c=c@entry=0x791add720380) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/mod_auth_openidc.c:516
+#5  0x0000791add748538 in oidc_check_userid_openidc (r=r@entry=0x791add70f0a0, c=c@entry=0x791add720380) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/mod_auth_openidc.c:1325
+#6  0x0000791add748887 in oidc_check_user_id (r=0x791add70f0a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/mod_auth_openidc.c:1388
+#7  0x000064144d9dd8ea in ap_run_check_user_id ()
+#8  0x000064144d9e7a68 in ap_process_request_internal ()
+#9  0x000064144da09645 in ap_process_async_request ()
+#10 0x000064144da09877 in ap_process_request ()
+#11 0x000064144da09bdd in ?? ()
+#12 0x000064144d9f54da in ap_run_process_connection ()
+#13 0x0000791add7e02df in ?? () from /usr/lib/apache2/modules/mod_mpm_prefork.so
+#14 0x0000791add7e0678 in ?? () from /usr/lib/apache2/modules/mod_mpm_prefork.so
+#15 0x0000791add7e06c1 in ?? () from /usr/lib/apache2/modules/mod_mpm_prefork.so
+#16 0x0000791add7e0f22 in ?? () from /usr/lib/apache2/modules/mod_mpm_prefork.so
+#17 0x000064144d9be5c1 in ap_run_mpm ()
+#18 0x000064144d9bd903 in main ()
+rip            0x791add749bc2      0x791add749bc2 <oidc_state_cookies_clean_expired+265>
+rsp            0x7ffef977cc30      0x7ffef977cc30
+rbp            0x7ffef977ccb0      0x7ffef977ccb0
+rax            0x791add51637c      133156289209212
+rbx            0x791add514028      133156289200168
+rcx            0x0                 0
+rdx            0x0                 0
+rdi            0x791add514028      133156289200168
+rsi            0x791add79b43c      133156291851324
+=> 0x791add749bc2 <oidc_state_cookies_clean_expired+265>:	movb   $0x0,(%rax)
+   0x791add749bc5 <oidc_state_cookies_clean_expired+268>:	add    $0x1,%rax
+   0x791add749bc9 <oidc_state_cookies_clean_expired+272>:	mov    %rax,-0x58(%rbp)
+   0x791add749bcd <oidc_state_cookies_clean_expired+276>:	mov    -0x68(%rbp),%rax
+   0x791add749bd1 <oidc_state_cookies_clean_expired+280>:	test   %rax,%rax
+   0x791add749bd4 <oidc_state_cookies_clean_expired+283>:	je     0x791add749bec <oidc_state_cookies_clean_expired+307>
+   0x791add749bd6 <oidc_state_cookies_clean_expired+285>:	mov    %rax,%rsi
+   0x791add749bd9 <oidc_state_cookies_clean_expired+288>:	mov    %rbx,%rdi
+   0x791add749bdc <oidc_state_cookies_clean_expired+291>:	call   0x791add741b00 <apr_strnatcmp@plt>
+   0x791add749be1 <oidc_state_cookies_clean_expired+296>:	mov    %eax,%r15d
+   0x791add749be4 <oidc_state_cookies_clean_expired+299>:	test   %eax,%eax
+   0x791add749be6 <oidc_state_cookies_clean_expired+301>:	je     0x791add749b65 <oidc_state_cookies_clean_expired+172>
+   0x791add749bec <oidc_state_cookies_clean_expired+307>:	mov    -0x58(%rbp),%rdx
+   0x791add749bf0 <oidc_state_cookies_clean_expired+311>:	mov    -0x50(%rbp),%rsi
+process 2587377
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x64144d982000     0x64144d9ba000    0x38000        0x0  r--p   /usr/sbin/apache2
+      0x64144d9ba000     0x64144da14000    0x5a000    0x38000  r-xp   /usr/sbin/apache2
+      0x64144da14000     0x64144da33000    0x1f000    0x92000  r--p   /usr/sbin/apache2
+      0x64144da33000     0x64144da37000     0x4000    0xb1000  r--p   /usr/sbin/apache2
+      0x64144da37000     0x64144da3b000     0x4000    0xb5000  rw-p   /usr/sbin/apache2
+      0x64144da3b000     0x64144da3f000     0x4000        0x0  rw-p   
+      0x641458d3d000     0x641458dc0000    0x83000        0x0  rw-p   [heap]
+      0x641458dc0000     0x641458ddb000    0x1b000        0x0  rw-p   [heap]
+      0x791ad244a000     0x791ad2462000    0x18000        0x0  rw-s   /dev/zero (deleted)
+      0x791ad2462000     0x791adc5d3000  0xa171000        0x0  rw-s   /dev/zero (deleted)
+      0x791adc5d3000     0x791adc5d6000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libresolv.so.2
+      0x791adc5d6000     0x791adc5df000     0x9000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libresolv.so.2
+      0x791adc5df000     0x791adc5e1000     0x2000     0xc000  r--p   /usr/lib/x86_64-linux-gnu/libresolv.so.2
+      0x791adc5e1000     0x791adc5e2000     0x1000     0xe000  r--p   /usr/lib/x86_64-linux-gnu/libresolv.so.2
+      0x791adc5e2000     0x791adc5e3000     0x1000     0xf000  rw-p   /usr/lib/x86_64-linux-gnu/libresolv.so.2
+      0x791adc5e3000     0x791adc5e5000     0x2000        0x0  rw-p   
+      0x791adc5e5000     0x791adc5e7000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x791adc5e7000     0x791adc5ee000     0x7000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x791adc5ee000     0x791adc5ef000     0x1000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x791adc5ef000     0x791adc5f0000     0x1000     0xa000  r--p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x791adc5f0000     0x791adc5f1000     0x1000     0xb000  rw-p   /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+      0x791adc5f6000     0x791adc5f8000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libkeyutils.so.1.10
+      0x791adc5f8000     0x791adc5fa000     0x2000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libkeyutils.so.1.10
+      0x791adc5fa000     0x791adc5fb000     0x1000     0x4000  r--p   /usr/lib/x86_64-linux-gnu/libkeyutils.so.1.10
+      0x791adc5fb000     0x791adc5fc000     0x1000     0x4000  r--p   /usr/lib/x86_64-linux-gnu/libkeyutils.so.1.10
+      0x791adc5fc000     0x791adc5fd000     0x1000     0x5000  rw-p   /usr/lib/x86_64-linux-gnu/libkeyutils.so.1.10
+      0x791adc5fd000     0x791adc5fe000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1.1.0
+      0x791adc5fe000     0x791adc5ff000     0x1000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1.1.0
+      0x791adc5ff000     0x791adc61e000    0x1f000     0x2000  r--p   /usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1.1.0
+      0x791adc61e000     0x791adc61f000     0x1000    0x21000  r--p   /usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1.1.0
+      0x791adc61f000     0x791adc620000     0x1000    0x22000  rw-p   /usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1.1.0
+      0x791adc620000     0x791adc658000    0x38000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x791adc658000     0x791adc72a000    0xd2000    0x38000  r-xp   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x791adc72a000     0x791adc7a9000    0x7f000   0x10a000  r--p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x791adc7a9000     0x791adc7b6000     0xd000   0x188000  r--p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x791adc7b6000     0x791adc7c3000     0xd000   0x195000  rw-p   /usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.1
+      0x791adc7c3000     0x791adc7c4000     0x1000        0x0  rw-p   
+      0x791adc7c7000     0x791adc7ca000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x791adc7ca000     0x791adc7d8000     0xe000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x791adc7d8000     0x791adc7db000     0x3000    0x11000  r--p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x791adc7db000     0x791adc7dc000     0x1000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x791adc7dc000     0x791adc7dd000     0x1000    0x15000  rw-p   /usr/lib/x86_64-linux-gnu/libtasn1.so.6.6.3
+      0x791adc7dd000     0x791adc7e0000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libsasl2.so.2.0.25
+      0x791adc7e0000     0x791adc7f0000    0x10000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libsasl2.so.2.0.25
+      0x791adc7f0000     0x791adc7f5000     0x5000    0x13000  r--p   /usr/lib/x86_64-linux-gnu/libsasl2.so.2.0.25
+      0x791adc7f5000     0x791adc7f6000     0x1000    0x17000  r--p   /usr/lib/x86_64-linux-gnu/libsasl2.so.2.0.25
+      0x791adc7f6000     0x791adc7f7000     0x1000    0x18000  rw-p   /usr/lib/x86_64-linux-gnu/libsasl2.so.2.0.25
+      0x791adc7f7000     0x791adc7fa000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libkrb5support.so.0.1
+      0x791adc7fa000     0x791adc800000     0x6000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libkrb5support.so.0.1
+      0x791adc800000     0x791adc802000     0x2000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libkrb5support.so.0.1
+      0x791adc802000     0x791adc803000     0x1000     0xa000  r--p   /usr/lib/x86_64-linux-gnu/libkrb5support.so.0.1
+      0x791adc803000     0x791adc804000     0x1000     0xb000  rw-p   /usr/lib/x86_64-linux-gnu/libkrb5support.so.0.1
+      0x791adc804000     0x791adc806000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libcom_err.so.2.1
+      0x791adc806000     0x791adc807000     0x1000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libcom_err.so.2.1
+      0x791adc807000     0x791adc808000     0x1000     0x3000  r--p   /usr/lib/x86_64-linux-gnu/libcom_err.so.2.1
+      0x791adc808000     0x791adc809000     0x1000     0x3000  r--p   /usr/lib/x86_64-linux-gnu/libcom_err.so.2.1
+      0x791adc809000     0x791adc80a000     0x1000     0x4000  rw-p   /usr/lib/x86_64-linux-gnu/libcom_err.so.2.1
+      0x791adc80a000     0x791adc80e000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libk5crypto.so.3.1
+      0x791adc80e000     0x791adc829000    0x1b000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libk5crypto.so.3.1
+      0x791adc829000     0x791adc834000     0xb000    0x1f000  r--p   /usr/lib/x86_64-linux-gnu/libk5crypto.so.3.1
+      0x791adc834000     0x791adc835000     0x1000    0x2a000  r--p   /usr/lib/x86_64-linux-gnu/libk5crypto.so.3.1
+      0x791adc835000     0x791adc836000     0x1000    0x2b000  rw-p   /usr/lib/x86_64-linux-gnu/libk5crypto.so.3.1
+      0x791adc836000     0x791adc856000    0x20000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libkrb5.so.3.3
+      0x791adc856000     0x791adc8b7000    0x61000    0x20000  r-xp   /usr/lib/x86_64-linux-gnu/libkrb5.so.3.3
+      0x791adc8b7000     0x791adc8f0000    0x39000    0x81000  r--p   /usr/lib/x86_64-linux-gnu/libkrb5.so.3.3
+      0x791adc8f0000     0x791adc8fd000     0xd000    0xba000  r--p   /usr/lib/x86_64-linux-gnu/libkrb5.so.3.3
+      0x791adc8fd000     0x791adc8ff000     0x2000    0xc7000  rw-p   /usr/lib/x86_64-linux-gnu/libkrb5.so.3.3
+      0x791adc8ff000     0x791adc909000     0xa000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x791adc909000     0x791adc96c000    0x63000     0xa000  r-xp   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x791adc96c000     0x791adc981000    0x15000    0x6d000  r--p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x791adc981000     0x791adc982000     0x1000    0x81000  r--p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x791adc982000     0x791adc983000     0x1000    0x82000  rw-p   /usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0
+      0x791adc983000     0x791adc98f000     0xc000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x791adc98f000     0x791adc9be000    0x2f000     0xc000  r-xp   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x791adc9be000     0x791adc9d5000    0x17000    0x3b000  r--p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x791adc9d5000     0x791adc9d7000     0x2000    0x51000  r--p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x791adc9d7000     0x791adc9d8000     0x1000    0x53000  rw-p   /usr/lib/x86_64-linux-gnu/libnettle.so.8.8
+      0x791adc9d8000     0x791adc9e0000     0x8000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x791adc9e0000     0x791adc9f4000    0x14000     0x8000  r-xp   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x791adc9f4000     0x791adca1d000    0x29000    0x1c000  r--p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x791adca1d000     0x791adca1f000     0x2000    0x44000  r--p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x791adca1f000     0x791adca20000     0x1000    0x46000  rw-p   /usr/lib/x86_64-linux-gnu/libhogweed.so.6.8
+      0x791adca20000     0x791adca53000    0x33000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x791adca53000     0x791adcb8d000   0x13a000    0x33000  r-xp   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x791adcb8d000     0x791adcc06000    0x79000   0x16d000  r--p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x791adcc06000     0x791adcc16000    0x10000   0x1e6000  r--p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x791adcc16000     0x791adcc18000     0x2000   0x1f6000  rw-p   /usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1
+      0x791adcc18000     0x791adcc1b000     0x3000        0x0  rw-p   
+      0x791adcc1b000     0x791adcc2c000    0x11000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x791adcc2c000     0x791adcc63000    0x37000    0x11000  r-xp   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x791adcc63000     0x791adcdc3000   0x160000    0x48000  r--p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x791adcdc3000     0x791adcdc7000     0x4000   0x1a8000  r--p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x791adcdc7000     0x791adcdc8000     0x1000   0x1ac000  rw-p   /usr/lib/x86_64-linux-gnu/libunistring.so.5.0.0
+      0x791adcdc8000     0x791adcdc9000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0
+      0x791adcdc9000     0x791adcdd1000     0x8000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0
+      0x791adcdd1000     0x791adcdd4000     0x3000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0
+      0x791adcdd4000     0x791adcdd5000     0x1000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0
+      0x791adcdd5000     0x791adcdd6000     0x1000     0xc000  rw-p   /usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0
+      0x791adcdd6000     0x791adcdda000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x791adcdda000     0x791adce81000    0xa7000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x791adce81000     0x791adce8e000     0xd000    0xab000  r--p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x791adce8e000     0x791adce8f000     0x1000    0xb7000  r--p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x791adce8f000     0x791adce90000     0x1000    0xb8000  rw-p   /usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5
+      0x791adce90000     0x791adce9e000     0xe000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libldap.so.2.0.200
+      0x791adce9e000     0x791adceda000    0x3c000     0xe000  r-xp   /usr/lib/x86_64-linux-gnu/libldap.so.2.0.200
+      0x791adceda000     0x791adcee9000     0xf000    0x4a000  r--p   /usr/lib/x86_64-linux-gnu/libldap.so.2.0.200
+      0x791adcee9000     0x791adceeb000     0x2000    0x58000  r--p   /usr/lib/x86_64-linux-gnu/libldap.so.2.0.200
+      0x791adceeb000     0x791adceec000     0x1000    0x5a000  rw-p   /usr/lib/x86_64-linux-gnu/libldap.so.2.0.200
+      0x791adceec000     0x791adceee000     0x2000        0x0  rw-p   
+      0x791adceee000     0x791adcefa000     0xc000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2.2
+      0x791adcefa000     0x791adcf34000    0x3a000     0xc000  r-xp   /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2.2
+      0x791adcf34000     0x791adcf3e000     0xa000    0x46000  r--p   /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2.2
+      0x791adcf3e000     0x791adcf40000     0x2000    0x4f000  r--p   /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2.2
+      0x791adcf40000     0x791adcf42000     0x2000    0x51000  rw-p   /usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2.2
+      0x791adcf42000     0x791adcf44000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libpsl.so.5.3.4
+      0x791adcf44000     0x791adcf46000     0x2000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libpsl.so.5.3.4
+      0x791adcf46000     0x791adcf54000     0xe000     0x4000  r--p   /usr/lib/x86_64-linux-gnu/libpsl.so.5.3.4
+      0x791adcf54000     0x791adcf55000     0x1000    0x11000  r--p   /usr/lib/x86_64-linux-gnu/libpsl.so.5.3.4
+      0x791adcf55000     0x791adcf56000     0x1000    0x12000  rw-p   /usr/lib/x86_64-linux-gnu/libpsl.so.5.3.4
+      0x791adcf56000     0x791adcf74000    0x1e000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x791adcf74000     0x791adcfd6000    0x62000    0x1e000  r-xp   /usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x791adcfd6000     0x791adcff2000    0x1c000    0x80000  r--p   /usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x791adcff2000     0x791adcffc000     0xa000    0x9c000  r--p   /usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x791adcffc000     0x791add000000     0x4000    0xa6000  rw-p   /usr/lib/x86_64-linux-gnu/libssl.so.3
+      0x791add000000     0x791add0b3000    0xb3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x791add0b3000     0x791add3e7000   0x334000    0xb3000  r-xp   /usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x791add3e7000     0x791add4b2000    0xcb000   0x3e7000  r--p   /usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x791add4b2000     0x791add50e000    0x5c000   0x4b1000  r--p   /usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x791add50e000     0x791add511000     0x3000   0x50d000  rw-p   /usr/lib/x86_64-linux-gnu/libcrypto.so.3
+      0x791add511000     0x791add514000     0x3000        0x0  rw-p   
+      0x791add514000     0x791add516000     0x2000        0x0  rw-p   
+      0x791add516000     0x791add519000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/liblber.so.2.0.200
+      0x791add519000     0x791add521000     0x8000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/liblber.so.2.0.200
+      0x791add521000     0x791add524000     0x3000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/liblber.so.2.0.200
+      0x791add524000     0x791add525000     0x1000     0xd000  r--p   /usr/lib/x86_64-linux-gnu/liblber.so.2.0.200
+      0x791add525000     0x791add526000     0x1000     0xe000  rw-p   /usr/lib/x86_64-linux-gnu/liblber.so.2.0.200
+      0x791add526000     0x791add534000     0xe000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libssh.so.4.9.6
+      0x791add534000     0x791add57c000    0x48000     0xe000  r-xp   /usr/lib/x86_64-linux-gnu/libssh.so.4.9.6
+      0x791add57c000     0x791add594000    0x18000    0x56000  r--p   /usr/lib/x86_64-linux-gnu/libssh.so.4.9.6
+      0x791add594000     0x791add596000     0x2000    0x6d000  r--p   /usr/lib/x86_64-linux-gnu/libssh.so.4.9.6
+      0x791add596000     0x791add598000     0x2000    0x6f000  rw-p   /usr/lib/x86_64-linux-gnu/libssh.so.4.9.6
+      0x791add598000     0x791add59d000     0x5000        0x0  r--p   /usr/lib/x86_64-linux-gnu/librtmp.so.1
+      0x791add59d000     0x791add5ae000    0x11000     0x5000  r-xp   /usr/lib/x86_64-linux-gnu/librtmp.so.1
+      0x791add5ae000     0x791add5b4000     0x6000    0x16000  r--p   /usr/lib/x86_64-linux-gnu/librtmp.so.1
+      0x791add5b4000     0x791add5b5000     0x1000    0x1c000  r--p   /usr/lib/x86_64-linux-gnu/librtmp.so.1
+      0x791add5b5000     0x791add5b6000     0x1000    0x1d000  rw-p   /usr/lib/x86_64-linux-gnu/librtmp.so.1
+      0x791add5b6000     0x791add5b8000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x791add5b8000     0x791add5bc000     0x4000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x791add5bc000     0x791add5d6000    0x1a000     0x6000  r--p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x791add5d6000     0x791add5d7000     0x1000    0x1f000  r--p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x791add5d7000     0x791add5d8000     0x1000    0x20000  rw-p   /usr/lib/x86_64-linux-gnu/libidn2.so.0.4.0
+      0x791add5d8000     0x791add5dd000     0x5000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libnghttp2.so.14.26.0
+      0x791add5dd000     0x791add5f3000    0x16000     0x5000  r-xp   /usr/lib/x86_64-linux-gnu/libnghttp2.so.14.26.0
+      0x791add5f3000     0x791add5ff000     0xc000    0x1b000  r--p   /usr/lib/x86_64-linux-gnu/libnghttp2.so.14.26.0
+      0x791add5ff000     0x791add602000     0x3000    0x26000  r--p   /usr/lib/x86_64-linux-gnu/libnghttp2.so.14.26.0
+      0x791add602000     0x791add603000     0x1000    0x29000  rw-p   /usr/lib/x86_64-linux-gnu/libnghttp2.so.14.26.0
+      0x791add603000     0x791add605000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x791add605000     0x791add617000    0x12000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x791add617000     0x791add61d000     0x6000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x791add61d000     0x791add61e000     0x1000    0x1a000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x791add61e000     0x791add61f000     0x1000    0x1b000  rw-p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x791add61f000     0x791add621000     0x2000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libjansson.so.4.14.0
+      0x791add621000     0x791add629000     0x8000     0x2000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libjansson.so.4.14.0
+      0x791add629000     0x791add62c000     0x3000     0xa000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libjansson.so.4.14.0
+      0x791add62c000     0x791add62d000     0x1000     0xc000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libjansson.so.4.14.0
+      0x791add62d000     0x791add62e000     0x1000     0xd000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libjansson.so.4.14.0
+      0x791add62e000     0x791add633000     0x5000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libcjose.so.0.0.0
+      0x791add633000     0x791add641000     0xe000     0x5000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libcjose.so.0.0.0
+      0x791add641000     0x791add644000     0x3000    0x13000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libcjose.so.0.0.0
+      0x791add644000     0x791add645000     0x1000    0x16000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libcjose.so.0.0.0
+      0x791add645000     0x791add646000     0x1000    0x17000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libcjose.so.0.0.0
+      0x791add646000     0x791add657000    0x11000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libcurl.so.4.8.0
+      0x791add657000     0x791add6e3000    0x8c000    0x11000  r-xp   /usr/lib/x86_64-linux-gnu/libcurl.so.4.8.0
+      0x791add6e3000     0x791add700000    0x1d000    0x9d000  r--p   /usr/lib/x86_64-linux-gnu/libcurl.so.4.8.0
+      0x791add700000     0x791add704000     0x4000    0xb9000  r--p   /usr/lib/x86_64-linux-gnu/libcurl.so.4.8.0
+      0x791add704000     0x791add707000     0x3000    0xbd000  rw-p   /usr/lib/x86_64-linux-gnu/libcurl.so.4.8.0
+      0x791add707000     0x791add719000    0x12000        0x0  rw-p   
+      0x791add719000     0x791add71a000     0x1000        0x0  rw-s   /dev/shm/sem.than60 (deleted)
+      0x791add71a000     0x791add728000     0xe000        0x0  rw-p   
+      0x791add728000     0x791add740000    0x18000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/.libs/mod_auth_openidc.so
+      0x791add740000     0x791add79a000    0x5a000    0x18000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/.libs/mod_auth_openidc.so
+      0x791add79a000     0x791add7bc000    0x22000    0x72000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/.libs/mod_auth_openidc.so
+      0x791add7bc000     0x791add7bf000     0x3000    0x93000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/.libs/mod_auth_openidc.so
+      0x791add7bf000     0x791add7c0000     0x1000    0x96000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/.libs/mod_auth_openidc.so
+      0x791add7c0000     0x791add7c2000     0x2000        0x0  rw-p   
+      0x791add7c2000     0x791add7c3000     0x1000        0x0  r--p   /usr/lib/apache2/modules/mod_authz_host.so
+      0x791add7c3000     0x791add7c4000     0x1000     0x1000  r-xp   /usr/lib/apache2/modules/mod_authz_host.so
+      0x791add7c4000     0x791add7c5000     0x1000     0x2000  r--p   /usr/lib/apache2/modules/mod_authz_host.so
+      0x791add7c5000     0x791add7c6000     0x1000     0x2000  r--p   /usr/lib/apache2/modules/mod_authz_host.so
+      0x791add7c6000     0x791add7c7000     0x1000     0x3000  rw-p   /usr/lib/apache2/modules/mod_authz_host.so
+      0x791add7c7000     0x791add7c8000     0x1000        0x0  r--p   /usr/lib/apache2/modules/mod_authz_user.so
+      0x791add7c8000     0x791add7c9000     0x1000     0x1000  r-xp   /usr/lib/apache2/modules/mod_authz_user.so
+      0x791add7c9000     0x791add7ca000     0x1000     0x2000  r--p   /usr/lib/apache2/modules/mod_authz_user.so
+      0x791add7ca000     0x791add7cb000     0x1000     0x2000  r--p   /usr/lib/apache2/modules/mod_authz_user.so
+      0x791add7cb000     0x791add7cc000     0x1000     0x3000  rw-p   /usr/lib/apache2/modules/mod_authz_user.so
+      0x791add7cc000     0x791add7ce000     0x2000        0x0  r--p   /usr/lib/apache2/modules/mod_authz_core.so
+      0x791add7ce000     0x791add7d1000     0x3000     0x2000  r-xp   /usr/lib/apache2/modules/mod_authz_core.so
+      0x791add7d1000     0x791add7d2000     0x1000     0x5000  r--p   /usr/lib/apache2/modules/mod_authz_core.so
+      0x791add7d2000     0x791add7d3000     0x1000     0x6000  r--p   /usr/lib/apache2/modules/mod_authz_core.so
+      0x791add7d3000     0x791add7d4000     0x1000     0x7000  rw-p   /usr/lib/apache2/modules/mod_authz_core.so
+      0x791add7d4000     0x791add7d6000     0x2000        0x0  rw-p   
+      0x791add7d6000     0x791add7d7000     0x1000        0x0  r--p   /usr/lib/apache2/modules/mod_authn_core.so
+      0x791add7d7000     0x791add7d8000     0x1000     0x1000  r-xp   /usr/lib/apache2/modules/mod_authn_core.so
+      0x791add7d8000     0x791add7d9000     0x1000     0x2000  r--p   /usr/lib/apache2/modules/mod_authn_core.so
+      0x791add7d9000     0x791add7da000     0x1000     0x2000  r--p   /usr/lib/apache2/modules/mod_authn_core.so
+      0x791add7da000     0x791add7db000     0x1000     0x3000  rw-p   /usr/lib/apache2/modules/mod_authn_core.so
+      0x791add7db000     0x791add7de000     0x3000        0x0  r--p   /usr/lib/apache2/modules/mod_mpm_prefork.so
+      0x791add7de000     0x791add7e2000     0x4000     0x3000  r-xp   /usr/lib/apache2/modules/mod_mpm_prefork.so
+      0x791add7e2000     0x791add7e4000     0x2000     0x7000  r--p   /usr/lib/apache2/modules/mod_mpm_prefork.so
+      0x791add7e4000     0x791add7e5000     0x1000     0x8000  r--p   /usr/lib/apache2/modules/mod_mpm_prefork.so
+      0x791add7e5000     0x791add7e6000     0x1000     0x9000  rw-p   /usr/lib/apache2/modules/mod_mpm_prefork.so
+      0x791add7e6000     0x791add800000    0x1a000        0x0  rw-p   
+      0x791add800000     0x791add828000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x791add828000     0x791add9b1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x791add9b1000     0x791adda00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x791adda00000     0x791adda04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x791adda04000     0x791adda06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x791adda06000     0x791adda13000     0xd000        0x0  rw-p   
+      0x791adda13000     0x791adda26000    0x13000        0x0  rw-p   
+      0x791adda26000     0x791adda28000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0
+      0x791adda28000     0x791adda2d000     0x5000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0
+      0x791adda2d000     0x791adda2e000     0x1000     0x7000  r--p   /usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0
+      0x791adda2e000     0x791adda2f000     0x1000     0x7000  r--p   /usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0
+      0x791adda2f000     0x791adda30000     0x1000     0x8000  rw-p   /usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0
+      0x791adda30000     0x791adda32000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0
+      0x791adda32000     0x791adda47000    0x15000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0
+      0x791adda47000     0x791adda60000    0x19000    0x17000  r--p   /usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0
+      0x791adda60000     0x791adda61000     0x1000    0x2f000  r--p   /usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0
+      0x791adda61000     0x791adda62000     0x1000    0x30000  rw-p   /usr/lib/x86_64-linux-gnu/libcrypt.so.1.1.0
+      0x791adda62000     0x791adda6c000     0xa000        0x0  rw-p   
+      0x791adda6c000     0x791adda70000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+      0x791adda70000     0x791adda8f000    0x1f000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+      0x791adda8f000     0x791adda97000     0x8000    0x23000  r--p   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+      0x791adda97000     0x791adda99000     0x2000    0x2b000  r--p   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+      0x791adda99000     0x791adda9a000     0x1000    0x2d000  rw-p   /usr/lib/x86_64-linux-gnu/libexpat.so.1.9.1
+      0x791adda9a000     0x791addaa6000     0xc000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libapr-1.so.0.7.2
+      0x791addaa6000     0x791addaca000    0x24000     0xc000  r-xp   /usr/lib/x86_64-linux-gnu/libapr-1.so.0.7.2
+      0x791addaca000     0x791addad4000     0xa000    0x30000  r--p   /usr/lib/x86_64-linux-gnu/libapr-1.so.0.7.2
+      0x791addad4000     0x791addad5000     0x1000    0x3a000  r--p   /usr/lib/x86_64-linux-gnu/libapr-1.so.0.7.2
+      0x791addad5000     0x791addad6000     0x1000    0x3b000  rw-p   /usr/lib/x86_64-linux-gnu/libapr-1.so.0.7.2
+      0x791addad6000     0x791addadf000     0x9000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libaprutil-1.so.0.6.3
+      0x791addadf000     0x791addafa000    0x1b000     0x9000  r-xp   /usr/lib/x86_64-linux-gnu/libaprutil-1.so.0.6.3
+      0x791addafa000     0x791addb02000     0x8000    0x24000  r--p   /usr/lib/x86_64-linux-gnu/libaprutil-1.so.0.6.3
+      0x791addb02000     0x791addb03000     0x1000    0x2b000  r--p   /usr/lib/x86_64-linux-gnu/libaprutil-1.so.0.6.3
+      0x791addb03000     0x791addb04000     0x1000    0x2c000  rw-p   /usr/lib/x86_64-linux-gnu/libaprutil-1.so.0.6.3
+      0x791addb04000     0x791addb06000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.11.2
+      0x791addb06000     0x791addb74000    0x6e000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.11.2
+      0x791addb74000     0x791addb9c000    0x28000    0x70000  r--p   /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.11.2
+      0x791addb9c000     0x791addb9d000     0x1000    0x97000  r--p   /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.11.2
+      0x791addb9d000     0x791addb9e000     0x1000    0x98000  rw-p   /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.11.2
+      0x791addb9e000     0x791addb9f000     0x1000        0x0  rw-s   /dev/shm/sem.tvHrh5 (deleted)
+      0x791addb9f000     0x791addbb5000    0x16000        0x0  rw-p   
+      0x791addbb5000     0x791addbb6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x791addbb6000     0x791addbe1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x791addbe1000     0x791addbeb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x791addbeb000     0x791addbed000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x791addbed000     0x791addbef000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffef975f000     0x7ffef9780000    0x21000        0x0  rw-p   [stack]
+      0x7ffef97bc000     0x7ffef97c0000     0x4000        0x0  r--p   [vvar]
+      0x7ffef97c0000     0x7ffef97c2000     0x2000        0x0  r-xp   [vdso]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]

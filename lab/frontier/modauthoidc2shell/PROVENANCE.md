@@ -461,3 +461,44 @@ No chosen byte, pointer target, consumer dereference, command or marker.
 W12's shim experiment and W15's production-allocator full-module crash were
 not part of this verdict and remain author-only/unwitnessed. W170's NIT —
 stale "unwitnessed" wording in the status report — was folded the same wake.
+
+## Native faulting PC on the non-ASan full module (2026-11-23 W16)
+
+W15 left the production-allocator crash observed only through Apache's
+`AH00051 ... exit signal Segmentation fault (11)` line, with no faulting PC
+(children have `RLIMIT_CORE=0`, core_pattern pipes to apport).
+`full/probe-sys-gdb.sh` closes that gap with a debugger attached **only to
+observe**: system `/usr/sbin/apache2` 2.4.58, the same non-ASan vulnerable
+module `59d9a2f9…116701` (pinned `state.c` `ceedb687…5aa`) and fixed tag
+module `704f0d5f…f5375a3`, ASLR left on (`set disable-randomization off`),
+`follow-fork-mode child`, `handle SIGSEGV stop print nopass`. No shim,
+`LD_PRELOAD` or `ASAN_OPTIONS`.
+
+Bare `Cookie: mod_auth_openidc_state_<7800 a>` on `GET /protected` on each
+fresh start: **4/4** vulnerable starts stopped on SIGSEGV with a captured
+native PC; well-formed `<7800 a>=1` 0/1 (6/6 HTTP 302) and released
+tag bare token 0/1 (6/6 HTTP 302). All four stops attribute to
+`oidc_state_cookies_parse_token` at pinned **`state.c:219`, the `*cookie =
+'\0'` store**, not the OOB read: the faulting instruction is
+`movb $0x0,(%rax)`; gcc inlined the parser into
+`oidc_state_cookies_clean_expired`, so the raw symbol on `$pc` is
+`oidc_state_cookies_clean_expired+265`. Live stack: `:219` →
+`oidc_state_cookies_clean_expired` `state.c:244` →
+`oidc_request_authorization_set_cookie` `handle/request.c:132` →
+`oidc_handle_unauthenticated_user` `mod_auth_openidc.c:516` →
+`oidc_check_user_id` `:1388` → `ap_run_check_user_id`.
+
+The scan stopped at an `=` byte outside the request token and the NUL store
+faulted. `info proc mappings` places the target in read-only library pages in
+two starts (`libresolv.so.2`, `libbrotlicommon.so.1.1.0`, immediately after a
+writable/shm mapping) and in unmapped gaps in the other two. The `=` byte and
+its address come from adjacent process memory, not from the client; the
+client chooses only token length and the NUL value.
+
+The PC is native but observed with gdb attached; W15's non-debugger crashes
+remain the availability claim. 4/4 under gdb vs W15's 5/6 first-request rate
+is a small-sample layout effect, not a contradiction. No chosen byte,
+controlled pointer target, consumer dereference, command or rung 5. Grade
+unchanged; author-only and unwitnessed at this scope. Raw transcripts, codes,
+error logs and hashes: `full/evidence/sys-gdb/README.md`. Re-run:
+`cd full && bash probe-sys-gdb.sh`.

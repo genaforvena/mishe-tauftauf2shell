@@ -1,0 +1,1 @@
+fixed_bare_7800 start=1 caught=0  codes=1 302,2 302,3 302,4 302,5 302,6 302,

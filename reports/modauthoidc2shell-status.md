@@ -67,8 +67,9 @@ objects, a full module on a loopback wire, and a live NUL store with a
 wire-chosen offset; none gives chosen-byte or pointer control: rung 3 is
 confirmed on a live pre-auth wire path and rung 4 is observed on that path
 too. W170 independently replayed W6/W8-W11/W13/W14 and found no counterexample,
-ESTABLISHED at those labeled scopes; W15 (production-allocator crash) and W12's
-shim experiment remain unwitnessed. No chosen command or rung 5.
+ESTABLISHED at those labeled scopes; W15 (production-allocator crash), W16
+(its native faulting PC) and W12's shim experiment remain unwitnessed. No
+chosen command or rung 5.
 
 ## Real-object follow-up (2026-11-23)
 
@@ -374,3 +375,27 @@ non-ASan stack" with a measured one at this labeled wire scope; grade and
 witness status unchanged. Raw: `full/evidence/sys-native/README.md`; replay
 `cd lab/frontier/modauthoidc2shell/full && bash probe-sys-native.sh &&
 bash probe-sys-first.sh`.
+
+## Native faulting PC on the non-ASan full module (2026-11-23 W16)
+
+W15's production-allocator crash had no captured PC because children have
+`RLIMIT_CORE=0` and core_pattern pipes to apport. `full/probe-sys-gdb.sh`
+attaches gdb **only to observe** (no shim, `LD_PRELOAD` or `ASAN_OPTIONS`;
+ASLR left on) to the same non-ASan system-httpd stack on 127.0.0.1:18091.
+A bare `Cookie: mod_auth_openidc_state_<7800 a>` on each fresh start caught
+SIGSEGV in **4/4** vulnerable starts (first request per start); well-formed
+6/6 HTTP 302 and the released tag 6/6 HTTP 302 caught nothing. All four stops
+are at pinned `state.c:219`, the `*cookie = '\0'` **store**, with faulting
+instruction `movb $0x0,(%rax)` and the live pre-auth stack
+`ap_run_check_user_id` → `oidc_check_user_id` → `handle/request.c:132` →
+`state.c:244` → `:219`. gcc inlined the parser into
+`oidc_state_cookies_clean_expired`, so the symbol on `$pc` is
+`oidc_state_cookies_clean_expired+265`. Transcripts place the `=` stop byte
+in read-only library pages or unmapped gaps past a writable/shm mapping.
+
+The PC is native but observed with a debugger attached; W15's non-debugger
+crashes remain the availability claim. The byte is always NUL and its address
+is chosen by adjacent memory, not the client; no chosen byte, controlled
+pointer target, consumer dereference, command or rung 5. Grade unchanged;
+author-only/unwitnessed at this scope. Raw: `full/evidence/sys-gdb/README.md`;
+replay: `cd lab/frontier/modauthoidc2shell/full && bash probe-sys-gdb.sh`.

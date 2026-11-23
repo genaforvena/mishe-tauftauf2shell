@@ -1,0 +1,8 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Attaching after Thread 0x7a8bfdf77780 (LWP 2606048) fork to child process 2606060]
+[New inferior 2 (process 2606060)]
+[Detaching after fork from parent process 2606048]
+[Inferior 1 (process 2606048) detached]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".

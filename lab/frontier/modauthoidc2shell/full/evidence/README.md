@@ -104,6 +104,13 @@ the runner because it depends on arena layout.
   clean; no captured faulting PC, no chosen byte, rung 5 or witness verdict.
   Raw: `sys-native/README.md`; replay `bash probe-sys-native.sh &&
   bash probe-sys-first.sh`.
+- W16 captures a native faulting PC for that non-ASan crash: `probe-sys-gdb.sh`
+  attaches gdb only to observe (ASLR on, no shim/preload/ASAN_OPTIONS) and
+  stops 4/4 bare-7800 vulnerable starts at pinned `state.c:219`, instruction
+  `movb $0x0,(%rax)`, with the full pre-auth stack; well-formed and released
+  tag 6/6 HTTP 302 with no catch. The PC is native but debugger-observed;
+  byte always NUL, no chosen byte, pointer control, consumer dereference,
+  command, rung 5 or witness verdict. Raw: `sys-gdb/README.md`.
 
 
 ## Re-run

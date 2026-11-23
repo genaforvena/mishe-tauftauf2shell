@@ -31,3 +31,4 @@ httpd-sys-fixed.pid
 error-sys.log
 error-sys-fixed.log
 evidence/sys-native/*-error.log
+evidence/sys-gdb/*-error.log
