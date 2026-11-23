@@ -1,1 +1,1 @@
-SENT uncompressed_payload=4 transform=ZLIB
+SENT mode=client-safe wire_bytes=50 file=wire-safe.bin

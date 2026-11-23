@@ -1,1 +1,1 @@
-SENT uncompressed_payload=700 transform=ZLIB
+SENT mode=client wire_bytes=72 file=wire.bin
