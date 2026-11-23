@@ -111,13 +111,21 @@ reported by the library (`w1/evidence/<binary>.<scenario>.log`):
 | `valid` | 32 | rc 0, `CEK_LEN_AFTER=32`, HMAC fail (`ERRCODE=4`: synthetic ciphertext/tag) | clean | rc 0, same HMAC fail |
 | `wrapped` | 40 | rc 0, `CEK_LEN_AFTER=40` | `WRITE of size 40`, `jwe.c:595` | rc 0, `ERRCODE=1`, `CEK_LEN_AFTER=32` |
 | `wrappedN48` | 48 | rc 134, `munmap_chunk(): invalid pointer` | ASan OOB write | rc 0, `ERRCODE=1` |
-| `wrappedN56` | 56 | rc 0, `CEK_LEN_AFTER=56` (stable 3/3 replays) | ASan OOB write | rc 0, `ERRCODE=1` |
+| `wrappedN56` | 56 | rc 0 (`CEK_LEN_AFTER=56`) or rc 139 SIGSEGV, varies by build/run | ASan OOB write | rc 0, `ERRCODE=1` |
 | `wrappedbig` | 1016 | rc 139 SIGSEGV | `WRITE of size 1016` | rc 0, `ERRCODE=1` |
 | `probe` (invalid IV) | 40 | rc 0, output cleansed, no chosen bytes | ASan OOB write | rc 0, `ERRCODE=1` |
 
-The 48-byte case aborting while the larger 56-byte case survives is a
-deterministic negative/contradiction, not an escalation: the cause of that
-difference was not established and no control-flow target was observed.
+The 48-byte case aborting is deterministic (`munmap_chunk()`); the 56-byte
+case is not. Author repeats and an independent witness clean-room replay
+observed both rc 0 and rc 139 SIGSEGV across builds/runs (W182 repetition
+log `w1/evidence/wrappedN56-variation-w182.log`: 2/12 plain and 1/12 trace
+rc 139). The witness traced one rc 139 to `__strcmp_avx2` from
+`_cjose_jwe_calc_auth_tag` (`jwe.c:1098`) via
+`_cjose_jwe_decrypt_dat_aes_cbc` (`jwe.c:1400`) with `enc=0x0`, i.e. an
+overflow-corrupted live jansson string consumed by the real decrypt path.
+The cause of the variation was not established and stays UNKNOWN; no
+control-flow target was observed and the security grade is unchanged. This
+is a preserved contradiction, not an escalation.
 
 Heap geometry in the plain vulnerable process (`w1-plain-vuln.wrapped.log`):
 `CEK_MINUS16=...3100000000000000` gives a 48-byte glibc chunk (32-byte

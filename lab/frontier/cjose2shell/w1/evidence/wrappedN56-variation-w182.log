@@ -1,0 +1,33 @@
+W182 bounded replay of the wrappedN56 wire case, 2026-11-23 20:55:57Z.
+Command: bash /tmp/cjose56-replay.sh (throwaway; one server per request,
+python3 client.py 127.0.0.1 PORT wrappedN56), pinned w1 binaries from W181.
+Each line is one fresh process; rc is the server exit status.
+
+w1-plain-vuln 1 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 2 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 3 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 4 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 5 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 6 rc=139 SIGSEGV
+w1-plain-vuln 7 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 8 rc=139 SIGSEGV
+w1-plain-vuln 9 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 10 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 11 rc=0 CEK_LEN_AFTER=56
+w1-plain-vuln 12 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 1 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 2 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 3 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 4 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 5 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 6 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 7 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 8 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 9 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 10 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 11 rc=0 CEK_LEN_AFTER=56
+w1-trace-vuln 12 rc=139 SIGSEGV
+
+Totals: plain 10/12 rc0, 2/12 rc139; trace 11/12 rc0, 1/12 rc139.
+This contradicts the earlier "stable 3/3" wording; cause of the variation
+not established (UNKNOWN). No witness verdict is asserted here.

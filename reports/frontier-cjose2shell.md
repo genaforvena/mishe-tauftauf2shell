@@ -113,7 +113,8 @@ tampered compact JWE in `Authorization: Bearer`, decodes the encrypted_key
 segment from the wire, and calls real `cjose_jwe_import()` /
 `cjose_jwe_decrypt()` in the pinned vulnerable, fixed and ASan builds. The
 client generates RFC 3394 wraps locally with the same lab KEK. Results in
-`w1/evidence/`, all stable across three replays:
+`w1/evidence/`; length propagation and ASan findings were stable across three
+replays, but the plain 56-byte outcome varies by build/run (below).
 
 - Wire length propagates: 48-, 56-, 64- and 1024-byte wrapped segments reach
   the copy and yield `CEK_LEN_AFTER=40/48/56/1016` on the 32-byte CEK in vulnerable
@@ -121,10 +122,19 @@ client generates RFC 3394 wraps locally with the same lab KEK. Results in
   `jwe.c:595` write in each tampered case.
 - Plain glibc result depends on the write size: 40 bytes stay inside the
   chunk's 40 usable bytes and exit cleanly; 48 bytes corrupt the adjacent
-  chunk's size field and abort in `munmap_chunk()` (rc 134); 56 bytes also
-  corrupt it yet exits 0 — a preserved contradiction whose cause was not
-  established; 1016 bytes segfault (rc 139). No pointer or control-flow
-  target was observed.
+  chunk's size field and abort in `munmap_chunk()` (rc 134); 1016 bytes
+  segfault (rc 139). The 56-byte case is not stable: the author's first
+  three runs and most repeats exited 0 with `CEK_LEN_AFTER=56`, while an
+  independent clean-room witness replay saw rc 139 on its first run, 10/10
+  rc 0 on plain repeats and 2/10 rc 139 on the trace build. The author's own
+  W182 replay (`w1/evidence/wrappedN56-variation-w182.log`) saw 2/12 rc 139
+  on plain and 1/12 rc 139 on trace. The witness traced one rc 139 crash to
+  `__strcmp_avx2` via `_cjose_jwe_calc_auth_tag` (`jwe.c:1098`) through
+  `_cjose_jwe_decrypt_dat_aes_cbc` (`jwe.c:1400`) with `enc=0x0`, consistent
+  with an overflow-corrupted live jansson string reaching the real decrypt
+  path. Why the outcome varies by build and run was not established and
+  stays UNKNOWN; no pointer or control-flow target was observed. This
+  changes neither the security grade nor the rung 1-4 ceiling.
 - Heap map: the CEK is a 48-byte glibc chunk; the adjacent object is a
   25-byte jansson `jsonp_malloc` string at `cek+48`, preceded by its size
   field at `cek+40`. Further neighbors come from jansson, `_decode`,
@@ -143,8 +153,13 @@ client generates RFC 3394 wraps locally with the same lab KEK. Results in
 
 Direct call plus a loopback-only synthetic consumer, with a real compact JWE
 token and a lab-known symmetric key. Wire-length control and heap adjacency
-are measured; no deployed server, credential, pointer/IP control, shell
-command or independent witness replay. Advisory pre-authentication
+are measured. The witness independently replayed both lanes from a clean
+git archive: rungs 1-4 ESTABLISHED at the labeled direct-call real-library
+scope, and rungs 1-3 plus byte-control mechanics ESTABLISHED at the labeled
+synthetic 127.0.0.1 consumer scope (the 56-byte wording contradiction from
+that replay is amended in section 5). No deployed server, credential,
+pointer/IP control or shell command. Advisory pre-authentication
 reachability in a real deployment and any RCE claim remain **UNKNOWN**;
-rung 5 not attempted. A pointer or control-flow target in a real consuming
-process is the prerequisite for any benign-marker attempt.
+rung 5 not attempted and not established. A pointer or control-flow target
+in a real consuming process is the prerequisite for any benign-marker
+attempt.
