@@ -76,7 +76,11 @@ passive gdb observation saw `__libc_system` entered with the wire-supplied
 same payload against the upstream fixed build leave no marker, the latter
 logging `RDMA recv overrun: got=1024 rem=1`. This is rung 5 **observed locally /
 PENDING**, not ESTABLISHED: no independent replay yet, no canary-enabled or
-ASLR-on rung-5 run, no external target, 256 KiB bound still unmeasured.
+ASLR-on rung-5 run and no external target. The advisory's 262144-byte upper
+bound was measured on the wire in a fourth wake: the vulnerable server faults
+(`Segmentation fault (core dumped)`), the fixed server logs
+`RDMA recv overrun: got=262144 rem=1` and stays up; no chosen bytes, pointer
+control or command at that size, so no grade change.
 
 Witness W142 (DM #2193) replayed `37da4e6` from a clean `git archive` with its
 own hash-checked rebuilds and graded rungs 3 and 4 ESTABLISHED at the labeled
@@ -90,3 +94,12 @@ own replay by the witness. The staged slice grade above is the historical
 baseline, not the current ceiling. Exact commands, hashes and controls for the
 new claim are in `reports/llamarpc2shell.md` under "Rung-5 wire-only
 observation".
+
+Fourth wake (2026-11-23): bounded 256 KiB measurement only. A 262144-byte
+zero-filled SEND (`wire/evidence/bulk256k-payload.bin`, sha
+`cc717bb7…d164d164`) gave client `byte_len=262144` and a vulnerable-server
+fault with no marker; the fixed ASan server logged `got=262144 rem=1`, stayed
+up and left no marker. Evidence hashes and runner commands are in
+`reports/llamarpc2shell.md` under "256 KiB SEND upper bound" and in
+`lab/frontier/llamarpc2shell/PROVENANCE.md` under "256 KiB upper bound".
+Rung-5 replay is still owed; no new primitive and no grade change here.

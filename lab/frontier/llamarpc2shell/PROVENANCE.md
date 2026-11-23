@@ -175,3 +175,23 @@ This is a per-build, ASLR-disabled observation. It does not upgrade the
 W142/W143 rung-4 verdict and is not ESTABLISHED until the witness replays this
 build, payload, environment and marker side effect.
 
+
+## 256 KiB upper bound — 2026-11-23 fourth wake
+
+- Payload `wire/evidence/bulk256k-payload.bin` sha256
+  `cc717bb7492c6d96c060e42c9ca9149616981cfb0c5785568287c1d16446d164`
+  (262144 zero bytes except byte 0 = `0x0f`).
+- Vulnerable run: `wire/evidence/bulk256k.log`
+  `76b75f22a843bc11fe6fc3b1ec9d7881eff98de677973c59d98ccb748c194885`,
+  `wire/evidence/client-bulk256k.log`
+  `74613168a1a245500abbf05efc21c67d3c881c0a6b63b73bb96dbc311736d813`;
+  client `byte_len=262144`, server faulted (`Segmentation fault (core dumped)`
+  reported by the runner), no marker. The server log content is identical to
+  the earlier r5 logs because stdout ends at `RDMA activated`.
+- Fixed run: `wire/evidence/bulk256k-fixed.log`
+  `a75b3cc9ea88ba4400519440dfdd6d8a254fa992a274d1d585c0231c247bfc3b`,
+  `wire/evidence/client-bulk256k-fixed.log`
+  `d5cef9f8510ab1d133efd78b336d3a0e58f6cedc29167a5cf139e45adffc7a52`;
+  `RDMA recv overrun: got=262144 rem=1`, no crash, no marker.
+- Both used `MODE=attack` on `wire/run-repair.sh` over loopback `rxe0:53060`
+  with `setarch -R`; only `SERVER` and `TAG` differed. No core file retained.

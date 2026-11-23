@@ -235,9 +235,12 @@ bundle regression is repaired here with no grade change and no new replay owed.
   build has different frame layout. Saved-RIP overwrite was not reproduced
   under ASan. The 761-byte offset is measured in the separate no-stack-protector
   build only.
-- The 256 KiB upper bound from the advisory was not exercised; the largest
-  measured SEND is 4608 bytes in the failed ROP attempt, 3593 bytes in the
-  saved-frame probe and 1024 bytes in the locally observed rung-5 run. The
+- The advisory's 256 KiB upper bound was exercised on the wire in a fourth
+  wake: a 262144-byte SEND gives `wc.byte_len=262144` and faults the vulnerable
+  process (`Segmentation fault (core dumped)` from the runner), with no marker.
+  The fixed server logs `RDMA recv overrun: got=262144 rem=1` and stays up.
+  That is a process-fault observation on the lab build, not a larger control
+  primitive: no chosen bytes, pointer control or command at that size. The
   transport still requires an RDMA-capable path (`AT:P`), here loopback
   SoftRoCE with passwordless device creation.
 - Each run used a freshly built pinned tree and a locally generated QP pair;
@@ -245,3 +248,32 @@ bundle regression is repaired here with no grade change and no new replay owed.
 - Chosen-byte placement in the ASan build's adjacent `response` objects was
   inferred from ASan's object map, not directly dumped; the byte-exact dump is
   from the plain Debug build.
+
+## 256 KiB SEND upper bound (2026-11-23 fourth wake)
+
+Bounded wire-only measurement of the advisory's largest claimed copy. The
+existing runner was reused unchanged with a 262144-byte zero-filled payload
+(first byte `0x0f`, same as the 1024-byte rung-5 payload) generated locally:
+`wire/evidence/bulk256k-payload.bin` sha256
+`cc717bb7492c6d96c060e42c9ca9149616981cfb0c5785568287c1d16446d164`.
+Both runs used loopback `rxe0`, port 53060, `setarch x86_64 -R` and the fixed
+minimal environment of the rung-5 run; the client reported
+`send wc status=0 opcode=0 byte_len=262144 wr_id=0 inline=0` in each.
+
+- Vulnerable no-stack-protector server (sha `3fb0d4bf…7599959`): the runner
+  reported `Segmentation fault (core dumped)`; no marker. Server stdout ends at
+  `RDMA activated`, so its hash
+  (`wire/evidence/bulk256k.log`, `76b75f22…194885`) matches the earlier r5
+  server logs. Client: `wire/evidence/client-bulk256k.log` (`74613168…36d813`).
+- Upstream fixed ASan server (sha `31dbd386…4c18df`): no crash, no marker,
+  `RDMA recv overrun: got=262144 rem=1`, `Client connection closed`.
+  Server: `wire/evidence/bulk256k-fixed.log`
+  (`a75b3cc9…247bfc3b`); client: `wire/evidence/client-bulk256k-fixed.log`
+  (`d5cef9f8…45adffc7a52`).
+
+Command shape (from the repo root):
+`MODE=attack TAG=bulk256k RDMA_PAYLOAD_FILE=$PWD/lab/frontier/llamarpc2shell/wire/evidence/bulk256k-payload.bin bash lab/frontier/llamarpc2shell/wire/run-repair.sh`,
+then the same with `SERVER=$PWD/lab/frontier/llamarpc2shell/src/llama.cpp-fixed-asan/bin/ggml-rpc-server` and `TAG=bulk256k-fixed`.
+This closes the "largest SEND 4608 bytes" gap; it does not change any grade.
+No core file was retained; no independent replay is owed for this observation
+because it adds no new primitive.
