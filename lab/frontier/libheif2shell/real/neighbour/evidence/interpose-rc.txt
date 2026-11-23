@@ -1,0 +1,3 @@
+controlled release rc=134
+controlled retain rc=0
+pattern retain rc=0

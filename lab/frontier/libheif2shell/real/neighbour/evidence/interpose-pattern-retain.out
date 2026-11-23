@@ -1,0 +1,11 @@
+CALLOC32783 count=1 ret=0x5b231b4384c0
+frame 0 decoded: 512x64 stride=512 plane=0x5b231b4384c0
+frame 0 encoded rc=0
+Corrupt JPEG data: 631 extraneous bytes before marker 0xd9
+frame 1 decoded: 64x65 stride=64 plane=0x5b231b52a850
+GROOM count=2 A=0x5b231b415740 B=0x5b231b41d760 delta=32800 fn=0x5b22e3e99c49 tag0=0xa5
+CALLOC32783 count=2 ret=0x5b231b415740 == A
+frame 1 encoded rc=0
+VICTIM fn=0xa8a8a8a8a8a8a8a8 tag[0..7]=b6 b6 b6 b6 b6 b6 b6 b6 
+HEADER A-8=0x8021 B-8=0x9c9c9c9c9c9c9c9c
+POST fn=0xa8a8a8a8a8a8a8a8

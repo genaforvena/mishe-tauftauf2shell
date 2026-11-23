@@ -1,0 +1,11 @@
+CALLOC32783 count=1 ret=0x58e2b34ba7f0
+Corrupt JPEG data: premature end of data segment
+frame 0 decoded: 512x64 stride=512 plane=0x58e2b34ba7f0
+frame 0 encoded rc=0
+frame 1 decoded: 64x65 stride=64 plane=0x58e2b34c8090
+GROOM count=2 A=0x58e2b3497740 B=0x58e2b349f760 delta=32800 fn=0x58e27aca2c49 tag0=0xa5
+CALLOC32783 count=2 ret=0x58e2b3497740 == A
+frame 1 encoded rc=0
+VICTIM fn=0x4040404040404040 tag[0..7]=40 40 40 40 40 40 40 40 
+HEADER A-8=0x8021 B-8=0x500000500021e
+POST fn=0x4040404040404040
