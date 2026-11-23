@@ -3838,6 +3838,20 @@ FIRST-RUN-20261123T1406Z.md transcription tracked; `error.log` and the
 gdb-*/fork-*/sigsegv-*/fixed-* transcripts gitignored). Status:
 `reports/modauthoidc2shell-status.md`.
 
+### W14 build-stack correction — 2026-11-23 (no grade change)
+
+Commit `77678ab` corrects the "non-ASan plain" label on W9-W13. The
+`build-plain.sh` module
+`008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654` and the
+serving httpd both link `libasan.so.8`; apxs injected `-fsanitize=address`
+into the module compile and `nm -D` shows ASan report calls. Check with `ldd`
+on the module and httpd and `nm -D` on the module; commands and output are in
+`lab/frontier/modauthoidc2shell/PROVENANCE.md` § "Build-stack correction
+(2026-11-23 W14)". W13's SIGSEGV had no added shim or preload but ran the ASan
+allocator, so `ASAN_OPTIONS=detect_leaks=0` is a change to that allocator's
+layout, not to a production heap. The faults, stored bytes and controls stand;
+no availability claim on a non-ASan stack. Grade unchanged.
+
 ## 2026-11-23 06:4xZ — radvdump2shell
 
 CVE-2026-48715 / GHSA-52px-gh9p-m379, radvd `<= 2.20`, fixed in `2.21` by
@@ -4976,6 +4990,33 @@ named blocker: a live affected application process fed by wire/request input;
 deep-tiled, OpenImageIO and aarch64 remain untested. "W160" in the report is
 an author wake label, not a witness verdict.
 
+### 16:1xZ — openexr W163 pixel-byte negative (no grade change)
+
+`cases/make_poc.py` now takes an optional fifth argument: the ZSTD pixel fill
+byte, default `0x41` so the committed PoC is unchanged. From
+`lab/openexr2shell-real` with the gitignored `bin-vuln-plain` tree built by
+`./harness/build.sh build-vuln-plain src/openexr-3.5.2 bin-vuln-plain plain`:
+
+```
+python3 cases/make_poc.py cases/baseline.exr /tmp/poc-5a.exr 1024 64 0x5a
+sha256sum cases/poc.exr /tmp/poc-5a.exr
+./bin-vuln-plain/guarded_harness cases/poc.exr
+./bin-vuln-plain/guarded_harness /tmp/poc-5a.exr
+```
+
+Expect two 692-byte files with sha256
+`283cec0e18532c500495e71496145832d36dbfc502e44f490e09114661ab37ce` (default)
+and `17f3752e95e35d70c454368789a8dd163938f03a6fe0784a1bee5ecab347ea8e`
+(variant), both with `packed=52` and forged `S=1024, U=64`. Both guarded runs
+print `DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA`,
+`GUARD-CHANGE alloc=23 size=64 changed=4032 first=+0 expected=0xa1
+actual@first=0x57` and `GUARD-TOTAL post-decode changed=4032` (paths and heap
+addresses aside). The changed pixel bytes never reach the overrun: the 64-byte
+`scratch_buffer_1` holds only source offsets 0..63; offsets 64..4095 read
+adjacent heap. Saved outputs: `evidence/guarded-pixel-{41,5a}.out`. Generated
+`.exr` files and builds are gitignored; regenerate with `build.sh` and
+`make_poc.py` as above. Grade unchanged; rung 5 UNKNOWN.
+
 ## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
 
 GHSA-hpg4-g2gc-pq42 (High 7.5, no CVE stated, CWE-122) affects libheif
@@ -5510,6 +5551,30 @@ also returning 129/0 on the same trace. Rung 5 stays UNKNOWN and the grade is
 unchanged.
 See `reports/munt2shell-status.md`.
 
+### 16:0xZ — munt W168 fragment-accumulation boundary (no grade change)
+
+`real/frag_driver.cpp` and `real/frag_probe.sh` add an isolated probe against
+the same pinned libraries (build them with `real/build_and_run.sh` and
+`real/build_clang_asan.sh`; `src/`, `build/` and `frag-*-{asan,plain}` binaries
+are gitignored). From `lab/frontier/munt2shell/real`:
+
+```
+sh frag_probe.sh
+cat evidence/frag-results.txt
+```
+
+Expect `frag-many` (eight separate 5000-byte incomplete-SysEx calls, 40000
+bytes total) rc 0 in gcc ASan, clang ASan and plain vulnerable builds, ASan
+clean and `tail_0x5a=0/16384`; `single-32768` clean everywhere; `single-32769`
+gcc/clang ASan `WRITE of size 32769` 0 bytes after a 32768-byte region and
+plain tail exactly 1, while pinned-fixed ASan is rc 0; `single-40001` is the
+known ASan `WRITE of size 40001` control with plain tail `7233/16384`.
+Raw outputs `evidence/frag-*.out` and the rc matrix are committed; the pinned
+sources and binaries are regenerable as above. The defect needs one
+`parseStream()` call with at least 32769 unterminated bytes; all in-tree call
+sites are non-network (ALSA cap 5572 bytes). Grade unchanged, rung 5 UNKNOWN.
+Brief: `reports/frontier-munt2shell.md` §9.
+
 ## 2026-11-23 15:0xZ — libfontenc2shell operator admission replay
 
 The operator re-archived the current checkout at HEAD `b0387c8` with
@@ -5580,9 +5645,54 @@ slot at `info+16472`; the process faults in `memmove` before `ret`, so IP
 control is NOT demonstrated. `lab/frontier/libgphoto2shell/REPLAY.md` records
 both clean-archive replays (`0e10c83` and `a42e02e`); they are deterministic
 replay of the author's harness, not witness acceptance. Raw outputs are in
-`harness/evidence/`; no libgphoto2 build, USB/libusb, camera consumer, socket,
-wire, marker or command is tested. Grade is direct-call rungs 1-4; rung 5 stays
-UNKNOWN.
+`harness/evidence/`; the direct-call scope has no real USB bus or camera
+consumer, socket, wire, marker, command or pointer control. The separate W162
+real-library limb below is a real ASan build on a synthetic vusb port; grade
+stays direct-call rungs 1-4 and rung 5 stays UNKNOWN.
+
+### 16:2xZ — libgphoto2 W162 real ASan library on vusb (rung 3, author-only)
+
+`lab/frontier/libgphoto2shell/REAL-BUILD.md` records the full provisioning,
+patch, build, run and restore recipe. The 2.5.34 release tarball (sha256
+`5df9e774eb4ab6087a193afff84dcafe9f666e3443fe29e73e6779f659ff7f28`) is built
+shared with `-fsanitize=address` after applying `live/vusb-jl2005.patch`; the
+driver `live/real_init.c` calls `gp_camera_init()` on the patched virtual USB
+port. From the repo root:
+
+```
+P=$PWD/lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34/installdir
+env CAMLIBS="$P/lib/libgphoto2/2.5.34" \
+  IOLIBS="$P/lib/libgphoto2_port/0.12.2" IOLIBS_PREFIX=vusb \
+  LD_LIBRARY_PATH="$P/lib" M2SHELL_JL2005_VUSB=1 \
+  M2SHELL_JL2005_COUNT=1022 ASAN_OPTIONS=detect_leaks=0 \
+  lab/frontier/libgphoto2shell/live/real_init "usb:001,001"
+```
+
+Expect the device to receive a 16384-byte read and ASan
+`stack-buffer-overflow WRITE of size 16384` at real
+`jl2005c/jl2005c.c:152`, via `camera_init` -> `jl2005c_init` ->
+`gp_port_read`, exit 1; count 100 gives `gp_camera_init rc=0` and no report,
+and the upstream-fixed tree (patch `pins/fix-6a3393d.patch`) makes no oversized
+read. Raw outputs `evidence/real-lib-asan-{attack,baseline}.out`,
+`evidence/real-lib-{vuln,fixed}-reads.out` and
+`evidence/real-lib-fixed-{100,1022}.out` are committed; the tarball, build
+tree, installed prefix and driver binary are untracked lab artifacts, not
+committed evidence, and are regenerated by the recipe. No real USB hardware,
+consumer, wire, pointer control, command or witness verdict; the direct-call
+harness trace is unchanged and rung 5 stays UNKNOWN.
+
+W162 (`f4387c5`) measured the frame ceiling at pinned `jl2005c.c.vuln:154`
+under gdb: `priv`, `port` and `camera` argument slots sit at
+`info+16432/16440/16448` and saved RIP at `info+16472`, all already overwritten
+with chosen bytes. Since the rounded `alloc_table_size` is at least `0x4200`
+for any heap overrun, both the device write and the `memmove` copy end at
+`info+0x4200`, past every slot: no count corrupts the heap array while leaving
+a usable pointer or return address intact. `priv->table` is the last struct
+member, so the 464-byte heap overrun has no in-struct pointer to overwrite and
+the chosen heap bytes are the harness canary, not an observed real neighbour.
+Raw `gdb-frame-offsets.out` and the "Measured frame layout and structural
+ceiling" section of `PROVENANCE.md` carry the evidence. Negative at direct-call
+scope only; real USB hardware and wire remain untested and rung 5 UNKNOWN.
 
 ## 2026-11-23 W161 — ndpi2shell FRONTIER-STAGED replay (not admitted)
 
@@ -5653,6 +5763,28 @@ also aborts, and no pointer-bearing neighbour was seen. A fixed-pin reencode
 control exits 0 and then returns rc 2 at encode with "All frames of a sequence
 must have the size of the first frame" (rc 2 is an encode API return, not a
 successful encode). Grade unchanged, not witness-replayed, rung 5 UNKNOWN.
+
+### 16:2xZ — libheif W169 groomed live-victim adjacency negative
+
+`real/reencode_groom.cc` (built against the gitignored pinned plain Release
+tree with the `reencode_retain.cc` recipe recorded in `real/PROVENANCE-real.md`)
+allocates adjacent 32783-byte chunks A and a function-pointer-bearing `Victim`
+B (B-A=`0x8020`), frees A, then decodes/encodes the committed one-row input
+sha256 `e028c5af98002a921e8a326d418fd3af9f6911032491c177264ee81eaf9a3b67`.
+Under gdb with `real/neighbour/gdb_groom.cmd`, plane 2 came from
+`0x5555558ac490` rather than A (`0x555555793490`), whose header had become
+`0x3fe1`; B's `fn` and tags stayed intact and the process aborted on
+`malloc(): corrupted top size` (rc 134, SIGABRT). Assert the saved logs:
+
+```
+python3 lab/frontier/libheif2shell/real/neighbour/check_groom.py lab/frontier/libheif2shell/real/neighbour/evidence/groom-gdb.out
+```
+
+Expect PASS with `A=0x555555793490 B=0x55555579b4b0 (B-A=0x8020)` and
+`plane2=0x5555558ac490`; `groom-{plain,gdb}.out` are committed. This is a
+harness-groomed rung-4 negative — deliberate same-size grooming did not place
+a live object adjacent — not file-derived placement, pointer control, marker
+or rung 5. W164/W166 still have no witness verdict.
 
 ## 2026-11-23 16:1xZ — kicad2shell admission replay and route
 

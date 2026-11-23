@@ -7934,6 +7934,15 @@ error.log, FIRST-RUN-20261123T1406Z.md, plus gdb-*, fork-*, sigsegv-* and
 fixed-* logs). Evidence: `reports/modauthoidc2shell-status.md:256-284`,
 `reports/frontier-modauthoidc2shell.md:237-250`.
 
+Modauthoidc W14 (`77678ab`) checks the W9-W13 "plain" build stack: `ldd` on
+module `00899061…5654` and the serving httpd shows `libasan.so.8`, apxs
+injected `-fsanitize=address`, and `nm -D` shows ASan report calls. W13's
+SIGSEGV ran the ASan allocator, so `ASAN_OPTIONS=detect_leaks=0` changed that
+allocator's layout; the fault and controls stand, no non-ASan availability
+claim is made, and the grade is unchanged. Detail:
+`lab/frontier/modauthoidc2shell/PROVENANCE.md` § "Build-stack correction
+(2026-11-23 W14)".
+
 ## 2026-11-23 06:4xZ — radvdump2shell admitted as the 104th route
 
 Frontier W140 staged radvd `CVE-2026-48715 / GHSA-52px-gh9p-m379` in commits
@@ -8985,3 +8994,34 @@ command or witness verdict; rung 5 UNKNOWN. Status:
 `reports/kicad2shell-status.md`; recipe and pins: `docs/reproducibility.md`,
 `lab/frontier/kicad2shell/PROVENANCE.md` and `REPLAY.md`; brief:
 `reports/frontier-kicad2shell.md`.
+
+## 2026-11-23 16:0x–16:2xZ — four boundary negatives and a real-library rung 3 (no grade change)
+
+Five report-only edges after the 16:1xZ kicad admission (`d9a4481`, folded by
+its author) close or narrow lanes without moving a row, verdict or grade;
+recipes and evidence are in `docs/reproducibility.md` and the named reports.
+Munt W168 (`3de0c3b`) measured the real-library boundary: eight ALSA-sized
+5000-byte fragments (40000 bytes across `parseStream()` calls) are clean,
+while one call first overflows at 32769 bytes (plain tail 1, ASan `WRITE of
+size 32769` in gcc/clang, pinned-fixed clean); all in-tree call sites are
+non-network. Libgphoto2 W162 (`f4387c5`) measured pinned `:154`: the argument
+slots and saved RIP at `info+16432/16440/16448/16472` sit before the minimum
+0x4200 table end for every overrun, and `priv->table` is the last struct
+member, so no count leaves a usable pointer or return address at direct-call
+scope. The same W162 window built real ASan libgphoto2 2.5.34 and reached
+`jl2005c_init()` through `gp_camera_init()` on a lab-patched vusb port:
+count 1022 gives ASan `WRITE of size 16384` at real `jl2005c.c:152`, while
+count 100 and the fixed tree are clean — rung 3 on the real camlib at a
+synthetic-transport scope, author-only, with no real USB hardware, camera
+consumer, wire, pointer control or witness verdict. Openexr W163
+(`49cff74`) regenerated the 692-byte PoC with a `0x5a`
+pixel fill (sha256 `17f3752e…347ea8e`) and replayed both files: identical 4032
+guard-byte changes with `actual@first=0x57`, so the file controls copy length
+and destination but not the overwritten values. Libheif W169 (`3a1ec8f`)
+groomed an adjacent same-size live function-pointer victim; it was
+consolidated before plane allocation, the victim stayed intact and the process
+aborted on top metadata, leaving the neighbour free/top in every measured
+state. Each stays at its labeled scope with rung 5 UNKNOWN; no witness verdict
+changed. Briefs: `reports/frontier-munt2shell.md` §9,
+`reports/frontier-libgphoto2shell.md`, `reports/openexr2shell-file-level.md`
+and `reports/libheif2shell-status.md`.
