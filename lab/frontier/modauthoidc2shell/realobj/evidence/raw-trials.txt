@@ -1,0 +1,601 @@
+
+=== VULN FILL=0 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+=================================================================
+==3256898==ERROR: AddressSanitizer: unknown-crash on address 0x79d36ac47000 at pc 0x58473c6a26ed bp 0x7ffe3831c640 sp 0x7ffe3831c630
+READ of size 1 at 0x79d36ac47000 thread T0
+    #0 0x58473c6a26ec in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x58473c6a2c80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x58473c6a309a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x58473c6a3a50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x79d36aa2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x79d36aa2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x58473c6a24a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+Address 0x79d36ac47000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x79d36ac46d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79d36ac46e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79d36ac46e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79d36ac46f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79d36ac46f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x79d36ac47000:[fe]fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x79d36ac47080: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x79d36ac47100: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x79d36ac47180: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x79d36ac47200: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x79d36ac47280: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3256898==ABORTING
+
+=== VULN FILL=0 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3256905==ERROR: AddressSanitizer: SEGV on unknown address 0x7225c12afec0 (pc 0x590bf085a776 bp 0x7ffcb9301ef0 sp 0x7ffcb9301eb0 T0)
+==3256905==The signal is caused by a WRITE memory access.
+    #0 0x590bf085a776 in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219
+    #1 0x590bf085ac80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x590bf085b09a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x590bf085ba50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x7225c1e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7225c1e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x590bf085a4a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219 in oidc_state_cookies_parse_token
+==3256905==ABORTING
+
+=== VULN FILL=0 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== VULN FILL=0 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+=================================================================
+==3256916==ERROR: AddressSanitizer: unknown-crash on address 0x734f54563000 at pc 0x55e6488676ed bp 0x7ffe7461c4d0 sp 0x7ffe7461c4c0
+READ of size 1 at 0x734f54563000 thread T0
+    #0 0x55e6488676ec in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x55e648867c80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x55e64886809a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x55e648868a50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x734f5562a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x734f5562a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x55e6488674a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+Address 0x734f54563000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x734f54562d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x734f54562e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x734f54562e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x734f54562f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x734f54562f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x734f54563000:[fe]fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x734f54563080: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x734f54563100: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x734f54563180: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x734f54563200: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x734f54563280: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3256916==ABORTING
+
+=== VULN FILL=0 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+=================================================================
+==3256922==ERROR: AddressSanitizer: unknown-crash on address 0x7d788376d000 at pc 0x65491d42e6ed bp 0x7ffeb06d9d80 sp 0x7ffeb06d9d70
+READ of size 1 at 0x7d788376d000 thread T0
+    #0 0x65491d42e6ec in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x65491d42ec80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x65491d42f09a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x65491d42fa50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x7d788482a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7d788482a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x65491d42e4a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+Address 0x7d788376d000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x7d788376cd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d788376ce00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d788376ce80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d788376cf00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d788376cf80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7d788376d000:[fe]fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7d788376d080: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7d788376d100: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7d788376d180: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7d788376d200: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7d788376d280: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3256922==ABORTING
+
+=== VULN FILL=512 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3256994==ERROR: AddressSanitizer: SEGV on unknown address 0x7389ce942000 (pc 0x5b58f2d0b6f1 bp 0x7fffce77b9a0 sp 0x7fffce77b960 T0)
+==3256994==The signal is caused by a READ memory access.
+    #0 0x5b58f2d0b6f1 in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x5b58f2d0bc80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x5b58f2d0c09a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x5b58f2d0ca50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x7389cec2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7389cec2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5b58f2d0b4a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+==3256994==ABORTING
+
+=== VULN FILL=512 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+=================================================================
+==3257019==ERROR: AddressSanitizer: unknown-crash on address 0x7fa3b0d25000 at pc 0x587a12cad6ed bp 0x7ffc62a06ff0 sp 0x7ffc62a06fe0
+READ of size 1 at 0x7fa3b0d25000 thread T0
+    #0 0x587a12cad6ec in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x587a12cadc80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x587a12cae09a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x587a12caea50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x7fa3b102a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7fa3b102a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x587a12cad4a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+Address 0x7fa3b0d25000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x7fa3b0d24d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fa3b0d24e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fa3b0d24e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fa3b0d24f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fa3b0d24f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7fa3b0d25000:[fe]fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7fa3b0d25080: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7fa3b0d25100: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7fa3b0d25180: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7fa3b0d25200: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7fa3b0d25280: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3257019==ABORTING
+
+=== VULN FILL=512 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3257023==ERROR: AddressSanitizer: SEGV on unknown address 0x7b0d9893f36c (pc 0x557a67da1776 bp 0x7fff6cc43ff0 sp 0x7fff6cc43fb0 T0)
+==3257023==The signal is caused by a WRITE memory access.
+    #0 0x557a67da1776 in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219
+    #1 0x557a67da1c80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x557a67da209a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x557a67da2a50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x7b0d98c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7b0d98c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x557a67da14a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219 in oidc_state_cookies_parse_token
+==3257023==ABORTING
+
+=== VULN FILL=512 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== VULN FILL=512 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3257138==ERROR: AddressSanitizer: SEGV on unknown address 0x75bafcb39b70 (pc 0x57221c5ed776 bp 0x7fffd6d75040 sp 0x7fffd6d75000 T0)
+==3257138==The signal is caused by a WRITE memory access.
+    #0 0x57221c5ed776 in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219
+    #1 0x57221c5edc80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x57221c5ee09a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x57221c5eea50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x75bafce2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x75bafce2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x57221c5ed4a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219 in oidc_state_cookies_parse_token
+==3257138==ABORTING
+
+=== VULN FILL=4000 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3257294==ERROR: AddressSanitizer: SEGV on unknown address 0x75d3c2c2b000 (pc 0x58b3be6b86f1 bp 0x7ffc04708210 sp 0x7ffc047081d0 T0)
+==3257294==The signal is caused by a READ memory access.
+    #0 0x58b3be6b86f1 in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x58b3be6b8c80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x58b3be6b909a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x58b3be6b9a50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x75d3c2a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x75d3c2a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x58b3be6b84a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+==3257294==ABORTING
+
+=== VULN FILL=4000 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+=================================================================
+==3257301==ERROR: AddressSanitizer: unknown-crash on address 0x728038358000 at pc 0x631b7cdb36ed bp 0x7ffc56f9f2c0 sp 0x7ffc56f9f2b0
+READ of size 1 at 0x728038358000 thread T0
+    #0 0x631b7cdb36ec in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x631b7cdb3c80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x631b7cdb409a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x631b7cdb4a50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x72803862a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x72803862a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x631b7cdb34a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+Address 0x728038358000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x728038357d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x728038357e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x728038357e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x728038357f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x728038357f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x728038358000:[fe]fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x728038358080: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x728038358100: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x728038358180: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x728038358200: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x728038358280: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3257301==ABORTING
+
+=== VULN FILL=4000 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== VULN FILL=4000 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== VULN FILL=4000 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+=================================================================
+==3257364==ERROR: AddressSanitizer: unknown-crash on address 0x7ea9b1d4a000 at pc 0x5d22bb1166ed bp 0x7fff36773570 sp 0x7fff36773560
+READ of size 1 at 0x7ea9b1d4a000 thread T0
+    #0 0x5d22bb1166ec in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x5d22bb116c80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x5d22bb11709a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x5d22bb117a50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x7ea9b202a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7ea9b202a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5d22bb1164a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+Address 0x7ea9b1d4a000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x7ea9b1d49d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea9b1d49e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea9b1d49e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea9b1d49f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea9b1d49f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7ea9b1d4a000:[fe]fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7ea9b1d4a080: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7ea9b1d4a100: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7ea9b1d4a180: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7ea9b1d4a200: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x7ea9b1d4a280: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3257364==ABORTING
+
+=== VULN FILL=8000 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== VULN FILL=8000 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== VULN FILL=8000 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== VULN FILL=8000 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+=================================================================
+==3257563==ERROR: AddressSanitizer: unknown-crash on address 0x75a61fa42000 at pc 0x5621a4fe26ed bp 0x7ffe40226af0 sp 0x7ffe40226ae0
+READ of size 1 at 0x75a61fa42000 thread T0
+    #0 0x5621a4fe26ec in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214
+    #1 0x5621a4fe2c80 in parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:94
+    #2 0x5621a4fe309a in do_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:121
+    #3 0x5621a4fe3a50 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/driver.c:176
+    #4 0x75a61f82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x75a61f82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5621a4fe24a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/a-vuln+0x24a4) (BuildId: 8eb8ba1643e2033e1d4f9673ec8ab78f6815b40f)
+
+Address 0x75a61fa42000 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x75a61fa41d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75a61fa41e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75a61fa41e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75a61fa41f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x75a61fa41f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x75a61fa42000:[fe]fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x75a61fa42080: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x75a61fa42100: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x75a61fa42180: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x75a61fa42200: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+  0x75a61fa42280: fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe fe
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3257563==ABORTING
+
+=== VULN FILL=8000 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+
+=== a-fixed FILL=0 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=0 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=0 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=0 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=0 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=512 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=512 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=512 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=512 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-fixed FILL=512 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=0 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=0 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=0 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=0 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=0 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=512 TRIAL=1 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=512 TRIAL=2 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=512 TRIAL=3 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=512 TRIAL=4 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== a-release FILL=512 TRIAL=5 ===
+TOKEN_LEN=30 FIRST_POISON_OFFSET=95 POISON_AT_TOKEN_END=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+
+=== p-vuln WRITE GAP=1 ===
+TOKEN_LEN=30 EQ_OFFSET=1 BYTE_BEFORE=00
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+BYTE_AT_EQ_OFFSET=00
+NUL_AT_OFFSET=31 BYTE_NOW=00
+PROCESS_NAME=mod_auth_openidc_state_novalue
+
+=== p-fixed WRITE GAP=1 ===
+TOKEN_LEN=30 EQ_OFFSET=1 BYTE_BEFORE=00
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+BYTE_AT_EQ_OFFSET=3d
+NUL_AT_OFFSET=31 BYTE_NOW=3d
+PROCESS_NAME=
+
+=== p-release WRITE GAP=1 ===
+TOKEN_LEN=30 EQ_OFFSET=1 BYTE_BEFORE=00
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+BYTE_AT_EQ_OFFSET=3d
+NUL_AT_OFFSET=31 BYTE_NOW=3d
+PROCESS_NAME=
+
+=== p-vuln WRITE GAP=17 ===
+TOKEN_LEN=30 EQ_OFFSET=17 BYTE_BEFORE=00
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+BYTE_AT_EQ_OFFSET=00
+NUL_AT_OFFSET=47 BYTE_NOW=00
+PROCESS_NAME=mod_auth_openidc_state_novalue
+
+=== p-fixed WRITE GAP=17 ===
+TOKEN_LEN=30 EQ_OFFSET=17 BYTE_BEFORE=00
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+BYTE_AT_EQ_OFFSET=3d
+NUL_AT_OFFSET=47 BYTE_NOW=3d
+PROCESS_NAME=
+
+=== p-release WRITE GAP=17 ===
+TOKEN_LEN=30 EQ_OFFSET=17 BYTE_BEFORE=00
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+BYTE_AT_EQ_OFFSET=3d
+NUL_AT_OFFSET=47 BYTE_NOW=3d
+PROCESS_NAME=
+
+=== p-vuln WRITE GAP=33 ===
+TOKEN_LEN=30 EQ_OFFSET=33 BYTE_BEFORE=00
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+BYTE_AT_EQ_OFFSET=00
+NUL_AT_OFFSET=63 BYTE_NOW=00
+PROCESS_NAME=mod_auth_openidc_state_novalue
+
+=== p-fixed WRITE GAP=33 ===
+TOKEN_LEN=30 EQ_OFFSET=33 BYTE_BEFORE=00
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+BYTE_AT_EQ_OFFSET=3d
+NUL_AT_OFFSET=63 BYTE_NOW=3d
+PROCESS_NAME=
+
+=== p-release WRITE GAP=33 ===
+TOKEN_LEN=30 EQ_OFFSET=33 BYTE_BEFORE=00
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+BYTE_AT_EQ_OFFSET=3d
+NUL_AT_OFFSET=63 BYTE_NOW=3d
+PROCESS_NAME=

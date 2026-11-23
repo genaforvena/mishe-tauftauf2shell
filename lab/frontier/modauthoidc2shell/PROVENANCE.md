@@ -69,22 +69,64 @@ logic is reimplemented.
   proving a single-byte write rather than a length-driven overwrite. The
   address is chosen by the harness block layout, not by a wire field.
 
-## Ceiling / negatives
 
-- No Apache, APR pool, request object, listener, socket, or off-loopback probe.
-  The scanner is called directly with stubbed request/config pointers.
-- A real `apr_pstrdup()` token lives in an APR arena, not a malloc redzone, so
-  ASan may not flag the real daemon object [INFERENCE from source, untested].
-  The exact-size heap object is a harness instrument, not a measured allocation.
-- The ASan read necessarily precedes any write in this bug: an
-  `ASan WRITE` observation of the NUL store is **not available** in the same
-  build without deliberately unpoisoning the scan path. The NUL store is
-  therefore measured only in the plain build.
-- Only the *offset* of the NUL is controllable here; the byte value is fixed.
-  No pointer-bearing state, chosen command, or rung 5. Witness verdict: none.
+## Ceiling / negatives of the direct-call harness
+
+- The stubbed harness has no Apache, APR pool, request object, listener,
+  socket or off-loopback probe; the scanner is called with stubbed request/config
+  pointers. The separate real-object probe below covers the APR-pool follow-up.
+- The exact-size heap token is a harness instrument, not a measured allocation.
+- In that harness the ASan read necessarily faults before any write, so an
+  ASan WRITE of the NUL store is not available there; the NUL store is measured
+  in the plain build. The real-object probe below did observe an ASan WRITE
+  fault at pinned line 219 in some layouts.
+- Only the *offset* of the NUL is controllable; the byte value is fixed. No
+  pointer-bearing state, chosen command or rung 5. W147 witnessed rungs 1-3
+  and scoped rung 4 ESTABLISHED at this scope; the probe below is unwitnessed.
 
 ## Re-run
 
 ```
 cd lab/frontier/modauthoidc2shell/harness && bash run.sh
 ```
+
+## Real-object APR/Apache probe (2026-11-23, W4)
+
+`realobj/driver.c` keeps the struct and parser slices verbatim from the three
+pinned blobs and replaces the stubs with a real `apr_pool_t`, a zeroed real
+Apache `request_rec` (`r->pool`, `r->headers_in`), a real `apr_table_t` Cookie
+header, a real `apr_pstrdup()` token and a real `apr_strtok()` split. The
+prefix getter and `oidc_state_cookies_process_one()` recorder remain local
+stand-ins. This is **not** a full module build: no complete mod_auth_openidc
+tree is present locally and jansson development headers are absent; there is no
+Apache process, listener, socket, wire or OIDC config.
+
+`realobj/SHA256SUMS` covers `driver.c`, `run.sh` and the six generated slices;
+`src/SHA256SUMS` is checked again on every run. The runner builds six gcc
+variants (plain and ASan for parent, fix, release), then runs 20 parent ASan
+reads (fills 0/512/4000/8000, five trials each), 10 fix and 10 release ASan
+reads, and nine plain writes (gaps 1/17/33 x three variants). Raw logs are
+`realobj/evidence/raw-trials.txt`; normalized trace and counts are
+`normalized.txt` and `summary.txt`; console logs are `run6-console.txt` and
+`run7-console.txt`.
+
+Measured on two consecutive runs: **PASS=17 FAIL=0** each. Parent ASan
+outcomes were layout-dependent under ASLR — run6: 15 fault summaries at pinned
+`state.c.4301b536:214` (READ-class `unknown-crash`), 1 `SEGV` summary at pinned
+`:219` reported by ASan as caused by a **WRITE** memory access, 4 trials
+dispatched; run7: 9 / 3 / 8. Across trials `__asan_address_is_poisoned()` found
+the first poisoned byte 95 bytes past the 30-byte token, never at its end: a
+real APR arena has no per-object redzone, so the scan continues until it hits
+an arena edge, an adjacent `=` (then dispatches) or an unmapped/protected page.
+One full log in `raw-trials.txt` shows the WRITE fault stack at pinned line
+219, which was unavailable in the exact-size-malloc harness.
+
+Plain-build parent writes in the real arena placed `=` at token length + gap
+and measured NUL at offsets 31, 47 and 63 for gaps 1, 17, 33, with
+`PROCESS_CALLS=1`; the `=` position is still a harness placement, not a chosen
+wire field. Fix and release slices rejected the value-less token in all 10
+trials each (`RC=0`, `PROCESS_CALLS=0`) with no ASan report. Grade unchanged:
+rung 4 **scoped**, now with real APR/Apache objects; no pointer control, chosen
+byte value, command, rung 5 or independent witness verdict for this probe.
+
+Re-run: `cd lab/frontier/modauthoidc2shell/realobj && bash run.sh`.

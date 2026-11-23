@@ -1,0 +1,8 @@
+driver.c: OK
+run.sh: OK
+vuln/state_struct.inc: OK
+vuln/parse_token.inc: OK
+fixed/state_struct.inc: OK
+fixed/parse_token.inc: OK
+release/state_struct.inc: OK
+release/parse_token.inc: OK

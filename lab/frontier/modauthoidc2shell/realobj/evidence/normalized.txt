@@ -1,0 +1,49 @@
+SUMMARY: AddressSanitizer: unknown-crash state.c.4301b536:214 in oidc_state_cookies_parse_token
+SUMMARY: AddressSanitizer: SEGV state.c.4301b536:219 in oidc_state_cookies_parse_token
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+SUMMARY: AddressSanitizer: unknown-crash state.c.4301b536:214 in oidc_state_cookies_parse_token
+SUMMARY: AddressSanitizer: unknown-crash state.c.4301b536:214 in oidc_state_cookies_parse_token
+SUMMARY: AddressSanitizer: SEGV state.c.4301b536:214 in oidc_state_cookies_parse_token
+SUMMARY: AddressSanitizer: unknown-crash state.c.4301b536:214 in oidc_state_cookies_parse_token
+SUMMARY: AddressSanitizer: SEGV state.c.4301b536:219 in oidc_state_cookies_parse_token
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+SUMMARY: AddressSanitizer: SEGV state.c.4301b536:219 in oidc_state_cookies_parse_token
+SUMMARY: AddressSanitizer: SEGV state.c.4301b536:214 in oidc_state_cookies_parse_token
+SUMMARY: AddressSanitizer: unknown-crash state.c.4301b536:214 in oidc_state_cookies_parse_token
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+SUMMARY: AddressSanitizer: unknown-crash state.c.4301b536:214 in oidc_state_cookies_parse_token
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+SUMMARY: AddressSanitizer: unknown-crash state.c.4301b536:214 in oidc_state_cookies_parse_token
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0

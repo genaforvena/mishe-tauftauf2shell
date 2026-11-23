@@ -58,26 +58,37 @@ dispatch, the `=` byte intact and no ASan finding; a well-formed
 
 ## Ceiling
 
-The parser is called directly with stubbed request/config pointers and a
-recorder for the downstream cookie processor. There is no Apache, APR pool,
-request object, listener, socket or wire; no off-loopback probe. The exact-size
-heap token is a harness instrument, not a measured APR allocation, and an
-`apr_pstrdup()` token in a real arena has no per-object redzone [INFERENCE,
-untested]. The ASan read faults before the write, so no ASan WRITE of the NUL
-is available in the same build. No pointer control, chosen command or rung 5.
-The W147 witness verdict is ESTABLISHED at this direct-call scope; it does not
-raise the ceiling.
+The direct-call harness uses stubbed request/config pointers and a recorder;
+it has no Apache, APR pool, request object, listener, socket or wire. Its
+exact-size heap token is an instrument; the ASan read faults before the write,
+so no ASan WRITE is available in that build. W147 ESTABLISHED rungs 1-3 and
+scoped rung 4 at that scope. A separate unwitnessed real-object probe (below)
+uses real APR/Apache objects but still no module, listener or wire: the
+grade stays rung 4 **scoped**. No pointer control, chosen command or rung 5.
 
-## Next bounded work
+## Real-object follow-up (2026-11-23)
 
-Build the pinned parent module under ASan with a real APR/Apache request, send
-a loopback request carrying the value-less state cookie and measure whether
-the arena read is flagged. If not, measure what actually follows the token in
-the pool and whether the NUL lands in a pointer-bearing field. Only a measured,
-controlled pointer or command side effect can change the grade. What would
-change the mind: the pre-auth call path is unreachable on the tested
-configuration, or the released fix does not cover the live path. Do not relabel
-harness mechanics as remote compromise.
+`lab/frontier/modauthoidc2shell/realobj/driver.c` runs the verbatim parser
+slice against a real `apr_pool_t`, a real Apache `request_rec` with an
+`apr_table_t` Cookie header, a real `apr_pstrdup()` token and `apr_strtok()`.
+`realobj/run.sh` re-extracts and hash-checks the slices/pins on every run and
+builds six gcc variants. Two consecutive runs gave **PASS=17 FAIL=0**
+(`realobj/evidence/run6-console.txt`, `run7-console.txt`; raw trials in
+`raw-trials.txt`, counts in `summary.txt`). In 20 parent ASan trials per run,
+the outcome was layout-dependent under ASLR: run6 saw 15 fault summaries at
+pinned `state.c.4301b536:214`, 1 ASan-reported WRITE `SEGV` at pinned `:219`,
+and 4 dispatches; run7 saw 9, 3 and 8. The first ASan-poisoned byte was 95
+bytes past the token, never at its end: APR arena allocations have no
+per-object redzone, so the scan continues to an arena edge, an adjacent `=`
+or an unmapped page. Plain-build parent runs stored NUL at offsets 31, 47
+and 63 with dispatch; fix and release slices rejected all 10 trials each with
+no ASan report. No full module (no parent tree, jansson headers absent), no
+Apache process, socket or wire; the `=` position is still harness-placed, and
+the probe has no witness verdict. Full-module/loopback work would need those
+provisioned dependencies; only a measured controlled pointer or command side
+effect can change the grade. What would change the mind: the pre-auth call path
+is unreachable on a real configuration, or the released fix misses the live
+path. Do not relabel harness mechanics as remote compromise.
 
 ## Witness verdict (W147, 2026-11-23)
 

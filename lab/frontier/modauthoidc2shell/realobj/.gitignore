@@ -1,0 +1,14 @@
+a-vuln
+a-fixed
+a-release
+p-vuln
+p-fixed
+p-release
+vuln/*.inc
+fixed/*.inc
+release/*.inc
+evidence/sweep.txt
+evidence/read-vuln-*.txt
+evidence/run1-console.txt
+evidence/run2-console.txt
+evidence/run3-console.txt

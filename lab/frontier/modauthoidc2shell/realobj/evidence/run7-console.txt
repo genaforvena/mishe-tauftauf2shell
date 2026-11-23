@@ -1,0 +1,35 @@
+PASS pinned-source-sha256
+PASS realobj-sha256-manifest
+PASS build-asan-vuln
+PASS build-asan-fixed
+PASS build-asan-release
+PASS build-plain-vuln
+PASS build-plain-fixed
+PASS build-plain-release
+PASS asan-fault-in-verbatim-parser
+INFO asan-write-faults=3 (layout-dependent; not asserted)
+PASS adjacent-equals-dispatched-in-real-pool
+PASS fixed-and-release-asan-clean
+PASS fixed-rejects-all-10-trials
+PASS release-rejects-all-10-trials
+PASS plain-vuln-dispatched-at-gap-1
+PASS plain-nul-at-31
+PASS plain-nul-at-47
+PASS plain-nul-at-63
+VULN_TRIALS=20 READ_FAULTS=9 WRITE_FAULTS=3 DISPATCH=8
+FIXED_ASAN_REPORTS=0 RELEASE_ASAN_REPORTS=0
+PLAIN_VULN:
+TOKEN_LEN=30 EQ_OFFSET=1 BYTE_BEFORE=00
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+BYTE_AT_EQ_OFFSET=00
+NUL_AT_OFFSET=31 BYTE_NOW=00
+TOKEN_LEN=30 EQ_OFFSET=17 BYTE_BEFORE=00
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+BYTE_AT_EQ_OFFSET=00
+NUL_AT_OFFSET=47 BYTE_NOW=00
+TOKEN_LEN=30 EQ_OFFSET=33 BYTE_BEFORE=00
+VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+BYTE_AT_EQ_OFFSET=00
+NUL_AT_OFFSET=63 BYTE_NOW=00
+TRACE_SHA256=959b65febcae4953532a50e0a374f3133bcb6820ac523865a4408981ac9ca87f
+PASS=17 FAIL=0
