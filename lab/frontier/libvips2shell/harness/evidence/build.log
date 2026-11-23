@@ -1,0 +1,29 @@
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-vuln.c:103:14: warning: ‘vips_window_take’ defined but not used [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-vuln.c:103:14: warning: ‘vips_window_take’ defined but not used [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-fixed.c:103:14: warning: ‘vips_window_take’ defined but not used [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-fixed.c:103:14: warning: ‘vips_window_take’ defined but not used [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-vuln.c:103:14: warning: unused function 'vips_window_take' [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+1 warning generated.
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-vuln.c:103:14: warning: unused function 'vips_window_take' [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+1 warning generated.
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-fixed.c:103:14: warning: unused function 'vips_window_take' [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+1 warning generated.
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/driver-fixed.c:103:14: warning: unused function 'vips_window_take' [-Wunused-function]
+  103 | static void *vips_window_take(void *w, VipsImage *im, int top, int height)
+      |              ^~~~~~~~~~~~~~~~
+1 warning generated.
+generated drivers and 8 binaries in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness

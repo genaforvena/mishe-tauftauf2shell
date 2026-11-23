@@ -1,0 +1,11 @@
+Breakpoint 1 at 0x1bdb: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2, line 1005.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SANITY_CRAFT=-
+SANITY_SAFE=-
+CHAIN_REJECT=0
+
+Breakpoint 1, vips_region_paint_pel (reg=0x7fffffffe090, r=0x7fffffffe080, ink=0x7fffffffe124 "ZZZZ") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1005
+warning: 1005	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2: No such file or directory
+TO=0x55555555a4a0 WS=4 LS=-256
+0x55555555a3a0:	0x5a	0x5a	0x5a	0x5a	0x00	0x00	0x00	0x00

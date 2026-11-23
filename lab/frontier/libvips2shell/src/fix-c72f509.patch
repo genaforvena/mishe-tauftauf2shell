@@ -1,0 +1,38 @@
+From c72f50927413cd2451837d9813f954bc5d88f548 Mon Sep 17 00:00:00 2001
+From: John Cupitt <jcupitt@gmail.com>
+Date: Sun, 26 Apr 2026 10:31:52 +0100
+Subject: [PATCH] ensure scanlines fit in INT_MAX (#5012)
+
+---
+ ChangeLog               | 1 +
+ libvips/iofuncs/image.c | 5 +++++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/ChangeLog b/ChangeLog
+index e4ce683881..85a5cdc0de 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -7,6 +7,7 @@ tbd 8.18.3
+ - foreign: guard against NULL filenames [kleisauke]
+ - stdif: verify window dimensions are smaller than image [lovell]
+ - dcrawload: add support for non-square pixels [jcupitt]
++- image_sanity: ensure scanlines fit in INT_MAX [Niels Provos]
+ 
+ 31/3/26 8.18.2
+ 
+diff --git a/libvips/iofuncs/image.c b/libvips/iofuncs/image.c
+index c8e38f21f7..811ec70ab9 100644
+--- a/libvips/iofuncs/image.c
++++ b/libvips/iofuncs/image.c
+@@ -693,6 +693,11 @@ vips_image_sanity(VipsObject *object, VipsBuf *buf)
+ 			sizeof_image > G_MAXSIZE - 16))
+ 		vips_buf_appends(buf, "dimension overflow\n");
+ 
++	/* And a scanline has to fit in INT_MAX.
++	 */
++	if (ls >= INT_MAX)
++		vips_buf_appends(buf, "dimension overflow\n");
++
+ 	/* These checks are expensive -- only do in leakcheck mode.
+ 	 */
+ 	if (vips__leak) {
