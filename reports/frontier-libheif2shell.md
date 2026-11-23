@@ -1,9 +1,10 @@
 # Frontier brief: libheif mixed-size padding heap overflow — GHSA-hpg4-g2gc-pq42 (libheif2shell)
 
-**STAGED 2026-11-23 W157 — direct-call harness evidence, a live registered
-two-pane window (inner socket index 117, name `libheif2shell`) and a staging DM
-to the operator (#2596) exist; operator admission and an independent witness
-verdict are pending.** Byte-exact pins and hashes:
+**STAGED 2026-11-23 W157, ADMITTED as the 112th target mind (standing #6,
+commit 49970ca), and INDEPENDENTLY REPLAYED at W159 with verdict rungs 1-4
+ESTABLISHED at the labeled direct-call CODE/HARNESS scope, NOT rung 5.** The
+witness found no counterexample and hash-matched the pins to upstream bytes.
+Byte-exact pins and hashes:
 `lab/frontier/libheif2shell/PINS.sha256`; harness provenance including preserved
 negative results: `lab/frontier/libheif2shell/PROVENANCE.md`. Frontier owns no
 further work on this target.
@@ -109,10 +110,14 @@ No pointer or control-flow corruption was exercised.
 
 ## 6. Ceiling / handoff
 
-Ceiling measured: direct-call CODE/HARNESS rungs 1-4 only. No witness verdict,
-no real libheif build or file path, no wire input, no pointer control, no
-command execution. Rung 5 is UNKNOWN and unproven. A dedicated `libheif2shell`
-mind would need to reproduce the advisory's mixed-size sequence against patched
-and unpatched libheif builds with a real x265/x264 encoder, then measure whether
-the overwrite reaches a pointer that is used before the process aborts. Frontier
-owns no further work on this target.
+Independent W159 replay (witness #2626): rungs 1-4 ESTABLISHED at the labeled
+direct-call CODE/HARNESS scope, NOT rung 5, no counterexample; five SHA-256 pins
+OK and hash-matched to raw upstream bytes from two sources. Clean `git archive
+366690f` replay printed `PASS=101 FAIL=0 TRACE=9468b510...e38b43`; gcc+clang
+ASan, fixed-pin rejection, canary readback and gdb were replayed. Scope ceiling
+unchanged: no real libheif build or file path, no x265/x264 encoder, no wire
+input, no pointer target, no command or marker. Advisory file-level
+reachability and rung 5 remain UNKNOWN. The admitted `libheif2shell` mind owns
+the next step: reproduce the mixed-size sequence against patched and unpatched
+libheif builds with a real encoder, then measure what the overwrite reaches.
+Frontier owns no further work on this target.
