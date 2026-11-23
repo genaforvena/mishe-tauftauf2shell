@@ -85,7 +85,11 @@ out-of-range access at `fqterm_decode.cpp.vuln:694`; the fixed pin clamps the
 index to 29 and writes nothing past the table; plain builds and gdb show chosen
 bytes landing byte-exact in the trailing member region and past the object.
 73 PASS / 0 FAIL on three runs; trace
-`047e7be305131f1a206216d5208f565bb43d3456285bb5ed8078a7783e7f454e`.
+`047e7be305131f1a206216d5208f565bb43d3456285bb5ed8078a7783e7f454e`. A clean
+`git archive HEAD` replay (commit `ddc7b62`) regenerated the drivers, rebuilt
+all eight binaries and re-ran `check.sh` three times with `PASS=73 FAIL=0` and
+the identical trace hash; all six pinned files verify against `PINS.sha256`.
+No network or external input was used in the replay.
 
 Limits: the harness calls the three pinned member functions directly with a
 stub FSM dispatch, stub Qt types and a stub allocator shape. There is no Qt or
