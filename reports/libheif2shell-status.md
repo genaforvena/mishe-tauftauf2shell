@@ -442,3 +442,48 @@ encoder-sizing frame is harness-created and the uncompressed sequence cannot
 carry mixed sizes by itself. No valid pointer, marker, command, real network
 consumer, witness replay or rung 5. Independent witness replay of W178 is
 requested; grade stays rung 3 + rung 4, rung 5 UNKNOWN.
+
+## W179 file-derived valid pointer executes a benign marker (2026-11-23)
+
+Charter option 2's "valid pointer target" item is now measured at the labelled
+rung-4 scope. W171 left the adjacent live object's pointer overwritten with
+eight uniform file bytes (0x40 or 0xa8) that were not an address. W178 made
+arbitrary 64-byte file-derived rows byte-exact. W179 combines them: a
+non-PIE build of the W171 interposer, a crafted byte-exact input whose row
+bytes carry a real function address, and a control function that prints a
+different line. Full commands, hashes, negatives and scope in
+`lab/frontier/libheif2shell/real/PROVENANCE-real.md` (W179 section).
+
+Mechanism detail that made this possible: with B-A=32800 (=0x8020) the
+64-byte OOB row starts 32 bytes before the live object. Row bytes 24..31
+overwrite the neighbour's malloc chunk header, and bytes 32..39 overwrite
+`Victim::fn`. Keeping the header word `0x8021` (valid allocated-neighbour
+size) lets the process return cleanly; the pointer bytes then go to the
+intended field instead of breaking the heap. A first attempt with a
+`0x9090...` header aborted `sysmalloc` before the call; that negative is
+preserved in provenance.
+
+Measured triad on the pinned plain v1.23.6 uncompressed build, rc 0 in all
+three cases (`real/run_pointer.sh`, evidence under
+`real/neighbour/evidence/pointer/`):
+
+- Attack input SHA-256
+  `7f9aadb5da6cdbf23a12ca0e6ca7b37d2e11cd28512259bbcb557b4d25bebf4c`:
+  the plane reuses the adjacent A, `VICTIM fn=0x408346`, `HEADER B-8=0x8021`,
+  `POST fn=0x408346 expected=0x408346`, then `BENIGN_MARKER_CALLED`.
+- Safe-input control (same bytes, encoder sized 64x65 so no padding growth):
+  `VICTIM fn=0x408360`, `POST fn=0x408360 expected=0x408346`,
+  `CONTROL_FN_UNCHANGED`; no marker.
+- Fixed-pin control (9ec655f, same bytes and driver): encode returns rc 2
+  "All frames of a sequence must have the size of the first frame", fn
+  unchanged, `CONTROL_FN_UNCHANGED`; no marker.
+
+`real/neighbour/check_pointer.py` PASS=16 FAIL=0. Grade UNCHANGED: rung 3
+plus rung 4. The pointer is a harness-chosen non-PIE code address embedded in
+a lab-crafted file; the adjacent object and the retained frame are harness
+setup; the consumer is synthetic; the first encoder-sizing frame is still
+harness-created; ASLR on the code pointer was disabled by `-no-pie`. An
+in-process marker is explicitly rung-4 mechanics, not rung 5. No real
+network consumer, command, witness verdict or remote reachability. Rung 5
+stays UNKNOWN. Independent replay of W178 (#3035) and the older lanes is
+still queued; W179 replay is requested on tape.

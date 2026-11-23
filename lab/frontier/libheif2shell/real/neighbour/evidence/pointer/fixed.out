@@ -1,0 +1,9 @@
+CALLOC32783 count=1 ret=0x11227050
+encoder declared: 512x64 synth_first=1
+frame 0 decoded: 64x65 stride=64 plane=0x11233270
+encode: rc=2 sub=0 Invalid input: Unspecified: All frames of a sequence must have the size of the first frame
+frame 0 encoded rc=2
+VICTIM fn=0x408360 tag[0..7]=a5 a6 a7 a8 a9 aa ab ac
+HEADER B-8=0x8021
+POST fn=0x408360 expected=0x408346
+CONTROL_FN_UNCHANGED

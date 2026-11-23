@@ -1,0 +1,10 @@
+CALLOC32783 count=1 ret=0x9b61040
+encoder declared: 512x64 synth_first=1
+frame 0 decoded: 64x65 stride=64 plane=0x9b6d260
+GROOM count=2 A=0x9b49220 B=0x9b51240 delta=32800 B-8=0x8020 fn=0x408360 tag0=0xa5
+CALLOC32783 count=2 ret=0x9b49220 == A
+frame 0 encoded rc=0
+VICTIM fn=0x408346 tag[0..7]=90 90 90 90 90 90 90 90
+HEADER B-8=0x8021
+POST fn=0x408346 expected=0x408346
+BENIGN_MARKER_CALLED

