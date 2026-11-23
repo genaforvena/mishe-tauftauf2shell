@@ -1,0 +1,49 @@
+=================================================================
+==3121864==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b865380049c at pc 0x5639d1a032a1 bp 0x7fff05d165d0 sp 0x7fff05d165c8
+WRITE of size 4 at 0x7b865380049c thread T0
+    #0 0x5639d1a032a0 in FetchXLaw(WAV_TrackData*, unsigned char*, int, float const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/decoder_wav.c.vuln:759:16
+    #1 0x5639d1a02ee2 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/lab-driver.cpp:1039:14
+    #2 0x7b865522a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7b865522a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5639d1927344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/clang++-vuln-asan+0x2c344) (BuildId: 7e2ae6dd99462c1a4612619bae2e44306f89abd9)
+
+Address 0x7b865380049c is located in stack of thread T0 at offset 1180 in frame
+    #0 0x5639d1a02b3f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/lab-driver.cpp:1016
+
+  This frame has 1 object(s):
+    [32, 1056) 'buffer' (line 1037) <== Memory access at offset 1180 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/decoder_wav.c.vuln:759:16 in FetchXLaw(WAV_TrackData*, unsigned char*, int, float const*)
+Shadow bytes around the buggy address:
+  0x7b8653800200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800400: 00 00 00 00 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x7b8653800480: f3 f3 f3[f3]00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b8653800700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3121864==ABORTING

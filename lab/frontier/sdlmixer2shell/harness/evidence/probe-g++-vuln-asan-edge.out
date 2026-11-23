@@ -1,0 +1,49 @@
+=================================================================
+==3057134==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x73fb37e00420 at pc 0x5f75f96315d3 bp 0x7fffd4c9f750 sp 0x7fffd4c9f740
+WRITE of size 4 at 0x73fb37e00420 thread T0
+    #0 0x5f75f96315d2 in FetchXLaw /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/decoder_wav.c.vuln:759
+    #1 0x5f75f9631acd in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/lab-driver.cpp:1039
+    #2 0x73fb39a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x73fb39a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x5f75f9631284 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/g++-vuln-asan+0x2284) (BuildId: bf5aa260bcec681648a0d6c7d03ae7fda487172a)
+
+Address 0x73fb37e00420 is located in stack of thread T0 at offset 1056 in frame
+    #0 0x5f75f96317ac in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/lab-driver.cpp:1016
+
+  This frame has 1 object(s):
+    [32, 1056) 'buffer' (line 1037) <== Memory access at offset 1056 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/decoder_wav.c.vuln:759 in FetchXLaw
+Shadow bytes around the buggy address:
+  0x73fb37e00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x73fb37e00400: 00 00 00 00[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x73fb37e00480: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fb37e00680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3057134==ABORTING

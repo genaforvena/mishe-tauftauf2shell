@@ -1,0 +1,43 @@
+g++-vuln-plain small clean rc=64
+g++-vuln-plain edge 4-byte-past-canary-padding-survives
+g++-vuln-plain attack glibc-canary-smash
+g++-vuln-asan small clean rc=64
+g++-vuln-asan edge ASAN-STACK-WRITE4-759
+g++-vuln-asan attack ASAN-STACK-WRITE4-759
+g++-vuln-nossp small clean rc=64
+g++-vuln-nossp edge no-canary-survives
+g++-vuln-nossp attack no-canary-segv
+g++-fixed-plain small clean rc=64
+g++-fixed-plain small FIXED-clean
+g++-fixed-plain edge FIXED-clean
+g++-fixed-plain attack FIXED-clean
+g++-fixed-asan small clean rc=64
+g++-fixed-asan small FIXED-clean
+g++-fixed-asan edge FIXED-clean
+g++-fixed-asan attack FIXED-clean
+g++-fixed-nossp small clean rc=64
+g++-fixed-nossp small FIXED-clean
+g++-fixed-nossp edge FIXED-clean
+g++-fixed-nossp attack FIXED-clean
+clang++-vuln-plain small clean rc=64
+clang++-vuln-plain edge 4-byte-past-canary-padding-survives
+clang++-vuln-plain attack stack-fault-no-canary-message
+clang++-vuln-asan small clean rc=64
+clang++-vuln-asan edge ASAN-STACK-WRITE4-759
+clang++-vuln-asan attack ASAN-STACK-WRITE4-759
+clang++-vuln-nossp small clean rc=64
+clang++-vuln-nossp edge no-canary-survives
+clang++-vuln-nossp attack no-canary-segv
+clang++-fixed-plain small clean rc=64
+clang++-fixed-plain small FIXED-clean
+clang++-fixed-plain edge FIXED-clean
+clang++-fixed-plain attack FIXED-clean
+clang++-fixed-asan small clean rc=64
+clang++-fixed-asan small FIXED-clean
+clang++-fixed-asan edge FIXED-clean
+clang++-fixed-asan attack FIXED-clean
+clang++-fixed-nossp small clean rc=64
+clang++-fixed-nossp small FIXED-clean
+clang++-fixed-nossp edge FIXED-clean
+clang++-fixed-nossp attack FIXED-clean
+gdb vuln edge I=128 LUT=5a5a5a5a chosen-bytes-at-buffer+1024

@@ -1,0 +1,4 @@
+b651a6c2225378c6d2407df75eb1ec6f30ace68893a621cf29fd2089cd2016fa  src/decoder_wav.c.vuln
+b930672ee9ceaaea46ed2e8a3251ea3207ebcfa7366e1e7c8e851e40d13d9ca3  src/decoder_wav.c.fixed
+54a27dd388fc9d8826d512388b06d070c7c490d6d49007d1385fa2e8cdcb0eef  pins/decoder_wav.c.vuln.slice
+dac7eb45017e386325512ea3b2ad41ce748289bc8e131c02a12204240097d8c4  pins/decoder_wav.c.fixed.slice
