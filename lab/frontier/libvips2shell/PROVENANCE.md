@@ -547,3 +547,11 @@ header-acceptance scope only. No grade change, no rung-5 claim.
 
 Grade unchanged: rungs 1-4; rung 5 UNKNOWN. No witness verdict requested for
 this scope.
+
+Clean `git archive 520d48f` replay (only `lab/frontier/libvips2shell` and
+`reports/frontier-libvips2shell.md`, gitignored source and both plain build
+trees symlinked in) returned `RESULT fail=0`, 13/13 PASS, rc 0, same four legs.
+The first replay attempt failed at compile because `src` was extracted as a
+real directory, so the symlink became `src/src`; removing it before the
+symlink fixed the harness setup. This is a replay-procedure error, not a
+libvips finding.
