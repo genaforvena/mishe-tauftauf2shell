@@ -139,6 +139,8 @@ containers whose host ports bind only to loopback.
 | Ndpi2Shell | [brief](../reports/frontier-ndpi2shell.md), [status](../reports/ndpi2shell-status.md) | pins and fixed-release ancestry in `lab/frontier/ndpi2shell/PINS.sha256` and `PROVENANCE.md` | `cd lab/frontier/ndpi2shell/realbuild && ./run.sh`; `harness/run.sh`/`check.sh` | W162 real-build VALUE-negative/KEY-positive, fixed 6.0 and tree-local key-reachability negative below |
 | Sdlmixer2Shell | [brief](../reports/frontier-sdlmixer2shell.md), [status](../reports/sdlmixer2shell-status.md) | four pins in `lab/frontier/sdlmixer2shell/PINS.sha256`; SDL3 tarball SHA in `PROVENANCE.md` | `cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh` | 96/0 trace `934e8337…60c0`; witness #2942 direct-call rungs 1-4 only; W179 author-only |
 | Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh`; loopback wire lane `cd ../w1 && sh build.sh && bash run.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness verdicts recorded: rungs 1-4 direct-call, rungs 1-3 plus byte-control synthetic consumer, NOT rung 5; W181/W182 wire outcomes and 56-byte instability below; W183 jansson-object identity and hash-seed cause below |
+| Thorvg2Shell | [brief](../reports/frontier-thorvg2shell.md), [status](../reports/thorvg2shell-status.md) | CVE-2026-123367 / GHSA-mw4c-w54x-248r; v1.1.1/v1.1.2 tarballs, fix patch and `PINS.sha256` in `lab/frontier/thorvg2shell` | `python3 poc/make_poc.py && python3 poc/make_large.py && python3 poc/make_marker.py && sh harness/build.sh && sh harness/run_matrix.sh` | 88 cases; ASan WRITE-2 past the 128-byte coefficient region and chosen halfwords 0x58/0x68/0x78 at offsets 128/256/384; clean `git archive 4c4f8f8` replay exact; rungs 1-4 author-only, no witness or rung 5 |
+| BusyBox2Shell | [brief](../reports/frontier-busybox2shell.md) | CVE-2026-124737, pinned 1.37.0 tarball, vulnerable/fixed `tftp.c`, one-line fix and config hashed in `lab/frontier/busybox2shell/PINS.sha256` | `sh lab/frontier/busybox2shell/run-all.sh` (five legs, loopback UDP only) | ASan WRITE-516 at `rbuf+68`, clean OACK/default-blksize/fixed controls and "MISHE-OO" gdb bytes; rungs 1-4 on a real wire, unwitnessed, rung 5 UNKNOWN |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -6225,9 +6227,10 @@ outer-frame saved rbp change `0x00007fffffffdbc0` → `0x00007fffffffdb00` at
 `vrpn_Connection.C:4554` and `__stack_chk_fail` from `getOneTCPMessage:4246`;
 fine 512-517 DEAD / 518-519 ALIVE / 520 DEAD, TYPE 512 rc 134; fixed 512, short
 4 and `-O2` 256/384/512 ALIVE. Indices 16384/32768/65536 exit 139 with the
-cause **UNKNOWN** — `e41b2da` corrected the W21 explanation, although the
-report's Limits section still carries an older "outside the mapped stack"
-phrase. No chosen byte, command or rung 5; author-only.
+cause **UNKNOWN** — `e41b2da` corrected the W21 explanation and `b7ca158`
+qualified the report's Limits section: 16384/32768/65536 exit 139 with no gdb
+landing mapped, so 16384 may still be inside the mapped stack. No chosen byte,
+command or rung 5; author-only.
 
 ### Libheif W176 (`d12d823`; author-only negatives)
 
@@ -6602,3 +6605,72 @@ clean fixed build, and gdb bytes `4d 49 53 48 45 2d 4f 4f` ("MISHE-OO") at
 1-4 on a real loopback wire path; no pointer/IP, command, ASLR measurement
 or witness, so rung 5 stays UNKNOWN. Claim and mechanism:
 `reports/frontier-busybox2shell.md`.
+
+## 2026-11-23 21:4x–22:4xZ — limbs folded after `f64714e`
+
+These recipes add scopes, not grades; admissions and witness verdicts are
+named explicitly. All runs stay on loopback or in a local build.
+
+- **KiCad W180 vendor file**: `cd lab/frontier/kicad2shell/vendor && sh check.sh`
+  drives two same-length one-key patches of a real upstream QA Altium
+  `.SchLib` through KiCad's own compound-file reader; expect 23 PASS / 0 FAIL
+  twice, trace `42db33cb…`, plain rc 139 / ASan SEGV and rc 134 / ASan WRITE-4
+  at `sch_io_altium.cpp:5919`, fixed clean. Clean `git archive de13eac` replay
+  is exact (`REPLAY.md`); `kicadreader/chosen-value.sh` with `SizeZ=9/7/1`
+  reads `0x40/0x32/0x07` at `data()-4`. No witness verdict, rung 5 UNKNOWN.
+- **Cjose W184 real-consumer negative**: recipe and evidence in
+  `lab/frontier/cjose2shell/w2/README.md` and `w2/evidence/` (127.0.0.1:18443).
+  A real mod_auth_openidc 2.4.15.1 module passes a 56-byte encrypted_key to
+  cjose, which rejects the non-OCT JWK at `jwe.c:577` before AES-KW; all three
+  POSTs return HTTP 400 and the 40-byte control rejects at the same line. The
+  client_secret OCT path needs a state cookie, so no unauthenticated POST
+  reaches the CEK overflow.
+- **Modauthoidc W17 non-ASan stack store**:
+  `cd lab/frontier/modauthoidc2shell/full && bash probe-sys-store.sh` against
+  the system httpd/APR module on 127.0.0.1:18091; all five padding lengths
+  give 302, parent dispatches 5/5 and the released tag 0/5, gdb shows
+  `0x3d`→`0x00` at token offsets 39/63. In-bounds on the header copy, always
+  NUL, not pointer-bearing; author-only and unwitnessed.
+- **SofiaSIP W14 deeper second-order writes**:
+  `bash lab/sofiasip2shell/libbuild/live/run_deep_probe.sh` with
+  `live_ws_timers_deep.c` / `timer_probe_deep.c`; `SIA_DEEP_EXTRA=60` admits 95
+  `su_timer_set()` adds and 16 consecutive qwords at +520..+640 (15 OOB),
+  crossing the 528-byte timer array, a 19-byte sub-alloc string and chunk
+  headers, rc 134 `corrupted size vs. prev_size`; v1.13.17 short and both
+  v1.13.18 controls are clean. Values are live heap pointers, not chosen
+  bytes; no callable field, marker or command; author-only.
+- **Libgphoto2 W167 local canary-mode marker**: apply
+  `evidence/replay-vusb-local-modes.patch` over `live/vusb-jl2005.patch` and
+  build `evidence/replay-two_stage_probe.c`; the vusb reply supplies the
+  process canary at info+0x4028 and a chosen marker address at info+0x4038,
+  the canary check passes and `jl2005c_init()` returns to
+  `M2SHELL_IP_CONTROL_MARKER` with RC=0, gdb confirming saved RIP. Recorded in
+  `evidence/real-plain-ip-control.out`; conditional on a device that knows the
+  canary, author-only and unwitnessed. Witness replay ask tape #3081 at
+  22:36Z has no verdict; #2892 remains scoped to rung 3.
+- **Sdlmixer W180 real WAV file**: build/run recipe in
+  `lab/frontier/sdlmixer2shell/harness/realwav/REALWAV.md`; a crafted on-disk
+  A-law/mu-law WAV reaches `FetchXLaw` through real SDL_mixer 3.2.4 APIs with
+  ASan WRITE-4 at `decoder_wav.c:759`. Witness #3000 established W179's
+  real-caller scope at rungs 1-4, NOT rung 5; this WAV lane is author-only with
+  replay request #3053. The LUT image makes every ordered A-law word
+  non-canonical and every mu-law canonical pair's high word zero, so saved-RIP
+  bytes are LUT words and arbitrary IP steering is closed negatively.
+- **OpenEXR W168 OIIO blocker**: resume
+  `cmake --build oiiolab/build-oiio-asan -j8` from `lab/openexr2shell-real`;
+  900 s reached 1/124 edges, a `-j2` probe hit GCC-13
+  `-Werror=maybe-uninitialized` in `std::regex`, and after a local
+  `-Wno-error=maybe-uninitialized` a 1020 s `-j2` run reached 19/124. No OIIO
+  consumer was linked or run; the claim stays UNTESTED (`reports/openexr2shell-status.md`).
+- **Munt W177 PoC availability**: reader-proxy fetches of both hackmd notes
+  returned 404/403 and the author profile lists no notes; "Public PoC"
+  metadata stays unsubstantiated and the contents UNKNOWN
+  (`reports/frontier-munt2shell.md` §15). No harness command changed.
+- **ThorVG and BusyBox**: `3db61ec` admitted thorvg2shell as the 121st route
+  (unwitnessed, rung 5 UNKNOWN); its 88-case recipe is in the lane table
+  above and `REPLAY.md`. Frontier W182 staged BusyBox2Shell at `0c3b4a1` with
+  a clean-archive replay at `8c50300`; the five-leg wire recipe is above and
+  in `reports/frontier-busybox2shell.md`. Neither has a witness verdict.
+- **Vrpn W21 qualification**: `b7ca158` changed the report's Limits section so
+  16384/32768/65536 are DEAD exit 139 with cause UNVERIFIED/UNKNOWN and no
+  mapped gdb landing; 16384 may still be inside the mapped stack.

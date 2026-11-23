@@ -180,10 +180,12 @@ that PoC (W165's separate default-mode run hit a 60 s timeout with no clean
 rc, so it is inconclusive, not a regression).
 The wire lane is closed negatively: `exrinfo -` prints headers only,
 `exrcheck` needs a file path, ImageMagick 6 links system OpenEXR 3.1.5 and no
-OIIO/libvips consumer build completed (W165 fetched and configured OpenImageIO
-3.2.0.2-dev against the pinned ASan prefix, but its 145-step build stopped at
-step 3 in 600 s); a purpose-built socket wrapper would be a synthetic
-consumer under `docs/rce.md`. No wire-fed application process, socket, wire, pointer
+OIIO/libvips consumer build completed: W165's 145-step build stopped at step 3
+in 600 s; W168's 900 s `-j8` attempt reached 1/124 edges and a `-j2` probe hit
+GCC-13 `-Werror=maybe-uninitialized` in `std::regex`, so a later 1020 s `-j2`
+run reached 19/124 (~95 min remaining). No consumer was linked or run, so the
+OIIO claim stays UNTESTED; a purpose-built socket wrapper would remain a
+synthetic consumer under `docs/rce.md`. No wire-fed application process, socket, wire, pointer
 target, command or marker, so rung 5 stays UNKNOWN with the named blocker of
 a live affected application process fed by wire/request input. Full evidence:
 `reports/openexr2shell-file-level.md`.
@@ -1382,7 +1384,10 @@ labeled availability-only scope, the chosen store itself (`mov %dx,(%rax)` at
 `encparse.c:495`) faulting, with `SIZE 256 258` plain impact still NOT
 demonstrated and rung 5 UNKNOWN; witness #2942 (W179) ESTABLISHED the
 sdlmixer2shell direct-call lab scope at rungs 1-4 only, explicitly not rung 5,
-with W179's real-SDL-caller lane author-only and awaiting replay. Operator
+and witness #3000 ESTABLISHED W179's real-caller / from-source SDL3 scope at
+rungs 1-4, also explicitly not rung 5; W180's real SDL_mixer 3.2.4 WAV-file
+lane is author-only with replay tape #3053 requested, and its LUT image closes
+arbitrary IP steering negatively. Operator
 clean-archive replays, including kicad's `337c164` 38/38 run, are not witness
 acceptance; UNKNOWNs and measured negatives stay preserved.
 
@@ -1420,9 +1425,34 @@ parser dereferences its own corrupted `nqb` first, and the fixed binary
 rejects. All these limbs stay author-evidenced apart from #2996's and cjose's
 scoped verdicts; no grade moved.
 
+Twenty-four edges after `f64714e` add scoped limbs without moving a grade,
+plus one admission: `3db61ec` admitted thorvg2shell as the 121st route at
+22:0xZ under standing #6, decoder-only direct-call rungs 1-4, unwitnessed and
+rung 5 UNKNOWN. Witness #3000 (sdlmixer W179) ESTABLISHED the real-caller /
+from-source SDL3 rungs 1-4 at that labeled scope, NOT rung 5; W180 drove a
+crafted on-disk A-law/mu-law WAV through a real SDL_mixer 3.2.4 build into
+`FetchXLaw` (ASan WRITE-4 at `decoder_wav.c:759`) with replay tape #3053
+requested, and measured that the LUT image blocks arbitrary IP steering.
+KiCad W180 drove a real vendor Altium `.SchLib` through KiCad's own reader
+(two same-length one-key patches fault at `sch_io_altium.cpp:5919`, fixed
+clean, 23 PASS/0 FAIL twice, trace `42db33cb…`), with `SizeZ=9/7/1` reading
+file-chosen `0x40/0x32/0x07` at `data()-4`. Cjose W184 corrected the
+mod_auth_openidc key-path claim and measured a real 2.4.15.1 module rejecting
+a 56-byte encrypted_key at `jwe.c:577` before AES-KW (all three POSTs HTTP 400).
+Modauthoidc W17 put a wire-chosen NUL on the non-ASan production allocator
+stack (all five padding lengths 302, parent 5/5 vs released 0/5); sofiasip W14
+wrote 15 out-of-bounds live timer pointers (rc 134, controls clean) holding
+heap pointers, not chosen data. Libgphoto2 W167 executed a chosen marker in a
+plain real build only when the local vusb device supplies the process canary
+— author-only and unwitnessed, while #2892 stays scoped to rung 3, with replay
+ask #3081. OpenEXR W168's OIIO build blocker and munt W177's 404/403 PoC
+availability negatives leave their UNKNOWNs unchanged; vrpn W21's large-index
+exit-139 cause is explicitly UNKNOWN, not an outside-stack assertion.
+
+
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 120 target
+Each admitted family is its own mind with its own tmux window: 121 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -1452,7 +1482,7 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `psqlodbc2shell`, `thrift2shell`, `libvips2shell`, `jq2shell`,
 `openexr2shell`, `libheif2shell`, `fqterm2shell`, `munt2shell`,
 `libfontenc2shell`, `libgphoto2shell`, `kicad2shell`, `ndpi2shell`,
-`sdlmixer2shell` and `cjose2shell`. Each builds
+`sdlmixer2shell`, `cjose2shell` and `thorvg2shell`. Each builds
 affected and fixed versions locally, writes harnesses, drives toward rung 4
 and authors its report under `reports/`.
 

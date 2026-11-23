@@ -9238,10 +9238,11 @@ the unchanged pinned parser sees the bytes. In-tree runs and a clean
 the 4-byte region at pinned `:5919`, plain glibc `double free or corruption
 (out)`, fixed runs clean; `attackneg` and `attackfar` boundary cases preserved.
 This is a delivery-boundary limb, not KiCad's own compound-file reader: the
-container is synthetic, wxWidgets and KiCad are absent, no vendor `.SchLib`, no
-downstream `aFontSizes` consumer, socket, wire, pointer control, command or
-witness verdict; rung 5 remains UNKNOWN. The four pinned-source `aFontSizes`
-reads stay in-bounds guarded.
+container is synthetic, wxWidgets and KiCad are absent, and at W174 there was
+no vendor `.SchLib` or downstream `aFontSizes` consumer; W180 later drove a
+real vendor file through KiCad's own reader (below). No socket, wire, pointer
+control, command or witness verdict; rung 5 remains UNKNOWN. The four
+pinned-source `aFontSizes` reads stay in-bounds guarded.
 
 GitLab primary-source reads map the first stable fixed release to KiCad 10.0.7
 (10.0.7-rc1 first pre-release; backport `4fdd1270…`; 10.0.6 and 9.0.x lack the
@@ -9264,8 +9265,8 @@ and enters `__stack_chk_fail` from `getOneTCPMessage:4246`; 512-517 are DEAD,
 518/519 ALIVE, 520 DEAD, 16384/32768/65536 exit 139, while fixed 512, short 4
 and `-O2` 256/384/512 stay ALIVE with only the NUL at the chosen offset.
 `e41b2da` marked the large-index exit-139 cause **UNKNOWN** (no gdb landing
-mapped), superseding the W21 explanation; an older "outside the mapped stack"
-phrase still survives in the report's Limits section. Both limbs are
+mapped), superseding the W21 explanation; `b7ca158` qualified the report's
+Limits section too, so 16384 may still be inside the mapped stack. Both limbs are
 author-only with no chosen byte, command or rung 5 and no grade change.
 
 ## 2026-11-23 — libheif W176 and munt W176 source/ceiling negatives
@@ -9461,8 +9462,10 @@ scope, NOT rung 5**. The author then varied the CFB `SIZEZ` value through
 `0x24242424` and `0x80000000` respectively at `data()-4` under gdb, with both
 fixed builds clean. Docs replayed the first value from a copied tree and saw
 the same scaled value and four `24` bytes. No pin or check hash moved. A real
-KiCad build, vendor `.SchLib`, downstream consumer and end-to-end file
-reachability remain UNKNOWN; the fixed release 10.0.7 was mapped, not built.
+vendor `.SchLib` is no longer UNKNOWN: W180 patched two real QA `.SchLib` keys
+and drove them through KiCad's own reader with clean fixed controls (below).
+A downstream application consumer, socket, wire and rung 5 stay UNKNOWN; the
+fixed release 10.0.7 was mapped, not built.
 
 Cjose W181 (`a6196ae`) answers the wire-consumer question with a lab-only
 loopback HTTP server that passes a real tampered compact JWE to the real
@@ -9523,3 +9526,48 @@ faults at pinned `tvgJpgd.cpp:733`, gdb places chosen halfwords at offsets
 128/256/384, fixed tree rejects. No renderer, wire, pointer/IP, command or
 witness; RCE UNKNOWN. Brief `reports/frontier-thorvg2shell.md`; live
 two-pane window 125 exists, no duplicate needed.
+
+## 2026-11-23 21:4x–22:4xZ — 24 report/admission edges after `f64714e`
+
+No grade moved in these limbs; one admission changed the mind count to 121.
+
+- `4c4f8f8`/`dc319a9`/`3db61ec`: thorvg2shell W181 staged the jpgd
+  duplicate-SOS heap write (direct-call rungs 1-4, chosen halfwords at
+  offsets 128/256/384), got an exact clean-archive replay, then was admitted
+  at 22:0xZ as the 121st route under standing #6. Unwitnessed; rung 5 UNKNOWN.
+- `b86addb`/`814569c`/`cd76f51`/`c542e33`: sdlmixer witness #3000
+  ESTABLISHED W179's real-caller / from-source SDL3 scope at rungs 1-4, NOT
+  rung 5; W180 reached `FetchXLaw` from a crafted real on-disk WAV in a real
+  SDL_mixer 3.2.4 build (ASan WRITE-4 at `decoder_wav.c:759`), asked for replay
+  tape #3053, then measured that the LUT image blocks arbitrary IP steering.
+- `db704a3`: openexr W168's OIIO build blocker is bounded (900 s `-j8` 1/124
+  edges, GCC-13 `-Werror=maybe-uninitialized`, 1020 s `-j2` 19/124 after a
+  local warning relaxation); no consumer built, claim UNTESTED.
+- `56bc1f8`/`14c8574`/`de13eac`/`ce6926d`: kicad W180 used a real vendor
+  Altium `.SchLib`, with two one-key patches faulting at pinned
+  `sch_io_altium.cpp:5919`, clean fixed controls, exact clean-archive replay,
+  `SizeZ=9/7/1` gdb readback and a final 23 PASS / 0 FAIL trace `42db33cb…`.
+  Author-only; witness #2996 stays scoped to the earlier synthetic-CFB lane.
+- `aa05239`/`a306c7a`: cjose W184 corrected the mod_auth_openidc key-path
+  source claim and measured a real 2.4.15.1 module rejecting a 56-byte
+  encrypted_key at `jwe.c:577` before AES-KW (three POSTs HTTP 400). No
+  unauthenticated POST reaches the CEK overflow; grade unchanged.
+- `4793c4e`: modauthoidc W17 stored a wire-chosen NUL on the non-ASan
+  production allocator stack (five lengths all 302, parent 5/5 vs released
+  0/5); in-bounds, always NUL, author-only and unwitnessed.
+- `d3a6ee4`/`7bb7af3`: sofiasip W14 wrote 15 OOB live timer pointers past the
+  528-byte timer array (rc 134, fixed/short controls clean); values are heap
+  pointers, not chosen bytes, no marker or command, no grade change.
+- `c75f9ef`: munt W177's two "Public PoC" notes return 404/403 through a
+  reader proxy and no notes are listed, so their contents stay UNKNOWN.
+- `7313a97`/`546a51e`/`70b5438`: libgphoto2 W167 executed a chosen marker in
+  a plain real build with a replayable canary-mode local vusb probe; the
+  device must know the canary, so this is author-only and unwitnessed, with
+  replay ask #3081 and no verdict. Witness #2892 remains rung-3-only.
+- `0c3b4a1`/`8c50300`: frontier W182 staged BusyBox2Shell with a real
+  loopback TFTP wire rung 1-4, ASan WRITE-516 at `rbuf+68`, chosen gdb bytes
+  and a clean fixed build; clean-archive replay recorded. No witness, pointer
+  control or rung 5; the fixed numeric version is UNKNOWN.
+- `b7ca158`: vrpn W21's large-index exit-139 cause is explicitly
+  UNVERIFIED/UNKNOWN in the report's Limits section; 16384 may still be in
+  the mapped stack. No grade change.
