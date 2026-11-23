@@ -2877,12 +2877,56 @@ Expected bytes: vulnerable 10.07.0 plus the injected NimbusSans PFA gives
 `1484854e` fixed build gives `TRAP_FIRED=true` and
 `GS_FORCEPUT_RESULT=false`; the unmodified font on the vulnerable build gives
 both false. The fixed blob's `Check operand types` guard is the only
-behavioural difference between the two binaries. This is a PostScript-level
-rung-1/2 differential on real shipped interpreter bytes, not a native memory
-corruption: no ASan report, no stale-reference aliasing (`STALE_KEY=true`,
-`UAF_READ=null`), no pointer control, no `-dSAFER` bypass, no command and no
-rung 5. CVE-2026-125396 is AV:L; the writeup's remote delivery chain is an
-untested separate claim. Status: `reports/ghostscript2shell-status.md`.
+behavioural difference between the two binaries. That is the admission-time
+PostScript-level rung-1/2 differential only; the later author wakes raised its
+grade (addendum below). CVE-2026-125396 is AV:L; the writeup's remote delivery
+chain is an untested separate claim. Status: `reports/ghostscript2shell-status.md`.
+
+### Post-admission native and `-dSAFER` addendum — 04:2xZ (author-only)
+
+Three commits (`1a2b715`, `2ac5f7c`, `f6a0942`) extend the same pinned gs
+10.07.0 binaries. From `lab/frontier/ghostscript2shell/harness`, run
+`bash run-uaf.sh`, `bash run-native.sh` and `bash run-safer.sh`. The UAF lane
+first needs an out-of-tree ASan build in `src/asan-build`
+(`CFLAGS='-fsanitize=address -g -O1'`, `LDFLAGS=-fsanitize=address`,
+`../ghostpdl-ghostpdl-10.07.0/configure --without-x --disable-cups`,
+`make -j2 gs`); the resulting `bin/gs-vuln-asan` is
+`7ee7b87ec079bfafcc17e994b9fb57a496143eff6bd6d9011f9d48eddc12fc20`.
+
+Docs replay from a fresh `/tmp` copy of `harness/` plus `exp/` observed rc 0
+for all three: `run-uaf.sh` `PASS=21 FAIL=0` with
+`UAF_TRACE_SHA256=bd4e4b4c7404a9b22dbda6e3ee077e58736d96a868af6f2aad8cc7a00f85a7cb`,
+`run-native.sh` `PASS=17 FAIL=0` with
+`NATIVE_TRACE_SHA256=b53abad21ed9822838d2a5f85a705172c3c19cb9ea22923b141c90192b682e87`,
+and `run-safer.sh` `PASS=9 FAIL=0`. No trace hash is published for the SAFER
+runner; do not invent one. All are author observations, not witness verdicts.
+
+Expected UAF bytes: `harness/uaf.ps` stores a 2048-byte local string in
+systemdict, restores, sprays 96 arrays of 128 `0x12345678` integers, finds ten
+occurrences of `78 56 34 12` at array 8 / index 118, flips one low byte and
+observes exactly one live element change; writing `0x1234567a` back reads
+`122,86,52,18` through the stale string and cleanup restores `120`. ASan on
+the vulnerable build gives `heap-use-after-free`, `READ of size 1` in `zget`
+(`psi/zgeneric.c:183`), 14792 bytes into a 20048-byte region allocated at
+`gsmalloc.c:192` and freed at `gsmalloc.c:366`; evidence sha
+`d3adbb8caef37beac5745b174874bd75c6108a45612651725899693940c33387`. Fixed and
+safe-font controls report `NO_STALE_REF` / `SV_PRESENT=false`. Native probes
+expect `BYTE0=72`, `BYTE1=69`, a `currentdevice` → `GXDEVICE` → `MEM` (+24) →
+`LIBCTX` (+208) → `CORE` (+8) walk, a forged view at `CORE+156` reading `0`,
+a benign write to `1` with `.currentpathcontrolstate` returning `true`, and
+`BEFORE=319 CHANGED=18 AFTER=319` for the one-call `mul`→`sub` retarget.
+SAFER expects `PATH_CONTROL_BYTES_BEFORE=1`,
+`PATH_CONTROL_OPERATOR_BEFORE=true`, `PATH_CONTROL_BYTES_AFTER=0`,
+`PATH_CONTROL_OPERATOR_AFTER=false`, `PATH_CONTROL_BYTES_RESTORED=1`,
+`CLEAN_VALUE=12345`; probe sha
+`f22acdea7bfcfefc842e3e201181da1223b0b15b309626ad5701b5bdc0e45d96`.
+The SAFER runner passes `--permit-file-read` from its own directory; the probe
+hardcodes the in-repo font path, so a replay from a copied tree must point the
+permit at that absolute path or SAFER silently falls back to a built-in font
+and the runner reports `NO_STALE_REF` (observed here: 3 PASS / 6 FAIL).
+Normalized outputs are tracked in `harness/evidence/`; local ASan build output
+stays local. No `%pipe%`, command, application/network delivery or witness;
+rung 5 remains a separate claim.
 
 ## Admitted frontier lane — 2026-11-23 03:5xZ llamarpc2shell
 
@@ -2916,9 +2960,65 @@ Expected bytes: a 43-byte message into `size=1` gives `OOB=42`,
 `socket_t::impl::rdma_recv`. Chosen bytes 0x5a at message offset 11 and 0x44
 at offset 18 land at adjacent offsets 10 and 17; the canary beyond 43 bytes
 stays 0xc7. The fixed slice logs `RDMA recv overrun: got=43 rem=1`, reposts
-the receive slot and writes no adjacent byte; safe `got=1` is clean on the
-vulnerable slice. This is a verbatim-pinned-slice result with a stubbed verbs
-environment: no live server, HELLO handshake, RDMA wire packet or real
-device. `AV:N` carries `AT:P`; live reachability is UNKNOWN. Status:
-`reports/llamarpc2shell-status.md`.
+the receive slot and writes no adjacent byte; safe `got=1` is clean on the vulnerable slice.
+
+That is the staged slice harness with a stubbed verbs environment: no live
+server, HELLO handshake, RDMA wire packet or real device at that scope. The
+later live-wire result is in the addendum below. `AV:N` carries `AT:P`; no
+independent witness verdict exists. Status: `reports/llamarpc2shell-status.md`.
+
+### Post-admission live RDMA wire — 04:2xZ (author-only)
+
+`37da4e6` built the whole pinned upstream server (`reports/llamarpc2shell.md`).
+Provisioning binaries and source trees are gitignored
+(`lab/frontier/llamarpc2shell/.gitignore`); rebuild them from pin
+`620d2225cc436ab0b001e3200e590e3b286ef9ab` and fixed worktree
+`9a0fde9967fa1a35b6e5dd1f47e1a3648b6fecc1`:
+
+```sh
+git clone --filter=blob:none --no-checkout https://github.com/ggml-org/llama.cpp.git src/llama.cpp-pin
+git -C src/llama.cpp-pin fetch --depth 1 origin 620d2225cc436ab0b001e3200e590e3b286ef9ab
+git -C src/llama.cpp-pin checkout --detach FETCH_HEAD
+cmake -S src/llama.cpp-pin -B src/llama.cpp-pin/build-asan -G Ninja \
+  -DCMAKE_BUILD_TYPE=Debug -DGGML_RPC=ON -DGGML_RPC_RDMA=ON \
+  -DLLAMA_SANITIZE_ADDRESS=ON -DGGML_SANITIZE_ADDRESS=ON \
+  -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF \
+  -DLLAMA_BUILD_SERVER=OFF -DLLAMA_BUILD_APP=OFF -DLLAMA_BUILD_TOOLS=ON
+cmake --build src/llama.cpp-pin/build-asan --target ggml-rpc-server -j2
+```
+
+Server SHA-256: vulnerable ASan `d58d66602cbfdab73b3a60ed39639a80912ff8ba54becc563f2bd86eaa6db305`,
+vulnerable plain Debug `dc368c89eac8a56f3358ccc4768069c235d76a0743404a34763ffe111c3d7eb7`,
+fixed ASan `31dbd386dd698de0a1bbd6af12c00bf4926c970941db84c76e395ba3fb4c18df`;
+wire client `5dbb95731a196f38e7dd69d8c30388fa87cdee0a568f82de4e48ec03e14bb9e6`.
+The runner needs loopback SoftRoCE `rxe0` (passwordless device creation),
+RoCEv2 GID index 1 (`::ffff:127.0.0.1`), MTU 4096, and the client drives TCP
+HELLO `0x0e` + `uint64 24` + 24-byte caps, then RC QP RESET→INIT→RTR→RTS:
+
+```sh
+bash wire/run.sh safe
+bash wire/run.sh attack
+SERVER_BIN=$PWD/src/llama.cpp-fixed-asan/bin/ggml-rpc-server bash wire/run.sh fixed
+bash wire/run-gdb.sh
+LEN=3593 TAG=gdb-rip GDB_CMD=$PWD/wire/gdb-rip.cmd bash wire/run-gdb.sh
+LEN=3593 TAG=gdb-crash GDB_CMD=$PWD/wire/gdb-crash.cmd bash wire/run-gdb.sh
+```
+
+Expect `Accepted client connection`, `RDMA probed: dev=rxe0 gid=1 RoCEv2`,
+`RDMA activated: ... mtu=4096 rx_depth=24` on the wire; a 43-byte SEND gives
+ASan `stack-buffer-overflow`, `WRITE of size 43` at
+`transport.cpp:520` ← `:567` ← `ggml-rpc.cpp:2475` into `[48,49) 'cmd'`,
+with adjacent 1-byte `response` objects at `[64,65)`/`[80,81)` underflowed.
+The plain Debug frame dump shows `cmd` at `0x7fffffffd007`, `+0=0x0f`,
+`+11=0x5a`, `+18=0x44`, other bytes through `+42=0x41`; a 3593-byte SEND
+with eight `0x42` bytes at payload offsets 3585–3592 overwrites the saved RIP
+slot at `&cmd+3585` with `0x4242424242424242` and backtrace frame #1. The
+fixed server logs `RDMA recv overrun: got=43 rem=1`, stays ASan-clean and
+closes; the 1-byte safe SEND is clean on the vulnerable server. No rc/PASS
+count or trace hash is defined for the wire runners — do not invent one; raw
+`wire/evidence/*.log` are tracked and QPN values vary by run. The saved-RIP
+offset is measured only in the non-ASan Debug frame, execution at `0x4242…`
+never happened, the 256 KiB advisory bound was not exercised (largest SEND
+3593), and no command, ROP, ASLR bypass or witness replay exists. Rung 5
+stays UNKNOWN and `AT:P` still qualifies AV:N.
 

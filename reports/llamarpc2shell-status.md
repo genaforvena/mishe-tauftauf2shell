@@ -51,23 +51,34 @@ path unit is enabled and active. Both
   adjacent byte and is ASan-clean; safe `got=1` on the vulnerable slice is
   also clean.
 
-Grade: **rung 3 confirmed memory corruption in a verbatim pinned slice and
-rung 4 scoped to an adjacent synthetic stack probe** — no live server, no
-HELLO handshake, no wire/RDMA packet, no real verbs device, no saved frame
-pointer, canary in the real frame, return address or vtable overwritten, no
-pointer control, no ROP, no command and no rung 5. The advisory's 256 KiB
-upper bound and "potentially execute code" remain unmeasured claims; only
-43 bytes were exercised. Host loopback SoftRoCE creation with `sudo`
-succeeded and showed the link ACTIVE, but the device was deleted immediately;
-no server build or wire client was attempted, so live-server reachability is
-UNKNOWN. No independent witness verdict exists yet.
+## Current grade — 04:2xZ (author-only, witness replay owed)
 
-Next bounded experiment: build `llama-rpc-server` from pin `620d2225…` with
-`-DGGML_RPC=ON -DGGML_RPC_RDMA=ON` under ASan, recreate loopback `rxe0`, drive
-the HELLO/caps exchange with a raw verbs client, then send a 43-byte RDMA
-message for the 1-byte `cmd` read. An ASan `stack-buffer-overflow` in the real
-server would promote rung 3 from slice to live process; a benign marker
-landing in an observed adjacent frame would make rung 4 unscoped. Only if both
-hold should a mind look at control-flow data — never relabel this as RCE
-without observation. Preserve the current UNKNOWN live-reachability result
-rather than retrying it into existence.
+Rung 3 is confirmed both in the verbatim pinned slice and in a live
+plant-started `ggml-rpc-server` over loopback SoftRoCE: a 43-byte SEND gives
+ASan `stack-buffer-overflow`, `WRITE of size 43`, at `transport.cpp:520` ←
+`ggml-rpc.cpp:2475` into the 1-byte `cmd`. Rung 4 is demonstrated in that live
+server's frame: chosen `0x5a` at +11 and `0x44` at +18 land byte-exact, and a
+3593-byte SEND with eight `0x42` bytes at offsets 3585–3592 puts
+`0x4242424242424242` in the saved RIP slot at `&cmd+3585`, shown as backtrace
+frame #1 before a `SIGSEGV` during destructor unwinding. That is overwritten
+saved-frame data, not execution at the chosen address. The fixed server logs
+`RDMA recv overrun: got=43 rem=1`, stays ASan-clean and closes; the 1-byte
+safe SEND is clean on the vulnerable server.
+
+No command, shellcode, ROP, ASLR bypass or pointer redirect was executed;
+rung 5 is UNKNOWN. The +3585 offset is measured only in the non-ASan plain
+Debug build (ASan frame layout differs); the largest SEND is 3593 bytes, so
+the advisory's 256 KiB bound stays unmeasured. Each run used a freshly built
+pin and its own QP pair (QPNs vary), and `AT:P` still qualifies the advisory's
+`AV:N`: this needs an RDMA-capable peer, here loopback SoftRoCE with
+passwordless device creation. Exact build hashes, runner commands and raw
+logs are in `reports/llamarpc2shell.md`; `wire/evidence/*.log` are tracked,
+the provisioned source trees and wire client binary are gitignored.
+
+This is an author report: independent witness replay is still required before
+any stronger claim. The staged slice grade above is kept as the historical
+baseline, not as the current ceiling. Next useful work: a clean-checkout
+witness rebuild of both pins that reruns `wire/run.sh safe|attack|fixed` and
+the `wire/run-gdb.sh` frame dump, varying an attacker byte and checking the
+saved-frame value. A rung-5 attempt still needs a command, a request-bound
+observed side effect, controls and a witness; none was attempted.

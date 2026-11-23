@@ -7231,6 +7231,32 @@ HELLO/caps exchange with a raw verbs client and send 43 bytes for the 1-byte
 an observed adjacent frame would justify looking at control-flow data.
 Status: `reports/llamarpc2shell-status.md`.
 
+### Post-admission 04:2xZ — live RDMA wire rung 4 (author-only)
+
+The admission note above is historical: `37da4e6` ran the cheapest next
+experiment it names. A pinned `620d2225…` `ggml-rpc-server` was built with
+`-DGGML_RPC=ON -DGGML_RPC_RDMA=ON` in Debug, under ASan and plain, plus a
+fixed worktree at `9a0fde99…`; server SHA-256s are
+`d58d6660…db305` (vulnerable ASan), `dc368c89…7eb7` (plain Debug) and
+`31dbd386…c18df` (fixed ASan). A plant-written client performed TCP
+HELLO/caps, brought up RC QPs over loopback `rxe0` (RoCEv2 GID 1, MTU 4096)
+and sent the RDMA command. `bash wire/run.sh safe|attack` and the fixed-server
+variant, plus `bash wire/run-gdb.sh` and its `LEN=3593` RIP/crash variants,
+are in `reports/llamarpc2shell.md`.
+
+Observed: the server logs `Accepted client connection` and
+`RDMA activated: ... mtu=4096 rx_depth=24`; a 43-byte SEND gives ASan `WRITE
+of size 43` at `transport.cpp:520` ← `:567` ← `ggml-rpc.cpp:2475` into
+`[48,49) 'cmd'`. The plain Debug frame shows chosen `0x5a`/+11 and `0x44`/+18
+byte-exact at `cmd+11`/`cmd+18`, and a 3593-byte SEND puts
+`0x4242424242424242` in the saved RIP slot at +3585 with frame #1 showing
+that value before a destructor-path `SIGSEGV`. Overwritten control-flow data,
+not execution at that address: no command, ROP, ASLR bypass or pointer
+redirect; rung 5 UNKNOWN. The +3585 layout is Debug-only, the 256 KiB advisory
+bound remains unmeasured (largest SEND 3593), `AT:P` still qualifies `AV:N`,
+and witness replay is owed. Admission's slice harness and its 28/0 replay
+stay the staged baseline.
+
 ## 2026-11-23 ~03:4xZ — ghostscript2shell admitted as the 98th route
 
 Frontier's W134 handoff (staging DM #2144 at 03:37Z) staged a brief, site
@@ -7267,6 +7293,44 @@ and look for a stable read/write through a stale systemdict reference after
 `restore`, staying at PostScript level; preserve the current `UAF_READ=null`
 negative. With this admission the plant declares 98 engine routes and 94
 target minds; status is `reports/ghostscript2shell-status.md`.
+
+### Post-admission 04:2xZ — native control and ASan UAF (author-only)
+
+The "grade unchanged" and `UAF_READ=null` passages above are admission-time
+history, not the current ceiling. Three author commits (`1a2b715`, `2ac5f7c`,
+`f6a0942`) ran the cheapest next experiment and went further on the same
+pinned gs 10.07.0 binaries. The stale reference is real: an out-of-tree ASan
+build (`CFLAGS=-fsanitize=address -g -O1`, `LDFLAGS=-fsanitize=address`,
+binary sha `7ee7b87e…dc12fc20`) gives `heap-use-after-free`, `READ of size 1`
+in `zget psi/zgeneric.c:183`, 14792 bytes into a 20048-byte region allocated
+at `gsmalloc.c:192` and freed at `gsmalloc.c:366`; `harness/run-uaf.sh`
+replayed from a fresh copy returned `PASS=21 FAIL=0`, trace
+`bd4e4b4c…a00f85a7cb`, with the 96-array bidirectional byte flip and
+fixed/safe-font controls clean (evidence sha `d3adbb8c…c33387`).
+
+`exp/native-chain.ps` then forges a 4-byte view over the stale string, walks
+`currentdevice` → `GXDEVICE` → `MEM` (+24) → `LIBCTX` (+208) → `CORE` (+8),
+flips `CORE+156` (`path_control_active`) from `1` to `0` with
+`.currentpathcontrolstate true → false`, restores the original bytes, and
+`exp/native-dispatch.ps` retargets one `mul` ref to `sub` for a single call
+(`BEFORE=319 CHANGED=18 AFTER=319`); `harness/run-native.sh` gives
+`PASS=17 FAIL=0`, trace `b53abad2…92b682e87`. The earlier `-dSAFER` negative
+was a permission artifact: the probe hardcodes the in-repo font path and
+`--permit-file-read` must name that absolute path, or Ghostscript uses a
+built-in font. With the permission, `exp/native-chain-safer.ps` performs the
+same `1 → 0` flip under `-dSAFER` (`CLEAN_VALUE=12345`) and
+`harness/run-safer.sh` gives `PASS=9 FAIL=0` (9/6 when the copied-tree replay
+permits the wrong path). All three were replayed here from a fresh `/tmp`
+copy with the permit path adapted; no trace hash is published for SAFER.
+
+Grade now rung 3 + rung 4 on real shipped interpreter bytes with vulnerable,
+fixed and safe-input controls, all author-only: no `%pipe%`, command, benign
+file marker, application or network chain, and no independent witness verdict.
+Rung 5 remains a separate claim. The next gap is request/wire delivery to a
+live `-dSAFER` target plus the PostScript permission writes used for
+`%pipe%` (`PermitFileWriting`, `LockFilePermissions`); none was attempted.
+Recipes and hashes: `docs/reproducibility.md` and
+`reports/ghostscript2shell-status.md`.
 
 ## 2026-11-23 ~03:3xZ — gdbserver2shell W5: wire-only libc `system()` reaches local rung 5
 
