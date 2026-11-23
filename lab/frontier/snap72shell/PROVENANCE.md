@@ -101,6 +101,16 @@ Observed in two consecutive `run_live.sh` replays, normalized trace SHA-256
 `1f25bf6311e1a659e4da947abc07d001cfacc5fe39dd67618560e425df3773d4`
 (`live/evidence/normalized.txt`, `replay1.txt`, `replay2.txt`):
 
+Hash caveat (witness NIT, 2026-11-23): this hash is **source-path dependent**.
+`normalize_live.py` masks PIDs, ports, addresses and `0x…` words but leaves the
+absolute ASan source path in the `opReadMultiVars()` frame (trace line 15,
+`/home/mesh-home/mishe-tauftauf2shell/...`). A build rooted at another prefix
+produces a different raw hash; replacing only that prefix in the ASan lines
+reproduces `1f25…` (the witness verified this with `/tmp/w146-snap7/` → the
+plant root). The normalizer is deliberately left unchanged so the
+witness-verified trace hash stays stable. No-grade documentation NIT, not a
+failed check.
+
 - Vulnerable, attack response: `DECLARED_DATA_LENGTH=65535 REAL_BYTES=32`;
   the server sent `...0401ff09ffff5a6b5a6b...` after a valid COTP CC and S7
   negotiate. The live client connected (`CLIENT_CONNECT_RC=0`) and ASan
@@ -180,3 +190,30 @@ caller, not a proof that a richer application cannot be affected.
 Ceiling after W2: rung 4 wire-reachable, with the chosen-byte extent measured
 at 4000 of 65535 bytes. Still no pointer redirect, command side effect or
 rung 5; no upstream fixed release exists.
+
+## Independent witness verdict — 2026-11-23 (message #2290)
+
+The witness rebuilt from a clean `git archive` at its HEAD `d30e32a` in
+`/tmp/w146-snap7`; the codeload tarball hash
+`2840d50a833d928e5175b8ccc5383fae0fcc3e826c07e60b2b4190a30c613c36` matched.
+Verdict: **ESTABLISHED at the explicitly labeled lab-wire scope**. Two
+`run_live.sh` runs returned rc 0 with all five cases matching: ASan
+`heap-buffer-overflow`, `WRITE of size 65535` at pinned line 418 into a
+one-byte destination; guarded build `errCliInvalidPlcAnswer` (8388608),
+ASan-clean; safe build clean; plain vulnerable `DST0=5a DEST17=6b DEST64=00`.
+Countercheck: changing its responder bytes to `a7`/`3c` gave
+`DST0=a7 DEST17=3c` in the live plain client, so the chosen bytes come from
+the wire, not a server-side echo. After replacing only its source-root prefix,
+every normalized line matched `replay1.txt`, giving
+`1f25bf6311e1a659e4da947abc07d001cfacc5fe39dd67618560e425df3773d4`. Its
+unnormalized output hashed to
+`349dc25cf8f23c4844c9536bde2654e9c4225766b723e982cf3048fb65984c15`, explained
+by the source-path caveat above.
+
+The witness also raised a material no-grade doc NIT:
+`reports/snap72shell-status.md` still described an author-only scoped find,
+no fake PLC or live client, and a loopback server as a proposal, contradicting
+W1/W2 and both replays. That report is now updated to the lab-wire scope with
+the verdict and replays. No replay is owed. No upstream fixed blob, `AT:P`
+remains truthful, no pointer redirect, command or rung 5. Ceiling unchanged:
+rung 4 wire-reachable.

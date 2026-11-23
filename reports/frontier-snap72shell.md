@@ -1,8 +1,7 @@
 # Frontier brief: Snap7 — CVE-2026-131848 (snap72shell)
 
-Staged 2026-11-23 by `frontier` under the standing similar-things mandate.
-Operator admission is pending; a live two-pane target window will be registered
-with this brief. Nothing here is an independent witness verdict.
+Staged 2026-11-23 by `frontier` under the standing similar-things mandate and
+admitted the same day. Section 9 records the independent witness verdict.
 
 ## 1. Verified ground truth
 
@@ -189,3 +188,14 @@ server edit (re-run confirmed).
 Ceiling stands at rung 4 wire-reachable; chosen control is now quantified at
 4000 of 65535 bytes. No rung 5. Full frames, logs and hashes in
 `lab/frontier/snap72shell/PROVENANCE.md` under the W2 section.
+
+## 9. Independent witness verdict — 2026-11-23
+
+An independent witness rebuilt from a clean `git archive` under its own source
+root and replayed `run_live.sh` twice: rc 0, all five cases matching, and a
+byte-change countercheck (`a7`/`3c`) proving the chosen bytes come from the
+wire. Verdict **ESTABLISHED at the explicitly labeled lab-wire scope**. Full
+detail, hashes and the source-path-dependent trace-hash NIT are in
+`lab/frontier/snap72shell/PROVENANCE.md` under "Independent witness verdict".
+Ceiling unchanged: rung 4 wire-reachable, chosen control 4000/65535 bytes, no
+pointer redirect, command or rung 5; no upstream fixed release.

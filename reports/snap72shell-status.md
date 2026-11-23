@@ -42,23 +42,45 @@ rc 0, `PASS local plant out of Git` / `GREEN`. Admission changes no grade.
   gcc and clang ASan report `heap-buffer-overflow`, `WRITE of size 65535`,
   0 bytes after a 1-byte region, in `opReadMultiVars()` at pinned line 418.
 
-## Current grade — 05:1xZ (author-only, no witness verdict)
+## Current grade — 2026-11-23 (independent witness ESTABLISHED, lab-wire scope)
 
 Rung 3 is confirmed in the pinned harness with two compilers. Rung 4 is
-**scoped**: wire seeds `0x5a` and `0x3c` put chosen bytes at destination
-offsets 0 and 17 (`DEST0=5a`/`DEST17=6b` and `DEST0=3c`/`DEST17=4d`);
-the fixed guard returns `errCliInvalidPlcAnswer` (`RC=8388608`) and the
-destination stays untouched; a safe declared length of 1 is clean on both
-vulnerable and fixed builds.
+**wire-reachable in the lab** (W1): a plant-written fake S7 responder bound to
+127.0.0.1 drives the real pinned client library under ASan through COTP CR/CC
+and Setup Communication, then answers `Cli_ReadMultiVars()` with
+`ReturnCode=0xFF`, `TransportSize=0x09`, `DataLength=0xFFFF`. The live client
+reports `heap-buffer-overflow`, `WRITE of size 65535`, 0 bytes after the
+one-byte caller allocation, in `opReadMultiVars()` at pinned line 418. Two
+consecutive `run_live.sh` replays matched normalized trace SHA-256
+`1f25bf6311e1a659e4da947abc07d001cfacc5fe39dd67618560e425df3773d4`
+(`live/evidence/normalized.txt`, `replay1.txt`, `replay2.txt`). An independent
+witness rebuilt from a clean `git archive` of HEAD under its own source root,
+got rc 0 on all five cases, and changed its responder bytes to `a7`/`3c`: the
+live plain client read `DST0=a7 DEST17=3c`, confirming the chosen bytes come
+from the wire, not a server-side echo. W2 measured the chosen-byte extent: all
+4000 real response bytes land byte-exact (`MATCHES=4000`,
+`FIRST_BAD_OFFSET=4000`), normalized hash
+`f254a539df2d8dd63c5dbb54e9dc6d1c8f9a7536c746768e159f817ee87c3808`.
+Both controls hold on the live wire: the guard returns
+`errCliInvalidPlcAnswer` (`RC=8388608`) and is ASan-clean; a safe one-byte
+response returns 0 with `DST0=5a`. The witness verdict ESTABLISHED applies to
+this explicitly labeled lab-wire scope only.
 
 ## Ceiling
 
-The response is injected into `PDU.Payload` by an `isoExchangeBuffer()` stub;
-there is no fake PLC, socket, listener or live client process. Only 32 real
-payload bytes exist in the crafted response, so chosen-byte control is shown
-inside those 32 bytes (`DEST64=00` beyond them), not past the real payload.
-No pointer redirect, ROP, command, marker or witness verdict was produced;
-rung 5 remains UNKNOWN. The issue's guard is a proposed fix, not an upstream
-release. The cheapest next experiment is a loopback fake S7 server driving
-the real pinned client library under ASan through COTP and Setup
-Communication; it is a proposal, not an observation.
+The attacker must control or impersonate a PLC (`AT:P`); the 127.0.0.1
+responder is plant-written and no real PLC or external host is involved.
+Peer-chosen control is bounded by the 4096-byte Iso payload and `CheckPDU()`'s
+TPKT cap (`s7_isotcp.h:38`, `s7_isotcp.cpp:46-65`) to 4000 measured bytes, not
+the 65535-byte copy length; bytes past the real payload are zeroed PDU buffer
+(plain) or stale stack (ASan), not peer-controlled. After the copy,
+`PerformOperation()` (pinned lines 2632-2634) touches only the stack-resident
+`Job`; the caller's `delete[] dst` is the next heap operation, so no
+post-overflow dereference of adjacent heap state was measured in this client.
+No pointer redirect, ROP, command, marker or rung 5 observation exists; rung 5
+remains UNKNOWN. No upstream fixed version or fix commit exists; the guard is
+issue #32's proposed fix, deliberately weaker than an upstream fixed blob.
+
+Exact replays: `bash lab/frontier/snap72shell/live/run_live.sh` and
+`bash lab/frontier/snap72shell/live/run_wide.sh`. Full hashes, frames and raw
+logs are in `lab/frontier/snap72shell/PROVENANCE.md` and `live/evidence/`.
