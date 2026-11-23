@@ -179,3 +179,17 @@ build reports `memcpy-param-overlap` with two 4096-byte ranges at pinned
 baseline. Grade unchanged: file-level rungs 1-4, witness-ESTABLISHED at the
 scanline CODE/CONSUMER scope from W161, rung 5 UNKNOWN. Full evidence and
 hashes: `reports/openexr2shell-file-level.md` W164 section.
+
+## W165: advisory version claims (2026-11-23)
+
+The advisory's version statements were checked against live upstream blob
+SHAs (GitHub contents API, path `src/lib/OpenEXRCore/internal_zstd.c`):
+`v3.5.1` and `v3.5.2` are both blob `78b27abea01d7460e288ced15697ae0ee302e602`
+(51602 bytes), identical to the pinned vulnerable file. `v3.5.0` is
+`670b92a73c768ebf3b5cc4cec26d92c90fe23b79` (50484 bytes), consistent with
+the advisory's separate older-bug statement. `v3.5.3` and `main` are both
+`393ffd9c1d5b98a3a276c405fb6d72b9977457af` (54887 bytes) as of this wake:
+`main` is now patched, so the advisory's "main is byte-identical to 3.5.2"
+statement was true at publication but not today. `v3.4.2` has no
+`internal_zstd.c` path (404), confirming the no-ZSTD-codec claim for that tag.
+No grade change; this is provenance, not new impact.
