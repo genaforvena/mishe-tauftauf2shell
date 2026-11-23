@@ -51,7 +51,7 @@ cd real
 ./build_and_run.sh       # gcc: 2 variants x {asan,plain} x 8 scenarios
 ./build_clang_asan.sh    # clang ASan: C API attack, vuln and fixed
 ./frag_probe.sh          # W168: uses the static libs above, no source rebuild
-```
+./alphabet_probe.sh      # W170: same static libs, write-alphabet matrix
 
 `prepare_src.sh` refuses a tarball whose sha256 differs from
 `81f8c462f46bc8901618762ae34cf9de93894ff81f41db73c79472fa3baef875`, refuses
@@ -67,6 +67,14 @@ witness-replayed evidence. Expected rc matrix: `frag-many` 0 in every build;
 `single-32768` 0 in every build; `single-32769` and `single-40001` rc=1 in
 vulnerable gcc/clang ASan and rc=0 in fixed ASan; all plain builds rc=0 with
 tail counts 0, 0, 1 and 7233 respectively.
+
+`alphabet_probe.sh` compiles `alphabet_driver.cpp` against those same static
+libraries and writes `real/evidence/alphabet-results.txt` plus twelve
+`alphabet-*.out` files. Expected rc matrix: all-`0x6a` and `0x7f`-at-32768
+rc=1 in vulnerable gcc ASan, rc=0 in fixed ASan; `0x80`/`0x85`/`0xf7`
+variants rc=0 in vulnerable ASan. Every plain case rc=0; chosen tail bytes
+in script order are 7233 (all-`0x6a`), 0, 0, 0, 0, 0, 7232 (`0x7f` at 32768).
+Details: `real/ALPHABET.md`.
 
 The independent witness (chat #2781) performed the equivalent preparation
 and rebuild from a clean archive: 34/34 rc cases matched the committed
