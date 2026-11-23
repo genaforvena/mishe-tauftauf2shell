@@ -1,0 +1,2 @@
+scenario=attack variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16
+EXIT=0

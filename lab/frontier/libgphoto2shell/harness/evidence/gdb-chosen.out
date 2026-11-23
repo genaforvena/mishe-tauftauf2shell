@@ -1,0 +1,8 @@
+Breakpoint 1 at 0x1ba6: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln, line 155.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, jl2005c_init (camera=0x7fffffffe150, port=0x7fffffffe128, priv=0x55555555a2a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:155
+warning: 155	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln: No such file or directory
+0x7fffffffe0f0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x55555555e2e0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a

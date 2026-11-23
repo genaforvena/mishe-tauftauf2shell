@@ -1,0 +1,4 @@
+3f8dac0fed557f2b1072f6e66374482c6b164a73ffaddc2551ba00abe9e33d1b  lab/frontier/libgphoto2shell/pins/fix-6a3393d.patch
+4fdaf4b1bd7a3691fc0a0305566f46a6f5f4f68779784e7358a14c75a8a763a6  lab/frontier/libgphoto2shell/pins/jl2005c.c.fixed
+0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185  lab/frontier/libgphoto2shell/pins/jl2005c.c.vuln
+d2966f74665b4c99749da70981221b726e62f4278f31ef105872af9497fd74f5  lab/frontier/libgphoto2shell/pins/jl2005c.h.vuln

@@ -1,0 +1,3 @@
+scenario=heap variant=vuln count=1022 rc=0 table_seen=1 big_seen=1 big_n=15904 seq1=16
+heap_tail=a0 52 d2 0d
+EXIT=0

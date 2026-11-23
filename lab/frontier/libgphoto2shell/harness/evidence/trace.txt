@@ -1,0 +1,29 @@
+plain-gcc-vuln-baseline scenario=baseline variant=vuln count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+plain-gcc-vuln-attack EXIT=134|stack smashing detected|
+plain-gcc-vuln-heap scenario=heap variant=vuln count=1022 rc=0 table_seen=1 big_seen=1 big_n=15904 seq1=16|EXIT=0|
+asan-gcc-vuln-baseline scenario=baseline variant=vuln count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+asan-gcc-vuln-attack EXIT=1|ERROR: AddressSanitizer: stack-buffer-overflow|WRITE of size 16384|jl2005c.c.vuln:152|jl2005c.c.vuln:47|
+asan-gcc-vuln-heap EXIT=1|ERROR: AddressSanitizer: stack-buffer-overflow|READ of size 16848|jl2005c.c.vuln:154|jl2005c.c.vuln:47|
+plain-gcc-fixed-baseline scenario=baseline variant=fixed count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+plain-gcc-fixed-attack scenario=attack variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+plain-gcc-fixed-heap scenario=heap variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+asan-gcc-fixed-baseline scenario=baseline variant=fixed count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+asan-gcc-fixed-attack scenario=attack variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+asan-gcc-fixed-heap scenario=heap variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+plain-clang-vuln-baseline scenario=baseline variant=vuln count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+plain-clang-vuln-attack EXIT=139|
+plain-clang-vuln-heap scenario=heap variant=vuln count=1022 rc=0 table_seen=1 big_seen=1 big_n=15904 seq1=16|EXIT=0|
+asan-clang-vuln-baseline scenario=baseline variant=vuln count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+asan-clang-vuln-attack EXIT=1|ERROR: AddressSanitizer: stack-buffer-overflow|WRITE of size 16384|jl2005c.c.vuln:152|jl2005c.c.vuln:47|
+asan-clang-vuln-heap EXIT=1|ERROR: AddressSanitizer: stack-buffer-overflow|READ of size 16848|jl2005c.c.vuln:154|jl2005c.c.vuln:47|
+plain-clang-fixed-baseline scenario=baseline variant=fixed count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+plain-clang-fixed-attack scenario=attack variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+plain-clang-fixed-heap scenario=heap variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+asan-clang-fixed-baseline scenario=baseline variant=fixed count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16|EXIT=0|
+asan-clang-fixed-attack scenario=attack variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+asan-clang-fixed-heap scenario=heap variant=fixed count=1022 rc=-3 table_seen=1 big_seen=0 big_n=0 seq1=16|EXIT=0|
+0x7fffffffe0f0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x55555555e2e0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+Breakpoint 1, jl2005c_init (camera=0x5a5a5a5a5a5a5a5a, port=0x5a5a5a5a5a5a5a5a, priv=0x5a5a5a5a5a5a5a5a) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:154
+OFFSET=16472
+0x7fffffffe0e8:	0x41	0x42	0x43	0x44	0x45	0x46	0x47	0x48
