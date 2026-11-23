@@ -2327,3 +2327,47 @@ needs `dbus-1 >= 1.4` and (except with firewall `none` and wireguard off)
 `libmnl >= 1.0.0`; neither is installed here, and `client.c` includes
 `<connman/dbus.h>`, so no live build, daemon, socket, remote input or witness
 replay is claimed.
+
+## Admitted frontier lane — 2026-11-23 01:0xZ gdbserver2shell
+
+Frontier re-opened the previously held gdbserver lane at 01:01Z with brief
+`reports/frontier-gdbserver2shell.md`, site charter and seed wall, and pinned
+upstream bytes plus a derived fixed snapshot in
+`lab/frontier/gdbserver2shell/PROVENANCE.md`. The vulnerable pin is
+`binutils-gdb` HEAD `633ae02c4ea8f87c670f7192804349860cfa291d`; the "fixed"
+snapshot is that file with Andrew Burgess's 2026-11-16 gdb-patches hunk
+applied, because the fix is posted but not merged and no tagged fixed release
+exists. All work is local and direct-call: the harness starts no gdbserver and
+opens no socket.
+
+From the repository root, replay from an isolated copy so staged evidence is
+untouched:
+
+```sh
+T=$(mktemp -d /tmp/gdb-replay.XXXXXX)
+cp -a lab/frontier/gdbserver2shell/. "$T/"
+bash "$T/harness/run.sh"
+```
+
+`run.sh` re-extracts the verbatim 61-line vulnerable and 71-line fixed
+`cmd_qtdpsrc()` slices plus `ishex`/`unpack_varlen_hex` from the saved pinned
+files and asserts eight SHA-256 pins on every run before compiling gcc 13.3.0
+and clang 18.1.3 ASan variants and a plain canary variant. Expect rc 0,
+`SUMMARY=60 PASS / 0 FAIL` and
+`NORMALIZED_HASH=0c9b837e5300ac744b133e6668179cda410520177d87b859c99cac9af1c1db73`.
+The operator observed exactly those values at admission on 2026-11-23 from a
+fresh `/tmp` copy, matching frontier's clean-archive replay. No witness
+verdict exists for this second harness yet.
+
+Expected bytes: the crafted packet is `QTDPsrc:1:0:cond:0:1:<hex>` (RSP
+numbers are hex, so `SLEN=1` allocates 2 bytes) with N=8/32/64/128 decoded
+pattern bytes. Both compilers report `AddressSanitizer: heap-buffer-overflow`,
+`WRITE of size 1`, `0 bytes after 2-byte region`, frames `hex2bin` →
+`cmd_qtdpsrc` → `main`. The plain 64 KiB `0xEE` arena reports
+`WRITTEN=N-2 FIRST=2 LAST=N-1 PATTERN_OK=1` at N=32/64, so every chosen byte
+lands past the allocation. The fixed snapshot returns `RC=0 REPLY=E01
+LIST_LEN=0` on the attack and the well-formed packet returns `RC=0 REPLY=OK
+LIST_LEN=1` on both pins, with no ASan report. The `hex2bin` decoder is a
+faithful reimplementation, not verbatim GDB source; all allocation and length
+decisions come from the verbatim slices. No pointer, marker, command or rung
+5 is claimed. Status: `reports/gdbserver2shell-status.md`.

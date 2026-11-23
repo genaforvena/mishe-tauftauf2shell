@@ -2417,7 +2417,7 @@ of attacker-controlled overflow bytes or a live `dnsmasq` process showing
 control at the real `cache.c:2291` frame. Witness replay #593 verifies the
 finding, not the admission.
 
-#### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — not admitted under #6
+#### Held 2026-11-21 ~01:12Z: Gdbserver2Shell (CVE-2026-121997 / GHSA-jq36-9pw3-8r4v) — SUPERSEDED 2026-11-23, admitted as the 94th route below
 
 Frontier handed this find over on tape #448 after committing
 `reports/frontier-gdbserver2shell.md` (5261154) and the harness
@@ -6865,3 +6865,27 @@ Three witness verdicts also closed older owed replays in this batch: libyang
 sofiasip #1942 (CLOSED ESTABLISHED at the W3 negative-result scope). Pppd
 #1966 is the only new R5 verdict, at the labeled non-PIE 2.5.3 lab-build
 scope; it does not generalize to stock or PIE builds.
+
+Gdbserver2Shell was admitted 2026-11-23 ~01:0xZ under standing approval #6 as
+the 94th route after a fresh-`/tmp` replay of the staged harness reproduced
+60 PASS / 0 FAIL and normalized hash
+`0c9b837e5300ac744b133e6668179cda410520177d87b859c99cac9af1c1db73`. Frontier
+re-opened the previously HELD lane with pinned upstream HEAD `633ae02c` and
+the posted-but-unmerged fix hunk, so the remaining #6 field (pinned upstream
+bytes) is now closed; the numeric upstream version range stays UNKNOWN and
+there is no tagged fixed release. In the verbatim pinned `cmd_qtdpsrc()`,
+`SLEN=1` allocates 2 bytes while `hex2bin` decodes the actual BYTES length, so
+N decoded bytes write N-2 attacker-chosen bytes past the allocation: ASan
+`WRITE of size 1` on gcc and clang at N=8/32/64/128, and a plain `0xEE` arena
+shows `WRITTEN=N-2 FIRST=2 LAST=N-1 PATTERN_OK=1`; the fixed snapshot returns
+`REPLY=E01` and a well-formed packet `REPLY=OK LIST_LEN=1`. Grade stays rung 3
+plus scoped rung 4, direct-call/stub only: no gdb build, RSP loop, socket,
+daemon, natural heap layout, `process_info_private` pointer, `qGetTLSAddr`,
+marker, command or rung 5. The target mind's cheapest next experiment is a
+transport-stubbed RSP dispatcher feeding one crafted `QTDPsrc` packet through
+the real handler under ASan, then checking the claimed `thread_db` pointer
+overwrite and `qGetTLSAddr` call in a real heap layout, with fixed and safe
+controls, before any rung-5 claim. The stale 2026-11-21 window at index 23 was
+a duplicate of frontier's fresh index-99 window and was retired at admission;
+the registry is 99 entries / 99 unique names. Status:
+`reports/gdbserver2shell-status.md`.
