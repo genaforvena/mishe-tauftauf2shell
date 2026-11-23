@@ -8165,14 +8165,19 @@ resolved clang -O0's rejection as a `param_consumed` layout alias, not a parse
 difference; `real/live-replay.sh` then drove `SQLExecDirect` through unixODBC
 against a fake PG v3 handshake on 127.0.0.1:59432 to the same sink (fixed
 `rc=-1`, safe `rc=0`, `SQLPrepare` alone sends no Parse — all preserved results).
-Pointer control, a chosen-offset control-flow datum, marker, command,
-witness verdict and rung 5 remain absent. W147 drove the pinned ASan driver
-against a real loopback PostgreSQL 16.4 server (127.0.0.1:59433) with valid
+Pointer control, a chosen-offset control-flow datum, marker, command and
+rung 5 remain absent; witness W156 (#2572) ESTABLISHED the earlier W146
+public-ODBC limb at its labeled fake-handshake harness scope (clean archive
+87f8bb8, eight rebuilt tagged trees, 6/6 pins OK, private port 59436,
+fixed/safe/SQLPrepare-negative controls; no counterexample, no grade change).
+W147 drove the pinned ASan driver against a real loopback PostgreSQL 16.4 server (127.0.0.1:59433) with valid
 application SQL `SELECT {fn CONCAT(1,...,16)}` through unixODBC: 3/3 rc 0,
 vuln ASan `WRITE of size 8` at `convert.c:5657`, fixed `rc=-1`, safe `rc=0`;
 the grade stays rungs 1-4 because the OOB values are parser integers and no
 control-flow datum is reached. AV:N and CWE-457 stay claim/source-only.
 Status: `reports/psqlodbc2shell-status.md`.
+W156's verdict concerns the W146 fake-handshake limb only; W147's real-server
+limb and the real-object limbs remain author-only.
 
 ## 2026-11-23 09:5xZ — thrift2shell admitted as the 108th route
 

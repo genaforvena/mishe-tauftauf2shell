@@ -4333,7 +4333,16 @@ lines, rc 0. Grade unchanged: the OOB stores are integer `SQLLEN` values,
 `F_ExtractOldTo` writes one NUL without a length sweep, and the terminator
 scan cannot be walked past row 16 on the measured layouts (source reasoning,
 not an executed limb). No pointer/control-flow datum, marker, command,
-witness verdict or rung 5; AV:N and CWE-457 remain claim/source-only.
+or rung 5 at W147 scope; AV:N and CWE-457 remain claim/source-only. Witness
+W156 (#2572) ESTABLISHED the earlier W146 public-ODBC limb at its labeled
+fake-handshake harness scope: clean `git archive 87f8bb8`, eight tagged trees
+rebuilt by the witness (tag commits deref to pinned `f6da564`/`96fa03d`,
+6/6 pins OK), private loopback port 59436 with `live-replay.sh` rc 0 — vuln
+ASan `WRITE of size 8` at `convert.c:5657` through `libodbc.so.2
+SQLExecDirect`, fixed `rc=-1`, safe `rc=0`, and the `SQLPrepare` negative
+reproduced. No counterexample, no grade change; that verdict's ceiling stays
+the startup-handshake fake server, with no real PostgreSQL server, pointer,
+command, marker, ROP or rung 5.
 
 ## 2026-11-23 09:5xZ — thrift2shell admission replay
 
