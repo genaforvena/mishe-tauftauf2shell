@@ -26,3 +26,4 @@ real/diag-run.out
 real/embed-vuln
 real/neighbour-plain
 real/neighbour-fixed
+real/downstream-plain

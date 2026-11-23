@@ -328,3 +328,46 @@ build trees symlinked in) returned `RESULT fail=0` for both
 `run-neighbour.sh` (14 PASS / 0 FAIL) and `run-consumer.sh` (21 PASS /
 0 FAIL), both process rc 0. The W6 change is reproducible from the committed
 tree, not only the working tree.
+
+## W7 — file-to-consumer stall remains UNKNOWN (2026-11-23 target mind)
+
+Bounded attempt to close the W3 gap: make a crafted TIFF decode finish so a
+consumer could run on loader-decoded pixels. No new rung was claimed.
+
+- Loader limits are pinned at `foreign/tiff2vips.c:3122-3128`:
+  `samples_per_pixel <= 10000` and `bits_per_sample <= 32`. A 32768x2x16384
+  x32-bit TIFF (`real/smallline.tif`) is rejected with
+  `tiff2vips: samples out of range` (`real/downstream-small.out`), so ~2.148 GB
+  is the smallest line that still overflows `int`. `real/minline.tif`
+  (53700x2x10000x32-bit, 154 bytes) gives `DOWNLOAD=OK ...
+  sizeof_line=2148000000 sizeof_image=4296000000`, but the consumer still
+  printed no `REGION_PREPARE` after 240 s (`real/downstream-min.out`, rc 124).
+- `gdb -p` attach failed on this host: `yama/ptrace_scope=1` and
+  `ptrace: Inappropriate ioctl for device` (`real/diag-gdb-bt1.txt`,
+  `real/diag-gdb-bt2.txt`). `perf` is unusable at
+  `perf_event_paranoid=4`. A throwaway SIGPROF/SIGALRM backtrace preload
+  sampled `/bin/sleep` correctly but emitted no samples for either consumer;
+  it is a tooling negative, not a stack observation.
+- Parent-launched gdb (allowed to trace its own child) with breakpoint command
+  lists produced `real/gdb-stall-prepare.out` (four nested
+  `vips_region_prepare` calls: main → `vips_foreign_load_generate` →
+  `vips_image_write_gen` → `vips_sequential_generate` → tilecache),
+  `real/gdb-stall-map.out` and `real/gdb-stall-buffer.out`. The last calls
+  before the stall are `vips_buffer_unref_ref` → `vips_buffer_new` →
+  `vips_region_buffer`, repeated five times; `vips_region_buffer` is entered
+  from `vips_tile_new` (`tilecache.c:232`) and `vips_buffer_new()` is entered
+  but never returns. `buffer_move()` computes
+  `VIPS_IMAGE_SIZEOF_PEL * width * height` (`buffer.c:481-501`), i.e. a
+  multi-gigabyte tile buffer for this geometry; the exact instruction at the
+  stall was not captured, so allocation is a hypothesis, not an observation.
+- Breakpoints at TIFF fill/read entry points (`tiff2vips.c:2520`, `:2384`,
+  `:2417`, `:717`, `:719`, set after process start so symbols resolved) were
+  never hit within 35 s (`real/gdb-stall-tiff-fill.out`). No scanline read,
+  no decoded pixel, no `REGION_PREPARE` return and no negative-offset access
+  on loader-decoded pixels was observed.
+
+Disposition: the file-to-consumer path remains a negative result. The
+acceptance of the crafted header (W2) and the negative-offset write on a
+programmatically created real image (W4/W6) are unchanged. No pointer,
+control-flow datum, wire input, command, marker or witness verdict. Grade
+remains rungs 1-4; rung 5 UNKNOWN.

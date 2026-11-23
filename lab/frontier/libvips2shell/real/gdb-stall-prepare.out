@@ -1,0 +1,68 @@
+Breakpoint 1 at 0x1180
+Function "rtiff_stripwise_generate" not defined.
+Breakpoint 2 (rtiff_stripwise_generate) pending.
+Function "rtiff_strip_read_interleaved" not defined.
+Breakpoint 3 (rtiff_strip_read_interleaved) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+(process:3743006): VIPS-WARNING **: 12:52:30.290: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.290: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.292: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+DOWNLOAD=OK Xsize=53700 Ysize=2 Bands=10000 BandFmt=6 sizeof_line=2148000000 sizeof_image=4296000000
+HIT prepare
+#0  vips_region_prepare (reg=0x5555556546f0, r=0x7fffffffe070) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1647
+#1  0x00005555555555c2 in main (argc=2, argv=0x7fffffffe1d8) at downstream.c:51
+
+(process:3743006): VIPS-WARNING **: 12:52:30.304: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.304: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3743006): VIPS-WARNING **: 12:52:30.304: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.304: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3743006): VIPS-WARNING **: 12:52:30.304: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3743006): VIPS-WARNING **: 12:52:30.304: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+HIT prepare
+#0  vips_region_prepare (reg=0x55555565f670, r=0x555555654748) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1647
+#1  0x00007ffff7a41f23 in vips_foreign_load_generate (out_region=0x5555556546f0, seq=0x55555565f670, a=0x0, b=0x5555556509b0, stop=0x7fffffffdf7c) at ../src/libvips-8.18.2/libvips/foreign/foreign.c:1083
+#2  0x00007ffff7be4cd7 in vips_region_generate (reg=0x5555556546f0, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1614
+#3  0x00007ffff7bdcab6 in vips_region_fill (reg=0x5555556546f0, r=0x7fffffffe070, fn=0x7ffff7be4c4a <vips_region_generate>, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:867
+#4  0x00007ffff7be4e25 in vips_region_prepare (reg=0x5555556546f0, r=0x7fffffffe070) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1682
+#5  0x00005555555555c2 in main (argc=2, argv=0x7fffffffe1d8) at downstream.c:51
+HIT prepare
+#0  vips_region_prepare (reg=0x55555565f960, r=0x55555565f6c8) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1647
+#1  0x00007ffff7bc6d88 in vips_image_write_gen (out_region=0x55555565f670, seq=0x55555565f960, a=0x5555556579a0, b=0x0, stop=0x7fffffffde4c) at ../src/libvips-8.18.2/libvips/iofuncs/image.c:2616
+#2  0x00007ffff7be4cd7 in vips_region_generate (reg=0x55555565f670, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1614
+#3  0x00007ffff7bdcab6 in vips_region_fill (reg=0x55555565f670, r=0x555555654748, fn=0x7ffff7be4c4a <vips_region_generate>, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:867
+#4  0x00007ffff7be4e25 in vips_region_prepare (reg=0x55555565f670, r=0x555555654748) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1682
+#5  0x00007ffff7a41f23 in vips_foreign_load_generate (out_region=0x5555556546f0, seq=0x55555565f670, a=0x0, b=0x5555556509b0, stop=0x7fffffffdf7c) at ../src/libvips-8.18.2/libvips/foreign/foreign.c:1083
+#6  0x00007ffff7be4cd7 in vips_region_generate (reg=0x5555556546f0, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1614
+#7  0x00007ffff7bdcab6 in vips_region_fill (reg=0x5555556546f0, r=0x7fffffffe070, fn=0x7ffff7be4c4a <vips_region_generate>, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:867
+HIT prepare
+#0  vips_region_prepare (reg=0x55555565fc20, r=0x55555565f9b8) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1647
+#1  0x00007ffff7b2eeea in vips_sequential_generate (out_region=0x55555565f960, seq=0x55555565fc20, a=0x55555565da90, b=0x5555556575f0, stop=0x7fffffffdd1c) at ../src/libvips-8.18.2/libvips/conversion/sequential.c:172
+#2  0x00007ffff7be4cd7 in vips_region_generate (reg=0x55555565f960, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1614
+#3  0x00007ffff7bdcab6 in vips_region_fill (reg=0x55555565f960, r=0x55555565f6c8, fn=0x7ffff7be4c4a <vips_region_generate>, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:867
+#4  0x00007ffff7be4e25 in vips_region_prepare (reg=0x55555565f960, r=0x55555565f6c8) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1682
+#5  0x00007ffff7bc6d88 in vips_image_write_gen (out_region=0x55555565f670, seq=0x55555565f960, a=0x5555556579a0, b=0x0, stop=0x7fffffffde4c) at ../src/libvips-8.18.2/libvips/iofuncs/image.c:2616
+#6  0x00007ffff7be4cd7 in vips_region_generate (reg=0x55555565f670, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:1614
+#7  0x00007ffff7bdcab6 in vips_region_fill (reg=0x55555565f670, r=0x555555654748, fn=0x7ffff7be4c4a <vips_region_generate>, a=0x0) at ../src/libvips-8.18.2/libvips/iofuncs/region.c:867

@@ -1,0 +1,44 @@
+Temporary breakpoint 1 at 0x1341: file downstream.c, line 17.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, main (argc=2, argv=0x7fffffffe1d8) at downstream.c:17
+17	{
+Breakpoint 2 at 0x7ffff7a6b35d: file ../src/libvips-8.18.2/libvips/foreign/tiff2vips.c, line 2523.
+Breakpoint 3 at 0x7ffff7a6acee: file ../src/libvips-8.18.2/libvips/foreign/tiff2vips.c, line 2387.
+Breakpoint 4 at 0x7ffff7a6afbe: file ../src/libvips-8.18.2/libvips/foreign/tiff2vips.c, line 2419.
+Breakpoint 5 at 0x7ffff7a670e2: file ../src/libvips-8.18.2/libvips/foreign/tiff2vips.c, line 717.
+Breakpoint 6 at 0x7ffff7a67106: file ../src/libvips-8.18.2/libvips/foreign/tiff2vips.c, line 719.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.614: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.614: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3851205): VIPS-WARNING **: 12:59:36.616: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.616: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+DOWNLOAD=OK Xsize=53700 Ysize=2 Bands=10000 BandFmt=6 sizeof_line=2148000000 sizeof_image=4296000000
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:3851205): VIPS-WARNING **: 12:59:36.617: Bogus "StripByteCounts" field, ignoring and calculating from imagelength

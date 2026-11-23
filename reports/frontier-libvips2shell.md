@@ -258,3 +258,31 @@ From a clean `git archive HEAD` at commit `ee9ffd6` with the gitignored
 pinned source and build trees symlinked in, `real/run-neighbour.sh` returned
 `RESULT fail=0` (14/14) and `real/run-consumer.sh` returned `RESULT fail=0`
 (21/21); both process rc 0.
+
+## 11. W7 addendum — file-to-consumer path still UNKNOWN
+
+The remaining gap between W2 (crafted header accepted by the real loader) and
+W4 (negative-offset write on a programmatically created real image) was
+attacked within one bounded experiment. It did not close.
+
+- Pinned loader limits (`foreign/tiff2vips.c:3122-3128`) cap bands at 10000
+  and bits at 32, so the smallest line that can truncate to a negative `int`
+  is ~2.148 GB. `real/minline.tif` (53700x2x10000x32-bit, 154 bytes) is
+  accepted (`sizeof_line=2148000000`) but `real/downstream.c` still prints no
+  `REGION_PREPARE` after 240 s (`real/downstream-min.out`, rc 124). A
+  larger-band geometry is rejected as `samples out of range`.
+- Parent-launched gdb backtraces (`real/gdb-stall-prepare.out`,
+  `real/gdb-stall-map.out`, `real/gdb-stall-buffer.out`) place the stall below
+  nested `vips_region_prepare` calls in the loader chain, inside repeated
+  `vips_buffer_new()` calls from tilecache's `vips_tile_new()`
+  (`tilecache.c:232`). The buffer size is computed as
+  `VIPS_IMAGE_SIZEOF_PEL * width * height` (`buffer.c:481-501`), here several
+  GB per tile. The exact stalling instruction was not captured; this is a
+  bounded observation, not a proven allocation loop.
+- TIFF fill and scanline-read breakpoints were never reached
+  (`real/gdb-stall-tiff-fill.out`). No decoded pixel was addressed at a
+  negative offset. `gdb -p` attach is blocked on this host by
+  `yama/ptrace_scope=1`; `perf` by `perf_event_paranoid=4`.
+
+Ceiling unchanged: rungs 1-4. No wire or request input, command, marker side
+effect or witness verdict for this path; rung 5 remains UNKNOWN.
