@@ -1,0 +1,4 @@
+vuln_bare_7800 start=1 master=881029 ok302=0/12 faults=11
+vuln_bare_7800 start=2 master=890057 ok302=0/12 faults=11
+vuln_bare_7800 start=3 master=902773 ok302=0/12 faults=11
+vuln_bare_7800 start=4 master=919539 ok302=0/12 faults=11

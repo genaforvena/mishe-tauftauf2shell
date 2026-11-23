@@ -26,3 +26,8 @@ evidence/plain-fixed-module-*.log
 evidence/plain-crash/*.so
 evidence/plain-crash/*error.log
 evidence/plain-crash/error.log
+httpd-sys.pid
+httpd-sys-fixed.pid
+error-sys.log
+error-sys-fixed.log
+evidence/sys-native/*-error.log

@@ -1,0 +1,2 @@
+vuln_safe start=1 first_code=302 faults=0
+vuln_safe start=2 first_code=302 faults=0

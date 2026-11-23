@@ -97,6 +97,13 @@ the runner because it depends on arena layout.
   allocator. The signal-11 fault and controls stand; no production-allocator
   availability claim. Detail in `PROVENANCE.md` § "Build-stack correction
   (2026-11-23 W14)".
+- W15 closes that production-allocator caveat at this lab scope: the pinned
+  parent and released tag rebuilt with system apxs / system APR and no
+  `libasan` served on 18091 fault 44/48 bare 7800-byte requests (first request
+  in 5/6 fresh starts) with well-formed and fixed controls 16/16 and 2/2
+  clean; no captured faulting PC, no chosen byte, rung 5 or witness verdict.
+  Raw: `sys-native/README.md`; replay `bash probe-sys-native.sh &&
+  bash probe-sys-first.sh`.
 
 
 ## Re-run

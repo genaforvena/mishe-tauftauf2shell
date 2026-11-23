@@ -1,0 +1,15 @@
+date: 2026-11-23T16:52:49Z
+httpd: 8e37d897784a95b8c3402e1457a72d736cc10abf13d9666b78fecbc55849087f  /usr/sbin/apache2
+vuln state.c: ceedb687ad21c4668f546d0f1c9164890f740a1ff81bbc8fb5807a9aab1ae5aa  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/state.c
+vuln module:  59d9a2f935654ba6bb2f20509b12e1c598d9246d2237fe92aeb7afda3b116701  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys/src/.libs/mod_auth_openidc.so
+fixed state.c: f02d8ddb60927b9da1402c6430d179e4418ff6751ecda6c78db34424ccf77ce5  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys-fixed/src/state.c
+fixed module:  704f0d5fa55c64308415a8d8b31d92230bbd3cb1f15da580f7108fd2df5375a3  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-sys-fixed/src/.libs/mod_auth_openidc.so
+--- httpd ldd (no asan expected) ---
+	libaprutil-1.so.0 => /lib/x86_64-linux-gnu/libaprutil-1.so.0 (0x000070b2f84f2000)
+	libapr-1.so.0 => /lib/x86_64-linux-gnu/libapr-1.so.0 (0x000070b2f84b6000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x000070b2f8200000)
+--- module ldd (no asan expected) ---
+	libapr-1.so.0 => /lib/x86_64-linux-gnu/libapr-1.so.0 (0x0000761a7d181000)
+	libaprutil-1.so.0 => /lib/x86_64-linux-gnu/libaprutil-1.so.0 (0x0000761a7d153000)
+	libcjose.so.0 => /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libcjose.so.0 (0x0000761a7d07a000)
+	libjansson.so.4 => /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/plain-prefix/lib/libjansson.so.4 (0x0000761a7d06b000)

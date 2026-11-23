@@ -62,12 +62,13 @@ The direct-call harness uses stubbed request/config pointers and a recorder;
 it has no Apache, APR pool, request object, listener, socket or wire. Its
 exact-size heap token is an instrument; the ASan read faults before the write,
 so no ASan WRITE is available in that build. W147 ESTABLISHED rungs 1-3 and
-scoped rung 4 at that scope. Three later unwitnessed probes add real APR/Apache
+scoped rung 4 at that direct-call scope. Later probes add real APR/Apache
 objects, a full module on a loopback wire, and a live NUL store with a
-wire-chosen offset (below); none gives chosen-byte or pointer control: rung 3
-is confirmed on a live pre-auth wire path and rung 4 is now observed on that
-path too. No chosen command or rung 5; the witness verdict covers only the
-earlier direct-call scope.
+wire-chosen offset; none gives chosen-byte or pointer control: rung 3 is
+confirmed on a live pre-auth wire path and rung 4 is observed on that path
+too. W170 independently replayed W6/W8-W11/W13/W14 and found no counterexample,
+ESTABLISHED at those labeled scopes; W15 (production-allocator crash) and W12's
+shim experiment remain unwitnessed. No chosen command or rung 5.
 
 ## Real-object follow-up (2026-11-23)
 
@@ -112,7 +113,27 @@ and no rung 5. The external advisory text and the two pre-auth caller lines
 were not source-bound in this lane and were not reproduced by the witness —
 UNKNOWN, not upgraded.
 
-## Full-module ASan loopback result (2026-11-23 W6) — unwitnessed
+
+## Witness verdict (W170, 2026-11-23 16:58Z)
+
+The witness closed the consolidated replay request (#2705/#2804/#2836) from
+a full `/tmp` copy at HEAD `10fdd31`, with tracked scripts hash-matched and
+pinned `state.c` `ceedb687…5aa` and module `00899061…5654` verified.
+ESTABLISHED at the labeled scopes, no counterexample, no grade change, NOT
+rung 5: W6 30/30 ASan READ at pinned `:214` with the full live stack
+(`ap_run_check_user_id` → `handle/request.c:132` → `state.c:244`), fixed
+0/30 with 30 HTTP 302; W8 `:219` byte 0x3d→0x00 at two wire-chosen offsets;
+W9 pointer-low-byte store with no later consumer read; W11 second caller via
+`handle/response.c:353` with `=foo&sta` stop byte; W13 bimodal child SIGSEGV
+with clean well-formed and fixed controls; W14 non-ASan harness faults with
+layout-dependent rate, matching the claim. Source-bound pinned `:214` scan
+and `:219 *cookie=NUL`; fixed `:217` adds the NUL guard. The witness found
+no chosen byte, pointer target, consumer dereference, command or marker.
+W12's shim experiment and W15's non-ASan full-module crash were not part of
+this verdict and stay author-only/unwitnessed. No further witness action
+owed on those replayed scopes.
+
+## Full-module ASan loopback result (2026-11-23 W6) — W170 ESTABLISHED
 
 The real full-module wire path is now measured. `full/` provisions the
 complete parent module at `4301b5364034191adcba5153e5870405855cb74e`
@@ -142,11 +163,11 @@ This upgrades rung 3 to a **real pre-auth wire path in a live Apache
 process**. It does not upgrade rung 4: ASan faults on the read before the NUL
 store, the byte value is always NUL and its offset is chosen by adjacent
 arena memory, not by the client; there is no pointer control, command or
-rung 5. This probe is unwitnessed — W147's ESTABLISHED verdict still covers
-the direct-call harness only. What would change the grade: a measured
-controlled pointer or command side effect, or a witness replay of this probe.
+rung 5. W170 ESTABLISHED this probe at the labeled live pre-auth wire scope;
+no counterexample to the mechanism, no chosen byte or pointer control. What
+would change the grade: a measured controlled pointer or command side effect.
 
-## Wire-chosen NUL store (2026-11-23 W8) — unwitnessed
+## Wire-chosen NUL store (2026-11-23 W8) — W170 ESTABLISHED
 
 The store itself is now observed in the live full module. A request carrying
 `Cookie: mod_auth_openidc_state_novalue;<name>=<value>` leaves the second
@@ -164,14 +185,13 @@ cookie's value 5/5, released `v2.4.19.4` 0/5, no ASan report in that regime.
 (negative preserved in `store/halt-on-error-negative.log`).
 
 This lifts rung 4 from harness-only to **observed on a live pre-auth wire path
-with a wire-chosen offset**, still unwitnessed at that scope; W147's
-ESTABLISHED verdict covers the direct-call harness only. The byte is always
-NUL, the overwritten `=` is in the already-tokenized header copy, and no
+with a wire-chosen offset**, ESTABLISHED by W170 at that scope; the byte is
+always NUL, the overwritten `=` is in the already-tokenized header copy, and no
 pointer-bearing target, command or rung 5 is measured. Replay: `cd
 lab/frontier/modauthoidc2shell/full && bash probe-store.sh && bash probe-gdb.sh`;
 evidence and limits in `full/evidence/store/README.md`.
 
-## Live pointer-bearing OOB store (2026-11-23 W9) — unwitnessed
+## Live pointer-bearing OOB store (2026-11-23 W9) — W170 ESTABLISHED
 
 A `build-plain.sh` full module (labelled "plain", not non-ASan — see the W14
 correction below) built from the same pinned parent, module sha256
@@ -205,14 +225,14 @@ This refines W8 rather than replacing it: W8's **in-bounds** store overwrites
 a header-copy `=` chosen by the wire and has no pointer target; W9's
 **out-of-bounds** store in the plain build corrupts a pointer's low byte.
 Grade is unchanged: rung 4 scoped, now with a pointer-bearing target on a
-live pre-auth wire path, still unwitnessed at that scope. The byte is always
+live pre-auth wire path, ESTABLISHED by W170 at that scope. The byte is always
 NUL, the pointer target is not wire-chosen, no consumer read, chosen byte,
 command or rung 5 is measured; gdb disables ASLR, so the addresses are
 lab-layout facts. Replay: `cd lab/frontier/modauthoidc2shell/full &&
 bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh`;
 raw evidence and limits `full/evidence/plain-oob/README.md`.
 
-### W10 no-consumer check (2026-11-23) — unwitnessed
+### W10 no-consumer check (2026-11-23) — W170 ESTABLISHED
 
 `full/probe-plain-keepalive.sh` arms a hardware watchpoint on the corrupted
 word at pinned `state.c:219`, removes the source breakpoint, and sends three
@@ -228,12 +248,12 @@ later), though intra-libapr calls bypass interposition
 No consumer of the corrupted word was observed in the faulting request or the
 two later same-connection requests. "Pointer-bearing" describes the 8-byte
 shape, not a demonstrated dereference. Grade unchanged: rung 4 scoped on a
-live pre-auth wire path, unwitnessed at that scope; byte always NUL, no chosen
+live pre-auth wire path, ESTABLISHED by W170 at that scope; byte always NUL, no chosen
 byte, pointer target not wire-chosen, no command or rung 5. Replay: `cd
 lab/frontier/modauthoidc2shell/full && bash build-plain.sh &&
 bash probe-plain-oob.sh && bash probe-plain-keepalive.sh`.
 
-### W11 response-path store (2026-11-23) — unwitnessed
+### W11 response-path store (2026-11-23) — W170 ESTABLISHED
 
 `full/httpd-plain-response.conf` enables `<Location /redirect_uri>`;
 `full/probe-plain-response.sh` sends an unauthenticated
@@ -247,7 +267,7 @@ wire-chosen `=` of `code=foo` in the copied request line. HTTP 400 followed;
 failed JWE decode. A hardware watchpoint on the corrupted word recorded no
 later read/write of that word (`full/evidence/plain-oob/response/`).
 
-Grade unchanged: rung 4 scoped on a live pre-auth wire path, unwitnessed at
+Grade unchanged: rung 4 scoped on a live pre-auth wire path, ESTABLISHED by W170 at
 that scope. The second caller is now source-bound and reached on the wire, and
 the stop byte is wire-chosen, but the byte written is always NUL with no
 dereference of the corrupted word, chosen byte, pointer control, command or
@@ -285,7 +305,7 @@ bash probe-plain-crash-sigsegv.sh && bash probe-plain-fixed-sigsegv.sh`.
 Raw and limits: `full/evidence/plain-crash/README.md`.
 
 
-### W13 native child SIGSEGV, bimodal per server start — unwitnessed
+### W13 native child SIGSEGV, bimodal per server start — W170 ESTABLISHED
 
 The child fault was reproduced without the W12 shim, `LD_PRELOAD` or ptrace:
 the pinned plain module on the plain httpd/APR stack, started with
@@ -307,7 +327,7 @@ Apache zeroes child `RLIMIT_CORE` without `CoreDumpDirectory` and the core
 pattern pipes to apport, so no usable core was captured.
 
 Grade unchanged: rung 3 confirmed on the live pre-auth wire path, rung 4
-scoped and unwitnessed at that scope. This adds a **native** availability
+scoped and ESTABLISHED by W170 at that scope. This adds a **native** availability
 observation from one unauthenticated request, but it is bimodal across
 restarts, not a deterministic primitive. Byte always NUL; no chosen byte,
 pointer target, consumer dereference, command or rung 5. Replay: `cd
@@ -336,3 +356,21 @@ plain-process SIGSEGV at pinned `state.c.4301b536:219` (the NUL store), no
 libasan/preload/shim. Harness availability only — no full module, listener,
 socket or wire; no grade change, no rung 5. Full evidence in `PROVENANCE.md`
 § "Long value-less token faults a non-ASan real-APR process (2026-11-23 W14)".
+
+**W15 non-ASan full-module crash on the wire — unwitnessed.** The pinned
+parent module and the released tag were rebuilt with system `/usr/bin/apxs`
+against Ubuntu httpd 2.4.58 / system APR and non-ASan jansson/cjose; `ldd`
+shows no `libasan` in the server or either module. On loopback 18091 (18090
+was the witness's port), a bare 7800-byte value-less state cookie returned
+0/48 HTTP 302 across four fresh starts with 44 logged `AH00051 ... exit
+signal Segmentation fault (11)` children; well-formed and released-tag
+controls were 16/16 HTTP 302 with zero faults. With one request per fresh
+start, 5/6 bare requests faulted on the **first** request (1/6 clean), so the
+effect is driven by one unauthenticated request but is layout-dependent
+across starts. No native faulting PC is captured on this stack; the written
+byte is still NUL, with no chosen byte, pointer target, consumer dereference,
+command or rung 5. This replaces the W14 caveat "no availability claim on a
+non-ASan stack" with a measured one at this labeled wire scope; grade and
+witness status unchanged. Raw: `full/evidence/sys-native/README.md`; replay
+`cd lab/frontier/modauthoidc2shell/full && bash probe-sys-native.sh &&
+bash probe-sys-first.sh`.

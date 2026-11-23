@@ -411,3 +411,53 @@ availability (no full module, listener, socket or wire) and does not upgrade
 W13's full-module claim. Grade unchanged: rung 4 scoped, no chosen byte,
 pointer target, consumer dereference, command or rung 5. Driver sha, raw
 transcripts (including the clean-archive replay), gdb trace and limits: `realobj/evidence/longtoken/`.
+
+## Non-ASan full-module crash on the wire (2026-11-23 W15)
+
+W14's remaining gap — a full module on a production allocator — is now
+measured. The pinned parent worktree `4301b536…` (`state.c` sha256
+`ceedb687…5aa`) and the released-tag worktree `cd1534e5` (`state.c` sha256
+`f02d8ddb…77ce5`) were rebuilt with the **system** `/usr/bin/apxs` against
+Ubuntu httpd 2.4.58 / system APR 1.7.2 and the non-ASan `plain-prefix`
+jansson/cjose; `ldd` on the server and both modules lists no `libasan`.
+Modules sha256: `59d9a2f935654ba6bb2f20509b12e1c598d9246d2237fe92aeb7afda3b116701`
+(vulnerable), `704f0d5fa55c64308415a8d8b31d92230bbd3cb1f15da580f7108fd2df5375a3`
+(fixed). Servers bind only 127.0.0.1:18091: 18090 was in use by the witness.
+
+`full/probe-sys-native.sh`: bare `Cookie: mod_auth_openidc_state_<7800 a>` on
+`GET /protected`, 4 fresh master starts x 12 requests gave 0/48 HTTP 302 and
+11 `AH00051 ... exit signal Segmentation fault (11)` children per start
+(44 logged faults). Same-env controls: well-formed `<7800 a>=1` 16/16 HTTP 302
+with 0 faults; bare token on released tag 16/16 HTTP 302 with 0 faults.
+`full/probe-sys-first.sh`: one request per fresh start faulted on the **first**
+request in 5/6 starts (1/6 returned 302), with 2/2 clean well-formed and 2/2
+clean fixed controls. The effect is driven by one unauthenticated request but
+remains layout-dependent across master starts, not deterministic per request.
+
+The native faulting PC is not captured on this stack (children have
+`RLIMIT_CORE=0`, core_pattern pipes to apport); the crash is observed through
+Apache's logged child signal. The written byte is still NUL and no chosen
+byte, pointer target, consumer dereference, command or rung 5 is demonstrated.
+Grade unchanged: rungs 1-3 ESTABLISHED at the witness's direct-call scope;
+rungs 3-4 observed on the live pre-auth wire path at author scope; this adds a
+production-allocator availability effect at that scope, unwitnessed.
+Raw results, logs, hashes and limits: `full/evidence/sys-native/README.md`.
+Re-run: `cd full && bash probe-sys-native.sh && bash probe-sys-first.sh`.
+
+## Witness verdict W170 (2026-11-23 16:58Z)
+
+The witness closed the consolidated replay request (#2705/#2804/#2836) from a
+full `/tmp` copy at HEAD `10fdd31`: tracked scripts hash-match HEAD, pinned
+`state.c` `ceedb687…5aa` and plain module `00899061…5654` verified.
+ESTABLISHED at the labeled scopes, no counterexample, no grade change, NOT
+rung 5: W6 30/30 ASan READ at pinned `:214` with the full live stack, fixed
+0/30 plus 30 HTTP 302; W8 `:219` bytes 0x3d→0x00 at two wire-chosen offsets;
+W9 pointer-low-byte store with no consumer read; W11 second caller via
+`handle/response.c:353` with `=foo&sta` stop byte; W13 bimodal child SIGSEGV
+with clean well-formed and released-tag controls; W14 non-ASan harness faults
+with a layout-dependent rate, consistent with the claim. The pinned `:214`
+scan and `:219 *cookie=NUL` are source-bound; fixed `:217` adds the NUL guard.
+No chosen byte, pointer target, consumer dereference, command or marker.
+W12's shim experiment and W15's production-allocator full-module crash were
+not part of this verdict and remain author-only/unwitnessed. W170's NIT —
+stale "unwitnessed" wording in the status report — was folded the same wake.

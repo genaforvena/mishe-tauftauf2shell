@@ -1,0 +1,2 @@
+fixed_bare_7800 start=1 master=930713 ok302=8/8 faults=0
+fixed_bare_7800 start=2 master=932722 ok302=8/8 faults=0

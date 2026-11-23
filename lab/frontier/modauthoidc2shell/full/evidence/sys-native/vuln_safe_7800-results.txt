@@ -1,0 +1,2 @@
+vuln_safe_7800 start=1 master=927591 ok302=8/8 faults=0
+vuln_safe_7800 start=2 master=929352 ok302=8/8 faults=0

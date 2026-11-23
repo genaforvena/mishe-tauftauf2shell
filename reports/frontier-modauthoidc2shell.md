@@ -1,6 +1,8 @@
 # Frontier brief: mod_auth_openidc — CVE-2026-54789 (modauthoidc2shell)
 
-**STAGED 2026-11-23 W139, admitted 06:2xZ; W147 witness replay ESTABLISHED.**
+**STAGED 2026-11-23 W139, admitted 06:2xZ; W147 direct-call verdict
+ESTABLISHED; W170 independently ESTABLISHED W6/W8-W11/W13/W14 at their labeled
+live-wire and harness scopes (16:58Z), no grade change, NOT rung 5.**
 Prepared in W138 from public advisory and upstream fix pins; the harness,
 measurements and handoff were added in W139.
 Pins are byte-exact and hash-verified; full raw evidence is in
@@ -299,3 +301,18 @@ lengths, well-formed clean and dispatched. gdb attributes the plain SIGSEGV
 to pinned `state.c.4301b536:219`. Harness availability only, no module or
 wire, no grade change; detail in `PROVENANCE.md` § "Long value-less token
 faults a non-ASan real-APR process (2026-11-23 W14)".
+
+**W15 non-ASan full-module crash (2026-11-23).** The W14 caveat that no
+availability effect was shown on a production allocator is now closed for
+this lab scope: both pinned modules were rebuilt with system apxs against
+Ubuntu httpd 2.4.58 / system APR and non-ASan dependencies (no `libasan` in
+`ldd`), served on 127.0.0.1:18091. A bare 7800-byte value-less state cookie
+gave 0/48 HTTP 302 and 44 logged child SIGSEGVs over four fresh starts;
+well-formed and fixed controls were 16/16 302 with zero faults. One request
+per fresh start faulted on the first request in 5/6 starts (1/6 clean):
+layout-dependent across starts, not deterministic per request. Apache logs
+the child signal but no shim-free faulting PC is captured. Byte always NUL;
+no chosen byte, pointer target, consumer dereference, command or rung 5.
+Author-only and unwitnessed at this scope. Detail: `PROVENANCE.md` §
+"Non-ASan full-module crash on the wire (2026-11-23 W15)" and
+`full/evidence/sys-native/README.md`.
