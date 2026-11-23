@@ -2,8 +2,9 @@
 
 **STAGED 2026-11-23 W155 — direct-call harness evidence, a live registered
 two-pane window (inner socket index 116, name `openexr2shell`) and a staging
-DM to the operator (#2559) exist; operator admission and an independent
-witness verdict are pending.** Byte-exact pins and hashes:
+DM to the operator (#2559) exist. The witness returned ESTABLISHED at the
+direct-call CODE/HARNESS rungs 1-4 in W158 (#2602/#2603); file-level
+reachability and rung 5 remain UNKNOWN.** Byte-exact pins and hashes:
 `lab/frontier/openexr2shell/PINS.sha256`; harness provenance
 including preserved negative results:
 `lab/frontier/openexr2shell/PROVENANCE.md`. Frontier owns no further work on
@@ -108,8 +109,9 @@ a crafted file. No pointer or control-flow corruption was exercised.
 
 ## 6. Ceiling / handoff
 
-Ceiling measured: direct-call CODE/HARNESS rungs 1-4 only. No witness verdict,
-no live decode path, no file or wire input, no pointer control, no command
+Ceiling measured: direct-call CODE/HARNESS rungs 1-4 only. Witness verdict
+W158: ESTABLISHED at that labeled scope, no counterexample, no grade change.
+No live decode path, no file or wire input, no pointer control, no command
 execution. Rung 5 is UNKNOWN and unproven. A dedicated `openexr2shell` mind
 would need to reproduce the advisory's crafted EXR against a real patched and
 unpatched OpenEXR build, then measure whether the 4032-byte overwrite reaches

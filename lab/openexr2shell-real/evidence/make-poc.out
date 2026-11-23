@@ -1,0 +1,6 @@
+baseline chunk: y=0 samptab=112 packed=49 unpacked=256
+poc: samptab=256 (raw) packed=52 unpacked=64
+forged totsamp=1024 combSampSize=4 GRID_TOTAL=4096
+split=0 (all-float part) -> legacy split guard FALSE
+sort2 would memcpy 4096 bytes into a 64-byte buffer (overflow 4032 bytes)
+wrote cases/poc.exr (692 bytes)

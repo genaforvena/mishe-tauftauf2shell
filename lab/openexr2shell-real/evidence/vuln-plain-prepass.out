@@ -1,0 +1,7 @@
+START rv=0
+CHUNK rv=0 packed=52 unpacked=64 width=64 height=1
+INIT rv=0 channels=1
+ROUTINES rv=0
+RUN flags=4
+cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample count table
+DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA

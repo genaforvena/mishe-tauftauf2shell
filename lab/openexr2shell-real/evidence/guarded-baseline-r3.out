@@ -1,0 +1,4 @@
+DECODE rv=0 EXR_ERR_SUCCESS
+BUFFERS unpacked=0x64bb4a610678 alloc=24 size=256 scratch1=0x64bb4a6314f8 alloc=26 size=256
+GUARDS post-decode nallocs=27
+GUARD-TOTAL post-decode changed=0

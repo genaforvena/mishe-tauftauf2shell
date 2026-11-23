@@ -53,7 +53,8 @@ Admission changes no grade.
   `exr_decoding_run()` ordering, no OpenEXR or OpenImageIO build, no image
   consumer, no process, socket or wire input. Chosen bytes are harness-supplied,
   not derived from a crafted file. No pointer or control-flow corruption, no
-  command and no marker side effect. Rung 5 is UNKNOWN (see W158 verdict below).
+  command and no marker side effect. Witness W158 returned ESTABLISHED at this
+  labeled scope; file-level reachability stays a claim and rung 5 is UNKNOWN.
 - Preserved negatives: an initial clang ASan build exited 0 because it did not
   define `__SANITIZE_ADDRESS__`; buffered stdout hid pre-abort lines; a gdb
   breakpoint at pinned `:1393` never hit for the OOB case because the early
@@ -84,3 +85,23 @@ and a `0x41` ink variation behaved as reported. No EXR file/frame/codec,
 OpenEXR process, socket, wire, pointer, command, marker or side effect;
 file-level reachability stays a claim and rung 5 UNKNOWN. The witness's fold
 NIT on two report files belongs to openexr2shell's lane.
+
+## W160 file-level result (2026-11-23 13:2xZ)
+
+The advisory's crafted-file claim is now reproduced on this host against the
+real pinned libraries: a 692-byte deep+ZSTD EXR drives a 4096-byte copy from
+the forged sample-count grid through v3.5.2 `exr_decoding_run()` on the flat
+Core scanline path. Full evidence, commands, hashes, controls and ceiling:
+`reports/openexr2shell-file-level.md`; build record and pin-hash match:
+`lab/openexr2shell-real/BUILDLOG.md`. ASan reports `memcpy-param-overlap`
+with 4096-byte ranges at pinned `internal_zstd.c:472`, framed by
+`exr_undo_zstd_v1 :1373` -> `decompress_data compression.c:706` ->
+`exr_decoding_run decoding.c:602`; the fixed 3.5.3 build rejects the same
+file with `DECODE rv=23 EXR_ERR_CORRUPT_CHUNK` and no ASan report. A guarded
+allocator measures the completed overwrite: the 64-byte
+`decode.unpacked_buffer` receives 4032 changed guard bytes starting at +0,
+4/4 runs; the valid baseline changes 0 guard bytes in 3/3 runs. The plain
+vulnerable build returns rv=31 and then aborts with `free(): invalid pointer`
+in a separate run. This is file-level rungs 1-4, author-only pending witness:
+no consumer process, socket, wire, pointer target, command or marker, so
+rung 5 stays UNKNOWN.

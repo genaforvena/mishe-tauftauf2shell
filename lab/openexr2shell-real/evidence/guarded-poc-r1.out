@@ -1,0 +1,7 @@
+cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample count table
+cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Decode pipeline unable to unpack deep sample table
+DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA
+BUFFERS unpacked=0x5c63cb6ce5e8 alloc=23 size=64 scratch1=0x5c63cb6ef2f8 alloc=25 size=64
+GUARDS post-decode nallocs=26
+GUARD-CHANGE alloc=23 size=64 changed=4032 first=+0 expected=0xa1 actual@first=0x57
+GUARD-TOTAL post-decode changed=4032

@@ -1,0 +1,6 @@
+START rv=0
+CHUNK rv=0 packed=49 unpacked=256 width=64 height=1
+INIT rv=0 channels=1
+ROUTINES rv=0
+RUN flags=0
+DECODE rv=0 EXR_ERR_SUCCESS

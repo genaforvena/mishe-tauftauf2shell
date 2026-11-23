@@ -99,7 +99,7 @@ gdb -q -batch -nx -ex 'directory ../src' \
   generated driver; both compilers then fault.
 - First ASan runs lost their pre-abort `CASE baseline` lines because stdout
   was block-buffered when ASan aborts; fixed with `setbuf(stdout, NULL)`.
-  The failing trace `27a2a815...` was computed afterwards and is stable.
+  The passing normalized trace `27a2a815...` was computed afterwards and is stable.
 - A conditional gdb breakpoint at pinned `:1393` never hit for the OOB case:
   the early return at `:1391` fires first. The fixed-reject evidence was
   retaken at `:1390`.

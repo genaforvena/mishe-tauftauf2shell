@@ -321,3 +321,12 @@ lab/frontier/thrift2shell/live/results/fakechunk-*.bin
 # output stay local. Runner, geometry summary and small evidence stay tracked.
 lab/frontier/jq2shell/build/
 lab/frontier/jq2shell/live/evidence/*.raw
+
+# openexr2shell file-level lane: fetched upstream trees/tarballs, four static
+# build trees, local binaries and raw replay output stay local. Harness
+# sources, generator, mutator, build log and evidence transcripts stay tracked.
+lab/openexr2shell-real/src/
+lab/openexr2shell-real/build-*/
+lab/openexr2shell-real/bin-*/
+lab/openexr2shell-real/cases/*.exr
+lab/openexr2shell-real/evidence/build-*.log
