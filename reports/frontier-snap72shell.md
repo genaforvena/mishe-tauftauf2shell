@@ -91,7 +91,7 @@ The harness replaces `isoExchangeBuffer()` with a stub that places the crafted
 response in `PDU.Payload` and records its length in `IsoSize`, as the real
 routine does. No socket, listener, PLC or external host is involved.
 
-## 4. Rung-4 feasibility and honest ceiling
+## 4. Rung-4 feasibility and honest ceiling at handoff (superseded in §7)
 
 Feasible to rung 4 in the scoped sense: the peer chooses the copy length, the
 copy destination is the caller's object, and the first 32 copied bytes are
@@ -106,7 +106,7 @@ such. Robustness caveat: the write length is a 16-bit word, so the maximum
 single-item overflow is 65535 bytes and the transport-size branch divides it
 by 8 for the byte case.
 
-## 5. Cheapest next experiment to move up a rung
+## 5. Cheapest next experiment (completed in §7)
 
 Build the real snap7 library from the pinned commit under ASan and run a
 loopback fake S7 server that completes COTP connection setup and Setup
@@ -132,3 +132,34 @@ observation would the remote precondition be measured rather than assumed.
 - QuickJS-NG CVE-2026-120438 / CVE-2026-120439 remain parked from W136:
   32-bit-host only and this host cannot link `gcc -m32`.
 - All exclusion-list targets unchanged; no duplicate lane opened.
+
+## 7. W1 live loopback observation — 2026-11-23 05:23Z
+
+The §5 experiment was completed in `lab/frontier/snap72shell/live/`, not left
+as a plan. `run_live.sh` builds the real pinned client under gcc ASan (and a
+guarded variant generated from the pinned issue-#32 function), starts a
+plant-written fake S7 responder bound only to 127.0.0.1, and replays COTP CR/CC,
+S7 Setup Communication and one `Cli_ReadMultiVars()` answer. Two consecutive
+runs gave the same normalized trace SHA-256
+`1f25bf6311e1a659e4da947abc07d001cfacc5fe39dd67618560e425df3773d4`.
+
+- Attack wire (`ReturnCode=0xFF`, `TransportSize=0x09`, `DataLength=0xFFFF`,
+  32 real bytes): the live client connected and ASan reported
+  `heap-buffer-overflow`, `WRITE of size 65535`, 0 bytes after a one-byte
+  caller allocation, in `opReadMultiVars()` at pinned line 418.
+- Guarded build on the same wire returned `errCliInvalidPlcAnswer` (8388608),
+  left the destination at `00` and was ASan-clean. The guard is the pinned
+  reporter proposal, not an upstream fix.
+- Safe one-byte response: both builds returned 0 with `DST0=5a`, ASan-clean.
+- Plain vulnerable build with a 200000-byte caller buffer, attack wire:
+  `DST0=5a DEST17=6b DEST64=00` — peer-chosen bytes land at offsets 0 and 17
+  in the live destination; beyond the 32 real bytes the copied source is the
+  zeroed PDU buffer.
+
+Ceiling is now rung 4 **wire-reachable in the lab**: the write is driven by a
+plant-started loopback responder into a live pinned client process, not by a
+stub injection. It is still not rung 5. Position requires control or
+impersonation of a PLC (`AT:P`); there is no pointer redirect, command or
+observed command side effect, and no upstream fixed release. Hashes, exact
+frames, ASan reports and both replay transcripts are in `PROVENANCE.md` and
+`live/evidence/`.

@@ -3,3 +3,8 @@ harness/p-fixed
 harness/a-vuln-gcc
 harness/a-vuln-clang
 harness/a-fixed-gcc
+live/snap7-30f37da*/
+live/snap7-30f37da*.tar.gz
+live/bin/
+live/patched/
+live/port.txt
