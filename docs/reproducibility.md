@@ -4682,14 +4682,15 @@ request/wire path, pointer control, command, side effect or rung 5.
 No lab run and no guard bypass. From the repo root:
 
 ```
-python3 -c 'M=1<<32; print(next(L for L in range(1,0x55555560) if L*3+1>=M and (L*3+1)%M<=32), (0x55555557*3+1)%M, 477218589*4+1431655767)'
+python3 -c 'M=1<<32; L=(M-1)//3; print(L, 3*L+1, (0x55555557*3+1)%M, 477218589*4+1431655767)'
 sha256sum -c lab/frontier/jq2shell/PINS.sha256
 ```
 
-Expected `1431655765 6 3340530123` and 14 `OK` lines. The first number is
-the shortest positive `length` that wraps at `jv.c.vuln:1117`; the second is
-the harness's `1431655767u` (`0x55555557`, not the `0x5555555b` typo in the
-older comments); the third is the live encoded plus decoded byte count of
+Expected `1431655765 4294967296 6 3340530123` and 14 `OK` lines. The first
+two numbers are the shortest positive `length` whose product wraps and the
+wrapped product itself (`2^32`, `maxlength=0`) at `jv.c.vuln:1117`; the third
+is the harness's `1431655767u` (`0x55555557`, not the `0x5555555b` typo in
+older comments); the fourth is the live encoded plus decoded byte count of
 the `@base64d` path (`builtin.c:754-755`, `:787`, `jv.c.vuln:1511`) at that
 length, above the 2147483648-byte guard. Conclusion and limits in
 `reports/jq2shell-status.md`.
