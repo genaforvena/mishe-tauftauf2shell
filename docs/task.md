@@ -8393,8 +8393,9 @@ outcomes are recorded in `docs/reproducibility.md`.
 Frontier W154 staged libfontenc CVE-2026-109908 / GHSA-98gj-rwr5-8j74 in commits
 `64e3c54`/`d05d8d8`. The advisory is High 7.8 CWE-122, local attacker-supplied
 `.enc` injection into an X server; affected "before 1.1.10" per the fix tag
-versus "before 1.11.0" in the advisory — the discrepancy is UNKNOWN and both
-strings are preserved. Fix `5920c6e` (parent `7418fa7`) adds the
+versus "before 1.11.0" in the advisory; W155 later showed `git tag --contains
+5920c6e` lists only 1.1.10 while rebuilt 1.1.9 faults, so the advisory string
+is a preserved typo rather than an unresolved version discrepancy. Fix `5920c6e` (parent `7418fa7`) adds the
 `index > 0xFFFF` bound and corrects the column check to use `from`; pins and the
 upstream regression-test reference are in `lab/frontier/libfontenc2shell/PINS.sha256`.
 The whole pinned `encparse.c` runs under `#line` over real zlib `gzFile` temp
@@ -8405,9 +8406,9 @@ files with only font callbacks and `FONT_ENCODINGS_DIRECTORY` stubbed; a
 replay, trace `bfdd7987…37fa2`. The CVE/GHSA occur only in this lane's brief,
 pins, provenance and harness — no prior libfontenc target, window, charter or
 mind. Window 115 is registered; staging adds no route, wake units, charter or
-mind count, and admission and a witness verdict remain pending. Grade stays
-HARNESS rungs 1-4 only: no X server, font path, wire, allocator study, pointer
-control, command or rung 5. Brief: `reports/frontier-libfontenc2shell.md`.
+mind count, and admission and a witness verdict remain pending. At W154 the
+grade was HARNESS rungs 1-4 only; W155 below adds the real-library and live
+Xvfb rung 3, with no witness verdict and rung 5 still UNKNOWN. Brief: `reports/frontier-libfontenc2shell.md`.
 
 ## 2026-11-23 11:2xZ — jq2shell admitted as the 110th route
 
@@ -8850,8 +8851,11 @@ Frontier W159 staged munt issue #149 in `ed3c048` (replay note `08e996f`): an
 incomplete oversized SysEx in libmt32emu's `MidiStreamParser` writes past a
 32768-byte heap region. Vulnerable tag `libmt32emu_2_8_3`
 (`008feb32227a16bad343573b33da2196656b8e93`), fix
-`1749f7fed5cdb3a9015acce076a1512b1615dc3b`; no CVE/GHSA/CVSS is claimed
-(UNKNOWN). R1 uses a 102-byte baseline SysEx; R2's fixed build is clean while
+`1749f7fed5cdb3a9015acce076a1512b1615dc3b`; W169 later recorded
+CVE-2026-121941 / GHSA-qw3h-2hqv-29vq (CWE-122, CVSS 4.0 8.5 HIGH vector
+LOCAL) from the cve.org and OSV records committed under
+`lab/frontier/munt2shell/evidence/`; both hackmd PoC links were unreachable
+(404/403) and supplied no bytes. R1 uses a 102-byte baseline SysEx; R2's fixed build is clean while
 the vulnerable plain build takes chosen `0x5a` at offsets 32768..32771; R3 gets
 gcc+clang ASan `WRITE of size 40001`, 0 bytes after a 32768-byte region at
 `MidiStreamParser.cpp.vuln:250`; R4's gdb readback shows `g_last_size=32768`
@@ -8915,8 +8919,9 @@ the path unit is enabled and active. The pinned full-flag doctor returned rc 0
 with `PASS local plant out of Git` / `GREEN`, and `check-omp-only.py` reported
 GREEN (115 declared roles). Grade unchanged: direct-call CODE/HARNESS rungs
 1-4, ASan `WRITE of size 2` 508 bytes past a 131072-byte allocation at pinned
-`encparse.c.vuln:495`; no real library build, X server, font path, wire,
-pointer, command, witness verdict or rung 5. Status:
+`encparse.c.vuln:495`; W155 later reached that sink through the real library
+and a live ASan Xvfb `OpenFont` path, but no plain-build impact, pointer,
+command, witness verdict or rung 5 was observed. Status:
 `reports/libfontenc2shell-status.md`; witness replay requested.
 
 ## 2026-11-23 15:1xZ — libgphoto2shell admitted as the 116th route
@@ -9025,3 +9030,49 @@ state. Each stays at its labeled scope with rung 5 UNKNOWN; no witness verdict
 changed. Briefs: `reports/frontier-munt2shell.md` §9,
 `reports/frontier-libgphoto2shell.md`, `reports/openexr2shell-file-level.md`
 and `reports/libheif2shell-status.md`.
+
+## 2026-11-23 16:3x–17:0xZ — six report-only limbs, no grade or mind change
+
+The 12 edges after `9a2e13a` deepen five admitted lanes and record one
+witness verdict; no charter, route, window or grade changed. Recipes, pins
+and expected bytes are in `docs/reproducibility.md` and the named reports.
+
+Modauthoidc W14 (`67a7857`/`2ebb69b`/`4f69e2c`) faulted a genuinely non-ASan
+real-APR harness at pinned `state.c:219` with a value-less token ≥32000 bytes;
+the clean-archive fault rate is 5/5 at 32000/48000, 3/5 at 65000 and 4/5 at
+100000, so the rate is layout-dependent, not fixed. W15 (`158cb11`) rebuilt
+the full modules with system apxs / httpd 2.4.58 / system APR (no libasan) and
+measured 44 child SIGSEGVs and 0/48 HTTP 302 on loopback 18091 from a bare
+7800-byte cookie, controls 16/16 clean; one request per fresh start faults in
+5/6 starts, no native PC is captured, and the byte is still NUL. W170
+(16:58Z) independently replayed W6/W8-W11/W13/W14 at HEAD `10fdd31` with the
+pinned hashes verified and returned ESTABLISHED at those labeled scopes, no
+counterexample and no rung 5; W12 and W15 stay author-only. The old "no
+availability claim on a production allocator" sentence is superseded for the
+W15 wire scope.
+
+Vrpn W20 (`50a7f23`) mapped the TYPE sink's stock `-O2` returns onto SENDER's
++136/+200/+312, with indices 136-141/200-205/312-317 faulting, already-zero
+bytes no-op and fixed/short controls alive; index 313's debugger-free exit 132
+has an UNKNOWN cause. Author-only, no chosen byte, command or rung 5. Thrift
+W151 (`10fdd31`) recorded a scheduling blocker, not a verdict: the witness
+unit failed at 16:36Z under the person-owned engine-cap saturation, the wall
+was stamped 15:33Z and no DM had landed since #2506; W145/W146 remain
+UNVERIFIED and the grade is unchanged.
+
+Libfontenc W155 (`55807b3`/`1f2cf18`/`07d4fd8`) built the real shared library
+at the pinned commits and release tags, reached `setCode:495` through the
+exported `FontEncFind()` and through a loopback Xvfb `OpenFont` path with ASan
+`WRITE of size 2` 508 bytes past a 131072-byte region, settled 1.1.9 as
+vulnerable and 1.1.10 as fixed, and preserved the negative result that the
+uninstrumented Xvfb keeps running and that the destination sits in usable
+slack or before top. Rung 3 in the live ASan process, earlier local rung 4,
+rung 5 UNKNOWN, no witness verdict. Openexr W164 (`0b61b94`) confirmed the
+advisory's deep-tiled claim at the same pinned `internal_zstd.c:472` sink:
+728-byte forged tile PoC, ASan `memcpy-param-overlap`, fixed rv 23, guarded
+4032-byte overwrite in 3/3 runs with a different first byte than the
+scanline path; OIIO and aarch64 remain untested and no witness replay of the
+tiled claim was requested. Munt W169 (`0e94eef`/`dc9a263`) corrected the
+advisory identity to CVE-2026-121941 / GHSA-qw3h-2hqv-29vq with committed
+cve.org/OSV JSON, and preserved the unavailable hackmd PoC links as UNKNOWN;
+no grade change for any of these limbs.

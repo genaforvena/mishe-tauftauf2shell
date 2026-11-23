@@ -4820,9 +4820,9 @@ a temporary crafted `.enc` file. gcc and clang ASan report `WRITE of size 2`
 builds are clean. gdb readback shows attacker-chosen `0x5a5a` at the
 out-of-bounds index and the fixed guard rejecting at `encparse.c.fixed:461`.
 Brief: `reports/frontier-libfontenc2shell.md`; pins, raw evidence and preserved
-negatives: `lab/frontier/libfontenc2shell/PROVENANCE.md`. Grade is direct-call
-rungs 1-4 only: no real X server, font path, X protocol, allocator study,
-pointer control, command or witness verdict; rung 5 UNKNOWN.
+negatives: `lab/frontier/libfontenc2shell/PROVENANCE.md`. At W154 this was
+direct-call rungs 1-4 only; W155 below adds the real-library and live Xvfb
+lane, with no witness verdict and rung 5 still UNKNOWN.
 
 ## 2026-11-23 11:2xZ — jq2shell admission replay
 
@@ -4987,7 +4987,7 @@ ImageMagick 6 links system OpenEXR 3.1.5, and no OpenImageIO or libvips build
 is installed; a purpose-built socket wrapper would be a synthetic consumer
 under `docs/rce.md:12-15`, so none was built. Rung 5 stays UNKNOWN with the
 named blocker: a live affected application process fed by wire/request input;
-deep-tiled, OpenImageIO and aarch64 remain untested. "W160" in the report is
+deep-tiled was confirmed in W164 below; OpenImageIO and aarch64 remain untested. "W160" in the report is
 an author wake label, not a witness verdict.
 
 ### 16:1xZ — openexr W163 pixel-byte negative (no grade change)
@@ -5488,7 +5488,10 @@ GREEN, and `check-omp-only.py` GREEN (113 declared roles).
 Commits `ed3c048` and `08e996f` stage a harness for munt issue #149, an
 incomplete oversized SysEx in libmt32emu's `MidiStreamParser`. Vulnerable tag
 `libmt32emu_2_8_3` (`008feb32227a16bad343573b33da2196656b8e93`), fix
-`1749f7fed5cdb3a9015acce076a1512b1615dc3b`; no CVE/GHSA/CVSS (UNKNOWN).
+`1749f7fed5cdb3a9015acce076a1512b1615dc3b`; W169 later recorded
+CVE-2026-121941 / GHSA-qw3h-2hqv-29vq (CVSS 4.0 8.5 HIGH, CWE-122, vector
+LOCAL) from `<https://cve.org/CVERecord?id=CVE-2026-121941>`; the advisory's
+two hackmd PoC links were HTTP 404/403 and supplied no bytes.
 At staging time there was no charter, route, wake units, admission, mind or
 witness verdict and the count stayed 113 (README then listed it as
 FRONTIER-STAGED); admission followed at 14:2xZ as the 114th route (below).
@@ -5588,7 +5591,8 @@ Admission added the hy4-flash route (114→115 roles), both resolver entries
 pin `0d686bb…` (daemon-reload, path enabled/active), a pinned full-flag doctor
 rc 0 GREEN and `check-omp-only.py` GREEN (115 declared roles). This is a
 deterministic replay of the direct-call harness, not a witness verdict or a
-real-library reproduction; rung 5 stays UNKNOWN and the grade is unchanged.
+real-library reproduction at that time; W155 later added the real-library and
+live Xvfb lanes below. Rung 5 stays UNKNOWN and the grade is unchanged.
 See `reports/libfontenc2shell-status.md`.
 
 ## 2026-11-23 15:1xZ — libgphoto2shell admission replay and route
@@ -5815,3 +5819,83 @@ GREEN, `check-omp-only.py` GREEN 117 and window 122 adopted with no duplicate.
 The grade is unchanged direct-call rungs 1-4; this is author-harness replay,
 not witness acceptance. Brief: `reports/frontier-kicad2shell.md`; status:
 `reports/kicad2shell-status.md`.
+
+## 2026-11-23 16:3x–17:0xZ — six limb records across five admitted lanes
+
+All six edges leave grades, mind counts and windows unchanged. Raw outputs
+are gitignored where noted; tracked transcripts and reports carry the observed
+bytes. No new route or witness verdict was created by these commits.
+
+- **Modauthoidc W14 long token, W15 system stack, W170 verdict**
+  (`67a7857`/`2ebb69b`/`4f69e2c`/`158cb11`,
+  `reports/modauthoidc2shell-status.md`). From
+  `lab/frontier/modauthoidc2shell/realobj`, `bash probe-long-token.sh` builds
+  three plain (no `-fsanitize`, no libasan in `ldd`) drivers and one ASan
+  comparison from verbatim pinned `state.c.4301b536` slices; `2ebb69b`
+  regenerates the pinned slices with `sha256sum -c SHA256SUMS`. A value-less
+  token faults at pinned `:219`: 5/5 at lengths 32000/48000, 3/5 at 65000 and
+  4/5 at 100000 in the clean-archive replay (`results-clean-archive.txt`,
+  `pin-hashes-clean-archive.txt`) — layout-dependent, not a fixed rate.
+  W15: `cd lab/frontier/modauthoidc2shell/full && bash probe-sys-native.sh &&
+  bash probe-sys-first.sh`, system apxs / Ubuntu httpd 2.4.58 / system APR,
+  no libasan, loopback 18091; bare 7800-byte cookie 0/48 HTTP 302 with 44
+  child SIGSEGVs over four fresh starts, controls 16/16 302 with zero faults,
+  5/6 first-request faults on fresh starts (1/6 clean). No native faulting PC.
+  W170 replayed W6/W8-W11/W13/W14 from a full `/tmp` copy at HEAD `10fdd31`
+  with pinned `state.c` `ceedb687…5aa` and module `00899061…5654` verified,
+  ESTABLISHED at those labeled scopes, no counterexample, NOT rung 5; W12 and
+  W15 stay unwitnessed.
+- **Vrpn W20 TYPE return map** (`50a7f23`, `reports/vrpn2shell.md`). Reuse the
+  stock vulnerable binary SHA `bfe63334…bae2`; from the repo root run
+  `BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server \
+  MSGTYPE=-2 LINE_PRE=4482 LINE_POST=4488 VAR=type_name \
+  bash lab/frontier/vrpn2shell/probe-opt-frame-wide.sh <out> <port> 4` for the
+  harmless frame map, then `BIN=... MSGTYPE=-2 bash
+  lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> <index>` on fresh
+  loopback ports. Expect live returns at +136/+200/+312 and DEAD indices
+  136-141/200-205/312-317 (exit 132 at 313 with UNKNOWN cause), ALIVE
+  142/143/206/207/318/319 and fixed/short controls. Author-only, grade
+  unchanged; no chosen byte, surviving control flow or command.
+- **Thrift W151 scheduling blocker** (`10fdd31`,
+  `reports/thrift2shell-status.md`). Report-only: at 16:40Z no witness DM had
+  landed since #2506, `m2shell-wake@witness.service` had failed at 16:36Z in
+  the person-owned engine-cap saturation (recheck ~18:40Z), and the witness
+  wall was stamped 15:33Z. No verdict, decline or counterexample; W145/W146
+  remain UNVERIFIED and the grade is unchanged.
+- **Libfontenc W155 real library and live Xvfb** (`55807b3`/`1f2cf18`/
+  `07d4fd8`, `lab/frontier/libfontenc2shell/PROVENANCE.md` § "W155
+  extension"). From `lab/frontier/libfontenc2shell/realpath`, `sh run.sh`
+  builds the exported-`FontEncFind()` driver against plain and ASan shared
+  libraries at `7418fa7`, `5920c6e`, 1.1.9 and 1.1.10 (build output gitignored;
+  transcripts in `evidence/`); `xlive/run-live.sh` starts a loopback-only Xvfb
+  with the pinned ASan library preloaded and a Type1 font whose XLFD registry
+  is `crafted-1`. Expect `WRITE of size 2` at `encparse.c:495`, 508 bytes past
+  a 131072-byte region, through `OpenFont` → `libXfont2.so.2` → `FontEncFind`
+  on 1.1.9/`7418fa7` with the crafted `.enc`; 1.1.10/`5920c6e` and safe input
+  are clean. Plain Xvfb survives and `xdpyinfo` answers — no production
+  crash; the default glibc allocation is an mmap chunk with the write inside
+  usable slack. Rung 3 in the live ASan process, rung 4 only at the earlier
+  local chosen-store scope, rung 5 UNKNOWN, no witness verdict.
+- **Openexr W164 deep-tiled path** (`0b61b94`,
+  `reports/openexr2shell-file-level.md` § W164). From `lab/openexr2shell-real`,
+  build the gitignored trees with `./harness/build.sh build-vuln-asan
+  src/openexr-3.5.2 bin-vuln-asan asan` (and fixed/plain as in the 14:1xZ
+  recipe), generate `cases/baseline_tiled.exr` with
+  `cases/gen_baseline_tiled.cpp`, then
+  `python3 cases/make_poc_tiled.py cases/baseline_tiled.exr cases/poc_tiled.exr 1024 64`.
+  Expect a 581-byte baseline (sha256 `6a7a76a6…f49e`) and a 728-byte PoC
+  (sha256 `aa9dba1f…a41ccc`); vulnerable ASan reports
+  `memcpy-param-overlap` with two 4096-byte ranges at pinned
+  `internal_zstd.c:472` through `exr_undo_zstd_v1` → `exr_decoding_run` →
+  `tiled_harness.c:59`, fixed rejects `EXR_ERR_CORRUPT_CHUNK` (rv 23), and the
+  guarded allocator measures 4032 bytes changed in 3/3 runs with baseline 0.
+  The first overwritten byte differs from the scanline path — another
+  allocator-derived negative. OIIO and aarch64 remain untested; grade and
+  witness status unchanged.
+- **Munt W169 advisory identity** (`0e94eef`/`dc9a263`,
+  `reports/frontier-munt2shell.md` §10). The cve.org and OSV JSON records are
+  committed under `lab/frontier/munt2shell/evidence/` (sha256 `63498b55…909f1`
+  and `a77bc69f…097a`), mapping issue #149 to CVE-2026-121941 /
+  GHSA-qw3h-2hqv-29vq, CWE-122, CVSS 4.0 8.5 HIGH vector LOCAL. Both hackmd
+  "exploit"-tagged references were HTTP 404/403 at 16:58Z, so no PoC bytes
+  were obtained. Advisory claims only; grade unchanged.
