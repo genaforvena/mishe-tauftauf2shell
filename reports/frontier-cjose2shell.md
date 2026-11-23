@@ -105,24 +105,46 @@ normalized trace hash.
 - `harness/check.sh`: **223 PASS / 0 FAIL** on three identical runs, trace
   `455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`.
 
-## 5. Next distinct rung move
+## 5. W181 loopback wire consumer (measured this wake)
 
-The next step is a real consumer of cjose — e.g. a loopback-only
-`mod_auth_openidc`-style verifier fed an actual HTTP request with a tampered
-compact JWE — to learn whether a deployed pre-auth path reaches
-`cjose_jwe_decrypt` with attacker-controlled encrypted_key length, and what
-adjacent heap object the write lands in. That would move the wire-reachability
-part of the advisory from UNKNOWN to measured. Beyond that, pointer/IP
-control and command execution remain unattempted: the written value is a
-chosen byte pattern derived from a lab-known KEK, not an address read from
-the input.
+A lab-only consumer (`lab/frontier/cjose2shell/w1/{server.c,client.py,build.sh,run.sh}`)
+binds an ephemeral port on 127.0.0.1, accepts a real HTTP GET carrying a
+tampered compact JWE in `Authorization: Bearer`, decodes the encrypted_key
+segment from the wire, and calls real `cjose_jwe_import()` /
+`cjose_jwe_decrypt()` in the pinned vulnerable, fixed and ASan builds. The
+client generates RFC 3394 wraps locally with the same lab KEK. Results in
+`w1/evidence/`, all stable across three replays:
+
+- Wire length propagates: 48-, 56-, 64- and 1024-byte wrapped segments reach
+  the copy and yield `CEK_LEN_AFTER=40/48/56/1016` on the 32-byte CEK in vulnerable
+  builds; fixed builds reject with `ERRCODE=1` and keep 32. ASan reports the
+  `jwe.c:595` write in each tampered case.
+- Plain glibc result depends on the write size: 40 bytes stay inside the
+  chunk's 40 usable bytes and exit cleanly; 48 bytes corrupt the adjacent
+  chunk's size field and abort in `munmap_chunk()` (rc 134); 56 bytes also
+  corrupt it yet exits 0 — a preserved contradiction whose cause was not
+  established; 1016 bytes segfault (rc 139). No pointer or control-flow
+  target was observed.
+- Heap map: the CEK is a 48-byte glibc chunk; the adjacent object is a
+  25-byte jansson `jsonp_malloc` string at `cek+48`, preceded by its size
+  field at `cek+40`. Further neighbors come from jansson, `_decode`,
+  `_cjose_strndup` and `_oct_new` (symbolized in `PROVENANCE.md`).
+- Source-only check of an unbuilt mod_auth_openidc v2.4.15.1 finds an
+  unauthenticated backchannel-logout POST path
+  (`src/mod_auth_openidc.c:3960-3967` dispatch, `:3154-3182` handler;
+  `src/jose.c:930-936`, `:765-771`) that passes an
+  attacker-posted `logout_token` to `cjose_jwe_import()` and
+  `cjose_jwe_decrypt()` with configured symmetric keys before signature
+  validation and without an encrypted_key length check. This supports the
+  advisory's pre-auth shape but is not a running deployment, a witness
+  replay or a byte-value claim: the real KEK is secret.
 
 ## 6. Honest ceiling
 
-Direct call into a real cjose library built from pinned bytes, with real
-JWE import/decrypt, real RFC 3394 wrap/unwrap, and a lab-known symmetric key.
-No server, application, socket, wire listener, remote request, credential
-access, pointer/IP control, shell command or independent witness replay.
-Advisory pre-authentication wire reachability and any RCE claim remain
-**UNKNOWN**; rung 5 not attempted. The remote-length/heap-corruption claim is
-measured, the "code execution" claim is not.
+Direct call plus a loopback-only synthetic consumer, with a real compact JWE
+token and a lab-known symmetric key. Wire-length control and heap adjacency
+are measured; no deployed server, credential, pointer/IP control, shell
+command or independent witness replay. Advisory pre-authentication
+reachability in a real deployment and any RCE claim remain **UNKNOWN**;
+rung 5 not attempted. A pointer or control-flow target in a real consuming
+process is the prerequisite for any benign-marker attempt.

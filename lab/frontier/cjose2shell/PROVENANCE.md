@@ -1,4 +1,4 @@
-# cjose2shell — provenance and harness notes (W180, 2026-11-23)
+# cjose2shell — provenance and harness notes (W180/W181, 2026-11-23)
 
 ## Claim and provisioning (read-only public sources)
 
@@ -90,12 +90,80 @@ normalized trace `harness/evidence/trace.txt`; summary
   report; the invalid-IV `probe` cleanses its output, so its bytes are not a
   chosen-byte claim.
 
-## Ceiling
 
-Direct call into a real library with a real compact JWE token and a lab KEK.
-No server, application, socket, wire listener, remote request, credential
-theft, pointer/IP control, shell command or witness replay. The chosen bytes
-are the plaintext of a lab-generated RFC 3394 wrap under a lab-known key;
-the advisory's pre-auth wire reachability and code-execution claim remain
-UNKNOWN. The write length is attacker-controlled; the transformed byte
-values depend on the recipient KEK in a real deployment.
+## W181 — loopback wire consumer (2026-11-23 20:22-20:30Z)
+
+New lab-only files: `w1/{server.c,client.py,build.sh,run.sh}` and text logs in
+`w1/evidence/`. Build: `cd lab/frontier/cjose2shell/w1 && ./build.sh && ./run.sh`.
+The server binds an ephemeral port on 127.0.0.1 only, accepts one real HTTP
+GET with `Authorization: Bearer <compact JWE>`, independently base64url-decodes
+the second segment, then calls real `cjose_jwe_import()` and
+`cjose_jwe_decrypt()` from the pinned libraries. The Python client builds
+RFC 3394 wraps locally with the same lab KEK; no external target is contacted.
+Binaries: `w1-plain-vuln`, `w1-trace-vuln` (adds a static malloc/calloc/realloc
+caller ring linked with `--wrap`, non-PIE), `w1-asan-vuln`, `w1-plain-fixed`.
+
+Measured, with `EK_RAW_LEN` read from the wire segment and `CEK_LEN_AFTER`
+reported by the library (`w1/evidence/<binary>.<scenario>.log`):
+
+| scenario | write bytes | vulnerable plain | vulnerable ASan | fixed plain |
+| --- | --- | --- | --- | --- |
+| `valid` | 32 | rc 0, `CEK_LEN_AFTER=32`, HMAC fail (`ERRCODE=4`: synthetic ciphertext/tag) | clean | rc 0, same HMAC fail |
+| `wrapped` | 40 | rc 0, `CEK_LEN_AFTER=40` | `WRITE of size 40`, `jwe.c:595` | rc 0, `ERRCODE=1`, `CEK_LEN_AFTER=32` |
+| `wrappedN48` | 48 | rc 134, `munmap_chunk(): invalid pointer` | ASan OOB write | rc 0, `ERRCODE=1` |
+| `wrappedN56` | 56 | rc 0, `CEK_LEN_AFTER=56` (stable 3/3 replays) | ASan OOB write | rc 0, `ERRCODE=1` |
+| `wrappedbig` | 1016 | rc 139 SIGSEGV | `WRITE of size 1016` | rc 0, `ERRCODE=1` |
+| `probe` (invalid IV) | 40 | rc 0, output cleansed, no chosen bytes | ASan OOB write | rc 0, `ERRCODE=1` |
+
+The 48-byte case aborting while the larger 56-byte case survives is a
+deterministic negative/contradiction, not an escalation: the cause of that
+difference was not established and no control-flow target was observed.
+
+Heap geometry in the plain vulnerable process (`w1-plain-vuln.wrapped.log`):
+`CEK_MINUS16=...3100000000000000` gives a 48-byte glibc chunk (32-byte
+request, 40 usable bytes). The dump from `cek+24` is
+`5a5a5a5a5a5a5a5a 4d495348452d4f4f 3100000000000000 02000000...`:
+chosen `MISHE-OO` at `cek+32..39` (the next chunk's `prev_size`, ignored
+while that chunk is in use), intact next-chunk size `0x31` at `cek+40..47`,
+then that chunk's user data at `cek+48`. The 40-byte write therefore corrupts
+no header or object on this host; the first header corruption is the 48-byte
+write, which matches the deterministic `munmap_chunk()` abort. This is the
+host-specific consumer behavior the plant requires before exploitation work.
+
+`w1-trace-vuln.wrapped.log` resolves allocations near the CEK: `off=+0`
+32 bytes from `_cjose_jwe_malloc` (`jwe.c:193`, the CEK); `off=+48` 25 bytes
+from `jsonp_malloc` (`deps/jansson-build/src/memory.c:28`, a jansson string);
+`off=+96` 32 bytes from `jsonp_malloc` and 35 from `_decode`
+(`src/base64.c:77`); `off=+144` 58 from `jsonp_malloc` and 65 from
+`_cjose_strndup` (`src/util.c:119`); `off=+224` 48 from `_oct_new`
+(`src/jwk.c:360`). The ring is 128 entries and may list one address twice
+after realloc.
+
+Real-consumer source inspection (provisioning only, not a deployed build):
+`src/provisioning/mod_auth_openidc-2.4.15.1.tar.gz`, SHA-256
+`b50b12beaf1c210e3f98d900306a0a7ea252aa1e2b77147cb3b2cb34072f3444`.
+`src/mod_auth_openidc.c:3960-3967` dispatches a logout parameter before POST
+authorization-response handling; `:2939-2942` with `:238` selects
+`?logout=backchannel`; `:3154-3182` reads the attacker-posted `logout_token`
+and calls `oidc_jwt_parse(..., cfg->private_keys, ...)` before any signature
+check. `src/jose.c:930-936` calls `oidc_jwe_decrypt(..., FALSE)`;
+`:765-771` imports the token with `cjose_jwe_import()` and calls
+`oidc_jwe_decrypt_impl`; `:703-747` calls `cjose_jwe_decrypt()` over configured
+keys. None of these wrappers checks encrypted_key length. This is a source
+claim about an unbuilt consumer: it supports the advisory's pre-auth shape but
+does not replace a running deployment or witness replay. In a real deployment
+the server KEK is secret, so only the write length is attacker-chosen; byte
+values are not.
+
+## Ceiling (after W181)
+
+Direct call plus a loopback-only HTTP consumer with a real compact JWE token
+and a lab KEK. Attacker-controlled segment length is carried by a real HTTP
+request into the real import/decrypt path; ASan and plain glibc corruption
+are measured, including the exact object adjacent to the CEK. No deployed
+consumer was built or exercised, no credential, pointer/IP control, shell
+command or witness replay. The chosen bytes are the plaintext of a
+lab-generated RFC 3394 wrap under a lab-known key; in a real deployment the
+recipient KEK is secret, so only the write length is attacker-chosen. The
+advisory's deployed pre-auth reachability and code-execution claim remain
+UNKNOWN; rung 5 not attempted.
