@@ -124,7 +124,7 @@ hasnt "$E/vuln-gcc-asan-safe.out" 'ERROR: AddressSanitizer' 'safe-asan-clean'
 {
   echo "PASS=$PASS FAIL=$FAIL"
   cat "$E/arith-vuln.out" "$E/plain-vuln-5a.out" "$E/vuln-gcc-asan.out"
-} | sed -E 's#/[^ ]*/lab/frontier#lab/frontier#g; s/0x[0-9a-f]+/0xADDR/g; s/#[0-9]+ /#FRAME /g; s/==[0-9]+==/==PID==/g; s#in TSnap7MicroClient::opReadMultiVars [^ ]+#in TSnap7MicroClient::opReadMultiVars SOURCE#g' > "$E/normalized.txt"
+} | sed -E 's#/[^ ]*/lab/frontier#lab/frontier#g; s/0x[0-9a-f]+/0xADDR/g; s/#[0-9]+ /#FRAME /g; s/==[0-9]+==/==PID==/g; s/BuildId: [0-9a-f]+/BuildId: BUILDID/g; s#in TSnap7MicroClient::opReadMultiVars [^ ]+#in TSnap7MicroClient::opReadMultiVars SOURCE#g' > "$E/normalized.txt"
 TRACE=$(srcsha "$E/normalized.txt")
 printf 'TRACE_SHA256=%s\n' "$TRACE"
 

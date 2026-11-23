@@ -32,7 +32,7 @@ WRITE of size 65535 at 0xADDR thread T0
     #FRAME 0xADDR in main lab/frontier/snap72shell/harness/driver.cpp:219
     #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    #FRAME 0xADDR in _start (lab/frontier/snap72shell/harness/a-vuln-gcc+0xADDR) (BuildId: 209c3f56a01a653e4b1e48654538aaf35a13d075)
+    #FRAME 0xADDR in _start (lab/frontier/snap72shell/harness/a-vuln-gcc+0xADDR) (BuildId: BUILDID)
 
 0xADDR is located 0 bytes after 1-byte region [0xADDR,0xADDR)
 allocated by thread T0 here:
@@ -40,7 +40,7 @@ allocated by thread T0 here:
     #FRAME 0xADDR in main lab/frontier/snap72shell/harness/driver.cpp:208
     #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
     #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
-    #FRAME 0xADDR in _start (lab/frontier/snap72shell/harness/a-vuln-gcc+0xADDR) (BuildId: 209c3f56a01a653e4b1e48654538aaf35a13d075)
+    #FRAME 0xADDR in _start (lab/frontier/snap72shell/harness/a-vuln-gcc+0xADDR) (BuildId: BUILDID)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:

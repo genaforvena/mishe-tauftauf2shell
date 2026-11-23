@@ -1,21 +1,21 @@
 =================================================================
-==1111535==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000011 at pc 0x5dd46cdd00e8 bp 0x7fff3a325e90 sp 0x7fff3a325650
+==1134105==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000011 at pc 0x5dfb20cb20e8 bp 0x7fffad027ad0 sp 0x7fffad027290
 WRITE of size 65535 at 0x502000000011 thread T0
-    #0 0x5dd46cdd00e7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0xc50e7) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
-    #1 0x5dd46ce14fd1 in TSnap7MicroClient::opReadMultiVars() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/s7_micro_client.cpp.30f37da:418:5
-    #2 0x5dd46ce16304 in TSnap7MicroClient::run() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/driver.cpp:143:28
-    #3 0x5dd46ce159ea in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/driver.cpp:219:18
-    #4 0x778b0722a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #5 0x778b0722a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #6 0x5dd46cd37354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0x2c354) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
+    #0 0x5dfb20cb20e7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0xc50e7) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
+    #1 0x5dfb20cf6fd1 in TSnap7MicroClient::opReadMultiVars() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/s7_micro_client.cpp.30f37da:418:5
+    #2 0x5dfb20cf8304 in TSnap7MicroClient::run() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/driver.cpp:143:28
+    #3 0x5dfb20cf79ea in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/driver.cpp:219:18
+    #4 0x71b592a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x71b592a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5dfb20c19354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0x2c354) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
 
 0x502000000011 is located 0 bytes after 1-byte region [0x502000000010,0x502000000011)
 allocated by thread T0 here:
-    #0 0x5dd46cdd21a3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0xc71a3) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
-    #1 0x5dd46ce1595b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/driver.cpp:208:39
-    #2 0x778b0722a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #3 0x778b0722a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #4 0x5dd46cd37354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0x2c354) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
+    #0 0x5dfb20cb41a3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0xc71a3) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
+    #1 0x5dfb20cf795b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/driver.cpp:208:39
+    #2 0x71b592a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x71b592a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5dfb20c19354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0x2c354) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/snap72shell/harness/a-vuln-clang+0xc50e7) (BuildId: 61798b144404896e0330d3538de29e916e0b3b1c) in __asan_memcpy
 Shadow bytes around the buggy address:
@@ -49,4 +49,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1111535==ABORTING
+==1134105==ABORTING
