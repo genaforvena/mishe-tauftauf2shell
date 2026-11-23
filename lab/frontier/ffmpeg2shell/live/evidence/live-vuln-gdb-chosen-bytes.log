@@ -1,0 +1,25 @@
+Breakpoint 1 at 0x2fb7aa: file libavformat/librist.c, line 230.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff45ee6c0 (LWP 47042)]
+[New Thread 0x7ffff3ded6c0 (LWP 47043)]
+[New Thread 0x7ffff1fda6c0 (LWP 47709)]
+[Switching to Thread 0x7ffff3ded6c0 (LWP 47043)]
+
+Thread 3 "async" hit Breakpoint 1, 0x000055555584f7aa in librist_read (h=0x510000000340, buf=<optimized out>, size=9968) at libavformat/librist.c:230
+warning: Source file is more recent than executable.
+230	    memcpy(buf, data_block->payload, size);
+#1  0x00005555557ea505 in retry_transfer_wrapper (h=0x510000000340, buf=0x7ffff47ff800 'Z' <repeats 200 times>..., cbuf=0x0, size=4096, size_min=1, read=1) at libavformat/avio.c:522
+522	        ret = read ? h->prot->url_read (h, buf + len, size - len):
+POST_MEMCPY dst=0x7ffff47ff800 caller_size=4096
+0x7ffff4800800:	0x41	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x7ffff4800811:	0x7a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x3c
+0x7ffff4800b88:	0x42	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x7ffff4801b28:	0x63	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x7ffff47ff800:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+#0  0x000055555584f7aa in librist_read (h=0x510000000340, buf=<optimized out>, size=9968) at libavformat/librist.c:230
+#1  0x00005555557ea505 in retry_transfer_wrapper (h=0x510000000340, buf=0x7ffff47ff800 'Z' <repeats 200 times>..., cbuf=0x0, size=4096, size_min=1, read=1) at libavformat/avio.c:522
+#2  ffurl_read2 (urlcontext=0x510000000340, buf=0x7ffff47ff800 'Z' <repeats 200 times>..., size=4096) at libavformat/avio.c:560
+#3  0x0000555555847bd8 in ffurl_read (h=0x7ffff4801ef0, buf=0x526000002810 "", size=9968) at libavformat/url.h:183
+#4  wrapped_url_read (src=<optimized out>, dst=0x526000002810, size=0x7ffff1fe4060) at libavformat/async.c:140
+#5  0x0000555555ce5c09 in fifo_write_common (f=<optimized out>, buf=<optimized out>, nb_elems=0x7ffff1fe4020, read_cb=<optimized out>, opaque=<optimized out>) at libavutil/fifo.c:167

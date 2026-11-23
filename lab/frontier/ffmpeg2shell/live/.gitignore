@@ -1,0 +1,11 @@
+# Provisioned upstream source trees, build output and local binaries.
+ffmpeg-n9.0.tar.gz
+ffmpeg-n9.0/
+librist/
+prefix/
+ffmpeg-prefix/
+config-asan.log
+build-asan.log
+build-fixed-live.log
+build-restore.log
+rist_sender_live

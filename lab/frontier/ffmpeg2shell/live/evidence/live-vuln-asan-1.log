@@ -1,0 +1,112 @@
+[rist @ 0x510000000340] Starting in Main Profile Mode
+[rist @ 0x510000000340] RIST Receiver Library version:a911bee 
+[rist @ 0x510000000340] Starting in receiver mode
+[rist @ 0x510000000340] Encryption is disabled for this peer
+[rist @ 0x510000000340] URL parsed successfully: Host 0.0.0.0, Port 5004
+[rist @ 0x510000000340] Starting in URL listening mode (socket# 3)
+[rist @ 0x510000000340] Configured the starting socket receive buffer size to 419430 Bytes.
+[rist @ 0x510000000340] Configured the starting socket send buffer size to 419430 Bytes.
+[rist @ 0x510000000340] Peer cname is mesh-home
+[rist @ 0x510000000340] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+[rist @ 0x510000000340] New peer with id #0 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x510000000340] Initialized Receiver Peer, listening mode ...
+[rist @ 0x510000000340] Active Peer Information, IP:Port => 0.0.0.0:5004 (1), id: 1, ports: 5004->1969
+[rist @ 0x510000000340] Starting receiver protocol loop with 5 ms timer
+Input #0, data, from 'async:rist://@:5004':
+  Duration: N/A, start: 0.000000, bitrate: N/A
+  Stream #0:0: Data: none
+Unsupported codec with id 0 for input stream 0
+Processing read interval id:0 start:N/A end:N/A
+[rist @ 0x510000000340] New peer with id #2 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x510000000340] Enabling keepalive for peer 2
+[rist @ 0x510000000340] New keepalive received. MAC: 34:5a:60:7c:10:21 X: 0 R: 0 B: 1 A: 0 P: 0 E: 1 L: 0: N: 1 D: 1 T: 0 V: 0: J: 1 F: 0
+[rist @ 0x510000000340] New RTCP peer connecting, flow_id 939472680, peer_id 2, ports 0 <- 17120
+[rist @ 0x510000000340] Updating peer virt dst port to match remote source port: 32768
+[rist @ 0x510000000340] Peer 2 receiver name is now: mesh-home
+[rist @ 0x510000000340] FLOW #939472680 created (short=1)
+[rist @ 0x510000000340] Peer with id #2 associated with flow #939472680
+[rist @ 0x510000000340] Flow #939472680 has now 1 peers.
+[rist @ 0x510000000340] Successfully Authenticated peer 2
+[rist @ 0x510000000340] Authenticated RTCP peer 2 and flow 939472680 for connection with cname: mesh-home
+[rist @ 0x510000000340] Failed to set data output thread to RR scheduler with prio of 99
+[rist @ 0x510000000340] Peer 2 receiver with name mesh-home reconnected
+[rist @ 0x510000000340] Starting data output thread with 5 ms max output jitter
+[rist @ 0x510000000340] Authenticated RTP peer 2 and ssrc 939472680 for connection with flowid 939472680
+[rist @ 0x510000000340] Storing first packet seq 0, idx 0, 156018690557104, offset -2085779428261 ms, output_idx 0
+=================================================================
+==4140481==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7c34ae9ff800 at pc 0x5c90f47a4da8 bp 0x7c34ad7eca30 sp 0x7c34ad7ec1f0
+WRITE of size 9968 at 0x7c34ae9ff800 thread T2 (async)
+    #0 0x5c90f47a4da7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x1b3da7) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #1 0x5c90f48ec7a9  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2fb7a9) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #2 0x5c90f4887504  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x296504) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #3 0x5c90f48e4bd7  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2f3bd7) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #4 0x5c90f4d82c08  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x791c08) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #5 0x5c90f48e47ed  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2f37ed) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #6 0x5c90f47a494c  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x1b394c) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #7 0x7c34b149cb63 in start_thread nptl/pthread_create.c:447:8
+    #8 0x7c34b1529e8b in clone3 misc/../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+0x7c34ae9ff800 is located 0 bytes after 8388608-byte region [0x7c34ae1ff800,0x7c34ae9ff800)
+allocated by thread T0 here:
+    #0 0x5c90f47a7280 in realloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x1b6280) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #1 0x5c90f4d821d7  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x7911d7) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #2 0x5c90f48e35a1  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2f25a1) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #3 0x5c90f4887a82  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x296a82) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #4 0x5c90f4889af6  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x298af6) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #5 0x5c90f488a314  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x299314) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #6 0x5c90f48d35d7  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2e25d7) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #7 0x5c90f489a543  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2a9543) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #8 0x5c90f4807c90  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x216c90) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #9 0x5c90f4806357  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x215357) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #10 0x7c34b142a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #11 0x7c34b142a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #12 0x5c90f470c014  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x11b014) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+
+Thread T2 (async) created by T0 here:
+    #0 0x5c90f478c7d5 in pthread_create (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x19b7d5) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #1 0x5c90f48e38e6  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2f28e6) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #2 0x5c90f4887a82  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x296a82) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #3 0x5c90f4889af6  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x298af6) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #4 0x5c90f488a314  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x299314) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #5 0x5c90f48d35d7  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2e25d7) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #6 0x5c90f489a543  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x2a9543) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #7 0x5c90f4807c90  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x216c90) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #8 0x5c90f4806357  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x215357) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+    #9 0x7c34b142a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #10 0x7c34b142a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #11 0x5c90f470c014  (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x11b014) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/ffmpeg-n9.0/ffprobe+0x1b3da7) (BuildId: 11f82e2109584a74ee24ce54e5f7444f9f2ac2f6) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x7c34ae9ff580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c34ae9ff600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c34ae9ff680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c34ae9ff700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7c34ae9ff780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7c34ae9ff800:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c34ae9ff880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c34ae9ff900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c34ae9ff980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c34ae9ffa00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7c34ae9ffa80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4140481==ABORTING
+ffprobe rc=1

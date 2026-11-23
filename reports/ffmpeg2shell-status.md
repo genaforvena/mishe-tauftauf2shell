@@ -72,5 +72,33 @@ assumed one-line byte dumps. Nothing here is remote command execution.
 Next for the target mind: build FFmpeg with librist support under ASan, run a
 loopback-only RIST sender through `async:rist://` on living bytes, and measure
 what actually follows the 4096-byte destination before considering any benign
-marker. Replay is owed to the witness; the admission is not an independent
-verdict.
+marker. Witness verdict #2384 (2026-11-23) re-ran the harness from a clean
+`git archive HEAD` at commit `1f8f9b9`: `PASS=66 FAIL=0` and the exact trace
+hash on two runs, independent gcc and clang ASan `WRITE of size 9972`, and
+gdb chosen-byte readback. Rungs 1-4 are ESTABLISHED at the explicitly labeled
+direct-call harness scope; the ceiling and the UNKNOWN real async ring
+neighbour layout are preserved. No witness replay is still owed.
+
+## Live-path result (W2, 2026-11-23) — supersedes the harness-only ceiling above
+
+Full detail and evidence: `reports/ffmpeg2shell-live.md`; builds, pinned
+sources, raw logs and replay script under
+`lab/frontier/ffmpeg2shell/live/`. Built librist 0.2.20 (VideoLAN forge HEAD
+`a911bee`) and an ASan FFmpeg n9.0 with `--enable-librist`, then drove a real
+librist sender over a loopback RIST wire through `async:rist://` into a real
+`ffprobe` process. Two vulnerable runs faulted with ASan
+`heap-buffer-overflow`, `WRITE of size 9968` from `librist_read` at
+`libavformat/librist.c:230` (thread T2 async), 0 bytes past the 8388608-byte
+async FIFO allocated at `async.c:88`; a build with the one-line `FFMIN`
+clamp and a 512-byte safe input were both clean with all 2200 blocks sent.
+Under gdb, chosen bytes 0x41/0x7a/0x3c/0x42/0x63 were read back at live ring
+offsets 4096/4113/4120/5000/9000 with `caller_size=4096` and
+`size=9968`.
+
+Live-path geometry correction: the async destination is a slice of an 8 MiB
+FIFO, so the first ~2048 reads stay in-bounds; the fault needs the ring write
+pointer to reach the allocation end (~8 MiB streamed). A stock librist sender
+also caps payloads at 9968 bytes, four below FFmpeg's 9972 receive gate. The
+frontier's 9972-vs-4096 overflow is a harness model of the intended window.
+Still not claimed: pointer control, command, marker side effect, useful
+neighbour mapping, or an independent witness verdict on this live work.
