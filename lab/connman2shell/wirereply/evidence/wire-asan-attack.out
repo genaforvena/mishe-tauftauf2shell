@@ -1,0 +1,54 @@
+WIREPARSE OLEN=2048 COUNT=1 OFFSET=8
+WIRE MODE=attack PKTLEN=2056 LASTJUMP=80
+=================================================================
+==1937678==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x78f685e004b1 at pc 0x626e17647e88 bp 0x7ffd3cf998f0 sp 0x7ffd3cf998e0
+READ of size 1 at 0x78f685e004b1 thread T0
+    #0 0x626e17647e87 in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/get_domains_fn.inc:16
+    #1 0x626e176480dc in get_dhcpv6_option_value_list /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/get_ov_list_fn.inc:44
+    #2 0x626e176482e4 in get_dhcpv6_request /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/get_request_fn.inc:21
+    #3 0x626e17648798 in run_chain /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/driver.c:170
+    #4 0x626e17648b86 in main /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/driver.c:195
+    #5 0x78f687a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x78f687a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x626e17647444 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/a-wire+0x2444) (BuildId: 2967e3ee03500cc7b4bad30b945ad598e48d86d2)
+
+Address 0x78f685e004b1 is located in stack of thread T0 at offset 1201 in frame
+    #0 0x626e17647caf in get_domains /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/get_domains_fn.inc:3
+
+  This frame has 1 object(s):
+    [48, 1074) 'dns_name' (line 7) <== Memory access at offset 1201 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/wirereply/get_domains_fn.inc:16 in get_domains
+Shadow bytes around the buggy address:
+  0x78f685e00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00400: 00 00 00 00 00 00 02 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x78f685e00480: f3 f3 f3 f3 f3 f3[f3]f3 00 00 00 00 00 00 00 00
+  0x78f685e00500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x78f685e00700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1937678==ABORTING
