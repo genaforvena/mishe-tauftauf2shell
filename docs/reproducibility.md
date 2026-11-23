@@ -3241,3 +3241,39 @@ Boundaries: the handlers are direct-called, `ppp_tx_frame_header()` and
 modeled. The 65535-byte read is avoided in the large-frame case by a larger
 rx allocation; the short-frame ASan case demonstrates the read separately.
 No pointer control, command, witness verdict or rung 5.
+
+## 2026-11-23 06:2xZ — modauthoidc2shell
+
+CVE-2026-54789 / GHSA-vgr5-qcpp-x2pr, mod_auth_openidc `< 2.4.19.4`,
+unauthenticated state-prefixed `Cookie` token without `=`. Claim URLs, the
+byte-exact pinned parent `state.c.4301b536`, fix commit `8017478471cc` and
+released `v2.4.19.4` blobs, and their SHA-256 digests are in
+`lab/frontier/modauthoidc2shell/PROVENANCE.md`. The brief is
+`reports/frontier-modauthoidc2shell.md`; status is
+`reports/modauthoidc2shell-status.md`. `harness/run.sh` re-extracts the record
+struct and the whole `oidc_state_cookies_parse_token()` verbatim from all three
+blobs on every run under `#line` directives, checks two SHA-256 manifests
+(12 files) and builds plain plus gcc/clang ASan variants. No daemon, listener,
+socket or off-loopback probe.
+
+```
+T=$(mktemp -d /tmp/modauthoidc2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/modauthoidc2shell | tar -x -C "$T"
+bash "$T/lab/frontier/modauthoidc2shell/harness/run.sh"
+```
+
+Expect rc 0, `PASS=59 FAIL=0` and
+`TRACE_SHA256=bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`.
+ASan on the vulnerable slice reports `READ of size 1` 0 bytes past a 31-byte
+token in `oidc_state_cookies_parse_token` at pinned `state.c.4301b536:214`;
+gcc and clang agree. The plain build dispatches the downstream processor and
+places the single NUL at chosen offsets 31, 47 and 63 with the canary intact.
+Both fixed slices reject the value-less token with `RC=0` and `PROCESS_CALLS=0`,
+and a well-formed `mod_auth_openidc_state_abc=1` token is clean on all six
+binaries.
+
+Boundaries: the parser is direct-called with stubbed request/config pointers
+and a recorder; the exact-size heap token is an instrument, not a measured APR
+allocation. Only the NUL offset is chosen, never its value, and ASan faults on
+the read before the write, so there is no ASan WRITE observation. No pointer
+control, command, witness verdict or rung 5.

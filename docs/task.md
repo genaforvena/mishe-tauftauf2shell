@@ -7549,3 +7549,28 @@ in `ppp_tx_frame()` with gcc and clang, scoped rung 4 chosen bytes at canary
 offsets 0/17, upstream fixed guard ASan-clean and safe frame clean; no real
 PPP link, socket, live `mg_tcpip_if`, LCP model, pointer control, command,
 witness verdict or rung 5. Status: `reports/mongoose2shell-status.md`.
+
+## 2026-11-23 06:2xZ — modauthoidc2shell admitted as the 103rd route
+
+Frontier W139 staged mod_auth_openidc CVE-2026-54789 / GHSA-vgr5-qcpp-x2pr
+after DM #2291: a state-prefixed `Cookie` token with no `=` makes
+`oidc_state_cookies_parse_token()` scan past its terminator and write one NUL.
+The brief is `reports/frontier-modauthoidc2shell.md`; byte-exact pins for the
+vulnerable parent, fix commit `8017478471cc` and released `v2.4.19.4`, plus
+verbatim slices and raw evidence, are in
+`lab/frontier/modauthoidc2shell/PROVENANCE.md`. Operator replay from
+`git archive HEAD lab/frontier/modauthoidc2shell` in a fresh `/tmp` directory
+returned rc 0, `PASS=59 FAIL=0` and trace
+`bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route, minted the
+path/debounce/slice units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, added both resolver entries,
+and got the pinned full-flag doctor rc 0 `GREEN` and `check-omp-only.py` GREEN
+with 103 roles. The two-pane window 107 was already live and registered, so no
+window or registry change was made.
+Grade stays the author's: rung 3 ASan READ-1 in the verbatim pinned parser with
+gcc and clang, scoped rung 4 one-byte NUL at offsets 31/47/63, fix and release
+blobs clean and well-formed token clean. No Apache/APR pool, request object,
+listener, socket or wire; no pointer control, command, witness verdict or rung
+5. Status: `reports/modauthoidc2shell-status.md`.
