@@ -3197,3 +3197,39 @@ payload. Upstream HEAD is still vulnerable, so the fixed control is a pinned
 derivative rather than an upstream release; `AT:P` requires control or
 impersonation of a PLC. There is no pointer redirect, command, witness verdict
 or rung 5. Status: `reports/snap72shell-status.md`.
+
+## 2026-11-23 05:3xZ — mongoose2shell
+
+CVE-2026-63626 / GHSA-pc66-j6r6-49x9, Mongoose <7.23, peer-controlled IPv6CP
+length. Claim URLs, the vulnerable parent `8bb65c64926d`, upstream fix commit
+`751f14742dea` and fixed version 7.23, and the three pinned blob SHA-256
+digests are in `lab/frontier/mongoose2shell/PROVENANCE.md`. The brief is
+`reports/frontier-mongoose2shell.md`; status is
+`reports/mongoose2shell-status.md`. `harness/run.sh` re-extracts four verbatim
+slices from both pinned `src/l2_ppp.c` blobs on every run under `#line`
+directives, checks a 12-file SHA-256 manifest, and builds plain and gcc/clang
+ASan variants. No daemon, listener, socket or off-loopback probe.
+
+```
+T=$(mktemp -d /tmp/mongoose2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/mongoose2shell | tar -x -C "$T"
+bash "$T/lab/frontier/mongoose2shell/harness/run.sh"
+```
+
+Expect rc 0, `PASS=43 FAIL=0` and
+`TRACE_SHA256=8c5d62a55be40595f76d3479f05a9ab4652585f07ebae13cd35017d64e3d1cb7`.
+The run logs `PEER_LEN=65535`, `OPTS_WALK_LEN=65531`, `TX_DATASZ=65535` and
+`OVERFLOW_BYTES=64515`. ASan on the vulnerable slices reports
+`heap-buffer-overflow`, `READ of size 1` in `find_opt()` at pinned `:281` and
+`WRITE of size 65535` in `ppp_tx_frame()` at pinned `:234`; gcc and clang
+agree. The plain build reads `CANARY0=5a CANARY17=3c` from chosen source
+bytes at rx offsets 1020/1037. The real upstream fixed blob gives
+`TX_CALLS=0`, an untouched canary and no ASan report; a well-formed 14-byte
+frame transmits normally and is clean on the vulnerable build.
+
+Boundaries: the handlers are direct-called, `ppp_tx_frame_header()` and
+`ppp_tx_frame_trailer()` are recording stubs, `tx.buf` is a harness-chosen
+1024 bytes rather than a measured `ifp->framesize`, and LCP completion is not
+modeled. The 65535-byte read is avoided in the large-frame case by a larger
+rx allocation; the short-frame ASan case demonstrates the read separately.
+No pointer control, command, witness verdict or rung 5.

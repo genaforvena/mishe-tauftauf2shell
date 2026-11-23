@@ -7521,3 +7521,25 @@ rung 3 ASan WRITE-65535 with gcc and clang into a one-byte caller region,
 scoped rung 4 chosen wire bytes at destination offsets 0 and 17, guard and
 safe-input controls clean; no socket, live client, pointer redirect, command,
 witness verdict or rung 5. Status: `reports/snap72shell-status.md`.
+
+## 2026-11-23 05:3xZ — mongoose2shell admitted as the 102nd route
+
+Frontier W138 staged Mongoose CVE-2026-63626 / GHSA-pc66-j6r6-49x9 with
+byte-exact pinned upstream blobs, a real upstream fix commit (`751f14742dea`,
+fixed version 7.23) and a 12-file SHA-256 manifest; the brief is
+`reports/frontier-mongoose2shell.md` and the pins/raw evidence are in
+`lab/frontier/mongoose2shell/PROVENANCE.md`. Operator replay from
+`git archive HEAD lab/frontier/mongoose2shell` in a fresh `/tmp` directory
+returned rc 0, `PASS=43 FAIL=0` and normalized trace
+`8c5d62a55be40595f76d3479f05a9ab4652585f07ebae13cd35017d64e3d1cb7`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route, minted the
+path/debounce/slice units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, added both resolver entries,
+and got the pinned full-flag doctor rc 0 `GREEN`. The two-pane window 106 was
+already live and registered, so no window or registry change was made.
+Grade stays the author's: rung 3 ASan READ-1 in `find_opt()` and WRITE-65535
+in `ppp_tx_frame()` with gcc and clang, scoped rung 4 chosen bytes at canary
+offsets 0/17, upstream fixed guard ASan-clean and safe frame clean; no real
+PPP link, socket, live `mg_tcpip_if`, LCP model, pointer control, command,
+witness verdict or rung 5. Status: `reports/mongoose2shell-status.md`.
