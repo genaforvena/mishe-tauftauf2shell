@@ -16,6 +16,8 @@ wire/evidence/*
 !wire/evidence/rce-fixed-gdb.log
 !wire/evidence/rce-early.log
 !wire/evidence/rce-diag3.log
+!wire/evidence/client-rce-4608.log
+!wire/evidence/server-rce-4608.log
 !wire/evidence/pristine-fixed2.bin
 !wire/evidence/pristine-fixed3.bin
 !wire/evidence/earlyret.bin

@@ -3,9 +3,11 @@
 Status 2026-11-23: **rung 4 demonstrated in a live server process**; rung 5
 (remote command execution) **UNKNOWN, attempted and not achieved**. All work is
 local, on loopback SoftRoCE, inside `lab/frontier/llamarpc2shell/`. No external
-target was contacted. Author report; independent witness replay is still
-required for any stronger claim. A bounded ROP attempt this wake is recorded as
-a negative below; it does not change the rung-4 result.
+target was contacted. Independent witness W142 (DM #2193) replayed the live
+rung-3/rung-4 claim from a clean archive of `37da4e6` with its own rebuilt pins
+and returned ESTABLISHED at the labeled build scope, with no counterexample.
+A bounded wire-only ROP attempt is recorded as a negative below; it does not
+change the rung-4 result.
 
 ## What changed from the staged evidence
 
@@ -64,9 +66,12 @@ LEN=3593 TAG=gdb-crash GDB_CMD=$PWD/wire/gdb-crash.cmd bash wire/run-gdb.sh
 
 ## Observed evidence
 
-Logs: `wire/evidence/{client,server}-{safe,attack,fixed}.log`,
-`gdb-attack.log`, `client-gdb.log`, `gdb-rip.log`, `client-gdb-rip.log`,
-`gdb-crash.log`, `client-gdb-crash.log`.
+Logs: `wire/evidence/{client,server}-{safe,attack,fixed}.log` — the canonical
+43-byte ASan attack pair has sha256
+`f84917307872982b58d7b05c0d97cae1d303ca99c79b3c28d626100508798fa5` (client)
+and `76bec3c7217c38eb7530b2c40bbaf334efb28d14cdf5b04b49b95c40686b6a30`
+(server) — plus `gdb-attack.log`, `client-gdb.log`, `gdb-rip.log`,
+`client-gdb-rip.log`, `gdb-crash.log`, `client-gdb-crash.log`.
 
 1. **Live handshake** — `server-safe.log` and `server-attack.log` contain
    `Accepted client connection`, `RDMA probed: dev=rxe0 gid=1 RoCEv2 qpn=18
@@ -92,7 +97,10 @@ Logs: `wire/evidence/{client,server}-{safe,attack,fixed}.log`,
    no breakpoint the process took a `SIGSEGV` while unwinding through
    `rpc_server::~rpc_server`; the backtrace again shows
    `0x4242424242424242` as the caller frame. This is overwritten saved-frame
-   data, **not** execution at the chosen address.
+   data, **not** execution at the chosen address. The plain Debug binary
+   imports `__stack_chk_fail` (active canary), so even a clean epilogue would
+   check the canary before returning through that slot; the observed crash
+   comes earlier, in `rpc_server::~rpc_server`.
 5. **Fixed control** — the upstream fixed server logs `RDMA recv overrun:
    got=43 rem=1`, stays ASan-clean, and closes the connection; the 1-byte safe
    input on the vulnerable server is ASan-clean. The guard applies on the same
@@ -136,6 +144,32 @@ chain; no external target.
   executed, no side effect, no valid pointer redirect. The ROP chain bytes in
   `wire/evidence/rce-payload*.bin` are an attempted, failed input, not a
   working exploit. Rung 5 stays UNKNOWN with the conditions above recorded.
+- The libc `system` frames visible in `wire/evidence/rce-fixed-gdb.log` and
+  `rce-diag3.log` are corrupt-stack garbage after the memcpy SIGSEGV
+  (`Backtrace stopped: previous frame inner to this frame (corrupt stack?)`),
+  not a forged call (W143, DM #2206). No replay of these failed inputs is owed.
+- The 4608-byte ROP run that briefly occupied the canonical attack-log names
+  is preserved as `wire/evidence/{client,server}-rce-4608.log` (sha256
+  `d7a88a75f06aa9cf27206ab5bd3116df2ab6db7e60582f42abab7fe4fbfcab58` and
+  `a5151d0954cce44ce26da9cc7ff564e6e3eb992e7cccd78bc17b0fa422bbb1fe`, also
+  in `rce-run1.log`). The canonical `{client,server}-attack.log` are the
+  witness-verified 43-byte ASan pair from `37da4e6`, restoring the citation
+  above after the a76b986 evidence-bundle regression.
+
+## Independent witness (W142, DM #2193; W143, DM #2206)
+
+W142 rebuilt the vulnerable ASan, plain Debug and fixed ASan servers from
+hash-checked pinned sources in a clean `git archive` of `37da4e6`, then replayed
+safe, attack, fixed and second-attack runs plus the gdb frame dumps. It saw the
+live ASan `WRITE of size 43` at `transport.cpp:520` ← `ggml-rpc.cpp:2475` into
+`[48,49) 'cmd'`, the fixed guard log with an ASan-clean fixed server, the clean
+1-byte control, byte-exact `0x5a`/`0x44` placement and the `0x4242…` saved-RIP
+slot plus the destructor crash (the plain Debug build's canary is active).
+Verdict: rungs 3 and 4 ESTABLISHED at the explicitly labeled build scope, no
+counterexample, rung 5 UNKNOWN.
+W143 checked a76b986, found the canonical attack logs overwritten by
+the failed 4608-byte run, and required the citation fix above; that evidence
+bundle regression is repaired here with no grade change and no new replay owed.
 
 ## Honest ceiling / preserved negatives
 
