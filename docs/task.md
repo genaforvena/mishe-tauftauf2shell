@@ -6908,15 +6908,16 @@ there is no tagged fixed release. In the verbatim pinned `cmd_qtdpsrc()`,
 N decoded bytes write N-2 attacker-chosen bytes past the allocation: ASan
 `WRITE of size 1` on gcc and clang at N=8/32/64/128, and a plain `0xEE` arena
 shows `WRITTEN=N-2 FIRST=2 LAST=N-1 PATTERN_OK=1`; the fixed snapshot returns
-`REPLY=E01` and a well-formed packet `REPLY=OK LIST_LEN=1`. Grade stays rung 3
-plus scoped rung 4, direct-call/stub only: no gdb build, RSP loop, socket,
-daemon, natural heap layout, `process_info_private` pointer, `qGetTLSAddr`,
-marker, command or rung 5. The target mind's cheapest next experiment is a
+`REPLY=E01` and a well-formed packet `REPLY=OK LIST_LEN=1`. At admission the
+grade was rung 3 plus scoped rung 4, direct-call/stub only: no gdb build,
+RSP loop, socket, daemon, natural heap layout, `process_info_private` pointer,
+`qGetTLSAddr`, marker, command or rung 5. The cheapest next experiment was a
 transport-stubbed RSP dispatcher feeding one crafted `QTDPsrc` packet through
 the real handler under ASan, then checking the claimed `thread_db` pointer
 overwrite and `qGetTLSAddr` call in a real heap layout, with fixed and safe
-controls, before any rung-5 claim. The stale 2026-11-21 window at index 23 was
-a duplicate of frontier's fresh index-99 window and was retired at admission;
+controls. W1 and W1b below carry out that program; the forged-pointer call,
+marker and rung 5 remain unobserved. The stale 2026-11-21 window at index 23
+was a duplicate of frontier's fresh index-99 window and was retired at admission;
 the registry is 99 entries / 99 unique names. With this admission the plant
 declares 94 engine routes and 90 target minds (four cross-cutting roles);
 `tools/check-omp-only.py` reports `GREEN (94 declared roles)`. Status:
@@ -7010,3 +7011,30 @@ with `E01`, then died with SIGSEGV at connection teardown; the safe packet
 exited 0. That is a delayed natural-layout process failure, not a forged
 pointer call or command. Grade unchanged; details in
 `lab/frontier/gdbserver2shell/PROVENANCE.md`.
+
+## 2026-11-23 ~01:38Z — connman2shell W4: loopback UDP REPLY delivery
+
+W4 (`8da09bf`, `reports/connman2shell-wireloop.md`) removes W2's remaining
+input caveat: the 2056-byte REPLY is no longer an in-process byte buffer. A
+sender process writes it to a real 127.0.0.1 UDP socket; a receiver reads it
+with `recvfrom()` and feeds the received bytes to the four verbatim tag-2.0
+functions (`dhcpv6_get_option`, `get_domains`,
+`get_dhcpv6_option_value_list`, `get_dhcpv6_request`), each asserted by
+SHA-256 on every run. `bash lab/connman2shell/wireloop/run.sh` gave
+`SUMMARY=30 PASS / 0 FAIL` in three consecutive author runs and once from a
+clean `/tmp` copy on 2026-11-23: `CLI SENT=2056 PKTLEN=2056`, `RECV=2056`
+and `WIREPARSE OLEN=2048 COUNT=1 OFFSET=8`, with ASan `READ of size 1` at
+the same delta-127 through the caller chain. Fixed snapshot and safe
+8-byte DOMAIN_LIST are clean. Plain canary store counts are informational
+and ASLR-dependent (isolated-copy mix `store=7 none=5 crash=0`).
+
+`retarget.sh` solves K from the live receiver frame chain and reported
+`RETARGET_K=0x67 HITS=5/5`: a hardware watchpoint sees `BEFORE=ae AFTER=2e`
+on the saved return-address byte of `get_dhcpv6_option_value_list` in all
+five ASLR-enabled runs, with the socket receiver adding a frame relative
+to W1. The written byte is the fixed `.`, K is layout-specific and the walk
+after the first step reads ambient stack bytes. Grade stays rung 3 plus
+scoped rung 4: no connmand daemon, remote input, pointer, marker or command,
+and no witness replay. Root-service impact remains an advisory claim. The
+full-build negative from the 00:2x–00:4xZ limb stands: missing `dbus-1` and
+`libmnl` dev packages.

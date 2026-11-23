@@ -2308,8 +2308,9 @@ marker, command or rung 5 is claimed. Status:
 
 ## Admitted lane limbs — 2026-11-23 00:3xZ connman2shell caller chain and REPLY
 
-These two lanes remove the admission row's "no natural layout / no DHCPv6
-REPLY" caveats without adding a daemon, socket or full build. W1
+These W1/W2 lanes remove the admission row's "no natural layout / no DHCPv6
+REPLY" caveats without adding a daemon, socket or full build; W4 below adds
+loopback socket delivery only. W1
 (`reports/connman2shell-callpath.md`) calls three verbatim tag-2.0 functions —
 `get_domains`, `get_dhcpv6_option_value_list`, `get_dhcpv6_request` — from a
 forged option-24 value; only `dhcpv6_get_option()` is stubbed. W2
@@ -2348,8 +2349,52 @@ generated function slices, binaries and build logs out of Git; the evidence
 `.out` files are tracked. A full build is a preserved negative: `configure.ac`
 needs `dbus-1 >= 1.4` and (except with firewall `none` and wireguard off)
 `libmnl >= 1.0.0`; neither is installed here, and `client.c` includes
-`<connman/dbus.h>`, so no live build, daemon, socket, remote input or witness
-replay is claimed.
+`<connman/dbus.h>`, so no live build, daemon, remote input or witness
+replay is claimed; W4 below adds loopback socket delivery, not a daemon.
+
+### W4 — loopback UDP REPLY delivery (2026-11-23 01:4xZ)
+
+`lab/connman2shell/wireloop/` moves the 2056-byte REPLY out of the receiver
+process: `driver.c` forks, the child binds an ephemeral UDP port on
+`INADDR_LOOPBACK` and blocks in `recvfrom()`, and the parent `sendto()`s the
+same message-7 / option-24 / `len=2048` packet with `value[1024]=K`. The
+receiver casts the bytes it actually received to `struct dhcpv6_packet` and
+runs the four verbatim tag-2.0 functions. Report:
+`reports/connman2shell-wireloop.md`.
+
+From the repository root, replay from an isolated copy so tracked evidence is
+untouched:
+
+```sh
+T=$(mktemp -d /tmp/connman-loop.XXXXXX)
+mkdir -p "$T/frontier/connman2shell"
+cp -a lab/connman2shell/wireloop "$T/"
+cp -a lab/frontier/connman2shell/src "$T/frontier/connman2shell/"
+bash "$T/wireloop/run.sh"
+bash "$T/wireloop/retarget.sh"
+```
+
+Expect rc 0 and `SUMMARY=30 PASS / 0 FAIL` (observed three consecutive runs
+by the author, and once from the isolated copy above on 2026-11-23): four
+source SHA-256 pins plus four extracted-function pins are asserted on every
+run. The attack output carries `CLI SENT=2056 PKTLEN=2056 DST=127.0.0.1:`,
+`SRV BOUND=127.0.0.1: RECV=2056` and `WIREPARSE OLEN=2048 COUNT=1 OFFSET=8`;
+ASan reports `stack-buffer-overflow`, `READ of size 1` through `get_domains`
+← `get_dhcpv6_option_value_list` ← `get_dhcpv6_request` ← `run_chain` ←
+`server_body`, with the same 127-byte delta as W1/W2. Fixed snapshot and the
+8-byte safe DOMAIN_LIST both give `CHAIN DONE STATUS=0`, exit 0 and no ASan.
+Plain canary outcomes are informational (`OBS`, ASLR-dependent); the observed
+mix from the isolated copy was `store=7 none=5 crash=0 total=12`.
+
+`retarget.sh` solves K from the live receiver's frame chain at the
+`get_domains()` breakpoint; expect `RETARGET_K=0x67 HITS=5/5` and a hardware
+watchpoint on the saved return-address byte of
+`get_dhcpv6_option_value_list` reading `BEFORE=ae AFTER=2e` in each run.
+That byte is the fixed `.`, K is layout-specific (the socket receiver adds a
+frame), and there is no connmand daemon, hostile remote input, pointer,
+marker or command; grade stays rung 3 plus scoped rung 4. The lane's
+`.gitignore` keeps generated slices, binaries and build logs out of Git; the
+`.out` files are tracked.
 
 ## Admitted frontier lane — 2026-11-23 01:0xZ gdbserver2shell
 
@@ -2360,8 +2405,8 @@ upstream bytes plus a derived fixed snapshot in
 `binutils-gdb` HEAD `633ae02c4ea8f87c670f7192804349860cfa291d`; the "fixed"
 snapshot is that file with Andrew Burgess's 2026-11-16 gdb-patches hunk
 applied, because the fix is posted but not merged and no tagged fixed release
-exists. All work is local and direct-call: the harness starts no gdbserver and
-opens no socket.
+exists. The admission harness below is local and direct-call: it starts no
+gdbserver and opens no socket. The W1/W1b limbs added below do both.
 
 From the repository root, replay from an isolated copy so staged evidence is
 untouched:
@@ -2394,6 +2439,55 @@ LIST_LEN=1` on both pins, with no ASan report. The `hex2bin` decoder is a
 faithful reimplementation, not verbatim GDB source; all allocation and length
 decisions come from the verbatim slices. No pointer, marker, command or rung
 5 is claimed. Status: `reports/gdbserver2shell-status.md`.
+
+### Admitted lane limbs — 2026-11-23 01:1x–01:4xZ gdbserver2shell RSP and real build
+
+`rsp/wire_driver.c` extends the harness to a checksummed `$QTDPsrc:...#xx`
+frame sent over a 127.0.0.1 socket to a server that acks `+`, calls the
+verbatim pinned `handle_tracepoint_general_set()` and then `cmd_qtdpsrc()`.
+From the isolated copy above, replay with `bash "$T/rsp/run.sh"`. Expect rc 0,
+`SUMMARY=70 PASS / 0 FAIL` and
+`NORMALIZED_HASH=f25a563e0b06136e1dec12d2dbe70c593dfae5aca9aaa851f3e337d1c29331f2`.
+ASan on g++ and clang++ gives `heap-buffer-overflow`, `WRITE of size 1`,
+`0 bytes after 2-byte region`, frames `hex2bin` → `cmd_qtdpsrc` →
+`handle_tracepoint_general_set`; the fixed snapshot replies `E01` and the
+safe packet `OK`, both without ASan. On stock glibc a two-hole tcache groom
+lets the decoded length select the adjacent bytes reached (N=8 intact, N=32
+victim size and `type` low byte, N=48 `next`, N=64 all three `source_string`
+pointers); with a verbatim `process_info_private` slice as victim, N=64 writes
+chosen `0x504f4e4d4c4b4a49` into `thread_db` at offset 8. Safe and fixed
+controls stay intact; the simpler one-hole groom aborted with `malloc():
+corrupted top size` and is preserved as a negative. This is placement
+feasibility, not a call through the pointer.
+
+`rsp/build-gdbserver.sh` provisions the exact 633ae02 HEAD source, builds a
+gdbserver-only ASan binary and a fixed control, then restores the vulnerable
+binary and a clean source tree. It needs network provisioning (sourceware
+clone) and a local build; both are outside the replay itself. With those
+binaries in `lab/build/gdbserver-633ae02-asan/gdbserver/`:
+
+```sh
+bash lab/frontier/gdbserver2shell/rsp/live_verify.sh \
+  lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver \
+  lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver-fixed
+```
+
+Expect `LIVE_SUMMARY=16 PASS / 0 FAIL` and
+`LIVE_NORMALIZED_HASH=b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+The loopback client acks every reply; `QTDP:1:0:E:0:0` creates a tracepoint,
+then `QTDPsrc:1:0:cond:0:1:` with 64 chosen bytes produces ASan `WRITE of
+size 1` in `hex2bin (gdbsupport/common-utils.cc:465)` ← `cmd_qtdpsrc
+(gdbserver/tracepoint.cc:2547)`, server exit 134; safe `SLEN=16` replies `OK`
+with exit 0 and the fixed binary rejects with `E01`, both ASan-clean. A client
+that did not ack the replies desynced the session and reached no handler; that
+negative is preserved in `PROVENANCE.md`. The same pin built with default
+CFLAGS (`lab/build/gdbserver-633ae02-plain/gdbserver/gdbserver`) and run
+through `rsp/live_run.sh` with `attack 64` answers `OK` to `QTDPsrc`, `E01` to
+`qGetTLSAddr` and dies with `SERVER_RC=139` at teardown; the safe `16` case is
+`CLIENT_RC=0 SERVER_RC=0`. The `E01` means no thread_db was loaded, not an
+executed indirect call. Neither live build yields a chosen-byte readback,
+forged pointer call, marker or command, so rung 3 on a live wire and rung 4 at
+the groomed scope only; witness replay is outstanding.
 
 ## Admitted frontier lane — 2026-11-23 01:3xZ erlang2shell
 
