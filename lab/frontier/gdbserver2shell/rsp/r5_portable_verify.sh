@@ -5,8 +5,8 @@
 # W140 showed that the fixed fake vtable at obj+8 makes the C string at rdi
 # begin with the object's low byte + 8.  When that byte is 0x28 ('(') the
 # /bin/sh -c command is syntax, not a word, so no staged file can run.  The
-# vptr is OURS to choose: any 16-byte-aligned offset inside the live object
-# works as a fake vtable, and its low byte becomes the command's first byte.
+# vptr is OURS to choose: offsets inside the live object can serve as a fake
+# vtable, and the chosen offset's low byte becomes the command's first byte.
 # This harness derives the object from an abort@plt sweep, then picks the
 # smallest offset whose vptr bytes form a literal shell word (verified with
 # sh -n -c), and puts system() in the corresponding slot at vptr+0x10.
