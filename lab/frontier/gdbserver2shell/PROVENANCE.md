@@ -308,3 +308,13 @@ gave SIGILL (132), `exit@plt` (`0x555555564380`) and `getpid@plt`
 (`0x555555564540`) gave SIGSEGV (139). No clean distinctive exit,
 no command, no side effect. `qGetTLSAddr` is `E01` in every case.
 
+Diagnostic on the bare-`ret` retarget, kept as an UNKNOWN rather than a
+CET claim: under gdb with `setarch -R` (object `0x...c470` in that
+configuration, payload vptr `0x...c478`), SIGILL landed at
+`rip=0x55555557d4df` with `rax=0x55555557d4de`. The target bytes are
+`c3 90` (`ret`, `nop`) at `0x2d4de/0x2d4df`, so the `ret` appears to have
+executed and the fault was reported one byte later; IBT-on-indirect-call
+is therefore NOT established as the cause. Shadow-stack enforcement or
+subsequent corrupted control flow remain untested explanations. This
+does not change the observation that no retarget produced a command.
+
