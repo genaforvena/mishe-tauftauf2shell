@@ -987,7 +987,9 @@ on the stock plain `-O0` server (SHA-256 `5cf4945768615a55da3401c7608f4223...`,
 
 Coarse sweep: indices 320, 384, 448, 640, 768, 1024, 1280, 1536, 2048, 3072,
 4096, 6144 and 8192 are `ALIVE_AFTER_MESSAGE`; 16384, 32768 and 65536 are
-`DEAD_AFTER_MESSAGE exit=139` (the write leaves the mapped stack). Index 512
+`DEAD_AFTER_MESSAGE exit=139` (no gdb landing was mapped for those three, so
+the fault cause is UNKNOWN; 16384 is close enough to the array that it may
+still be inside the mapped stack). Index 512
 alone is `DEAD_AFTER_MESSAGE exit=134` with `*** stack smashing detected ***`
 in `server.err` (`out-w21-o0-512/`). The same index on the TYPE sink is also
 134 with the same stderr (`out-w21-o0--2-512/`); the fixed commit is ALIVE
