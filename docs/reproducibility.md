@@ -4442,7 +4442,10 @@ build/source trees symlinked in, rc 0): `vips_region_prepare()` → `bpl=-7296`,
 `vips_extract_area()` → `vips_image_write_to_memory()` → ASan
 `heap-buffer-overflow`, `READ of size 160000`, in `vips_region_copy`
 (`region.c:1090`), 6144 bytes before the live allocation; the decoded-TIFF
-consumer stalls (>180 s) as a preserved negative. W4 adds the chosen-byte
+consumer stalled (>180 s) as a preserved negative under a memory-constrained
+host (13:07Z `SwapFree 432 kB` of 8 GiB; an unrelated replay also stalled). The
+cause is UNKNOWN, not attributable to the crafted geometry alone (`a3a8432`).
+W4 adds the chosen-byte
 negative-offset WRITE through the exported public API `vips_region_paint()`:
 the same `real/run-consumer.sh` now also runs a `paint` mode on that real
 image (`vips_region_prepare({0,0,4,2})`, then `vips_region_paint(reg,&r,0x5a)`),
@@ -4855,10 +4858,12 @@ both resolver entries (225 total). The pinned full-flag doctor returned rc 0
 `GREEN`; `python3 tools/check-omp-only.py .mishe-tauftauf .` returned
 `GREEN (112 declared roles)`. Status: `reports/libheif2shell-status.md`.
 
-## 2026-11-23 12:4xZ — fqterm2shell staged by frontier W158 (not admitted)
+## 2026-11-23 12:4xZ — fqterm2shell staged by frontier W158 (admitted 13:1xZ)
 
 Frontier staged CVE-2026-131875 / GHSA-8m6p-6hq3-xcx4 in commit `ddc7b62`
-without a charter, route, mind or witness verdict. Affected fqterm is before
+without a charter, route, mind or witness verdict at that time; it was admitted
+13:1xZ under standing #6 as the 113th route after the operator replay below.
+Affected fqterm is before
 0.9.11; fixed 0.9.11 by `e340b62`, vulnerable parent `079b6d5`. Byte-exact
 source/patch pins and URLs are in `lab/frontier/fqterm2shell/PINS.sha256` and
 `PROVENANCE.md`. From a clean committed tree:
@@ -4880,8 +4885,9 @@ the report records six pins verifying. Plain builds and gdb put chosen
 `fqterm_decode.cpp.vuln:694` (the store is on the same line); the fixed pin
 clamps `paramIndex_` at 29. No Qt/fqterm build, terminal, telnet/SSH host,
 socket, wire, real QObject ABI measurement, pointer control, command or
-witness verdict; rung 5 is UNKNOWN. Window 118 and a staging DM exist but do
-not constitute admission. Brief: `reports/frontier-fqterm2shell.md`.
+witness verdict; rung 5 is UNKNOWN. Window 118 and a staging DM existed then;
+the admission and its full-flag-sync units are in the 13:1xZ section below.
+Brief: `reports/frontier-fqterm2shell.md`.
 
 ## 2026-11-23 12:4xZ — libvips2shell W6 allocator-neighbour observation
 

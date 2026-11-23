@@ -8255,7 +8255,9 @@ limbs: W2 built both pinned tags with ASan and loaded a crafted many-band TIFF
 (the `BPL=-256` write is the synthetic staged shape; the TIFF-accepted geometry
 has `bpl=-7296`), and W3 drove real region/consumer APIs on a real 8.6 GB buffer
 — `READ of size 160000` in `vips_region_copy` 6144 bytes before the allocation,
-with the decoded-TIFF consumer stall preserved as a negative. W4 then observed
+with the decoded-TIFF consumer stalling >180 s preserved as a negative under
+memory pressure (13:07Z 8.0/8.0 GiB swap; an unrelated replay also stalled;
+cause UNKNOWN, not the crafted geometry alone, `a3a8432`). W4 then observed
 a chosen-byte negative-offset WRITE through the exported public API
 `vips_region_paint()` on that real image (ASan `WRITE of size 160000` at
 `region.c:922`, fixed rejects `image: dimension overflow`; clean-archive
@@ -8504,14 +8506,19 @@ primitive stays an availability fault at rung 4 with no control-flow datum.
 Jq's alias limb (`b984a92`) reaches `currlen + len = 0x80000000` in a real
 ASan jq 1.8.1 process by aliasing one 1 GiB string: vulnerable rc 134 with
 `WRITE of size 1073741824` at `src/jv.c:1191`, fixed rc 5, safe input clean.
-Docs clean-archive replay reproduced the safe, ASan and fixed controls and
-their two normalized hashes but did not complete the conditional gdb
-breakpoint (no `src/jv.c` in the copied tree, host swap 8.0/8.0 GiB with peer
-1 GiB jobs, 400 s working-tree retry also timed out); `1b86ae5` records the
-clean replay as UNKNOWN under contention, witness asked in #2629, so the gdb
-frame hash and `ALIAS-GEOM-PASS` stay author-only. Local expression, no
-request/wire input, neighbour map, pointer control, command, side effect or
-witness; the literal PoCs stay preserved negatives.
+Docs' early clean-archive replay reproduced the safe, ASan and fixed controls
+and their two normalized hashes but did not complete the conditional gdb
+breakpoint (no `src/jv.c`, host swap 8.0/8.0 GiB with peer 1 GiB jobs, 400 s
+working-tree retry timed out); `1b86ae5` keeps those attempts UNKNOWN.
+Witness W160 (#2651) replayed `alias-geom.sh` from a clean archive of `1b86ae5`
+in 65 s: rc 0 `ALIAS-GEOM-PASS`, 14/14 pins OK, three normalized logs
+byte-identical, the same ASan `WRITE of size 1073741824` at `src/jv.c:1191`
+and gdb `currlen=len=1073741824, allocsz=0`, fixed rc 5 and a clean small input;
+in its archive only, ink `A` read `s->data[0]=0x41` and `length=1073741825`
+gave `WRITE of size 1073741825`. ESTABLISHED at the labeled real-process
+geometry scope, no grade change. Local expression, no request/wire input,
+heap-neighbour map, destination-offset or pointer control, command or side
+effect; rung 5 stays unclaimed and the literal PoCs are preserved negatives.
 
 Psqlodbc W159 (`91b76e3`) rebuilt the pinned tag with `clang -O2` over real
 objects and found `n=73 rc=0`, `n=74 rc=139`: the parser's own `QueryBuild`
