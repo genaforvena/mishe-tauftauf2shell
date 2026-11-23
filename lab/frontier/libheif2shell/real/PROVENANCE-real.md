@@ -261,9 +261,37 @@ frame, not from a harness-injected buffer. Still absent: network/wire input,
 a live server process, a chosen-pointer or control-flow target, a benign
 command/marker side effect. Independent W163 replay (witness #2729)
 ESTABLISHED W161 and W162 at the labeled local-file/process scope, rungs 1-4,
-no counterexample; W164 above was not replayed. The neighbouring object is a
-free heap chunk, not a live pointer, so no exploitation path is claimed.
+no counterexample; W164/W166 above were not replayed. The neighbouring object
+is a free or top heap chunk in every measured state, including W169's failed
+same-size grooming, not a live pointer, so no exploitation path is claimed.
 Rung 5 remains UNKNOWN. The advisory's 36,879-byte allocation remains an
 untested claim from a different build; this build reports a 32783-byte ASan
 region. The release-build SIGSEGV claim is now observed locally (above), not
 just quoted from the advisory.
+
+## W169 groomed live-victim adjacency negative (2026-11-23)
+
+Built `real/reencode_groom.cc` against the pinned plain Release tree
+`/tmp/libheif2shell-vuln-plain` with the exact recipe used for
+`reencode_retain.cc` (`g++ -std=c++17 -g -I<src>/libheif/api -I<build>
+reencode_groom.cc <build>/libheif/libheif.a <codec libs from 'ninja -C <build>
+-t commands examples/heif-enc'> -ldl`). Input: the committed one-row generator
+output, SHA-256 `e028c5af98002a921e8a326d418fd3af9f6911032491c177264ee81eaf9a3b67`.
+
+Grooming at frame 1: `A=malloc(32783)`, `B=malloc(sizeof(Victim))` where
+`Victim{void(*fn)(); unsigned char tag[32775];}` so B is also 32783 bytes;
+`B->fn=benign_marker`, tag `0xa5+i`; `free(A)` to put A in the unsorted bin.
+Observed addresses `A=0x555555793490`, `B=0x55555579b4b0` (B-A=0x8020), so the
+two chunks were adjacent and A was the exact plane size. gdb
+(`neighbour/gdb_groom.cmd`) then showed plane 1 at A and plane 2 at
+`0x5555558ac490`: A's header had become size `0x3fe1` (consolidated/split),
+so the frame-1 replacement plane did not reclaim A and its OOB row never
+reached B. B's `fn` and tag remained intact; plain rc 134 with
+`malloc(): corrupted top size`, SIGABRT under gdb. Saved output:
+`neighbour/evidence/groom-plain.out`, `neighbour/evidence/groom-gdb.out`;
+`neighbour/check_groom.py` PASS asserts adjacency, plane relocation, intact
+victim and the abort. No fixed-pin variant was rebuilt for this negative; the
+W166(b) fixed-pin control already covers the same one-row input and mechanism.
+
+This is a harness-groomed rung-4 negative. It does not claim file-derived
+placement of a live object, pointer control, a marker side effect or rung 5.

@@ -1,0 +1,7 @@
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+frame 0 encoded rc=0
+Corrupt JPEG data: 631 extraneous bytes before marker 0xd9
+GROOM A=0x5bf2c94c5490 B=0x5bf2c94cd4b0 A<B=1 fn=0x5bf2b1067b3c tag0=0xa5
+frame 1 decoded: 64x65 stride=64
+malloc(): corrupted top size

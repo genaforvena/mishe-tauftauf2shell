@@ -1,0 +1,52 @@
+Breakpoint 1 at 0x25040
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+warning: 3699	./malloc/malloc.c: No such file or directory
+0x0000555555660db1 in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_component_datatype, int, int, heif_security_limits const*, MemoryHandle&) ()
+Value returned is $1 = (void *) 0x555555793490
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+[New Thread 0x7ffff61ff6c0 (LWP 38209)]
+[New Thread 0x7ffff59fe6c0 (LWP 38210)]
+[New Thread 0x7ffff51fd6c0 (LWP 38211)]
+[New Thread 0x7ffff49fc6c0 (LWP 38212)]
+[New Thread 0x7fffe7fff6c0 (LWP 38216)]
+[New Thread 0x7fffe77fe6c0 (LWP 38220)]
+[New Thread 0x7fffe6ffd6c0 (LWP 38221)]
+[New Thread 0x7fffe67fc6c0 (LWP 38222)]
+[New Thread 0x7fffe5ffb6c0 (LWP 38223)]
+[New Thread 0x7fffe57fa6c0 (LWP 38224)]
+[New Thread 0x7fffe4ff96c0 (LWP 38225)]
+[New Thread 0x7fffc7fff6c0 (LWP 38226)]
+[New Thread 0x7fffc77fe6c0 (LWP 38227)]
+[New Thread 0x7fffc6ffd6c0 (LWP 38228)]
+[New Thread 0x7fffc67fc6c0 (LWP 38229)]
+[New Thread 0x7fffc5ffb6c0 (LWP 38230)]
+[New Thread 0x7fffc57fa6c0 (LWP 38231)]
+frame 0 encoded rc=0
+Corrupt JPEG data: 631 extraneous bytes before marker 0xd9
+GROOM A=0x555555793490 B=0x55555579b4b0 A<B=1 fn=0x55555558fb3c tag0=0xa5
+frame 1 decoded: 64x65 stride=64
+
+Thread 1 "libheif2shell-r" hit Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+3699	in ./malloc/malloc.c
+0x0000555555660db1 in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_component_datatype, int, int, heif_security_limits const*, MemoryHandle&) ()
+Value returned is $2 = (void *) 0x5555558ac490
+PLANE2=0x5555558ac490 A=0x555555793490 B=0x55555579b4b0
+malloc(): corrupted top size
+
+Thread 1 "libheif2shell-r" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+--- A chunk header (A-16) ---
+0x555555793480:	0x0000000000000040	0x0000000000003fe1
+0x555555793490:	0x0000555555798480	0x00007ffff6405220
+--- B chunk header (B-16) ---
+0x55555571b3b0:	0xfff01f900001a71c	0xfff01fb00001a75c
+0x55555571b3c0:	0xfff021000001a8b4	0xfff023600001a934
+B fn=0x55555558fb3c tag0=0xa5 tag8=0xad
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89

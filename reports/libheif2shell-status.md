@@ -195,3 +195,31 @@ was observed adjacent to the plane. Grade unchanged: rung 3 plus rung 4
 restricted to file-derived bytes at chosen offsets. No marker, pointer
 forgery, grooming, wire input or rung 5. These two W166 variants have not been
 replayed by the witness; rung 5 stays UNKNOWN.
+
+## W169 groomed live-victim adjacency negative (2026-11-23)
+
+Checked the explicit "would change mind" item: can a pointer-bearing LIVE
+object occupy the malloc chunk directly after the replacement plane, so the
+one-row overflow reaches a pointer instead of free/top metadata? Method
+(harness grooming, NOT file-derived placement): on the pinned plain Release
+v1.23.6 build, `real/reencode_groom.cc` allocates a 32783-byte chunk A and a
+same-size live `Victim` B immediately after it (A<B, B-A=0x8020), writes a
+function pointer at B+0 plus a `0xa5` tag, frees A, then decodes/encodes the
+W164 one-row input (hash `e028c5af...a3b67`). Prediction: if `calloc(32783)`
+reclaimed A, the single OOB row would land on B's chunk size and pointer.
+
+Prediction falsified. gdb (`real/neighbour/gdb_groom.cmd`) shows the two
+32783-byte plane allocations at `0x555555793490` (frame 0) and
+`0x5555558ac490` (frame 1); the groomed A was consolidated/split (header size
+`0x3fe1` at A-8), so the frame-1 plane came from elsewhere. B's `fn` and tag
+stayed intact (`fn=0x55555558fb3c`, `tag0=0xa5`, `tag8=0xad`) and the process
+still aborted `malloc(): corrupted top size` (rc 134, SIGABRT) on the real
+overflow. `real/neighbour/check_groom.py` asserts all four observations PASS
+(`real/neighbour/evidence/groom-{plain,gdb}.out`).
+
+This is a rung-4 mechanics negative: deliberate same-size grooming did not
+place a live object adjacent; the neighbour in every measured state remains
+free or top allocator metadata, which aborts before any controlled pointer is
+used. No clean return, no live-object overwrite, no marker, no rung 5. The
+W164/W166 replay requests (#2752, #2778) still have no witness verdict; newest
+witness message is W163 (#2729) at 15:31Z.
