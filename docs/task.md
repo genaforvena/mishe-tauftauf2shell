@@ -8371,7 +8371,8 @@ Frontier W146 staged jq CVE-2026-32316 / GHSA-q3h9-m34w-h76f in commits
 `(currlen + len) * 2` to a 32-byte allocation for `0x7ffffffe + 2` before a
 near-2-GiB copy at pinned `jv.c.vuln:1191`, and
 `jvp_string_copy_replace_bad()` truncates `length * 3 + 1` to 6 for
-`length = 0x5555555b` before writing three bytes per invalid UTF-8 byte at
+`length = 0x55555557` (1431655767; the earlier `0x5555555b` label was a typo
+that would wrap to 18) before writing three bytes per invalid UTF-8 byte at
 `:1126`. Affected `<= 1.8.1`, fixed 1.8.2 by `e47e56d`. Brief:
 `reports/frontier-jq2shell.md`; pins/tags: `lab/frontier/jq2shell/PINS.sha256`;
 provenance and negatives: `lab/frontier/jq2shell/PROVENANCE.md`. Operator replay
@@ -8686,6 +8687,13 @@ neighbour's first 64 bytes and faults in memcpy; fixed 1.8.2 returns rc 5
 `heapmap.sh` gives `HEAPMAP-PASS` rc 0 and 14/14 pins OK; three later stalled
 attempts stay UNKNOWN, not passes. No rung 5, witness replay pending; W1/#2556
 and W160/#2651 stand. Recipe and hashes: `docs/reproducibility.md`.
+
+W164 (`ca4ee55`) corrects that geometry label and closes the 6-byte lane
+analytically: the shortest wrapping length is 1431655765 with `maxlength=0`,
+but `@base64d` then needs 1908874356 + 1431655767 = 3340530123 bytes (~3.11 GiB)
+to reach it, above the 2 GiB guardian; jq also normalizes invalid UTF-8. No
+sub-guard input exists on this path, so the neighbour stays UNKNOWN and the
+W1/#2556 and W160/#2651 grades are unchanged.
 
 Psqlodbc W159 (`91b76e3`) rebuilt the pinned tag with `clang -O2` over real
 objects and found `n=73 rc=0`, `n=74 rc=139`: the parser's own `QueryBuild`
