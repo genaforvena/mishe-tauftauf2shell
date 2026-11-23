@@ -81,7 +81,7 @@ destination stays out of bounds), `max` (65535, used only for layout probes).
 
 `harness/check.sh`: 24 invocations plus gdb probes; `92 PASS / 0 FAIL` on
 three consecutive runs, trace
-`9b1eacabeaefb2645295057b140f4e6e8a270f67759dfe9c5ade3cf2c6c8ccd7`. Raw
+`e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`. Raw
 outputs in `harness/evidence/`.
 
 - Rung 1: vulnerable baseline returns `rc=0`, `big_n=1536`, one table block
