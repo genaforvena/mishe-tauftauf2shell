@@ -1,0 +1,75 @@
+=================================================================
+==678542==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7351bc5ff9fc at pc 0x7351be2b5e3b bp 0x7ffdfeb9d810 sp 0x7ffdfeb9d800
+WRITE of size 2 at 0x7351bc5ff9fc thread T0
+    #0 0x7351be2b5e3a in setCode ../src/encparse.c:495
+    #1 0x7351be2b71ee in parseEncodingFile ../src/encparse.c:672
+    #2 0x7351be2b8bba in FontEncReallyReallyLoad ../src/encparse.c:941
+    #3 0x7351be2b8d94 in FontEncReallyLoad ../src/encparse.c:962
+    #4 0x7351be2ba51b in FontEncLoad ../src/fontenc.c:780
+    #5 0x7351be2ba311 in FontEncFind ../src/fontenc.c:738
+    #6 0x7351be0e894a  (/lib/x86_64-linux-gnu/libXfont2.so.2+0xf94a) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #7 0x7351be0f7e7b  (/lib/x86_64-linux-gnu/libXfont2.so.2+0x1ee7b) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #8 0x7351be0faadb  (/lib/x86_64-linux-gnu/libXfont2.so.2+0x21adb) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #9 0x7351be0e640a  (/lib/x86_64-linux-gnu/libXfont2.so.2+0xd40a) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #10 0x63d3aa66543b  (/usr/bin/Xvfb+0x13543b) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #11 0x63d3aa66596a in OpenFont (/usr/bin/Xvfb+0x13596a) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #12 0x63d3aa662fef  (/usr/bin/Xvfb+0x132fef) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #13 0x63d3aa667409  (/usr/bin/Xvfb+0x137409) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #14 0x7351bd42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x7351bd42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x63d3aa56fd84 in _start (/usr/bin/Xvfb+0x3fd84) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+
+0x7351bc5ff9fc is located 508 bytes after 131072-byte region [0x7351bc5df800,0x7351bc5ff800)
+allocated by thread T0 here:
+    #0 0x7351bdafc91d in reallocarray ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:92
+    #1 0x7351be2b59bb in setCode ../src/encparse.c:469
+    #2 0x7351be2b71ee in parseEncodingFile ../src/encparse.c:672
+    #3 0x7351be2b8bba in FontEncReallyReallyLoad ../src/encparse.c:941
+    #4 0x7351be2b8d94 in FontEncReallyLoad ../src/encparse.c:962
+    #5 0x7351be2ba51b in FontEncLoad ../src/fontenc.c:780
+    #6 0x7351be2ba311 in FontEncFind ../src/fontenc.c:738
+    #7 0x7351be0e894a  (/lib/x86_64-linux-gnu/libXfont2.so.2+0xf94a) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #8 0x7351be0f7e7b  (/lib/x86_64-linux-gnu/libXfont2.so.2+0x1ee7b) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #9 0x7351be0faadb  (/lib/x86_64-linux-gnu/libXfont2.so.2+0x21adb) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #10 0x7351be0e640a  (/lib/x86_64-linux-gnu/libXfont2.so.2+0xd40a) (BuildId: ec163f9965b7ae6ec7c32a740899b59349e3ebc1)
+    #11 0x63d3aa66543b  (/usr/bin/Xvfb+0x13543b) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #12 0x63d3aa66596a in OpenFont (/usr/bin/Xvfb+0x13596a) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #13 0x63d3aa662fef  (/usr/bin/Xvfb+0x132fef) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #14 0x63d3aa667409  (/usr/bin/Xvfb+0x137409) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+    #15 0x7351bd42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x7351bd42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x63d3aa56fd84 in _start (/usr/bin/Xvfb+0x3fd84) (BuildId: 7e1413ca923e9b6fd8c6320d937a946cf87c1307)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../src/encparse.c:495 in setCode
+Shadow bytes around the buggy address:
+  0x7351bc5ff700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7351bc5ff780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7351bc5ff800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7351bc5ff880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7351bc5ff900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x7351bc5ff980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x7351bc5ffa00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7351bc5ffa80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7351bc5ffb00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7351bc5ffb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7351bc5ffc00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==678542==ABORTING

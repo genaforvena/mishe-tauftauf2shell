@@ -84,3 +84,66 @@ files in `harness/evidence/`.
   enc files into the X server); no X server, `.enc` file delivery path, real
   font backend, allocator steering, pointer control, ROP, command or witness
   verdict was exercised. The chosen `0x5a5a` is data, not execution.
+
+## W155 extension: real library and live X server path (2026-11-23)
+
+The W154 negative result above ("no X server ... exercised") is superseded
+for this target by the following. The earlier direct-call harness evidence is
+unchanged and still reproducible.
+
+Upstream source trees were materialised by `git archive` from the read-only
+`/tmp/libfontenc-src` clone at `7418fa7` (vulnerable parent), `5920c6e`
+(fix), release tags `libfontenc-1.1.9` (archive commit `780d1f6`) and
+`libfontenc-1.1.10` (archive commit `eb42c92`), into the gitignored
+`build-{vuln,fixed,1.1.9,1.1.10}/` directories. All four build with meson
+1.3.2; the 1.1.10 `libtest_helper.so` target fails because that release's
+`fontencI.h` lacks a header guard (upstream HEAD `4c48b91` adds one), so its
+library target `libfontenc.so.1.0.0` was built alone. `git tag --contains
+5920c6e` lists only `libfontenc-1.1.10`; 1.1.9 predates the fix. This settles
+the advisory's "before 1.11.0" string as inconsistent with every upstream
+tag; both strings are preserved, not silently reconciled.
+
+`realpath/run.sh` builds `load_via_public_api.c` against each shared library
+(plain and `-Db_sanitize=address`) and calls the exported
+`FontEncFind(charset, fontfile)` — the path used by libXfont2 — with a real
+`encodings.dir` and crafted `.enc` in `realpath/tmp/fonts/`. Raw results:
+`realpath/evidence/{vuln,fixed,1.1.9,1.1.10}-{plain,asan}-{safe,crafted}.out`.
+The vulnerable build and 1.1.9 report ASan `WRITE of size 2` at
+`../src/encparse.c:495`, 508 bytes after a 131072-byte region allocated at
+`:469`, with the chain `FontEncFind:738 -> FontEncLoad:780 ->
+FontEncReallyLoad:962 -> FontEncReallyReallyLoad:941 ->
+parseEncodingFile:672 -> setCode:495`. Fixed `5920c6e` and 1.1.10 produce no
+report; safe input produces no report in any build. Passing a NULL font
+filename to `FontEncFind` makes this release's directory branch fopen the
+directory itself and return NULL; the real X path always passes a font
+filename, so the replay does too.
+
+`realpath/xlive/run-live.sh` drives a **live loopback Xvfb**: the client opens
+a Type1 font whose XLFD registry is `crafted-1`; libXfont2 calls
+`FontEncFromXLFD`, `FontEncFind` and `FontEncReallyLoad` with the crafted
+charset and font path (trace in `realpath/evidence/live/tracer-xvfb.out`).
+With ASan and the pinned vulnerable library preloaded, the crafted input
+crashes Xvfb from inside `OpenFont` with the same 508-byte write at `:495`
+(`realpath/evidence/live/asan-vuln-crafted.out`); 1.1.9 behaves identically.
+Fixed and 1.1.10 libraries and the safe input keep the X server alive and
+the client succeeds (`realpath/evidence/live/client-*.out`).
+
+Negative results preserved:
+
+- Plain (non-ASan) Xvfb with the vulnerable library and identical crafted
+  input survives: the client loads the font and `xdpyinfo` still answers
+  (`realpath/evidence/live/client-plain-vuln.out`). The ASan crash is not an
+  observed crash or service loss in the uninstrumented build.
+- `gdb-heap-layout.out`: default glibc makes this 131072-byte request an
+  mmap chunk (header `0x21002`, `malloc_usable_size=135152`); the target 508
+  bytes past the nominal end is inside the chunk's usable slack. With
+  `MALLOC_MMAP_THRESHOLD_=262144` (`gdb-heap-layout-brk.out`) it is a brk
+  chunk (`0x20011`, usable 131080) followed by the top chunk; again no live
+  object is at the destination. No allocation occurs between `reallocarray`
+  at `:469` and the store at `:495`, so no neighbour object can be placed
+  there in this single-threaded parse path.
+- The live setup controls both the font path (`fonts.dir`, `encodings.dir`,
+  `.enc`) and a Type1 font's `CHARSET_REGISTRY` property; this models the
+  advisory's local attacker who can inject enc files. No remote protocol,
+  pointer control, allocator grooming toward a live object, command, marker
+  side effect or witness verdict was exercised. Rung 5 stays UNKNOWN.

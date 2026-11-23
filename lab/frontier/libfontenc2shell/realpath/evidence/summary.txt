@@ -1,0 +1,54 @@
+libfontenc2shell W155 — real library and live X server replay (2026-11-23)
+==========================================================================
+
+Sources materialised with `git archive` from /tmp/libfontenc-src (upstream
+gitlab.freedesktop.org/xorg/lib/libfontenc):
+  7418fa7  vulnerable parent of the fix
+  5920c6e  fix (index > 0xFFFF guard + from-column check)
+  libfontenc-1.1.9  tag 73583de -> archive commit 780d1f6 (2026-02-07)
+  libfontenc-1.1.10 tag d66835cf -> archive commit eb42c92 (2026-11-18)
+`git tag --contains 5920c6e` lists only libfontenc-1.1.10; 1.1.9 predates it.
+
+A. Public library API (realpath/run.sh), crafted font path in
+   realpath/tmp/fonts/encodings.dir -> crafted.enc:
+vuln-plain-safe    rc=0 FontEncFind non-NULL
+vuln-plain-crafted rc=0 FontEncFind non-NULL (write lands in allocator slack)
+vuln-asan-safe     rc=0 no ASan report
+vuln-asan-crafted  rc=1 ASan heap-buffer-overflow, WRITE of size 2 at
+                   encparse.c:495, 508 bytes after a 131072-byte region,
+                   allocated at :469; call chain FontEncFind:738 ->
+                   FontEncLoad:780 -> FontEncReallyLoad:962 ->
+                   FontEncReallyReallyLoad:941 -> parseEncodingFile:672
+fixed-*-safe       rc=0 no report
+fixed-*-crafted    rc=0 no report (fixed guard at encparse.c:461)
+1.1.9-asan-crafted rc=1 same ASan report at encparse.c:495
+1.1.10-*-crafted   rc=0 no report
+
+B. Live loopback X server (realpath/xlive/run-live.sh): Xvfb loads a Type1
+   font whose XLFD registry is "crafted-1"; libXfont2 calls FontEncFind with
+   that charset and the font file path. xlive/logs/tracer-xvfb.out records
+   FontEncFromXLFD -> crafted-1, FontEncFind, FontEncReallyLoad from Xvfb.
+vuln safe       client_rc=0 asan_logs=0
+fixed safe      client_rc=0 asan_logs=0
+vuln crafted    client_rc=1 asan_logs=1  (X connection broken; ASan report
+                from inside Xvfb OpenFont, same 508-byte write at :495)
+fixed crafted   client_rc=0 asan_logs=0
+1.1.9 crafted   client_rc=1 asan_logs=1
+1.1.10 crafted  client_rc=0 asan_logs=0
+Plain (non-ASan) Xvfb with the vulnerable library and identical crafted
+input: client_rc=0, server still answers xdpyinfo (client-plain-vuln.out) —
+no observed crash or service loss in the uninstrumented build.
+
+C. Heap neighbours at the OOB store (gdb-heap-layout*.out):
+default glibc: chunk size 0x21002 (IS_MMAPPED), malloc_usable_size 135152,
+so 508 bytes past the 131072-byte buffer is still inside the mmap chunk's
+usable slack; target bytes change 0000 -> 5a5a at the store.
+MALLOC_MMAP_THRESHOLD_=262144: chunk size 0x20011 (brk/arena), usable 131080,
+next chunk at enc+0x20000 is top chunk (size 0x20cd1); the store again lands
+in unallocated space, not a live object. No intervening allocation exists
+between reallocarray at :469 and the store at :495 in this code path.
+
+Grade: rung 3 (memory corruption proven in a live X server under ASan with
+chosen bytes at a chosen offset); no demonstrated crash or command execution
+in a plain build, no pointer/control-flow diversion, no marker side effect,
+no witness verdict. Rung 5 UNKNOWN.

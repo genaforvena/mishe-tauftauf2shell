@@ -1,0 +1,71 @@
+No source file named encparse.c.
+Breakpoint 1 (encparse.c:495 if index > 0xffff) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PUBLIC-API-DRIVER charset=crafted filename=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts/dummy.pcf envdir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts dir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts
+
+Breakpoint 1, setCode (from=65280, to=23130, row_size=258, first=0x7fffffffc9fc, last=0x7fffffffca00, encsize=0x7fffffffca04, enc=0x7fffffffca18) at ../src/encparse.c:495
+495	    (*enc)[index] = to;
+STOPPED index=65790 row_size=258 to=23130 encbase=0x7ffff7f5e010 encsize=65536
+glibc malloc_usable_size=135152
+chunk header before user pointer:
+0x7ffff7f5e000:	0x0000000000000000	0x0000000000021002
+0x7ffff7f5e010:	0x0000000000000000	0x0000000000000000
+128 bytes straddling nominal end (enc+131072):
+0x7ffff7f7dfd0:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7dfe0:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7dff0:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7e000:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7e010:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7e020:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7e030:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7e040:	0x0000000000000000	0x0000000000000000
+target bytes at chosen index (before store):
+0x7ffff7f7e204:	0x0000000000000000	0x0000000000000000
+0x7ffff7f7e214:	0x0000000000000000	0x0000000000000000
+process mappings:
+process 545436
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555555000     0x1000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-plain
+      0x555555555000     0x555555556000     0x1000     0x1000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-plain
+      0x555555556000     0x555555557000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-plain
+      0x555555557000     0x555555558000     0x1000     0x2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-plain
+      0x555555558000     0x555555559000     0x1000     0x3000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-vuln-plain
+      0x555555559000     0x55555557a000    0x21000        0x0  rw-p   [heap]
+      0x7ffff7c00000     0x7ffff7c28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c28000     0x7ffff7db1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7db1000     0x7ffff7e00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e00000     0x7ffff7e04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e04000     0x7ffff7e06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e06000     0x7ffff7e13000     0xd000        0x0  rw-p   
+      0x7ffff7f5e000     0x7ffff7f81000    0x23000        0x0  rw-p   
+      0x7ffff7f81000     0x7ffff7f83000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f83000     0x7ffff7f95000    0x12000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f95000     0x7ffff7f9b000     0x6000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f9b000     0x7ffff7f9c000     0x1000    0x1a000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7f9c000     0x7ffff7f9d000     0x1000    0x1b000  rw-p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x7ffff7fb2000     0x7ffff7fb4000     0x2000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/build-vuln/out-plain/libfontenc.so.1.0.0
+      0x7ffff7fb4000     0x7ffff7fb8000     0x4000     0x2000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/build-vuln/out-plain/libfontenc.so.1.0.0
+      0x7ffff7fb8000     0x7ffff7fba000     0x2000     0x6000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/build-vuln/out-plain/libfontenc.so.1.0.0
+      0x7ffff7fba000     0x7ffff7fbb000     0x1000     0x7000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/build-vuln/out-plain/libfontenc.so.1.0.0
+      0x7ffff7fbb000     0x7ffff7fbc000     0x1000     0x8000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/build-vuln/out-plain/libfontenc.so.1.0.0
+      0x7ffff7fbc000     0x7ffff7fbf000     0x3000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+496	    return 0;
+target bytes at chosen index (after store):
+0x7ffff7f7e204:	0x0000000000000000	0x0000000000005a5a
+0x7ffff7f7e214:	0x0000000000000000	0x0000000000000000
+FontEncFind=0x555555563290
+name=crafted size=256 row_size=258 mappings=0x5555555632f0
+map_type=1 first_col=0
+[Inferior 1 (process 545436) exited normally]

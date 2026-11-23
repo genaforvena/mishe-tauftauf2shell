@@ -1,12 +1,14 @@
 # Frontier brief: libfontenc setCode() row-size overflow — CVE-2026-109908 (libfontenc2shell)
 
-**STAGED 2026-11-23 W154 — direct-call harness evidence, a live registered
-two-pane window (inner socket index 115, name `libfontenc2shell`) and a staging
-DM to the operator exist; operator admission and an independent witness verdict
-are pending.** Byte-exact pins and hashes: `lab/frontier/libfontenc2shell/PINS.sha256`;
-harness provenance including preserved negative results:
-`lab/frontier/libfontenc2shell/PROVENANCE.md`. Frontier owns no further work on
-this target.
+**STAGED 2026-11-23 W154; EXTENDED W155.** The W154 direct-call harness
+evidence stands unchanged. W155 built the real library at the pinned commits
+and release tags, reached the parser through the exported `FontEncFind()` API
+and through a **live loopback Xvfb `OpenFont` path**, and settled the version
+discrepancy against upstream tags. An independent witness verdict is still
+pending; the author's report is not acceptance. Byte-exact pins and hashes:
+`lab/frontier/libfontenc2shell/PINS.sha256`. Full commands, controls and
+negative results: `lab/frontier/libfontenc2shell/PROVENANCE.md`; compact W155
+matrix: `lab/frontier/libfontenc2shell/realpath/evidence/summary.txt`.
 
 ## 1. Verified ground truth
 
@@ -17,25 +19,28 @@ this target.
   attacker who can inject enc files into the X server crash it or escalate
   privileges. Discovery credited to Adam Bedard (TrendAI ZDI), ZDI-CAN-31888.
   A remote path is **not** claimed.
-- Affected: libfontenc before 1.1.10 per the upstream fix tag; the advisory
-  text says "before 1.11.0". Both strings are preserved verbatim; the numeric
-  version discrepancy is UNKNOWN, not silently reconciled.
+- Affected text is preserved verbatim: advisory "before 1.11.0", upstream fix
+  tag `libfontenc-1.1.10`. W155 evidence resolves which upstream releases
+  carry the fix, not the advisory's typo: `git tag --contains 5920c6e` lists
+  only `libfontenc-1.1.10`; `libfontenc-1.1.9` predates the fix. Rebuilt
+  1.1.9 faults on the crafted input, 1.1.10 does not. Both version strings
+  remain in the record; nothing is silently reconciled.
 - Upstream fix commit
   `5920c6ee144fffff84b62f5b479171f734f15316` (2026-09-16) adds
   `if (index > 0xFFFF) return 0;` to `setCode()` and corrects the column check
   from global `value1` to the `from` parameter. Vulnerable parent:
   `7418fa7a77d1faf795ae40ea92f9ec2828e2a0b9`. Source:
   https://gitlab.freedesktop.org/xorg/lib/libfontenc.git. Upstream regression
-  test `be6a0eb` includes the `SIZE 256 258` / `0xff00` case. No target by
-  this name is in the plant's do-not-duplicate list, brief set or registry.
+  test `be6a0eb` includes the `SIZE 256 258` / `0xff00` case.
 
 ## 2. Source-bound mechanism and fix
 
 Rendered line numbers are claims; the pinned bytes live in
 `src/encparse.c.{vuln,fixed}` and are included verbatim under `#line` control
-in the generated drivers.
+in the W154 generated drivers. W155 builds the same upstream commits as shared
+libraries; its ASan and gdb reports cite the real source lines directly.
 
-`setCode(from, to, row_size, ...)` computes the destination index at pinned
+`setCode(from, to, row_size, ...)` computes the destination index at
 `encparse.c.vuln:460` as `(from >> 8) * row_size + (from & 0xFF)` when
 `row_size != 0`. `from` is bounded by `0xFFFF`, but `row_size` comes straight
 from the attacker-controlled `SIZE` line and is not bounded by the 256 columns
@@ -50,70 +55,90 @@ loop advances `from` while `value1` stays at the range start.
 Fixed `encparse.c.fixed:458-462` checks `(from & 0xFF) >= row_size` per call
 and rejects `index > 0xFFFF` before allocating or storing.
 
-## 3. Cheapest local experiment
+## 3. Experiments
 
-Two generated C drivers include the complete pinned `encparse.c` for each
-variant, with `#line` numbers preserved. Harness-only stubs supply four font
-backend callbacks and allocator macros; the parser's real zlib `gzFile` API
-reads a temporary crafted `.enc` file. No X server, font path, process, socket
-or network is involved. Seven scenarios cover normal encodings, three
-boundaries, the chosen-byte overflow and both loop variants.
+### 3.1 W154 direct-call harness (unchanged)
 
-Commands: `cd lab/frontier/libfontenc2shell/harness && ./run.sh && ./check.sh`;
-then the `gdb` commands recorded in `PROVENANCE.md`.
+Two generated C drivers include the complete pinned `encparse.c`, with real
+zlib `gzFile` parsing of a temporary `.enc` and harness-only backend stubs.
+Commands: `cd lab/frontier/libfontenc2shell/harness && ./run.sh && ./check.sh`.
+Results: `PASS=50 FAIL=0`, normalized trace
+`bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`, gcc and
+clang ASan `WRITE of size 2` at pinned `:495`, 508 bytes past a 131072-byte
+region, and debugger readback of chosen `0x5a5a` at the destination.
 
-## 4. Rung-4 feasibility and risks
+### 3.2 W155 real library, public API
 
-Favorable: the index arithmetic, allocation cap and store are all in verbatim
-pinned bytes; the fixed pin rejects the same input; both gcc and clang ASan
-classify the write at the pinned line; plain-build debugger readback shows
-attacker-chosen `0x5a5a` at a chosen out-of-bounds index. The overflow distance
-is a direct function of the two attacker-controlled `.enc` numbers.
+`realpath/run.sh` builds `load_via_public_api.c` against plain and ASan shared
+libraries at `7418fa7`, `5920c6e`, 1.1.9 and 1.1.10. It calls the exported
+`FontEncFind(charset, fontfile)`, the entry point libXfont2 uses, with a real
+`encodings.dir` index and crafted/safe `.enc` files under
+`realpath/tmp/fonts/`. The call chain in the ASan report is
+`FontEncFind:738 -> FontEncLoad:780 -> FontEncReallyLoad:962 ->
+FontEncReallyReallyLoad:941 -> parseEncodingFile:672 -> setCode:495`.
+Vulnerable parent and 1.1.9 fault on `SIZE 256 258`; `5920c6e` and 1.1.10 do
+not; safe input faults nothing in any build. A NULL font filename makes this
+version's directory branch fopen the directory and return NULL, so the replay
+passes a font filename exactly as the X path does.
 
-Constraints: the advisory's attack vector is **local** and requires the X
-server to read an attacker-supplied encoding file. This harness calls the
-parser directly with a temporary file; no real X server, font path,
-`encodings.dir`, process boundary, allocator grooming, ASLR study, pointer or
-control-flow diversion, command execution or witness replay was exercised.
-The 16-bit `sm->first` field truncates 65790 to 254, so only the chosen value
-survives into the copied map; the raw index survives in the debugger evidence.
-Whether a real X server can be made to ingest this `.enc` file, and which heap
-objects lie 508 bytes past this allocation, remain UNKNOWN.
+### 3.3 W155 live X server
 
-## 5. Observations
+`realpath/xlive/run-live.sh` starts a loopback-only Xvfb with an ASan-instrumented
+pinned library preloaded ahead of the ASan runtime, and a client opens a Type1
+font whose XLFD registry is `crafted-1`. `xlive/fontenc-trace.c` logged the
+live server calling `FontEncFromXLFD`, `FontEncFind` and `FontEncReallyLoad`
+with that charset and the font file path
+(`realpath/evidence/live/tracer-xvfb.out`). Matrix:
 
-- Harness `PASS=50 FAIL=0` three consecutive runs; normalized trace
-  `bfdd7987e86276e59b580e2f2a960c1a760f389625ced38a065bfaba4de37fa2`
-  (PID, address, absolute path and build id excluded). Raw outputs in
-  `lab/frontier/libfontenc2shell/harness/evidence/`.
-- A clean `git archive 64e3c54` replay of the staged paths reproduced
-  `PASS=50 FAIL=0` and the same trace with five `PINS.sha256` digests verified;
-  recipe in `docs/reproducibility.md`.
-- Rung 1/2: vulnerable `oob-chosen ok=1 row=258 first=254 len=1
-  chosen=0x5a5a`; fixed `first=0 len=0 chosen=0x0000`. Range and undefine
-  controls also separate vulnerable from fixed (`first=0 len=0` vs
-  `first=4 len=3`, and `first=0 len=1` vs `first=0 len=7`).
-- Rung 3: gcc and clang ASan each report `heap-buffer-overflow`, `WRITE of
-  size 2` at pinned `encparse.c.vuln:495`, `508 bytes after 131072-byte
-  region` allocated at `:469`. Fixed ASan builds complete all seven cases
-  cleanly.
-- Rung 4: `evidence/gdb-chosen.out` shows
-  `FROM=65280 TO=5a5a INDEX=65790 ENCSIZE=65536` at `:495`, bytes `00 00`
-  before the store and `00 00 5a 5a` after it at the destination, with `5a 5a`
-  at the out-of-bounds index. `evidence/gdb-fixed-reject.out` shows the fixed
-  pin's `:461` guard firing with `ENCSIZE=0` before allocation.
+| library | input | client | ASan log |
+| --- | --- | --- | --- |
+| `7418fa7` | safe (`SIZE 256 256`) | rc 0 | 0 |
+| `5920c6e` | safe | rc 0 | 0 |
+| `7418fa7` | crafted (`SIZE 256 258`) | rc 1, X connection broken | 1 |
+| `5920c6e` | crafted | rc 0 | 0 |
+| 1.1.9 | crafted | rc 1 | 1 |
+| 1.1.10 | crafted | rc 0 | 0 |
 
-## 6. Ceiling / handoff
+The vulnerable report (`realpath/evidence/live/asan-vuln-crafted.out`) is a
+`heap-buffer-overflow`, `WRITE of size 2` at `encparse.c:495`, 508 bytes after
+a 131072-byte region, with frames through `/usr/bin/Xvfb` `OpenFont` and
+`libXfont2.so.2`. The live setup controls a font path and a Type1 font's
+`CHARSET_REGISTRY` property, modelling the advisory's local attacker, not a
+remote client.
 
-Direct call with stubbed backend callbacks and a temporary `.enc` file; no
-real libfontenc build, X server, font path, X protocol, wire delivery,
-allocator study, pointer control, ROP chain, command, marker side effect or
-witness verdict. The `0x5a5a` bytes are chosen data, not execution.
+## 4. Feasibility, constraints and preserved negative results
 
-A dedicated target mind should first build pinned `7418fa7` and `5920c6e`
-(plus the 1.1.9/1.1.10 releases to settle the numeric version discrepancy),
-drive the upstream regression `.enc` file through the real
-`FontEncLoad`/X server path under ASan, and identify which allocations sit
-past the 131072-byte region in a live process before considering any pointer
-or benign marker test. Only an observed saved pointer or control-flow
-diversion would change the ceiling.
+- The advisory's vector is local. No remote wire delivery, font-server
+  protocol or unprivileged path to write the font path was exercised.
+- **Plain-build impact is not demonstrated.** With the uninstrumented
+  vulnerable library, the same live Xvfb keeps running and `xdpyinfo` still
+  answers (`realpath/evidence/live/client-plain-vuln.out`). The ASan crash is
+  a lab-instrumentation observation, not an observed production crash.
+- Heap-neighbour study (`realpath/evidence/gdb-heap-layout*.out`): default
+  glibc places this 131072-byte request in an mmap chunk (size field
+  `0x21002`, `malloc_usable_size=135152`), so 508 bytes past the nominal end
+  is inside usable slack, not a neighbouring object. With
+  `MALLOC_MMAP_THRESHOLD_=262144` it is a brk chunk followed by the top chunk
+  (`0x20011`, next size `0x20cd1`); still no live object at the destination.
+  `reallocarray` at `:469` and the store at `:495` have no intervening
+  allocation in this parse path.
+- The 16-bit `sm->first` truncates 65790 to 254, so only the chosen value,
+  not the chosen index, survives into the copied map. No pointer control,
+  allocator grooming toward a live object, control-flow diversion, marker
+  side effect, command or witness replay was observed. Rung 5 is UNKNOWN.
+
+## 5. Grade and handoff
+
+Grade at this wake: **rung 3 confirmed in a live X server process** under ASan
+with attacker-request-driven chosen bytes at a chosen offset; rung 4 is
+limited to the earlier local chosen-store demonstration (no live-object
+control); rung 5 UNKNOWN. The crash claim in the advisory is not established
+in a plain build on this host.
+
+Next bounded experiment: hand the exact live replay to the witness for
+independent replay, then — only on an observed saved pointer or control-flow
+target — consider a benign marker with vulnerable, fixed and safe-input
+controls. Alternative evidence: find a production X configuration whose
+allocator places a live object 508 bytes past this allocation before the
+store, or prove the local font-path write precondition on a real deployment.
+Neither is assumed here.

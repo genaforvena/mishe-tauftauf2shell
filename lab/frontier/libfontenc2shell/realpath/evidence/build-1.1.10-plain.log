@@ -1,0 +1,46 @@
+ninja: Entering directory `/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/build-1.1.10/out-plain'
+[1/6] Compiling C object libtest_helper.so.p/test_test_helper.c.o
+FAILED: [code=1] libtest_helper.so.p/test_test_helper.c.o 
+cc -Ilibtest_helper.so.p -I. -I.. -I../include -I../src -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -O0 -g -fno-strict-aliasing -DHAVE_CONFIG_H -fPIC '-DFONT_ENCODINGS_DIRECTORY="/dev/null"' -MD -MQ libtest_helper.so.p/test_test_helper.c.o -MF libtest_helper.so.p/test_test_helper.c.o.d -o libtest_helper.so.p/test_test_helper.c.o -c ../test/test_helper.c
+In file included from ../src/encparse.c:59,
+                 from ../test/test_helper.c:20:
+../src/fontencI.h:26:16: error: redefinition of ‘struct _FontEncSimpleMap’
+   26 | typedef struct _FontEncSimpleMap {
+      |                ^~~~~~~~~~~~~~~~~
+In file included from ../test/test_helper.c:16:
+../src/fontencI.h:26:16: note: originally defined here
+   26 | typedef struct _FontEncSimpleMap {
+      |                ^~~~~~~~~~~~~~~~~
+../src/fontencI.h:31:3: error: conflicting types for ‘FontEncSimpleMapRec’; have ‘struct _FontEncSimpleMap’
+   31 | } FontEncSimpleMapRec, *FontEncSimpleMapPtr;
+      |   ^~~~~~~~~~~~~~~~~~~
+../src/fontencI.h:31:3: note: previous declaration of ‘FontEncSimpleMapRec’ with type ‘FontEncSimpleMapRec’ {aka ‘struct _FontEncSimpleMap’}
+   31 | } FontEncSimpleMapRec, *FontEncSimpleMapPtr;
+      |   ^~~~~~~~~~~~~~~~~~~
+../src/fontencI.h:31:25: error: conflicting types for ‘FontEncSimpleMapPtr’; have ‘struct _FontEncSimpleMap *’
+   31 | } FontEncSimpleMapRec, *FontEncSimpleMapPtr;
+      |                         ^~~~~~~~~~~~~~~~~~~
+../src/fontencI.h:31:25: note: previous declaration of ‘FontEncSimpleMapPtr’ with type ‘FontEncSimpleMapPtr’ {aka ‘struct _FontEncSimpleMap *’}
+   31 | } FontEncSimpleMapRec, *FontEncSimpleMapPtr;
+      |                         ^~~~~~~~~~~~~~~~~~~
+../src/fontencI.h:33:16: error: redefinition of ‘struct _FontEncSimpleName’
+   33 | typedef struct _FontEncSimpleName {
+      |                ^~~~~~~~~~~~~~~~~~
+../src/fontencI.h:33:16: note: originally defined here
+   33 | typedef struct _FontEncSimpleName {
+      |                ^~~~~~~~~~~~~~~~~~
+../src/fontencI.h:37:3: error: conflicting types for ‘FontEncSimpleNameRec’; have ‘struct _FontEncSimpleName’
+   37 | } FontEncSimpleNameRec, *FontEncSimpleNamePtr;
+      |   ^~~~~~~~~~~~~~~~~~~~
+../src/fontencI.h:37:3: note: previous declaration of ‘FontEncSimpleNameRec’ with type ‘FontEncSimpleNameRec’ {aka ‘struct _FontEncSimpleName’}
+   37 | } FontEncSimpleNameRec, *FontEncSimpleNamePtr;
+      |   ^~~~~~~~~~~~~~~~~~~~
+../src/fontencI.h:37:26: error: conflicting types for ‘FontEncSimpleNamePtr’; have ‘struct _FontEncSimpleName *’
+   37 | } FontEncSimpleNameRec, *FontEncSimpleNamePtr;
+      |                          ^~~~~~~~~~~~~~~~~~~~
+../src/fontencI.h:37:26: note: previous declaration of ‘FontEncSimpleNamePtr’ with type ‘FontEncSimpleNamePtr’ {aka ‘struct _FontEncSimpleName *’}
+   37 | } FontEncSimpleNameRec, *FontEncSimpleNamePtr;
+      |                          ^~~~~~~~~~~~~~~~~~~~
+[2/6] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[3/6] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+ninja: build stopped: subcommand failed.

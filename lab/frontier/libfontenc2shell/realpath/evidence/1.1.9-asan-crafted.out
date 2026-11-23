@@ -1,0 +1,64 @@
+PUBLIC-API-DRIVER charset=crafted filename=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts/dummy.pcf envdir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts dir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts
+=================================================================
+==519668==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x710d28cd39fc at pc 0x710d2961de5b bp 0x7ffe6f20d4a0 sp 0x7ffe6f20d490
+WRITE of size 2 at 0x710d28cd39fc thread T0
+    #0 0x710d2961de5a in setCode ../src/encparse.c:495
+    #1 0x710d2961f20e in parseEncodingFile ../src/encparse.c:672
+    #2 0x710d29620bd5 in FontEncReallyReallyLoad ../src/encparse.c:940
+    #3 0x710d29620daf in FontEncReallyLoad ../src/encparse.c:961
+    #4 0x710d29622536 in FontEncLoad ../src/fontenc.c:780
+    #5 0x710d2962232c in FontEncFind ../src/fontenc.c:738
+    #6 0x5b87fd1173c3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/load_via_public_api.c:28
+    #7 0x710d28a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x710d28a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x5b87fd1171c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-1.1.9-asan+0x11c4) (BuildId: 0c2dbd6eeb10556b249fd101a892fbb05c5e7a2e)
+
+0x710d28cd39fc is located 508 bytes after 131072-byte region [0x710d28cb3800,0x710d28cd3800)
+allocated by thread T0 here:
+    #0 0x710d28efc91d in reallocarray ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:92
+    #1 0x710d2961d9db in setCode ../src/encparse.c:469
+    #2 0x710d2961f20e in parseEncodingFile ../src/encparse.c:672
+    #3 0x710d29620bd5 in FontEncReallyReallyLoad ../src/encparse.c:940
+    #4 0x710d29620daf in FontEncReallyLoad ../src/encparse.c:961
+    #5 0x710d29622536 in FontEncLoad ../src/fontenc.c:780
+    #6 0x710d2962232c in FontEncFind ../src/fontenc.c:738
+    #7 0x5b87fd1173c3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/load_via_public_api.c:28
+    #8 0x710d28a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x710d28a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5b87fd1171c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/bin-1.1.9-asan+0x11c4) (BuildId: 0c2dbd6eeb10556b249fd101a892fbb05c5e7a2e)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../src/encparse.c:495 in setCode
+Shadow bytes around the buggy address:
+  0x710d28cd3700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x710d28cd3780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x710d28cd3800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x710d28cd3880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x710d28cd3900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x710d28cd3980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x710d28cd3a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x710d28cd3a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x710d28cd3b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x710d28cd3b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x710d28cd3c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==519668==ABORTING
+
+RC=1
