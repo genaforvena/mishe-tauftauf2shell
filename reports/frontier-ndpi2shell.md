@@ -1,13 +1,15 @@
 # Frontier brief: nDPI `ndpi_json_string_escape()` caller-buffer write (ndpi2shell)
 
-**UPDATED 2026-11-23 W162** — a real pinned nDPI build with ASan now exists
-and shows both a measured negative (crafted VALUE strings are protected by the
-caller's `24+slen*2` headroom) and a new positive: three real in-tree serializer
-callers under-allocate a KEY by `klen+16` and overflow at klen>=128. Seed wall
-`.mishe-tauftauf/walls/ndpi2shell.md`; pins and original direct-call evidence
-`lab/frontier/ndpi2shell/PINS.sha256`, `PROVENANCE.md`; real-build reproducer
-`lab/frontier/ndpi2shell/realbuild/run.sh`. Operator admission and independent
-witness replay are pending. Frontier owns no further work on this target.
+**UPDATED 2026-11-23 W183** — a real pinned nDPI build with ASan shows both a
+measured negative (crafted VALUE strings are protected by the caller's
+`24+slen*2` headroom) and a positive: three real in-tree serializer callers
+under-allocate a KEY by `klen+16` and overflow at klen>=128. Independent witness
+replay from clean archives established rungs 1-4 at that real-library /
+in-tree-caller ASan scope (§7), NOT rung 5; the advisory's wire-reachability
+claim remains unestablished. Seed wall `.mishe-tauftauf/walls/ndpi2shell.md`;
+pins and original direct-call evidence `lab/frontier/ndpi2shell/PINS.sha256`,
+`PROVENANCE.md`; real-build reproducer `lab/frontier/ndpi2shell/realbuild/run.sh`.
+Frontier owns no further work on this target.
 
 ## 1. Verified ground truth
 
@@ -86,18 +88,17 @@ prints a normalized trace hash.
 
 Direct calls with a stubbed typedef and driver-owned buffers. No nDPI build,
 no serializer struct, no real packet, parser, socket or wire path, no pointer
-chain, no benign marker execution, no command execution, no witness replay.
-The advisory's TLS SNI / HTTP / DNS reachability is a claim; the reporter's own
-patch text says internal callers over-allocate by 24 bytes, so this harness
-reproduces the exact-size external public-API condition rather than an in-tree
-caller.
+chain, no benign marker execution and no command execution in this harness.
+The witness replayed this harness from a clean archive (§7); that replay does
+not raise its grade beyond direct-call rungs 1-4. The advisory's TLS SNI / HTTP /
+DNS reachability is a claim; the reporter's own patch text says internal callers
+over-allocate by 24 bytes, so this harness reproduces the exact-size external
+public-API condition rather than an in-tree caller.
 
-Cheapest move toward a real consumer: build nDPI 5.0 with ASan, call the
-public serializer through a small C program that passes an exact-size
-`dst_max_len`, then trace which real dissector supplies untrusted strings and
-whether any caller passes a tight buffer; feed crafted TLS SNI / HTTP / DNS
-data to a loopback-only nDPI reader and preserve the negative if all in-tree
-callers keep the +24-byte margin. Rung 5 is UNKNOWN.
+§6 records the resulting real-build analysis; that lane is closed for this tree
+(weak-key callers take constant keys or short decimals, VALUE callers keep
+`24+slen*2` headroom). No further wire lane exists in this build. Rung 5 is
+UNKNOWN and unreachable via this primitive.
 
 ## 6. W162 — real pinned build, caller analysis (2026-11-23)
 
@@ -127,8 +128,10 @@ ASan. `realbuild/run.sh` rebuilds a probe driver against that real `libndpi.a`.
 
 This moves rungs 3 and 4 from a stub harness to a REAL nDPI caller and
 library build. It is still a local library-API result: the probe supplies the
-long key, in-tree call sites mostly pass constant field-name keys, and no
-packet, socket, pointer control, command or witness replay was exercised.
+long key and in-tree call sites mostly pass constant field-name keys; no
+packet, socket, pointer control or command was exercised. The witness
+independently replayed this scope from a clean archive with from-scratch ASan
+builds (§7); its verdict is rungs 1-4 ESTABLISHED, not rung 5.
 The key-reachability lane is closed for this tree: the only callers of the
 TLV-to-JSON clone are the fuzz and unit harnesses, and every other key passed
 to the weak functions is a literal field name or a decimal number of at most
@@ -148,3 +151,27 @@ Fixed-control: the fixed commit tree (source sha256 `0aa83a83...92fd`, matching
 the pin) was built with the same ASan flags and driven with the same probe;
 `direct`, `real` and all `weakkey` cases returned rc=0 with zero ASan reports
 (`realbuild/fixed-*.out`). The fix's prechecks close the real-caller overflow.
+
+## 7. Independent witness replay (2026-11-23, ESTABLISHED rungs 1-4)
+
+Witness messages #2999 and #3001 closed the outstanding review. From a clean
+`git archive 44be53e` both serializer sources matched their pins (vulnerable
+`4840fb41...9ad5`, fixed `0aa83a83...92fd`), and both clang ASan static libs
+were rebuilt from scratch rather than reusing the author's `.a`.
+`realbuild/run.sh` gave `PASS=9 FAIL=0` before and after that rebuild. The
+fresh report is `WRITE of size 1` at `ndpi_serializer.c:107:18` in
+`ndpi_json_string_escape`, 0 bytes past the 256-byte `calloc` from `:209`, top
+real caller `ndpi_serialize_start_of_block_binary:2340`; `:107` stores the
+chosen slash byte `0x2f`. klen=16 is clean; the 145 crafted VALUE cases and the
+end-to-end reader pcaps produce zero ASan reports; the from-scratch fixed build
+gives rc=0 and zero reports for direct/real/weakkey.
+
+Witness verdict: **ESTABLISHED rungs 1-4 at the real-pinned-library /
+in-tree-caller ASan scope, NOT rung 5**. No >128-byte attacker key has an
+in-tree wire path in this build, so the advisory's wire-reachability prose
+stays unestablished and rung 5 is unreachable via this primitive. Separately,
+the direct-call harness was replayed from clean `git archive 6510950`:
+`PASS=172 FAIL=0`, trace
+`16060f55dfe944bf5e481a43e76034f6cd3d7acc159d561beaa067c8c97f7b5b` exact;
+its grade stays direct-call rungs 1-4. This section resolves the "witness
+replay pending" claims that previously appeared above.
