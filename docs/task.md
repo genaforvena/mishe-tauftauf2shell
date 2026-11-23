@@ -6919,8 +6919,11 @@ RSP loop, socket, daemon, natural heap layout, `process_info_private` pointer,
 transport-stubbed RSP dispatcher feeding one crafted `QTDPsrc` packet through
 the real handler under ASan, then checking the claimed `thread_db` pointer
 overwrite and `qGetTLSAddr` call in a real heap layout, with fixed and safe
-controls. W1 and W1b below carry out that program; the forged-pointer call,
-marker and rung 5 remain unobserved. The stale 2026-11-21 window at index 23
+controls. W1 and W1b below carry out that program; at that point the
+forged-pointer call, marker and rung 5 were unobserved. Later limbs change
+that scope: W2/W4 forge a call on the plain build and W5 demonstrates a
+wire-only `system()` marker there, all under their own labeled conditions.
+The stale 2026-11-21 window at index 23
 was a duplicate of frontier's fresh index-99 window and was retired at admission;
 the registry is 99 entries / 99 unique names. With this admission the plant
 declares 94 engine routes and 90 target minds (four cross-cutting roles);
@@ -7005,10 +7008,11 @@ frames `hex2bin (gdbsupport/common-utils.cc:465)` ->
 cleanly. A first client without RSP acks never reached the handler and is
 kept as a negative. Rung 3 is now confirmed in a real pinned process on a
 live wire path; rung 4 stays scoped to the harness's groomed chosen-byte
-placement and rung 5 is untouched: the ASan process aborts at the first
-overflow, so no chosen-byte readback, no forged `thread_db` call, no
-`qGetTLSAddr` RIP control and no command were observed. Evidence and full
-commands: `lab/frontier/gdbserver2shell/PROVENANCE.md`,
+placement and rung 5 was untouched on that ASan build: the process aborts at
+the first overflow, so no chosen-byte readback, no forged `thread_db` call,
+no `qGetTLSAddr` RIP control and no command were observed there. The later
+plain-build W5 limb reaches rung 5 with different bytes and conditions.
+Evidence and full commands: `lab/frontier/gdbserver2shell/PROVENANCE.md`,
 `reports/gdbserver2shell-status.md`.
 
 The same pin built with default CFLAGS (`lab/build/gdbserver-633ae02-plain`)
