@@ -268,3 +268,28 @@ Fixture hashes, license, exact offsets and the ceiling are in
 full path: no wxWidgets, full KiCad build/GUI import, consumer, wire,
 pointer/control-flow target or marker. No new witness verdict; rung 5 UNKNOWN.
 
+
+## 12. Real KiCad process probe (W181, 22:47-23:05Z) — negative, rung 5 unchanged
+
+An official prebuilt KiCad 10.0.6 AppImage (MIT mirror tar sha256
+`8c789e36644856cff30a66801692881582b9ca7c7475699494e614ce1bcb1f9c`, AppImage
+sha256 `806e949cb357f9f0a05c3298c36eecb2b06d79c0a36e12c99f75aad9c89f0792`,
+`kicad-cli version` → `10.0.6`) was provisioned locally and run from a live
+`--appimage-mount`. The released CLI has no `sch import`/`sym import`: `sch`
+offers `erc,export,upgrade`, `sym` offers `export,upgrade`. `sym export svg`
+opened each of the five committed vendor `.SchLib` files (`strace` confirms the
+`openat` on the hostile fixture) but exited `rc=0` with no stdout, no stderr
+and **zero SVG files**, for unmodified, `Size0=99` and `SizeZ=9/7/1` bytes. A
+native `.kicad_sym` control through the same CLI wrote `TEST_unit1.svg`.
+Therefore this CLI does not route `.SchLib` through `SCH_IO_ALTIUM` and never
+reached `ParseLibHeader`; a clean exit from an uninstrumented vendor binary is
+not a pass. A headless Symbol Editor attempt (Xvfb + locally unpacked twm)
+left eeschema in uninterruptible `Dsl` state with an unrendered window on two
+runs; no GUI import or GUI crash was observed, and the stall's cause is
+UNKNOWN. `--appimage-extract` did not finish in two time-boxed passes (13% in
+240 s, 23% in 280 s), so its partial tree was discarded.
+
+No real importer execution, consumer, wire, pointer/control-flow target,
+marker or command. The committed rungs 1-4 evidence and witness #2996 are
+unaffected; rung 5 stays UNKNOWN. Exact commands, hashes, matrix and the
+ceiling: `lab/frontier/kicad2shell/realprocess/PROVENANCE-realprocess.md`.

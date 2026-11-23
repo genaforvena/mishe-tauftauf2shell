@@ -119,12 +119,28 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   release is mapped (10.0.7) but no KiCad
   build at that release was exercised. End-to-end file reachability through
   KiCad and the ZDI RCE claim stay UNKNOWN; rung 5 is UNKNOWN.
+- Real prebuilt-process probe (W181, negative): a locally provisioned official
+  KiCad 10.0.6 AppImage (tar sha256
+  `8c789e36644856cff30a66801692881582b9ca7c7475699494e614ce1bcb1f9c`;
+  AppImage sha256
+  `806e949cb357f9f0a05c3298c36eecb2b06d79c0a36e12c99f75aad9c89f0792`;
+  `kicad-cli version` → `10.0.6`) was run from a live `--appimage-mount`. The
+  released CLI has no `sch import`/`sym import`; `sym export svg` opened all
+  five committed vendor `.SchLib` files (strace-confirmed on the hostile one)
+  but exited `rc=0` with zero SVG files, while a native `.kicad_sym` control
+  produced one. `ParseLibHeader` was not reached in a real KiCad process. A
+  Xvfb/twm Symbol Editor attempt left eeschema in uninterruptible `Dsl` state
+  with an unrendered window; no GUI import or crash was observed. No ASan in
+  the vendor binary, so clean exits are not passes. Evidence and ceiling:
+  `lab/frontier/kicad2shell/realprocess/PROVENANCE-realprocess.md`.
 
-Next for the target mind: a full KiCad build/GUI import of a vendor
-`.SchLib` closes the remaining file-reachability unknown; the synthetic CFB
-lanes and the vendor-file patch lane through KiCad's own reader are
-exhausted, and the pinned-source consumer reads are guarded (no read of the
-corrupted bytes), so preserve that negative.
+Next for the target mind: a working GUI Symbol Editor import (or a locally
+built `eeschema` with the Altium plugin) of the crafted vendor `.SchLib` is
+the remaining file-reachability unknown; the released 10.0.6 CLI does not
+select the SCHLIB importer and the FUSE/DwarFS GUI stalled here, so neither
+counts as a pass. The synthetic CFB lanes, the vendor-file patch lane through
+KiCad's own reader and the pinned-source consumer reads (all guarded) are
+exhausted; preserve those negatives.
 Only on an observed pointer or control-flow target,
 attempt a bounded benign marker with vulnerable, fixed and safe-input
 controls and a fresh witness replay: #2996 covers only the lanes above.
