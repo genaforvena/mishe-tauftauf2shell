@@ -3701,13 +3701,45 @@ controls were clean. The overflowed 8192-byte region is a real APR arena from
 `run-final.txt`, `asan-asan.log.*`, `trial-codes.txt`, `error_log`.
 
 This upgrades rung 3 to a real pre-auth wire path in a live Apache process;
-rung 4 stays scoped because ASan faults on the read before the NUL store, the
-byte value is always NUL and its offset is chosen by adjacent arena memory, not
-the client. No pointer control, chosen command or rung 5. W147's ESTABLISHED
-verdict still covers the direct-call harness only; this probe is unwitnessed and
-the external advisory text remains UNKNOWN. What would change the grade: a
-measured controlled pointer or command side effect, or a witness replay of this
-probe.
+rung 4 stays scoped at that verdict because ASan faults on the read before the
+NUL store and the byte value is always NUL. W8 below reaches the store and
+shows its offset is chosen by the wire, lifting rung 4 to an observed live-wire
+scope that is still unwitnessed. No pointer control, chosen command or rung 5.
+W147's ESTABLISHED verdict still covers the direct-call harness only; both W6
+and W8 are author-only and the external advisory text remains UNKNOWN. What
+would change the grade: a measured controlled pointer or command side effect,
+or a witness replay of these probes.
+
+### Wire-chosen NUL store — 2026-11-23 W8 (author-only, unwitnessed)
+
+`lab/frontier/modauthoidc2shell/full/probe-store.sh` extends the full-module
+probe with `Cookie: mod_auth_openidc_state_novalue;<name>=<value>` on the same
+loopback `127.0.0.1:18090/protected` request. `apr_pstrdup` copies the header,
+`apr_strtok` tokenizes on `;` and leaves the second cookie's `=` after the
+value-less token's NUL; the `:214` scan finds it in bounds and `:219` writes
+NUL there. Re-run from `lab/frontier/modauthoidc2shell/full`:
+
+```sh
+bash probe-store.sh && bash probe-gdb.sh
+```
+
+Expect `vuln dispatch=5 oob_value_peek=5` and `fixed dispatch=0
+oob_value_peek=0` in `evidence/store/summary.txt`, all ten requests HTTP 302,
+and no ASan report in that in-bounds regime. gdb (`evidence/store/gdb-single.txt`,
+`gdb-dump.txt`, `gdb-dump-32.txt`) observed `0x3d` → `0x00` with the live
+`state.c:219` → `oidc_state_cookies_clean_expired:244` → `ap_run_check_user_id`
+stack; the store sits at token offset **39** with eight `z` padding bytes and
+**63** with 32, i.e. `30 + 1 + <name length>`: the offset is wire-chosen, the
+value is always NUL. `ASAN_OPTIONS=halt_on_error=0` did not continue past the
+value-only READ fault (`evidence/store/halt-on-error-negative.log`, preserved
+negative); the gdb runs end with an empty curl reply because `httpd -X` exits at
+the breakpoint command list. The overwritten `=` lies in the already-tokenized
+header copy, not a pointer-bearing field: rung 4 is observed on a live pre-auth
+wire path with a wire-chosen offset but no chosen byte value, pointer control,
+command, marker or rung 5. This probe is unwitnessed; W147's ESTABLISHED verdict
+covers the direct-call harness only. Raw gdb captures and the exact `-ex`
+command lists are tracked under `full/evidence/store/` and `full/probe-gdb.sh`;
+no upstream fetch is needed if the W6 module builds are present.
 
 ## 2026-11-23 06:4xZ — radvdump2shell
 
@@ -4145,3 +4177,49 @@ streamed to walk the ring write pointer to the wrap; no debugger attached.
 shell. The default-mmap read-only ceiling from W2 is unchanged, and no
 witness replay of W4 has been accepted.
 
+
+## 2026-11-23 09:3xZ — psqlodbc2shell staged by frontier W144 (not admitted)
+
+CVE-2026-120061 / GHSA-hfm6-qfx8-v4xq (High 7.5,
+`CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H`, CWE-121/193/457), affected
+`<= 18.00.0005` / patched `18.00.0006`; security fix merge
+`79f4631db27cdb62276d3d9d3c1e5c47dcc315c0`. Brief:
+`reports/frontier-psqlodbc2shell.md`; tag commits, blob IDs and source hashes:
+`lab/frontier/psqlodbc2shell/PINS.sha256`; provenance and preserved negatives:
+`lab/frontier/psqlodbc2shell/PROVENANCE.md`. A two-pane window (inner socket
+index 112, `psqlodbc2shell`) is registered, but no route, charter admission or
+witness verdict exists; staging does not change the 106 admitted target minds.
+
+No upstream fetch is needed at replay time: both pinned `convert.c` blobs are
+committed under `lab/frontier/psqlodbc2shell/src/`. The runner re-extracts
+`F_ExtractOldTo` (lines 2424-2436) and `processParameters` (vulnerable
+5607-5698 / fixed 5607-5710) from those blobs under `#line` directives and
+builds gcc and clang plain/ASan drivers:
+
+```sh
+cd lab/frontier/psqlodbc2shell/harness
+./run.sh && ./check.sh
+```
+
+Expect `PASS=34 FAIL=0` from `check.sh` and
+`TRACE d5145bdbd72b30af5a5d5d0824d6497db85781260386d6984f0455954d424d63`
+from `run.sh`. Expected bytes: gcc and clang ASan `WRITE of size 8` at pinned
+`convert.c.vuln:5637` in `processParameters` and `WRITE of size 1` at `:2424`
+in `F_ExtractOldTo`; both fixed ASan runs report
+`EXTRACT_ASAN RETVAL=0 BUF127=00` and the fixed function run prints
+`too many parameters in the escape function call`. Plain vulnerable runs
+report `FIRST_DIFF=0 CHOSEN_5A=112` and a sink dump starting
+`215a5a5a5a5a5a5a21`; both fixed runs leave `CHOSEN_5A=0`.
+
+A clean-archive replay of
+`git archive HEAD lab/frontier/psqlodbc2shell reports/frontier-psqlodbc2shell.md`
+into `/tmp/replay-psql2-a` reproduced `PASS=34 FAIL=0` and the same normalized
+trace hash at commit `13c835d` (brief section 5, preserved in `255dfd4`).
+Upstream `src/repo/` and generated `harness/bin-*` are gitignored; the pinned
+blobs, slice manifests, generated drivers and normalized `harness/evidence/`
+outputs are tracked, and `run.sh` regenerates the drivers and evidence on
+every run. Ceiling: direct call with stubbed token processing, struct layouts
+and a harness-adjacent sink; no real psqlODBC build, driver manager, ODBC API
+entry point, application SQL path, process, socket, wire, pointer control,
+marker, command or witness verdict. The CWE-457 uninitialized-array limb is
+recorded from source but not exercised.
