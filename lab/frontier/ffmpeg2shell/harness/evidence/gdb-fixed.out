@@ -1,0 +1,11 @@
+Breakpoint 1 at 0x13b9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/harness/librist.c.1c10bcc2, line 233.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, librist_read (h=0x7fffffffe098, buf=0x5555555639a0 'A' <repeats 17 times>, "Z", 'A' <repeats 182 times>..., size=4096) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/harness/librist.c.1c10bcc2:233
+warning: 233	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/harness/librist.c.1c10bcc2: No such file or directory
+$1 = 4096
+0x5555555649ac:	0x00	0x00	0x00	0x00	0xcc	0xcc	0xcc	0xcc
+0x5555555649b4:	0xcc	0xcc	0xcc	0xcc	0xcc	0xcc	0xcc	0xcc
+#0  librist_read (h=0x7fffffffe098, buf=0x5555555639a0 'A' <repeats 17 times>, "Z", 'A' <repeats 182 times>..., size=4096) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/harness/librist.c.1c10bcc2:233
+#1  0x0000555555555623 in main (argc=2, argv=0x7fffffffe228) at driver.c:160

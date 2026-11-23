@@ -1,0 +1,164 @@
+librist.c.7b05d16c: OK
+librist.c.n9.0: OK
+librist.c.1c10bcc2: OK
+librist.c.n9.0.1: OK
+async.c.n9.0: OK
+fix-1c10bcc2.patch: OK
+GHSA-7qc3-xqxj-426p.html: OK
+driver.c: OK
+run.sh: OK
+vuln/librist_read.inc: OK
+rel90/librist_read.inc: OK
+fixed/librist_read.inc: OK
+rel901/librist_read.inc: OK
+../src/librist.c.7b05d16c: OK
+../src/librist.c.n9.0: OK
+../src/librist.c.1c10bcc2: OK
+../src/librist.c.n9.0.1: OK
+../src/async.c.n9.0: OK
+../src/fix-1c10bcc2.patch: OK
+../src/GHSA-7qc3-xqxj-426p.html: OK
+VARIANT=vuln-7b05d16c MODE=arith PAYLOAD_LEN=9972 CALLER_SIZE=4096 OVERFLOW_BYTES=5876 MAX_PAYLOAD_SIZE=9972 ASYNC_CALLER_CAP=4096
+VARIANT=release-n9.0 MODE=arith PAYLOAD_LEN=9972 CALLER_SIZE=4096 OVERFLOW_BYTES=5876 MAX_PAYLOAD_SIZE=9972 ASYNC_CALLER_CAP=4096
+VARIANT=vuln-7b05d16c MODE=attack PAYLOAD_LEN=9972 CALLER_SIZE=4096 RET=9972 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=41 BUF_IN_17=5a BUF_AT_4095=41
+SINK_DIST=4112 SINK_BYTE_1=5a SINK_BYTE_8=7a
+OBS_OFFSET_4096=41 OBS_OFFSET_4113=5a OBS_OFFSET_4120=7a OBS_OFFSET_4128=3c OBS_OFFSET_4136=7b OBS_OFFSET_4144=42 OBS_OFFSET_4152=7b OBS_OFFSET_4160=41 OBS_OFFSET_5000=41 OBS_OFFSET_9000=41
+VARIANT=release-n9.0 MODE=attack PAYLOAD_LEN=9972 CALLER_SIZE=4096 RET=9972 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=41 BUF_IN_17=5a BUF_AT_4095=41
+SINK_DIST=4112 SINK_BYTE_1=5a SINK_BYTE_8=7a
+OBS_OFFSET_4096=41 OBS_OFFSET_4113=5a OBS_OFFSET_4120=7a OBS_OFFSET_4128=3c OBS_OFFSET_4136=7b OBS_OFFSET_4144=42 OBS_OFFSET_4152=7b OBS_OFFSET_4160=41 OBS_OFFSET_5000=41 OBS_OFFSET_9000=41
+VARIANT=fixed-1c10bcc2 MODE=attack PAYLOAD_LEN=9972 CALLER_SIZE=4096 RET=4096 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=41 BUF_IN_17=5a BUF_AT_4095=41
+SINK_DIST=4112 SINK_BYTE_1=cc SINK_BYTE_8=cc
+OBS_OFFSET_4096=00 OBS_OFFSET_4113=cc OBS_OFFSET_4120=cc OBS_OFFSET_4128=cc OBS_OFFSET_4136=cc OBS_OFFSET_4144=cc OBS_OFFSET_4152=cc OBS_OFFSET_4160=cc OBS_OFFSET_5000=cc OBS_OFFSET_9000=cc
+VARIANT=release-n9.0.1 MODE=attack PAYLOAD_LEN=9972 CALLER_SIZE=4096 RET=4096 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=41 BUF_IN_17=5a BUF_AT_4095=41
+SINK_DIST=4112 SINK_BYTE_1=cc SINK_BYTE_8=cc
+OBS_OFFSET_4096=00 OBS_OFFSET_4113=cc OBS_OFFSET_4120=cc OBS_OFFSET_4128=cc OBS_OFFSET_4136=cc OBS_OFFSET_4144=cc OBS_OFFSET_4152=cc OBS_OFFSET_4160=cc OBS_OFFSET_5000=cc OBS_OFFSET_9000=cc
+VARIANT=vuln-7b05d16c MODE=oversize PAYLOAD_LEN=9973 CALLER_SIZE=4096 RET=-5 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=00 BUF_IN_17=00 BUF_AT_4095=00
+SINK_DIST=4112 SINK_BYTE_1=cc SINK_BYTE_8=cc
+OBS_OFFSET_4096=00 OBS_OFFSET_4113=cc OBS_OFFSET_4120=cc OBS_OFFSET_4128=cc OBS_OFFSET_4136=cc OBS_OFFSET_4144=cc OBS_OFFSET_4152=cc OBS_OFFSET_4160=cc OBS_OFFSET_5000=cc OBS_OFFSET_9000=cc
+VARIANT=fixed-1c10bcc2 MODE=oversize PAYLOAD_LEN=9973 CALLER_SIZE=4096 RET=-5 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=00 BUF_IN_17=00 BUF_AT_4095=00
+SINK_DIST=4112 SINK_BYTE_1=cc SINK_BYTE_8=cc
+OBS_OFFSET_4096=00 OBS_OFFSET_4113=cc OBS_OFFSET_4120=cc OBS_OFFSET_4128=cc OBS_OFFSET_4136=cc OBS_OFFSET_4144=cc OBS_OFFSET_4152=cc OBS_OFFSET_4160=cc OBS_OFFSET_5000=cc OBS_OFFSET_9000=cc
+VARIANT=fixed-1c10bcc2 MODE=attack PAYLOAD_LEN=9972 CALLER_SIZE=4096 RET=4096 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=41 BUF_IN_17=5a BUF_AT_4095=41
+SINK_DIST=618475290880 SINK_BYTE_1=cc SINK_BYTE_8=cc
+VARIANT=release-n9.0.1 MODE=attack PAYLOAD_LEN=9972 CALLER_SIZE=4096 RET=4096 READ_CALLS=1 FREE_CALLS=1 LOG_CALLS=0
+BUF_IN_0=41 BUF_IN_17=5a BUF_AT_4095=41
+SINK_DIST=618475290880 SINK_BYTE_1=cc SINK_BYTE_8=cc
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 9972 at 0xADDR thread T0
+    #FRAME 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #FRAME 0xADDR in librist_read HARNESS/librist.c.7b05d16c:230
+    #FRAME 0xADDR in main HARNESS/driver.c:160
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-gcc+0xADDR) (BuildId: BUILDID)
+
+0xADDR is located 0 bytes after 4096-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #FRAME 0xADDR in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #FRAME 0xADDR in main HARNESS/driver.c:139
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-gcc+0xADDR) (BuildId: BUILDID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 9972 at 0xADDR thread T0
+    #FRAME 0xADDR in __asan_memcpy (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+    #FRAME 0xADDR in librist_read HARNESS/librist.c.7b05d16c:230:5
+    #FRAME 0xADDR in main HARNESS/driver.c:160:11
+    #FRAME 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #FRAME 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+
+0xADDR is located 0 bytes after 4096-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #FRAME 0xADDR in malloc (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+    #FRAME 0xADDR in main HARNESS/driver.c:139:28
+    #FRAME 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #FRAME 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+evidence/gdb-vuln.out:Breakpoint 1 at 0xADDR: file HARNESS/librist.c.7b05d16c, line 233.
+evidence/gdb-vuln.out:Breakpoint 1, librist_read (h=0xADDR, buf=0xADDR 'A' <repeats 17 times>, "Z", 'A' <repeats 182 times>..., size=9972) at HARNESS/librist.c.7b05d16c:233
+evidence/gdb-vuln.out:warning: 233	HARNESS/librist.c.7b05d16c: No such file or directory
+evidence/gdb-vuln.out:0xADDR:	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR
+evidence/gdb-vuln.out:0xADDR:	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR	0xADDR
+evidence/gdb-vuln.out:#FRAME  librist_read (h=0xADDR, buf=0xADDR 'A' <repeats 17 times>, "Z", 'A' <repeats 182 times>..., size=9972) at HARNESS/librist.c.7b05d16c:233
+evidence/gdb-fixed.out:Breakpoint 1 at 0xADDR: file HARNESS/librist.c.1c10bcc2, line 233.
+evidence/gdb-fixed.out:Breakpoint 1, librist_read (h=0xADDR, buf=0xADDR 'A' <repeats 17 times>, "Z", 'A' <repeats 182 times>..., size=4096) at HARNESS/librist.c.1c10bcc2:233
+evidence/gdb-fixed.out:warning: 233	HARNESS/librist.c.1c10bcc2: No such file or directory
+evidence/gdb-fixed.out:#FRAME  librist_read (h=0xADDR, buf=0xADDR 'A' <repeats 17 times>, "Z", 'A' <repeats 182 times>..., size=4096) at HARNESS/librist.c.1c10bcc2:233
