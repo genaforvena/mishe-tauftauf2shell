@@ -444,3 +444,47 @@ byte crosses into the redzone, no adjacent object written, no chosen
 byte, pointer, marker, command, ROP or rung 5; its loopback PG was stopped
 and the port verified closed. The W147 real-PG verdict (#2576) remains
 pending.
+
+## CWE-457 unsupplied-argument read: real-path negative (W165, target mind)
+
+The advisory's third limb was still recorded only from source at W163. The
+fix initializes all 16 rows to `-1` with the comment "A '$k' reference in the
+mapping expression for an argument that was not supplied must see -1 here,
+not a stale or uninitialized offset that would copy arbitrary bytes"
+(pinned `convert.c.fixed:5875-5879`). On the vulnerable tag the read sites
+are pinned `convert.c.vuln:6038-6048`: a `$k` in a mapped expression takes
+`from`/`to` from `param_pos[k-1]` and copies that slice of
+`nqb.query_statement` into emitted SQL.
+
+Probe: throwaway, gitignored scripts and harness under
+`lab/frontier/psqlodbc2shell/src/repo/build/w165-*`. They drive the same
+pinned ASan vulnerable and fixed driver `.so` used by W147 through unixODBC
+`SQLDriverConnect`/`SQLExecDirect` against a real loopback PostgreSQL 16.4 on
+127.0.0.1:59436 with its own PGDATA `build/w165-pgdata` and
+`log_statement = 'all'`; the server was stopped on exit. A multi-statement
+harness (`w165-seq-harness.c`) also ran a shaping escape and the test escape
+on one connection. Raw: `build/evidence/w165-cwe457-*.out` and
+`w165-sweep-{vuln,fixed}.out`.
+
+Sweep, 7 escape forms x 2 tags, executed once each: `{fn CONCAT()}`,
+`{fn CONCAT(1)}`, `{fn INSERT(1,2,3)}`, `{fn INSERT((1,2),3)}`,
+`{fn TIMESTAMPADD(SQL_TSI_DAY,1)}`, `{fn CONCAT(1,2,3)}`,
+`{fn LOCATE(1,2,3,4)}`. Five forms give `DIAG ... msg=param not found` on
+both tags; LOCATE reaches PG and fails on its arity on both tags; extra-arg
+CONCAT emits `SELECT concat(1::text, 2::text)` on both tags. Zero ASan
+`READ`/`WRITE` reports in either tag. Shaping with a prior 4-argument INSERT
+or 15-argument CONCAT on the same connection did not move the one-argument
+or three-argument case off `param not found` on either tag.
+
+Causal reading: the closing `)` at pinned `:5654-5657` increments
+`param_count` and then writes `-1` to `param_pos[param_count]`, so the first
+unsupplied index in these well-formed escapes reads the explicit sentinel,
+not stale stack. The fixed tag's loop makes that value deterministic, but on
+this ASan layout the vulnerable tag already rejects the same forms. Preserved as a
+negative: CWE-457 was **not** observed as a stale-byte copy on the real
+ODBC -> real-PG path in these forms. The uninitialized-array claim stays a
+claim for untested malformed inputs or other layouts; it is not evidence of
+a pointer disclosure, and it does not change W163's store-value closure,
+the grade (rungs 1-4, no rung 5) or any witness status. #2576 (W147 real-PG
+replay) remains pending at 17:3xZ.
+
