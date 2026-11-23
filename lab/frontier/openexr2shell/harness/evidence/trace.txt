@@ -1,0 +1,46 @@
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 b64=0xa5 b4095=0xa5
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=0
+CASE oob-chosen guard=absent total=4096 b64=0x5a b4095=0x5a
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 b64=0xa5 b4095=0xa5
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 b64=0xa5 b4095=0xa5
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=23
+CASE oob-chosen guard=reject rc=23 copies=0
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 b64=0xa5 b4095=0xa5
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 b64=0xa5 b4095=0xa5
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=0
+CASE oob-chosen guard=absent total=4096 b64=0x5a b4095=0x5a
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 b64=0xa5 b4095=0xa5
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 b64=0xa5 b4095=0xa5
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=23
+CASE oob-chosen guard=reject rc=23 copies=0
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 b64=0xa5 b4095=0xa5
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 copy=completed
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=23
+CASE oob-chosen guard=reject rc=23 copies=0
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 copy=completed
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 copy=completed
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=23
+CASE oob-chosen guard=reject rc=23 copies=0
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 copy=completed
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 4096 at 0xADDR thread T0
+    #1 0xADDR in sort2_4ByteChannels_tiled LAB/harness/internal_zstd.c.vuln:472
+0xADDR is located 0 bytes after 64-byte region [0xADDR,0xADDR)
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 4096 at 0xADDR thread T0
+    #1 0xADDR in sort2_4ByteChannels_tiled LAB/harness/internal_zstd.c.vuln:472:21
+0xADDR is located 0 bytes after 64-byte region [0xADDR,0xADDR)
+SUMMARY: AddressSanitizer: heap-buffer-overflow (LAB/harness/bin-clang-vuln-asan+0xc50e7) (BuildId: ID) in __asan_memcpy

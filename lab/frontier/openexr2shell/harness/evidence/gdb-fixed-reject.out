@@ -1,0 +1,17 @@
+Breakpoint 1 at 0x158f: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/internal_zstd.c.fixed, line 1390.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 b64=0xa5 b4095=0xa5
+
+Breakpoint 1, fixed_guard (chunk_line_count=1, channel_count=1, channel_sample_count_grid=0x7fffffffe118, pack_channels=0x7fffffffe117, uncompressed_size=64, split=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/internal_zstd.c.fixed:1390
+1390	                if (grid_total > uncompressed_size)
+FIX grid_total=4096 split=0 uncompressed_size=64
+#0  fixed_guard (chunk_line_count=1, channel_count=1, channel_sample_count_grid=0x7fffffffe118, pack_channels=0x7fffffffe117, uncompressed_size=64, split=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/internal_zstd.c.fixed:1390
+#1  0x0000555555555673 in run_case (name=0x5555555560aa "oob-chosen", nsamp=1024, bpe=4 '\004', unpacked=64) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/driver-harness.c:1328
+#2  0x000055555555583a in main () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/driver-harness.c:1380
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=23
+CASE oob-chosen guard=reject rc=23 copies=0
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 b64=0xa5 b4095=0xa5
+[Inferior 1 (process 2868164) exited normally]

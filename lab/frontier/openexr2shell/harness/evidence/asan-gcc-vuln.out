@@ -1,0 +1,56 @@
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 copy=completed
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=0
+=================================================================
+==2865355==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x506000000120 at pc 0x7797d36fb303 bp 0x7ffecf50fd30 sp 0x7ffecf50f4d8
+WRITE of size 4096 at 0x506000000120 thread T0
+    #0 0x7797d36fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x56e78da81786 in sort2_4ByteChannels_tiled /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/internal_zstd.c.vuln:472
+    #2 0x56e78da81a7f in run_case /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/driver-harness.c:1356
+    #3 0x56e78da81b94 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/driver-harness.c:1380
+    #4 0x7797d322a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7797d322a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x56e78da812a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/bin-gcc-vuln-asan+0x12a4) (BuildId: 7d8e1986b84e670c3fa04fb1ac895bb32f8d842e)
+
+0x506000000120 is located 0 bytes after 64-byte region [0x5060000000e0,0x506000000120)
+allocated by thread T0 here:
+    #0 0x7797d36fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x56e78da81a0e in run_case /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/driver-harness.c:1350
+    #2 0x56e78da81b94 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/driver-harness.c:1380
+    #3 0x7797d322a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7797d322a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x56e78da812a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/bin-gcc-vuln-asan+0x12a4) (BuildId: 7d8e1986b84e670c3fa04fb1ac895bb32f8d842e)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x505ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x505fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x505fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506000000000: fa fa fa fa fd fd fd fd fd fd fd fd fa fa fa fa
+  0x506000000080: fd fd fd fd fd fd fd fd fa fa fa fa 00 00 00 00
+=>0x506000000100: 00 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2865355==ABORTING

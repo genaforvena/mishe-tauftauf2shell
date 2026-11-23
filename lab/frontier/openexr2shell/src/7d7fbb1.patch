@@ -1,0 +1,67 @@
+From 7d7fbb1a5cf637ede04dae51123aff02d89c2b5c Mon Sep 17 00:00:00 2001
+From: Cary Phillips <seabeepea@gmail.com>
+Date: Tue, 6 Oct 2026 07:46:30 -0700
+Subject: [PATCH] bound the ZSTD grid total against uncompressed_size (#2713)
+
+exr_undo_zstd_v1() validated `split` (the 2-byte/half-channel subtotal
+from compute_sorting_lookup()) against uncompressed_size, but never
+checked the full grid total -- the sum including 4-byte/float channels
+that sort2_4ByteChannels_tiled() actually writes. For a part with no
+half channels, split == 0, so the existing check is vacuous and the
+float-channel byte count, derived from the attacker-controlled
+sample-count table, is completely unbounded.
+
+This allowed a crafted deep (or flat, via the same decompressor)
+ZSTD-compressed chunk to make sort2_4ByteChannels_tiled() write past
+the end of uncompressed_data, which is allocated using only the chunk
+leader's unpacked_size -- a heap out-of-bounds write reachable through
+ordinary flat scanline/tile decoding, not just deep APIs.
+
+Fix by computing the full grid total right after the existing split
+check and rejecting the chunk unless it exactly accounts for
+uncompressed_size, before the inverse sort runs.
+
+Addresses https://github.com/AcademySoftwareFoundation/openexr/security/advisories/GHSA-98rx-qpfv-qcwv
+
+Assisted-by: Copilot / Claude Sonnet 5
+
+Signed-off-by: Cary Phillips <seabeepea@gmail.com>
+---
+ src/lib/OpenEXRCore/internal_zstd.c | 19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/src/lib/OpenEXRCore/internal_zstd.c b/src/lib/OpenEXRCore/internal_zstd.c
+index be2c238d21..f2032a77d6 100644
+--- a/src/lib/OpenEXRCore/internal_zstd.c
++++ b/src/lib/OpenEXRCore/internal_zstd.c
+@@ -1338,6 +1338,23 @@ exr_undo_zstd_v1 (
+      * destination allocation. */
+     if (split > uncompressed_size) return EXR_ERR_CORRUPT_CHUNK;
+ 
++    /* split only covers the 2-byte (half) channels, so for a part with no
++     * half channels (split == 0) the check above does not bound the
++     * 4-byte (float) channels at all. Compute the full grid total (the
++     * actual number of bytes the inverse sort below will write into
++     * uncompressed_data, sized to uncompressed_size) and reject any
++     * chunk where it does not exactly account for the whole buffer,
++     * before sort2_4ByteChannels_tiled() runs. */
++    {
++        uint64_t grid_total = 0;
++        for (int gh = 0; gh < chunk_line_count; ++gh)
++            for (int gi = 0; gi < channel_count; ++gi)
++                grid_total +=
++                    channel_sample_count_grid[(size_t) gh * channel_count + gi] *
++                    (uint64_t) pack_channels[gi].bytes_per_element;
++        if (grid_total != uncompressed_size) return EXR_ERR_CORRUPT_CHUNK;
++    }
++
+     uint64_t  inner_lens[2];
+     uint64_t  inner_els[2];
+     int const n_inner =
+@@ -1432,4 +1449,4 @@ internal_exr_undo_zstd (
+         comp_buf_size,
+         uncompressed_data,
+         uncompressed_size);
+-}
+\ No newline at end of file
++}

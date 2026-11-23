@@ -1,0 +1,6 @@
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 b64=0xa5 b4095=0xa5
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=0
+CASE oob-chosen guard=absent total=4096 b64=0x5a b4095=0x5a
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 b64=0xa5 b4095=0xa5

