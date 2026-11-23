@@ -2050,9 +2050,11 @@ reachability that distinguishes every admitted non-runtime extension
 (Bzfs2Shell, Kamailio2Shell, Iperf2Shell and the rest). No live DCMTK process,
 DICOM storage service, network trigger or stock allocator neighbour was
 exercised; the brief records reachability as UNKNOWN and untested and calls
-this the weakest scope fit of the recent finds. The held Airlock2Shell,
-Dnsmasq2Shell and Gdbserver2Shell lanes were declined partly on reachability
-gates (non-default config, AC:H, PR:L); an AV:L library with no demonstrated
+this the weakest scope fit of the recent finds. The held Airlock2Shell and
+Dnsmasq2Shell lanes were declined partly on reachability gates (non-default
+config, AC:H, PR:L); Gdbserver2Shell was declined then for missing pinned
+upstream bytes and admitted on 2026-11-23 (below), so it is no longer a
+precedent for a held lane. An AV:L library with no demonstrated
 path is weaker still. No charter, status file, docs admission, engine route,
 wake unit or presentation entry is created and no person action is owed.
 Frontier's two-pane `dcmtk2shell` window (inner socket, index 45), registry
@@ -2358,8 +2360,10 @@ rung-4-plausibility element fails in this lab: GHSA says "No known source
 code", lists no package and unknown affected/patched versions; the vendor
 distributes signed appliance images behind Techzone; and the advisory's
 `memcpy` fragment is not a pinned source-byte range. A decoder model would be
-an invented struct like the held Gdbserver lane, not a source-bound
-affected/fixed pair. Reachability is also gated by non-default URL encryption
+an invented struct like the originally held Gdbserver lane, which was reopened
+with hash-pinned upstream bytes and a derived fixed snapshot before its
+2026-11-23 admission, not a source-bound affected/fixed pair here.
+Reachability is also gated by non-default URL encryption
 plus Form Protection and Smart Form Value Protection, and by attacker control
 of backend HTML served as `text/html`: no login at the gateway, but not a
 default-configuration pre-auth trigger. No charter, wall, window, engine
@@ -2443,22 +2447,27 @@ execution. The window's claimed `01:21Z`/`01:22Z` creation and capture times
 contradict the files' `00:58:5xZ` mtimes and #448's `00:59:06Z` tape stamp;
 those timestamps stay UNKNOWN.
 
-Decision: **held, not admitted** under standing approval #6. That approval
-lists "affected/fixed versions" among the evidence required for admission;
-a debugger daemon with no upstream version, no fix, no pinned source bytes,
-AC:H and instrumented-only rung 4 sits further outside this plant's
-runtime/web-server class than Bzfs2Shell, already recorded as the first lane
-to revisit if the class is narrowed. No charter, status file, docs/README
-admission entry or engine route is created, and none is requested from the
-person for this candidate. Frontier's two-pane window 23, registry entry
-(status file still the brief) and seed wall remain a **frontier dashboard,
-not a declared target**; no wake unit or presentation entry is owed.
+Decision at the time: **held, not admitted** under standing approval #6. That
+approval lists "affected/fixed versions" among the evidence required for
+admission; a debugger daemon with no upstream version, no fix, no pinned
+source bytes, AC:H and instrumented-only rung 4 sits further outside this
+plant's runtime/web-server class than Bzfs2Shell, already recorded as the
+first lane to revisit if the class is narrowed. At that time no charter,
+status file, docs/README admission entry or engine route was created, and
+none was requested from the person for this candidate. Frontier's two-pane
+window 23, registry entry (status file still the brief) and seed wall stayed
+a **frontier dashboard, not a declared target**, with no wake unit or
+presentation entry owed. On 2026-11-23 a pinned-HEAD reopen and clean-replay
+superseded this decision: the lane is now the 94th route with a charter,
+status file, README row, window 99 and wake units (admission below).
 
-Revisit trigger: a reachable mirror supplies pinned vulnerable upstream bytes
-and a fixed version/commit, the real `gdbserver/tracepoint.cc` handler is
-compiled into the ASan harness, and the stock `process_info_private` layout
-and `qGetTLSAddr` dispatch are exercised. Until then this is an examined
-candidate, not a mind.
+Revisit trigger at the time: a reachable mirror supplies pinned vulnerable
+upstream bytes and a fixed version/commit, the real `gdbserver/tracepoint.cc`
+handler is compiled into the ASan harness, and the stock `process_info_private`
+layout and `qGetTLSAddr` dispatch are exercised. The pinned-bytes part was met
+on 2026-11-23 with a derived fixed snapshot (no upstream fixed release); the
+layout and dispatch parts remain untested. The candidate is now an admitted
+mind, not an examined candidate.
 
 #### Examined 2026-11-20: GHSA-87fm-7w84-j2px (Ruby case-conversion integer overflow)
 
@@ -6512,7 +6521,7 @@ wire-selected saved-RIP NUL can reach a valid function entry instead of
 unmapped memory. Both pinned trees rebuild unmodified with `Debug`,
 `-fno-stack-protector -fno-pie -falign-functions=256` and `-no-pie`: saved RIP
 is array offset 136 and `0x413d00` is a 256-byte-aligned function entry.
-`install_marker_patch.py` installs a 91-byte `.text` stub that distinguishes
+`install_marker_patch.py` installs a 95-byte `.text` stub that distinguishes
 normal calls by their in-range `[rsp]` return address and, on the corrupted
 return, calls `write(2, "VRPN2SHELL_MARKER\n", 18)` before resuming. The
 debugger-free matrix gives ALIVE plus marker on both SENDER and TYPE index
@@ -6522,8 +6531,10 @@ routed normal or low out-of-range returns to the marker and are preserved as
 negatives; only the two-sided range test matches the controls. This is a
 rung-4 mechanic in a lab-patched build only: the marker bytes are installed
 by the patch, not supplied by the wire, no attacker-chosen command exists,
-stock builds remain at witness W115's rung 3, and the claim is author-only
-pending a witness replay with its own request. No rung 5.
+stock builds remain at witness W115's rung 3. Witness W135 (#1985) later
+replayed this specific patched-build claim from a clean archive and graded the
+marker ESTABLISHED at the labeled lab-patched rung-4 scope (report verdict
+section); no wire-chosen byte, command or rung 5.
 
 ## 2026-11-22 22:2xZ admission — sofiasip2shell (operator, standing #6)
 
@@ -6906,5 +6917,7 @@ the real handler under ASan, then checking the claimed `thread_db` pointer
 overwrite and `qGetTLSAddr` call in a real heap layout, with fixed and safe
 controls, before any rung-5 claim. The stale 2026-11-21 window at index 23 was
 a duplicate of frontier's fresh index-99 window and was retired at admission;
-the registry is 99 entries / 99 unique names. Status:
+the registry is 99 entries / 99 unique names. With this admission the plant
+declares 94 engine routes and 90 target minds (four cross-cutting roles);
+`tools/check-omp-only.py` reports `GREEN (94 declared roles)`. Status:
 `reports/gdbserver2shell-status.md`.
