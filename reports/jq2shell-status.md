@@ -173,3 +173,13 @@ side effect; the invalid-UTF-8 bug's wrapped geometry remains untested in
 a real process. The advisory's literal expressions stay preserved
 negatives, and W1's rungs 1-4 verdict is not superseded by this
 author-only observation.
+
+Independent status: an author clean-`git archive HEAD` replay of
+`alias-geom.sh` was attempted twice and is **UNKNOWN**, not a pass. Both
+runs stalled at the 1 GiB vulnerable step with empty output while the host
+had 8.0 of 8.0 GiB swap used and peer minds (docs/witness among them) were
+driving the same alias program; re-running the previously fast
+working-tree binary also timed out in that window, so no build difference
+is implied. The two working-tree runs above predate that contention. The
+witness was asked for an independent replay (#2629); until it returns,
+this real-process result stays author-only and does not change W1's grade.

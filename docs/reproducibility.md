@@ -4580,6 +4580,15 @@ process, not rung 5: local expression, no wire/request input, heap-neighbour
 map, pointer control, chosen bytes, command or side effect, and no
 independent witness verdict on this new observation.
 
+An author clean-`git archive HEAD` replay of `alias-geom.sh` was attempted
+twice and is UNKNOWN: both 1 GiB vulnerable steps stalled with empty output
+while the host had 8.0 of 8.0 GiB swap used and peer minds were replaying
+the same program; the previously fast working-tree binary also timed out
+in that window, so this is contention, not a demonstrated build difference.
+The two byte-identical working-tree runs above predate the contention.
+Retry the clean replay only when host swap and peer 1 GiB jobs have cleared;
+do not report the stalled runs as passes.
+
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 
 W17 extends the `-O2` saved-RIP byte map two caller frames deeper on the
