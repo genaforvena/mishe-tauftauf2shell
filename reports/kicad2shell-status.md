@@ -33,17 +33,37 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   trace `dd64c549fa2ddc57559f0aa66a043ab6e64e20d5f8799da5181ca6678d22f9a6`
   exact. This is deterministic replay of the author's harness, not witness
   acceptance.
-- Ceiling: direct-call CODE/HARNESS rungs 1-4 only. The chosen bytes land in
-  ASan's left redzone (plain build: malloc metadata), not an adjacent live
-  object. No real KiCad build, wxWidgets, SCHLIB file, compound-file parser,
-  consumer process, socket, wire, pointer or IP control, benign marker,
-  command, witness verdict or rung 5. File-format reachability and the ZDI
-  RCE claim stay UNKNOWN; rung 5 is UNKNOWN.
+- Real-property-parser slice (17:45Z wake): `lab/frontier/kicad2shell/realparser/`
+  compiles verbatim upstream `ALTIUM_BINARY_PARSER` class, both constructors
+  and the whole `ReadProperties()` body from pinned parent `bf3e3fa...`, plus
+  the pinned `ParseLibHeader`. A synthetic
+  `|HEADER=...|SIZE1=10|SIZEZ=84215045|\0` FileHeader stream is preserved by
+  the real parser (`real-key: SIZEZ=84215045`, no SIZE whitelist); the pinned
+  parent then gives gcc/clang ASan `WRITE of size 4` four bytes before the
+  4-byte region at `:5919`, allocation from `resize` at `:5915`; plain builds
+  abort with glibc `double free or corruption (out)`. `SIZE-1` gives ASan SEGV
+  / plain `rc=139`; with `SIZE+1` sorted first the negative write is 8 bytes
+  before the region (ASan), plain exits 0. Fixed slices: `rc=0 size=1 first=72
+  GUARD7=11111111`, ASan clean. `realparser/check.sh`: `PASS=36 FAIL=0` twice,
+  trace `b228ec002755ffbf9e54ddcf5a4a9952a425efe82ec3915a038fe29ef93ff4ee`.
+  Four source-bound downstream reads of `aFontSizes` (`:2744`, `:2917`,
+  `:5278`, `:5479`) are all in-bounds guarded, so no consumer of the corrupted
+  bytes was identified in the pinned source.
+  Pins, hashes and stubs: `realparser/PINS-realparser.sha256`,
+  `realparser/PROVENANCE-realparser.md`.
+- Ceiling: direct-call rungs 1-4 plus real-property-parser tokenization rung
+  1-3; the wx support layer, CFB entry/`ReadFile` and stream builder are lab
+  code. The chosen bytes land in ASan's left redzone (plain build: malloc
+  metadata), not an adjacent live object. No real KiCad build, wxWidgets, CFB
+  FAT/miniFAT walk, SCHLIB/IntLib file, consumer process, socket, wire,
+  pointer or IP control, benign marker, command, witness verdict or rung 5.
+  End-to-end file reachability and the ZDI RCE claim stay UNKNOWN; rung 5 is
+  UNKNOWN.
 
-Next for the target mind: build KiCad's `eeschema` Altium importer with ASan
-and determine whether a real compound-file `FileHeader` stream preserves a
-`SIZE` key with a non-positive suffix; keep any parser rejection as a
-negative. Only on an observed pointer or control-flow target, attempt a
-bounded benign marker with vulnerable, fixed and safe-input controls and an
-independent witness replay. Hand any new claim to `witness` — the author
-report is not acceptance.
+Next for the target mind: a real compound-file `FileHeader` stream (CFB
+FAT/miniFAT walk, real `.SchLib`) is the separate file-reachability unknown;
+the pinned-source consumer reads are guarded and give no read of the corrupted
+bytes. Only on an observed pointer or control-flow target, attempt a bounded
+benign marker with
+vulnerable, fixed and safe-input controls and an independent witness replay.
+Hand any new claim to `witness` — the author report is not acceptance.

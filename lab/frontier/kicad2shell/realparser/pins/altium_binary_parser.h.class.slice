@@ -1,0 +1,216 @@
+class ALTIUM_BINARY_PARSER
+{
+public:
+    ALTIUM_BINARY_PARSER( const ALTIUM_COMPOUND_FILE& aFile, const CFB::COMPOUND_FILE_ENTRY* aEntry );
+    ALTIUM_BINARY_PARSER( std::unique_ptr<char[]>& aContent, size_t aSize );
+    ~ALTIUM_BINARY_PARSER() = default;
+
+    template <typename Type>
+    Type Read()
+    {
+        const size_t remainingBytes = GetRemainingBytes();
+
+        if( remainingBytes >= sizeof( Type ) )
+        {
+            Type val = *(Type*) ( m_pos );
+            m_pos += sizeof( Type );
+            return val;
+        }
+        else
+        {
+            m_pos += remainingBytes; // Ensure remaining bytes are zero
+            m_error = true;
+            return 0;
+        }
+    }
+
+    template <typename Type>
+    Type Peek()
+    {
+        char* const oldPos = m_pos;
+        const bool  oldError = m_error;
+        Type        result = Read<Type>();
+        m_pos = oldPos;
+        m_error = oldError;
+        return result;
+    }
+
+    wxScopedCharBuffer ReadCharBuffer()
+    {
+        uint8_t len = Read<uint8_t>();
+
+        if( GetRemainingBytes() >= len )
+        {
+            char* buf = static_cast<char*>( malloc( len ) );
+            memcpy( buf, m_pos, len );
+            m_pos += len;
+
+            return wxScopedCharBuffer::CreateOwned( buf, len );
+        }
+        else
+        {
+            m_error = true;
+            return wxScopedCharBuffer();
+        }
+    }
+
+    wxString ReadWxString()
+    {
+        // TODO: Identify where the actual code page is stored. For now, this default code page
+        //       has limited impact, because recent Altium files come with a UTF16 string table
+        return wxString( ReadCharBuffer(), wxConvISO8859_1 );
+    }
+
+    std::map<uint32_t, wxString> ReadWideStringTable()
+    {
+        std::map<uint32_t, wxString> table;
+        size_t                       remaining = GetRemainingBytes();
+
+        while( remaining >= 8 )
+        {
+            uint32_t index = Read<uint32_t>();
+            uint32_t length = Read<uint32_t>();
+            wxString str;
+            remaining -= 8;
+
+            if( length <= 2 )
+            {
+                length = 0; // for empty strings, not even the null bytes are present
+            }
+            else
+            {
+                if( length > remaining )
+                    break;
+
+                str = wxString( m_pos, wxMBConvUTF16LE(), length - 2 );
+            }
+
+            table.emplace( index, str );
+            m_pos += length;
+            remaining -= length;
+        }
+
+        return table;
+    }
+
+    std::vector<char> ReadVector( size_t aSize )
+    {
+        if( aSize > GetRemainingBytes() )
+        {
+            m_error = true;
+            return {};
+        }
+        else
+        {
+            std::vector<char> data( m_pos, m_pos + aSize );
+            m_pos += aSize;
+            return data;
+        }
+    }
+
+    int ReadBytes( char* aOut, size_t aSize )
+    {
+        if( aSize > GetRemainingBytes() )
+        {
+            m_error = true;
+            return 0;
+        }
+        else
+        {
+            memcpy( aOut, m_pos, aSize );
+            m_pos += aSize;
+            return aSize;
+        }
+    }
+
+    int32_t ReadKicadUnit()
+    {
+        return ALTIUM_PROPS_UTILS::ConvertToKicadUnit( Read<int32_t>() );
+    }
+
+    int32_t ReadKicadUnitX()
+    {
+        return ReadKicadUnit();
+    }
+
+    int32_t ReadKicadUnitY()
+    {
+        return -ReadKicadUnit();
+    }
+
+    VECTOR2I ReadVector2IPos()
+    {
+        int32_t x = ReadKicadUnitX();
+        int32_t y = ReadKicadUnitY();
+        return { x, y };
+    }
+
+    VECTOR2I ReadVector2ISize()
+    {
+        int32_t x = ReadKicadUnit();
+        int32_t y = ReadKicadUnit();
+        return { x, y };
+    }
+
+    size_t ReadAndSetSubrecordLength()
+    {
+        uint32_t length = Read<uint32_t>();
+        m_subrecord_end = m_pos + length;
+        return length;
+    }
+
+    std::map<wxString, wxString> ReadProperties(
+            std::function<std::map<wxString, wxString>( const std::string& )> handleBinaryData =
+                    []( const std::string& )
+                    {
+                        return std::map<wxString, wxString>();
+                    } );
+
+    void Skip( size_t aLength )
+    {
+        if( GetRemainingBytes() < aLength )
+        {
+            m_error = true;
+            return;
+        }
+
+        m_pos += aLength;
+    }
+
+    void SkipSubrecord()
+    {
+        if( m_subrecord_end == nullptr || m_subrecord_end < m_pos )
+        {
+            m_error = true;
+            return;
+        }
+
+        m_pos = m_subrecord_end;
+    };
+
+    size_t GetRemainingBytes() const
+    {
+        if( m_pos == nullptr || m_content.get() + m_size < m_pos )
+            return 0;
+
+        return m_size - ( m_pos - m_content.get() );
+    }
+
+    size_t GetRemainingSubrecordBytes() const
+    {
+        if( m_pos == nullptr || m_subrecord_end == nullptr || m_subrecord_end < m_pos )
+            return 0;
+
+        return m_subrecord_end - m_pos;
+    };
+
+    bool HasParsingError() { return m_error; }
+
+private:
+    std::unique_ptr<char[]> m_content;
+    size_t                  m_size;
+
+    char*                   m_pos;           // current read pointer
+    char*                   m_subrecord_end; // pointer which points to next subrecord start
+    bool                    m_error;
+};

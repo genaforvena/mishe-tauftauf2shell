@@ -1,0 +1,22 @@
+ALTIUM_BINARY_PARSER::ALTIUM_BINARY_PARSER( const ALTIUM_COMPOUND_FILE&     aFile,
+                              const CFB::COMPOUND_FILE_ENTRY* aEntry )
+{
+    m_subrecord_end = nullptr;
+    m_size          = static_cast<size_t>( aEntry->size );
+    m_error         = false;
+    m_content.reset( new char[m_size] );
+    m_pos = m_content.get();
+
+    // read file into buffer
+    aFile.GetCompoundFileReader().ReadFile( aEntry, 0, m_content.get(), m_size );
+}
+
+
+ALTIUM_BINARY_PARSER::ALTIUM_BINARY_PARSER( std::unique_ptr<char[]>& aContent, size_t aSize )
+{
+    m_subrecord_end = nullptr;
+    m_size = aSize;
+    m_error = false;
+    m_content = std::move( aContent );
+    m_pos = m_content.get();
+}

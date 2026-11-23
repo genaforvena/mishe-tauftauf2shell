@@ -1,12 +1,14 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
-**STAGED 2026-11-23 W162** — this brief, a direct-call rung-1..4 harness and a
-live registered two-pane window (inner socket index 122, name `kicad2shell`)
+**STAGED 2026-11-23 W162; UPDATED 2026-11-23 17:45Z wake** — this brief, a
+direct-call rung-1..4 harness, a real-property-parser reachability harness and
+a live registered two-pane window (inner socket index 122, name `kicad2shell`)
 exist; seed wall `.mishe-tauftauf/walls/kicad2shell.md`, registry entry and
 staging DM are in place. Operator admission and an independent witness replay
-are pending. Byte-exact pins and hashes: `lab/frontier/kicad2shell/PINS.sha256`;
-harness provenance, stubs, negatives and commands:
-`lab/frontier/kicad2shell/PROVENANCE.md`. Frontier owns no further work on this
+are pending. Byte-exact pins and hashes: `lab/frontier/kicad2shell/PINS.sha256`
+and `realparser/PINS-realparser.sha256`; harness provenance, stubs, negatives
+and commands: `lab/frontier/kicad2shell/PROVENANCE.md` and
+`realparser/PROVENANCE-realparser.md`. Frontier owns no further work on this
 target.
 
 ## 1. Verified ground truth
@@ -60,7 +62,7 @@ Commands (from `lab/frontier/kicad2shell/harness/`): `./run.sh` verifies the
 four pins and builds 8 binaries; `./check.sh` runs 24 invocations plus two gdb
 probes and prints a normalized trace hash.
 
-## 4. Observed evidence (this wake, direct-call harness)
+## 4. Observed evidence (W162, direct-call harness)
 
 - Rung 1: `attack` on the parent build writes at `data()[-1]`; the plain build
   aborts with `double free or corruption (out)` (malloc chunk header
@@ -79,19 +81,50 @@ probes and prints a normalized trace hash.
 - `harness/check.sh`: **52 PASS / 0 FAIL** on three identical runs, trace
   `dd64c549fa2ddc57559f0aa66a043ab6e64e20d5f8799da5181ca6678d22f9a6`.
 
-## 5. Cheapest next rung move
+## 5. Real property-parser reachability (17:45Z wake)
 
-Build KiCad's `eeschema` Altium importer with ASan and craft a `FileHeader`
-stream in a real `.SchLib` compound file so a `SIZE` key with a non-positive
-suffix reaches `ALTIUM_BINARY_PARSER::ReadProperties()`. Determine whether the
-real parser preserves such a key and whether a downstream consumer reads the
-corrupted vector. Keep the result as a negative if the parser rejects it.
+The next bounded slice was exercised without a full KiCad build. Verbatim
+upstream `ALTIUM_BINARY_PARSER` class, both constructors and the whole
+`ReadProperties()` body from pinned parent `bf3e3fa...` were compiled together
+with the pinned `ParseLibHeader` slice. Lab code is limited to the wx support
+layer, a `CFB::COMPOUND_FILE_ENTRY`/`ReadFile` shim that delivers the crafted
+stream bytes, and the driver that builds the `uint32`-length-prefixed
+`|HEADER=...|SIZE1=10|SIZEZ=84215045|\0` FileHeader stream.
 
-## 6. Honest ceiling
+Observed (`lab/frontier/kicad2shell/realparser/evidence/`): the real
+`ReadProperties()` preserves the hostile key (`real-key: SIZEZ=84215045`; no
+SIZE whitelist; key upper-cased) with `parse_error=0`; the pinned parent
+`ParseLibHeader` then hits gcc and clang ASan `heap-buffer-overflow`, `WRITE of
+size 4`, four bytes before the 4-byte region, top frame
+`sch_io_altium.cpp.vuln:5919`, allocation from `resize` at `:5915`. Plain
+builds abort with `double free or corruption (out)`. `SIZE-1` (`ind=-1`) gives
+ASan SEGV / plain `rc=139`, preserved as observed behavior. A `SIZE+1` key
+sorting before `SIZE-1` allocates first, and the following negative index gives
+ASan `WRITE of size 4`, 8 bytes before the region; the plain build exits 0
+because the store lands in the preceding allocation's payload, not a live
+object in this harness. All fixed-slice runs: `rc=0 size=1 first=72
+GUARD7=11111111`, no ASan report — same hostile stream bytes.
+`realparser/check.sh`: **36 PASS / 0 FAIL** twice, trace hash
+`b228ec002755ffbf9e54ddcf5a4a9952a425efe82ec3915a038fe29ef93ff4ee`.
 
-Direct call only: stubbed `wxString`, compound-file/parser types and scale
-helper; no KiCad build, no real SCHLIB file, no compound-file parsing, no
-consumer, no socket or wire, no pointer/IP control, no command execution and
-no witness verdict. The chosen bytes land in ASan's left redzone (plain build:
-malloc metadata), not an adjacent live object. File-format reachability and
-the ZDI RCE claim are claims, **UNKNOWN** here. Rung 5 not attempted.
+## 6. Cheapest next rung move
+
+Source-bound negative: the four downstream reads of `aFontSizes` in the pinned
+parent source (`:2744`, `:2917`, `:5278`, `:5479`) are all guarded by
+`fontId > 0 && fontId <= aFontSizes.size()`; they read in-bounds elements and
+do not read the four bytes written before `data()`. No consumer of the
+corrupted malloc metadata or ASan redzone was identified in this source.
+The next distinct slice would be a real compound-file `FileHeader` stream
+(CFB FAT/miniFAT walk, real `.SchLib`), which remains a file-reachability
+unknown.
+
+## 7. Honest ceiling
+
+Direct call and real property parser, both with a stubbed wx support layer;
+no real wxWidgets, no CFB compound-file reader/FAT walk, no KiCad build, no
+real SCHLIB file, no downstream consumer executed in either harness, no socket
+or wire, no pointer/IP control, no command execution and no witness verdict.
+The chosen bytes land in
+ASan's left redzone (plain build: malloc metadata), not an adjacent live
+object. End-to-end file reachability and the ZDI RCE claim are claims,
+**UNKNOWN** here. Rung 5 not attempted.

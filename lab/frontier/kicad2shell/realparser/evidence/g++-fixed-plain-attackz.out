@@ -1,0 +1,7 @@
+real-prop: [HEADER]=[Protel for Windows - Schematic Library Editor Binary File Version 5.0]
+real-prop: [SIZE1]=[10]
+real-prop: [SIZEZ]=[84215045]
+real-reader: bytes=107 props=3 parse_error=0
+real-key: SIZE1=10
+real-key: SIZEZ=84215045
+rc=0 size=1 first=72 GUARD7=11111111

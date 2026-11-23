@@ -1,0 +1,20 @@
+real-prop: [HEADER]=[Protel for Windows - Schematic Library Editor Binary File Version 5.0]
+real-prop: [SIZE-1]=[84215045]
+real-prop: [SIZE1]=[10]
+real-reader: bytes=108 props=3 parse_error=0
+real-key: SIZE-1=84215045
+real-key: SIZE1=10
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2525781==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x64a582b9835d bp 0x7ffc95ee0ed0 sp 0x7ffc95ee0d20 T0)
+==2525781==The signal is caused by a READ memory access.
+==2525781==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x64a582b9835d in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int>>&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realparser/sch_io_altium.cpp.vuln:5919:37
+    #1 0x64a582b9959a in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realparser/sch_io_altium.cpp.vuln:5983:15
+    #2 0x7e42ae02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7e42ae02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x64a582aba724 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realparser/clang++-vuln-asan+0x2e724) (BuildId: 53bf663299248762d31d33a645350265cacfb99a)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realparser/sch_io_altium.cpp.vuln:5919:37 in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int>>&)
+==2525781==ABORTING
