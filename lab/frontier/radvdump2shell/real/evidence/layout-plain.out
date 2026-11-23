@@ -1,0 +1,71 @@
+Breakpoint 1 at 0x4aa4: file radvdump.c, line 381.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Nov 23 07:40:21] radvdump (3626365): receiver if_index: 1
+
+=== HIT LINE 381 ===
+Stack level 0, frame at 0x7fffffffe340:
+ rip = 0x555555558aa4 in print_ff (radvdump.c:381); saved rip = 0x1234567812345678
+ called by frame at 0x7fffffffe348
+ source language c.
+ Arglist at 0x7fffffffe330, args: msg=0x7fffffffe390 "\206", len=0, addr=0x7fffffffe970, hoplimit=64, if_index=1, edefs=0
+ Locals at 0x7fffffffe330, Previous frame's sp is 0x7fffffffe340
+ Saved registers:
+  rbx at 0x7fffffffe328, rbp at 0x7fffffffe330, rip at 0x7fffffffe338
+
+=== FRAME POINTERS ===
+$1 = (void *) 0x7fffffffe330
+$2 = (void *) 0x7fffffffe0e0
+
+=== LOCAL/ARG ADDRESSES ===
+$3 = (struct in6_addr *) 0x7fffffffe210
+$4 = (struct nd_opt_route_info_local **) 0x7fffffffe280
+$5 = (char (*)[46]) 0x7fffffffe100
+$6 = (char (*)[46]) 0x7fffffffe240
+$7 = (char (*)[16]) 0x7fffffffe230
+$8 = (struct nd_router_advert **) 0x7fffffffe2f8
+$9 = (uint8_t **) 0x7fffffffe310
+$10 = (int *) 0x7fffffffe2b4
+$11 = (int *) 0x7fffffffe31c
+
+=== PARAMETER SLOTS ===
+$12 = (unsigned char **) 0x7fffffffe0f8
+$13 = (int *) 0x7fffffffe0f4
+$14 = {__in6_u = {__u6_addr8 = 'A' <repeats 16 times>, __u6_addr16 = {16705, 16705, 16705, 16705, 16705, 16705, 16705, 16705}, __u6_addr32 = {1094795585, 1094795585, 1094795585, 1094795585}}}
+$15 = (int *) 0x7fffffffe0f0
+$16 = (unsigned int *) 0x7fffffffe0e4
+$17 = (int *) 0x7fffffffe0e0
+$18 = 0
+
+=== BUFFER POINTERS ===
+$19 = (unsigned char *) 0x7fffffffe390 "\206"
+$20 = (struct nd_router_advert *) 0x4141414141414141
+
+=== LIBC TARGETS ===
+$21 = {int (const char *)} 0x7ffff7c58750 <__libc_system>
+$22 = {void (int)} 0x7ffff7c47ba0 <__GI_exit>
+$23 = (char (*)[19]) 0x55555555d010 <usage_str>
+
+=== STACK WORDS AROUND rbp ===
+0x7fffffffe200:	0x0000000000000000	0x00007ffff7d2bdb9
+0x7fffffffe210:	0x4141414141414141	0x4141414141414141
+0x7fffffffe220:	0x4141414141414141	0x4141414141414141
+0x7fffffffe230:	0x4141414141414141	0x4141414141414141
+0x7fffffffe240:	0x4141414141414141	0x4141414141414141
+0x7fffffffe250:	0x4141414141414141	0x4141414141414141
+0x7fffffffe260:	0x4141414141414141	0x4141414141414141
+0x7fffffffe270:	0x4141414141414141	0x4141414141414141
+0x7fffffffe280:	0x4141414141414141	0x4141414141414141
+0x7fffffffe290:	0x4141414141414141	0x4141414141414141
+0x7fffffffe2a0:	0x4141414141414141	0x4141414141414141
+0x7fffffffe2b0:	0x4141414141414141	0x4141414141414141
+0x7fffffffe2c0:	0x4141414141414141	0x4141414141414141
+0x7fffffffe2d0:	0x4141414141414141	0x4141414141414141
+0x7fffffffe2e0:	0x4141414141414141	0x4141414141414141
+0x7fffffffe2f0:	0x4141414141414141	0x4141414141414141
+0x7fffffffe300:	0x4141414141414141	0x4141414141414141
+0x7fffffffe310:	0x4141414141414141	0x4141414141414141
+0x7fffffffe320:	0x4141414141414141	0x4141414141414141
+0x7fffffffe330:	0x4141414141414141	0x1234567812345678
+
+=== DONE ===

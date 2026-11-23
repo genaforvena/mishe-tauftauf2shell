@@ -89,31 +89,62 @@ the host GCC's default `_FORTIFY_SOURCE 3` (`*** buffer overflow detected
 -U_FORTIFY_SOURCE` performs the copy but yields no pointer control and no
 crash (`live-gdb-O2-nofort.out`). Ordinary distro builds are mitigated.
 
-## Current grade — rung 4 on living bytes (author-only, no witness)
+## Rung-5 wire demonstration — 2026-11-23 07:46Z (author-only, no witness yet)
 
-Rung 1-3 are reproduced on real binaries with real wire input. Rung 4 is no
-longer scoped to the harness: chosen bytes at chosen offsets control a live
-pointer and the saved return address in a genuine `radvdump` process. The
-negative results (fortify abort, -O2 no control, length-33 RIP gap) are part
-of the grade and must not be erased.
+The earlier ceiling was conditional, not structural. `defaults.h:23`
+(`MSG_SIZE_RECV 1500`) admits an option length byte up to 185; length byte 60
+makes a 496-byte RA whose `(len-1)*8 = 472`-byte copy reaches the saved RIP
+and leaves room for a ROP chain. A genuine upstream v2.20 `radvdump` built
+`-O0 -g -fno-stack-protector` (no stubs), launched by
+`sudo -n setarch -R gdb -q -batch -x marker.gdb --args ... -d 4` (gdb's
+disable-randomization supplies the fixed addresses), received one crafted RA
+at `::1%lo` from `real/send_marker.py marker`. Tooling and raw evidence:
+`real/{send_marker.py,marker.gdb,run_marker.sh,run_controls.sh,repro_rung5.sh}`
+and `real/evidence/{marker-attack-5,6,7,control-*}.out`.
 
-## Ceiling
+- At pinned line 381: `&addr = 0x7fffffffe220`, `rinfo = 0x55555555d010`
+  (`usage_str`, a readable stand-in so `print_ff` survives its later
+  dereferences), `system = 0x7ffff7c58750`; `info frame` reads
+  `saved rip = 0x7ffff7d0f84b` (`pop rdi; ret`).
+- `print_ff` printed its full route block, then
+  `pop rdi; ret -> &command -> ret (stack alignment) -> system -> exit` ran.
+  GDB logged `[Detaching after vfork from child process …]` and
+  `inferior exited with code 02`. The observable side effect was the creation
+  of `/tmp/radvdump2shell-marker` (root-owned, 0 bytes). `system()` is not in
+  radvdump's normal callpath; this is command execution driven by wire input,
+  not an in-process harness marker. Reproduced 3/3 (`marker-attack-5/6/7`).
 
-No rung 5. The process SIGSEGVs at pinned line 382 while dereferencing the
-smashed `rinfo` before `print_ff` can return, so the controlled saved RIP is
-not reached as control flow. The binary is PIE, ASLR is live, and no address
-is known for a usable RIP or a valid `rinfo`; there is no ROP chain, benign
-marker, chosen command or witness verdict. The lab sender needs root for
-CAP_NET_RAW and injects the RA on the same host's loopback, not from a
-network-adjacent neighbour. The fix's root-drop, buffer-zeroing,
-jumbo-packet and earlier-loop changes are outside this callpath.
+Controls, all run against the same 496-byte attack RA unless noted
+(`real/evidence/control-*.out`):
+
+- Vulnerable binary, RFC-conformant length byte 2 (`marker-safe`): clean
+  parse, no copy, **no marker**.
+- Real upstream v2.21 with attack RA: logs
+  `# Invalid Route Information option length 60, per RFC4191 section 2.3`,
+  no copy, **no marker**.
+- Vulnerable binary with ASLR left on (no gdb): SIGSEGV in the ROP, **no
+  marker** — the address knowledge is lab-specific, not incidental.
+- Fortified `-O2` build of the pinned source: `*** buffer overflow detected
+  ***` from `__memcpy_chk`, abort, **no marker**.
+
+Mechanics worth preserving as negative results: `sudo` clears
+`ADDR_NO_RANDOMIZE` on every exec, so `sudo -n setarch -R ./radvdump` leaves
+ASLR on; gdb's inferior-level disable-randomization is what fixes the
+addresses. Without the extra `ret` gadget for x86-64 8-mod-16 stack
+alignment, `system` SIGSEGVs in `do_system` (`marker-attack-3.out`).
+
+## Current grade — rung 5 conditional (author-only, witness verdict pending)
+
+Rung 5 is demonstrated on living bytes with a real loopback RA, a lab-chosen
+benign command, an observed side effect, and four controls. It is **NOT**
+ESTABLISHED: independent witness replay is owed, and the conditions are a
+non-fortified `-O0` build with ASLR disabled in the lab. A stock fortified
+distro build aborts at `__memcpy_chk` before the copy and is a negative
+result, not a hidden success. Do not claim remote execution from a saved-RIP
+byte alone; here the claim rests on the executed marker and its controls.
 
 ## Next bounded work
 
-Groom `rinfo`/`radvert` to valid readable pointers while keeping the chosen
-saved RIP so `print_ff` can return (address knowledge is needed under
-PIE/ASLR; the lab may use `setarch -R`), then attempt a benign marker with
-vulnerable, safe and fixed controls and an independent witness. What would
-change the mind: a return into the chosen RIP without a fault, an independent
-witness replay contradicting the above, or a distro configuration where the
-overflow is reached without disabling fortify.
+One-command witness replay: `real/repro_rung5.sh`
+(ATTACK => MARKER_PRESENT; four CONTROLS => MARKER_ABSENT). Record the
+witness verdict. Do not relabel the fortify/ASLR-on negatives as passes.

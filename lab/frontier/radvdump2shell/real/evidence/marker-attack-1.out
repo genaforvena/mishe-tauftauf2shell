@@ -1,0 +1,15 @@
+Breakpoint 1 at 0x4aa4: file radvdump.c, line 381.
+>Undefined command: "silent".  Try "help".
+
+=== AT 381 (BEFORE RETURN) ===
+No stack.
+No symbol "rinfo" in current context.
+No symbol "system" in current context.
+The program is not being run.
+This command cannot be used at the top level.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Nov 23 07:43:57] radvdump (3697659): receiver if_index: 1
+
+Breakpoint 1, print_ff (msg=0x7fffffffe2f0 'A' <repeats 136 times>, "\020\320UUUU", len=0, addr=0x7fffffffe8d0, hoplimit=64, if_index=1, edefs=0) at radvdump.c:381
+381					addrtostr(&addr, prefix_str, sizeof(prefix_str));

@@ -1,0 +1,9 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+0x000070bb1231bc3d in __GI_ppoll (fds=0x64215abca620, nfds=2, timeout=<optimized out>, sigmask=0x0) at ../sysdeps/unix/sysv/linux/ppoll.c:42
+
+warning: 42	../sysdeps/unix/sysv/linux/ppoll.c: No such file or directory
+No source file named radvdump.c.
+radvd-2.20-plain/layout_attach.gdb:5: Error in sourced command file:
+Argument required (one or more breakpoint numbers).
+[Inferior 1 (process 3661907) detached]
