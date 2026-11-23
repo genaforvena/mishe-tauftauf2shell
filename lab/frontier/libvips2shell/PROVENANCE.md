@@ -66,9 +66,12 @@ bytes are harness-chosen ink, not a pointer, return address or command.
 
 ## Results and negative results preserved
 
-- `PASS=62 FAIL=0` three consecutive runs; normalized trace
-  `5532e495d71cc0be1b14f4f58e0d8fd4d9790bb6ff73fe921e380f39dcd1490e`
-  (PIDs, addresses, paths, build ids excluded). Raw runs in `evidence/`.
+- `PASS=62 FAIL=0` three consecutive runs in the working tree and once from a
+  clean `git archive HEAD lab/frontier/libvips2shell
+  reports/frontier-libvips2shell.md` extraction at commit `2f35788`; normalized
+  trace `5532e495d71cc0be1b14f4f58e0d8fd4d9790bb6ff73fe921e380f39dcd1490e`
+  in all four runs (PIDs, addresses, paths, build ids excluded). Raw runs in
+  `evidence/`.
 - Initial stub enums had no `-1` sentinel, so C promoted the enum to unsigned
   and the verbatim sanity check emitted a spurious `bad enum`. Adding the
   real `VIPS_FORMAT_NOTSET = -1` / `VIPS_CODING_ERROR = -1` sentinels removed

@@ -1,0 +1,12 @@
+Clean archive replay, 2026-11-23T10:00Z, commit 2f35788:
+git archive HEAD lab/frontier/libvips2shell reports/frontier-libvips2shell.md
+  | tar -x -C /tmp/replay-libvips-a
+cd /tmp/replay-libvips-a/lab/frontier/libvips2shell/harness
+./run.sh > /tmp/replay-libvips-build.log 2>&1
+./check.sh
+
+PASS=62 FAIL=0 TRACE=5532e495d71cc0be1b14f4f58e0d8fd4d9790bb6ff73fe921e380f39dcd1490e
+REPLAY_OK
+
+Same normalized trace as the three working-tree runs; no address, PID, path
+or build-id bytes in the hash input.

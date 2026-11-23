@@ -92,7 +92,8 @@ claim is a source claim, not a lab observation.
 
 ## 5. Observations
 
-- Harness `PASS=62 FAIL=0` three times in the working tree; normalized trace
+- Harness `PASS=62 FAIL=0` three times in the working tree and once from a
+  clean `git archive HEAD` extraction at commit `2f35788`; normalized trace
   `5532e495d71cc0be1b14f4f58e0d8fd4d9790bb6ff73fe921e380f39dcd1490e`
   (no PID, address, path or build id).
 - Rung 1/2: vulnerable sanity reports no overflow for the crafted geometry;
