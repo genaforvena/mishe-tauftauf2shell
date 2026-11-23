@@ -2965,7 +2965,9 @@ the receive slot and writes no adjacent byte; safe `got=1` is clean on the vulne
 That is the staged slice harness with a stubbed verbs environment: no live
 server, HELLO handshake, RDMA wire packet or real device at that scope. The
 later live-wire result is in the addendum below. `AV:N` carries `AT:P`; no
-independent witness verdict exists. Status: `reports/llamarpc2shell-status.md`.
+independent witness verdict exists at the staged slice scope. Witness W142
+(#2193) later ESTABLISHED the live-wire scope below from a clean archive.
+Status: `reports/llamarpc2shell-status.md`.
 
 ### Post-admission live RDMA wire — 04:2xZ (author-only)
 
@@ -3018,9 +3020,44 @@ closes; the 1-byte safe SEND is clean on the vulnerable server. No rc/PASS
 count or trace hash is defined for the wire runners — do not invent one; raw
 `wire/evidence/*.log` are tracked and QPN values vary by run. The saved-RIP
 offset is measured only in the non-ASan Debug frame, execution at `0x4242…`
-never happened, the 256 KiB advisory bound was not exercised (largest SEND
-3593), and no command, ROP, ASLR bypass or witness replay exists. Rung 5
-stays UNKNOWN and `AT:P` still qualifies AV:N.
+never happened, the 256 KiB advisory bound was not exercised (3593 bytes in
+the saved-frame probe, 4608 in the failed ROP attempt), and no command,
+working ROP chain or ASLR bypass was observed. Witness W142 (#2193) replayed
+`37da4e6` from a clean archive with its own three pinned builds (ASan vuln
+`0a073add…`, plain Debug `dadd8c62…`, fixed ASan `f507d7cb…` prefixes): rungs
+3 and 4 ESTABLISHED at that labeled build scope with fixed, safe and repeated
+attack controls and no counterexample. Its only output was a wording NIT to
+the author. Rung 5 stays UNKNOWN and `AT:P` still qualifies AV:N.
+
+#### Failed wire-only rung-5 feasibility attempt — 04:4xZ (negative)
+
+`a76b986` tried one chain on one labelled lab build of the same pin with
+`-fno-stack-protector`; the build tree and wire client binary are gitignored
+(`lab/frontier/llamarpc2shell/.gitignore`), and decisive failure logs and
+payload files are committed under `wire/evidence/`. Re-measure the baseline
+first, then use the raw-file client option and the fixed-environment wrapper:
+
+```sh
+bash wire/run.sh attack
+RDMA_PAYLOAD_FILE=$PWD/wire/evidence/rce-payload-early.bin \
+  bash wire/run-rce-gdb.sh
+```
+
+`rdma_attacker.cpp` sends `RDMA_PAYLOAD_FILE` bytes verbatim; the default
+marker path is unchanged. The no-canary server sha256 is
+`3fb0d4bff4ae699088cd20f81f575b0399f1fe797ae2ec87979c100ea7599959`
+(`wire/evidence/build-nocanary.log`). Under `setarch -R` plus a fixed minimal
+environment, the saved RIP was at `&cmd + 761` and libc symbols were read at
+`pop rdi; ret` +`0x10f84b`, `system` +`0x58750`, `_exit` +`0xee2c0`; the chain
+pointed `rdi` at a command string at `&cmd + 1200`. No command ran. Every
+oversized completion makes `rem` underflow in `rdma_recv`, so
+`rpc_serve_client` takes the early `break` at `ggml-rpc.cpp:2476` and the
+destructor at `:2432` consumes the smashed locals before the epilogue:
+`free(): invalid pointer` (`graphs.__n = -11`) at 100/761/820-byte SENDs
+(`fxlen{100,761,820}.log`), and a second `rdma_recv` memcpy fault at 4608
+bytes (`rce-diag3.log`). A 1-byte SEND stays clean. The payload binaries are
+failed inputs, not working exploits; no marker file, valid pointer redirect
+or rung 5 was produced, and no witness replay is owed for this negative.
 
 
 ## Admitted frontier lane — 2026-11-23 04:4xZ zlib2shell

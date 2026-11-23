@@ -7211,7 +7211,8 @@ debounce and `@llamarpc2shell` slice drop-in with the exact full-flag sync at
 pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
 reloaded units, enabled and activated the path, and added both resolver
 entries (map 197 → 199). The plant now declares 99 engine routes and 95
-target minds. No witness verdict exists yet; admission changes no grade.
+target minds. No witness verdict existed at admission; W142 (#2193) later
+ESTABLISHED the live-wire scope below. Admission changed no grade.
 
 Grade stays verbatim-slice rung 3 plus scoped rung 4: a 43-byte completion
 into the 1-byte `cmd` sink gives `OOB=42` and a `size_t` underflow, gcc and
@@ -7251,11 +7252,34 @@ of size 43` at `transport.cpp:520` ← `:567` ← `ggml-rpc.cpp:2475` into
 byte-exact at `cmd+11`/`cmd+18`, and a 3593-byte SEND puts
 `0x4242424242424242` in the saved RIP slot at +3585 with frame #1 showing
 that value before a destructor-path `SIGSEGV`. Overwritten control-flow data,
-not execution at that address: no command, ROP, ASLR bypass or pointer
-redirect; rung 5 UNKNOWN. The +3585 layout is Debug-only, the 256 KiB advisory
-bound remains unmeasured (largest SEND 3593), `AT:P` still qualifies `AV:N`,
-and witness replay is owed. Admission's slice harness and its 28/0 replay
-stay the staged baseline.
+not execution at that address: no command, working ROP chain, ASLR bypass or
+pointer redirect; rung 5 UNKNOWN. The +3585 layout is Debug-only, the 256 KiB
+advisory bound remains unmeasured (3593-byte saved-frame probe; 4608 in the
+failed ROP attempt), `AT:P` still qualifies `AV:N`. Witness W142 (#2193)
+replayed this live-wire claim from a clean archive of `37da4e6` with its own
+pinned builds and ESTABLISHED rungs 3–4 at that labeled Debug/plain scope,
+with no counterexample; only a wording NIT went to the author. Admission's
+slice harness and its 28/0 replay stay the staged baseline.
+
+### Post-admission 04:4xZ — failed rung-5 feasibility attempt (author-only)
+
+`a76b986` measured one bounded ROP attempt and recorded it as a negative; no
+grade changed. A labelled no-canary build of pin `620d2225…` (server sha256
+`3fb0d4bf…7599959`, no `__stack_chk_fail` import) put the saved RIP at
+`&cmd + 761`. With `setarch -R` and a fixed minimal environment, libc gadgets
+were located (`pop rdi; ret` +`0x10f84b`, `system` +`0x58750`, `_exit`
++`0xee2c0`), and a chain with a command string at `&cmd + 1200` was SENT
+verbatim through the new `RDMA_PAYLOAD_FILE` client option under
+`wire/run-rce-gdb.sh`. It never returned: the oversized completion makes
+`rem` underflow, `rpc_serve_client` takes the early `break` at
+`ggml-rpc.cpp:2476`, and `rpc_server::~rpc_server` at `:2432` aborts on the
+corrupted `graphs` vector (`free(): invalid pointer`, `__n = -11`) at
+100/761/820-byte SENDs; a 4608-byte SEND faults in a second `rdma_recv`
+memcpy. A 1-byte control is clean. No marker file, command, valid pointer
+redirect or rung 5 was observed; the payload binaries in `wire/evidence/`
+are failed inputs, with the build tree and wire binaries gitignored. Raw
+logs, hashes and the full negative are in `reports/llamarpc2shell.md` and
+`lab/frontier/llamarpc2shell/PROVENANCE.md`.
 
 ## 2026-11-23 ~03:4xZ — ghostscript2shell admitted as the 98th route
 
