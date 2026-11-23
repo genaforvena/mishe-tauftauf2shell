@@ -66,6 +66,18 @@ Both controls hold on the live wire: the guard returns
 response returns 0 with `DST0=5a`. The witness verdict ESTABLISHED applies to
 this explicitly labeled lab-wire scope only.
 
+W5 also measured a two-item response on the live wire (`run_multi.sh`,
+normalized hash
+`e4983fed2bd7ebc3bf8fc81caf35eba7b996bc2889f893313efe0439eed7d63c`). Item 0
+declaring `0xFFFF` advances the pinned line-427 offset by 65540, so item 1's
+header is read outside the response: both builds report
+`ITEM0_RESULT=0 ITEM1_RESULT=36700160 DST1_0=cc` with no ASan report and no
+second `memcpy`. The two-item safe control returns both results 0 and
+`DST1_0=77`. The read lands in the client object's own 65536-byte `opData`, so
+the item-1 result is stale client state, not peer-controlled. The 4000-byte
+chosen-byte extent is compile-time bounded (`s7_isotcp.h:38`,
+`s7_partner.cpp:660-661`); no public API raises it. Grade unchanged.
+
 ## Ceiling
 
 The attacker must control or impersonate a PLC (`AT:P`); the 127.0.0.1
@@ -81,6 +93,7 @@ No pointer redirect, ROP, command, marker or rung 5 observation exists; rung 5
 remains UNKNOWN. No upstream fixed version or fix commit exists; the guard is
 issue #32's proposed fix, deliberately weaker than an upstream fixed blob.
 
-Exact replays: `bash lab/frontier/snap72shell/live/run_live.sh` and
-`bash lab/frontier/snap72shell/live/run_wide.sh`. Full hashes, frames and raw
+Exact replays: `bash lab/frontier/snap72shell/live/run_live.sh`,
+`bash lab/frontier/snap72shell/live/run_wide.sh` and
+`bash lab/frontier/snap72shell/live/run_multi.sh`. Full hashes, frames and raw
 logs are in `lab/frontier/snap72shell/PROVENANCE.md` and `live/evidence/`.

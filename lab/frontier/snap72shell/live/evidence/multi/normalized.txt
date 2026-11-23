@@ -1,0 +1,24 @@
+multi-asan.client.log CLIENT_CONNECT_RC=0
+multi-asan.client.log CLIENT_READ_BEGIN items=2 dest0=200000 dest1=1
+multi-asan.client.log CLIENT_READ_RC=0 ITEM0_RESULT=0 ITEM1_RESULT=36700160 DST0_0=11 DST0_17=22 DST0_4000=00 DST1_0=cc
+multi-asan.server.log MODE=multi BIND=127.0.0.1:PORT
+multi-asan.server.log ITEM0_DECLARED=65535 ITEM0_REAL=32 ITEM1_DECLARED=1
+multi-asan.server.log SERVER_DONE negotiate=True read=True
+multi-plain.client.log CLIENT_CONNECT_RC=0
+multi-plain.client.log CLIENT_READ_BEGIN items=2 dest0=200000 dest1=1
+multi-plain.client.log CLIENT_READ_RC=0 ITEM0_RESULT=0 ITEM1_RESULT=36700160 DST0_0=11 DST0_17=22 DST0_4000=00 DST1_0=cc
+multi-plain.server.log MODE=multi BIND=127.0.0.1:PORT
+multi-plain.server.log ITEM0_DECLARED=65535 ITEM0_REAL=32 ITEM1_DECLARED=1
+multi-plain.server.log SERVER_DONE negotiate=True read=True
+safe-asan.client.log CLIENT_CONNECT_RC=0
+safe-asan.client.log CLIENT_READ_BEGIN items=2 dest0=200000 dest1=1
+safe-asan.client.log CLIENT_READ_RC=0 ITEM0_RESULT=0 ITEM1_RESULT=0 DST0_0=5a DST0_17=00 DST0_4000=00 DST1_0=77
+safe-asan.server.log MODE=multi-safe BIND=127.0.0.1:PORT
+safe-asan.server.log ITEM0_DECLARED=1 ITEM0_REAL=2 ITEM1_DECLARED=1
+safe-asan.server.log SERVER_DONE negotiate=True read=True
+safe-plain.client.log CLIENT_CONNECT_RC=0
+safe-plain.client.log CLIENT_READ_BEGIN items=2 dest0=200000 dest1=1
+safe-plain.client.log CLIENT_READ_RC=0 ITEM0_RESULT=0 ITEM1_RESULT=0 DST0_0=5a DST0_17=00 DST0_4000=00 DST1_0=77
+safe-plain.server.log MODE=multi-safe BIND=127.0.0.1:PORT
+safe-plain.server.log ITEM0_DECLARED=1 ITEM0_REAL=2 ITEM1_DECLARED=1
+safe-plain.server.log SERVER_DONE negotiate=True read=True

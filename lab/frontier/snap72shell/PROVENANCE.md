@@ -236,3 +236,53 @@ Consequence: the fixed control remains the pinned issue-#32 derivative, not an
 upstream patch. No replay is owed; W1/W2 hashes and the witness verdict are
 unchanged. This is a negative result, not a new claim of fix absence beyond
 the two APIs named above.
+
+## Two-item offset-advance probe — 2026-11-23T07:45Z (W5)
+
+Pinned lines 424–427 round an odd `Slice` up and advance
+`Offset += 4 + Slice`; line 316 initializes `Offset = 0`. With two requested
+items and item 0 declaring `DataLength = 0xFFFF` on `TS_ResOctet`, item 0's
+`Slice` becomes 65536 after rounding and item 1's source pointer is
+`P + 65540`, about 64 KB past the 4096-byte answer. This is a second potential
+consequence of the same unvalidated length, measured on the live wire.
+
+New artifacts only; no witness-verified file was modified:
+
+| File | Purpose |
+| --- | --- |
+| `live/multi_client.cpp` | real pinned client, two 1-byte items; item 0 destination 200000 bytes, item 1 destination 1 byte (`0xCC` sentinel) |
+| `live/fake_s7_server_multi.py` | loopback responder, modes `multi` and `multi-safe` |
+| `live/run_multi.sh` | builds plain and ASan, runs four cases, normalizes |
+
+Replay: `bash lab/frontier/snap72shell/live/run_multi.sh`. Raw logs:
+`live/evidence/multi/`. Normalized trace SHA-256
+`e4983fed2bd7ebc3bf8fc81caf35eba7b996bc2889f893313efe0439eed7d63c`.
+
+Result, four cases all `client_rc=0`:
+
+- `multi`, plain and ASan: item 0's 32 chosen wire bytes land at
+  `DST0_0=11 DST0_17=22`. Item 1's result is `36700160` (`0x02300000`), read
+  from outside the response; `DST1_0=cc` is unchanged. **No second `memcpy`
+  occurred** because the byte at `P+65540` was not `0xFF`. No ASan report.
+- `multi-safe`, plain and ASan: both items declare one byte, both results are
+  0, `DST0_0=5a DST1_0=77`. No ASan report. This control shows the two-item
+  path itself is clean, so the attack result is attributable to the inflated
+  first length.
+
+Why the ~64 KB source read is not ASan-flagged: `Answer` points into
+`PDU.Payload` (`s7_micro_client.cpp:345`) and `TSnap7MicroClient` also owns a
+65536-byte `opData` member (`s7_micro_client.h:294`). `P + 65540` lands inside
+that member of the same stack-resident client object, so it is not an ASan
+out-of-bounds access. This also explains the earlier unflagged source read
+past the receive buffer in the one-item wide run. The item-1 result is stale
+client state, not peer-controlled; there is no measured pointer redirect.
+
+Related source-only negative: the 4000-byte chosen-byte extent cannot be
+raised through the public API. `IsoPayload_Size` is a compile-time
+`#define 4096` (`s7_isotcp.h:38`); `CheckPDU()` rejects larger TPKTs
+(`s7_isotcp.cpp:56`); and the negotiate path clamps a peer's advertised PDU
+length to that constant (`s7_partner.cpp:660-661`). The only related setter is
+`p_i32_PDURequest`, which cannot exceed the clamp. No API raises the extent.
+
+Evidence disposition: this refines the rung-4 ceiling but does not move the
+grade. No upstream fixed blob, no second controlled write, no rung 5.
