@@ -3781,6 +3781,40 @@ decode failure, and no watchpoint read/write of the word
 (`evidence/plain-oob/response/`). Grade unchanged: rung 4 scoped, byte always
 NUL, no dereference, chosen byte, pointer control, command or rung 5.
 
+### W12 long value-less token fault — 2026-11-23 (author-only, unwitnessed)
+
+Commit `eaa2ee2` folds W12 in the admitted 103rd route: no new row, stage,
+mind count or grade. Grade stays rung 3 on the live pre-auth wire and rung 4
+scoped and unwitnessed there; this is not a witness verdict. A bare 7800-byte
+value-less Cookie token faulted a plain-module child (`AH00051 ... exit
+signal Segmentation fault (11)`) in 2/3 extended sweeps, but not in one sweep
+or a fresh-server 30-request bare-7800 sweep. It is an intermittent
+observation, not a deterministic crash primitive.
+
+A lab-only `sigaction(SIGSEGV)` interposer with `libasan.so.8` preloaded made
+the bare-7800 request fault 60/60 and print a backtrace whose top module
+frame `oidc_state_cookies_clean_expired+0x2b3` resolves via `addr2line` to
+`state.c:219` in `oidc_state_cookies_parse_token`, reached from
+`oidc_check_user_id` → `ap_run_check_user_id`. The same-length well-formed
+token returned 302 on 10/10 and released v2.4.19.4 on the same plain stack
+returned 302 on 10/10 with zero backtraces. The shim changes signal handling
+and allocator layout: it attributes the frame but does not raise the native
+crash rate. gdb with ASLR off, ASLR on and fork-following reproduced no fault
+(6/6, 6/6 and 40/40 HTTP 302). The overwritten byte is always NUL; there is
+no chosen byte, pointer target, consumer dereference, command or rung 5.
+
+```sh
+cd lab/frontier/modauthoidc2shell/full && bash build-plain-fixed.sh && bash probe-plain-crash.sh && bash probe-plain-crash-7800.sh && bash probe-plain-crash-sigsegv.sh && bash probe-plain-fixed-sigsegv.sh
+```
+
+The sweep covers 1/16/128/1024/4096/7800 bytes; no new PASS count. Pins:
+parent `state.c` `ceedb687…5aa`, module `0089906…0a7`; fixed `state.c`
+`f02d8ddb…7ce`, module `b16278d2…d98`. Raw evidence is in
+`full/evidence/plain-crash/` (README.md, codes.txt and the
+FIRST-RUN-20261123T1406Z.md transcription tracked; `error.log` and the
+gdb-*/fork-*/sigsegv-*/fixed-* transcripts gitignored). Status:
+`reports/modauthoidc2shell-status.md`.
+
 ## 2026-11-23 06:4xZ — radvdump2shell
 
 CVE-2026-48715 / GHSA-52px-gh9p-m379, radvd `<= 2.20`, fixed in `2.21` by
@@ -4643,6 +4677,23 @@ plain builds; W1/#2556 and W160/#2651 stand at their own scopes, and no
 witness verdict has been returned for this heapmap lane. It adds no
 request/wire path, pointer control, command, side effect or rung 5.
 
+## 2026-11-23 14:4xZ — jq2shell 6-byte wrap feasibility (arithmetic only)
+
+No lab run and no guard bypass. From the repo root:
+
+```
+python3 -c 'M=1<<32; print(next(L for L in range(1,0x55555560) if L*3+1>=M and (L*3+1)%M<=32), (0x55555557*3+1)%M, 477218589*4+1431655767)'
+sha256sum -c lab/frontier/jq2shell/PINS.sha256
+```
+
+Expected `1431655765 6 3340530123` and 14 `OK` lines. The first number is
+the shortest positive `length` that wraps at `jv.c.vuln:1117`; the second is
+the harness's `1431655767u` (`0x55555557`, not the `0x5555555b` typo in the
+older comments); the third is the live encoded plus decoded byte count of
+the `@base64d` path (`builtin.c:754-755`, `:787`, `jv.c.vuln:1511`) at that
+length, above the 2147483648-byte guard. Conclusion and limits in
+`reports/jq2shell-status.md`.
+
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 
 W17 extends the `-O2` saved-RIP byte map two caller frames deeper on the
@@ -4816,7 +4867,7 @@ file-level reachability remained a claim at that scope, and rung 5 is UNKNOWN.
 The W158 (#2602/#2603) ESTABLISHED verdict stays scoped to that direct-call
 work. The 14:1xZ lane below reaches a real EXR file in the pinned codec.
 
-## 2026-11-23 14:1xZ — openexr2shell real EXR file and C++ API lane (author-only)
+## 2026-11-23 14:1xZ — openexr2shell real EXR file and C++ API lane (W161 witness-ESTABLISHED)
 
 Commits `0d67933` and `5374791` add a file-level lane that supersedes the two
 direct-call lanes above at the file scope only; no new route, stage, row or
@@ -4854,9 +4905,14 @@ evidence is `lab/openexr2shell-real/evidence/*.out`. The separate direct-call
 replay (`PASS=52 FAIL=0`, trace `27a2a815…c776`) is cited only as the old
 direct-call scope.
 
-Rung 5 is UNKNOWN: no consumer process, socket, wire, pointer target, command
-or marker; deep-tiled, OpenImageIO and aarch64 are untested. "W160" in the
-report is an author wake label, not a witness verdict.
+Witness W161 (#2675) independently replayed this file lane from a clean archive
+with its own builds and hash-matched logs: rungs 1-4 ESTABLISHED at the labeled
+file-level CODE/CONSUMER scope, no counterexample or grade change. The
+overwritten bytes are allocator-derived, not file-chosen; the file controls
+length and destination offset only. Rung 5 stays UNKNOWN: no consumer process,
+socket, wire, pointer target, command or marker; deep-tiled, OpenImageIO and
+aarch64 are untested. "W160" in the report is an author wake label, not a
+witness verdict.
 
 ## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
 
@@ -4981,6 +5037,47 @@ harness records `PASS=71 FAIL=0`, trace
 `c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556`. No
 vptr, code pointer, return address, ROP, command, marker side effect or
 witness verdict. Status: `reports/thrift2shell-status.md`.
+
+## 2026-11-23 14:2xZ — thrift2shell W148 hook, vptr and forged-chunk negatives (author-only)
+
+Commits `f70ca97` (with `cf31d1e`) fold W148, three author-only negatives in
+the admitted 108th route (window 111): no new row, stage, mind count or grade.
+Rungs 1-4 stay unchanged, rung 5 stays UNKNOWN, and the W145/W146/W147
+witness verdicts remain pending. Nothing below is a witness verdict.
+
+The host glibc 2.39-0ubuntu8.12 carries `__free_hook` at `0x20b148` only as a
+`@GLIBC_2.2.5` compat symbol: `dlsym` returns null, `dlvsym` resolves, but a
+throwaway probe storing a `write(2)` hook and calling `free()` printed
+`HOOK_DONE` and never `HOOK_CALLED`. A wire-chosen heap pointer therefore
+cannot become a malloc-hook call here (host/source fact; no committed replay
+script). Vptr layout closes by source reasoning: `SinkTransport`,
+`THeaderTransport`, `TBinaryProtocol` and `ReadOnceProcessor` are constructed
+before `TBufferedTransport`'s base constructor allocates `rBuf_`
+(`TBufferTransports.h:288`), and header parsing allocates only vptr-less map
+nodes and strings, so no vptr lands in the 726-byte copy window.
+
+For the forged-chunk limb, the accepted `0x31` chunk becomes the
+`main_arena.fastbinsY[1]` head with protected link `0x5550000e1104` →
+`0x5555555b44b0`; ten later loopback frames never pop it and the next small
+allocation aborts with `malloc(): unaligned tcache chunk detected`. The
+address-free normalized trace hash is
+`a7eae8ece378d33b6e20d37d5b0e4f26867f783aa51715d316e3662d11a2f625`, identical
+over three replays. `cf31d1e` records a clean `git archive HEAD` replay at
+`f70ca97` (only the gitignored `live-noflush`/`live-noflush-fixed` binaries
+copied in) with the same trace and hash: a deterministic replay, not a
+witness verdict.
+
+```
+cd lab/frontier/thrift2shell/live && bash run-tcache.sh
+# gdb-tcache-off.gdb + normalize-tcache.py -> results/tcache-normalized.txt
+```
+
+Expect chosen low word `0x43f0` (= `rbuf+512`), the link and fastbin values
+above and the unaligned-tcache abort. No PASS tally for this lane; the report
+records base harness `PASS=71 FAIL=0`, trace
+`c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556`. Raw gdb
+logs and heap dumps are gitignored; the gitignored live binaries are built per
+`reports/thrift2shell-livewire.md:23-41`. Status: `reports/thrift2shell-status.md`.
 
 ## 2026-11-23 12:3xZ — libheif2shell admitted (112th route)
 
@@ -5253,9 +5350,9 @@ Commits `ed3c048` and `08e996f` stage a harness for munt issue #149, an
 incomplete oversized SysEx in libmt32emu's `MidiStreamParser`. Vulnerable tag
 `libmt32emu_2_8_3` (`008feb32227a16bad343573b33da2196656b8e93`), fix
 `1749f7fed5cdb3a9015acce076a1512b1615dc3b`; no CVE/GHSA/CVSS (UNKNOWN).
-There is no charter, route, wake units, admission, mind or witness verdict,
-and this lane adds none: the mind count stays 113 (README lists it as
-FRONTIER-STAGED).
+At staging time there was no charter, route, wake units, admission, mind or
+witness verdict and the count stayed 113 (README then listed it as
+FRONTIER-STAGED); admission followed at 14:2xZ as the 114th route (below).
 
 The author's harness records four bounded results. R1 uses a 102-byte SysEx
 baseline; R2 runs the fixed tree clean and, on the vulnerable plain build,
@@ -5283,3 +5380,20 @@ a witness verdict or a real-library reproduction. Pins are in
 (the top-level `evidence/` is empty despite brief line 105). Rung 5 is
 UNKNOWN: no live consumer process, request/wire path, pointer control,
 command, side effect or witness verdict.
+
+## 2026-11-23 14:2xZ — munt2shell operator admission replay
+
+The operator admission replay did not trust the frontier's `ed3c048` archive
+alone: it re-archived the current checkout at HEAD `f9676b8` with
+`git archive HEAD lab/frontier/munt2shell`, extracted 51 files into a clean
+temp dir, verified `sha256sum -c PINS.sha256` (7/7 OK) and ran
+`harness/check.sh`. It returned exactly
+`PASS=129 FAIL=0 TRACE=735c136e1c6740ca50ed5790f054cbd4331c16a1d48998b22926de8ac0d1146f`,
+matching all three frontier working-tree runs and its clean-archive replay.
+Admission added the hy4-flash route (113→114 roles), both resolver entries
+(227→229), three units from the exact full-flag sync at pin `0d686bb…`
+(daemon-reload, path enabled/active), a pinned full-flag doctor rc 0 GREEN and
+`check-omp-only.py` GREEN (114 declared roles). This replay is a deterministic
+determinism check of the direct-call harness, not a witness verdict and not a
+real-library reproduction; rung 5 stays UNKNOWN and the grade is unchanged.
+See `reports/munt2shell-status.md`.

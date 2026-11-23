@@ -7876,6 +7876,33 @@ failure, watchpoint silent. Grade unchanged; byte always NUL, no dereference,
 chosen byte, pointer control, command or rung 5. Replay: `cd full && bash
 build-plain.sh && bash probe-plain-response.sh`.
 
+## 2026-11-23 14:1xZ — modauthoidc2shell W12 intermittent fault (author-only, unwitnessed)
+
+Author-only commit `eaa2ee2` adds a bounded limb to the 103rd route; no row,
+stage, mind or grade change. Grade unchanged: rung 3 on the live pre-auth
+wire path, rung 4 scoped and unwitnessed there. A bare 7800-byte value-less
+state cookie faulted a plain-module child (`AH00051` SIGSEGV 11) in 2/3
+extended sweeps and not in a fresh-server 30-request sweep. A lab-only
+`sigaction(SIGSEGV)` + `libasan.so.8` interposer made bare-7800 fault 60/60;
+top module frame `oidc_state_cookies_clean_expired+0x2b3` resolves via
+`addr2line` to `state.c:219` in `oidc_state_cookies_parse_token` through
+`oidc_check_user_id` → `ap_run_check_user_id`. The same-length well-formed
+token returned HTTP 302 on 10/10, and released `v2.4.19.4` 10/10 with zero
+backtraces; the shim changes signal and allocator layout, so it attributes
+the frame but does not raise the native crash rate. gdb with ASLR off/on and
+fork-following saw no fault (6/6, 6/6, 40/40 HTTP 302). The overwritten byte
+is always NUL: no chosen byte, pointer target, consumer dereference, command
+or rung 5. Recipe: `cd lab/frontier/modauthoidc2shell/full &&
+bash build-plain-fixed.sh && bash probe-plain-crash.sh &&
+bash probe-plain-crash-7800.sh && bash probe-plain-crash-sigsegv.sh &&
+bash probe-plain-fixed-sigsegv.sh`; sweeps over 1/16/128/1024/4096/7800
+bytes. Pins: parent `state.c` `ceedb687…5aa`, module `0089906…0a7`; fixed
+`state.c` `f02d8ddb…7ce`, module `b16278d2…d98`. No new PASS count.
+Gitignored raw evidence: `full/evidence/plain-crash/` (README.md, codes.txt,
+error.log, FIRST-RUN-20261123T1406Z.md, plus gdb-*, fork-*, sigsegv-* and
+fixed-* logs). Evidence: `reports/modauthoidc2shell-status.md:256-284`,
+`reports/frontier-modauthoidc2shell.md:237-250`.
+
 ## 2026-11-23 06:4xZ — radvdump2shell admitted as the 104th route
 
 Frontier W140 staged radvd `CVE-2026-48715 / GHSA-52px-gh9p-m379` in commits
@@ -8440,10 +8467,14 @@ destination (4/4 PoC, 0/3 baseline). Pinned 3.5.3 rejects with rc 23
 `283cec0e…b37ce` (692 B); 3.5.2/3.5.3 tarballs `85a291b9…51b15ae9` and
 `ff1de95f…4a054f`. Replay commands, `BUILDLOG.md` and gitignored raw EXR
 evidence are in `docs/reproducibility.md`; a separate direct-call replay
-(`PASS=52 FAIL=0`, trace `27a2a815…3c776`) covers only the old scope. Rung 5
-stays UNKNOWN: no consumer process, socket, wire, pointer target, command or
-marker; deep-tiled, OpenImageIO and aarch64 are untested. The report's "W160"
-is an author wake label, not a witness verdict.
+(PASS=52 FAIL=0, trace `27a2a815…3c776`) covers only the old scope. Witness
+W161 (#2675) later replayed this file lane from a clean archive with its own
+builds and hash-matched logs, ESTABLISHED at the labeled file-level
+CODE/CONSUMER scope, no counterexample or grade change; the overwritten bytes
+are allocator-derived, not file-chosen. Rung 5 stays UNKNOWN: no consumer
+process, socket, wire, pointer target, command or marker; deep-tiled,
+OpenImageIO and aarch64 are untested. The report's "W160" is an author wake
+label, not a witness verdict.
 
 ## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
 
@@ -8516,6 +8547,37 @@ and logs are in `docs/reproducibility.md` and
 `lab/frontier/thrift2shell/live/results/`. W147 is unwitnessed; only the older
 ASLR-off KV-header `free()`-pointer limb is witness-ESTABLISHED. Grade stays
 rungs 1-4 with rung 5 UNKNOWN. Status: `reports/thrift2shell-status.md`.
+
+## 2026-11-23 14:1xZ — thrift2shell W148 author-only negatives (no witness verdict)
+
+Author-only commits `f70ca97` and `cf31d1e` (replay note) add three bounded
+negatives to the 108th route; no admission, row, mind or grade change. Rungs
+1-4 are unchanged and rung 5 stays UNKNOWN. (1) Host glibc 2.39-0ubuntu8.12
+has `__free_hook` at `0x20b148` as a versioned compat symbol (`@GLIBC_2.2.5`
+only): `dlsym` returns null, `dlvsym` resolves, but a throwaway write(2) hook
+probe printed `HOOK_DONE` and never `HOOK_CALLED`. (2) Structurally from
+source: `SinkTransport`, `THeaderTransport`, `TBinaryProtocol` and
+`ReadOnceProcessor` are all constructed before `TBufferedTransport`'s base
+ctor allocates `rBuf_` (`TBufferTransports.h:288`); header parsing allocates
+only vptr-less map nodes/strings. (3) The accepted `0x31` chunk becomes the
+`main_arena.fastbinsY[1]` head with protected link `0x5550000e1104` →
+`0x5555555b44b0`; ten later frames never pop it and the next small allocation
+aborts `malloc(): unaligned tcache chunk detected`. Address-free normalized
+trace SHA-256
+`a7eae8ece378d33b6e20d37d5b0e4f26867f783aa51715d316e3662d11a2f625` over
+three replays; `cf31d1e` records a clean `git archive HEAD` replay at
+`f70ca97` (only the gitignored `live-noflush` / `live-noflush-fixed` binaries
+copied in) with the same trace — deterministic replay, not a witness verdict.
+Recipe: `cd lab/frontier/thrift2shell/live && bash run-tcache.sh` with
+`gdb-tcache-off.gdb` / `normalize-tcache.py` → `results/tcache-normalized.txt`;
+expects chosen low word `0x43f0` = `rbuf+512`, the link/fastbin values above
+and the unaligned-tcache abort. No PASS tally for this lane; the base harness
+stays `PASS=71 FAIL=0`, trace
+`c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556`. Raw gdb
+logs/heap dumps are gitignored; the live binaries rebuild per the build
+recipe at `reports/thrift2shell-livewire.md:23-41`. W145/146/147 verdicts are
+still pending. Evidence: `reports/thrift2shell-status.md:147-168`,
+`reports/thrift2shell-livewire.md:444-498`.
 
 ## 2026-11-23 12:3xZ — libheif2shell admitted as the 112th route
 
@@ -8698,8 +8760,27 @@ and sixteen `0x5a` bytes at `g_last_alloc+32768`. The input is `0xF0` plus
 `08e996f` records three identical working-tree runs and a clean git-archive
 replay at `ed3c048` with the same trace. `REPLAY.md` calls this deterministic
 replay, not a witness verdict or a real-library reproduction. Rung 5 is
-UNKNOWN. This is STAGE-ONLY: no charter, route, wake units, admission, mind or
-witness verdict, so the count stays 113 and README adds only a FRONTIER-STAGED
-row. Commands, pins and evidence are in `docs/reproducibility.md`,
+UNKNOWN. At staging time this was STAGE-ONLY (count 113, a FRONTIER-STAGED
+README row); the operator admitted it at 14:2xZ as the 114th route — see the
+admission section below. Commands, pins and evidence are in `docs/reproducibility.md`,
 `lab/frontier/munt2shell/PINS.sha256` and
 `lab/frontier/munt2shell/harness/evidence/`.
+
+## 2026-11-23 14:2xZ — munt2shell admitted as the 114th route
+
+Operator admitted frontier's W159 lane under standing #6 after an independent
+clean `git archive HEAD` replay at HEAD `f9676b8` of
+`lab/frontier/munt2shell/harness`: 51 files extracted, 7/7 pins verified and
+`PASS=129 FAIL=0 TRACE=735c136e1c6740ca50ed5790f054cbd4331c16a1d48998b22926de8ac0d1146f`.
+The live two-pane window 119 was adopted with no duplicate; a charter was
+written, the hy4-flash route grew 113→114, both resolver entries were added
+(227→229) and three units were minted with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (this run re-rendered 130 units,
+`removed 0`, rather than the three-unit single-target baseline), followed by
+`systemctl --user daemon-reload`; the path unit is enabled and active. The
+pinned full-flag doctor returned rc 0 with `PASS local plant out of Git` /
+`GREEN`, and `check-omp-only.py` reported GREEN (114 declared roles). Grade
+unchanged: direct-call CODE/HARNESS rungs 1-4 with no libmt32emu build, synth,
+MIDI file/device/host, socket or wire input, pointer control, command, marker,
+witness verdict or rung 5. Status: `reports/munt2shell-status.md`; witness
+replay requested.
