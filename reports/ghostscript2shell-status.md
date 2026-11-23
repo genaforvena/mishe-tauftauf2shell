@@ -107,25 +107,38 @@ Both 3/3 stable; fixed-resource control gives `NO_STALE_REF`.
 `harness/run-native.sh`: 17 PASS / 0 FAIL ×3, trace
 `b53abad21ed9822838d2a5f85a705172c3c19cb9ea22923b141c90192b682e87`.
 
+### Native control under -dSAFER (same wake)
+
+The earlier `-dSAFER` negative was a permission artifact: SAFER needs
+`--permit-file-read=<font path>`, otherwise Ghostscript falls back to a built-in
+font and the injected cleartext never runs. With that permission the full
+primitive fires under `-dSAFER`. `exp/native-chain-safer.ps` walks the chain and
+performs the writeup's benign `path_control_active` `1 -> 0` write:
+`PATH_CONTROL_BYTES_BEFORE=1`, `PATH_CONTROL_OPERATOR_BEFORE=true`,
+`PATH_CONTROL_BYTES_AFTER=0`, `PATH_CONTROL_OPERATOR_AFTER=false`, restored to
+`1` with `CLEAN_VALUE=12345`. 3/3 stable; fixed control gives `NO_STALE_REF`.
+`harness/run-safer.sh`: 9 PASS / 0 FAIL ×3. No `%pipe%`, no command, no benign
+file marker, no application or network chain was attempted.
+
 ## Current grade
 
 Rungs 3 + 4: instrumented `heap-use-after-free` (rung 3); a stable,
 bidirectional, chosen-byte read/write through a dangling systemdict reference;
-and native ref forging that walks live interpreter pointers, writes a benign
-marker to `path_control_active` with an observed state change, and retargets
-one operator dispatch for a single call (rung 4 mechanics and impact), on real
-gs 10.07.0 shipped bytes with vulnerable, fixed and safe-input controls.
-Honest ceiling: no `-dSAFER` bypass, no `%pipe%` command, no application or
-network chain, no independent witness verdict. Rung 5 remains a separate claim.
-The local `-dSAFER` probe never triggered the injected cleartext, so no bypass
-was attempted.
+native ref forging that walks live interpreter pointers, writes a benign marker
+to `path_control_active` with an observed state change, and retargets one
+operator dispatch for a single call; and a measured state-level `-dSAFER`
+boundary flip (`path_control_active 1 -> 0`, `.currentpathcontrolstate true ->
+false`) on real gs 10.07.0 shipped bytes with vulnerable, fixed and safe-input
+controls. Honest ceiling: this is native state control, not command execution —
+no `%pipe%`, no application or network chain, no independent witness verdict.
+Rung 5 remains a separate claim.
 
 ## Next bounded experiment
 
-A rung-5 attempt needs prerequisites absent here: a live `-dSAFER` target whose
-font load actually executes the injected cleartext, a wire/request-delivered
-document, a chosen benign command and an observed side effect with vulnerable,
-fixed and safe controls plus witness replay. The local `-dSAFER` trigger gap
-(font resolution/caching candidate, cause unisolated) is the first thing to
-settle. Until then, preserve rungs 3/4 and do not relabel these mechanics as
-RCE.
+A rung-5 attempt needs a wire/request-delivered document reaching a live
+`-dSAFER` target, a chosen benign command, an observed side effect, vulnerable,
+fixed and safe controls and witness replay. The remaining local gap is the
+application delivery chain and the additional PostScript-side permission writes
+the writeup used for `%pipe%` (`PermitFileWriting`, `LockFilePermissions`);
+none were attempted. Until then preserve rungs 3/4 and never relabel these
+mechanics as RCE.

@@ -169,12 +169,13 @@ command was exercised.
 - Naive save/restore UAF probe: `STALE_KEY=true`, `UAF_READ=null` — a single
   fresh `8 array` did not reuse the freed block; later marker scan found
   aliasing with 96 fresh arrays (see rung-4 section).
-- Under local `-dSAFER`, the injected font cleartext did not execute and no
-  stale ref appeared (with a literal font path and a fresh HOME). Cause not
-  isolated — font resolution/caching is a candidate. Not used for any claim.
-- ASan exercised (rung 3). Native ref forging and a benign path-control write
-  were exercised (rung 4 mechanics, section below). Still no `-dSAFER` bypass,
-  no command, no application/network chain, no rung 5.
+- Initial local `-dSAFER` probe showed no cleartext and no stale ref. Cause was
+  later isolated: SAFER requires `--permit-file-read=<font path>`; without it
+  Ghostscript falls back to a built-in font and the injected cleartext never
+  runs. With the permission, the full primitive fires under `-dSAFER` (below).
+- ASan exercised (rung 3). Native ref forging, a benign path-control write and
+  a state-level `-dSAFER` boundary flip were exercised (below). No command, no
+  application/network chain, no rung 5.
 
 ## Native rung-4 mechanics — 2026-11-23 first mind wake (option 3)
 
@@ -208,8 +209,31 @@ times, trace `b53abad21ed9822838d2a5f85a705172c3c19cb9ea22923b141c90192b682e87`.
 Fixed-resource control on both probes: `NO_STALE_REF`, no chain, no dispatch
 change.
 
-Honest ceiling: native reads/writes through forged refs with a benign marker
-and an observed interpreter state change — rung-4 mechanics. No absolute
-process address guessed, no `-dSAFER` bypass, no `%pipe%` command, no
-application/network chain, no witness verdict. The local `-dSAFER` probe never
-triggered the injected font cleartext, so no bypass was attempted.
+Honest ceiling for this section: native reads/writes through forged refs with a
+benign marker and an observed interpreter state change — rung-4 mechanics. No
+absolute process address guessed, no `%pipe%` command, no application/network
+chain, no witness verdict. The `-dSAFER` result is recorded separately below.
+
+## Native control under -dSAFER — same wake
+
+The initial `-dSAFER` negative was a permission artifact. With
+`--permit-file-read=<absolute font path>`, the injected cleartext executes under
+`-dSAFER` and `harness/uaf.ps` shows the full aliasing (`SV_PRESENT=true`,
+`D1_HIT=true`, bidirectional read-back). `exp/native-chain-safer.ps` then walks
+the same pointer chain and performs the writeup's benign `path_control_active`
+`1 -> 0` write through a forged 4-byte view:
+
+- `PATH_CONTROL_BYTES_BEFORE=1`, `PATH_CONTROL_OPERATOR_BEFORE=true`
+- native write of four zero bytes
+- `PATH_CONTROL_BYTES_AFTER=0`, `PATH_CONTROL_OPERATOR_AFTER=false`
+- `PATH_CONTROL_BYTES_RESTORED=1`, `CLEAN_VALUE=12345`
+
+3/3 stable; `gs-fixed` with the same SAFER permission gives `NO_STALE_REF`.
+`harness/run-safer.sh`: 9 PASS / 0 FAIL three times; evidence
+`harness/evidence/safer-chain*.out`, probe sha256
+`f22acdea7bfcfefc842e3e201181da1223b0b15b309626ad5701b5bdc0e45d96`.
+
+This is a measured state-level `-dSAFER` boundary flip on the vulnerable build,
+not a command execution: no `%pipe%`, no `PermitFileWriting` manipulation, no
+benign command, no application or network delivery, no witness verdict. Rung 5
+remains a separate claim.
