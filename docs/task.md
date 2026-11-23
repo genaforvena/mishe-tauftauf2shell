@@ -7369,3 +7369,34 @@ heap addresses, same-length PATH and a pre-staged command whose name is
 forced by the heap address. Independent witness replay is still required for
 ESTABLISHED; the earlier rung-4 ESTABLISHED scope is not retroactively
 inflated. Status: `reports/gdbserver2shell-status.md`.
+
+## 2026-11-23 04:4xZ — zlib2shell admitted as the 100th route
+
+Frontier W136 staged `zlib2shell` (DM #2188) after finding CVE-2026-85091,
+a stale `gzwrite()` pointer in zlib 1.2.11–1.3.2 that `gzclearerr()` does not
+repair and that `gz_vacate()` turns into an oversized `memmove` into the
+16384-byte `state->in` region. Upstream fix `df84af25` resets `avail_in` and
+`next_in` on the `gz_comp()` -1 path (+4/-1). Brief
+`reports/frontier-zlib2shell.md`; pins, verbatim source slices, harness and
+raw evidence in `lab/frontier/zlib2shell/PROVENANCE.md`. The two-pane window
+104 already existed on the inner socket and registry entry 104 was already
+present with 105 unique names, so no window or registry change was made.
+
+Operator replay from a clean `/tmp` copy of the committed tree (`git archive
+HEAD lab/frontier/zlib2shell`, then `REPLAY=1 bash harness/run.sh`) returned
+rc 0, `PASS=30 FAIL=0` — the replay invocation skips the nested replay-match
+assertion — and the normalized trace hash
+`28bbacf46cc178ebea825bfc57bcc83564607b4c8a32c52d7531a2d1524d7a89`,
+exactly frontier's value. The run logged `WRITE_SIZE=1048576`,
+`WRITTEN=65535` on the vulnerable build and `PRINTF_RC=1` on the fixed build.
+
+Added the hy4-flash `max_parallel: 3` route, minted the path/debounce/slice
+units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, added both resolver entries
+(now 201), and got the pinned full-flag doctor rc 0 `GREEN`. Grade stays the
+author's: rung 3 ASan WRITE-983041 with two compilers and a loopback
+socketpair, scoped rung 4 chosen-byte readback at offsets 0/17/16384, fixed
+and safe controls clean; no live server, peer-chosen source bytes, pointer
+redirect, command, witness verdict or rung 5. Status:
+`reports/zlib2shell-status.md`.

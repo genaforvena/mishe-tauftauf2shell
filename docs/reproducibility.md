@@ -3022,3 +3022,38 @@ never happened, the 256 KiB advisory bound was not exercised (largest SEND
 3593), and no command, ROP, ASLR bypass or witness replay exists. Rung 5
 stays UNKNOWN and `AT:P` still qualifies AV:N.
 
+
+## Admitted frontier lane — 2026-11-23 04:4xZ zlib2shell
+
+CVE-2026-85091, zlib 1.2.11–1.3.2. Pins, claim sources, verbatim source
+slices and all raw evidence are in `lab/frontier/zlib2shell/PROVENANCE.md`;
+the brief is `reports/frontier-zlib2shell.md`. The harness re-verifies five
+pin hashes, self-extracts the pinned 1.3.2 tarball when needed, extracts
+`gz_write()` and `gz_vacate()` from both pinned blobs with `awk`, dry-runs
+the published `df84af25` fix hunk and rebuilds five binaries from the
+tarball with only `gzwrite.c` swapped.
+
+```
+T=$(mktemp -d /tmp/zlib2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/zlib2shell | tar -x -C "$T"
+(cd "$T/lab/frontier/zlib2shell" && REPLAY=1 bash harness/run.sh)
+```
+
+Expect rc 0, `PASS=30 FAIL=0` and
+`TRACE_SHA256=28bbacf46cc178ebea825bfc57bcc83564607b4c8a32c52d7531a2d1524d7a89`.
+The count is 30 rather than 31 because `REPLAY=1` skips the nested
+replay-match assertion; a plain `bash harness/run.sh` adds it and expects
+31 PASS / 0 FAIL. The normalized trace records `WRITE_SIZE=1048576`,
+`WRITTEN=65535`, `PRINTF_RC=1` on the fixed build and the gdb readback
+`GDB_AVAIL_IN=34465`, `GDB_DST0=0x5a`, `GDB_DST17=0x44`,
+`GDB_DST16384=0xc7`.
+
+gcc and clang ASan report `heap-buffer-overflow`, `WRITE of size 983041` in
+`gz_vacate()` at `gzwrite.c:394`, 0 bytes after the 16384-byte `state->in`
+region; a plant-started loopback `socketpair` with a 4 KiB receive buffer
+gives the same write. Fixed and safe inputs are ASan-clean on both
+transports. Boundaries: the source bytes are the application's compression
+input rather than peer bytes, the guard is allocator-dependent (buffer must
+be allocated after `gz_init()` for the readback), a 20000-byte stalled write
+does not trigger, there is no live gzip server or witness verdict, and rung
+5 stays UNKNOWN. Status: `reports/zlib2shell-status.md`.
