@@ -199,10 +199,34 @@ safe input gives `EXECDIRECT rc=0` with no ASan report.
   prepare time. This is a negative result, preserved.
 - The fake server answers the startup handshake only; it is not a
   PostgreSQL server and no application that forwards untrusted SQL to ODBC
-  was exercised. Still UNKNOWN: real PostgreSQL server interaction, pointer
-  control, chosen-offset control-flow datum, command, marker side effect and
-  witness verdict. This retires the "no public ODBC path" half of the W145
-  ceiling; it does not establish AV:N or rung 5.
+  was exercised in this limb. At W146 scope, real PostgreSQL server
+  interaction was UNKNOWN (an author-only lane later covered it in W147);
+  pointer control, chosen-offset control-flow datum, command, marker and
+  rung 5 remain UNKNOWN. This retires the "no public ODBC path" half of the
+  W145 ceiling; it does not establish AV:N or rung 5.
+- Witness verdict (witness #2572, W156, delivered after W147): **ESTABLISHED
+  at the labeled public-ODBC harness scope**; no counterexample, no grade
+  change. The witness re-extracted commit `87f8bb8` with a clean
+  `git archive`, rebuilt all eight tagged trees itself (tag commits deref
+  to pinned `f6da564` / `96fa03d`, pinned `convert.c` blobs, 6/6 SHA-256
+  pins OK), and replayed `live-replay.sh` on a private loopback port 59436
+  with rc=0: vulnerable `CONNECT rc=0` then ASan `WRITE of size 8` at
+  `convert.c:5657` in `processParameters` (`param_pos [272,528)`, access at
+  offset 536) with the full chain from `libodbc.so.2 SQLExecDirect` through
+  driver `SQLExecDirect`, `PGAPI_ExecDirect`, `PGAPI_Execute`,
+  `Exec_with_parameters_resolved` and `copy_statement_with_parameters`;
+  fixed `CONNECT rc=0`, `EXECDIRECT rc=-1`, diagnostic "too many parameters
+  in the escape function call", ASan-clean; safe input `rc=0`, ASan-clean;
+  server log shows Q messages carrying each SQL. It independently
+  reproduced the `SQLPrepare` negative on its own server (`CONNECT rc=0`,
+  `PREPARE rc=0`, no Parse message) and re-read pinned `:5657`, where the
+  closing `)` writes `param_pos[param_count][1] = -1` unbounded while the
+  fixed tag has the `param_count + 1 >= param_pos_count` guard. Witness
+  ceiling preserved: fake server answers the startup handshake only; no
+  PostgreSQL server, chosen-offset datum, command, marker, ROP or rung 5.
+  Raw evidence: `/tmp/w156-psqlodbc/lab/frontier/psqlodbc2shell/src/repo/build/evidence/w146-live-*.out`
+  and `/tmp/w156-prep*.out`; the witness made no repo writes and left no
+  listeners.
 
 ## Real PostgreSQL path and rung-5 ceiling (2026-11-23 W147, target mind)
 
@@ -258,10 +282,13 @@ Source analysis of the pinned vulnerable tree, not a fresh run.
   makes `processParameters`' own terminator check at `:5671` fail and return
   `SQL_ERROR` before the scan is reached. Source reasoning, not an observed
   execution of that limb.
-- The witness wake signal is RED with the standing person-owned engine-cap
-  disposition (tape 11:26Z), and no verdict has arrived. Replay requests for
-  the slice limb (09:50Z), the W145 real-object limb (11:25Z) and the W146
-  public-ODBC limb (this wake, event 2562) are in the tape.
+- Witness status: the public-ODBC limb (event 2562, commit `87f8bb8`) is
+  ESTABLISHED at the labeled harness scope by witness #2572 (details in
+  W146 above); no counterexample and no grade change. The witness wake
+  signal was RED under the standing person-owned engine-cap disposition
+  (tape 11:26Z) when W147 was written; the slice limb (09:50Z), W145
+  real-object limb (11:25Z) and W147 real-PG limb have no witness verdict
+  yet. No witness has claimed pointer control, command, marker or rung 5.
 
 Decision: keep the grade at rungs 1-4 (slice, real-object and live-server
 evidence) with no rung 5. A benign marker or ROP attempt is unjustified
