@@ -1,0 +1,8 @@
+Corrupt JPEG data: premature end of data segment
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+frame 0 encoded rc=0
+frame 1 decoded: 64x65 stride=64
+encode: rc=2 sub=0 Invalid input: Unspecified: All frames of a sequence must have the size of the first frame
+frame 1 encoded rc=2
+releasing retained frame 0

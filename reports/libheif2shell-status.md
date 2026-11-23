@@ -182,6 +182,11 @@ the committed input `controlled-size.heif` SHA-256
 `plane+32768` and the top size `0x3821` -> `0x000500000500021e` at
 `plane+32792`.
 
+Fixed-pin control on the same controlled input: `reencode_retain.cc` linked
+against patched `9ec655f` exits 0 with no ASan report and rejects frame 1 at
+encode with rc 2 "All frames of a sequence must have the size of the first
+frame" (`real/neighbour/evidence/controlled-fixed.out`).
+
 Negative: the intended small valid top size (`0x21` followed by zeros) did not
 survive JPEG DCT/quantization: decoded bytes were `1e 02 00 05 00 00 05 00`;
 a uniform `0x40` row produced an even larger invalid size and the same abort.

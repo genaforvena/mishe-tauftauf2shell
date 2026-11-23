@@ -232,6 +232,15 @@ changes `0x3821` -> `0x000500000500021e`. Plain driver: rc 134,
 `pixelimage.cc:644`, 0 bytes after the 32783-byte region; retained-frame
 driver: rc 134, `malloc(): corrupted top size`.
 
+Fixed-pin control for the controlled input: the same `reencode_retain.cc`
+compiled against `/tmp/libheif2shell-fixed-asan/libheif/libheif.a` with the
+pinned `9ec655f` patch runs to rc 0 with no ASan report, decodes frame 1 as
+64x65 and rejects it at encode with `rc=2 ... All frames of a sequence must
+have the size of the first frame`
+(`neighbour/evidence/controlled-fixed.out`). The driver label reads
+`frame 1 encoded rc=2`; rc 2 is the encode API return, not a successful
+encode.
+
 Negative: JPEG DCT/quantization turned the intended `0x21,0,...` into
 `1e 02 00 05 00 00 05 00`, which is not a valid malloc chunk size; a control
 row of uniform `0x40` wrote `0x4040404040404040` and produced the same abort.
