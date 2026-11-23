@@ -122,6 +122,39 @@ that trace (older harness bytes; see `REPLAY.md`).
   `attack` aborts on its stack protector (`stack smashing detected`,
   EXIT=134); clang's plain `attack` faults (EXIT=139).
 
+## Measured frame layout and structural ceiling (W162)
+
+A one-off gdb probe on `clang-vuln-plain` at pinned `:154`, scenario `attack`
+(raw output `harness/evidence/gdb-frame-offsets.out`; not part of `check.sh`
+assertions or its trace), measured the frame slots relative to `info`:
+
+- `priv` argument slot at `info+16432` (`0x4030`), `port` at `info+16440`
+  (`0x4038`), `camera` at `info+16448` (`0x4040`), saved RIP at
+  `info+16472` (`0x4058`).
+- At the `:154` breakpoint all three argument slots already hold chosen
+  `0x5a5a5a5a5a5a5a5a`; the saved-RIP marker probe in `gdb-rip.out` holds
+  `41 42 43 44 45 46 47 48`.
+- Arithmetic from the pinned source: a heap overflow needs a copy length
+  above 16384, so the rounded `alloc_table_size` is at least `0x4200`; both
+  the `:152` device write and the `:154` copy end at `info+0x4200`. Every
+  slot above, including saved RIP, lies below that end. Therefore on this
+  path there is no count that corrupts the heap array while leaving the
+  argument pointers or return address intact.
+- The source over-read is also inseparable from the heap overflow: the copy
+  starts at `info+0x30`, so at most `0x4020-0x30 = 16368` bytes can come from
+  inside `info`, 16 fewer than the 16384-byte destination array. Any copy
+  that overflows `table` must read past `info`; that is why default ASan
+  reports the READ first and recover mode is needed to observe the WRITE.
+- `priv->table` is the last member of the pinned struct. The 464-byte
+  destination overrun has no in-struct pointer to overwrite; the chosen heap
+  bytes reported in rung 4 are read from the harness's appended 16384-byte
+  canary, not from an observed real heap neighbour. Finding a surviving
+  controlled pointer would need the real allocator layout — unavailable in
+  this harness and blocked here without a libgphoto2/USB device path.
+
+These are negatives for rung 5 at the direct-call scope, not a claim that the
+real-device path is unreachable; that path remains UNTESTED.
+
 ## Ceiling
 
 Direct calls only. No libgphoto2 build, USB/gp_port driver, libusb, camera

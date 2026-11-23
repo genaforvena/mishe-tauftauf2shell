@@ -118,3 +118,16 @@ not yet actionable without host-level provisioning: `pkg-config --modversion
 libusb-1.0` reports the package missing, and the lab has no USB/IP or usbvirt
 device. A rung-5 path would still need a network-facing host that processes
 untrusted camera data automatically. Rung 5 is UNKNOWN, not established.
+
+- Measured ceiling on this path (W162): gdb at pinned `:154` puts the `priv`,
+  `port` and `camera` argument slots at `info+16432/16440/16448` and saved
+  RIP at `info+16472`, all already overwritten with chosen bytes. Since the
+  rounded `alloc_table_size` must be at least `0x4200` for any heap overrun,
+  both the device write and the `memmove` copy end at `info+0x4200`, past
+  every one of those slots; no count corrupts the heap array while leaving a
+  usable pointer or return address intact. `priv->table` is the last struct
+  member, so the 464-byte heap overrun has no in-struct pointer to overwrite
+  — the chosen heap bytes are the harness canary, not an observed real
+  neighbour. Details and raw gdb output in `PROVENANCE.md`, section
+  "Measured frame layout and structural ceiling". This is a negative at the
+  direct-call scope only; the real-device path remains untested.
