@@ -126,7 +126,9 @@ grade.
   is not implied: knowing the original safe-linked pointer (heap-leak
   prerequisite), two subsequent 128-byte allocations, a writable aligned T
   satisfying the repeating-mask byte constraints, and a live service path are
-  all outside what was demonstrated. Witness replay of W4 is still pending.
+  all outside what was demonstrated. An author clean-`git archive` replay into
+  `/tmp/w4-clean` (pins regenerated, hashes asserted) reproduced all six rcs
+  and flags; independent witness replay of W4 is still pending.
 - Stage: rung 4 ESTABLISHED at its labeled W1/W2/W3 scopes; W4 is
   author-observed and awaits witness replay. Rung 5 needs a live plant-started
   process, attacker wire input and an observed command side effect, not more

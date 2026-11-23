@@ -121,6 +121,16 @@ Example control (`f18-geom`): `NEXT_AFTER_BYTES=d1c57b9b65560000` equals
 The harness exits 1 whenever the expected poison/flags do not match, which is
 why the controls carry rc 1; that is the negative-result signal, not a crash.
 
+## Clean archive replay (author, 2026-11-23)
+
+`git archive HEAD lab/sofiasip2shell lab/frontier/sofiasip2shell` extracted into
+`/tmp/w4-clean`, with the two gitignored `fns-1.13.1{7,8}.inc` regenerated from
+the tracked pinned `ws-*.c` via `harness/gen_fn.py` (hashes `b96477e0` /
+`42dce55f`), gave runner rc 0 and the same six per-case rcs and flags
+(`RESULT VULN_POISON=1 VULN_POINTER=1` in both vulnerable geometries; 0 in all
+four controls). Only addresses, masks and scratch bases differed with ASLR.
+This is an author replay, not the independent witness replay still pending.
+
 ## Honest grade
 
 - **Rung 1/2/3**: unchanged from W1/W2/W3 — deterministic real-frame trigger,
