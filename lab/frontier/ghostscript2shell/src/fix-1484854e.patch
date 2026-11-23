@@ -1,0 +1,39 @@
+From 1484854e0c8ddfda1baa4ad4cd965b8a9790aa81 Mon Sep 17 00:00:00 2001
+From: Ken Sharp <Ken.Sharp@artifex.com>
+Date: Wed, 2 Sep 2026 12:04:15 +0100
+Subject: [PATCH] PS interpreter - validate operands to .putgstringcopy
+
+Bug #709684 "Type 1 font-loader `.forceput` save/restore UAF yields native read/write and controlled dispatch/RCE under `-dSAFER`"
+
+Effectively another case of recovering .forceput, in this case by
+causing an error and then having the error handler use it.
+
+We are in the process of eliminating, or at least absolutely minimising,
+the use of .forceput. Ideally we want to remove it completely precisely
+to avoid this sort of thing. Unfortunately that's still a work in
+progress; it isn't easy to undo 30 years worth of assumptions in the
+code.
+
+For now this prevents the problem by ensuring that the operands are the
+correct types, which prevents the error executing 'copy' and so avoids
+the custom error handler managing to execute .forceput.
+
+This issue was reported by Paulos Yibelo <habte.yibelo@gmail.com>
+---
+ Resource/Init/gs_fonts.ps | Bin 49082 -> 49281 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+diff --git a/Resource/Init/gs_fonts.ps b/Resource/Init/gs_fonts.ps
+index 5b46ef1f558eef53b2be97a896fbcace2651dcb2..5420431c7dabfb0a6f3385ed55f579d678a806b7 100644
+GIT binary patch
+delta 266
+zcmZ9HF-rqM5QRA<O<J3~1mTGYR(FzsScnMLc48m)Cg<X@yV={w9TFk`;4bqUtgIxR
+ze=hDW*jT(~-uK?j{2Y$9+v7e>uD`QgKN$lTcz7Z43T?<PR0-D^YR2H?IZI~zadLV-
+zhg2oC(Lqs4;Q|9%A@J|M1N_zF7MMY3(*-9^y<xP8%9q*-GHVxTY(OoEwIi+SF0y>+
+zr~G)6^3^cn`H(*Shvbs#hJ1SC_19kHzOibYm8y!H#aoLaTqojBjjYt7CTq0~Nxr|!
+Mc>j5}-wl`fFKd=pbpQYW
+
+delta 71
+zcmV-N0J#5wfdjh#0+1L1GqD+xkdq&gAd`YB6q8qx5R)lB4Fe#13X^-08<S5s76A&A
+dv5^`LeIR9cWn*=8Wp8e5d6Pgs8M8Q&NiK$t7}@{;
+
