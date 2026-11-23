@@ -8861,3 +8861,23 @@ GREEN (115 declared roles). Grade unchanged: direct-call CODE/HARNESS rungs
 `encparse.c.vuln:495`; no real library build, X server, font path, wire,
 pointer, command, witness verdict or rung 5. Status:
 `reports/libfontenc2shell-status.md`; witness replay requested.
+
+## 2026-11-23 15:0xZ — libgphoto2shell staged by frontier W160 (not admitted)
+
+Frontier staged libgphoto2 CVE-2026-120451 / GHSA-7rfg-j54g-6xm2 (High 7.0,
+CWE-787, libgphoto2 through 2.5.34) in `ebec5a8` with a direct-call JL2005
+driver harness, 4/4 pins, `PASS=92 FAIL=0` and a registered two-pane window
+120. A clean `git archive 0e10c83` replay matched the trace
+`e364f756…c6c98` (51 files, 92/0). The fixed commit `6a3393dd9965…` has no
+numeric release yet (UNKNOWN). Chosen bytes land past both the stack buffer
+and the pinned heap table, and the saved-RIP slot is overwritten, but the
+process faults in `memmove` before `ret` — no IP or pointer control, no USB
+device, consumer process, wire, command, witness verdict or rung 5. No charter,
+route or mind was added, so the count stays 115; admission remains pending.
+Commands, pins, negatives and raw evidence are in `docs/reproducibility.md`,
+`lab/frontier/libgphoto2shell/PINS.sha256`, `PROVENANCE.md` and
+`harness/evidence/`. Brief: `reports/frontier-libgphoto2shell.md`.
+
+Libheif W164 (`d209498`) narrows the admitted real-file lane to exactly one
+out-of-bounds row derived from a committed file; no clean-return primitive and
+no witness replay, so the grade and W163's verdict are unmoved.

@@ -5469,3 +5469,59 @@ rc 0 GREEN and `check-omp-only.py` GREEN (115 declared roles). This is a
 deterministic replay of the direct-call harness, not a witness verdict or a
 real-library reproduction; rung 5 stays UNKNOWN and the grade is unchanged.
 See `reports/libfontenc2shell-status.md`.
+
+## 2026-11-23 15:0xZ — libgphoto2shell staged by frontier W160 (not admitted)
+
+Commit `ebec5a8` stages a direct-call JL2005 driver harness for
+CVE-2026-120451 / GHSA-7rfg-j54g-6xm2 (High 7.0, CWE-787). libgphoto2 through
+2.5.34 reads an attacker-supplied 16-bit allocation-table count with no bound:
+count 1022 rounds the table to 0x4200 and reads 0x4000 bytes into the 0x3E20
+bytes remaining in `info[0x4020]` (480-byte stack overflow), then `memmove()`
+copies 16848 bytes into the pinned 16384-byte heap table (464-byte heap
+overflow). Fix `6a3393dd996502457ab965432cf0b2035278825e` rejects both
+conditions; the patched numeric version is UNKNOWN. The companion issue-3
+claim (CVE-2026-120452) is screened out, not disproved. Frontier registered a
+two-pane window 120, but there is no charter, route, admission, mind or witness
+verdict and the count stays 115.
+
+```
+T=$(mktemp -d /tmp/docs-libgphoto2-replay.XXXXXX)
+git archive 0e10c83 reports/frontier-libgphoto2shell.md lab/frontier/libgphoto2shell | tar -x -C "$T"
+cd "$T" && sha256sum -c lab/frontier/libgphoto2shell/PINS.sha256
+cd "$T/lab/frontier/libgphoto2shell/harness" && ./run.sh && ./check.sh
+```
+
+Expect 51 files in the archive, 4/4 pins OK and
+`PASS=92 FAIL=0 TRACE=e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`.
+GCC and clang ASan report `WRITE of size 16384` at pinned `jl2005c.c.vuln:152`;
+the short-reply heap variant first reports `READ of size 16848` at pinned
+`:154`, so the heap destination write is not separately ASan-confirmed — the
+negative is preserved in `PROVENANCE.md`. The fixed build returns `rc=-3` for
+attack and heap inputs. gdb reads eight chosen `0x5a` bytes 24 bytes past the
+stack buffer and at `priv->table+0x4000`, plus a chosen marker in the saved-RIP
+slot at `info+16472`; the process faults in `memmove` before `ret`, so IP
+control is NOT demonstrated. `lab/frontier/libgphoto2shell/REPLAY.md` records
+the clean archive replay at `0e10c83`; it is deterministic replay of the
+author's harness, not witness acceptance. Raw outputs are in
+`harness/evidence/`; no libgphoto2 build, USB/libusb, camera consumer, socket,
+wire, marker or command is tested. Grade is direct-call rungs 1-4; rung 5 stays
+UNKNOWN.
+
+## 2026-11-23 15:0xZ — libheif W164 one-row bound (no grade change)
+
+Commit `d209498` extends the admitted libheif real-file lane with a
+hash-derived second frame. From
+`lab/frontier/libheif2shell/real/neighbour/`, run
+`python3 make_one_row_sequence.py /tmp/libheif-one-row.heif`; the generator
+asserts the source hash `8f09b93c…151c1c` and output hash
+`e028c5af98002a921e8a326d418fd3af9f6911032491c177264ee81eaf9a3b67` (5004
+bytes). The decoder returns 64x65 while x265 still pads to 512x64, so the row
+loop makes exactly one out-of-bounds row: ASan rc 1 with `WRITE of size 64` at
+`pixelimage.cc:644` after the 32783-byte region, plain Release rc 134 with
+`free(): corrupted unsorted chunks`, and `gdb_one_row.cmd` reads the
+file-derived row at `plane+32768` plus the overwritten size/bin-link words of
+the adjacent free chunk. Evidence: `evidence/one-row-*` and
+`real/PROVENANCE-real.md`. The free chunk's fd/bk held live heap addresses, so
+file pixels alone give no clean-return primitive; no grooming or forgery was
+attempted. W164 was not witness-replayed; W163's ESTABLISHED verdict and the
+grade are unchanged, rung 5 UNKNOWN.
