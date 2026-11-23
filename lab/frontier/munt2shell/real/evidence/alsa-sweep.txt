@@ -1,0 +1,18 @@
+n=1024 subscribe rc=0 client=128 port=0 send len=1024 rc=1052 receive rc=1 type=130 ext.len=1024 first=f0 last=5a 
+n=2048 subscribe rc=0 client=128 port=0 send len=2048 rc=2076 receive rc=1 type=130 ext.len=2048 first=f0 last=5a 
+n=4096 subscribe rc=0 client=128 port=0 send len=4096 rc=4124 receive rc=1 type=130 ext.len=4096 first=f0 last=5a 
+n=5000 subscribe rc=0 client=128 port=0 send len=5000 rc=5028 receive rc=1 type=130 ext.len=5000 first=f0 last=5a 
+n=5500 subscribe rc=0 client=128 port=0 send len=5500 rc=5528 receive rc=1 type=130 ext.len=5500 first=f0 last=5a 
+n=5568 subscribe rc=0 client=128 port=0 send len=5568 rc=5596 receive rc=1 type=130 ext.len=5568 first=f0 last=5a 
+n=5570 subscribe rc=0 client=128 port=0 send len=5570 rc=5598 receive rc=1 type=130 ext.len=5570 first=f0 last=5a 
+n=5572 subscribe rc=0 client=128 port=0 send len=5572 rc=5600 receive rc=1 type=130 ext.len=5572 first=f0 last=5a 
+n=5573 subscribe rc=0 client=128 port=0 send len=5573 rc=-12 receive rc=-28 
+n=5576 subscribe rc=0 client=128 port=0 send len=5576 rc=-12 receive rc=-28 
+n=5600 subscribe rc=0 client=128 port=0 send len=5600 rc=-12 receive rc=-28 
+n=5632 subscribe rc=0 client=128 port=0 send len=5632 rc=-12 receive rc=-28 
+n=6144 subscribe rc=0 client=128 port=0 send len=6144 rc=-12 receive rc=-28 
+n=8192 subscribe rc=0 client=128 port=0 send len=8192 rc=-12 receive rc=-28 
+n=16384 subscribe rc=0 client=128 port=0 send len=16384 rc=-12 receive rc=-28 
+n=32768 subscribe rc=0 client=128 port=0 send len=32768 rc=-12 receive rc=-28 
+n=32769 subscribe rc=0 client=128 port=0 send len=32769 rc=-12 receive rc=-28 
+n=40001 subscribe rc=0 client=128 port=0 send len=40001 rc=-12 receive rc=-28 

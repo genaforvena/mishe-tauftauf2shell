@@ -6,3 +6,4 @@ driver-fixed-1749f7f-*
 *.o
 core
 core.*
+alsa_probe

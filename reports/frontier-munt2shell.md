@@ -147,8 +147,30 @@ no SysEx dispatch and one overrun debug report. `parseSysexFragment()` sees
 capacity already at `MAX_STREAM_BUFFER_SIZE`, discards, and the only later
 buffer read is `streamBuffer[0]`. libmt32emu itself does not consume the
 overwritten bytes on this path — a negative result for an in-library live
-consumer, not proof an application cannot be affected. No host application,
-MIDI file/device/port, socket, wire input, grooming into a live object,
-pointer control, command, marker side effect or witness replay was measured;
-the issue's network narrative stays a claim. **Grade: real-library rungs 1-4;
-rung 5 UNKNOWN.**
+One in-tree host path was measured (below); no socket, wire input, grooming
+into a live object, pointer control, command, marker side effect or witness
+replay was measured; the issue's network narrative stays a claim. **Grade:
+real-library rungs 1-4; rung 5 UNKNOWN.**
+
+## 7. In-tree host reachability: ALSA sequencer negative (W160)
+
+The pinned tarball contains `mt32emu_alsadrv/src/alsadrv.cpp`, a real Linux
+host whose sequencer input copies an ALSA sysex event into `EVENT_SYSEX`
+(`alsadrv.cpp:682-688`) and forwards the whole buffer in one call to
+`MidiStreamParser::parseStream()` (`:1182`). `alsa_probe.c` measures the
+consumer's actual behavior on this host: a local duplex sequencer client
+sends variable `SND_SEQ_EVENT_SYSEX` events to its own port and reads them
+back. Payloads up to **5572 bytes** arrive intact; **5573 bytes and above**,
+including 40001, are rejected by the kernel with `-12` (ENOMEM) and no event
+is received. The 5600-byte event limit (payload + 28-byte header) did not
+move when client pools were enlarged from 4096 to 131072. Raw sweep:
+`lab/frontier/munt2shell/real/evidence/alsa-sweep.txt`; analysis:
+`real/ALSA_CEILING.md`.
+
+Consequence: on this host the ALSA host cannot deliver the single >32768-byte
+fragment this defect requires; its first fragment grows the buffer safely and
+later fragments take the bounded `parseSysexFragment()` path. This is a
+measured negative for one consumer on one kernel, not a claim about all ALSA
+setups, Qt/Win32 hosts (Qt5 unavailable here) or third-party C-API users;
+`mt32emu_parse_stream()` itself remains an unclamped forward. All probe
+events were loopback-only inside the local kernel sequencer.
