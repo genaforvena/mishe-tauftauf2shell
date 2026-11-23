@@ -24,7 +24,7 @@ with a crafted input.
 
 ## CFB and property inspection
 
-`olefile` 0.46 reads all three fixtures as valid compound files, six streams
+`olefile` 0.46 reads all five fixtures as valid compound files, six streams
 each, `FileHeader` 551 bytes. The unmodified file's `FileHeader` contains
 `Size1=10` and `Size2=9` (mixed case). The verbatim
 `ALTIUM_BINARY_PARSER::ReadProperties()` uppercases keys, so the pinned
@@ -32,9 +32,9 @@ each, `FileHeader` 551 bytes. The unmodified file's `FileHeader` contains
 vendor-authored key — not just the synthetic uppercase keys used before.
 The driver's `real-key:` lines confirm `SIZE1=10`, `SIZE2=9` after parsing.
 
-## Two in-place byte patches
+## Three in-place byte patches
 
-Both patches change exactly one property key, with identical byte length, at
+All patches change exactly one property key, with identical byte length, at
 a fixed raw-file offset. No CFB header, FAT, directory, miniFAT or stream
 length changes; `olefile` re-verifies each result.
 
@@ -42,15 +42,17 @@ length changes; `olefile` re-verifies each result.
 | --- | --- | --- | --- |
 | `mounting_holes-size0.SchLib` | 650 | `\|Size1=10\|` → `\|Size0=99\|` | `06fb23f9ca050c6fc177ecb4e3c0384262e1a8696d0ec4aa2c204ee15273bd2a` |
 | `mounting_holes-sizez.SchLib` | 685 | `\|Size2=9\|` → `\|SizeZ=9\|` | `09ebf2aa9ca5dc9a52aa1edec4f55d5ca56913bd567114a127472ff90b286d23` |
+| `mounting_holes-sizez7.SchLib` | 685 | `\|Size2=9\|` → `\|SizeZ=7\|` | `d97a37ab6a8634d2c79bbeafae91e976e208ce8ec3d71a792e105c3ec8602eae` |
+| `mounting_holes-sizez1.SchLib` | 685 | `\|Size2=9\|` → `\|SizeZ=1\|` | `20ea3a0da21d7d1e794a75947b75c2d3f102ce3cd95a442ba4f0c250a43fdb3a` |
 
-`wxAtoi("0") == wxAtoi("Z") == 0`, so both keys select `ind == 0` and hit the
-unbounded `aFontSizes[ind - 1]` store. Their map ordering differs: uppercase
+`wxAtoi("0") == wxAtoi("Z") == 0`, so all hostile keys select `ind == 0` and hit
+the unbounded `aFontSizes[ind - 1]` store. Their map ordering differs: uppercase
 `SIZE0` sorts before `SIZE1`, `SIZEZ` after it.
 
 ## Observed (`sh check.sh`, two identical runs)
 
-`vendor-pins`: 4/4 sha256 OK. `PASS=13 FAIL=0`, trace
-`fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
+`vendor-pins`: 6/6 sha256 OK. `PASS=23 FAIL=0`, trace
+`42db33cb056a52d223a51a6af7d0ffd5cfaeeb4a6f64fc8c28d80fdd6e341e4f`.
 Raw outputs for every invocation are in `evidence/`.
 
 - Unmodified vendor library through `g++-vuln/plain/asan` and both fixed
@@ -62,16 +64,17 @@ Raw outputs for every invocation are in `evidence/`.
   store targets `nullptr - 4`, not an allocated region. Preserved as a
   distinct observed fault mode, not a separate vulnerability claim. Both
   fixed binaries: `rc=0 size=2 first=0 GUARD7=11111111`, clean ASan.
-- `sizez`: vulnerable plain prints `rc=0 size=1 first=72` and then glibc
-  aborts with `double free or corruption (out)` (`rc=134`). gcc ASan reports
-  `heap-buffer-overflow`, `WRITE of size 4`, `0x... is located 4 bytes before
-  4-byte region`, top frame `sch_io_altium.cpp.vuln:5919`, allocation from
-  `resize` at `:5915`. Both fixed binaries: `rc=0 size=1 first=72
-  GUARD7=11111111`, clean ASan on the same file bytes.
-- gdb on the patched vendor file, skipping the first valid `:5919` hit:
-  `GDBKEY=Z GDBIND=0 GDBSCALED=0x00000040`, four bytes at
-  `aFontSizes._M_impl._M_start-4` are `40 00 00 00`. The file's own
-  `SizeZ=9` value determines the stored word.
+- `sizez9` / `sizez7` / `sizez1`: same byte 685 patched to `SizeZ=9`, `7`,
+  `1`. Each vulnerable plain build prints `rc=0 size=1 first=72` then glibc
+  aborts with `double free or corruption (out)` (`rc=134`); each gcc ASan
+  run reports `heap-buffer-overflow`, `WRITE of size 4`, 4 bytes before the
+  4-byte region, top frame `sch_io_altium.cpp.vuln:5919`, allocation from
+  `resize` at `:5915`. Both fixed binaries are clean on all three byte sets.
+- gdb on each patched vendor file, skipping the first valid `:5919` hit:
+  `SizeZ=9` → `SCALED=0x00000040`, bytes `40 00 00 00`; `SizeZ=7` →
+  `0x00000032`, bytes `32 00 00 00`; `SizeZ=1` → `0x00000007`, bytes
+  `07 00 00 00`, all at `data()-4`. The file's own hostile value determines
+  the four-byte word stored at the chosen offset, now on a real vendor file.
 
 ## Ceiling
 

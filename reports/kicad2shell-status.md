@@ -101,8 +101,10 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   plain `rc=134` glibc abort and ASan `WRITE of size 4` four bytes before
   the 4-byte region at `:5919`. Both fixed binaries clean. gdb reads
   `IND=0 SCALED=0x00000040`, bytes `40 00 00 00` at `data()-4`.
-  `vendor/check.sh`: **13 PASS / 0 FAIL** twice, trace
-  `fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
+  `vendor/check.sh`: **23 PASS / 0 FAIL** twice, trace
+  `42db33cb056a52d223a51a6af7d0ffd5cfaeeb4a6f64fc8c28d80fdd6e341e4f`.
+  Same-offset `SizeZ=9/7/1` patches give gdb words `0x40/0x32/0x07` at
+  `data()-4`; fixed builds clean on all three.
   Clean-archive replay at `56bc1f8` (7882 files) matched exactly (`REPLAY.md`).
   Provenance, hashes and offsets: `vendor/PROVENANCE-vendor-file.md`.
 - Ceiling: direct call, real property parser, real compound-file stream,

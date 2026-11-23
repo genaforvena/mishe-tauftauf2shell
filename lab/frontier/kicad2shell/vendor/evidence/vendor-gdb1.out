@@ -1,0 +1,16 @@
+Breakpoint 1 at 0x4b08: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/kicadreader/sch_io_altium.cpp.vuln, line 5919.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+kicad-cfb: file=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/vendor/mounting_holes-sizez1.SchLib stream=551
+real-reader: bytes=551 props=30 parse_error=0
+real-key: SIZE1=10
+real-key: SIZEZ=1
+
+Breakpoint 1, SCH_IO_ALTIUM::ParseLibHeader (this=0x7fffffffdfa8, aAltiumSchFile=..., aFontSizes=std::vector of length 1, capacity 1 = {...}) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/kicadreader/sch_io_altium.cpp.vuln:5919
+warning: 5919	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/kicadreader/sch_io_altium.cpp.vuln: No such file or directory
+
+Breakpoint 1, SCH_IO_ALTIUM::ParseLibHeader (this=0x7fffffffdfa8, aAltiumSchFile=..., aFontSizes=std::vector of length 1, capacity 1 = {...}) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/kicadreader/sch_io_altium.cpp.vuln:5919
+5919	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/kicadreader/sch_io_altium.cpp.vuln
+GDBKEY=Z GDBIND=0 GDBSCALED=0x00000007
+5922	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/kicadreader/sch_io_altium.cpp.vuln
+0x55555557e49c:	0x07	0x00	0x00	0x00

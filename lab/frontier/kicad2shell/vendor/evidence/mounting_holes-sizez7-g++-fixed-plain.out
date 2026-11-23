@@ -1,0 +1,5 @@
+kicad-cfb: file=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/vendor/mounting_holes-sizez7.SchLib stream=551
+real-reader: bytes=551 props=30 parse_error=0
+real-key: SIZE1=10
+real-key: SIZEZ=7
+rc=0 size=1 first=72 GUARD7=11111111

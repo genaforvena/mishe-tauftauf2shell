@@ -2,8 +2,8 @@
 # Vendor-produced .SchLib reachability lane for kicad2shell (2026-11-23 W180).
 #
 # The unmodified fixture is a real Altium schematic library from KiCad's own QA
-# data. The two patched fixtures change ONE FileHeader property key in place
-# (same byte length, CFB structure untouched). All three go through the
+# data. The patched fixtures each change ONE FileHeader property key in place
+# (same byte length, CFB structure untouched). All five go through the
 # already-committed kicadreader binaries: KiCad 10.0.6's own verbatim
 # compoundfilereader plus the pinned ALTIUM_BINARY_PARSER and ParseLibHeader.
 # No new upstream bytes, no rebuild, no network at check time.
@@ -23,6 +23,8 @@ expect = {
     'mounting_holes.SchLib':      ['SIZE1=10', 'SIZE2=9'],
     'mounting_holes-size0.SchLib':['SIZE0=99', 'SIZE2=9'],
     'mounting_holes-sizez.SchLib':['SIZE1=10', 'SIZEZ=9'],
+    'mounting_holes-sizez7.SchLib':['SIZE1=10', 'SIZEZ=7'],
+    'mounting_holes-sizez1.SchLib':['SIZE1=10', 'SIZEZ=1'],
 }
 for path, keys in expect.items():
     ok = olefile.isOleFile(path)
@@ -37,7 +39,7 @@ for path, keys in expect.items():
 PY
 cat evidence/vendor-olefile.out
 
-for f in mounting_holes mounting_holes-size0 mounting_holes-sizez; do
+for f in mounting_holes mounting_holes-size0 mounting_holes-sizez mounting_holes-sizez7 mounting_holes-sizez1; do
     for b in g++-vuln-plain g++-vuln-asan g++-fixed-plain g++-fixed-asan; do
         set +e
         case "$b" in
@@ -51,15 +53,21 @@ for f in mounting_holes mounting_holes-size0 mounting_holes-sizez; do
 done
 
 # gdb: skip the first :5919 hit (valid SIZE1), then read ind/scaled and the
-# four bytes actually stored before data().
+# four bytes actually stored before data(). One probe per chosen value.
 set +e
-gdb -q -batch -ex 'set pagination off' \
-    -ex 'break sch_io_altium.cpp.vuln:5919' \
-    -ex "run $HERE/mounting_holes-sizez.SchLib" -ex 'continue' \
-    -ex 'printf "GDBKEY=%s GDBIND=%d GDBSCALED=0x%08x\n", remaining.s.c_str(), ind, scaled' \
-    -ex 'next' -ex 'x/4xb (char*)aFontSizes._M_impl._M_start-4' \
-    "$READER/g++-vuln-plain" > evidence/vendor-gdb.out 2>&1
-echo $? > evidence/vendor-gdb.rc
+for v in 9 7 1; do
+    case "$v" in
+        9) f=mounting_holes-sizez.SchLib; o=vendor-gdb.out; r=vendor-gdb.rc ;;
+        *) f=mounting_holes-sizez$v.SchLib; o=vendor-gdb$v.out; r=vendor-gdb$v.rc ;;
+    esac
+    gdb -q -batch -ex 'set pagination off' \
+        -ex 'break sch_io_altium.cpp.vuln:5919' \
+        -ex "run $HERE/$f" -ex 'continue' \
+        -ex 'printf "GDBKEY=%s GDBIND=%d GDBSCALED=0x%08x\n", remaining.s.c_str(), ind, scaled' \
+        -ex 'next' -ex 'x/4xb (char*)aFontSizes._M_impl._M_start-4' \
+        "$READER/g++-vuln-plain" > "evidence/$o" 2>&1
+    echo $? > "evidence/$r"
+done
 set -e
 
 python3 - <<'PY'
@@ -104,25 +112,34 @@ for b in ('g++-fixed-plain', 'g++-fixed-asan'):
 
 # Hostile key sorting AFTER the valid one: the vector is allocated first, so
 # the same real-file patch reproduces the pinned four-byte heap underflow.
-ozp, oza = out('mounting_holes-sizez', 'g++-vuln-plain'), out('mounting_holes-sizez', 'g++-vuln-asan')
-check(rc('mounting_holes-sizez', 'g++-vuln-plain') == 134
-      and 'real-key: SIZEZ=9' in oza and 'double free or corruption (out)' in ozp,
-      'vendor-sizez vuln-plain rc=134 glibc chunk corruption')
-check(rc('mounting_holes-sizez', 'g++-vuln-asan') == 1
-      and 'heap-buffer-overflow' in oza and 'WRITE of size 4' in oza
-      and '4 bytes before 4-byte region' in oza
-      and 'sch_io_altium.cpp.vuln:5919' in oza
-      and 'sch_io_altium.cpp.vuln:5915' in oza,
-      'vendor-sizez vuln-asan WRITE 4 before 4-byte region at :5919')
-for b in ('g++-fixed-plain', 'g++-fixed-asan'):
-    o = out('mounting_holes-sizez', b)
-    check(rc('mounting_holes-sizez', b) == 0 and 'rc=0 size=1 first=72 GUARD7=11111111' in o
-          and 'AddressSanitizer' not in o, 'vendor-sizez fixed %s rc=0 size=1 intact' % b)
+# Three values patch the same byte 685; the stored word follows file bytes.
+for spec in ('mounting_holes-sizez 9 0x00000040 40',
+             'mounting_holes-sizez7 7 0x00000032 32',
+             'mounting_holes-sizez1 1 0x00000007 07'):
+    f, v, scaled, byte = spec.split()
+    zp = out(f, "g++-vuln-plain")
+    za = out(f, "g++-vuln-asan")
+    check(rc(f, "g++-vuln-plain") == 134
+          and 'real-key: SIZEZ=' + v in za
+          and 'double free or corruption (out)' in zp,
+          'vendor-sizez%s vuln-plain rc=134 glibc chunk corruption' % v)
+    check(rc(f, "g++-vuln-asan") == 1
+          and 'heap-buffer-overflow' in za and 'WRITE of size 4' in za
+          and '4 bytes before 4-byte region' in za
+          and 'sch_io_altium.cpp.vuln:5919' in za
+          and 'sch_io_altium.cpp.vuln:5915' in za,
+          'vendor-sizez%s vuln-asan WRITE 4 before 4-byte region at :5919' % v)
+    for b in ('g++-fixed-plain', 'g++-fixed-asan'):
+        o = out(f, b)
+        check(rc(f, b) == 0 and 'rc=0 size=1 first=72 GUARD7=11111111' in o
+              and 'AddressSanitizer' not in o,
+              'vendor-sizez%s fixed %s rc=0 size=1 intact' % (v, b))
+    gname = 'vendor-gdb.out' if v == '9' else 'vendor-gdb%s.out' % v
+    g = (e / gname).read_text(errors='replace')
+    check('GDBKEY=Z GDBIND=0 GDBSCALED=' + scaled in g
+          and '0x%s\t0x00\t0x00\t0x00' % byte in g,
+          'vendor-gdb%s ind=0 scaled=%s bytes=%s 00 00 00 at data()-4' % (v, scaled, byte))
 
-g = (e / 'vendor-gdb.out').read_text(errors='replace')
-check('GDBKEY=Z GDBIND=0 GDBSCALED=0x00000040' in g
-      and '0x40\t0x00\t0x00\t0x00' in g,
-      'vendor-gdb ind=0 scaled=0x40 bytes=40 00 00 00 at data()-4')
 
 text = '\n'.join('PASS ' + line for line in trace) + '\n'
 (e / 'trace-vendor.txt').write_text(text)

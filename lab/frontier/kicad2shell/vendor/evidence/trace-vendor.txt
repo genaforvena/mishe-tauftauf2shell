@@ -6,8 +6,18 @@ PASS vendor-size0 vuln-plain rc=139 null-adjacent store
 PASS vendor-size0 vuln-asan SEGV at pinned :5919
 PASS vendor-size0 fixed g++-fixed-plain rc=0 size=2 intact
 PASS vendor-size0 fixed g++-fixed-asan rc=0 size=2 intact
-PASS vendor-sizez vuln-plain rc=134 glibc chunk corruption
-PASS vendor-sizez vuln-asan WRITE 4 before 4-byte region at :5919
-PASS vendor-sizez fixed g++-fixed-plain rc=0 size=1 intact
-PASS vendor-sizez fixed g++-fixed-asan rc=0 size=1 intact
-PASS vendor-gdb ind=0 scaled=0x40 bytes=40 00 00 00 at data()-4
+PASS vendor-sizez9 vuln-plain rc=134 glibc chunk corruption
+PASS vendor-sizez9 vuln-asan WRITE 4 before 4-byte region at :5919
+PASS vendor-sizez9 fixed g++-fixed-plain rc=0 size=1 intact
+PASS vendor-sizez9 fixed g++-fixed-asan rc=0 size=1 intact
+PASS vendor-gdb9 ind=0 scaled=0x00000040 bytes=40 00 00 00 at data()-4
+PASS vendor-sizez7 vuln-plain rc=134 glibc chunk corruption
+PASS vendor-sizez7 vuln-asan WRITE 4 before 4-byte region at :5919
+PASS vendor-sizez7 fixed g++-fixed-plain rc=0 size=1 intact
+PASS vendor-sizez7 fixed g++-fixed-asan rc=0 size=1 intact
+PASS vendor-gdb7 ind=0 scaled=0x00000032 bytes=32 00 00 00 at data()-4
+PASS vendor-sizez1 vuln-plain rc=134 glibc chunk corruption
+PASS vendor-sizez1 vuln-asan WRITE 4 before 4-byte region at :5919
+PASS vendor-sizez1 fixed g++-fixed-plain rc=0 size=1 intact
+PASS vendor-sizez1 fixed g++-fixed-asan rc=0 size=1 intact
+PASS vendor-gdb1 ind=0 scaled=0x00000007 bytes=07 00 00 00 at data()-4

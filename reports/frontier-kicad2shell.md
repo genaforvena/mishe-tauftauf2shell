@@ -244,9 +244,9 @@ pinned `ParseLibHeader` really processes them. The unmodified file is a clean
 negative: all four reader binaries print `real-key: SIZE1=10`,
 `real-key: SIZE2=9`, `rc=0 size=2 first=72 GUARD7=11111111`, no ASan report.
 
-Two same-length in-place key patches drive the vulnerable path from the real
+Two distinct key positions were patched (three same-offset value variants):
 file: byte 650 `|Size1=10|` → `|Size0=99|`, and byte 685 `|Size2=9|` →
-`|SizeZ=9|`. `olefile` re-verifies both as valid compound files with unchanged
+`|SizeZ=9|` / `|SizeZ=7|` / `|SizeZ=1|`. `olefile` re-verifies all five as valid
 551-byte `FileHeader` streams. The first sorts before the valid key: the
 vector is still empty, so vulnerable plain SEGVs (`rc=139`) and ASan reports
 `SEGV` at pinned `:5919` (null-adjacent store, preserved as a distinct fault
@@ -258,8 +258,10 @@ exit 0 with the intact vector and no ASan report on the same file bytes. gdb
 on the patched vendor file reads `IND=0 SCALED=0x00000040` and bytes
 `40 00 00 00` at `data()-4`.
 
-`vendor/check.sh`: **13 PASS / 0 FAIL** twice, trace
-`fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
+`vendor/check.sh`: **23 PASS / 0 FAIL** twice, trace
+`42db33cb056a52d223a51a6af7d0ffd5cfaeeb4a6f64fc8c28d80fdd6e341e4f`.
+Three same-offset patches (`SizeZ=9/7/1`) give gdb words `0x40/0x32/0x07`
+at `data()-4`; fixed builds are clean on all three byte sets.
 A clean-archive replay at commit `56bc1f8` (7882 files) matched exactly;
 see `REPLAY.md`.
 Fixture hashes, license, exact offsets and the ceiling are in
