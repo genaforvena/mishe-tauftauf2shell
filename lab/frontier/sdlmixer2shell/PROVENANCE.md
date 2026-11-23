@@ -176,6 +176,29 @@ and gdb reports back to pinned upstream lines.
   beyond the sanitizer report. Rungs 1-4 only, author-observed, unwitnessed;
   advisory RCE and real network reachability remain UNKNOWN.
 
+## Unmodified upstream sample and sibling surface (W182, 2026-11-23)
+
+- Provisioning only: upstream issue #907 and PR #910 were read via the GitHub
+  API; PR #910 names
+  `https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/Samples/AFsp/M1F1-Alaw-AFsp.wav`
+  as its reproducer. The file was fetched as a reference and stored unmodified
+  at `harness/realwav/evidence/M1F1-Alaw-AFsp.wav` (47210 bytes, SHA-256
+  `cfbc1821b7dd3d288d4223859c454d28065f4fbf23eabcdc77a13166a61fd37f`). No
+  external system was probed.
+- Real 3.2.4 drivers: unmodified stereo A-law WAV gives `channels=2
+  framesize=8`; `FetchXLaw` still takes `length = buflen/4 = 256` from pinned
+  `:752-756`, so vulnerable decode/play both report ASan `WRITE of size 4` at
+  pinned `:759`, while fixed decode/play return rc=0 with `got=4096`. Four logs
+  and the sample are in `evidence/UPSTREAM.sha256`. Rungs 1-4 only,
+  author-observed, unwitnessed; no pointer, marker or command.
+- Sibling surface seen but NOT staged or tested here: the pinned vulnerable
+  tarball's `src/decoder_aiff.c:86-97` carries the same doubled-stride line at
+  `:93`; upstream maintainer fixed it in commit
+  `34486847a607540ce9ef5fbe20979c7140bf8c82` (2026-11-04), and a separate
+  advisory exists (CVE-2026-122329 / GHSA-782g-354j-4465). This target's
+  charter covers the WAV advisory GHSA-7qqc-5rvj-wqqw only; the AIFF route is
+  reported to the operator as a candidate, with no lab work done on it.
+
 ## Verification
 
 `cd lab/frontier/sdlmixer2shell/harness && ./run.sh && ./check.sh` →

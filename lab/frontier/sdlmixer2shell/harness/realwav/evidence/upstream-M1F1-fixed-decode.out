@@ -1,0 +1,7 @@
+MODE=decode PATH=M1F1-Alaw-AFsp.wav AUDIO_DRIVER=dummy MIX_DECODERS=3
+SPEC freq=8000 format=33056 channels=2 framesize=8
+DECODE round=0 got=4096
+DECODE round=1 got=4096
+DECODE round=2 got=4096
+DECODE round=3 got=4096
+RESULT=OK total=16384

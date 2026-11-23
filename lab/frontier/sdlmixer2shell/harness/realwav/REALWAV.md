@@ -339,3 +339,39 @@ rungs 1-4 only, author-observed and unwitnessed.
 
 Source, both built drivers and all seven output logs are checksummed in
 `evidence/WIRE.sha256` (verify with `cd evidence && sha256sum -c WIRE.sha256`).
+
+## Unmodified upstream reference WAV (W182, 2026-11-23)
+
+PR #910 names a real A-law sample as the reporter's reproducer,
+`M1F1-Alaw-AFsp.wav` from
+<https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/Samples/AFsp/M1F1-Alaw-AFsp.wav>.
+It was fetched as reference provisioning (no probing), stored unmodified in
+`evidence/M1F1-Alaw-AFsp.wav` (47210 bytes, SHA-256
+`cfbc1821b7dd3d288d4223859c454d28065f4fbf23eabcdc77a13166a61fd37f`), and fed
+to the same two built drivers. This is a stereo, 8 kHz, G.711 A-law RIFF/WAVE:
+`file(1)` reports "ITU G.711 A-law, stereo 8000 Hz", and the driver prints
+`SPEC freq=8000 format=33056 channels=2 framesize=8`. The doubled stride is
+not mono-specific: `FetchXLaw` sets `length = buflen/4 = 256` from the
+1024-byte caller buffer regardless of `framesize` (pinned `:752-756`), so the
+same 1020-byte overflow follows.
+
+```sh
+cd lab/frontier/sdlmixer2shell/harness/realwav/evidence
+export ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-18/bin/llvm-symbolizer
+export ASAN_OPTIONS=detect_leaks=0:abort_on_error=0
+./realwav-driver-vuln-asan M1F1-Alaw-AFsp.wav decode > upstream-M1F1-vuln-decode.out 2>&1   # rc=1
+./realwav-driver-fixed-asan M1F1-Alaw-AFsp.wav decode > upstream-M1F1-fixed-decode.out 2>&1  # rc=0
+./realwav-driver-vuln-asan M1F1-Alaw-AFsp.wav play > upstream-M1F1-vuln-play.out 2>&1       # rc=1
+./realwav-driver-fixed-asan M1F1-Alaw-AFsp.wav play > upstream-M1F1-fixed-play.out 2>&1      # rc=0
+sha256sum -c UPSTREAM.sha256
+```
+
+Observed: vulnerable decode gives ASan `stack-buffer-overflow WRITE of size 4`
+at pinned `:759` via `FetchALaw:771` → `WAV_decode:1668` →
+`MIX_DecodeAudio:3190`, `buffer [32,1056)`, frame offset 1180; play gives the
+same store on the audio thread via `DecodeMore:306`. Fixed decode reports
+`DECODE round=... got=4096`, `RESULT=OK total=16384`, rc=0; fixed play
+`PLAY started=1`, `RESULT=OK`, rc=0. This is an unmodified third-party input,
+not a lab-crafted WAV, but still no request-facing SDL_mixer consumer, pointer
+control or command: rungs 1-4 only, author-observed, unwitnessed. The sample
+and four logs are checksummed in `evidence/UPSTREAM.sha256`.
