@@ -1,0 +1,3 @@
+cases/poc.exr: (EXR_ERR_CORRUPT_CHUNK) Unable to decompress w 13 image data 52 -> 64, got 256
+cases/poc.exr: (EXR_ERR_CORRUPT_CHUNK) Decode pipeline unable to decompress data
+READPIXELS exception: Unable to run decoder

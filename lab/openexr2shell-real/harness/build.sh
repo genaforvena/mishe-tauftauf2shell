@@ -22,3 +22,4 @@ set -x
 gcc $SAN -g -O1 $INC harness/flat_harness.c $LIBS $IMATH_LIB -ldeflate -lzstd -lz -lpthread -lstdc++ -lm -o "$OUT/flat_harness"
 gcc $SAN -g -O1 $INC harness/guarded_harness.c $LIBS $IMATH_LIB -ldeflate -lzstd -lz -lpthread -lstdc++ -lm -o "$OUT/guarded_harness"
 g++ $SAN -g -O1 $INC cases/gen_baseline.cpp $LIBS $IMATH_LIB -ldeflate -lzstd -lz -lpthread -lm -o "$OUT/gen_baseline"
+g++ $SAN -g -O1 $INC cases/cpp_singlepass.cpp $LIBS $IMATH_LIB -ldeflate -lzstd -lz -lpthread -lm -o "$OUT/cpp_singlepass"

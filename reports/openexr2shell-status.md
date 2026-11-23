@@ -105,3 +105,10 @@ vulnerable build returns rv=31 and then aborts with `free(): invalid pointer`
 in a separate run. This is file-level rungs 1-4, author-only pending witness:
 no consumer process, socket, wire, pointer target, command or marker, so
 rung 5 stays UNKNOWN.
+
+The same file also reproduces through the advisory's C++
+`DeepScanLineInputFile::readPixels()` single-pass path on the vulnerable
+ASan build (`cpp-vuln-poc.out`: `memcpy-param-overlap` at pinned
+`internal_zstd.c:472`; baseline `READPIXELS ok rv=0`), while the pinned 3.5.3
+build throws `Unable to run decoder` with no ASan report
+(`cpp-fixed-poc.out`). Deep-tiled, OpenImageIO and aarch64 remain untested.

@@ -97,18 +97,31 @@ All stdout/stderr is preserved in `lab/openexr2shell-real/evidence/`.
    out-of-bounds offset. The overwrite is therefore completed, not merely
    attempted, in a live pinned 3.5.2 decode.
 
+## C++ single-pass confirmation (same builds)
+
+`cases/cpp_singlepass.cpp` uses `Imf::DeepScanLineInputFile::readPixels(0,0)`
+with no sample-count pre-pass, matching the advisory's vulnerable C++ mode.
+On the vulnerable ASan build the valid baseline prints `READPIXELS ok rv=0`,
+while `cases/poc.exr` aborts with `memcpy-param-overlap` at the same pinned
+`internal_zstd.c:472` (`cpp-vuln-{baseline,poc}.out`). On the fixed ASan
+build the same file throws `READPIXELS exception: Unable to run decoder`
+after `EXR_ERR_CORRUPT_CHUNK` and produces no ASan report
+(`cpp-fixed-poc.out`). This is a second, independent real-library caller of
+the same file; it is still a purpose-built consumer invoked on a local path,
+not an image-application process or wire input.
+
 ## Ceiling and preserved negatives
 
-- File input is a local EXR path handed to a purpose-built C consumer. No
-  OpenImageIO build, image consumer process, daemon, socket, port, wire,
+- File input is a local EXR path handed to purpose-built C and C++ consumers.
+  No OpenImageIO build, image application process, daemon, socket, port, wire,
   remote request or network probe was used. No pointer target, control-flow
   corruption, command, marker side effect, ASLR/grooming measurement or
   witness replay. Rung 5 is UNKNOWN, not a scaled-down rung 4.
-- The advisory's C++ `DeepScanLineInputFile`, deep-tiled, OpenImageIO and
-  aarch64 claims were not tested. The `exrcheck`/`exrinfo` claims were not
-  tested. The advisory's 4032-byte length and 692-byte file size were
-  independently observed here; its `malloc(): invalid size (unsorted)` abort
-  text differs from this host's `free(): invalid pointer`.
+- The advisory's deep-tiled, OpenImageIO and aarch64 claims were not tested.
+  The `exrcheck`/`exrinfo` claims were not tested. The advisory's 4032-byte
+  length and 692-byte file size were independently observed here; its
+  `malloc(): invalid size (unsorted)` abort text differs from this host's
+  `free(): invalid pointer`.
 - Build negatives: the C consumer needed `-lstdc++`, `-ldeflate` and explicit
   static-library order; the C++ generator needed Imath config/include paths.
   The first ASan report is `memcpy-param-overlap` rather than

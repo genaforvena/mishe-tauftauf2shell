@@ -1,0 +1,53 @@
+=================================================================
+==479642==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x506000000200,0x506000001200) and [0x506000000260, 0x506000001260) overlap
+    #0 0x7f9ba92fb16d in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5e2b67797580 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x5e2b67797580 in sort2_4ByteChannels_tiled /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+    #3 0x5e2b67799e21 in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+    #4 0x5e2b67799e21 in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x5e2b67749b2b in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x5e2b6774b1e2 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x5e2b6774d3c6 in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x5e2b67621cbe in run_decode /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:831
+    #9 0x5e2b6762dcfd in Imf_3_5::DeepScanLineInputFile::Data::readData(Imf_3_5::DeepFrameBuffer const&, int, int, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:568
+    #10 0x5e2b6762e4a4 in Imf_3_5::DeepScanLineInputFile::readPixels(int, int) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:304
+    #11 0x5e2b67619789 in main cases/cpp_singlepass.cpp:30
+    #12 0x7f9ba8a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7f9ba8a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x5e2b67618d04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/bin-vuln-asan/cpp_singlepass+0x3fd04) (BuildId: a008087c2bf534ecfce3fc821bb1965c04508051)
+
+0x506000000240 is located 0 bytes after 64-byte region [0x506000000200,0x506000000240)
+allocated by thread T0 here:
+    #0 0x7f9ba92fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5e2b677a782e in internal_exr_alloc /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 0x5e2b677a8cb5 in internal_decode_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 0x5e2b6774d38e in update_pack_unpack_ptrs /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:81
+    #4 0x5e2b6774d38e in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:594
+    #5 0x5e2b67621cbe in run_decode /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:831
+    #6 0x5e2b6762dcfd in Imf_3_5::DeepScanLineInputFile::Data::readData(Imf_3_5::DeepFrameBuffer const&, int, int, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:568
+    #7 0x5e2b6762e4a4 in Imf_3_5::DeepScanLineInputFile::readPixels(int, int) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:304
+    #8 0x5e2b67619789 in main cases/cpp_singlepass.cpp:30
+    #9 0x7f9ba8a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7f9ba8a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x5e2b67618d04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/bin-vuln-asan/cpp_singlepass+0x3fd04) (BuildId: a008087c2bf534ecfce3fc821bb1965c04508051)
+
+0x5060000002a0 is located 0 bytes after 64-byte region [0x506000000260,0x5060000002a0)
+allocated by thread T0 here:
+    #0 0x7f9ba92fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5e2b677a782e in internal_exr_alloc /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 0x5e2b677a8cb5 in internal_decode_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 0x5e2b677996cd in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1335
+    #4 0x5e2b677996cd in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x5e2b67749b2b in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x5e2b6774b1e2 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x5e2b6774d3c6 in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x5e2b67621cbe in run_decode /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:831
+    #9 0x5e2b6762dcfd in Imf_3_5::DeepScanLineInputFile::Data::readData(Imf_3_5::DeepFrameBuffer const&, int, int, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:568
+    #10 0x5e2b6762e4a4 in Imf_3_5::DeepScanLineInputFile::readPixels(int, int) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXR/ImfDeepScanLineInputFile.cpp:304
+    #11 0x5e2b67619789 in main cases/cpp_singlepass.cpp:30
+    #12 0x7f9ba8a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7f9ba8a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x5e2b67618d04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/bin-vuln-asan/cpp_singlepass+0x3fd04) (BuildId: a008087c2bf534ecfce3fc821bb1965c04508051)
+
+SUMMARY: AddressSanitizer: memcpy-param-overlap ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+==479642==ABORTING
