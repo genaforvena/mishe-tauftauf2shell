@@ -178,19 +178,28 @@ the vulnerable store:
   control-flow state, **not** demonstrated pointer/IP control or code
   execution.
 
+- Pointer feasibility, enumerated from the pinned LUT constants
+  (`SDL_mixer.c:3303-3359`, float32 bit patterns reconstructed and checked
+  against the two gdb LUT words): all 65536 ordered A-law word pairs are
+  non-canonical as a 64-bit pointer; mu-law has 512 canonical pairs, all with
+  high word `0x00000000` (first 4 GiB, e.g. `0x00000000bf7af9f6`). No pair
+  forms a typical PIE (`0x00005555...`) or libc (`0x00007f...`) address. The
+  observed saved RIP `0xbca40148bcac0158` equals
+  `MIX_alawToFloat[payload[28]]<<32 | MIX_alawToFloat[payload[27]]` for the
+  crafted file bytes, so input bytes select the two LUT words; the LUT image
+  itself blocks arbitrary IP steering.
+
 ## 5. Next distinct rung move
 
-File-path reachability is measured; the remaining gaps are a wire/request
-consumer, chosen control-flow data and a benign command with an observed side
-effect. Two bounded questions remain: (1) enumerate all 256
-`MIX_alawToFloat`/`MIX_ulawToFloat` bit patterns and check whether any adjacent
-pair can form a canonical user-space pointer when written across the real
-saved-RIP slot — if none can, this path cannot yield arbitrary IP control;
-(2) find a network- or request-facing consumer that loads an attacker-named
-WAV through the same decoder on a live loopback instance. Any new claim goes to
-`witness`; the author report is not acceptance. No pointer-sized target has
-been demonstrated: the written value is a LUT-selected float bit pattern, not
-an address read from the input.
+File-path reachability and the LUT pointer image are now measured. The LUT
+enumeration above closes the arbitrary-IP question for the overwritten
+saved-RIP slot: A-law yields no canonical pointer and mu-law only first-4-GiB
+addresses, so no chosen PIE/libc target. The remaining distinct move is a
+network- or request-facing consumer that loads an attacker-named WAV through
+the same decoder on a live loopback instance, plus a benign command with an
+observed side effect. Any new claim goes to `witness`; the author report is not
+acceptance. No pointer-sized target has been demonstrated: the written value
+is a LUT-selected float bit pattern, not an address read from the input.
 
 
 ## 6. Honest ceiling

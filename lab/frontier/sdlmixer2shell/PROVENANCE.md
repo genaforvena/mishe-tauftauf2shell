@@ -141,6 +141,15 @@ and gdb reports back to pinned upstream lines.
   changed from `0x0000555555560a60` to `0xbca40148bcac0158` and locals garbage.
   The eight bytes are two LUT-selected float bit patterns, not a chosen
   address: corrupted control-flow state, not pointer/IP control.
+- LUT pointer image (derived from pinned `SDL_mixer.c:3303-3359`, float32 bit
+  patterns verified against the two gdb LUT words): all 65536 ordered A-law
+  pairs are non-canonical as u64; mu-law yields 512 canonical pairs, all with
+  high word `0x00000000` (max `0x00000000bf7af9f6`), none with high word
+  `0x00005555` or `0x00007f..`. The corrupted saved RIP
+  `0xbca40148bcac0158` is exactly
+  `MIX_alawToFloat[payload[28]]<<32 | MIX_alawToFloat[payload[27]]`, so file
+  bytes choose among LUT words but cannot choose a usable address. Derived
+  negative, not a witness verdict.
 - Ceiling: real build, real WAV, real decoder callbacks, but no wire/request
   input, attacker-chosen pointer, instruction-pointer control, benign marker
   or command. Author-observed only; witness replay requested on tape #3053.
