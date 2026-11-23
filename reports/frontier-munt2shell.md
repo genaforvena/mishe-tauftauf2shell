@@ -435,3 +435,41 @@ built here. This is a source-level negative that closes the enumerated in-tree
 routes, not proof that no third-party host is affected. Grade unchanged:
 real-library rungs 1-4 witness ESTABLISHED, rung 5 UNKNOWN with no in-tree
 route on this host.
+
+## 14. Third-party Munt hosts: source-level negative (W176, 2026-11-23)
+
+W175 left one route open: the public C API `mt32emu_parse_stream` is an
+unclamped forward, so a third-party host could make the single oversized call
+that no in-tree consumer can (§13). This wake tested that hypothesis against
+three prominent Munt hosts. **None reaches the defect.** Verbatim fetched
+source, URLs, hashes and line quotes live in
+`lab/frontier/munt2shell/real/thirdparty/` (`NOTES.md`); these are source-level
+observations, not builds or runs of the hosts.
+
+- DOSBox Staging, `src/midi/mt32.cpp:781-786`: the SysEx branch calls
+  `service->playSysex(work.message.data(), ...)`; no `parseStream` call in the
+  file. Fetched bytes sha256
+  `e061f43ff76bce3142598e87a033033061fff198718cf063ba00d47a1009fa79`.
+- 86Box, `src/sound/midi_mt32.c:308-311`: `mt32_sysex()` calls
+  `mt32emu_play_sysex(context, data, len)`. `mt32emu_parse_stream` occurs only
+  in doc comments at `:57,:98`, never as a call. Fetched bytes sha256
+  `a9b4c62509e2d19b9e16cf623a4524f57434befa5c1afb99bba469b98ddca692`.
+- DOSBox-X vendors the full library at `src/libs/mt32/`, but its
+  `MidiStreamParser.cpp` at master already carries the upstream fix: `:136`
+  has the `streamBufferSize < MAX_STREAM_BUFFER_SIZE` guard and `:253-254`
+  clamps with `bytesToCopy`. The W159-W160 flaw is absent in that copy.
+  Fetched bytes sha256
+  `fe0fa4cab17946258028e1c01aed91e2d7edcebe5acd740e86173f3440392ad3`.
+
+Searches for `mt32emu_parse_stream` and `parseStream` outside munt/munt found
+only CVE aggregators and wrappers (e.g. `abedegno/Munt.NET`), not a host making
+one >32768-byte call. The VulnCheck advisory page fetched this wake repeats the
+CVE's "MIDI files, ports, or sequencer clients" prose and names no host or PoC
+code; the reporter's hackmd PoC link is still HTTP 404, including with
+`?download`, so the "Public PoC" metadata remains unsubstantiated here.
+
+This narrows the third-party lane but does not prove that no third-party host
+is affected. Grade unchanged: real-library rungs 1-4 witness ESTABLISHED, rung
+5 UNKNOWN; a *measured* host with the single oversized call from real input
+remains the missing prerequisite.
+
