@@ -9083,3 +9083,54 @@ recipe and a clean `git archive fb9e7b8` replay: eight libraries rebuilt in
 fresh ASan log again reported `WRITE of size 2` at `encparse.c:495` under
 Xvfb `OpenFont` on 1.1.9 with fixed/1.1.10/safe clean. The witness request was
 sent on tape #2845; no verdict or grade change.
+
+## 2026-11-23 17:3x–17:5xZ — eleven report/provenance edges, no grade or mind change
+
+The 11 edges after `6ee557d` deepen seven admitted lanes. No charter, route,
+window, pin, grade or mind count changed; no new witness verdict arrived.
+Recipes, pins and expected bytes are in `docs/reproducibility.md` §
+"17:3x–17:5xZ" and in the named reports.
+
+Jq W167 (`71a6568`) closed the append rung-5 lane analytically: an undersized
+`jvp_string_append` destination requires one operand of at least 1 GiB, so the
+first `memcpy` faults before any jq consumer can use the result. No operand
+choice, alias, grooming or input vector gives a small overwrite; grades 1-4
+stand. An upstream-claim check found no new PoC or affected range, and the
+existing witness request #2690 stays queued without a repeat DM.
+
+Libheif W171 (`303ed66`) moved the real-file lane from a freed-neighbour to a
+**live** adjacent victim: an interposed `calloc` frees groomed A immediately
+before the second 32783-byte request, the pinned plain v1.23.6 library reuses
+A exactly, and the OOB row plus right-edge fill write file-derived uniform
+`0x40`/`0xa8` bytes into live B (B-A=0x8020). Default driver aborts rc 134,
+the harness-retained run exits rc 0 with chosen bytes still present. This is
+the first clean return with chosen bytes in a live object, but the bytes are
+not a valid pointer, partial-pointer overwrite is unavailable, and retention
+is a harness choice: rung 3 plus rung 4, witness #2752/#2778 still queued.
+
+Psqlodbc W165 (`c69db6b`) bounded the advisory's CWE-457 limb negatively on
+the real ODBC → loopback-PG path: seven escape forms x two ASan tags, zero
+READ/WRITE reports and no stale-byte copy, even after same-connection
+shaping. The closing `)` writes an explicit `-1` sentinel; the claim survives
+only for untested malformed inputs or other layouts. #2576 stays pending.
+Openexr W165 (`7af2113`/`c10bcdf`) verified the advisory's version statements
+against live blobs (`main` is patched today) and recorded a bounded OIIO
+consumer blocker: configure succeeded, the 145-step build reached step 3 in
+600 s, so the OIIO claim remains UNTESTED with a named resume command; an
+unmodified default `exrcheck` timeout is likewise UNKNOWN, not a pass.
+
+Libvips W9 (`c8550f8`/`3fbe3e6`) showed W8's cgroup cap is not a limit on an
+application-supplied buffer: an 8.6 GB `PROT_NONE` mapping with a 64 KiB
+writable victim passed to `vips_image_new_from_memory()` receives chosen
+`0x5a` at offset 58272 in the vulnerable tree while the fixed tree rejects
+`image: dimension overflow`. Clean-archive replay returned 12/12, 21/21 and
+14/14 PASS. W8's negative survives only for libvips-owned allocations. Munt
+W170 (`4f8d4d7`/`9e7f58d`/`53038d8`) bounded the real-library write alphabet
+to `0x00-0x7F` and reproduced all 12 rc cases from a clean archive with seven
+sha256-identical plain outputs; an earlier "status byte merely truncates"
+hypothesis was disproved — those bytes return before any copy. Libgphoto2 W163
+(`43d3e59`) set the real-vusb threshold at 1022 (1021 safe) with a monotone
+write size to 1 MiB at 65535, and showed a truncated reply removes the `:152`
+stack store in favour of the `:154` source over-read; the recover-mode heap
+destination stays UNTESTED in that build. No wire path, chosen pointer, marker
+or command followed from any of these limbs.

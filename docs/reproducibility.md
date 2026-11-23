@@ -5910,3 +5910,85 @@ bytes. No new route or witness verdict was created by these commits.
   GHSA-qw3h-2hqv-29vq, CWE-122, CVSS 4.0 8.5 HIGH vector LOCAL. Both hackmd
   "exploit"-tagged references were HTTP 404/403 at 16:58Z, so no PoC bytes
   were obtained. Advisory claims only; grade unchanged.
+
+## 2026-11-23 17:3x–17:5xZ — eleven limb records across seven admitted lanes
+
+All eleven edges change reports, provenance or replay notes, not grades, mind
+counts or windows. The analytic limbs are source/prose checks with no harness
+run; the probe limbs name their raw outputs below. No new witness verdict is
+claimed.
+
+- **Jq W167 general append bound** (`71a6568`, `reports/jq2shell-status.md`
+  § "general append bound"). Source check only, no rebuild: pinned
+  `jv.c.vuln:1187-1192` allocates `allocsz = (2*(T mod 2^32)) mod 2^32` and
+  copies `currlen` then `len` bytes; an undersized destination needs
+  `T = currlen + len >= 2^31`, so `max(currlen, len) >= 2^30` (1 GiB) and the
+  first `memcpy` faults before returning. Both measured geometries
+  (`2^31-2 + 2`, `2^30 + 2^30`) yield `S = 2^31`, `allocsz = 0` clamped to 32.
+  No PoC, no guard change, no memory envelope measured.
+- **Libheif W171 interposed live victim** (`303ed66`,
+  `reports/libheif2shell-status.md` § W171). From
+  `lab/frontier/libheif2shell/real`, `reencode_interpose.cc` allocates A and a
+  live adjacent victim B (B-A=0x8020) and frees A inside an interposed
+  `calloc` at the second 32783-byte request. On pinned plain v1.23.6 expect
+  `CALLOC32783 count=2 ... == A`, encode rc 0, and B's
+  `fn = 0x4040404040404040` / `tag[0..7] = 40*8` for `controlled-size.heif`
+  (sha256 `062301df…bc7550`); the default driver aborts rc 134, the
+  harness-retained run exits rc 0 with `POST fn=0x4040…` intact.
+  `python3 real/neighbour/check_interpose.py EVIDENCE_DIR` PASS asserts
+  adjacency, exact reuse, bytes, rc 0 and retained clean exit. The patterned
+  sequence regenerates byte-exact from `make_one_row_sequence.py` (sha256
+  `e028c5af…a3b67`). Uniform file bytes and a harness lifetime choice; no
+  valid pointer, fixed-pin W171 variant or witness verdict.
+- **Psqlodbc W165 CWE-457 negative** (`c69db6b`,
+  `reports/psqlodbc2shell-status.md`). Throwaway gitignored scripts under
+  `lab/frontier/psqlodbc2shell/src/repo/build/w165-*` drive the pinned ASan
+  vulnerable and fixed `.so` through unixODBC against a private loopback
+  PostgreSQL 16.4 on 127.0.0.1:59436. Seven escape forms x two tags: five give
+  `DIAG ... msg=param not found` on both, LOCATE fails its arity on both,
+  extra-arg CONCAT emits `SELECT concat(1::text, 2::text)` on both; zero ASan
+  READ/WRITE in either tag, and same-connection shaping does not move the
+  result. Raw: `build/evidence/w165-cwe457-*.out` and
+  `w165-sweep-{vuln,fixed}.out`.
+- **Openexr W165 provenance and OIIO blocker** (`7af2113`, `c10bcdf`,
+  `reports/openexr2shell-status.md`). Advisory version claims checked via the
+  GitHub contents API on `src/lib/OpenEXRCore/internal_zstd.c`: 3.5.1/3.5.2
+  blob `78b27abe…` (51602 bytes, same as the vulnerable pin), 3.5.0 blob
+  `670b92a7…` (50484), 3.5.3/main blob `393ffd9c…` (54887), 3.4.2 no path.
+  The OIIO advisory tag was fetched as `oiiolab/oiio.tar.gz` (sha256
+  `1c1283e8…ff4d2`); configure succeeded against the pinned ASan OpenEXR
+  prefix with the recorded shims, but `cmake --build oiiolab/build-oiio-asan -j8`
+  reached step 3/145 in 600 s and was interrupted; no consumer run. An
+  unmodified `exrcheck` without `-c` on the PoC also timed out at 60 s with only
+  `EXR_ERR_INVALID_SAMPLE_DATA` captured — UNKNOWN, not a pass.
+- **Libvips W9 app-supplied buffer** (`c8550f8`, `3fbe3e6`,
+  `reports/frontier-libvips2shell.md` §13). `real/external.c` reserves an 8.6 GB
+  anonymous `PROT_NONE MAP_NORESERVE` mapping, makes a 64 KiB victim and 64
+  pages writable, and calls the public `vips_image_new_from_memory()`.
+  `bash real/run-external.sh` expects `IMAGE_OK ...`,
+  `PAINT_PREPARE=0 bpl=-7296`, `PAINT_ADDR1=data-7296`, `PAINT_DONE`, and
+  `VICTIM_POST off=58272 byte0=5a ... after_end=5a` on the vulnerable plain
+  tree, `image: dimension overflow` on fixed, 12/12 PASS rc 0. From a clean
+  `git archive HEAD` at `c8550f8` with gitignored source/build trees symlinked
+  in, external 12/12, consumer 21/21 and neighbour 14/14 all returned rc 0.
+- **Munt W170 write alphabet** (`4f8d4d7`, `9e7f58d`, `53038d8`,
+  `reports/frontier-munt2shell.md` §11). From `lab/frontier/munt2shell/real`,
+  `./alphabet_probe.sh` sends one 40001-byte incomplete SysEx with one varied
+  byte. Expected: all-`0x6a` writes 7233 tail bytes with gcc ASan `WRITE of
+  size 40001` at `MidiStreamParser.cpp:250` and pinned-fixed rc 0; `0x7f` at
+  32768 is the first tail byte; `0x80`/`0x85` (or `0x80` at 32769) produce no
+  allocation or copy; `0xf7` dispatches from the caller buffer without a copy;
+  `0xf8` ends the copy inside 32768 bytes. Interpretation in `real/ALPHABET.md`;
+  raw in `real/evidence/alphabet-*`. Clean-archive replay at `9e7f58d`
+  regenerated both trees and reproduced all 12 rc cases with seven
+  sha256-identical plain `.out` files.
+- **Libgphoto2 W163 virtual-port sweep** (`43d3e59`,
+  `lab/frontier/libgphoto2shell/PROVENANCE.md` § "Counterexample hunt"). Same
+  real ASan 2.5.34 build on the lab-patched vusb port; raw
+  `evidence/real-lib-count-*.out` and `real-lib-reply-*.out`. Expect `n=1021`
+  rc 0 with no ASan, `n=1022..1053` `WRITE of size 16384` at real
+  `jl2005c.c:152`, 16896 at 1054, 31744 at 2000 and 1048576 at 65535. With
+  `M2SHELL_JL2005_VUSB=s1` the `:152` store disappears and default ASan
+  reports `stack-buffer-overflow READ of size 16848` at `:154` (count 1022)
+  or `1049040` (65535). The recover-mode heap destination was not built for
+  this library and remains UNTESTED.
