@@ -939,6 +939,44 @@ unchanged; raw logs, client output, server stderr and per-run `meta.txt`
 and were freed; no server left running. Author self-observation, not
 independently replayed.
 
+## W20 — TYPE sink byte maps at -O2 match SENDER (2026-11-23 ~16:40Z)
+
+W16/W17/W19 mapped the stock `-O2` frame only on the SENDER sink; W15's TYPE
+coverage was one Debug `-O0` index (121) and W18's TYPE `-O2` coverage was
+negative indices. New `probe-opt-frame-wide.sh` (VAR/LINE overrides, 48-word
+frame dump, PRE/POST return slots) closes that gap on the same vulnerable
+`build-opt-07.36` server (SHA `bfe63334...`) and fixed control (`227fcb55...`).
+
+`out-w20-type-frame/gdb.log` (harmless TYPE index 4, port 14500):
+`array=rsp=rbp=0x7fffffffd930`, with the same three live returns as SENDER —
+`+136=0x5555555a1f42` (inner `doSystemCallbacksFor :1446`),
+`+200=0x5555555a200d` (outer, `:1424`) and `+312=0x5555555a4059`
+(`vrpn_Endpoint::dispatch :4331`). Both handlers are called from the same
+caller chain, so one return map covers both sinks on this build.
+
+PRE -> POST at `vrpn_Connection.C:4482` / `:4488` (`VAR=type_name`,
+`MSGTYPE=-2`, breakpoints confirmed to be in `handle_type_message`):
+
+| index | slot | PRE -> POST | observed |
+| --- | --- | --- | --- |
+| 136 | +136 byte 0 | `0x...5a1f42 -> 0x...5a1f00` | SIGSEGV (`out-w20-gdb-type-136`) |
+| 200 | +200 byte 0 | `0x...5a200d -> 0x...5a2000` | SIGSEGV (`out-w20-gdb-type-200`) |
+| 312 | +312 byte 0 | `0x...5a4059 -> 0x...5a4000` | backtrace frame #3 enters `dispatch` at `0x...5a4000` with `this=0x20`, SIGSEGV (`out-w20-gdb-type-312`) |
+| 313 | +312 byte 1 | `0x...5a4059 -> 0x...5a0059` | SIGSEGV under gdb (`out-w20-gdb-type-313`); debugger-free exit 132 with empty stderr, cause UNKNOWN |
+
+Debugger-free `probe-func-dos.sh` with explicit `BIN=` and `MSGTYPE=-2` on
+loopback ports 14636-14819: TYPE indices 136-141, 200-205 and 312-317 are
+DEAD (exit 139 everywhere except 313, exit 132); 142/143, 206/207 and 318/319
+are ALIVE no-ops because those return bytes are already `00`. Fixed-binary
+indices 136/200/312 (`227fcb55...`) and vulnerable short index 4 on ports
+14911-14914 are ALIVE.
+
+This confirms rather than extends the rung-4 boundary: the second sink's
+stock `-O2` frame has the same three live saved returns and every changed byte
+faults. No surviving modified control flow, no chosen byte, no command side
+effect, no rung 5, grade unchanged. Author self-observation. All ports were
+loopback and were freed; no server left running. Raw evidence in `out-w20-*/`.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
@@ -967,6 +1005,12 @@ independently replayed.
   sampled landing there survives. No new control-flow target, pointer effect
   with downstream use, command side effect or rung 5; do not resweep this
   region on the same build.
+- W20 closes the TYPE sink's stock `-O2` return map: same live returns at
+  `+136/+200/+312` as SENDER, with all six changed bytes per slot faulting
+  and the two already-zero bytes per slot as no-ops. Index 313's debugger-free
+  exit 132 has an UNKNOWN cause (under gdb it lands at `0x...5a0059` and
+  faults SIGSEGV); no signal-specific claim rests on that row. Do not resweep
+  TYPE `-O2` 136-143 / 200-207 / 312-319 on the same build.
 - W6's DoS signature (SIGSEGV/SIGILL) is a **Debug -O0 layout effect**; W7's
   -8/120 samples were non-fatal at `-O2`. W8/W10 measure a distinct stock `-O2`
   consequence: indices 105-111 zero a nonzero canary byte and abort with

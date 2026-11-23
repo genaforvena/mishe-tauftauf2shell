@@ -1,0 +1,48 @@
+Breakpoint 1 at 0x50901: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4482.
+Breakpoint 2 at 0x50907: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4488.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=313 array=0x7fffffffd930 rsp=0x7fffffffd930 rbp=0x7fffffffd930 dest=0x7fffffffda69 byte=0x40
+PRE-RETS +136=0x5555555a1f42 +200=0x5555555a200d +312=0x5555555a4059
+PRE-FRAME from array+128:
+0x7fffffffd9b0:	0x0000000000000000	0x00005555555a1f42
+0x7fffffffd9c0:	0x00000000fffffffe	0x0000000000000000
+0x7fffffffd9d0:	0x0000000000000000	0x0000000000000008
+0x7fffffffd9e0:	0x00005555556a7380	0x0000000000000000
+0x7fffffffd9f0:	0x0000000000000000	0x00005555555a200d
+0x7fffffffda00:	0x00000000fffffffe	0x0000000000000000
+0x7fffffffda10:	0x0000000000000000	0x0000000000000008
+0x7fffffffda20:	0x00005555556a7380	0x0000000000000000
+0x7fffffffda30:	0x00000000fffffffe	0x0000000000000000
+0x7fffffffda40:	0x0000000000000000	0x0000000000000008
+0x7fffffffda50:	0x0000000000000000	0x0000000000000000
+0x7fffffffda60:	0x0000000000000000	0x00005555555a4059
+0x7fffffffda70:	0x00005555556a7380	0x00005555556a7220
+0x7fffffffda80:	0x0000000000000000	0x00005555555a14b9
+0x7fffffffda90:	0x0000000000000000	0x0000000000000000
+0x7fffffffdaa0:	0x0000000000000000	0x0000000000000006
+0x7fffffffdab0:	0x00005555556a7380	0x00005555556a7220
+0x7fffffffdac0:	0x0000000000000020	0x00005555555a553a
+0x7fffffffdad0:	0x00005555556a7380	0x00005555555a54d5
+0x7fffffffdae0:	0x0000000000000000	0xfffffffe00000000
+0x7fffffffdaf0:	0x0000000000000008	0x0000000000000008
+0x7fffffffdb00:	0x0000000020000000	0x0000000000000000
+0x7fffffffdb10:	0x00000000feffffff	0x0000000000000000
+0x7fffffffdb20:	0x0000000000000000	0x72a90567bab95400
+#0  vrpn_Endpoint::handle_type_message (userdata=0x5555556a7220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4482
+#1  0x00005555555a1f42 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, p=..., userdata=userdata@entry=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x00005555555a200d in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, type=-2, sender=0, time=..., len=8, buffer=0x5555556a7380 "", userdata=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x00005555555a4059 in vrpn_Endpoint::dispatch (this=0x5555556a7220, type=-2, sender=0, time=..., payload_len=8, bufptr=0x5555556a7380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#4  0x00005555555a553a in vrpn_Endpoint_IP::getOneTCPMessage (this=this@entry=0x5555556a7220, fd=6, buf=0x5555556a7380 "", buflen=buflen@entry=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+#5  0x00005555555a575a in vrpn_Endpoint_IP::handle_tcp_messages (this=this@entry=0x5555556a7220, timeout=timeout@entry=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3561
+POST byte=0x0 RETS +136=0x5555555a1f42 +200=0x5555555a200d +312=0x5555555a0059
+#0  vrpn_Endpoint::handle_type_message (userdata=0x5555556a7220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4488
+#1  0x00005555555a1f42 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, p=..., userdata=userdata@entry=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x00005555555a200d in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, type=-2, sender=0, time=..., len=8, buffer=0x5555556a7380 "", userdata=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x00005555555a0059 in memset (__len=<optimized out>, __ch=<optimized out>, __dest=<optimized out>) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:59
+#4  vrpn_connect_udp_port (machineName=0x0, remotePort=1433039392, NIC_IP=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:2208
+#5  0x00005555556a7220 in ?? ()
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555a0059 in memset (__len=<optimized out>, __ch=<optimized out>, __dest=<optimized out>) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:59
+59	  return __builtin___memset_chk (__dest, __ch, __len,

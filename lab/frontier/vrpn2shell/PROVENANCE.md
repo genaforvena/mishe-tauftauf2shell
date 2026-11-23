@@ -591,3 +591,31 @@ copies. Each `out-w19-sweep-*/meta.txt` and `out-w19-ctl-*/meta.txt` records
 binary SHA, port, index and status. All ports were freed; no server left
 running. Author self-observation, grade unchanged, no chosen byte, no command,
 no rung 5.
+
+## W20 — TYPE sink -O2 frame map (2026-11-23 ~16:40Z)
+
+No build change: vulnerable `build-opt-07.36/server_src/vrpn_server` (SHA-256
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`) and fixed
+`build-opt-fixed/server_src/vrpn_server` (SHA-256
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`) reused.
+New committed probe `probe-opt-frame-wide.sh` takes BIN/MSGTYPE/LINE_PRE/
+LINE_POST/VAR; with `VAR=type_name MSGTYPE=-2 LINE_PRE=4482 LINE_POST=4488` it
+prints the array address, the three live return slots and a 48-quadword frame
+dump around `type_name+128`.
+
+`out-w20-type-frame/gdb.log` (harmless index 4, port 14500) measures
+`array=rsp=rbp=0x7fffffffd930` and live returns `+136=0x5555555a1f42`,
+`+200=0x5555555a200d`, `+312=0x5555555a4059`, matching SENDER's caller chain
+frame for frame. `out-w20-gdb-type-{136,200,312,313}/gdb.log` (ports
+14901-14904) record PRE -> POST `0x...5a1f42 -> 0x...5a1f00`,
+`0x...5a200d -> 0x...5a2000`, `0x...5a4059 -> 0x...5a4000` (backtrace frame #3
+enters `dispatch` with `this=0x20`) and `0x...5a4059 -> 0x...5a0059`; all four
+end in SIGSEGV under gdb.
+
+Debugger-free `probe-func-dos.sh` with explicit `BIN=` and `MSGTYPE=-2` on
+loopback ports 14636-14819: TYPE indices 136-141, 200-205 and 312-317 DEAD
+(exit 139 except 313, exit 132 with empty stderr, cause UNKNOWN); 142/143,
+206/207 and 318/319 ALIVE; fixed 136/200/312 and short index 4 on ports
+14911-14914 ALIVE. Each `meta.txt` records binary SHA, port, index and status.
+All ports were loopback and were freed; no server left running. Author
+self-observation; grade unchanged, no chosen byte, no command, no rung 5.
