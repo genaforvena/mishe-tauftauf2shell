@@ -7319,9 +7319,10 @@ was a permission artifact: the probe hardcodes the in-repo font path and
 `--permit-file-read` must name that absolute path, or Ghostscript uses a
 built-in font. With the permission, `exp/native-chain-safer.ps` performs the
 same `1 → 0` flip under `-dSAFER` (`CLEAN_VALUE=12345`) and
-`harness/run-safer.sh` gives `PASS=9 FAIL=0` (9/6 when the copied-tree replay
-permits the wrong path). All three were replayed here from a fresh `/tmp`
-copy with the permit path adapted; no trace hash is published for SAFER.
+`harness/run-safer.sh` gives `PASS=9 FAIL=0` (`3 PASS / 6 FAIL` when a
+copied-tree replay permits the wrong path). All three were replayed here
+from a fresh `/tmp` copy with the permit path adapted; no trace hash is
+published for SAFER.
 
 Grade now rung 3 + rung 4 on real shipped interpreter bytes with vulnerable,
 fixed and safe-input controls, all author-only: no `%pipe%`, command, benign
