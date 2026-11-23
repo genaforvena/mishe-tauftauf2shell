@@ -8142,3 +8142,38 @@ CHOSEN_5A=112`), fixed runs clean. No real psqlODBC build, driver manager,
 application SQL path, process, socket, wire, pointer control, command,
 witness verdict or rung 5; real application reachability UNKNOWN. Status:
 `reports/psqlodbc2shell-status.md`.
+
+## 2026-11-23 09:5xZ — thrift2shell admitted as the 108th route
+
+Frontier W143 staged Apache Thrift CVE-2026-55971 / GHSA-gwj4-q93m-wwqc in
+commit `42abf3a`: the C++ bindings' `THeaderTransport::untransform()` inflates
+an attacker-supplied frame section into the 1024-byte `tBuf_`, replaces `sz`
+with the decompressed length, then copies that many bytes back to `ptr`,
+which still points at the smaller compressed receive frame (pinned
+`THeaderTransport.cpp.v0.23.0:286-301`; same copy-back at the fix parent's
+`:320`). A 700-byte payload compressed to 31 bytes overruns the destination
+by 669 bytes. Affected before 0.24.0, fixed 0.24.0 by commit `db4a473f`
+(buffer swap). Duplicate check recorded in staging: the CVE/GHSA and
+`untransform()` appear in no other lane, the window registry records "Thrift
+absent", and the nearest ZLIB lane is a different bug. Brief:
+`reports/frontier-thrift2shell.md`; pins, verbatim slices, stubs and raw
+evidence: `lab/frontier/thrift2shell/PROVENANCE.md`. Operator replay from
+`git archive HEAD lab/frontier/thrift2shell` in a fresh `/tmp` returned rc 0,
+`PASS=71 FAIL=0` and trace
+`c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route as the 108th
+role, minted the path/debounce/slice units with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (217 total). The pinned full-flag doctor returned rc 0 `GREEN`, the
+doctor service read `ExecMainStatus=0` / `Result=success`, `check-omp-only.py`
+returned `GREEN (108 declared roles)`, `check-readme.py` GREEN and
+`check-reproducibility.py` GREEN (29 files). The two-pane window 111 and its
+registry entry were already live, so no window was created; the registry's
+historical "admission pending" description was left as a handoff record.
+Grade stays the author's: rung 3 gcc+clang ASan `WRITE of size 700` at pinned
+`:301` (fix parent `:320`), scoped rung 4 chosen bytes at inflated offsets
+0/16/32/64/128/256/699, fixed/v0.24.0/safe/gate controls clean. No real
+Thrift process, framing parser, socket, wire, pointer control, command,
+witness verdict or rung 5; live-server reachability UNKNOWN. Status:
+`reports/thrift2shell-status.md`.

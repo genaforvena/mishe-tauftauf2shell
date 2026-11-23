@@ -4262,3 +4262,40 @@ no real psqlODBC build, ODBC driver manager, application SQL path, process,
 socket, wire, pointer control, ROP chain, command, marker side effect,
 witness verdict or rung 5. The CWE-457 uninitialized-array limb is recorded
 from source but not exercised.
+
+## 2026-11-23 09:5xZ — thrift2shell admission replay
+
+GHSA-gwj4-q93m-wwqc / CVE-2026-55971, Apache Thrift before 0.24.0, fixed
+0.24.0 by commit `db4a473f3a984eee27273256fe737be5dd175595`. Claim URLs,
+the four pinned `THeaderTransport.cpp` blobs (v0.23.0, fix parent, fix
+commit, v0.24.0), the fix patch, the verbatim `untransform()` slices and the
+raw evidence are in `lab/frontier/thrift2shell/PROVENANCE.md` and its SHA-256
+manifests. Brief: `reports/frontier-thrift2shell.md`; status:
+`reports/thrift2shell-status.md`. The harness re-extracts the complete
+`untransform()` from all four pinned blobs under `#line` directives on every
+run, checks nine source files and fifteen harness files, and verifies the
+fix patch's git blob prefixes `cdf29cf3d53` / `891059b888e`.
+
+```
+T=$(mktemp -d /tmp/thrift2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/thrift2shell | tar -x -C "$T"
+bash "$T/lab/frontier/thrift2shell/harness/run.sh"
+```
+
+Expect rc 0, `PASS=71 FAIL=0` and
+`TRACE_SHA256=c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556`.
+ASan on the vulnerable slices reports `heap-buffer-overflow`, `WRITE of size
+700` at pinned `THeaderTransport.cpp.v0.23.0:301` in `untransform` and at the
+fix parent's `:320`; fix and v0.24.0 are clean. Rung 1 arithmetic is
+`COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669
+TBUF_SIZE=1024`; rung 2 vulnerable variants return `SET_SIZE=700` and smear
+the adjacent sink while fixed variants return `SETPTR_IS_ORIG_TBUF=1` with an
+intact sink; rung 4 observes chosen bytes `41/5a/7a/3c/7b/42/7b` at inflated
+offsets 0/16/32/64/128/256/699. The 4096-byte gate input is rejected in
+every variant.
+
+Boundaries: direct call with a stubbed object environment and a 31-byte
+harness destination adjacent to a 0xCC sink. There is no real Thrift
+process, framing parser, transport stack, socket, listener, peer, wire
+exchange, ASLR/grooming study, pointer control, ROP chain, command, marker
+side effect, witness verdict or rung 5. Live-server reachability UNKNOWN.
