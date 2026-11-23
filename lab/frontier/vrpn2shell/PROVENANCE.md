@@ -416,3 +416,37 @@ no-alignment control measured `0x4108f2 -> 0x410800` (port 14251) and exit
 Verdict: ESTABLISHED at the exact claimed lab-patched rung-4 scope; #1770 is
 answered. Full narrative, preconditions and limits in
 `reports/vrpn2shell.md`, "Independent witness replay — W135 / DM #1985".
+
+## W14 — observed canary and saved-rbp landings (2026-11-23 ~03:09Z)
+
+No new build: vulnerable `build-plain-07.36/server_src/vrpn_server` (SHA-256
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`) and
+fixed `build-replay-fixed-w4/server_src/vrpn_server` (SHA-256
+`15111740fd68868c49569570f1f283d4f801e7a4cfd9c988c94497e0c4b791fa`) reused.
+Committed `probe-plain-rip.sh` prints the canary word at `&sender_name+104`
+and saved rbp at `+112` PRE/POST; indices 104, 105, 108, 111, 112, 115, 119,
+4 on fresh ports 13971-13978. Raw PRE/POST and signal lines in
+`out-w14-canary-{104,105,108,111}/gdb.log`,
+`out-w14-rbp-{112,115,119,4}/gdb.log`.
+
+- 104: canary `0x067caf7cc8afc400` unchanged (LSB already 00), no signal.
+- 105: canary `0xd7015b652b808700` -> `0xd7015b652b800000`, byte 1 0x87 -> 00,
+  SIGABRT.
+- 108: canary `0x255bad791bd1c400` -> `0x255bad001bd1c400`, byte 4 0x79 -> 00,
+  SIGABRT.
+- 111: canary `0x5ad95cff4c673200` -> `0x00d95cff4c673200`, byte 7 0x5a -> 00,
+  SIGABRT.
+- 112: saved rbp `0x7fffffffd9f0` -> `0x7fffffffd900`, byte 0 0xf0 -> 00,
+  SIGSEGV.
+- 115: saved rbp `0x7fffffffd9f0` -> `0x7fff00ffd9f0`, byte 3 0xff -> 00,
+  SIGSEGV.
+- 119: saved rbp unchanged (byte 7 already 00), no signal.
+- 4: in-frame, unchanged, short control.
+
+Debugger-free `probe-func-dos.sh` on ports 13981-13984: vulnerable 105 and 111
+DEAD exit 134 with `*** stack smashing detected ***`, vulnerable 4 ALIVE,
+fixed 105 ALIVE. Per-run SHA, port, index, msgtype and status in
+`out-w14-func-{vuln-105,vuln-4,fixed-105,vuln-111}/meta.txt`, with client and
+server stderr alongside. This retires the address-inference wording for the
+Debug -O0 canary/saved-rbp bytes in the report. Author self-observation only;
+no grade change, no rung 5, no external host contacted, no server left running.

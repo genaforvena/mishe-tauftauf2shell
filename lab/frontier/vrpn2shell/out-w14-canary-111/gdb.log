@@ -1,0 +1,11 @@
+Breakpoint 1 at 0x49dad: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+Breakpoint 2 at 0x49db7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4560.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=111 dest=0x7fffffffd97f canary=0x5ad95cff4c673200 saved_rbp=0x7fffffffd9f0 saved_rip=0x555555596d88
+POST i=111 dest=0x7fffffffd97f canary=0xd95cff4c673200 saved_rbp=0x7fffffffd9f0 saved_rip=0x555555596d88
+*** stack smashing detected ***: terminated
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory

@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x49dad: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+Breakpoint 2 at 0x49db7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4560.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=115 dest=0x7fffffffd983 canary=0x6ba87a4a50291400 saved_rbp=0x7fffffffd9f0 saved_rip=0x555555596d88
+POST i=115 dest=0x7fffffffd983 canary=0x6ba87a4a50291400 saved_rbp=0x7fff00ffd9f0 saved_rip=0x555555596d88
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555555596d8c in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<error reading variable: Cannot access memory at address 0x7fff00ffd9c8>, p=<error reading variable: Cannot access memory at address 0x7fff00ffda00>, userdata=<error reading variable: Cannot access memory at address 0x7fff00ffd9c0>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+1446	    retval = d_systemMessages[-p.type](userdata, p);

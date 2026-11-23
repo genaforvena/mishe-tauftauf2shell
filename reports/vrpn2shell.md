@@ -1,6 +1,6 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-23 ~00:59Z. Wire rung 3 is OBSERVED on the live pinned 07.36
+Status 2026-11-23 ~03:09Z. Wire rung 3 is OBSERVED on the live pinned 07.36
 ASan server through both description handlers and, since W3, from a wire-supplied
 negative index; W7 extended it to an optimized (-O2) build. Plain-build wire
 input demonstrably changes a saved return address (W1/W2) and, at index -8,
@@ -24,6 +24,13 @@ and measured that the marker needs `-falign-functions=256`: with default
 function alignment the same wire index lands mid-function and faults.
 No chosen-byte control, no rung 5. W1/W2/W3/W6/W7/W10 consequence claims
 remain author-only pending replay; raw logs for every reported row are committed.
+
+W14 (2026-11-23 ~03:09Z) closes the last address-based inference in the plain
+Debug -O0 frame map: wire indices 104, 105, 108, 111, 112, 115 and 119 now have
+observed PRE/POST landing words across the canary (104-111) and saved rbp
+(112-119), not just address arithmetic. Debugger-free index 105 and 111 give
+`*** stack smashing detected ***`, with short and fixed controls clean. Rung
+and grade are unchanged; this is evidence quality on an author-only build.
 
 ## Claim and pins
 
@@ -109,10 +116,11 @@ Stack level 0, frame at 0x7fffffffd8a0
 ```
 
 Geometry from `out-plain-wire-100/gdb.log`: bytes 100-103 are padding, the
-stack canary occupies 104-111, saved rbp 112-119, saved rip 120-127. Only the
-120+ landing has a write-site log; the 104-119 consequences are inference from
-these addresses, not observed NUL landings. The ASan build places a redzone at
-100+, which is why the same index faults there.
+stack canary occupies 104-111, saved rbp 112-119, saved rip 120-127. The ASan
+build places a redzone at 100+, which is why the same index faults there.
+W14 measured NUL landings at offsets 104/105/108/111 (canary) and
+112/115/119 (saved rbp), so the 104-119 geometry is no longer pure
+address-based inference.
 
 ## Rung-4 boundary — saved return address changed from wire input
 
@@ -683,6 +691,44 @@ wire-chosen byte, no attacker-chosen command, no stock-build upgrade, and no
 rung 5. This answers replay request #1770; it is not promotion of the rung
 above 4 and not acceptance of the still-unreplayed W1/W2/W3/W6/W7/W10 claims.
 
+## W14 — observed canary and saved-rbp landings in the Debug -O0 frame (2026-11-23 ~03:09Z)
+
+The plain-build layout map had one caveat: only the saved-rip landing at index
+120 had a PRE/POST write-site log; the canary (104-111) and saved-rbp
+(112-119) bytes were inferred from addresses. W14 measured them directly with
+the committed `probe-plain-rip.sh`, which prints the whole canary word at
+`&sender_name+104` and the saved rbp word at `+112` immediately before and
+after the store. Vulnerable binary `build-plain-07.36/server_src/vrpn_server`
+(SHA-256 `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`),
+fresh loopback ports 13971-13978, no new build.
+
+| Index | Word touched | PRE -> POST | Signal |
+| --- | --- | --- | --- |
+| 104 | canary byte 0 | `0x067caf7cc8afc400` unchanged (already 00) | none |
+| 105 | canary byte 1 | `0xd7015b652b808700` -> `0xd7015b652b800000` (0x87 -> 00) | SIGABRT |
+| 108 | canary byte 4 | `0x255bad791bd1c400` -> `0x255bad001bd1c400` (0x79 -> 00) | SIGABRT |
+| 111 | canary byte 7 | `0x5ad95cff4c673200` -> `0x00d95cff4c673200` (0x5a -> 00) | SIGABRT |
+| 112 | saved rbp byte 0 | `0x7fffffffd9f0` -> `0x7fffffffd900` (0xf0 -> 00) | SIGSEGV |
+| 115 | saved rbp byte 3 | `0x7fffffffd9f0` -> `0x7fff00ffd9f0` (0xff -> 00) | SIGSEGV |
+| 119 | saved rbp byte 7 | `0x7fffffffd9f0` unchanged (already 00) | none |
+| 4 | in-frame | unchanged | none (short control) |
+
+Raw PRE/POST lines and debugger output are in `out-w14-canary-*/gdb.log` and
+`out-w14-rbp-*/gdb.log`. Indices 104 and 119 are honest no-op controls: the
+byte at that offset was already 0x00, so the same NUL store leaves the word
+unchanged. Indices 105/108/111 prove the canary occupies 104-111 in this
+build; indices 112/115 prove the saved rbp occupies 112-119.
+
+Debugger-free confirmation with `probe-func-dos.sh`, ports 13981-13984, each
+`meta.txt` recording the binary SHA: vulnerable 105 DEAD exit 134 with
+`*** stack smashing detected ***`, vulnerable 111 the same, vulnerable 4
+ALIVE, fixed-commit 105 (`build-replay-fixed-w4`, SHA `15111740...`) ALIVE.
+Evidence in `out-w14-func-*/`. This is the third distinct Debug -O0
+consequence signature (W6: -8 SIGSEGV, 120 SIGILL; W14: 105/111 SIGABRT), the
+same canary mechanism W8/W10 measured at -O2. Author self-observation on this
+plant's builds, not a witness verdict; fixed NUL at a chosen offset, no chosen
+byte, no command side effect, no rung 5. No build change and no grade change.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
@@ -696,9 +742,10 @@ above 4 and not acceptance of the still-unreplayed W1/W2/W3/W6/W7/W10 claims.
   Two superseded W11 stub iterations and the W11/W12 CMake configure logs
   remain uncommitted in the lab. Replay request #1261/#1271/#1304/#1329 is
   still open for the earlier claims; #1770 is answered.
-- Debug `-O0` geometry (W1/W2): canary at 104-111, saved rbp at 112-119 and
-  saved rip at 120-127 remain an address-based inference for the 104-119
-  bytes; only the 120 landing has a write-site log. Plain `-O2` geometry
+- Debug `-O0` geometry (W1/W2, W14): canary at 104-111, saved rbp at 112-119
+  and saved rip at 120-127. W14 measured write landings at 104/105/108/111
+  (canary) and 112/115/119 (saved rbp); W1 measured 120. The earlier
+  address-inference wording is retired for those offsets. Plain `-O2` geometry
   (W8) is measured from the store instruction and frame words: canary at
   104-111, saved rbp at 120, saved rip at 136-143. Both ranges are specific
   to g++ 13.3.0 on this host and must be re-measured on any other build.
