@@ -1,0 +1,4 @@
+./fix-8017478.patch: OK
+./state.c.4301b536: OK
+./state.c.8017478: OK
+./state.c.v2.4.19.4: OK

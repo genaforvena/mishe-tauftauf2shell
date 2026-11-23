@@ -1,9 +1,11 @@
 # Frontier brief: mod_auth_openidc — CVE-2026-54789 (modauthoidc2shell)
 
-**PROVISIONED, NOT STAGED — no harness, no rung, no target window.** Prepared by
-`frontier` on 2026-11-23 W138 after staging mongoose2shell. Pins are byte-exact
-and hash-verified; the harness and any window are work for a later wake. The
-operator owns final admission.
+**STAGED 2026-11-23 W139 — harness evidence and a live two-pane target window
+exist; no operator admission yet.** Prepared in W138 from public advisory and
+upstream fix pins; the harness, measurements and handoff were added in W139.
+Pins are byte-exact and hash-verified; full raw evidence is in
+`lab/frontier/modauthoidc2shell/PROVENANCE.md`. The operator owns final
+admission; the person owns wake units and full-flag sync.
 
 ## 1. Verified ground truth
 
@@ -88,6 +90,39 @@ chosen data). No Apache, APR pool or network is needed for the first step.
   is therefore the first measurement; a real-daemon attempt comes only after
   the slice works.
 - NVD status is `Deferred`; distro/RHSA references were not read and remain
-  UNKNOWN. No duplicate brief, charter, window or owning mind exists.
+  UNKNOWN. At provisioning time no duplicate brief, charter, window or owning
+  mind existed; W139 then created the charter, seed wall and target window.
+
+
+## 5. W139 local result — staged, rung 4 scoped
+
+`lab/frontier/modauthoidc2shell/harness/run.sh` re-extracts the record struct
+and the entire `oidc_state_cookies_parse_token()` verbatim from all three
+pinned blobs on every run, checks two SHA-256 manifests (12 files, including
+the driver and runner), and builds plain and ASan variants for the vulnerable
+parent, the fix commit and the released tag. It reports **59 PASS / 0 FAIL**
+on three consecutive runs and a clean-directory replay, all with
+`TRACE_SHA256=bbda75f0cf7e4e1789b75bd206922f7ccbbb0c24b676e8b92fb833af4c448459`
+(raw logs in `harness/evidence/`).
+
+- Rung 1: valueless state-prefixed token, dead `cookie != NULL` test, NUL at
+  logical index 30, predicted write offset 47; no vulnerable call.
+- Rung 2: the vulnerable slice scans past the token, overwrites an adjacent
+  `=` and dispatches `PROCESS_CALLS=1`; both fixed slices return `RC=0` with
+  no dispatch and leave the `=` byte intact.
+- Rung 3: gcc and clang ASan `READ of size 1`, 0 bytes past a 31-byte exact-size
+  token, in the verbatim slice at pinned `state.c.4301b536:214`.
+- Rung 4 (scoped): the one-byte NUL store lands at chosen offsets 31, 47 and
+  63 in the plain-build block, with an intact canary. The byte value is not
+  chosen; only its location is. No ASan WRITE is observable because the read
+  faults first.
+- Controls: fix-commit and released `v2.4.19.4` slices ASan-clean; well-formed
+  `mod_auth_openidc_state_abc=1` clean on all six binaries.
+
+Ceiling: no Apache/APR pool, request object, listener, socket or wire; scanner
+called directly with stubbed config and a recorder for the downstream cookie
+processor. The exact-size heap token is an instrument; a real APR arena has no
+per-object redzone [INFERENCE, untested]. No pointer control, chosen command or
+independent witness verdict. Rung 5 must not be inferred from this.
 
 No external system was probed; all URLs above were read for provisioning only.

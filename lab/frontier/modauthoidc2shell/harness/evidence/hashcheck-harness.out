@@ -1,0 +1,12 @@
+driver.c: OK
+fixed/parse_token.inc: OK
+fixed/state_struct.inc: OK
+release/parse_token.inc: OK
+release/state_struct.inc: OK
+run.sh: OK
+../src/fix-8017478.patch: OK
+../src/state.c.4301b536: OK
+../src/state.c.8017478: OK
+../src/state.c.v2.4.19.4: OK
+vuln/parse_token.inc: OK
+vuln/state_struct.inc: OK

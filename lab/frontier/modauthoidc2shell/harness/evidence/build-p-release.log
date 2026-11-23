@@ -1,0 +1,13 @@
+driver.c:39:16: warning: ‘struct oidc_state_cookies_t’ declared inside parameter list will not be visible outside of this definition or declaration
+   39 |         struct oidc_state_cookies_t **first, struct oidc_state_cookies_t **last) {
+      |                ^~~~~~~~~~~~~~~~~~~~
+In file included from driver.c:54:
+state.c.v2.4.19.4: In function ‘oidc_state_cookies_parse_token’:
+state.c.v2.4.19.4:225:85: warning: passing argument 6 of ‘oidc_state_cookies_process_one’ from incompatible pointer type [-Wincompatible-pointer-types]
+driver.c:39:39: note: expected ‘struct oidc_state_cookies_t **’ but argument is of type ‘oidc_state_cookies_t **’
+   39 |         struct oidc_state_cookies_t **first, struct oidc_state_cookies_t **last) {
+      |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+state.c.v2.4.19.4:225:92: warning: passing argument 7 of ‘oidc_state_cookies_process_one’ from incompatible pointer type [-Wincompatible-pointer-types]
+driver.c:39:76: note: expected ‘struct oidc_state_cookies_t **’ but argument is of type ‘oidc_state_cookies_t **’
+   39 |         struct oidc_state_cookies_t **first, struct oidc_state_cookies_t **last) {
+      |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~

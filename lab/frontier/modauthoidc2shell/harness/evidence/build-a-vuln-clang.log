@@ -1,0 +1,18 @@
+driver.c:39:16: warning: declaration of 'struct oidc_state_cookies_t' will not be visible outside of this function [-Wvisibility]
+   39 |         struct oidc_state_cookies_t **first, struct oidc_state_cookies_t **last) {
+      |                ^
+In file included from driver.c:58:
+state.c.4301b536:222:85: warning: incompatible pointer types passing 'oidc_state_cookies_t **' (aka 'struct oidc_state_cookies_t **') to parameter of type 'struct oidc_state_cookies_t **' [-Wincompatible-pointer-types]
+  222 |         return oidc_state_cookies_process_one(r, c, cookieName, cookie, currentCookieName, first, last);
+      |                                                                                            ^~~~~
+driver.c:39:39: note: passing argument to parameter 'first' here
+   39 |         struct oidc_state_cookies_t **first, struct oidc_state_cookies_t **last) {
+      |                                       ^
+In file included from driver.c:58:
+state.c.4301b536:222:92: warning: incompatible pointer types passing 'oidc_state_cookies_t **' (aka 'struct oidc_state_cookies_t **') to parameter of type 'struct oidc_state_cookies_t **' [-Wincompatible-pointer-types]
+  222 |         return oidc_state_cookies_process_one(r, c, cookieName, cookie, currentCookieName, first, last);
+      |                                                                                                   ^~~~
+driver.c:39:76: note: passing argument to parameter 'last' here
+   39 |         struct oidc_state_cookies_t **first, struct oidc_state_cookies_t **last) {
+      |                                                                            ^
+3 warnings generated.

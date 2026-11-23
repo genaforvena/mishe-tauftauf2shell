@@ -1,0 +1,3 @@
+VARIANT=release-v2.4.19.4 MODE=safe RC=1
+TOKEN=mod_auth_openidc_state_abc=1 TOKEN_LEN=28 TOKEN_ALLOC=29 PREFIX_LEN=23
+PROCESS_CALLS=1 PROCESS_KEPT=1 PROCESS_NAME=mod_auth_openidc_state_abc PROCESS_VALUE=1

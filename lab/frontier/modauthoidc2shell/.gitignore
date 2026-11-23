@@ -1,0 +1,7 @@
+harness/p-vuln
+harness/p-fixed
+harness/p-release
+harness/a-vuln-gcc
+harness/a-vuln-clang
+harness/a-fixed-gcc
+harness/a-release-gcc
