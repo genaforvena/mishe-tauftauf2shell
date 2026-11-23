@@ -356,9 +356,11 @@ bash run-fakechunk.sh
 `CHANGED_QWORDS_IN_WINDOW=1`, `CHANGED_OFFSETS=+512`,
 `PROCESS_REACHED_VULN=1`, `ABORT_VULN=0`,
 `PROCESS_REACHED_FIXED=1`, `ABORT_FIXED=0`,
-`PROCESS_REACHED_SAFE=1`, `ABORT_SAFE=1`. Two consecutive committed-script
-replays returned the identical normalized trace (winning low words `0x83f0`
-and `0x73f0`); SHA-256
+`PROCESS_REACHED_SAFE=1`, `ABORT_SAFE=1`. Three committed-script replays
+returned the identical normalized trace: two in-tree (winning low words
+`0x83f0` and `0x73f0`) and one from a clean `git archive HEAD` at commit
+`cd54f25` into `/tmp` with only the gitignored no-flush binaries copied in
+(winning low word `0x53f0`). SHA-256
 `bcde0050c441f08c0d920ad6365971b425d54ff3dd834bec84226647056bc3a1`.
 Raw gdb logs and heap dumps are gitignored. The fixed v0.24.0 control uses
 the winning frame and stays clean; the safe control is `kv-partial-safe.bin`
