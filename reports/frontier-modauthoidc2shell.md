@@ -196,3 +196,21 @@ lab/frontier/modauthoidc2shell/full && bash build-plain.sh &&
 bash probe-plain-oob.sh && bash probe-plain-detail.sh`; raw evidence and
 limits `full/evidence/plain-oob/README.md`.
 
+### W10 consumer check (2026-11-23)
+
+`full/probe-plain-keepalive.sh` arms a hardware watchpoint on the corrupted
+word after the store, deletes the source breakpoint, and sends three requests
+on the **same TCP connection** so no new accept can clear the word. It
+measured the same store (`0x7ffff6de2221`, `0x7ffff5603d` → `0x7ffff56000`),
+got three HTTP 302 replies, and recorded no watchpoint hit or watch-stop
+backtrace within 70 seconds. A one-off `LD_PRELOAD` allocation tracer also
+found no traced APR allocation covering the word (nearest starts 0x6f bytes
+later), with the caveat that intra-libapr calls bypass interposition.
+
+Both are negative results. The word is connection-pool state with no observed
+consumer in the same request or two later requests on that connection; the
+"pointer-bearing" wording describes the 8-byte shape at the store, not a
+demonstrated dereference. Grade stays rung 4 scoped, byte always NUL, target
+not wire-chosen, no chosen byte, command or rung 5. Raw:
+`full/evidence/plain-oob/keepalive/` and `alloc-trace/`.
+

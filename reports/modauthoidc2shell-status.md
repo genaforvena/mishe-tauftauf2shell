@@ -211,3 +211,24 @@ lab-layout facts. Replay: `cd lab/frontier/modauthoidc2shell/full &&
 bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh`;
 raw evidence and limits `full/evidence/plain-oob/README.md`.
 
+### W10 no-consumer check (2026-11-23) — unwitnessed
+
+`full/probe-plain-keepalive.sh` arms a hardware watchpoint on the corrupted
+word at pinned `state.c:219`, removes the source breakpoint, and sends three
+requests on the **same TCP connection**, avoiding the W9 accept-time overwrite.
+It measured `STORE=0x7ffff6de2221 WORD=0x7ffff5603d` →
+`AFTER=0x7ffff56000`; all three returned HTTP 302 and no watchpoint hit,
+`Old value`/`New value` or watch-stop backtrace occurred within 70 seconds
+(`full/evidence/plain-oob/keepalive/`). A one-off `LD_PRELOAD` APR allocator
+trace found no traced allocation covering the word (nearest starts 0x6f bytes
+later), though intra-libapr calls bypass interposition
+(`plain-oob/alloc-trace/`).
+
+No consumer of the corrupted word was observed in the faulting request or the
+two later same-connection requests. "Pointer-bearing" describes the 8-byte
+shape, not a demonstrated dereference. Grade unchanged: rung 4 scoped on a
+live pre-auth wire path, unwitnessed at that scope; byte always NUL, no chosen
+byte, pointer target not wire-chosen, no command or rung 5. Replay: `cd
+lab/frontier/modauthoidc2shell/full && bash build-plain.sh &&
+bash probe-plain-oob.sh && bash probe-plain-keepalive.sh`.
+

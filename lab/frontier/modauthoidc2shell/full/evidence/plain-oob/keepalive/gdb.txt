@@ -1,0 +1,12 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/state.c.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/state.c:219) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so"
+
+Breakpoint 1, oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x7ffff6de2221 "=`\365\377\177", c=<optimized out>, r=<optimized out>) at state.c:219
+219		*cookie = '\0';
+STORE=0x7ffff6de2221 WORD=0x7ffff5603d
+220		cookie++;
+AFTER=0x7ffff56000
+Hardware watchpoint 2: -location *(unsigned long *)$store

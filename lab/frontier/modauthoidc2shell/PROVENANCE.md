@@ -241,3 +241,32 @@ or rung 5. gdb disables ASLR, so the absolute addresses are lab-layout facts.
 Re-run: `cd full && bash build-plain.sh && bash probe-plain-oob.sh &&
 bash probe-plain-detail.sh && bash probe-plain-second.sh`.
 
+
+## No consumer for the OOB word (2026-11-23 W10)
+
+`full/probe-plain-keepalive.sh` breaks at pinned `state.c:219` on the live
+pre-auth wire path, saves the store address, steps over the NUL store, arms a
+hardware watchpoint on that exact 8-byte word, deletes the source breakpoint
+and sends three requests on the **same TCP connection** (no new accept). Raw:
+`full/evidence/plain-oob/keepalive/{gdb,client}.txt`.
+
+Measured: `STORE=0x7ffff6de2221 WORD=0x7ffff5603d`,
+`AFTER=0x7ffff56000`; all three replies HTTP 302; no watchpoint hit, no
+`Old value`/`New value`, no watch-stop backtrace before the 70-second gdb
+timeout. Neither the faulting request nor the two later requests on that
+connection read or wrote the corrupted word. This sharpens, not replaces, the
+W9 accept-time overwrite: the word is connection-pool state with no observed
+consumer.
+
+A separate one-off `LD_PRELOAD` tracer (`full/evidence/plain-oob/alloc-trace/`)
+logged 594 `apr_palloc`/`apr_pcalloc` returns while the same probe faulted in
+the shifted layout at `0x7ffff6ddd221`. No traced allocation covers the word;
+the nearest following allocation starts at `0x7ffff6ddd290` (0x6f bytes
+later). Intra-libapr calls bind locally and bypass the interposer, so this is
+suggestive, not proof, that the word is pool slack rather than a live object.
+
+Both checks are negative. Byte still always NUL, target not wire-chosen, no
+consumer read, chosen byte, command or rung 5. Grade unchanged: rung 4 scoped
+on a live pre-auth wire path, unwitnessed at that scope; W147 covers only the
+direct-call harness. Re-run: `cd full && bash build-plain.sh &&
+bash probe-plain-oob.sh && bash probe-plain-keepalive.sh`.

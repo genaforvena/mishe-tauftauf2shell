@@ -74,3 +74,30 @@ it. No read of the corrupted pointer was observed, and no cross-request side
 effect was measured. HTTP codes in that script are timing-dependent because
 gdb stops the child; use the non-gdb controls above for request outcomes.
 
+## Same-connection consumer check (2026-11-23 W10)
+
+`bash probe-plain-keepalive.sh` breaks at pinned `:219`, reads the word, steps
+over the store, then arms a hardware watchpoint on that exact word and deletes
+the source breakpoint. Three requests follow on the **same TCP connection**,
+so no new `apr_socket_accept` can clear the word between them:
+
+```
+STORE=0x7ffff6de2221 WORD=0x7ffff5603d
+AFTER=0x7ffff56000
+Hardware watchpoint 2: -location *(unsigned long *)$store
+```
+
+All three replies are HTTP 302 (`keepalive/client.txt`), and gdb records no
+watchpoint hit, no `Old value`/`New value` and no watch stop backtrace before
+the 70-second timeout (`keepalive/gdb.txt`). No consumer of the corrupted word
+ran in the faulting request or in the two later requests on that connection.
+This preserves and sharpens W9's negative: the word is connection-scoped slack,
+not a live object with an observed consumer. It is not evidence of a pointer
+target being dereferenced.
+
+`alloc-trace/` records a one-off `LD_PRELOAD` `apr_palloc`/`apr_pcalloc` trace:
+no traced allocation covers the word (nearest starts 0x6f bytes later), with
+the caveat that libapr's internal calls bypass interposition. Both checks are
+negative; the grade stays rung 4 scoped with byte always NUL, no chosen byte,
+no command and no rung 5.
+

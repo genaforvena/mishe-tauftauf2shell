@@ -72,12 +72,15 @@ the runner because it depends on arena layout.
 - W9 adds a non-ASan plain build (`build-plain.sh`): on the same value-less
   wire request the OOB store lands in the low byte of pointer `0x7ffff5603d`
   (→ `0x7ffff56000`) with the live pre-auth stack; no consumer read followed.
-  Raw evidence and limits: `plain-oob/README.md`.
+  Raw evidence and limits: `plain-oob/README.md`. W10's same-connection
+  watchpoint probe found no consumer of that word in two later requests on the
+  same TCP connection, and the one-off allocator trace found no covered live
+  allocation (`plain-oob/keepalive/`, `plain-oob/alloc-trace/`).
 - No chosen byte, pointer control, command or rung 5 in any regime. None of
   the live probes is witnessed; W147 covers the direct-call harness only.
 
 ## Re-run
 
 ```
-cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh && bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh
+cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh && bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh && bash probe-plain-keepalive.sh
 ```

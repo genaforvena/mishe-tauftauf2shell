@@ -1,0 +1,3 @@
+mod_auth_openidc_state_novalue HTTP/1.1 302 Found
+mod_auth_openidc_state_good=1 HTTP/1.1 302 Found
+mod_auth_openidc_state_novalue2=x HTTP/1.1 302 Found
