@@ -111,21 +111,42 @@ reported by the library (`w1/evidence/<binary>.<scenario>.log`):
 | `valid` | 32 | rc 0, `CEK_LEN_AFTER=32`, HMAC fail (`ERRCODE=4`: synthetic ciphertext/tag) | clean | rc 0, same HMAC fail |
 | `wrapped` | 40 | rc 0, `CEK_LEN_AFTER=40` | `WRITE of size 40`, `jwe.c:595` | rc 0, `ERRCODE=1`, `CEK_LEN_AFTER=32` |
 | `wrappedN48` | 48 | rc 134, `munmap_chunk(): invalid pointer` | ASan OOB write | rc 0, `ERRCODE=1` |
-| `wrappedN56` | 56 | rc 0 (`CEK_LEN_AFTER=56`) or rc 139 SIGSEGV, varies by build/run | ASan OOB write | rc 0, `ERRCODE=1` |
+| `wrappedN56` | 56 | rc 0 (`CEK_LEN_AFTER=56`) or rc 139 SIGSEGV; W183 below explains the variation | ASan OOB write | rc 0, `ERRCODE=1` |
 | `wrappedbig` | 1016 | rc 139 SIGSEGV | `WRITE of size 1016` | rc 0, `ERRCODE=1` |
 | `probe` (invalid IV) | 40 | rc 0, output cleansed, no chosen bytes | ASan OOB write | rc 0, `ERRCODE=1` |
 
 The 48-byte case aborting is deterministic (`munmap_chunk()`); the 56-byte
-case is not. Author repeats and an independent witness clean-room replay
+case varies. Author repeats and an independent witness clean-room replay
 observed both rc 0 and rc 139 SIGSEGV across builds/runs (W182 repetition
 log `w1/evidence/wrappedN56-variation-w182.log`: 2/12 plain and 1/12 trace
 rc 139). The witness traced one rc 139 to `__strcmp_avx2` from
 `_cjose_jwe_calc_auth_tag` (`jwe.c:1098`) via
-`_cjose_jwe_decrypt_dat_aes_cbc` (`jwe.c:1400`) with `enc=0x0`, i.e. an
-overflow-corrupted live jansson string consumed by the real decrypt path.
-The cause of the variation was not established and stays UNKNOWN; no
-control-flow target was observed and the security grade is unchanged. This
-is a preserved contradiction, not an escalation.
+`_cjose_jwe_decrypt_dat_aes_cbc` (`jwe.c:1400`) with `enc=0x0`.
+
+W183 established the cause (`w1/evidence/wrappedN56-cause-w183.log`; the
+author's gdb capture `w1/evidence/wrappedN56-gdb-w183.log` matches the witness
+backtrace): the 25-byte jansson object at `cek+48` is a `json_string_t` and,
+in different processes, is either the 13-byte `enc` value `A128CBC-HS256` or
+the 6-byte `alg` value `A128KW`. The allocation ring, offsets, callers and
+CEK address are identical in every run; only that object's semantic identity
+swaps. In all 4 crashes of a 40-run instrumented batch,
+`json_object_get(hdr,"enc")` returned the adjacent object; in all 36
+survivors it did not. The 56-byte write overwrites that object's `type` field
+at `cek+48` with the chosen byte `0x5a`, so `json_string_value()` returns
+NULL and the real decrypt path calls `strcmp(NULL, ...)`; when the other
+string occupies the slot, `enc` stays intact and decrypt returns `ERRCODE=4`.
+Fixed-IV and ASLR-off batches still vary (7/60 and 6/60 rc 139), so neither
+token randomness nor address randomization is the cause. Chosen bytes
+`02 00 00 00 01 00 00 00` at that offset (valid JSON_STRING type, refcount 1)
+removed the early strcmp fault in all 60 runs, including the 5 where `enc`
+was the adjacent object; all 60 then aborted in `munmap_chunk()` because the
+chunk size at `cek+40..47` stays corrupted. This is chosen-byte control of a
+live jansson object's metadata in the real decrypt path, not pointer control:
+the object's value pointer at +16 is past the 56-byte write. Why the two
+same-size strings swap identity with an identical allocation ring remains
+UNKNOWN (jansson hash-seed-dependent insertion order is an untested
+inference). No control-flow target; security grade unchanged. This is a
+preserved contradiction, now causally explained, not an escalation.
 
 Heap geometry in the plain vulnerable process (`w1-plain-vuln.wrapped.log`):
 `CEK_MINUS16=...3100000000000000` gives a 48-byte glibc chunk (32-byte

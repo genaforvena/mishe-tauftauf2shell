@@ -1,0 +1,57 @@
+W183 — cause of the 56-byte wire-outcome variation, 2026-11-23 21:21-21:29Z.
+
+All work is loopback-only, one HTTP request per fresh process, pinned w1
+binaries and pinned vulnerable cjose. Throwaway tooling lived in
+/tmp/cjose-w183-56var (scripts and instrumented server sources are not part of
+the durable harness); the four representative raw logs are beside this file:
+
+  wrappedN56-gdb-w183.log              gdb backtrace of one rc 139 crash
+  wrappedN56-encadjacent-crash-w183.log  pre-dump: enc object == cek+48 object
+  wrappedN56-encelsewhere-survive-w183.log  pre-dump: enc object elsewhere
+  wrappedN56-typed-refcount-w183.log   chosen type/refcount bytes, abort
+
+Batches (fresh process each, fixed IV means identical token bytes):
+
+  random IV, w1-trace-vuln       60 runs: 56 rc 0,  4 rc 139
+  fixed IV,  w1-trace-vuln       60 runs: 53 rc 0,  7 rc 139
+  fixed IV, ASLR off (setarch -R) 60 runs: 54 rc 0,  6 rc 139
+  instrumented, ring dump        60 runs: 48 rc 0, 12 rc 139
+  instrumented, + object content 40 runs: 36 rc 0,  4 rc 139
+  instrumented, chosen type/refcount bytes
+                                 60 runs:  0 rc 0,  0 rc 139, 60 rc 134
+                                          (all DECRYPT=0 ERRCODE=4
+                                           CEK_LEN_AFTER=56,
+                                           munmap_chunk(): invalid pointer)
+
+Fixed IV removes token randomness; disabling ASLR makes every CEK address
+0x4234b0. Neither removes the variation. The pre-decrypt allocation ring is
+byte-for-byte identical across all outcomes (same 39 entries, same requested
+sizes/offsets/callers, same CEK address); only the semantic identity of the
+adjacent 25-byte jansson object swaps.
+
+The adjacent object is a json_string_t at cek+48: type=2 at +0, refcount=1 at
++8, value pointer at +16, length at +24. In all 4 crashes of the 40-run batch
+json_object_get(hdr,"enc") RETURNED THAT OBJECT (13-byte "A128CBC-HS256");
+in all 36 survivors it returned a different object (the 6-byte "A128KW").
+The 56-byte write covers cek+32..55, including that object's type field at
+cek+48; the baseline wrap plaintext puts the chosen byte 0x5a there. Invalid
+type makes json_string_value() return NULL, so
+_cjose_jwe_decrypt_dat_aes_cbc (jwe.c:1395-1400) passes enc=0x0 to
+_cjose_jwe_calc_auth_tag, whose strcmp at jwe.c:1098 faults in __strcmp_avx2.
+Author gdb capture matches the witness's #3020 backtrace exactly. When the
+other string occupies cek+48, enc stays intact and decrypt returns ERRCODE=4
+with rc 0.
+
+Chosen-bytes control: replacing wrap bytes 48..55 with
+02 00 00 00 01 00 00 00 (JSON_STRING type, refcount 1) removed the early
+strcmp fault in every run, including the 5 runs where enc was the adjacent
+object; decrypt then returned DECRYPT=0 ERRCODE=4 CEK_LEN_AFTER=56 in all 60.
+All 60 later aborted in munmap_chunk(): invalid pointer, because the chunk
+size field at cek+40..47 is still the chosen 0x5a bytes. So the chosen wire
+bytes control the type/refcount of a live jansson object consumed by the real
+decrypt path and change the fault site, but the object's value pointer at
++16 is past the write: no pointer or IP control. Outcome differences in the
+baseline are fully accounted for by the adjacent object's identity; why the
+two same-size strings swap identity with an identical allocation ring is
+UNKNOWN (jansson hash-seed-dependent insertion order is an untested
+inference). Grade and rung 1-4 ceiling unchanged; no r5.

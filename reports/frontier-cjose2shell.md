@@ -105,7 +105,7 @@ normalized trace hash.
 - `harness/check.sh`: **223 PASS / 0 FAIL** on three identical runs, trace
   `455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`.
 
-## 5. W181 loopback wire consumer (measured this wake)
+## 5. W181 loopback wire consumer (measured W181, variation cause resolved W183)
 
 A lab-only consumer (`lab/frontier/cjose2shell/w1/{server.c,client.py,build.sh,run.sh}`)
 binds an ephemeral port on 127.0.0.1, accepts a real HTTP GET carrying a
@@ -132,9 +132,20 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   `__strcmp_avx2` via `_cjose_jwe_calc_auth_tag` (`jwe.c:1098`) through
   `_cjose_jwe_decrypt_dat_aes_cbc` (`jwe.c:1400`) with `enc=0x0`, consistent
   with an overflow-corrupted live jansson string reaching the real decrypt
-  path. Why the outcome varies by build and run was not established and
-  stays UNKNOWN; no pointer or control-flow target was observed. This
-  changes neither the security grade nor the rung 1-4 ceiling.
+  path. W183 established why it varies
+  (`w1/evidence/wrappedN56-cause-w183.log`): the adjacent 25-byte jansson
+  object is a `json_string_t`, and with an identical allocation ring it is
+  either the 13-byte `enc` value or the 6-byte `alg` value in different
+  processes. In a 40-run instrumented batch all 4 crashes had
+  `json_object_get(hdr,"enc")` returning that object and all 36 survivors did
+  not; the 56-byte write replaces its `type` with chosen byte `0x5a`, so
+  `json_string_value()` returns NULL and the real decrypt path faults in
+  `strcmp`. Chosen bytes `02 00 00 00 01 00 00 00` (valid type and refcount)
+  removed that fault in all 60 runs, but all then aborted in `munmap_chunk()`
+  because the chunk size at `cek+40..47` is still corrupted. Fixed-IV and
+  ASLR-off batches still vary, so neither token randomness nor ASLR explains
+  it; why the two same-size strings swap identity stays UNKNOWN. No pointer or
+  control-flow target; security grade and rung 1-4 ceiling unchanged.
 - Heap map: the CEK is a 48-byte glibc chunk; the adjacent object is a
   25-byte jansson `jsonp_malloc` string at `cek+48`, preceded by its size
   field at `cek+40`. Further neighbors come from jansson, `_decode`,
@@ -157,8 +168,8 @@ are measured. The witness independently replayed both lanes from a clean
 git archive: rungs 1-4 ESTABLISHED at the labeled direct-call real-library
 scope, and rungs 1-3 plus byte-control mechanics ESTABLISHED at the labeled
 synthetic 127.0.0.1 consumer scope (the 56-byte wording contradiction from
-that replay is amended in section 5). No deployed server, credential,
-pointer/IP control or shell command. Advisory pre-authentication
+that replay is amended and its cause measured in section 5). No deployed
+server, credential, pointer/IP control or shell command. Advisory pre-authentication
 reachability in a real deployment and any RCE claim remain **UNKNOWN**;
 rung 5 not attempted and not established. A pointer or control-flow target
 in a real consuming process is the prerequisite for any benign-marker

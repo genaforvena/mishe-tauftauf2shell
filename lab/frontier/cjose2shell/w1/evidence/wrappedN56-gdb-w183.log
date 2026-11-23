@@ -1,0 +1,66 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=42823
+REQUEST_BYTES=390
+TOKEN_BYTES=270
+WIRE_SEG_B64=86 WIRE_DECODE=1 WIRE_EK_RAW_LEN=64
+IMPORT=1 ERRCODE=0
+JWE_CEK_LEN_BEFORE=0 JWE_EK_RAW_LEN=64
+PRE_ALLOCS_BEGIN
+PRE 0 0x4232a0 67 0x4053ad
+PRE 1 0x4232f0 16 0x4171a3
+PRE 2 0x423310 72 0x4171a3
+PRE 3 0x423360 128 0x4171a3
+PRE 4 0x4233f0 6 0x4171a3
+PRE 5 0x423410 6 0x4171a3
+PRE 6 0x423430 32 0x4171a3
+PRE 7 0x423460 60 0x4171a3
+PRE 8 0x4233f0 4 0x4171a3
+PRE 9 0x4234b0 32 0x4171a3
+PRE 10 0x4234e0 25 0x4171a3
+PRE 11 0x423510 32 0x4171a3
+PRE 12 0x423540 58 0x4171a3
+PRE 13 0x4233f0 19 0x4053ad
+PRE 14 0x4232f0 16 0x406eac
+PRE 15 0x423590 48 0x406a83
+PRE 16 0x4235d0 224 0x40b30b
+PRE 17 0x4236c0 56 0x40b30b
+PRE 18 0x423700 52 0x4050bb
+PRE 19 0x423740 41 0x4053ad
+PRE 20 0x423780 87 0x4050bb
+PRE 21 0x423310 67 0x4053ad
+PRE 22 0x423410 23 0x4050bb
+PRE 23 0x4233f0 19 0x4053ad
+PRE 24 0x423460 65 0x4050bb
+PRE 25 0x4237e0 51 0x4053ad
+PRE 26 0x423820 44 0x4050bb
+PRE 27 0x423430 35 0x4053ad
+PRE 28 0x423860 16 0x4171a3
+PRE 29 0x423540 72 0x4171a3
+PRE 30 0x423360 128 0x4171a3
+PRE 31 0x423880 6 0x4171a3
+PRE 32 0x4238a0 9 0x4171a3
+PRE 33 0x423510 32 0x4171a3
+PRE 34 0x4238c0 60 0x4171a3
+PRE 35 0x423880 6 0x4171a3
+PRE 36 0x423910 16 0x4171a3
+PRE 37 0x4234e0 32 0x4171a3
+PRE 38 0x423930 60 0x4171a3
+PRE_ALLOCS_END
+
+Program received signal SIGSEGV, Segmentation fault.
+__strcmp_avx2 () at ../sysdeps/x86_64/multiarch/strcmp-avx2.S:283
+warning: 283	../sysdeps/x86_64/multiarch/strcmp-avx2.S: No such file or directory
+#0  __strcmp_avx2 () at ../sysdeps/x86_64/multiarch/strcmp-avx2.S:283
+#1  0x000000000040db82 in _cjose_jwe_calc_auth_tag (enc=0x0, jwe=0x4235d0, md=0x7fffffff6000 "\300\025B", md_len=0x7fffffff5fd4, err=0x7fffffff6150) at jwe.c:1098
+#2  0x000000000040eb9c in _cjose_jwe_decrypt_dat_aes_cbc (jwe=0x4235d0, err=0x7fffffff6150) at jwe.c:1400
+#3  0x0000000000411077 in cjose_jwe_decrypt (jwe=0x4235d0, jwk=0x423590, content_len=0x7fffffff60e8, err=0x7fffffff6150) at jwe.c:2157
+#4  0x0000000000404a72 in main (argc=1, argv=0x7fffffffe2f8) at /tmp/cjose-w183-56var/server-pre.c:151
+rip            0x7ffff778b32b      0x7ffff778b32b <__strcmp_avx2+27>
+rax            0xd6e00000          3605004288
+rdi            0x0                 0
+rsi            0x41bd6e            4308334
+rdx            0x41bd6e            4308334
+rcx            0x7fffffff5fd4      140737488314324
+SCENARIO=wrappedN56 FIXED_IV=1 TOKEN_LEN=270
+RESPONSE=b''
