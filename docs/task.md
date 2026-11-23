@@ -6756,7 +6756,9 @@ witness #1942 returned CLOSED ESTABLISHED at that negative-result scope.
 W4 (`08e86c0`) chooses a mask that redirects a freed tcache chunk's `next`
 to a chosen address, with two `malloc(128)` calls returning the victim then
 the chosen address and an observed eight-byte key-slot write there —
-in-process harness mechanics, witness pending. A full FreeSWITCH SIP dialog,
+in-process harness mechanics; witness #1968 replayed it three times from a
+clean archive and returned ESTABLISHED at that labeled rung-4 scope, no nit or
+grade change. A full FreeSWITCH SIP dialog,
 marker, command and rung 5 remain absent.
 
 Pppd2Shell W132 (`740b6fd`, `reports/pppd2shell-live.md` W132) strengthens rung
@@ -6991,7 +6993,9 @@ provision the exact 633ae02 HEAD pin, build a gdbserver-only ASan binary
 plus a fixed control, and send checksummed RSP packets from a loopback
 client with correct acknowledgements. `live_verify.sh` produced
 **16 PASS / 0 FAIL** twice, normalized hash
-`b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+`5701a8746f6b5ed7dc43eadef6b4b938f85af6410a44e5d2105537929687de42`.
+W3 normalized the compile-time source path in `live_verify.sh`; the earlier
+`b646cc08…` value varied with build directory and is superseded.
 On the real plant-started gdbserver, `QTDP:1:0:E:0:0` created a tracepoint
 and `QTDPsrc:1:0:cond:0:1:` with 64 chosen bytes produced ASan
 `heap-buffer-overflow`, `WRITE of size 1`, `0 bytes after a 2-byte region`,
@@ -7101,11 +7105,16 @@ and short N=8 exit 0. Under gdb the 64 chosen bytes overwrite the vptr
 of a live adjacent `tdesc_feature` (`vtable for tdesc_feature + 16`),
 and a second exact-byte packet forges that vtable so the destructor's
 indirect call reaches `abort()` (SIGABRT, twice) while a same-length
-original-object control exits normally. The forged address needs gdb's
-fixed load address; the same payload under `setarch -R` without gdb
-exited 0. No command, no wire-only side effect, no `thread_db` call and
-no witness replay: rung 4 demonstrated with recorded conditions, rung 5
-untouched. Details: `reports/gdbserver2shell-status.md`,
+original-object control exits normally. Witness W137 (#2085) reproduced the
+live vptr overwrite and forged call in its own plain build (6 PASS / 0 FAIL
+twice, byte-identical hash), changing only the vptr field to that build's
+object+8; the payload must be re-derived per build for load base and heap
+object offset. W4 (`2a1b301`) then fired the forged `abort@plt` call from a
+loopback client under `setarch -R` with no debugger (3 PASS / 0 FAIL twice,
+`SERVER_RC=134`; short N=8 and well-formed N=16 exit 0). No command, no
+wire-only command side effect, no `thread_db` call: rung 4 demonstrated with
+recorded build- and environment-specific conditions, rung 5 untouched;
+`abort()` is a marker. Details: `reports/gdbserver2shell-status.md`,
 `lab/frontier/gdbserver2shell/PROVENANCE.md`.
 
 ## 2026-11-23 ~02:4xZ — minisnmpd2shell admitted as the 96th route
@@ -7130,12 +7139,16 @@ entries (map 193). The pinned doctor returned `PASS local plant out of Git` /
 `GREEN`, closing the transient RED caused by the charter appearing before its
 units existed. Repo checkers are GREEN (README 92 rows, omp-only 96 roles).
 Grade is unchanged: harness rungs 1–3 ASan READ-1 with scoped rung 4
-chosen-offset/chosen-byte readback, and a real loopback daemon reaching the
-vulnerable branch at rung 2. No wire-level ASan report, adjacent-object
-identity, pointer control, marker, command or rung 5. The cheapest next
-experiment is gdb on a plant-started vulnerable daemon reading `pos` and the
-bytes past `client->packet` at the subid-cap branch; a heap-packet variant
-would be instrumented rather than verbatim and must be labeled as such. With
+chosen-offset/chosen-byte readback, now also reproduced in the real
+plant-started daemon under gdb (`4096b47`): a crafted loopback GET reads 18
+bytes past the logical 2048-byte `client->packet` and recovers adjacent
+`g_udp_client.size` byte `0x08` into `subid_list[5]`, with declared lengths
+2047–2049 rejected and 2050/65535 saturating at 18 reads. Witness W138
+replayed the harness (43 PASS / 0 FAIL, byte-identical hash) and the full
+gdb dump from `git archive 4096b47`, verdict ESTABLISHED at that labeled
+scope, no grade change. No wire-level ASan report, adjacent-object identity,
+pointer control, marker, command or rung 5; a heap-packet variant would be
+instrumented rather than verbatim and must be labeled as such. With
 this admission the plant declares 96 engine routes and 92 target minds;
 status is `reports/minisnmpd2shell-status.md`.
 
@@ -7159,11 +7172,14 @@ entries (map 195). The pinned doctor returned `PASS local plant out of Git` /
 `GREEN` and `tools/check-omp-only.py` reports `GREEN (97 declared roles)`.
 Grade is unchanged: rung 3 ASan WRITE-13 on verbatim pinned helper bytes and
 scoped partial rung 4 over write extent with a fixed suffix tail, not
-arbitrary OOB bytes. No live dissector or loopback capture path, pointer
-control, marker, command or rung 5. AV:A is preserved: this is an adjacent
-dissector bug, not a remotely connectable service. Cheapest next experiment:
-build v0.8.4.1 with ASan, inject a crafted TCP 8074 `GG_LOGIN50_CMD` packet
-with `version=0x44000042` into a loopback capture and check whether ASan
-reports at `gg_get_version` before the length guards; preserve a guard-first
-negative. With this admission the plant declares 97 engine routes and 93
-target minds; status is `reports/ettercap2shell-status.md`.
+arbitrary OOB bytes. W1 (`fcec372`, `e6649d4`) then ran the cheapest next
+experiment on the real v0.8.4.1 dissector: the crafted `GG_LOGIN50_CMD`
+packet with `version=0x44000042` writes at `gg_get_version:673` via
+`dissector_gg:360` before the length guard, 0 bytes past the 30-byte `tbuf3`
+from `:356`, both from a pcap replay and from a live frame on `lo`
+(`reports/ettercap2shell-livedissector.md`). Extent controls give WRITE-12 at
+`:676`; safe version, wrong type, server direction and fixed 0.8.5.1 are
+clean. No arbitrary byte write, pointer control, marker, command or rung 5;
+an adjacent-network sender is still untested, so AV:A is preserved. With this
+admission the plant declares 97 engine routes and 93 target minds; status is
+`reports/ettercap2shell-status.md`.

@@ -129,7 +129,7 @@ containers whose host ports bind only to loopback.
 | Gdbserver2Shell | [brief](../reports/frontier-gdbserver2shell.md), [status](../reports/gdbserver2shell-status.md) | CVE-2026-121997 / GHSA-jq36-9pw3-8r4v (Red Hat 2026-11-05, HIGH 8.1, CWE-122); upstream HEAD `633ae02c4ea8f87c670f7192804349860cfa291d` still vulnerable, fix is a posted-but-unmerged gdb-patches hunk; vulnerable `tracepoint-633ae02.cc` SHA-256 `942306a5…`, derived fixed `c3aa8ac2…`, fix patch `5b8bc3cb…` in `lab/frontier/gdbserver2shell/PROVENANCE.md` | `harness/run.sh` re-extracts verbatim pinned `cmd_qtdpsrc()` slices and helpers, asserts eight SHA-256 pins and builds gcc/clang ASan plus plain-canary variants; opens no socket | `T=$(mktemp -d /tmp/gdb-replay.XXXXXX); cp -a lab/frontier/gdbserver2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `SUMMARY=60 PASS / 0 FAIL`, `NORMALIZED_HASH=0c9b837e…1c1db73`; attack packet `QTDPsrc:1:0:cond:0:1:<hex>` with N=8/32/64/128 gives ASan `WRITE of size 1` 0 bytes after a 2-byte region; full recipe in the lane section below |
 | Erlang2Shell | [brief](../reports/frontier-erlang2shell.md), [status](../reports/erlang2shell-status.md) | CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA 2026-07-27, MEDIUM 5.1 CVSS4 AV:L, CWE-195+CWE-787); affected OTP 25.0+ before 27.3.4.15 / 28.5.0.4 / 29.0.4, fix `c5210b42`; pinned `external.c` / `erl_term.h` blobs and the five-line patch SHA-256 in `lab/frontier/erlang2shell/PROVENANCE.md` | `harness/run.sh` re-extracts four verbatim pinned slices, asserts source/patch/slice/driver SHA-256 pins, builds gcc and clang ASan plus plain-canary variants; opens no socket, VM or BEAM build | `T=$(mktemp -d /tmp/erlang-replay.XXXXXX); cp -a lab/frontier/erlang2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `PASS=60 FAIL=0`, `TRACE_SHA256=8517d3e1…c88` |
 | MiniSnmpd2Shell | [brief](../reports/frontier-minisnmpd2shell.md), [status](../reports/minisnmpd2shell-status.md) | CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed `5419bc38` / release `6894e33e`; pinned vulnerable `protocol.c` `b5322437` (`4bd06467…`), fixed `5419bc38` (`eeb05d95…`), patch `fac30b06…`; five blob/driver hashes in `lab/frontier/mini-snmpd/PROVENANCE.md`, URLs there and in `src/SHA256SUMS` | `harness/run.sh` re-extracts verbatim `decode_oid` (190–256) and `decode_str` (175–187) from both pinned files, asserts five source/patch/driver and four slice SHA-256 pins, builds gcc/clang ASan plus plain variants; opens no socket | `cd lab/frontier/mini-snmpd && bash harness/run.sh` → `PASS=43 FAIL=0`, normalized trace SHA-256 `0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`; ASan `READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`, fixed/safe clean. `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte GET with declared OID length 0xffff; `run_fixed_wire.sh` uses 16162 and `run_safe_wire.sh` the 35-byte control. Full staging recipe below |
-| Ettercap2Shell | [brief](../reports/frontier-ettercap.md), [status](../reports/ettercap2shell-status.md) | CVE-2026-125401 / GHSA-vrjv-f8gv-2h35 (GitHub CNA 2026-11-06, HIGH 8.1 `CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-131+CWE-787; OSV CVSS4 also AV:A), affected `<=0.8.4.1`, patched `0.8.5.1`, fix `1d8badb7`; pinned vulnerable `3548c10c` and PR-head fix `a8c1a50` (byte-identical to merged/released 0.8.5.1), six blobs in `lab/frontier/ettercap2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | `cd lab/frontier/ettercap2shell && bash harness/run.sh` re-extracts the verbatim pinned `gg_get_version()` slices, asserts source/patch/tag/slice/driver SHA-256 pins, builds plain plus gcc/clang ASan variants; opens no socket | operator clean `/tmp` replay: rc 0, `PASS=58 FAIL=0`, normalized trace SHA-256 `d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`; gcc/clang ASan `WRITE of size 13`, 0 bytes after a 30-byte region in `gg_get_version`; fixed and small-version controls clean. Full admission recipe below |
+| Ettercap2Shell | [brief](../reports/frontier-ettercap.md), [status](../reports/ettercap2shell-status.md), [live dissector](../reports/ettercap2shell-livedissector.md) | CVE-2026-125401 / GHSA-vrjv-f8gv-2h35 (GitHub CNA 2026-11-06, HIGH 8.1 `CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-131+CWE-787; OSV CVSS4 also AV:A), affected `<=0.8.4.1`, patched `0.8.5.1`, fix `1d8badb7`; pinned vulnerable `3548c10c` and PR-head fix `a8c1a50` (byte-identical to merged/released 0.8.5.1), six blobs in `lab/frontier/ettercap2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | `cd lab/frontier/ettercap2shell && bash harness/run.sh` re-extracts the verbatim pinned `gg_get_version()` slices, asserts source/patch/tag/slice/driver SHA-256 pins, builds plain plus gcc/clang ASan variants; opens no socket. Real dissector: build both pinned tags with clang ASan and drive a crafted TCP/8074 frame from a pcap and from `lo` (recipe below) | operator clean `/tmp` replay: rc 0, `PASS=58 FAIL=0`, normalized trace SHA-256 `d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`; gcc/clang ASan `WRITE of size 13`, 0 bytes after a 30-byte region in `gg_get_version`; fixed and small-version controls clean. Real dissector gives the same `WRITE of size 13` at `gg_get_version:673` via `dissector_gg:360` offline and live; extent, safe, wrong-type, server-direction and fixed controls as recorded below. Full admission recipe below |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -2214,7 +2214,9 @@ consumers are UNKNOWN; no marker, command or rung 5. Admission minted the
   chooses a 4-byte mask that sets a freed tcache chunk's `next` to
   `P_A ^ T`, then two `malloc(128)` calls return the victim and the chosen
   address, with an observed 8-byte key-slot zero write there — still
-  in-process mechanics, witness pending. No marker, command or rung 5;
+  in-process mechanics; witness #1968 replayed it three times from a clean
+  archive and returned ESTABLISHED at that labeled rung-4 scope, no nit or
+  grade change. No marker, command or rung 5;
   gitignored pin trees and raw logs regenerate with the committed scripts.
 - **Pppd2Shell W132 chosen function call with chosen argument** (commit
   `740b6fd`, [live](../reports/pppd2shell-live.md) W132): after the W131
@@ -2468,8 +2470,13 @@ gdhcp/client.c:2223`, object `'dns_name' (line 2214)` at `[48, 1074)` and
 harness, now in the linked object. Fixed ASan and both well-formed 8-byte
 DOMAIN_LIST cases have no ASan report. The plain `-O2` disassembly summary
 in `evidence/geometry-summary.txt` shows `strncpy@plt` and `fs:0x28`
-(stack canary); whether a given K corrupts or skips the canary was not
-observed, because the plain binary was disassembled, not run with a daemon.
+(stack canary). W6 (`bash lab/connman2shell/realobj/canary-boundary.sh`, 9 PASS
+/ 0 FAIL) measured the boundary in the real object: the canary is at
+`dns_name+1032` (`rsp+0x418`), K=7 reads its zero low byte at frame offset
+1080 and the walk stops, K=0x80 steps over to offset 1201. This is a
+structural negative for W1's synthetic-canary byte-run claim; a larger K can
+step into a caller-frame byte but the store there is still unobserved. The
+private-netns daemon was not run (CAP_SYS_ADMIN and loopback-only scope).
 
 This is a debugger-forced call: no running daemon, natural DHCPv6 REPLY call
 chain, observed store in the production object, pointer, marker, command or
@@ -2556,7 +2563,9 @@ bash lab/frontier/gdbserver2shell/rsp/live_verify.sh \
 ```
 
 Expect `LIVE_SUMMARY=16 PASS / 0 FAIL` and
-`LIVE_NORMALIZED_HASH=b646cc08458fb0344a3a62ceaf0e31b4eb5456572bd470e5b05f4cb17fbeb68e`.
+`LIVE_NORMALIZED_HASH=5701a8746f6b5ed7dc43eadef6b4b938f85af6410a44e5d2105537929687de42`.
+W3 normalized the compile-time source path in `live_verify.sh`; the earlier
+`b646cc08…` value differed across build directories and is superseded.
 The loopback client acks every reply; `QTDP:1:0:E:0:0` creates a tracepoint,
 then `QTDPsrc:1:0:cond:0:1:` with 64 chosen bytes produces ASan `WRITE of
 size 1` in `hex2bin (gdbsupport/common-utils.cc:465)` ← `cmd_qtdpsrc
@@ -2595,11 +2604,17 @@ inside the object and installs `abort@plt` at fake-vtable `+0x10`; the
 destructor's `call *%rax` gives SIGABRT twice, while the same-length control
 carrying the original four words exits 0 (`rsp/evidence/marker-marker-{1,2}.log`,
 `marker-control-3.log`). All wire clients hit 127.0.0.1 only; raw logs and
-per-run `.out` files under `rsp/evidence/` are committed. This is rung 4
-demonstrated at the gdb-fixed-address condition — the same bytes under
-`setarch -R` without gdb exited 0 — with no lab-chosen command, no wire-only
-side effect, no `thread_db` call (`qGetTLSAddr` stays `E01`), no witness replay
-and no rung 5. Author-only; details in `reports/gdbserver2shell-status.md`.
+per-run `.out` files under `rsp/evidence/` are committed. Witness W137 (#2085)
+reproduced the W2 mechanism in its own plain pinned build (6 PASS / 0 FAIL
+twice, byte-identical hash), changing only the vptr field to that build's
+object+8; the wire bytes must be re-derived per build for both the gdb-fixed
+load base and the heap object offset. W4's `rsp/aslr_off_verify.sh` removes the
+debugger: under `setarch -R` with the recorded invocation a loopback-client
+forged `abort@plt` call fires with no gdb (3 PASS / 0 FAIL twice,
+`SERVER_RC=134`); short N=8 and well-formed N=16 exit 0. No lab-chosen command,
+no wire-only command side effect, no `thread_db` call (`qGetTLSAddr` stays
+`E01`) and no rung 5 — `abort()` is a marker, not a command. Author-only;
+details in `reports/gdbserver2shell-status.md`.
 
 ## Admitted frontier lane — 2026-11-23 01:3xZ erlang2shell
 
@@ -2723,8 +2738,14 @@ clean. The plant-started loopback ASan daemon on 127.0.0.1:16161 logs
 `overflow for OID byte` on the vulnerable pin, fixed 16162 rejects with
 `underflow for oid`, and a 35-byte GET is clean on both. Preserved negative:
 no wire-level ASan report because `client->packet` sits inside a larger
-global struct and the 20-subid cap stops the walk. Grade stays harness rungs
-1–4 plus daemon rung-2 reachability; no pointer, marker, command or rung 5.
+global struct and the 20-subid cap stops the walk. Under gdb the daemon reads
+18 bytes past the logical 2048-byte packet and recovers the adjacent
+`g_udp_client.size` byte `0x08` into `subid_list[5]`; declared lengths
+2047–2049 reject at the guard while 2050/65535 saturate at 18 reads. Grade
+stays harness rungs 1–4 plus scoped rung 4 in the real daemon; witness W138
+replayed the harness (43 PASS / 0 FAIL, byte-identical hash) and the full
+18-read gdb dump from `git archive 4096b47`, ESTABLISHED at that labeled scope
+with no grade change. No pointer, marker, command or rung 5.
 Status: `reports/minisnmpd2shell-status.md`.
 
 ## Admitted frontier lane — 2026-11-23 02:4xZ ettercap2shell
@@ -2759,6 +2780,26 @@ size 64, writing 29 chars in 30 and 43 in 64 bytes, ASan-clean; `0x2a` writes
 3 chars cleanly on the vulnerable helper. Both flag bits select the exact OOB
 tail `69 6f 20 2b 20 65 72 61 6f 6d 6e 69 78 00`, and chosen hex digits land
 byte-exact at offsets 11..18 **inside** the object — so the crossing bytes are
-fixed suffix literals, not arbitrary attacker bytes. No live dissector, wire
-capture, pointer control, marker, command or rung 5; the advisory's AV:A
-vector is preserved. Status: `reports/ettercap2shell-status.md`.
+fixed suffix literals, not arbitrary attacker bytes. No pointer control, marker,
+command or rung 5; the advisory's AV:A vector is preserved.
+
+The real-dissector lane (`reports/ettercap2shell-livedissector.md`, commit
+`fcec372`) moves the same fault onto unmodified ettercap v0.8.4.1 built with
+clang 18 ASan (`CMAKE_BUILD_TYPE=Debug`, `-fsanitize=address -g -O1
+-fno-omit-frame-pointer`; the cmake switches and both `ec_gg.c` SHA-256 pins
+are in `live-evidence/README.md`). From `lab/frontier/ettercap2shell/live`,
+run `python3 mkggpcap.py gg-vuln.pcap` (or `mkcontrols.py`), then from
+`ettercap-0.8.4.1/build-asan` run
+`ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 ./src/ettercap -T -q -r ../../gg-vuln.pcap -i lo`
+and finally `python3 liveinject.py gg-vuln.pcap` back in `live/`, which sends
+the frame verbatim with `AF_PACKET` on `lo` and stops the process.
+Expect `WRITE of size 13` at `gg_get_version:673`, reached via
+`dissector_gg:360` before the length guard, 0 bytes after the 30-byte `tbuf3`
+allocated at `:356`, both offline and live through `pcap_loop` ← `capture:90`.
+The two extent packets (`0x44000018`, `0x04000042`) give `WRITE of size 12` at
+`:676`, while safe version `0x0000002a`, wrong type, server direction and the
+fixed v0.8.5.1 build are clean. Injection is same-host on `lo`; an
+adjacent-network sender is untested and AV:A stays. Several control runs log
+an unrelated ASan double-free during shutdown and offline "Joining already
+joined thread"; neither is in the GG path. Status:
+`reports/ettercap2shell-status.md`.
