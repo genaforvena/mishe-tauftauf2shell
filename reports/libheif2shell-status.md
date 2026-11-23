@@ -309,4 +309,5 @@ clean return into a live object. Still not rung 5: the consumer is a harness,
 the victim is harness-placed, the 8 bytes are uniform file values rather than
 a valid address, retention is a harness lifetime choice, and no marker or
 command is executed. No real-world libheif network consumer or arbitrary-byte
-control is measured. Witness replay not yet requested.
+control is measured. Witness replay request sent as tape #2897, explicitly
+queued after #2690/#2576/#2752/#2878/#2869; no verdict yet.
