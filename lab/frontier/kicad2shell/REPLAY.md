@@ -25,8 +25,11 @@ no replay output is copied back into the committed tree.
 From `lab/frontier/kicad2shell/realparser/`: `sh run.sh` rebuilds 8 binaries
 from the verbatim upstream parser slices plus the pinned `ParseLibHeader`
 slices; `sh check.sh` runs 32 invocations and 36 assertions. Two in-tree runs
-of the updated harness gave `PASS=36 FAIL=0` with the same trace hash
+and a clean-archive replay at commit `7ad20c7` gave `PASS=36 FAIL=0` with the
+same trace hash
 `b228ec002755ffbf9e54ddcf5a4a9952a425efe82ec3915a038fe29ef93ff4ee`.
+The archive replay checked both `../PINS.sha256` (4/4) and
+`PINS-realparser.sha256` (5/5) before building.
 The raw upstream parser files and three verbatim slice hashes are pinned in
 `PINS-realparser.sha256`; provenance and the lab/wx/CFB boundary are in
 `PROVENANCE-realparser.md`.
