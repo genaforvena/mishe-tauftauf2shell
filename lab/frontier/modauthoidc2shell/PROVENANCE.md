@@ -270,3 +270,31 @@ consumer read, chosen byte, command or rung 5. Grade unchanged: rung 4 scoped
 on a live pre-auth wire path, unwitnessed at that scope; W147 covers only the
 direct-call harness. Re-run: `cd full && bash build-plain.sh &&
 bash probe-plain-oob.sh && bash probe-plain-keepalive.sh`.
+
+## Second pre-auth caller: response path (2026-11-23 W11)
+
+`full/httpd-plain-response.conf` adds `<Location /redirect_uri>` to the plain
+config. `full/probe-plain-response.sh` sends
+`GET /redirect_uri?code=foo&state=foo` with
+`Cookie: mod_auth_openidc_state_novalue` on 127.0.0.1:18090 under gdb.
+Raw: `full/evidence/plain-oob/response/{gdb,client}.txt`.
+
+At pinned `state.c:219` the live stack is
+`oidc_response_authorization_redirect` (`handle/response.c:765`) →
+`oidc_response_process` (`:614`) → `oidc_response_match_state` (`:426`) →
+`oidc_response_proto_state_restore` (`:353`) →
+`oidc_state_cookies_clean_expired` (`:244`) → `oidc_state_cookies_parse_token`.
+The store is `0x7ffff6ddc05e`, whose eight bytes `3d 66 6f 6f 26 73 74 61`
+spell `=foo&sta` — the `=` of `code=foo` in the copied request line. After the
+store the word is `0x617473266f6f6600`, i.e. that `=` became NUL. The first
+request returns HTTP 400; the log shows the scanner's value
+`foo&state=foo HTTP/1.1…` passed to `oidc_state_cookies_process_one`, JWE
+decode failure and deletion of the value-less cookie. A hardware watchpoint
+on the corrupted word recorded no later read/write of that word.
+
+This is the second source caller (`handle/response.c:353`) reached on a live
+pre-auth wire request, and the stop byte is wire-chosen query data in adjacent
+request-line memory. Grade unchanged: rung 4 scoped, unwitnessed at live-wire
+scope; byte always NUL, no consumer dereference of the corrupted word, no
+chosen byte, pointer control, command or rung 5. Re-run:
+`cd full && bash build-plain.sh && bash probe-plain-response.sh`.

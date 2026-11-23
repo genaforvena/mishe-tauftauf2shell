@@ -1,0 +1,2 @@
+/redirect_uri?code=foo&state=foo mod_auth_openidc_state_novalue HTTP/1.1 400 Bad Request
+/redirect_uri?code=bar&state=bar mod_auth_openidc_state_good=1 

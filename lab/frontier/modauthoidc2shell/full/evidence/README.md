@@ -76,11 +76,15 @@ the runner because it depends on arena layout.
   watchpoint probe found no consumer of that word in two later requests on the
   same TCP connection, and the one-off allocator trace found no covered live
   allocation (`plain-oob/keepalive/`, `plain-oob/alloc-trace/`).
+- W11 reaches the second pre-auth caller (`handle/response.c:353`) with
+  `GET /redirect_uri?code=foo&state=foo`: the NUL lands on the wire-chosen `=`
+  of `code=foo` in the copied request line (`=foo&sta` → `\0foo&sta`), no
+  watchpoint read of that word. Raw: `plain-oob/response/`.
 - No chosen byte, pointer control, command or rung 5 in any regime. None of
   the live probes is witnessed; W147 covers the direct-call harness only.
 
 ## Re-run
 
 ```
-cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh && bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh && bash probe-plain-keepalive.sh
+cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh && bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh && bash probe-plain-keepalive.sh && bash probe-plain-response.sh
 ```

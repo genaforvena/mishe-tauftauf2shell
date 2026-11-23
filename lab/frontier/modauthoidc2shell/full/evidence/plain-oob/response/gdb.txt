@@ -1,0 +1,18 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/state.c.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/state.c:219) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so"
+
+Breakpoint 1, oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x7ffff6ddc05e "=foo&state=foo HTTP/1.1\r\nHost: 127.0.0.1:18090\r\nConnection: keep-alive\r\nUser-Agent: curl/8.5.0\r\nAccept: */*\r\nCookie: mod_auth_openidc_state_novalue\r\n\r\n", c=<optimized out>, r=<optimized out>) at state.c:219
+219		*cookie = '\0';
+STORE=0x7ffff6ddc05e WORD=0x617473266f6f663d
+#0  oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x7ffff6ddc05e "=foo&state=foo HTTP/1.1\r\nHost: 127.0.0.1:18090\r\nConnection: keep-alive\r\nUser-Agent: curl/8.5.0\r\nAccept: */*\r\nCookie: mod_auth_openidc_state_novalue\r\n\r\n", c=<optimized out>, r=<optimized out>) at state.c:219
+#1  oidc_state_cookies_clean_expired (r=r@entry=0x7ffff6dde0a0, c=c@entry=0x7ffff6deebe8, currentCookieName=currentCookieName@entry=0x7ffff6ddaf30 "mod_auth_openidc_state_foo", delete_oldest=delete_oldest@entry=0) at state.c:244
+#2  0x00007ffff504f67a in oidc_response_proto_state_restore (proto_state=0x7ffff5508c40, state=0x7ffff6ddaec0 "foo", c=0x7ffff6deebe8, r=0x7ffff6dde0a0) at handle/response.c:353
+#3  oidc_response_match_state (proto_state=0x7ffff5508c40, provider=0x7ffff5508c20, state=0x7ffff6ddaec0 "foo", c=0x7ffff6deebe8, r=0x7ffff6dde0a0) at handle/response.c:426
+#4  oidc_response_process (r=r@entry=0x7ffff6dde0a0, c=c@entry=0x7ffff6deebe8, session=session@entry=0x7ffff6dda888, params=params@entry=0x7ffff6ddac30, response_mode=response_mode@entry=0x7ffff50f16c0 "query") at handle/response.c:614
+#5  0x00007ffff505389b in oidc_response_authorization_redirect (r=r@entry=0x7ffff6dde0a0, c=c@entry=0x7ffff6deebe8, session=session@entry=0x7ffff6dda888) at handle/response.c:765
+220		cookie++;
+AFTER=0x617473266f6f6600
+Hardware watchpoint 2: -location *(unsigned long *)$store

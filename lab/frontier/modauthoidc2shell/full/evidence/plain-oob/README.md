@@ -101,3 +101,44 @@ the caveat that libapr's internal calls bypass interposition. Both checks are
 negative; the grade stays rung 4 scoped with byte always NUL, no chosen byte,
 no command and no rung 5.
 
+## Response-path store in request-line bytes (2026-11-23 W11)
+
+`full/httpd-plain-response.conf` adds `<Location /redirect_uri>` so the
+module's second pre-auth caller runs on a loopback callback. With
+`GET /redirect_uri?code=foo&state=foo` and `Cookie:
+mod_auth_openidc_state_novalue`, `bash probe-plain-response.sh` breaks at
+pinned `state.c:219` on this live stack:
+
+```
+oidc_state_cookies_parse_token (state.c:219)
+oidc_state_cookies_clean_expired (state.c:244)
+oidc_response_proto_state_restore (handle/response.c:353)
+oidc_response_match_state (handle/response.c:426)
+oidc_response_process (handle/response.c:614)
+oidc_response_authorization_redirect (handle/response.c:765)
+```
+
+The store address is `0x7ffff6ddc05e`; the eight bytes there are
+`3d 66 6f 6f 26 73 74 61` (`=foo&sta`), i.e. the `=` of `code=foo` in the
+copied request line, not pool slack:
+
+```
+STORE=0x7ffff6ddc05e WORD=0x617473266f6f663d
+AFTER=0x617473266f6f6600
+```
+
+The scan left the copied Cookie header (the value-less token has no `=`) and
+stopped at the wire-chosen `=` in the adjacent request-line buffer. The byte
+written is still NUL; only the stop position is chosen by the query string.
+The first request returns HTTP 400 (state mismatch); the module dispatches
+`oidc_state_cookies_process_one` with `foo&state=foo HTTP/1.1…` as the value,
+which fails JWE decode and deletes the value-less cookie. A hardware
+watchpoint on the corrupted word recorded no read or write of that word
+during the remaining request processing (`response/gdb.txt`).
+
+Grade unchanged: rung 4 scoped on a live pre-auth wire path, unwitnessed at
+that scope. This reaches the **second** source caller and shows an OOB scan
+can terminate in wire-chosen adjacent request-line data; it is not pointer
+control, a chosen byte, a consumer dereference of the corrupted word, a
+command or rung 5. Raw: `response/{gdb,client}.txt`.
+

@@ -214,3 +214,23 @@ demonstrated dereference. Grade stays rung 4 scoped, byte always NUL, target
 not wire-chosen, no chosen byte, command or rung 5. Raw:
 `full/evidence/plain-oob/keepalive/` and `alloc-trace/`.
 
+### W11 second caller: callback path (2026-11-23)
+
+With `<Location /redirect_uri>` enabled in the lab config, an unauthenticated
+`GET /redirect_uri?code=foo&state=foo` plus a value-less state cookie reaches
+the other source caller: `handle/response.c:353` →
+`oidc_state_cookies_clean_expired` → pinned `:219`. `full/probe-plain-response.sh`
+measured the store at `0x7ffff6ddc05e`: the eight bytes `=foo&sta` are the
+wire-chosen `=` of `code=foo` in the copied request line, becoming
+`\0foo&sta` after the store. The request returned HTTP 400; the module
+dispatched the adjacent request-line text to
+`oidc_state_cookies_process_one`, whose JWE decode failed and deleted the
+value-less cookie. A watchpoint on the corrupted word saw no consumer
+read/write.
+
+This reaches the second pre-auth caller and places the NUL in wire-chosen
+adjacent request-line data, not a pointer field or pool slack. Grade remains
+rung 4 scoped, unwitnessed at live-wire scope: byte always NUL, no dereference
+of the corrupted word, chosen byte, pointer control, command or rung 5. Raw:
+`full/evidence/plain-oob/response/`.
+

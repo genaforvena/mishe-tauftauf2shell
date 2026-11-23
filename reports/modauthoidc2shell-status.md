@@ -232,3 +232,24 @@ byte, pointer target not wire-chosen, no command or rung 5. Replay: `cd
 lab/frontier/modauthoidc2shell/full && bash build-plain.sh &&
 bash probe-plain-oob.sh && bash probe-plain-keepalive.sh`.
 
+### W11 response-path store (2026-11-23) — unwitnessed
+
+`full/httpd-plain-response.conf` enables `<Location /redirect_uri>`;
+`full/probe-plain-response.sh` sends an unauthenticated
+`GET /redirect_uri?code=foo&state=foo` with the value-less state cookie. gdb
+at pinned `state.c:219` shows the live stack through
+`oidc_response_proto_state_restore` (`handle/response.c:353`), the second
+source caller. The store at `0x7ffff6ddc05e` holds `=foo&sta` before and
+`\0foo&sta` after: the scan left the copied Cookie header and stopped at the
+wire-chosen `=` of `code=foo` in the copied request line. HTTP 400 followed;
+`oidc_state_cookies_process_one` received the adjacent request-line text and
+failed JWE decode. A hardware watchpoint on the corrupted word recorded no
+later read/write of that word (`full/evidence/plain-oob/response/`).
+
+Grade unchanged: rung 4 scoped on a live pre-auth wire path, unwitnessed at
+that scope. The second caller is now source-bound and reached on the wire, and
+the stop byte is wire-chosen, but the byte written is always NUL with no
+dereference of the corrupted word, chosen byte, pointer control, command or
+rung 5. Replay: `cd lab/frontier/modauthoidc2shell/full && bash build-plain.sh
+&& bash probe-plain-response.sh`.
+
