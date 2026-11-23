@@ -146,7 +146,13 @@ with `PONG[1]=true` on port 20268 returned `handshake status = 0` and created
 no marker (`lab/fluentbit2shell/evidence/ctl-{fixed,auth}-rop2.*`).
 The reason encoder exposes `--rbp`, `--rip` and raw `--rop` for replay.
 
-
+Clean-archive replay of the committed harness: `git archive HEAD
+lab/fluentbit2shell` at `fb2fc4d`, extracted into the gitignored site lab
+`.../archive-fb2fc4d`, drove the same chain on 127.0.0.1:20270 with a fresh
+marker path and created that marker at 08:21:40Z
+(`.../archive-fb2fc4d/clean-{server,victim}.log`; marker
+`.../evidence/rung5-marker-archive.txt`). Victim exit code 2, expected from
+`exit@plt` with a leftover rdi.
 
 ## 5. Rung assessment
 

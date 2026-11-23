@@ -146,3 +146,6 @@ Rung 5 stays UNKNOWN.
   ESTABLISHED — no independent replay and no default-build claim. Next
   owner: witness, via an explicit replay request; do not relabel earlier
   pointer-control rows or claim the advisory's root result.
+- Clean `git archive HEAD lab/fluentbit2shell` replay at `fb2fc4d` (site-lab
+  extract, port 20270, fresh marker path) reproduced the debugger-free
+  marker at 08:21:40Z with victim exit 2.
