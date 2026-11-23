@@ -1,0 +1,89 @@
+From 8017478471cc071c49aa073c5c9be652a73a8630 Mon Sep 17 00:00:00 2001
+From: Hans Zandbelt <hans.zandbelt@openidc.com>
+Date: Tue, 9 Jun 2026 22:31:35 +0200
+Subject: [PATCH] state: stop the state-cookie scan at the string terminator
+
+oidc_state_cookies_parse_token scanned a cookie token for the '=' that
+separates the cookie name from its value, but the loop condition was
+"cookie != NULL && *cookie != '='". Since cookie is only ever incremented
+(never reassigned to NULL), the NULL test could never fire, so the only
+exit was hitting a '=' byte. A token that merely starts with the state
+cookie prefix (default "mod_auth_openidc_state_") but contains no '=' --
+trivially supplied by an unauthenticated client in the Cookie header --
+made the loop walk past the end of the token buffer through adjacent
+memory until it happened to find a '=' (out-of-bounds read; DoS if it
+reaches an unmapped page), then wrote a NUL there (one-byte out-of-bounds
+write at an attacker-influenced offset).
+
+The parser runs on the normal authentication path (when a new flow starts)
+and on the redirect-URI callback, both before any session/state
+validation. Stop the scan at the string terminator as well; the existing
+"if (*cookie != '=') return 0;" then correctly rejects a value-less token.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+---
+ ChangeLog         |  5 +++++
+ src/state.c       |  5 ++++-
+ test/test_state.c | 13 +++++++++++++
+ 3 files changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/ChangeLog b/ChangeLog
+index db8ac7c0..7d94a072 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -1,3 +1,8 @@
++06/09/2026
++- state: fix an out-of-bounds read (and one-byte out-of-bounds write) in the
++  state-cookie parser; a state-prefixed Cookie token without a "=" scanned
++  past the end of the token buffer; stop the scan at the string terminator
++
+ 06/03/2026
+ - proto: do not skip id_token signature validation for the "code" flow with
+   algorithm "none" when an id_token signing algorithm has been pinned via
+diff --git a/src/state.c b/src/state.c
+index 0122cde7..92bd078a 100644
+--- a/src/state.c
++++ b/src/state.c
+@@ -211,7 +211,10 @@ static int oidc_state_cookies_parse_token(request_rec *r, const oidc_cfg_t *c, c
+ 		return 0;
+ 
+ 	char *cookieName = cookie;
+-	while (cookie != NULL && *cookie != OIDC_CHAR_EQUAL)
++	/* stop at the string terminator as well as at '='; the previous "cookie != NULL" condition could
++	 * never be false (cookie is only incremented) so a state-prefixed token without a '=' would scan
++	 * past the end of the buffer (out-of-bounds read, and a subsequent out-of-bounds NUL write) */
++	while ((*cookie != '\0') && (*cookie != OIDC_CHAR_EQUAL))
+ 		cookie++;
+ 	if (*cookie != OIDC_CHAR_EQUAL)
+ 		return 0;
+diff --git a/test/test_state.c b/test/test_state.c
+index 808d120c..e1ccb4a3 100644
+--- a/test/test_state.c
++++ b/test/test_state.c
+@@ -190,6 +190,18 @@ START_TEST(test_state_cookies_clean_undecodable) {
+ }
+ END_TEST
+ 
++START_TEST(test_state_cookies_clean_no_value) {
++	request_rec *r = oidc_test_request_get();
++	oidc_cfg_t *c = oidc_test_cfg_get();
++
++	/* a state-prefixed cookie token without a '=' must be rejected and must not scan past the end of
++	 * the token buffer looking for a '=' (out-of-bounds read + NUL write) */
++	apr_table_set(r->headers_in, "Cookie", "mod_auth_openidc_state_novalue");
++
++	ck_assert_int_eq(oidc_state_cookies_clean_expired(r, c, NULL, 0), 0);
++}
++END_TEST
++
+ START_TEST(test_state_cookies_clean_valid_kept) {
+ 	request_rec *r = oidc_test_request_get();
+ 	oidc_cfg_t *c = oidc_test_cfg_get();
+@@ -269,6 +281,7 @@ int main(void) {
+ 	tcase_add_test(state, test_state_cookies_clean_no_cookie_header);
+ 	tcase_add_test(state, test_state_cookies_clean_skip_current_and_non_state);
+ 	tcase_add_test(state, test_state_cookies_clean_undecodable);
++	tcase_add_test(state, test_state_cookies_clean_no_value);
+ 	tcase_add_test(state, test_state_cookies_clean_valid_kept);
+ 	tcase_add_test(state, test_state_cookies_clean_expired_deleted);
+ 	tcase_add_test(state, test_state_cookies_clean_delete_oldest);
