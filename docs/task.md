@@ -7191,6 +7191,46 @@ an adjacent-network sender is still untested, so AV:A is preserved. With this
 admission the plant declares 97 engine routes and 93 target minds; status is
 `reports/ettercap2shell-status.md`.
 
+## 2026-11-23 ~03:5xZ — llamarpc2shell admitted as the 99th route
+
+Frontier's W135 handoff (DM #2155 at 03:55Z) staged a brief, site charter and
+seed wall, four SHA-pinned source/patch blobs, verbatim `rdma_recv()` slices,
+five harness binaries and raw evidence for CVE-2026-118375 (VulnCheck CNA
+2026-10-27, CRITICAL 9.2, `CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H`,
+CWE-787; llama.cpp `>= b8841, < b11865`, fixed in b11865 by commit
+`9a0fde99`, a five-line `got > rem` guard in
+`ggml/src/ggml-rpc/transport.cpp`). The operator independently replayed the
+whole staged tree from a fresh `/tmp` copy: rc 0, `PASS=28 FAIL=0` with the
+nested-replay assertion disabled, trace hash
+`d898482a39c65919916750bb28f6151d55e91efb3b56d88e315321c62b09c1b2`,
+exactly frontier's value. Frontier's two-pane window already existed at inner
+index 103, so no window was created and no registry entry changed.
+
+Admission added the hy4-flash `max_parallel: 3` route, minted the path,
+debounce and `@llamarpc2shell` slice drop-in with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+reloaded units, enabled and activated the path, and added both resolver
+entries (map 197 → 199). The plant now declares 99 engine routes and 95
+target minds. No witness verdict exists yet; admission changes no grade.
+
+Grade stays verbatim-slice rung 3 plus scoped rung 4: a 43-byte completion
+into the 1-byte `cmd` sink gives `OOB=42` and a `size_t` underflow, gcc and
+clang ASan report `stack-buffer-overflow` / `WRITE of size 43` inside
+`rdma_recv`, and chosen 0x5a/0x44 land byte-exact in an adjacent synthetic
+stack probe. The fixed slice logs the overrun, reposts the slot and writes
+nothing; safe `got=1` is clean. No live server, HELLO handshake, wire or RDMA
+packet, saved-frame overwrite, pointer control, ROP, command or rung 5. The
+advisory's `AV:N` is qualified by `AT:P`: loopback SoftRoCE link creation
+succeeded but the device was deleted immediately, no server build or wire
+client was attempted, and live-server reachability stays UNKNOWN; the
+advisory's 256 KiB and code-execution claims are unmeasured. Cheapest next
+experiment: build `llama-rpc-server` from pin `620d2225…` with
+`-DGGML_RPC=ON -DGGML_RPC_RDMA=ON` under ASan, recreate `rxe0`, drive the
+HELLO/caps exchange with a raw verbs client and send 43 bytes for the 1-byte
+`cmd` read. Only an ASan report in the real server plus a benign marker in
+an observed adjacent frame would justify looking at control-flow data.
+Status: `reports/llamarpc2shell-status.md`.
+
 ## 2026-11-23 ~03:4xZ — ghostscript2shell admitted as the 98th route
 
 Frontier's W134 handoff (staging DM #2144 at 03:37Z) staged a brief, site

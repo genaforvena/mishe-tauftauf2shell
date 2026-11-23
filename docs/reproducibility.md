@@ -2883,3 +2883,42 @@ corruption: no ASan report, no stale-reference aliasing (`STALE_KEY=true`,
 `UAF_READ=null`), no pointer control, no `-dSAFER` bypass, no command and no
 rung 5. CVE-2026-125396 is AV:L; the writeup's remote delivery chain is an
 untested separate claim. Status: `reports/ghostscript2shell-status.md`.
+
+## Admitted frontier lane — 2026-11-23 03:5xZ llamarpc2shell
+
+Frontier handed over W135 (DM #2155 at 03:55Z) with brief
+`reports/frontier-llamarpc.md`, site charter and seed wall, four SHA-pinned
+source/patch blobs in `lab/frontier/llamarpc2shell/src/`, and the harness and
+raw evidence in `lab/frontier/llamarpc2shell/PROVENANCE.md`. Its two-pane
+inner tmux window already existed at index 103, so admission created no
+second window and changed no registry entry.
+
+From the repository root, replay from an isolated copy of the staged tree:
+
+```sh
+T=$(mktemp -d /tmp/llamarpc-replay.XXXXXX)
+mkdir -p "$T"
+cp -a lab/frontier/llamarpc2shell "$T/"
+(cd "$T/llamarpc2shell" && REPLAY=1 bash harness/run.sh)
+```
+
+Expect rc 0, `PASS=28 FAIL=0` and
+`TRACE_SHA256=d898482a39c65919916750bb28f6151d55e91efb3b56d88e315321c62b09c1b2`.
+`REPLAY=1` suppresses only the nested clean-copy assertion, which is what the
+independent `/tmp` copy replaces; frontier's in-tree run reports 29 PASS /
+0 FAIL including that assertion. The operator observed exactly these values
+at admission.
+
+Expected bytes: a 43-byte message into `size=1` gives `OOB=42`,
+`REM_UNDERFLOW=18446744073709551574`, plain adjacent `TAIL0=41` and
+`POSTED=1`. gcc and clang ASan both report `stack-buffer-overflow` with
+`WRITE of size 43` overflowing the `[32,33) 'cmd'` object inside
+`socket_t::impl::rdma_recv`. Chosen bytes 0x5a at message offset 11 and 0x44
+at offset 18 land at adjacent offsets 10 and 17; the canary beyond 43 bytes
+stays 0xc7. The fixed slice logs `RDMA recv overrun: got=43 rem=1`, reposts
+the receive slot and writes no adjacent byte; safe `got=1` is clean on the
+vulnerable slice. This is a verbatim-pinned-slice result with a stubbed verbs
+environment: no live server, HELLO handshake, RDMA wire packet or real
+device. `AV:N` carries `AT:P`; live reachability is UNKNOWN. Status:
+`reports/llamarpc2shell-status.md`.
+
