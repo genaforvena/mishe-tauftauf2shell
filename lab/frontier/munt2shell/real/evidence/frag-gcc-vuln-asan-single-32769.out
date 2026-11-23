@@ -1,0 +1,56 @@
+=================================================================
+==3911237==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d000012400 at pc 0x7d67542fb303 bp 0x7ffcd5b1de30 sp 0x7ffcd5b1d5d8
+WRITE of size 32769 at 0x52d000012400 thread T0
+    #0 0x7d67542fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x612cc1cf175a in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x612cc1cf175a in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:250
+    #3 0x612cc1cf1d35 in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
+    #4 0x612cc1cefd49 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/frag_driver.cpp:104
+    #5 0x7d6753a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7d6753a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x612cc1cef6c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/frag-gcc-vuln-asan+0xf6c4) (BuildId: abe50c9e30ca6bc8f96fd81c88a5b361745c2f16)
+
+0x52d000012400 is located 0 bytes after 32768-byte region [0x52d00000a400,0x52d000012400)
+allocated by thread T0 here:
+    #0 0x7d67542fe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x612cc1cf07c8 in MT32Emu::MidiStreamParserImpl::checkStreamBufferCapacity(bool) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:137
+    #2 0x612cc1cf15b8 in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:249
+    #3 0x612cc1cf1d35 in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
+    #4 0x612cc1cefd49 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/frag_driver.cpp:104
+    #5 0x7d6753a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7d6753a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x612cc1cef6c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/frag-gcc-vuln-asan+0xf6c4) (BuildId: abe50c9e30ca6bc8f96fd81c88a5b361745c2f16)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x52d000012180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000012200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000012280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000012300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000012380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x52d000012400:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000012480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000012500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000012580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000012600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000012680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3911237==ABORTING

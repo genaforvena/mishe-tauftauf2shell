@@ -1,0 +1,16 @@
+frag-gcc-vuln-asan-frag-many rc=0
+frag-gcc-vuln-asan-single-32768 rc=0
+frag-gcc-vuln-asan-single-32769 rc=1
+frag-gcc-vuln-asan-single-40001 rc=1
+frag-gcc-fixed-asan-frag-many rc=0
+frag-gcc-fixed-asan-single-32768 rc=0
+frag-gcc-fixed-asan-single-32769 rc=0
+frag-gcc-fixed-asan-single-40001 rc=0
+frag-clang-vuln-asan-frag-many rc=0
+frag-clang-vuln-asan-single-32768 rc=0
+frag-clang-vuln-asan-single-32769 rc=1
+frag-clang-vuln-asan-single-40001 rc=1
+frag-gcc-vuln-plain-frag-many rc=0
+frag-gcc-vuln-plain-single-32768 rc=0
+frag-gcc-vuln-plain-single-32769 rc=0
+frag-gcc-vuln-plain-single-40001 rc=0

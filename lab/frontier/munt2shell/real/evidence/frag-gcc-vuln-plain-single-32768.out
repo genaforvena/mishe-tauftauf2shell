@@ -1,0 +1,3 @@
+mode=single-32768 len=32768
+sysex=0 lastlen=0 debug=0
+alloc32768=2 tail_bytes=00000000000000000000000000000000 tail_0x5a=0/16384

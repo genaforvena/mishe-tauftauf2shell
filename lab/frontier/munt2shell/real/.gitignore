@@ -7,3 +7,5 @@ driver-fixed-1749f7f-*
 core
 core.*
 alsa_probe
+frag-*-asan
+frag-*-plain

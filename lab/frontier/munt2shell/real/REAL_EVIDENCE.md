@@ -26,6 +26,7 @@ cd lab/frontier/munt2shell/real
 ./prepare_src.sh        # verify tarball + pins; extract; patch; rehash trees
 ./build_and_run.sh      # gcc: 2 variants x {asan,plain} x 8 scenarios
 ./build_clang_asan.sh   # clang ASan: C API attack, vuln and fixed
+./frag_probe.sh         # W168: fragment-boundary probe, uses the static libs above
 ```
 
 Inputs: `driver.cpp`; scenario `*-attack` is one `0xF0` + 40000 x `0x5a` slice
@@ -71,6 +72,34 @@ pointer control, command or marker side effect was tested. Independent
 witness chat #2781 replayed this lane from a clean archive and returned
 ESTABLISHED at rungs 1-4; the issue's network-forwarding narrative remains a
 claim and rung 5 stays UNKNOWN.
+
+## Fragment-boundary probe (W168, 2026-11-23)
+
+`frag_driver.cpp` is intentionally a separate binary: `driver.cpp` and its
+witness-replayed evidence stay byte-stable. It feeds the same real CMake
+static libraries with either eight 5000-byte incomplete-SysEx fragments in
+eight `parseStream()` calls (`frag-many`, 40000 bytes total, no `0xF7`) or one
+call of an exact length (`single-N`, `0xF0` + `0x5a`, no `0xF7`).
+
+Measured rc matrix in `evidence/frag-results.txt`, raw output in
+`evidence/frag-{gcc-vuln-asan,gcc-fixed-asan,clang-vuln-asan,gcc-vuln-plain}-*.out`:
+
+- `frag-many`: rc=0 in gcc ASan, clang ASan and plain vulnerable; ASan clean;
+  plain `tail_0x5a=0/16384`. Small fragments do not accumulate into the
+  overflow.
+- `single-32768`: rc=0 everywhere, plain tail `0/16384` — exact safe cap.
+- `single-32769`: rc=1 in gcc and clang ASan vulnerable (`WRITE of size
+  32769`, 0 bytes after a 32768-byte region), rc=0 in pinned-fixed ASan;
+  plain tail `tail_0x5a=1/16384`. One-byte threshold.
+- `single-40001`: rc=1 vuln ASan (`WRITE of size 40001`), rc=0 fixed ASan;
+  plain tail `tail_0x5a=7233/16384`.
+
+Mechanism: `parseSysex()` only runs with an empty parser buffer and a leading
+`0xF0` (`MidiStreamParser.cpp:96-106`). After that, bytes go to
+`parseSysexFragment()`, whose capacity checks at `:266` and `:283` refuse to
+grow past 32768 and discard the remainder. The trigger is one call with at
+least 32769 unterminated bytes, not a large byte total across calls. This is
+a negative result for the fragment route, not a rung-5 claim.
 
 ## Ceiling
 

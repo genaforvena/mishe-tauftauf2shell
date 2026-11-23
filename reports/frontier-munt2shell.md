@@ -212,7 +212,7 @@ normalized-identical (path, PID, address and build id aside).
   `malloc(): corrupted top size`, but gdb places that abort in `printf` at
   `driver.cpp:105`, after `mt32emu_parse_stream` returned at `:104` (line
   numbers in the witness's copy before the W167 comment fix added one line).
-  abort precedes the out-of-bounds store.
+  The out-of-bounds store completes before the abort; no abort precedes it.
 - In-library consumer negative rechecked in source: after the overflow
   `streamBufferSize = 40001` exceeds capacity, so
   `checkStreamBufferCapacity(true)` returns false and
@@ -228,3 +228,42 @@ Witness ceiling: rung-4 chosen bytes come from the harness's 16384-byte
 process, socket or wire input, grooming into a live object, pointer control,
 marker or command. Verdict: ESTABLISHED at real-library rungs 1-4, NOT rung
 5, no counterexample and no grade change.
+
+## 9. Fragment-accumulation boundary: measured negative (W168, 2026-11-23)
+
+The earlier ALSA section said only from source that later fragments take a
+bounded path. That is now measured against the real pinned library. An
+isolated driver `real/frag_driver.cpp` (separate from the witness-replayed
+`driver.cpp`, which is untouched) plus replay `real/frag_probe.sh` feed the
+existing CMake static libraries with:
+
+- `frag-many`: eight 5000-byte incomplete-SysEx fragments in eight separate
+  `parseStream()` calls, total 40000 bytes, no `0xF7` — ALSA-sequencer-sized
+  fragments. Result: `rc=0` in gcc ASan, clang ASan and plain vulnerable
+  builds; ASan clean; plain tail `tail_0x5a=0/16384`. No accumulation overflow.
+- `single-32768` / `single-32769`: one call with exactly the cap, then one byte
+  past it. The 32768 case is clean everywhere with tail `0/16384`; the 32769
+  case aborts `rc=1` in gcc and clang ASan vulnerable with `WRITE of size
+  32769`, 0 bytes after a 32768-byte region, and is clean `rc=0` in the
+  pinned-fixed ASan build. Plain tail goes from 0 to exactly 1 chosen byte.
+- `single-40001`: the known control; `WRITE of size 40001` in vuln ASan,
+  `rc=0` in fixed ASan, plain tail `tail_0x5a=7233/16384`.
+
+Raw outputs and rc matrix: `real/evidence/frag-*.out` and
+`real/evidence/frag-results.txt`. The structural reason, confirmed by the
+measurement: `parseSysex()` is entered only when the parser buffer is empty
+and the byte is `0xF0` (`MidiStreamParser.cpp:96-106`); once an incomplete
+SysEx is buffered, later bytes go to `parseSysexFragment()`, whose
+`checkStreamBufferCapacity(true)` checks at `:266` and `:283` return false at
+32768 and discard the rest. The defect therefore requires one `parseStream()`
+call carrying at least 32769 unterminated bytes, not a large total across
+calls.
+
+Enumerated every in-tree `parseStream()` call site in the pinned tarball:
+ALSA sequencer (`alsadrv.cpp:1182`), Windows multimedia
+(`winmm_drv.cpp:324`), Qt Win32 (`Win32Driver.cpp:135,383`), CoreMIDI
+(`CoreMidiDriver.cpp:36`) and OSS (`OSSMidiPortDriver.cpp:95`). None is a
+network input; this host has no `/dev/midi*` devices, Qt5 is unavailable, and
+the measured ALSA event cap is 5572 bytes. Third-party C-API users remain a
+claim. Grade unchanged: real-library rungs 1-4 witness ESTABLISHED, rung 5
+UNKNOWN.

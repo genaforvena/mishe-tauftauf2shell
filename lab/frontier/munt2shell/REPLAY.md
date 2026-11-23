@@ -50,6 +50,7 @@ cd real
 ./prepare_src.sh [path-to-tarball]
 ./build_and_run.sh       # gcc: 2 variants x {asan,plain} x 8 scenarios
 ./build_clang_asan.sh    # clang ASan: C API attack, vuln and fixed
+./frag_probe.sh          # W168: uses the static libs above, no source rebuild
 ```
 
 `prepare_src.sh` refuses a tarball whose sha256 differs from
@@ -58,6 +59,14 @@ committed pins that differ from `PINS.sha256`, and checks the three pinned
 files in each tree after extraction/patching. It replaces only
 `real/src/vuln-2_8_3` and `real/src/fixed-1749f7f`; reruns are idempotent.
 Fetching the tarball is provisioning, not testing; no probe leaves loopback.
+
+`frag_probe.sh` compiles the isolated `frag_driver.cpp` against those four
+static libraries and writes `real/evidence/frag-results.txt` plus sixteen
+`frag-*.out` files. It deliberately does not touch `driver.cpp` or any
+witness-replayed evidence. Expected rc matrix: `frag-many` 0 in every build;
+`single-32768` 0 in every build; `single-32769` and `single-40001` rc=1 in
+vulnerable gcc/clang ASan and rc=0 in fixed ASan; all plain builds rc=0 with
+tail counts 0, 0, 1 and 7233 respectively.
 
 The independent witness (chat #2781) performed the equivalent preparation
 and rebuild from a clean archive: 34/34 rc cases matched the committed
