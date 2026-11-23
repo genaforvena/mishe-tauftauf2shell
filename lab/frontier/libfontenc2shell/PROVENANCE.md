@@ -260,3 +260,11 @@ only for the larger row count; the upstream regression input `SIZE 256 258`
 still survives plain and must stay labeled that way. The crash is
 availability impact, not pointer control, a marker, a command or rung 5, and
 this matrix has not yet been independently replayed by the witness.
+
+Final W172 probe: a gdb breakpoint at `encparse.c:495` in the ASan build,
+calling `__asan_describe_address(*enc + index)`, describes the in-bounds row
+256 destination as inside the 131072-byte region, but returns "wild memory
+access suspected" for both silent OOB rows 512 and 16384. Full output is in
+`realpath/evidence/gdb-asan-destination.txt`. No live object, pointer or
+control-flow target was found at either destination; those silent cases stay
+UNKNOWN, not rung 4 object control and not passes.

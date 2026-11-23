@@ -130,6 +130,12 @@ uninstrumented live server, not pointer or control-flow control; rows 512 and
 16384 fault in the public-API harness but not in Xvfb, so address placement
 remains process-specific.
 
+For the ASan-silent rows 512 and 16384, a gdb breakpoint at `:495` and
+`__asan_describe_address(*enc + index)` report "wild memory access
+suspected" — no live object, pointer or control-flow target
+(`realpath/evidence/gdb-asan-destination.txt`). Those cases stay UNKNOWN,
+not rung 4 object control and not passes.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery, font-server

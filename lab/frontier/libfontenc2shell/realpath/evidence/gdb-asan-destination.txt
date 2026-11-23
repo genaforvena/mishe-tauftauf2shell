@@ -1,0 +1,29 @@
+W172 gdb probe of the chosen-store destination at src/encparse.c:495 in the
+pinned vulnerable ASan build (bin-vuln-asan), one mapping 0xff00 0x5a5a.
+Gdb commands after `start`: `break encparse.c:495`, `continue`, print index
+and `(*enc + index)`, then call `__asan_describe_address(*enc + index)`.
+Sanity case row 256 (in-bounds index 65280) confirms the runtime can describe
+a valid address:
+
+  $1 = 65280
+  $2 = 0x7ffff7f10600
+  0x7ffff7f10600 is located 130560 bytes inside of 131072-byte region
+  [0x7ffff7ef0800,0x7ffff7f10800)
+
+Silent OOB cases where ASan reported no error:
+
+  row=512   FROM=65280 TO=23130 INDEX=130560
+  $1 = 130560
+  $2 = 0x7ffff7f30400
+  AddressSanitizer can not describe address in more detail (wild memory
+  access suspected).
+
+  row=16384 FROM=65280 TO=23130 INDEX=4177920
+  $1 = 4177920
+  $2 = 0x7ffff86e8800
+  AddressSanitizer can not describe address in more detail (wild memory
+  access suspected).
+
+No live heap object, stack object or global was identified at either
+destination. These cases are NOT rung 4 object control and NOT passes: the
+chosen bytes landed in mapped but undescribed memory. Addresses vary per run.
