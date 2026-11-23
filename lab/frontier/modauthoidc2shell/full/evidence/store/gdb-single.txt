@@ -1,0 +1,22 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/state.c.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/state.c:219) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/.libs/mod_auth_openidc.so"
+
+Breakpoint 1, oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x5250000745b7 "=V8", c=<optimized out>, r=<optimized out>) at state.c:219
+219		*cookie = '\0';
+HIT addr=0x5250000745b7 before=61 (0x3d)
+value has been optimized out
+0x5250000745b7:	"=V8"
+220		cookie++;
+AFTER addr=0x5250000745b7 val=0 (0x00)
+0x5250000745b7:	""
+#0  oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x5250000745b7 "", c=<optimized out>, r=<optimized out>) at state.c:220
+#1  oidc_state_cookies_clean_expired (r=r@entry=0x52500006e1a0, c=c@entry=0x52500005d4e8, currentCookieName=currentCookieName@entry=0x0, delete_oldest=<optimized out>) at state.c:244
+#2  0x00007ffff4feaf4e in oidc_request_authorization_set_cookie (proto_state=0x5070000052d0, state=0x525000074090 "6onwEhxIJs0JcrOEr1MZPLGQZ8A", c=0x52500005d4e8, r=0x52500006e1a0) at handle/request.c:132
+#3  oidc_request_authenticate_user (r=r@entry=0x52500006e1a0, c=c@entry=0x52500005d4e8, provider=provider@entry=0x0, original_url=<optimized out>, login_hint=login_hint@entry=0x0, id_token_hint=id_token_hint@entry=0x0, prompt=<optimized out>, auth_request_params=<optimized out>, path_scope=<optimized out>) at handle/request.c:239
+#4  0x00007ffff4fa1066 in oidc_handle_unauthenticated_user (r=r@entry=0x52500006e1a0, c=c@entry=0x52500005d4e8) at mod_auth_openidc.c:516
+#5  0x00007ffff4fa637c in oidc_check_userid_openidc (r=r@entry=0x52500006e1a0, c=c@entry=0x52500005d4e8) at mod_auth_openidc.c:1325
+#6  0x00007ffff4fa6e96 in oidc_check_user_id (r=0x52500006e1a0) at mod_auth_openidc.c:1388
+#7  0x0000555555656532 in ap_run_check_user_id (r=r@entry=0x52500006e1a0) at request.c:84

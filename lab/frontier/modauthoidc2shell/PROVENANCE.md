@@ -163,3 +163,31 @@ region is a real APR arena allocated in `ap_parse_htaccess`, not a harness
 malloc. ASan faults before the NUL store, so no ASan WRITE here; no chosen
 byte, pointer control, command or rung 5. Grade unchanged: rung 3 on a real
 pre-auth wire path; rung 4 scoped. Unwitnessed.
+
+## Wire-chosen NUL store in the full module (2026-11-23 W8)
+
+`full/probe-store.sh` and `full/probe-gdb.sh` extend the live probe with
+`Cookie: mod_auth_openidc_state_novalue;<name>=<value>`. `apr_strtok` leaves
+the second cookie's `=` after the value-less token's NUL in the copied header,
+so the pinned `:214` scan reaches it in bounds and `:219` stores NUL there.
+Raw output: `full/evidence/store/`; summary `store/README.md`.
+
+gdb at pinned `:219` observed `cookie=0x5250000745b7` holding `0x3d` before the
+`next` and `0x00` after, with the live stack through `ap_run_check_user_id`
+(`store/gdb-single.txt`). Arena dumps give token start `0x525000074590` and
+store `0x5250000745b7` (offset 39 = 30 + 1 + 8) for eight `z` bytes, and
+token start `0x525000074628`, store `0x525000074667` (offset 63 = 30 + 1 +
+32) for 32 `z` bytes (`store/gdb-dump*.txt`). The offset is wire-chosen by
+`<name>` length; the byte value is always NUL.
+
+Sweep (`store/summary.txt`, `codes.txt`): five lengths 1/4/8/16/32 all HTTP
+302 on both modules; parent dispatched `oidc_state_cookies_process_one` with
+the second cookie's value 5/5, released tag 0/5, no ASan report in that
+in-bounds regime. A single value-less request under
+`ASAN_OPTIONS=halt_on_error=0:abort_on_error=0` still ended at the pinned READ
+with no WRITE report (`store/halt-on-error-negative.log`).
+
+Grade: rung 4 now observed on a real pre-auth wire path with a wire-chosen
+offset, still unwitnessed at that scope; byte always NUL, no pointer-bearing
+target, command or rung 5. Re-run: `cd full && bash probe-store.sh &&
+bash probe-gdb.sh`.

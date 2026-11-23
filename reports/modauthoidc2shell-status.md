@@ -62,10 +62,12 @@ The direct-call harness uses stubbed request/config pointers and a recorder;
 it has no Apache, APR pool, request object, listener, socket or wire. Its
 exact-size heap token is an instrument; the ASan read faults before the write,
 so no ASan WRITE is available in that build. W147 ESTABLISHED rungs 1-3 and
-scoped rung 4 at that scope. Two later unwitnessed probes add real APR/Apache
-objects and then a full module on a loopback wire (below), but neither gives
-chosen-byte or pointer control: rung 3 is now also confirmed on a live
-pre-auth wire path and rung 4 stays **scoped**. No chosen command or rung 5.
+scoped rung 4 at that scope. Three later unwitnessed probes add real APR/Apache
+objects, a full module on a loopback wire, and a live NUL store with a
+wire-chosen offset (below); none gives chosen-byte or pointer control: rung 3
+is confirmed on a live pre-auth wire path and rung 4 is now observed on that
+path too. No chosen command or rung 5; the witness verdict covers only the
+earlier direct-call scope.
 
 ## Real-object follow-up (2026-11-23)
 
@@ -143,3 +145,28 @@ arena memory, not by the client; there is no pointer control, command or
 rung 5. This probe is unwitnessed — W147's ESTABLISHED verdict still covers
 the direct-call harness only. What would change the grade: a measured
 controlled pointer or command side effect, or a witness replay of this probe.
+
+## Wire-chosen NUL store (2026-11-23 W8) — unwitnessed
+
+The store itself is now observed in the live full module. A request carrying
+`Cookie: mod_auth_openidc_state_novalue;<name>=<value>` leaves the second
+cookie's `=` in the apr_pstrdup'd header copy after the value-less token's
+NUL; the pinned `:214` scan finds it in bounds and `:219` writes NUL there.
+gdb on the ASan child recorded `0x3d` → `0x00` at
+`0x5250000745b7` with the live stack through `ap_run_check_user_id`
+(`full/evidence/store/gdb-single.txt`). Arena dumps put the store at token
+offset **39** with eight `z` padding bytes and **63** with 32, i.e.
+`30 + 1 + <name length>`: the offset is chosen by the wire input
+(`store/gdb-dump*.txt`). `full/probe-store.sh` sent five lengths (1/4/8/16/32):
+all 302, parent dispatched `oidc_state_cookies_process_one` with the second
+cookie's value 5/5, released `v2.4.19.4` 0/5, no ASan report in that regime.
+`ASAN_OPTIONS=halt_on_error=0` did not continue past the value-only READ fault
+(negative preserved in `store/halt-on-error-negative.log`).
+
+This lifts rung 4 from harness-only to **observed on a live pre-auth wire path
+with a wire-chosen offset**, still unwitnessed at that scope; W147's
+ESTABLISHED verdict covers the direct-call harness only. The byte is always
+NUL, the overwritten `=` is in the already-tokenized header copy, and no
+pointer-bearing target, command or rung 5 is measured. Replay: `cd
+lab/frontier/modauthoidc2shell/full && bash probe-store.sh && bash probe-gdb.sh`;
+evidence and limits in `full/evidence/store/README.md`.

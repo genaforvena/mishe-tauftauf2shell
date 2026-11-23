@@ -29,7 +29,7 @@ listener, a real HTTP request and the full pinned parent module**. Earlier
 
 ## Measured
 
-`bash ../run.sh` (30 value-less-cookie requests, 10 well-formed-cookie
+`bash run.sh` from `full/` (30 value-less-cookie requests, 10 well-formed-cookie
 requests per module; see `run-final.txt`):
 
 ```
@@ -53,19 +53,25 @@ controls and all 30 fixed-module attacks were clean. Both outcomes are
 consistent with the same dead-NULL-test scan; the fault is not asserted by
 the runner because it depends on arena layout.
 
-## Limits
+## Limits and later store probe
 
-- ASan faults on the **read** before the NUL store; no ASan WRITE was observed
-  in this build. The written byte is still always NUL and its offset is set
-  by adjacent memory, not by a wire field or an attacker-chosen offset.
-- No pointer control, chosen byte value, command execution or rung 5.
-- Unwitnessed by W147; its ESTABLISHED verdict covers the earlier direct-call
-  harness only.
-- Grade remains rung 3 **confirmed memory corruption on a real pre-auth wire
-  path**; rung 4 stays scoped to the earlier direct-call harness.
+- ASan faults on the **read** before the NUL store in the value-only regime;
+  `ASAN_OPTIONS=halt_on_error=0` did not continue past that fault (negative in
+  `store/halt-on-error-negative.log`). The direct NUL store is measured
+  separately in `store/` with a second cookie that places its `=` after the
+  value-less token: gdb observed 0x3d → 0x00 at pinned `:219` with offsets 39
+  and 63 chosen by 8- and 32-byte name padding. That regime writes inside the
+  copied Cookie header, not into a pointer-bearing field.
+- The stored byte is always NUL. No pointer control, chosen byte value,
+  command execution or rung 5.
+- Neither probe is witnessed; W147's ESTABLISHED verdict covers the earlier
+  direct-call harness only.
+- Grade: rung 3 confirmed on a real pre-auth wire path; rung 4 now also
+  observed on that wire path with a wire-chosen offset, unwitnessed at that
+  scope. No rung 5.
 
 ## Re-run
 
 ```
-cd lab/frontier/modauthoidc2shell/full && bash run.sh
+cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh
 ```

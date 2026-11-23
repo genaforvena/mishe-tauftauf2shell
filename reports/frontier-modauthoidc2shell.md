@@ -147,7 +147,28 @@ faults and 23/30 OOB dispatches of the value-less cookie name. The overflowed
 8192-byte region is a real APR arena. Evidence and limits:
 `lab/frontier/modauthoidc2shell/full/evidence/README.md`.
 
-This confirms rung 3 on a real pre-auth wire path; rung 4 stays scoped to the
-direct-call harness (ASan faults before the NUL store; byte value always NUL,
-offset chosen by adjacent memory, no pointer control or command). The probe is
+This confirms rung 3 on a real pre-auth wire path; at this point rung 4 stayed
+scoped to the direct-call harness (ASan faults before the NUL store; byte value
+always NUL, offset chosen by adjacent memory, no pointer control or command).
+Section 7 later reached the store on the same wire path. This probe is
 unwitnessed; W147's verdict covers the earlier harness only.
+
+## 7. Wire-chosen NUL store (2026-11-23 W8)
+
+The full-module probe now reaches the store itself. With
+`Cookie: mod_auth_openidc_state_novalue;<name>=<value>`, `apr_strtok` leaves
+the second cookie's `=` after the value-less token's NUL in the copied header,
+so the pinned scan finds it in bounds and line 219 writes NUL there. gdb on
+the live child read `0x3d` before and `0x00` after the store at pinned
+`:219`, with the full pre-auth stack; arena dumps put the store at token
+offset `30 + 1 + len(<name>)` — 39 for eight `z` bytes, 63 for 32
+(`full/evidence/store/gdb-dump*.txt`). Five wire lengths all returned 302;
+the parent dispatched `oidc_state_cookies_process_one` with the second
+cookie's value 5/5, the released tag 0/5. `halt_on_error=0` did not continue
+past the value-only READ fault (negative preserved).
+
+Rung 4 is therefore also observed on a live pre-auth wire path with a
+wire-chosen offset, still unwitnessed at that scope. No chosen byte value, no
+pointer-bearing target, command or rung 5. Replay: `cd
+lab/frontier/modauthoidc2shell/full && bash probe-store.sh && bash probe-gdb.sh`;
+evidence and limits in `full/evidence/store/README.md`.
