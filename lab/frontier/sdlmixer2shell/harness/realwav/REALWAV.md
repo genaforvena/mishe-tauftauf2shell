@@ -283,5 +283,59 @@ Demonstrated: real SDL_mixer 3.2.4 build, real on-disk RIFF/WAVE input, real
 SDL_mixer public API, real SDL3 dummy audio device, pinned vulnerable line
 reached with attacker-controlled length, ASan `WRITE of size 4`, clean fixed
 and negative controls, and gdb observation of the adjacent saved-frame bytes.
-Not demonstrated and not claimed: wire/network input, attacker-chosen
-pointer values, instruction-pointer control, or command execution (rung 5).
+Not demonstrated and not claimed at this scope: chosen pointer values,
+instruction-pointer control, or command execution (rung 5). The W181
+loopback-wire extension below adds wire input without any of those.
+
+## Loopback-wire input (W181, 2026-11-23)
+
+Scope extension only: the WAV bytes now arrive on a 127.0.0.1 TCP socket
+instead of from a file path. `wire_driver.c` binds `INADDR_LOOPBACK`, accepts
+one connection, reads up to 4096 bytes into a static buffer, wraps them with
+`SDL_IOFromMem`, and passes that stream to the real
+`MIX_CreateAudioDecoder_IO(io, true, 0)` / `MIX_DecodeAudio` API (`decode`)
+or `MIX_LoadAudio_IO(mixer, io, false, true)` / `MIX_PlayTrack` (`play`).
+No file path, no external address, no SDL or mixer source changes. It is
+linked against the same committed vulnerable/fixed static mixer builds:
+
+```sh
+clang -g -O0 -fno-omit-frame-pointer -fsanitize=address \
+  -I"$D/SDL_mixer-vuln-src/include" -I"$D/SDL-release-3.4.0/include" \
+  -I"$D/SDL3-3.4.0-build/include-revision" \
+  "$L/harness/realwav/wire_driver.c" "$D/mixer-vuln-asan-build/libSDL3_mixer.a" \
+  -L"$D/SDL3-3.4.0-build" -lSDL3 -Wl,-rpath,"$D/SDL3-3.4.0-build" \
+  -lm -lpthread -ldl -o "$L/harness/realwav/evidence/wire-driver-vuln-asan"
+```
+
+Fixed driver: same command with `SDL_mixer-fixed-src/include` and
+`mixer-fixed-asan-build/libSDL3_mixer.a`, output `wire-driver-fixed-asan`.
+Each scenario starts the listener in the background, then sends the committed
+WAV from a Python client:
+
+```sh
+export ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-18/bin/llvm-symbolizer
+export ASAN_OPTIONS=detect_leaks=0:abort_on_error=0
+E=lab/frontier/sdlmixer2shell/harness/realwav/evidence
+"$E/wire-driver-vuln-asan" 19442 decode >"$E/wire-vuln-decode-alaw256.out" 2>&1 &
+python3 -c 'import socket,sys; s=socket.create_connection(("127.0.0.1",int(sys.argv[1])),2); s.sendall(open(sys.argv[2],"rb").read()); s.shutdown(socket.SHUT_WR); s.close()' 19442 "$E/alaw256.wav"
+```
+
+| Output prefix | Build / mode | Wire bytes | Result |
+|---|---|---|---|
+| `wire-vuln-decode-alaw256.out` | vuln ASan / decode | 300 | rc=1, ASan `WRITE of size 4` at `:759` via `FetchALaw:771` → `WAV_decode:1668` → `MIX_DecodeAudio:3190`, `buffer [32,1056)`, frame offset 1180 |
+| `wire-vuln-decode-ulaw256.out` | vuln ASan / decode | 300 | rc=1, same via `FetchULaw:766` |
+| `wire-vuln-play-alaw256.out` | vuln ASan / play | 300 | rc=1, same store on audio thread via `DecodeMore:306` → `TrackGetCallback:381` |
+| `wire-fixed-decode-alaw256.out` | fixed ASan / decode | 300 | rc=0, `got=1024`, clean |
+| `wire-fixed-play-alaw256.out` | fixed ASan / play | 300 | rc=0, `PLAY started=1`, clean |
+| `wire-vuln-decode-alaw8.out` | vuln ASan / decode | 52 | rc=0, `got=32`, clean |
+| `wire-vuln-decode-badfmt.out` | vuln ASan / decode | 300 | rc=1, parser rejection, no ASan report |
+
+All seven runs printed `LISTEN=127.0.0.1:<port>` and `WIRE bytes=...
+first4=52494646` ("RIFF"). The listener is the lab driver: this demonstrates
+attacker-supplied bytes on a loopback wire reaching the pinned store through
+real mixer APIs, **not** an SDL_mixer network listener. No chosen pointer or
+instruction address, no command, no side effect beyond the sanitizer report;
+rungs 1-4 only, author-observed and unwitnessed.
+
+Source, both built drivers and all seven output logs are checksummed in
+`evidence/WIRE.sha256` (verify with `cd evidence && sha256sum -c WIRE.sha256`).

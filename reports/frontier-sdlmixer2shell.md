@@ -1,6 +1,6 @@
 # Frontier brief: SDL_mixer `FetchXLaw()` doubled output stride (sdlmixer2shell)
 
-**STAGED 2026-11-23 W173; advanced W180** — this brief, direct-call,
+**STAGED 2026-11-23 W173; advanced W181** — this brief, direct-call,
 real-caller and real-WAV harnesses and a registered two-pane window exist.
 Clean git-archive replay at commit `7e7f1d6`
 (65 files, 4/4 pins, 12 binaries, exact trace) is in
@@ -14,9 +14,10 @@ at the labeled direct-call lab scope, rungs 1-4 only, explicitly not rung 5;
 witness #3000 (W180) graded the W179 real-caller / from-source SDL3 scope
 ESTABLISHED at the same rungs, explicitly not rung 5.
 
-A real SDL_mixer 3.2.4 build fed a crafted on-disk A-law WAV now demonstrates
+A real SDL_mixer 3.2.4 build fed a crafted on-disk A-law WAV demonstrates
 file-path reachability to the vulnerable store (W180, author-observed,
-independent witness replay requested on tape #3053).
+independent witness replay requested on tape #3053). W181 adds loopback-wire
+bytes into the same decoder through real mixer APIs, also author-observed.
 
 ## 1. Verified ground truth
 
@@ -189,29 +190,46 @@ the vulnerable store:
   crafted file bytes, so input bytes select the two LUT words; the LUT image
   itself blocks arbitrary IP steering.
 
+## 4d. Loopback-wire bytes into the real decoder (W181, 2026-11-23)
+
+`harness/realwav/wire_driver.c` binds `127.0.0.1:<port>`, accepts one
+connection and reads the WAV bytes from the socket (no file path), wraps them
+in `SDL_IOFromMem`, and calls real `MIX_CreateAudioDecoder_IO` /
+`MIX_DecodeAudio` or `MIX_LoadAudio_IO` / `MIX_PlayTrack` with the SDL dummy
+device. Linked against the same committed vulnerable and fixed mixer builds.
+Sending the committed 300-byte `alaw256.wav` over 127.0.0.1:19442 reproduces
+ASan `WRITE of size 4` at pinned `:759` via `FetchALaw:771` → `WAV_decode:1668`
+→ `MIX_DecodeAudio:3190`, `buffer [32,1056)`, frame offset 1180; mu-law via
+`FetchULaw:766`, and the play path on the audio thread via `DecodeMore:306` →
+`TrackGetCallback:381`. Fixed decode/play return rc=0 with `got=1024`;
+8-byte-data and bad-format wire controls are clean. Exact commands, ports,
+per-case logs and the listener limitation are in
+`harness/realwav/REALWAV.md` ("Loopback-wire input (W181)"). Author-observed,
+unwitnessed; the listener is lab code, not an SDL_mixer network consumer.
+
 ## 5. Next distinct rung move
 
-File-path reachability and the LUT pointer image are now measured. The LUT
-enumeration above closes the arbitrary-IP question for the overwritten
-saved-RIP slot: A-law yields no canonical pointer and mu-law only first-4-GiB
-addresses, so no chosen PIE/libc target. The remaining distinct move is a
-network- or request-facing consumer that loads an attacker-named WAV through
-the same decoder on a live loopback instance, plus a benign command with an
-observed side effect. Any new claim goes to `witness`; the author report is not
-acceptance. No pointer-sized target has been demonstrated: the written value
-is a LUT-selected float bit pattern, not an address read from the input.
+File-path reachability, loopback-wire byte input and the LUT pointer image are
+now measured. The LUT enumeration above closes the arbitrary-IP question for
+the overwritten saved-RIP slot: A-law yields no canonical pointer and mu-law
+only first-4-GiB addresses, so no chosen PIE/libc target. The remaining
+distinct move is a real request-facing consumer that loads an
+attacker-named WAV through this decoder on a live loopback instance, plus a
+benign command with an observed side effect.
 
 
 ## 6. Honest ceiling
 
-Direct call, real-caller slice and a real SDL_mixer 3.2.4 build fed an actual
-crafted WAV, all against the pinned vulnerable source, with a 1024-byte stack
-buffer. The real-WAV lane uses real SDL_mixer public APIs, real `ParseFMT`, a
-real dummy audio device and real decoder/consumer callbacks; the WAV files are
-synthetic lab inputs and the build uses SDL3 3.4.0 (the mixer's declared
-minimum) rather than the lab's older 3.2.4. Witness #2942 and #3000 graded the
-two harness scopes ESTABLISHED at rungs 1-4, NOT rung 5; the W180 real-WAV
-claim is author-observed and awaits independent replay. No wire/request input,
-attacker-chosen pointer, instruction-pointer control, benign marker or command
-execution. Advisory RCE and any network reachability remain **UNKNOWN**. Rung 5
-not attempted.
+Direct call, real-caller slice, a real SDL_mixer 3.2.4 build fed an actual
+crafted WAV, and the W181 loopback-wire variant, all against the pinned
+vulnerable source with a 1024-byte stack buffer. The real-WAV lanes use real
+SDL_mixer public APIs, real `ParseFMT`, a real dummy audio device and real
+decoder/consumer callbacks; the WAV files and the loopback listener are lab
+code, and the build uses SDL3 3.4.0 (the mixer's declared minimum) rather
+than the lab's older 3.2.4. Witness #2942 and #3000 graded the two earlier
+harness scopes ESTABLISHED at rungs 1-4, NOT rung 5; the W180 on-disk claim
+(#3053) and the W181 wire claim are author-observed and unwitnessed. There is
+no request-facing SDL_mixer listener, attacker-chosen pointer,
+instruction-pointer control, benign marker or command execution. Advisory RCE
+and network reachability beyond this loopback lab listener remain **UNKNOWN**.
+Rung 5 not attempted.

@@ -155,6 +155,27 @@ and gdb reports back to pinned upstream lines.
   or command. Author-observed only; witness replay requested on tape #3053.
   Advisory RCE and network reachability remain UNKNOWN; rung 5 not attempted.
 
+## Loopback-wire reachability (W181, 2026-11-23)
+
+- Lab code: `harness/realwav/wire_driver.c` binds `INADDR_LOOPBACK`, accepts
+  one TCP connection, reads up to 4096 bytes and feeds them to
+  `SDL_IOFromMem` → `MIX_CreateAudioDecoder_IO` / `MIX_DecodeAudio` or
+  `MIX_LoadAudio_IO` / `MIX_PlayTrack`. WAV files, SDL3 and mixer builds are
+  the same committed artifacts as the W180 section; no source or WAV changes.
+- Result: a Python client sends the committed 300-byte `alaw256.wav` to
+  127.0.0.1:19442; vulnerable ASan reports `WRITE of size 4` at pinned `:759`
+  via `FetchALaw:771` → `WAV_decode:1668` → `MIX_DecodeAudio:3190`,
+  `buffer [32,1056)`, frame offset 1180. Mu-law decode
+  (`wire-vuln-decode-ulaw256.out`, `FetchULaw:766`) and dummy-audio play
+  (`wire-vuln-play-alaw256.out`, `DecodeMore:306` → `TrackGetCallback:381`,
+  thread T1) reproduce it. Fixed decode/play rc=0 (`got=1024`); 52-byte
+  `alaw8` clean; `badfmt_256` parser-rejected with no ASan report. Seven
+  `wire-*.out` logs plus two built drivers are in `harness/realwav/evidence/`.
+- Ceiling: this is wire *bytes* into a lab listener, not a network-facing
+  SDL_mixer consumer. No chosen pointer/IP, command or observed side effect
+  beyond the sanitizer report. Rungs 1-4 only, author-observed, unwitnessed;
+  advisory RCE and real network reachability remain UNKNOWN.
+
 ## Verification
 
 `cd lab/frontier/sdlmixer2shell/harness && ./run.sh && ./check.sh` →

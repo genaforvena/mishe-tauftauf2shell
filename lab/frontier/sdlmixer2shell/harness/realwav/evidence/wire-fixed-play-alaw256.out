@@ -1,0 +1,5 @@
+MODE=play AUDIO_DRIVER=dummy MIX_DECODERS=3
+LISTEN=127.0.0.1:19447
+WIRE bytes=300 first4=52494646
+PLAY started=1
+RESULT=OK still_playing=0
