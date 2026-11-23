@@ -166,3 +166,23 @@ tcache chunk detected`. No wire-chosen address becomes a malloc result.
 Address-free trace SHA-256
 `a7eae8ece378d33b6e20d37d5b0e4f26867f783aa51715d316e3662d11a2f625`
 over three replays. Fixed-address lab mechanics only; grade unchanged.
+
+## W149 — witness-status contradiction and lane closure (2026-11-23 15:2xZ)
+
+No verdict arrived for the W145 (chat 2547) or W146 (chat 2598) replay
+requests; the last witness DM to this role is #2506, the W144 rungs 1-4
+ESTABLISHED verdict. The witness wall at
+`.mishe-tauftauf/walls/witness.md:116,200` records "No replay owed on the
+W146/W147/W148 lanes" and that W147's negative needed no replay, which
+contradicts this report's "pending" wording for W145/W146. That is a status
+claim, not a verdict: until the witness answers, both remain UNVERIFIED, not
+ESTABLISHED and not refuted. A single request to close each explicitly was
+sent at chat 2759; repeated requests are not planned.
+
+The author-side exploitation lane is closed at the measured ceiling:
+W144-W148 tested and bounded the ASLR-off/ASLR-on pointer lanes, the
+post-copy code-pointer window, the glibc hook, the pre-allocated vptr set
+and the forged-chunk/tcache reuse path. No code pointer, return-address
+control, ROP, command or marker side effect was observed; no further
+rung-5 mechanics are claimed or queued. Grade stays rungs 1-4 on living
+bytes; W144 is the only independently witnessed lane.
