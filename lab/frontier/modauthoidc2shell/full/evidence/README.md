@@ -1,0 +1,71 @@
+# Live ASan httpd loopback probe — CVE-2026-54789 (2026-11-23)
+
+## What this is
+
+The first probe in this lane that uses a **real Apache httpd process, a real
+listener, a real HTTP request and the full pinned parent module**. Earlier
+`harness/` and `realobj/` probes called the parser directly or in-process.
+
+## Pinned inputs and builds
+
+- Module source: full upstream clone checked out at
+  `4301b5364034191adcba5153e5870405855cb74e` (parent of fix `8017478471cc`).
+  `src/state.c` sha256 `ceedb687ad21c4668f546d0f1c9164890f740a1ff81bbc8fb5807a9aab1ae5aa`,
+  identical to `../src/SHA256SUMS`.
+- Fixed control: released tag `v2.4.19.4` (`cd1534e54875d1723949d1afa48cefef48269832`)
+  in a separate git worktree.
+- Both modules built with `-fsanitize=address` against the prebuilt ASan stack
+  in `../../apache2shell/build/`: APR 1.7.4, APR-util 1.6.3, httpd 2.4.71.
+  jansson 2.14 and cjose 0.6.1 were provisioned under `src/` and built with
+  ASan into `prefix/`. `ldd` on the module resolves libasan, ASan APR/APU and
+  the local jansson/cjose. Module sha256s are in `MODULE_SHA256`.
+- Configs: `httpd-asan.conf` (parent) and `httpd-fixed.conf` (released fix),
+  both binding `127.0.0.1:18090` only. Static provider config — no metadata
+  fetch, no external network. `/protected` uses `AuthType openid-connect` and
+  `Require valid-user`, so `oidc_check_user_id` → `oidc_handle_unauthenticated_user`
+  → `oidc_request_authenticate_user` → `oidc_request_authorization_set_cookie`
+  → `oidc_state_cookies_clean_expired` → `oidc_state_cookies_parse_token`
+  runs before any authentication.
+
+## Measured
+
+`bash ../run.sh` (30 value-less-cookie requests, 10 well-formed-cookie
+requests per module; see `run-final.txt`):
+
+```
+sha256: ceedb687ad21c4668f546d0f1c9164890f740a1ff81bbc8fb5807a9aab1ae5aa
+vuln: ASan_reports=30 pinned_214=30 empty_reply=30 http302=0 dispatch=0
+fixed: ASan_reports=0 pinned_214=0 empty_reply=0 http302=30 dispatch=0
+```
+
+Every parent fault is `heap-buffer-overflow` `READ of size 1` at pinned
+`state.c:214` in `oidc_state_cookies_parse_token`, with the full native stack
+through `ap_run_check_user_id` (see `asan-asan.log.*`). The 8192-byte region
+was allocated by `apr_palloc` in `ap_parse_htaccess` — a real APR arena, not
+a harness malloc. The child dies and curl gets `000`.
+
+A separate first run (`trial-codes.txt`, `fixed-codes.txt`, `asan.log.*`,
+`error_log`) was layout-dependent: 7/30 attacks faulted at pinned `:214` and
+23/30 returned 302 after reaching `oidc_state_cookies_process_one` with
+`mod_auth_openidc_state_novalue` — the scan had found an `=` in adjacent
+arena memory and dispatched from the out-of-bounds region. All 10 safe
+controls and all 30 fixed-module attacks were clean. Both outcomes are
+consistent with the same dead-NULL-test scan; the fault is not asserted by
+the runner because it depends on arena layout.
+
+## Limits
+
+- ASan faults on the **read** before the NUL store; no ASan WRITE was observed
+  in this build. The written byte is still always NUL and its offset is set
+  by adjacent memory, not by a wire field or an attacker-chosen offset.
+- No pointer control, chosen byte value, command execution or rung 5.
+- Unwitnessed by W147; its ESTABLISHED verdict covers the earlier direct-call
+  harness only.
+- Grade remains rung 3 **confirmed memory corruption on a real pre-auth wire
+  path**; rung 4 stays scoped to the earlier direct-call harness.
+
+## Re-run
+
+```
+cd lab/frontier/modauthoidc2shell/full && bash run.sh
+```

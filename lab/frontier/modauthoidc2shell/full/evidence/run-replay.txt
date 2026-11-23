@@ -1,0 +1,3 @@
+sha256: ceedb687ad21c4668f546d0f1c9164890f740a1ff81bbc8fb5807a9aab1ae5aa
+vuln: ASan_reports=30 pinned_214=30 empty_reply=30 http302=0 dispatch=23
+fixed: ASan_reports=0 pinned_214=0 empty_reply=0 http302=30 dispatch=0

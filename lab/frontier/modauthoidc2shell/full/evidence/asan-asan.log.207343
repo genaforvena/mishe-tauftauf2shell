@@ -1,0 +1,87 @@
+=================================================================
+==207343==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x525000077900 at pc 0x7924c7ab1073 bp 0x7ffc2cb4b240 sp 0x7ffc2cb4b230
+READ of size 1 at 0x525000077900 thread T0
+    #0 0x7924c7ab1072 in oidc_state_cookies_parse_token /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/state.c:214
+    #1 0x7924c7ab1072 in oidc_state_cookies_clean_expired /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/state.c:244
+    #2 0x7924c7af3f4d in oidc_request_authorization_set_cookie handle/request.c:132
+    #3 0x7924c7af3f4d in oidc_request_authenticate_user handle/request.c:239
+    #4 0x7924c7aaa065 in oidc_handle_unauthenticated_user /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/mod_auth_openidc.c:516
+    #5 0x7924c7aaf37b in oidc_check_userid_openidc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/mod_auth_openidc.c:1325
+    #6 0x7924c7aafe95 in oidc_check_user_id /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/mod_auth_openidc.c:1388
+    #7 0x5bea42fba531 in ap_run_check_user_id /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/request.c:84
+    #8 0x5bea42fc3a9f in ap_process_request_internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/request.c:342
+    #9 0x5bea430190cc in ap_process_async_request /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_request.c:450
+    #10 0x5bea4301937a in ap_process_request /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_request.c:487
+    #11 0x5bea4300f4e2 in ap_process_http_sync_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_core.c:208
+    #12 0x5bea4300f4e2 in ap_process_http_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_core.c:249
+    #13 0x5bea42ff54ed in ap_run_process_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/connection.c:42
+    #14 0x5bea42ff61cb in ap_process_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/connection.c:217
+    #15 0x5bea4303043a in child_main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:667
+    #16 0x5bea430307bd in make_child /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:773
+    #17 0x5bea43031ee2 in perform_idle_server_maintenance /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:877
+    #18 0x5bea43031ee2 in prefork_run /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:1070
+    #19 0x5bea42f7fd27 in ap_run_mpm /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm_common.c:95
+    #20 0x5bea42f6adb9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/main.c:843
+    #21 0x7924ca82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #22 0x7924ca82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #23 0x5bea42f68174 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr-install/bin/httpd+0xb0174) (BuildId: 4eaa04245836690f08b88d0f1665055d500d6213)
+
+0x525000077900 is located 0 bytes after 8192-byte region [0x525000075900,0x525000077900)
+allocated by thread T0 here:
+    #0 0x7924cacfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x7924caab795b in allocator_alloc memory/unix/apr_pools.c:402
+    #2 0x7924caab8d15 in apr_palloc memory/unix/apr_pools.c:843
+    #3 0x5bea42fe0781 in ap_parse_htaccess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/config.c:2070
+    #4 0x5bea42fbea3e in ap_directory_walk /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/request.c:1084
+    #5 0x5bea42fa562f in core_map_to_storage /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/core.c:4824
+    #6 0x5bea42fba279 in ap_run_map_to_storage /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/request.c:82
+    #7 0x5bea42fc310e in ap_process_request_internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/request.c:287
+    #8 0x5bea430190cc in ap_process_async_request /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_request.c:450
+    #9 0x5bea4301937a in ap_process_request /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_request.c:487
+    #10 0x5bea4300f4e2 in ap_process_http_sync_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_core.c:208
+    #11 0x5bea4300f4e2 in ap_process_http_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/modules/http/http_core.c:249
+    #12 0x5bea42ff54ed in ap_run_process_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/connection.c:42
+    #13 0x5bea42ff61cb in ap_process_connection /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/connection.c:217
+    #14 0x5bea4303043a in child_main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:667
+    #15 0x5bea430307bd in make_child /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:773
+    #16 0x5bea43031ee2 in perform_idle_server_maintenance /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:877
+    #17 0x5bea43031ee2 in prefork_run /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm/prefork/prefork.c:1070
+    #18 0x5bea42f7fd27 in ap_run_mpm /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/mpm_common.c:95
+    #19 0x5bea42f6adb9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr/server/main.c:843
+    #20 0x7924ca82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #21 0x7924ca82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #22 0x5bea42f68174 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.71-asanapr-install/bin/httpd+0xb0174) (BuildId: 4eaa04245836690f08b88d0f1665055d500d6213)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc/src/state.c:214 in oidc_state_cookies_parse_token
+Shadow bytes around the buggy address:
+  0x525000077680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000077700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000077780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000077800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x525000077880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x525000077900:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000077980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000077a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000077a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000077b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x525000077b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==207343==ABORTING

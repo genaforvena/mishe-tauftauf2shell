@@ -135,3 +135,31 @@ returned rc 0 and `PASS=17 FAIL=0` (14 READ-class faults, 0 WRITE faults,
 asserted by the runner.
 
 Re-run: `cd lab/frontier/modauthoidc2shell/realobj && bash run.sh`.
+
+## Full-module ASan httpd loopback probe (2026-11-23 W6)
+`full/` provisions the complete parent module at
+`4301b5364034191adcba5153e5870405855cb74e` (`src/state.c` sha256
+`ceedb687…5aa`, matching `src/SHA256SUMS`), jansson 2.14, cjose 0.6.1 and a
+released-tag `v2.4.19.4` control worktree. Both modules were built with
+`-fsanitize=address` against the prebuilt ASan APR 1.7.4 / APR-util 1.6.3 /
+httpd 2.4.71 stack in `../../apache2shell/build/`; configs bind only
+`127.0.0.1:18090`. Full recipe, hashes and limits: `full/evidence/README.md`.
+
+Reachable path confirmed in source, not inferred: `src/state.c:229`
+`oidc_state_cookies_clean_expired()` apr_pstrdup's the whole Cookie header,
+`apr_strtok`s it and calls `oidc_state_cookies_parse_token()` on each token;
+`src/handle/request.c:132` calls it from `oidc_request_authorization_set_cookie()`
+at `request.c:239`, reached from `oidc_check_user_id` for an unauthenticated
+request to a protected `/Location`. `handle/response.c:353` is the callback path.
+
+`cd full && bash run.sh` (final run, `evidence/run-final.txt`): parent
+30/30 ASan `READ of size 1` faults at pinned `state.c:214`, full stack through
+`ap_run_check_user_id`, 30/30 empty replies; released fix 0/30 ASan reports,
+30/30 HTTP 302, no dispatch. First manual run
+(`evidence/trial-codes.txt`, `asan.log.*`, `error_log`) was layout-dependent:
+7/30 faults and 23/30 dispatches of `mod_auth_openidc_state_novalue` from the
+out-of-bounds region; 10/10 safe controls clean. The 8192-byte overflowed
+region is a real APR arena allocated in `ap_parse_htaccess`, not a harness
+malloc. ASan faults before the NUL store, so no ASan WRITE here; no chosen
+byte, pointer control, command or rung 5. Grade unchanged: rung 3 on a real
+pre-auth wire path; rung 4 scoped. Unwitnessed.

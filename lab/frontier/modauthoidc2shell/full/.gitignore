@@ -1,0 +1,16 @@
+# Provisioned upstream sources, dependency builds and module binaries.
+# Recreate with BUILD.md; only configs, runner and evidence are committed.
+src/
+prefix/
+httpd.pid
+error_log
+error-fixed.log
+asan.log.*
+asan-asan.log.*
+start.out
+start-fixed.out
+*.response
+trial-codes.txt
+!evidence/asan.log.*
+!evidence/asan-asan.log.*
+fixed-codes.txt

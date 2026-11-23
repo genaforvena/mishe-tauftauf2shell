@@ -62,9 +62,10 @@ The direct-call harness uses stubbed request/config pointers and a recorder;
 it has no Apache, APR pool, request object, listener, socket or wire. Its
 exact-size heap token is an instrument; the ASan read faults before the write,
 so no ASan WRITE is available in that build. W147 ESTABLISHED rungs 1-3 and
-scoped rung 4 at that scope. A separate unwitnessed real-object probe (below)
-uses real APR/Apache objects but still no module, listener or wire: the
-grade stays rung 4 **scoped**. No pointer control, chosen command or rung 5.
+scoped rung 4 at that scope. Two later unwitnessed probes add real APR/Apache
+objects and then a full module on a loopback wire (below), but neither gives
+chosen-byte or pointer control: rung 3 is now also confirmed on a live
+pre-auth wire path and rung 4 stays **scoped**. No chosen command or rung 5.
 
 ## Real-object follow-up (2026-11-23)
 
@@ -108,3 +109,37 @@ scoped rung 4 are ESTABLISHED at the labeled direct-call scope; no repair owed
 and no rung 5. The external advisory text and the two pre-auth caller lines
 were not source-bound in this lane and were not reproduced by the witness —
 UNKNOWN, not upgraded.
+
+## Full-module ASan loopback result (2026-11-23 W6) — unwitnessed
+
+The real full-module wire path is now measured. `full/` provisions the
+complete parent module at `4301b5364034191adcba5153e5870405855cb74e`
+(`src/state.c` sha256 `ceedb687…5aa`, matching the pin), jansson 2.14 and
+cjose 0.6.1, and builds it with ASan against the local ASan APR 1.7.4 /
+APR-util 1.6.3 / httpd 2.4.71 stack. A released-tag `v2.4.19.4` module is
+the control. Both serve only `127.0.0.1:18090`; static provider config means
+no metadata fetch or external contact.
+
+The caller is source-bound and live: an unauthenticated GET of
+`/protected` (protected by `AuthType openid-connect` / `Require valid-user`)
+passes `oidc_check_user_id` → `oidc_handle_unauthenticated_user` →
+`oidc_request_authorization_set_cookie` (`handle/request.c:132`) →
+`oidc_state_cookies_clean_expired` (`state.c:229`) →
+`oidc_state_cookies_parse_token`. With `Cookie:
+mod_auth_openidc_state_novalue`, `cd full && bash run.sh` gave parent
+30/30 ASan `heap-buffer-overflow` READ at pinned `state.c:214`, full native
+stack through `ap_run_check_user_id`, 30/30 empty replies; released fix 0/30
+reports, 30/30 HTTP 302, zero OOB dispatches. A first layout-dependent run
+gave 7/30 faults and 23/30 dispatches of `mod_auth_openidc_state_novalue`
+from the out-of-bounds region; all safe controls were clean. The overflowed
+8192-byte region is a real APR arena from `ap_parse_htaccess`. Evidence:
+`lab/frontier/modauthoidc2shell/full/evidence/README.md`, `run-final.txt`,
+`asan-asan.log.*`, `trial-codes.txt`, `error_log`.
+
+This upgrades rung 3 to a **real pre-auth wire path in a live Apache
+process**. It does not upgrade rung 4: ASan faults on the read before the NUL
+store, the byte value is always NUL and its offset is chosen by adjacent
+arena memory, not by the client; there is no pointer control, command or
+rung 5. This probe is unwitnessed — W147's ESTABLISHED verdict still covers
+the direct-call harness only. What would change the grade: a measured
+controlled pointer or command side effect, or a witness replay of this probe.

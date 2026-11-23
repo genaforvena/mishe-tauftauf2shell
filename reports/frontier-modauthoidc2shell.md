@@ -129,3 +129,25 @@ the direct-call scope, no repair owed; no rung 5. Rung 5 must not be inferred
 from this.
 
 No external system was probed; all URLs above were read for provisioning only.
+
+## 6. Full-module ASan loopback result (2026-11-23 W6)
+
+The full parent module was provisioned and built with ASan against the local
+ASan APR/httpd stack, with jansson and cjose provisioned under `lab/`. A
+released `v2.4.19.4` module is the control; both bind only `127.0.0.1:18090`.
+The caller is source-bound and live: an unauthenticated GET of `/protected`
+reaches `oidc_check_user_id` → `oidc_handle_unauthenticated_user` →
+`oidc_request_authorization_set_cookie` (`handle/request.c:132`) →
+`oidc_state_cookies_clean_expired` → `oidc_state_cookies_parse_token` before
+authentication. `cd lab/frontier/modauthoidc2shell/full && bash run.sh`:
+parent 30/30 ASan `READ of size 1` faults at pinned `state.c:214` with a full
+native stack through `ap_run_check_user_id` and 30/30 empty replies; fixed tag
+0/30 reports and 30/30 HTTP 302. An earlier layout-dependent run gave 7/30
+faults and 23/30 OOB dispatches of the value-less cookie name. The overflowed
+8192-byte region is a real APR arena. Evidence and limits:
+`lab/frontier/modauthoidc2shell/full/evidence/README.md`.
+
+This confirms rung 3 on a real pre-auth wire path; rung 4 stays scoped to the
+direct-call harness (ASan faults before the NUL store; byte value always NUL,
+offset chosen by adjacent memory, no pointer control or command). The probe is
+unwitnessed; W147's verdict covers the earlier harness only.
