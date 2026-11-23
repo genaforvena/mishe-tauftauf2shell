@@ -97,6 +97,41 @@ which removes the `:152` stack write and leaves the `:154` source over-read as
 the first ASan report. Details and raw outputs in `PROVENANCE.md`, section
 "Counterexample hunt on the virtual-port claim (W163)".
 
+## Heap destination on the real build (W164, 2026-11-23)
+
+No rebuild is needed for the heap-destination report: the W162 ASan build
+reports it at run time with `halt_on_error=0`. With the run env above,
+`M2SHELL_JL2005_COUNT=1022` and
+`ASAN_OPTIONS=detect_leaks=0:halt_on_error=0`, one run reports three
+faults: the `:152` stack `WRITE of size 16384` (via `memset` in
+`gp_port_vusb_read`), the `:154` stack `READ of size 16848` (via
+`memmove`), and the `:154` heap `WRITE of size 16848` at 0 bytes past a
+16448-byte region allocated in `camera_init` at `jl2005c/library.c:477`.
+`rc=0`: these errors are recoverable in this mode. Raw output:
+`evidence/real-lib-recover-1022.out`.
+
+Why this differs from the pinned harness: there the fault is an
+instrumented store and needs `-fsanitize-recover=address` at compile
+time; here all three are libasan interceptor reports, so the runtime
+option alone suffices.
+
+Controls: count 100 with the same options is clean
+(`evidence/real-lib-recover-100.out`). Applying
+`pins/fix-6a3393d.patch`, rebuilding only `camlibs/jl2005c.la` and
+rerunning count 1022 gives only the 16 one-byte replies and the
+512-byte block, no oversized read and no ASan
+(`evidence/real-lib-recover-fixed-1022.out`, `...-reads.out`). The patch
+was reversed, the vulnerable source hash `0ccb1dac24a837bc…` restored,
+the camlib rebuilt, and a fresh run reproduced all three reports
+(`evidence/real-lib-recover-restore-1022.out`). At count 65535 the same
+mode reports the 1048576- and 1049040-byte faults and then SEGVs inside
+`__sanitizer_internal_memmove` (`evidence/real-lib-recover-65535.out`):
+the advisory's 1 MiB bound is observed but not recoverable.
+
+Grade unchanged: rung 3 at the real heap destination. Device replies
+remain lab-chosen vusb responses; no bus, wire, consumer, pointer chain,
+marker or command, no rung 5.
+
 ## Scope limit
 
 No real USB bus, camera hardware, wire protocol, consumer application, pointer

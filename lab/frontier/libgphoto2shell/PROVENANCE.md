@@ -212,12 +212,49 @@ vusb, no source or patch change. Raw outputs in `evidence/real-lib-count-*.out`,
   reply leaves only the `:154` source over-read under default ASan. This
   bounds the claim rather than refuting it: the lab device can supply full
   replies, but a real device that truncates takes a different first fault.
-  The real-build heap destination under recover mode remains UNTESTED — this
-  library was built without `-fsanitize-recover=address`; that confirmation
-  stands only in the pinned harness.
+  The real-build heap destination was still UNTESTED at that point:
+  default ASan aborts at `:152` first. W164 below closes that gap with
+  `halt_on_error=0` on the same build, without recompiling.
 
 No witness verdict arrived during this wake (#2763, #2777, #2831 all still
 queued). Grade unchanged: rung 3 on a synthetic transport, rung 5 UNKNOWN.
+
+## Real-library heap destination under recoverable ASan (W164)
+
+The same real ASan build from W162 reports all three faults when run with
+`ASAN_OPTIONS=detect_leaks=0:halt_on_error=0`; no compile-time
+`-fsanitize-recover=address` is needed because these reports come from
+libasan's intercepted `memset`/`memmove`, not instrumented camlib stores.
+Command as in `REAL-BUILD.md`, count 1022, full replies:
+
+- `stack-buffer-overflow`, `WRITE of size 16384`, via `memset` ->
+  `gp_port_vusb_read` -> real `gp_port_read` at real `jl2005c.c:152`;
+- `stack-buffer-overflow`, `READ of size 16848`, via `memmove` at `:154`;
+- `heap-buffer-overflow`, `WRITE of size 16848`, via the same `memmove`
+  at `:154`, address `0x529000004240` = 0 bytes after the 16448-byte
+  region `[0x529000000200,0x529000004240)` allocated in `camera_init`
+  at `jl2005c/library.c:477`. The process completes with `rc=0` because
+  these errors are recoverable in this mode.
+
+Raw: `evidence/real-lib-recover-1022.out`. Controls under identical
+options: count 100 gives `rc=0` and no ASan
+(`evidence/real-lib-recover-100.out`); with `pins/fix-6a3393d.patch`
+applied and only `camlibs/jl2005c.la` rebuilt, count 1022 gives just the
+16 one-byte replies and the 512-byte block, no oversized read and no
+ASan (`evidence/real-lib-recover-fixed-1022.out`, `...-reads.out`).
+The patch was reversed, the vulnerable source hash
+`0ccb1dac24a837bc…` restored, the camlib rebuilt, and a fresh run
+reproduced all three reports
+(`evidence/real-lib-recover-restore-1022.out`).
+
+At count 65535 the same mode reports `WRITE of size 1048576` at `:152`,
+`READ of size 1049040` and heap `WRITE of size 1049040` at `:154`, then
+SEGVs inside `__sanitizer_internal_memmove`: recovery cannot absorb the
+1 MiB write (`evidence/real-lib-recover-65535.out`).
+
+This is rung 3 at the heap destination on a real library build. The
+device is still lab-patched vusb; no wire, pointer-control chain,
+marker, command or rung 5 claim follows.
 
 ## Ceiling
 
