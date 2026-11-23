@@ -40,7 +40,6 @@ Read from the pinned vulnerable blob. In `ppp_handle_ipv6cp()`
 - Lines 374, 382, 389 and 407 pass the same `len` to `ppp_tx_frame()`; its
   `memcpy(pay, data, datasz)` at line 234 writes peer-chosen extent into
   `tx.buf`, whose real capacity is `ifp->framesize` (~1506 bytes).
-
 The upstream fix (commit `751f1474`, 2026-07-01, +6/-2) adds
 `if (len < sizeof(*ipv6cp) || len > ipv6cpsz) return;` after the length read in
 all three handlers, tightening the existing IPCP-only `len > ipcpsz` check.
@@ -57,6 +56,7 @@ that place `pay` at `tx.buf + 4`. Inputs are local heap objects; no daemon,
 listener, socket or off-loopback probe. `./run.sh` produced **43 PASS / 0 FAIL**
 three consecutive times plus a clean `git archive HEAD` replay in `/tmp`;
 `TRACE_SHA256=8c5d62a55be40595f76d3479f05a9ab4652585f07ebae13cd35017d64e3d1cb7`.
+The full replay log is `lab/frontier/mongoose2shell/harness/evidence/replay.txt`.
 
 - **Rung 1**: peer `len=65535`, declared frame length 2048, `find_opt()` walk
   extent 65531, `ppp_tx_frame()` copy extent 65535, 64515 bytes past a 1024-byte
