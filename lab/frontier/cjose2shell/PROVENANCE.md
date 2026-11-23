@@ -213,6 +213,9 @@ and limitations are in `w2/README.md` and `w2/evidence/SHA256SUMS`.
   2.4.15.1 with `/usr/bin/apxs`. Static library SHA-256
   `6801ddac35126f61e0eb160c212597c66a1ce85c6e5743eac5f196c1b179581d`;
   module SHA-256 `f1be85cfaf9e2db3935bd5a775bd8e76406e64817a46be72e6517cd1fd6b24cd`.
+  These are build-instance values for this checkout path: `-g` embeds the
+  build directory, so the witness's replay in `/tmp` produced different
+  module/library hashes without changing the measured result (DM #3079).
   Startup log: `mod_auth_openidc-2.4.15.1 - init - cjose 0.6.2.4, openssl-3.0.13`.
 - Private Apache `127.0.0.1:18443` only, `Listen` bound to loopback,
   `OIDCPrivateKeyFiles` loading a generated RSA key under kid `w2-rsa-kid`.
@@ -239,8 +242,10 @@ logout key configuration. The attacker-supplied oversized length reaches the
 vulnerable helper, but no OCT KEK is configured on this path, so no overflow
 occurred. Unauthenticated reachability of the corruption in a real deployment
 stays UNKNOWN; the id_token path (proto.c:1426-1434) with an OCT JWK from
-client_secret is an unmeasured source-level follow-up. No witness verdict,
-pointer/IP control, rung 5 or module patch.
+client_secret is an unmeasured source-level follow-up. The witness
+independently replayed this lane from a clean archive and ESTABLISHED the
+negative at the labeled real mod_auth_openidc / loopback scope (DM #3079).
+No pointer/IP control, rung 5 or module patch.
 
 ## Ceiling (after W181)
 
@@ -250,7 +255,9 @@ request into the real import/decrypt path; ASan and plain glibc corruption
 are measured, including the exact object adjacent to the CEK. No deployed
 consumer was exercised; a real loopback mod_auth_openidc build reached the
 vulnerable helper but not the copy (W184). No credential, pointer/IP control,
-shell command or witness replay. The chosen bytes are the plaintext of a
+shell command. The witness independently replayed the direct-call and wire
+lanes from a clean archive (verdicts #3019/#3020) and the W184
+real-consumer negative (DM #3079). The chosen bytes are the plaintext of a
 lab-generated RFC 3394 wrap under a lab-known key; in a real deployment the
 recipient KEK is secret, so only the write length is attacker-chosen. The
 advisory's deployed pre-auth reachability and code-execution claim remain

@@ -29,5 +29,7 @@ Observed 2026-11-23 20:0xZ from archive
 
 `bootstrap.sh` is provisioning for replication only; the scientific claims
 rest on the real library calls and pinned bytes documented in
-`PROVENANCE.md`. An independent witness replay is still owed; this is an
-author-observed clean-archive replay, not external acceptance.
+`PROVENANCE.md`. The witness independently replayed the direct-call and W181
+wire lanes from a clean archive (verdicts #3019/#3020) and the W184
+real-consumer negative (DM #3079); this author record is not itself the
+witness verdict.

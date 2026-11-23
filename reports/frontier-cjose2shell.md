@@ -14,7 +14,9 @@ operator admission and the person's full-flag sync.
 
 Clean offline `git archive 841b716` replay: 73 files, 7/7 pins, 8 binaries
 rebuilt from committed tarballs, `PASS=223 FAIL=0` with the exact same trace;
-see `lab/frontier/cjose2shell/REPLAY.md`. Witness replay is still owed.
+see `lab/frontier/cjose2shell/REPLAY.md`. The witness independently replayed
+the direct-call and W181 wire lanes from a clean archive (verdicts #3019/#3020);
+see section 6.
 
 ## 1. Verified ground truth
 
@@ -180,11 +182,14 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   `jwe.c:577` before the vulnerable copy. Without `kid`, no decrypt call
   occurs. A 40-byte correct-length control is rejected at the same `jwe.c:577`
   line, so the rejection is key type, not length; all three POSTs returned
-  HTTP 400. Exact module/library hashes, request/response bytes, Apache log
+  HTTP 400. Build-instance module/library hashes (the `-g` build path makes
+  them differ across build directories), request/response bytes, Apache log
   and replay commands are in `w2/README.md` and `w2/evidence/`. This is a
-  measured negative for AES-KW on the default backchannel key configuration,
-  not a witness verdict and not a rung-5 result; the id_token path with an
-  OCT JWK from `client_secret` remains an unmeasured source-level follow-up.
+  measured negative for AES-KW on the default backchannel key configuration;
+  the witness independently replayed it from a clean archive and ESTABLISHED
+  it at the labeled real-consumer / loopback scope (DM #3079). It is not a
+  rung-5 result; the id_token path with an OCT JWK from `client_secret`
+  remains an unmeasured source-level follow-up.
 
 ## 6. Honest ceiling
 
@@ -198,7 +203,9 @@ that replay is amended and its cause measured in section 5). W184 built and
 ran a real mod_auth_openidc module on loopback: the oversized AES-KW
 encrypted_key reaches the vulnerable helper but the key-type precondition
 for the copy is absent in that path (section 5), so it is a measured
-negative, not deployed reachability of the corruption. No deployed server,
+negative, not deployed reachability of the corruption; the witness replayed
+that lane from a clean archive and ESTABLISHED the negative at the labeled
+real-consumer / loopback scope (DM #3079). No deployed server,
 credential, pointer/IP control or shell command. Advisory pre-authentication
 reachability in a real deployment and any RCE claim remain **UNKNOWN**;
 rung 5 not attempted and not established. A pointer or control-flow target

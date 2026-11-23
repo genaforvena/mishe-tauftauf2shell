@@ -27,7 +27,10 @@ default backchannel-logout key configuration. **No rung-5/RCE claim.**
 * cjose v0.6.2.4 copied to `w2/cjose-vuln`, rebuilt PIC/static with
   `CFLAGS='-g -O0 -fPIC -fno-omit-frame-pointer'`, linked to the harness
   jansson 2.14 prefix.
-* Hashes: `evidence/SHA256SUMS`.
+* Hashes: `evidence/SHA256SUMS`. The `.a`/`.so` entries are build-instance
+  values for this checkout path: `-g` embeds the build directory, so a replay
+  elsewhere produces different library/module hashes (seen in the witness's
+  `/tmp` replay, DM #3079). Tokens, private key and wire bytes are stable.
 * Listener: `127.0.0.1:18443` only; private Apache started with `-X -f w2/apache.conf`;
   no system Apache or external network touched.
 
