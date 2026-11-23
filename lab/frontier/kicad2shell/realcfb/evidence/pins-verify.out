@@ -1,0 +1,9 @@
+src/altium_binary_parser.cpp: OK
+src/altium_binary_parser.h: OK
+pins/altium_binary_parser.h.class.slice: OK
+pins/altium_binary_parser.cpp.ctors.slice: OK
+pins/altium_binary_parser.cpp.readprops.slice: OK
+src/sch_io_altium.cpp.vuln: OK
+src/sch_io_altium.cpp.fixed: OK
+pins/sch_io_altium.cpp.vuln.slice: OK
+pins/sch_io_altium.cpp.fixed.slice: OK

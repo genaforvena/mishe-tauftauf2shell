@@ -1,0 +1,5 @@
+attackfar  olefile=True streams=[['FileHeader']] size=118 key_ok=True PASS
+attackneg  olefile=True streams=[['FileHeader']] size=108 key_ok=True PASS
+attackz    olefile=True streams=[['FileHeader']] size=107 key_ok=True PASS
+baseline   olefile=True streams=[['FileHeader']] size=92 key_ok=True PASS
+ALL_FIXTURES_OK

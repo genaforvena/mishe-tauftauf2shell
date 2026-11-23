@@ -1,0 +1,5 @@
+cfb: file=fixtures/FileHeader-attackz.SchLib sectors=4 fat=128 mini_stream=128 stream=107
+real-reader: bytes=107 props=3 parse_error=0
+real-key: SIZE1=10
+real-key: SIZEZ=84215045
+rc=0 size=1 first=72 GUARD7=11111111

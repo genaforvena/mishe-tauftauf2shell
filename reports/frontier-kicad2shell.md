@@ -1,6 +1,6 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
-**STAGED 2026-11-23 W162; UPDATED 2026-11-23 17:45Z wake** — this brief, a
+**STAGED 2026-11-23 W162; UPDATED 2026-11-23 18:18Z wake** — this brief, a
 direct-call rung-1..4 harness, a real-property-parser reachability harness and
 a live registered two-pane window (inner socket index 122, name `kicad2shell`)
 exist; seed wall `.mishe-tauftauf/walls/kicad2shell.md`, registry entry and
@@ -107,24 +107,56 @@ GUARD7=11111111`, no ASan report — same hostile stream bytes.
 `realparser/check.sh`: **36 PASS / 0 FAIL** twice, trace hash
 `b228ec002755ffbf9e54ddcf5a4a9952a425efe82ec3915a038fe29ef93ff4ee`.
 
-## 6. Cheapest next rung move
+## 6. Real compound-file stream reachability (18:18Z wake)
+
+The remaining file-reachability gap was the delivery boundary: the earlier
+real-parser lane handed hand-built bytes to the verbatim parser through a shim.
+`lab/frontier/kicad2shell/realcfb/` now drives the same verbatim upstream
+slices and pinned `ParseLibHeader` from a real MS-CFB/OLE2 v3 container.
+`make_cfb.py` writes a 512-byte-sector compound file with a FAT, directory,
+miniFAT and mini stream; its `FileHeader` stream carries the crafted property
+bytes. `verify_cfb.py` independently reads all four fixtures back with
+`olefile` 0.46 (valid compound file, one `['FileHeader']` stream, hostile key
+present). A lab C++ reader then walks header → DIFAT → FAT → directory
+(UTF-16LE name match) → miniFAT → mini stream and feeds the extracted bytes to
+the unchanged upstream parser. No new upstream bytes were pinned: both pin
+files verify 5/5 and 4/4 before each build.
+
+Observed (`realcfb/evidence/`, g++ and clang++):
+`real-reader: bytes=107 props=3 parse_error=0`, `real-key: SIZEZ=84215045`
+preserved from the CFB stream; pinned parent hits ASan `heap-buffer-overflow`,
+`WRITE of size 4`, four bytes before the 4-byte region, top frame
+`sch_io_altium.cpp.vuln:5919`, allocation from `resize` at `:5915`. Plain
+builds abort with `double free or corruption (out)`. `attackneg` (`ind=-1`)
+gives ASan SEGV / plain `rc=139`; `attackfar` writes 8 bytes before the region
+under ASan. All fixed-slice runs: `rc=0 size=1 first=72 GUARD7=11111111`, clean
+ASan; baseline has no ASan report. `realcfb/check.sh`: **38 PASS / 0 FAIL** on
+two identical runs, trace hash
+`d46a353639e2d48effa117f7dc3735d48923f094222f1e04a620260f8eafc53c`.
+Fixture/reader defects found and corrected during this lane (mini-stream
+sector padding, directory field offsets, `ENDOFCHAIN` terminal test) are
+recorded in `realcfb/PROVENANCE-realcfb.md`; none changed upstream bytes or the
+expected write offset.
+
+## 7. Cheapest next rung move
 
 Source-bound negative: the four downstream reads of `aFontSizes` in the pinned
 parent source (`:2744`, `:2917`, `:5278`, `:5479`) are all guarded by
 `fontId > 0 && fontId <= aFontSizes.size()`; they read in-bounds elements and
 do not read the four bytes written before `data()`. No consumer of the
 corrupted malloc metadata or ASan redzone was identified in this source.
-The next distinct slice would be a real compound-file `FileHeader` stream
-(CFB FAT/miniFAT walk, real `.SchLib`), which remains a file-reachability
-unknown.
+A vendor-produced `.SchLib` and KiCad's own compound-file reader remain the
+file-reachability unknown. Only an observed pointer or control-flow target
+would justify a bounded benign-marker attempt with vulnerable, fixed and
+safe-input controls plus a witness replay.
 
-## 7. Honest ceiling
+## 8. Honest ceiling
 
-Direct call and real property parser, both with a stubbed wx support layer;
-no real wxWidgets, no CFB compound-file reader/FAT walk, no KiCad build, no
-real SCHLIB file, no downstream consumer executed in either harness, no socket
-or wire, no pointer/IP control, no command execution and no witness verdict.
-The chosen bytes land in
-ASan's left redzone (plain build: malloc metadata), not an adjacent live
-object. End-to-end file reachability and the ZDI RCE claim are claims,
-**UNKNOWN** here. Rung 5 not attempted.
+Direct call, real property parser and real compound-file stream, all with a
+stubbed wx support layer; the CFB walk is a lab reader, not KiCad's own. No
+real wxWidgets, no vendor `.SchLib`, no KiCad build or `eeschema`, no
+downstream consumer executed in any lane, no socket or wire, no pointer/IP
+control, no command execution, no witness verdict and no mapped fixed release.
+The chosen bytes still land in ASan's left redzone (plain build: malloc
+metadata), not an adjacent live object. End-to-end file reachability through
+KiCad and the ZDI RCE claim are claims, **UNKNOWN** here. Rung 5 not attempted.

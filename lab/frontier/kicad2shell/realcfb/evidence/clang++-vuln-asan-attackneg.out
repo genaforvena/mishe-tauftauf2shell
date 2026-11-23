@@ -1,0 +1,18 @@
+cfb: file=fixtures/FileHeader-attackneg.SchLib sectors=4 fat=128 mini_stream=128 stream=108
+real-reader: bytes=108 props=3 parse_error=0
+real-key: SIZE-1=84215045
+real-key: SIZE1=10
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3400972==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x5948745d044d bp 0x7fff943021b0 sp 0x7fff94302000 T0)
+==3400972==The signal is caused by a READ memory access.
+==3400972==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x5948745d044d in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int>>&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:5919:37
+    #1 0x5948745d14ad in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:6170:15
+    #2 0x7c5e43c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7c5e43c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5948744f2814 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/clang++-vuln-asan+0x2f814) (BuildId: 9200db958ef2601a1c857181867b79aa69149015)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:5919:37 in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int>>&)
+==3400972==ABORTING

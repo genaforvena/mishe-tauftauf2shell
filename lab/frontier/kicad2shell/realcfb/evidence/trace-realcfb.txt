@@ -1,0 +1,72 @@
+
+RUN g++-vuln-asan-baseline rc=0
+RUN g++-vuln-asan-attackz rc=1
+RUN g++-vuln-asan-attackneg rc=1
+RUN g++-vuln-asan-attackfar rc=1
+RUN g++-vuln-plain-baseline rc=0
+RUN g++-vuln-plain-attackz rc=134
+RUN g++-vuln-plain-attackneg rc=139
+RUN g++-vuln-plain-attackfar rc=139
+RUN g++-fixed-asan-baseline rc=0
+RUN g++-fixed-asan-attackz rc=0
+RUN g++-fixed-asan-attackneg rc=0
+RUN g++-fixed-asan-attackfar rc=0
+RUN g++-fixed-plain-baseline rc=0
+RUN g++-fixed-plain-attackz rc=0
+RUN g++-fixed-plain-attackneg rc=0
+RUN g++-fixed-plain-attackfar rc=0
+RUN clang++-vuln-asan-baseline rc=0
+RUN clang++-vuln-asan-attackz rc=1
+RUN clang++-vuln-asan-attackneg rc=1
+RUN clang++-vuln-asan-attackfar rc=1
+RUN clang++-vuln-plain-baseline rc=0
+RUN clang++-vuln-plain-attackz rc=134
+RUN clang++-vuln-plain-attackneg rc=139
+RUN clang++-vuln-plain-attackfar rc=139
+RUN clang++-fixed-asan-baseline rc=0
+RUN clang++-fixed-asan-attackz rc=0
+RUN clang++-fixed-asan-attackneg rc=0
+RUN clang++-fixed-asan-attackfar rc=0
+RUN clang++-fixed-plain-baseline rc=0
+RUN clang++-fixed-plain-attackz rc=0
+RUN clang++-fixed-plain-attackneg rc=0
+RUN clang++-fixed-plain-attackfar rc=0
+PASS olefile verifies all four CFB fixtures
+PASS all upstream and ParseLibHeader pins verify
+PASS g++ real CFB read extracted the FileHeader stream
+PASS g++ real parser preserves SIZEZ from CFB stream
+PASS g++ vulnerable ASan attackz: WRITE of size 4
+PASS g++ vulnerable ASan top frame at pinned :5919
+PASS g++ vulnerable ASan allocation from resize at :5915
+PASS g++ vulnerable plain attackz aborts on heap corruption
+PASS g++ vulnerable attackneg SEGV observed
+PASS g++ vulnerable ASan attackfar writes 8 bytes before region
+PASS g++ vulnerable baseline has no ASan report
+PASS g++ fixed asan baseline clean
+PASS g++ fixed plain baseline clean
+PASS g++ fixed asan attackz clean
+PASS g++ fixed plain attackz clean
+PASS g++ fixed asan attackneg clean
+PASS g++ fixed plain attackneg clean
+PASS g++ fixed asan attackfar clean
+PASS g++ fixed plain attackfar clean
+PASS g++ fixed attackz has no ASan report
+PASS clang++ real CFB read extracted the FileHeader stream
+PASS clang++ real parser preserves SIZEZ from CFB stream
+PASS clang++ vulnerable ASan attackz: WRITE of size 4
+PASS clang++ vulnerable ASan top frame at pinned :5919
+PASS clang++ vulnerable ASan allocation from resize at :5915
+PASS clang++ vulnerable plain attackz aborts on heap corruption
+PASS clang++ vulnerable attackneg SEGV observed
+PASS clang++ vulnerable ASan attackfar writes 8 bytes before region
+PASS clang++ vulnerable baseline has no ASan report
+PASS clang++ fixed asan baseline clean
+PASS clang++ fixed plain baseline clean
+PASS clang++ fixed asan attackz clean
+PASS clang++ fixed plain attackz clean
+PASS clang++ fixed asan attackneg clean
+PASS clang++ fixed plain attackneg clean
+PASS clang++ fixed asan attackfar clean
+PASS clang++ fixed plain attackfar clean
+PASS clang++ fixed attackz has no ASan report
+PASS=38 FAIL=0

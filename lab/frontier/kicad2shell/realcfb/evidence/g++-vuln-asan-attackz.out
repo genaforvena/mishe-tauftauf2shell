@@ -1,0 +1,60 @@
+cfb: file=fixtures/FileHeader-attackz.SchLib sectors=4 fat=128 mini_stream=128 stream=107
+real-reader: bytes=107 props=3 parse_error=0
+real-key: SIZE1=10
+real-key: SIZEZ=84215045
+=================================================================
+==3399084==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50200000020c at pc 0x62747d743675 bp 0x7ffd1907c900 sp 0x7ffd1907c8f0
+WRITE of size 4 at 0x50200000020c thread T0
+    #0 0x62747d743674 in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int> >&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:5919
+    #1 0x62747d7442ee in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:6170
+    #2 0x770e7aa2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x770e7aa2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x62747d740da4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/g++-vuln-asan+0x5da4) (BuildId: b2beb09d1f88f13854fb04bab3533c55fe8fdf71)
+
+0x50200000020c is located 4 bytes before 4-byte region [0x502000000210,0x502000000214)
+allocated by thread T0 here:
+    #0 0x770e7b2fe548 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95
+    #1 0x62747d75a12d in std::__new_allocator<int>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151
+    #2 0x62747d7550aa in std::allocator_traits<std::allocator<int> >::allocate(std::allocator<int>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482
+    #3 0x62747d7550aa in std::_Vector_base<int, std::allocator<int> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381
+    #4 0x62747d74fd58 in std::vector<int, std::allocator<int> >::_M_default_append(unsigned long) /usr/include/c++/13/bits/vector.tcc:663
+    #5 0x62747d74c52c in std::vector<int, std::allocator<int> >::resize(unsigned long) /usr/include/c++/13/bits/stl_vector.h:1016
+    #6 0x62747d7435c7 in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int> >&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:5915
+    #7 0x62747d7442ee in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:6170
+    #8 0x770e7aa2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x770e7aa2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x62747d740da4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/g++-vuln-asan+0x5da4) (BuildId: b2beb09d1f88f13854fb04bab3533c55fe8fdf71)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/realcfb/sch_io_altium.cpp.vuln:5919 in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int> >&)
+Shadow bytes around the buggy address:
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x502000000000: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000000080: fa fa fd fd fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000000100: fa fa fd fd fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000000180: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fd
+=>0x502000000200: fa[fa]04 fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3399084==ABORTING
