@@ -1,0 +1,70 @@
+Breakpoint 1 at 0x404bed: file gzwrite.c, line 394.
+Breakpoint 2 at 0x404c10: file gzwrite.c, line 395.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=39651
+SYSTEM_ADDR=0x7ffff7c58750
+ASYNC_ADDR=0x46ae30
+LOOP_ADDR=0x7ffff7fa7180
+HANDLE_SIZE=128
+ASYNC_CB_OFF=96
+HANDLE_HEX=00000000000000008071faf7ff7f0000010000000000000000000000000000009071faf7ff7f00005072faf7ff7f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000c00000000000000a6154000000000003073faf7ff7f00009872faf7ff7f00000000000000000000
+REQ_BYTES=359400
+WRITTEN=65535
+
+Breakpoint 1, gz_vacate (state=0x4232d0) at gzwrite.c:394
+394	    memmove(state->in, strm->next_in, strm->avail_in);
+$1 = 0x4233f0
+$2 = 0x46ae30
+#3  0x0000000000401ad5 in main () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/uv_server.c:111
+111	    int pr = gzprintf(gz, "x");
+$3 = 0x7ffff7f18010
+#0  gz_vacate (state=0x4232d0) at gzwrite.c:394
+394	    memmove(state->in, strm->next_in, strm->avail_in);
+$4 = 293865
+0x46aeb0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x46aeb8:	0x41	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+$5 = 0x7ffff7f2800f
+$6 = 0x46aef0
+0x46aef0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x46aef8:	0x11	0x01	0x00	0x00	0x00	0x00	0x00	0x00
+
+Breakpoint 2, gz_vacate (state=0x4232d0) at gzwrite.c:395
+395	    strm->next_in = state->in;
+0x46ae30:	0xe7	0x4e	0x56	0x2d	0xfe	0x03	0xb3	0x8b
+0x46ae38:	0xb2	0x86	0xfe	0xb3	0x7d	0x47	0xa3	0xcc
+0x46ae90:	0xf4	0xf1	0x36	0xab	0xa4	0xb5	0xe4	0x11
+0x46ae98:	0x2f	0xac	0x66	0x0b	0x24	0xf2	0xdb	0xc5
+0x46aeb0:	0xd5	0xd1	0x3a	0x1d	0x27	0xfe	0x37	0x8f
+0x46aeb8:	0x66	0xf8	0x67	0x08	0x1b	0x98	0x2e	0x21
+0x46afe0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x46afe8:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x46aff0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x46aff8:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+munmap_chunk(): invalid pointer
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff7c4527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff7c288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff7c297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff7dcf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x00007ffff7ca90b5 in malloc_printerr (str=str@entry=0x7ffff7dd2540 "munmap_chunk(): invalid pointer") at ./malloc/malloc.c:5775
+#7  0x00007ffff7ca953c in munmap_chunk (p=<optimized out>) at ./malloc/malloc.c:3040
+#8  0x00007ffff7cadeda in __GI___libc_free (mem=0x46aec0) at ./malloc/malloc.c:3388
+#9  0x0000000000402902 in gz_error (state=0x4232d0, err=-5, msg=0x4153e2 "stalled write on gzprintf") at gzlib.c:559
+#10 0x0000000000404d4f in gzvprintf (file=0x4232d0, format=0x4150b3 "x", va=0x7fffffffe090) at gzwrite.c:446
+#11 0x0000000000404f16 in gzprintf (file=0x4232d0, format=0x4150b3 "x") at gzwrite.c:494
+#12 0x0000000000401ad5 in main () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/uv_server.c:111
+pthread_kill + 284 in section .text of /lib/x86_64-linux-gnu/libc.so.6
+   0x7ffff7c9ebcc <__GI___pthread_kill+252>:	neg    %esi
+   0x7ffff7c9ebce <__GI___pthread_kill+254>:	jmp    0x7ffff7c9eb5a <__GI___pthread_kill+138>
+   0x7ffff7c9ebd0 <__GI___pthread_kill+256>:	mov    $0xba,%eax
+   0x7ffff7c9ebd5 <__GI___pthread_kill+261>:	syscall
+   0x7ffff7c9ebd7 <__GI___pthread_kill+263>:	mov    %eax,%ebx
+   0x7ffff7c9ebd9 <__GI___pthread_kill+265>:	call   0x7ffff7cf5b50 <__GI_getpid>
+   0x7ffff7c9ebde <__GI___pthread_kill+270>:	mov    %r12d,%edx
+   0x7ffff7c9ebe1 <__GI___pthread_kill+273>:	mov    %ebx,%esi

@@ -146,3 +146,24 @@ walks are in `lab/frontier/zlib2shell/harness/tcp-evidence/layout-*.txt` and
 the analysis in `lab/frontier/zlib2shell/PROVENANCE.md`. This is an author-side
 negative, not a witness verdict and not evidence against a different
 application shape; rung 5 stays UNKNOWN.
+
+## Callable-pointer rewrite attempt — W3 (2026-11-23 06:0xZ, author-only)
+
+A bounded rung-5 attempt added `harness/uv_server.c`, `harness/uv_probe.py`
+and `harness/run_uv.sh`. A plant-started loopback gzip server allocates a real
+libuv `uv_async_t` after `gz_init()`; a 359400-byte stalled request makes the
+stale `gz_vacate()` copy long enough to reach it. gdb readback after the
+memmove shows the handle's `data` bytes replaced by `id>a` and its `async_cb`
+field replaced by exactly the printed `system@plt` address
+(`harness/uv-evidence/callback-rewrite-gdb.txt`). That is a peer-chosen
+function pointer in a real heap consumer, beyond the W2 byte-copy result.
+
+The attempt did not reach rung 5: `uv_run()` segfaults inside `libuv.so.1`
+before dispatch, no command marker appears, and the same crash occurs when
+the handle bytes are preserved verbatim, so collateral heap corruption blocks
+this consumer. Fixed build and draining-peer controls are clean (`UV_RAN=1`,
+rc 0, no marker); trace hash
+`39c477c855862aa4f3fc37c04e81396b859afef79016014a56b4c1c732dd33c6`.
+The payload also depends on gdb-derived build-specific heap offsets to keep
+zlib's allocator from aborting; it is not a wire-only exploit. Author-side
+negative, no witness replay owed. Rung 5 remains UNKNOWN.

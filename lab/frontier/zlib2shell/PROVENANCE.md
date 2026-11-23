@@ -192,3 +192,42 @@ redirect; the later `free()` calls see corrupted metadata, which is the crash
 already recorded. Author-side feasibility negative, not a witness verdict; it
 does not exclude a different application shape with a callable pointer inside
 the overwritten range. Rung 5 remains UNKNOWN.
+
+## Callable-pointer rewrite attempt with a real libuv consumer — W3 (2026-11-23 06:0xZ, author-only)
+
+New files: `harness/uv_server.c`, `harness/uv_probe.py`, `harness/run_uv.sh`,
+raw output in `harness/uv-evidence/`. `bash harness/run_uv.sh` builds the
+vulnerable and fixed non-PIE servers from the pinned tarball (only
+`gzwrite.c` swapped), calibrates the heap delta under gdb, then runs a stalled
+crafted peer, a fixed-build control and a draining-peer control on a
+plant-started 127.0.0.1 listener. Trace hash at staging:
+`39c477c855862aa4f3fc37c04e81396b859afef79016014a56b4c1c732dd33c6`.
+
+The server allocates a real `uv_async_t` after `gz_init()` so a larger stalled
+request can reach it: at the breakpoint `state->in=0x4233f0`, handle
+`0x46ae30` (delta 293440), handle size 128, `async_cb` at offset 96, heap end
+`0x46b000`, top chunk `0x46aef0`, stale source base `req+65535`. A 359400-byte
+request leaves `avail_in=293865`, enough to cover the handle. The peer payload
+places the string `id>a` at the handle's `data` field and `system@plt` at
+`async_cb`; the original message-chunk and top-chunk headers must be preserved
+in the same payload so zlib's error path and glibc's allocator survive the
+copy. These preserved offsets are build-specific and gdb-derived: they are a
+lab condition, not a claimed wire-only exploit.
+
+Measured (raw `harness/uv-evidence/callback-rewrite-gdb.txt`): after the
+memmove the handle begins `69 64 3e 61 00...` (`id>a`) and its `async_cb`
+field reads `50 87 c5 f7 ff 7f 00 00` = `0x7ffff7c58750`, exactly the
+`SYSTEM_ADDR` the server printed in that run. Peer bytes therefore rewrote a
+function pointer in a real event-loop consumer to `system()`. But
+`uv_run()` then faults inside `libuv.so.1` before dispatch; the marker file is
+absent (`MARKER=0`), `SERVER_RC=-11`. Even with the handle bytes preserved
+verbatim, `uv_run()` faults, so collateral heap state, not the rewritten
+callback alone, blocks this consumer. Fixed build: `PRINTF_RC=1`, `UV_RAN=1`,
+rc 0, no marker. Vulnerable + draining peer: `WRITTEN=359400`, `UV_RAN=1`,
+rc 0, no marker. `system@plt` is a non-PIE convenience; no command executed.
+
+Disposition: rung-4 mechanics strengthened to a peer-chosen callback pointer
+in a real heap consumer, but **no observed command side effect**. This is a
+rung-5 negative for this application shape, not a witness verdict and not
+evidence against another consumer with less collateral state. Rung 5 remains
+UNKNOWN.
