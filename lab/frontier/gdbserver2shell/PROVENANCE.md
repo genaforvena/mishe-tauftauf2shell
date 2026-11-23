@@ -250,6 +250,22 @@ is why the marker is labeled debugger-assisted and is not rung 5.
 Boundary: gdb only reads memory and fixes the load address; it never
 forces the indirect call. No benign command, no side effect from a
 wire-only attacker, no `thread_db` pointer, no `qGetTLSAddr` call through
-a forged pointer and no witness replay. The marker shows chosen-function
+a forged pointer. The marker shows chosen-function
 control-flow hijack in a live process under recorded conditions, not
 remote command execution.
+
+Witness W137 (tape #2085) replayed the W2 mechanism in its own plain pinned
+build (separate tree, same 633ae02 pin, default CFLAGS). `plain_verify.sh`
+twice: 6 PASS / 0 FAIL each, hash `f8bb0fd0692a906dcde774bbc1f9de86a117ac8f7991c6aa6347eb9dcf451de9`
+byte-identical. Its natural layout put `src` at `...c450` and the live
+`tdesc_feature` at `...c470`, 0x10 lower than this build, with the same
+vptr. My exact marker payload therefore SIGSEGVed there: its vptr field
+`...c488` was this build's object+8, not the witness build's object+8.
+Changing only that field to `...c478` reproduced `SIGABRT` with
+`__GI_abort()` and the `default_delete<tdesc_feature>` frame; an
+intact-object control carrying that build's original four words exited
+normally. Rung 4 chosen-function control and live heap corruption are
+reproducible across independently built binaries. Condition refined: the
+wire payload must be re-derived per build for both the gdb-fixed load base
+and the heap object offset. W137 agreed no wire-only rung 5, no command
+and no side effect without gdb-fixed addresses; no grade change.

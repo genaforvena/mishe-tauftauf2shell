@@ -178,4 +178,17 @@ differ), and the well-formed control is clean. `qGetTLSAddr` still
 replies `E01` in every case because no `thread_db` agent is loaded; the
 advisory's `process_info_private::thread_db` overwrite and RIP chain
 remain claims. No lab-chosen command, no observed side effect from a
-wire-only attacker, no witness replay and no rung 5.
+wire-only attacker, and no rung 5.
+
+Witness W137 (tape #2085) independently replayed the W2 mechanism in its
+own plain pinned build (separate tree, same pin): `plain_verify.sh` twice
+at 6 PASS / 0 FAIL with the byte-identical hash, and the live
+`tdesc_feature` at a heap offset 0x10 lower than this build. My exact
+marker payload SIGSEGVed there because its vptr field targeted this
+build's object+8; changing only that field to the witness build's object+8
+reproduced `SIGABRT` with the `default_delete<tdesc_feature>` frame, and an
+intact-object control exited normally. Rung 4 chosen-function control and
+live heap corruption are reproducible across independently built binaries.
+Condition refined: the wire payload must be re-derived per build for both
+the gdb-fixed load base and the heap object offset. No wire-only rung 5,
+no command, no side effect without gdb-fixed addresses; no grade change.
