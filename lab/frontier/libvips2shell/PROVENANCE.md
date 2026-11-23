@@ -253,15 +253,18 @@ data-7296`.
 - Fixed tree: `PREPARE=ERR msg=image: dimension overflow`; no paint, no ASan
   (`real/consumer-fixed-paint.out`).
 
-`real/run-consumer.sh` now runs 23 assertions (was 12); both the vulnerable
+`real/run-consumer.sh` now runs 21 assertions (was 12); both the vulnerable
 and fixed paint controls are included. `real/consumer-paint.out` and
 `real/consumer-fixed-paint.out` are new committed evidence. The W2 direct
 call on the synthetic image remains the chosen-byte placement demonstration;
 W4 adds a real allocation and an unmodified public entry point. No pointer,
-return address, control-flow datum, wire, command, marker or witness verdict.
+return address, control-flow datum, wire, command or marker side effect.
+Witness verdict (DM 2588): ESTABLISHED at this labeled real-image/public-API
+scope, rung 4 only, no grade change, rung 5 UNKNOWN; clean-archive replay of
+`22278cb` with hash-matched pinned ASan rebuilds found no counterexample.
 Rung 4 stands for a negative-offset write on living bytes; rung 5 UNKNOWN.
 
 Clean `git archive HEAD` replay at commit `22278cb` (gitignored build and
 source trees symlinked in, as at W3) returned `CLEAN_ARCHIVE_RC=0` and
-23/23 PASS, including both paint controls. This confirms the checked change
+21/21 PASS, including both paint controls. This confirms the checked change
 is reproducible from the committed tree, not just the working tree.

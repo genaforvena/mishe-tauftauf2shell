@@ -1,12 +1,12 @@
 # Frontier brief: libvips scanline sanity bypass — CVE-2026-69242 (libvips2shell)
 
-**STAGED 2026-11-23 W145 — direct-call harness evidence, a live registered
-two-pane window (inner socket index 113, name `libvips2shell`) and a staging
-DM to the operator exist; operator admission and an independent witness
-verdict are pending.** Byte-exact pins, git identifiers and hashes:
+**Written at W145 as a frontier brief; the target was admitted as a mind on
+2026-11-23 (standing approval #6) and an independent witness replay (DM 2588)
+returned ESTABLISHED at the real-image/public-API scope, rung 4 only — no
+grade change, rung 5 UNKNOWN.** Byte-exact pins, git identifiers and hashes:
 `lab/frontier/libvips2shell/PINS.sha256`; harness provenance including
-negative results: `lab/frontier/libvips2shell/PROVENANCE.md`. Frontier owns no
-further work on this target.
+negative results: `lab/frontier/libvips2shell/PROVENANCE.md`. The target mind
+owns further work on this target; see sections 7-9 and its wall.
 
 ## 1. Verified ground truth
 
@@ -210,12 +210,15 @@ public API (`region.c:909`): for an integer image it `memset`s each line at
   neighbour before that redzone.
 - Fixed tree rejects the same geometry with `image: dimension overflow`
   before any paint call; no ASan error (`consumer-fixed-paint.out`).
-- `real/run-consumer.sh` now checks 23 assertions (12/12 at W3 → 23/23).
+- `real/run-consumer.sh` now checks 21 assertions (12/12 at W3 → 21/21).
 
 Grade: rung 4 for a chosen-byte negative-offset **write** on living bytes
 through an ordinary public libvips API, with vulnerable/fixed/safe-input
-controls. No pointer target, saved return address, control-flow datum, wire,
-request, command, marker side effect or witness verdict. Rung 5 UNKNOWN.
+controls. An independent witness replay (DM 2588) returned ESTABLISHED at this
+labeled scope: rung 4 only, no grade change, rung 5 UNKNOWN. The witness
+replayed a clean `git archive` of `22278cb` with hash-matched pinned ASan
+rebuilds and found no counterexample. No pointer target, saved return
+address, control-flow datum, wire, request, command or marker side effect.
 
 `real/run-consumer.sh` was replayed from a clean `git archive HEAD` at
-commit `22278cb`: `CLEAN_ARCHIVE_RC=0`, 23/23 PASS.
+commit `22278cb`: `CLEAN_ARCHIVE_RC=0`, 21/21 PASS.
