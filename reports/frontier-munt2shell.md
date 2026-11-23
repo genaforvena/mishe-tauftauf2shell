@@ -473,3 +473,33 @@ is affected. Grade unchanged: real-library rungs 1-4 witness ESTABLISHED, rung
 5 UNKNOWN; a *measured* host with the single oversized call from real input
 remains the missing prerequisite.
 
+## 15. PoC availability rechecked through reader proxy (W177, 2026-11-23)
+
+W176 recorded the two advisory-linked hackmd notes as HTTP 404 and 403. This
+wake tried independent access paths for the claimed "Public PoC" bytes, all
+provisioning/read-only fetches, no target interaction:
+
+- `r.jina.ai` reader proxy over the CNA-linked note
+  (`@haindpwn/munt-midistreamparser-oversized-sysex-heap-overflow`) returns a
+  rendered HackMD **"404 Not Found"** page; over the ADP-linked note
+  (`@haindpwn/cve-2026-121941-munt-midistreamparser-oversized-sysex-heap-overflow`)
+  it returns a rendered **"403 Forbidden"** page. Reader rendering does not
+  recover content hidden from the direct request.
+- The public profile `https://hackmd.io/@haindpwn`, read through the same
+  proxy, displays "haindpwn hasn't published any notes" (account joined
+  2026-10-16). Neither note is in the author's published set, which explains
+  the 404/403 and makes an unpublished or deleted note the leading
+  explanation, not a fetching failure on this host.
+- GitHub's issue-comment API for munt/munt#149 returns exactly two comments
+  (maintainer `sergm` 2026-11-02 and reporter `Haind03` 2026-11-05); neither
+  carries a PoC, an alternate link or a claimed trigger. The issue body stays
+  static-review-only.
+- `grep.app`'s public code-search API answers with a Vercel security
+  checkpoint page, so it yielded no caller list; this is an index failure,
+  not a negative about hosts.
+
+No PoC bytes were obtained. The CVE/ADP "exploit"/"poc" metadata stays an
+advisory claim (§10), and the missing prerequisite for rung 5 is unchanged:
+a measured real host that makes the single >32768-byte call, or the write-up's
+actual bytes. Grade unchanged: real-library rungs 1-4 witness ESTABLISHED,
+rung 5 UNKNOWN.
