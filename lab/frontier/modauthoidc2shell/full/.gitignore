@@ -14,3 +14,9 @@ trial-codes.txt
 !evidence/asan.log.*
 !evidence/asan-asan.log.*
 fixed-codes.txt
+plain-prefix/
+httpd-plain.pid
+error-plain.log
+evidence/plain-jansson-*.log
+evidence/plain-cjose-*.log
+evidence/plain-module-*.log

@@ -172,3 +172,27 @@ wire-chosen offset, still unwitnessed at that scope. No chosen byte value, no
 pointer-bearing target, command or rung 5. Replay: `cd
 lab/frontier/modauthoidc2shell/full && bash probe-store.sh && bash probe-gdb.sh`;
 evidence and limits in `full/evidence/store/README.md`.
+
+## 8. Pointer-bearing OOB store in the plain full module (2026-11-23 W9)
+
+The earlier "no pointer-bearing target" line applies to W8's **in-bounds**
+header-copy store. A non-ASan build of the same pinned module
+(`full/build-plain.sh`, module sha256
+`008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654`,
+plain httpd 2.4.70 / APR, 127.0.0.1:18090) allows the **out-of-bounds** scan
+to reach its store. With a value-less state cookie, gdb at pinned `state.c:219`
+on the live pre-auth stack measured the store at `0x7ffff6de2221`: the byte
+`0x3d` is the low byte of pointer `0x7ffff5603d`; after the store the byte is
+`0x00` and the pointer `0x7ffff56000`. The target is zeroed OIDC shared-memory
+data; a hardware watchpoint caught no consumer read, and non-gdb value-less
+and well-formed requests both return 302. The real-object harness reproduces
+the same pointer-low-byte shape stably across six pool fills.
+
+Grade unchanged: rung 4 scoped, now with a pointer-bearing target on a live
+pre-auth wire path, still unwitnessed at that scope. Byte always NUL, target
+not wire-chosen, no consumer effect, chosen byte, command or rung 5;
+gdb disables ASLR, so addresses are lab-layout facts. Replay: `cd
+lab/frontier/modauthoidc2shell/full && bash build-plain.sh &&
+bash probe-plain-oob.sh && bash probe-plain-detail.sh`; raw evidence and
+limits `full/evidence/plain-oob/README.md`.
+

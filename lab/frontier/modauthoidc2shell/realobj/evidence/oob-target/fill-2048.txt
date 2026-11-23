@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x14ff: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536, line 219.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, oidc_state_cookies_parse_token (r=0x7ffff7fb70a0, c=0x0, cookie=0x7ffff7fbe9d0 "=.\366\367\377\177", currentCookieName=0x0, first=0x0, last=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219
+warning: 219	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536: No such file or directory
+FILL=2048 TOKEN=0x7ffff7fb7d30 STORE=0x7ffff7fbe9d0 DELTA=27808 PTR_BEFORE=0x7ffff7f62e3d STR_BEFORE=GLIBC_2.38
+220	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536
+FILL=2048 PTR_AFTER=0x7ffff7f62e00 STR_AFTER=_2.3

@@ -1,0 +1,2 @@
+PIN: ceedb687ad21c4668f546d0f1c9164890f740a1ff81bbc8fb5807a9aab1ae5aa  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/state.c
+MODULE: 008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so

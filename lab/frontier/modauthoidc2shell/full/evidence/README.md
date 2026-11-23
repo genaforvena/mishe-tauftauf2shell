@@ -69,9 +69,15 @@ the runner because it depends on arena layout.
 - Grade: rung 3 confirmed on a real pre-auth wire path; rung 4 now also
   observed on that wire path with a wire-chosen offset, unwitnessed at that
   scope. No rung 5.
+- W9 adds a non-ASan plain build (`build-plain.sh`): on the same value-less
+  wire request the OOB store lands in the low byte of pointer `0x7ffff5603d`
+  (→ `0x7ffff56000`) with the live pre-auth stack; no consumer read followed.
+  Raw evidence and limits: `plain-oob/README.md`.
+- No chosen byte, pointer control, command or rung 5 in any regime. None of
+  the live probes is witnessed; W147 covers the direct-call harness only.
 
 ## Re-run
 
 ```
-cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh
+cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh && bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh
 ```

@@ -170,3 +170,37 @@ NUL, the overwritten `=` is in the already-tokenized header copy, and no
 pointer-bearing target, command or rung 5 is measured. Replay: `cd
 lab/frontier/modauthoidc2shell/full && bash probe-store.sh && bash probe-gdb.sh`;
 evidence and limits in `full/evidence/store/README.md`.
+
+## Live pointer-bearing OOB store (2026-11-23 W9) — unwitnessed
+
+A non-ASan full module built from the same pinned parent (`build-plain.sh`,
+module sha256 `008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654`)
+serves 127.0.0.1:18090 with plain httpd 2.4.70 / APR. A value-less state
+cookie has no `=` after its NUL, so the pinned `:214` scan runs out of the
+header copy into adjacent pool memory. gdb at pinned `state.c:219` on a live
+pre-auth request (full stack through `oidc_state_cookies_clean_expired:244` →
+`oidc_request_authorization_set_cookie` `handle/request.c:132` →
+`oidc_check_userid_openidc`) measured the store at `0x7ffff6de2221`: the
+byte is `0x3d` and the eight bytes there are
+`3d 60 f5 ff ff 7f 00 00`, i.e. the low byte of pointer `0x7ffff5603d`.
+After the store the byte is `0x00` and the pointer `0x7ffff56000`.
+
+The pointer's target lies in zeroed bytes of the OIDC shared-memory mapping
+`0x7ffff5157000-0x7ffff5e00000`; a hardware watchpoint on the corrupted word
+caught no later read or write. Non-gdb controls: value-less and well-formed
+cookies both return HTTP 302 on this module. The real-object harness shows
+the same shape naturally (`realobj/probe-oob-target.sh`: store at the low
+byte of `0x7ffff7f62e3d` → `"GLIBC_2.38"`, stable over six pool fills; the
+watchpoint again caught only the store).
+
+This refines W8 rather than replacing it: W8's **in-bounds** store overwrites
+a header-copy `=` chosen by the wire and has no pointer target; W9's
+**out-of-bounds** store in the plain build corrupts a pointer's low byte.
+Grade is unchanged: rung 4 scoped, now with a pointer-bearing target on a
+live pre-auth wire path, still unwitnessed at that scope. The byte is always
+NUL, the pointer target is not wire-chosen, no consumer read, chosen byte,
+command or rung 5 is measured; gdb disables ASLR, so the addresses are
+lab-layout facts. Replay: `cd lab/frontier/modauthoidc2shell/full &&
+bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh`;
+raw evidence and limits `full/evidence/plain-oob/README.md`.
+

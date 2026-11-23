@@ -191,3 +191,44 @@ Grade: rung 4 now observed on a real pre-auth wire path with a wire-chosen
 offset, still unwitnessed at that scope; byte always NUL, no pointer-bearing
 target, command or rung 5. Re-run: `cd full && bash probe-store.sh &&
 bash probe-gdb.sh`.
+
+## Live pointer-bearing OOB NUL store (2026-11-23 W9)
+
+A non-ASan full module (`build-plain.sh`, module sha256
+`008990618887dde66e4371d1a354c64dccf29c40d36d17c4ac1d8e5f8b375654`,
+pinned `state.c` unchanged) was built against the plain httpd 2.4.70 / APR
+stack and started only on 127.0.0.1:18090 (`httpd-plain.conf`). A value-less
+state cookie has no `=` after its NUL, so the pinned `:214` scan runs out of
+the header copy until it meets a `0x3d` byte in adjacent pool memory.
+
+`full/probe-plain-oob.sh`, gdb break at pinned `state.c:219`, live pre-auth
+stack through `oidc_state_cookies_clean_expired` (`:244`) →
+`oidc_request_authorization_set_cookie` (`handle/request.c:132`) →
+`oidc_check_userid_openidc`: store `0x7ffff6de2221` holds `0x3d`, the eight
+bytes there are `3d 60 f5 ff ff 7f 00 00`, i.e. the low byte of the 8-byte
+pointer `0x00007ffff5603d`. After `next` the byte is `0x00` and the pointer
+is `0x00007ffff56000`.
+
+`full/probe-plain-detail.sh`: the pointer's target bytes are all zero and lie
+in the anonymous rw mapping `0x7ffff5157000-0x7ffff5e00000` (OIDC shared
+memory). A hardware watchpoint on the corrupted word caught no later read or
+write before the 60-second timeout. Non-gdb controls: value-less and
+well-formed cookies both return HTTP 302 on this module. Raw output and
+limits: `full/evidence/plain-oob/README.md` and `plain-oob/{live-plain,detail}.txt`.
+
+In the real-object harness the same pointer-low-byte shape occurs naturally:
+`realobj/probe-oob-target.sh`, `p-vuln read 0`, store `0x7ffff7fbe9d0` is the
+low byte of `0x7ffff7f62e3d` → `"GLIBC_2.38"`; after the store `0x…f62e00` →
+`"_2.3"`, stable across six fills 0/512/1024/2048/4000/8000. A hardware
+watchpoint there also caught only the store itself. Raw:
+`realobj/evidence/oob-target/fill-*.txt`.
+
+This refines, rather than replaces, the W8 result: W8's wire-chosen store
+lands **in bounds** on a header-copy `=` and has no pointer target; W9's
+**out-of-bounds** store in the plain build lands in a pointer's low byte.
+Both are rung 4 scoped and unwitnessed at their live-wire scope. Byte always
+NUL, pointer target not wire-chosen, no consumer read, chosen byte, command
+or rung 5. gdb disables ASLR, so the absolute addresses are lab-layout facts.
+Re-run: `cd full && bash build-plain.sh && bash probe-plain-oob.sh &&
+bash probe-plain-detail.sh`.
+
