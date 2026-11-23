@@ -6921,3 +6921,34 @@ the registry is 99 entries / 99 unique names. With this admission the plant
 declares 94 engine routes and 90 target minds (four cross-cutting roles);
 `tools/check-omp-only.py` reports `GREEN (94 declared roles)`. Status:
 `reports/gdbserver2shell-status.md`.
+
+## 2026-11-23 ~01:1xZ — gdbserver2shell W1: wire-fed pinned dispatcher, adjacent-object placement
+
+The first admitted wake added
+`lab/frontier/gdbserver2shell/rsp/{wire_driver.c,run.sh}` and a pinned
+`gdbserver/linux-low.h` slice. A checksummed `$QTDPsrc:...#xx` frame is
+sent over a 127.0.0.1 socket to a server that validates it, acks `+` and
+calls the verbatim pinned `handle_tracepoint_general_set()`; its `QTDPsrc`
+branch calls the verbatim pinned `cmd_qtdpsrc()`. **70 PASS / 0 FAIL**
+twice and from a clean `/tmp` copy, normalized hash
+`f25a563e0b06136e1dec12d2dbe70c593dfae5aca9aaa851f3e337d1c29331f2`.
+ASan on g++ and clang++: `heap-buffer-overflow`, `WRITE of size 1`,
+`0 bytes after 2-byte region`, frames `hex2bin` -> `cmd_qtdpsrc` ->
+`handle_tracepoint_general_set`; fixed snapshot replies `E01`, safe packet
+`OK`, both without ASan.
+
+On stock glibc with a two-hole tcache groom, the attacker's decoded length
+selects which adjacent live bytes are reached: N=8 intact, N=32 rewrites
+the victim chunk size and `type`'s low byte, N=48 reaches `next`, N=64
+rewrites all three `source_string` pointers with the chosen pattern
+(`DELTA=32`). With a verbatim `process_info_private` slice as victim,
+N=64 writes the chosen word `0x504f4e4d4c4b4a49` into `thread_db` at
+offset 8 (`THREADDB_HIT=1`); safe and fixed controls stay intact. That is
+placement feasibility, not a call through the pointer: no real gdbserver
+build, no process lifecycle, no `qGetTLSAddr`, no marker or command, so
+grade stays rung 3 plus scoped rung 4 and rung 5 is untouched. One recorded
+negative: the simpler one-hole groom aborted with `malloc(): corrupted top
+size` because `srctype` took the primed hole. Next: build the pinned
+upstream source as a real loopback gdbserver and test the claimed field on
+an ungroomed layout. Details: `PROVENANCE.md`,
+`reports/gdbserver2shell-status.md`.

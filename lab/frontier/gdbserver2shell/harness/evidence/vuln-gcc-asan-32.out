@@ -1,23 +1,23 @@
 MODE=attack USEDLEN=32 DECLARED=1 EXPECTED_OOB=30
 =================================================================
-==2305132==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000032 at pc 0x5797d5ab2b5a bp 0x7fff684b31e0 sp 0x7fff684b31d0
+==2680058==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000032 at pc 0x598accb46b5a bp 0x7ffd8486f150 sp 0x7ffd8486f140
 WRITE of size 1 at 0x502000000032 thread T0
-    #0 0x5797d5ab2b59 in hex2bin /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:124
-    #1 0x5797d5ab2ffe in cmd_qtdpsrc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/qtdpsrc_fn.inc:41
-    #2 0x5797d5ab3613 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:172
-    #3 0x7c8db4c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x7c8db4c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x5797d5ab2424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/a-vuln-gcc+0x2424) (BuildId: 67f025f7a863076e0e36725175dfaa81e69761ff)
+    #0 0x598accb46b59 in hex2bin /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:124
+    #1 0x598accb46ffe in cmd_qtdpsrc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/qtdpsrc_fn.inc:41
+    #2 0x598accb47613 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:172
+    #3 0x73afe582a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x73afe582a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x598accb46424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/a-vuln-gcc+0x2424) (BuildId: 67f025f7a863076e0e36725175dfaa81e69761ff)
 
 0x502000000032 is located 0 bytes after 2-byte region [0x502000000030,0x502000000032)
 allocated by thread T0 here:
-    #0 0x7c8db54fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x5797d5ab2633 in xmalloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:74
-    #2 0x5797d5ab2fca in cmd_qtdpsrc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/qtdpsrc_fn.inc:40
-    #3 0x5797d5ab3613 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:172
-    #4 0x7c8db4c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #5 0x7c8db4c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #6 0x5797d5ab2424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/a-vuln-gcc+0x2424) (BuildId: 67f025f7a863076e0e36725175dfaa81e69761ff)
+    #0 0x73afe60fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x598accb46633 in xmalloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:74
+    #2 0x598accb46fca in cmd_qtdpsrc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/qtdpsrc_fn.inc:40
+    #3 0x598accb47613 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:172
+    #4 0x73afe582a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x73afe582a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x598accb46424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/a-vuln-gcc+0x2424) (BuildId: 67f025f7a863076e0e36725175dfaa81e69761ff)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gdbserver2shell/harness/driver.c:124 in hex2bin
 Shadow bytes around the buggy address:
@@ -51,4 +51,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==2305132==ABORTING
+==2680058==ABORTING

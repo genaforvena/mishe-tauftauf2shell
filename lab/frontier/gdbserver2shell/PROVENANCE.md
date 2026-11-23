@@ -51,9 +51,11 @@ without ASan. **60 PASS / 0 FAIL** on three consecutive runs and one clean
 `/tmp` replay, path-independent normalized content hash
 `0c9b837e5300ac744b133e6668179cda410520177d87b859c99cac9af1c1db73`.
 
-## Instrumentation boundary
+## Direct-call harness instrumentation boundary (original limb)
 
-- No gdb build, no RSP server, no socket, no daemon, no network.
+This section records the direct-call harness only; the loopback wire limb
+below supersedes its socket/heap statements.
+
 - One direct call to the verbatim pinned `cmd_qtdpsrc(own_buf)` with a
   constructed RSP packet `QTDPsrc:1:0:cond:0:1:<hex>`: declared `SLEN=1`
   (2-byte allocation), actual decoded payload `N` bytes chosen from the
@@ -78,3 +80,57 @@ without ASan. **60 PASS / 0 FAIL** on three consecutive runs and one clean
   no adjacent object identity, no `process_info_private::thread_db` pointer,
   no `qGetTLSAddr`, no marker, no command, no rung 5. The reported RIP-control
   chain from RHBZ#2565679 is a claim, not reproduced here.
+
+## Loopback wire-dispatcher limb (gdbserver2shell W1, 2026-11-23)
+
+New files: `rsp/wire_driver.c`, `rsp/run.sh`, and pinned
+`src/linux-low-633ae02.h` (SHA-256
+`4fe6cc996097cd4e3d30ecaafcfbb70a7d4f65914c3d02edfb193e3e48de2dcb`,
+sourceware `blob_plain` at the same 633ae02 pin). `run.sh` re-extracts and
+asserts five verbatim slices each run:
+
+```
+99780c047e65cb687800e27b50525e8dd6202bfefecca13f954fae8b1aca6145  cmd_qtdpsrc() (vulnerable)
+bd86f8a40b0ac06286d6bbddf6c8fb88385c75d4f23642bcd6738c153f82f02b  handle_tracepoint_general_set()
+b0bcd1a7a1bb77939a92547b01d78dc88e9a4d4a902af3ac63aebb2244a6e5d0  ishex + unpack_varlen_hex
+5e9aa981020061f85eb9b48eecd991ca46bc0487f424de37ee8ff5f4f0667d46  struct process_info_private
+ec699708715aad2ac60a6316f2fc5beb128544280c6d6e50847ab451f3294f87  cmd_qtdpsrc() (fixed)
+```
+
+`wire_driver.c` SHA-256
+`19a04d63ce458678d9ebe638cf803f30c2e144232d20fe5f2dd11ac671532b30`.
+Result: **70 PASS / 0 FAIL** twice locally and once from a clean `/tmp`
+copy; path-independent normalized hash
+`f25a563e0b06136e1dec12d2dbe70c593dfae5aca9aaa851f3e337d1c29331f2`.
+
+Observed path: a child client sends a checksummed `$QTDPsrc:...#xx` frame
+over a 127.0.0.1 socket; the server validates the sum, sends `+`, and
+calls the verbatim pinned dispatcher, which dispatches `QTDPsrc` to the
+verbatim pinned handler. Under ASan (g++ 13.3.0 and clang++ 18.1.3) N=32/64
+with declared `SLEN=1` gives `heap-buffer-overflow`, `WRITE of size 1`,
+`0 bytes after 2-byte region`, frames `hex2bin` -> `cmd_qtdpsrc` ->
+`handle_tracepoint_general_set` -> `main`. Fixed snapshot replies `E01`
+over the wire and the client sees `$E01#...`; a well-formed `SLEN=16`
+packet replies `OK` on both pins; neither control reports ASan.
+
+Plain stock-glibc limb: two 0x20 tcache holes with the victim between them
+(hole1, victim, hole2) make the handler's `srctype` take hole2 and `src`
+take hole1. Measured `DELTA=32` between `src` and the live victim; the
+chosen pattern overwrites the victim chunk's size field
+(`SIZE_HIT=1`) and all three `source_string` pointers at N=64. N=8 leaves
+the adjacent object intact; N=32 hits the size field and the low byte of
+`type`; N=48 reaches `next`. With the verbatim `process_info_private`
+slice as the victim, N=64 writes the chosen pattern word
+`0x504f4e4d4c4b4a49` into the `thread_db` pointer at offset 8
+(`THREADDB_HIT=1`) and overwrites `r_debug`; safe and fixed controls leave
+the object intact.
+
+Instrumentation boundary: the RSP framing, loopback socket, tcache
+grooming, stub branches and the fixed-count `hex2bin` decoder are harness
+code; only the listed slices are GDB source. The `process_info_private`
+object is a freshly groomed harness object, not a live gdbserver process
+instance; no `qGetTLSAddr` packet, no call through the forged pointer, no
+full gdbserver build, no marker, no command and no rung-5 claim. The
+natural (ungroomed) layout was tried first and aborted with
+`malloc(): corrupted top size` because `srctype` took the primed hole — a
+recorded negative that motivated the two-hole ordering.
