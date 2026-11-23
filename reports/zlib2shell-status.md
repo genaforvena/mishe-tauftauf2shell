@@ -42,7 +42,7 @@ to the site's owner resolver map (now 201 entries). Admission changes no grade.
   `WRITE_SIZE=1048576`, `WRITTEN=65535` on the vulnerable build and
   `PRINTF_RC=1` on the fixed build.
 
-## Current grade — 05:11Z (witness ESTABLISHED at labeled scope)
+## Current grade — 06:5xZ (rung 4 ESTABLISHED; rung 5 ESTABLISHED at stated lab scope)
 
 Witness W144 (2026-11-23 05:06–05:11Z) replayed both harnesses from its own
 clean `git archive` of HEAD (`1d09288`; target tree unchanged `beab687..HEAD`)
@@ -51,8 +51,15 @@ with its own builds at a different `/tmp` path: base `run.sh` rc 0,
 `28bbacf46cc178ebea825bfc57bcc83564607b4c8a32c52d7531a2d1524d7a89`; W1
 `run_tcp.sh` rc 0, `PASS=14 FAIL=0` twice and trace hash exactly
 `3ae896390ce28d6ec551dbac3e8e6473fd7ae923be9cb7f42762721dbdd78d02`. No
-counterexample. Both claims are ESTABLISHED at the rung-4 scope labeled below;
-rung 5 remains UNKNOWN. Details in "Independent witness verdict" at the end.
+counterexample. Both claims are ESTABLISHED at the rung-4 scope labeled below.
+
+Witness W147 (06:5xZ) then replayed the W4 command harness from its own clean
+`git archive HEAD` trees and found no counterexample: rung 5 is ESTABLISHED
+only at the explicitly conditioned lab scope in W4 — non-PIE, ASLR off, a
+gdb-derived 293865-byte heap image replayed as peer bytes at fixed delta
+293440 with a known libc address, benign `id > file` only. This is not a
+wire-only or deployment rung 5. Details in "Independent witness verdict —
+W147" at the end. The older rung-4 verdicts are unchanged.
 
 Rung 3 is confirmed in the pinned harness: gcc and clang ASan both report
 `heap-buffer-overflow`, `WRITE of size 983041` in `gz_vacate()` at
@@ -168,7 +175,7 @@ The payload also depends on gdb-derived build-specific heap offsets to keep
 zlib's allocator from aborting; it is not a wire-only exploit. Author-side
 negative, no witness replay owed. Rung 5 remains UNKNOWN.
 
-## W4 — observed command through real libuv dispatch (2026-11-23 06:2xZ, author-only)
+## W4 — observed command through real libuv dispatch (2026-11-23 06:2xZ; witness ESTABLISHED 06:5xZ)
 
 W3 showed a peer-chosen `async_cb` rewrite but died before dispatch. The
 crash was collateral heap corruption: the faulting object held random peer
@@ -194,5 +201,39 @@ explicit lab conditions** — -no-pie plain build, ASLR off, gdb-captured heap
 image replayed by the peer, fixed heap delta and printable `system@plt`.
 The peer does not need to invent the command or pointer, but it does need a
 memory image unavailable from the wire in this experiment, so this is not a
-wire-only exploit. Author-only: independent witness replay is owed before an
-ESTABLISHED rung-5 label. The older rung-4 ESTABLISHED claims are unchanged.
+wire-only exploit. Witness W147 replayed the harness from its own clean
+checkout and confirmed the measured command, controls and trace; rung 5 is
+ESTABLISHED at this labeled scope, not as a wire-only or deployment claim.
+The older rung-4 ESTABLISHED claims are unchanged.
+
+## Independent witness verdict — W147 (2026-11-23 06:5xZ)
+
+Witness replayed `harness/run_uv_snap.sh` from its own `git archive HEAD`
+copy into two fresh `/tmp` trees (`/tmp/w147-zlib`, `/tmp/w147-zlib2`),
+re-hashed the tarball and both `gzwrite.c` pins to the published values and
+built its own binaries. Two unmodified runs returned rc 0 and trace hash
+`1d0b5122c8f45d6f5a1acdab8da6d4a90c00609c2ae28912e8e9461a3abb8611`,
+byte-identical between its trees. `SNAPSHOT_BYTES=293865`; vulnerable `id>a`
+and `id>b` each gave `MARKER=1`, `UV_SENT=1`, `UV_RAN=1`, `SERVER_DONE=1`,
+`SERVER_RC=0`, `WRITTEN=65535`, `PRINTF_RC=-5`, and fresh 173-byte marker
+files containing `id` output in both case outdirs. Controls: fixed
+`MARKER=0` `PRINTF_RC=1`; `KEEP_CB=1` `MARKER=0`; ASLR-on `MARKER=0`
+`SERVER_RC=-11`; safe drain `WRITTEN=359400` `MARKER=0`.
+
+Source-bound counterchecks: `harness/uv_server.c:58-121` accepts on loopback,
+allocates the handle after `gz_init()`, prints addresses, then uses a real
+`uv_async_send()` and `uv_run(UV_RUN_ONCE)`; `harness/uv_probe.py:136-168`
+writes the command bytes and system address into the handle from the wire
+payload, while `:95-103` only reads the marker. Exploit runs had no debugger:
+the wrappers are `setarch`-only. `ZLIB2_UNUSED_FORCE_PLT` was unset, so the
+direct `system("true")` PLT-forcing branch never ran. The harness label
+`system@plt` was checked under `setarch -R gdb`: `p/x &system` and
+`info symbol &system` give `0x7ffff7c58750` in libc `.text` (the PLT stub is
+`0x401270`), so the rewritten pointer is real libc `system`, not a synthetic
+callback.
+
+Limits preserved: ASLR off, non-PIE, gdb-derived target heap image replayed
+as peer bytes at delta 293440 with a known libc address, no derivation of
+that image from wire input, no deployment configuration, benign `id > file`
+only. Rung 5 ESTABLISHED at this explicitly conditioned lab scope; no replay
+owed. Older rung-4 verdicts unchanged.
