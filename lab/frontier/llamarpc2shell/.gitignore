@@ -3,5 +3,22 @@
 src/llama.cpp-pin/
 src/llama.cpp-pin-plain/
 src/llama.cpp-fixed/
+src/llama.cpp-pin-nocanary/
 src/llama.cpp-fixed-asan/
 wire/rdma_attacker
+
+# Second-wake ROP attempt: keep only the decisive failure logs and payloads.
+wire/evidence/*
+!wire/evidence/build-nocanary.log
+!wire/evidence/fxlen100.log
+!wire/evidence/fxlen761.log
+!wire/evidence/fxlen820.log
+!wire/evidence/rce-fixed-gdb.log
+!wire/evidence/rce-early.log
+!wire/evidence/rce-diag3.log
+!wire/evidence/pristine-fixed2.bin
+!wire/evidence/pristine-fixed3.bin
+!wire/evidence/earlyret.bin
+!wire/evidence/rce-payload-fixed.bin
+!wire/evidence/rce-payload-early.bin
+!wire/evidence/safe1.bin

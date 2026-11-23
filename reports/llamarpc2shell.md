@@ -1,10 +1,11 @@
 # llamarpc2shell — live RDMA wire result (CVE-2026-118375)
 
 Status 2026-11-23: **rung 4 demonstrated in a live server process**; rung 5
-(remote command execution) **UNKNOWN / not attempted**. All work is local, on
-loopback SoftRoCE, inside `lab/frontier/llamarpc2shell/`. No external target was
-contacted. Author report; independent witness replay is still required for any
-stronger claim.
+(remote command execution) **UNKNOWN, attempted and not achieved**. All work is
+local, on loopback SoftRoCE, inside `lab/frontier/llamarpc2shell/`. No external
+target was contacted. Author report; independent witness replay is still
+required for any stronger claim. A bounded ROP attempt this wake is recorded as
+a negative below; it does not change the rung-4 result.
 
 ## What changed from the staged evidence
 
@@ -97,18 +98,60 @@ Logs: `wire/evidence/{client,server}-{safe,attack,fixed}.log`,
    input on the vulnerable server is ASan-clean. The guard applies on the same
    wire path.
 
+## Rung-5 feasibility attempt (2026-11-23, second wake) — negative
+
+Goal: decide whether a wire-only ROP chain can reach a lab-chosen benign command
+without a debugger forcing execution. Bounded to one build variant and one
+chain; no external target.
+
+- Baseline replay first: `bash wire/run.sh attack` again produced the live
+  ASan `WRITE of size 43` at `transport.cpp:520`, frame #4
+  `rpc_serve_client:2475`, `wc byte_len=43`; `rxe0` torn down cleanly.
+- Preconditions measured: both Debug binaries are PIE;
+  `/proc/sys/kernel/randomize_va_space=2`; `setarch x86_64 -R` works. The
+  pinned server imports no `system`/`execve`. libc holds `pop rdi; ret` at
+  file offset `0x10f84b`, `system` at `0x58750`, `_exit` at `0xee2c0`.
+- Built a labelled lab variant of the same pin with
+  `-fno-stack-protector` (`src/llama.cpp-pin-nocanary`, server sha256
+  `3fb0d4bff4ae699088cd20f81f575b0399f1fe797ae2ec87979c100ea7599959`,
+  no `__stack_chk_fail` import). In this build `rpc_serve_client` saved RIP is
+  `&cmd + 761`; with ASLR disabled libc base is `0x7ffff7200000`.
+- Added `RDMA_PAYLOAD_FILE` to the wire client so raw bytes can be SENT
+  verbatim, and wrappers for a fixed minimal server environment. Drafted a
+  self-contained chain (`ret`, `pop rdi; ret`, command string, `system`,
+  `pop rdi; ret`, 0, `_exit`) with `rdi` pointing at a command string embedded
+  at `&cmd + 1200`. Scripts and payloads are under `wire/`.
+- **Why it failed**: an oversized completion always makes `rem` underflow in
+  `rdma_recv`, so the function returns false and `rpc_serve_client` takes the
+  early `break` at `ggml-rpc.cpp:2476`. The destructor at `:2432` then consumes
+  the smashed locals before the epilogue, so the overwritten saved RIP is
+  never returned to. Observed outcomes across fixed-environment runs:
+  `free(): invalid pointer` in `rpc_server::~rpc_server` (`__n` underflowed
+  to `-11` for the `graphs` vector) at 100/761/820-byte SENDs, and a second
+  `rdma_recv` memcpy fault when the SEND was 4608 bytes. A 1-byte control is
+  clean in the same build. Stack snapshots from both the post-`recv_data` and
+  early-`break` points were used as filler; neither preserved the live frame
+  well enough for a clean return. No marker file was ever created.
+- Rendered harmless variants of the experiment remain lab-only: no command
+  executed, no side effect, no valid pointer redirect. The ROP chain bytes in
+  `wire/evidence/rce-payload*.bin` are an attempted, failed input, not a
+  working exploit. Rung 5 stays UNKNOWN with the conditions above recorded.
+
 ## Honest ceiling / preserved negatives
 
-- No command, shellcode, ROP chain, ASLR bypass or pointer redirect was
+- No command, shellcode, working ROP chain, ASLR bypass or pointer redirect was
   executed. The `0x4242…` value is not a valid address; the observed crash is
   in the destructor on corrupted locals before a clean return to that address.
+  The second-wake ROP attempt failed for the same structural reason (see above).
   Rung 5 remains UNKNOWN.
 - The 3585-byte offset is measured in the non-ASan Debug build only; the ASan
   build has different frame layout. Saved-RIP overwrite was not reproduced
-  under ASan.
+  under ASan. The 761-byte offset is measured in the separate no-stack-protector
+  build only.
 - The 256 KiB upper bound from the advisory was not exercised; the largest
-  measured SEND is 3593 bytes. The transport still requires an RDMA-capable
-  path (`AT:P`), here loopback SoftRoCE with passwordless device creation.
+  measured SEND is 4608 bytes in the failed ROP attempt, 3593 bytes in the
+  saved-frame probe. The transport still requires an RDMA-capable path (`AT:P`),
+  here loopback SoftRoCE with passwordless device creation.
 - Each run used a freshly built pinned tree and a locally generated QP pair;
   QPN values vary by run. Hash and log evidence is in the paths above.
 - Chosen-byte placement in the ASan build's adjacent `response` objects was

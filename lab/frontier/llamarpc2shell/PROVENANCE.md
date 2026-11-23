@@ -92,3 +92,42 @@ through `+42`; 3593-byte payload puts `0x4242424242424242` in the saved RIP
 slot at `&cmd + 3585`, and the no-breakpoint run takes SIGSEGV with that value
 in backtrace frame #2. Fixed server logs `RDMA recv overrun: got=43 rem=1` and
 is ASan-clean; 1-byte input on the vulnerable server is ASan-clean.
+
+## Rung-5 feasibility attempt — 2026-11-23 second wake (negative)
+
+Replay: `bash wire/run.sh attack` reproduced the live ASan `WRITE of size 43`
+(`transport.cpp:520` ← `ggml-rpc.cpp:2475`, `wc byte_len=43`) before any edits.
+
+New lab-only artifacts (all under `wire/`; binaries/large logs are not evidence
+of a working exploit):
+
+- `rdma_attacker.cpp` gained optional `RDMA_PAYLOAD_FILE`, which SENDs the file
+  bytes verbatim; the default marker behaviour is unchanged.
+- `server-noaslr.sh`, `server-fixedenv.sh`, `run-dump-fixedenv.sh`,
+  `run-rce-gdb.sh`, `gdb-dump-nocanary.cmd`, `gdb-earlyret-dump.cmd`,
+  `gdb-rce-observe.cmd`, `gdb-rxaddr.cmd`: wrappers to hold the lab server
+  environment fixed, disable ASLR with `setarch -R`, and dump stack/runtime
+  addresses. `env -i PATH=/usr/bin:/bin HOME=/home/mesh-home TERM=dumb` is used
+  for every fixed-environment dump and attack.
+- `src/llama.cpp-pin-nocanary/` (gitignored) is the same pin configured with
+  `-fno-stack-protector` for C/CXX/link; built server sha256
+  `3fb0d4bff4ae699088cd20f81f575b0399f1fe797ae2ec87979c100ea7599959`,
+  `libggml-rpc` has no `__stack_chk_fail` import. Build log:
+  `wire/evidence/build-nocanary.log`.
+- Measured layout in that build under `setarch -R` + fixed environment:
+  `&cmd = 0x7fffffffe4bf`, `rpc rbp = 0x7fffffffe7b0`, saved RIP at
+  `&cmd + 761`, libc base `0x7ffff7200000`, RDMA rx slot `0x7ffff6bff000`.
+  libc offsets: `pop rdi; ret` `0x10f84b`, `system` `0x58750`, `_exit`
+  `0xee2c0`. Deterministic dumps: `pristine-fixed2.bin` == `pristine-fixed3.bin`.
+- Attempted inputs: `wire/evidence/rce-payload{,-fixed,-early}.bin`, including
+  a complete `ret`/`pop rdi`/`system`/`_exit` chain and a command string at
+  `&cmd + 1200`. Failure logs: `fxlen100.log`, `fxlen761.log`, `fxlen820.log`,
+  `rce-fixed-gdb.log`, `rce-early.log`, `rce-diag3.log`.
+
+Result: no command, side effect or valid pointer redirect. The oversized
+completion underflows `rem` in `rdma_recv`, so `recv_data` returns false and
+`rpc_serve_client` breaks at `ggml-rpc.cpp:2476`; `rpc_server::~rpc_server`
+at `:2432` then aborts on the smashed `graphs` vector (`free(): invalid
+pointer`, `__n = -11`) before the epilogue can return into the chain. A 4608-byte
+SEND instead faults in a second `rdma_recv` memcpy. 1-byte control is clean.
+Rung 5 remains UNKNOWN; no witness replay of these failed inputs is needed.

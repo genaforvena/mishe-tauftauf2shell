@@ -5,7 +5,7 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WIRE="$ROOT/wire"
-SERVER="$ROOT/src/llama.cpp-pin-plain/bin/ggml-rpc-server"
+SERVER="${SERVER_BIN:-$ROOT/src/llama.cpp-pin-plain/bin/ggml-rpc-server}"
 EVID="$WIRE/evidence"
 PORT=53055
 CREATED=0
