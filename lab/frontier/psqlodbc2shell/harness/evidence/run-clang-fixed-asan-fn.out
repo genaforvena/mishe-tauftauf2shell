@@ -1,0 +1,2 @@
+FN_ASAN RV=-1 CONSUMED=0
+FN_ASAN ERR=too many parameters in the escape function call

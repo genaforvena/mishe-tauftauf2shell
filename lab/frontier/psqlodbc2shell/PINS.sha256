@@ -1,0 +1,15 @@
+# psqlodbc2shell pins (fetched 2026-11-23, provisioning read-only)
+# Advisory: GHSA-hfm6-qfx8-v4xq / CVE-2026-120061
+# https://github.com/postgresql-interfaces/psqlodbc/security/advisories/GHSA-hfm6-qfx8-v4xq
+# Repo: https://github.com/postgresql-interfaces/psqlodbc.git
+# vulnerable tag REL-18_00_0005 commit f6da5647355b110fc9cc005100e23ba980e20e33
+#   convert.c git blob 829071f0b9062d35ecd67c8daa8b23674a295a3b
+# fixed tag     REL-18_00_0006 commit 96fa03dbc968c40920c907bf18d3b4cbd8efeebc
+#   convert.c git blob c0a295d950084bb16bc0942a54930b2306dc5f3c
+# security fix merge 79f4631db27cdb62276d3d9d3c1e5c47dcc315c0 (2026-11-02)
+27fc049b34ee48d65fc8eec49e1982ac0bfb3dbaf621feb31a0f74cad91175b1  src/convert.c.vuln
+1925343228dedccf17254207a56e354dfef808107614c09b67028c3067f5d762  src/convert.c.fixed
+f74ebf4317aaae7af25fa0b3f87b239400d93681dbfdd536bf59aa6ee4c8e359  harness/slice-extract-vuln.inc
+829403b94f6b21d937034448f8a58f57faf773febcbb4caf58494d4b3b28c149  harness/slice-extract-fixed.inc
+b027b49186c17c381c818d96974584356d75b2389cbb36830c7072c63e2926e5  harness/slice-params-vuln.inc
+f471bca5cbeaa334576b12d439ce4dd990af9a920a05b10ac10dc3fdb09e8de1  harness/slice-params-fixed.inc

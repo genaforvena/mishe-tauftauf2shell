@@ -1,0 +1,51 @@
+=================================================================
+==584913==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x76bd335001e0 at pc 0x57e7bcc9f282 bp 0x7fffb55295f0 sp 0x7fffb55295e8
+WRITE of size 1 at 0x76bd335001e0 thread T0
+    #0 0x57e7bcc9f281 in run_extract_asan /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:2424:7
+    #1 0x57e7bcc9e815 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:2436:45
+    #2 0x76bd3502a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x76bd3502a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x57e7bcbc5344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/bin-clang-vuln-asan+0x2c344) (BuildId: 1237d80f43151fac6ecfd5622c356247f77b4f7f)
+
+Address 0x76bd335001e0 is located in stack of thread T0 at offset 480 in frame
+    #0 0x57e7bcc9ec3f in run_extract_asan /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:5763
+
+  This frame has 3 object(s):
+    [32, 288) 'stmt' (line 2429)
+    [352, 480) 'buf_small' (line 2429) <== Memory access at offset 480 overflows this variable
+    [512, 544) 'qp' (line 2429)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:2424:7 in run_extract_asan
+Shadow bytes around the buggy address:
+  0x76bd334fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76bd334fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76bd33500000: f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76bd33500080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76bd33500100: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+=>0x76bd33500180: 00 00 00 00 00 00 00 00 00 00 00 00[f2]f2 f2 f2
+  0x76bd33500200: 00 00 00 00 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x76bd33500280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76bd33500300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76bd33500380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76bd33500400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==584913==ABORTING

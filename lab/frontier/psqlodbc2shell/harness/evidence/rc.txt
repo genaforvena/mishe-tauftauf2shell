@@ -1,0 +1,8 @@
+gcc-vuln-asan RC=1/1
+gcc-vuln-plain RC=0
+gcc-fixed-asan RC=0/0
+gcc-fixed-plain RC=0
+clang-vuln-asan RC=1/1
+clang-vuln-plain RC=0
+clang-fixed-asan RC=0/0
+clang-fixed-plain RC=0

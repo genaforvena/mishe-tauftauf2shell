@@ -1,0 +1,54 @@
+=================================================================
+==584900==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b0790601240 at pc 0x5eb25cfc2de9 bp 0x7ffc70144800 sp 0x7ffc701447f8
+WRITE of size 8 at 0x7b0790601240 thread T0
+    #0 0x5eb25cfc2de8 in processParameters /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:5637:32
+    #1 0x5eb25cfc1b09 in run_fn_asan /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:5729:10
+    #2 0x5eb25cfc17f2 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:2435:35
+    #3 0x7b0791e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7b0791e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5eb25cee8344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/bin-clang-vuln-asan+0x2c344) (BuildId: 1237d80f43151fac6ecfd5622c356247f77b4f7f)
+
+Address 0x7b0790601240 is located in stack of thread T0 at offset 4672 in frame
+    #0 0x5eb25cfc183f in run_fn_asan /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:5718
+
+  This frame has 5 object(s):
+    [32, 4128) 'out' (line 5720)
+    [4256, 4288) 'qp' (line 5721)
+    [4320, 4384) 'qb' (line 5721)
+    [4416, 4672) 'param_pos' (line 5722) <== Memory access at offset 4672 overflows this variable
+    [4736, 4744) 'consumed' (line 5723)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/psqlodbc2shell/harness/convert.c.vuln:5637:32 in processParameters
+Shadow bytes around the buggy address:
+  0x7b0790600f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b0790601000: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x7b0790601080: f2 f2 f2 f2 00 00 00 00 f2 f2 f2 f2 00 00 00 00
+  0x7b0790601100: 00 00 00 00 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x7b0790601180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7b0790601200: 00 00 00 00 00 00 00 00[f2]f2 f2 f2 f2 f2 f2 f2
+  0x7b0790601280: 00 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b0790601300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b0790601380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b0790601400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b0790601480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==584900==ABORTING

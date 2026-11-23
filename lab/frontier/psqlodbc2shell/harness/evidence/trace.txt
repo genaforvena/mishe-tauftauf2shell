@@ -1,0 +1,12 @@
+run-clang-fixed-asan-extract EXTRACT_ASAN RETVAL=0 BUF127=00 
+run-clang-fixed-asan-fn FN_ASAN RV=-1 CONSUMED=0 FN_ASAN ERR=too many parameters in the escape function call 
+run-clang-fixed-plain FN_CHOSEN RV=-1 FIRST_DIFF=-1 CHOSEN_5A=0 FN_CHOSEN SINK=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc 
+run-clang-vuln-asan-extract 
+run-clang-vuln-asan-fn 
+run-clang-vuln-plain FN_CHOSEN RV=0 FIRST_DIFF=0 CHOSEN_5A=112 FN_CHOSEN SINK=215a5a5a5a5a5a5a215a5a5a5a5a5a5a235a5a5a5a5a5a5a235a5a5a5a5a5a5a 
+run-gcc-fixed-asan-extract EXTRACT_ASAN RETVAL=0 BUF127=00 
+run-gcc-fixed-asan-fn FN_ASAN RV=-1 CONSUMED=0 FN_ASAN ERR=too many parameters in the escape function call 
+run-gcc-fixed-plain FN_CHOSEN RV=-1 FIRST_DIFF=-1 CHOSEN_5A=0 FN_CHOSEN SINK=cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc 
+run-gcc-vuln-asan-extract 
+run-gcc-vuln-asan-fn 
+run-gcc-vuln-plain FN_CHOSEN RV=0 FIRST_DIFF=0 CHOSEN_5A=112 FN_CHOSEN SINK=215a5a5a5a5a5a5a215a5a5a5a5a5a5a235a5a5a5a5a5a5a235a5a5a5a5a5a5a 
