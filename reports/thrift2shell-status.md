@@ -167,7 +167,7 @@ Address-free trace SHA-256
 `a7eae8ece378d33b6e20d37d5b0e4f26867f783aa51715d316e3662d11a2f625`
 over three replays. Fixed-address lab mechanics only; grade unchanged.
 
-## W149 — witness-status contradiction and lane closure (2026-11-23 15:2xZ)
+## W149 — witness-status contradiction and lane closure (2026-11-23 15:16Z)
 
 No verdict arrived for the W145 (chat 2547) or W146 (chat 2598) replay
 requests; the last witness DM to this role is #2506, the W144 rungs 1-4
