@@ -120,17 +120,60 @@ that this application is a local re-encode driver, not a remote consumer.
 - An early driver revision printed the plane pointer as a stride and omitted
   the track-creation call; both were corrected before these runs.
 
+## W162 heap-neighbour and file-derived chosen bytes
+
+Charter option 2 on the plain Release build. `neighbour/make_pattern_sequence.py`
+creates two 512x64 grayscale JPEGs whose pixel value is constant per 8x8
+block and varies by block, builds a reference with the pinned `heif-enc -S
+--jpeg`, then patches only the second sample's SOF0 to 64x512 (entropy bytes
+unchanged). The committed input `neighbour/pattern-mixed.heif` is 5004 bytes,
+SHA-256 `8f09b93c85341e9e120e75304379a79df11518cb7def4cc2fc6cdee7da151c1c`;
+the generator reproduces that hash exactly from the pinned build's
+`heif-enc`. The driver decodes frame 1 as 64x512 stride 64 as before.
+
+`neighbour/gdb_neighbour.cmd` breaks on `calloc(1,32783)`, takes the third hit
+(the frame-1 replacement plane), then breaks on each 64-byte row copy whose
+destination is at or past `plane+32768`. Save output with:
+
+```
+gdb -q -batch -x lab/frontier/libheif2shell/real/neighbour/gdb_neighbour.cmd \
+  /tmp/libheif2shell-reencode-plain > .../neighbour/evidence/gdb-neighbour.out 2>&1
+python3 .../neighbour/check_neighbour.py .../neighbour/evidence/gdb-neighbour.out
+```
+
+Observed (`neighbour/evidence/gdb-neighbour.out`, captured rc 0; checker PASS):
+the plane's malloc chunk header at `plane-16` is `0x8021` (32800-byte chunk,
+32783 requested). The next chunk's size field at `plane+32792` reads `0x3b41`
+before the store. OOB row A copies from the decoded frame-1 plane to
+`plane+32768`, row B to `plane+33280`; their 64 source bytes are
+`74*8 82*8 8e*8 9c*8 a8*8 b6*8 c2*8 1a*8`, derived from the crafted JPEG
+blocks. At the eventual SIGSEGV (faulting row at `plane+33792`), gdb reads
+exactly those 64 bytes at both destinations; the next-chunk size field is
+now `0x9c9c9c9c9c9c9c9c`. With the earlier uniform JPEG the bytes past the
+plane were zero and the next chunk size `0x3cc1`, so the observed bytes track
+the file, not allocator residue.
+
+This is rung 4 on the real file-triggered path: file-derived, position-
+dependent bytes at chosen offsets (row y -> plane+512*y) past the plane, plus
+overwritten malloc metadata. The neighbouring object is a **free** chunk, not
+a live pointer-bearing object; the process faults after ~16 KB of further
+row copies. No pointer target, grooming, marker, live server or wire input
+was exercised. Rung 5 stays UNKNOWN.
+
 ## Scope and grade
 
 Observed here: rung 2 (fixed build rejects the same mixed-size file),
 rung 3 confirmed memory corruption on the real file-triggered path (ASan
-WRITE, exact stack and allocation), and the advisory's central structural
-claim — decoder returns per-frame bitstream dimensions while the x265 encoder
-keeps first-frame dimensions. Bytes written past the plane come from the
-JPEG-derived decoded frame, not from a harness-injected buffer. Still absent:
-network/wire input, a live server process, a chosen-pointer or control-flow
-target, a benign command/marker side effect, and an independent witness
-verdict of this new lane. Rung 5 remains UNKNOWN. The advisory's 36,879-byte
-allocation remains an untested claim from a different build; this build
-reports a 32783-byte ASan region. The release-build SIGSEGV claim is now
-observed locally (above), not just quoted from the advisory.
+WRITE, exact stack and allocation, overwritten malloc chunk size), rung 4
+restricted to file-derived bytes at chosen offsets past the plane (W162,
+above), and the advisory's central structural claim — decoder returns
+per-frame bitstream dimensions while the x265 encoder keeps first-frame
+dimensions. Bytes written past the plane come from the crafted JPEG's decoded
+frame, not from a harness-injected buffer. Still absent: network/wire input,
+a live server process, a chosen-pointer or control-flow target, a benign
+command/marker side effect, and an independent witness verdict of this new
+lane. The neighbouring object is a free heap chunk, not a live pointer, so no
+exploitation path is claimed. Rung 5 remains UNKNOWN. The advisory's
+36,879-byte allocation remains an untested claim from a different build;
+this build reports a 32783-byte ASan region. The release-build SIGSEGV claim
+is now observed locally (above), not just quoted from the advisory.

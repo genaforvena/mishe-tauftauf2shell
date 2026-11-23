@@ -91,3 +91,28 @@ the mixed file and exits 0 on the safe input; gdb places the fault in the same
 `extend_padding_to_size` memcpy, so the advisory's release SIGSEGV is observed
 locally. Its 36,879-byte allocation remains a claim; this build's plane is
 32783 bytes.
+
+## W162 file-derived chosen bytes on the real file path (2026-11-23)
+
+Charter option 2 measured what lies past the reallocated plane and whether a
+crafted file controls those bytes. On the pinned Release build's plain driver,
+gdb breaks on `calloc(1,32783)` and on each 64-byte row copy landing at or
+after `plane+32768`. The first neighbours are a malloc chunk header and a
+**free** chunk, initially zero; the plane's own chunk header is `0x8021`.
+With the W161 uniform JPEG the overwrite bytes were uniform `0x40`. A
+patterned second JPEG (committed generator `real/neighbour/make_pattern_sequence.py`,
+input `real/neighbour/pattern-mixed.heif` SHA-256
+`8f09b93c85341e9e120e75304379a79df11518cb7def4cc2fc6cdee7da151c1c`) decodes
+to position-dependent bytes `74*8 82*8 8e*8 9c*8 a8*8 b6*8 c2*8 1a*8`; gdb
+reads those exact 64 bytes at `plane+32768` and `plane+33280` after the
+stores, and the next free chunk's size field changes `0x3b41` ->
+`0x9c9c9c9c9c9c9c9c`. `real/neighbour/check_neighbour.py` asserts the byte
+match and metadata overwrite against the saved log (PASS). Full method,
+hashes, controls and limits: `real/PROVENANCE-real.md` W162 section.
+
+This is rung 4 on the real decoder-to-encoder file path, limited to file-
+derived chosen bytes at chosen offsets and malloc-metadata corruption. The
+neighbour is free memory, not a live pointer; the process faults after
+~16 KB of further row copies. No wire input, live server, pointer target,
+grooming, marker or command. No independent witness verdict on this new lane
+yet; rung 5 remains UNKNOWN. A replay request is on the chat tape.
