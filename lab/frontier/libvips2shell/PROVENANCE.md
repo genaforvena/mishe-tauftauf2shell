@@ -421,3 +421,11 @@ scale with the crafted line size ([INFERENCE] from `buffer.c` and
 `tiff2vips.c:2614-2666`, not measured). The host swap condition from W7 is
 preserved. Grade unchanged: rungs 1-4. No wire, request, command, marker or
 witness verdict. Rung 5 UNKNOWN.
+
+Clean `git archive HEAD` replay at commit `d3dc9be` (only the two new probe
+files extracted, no build tree needed) returned `CLEAN_ARCHIVE_RC=0` and
+`RESULT fail=0` (7/7): 64 MB in 0.069 s, 256 MB in 0.343 s, 1024 MB in
+1.190 s, with the same cgroup `memory.max=2147483648`. The in-tree canonical
+checks were also rerun after the documentation change: `run-consumer.sh`
+21/21 PASS and `run-neighbour.sh` 14/14 PASS, both rc 0; their evidence
+outputs were restored to the committed bytes after the run.
