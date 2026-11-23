@@ -102,3 +102,77 @@ Scope note for the operator: gdbserver is a debugger daemon, not a web server
 or language runtime. Proposed under the standing "similar things" mandate
 only because the primitive is an unauthenticated remote heap write with
 chosen bytes plus a claimed code-execution trigger. No off-loopback probe.
+
+---
+
+## Re-open W130 (2026-11-23): pinned upstream bytes and real fix hunk
+
+Status: the earlier find was HELD by the operator (tape #1920) for three
+missing #6 fields: no upstream version range, no fixed version/fix commit,
+no pinned upstream bytes. **Two of those three are now closed by observation**;
+the upstream numeric version range remains UNKNOWN. Witness W27 established
+rungs 1/2/3 and instrumented rung 4 for the earlier harness (tape #1956/#1960).
+This section **adds** a second harness from pinned upstream source; it does
+not erase the 2026-11-21 record above. The earlier harness is still committed
+at `lab/frontier/gdbserver2shell/{qtdpsrc_overflow.c,run.sh}` (commit
+`5261154`).
+
+### New ground truth
+
+- Upstream pin obtained by direct fetch: `binutils-gdb` HEAD
+  `633ae02c4ea8f87c670f7192804349860cfa291d` (2026-11-23). The exact
+  vulnerable lines are present at `gdbserver/tracepoint.cc:2546-2547`:
+  `src = (char *) xmalloc (slen + 1);` and
+  `nbytes = hex2bin (packet, (gdb_byte *) src, strlen (packet) / 2);`.
+  HEAD is still vulnerable; the fix is **posted but not merged**, so there is
+  still no fixed release or upstream version range.
+- Fix bytes: Andrew Burgess, `[PATCH 2/5] gdbserver: prevent buffer overrun
+  for QTDPsrc packet`, 2026-11-16,
+  `https://sourceware.org/pipermail/gdb-patches/2026-November/231917.html`
+  (review `.../232038.html`), plus Sourceware bug 34968. The hunk requires
+  `slen == strlen(BYTES)/2` and even nibble count, then allocates and decodes
+  from the actual payload length. The saved patch adapts that change to the
+  pinned HEAD bytes.
+- RSP numbers are hex, so the attack packet uses `SLEN=1` and the safe packet
+  uses `SLEN=10` (16 decoded bytes). This corrects an UNKNOWN in the first
+  section: `slen` integer semantics are now source-bound.
+
+### Second harness — observed bytes
+
+`lab/frontier/gdbserver2shell/harness/run.sh` re-extracts the verbatim
+61-line vulnerable and 71-line fixed `cmd_qtdpsrc()` slices, plus verbatim
+`ishex` and `unpack_varlen_hex` from `gdbsupport/rsp-low.cc`, and SHA-256-asserts eight
+pinned files/slices every run. Full hashes and the instrumentation boundary
+are in `lab/frontier/gdbserver2shell/PROVENANCE.md`.
+
+- **60 PASS / 0 FAIL** three times plus one clean `/tmp` replay; normalized
+  content hash
+  `0c9b837e5300ac744b133e6668179cda410520177d87b859c99cac9af1c1db73`.
+- g++ 13.3.0 and clang++ 18.1.3: `ERROR: AddressSanitizer:
+  heap-buffer-overflow`, `WRITE of size 1`, `0 bytes after 2-byte region`,
+  frames `hex2bin` -> `cmd_qtdpsrc` -> `main`, for decoded lengths
+  N=8/32/64/128 with `SLEN=1`.
+- Plain 64 KiB `0xEE` arena at N=32/64, twice each:
+  `WRITTEN=N-2 FIRST=2 LAST=N-1 PATTERN_OK=1` — every out-of-bounds byte is
+  an attacker-chosen pattern byte.
+- Fixed snapshot on the same attack: `RC=0 REPLY=E01 LIST_LEN=0`, no ASan.
+  Safe packet: `RC=0 REPLY=OK LIST_LEN=1` on both pins, no ASan.
+
+### Updated grade and honesty
+
+Still rung 3 plus scoped rung 4, now against verbatim upstream source rather
+than a modelled struct. The 2026-11-21 instrumented pointer/marker limb stays
+instrumented; it is not upgraded by this harness. No gdb build, no RSP loop,
+no socket, no daemon, no natural heap layout, no `process_info_private`
+pointer, no `qGetTLSAddr`, no marker, no command, no rung 5. The `hex2bin`
+decoder in the new driver is a faithful reimplementation, not verbatim GDB
+source; all allocation and length decisions are verbatim. The operator owns
+admission; if HELD again, the remaining #6 gap is precisely the missing
+upstream fixed version/range (the fix is a mailing-list patch only).
+
+### Cheapest next experiment
+
+Build the pinned RSP dispatcher with transport stubs and send one crafted
+`QTDPsrc` packet through the real `cmd_qtdpsrc` under ASan, then confirm the
+reported `thread_db` pointer overwrite and `qGetTLSAddr` call in a real heap
+layout, with fixed and safe controls, before any rung-5 claim.

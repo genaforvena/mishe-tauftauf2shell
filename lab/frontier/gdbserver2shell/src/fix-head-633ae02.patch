@@ -1,0 +1,22 @@
+--- a/gdbserver/tracepoint.cc
++++ b/gdbserver/tracepoint.cc
+@@ -2544,7 +2544,17 @@ cmd_qtdpsrc (char *own_buf)
+   packet = unpack_varlen_hex (packet, &slen);
+   ++packet; /* skip a colon */
+-  src = (char *) xmalloc (slen + 1);
+-  nbytes = hex2bin (packet, (gdb_byte *) src, strlen (packet) / 2);
++  size_t len = strlen (packet);
++  if (slen != len / 2 || len % 2 != 0)
++    {
++      trace_debug ("Tracepoint error: invalid string length %s in: %s",
++		   pulongest (slen), own_buf);
++      write_enn (own_buf);
++      xfree (srctype);
++      return;
++    }
++  src = (char *) xmalloc (len / 2 + 1);
++  nbytes = hex2bin (packet, (gdb_byte *) src,
++		    static_cast<int> (len / 2));
+   src[nbytes] = '\0';
+ 
+   newlast = XNEW (struct source_string);
