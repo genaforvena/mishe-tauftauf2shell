@@ -126,3 +126,57 @@ still requires PLC control or impersonation (`AT:P`); no upstream fixed
 release exists; the guard is the reporter's proposal. No pointer redirect,
 function-pointer overwrite, command execution or rung 5 observation. Raw
 frames, ASan reports and server transcripts are in `live/evidence/`.
+
+## Chosen-byte extent on the live wire — W2, 2026-11-23 05:48Z
+
+Experiment: `bash lab/frontier/snap72shell/live/run_wide.sh`. New files are
+`live/wide_client.cpp`, `live/run_wide.sh`, and a `wide` mode in
+`live/fake_s7_server.py`. The mode declares `DataLength=0xFFFF` but sends 4000
+real response bytes of a 4-byte pattern `11 22 33 44 11 22 33 44 ...`, so every
+copied offset is independently checkable. The client allocates a 200000-byte
+destination (plain and ASan builds), requests one one-byte DB item, then scans
+all 65535 copied bytes and reports the first pattern mismatch. These logs are
+under `live/evidence/wide/`; they deliberately do **not** match the
+`wire-*.*.log` normalizer glob, so the W1 trace hash above stays stable.
+
+Why 4000 bytes: `s7_isotcp.h:38` sets `IsoPayload_Size=4096` and
+`TIsoTcpSocket::CheckPDU()` (`s7_isotcp.cpp:46-65`) rejects a TPKT length below
+7 or above 4096. A read response carries 7 bytes of TPKT/COTP header, 12 bytes
+of S7 header, 2 bytes of read params and 4 bytes of item header, leaving 4071
+bytes for real data. 4000 leaves headroom. The receive-buffer cap, not the
+16-bit `DataLength`, bounds attacker-chosen bytes.
+
+Observed (normalized trace SHA-256
+`f254a539df2d8dd63c5dbb54e9dc6d1c8f9a7536c746768e159f817ee87c3808`):
+
+- Plain build: `DECLARED_DATA_LENGTH=65535 REAL_BYTES=4000`,
+  `CLIENT_READ_RC=0 ITEM_RESULT=0 MATCHES=4000 FIRST_BAD_OFFSET=4000`.
+  `DST0=11 DST1=22 DST2=33 DST3=44 DST4=11 DST17=22 DST3999=44`, then
+  `DST4000=00 DST4096=00 DST65534=00`. Every one of the 4000 real wire bytes
+  lands byte-exact at its matching destination offset; peer-chosen control
+  ends exactly where the real response bytes end, 24535 bytes before the copy
+  ends.
+- ASan build with the same enlarged destination: identical `MATCHES=4000`
+  and `FIRST_BAD_OFFSET=4000`, `client_rc=0`, **no ASan report**. Negative
+  result preserved: when the destination is large enough, ASan did not flag
+  the source-side read past the 4096-byte receive buffer. `DST4095=02` and
+  `DST65534=9a` (versus `00` in the plain build) show those bytes are stale
+  stack contents, not peer-controlled; they vary by build.
+- Regression: re-running `run_live.sh` after the server change reproduced
+  W1's normalized trace hash
+  `1f25bf6311e1a659e4da947abc07d001cfacc5fe39dd67618560e425df3773d4`
+  exactly, including the 32-byte attack, both controls and the plain byte
+  observation.
+
+Source-bound limit on escalation: after `opReadMultiVars()` returns,
+`PerformOperation()` (pinned lines 2632-2634) touches only `Job` and
+`LastError` in the client object, which is on the caller's stack, not adjacent
+to the caller's heap `Item->pdata`. `ReadMultiVars()` then returns and the
+caller's `delete[] dst` is the next operation. No post-overflow dereference of
+heap state adjacent to the destination was found in the real client, so no
+pointer-redirect path is measured. This is a limit of this client and this
+caller, not a proof that a richer application cannot be affected.
+
+Ceiling after W2: rung 4 wire-reachable, with the chosen-byte extent measured
+at 4000 of 65535 bytes. Still no pointer redirect, command side effect or
+rung 5; no upstream fixed release exists.

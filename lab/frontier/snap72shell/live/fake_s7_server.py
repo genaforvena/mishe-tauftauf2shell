@@ -108,6 +108,14 @@ for _ in range(8):
         elif mode == "safe":
             declared = 1
             data = b"\x5a"
+        elif mode == "wide":
+            # Largest read response that fits CheckPDU's 4096-byte TPKT cap:
+            # 7 TPKT/COTP + 12 S7 header + 2 params + 4 item header = 25 bytes
+            # of overhead, so at most 4071 data bytes. Use 4000 for headroom.
+            # A 4-byte pattern makes every copied offset checkable.
+            declared = 0xFFFF
+            pat = bytes([0x11, 0x22, 0x33, 0x44])
+            data = bytes(pat[i % 4] for i in range(4000))
         else:
             raise ValueError("unknown mode: %s" % mode)
         # 12-byte header, 2-byte read params (FunRead, ItemCount),

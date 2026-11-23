@@ -163,3 +163,29 @@ impersonation of a PLC (`AT:P`); there is no pointer redirect, command or
 observed command side effect, and no upstream fixed release. Hashes, exact
 frames, ASan reports and both replay transcripts are in `PROVENANCE.md` and
 `live/evidence/`.
+
+## 8. W2 chosen-byte extent — 2026-11-23 05:48Z
+
+Charter research option (2) was measured, not assumed. A new `wide` response
+mode declares `DataLength=0xFFFF` but sends 4000 real bytes of a repeating
+`11 22 33 44` pattern; `live/wide_client.cpp` scans all 65535 copied bytes of
+a deliberately large (200000-byte) destination. `run_wide.sh` keeps these logs
+out of the W1 normalizer glob, so the W1 trace hash is unchanged after the
+server edit (re-run confirmed).
+
+- Plain live client over the loopback wire: `MATCHES=4000`,
+  `FIRST_BAD_OFFSET=4000`, with `DST0=11 ... DST3999=44` and `DST4000=00`.
+  All 4000 real wire bytes land byte-exact at their offsets.
+- The 4096-byte Iso payload buffer and `CheckPDU()`'s 4096-byte TPKT cap
+  (`s7_isotcp.h:38`, `s7_isotcp.cpp:46-65`) bound chosen-byte control at about
+  4071 bytes regardless of the 65535 copy length.
+- ASan with the enlarged destination reported nothing and gave the same
+  `MATCHES=4000`; bytes past the real payload are stale stack contents
+  (`DST4095=02`, `DST65534=9a`), not peer-controlled. Negative preserved.
+- `PerformOperation()` lines 2632-2634 touch only the stack-resident `Job`
+  after the overflow; no adjacent-heap pointer is dereferenced by the real
+  client post-copy. No pointer redirect path was measured.
+
+Ceiling stands at rung 4 wire-reachable; chosen control is now quantified at
+4000 of 65535 bytes. No rung 5. Full frames, logs and hashes in
+`lab/frontier/snap72shell/PROVENANCE.md` under the W2 section.
