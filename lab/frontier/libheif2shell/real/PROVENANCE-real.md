@@ -618,3 +618,44 @@ harness setup; the first encoder-sizing frame is harness-created; the marker
 is in-process. No real consumer, socket, command, valid-address derivation
 from ASLR, witness verdict or rung 5. The older replay requests remain
 queued; #3035 covers W178 and a W179 request is on tape.
+
+## W180 ASan classification of the W178 uncompressed-coded file path (2026-11-23)
+
+W178 recorded "no ASan run on this build" as a gap. Closed with a fresh
+sanitized build of the same pinned `v1.23.6` tree:
+`/tmp/w180-asan-unci`, CMake `-DCMAKE_BUILD_TYPE=Release
+-DCMAKE_C_FLAGS_RELEASE='-O0 -g -DNDEBUG -fsanitize=address
+-fno-omit-frame-pointer'` and the same `CMAKE_CXX_FLAGS_RELEASE`, the W178
+feature flags (`WITH_UNCOMPRESSED_CODEC=ON`, X265 in-tree, plugin loading
+off, JPEG/AOM/libde265/examples/GDK off, static, testing off), `ninja -j1
+libheif/libheif.a` (119/119). The committed `real/reencode_chroma.cc` driver
+was linked with `-fsanitize=address -fno-omit-frame-pointer` against that
+library plus the same W178 codec libraries into `/tmp/w180-reencode-chroma`.
+Build trees and binaries stay outside the repository.
+
+Input: committed `neighbour/evidence/uncompressed/byte-exact.heif`, SHA-256
+`b585565b5ca9af5860880c2102ae124749f298a5a3319e08a24e57cb8ca3a249`.
+Attack command: `ASAN_OPTIONS=detect_leaks=0 SYNTH_FIRST=1 TW=512 TH=64
+/tmp/w180-reencode-chroma byte-exact.heif out.heif`; safe command: same
+without `SYNTH_FIRST` and with `TW=64 TH=65`. Saved outputs:
+`neighbour/evidence/uncompressed/asan-{attack,safe}.out` and `.rc`.
+
+Observed attack rc 1, `ERROR: AddressSanitizer: heap-buffer-overflow`,
+`WRITE of size 64`, 0 bytes after a 32783-byte region allocated by `calloc`
+at `pixelimage.cc:571` via `:631`, pinned store at
+`HeifPixelImage::extend_padding_to_size pixelimage.cc:644` via
+`heif_image_extend_padding_to_size heif_image.cc:403` and
+`x265_encode_sequence_frame encoder_x265.cc:1139` — the same call chain and
+allocation size as W161, now on the byte-exact uncompressed-coded file.
+Safe input rc 0, no ASan report, both frames decode 64x65 and encode rc 0.
+`neighbour/check_uncompressed.py` extended by five ASan assertions;
+PASS=10 FAIL=0, including the original W178 byte/gdb/plain checks.
+The committed `asan-attack.out` has one trailing space removed from ASan's
+"Partially addressable" legend line to satisfy `git diff --check`; all
+diagnostic lines are otherwise verbatim.
+
+Scope: confirms rung 3 for this build/codec lane; does not add a consumer,
+pointer, command, ASLR-independent address or witness verdict. Grade stays
+rung 3 plus rung 4, NOT rung 5. ASLR was not disabled here; no pointer was
+written by this leg (ASan traps at the first OOB store). This is an author
+observation, not independent acceptance.

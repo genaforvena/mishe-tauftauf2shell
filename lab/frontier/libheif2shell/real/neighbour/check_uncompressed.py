@@ -37,6 +37,16 @@ def main():
 
     plain = (d / "plain-byte-exact.out").read_text(errors="replace")
     check.append(("plain heap abort", "double free or corruption (out)" in plain, ""))
+    asan = (d / "asan-attack.out").read_text(errors="replace")
+    asan_safe = (d / "asan-safe.out").read_text(errors="replace")
+    check.append(("asan attack rc=1", (d / "asan-attack.rc").read_text().strip() == "1", ""))
+    check.append(("asan heap WRITE 64", "heap-buffer-overflow" in asan and
+                  "WRITE of size 64" in asan, ""))
+    check.append(("asan pinned store stack", all(s in asan for s in (
+                  "pixelimage.cc:644", "heif_image.cc:403", "encoder_x265.cc:1139")), ""))
+    check.append(("asan 32783-byte region, 0 after", "0 bytes after 32783-byte region" in asan, ""))
+    check.append(("asan safe rc=0 clean", (d / "asan-safe.rc").read_text().strip() == "0" and
+                  "AddressSanitizer" not in asan_safe and "frame 1 encode rc=0" in asan_safe, ""))
 
     for name, ok, detail in check:
         print(f"{'PASS' if ok else 'FAIL'} {name}" + (f" {detail}" if detail and not ok else ""))

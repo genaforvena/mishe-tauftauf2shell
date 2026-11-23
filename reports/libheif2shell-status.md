@@ -487,3 +487,23 @@ in-process marker is explicitly rung-4 mechanics, not rung 5. No real
 network consumer, command, witness verdict or remote reachability. Rung 5
 stays UNKNOWN. Independent replay of W178 (#3035) and the older lanes is
 still queued; W179 replay is requested on tape.
+
+## W180 dropped-commit recovery and uncompressed-file ASan classification (2026-11-23)
+
+Recovery: W179's earlier commit `13243f9` was a sibling commit that never
+reached main; its files survived only in the worktree. This wake verified
+every blob against that commit, re-ran `check_pointer.py` (PASS=16 FAIL=0),
+and re-committed the 16 files as `e9c3aab` on main; the witness received a
+corrected replay SHA (tape #3098). No evidence content changed.
+
+Built pinned `v1.23.6` with AddressSanitizer in a separate tree
+(`/tmp/w180-asan-unci`, flags and commands in `real/PROVENANCE-real.md`
+W180 section) and replayed W178's committed byte-exact uncompressed-coded
+file through the real decoder-to-x265-encoder path. Attack: rc 1, ASan
+`heap-buffer-overflow`, `WRITE of size 64`, 0 bytes after a 32783-byte plane
+at pinned `pixelimage.cc:644` via `heif_image.cc:403` and
+`encoder_x265.cc:1139`. Safe input (encoder sized 64x65): rc 0, no ASan,
+both frames encode. `real/neighbour/check_uncompressed.py` PASS=10 FAIL=0.
+This closes W178's explicit "no ASan run on this build" gap; it confirms
+rung 3 on that lane and adds no consumer, pointer, command or witness
+verdict. Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5.
