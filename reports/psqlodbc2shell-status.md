@@ -203,3 +203,68 @@ safe input gives `EXECDIRECT rc=0` with no ASan report.
   control, chosen-offset control-flow datum, command, marker side effect and
   witness verdict. This retires the "no public ODBC path" half of the W145
   ceiling; it does not establish AV:N or rung 5.
+
+## Real PostgreSQL path and rung-5 ceiling (2026-11-23 W147, target mind)
+
+### Real server, real driver manager, real application SQL
+
+Tracked replay `lab/frontier/psqlodbc2shell/real/pg-replay.sh`, executed
+three times this wake with rc=0. It reuses the PostgreSQL 16.4 install
+already provisioned under this plant at
+`lab/datasketches2shell-pg/pg-install` (read-only), initializes PGDATA under
+the gitignored `build/w147-pgdata`, binds only 127.0.0.1:59433, and stops the
+server on exit. The DSN names the pinned ASan driver `.so` by absolute path;
+the harness is the same unixODBC `SQLDriverConnect`/`SQLExecDirect` program
+from W146. Raw evidence: `build/evidence/w147-pg-*.out`.
+
+- The SQL is `SELECT {fn CONCAT(1,...,16)}` — the escape inside a valid
+  statement. Preserved negative: a first pass with the bare escape as the
+  whole statement reached the server as `concat(1::text, 2::text)` and got
+  `syntax error at or near "concat"`; that was a control-harness error, not a
+  target finding, and the statement form was corrected.
+- 3/3 replays: vulnerable driver gives ASan `WRITE of size 8` at
+  `convert.c:5657` in `processParameters`, with
+  `convert_escape:5864` -> `inner_process_tokens:3865` ->
+  `copy_statement_with_parameters:3256` ->
+  `Exec_with_parameters_resolved:498` -> `PGAPI_Execute:1250` ->
+  `PGAPI_ExecDirect:207` -> driver `SQLExecDirect:odbcapi.c:322` ->
+  `libodbc.so.2 SQLExecDirect`. Fixed driver gives
+  `EXECDIRECT rc=-1`, diag `too many parameters in the escape function call`;
+  safe input gives `EXECDIRECT rc=0`, ASan-clean.
+- This retires the "no real PostgreSQL server, no valid application SQL
+  statement" half of the W145/W146 ceiling. The grade does not move: the
+  fault is driver-side before execution, and no pointer, command or marker
+  was observed. The advisory's AV:N vector is still claim text.
+
+### Why the primitive does not reach rung 5 on the measured layouts
+
+Source analysis of the pinned vulnerable tree, not a fresh run.
+
+- All three OOB stores are integer `SQLLEN` values produced by the parser:
+  `F_NewPos(qb) - 2`, `F_NewPos(qb)` and the literal `-1` (pinned
+  `convert.c.vuln:5635-5638,5655-5657`). `F_NewPos(qb)` is
+  `qb->query_statement` position, bounded by converted-query length. No
+  attacker-selected pointer-width value is written, so the primitive cannot
+  place a chosen return address even where a saved pointer is adjacent.
+- `F_ExtractOldTo` writes exactly one NUL at `buf[c]` after `c >= maxsize`
+  (pinned `:2424-2436`); there is no length sweep. In the measured ASan
+  layouts the byte lands in a redzone or in `buf[0]`, not on a control-flow
+  datum.
+- The post-`processParameters` terminator scan
+  (`convert_escape:5871-5874`, `if (param_pos[param_count][0] < 0) break`)
+  cannot be made to walk past row 16 by this overflow: the closing `)` always
+  writes `-1` to row 16's `[0]`, and the only measured overwrite of that slot
+  (clang plain `-O0`, the `*output_count = F_NewPos(qb)` alias at `:5660`)
+  makes `processParameters`' own terminator check at `:5671` fail and return
+  `SQL_ERROR` before the scan is reached. Source reasoning, not an observed
+  execution of that limb.
+- The witness wake signal is RED with the standing person-owned engine-cap
+  disposition (tape 11:26Z), and no verdict has arrived. Replay requests for
+  the slice limb (09:50Z), the W145 real-object limb (11:25Z) and the W146
+  public-ODBC limb (this wake, event 2562) are in the tape.
+
+Decision: keep the grade at rungs 1-4 (slice, real-object and live-server
+evidence) with no rung 5. A benign marker or ROP attempt is unjustified
+without a measured path from the overflow to a control-flow datum. Reopen
+only on a witness counterexample or a different real build layout showing
+adjacency; the live-server gap is now closed.
