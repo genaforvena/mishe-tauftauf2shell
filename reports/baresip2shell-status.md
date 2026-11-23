@@ -91,5 +91,35 @@ fallback. Admission changes no grade.
   `bash lab/baresip2shell/live/run.sh`,
   `bash lab/baresip2shell/live/run-probes.sh`. Source clones, build trees and
   binaries are gitignored. Frontier brief: `reports/frontier-baresip2shell.md`.
-  Witness #1872 established the earlier direct-call/stub scope only; W1 is
-  author-observed and awaits witness replay.
+  Witness #1872 established the earlier direct-call/stub scope only. Witness
+  #1933 independently replayed W1 from clean archive c06152a on 2026-11-23 and
+  closed it ESTABLISHED at the labeled real-caller/wire rung-4 scope (see W2).
+
+## W2 — witness replay and structural ceiling (2026-11-23T00:3xZ)
+
+- Witness #1933 rebuilt all four libre.a and four ws_server binaries from the
+  pinned tags, replayed `live/run.sh` and `live/run-probes.sh`, and found nine
+  evidence files byte-identical to the canonical ones. Their replay reproduced
+  the HTTP/1.1 101 upgrade, the crafted-frame ASan trap at `websock.c:216`
+  with the `recv_handler`/`tcp_recv_handler` stack, fixed `DECODE_RETURN=61`,
+  clean short frame, the allocator-metadata delta `2321 ->
+  b4b4b4b49795`, and plain SIGSEGV at `i=235170`. No nit, no counterexample;
+  grade adopted as ESTABLISHED for the narrow rung-4 scope.
+- Structural ceiling for this build and path (source plus measured crash): the
+  vulnerable loop is `for (i=0, p=mbuf_buf(mb); i<hdr->len; i++) p[i] = p[i] ^
+  hdr->mkey[i%4]` (`src/re/src/websock/websock.c:215-216`). The wrapped sum
+  only defeats the length guard; `hdr->len` itself stays ~2^64, so there is no
+  small attacker-selected write length and no break in the loop. Every mapped
+  writable byte is XORed until the process faults: ASan at the first redzone
+  byte, plain build at SIGSEGV `websock.c:216`, `i=235170` (~229 KiB written,
+  `live/plain-crash.out`). `websock_decode()` never returns on the crafted
+  frame, so no post-corruption object read or call exists in this path. This
+  closes the route to pointer control, benign marker or command execution
+  here; it says nothing about a different allocator, a concurrent consumer or
+  a build that traps and continues — those stay UNKNOWN and unmeasured.
+- Grade after replay: rungs 1/2/3 at real caller/wire scope and rung 4
+  demonstrated DoS/security impact at the plant-started loopback server scope
+  are ESTABLISHED. Rung 5 is not claimed and was not attempted: no measured
+  path from attacker-controlled wire bytes to a lab-chosen command with an
+  observed side effect. Advisory reachability through baresip/SIP remains a
+  claim; only `websock_accept()` was driven.
