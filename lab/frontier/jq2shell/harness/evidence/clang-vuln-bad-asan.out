@@ -1,0 +1,55 @@
+=================================================================
+==1449214==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000057 at pc 0x61e63a9bf0d8 bp 0x7fff71a84890 sp 0x7fff71a84050
+WRITE of size 3 at 0x503000000057 thread T0
+    #0 0x61e63a9bf0d7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-clang-vuln-asan+0xc50d7) (BuildId: 857c12ef8effdcc87a4aec4e354dde6d1d26392e)
+    #1 0x61e63aa007d1 in jvp_string_copy_replace_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1126:12
+    #2 0x61e63a9ffcbb in run_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1261:9
+    #3 0x61e63a9ff7da in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1278:5
+    #4 0x721525a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x721525a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x61e63a926344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-clang-vuln-asan+0x2c344) (BuildId: 857c12ef8effdcc87a4aec4e354dde6d1d26392e)
+
+0x503000000057 is located 0 bytes after 23-byte region [0x503000000040,0x503000000057)
+allocated by thread T0 here:
+    #0 0x61e63a9c1193 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-clang-vuln-asan+0xc7193) (BuildId: 857c12ef8effdcc87a4aec4e354dde6d1d26392e)
+    #1 0x61e63a9ffd65 in jvp_string_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:76:23
+    #2 0x61e63aa00739 in jvp_string_copy_replace_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1118:19
+    #3 0x61e63a9ffcbb in run_bad /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1261:9
+    #4 0x61e63a9ff7da in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/jv.c.vuln:1278:5
+    #5 0x721525a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x721525a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x61e63a926344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-clang-vuln-asan+0x2c344) (BuildId: 857c12ef8effdcc87a4aec4e354dde6d1d26392e)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/bin-clang-vuln-asan+0xc50d7) (BuildId: 857c12ef8effdcc87a4aec4e354dde6d1d26392e) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x502ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x502ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x502ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x502fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x502fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x503000000000: fa fa 00 00 00 fa fa fa 00 00[07]fa fa fa fa fa
+  0x503000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1449214==ABORTING

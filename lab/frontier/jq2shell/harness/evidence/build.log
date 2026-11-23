@@ -1,0 +1,64 @@
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:114:13: warning: ‘jv_free’ defined but not used [-Wunused-function]
+  114 | static void jv_free(jv x) { (void) x; }
+      |             ^~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:66:11: warning: ‘jv_invalid_with_msg’ defined but not used [-Wunused-function]
+   66 | static jv jv_invalid_with_msg(jv msg) {
+      |           ^~~~~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:59:11: warning: ‘jv_string’ defined but not used [-Wunused-function]
+   59 | static jv jv_string(const char* msg) {
+      |           ^~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:114:13: warning: ‘jv_free’ defined but not used [-Wunused-function]
+  114 | static void jv_free(jv x) { (void) x; }
+      |             ^~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:66:11: warning: ‘jv_invalid_with_msg’ defined but not used [-Wunused-function]
+   66 | static jv jv_invalid_with_msg(jv msg) {
+      |           ^~~~~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:59:11: warning: ‘jv_string’ defined but not used [-Wunused-function]
+   59 | static jv jv_string(const char* msg) {
+      |           ^~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:49:15: warning: ‘hc_plain_off’ defined but not used [-Wunused-variable]
+   49 | static size_t hc_plain_off = 0;
+      |               ^~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:48:23: warning: ‘hc_plain_base’ defined but not used [-Wunused-variable]
+   48 | static unsigned char* hc_plain_base = NULL;
+      |                       ^~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-fixed.c:49:15: warning: ‘hc_plain_off’ defined but not used [-Wunused-variable]
+   49 | static size_t hc_plain_off = 0;
+      |               ^~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-fixed.c:48:23: warning: ‘hc_plain_base’ defined but not used [-Wunused-variable]
+   48 | static unsigned char* hc_plain_base = NULL;
+      |                       ^~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:59:11: warning: unused function 'jv_string' [-Wunused-function]
+   59 | static jv jv_string(const char* msg) {
+      |           ^~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:66:11: warning: unused function 'jv_invalid_with_msg' [-Wunused-function]
+   66 | static jv jv_invalid_with_msg(jv msg) {
+      |           ^~~~~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:114:13: warning: unused function 'jv_free' [-Wunused-function]
+  114 | static void jv_free(jv x) { (void) x; }
+      |             ^~~~~~~
+3 warnings generated.
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:48:23: warning: unused variable 'hc_plain_base' [-Wunused-variable]
+   48 | static unsigned char* hc_plain_base = NULL;
+      |                       ^~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:49:15: warning: unused variable 'hc_plain_off' [-Wunused-variable]
+   49 | static size_t hc_plain_off = 0;
+      |               ^~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:59:11: warning: unused function 'jv_string' [-Wunused-function]
+   59 | static jv jv_string(const char* msg) {
+      |           ^~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:66:11: warning: unused function 'jv_invalid_with_msg' [-Wunused-function]
+   66 | static jv jv_invalid_with_msg(jv msg) {
+      |           ^~~~~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-vuln.c:114:13: warning: unused function 'jv_free' [-Wunused-function]
+  114 | static void jv_free(jv x) { (void) x; }
+      |             ^~~~~~~
+5 warnings generated.
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-fixed.c:48:23: warning: unused variable 'hc_plain_base' [-Wunused-variable]
+   48 | static unsigned char* hc_plain_base = NULL;
+      |                       ^~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness/driver-fixed.c:49:15: warning: unused variable 'hc_plain_off' [-Wunused-variable]
+   49 | static size_t hc_plain_off = 0;
+      |               ^~~~~~~~~~~~
+2 warnings generated.
+generated drivers and 8 binaries in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/jq2shell/harness
