@@ -1,0 +1,14 @@
+WIRE_PORT 46601
+WIRE_RECEIVED 5004 bytes
+CALLOC32783 count=1 ret=0x58deedf41a00
+WIRE_FRAME 0 decoded 512x64 stride=512
+WIRE_ENCODE_RC 0
+Corrupt JPEG data: 631 extraneous bytes before marker 0xd9
+WIRE_FRAME 1 decoded 64x65 stride=64
+GROOM count=2 A=0x58deedf1d740 B=0x58deedf25760 delta=32800 fn=0x58dee2f28d69 tag0=0xa5
+CALLOC32783 count=2 ret=0x58deedf1d740 == A
+WIRE_ENCODE_RC 0
+VICTIM fn=0xa8a8a8a8a8a8a8a8 tag[0..7]=b6 b6 b6 b6 b6 b6 b6 b6 
+B-8=0x9c9c9c9c9c9c9c9c
+POST fn=0xa8a8a8a8a8a8a8a8
+CLIENT driver_rc=0

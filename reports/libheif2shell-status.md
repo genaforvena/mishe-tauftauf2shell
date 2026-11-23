@@ -257,3 +257,56 @@ choice, not file-derived. No marker, pointer target, wire input or rung 5.
 No fixed-pin W171 variant was built; W166(b)'s fixed-pin control still covers
 the underlying mechanism. Witness replay requests #2752/#2778 remain queued.
 
+
+## W172 loopback wire-input lane (2026-11-23)
+
+The one missing measured category from the W171 clean return was wire input.
+`real/reencode_wire.cc` is a **synthetic one-shot consumer**: it binds
+127.0.0.1:0, accepts one HEIF byte stream, decodes it through the pinned public
+libheif API (`heif_context_read_from_memory`) and re-encodes each frame through
+a fixed-size x265 sequence encoder. It is not a real-world libheif network
+service; it measures whether socket-derived bytes reach the same overflow.
+
+`real/neighbour/wire_client.py DRIVER INPUT OUTPUT [retain]` sends the file.
+Saved runs (all under `real/neighbour/evidence/wire-*.out`):
+
+- `wire-vuln-asan-attack.out`: the committed `controlled-size.heif`
+  (SHA-256 `062301df...bc7550`, 6004 bytes) arrives over the socket; frame 1
+  decodes 64x65 while the encoder pads to 512x64. ASan reports
+  `heap-buffer-overflow`, `WRITE of size 64`, 0 bytes after a 32783-byte
+  region, at pinned `pixelimage.cc:644` via `heif_image.cc:403` and
+  `encoder_x265.cc:1139`. Driver rc 1.
+- `wire-vuln-asan-safe.out`: the same-size reference input
+  (`4da16469...583f8dc`, 4262 bytes) on the vulnerable build: both frames
+  512x64, no ASan, rc 0.
+- `wire-fixed-attack-noleak.out`: fixed `9ec655f` build, same attack bytes:
+  `encode: rc=2 ... All frames of a sequence must have the size of the first
+  frame`, no ASan, rc 0 (`ASAN_OPTIONS=detect_leaks=0`).
+- `wire-vuln-attack.out`: plain Release build, same attack bytes:
+  `free(): corrupted unsorted chunks`, rc -6 (SIGABRT).
+
+`real/neighbour/check_wire.py EVIDENCE_DIR` PASS asserts all four runs.
+
+Combining the wire lane with W171's interposer, `reencode_wire_interpose.cc`
+places a live `Victim` adjacent to the padding plane at the second
+`calloc(32783)` while the mixed-size frame arrives over the socket. With frame
+1 retained (never released, as in W171) the process returns cleanly:
+
+- `wire-interpose-retain.out`: 6004 wire bytes, plane reuses adjacent A
+  (B-A=0x8020), `fn=0x4040404040404040`, `tag[0..7]=40*8`,
+  `B-8=0x500000500021e`, `POST fn=0x4040...`, rc 0.
+- `wire-interpose-pattern-retain.out`: the regenerated one-row input
+  (`e028c5af...a3b67`, 5004 bytes), `fn=0xa8a8a8a8a8a8a8a8`,
+  `tag[0..7]=b6*8`, `B-8=0x9c9c...`, rc 0. Pointer bytes track the wire input.
+
+`real/neighbour/check_wire_interpose.py EVIDENCE_DIR` PASS.
+`real/run_wire.sh [EVIDENCE_DIR]` recompiles both drivers against the pinned
+builds, replays all six cases into a chosen directory and runs both checkers;
+it was run this wake into `/tmp/libheif-wire-replay` with all checks PASS.
+
+Grade unchanged: rung 3 plus rung 4, now with **wire-derived** bytes and a
+clean return into a live object. Still not rung 5: the consumer is a harness,
+the victim is harness-placed, the 8 bytes are uniform file values rather than
+a valid address, retention is a harness lifetime choice, and no marker or
+command is executed. No real-world libheif network consumer or arbitrary-byte
+control is measured. Witness replay not yet requested.

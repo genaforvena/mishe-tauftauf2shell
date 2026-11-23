@@ -1,0 +1,31 @@
+WIRE_PORT 35599
+WIRE_RECEIVED 6004 bytes
+Corrupt JPEG data: premature end of data segment
+WIRE_TRACK 512x64
+WIRE_FRAME 0 decoded 512x64 stride=512
+WIRE_ENCODE_RC 0
+WIRE_FRAME 1 decoded 64x65 stride=64
+WIRE_MIXED_FRAME h=65 padded=64
+encode: rc=2 sub=0 Invalid input: Unspecified: All frames of a sequence must have the size of the first frame
+WIRE_ENCODE_RC 2
+WIRE_DONE last_encode_rc=2
+
+=================================================================
+==2759257==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 1168 byte(s) in 1 object(s) allocated from:
+    #0 0x7b1f910fcf1d in posix_memalign ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:145
+    #1 0x7b1f90127ddb in x265::x265_malloc(unsigned long) (/lib/x86_64-linux-gnu/libx265.so.199+0x127ddb) (BuildId: 6163f4896930752408771e62b52f6ccd6b4e4190)
+    #2 0x7b1f900d71f5 in x265_encoder_open_199 (/lib/x86_64-linux-gnu/libx265.so.199+0xd71f5) (BuildId: 6163f4896930752408771e62b52f6ccd6b4e4190)
+    #3 0x5ea484c0a7c5 in x265_start_sequence_encoding_intern /tmp/libheif2shell-fixed-src/libheif/plugins/encoder_x265.cc:1069
+    #4 0x5ea484c0aecc in x265_start_sequence_encoding /tmp/libheif2shell-fixed-src/libheif/plugins/encoder_x265.cc:1101
+    #5 0x5ea484c655b6 in Encoder_HEVC::encode_sequence_frame(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const&, heif_image_input_class, unsigned int, unsigned int, unsigned long) /tmp/libheif2shell-fixed-src/libheif/codecs/hevc_enc.cc:168
+    #6 0x5ea4848ffa16 in Track_Visual::encode_image(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const*, heif_image_input_class) /tmp/libheif2shell-fixed-src/libheif/sequences/track_visual.cc:620
+    #7 0x5ea484769199 in heif_track_encode_sequence_image /tmp/libheif2shell-fixed-src/libheif/api/libheif/heif_sequences.cc:622
+    #8 0x5ea484721373 in main lab/frontier/libheif2shell/real/reencode_wire.cc:117
+    #9 0x7b1f8f22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7b1f8f22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x5ea48471fe74 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/real/wire-fixed-asan+0x91e74) (BuildId: 8f4fb1e242dc2af1f3bdb7cf683fe83825879668)
+
+SUMMARY: AddressSanitizer: 1168 byte(s) leaked in 1 allocation(s).
+CLIENT driver_rc=1
