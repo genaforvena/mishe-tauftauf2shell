@@ -431,3 +431,12 @@ This is a negative reachability result for the post-copy indirect-call
 limb across these five header layouts, not a failed exploit. It leaves the
 grade unchanged: rungs 1-4 on living bytes, no code pointer, ROP, command
 or marker side effect, and no rung 5.
+
+A clean `git archive HEAD` at commit `9579cc8` into `/tmp/thrift-w147.*`,
+with only the gitignored `live-noflush` / `live-noflush-fixed` binaries
+copied in, reproduced the two anchor windows: vulnerable `sz=726`,
+`nonzero=128 exec=0 heap=1` with the heap pointer at `+1008`, fixed
+`sz=160`, `nonzero=98 exec=0 heap=11`. A first fixed-control attempt on a
+fresh port hit `ConnectionRefusedError` before gdb finished loading; that
+attempt is recorded as a negative, not a pass, and the retry above
+succeeded on a new port with the same window counts.
