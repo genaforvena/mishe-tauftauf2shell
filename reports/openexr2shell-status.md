@@ -226,3 +226,30 @@ interrupted. Its captured output
 `cases/poc.exr cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample
 count table`, but with no clean return code this is neither a pass nor a
 regression; the advisory's "exrcheck safe" statement stays untested here.
+
+## W168: OpenImageIO build still blocked (2026-11-23)
+
+The advisory's OpenImageIO flat-path reproduction remains UNTESTED. A prior
+unknown wake's build attempt was interrupted at cut and its attempted commit
+was a no-op (the consumer sources were already tracked in `c8550f8`); nothing
+was repeated blindly. This wake tried three bounded builds of the configured
+ASan tree on a host exposing only 2 CPUs (load 9-12): 900s at `-j8` completed
+1/124 edges; a 150s `-j2` probe reached `[9/124]` and then failed on GCC-13's
+false-positive `-Werror=maybe-uninitialized` in `std::regex` from
+`filesystem.cpp`; after adding `-Wno-error=maybe-uninitialized` to the lab
+build tree only (all other cached flags unchanged), 1020s at `-j2` reached
+`[19/124]` and timed out. `libOpenImageIO_Util_d.so` linked; the main
+`libOpenImageIO_d.so` did not. At the observed ~54s/edge, roughly 95 more
+minutes of compile are needed. Raw output:
+`lab/openexr2shell-real/oiiolab/build-oiio-target.log`. No consumer link or
+run, no new reachability evidence, no grade change.
+
+Static trace, explicitly not a lab observation: OIIO 3.2.0.2-dev's Core reader
+calls `exr_decoding_run()` at
+`src/openexr.imageio/exrinput_c.cpp:1329`, but `open()` constructs C++
+`DeepScanLineInputPart` for deep parts (`exrinput.cpp:1079-1092`) and its deep
+read path calls `readPixelSampleCounts()` before `readPixels()`
+(`exrinput.cpp:1627-1632`), which takes the safe prepass. Which branch a flat
+`read_image()` on a deep file takes was not resolved from source; it needs the
+linked consumer. A resumed build needs a single uninterrupted ~2h window on a
+less contended host, or a matching prebuilt OIIO.
