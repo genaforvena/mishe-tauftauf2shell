@@ -157,3 +157,34 @@ peer's flow-control behaviour and whose copied bytes are the peer's own
 request bytes. Still rung 4: no pointer redirect, no control-flow hijack, no
 command, no remote client beyond the plant's own loopback process. Rung 5
 remains UNKNOWN.
+
+## Heap layout under the 34465-byte copy — W2 (2026-11-23 05:2xZ, author-only)
+
+Bounded rung-5 feasibility check on the plain vulnerable server from W1, own
+build from the pinned tarball with `gzwrite.c.parent` swapped; gdb breakpoints
+at `gzwrite.c:389` (before the memmove) and `:395` (after). Raw output in
+`harness/tcp-evidence/layout-pre-memmove.txt`, `layout-post-memmove.txt`,
+`layout-scan.txt` and `layout-ptrs.txt`. The pre-memmove files report
+`PEER_BYTE_CHECK=FAIL` by design: at that breakpoint the copy has not happened
+yet; the post-memmove file is the peer-byte readback already described above.
+
+At the pre-memmove breakpoint: `state=0x5555555762d0`,
+`state->in=0x5555555763f0`, stale `next_in=0x5555555cdbaf`, `avail_in=34465`.
+Walking glibc chunks from `state->in`: chunk0 size 0x4010 is `state->in`;
+chunk1 size 0x2010 at `0x...7a400` is `state->out`; chunk2 size 0x1760 at
+`0x...7c410` is `state->strm.state` (deflate internal state); chunks3-6 are
+0x10010 each; chunk7 size 0x186b0 at `0x...5bdbb0` is the 100000-byte caller
+`req` buffer, whose `+65535` offset is the stale source pointer. The
+34465-byte copy therefore covers all of `state->out`, all of the deflate
+state and about the first 3.8 KiB of the following 64 KiB chunk. After the
+copy, the first following chunk's size field reads
+`0xec4760c5bf4a1ff8` — peer bytes have replaced live heap metadata.
+
+A scan of the whole pristine 34465-byte destination range for 8-byte-aligned
+qwords pointing into executable mappings found 0 hits across 5 executable
+ranges; 13 qwords look like heap pointers. No function pointer lies in the
+range in this server, so this overwrite has no direct call target to
+redirect; the later `free()` calls see corrupted metadata, which is the crash
+already recorded. Author-side feasibility negative, not a witness verdict; it
+does not exclude a different application shape with a callable pointer inside
+the overwritten range. Rung 5 remains UNKNOWN.

@@ -133,3 +133,16 @@ bound checked: pinned parent `:234`/`:245-246`/`:386-388`/`:394`; fixed blob
 differs by exactly the published +4/-1 hunk. No counterexample. Both claims
 ESTABLISHED at the labeled rung-4 scope: no pointer redirect, no control flow,
 no command, so rung 5 remains UNKNOWN. No replay owed.
+
+## Rung-5 feasibility check — W2 (2026-11-23 05:2xZ, author-only)
+
+A gdb heap walk on the plain vulnerable TCP server shows the 34465-byte copy
+covering `state->out`, zlib's deflate state and the first ~3.8 KiB of the next
+64 KiB chunk, replacing heap metadata; the stale source sits in the caller's
+100000-byte request buffer at offset 65535. A scan of the pristine destination
+range found 0 qwords pointing into executable mappings and 13 heap-like
+pointers — no direct call target in this server. Raw gdb output and chunk
+walks are in `lab/frontier/zlib2shell/harness/tcp-evidence/layout-*.txt` and
+the analysis in `lab/frontier/zlib2shell/PROVENANCE.md`. This is an author-side
+negative, not a witness verdict and not evidence against a different
+application shape; rung 5 stays UNKNOWN.

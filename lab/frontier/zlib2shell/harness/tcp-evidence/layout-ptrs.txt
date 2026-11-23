@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x49ed: file gzwrite.c, line 389.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=33291
+CLIENT_HEADER_BYTES=10
+REQ_BYTES=100000
+WRITTEN=65535
+
+Breakpoint 1, gz_vacate (state=0x5555555762d0) at gzwrite.c:389
+389	    (void)gz_comp(state, Z_NO_FLUSH);
+$1 = 34465
+$2 = 0x42
+$3 = 0x0
+$4 = 0x0
+PTR state=0x5555555762d0
+PTR state->in=0x5555555763f0
+PTR state->out=0x55555557a400
+PTR state->strm.state=0x55555557c410
+PTR state->strm.next_in=0x5555555cdbaf
+PTR strm->next_in=0x5555555cdbaf
