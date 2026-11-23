@@ -304,8 +304,53 @@ plant-started process, a real command-execution function, a lab-chosen
 benign command with an observed side effect, and vulnerable, fixed,
 safe-input and marker controls. Conditions: ASLR off, exact build,
 measured libc and heap addresses, same-length PATH, and a pre-staged
-command whose name is forced by the heap address. Independent witness
-replay is still required for ESTABLISHED; until then this is a claim, not
-acceptance. The earlier rung-4 ESTABLISHED scope stands; this result does
-not retroactively inflate it.
+command whose name is forced by the heap address and must be a literal
+shell word (the vptr's low byte must not be a shell metacharacter).
+Independent witness replay is recorded below: the forged call reaching
+`system` is ESTABLISHED at this labeled build scope, while the side effect
+is not portable across derived addresses; the 4/4 hash below is valid
+only where that byte is shell-safe. The earlier rung-4 ESTABLISHED scope
+stands; this result does not retroactively inflate it.
+
+## Witness W140 replay of W5 and shell-safety precondition (2026-11-23T04:02Z)
+
+W140 (tape #2157) replayed W5 from a clean git archive with its own plain
+build of the same `633ae02` pin and an ASan fixed control. It independently
+measured libc base `0x7ffff7800000` and `system` offset `0x58750`
+(`endbr64`). Two runs of the then-current `r5_system_verify.sh` derived
+object `0x...c420` (vptr `0x...c428`) in its environment: `vuln+system`
+returned `SERVER_RC=0` with no marker (FAIL 1/4), while `vuln+abort` rc134,
+fixed `E01`, and well-formed `SLEN=16` all passed. Root cause: the vptr low
+byte `0x28` is ASCII `(`, so the forced command name `(\xc4aUUU` is shell
+syntax, not a command; `/bin/sh -c` exits 2 before PATH lookup. My derived
+vptr `0x...c438` has low byte `0x38` (`8`), a literal word the staged
+executable resolves. W140 also broke on libc `system` in a gdb parent on
+its own build: frame 0 `__libc_system` with `rdi` pointing at the object
+string, frame 1 `default_delete<tdesc_feature>`, after which the staged
+command wrote the marker. That confirms the marker came from the forged
+call when the byte is shell-safe, not from an unrelated side effect.
+
+Verdict: the wire-only forged call reaching libc `system` in a live,
+plant-started process is ESTABLISHED at the labeled build scope; the
+side effect is established only under the shell-safe-derived-name
+condition. The old hash `9104b0ec...` and its 4/4 result must not be
+presented as portable. W4's rung-4 ESTABLISHED verdict is unchanged.
+
+Repair in W6: `rsp/r5_system_verify.sh` now checks the derived command
+name against a literal shell-word whitelist and `sh -n -c` (syntax only)
+before phase 2. It prints `SHELL_SAFE` and `COMMAND_HEX`; if the name is
+unsafe it records `vuln-system` as UNSUPPORTED with the observed rc and
+marker rather than a FAIL, still asserts the three other cases, and exits
+3 for an unsupported environment (1 for a real control failure, 0 only
+when all four cases are demonstrated). This makes the precondition an
+explicit outcome instead of an environment-dependent 1/4 surprise.
+Three local runs after the change gave 4 PASS / 0 FAIL / 0 UNSUPPORTED,
+`SHELL_SAFE=1`, name hex `38c461555555`, and the harness's explicit
+`R5_NORMALIZED_HASH` (sha256 of the four client transcripts and four
+marker records in fixed case order)
+`9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`,
+byte-identical to W5's client/marker content. The shell-safety classifier
+was checked directly on `38c461555555` (SAFE 1) and W140's
+`28c461555555` (SAFE 0).
+
 

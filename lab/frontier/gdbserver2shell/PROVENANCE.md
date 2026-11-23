@@ -385,11 +385,51 @@ with `rdi=rbx=object`, `rdx` a constant and `rsi` clobbered by the
 preceding `operator delete`; no argv setup exists, which is why the
 command string is constrained to the vptr bytes rather than freely
 chosen. That constraint is part of the demonstrated condition: the
-command is pre-staged by the lab under a name forced by the heap address.
+command is pre-staged by the lab under a name forced by the heap address,
+and that name must be a literal shell word (W6 below).
 
-Grade: rung 5 demonstrated locally under the recorded conditions —
-ASLR off, exact build, measured libc/heap addresses, same-length PATH,
-pre-staged command. No debugger, no in-process marker function, no
-forced execution. Independent witness replay is still required for
-ESTABLISHED; W4's rung-4 ESTABLISHED verdict is unchanged by this result.
+Grade at W5 was rung 5 demonstrated locally under the recorded
+conditions. Witness disposition is in the W6 section below: the forged
+call reaching libc `system` is ESTABLISHED at the labeled build scope,
+while the command side effect is conditioned on a shell-safe derived
+name; the W5 4/4 hash is not portable. W4's rung-4 ESTABLISHED verdict
+is unchanged by this result.
+
+## Witness W140 replay and shell-safety precondition (W6, 2026-11-23T04:02Z)
+
+W140 (tape #2157) replayed W5 from a clean git archive with its own plain
+build of the same `633ae02` pin and an ASan fixed control. It independently
+measured libc base `0x7ffff7800000` and `system` offset `0x58750`
+(`endbr64`). Two runs of the then-current harness derived object
+`0x...c420`, hence vptr `0x...c428`; `vuln+system` gave `SERVER_RC=0`,
+`MARKER=0` (1/4 FAIL), while `vuln+abort` rc134, fixed `E01`, and safe
+`SLEN=16` all passed. Cause: the vptr's low byte `0x28` is ASCII `(`; the
+forced name `(\xc4aUUU` is shell syntax and `/bin/sh -c` exits 2 before
+PATH lookup. My `0x...c438` gives low byte `0x38` (`8`), a literal word.
+W140 also broke on libc `system` under a gdb parent in its own build:
+frame 0 `__libc_system` with `rdi` at the object string `h\304aUUU`,
+frame 1 `default_delete<tdesc_feature>::operator()`, after which the
+staged command wrote `R5_SYSTEM_MARKER=1`. The marker therefore came from
+the forged call when the byte is shell-safe; the address derivation alone
+does not guarantee a runnable command name.
+
+`rsp/r5_system_verify.sh` now prints `SHELL_SAFE` and `COMMAND_HEX`. The
+derived name is checked against a literal shell-word whitelist (ASCII
+alphanumerics, `_+-.`, or high bytes) and `sh -n -c` for syntax; neither
+check executes the command. An unsafe name makes the `vuln-system` case
+an explicit `UNSUPPORTED` line carrying the observed rc and marker, not a
+FAIL; the other three cases stay strict. Exit codes: 0 all four shown,
+1 a control failure, 3 unsupported environment. Three local replays after
+the change gave 4 PASS / 0 FAIL / 0 UNSUPPORTED each, derived object
+`0x...c430`, vptr `0x...c438`, name hex `38c461555555`, and stable
+client/marker content hash
+`9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`.
+
+The harness now computes that value itself as sha256 of the four
+`r5-system-*.client.out` and four `r5-system-*.marker` files in fixed case
+order (`vuln-system`, `vuln-abort`, `fixed-system`, `vuln-safe`) and prints
+`R5_NORMALIZED_HASH`; a third run with the printed hash matched the W5
+value byte-for-byte.
+The shell-safety classifier was also checked directly on both vptrs:
+`38c461555555` -> SAFE 1, `28c461555555` -> SAFE 0.
 

@@ -17,6 +17,14 @@
 # replaced by a same-length value starting with the lab command directory,
 # keeping the total environment size unchanged within a run.
 #
+# Shell-safety precondition (W6): system() hands the vptr's little-endian
+# bytes to /bin/sh -c, so the derived command name must be a literal shell
+# word.  If the derived vptr byte is a metacharacter (W140 saw 0x28 = '(',
+# which makes /bin/sh -c fail with rc2 before PATH lookup), the harness
+# records vuln-system as UNSUPPORTED rather than FAIL: the forged call is
+# still reached, but no staged command can run under that name.  Exit 3
+# means UNSUPPORTED environment; exit 1 means a real control failure.
+#
 # Controls in phase 2: fixed binary rejects the packet (E01, no marker);
 # well-formed SLEN=16 packet leaves the object intact (no marker);
 # abort@plt gives SIGABRT and no marker, distinguishing a call to system.
@@ -93,8 +101,31 @@ with open(p, "wb") as f:
 os.chmod(p, 0o755)
 PYEOF
 
+# system() runs /bin/sh -c on that exact name.  Require a literal shell word
+# (ASCII letters/digits/_+-. or high bytes, which dash treats as literal),
+# then confirm the syntax parses without executing anything.  W140's vptr
+# low byte 0x28 ('(') fails both and cannot be made to run by staging a file.
+SAFE_RESULT=$($PY - "$VPTR" <<'PYEOF'
+import subprocess, sys
+name = int(sys.argv[1]).to_bytes(8, "little").split(b"\0", 1)[0]
+ok = bool(name) and all(
+    (48 <= b <= 57) or (65 <= b <= 90) or (97 <= b <= 122)
+    or b in b"_+-." or b >= 0x80 for b in name
+)
+if ok:
+    ok = subprocess.run([b"/bin/sh", b"-n", b"-c", name],
+                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL).returncode == 0
+print("%d %s" % (1 if ok else 0, name.hex()))
+PYEOF
+)
+SHELL_SAFE=${SAFE_RESULT%% *}
+NAME_HEX=${SAFE_RESULT#* }
+echo "SHELL_SAFE=$SHELL_SAFE COMMAND_HEX=$NAME_HEX"
+
 # Phase 2: vulnerable system call plus three controls.
 FAIL=0
+UNSUPPORTED=0
 run_case() {
   local tag=$1 bin=$2 payload_hex=$3 expect_rc=$4 expect_marker=$5 slen=${6:-1}
   local log="$E/r5-system-$tag.log" out="$E/r5-system-$tag.client.out"
@@ -104,6 +135,11 @@ run_case() {
   local marker=0
   [ -e "$CMD/marker" ] && marker=1
   { echo "MARKER=$marker"; [ "$marker" = 1 ] && /bin/cat "$CMD/marker"; } > "$E/r5-system-$tag.marker"
+  if [ "$tag" = vuln-system ] && [ "$SHELL_SAFE" != 1 ]; then
+    echo "UNSUPPORTED $tag SERVER_RC=$rc MARKER=$marker COMMAND_HEX=$NAME_HEX shell-unsafe derived name"
+    UNSUPPORTED=$((UNSUPPORTED+1))
+    return
+  fi
   if [ "$rc" = "$expect_rc" ] && [ "$marker" = "$expect_marker" ]; then
     echo "PASS $tag SERVER_RC=$rc MARKER=$marker"
   else
@@ -116,5 +152,14 @@ run_case vuln-abort   "$BIN"   "$(payload "$ABORT_HEX")" 134 0
 run_case fixed-system "$FIXED" "$(payload "$SYSHEX")"    0 0
 run_case vuln-safe    "$BIN"   "$(printf '43%.0s' {1..16})" 0 0 16
 /bin/rm -f "$CMD/marker"
-echo "TOTAL FAIL=$FAIL"
+
+# Explicit content hash: four client transcripts and four marker records in
+# fixed case order.  No addresses or ports appear in these files, so the
+# value is path- and port-independent by construction.
+HASH=$(for t in vuln-system vuln-abort fixed-system vuln-safe; do
+  /bin/cat "$E/r5-system-$t.client.out" "$E/r5-system-$t.marker"
+done | /usr/bin/sha256sum | /usr/bin/cut -d' ' -f1)
+echo "R5_NORMALIZED_HASH=$HASH"
+echo "TOTAL FAIL=$FAIL UNSUPPORTED=$UNSUPPORTED"
+[ "$UNSUPPORTED" -gt 0 ] && exit 3
 exit "$FAIL"
