@@ -1,0 +1,123 @@
+Breakpoint 1 at 0x152ea: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x15408: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 307.
+Function "__libc_free" not defined.
+Breakpoint 3 (__libc_free) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29484
+FREE mem=(nil)
+FREE mem=(nil)
+FREE mem=(nil)
+FREE mem=0x608a7e4fa670
+FREE mem=0x608a7e4fb1d0
+FREE mem=0x608a7e4fb3f0
+FREE mem=0x608a7e4fb3c0
+FREE mem=0x608a7e4fb3f0
+FREE mem=0x608a7e4fb3c0
+FREE mem=0x608a7e4fb3f0
+FREE mem=0x608a7e4fb3c0
+FREE mem=0x608a7e4fb3f0
+FREE mem=0x608a7e4fb3c0
+FREE mem=0x608a7e4fbb70
+PRE ptr=0x608a7e4fb30a sz=312 rbuf=0x608a7e4fb1f0 tbuf=0x608a7e4fb760
+POST rbuf=0x608a7e4fb1f0 target=0x608a7e4fc370
+FREE mem=0x608a7e4fbb70
+PROCESS_REACHED name=attack seqid=1
+FREE mem=0x608a7e4fbd60
+FREE mem=0x608a7e4fbd80
+FREE mem=0x608a7e4fbca0
+FREE mem=0x608a7e4fb110
+FREE mem=0x608a7e4fb190
+FREE mem=0x608a7e4fb0a0
+FREE mem=0x608a7e4fb0f0
+FREE mem=0x608a7e4fb030
+FREE mem=0x608a7e4fb080
+FREE mem=0x608a7e4fbda0
+FREE mem=0x608a7e4fae20
+FREE mem=0x608a7e4fac50
+FREE mem=0x608a7e4fac70
+FREE mem=0x608a7e4fac00
+FREE mem=0x608a7e4fade0
+FREE mem=0x608a7e4fae00
+FREE mem=0x608a7e4fac90
+FREE mem=0x608a7e4fb760
+FREE mem=0x608a7e4fb730
+FREE mem=0x608a7e4fb700
+FREE mem=0x608a7e4fb690
+FREE mem=0x608a7e4fb660
+FREE mem=0x608a7e4fb630
+FREE mem=0x608a7e4fb5c0
+FREE mem=0x608a7e4fb590
+FREE mem=0x608a7e4fb560
+FREE mem=0x608a7e4fb4f0
+FREE mem=0x608a7e4fb4c0
+FREE mem=0x608a7e4fc370
+free(): invalid pointer
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+END
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x0000780f6264527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x0000780f626288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x0000780f626297b6 in __libc_message_impl (fmt=fmt@entry=0x780f627cf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x0000780f626a90b5 in malloc_printerr (str=str@entry=0x780f627cd672 "free(): invalid pointer") at ./malloc/malloc.c:5775
+#7  0x0000780f626ab44c in _int_free (av=<optimized out>, p=<optimized out>, have_lock=0) at ./malloc/malloc.c:4507
+#8  0x0000780f626ade8e in __GI___libc_free (mem=0x608a7e4fc370) at ./malloc/malloc.c:3398
+#9  0x0000608a4322702d in std::__new_allocator<char>::deallocate (__n=<optimized out>, __p=<optimized out>, this=0x608a7e4fb440) at /usr/include/c++/13/bits/new_allocator.h:172
+#10 std::allocator_traits<std::allocator<char> >::deallocate (__n=<optimized out>, __p=<optimized out>, __a=...) at /usr/include/c++/13/bits/alloc_traits.h:517
+#11 std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_destroy (__size=<optimized out>, this=0x608a7e4fb440) at /usr/include/c++/13/bits/basic_string.h:289
+#12 std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose (this=0x608a7e4fb440) at /usr/include/c++/13/bits/basic_string.h:283
+#13 std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::~basic_string (this=0x608a7e4fb440, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/basic_string.h:804
+#14 std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::~pair (this=0x608a7e4fb440, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/stl_pair.h:187
+process 2701215
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x608a43215000     0x608a4321f000     0xa000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-noflush
+      0x608a4321f000     0x608a4324a000    0x2b000     0xa000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-noflush
+      0x608a4324a000     0x608a4325d000    0x13000    0x35000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-noflush
+      0x608a4325d000     0x608a43260000     0x3000    0x48000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-noflush
+      0x608a43260000     0x608a43261000     0x1000    0x4b000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-noflush
+      0x608a7e4e7000     0x608a7e508000    0x21000        0x0  rw-p   [heap]
+      0x780f62600000     0x780f62628000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x780f62628000     0x780f627b1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x780f627b1000     0x780f62800000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x780f62800000     0x780f62804000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x780f62804000     0x780f62806000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x780f62806000     0x780f62813000     0xd000        0x0  rw-p   
+      0x780f62a00000     0x780f62a9d000    0x9d000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x780f62a9d000     0x780f62be5000   0x148000    0x9d000  r-xp   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x780f62be5000     0x780f62c6c000    0x87000   0x1e5000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x780f62c6c000     0x780f62c77000     0xb000   0x26b000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x780f62c77000     0x780f62c7a000     0x3000   0x276000  rw-p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x780f62c7a000     0x780f62c7e000     0x4000        0x0  rw-p   
+      0x780f62d46000     0x780f62d4b000     0x5000        0x0  rw-p   
+      0x780f62d4b000     0x780f62d4f000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x780f62d4f000     0x780f62d73000    0x24000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x780f62d73000     0x780f62d77000     0x4000    0x28000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x780f62d77000     0x780f62d78000     0x1000    0x2b000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x780f62d78000     0x780f62d79000     0x1000    0x2c000  rw-p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x780f62d79000     0x780f62d89000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x780f62d89000     0x780f62e08000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x780f62e08000     0x780f62e60000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x780f62e60000     0x780f62e61000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x780f62e61000     0x780f62e62000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x780f62e62000     0x780f62e64000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x780f62e64000     0x780f62e76000    0x12000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x780f62e76000     0x780f62e7c000     0x6000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x780f62e7c000     0x780f62e7d000     0x1000    0x1a000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x780f62e7d000     0x780f62e7e000     0x1000    0x1b000  rw-p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x780f62e92000     0x780f62e95000     0x3000        0x0  rw-p   
+      0x780f62e95000     0x780f62e96000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x780f62e96000     0x780f62ec1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x780f62ec1000     0x780f62ecb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x780f62ecb000     0x780f62ecd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x780f62ecd000     0x780f62ecf000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffc62666000     0x7ffc62687000    0x21000        0x0  rw-p   [stack]
+      0x7ffc627f6000     0x7ffc627fa000     0x4000        0x0  r--p   [vvar]
+      0x7ffc627fa000     0x7ffc627fc000     0x2000        0x0  r-xp   [vdso]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]

@@ -209,3 +209,92 @@ independent witness verdict. The advisory's `AV:N` vector is demonstrated as
 a loopback wire path in this lab build, not as an externally reachable
 configuration. The fixed build and the safe-input control do not produce the
 chosen-address fault.
+
+## ASLR-on partial pointer overwrite (2026-11-23 W145)
+
+The `kv-ptr14.bin` pointer control embeds whole glibc addresses and therefore
+needs ASLR off. To test whether wire bytes still control a pointer when ASLR
+is on, the copy was made to **end inside** a live `std::string` data pointer:
+the high bytes then remain the process's real heap address and only the low
+two bytes come from the frame. In the four-KV/32-byte-string layout the first
+such pointer is at `rbuf+592`, the copy starts at `rbuf+282`, so a 312-byte
+decompressed payload ends at `rbuf+594`. `make-kv-frame.py --plain-len 312`
+truncates the message, and the string-length field at decompressed offset 21
+is set to 284 so `readMessageBegin()`/the processor still complete. The
+compressed section remains padded to 160 bytes, preserving frame length 442
+and the allocation sizes.
+
+Replays used `gdb-kv-partial.gdb` with `set disable-randomization off`
+(ASLR on) against the committed plain v0.23.0 server on 127.0.0.1:
+
+| Frame | Observed `rbuf` | Observed pointer at `rbuf+592` |
+|---|---|---|
+| `kv-partial-4240.bin`, run 1 | `0x5875888eb0d0` | `0x5875888e4240` |
+| `kv-partial-4240.bin`, run 2 | `0x5f9e4fed20d0` | `0x5f9e4fed4240` |
+| `kv-partial-c3a0.bin` | `0x5d037cc440d0` | `0x5d037cc4c3a0` |
+| `kv-partial-safe.bin` | `0x5d85843e00d0` | `0x5d85843ec370` |
+
+`PROCESS_REACHED name=attack seqid=1` in all four. The high bytes change with
+the randomized heap base while the low 16 bits follow the wire bytes; the
+safe frame preserves the original low word. No absolute address for the
+target pointer is embedded in the frame.
+
+Ceiling of this experiment: every one of these runs later aborts in
+`tcache_get_n` from `malloc(32)`, because the same 312-byte template also
+overwrites two freed 0x30 tcache link fields with address values captured
+from an ASLR-disabled layout. The chosen pointer is therefore **not** yet
+consumed by `free()` with ASLR on; those earlier ASLR-off frames remain the
+only observation of a wire-chosen free argument. This is rung 4 mechanics on
+living bytes, not RCE: no code pointer, return address, command or marker
+side effect.
+
+## ASLR-on pointer control: wire-chosen low word reaches `free()` (2026-11-23 W145)
+
+The previous section's partial-overwrite frames still aborted in
+`malloc(32)` before the destructor: after `PROCESS_REACHED`, the lab server's
+`TFramedTransport::close()` flushes an error response, and the 312-byte copy
+had overwritten two 0x30 tcache link fields with address values captured from
+an ASLR-disabled layout. To isolate the primitive from that teardown write,
+`live-noflush.cpp` (a copy of `live.cpp` plus `SinkTransport`/
+`SinkHeaderFactory` and mode `server-noflush`) discards writes, flushes and
+close; reads and the upstream `THeaderTransport` untransform path are
+unchanged. `live-noflush` is a separate binary; the original `live-plain`
+used for the earlier evidence is untouched. Frame generation and replay:
+
+```sh
+cd lab/frontier/thrift2shell/live
+python3 make-kv-frame.py kv-partial-4240.bin --base kv-ptr14.bin \
+  --plain-len 312 --patch 21=0000011c --patch 310=4042 --pad-compressed 160
+NOFLUSH_SERVER=./live-noflush ./run-kv-noflush.sh \
+  kv-partial-4240.bin gdb-kv-partial.gdb PORT 1
+```
+
+`gdb-kv-partial.gdb` sets `disable-randomization off`, so ASLR is on. The
+frame contains no absolute address for the target pointer: the copy ends at
+`rbuf+594`, inside the 8-byte string pointer at `rbuf+592`, so its high six
+bytes stay the process's heap address and only the low two come from the
+frame (decompressed offsets 310/311). Observed with the vulnerable v0.23.0
+no-flush server:
+
+| Frame | `rbuf` / post-copy pointer | `free()` argument | Result |
+|---|---|---|---|
+| `kv-partial-4240.bin`, run A | `0x5ae70a0a6f..` / `0x5ae70a0a4240` | `0x5ae70a0a4240` | `free(): invalid pointer` |
+| `kv-partial-4240.bin`, run B | `0x6307eaac81f0` / `0x6307eaac4240` | `0x6307eaac4240` | `free(): invalid pointer` |
+| `kv-partial-c3a0.bin` | `0x55a0d6ad11f0` / `0x55a0d6adc3a0` | `0x55a0d6adc3a0` | `free(): invalid pointer` |
+| `kv-partial-safe.bin` | `0x608a7e4fb1f0` / `0x608a7e4fc370` | `0x608a7e4fc370` | original low word |
+
+All four printed `PROCESS_REACHED name=attack seqid=1`. The backtrace for the
+chosen pointer is `__GI___libc_free (mem=0x6307eaac4240)` ← `std::string`
+destructor ← `std::pair` destructor, i.e. the header map's teardown. The high
+bytes change between runs with the randomized heap while the low 16 bits
+follow the wire bytes; the safe frame leaves the original low word. A
+v0.24.0 no-flush control built from the same source and replayed with the
+same frame printed `PROCESS_REACHED`, had no `4240` in its log, and stayed
+alive until the 25-second debugger timeout (`results/kv-noflush-live-noflush-fixed-kv-partial-4240.log`).
+
+This is still rung 4: a wire-chosen **heap pointer** is consumed by `free()`
+with ASLR on, in a lab harness that discards server writes. The low 16 bits
+are chosen; the high bits come from the process. No code pointer, return
+address, ROP, command, marker side effect or witness verdict is present.
+The no-flush harness change is disclosed and affects only teardown writes,
+not the vulnerable read/copy path.

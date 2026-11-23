@@ -88,10 +88,16 @@ lands the copy on live `std::map` nodes and makes attacker-chosen bytes become
 the pointer argument of `free()` in the v0.23.0 server
 (`mem=0x7f4242424240`, and a different value for a different frame); ASan
 still reports `WRITE of size 726` at `:301`, while v0.24.0 and the
-no-chosen-pointer frame do not produce that fault. Rungs 1-4 are now observed
-on living bytes, with pointer control conditional on ASLR-disabled replay
-using exact glibc addresses from this build. Still absent: code-pointer or
-return-address control, ROP, command, marker side effect, witness verdict and
-rung 5. Hand any live-server claim to the witness before upgrading the row;
-do not relabel a controlled heap pointer as execution.
+no-chosen-pointer frame do not produce that fault. Rungs 1-4 are observed
+on living bytes. The earlier pointer control needed ASLR off and exact glibc
+addresses; a later lane (`reports/thrift2shell-livewire.md`, W145) ends the
+copy inside a live string pointer so only its low 16 bits come from the wire.
+With ASLR on and a lab-only no-flush server (writes/flush/close discarded;
+reads and upstream untransform unchanged), `free()` receives the chosen low
+word with the process's randomized high bytes (`0x...4240`, `0x...c3a0` and
+the original `0x...c370` control); the fixed v0.24.0 control stays clean.
+Still absent: code-pointer or return-address control, ROP, command, marker
+side effect, witness verdict and rung 5. Hand any live-server claim to the
+witness before upgrading the row; do not relabel a controlled heap pointer
+as execution.
 

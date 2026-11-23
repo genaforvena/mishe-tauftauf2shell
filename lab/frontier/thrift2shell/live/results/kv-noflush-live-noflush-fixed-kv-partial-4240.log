@@ -1,0 +1,67 @@
+Breakpoint 1 at 0x15072: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.24.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x150bb: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.24.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 307.
+Function "__libc_free" not defined.
+Breakpoint 3 (__libc_free) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29486
+FREE mem=(nil)
+FREE mem=(nil)
+FREE mem=(nil)
+FREE mem=0x5c0f60f8f670
+FREE mem=0x5c0f60f901d0
+FREE mem=0x5c0f60f903f0
+FREE mem=0x5c0f60f903c0
+FREE mem=0x5c0f60f903f0
+FREE mem=0x5c0f60f903c0
+FREE mem=0x5c0f60f903f0
+FREE mem=0x5c0f60f903c0
+FREE mem=0x5c0f60f903f0
+FREE mem=0x5c0f60f903c0
+PRE ptr=0x5c0f60f9030a sz=160 rbuf=0x5c0f60f901f0 tbuf=0x5c0f60f90760
+FREE mem=0x5c0f60f90b70
+FREE mem=0x5c0f60f90b70
+PROCESS_REACHED name=attack seqid=1
+FREE mem=0x5c0f60f90d60
+FREE mem=0x5c0f60f90d80
+FREE mem=0x5c0f60f90ca0
+FREE mem=0x5c0f60f901f0
+FREE mem=0x5c0f60f90110
+FREE mem=0x5c0f60f90190
+FREE mem=0x5c0f60f900a0
+FREE mem=0x5c0f60f900f0
+FREE mem=0x5c0f60f90030
+FREE mem=0x5c0f60f90080
+FREE mem=0x5c0f60f911b0
+FREE mem=0x5c0f60f8fe20
+FREE mem=0x5c0f60f8fc50
+FREE mem=0x5c0f60f8fc70
+FREE mem=0x5c0f60f8fc00
+FREE mem=0x5c0f60f8fde0
+FREE mem=0x5c0f60f8fe00
+FREE mem=0x5c0f60f8fc90
+FREE mem=0x5c0f60f90da0
+FREE mem=0x5c0f60f90730
+FREE mem=0x5c0f60f90700
+FREE mem=0x5c0f60f90690
+FREE mem=0x5c0f60f90660
+FREE mem=0x5c0f60f90630
+FREE mem=0x5c0f60f905c0
+FREE mem=0x5c0f60f90590
+FREE mem=0x5c0f60f90560
+FREE mem=0x5c0f60f904f0
+FREE mem=0x5c0f60f904c0
+FREE mem=0x5c0f60f90490
+FREE mem=0x5c0f60f90420
+FREE mem=0x5c0f60f901d0
+FREE mem=0x5c0f60f8f9f0
+FREE mem=0x5c0f60f90760
+FREE mem=0x5c0f60f8f820
+FREE mem=0x5c0f60f8f840
+FREE mem=0x5c0f60f8f670
+FREE mem=0x5c0f60f8f9b0
+FREE mem=0x5c0f60f8f9d0
+FREE mem=0x5c0f60f8f860
+FREE mem=0x5c0f60f8f7e0
+FREE mem=0x5c0f60f8f800
+FREE mem=0x5c0f60f8f6c0

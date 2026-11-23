@@ -34,6 +34,8 @@ def main() -> None:
     ap.add_argument("--vlen", type=int, default=32, help="value length (>15 forces a heap allocation)")
     ap.add_argument("--patch", action="append", default=[], metavar="OFFSET=HEX",
                     help="replace decompressed bytes at OFFSET with hex bytes")
+    ap.add_argument("--plain-len", type=int, default=0,
+                    help="truncate decompressed payload to this many bytes (0=keep all)")
     ap.add_argument("--pad-compressed", type=int, default=0,
                     help="pad the wire section after the zlib stream to this fixed length")
     args = ap.parse_args()
@@ -42,6 +44,9 @@ def main() -> None:
     assert int.from_bytes(wire[:4], "big") == len(wire) - 4
     header_words = int.from_bytes(wire[12:14], "big")
     plain = bytearray(zlib.decompress(wire[14 + 4 * header_words:]))
+    if args.plain_len:
+        assert 0 < args.plain_len <= len(plain), "plain_len outside payload"
+        plain = plain[:args.plain_len]
 
     for spec in args.patch:
         off_s, hex_s = spec.split("=", 1)

@@ -1,0 +1,97 @@
+Breakpoint 1 at 0x1c000: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x1c11e: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 307.
+Function "__libc_free" not defined.
+Breakpoint 3 (__libc_free) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29463
+FREE mem=(nil)
+FREE mem=(nil)
+FREE mem=(nil)
+FREE mem=0x5d037cc43650
+FREE mem=0x5d037cc440b0
+FREE mem=0x5d037cc442d0
+FREE mem=0x5d037cc442a0
+FREE mem=0x5d037cc442d0
+FREE mem=0x5d037cc442a0
+FREE mem=0x5d037cc442d0
+FREE mem=0x5d037cc442a0
+FREE mem=0x5d037cc442d0
+FREE mem=0x5d037cc442a0
+FREE mem=0x5d037cc44a50
+PRE ptr=0x5d037cc441ea sz=312 rbuf=0x5d037cc440d0 tbuf=0x5d037cc44640
+POST rbuf=0x5d037cc440d0 target=0x5d037cc4c3a0
+FREE mem=0x5d037cc44a50
+PROCESS_REACHED name=attack seqid=1
+FREE mem=0x5d037cc44c40
+FREE mem=0x5d037cc44c60
+FREE mem=0x5d037cc44b80
+malloc(): unaligned tcache chunk detected
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+END
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x0000797f64a4527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x0000797f64a288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x0000797f64a297b6 in __libc_message_impl (fmt=fmt@entry=0x797f64bcf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x0000797f64aa90b5 in malloc_printerr (str=str@entry=0x797f64bd2ed8 "malloc(): unaligned tcache chunk detected") at ./malloc/malloc.c:5775
+#7  0x0000797f64aada2c in tcache_get_n (ep=<optimized out>, tc_idx=<optimized out>) at ./malloc/malloc.c:3183
+#8  tcache_get (tc_idx=<optimized out>) at ./malloc/malloc.c:3199
+#9  __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3320
+#10 0x0000797f64ebb904 in operator new(unsigned long) () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#11 0x0000797f64f6b85b in void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<char*>(char*, char*, std::forward_iterator_tag) () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#12 0x00005d0374241570 in apache::thrift::TException::TException (this=0x5d037cc44c00, message="Called write on non-open socket") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/Thrift.h:87
+#13 0x00005d0374241730 in apache::thrift::transport::TTransportException::TTransportException (this=0x5d037cc44c00, type=apache::thrift::transport::TTransportException::NOT_OPEN, message="Called write on non-open socket") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/TTransportException.h:64
+#14 0x00005d037425a087 in apache::thrift::transport::TSocket::write_partial (this=0x5d037cc436b0, buf=0x5d037cc44c80 "", len=18) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/TSocket.cpp:662
+process 2435344
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x5d0374235000     0x5d037423f000     0xa000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-plain
+      0x5d037423f000     0x5d037426e000    0x2f000     0xa000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-plain
+      0x5d037426e000     0x5d0374285000    0x17000    0x39000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-plain
+      0x5d0374285000     0x5d0374288000     0x3000    0x50000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-plain
+      0x5d0374288000     0x5d0374289000     0x1000    0x53000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-plain
+      0x5d037cc30000     0x5d037cc51000    0x21000        0x0  rw-p   [heap]
+      0x797f64a00000     0x797f64a28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x797f64a28000     0x797f64bb1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x797f64bb1000     0x797f64c00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x797f64c00000     0x797f64c04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x797f64c04000     0x797f64c06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x797f64c06000     0x797f64c13000     0xd000        0x0  rw-p   
+      0x797f64d17000     0x797f64d27000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x797f64d27000     0x797f64da6000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x797f64da6000     0x797f64dfe000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x797f64dfe000     0x797f64dff000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x797f64dff000     0x797f64e00000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x797f64e00000     0x797f64e9d000    0x9d000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x797f64e9d000     0x797f64fe5000   0x148000    0x9d000  r-xp   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x797f64fe5000     0x797f6506c000    0x87000   0x1e5000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x797f6506c000     0x797f65077000     0xb000   0x26b000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x797f65077000     0x797f6507a000     0x3000   0x276000  rw-p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x797f6507a000     0x797f6507e000     0x4000        0x0  rw-p   
+      0x797f650e1000     0x797f650e6000     0x5000        0x0  rw-p   
+      0x797f650e6000     0x797f650ea000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x797f650ea000     0x797f6510e000    0x24000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x797f6510e000     0x797f65112000     0x4000    0x28000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x797f65112000     0x797f65113000     0x1000    0x2b000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x797f65113000     0x797f65114000     0x1000    0x2c000  rw-p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x797f65114000     0x797f65116000     0x2000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x797f65116000     0x797f65128000    0x12000     0x2000  r-xp   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x797f65128000     0x797f6512e000     0x6000    0x14000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x797f6512e000     0x797f6512f000     0x1000    0x1a000  r--p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x797f6512f000     0x797f65130000     0x1000    0x1b000  rw-p   /usr/lib/x86_64-linux-gnu/libz.so.1.3
+      0x797f65144000     0x797f65147000     0x3000        0x0  rw-p   
+      0x797f65147000     0x797f65148000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x797f65148000     0x797f65173000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x797f65173000     0x797f6517d000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x797f6517d000     0x797f6517f000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x797f6517f000     0x797f65181000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffc97686000     0x7ffc976a7000    0x21000        0x0  rw-p   [stack]
+      0x7ffc9777d000     0x7ffc97781000     0x4000        0x0  r--p   [vvar]
+      0x7ffc97781000     0x7ffc97783000     0x2000        0x0  r-xp   [vdso]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]

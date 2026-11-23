@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x1c000: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x1c11e: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 307.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29475
+AT301 ptr=0x5555555bc16a sz=56 tbuf=0x5555555bc580
+0x5555555bc182:	0x60	0xc0	0x01	0x1c	0x9c	0x00	0xca	0x37
+0x5555555bc598:	0x1c	0x41	0x42	0x42	0x42	0x42	0x00	0x00
+AT307 ptr=0x5555555bc16a sz=56 rbuf=0x5555555bc0d0
+0x5555555bc182:	0x1c	0x41	0x42	0x42	0x42	0x42	0x00	0x00

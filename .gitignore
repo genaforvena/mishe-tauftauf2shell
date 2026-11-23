@@ -310,3 +310,5 @@ lab/frontier/thrift2shell/live/live-vuln
 lab/frontier/thrift2shell/live/live-fixed
 lab/frontier/thrift2shell/live/live-plain
 lab/frontier/thrift2shell/live/wire-safe.bin
+lab/frontier/thrift2shell/live/live-noflush
+lab/frontier/thrift2shell/live/live-noflush-fixed
