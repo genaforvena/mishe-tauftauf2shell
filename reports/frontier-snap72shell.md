@@ -65,7 +65,7 @@ caller allocated), returning `errCliInvalidPlcAnswer` before the copy. The
 verbatim from the pinned blob on every run, builds plain and ASan variants with
 gcc and clang, and checks the ladder. Three consecutive runs gave **43 PASS /
 0 FAIL**; normalized trace hash
-`9bd3f964003a04d0c757c1ff06da535b7f35872dff5d3c9277919fa85324678e`.
+`24c8438c85474ab76ade31d8c9d98e1a510f926b4f97cf6ee8948208427eda59`.
 
 - Rung 1: wire `DataLength = 0xFFFF` yields `SLICE=65535` on the octet path and
   `SLICE=8191` on the byte path, against a caller buffer of `MAXDEST=1` —

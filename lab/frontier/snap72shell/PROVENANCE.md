@@ -54,7 +54,7 @@ from the byte-exact vulnerable slice.
 
 `harness/run.sh` asserts every hash above, rebuilds all binaries, runs the
 ladder, and prints a normalized trace hash. Observed 2026-11-23: 43 PASS /
-0 FAIL three consecutive times; `TRACE_SHA256=9bd3f964003a04d0c757c1ff06da535b7f35872dff5d3c9277919fa85324678e`.
+0 FAIL three consecutive times; `TRACE_SHA256=24c8438c85474ab76ade31d8c9d98e1a510f926b4f97cf6ee8948208427eda59`.
 
 ## Negative results preserved
 

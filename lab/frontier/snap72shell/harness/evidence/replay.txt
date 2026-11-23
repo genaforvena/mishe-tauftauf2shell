@@ -41,5 +41,5 @@ PASS fixed-asan-rejects
 PASS safe-vuln-decodes-cleanly
 PASS safe-first-byte-as-sent
 PASS safe-asan-clean
-TRACE_SHA256=71dd2037ab8595d393b999eb29ed63c7f36959b73b52de5ee6ccc6e563b7cef4
+TRACE_SHA256=24c8438c85474ab76ade31d8c9d98e1a510f926b4f97cf6ee8948208427eda59
 PASS=43 FAIL=0
