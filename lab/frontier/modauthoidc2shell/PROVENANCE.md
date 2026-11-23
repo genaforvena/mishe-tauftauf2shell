@@ -216,6 +216,15 @@ write before the 60-second timeout. Non-gdb controls: value-less and
 well-formed cookies both return HTTP 302 on this module. Raw output and
 limits: `full/evidence/plain-oob/README.md` and `plain-oob/{live-plain,detail}.txt`.
 
+`full/probe-plain-second.sh` arms a watchpoint on the corrupted word after the
+store and lets the child accept another loopback connection. The watchpoint
+fires in `libapr-1.so.0` from `apr_socket_accept` → `ap_unixd_accept`
+(`unixd.c:303`) with old value `0x7ffff56000` (the corrupted pointer) and new
+value `0` (`plain-oob/second.txt`). The word is in the connection's `ptrans`
+region near `0x7ffff6de2028`, not a long-lived config object; the next accept
+clears it. No read of the corrupted pointer and no cross-request side effect
+was observed. HTTP codes in that script are timing-dependent under gdb.
+
 In the real-object harness the same pointer-low-byte shape occurs naturally:
 `realobj/probe-oob-target.sh`, `p-vuln read 0`, store `0x7ffff7fbe9d0` is the
 low byte of `0x7ffff7f62e3d` → `"GLIBC_2.38"`; after the store `0x…f62e00` →
@@ -230,5 +239,5 @@ Both are rung 4 scoped and unwitnessed at their live-wire scope. Byte always
 NUL, pointer target not wire-chosen, no consumer read, chosen byte, command
 or rung 5. gdb disables ASLR, so the absolute addresses are lab-layout facts.
 Re-run: `cd full && bash build-plain.sh && bash probe-plain-oob.sh &&
-bash probe-plain-detail.sh`.
+bash probe-plain-detail.sh && bash probe-plain-second.sh`.
 

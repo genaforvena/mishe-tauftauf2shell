@@ -193,6 +193,13 @@ the same shape naturally (`realobj/probe-oob-target.sh`: store at the low
 byte of `0x7ffff7f62e3d` → `"GLIBC_2.38"`, stable over six pool fills; the
 watchpoint again caught only the store).
 
+`probe-plain-second.sh` armed a watchpoint on the corrupted word: the next
+`apr_socket_accept` wrote `0` over it (old value `0x7ffff56000`). The word
+is in the connection's `ptrans` region near `0x7ffff6de2028`, so the
+corruption is connection-scoped; no consumer read or cross-request side
+effect was observed (`plain-oob/second.txt`).
+
+
 This refines W8 rather than replacing it: W8's **in-bounds** store overwrites
 a header-copy `=` chosen by the wire and has no pointer target; W9's
 **out-of-bounds** store in the plain build corrupts a pointer's low byte.

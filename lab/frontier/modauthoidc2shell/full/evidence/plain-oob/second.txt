@@ -1,0 +1,26 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/state.c.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/state.c:219) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so"
+
+Breakpoint 1, oidc_state_cookies_parse_token (last=<optimized out>, first=<optimized out>, currentCookieName=<optimized out>, cookie=0x7ffff6de2221 "=`\365\377\177", c=<optimized out>, r=<optimized out>) at state.c:219
+219		*cookie = '\0';
+FIRST STORE=0x7ffff6de2221 PTR=0x7ffff5603d
+220		cookie++;
+Hardware watchpoint 2: -location *(unsigned long*)cookie
+
+Hardware watchpoint 2: -location *(unsigned long*)cookie
+
+Old value = 549755117568
+New value = 0
+0x00007ffff77e3ef3 in ?? () from /lib/x86_64-linux-gnu/libapr-1.so.0
+WATCH STOP PC=óH«H‰V I‹$H‹P H‰Ç@<
+#0  0x00007ffff77e3ef3 in ?? () from /lib/x86_64-linux-gnu/libapr-1.so.0
+#1  0x00007ffff77e6fcb in apr_socket_accept () from /lib/x86_64-linux-gnu/libapr-1.so.0
+#2  0x00005555556d2177 in ap_unixd_accept (accepted=<optimized out>, lr=0x7ffff6f2ede0, ptrans=0x7ffff6de2028) at unixd.c:303
+#3  0x00005555556cdf64 in child_main (child_num_arg=child_num_arg@entry=0, child_bucket=child_bucket@entry=0) at prefork.c:645
+#4  0x00005555556ce6c3 in make_child (s=0x7ffff6f2a388, slot=slot@entry=0) at prefork.c:705
+#5  0x00005555556cedaf in prefork_run (_pconf=<optimized out>, plog=0x7ffff6f26028, s=0x7ffff6f2a388) at prefork.c:922
+#6  0x000055555561dd28 in ap_run_mpm (pconf=pconf@entry=0x7ffff7616028, plog=0x7ffff6f26028, s=0x7ffff6f2a388) at mpm_common.c:95
+#7  0x0000555555608dba in main (argc=<optimized out>, argv=<optimized out>) at main.c:843

@@ -58,4 +58,19 @@ the child at the breakpoint.
   observed on a live pre-auth wire path, unwitnessed at that scope.
 
 Replay: `cd lab/frontier/modauthoidc2shell/full && bash build-plain.sh &&
-bash probe-plain-oob.sh && bash probe-plain-detail.sh`.
+bash probe-plain-oob.sh && bash probe-plain-detail.sh &&
+bash probe-plain-second.sh`.
+
+## Second-request check (2026-11-23 W9)
+
+`bash probe-plain-second.sh` arms a hardware watchpoint on the corrupted word
+after the store and lets the pre-fork child accept another loopback request.
+The watchpoint fires inside `libapr-1.so.0` from `apr_socket_accept` →
+`ap_unixd_accept` (`unixd.c:303`), with old value `0x7ffff56000` (exactly the
+pointer produced by the NUL store) and new value `0` (`second.txt`). The
+corrupted word belongs to the connection's `ptrans` region near
+`0x7ffff6de2028`, not to a long-lived config object; the next accept clears
+it. No read of the corrupted pointer was observed, and no cross-request side
+effect was measured. HTTP codes in that script are timing-dependent because
+gdb stops the child; use the non-gdb controls above for request outcomes.
+
