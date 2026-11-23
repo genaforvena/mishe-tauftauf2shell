@@ -453,3 +453,19 @@ in a separate allocation (`0x5555555fd5d0`) that is not overwritten, but the
 earlier W129 attempt to edit its `arr_count`/`arr` in place aborted in glibc
 metadata. No rung-5 claim.
 
+Second bounded refinement (same wake, `harness/wire8.py`,
+`harness/gdb-argchunk.cmd`, logs `argchunk-*.log`): keep the real `session->mem`
+object and use the write primitive to set `type=0, arr_count=1,
+arr=cmd_argp[12]` at `m+8`, where `cmd_argp[12]` is a valid `calloc` chunk whose
+first bytes were intended to carry `{system, cmd_addr, "touch ..."}`. The write
+landed exactly as designed — at `mem_destroy()` entry the live object read
+`type=0 count=1 arr=0x5555555fe440` — but the indirect call faulted because
+the `arr` chunk held heap-pointer bytes, not the intended values. A dump at
+`author.c:149` shows the prime pattern at `in+1156` already overwritten by
+`0x5555…` memlist pointer arrays by the time `cmd_argp` is populated; the
+region is consumed by daemon allocations between `eval_args` (`author.c:141`,
+where the pattern is intact) and the argument-string loop. Together with the
+reply-overwrite finding, this closes the practical fake-`mem_t` staging route
+in the reused `in` chunk on this build/config. Grade unchanged: rung 4 live
+daemon, rung 5 UNKNOWN; no chosen function call, marker or command.
+
