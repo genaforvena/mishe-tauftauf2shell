@@ -1,0 +1,5 @@
+cmake_minimum_required (VERSION 3.16)
+project (oiio_flat_consumer LANGUAGES CXX)
+find_package (OpenImageIO REQUIRED)
+add_executable (oiio_flat_consumer oiio_flat_consumer.cpp)
+target_link_libraries (oiio_flat_consumer PRIVATE OpenImageIO::OpenImageIO)

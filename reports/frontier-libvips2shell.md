@@ -316,3 +316,32 @@ alternative was not measured ([INFERENCE] from the pinned buffer sizing).
 
 Ceiling unchanged: rungs 1-4. No wire, request, command, marker side effect
 or witness verdict for this path; rung 5 remains UNKNOWN.
+
+## 13. W9 addendum — app-supplied buffer reaches the write under the W8 cap
+
+W8 measured a 2 GiB wake-cgroup limit that blocks libvips's own eager
+zero-fill of a multi-GB region buffer. That limit is not a limit on a buffer
+the application supplies: `real/external.c` reserves an 8.6 GB anonymous
+`PROT_NONE MAP_NORESERVE` mapping, makes only a 64 KiB victim block and 64
+pages at the image area writable, and passes the pointer to the public
+`vips_image_new_from_memory()` with the TIFF-accepted geometry.
+
+- Vulnerable plain tree: `IMAGE_OK sizeof_line=4294960000 sizeof_image=8589920000`,
+  `PAINT_PREPARE=0 bpl=-7296`, `PAINT_ADDR1=data-7296`, `PAINT_DONE`, and
+  `VICTIM_POST off=58272 byte0=5a byte1=5a before=11 after_end=5a`. Chosen
+  bytes reach a mapped neighbour at the chosen offset without allocating or
+  zero-filling more than ~200 KiB (`external-vuln.out`).
+- Fixed tree: `image: dimension overflow`, no paint, no neighbour write
+  (`external-fixed.out`).
+- A negative `int bpl` requires a scanline in `(INT_MAX, 2^32)`, so the
+  smallest truncatable line is exactly 2 GiB and a two-line image needs at
+  least 4 GiB. No TIFF geometry can place a libvips-owned truncatable line
+  below this cgroup's cap; W8's negative result survives only for
+  libvips-owned allocations.
+- `real/run-external.sh`: 12/12 anchored assertions PASS, rc 0. Details and
+  the implementation mistake found on the first run are in `PROVENANCE.md`
+  §W9.
+
+Grade unchanged: rungs 1-4. The neighbour is explicit grooming and holds
+anonymous bytes; no pointer target, control-flow datum, wire/request input,
+command or marker side effect. Rung 5 remains UNKNOWN.

@@ -1,0 +1,8 @@
+RESERVE base=0x7d1ac001f000 data=0x7d1ac002f020 victim=0x7d1ac001f000 off=58272 pre=11 image=8589920000 line=4294960000
+IMAGE_OK sizeof_line=4294960000 sizeof_image=8589920000 data=0x7d1ac002f020
+PAINT_PREPARE=0 bpl=-7296 lskip=18446744073709544320
+PAINT_ADDR1=0x7d1ac002d3a0
+PAINT_DONE
+VICTIM_POST off=58272 byte0=5a byte1=5a before=11 after_end=5a
+memory: high-water mark 0 bytes
+RUN_RC=0

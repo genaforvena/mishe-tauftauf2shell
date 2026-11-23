@@ -1,0 +1,5 @@
+RESERVE base=0x75435a8e2000 data=0x75435a8f2020 victim=0x75435a8e2000 off=58272 pre=11 image=8589920000 line=4294960000
+IMAGE=ERR msg=image: dimension overflow
+
+
+RUN_RC=0

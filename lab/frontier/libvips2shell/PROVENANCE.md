@@ -429,3 +429,39 @@ files extracted, no build tree needed) returned `CLEAN_ARCHIVE_RC=0` and
 checks were also rerun after the documentation change: `run-consumer.sh`
 21/21 PASS and `run-neighbour.sh` 14/14 PASS, both rc 0; their evidence
 outputs were restored to the committed bytes after the run.
+
+## W9 — application-supplied buffer bypasses the W8 zero-fill limit (2026-11-23)
+
+W8's cgroup conclusion covered only libvips-owned allocations. A negative
+`int bpl` requires a 64-bit scanline in `(INT_MAX, 2^32)`; the smallest such
+line is `2^31 = 2147483648` bytes and a two-line image needs at least twice
+that, so no geometry tuning can put a libvips-owned truncatable line under the
+2 GiB cap. An application-supplied buffer need not be eagerly zero-filled:
+
+- `real/external.c` reserves an 8.6 GB anonymous `PROT_NONE MAP_NORESERVE`
+  mapping, makes only a 64 KiB victim block and 64 pages at the image area
+  writable, and passes that pointer to `vips_image_new_from_memory()` with the
+  TIFF-accepted geometry (`107374 x 2 x 10000` uint32). No
+  `vips_tracked_aligned_alloc()` and no multi-GB `memset` occur.
+- Vulnerable plain tree: `IMAGE_OK sizeof_line=4294960000
+  sizeof_image=8589920000`, `PAINT_PREPARE=0 bpl=-7296`, `PAINT_ADDR1=data-7296`,
+  then `PAINT_DONE` and `VICTIM_POST off=58272 byte0=5a byte1=5a before=11
+  after_end=5a`. The chosen ink reaches a mapped neighbour at the chosen
+  offset inside the 2 GiB wake cap. Output: `real/external-vuln.out`.
+- Fixed plain tree: `IMAGE=ERR msg=image: dimension overflow`, no `PAINT_DONE`,
+  no `VICTIM_POST`, victim remains `0x11` (`real/external-fixed.out`).
+- First run of the probe segfaulted in `memset` at the first page after the
+  victim: `mprotect()` length had been passed as 64 *bytes* instead of 64
+  pages. The runner assertions caught it; the fixed length is
+  `DATA_PAGES * 4096`. A gdb parent-launch backtrace
+  (`vips_region_paint ... region.c:922` → `__memset_avx2_unaligned_erms`)
+  located that implementation bug before the correction. No libvips change
+  was made in response.
+- `real/run-external.sh`: 12/12 anchored assertions PASS, rc 0, in-tree.
+
+Disposition: W8 is narrowed, not overturned. A libvips-owned allocation of a
+truncatable line still cannot complete under this cgroup; an application that
+supplies a lazily backed image buffer can still reach the same rung-4
+negative write. The victim is explicit grooming and holds anonymous bytes —
+no pointer, control-flow datum, wire/request input, command or marker side
+effect. Grade unchanged: rungs 1-4; rung 5 UNKNOWN.
