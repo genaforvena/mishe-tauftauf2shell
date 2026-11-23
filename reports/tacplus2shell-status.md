@@ -402,3 +402,36 @@ registrations on realm/global mem (`config.c:4582,4591,5235,5250`). No such
 config was exercised here; this is a measured limit of the current lab
 setup, not a claim about other configurations. Verdict unchanged: rung 4 at
 live-daemon scope, rung 5 UNKNOWN.
+
+## W134 fake `mem_t` pointer replacement — bounded negative (2026-11-23 00:5xZ)
+
+Staged plan correction: `session->mem = mem_create(M_LIST)` at `packet.c:1264`
+is a fresh empty mem. `time`/`timespec` on user `demo` registers a destructor on
+`user->mem` (`config.c:3622`), destroyed only at config teardown
+(`config.c:2348`); in tac_plus-ng `mem_destroy()` runs on `session->mem`
+(`packet.c:1326`), `ctx->mem` (`main.c:483`) and config objects. Under the lab
+config, a config-side destructor registration is therefore the wrong target.
+
+New hypothesis tested: use the W129 `t`-slot write-what-where to replace the
+`session->mem` *pointer field* with a fully fake `mem_t` in surviving prime
+plaintext. Measured under gdb (ASLR off, plain `929671c`, `in=0x5555555fda20`):
+`&session->mem=in+0xa8=0x5555555fdac8`, `__libc_system=0x7ffff7c58750`. New
+local harness `wire7.py` places a 32-byte fake `mem_t` at `in+1356`
+(`{u.list=0,type=0,arr_count=1,arr=in+1388}`), `arr[0]={system,in+1404}` and
+`in+1404="touch /tmp/tacplus-rce-marker\0"`; the W129 transit/i=13/i=14 records
+write the fake address into `&session->mem`. Live result: the write landed —
+at `cleanup_session()` (`packet.c:1326`) `session->mem=0x5555555fdf6c`, the
+fake address — and `mem_destroy()` was entered with that pointer. Byte dumps
+at `author.c:141` show the fake `mem_t`, `arr[0].f` and `arr[0].p` correct.
+Execution then faulted in libmavis `mem_destroy` at the destructor loop
+(`memops.c:247`, libmavis+0x1524e) before the indirect call completed. No
+`system()` call with the chosen string, no marker file, no command side effect.
+
+Controls: fixed `d8493e0` with identical wire input never enters `eval_args`,
+replies 57 bytes, `session->mem` unchanged, no marker; vulnerable with no prime
+has no chosen source, no fake write, no marker. Raw logs
+`harness/fakemem-*.log` and the new probe files are local-only evidence.
+Verdict unchanged: rung 4 ESTABLISHED at labeled live-daemon scope, rung 5
+UNKNOWN. The pointer write is new rung-4 mechanics (a chosen heap address
+carrying a chosen fake object), still fixed only by gdb-disabled ASLR.
+
