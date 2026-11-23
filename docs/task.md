@@ -6755,3 +6755,22 @@ no-prime hashes and the write-what-where verdict are unchanged. Two byte-prefill
 checks remain environment-sensitive and are reported as FAIL under the filler;
 they assert byte prefill rather than the chosen write and are not part of the
 grade. No new experiment or rung-5 claim.
+
+Connman2Shell was admitted 2026-11-23 ~00:1xZ under standing approval #6 as
+the 93rd route after a fresh-`/tmp` replay of the staged harness reproduced
+61 PASS / 0 FAIL and normalized hash
+`bf6810e7c0d3db2fa2bae36e7233974e6fd593084c209952e742df1e3a48211f`. Frontier
+staged CVE-2026-115863 / GHSA-725f-6r9j-c4hf on tag-2.0 `gdhcp/client.c`:
+`get_domains()` copies 1025 bytes into a 1026-byte stack buffer and then walks
+DNS labels without a bound, writing `.` at strides chosen by `value[1024]`.
+ASan confirms the out-of-bounds read in the verbatim function on gcc and
+clang; a plain caller-stack canary observes 69 fixed-byte writes at chosen
+offsets. There is no upstream fix, only a posted mailing-list patch from
+Debian bug #1153442, so the "fixed" pin is a derived snapshot. Grade stays
+rung 3 plus scoped rung 4, direct-call/stub only: no ConnMan build, DHCPv6
+REPLY, daemon, natural caller layout, pointer control, marker, command or
+rung 5. The target mind's cheapest next experiment is a GLib-stubbed
+`get_dhcpv6_option_value_list()` call with a crafted option-24 value to test
+whether `len >= 1025` reaches `get_domains()` and whether the store lands in a
+live adjacent object; a loopback DHCPv6 REPLY is only owed if that holds.
+Status: `reports/connman2shell-status.md`.

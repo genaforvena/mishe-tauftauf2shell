@@ -2174,3 +2174,43 @@ frontier's live window; none of that changes the grade.
   verdict are unaffected. Two byte-prefill checks remain environment-sensitive
   and report FAIL under the filler; they are byte-prefill assertions, not the
   write proof. Replay: `bash lab/frontier/tacplus2shell/harness/run_ptr.sh`.
+
+## Admitted frontier lane — 2026-11-23 00:1xZ connman2shell
+
+Frontier staged CVE-2026-115863 / GHSA-725f-6r9j-c4hf at 23:53–23:55Z with
+brief `reports/frontier-connman2shell.md`; tag-2.0 `gdhcp/client.c`, the derived
+fixed snapshot and Andrei Miu's mailing-list fix patch are SHA-256-pinned in
+`lab/frontier/connman2shell/PROVENANCE.md`. There is no tagged upstream fix:
+the fixed snapshot is tag 2.0 plus the posted hunk from Debian bug #1153442.
+All inputs are local; the harness opens no socket and starts no daemon.
+
+From the repository root, replay from an isolated copy so the staged evidence
+directory is untouched:
+
+```sh
+T=$(mktemp -d /tmp/connman-replay.XXXXXX)
+cp -a lab/frontier/connman2shell "$T/lane"
+bash "$T/lane/harness/run.sh"
+```
+
+`run.sh` re-extracts `get_domains()` from both pinned sources with
+`sed -n '/^static GList \*get_domains/,/^}/p'`, asserts six SHA-256 pins (three
+full files and both verbatim function slices plus the driver), then builds gcc
+13.3.0 and clang 18.1.3 ASan variants and a plain stack-canary variant. Expect
+rc 0, `SUMMARY=61 PASS / 0 FAIL` and
+`NORMALIZED_HASH=bf6810e7c0d3db2fa2bae36e7233974e6fd593084c209952e742df1e3a48211f`
+over `harness/evidence/*.out` after address/path normalization. The operator
+observed exactly those values at admission on 2026-11-23 from a fresh `/tmp`
+copy, matching frontier's clean-archive replay; no witness verdict exists yet.
+
+Expected bytes: crafted DOMAIN_LIST is 2048 bytes of `0xff` except
+`value[1024] = K`; the vulnerable ASan runs report
+`ERROR: AddressSanitizer: stack-buffer-overflow`, `READ of size 1`, top frame
+`get_domains`, `dns_name` at gcc frame `[48,1074)`, with access offsets
+1089/1105/1137/1201 for K=0x10/0x20/0x40/0x80 (delta `K-1`) and clang K=0x80
+delta 127. The plain build reports `CANARY DOTS=69 FIRST=49 LAST=16301`,
+observing the store half. The fixed snapshot returns `RC=0 LIST_LEN=256` on
+the same attack input and the safe DOMAIN_LIST returns `RC=0 LIST_LEN=1` on
+both pins with no ASan report. The write byte is fixed `.`; no pointer,
+marker, command or rung 5 is claimed. Status:
+`reports/connman2shell-status.md`.
