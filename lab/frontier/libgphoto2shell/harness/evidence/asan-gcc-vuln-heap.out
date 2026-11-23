@@ -1,15 +1,15 @@
 =================================================================
-==2391974==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ed3d9604080 at pc 0x7ed3db2fae26 bp 0x7ffe4560c390 sp 0x7ffe4560bb38
-READ of size 16848 at 0x7ed3d9604080 thread T0
-    #0 0x7ed3db2fae25 in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
-    #1 0x56a9ab57d396 in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:154
-    #2 0x56a9ab57e5ca in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/driver-tail.c:27
-    #3 0x7ed3dae2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x7ed3dae2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x56a9ab57c3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/gcc-vuln-asan+0x23c4) (BuildId: 3993af0969becfe0febd677f3bfba2cdd9343e3a)
+==3030383==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x786049004080 at pc 0x78604acfae26 bp 0x7ffe3694c0d0 sp 0x7ffe3694b878
+READ of size 16848 at 0x786049004080 thread T0
+    #0 0x78604acfae25 in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
+    #1 0x64fad6792396 in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:154
+    #2 0x64fad67935ca in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/driver-tail.c:27
+    #3 0x78604a82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x78604a82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x64fad67913c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/gcc-vuln-asan+0x23c4) (BuildId: 3993af0969becfe0febd677f3bfba2cdd9343e3a)
 
-Address 0x7ed3d9604080 is located in stack of thread T0 at offset 16512 in frame
-    #0 0x56a9ab57c7f9 in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:47
+Address 0x786049004080 is located in stack of thread T0 at offset 16512 in frame
+    #0 0x64fad67917f9 in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:47
 
   This frame has 3 object(s):
     [48, 49) 'response' (line 48)
@@ -19,17 +19,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98 in memmove
 Shadow bytes around the buggy address:
-  0x7ed3d9603e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ed3d9603e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ed3d9603f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ed3d9603f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ed3d9604000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x7ed3d9604080:[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7ed3d9604100: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7ed3d9604180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ed3d9604200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ed3d9604280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ed3d9604300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049003e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049003e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049003f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049003f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049004000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x786049004080:[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x786049004100: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x786049004180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049004200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049004280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x786049004300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -49,5 +49,5 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==2391974==ABORTING
+==3030383==ABORTING
 EXIT=1

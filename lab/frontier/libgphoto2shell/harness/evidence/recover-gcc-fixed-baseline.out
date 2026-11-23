@@ -1,0 +1,2 @@
+scenario=baseline variant=fixed count=100 rc=0 table_seen=1 big_seen=1 big_n=1536 seq1=16
+EXIT=0

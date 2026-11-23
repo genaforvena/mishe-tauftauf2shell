@@ -142,8 +142,13 @@ gen_driver fixed
 build() { # cc variant mode
     cc=$1; v=$2; mode=$3
     defs="-DVULN_BUILD=$([ "$v" = vuln ] && echo 1 || echo 0)"
-    if [ "$mode" = asan ]; then
+    if [ "$mode" = asan ] || [ "$mode" = recover ]; then
         defs="$defs -DASAN_BUILD=1 -fsanitize=address"
+    fi
+    # Recover mode lets both memmove range checks report: default ASan aborts
+    # on the source over-read before the heap destination check runs.
+    if [ "$mode" = recover ]; then
+        defs="$defs -fsanitize-recover=address"
     fi
     # shellcheck disable=SC2086
     "$cc" -O0 -g -fno-omit-frame-pointer -std=gnu11 $defs \
@@ -152,9 +157,9 @@ build() { # cc variant mode
 
 for cc in gcc clang; do
     for v in vuln fixed; do
-        for mode in plain asan; do
+        for mode in plain asan recover; do
             build "$cc" "$v" "$mode"
         done
     done
 done
-printf 'built 8 binaries in %s\n' "$HERE"
+printf 'built 12 binaries in %s\n' "$HERE"

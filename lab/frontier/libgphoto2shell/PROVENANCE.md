@@ -53,9 +53,12 @@ pinned `.c` includes it by quoted path.
 
 ## Harness scope — declared stubs
 
-`harness/run.sh` generates `driver-{vuln,fixed}.c` and builds eight binaries
-(gcc/clang x vuln/fixed x plain/ASan). Pinned source is included verbatim
-under `#line`; everything else is declared stub code:
+`harness/run.sh` generates `driver-{vuln,fixed}.c` and builds twelve binaries
+(gcc/clang x vuln/fixed x plain/ASan/recover). Recover mode adds
+`-fsanitize-recover=address` and is run with
+`ASAN_OPTIONS=detect_leaks=0:halt_on_error=0`; it changes only instrumentation,
+not the emulated device or pinned source.
+Pinned source is included verbatim under `#line`; everything else is declared stub code:
 
 - `config.h`, `gphoto2/gphoto2.h`, `gphoto2/gphoto2-port.h`,
   `libgphoto2/gphoto2-endian.h` under `harness/stubs/` — types and constants
@@ -79,11 +82,15 @@ destination stays out of bounds), `max` (65535, used only for layout probes).
 
 ## Observed evidence
 
-`harness/check.sh`: 24 invocations plus gdb probes; `92 PASS / 0 FAIL` on
-three consecutive runs, trace
-`e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`. Raw
-outputs in `harness/evidence/`. Clean git-archive replay at `0e10c83`: 51
-files, 4/4 pins OK, 92 PASS/0 FAIL and the same trace (`REPLAY.md`).
+`harness/check.sh`: 36 invocations plus gdb probes; this wake's run is
+`146 PASS / 0 FAIL`, trace
+`e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98` (unchanged
+because the trace covers plain/ASan only). Raw outputs in
+`harness/evidence/`, including `recover-*.out`. The pre-recover check ran
+`92 PASS / 0 FAIL` on three consecutive runs with the same trace. Clean
+git-archive replay at `0e10c83`: 51 files, 4/4 pins OK, 92 PASS/0 FAIL and
+that trace (older harness bytes; see `REPLAY.md`).
+
 
 - Rung 1: vulnerable baseline returns `rc=0`, `big_n=1536`, one table block
   and 16 single-byte device replies; attack requests `big_n=16384`.
@@ -91,10 +98,18 @@ files, 4/4 pins OK, 92 PASS/0 FAIL and the same trace (`REPLAY.md`).
   the oversized read (`big_seen=0`), no ASan report.
 - Rung 3: gcc and clang ASan on `attack` report
   `ERROR: AddressSanitizer: stack-buffer-overflow`, `WRITE of size 16384`,
-  at pinned `jl2005c.c.vuln:152`. Neither ASan run reaches the heap write:
-  on `heap`, the first report is a `READ of size 16848` from `info+0x30` at
-  pinned `:154`, i.e. the source over-read aborts before the destination
-  write is reported. That is a preserved negative, not a heap ASan pass.
+  at pinned `jl2005c.c.vuln:152`. Default-mode ASan on `heap` aborts on the
+  source over-read (`READ of size 16848` at pinned `:154`) before the
+  destination check. Recover-mode ASan on `heap` reports both checks inside
+  the real libc `memmove` interceptor: the source over-read at pinned `:154`
+  and `ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size 16848`,
+  with the address `0 bytes after 16448-byte region`, frame at pinned
+  `jl2005c.c.vuln:154`, and `scenario=heap ... rc=0` (recoverable errors do
+  not abort). This is the heap destination ASan confirmation that default
+  abort mode masked; it uses the pinned source and real memmove, not a
+  custom destination-first copy or synthetic write. Fixed recover builds
+  return `rc=-3` with no ASan report. Recover-mode `attack` also reports the
+  stack write at `:152`, the source over-read and the heap write.
 - Rung 4 (plain, gdb): at pinned `:155`, `x/8xb info+0x4020` and
   `x/8xb g_priv->table+0x4000` both show eight chosen `0x5a` bytes — exact
   offsets 24 bytes past the stack buffer and 0 bytes past the heap array.

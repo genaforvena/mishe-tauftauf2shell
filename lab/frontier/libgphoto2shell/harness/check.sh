@@ -1,7 +1,8 @@
 #!/bin/sh
 # Deterministic assertions + normalized trace for libgphoto2shell.
-# 24 invocations (gcc/clang x vuln/fixed x plain/asan x baseline/attack/heap)
-# plus three gdb chosen-byte probes. Trace excludes PID, addresses and paths.
+# 36 invocations (gcc/clang x vuln/fixed x plain/asan/recover x
+# baseline/attack/heap) plus three gdb chosen-byte probes. Trace covers only
+# plain/asan and excludes PID, addresses and paths.
 set -eu
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 OUT="$HERE/evidence"
@@ -21,11 +22,15 @@ absent() { # file forbidden-substring label
 run_all() {
     for cc in gcc clang; do
         for v in vuln fixed; do
-            for mode in plain asan; do
+            for mode in plain asan recover; do
                 for sc in baseline attack heap; do
                     f="$OUT/$mode-$cc-$v-$sc.out"
                     set +e
-                    ASAN_OPTIONS=detect_leaks=0 "$HERE/$cc-$v-$mode" "$sc" > "$f" 2>&1
+                    if [ "$mode" = recover ]; then
+                        ASAN_OPTIONS=detect_leaks=0:halt_on_error=0 "$HERE/$cc-$v-$mode" "$sc" > "$f" 2>&1
+                    else
+                        ASAN_OPTIONS=detect_leaks=0 "$HERE/$cc-$v-$mode" "$sc" > "$f" 2>&1
+                    fi
                     rc=$?
                     set -e
                     printf 'EXIT=%d\n' "$rc" >> "$f"
@@ -38,7 +43,7 @@ run_all
 
 for cc in gcc clang; do
   for v in vuln fixed; do
-    for mode in plain asan; do
+    for mode in plain asan recover; do
       for sc in baseline attack heap; do
         f="$OUT/$mode-$cc-$v-$sc.out"; tag="$mode-$cc-$v-$sc"
         if [ "$sc" = baseline ]; then
@@ -81,6 +86,25 @@ for cc in gcc clang; do
     expect "$f" 'READ of size 16848' "asan-$cc-heap"
     expect "$f" 'jl2005c.c.vuln:154' "asan-$cc-heap"
     expect "$f" 'EXIT=1' "asan-$cc-heap"
+done
+
+# Recover-mode ASan reaches the memmove destination check after the source
+# over-read aborts default ASan. The real libc memmove interceptor reports a
+# heap write 0 bytes past the 16448-byte calloc region at pinned :154.
+for cc in gcc clang; do
+    f="$OUT/recover-$cc-vuln-heap.out"; tag="recover-$cc-heap"
+    expect "$f" 'ERROR: AddressSanitizer: stack-buffer-overflow' "$tag"
+    expect "$f" 'READ of size 16848' "$tag"
+    expect "$f" 'ERROR: AddressSanitizer: heap-buffer-overflow' "$tag"
+    expect "$f" 'WRITE of size 16848' "$tag"
+    expect "$f" '0 bytes after 16448-byte region' "$tag"
+    expect "$f" 'jl2005c.c.vuln:154' "$tag"
+    expect "$f" 'scenario=heap' "$tag"
+    expect "$f" 'EXIT=0' "$tag"
+    f="$OUT/recover-$cc-vuln-attack.out"
+    expect "$f" 'WRITE of size 16384' "recover-$cc-attack"
+    expect "$f" 'heap-buffer-overflow' "recover-$cc-attack"
+    expect "$f" 'EXIT=0' "recover-$cc-attack"
 done
 
 # gdb chosen-byte probes, plain builds.

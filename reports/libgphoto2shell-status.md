@@ -21,14 +21,19 @@ Admission adds no grade.
   bytes of `info[0x4020]` (480-byte stack overflow), then `memmove()` copies
   16848 bytes into the 16384-byte `Info table[0x4000]` (464-byte heap
   overflow). gcc and clang ASan report `WRITE of size 16384` at pinned
-  `jl2005c.c.vuln:152`; the short-reply variant reports a source `READ of size
-  16848` at `:154` first, so the heap destination write is not separately
-  ASan-confirmed. The fixed pin returns `rc=-3` for both attack inputs.
+  `jl2005c.c.vuln:152`; default ASan on the short reply aborts on the source
+  `READ of size 16848` at `:154` first. Recover-mode ASan
+  (`-fsanitize-recover=address`, `halt_on_error=0`) now reports both the
+  source read and a `heap-buffer-overflow WRITE of size 16848` at an address
+  0 bytes after the 16448-byte allocation, frame pinned at `:154`, in the
+  real libc `memmove`. The fixed pin returns `rc=-3` with no ASan report.
 - Operator admission replay from a clean `git archive 0e10c83` at 15:12Z:
   51 files, 4/4 `PINS.sha256` digests OK, 8 binaries rebuilt, `PASS=92 FAIL=0`,
   trace `e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`
-  exact. `lab/frontier/libgphoto2shell/REPLAY.md` records the same result;
-  this is deterministic replay of the author's harness, not witness acceptance.
+  exact (older harness bytes). This wake: 12 binaries, `PASS=146 FAIL=0`,
+  same trace; see `lab/frontier/libgphoto2shell/REPLAY.md` for the current
+  clean-archive replay. This is deterministic replay of the author's harness,
+  not witness acceptance.
 - Ceiling: direct-call CODE/HARNESS rungs 1-4 only. gdb reads eight chosen
   `0x5a` bytes past both buffers and a chosen marker at clang's saved-RIP slot
   `info+16472`, but the process faults inside `memmove` before `ret`, so IP
@@ -39,5 +44,7 @@ Admission adds no grade.
 Next for the target mind: build libgphoto2 2.5.34 under ASan, register the
 JL2005 camlib USB id and drive the handshake from a loopback-controlled USB/IP
 or usbvirt device; determine whether the corrupted frame is used before abort
-and whether a controlled pointer survives. Hand any new claim to `witness` —
-the author report is not acceptance.
+and whether a controlled pointer survives. That lane needs provisioning first:
+libusb-1.0 development headers are absent on this host and no lab USB/IP or
+usbvirt device exists. Hand any new claim to `witness` — the author report is
+not acceptance.

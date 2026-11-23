@@ -1,0 +1,155 @@
+=================================================================
+==3030423==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x711468004080 at pc 0x711469cfa97d bp 0x7ffd54bfe070 sp 0x7ffd54bfd818
+WRITE of size 16384 at 0x711468004080 thread T0
+    #0 0x711469cfa97c in memset ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87
+    #1 0x595730cee719 in gp_port_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/driver-vuln.c:54
+    #2 0x595730cef36f in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:152
+    #3 0x595730cf05f8 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/driver-tail.c:27
+    #4 0x71146982a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x71146982a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x595730cee3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/gcc-vuln-recover+0x23c4) (BuildId: 71e0ec2bbcac9b1b2b132c5c8620a095f7e714f8)
+
+Address 0x711468004080 is located in stack of thread T0 at offset 16512 in frame
+    #0 0x595730cee7fc in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:47
+
+  This frame has 3 object(s):
+    [48, 49) 'response' (line 48)
+    [64, 70) 'camera_id' (line 52)
+    [96, 16512) 'info' (line 51) <== Memory access at offset 16512 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87 in memset
+Shadow bytes around the buggy address:
+  0x711468003e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468003e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468003f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468003f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x711468004080:[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x711468004100: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x711468004180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3030423==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x711468004080 at pc 0x711469cfae26 bp 0x7ffd54bfe0c0 sp 0x7ffd54bfd868
+READ of size 16848 at 0x711468004080 thread T0
+    #0 0x711469cfae25 in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
+    #1 0x595730cef39c in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:154
+    #2 0x595730cf05f8 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/driver-tail.c:27
+    #3 0x71146982a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x71146982a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x595730cee3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/gcc-vuln-recover+0x23c4) (BuildId: 71e0ec2bbcac9b1b2b132c5c8620a095f7e714f8)
+
+Address 0x711468004080 is located in stack of thread T0 at offset 16512 in frame
+    #0 0x595730cee7fc in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:47
+
+  This frame has 3 object(s):
+    [48, 49) 'response' (line 48)
+    [64, 70) 'camera_id' (line 52)
+    [96, 16512) 'info' (line 51) <== Memory access at offset 16512 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98 in memmove
+Shadow bytes around the buggy address:
+  0x711468003e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468003e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468003f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468003f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x711468004080:[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x711468004100: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x711468004180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x711468004300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3030423==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x529000004240 at pc 0x711469cfac7f bp 0x7ffd54bfe0c0 sp 0x7ffd54bfd868
+WRITE of size 16848 at 0x529000004240 thread T0
+    #0 0x711469cfac7e in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
+    #1 0x595730cef39c in jl2005c_init /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/jl2005c.c.vuln:154
+    #2 0x595730cf05f8 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/driver-tail.c:27
+    #3 0x71146982a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x71146982a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x595730cee3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/gcc-vuln-recover+0x23c4) (BuildId: 71e0ec2bbcac9b1b2b132c5c8620a095f7e714f8)
+
+0x529000004240 is located 0 bytes after 16448-byte region [0x529000000200,0x529000004240)
+allocated by thread T0 here:
+    #0 0x711469cfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x595730cf05b5 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/driver-tail.c:21
+    #2 0x71146982a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x71146982a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x595730cee3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libgphoto2shell/harness/gcc-vuln-recover+0x23c4) (BuildId: 71e0ec2bbcac9b1b2b132c5c8620a095f7e714f8)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98 in memmove
+Shadow bytes around the buggy address:
+  0x529000003f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x529000004000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x529000004080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x529000004100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x529000004180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x529000004200: 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa fa fa
+  0x529000004280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x529000004300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x529000004380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x529000004400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x529000004480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+scenario=attack variant=vuln count=1022 rc=0 table_seen=1 big_seen=1 big_n=16384 seq1=16
+EXIT=0

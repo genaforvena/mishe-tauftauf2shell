@@ -66,8 +66,11 @@ Drive counts 100 (baseline), 1022 (attack), a capped short reply (heap) and
 65535 (layout probe).
 
 Commands (from `lab/frontier/libgphoto2shell/harness/`): `./run.sh` generates
-the drivers and builds 8 binaries; `./check.sh` runs 24 invocations plus gdb
-probes and prints a normalized trace hash.
+the drivers and builds 12 binaries (gcc/clang x vuln/fixed x
+plain/ASan/recover); `./check.sh` runs 36 invocations plus gdb probes and
+prints a normalized trace over the original plain/ASan subset. Recover mode
+compiles with `-fsanitize-recover=address` and runs with
+`ASAN_OPTIONS=halt_on_error=0`.
 
 ## 4. Observed evidence (this wake, direct-call harness)
 
@@ -77,10 +80,14 @@ probes and prints a normalized trace hash.
   the oversized read; no ASan report in any fixed run.
 - Rung 3: gcc and clang ASan both report
   `ERROR: AddressSanitizer: stack-buffer-overflow`, `WRITE of size 16384`,
-  at pinned `jl2005c.c.vuln:152`. On the short-reply variant the first ASan
-  report is instead a `READ of size 16848` at pinned `:154` (source
-  over-read), so the heap destination write is not separately ASan-confirmed;
-  that negative is preserved in PROVENANCE.md.
+  at pinned `jl2005c.c.vuln:152`. On the short-reply variant default ASan
+  reports a source `READ of size 16848` at pinned `:154` and aborts first.
+  Recover-mode ASan (real libc `memmove`, pinned source unchanged) reports
+  that source read **and** `ERROR: AddressSanitizer: heap-buffer-overflow`,
+  `WRITE of size 16848`, at an address 0 bytes after the 16448-byte calloc
+  region, frame pinned at `jl2005c.c.vuln:154`, for gcc and clang. Both
+  overwrite directions are now ASan-confirmed; the fixed pin returns
+  `rc=-3` with no ASan report in recover mode too.
 - Rung 4: gdb on plain builds shows eight chosen `0x5a` bytes at
   `info+0x4020` (24 bytes past the stack buffer) and at
   `priv->table+0x4000` (exactly past the heap array). In clang's plain build
@@ -88,11 +95,14 @@ probes and prints a normalized trace hash.
   offset `0x3e58` lands there byte-for-byte (`41 42 43 44 45 46 47 48`).
   The process faults inside `memmove` before `ret`, so IP control is NOT
   demonstrated — chosen bytes at the saved-RIP slot only.
-- `92 PASS / 0 FAIL` over 24 runs plus gdb probes, three identical runs;
-  trace `e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`.
-  Raw outputs in `lab/frontier/libgphoto2shell/harness/evidence/`. Clean
-  git-archive replay at `0e10c83`: 51 files, 4/4 pins OK, 92 PASS/0 FAIL,
-  trace exact (`lab/frontier/libgphoto2shell/REPLAY.md`).
+- `146 PASS / 0 FAIL` over 36 runs plus gdb probes; the normalized trace is
+  unchanged at
+  `e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`.
+  Raw outputs in `lab/frontier/libgphoto2shell/harness/evidence/`,
+  including the recover-mode `recover-*.out` files. The earlier clean
+  git-archive replay at `0e10c83` covered 51 files, 4/4 pins OK, 92 PASS/0
+  FAIL and the same trace; see `lab/frontier/libgphoto2shell/REPLAY.md` for
+  the replay of the current harness.
 
 ## 5. Ceiling and cheapest next rung
 
@@ -103,6 +113,8 @@ execution or witness replay. The malicious-USB-device attacker model is a
 claim. The cheapest move toward a real consumer is to build libgphoto2
 2.5.34 with ASan, register the JL2005 camlib USB id and feed the handshake
 from a loopback-controlled USB/IP or usbvirt device; the next question is
-whether the corrupted frame is used before abort. A rung-5 path would need a
-network-facing host that processes untrusted camera data automatically.
-Rung 5 is UNKNOWN, not established.
+whether the corrupted frame is used before abort. On this host that lane is
+not yet actionable without host-level provisioning: `pkg-config --modversion
+libusb-1.0` reports the package missing, and the lab has no USB/IP or usbvirt
+device. A rung-5 path would still need a network-facing host that processes
+untrusted camera data automatically. Rung 5 is UNKNOWN, not established.
