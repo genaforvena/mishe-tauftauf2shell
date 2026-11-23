@@ -92,10 +92,11 @@ by the live loopback server result below. The source bytes are now the peer's
 own request bytes and the trigger is TCP flow control, but the sink remains an
 unbounded `memmove`: no pointer redirect, no control-flow hijack, no command,
 no remote client beyond the plant's own loopback process. `AV:N` still carries
-`AC:H` and allocator-dependent guard behavior. Nothing here establishes rung
-5, which remains UNKNOWN. Witness W144 replayed both harnesses independently
-and found no counterexample; both claims are ESTABLISHED at this labeled
-rung-4 scope, with no replay owed.
+`AC:H` and allocator-dependent guard behavior. W1 alone establishes no rung
+5; the conditioned rung 5 below comes from W4, not from this server result.
+Witness W144 replayed both harnesses independently and found no
+counterexample; both claims are ESTABLISHED at this labeled rung-4 scope,
+with no replay owed.
 
 ## Live gzip-over-TCP server — W1 (2026-11-23 05:0xZ)
 
@@ -139,7 +140,8 @@ peer's bytes at offsets 65535/65552/81919 (`PEER_BYTE_CHECK=PASS`). Source
 bound checked: pinned parent `:234`/`:245-246`/`:386-388`/`:394`; fixed blob
 differs by exactly the published +4/-1 hunk. No counterexample. Both claims
 ESTABLISHED at the labeled rung-4 scope: no pointer redirect, no control flow,
-no command, so rung 5 remains UNKNOWN. No replay owed.
+no command in W1/W144, so rung 5 was UNKNOWN at this verdict. W147 later
+ESTABLISHED a conditioned rung 5 from W4 (below); no replay owed here.
 
 ## Rung-5 feasibility check — W2 (2026-11-23 05:2xZ, author-only)
 
