@@ -3,5 +3,6 @@
 /sysroot/
 /core-vuln/
 /core-fixed/
+/evidence/replay-*.out
 /*-vuln
 /*-fixed

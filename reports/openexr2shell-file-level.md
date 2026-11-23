@@ -341,6 +341,15 @@ x86 CMake build is the cross toolchain, the newer arm64 compression runtimes,
 and the manual inclusion of the single C/OpenJPH objects that CMake normally
 selects; no project source was edited.
 
+The three arm64 runtime debs were fetched from
+`http://archive.ubuntu.com/ubuntu/pool/main/` paths
+`libz/libzstd/libzstd1_1.5.7+dfsg-4_arm64.deb`,
+`libd/libdeflate/libdeflate0_1.25-1ubuntu1_arm64.deb` and
+`z/zlib/zlib1g_1.3.dfsg+really1.3.2-3ubuntu1.1_arm64.deb`, then unpacked with
+`dpkg-deb -x` into `aarch64/sysroot`. A committed replay check,
+`aarch64/check.sh`, re-runs all ten cases and reports `PASS=10 FAIL=0` on this
+host.
+
 Commands (from `lab/openexr2shell-real`):
 
 ```
