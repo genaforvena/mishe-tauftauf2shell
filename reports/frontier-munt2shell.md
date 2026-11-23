@@ -389,3 +389,49 @@ host-side sentinel rather than a library object consumed later, the new
 pointer value is not valid, no command or marker side effect was produced,
 and no witness has replayed this lane. A real consumer that supplies one
 >32768-byte SysEx in a single call remains the missing rung-5 prerequisite.
+
+## 13. Bulk-SysEx consumers bypass the parser; in-tree rung-5 route closed (W175, 2026-11-23)
+
+The missing rung-5 prerequisite is a real host that supplies one >32768-byte
+SysEx in a single `parseStream()` call (§5, §12). This wake enumerated every
+bulk-SysEx consumer in the pinned `libmt32emu_2_8_3` tree and recorded, from
+source, which API each uses. Result: **every consumer that can carry a large
+SysEx uses `playSysex()`/`playSysexNow()`, which bypasses the vulnerable
+`parseStream()`; the only Linux `parseStream()` caller is the ALSA sequencer
+driver, already measured at a 5572-byte cap (§7).** No consumer in this tree
+can deliver a single oversized SysEx to the flawed parser.
+
+Complete non-test `parseStream()` caller set in the pinned tree:
+
+- `mt32emu_alsadrv/src/alsadrv.cpp:1182` — Linux ALSA sequencer, capped 5572
+  by measurement (§7).
+- `mt32emu_qt/src/mididrv/CoreMidiDriver.cpp:36`, `OSSMidiPortDriver.cpp:95`,
+  `Win32Driver.cpp:135,383`, and `mt32emu_win32drv/src/winmm_drv.cpp:324` —
+  macOS/OSS/Windows byte-stream drivers, all unavailable on this Linux host
+  (no `/dev/midi*`, no Qt5, Win32/CoreMIDI not applicable).
+
+Bulk-SysEx consumers that **do not** reach the parser:
+
+- `mt32emu_smf2wav/src/mt32emu-smf2wav.cpp:736` sends SMF sysex events with
+  `service.playSysex()`; standalone `.syx` files use `playSysexNow()` at `:476`.
+  Its hand-rolled unterminated-SysEx accumulator at `:724-733` joins fragments
+  into one buffer but still calls `playSysex()`, never `parseStream()`.
+- `mt32emu_qt/src/mididrv/SMFDriver.cpp:129` (parsed SMF sysex),
+  `ALSADriver.cpp:225,231` (the Qt ALSA driver accumulates sysex fragments in
+  `sysexBuffer` and commits the whole buffer), `JACKMidiDriver.cpp:43` and
+  `Win32Driver.cpp:193` (sysex events) all go through
+  `SynthRoute::pushMIDISysex` (`SynthRoute.cpp:248-259`) → `playMIDISysex` →
+  `QSynth::playMIDISysex` (`QSynth.cpp:892-898`) → `synth->playSysex()`; the
+  realtime helper at `QSynth.cpp:613-615` also uses `playSysex`. No parser in
+  the chain. JACK libraries are present but no `jackd` is installed or running.
+- `DOSBox-mt32-patch/dosbox-0.74-3-mt32-patch.diff:236-240`: the DOSBox MT-32
+  handler's `PlaySysex()` calls `playSysexAt`/`playSysex` and `PlayMsg()` calls
+  `playMsg`; the patch never calls `parseStream()`.
+
+Consequence: on this host no in-tree consumer reaches the defect. The public C
+API `mt32emu_parse_stream` (`c_interface.cpp:760`) remains an unclamped
+forward, so a third-party C-API host could still reach it; none was found or
+built here. This is a source-level negative that closes the enumerated in-tree
+routes, not proof that no third-party host is affected. Grade unchanged:
+real-library rungs 1-4 witness ESTABLISHED, rung 5 UNKNOWN with no in-tree
+route on this host.
