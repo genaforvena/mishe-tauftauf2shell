@@ -1,0 +1,46 @@
+thorvg2shell W184 — 2026-11-23 23:3xZ — author observation, not a witness verdict.
+
+Question: does the 2048x2048 crafted-frame crash in the REAL pinned library
+expose a pointer or control-flow target (prerequisite for the charter's
+benign-marker lane)? Answer: NO. Measured below.
+
+Setup: /tmp/thorvg-public-build (v1.1.1 shared lib, meson -Dloaders=jpg),
+harness/bin/public-api-vuln (g++ -O0), input poc/dup4_large.jpg.
+gdb -q -batch -ex 'run poc/dup4_large.jpg' -ex 'p/x $_siginfo...si_addr'
+  -ex 'info registers ...' -ex 'x/10i $rip-12' (full commands in this wake log).
+
+Observed at SIGSEGV:
+  frame 0: jpeg_decoder::huff_decode(pH=0x5555555736a8, this=0x55555556b6b0)
+           at src/vuln/src/loaders/jpg/tvgJpgd.cpp:733
+  si_addr = 0x55569ab8c148
+  rsi (pH) = 0x5555555736a8
+  rdx (index) = 0x51586067 = 1364746343
+  faulting insn: mov 0x904(%rsi,%rdx,4),%ebp     # pH->tree[-(symbol+bit)]
+  Check: 0x5555555736a8 + 0x904 + 4*0x51586067 = 0x55569ab8c148 (exact).
+
+Legitimacy of pH and the overflow layout (same crash frame):
+  m_pHuff_tabs[0] = 0x5555555736a8  == pH          (legitimate table)
+  m_pHuff_tabs[1..3] = 0, 0, 0
+  m_blocks_per_mcu = 4, m_max_blocks_per_mcu = 1
+  m_mcu_org[0..3] = {0,0,0,0}
+  m_pMCU_coefficients = 0x55555556f3f8  (128 bytes -> ends 0x55555556f478)
+  m_pSample_buf       = 0x55555556f478  (immediately follows)
+
+Conclusions, bounded by what was measured:
+- pH is the decoder's own m_pHuff_tabs[0], a valid heap pointer. It is NOT
+  overwritten: the coefficient overflow starts at 0x...6f3f8 and reaches at
+  most ~510 bytes forward (3 blocks x 128 B + 63 halfwords), ending near
+  0x...6f5f6. pH at 0x...736a8 is 17072 bytes away, unreachable. The Huffman
+  tables were allocated earlier in the bump arena, before the overflow base.
+- The overflow's forward target is m_pSample_buf (pixel/sample scratch), not a
+  pointer, vtable, saved return address or other control-flow structure.
+- The fault is an OOB READ of the embedded tree[] array with a huge DATA index
+  (0x51586067) produced inside huff_decode from a Huffman symbol: decoding 4
+  blocks per MCU instead of 1 desynchronises the entropy bitstream, driving
+  look_up2 to a wild negative symbol whose negation is used as tree[] index.
+  No attacker-chosen value is loaded into a pointer or the instruction pointer.
+
+Therefore: no observed pointer/IP control and no control-flow target on this
+path. The charter's option (2) — bounded benign marker only on an observed
+pointer or control-flow target — has no target and is NOT entered. Rung 5
+stays UNKNOWN and unattempted. This is a negative result, kept deliberately.

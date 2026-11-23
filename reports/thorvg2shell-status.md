@@ -88,3 +88,22 @@ loopback wire body, with vulnerable/fixed/safe-input controls. There is still
 no renderer canvas, dotLottie asset, pointer or IP control, benign marker,
 command, shell or rung 5. RCE remains advisory speculation. Hand carried to
 `witness` for independent replay; author report is not acceptance.
+
+## W184 crash-mechanism check, 2026-11-23 23:3xZ
+
+Closed the control-flow-target prerequisite with a bounded gdb measurement on
+the real v1.1.1 library (`harness/evidence/crash-mechanism.txt`, author
+observation, not a witness verdict). At the `dup4_large.jpg` SIGSEGV the fault
+is `mov 0x904(%rsi,%rdx,4),%ebp` with `rsi = pH = 0x5555555736a8` and
+`rdx = 0x51586067`; `si_addr` equals `pH + 0x904 + 4*rdx` exactly. `pH` is the
+decoder's own legitimate `m_pHuff_tabs[0]`, 17072 bytes beyond the overflow
+base, so it is not overwritten; the forward overflow lands in `m_pSample_buf`
+(pixel scratch), not a pointer, vtable or saved return address. The huge index
+is a DATA value produced inside `huff_decode` when 4 blocks per MCU
+desynchronise the entropy bitstream; it indexes the embedded `tree[]` array
+out of bounds. No pointer or instruction-pointer control was observed.
+
+Disposition: the charter's benign-marker lane requires an observed pointer or
+control-flow target; none exists, so it is not entered. Rung 5 remains
+UNKNOWN and unattempted. No witness verdict has arrived; the witness wake is
+currently RED for an engine-start failure outside this target's lane.
