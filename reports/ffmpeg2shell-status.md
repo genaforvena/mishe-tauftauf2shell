@@ -100,15 +100,39 @@ FIFO, so the first ~2048 reads stay in-bounds; the fault needs the ring write
 pointer to reach the allocation end (~8 MiB streamed). A stock librist sender
 also caps payloads at 9968 bytes, four below FFmpeg's 9972 receive gate. The
 frontier's 9972-vs-4096 overflow is a harness model of the intended window.
-Still not claimed: pointer control, command, marker side effect, useful
-neighbour mapping, or an independent witness verdict on this live work.
+Still not claimed: pointer control, command, marker side effect, or useful
+neighbour mapping in the default layout. Witness W151 verdict #2428
+(2026-11-23 09:04Z) independently replayed this W2 live path from
+`git archive HEAD cbeeafa` with its own builds and port 5514: both vulnerable
+cases gave the pinned ASan `WRITE of size 9968`, fixed and 512-byte safe cases
+stayed clean (`rc=124`), and its own gdb saw the same chosen bytes. Rungs 3
+and 4 are ESTABLISHED at the labeled live-loopback / ASan / ~8 MiB ring-wrap
+scope; its own plain build reproduced the read-only-mapping ceiling. No new
+rung. The W3 pointer result below is author-only, not covered by #2428.
 
-Plain-build ceiling (same host, 2026-11-23 08:14Z): a non-ASan FFmpeg n9.0
-build driven with the identical 2200 x 9968 loopback stream exits SIGSEGV
+Plain-build ceiling on the default mmap layout (same host, 08:14Z):
+A non-ASan FFmpeg n9.0 build driven with the identical 2200 x 9968 loopback
+stream exits SIGSEGV
 (`rc=139`) at the ring wrap. Under gdb the faulting `memcpy` has
 `buf=0x7ffff79fda80` and length 9968; the write crosses the end of an
 anonymous `rw-p` region at `0x7ffff7a00000`, where libc is mapped `r--p`.
 No writable adjacent object is reachable at the wrap on this build, so
 pointer control or a benign marker through this path stays structurally
-blocked; other allocator/map orders were not measured. Logs:
+blocked in that layout. Logs:
 `lab/frontier/ffmpeg2shell/live/evidence/live-plain-*.log`.
+
+Brk-layout pointer overwrite (W3, 09:03Z, author-only): setting glibc
+`MALLOC_MMAP_THRESHOLD_=16777216` locally puts the 8 MiB FIFO buffer on
+`[heap]` at `0x5555558d1fe0`; `av_fifo_alloc2` places its `AVFifo` struct at
+`buffer+0x800060` and the wrapped librist `URLContext` at `buffer+0x8000a0`.
+Hardware watchpoints in the async-thread `librist_read` `memcpy`
+(`librist.c:230`) show the sender's 0x5a fill replacing the low byte of
+`AVFifo.buffer` (`…1fe0` → `…1f5a`) and of `URLContext.prot`
+(`ff_librist_protocol …fea0` → `…fe5a`); the main thread then dereferences
+the corrupted buffer pointer at `fifo.c:226` with `rsi=0x5a5a…`. A plain
+FFMIN-fixed binary built from the same source survives the same stream and
+neither watchpoint fires. No chosen target address, control transfer,
+marker side effect, command or witness replay: this is scoped rung 4 pointer
+control under a local layout prerequisite, not rung 5. Evidence and controls:
+`reports/ffmpeg2shell-live.md`, `live/evidence/layout-brk-*.log`,
+`live/layout-probe.sh`, `live/watch-*.cmd`.

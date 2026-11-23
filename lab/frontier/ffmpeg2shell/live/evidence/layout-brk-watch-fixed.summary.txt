@@ -1,0 +1,7 @@
+W3 fixed watchpoint control (plain FFMIN-fixed ffprobe_g, same env and stream):
+gdb at async.c:89: INIT buffer=0x5555558d1fe0
+Hardware watchpoint installed on ring->fifo->buffer.
+No watchpoint hit, no Old/New value, no SIGSEGV during the whole 2200 x 9968
+stream; sender: sent 2200 blocks of 9968 bytes, 0 failures. gdb was killed by
+the 45 s timeout after the sender finished. The unabridged gdb capture stays
+in the local lab tree; replay with live/watch-buffer.cmd.

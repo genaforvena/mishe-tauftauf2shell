@@ -1,0 +1,53 @@
+[librist] Starting in Main Profile Mode
+
+[librist] RIST Sender Library a911bee
+
+[librist] Encryption is disabled for this peer
+
+[librist] URL parsed successfully: Host 127.0.0.1, Port 5004
+
+[librist] Starting in URL connect mode (3)
+
+[librist] Configured the starting socket receive buffer size to 419430 Bytes.
+
+[librist] Configured the starting socket send buffer size to 419430 Bytes.
+
+[librist] Peer cname is mesh-home
+
+[librist] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+
+[librist] Setting max nacks per cycle to 88
+
+[librist] Setting buffer size to 1100ms (Max buffer size + 2 * Min RTT, 1000+2*50)
+
+[librist] Advertising flow_id  2700497170 and peer_id 1, 32768/1969
+
+[librist] Initialized Sender Peer, connecting to receiver ...
+
+[librist] Active Peer Information, IP:Port => 0.0.0.0:5004 (0), id: 1, ports: 32768->1969
+
+[librist] Enabling keepalive for peer 1
+
+[librist] Successfully Authenticated peer 1
+
+[librist] Starting master sender loop at 5 ms max jitter
+
+sent 2200 blocks of 9968 bytes, 0 failures
+[librist] Triggering protocol loop termination
+
+[librist] Exiting master sender loop
+
+[librist] Starting peers cleanup, count 1
+
+[librist] [CLEANUP] Removing peer data received event
+
+[librist] [CLEANUP] Removing peer handshake/ping timer
+
+[librist] [CLEANUP] Closing peer socket on port 32768
+
+[librist] [CLEANUP] cleanup done for peer 1
+
+[librist] Peers cleanup complete
+
+[librist] Freeing up context memory allocations
+

@@ -1,0 +1,12 @@
+Breakpoint 1 at 0x26ca20: file libavutil/fifo.c, line 49.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, av_fifo_alloc2 (nb_elems=nb_elems@entry=8388608, elem_size=elem_size@entry=1, flags=flags@entry=0) at libavutil/fifo.c:49
+49	{
+ALLOC nb_elems=8388608 elem_size=1
+0x00005555555eb490 in ring_init (capacity=4194304, read_back_capacity=4194304, ring=0x5555558d1e50) at libavformat/async.c:88
+88	    ring->fifo = av_fifo_alloc2(capacity + read_back_capacity, 1, 0);
+Value returned is $1 = (AVFifo *) 0x5555560d2040
+alloc-gdb.cmd:8: Error in sourced command file:
+No symbol "f" in current context.

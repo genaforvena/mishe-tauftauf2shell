@@ -7,8 +7,10 @@ ASan reports an out-of-bounds `WRITE` from `librist_read()` at pinned
 `librist.c:230`; two vulnerable runs fault, a one-line-clamp fixed build and
 a safe-input run stay clean. Under gdb the same live process shows
 attacker-chosen bytes at offsets 4096, 4113, 4120, 5000 and 9000 past the
-4096-byte caller window. This is rung 3 plus scoped rung 4 on **living
-bytes**, not remote command execution.
+4096-byte caller window. With a local brk-layout tweak, the same overflow
+overwrites live FFmpeg control pointers (`AVFifo.buffer`, `URLContext.prot`);
+see the W3 section. This is rung 3 plus scoped rung 4 on **living bytes**,
+not remote command execution.
 
 ## Builds and pins (all provisioning was read-only source fetch)
 
@@ -60,8 +62,8 @@ bytes: `len = FFMIN(nb_elems - offset_w, to_write)` becomes small, but
 frontier's "5876-byte overflow past a 4096-byte heap object" is a harness
 model of the intended window; on a live consumer the measured claim is an
 out-of-bounds ring write at the wrap boundary after roughly 8 MiB of
-attacker-streamed data. No live adjacent heap object with metadata was
-identified.
+attacker-streamed data. On the default mmap layout no adjacent heap object
+with metadata was identified; the brk-layout experiment below found one.
 
 ## Experiment matrix
 
@@ -127,6 +129,56 @@ for 4096 bytes, and the live ring holds the attacker's bytes well past that
 window. This is placement in a real consumer's memory, not in the harness's
 20000-byte sink. It is still byte placement, not a pointer or a command.
 
+## Brk-layout pointer overwrite (W3, 2026-11-23)
+
+W2's structural ceiling applies to the default mmap layout only. With glibc
+`MALLOC_MMAP_THRESHOLD_=16777216` set locally on the same plain n9.0 build,
+`av_fifo_alloc2`'s 8 MiB buffer comes from `[heap]` instead of its own mmap,
+and the wrap write reaches live FFmpeg control objects. No source, binary or
+wire format was changed for this experiment; the environment variable is a
+local layout prerequisite, **not** attacker-controlled.
+
+Allocation geometry under gdb (`evidence/layout-brk-alloc2-gdb.log`,
+`layout-brk-alloc-gdb.log`):
+`buffer=0x5555558d1fe0`, `AVFifo=0x5555560d2040` (`buffer+0x800060`),
+wrapped librist `URLContext=0x5555560d2080` (`buffer+0x8000a0`). The struct
+is allocated after the buffer by `av_fifo_alloc2` (`fifo.c:57,61`), so the
+9968-byte overflow reaches both objects.
+
+- Hardware watchpoint on `ring->fifo->buffer` (`evidence/layout-brk-watch-vuln2.log`):
+  thread 3 async, old `0x5555558d1fe0`, new `0x5555558d1f5a` (low byte
+  replaced by the sender's 0x5a fill), inside `librist_read` `librist.c:230`
+  `memcpy`, reached via `fifo_write_common` `fifo.c:167` →
+  `wrapped_url_read` `async.c:140`.
+- Hardware watchpoint on `URLContext->prot` (`evidence/layout-brk-watch-prot2.log`):
+  old `0x55555584fea0` `<ff_librist_protocol>`, new `0x55555584fe5a`; the
+  same partial overwrite of the low byte. `ffurl_read` dereferences this
+  field on every read (`libavformat/url.h:183`).
+- Consumer dereference (`evidence/layout-brk-fields-gdb.log`): after the
+  overwrite, main thread faults at `fifo_peek_common` `fifo.c:226` reading
+  `(%rsi)` with `rsi=0x5a5a5a5a5a5a5a5a`; the `AVFifo` at that point has
+  `buffer`, `elem_size`, `nb_elems`, `offset_r`, `flags` all set to 0x5a.
+  This is chosen bytes in a live pointer that the consumer dereferences.
+
+Controls: a plain FFMIN-fixed binary was built from the same source tree
+(`librist.c:229` → `size = FFMIN(data_block->payload_len, size)`; vulnerable
+source SHA-256 `bf749fb2…21e9a7c` restored after the build; fixed binary
+SHA-256 `8d302dee…80e5857`). Against 2200 x 9968 blocks under the same
+layout, it survives to timeout (`rc=124`,
+`evidence/layout-brk-fixed-g.summary.txt`)
+and neither watchpoint fires (`evidence/layout-brk-watch-fixed.summary.txt`,
+`evidence/layout-brk-fixed-g.summary.txt`; `layout-brk-watch-prot2.log` is the
+vulnerable run). The default mmap layout still faults at the read-only libc
+mapping as described in the next section.
+
+**Ceiling.** Only the low byte of each pointer was observed changed, to the
+sender's uniform 0x5a fill; a chosen target address, chosen-byte control at a
+specific pointer field, control transfer through the corrupted `prot` table,
+a benign marker side effect, a command and an independent witness are all
+not demonstrated. The layout tweak is local. Grade: rung 3 on live bytes plus
+scoped rung 4 pointer control of live consumer state under that local layout;
+not rung 5.
+
 ## Plain-build structural ceiling (host-specific negative)
 
 A second FFmpeg n9.0 build without ASan (`live/plain/src`, same configure
@@ -146,14 +198,19 @@ were not measured; this is a negative for the tested build only.
 
 ## Ceiling / not claimed
 
-- No pointer control, ROP, function-pointer overwrite, chosen-address write
-  or command execution. No marker file or other external side effect.
-- The 8 MiB ring's neighbours were not mapped to useful state; the live
-  out-of-bounds write is at an allocator-owned boundary, not into a named
-  adjacent object.
-- No independent witness replay of this live work yet. The prior witness
-  verdict #2384 covers only the direct-call harness (rungs 1-4 at that
-  labeled scope).
+- On the default mmap layout: no pointer control, ROP, function-pointer
+  overwrite or chosen-address write; the ring's neighbours were unmapped or
+  read-only. The brk-layout section above records scoped pointer overwrite
+  only; no control transfer, marker side effect or command was demonstrated
+  in either layout.
+- Witness W151 verdict #2428 (2026-11-23 09:04Z) independently replayed the
+  W2 live path from `git archive HEAD cbeeafa` with its own builds and port
+  5514: both vulnerable cases gave the pinned ASan `WRITE of size 9968`,
+  fixed and safe inputs stayed clean, and its gdb saw the same chosen bytes.
+  Rungs 3 and 4 are ESTABLISHED at the labeled live-loopback / ASan / ~8 MiB
+  ring-wrap scope; its plain build also reproduced the read-only ceiling.
+  The W3 brk-layout pointer overwrite above is author-only and not covered
+  by this verdict.
 - Main profile without encryption was used because FFmpeg does not expose
   its `rist_profile` AVOption through the URL query (librist's own parser
   reports `Unknown or invalid parameter rist_profile`); the receive path and

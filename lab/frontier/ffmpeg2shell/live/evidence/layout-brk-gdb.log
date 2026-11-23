@@ -1,0 +1,105 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[rist @ 0x5555560d2080] Starting in Main Profile Mode
+[rist @ 0x5555560d2080] RIST Receiver Library version:a911bee 
+[rist @ 0x5555560d2080] Starting in receiver mode
+[rist @ 0x5555560d2080] Encryption is disabled for this peer
+[rist @ 0x5555560d2080] URL parsed successfully: Host 0.0.0.0, Port 5004
+[rist @ 0x5555560d2080] Starting in URL listening mode (socket# 3)
+[rist @ 0x5555560d2080] Configured the starting socket receive buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Configured the starting socket send buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Peer cname is mesh-home
+[rist @ 0x5555560d2080] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+[rist @ 0x5555560d2080] New peer with id #0 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Initialized Receiver Peer, listening mode ...
+[rist @ 0x5555560d2080] Active Peer Information, IP:Port => 0.0.0.0:5004 (1), id: 1, ports: 5004->1969
+[New Thread 0x7ffff79ff6c0 (LWP 435154)]
+[rist @ 0x5555560d2080] Starting receiver protocol loop with 5 ms timer
+[New Thread 0x7ffff71fe6c0 (LWP 435155)]
+Input #0, data, from 'async:rist://@:5004':
+  Duration: N/A, start: 0.000000, bitrate: N/A
+  Stream #0:0: Data: none
+Unsupported codec with id 0 for input stream 0
+Processing read interval id:0 start:N/A end:N/A
+[rist @ 0x5555560d2080] New peer with id #2 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Enabling keepalive for peer 2
+[rist @ 0x5555560d2080] New keepalive received. MAC: 34:5a:60:7c:10:21 X: 0 R: 0 B: 1 A: 0 P: 0 E: 1 L: 0: N: 1 D: 1 T: 0 V: 0: J: 1 F: 0
+[rist @ 0x5555560d2080] New RTCP peer connecting, flow_id 3596728446, peer_id 2, ports 0 <- 37848
+[rist @ 0x5555560d2080] Updating peer virt dst port to match remote source port: 32768
+[rist @ 0x5555560d2080] Peer 2 receiver name is now: mesh-home
+[rist @ 0x5555560d2080] FLOW #3596728446 created (short=1)
+[rist @ 0x5555560d2080] Peer with id #2 associated with flow #3596728446
+[rist @ 0x5555560d2080] Flow #3596728446 has now 1 peers.
+[New Thread 0x7ffff69fd6c0 (LWP 435317)]
+[rist @ 0x5555560d2080] Successfully Authenticated peer 2
+[rist @ 0x5555560d2080] Authenticated RTCP peer 2 and flow 3596728446 for connection with cname: mesh-home
+[rist @ 0x5555560d2080] Peer 2 receiver with name mesh-home reconnected
+[rist @ 0x5555560d2080] Failed to set data output thread to RR scheduler with prio of 99
+[rist @ 0x5555560d2080] Starting data output thread with 5 ms max output jitter
+[rist @ 0x5555560d2080] Authenticated RTP peer 2 and ssrc 3596728446 for connection with flowid 3596728446
+[rist @ 0x5555560d2080] Storing first packet seq 0, idx 0, 169233031135039, offset -2085779428261 ms, output_idx 0
+
+Thread 1 "ffprobe" received signal SIGSEGV, Segmentation fault.
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:265
+warning: 265	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+rip            0x7ffff7b88d8d      0x7ffff7b88d8d <__memcpy_avx_unaligned_erms+13>
+rdi            0x5555562e5f80      93825006460800
+rsi            0x5a5a5a5a5a5a5a5a  6510615555426900570
+rdx            0x2d2d2d2d2d2d0000  3255307777713438720
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:265
+#1  0x00005555557c1187 in ?? ()
+#2  0x00005555555eb8c3 in ?? ()
+#3  0x00005555555ca498 in ?? ()
+#4  0x00005555555ca8f9 in ?? ()
+#5  0x00005555555cc938 in ?? ()
+process 435151
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555587000    0x33000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe
+      0x555555587000     0x5555557ec000   0x265000    0x33000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe
+      0x5555557ec000     0x555555846000    0x5a000   0x298000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe
+      0x555555846000     0x55555587f000    0x39000   0x2f2000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe
+      0x55555587f000     0x555555880000     0x1000   0x32b000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/plain/src/ffprobe
+      0x555555880000     0x5555558cd000    0x4d000        0x0  rw-p   
+      0x5555558cd000     0x5555562ff000   0xa32000        0x0  rw-p   [heap]
+      0x7fffe8000000     0x7fffe8021000    0x21000        0x0  rw-p   
+      0x7fffe8021000     0x7fffec000000  0x3fdf000        0x0  ---p   
+      0x7fffec000000     0x7fffec021000    0x21000        0x0  rw-p   
+      0x7fffec021000     0x7ffff0000000  0x3fdf000        0x0  ---p   
+      0x7ffff0000000     0x7ffff03cc000   0x3cc000        0x0  rw-p   
+      0x7ffff03cc000     0x7ffff4000000  0x3c34000        0x0  ---p   
+      0x7ffff61fd000     0x7ffff61fe000     0x1000        0x0  ---p   
+      0x7ffff61fe000     0x7ffff69fe000   0x800000        0x0  rw-p   
+      0x7ffff69fe000     0x7ffff69ff000     0x1000        0x0  ---p   
+      0x7ffff69ff000     0x7ffff71ff000   0x800000        0x0  rw-p   
+      0x7ffff71ff000     0x7ffff7200000     0x1000        0x0  ---p   
+      0x7ffff7200000     0x7ffff7a00000   0x800000        0x0  rw-p   
+      0x7ffff7a00000     0x7ffff7a28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7a28000     0x7ffff7bb1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7bb1000     0x7ffff7c00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c00000     0x7ffff7c04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c04000     0x7ffff7c06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c06000     0x7ffff7c13000     0xd000        0x0  rw-p   
+      0x7ffff7d89000     0x7ffff7d8b000     0x2000        0x0  rw-p   
+      0x7ffff7d8b000     0x7ffff7d96000     0xb000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7d96000     0x7ffff7e87000    0xf1000     0xb000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7e87000     0x7ffff7eb5000    0x2e000    0xfc000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7eb5000     0x7ffff7ebb000     0x6000   0x12a000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7ebb000     0x7ffff7ebc000     0x1000   0x130000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ffmpeg2shell/live/prefix/lib/librist.so.4.12.1
+      0x7ffff7ebc000     0x7ffff7ebf000     0x3000        0x0  rw-p   
+      0x7ffff7ebf000     0x7ffff7ecf000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7ecf000     0x7ffff7f4e000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f4e000     0x7ffff7fa6000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7fa6000     0x7ffff7fa7000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7fa7000     0x7ffff7fa8000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7fbd000     0x7ffff7fbf000     0x2000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]

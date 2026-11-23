@@ -1,0 +1,71 @@
+[librist] Starting in Main Profile Mode
+
+[librist] RIST Sender Library a911bee
+
+[librist] Encryption is disabled for this peer
+
+[librist] URL parsed successfully: Host 127.0.0.1, Port 5004
+
+[librist] Starting in URL connect mode (3)
+
+[librist] Configured the starting socket receive buffer size to 419430 Bytes.
+
+[librist] Configured the starting socket send buffer size to 419430 Bytes.
+
+[librist] Peer cname is mesh-home
+
+[librist] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+
+[librist] Setting max nacks per cycle to 88
+
+[librist] Setting buffer size to 1100ms (Max buffer size + 2 * Min RTT, 1000+2*50)
+
+[librist] Advertising flow_id  3642721116 and peer_id 1, 32768/1969
+
+[librist] Initialized Sender Peer, connecting to receiver ...
+
+[librist] Active Peer Information, IP:Port => 0.0.0.0:5004 (0), id: 1, ports: 32768->1969
+
+[librist] Enabling keepalive for peer 1
+
+[librist] Successfully Authenticated peer 1
+
+[librist] Starting master sender loop at 5 ms max jitter
+
+[librist] New keepalive received. MAC: 34:5a:60:7c:10:21 X: 0 R: 0 B: 1 A: 0 P: 0 E: 1 L: 0: N: 1 D: 1 T: 0 V: 0: J: 1 F: 0
+
+[librist] Peer 1 receiver name is now: mesh-home
+
+[librist] Peer 1 receiver with name mesh-home reconnected
+
+[librist] Listening peer 1 timed out after 2457 ms
+
+[librist] Starting in URL connect mode (3)
+
+[librist] Configured the starting socket receive buffer size to 419430 Bytes.
+
+[librist] Configured the starting socket send buffer size to 419430 Bytes.
+
+[librist] Peer cname is mesh-home
+
+[librist] Caller peer 1 silent past session_timeout (attempt 1); rebound caller socket 3->3 (local_port 32768->32769) for NAT/dynamic-IP recovery.
+
+sent 2200 blocks of 9968 bytes, 0 failures
+[librist] Triggering protocol loop termination
+
+[librist] Exiting master sender loop
+
+[librist] Starting peers cleanup, count 1
+
+[librist] [CLEANUP] Removing peer data received event
+
+[librist] [CLEANUP] Removing peer handshake/ping timer
+
+[librist] [CLEANUP] Closing peer socket on port 32769
+
+[librist] [CLEANUP] cleanup done for peer 1
+
+[librist] Peers cleanup complete
+
+[librist] Freeing up context memory allocations
+

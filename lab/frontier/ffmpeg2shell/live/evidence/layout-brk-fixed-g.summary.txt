@@ -1,0 +1,6 @@
+W3 fixed control (plain FFMIN-fixed ffprobe_g, MALLOC_MMAP_THRESHOLD_=16777216):
+receiver: ffprobe rc=124 (survived the 24 s timeout on 2200 x 9968 blocks)
+sender:   sent 2200 blocks of 9968 bytes, 0 failures
+No SIGSEGV, no ASan, no corrupted FIFO struct. Full packet dump is large and
+stays in the local lab tree; replay with live/layout-probe.sh and the fixed
+binary built as described in reports/ffmpeg2shell-live.md.

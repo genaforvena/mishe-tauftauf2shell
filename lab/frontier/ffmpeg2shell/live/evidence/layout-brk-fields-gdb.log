@@ -1,0 +1,80 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[rist @ 0x5555560d2080] Starting in Main Profile Mode
+[rist @ 0x5555560d2080] RIST Receiver Library version:a911bee 
+[rist @ 0x5555560d2080] Starting in receiver mode
+[rist @ 0x5555560d2080] Encryption is disabled for this peer
+[rist @ 0x5555560d2080] URL parsed successfully: Host 0.0.0.0, Port 5004
+[rist @ 0x5555560d2080] Starting in URL listening mode (socket# 3)
+[rist @ 0x5555560d2080] Configured the starting socket receive buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Configured the starting socket send buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Peer cname is mesh-home
+[rist @ 0x5555560d2080] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+[rist @ 0x5555560d2080] New peer with id #0 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Initialized Receiver Peer, listening mode ...
+[rist @ 0x5555560d2080] Active Peer Information, IP:Port => 0.0.0.0:5004 (1), id: 1, ports: 5004->1969
+[New Thread 0x7ffff79ff6c0 (LWP 443922)]
+[rist @ 0x5555560d2080] Starting receiver protocol loop with 5 ms timer
+[New Thread 0x7fffeefff6c0 (LWP 443923)]
+Input #0, data, from 'async:rist://@:5004':
+  Duration: N/A, start: 0.000000, bitrate: N/A
+  Stream #0:0: Data: none
+Unsupported codec with id 0 for input stream 0
+Processing read interval id:0 start:N/A end:N/A
+[rist @ 0x5555560d2080] New peer with id #2 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Enabling keepalive for peer 2
+[rist @ 0x5555560d2080] New keepalive received. MAC: 34:5a:60:7c:10:21 X: 0 R: 0 B: 1 A: 0 P: 0 E: 1 L: 0: N: 1 D: 1 T: 0 V: 0: J: 1 F: 0
+[rist @ 0x5555560d2080] New RTCP peer connecting, flow_id 3642721116, peer_id 2, ports 0 <- 2992
+[rist @ 0x5555560d2080] Updating peer virt dst port to match remote source port: 32768
+[rist @ 0x5555560d2080] Peer 2 receiver name is now: mesh-home
+[rist @ 0x5555560d2080] FLOW #3642721116 created (short=1)
+[rist @ 0x5555560d2080] Peer with id #2 associated with flow #3642721116
+[rist @ 0x5555560d2080] Flow #3642721116 has now 1 peers.
+[New Thread 0x7ffff71fe6c0 (LWP 444007)]
+[rist @ 0x5555560d2080] Successfully Authenticated peer 2
+[rist @ 0x5555560d2080] Authenticated RTCP peer 2 and flow 3642721116 for connection with cname: mesh-home
+[rist @ 0x5555560d2080] Peer 2 receiver with name mesh-home reconnected
+[rist @ 0x5555560d2080] Failed to set data output thread to RR scheduler with prio of 99
+[rist @ 0x5555560d2080] Starting data output thread with 5 ms max output jitter
+[rist @ 0x5555560d2080] Authenticated RTP peer 2 and ssrc 3642721116 for connection with flowid 3642721116
+[rist @ 0x5555560d2080] Storing first packet seq 0, idx 0, 169697438456424, offset -2085779428261 ms, output_idx 0
+
+Thread 1 "ffprobe_g" received signal SIGSEGV, Segmentation fault.
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:265
+warning: 265	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+FAULT pc=0x7ffff7b88d8d
+$1 = 0x0
+rip            0x7ffff7b88d8d      0x7ffff7b88d8d <__memcpy_avx_unaligned_erms+13>
+rdi            0x5555562e5f80      93825006460800
+rsi            0x5a5a5a5a5a5a5a5a  6510615555426900570
+rdx            0x2d2d2d2d2d2d0000  3255307777713438720
+rax            0x5555562e5f80      93825006460800
+rcx            0x5a5a5a5a5a5a5a5a  6510615555426900570
+r8             0x8000              32768
+r11            0x5555558d1e70      93824995892848
+   0x7ffff7b88d85 <__memcpy_avx_unaligned_erms+5>:	mov    %edi,%eax
+   0x7ffff7b88d87 <__memcpy_avx_unaligned_erms+7>:	cmp    $0x20,%rdx
+   0x7ffff7b88d8b <__memcpy_avx_unaligned_erms+11>:	jb     0x7ffff7b88db0 <__memcpy_avx_unaligned_erms+48>
+=> 0x7ffff7b88d8d <__memcpy_avx_unaligned_erms+13>:	vmovdqu (%rsi),%ymm0
+   0x7ffff7b88d91 <__memcpy_avx_unaligned_erms+17>:	cmp    $0x40,%rdx
+   0x7ffff7b88d95 <__memcpy_avx_unaligned_erms+21>:	ja     0x7ffff7b88e40 <__memcpy_avx_unaligned_erms+192>
+   0x7ffff7b88d9b <__memcpy_avx_unaligned_erms+27>:	vmovdqu -0x20(%rsi,%rdx,1),%ymm1
+   0x7ffff7b88da1 <__memcpy_avx_unaligned_erms+33>:	vmovdqu %ymm0,(%rdi)
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:265
+#1  0x00005555557c1187 in memcpy (__len=<optimized out>, __src=<optimized out>, __dest=0x5555562e5f80) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  fifo_peek_common (write_cb=0x0, opaque=0x0, offset=<optimized out>, nb_elems=<synthetic pointer>, buf=0x5555562e5f80 "", f=0x5555560d2040) at libavutil/fifo.c:226
+#3  av_fifo_peek (f=0x5555560d2040, buf=buf@entry=0x5555562e5f80, nb_elems=nb_elems@entry=32768, offset=<optimized out>) at libavutil/fifo.c:257
+#4  0x00005555555eb8c3 in ring_read (buf_size=32768, dest=0x5555562e5f80, ring=0x5555558d1e50) at libavformat/async.c:123
+#5  async_read_internal (h=0x5555558d1d80, dest=0x5555562e5f80, size=32768) at libavformat/async.c:361
+#6  0x00005555555ca498 in retry_transfer_wrapper (cbuf=<optimized out>, read=<optimized out>, size_min=<optimized out>, size=<optimized out>, buf=<optimized out>, h=<optimized out>) at libavformat/avio.c:522
+#7  ffurl_read2 (urlcontext=0x5555558d1d80, buf=0x5555562e5f80 "", size=32768) at libavformat/avio.c:560
+#2  fifo_peek_common (write_cb=0x0, opaque=0x0, offset=<optimized out>, nb_elems=<synthetic pointer>, buf=0x5555562e5f80 "", f=0x5555560d2040) at libavutil/fifo.c:226
+226	            memcpy(buf, rptr, len * f->elem_size);
+$2 = {buffer = 0x5a5a5a5a5a5a5a5a <error: Cannot access memory at address 0x5a5a5a5a5a5a5a5a>, elem_size = 6510615555426900570, nb_elems = 6510615555426900570, offset_r = 6510615555426900570, offset_w = 8393056, is_empty = 0, flags = 1515870810, auto_grow_limit = 6510615555426900570}
+$3 = 0x5a5a5a5a5a5a5a5a
+$4 = 0x5a5a5a5a5a5a5a5a
+$5 = 0x5a5a5a5a5a5a5a5a
+$6 = 0x801160
+#4  0x00005555555eb8c3 in ring_read (buf_size=32768, dest=0x5555562e5f80, ring=0x5555558d1e50) at libavformat/async.c:123
+123	        ret = av_fifo_peek(ring->fifo, dest, buf_size, ring->read_pos);
+$7 = 0x5555560d2040

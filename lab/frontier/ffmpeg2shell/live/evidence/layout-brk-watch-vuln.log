@@ -1,0 +1,56 @@
+Breakpoint 1 at 0x97495: file libavformat/async.c, line 89.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ring_init (capacity=4194304, read_back_capacity=4194304, ring=0x5555558d1e50) at libavformat/async.c:89
+89	    if (!ring->fifo)
+INIT fifo=0x5555560d2040 buffer=0x5555558d1fe0
+Hardware watchpoint 2: -location ring->fifo->buffer
+[rist @ 0x5555560d2080] Starting in Main Profile Mode
+[rist @ 0x5555560d2080] RIST Receiver Library version:a911bee 
+[rist @ 0x5555560d2080] Starting in receiver mode
+[rist @ 0x5555560d2080] Encryption is disabled for this peer
+[rist @ 0x5555560d2080] URL parsed successfully: Host 0.0.0.0, Port 5004
+[rist @ 0x5555560d2080] Starting in URL listening mode (socket# 3)
+[rist @ 0x5555560d2080] Configured the starting socket receive buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Configured the starting socket send buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Peer cname is mesh-home
+[rist @ 0x5555560d2080] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+[rist @ 0x5555560d2080] New peer with id #0 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Initialized Receiver Peer, listening mode ...
+[rist @ 0x5555560d2080] Active Peer Information, IP:Port => 0.0.0.0:5004 (1), id: 1, ports: 5004->1969
+[New Thread 0x7ffff79ff6c0 (LWP 453191)]
+[rist @ 0x5555560d2080] Starting receiver protocol loop with 5 ms timer
+[New Thread 0x7fffeefff6c0 (LWP 453192)]
+Input #0, data, from 'async:rist://@:5004':
+  Duration: N/A, start: 0.000000, bitrate: N/A
+  Stream #0:0: Data: none
+Unsupported codec with id 0 for input stream 0
+Processing read interval id:0 start:N/A end:N/A
+[rist @ 0x5555560d2080] New peer with id #2 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Enabling keepalive for peer 2
+[rist @ 0x5555560d2080] New keepalive received. MAC: 34:5a:60:7c:10:21 X: 0 R: 0 B: 1 A: 0 P: 0 E: 1 L: 0: N: 1 D: 1 T: 0 V: 0: J: 1 F: 0
+[rist @ 0x5555560d2080] New RTCP peer connecting, flow_id 1834150676, peer_id 2, ports 0 <- 19107
+[rist @ 0x5555560d2080] Updating peer virt dst port to match remote source port: 32768
+[rist @ 0x5555560d2080] Peer 2 receiver name is now: mesh-home
+[rist @ 0x5555560d2080] FLOW #1834150676 created (short=1)
+[rist @ 0x5555560d2080] Peer with id #2 associated with flow #1834150676
+[rist @ 0x5555560d2080] Flow #1834150676 has now 1 peers.
+[New Thread 0x7ffff71fe6c0 (LWP 453249)]
+[rist @ 0x5555560d2080] Successfully Authenticated peer 2
+[rist @ 0x5555560d2080] Authenticated RTCP peer 2 and flow 1834150676 for connection with cname: mesh-home
+[rist @ 0x5555560d2080] Peer 2 receiver with name mesh-home reconnected
+[rist @ 0x5555560d2080] Failed to set data output thread to RR scheduler with prio of 99
+[rist @ 0x5555560d2080] Starting data output thread with 5 ms max output jitter
+[rist @ 0x5555560d2080] Authenticated RTP peer 2 and ssrc 1834150676 for connection with flowid 1834150676
+[rist @ 0x5555560d2080] Storing first packet seq 0, idx 0, 170327682339214, offset -2085779428261 ms, output_idx 0
+[Switching to Thread 0x7fffeefff6c0 (LWP 453192)]
+
+Thread 3 "async" hit Hardware watchpoint 2: -location ring->fifo->buffer
+
+Old value = (uint8_t *) 0x5555558d1fe0 'Z' <repeats 200 times>...
+New value = (uint8_t *) 0x5555558d1f5a ""
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+warning: 660	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+watch-buffer.cmd:9: Error in sourced command file:
+No symbol "ring" in current context.

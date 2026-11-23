@@ -1,0 +1,69 @@
+Breakpoint 1 at 0x97495: file libavformat/async.c, line 89.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ring_init (capacity=4194304, read_back_capacity=4194304, ring=0x5555558d1e50) at libavformat/async.c:89
+89	    if (!ring->fifo)
+INIT buffer=0x5555558d1fe0
+Hardware watchpoint 2: -location ring->fifo->buffer
+[rist @ 0x5555560d2080] Starting in Main Profile Mode
+[rist @ 0x5555560d2080] RIST Receiver Library version:a911bee 
+[rist @ 0x5555560d2080] Starting in receiver mode
+[rist @ 0x5555560d2080] Encryption is disabled for this peer
+[rist @ 0x5555560d2080] URL parsed successfully: Host 0.0.0.0, Port 5004
+[rist @ 0x5555560d2080] Starting in URL listening mode (socket# 3)
+[rist @ 0x5555560d2080] Configured the starting socket receive buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Configured the starting socket send buffer size to 419430 Bytes.
+[rist @ 0x5555560d2080] Peer cname is mesh-home
+[rist @ 0x5555560d2080] rtt_min is too small (5) for the buffer size, using 1000/20 = 50ms instead
+[rist @ 0x5555560d2080] New peer with id #0 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Initialized Receiver Peer, listening mode ...
+[rist @ 0x5555560d2080] Active Peer Information, IP:Port => 0.0.0.0:5004 (1), id: 1, ports: 5004->1969
+[New Thread 0x7ffff79ff6c0 (LWP 454272)]
+[rist @ 0x5555560d2080] Starting receiver protocol loop with 5 ms timer
+[New Thread 0x7fffeefff6c0 (LWP 454273)]
+Input #0, data, from 'async:rist://@:5004':
+  Duration: N/A, start: 0.000000, bitrate: N/A
+  Stream #0:0: Data: none
+Unsupported codec with id 0 for input stream 0
+Processing read interval id:0 start:N/A end:N/A
+[rist @ 0x5555560d2080] New peer with id #2 was configured with maxrate=100000/0 bufmin=1000 bufmax=1000 reorder=15 rttmin=50 rttmax=500 congestion_control=1 min_retries=6 max_retries=20
+[rist @ 0x5555560d2080] Enabling keepalive for peer 2
+[rist @ 0x5555560d2080] New keepalive received. MAC: 34:5a:60:7c:10:21 X: 0 R: 0 B: 1 A: 0 P: 0 E: 1 L: 0: N: 1 D: 1 T: 0 V: 0: J: 1 F: 0
+[rist @ 0x5555560d2080] New RTCP peer connecting, flow_id 2989237786, peer_id 2, ports 0 <- 13532
+[rist @ 0x5555560d2080] Updating peer virt dst port to match remote source port: 32768
+[rist @ 0x5555560d2080] Peer 2 receiver name is now: mesh-home
+[rist @ 0x5555560d2080] FLOW #2989237786 created (short=1)
+[rist @ 0x5555560d2080] Peer with id #2 associated with flow #2989237786
+[rist @ 0x5555560d2080] Flow #2989237786 has now 1 peers.
+[New Thread 0x7ffff71fe6c0 (LWP 454366)]
+[rist @ 0x5555560d2080] Successfully Authenticated peer 2
+[rist @ 0x5555560d2080] Authenticated RTCP peer 2 and flow 2989237786 for connection with cname: mesh-home
+[rist @ 0x5555560d2080] Peer 2 receiver with name mesh-home reconnected
+[rist @ 0x5555560d2080] Failed to set data output thread to RR scheduler with prio of 99
+[rist @ 0x5555560d2080] Starting data output thread with 5 ms max output jitter
+[rist @ 0x5555560d2080] Authenticated RTP peer 2 and ssrc 2989237786 for connection with flowid 2989237786
+[rist @ 0x5555560d2080] Storing first packet seq 0, idx 0, 170474215695048, offset -2085779428261 ms, output_idx 0
+[Switching to Thread 0x7fffeefff6c0 (LWP 454273)]
+
+Thread 3 "async" hit Hardware watchpoint 2: -location ring->fifo->buffer
+
+Old value = (uint8_t *) 0x5555558d1fe0 'Z' <repeats 200 times>...
+New value = (uint8_t *) 0x5555558d1f5a ""
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+warning: 660	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+WATCH HIT
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:660
+#1  0x00005555555ee7b9 in memcpy (__len=<optimized out>, __src=<optimized out>, __dest=0x5555560d0a50) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  librist_read (h=<optimized out>, buf=0x5555560d0a50 "", size=9968) at libavformat/librist.c:230
+#3  0x00005555555ca498 in retry_transfer_wrapper (cbuf=<optimized out>, read=<optimized out>, size_min=<optimized out>, size=<optimized out>, buf=<optimized out>, h=<optimized out>) at libavformat/avio.c:522
+#4  ffurl_read2 (urlcontext=0x5555560d2080, buf=0x5555560d0a50 "", size=5520) at libavformat/avio.c:560
+#5  0x00005555555eb3ec in ffurl_read (size=<optimized out>, buf=<optimized out>, h=<optimized out>) at libavformat/url.h:183
+#6  wrapped_url_read (src=<optimized out>, dst=<optimized out>, size=0x7fffeeffee30) at libavformat/async.c:140
+#7  0x00005555557c1034 in fifo_write_common (opaque=0x5555558d1d80, read_cb=0x5555555eb3d0 <wrapped_url_read>, nb_elems=0x7fffeeffee80, buf=<optimized out>, f=0x5555560d2040) at libavutil/fifo.c:167
+#8  av_fifo_write_from_cb (f=0x5555560d2040, read_cb=read_cb@entry=0x5555555eb3d0 <wrapped_url_read>, opaque=opaque@entry=0x5555558d1d80, nb_elems=nb_elems@entry=0x7fffeeffee80) at libavutil/fifo.c:196
+#9  0x00005555555ebad7 in ring_write (size=<optimized out>, h=0x5555558d1d80, ring=0x5555558d1e50) at libavformat/async.c:152
+rip            0x7ffff7b89087      0x7ffff7b89087 <__memcpy_avx_unaligned_erms+775>
+rdi            0x5555560d2041      93825004281921
+rsi            0x7ffff0267601      140737222440449
+rdx            0x26f0              9968
