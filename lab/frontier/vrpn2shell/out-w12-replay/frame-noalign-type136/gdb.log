@@ -1,0 +1,30 @@
+Breakpoint 1 at 0x416f3d: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4482.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+HIT-REGS pc=0x416f3d rbp=0x7fffffffd930 rsp=0x7fffffffd8a0 rdi=0x88000000 rsi=0x41414141 rdx=0x3 rcx=0x20 rax=0x88 rbx=0x8
+   0x416f25 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+113>:	mov    rdi,rax
+   0x416f28 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+116>:	call   0x40af40 <strncpy@plt>
+   0x416f2d <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+121>:	mov    rax,QWORD PTR [rbp+0x30]
+   0x416f31 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+125>:	mov    eax,DWORD PTR [rax]
+   0x416f33 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+127>:	mov    edi,eax
+   0x416f35 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+129>:	call   0x40b4a0 <ntohl@plt>
+   0x416f3a <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+134>:	mov    DWORD PTR [rbp-0x14],eax
+=> 0x416f3d <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+137>:	mov    eax,DWORD PTR [rbp-0x14]
+   0x416f40 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+140>:	cdqe
+   0x416f42 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+142>:	mov    BYTE PTR [rbp+rax*1-0x80],0x0
+   0x416f47 <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+147>:	mov    rax,QWORD PTR [rbp-0x10]
+   0x416f4b <_ZN13vrpn_Endpoint19handle_type_messageEPv17vrpn_HANDLERPARAM+151>:	mov    rax,QWORD PTR [rax+0xe0]
+rax            0x88                136
+rbx            0x8                 8
+rcx            0x20                32
+rdx            0x3                 3
+rsi            0x41414141          1094795585
+rdi            0x88000000          2281701376
+rbp            0x7fffffffd930      0x7fffffffd930
+rsp            0x7fffffffd8a0      0x7fffffffd8a0
+r8             0x0                 0
+r9             0x8                 8
+r10            0x416b0c            4287244
+r11            0x246               582
+lab/frontier/vrpn2shell/out-w12-replay/frame-noalign-type136/gdb.cmd:15: Error in sourced command file:
+No symbol "sender_name" in current context.

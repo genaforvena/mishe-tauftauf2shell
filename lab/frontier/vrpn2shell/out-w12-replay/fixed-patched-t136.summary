@@ -1,0 +1,17 @@
+=== lab/frontier/vrpn2shell/out-w12-replay/fixed-patched-t136
+date_utc=2026-11-23T00:35:41Z
+bin=lab/frontier/vrpn2shell/build-w12-fixed/server_src/vrpn_server-marked3
+bin_sha256=ea0bf4e0817f551c84ad823d6518389f5fe7d84eafd0d5d2fbf9e06df50953c5  lab/frontier/vrpn2shell/build-w12-fixed/server_src/vrpn_server-marked3
+port=14215 index=136 msgtype=-2 hold=2.0
+status=ALIVE_AFTER_MESSAGE
+--- client
+cookie=b'vrpn: ver. 07.38  0\x00\x00\x00\x00\x00'
+index=136 payload_len=8 msg_len=32
+--- server stderr (last 12)
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)
+Deleting forwarder server
+Deleting generic server object...
+All devices closed...
+Deleting connection
+Deleted server and connection, Exiting.

@@ -1,0 +1,4 @@
+date_utc=2026-11-23T00:34:56Z
+bin=lab/frontier/vrpn2shell/build-w12-07.36/server_src/vrpn_server
+bin_sha256=52eefbfb7964c0988a8622a31d3578760c146c1fa960bad979e952422606d5a0  lab/frontier/vrpn2shell/build-w12-07.36/server_src/vrpn_server
+port=14201 index=136

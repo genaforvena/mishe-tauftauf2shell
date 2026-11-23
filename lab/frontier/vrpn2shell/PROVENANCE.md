@@ -360,3 +360,36 @@ and controls are in `out-w11-marked3-*`, `out-w11-fixed-marked3-*`,
 14115-14117, 14119-14121). Earlier wrong stub versions are preserved in
 `out-w11-marked-*` and `out-w11-marked2-*` as negative results. All probes were
 on 127.0.0.1 ports started by this plant; no server was left running.
+
+## W12 — clean rebuild self-replay and alignment control (2026-11-23 ~00:38Z)
+
+Built both pinned sources again in NEW directories with the exact W11 flags
+(`Debug`, `-fno-stack-protector -fno-pie -falign-functions=256`, link `-no-pie`);
+configure/build logs are `out-w12-replay/cfg-vuln.log`,
+`out-w12-replay/build-vuln.log`, `out-w12-replay/cfg-fixed.log` and
+`out-w12-replay/build-fixed.log`. Fresh unpatched SHA-256: vulnerable
+`52eefbfb7964c0988a8622a31d3578760c146c1fa960bad979e952422606d5a0`, fixed
+`f8d50ba72450f2db6e62ac8010c5ddc1796cc1bf728a404bb132a740d1c11792`. The
+digests differ from W11's because Debug info embeds the build directory; the
+code layout does not. `out-w12-replay/frame-136/gdb.log` again records
+`PRE i=136 ... rip136=0x413dda` / `POST ... rip136=0x413d00`.
+
+`install_marker_patch.py` with `--target 0x413d00 --ret 0x413dda --cave
+0x40be40` produced `out-w12-replay/patch-vuln.txt` and `patch-fixed.txt`
+(patched SHA-256 `fb0e4d1281f73f38af1efa65ddd660ed7d8f920d42d5dd55d4aa0580d16fc0d5`
+and `ea0bf4e0817f551c84ad823d6518389f5fe7d84eafd0d5d2fbf9e06df50953c5`).
+Six-case functional matrix, raw meta/client/server stderr in
+`out-w12-replay/vuln-patched-s136`, `vuln-patched-s4`, `fixed-patched-s136`,
+`vuln-patched-t136`, `fixed-patched-t136`, `vuln-unpatched-s136` (ports
+14211-14216): results match W11 exactly — patched vulnerable SENDER/TYPE 136
+ALIVE with marker, patched vulnerable SENDER 4 and patched fixed SENDER/TYPE
+136 ALIVE without marker, unpatched vulnerable SENDER 136 DEAD exit 139.
+
+Alignment control: `out-w12-replay/cfg-noalign.log` / `build-noalign.log`
+built `build-w12-noalign` with the same flags minus `-falign-functions=256`
+(SHA-256 `d82632d568a134cb6fa808423d06db7398c1665099b94dd25c086bd0ea71f18f`).
+`out-w12-replay/frame-noalign-136/gdb.log` and `type-noalign-gdb.log` record
+saved RIP `0x4108f2 -> 0x410800` on both sinks; `0x410800` is mid-function and
+`out-w12-replay/noalign-unpatched-s136` dies exit 139. The 256-byte function
+alignment is a measured precondition for the marker landing. Author
+self-replay; not a witness verdict. No server was left running.

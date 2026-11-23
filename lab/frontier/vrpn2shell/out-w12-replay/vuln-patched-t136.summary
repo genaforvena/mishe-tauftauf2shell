@@ -1,0 +1,19 @@
+=== lab/frontier/vrpn2shell/out-w12-replay/vuln-patched-t136
+date_utc=2026-11-23T00:35:35Z
+bin=lab/frontier/vrpn2shell/build-w12-07.36/server_src/vrpn_server-marked3
+bin_sha256=fb0e4d1281f73f38af1efa65ddd660ed7d8f920d42d5dd55d4aa0580d16fc0d5  lab/frontier/vrpn2shell/build-w12-07.36/server_src/vrpn_server-marked3
+port=14214 index=136 msgtype=-2 hold=2.0
+status=ALIVE_AFTER_MESSAGE
+--- client
+cookie=b'vrpn: ver. 07.36  0\x00\x00\x00\x00\x00'
+index=136 payload_len=8 msg_len=32
+--- server stderr (last 12)
+VRPN2SHELL_MARKER
+vrpn_TypeDispatcher::doSystemCallbacksFor:  Nonzero system handler return.
+vrpn_Endpoint::dispatch:  Nonzero system return
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)
+Deleting forwarder server
+Deleting generic server object...
+All devices closed...
+Deleting connection
+Deleted server and connection, Exiting.

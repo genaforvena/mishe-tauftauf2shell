@@ -1,6 +1,6 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-22 ~22:12Z. Wire rung 3 is OBSERVED on the live pinned 07.36
+Status 2026-11-23 ~00:38Z. Wire rung 3 is OBSERVED on the live pinned 07.36
 ASan server through both description handlers and, since W3, from a wire-supplied
 negative index; W7 extended it to an optimized (-O2) build. Plain-build wire
 input demonstrably changes a saved return address (W1/W2) and, at index -8,
@@ -16,7 +16,10 @@ message zeroes the saved return address low byte and reaches an installed
 `write(2,...)` marker before resuming normal execution, on both sinks, with
 fixed and short-input controls clean. The marker is installed by the patch,
 not chosen by the wire; this is not command execution, not rung 5, and is
-author-only pending replay. Stock builds remain at the witnessed rung 3.
+author-only pending replay. Stock builds remain at the witnessed rung 3. W12
+rebuilt both pins in fresh directories and reproduced the full marker matrix,
+and measured that the marker needs `-falign-functions=256`: with default
+function alignment the same wire index lands mid-function and faults.
 No chosen-byte control, no rung 5. W1/W2/W3/W6/W7/W10 consequence claims
 remain author-only pending replay; raw logs for every reported row are committed.
 
@@ -548,7 +551,7 @@ store is `mov BYTE PTR [rbp+rax-0x80],0x0`, so saved RIP is array offset 136.
 `0x413dda` is the instruction after `call rsi` at `0x413dd8`. Unpatched, that
 redirect faults (`out-w11-unpatched2-136`: DEAD exit 139).
 
-`install_marker_patch.py` copies a server binary and installs a 91-byte stub in
+`install_marker_patch.py` copies a server binary and installs a 95-byte stub in
 a `.text` NOP cave at `0x40be40`, replacing the five prologue bytes at
 `0x413d00` with `jmp 0x40be40`. The stub tests the return address at entry
 `[rsp]` against the real `.text` range `[0x40ba00, 0x57264d)`: in range means a
@@ -598,6 +601,45 @@ Reproduce from the repo root on fresh ports:
 `BIN=<out>/server_src/vrpn_server-marked bash lab/frontier/vrpn2shell/probe-func-dos.sh <outdir> <port> 136`.
 The target and return addresses must be re-measured if compiler, flags or
 source differ; `probe-marker-frame.sh` and `probe-marker-stub.sh` do that.
+
+
+## W12 — clean rebuild self-replay and the alignment precondition (2026-11-23 ~00:38Z)
+
+Both pinned sources were rebuilt in NEW directories with the exact W11 flags
+(`build-w12-07.36`, `build-w12-fixed`; configure and build logs in
+`out-w12-replay/cfg-*.log`, `build-*.log`). Fresh binary SHA-256: vulnerable
+`52eefbfb7964c0988a8622a31d3578760c146c1fa960bad979e952422606d5a0`, fixed
+`f8d50ba72450f2db6e62ac8010c5ddc1796cc1bf728a404bb132a740d1c11792`. The
+digests differ from W11's because Debug info embeds the build directory, but
+the code layout is identical: the fresh vulnerable build's frame probe
+(`out-w12-replay/frame-136/gdb.log`) again records `PRE i=136 ...
+rip136=0x413dda` and `POST ... rip136=0x413d00`, and `nm`/`objdump` confirm
+`0x413d00` is still the `doSystemCallbacksFor(HANDLERPARAM,void*)` entry with
+a NOP cave at `0x40be40`.
+
+Applying the committed patcher to both fresh binaries
+(`out-w12-replay/patch-{vuln,fixed}.txt`; patched SHA-256 `fb0e4d12...` and
+`ea0bf4e0...`) and replaying the six-case matrix on fresh ports 14211-14216
+reproduced W11 exactly: vulnerable patched SENDER 136 ALIVE with marker,
+SENDER 4 ALIVE without marker, fixed patched SENDER 136 ALIVE without marker,
+vulnerable patched TYPE 136 ALIVE with marker, fixed patched TYPE 136 ALIVE
+without marker, vulnerable unpatched SENDER 136 DEAD exit 139. Per-run `meta.txt`,
+client output and server stderr are in `out-w12-replay/*`.
+
+A control build with **default function alignment** (same flags minus
+`-falign-functions=256`, SHA `d82632d568a134cb6fa808423d06db7398c1665099b94dd25c086bd0ea71f18f`)
+measures the precondition: wire index 136 zeroes saved RIP `0x4108f2 ->
+0x410800` on both sinks (`frame-noalign-136/gdb.log`, `type-noalign-gdb.log`);
+`0x410800` is mid-function (`mov %rcx,0x20(%rax)` inside
+`doSystemCallbacksFor(int,...)`), not a function entry, and the unpatched
+server dies with exit 139 (`noalign-unpatched-s136`). The 256-byte function
+alignment is therefore what makes the zeroed low byte land on a callable
+entry; the marker is not available with default alignment on this build.
+
+This is author self-replay, not an independent witness verdict. Rung and grade
+are unchanged: lab-only patched rung-4 mechanic, no chosen byte, no command,
+no rung 5. It strengthens the turnkey W11 replay request #1770 by showing the
+marker survives a fresh build and by stating its build precondition.
 
 ## Limits and next work
 
