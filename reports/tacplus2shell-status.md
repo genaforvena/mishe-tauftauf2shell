@@ -386,3 +386,19 @@ bytes but glibc aborted with `free(): invalid next size (fast)` before the
 fake destructor fired. No `system()` call with the chosen command, no marker
 file, no command side effect. Rung 5 stays UNKNOWN; the advisory's
 `system()`/root chain remains claim text.
+
+W133 reachability refinement (2026-11-23 00:06Z). A read-only gdb probe on
+the plain vulnerable daemon with the lab `harness/tac.cfg`, driving the
+W127 prime+trigger via `harness/run_gdb2.py` (`--skips 8,9,10,11`), printed
+at `author.c:141`: `session->mem type=1 arr_count=0 arr=(nil)`,
+`session->user=(nil)`, and `session->ctx->mem type=2 arr_count=0 arr=(nil)`;
+at `packet.c:1326` the same session mem still had `arr_count=0`. So under
+this configuration the indirect call loop in `mem_destroy()` is not entered
+for either the session or the context: a destructor chain needs a config
+that registers one first. In the pinned source the registration sites are
+`mem_add_free(user->mem, RB_tree_delete, user->timespectable)`
+(`config.c:3622`, only for a user with `time`/`timespec`) and nettree/regex
+registrations on realm/global mem (`config.c:4582,4591,5235,5250`). No such
+config was exercised here; this is a measured limit of the current lab
+setup, not a claim about other configurations. Verdict unchanged: rung 4 at
+live-daemon scope, rung 5 UNKNOWN.
