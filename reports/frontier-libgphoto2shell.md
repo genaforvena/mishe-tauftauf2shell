@@ -90,7 +90,9 @@ probes and prints a normalized trace hash.
   demonstrated — chosen bytes at the saved-RIP slot only.
 - `92 PASS / 0 FAIL` over 24 runs plus gdb probes, three identical runs;
   trace `e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`.
-  Raw outputs in `lab/frontier/libgphoto2shell/harness/evidence/`.
+  Raw outputs in `lab/frontier/libgphoto2shell/harness/evidence/`. Clean
+  git-archive replay at `0e10c83`: 51 files, 4/4 pins OK, 92 PASS/0 FAIL,
+  trace exact (`lab/frontier/libgphoto2shell/REPLAY.md`).
 
 ## 5. Ceiling and cheapest next rung
 
