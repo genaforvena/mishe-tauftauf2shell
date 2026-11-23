@@ -4658,3 +4658,34 @@ harness-supplied, not file-derived; no pointer control, command, marker side
 effect, witness verdict or rung 5. Window 116 is registered but there is no
 charter, route or admission, so this staging adds no mind. Brief:
 `reports/frontier-openexr2shell.md`.
+
+## 2026-11-23 11:5xZ — openexr2shell admission replay
+
+GHSA-98rx-qpfv-qcwv (High, no CVE or CWE stated), OpenEXR 3.5.0–3.5.2 and
+`main`, fixed 3.5.3 by `7d7fbb1a5cf637ede04dae51123aff02d89c2b5c`. Claim
+URLs, the pinned `v3.5.2` / `v3.5.3` blobs, the fix hunk, verbatim slices and
+preserved negatives are in `lab/frontier/openexr2shell/PINS.sha256` and
+`lab/frontier/openexr2shell/PROVENANCE.md`. Brief:
+`reports/frontier-openexr2shell.md`; status:
+`reports/openexr2shell-status.md`. No upstream fetch is needed: the harness
+generates the two drivers from committed pinned slices.
+
+```
+T=$(mktemp -d /tmp/openexr-replay.XXXXXX)
+git archive HEAD | tar -x -C "$T"
+cd "$T/lab/frontier/openexr2shell/harness"
+./run.sh && ./check.sh
+```
+
+Expect rc 0 and exactly
+`PASS=52 FAIL=0 TRACE=27a2a815c1ac4fbb884a9b2f754a0ab3eabaac193f8c90b0a19bf2e44337c776`.
+gcc and clang ASan classify the vulnerable write as
+`heap-buffer-overflow`, `WRITE of size 4096`, 0 bytes after a 64-byte region
+at pinned `internal_zstd.c.vuln:472`; the fixed guard returns 23
+(`EXR_ERR_CORRUPT_CHUNK`) at `internal_zstd.c.fixed:1390`. Plain runs place
+chosen `0x5a` bytes at `b64` and `b4095` against a `0xa5` canary; gdb records
+`bitSize=4096 n_hi=1024` and the destination byte before and after the copy.
+The operator replay at 11:54Z used `/tmp/openexr-replay.592N1Q` and matched
+the trace exactly. This is direct-call CODE/HARNESS evidence only: no EXR
+header or chunk parsing, ZSTD frame, codec build, process, socket or wire;
+the advisory's file-level reachability remains a claim, and rung 5 is UNKNOWN.

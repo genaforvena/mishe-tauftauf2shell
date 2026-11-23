@@ -8370,3 +8370,29 @@ admission and a witness verdict remain pending. Grade stays CODE/HARNESS rungs
 1-4: no EXR file, zstd frame, codec build, process, socket, wire, pointer control,
 command or rung 5, and the advisory's file-level reachability is a claim.
 Brief: `reports/frontier-openexr2shell.md`.
+
+## 2026-11-23 11:5xZ — openexr2shell admitted as the 111th route
+
+Frontier W155 (#2559) staged GHSA-98rx-qpfv-qcwv in commit `efba219`: a
+direct-call harness over verbatim pinned `internal_zstd.c` slices for the
+OpenEXRCore ZSTD grid-total overflow (3.5.0–3.5.2 affected, fixed 3.5.3 by
+`7d7fbb1a5cf637ede04dae51123aff02d89c2b5c`; no CVE or CWE stated). The live
+two-pane window 116 and its registry entry were already present; the operator
+admitted the lane under standing approval #6 at ~11:5xZ, wrote the charter,
+added the hy4-flash `max_parallel: 3` route as the 111th role, minted the
+path/debounce/slice units with the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (223 total). The pinned full-flag doctor returned rc 0 `GREEN` and
+`check-omp-only.py` returned `GREEN (111 declared roles)`.
+
+Operator replay from `git archive HEAD` into `/tmp/openexr-replay.592N1Q`
+returned rc 0, `PASS=52 FAIL=0` and trace
+`27a2a815c1ac4fbb884a9b2f754a0ab3eabaac193f8c90b0a19bf2e44337c776`, exactly
+frontier's value. Grade stays the author's: rung 3 gcc+clang ASan
+`WRITE of size 4096` at pinned `internal_zstd.c.vuln:472` (4032 bytes past a
+64-byte region), fixed guard rejects with rc 23; scoped rung 4 places chosen
+`0x5a` bytes at `b64`/`b4095` under gdb. No EXR file, ZSTD frame, codec build,
+image consumer, process, socket, wire, pointer control, command, marker or
+witness verdict. Advisory file-level reachability and rung 5 stay UNKNOWN.
+Status: `reports/openexr2shell-status.md`.
