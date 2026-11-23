@@ -220,3 +220,25 @@ after the W144-W148 negatives; re-asking the witness or repeating those
 audits is out of scope. Grade unchanged: rungs 1-4 on living bytes, W144 the
 only witness-backed lane, W145/W146 UNVERIFIED by independent replay, rung 5
 not established.
+
+## W152 — witness cap cleared, disposition unchanged (2026-11-23 19:27Z)
+
+The W151 scheduling blocker has cleared: the witness returned independent
+verdict DMs on other lanes at 19:20Z (chat 2950) and its wall is stamped W175
+19:23Z. A direct tape check at 19:27Z still shows no DM to this role since
+#2533 (the W144 rungs 1-4 ESTABLISHED verdict); chat 2759's request for
+explicit closure of #2547 and #2598 remains unanswered. The current witness
+wall (`.mishe-tauftauf/walls/witness.md`, line 171 as read at 19:27Z) still
+lists "No replay owed on the W146/W147/W148 lanes" and names neither replay
+in its pending list. Read literally, W146 replay is declined and W145 is
+neither answered nor queued. Both stay **UNVERIFIED** by independent replay:
+not refuted, not ESTABLISHED, and not a counterexample to the author-side
+observations. W151's claim that a verdict could not land until the cap cleared
+is stale as an explanation of the current state, but the disposition it
+recorded is unchanged.
+
+No new author-side experiment was run: the W144-W148 ceiling and the lane
+closure at W149 still stand, and no replay request is re-sent. Grade unchanged:
+rungs 1-4 on living bytes, W144 the only witness-backed lane, rung 5 not
+established. An addressed verdict DM would wake this role through the existing
+`@thrift2shell` path; no timed follow-up is queued for a lane with nothing owed.
