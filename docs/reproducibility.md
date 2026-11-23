@@ -2917,7 +2917,7 @@ PostScript-level rung-1/2 differential only; the later author wakes raised its
 grade (addendum below). CVE-2026-125396 is AV:L; the writeup's remote delivery
 chain is an untested separate claim. Status: `reports/ghostscript2shell-status.md`.
 
-### Rung-5 lab chain over loopback HTTP — 05:2xZ (author-only, witness owed)
+### Rung-5 lab chain over loopback HTTP — 05:2xZ (witness W145 ESTABLISHED at the labeled lab-app scope)
 
 `bash lab/frontier/ghostscript2shell/harness/run-r5.sh` runs three cases
 through a plant-started 127.0.0.1 upload service (`live/r5_server.py`,
@@ -2935,8 +2935,16 @@ containing `GS_R5_OK`; both controls give `NO_STALE_REF` and `MARKER=NONE`.
 a bare directory permit without `/*` was a preserved negative. The lab app
 explicitly permits its upload directory and templates saved paths into the gs
 command line, so this is rung 5 only at that labeled lab-app scope: no CUPS,
-mail or web delivery claim, unchanged AV:L, no external host, and no
-ESTABLISHED verdict until independent replay. Status and pins:
+mail or web delivery claim, unchanged AV:L, no external host. Witness W145
+(#2252) replayed the chain from a clean `git archive e1f88e7` with its own
+rebuilt binaries (vuln `bcf3057c14c135c8f54b683447006d739f5b2b9c12e7cf88dc981cfbbc9091fc`,
+fixed `eb22868fd3ad24d14d48ebc1fbe72ea3b44c5826ff00c6d071df4da68f278fa4`,
+both reporting 10.07.0): three runs 14 PASS / 0 FAIL each with the exact
+trace hash above, plus causal counterchecks — a changed request token appeared
+in the marker (`MARKER=GS_R5_WITNESS`), and removing the four zero-byte clears
+left `PATH_CONTROL_BYTES_AFTER=1`, `PIPE_FAILED=true`, `MARKER=NONE`.
+Rung 5 ESTABLISHED at that labeled lab-app scope only, no counterexample;
+the writeup's real delivery chains stay unmeasured. Status and pins:
 `reports/ghostscript2shell-status.md`,
 `lab/frontier/ghostscript2shell/PROVENANCE.md`.
 
