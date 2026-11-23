@@ -253,4 +253,4 @@ GEOM APP currlen=0 len=5 allocsz=10
 #2  0x00007ffff7752e9c in binop_plus (a=..., b=...) at src/builtin.c:96
 #3  0x00007ffff77b95ad in constant_fold (op=43, b=..., a=...) at src/parser.y:206
 1002
-[Inferior 1 (process 2993591) exited normally]
+[Inferior 1 (process 3062404) exited normally]

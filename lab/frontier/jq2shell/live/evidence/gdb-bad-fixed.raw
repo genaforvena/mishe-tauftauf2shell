@@ -8,4 +8,4 @@ GEOM BAD-FIXED length=30 maxlength64=91
 #2  0x00007ffff77466ad in f_format (jq=<optimized out>, input=..., fmt=...) at src/builtin.c:836
 #3  0x00007ffff775ec93 in jq_next (jq=jq@entry=0x511000000040) at src/execute.c:916
 30
-[Inferior 1 (process 2995024) exited normally]
+[Inferior 1 (process 3062749) exited normally]

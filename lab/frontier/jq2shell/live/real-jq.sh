@@ -22,7 +22,7 @@ sha256sum -c PINS.sha256 > "$OUT/pins.out"
 
 CG=/sys/fs/cgroup$(sed -n 's/^0:://p' /proc/self/cgroup)
 {
-  for key in memory.max memory.high memory.current; do
+  for key in memory.max memory.high; do
     if [ -r "$CG/$key" ]; then
       echo "$key=$(cat "$CG/$key")"
     else
