@@ -2,3 +2,4 @@
 *-live-plain
 *-live-victim
 libvictim.so
+libneighbor_probe.so

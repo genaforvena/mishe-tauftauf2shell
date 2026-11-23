@@ -140,3 +140,45 @@ allocators or builds.
   forked client in the same process tree, both constrained to 127.0.0.1.
 - The parent's `su_root_step()` polling loop is a lab harness driver, not a
   production SIP server; its exit is not itself security impact.
+
+## W5: identity of the physical live neighbour (2026-11-23)
+
+The plain live lane previously knew only that the chunk after the frame
+buffer had size `0x111` and that `LD_PRELOAD`'s own 128-byte victim landed
+312 bytes away. This wake identifies the real neighbour with a bounded
+allocation-tracker shim, `lab/sofiasip2shell/libbuild/live/neighbor_probe.c`,
+driven by `run_neighbor_probe.sh` on the unmodified plain v17 live driver
+and fresh loopback ports 18871/18872. The shim interposes
+`malloc`/`calloc`/`realloc` through glibc's `__libc_*` entry points, records
+each allocation's caller and size, and on the pinned `ws.c:1057`
+`realloc(..., 65544)` looks for the allocation whose user pointer is
+`r+65552` — the neighbour whose size field starts at `r+65544`.
+
+Full case (`lab/sofiasip2shell/libbuild/evidence/w5/v17plain-neighbor-full.*`,
+rc 134): `NEIGHBOR_FOUND=1`, neighbour allocation size 264, caller
+symbolized with `addr2line` as `timers_alloc` at pinned
+`su/su_timer.c:201`. The bbuffer callers resolve to `ws_init` at
+`ws.c:744` (original 65536-byte allocation) and `ws_read_frame` at
+`ws.c:1057` (the realloc), confirming the library's own path. Raw neighbour
+bytes are `NEIGHBOR_FIRST8=1e00000000000000`: the first word is `0x1e`
+(30), not a pointer. `NEXT_SIZE_BEFORE=0000000000000111`, followed by the
+same `corrupted size vs. prev_size` abort and `TPORT_RECV count=1`. The
+65520-byte short control (`v17plain-neighbor-short.*`, rc 0) never fires the
+realloc probe, reaches `TPORT_RECV count=1` and stays clean.
+
+Source-bound layout: `HEAP_BODIES` at `su/sofia-sip/heap.h:162-198` defines
+the 264-byte control block as `{size_t _size; size_t _used;
+su_timer_t *_heap[2];}` with `_size = 32 - _offset = 30` at
+`heap.h:167-169`; `timers_alloc` is its realloc callback at
+`su_timer.c:196-204`. `struct su_timer_s` at `su_timer.c:159-170` puts
+`sut_wakeup` well past the first words. The 5/6 overwritten bytes are the
+low bytes of `_size`; the timer pointers and the callback are out of reach.
+
+This is a **measured negative at the live-process scope**, not a new rung-4
+positive and not rung 5: no pointer, callback, marker, command or side
+effect was obtained. The mask is still repeating-XOR and requires heap-byte
+knowledge; the neighbour chunk's size is corrupted by the same write and
+glibc aborts before any timer-heap use. Enlarging `_size` would additionally
+require enough queued timers for `_used` to approach `_size`, which was
+neither measured nor claimed. The identity measurement is author-observed;
+an independent witness replay was requested.

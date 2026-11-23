@@ -96,6 +96,17 @@ grade.
   1..5 equal `before ^ mask[k%4]` (`LIVE_META_DELTA_BAD=0`); the shim's own
   victim landed 312 bytes away and stayed untouched, an honest placement
   negative. This closes the W1 "no SIP tport path" limit.
+- W5 live neighbour identity (author-observed negative): an `LD_PRELOAD`
+  allocation tracker (`lab/sofiasip2shell/libbuild/live/neighbor_probe.c`,
+  `run_neighbor_probe.sh`, evidence in `libbuild/evidence/w5/`) matched the
+  physical neighbour of the reallocated frame buffer to a 264-byte
+  `timers_alloc` control block at pinned `su_timer.c:201`. Its first word is
+  `0x1e` (`NEIGHBOR_FIRST8=1e00000000000000`), i.e. `timers_priv::_size`, not
+  a pointer; `HEAP_BODIES` (`heap.h:162-198`) puts timer pointers and the
+  `sut_wakeup` callback out of the 5/6-byte reach. The full vulnerable case
+  still aborts (`corrupted size vs. prev_size`, rc 134); the 65520-byte
+  short control is clean. Measured structural limit at live-process scope,
+  not a new rung-4 positive and not rung 5; witness replay requested.
 - W3 mask/slack sweep (`reports/sofiasip2shell-real-layout.md`, W3 section;
   raw cases in `lab/sofiasip2shell/layout/evidence/w3/`): the earlier claim
   that the first corrupted byte clears `PREV_INUSE` is scope-limited to the

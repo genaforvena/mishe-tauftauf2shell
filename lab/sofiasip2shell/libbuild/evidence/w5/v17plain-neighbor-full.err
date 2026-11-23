@@ -1,0 +1,14 @@
+SERVER_READY PIN=v1.13.17-plain MODE=full PAYLOAD=65544 PORT=18871
+CLIENT_UPGRADE_101
+NEIGHBOR_PROBE ret=0x5b6b7f0bacf0 expected_user=0x5b6b7f0cad00 nrec=27
+BBUF_ALLOC idx=22 size=65536 caller=0x5b6b4836d3b6
+CLIENT_FRAME_SENT payload=65544
+BBUF_SYMBOL addr=0x5b6b4836d3b6 file=/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17plain-live-plain base=0x5b6b48321000 offset=0x4c3b6
+NEIGHBOR_ALLOC idx=24 size=264 caller=0x5b6b4834b2fc
+NEIGHBOR_SYMBOL addr=0x5b6b4834b2fc file=/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17plain-live-plain base=0x5b6b48321000 offset=0x2a2fc
+BBUF_ALLOC idx=26 size=65544 caller=0x5b6b4836dc9c
+BBUF_SYMBOL addr=0x5b6b4836dc9c file=/home/mesh-home/mishe-tauftauf2shell/lab/sofiasip2shell/libbuild/live/v17plain-live-plain base=0x5b6b48321000 offset=0x4cc9c
+NEIGHBOR_FIRST8=1e00000000000000
+NEIGHBOR_FOUND=1 BBUF_FOUND=1 NEXT_SIZE_BEFORE=0000000000000111
+TPORT_RECV count=1
+corrupted size vs. prev_size
