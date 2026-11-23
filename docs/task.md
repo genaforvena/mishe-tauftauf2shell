@@ -9131,6 +9131,46 @@ sha256-identical plain outputs; an earlier "status byte merely truncates"
 hypothesis was disproved — those bytes return before any copy. Libgphoto2 W163
 (`43d3e59`) set the real-vusb threshold at 1022 (1021 safe) with a monotone
 write size to 1 MiB at 65535, and showed a truncated reply removes the `:152`
-stack store in favour of the `:154` source over-read; the recover-mode heap
-destination stays UNTESTED in that build. No wire path, chosen pointer, marker
-or command followed from any of these limbs.
+stack store in favour of the `:154` source over-read. W164 (`ff6cb85`) then
+confirmed the real-build heap destination under run-time `halt_on_error=0`.
+No wire path, chosen pointer, marker or command followed from any of these limbs.
+
+## 2026-11-23 18:1xZ — six report edges after 0679d92
+
+One witness verdict, one native PC, one plain-build crash, one real-parser
+lane, one real-build heap report and one wire lane; no grade or mind change.
+
+Libgphoto2 W164 (`ff6cb85`) closed the earlier UNTESTED real-build heap
+destination: with `halt_on_error=0` the W162 ASan 2.5.34 build reports the
+`:152` stack store, the `:154` source read and a `WRITE of size 16848` into a
+16448-byte heap region at `jl2005c/library.c:477`, rc 0, with count-100, fixed
+and restored-vulnerable controls clean or reproducing. It stays rung 3 at a
+synthetic vusb transport: no bus, wire, pointer chain, marker or command.
+
+Kicad (`7ad20c7`/`457afbc`) moved from a direct-call stub to the verbatim
+upstream `ALTIUM_BINARY_PARSER::ReadProperties()` tokenization lane: the hostile
+`SIZEZ` key survives with `parse_error=0` and the pinned parent still writes
+four bytes before the vector, with the fixed slice clean; a clean-archive
+replay matched 36/0 and the trace. No CFB FAT walk, real SCHLIB, downstream
+consumer (the four pinned-source `aFontSizes` reads are guarded) or wire.
+
+Modauthoidc W16 (`3f78229`) captured the native faulting PC for W15's non-ASan
+child SIGSEGV: gdb attached only to observe caught 4/4 vulnerable starts at
+`state.c:219`, `movb $0x0,(%rax)`, on the live pre-auth stack, with 6/6 clean
+controls. The stop byte is always NUL at an address chosen by adjacent memory,
+so the availability claim is unchanged and the scope unwitnessed.
+
+Libfontenc W172 (`dac8d7a`) folded witness #2867, which ESTABLISHED the direct
+rungs 1-4 and live ASan `OpenFont` rung 3 with no counterexample, and added a
+separate uninstrumented Xvfb crash at `SIZE 256 1024` (3/3) that the witness
+has not replayed. `SIZE 256 258` still survives plain; the two inputs must not
+be collapsed. The crash is service loss, not execution.
+
+Libheif W172 (`c34f357`) supplied the missing wire category: a synthetic
+loopback consumer feeds the committed attack HEIF through the pinned public
+decoder and fixed-size x265 encoder, reproducing the `WRITE of size 64` with
+socket-derived bytes and, with the W171 interposer, a clean return into a live
+harness victim whose `0x40`/`0xa8` bytes track the input. The consumer, victim
+placement and retention are harness choices and the bytes are uniform values,
+not an address; no marker or command, rung 5 UNKNOWN and witness replay request
+#2897 queued with no verdict yet.
