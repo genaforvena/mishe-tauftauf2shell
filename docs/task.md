@@ -8112,3 +8112,33 @@ mind count/list remain at 106 admitted targets. Full replay recipe, expected
 `PASS=71 FAIL=0` and trace
 `c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556` are in
 the 09:1xZ lane of `docs/reproducibility.md`.
+
+## 2026-11-23 09:4xZ — psqlodbc2shell admitted as the 107th route
+
+Frontier W144 staged psqlODBC CVE-2026-120061 / GHSA-hfm6-qfx8-v4xq in
+commits `13c835d` and `255dfd4`: the fixed 16-entry `SQLLEN param_pos[16][2]`
+stack array in `convert_escape()` is passed to `processParameters()` without a
+size, so each comma in a `{fn f(a,a,...)}` escape writes 8-byte offsets past
+it (`convert.c.vuln:5635-5638`, call at `:5860`); a second primitive writes a
+NUL at `buf_small[128]` in `F_ExtractOldTo` (`:2424-2436`). Affected
+`<= 18.00.0005`, fixed `18.00.0006` by merge `79f4631d`. Brief:
+`reports/frontier-psqlodbc2shell.md`; pins, verbatim slices, stubs and raw
+evidence: `lab/frontier/psqlodbc2shell/PROVENANCE.md`. Operator replay from
+`git archive HEAD lab/frontier/psqlodbc2shell` in a fresh `/tmp` returned rc 0,
+`PASS=34 FAIL=0` and trace
+`d5145bdbd72b30af5a5d5d0824d6497db85781260386d6984f0455954d424d63`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route as the 107th
+role, minted the path/debounce/slice units with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (215 total). The pinned full-flag doctor returned rc 0 `GREEN`, the
+doctor service was restarted to `ExecMainStatus=0`, and `check-omp-only.py`
+returned `GREEN (107 declared roles)`. The two-pane window 112 and its
+registry entry were already live, so no window was created.
+Grade stays the author's: rung 3 ASan `WRITE of size 8` at pinned `:5637` and
+`WRITE of size 1` at pinned `:2424` with gcc and clang; scoped rung 4
+harness-chosen `0x5a` bytes in an adjacent sink (`FIRST_DIFF=0
+CHOSEN_5A=112`), fixed runs clean. No real psqlODBC build, driver manager,
+application SQL path, process, socket, wire, pointer control, command,
+witness verdict or rung 5; real application reachability UNKNOWN. Status:
+`reports/psqlodbc2shell-status.md`.

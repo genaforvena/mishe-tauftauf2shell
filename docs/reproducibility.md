@@ -4223,3 +4223,42 @@ and a harness-adjacent sink; no real psqlODBC build, driver manager, ODBC API
 entry point, application SQL path, process, socket, wire, pointer control,
 marker, command or witness verdict. The CWE-457 uninitialized-array limb is
 recorded from source but not exercised.
+
+## 2026-11-23 09:4xZ — psqlodbc2shell admission replay
+
+CVE-2026-120061 / GHSA-hfm6-qfx8-v4xq, psqlODBC `<= 18.00.0005`, fixed
+18.00.0006 by merge `79f4631db27cdb62276d3d9d3c1e5c47dcc315c0`. Claim URLs,
+the pinned tags `REL-18_00_0005`/`REL-18_00_0006` and their `convert.c` blobs,
+the fix patch, the two verbatim slices, the stubs and the raw evidence are in
+`lab/frontier/psqlodbc2shell/PROVENANCE.md` and `PINS.sha256`. Brief:
+`reports/frontier-psqlodbc2shell.md`; status:
+`reports/psqlodbc2shell-status.md`. The harness re-extracts the verbatim
+`F_ExtractOldTo` (2424-2436) and `processParameters` (vulnerable 5607-5698,
+fixed 5607-5710) slices from the pinned blobs under `#line` directives on
+every run, then builds gcc and clang plain/ASan drivers. No driver manager,
+DSN, PostgreSQL server, SQL text path or listener is used.
+
+```
+T=$(mktemp -d /tmp/psqlodbc2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/psqlodbc2shell | tar -x -C "$T"
+bash "$T/lab/frontier/psqlodbc2shell/harness/run.sh"
+bash "$T/lab/frontier/psqlodbc2shell/harness/check.sh"
+```
+
+Expect `run.sh` to end with
+`TRACE d5145bdbd72b30af5a5d5d0824d6497db85781260386d6984f0455954d424d63`
+and `check.sh` with `PASS=34 FAIL=0`, rc 0. ASan on the vulnerable slice
+reports `stack-buffer-overflow`, `WRITE of size 8` at pinned
+`convert.c.vuln:5637` in `processParameters` and `WRITE of size 1` at pinned
+`:2424` in `F_ExtractOldTo`, with gcc and clang in agreement; the fixed slices
+reject 24 arguments with "too many parameters in the escape function call"
+and are ASan-clean. The plain vulnerable build puts harness-chosen `0x5a`
+bytes in an adjacent sink (`FIRST_DIFF=0 CHOSEN_5A=112`, dump beginning
+`215a5a5a5a5a5a5a21`); fixed runs leave it all `0xCC`.
+
+Boundaries: direct call with stubbed token processing and struct layouts;
+plain builds need `-fno-stack-protector` to reach the observation. There is
+no real psqlODBC build, ODBC driver manager, application SQL path, process,
+socket, wire, pointer control, ROP chain, command, marker side effect,
+witness verdict or rung 5. The CWE-457 uninitialized-array limb is recorded
+from source but not exercised.
