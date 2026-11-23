@@ -336,3 +336,18 @@ always NUL, no chosen byte, pointer control, consumer dereference, command or
 rung 5; grade unchanged, author-only/unwitnessed. Raw:
 `full/evidence/sys-gdb/README.md`; replay `cd
 lab/frontier/modauthoidc2shell/full && bash probe-sys-gdb.sh`.
+
+**Wire-chosen store on the non-ASan stack (2026-11-23 W17).** The W8
+second-cookie input now runs on W15's system httpd / system APR full modules
+with no `libasan` (`full/probe-sys-store.sh`, 127.0.0.1:18091). Five padding
+lengths returned 302 on both modules; the vulnerable parent dispatched the
+second cookie's value 5/5 while the released tag dispatched 0/5, no child
+fault. gdb at pinned `state.c:219` read `0x3d` before and `0x00` after at
+token offsets 39 and 63, with the copied header and the pre-auth stack
+through `handle/request.c:132` visible in raw transcripts. The store is
+in bounds on the header copy, not a pointer field; the byte is always NUL,
+the client chooses only its offset, and there is no consumer dereference,
+command or rung 5. Grade unchanged; author-only/unwitnessed. Raw:
+`full/evidence/sys-store/README.md`; replay `cd
+lab/frontier/modauthoidc2shell/full && bash probe-sys-store.sh`.
+

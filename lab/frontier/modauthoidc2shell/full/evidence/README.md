@@ -111,10 +111,15 @@ the runner because it depends on arena layout.
   tag 6/6 HTTP 302 with no catch. The PC is native but debugger-observed;
   byte always NUL, no chosen byte, pointer control, consumer dereference,
   command, rung 5 or witness verdict. Raw: `sys-gdb/README.md`.
+- W17 reproduces W8's wire-chosen, in-bounds NUL store on W15's non-ASan
+  production-allocator stack: `probe-sys-store.sh` got 5/5 302 and 5/5
+  dispatches on the pinned parent, 0/5 on the released tag, and gdb measured
+  `0x3d`→`0x00` at token offsets 39 and 63. Byte always NUL, no pointer
+  target, command, rung 5 or witness verdict. Raw: `sys-store/README.md`.
 
 
 ## Re-run
 
 ```
-cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh && bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh && bash probe-plain-keepalive.sh && bash probe-plain-response.sh
+cd lab/frontier/modauthoidc2shell/full && bash run.sh && bash probe-store.sh && bash probe-gdb.sh && bash build-plain.sh && bash probe-plain-oob.sh && bash probe-plain-detail.sh && bash probe-plain-keepalive.sh && bash probe-plain-response.sh && bash probe-sys-native.sh && bash probe-sys-first.sh && bash probe-sys-gdb.sh && bash probe-sys-store.sh
 ```

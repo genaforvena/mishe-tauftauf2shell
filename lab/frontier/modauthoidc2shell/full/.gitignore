@@ -31,4 +31,13 @@ httpd-sys-fixed.pid
 error-sys.log
 error-sys-fixed.log
 evidence/sys-native/*-error.log
+evidence/sys-store/*-error.log
+evidence/sys-store/gdb-*.txt
+evidence/sys-store/*-start.out
+evidence/sys-store/*-codes.txt
+evidence/sys-store/summary.txt
+httpd-sys-store.pid
+httpd-sys-store-fixed.pid
+error-sys-store.log
+error-sys-store-fixed.log
 evidence/sys-gdb/*-error.log

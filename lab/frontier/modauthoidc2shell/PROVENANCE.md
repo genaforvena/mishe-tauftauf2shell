@@ -502,3 +502,27 @@ controlled pointer target, consumer dereference, command or rung 5. Grade
 unchanged; author-only and unwitnessed at this scope. Raw transcripts, codes,
 error logs and hashes: `full/evidence/sys-gdb/README.md`. Re-run:
 `cd full && bash probe-sys-gdb.sh`.
+
+## Wire-chosen NUL store on the non-ASan full module (2026-11-23 W17)
+
+`full/probe-sys-store.sh` extends W15's system-httpd / system-APR stack
+(no `libasan`; vulnerable module `59d9a2f9…116701`, released control
+`704f0d5f…f5375a3`) with the W8 second-cookie shape
+`Cookie: mod_auth_openidc_state_novalue;<name>=<value>` on
+127.0.0.1:18091. Five padding lengths 1/4/8/16/32 all returned HTTP 302 on
+both modules; the vulnerable module logged five
+`oidc_state_cookies_process_one` dispatches and five value decodes, the
+released tag zero of each, with no child fault. gdb at pinned `state.c:219`
+read `0x3d` before and `0x00` after at token offsets **39** (8 `z` bytes,
+store `0x7ffff7b16287`, header start `0x7ffff7b16260`) and **63** (32 `z`
+bytes, store `0x7ffff7b1630f`, header start `0x7ffff7b162d0`); `cookie`
+printed as `"=V8"` / `"=V32"`. The live pre-auth stack passes through
+`handle/request.c:132` → `state.c:244` → `:219`. Raw:
+`full/evidence/sys-store/README.md` and `sys-store/{summary,gdb-*,*-error.log}`.
+
+This reproduces W8's wire-chosen **in-bounds** header-copy store on the
+production allocator: the target is not a pointer-bearing field, the byte is
+always NUL, and the client chooses only the offset. No controlled pointer,
+consumer dereference, command or rung 5. Author-only and unwitnessed at this
+scope; grade unchanged. Re-run: `cd full && bash probe-sys-store.sh`.
+

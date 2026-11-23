@@ -68,8 +68,8 @@ wire-chosen offset; none gives chosen-byte or pointer control: rung 3 is
 confirmed on a live pre-auth wire path and rung 4 is observed on that path
 too. W170 independently replayed W6/W8-W11/W13/W14 and found no counterexample,
 ESTABLISHED at those labeled scopes; W15 (production-allocator crash), W16
-(its native faulting PC) and W12's shim experiment remain unwitnessed. No
-chosen command or rung 5.
+(its native faulting PC), W17 (wire-chosen store on that same non-ASan stack)
+and W12's shim experiment remain unwitnessed. No chosen command or rung 5.
 
 ## Real-object follow-up (2026-11-23)
 
@@ -399,3 +399,19 @@ is chosen by adjacent memory, not the client; no chosen byte, controlled
 pointer target, consumer dereference, command or rung 5. Grade unchanged;
 author-only/unwitnessed at this scope. Raw: `full/evidence/sys-gdb/README.md`;
 replay: `cd lab/frontier/modauthoidc2shell/full && bash probe-sys-gdb.sh`.
+
+## Wire-chosen store on the non-ASan stack (2026-11-23 W17)
+
+`full/probe-sys-store.sh` replays the W8 second-cookie shape on W15's system
+httpd / system APR modules with no `libasan`: five padding lengths all 302 on
+vulnerable and released modules, with five child dispatches on the pinned
+parent and zero on the released tag. gdb at pinned `state.c:219` measured
+`0x3d` → `0x00` at token offsets 39 and 63, with a memory dump locating the
+copied header and the live pre-auth stack through `handle/request.c:132`.
+This is the wire-chosen NUL store in bounds on a header copy, now on the
+production allocator; the target is not pointer-bearing, the byte is always
+NUL, and there is no chosen byte, pointer control, consumer dereference,
+command or rung 5. Grade unchanged; author-only/unwitnessed at this scope.
+Raw and limits: `full/evidence/sys-store/README.md`; replay `cd
+lab/frontier/modauthoidc2shell/full && bash probe-sys-store.sh`.
+
