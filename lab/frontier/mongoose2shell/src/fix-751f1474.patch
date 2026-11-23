@@ -1,0 +1,68 @@
+From 751f14742dea934bec08a507ab1fecc3673d4903 Mon Sep 17 00:00:00 2001
+From: "Sergio R. Caprile" <scaprile@gmail.com>
+Date: Wed, 1 Jul 2026 14:13:31 -0300
+Subject: [PATCH] strenghten len checks
+
+---
+ mongoose.c   | 4 +++-
+ src/l2_ppp.c | 4 +++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/mongoose.c b/mongoose.c
+index 2663634cff..a4d44d3e56 100644
+--- a/mongoose.c
++++ b/mongoose.c
+@@ -5596,6 +5596,7 @@ static void ppp_handle_lcp(struct mg_tcpip_if *ifp, uint8_t *lcpp,
+   if (lcpsz < sizeof(*lcp)) return;
+   id = lcp->id;
+   len = mg_ntohs(lcp->len);
++  if (len < sizeof(*lcp) || len > lcpsz) return;
+   switch (lcp->code) {
+     case MG_PPP_LCP_CFG_REQ: {
+       if (len == sizeof(*lcp)) {
+@@ -5652,7 +5653,7 @@ static void ppp_handle_ipcp(struct mg_tcpip_if *ifp, uint8_t *ipcpp,
+   if (ipcpsz < sizeof(*ipcp)) return;
+   id = ipcp->id;
+   len = mg_ntohs(ipcp->len);
+-  if (len > ipcpsz) return;
++  if (len < sizeof(*ipcp) || len > ipcpsz) return;
+   switch (ipcp->code) {
+     case MG_PPP_IPCP_CFG_REQ:
+       MG_VERBOSE(("got IPCP config request, acknowledging..."));
+@@ -5712,6 +5713,7 @@ static void ppp_handle_ipv6cp(struct mg_tcpip_if *ifp, uint8_t *ipv6cpp,
+   if (ipv6cpsz < sizeof(*ipv6cp)) return;
+   id = ipv6cp->id;
+   len = mg_ntohs(ipv6cp->len);
++  if (len < sizeof(*ipv6cp) || len > ipv6cpsz) return;
+   switch (ipv6cp->code) {
+     case MG_PPP_IPV6CP_CFG_REQ:
+       MG_VERBOSE(("got IPV6CP config request..."));
+diff --git a/src/l2_ppp.c b/src/l2_ppp.c
+index a7ecf160c1..cc63c915d0 100644
+--- a/src/l2_ppp.c
++++ b/src/l2_ppp.c
+@@ -243,6 +243,7 @@ static void ppp_handle_lcp(struct mg_tcpip_if *ifp, uint8_t *lcpp,
+   if (lcpsz < sizeof(*lcp)) return;
+   id = lcp->id;
+   len = mg_ntohs(lcp->len);
++  if (len < sizeof(*lcp) || len > lcpsz) return;
+   switch (lcp->code) {
+     case MG_PPP_LCP_CFG_REQ: {
+       if (len == sizeof(*lcp)) {
+@@ -299,7 +300,7 @@ static void ppp_handle_ipcp(struct mg_tcpip_if *ifp, uint8_t *ipcpp,
+   if (ipcpsz < sizeof(*ipcp)) return;
+   id = ipcp->id;
+   len = mg_ntohs(ipcp->len);
+-  if (len > ipcpsz) return;
++  if (len < sizeof(*ipcp) || len > ipcpsz) return;
+   switch (ipcp->code) {
+     case MG_PPP_IPCP_CFG_REQ:
+       MG_VERBOSE(("got IPCP config request, acknowledging..."));
+@@ -359,6 +360,7 @@ static void ppp_handle_ipv6cp(struct mg_tcpip_if *ifp, uint8_t *ipv6cpp,
+   if (ipv6cpsz < sizeof(*ipv6cp)) return;
+   id = ipv6cp->id;
+   len = mg_ntohs(ipv6cp->len);
++  if (len < sizeof(*ipv6cp) || len > ipv6cpsz) return;
+   switch (ipv6cp->code) {
+     case MG_PPP_IPV6CP_CFG_REQ:
+       MG_VERBOSE(("got IPV6CP config request..."));

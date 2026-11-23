@@ -433,3 +433,43 @@ value byte-for-byte.
 The shell-safety classifier was also checked directly on both vptrs:
 `38c461555555` -> SAFE 1, `28c461555555` -> SAFE 0.
 
+
+## Adaptive fake-vtable offset (W7, 2026-11-23T05:08Z)
+
+New `rsp/r5_portable_verify.sh` (same pins and invocation as
+`r5_system_verify.sh`, separate `evidence-portable/` and ignored
+`r5-bin-portable/`) derives the object with abort@plt at the fixed +8
+layout, then selects the first fake-vtable offset in
+`8, 0x10, 0x18, 0x20, 0x28, 0x30` whose vptr bytes pass the W6 literal-word
+whitelist and `sh -n -c`. `system` goes at `vptr+0x10`; decoded length is
+`N=64+delta-8`, so the largest offset writes through `obj+0x47` (inside
+the 0x58-byte usable chunk measured at `obj-8`). The staged command name is
+re-derived from the chosen vptr, not from a fixed assumption.
+
+Commands (from repo root):
+`bash lab/frontier/gdbserver2shell/rsp/r5_portable_verify.sh $PWD/lab/build/gdbserver-633ae02-plain/gdbserver/gdbserver $PWD/lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver-fixed`.
+Binary SHA-256: plain `7a5f8feb099f0ccb58ce5cc306ba242560b4b8c195d6e526c528318cff7d99b1`,
+fixed `0827f1a400795eeaca41806a03b4b62fb53c188361900aa68e9850a7c833aab3`.
+libc base `0x7ffff7800000`, `system` offset `0x58750`, address
+`0x7ffff7858750` (endbr64), re-derived by the script each run.
+
+Default run: `DERIVED obj=0x55555561c440`, `CHOSEN delta=0x8`,
+`COMMAND_HEX=48c461555555`, 4 PASS / 0 FAIL,
+`P_SYSTEM_NORMALIZED_HASH=9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`.
+Forced-offset run: a scratch copy of the same script with the candidate
+tuple replaced by `(0x10,)` (scratch file deleted; evidence preserved under
+`evidence-portable/forced-0x10/`) gave `CHOSEN delta=0x10`,
+`COMMAND_HEX=50c461555555`, `SLOT_LEN=72`, `MARKER=1` on vuln+system,
+abort rc134, fixed E01, safe clean, 4 PASS / 0 FAIL,
+`P_SYSTEM_NORMALIZED_HASH=6be8244f7949331ac1f8ee9e1a1389e4f30a8525f25317a444063367d41d3747`.
+Both hashes were recomputed from the preserved transcript/marker files.
+
+Chooser enumeration over `obj=0x55555561c400 + n*0x10`, `n=0..12`, found a
+passing offset for every value; W140's low byte `0x20` selects `+0x10`
+(`30c461555555`, ASCII `0`) instead of the unsafe `+8` (`28c461555555`).
+Negative result preserved: attempts to reproduce W140's exact environment
+locally failed. An added `GROOM` variable of 0/16/32/48 bytes moved the
+object to `c460/c460/c470/c480`; unsetting two long variables and a
+minimal `env -i` run found no abort in `c380..c600`. The unsafe-byte case
+is therefore verified by the chooser computation plus the forced-offset
+marker run, not by a replay in W140's environment.

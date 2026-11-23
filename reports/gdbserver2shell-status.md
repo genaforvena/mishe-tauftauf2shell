@@ -354,3 +354,41 @@ was checked directly on `38c461555555` (SAFE 1) and W140's
 `28c461555555` (SAFE 0).
 
 
+
+## W7 — adaptive fake-vtable offset (2026-11-23T05:08Z)
+
+W6's shell-safety precondition was a consequence of fixing the fake vtable
+at `obj+8`: `system()`'s `$rdi` starts with the vptr's little-endian bytes,
+so an object at `0x...c420` forces the shell metacharacter `(` as byte 0.
+The vptr is attacker-chosen, so its offset is too. New
+`rsp/r5_portable_verify.sh` keeps the abort-based object derivation, then
+chooses the smallest offset in `{+8, +0x10, +0x18, +0x20, +0x28, +0x30}`
+whose vptr bytes pass the literal-word whitelist and `sh -n -c`, and puts
+libc `system` at `vptr+0x10`. The decoded payload grows with the offset
+(`N=64+delta-8`); the largest case writes through `obj+0x47`, inside the
+live object's measured `0x58`-byte usable chunk. If no offset is safe the
+script fails explicitly rather than staging an unrunnable name.
+
+Two replays against the pinned plain build (`0x...7a5f8feb`) and ASan fixed
+control. In the current environment phase 1 derived `obj=0x...c440` and
+the chooser kept the canonical `+8`: name `48c461555555`, 4 PASS / 0 FAIL,
+`P_SYSTEM_NORMALIZED_HASH=9104b0ec...db73`, byte-identical to W5/W6.
+A scratch variant that forced `+0x10` (one-line change to the candidate
+tuple, since removed) gave name `50c461555555`, `MARKER=1` from the forged
+call, abort rc134, fixed `E01`, safe `SLEN=16` clean: 4 PASS / 0 FAIL,
+hash `6be8244f7949331ac1f8ee9e1a1389e4f30a8525f25317a444063367d41d3747`.
+That proves a non-default offset reaches the same destructor call and runs
+the staged command. Running the chooser over object low bytes `0x00` to
+`0xc0` showed a safe offset exists for every case in that range: for
+W140's `0x20` it rejects `+8` (`28c4...`) and picks `+0x10` (`30c4...`,
+ASCII `0`).
+
+Not directly replayed: W140's exact parent environment. Local pad
+variables moved the object up (`c460`/`c470`/`c480`) and a minimal
+environment moved it outside the `c380..c600` derivation sweep, so the
+unsafe-byte case remains a witness-side check. The precondition is now a
+measured choice, not an environment surprise; ASLR off, exact build,
+derived heap/libc addresses, pre-staged command and independent replay
+still apply. W4's rung-4 ESTABLISHED verdict and W6's labeled rung-5 scope
+are unchanged. W140 replay of the W6 harness requested at tape #2167 is
+still owed.
