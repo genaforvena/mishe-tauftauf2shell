@@ -157,3 +157,12 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   labeled scope only — rung 3 at the real heap destination, NOT rung 4
   impact, rung 5 UNKNOWN. The witness also closed #2763 with the harness
   check at 146 PASS/0 FAIL and trace `e364f756…c6c98`.
+
+- Plain-build saved-RIP probe (W165): a separate real-library build without
+  ASan (default distro stack protector) aborts at count 1022 with
+  `*** stack smashing detected ***` (`rc=134`). gdb at `__stack_chk_fail`
+  shows the real `jl2005c_init` frame with its canary and saved RIP both
+  equal to the device-chosen `0x5a5a5a5a5a5a5a`; the protector aborts
+  before `ret`, so no chosen control-flow target executes. This is chosen
+  bytes at a real control-flow slot, not IP control; rung 5 stays UNKNOWN.
+  Raw: `lab/frontier/libgphoto2shell/evidence/real-plain-gdb-rip.out`.

@@ -150,3 +150,20 @@ and byte-substitution probes found no live neighbour or pointer chain:
 `table` ends at the allocation boundary and the chosen bytes land in the ASan
 redzone. The witness also closed the harness verdict (#2763) at 146 PASS/0
 FAIL with trace `e364f756…c6c98`.
+
+## Plain-build saved-RIP probe (W165, 2026-11-23)
+
+The remaining bounded lane is closed with a negative. A separate plain
+(no-ASan) real-library build with the distro's default stack protector was
+made from the same lab-patched source (`src/libgphoto2-2.5.34-plain`,
+`CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer'`, installdir-plain, driver
+`live/real_init_plain`). Count 100 gives `gp_camera_init rc=0`; count 1022
+aborts with `*** stack smashing detected ***` (`rc=134`). Breaking at
+`__stack_chk_fail` and inspecting frame 1 shows the real `jl2005c_init`
+frame at `rbp=0x7fffffffc9b0` with both the canary at `rbp-8` and the saved
+RIP at `rbp+8` equal to `0x5a5a5a5a5a5a5a` — device-chosen bytes fill both
+slots. The stack protector calls `__stack_chk_fail` before `ret`, so no
+chosen control-flow target executes. Grade unchanged: rung 4 chosen bytes
+at a real control-flow slot, not IP control; no rung 5. Raw output and build
+recipe: `evidence/real-plain-gdb-rip.out`. The build tree and driver are
+local lab artifacts, not committed.

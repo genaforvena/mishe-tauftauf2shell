@@ -1,0 +1,62 @@
+# W165 (2026-11-23): plain (no ASan) real libgphoto2 2.5.34 build, default
+# distro stack protector. Build: copy the lab-patched source tree to
+# src/libgphoto2-2.5.34-plain, `make clean`, configure with
+# CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' (no -fsanitize), same
+# --with-camlibs=jl2005c --enable-vusb options, prefix installdir-plain,
+# `make -j4 && make install`. Driver: gcc -O0 -g -fno-omit-frame-pointer
+# live/real_init.c -o live/real_init_plain $(pkg-config --cflags --libs
+# libgphoto2 from installdir-plain) -lltdl.
+#
+# Run env: CAMLIBS/IOLIBS from installdir-plain, IOLIBS_PREFIX=vusb,
+# LD_LIBRARY_PATH=installdir-plain/lib, M2SHELL_JL2005_VUSB=1,
+# M2SHELL_JL2005_COUNT=<n>, port usb:001,001. Count 100 and 1022 runs:
+
+=== count 100 ===
+model_index=0
+port_index=0 path=usb:001,001
+gp_camera_init rc=0
+rc=0
+=== count 1022 ===
+*** stack smashing detected ***: terminated
+rc=134
+
+# gdb -batch on live/real_init_plain with the same env, count 1022,
+# breakpoint __stack_chk_fail, `bt 6`, `frame 1`, `info frame`, inspect
+# rbp+8 (saved RIP) and rbp-8 (canary) in the jl2005c_init frame:
+
+Breakpoint 1 at 0x1160
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, __stack_chk_fail () at ./debug/stack_chk_fail.c:23
+warning: 23	./debug/stack_chk_fail.c: No such file or directory
+=== AT STACK_CHK_FAIL ===
+#0  __stack_chk_fail () at ./debug/stack_chk_fail.c:23
+#1  0x00007ffff7bf5608 in jl2005c_init (camera=0x5555555592a0, port=0x55555555a690, priv=0x5555555635f0) at jl2005c/jl2005c.c:189
+#2  0x5a5a5a5a5a5a5a5a in ?? ()
+#3  0x5a5a5a5a5a5a5a5a in ?? ()
+#4  0x5a5a5a5a5a5a5a5a in ?? ()
+#5  0x5a5a5a5a5a5a5a5a in ?? ()
+#1  0x00007ffff7bf5608 in jl2005c_init (camera=0x5555555592a0, port=0x55555555a690, priv=0x5555555635f0) at jl2005c/jl2005c.c:189
+189	}
+Stack level 1, frame at 0x7fffffffc9c0:
+ rip = 0x7ffff7bf5608 in jl2005c_init (jl2005c/jl2005c.c:189); saved rip = 0x5a5a5a5a5a5a5a5a
+ called by frame at 0x7fffffffc9c8, caller of frame at 0x7fffffff8940
+ source language c.
+ Arglist at 0x7fffffffc9b0, args: camera=0x5555555592a0, port=0x55555555a690, priv=0x5555555635f0
+ Locals at 0x7fffffffc9b0, Previous frame's sp is 0x7fffffffc9c0
+ Saved registers:
+  rbp at 0x7fffffffc9b0, rip at 0x7fffffffc9b8
+rbp: $1 = 0x7fffffffc9b0
+saved RIP at rbp+8: $2 = 0x5a5a5a5a5a5a5a5a
+canary at rbp-8: $3 = 0x5a5a5a5a5a5a5a5a
+rbp-0x10 words: 0x7fffffffc9a0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7fffffffc9b0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7fffffffc9c0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+0x7fffffffc9d0:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a
+
+# Result: device-chosen 0x5a bytes overwrite both the stack canary and the
+# saved RIP of the real jl2005c_init frame. The stack protector calls
+# __stack_chk_fail before ret, so no chosen control-flow target is executed.
+# Grade unchanged: rung 4 chosen bytes at a real control-flow slot, not IP
+# control; no witness retry, no rung 5. Synthetic vusb transport only.
