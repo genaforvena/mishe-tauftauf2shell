@@ -440,3 +440,55 @@ copied in, reproduced the two anchor windows: vulnerable `sz=726`,
 fresh port hit `ConnectionRefusedError` before gdb finished loading; that
 attempt is recorded as a negative, not a pass, and the retry above
 succeeded on a new port with the same window counts.
+
+## W148 — hook and allocation-order negatives (2026-11-23)
+
+Two bounded checks close tempting but unavailable shortcuts from the W146
+forged-chunk lane. Neither changes the grade.
+
+**glibc malloc hooks are inert here.** The host libc is
+`2.39-0ubuntu8.12`. `readelf -Ws /lib/x86_64-linux-gnu/libc.so.6` lists
+`__free_hook` as a weak compat object at `0x20b148` with only
+`@GLIBC_2.2.5` (no default version), so plain `dlsym(RTLD_DEFAULT,
+"__free_hook")` returns null. `dlvsym(RTLD_DEFAULT, "__free_hook",
+"GLIBC_2.2.5")` resolves it, but a throwaway probe that stores a `write(2)`
+function there and then calls `free(malloc(32))` printed `HOOK_DONE` and
+never `HOOK_CALLED`. Even a wire-chosen heap address reaching `free()` thus
+cannot be turned into a call through a malloc hook on this host.
+
+**No polymorphic object is allocated after the receive buffer.** In
+v0.23.0 `THeaderTransport` derives from `TVirtualTransport<...,
+TFramedTransport>`; `rBuf_` is the `std::unique_ptr<uint8_t[]>` member of
+`TBufferedTransport` (`TBufferTransports.h:288`), allocated by `new
+uint8_t[rBufSize_]` inside the base-class constructor. Every object with a
+vptr in this server — `SinkTransport`, `THeaderTransport`, the
+`TBinaryProtocol` objects and `ReadOnceProcessor` — is allocated *before*
+that base constructor runs, so its vptr sits before `rBuf_`, not inside the
+copy window. Header parsing after the copy allocates `std::map` nodes and
+string buffers (no vptrs), which is exactly what W146 and W147 observed.
+The "shared_ptr control block with a vptr in the window" idea is therefore
+structurally closed for this transport stack, not merely unmeasured.
+
+Still absent: code pointer or return-address control, ROP, command, marker
+side effect and witness verdict for W145/W146/W147. Grade unchanged at
+rungs 1-4 on living bytes.
+
+**The forged chunk becomes an allocator-list head, but no later allocation
+survives.** A bounded two-connection probe (`live/gdb-tcache-off.gdb`,
+`live/run-tcache.sh`, `live/normalize-tcache.py`) asks what consumes the
+0x31 chunk after W146's accepted chosen free. With the fixed-address replay
+(`rBuf_=0x5555555b41f0`, chosen pointer low word `0x43f0` = `rbuf+512`),
+`__libc_free` accepts the pointer at pinned `:301` and writes a protected
+link `0x5550000e1104` over the 0xA5 marker; decoding it with the standard
+glibc `PROTECT_PTR` rule gives `0x5555555b44b0`, the previous list head. The
+chunk header `rbuf+496` then appears in `main_arena.fastbinsY[1]` (glibc
+2.39 tcache bin 1 was already full, count 7). Ten later loopback frames did
+not produce a pop; instead the next small allocation aborted with
+`malloc(): unaligned tcache chunk detected`. No wire-chosen address became
+an allocation result in this layout, so the arbitrary-allocation limb stays
+closed. Address-free trace SHA-256
+`a7eae8ece378d33b6e20d37d5b0e4f26867f783aa51715d316e3662d11a2f625`,
+identical over three full replays. The fixed-address frame embeds a host
+heap address; this is a lab mechanics probe, not an ASLR-on remote claim.
+Grade unchanged: rungs 1-4, no code pointer, ROP, command or marker side
+effect.

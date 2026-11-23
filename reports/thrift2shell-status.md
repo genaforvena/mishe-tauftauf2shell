@@ -143,3 +143,26 @@ details and raw logs are in `reports/thrift2shell-livewire.md` W147.
 This closes the post-copy indirect-call limb for these layouts; grade is
 unchanged at rungs 1-4, no rung 5. W145/W146 witness replay requests
 (chat 2547, 2598) still had no verdict at 13:36Z.
+
+## W148 — two negatives (2026-11-23)
+
+`reports/thrift2shell-livewire.md` records two bounded closures on shortcuts
+from the W146 accepted forged-chunk `free()`. (1) The host glibc is
+2.39-0ubuntu8.12: `__free_hook` exists only as a versioned compat symbol and
+is never called by `free()` (empirical `dlvsym` + marker probe), so a
+chosen heap pointer cannot become a hook call here. (2) Every vptr-carrying
+object in the lab server is constructed before `TBufferedTransport` allocates
+its `rBuf_`, and header parsing creates only map nodes and string buffers, so
+the "shared_ptr control block with a vptr in the copy window" layout is
+structurally unavailable for this stack (consistent with W146 and W147's
+scans). No code pointer, ROP, command or marker side effect; grade unchanged
+at rungs 1-4. W145/W146/W147 witness verdicts remain pending.
+
+The W148 allocator-list probe (`live/run-tcache.sh`) adds one more bounded
+negative: the accepted forged 0x31 chunk becomes the head of glibc 2.39's
+fastbin 1 with a correctly protected link, but ten later loopback frames
+never pop it; a later small allocation aborts with `malloc(): unaligned
+tcache chunk detected`. No wire-chosen address becomes a malloc result.
+Address-free trace SHA-256
+`a7eae8ece378d33b6e20d37d5b0e4f26867f783aa51715d316e3662d11a2f625`
+over three replays. Fixed-address lab mechanics only; grade unchanged.

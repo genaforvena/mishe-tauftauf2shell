@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x152ea: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Function "__libc_free" not defined.
+Breakpoint 2 (__libc_free) pending.
+Function "__libc_malloc" not defined.
+Breakpoint 3 (__libc_malloc if $seen == 1) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29981
+ANCHOR rbuf=0x5555555b41f0 sz=312
+PROCESS_REACHED name=attack seqid=1
+MATCHFREE mem=0x5555555b43f0 target=0x5555555b43f0
+LINK saved=0x5550000e1104 decoded_head=0x5555555b44b0 kind=2 bin=1 hdr=0x5555555b43e0
+malloc(): unaligned tcache chunk detected
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+END matched=1 seen=1 kind=2 bin=1 pops=0
