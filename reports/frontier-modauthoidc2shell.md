@@ -292,8 +292,9 @@ on a production allocator. Grade unchanged; detail in `PROVENANCE.md` §
 
 **W14 long-token plain-allocator result.** `realobj/probe-long-token.sh` with
 `driver_long.c` (verbatim pinned parser) shows a genuinely non-ASan process
-(no libasan) faulting 5/5 at token lengths >= 32000 bytes (rc 139), 4/5 at
-29000-31000, clean with dispatch at <= 28000; fixed/release clean at all
+(no libasan) faulting 5/5 at 32000/48000 in both runs but 3/5 at 65000 and
+4/5 at 100000 in a clean-archive replay (rc 139), 4/5 at 29000-31000, clean
+with dispatch at <= 28000; fixed/release clean at all
 lengths, well-formed clean and dispatched. gdb attributes the plain SIGSEGV
 to pinned `state.c.4301b536:219`. Harness availability only, no module or
 wire, no grade change; detail in `PROVENANCE.md` § "Long value-less token

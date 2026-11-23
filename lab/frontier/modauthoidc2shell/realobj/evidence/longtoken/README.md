@@ -16,26 +16,38 @@ builds a `mod_auth_openidc_state_` + N `a` token with no `=`;
 the same verbatim pinned `state.c.4301b536` slice. `probe-long-token.sh`
 builds three plain (no `-fsanitize`) binaries plus one ASan comparison and
 sweeps lengths; `raw-by-trial.txt`, `results.txt`, `wellformed.txt`,
-`asan.txt` are the verbatim transcripts. `driver-sha256.txt` pins the driver.
+`asan.txt`, `results-clean-archive.txt` and `pin-hashes-clean-archive.txt`
+are the verbatim transcripts. `driver-sha256.txt` pins the driver.
 
 A plain build here is genuinely non-ASan: `gcc -O0 -g -std=gnu11` with system
 APR/APR-util, no `-fsanitize`, no libasan in `ldd`.
 
 ## Measured
 
-Value-less token, `pl-vuln`, 5 trials per length, `timeout 15 ./pl-vuln read 0`:
+Value-less token, `pl-vuln`, 5 trials per length, `timeout 15 ./pl-vuln read 0`.
+Two independent runs: the working-tree run (`results.txt`,
+`raw-by-trial.txt`) and a clean `git archive HEAD` (2ebb69b) replay
+(`results-clean-archive.txt`, 4/4 pinned blobs OK in
+`pin-hashes-clean-archive.txt`). The script regenerates the verbatim slices
+from the pinned blobs, so the archive replay needs no `run.sh` artifacts.
 
-| token bytes | rc 0 + dispatch | nonzero rc (SIGSEGV) |
+| token bytes | run 1: rc 0 / nonzero | clean-archive replay: rc 0 / nonzero |
 | --- | --- | --- |
-| 30 / 7800 / 16000 | 5/5 each | 0/5 |
-| 20000 / 24000 / 28000 | 5/5 each | 0/5 |
-| 29000 / 30000 / 31000 | 1/5 each | 4/5 |
-| 32000 / 48000 / 65000 / 100000 | 0/5 each | 5/5 |
+| 30 / 7800 / 16000 | 5/5 / 0/5 | 5/5 / 0/5 (dispatch 5/5) |
+| 20000 / 24000 / 28000 | 5/5 / 0/5 | not replayed |
+| 29000 / 30000 / 31000 | 1/5 / 4/5 | not replayed |
+| 32000 | 0/5 / 5/5 | 0/5 / 5/5 |
+| 48000 | 0/5 / 5/5 | 0/5 / 5/5 |
+| 65000 | 0/5 / 5/5 | 2/5 / 3/5 |
+| 100000 | 0/5 / 5/5 | 1/5 / 4/5 |
 
-Nonzero is rc 139 (`timeout` reports "monitored command dumped core"), i.e.
-SIGSEGV 11, deterministic at >= 32000 and layout-dependent around 29-31k.
-Below threshold the scan finds an `=` in adjacent pool memory, writes NUL and
-dispatches `oidc_state_cookies_process_one` (RC=1, PROCESS_CALLS=1).
+Nonzero is rc 139 ("monitored command dumped core"), i.e. SIGSEGV 11. The
+fault is layout-dependent: certain at 32000/48000 in both runs, frequent but
+not certain at larger lengths (3-5/5). When it does not fault, the scan found
+an `=` in adjacent pool memory, wrote NUL and dispatched
+`oidc_state_cookies_process_one` (RC=1, PROCESS_CALLS=1). No tested setting
+makes the fault deterministic at every length; it is not a deterministic
+per-request primitive.
 
 Controls in the same plain build: `pl-fixed` (upstream fix `8017478`) and
 `pl-release` (`v2.4.19.4`) are rc 0 with PROCESS_CALLS=0 in 5/5 trials at every

@@ -327,7 +327,8 @@ stack. Grade unchanged. Detail: `lab/frontier/modauthoidc2shell/PROVENANCE.md`
 **W14 long-token plain-allocator result.** `realobj/evidence/longtoken/`:
 `driver_long.c` plus `probe-long-token.sh` built a genuinely non-ASan driver
 (no `-fsanitize`, no libasan in `ldd`) with the verbatim pinned parser. A
-value-less token faults 5/5 at 32000/48000/65000/100000 bytes (rc 139,
+value-less token faults 5/5 at 32000/48000 in both runs, but 3/5 at 65000
+and 4/5 at 100000 in a clean-archive replay (first run 5/5 at both; rc 139,
 SIGSEGV 11), 4/5 at 29000-31000, and is clean with dispatch at <= 28000;
 fixed and release drivers are clean with no dispatch at all lengths, and the
 well-formed control is clean and dispatched at 7800/65000. gdb caught the

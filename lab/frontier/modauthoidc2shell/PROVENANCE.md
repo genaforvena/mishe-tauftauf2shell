@@ -397,8 +397,11 @@ Raw capture and detail: `full/evidence/w14-buildstack/raw.txt` and
 builds a genuinely non-ASan driver: gcc without `-fsanitize`, system
 APR/APR-util, no libasan in `ldd`. With a value-less token, `pl-vuln` returns
 rc 0 and dispatches in 5/5 trials at 30/7800/16000/20000/24000/28000 bytes,
-is 4/5 faulting at 29000/30000/31000 and 5/5 faulting (rc 139 = SIGSEGV 11)
-at 32000/48000/65000/100000. Fixed (`8017478`) and release (`v2.4.19.4`)
+is 4/5 faulting at 29000/30000/31000, and faults (rc 139 = SIGSEGV 11) in
+5/5 at 32000/48000 in both runs but 3/5 at 65000 and 4/5 at 100000 in a
+clean `git archive HEAD` (2ebb69b) replay; the first run was 5/5 at both.
+The fault is layout-dependent; non-faulting trials dispatch (the scan found
+a neighbouring `=`). Fixed (`8017478`) and release (`v2.4.19.4`)
 drivers are rc 0 with `PROCESS_CALLS=0` in 5/5 trials at every length; the
 well-formed `=1` control on the vulnerable slice is 3/3 clean and dispatched
 at 7800 and 65000. `gdb` on the plain 65000 run caught the native SIGSEGV at
@@ -407,4 +410,4 @@ pinned `state.c.4301b536:219` — the NUL **store**, stack `parse` → `do_read`
 availability (no full module, listener, socket or wire) and does not upgrade
 W13's full-module claim. Grade unchanged: rung 4 scoped, no chosen byte,
 pointer target, consumer dereference, command or rung 5. Driver sha, raw
-transcripts, gdb trace and limits: `realobj/evidence/longtoken/`.
+transcripts (including the clean-archive replay), gdb trace and limits: `realobj/evidence/longtoken/`.
