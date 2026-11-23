@@ -1,0 +1,414 @@
+CVE-2026-55971.html: OK
+fix-db4a473f.patch: OK
+THeaderTransport.h.v0.23.0: OK
+THeaderTransport.cpp.v0.23.0: OK
+THeaderTransport.cpp.parent: OK
+THeaderTransport.cpp.fix: OK
+THeaderTransport.cpp.v0.24.0: OK
+vendor-advisory-2026-07-24.html: OK
+GHSA-gwj4-q93m-wwqc.html: OK
+driver.cpp: OK
+run.sh: OK
+vuln/untransform.inc: OK
+rel023/untransform.inc: OK
+fix/untransform.inc: OK
+rel024/untransform.inc: OK
+../src/CVE-2026-55971.html: OK
+../src/fix-db4a473f.patch: OK
+../src/THeaderTransport.h.v0.23.0: OK
+../src/THeaderTransport.cpp.v0.23.0: OK
+../src/THeaderTransport.cpp.parent: OK
+../src/THeaderTransport.cpp.fix: OK
+../src/THeaderTransport.cpp.v0.24.0: OK
+../src/vendor-advisory-2026-07-24.html: OK
+../src/GHSA-gwj4-q93m-wwqc.html: OK
+VARIANT=vuln-0e4a47ea MODE=arith COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=1 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=0
+SINK_DIST=48 SINK_BYTE_1=42 SINK_BYTE_8=42 SINK_BYTE_16=3c
+OBS_OFFSET_0=41
+OBS_OFFSET_16=5a
+OBS_OFFSET_32=7a
+OBS_OFFSET_64=3c
+OBS_OFFSET_128=7b
+OBS_OFFSET_256=42
+OBS_OFFSET_699=7b
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=fix-db4a473f MODE=arith COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=21
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=vuln-0e4a47ea MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=1 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=0
+SINK_DIST=48 SINK_BYTE_1=42 SINK_BYTE_8=42 SINK_BYTE_16=3c
+OBS_OFFSET_0=41
+OBS_OFFSET_16=5a
+OBS_OFFSET_32=7a
+OBS_OFFSET_64=3c
+OBS_OFFSET_128=7b
+OBS_OFFSET_256=42
+OBS_OFFSET_699=7b
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=vuln-0e4a47ea MODE=oversize COMPRESSED_LEN=28 DECOMPRESSED_LEN=4096 DEST_BYTES=28 OVERFLOW_BYTES=4068 TBUF_SIZE=1024
+THREW=6 MSG=Error while zlib deflate
+SET_CALLS=0 SET_SIZE=0 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=0e
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=42
+VARIANT=vuln-0e4a47ea MODE=safe COMPRESSED_LEN=12 DECOMPRESSED_LEN=4 DEST_BYTES=12 OVERFLOW_BYTES=-8 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=4 SETPTR_IS_RBUF=1 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=0
+SINK_DIST=32 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=42
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=parent-0e4a47ea MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=1 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=0
+SINK_DIST=48 SINK_BYTE_1=42 SINK_BYTE_8=42 SINK_BYTE_16=3c
+OBS_OFFSET_0=41
+OBS_OFFSET_16=5a
+OBS_OFFSET_32=7a
+OBS_OFFSET_64=3c
+OBS_OFFSET_128=7b
+OBS_OFFSET_256=42
+OBS_OFFSET_699=7b
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=parent-0e4a47ea MODE=oversize COMPRESSED_LEN=28 DECOMPRESSED_LEN=4096 DEST_BYTES=28 OVERFLOW_BYTES=4068 TBUF_SIZE=1024
+THREW=6 MSG=Error while zlib deflate
+SET_CALLS=0 SET_SIZE=0 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=0e
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=42
+VARIANT=parent-0e4a47ea MODE=safe COMPRESSED_LEN=12 DECOMPRESSED_LEN=4 DEST_BYTES=12 OVERFLOW_BYTES=-8 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=4 SETPTR_IS_RBUF=1 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=0
+SINK_DIST=32 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=42
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=fix-db4a473f MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=21
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=fix-db4a473f MODE=oversize COMPRESSED_LEN=28 DECOMPRESSED_LEN=4096 DEST_BYTES=28 OVERFLOW_BYTES=4068 TBUF_SIZE=1024
+THREW=6 MSG=Error while zlib deflate
+SET_CALLS=0 SET_SIZE=0 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=0e
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=42
+VARIANT=fix-db4a473f MODE=safe COMPRESSED_LEN=12 DECOMPRESSED_LEN=4 DEST_BYTES=12 OVERFLOW_BYTES=-8 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=4 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=32 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=release-v0.24.0 MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=21
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=release-v0.24.0 MODE=oversize COMPRESSED_LEN=28 DECOMPRESSED_LEN=4096 DEST_BYTES=28 OVERFLOW_BYTES=4068 TBUF_SIZE=1024
+THREW=6 MSG=Error while zlib deflate
+SET_CALLS=0 SET_SIZE=0 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=0e
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=42
+VARIANT=release-v0.24.0 MODE=safe COMPRESSED_LEN=12 DECOMPRESSED_LEN=4 DEST_BYTES=12 OVERFLOW_BYTES=-8 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=4 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=32 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+TBUF_OBS_0=42
+SINK_TAG=cc TBUF_TAG=dd
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 700 at 0xADDR thread T0
+    #FRAME 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #FRAME 0xADDR in apache::thrift::transport::THeaderTransport::untransform(unsigned char*, unsigned int) HARNESS/THeaderTransport.cpp.v0.23.0:301
+    #FRAME 0xADDR in main HARNESS/driver.cpp:150
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-gcc+0xADDR) (BuildId: BUILDID)
+
+0xADDR is located 0 bytes after 31-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #FRAME 0xADDR in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #FRAME 0xADDR in main HARNESS/driver.cpp:132
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-gcc+0xADDR) (BuildId: BUILDID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR: fa fa 00 00 00 fa fa fa 00 00 00[07]fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 700 at 0xADDR thread T0
+    #FRAME 0xADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #FRAME 0xADDR in apache::thrift::transport::THeaderTransport::untransform(unsigned char*, unsigned int) HARNESS/THeaderTransport.cpp.parent:320
+    #FRAME 0xADDR in main HARNESS/driver.cpp:150
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (HARNESS/a-rel023-gcc+0xADDR) (BuildId: BUILDID)
+
+0xADDR is located 0 bytes after 31-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #FRAME 0xADDR in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #FRAME 0xADDR in main HARNESS/driver.cpp:132
+    #FRAME 0xADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #FRAME 0xADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #FRAME 0xADDR in _start (HARNESS/a-rel023-gcc+0xADDR) (BuildId: BUILDID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR: fa fa 00 00 00 fa fa fa 00 00 00[07]fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+VARIANT=fix-db4a473f MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=2061584302272 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=21
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+VARIANT=release-v0.24.0 MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=2061584302272 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=21
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+=================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+WRITE of size 700 at 0xADDR thread T0
+    #FRAME 0xADDR in __asan_memcpy (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+    #FRAME 0xADDR in apache::thrift::transport::THeaderTransport::untransform(unsigned char*, unsigned int) HARNESS/THeaderTransport.cpp.v0.23.0:301:7
+    #FRAME 0xADDR in main HARNESS/driver.cpp:150:7
+    #FRAME 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #FRAME 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+
+0xADDR is located 0 bytes after 31-byte region [0xADDR,0xADDR)
+allocated by thread T0 here:
+    #FRAME 0xADDR in operator new[](unsigned long) (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+    #FRAME 0xADDR in main HARNESS/driver.cpp:132:18
+    #FRAME 0xADDR in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #FRAME 0xADDR in __libc_start_main csu/../csu/libc-start.c:360:3
+    #FRAME 0xADDR in _start (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (HARNESS/a-vuln-clang+0xADDR) (BuildId: BUILDID) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xADDR: fa fa 00 00 00 fa fa fa 00 00 00[07]fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING
+Breakpoint 1 at 0xADDR: file HARNESS/THeaderTransport.cpp.v0.23.0, line 301.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, apache::thrift::transport::THeaderTransport::untransform (this=0xADDR, ptr=0xADDR "x\234stB\005Qh\374*'\374\300\206\200<!PM\241\376Q0bA5", sz=700) at HARNESS/THeaderTransport.cpp.v0.23.0:301
+warning: 301	HARNESS/THeaderTransport.cpp.v0.23.0: No such file or directory
+#FRAME  0xADDR in main (argc=2, argv=0xADDR) at driver.cpp:150
+150	    t.untransform(dst, static_cast<uint32_t>(comp.size()));
+$1 = 31
+$2 = 90 'Z'
+$3 = 60 '<'
+#FRAME  apache::thrift::transport::THeaderTransport::untransform (this=0xADDR, ptr=0xADDR "x\234stB\005Qh\374*'\374\300\206\200<!PM\241\376Q0bA5", sz=700) at HARNESS/THeaderTransport.cpp.v0.23.0:301
+warning: 301	HARNESS/THeaderTransport.cpp.v0.23.0: No such file or directory
+VARIANT=vuln-0e4a47ea MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=1 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=0
+SINK_DIST=48 SINK_BYTE_1=42 SINK_BYTE_8=42 SINK_BYTE_16=3c
+OBS_OFFSET_0=41
+OBS_OFFSET_16=5a
+OBS_OFFSET_32=7a
+OBS_OFFSET_64=3c
+OBS_OFFSET_128=7b
+OBS_OFFSET_256=42
+OBS_OFFSET_699=7b
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+[Inferior 1 (process PID) exited normally]
+Breakpoint 1 at 0xADDR: file HARNESS/THeaderTransport.cpp.fix, line 328.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+VARIANT=fix-db4a473f MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=0 SETPTR_IS_ORIG_TBUF=1
+DST_UNCHANGED=1
+SINK_DIST=48 SINK_BYTE_1=cc SINK_BYTE_8=cc SINK_BYTE_16=cc
+OBS_OFFSET_0=78
+OBS_OFFSET_16=21
+OBS_OFFSET_32=OOB
+OBS_OFFSET_64=OOB
+OBS_OFFSET_128=OOB
+OBS_OFFSET_256=OOB
+OBS_OFFSET_699=OOB
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+[Inferior 1 (process PID) exited normally]
+No registers.
+No symbol "comp_len" in current context.
+No symbol "payload" in current context.
+No registers.
+The program is not being run.

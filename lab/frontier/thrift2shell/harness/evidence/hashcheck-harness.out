@@ -1,0 +1,15 @@
+driver.cpp: OK
+run.sh: OK
+vuln/untransform.inc: OK
+rel023/untransform.inc: OK
+fix/untransform.inc: OK
+rel024/untransform.inc: OK
+../src/CVE-2026-55971.html: OK
+../src/fix-db4a473f.patch: OK
+../src/THeaderTransport.h.v0.23.0: OK
+../src/THeaderTransport.cpp.v0.23.0: OK
+../src/THeaderTransport.cpp.parent: OK
+../src/THeaderTransport.cpp.fix: OK
+../src/THeaderTransport.cpp.v0.24.0: OK
+../src/vendor-advisory-2026-07-24.html: OK
+../src/GHSA-gwj4-q93m-wwqc.html: OK

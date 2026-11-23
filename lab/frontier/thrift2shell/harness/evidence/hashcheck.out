@@ -1,0 +1,9 @@
+CVE-2026-55971.html: OK
+fix-db4a473f.patch: OK
+THeaderTransport.h.v0.23.0: OK
+THeaderTransport.cpp.v0.23.0: OK
+THeaderTransport.cpp.parent: OK
+THeaderTransport.cpp.fix: OK
+THeaderTransport.cpp.v0.24.0: OK
+vendor-advisory-2026-07-24.html: OK
+GHSA-gwj4-q93m-wwqc.html: OK

