@@ -356,3 +356,56 @@ still faults before the saved return address, stores remain parser integers,
 and there is no chosen pointer, marker, command or rung 5. W160 is
 author-only and unwitnessed; the W147 real-PG witness verdict (#2576) is
 still pending.
+
+## Date escape on the real PostgreSQL path (W161, target mind)
+
+The second primitive had only been seen on direct-call slices; W159's
+clang -O2 watch probe was ambiguous and stayed a negative. Tracked
+`lab/frontier/psqlodbc2shell/real/date-replay.sh` now drives it on the full
+public-ODBC -> real-server path. It starts the provisioned PostgreSQL 16.4
+on loopback 127.0.0.1:59434 with its own gitignored PGDATA
+`build/w161-pgdata`, stops that instance on exit, and uses the existing
+`real/odbc-harness.c` (`gcc -g -O0 -fsanitize=address ... -lodbc`) with
+DSNs pointing at the W147-built ASan driver trees `asan-vuln` and
+`asan-fixed`. Its only network peer is the server it started; no listener
+remained after the runs.
+
+`SELECT {d '<200 A>'}` through `SQLDriverConnect` then `SQLExecDirect`
+gives, on the vulnerable tag, ASan `stack-buffer-overflow` / `WRITE of
+size 1` at pinned `convert.c:5786` in `convert_escape`, exactly the
+`F_ExtractOldTo` NUL store from macro line `:2424`. Frames:
+`inner_process_tokens:3865` -> `copy_statement_with_parameters:3256` ->
+`Exec_with_parameters_resolved:498` -> `PGAPI_Execute:1250` ->
+`PGAPI_ExecDirect:207` -> driver `SQLExecDirect:322` ->
+`libodbc.so.2 SQLExecDirect` -> harness main. ASan places the access at
+offset 992, one past `buf_small [864,992)` in the `convert_escape` frame.
+The fixed tag reports `EXECDIRECT rc=-1` with PG state 42601
+(`unterminated quoted string`) and no ASan finding; the short safe input
+`SELECT {d '2000-01-01'}` returns `rc=0` ASan-clean on the vulnerable tag.
+
+A body-length sweep on the same path puts the first overflow at 126 A's:
+L=124 and L=125 return `rc=-1` with PG state 22007 (invalid date) and no
+ASan report; L=126, 127, 128, 129 and 200 all report the same `WRITE of
+size 1` at `:5786`. That matches `c = L + 2` copied bytes (both quotes),
+with `buf[c] = '\0'` crossing offset 128 at L=126. The fixed tag is
+ASan-clean at every swept length. Script run four times (2.2 s each after
+warm builds); raw gitignored evidence `build/evidence/w161-run{1,2,3,4}.summary`
+and `build/evidence/w161-pg-date-*.out`. Binaries/source hashed at replay:
+`asan-vuln/.libs/psqlodbcw.so` sha256
+`3a206a8733333d8cb4f14a7772e42b393588a96390b75566959501f3dbdd7f97`,
+`asan-fixed/.libs/psqlodbcw.so`
+`dc18d6a85304b54dd3e9afc0219e3ce102eb9209a61fcd946ee3db45642b266f`,
+`vuln-src/convert.c`
+`27fc049b34ee48d65fc8eec49e1982ac0bfb3dbaf621feb31a0f74cad91175b1`,
+`fixed-src/convert.c`
+`1925343228dedccf17254207a56e354dfef808107614c09b67028c3067f5d762`.
+
+This closes the reachability gap for the `{d}` limb on a real server path:
+rung 3 (confirmed memory corruption) is now observed there through the
+public driver manager, not only in a direct-call harness. The grade does
+not change. The stored byte is always NUL, the fixed macro guard at
+`:2429` prevents the write, PG rejects the truncated date, and no stack
+datum adjacent to `buf_small` was shown to be a pointer or control-flow
+value. No chosen byte, pointer control, marker, command, ROP or rung 5.
+W161 is author-only and unwitnessed; the W147 real-PG verdict (#2576)
+remains pending.
