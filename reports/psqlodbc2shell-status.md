@@ -295,3 +295,39 @@ evidence) with no rung 5. A benign marker or ROP attempt is unjustified
 without a measured path from the overflow to a control-flow datum. Reopen
 only on a witness counterexample or a different real build layout showing
 adjacency; the live-server gap is now closed.
+
+## Clang -O2 real layout: control-flow datum still unreachable (W159)
+
+This wake tested the one build layout the W147 decision named as a possible
+reopen condition: pinned `REL-18_00_0005` (`f6da564`) rebuilt with
+`clang -g -O2 -fno-omit-frame-pointer -fno-stack-protector`, real upstream
+objects, and the same `real-driver.c` entry to `prepareParametersNoDesc()`.
+Tracked replay: `lab/frontier/psqlodbc2shell/real/clang-o2-layout.sh`.
+Expected: `n=73 rc=0`, `n=74 rc=139`, `n=80 rc=139`; raw logs
+`build/evidence/w159-*.out` in the gitignored build tree. `clang-asan-vuln`
+and the other seven tagged trees from `real/replay.sh` are unchanged.
+
+- Sweep: sampled `n=14,15,16,17,20,24,32,48,64,70,71,72,73` all accepted
+  (`RC=0`); the first SIGSEGV is exactly `n=74`, matching the row that first
+  reaches the parser's own `QueryBuild` local. `n=80` faults in
+  `inner_process_tokens:3760` called from `processParameters:5622`, with a
+  live `qb` argument equal to the corrupted `nqb` address — the dereference
+  fails before control returns.
+- gdb at `convert_escape:5864`: in the 24-arg probe `param_pos=0x...d790`,
+  `nqb=0x...dc30`, saved-RIP slot `0x...dd08`; in the 80-arg probe
+  `param_pos=0x...d720`, `nqb=0x...dbc0`, saved-RIP slot `0x...dc98`.
+  Both give `&nqb - param_pos = 0x4a0` (1184 bytes = row 74) and
+  `saved_rip_slot - param_pos = 0x578` (1400 bytes = row 87 plus 8).
+  Saved RIP is 13 rows beyond the first crashing dereference.
+- Hardware watch on `nqb.query_statement` with `n=80`: at pinned
+  `convert.c:5638` (`param_pos[param_count][1] = -1`), the old value is a
+  live heap pointer `0x5555555f9290` and the new value is `0x95`, the
+  parser's `F_NewPos` integer. A watch on the saved-RIP slot never fired;
+  after the SIGSEGV the saved RIP still reads `0x55555556c679`. No chosen
+  pointer, partial pointer overwrite, gadget, ROP, marker or command.
+- Disposition: this is a **negative for rung 5**, not a new mechanism. Even
+  in a layout where a control-flow datum is only 1400 bytes past the array,
+  the parser's own query-build pointer at row 74 faults first; 8-byte stores
+  of parser integers cannot redirect it. Grade stays rungs 1-4. W147's
+  real-PG limb still awaits a witness verdict; W159 is author-only and
+  unwitnessed. No new marker, wire or rung-5 attempt is justified.
