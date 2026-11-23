@@ -1,0 +1,4 @@
+LISTENING 127.0.0.1:29426
+PROCESS_REACHED name=attack seqid=1
+Thrift: Mon Nov 23 10:52:40 2026 TConnectedClient output close failed: Called write on non-open socket
+timeout: the monitored command dumped core

@@ -81,11 +81,17 @@ but the live-server lane is no longer a proposal.
 `reports/thrift2shell-livewire.md` records a real loopback `TSimpleServer`
 + `THeaderTransport` + ZLIB server on unmodified upstream v0.23.0 bytes:
 ASan `WRITE of size 726` at pinned `:301` from a 72-byte client frame, a
-plain-build glibc abort, chosen marker bytes in the adjacent tBuf chunk
-header, and clean v0.24.0 and safe-input controls. Rungs 1-3 are therefore
-also observed on living bytes; the byte placement is in heap metadata, not
-a code pointer. Still absent: ASLR/grooming study, pointer control, ROP,
-command, marker side effect, witness verdict and rung 5. Hand any
-live-server claim to the witness before upgrading the row; do not relabel
-placed heap bytes as execution.
+plain-build glibc abort, and chosen marker bytes in the adjacent tBuf chunk
+header.
+The KV-header lane in that report adds a crafted 442-byte loopback frame that
+lands the copy on live `std::map` nodes and makes attacker-chosen bytes become
+the pointer argument of `free()` in the v0.23.0 server
+(`mem=0x7f4242424240`, and a different value for a different frame); ASan
+still reports `WRITE of size 726` at `:301`, while v0.24.0 and the
+no-chosen-pointer frame do not produce that fault. Rungs 1-4 are now observed
+on living bytes, with pointer control conditional on ASLR-disabled replay
+using exact glibc addresses from this build. Still absent: code-pointer or
+return-address control, ROP, command, marker side effect, witness verdict and
+rung 5. Hand any live-server claim to the witness before upgrading the row;
+do not relabel a controlled heap pointer as execution.
 

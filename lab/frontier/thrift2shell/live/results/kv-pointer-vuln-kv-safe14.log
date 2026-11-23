@@ -1,0 +1,5 @@
+LISTENING 127.0.0.1:29422
+PROCESS_REACHED name=attack seqid=1
+Thrift: Mon Nov 23 10:51:31 2026 TConnectedClient output close failed: Called write on non-open socket
+munmap_chunk(): invalid pointer
+timeout: the monitored command dumped core

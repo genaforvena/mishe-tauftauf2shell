@@ -136,14 +136,76 @@ the 1024-byte tBuf user region. Reaching an object past tBuf would require a
 different allocation order or a second allocation inside the copy window,
 which was not produced here.
 
+The KV-header lane below produced a different allocation order in which the
+copy lands on live C++ objects rather than `tBuf_`.
+
+## KV-header grooming: a chosen pointer reaches free() on live bytes (2026-11-23 W144)
+
+The earlier heap study showed the copy landing in heap metadata. This wake
+added attacker-controlled THeader KEYVALUE headers to place live C++ objects
+inside the copy window. `live/make-kv-frame.py` builds a wire frame from the
+captured 726-byte message with four KEYVALUE headers (32-byte heap-allocated
+keys and values), a 68-word header, and a compressed section padded to 160
+bytes so every variant keeps the same frame length (442 bytes) and allocation
+sizes. `--patch OFFSET=HEX` replaces chosen decompressed bytes. Frames:
+
+| Frame | SHA-256 | Purpose |
+|---|---|---|
+| `kvbase160.bin` | `f4e1c878...6bebbd94` | layout baseline, no patches |
+| `kv-ptr14.bin` | `d6d47e19...e073ce34ba0e6ee` | chosen pointer `0x00007f4242424240` |
+| `kv-ptr-alt.bin` | `34f68bf1...e38516b158` | different pointer `0x00007a5a42424240` |
+| `kv-safe14.bin` | `8fccc955...ec267bc2a544970fd9ee483e96` | original pointers restored |
+
+Baseline layout under the plain build, observed with `live/gdb-kv.gdb`:
+`rbuf=0x5555555bc0d0`, `ptr=rbuf+282`, `tbuf=rbuf+1392`, `rbufsz=442`.
+The 726-byte copy ends at `rbuf+1008` — 384 bytes short of `tBuf_`, so it does
+not touch the transform chunk. It crosses two freed 0x30 tcache entries at
+`rbuf+0x1d0` and `rbuf+0x200` and three 0x71 `std::map` nodes at
+`rbuf+0x230`, `rbuf+0x300` and `rbuf+0x3d0`, all created by the header parser
+before `untransform()` (`readHeaderFormat:239-254`, pinned
+`THeaderTransport.cpp.v0.23.0`). A gdb heap dump of the exact window is in
+`live/results/kv-post-heap.bin` (pre-copy) and `kv-post-after.bin` (post-copy).
+
+`kv-ptr14.bin` restores the overwritten tcache links, chunk sizes and tree
+links so the only live pointers left corrupt are the four `std::string` data
+pointers in the first two map nodes, set to bytes at decompressed offsets
+310, 342, 518 and 550. Replays:
+
+- `live/run-kv-gdb.sh kv-ptr14.bin gdb-kv-post.gdb PORT 1`: server reaches
+  `PROCESS_REACHED`, then SIGSEGV in
+  `__GI___libc_free (mem=0x7f4242424240) at malloc.c:3375`, called from
+  `~map` in `THeaderTransport::~THeaderTransport`. Reproduced twice; the
+  alternative frame faults at `mem=0x7a5a42424240`, so the fault address
+  follows the wire bytes. Logs: `results/kv-gdb-kv-ptr14.log`,
+  `results/kv-gdb-kv-ptr-alt.log`.
+- `live/run-kv-pointer.sh vuln PORT kv-ptr14.bin` (`setarch -R`, no gdb):
+  server rc 139; fixed v0.24.0 with the same frame reaches `PROCESS_REACHED`
+  and stays clean until the script's 8-second timeout (rc 124). Logs:
+  `results/kv-pointer-vuln-kv-ptr14.log`, `results/kv-pointer-fixed-kv-ptr14.log`.
+- Same frame against the ASan build: `WRITE of size 726` at
+  `THeaderTransport.cpp:301` (`results/kv-pointer-asan-kv-ptr14.log`).
+- `kv-safe14.bin` restores the original string pointers and keeps every
+  grooming patch: the vulnerable server aborts in `munmap_chunk(): invalid
+  pointer` instead, with no chosen-address fault
+  (`results/kv-pointer-vuln-kv-safe14.log`).
+
+Conditions: the frames embed exact glibc addresses and tcache `PROTECT_PTR`
+values from this build; replay is deterministic with ASLR disabled (gdb's
+default, or `setarch -R`). Whether the same control survives ASLR, other
+glibc versions or a different allocator is UNKNOWN. No code pointer, return
+address, ROP chain, command, marker side effect or witness verdict is present.
+
 ## Grade and ceiling
 
-New evidence supports rungs 1-3 on living bytes (ASan write and a plain
-glibc abort from a loopback frame) and byte placement into adjacent heap
-metadata of a live process. It does **not** support rung 5: no pointer
-control, no chosen bytes at a chosen offset in a code pointer or return
-address, no ROP, no command, no benign marker side effect, no ASLR/grooming
-study and no independent witness verdict. The advisory's `AV:N` vector is
-now demonstrated as a loopback wire path in this lab build; it is still not
-a claim about any externally reachable configuration. The fixed build and
-the safe input are clean controls, not evidence of exploitability.
+New evidence supports rungs 1-4 on living bytes: ASan write at the pinned
+line, plain glibc aborts, placed bytes in adjacent heap metadata, and now
+attacker-chosen bytes becoming a heap pointer consumed by `free()` in the
+live server, with the fault address following the wire bytes. The control is
+measured under ASLR-disabled replay with exact glibc addresses and tcache
+link bytes embedded in the frame; ASLR-on and allocator-portable control are
+UNKNOWN. Rung 5 is **not** supported: no chosen bytes in a code pointer or
+return address, no ROP, no command, no benign marker side effect and no
+independent witness verdict. The advisory's `AV:N` vector is demonstrated as
+a loopback wire path in this lab build, not as an externally reachable
+configuration. The fixed build and the safe-input control do not produce the
+chosen-address fault.
