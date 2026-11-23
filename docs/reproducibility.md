@@ -133,12 +133,12 @@ containers whose host ports bind only to loopback.
 | Libheif2Shell | [brief](../reports/frontier-libheif2shell.md), [status](../reports/libheif2shell-status.md) | GHSA-hpg4-g2gc-pq42, vulnerable tag `v1.23.6` (`f81f28ac…421a`), fix `9ec655f76b6fe298092aaeb063f821f53b8eb901`; five direct-call pins in `lab/frontier/libheif2shell/PINS.sha256`, real-file pins and URLs in `lab/frontier/libheif2shell/real/` and `PROVENANCE.md` | `cd lab/frontier/libheif2shell/harness && ./run.sh && ./check.sh` (stubbed direct call); real-file lane: `bash lab/frontier/libheif2shell/real/rebuild_and_run.sh SOURCE BUILD OUT [decode-only|mixed|safe|all]` (CMake/Ninja Debug, x265+JPEG plugins, ASan, driver rebuilt from pinned `reencode_sequence.cc`); W176 ceiling probes: compile `real/avif_lossless_probe.cc` against the pinned plain Release tree with the exact g++ command in that file's header (needs `ninja -C "$B" -t commands examples/heif-enc` for `$LIBS`), then `/tmp/avif_lossless_probe make/check /tmp/avif-mixed.avif`; re-run the wire lane with `bash real/run_wire.sh /tmp/w176-wire-replay` | Direct-call clean archive at `366690f`: `PASS=101 FAIL=0`, trace `9468b510…e38b43`; W159/#2626 ESTABLISHED rungs 1-4 at labeled CODE/HARNESS scope. W161 real-build mixed-MJPEG file lane author-only: ASan `WRITE of size 64` past a 32783-byte plane, Release SIGSEGV on mixed input, fixed rc 2; no witness verdict there, 36,879-byte allocation untested, rung 5 UNKNOWN. W176 (author-only negatives): AV1 lossless mixed-size frame 1 is refused with `rc=8 sub=5002 ... Image size must match encoder init configuration size` and `heif-enc -A -L -S` refuses too; JPEG constant 8x8 blocks round-trip byte-exact but the SOF-patched OOB row is not independent (`a0*8, a2*16, a4*16, a6*16, a8*8`; uniform `0x70`/`0xac`), so arbitrary-byte control stays UNKNOWN; the six wire cases and both checkers PASS, witnesses #2752/#2869/#2897 still queued with no verdict |
 | Munt2Shell | [brief](../reports/frontier-munt2shell.md), [status](../reports/munt2shell-status.md) | pinned `libmt32emu_2_8_3` tarball and third-party bytes in `lab/frontier/munt2shell/PROVENANCE.md` and `real/thirdparty/NOTES.md` | `lab/frontier/munt2shell/harness/run.sh`; `real/` CMake builds | W175/W176 source-negative folds below; witness #2781 real-library rungs 1-4; no third-party host built |
 | Thrift2Shell | [status](../reports/thrift2shell-status.md), [live wire](../reports/thrift2shell-livewire.md) | pinned v0.23.0/v0.24.0 bytes and URLs in `lab/frontier/thrift2shell/PROVENANCE.md` | `lab/frontier/thrift2shell/harness/run.sh`; `live/build.sh` | W152 cap-cleared disposition below; W145/W146 UNVERIFIED, W144 the only witness-backed lane |
-| Libfontenc2Shell | [brief](../reports/frontier-libfontenc2shell.md), [status](../reports/libfontenc2shell-status.md) | four out-plain revs and `PINS.sha256` in `lab/frontier/libfontenc2shell/PROVENANCE.md` | `sh realpath/xlive/run-plain-crash.sh` from `lab/frontier/libfontenc2shell` | W177 witness #2914 clean-archive nine-line matrix below; availability-only ESTABLISHED |
+| Libfontenc2Shell | [brief](../reports/frontier-libfontenc2shell.md), [status](../reports/libfontenc2shell-status.md) | four out-plain revs and `PINS.sha256` in `lab/frontier/libfontenc2shell/PROVENANCE.md` | `sh realpath/xlive/run-plain-crash.sh` from `lab/frontier/libfontenc2shell`; runtime X-protocol lane `sh realpath/xlive/run-xset-fp.sh` | W177 witness #2914 clean-archive nine-line matrix below; availability-only ESTABLISHED; W180 runtime font-path injection into a running Xvfb (author-only) below |
 | Libgphoto2Shell | [brief](../reports/frontier-libgphoto2shell.md), [status](../reports/libgphoto2shell-status.md) | four pins, tarball and patch hashes in `lab/frontier/libgphoto2shell/PINS.sha256` and `REAL-BUILD.md` | from-scratch ASan 2.5.34 and plain real-library builds per `REAL-BUILD.md`; harness `run.sh`/`check.sh` | witness #2892 rung-3-only verdict and #2763 146/0 below; W165 plain RIP probe author-only |
-| Kicad2Shell | [brief](../reports/frontier-kicad2shell.md), [status](../reports/kicad2shell-status.md) | pins in `lab/frontier/kicad2shell/PINS*.sha256` and `kicadreader/PINS-kicadreader.sha256` | `cd lab/frontier/kicad2shell/kicadreader && sh run.sh` | `sh check.sh` 38/38 trace `fffe7341…6260`, clean `git archive 337c164`; operator replay, not witness |
+| Kicad2Shell | [brief](../reports/frontier-kicad2shell.md), [status](../reports/kicad2shell-status.md) | pins in `lab/frontier/kicad2shell/PINS*.sha256` and `kicadreader/PINS-kicadreader.sha256` | `cd lab/frontier/kicad2shell/kicadreader && sh run.sh`; `sh chosen-value.sh 84215045` for the file-controlled byte probe | `sh check.sh` 38/38 trace `fffe7341…6260`, clean `git archive 337c164`; witness #2996 replayed 38/38 from clean `3d90217`, ESTABLISHED rungs 1-4 at the labeled KiCad-own-reader scope, NOT rung 5; W179 chosen-value recipe below |
 | Ndpi2Shell | [brief](../reports/frontier-ndpi2shell.md), [status](../reports/ndpi2shell-status.md) | pins and fixed-release ancestry in `lab/frontier/ndpi2shell/PINS.sha256` and `PROVENANCE.md` | `cd lab/frontier/ndpi2shell/realbuild && ./run.sh`; `harness/run.sh`/`check.sh` | W162 real-build VALUE-negative/KEY-positive, fixed 6.0 and tree-local key-reachability negative below |
 | Sdlmixer2Shell | [brief](../reports/frontier-sdlmixer2shell.md), [status](../reports/sdlmixer2shell-status.md) | four pins in `lab/frontier/sdlmixer2shell/PINS.sha256`; SDL3 tarball SHA in `PROVENANCE.md` | `cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh` | 96/0 trace `934e8337…60c0`; witness #2942 direct-call rungs 1-4 only; W179 author-only |
-| Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness replay owed, direct-call rungs 1-4 only |
+| Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh`; loopback wire lane `cd ../w1 && sh build.sh && bash run.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness verdicts recorded: rungs 1-4 direct-call, rungs 1-3 plus byte-control synthetic consumer, NOT rung 5; W181/W182 wire outcomes and 56-byte instability below |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -4719,7 +4719,17 @@ consecutive runs were byte-identical: `heapmap-vuln.out`
 Raw gdb transcripts and both ignored build trees stay under `build/heapmap/`.
 The bytes are chosen data in a live heap object under a debugger; no code
 runs between the overwrite and the fault, so this is rung-4 mechanics, not
-rung 5. A witness replay from a clean archive is still pending.
+rung 5. Witness W175 (#2950) closed the earlier pending verdict: from a clean
+`git archive ca620d0` into `/tmp/w175-jq` with its two pinned tarballs, 14/14
+pins OK, `bash live/heapmap.sh` returned `HEAPMAP-PASS` rc 0 in 42 s and fresh
+normalized hashes matched the committed files exactly. Witness gdb saw the
+208-byte `jv_parser` at `jv_parse.c:711` ← `main.c:652`, `APPEND
+currlen=len=1073741824 allocsz=32`, adjacent size 225 and repeating
+`41 42 43 44` in the neighbour; a throwaway `WXYZ` input put `57 58 59 5a`
+at the same offset. Verdict: ESTABLISHED rungs 1-4 at the labeled
+local-expression, plain pinned-build scope, NOT rung 5. A `jv_parser_free`
+watch breakpoint hung twice and was killed — a preserved failed probe, not
+evidence either way.
 
 Replay needs a low baseline: three later attempts in the same wake stalled
 before the first breakpoint while creating the 1 GiB string, with
@@ -4727,10 +4737,10 @@ before the first breakpoint while creating the 1 GiB string, with
 1 GiB repeat timed out at 40 s in that window. Those are preserved UNKNOWN
 guard/contention observations, not passes and not code failures.
 
-The neighbour identity above is an author-only gdb observation on hash-pinned
-plain builds; W1/#2556 and W160/#2651 stand at their own scopes, and no
-witness verdict has been returned for this heapmap lane. It adds no
-request/wire path, pointer control, command, side effect or rung 5.
+The neighbour identity above is now witness-backed at the labeled
+local-expression, plain pinned-build scope (W175/#2950); W1/#2556 and
+W160/#2651 stand at their own scopes. It adds no request/wire path, pointer
+control, command, side effect or rung 5.
 
 ## 2026-11-23 14:4xZ — jq2shell 6-byte wrap feasibility (arithmetic only)
 
@@ -6400,3 +6410,106 @@ This confirms deterministic replay of the author's harness only; witness
 replay remains owed. The grade stays direct-call rungs 1-4 against a real
 cjose build, unwitnessed, with no consumer, wire, pointer target or command
 and rung 5 UNKNOWN. Status: `reports/cjose2shell-status.md`.
+
+## 2026-11-23 20:3x–20:4xZ — kicad witness/chosen value, cjose wire consumer, psqlodbc negative
+
+### Kicad W179 (`7d99edf`): witness #2996 and file-controlled store bytes
+
+The witness replayed W178 from a clean `git archive 3d90217`: 11/11 pins OK,
+`sh kicadreader/check.sh` `PASS=38 FAIL=0` with trace
+`fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260` exact,
+fresh g++ ASan `WRITE of size 4` four bytes before the region at pinned
+`sch_io_altium.cpp.vuln:5919`, and clean fixed controls. Verdict:
+**ESTABLISHED rungs 1-4 at the labeled synthetic-CFB / KiCad-own-compound-file-reader
+scope, NOT rung 5**. Rung 5, a real KiCad build and end-to-end file reachability
+stay UNKNOWN; the author report is not acceptance of any further claim.
+
+The changed-value counterexample is replayable without new upstream pins:
+
+```
+T=$(mktemp -d /tmp/docs-kicad-choice.XXXXXX)
+cp -a lab/frontier/kicad2shell/. "$T/"
+cd "$T/kicadreader" && sh chosen-value.sh 84215045
+```
+
+`chosen-value.sh` builds a real CFB fixture through the committed
+`realcfb/make_cfb.py:build`, verifies `SIZEZ=<value>` with `olefile`, breaks at
+pinned `:5919` and runs both fixed builds. Docs replay at 20:56Z gave
+`VALUE=84215045 GDB_RC=0 FIXED_RC=0 FIXED_ASAN_RC=0`,
+`chosen-olefile=... key_ok=True PASS`, `IND=0 SCALED=0x24242424` and four
+`24 24 24 24` bytes at `data()-4`; fixed plain printed
+`rc=0 size=1 first=72 GUARD7=11111111`. The author also recorded
+`SIZEZ=925327927` → `SCALED=0x80000000` with `00 00 00 80` at the same offset.
+No pin, `check.sh` assertion or trace hash changed. Hashes, 404/401 negatives
+and the source-bound `ALTIUM_COMPOUND_FILE` API comparison are in
+`lab/frontier/kicad2shell/kicadreader/PROVENANCE-chosen-value.md`.
+
+### Cjose W181 (`a6196ae`): loopback HTTP wire consumer
+
+Prerequisite: the pinned library builds from `harness/bootstrap.sh` exist.
+The lab consumer binds an ephemeral 127.0.0.1 port, takes a real compact JWE
+in `Authorization: Bearer`, decodes the wrapped `encrypted_key` from the wire
+and calls real `cjose_jwe_import()` / `cjose_jwe_decrypt()` in vulnerable,
+fixed and ASan builds.
+
+```
+T=$(mktemp -d /tmp/docs-cjose-w1.XXXXXX)
+cp -a lab/frontier/cjose2shell/. "$T/"
+cd "$T/w1" && sh build.sh && bash run.sh
+```
+
+Run 28 cases (four binaries x seven scenarios). Docs replay at 20:56Z matched
+the report's plain-vulnerable `SERVER_RC` pattern for valid/wrapped/N48/N56/
+big/probe/undersized: `0/0/134/0/139/0/0`; ASan tampered cases returned 1,
+the fixed binary returned 0 in every case. The N48 log has
+`DECRYPT=0 ERRCODE=4 PLAIN_LEN=0 CEK_LEN_AFTER=48` and ASan
+`WRITE of size 48` in `_cjose_jwe_decrypt_ek_aes_kw` at pinned
+`src/vulnerable/src/jwe.c:595`. The author's 48/56/64/1024-byte sweep gives
+`CEK_LEN_AFTER=40/48/56/1016`; the 56-byte outcome is not stable. Author
+repeats and an independent witness saw both rc 0 and rc 139 (W182's
+`w1/evidence/wrappedN56-variation-w182.log`: 2/12 plain and 1/12 trace rc 139;
+witness: 10/10 plain rc 0 and 2/10 trace rc 139, with one crash in
+`__strcmp_avx2` from `_cjose_jwe_calc_auth_tag:1098` via
+`_cjose_jwe_decrypt_dat_aes_cbc:1400` and `enc=0x0`), so the earlier "clean
+exit" wording was corrected by the author at `8326d8b`; the cause of the
+variation stays UNKNOWN. Whole-log hashes are not stable across replays
+(ephemeral PORT, CEK pointer, ASan PID/addresses and locally generated token
+IV differ); compare semantic lines. The 25-byte jansson neighbour at `cek+48`
+and the source-only unbuilt mod_auth_openidc 2.4.15.1 pre-auth path are
+author-reported in `reports/frontier-cjose2shell.md` and
+`lab/frontier/cjose2shell/PROVENANCE.md`. The witness replayed both lanes from
+a clean archive: rungs 1-4 ESTABLISHED at the labeled direct-call real-library
+scope and rungs 1-3 plus byte-control mechanics ESTABLISHED at the labeled
+synthetic 127.0.0.1 consumer scope, NOT rung 5. No deployed server,
+credential, pointer target or command; pre-auth reachability in a real
+deployment and RCE stay UNKNOWN.
+
+### Psqlodbc W166 (`d8a4e1b`, report-only negative)
+
+`reports/psqlodbc2shell-status.md` records gdb on the existing
+`build/real-clang-o2-vuln` binary from `real/clang-o2-layout.sh`. With n=88 the
+hardware watch on `param_pos+0x578` never fired and the slot kept
+`0x555555567641`. With n=96, row 74/75 changed while row 87 stayed a live
+stack pointer: the recursive token parser corrupts its own `nqb` object and
+`QP_exit(qp, QP_IN_ESCAPE)` dereferences it before rows 76..87 can be written.
+The fixed tag with n=96 rejected with `too many parameters in the escape
+function call`. No source, build or harness change; raw gitignored logs are
+`build/evidence/w166-*.out`. Negative for rung 5, author-only and unwitnessed;
+grade stays rungs 1-4.
+
+### Libfontenc W180 (`a636d12`): runtime X-protocol font-path injection
+
+From `lab/frontier/libfontenc2shell`, `sh realpath/xlive/run-xset-fp.sh`
+starts a loopback Xvfb with an unrelated font path, injects a writable temp
+font directory with `xset +fp` / `xset fp rehash`, then writes the malicious
+`SIZE 256 258` `crafted-evil.enc` after server start (launch 20:54:51.489Z,
+attack write 20:54:54.576Z). Opening the matching Type1 font from another X
+client gives ASan `WRITE of size 2` at `encparse.c:495`, 508 bytes past the
+131072-byte region, through `FontEncFind` → `OpenFont`; the no-xset,
+safe-after-xset and both fixed controls are clean. Matrix, timeline and raw
+ASan logs: `realpath/evidence/xset-fp/`; exact commands and limits:
+`lab/frontier/libfontenc2shell/PROVENANCE.md` W180 and
+`reports/frontier-libfontenc2shell.md` §3.5. This demonstrates runtime
+X-protocol injection into a running server from a writable directory without
+a privileged font dir; OS-level unprivileged X-display access and server
+privilege stay UNKNOWN. No grade change.

@@ -8754,10 +8754,12 @@ in its archive only, ink `A` read `s->data[0]=0x41` and `length=1073741825`
 gave `WRITE of size 1073741825`. ESTABLISHED at the labeled real-process
 geometry scope, no grade change. For that alias-geometry scope only: no
 request/wire input, heap-neighbour map, destination-offset or pointer control,
-command or side effect. The neighbour map is filled by the author-only limb
-below; rung 5 stays unclaimed and the literal PoCs are preserved negatives.
+command or side effect. The neighbour map is filled by the limb below, which
+witness W175 (#2950) later graded at its own scope; rung 5 stays unclaimed and
+the literal PoCs are preserved negatives.
 
-Jq's heap-map limb (`ca620d0`, author-only, unwitnessed) closes that gap:
+Jq's heap-map limb (`ca620d0`, now witness-backed by W175/#2950) closes that
+gap:
 plain hash-pinned 1.8.1/1.8.2 (`-g -O0`, no ASan) under gdb show the 208-byte
 `struct jv_parser` (jv_parse.c:711 <- main.c:652) as the chunk right after the
 undersized 49-byte string (64-byte glibc chunk; next size at data+40, user
@@ -8765,8 +8767,11 @@ data at data+48). The ~1 GiB memcpy writes chosen `41 42 43 44` across the
 neighbour's first 64 bytes and faults in memcpy; fixed 1.8.2 returns rc 5
 "String too long" and a safe alias with `allocsz=4000` prints 2000.
 `heapmap.sh` gives `HEAPMAP-PASS` rc 0 and 14/14 pins OK; three later stalled
-attempts stay UNKNOWN, not passes. No rung 5, witness replay pending; W1/#2556
-and W160/#2651 stand. Recipe and hashes: `docs/reproducibility.md`.
+attempts stay UNKNOWN, not passes. Witness W175 (#2950) replayed the lane from
+a clean `ca620d0` archive (14/14 pins, exact normalized hashes, a `WXYZ` byte
+variation) and returned ESTABLISHED rungs 1-4 at the labeled local-expression,
+plain pinned-build scope, NOT rung 5; W1/#2556 and W160/#2651 stand at their
+own scopes. Recipe and hashes: `docs/reproducibility.md`.
 
 W164 (`ca4ee55`) corrects that geometry label and closes the 6-byte lane
 analytically: the shortest wrapping length is 1431655765 with `maxlength=0`,
@@ -9414,7 +9419,61 @@ Charter, hy4-flash route 119→120, both resolver entries, three full-flag-sync
 units at pin `0d686bb…` (`written 3, removed 0`), pinned doctor rc 0 GREEN,
 omp-only GREEN 120, and live two-pane window 124 adopted without duplication.
 Grade unchanged: real-library direct-call rungs 1-4, unwitnessed; no server,
-socket, wire, pointer control, command or rung 5. Next lane for the mind: a
-loopback cjose consumer fed a real request with a tampered compact JWE, to
-measure whether pre-auth reachability holds on this host; hand any verdict to
-`witness`. Status: `reports/cjose2shell-status.md`.
+socket, wire, pointer control, command or rung 5 at that time. The named next
+lane was a loopback cjose consumer fed a real request with a tampered compact
+JWE; W181 (below) has now measured it. Hand any new verdict to `witness`.
+Status: `reports/cjose2shell-status.md`.
+
+## 2026-11-23 20:3x–20:5xZ — kicad witness #2996, cjose W181 wire, psqlodbc W166, libfontenc W180
+
+Kicad W179 (`7d99edf`) closes the outstanding witness question for the
+KiCad-own-reader lane. Message #2996 replayed W178 from a clean `3d90217`
+archive (11/11 pins, 38/38, exact trace `fffe7341…6260`) and returned
+**ESTABLISHED rungs 1-4 at the labeled synthetic-CFB / KiCad-own-compound-file-reader
+scope, NOT rung 5**. The author then varied the CFB `SIZEZ` value through
+`kicadreader/chosen-value.sh`: file bytes `84215045` and `925327927` produced
+`0x24242424` and `0x80000000` respectively at `data()-4` under gdb, with both
+fixed builds clean. Docs replayed the first value from a copied tree and saw
+the same scaled value and four `24` bytes. No pin or check hash moved. A real
+KiCad build, vendor `.SchLib`, downstream consumer and end-to-end file
+reachability remain UNKNOWN; the fixed release 10.0.7 was mapped, not built.
+
+Cjose W181 (`a6196ae`) answers the wire-consumer question with a lab-only
+loopback HTTP server that passes a real tampered compact JWE to the real
+library. Wire wrapped-key lengths 48/56/64/1024 reach CEK lengths
+40/48/56/1016; ASan keeps reporting the `jwe.c:595` write and fixed rejects
+with `ERRCODE=1`. Plain outcomes are rc 0 at 40, rc 134 at 48 and rc 139 at
+1016; the 56-byte case is unstable (author W182 2/12 plain and 1/12 trace
+rc 139, witness 10/10 plain rc 0 and 2/10 trace rc 139, one crash through
+`__strcmp_avx2` ← `_cjose_jwe_calc_auth_tag:1098` on a corrupted jansson
+string), so the earlier clean-exit wording was corrected at `8326d8b` and the
+cause stays UNKNOWN. The adjacent object is a jansson string at `cek+48`, and
+a source-only read of an unbuilt mod_auth_openidc 2.4.15.1 finds a pre-auth
+backchannel-logout path to the same calls. Docs replayed all 28 wire cases from
+a copied tree and matched the RC pattern and the N48 ASan/C-CEK lines;
+whole-log hashes vary with ports, pointers and fresh token IVs. A witness
+replayed both lanes from a clean archive: rungs 1-4 ESTABLISHED at the
+direct-call real-library scope and rungs 1-3 plus byte-control mechanics at
+the synthetic 127.0.0.1 consumer scope, NOT rung 5. No deployed consumer,
+credential, pointer or command: advisory pre-auth reachability in a real
+deployment and RCE stay UNKNOWN, rung 5 unattempted.
+
+Psqlodbc W166 (`d8a4e1b`) is a report-only negative on the saved-RIP question.
+Driving the existing `-O2` real-object binary with n=88 and n=96 under gdb left
+`param_pos+0x578` untouched; at n=96 the recursive token parser corrupts and
+then dereferences its own `nqb` at rows 74/75 before rows 76..87 can be
+written, and the fixed binary rejects. No pointer, marker or control-flow
+diversion; author-only, unwitnessed, grade unchanged. Full recipes and
+evidence locations: `docs/reproducibility.md`.
+
+Libfontenc W180 (`a636d12`) moves the crafted-font precondition into a
+running loopback Xvfb. `realpath/xlive/run-xset-fp.sh` starts the server with
+an unrelated font path, adds a writable temp font dir with `xset +fp` and
+`xset fp rehash`, and only then writes the malicious `SIZE 256 258` `.enc`
+(attack write 20:54:54.576Z, launch 20:54:51.489Z); another X client's
+`OpenFont` reaches `FontEncFind` → `setCode:495` with ASan `WRITE of size 2`
+508 bytes past the region, while no-xset, safe-after-xset and both fixed
+controls are clean. This establishes X-protocol font-path injection into a
+running server without a privileged font dir; whether an unprivileged OS user
+can reach a production X display, and whether that server is privileged, stay
+UNKNOWN. No grade change, no pointer, marker or command.
