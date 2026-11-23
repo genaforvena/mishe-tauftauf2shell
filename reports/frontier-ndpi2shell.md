@@ -1,13 +1,13 @@
 # Frontier brief: nDPI `ndpi_json_string_escape()` caller-buffer write (ndpi2shell)
 
-**STAGED 2026-11-23 W161** — this brief, a direct-call rung-1..4 harness and a
-live registered two-pane window (inner socket index 121, name `ndpi2shell`)
-exist; seed wall `.mishe-tauftauf/walls/ndpi2shell.md`, registry entry and
-staging DM are in place. Operator admission and an independent witness replay
-are pending. Byte-exact pins and hashes: `lab/frontier/ndpi2shell/PINS.sha256`;
-harness provenance, stubs, negatives and commands:
-`lab/frontier/ndpi2shell/PROVENANCE.md`. Frontier owns no further work on this
-target.
+**UPDATED 2026-11-23 W162** — a real pinned nDPI build with ASan now exists
+and shows both a measured negative (crafted VALUE strings are protected by the
+caller's `24+slen*2` headroom) and a new positive: three real in-tree serializer
+callers under-allocate a KEY by `klen+16` and overflow at klen>=128. Seed wall
+`.mishe-tauftauf/walls/ndpi2shell.md`; pins and original direct-call evidence
+`lab/frontier/ndpi2shell/PINS.sha256`, `PROVENANCE.md`; real-build reproducer
+`lab/frontier/ndpi2shell/realbuild/run.sh`. Operator admission and independent
+witness replay are pending. Frontier owns no further work on this target.
 
 ## 1. Verified ground truth
 
@@ -22,7 +22,7 @@ target.
 - Affected/fixed: the advisory claims fixed 6.0; only the fix commit was
   fetched, so the numeric fixed release is **UNKNOWN** pending a tag check.
   The vulnerable file was pinned at `94e82c1^` and the fixed file at
-  `94e82c1`; no nDPI build was made.
+  `94e82c1`; W162 additionally built the pinned vulnerable tree with ASan.
 - No external probe. Advisory and source fetches were provisioning only.
 
 ## 2. Source-bound mechanism and fix
@@ -98,3 +98,44 @@ public serializer through a small C program that passes an exact-size
 whether any caller passes a tight buffer; feed crafted TLS SNI / HTTP / DNS
 data to a loopback-only nDPI reader and preserve the negative if all in-tree
 callers keep the +24-byte margin. Rung 5 is UNKNOWN.
+
+## 6. W162 — real pinned build, caller analysis (2026-11-23)
+
+The full vulnerable commit tree was fetched and verified byte-identical to
+the pin (`ndpi_serializer.c` sha256 `4840fb41...9ad5`) and built with clang 18
+ASan. `realbuild/run.sh` rebuilds a probe driver against that real `libndpi.a`.
+
+- **Measured negative.** All 13 in-tree escape call sites live in
+  `ndpi_serializer.c` and pass `dst_max_len = buffer.size - size_used`. The
+  VALUE caller (`:1296-1310`) pre-extends by `24 + slen*2`. Driving the real
+  JSON serializer with 145 crafted cases (slash, 4-byte UTF-8, mixed escapes;
+  lengths 1..2000; initial buffers 8..128) produced zero ASan reports, with
+  `{"key":"\/"}` in the output proving the escape ran. Crafted SNI/HTTP/DNS
+  strings serialized as values do not overflow this build.
+- **New positive, real in-tree caller.** Three functions compute
+  `needed = klen + 16` but escape a key that can expand to `2*klen+3`:
+  `ndpi_serialize_start_of_block_binary` (`:2328,:2340`),
+  `ndpi_serialize_start_of_list_binary` (`:2245,:2257`) and
+  `ndpi_serialize_binary_boolean` (`:2181,:2194`). With a 128-byte key of `/`
+  and the default 256-byte buffer, ASan reports `WRITE of size 1` at `:107:18`
+  in `ndpi_json_string_escape`, called from
+  `ndpi_serialize_start_of_block_binary:2340`, at address 0 bytes past the
+  256-byte `calloc` from `:209`; the stored byte is the chosen key char
+  `0x2f`. At klen=256 the first report is the off-by-one NUL at `:163:12`, 1
+  byte past a 516-byte `realloc` from `:286`/`:2331`. klen 16/64 are clean;
+  128..2048 overflow in all three callers (`realbuild/enumeration.txt`).
+
+This moves rungs 3 and 4 from a stub harness to a REAL nDPI caller and
+library build. It is still a local library-API result: the probe supplies the
+long key, in-tree call sites mostly pass constant field-name keys, and no
+packet, socket, pointer control, command or witness replay was exercised.
+Whether attacker-controlled network data can become such a key is UNKNOWN;
+the advisory's wire-reachability claim is unproven and rung 5 stays UNKNOWN.
+
+An end-to-end control was also run on loopback-local pcaps with the ASan
+reader (`-k ... -K json`): a stock DNS pcap and a generated HTTP GET whose
+`Host:` is 400 `/` bytes. Both returned rc=0 with zero ASan reports; the HTTP
+JSON contains the untrusted value as 560 `\/` escapes, proving the real
+packet-to-serializer-to-escape path executed. It does not reach the weak-key
+callers, whose keys are constant field names. `realbuild/reader-*` holds the
+outputs; `realbuild/mk_longhost_pcap.py` regenerates the crafted pcap.

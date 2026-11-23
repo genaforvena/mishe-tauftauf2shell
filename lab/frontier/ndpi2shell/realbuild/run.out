@@ -1,0 +1,13 @@
+PASS pinned serializer matches 4840fb41...9ad5
+PASS driver linked against real libndpi.a
+== direct public API (exact-size 8-byte buffer) ==
+PASS direct API ASan WRITE at pinned :107
+== real serializer VALUE path (145 crafted cases) ==
+PASS VALUE path: 0 ASan reports
+PASS VALUE path completed
+== real serializer KEY path (weak-headroom callers) ==
+PASS key path caller 0: real-caller ASan WRITE at :107
+PASS key path caller 1: real-caller ASan WRITE at :107
+PASS key path caller 2: real-caller ASan WRITE at :107
+PASS short key (klen=16) clean control
+PASS=9 FAIL=0

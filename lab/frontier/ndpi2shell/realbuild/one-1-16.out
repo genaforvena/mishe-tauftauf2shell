@@ -1,0 +1,3 @@
+WEAK one klen=16 bufsize=256 which=1
+WEAK one klen=16 rc=0
+DONE mode=weakone

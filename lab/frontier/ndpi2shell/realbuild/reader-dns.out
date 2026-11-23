@@ -1,0 +1,61 @@
+
+-----------------------------------------------------------
+* NOTE: This is demo app to show *some* nDPI features.
+* In this demo we have implemented only some basic features
+* just to show you what you can do with the library. Feel 
+* free to extend it and send us the patches for inclusion
+------------------------------------------------------------
+
+Using nDPI (5.1.0) [1 thread(s)]
+nDPI license: Non-commercial LGPL (0)
+Using libgcrypt version 1.8.6internal
+Reading packets from pcap file tests/cfgs/dns_sub_enable/pcap/dns.pcap...
+Running thread 0...
+
+nDPI Memory statistics:
+	nDPI Memory (once):      3.56 KB      
+	Flow Memory (per flow):  1.30 KB      
+	Total memory allocated:  9.36 MB      
+	Setup Time:              70 msec
+	Packet Processing Time:  1 msec
+
+Traffic statistics:
+	Ethernet bytes:        3961          (includes ethernet CRC/IFC/trailer)
+	Discarded bytes:       0            
+	IP packets:            17            of 17 packets total
+	IP bytes:              3553          (avg pkt size 209 bytes)
+	Unique flows:          4            
+	TCP Packets:           11           
+	UDP Packets:           6            
+	VLAN Packets:          2            
+	MPLS Packets:          0            
+	PPPoE Packets:         2            
+	Fragmented Packets:    0            
+	Max Packet size:       1240         
+	Packet Len < 64:       13           
+	Packet Len 64-128:     0            
+	Packet Len 128-256:    1            
+	Packet Len 256-1024:   2            
+	Packet Len 1024-1500:  1            
+	Packet Len > 1500:     0            
+	nDPI throughput:       12.23 K pps / 21.74 Mb/sec
+	Analysis begin:        01/Jan/1970 00:00:15
+	Analysis end:          17/Jan/2017 17:10:25
+	Traffic throughput:    0.00 pps / 0 b/sec
+	Traffic duration:      1484673024.000 sec
+	DPI Packets (TCP):     7             (7.00 pkts/flow)
+	DPI Packets (UDP):     6             (2.00 pkts/flow)
+	Confidence: DPI        4             (flows)
+
+
+Detected protocols:
+	DNS                  packets: 16            bytes: 3182          flows: 3            
+	MDNS                 packets: 1             bytes: 371           flows: 1            
+
+
+Protocol statistics:
+	Acceptable           packets: 17            bytes: 3553          flows: 4            
+
+
+Category statistics:
+	Network              packets: 17            bytes: 3553          flows: 4            

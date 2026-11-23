@@ -1,0 +1,56 @@
+WEAK one klen=1024 bufsize=256 which=0
+=================================================================
+==494320==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000000994 at pc 0x5b1ce007d17a bp 0x7ffcfa0e8ae0 sp 0x7ffcfa0e8ad8
+WRITE of size 1 at 0x519000000994 thread T0
+    #0 0x5b1ce007d179 in ndpi_json_string_escape /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/src/ndpi-full-vuln/build-asan/src/lib/../../../src/lib/ndpi_serializer.c:107:18
+    #1 0x5b1ce0093b73 in ndpi_serialize_start_of_block_binary /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/src/ndpi-full-vuln/build-asan/src/lib/../../../src/lib/ndpi_serializer.c:2340:44
+    #2 0x5b1ce007c64a in run_weakkey /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/realbuild/driver.c:64:10
+    #3 0x5b1ce007bbb2 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/realbuild/driver.c:127:5
+    #4 0x727934c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x727934c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5b1cdffa2514 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/realbuild/driver-asan+0x44e514) (BuildId: d1d2c91d23512af778a39207a0a6a17e5f3d8603)
+
+0x519000000994 is located 0 bytes after 1044-byte region [0x519000000580,0x519000000994)
+allocated by thread T0 here:
+    #0 0x5b1ce003d780 in realloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/realbuild/driver-asan+0x4e9780) (BuildId: d1d2c91d23512af778a39207a0a6a17e5f3d8603)
+    #1 0x5b1ce0093aac in ndpi_extend_serializer_buffer /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/src/ndpi-full-vuln/build-asan/src/lib/../../../src/lib/ndpi_serializer.c:286:7
+    #2 0x5b1ce0093aac in ndpi_serialize_start_of_block_binary /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/src/ndpi-full-vuln/build-asan/src/lib/../../../src/lib/ndpi_serializer.c:2331:8
+    #3 0x5b1ce007c64a in run_weakkey /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/realbuild/driver.c:64:10
+    #4 0x5b1ce007bbb2 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/realbuild/driver.c:127:5
+    #5 0x727934c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x727934c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5b1cdffa2514 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/realbuild/driver-asan+0x44e514) (BuildId: d1d2c91d23512af778a39207a0a6a17e5f3d8603)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ndpi2shell/src/ndpi-full-vuln/build-asan/src/lib/../../../src/lib/ndpi_serializer.c:107:18 in ndpi_json_string_escape
+Shadow bytes around the buggy address:
+  0x519000000700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000000980: 00 00[04]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==494320==ABORTING
