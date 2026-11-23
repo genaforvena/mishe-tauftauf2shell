@@ -3,29 +3,29 @@ WRITE_SIZE=1048576
 STALL=1
 WRITTEN=65535
 =================================================================
-==986197==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x529000004200 at pc 0x58287cb8d669 bp 0x7ffec5eac030 sp 0x7ffec5eab7f0
+==1021575==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x529000004200 at pc 0x57a5c1373669 bp 0x7ffed8fdc990 sp 0x7ffed8fdc150
 WRITE of size 983041 at 0x529000004200 thread T0
-    #0 0x58287cb8d668 in __asan_memmove (/tmp/zlib2shell.V0Aw6G/poc-vuln-asan-clang+0xc6668) (BuildId: 639d5027e17b024fa247237a4bdec41538144dbf)
-    #1 0x58287cbda5c0 in gz_vacate /tmp/zlib2shell.V0Aw6G/build-vuln-asan-clang/gzwrite.c:394:5
-    #2 0x58287cbd91f1 in gzvprintf /tmp/zlib2shell.V0Aw6G/build-vuln-asan-clang/gzwrite.c:439:11
-    #3 0x58287cbda880 in gzprintf /tmp/zlib2shell.V0Aw6G/build-vuln-asan-clang/gzwrite.c:494:11
-    #4 0x58287cbce086 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:94:14
-    #5 0x73273d62a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #6 0x73273d62a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #7 0x58287caf43b4 in _start (/tmp/zlib2shell.V0Aw6G/poc-vuln-asan-clang+0x2d3b4) (BuildId: 639d5027e17b024fa247237a4bdec41538144dbf)
+    #0 0x57a5c1373668 in __asan_memmove (/tmp/zlib2shell.eRtlOe/poc-vuln-asan-clang+0xc6668) (BuildId: c9e4728771fd4b199b828592368bb36ad98cd7d2)
+    #1 0x57a5c13c05c0 in gz_vacate /tmp/zlib2shell.eRtlOe/build-vuln-asan-clang/gzwrite.c:394:5
+    #2 0x57a5c13bf1f1 in gzvprintf /tmp/zlib2shell.eRtlOe/build-vuln-asan-clang/gzwrite.c:439:11
+    #3 0x57a5c13c0880 in gzprintf /tmp/zlib2shell.eRtlOe/build-vuln-asan-clang/gzwrite.c:494:11
+    #4 0x57a5c13b4086 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:94:14
+    #5 0x72b3c4e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x72b3c4e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x57a5c12da3b4 in _start (/tmp/zlib2shell.eRtlOe/poc-vuln-asan-clang+0x2d3b4) (BuildId: c9e4728771fd4b199b828592368bb36ad98cd7d2)
 
 0x529000004200 is located 0 bytes after 16384-byte region [0x529000000200,0x529000004200)
 allocated by thread T0 here:
-    #0 0x58287cb8f203 in malloc (/tmp/zlib2shell.V0Aw6G/poc-vuln-asan-clang+0xc8203) (BuildId: 639d5027e17b024fa247237a4bdec41538144dbf)
-    #1 0x58287cbd9b1e in gz_init /tmp/zlib2shell.V0Aw6G/build-vuln-asan-clang/gzwrite.c:16:34
-    #2 0x58287cbd7724 in gz_write /tmp/zlib2shell.V0Aw6G/build-vuln-asan-clang/gzwrite.c:197:29
-    #3 0x58287cbd767b in gzwrite /tmp/zlib2shell.V0Aw6G/build-vuln-asan-clang/gzwrite.c:276:17
-    #4 0x58287cbcdbd7 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:55:5
-    #5 0x73273d62a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #6 0x73273d62a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #7 0x58287caf43b4 in _start (/tmp/zlib2shell.V0Aw6G/poc-vuln-asan-clang+0x2d3b4) (BuildId: 639d5027e17b024fa247237a4bdec41538144dbf)
+    #0 0x57a5c1375203 in malloc (/tmp/zlib2shell.eRtlOe/poc-vuln-asan-clang+0xc8203) (BuildId: c9e4728771fd4b199b828592368bb36ad98cd7d2)
+    #1 0x57a5c13bfb1e in gz_init /tmp/zlib2shell.eRtlOe/build-vuln-asan-clang/gzwrite.c:16:34
+    #2 0x57a5c13bd724 in gz_write /tmp/zlib2shell.eRtlOe/build-vuln-asan-clang/gzwrite.c:197:29
+    #3 0x57a5c13bd67b in gzwrite /tmp/zlib2shell.eRtlOe/build-vuln-asan-clang/gzwrite.c:276:17
+    #4 0x57a5c13b3bd7 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:55:5
+    #5 0x72b3c4e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x72b3c4e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x57a5c12da3b4 in _start (/tmp/zlib2shell.eRtlOe/poc-vuln-asan-clang+0x2d3b4) (BuildId: c9e4728771fd4b199b828592368bb36ad98cd7d2)
 
-SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/zlib2shell.V0Aw6G/poc-vuln-asan-clang+0xc6668) (BuildId: 639d5027e17b024fa247237a4bdec41538144dbf) in __asan_memmove
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/zlib2shell.eRtlOe/poc-vuln-asan-clang+0xc6668) (BuildId: c9e4728771fd4b199b828592368bb36ad98cd7d2) in __asan_memmove
 Shadow bytes around the buggy address:
   0x529000003f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
   0x529000004000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
@@ -57,4 +57,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==986197==ABORTING
+==1021575==ABORTING

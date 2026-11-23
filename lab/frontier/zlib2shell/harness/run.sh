@@ -22,6 +22,9 @@ FIXED_SHA=a3289b4dc38c5470c34b14908c921fdf3dbb0e78c9e344aa0cb3d535d6292c10
 PATCH_SHA=110ff14375733173d8aa54574473424fbd7dfe4b81f1ca34a759c6fe14b15b14
 DRIVER_SHA=941296b030e0f9f6a904f689aff057ac8174326a83a112f3964cba1a1c99e1cf
 ck PIN_TARBALL "$([ "$(hr "$SRC/zlib-1.3.2.tar.gz")" = "$TARBALL_SHA" ] && echo 1 || echo 0)"
+if [ ! -f "$SRC/zlib-1.3.2/configure" ]; then
+  tar xzf "$SRC/zlib-1.3.2.tar.gz" -C "$SRC"
+fi
 ck PIN_PARENT "$([ "$(hr "$SRC/gzwrite.c.parent")" = "$PARENT_SHA" ] && echo 1 || echo 0)"
 ck PIN_FIXED "$([ "$(hr "$SRC/gzwrite.c.fixed")" = "$FIXED_SHA" ] && echo 1 || echo 0)"
 ck PIN_PATCH "$([ "$(hr "$SRC/fix-df84af25.patch")" = "$PATCH_SHA" ] && echo 1 || echo 0)"

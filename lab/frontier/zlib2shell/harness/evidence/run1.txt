@@ -10,7 +10,7 @@ PASS SLICE_FIXED_RESET
 PASS SLICE_MEMMOVE_BOTH
 PASS FIX_HUNK_APPLIES
 PASS BUILDS
-harness/run.sh: line 67: 980513 Segmentation fault      (core dumped) "$TMP/poc-vuln-plain" attack > "$OUT/plain-attack.out" 2>&1
+harness/run.sh: line 70: 1014047 Segmentation fault      (core dumped) "$TMP/poc-vuln-plain" attack > "$OUT/plain-attack.out" 2>&1
 PASS R1_STALL_OBSERVED
 PASS R1_STALE_AVAIL
 PASS R2_COPY_PAST_REGION

@@ -3,27 +3,27 @@ WRITE_SIZE=1048576
 STALL=1
 WRITTEN=65535
 =================================================================
-==986217==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x529000004200 at pc 0x73e5106fac7f bp 0x7ffd885a18c0 sp 0x7ffd885a1068
+==1021615==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x529000004200 at pc 0x7d92efafac7f bp 0x7ffc48a246e0 sp 0x7ffc48a23e88
 WRITE of size 983041 at 0x529000004200 thread T0
-    #0 0x73e5106fac7e in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
-    #1 0x623424898f85 in gz_vacate /tmp/zlib2shell.V0Aw6G/build-vuln-asan/gzwrite.c:394
-    #2 0x623424899224 in gzvprintf /tmp/zlib2shell.V0Aw6G/build-vuln-asan/gzwrite.c:439
-    #3 0x623424899829 in gzprintf /tmp/zlib2shell.V0Aw6G/build-vuln-asan/gzwrite.c:494
-    #4 0x6234248902ed in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:94
-    #5 0x73e51022a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x73e51022a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x62342488f624 in _start (/tmp/zlib2shell.V0Aw6G/poc-vuln-asan+0x4624) (BuildId: 935a6a1fdb3acd1d20248d3619fd56d8805ef1f4)
+    #0 0x7d92efafac7e in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
+    #1 0x57a9040b2f85 in gz_vacate /tmp/zlib2shell.eRtlOe/build-vuln-asan/gzwrite.c:394
+    #2 0x57a9040b3224 in gzvprintf /tmp/zlib2shell.eRtlOe/build-vuln-asan/gzwrite.c:439
+    #3 0x57a9040b3829 in gzprintf /tmp/zlib2shell.eRtlOe/build-vuln-asan/gzwrite.c:494
+    #4 0x57a9040aa2ed in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:94
+    #5 0x7d92ef62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7d92ef62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x57a9040a9624 in _start (/tmp/zlib2shell.eRtlOe/poc-vuln-asan+0x4624) (BuildId: d5e1fb6cb5a56fc95bf50a987835252276e30daa)
 
 0x529000004200 is located 0 bytes after 16384-byte region [0x529000000200,0x529000004200)
 allocated by thread T0 here:
-    #0 0x73e5106fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x623424896a17 in gz_init /tmp/zlib2shell.V0Aw6G/build-vuln-asan/gzwrite.c:16
-    #2 0x623424897d84 in gz_write /tmp/zlib2shell.V0Aw6G/build-vuln-asan/gzwrite.c:197
-    #3 0x623424898470 in gzwrite /tmp/zlib2shell.V0Aw6G/build-vuln-asan/gzwrite.c:276
-    #4 0x62342488fdcf in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:55
-    #5 0x73e51022a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #6 0x73e51022a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #7 0x62342488f624 in _start (/tmp/zlib2shell.V0Aw6G/poc-vuln-asan+0x4624) (BuildId: 935a6a1fdb3acd1d20248d3619fd56d8805ef1f4)
+    #0 0x7d92efafd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x57a9040b0a17 in gz_init /tmp/zlib2shell.eRtlOe/build-vuln-asan/gzwrite.c:16
+    #2 0x57a9040b1d84 in gz_write /tmp/zlib2shell.eRtlOe/build-vuln-asan/gzwrite.c:197
+    #3 0x57a9040b2470 in gzwrite /tmp/zlib2shell.eRtlOe/build-vuln-asan/gzwrite.c:276
+    #4 0x57a9040a9dcf in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/zlib2shell/harness/driver.c:55
+    #5 0x7d92ef62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7d92ef62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x57a9040a9624 in _start (/tmp/zlib2shell.eRtlOe/poc-vuln-asan+0x4624) (BuildId: d5e1fb6cb5a56fc95bf50a987835252276e30daa)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98 in memmove
 Shadow bytes around the buggy address:
@@ -57,4 +57,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==986217==ABORTING
+==1021615==ABORTING

@@ -24,7 +24,8 @@ Claim sources: <https://www.cve.org/CVERecord?id=CVE-2026-85091>,
 <https://www.vulncheck.com/advisories/zlib-1.3.1.2-through-1.3.2-heap-buffer-overflow-via-gz-vacate>,
 fix commit `df84af25dc19` (Mark Adler, 2026-09-16), PoC and instrumentation
 <https://gist.github.com/thesmartshadow/e0b9481792afb7c31e86fee1ff084490>.
-
+The tarball is self-extracted by `run.sh` when `src/zlib-1.3.2/` is absent, so
+a clean checkout of only the committed files reproduces the harness.
 ## Harness
 
 `harness/run.sh` drives everything from this directory:
