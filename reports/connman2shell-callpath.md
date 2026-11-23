@@ -34,12 +34,13 @@ can legitimately contain no store or no crash.
   `len=2048` therefore reaches the bug on the real caller layout.
 - **Controls**: fixed snapshot and a well-formed short DOMAIN_LIST both give
   `CHAIN DONE STATUS=0` and no ASan report through the same chain.
-- **Store landing** (plain, 12 runs, K=0x80): 7 runs show 68–69 `0x2E`
-  stores in a 16 KiB `main()` canary (`FIRST` 4..177, `LAST` ~16190..16299);
-  4 runs show no canary writes; 1 run aborts. An earlier batch gave 3 store
-  / 8 none / 1 SIGSEGV. The first OOB step is attacker-chosen (`K-1` bytes
-  past the 1026-byte object), but subsequent strides read ambient stack
-  bytes, so the continuation is ASLR-dependent.
+- **Store landing** (plain, 12 runs, K=0x80): 5 runs show 69 `0x2E`
+  stores in a 16 KiB `main()` canary (`FIRST` 22..48, `LAST` 16274..16300);
+  5 runs show no canary writes; 2 runs abort (one with a stack-smashing
+  report). An earlier, historical 12-run batch gave 3 store / 8 none /
+  1 SIGSEGV. The first OOB step is attacker-chosen (`K-1` bytes past the
+  1026-byte object), but subsequent strides read ambient stack bytes, so
+  the continuation is ASLR-dependent.
 
 `bash lab/connman2shell/callpath/retarget.sh` → `RETARGET_K=0x67 HITS=5/5`.
 
