@@ -316,11 +316,20 @@ loopback; ~8 MiB streamed to walk the ring write pointer to the wrap. The
 command is lab-chosen and benign; the callback address is a lab-measured
 absolute value, not a leaked or brute-forced one.
 
-Grade: author-observed rung 5 mechanics at the labeled loopback / no-ASLR /
-brk-layout / known-address scope. No independent witness replay of W4 yet, so
-it is **not ESTABLISHED**; the default-mmap read-only ceiling from W2 remains
-valid. Two earlier script defects were found and corrected: the structured
-sender wrote past a 512-byte `malloc` in one safe case, and an early
-`no-gdb-case.sh` edit dropped the command argument and overrode the callback.
-Those void runs are not evidence and are not cited.
+Grade: witness W153 (#2461, 2026-11-23 09:51Z) replayed the four no-gdb
+checks with witness-owned builds and ESTABLISHED the W4 no-debugger command
+claim at the labeled scope: port 5714, its own marker paths and
+`/usr/bin/touch` variants, calibrated addresses (`&system 0x7ffff7a58750`,
+`&ff_file_protocol 0x55555584f5a0`, `h 0x5555560d2080`), and a fresh v4
+no-gdb matrix with fixed, safe and cb=0 controls absent (rc 124/134). The
+limits stay inside the claim: `setarch -R` no-ASLR, the local
+`MALLOC_MMAP_THRESHOLD_=16777216` brk layout, lab-measured absolute addresses
+passed as sender arguments, unencrypted main profile, benign `touch` only,
+no ROP and a later abort of the vulnerable process. Rung 5 is ESTABLISHED at
+that scope only; the default-mmap read-only ceiling from W2 and any ASLR-on
+or stock-layout execution remain unclaimed. Two earlier script defects were
+found and corrected: the structured sender wrote past a 512-byte `malloc` in
+one safe case, and an early `no-gdb-case.sh` edit dropped the command
+argument and overrode the callback. Those void runs are not evidence and are
+not cited.
 

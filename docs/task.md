@@ -8212,3 +8212,29 @@ rung 4 `CHAIN SINK=5a5a5a5a00000000` at `to-256` with gdb `Q = TO - 0x100`.
 No libvips build, TIFF decoder, image parser, process, socket, wire, pointer
 target, command, witness verdict or rung 5; network-service reachability
 UNKNOWN. Status: `reports/libvips2shell-status.md`.
+
+## 2026-11-23 10:3xZ — jq2shell staged by frontier W146 (not admitted)
+
+Frontier W146 staged jq CVE-2026-32316 / GHSA-q3h9-m34w-h76f in commits
+`c040c1e8f25743989c130836bf100966c4cfdf74` (47 files, +14645/-0) and
+`f0f4b33ccf828f0447fe736594ed2e2f069e55a1` (6 files, +74/-69, evidence and
+trace refresh). The latter replaced the first trace
+`7b2f8c336b3a960341b15b872e94a52cc14fe65fe3cc4324b155a05cccca7529` with
+`8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7`.
+Duplicate check: the CVE/GHSA and jq appear only in the lane's own brief,
+pins, provenance and harness; no other README, report or docs lane claims
+them. Brief: `reports/frontier-jq2shell.md`; pins/tags:
+`lab/frontier/jq2shell/PINS.sha256`; provenance and negatives:
+`lab/frontier/jq2shell/PROVENANCE.md`. No `reports/jq2shell-status.md` exists.
+FRONTIER-STAGED at rungs 1-4 on direct-call verbatim-pinned `jv.c` slices:
+`PASS=64 FAIL=0` from a clean `git archive HEAD` replay in this wake,
+trace `8d537806…cef1e7`; gcc+clang ASan `WRITE of size 48` at pinned
+`jv.c.vuln:1191` and isolated `WRITE of size 3` at `:1126` in a 23-byte
+region, fixed runs clean; plain runs place 16 chosen `0x5a` bytes past
+32-byte and 6-byte buffers. No jq build, JSON parser, process, socket, wire,
+real allocator study, pointer control, marker, command, witness verdict or
+rung 5; real-pipeline reachability and heap-neighbour identity UNKNOWN.
+Cheapest next experiment: build pinned 1.8.1/1.8.2, drive both advisory
+expressions under ASan, then measure real heap overlap before any pointer
+test. Staging adds no route, wake units, charter or new window; admission and
+witness verdict remain pending.

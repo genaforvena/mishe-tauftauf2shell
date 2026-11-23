@@ -139,7 +139,7 @@ pointer control under the local layout prerequisite. It withheld control
 transfer and rung 5. Evidence and controls: `reports/ffmpeg2shell-live.md`,
 `live/evidence/layout-brk-*.log`, `live/layout-probe.sh`, `live/watch-*.cmd`.
 
-## W4 wire-driven command execution (2026-11-23) — author-only, not ESTABLISHED
+## W4 wire-driven command execution (2026-11-23) — witness-ESTABLISHED at the labeled scope (W153/#2461)
 
 Full detail and exact evidence: `reports/ffmpeg2shell-live.md` W4 section and
 `lab/frontier/ffmpeg2shell/live/evidence/w4-nogdb-matrix.summary.txt`.
@@ -161,8 +161,14 @@ no side effect; wire callback `0x0` no side effect; sender rc 0 in all four.
 
 Conditions are part of the claim: local `MALLOC_MMAP_THRESHOLD_=16777216`,
 no-ASLR, absolute PIE/libc addresses measured in this build, main-profile
-unencrypted loopback RIST and ~8 MiB streamed to the ring wrap. Grade:
-author-observed rung 5 mechanics at that labeled scope. No independent
-witness replay of W4, so it is NOT ESTABLISHED. W3 is now witness-ESTABLISHED
-(#2444) at its brk-layout scope; the W2 live-path rungs 3/4 are unchanged.
+unencrypted loopback RIST and ~8 MiB streamed to the ring wrap. Witness W153
+(#2461, 09:51Z) replayed the four no-gdb checks with witness-owned builds on
+port 5714, its own marker paths and `/usr/bin/touch` variants, and calibrated
+`&system 0x7ffff7a58750`, `&ff_file_protocol 0x55555584f5a0` and
+`h 0x5555560d2080`; the fixed, safe and cb=0 controls stayed marker-absent
+(rc 124/134). Rung 5 is ESTABLISHED at that labeled no-ASLR, local-brk-layout,
+lab-measured-address, benign-touch scope only. The W2 default-mmap read-only
+ceiling and any ASLR-on or stock-layout execution stay unclaimed; W3 and the
+W2 live rungs 3/4 are unchanged. No ROP is asserted and the vulnerable process
+aborts after the marker.
 
