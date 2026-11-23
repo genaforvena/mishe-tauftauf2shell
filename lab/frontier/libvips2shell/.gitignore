@@ -8,6 +8,12 @@ cfg-vuln-asan.log
 cfg-fixed-asan.log
 build-vuln-asan.log
 build-fixed-asan.log
+build-vuln-plain/
+build-fixed-plain/
+cfg-vuln-plain.log
+cfg-fixed-plain.log
+build-vuln-plain.log
+build-fixed-plain.log
 real/probe-vuln
 real/probe-fixed
 real/probe
@@ -18,3 +24,5 @@ real/diag-gdb.txt
 real/diag-abrt.out
 real/diag-run.out
 real/embed-vuln
+real/neighbour-plain
+real/neighbour-fixed

@@ -1,0 +1,4 @@
+PREPARE=ERR msg=image: dimension overflow
+
+
+RUN_RC=0

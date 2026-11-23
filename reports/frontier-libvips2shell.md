@@ -222,3 +222,34 @@ address, control-flow datum, wire, request, command or marker side effect.
 
 `real/run-consumer.sh` was replayed from a clean `git archive HEAD` at
 commit `22278cb`: `CLEAN_ARCHIVE_RC=0`, 21/21 PASS.
+
+## 10. W6 addendum — what the negative WRITE actually lands on
+
+W4 established a chosen-byte negative-offset write through a public API but
+left the allocator question open. `real/neighbour.c` builds the same real
+8.6 GB memory image on **plain** (non-ASan) pinned vulnerable and fixed trees
+and drives `vips_region_paint()`; ASan cannot answer this because it aborts
+at the first poisoned byte (`data-6144`). `real/run-neighbour.sh` checks
+14 assertions in both trees.
+
+- Default layout, vulnerable tree: `data = mapping_base + 32`, so the target
+  is `mapping_base - 7264`. `mincore()` reports `ENOMEM` for that page, the
+  nearest lower mapping is ~2.7e13 bytes away, and the second `memset`
+  SIGSEGVs before `PAINT_DONE` (`RUN_RC=139`, `neighbour-layout.out`). No
+  natural neighbour holds a control-flow datum on this host; the observation
+  matches the advisory's "segfault likely" statement.
+- Groomed neighbour, vulnerable tree: a 64 KiB anonymous mapping placed
+  immediately below the glibc mapping with `MAP_FIXED_NOREPLACE` changes the
+  outcome: `PAINT_DONE`, `VICTIM_POST off=58272 byte0=5a byte1=5a before=11
+  after_end=5a`, `RUN_RC=0` (`neighbour-victim.out`). Chosen bytes reach a
+  *different live mapping* at a chosen offset; the byte before the write is
+  untouched. The victim holds anonymous bytes, not a pointer.
+- Fixed tree: `vips_image_write_prepare()` rejects the geometry with
+  `image: dimension overflow`, no paint and no neighbour write
+  (`neighbour-fixed-layout.out`, `neighbour-fixed-victim.out`).
+
+Grade unchanged: rung 4. The neighbour is explicit grooming, the default
+layout crashes, and no pointer, vtable, saved return address, wire input,
+command or marker side effect was observed. On this host and glibc layout
+the negative write is structurally an availability primitive; reaching a
+control-flow datum would require a different, unmeasured allocator layout.

@@ -268,3 +268,57 @@ Clean `git archive HEAD` replay at commit `22278cb` (gitignored build and
 source trees symlinked in, as at W3) returned `CLEAN_ARCHIVE_RC=0` and
 21/21 PASS, including both paint controls. This confirms the checked change
 is reproducible from the committed tree, not just the working tree.
+
+## W6 — allocator neighbour of the negative WRITE (2026-11-23 target mind)
+
+### Builds and probe
+
+- Plain pinned builds of `src/libvips-8.18.2` and `src/libvips-fixed`
+  (`meson --buildtype=debug -Db_sanitize=none`, same format flags as the ASan
+  builds): `cfg-vuln-plain.log`, `cfg-fixed-plain.log`, both `ninja` rc 0,
+  433/433 targets. Only provisioning corrections: the first two `meson setup`
+  attempts used a reversed argument order and then `../src/libvips-8.18.2`
+  instead of `src/libvips-8.18.2`; neither produced a finding.
+- `real/neighbour.c` creates the real memory image with the TIFF-accepted
+  geometry, prints the `/proc/self/maps` entries and `mincore()` status around
+  `data - 7296`, and calls the same public `vips_region_prepare()` +
+  `vips_region_paint(reg, {0,0,4,2}, 0x5a)` as W4. Modes: `layout` (no
+  grooming) and `victim` (64 KiB anonymous mapping at `map_start - 65536`,
+  placed with `MAP_FIXED_NOREPLACE`, prefilled with `0x11`).
+
+### Observations
+
+- `vips_tracked_malloc()` (pinned `memory.c:304-347`) calls
+  `g_try_malloc0(size + 16)` and returns `buf + 16`; on a glibc mmap
+  allocation this makes `data = mapping_base + 32`. Therefore the W4
+  negative target is `mapping_base - 7264`, not `mapping_base - 7296`.
+- Vulnerable `layout`: `MINCORE_TARGET=0 errno=12`, `DELTA=-7264`,
+  `bpl=-7296 lskip=18446744073709544320`, `PAINT_ADDR1=data-7296`; no
+  `PAINT_DONE` and `RUN_RC=139` (SIGSEGV). `MAP_NEXT_BELOW_HI` is ~2.7e13
+  bytes below the crafted mapping, so there is no natural neighbour to hit.
+- Vulnerable `victim`: `pre=11` before paint, then `PAINT_DONE` and
+  `VICTIM_POST off=58272 byte0=5a byte1=5a before=11 after_end=5a`,
+  `RUN_RC=0`. The 160000-byte second memset starts 7264 bytes below the
+  crafted mapping, covers the last 7264 bytes of the victim mapping, and
+  continues into the valid first line of the crafted image.
+- Fixed `layout` and `victim`: `PREPARE=ERR msg=image: dimension overflow`,
+  no paint, no `VICTIM_POST`, `RUN_RC=0`.
+- `real/run-neighbour.sh` runs 14 anchored check/absent assertions over the
+  four runs; `RESULT fail=0` in-tree.
+
+### Negative results and corrections preserved
+
+- The write also overwrites the crafted glibc mmap chunk header at
+  `mapping_base`. The first victim run printed `VIPS-WARNING: vips_free: too
+  much free` and aborted in `munmap_chunk()` during teardown (rc 134). That
+  is an artifact of the deliberate overwrite, not a separate finding; the
+  corrected probe finishes with `_exit(0)` after reading the victim bytes
+  and returns rc 0.
+- A one-pass `/proc/self/maps` scan first printed a bogus
+  `GAP_BELOW=124132456128512` because `containing` was still zero when
+  earlier mappings were visited. Tracking the previous mapping end fixes it;
+  the recorded gap is the distance from the nearest lower mapping.
+- No natural control-flow datum at the target, no libvips object deliberately
+  placed as the neighbour (the victim is an anonymous mapping), no wire or
+  request input, no process-level execution, no marker and no witness verdict
+  for this experiment. Rung 4 remains the grade; rung 5 UNKNOWN.
