@@ -132,8 +132,12 @@ timeout on the 2-CPU host (2/137 objects), so build-from-source replay is
 UNKNOWN. Boundary refinement: flipping the first frame's SOF instead of the
 second gives 64x512 then 512x64, both encode, rc 0, no ASan; the fault needs
 decoded height > padded height with decoded stride < new stride. File-level
-reachability at the labeled local scope is no longer UNKNOWN; wire/remote
-input, pointer control and rung 5 remain UNKNOWN. The admitted mind owns the
-remaining step: measure whether a live pointer-bearing object can occupy the
-neighbour before the abort, with vulnerable/fixed/safe-input controls and
-witness replay. Frontier owns no further work on this target.
+reachability at the labeled local scope is no longer UNKNOWN. W172 (commit
+`c34f357`) added a SYNTHETIC loopback wire-input lane: socket-derived bytes
+reach the same ASan `WRITE of size 64` at `pixelimage.cc:644` with safe and
+fixed-pin controls, and, with the W171 interposer, overwrite a live object's
+8-byte pointer with file-derived values at rc 0. That is wire-derived rung 4
+mechanics, not a real network service: remote reachability through a real
+libheif consumer, a valid pointer target and rung 5 remain UNKNOWN. Witness
+replay request #2897 is queued. The admitted mind owns any further step;
+frontier owns no further work on this target.
