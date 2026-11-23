@@ -1,0 +1,6 @@
+decode request: colorspace=0 chroma=420
+track declared: 64x65
+encoder declared: 512x64
+frame 0 native colorspace=0 chroma=1
+frame 0 Y row64: 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88
+double free or corruption (out)

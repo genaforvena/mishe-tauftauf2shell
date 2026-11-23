@@ -402,3 +402,43 @@ a different libheif build remain UNKNOWN, not demonstrated. Grade unchanged:
 rung 3 plus rung 4 with uniform file-derived bytes at a chosen offset. No
 valid pointer target, marker, command or rung 5. New witness verdicts on
 #2752/#2869/#2897 were still absent at 20:06Z; this W177 lane is unreplayed.
+
+## W178 arbitrary-byte OOB row through an uncompressed-coded source (2026-11-23)
+
+W177 measured the JPEG ceiling: one uniform value per row was byte-exact, but
+eight independently chosen block values decoded distorted. This wake tested
+the charter's "another codec or build" item on the same pinned v1.23.6 source
+with `WITH_UNCOMPRESSED_CODEC=ON` enabled. Full commands, hashes, negatives and
+the exact checker output are in
+`lab/frontier/libheif2shell/real/PROVENANCE-real.md` (W178 section).
+
+Two cheap variants were FALSIFIED first. Requesting YCbCr 4:4:4 or native
+chroma from the pinned JPEG-sequence build returned the same distorted row as
+4:2:0 (`10 10 ...` from target `11 22 ...`); native decode reported YCbCr 4:2:0,
+so the distortion is in the decoded source, not the decode request. Monochrome
+decode failed `rc=4 sub=3003`. An uncompressed-coded sequence with frame 0
+512x64 and frame 1 64x65 encoded without error but frame 1 could not be decoded
+(`rc=2 sub=100 Requested data range exceeds the sample data`): the sample entry
+has one fixed size, so this codec cannot carry the mixed decoded sizes the x265
+padding fault needs in a single file. Patching the sample entry to 512x64
+broke decode the same way. Both negatives are preserved.
+
+Positive, with its label: `real/uncompressed_mixed.cc` generated a 64x65
+ISO/IEC 23001-17-coded sequence whose rows 64 carry the chosen 64 bytes
+`11 22 33 44 55 66 77 88` repeated eight times; the decoder returns them
+byte-exact. `real/reencode_chroma.cc` with `SYNTH_FIRST=1 TW=512 TH=64` then
+feeds one harness-created 512x64 frame to fix the x265 encoder size and the
+file-derived 64x65 frames to the same encoder. gdb on the pinned plain build
+breaks at the 64-byte `memcpy` with `OOB dest_off=32768` and reads the exact
+chosen 64 bytes at the source and at `plane+32768`; the plain run aborts
+`double free or corruption (out)` (rc 134). Input SHA-256
+`b585565b5ca9af5860880c2102ae124749f298a5a3319e08a24e57cb8ca3a249`;
+`real/neighbour/check_uncompressed.py` PASS=5 FAIL=0.
+
+This is rung 4 with arbitrary 64-byte file-derived control at the OOB row on
+this labeled codec/build scope; it supersedes W177's "one uniform value only"
+ceiling. It is NOT one uncompressed file driving the mismatch: the first
+encoder-sizing frame is harness-created and the uncompressed sequence cannot
+carry mixed sizes by itself. No valid pointer, marker, command, real network
+consumer, witness replay or rung 5. Independent witness replay of W178 is
+requested; grade stays rung 3 + rung 4, rung 5 UNKNOWN.

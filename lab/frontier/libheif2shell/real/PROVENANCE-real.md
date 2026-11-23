@@ -482,3 +482,66 @@ byte-level strings snap to the decoder's output lattice. W162's byte runs
 were observations of that lattice, not independently chosen constants.
 Arbitrary bytes through another codec or build remain UNKNOWN. No pointer
 target, marker, command or rung 5. This lane was not witness-replayed.
+
+## W178 uncompressed-codec byte-exact OOB row (2026-11-23)
+
+Build: pinned `v1.23.6` tree used for W161, configured into a separate
+`/tmp/libheif2shell-unci` with `-DWITH_UNCOMPRESSED_CODEC=ON -DWITH_X265=ON
+-DWITH_X265_PLUGIN=OFF -DWITH_JPEG_DECODER=OFF -DWITH_JPEG_ENCODER=OFF
+-DWITH_AOM_DECODER=OFF -DWITH_AOM_ENCODER=OFF -DWITH_LIBDE265=OFF
+-DWITH_EXAMPLES=OFF -DWITH_GDK_PIXBUF=OFF -DBUILD_TESTING=OFF
+-DBUILD_SHARED_LIBS=OFF -DENABLE_PLUGIN_LOADING=OFF`. First attempt with
+default Release `-O3` and default ninja parallelism made **zero objects in
+900s**: `cc1plus` processes sat in `D` state for 16 minutes; they were killed.
+Reconfigure `-DCMAKE_CXX_FLAGS_RELEASE='-O0 -DNDEBUG'` with `ninja -j1
+libheif.a` succeeded (119 steps, 216s), then `-O0 -g -DNDEBUG` likewise
+(256s) for line-info-backed gdb. This is a host I/O/memory condition, not a
+source failure; none of these build trees is committed.
+
+Probes: `real/uncompressed_mixed.cc` (`make`/`check`) uses the public
+`heif_compression_uncompressed` encoder to write 64x65 YCbCr 4:2:0 frames with
+chosen Y row 64; `BOTH_SMALL=1 BOTH_ROWS=1` makes both frames small with the
+same chosen row. `real/reencode_chroma.cc` is W161's driver with a decode
+chroma selector, `TW`/`TH` encoder-size override and `SYNTH_FIRST=1` (one
+harness-created 512x64 frame encoded first so x265 latches 512x64). Both were
+linked against `/tmp/libheif2shell-unci/libheif/libheif.a` plus the W161 codec
+libraries and `-lbrotlidec -lbrotlienc -lbrotlicommon -ldl`.
+
+Negatives preserved: (a) `420`, `444` and `native` decode of the W177
+`blocks/attack.heif` (SHA-256 `2067de8d...3fbb1`) all returned the distorted
+row `10*8 22*8 32*8 44*8 54*8 66*8 76*8 88*8`; native reported colorspace 0,
+chroma 1, so the JPEG sequence decoder emits 4:2:0; `mono` failed
+`rc=4 sub=3003 Unsupported color conversion`. (b) A mixed 512x64/64x65
+uncompressed sequence encoded with rc 0 but frame 1 decode failed
+`rc=2 sub=100 Invalid input: Unexpected end of file: Requested data range
+exceeds the sample data`; patching the visual sample entry to 512x64 produced
+the same failure. `real/neighbour/patch_track_tkhd.py` was written for that
+attempt; tkhd in this file was already 512x64 and is not the limiting field.
+(c) The first `-O3` build stalled as above.
+
+Positive evidence (`real/neighbour/evidence/uncompressed/`): input
+`byte-exact.heif` SHA-256
+`b585565b5ca9af5860880c2102ae124749f298a5a3319e08a24e57cb8ca3a249`, chosen
+row `1122334455667788` x8. Command (from repo root):
+
+```
+SYNTH_FIRST=1 TW=512 TH=64 /tmp/w178-reencode-unci \
+  real/neighbour/evidence/uncompressed/byte-exact.heif /tmp/w178-unci-out.heif
+gdb -q -batch -x real/neighbour/gdb_uncompressed.cmd /tmp/w178-reencode-unci
+python3 real/neighbour/check_uncompressed.py
+```
+
+The plain run aborts rc 134 `double free or corruption (out)` after the
+harness-created first frame and the first file-derived 64x65 frame. The gdb
+log shows `OOB dest_off=32768 src=...`, source dump and `plane+32768` AFTER
+dump both exactly `11 22 33 44 55 66 77 88` x8. Checker PASS=5 FAIL=0: input
+hash, dest offset, source row, landed bytes and plain abort. Frames decoded
+from the file are byte-exact because ISO/IEC 23001-17 stores raw samples;
+the overflowing copy is the pinned `pixelimage.cc:643-647` loop through
+`encoder_x265.cc:1139`, observed in this build's plain process.
+
+Scope: arbitrary 64-byte file-derived bytes at the OOB row, rung 4, at this
+labeled build/codec scope. The first encoder-sizing frame is harness-created;
+the uncompressed sequence cannot itself carry mixed decoded sizes, so this is
+not a single-file remote attack. No pointer target, marker, command, ASan
+run on this build, live network consumer or witness replay. Rung 5 UNKNOWN.

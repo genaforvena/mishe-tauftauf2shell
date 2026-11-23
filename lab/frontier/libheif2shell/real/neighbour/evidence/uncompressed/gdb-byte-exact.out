@@ -1,0 +1,78 @@
+Breakpoint 1 at 0x27fc0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+warning: 3699	./malloc/malloc.c: No such file or directory
+0x00005555557198a8 in HeifPixelImage::ComponentStorage::alloc (this=0x7fffffffdef0, width=512, height=64, datatype=heif_component_datatype_unsigned_integer, bit_depth=8, num_interleaved_components=1, limits=0x0, memory_handle=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/image/pixelimage.cc:571
+571	  allocated_mem = static_cast<uint8_t*>(std::calloc(1, allocation_size));
+Value returned is $1 = (void *) 0x55555599d000
+[New Thread 0x7ffff67ff6c0 (LWP 3951963)]
+[New Thread 0x7ffff5ffe6c0 (LWP 3951964)]
+[New Thread 0x7ffff57fd6c0 (LWP 3951968)]
+[New Thread 0x7ffff4ffc6c0 (LWP 3951973)]
+[New Thread 0x7fffe7fff6c0 (LWP 3951975)]
+[New Thread 0x7fffe77fe6c0 (LWP 3951976)]
+[New Thread 0x7fffe6ffd6c0 (LWP 3951978)]
+[New Thread 0x7fffe67fc6c0 (LWP 3951980)]
+[New Thread 0x7fffe5ffb6c0 (LWP 3951982)]
+[New Thread 0x7fffe57fa6c0 (LWP 3951983)]
+[New Thread 0x7fffe4ff96c0 (LWP 3951984)]
+[New Thread 0x7fffc7fff6c0 (LWP 3951985)]
+[New Thread 0x7fffc77fe6c0 (LWP 3951986)]
+[New Thread 0x7fffc6ffd6c0 (LWP 3951987)]
+[New Thread 0x7fffc67fc6c0 (LWP 3951989)]
+[New Thread 0x7fffc5ffb6c0 (LWP 3951990)]
+[New Thread 0x7fffc57fa6c0 (LWP 3951991)]
+decode request: colorspace=0 chroma=420
+track declared: 64x65
+encoder declared: 512x64
+frame 0 native colorspace=0 chroma=1
+frame 0 Y row64: 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88 11 22 33 44 55 66 77 88
+
+Thread 1 "w178-reencode-u" hit Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+warning: 3699	./malloc/malloc.c: No such file or directory
+0x00005555557198a8 in HeifPixelImage::ComponentStorage::alloc (this=0x7fffffff9960, width=512, height=64, datatype=heif_component_datatype_unsigned_integer, bit_depth=8, num_interleaved_components=1, limits=0x0, memory_handle=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/image/pixelimage.cc:571
+571	  allocated_mem = static_cast<uint8_t*>(std::calloc(1, allocation_size));
+Value returned is $2 = (void *) 0x55555599d000
+PLANE=0x55555599d000
+--- plane chunk header ---
+0x55555599cff0:	0x0000000000000000	0x0000000000008021
+--- offset 32768..32832 BEFORE ---
+0x5555559a5000:	0x0000000000000000	0x0000000000000000
+0x5555559a5010:	0x0000000000000000	0x0000000000000021
+0x5555559a5020:	0x0000555000000001	0x0000000000000000
+0x5555559a5030:	0x0000000000000000	0x0000000000000051
+Breakpoint 2 at 0x7ffff6988d80: file ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S, line 255.
+
+Thread 1 "w178-reencode-u" hit Breakpoint 2, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+OOB dest_off=32768 src=0x5555559aa220
+0x5555559aa220:	0x8877665544332211	0x8877665544332211
+0x5555559aa230:	0x8877665544332211	0x8877665544332211
+0x5555559aa240:	0x8877665544332211	0x8877665544332211
+0x5555559aa250:	0x8877665544332211	0x8877665544332211
+0x5555559aa220:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+0x5555559aa228:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+0x5555559aa230:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+0x5555559aa238:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+0x5555559aa240:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+0x5555559aa248:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+0x5555559aa250:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+0x5555559aa258:	0x11	0x22	0x33	0x44	0x55	0x66	0x77	0x88
+double free or corruption (out)
+
+Thread 1 "w178-reencode-u" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+--- offset 32768..32832 AFTER ---
+0x5555559a5000:	0x8877665544332211	0x8877665544332211
+0x5555559a5010:	0x8877665544332211	0x8877665544332211
+0x5555559a5020:	0x8877665544332211	0x8877665544332211
+0x5555559a5030:	0x8877665544332211	0x8877665544332211
+STOP rip=0x7ffff689ebec
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff684527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff68288ff in __GI_abort () at ./stdlib/abort.c:79
