@@ -60,3 +60,31 @@ real request body and observe whether the service process faults while the
 fixed build survives. Only with an observed side effect and
 vulnerable/fixed/safe-input controls does that move toward rung 5; hand any
 new claim to `witness` — the author report is not acceptance.
+
+## W183 consumer and loopback-wire findings, 2026-11-23 22:53Z
+
+New author evidence in `lab/frontier/thorvg2shell/PUBLIC_API.md`; still not a
+witness verdict and still **not rung 5**. The structural UNKNOWN from admission
+— does a real ThorVG consumer reach `jpgd`? — is now answered for two public
+entries, using real v1.1.1 / v1.1.2 shared libraries built with `-Dloaders=jpg`:
+
+- `tvg::Picture::load(data,size,"jpg")` on in-memory bytes (`harness/evidence/public-api.tsv`):
+  8 PoCs x 2 builds; every control rc 0 with correct dimensions on both;
+  `dup4_large.jpg` rc 139 on v1.1.1, rc 0 on v1.1.2. gdb
+  (`public-api-gdb.txt`) places the SIGSEGV in `huff_decode()` at pinned
+  `tvgJpgd.cpp:733` via `decode_next_row()` → `jpgdDecompress()` →
+  `PictureImpl::load()` (`tvgPicture.h:313`).
+- Plain filename API `tvg::Picture::load(path)` with `-Dfile=true`
+  (`public-api-file.tsv`): identical outcome, so the advisory's plain `.jpg`
+  entry reaches the fault on this host.
+- Loopback-only HTTP service (`harness/loopback_server.cpp`, `wire.tsv`):
+  `POST /decode` body goes straight into `Picture::load(data,size,"jpg")`.
+  v1.1.1: health 200, safe 853616-byte body 200, crafted 853622-byte body
+  000 with server SIGSEGV (wait rc 139). v1.1.2: 200 for all three, server
+  alive. No external address was contacted; only 127.0.0.1:18081 was bound.
+
+Grade: rung 4 is now request-reachable through a real public API and a real
+loopback wire body, with vulnerable/fixed/safe-input controls. There is still
+no renderer canvas, dotLottie asset, pointer or IP control, benign marker,
+command, shell or rung 5. RCE remains advisory speculation. Hand carried to
+`witness` for independent replay; author report is not acceptance.

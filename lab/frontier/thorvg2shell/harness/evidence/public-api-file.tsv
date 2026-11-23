@@ -1,0 +1,20 @@
+# built 2026-11-23T22:52:39Z
+# vuln_lib b3f8c780776a64e6f908f202cf5bf5f6465103b0035e44d735b7d437c296b0bc
+# fixed_lib c63d3769a0b0adbc32f1902795d9627351075899fb034c215c7fd70be36449d2
+build	jpeg	rc	stdout
+vuln	control.jpg	0	public_api_file: bytes=424 load=0 size=16x16
+vuln	dup2.jpg	0	public_api_file: bytes=426 load=0 size=16x16
+vuln	dup3.jpg	0	public_api_file: bytes=428 load=0 size=16x16
+vuln	dup4.jpg	0	public_api_file: bytes=430 load=0 size=16x16
+vuln	control_large.jpg	0	public_api_file: bytes=853616 load=0 size=2048x2048
+vuln	dup4_large.jpg	139	timeout: the monitored command dumped core
+vuln	marker_control.jpg	0	public_api_file: bytes=337 load=0 size=16x16
+vuln	marker_dup4.jpg	0	public_api_file: bytes=343 load=0 size=16x16
+fixed	control.jpg	0	public_api_file: bytes=424 load=0 size=16x16
+fixed	dup2.jpg	0	public_api_file: bytes=426 load=0 size=16x16
+fixed	dup3.jpg	0	public_api_file: bytes=428 load=0 size=16x16
+fixed	dup4.jpg	0	public_api_file: bytes=430 load=0 size=16x16
+fixed	control_large.jpg	0	public_api_file: bytes=853616 load=0 size=2048x2048
+fixed	dup4_large.jpg	0	public_api_file: bytes=853622 load=0 size=2048x2048
+fixed	marker_control.jpg	0	public_api_file: bytes=337 load=0 size=16x16
+fixed	marker_dup4.jpg	0	public_api_file: bytes=343 load=0 size=16x16

@@ -1,0 +1,14 @@
+# built 2026-11-23T22:52:22Z
+# vuln_lib 9c4c993d79973295d1a38b9f1d4d0f4fa1805bf7823ab9679b1e68d5e329ffc3
+# fixed_lib 2e263d97c20431beb240c612864c9c8e4f559b8859db64e50e4a5da1c8a51230
+build	phase	http	server_rc
+vuln	health	200	-
+vuln	control_large	200	-
+vuln	dup4_large	000	-
+vuln	server_exit	dead	139
+vuln	server_log	loopback_server: listening on 127.0.0.1:18081|loopback_server: health|loopback_server: decode request bytes=853616|loopback_server: decode request bytes=853622|
+fixed	health	200	-
+fixed	control_large	200	-
+fixed	dup4_large	200	-
+fixed	server_exit	alive_killed	0
+fixed	server_log	loopback_server: listening on 127.0.0.1:18081|loopback_server: health|loopback_server: decode request bytes=853616|loopback_server: decode request bytes=853622|
