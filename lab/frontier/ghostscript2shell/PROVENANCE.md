@@ -172,5 +172,44 @@ command was exercised.
 - Under local `-dSAFER`, the injected font cleartext did not execute and no
   stale ref appeared (with a literal font path and a fresh HOME). Cause not
   isolated — font resolution/caching is a candidate. Not used for any claim.
-- ASan now exercised (rung 3). Still no native pointer control, no forged ref,
-  no `path_control_active` write, no `-dSAFER` bypass, no command, no rung 5.
+- ASan exercised (rung 3). Native ref forging and a benign path-control write
+  were exercised (rung 4 mechanics, section below). Still no `-dSAFER` bypass,
+  no command, no application/network chain, no rung 5.
+
+## Native rung-4 mechanics — 2026-11-23 first mind wake (option 3)
+
+Both charter preconditions held (aliasing + ASan report), so the writeup's
+native chain was attempted at PostScript level on `gs-vuln`, `-dNOSAFER`.
+
+Byte arithmetic note: this build's `bitshift` truncates integers above 32 bits
+(verified: `105251546305479 8 bitshift 255 and` yields 0, while `idiv` yields
+the correct byte). All ref-byte assembly therefore uses `idiv`/`mul`.
+
+`exp/native-selftest.ps` first validated the forge technique: rewriting an
+aliased slot's ref with a captured writable-string header and its own data
+pointer round-trips the pointer and reads `BYTE0=72`, `BYTE1=69` from the
+resulting view (`HELLO_WORLD_16CHR`).
+
+`exp/native-chain.ps` walks live pointers without guessing an absolute address:
+`currentdevice` ref value → `GXDEVICE` (+0) → `MEM` (`gx_device+24`) →
+`LIBCTX` (`gs_memory_t+208`) → `CORE` (`gs_lib_ctx+8`). A forged 4-byte view at
+`CORE+156` reads `PATH_CONTROL_BYTES=0` under `-dNOSAFER`, then a benign write
+sets it to `1` (`PSTATE_WRITTEN=1`), `.currentpathcontrolstate` returns `true`,
+and the original bytes are restored (`PSTATE_RESTORED=0`). The aliased slot is
+restored to its integer ref (`CLEAN_VALUE=12345`). 3/3 stable.
+
+`exp/native-dispatch.ps` retargets one ref: captures `systemdict /mul get`'s
+16 ref bytes, swaps only the 8 implementation-pointer bytes for `sub`'s,
+invokes that ref once and observes `BEFORE=319`, `CHANGED=18` (29-11),
+`AFTER=319` after restoration. No systemdict entry is modified. 3/3 stable.
+
+`harness/run-native.sh` + evidence `native-*.out`: 17 PASS / 0 FAIL three
+times, trace `b53abad21ed9822838d2a5f85a705172c3c19cb9ea22923b141c90192b682e87`.
+Fixed-resource control on both probes: `NO_STALE_REF`, no chain, no dispatch
+change.
+
+Honest ceiling: native reads/writes through forged refs with a benign marker
+and an observed interpreter state change — rung-4 mechanics. No absolute
+process address guessed, no `-dSAFER` bypass, no `%pipe%` command, no
+application/network chain, no witness verdict. The local `-dSAFER` probe never
+triggered the injected font cleartext, so no bypass was attempted.

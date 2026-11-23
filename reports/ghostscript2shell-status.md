@@ -92,23 +92,40 @@ by `gs_heap_alloc_bytes` (`base/gsmalloc.c:192`) and freed by
 `gs-fixed-asan` (resource-only swap to `1484854e`): `SV_PRESENT=false`,
 `NO_STALE_REF`, rc 0, no report. Source tree restored to the vulnerable pin.
 
+### Native mechanics (same wake, charter option 3)
+
+With aliasing and ASan both established, `exp/native-selftest.ps` validated
+ref forging over a known string (`BYTE0=72`, `BYTE1=69`; note this build's
+`bitshift` truncates >32-bit integers, so byte arithmetic uses `idiv`/`mul`).
+`exp/native-chain.ps` walked live pointers without guessing an address:
+`currentdevice` → `GXDEVICE` → `MEM` (`+24`) → `LIBCTX` (`+208`) → `CORE`
+(`+8`). A forged 4-byte view at `CORE+156` read `0`, a benign write set it to
+`1` with `.currentpathcontrolstate` returning `true`, and the original bytes
+were restored. `exp/native-dispatch.ps` retargeted one `mul` ref to `sub` for a
+single call: `BEFORE=319`, `CHANGED=18`, `AFTER=319`, no systemdict change.
+Both 3/3 stable; fixed-resource control gives `NO_STALE_REF`.
+`harness/run-native.sh`: 17 PASS / 0 FAIL ×3, trace
+`b53abad21ed9822838d2a5f85a705172c3c19cb9ea22923b141c90192b682e87`.
+
 ## Current grade
 
-Rungs 3 + 4: instrumented `heap-use-after-free` (rung 3) plus a stable,
-bidirectional, chosen-byte read/write through a dangling systemdict reference
-into a live interpreter object after `restore` (rung 4), on real gs 10.07.0
-shipped bytes with vulnerable, fixed and safe-input controls. Honest ceiling:
-no native pointer chain, no forged ref, no `path_control_active` write, no
-`-dSAFER` bypass, no command, no application or network chain, no witness
-verdict. Rung 5 remains a separate claim.
+Rungs 3 + 4: instrumented `heap-use-after-free` (rung 3); a stable,
+bidirectional, chosen-byte read/write through a dangling systemdict reference;
+and native ref forging that walks live interpreter pointers, writes a benign
+marker to `path_control_active` with an observed state change, and retargets
+one operator dispatch for a single call (rung 4 mechanics and impact), on real
+gs 10.07.0 shipped bytes with vulnerable, fixed and safe-input controls.
+Honest ceiling: no `-dSAFER` bypass, no `%pipe%` command, no application or
+network chain, no independent witness verdict. Rung 5 remains a separate claim.
+The local `-dSAFER` probe never triggered the injected cleartext, so no bypass
+was attempted.
 
 ## Next bounded experiment
 
-Charter option 3 is now reachable (aliasing and ASan both hold): attempt a
-bounded native ref-forging probe — place `currentdevice` in the overlapping
-array slot, read its pointer through the stale string, forge a temporary string
-view, and walk the documented offsets toward `path_control_active` with a
-benign marker. Stop and preserve a negative if offsets or ref layout differ on
-this build. Rung 5 requirements unchanged: a live wire-only trigger, a chosen
-benign command, an observed side effect, vulnerable/fixed/safe controls and
-witness replay.
+A rung-5 attempt needs prerequisites absent here: a live `-dSAFER` target whose
+font load actually executes the injected cleartext, a wire/request-delivered
+document, a chosen benign command and an observed side effect with vulnerable,
+fixed and safe controls plus witness replay. The local `-dSAFER` trigger gap
+(font resolution/caching candidate, cause unisolated) is the first thing to
+settle. Until then, preserve rungs 3/4 and do not relabel these mechanics as
+RCE.
