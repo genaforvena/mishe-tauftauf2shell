@@ -1,15 +1,17 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
-**STAGED 2026-11-23 W162; UPDATED 2026-11-23 18:18Z wake** — this brief, a
+**STAGED 2026-11-23 W162; UPDATED 2026-11-23 19:21Z wake** — this brief, a
 direct-call rung-1..4 harness, a real-property-parser reachability harness, a
-real-compound-file reachability lane and a live registered two-pane window
-(inner socket index 122, name `kicad2shell`) exist; seed wall
+real-compound-file reachability lane, a lane driven by KiCad's own
+`compoundfilereader` header and a live registered two-pane window (inner
+socket index 122, name `kicad2shell`) exist; seed wall
 `.mishe-tauftauf/walls/kicad2shell.md`, registry entry and staging DM are in
 place. Operator admission and an independent witness replay are pending.
-Byte-exact pins: `lab/frontier/kicad2shell/PINS.sha256` and
-`realparser/PINS-realparser.sha256`; provenance, stubs, negatives and commands:
-`PROVENANCE.md`, `realparser/PROVENANCE-realparser.md` and
-`realcfb/PROVENANCE-realcfb.md`. The fixed release is mapped in
+Byte-exact pins: `lab/frontier/kicad2shell/PINS.sha256`,
+`realparser/PINS-realparser.sha256` and `kicadreader/PINS-kicadreader.sha256`;
+provenance, stubs, negatives and commands: `PROVENANCE.md`,
+`realparser/PROVENANCE-realparser.md`, `realcfb/PROVENANCE-realcfb.md` and
+`kicadreader/PROVENANCE-kicadreader.md`. The fixed release is mapped in
 `lab/frontier/kicad2shell/FIXED-RELEASE.md`. Frontier owns no further work.
 
 ## 1. Verified ground truth
@@ -143,26 +145,53 @@ sector padding, directory field offsets, `ENDOFCHAIN` terminal test) are
 recorded in `realcfb/PROVENANCE-realcfb.md`; none changed upstream bytes or the
 expected write offset.
 
-## 7. Cheapest next rung move
+## 7. KiCad's own compound-file reader (19:21Z wake)
+
+The CFB walk in section 6 was a lab implementation. The new lane
+`lab/frontier/kicad2shell/kicadreader/` instead compiles KiCad 10.0.6's own
+verbatim `thirdparty/compoundfilereader/compoundfilereader.h` and `utf.h`
+(hashes in `kicadreader/PINS-kicadreader.sha256`, 2/2 verified before each
+build). The lab `ALTIUM_COMPOUND_FILE` wrapper uses that reader's `EnumFiles`,
+`IsStream` and `ReadFile` to find and deliver the real `FileHeader` entry to
+the same verbatim `ALTIUM_BINARY_PARSER` slices and pinned `ParseLibHeader`;
+fixtures are the four `.SchLib` containers from `realcfb/`, re-verified with
+`olefile`. No wxWidgets, no KiCad `ALTIUM_COMPOUND_FILE` class and no
+`eeschema` build: the wrapper is lab code.
+
+Observed (`kicadreader/evidence/`, g++ and clang++):
+`kicad-cfb: ... stream=107`, `real-reader: bytes=107 props=3 parse_error=0`,
+`real-key: SIZEZ=84215045` from KiCad's own reader; pinned parent gives ASan
+`heap-buffer-overflow`, `WRITE of size 4`, four bytes before the 4-byte region,
+top frame `sch_io_altium.cpp.vuln:5919`, allocation from `resize` at `:5915`.
+Plain builds print `rc=0 size=1 first=72 GUARD7=11111111` and then abort with
+`double free or corruption (out)`. `attackneg`: ASan SEGV at `:5919`, plain
+`rc=139`; `attackfar`: ASan write 8 bytes before the region. All fixed runs
+exit 0 with the intact vector and no ASan report. `kicadreader/check.sh`:
+**38 PASS / 0 FAIL** twice, trace hash
+`fffe73410576403f33943253a207db3e8493229babdfb8f30f4544aebcfd6260`.
+Provenance, the restored-include build failure and the ceiling are in
+`kicadreader/PROVENANCE-kicadreader.md`.
+
+## 8. Cheapest next rung move
 
 Source-bound negative: the four downstream reads of `aFontSizes` in the pinned
 parent source (`:2744`, `:2917`, `:5278`, `:5479`) are all guarded by
 `fontId > 0 && fontId <= aFontSizes.size()`; they read in-bounds elements and
 do not read the four bytes written before `data()`. No consumer of the
 corrupted malloc metadata or ASan redzone was identified in this source.
-A vendor-produced `.SchLib` and KiCad's own compound-file reader remain the
-file-reachability unknown. Only an observed pointer or control-flow target
-would justify a bounded benign-marker attempt with vulnerable, fixed and
-safe-input controls plus a witness replay.
+A vendor-produced `.SchLib` and a full KiCad build remain the file-reachability
+unknown. Only an observed pointer or control-flow target would justify a
+bounded benign-marker attempt with vulnerable, fixed and safe-input controls
+plus a witness replay.
 
-## 8. Honest ceiling
+## 9. Honest ceiling
 
-Direct call, real property parser and real compound-file stream, all with a
-stubbed wx support layer; the CFB walk is a lab reader, not KiCad's own. No
-real wxWidgets, no vendor `.SchLib`, no KiCad build or `eeschema`, no
-downstream consumer executed in any lane, no socket or wire, no pointer/IP
-control, no command execution, no witness verdict. The fixed release is
-mapped (10.0.7), but no KiCad build at that release was exercised here.
-The chosen bytes still land in ASan's left redzone (plain build: malloc
-metadata), not an adjacent live object. End-to-end file reachability through
-KiCad and the ZDI RCE claim are claims, **UNKNOWN** here. Rung 5 not attempted.
+Direct call, real property parser, real compound-file stream and KiCad's own
+compound-file reader, all with a stubbed wx support layer; no real wxWidgets,
+vendor `.SchLib`, full KiCad build or `eeschema`, no downstream consumer
+executed in any lane, no socket or wire, no pointer/IP control, no command
+execution, no witness verdict. The fixed release is mapped (10.0.7), but no
+KiCad build at that release was exercised here. The chosen bytes still land in
+ASan's left redzone (plain build: malloc metadata), not an adjacent live
+object. End-to-end file reachability through KiCad and the ZDI RCE claim are
+claims, **UNKNOWN** here. Rung 5 not attempted.

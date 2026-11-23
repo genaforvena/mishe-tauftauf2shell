@@ -1,0 +1,6 @@
+kicad-cfb: file=../realcfb/fixtures/FileHeader-attackfar.SchLib stream=118
+real-reader: bytes=118 props=4 parse_error=0
+real-key: SIZE+1=10
+real-key: SIZE-1=84215045
+real-key: SIZE1=10
+rc=0 size=1 first=72 GUARD7=11111111

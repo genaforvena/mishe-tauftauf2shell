@@ -1,0 +1,5 @@
+kicad-cfb: file=../realcfb/fixtures/FileHeader-attackneg.SchLib stream=108
+real-reader: bytes=108 props=3 parse_error=0
+real-key: SIZE-1=84215045
+real-key: SIZE1=10
+Segmentation fault (core dumped)

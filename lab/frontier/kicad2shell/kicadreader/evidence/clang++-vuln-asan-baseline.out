@@ -1,0 +1,4 @@
+kicad-cfb: file=../realcfb/fixtures/FileHeader-baseline.SchLib stream=92
+real-reader: bytes=92 props=2 parse_error=0
+real-key: SIZE1=10
+rc=0 size=1 first=72 GUARD7=11111111

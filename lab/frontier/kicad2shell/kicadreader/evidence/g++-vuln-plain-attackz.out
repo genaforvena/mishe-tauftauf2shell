@@ -1,0 +1,7 @@
+kicad-cfb: file=../realcfb/fixtures/FileHeader-attackz.SchLib stream=107
+real-reader: bytes=107 props=3 parse_error=0
+real-key: SIZE1=10
+real-key: SIZEZ=84215045
+rc=0 size=1 first=72 GUARD7=11111111
+double free or corruption (out)
+Aborted (core dumped)
