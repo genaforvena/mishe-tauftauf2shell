@@ -346,3 +346,59 @@ at chosen offsets; arbitrary-byte control, valid pointer target, marker and
 rung 5 remain UNKNOWN. W176 re-ran `real/run_wire.sh` into
 `/tmp/w176-wire-replay`: all six cases and both checkers PASS. No new witness
 verdict: replay requests #2752, #2869 and #2897 were still queued at 18:50Z.
+
+## W177 measured byte-granularity ceiling (2026-11-23)
+
+Charter option 2's open item — can a crafted file place *arbitrary* bytes in
+the OOB row? — was measured on the real pinned plain Release v1.23.6
+decoder-to-x265 path. `real/neighbour/measure_byte_granularity.py` makes a
+genuine 64x72 frame-1 JPEG whose last block row (rows 64..71) is encoded source
+pixels, patches the container ispe/tkhd/stsd and frame-0 SOF to 512x64 as in
+`make_controlled_row.py`, and reads the real 64-byte source row at the first
+OOB memcpy with the committed `gdb_controlled.cmd`. Frame 1 decodes 64x72
+stride 64; the encoder still pads to 512x64, so row 64 lands at
+`plane+32768`. Raw logs, generated inputs and checker are under
+`real/neighbour/evidence/byte-granularity/`.
+
+Commands (from repo root, pinned plain build still at the W161 path):
+
+```
+python3 lab/frontier/libheif2shell/real/neighbour/measure_byte_granularity.py uniform EVIDENCE_DIR 80
+python3 lab/frontier/libheif2shell/real/neighbour/measure_byte_granularity.py blocks EVIDENCE_DIR 11 22 33 44 55 66 77 88
+python3 lab/frontier/libheif2shell/real/neighbour/measure_byte_granularity.py precomp EVIDENCE_DIR de ad be ef 41 42 43 44 1.0
+python3 lab/frontier/libheif2shell/real/neighbour/check_byte_granularity.py EVIDENCE_DIR
+```
+
+Observations:
+
+- One uniform value across the whole last block row is byte-exact:
+  `uniform-80.heif` (6122 bytes, SHA-256
+  `a7794eee1865f2077dd7a9e151a23e4834b6206403106d4dc78e1045baa2bca5`) puts
+  `80` repeated 64 times at `plane+32768`. This is the same control W162/W171
+  already used for uniform `0x40`/`0xa8` rows, now measured for a chosen value.
+- Eight independently chosen *block* values are NOT byte-exact:
+  `blocks-11223344.heif` (6127 bytes, SHA-256
+  `2067de8d6b14a6d5bd397576b8ea33fe6bebe6b0988a4513983da7b77cd3fbb1`) asks
+  for `11 22 33 44 55 66 77 88`, one per 8-px block; the decoder emits
+  `10*8 22*8 32*8 44*8 54*8 66*8 76*8 88*8`. Six of eight values move onto
+  the JPEG DCT/quantization output lattice. W162's `74*8 82*8 ...` runs were
+  the decoder's output, not independently chosen block constants.
+- Byte-level pre-compensation fails on the real decoder. Asking for
+  `de ad be ef 41 42 43 44` in columns 24..31 gave `db b0 be ec 46 3e 44 43`
+  on the first coded attempt; 20 feedback iterations at gain 1.0 never matched
+  the target (iteration 19 gave `dd af bc ea 48 41 45 41`). A local Pillow /
+  system-libjpeg decode of the same JPEG round-tripped the target exactly, so
+  a decoder-local pre-compensation model does not transfer to libheif's decode
+  on this build. A damped (0.5) variant on the `21 00 ...` malloc-size target
+  converged to the wrong fixed point `20 02 00 03 00 01 06 00` and is kept as
+  a negative result in `/tmp/w177/`.
+
+`real/neighbour/check_byte_granularity.py EVIDENCE_DIR` PASS=2 FAIL=0 over the
+uniform, block and two pre-compensation logs. Ceiling refinement: on the
+JPEG-coded input family of this build, byte-exact OOB control is one uniform
+value repeated across the row; multi-block and byte-level targets are snapped
+to the decoder's output lattice. Arbitrary bytes through a different codec or
+a different libheif build remain UNKNOWN, not demonstrated. Grade unchanged:
+rung 3 plus rung 4 with uniform file-derived bytes at a chosen offset. No
+valid pointer target, marker, command or rung 5. New witness verdicts on
+#2752/#2869/#2897 were still absent at 20:06Z; this W177 lane is unreplayed.

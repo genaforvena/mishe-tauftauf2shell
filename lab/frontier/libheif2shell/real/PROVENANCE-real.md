@@ -435,3 +435,50 @@ Therefore arbitrary-byte control from the crafted file is UNKNOWN; the W162
 position-dependent 8-byte block runs remain the measured chosen-byte lane.
 W176 also replayed `real/run_wire.sh /tmp/w176-wire-replay`: six cases and
 both checkers PASS, no change to the W172 grade or evidence.
+
+## W177 byte-granularity measurement on the real decoder
+
+Question: can the crafted JPEG place arbitrary bytes in the first OOB row?
+`neighbour/measure_byte_granularity.py` (no new libheif build; the pinned plain
+Release v1.23.6 tree and `/tmp/libheif2shell-reencode-retain` driver from W166)
+generates two 64x72 grayscale JPEGs with the pinned `heif-enc -S --jpeg`. Frame
+1's last block row (y=64..71) is encoded source data; the ispe/tkhd/sample
+entry and frame 0's SOF are patched to 512x64 exactly as in W166. Frame 1
+decodes 64x72 stride 64 and x265 pads to 512x64, so the first OOB memcpy copies
+row 64 to `plane+32768`. `neighbour/gdb_controlled.cmd` reads the 64 source
+bytes from that memcpy; the generated `gdb-*.cmd` files only replace the input
+path. All logs and inputs are under `neighbour/evidence/byte-granularity/`.
+
+Commands from repo root:
+
+```
+python3 lab/frontier/libheif2shell/real/neighbour/measure_byte_granularity.py uniform EVIDENCE_DIR 80
+python3 lab/frontier/libheif2shell/real/neighbour/measure_byte_granularity.py blocks EVIDENCE_DIR 11 22 33 44 55 66 77 88
+python3 lab/frontier/libheif2shell/real/neighbour/measure_byte_granularity.py precomp EVIDENCE_DIR de ad be ef 41 42 43 44 1.0
+python3 lab/frontier/libheif2shell/real/neighbour/check_byte_granularity.py EVIDENCE_DIR
+```
+
+Results:
+
+| mode | requested OOB row | measured source row at plane+32768 | input SHA-256 |
+| --- | --- | --- | --- |
+| uniform | `80` x64 | `80` x64 (exact) | `a7794eee1865f2077dd7a9e151a23e4834b6206403106d4dc78e1045baa2bca5` (6122 bytes) |
+| blocks | `11`,`22`,...,`88` per 8-px block | `10`x8 `22`x8 `32`x8 `44`x8 `54`x8 `66`x8 `76`x8 `88`x8 | `2067de8d6b14a6d5bd397576b8ea33fe6bebe6b0988a4513983da7b77cd3fbb1` (6127 bytes) |
+| precomp it01 | individual bytes `de ad be ef 41 42 43 44` | `db b0 be ec 46 3e 44 43` | `24021f6be55ed6ec869e3d46119171d3c364bb2bb5ce015f3f35e52d93abdff4` |
+| precomp it19 | same | `dd af bc ea 48 41 45 41` | `6b419a0eca81206b2e3565e06d2239cb710801c71beb66fc4fb68cb1e1b31a96` |
+
+`check_byte_granularity.py` PASS=2 FAIL=0 asserts all four source rows. A
+Pillow / system-libjpeg decode of the same JPEG round-tripped the eight
+individual target bytes exactly, so that local decoder is not a valid model
+for libheif's decode in this build; the feedback loop uses the real driver
+and still does not converge in 20 iterations. A damped 0.5 variant against
+`21 00 00 00 00 00 00 00` (the W166 malloc-size target) converged to the wrong
+fixed point `20 02 00 03 00 01 06 00`; its raw runs are in `/tmp/w177/` and
+are preserved as a negative, not as evidence of control.
+
+Ceiling: on this build's JPEG-coded input family, byte-exact OOB control is a
+single uniform value repeated across the row; distinct block values and
+byte-level strings snap to the decoder's output lattice. W162's byte runs
+were observations of that lattice, not independently chosen constants.
+Arbitrary bytes through another codec or build remain UNKNOWN. No pointer
+target, marker, command or rung 5. This lane was not witness-replayed.
