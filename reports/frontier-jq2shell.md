@@ -7,10 +7,11 @@ verdict were pending.** Byte-exact pins, tag commits and hashes:
 `lab/frontier/jq2shell/PINS.sha256`; harness provenance including negative
 results: `lab/frontier/jq2shell/PROVENANCE.md`. Frontier owns no further work
 on this target. Postscript: the target was admitted at 11:2xZ; witness W1
-(#2556) graded rungs 1-4 ESTABLISHED at the direct-call scope and W160
-(#2651) graded the real-process alias geometry ESTABLISHED at its labeled
-scope, both without a grade change and with rung 5 unclaimed. Current status:
-`reports/jq2shell-status.md`.
+(#2556) graded rungs 1-4 ESTABLISHED at the direct-call scope, W160 (#2651)
+graded the real-process alias geometry ESTABLISHED at its labeled scope and
+W175 (#2950) graded the live heap neighbour map ESTABLISHED at its labeled
+local-expression, plain pinned-build scope — all without a grade change and
+with rung 5 unclaimed. Current status: `reports/jq2shell-status.md`.
 
 ## 1. Verified ground truth
 

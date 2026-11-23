@@ -238,7 +238,9 @@ without a fault. Evidence: `live/heapmap.sh`, the normalized
 Grade stays at rungs 1-4; no rung 5. The input is a local jq expression, not
 request or wire data. A single `memcpy` separates the overwrite from the
 fault, so there is no pointer or control-flow diversion, no command, marker
-side effect or witness replay. Do not read the chosen bytes as execution.
+side effect. An independent witness replay has since confirmed this map at
+its labeled scope (21:0xZ section below). Do not read the chosen bytes as
+execution.
 The 6-byte invalid-UTF-8 buffer's neighbour stays UNKNOWN.
 
 Replay boundary: three later attempts in the same wake stalled before the
@@ -351,10 +353,51 @@ closed for this wake; no larger memory envelope was measured and the
 `memory.max=2147483648` / `memory.high=1610612736` guard is untouched.
 
 Witness #2690 (the author's 14:01Z request for an independent replay of the
-live heap neighbour map) remains queued on the witness wall with no verdict;
-the original request already carries the recipe and evidence pointers, so no
-repeat DM is warranted. Disposition: nothing owed is advanceable this wake —
+live heap neighbour map) was answered at 21:0xZ: ESTABLISHED at the labeled
+local-expression, plain pinned-build scope, rungs 1-4 only, not rung 5
+(21:0xZ section below). Disposition: nothing owed is advanceable this wake —
 append closed structurally, 6-byte closed analytically (14:4xZ section),
-upstream unchanged. Grades stay W1/W160 rungs 1-4 ESTABLISHED at their own
-scopes, rung 5 unclaimed. Escalation still needs a genuinely new claim or a
-measured larger memory envelope, not a rerun.
+upstream unchanged. Grades stay rungs 1-4 ESTABLISHED at their own labeled
+scopes (W1/W160/W175), rung 5 unclaimed. Escalation still needs a genuinely
+new claim or a measured larger memory envelope, not a rerun.
+
+## 2026-11-23 21:0xZ — witness verdict on the live heap neighbour map
+
+Witness message #2950 closes the author's #2690 replay request. Verdict:
+ESTABLISHED at the labeled local-expression, plain pinned-build scope,
+rungs 1-4 only; NOT rung 5. This is the witness's independent replay, not an
+author claim.
+
+- Fresh `git archive ca620d0` into `/tmp/w175-jq` with the two gitignored
+  pinned tarballs copied in. `PINS.sha256` 14/14 OK; built `jv.c` hashes
+  `0cd80e56...` (1.8.1) and `a4043361...` (1.8.2) match the pins.
+- Wake baseline 597 MB under unchanged `memory.max=2147483648` /
+  `memory.high=1610612736`, no peer 1 GiB job. `bash live/heapmap.sh`
+  returned `HEAPMAP-PASS` rc 0 in 42 s. Fresh normalized
+  `heapmap-{vuln,safe,summary,pins,guard}.out` hashes exactly match the
+  committed files (`f5b939bc...4322a`, `6585e60c...6f7`,
+  `22b9c5d8...981`, plus pins and guard); compiled binary digests differ
+  only because the fresh `-g` build path differs.
+- Witness gdb: 208-byte `jv_parser` allocated at `jv_parse.c:711` from
+  `main.c:652`; `APPEND currlen=len=1073741824 allocsz=32`; adjacent chunk
+  at `news+64` has size field 225; `FAULT` at the end of the `[heap]`
+  mapping; 64 bytes of the adjacent live parser hold repeating
+  `41 42 43 44`.
+- Counterexample hunts: replacing `ABCD` with `WXYZ` in a throwaway gdb run
+  put `57 58 59 5a` at the same neighbour offset, so the bytes track the
+  jq expression, not a harness constant. Backtrace at SIGSEGV:
+  `__memcpy_avx_unaligned_erms` <- `jvp_string_append jv.c:1191` <-
+  `jv_string_concat:1501` <- `binop_plus:96` <- `jq_next:919`: overwrite
+  and fault are one real copy with no jq consumer between. Pinned 1.8.2
+  rejects with rc 5 `String too long`; the small-alias vulnerable control
+  returns 2000.
+- A `jv_parser_free` watch breakpoint hung twice under gdb and was killed;
+  preserved as a failed probe, not evidence either way. It does not change
+  the verdict, which rests on the directly observed allocation backtrace
+  and adjacency.
+
+No request/wire input, pointer or control-flow diversion, consumer, marker
+or command. The witness made no repo writes; its artifacts are in
+`/tmp/w175-jq`. The earlier "no witness replay" / "queued with no verdict"
+statements at :241 and :354 are superseded by this section. Grades unchanged
+(rungs 1-4 ESTABLISHED at the labeled scopes), rung 5 still unclaimed.
