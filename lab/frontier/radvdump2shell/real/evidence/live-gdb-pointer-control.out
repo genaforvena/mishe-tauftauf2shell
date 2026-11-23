@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x4aa4: file radvdump.c, line 381.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Nov 23 07:01:02] radvdump (2702412): receiver if_index: 1
+
+Breakpoint 1, print_ff (msg=0x7fffffffe340 "\206", len=0, addr=0x7fffffffe920, hoplimit=64, if_index=1, edefs=0) at radvdump.c:381
+381					addrtostr(&addr, prefix_str, sizeof(prefix_str));
+
+=== PTR CONTROL AT 381 ===
+$1 = 0x1234567812345678
+$2 = 0x7fffffffe230
+$3 = 0x7fffffffe1c0
+$4 = 0x7fffffffe2e0
+0x7fffffffe2e8:	0x0000555555557f09	0x00007fffffffeaa8
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555555558ac9 in print_ff (msg=0x7fffffffe340 "\206", len=0, addr=0x7fffffffe920, hoplimit=64, if_index=1, edefs=0) at radvdump.c:382
+382					printf("\n\troute %s/%d\n\t{\n", prefix_str, rinfo->nd_opt_ri_prefix_len);

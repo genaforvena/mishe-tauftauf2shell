@@ -1,0 +1,57 @@
+[Nov 23 06:56:20] radvdump (2587308): receiver if_index: 1
+=================================================================
+==2587308==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7444bd100070 at pc 0x7444bf2fb303 bp 0x7fff21d1a880 sp 0x7fff21d1a028
+WRITE of size 256 at 0x7444bd100070 thread T0
+    #0 0x7444bf2fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5ed5f99b2c6d in print_ff /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/real/radvd-2.20/radvdump.c:380
+    #2 0x5ed5f99b121f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/real/radvd-2.20/radvdump.c:127
+    #3 0x7444bee2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7444bee2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5ed5f99ad904 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/real/radvd-2.20/radvdump+0x4904) (BuildId: a3bd489007b64366836181d506384f066a186b01)
+
+Address 0x7444bd100070 is located in stack of thread T0 at offset 112 in frame
+    #0 0x5ed5f99b1351 in print_ff /home/mesh-home/mishe-tauftauf2shell/lab/frontier/radvdump2shell/real/radvd-2.20/radvdump.c:141
+
+  This frame has 7 object(s):
+    [32, 40) 'ts' (line 266)
+    [64, 80) 'if_name' (line 149)
+    [96, 112) 'addr' (line 377)
+    [128, 144) 'nat64prefix' (line 479) <== Memory access at offset 112 partially underflows this variable
+    [160, 206) 'addr_str' (line 145) <== Memory access at offset 112 partially underflows this variable
+    [240, 286) 'prefix_str' (line 307) <== Memory access at offset 112 partially underflows this variable
+    [320, 576) 'suffix' (line 429) <== Memory access at offset 112 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x7444bd0ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7444bd0ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7444bd0ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7444bd0fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7444bd0fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7444bd100000: f1 f1 f1 f1 00 f2 f2 f2 00 00 f2 f2 00 00[f2]f2
+  0x7444bd100080: 00 00 f2 f2 00 00 00 00 00 06 f2 f2 f2 f2 00 00
+  0x7444bd100100: 00 00 00 06 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x7444bd100180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7444bd100200: 00 00 00 00 00 00 00 00 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7444bd100280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2587308==ABORTING

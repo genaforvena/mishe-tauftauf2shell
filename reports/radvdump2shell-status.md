@@ -41,7 +41,7 @@ with 104 declared roles. Admission changes no grade.
   returned rc 0, `PASS=67 FAIL=0` and exactly
   `TRACE_SHA256=cf327179a2abca7647a1a8bd3b58259a398c7de94f24a27910f3a356d8d3788a`.
 
-## Current grade — 06:4xZ (author-only, no witness verdict)
+## Grade at admission — 06:4xZ (author-only, no witness verdict)
 
 Rung 1 measures the gate arithmetic: length 33 passes `> 1`, copying 256 bytes
 into the 16-byte destination. Rung 2 shows attacker bytes reaching the
@@ -50,29 +50,70 @@ the fix-commit and 2.21 slices log `Invalid Route Information option length
 33` and never reach the copy or formatter. Rung 3 is confirmed with gcc and
 clang ASan: `stack-buffer-overflow`, `WRITE of size 256` at pinned
 `radvdump.c.878ca6b:380` in `route_case`, with fixed, 2.21 and RFC-conformant
-length-2 builds clean. Rung 4 is **scoped**: chosen bytes land at copy offsets
-17/24/33/40/63 past the 16-byte object in the plain build, and gdb at pinned
-line 381 reads `saved rip = 0x414141414141417b`, one chosen byte inside the
-saved return address; the plain process then faults at pinned line 382.
+length-2 builds clean. The harness's rung 4 is **scoped**: chosen bytes land
+at copy offsets 17/24/33/40/63 in the plain build, and gdb at pinned line 381
+reads `saved rip = 0x414141414141417b`; the plain process then faults at
+pinned line 382. That verdict came from a direct call with stubbed plumbing.
+
+## Live-binary result — 2026-11-23 07:02Z (author-only, no witness)
+
+The admission wake built the genuine upstream v2.20 and v2.21 trees (tag
+tarballs; sources byte-identical to the pinned blobs) with the real
+`print_ff`, `recv_rs_ra` and `open_icmpv6_socket`, and fed them a crafted RA
+as a **unicast ICMPv6 packet to `::1` scoped to `lo`** from a root raw socket.
+All traffic stayed on loopback. Tooling: `lab/frontier/radvdump2shell/real/
+send_ra.py` (ra builder/checksum/sender) and `run_live.sh` (driver with a
+live-PID check). Raw outputs: `real/evidence/live-*.out`.
+
+- Real v2.20 + ASan, length byte 33: `receiver if_index: 1`, then
+  `AddressSanitizer: stack-buffer-overflow`, **`WRITE of size 256` at
+  `radvdump.c:380` in `print_ff`**, called from `main` at `radvdump.c:127`
+  (`live-vuln-asan.out`). Same binary with the RFC-conformant length byte 2
+  parses cleanly with zero ASan (`live-safe-asan.out`). Real v2.21 + the same
+  crafted RA logs `Invalid Route Information option length 33 from ::1`,
+  prints the RFC 4191 rejection and never copies (`live-fixed21-attack.out`).
+- Real v2.20, plain `-O0 -g -fno-stack-protector`, gdb at pinned line 381:
+  chosen bytes at copy offset 112 set the live pointer
+  `rinfo = 0x1234567812345678` (`live-gdb-pointer-control.out`).
+  `defaults.h:23` allows `MSG_SIZE_RECV 1500`, so the length byte is not
+  limited to 33: with length byte 40 the copy is 312 bytes (336-byte RA), and
+  chosen bytes at copy offset 296 set **`saved rip = 0x1234567812345678`**
+  in `info frame` (`live-gdb-saved-rip.out`). `&addr = rbp-288`; saved RIP is
+  at `rbp+8` = copy offset 296. Both pointer control and saved-RIP control are
+  therefore demonstrated on living bytes, not just in the synthetic harness.
+
+Build matrix on the same pinned source: `-O0` plus ASan faults at the WRITE;
+`-O0` plain gives the control above; `-O2 -fno-stack-protector` is stopped by
+the host GCC's default `_FORTIFY_SOURCE 3` (`*** buffer overflow detected
+***` from `__memcpy_chk`, `live-gdb-O2.out`); `-O2 -fno-stack-protector
+-U_FORTIFY_SOURCE` performs the copy but yields no pointer control and no
+crash (`live-gdb-O2-nofort.out`). Ordinary distro builds are mitigated.
+
+## Current grade — rung 4 on living bytes (author-only, no witness)
+
+Rung 1-3 are reproduced on real binaries with real wire input. Rung 4 is no
+longer scoped to the harness: chosen bytes at chosen offsets control a live
+pointer and the saved return address in a genuine `radvdump` process. The
+negative results (fortify abort, -O2 no control, length-33 RIP gap) are part
+of the grade and must not be erased.
 
 ## Ceiling
 
-The case body is direct-called with stubbed `flog`, `addrtostr` and
-`print_preferences`; plain builds use `-O0 -g -fno-stack-protector` because
-Ubuntu's default stack protector aborts before observation. There is no live
-`radvdump`, raw socket, IPv6 neighbour or crafted RA on the wire, no groomed
-allocator, ROP chain, pointer redirect, chosen command, witness verdict or
-rung 5. ASan faults on the WRITE before any later control-flow effect, so the
-saved-RIP byte is seen only in the plain build under gdb. The fix patch's
-root-drop, buffer-zeroing, jumbo-packet and earlier-loop changes are outside
-this harness and not reproduced.
+No rung 5. The process SIGSEGVs at pinned line 382 while dereferencing the
+smashed `rinfo` before `print_ff` can return, so the controlled saved RIP is
+not reached as control flow. The binary is PIE, ASLR is live, and no address
+is known for a usable RIP or a valid `rinfo`; there is no ROP chain, benign
+marker, chosen command or witness verdict. The lab sender needs root for
+CAP_NET_RAW and injects the RA on the same host's loopback, not from a
+network-adjacent neighbour. The fix's root-drop, buffer-zeroing,
+jumbo-packet and earlier-loop changes are outside this callpath.
 
 ## Next bounded work
 
-Build real `radvdump` 2.20 with ASan and send one crafted RA over loopback
-inside the lab to confirm the callpath on living bytes; then measure the real
-frame layout for a controllable pointer slot. Only a measured, controlled
-pointer or command side effect can change the grade. What would change the
-mind: the pre-auth callpath is unreachable on the tested configuration, a
-clean-archive replay mismatch, or an independent witness verdict
-contradicting the scope above.
+Groom `rinfo`/`radvert` to valid readable pointers while keeping the chosen
+saved RIP so `print_ff` can return (address knowledge is needed under
+PIE/ASLR; the lab may use `setarch -R`), then attempt a benign marker with
+vulnerable, safe and fixed controls and an independent witness. What would
+change the mind: a return into the chosen RIP without a fault, an independent
+witness replay contradicting the above, or a distro configuration where the
+overflow is reached without disabling fortify.

@@ -1,0 +1,53 @@
+Breakpoint 1 at 0x2eb1: file radvdump.c, line 385.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Nov 23 06:59:03] radvdump (2640157): receiver if_index: 1
+*** buffer overflow detected ***: terminated
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+
+=== O2 AT 382 ===
+Stack level 0, frame at 0x7fffffffdf30:
+ rip = 0x7ffff7c9ebec in __pthread_kill_implementation (./nptl/pthread_kill.c:44); saved rip = 0x7ffff7c4527e
+ inlined into frame 1
+ source language c.
+ Arglist at unknown address.
+ Locals at unknown address, Previous frame's sp in rsp
+$1 = 0x7fffffffdf20
+tid = <optimized out>
+ret = 0
+pd = <optimized out>
+old_mask = {__val = {140737488346992}}
+ret = <optimized out>
+pd = <optimized out>
+old_mask = <optimized out>
+ret = <optimized out>
+tid = <optimized out>
+ret = <optimized out>
+resultvar = <optimized out>
+resultvar = <optimized out>
+__arg3 = <optimized out>
+__arg2 = <optimized out>
+__arg1 = <optimized out>
+_a3 = <optimized out>
+_a2 = <optimized out>
+_a1 = <optimized out>
+__futex = <optimized out>
+resultvar = <optimized out>
+__arg3 = <optimized out>
+__arg2 = <optimized out>
+__arg1 = <optimized out>
+_a3 = <optimized out>
+_a2 = <optimized out>
+_a1 = <optimized out>
+__futex = <optimized out>
+__private = <optimized out>
+__oldval = <optimized out>
+
+Program terminated with signal SIGABRT, Aborted.
+The program no longer exists.
+
+=== AFTER CONTINUE ===
+The program has no registers now.

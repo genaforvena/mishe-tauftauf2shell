@@ -1,0 +1,8 @@
+# Reproducible upstream trees and build output (see PROVENANCE / status report).
+__pycache__/
+*.tar.gz
+radvd-2.20/
+radvd-2.21/
+radvd-2.20-plain/
+radvd-2.20-O2/
+radvd-2.20-O2-nofortify/

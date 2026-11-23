@@ -1,0 +1,25 @@
+Breakpoint 1 at 0x4aa4: file radvdump.c, line 381.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Nov 23 07:01:48] radvdump (2722807): receiver if_index: 1
+
+Breakpoint 1, print_ff (msg=0x7fffffffe330 "\206", len=0, addr=0x7fffffffe910, hoplimit=64, if_index=1, edefs=0) at radvdump.c:381
+381					addrtostr(&addr, prefix_str, sizeof(prefix_str));
+
+=== SAVED RIP AT 381 ===
+Stack level 0, frame at 0x7fffffffe2e0:
+ rip = 0x555555558aa4 in print_ff (radvdump.c:381); saved rip = 0x1234567812345678
+ called by frame at 0x7fffffffe2e8
+ source language c.
+ Arglist at 0x7fffffffe2d0, args: msg=0x7fffffffe330 "\206", len=0, addr=0x7fffffffe910, hoplimit=64, if_index=1, edefs=0
+ Locals at 0x7fffffffe2d0, Previous frame's sp is 0x7fffffffe2e0
+ Saved registers:
+  rbx at 0x7fffffffe2c8, rbp at 0x7fffffffe2d0, rip at 0x7fffffffe2d8
+$1 = 0x7fffffffe1b0
+$2 = 0x7fffffffe2d0
+$3 = 0x1234567812345678
+0x7fffffffe2d8:	0x1234567812345678	0x4141414141414141
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555555558ac9 in print_ff (msg=0x7fffffffe330 "\206", len=0, addr=0x7fffffffe910, hoplimit=64, if_index=1, edefs=0) at radvdump.c:382
+382					printf("\n\troute %s/%d\n\t{\n", prefix_str, rinfo->nd_opt_ri_prefix_len);
