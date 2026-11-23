@@ -103,6 +103,7 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   `IND=0 SCALED=0x00000040`, bytes `40 00 00 00` at `data()-4`.
   `vendor/check.sh`: **13 PASS / 0 FAIL** twice, trace
   `fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
+  Clean-archive replay at `56bc1f8` (7882 files) matched exactly (`REPLAY.md`).
   Provenance, hashes and offsets: `vendor/PROVENANCE-vendor-file.md`.
 - Ceiling: direct call, real property parser, real compound-file stream,
   KiCad's own compound-file reader and a real vendor-produced `.SchLib` with

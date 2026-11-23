@@ -260,6 +260,8 @@ on the patched vendor file reads `IND=0 SCALED=0x00000040` and bytes
 
 `vendor/check.sh`: **13 PASS / 0 FAIL** twice, trace
 `fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`.
+A clean-archive replay at commit `56bc1f8` (7882 files) matched exactly;
+see `REPLAY.md`.
 Fixture hashes, license, exact offsets and the ceiling are in
 `vendor/PROVENANCE-vendor-file.md`. This closes fixture provenance, not the
 full path: no wxWidgets, full KiCad build/GUI import, consumer, wire,
