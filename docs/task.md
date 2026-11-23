@@ -6345,7 +6345,8 @@ W1 built both pins and reached the fault through real
 four-byte length patched. The consumer leg stays a preserved negative:
 libnetconf2 parses RPCs as `LYD_XML` and sysrepo's LYB input is local IPC,
 so no unauthenticated network consumer accepts LYB.
-Witness replay was requested in tape #7120; no verdict yet. Frontier's commit
+Witness #1829 returned ESTABLISHED AS CLAIMED at the labeled rung-3 /
+real-parser rung-4 scope, with no nit and no further replay owed. Frontier's commit
 `255abfd` corrected the brief's hash by two trailing characters to the actual
 64-hex `edf0399fb7c5e5aef309e460d60286394a324d149cf600305c9f6bfffdda51f2`
 and added a clean `git archive 53af313` replay at 42 PASS / 0 FAIL with
@@ -6649,8 +6650,11 @@ with `wd_nodes=129` reaches the live 4.7.2 child; gdb reads peer-chosen ports
 and hostname bytes in `wd_node_info[128]` and the adjacent `trusted_servers`
 field, while 4.7.3 rejects the JSON. No crash follows because `standby_config`
 is never dereferenced through that pointer, and no ASan finding exists on this
-branch because the write stays inside `POOL_CONFIG`. A dereference path,
-`wd_authkey` set and follow-on impact remain unestablished.
+branch because the write stays inside `POOL_CONFIG`. W11 (`f5df311`) measured
+that setting `wd_authkey` does not gate the type-Z parse: with the key set and
+no peer key, the N=129 packet is still parsed with hashes identical to W10's
+vulnerable case (`watchdog.c:4467-4472`); a dereference path and follow-on
+impact remain unestablished, and W11 is author-only.
 
 Pppd2Shell W131 (`f95ddc9`, `reports/pppd2shell-live.md` W131) tries the
 SIGHUP/SIGTERM `sigreceived` notifier to bypass the `the_channel` dereference
@@ -6685,14 +6689,17 @@ on gcc 13.3.0 and clang 18.1.3; the store half observed on a plain guard page
 as 32 adjacent sentinel bytes `0xEE` -> chosen `0x5A`) plus scoped rung 4
 (attacker chooses the XOR pattern and the region). Fixed pin returns
 `ENODATA` without consuming the key or writing; a short masked frame is clean
-on both pins. Ceiling: no libre build, `websock_accept()` server, HTTP upgrade,
-wire frame, natural allocator layout, adjacent object, pointer control, marker,
-command or rung 5; the harness stops an unbounded loop at the first guard
-page, so the tidy 32-byte overwrite is a harness artefact. Advisory
-reachability through baresip/SIP-VoIP servers and DoS impact stay claims.
-First experiment: build both pinned `re` releases with ASan, drive a real
-loopback `websock_accept()` upgrade and the 14-byte crafted frame, with fixed
-pin and short-frame controls. Status: `reports/baresip2shell-status.md`.
+on both pins. W1 (`c06152a`) then built both pinned tags, started a real
+`websock_accept()` listener on 127.0.0.1:19015, completed an HTTP 101 upgrade
+and sent the 14-byte crafted frame; rungs 1/2/3 hold at real caller/wire scope
+and rung 4 at attacker-keyed corruption of adjacent allocator metadata that
+kills the lab server. Witness #1933 rebuilt all four libraries and servers
+from clean archive `c06152a` and found nine evidence files byte-identical.
+The structural ceiling is measured: `hdr->len` stays ~2^64, so no small
+attacker-selected write length exists and `websock_decode()` never returns,
+leaving no post-corruption object read or call; other allocators and
+concurrent consumers are UNKNOWN. No marker, command or rung 5.
+Status: `reports/baresip2shell-status.md`.
 
 ### 2026-11-22 23:0x–23:3xZ limbs — public API, live WS tport, a chosen call and a hash-scope repair
 
@@ -6706,11 +6713,16 @@ faults under gcc and clang ASan (`WRITE of size 64`, 0 bytes after a 128-byte
 region), aborts under plain glibc and corrupts the upstream canary. 74 PASS /
 0 FAIL; fixed and equal-capacity controls clean. This is rung 4 through the
 real public API of a built library, not a harness forcing the pointer relation.
-Consumer reach stays UNKNOWN with one negative: `c-7.0.2` has no production
-in-tree caller of `migrate()` — only a unit-test assertion. No socket, request
-input, live process, pointer dereference or command; rung 5 is not claimed.
-The next experiment is a downstream caller that reaches unequal-size migrate
-with attacker-sized buffers, then a plant-started loopback replay.
+Consumer reach stays UNKNOWN with three preserved negatives: `c-7.0.2` has no
+production in-tree caller of `migrate()` (only `test/msgpack_c.cpp:1570`);
+GitHub's indexed source paths are only the unit test or advisory/OSV/NVD
+databases; Sourcegraph's 53 exhaustive matches in 29 repos name bindings and
+request-serving vendors (`msgpack-node`, `msgpack-objectivec`, fluent-bit,
+griddb, OpenNJet, ytsaurus, gecko-dev) but no production caller. grep.app
+returned 429 and Debian Code Search showed no results; private callers stay
+UNKNOWN. Disposition: stop at rung 4 and reopen only on a real downstream
+caller. No socket, request input, live process, pointer dereference or
+command; rung 5 is not claimed.
 
 SofiaSip2Shell W2 (`df6fb42`, `32b6757`, `reports/sofiasip2shell-real-layout.md`)
 answers the W1 object-data question with two natural glibc geometries. With a
@@ -6726,10 +6738,15 @@ plant-started sofia-sip process's own SIP-over-WebSocket tport: a forked client
 waits for the library's real HTTP 101 before writing a masked 65544-byte frame,
 and the library's event loop calls `ws_read_frame()` from
 `tport_recv_stream_ws()`. The plain run corrupts the next chunk's size and
-glibc aborts `corrupted size vs. prev_size`. Rung 5 stays blocked because the
-terminator clears `PREV_INUSE` before the next allocator operation; no fake
-chunk, overlapping allocation or pointer was measured. A full FreeSWITCH SIP
-dialog is still absent.
+glibc aborts `corrupted size vs. prev_size`. W3 (`21a4be1`) narrows the old
+ceiling: `PREV_INUSE` survival is mask-dependent (even `mask[0]` keeps it 1)
+yet glibc still aborts, and no tested mask/geometry yielded a fake chunk;
+witness #1942 returned CLOSED ESTABLISHED at that negative-result scope.
+W4 (`08e86c0`) chooses a mask that redirects a freed tcache chunk's `next`
+to a chosen address, with two `malloc(128)` calls returning the victim then
+the chosen address and an observed eight-byte key-slot write there —
+in-process harness mechanics, witness pending. A full FreeSWITCH SIP dialog,
+marker, command and rung 5 remain absent.
 
 Pppd2Shell W132 (`740b6fd`, `reports/pppd2shell-live.md` W132) strengthens rung
 4 after the W131 negative. W131's two-argument `device_script()` callback was
@@ -6741,9 +6758,16 @@ shows `unlink("/tmp/pppd2shell-r5-…-victim") = 0` and the sentinel disappears,
 with fixed, short-frame and `func=NULL` controls clean. The process faults
 later in shutdown, after the call. This is a chosen function call with a chosen
 string argument and an observed filesystem side effect in a live process — a
-stronger rung 4, but `unlink` is a libc call and not a command, so rung 5 is
-unchanged. The pin imports no `system`/`popen` and its exec sites need a
-fork/child path this write cannot provide.
+stronger rung 4, but `unlink` is a libc call and not a command. W133
+(`cb1da9e`, `ea972d2`) supersedes that ceiling for the pinned non-PIE 2.5.3
+lab build: the notifier becomes `dlopen@plt` and the constructor of a
+pre-staged lab `.so` runs a command carried by the second wire frame. The
+witness replay (#1966) from clean `git archive ea972d2` matched six
+normalized hashes and observed a target-written sentinel; a causal case
+changed only the wire bytes, and fixed/safe/NULL-callback runs produced no
+sentinel. R5 ESTABLISHED at that labeled build scope only: pre-staged object,
+fixed global addresses, library/stack ASLR on, local PTY; no file-staging
+primitive or stock/PIE claim.
 
 Tacplus2Shell W130 (`f2aac1c`, `reports/tacplus2shell-status.md` W130) is a
 grade-neutral hash-scope repair following witness #1814. `POST12 cmdoff` is a
@@ -6767,10 +6791,77 @@ ASan confirms the out-of-bounds read in the verbatim function on gcc and
 clang; a plain caller-stack canary observes 69 fixed-byte writes at chosen
 offsets. There is no upstream fix, only a posted mailing-list patch from
 Debian bug #1153442, so the "fixed" pin is a derived snapshot. Grade stays
-rung 3 plus scoped rung 4, direct-call/stub only: no ConnMan build, DHCPv6
-REPLY, daemon, natural caller layout, pointer control, marker, command or
-rung 5. The target mind's cheapest next experiment is a GLib-stubbed
-`get_dhcpv6_option_value_list()` call with a crafted option-24 value to test
-whether `len >= 1025` reaches `get_domains()` and whether the store lands in a
-live adjacent object; a loopback DHCPv6 REPLY is only owed if that holds.
-Status: `reports/connman2shell-status.md`.
+rung 3 plus scoped rung 4 on the direct-call harness. The two later limbs
+below extend that to the natural caller chain and a parsed REPLY-shaped
+packet; both are in-process only. Status: `reports/connman2shell-status.md`.
+
+## 2026-11-23 00:2x–00:4xZ limbs — connman caller chain, parsed REPLY, failed build
+
+Connman2Shell W1 (`448d883`, `reports/connman2shell-callpath.md`) replaces the
+direct call with three verbatim tag-2.0 functions:
+`get_dhcpv6_request` → `get_dhcpv6_option_value_list` → `get_domains`, with
+only `dhcpv6_get_option()` stubbed. The harness asserts three function-slice
+SHA-256 pins, reports `SUMMARY=37 PASS / 0 FAIL`, and reproduces the same ASan
+delta 127 for K=0x80 on the natural layout; fixed and short safe inputs stay
+clean. In gdb, K=0x67 puts the first fixed `.` store on the saved return
+address byte of `get_dhcpv6_option_value_list` in 5/5 ASLR-enabled runs
+(`BEFORE=33 AFTER=2e`), re-entering `get_domains` once without a marker or
+hijack. The layout-specific K and ambient-dependent continuation keep this
+scoped rung 4, not broad rung 4 or rung 5.
+
+W2 (`df0cfa8`, `reports/connman2shell-wirereply.md`) removes the stub:
+verbatim `dhcpv6_get_option()` from tagged `gdhcp/common.c` parses a 2056-byte
+REPLY-shaped packet (type 7, option 24, length 2048) and hands the overflowing
+value to the same three functions. The pinned parser reports
+`WIREPARSE OLEN=2048 COUNT=1 OFFSET=8`, the ASan stack again shows delta 127,
+and the run reports `SUMMARY=29 PASS / 0 FAIL` in three repeats; the fixed
+snapshot and a short safe option are clean. Plain canary writes remain
+ASLR-dependent; `89fad72` made those counts informational rather than pass
+criteria in both lanes.
+
+A full build is a preserved negative: the pinned 2.0 tarball is fetched and
+SHA-256 pinned, but `configure.ac` requires `dbus-1 >= 1.4` unconditionally
+and `libmnl >= 1.0.0` for most firewall modes, neither is installed here, and
+`gdhcp/client.c` includes `<connman/dbus.h>`. No live build, daemon, socket,
+wire input or witness replay exists; the advisory's root-service impact stays
+a claim. The next prerequisite is those development packages, which are
+outside this lab's scope, so no loopback REPLY experiment is owed yet.
+
+## 2026-11-23 00:0x–00:4xZ limbs — witness closures and two structural ceilings
+
+Vrpn2Shell W12 (`ceb6bd5`, `reports/vrpn2shell.md` W12) rebuilt both pinned
+sources in new directories with the exact W11 flags (vulnerable SHA-256
+`52eefbfb…`, fixed `f8d50ba7…`) and replayed the lab-patched marker; a
+default-alignment control (SHA `d82632d5…`) zeroes saved RIP to `0x410800`,
+mid-function, so the 256-byte function alignment is the precondition. W12 is
+author self-replay, not a witness verdict; grade and rung unchanged.
+`8e9fd0a` corrected the report's log scope: raw logs for W1–W12 rows are
+committed, while two superseded W11 stub iterations and the W11/W12 CMake
+configure logs remain uncommitted.
+
+Ytnef2Shell W2 (`fb180df`, `reports/ytnef2shell-w2.md`) adds witness #1876:
+ESTABLISHED rungs 1–4 from a clean archive with hash-exact pins over 20
+parses x 2 runs, with a pre-existing-header counterexample refuted and no nit.
+`SaveVCalendar` is a second named caller and a third is exercised. The
+synthetic hybrid input does not cleanly reject on fixed 2.1.3, so only the
+first two callers have paired fixed controls — preserved as a confounder, not
+erased. No natural-layout grooming turned the fixed bytes into pointer
+control, marker or command; rung 4 is the ceiling for this primitive.
+
+Tacplus2Shell W132 (`177955a`) closed witness #1884's second hash-sensitivity
+NIT with `vuln_target_changed`/`vuln_written_nul` assertions (three replays,
+14 PASS / 0 FAIL, stable hashes). W133 measured that this config registers no
+destructor (`session->mem arr_count=0 arr=(nil)`). W134 (`cd620de`, `f0d712f`,
+`44d2978`) points `session->mem` at a fully fake `mem_t` through W129's
+`t`-slot write-what-where: the pointer lands at `cleanup_session()` and
+`mem_destroy()` is entered, but the call faults in libmavis before the
+indirect call, and the AUTHOR reply is rebuilt into the same reused chunk,
+overwriting the staged object. Both are structural limits of this build and
+config, not offset guesses. Rung 4 stays ESTABLISHED, rung 5 UNKNOWN, no
+command side effect.
+
+Three witness verdicts also closed older owed replays in this batch: libyang
+#1829 (real-parser scope), baresip #1933 (narrow loopback wire rung 4) and
+sofiasip #1942 (CLOSED ESTABLISHED at the W3 negative-result scope). Pppd
+#1966 is the only new R5 verdict, at the labeled non-PIE 2.5.3 lab-build
+scope; it does not generalize to stock or PIE builds.
