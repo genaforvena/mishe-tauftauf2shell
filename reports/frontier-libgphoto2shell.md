@@ -3,8 +3,10 @@
 **STAGED 2026-11-23 W160** — this brief, a direct-call rung-1..4 harness and a
 live registered two-pane window (inner socket index 120, name
 `libgphoto2shell`) all exist; seed wall `.mishe-tauftauf/walls/libgphoto2shell.md`,
-registry entry and staging DM are in place. Operator admission and an
-independent witness replay are pending. Byte-exact pins and hashes:
+registry entry and staging DM are in place. Operator admission is complete
+(#2738, corrected #2742). An independent witness replay closed 2026-11-23
+(tape #2892): ESTABLISHED at the labeled scope — rung 3 at the real heap
+destination, NOT rung 4 impact, rung 5 UNKNOWN. Byte-exact pins and hashes:
 `lab/frontier/libgphoto2shell/PINS.sha256`; harness provenance, stubs,
 negatives and commands: `lab/frontier/libgphoto2shell/PROVENANCE.md`. Frontier
 owns no further work on this target.
@@ -112,8 +114,8 @@ is reached through `gp_camera_init()` with libgphoto2's own `vusb` virtual USB
 port, patched in the lab to answer the JL2005 handshake with chosen bytes; see
 `lab/frontier/libgphoto2shell/REAL-BUILD.md`. No real USB hardware, physical
 camera enumeration, gvfs/digiKam consumer, socket, network wire,
-pointer-control chain, benign marker execution, command execution or witness
-replay. The malicious-USB-device attacker model is a claim carried by a
+pointer-control chain, benign marker execution or command execution.
+The malicious-USB-device attacker model is a claim carried by a
 synthetic transport here. A rung-5 path would still need a network-facing host
 that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
 
@@ -139,3 +141,19 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   neighbour. Details and raw gdb output in `PROVENANCE.md`, section
   "Measured frame layout and structural ceiling". This is a negative at the
   direct-call scope only; real USB hardware and wire remain untested.
+
+- Independent witness replay (tape #2892, 2026-11-23): from a clean git
+  archive to `/tmp/w173-lgp`, all 4 pins plus the tarball and patch hashes
+  matched; a from-scratch ASan 2.5.34 build with the archived vusb patch and
+  the witness's own driver reproduced exactly three reports at count 1022
+  with `halt_on_error=0` (`rc=0`): stack WRITE 16384 at real `:152`, stack
+  READ 16848 and heap WRITE 16848 at real `:154`, 0 bytes past the
+  16448-byte `camera_init` region. Controls 100 and 1021 clean; fix hash
+  `4fdaf4b1…` suppresses the oversized read and all ASan; reversing the
+  patch restores all three; 65535 gives the 1 MiB faults then SEGV. Their
+  gdb and byte-substitution counterexamples found no live neighbour or
+  pointer chain: `table` ends exactly at the allocation boundary and the
+  chosen device bytes land in the ASan redzone. Verdict: ESTABLISHED at the
+  labeled scope only — rung 3 at the real heap destination, NOT rung 4
+  impact, rung 5 UNKNOWN. The witness also closed #2763 with the harness
+  check at 146 PASS/0 FAIL and trace `e364f756…c6c98`.

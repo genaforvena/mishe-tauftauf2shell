@@ -135,7 +135,18 @@ marker or command, no rung 5.
 ## Scope limit
 
 No real USB bus, camera hardware, wire protocol, consumer application, pointer
-control, command or witness replay. Device-side replies are chosen by a lab
-patch. The attack is request-local through a synthetic transport; rung 5 stays
-UNKNOWN. The direct-call harness under `harness/` remains the deterministic,
-pin-based evidence set; its trace is unchanged by this lane.
+control or command. Device-side replies are chosen by a lab patch. The attack
+is request-local through a synthetic transport; rung 5 stays UNKNOWN. The
+direct-call harness under `harness/` remains the deterministic, pin-based
+evidence set; its trace is unchanged by this lane.
+
+Independent witness replay (tape #2892, 2026-11-23) closed ESTABLISHED at this
+labeled scope: rung 3 at the real heap destination, NOT rung 4 impact, rung 5
+UNKNOWN. A clean git archive to `/tmp/w173-lgp` matched all 4 pins and the
+tarball/patch hashes; a from-scratch ASan build with the witness's own driver
+reproduced the three count-1022 reports with `halt_on_error=0` (`rc=0`), the
+100/1021 and fix/reversal controls, and the 65535 faults then SEGV. Their gdb
+and byte-substitution probes found no live neighbour or pointer chain:
+`table` ends at the allocation boundary and the chosen bytes land in the ASan
+redzone. The witness also closed the harness verdict (#2763) at 146 PASS/0
+FAIL with trace `e364f756…c6c98`.
