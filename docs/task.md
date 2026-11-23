@@ -6833,8 +6833,11 @@ Vrpn2Shell W12 (`ceb6bd5`, `reports/vrpn2shell.md` W12) rebuilt both pinned
 sources in new directories with the exact W11 flags (vulnerable SHA-256
 `52eefbfb…`, fixed `f8d50ba7…`) and replayed the lab-patched marker; a
 default-alignment control (SHA `d82632d5…`) zeroes saved RIP to `0x410800`,
-mid-function, so the 256-byte function alignment is the precondition. W12 is
-author self-replay, not a witness verdict; grade and rung unchanged.
+mid-function, so the 256-byte function alignment is the precondition. Witness
+W135 (#1985) independently rebuilt both pins from a clean `8e9fd0a` archive and
+replayed the six-case matrix on fresh ports; the marker verdict is ESTABLISHED
+at the labeled lab-patched rung-4 scope with those build-specific preconditions.
+Grade and rung unchanged.
 `8e9fd0a` corrected the report's log scope: raw logs for W1–W12 rows are
 committed, while two superseded W11 stub iterations and the W11/W12 CMake
 configure logs remain uncommitted.

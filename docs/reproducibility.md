@@ -1911,8 +1911,12 @@ external contact at replay time.
   new directories with the W11 flags (vulnerable SHA `52eefbfb…`, fixed
   `f8d50ba7…`) and replayed the marker; a control without
   `-falign-functions=256` (SHA `d82632d5…`) zeroes saved RIP to `0x410800`,
-  mid-function, so alignment is the precondition. This is author self-replay,
-  not a witness verdict; no command or rung 5 is claimed.
+  mid-function, so alignment is the precondition. Witness W135 (#1985)
+  rebuilt both pins from a clean `8e9fd0a` archive with the same flags,
+  replayed the six-case matrix on fresh loopback ports and graded the marker
+  ESTABLISHED at the labeled lab-patched rung-4 scope; build-specific
+  addresses and `-falign-functions=256` stay preconditions, and no command or
+  rung 5 is claimed.
 
 ## Admitted frontier lane — 2026-11-22 22:2xZ sofiasip2shell
 
