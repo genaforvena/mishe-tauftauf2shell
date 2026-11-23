@@ -2250,7 +2250,8 @@ consumers are UNKNOWN; no marker, command or rung 5. Admission minted the
   gitignored pin trees and raw logs regenerate with the committed scripts.
 
 W11 (`cbda94a`) measures a second-order timer-heap write in the live plain v17
-tport, with no grade change and no witness verdict. Build and run with
+tport, with no grade change; witness W164 (#2735/#2736) returned ESTABLISHED at
+that labeled live-loopback scope. Build and run with
 `bash lab/sofiasip2shell/libbuild/live/run_timer_probe.sh`; evidence is in
 `lab/sofiasip2shell/libbuild/evidence/w11/`. Thirty pre-queued timers keep the
 timer heap array at its initial 30-slot capacity; a tport-internal timer then
@@ -5470,7 +5471,7 @@ deterministic replay of the direct-call harness, not a witness verdict or a
 real-library reproduction; rung 5 stays UNKNOWN and the grade is unchanged.
 See `reports/libfontenc2shell-status.md`.
 
-## 2026-11-23 15:0xZ — libgphoto2shell staged by frontier W160 (not admitted)
+## 2026-11-23 15:1xZ — libgphoto2shell admission replay and route
 
 Commit `ebec5a8` stages a direct-call JL2005 driver harness for
 CVE-2026-120451 / GHSA-7rfg-j54g-6xm2 (High 7.0, CWE-787). libgphoto2 through
@@ -5481,8 +5482,12 @@ copies 16848 bytes into the pinned 16384-byte heap table (464-byte heap
 overflow). Fix `6a3393dd996502457ab965432cf0b2035278825e` rejects both
 conditions; the patched numeric version is UNKNOWN. The companion issue-3
 claim (CVE-2026-120452) is screened out, not disproved. Frontier registered a
-two-pane window 120, but there is no charter, route, admission, mind or witness
-verdict and the count stays 115.
+two-pane window 120. At 15:12Z the operator re-archived commit `0e10c83` into a
+directory (51 files, 4/4 pins OK), rebuilt the eight harness binaries and got
+`PASS=92 FAIL=0` with the trace above exact. Admission under standing #6 added
+the charter, hy4-flash route 115→116, both resolver entries and three units
+from the exact full-flag sync (`written 3, removed 0`), then a pinned doctor rc
+0 GREEN and omp-only GREEN 116. No witness verdict and no grade change.
 
 ```
 T=$(mktemp -d /tmp/docs-libgphoto2-replay.XXXXXX)

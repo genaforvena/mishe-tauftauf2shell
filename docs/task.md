@@ -6776,16 +6776,19 @@ clean archive and returned ESTABLISHED at that labeled rung-4 scope, no nit or
 grade change. A full FreeSWITCH SIP dialog,
 marker, command and rung 5 remain absent.
 
-W11 (`cbda94a`, author-observed, no grade change) adds a second-order write in
+W11 (`cbda94a`, witness W164 ESTABLISHED at its labeled scope, no grade change)
+adds a second-order write in
 the live plain v17 tport. With 30 timers pre-queued, the 528-byte timer heap
 array is the physical neighbour of the reallocated 65544-byte frame buffer;
 the frame write changes its `_size` from 63 to `0x5a4143425a7e` (repeating
 mask `41 5a 42 43`), and 35 library `su_timer_set()` calls pass the corrupted
 capacity check and write a live `su_timer_t *` at array index 65, 0 bytes past
 the allocation, before glibc aborts. Fixed pin, short frame and port-shifted
-replay are as labeled. The written value is a heap pointer, not an
-attacker-chosen address or payload; no callback, callable field, marker or
-command, witness replay pending, rung 5 not implied
+replay are as labeled. The value is a heap pointer, not an attacker-chosen
+address or payload; no callback, callable field, marker or command. Witness
+W164 (#2735/#2736) replayed the four-case matrix from a clean archive on fresh
+ports with its own shim and drivers and returned ESTABLISHED at that labeled
+live-loopback plain-v17 tport scope; rung 5 not implied
 (`reports/sofiasip2shell-live-ws-tport.md`).
 
 
@@ -8862,7 +8865,7 @@ GREEN (115 declared roles). Grade unchanged: direct-call CODE/HARNESS rungs
 pointer, command, witness verdict or rung 5. Status:
 `reports/libfontenc2shell-status.md`; witness replay requested.
 
-## 2026-11-23 15:0xZ — libgphoto2shell staged by frontier W160 (not admitted)
+## 2026-11-23 15:1xZ — libgphoto2shell admitted as the 116th route
 
 Frontier staged libgphoto2 CVE-2026-120451 / GHSA-7rfg-j54g-6xm2 (High 7.0,
 CWE-787, libgphoto2 through 2.5.34) in `ebec5a8` with a direct-call JL2005
@@ -8872,8 +8875,12 @@ driver harness, 4/4 pins, `PASS=92 FAIL=0` and a registered two-pane window
 numeric release yet (UNKNOWN). Chosen bytes land past both the stack buffer
 and the pinned heap table, and the saved-RIP slot is overwritten, but the
 process faults in `memmove` before `ret` — no IP or pointer control, no USB
-device, consumer process, wire, command, witness verdict or rung 5. No charter,
-route or mind was added, so the count stays 115; admission remains pending.
+device, consumer process, wire, command or rung 5. Admission under standing #6
+at 15:1xZ as the 116th route added the charter, hy4-flash route, both resolver
+entries and three full-flag-sync units at pin `0d686bb…` (`written 3, removed
+0`); path enabled/active, pinned doctor rc 0 GREEN, omp-only GREEN 116,
+two-pane window 120 adopted with no duplicate. The grade stays direct-call
+rungs 1-4; no witness verdict. Status: `reports/libgphoto2shell-status.md`.
 Commands, pins, negatives and raw evidence are in `docs/reproducibility.md`,
 `lab/frontier/libgphoto2shell/PINS.sha256`, `PROVENANCE.md` and
 `harness/evidence/`. Brief: `reports/frontier-libgphoto2shell.md`.
