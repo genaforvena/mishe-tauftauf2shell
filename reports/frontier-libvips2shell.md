@@ -216,3 +216,6 @@ Grade: rung 4 for a chosen-byte negative-offset **write** on living bytes
 through an ordinary public libvips API, with vulnerable/fixed/safe-input
 controls. No pointer target, saved return address, control-flow datum, wire,
 request, command, marker side effect or witness verdict. Rung 5 UNKNOWN.
+
+`real/run-consumer.sh` was replayed from a clean `git archive HEAD` at
+commit `22278cb`: `CLEAN_ARCHIVE_RC=0`, 23/23 PASS.

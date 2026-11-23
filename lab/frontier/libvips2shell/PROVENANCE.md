@@ -260,3 +260,8 @@ call on the synthetic image remains the chosen-byte placement demonstration;
 W4 adds a real allocation and an unmodified public entry point. No pointer,
 return address, control-flow datum, wire, command, marker or witness verdict.
 Rung 4 stands for a negative-offset write on living bytes; rung 5 UNKNOWN.
+
+Clean `git archive HEAD` replay at commit `22278cb` (gitignored build and
+source trees symlinked in, as at W3) returned `CLEAN_ARCHIVE_RC=0` and
+23/23 PASS, including both paint controls. This confirms the checked change
+is reproducible from the committed tree, not just the working tree.
