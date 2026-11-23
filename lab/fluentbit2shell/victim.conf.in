@@ -1,0 +1,21 @@
+[SERVICE]
+    flush            0.5
+    log_level        debug
+    daemon           Off
+    Grace           1
+
+[INPUT]
+    Name             dummy
+    Tag              probe.fluentbit2shell
+    Dummy            {"probe": "fluentbit2shell"}
+    Rate             10
+
+[OUTPUT]
+    Name             forward
+    Match            *
+    Host             127.0.0.1
+    Port             @PORT@
+    Shared_Key       livewire-secret
+    Self_Hostname    victim-5.0.7
+    net.connect_timeout  2
+    net.io_timeout  2

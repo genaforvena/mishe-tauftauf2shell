@@ -83,3 +83,30 @@ Rung 5 stays UNKNOWN.
    any rung-5 claim; a chosen saved-RIP byte is not execution.
 3. Hand any live-wire rung-4 or rung-5 claim to the witness without upgrading
    this row first.
+
+## Live-wire update — 2026-11-23 07:42Z (supersedes the ceiling and next-work sections above)
+
+- First target-mind wake built real Fluent Bit 5.0.7 from the pinned public
+  source with ASan and drove a malicious Secure-Forward server on 127.0.0.1.
+  A valid HELO then `["PONG", false, <1000-byte STR>, "h", "d"]` produced
+  `AddressSanitizer: stack-buffer-overflow`, `WRITE of size 1000` in
+  `secure_forward_pong` at `forward.c:567` of a live `flb-out-forward`
+  thread, reached from `secure_forward_handshake:645` and
+  `cb_forward_flush:1629`. Full evidence and provenance:
+  `reports/fluentbit2shell-livewire.md`.
+- Controls on the same binary: `PONG[1]=true` gives `handshake status = 0`;
+  a 4-byte reason gives a bounded `failed authorization`; both clean. The
+  pinned fix patch rebuilt into a clean binary (source SHA matches v5.0.8)
+  bounds the same 1000-byte PONG to a 31-byte log with no ASan report.
+- gdb on the real flushing thread placed chosen bytes at `msg` offsets
+  0/17/24/33/40/48/56/63; in the default plain build `$rbp - &msg = 0x30`,
+  `x/gx $rbp+8 = x/gx msg+56 = 0x414141414141417b` and the backtrace frame 1
+  is that value. The default canary aborts at return, so no control transfer
+  was executed in this build; the earlier direct-call harness with
+  `-fno-stack-protector` remains the only observed transfer.
+- Grade now: rung 3 confirmed on living bytes; rung 4 met at frame/pointer
+  level with the canary caveat above; rung 5 still UNKNOWN — no ROP chain,
+  command, side effect or witness. Threat model unchanged: malicious/upstream
+  forward destination versus a forwarding agent.
+- Next: a real no-canary 5.0.7 process under gdb to see the chosen RIP taken,
+  then witness replay; do not upgrade this row before that observation.
