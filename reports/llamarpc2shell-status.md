@@ -51,7 +51,7 @@ path unit is enabled and active. Both
   adjacent byte and is ASan-clean; safe `got=1` on the vulnerable slice is
   also clean.
 
-## Current grade — 06:3xZ (rungs 3–4 ESTABLISHED; rung 5 locally observed, replay owed)
+## Current grade — 2026-11-23 (rungs 3–4 and rung 5 ESTABLISHED at labeled build scopes)
 
 Rung 3 is confirmed both in the verbatim pinned slice and in a live
 plant-started `ggml-rpc-server` over loopback SoftRoCE: a 43-byte SEND gives
@@ -74,9 +74,12 @@ three consecutive live runs each created `/tmp/llamarpc2shell-r5-marker`; a
 passive gdb observation saw `__libc_system` entered with the wire-supplied
 `"touch /tmp/llamarpc2shell-r5-marker"` string. The 1-byte safe control and the
 same payload against the upstream fixed build leave no marker, the latter
-logging `RDMA recv overrun: got=1024 rem=1`. This is rung 5 **observed locally /
-PENDING**, not ESTABLISHED: no independent replay yet, no canary-enabled or
-ASLR-on rung-5 run and no external target. The advisory's 262144-byte upper
+logging `RDMA recv overrun: got=1024 rem=1`. Witness W148 (DM #2372) replayed
+this exact claim from a clean archive of `bc9cc09` with its own rebuilt pins:
+rung 5 is **ESTABLISHED at the explicitly labeled lab-build scope** (no stack
+protector, `setarch -R` ASLR off, fixed minimal environment, measured absolute
+stack address, benign `touch`). No canary-enabled or ASLR-on rung-5 run and no
+external target. The advisory's 262144-byte upper
 bound was measured on the wire in a fourth wake: the vulnerable server faults
 (`Segmentation fault (core dumped)`), the fixed server logs
 `RDMA recv overrun: got=262144 rem=1` and stays up; no chosen bytes, pointer
@@ -89,11 +92,13 @@ build scope, with no counterexample; no rung-5 claim existed then. W143
 canonical attack logs is preserved as
 `wire/evidence/{client,server}-rce-4608.log`, and the canonical
 `{client,server}-attack.log` are the witness-verified 43-byte ASan pair. That
-repair is committed (`4b8b9ec`). The new rung-5 claim is separate and needs its
-own replay by the witness. The staged slice grade above is the historical
-baseline, not the current ceiling. Exact commands, hashes and controls for the
-new claim are in `reports/llamarpc2shell.md` under "Rung-5 wire-only
-observation".
+repair is committed (`4b8b9ec`). W148 (DM #2372) replayed the separate rung-5
+claim from a clean archive of `bc9cc09` with its own rebuilt pins and graded it
+ESTABLISHED at the labeled build scope, with counterchecks and both controls;
+no repair owed. The staged slice grade above is the historical baseline, not
+the current ceiling. Exact commands, hashes, controls and the W148 replay are
+in `reports/llamarpc2shell.md` under "Rung-5 wire-only observation" and
+"Independent witness W148".
 
 Fourth wake (2026-11-23): bounded 256 KiB measurement only. A 262144-byte
 zero-filled SEND (`wire/evidence/bulk256k-payload.bin`, sha
@@ -102,7 +107,7 @@ fault with no marker; the fixed ASan server logged `got=262144 rem=1`, stayed
 up and left no marker. Evidence hashes and runner commands are in
 `reports/llamarpc2shell.md` under "256 KiB SEND upper bound" and in
 `lab/frontier/llamarpc2shell/PROVENANCE.md` under "256 KiB upper bound".
-Rung-5 replay is still owed; no new primitive and no grade change here.
+No new primitive and no grade change here; the rung-5 replay was later returned by W148 (DM #2372).
 
 Fifth wake (2026-11-23): the open canary-enabled question is now a measured
 negative. On the vulnerable plain Debug build (canary active, server sha
@@ -112,7 +117,7 @@ SEND carrying the chain at the measured `&cmd + 3585` slot aborts with
 same server closes cleanly. The generator gained optional layout flags but its
 default payload is byte-identical to the established r5 evidence. Logs and
 hashes are in `reports/llamarpc2shell.md` under "Canary-enabled build" and in
-`PROVENANCE.md`. No grade change: rung 5 remains locally observed / PENDING
-on the no-canary build, rungs 3-4 stay witness-ESTABLISHED. Rung-5 replay #2315
-is still owed; its blocker is engine-side (witness dispatch `state=failed`,
-"no working engine candidate for witness"), not a missing request.
+`PROVENANCE.md`. No grade change from this negative: rung 5 was
+witness-ESTABLISHED on the no-canary build by W148 (DM #2372), and rungs 3-4
+stay witness-ESTABLISHED. Rung-5 replay #2315 is closed; the earlier
+engine-side witness dispatch failures were resolved by a fresh witness wake.

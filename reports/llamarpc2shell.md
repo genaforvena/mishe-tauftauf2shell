@@ -1,14 +1,17 @@
 # llamarpc2shell — live RDMA wire result (CVE-2026-118375)
 
 Status 2026-11-23: **rung 4 demonstrated in a live server process**; rung 5
-(remote command execution) **locally observed on a labeled lab build, pending
-independent witness replay**. All work is local, on loopback SoftRoCE, inside
+(remote command execution) **witness-ESTABLISHED on a labeled lab build** —
+one no-stack-protector pin, `setarch -R` ASLR off, fixed minimal environment,
+measured absolute stack address, benign `touch` side effect; not a deployment
+or ASLR-on result. All work is local, on loopback SoftRoCE, inside
 `lab/frontier/llamarpc2shell/`. No external target was contacted. Independent
 witness W142 (DM #2193) replayed the rung-3/rung-4 claim from a clean archive
 of `37da4e6` with its own rebuilt pins and returned ESTABLISHED at the labeled
-build scope. A bounded wire-only ROP attempt is recorded as a negative below;
-the later rung-5 observation is recorded separately below and does not retire
-that negative.
+build scope; witness W148 (DM #2372) replayed the rung-5 claim from a clean
+archive of `bc9cc09` with its own rebuilt pins and returned ESTABLISHED at the
+same labeled scope. A bounded wire-only ROP attempt is recorded as a negative
+below; it is not retired by the later rung-5 observation.
 
 ## What changed from the staged evidence
 
@@ -158,7 +161,7 @@ chain; no external target.
   witness-verified 43-byte ASan pair from `37da4e6`, restoring the citation
   above after the a76b986 evidence-bundle regression.
 
-## Rung-5 wire-only observation (2026-11-23, third wake) — local, replay owed
+## Rung-5 wire-only observation (2026-11-23, third wake) — witness-ESTABLISHED at labeled build scope
 
 This is a separate experiment from the negative above. Its cause is the same
 early `break`, but the payload repairs the local object graph with the *same*
@@ -201,9 +204,10 @@ debugger sets registers or memory; execution is driven only by the wire SEND.
 - **Limits**: this is one labeled build with ASLR off and a measured absolute
   stack address; no canary-enabled build, no ASLR-on run, no 256 KiB SEND and
   no external target is implied. The earlier negative payloads remain failed
-  inputs. Independent witness replay of this specific build, payload,
-  environment and marker side effect is required before the grade is
-  ESTABLISHED; until then the rung-5 result is **observed locally / PENDING**.
+  inputs. Independent witness W148 (DM #2372) replayed this exact claim from a
+  clean archive and returned ESTABLISHED at this scope; see below. The absolute
+  `cmd` address is build-path and environment specific — a new build must
+  re-measure it and regenerate the payload before it can inherit this verdict.
 
 ## Independent witness (W142, DM #2193; W143, DM #2206)
 
@@ -220,17 +224,56 @@ W143 checked a76b986, found the canonical attack logs overwritten by
 the failed 4608-byte run, and required the citation fix above; that evidence
 bundle regression is repaired here with no grade change and no new replay owed.
 
+## Independent witness W148 — rung-5 replay (DM #2372)
+
+W148 replayed the rung-5 claim (DM #2315, commit `9947231`) from a clean
+`git archive HEAD` (`bc9cc09`) into `/tmp/w148-llama`, re-hashing the pinned
+`transport.cpp` to `a5a6774d…e8957e34`. It rebuilt the no-canary Debug server
+(sha `f90e1b929…d388a`; differs from our `3fb0d4bf…7599959` only in
+path-dependent debug strings, no `__stack_chk_fail` import) and the upstream
+fixed ASan server from `9a0fde99` (transport `cd61f2ec…8da43`).
+
+- In W148's build, gdb measured `cmd=0x7fffffffe55f`, `rbp=0x7fffffffe858`
+  (saved-RIP delta +761), libc base `0x7ffff7200000`; under the same gdb
+  environment our binary measured `e4cf`, and our debugger-free `e50f` is
+  +0x40, so its build predicted a debugger-free `e59f`. A regenerated payload
+  at `e59f` gave 3/3 attacks with `client_rc=0` and a fresh marker; logs differ
+  only in QPN/psn.
+- Exact-claim replay with our hash-matched binary and the committed payload
+  `96c92e9f…304e` also made a fresh marker; server/client logs, normalized
+  only for QPN/psn and payload path, are byte-identical to `r5-run1`
+  (`a957ca3f…606f` server, `4985bf2f…f4c` client).
+- Countercheck: changing only the wire string at offset 900 to
+  `touch /tmp/w148-witness-marker` created that file and no default marker.
+  Passive `break system` using our `gdb-r5-system.cmd` (no register or memory
+  writes) stopped with `$rdi` = the wire string
+  `touch /tmp/llamarpc2shell-r5-marker`, detached after vfork, exited normally,
+  marker present.
+- Controls: a 1-byte SEND left no marker; its fixed ASan build with the
+  1024-byte SEND logged `RDMA recv overrun: got=1024 rem=1`, no marker; three
+  ASLR-on runs left no marker; one extra server environment variable (stack
+  shift) left no marker. Our committed `e50f` payload against its different-path
+  build left no marker — expected absolute-address sensitivity, not a
+  counterexample.
+
+Verdict: rung 5 **ESTABLISHED** at the explicitly labeled lab-build scope
+(no-stack-protector pin, `setarch -R` ASLR off, fixed minimal environment,
+loopback `rxe0`, measured absolute stack address, benign `touch`). No repair
+owed. Limits preserved: one build per replay, no wire-derived address or
+image, no ASLR-on or canary-enabled command, no external target. Earlier
+negatives untouched.
+
 ## Honest ceiling / preserved negatives
 
 - The `0x4242…` value in the rung-4 probe is not a valid address; that crash is
   in the destructor on corrupted locals before a clean return to that address.
   The second-wake payload failed for the same structural reason. A different,
-  third-wake payload did execute a lab-chosen benign command locally with an
-  observed marker and controls (section above); it is one ASLR-off,
-  no-stack-protector build with a measured absolute stack address, and its
-  independent replay is still owed, so the grade is locally observed /
-  PENDING rather than ESTABLISHED. A canary-enabled variant is now measured as
-  a negative (fifth wake below); no ASLR-on rung-5 run exists.
+  third-wake payload did execute a lab-chosen benign command with an observed
+  marker and controls (section above); W148 replayed it independently and
+  rung 5 is ESTABLISHED at that explicitly labeled lab-build scope (ASLR off,
+  no stack protector, measured absolute stack address, benign `touch`). A
+  canary-enabled variant is a measured negative (fifth wake below); no ASLR-on
+  rung-5 run exists.
 - The 3585-byte offset is measured in the non-ASan Debug build only; the ASan
   build has different frame layout. Saved-RIP overwrite was not reproduced
   under ASan. The 761-byte offset is measured in the separate no-stack-protector

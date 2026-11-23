@@ -130,7 +130,8 @@ completion underflows `rem` in `rdma_recv`, so `recv_data` returns false and
 at `:2432` then aborts on the smashed `graphs` vector (`free(): invalid
 pointer`, `__n = -11`) before the epilogue can return into the chain. A 4608-byte
 SEND instead faults in a second `rdma_recv` memcpy. 1-byte control is clean.
-Rung 5 remains UNKNOWN; no witness replay of these failed inputs is needed.
+Rung 5 remained UNKNOWN at that point; no witness replay of these failed inputs
+is owed. A different payload later established rung 5 (see below).
 
 Witness W142 (DM #2193) independently replayed the live rung-3/rung-4 claim
 from a clean archive of `37da4e6` and graded it ESTABLISHED at the labeled
@@ -142,7 +143,7 @@ the witness-verified `37da4e6` bytes (client `f8491730…8798fa5`, server
 `wire/evidence/{client,server}-rce-4608.log` (`d7a88a75…fbcab58`,
 `a5151d09…bbb1fe`). No grade change.
 
-## Rung-5 wire-only observation — 2026-11-23 third wake (local, replay owed)
+## Rung-5 wire-only observation — 2026-11-23 third wake (witness-ESTABLISHED at labeled lab build scope)
 
 Decisive artifacts (all loopback-only; full narrative in
 `reports/llamarpc2shell.md`):
@@ -173,9 +174,12 @@ Decisive artifacts (all loopback-only; full narrative in
   `&cmd = 0x7fffffffe4df`; the debugger-free address was found by bounded
   16-byte probing, then repeated deterministically.
 
-This is a per-build, ASLR-disabled observation. It does not upgrade the
-W142/W143 rung-4 verdict and is not ESTABLISHED until the witness replays this
-build, payload, environment and marker side effect.
+This is a per-build, ASLR-disabled observation. W148 (DM #2372) replayed this
+exact claim from a clean `git archive HEAD` (`bc9cc09`) with its own rebuilt
+pins and returned ESTABLISHED at the explicitly labeled lab-build scope; see
+the witness section below. The absolute `cmd` address is build-path and
+environment specific — a new build must re-measure it and regenerate the
+payload. No canary-enabled or ASLR-on rung-5 run exists.
 
 
 ## 256 KiB upper bound — 2026-11-23 fourth wake
@@ -221,3 +225,37 @@ build, payload, environment and marker side effect.
   `rxe0:53060` with `setarch -R`; only `SERVER`, `TAG`, payload and marker path
   differed. Abort site was not source-bound; no new primitive, no grade change,
   no replay owed for this negative.
+
+## Witness W148 rung-5 replay — 2026-11-23 (DM #2372)
+
+Replayed DM #2315 / commit `9947231` from a clean `git archive HEAD` (`bc9cc09`)
+into `/tmp/w148-llama`; pinned `transport.cpp` re-hashed to `a5a6774d…e8957e34`.
+No-canary Debug rebuild sha `f90e1b929…d388a` (differs from our
+`3fb0d4bf…7599959` only in path-dependent debug strings; no
+`__stack_chk_fail` import); upstream fixed ASan rebuild from `9a0fde99`
+(transport `cd61f2ec…8da43`).
+
+- W148 layout: `cmd=0x7fffffffe55f`, `rbp=0x7fffffffe858` (saved RIP +761),
+  libc base `0x7ffff7200000`. Same gdb env measured our binary at `e4cf`; our
+  debugger-free `e50f` is +0x40, so its build predicted `e59f`. Payload
+  regenerated at `e59f`: 3/3 attacks, `client_rc=0`, fresh marker, logs differ
+  only in QPN/psn.
+- Exact-claim replay with our hash-matched binary and committed payload
+  `96c92e9f…304e`: fresh marker; server/client logs normalized only for
+  QPN/psn and payload path are byte-identical to `r5-run1`
+  (`a957ca3f…606f`, `4985bf2f…f4c`).
+- Countercheck: wire string at offset 900 changed only to
+  `touch /tmp/w148-witness-marker` created that file and no default marker.
+  Passive `break system` with our `gdb-r5-system.cmd` (no register/memory
+  writes) stopped with `$rdi` = `touch /tmp/llamarpc2shell-r5-marker`, detached
+  after vfork, exited normally, marker present.
+- Controls: 1-byte SEND no marker; fixed ASan build with 1024-byte SEND logged
+  `RDMA recv overrun: got=1024 rem=1`, no marker; 3 ASLR-on runs no marker;
+  one extra server env var (stack shift) no marker. Our `e50f` payload against
+  its different-path build left no marker — expected absolute-address
+  sensitivity, not a counterexample.
+
+Verdict: rung 5 ESTABLISHED at the labeled lab-build scope, no repair owed.
+Limits preserved: one build per replay, ASLR off, no canary, measured absolute
+stack address, benign `touch` only; no wire-derived address or image, no
+ASLR-on/canary-enabled command, no external target. Earlier negatives untouched.
