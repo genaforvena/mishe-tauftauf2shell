@@ -347,7 +347,7 @@ vulnerable patched `45b33f20c923016cba3e03852e2dc8d79adc86aa8b7a5614d28f27d6ed48
 fixed patched `a8f2ebf407d7d69b1f52cb0dd9402a268e8cd2686300348397e3ee147fde5651`.
 Patch records: `out-w11-patch-record.txt`, `out-w11-patch-record-fixed.txt`.
 The patcher records source/destination digests, `.text` range, target, return
-address, cave and displaced prologue; the stub is 91 bytes including the
+address, cave and displaced prologue; the stub is 95 bytes including the
 18-byte `VRPN2SHELL_MARKER\n` message.
 
 Frame measurement: `out-w11-frame-120/gdb.log` shows `&sender_name=rbp-0x80`
@@ -393,3 +393,26 @@ saved RIP `0x4108f2 -> 0x410800` on both sinks; `0x410800` is mid-function and
 `out-w12-replay/noalign-unpatched-s136` dies exit 139. The 256-byte function
 alignment is a measured precondition for the marker landing. Author
 self-replay; not a witness verdict. No server was left running.
+
+## W13 — independent witness replay of W11/W12 (DM #1985)
+
+Witness W135 rebuilt both pins from a clean git archive of `8e9fd0a` in
+`/tmp/w135-vrpn` with the exact W11 flags (`Debug`,
+`-fno-stack-protector -fno-pie -falign-functions=256`, link `-no-pie`).
+Pins verified against this file: `vrpn_Connection.C` SHA-256 `9eaa1045...`,
+fixed tarball `b5258e99...`. Witness binaries (SHA-256 prefixes):
+vulnerable `59dcffe0...`, fixed `7dae1705...`; patched
+`e10f1e3e...` / `4e9cc53a...`; no-alignment control `c7293b4a...`.
+Digests differ from W12 because Debug info embeds the build directory.
+
+Frame probe (port 14231): `0x413dda -> 0x413d00`; `nm` confirmed the
+`doSystemCallbacksFor(HANDLERPARAM,void*)` entry and the `0x40be40` cave.
+Six-case matrix on ports 14241-14246 matched W11/W12 exactly; gdb stub trace
+on port 14261 saw `ret_at_rsp=0x413c04` on the normal call, `0xffffffff` on
+the corrupted return, the marker, and `RESUME_413DDA` at `:1446`. The
+no-alignment control measured `0x4108f2 -> 0x410800` (port 14251) and exit
+139 (port 14252). All processes killed, ports freed, loopback only.
+
+Verdict: ESTABLISHED at the exact claimed lab-patched rung-4 scope; #1770 is
+answered. Full narrative, preconditions and limits in
+`reports/vrpn2shell.md`, "Independent witness replay — W135 / DM #1985".

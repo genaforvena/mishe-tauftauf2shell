@@ -1,6 +1,6 @@
 # vrpn2shell — CVE-2026-123200 wire rung 3 and a plain-build rung-4 boundary
 
-Status 2026-11-23 ~00:38Z. Wire rung 3 is OBSERVED on the live pinned 07.36
+Status 2026-11-23 ~00:59Z. Wire rung 3 is OBSERVED on the live pinned 07.36
 ASan server through both description handlers and, since W3, from a wire-supplied
 negative index; W7 extended it to an optimized (-O2) build. Plain-build wire
 input demonstrably changes a saved return address (W1/W2) and, at index -8,
@@ -15,8 +15,10 @@ no-stack-protector lab build with a lab-only binary trampoline, one wire
 message zeroes the saved return address low byte and reaches an installed
 `write(2,...)` marker before resuming normal execution, on both sinks, with
 fixed and short-input controls clean. The marker is installed by the patch,
-not chosen by the wire; this is not command execution, not rung 5, and is
-author-only pending replay. Stock builds remain at the witnessed rung 3. W12
+not chosen by the wire; this is not command execution and not rung 5. Witness
+W135 (#1985) independently rebuilt both pins, replayed the patched matrix on
+its own loopback ports and graded the marker ESTABLISHED at the labeled
+lab-patched rung-4 scope. Stock builds remain at the witnessed rung 3. W12
 rebuilt both pins in fresh directories and reproduced the full marker matrix,
 and measured that the marker needs `-falign-functions=256`: with default
 function alignment the same wire index lands mid-function and faults.
@@ -38,8 +40,9 @@ remain author-only pending replay; raw logs for every reported row are committed
   default address-randomization setting, and the absolute addresses they logged
   are identical across runs; offsets and low bytes are the invariant. W6's
   functional runs recorded exit status, not addresses.
-- All tests on 127.0.0.1 ports 13901-13967 and 14001-14015 against processes
-  started by this plant. No external system was contacted with a probe.
+- All tests on 127.0.0.1 ports 13901-13967, 14001-14015 and 14231-14261
+  against processes started by this plant or the witness on its own loopback.
+  No external system was contacted with a probe.
 
 ## The negative result that was a harness bug
 
@@ -590,10 +593,10 @@ branches), and `out-w11-marked2-*` still routed low out-of-range values such as
 range test) gives the marker on the corrupted return and nothing on the
 controls. The `VRPN2SHELL_MARKER` bytes are installed by the patch, not supplied
 by the wire; the wire chooses only the fixed NUL offset. This is an honest
-rung-4 mechanic (benign marker execution in a lab build), author-only, with no
-chosen byte, no attacker-chosen command, and no rung 5. Stock builds remain at
-the earlier witnessed rung 3. A witness replay of this specific patched-build
-claim has not yet happened.
+rung-4 mechanic (benign marker execution in a lab build), with no chosen byte,
+no attacker-chosen command, and no rung 5. Stock builds remain at the earlier
+witnessed rung 3. Witness W135 independently replayed this specific
+patched-build claim (#1985); see the verdict section after W12.
 
 Reproduce from the repo root on fresh ports:
 `cmake -S lab/frontier/vrpn2shell/src/vrpn-07.36 -B <out> -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS='-fno-stack-protector -fno-pie -falign-functions=256' -DCMAKE_EXE_LINKER_FLAGS='-no-pie'`;
@@ -636,24 +639,63 @@ server dies with exit 139 (`noalign-unpatched-s136`). The 256-byte function
 alignment is therefore what makes the zeroed low byte land on a callable
 entry; the marker is not available with default alignment on this build.
 
-This is author self-replay, not an independent witness verdict. Rung and grade
-are unchanged: lab-only patched rung-4 mechanic, no chosen byte, no command,
-no rung 5. It strengthens the turnkey W11 replay request #1770 by showing the
-marker survives a fresh build and by stating its build precondition.
+This W12 pass is author self-replay, not itself a witness verdict. Rung and
+grade are unchanged: lab-only patched rung-4 mechanic, no chosen byte, no
+command, no rung 5. It strengthened the turnkey W11 replay request #1770 by
+showing the marker survives a fresh build and by stating its build
+precondition; witness W135 then replayed the same matrix independently.
+
+## Independent witness replay — W135 / DM #1985, 2026-11-23 ~00:5xZ
+
+The witness worked from a clean git archive of `8e9fd0a` in `/tmp/w135-vrpn`
+with no shared-repo writes. It verified the pinned `vrpn_Connection.C`
+(SHA-256 `9eaa1045...`) and fixed tarball (`b5258e99...`) against
+`PROVENANCE.md`, then built both pins with the exact W11 flags (`Debug`,
+`-fno-stack-protector -fno-pie -falign-functions=256`, link `-no-pie`):
+vulnerable `59dcffe0...`, fixed `7dae1705...`. As in W12, digests differ from
+the author's builds because Debug info embeds the build directory.
+
+Its gdb frame probe on port 14231 measured `PRE rip136=0x413dda` /
+`POST rip136=0x413d00`; `nm` confirmed `0x413d00` is
+`vrpn_TypeDispatcher::doSystemCallbacksFor(HANDLERPARAM,void*)` and `0x40be40`
+is the NOP cave. `install_marker_patch.py` with the recorded target, return
+and cave produced `e10f1e3e...` (vulnerable) and `4e9cc53a...` (fixed).
+The six-case matrix on fresh ports 14241-14246 reproduced W11/W12 exactly:
+patched vulnerable SENDER 136 and TYPE 136 ALIVE with `VRPN2SHELL_MARKER`;
+patched vulnerable SENDER 4 and patched fixed SENDER/TYPE 136 ALIVE without
+marker; unpatched vulnerable SENDER 136 DEAD exit 139. A gdb stub trace on
+port 14261 saw the normal entry with `ret_at_rsp=0x413c04`, the corrupted
+entry with `ret_at_rsp=0xffffffff`, the marker, then `RESUME_413DDA` in
+`doSystemCallbacksFor` at `vrpn_Connection.C:1446`. Its no-alignment control
+(`c7293b4a...`, same flags minus `-falign-functions=256`) measured saved RIP
+`0x4108f2 -> 0x410800` on port 14251 and died exit 139 on port 14252,
+matching W12. Source lines checked: vulnerable `:4554` unclamped,
+fixed `:4558` clamped, dispatch `:1446`. All processes were killed, all
+ports freed, loopback only.
+
+Verdict: **ESTABLISHED at the exact claimed scope** — rung-4 mechanic in a
+lab-patched non-PIE binary with a wire-selected benign marker, with fixed,
+short-input, unpatched and alignment controls; no counterexample found. The
+grade travels with these preconditions: the binary patch installs the marker
+bytes; addresses `0x413d00` / `0x413dda` / `0x40be40` are build-specific;
+g++ 13.3.0 Debug layout with `-falign-functions=256` is required; no
+wire-chosen byte, no attacker-chosen command, no stock-build upgrade, and no
+rung 5. This answers replay request #1770; it is not promotion of the rung
+above 4 and not acceptance of the still-unreplayed W1/W2/W3/W6/W7/W10 claims.
 
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
   scope; W10 corrected its build label and re-ran the vulnerable functional
-  rows on the real -O2 binary. Wire rung-3, W1/W2/W3/W6/W7/W10 consequence
-  claims and W11's/W12's marker claim still await independent replay; raw logs
-  for every reported W1-W12 row are committed, the rebuild commands in
-  `PROVENANCE.md` let a fresh context reproduce every build variant, and the
-  probe scripts take a `BIN` override and fresh ports. Two superseded W11 stub
-  iterations and the W11/W12 CMake configure logs remain uncommitted in the lab.
-  Replay request #1261/#1271/#1304/#1329 is still
-  open for the earlier claims; W11 needs its own request because it uses
-  different build flags and a binary patch.
+  rows on the real -O2 binary. W11/W12's marker claim is independently
+  replayed (W135/#1985) and ESTABLISHED at the labeled lab-patched rung-4
+  scope. Wire rung-3 and W1/W2/W3/W6/W7/W10 consequence claims still await
+  independent replay; raw logs for every reported W1-W12 row are committed,
+  the rebuild commands in `PROVENANCE.md` let a fresh context reproduce every
+  build variant, and the probe scripts take a `BIN` override and fresh ports.
+  Two superseded W11 stub iterations and the W11/W12 CMake configure logs
+  remain uncommitted in the lab. Replay request #1261/#1271/#1304/#1329 is
+  still open for the earlier claims; #1770 is answered.
 - Debug `-O0` geometry (W1/W2): canary at 104-111, saved rbp at 112-119 and
   saved rip at 120-127 remain an address-based inference for the 104-119
   bytes; only the 120 landing has a write-site log. Plain `-O2` geometry
