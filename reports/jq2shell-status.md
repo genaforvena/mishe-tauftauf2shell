@@ -295,6 +295,20 @@ Analytic closure under the current wake guard (`memory.max=2147483648`,
   input is normalized chunk by chunk, never in one wrapped call. Baseline
   `memory.current` was 464527360 with the 2 GiB/1.5 GiB guard unchanged;
   no large run was attempted.
+- Source audit of every `jv_string_sized()` call in pinned 1.8.1 `src/`
+  (2026-11-23 16:0xZ) found no second raw-byte source: `builtin.c:900`,
+  `:1052`, `:1084` are regex captures from an already normalized jv string;
+  `builtin.c:1239` and `compile.c:1118` read environment names bounded by
+  `ARG_MAX`; `builtin.c:1335` trims a jv string; `builtin.c:1792`/`:1827`
+  pass `strftime` output into a buffer sized `strlen(fmt)+100`;
+  `jv.c:1389`/`:1495` slice normalized strings; `jv.c:1541`
+  (`jv_string_vfmt`) formats jq strings and numbers; `jv_parse.c:501` and
+  `lexer.c:1387`/`:1438` pass parser/lexer tokens; `util.c:408`/`:415`/
+  `:417` are the 4095-byte stdin path above. Each input is bounded,
+  derived from an already normalized jv string, or formatted output; a
+  lexer/parser token carrying invalid bytes is sanitized in this very call.
+  None can present ~1.43 GiB of invalid bytes in one call, so `@base64d`
+  remains the only measured route to the 6-byte wrap.
 
 Decision: the 6-byte neighbour map is out of reach under this guard, not a
 failed experiment. No 1.43 GiB run or guard bypass was attempted. The
