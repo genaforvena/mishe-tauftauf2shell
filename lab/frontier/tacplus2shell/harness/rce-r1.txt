@@ -1,0 +1,28 @@
+measured in=0x5555555fdaf0 mem=0x5555555fd6a0
+=== vulnerable pin + chosen-command chain ===
+case=vuln runner_rc=0
+marker=vuln present
+PASS vuln_eval
+PASS vuln_target
+PASS vuln_destroy
+PASS vuln_arr0
+PASS vuln_cmd
+PASS vuln_vfork
+PASS vuln_marker
+=== fixed pin + same wire input ===
+case=fixed runner_rc=0
+marker=fixed absent
+PASS fixed_no_eval
+PASS fixed_reply_57
+PASS fixed_no_marker
+=== vulnerable pin + no prime ===
+case=noprime runner_rc=0
+marker=noprime absent
+PASS noprime_no_target
+PASS noprime_reply_18
+PASS noprime_no_marker
+=== normalized evidence hashes ===
+vuln d316b431f00ce51c488fc79391b687afdea16fbfa596e3ccbb612e12fb539436
+fixed 88754a15124254c2b88eb6851cb762d2f64232edb6b9bcc1cc72cb9550d4de6f
+noprime ee3c069a0b4d5de24ebf810d5bb6dd2d6e0249cae7564a4e296520e5201b96ee
+FAILURES=0

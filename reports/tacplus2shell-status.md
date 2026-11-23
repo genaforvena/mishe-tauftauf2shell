@@ -469,3 +469,73 @@ reply-overwrite finding, this closes the practical fake-`mem_t` staging route
 in the reused `in` chunk on this build/config. Grade unchanged: rung 4 live
 daemon, rung 5 UNKNOWN; no chosen function call, marker or command.
 
+## W135 live-daemon chosen-command execution — rung 5 OBSERVED (2026-11-23 01:10Z)
+
+W134 closed fake-`mem_t` staging in the reused `in` chunk, but its second
+refinement also proved that a write landing in the **real** `session->mem`
+object survives to `mem_destroy()` with attacker-chosen `type`, `arr_count`
+and `arr`. W135 removes the remaining gap — `arr[0]` content — by using the
+W129 contiguous-write property instead of relying on prime plaintext surviving
+in a separate chunk.
+
+Primitive reuse. After the i=12 transit and i=13 `t`-slot redirect, every
+later `cmd=` record copies to sequential addresses `t, t+len, …`. Pointing
+that chain at `m+8` (the real `mem_t`) lets one packet write all three objects
+contiguously, including past the 24-byte `struct mem` into the next heap
+chunk:
+
+- i=14: `m+8  = {type=0, arr_count=1, arr=m+24}`
+- i=15: `m+24 = {f=system, p=m+40}`
+- i=16: `m+40 = "touch /tmp/tacplus-rce-marker\0"`
+
+`mem_destroy()` (`misc/memops.c:239-253`) skips both destroy branches for
+`type=0`, then calls `m->arr[0].f(m->arr[0].p)` before its two invalid frees.
+
+Live observation (plain vulnerable `929671c`, plant-started 127.0.0.1 daemon
+under gdb with ASLR off, plant-started client, prime AUTHEN/CONT then AUTHOR
+trigger on one connection):
+
+    POST14 t=0x5555555fd6a8 TARGET=0x5555555fd6a8
+    DESTROY m=0x5555555fd6a0 type=0 count=1 arr=0x5555555fd6b8
+    ARR0 f=0x7ffff7c58750 p=0x5555555fd6c8
+    0x5555555fd6c8:  "touch /tmp/tacplus-rce-marker"
+    [Detaching after vfork from child process 2550987]
+
+`/tmp/tacplus-rce-marker` exists after the run (created by the daemon's
+`system()` child). The inferior then aborts in `free(): invalid pointer`,
+expected because `arr` and `m` are not valid free arguments; the side effect
+precedes the abort. gdb's vfork detach line is independent corroboration that
+`system()` really executed a shell.
+
+Controls and replay. `bash lab/frontier/tacplus2shell/harness/run_rce.sh`:
+vulnerable pin marker present, eval_args/write/destructor/command lines
+observed, 18-byte trigger reply; fixed `d8493e0` with identical wire input
+never enters `eval_args`, replies 57 bytes, no marker; vulnerable with no
+prime has no chosen source, replies 18 bytes, no marker. 14 PASS / 0 FAIL in
+two byte-identical replays (`harness/rce-r1.txt`, `harness/rce-r2.txt`);
+normalized evidence hashes vulnerable `d316b431f00ce51c488fc79391b687afdea
+16fbfa596e3ccbb612e12fb539436`, fixed
+`88754a15124254c2b88eb6851cb762d2f64232edb6b9bcc1cc72cb9550d4de6f`, no-prime
+`ee3c069a0b4d5de24ebf810d5bb6dd2d6e0249cae7564a4e296520e5201b96ee`.
+
+Environment caveat, preserved as a negative. gdb disabling ASLR does not fix
+the heap base across caller environments: a direct shell run measured
+`in=0x…fdab0, m=0x…fd660`, while `bash run_rce.sh` measured
+`in=0x…fdaf0, m=0x…fd6a0`. Reusing the first pair inside the script sent the
+write 0x40 bytes early, clobbering a live memlist and faulting in
+`memlist_add` (`memops.c:130`) before `mem_destroy`; no marker. `run_rce.sh`
+now measures `in` and `smem` with a benign wire5 prime+trigger in the same
+shell before the three cases, and carries the measured addresses in wire data.
+This is still a build/config-scoped observation with gdb-measured addresses,
+not an attacker-side address leak.
+
+Grade: **rung 5 OBSERVED at the labeled build scope** — attacker-controlled
+wire input makes a live plant-started loopback daemon execute a lab-chosen
+benign command with an observed file side effect, with vulnerable, fixed and
+no-prime controls and two identical replays. Conditions: vulnerable
+`929671c` plain `-O0` build, gdb parent with ASLR off, configured shared key,
+permitted user, cross-packet prime and one AUTHOR trigger. **ESTABLISHED
+requires independent witness replay**, which is outstanding; author replay is
+not acceptance. The advisory's five-connection `system()`/root chain remains
+claim text: this is a different, shorter chain, and no privilege change was
+measured. Rungs 1-4 and all earlier negative results stand unchanged.
