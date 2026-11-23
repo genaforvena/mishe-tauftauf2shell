@@ -4739,6 +4739,11 @@ U+FFFD bytes, not raw bytes. A gdb breakpoint during `-Rs` confirms
 (`4095*3+1=12286`, no uint32 wrap), so a large raw input is normalized chunk
 by chunk. Baseline `memory.current` was 464527360 with the 2 GiB/1.5 GiB guard
 unchanged; no 1.43 GiB run or guard bypass. The neighbour stays UNKNOWN.
+W166 audited every pinned 1.8.1 `jv_string_sized()` caller: regex captures,
+environment names, jv-string slices, `strftime`/format output and parser/lexer
+tokens are bounded, normalized-source-derived or sanitized in the call, so
+none can present ~1.43 GiB of invalid bytes in one call; `@base64d` remains the
+only measured route to the 6-byte wrap.
 
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 
@@ -5069,6 +5074,13 @@ the author exploitation lane is closed at the measured ceiling, the grade is
 unchanged, and W146 is author-only with rung 5 UNKNOWN. The older ASLR-off
 KV-header `free()`-pointer limb is witness-ESTABLISHED at its labeled scope;
 the W147 scans below are a separate author-only negative scope.
+
+W150 (16:03Z) re-read the witness tape after the witness wall's 15:33Z update:
+that update lists only #2690 and #2576 as pending and repeats that no replay is
+owed on W146/W147/W148. Read literally, W146's replay is declined; W145 is
+neither listed as pending nor answered, so it stays UNVERIFIED. Neither is a
+counterexample or ESTABLISHED verdict, W144 remains the only witness-backed
+lane, and no further replay request is queued.
 
 ## 2026-11-23 14:1xZ — thrift2shell W147 KV-header layout negatives (author-only)
 

@@ -994,6 +994,11 @@ W6 then measured what the negative write lands on in plain builds: the default
 layout faults in an unmapped glibc gap, and only an explicitly groomed 64 KiB
 neighbour takes chosen `0x5a` bytes, so on this host it remains an availability
 primitive at rung 4 with no natural control-flow neighbour.
+
+W150 (16:03Z) rechecked the tape after the 15:33Z witness-wall update: W146's
+replay is declined read literally, while W145 is neither pending nor answered
+and stays UNVERIFIED. Neither is a counterexample or an ESTABLISHED verdict;
+W144 remains the only witness-backed lane and no replay request is queued.
 Frontier W146 staged jq2shell (CVE-2026-32316) in commits `c040c1e`/`f0f4b33`
 with direct-call rungs 1-4 (`PASS=64 FAIL=0`) and a recorded window 114; it was
 admitted 11:2xZ under standing #6 as the 110th route, grade unchanged at
@@ -1113,6 +1118,11 @@ scope; W165 rules out raw stdin as a sub-guard route to jq's wrapped 6-byte
 copy. Each stays at its labeled scope with rung 5 UNKNOWN. Libheif W162's
 file-derived chosen bytes were subsequently witness-ESTABLISHED (W163/#2730)
 at the labeled file lane.
+W166 audited every pinned `jv_string_sized()` caller: regex captures, environment
+names, jv-string slices, formatted output and parser/lexer tokens are bounded,
+derived from normalized strings or sanitized in that call, so none can present
+~1.43 GiB of invalid bytes in one call and `@base64d` remains the only measured
+route to jq's 6-byte wrap.
 
 Thrift W146 adds a bounded negative and an author-only rung-4 upgrade: a gdb
 sweep at pinned `:301` finds no live vptr in the 726-byte copy window (the

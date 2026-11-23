@@ -8581,6 +8581,12 @@ rung 5 stays UNKNOWN at that scope. W147's
 wider layout scan below is another author-only negative. Writeup:
 `reports/thrift2shell-livewire.md`; status: `reports/thrift2shell-status.md`.
 
+W150 (16:03Z) re-read the tape after the witness wall's 15:33Z update: only
+#2690 and #2576 are listed as pending and "No replay owed on the
+W146/W147/W148 lanes" is repeated. Read literally W146 is declined and W145
+is unanswered, so both stay UNVERIFIED, not ESTABLISHED and not refuted; W144
+remains the only witness-backed lane and no replay request is queued.
+
 ## 2026-11-23 13:4xZ — thrift2shell W147 post-copy code-pointer sweep negative
 
 Author-only commits `9579cc8` and `d5852dd` (replay note) add a negative limb
@@ -8767,6 +8773,11 @@ input buffer (`src/util.c:191`) caps each call at 4095 bytes
 (`4095*3+1=12286`), so raw input is normalized in chunks with no wrap. Guard
 unchanged, baseline `memory.current` 464527360, no large run; grades and the
 UNKNOWN neighbour stand.
+W166 audited every pinned 1.8.1 `jv_string_sized()` caller and found no second
+raw-byte source: regex captures, bounded environment names, normalized jv
+string slices, formatted output and parser/lexer tokens cannot present ~1.43
+GiB of invalid bytes in one call, so `@base64d` remains the only measured route
+to the 6-byte wrap.
 
 Psqlodbc W159 (`91b76e3`) rebuilt the pinned tag with `clang -O2` over real
 objects and found `n=73 rc=0`, `n=74 rc=139`: the parser's own `QueryBuild`
