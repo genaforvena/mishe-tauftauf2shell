@@ -1,0 +1,4 @@
+PUBLIC-API-DRIVER charset=ramp filename=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts/dummy.pcf envdir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts dir=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/fonts
+FontEncFind=0x632da2000290
+name=ramp size=256 row_size=1024 mappings=0x632da20002f0
+map_type=1 first_col=0

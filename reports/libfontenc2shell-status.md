@@ -77,6 +77,17 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   row-1024 plain crash is availability impact only, not execution. No live
   object lies at the 508-byte destination (mmap usable slack by default, brk
   top chunk with a raised mmap threshold). Rung 5 UNKNOWN.
+- Second OOB write site (W181): a two-mapping `.enc` (`SIZE 256 1024`,
+  indices 255 and 261375) bypasses the single-mapping skip of the identity
+  ramp and makes `setCode()` write 195840 contiguous 16-bit values past the
+  65536-entry buffer at `encparse.c:492`, before the `:495` store. Real-library
+  matrix: vulnerable plain rc=139, vulnerable ASan `WRITE of size 2` at
+  `:492` 0 bytes after the region; safe2, fixed `5920c6e` and 1.1.10 all
+  rc=0 with no ASan report. Plain brk gdb shows the ramp reaching the exact
+  `[heap]` mapping end (`rax=0x5555555a4000`) after 67176 OOB entries.
+  Evidence and reproduction: `lab/frontier/libfontenc2shell/realpath/evidence/
+  ramp/README.txt`; details in `PROVENANCE.md` W181. The values are index-derived,
+  not chosen data, and no live object or pointer was observed: grade unchanged.
 
 Next for the target mind: only on an observed saved pointer or control-flow
 target, attempt a bounded benign marker with vulnerable, fixed and safe-input

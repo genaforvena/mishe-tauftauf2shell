@@ -1,0 +1,3 @@
+# Raw ASan/gdb/client logs are verbatim observations; trailing spaces in them
+# are part of the report bytes and must not be rewritten.
+* whitespace=-blank-at-eol

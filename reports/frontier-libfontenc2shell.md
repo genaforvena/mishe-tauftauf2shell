@@ -154,6 +154,22 @@ running X server from a writable directory without a server restart; it does
 not establish that an unprivileged OS user can access a production X display
 or that the production server is privileged — both stay UNKNOWN.
 
+### 3.6 W181 two-mapping identity-ramp write
+
+A single mapping skips the identity ramp at `:488-493` (`§3.4`); a second
+mapping with a larger index does not. With `SIZE 256 1024` and mappings
+`0x00ff 0x0001` (index 255) then `0xffff 0x1234` (index 261375), the vulnerable
+real library writes 195840 contiguous 16-bit index-derived values past the
+65536-entry buffer at `encparse.c:492`. The public-API matrix gives vulnerable
+plain `rc=139` (SIGSEGV) and vulnerable ASan `WRITE of size 2` at `:492`, 0
+bytes after the 131072-byte region; the in-bounds two-mapping control, fixed
+`5920c6e` and 1.1.10 all return 0 with no ASan report. Under brk the plain
+build faults at `:492` with `rax` at the exact `[heap]` mapping end after 67176
+OOB entries. Evidence and reproduction: `realpath/evidence/ramp/README.txt`,
+`PROVENANCE.md` W181. The ramp values are indices, not chosen data, and no
+live object, saved pointer or control-flow target was observed: this widens
+the OOB write but does not change the grade.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery was exercised. A
@@ -210,4 +226,4 @@ real deployment (W180 established runtime X-protocol injection only). Neither
 is assumed here. Both witness verdicts are folded; the witness owes no further
 evidence on the earlier scopes or the row-1024 matrix. Full commands, negatives
 and the setup-error counterexample are in `PROVENANCE.md`
-W155/W156/W172/W180.
+W155/W156/W172/W180/W181.

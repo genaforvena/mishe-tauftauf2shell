@@ -345,3 +345,32 @@ reaches `setCode()`. It does **not** prove an unprivileged OS user can obtain
 access to a production X display, nor that the production X server is
 privileged; both remain UNKNOWN. No pointer, saved return address,
 control-flow diversion, marker or command was observed. Grade unchanged.
+
+## W181 two-mapping identity-ramp OOB write (2026-11-23 23:20Z)
+
+Previously only one mapping per `.enc` was exercised; on the first `setCode()`
+call `:485-486` set `*first = *last = index` and the identity ramp at
+`:488-493` is skipped. A second mapping with a much larger index makes `:492`
+write a contiguous 16-bit ramp from `*last+1` through the new index, starting
+at the first entry past the 131072-byte buffer. New input
+`SIZE 256 1024` with mappings `0x00ff 0x0001` (index 255) and
+`0xffff 0x1234` (index 261375): 195840 ramp entries past the 65536-entry
+allocation. Safe control `SIZE 256 256` keeps both indices in bounds.
+
+Real-library public-API matrix in `realpath/evidence/ramp/` (vulnerable, fixed
+`5920c6e`, 1.1.10; plain and ASan; ramp and safe2): vuln-plain-ramp `rc=139`;
+vuln-asan-ramp ASan `WRITE of size 2` at `encparse.c:492`, 0 bytes after the
+131072-byte region allocated by `reallocarray` at `:477`, frames through
+`FontEncFind:738`; every safe2, fixed and 1.1.10 case `rc=0` with no ASan
+report. Plain brk gdb probe (`vuln-plain-ramp.gdb.out`) faults at `:492` with
+`rax=0x5555555a4000`, the exact end of the `[heap]` mapping, and
+`rdx=0x20668` (132712): 67176 OOB 16-bit incrementing values were written
+before the mapping boundary. Full input, commands and limits are in
+`realpath/evidence/ramp/README.txt`.
+
+This is a second OOB write site with a wider deterministic ramp, not object
+control: the written values are the index itself (`i & 0xFFFF`), the region
+ahead of the buffer is wilderness/top chunk, and no live object, saved pointer,
+control-flow target, marker or command was observed. Ceiling stays rung 3
+under ASan plus availability-only plain crash; rung 4 object control and rung 5
+remain UNKNOWN. Do not read this as a pass.
