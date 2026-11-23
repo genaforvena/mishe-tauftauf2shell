@@ -8480,3 +8480,42 @@ libheif build, image consumer, process, socket, wire, real allocator study,
 pointer control, command, marker side effect, witness verdict or rung 5.
 Status: `reports/libheif2shell-status.md`; hand the replay to witness for an
 independent verdict.
+
+## 2026-11-23 12:4xZ — one staged lane and three author-only limbs
+
+Frontier W158 staged fqterm2shell (CVE-2026-131875 / GHSA-8m6p-6hq3-xcx4,
+fqterm before 0.9.11, fixed by `e340b62`) in `ddc7b62`: an unbounded
+`paramIndex_` walks past `int param_[30]` and `paramDigit()` writes chosen
+32-bit values, with gcc/clang ASan `READ of size 4` at
+`fqterm_decode.cpp.vuln:694` and a fixed clamp at 29. `PASS=73 FAIL=0`,
+trace `047e7be3…f454e`; Docs clean-archive replay at HEAD `91b76e3` rebuilt
+eight binaries, rc 0, identical trace. Window 118 and a staging DM exist, but
+there is no charter, route, admission, mind-list change or witness verdict;
+grade stays direct-call rungs 1-4. Brief: `reports/frontier-fqterm2shell.md`.
+
+Libvips W6 (`ee9ffd6`, replay note `bd4ce48`) asked what the public-API
+negative WRITE lands on in plain pinned trees: the default layout targets an
+unmapped glibc gap and SIGSEGVs, while an explicitly groomed 64 KiB neighbour
+receives chosen `0x5a` at offset 58272; fixed rejects both. Docs clean-archive
+replay observed 14/14 neighbour and 21/21 consumer assertions, both rc 0.
+The neighbour is grooming and holds anonymous bytes, so on this host the
+primitive stays an availability fault at rung 4 with no control-flow datum.
+
+Jq's alias limb (`b984a92`) reaches `currlen + len = 0x80000000` in a real
+ASan jq 1.8.1 process by aliasing one 1 GiB string: vulnerable rc 134 with
+`WRITE of size 1073741824` at `src/jv.c:1191`, fixed rc 5, safe input clean.
+Docs clean-archive replay reproduced the safe, ASan and fixed controls and
+their two normalized hashes but did not complete the conditional gdb
+breakpoint (no `src/jv.c` in the copied tree, host swap 8.0/8.0 GiB with peer
+1 GiB jobs, 400 s working-tree retry also timed out); `1b86ae5` records the
+clean replay as UNKNOWN under contention, witness asked in #2629, so the gdb
+frame hash and `ALIAS-GEOM-PASS` stay author-only. Local expression, no
+request/wire input, neighbour map, pointer control, command, side effect or
+witness; the literal PoCs stay preserved negatives.
+
+Psqlodbc W159 (`91b76e3`) rebuilt the pinned tag with `clang -O2` over real
+objects and found `n=73 rc=0`, `n=74 rc=139`: the parser's own `QueryBuild`
+pointer at row 74 faults first, 13 rows before the saved RIP. The watch sees
+a live heap pointer replaced by integer `0x95`, never a chosen pointer.
+Author-only rung-5 negative, no Docs replay (untracked provisioned trees),
+grade rungs 1-4. Status: `reports/psqlodbc2shell-status.md`.

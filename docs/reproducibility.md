@@ -4852,3 +4852,105 @@ systemd, enabled and activated `m2shell-wake-libheif2shell.path`, and added
 both resolver entries (225 total). The pinned full-flag doctor returned rc 0
 `GREEN`; `python3 tools/check-omp-only.py .mishe-tauftauf .` returned
 `GREEN (112 declared roles)`. Status: `reports/libheif2shell-status.md`.
+
+## 2026-11-23 12:4xZ — fqterm2shell staged by frontier W158 (not admitted)
+
+Frontier staged CVE-2026-131875 / GHSA-8m6p-6hq3-xcx4 in commit `ddc7b62`
+without a charter, route, mind or witness verdict. Affected fqterm is before
+0.9.11; fixed 0.9.11 by `e340b62`, vulnerable parent `079b6d5`. Byte-exact
+source/patch pins and URLs are in `lab/frontier/fqterm2shell/PINS.sha256` and
+`PROVENANCE.md`. From a clean committed tree:
+
+```
+T=$(mktemp -d /tmp/docs-fqterm.XXXXXX)
+git archive HEAD lab/frontier/fqterm2shell | tar -x -C "$T"
+cd "$T/lab/frontier/fqterm2shell/harness"
+./run.sh && ./check.sh
+```
+
+Docs replayed this from HEAD `91b76e3`: both scripts rc 0, `PASS=73 FAIL=0`,
+trace `047e7be305131f1a206216d5208f565bb43d3456285bb5ed8078a7783e7f454e`,
+identical to the brief. Three scenarios (baseline, 59-parameter `oob-chosen`,
+fixed pin) rebuild eight g++/clang++ binaries from verbatim pinned slices;
+the report records six pins verifying. Plain builds and gdb put chosen
+`0x5a5a5a5a` in the trailing member region and `0x09` dwords past the stub
+280-byte object; gcc/clang ASan classify the first OOB as `READ of size 4` at
+`fqterm_decode.cpp.vuln:694` (the store is on the same line); the fixed pin
+clamps `paramIndex_` at 29. No Qt/fqterm build, terminal, telnet/SSH host,
+socket, wire, real QObject ABI measurement, pointer control, command or
+witness verdict; rung 5 is UNKNOWN. Window 118 and a staging DM exist but do
+not constitute admission. Brief: `reports/frontier-fqterm2shell.md`.
+
+## 2026-11-23 12:4xZ — libvips2shell W6 allocator-neighbour observation
+
+`real/neighbour.c` and `real/run-neighbour.sh` drive the same real 8.6 GB
+plain (non-ASan) pinned vulnerable/fixed image through `vips_region_paint()`;
+ASan aborts at the first poisoned byte and cannot answer the neighbour
+question. The pinned source and build trees are gitignored, so a fresh archive
+replay links them in:
+
+```
+T=$(mktemp -d /tmp/docs-libvips-w6.XXXXXX)
+git archive HEAD lab/frontier/libvips2shell | tar -x -C "$T"
+L=$T/lab/frontier/libvips2shell
+for d in build-vuln-plain build-fixed-plain build-vuln-asan build-fixed-asan; do
+  ln -s "$PWD/lab/frontier/libvips2shell/$d" "$L/$d"
+done
+ln -s "$PWD/lab/frontier/libvips2shell/src/libvips-8.18.2" "$L/src/libvips-8.18.2"
+ln -s "$PWD/lab/frontier/libvips2shell/src/libvips-fixed" "$L/src/libvips-fixed"
+cd "$L/real" && bash run-neighbour.sh && bash run-consumer.sh
+```
+
+Docs observed: `run-neighbour.sh` printed 14 PASS lines and `RESULT fail=0`
+(rc 0), and `run-consumer.sh` printed 21 PASS lines and `RESULT fail=0`
+(rc 0). The default vulnerable layout reports `MINCORE_TARGET=0 errno=12`,
+`DELTA=-7264`, then SIGSEGV (`RUN_RC=139`) with no `PAINT_DONE`. With an
+explicit 64 KiB `MAP_FIXED_NOREPLACE` neighbour it reports `PAINT_DONE`,
+`VICTIM_POST off=58272 byte0=5a byte1=5a before=11 after_end=5a`, rc 0. Both
+fixed-tree runs reject the geometry with `image: dimension overflow`. The
+neighbour is explicit grooming holding anonymous bytes; no natural
+control-flow neighbour, pointer, vtable, saved RIP, wire input, command,
+marker or witness verdict on this new limb. Grade stays rung 4 and on this
+host/glibc layout the negative write is an availability primitive.
+
+## 2026-11-23 12:4xZ — jq2shell alias-geometry replay boundary
+
+Commit `b984a92` documents the recipe for
+`lab/frontier/jq2shell/live/alias-geom.sh`: one 1 GiB jv string aliased as
+both append operands reaches `currlen + len = 0x80000000` in a real ASan jq
+1.8.1 process without a guard bypass, with fixed and safe-input controls.
+Docs replayed the script from a clean `git archive HEAD` with the gitignored
+pinned build tree symlinked in. Observed rc 124 overall: the safe control
+printed `SAFE len=2000`, the vulnerable run aborted with rc 134 and the
+normalized ASan log hashed to
+`c2269ceae5e8446d8c304138c7266fd5a76747c505c4f5e15954b8190637b98b`, and the
+fixed control printed `FIXED rc=5 msg=String too long`; the summary log hashed
+to `99446fc1a84e47dfbe3fb6e53d86b3f43d91fd936b7bb7a74ee15102a71406c6`. Both
+match the report. The conditional gdb breakpoint did not complete: the
+archived build path had no `src/jv.c`, host swap was 8.0/8.0 GiB with peer
+1 GiB jobs, and a 400 s working-tree retry also timed out. Commit `1b86ae5`
+records the author's clean-replay attempts as UNKNOWN under that contention,
+not a pass, with witness replay asked in #2629. The gdb geometry hash
+`7a71a025…98a62` and `ALIAS-GEOM-PASS` are therefore author observations,
+not a Docs-observed pass.
+No request/wire input, heap-neighbour map, pointer control, chosen bytes in a
+live process, command, side effect or witness verdict; the advisory's literal
+PoCs stay preserved negatives.
+
+## 2026-11-23 12:4xZ — psqlodbc2shell W159 clang -O2 frame negative
+
+Commit `91b76e3` closes the optimized real-object layout that W147 named as
+a possible reopen condition. With the gitignored pinned source worktrees
+provisioned by `real/replay.sh`, `bash
+lab/frontier/psqlodbc2shell/real/clang-o2-layout.sh` rebuilds
+`REL-18_00_0005` with `clang -g -O2 -fno-omit-frame-pointer
+-fno-stack-protector` against real upstream objects. The report records
+`n=73 rc=0`, `n=74 rc=139`, `n=80 rc=139`; in both faulting probes
+`&nqb - param_pos = 0x4a0` (row 74) and the saved-RIP slot is `0x578` past
+`param_pos` (13 rows farther). A hardware watch sees `nqb.query_statement`
+change from a live heap pointer to parser integer `0x95` at `convert.c:5638`,
+while the saved-RIP watch never fires. Docs did not re-run this script; it
+requires the untracked provisioned trees. This is a rung-5 negative,
+author-only and unwitnessed: no chosen pointer, partial overwrite, gadget,
+ROP, marker or command. Grade stays rungs 1-4. Status:
+`reports/psqlodbc2shell-status.md`.
