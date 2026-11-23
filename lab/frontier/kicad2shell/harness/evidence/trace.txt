@@ -1,0 +1,28 @@
+g++-vuln-plain baseline clean
+g++-vuln-plain attack glibc-heap-metadata-corruption
+g++-vuln-plain far nonzero-rc
+g++-vuln-asan baseline clean
+g++-vuln-asan attack ASAN-WRITE4-BEFORE-5919
+g++-vuln-asan far ASAN-SEGV-5919
+g++-fixed-plain baseline clean
+g++-fixed-plain attack FIXED-clean
+g++-fixed-plain far FIXED-rejected
+g++-fixed-asan baseline clean
+g++-fixed-asan attack FIXED-clean
+g++-fixed-asan far FIXED-rejected
+clang++-vuln-plain baseline clean
+clang++-vuln-plain attack glibc-heap-metadata-corruption
+clang++-vuln-plain far nonzero-rc
+clang++-vuln-asan baseline clean
+clang++-vuln-asan attack ASAN-WRITE4-BEFORE-5919
+clang++-vuln-asan far ASAN-SEGV-5919
+clang++-fixed-plain baseline clean
+clang++-fixed-plain attack FIXED-clean
+clang++-fixed-plain far FIXED-rejected
+clang++-fixed-asan baseline clean
+clang++-fixed-asan attack FIXED-clean
+clang++-fixed-asan far FIXED-rejected
+IND=0 SCALED=0x24242424
+OOB4: 0x24	0x24	0x24	0x24
+FIXED_IND=1
+FIXED_IND=0

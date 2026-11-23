@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x2bce: file /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.fixed, line 5914.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, SCH_IO_ALTIUM::ParseLibHeader (this=0x7fffffffe12b, aAltiumSchFile=..., aFontSizes=std::vector of length 0, capacity 0) at /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.fixed:5914
+warning: 5914	/home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.fixed: No such file or directory
+FIXED_IND=1
+
+Breakpoint 1, SCH_IO_ALTIUM::ParseLibHeader (this=0x7fffffffe12b, aAltiumSchFile=..., aFontSizes=std::vector of length 1, capacity 1 = {...}) at /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.fixed:5914
+5914	in /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.fixed
+FIXED_IND=0
+rc=0 size=1 first=72 GUARD7=11111111
+[Inferior 1 (process 3676521) exited normally]

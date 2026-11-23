@@ -1,0 +1,44 @@
+void SCH_IO_ALTIUM::ParseLibHeader( const ALTIUM_COMPOUND_FILE& aAltiumSchFile,
+                                    std::vector<int>& aFontSizes )
+{
+    const CFB::COMPOUND_FILE_ENTRY* file = aAltiumSchFile.FindStream( { "FileHeader" } );
+
+    if( file == nullptr )
+        THROW_IO_ERROR( wxT( "FileHeader not found" ) );
+
+    ALTIUM_BINARY_PARSER reader( aAltiumSchFile, file );
+
+    if( reader.GetRemainingBytes() <= 0 )
+        THROW_IO_ERROR( wxT( "FileHeader does not contain any data" ) );
+
+    std::map<wxString, wxString> properties = reader.ReadProperties();
+
+    wxString libtype = ALTIUM_PROPS_UTILS::ReadString( properties, "HEADER", "" );
+
+    if( libtype.CmpNoCase( "Protel for Windows - Schematic Library Editor Binary File Version 5.0" ) )
+        THROW_IO_ERROR( _( "Expected Altium Schematic Library file version 5.0" ) );
+
+    for( auto& [key, value] : properties )
+    {
+        wxString upperKey = key.Upper();
+        wxString remaining;
+
+        if( upperKey.StartsWith( "SIZE", &remaining ) )
+        {
+            if( !remaining.empty() )
+            {
+                int ind = wxAtoi( remaining );
+
+                if( ind < 1 )
+                    continue;
+
+                if( static_cast<int>( aFontSizes.size() ) < ind )
+                    aFontSizes.resize( ind );
+
+                // Altium stores in pt.  1 pt = 1/72 inch.  1 mil = 1/1000 inch.
+                int scaled = schIUScale.MilsToIU( wxAtoi( value ) * 72.0 / 10.0 );
+                aFontSizes[ind - 1] = scaled;
+            }
+        }
+    }
+}

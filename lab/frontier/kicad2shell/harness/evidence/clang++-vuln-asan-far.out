@@ -1,0 +1,14 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3675598==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x5c38877ca4dc bp 0x7fff28105810 sp 0x7fff28105680 T0)
+==3675598==The signal is caused by a READ memory access.
+==3675598==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x5c38877ca4dc in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int>>&) /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln:5919:37
+    #1 0x5c38877caf05 in main /home/mesh-home/mishe-tauftauf2shell/lab-driver.cpp:1040:15
+    #2 0x7cddf842a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7cddf842a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5c38876ee604 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/harness/clang++-vuln-asan+0x2d604) (BuildId: 21d3e61bc57b18eb48ff007589dde500ae54e167)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln:5919:37 in SCH_IO_ALTIUM::ParseLibHeader(ALTIUM_COMPOUND_FILE const&, std::vector<int, std::allocator<int>>&)
+==3675598==ABORTING

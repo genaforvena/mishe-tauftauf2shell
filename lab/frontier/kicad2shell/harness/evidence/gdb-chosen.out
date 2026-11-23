@@ -1,0 +1,12 @@
+Breakpoint 1 at 0x2c53: file /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln, line 5919.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, SCH_IO_ALTIUM::ParseLibHeader (this=0x7fffffffe12b, aAltiumSchFile=..., aFontSizes=std::vector of length 1, capacity 1 = {...}) at /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln:5919
+warning: 5919	/home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln: No such file or directory
+
+Breakpoint 1, SCH_IO_ALTIUM::ParseLibHeader (this=0x7fffffffe12b, aAltiumSchFile=..., aFontSizes=std::vector of length 1, capacity 1 = {...}) at /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln:5919
+5919	in /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln
+IND=0 SCALED=0x24242424
+5922	in /home/mesh-home/mishe-tauftauf2shell/sch_io_altium.cpp.vuln
+0x55555557270c:	0x24	0x24	0x24	0x24

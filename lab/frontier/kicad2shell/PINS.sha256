@@ -1,0 +1,4 @@
+73f28d51f3c6cdfe2983a052a5c3e735725f2c735e21a58ca0d4f1bf89b4f982  src/sch_io_altium.cpp.vuln
+663035d5b3182efde046913eba5a4fb3f4ae89ec04b8686c14b23b27677fceac  src/sch_io_altium.cpp.fixed
+1c90ea097c653be8c2fc5ebad642e0cc9e1a47c0b5546607976422d0388a1cd9  pins/sch_io_altium.cpp.vuln.slice
+517d2a59b76305a7ab395f232425b38056f808e644624e4291dec57eafe725b8  pins/sch_io_altium.cpp.fixed.slice
