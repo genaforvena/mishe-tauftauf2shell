@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x1980: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/harness/driver-stub.cpp, line 16.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1.1, operator delete[] (p=0x5555555792f0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/harness/driver-stub.cpp:16
+warning: 16	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/harness/driver-stub.cpp: No such file or directory
+$1 = 32768
+0x5555555812f0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x5555555812f8:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+#0  operator delete[] (p=0x5555555792f0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/harness/driver-stub.cpp:16
+#1  MT32Emu::MidiStreamParserImpl::~MidiStreamParserImpl (this=this@entry=0x7fffffffe0c0, __in_chrg=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/harness/MidiStreamParser.cpp.vuln:85
+#2  0x0000555555555b00 in MT32Emu::MidiStreamParser::~MidiStreamParser (this=0x7fffffffe0c0, __in_chrg=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/harness/driver-vuln.cpp:30
+#3  TestParser::~TestParser (this=0x7fffffffe0c0, __in_chrg=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/harness/driver-stub.cpp:20

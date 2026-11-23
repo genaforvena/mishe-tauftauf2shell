@@ -1,0 +1,118 @@
+# Frontier brief: libmt32emu oversized-SysEx heap write — munt issue #149 (munt2shell)
+
+**STAGED 2026-11-23 W159** — this brief, a direct-call rung-1..4 harness and a
+live registered two-pane window (inner socket index 119, name `munt2shell`) all
+exist; seed wall `.mishe-tauftauf/walls/munt2shell.md`, registry entry and
+staging DM #2682 are in place. Operator admission and an independent witness
+replay are pending. No CVE or GHSA number was found for this issue: **UNKNOWN**.
+Byte-exact pins and hashes: `lab/frontier/munt2shell/PINS.sha256`; harness
+provenance including stubs, negatives and commands:
+`lab/frontier/munt2shell/PROVENANCE.md`. Frontier owns no further work on this
+target.
+
+## 1. Verified ground truth
+
+- Source claim: public GitHub issue https://github.com/munt/munt/issues/149,
+  "munt (libmt32emu): heap out-of-bounds write in the MIDI stream parser on an
+  oversized SysEx message", opened 2026-11-01 by @Haind03, closed 2026-11-05.
+  CWE-787 / CWE-122 / CWE-131 claimed by the reporter. The issue explicitly
+  says the finding came from static source review: no PoC, build, crash or
+  runtime observation was claimed there. Treated as a claim, reproduced here.
+- Affected: library tag `libmt32emu_2_8_3` (reporter calls it the latest release
+  at 2026-06-06) and the code on dev/master at review time. Pinned vulnerable
+  source is the raw file at that tag (commit object `008feb32227a`, raw
+  `mt32emu/src/MidiStreamParser.cpp` sha256
+  `0d9424e07eb9718ea4aafd...ef785810814753e213f20`).
+- Fix: upstream commit `1749f7fed5cdb3a9015acce076a1512b1615dc3b`
+  (2026-11-02T18:07:20Z, "mt32emu: Fixed heap buffer overflow in
+  `MidiStreamParserImpl::parseSysex` (#149)"), with unit tests. The patched
+  source at that commit hashes `6031e579d0777276ff49f1be0afec5c...108612268cf0c3a`.
+  Both library tag `libmt32emu_2_8_4` and application tag `munt_2_8_4` contain
+  the fix hunk (verified from raw source at both tags). Note the two tag
+  namespaces differ: raw `MidiStreamParser.cpp` at `munt_2_8_3` already contains
+  the fix; the vulnerable release tag named by the issue is the **library**
+  tag `libmt32emu_2_8_3`. This discrepancy is recorded, not smoothed over.
+- No advisory index entry, CVSS score or CVE identifier was found for this
+  issue in the GitHub advisory database feed; all are UNKNOWN. The issue's
+  write-up link (hackmd) is a claim and was not needed for the mechanism read.
+
+## 2. Source-bound mechanism and fix
+
+Rendered line numbers are claims; pinned bytes live in
+`pins/MidiStreamParser.cpp.{vuln,fixed}` and are included verbatim under
+`#line` control by the generated drivers.
+
+In the vulnerable pin, `MidiStreamParserImpl::parseStream()` (`:88-116`) passes
+the whole caller block to `parseSysex()` when the first byte is `0xF0` and the
+parser buffer is empty; there is no per-call size bound. `parseSysex()`
+(`:223-257`) scans for `0xF7` or another status byte. If the SysEx ends without
+either, it sets `streamBufferSize = sysexLength` at `:248`, calls
+`checkStreamBufferCapacity(false)` at `:249` and, when that returns true,
+copies `sysexLength` bytes into `streamBuffer` with `memcpy` at `:250`.
+
+`checkStreamBufferCapacity()` (`:132-143`) grows a smaller buffer to exactly
+`MAX_STREAM_BUFFER_SIZE` (32768, `globals.h:122,145`) and returns true at
+`:140` without ever checking that the requested `streamBufferSize` fits. With
+the default 1000-byte capacity (`SYSEX_BUFFER_SIZE`, `globals.h:127,148`) a
+single 40001-byte incomplete SysEx triggers the grow to 32768 and a 40001-byte
+copy: 7233 chosen bytes land past the allocation. The copy length comes from
+the caller's byte block; the overflow bytes are 7-bit SysEx data (0x5a in the
+harness), so both content and length are input-controlled.
+
+Fix `1749f7f` changes two places: `checkStreamBufferCapacity()` now requires
+`streamBufferSize < MAX_STREAM_BUFFER_SIZE` in the grow branch
+(`MidiStreamParser.cpp.fixed:136`), so an oversized one-shot message takes the
+safe discard path; and `parseSysex()` clamps the copy to `streamBufferCapacity`
+with `bytesToCopy` (`:253-254`, "Better be paranoid about buffer overflows").
+The fixed discard branch no longer overwrites `streamBufferSize`
+(`:257-259`), leaving a size larger than capacity as a bookkeeping oddity; it
+does not produce an out-of-bounds write on this path.
+
+## 3. Cheapest local experiment
+
+Build two drivers that include the pinned class implementation slices under
+`#line` (vulnerable `:68-295`, fixed `:68-299`), with declared stubs for the
+scalar types, `MidiReceiver`/`MidiReporter` interfaces, `Synth` helper and the
+driver. Allocate the parser's `new[]` buffer exactly in ASan builds; in plain
+builds append a 0xa5 canary so chosen bytes can be read past the boundary.
+Call the public `parseStream()` once with a 40001-byte incomplete SysEx block
+(`0xF0` + 40000 bytes of `0x5a`, no `0xF7`); compare against a complete 102-byte
+SysEx and a safe 101-byte incomplete fragment.
+
+Commands (from `lab/frontier/munt2shell/harness/`):
+`./run.sh` generates the drivers and builds 8 binaries (gcc/clang x vulnerable/fixed
+x plain/ASan); `./check.sh` runs 24 invocations plus a gdb probe and prints a
+normalized trace hash.
+
+## 4. Observed evidence (this wake, direct-call harness)
+
+- Rung 1 — vulnerable plain build: `parseStream()` returns normally after the
+  40001-byte block; baseline dispatches one complete SysEx (`sysex=1`,
+  `lastlen=102`); safe fragment dispatches none.
+- Rung 2 — fixed build handles the same attack with `rc=0` and no bytes past
+  the 32768-byte boundary; the vulnerable build writes chosen `0x5a` at
+  offsets 32768..32771 in both gcc and clang plain builds.
+- Rung 3 — gcc and clang ASan both report
+  `ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size 40001`,
+  `0 bytes after 32768-byte region`, at pinned
+  `MidiStreamParser.cpp.vuln:250`, with the stack through `parseSysex :249`
+  and `parseStream :106`.
+- Rung 4 — gdb on the plain vulnerable build, stopped at the destructor's
+  `delete[]` after the copy, shows `g_last_size = 32768` and sixteen `0x5a`
+  bytes at `g_last_alloc+32768` — chosen bytes, exact offset.
+- `129 PASS / 0 FAIL` over 24 runs plus 3 gdb assertions; trace
+  `735c136e1c6740ca50ed5790f054cbd4331c16a1d48998b22926de8ac0d1146f`.
+  Raw outputs and preserved negatives: `lab/frontier/munt2shell/evidence/`.
+
+## 5. Ceiling and cheapest next rung
+
+Direct calls only, with stubbed C++ interfaces and allocator. No libmt32emu
+build, synth, MIDI file/device/host, audio pipeline, socket, wire, pointer
+control, command execution or witness replay. The issue's attacker model — a
+MIDI/SysEx file, named pipe, virtual port or network-forwarded stream — is a
+claim, not exercised here. The cheapest move toward a real consumer is to
+build the pinned 2.8.3 library, feed a single oversized SysEx block through
+`DefaultMidiStreamParser::parseStream()` under ASan, and observe whether the
+corrupted heap region is subsequently used before aborts; a rung-5 path would
+then need a network-facing host that forwards untrusted bulk SysEx dumps.
+Rung 5 is UNKNOWN, not established.

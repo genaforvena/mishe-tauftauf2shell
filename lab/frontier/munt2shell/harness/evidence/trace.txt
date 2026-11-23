@@ -1,0 +1,27 @@
+plain-gcc-vuln-baseline scenario=baseline variant=vuln total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+plain-gcc-vuln-fragment scenario=fragment variant=vuln total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+plain-gcc-vuln-attack scenario=attack variant=vuln total=40001 sysex=0 short=0 realtime=0 debug=0 lastlen=0 b32768=5a b32769=5a b32770=5a b32771=5a|EXIT=0|
+asan-gcc-vuln-baseline scenario=baseline variant=vuln total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+asan-gcc-vuln-fragment scenario=fragment variant=vuln total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+asan-gcc-vuln-attack EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 40001|MidiStreamParser.cpp.vuln:250|MidiStreamParser.cpp.vuln:106|0 bytes after 32768-byte region|MidiStreamParser.cpp.vuln:137|MidiStreamParser.cpp.vuln:249|MidiStreamParser.cpp.vuln:106|
+plain-gcc-fixed-baseline scenario=baseline variant=fixed total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+plain-gcc-fixed-fragment scenario=fragment variant=fixed total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+plain-gcc-fixed-attack scenario=attack variant=fixed total=40001 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+asan-gcc-fixed-baseline scenario=baseline variant=fixed total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+asan-gcc-fixed-fragment scenario=fragment variant=fixed total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+asan-gcc-fixed-attack scenario=attack variant=fixed total=40001 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+plain-clang-vuln-baseline scenario=baseline variant=vuln total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+plain-clang-vuln-fragment scenario=fragment variant=vuln total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+plain-clang-vuln-attack scenario=attack variant=vuln total=40001 sysex=0 short=0 realtime=0 debug=0 lastlen=0 b32768=5a b32769=5a b32770=5a b32771=5a|EXIT=0|
+asan-clang-vuln-baseline scenario=baseline variant=vuln total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+asan-clang-vuln-fragment scenario=fragment variant=vuln total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+asan-clang-vuln-attack EXIT=1|ERROR: AddressSanitizer: heap-buffer-overflow|WRITE of size 40001|MidiStreamParser.cpp.vuln:250|MidiStreamParser.cpp.vuln:106|0 bytes after 32768-byte region|MidiStreamParser.cpp.vuln:137|MidiStreamParser.cpp.vuln:249|MidiStreamParser.cpp.vuln:106|
+plain-clang-fixed-baseline scenario=baseline variant=fixed total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+plain-clang-fixed-fragment scenario=fragment variant=fixed total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+plain-clang-fixed-attack scenario=attack variant=fixed total=40001 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+asan-clang-fixed-baseline scenario=baseline variant=fixed total=102 sysex=1 short=0 realtime=0 debug=0 lastlen=102|EXIT=0|
+asan-clang-fixed-fragment scenario=fragment variant=fixed total=101 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+asan-clang-fixed-attack scenario=attack variant=fixed total=40001 sysex=0 short=0 realtime=0 debug=0 lastlen=0|EXIT=0|
+$1 = 32768
+0x5555555812f0:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+0x5555555812f8:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a

@@ -1,0 +1,2 @@
+scenario=attack variant=vuln total=40001 sysex=0 short=0 realtime=0 debug=0 lastlen=0 b32768=5a b32769=5a b32770=5a b32771=5a
+EXIT=0
