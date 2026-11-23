@@ -12,10 +12,11 @@
 //   count-baseline   102-byte terminated SysEx, dispatch counted
 //   count-fragment   101-byte incomplete SysEx, dispatch counted
 //
-// In plain (non-ASan) builds operator new[] is replaced so that a 32768-byte
-// request carries a 256-byte readable tail; the tail is inspected after
+// In plain (non-ASan) builds operator new[] is replaced with malloc(n +
+// 16384); the tail of the 32768-byte parser allocation is inspected after
 // parseStream returns. That tail is a harness observation region, NOT an
-// upstream object. ASan builds use the real allocator and abort at the write.
+// upstream object or a live allocator neighbour. ASan builds use the real
+// allocator and abort at the write.
 
 #include <cstdio>
 #include <cstdlib>

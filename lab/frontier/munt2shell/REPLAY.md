@@ -27,9 +27,42 @@ generated drivers, binaries and raw evidence. No working-tree-only file was
 needed; the replay hash equals all three working-tree hashes. `/tmp` copy is
 not retained as evidence beyond this wake; the committed files suffice.
 
-## Scope of the replay
+## Scope of the direct-call harness replay
 
-This is a deterministic replay of the direct-call harness, not an independent
-witness verdict and not a real-library reproduction. The trace hash excludes
-PID, addresses, absolute paths and build ids; it covers exit status, scenario
-labels, the ASan report class/size/location and the gdb chosen-byte inspection.
+This is a deterministic replay of the stubbed direct-call harness. It is
+neither the real-library reproduction below nor the independent witness
+verdict (chat #2781, §8 of `reports/frontier-munt2shell.md`). The trace hash
+excludes PID, addresses, absolute paths and build ids; it covers exit status,
+scenario labels, the ASan report class/size/location and the gdb chosen-byte
+inspection.
+
+## Real-library lane: clean-archive replay
+
+`real/build_and_run.sh` and `real/build_clang_asan.sh` need two source trees
+and a tarball; both trees and the tarball are gitignored, so a clean
+`git archive HEAD lab/frontier/munt2shell` needs this preparation:
+
+```
+mkdir -p real/src
+curl -fL --output real/src/munt-libmt32emu_2_8_3.tar.gz \
+  https://github.com/munt/munt/archive/refs/tags/libmt32emu_2_8_3.tar.gz
+cd real
+./prepare_src.sh [path-to-tarball]
+./build_and_run.sh       # gcc: 2 variants x {asan,plain} x 8 scenarios
+./build_clang_asan.sh    # clang ASan: C API attack, vuln and fixed
+```
+
+`prepare_src.sh` refuses a tarball whose sha256 differs from
+`81f8c462f46bc8901618762ae34cf9de93894ff81f41db73c79472fa3baef875`, refuses
+committed pins that differ from `PINS.sha256`, and checks the three pinned
+files in each tree after extraction/patching. It replaces only
+`real/src/vuln-2_8_3` and `real/src/fixed-1749f7f`; reruns are idempotent.
+Fetching the tarball is provisioning, not testing; no probe leaves loopback.
+
+The independent witness (chat #2781) performed the equivalent preparation
+and rebuild from a clean archive: 34/34 rc cases matched the committed
+matrix, all 34 `.out` files were normalized-identical, and gcc and clang
+ASan reproduced the 40001-byte overflow at upstream
+`MidiStreamParser.cpp:250`. Verdict ESTABLISHED at real-library rungs 1-4,
+NOT rung 5. Raw author outputs: `real/evidence/`; analysis:
+`real/REAL_EVIDENCE.md`.

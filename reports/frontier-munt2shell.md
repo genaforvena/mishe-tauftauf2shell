@@ -3,8 +3,10 @@
 **STAGED 2026-11-23 W159** — this brief, a direct-call rung-1..4 harness and a
 live registered two-pane window (inner socket index 119, name `munt2shell`) all
 exist; seed wall `.mishe-tauftauf/walls/munt2shell.md`, registry entry and
-staging DM #2682 are in place. Operator admission and an independent witness
-replay are pending. No CVE or GHSA number was found for this issue: **UNKNOWN**.
+staging DM #2682 are in place. Independent witness replay (chat #2781) is
+ESTABLISHED at the labeled real-library rungs 1-4, not rung 5; operator
+admission and presentation activation remain owed. No CVE or GHSA number was
+found for this issue: **UNKNOWN**.
 Byte-exact pins and hashes: `lab/frontier/munt2shell/PINS.sha256`; harness
 provenance including stubs, negatives and commands:
 `lab/frontier/munt2shell/PROVENANCE.md`. Frontier owns no further work on this
@@ -84,7 +86,7 @@ Commands (from `lab/frontier/munt2shell/harness/`):
 x plain/ASan); `./check.sh` runs 24 invocations plus a gdb probe and prints a
 normalized trace hash.
 
-## 4. Observed evidence (this wake, direct-call harness)
+## 4. Observed evidence (W159, direct-call harness)
 
 - Rung 1 — vulnerable plain build: `parseStream()` returns normally after the
   40001-byte block; baseline dispatches one complete SysEx (`sysex=1`,
@@ -108,7 +110,8 @@ normalized trace hash.
 
 Direct calls only, with stubbed C++ interfaces and allocator. No libmt32emu
 build, synth, MIDI file/device/host, audio pipeline, socket, wire, pointer
-control, command execution or witness replay. The issue's attacker model — a
+control or command execution in this staged harness; the later real-library
+and ALSA lanes are in §§6-7. The issue's attacker model — a
 MIDI/SysEx file, named pipe, virtual port or network-forwarded stream — is a
 claim, not exercised here. The cheapest move toward a real consumer is to
 build the pinned 2.8.3 library, feed a single oversized SysEx block through
@@ -145,12 +148,17 @@ behave as in the staged harness.
 Post-write consumer probe: feeding `0xF7` after the oversized slice produces
 no SysEx dispatch and one overrun debug report. `parseSysexFragment()` sees
 capacity already at `MAX_STREAM_BUFFER_SIZE`, discards, and the only later
-buffer read is `streamBuffer[0]`. libmt32emu itself does not consume the
 overwritten bytes on this path — a negative result for an in-library live
+consumer, not proof that no host is affected.
+
 One in-tree host path was measured (below); no socket, wire input, grooming
-into a live object, pointer control, command, marker side effect or witness
-replay was measured; the issue's network narrative stays a claim. **Grade:
-real-library rungs 1-4; rung 5 UNKNOWN.**
+into a live object, pointer control, command or marker side effect was
+measured; the issue's network narrative stays a claim. Independent witness
+chat #2781 replayed the real-library lane from a clean archive and returned
+ESTABLISHED at these rungs 1-4, with no counterexample to the mechanism and
+no grade change. Its chosen-byte readback is from the harness's 16384-byte
+`operator new[]` tail, not a live allocator neighbour. **Grade: real-library
+rungs 1-4 (witness ESTABLISHED); rung 5 UNKNOWN.**
 
 ## 7. In-tree host reachability: ALSA sequencer negative (W160)
 
@@ -174,3 +182,47 @@ measured negative for one consumer on one kernel, not a claim about all ALSA
 setups, Qt/Win32 hosts (Qt5 unavailable here) or third-party C-API users;
 `mt32emu_parse_stream()` itself remains an unclamped forward. All probe
 events were loopback-only inside the local kernel sequencer.
+
+## 8. Independent witness verdict (chat #2781, 2026-11-23)
+
+The witness rebuilt from a clean `git archive HEAD lab/frontier/munt2shell`
+(commits 6e59110/04e2960 authoring the real-library and ALSA lanes): 7/7
+`PINS.sha256` entries OK, provisioned tarball hash
+`81f8c462f46bc8901618762ae34cf9de93894ff81f41db73c79472fa3baef875` OK.
+Both source trees were re-extracted, the fixed tree repatched with
+`pins/fix.patch`, and all six drivers rebuilt from committed sources and
+flags with the project's CMake. The witness's 34-case rc matrix matches the
+committed matrix case for case, and all 34 `.out` files are
+normalized-identical (path, PID, address and build id aside).
+
+- gcc and clang ASan: `WRITE of size 40001`, 0 bytes after a 32768-byte
+  region, at upstream `MidiStreamParser.cpp:250`; allocation at `:137` from
+  `:249`, stack through `parseStream :106` and C API
+  `mt32emu_parse_stream` at `c_interface.cpp:760`. Fixed build `rc=0` in all
+  scenarios; source re-read confirms the `1749f7f` guard
+  `streamBufferSize < MAX_STREAM_BUFFER_SIZE` suppresses the 32768-byte
+  allocation and clamps the copy.
+- Causal variation: changing only the attack byte `0x5a` to `0x37` in the
+  witness's own driver copy moved the chosen tail bytes to `0x37`
+  (`tail_0x37 = 7233/16384`); ASan still reported the same 40001-byte write.
+  Chosen bytes track input, not a harness constant.
+- Abort order (the witness's answer to follow-up #2768): a real-allocator
+  plain build without the tail probe aborts `rc=134` with
+  `malloc(): corrupted top size`, but gdb places that abort in `printf` at
+  `driver.cpp:105`, after `mt32emu_parse_stream` returned at `:104`. No
+  abort precedes the out-of-bounds store.
+- In-library consumer negative rechecked in source: after the overflow
+  `streamBufferSize = 40001` exceeds capacity, so
+  `checkStreamBufferCapacity(true)` returns false and
+  `parseSysexFragment()` takes the discard path at `:289-291`; there is no
+  `handleSysex` of corrupted bytes.
+- ALSA ceiling independently remeasured: 5572-byte payload delivered with
+  matching `ext.len`; 5573 and 40001 rejected (`send rc=-12`,
+  `receive rc=-28`). The in-tree host path is closed on this kernel; other
+  hosts and routes remain UNKNOWN.
+
+Witness ceiling: rung-4 chosen bytes come from the harness's 16384-byte
+`operator new[]` tail, not a live allocator neighbour; there is no host
+process, socket or wire input, grooming into a live object, pointer control,
+marker or command. Verdict: ESTABLISHED at real-library rungs 1-4, NOT rung
+5, no counterexample and no grade change.

@@ -16,14 +16,16 @@ artifact is a plain-build readable tail appended by a replacement global
 - Fixed tree `src/fixed-1749f7f`: pinned `pins/fix.patch` applied with `patch -p1`
   to a copy of the same tarball; MidiStreamParser.cpp becomes
   `6031e579d0777276ff49f1be0afec5cfd879716330108d32f810612268cf0c3a`, exactly
-  the pinned fixed hash. Both source trees are gitignored and regenerable.
+  the pinned fixed hash. Both source trees are gitignored and regenerable
+  with `./prepare_src.sh` (see `../REPLAY.md`).
 
 ## Commands
 
 ```
 cd lab/frontier/munt2shell/real
-./build_and_run.sh       # gcc: 2 variants x {asan,plain} x 8 scenarios
-./build_clang_asan.sh    # clang ASan: C API attack, vuln and fixed
+./prepare_src.sh        # verify tarball + pins; extract; patch; rehash trees
+./build_and_run.sh      # gcc: 2 variants x {asan,plain} x 8 scenarios
+./build_clang_asan.sh   # clang ASan: C API attack, vuln and fixed
 ```
 
 Inputs: `driver.cpp`; scenario `*-attack` is one `0xF0` + 40000 x `0x5a` slice
@@ -65,8 +67,10 @@ with no `0xF7` (40001 bytes), fed in a single `parseStream` call. Controls:
 `:573,751` instantiate `DefaultMidiStreamParser`. A host that passes
 attacker-controlled bulk MIDI bytes to that C API reaches the defect. No
 host application, MIDI file/device/port, socket, wire input, audio pipeline,
-pointer control, command, marker side effect or witness verdict was tested.
-The issue's network-forwarding narrative remains a claim. **Rung 5 UNKNOWN.**
+pointer control, command or marker side effect was tested. Independent
+witness chat #2781 replayed this lane from a clean archive and returned
+ESTABLISHED at rungs 1-4; the issue's network-forwarding narrative remains a
+claim and rung 5 stays UNKNOWN.
 
 ## Ceiling
 
