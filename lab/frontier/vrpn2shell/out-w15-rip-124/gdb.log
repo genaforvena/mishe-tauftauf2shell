@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x49dad: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+Breakpoint 2 at 0x49db7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4560.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=124 dest=0x7fffffffd98c canary=0x1242851ed3cc6400 saved_rbp=0x7fffffffd9f0 saved_rip=0x555555596d88
+POST i=124 dest=0x7fffffffd98c canary=0x1242851ed3cc6400 saved_rbp=0x7fffffffd9f0 saved_rip=0x550055596d88
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000550055596d88 in ?? ()

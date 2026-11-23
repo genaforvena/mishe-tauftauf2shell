@@ -32,6 +32,14 @@ observed PRE/POST landing words across the canary (104-111) and saved rbp
 `*** stack smashing detected ***`, with short and fixed controls clean. Rung
 and grade are unchanged; this is evidence quality on an author-only build.
 
+W15 (2026-11-23 ~05:39Z) closes the saved-RIP byte map on the same plain Debug
+-O0 build: indices 120-125 zero one saved-RIP byte each and every run faults
+(SIGILL for bytes 0-1, SIGSEGV for bytes 2-5); bytes 6-7 are already `00`, so
+126/127 are no-ops. Byte-1 zeroing does reach mapped text, but lands on an
+illegal instruction. TYPE sink reproduces it, the fixed binary is clean and a
+debugger-free run dies too. No surviving modified control flow, no chosen byte,
+no command, no rung 5, no grade change.
+
 ## Claim and pins
 
 - CVE-2026-123200 (CNA VulnCheck), CWE-787, pre-auth network write.
@@ -121,6 +129,37 @@ build places a redzone at 100+, which is why the same index faults there.
 W14 measured NUL landings at offsets 104/105/108/111 (canary) and
 112/115/119 (saved rbp), so the 104-119 geometry is no longer pure
 address-based inference.
+
+## Saved-RIP byte map closure (W15, 2026-11-23 ~05:39Z)
+
+W14 mapped the array through saved rbp; W15 closes the eight saved-RIP bytes on
+the same plain Debug -O0 binary (SHA `5cf494...`). With `probe-plain-rip.sh`,
+all eight indices start from `saved_rip=0x555555596d88`:
+
+- 120 -> `0x555555596d00`: SIGILL in `doSystemCallbacksFor :1436` (W1/W2).
+- 121 -> `0x555555590088`: SIGILL at `0x55555559008b in ??` (`out-w15-rip-121/gdb.log`).
+- 122-125 -> `0x555555006d88`, `0x555500596d88`, `0x550055596d88`,
+  `0x5555596d88` respectively: SIGSEGV at the redirected address.
+- 126 and 127: saved_rip unchanged; the byte is already `00`. The client
+  disconnect is logged as a normal connection drop, not a fault.
+
+The byte-1 landing is mapped executable memory, not a wild address:
+`readelf -lW` on this binary places the executable LOAD at vaddr `0x3c000`, so
+`0x3c08b` lies 139 bytes into the first text page. It executes an illegal
+instruction. TYPE sink index 121 (`out-w15-type-121/gdb.log`) reproduces the
+same redirect and SIGILL; the fixed binary (`10e581e8...`,
+`out-w15-fixed-121/gdb.log`) leaves saved_rip `0x...6d86` before and after with
+no signal. Debugger-free index 121 is `DEAD_AFTER_MESSAGE exit=139`
+(`out-w15-func-121/meta.txt`), while no-op 126 stays ALIVE
+(`out-w15-func-126/meta.txt`). Under gdb the same index 121 faults SIGILL; the
+difference in signal is observed and its cause is UNKNOWN, so no
+signal-specific claim rests on it.
+
+This closes the saved-RIP region: every byte that actually changes lands in a
+fault or an illegal instruction, and the two unchanged bytes are not NUL
+effects. No surviving modified control flow, no chosen byte, no command, no
+rung 5, no grade change. Raw evidence `out-w15-*/`; all ports 13970-13983 were
+loopback and were freed.
 
 ## Rung-4 boundary — saved return address changed from wire input
 

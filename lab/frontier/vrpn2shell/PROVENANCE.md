@@ -450,3 +450,38 @@ fixed 105 ALIVE. Per-run SHA, port, index, msgtype and status in
 server stderr alongside. This retires the address-inference wording for the
 Debug -O0 canary/saved-rbp bytes in the report. Author self-observation only;
 no grade change, no rung 5, no external host contacted, no server left running.
+
+## W15 — saved-RIP byte map closed (2026-11-23 ~05:39Z)
+
+No new build: vulnerable `build-plain-07.36/server_src/vrpn_server` (SHA-256
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`) and fixed
+`build-plain-fixed/server_src/vrpn_server` (SHA-256
+`10e581e895c25f39bea153b4d5ce1014796190fb9bd5f901693115d176ea2f45`) reused.
+Committed `probe-plain-rip.sh` on fresh loopback ports 13970-13977 (SENDER),
+13980 (TYPE), 13983 (fixed); each `gdb.log` records PRE/POST `saved_rip` and the
+fault address. All eight SENDER indices start from `saved_rip=0x555555596d88`:
+
+- 120: byte 0 -> `0x555555596d00`, SIGILL in `doSystemCallbacksFor :1436`
+  (already known from W1/W2).
+- 121: byte 1 -> `0x555555590088`, SIGILL at `0x55555559008b in ??`. This is
+  mapped executable memory: `readelf -lW` on this binary gives the executable
+  LOAD at vaddr `0x3c000`, so `0x3c08b` is 139 bytes into the first text page.
+- 122: `0x555555006d88`, 123: `0x555500596d88`, 124: `0x550055596d88`,
+  125: `0x5555596d88` — each SIGSEGV at the redirected address.
+- 126 and 127: bytes 6 and 7 already `00`, saved_rip unchanged, no signal;
+  the client's disconnect is logged as a normal connection drop.
+
+TYPE sink index 121 (`VAR=type_name LINE_PRE=4482 LINE_POST=4484 MSGTYPE=-2`,
+port 13980, `out-w15-type-121/gdb.log`): same byte-1 redirect
+`0x555555596d88 -> 0x555555590088`, SIGILL. Fixed-commit control at 121
+(`LINE_PRE=4558 LINE_POST=4560`, `out-w15-fixed-121/gdb.log`): saved_rip stays
+`0x555555596d86` before and after, no signal.
+
+Debugger-free `probe-func-dos.sh` (per-run SHA, port, index and status in each
+`meta.txt`): 121 on port 13981 gives `DEAD_AFTER_MESSAGE exit=139`; no-op 126
+on port 13982 gives `ALIVE_AFTER_MESSAGE` (killed by the probe). The gdb SIGILL
+at 121 versus the debugger-free SIGSEGV at 121 is an observed difference; its
+cause is UNKNOWN and no signal-specific claim is made. All ports 13970-13983
+were freed; no server left running. Grade unchanged: no surviving modified
+control flow, no chosen byte, no command side effect, no rung 5, no external
+host contacted. Author self-observation only.

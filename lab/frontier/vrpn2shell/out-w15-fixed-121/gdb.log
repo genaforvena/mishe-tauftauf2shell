@@ -1,0 +1,8 @@
+Breakpoint 1 at 0x49db5: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C, line 4558.
+Breakpoint 2 at 0x49dc9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-fixed/vrpn_Connection.C, line 4564.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=121 dest=0x7fffffffd919 canary=0x48a283d5b6bdf700 saved_rbp=0x7fffffffd980 saved_rip=0x555555596d86
+POST i=121 dest=0x7fffffffd919 canary=0x48a283d5b6bdf700 saved_rbp=0x7fffffffd980 saved_rip=0x555555596d86
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

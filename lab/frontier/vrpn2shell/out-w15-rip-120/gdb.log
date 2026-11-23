@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x49dad: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+Breakpoint 2 at 0x49db7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4560.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE i=120 dest=0x7fffffffd988 canary=0xb8ddd953d2549f00 saved_rbp=0x7fffffffd9f0 saved_rip=0x555555596d88
+POST i=120 dest=0x7fffffffd988 canary=0xb8ddd953d2549f00 saved_rbp=0x7fffffffd9f0 saved_rip=0x555555596d00
+
+Program received signal SIGILL, Illegal instruction.
+0x0000555555596d00 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, p=..., userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1436
+1436	        fprintf(stderr, "vrpn_TypeDispatcher::doSystemCallbacksFor:  "
