@@ -8177,3 +8177,38 @@ Grade stays the author's: rung 3 gcc+clang ASan `WRITE of size 700` at pinned
 Thrift process, framing parser, socket, wire, pointer control, command,
 witness verdict or rung 5; live-server reachability UNKNOWN. Status:
 `reports/thrift2shell-status.md`.
+
+## 2026-11-23 10:0xZ — libvips2shell admitted as the 109th route
+
+Frontier W145 staged libvips CVE-2026-69242 / GHSA-9rwc-f68v-4482 in commit
+`2f35788`: `vips_image_sanity()` checks only 64-bit products and accepts a
+scanline between `INT_MAX` and `UINT64_MAX` (pinned `image.c.v8.18.2:689-694`);
+the 64-bit value is truncated into the plain `int VipsRegion.bpl` at
+`region.c:637`, and `vips_region_paint_pel()` re-truncates it into a local
+`int ls` at `:982` before `memcpy(q, to, ws)` at pinned `:1004` writes chosen
+bytes at a negative offset. Affected `<= 8.18.2`, fixed 8.18.3 by commit
+`c72f509` (`if (ls >= INT_MAX)`). The advisory's vector is local and it
+explicitly says RCE could not be proven. Brief:
+`reports/frontier-libvips2shell.md`; pins, generated drivers and negative
+results: `lab/frontier/libvips2shell/PROVENANCE.md` and `PINS.sha256`.
+Duplicate check from staging: no libvips target in the do-not-duplicate list,
+brief set or window registry. Operator replay from
+`git archive HEAD lab/frontier/libvips2shell` in a fresh `/tmp` returned rc 0,
+`PASS=62 FAIL=0` and trace
+`5532e495d71cc0be1b14f4f58e0d8fd4d9790bb6ff73fe921e380f39dcd1490e`, exactly
+frontier's value. Added the hy4-flash `max_parallel: 3` route as the 109th
+role, minted the path/debounce/slice units with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`), ran
+`daemon-reload`, enabled and activated the path, and added both resolver
+entries (219 total). The pinned full-flag doctor returned rc 0 `GREEN`, the
+doctor service read `ExecMainStatus=0` / `Result=success`; `check-omp-only.py`
+returned `GREEN (109 declared roles)`. The two-pane window 113 and its
+registry entry were already live, so no window was created; its historical
+"admission pending" description was left as a handoff record.
+Grade stays the author's: rung 1/2 `CHAIN_REJECT=0 BPL=-256 LS=-256 WS=4`
+vs fixed `dimension overflow` / `CHAIN_REJECT=1`, rung 3 gcc+clang ASan
+`WRITE of size 4` at pinned `region.c.v8.18.2:1004` with fixed runs clean,
+rung 4 `CHAIN SINK=5a5a5a5a00000000` at `to-256` with gdb `Q = TO - 0x100`.
+No libvips build, TIFF decoder, image parser, process, socket, wire, pointer
+target, command, witness verdict or rung 5; network-service reachability
+UNKNOWN. Status: `reports/libvips2shell-status.md`.

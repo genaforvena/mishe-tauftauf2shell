@@ -143,6 +143,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Ffmpeg2Shell** | ✓ | ✓ | ✓ | ✓ | ◐ | **LIVE/CODE/HARNESS — W2 reaches the sink in a real ASan FFmpeg n9.0 process over a loopback RIST wire through `async:rist://`: `WRITE of size 9968` from `librist_read()` at `libavformat/librist.c:230`, 0 bytes past the 8388608-byte async FIFO allocated at `async.c:88`; two vulnerable runs fault, the one-line `FFMIN`-fixed build and a 512-byte safe input stay clean. gdb on the live process reads chosen 0x41/0x7a/0x3c/0x42/0x63 at ring offsets 4096/4113/4120/5000/9000 with `caller_size=4096`. Live geometry: the destination is a slice of an 8 MiB FIFO, so ~8 MiB of streamed data is needed to walk the write pointer to its end; a stock librist sender caps payloads at 9968, four below FFmpeg's 9972 receive gate. Harness rungs 1-4 witness-ESTABLISHED (#2384) at the labeled direct-call scope; the live path witness-ESTABLISHED (W151/#2428) at the labeled live-loopback / ASan / ~8 MiB ring-wrap scope, with the witness's own builds and port 5514. Default mmap and plain builds hit a read-only libc mapping at the wrap with no writable neighbour; W3's local `MALLOC_MMAP_THRESHOLD_=16777216` brk layout puts the FIFO on `[heap]` and the sender's 0x5a fill overwrites the low byte of live `AVFifo.buffer` and `URLContext.prot`, which the consumer then dereferences — scoped rung 4 pointer control under a local prerequisite, witness-ESTABLISHED (W152/#2444) at that labeled scope, not a chosen-address write, control transfer, marker, command or rung 5; no ROP chain is asserted** W4 continues W3: the whole 8-byte `URLContext->prot` is attacker-controlled at the next natural `ffurl_read2`, and the consumer's first natural indirect call is `interrupt_callback.callback(opaque)` from `ff_check_interrupt` (`avio.c:520`). With no debugger attached, `setarch -R` ASLR off and lab-measured absolute addresses, wire bytes set that callback to `system` and carry a benign `touch` command inside the overwritten `URLContext`; the vulnerable process creates the marker file (mtime 09:30:58Z) while FFMIN-fixed, 512-byte safe and callback-zero controls leave it absent, sender rc 0 in all four. Needs the local brk-layout variable, no-ASLR and ~8 MiB streamed to the wrap; author-observed rung 5 mechanics at that labeled scope, NOT witness-ESTABLISHED, no ASLR-on or stock-layout claim. ** — CVE-2026-75143 / GHSA-7qc3-xqxj-426p (Critical 9.3 `CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N`, CWE-122), RIST payload copied into an async caller buffer capped at 4096. Pins and URLs in `lab/frontier/ffmpeg2shell/PROVENANCE.md`; harness brief `reports/frontier-ffmpeg2shell.md`; live result `reports/ffmpeg2shell-live.md`; status `reports/ffmpeg2shell-status.md`. Operator replay from clean `git archive HEAD` matched 66 PASS / 0 FAIL and trace `6c3586c5d5b510b9619431873b157055c97edc32c5b6eda9967eb4feae61629f`. |
 | **Thrift2Shell** | ✓ | ✓ | ✓ | ✓ | — | **ADMITTED 09:5xZ under standing #6 as the 108th route; CODE/HARNESS rung 1-4 at the direct-call verbatim-pinned scope, no witness verdict.** Frontier staged W143 in commit `42abf3a`; the registered two-pane window 111 was adopted, no second window. CVE-2026-55971 / GHSA-gwj4-q93m-wwqc (Critical 9.3 `CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N`, CWE-122), Apache Thrift before 0.24.0, fixed 0.24.0 by `db4a473f` buffer swap: `THeaderTransport::untransform()` inflates a 31-byte compressed frame to 700 bytes in a 1024-byte transform buffer, then copies 700 bytes back over the 31-byte receive frame at pinned `THeaderTransport.cpp.v0.23.0:301`, 669 bytes over. Direct-call harness with four verbatim pinned slices and stubs: `PASS=71 FAIL=0`, trace `c12ba214…bbe556`, gcc+clang ASan `WRITE of size 700` at pinned `:301` (fix parent `:320`), chosen bytes at inflated offsets 0/16/32/64/128/256/699 under gdb; fixed, v0.24.0, safe-input and gate controls clean. No real Thrift process, framing parser, transport stack, socket, wire, pointer control, command, marker side effect, witness verdict or rung 5; live-server reachability UNKNOWN. Status: `reports/thrift2shell-status.md`. |
 | **Psqlodbc2Shell** | ✓ | ✓ | ✓ | ✓ | — | **ADMITTED 09:4xZ under standing #6 as the 107th route; CODE/HARNESS rung 1-4 at the direct-call verbatim-pinned scope, no witness verdict.** Frontier staged W144 in commits `13c835d`/`255dfd4`; the registered two-pane window 112 was adopted, no second window. CVE-2026-120061 / GHSA-hfm6-qfx8-v4xq (High 7.5 `CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H`, CWE-121/193/457), affected `<= 18.00.0005`, fixed 18.00.0006 by merge `79f4631d`: unbounded 16-entry `param_pos` stack writes in `processParameters()` (`convert.c.vuln:5637`) plus a one-byte NUL past `buf_small[128]` in `F_ExtractOldTo` (`:2424`). Direct-call harness only: `PASS=34 FAIL=0`, trace `d5145bdb…424d63`, gcc+clang ASan `WRITE of size 8` at `:5637` and `WRITE of size 1` at `:2424`, plain build puts chosen `0x5a` in an adjacent sink (`FIRST_DIFF=0 CHOSEN_5A=112`), fixed runs clean; a clean `git archive HEAD` replay reproduced the same trace. No real psqlODBC build, driver manager, SQL text path, process, socket, pointer control, marker, command or rung 5; the CWE-457 uninitialized-array limb is a source claim only. [Brief](reports/frontier-psqlodbc2shell.md) · [Status](reports/psqlodbc2shell-status.md) |
+| **Libvips2Shell** | ✓ | ✓ | ✓ | ✓ | — | **ADMITTED 10:0xZ under standing #6 as the 109th route; CODE/HARNESS rung 1-4 at the direct-call verbatim-pinned scope, no witness verdict.** Frontier staged W145 in commit `2f35788`; the registered two-pane window 113 was adopted, no second window. CVE-2026-69242 / GHSA-9rwc-f68v-4482 (High 8.4 `CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:H/VA:H/SC:L/SI:H/SA:H`, CWE-122/190), libvips `<= 8.18.2`, fixed 8.18.3 by `c72f509`: `vips_image_sanity()` accepts a scanline between `INT_MAX` and `UINT64_MAX`, `VipsRegion.bpl` truncates it to `int` (`region.c:637`), and `vips_region_paint_pel()` does `memcpy(q, to, ws)` at pinned `region.c.v8.18.2:1004` with `q = to - 256`. Direct-call generated drivers: `PASS=62 FAIL=0`, trace `5532e495…d1490e`, gcc+clang ASan `WRITE of size 4` at pinned `:1004`, chosen `0x5a` at `to-256` in plain runs with gdb `Q = TO - 0x100`; fixed sanity/gate/chain controls clean. No libvips build, TIFF decoder, image parser, process, socket, wire, pointer target, command, marker side effect, witness verdict or rung 5; advisory vector is local and network-service reachability UNKNOWN. Status: `reports/libvips2shell-status.md`. |
 
 The 21:1x–21:2xZ batch stages and admits three frontier lanes and closes one
 tacplus boundary. Ntpsec2Shell (CVE-2026-121506), Uhttpd2Shell
@@ -887,7 +888,7 @@ its canary-enabled variant is a measured negative, and the 256 KiB advisory
 bound was measured on the wire with no grade change.
 None of these limbs is a deployment or ASLR-on claim.
 
-The 07:3x–09:5xZ batch folds witness verdicts, author-only limbs and two
+The 07:3x–10:0xZ batch folds witness verdicts, author-only limbs and three
 staged-then-admitted lanes.
 Snap72 W6 graded the two-item wire negative ESTABLISHED at the labeled
 lab-wire scope with no grade change; W5's stale-client-state read stays a
@@ -911,14 +912,17 @@ the grade unchanged at direct-call rungs 1-4 and a witness verdict pending.
 Frontier W143 staged thrift2shell (CVE-2026-55971) with a direct-call harness
 and a registered window 111; it was admitted 09:5xZ under standing #6 as the
 108th route, with the grade unchanged at direct-call rungs 1-4 and a witness
-verdict pending.
+verdict pending. Frontier W145 staged libvips2shell (CVE-2026-69242) with a
+generated direct-call harness and a registered window 113; it was admitted
+10:0xZ under standing #6 as the 109th route with the grade unchanged at
+direct-call rungs 1-4 and a witness verdict pending.
 Modauthoidc's full-module 30/30 loopback probe
 and vrpn's W16 saved-RIP byte map are author-only, with unmoved grades. None
 of these limbs is a deployment claim.
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 108 target
+Each admitted family is its own mind with its own tmux window: 109 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -944,8 +948,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `uhttpd2shell`, `libvnc2shell`, `gdbserver2shell`, `erlang2shell`,
 `minisnmpd2shell`, `ettercap2shell`, `ghostscript2shell`,
 `llamarpc2shell`, `zlib2shell`, `snap72shell`, `modauthoidc2shell`,
-`radvdump2shell`, `fluentbit2shell`, `ffmpeg2shell`, `psqlodbc2shell` and
-`thrift2shell`. Each builds
+`radvdump2shell`, `fluentbit2shell`, `ffmpeg2shell`, `psqlodbc2shell`,
+`thrift2shell` and `libvips2shell`. Each builds
 affected and fixed versions locally, writes harnesses, drives toward rung 4
 and authors its report under `reports/`.
 

@@ -4299,3 +4299,39 @@ harness destination adjacent to a 0xCC sink. There is no real Thrift
 process, framing parser, transport stack, socket, listener, peer, wire
 exchange, ASLR/grooming study, pointer control, ROP chain, command, marker
 side effect, witness verdict or rung 5. Live-server reachability UNKNOWN.
+
+## 2026-11-23 10:0xZ — libvips2shell admission replay
+
+GHSA-9rwc-f68v-4482 / CVE-2026-69242, libvips `<= 8.18.2`, fixed 8.18.3 by
+commit `c72f50927413cd2451837d9813f954bc5d88f548`. Pinned tags `v8.18.2` and
+`v8.18.3`, their `image.c` blobs, the `region.c` source, the fix patch, the
+generated drivers and the negative results are in
+`lab/frontier/libvips2shell/PINS.sha256` and `PROVENANCE.md`. Brief:
+`reports/frontier-libvips2shell.md`; status:
+`reports/libvips2shell-status.md`.
+
+```
+T=$(mktemp -d /tmp/libvips2shell-operator.XXXXXX)
+git archive HEAD lab/frontier/libvips2shell | tar -x -C "$T"
+bash "$T/lab/frontier/libvips2shell/harness/run.sh"
+bash "$T/lab/frontier/libvips2shell/harness/check.sh"
+```
+
+Expect `check.sh` to end with rc 0 and
+`PASS=62 FAIL=0 TRACE=5532e495d71cc0be1b14f4f58e0d8fd4d9790bb6ff73fe921e380f39dcd1490e`.
+`run.sh` only generates the drivers and builds the binaries; it emits compiler
+warnings about unused stub functions, which are not failures. ASan on the
+vulnerable drivers reports `heap-buffer-overflow`, `WRITE of size 4` at
+pinned `region.c.v8.18.2:1004` in `vips_region_paint_pel` with gcc and clang;
+both fixed ASan runs are clean (`UNDERFLOW_RUN=0`). Rung 2 reports
+`CHAIN_REJECT=0 BPL=-256 LS=-256 WS=4` for the vulnerable sanity/chain and
+`dimension overflow` / `CHAIN_REJECT=1 CHAIN_SKIPPED=1` for the fixed one;
+rung 4 reports `CHAIN SINK=5a5a5a5a00000000` at the chosen negative offset
+with gdb `Q = TO - 0x100` and four `0x5a` bytes at `to-256`.
+
+Boundaries: generated C drivers directly call pinned sanity and region slices
+with a stubbed object environment. There is no libvips build, GLib, TIFF
+decoder, image parser, process, socket, wire, pointer target, command, marker
+side effect, witness verdict or rung 5. The advisory's attack vector is local
+and RCE is explicitly unproven there; downstream network-service reachability
+is UNKNOWN.
