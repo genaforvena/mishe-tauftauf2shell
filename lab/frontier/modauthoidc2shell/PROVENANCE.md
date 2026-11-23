@@ -327,3 +327,44 @@ Grade unchanged: rung 3 on the live pre-auth wire path, rung 4 scoped and
 unwitnessed at live-wire scope; byte always NUL, no chosen byte, pointer
 target, consumer dereference, command or rung 5. Replay and limits:
 `full/evidence/plain-crash/README.md`.
+
+## Native child SIGSEGV, bimodal per server start (2026-11-23 W13)
+
+`full/probe-plain-native.sh` reproduced the child fault with **no shim, no
+`LD_PRELOAD` and no ptrace**. The pinned plain module (sha256
+`00899061…5654`) on a plain httpd/APR stack started with
+`ASAN_OPTIONS=detect_leaks=0` enters one of two states at master start,
+inherited by its forked children:
+
+- crashing state: the unauthenticated 7800-byte value-less state cookie kills
+  the serving child (`AH00051 … exit signal Segmentation fault (11)`) and the
+  client gets a connection error. Six fresh starts gave, in order, 12/12 HTTP
+  302 with zero faults, then four starts with 0/12 HTTP 302 and 11 faults each,
+  then 12/12 clean. A 60-request A/B run gave 60/60 302 with default
+  `ASAN_OPTIONS` and 0/60 with `detect_leaks=0` (59 faults); an earlier
+  240-request run in the same state logged 240 `AH00051` lines.
+- safe state: the same request returns 302, no fault.
+
+So the native fault is **bimodal per server start**, not a per-request
+primitive and not reproducible by restarting into a chosen layout. The likely
+cause is the fork-inherited allocator/ASLR layout deciding whether the OOB
+scan meets a `=` byte and stops or runs into an unmapped page; this is a
+hypothesis, not a measured fault address. The first crash in the A/B run
+follows a logged 7800-`a` value-less Cookie by 0.98 s on the live pre-auth path.
+
+Controls in the same env across four fresh starts each: well-formed 7800-byte
+token on the vulnerable module 8/8 302 and zero faults in all four; value-less
+7800-byte token on released `v2.4.19.4` 8/8 302 and zero faults in all four.
+
+Negative lanes: 54/54 clean under `strace -e signal=SIGSEGV` (lengths to
+65000 with a raised lab `LimitRequestFieldSize`); 250/250 clean under gdb with
+default env and 120/120 under `detect_leaks=0`, so ptrace runs land in the
+safe layout and yielded no native frame. Cores are unavailable because Apache
+zeroes `RLIMIT_CORE` in children without `CoreDumpDirectory` and
+`kernel.core_pattern` pipes to apport. W12's layout-changing shim remains the
+only frame attribution (pinned `state.c:219`).
+
+Grade unchanged: rung 3 confirmed on a live pre-auth wire path, rung 4 scoped
+and unwitnessed there. Native availability effect only; byte always NUL, no
+chosen byte, pointer target, consumer dereference, command or rung 5. Raw
+transcripts, limits and replay: `full/evidence/w13-native/README.md`.

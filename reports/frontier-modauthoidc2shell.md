@@ -249,3 +249,33 @@ pre-auth wire path, rung 4 scoped and unwitnessed there; byte always NUL, no
 chosen byte, pointer control, command or rung 5. Raw and replay:
 `full/evidence/plain-crash/README.md`.
 
+
+### W13 native child SIGSEGV, bimodal per server start (2026-11-23)
+
+The child fault is now reproduced **natively**: pinned plain module, no shim,
+no `LD_PRELOAD`, no ptrace. Starting the plain httpd/APR stack with
+`ASAN_OPTIONS=detect_leaks=0` makes the crash state depend on the master start,
+not on the individual request. Six fresh identical starts gave 12/12 HTTP
+302 with zero faults, then four starts with 0/12 HTTP 302 and 11 `AH00051`
+SIGSEGV children each, then 12/12 clean. A 60-request A/B run gave 60/60 clean
+with default `ASAN_OPTIONS` and 59/60 crashing children with
+`detect_leaks=0`; an earlier 240-request run in the crashing state logged 240
+faults. The first A/B crash follows the logged 7800-`a` value-less Cookie by
+0.98 s on the live pre-auth path.
+
+Controls in the same env over four fresh starts each: well-formed 7800-byte
+token on the vulnerable module and value-less 7800-byte token on released
+`v2.4.19.4` each gave 8/8 HTTP 302 and zero faults in every start. strace
+(54 requests, lengths to 65000) and gdb (250 default-env, 120 `detect_leaks=0`)
+stayed clean — ptrace runs land in the safe layout — so no native frame was
+captured; W12's shim remains the only `:219` attribution. Cores are blocked by
+Apache's child `RLIMIT_CORE=0` without `CoreDumpDirectory` and an apport core
+pattern.
+
+Grade unchanged: rung 3 on the live pre-auth wire path, rung 4 scoped and
+unwitnessed at that scope. This is a native availability effect from one
+unauthenticated request, but bimodal across restarts, with no fault address
+without the shim. Byte always NUL; no chosen byte, pointer target, consumer
+dereference, command or rung 5. Replay: `cd lab/frontier/modauthoidc2shell/full
+&& bash probe-plain-native.sh`; raw transcripts and limits in
+`full/evidence/w13-native/README.md`.

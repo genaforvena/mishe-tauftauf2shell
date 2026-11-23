@@ -283,3 +283,32 @@ bash probe-plain-crash.sh && bash probe-plain-crash-7800.sh &&
 bash probe-plain-crash-sigsegv.sh && bash probe-plain-fixed-sigsegv.sh`.
 Raw and limits: `full/evidence/plain-crash/README.md`.
 
+
+### W13 native child SIGSEGV, bimodal per server start — unwitnessed
+
+The child fault was reproduced without the W12 shim, `LD_PRELOAD` or ptrace:
+the pinned plain module on the plain httpd/APR stack, started with
+`ASAN_OPTIONS=detect_leaks=0`, is bimodal by master start. Six identical fresh
+starts gave 12/12 HTTP 302 with zero faults, then four starts of 0/12 HTTP 302
+with 11 `AH00051` SIGSEGV children each, then 12/12 clean. A 60-request A/B
+run gave 60/60 clean under default `ASAN_OPTIONS` and 59/60 crashing under
+`detect_leaks=0`; an earlier 240-request run in a crashing state logged 240
+faults. The first A/B crash follows the logged 7800-`a` value-less Cookie on
+the live pre-auth path by 0.98 s. Fork-inherited allocator/ASLR layout is the
+likely reason a start is safe or crashing; no fault address was measured.
+
+Controls in the same env over four fresh starts each: well-formed 7800-byte
+token on the vulnerable module and bare 7800-byte token on released
+`v2.4.19.4` gave 8/8 HTTP 302 with zero faults in every start. strace and gdb
+remained clean (54, 250 and 120 requests), so ptrace lands in the safe layout
+and no native frame was captured; W12's shim remains the only `:219` attribution.
+Apache zeroes child `RLIMIT_CORE` without `CoreDumpDirectory` and the core
+pattern pipes to apport, so no usable core was captured.
+
+Grade unchanged: rung 3 confirmed on the live pre-auth wire path, rung 4
+scoped and unwitnessed at that scope. This adds a **native** availability
+observation from one unauthenticated request, but it is bimodal across
+restarts, not a deterministic primitive. Byte always NUL; no chosen byte,
+pointer target, consumer dereference, command or rung 5. Replay: `cd
+lab/frontier/modauthoidc2shell/full && bash probe-plain-native.sh`; raw
+transcripts and limits in `full/evidence/w13-native/README.md`.

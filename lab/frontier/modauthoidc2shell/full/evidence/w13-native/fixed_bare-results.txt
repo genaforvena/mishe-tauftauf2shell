@@ -1,0 +1,4 @@
+fixed_bare start=1 master=3758582 ok302=8/8 AH00051=0
+fixed_bare start=2 master=3759169 ok302=8/8 AH00051=0
+fixed_bare start=3 master=3760001 ok302=8/8 AH00051=0
+fixed_bare start=4 master=3760847 ok302=8/8 AH00051=0

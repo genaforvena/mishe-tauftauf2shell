@@ -1,0 +1,4 @@
+vuln_safe start=1 master=3754435 ok302=8/8 AH00051=0
+vuln_safe start=2 master=3755999 ok302=8/8 AH00051=0
+vuln_safe start=3 master=3756276 ok302=8/8 AH00051=0
+vuln_safe start=4 master=3757412 ok302=8/8 AH00051=0

@@ -1,0 +1,6 @@
+start=1 master=3604360 ok302=12/12 AH00051=0
+start=2 master=3606897 ok302=0/12 AH00051=11
+start=3 master=3616221 ok302=0/12 AH00051=11
+start=4 master=3625793 ok302=0/12 AH00051=11
+start=5 master=3634826 ok302=0/12 AH00051=11
+start=6 master=3644514 ok302=12/12 AH00051=0

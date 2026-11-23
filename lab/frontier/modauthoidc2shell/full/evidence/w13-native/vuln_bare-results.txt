@@ -1,0 +1,6 @@
+vuln_bare start=1 master=3733680 ok302=12/12 AH00051=0
+vuln_bare start=2 master=3735964 ok302=12/12 AH00051=0
+vuln_bare start=3 master=3737285 ok302=0/12 AH00051=11
+vuln_bare start=4 master=3744443 ok302=0/12 AH00051=11
+vuln_bare start=5 master=3750212 ok302=0/12 AH00051=11
+vuln_bare start=6 master=3753617 ok302=12/12 AH00051=0
