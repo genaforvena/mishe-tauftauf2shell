@@ -160,16 +160,20 @@ remains UNKNOWN.
 
 ## Heap layout under the 34465-byte copy — W2 (2026-11-23 05:2xZ, author-only)
 
-Bounded rung-5 feasibility check on the plain vulnerable server from W1, own
-build from the pinned tarball with `gzwrite.c.parent` swapped; gdb breakpoints
-at `gzwrite.c:389` (before the memmove) and `:395` (after). Raw output in
-`harness/tcp-evidence/layout-pre-memmove.txt`, `layout-post-memmove.txt`,
-`layout-scan.txt` and `layout-ptrs.txt`. The pre-memmove files report
-`PEER_BYTE_CHECK=FAIL` by design: at that breakpoint the copy has not happened
-yet; the post-memmove file is the peer-byte readback already described above.
+Bounded rung-5 feasibility check on the plain vulnerable server from W1.
+Reproduce with `python3 harness/layout_probe.py --out <file>`: it builds from
+the pinned tarball with `gzwrite.c.parent` swapped, stops at `gzwrite.c:389`
+(before the memmove), walks the chunks following `state->in` and scans the
+destination range for code pointers. The canonical output is
+`harness/tcp-evidence/layout-repro.txt`; `layout-post-memmove.txt` is the
+separate post-copy gdb walk whose first following chunk header reads as peer
+bytes. The post-copy walk was made with a one-off variant of `tcp_probe.py`
+that reports `PEER_BYTE_CHECK=FAIL` at the pre-copy breakpoint by design; the
+committed probe avoids that confusion.
 
 At the pre-memmove breakpoint: `state=0x5555555762d0`,
-`state->in=0x5555555763f0`, stale `next_in=0x5555555cdbaf`, `avail_in=34465`.
+`state->in=0x5555555763f0`, stale `next_in=0x5555555cdbaf`, `avail_in=34465`
+(addresses are ASLR-dependent; sizes and relationships are the evidence).
 Walking glibc chunks from `state->in`: chunk0 size 0x4010 is `state->in`;
 chunk1 size 0x2010 at `0x...7a400` is `state->out`; chunk2 size 0x1760 at
 `0x...7c410` is `state->strm.state` (deflate internal state); chunks3-6 are
