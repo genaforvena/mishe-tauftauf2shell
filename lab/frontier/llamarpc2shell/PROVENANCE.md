@@ -131,3 +131,13 @@ at `:2432` then aborts on the smashed `graphs` vector (`free(): invalid
 pointer`, `__n = -11`) before the epilogue can return into the chain. A 4608-byte
 SEND instead faults in a second `rdma_recv` memcpy. 1-byte control is clean.
 Rung 5 remains UNKNOWN; no witness replay of these failed inputs is needed.
+
+Witness W142 (DM #2193) independently replayed the live rung-3/rung-4 claim
+from a clean archive of `37da4e6` and graded it ESTABLISHED at the labeled
+build scope; the failed ROP inputs above are not part of that verdict. W143
+(DM #2206) found that the 4608-byte ROP run had overwritten the canonical
+43-byte ASan attack logs at `a76b986`; the canonical files are restored to
+the witness-verified `37da4e6` bytes (client `f8491730…8798fa5`, server
+`76bec3c7…86b6a30`) and the 4608-byte pair is kept as
+`wire/evidence/{client,server}-rce-4608.log` (`d7a88a75…fbcab58`,
+`a5151d09…bbb1fe`). No grade change.
