@@ -4445,10 +4445,11 @@ presentation entry or new window.
 No upstream fetch is needed at replay time: both tarballs, the extracted
 pinned `jv.c`/`jv.h`, the fix patch, four slices, two generated drivers and
 eight gcc/clang plain/ASan binaries are committed under
-`lab/frontier/jq2shell/`. Unlike other lanes, this one tracks its tarballs,
-binaries and raw `harness/evidence/*.out` files (no jq2shell `.gitignore`
-rule); only `.mishe-tauftauf/`, `lab/build/` and `lab/src/` are generically
-ignored. `run.sh` re-extracts `jvp_string_copy_replace_bad()` (vuln
+`lab/frontier/jq2shell/`. The real-jq lane's tarball extractions and
+autotools builds are ignored by `lab/frontier/jq2shell/build/`; its runner,
+pin check and small evidence logs are tracked; only `.mishe-tauftauf/`,
+`lab/build/` and `lab/src/` are otherwise generically ignored. `run.sh`
+re-extracts `jvp_string_copy_replace_bad()` (vuln
 lines 1113-1134 / fixed 1112-1138) and `jvp_string_append()` (vuln 1174-1198 /
 fixed 1178-1206) under `#line` directives and rebuilds the drivers and
 evidence on every run:
@@ -4480,8 +4481,43 @@ Ceiling: direct call with stubbed structs, a 48-byte capped copy, a bounded
 16-step UTF-8 iterator, NDEBUG and a 2 GiB reserved mapping; no jq build,
 JSON input, jq process, socket, wire, real allocator study, pointer control,
 marker, command, witness verdict or rung 5. Real-pipeline reachability and
-heap-neighbour overlap are UNKNOWN. Operator admission and a witness verdict
-remain pending.
+heap-neighbour overlap are UNKNOWN. The subsequent real-build and witness
+outcomes are recorded in the next section.
+
+## 2026-11-23 11:4xZ — jq2shell real-jq caller frames, memory-guard negative
+
+Witness W1 (#2556) returned rungs 1-4 ESTABLISHED at the labeled direct-call
+scope (not rung 5): clean-archive replay of `87f8bb8` gave `PASS=64 FAIL=0`
+and trace
+`8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7`,
+gcc+clang ASan at the pinned lines, fixed clean, 14 pins OK and an
+independent gdb readback of the `0x5a` sink. The witness's `PINS.sha256` NIT
+is fixed by making its three `REF` lines comments, so `sha256sum -c` is
+quiet (14/14 OK).
+
+Real pinned jq builds now exist: from the repo root run `bash
+lab/frontier/jq2shell/live/real-jq.sh`. It verifies the pins, builds both
+tarballs with `--enable-asan --disable-maintainer-mode
+--with-oniguruma=/usr` and `CFLAGS='-g -O1 -fno-omit-frame-pointer'`, then
+runs two small jq programs and four gdb breakpoints at the upstream pinned
+lines. Expect rc 0, `REAL-JQ-PASS`,
+`1.8.1 APPEND_LEN=1000 BAD_LEN=30` and the same for 1.8.2, plus four
+`GEOM ...` lines in `live/evidence/geometry-summary.out`: 1.8.1
+`currlen=1000 len=2 allocsz=2004` at `src/jv.c:1189` and `length=30
+maxlength=91` at `:1118`; 1.8.2 `sum64=1002` at `:1181` and
+`maxlength64=91` at `:1117`. The gdb frames are real jq caller chains
+(`jv_string_concat` ← `binop_plus` for append, `jv_string_sized` ←
+`f_format` for invalid UTF-8). Inputs are small; no overflow occurs in this
+replay.
+
+The advisory's full expressions cannot be driven in this wake: the cgroup
+guard reads `memory.max=2147483648` / `memory.high=1610612736`, while the
+append PoC needs a 2 GiB first operand. Running it under ASan returned
+rc=124 after 300s with no ASan report; `n=10^9` completed in 4.66s. The
+second PoC likewise needs ~1.43 GiB decoded bytes from ~1.9 GiB of base64.
+No guard bypass was attempted. Heap-neighbour overlap in a real jq process,
+pointer control and command execution stay UNKNOWN; the grade remains W1's
+rungs 1-4.
 
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 

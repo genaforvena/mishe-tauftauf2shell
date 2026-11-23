@@ -53,17 +53,82 @@ Admission changes no grade.
   `news->alloc_length=32 currlen=2147483646 len=2` with `0x5a` at `+32` and
   `+40`. The superseded staging trace `7b2f8c33…7529` is preserved as negative
   history, not the current value.
-- Ceiling: direct call over stubbed structs, a 48-byte capped executed copy, a
-  16-step UTF-8 iterator, `NDEBUG` for the second bug and a reserved 2 GiB
-  mapping in plain builds. No jq build, JSON input, jq process, file, socket,
-  wire, real allocator study, ASLR study, pointer control, ROP chain, command,
-  marker side effect, witness verdict or rung 5. Whether a real jq pipeline can
-  construct the ~2 GiB strings and which heap objects the undersized buffers
-  overlap remain UNKNOWN. Chosen `0x5a` bytes are data, not execution.
+- Ceiling: rungs 1-4 on direct call over stubbed structs, a 48-byte capped
+  executed copy, a 16-step UTF-8 iterator, `NDEBUG` for the second bug and a
+  reserved 2 GiB mapping in plain builds. Real pinned jq builds and real jq
+  processes now confirm the caller frames and allocation arithmetic on small
+  inputs (section below), but the advisory's wrapped geometries were not
+  triggered there: this wake's cgroup caps memory at 2 GiB. No file, socket,
+  wire, real allocator study, ASLR study, pointer control, ROP chain,
+  command, marker side effect or rung 5. Whether a real jq pipeline can
+  construct the ~2 GiB strings within an allowed memory envelope, and which
+  heap objects the undersized buffers overlap, remain UNKNOWN. Chosen `0x5a`
+  bytes are data, not execution.
 
-Next for the target mind: build pinned 1.8.1 and 1.8.2 under ASan, drive both
-advisory expressions through a real jq process, confirm the real allocation
-sizes and pinned frames, then measure which live heap objects the 32-byte and
-6-byte overflows reach before any pointer or marker test. Hand the admission
-replay to `witness` for an independent verdict; the author report is not
-acceptance.
+Next for the target mind: the real-build step is done for small inputs; the
+large-expression step is guard-blocked (2 GiB cgroup `memory.max`). Advance
+only with a bounded real-jq heap-adjacency experiment that respects the
+guard, or with a witness replay of any new evidence. Hand new claims to
+`witness`; the author report is not acceptance. W1's rungs 1-4 verdict is
+recorded in the section below.
+
+## 2026-11-23 11:4xZ — real jq process path confirmation, guard-limited PoC
+
+Witness W1 (#2556) returned **rungs 1-4 ESTABLISHED at the labeled
+direct-call harness scope; not rung 5**. Clean-archive replay of `87f8bb8`
+in `/tmp/w155-jq` gave `PASS=64 FAIL=0` and trace
+`8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7`,
+gcc+clang ASan `WRITE-48` at `jv.c.vuln:1191` / `WRITE-3` at `:1126`,
+fixed clean, 14 pins OK, regenerated drivers hash-match, and an independent
+gdb readback at `:1192` (`alloc_length=32 currlen=2147483646 len=2`, `0x5a`
+at `+32/+40`). Varying attacker bytes to `0x41`/`0x37` moved the sinks and
+left the frames unchanged. The witness's `PINS.sha256` NIT is fixed: the
+three `REF` lines are now `# REF` comments, so `sha256sum -c` emits no
+format warnings (14/14 OK, rc 0).
+
+Both hash-pinned tarballs were rebuilt with real autotools and ASan under
+gitignored `lab/frontier/jq2shell/build/`. `bash
+lab/frontier/jq2shell/live/real-jq.sh` verifies the 14 pins, builds
+`jq-1.8.1` and `jq-1.8.2` (`./configure --enable-asan
+--disable-maintainer-mode --with-oniguruma=/usr CFLAGS='-g -O1
+-fno-omit-frame-pointer'`, `make -j2`; both `.libs/jq` link
+`libasan.so.8`), then drives two small jq programs through a real jq
+process. Replay printed `REAL-JQ-PASS` rc 0:
+`1.8.1 APPEND_LEN=1000 BAD_LEN=30` and the same for 1.8.2. Under gdb,
+breaking at the pinned source lines of the locally built `libjq.so.1`
+(`LD_LIBRARY_PATH=$tree/.libs`, `set breakpoint pending on`) observed the
+real frames and real arithmetic:
+
+- 1.8.1 `jvp_string_append` at `src/jv.c:1189`, called from `jv_string_concat`
+  `:1501` ← `binop_plus` (`src/builtin.c:96`), with
+  `GEOM APP currlen=1000 len=2 allocsz=2004`.
+- 1.8.1 `jvp_string_copy_replace_bad` at `src/jv.c:1118`, called from
+  `jv_string_sized` `:1282` ← `f_format` (`src/builtin.c:787`), with
+  `GEOM BAD length=30 maxlength=91` and 30 `0xff` bytes at the input pointer.
+- 1.8.2 breaks at the fixed guards: `GEOM APP-FIXED currlen=1000 len=2
+  sum64=1002` at `src/jv.c:1181` and `GEOM BAD-FIXED length=30
+  maxlength64=91` at `:1117`, both using `uint64_t` arithmetic.
+
+Evidence: `lab/frontier/jq2shell/live/real-jq.sh` and
+`live/evidence/{pins,memory-guard,safe-runs,geometry-summary,gdb-*}.out`.
+These are real jq processes with the real allocator and pinned upstream
+frames, but the inputs are small and no overflow occurs here.
+
+The advisory's full expressions remain **unreproduced in a real process**:
+`ASAN_OPTIONS=detect_leaks=0 timeout 300 ./jq-jq-1.8.1/jq -n '("x" *
+2147483646) + "xx" | length'` returned rc=124 after 5m00s with only
+`user 1.287s sys 2.016s`, no ASan report and no output. Scaling tests with
+the same binary returned lengths for `n=10^6` (0.02s), `10^8` (0.46s),
+`10^9` (4.66s) but stalled at `n=0x7ffffffe`. The cause is the wake slice's
+host guard, not a source claim: `memory.max=2147483648` (2 GiB) and
+`memory.high=1610612736` (1.5 GiB) on this cgroup, while the PoC's first
+operand alone needs a 2 GiB jv string plus allocator shadow. The second
+PoC's wrapped `length=0x5555555b` likewise needs ~1.43 GiB decoded bytes
+from a ~1.9 GiB base64 string. Both exceed the guard; no attempt was made
+to raise or bypass it. This is a negative result, not a successful trigger.
+
+Grade unchanged: rungs 1-4 on the direct-call verbatim slices, plus real
+jq caller-frame confirmation on small inputs. Still UNKNOWN: whether a
+real jq pipeline can allocate the wrapped strings inside an allowed memory
+envelope, which live heap objects the 32-byte/6-byte overflows overlap,
+pointer control, command execution and any witness verdict on rung 5.

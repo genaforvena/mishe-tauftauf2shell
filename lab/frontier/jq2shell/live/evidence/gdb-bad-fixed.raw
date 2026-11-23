@@ -1,0 +1,11 @@
+No source file named src/jv.c.
+Breakpoint 1 (src/jv.c:1117) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+GEOM BAD-FIXED length=30 maxlength64=91
+#0  jvp_string_copy_replace_bad (data=data@entry=0x50300000df90 '\377' <repeats 30 times>, length=length@entry=30) at src/jv.c:1117
+#1  0x00007ffff776a09c in jv_string_sized (str=str@entry=0x50300000df90 '\377' <repeats 30 times>, len=30) at src/jv.c:1316
+#2  0x00007ffff77466ad in f_format (jq=<optimized out>, input=..., fmt=...) at src/builtin.c:836
+#3  0x00007ffff775ec93 in jq_next (jq=jq@entry=0x511000000040) at src/execute.c:916
+30
+[Inferior 1 (process 2995024) exited normally]

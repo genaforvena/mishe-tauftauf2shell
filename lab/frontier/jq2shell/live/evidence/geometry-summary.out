@@ -1,0 +1,4 @@
+GEOM APP currlen=1000 len=2 allocsz=2004
+GEOM BAD length=30 maxlength=91
+GEOM APP-FIXED currlen=1000 len=2 sum64=1002
+GEOM BAD-FIXED length=30 maxlength64=91

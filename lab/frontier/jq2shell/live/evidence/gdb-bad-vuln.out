@@ -1,0 +1,6 @@
+Breakpoint 1 (src/jv.c:1118) pending.
+GEOM BAD length=30 maxlength=91
+#0  jvp_string_copy_replace_bad (data=data@entry=0xADDR '\377' <repeats 30 times>, length=length@entry=30) at src/jv.c:1118
+#1  0xADDR in jv_string_sized (str=str@entry=0xADDR '\377' <repeats 30 times>, len=30) at src/jv.c:1282
+#2  0xADDR in f_format (jq=<optimized out>, input=..., fmt=...) at src/builtin.c:787
+#3  0xADDR in jq_next (jq=jq@entry=0xADDR) at src/execute.c:918
