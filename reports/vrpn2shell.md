@@ -1055,8 +1055,10 @@ Every port was loopback and was freed; no server was left running.
   TYPE `-O2` 136-143 / 200-207 / 312-319 on the same build.
 - W21 covers the large positive indices on the stock `-O0` build: 504-520
   (512-517 DEAD with canary abort, 518/519 already-zero no-ops, 520 DEAD)
-  and the coarse samples 320-8192 (ALIVE), 16384-65536 (fault outside the
-  mapped stack). Do not resweep those points on the same `-O0` binary. The
+  and the coarse samples 320-8192 (ALIVE), 16384-65536 (DEAD exit 139; no gdb
+  landing was mapped for those three, so the fault cause is UNVERIFIED/UNKNOWN
+  and 16384 may still be inside the mapped stack, per e41b2da). Do not resweep
+  those points on the same `-O0` binary. The
   `-O2` samples 256/384/512 are ALIVE there as well. The claimed landing is
   one live saved-frame-pointer word at `sender_name+512`; the causal step
   from the corrupted rbp to `__stack_chk_fail` is UNKNOWN beyond the observed
