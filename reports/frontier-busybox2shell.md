@@ -111,12 +111,17 @@ server bytes land at chosen offsets past the heap allocation, in a real
 client process on loopback. This is stronger than the plant's usual
 direct-call staging because the attacker-controlled input crosses a socket.
 
-**Ceiling / UNKNOWN:** no ASLR measurement, no allocator grooming into a
-live object, no function-pointer or return-address control, no shellcode, no
-command execution, no witness replay. Both safe controls need the operator's
+**Ceiling / UNKNOWN:** ASLR is measured (W1) but not defeated; no groomed
+live object holding a controlled pointer, no function-pointer or
+return-address control, no shellcode, no command execution, no witness replay.
+Both safe controls need the operator's
 `-b 64` action (UI:R in the advisory) and the server must ignore the option;
 that precondition is advisory-consistent but not deployment-measured.
 Rung 5 is **not attempted**. Advisory RCE prose remains a claim.
+
+W1 (below) adds chosen-byte corruption of live glibc heap metadata and a
+server-triggered allocator abort on the stock plain build; it adds no
+pointer/IP control and does not change the rung-5 ceiling.
 
 ## 5. Cheapest next steps for a dedicated mind
 
@@ -138,3 +143,47 @@ one-line upstream fix. Ranked above advisory-only candidates with unknown
 versions (HID parser CVE-2026-122173, BusyBox-unrelated Corosync/MS SQL/
 PostgreSQL paths) and below targets with an already demonstrated wire-to-code
 path. Operator owns admission.
+
+## 7. W1 heap-metadata experiment (2026-11-23 23:5xZ, all loopback)
+
+`lab/frontier/busybox2shell/heap_probe.py` and `run-heap.sh` replay to
+`heap_evidence.log` (SHA-256
+`9aef785cdd5f5386d65c9afc369c917f0e63ecb2e0cd171162ef8b37d75966c6`,
+2026-11-23T23:51:41Z–23:52:20Z). No code is injected into the client: the
+same stock unstripped BusyBox binary and real UDP path as legs 1-5 are used.
+
+Measured heap geometry under gdb with `set disable-randomization off`:
+`xbuf = rbuf - 0x50`; the rbuf chunk header at `rbuf-8` reads `0x51` (a
+68-byte request rounded to a 0x50-byte chunk); the next chunk's size word at
+`rbuf+72` (the top/wilderness chunk) reads `0x20cb1`. Five runs gave rbuf
+addresses `0x5a572bf3e310`, `0x60ab8d8c1310`, `0x58e20307e310`,
+`0x629542956310`, `0x588580dc3310`: ASLR moves the heap base while relative
+offsets stay invariant.
+
+After fallback, the server's second datagram is a 516-byte TFTP ERROR
+(opcode 5) packet. Wire bytes `payload[68:76]` land at `rbuf+72..79`, the
+top-chunk size word; the rest is a 511-byte NUL-free error text. The client's
+`tftp.c:632-639` calls `bb_error_msg("server error: (%u) %s", ...)`; its
+long-message path (`libbb/verror_msg.c:50`) calls `vasprintf` -> `malloc` on
+the corrupted heap.
+
+- Chosen `0x4141414141414141`: plain client rc -6 (SIGABRT), stderr
+  `malloc(): corrupted top size`. Under gdb, `NEXT_SIZE` changes
+  `0x20cb1` -> `0x4141414141414141` across the second `safe_read`
+  (`IO_BUFSIZE=516 LEN=516`), then SIGABRT with backtrace `tftp_protocol`
+  (`tftp.c:604`) <- `tftp_main` (`tftp.c:867`) <- `run_applet_no_and_exit`.
+- Chosen `0x4242424242424242`: same abort. Chosen `0x21`: rc -6 with glibc
+  `malloc.c:2599 (sysmalloc)` assertion. The failure mode follows the
+  chosen bytes.
+- Isolation: writing back the original word `0x20cb1` yields rc 1 and a
+  clean server-error exit despite the overflow having occurred.
+- Control: the same 516-byte ERROR packet without `-b 64` (rbuf=516 from
+  the start) yields rc 1 and no abort. The fixed one-line ASan build with
+  the identical attack yields rc 1 and no ASan overflow report.
+
+Grade unchanged at rungs 1-4, now with chosen-byte corruption of live glibc
+allocator metadata and a server-triggered abort on the stock client; no
+harness-forced execution is involved. Ceiling unchanged: no controlled
+function pointer or return address, no command, no rung 5. ASLR is measured
+but not defeated — only relative offsets are used. This W1 result is an
+author claim pending witness replay, like the original five legs.

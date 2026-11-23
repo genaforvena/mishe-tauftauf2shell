@@ -46,3 +46,15 @@ only `CONFIG_TFTP`, `CONFIG_FEATURE_TFTP_GET` and
 are byte copies of the two pinned source files; `fix.patch` is their `diff -u`.
 The up-to-four-hundred-forty-eight-byte overwrite is driven only by UDP
 datagrams sent from `malicious_tftp.py` to the client on loopback.
+
+## W1 heap-metadata follow-up (2026-11-23 23:5xZ)
+
+`heap_probe.py` is a second loopback-only server: after forcing the
+fallback with a 4-byte DATA block 0, it sends a 516-byte TFTP ERROR packet
+whose bytes at wire offset 68 overwrite the top-chunk size word at
+`rbuf+72`, and whose 511-byte NUL-free text makes BusyBox's `bb_verror_msg`
+allocate on the corrupted heap. `run-heap.sh` replays the ASLR/layout,
+chosen-value, isolation, no-small-block, fixed-build and gdb legs;
+`heap_evidence.log` is the unedited transcript (SHA-256
+`9aef785cdd5f5386d65c9afc369c917f0e63ecb2e0cd171162ef8b37d75966c6`).
+All sockets bind 127.0.0.1 only. No code is injected into the client.
