@@ -171,8 +171,10 @@ the 264-byte control block as `{size_t _size; size_t _used;
 su_timer_t *_heap[2];}` with `_size = 32 - _offset = 30` at
 `heap.h:167-169`; `timers_alloc` is its realloc callback at
 `su_timer.c:196-204`. `struct su_timer_s` at `su_timer.c:159-170` puts
-`sut_wakeup` well past the first words. The 5/6 overwritten bytes are the
-low bytes of `_size`; the timer pointers and the callback are out of reach.
+`sut_wakeup` well past the first words. The probe reads `NEIGHBOR_FIRST8`
+at realloc time, before the frame write; combined with W2's measured realloc
+extent (5/6 bytes), that write reaches the low bytes of `_size`. The timer
+pointers and the callback are out of reach.
 
 This is a **measured negative at the live-process scope**, not a new rung-4
 positive and not rung 5: no pointer, callback, marker, command or side
@@ -180,5 +182,8 @@ effect was obtained. The mask is still repeating-XOR and requires heap-byte
 knowledge; the neighbour chunk's size is corrupted by the same write and
 glibc aborts before any timer-heap use. Enlarging `_size` would additionally
 require enough queued timers for `_used` to approach `_size`, which was
-neither measured nor claimed. The identity measurement is author-observed;
-an independent witness replay was requested.
+neither measured nor claimed. Independent witness replay (W143) **ESTABLISHED**
+the identity measurement at this labeled scope: clean `git archive 709a34c`,
+hash-checked pins, three runs (full rc 134 with matching neighbour fields,
+short rc 0, port-shifted structurally identical), all caller offsets symbolized
+to the pinned sources, no counterexample and no grade change.

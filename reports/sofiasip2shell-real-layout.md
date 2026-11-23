@@ -377,8 +377,9 @@ fake chunk.
 into a usable allocator state. Preserving the bit removes one abort message
 but leaves an implausible size; restoring a plausible size removes the useful
 corruption. Rung 5 on this primitive needs a different write mechanism, not
-more grooming of this one. No pointer, marker, command or side effect was
-measured; grade unchanged. W3 is author-observed and awaits witness replay.
+measured; grade unchanged. Witness #1942 replayed W3 from clean archive
+`21a4be1` and **CLOSED ESTABLISHED** at this labeled negative-result scope;
+only the full autogen/configure/make library lane remains author-observed.
 
 Reproduce the W3 cases with
 `bash lab/sofiasip2shell/layout/run_w3.sh` (rebuilds the plain harness,

@@ -96,7 +96,7 @@ grade.
   1..5 equal `before ^ mask[k%4]` (`LIVE_META_DELTA_BAD=0`); the shim's own
   victim landed 312 bytes away and stayed untouched, an honest placement
   negative. This closes the W1 "no SIP tport path" limit.
-- W5 live neighbour identity (author-observed negative): an `LD_PRELOAD`
+- W5 live neighbour identity (witness-backed negative): an `LD_PRELOAD`
   allocation tracker (`lab/sofiasip2shell/libbuild/live/neighbor_probe.c`,
   `run_neighbor_probe.sh`, evidence in `libbuild/evidence/w5/`) matched the
   physical neighbour of the reallocated frame buffer to a 264-byte
@@ -106,7 +106,8 @@ grade.
   `sut_wakeup` callback out of the 5/6-byte reach. The full vulnerable case
   still aborts (`corrupted size vs. prev_size`, rc 134); the 65520-byte
   short control is clean. Measured structural limit at live-process scope,
-  not a new rung-4 positive and not rung 5; witness replay requested.
+  not a new rung-4 positive and not rung 5; independent witness replay (W143)
+  ESTABLISHED at that scope, no counterexample and no grade change.
 - W3 mask/slack sweep (`reports/sofiasip2shell-real-layout.md`, W3 section;
   raw cases in `lab/sofiasip2shell/layout/evidence/w3/`): the earlier claim
   that the first corrupted byte clears `PREV_INUSE` is scope-limited to the
