@@ -5,24 +5,24 @@ CHAIN RC=0 BPL=-256 LS=-256 WS=4
 CHAIN SINK=5a5a5a5a00000000
 UNDERFLOW_RUN=1 BPL=-256
 =================================================================
-==944278==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5210000014ff at pc 0x7c4b2e0fb303 bp 0x7ffc756b6b40 sp 0x7ffc756b62e8
+==1104393==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5210000014ff at pc 0x7cf9958fb303 bp 0x7ffe124dbe20 sp 0x7ffe124db5c8
 WRITE of size 4 at 0x5210000014ff thread T0
-    #0 0x7c4b2e0fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x5b30fa27c291 in vips_region_paint_pel /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1004
-    #2 0x5b30fa27d60c in run_underflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1098
-    #3 0x5b30fa27d706 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1110
-    #4 0x7c4b2dc2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #5 0x7c4b2dc2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #6 0x5b30fa27a424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/bin-gcc-vuln-asan+0x2424) (BuildId: f1d00bcfcae11c4798ea4ba0c75cb507b59c3840)
+    #0 0x7cf9958fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x59730e279291 in vips_region_paint_pel /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1004
+    #2 0x59730e27a60c in run_underflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1098
+    #3 0x59730e27a706 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1110
+    #4 0x7cf99542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7cf99542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x59730e277424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/bin-gcc-vuln-asan+0x2424) (BuildId: f1d00bcfcae11c4798ea4ba0c75cb507b59c3840)
 
 0x5210000014ff is located 1 bytes before 4096-byte region [0x521000001500,0x521000002500)
 allocated by thread T0 here:
-    #0 0x7c4b2e0fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x5b30fa27d33a in run_underflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1086
-    #2 0x5b30fa27d706 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1110
-    #3 0x7c4b2dc2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x7c4b2dc2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x5b30fa27a424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/bin-gcc-vuln-asan+0x2424) (BuildId: f1d00bcfcae11c4798ea4ba0c75cb507b59c3840)
+    #0 0x7cf9958fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x59730e27a33a in run_underflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1086
+    #2 0x59730e27a706 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/region.c.v8.18.2:1110
+    #3 0x7cf99542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7cf99542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x59730e277424 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell/harness/bin-gcc-vuln-asan+0x2424) (BuildId: f1d00bcfcae11c4798ea4ba0c75cb507b59c3840)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
@@ -56,4 +56,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==944278==ABORTING
+==1104393==ABORTING
