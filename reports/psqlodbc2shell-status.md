@@ -488,3 +488,41 @@ a pointer disclosure, and it does not change W163's store-value closure,
 the grade (rungs 1-4, no rung 5) or any witness status. #2576 (W147 real-PG
 replay) remains pending at 17:3xZ.
 
+## Larger argument counts do not reach saved RIP (W166, target mind)
+
+W159 measured `saved_rip_slot - param_pos = 0x578` (row 87+8) in the clang
+`-g -O2 -fno-omit-frame-pointer -fno-stack-protector` real-object layout,
+but only drove n=80 (row ~80). This wake tested the open question directly:
+does a larger count write the control-flow slot before the parser faults?
+No source, build or harness changes were made; the existing
+`build/real-clang-o2-vuln` binary from `real/clang-o2-layout.sh` was driven
+under gdb with n=88 and n=96, and the existing fixed-tag binary with n=96.
+Raw: gitignored `build/evidence/w166-gdb-n88.out`,
+`w166-gdb-rows-n96.out` and `w166-fixed-n96.out`.
+
+- n=88, breakpoint `convert.c:5864`: `param_pos=0x7fffffffd770`,
+  `nqb=param_pos+0x4a0`, saved-RIP slot `param_pos+0x578` old value
+  `0x555555567641`. Hardware watch on that slot never fired; after the
+  SIGSEGV it still read `0x555555567641`. Frame:
+  `inner_process_tokens:3760` <- `processParameters:5622` <-
+  `convert_escape:5864` <- `inner_process_tokens:3865`.
+- n=96, watches on `param_pos+75*16` (0x7fffffffdc10) and row 87
+  (0x7fffffffdcd0): row 75 changed `0 -> 1 -> 2 -> 3` at the faulting
+  instruction `:3760`, while row 87 stayed `0x7fffffffde70` (a live stack
+  pointer, not a written value). Frame #0's `qb` was
+  `0x7fffffffdc00`, i.e. row 74 — the parser's own `nqb` object. The first
+  row past it overwrites a field of that live object with a parser integer
+  and `QP_exit(qp, QP_IN_ESCAPE)` dereferences it immediately; no later
+  row is reached.
+- Fixed tag, n=96: `RC=-1 ERRNUM=1 ERRMSG=too many parameters in the escape
+  function call`, shell rc=1; no fault.
+
+Disposition: **negative for rung 5**, and a causal refinement of W159. The
+blocker is not merely that n=80 stops short of row 87; increasing the count
+does not help because the recursive token processing dereferences the
+corrupted `nqb` at row 74/75 before `processParameters` can write rows
+76..87. No saved pointer, partial pointer overwrite, chosen byte, marker,
+command or control-flow diversion was observed. Grade stays rungs 1-4,
+no rung 5; W166 is author-only and unwitnessed. #2576 (W147 real-PG replay)
+was still pending at 20:45Z; the witness wake that started at 20:39Z failed
+with the standing engine-cap RED, not a new target finding.
