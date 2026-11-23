@@ -813,6 +813,44 @@ cause. No surviving modified control flow, no chosen byte, no command side
 effect, no rung 5, no grade change. Ports 14100-14131 were loopback, all
 freed; no server left running. Raw evidence in `out-w16-*/`.
 
+
+## Caller-frame saved-RIP byte map at -O2 (W17, 2026-11-23 ~10:16Z)
+
+W15/W16 closed the *innermost* saved RIP (frame offset +136) on both stock
+builds. W17 extends the map two frames deeper on the same vulnerable
+`build-opt-07.36/server_src/vrpn_server` (SHA
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`), with the
+fixed `build-opt-fixed` binary (`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`)
+as control. At the `vrpn_Connection.C:4554` write site
+`rsp == rbp == &sender_name`; the live return addresses in the backtrace are
+at `+136 = 0x5555555a1f42` (inner `doSystemCallbacksFor`, :1446),
+`+200 = 0x5555555a200d` (outer `doSystemCallbacksFor`, :1424) and
+`+312 = 0x5555555a4059` (`vrpn_Endpoint::dispatch`, :4331). Words at +344
+(`0x5555555a14b9`) and +392 vary or do not appear in `bt`, so they are stale
+stack data, not live return slots; their rows below are honest no-ops.
+
+gdb PRE/POST at the store (temporary breakpoint at `$pc+6`) confirms both new
+landings and that the modified returns are actually taken:
+
+| index | frame offset | PRE -> POST | observed |
+| --- | --- | --- | --- |
+| 200 | +200 byte 0 | `0x5555555a200d -> 0x5555555a2000` | `bt` frame #2 enters `doSystemCallbacksFor` at `0x5555555a2000` (file offset `0x4e000`, mid-instruction), then SIGSEGV |
+| 312 | +312 byte 0 | `0x5555555a4059 -> 0x5555555a4000` | `bt` frame #3 enters `dispatch` at `0x5555555a4000` (file offset `0x50000`, mid-instruction) with `this=0x20`, then SIGSEGV |
+
+Debugger-free `probe-func-dos.sh` with explicit `BIN=` on fresh loopback ports
+closes both byte maps: indices 200-205 and 312-317 (bytes 0-5) are DEAD exit
+139; indices 206-207 and 318-319 (bytes 6-7, already `00`) are ALIVE no-ops.
+The fixed binary is ALIVE at 200 and 312; short input (index 4) is ALIVE;
+stale-word indices 296, 304, 328, 336, 344, 392 and 408 are ALIVE and prove no
+live control-flow change at those offsets. One timed-out probe wrapper left a
+server on port 14221; it was force-killed and the port verified free.
+
+This adds two more modified-return-to-mapped-text paths to the closure, both
+faulting. No surviving modified control flow beyond the already-graded
+lab-patched marker, no chosen byte, no command side effect, no rung 5, no
+grade change. Ports 14200-14241, all loopback, were freed; no server left
+running. Raw evidence in `out-w17-*/`.
+
 ## Limits and next work
 
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
@@ -831,8 +869,9 @@ freed; no server left running. Raw evidence in `out-w16-*/`.
   (canary) and 112/115/119 (saved rbp); W1 measured 120. The earlier
   address-inference wording is retired for those offsets. Plain `-O2` geometry
   (W8) is measured from the store instruction and frame words: canary at
-  104-111, saved rbp at 120, saved rip at 136-143. Both ranges are specific
-  to g++ 13.3.0 on this host and must be re-measured on any other build.
+  104-111, saved rbp at 120, saved rip at 136-143, with two further live
+  caller returns at +200 and +312 (W17). All ranges are specific to g++
+  13.3.0 on this host and must be re-measured on any other build.
 - W6's DoS signature (SIGSEGV/SIGILL) is a **Debug -O0 layout effect**; W7's
   -8/120 samples were non-fatal at `-O2`. W8/W10 measure a distinct stock `-O2`
   consequence: indices 105-111 zero a nonzero canary byte and abort with

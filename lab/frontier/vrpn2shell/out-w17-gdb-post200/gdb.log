@@ -1,0 +1,22 @@
+Breakpoint 1 at 0x50a32: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+HIT pc=0x5555555a4a32 rsp=0x7fffffffd9c0 i=200
+PRE  +136=0x5555555a1f42 +200=0x5555555a200d +312=0x5555555a4059
+Temporary breakpoint 2 at 0x5555555a4a38: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4560.
+
+Temporary breakpoint 2, vrpn_Endpoint::handle_sender_message (userdata=0x5555556a7220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4560
+4560	    local_id = endpoint->d_dispatcher->getSenderID(sender_name);
+POST pc=0x5555555a4a38 rsp=0x7fffffffd9c0
+POST +136=0x5555555a1f42 +200=0x5555555a2000 +312=0x5555555a4059
+=> 0x5555555a4a38 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+104>:	call   0x5555555a16a0 <_ZN19vrpn_TypeDispatcher11getSenderIDEPKc>
+#0  vrpn_Endpoint::handle_sender_message (userdata=0x5555556a7220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4560
+#1  0x00005555555a1f42 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, p=..., userdata=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x00005555555a2000 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, type=-1, sender=3, time=..., len=8, buffer=0x5555556a7380 "", userdata=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x00005555555a4059 in vrpn_Endpoint::dispatch (this=0x5555556a7220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x5555556a7380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#4  0x00005555555a553a in vrpn_Endpoint_IP::getOneTCPMessage (this=this@entry=0x5555556a7220, fd=6, buf=0x5555556a7380 "", buflen=buflen@entry=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+#5  0x00005555555a575a in vrpn_Endpoint_IP::handle_tcp_messages (this=this@entry=0x5555556a7220, timeout=timeout@entry=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3561
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555a1f0d in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x5555556a58d0, p=..., userdata=0x64, userdata@entry=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1442
+1442	    if (!d_systemMessages[-p.type]) {

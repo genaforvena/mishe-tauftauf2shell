@@ -1,0 +1,5 @@
+date_utc=2026-11-23T10:15:01Z
+bin=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server
+bin_sha256=bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2  lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server
+port=14239 index=318 msgtype=-1 hold=1.0
+status=ALIVE_AFTER_MESSAGE

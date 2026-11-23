@@ -1,0 +1,15 @@
+Breakpoint 1 at 0x50a32: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+HIT pc=0x5555555a4a32 rsp=0x7fffffffd9c0 i=304 &name=0x7fffffffd9c0
+PRE +200=0x5555555a200d +304=(nil) +336=(nil) +392=0x5555556a7220
+TARGETS t304=(nil) t336=(nil) t392=0x5555556a7200
+Breakpoint 2 at 0x0
+Breakpoint 3 at 0x0
+Breakpoint 4 at 0x5555556a7200
+Warning:
+Cannot insert breakpoint 2.
+Cannot access memory at address 0x0
+
+lab/frontier/vrpn2shell/out-w17-gdb-304/gdb.cmd:18: Error in sourced command file:
+Command aborted.

@@ -510,3 +510,26 @@ binary SHA, port, index and status; `out-w16-*/` holds raw gdb logs, client
 output and server stderr. All ports 14100-14131 were loopback and were freed;
 no server left running. Author self-observation only; grade unchanged, no
 chosen byte, no command side effect, no rung 5.
+
+## W17 — caller-frame saved-RIP byte map at -O2 (2026-11-23 ~10:16Z)
+
+No new build: the same vulnerable `build-opt-07.36/server_src/vrpn_server`
+(SHA-256 `bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`)
+and fixed `build-opt-fixed/server_src/vrpn_server` (SHA-256
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`) were
+reused. `out-w17-frame/gdb.log` dumps the stack at `vrpn_Connection.C:4554`
+with `rsp == rbp == &sender_name`; live returns are `+136=0x5555555a1f42`,
+`+200=0x5555555a200d`, `+312=0x5555555a4059`. `out-w17-gdb-post200/gdb.log`
+and `out-w17-gdb-post312/gdb.log` use a temporary breakpoint at `$pc+6` to
+record PRE -> POST `0x...5a200d -> 0x...5a2000` and
+`0x...5a4059 -> 0x...5a4000`; both modified returns appear in the backtrace
+and both end in SIGSEGV.
+
+Debugger-free `probe-func-dos.sh` with explicit `BIN=` on ports 14200-14241
+(all loopback) records indices 200-205 and 312-317 DEAD exit 139, 206-207 and
+318-319 ALIVE (bytes already `00`), stale-word indices 296/304/328/336/344/
+392/408 ALIVE, fixed 200 and 312 ALIVE, short index 4 ALIVE. A timed-out probe
+wrapper left a server on 14221, which was force-killed and the port verified
+free. Raw logs, client output and `meta.txt` (binary SHA, port, index, status)
+are in `out-w17-*/`. Author self-observation; grade unchanged, no chosen byte,
+no command side effect, no rung 5.
