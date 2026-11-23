@@ -83,3 +83,7 @@ Grade: observed command execution in a live daemon from attacker wire bytes —
 a rung 5 candidate, **not ESTABLISHED** until independent witness replay;
 the staged-payload precondition must be reported with it.
 
+Changing only the wire command (w133g) with the same staged object changes the
+sentinel content to `PPPD2SHELL_W133_SECOND_COMMAND\n`, confirming the command
+bytes travel in the frame.
+

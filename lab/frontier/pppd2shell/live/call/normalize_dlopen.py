@@ -16,6 +16,7 @@ TAGS = [
     "w133f",     # fixed 2.5.4 pin, identical frames
     "w133n",     # NULL callback control
     "w133s",     # short safe ConfReq control
+    "w133g",     # different wire command, same payload (causal check)
 ]
 
 MARKER = re.compile(r"/tmp/pppd2shell-r5-[A-Za-z0-9_-]+-(victim|payload\.so)")
@@ -43,8 +44,9 @@ def main() -> None:
         rej_norm = re.sub(
             rb"/tmp/pppd2shell-r5-[A-Za-z0-9_-]+-(?:victim|payload\.so)",
             b"/tmp/MARKER", rej)
-        rej_norm = rej_norm[:rej_norm.find(b"PPPD2SHELL_W133_WIRE_COMMAND_RAN")
-                            + len(b"PPPD2SHELL_W133_WIRE_COMMAND_RAN")]
+        wire_cmd = summary["layout"].get("wire_cmd", "echo PLACEHOLDER x")
+        token = wire_cmd.split()[1].encode()
+        rej_norm = rej_norm[:rej_norm.find(token) + len(token)]
         lines = [
             "=== W133 dlopen wire command ===",
             "binary=" + "/".join(Path(summary["binary"]).parts[-3:]),
