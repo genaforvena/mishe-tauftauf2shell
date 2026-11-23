@@ -1,0 +1,7 @@
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+frame 0 encoded
+Corrupt JPEG data: 631 extraneous bytes before marker 0xd9
+frame 1 decoded: 64x65 stride=64
+free(): corrupted unsorted chunks
+rc=134

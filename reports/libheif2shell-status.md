@@ -141,3 +141,24 @@ decoded stride < new stride — the `pixelimage.cc:643-646` copy pattern — not
 merely any dimension mismatch. This refines the boundary; it does not
 contradict the mechanism. Advisory 36,879-byte allocation is still untested
 (this build's plane is 32783).
+
+## W164 bounded one-row overflow (2026-11-23)
+
+Following witness #2729's boundary refinement, a second-frame SOF height of
+65 (width 64) makes the decoder return 64x65 while the x265 encoder still
+pads to 512x64, so the row-copy loop makes exactly one out-of-bounds row.
+`real/neighbour/make_one_row_sequence.py` derives the input from the committed
+patterned file and asserts its hash
+(`e028c5af98002a921e8a326d418fd3af9f6911032491c177264ee81eaf9a3b67`).
+Plain Release rc 134, `free(): corrupted unsorted chunks` after the copy;
+ASan rc 1, the same `WRITE of size 64` at `pixelimage.cc:644` after the
+32783-byte region; `gdb_one_row.cmd` reads the file-derived row at
+`plane+32768` and the overwritten size/bin-link words of the adjacent free
+chunk (`real/PROVENANCE-real.md` W164 section, evidence under
+`real/neighbour/evidence/one-row-*`).
+
+Negative: no clean-return primitive. The free chunk's fd/bk words held live
+heap addresses before the store, so file pixels alone cannot preserve them;
+no grooming or pointer forgery was attempted. Grade stays rung 3 plus rung 4
+restricted to file-derived bytes at chosen offsets, now with a one-row bound.
+This W164 variant was not replayed by the witness; rung 5 UNKNOWN.

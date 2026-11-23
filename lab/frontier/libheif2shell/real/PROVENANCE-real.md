@@ -160,6 +160,42 @@ a live pointer-bearing object; the process faults after ~16 KB of further
 row copies. No pointer target, grooming, marker, live server or wire input
 was exercised. Rung 5 stays UNKNOWN.
 
+## W164 bounded one-row overflow: clean copy, abort at free()
+
+Witness #2729's boundary refinement (decoded height must exceed padded
+height) suggested a minimal mismatch: patch only the second sample's SOF0
+HEIGHT from 512 to 65, width stays 64, using
+`neighbour/make_one_row_sequence.py` on the committed `pattern-mixed.heif`.
+The generated input is 5004 bytes, SHA-256
+`e028c5af98002a921e8a326d418fd3af9f6911032491c177264ee81eaf9a3b67`; the
+generator asserts both source and output hashes. Frame 1 decodes 64x65
+stride 64; the encoder still pads to the first frame's 512x64.
+
+The copy loop `pixelimage.cc:643-647` now performs exactly one OOB row,
+destinations 32768..32831. The following right-edge fill at `:659-666`
+repeats the last old-width byte across 32832..33279, reading its source from
+offset 33287 — also past the plane. No row-65 memcpy occurs.
+
+Plain Release driver: rc 134 (SIGABRT) with `free(): corrupted unsorted
+chunks` (`neighbour/evidence/one-row-plain.out`). The OOB copy itself
+completes; the abort comes from the old-plane `free` at `pixelimage.cc:652`,
+not from the memcpy. ASan driver: rc 1, the same `WRITE of size 64` at
+`pixelimage.cc:644`, 0 bytes after the 32783-byte region
+(`neighbour/evidence/one-row-asan.out`). `neighbour/gdb_one_row.cmd`
+(`neighbour/evidence/one-row-gdb.out`) reads the plane chunk header `0x8021`,
+the OOB row at `plane+32768` with source bytes
+`74*8 82*8 8e*8 9c*8 a8*8 b6*8 c2*8 1a*8` (the same file-derived pattern as
+W162), and the adjacent free chunk's size field `0x3041` -> `0x9c9c...`
+with its two bin-link words becoming `0xa8a8...` / `0xb6b6...`.
+
+Negative result: this is NOT a clean-return rung-4 primitive. The adjacent
+free chunk's fd/bk words at `plane+32800/+32808` held the live heap address
+`0x7ffff6404b20` twice before the store; they are not file-derived pixel
+values and preserving them would need heap-layout knowledge. No grooming or
+forgery was attempted. One row is therefore already enough to break malloc
+metadata: W162's large-copy SIGSEGV is not required for observable
+corruption.
+
 ## Scope and grade
 
 Observed here: rung 2 (fixed build rejects the same mixed-size file),
@@ -171,9 +207,11 @@ per-frame bitstream dimensions while the x265 encoder keeps first-frame
 dimensions. Bytes written past the plane come from the crafted JPEG's decoded
 frame, not from a harness-injected buffer. Still absent: network/wire input,
 a live server process, a chosen-pointer or control-flow target, a benign
-command/marker side effect, and an independent witness verdict of this new
-lane. The neighbouring object is a free heap chunk, not a live pointer, so no
-exploitation path is claimed. Rung 5 remains UNKNOWN. The advisory's
-36,879-byte allocation remains an untested claim from a different build;
-this build reports a 32783-byte ASan region. The release-build SIGSEGV claim
-is now observed locally (above), not just quoted from the advisory.
+command/marker side effect. Independent W163 replay (witness #2729)
+ESTABLISHED W161 and W162 at the labeled local-file/process scope, rungs 1-4,
+no counterexample; W164 above was not replayed. The neighbouring object is a
+free heap chunk, not a live pointer, so no exploitation path is claimed.
+Rung 5 remains UNKNOWN. The advisory's 36,879-byte allocation remains an
+untested claim from a different build; this build reports a 32783-byte ASan
+region. The release-build SIGSEGV claim is now observed locally (above), not
+just quoted from the advisory.
