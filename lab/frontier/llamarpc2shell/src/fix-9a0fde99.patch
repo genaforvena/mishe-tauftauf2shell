@@ -1,0 +1,25 @@
+From 9a0fde9967fa1a35b6e5dd1f47e1a3648b6fecc1 Mon Sep 17 00:00:00 2001
+From: Katara <sohaib.harraoui@ostorlab.dev>
+Date: Sat, 24 Oct 2026 16:34:46 +0100
+Subject: [PATCH] rpc : add bounds check in rdma_recv (#30399)
+
+---
+ ggml/src/ggml-rpc/transport.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/ggml/src/ggml-rpc/transport.cpp b/ggml/src/ggml-rpc/transport.cpp
+index 22b38e00f508..d5670f34d904 100644
+--- a/ggml/src/ggml-rpc/transport.cpp
++++ b/ggml/src/ggml-rpc/transport.cpp
+@@ -517,6 +517,11 @@ bool socket_t::impl::rdma_recv(void * data, size_t size) {
+ 
+         int slot = (int)wc.wr_id;
+         size_t got = wc.byte_len;
++        if (got > rem) {
++            LOG_ERROR("RDMA recv overrun: got=%zu rem=%zu\n", got, rem);
++            c->post_rx(slot);
++            return false;
++        }
+         memcpy(dst, c->rx_slot(slot), got);
+ 
+         if (!c->post_rx(slot)) return false;

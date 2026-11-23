@@ -1,0 +1,51 @@
+=================================================================
+==758150==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x76ff93500021 at pc 0x76ff95efb303 bp 0x7ffee415ba70 sp 0x7ffee415b218
+WRITE of size 43 at 0x76ff93500021 thread T0
+    #0 0x76ff95efb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x62fb3197b5e8 in socket_t::impl::rdma_recv(void*, unsigned long) /tmp/llamarpc2shell.jKGCUQ/vuln-asan.cpp:57
+    #2 0x62fb3197b880 in serve /tmp/llamarpc2shell.jKGCUQ/vuln-asan.cpp:90
+    #3 0x62fb3197bd7d in main /tmp/llamarpc2shell.jKGCUQ/vuln-asan.cpp:122
+    #4 0x76ff9562a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x76ff9562a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x62fb3197b264 in _start (/tmp/llamarpc2shell.jKGCUQ/vuln-asan+0x2264) (BuildId: 9577f40f4142cf29d2330fe7078f75dd514c78de)
+
+Address 0x76ff93500021 is located in stack of thread T0 at offset 33 in frame
+    #0 0x62fb3197b795 in serve /tmp/llamarpc2shell.jKGCUQ/vuln-asan.cpp:87
+
+  This frame has 1 object(s):
+    [32, 33) 'cmd' (line 89) <== Memory access at offset 33 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x76ff934ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff934ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff934ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff934fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff934fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x76ff93500000: f1 f1 f1 f1[01]f3 f3 f3 f1 f1 f1 f1 00 04 f3 f3
+  0x76ff93500080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff93500100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff93500180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff93500200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x76ff93500280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==758150==ABORTING
