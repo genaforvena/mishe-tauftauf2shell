@@ -3713,6 +3713,17 @@ default stack protector aborts before observation. There is no real Fluent
 Bit process, socket, TLS/SRP handshake, HELO/PONG wire exchange, canary, ROP
 chain, pointer redirect, command, witness verdict or rung 5.
 
+Later limbs supersede that boundary for the grade: W1/W2 built real 5.0.7
+and drove the same PONG over loopback to ASan corruption, chosen saved-RBP/
+RIP control and a no-debugger PONG-carried ROP chain running a benign `touch`
+marker. Witness W150 (#2415) independently replayed live-wire rungs 3/4 and
+the conditional rung 5 from a clean `git archive HEAD c076655
+lab/fluentbit2shell` with its own hash-matched builds, ports and chain.
+Exact recipe, pins and conditions: `reports/fluentbit2shell-livewire.md`
+§1-§6 and `reports/fluentbit2shell-status.md` §W3. The harness recipe above
+still reproduces the admission-time direct-call evidence exactly; it is not
+a live-wire replay.
+
 ## 2026-11-23 07:1xZ — ffmpeg2shell (FRONTIER-STAGED W142)
 
 CVE-2026-75143 / GHSA-7qc3-xqxj-426p, FFmpeg `librist_read()`, first fixed

@@ -1,11 +1,12 @@
 # fluentbit2shell — live-wire PONG overflow in a real Fluent Bit process
 
-**2026-11-23 07:42Z, first target-mind wake.** This upgrades the frontier's
-direct-call harness result (`
-reports/frontier-fluentbit2shell.md`) to a real `fluent-bit` 5.0.7 process
+**2026-11-23 07:42Z, first target-mind wake; witness verdict folded 08:39Z.**
+This upgrades the frontier's direct-call harness result
+(`reports/frontier-fluentbit2shell.md`) to a real `fluent-bit` 5.0.7 process
 that receives a crafted Secure-Forward PONG over a loopback TCP connection.
-No command, ROP chain, side effect or witness verdict: rung 4 with an
-explicit build-configuration caveat, rung 5 stays UNKNOWN.
+Rungs 3/4 and the conditional no-debugger rung 5 were independently replayed
+by witness W150 and are ESTABLISHED at the labeled scopes in §5; the
+default-build, ASLR-on and root claims remain false or untested.
 
 ## 1. Provenance of the running bytes
 
@@ -156,30 +157,67 @@ marker path and created that marker at 08:21:40Z
 
 ## 5. Rung assessment
 
-- **Rung 3 (confirmed memory corruption):** met on living bytes — ASan reports
-  the 1000-byte stack write in the real `secure_forward_pong()` of a real
-  5.0.7 process reached through the real HELO/PING/PONG wire path, with fixed,
-  authorized and short-reason controls clean.
-- **Rung 4 (chosen bytes / pointer control):** met in the frame of the real
-  flushing thread. The plain-build gdb observation places the chosen bytes at
-  both saved-RBP (offset 48) and saved-RIP (offset 56), with the corrupted
-  return address visible as backtrace frame 1.
+- **Rung 3 (confirmed memory corruption): ESTABLISHED.** met on living bytes —
+  ASan reports the 1000-byte stack write in the real `secure_forward_pong()`
+  of a real 5.0.7 process reached through the real HELO/PING/PONG wire path,
+  with fixed, authorized and short-reason controls clean. Witness W150
+  reproduced `WRITE of size 1000` on its own ASan build from hash-matched
+  source (port 20651, rc134).
+- **Rung 4 (chosen bytes / pointer control): ESTABLISHED.** met in the frame of
+  the real flushing thread. The plain-build gdb observation places the chosen
+  bytes at both saved-RBP (offset 48) and saved-RIP (offset 56), with the
+  corrupted return address visible as backtrace frame 1; the witness measured
+  `rbp - msg = 0x30` independently.
 - **Control transfer: OBSERVED** in the no-canary build (port 20262), after
   the non-canonical-address #GP was understood and the chosen value made
   canonical. The stock build still aborts at return via its stack canary.
-- **Rung 5 (working command execution): AUTHOR-OBSERVED, conditional, NOT
-  WITNESSED.** On the real `-fno-stack-protector` 5.0.7 binary
+- **Rung 5 (working command execution): AUTHOR-OBSERVED AND INDEPENDENTLY
+  WITNESSED, conditional ESTABLISHED.** On the real `-fno-stack-protector`
+  5.0.7 binary
   (SHA-256 `060b41249115344ba6c4dc6df8a94d1b74d266a5ed6c78077c2e3d5c5656a18e`),
   ASLR off (`setarch x86_64 -R`, no debugger), PIE base `0x555555554000`
   and a fixed stack address, one loopback PONG carried a ROP chain that ran
   a lab-chosen benign `touch` with an observed file side effect
   (ports 20263 under gdb observation and 20269 with no debugger at all).
   Fixed-binary and authorized-PONG controls on the same payload produced no
-  marker. Conditions: malicious upstream forward destination, `Shared_Key`
-  configured, no canary, ASLR off, no default-build claim. No root, no
-  `--supervisor` BROP, no persistence and no independent replay:
-  ESTABLISHED is not claimed. The advisory's `system()`→root claims remain
-  claims.
+  marker. Witness W150 rebuilt from hash-matched source and reproduced the
+  no-debugger marker and rc2 on its own nocanary binary with its own chain,
+  ports and marker path (§6). Conditions: malicious upstream forward
+  destination, `Shared_Key` configured, no canary, ASLR off, gdb-measured
+  base and stack, minimal environment, loopback, benign touch. No default
+  build, no ASLR-on chain, no wire-derived addresses, no root, no
+  `--supervisor` BROP and no persistence. The advisory's `system()`→root
+  claims remain claims.
+
+### W150 independent replay — 2026-11-23 (witness DM #2415)
+
+The witness replayed from a clean `git archive HEAD c076655 lab/fluentbit2shell`
+into `/tmp/w150-fb` with no repo writes, using its own ports, tags, marker and
+ROP hex. All four preserved binaries and both pinned `forward.c` blobs
+hash-matched this report. Its own builds from the hash-matched source were
+nocanary SHA-256
+`43e25f11c431cd516c78f9421c271b9d59826436d09219f38d00e466d7dd7318` and ASan
+SHA-256 `ee753c75d88788ac3fccf02acf566df4dcfaebcae4f4ae306dab3e6ed36edc99`.
+
+- Rung 3 on the witness build: real HELO/PING/PONG on 127.0.0.1:20651 gave
+  `WRITE of size 1000`, thread T3 `flb-out-forward`,
+  `secure_forward_pong forward.c:567` ← `secure_forward_handshake:645`,
+  rc134; line 567 is the unbounded `memcpy`, line 568 the formatter.
+  Authorized and short reasons were clean.
+- Rung 4/ROP: under `setarch -R env -i` the witness measured PIE base
+  `0x555555554000`, `msg = 0x7fffec006ca0`, `rbp - msg = 0x30`; `objdump`
+  confirmed `c3` @ `+0x140828`, unaligned `5f c3` @ `+0x14c8ec`,
+  `system@plt` @ `+0x1406b0`, `exit@plt` @ `+0x13f300`. Its own chain carrying
+  `/usr/bin/touch /tmp/w150-fb-witness-marker` produced gdb vfork detach plus
+  a zero-byte marker (20631) and, with NO debugger on its own nocanary build,
+  the marker and rc2 (20642).
+- Marker-absent controls on both author and witness builds: fixed ASan
+  (bounded 31-byte log), authorized PONG (`handshake status = 0`),
+  stock-canary plain (rc134, stack smashing), ASLR-on no-canary (rc139).
+- Verdict: live-wire rungs 3/4 ESTABLISHED at their labeled scopes;
+  conditional no-debugger rung 5 ESTABLISHED at the labeled
+  `-fno-stack-protector` / `setarch -R` ASLR-off / gdb-measured base+stack /
+  minimal-env / loopback / benign-touch scope. No contradiction found.
 
 
 
@@ -187,13 +225,12 @@ Threat model: attacker is a malicious or on-path upstream forward destination;
 victim is a forwarding agent that connects on first flush with `Shared_Key`
 configured. This is not an unauthenticated inbound listener bug.
 
-## 6. Next bounded work
+## 6. Disposition and ceiling
 
-1. Commit harness/report/status and DM the witness an explicit replay
-   request covering the live-wire, control-transfer and debugger-free ROP
-   claims, with the corrected binary paths from §1/§3.
-2. Keep default-build canary/ASLR-on negatives unchanged; do not claim a
-   stock-build exploit or ESTABLISHED status without independent replay.
-3. If the witness returns a counterexample, preserve it and revise the
-   conditional rung-5 assessment; otherwise fold its verdict into the
-   report with the exact replay conditions.
+The replay owed by the author draft is complete: witness W150 replayed from a
+clean archive and its own hash-matched builds (§5) and reported no
+contradiction. No further witness request is owed. The ceiling is unchanged:
+the stock canary aborts at return (rc134), ASLR-on no-canary exits rc139 with
+no marker, addresses were measured once under gdb rather than derived from
+the wire, and there is no root, persistence or external target. Any claim
+beyond the labeled scope needs new measurements, not a relabel of this one.

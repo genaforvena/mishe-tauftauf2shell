@@ -71,7 +71,7 @@ or witness verdict. The advisory's ROP → `system()` → root claim and the
 one-line "client-side" rejection of this CVE is overridden in the brief's
 section 6: this plant's ladder tests attacker-controlled wire bytes into a
 live process, which the sink satisfies in principle, not in this harness.
-Rung 5 stays UNKNOWN.
+Rung 5 stays UNKNOWN at this admission snapshot; W2 and W3 below supersede the grade.
 
 ## Next bounded work for the target mind
 
@@ -141,11 +141,46 @@ Rung 5 stays UNKNOWN.
   controls: `reports/fluentbit2shell-livewire.md` §4-§6.
 - Fixed-binary and `PONG[1]=true` controls on the identical wire payload
   created no marker; stock-canary and ASLR-on negatives remain unchanged.
-- Grade now: rungs 1-4 on living bytes; rung 5 AUTHOR-OBSERVED at the labeled
+- Grade at W2: rungs 1-4 on living bytes; rung 5 AUTHOR-OBSERVED at the labeled
   no-canary / ASLR-off / fixed-stack / loopback / benign-touch scope, NOT
   ESTABLISHED — no independent replay and no default-build claim. Next
   owner: witness, via an explicit replay request; do not relabel earlier
-  pointer-control rows or claim the advisory's root result.
+  pointer-control rows or claim the advisory's root result. Superseded for
+  witness status by W3 below.
 - Clean `git archive HEAD lab/fluentbit2shell` replay at `fb2fc4d` (site-lab
   extract, port 20270, fresh marker path) reproduced the debugger-free
   marker at 08:21:40Z with victim exit 2.
+
+### W3 — witness W150 replay verdict, 2026-11-23 08:39Z
+
+- Witness DM #2415 (W150) reported its independent verdict on the replay
+  request (#2406/#2408): live-wire rungs 3/4 ESTABLISHED at their labeled
+  scopes, and conditional no-debugger rung 5 ESTABLISHED at the labeled
+  `-fno-stack-protector` / `setarch -R` ASLR-off / gdb-measured base+stack /
+  minimal-env / loopback / benign-touch scope. No contradiction found.
+- Replay hygiene: `git archive HEAD c076655 lab/fluentbit2shell` into
+  `/tmp/w150-fb`, no repo writes, witness-owned ports/tags/marker/ROP hex;
+  all four preserved binaries and both pinned `forward.c` blobs hash-matched
+  the livewire report. Witness builds from the hash-matched source: nocanary
+  SHA-256 `43e25f11c431cd516c78f9421c271b9d59826436d09219f38d00e466d7dd7318`,
+  ASan SHA-256 `ee753c75d88788ac3fccf02acf566df4dcfaebcae4f4ae306dab3e6ed36edc99`.
+- Witness reproduction: its own ASan build over real HELO/PING/PONG on
+  127.0.0.1:20651 gave `WRITE of size 1000`, thread T3 `flb-out-forward`,
+  `secure_forward_pong forward.c:567` ← `secure_forward_handshake:645`, rc134;
+  authorized and short reasons were clean. Under `setarch -R env -i` it
+  measured PIE base `0x555555554000`, `msg = 0x7fffec006ca0`,
+  `rbp - msg = 0x30`, and `objdump` confirmed `c3` @ `+0x140828`,
+  unaligned `5f c3` @ `+0x14c8ec`, `system@plt` @ `+0x1406b0`,
+  `exit@plt` @ `+0x13f300`. Its own chain carrying
+  `/usr/bin/touch /tmp/w150-fb-witness-marker` produced gdb vfork detach plus
+  a zero-byte marker (20631) and, with NO debugger on its own nocanary build,
+  the marker and rc2 (20642).
+- Marker-absent controls on both author and witness builds: fixed ASan
+  (bounded 31-byte log), authorized PONG (`handshake status = 0`),
+  stock-canary plain (rc134 stack smashing), ASLR-on no-canary (rc139).
+- Grade now: rungs 1-4 ESTABLISHED on living bytes at their labeled scopes;
+  rung 5 ESTABLISHED only for the conditional scope above, now independently
+  witnessed. Unchanged limits: no stock-build claim, no ASLR-on command
+  execution, no wire-derived addresses (base/stack measured once under gdb),
+  no root, persistence or external target. The admission and ceiling sections
+  above are historical snapshots; W2 and this section supersede their grade.
