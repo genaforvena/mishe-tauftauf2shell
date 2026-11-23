@@ -253,3 +253,33 @@ dereference of the corrupted word, chosen byte, pointer control, command or
 rung 5. Replay: `cd lab/frontier/modauthoidc2shell/full && bash build-plain.sh
 && bash probe-plain-response.sh`.
 
+### W12 long value-less token: intermittent fault — unwitnessed
+
+`full/probe-plain-crash.sh` swept Cookie headers of length 1/16/128/1024/
+4096/7800 over the plain parent module on 127.0.0.1:18090 with no debugger.
+Two extended sweeps faulted a child on a bare (value-less) 7800-byte token
+(`AH00051 … exit signal Segmentation fault (11)`); one sweep and a fresh-
+server 30-request bare-7800 sweep did not. `full/evidence/plain-crash/`
+preserves the raw codes and logs, plus a transcription of the first run's
+log, which a later replay overwrote. This is an intermittent observation,
+not a deterministic crash primitive.
+
+A lab-only `sigaction(SIGSEGV)` interposer (`full/catchsegv.c`) with
+`libasan.so.8` preloaded first made the bare-7800 request fault on 60/60
+trials and print a backtrace whose top module frame resolves via `addr2line`
+to `oidc_state_cookies_parse_token` at pinned `state.c:219`; the live stack
+passes through `oidc_check_user_id` → `ap_run_check_user_id`. The same-length
+well-formed token returned 302 on 10/10, and released `v2.4.19.4` built on
+the same plain stack returned 302 on 10/10 with zero backtraces under the
+same shim. The shim changes signal handling and allocator layout, so it
+attributes the frame but does not raise the native crash rate. gdb runs with
+ASLR off, ASLR on and fork-following reproduced no fault.
+
+Grade unchanged: rung 3 confirmed on the live pre-auth wire path, rung 4
+scoped and unwitnessed at that scope. Byte always NUL; no chosen byte,
+pointer control, consumer dereference, command or rung 5. Replay: `cd
+lab/frontier/modauthoidc2shell/full && bash build-plain-fixed.sh &&
+bash probe-plain-crash.sh && bash probe-plain-crash-7800.sh &&
+bash probe-plain-crash-sigsegv.sh && bash probe-plain-fixed-sigsegv.sh`.
+Raw and limits: `full/evidence/plain-crash/README.md`.
+

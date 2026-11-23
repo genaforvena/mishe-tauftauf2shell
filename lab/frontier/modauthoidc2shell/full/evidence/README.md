@@ -82,6 +82,14 @@ the runner because it depends on arena layout.
   watchpoint read of that word. Raw: `plain-oob/response/`.
 - No chosen byte, pointer control, command or rung 5 in any regime. None of
   the live probes is witnessed; W147 covers the direct-call harness only.
+- W12 swept long value-less tokens (up to 7800 bytes) over the plain module:
+  an intermittent child SIGSEGV (2/3, 1/3 and 0/3 across three extended
+  sweeps; 0/30 on a fresh server). A SIGSEGV-backtrace shim with libasan
+  preloaded attributed the fault to pinned `state.c:219` in
+  `oidc_state_cookies_parse_token` (60/60 bare faults; safe token 10/10 302;
+  released tag with the same shim 10/10 302). The shim changes signal
+  handling and layout; the native crash has no captured frame and no gdb run
+  reproduced it. Grade unchanged. Raw and limits: `plain-crash/README.md`.
 
 ## Re-run
 

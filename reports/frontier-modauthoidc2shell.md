@@ -234,3 +234,18 @@ rung 4 scoped, unwitnessed at live-wire scope: byte always NUL, no dereference
 of the corrupted word, chosen byte, pointer control, command or rung 5. Raw:
 `full/evidence/plain-oob/response/`.
 
+### W12 long value-less token: intermittent fault (2026-11-23)
+
+On the live pre-auth wire path, a bare 7800-byte state token intermittently
+faulted the plain-module child (`AH00051` SIGSEGV 11) in two of three extended
+sweeps and in none of a fresh-server 30-request sweep. A SIGSEGV-backtrace
+shim with libasan preloaded attributed the fault to pinned `state.c:219` in
+`oidc_state_cookies_parse_token` (60/60 faults), while the same-length
+well-formed token and released `v2.4.19.4` under the same shim were clean
+(10/10 each). The shim changes signal handling and allocation layout, and
+gdb runs reproduced no fault, so this is frame attribution, not a
+deterministic native crash claim. Grade unchanged: rung 3 on the live
+pre-auth wire path, rung 4 scoped and unwitnessed there; byte always NUL, no
+chosen byte, pointer control, command or rung 5. Raw and replay:
+`full/evidence/plain-crash/README.md`.
+

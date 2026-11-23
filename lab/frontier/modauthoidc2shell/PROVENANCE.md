@@ -298,3 +298,32 @@ request-line memory. Grade unchanged: rung 4 scoped, unwitnessed at live-wire
 scope; byte always NUL, no consumer dereference of the corrupted word, no
 chosen byte, pointer control, command or rung 5. Re-run:
 `cd full && bash build-plain.sh && bash probe-plain-response.sh`.
+
+## Long value-less token: intermittent plain fault (2026-11-23 W12)
+
+`full/probe-plain-crash.sh` swept bare, `;tail=value`, well-formed and
+filler-only Cookie headers at name lengths 1/16/128/1024/4096/7800 over the
+loopback plain module. Two runs faulted a child on bare-7800 (two children at
+14:06Z, one at 14:14Z; `AH00051 … exit signal Segmentation fault (11)`), a
+third run faulted none; a fresh-server 30-request bare-7800 sweep faulted
+none. The fault is intermittent, not a deterministic primitive. The 14:06Z
+log was overwritten by later replays; its `AH00051` lines are transcribed in
+`full/evidence/plain-crash/FIRST-RUN-20261123T1406Z.md`, and a later raw
+crash is in `full/evidence/plain-crash/{codes.txt,error.log}`.
+
+`full/catchsegv.c` interposes `sigaction(SIGSEGV)` to print a backtrace, with
+`libasan.so.8` preloaded first. Under that instrument, 60/60 bare-7800
+requests faulted; the top module frame resolves with `addr2line` to
+`oidc_state_cookies_parse_token` at pinned `state.c:219`, with the live stack
+through `oidc_check_user_id` → `ap_run_check_user_id`. The well-formed
+7800-byte token on the vulnerable module returned 302 on 10/10, and released
+`v2.4.19.4` built against the same plain stack (`state.c` `f02d8ddb…`,
+module `b16278d2…`) returned 302 on 10/10 with zero backtraces under the same
+shim. The shim changes signal handling and allocator layout, so its crash
+rate does not describe the unmodified module; it only attributes the frame.
+gdb runs (ASLR off, ASLR on, and fork-following) produced no fault.
+
+Grade unchanged: rung 3 on the live pre-auth wire path, rung 4 scoped and
+unwitnessed at live-wire scope; byte always NUL, no chosen byte, pointer
+target, consumer dereference, command or rung 5. Replay and limits:
+`full/evidence/plain-crash/README.md`.

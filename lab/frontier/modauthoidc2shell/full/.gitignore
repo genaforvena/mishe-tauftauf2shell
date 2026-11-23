@@ -20,3 +20,9 @@ error-plain.log
 evidence/plain-jansson-*.log
 evidence/plain-cjose-*.log
 evidence/plain-module-*.log
+httpd-plain-fixed.pid
+error-plain-fixed.log
+evidence/plain-fixed-module-*.log
+evidence/plain-crash/*.so
+evidence/plain-crash/*error.log
+evidence/plain-crash/error.log

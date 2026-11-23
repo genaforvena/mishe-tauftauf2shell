@@ -1,0 +1,71 @@
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/catchsegv.c: In function ‘segv_handler’:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/catchsegv.c:20:5: warning: ignoring return value of ‘write’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   20 |     write(2, head, sizeof(head) - 1);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/catchsegv.c:22:5: warning: ignoring return value of ‘write’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   22 |     write(2, num, 1);
+      |     ^~~~~~~~~~~~~~~~
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/catchsegv.c:23:5: warning: ignoring return value of ‘write’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   23 |     write(2, "\n", 1);
+      |     ^~~~~~~~~~~~~~~~~
+shim_trials=60 empty=60 backtraces=120
+SEGVHANDLER signal=;
+/usr/lib/x86_64-linux-gnu/libasan.so.8(+0x831e0)[0x74ec1ee831e0]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/evidence/plain-crash/catchsegv.so(+0x1214)[0x74ec1f563214]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x74ec1ea45330]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_state_cookies_clean_expired+0x2b3)[0x74ec1c8080e8]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_request_authenticate_user+0x6f1)[0x74ec1c84af4e]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(+0x64066)[0x74ec1c801066]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(+0x6937c)[0x74ec1c80637c]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_check_user_id+0x6d1)[0x74ec1c806e96]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_run_check_user_id+0x9e)[0x614444f45532]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_request_internal+0xc07)[0x614444f4eaa0]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_async_request+0xccd)[0x614444fa40cd]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_request+0xa4)[0x614444fa437b]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x1594e3)[0x614444f9a4e3]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_run_process_connection+0x9e)[0x614444f804ee]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_connection+0x62)[0x614444f811cc]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17a43b)[0x614444fbb43b]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17a7be)[0x614444fbb7be]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17a8b2)[0x614444fbb8b2]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17adf1)[0x614444fbbdf1]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_run_mpm+0xae)[0x614444f0ad28]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(main+0x1fb1)[0x614444ef5dba]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x74ec1ea2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x74ec1ea2a28b]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(_start+0x25)[0x614444ef3175]
+[Mon Nov 23 14:16:01.699392 2026] [authz_core:debug] [pid 1274816:tid 1274816] mod_authz_core.c(815): [client 127.0.0.1:53794] AH01626: authorization result of Require valid-user : denied (no authenticated user yet)
+--
+SEGVHANDLER signal=;
+/usr/lib/x86_64-linux-gnu/libasan.so.8(+0x831e0)[0x74ec1ee831e0]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/evidence/plain-crash/catchsegv.so(+0x1214)[0x74ec1f563214]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x74ec1ea45330]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_state_cookies_clean_expired+0x2b3)[0x74ec1c8080e8]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_request_authenticate_user+0x6f1)[0x74ec1c84af4e]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(+0x64066)[0x74ec1c801066]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(+0x6937c)[0x74ec1c80637c]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_check_user_id+0x6d1)[0x74ec1c806e96]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_run_check_user_id+0x9e)[0x614444f45532]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_request_internal+0xc07)[0x614444f4eaa0]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_async_request+0xccd)[0x614444fa40cd]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_request+0xa4)[0x614444fa437b]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x1594e3)[0x614444f9a4e3]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_run_process_connection+0x9e)[0x614444f804ee]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_process_connection+0x62)[0x614444f811cc]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17a43b)[0x614444fbb43b]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17a7be)[0x614444fbb7be]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17a8b2)[0x614444fbb8b2]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(+0x17adf1)[0x614444fbbdf1]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(ap_run_mpm+0xae)[0x614444f0ad28]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(main+0x1fb1)[0x614444ef5dba]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x74ec1ea2a1ca]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x74ec1ea2a28b]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/apache2shell/build/httpd-2.4.70-install/bin/httpd(_start+0x25)[0x614444ef3175]
+[Mon Nov 23 14:16:01.710366 2026] [authz_core:debug] [pid 1274817:tid 1274817] mod_authz_core.c(815): [client 127.0.0.1:53798] AH01626: authorization result of Require valid-user : denied (no authenticated user yet)
+--
+SEGVHANDLER signal=;
+/usr/lib/x86_64-linux-gnu/libasan.so.8(+0x831e0)[0x74ec1ee831e0]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/evidence/plain-crash/catchsegv.so(+0x1214)[0x74ec1f563214]
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x74ec1ea45330]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_state_cookies_clean_expired+0x2b3)[0x74ec1c8080e8]
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/full/src/mod_auth_openidc-plain/src/.libs/mod_auth_openidc.so(oidc_request_authenticate_user+0x6f1)[0x74ec1c84af4e]
