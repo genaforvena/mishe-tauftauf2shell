@@ -190,3 +190,14 @@ grade.
   the witness rebuilt shim and drivers from committed sources but linked the
   gitignored provisioned pinned static `.a` libraries, not a from-scratch
   sofia-sip build. Rung 5 still not implied.
+- W14 (2026-11-23, author-observed pending witness replay, no grade change):
+  extending W11's second-order timer-heap write with `SIA_DEEP_EXTRA=60`
+  admitted 95 `su_timer_set()` adds and wrote 16 consecutive live timer
+  pointers from timer-array offset +520 through +640, overwriting a 19-byte
+  `sub_alloc` string object (`su_alloc.c:500`, neighbour+544) and several
+  chunk headers before glibc aborted. v1.13.17 short and both v1.13.18
+  controls stayed clean (two in-bounds adds); a port-shifted replay
+  reproduced all four cases. Values are heap pointers, not chosen
+  bytes/addresses; no callable field, marker or command; rung 4 only. Sources
+  `live_ws_timers_deep.c`, `timer_probe_deep.c`, `run_deep_probe.sh`;
+  evidence `lab/sofiasip2shell/libbuild/evidence/w14/`.

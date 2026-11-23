@@ -255,3 +255,44 @@ the committed no-timer and W5 full evidence abort with the same `corrupted
 size vs. prev_size`, confirming the second-order write is real but is not the
 abort cause, as this report states. Verdict **ESTABLISHED at the labeled
 scope**: no counterexample, no grade change, rung 5 still UNKNOWN.
+
+## W14: deeper second-order writes into live chunks (2026-11-23)
+
+W11 stopped after 35 adds, writing one live timer pointer at exactly the
+array boundary. The corrupted `_size` is `0x005a4143425a7e` (about 2.7e13),
+so the capacity check imposes no practical bound. W14 asks how far the
+library's own `su_timer_set()` calls will write once that check is passed,
+and which live object lies in the path. Three new sources under
+`lab/sofiasip2shell/libbuild/live/` extend W11 without changing its committed
+files: `live_ws_timers_deep.c` adds `SIA_DEEP_EXTRA` (extra adds beyond W11's
+stop) and a 16-qword tail snapshot; `timer_probe_deep.c` logs allocations in
+the next 640 bytes after the timer array; `run_deep_probe.sh` builds both and
+runs four cases. Evidence is in `libbuild/evidence/w14/`.
+
+Vulnerable full case (`SIA_DEEP_EXTRA=60`, port 19301, rc 134): the shim again
+identifies the physical neighbour as the 528-byte `timers_alloc` array
+(`su_timer.c:201`, `DELTA=0`); the 19-byte allocation at `neighbor+544` is
+`sub_alloc` at `su_alloc.c:500`. The receive callback performs 95 timer adds
+(`_used` 30 -> 125) and overwrites **16 consecutive qwords at array offsets
+520 through +640** with live timer pointers spaced `0x50` bytes apart. Before
+the adds, `+536` was the next chunk's `size` word `0x21`, `+544` and `+552`
+held the 19-byte string's data (`ws\0.127.0` / `.0.1363\0`), `+568` was
+`0x391`, `+576` was `0x388`, and `+584` held an existing heap pointer. After
+the adds all 16 qwords are `0x57f945423f10 + 0x50*k`. The process then aborts
+with `corrupted size vs. prev_size`.
+
+Controls: v1.13.17 with 65520-byte payload and both v1.13.18 cases (ports
+19302-19304, rc 0) keep `_size=63`, make only two in-bounds adds, and change
+only the two in-bounds array slots at `+256`/`+264`; their chunk headers and
+the following object stay intact. A port-shifted replay (19311-19314) with
+the same sources reproduced every field structurally: 95 adds, the same
+16-pointer run, the same controls.
+
+**Grade unchanged: rung 4, author-observed pending witness replay.** This is
+a larger second-order write than W11 — the library writes live timer pointers
+through a neighbouring 19-byte live object and several chunk headers, not
+just one boundary slot — but the values are heap pointers, not attacker-chosen
+bytes or addresses. The overwritten object was symbolized to a generic string
+allocation; no callback, callable field, marker or command was reached, and
+the glibc abort still follows from corrupted allocator headers. It does not
+support a rung-5 claim.
