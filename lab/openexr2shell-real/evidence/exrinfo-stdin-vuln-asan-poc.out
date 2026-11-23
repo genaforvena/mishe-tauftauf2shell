@@ -1,0 +1,6 @@
+File '<stdin>':
+  type: 'deepscanline'  compression: 'zstd'
+  displayWindow: [ 0, 0 - 63 0 ] 64 x 1
+  dataWindow: [ 0, 0 - 63 0 ] 64 x 1
+  channels: 1 channels
+   'Z': float samp 1 1

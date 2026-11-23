@@ -113,21 +113,82 @@ after `EXR_ERR_CORRUPT_CHUNK` and produces no ASan report
 the same file; it is still a purpose-built consumer invoked on a local path,
 not an image-application process or wire input.
 
+## Upstream exrcheck -c confirmation (W162, 2026-11-23)
+
+The shipped `exrcheck` tool was built from the pinned trees with
+`OPENEXR_BUILD_TOOLS=ON` and no source edits. Its `-c` option enables
+`ImfCheckFile.cpp` core checks; `readCoreScanlinePart()` calls
+`exr_decoding_run()` at `ImfCheckFile.cpp:1467` with no sample-count prepass.
+Commands run in each build tree:
+
+```
+cd lab/openexr2shell-real/build-vuln-asan   # or build-fixed-asan
+cmake -D OPENEXR_BUILD_TOOLS=ON . && cmake --build . --target exrcheck -j4
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 ./bin/exrcheck -c ../cases/baseline.exr
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 ./bin/exrcheck -c ../cases/poc.exr
+```
+
+- Vulnerable ASan, baseline (`exrcheck-c-vuln-asan-baseline.out`, rc 0):
+  `file ../cases/baseline.exr OK`.
+- Vulnerable ASan, PoC (`exrcheck-c-vuln-asan-poc.out`, rc 1):
+  `AddressSanitizer: memcpy-param-overlap` with the same 4096-byte ranges and
+  pinned `sort2_4ByteChannels_tiled internal_zstd.c:472`. The stack continues
+  through `exr_undo_zstd_v1 :1373` -> `decompress_data compression.c:706` ->
+  `exr_decoding_run decoding.c:602` ->
+  `readCoreScanlinePart ImfCheckFile.cpp:1467` ->
+  `checkCoreFile :1709` -> `runCoreChecks :1768` ->
+  `checkOpenEXRFile :1867` -> `exrCheck main.cpp:98` -> `main :166`. Both
+  ranges are 64-byte `internal_decode_alloc_buffer` allocations, one from
+  `decoding.c:81` and one from `internal_zstd.c:1335`.
+- Fixed ASan, baseline (`exrcheck-c-fixed-asan-baseline.out`, rc 0): `OK`.
+  Fixed ASan, PoC (`exrcheck-c-fixed-asan-poc.out`, rc 1): `bad`, no ASan
+  report.
+- Vulnerable plain (`exrcheck-c-vuln-plain-poc.out`, rc 134): the same
+  unmodified tool prints `free(): invalid pointer` and aborts; baseline
+  (`exrcheck-c-vuln-plain-baseline.out`, rc 0) prints `OK`.
+- Fixed plain (`exrcheck-c-fixed-plain-poc.out`, rc 1): prints `bad` with no
+  abort; baseline (`exrcheck-c-fixed-plain-baseline.out`, rc 0) prints `OK`.
+
+
+This is an unmodified upstream application binary reaching the same pinned
+sink from a local EXR path. Default `exrcheck` without `-c` still takes the
+safe sample prepass; the advisory's no-`-c` observation is unchanged. No
+wire, socket, pointer target, command or marker was exercised.
+
+## Wire-lane disposition (W162, 2026-11-23)
+
+`docs/rce.md:12-15` requires attacker-controlled wire/request input into a
+live affected target process and explicitly excludes synthetic consumers. On
+this host no unmodified EXR consumer has both a wire/request input and a deep
+ZSTD decode path: the pinned `exrinfo -` has a stdin reader
+(`src/bin/exrinfo/main.c:262-313`) but prints headers only — it exited 0 with
+no ASan report on both the baseline and the PoC
+(`exrinfo-stdin-vuln-asan-{baseline,poc}.out`); `exrcheck` needs a
+readable file path (`src/bin/exrcheck/main.cpp:156-166`); ImageMagick 6 links
+system OpenEXR 3.1.5, and no OpenImageIO or libvips build is installed. A
+purpose-built loopback receiver wrapping the existing harness would be a
+synthetic consumer and remain rung-4 mechanics, so none was built and no
+marker or pointer experiment was attempted. Rung 5 stays UNKNOWN with the
+concrete blocker: a live affected application process fed by wire/request
+input.
+
 ## Ceiling and preserved negatives
 
-- File input is a local EXR path handed to purpose-built C and C++ consumers.
-  No OpenImageIO build, image application process, daemon, socket, port, wire,
-  remote request or network probe was used. No pointer target, control-flow
-  corruption, command, marker side effect or ASLR/grooming measurement. The
-  W161 witness replay covers only the labeled file-level CODE/CONSUMER scope;
-  rung 5 is UNKNOWN, not a scaled-down rung 4.
+- File input is a local EXR path handed to purpose-built C and C++ consumers
+  or to the unmodified upstream `exrcheck -c` tool. No OpenImageIO build,
+  image-application process, daemon, socket, port, wire, remote request or
+  network probe was used. No pointer target, control-flow corruption, command,
+  marker side effect or ASLR/grooming measurement. The W161 witness replay
+  covers only the labeled file-level CODE/CONSUMER scope; rung 5 is UNKNOWN,
+  not a scaled-down rung 4.
 - The file controls the copy length and which destination allocation is
   overrun; the out-of-bounds bytes themselves are allocator-derived, not
   file-chosen. In W161, changing the harness fill pattern changed the first
   overwritten byte while the 4032-byte length and zero-byte baseline stayed
   fixed.
 - The advisory's deep-tiled, OpenImageIO and aarch64 claims were not tested.
-  The `exrcheck`/`exrinfo` claims were not tested. The advisory's 4032-byte
+  Its no-`-c` `exrcheck` and `exrinfo -v` observations were not rerun; this
+  wake tested `exrcheck -c` and `exrinfo -` instead. The advisory's 4032-byte
   length and 692-byte file size were independently observed here; its
   `malloc(): invalid size (unsorted)` abort text differs from this host's
   `free(): invalid pointer`.

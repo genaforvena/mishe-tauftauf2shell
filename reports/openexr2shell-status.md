@@ -137,3 +137,29 @@ without changing the 4032-byte length or the zero-byte baseline. Per the
 witness caveat, the out-of-bounds bytes are allocator-derived, not
 file-chosen; the file controls the length and destination offset. No
 application process, wire, pointer target, command or marker was exercised.
+
+## W162: unmodified-tool reachability; wire lane disposition (2026-11-23)
+
+The pinned 3.5.2/3.5.3 trees were rebuilt with `OPENEXR_BUILD_TOOLS=ON`.
+The unmodified upstream `exrcheck -c` binary on the vulnerable ASan build
+aborts on the 692-byte PoC with `memcpy-param-overlap` at pinned
+`internal_zstd.c:472`, reached through `readCoreScanlinePart
+ImfCheckFile.cpp:1467` -> `exr_decoding_run decoding.c:602`; the valid
+baseline prints `OK` (rc 0), and the fixed ASan build prints `bad` with no
+ASan report on the same PoC. On plain builds the same tool aborts on the PoC
+with `free(): invalid pointer` (rc 134) while the fixed plain build prints
+`bad` (rc 1); both baselines print `OK` (rc 0). Raw logs:
+`lab/openexr2shell-real/evidence/exrcheck-c-{vuln,fixed}-{asan,plain}-{baseline,poc}.out`.
+This adds an unmodified application binary to the file-level rungs 1-4; the
+grade does not change.
+
+Rung 5 disposition: no unmodified EXR consumer on this host combines
+wire/request input with deep ZSTD decoding. `exrinfo -` reads stdin but only
+prints headers — the pinned build exited 0 with no ASan report on both the
+baseline and the PoC (`evidence/exrinfo-stdin-vuln-asan-*.out`). `exrcheck`
+needs a file path, ImageMagick 6 links system OpenEXR 3.1.5, and no
+OpenImageIO/libvips build is present. A purpose-built
+socket wrapper around the harness would be a synthetic consumer under
+`docs/rce.md:12-15`, so none was built; no pointer, command or marker work
+was attempted. Rung 5 remains UNKNOWN with a named blocker: a live affected
+application process accepting wire/request input.
