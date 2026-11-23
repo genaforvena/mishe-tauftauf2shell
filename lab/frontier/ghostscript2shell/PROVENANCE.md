@@ -94,6 +94,45 @@ minimal `/tmp` replay; normalized trace
 `a4569485cb1fb98ab74b7d186e1566f18ede6bdb263cdb4e5e34f631e5683c29`.
 Raw outputs in `harness/evidence/`.
 
+## Rung-4 UAF aliasing — 2026-11-23 first mind wake
+
+Writeup `https://pwn.ai/upload2shell/research.html` (fetched 2026-11-23)
+describes a marker scan over many fresh allocations, not a single reuse.
+`psi/zgeneric.c:270-312` confirms `zforceput` temporarily sets systemdict's
+ref space to `avm_local` around `idict_put`, so a local object genuinely
+enters a dict that survives `restore`.
+
+Diagnostic `exp/uaf-diag.ps`: a local 2048-byte string force-put into
+systemdict is still `stringtype`, length 2048, byte0=65 after `restore`
+(`AFTER_RESTORE_KNOWN=true`, `AFTER_RESTORE_TYPE=stringtype`,
+`AFTER_RESTORE_LEN=2048`, `AFTER_RESTORE_0=65`). The handoff's
+`UAF_READ=null` was a failed single 8-array reuse, not ref nulling.
+
+Canonical probe `harness/uaf.ps` + `harness/run-uaf.sh`: vulnerable build +
+injected font stores the local string, restores, allocates 96 arrays of 128
+integers each holding `0x12345678`, scans the stale string for byte run
+`78 56 34 12`, flips one low byte to `0x79`, and observes exactly one live
+array element change. Reverse direction confirmed: writing `0x1234567a` to
+that live element reads back as `122,86,52,18` through the stale string, and
+cleanup restores byte `120`. Deterministic 5/5 and across 3 harness runs:
+array 8 / index 118, first pattern offset 8, 10 pattern occurrences.
+
+- `gs-vuln` + injected font: all rung-4 assertions PASS.
+- `gs-fixed` + injected font: `SV_PRESENT=false`, `NO_STALE_REF` — guard blocks.
+- `gs-vuln` + safe font: `SV_PRESENT=false`, `NO_STALE_REF` — no trigger.
+
+`./run-uaf.sh` → 21 PASS / 0 FAIL three times; normalized trace
+`bd4e4b4c7404a9b22dbda6e3ee077e58736d96a868af6f2aad8cc7a00f85a7cb`.
+Raw outputs in `harness/evidence/uaf-*.out`. `uaf.ps` sha256
+`34b6abffe3ed28648b57872b67d4ee91726d767e52ba1773dde2f2630b9eba8e`.
+
+Honest ceiling: PostScript-level rung 4 — chosen bytes at a chosen offset in
+a live interpreter object via a dangling reference, with vulnerable and two
+negative controls. No native address, no ASan report, no forged ref, no
+pointer-chain walk, no `path_control_active` write, no `-dSAFER` bypass, no
+command, no application/network chain. The handoff `UAF_READ=null` negative
+is preserved as the failed single-reuse hypothesis.
+
 ## Preserved negatives
 
 - Host gs 10.02.1 is patched and hides `.forceput`, `.forcebind`,

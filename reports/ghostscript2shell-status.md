@@ -41,8 +41,10 @@ map (now 197 entries). Admission changes no grade.
   because the resource is in ROMFS; the fixed control is a rebuild, and the
   tree was restored to the vulnerable blob afterward.
 
-Grade: **rung 1 trigger and rung 2 observed interpreter state failure on shipped
-interpreter bytes only** — a deterministic PostScript-level write of a benign
+## Grade at admission (03:4xZ)
+
+Rung 1 trigger and rung 2 observed interpreter state failure on shipped
+interpreter bytes only — a deterministic PostScript-level write of a benign
 marker into the readonly systemdict, opposite-signed on vulnerable vs fixed
 builds. No native memory corruption, no ASan report, no allocation aliasing
 after `restore` (`STALE_KEY=true`, `UAF_READ=null`), no pointer-chain walk, no
@@ -51,11 +53,49 @@ forged string ref, no `path_control_active` overwrite, no `-dSAFER` bypass, no
 case-study PoCs are unpublished; its native write-what-where and RCE remain
 claims to reproduce. No independent witness verdict exists yet.
 
-Next bounded experiment (if resumed): reproduce the writeup's 2048-byte
-dangling-reference aliasing and observe a stable read/write through a stale
-systemdict reference after `restore`, keeping the work at PostScript level.
-Only then build under ASan and, if both hold, follow the native ref-forging
-chain with a benign marker, labelled honestly. Preserve the current
-`UAF_READ=null` negative rather than retrying it into existence. Keep rung 5
-requirements unchanged: a live wire-only trigger, a chosen benign command, an
-observed side effect, vulnerable/fixed/safe controls and witness replay.
+## First mind wake — 2026-11-23T03:58Z onward
+
+Baseline `harness/run.sh` replayed unchanged first: `PASS=22 FAIL=0`,
+`TRACE_SHA256=a4569485...3c29`. Fetched the writeup
+`https://pwn.ai/upload2shell/research.html` and read `psi/zgeneric.c:270-312`,
+which confirms `zforceput` temporarily marks systemdict local around
+`idict_put`, so a local object genuinely enters a dict surviving `restore`.
+
+The handoff's `UAF_READ=null` was isolated: `exp/uaf-diag.ps` shows the
+force-put 2048-byte string is still `stringtype`, length 2048, byte0=65 after
+`restore` (`AFTER_RESTORE_KNOWN=true`). The single fresh `8 array` simply did
+not reuse that freed block. The writeup scans MANY fresh allocations instead.
+
+`harness/uaf.ps` (canonical) + `harness/run-uaf.sh`: vulnerable build + injected
+font stores the local 2048-byte string in systemdict, restores, allocates 96
+arrays of 128 integers holding `0x12345678`, finds the byte run
+`78 56 34 12` in the stale string, flips one low byte to `0x79`, and observes
+exactly one live array element change. Reverse direction also holds: writing
+`0x1234567a` to that live element reads back as `122,86,52,18` through the
+stale string; cleanup restores byte `120`. Deterministic 5/5 direct runs and
+3 harness runs: array 8 / index 118, first pattern offset 8, 10 occurrences.
+`./run-uaf.sh` → `PASS=21 FAIL=0` ×3, trace
+`bd4e4b4c7404a9b22dbda6e3ee077e58736d96a868af6f2aad8cc7a00f85a7cb`.
+Controls: `gs-fixed` + injected and `gs-vuln` + safe font both give
+`SV_PRESENT=false`, `NO_STALE_REF`. Full record in `PROVENANCE.md`.
+
+## Current grade
+
+Rung 4 (demonstrated security impact, PostScript level): a dangling reference
+in the surviving global systemdict gives a stable, bidirectional, chosen-byte
+read/write into a live interpreter object after `restore`, with vulnerable,
+fixed and safe-input controls, on real gs 10.07.0 shipped bytes. Honest ceiling:
+no native address, no ASan report, no forged ref, no pointer-chain walk, no
+`path_control_active` write, no `-dSAFER` bypass, no command, no application or
+network chain, no witness verdict. Rung 5 remains a separate claim.
+
+## Next bounded experiment
+
+Charter option 2: build from the pinned tree with ASan
+(`CFLAGS='-fsanitize=address -g'`), swap in the vulnerable `gs_fonts.ps`, run
+`harness/uaf.ps`, and check whether the PostScript allocator's reuse yields an
+instrumented heap-use-after-free. If Ghostscript suballocates and ASan is
+inconclusive, preserve that negative; do not start the native ref-forging
+chain without it. Rung 5 requirements unchanged: a live wire-only trigger, a
+chosen benign command, an observed side effect, vulnerable/fixed/safe controls
+and witness replay.

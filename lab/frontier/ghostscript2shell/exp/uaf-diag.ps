@@ -1,0 +1,44 @@
+%!PS
+% Diagnostic: what is the state of the force-put local object after restore?
+/LoaderOriginalTypecheck errordict /typecheck get def
+errordict /typecheck {
+  userdict /LoaderTrapPhase known
+    { userdict /LoaderTrapPhase get } { false } ifelse
+  {
+    userdict /LoaderTrapPhase false put
+    pop pop pop pop pop
+    userdict /ForceTarget get
+    userdict /ForceKey get
+    userdict /ForceValue get
+  } { LoaderOriginalTypecheck } ifelse
+} bind put
+userdict /QUIET true put
+userdict /ForceTarget systemdict put
+userdict /ForceKey /GS_UAF_DIAG put
+userdict /LoaderTrapPhase true put
+
+(GS_FONT_PATH) getenv { /GSFontPath exch def } { (ENV_MISSING) = quit } ifelse
+userdict /Fontmap 20 dict put
+userdict /Fontmap get /NimbusSans-Regular [ GSFontPath ] put
+
+/AttackSave save def
+userdict /ForceValue 2048 string put
+userdict /ForceValue get 0 65 put
+{ /NimbusSans-Regular findfont pop } stopped pop
+
+(BEFORE_RESTORE_KNOWN=) print systemdict /GS_UAF_DIAG known == flush
+(BEFORE_RESTORE_TYPE=) print systemdict /GS_UAF_DIAG get type == flush
+(BEFORE_RESTORE_0=) print systemdict /GS_UAF_DIAG get 0 get == flush
+
+AttackSave restore
+
+(AFTER_RESTORE_KNOWN=) print systemdict /GS_UAF_DIAG known == flush
+(AFTER_RESTORE_TYPE=) print systemdict /GS_UAF_DIAG get type == flush
+/sv systemdict /GS_UAF_DIAG get def
+sv type /stringtype eq {
+  (AFTER_RESTORE_LEN=) print sv length == flush
+  (AFTER_RESTORE_0=) print sv 0 get == flush
+} {
+  (AFTER_RESTORE_NOT_STRING) = flush
+} ifelse
+quit
