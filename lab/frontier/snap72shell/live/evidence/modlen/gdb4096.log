@@ -1,0 +1,8 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CLIENT_CONNECT_BEGIN addr=127.0.0.1 port=37493
+CLIENT_CONNECT_RC=0
+CLIENT_READ_BEGIN amount=1 dest_size=1
+CLIENT_READ_RC=0 ITEM_RESULT=0 DST0=5a DEST17=00 DEST64=00
+[Inferior 1 (process 1534345) exited normally]
+No stack.

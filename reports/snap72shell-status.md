@@ -105,12 +105,20 @@ and 16384 all die with SIGSEGV inside the pinned line-418 `memcpy` at the brk
 page boundary, before `delete[] dst` is reached; the 200000-byte mmap-backed
 control exits 0 without overflowing. No post-overflow dereference of adjacent
 heap state is reachable in this client on this host.
+W8 swept the attack parameter itself (`run_modlen.sh`, one-byte destination,
+declared lengths 256..49152): all exit 0 with `CLIENT_READ_RC=0 ITEM_RESULT=0
+DST0=5a`, and ASan at 4096 confirms a real `WRITE of size 4096` at pinned line
+418 while gdb shows `exited normally`. Only declared=65535 still faults. So
+even when the copy stays mapped and `free()` is reached, no post-overflow
+dereference occurs; the negative is measured, not merely inferred from the
+memcpy fault.
 No pointer redirect, ROP, command, marker or rung 5 observation exists; rung 5
 remains UNKNOWN. No upstream fixed version or fix commit exists; the guard is
 issue #32's proposed fix, deliberately weaker than an upstream fixed blob.
 
 Exact replays: `bash lab/frontier/snap72shell/live/run_live.sh`,
 `bash lab/frontier/snap72shell/live/run_wide.sh`,
-`bash lab/frontier/snap72shell/live/run_multi.sh` and
-`bash lab/frontier/snap72shell/live/run_freeprobe.sh`. Full hashes, frames and
+`bash lab/frontier/snap72shell/live/run_multi.sh`,
+`bash lab/frontier/snap72shell/live/run_freeprobe.sh` and
+`bash lab/frontier/snap72shell/live/run_modlen.sh`. Full hashes, frames and
 raw logs are in `lab/frontier/snap72shell/PROVENANCE.md` and `live/evidence/`.

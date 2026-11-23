@@ -342,3 +342,41 @@ sizes plus the mmap control. Raw probe logs are not hash-stable (ASLR addresses
 and the absolute source root appear in the gdb frame); the stable facts are the
 `SIZE=n RC=139/0` rows and the memcpy frame at pinned line 418. No pointer
 redirect, command side effect or rung 5. Grade unchanged: rung 4 wire-reachable.
+
+## Declared-length sweep — 2026-11-23 10:4xZ (W8)
+
+W7 varied only the destination allocation while the copy stayed at
+`DataLength=0xFFFF`, so all its overflowing cases died inside `memcpy` before
+the caller could dereference anything. The attack parameter itself was never
+swept below `0xFFFF`. This wake closed that gap.
+
+Pinned source re-read at lines 408-418: `Slice=SwapWord(ResData[c]->DataLength)`
+and, for `TS_ResOctet=0x09`, no `>>3`; line 418 copies `Slice` bytes into
+`Item->pdata`. So a declared 4096 really is a 4096-byte write into the
+one-byte caller allocation.
+
+New files only — `live/fake_s7_server_modlen.py` (argv[4] overrides the
+attack-mode declared length; original responder byte-identical),
+`live/run_modlen.sh`, and raw logs under `live/evidence/modlen/`. Replay:
+`bash lab/frontier/snap72shell/live/run_modlen.sh`. The runner re-verifies the
+four pinned source hashes each run; binary and port file stay in ignored
+`live/bin/`. Two consecutive runs returned the same stable
+`evidence/modlen/summary.txt` SHA-256
+`00a19554ce316b649bcebe2703f7ef85fd7b5eaf20f09c2b726c3c5306134408`.
+
+Rows: `safe1` (declared 1) and every moderate attack length — 256, 1024, 4096,
+16384, 32768, 49152 — exit `RC=0` with `CLIENT_READ_RC=0 ITEM_RESULT=0
+DST0=5a`. Only `declared=65535` still exits `RC=139`, W7's known fault inside
+the copy. ASan at declared=4096 reports `WRITE of size 4096` at
+`opReadMultiVars()` pinned line 418, so the moderate cases are real overflows,
+not a skipped copy. gdb at declared=4096 reports `exited normally`: no fault
+in `memcpy`, none in `delete[] dst`, no post-overflow dereference.
+
+Consequence: W7's negative is stronger than its own sampling showed. The
+65535-byte case faults only because the copy runs off the mapped brk page; a
+copy that stays mapped reaches `free()` and the caller exits cleanly. The
+mechanism by which `free()` tolerates the overwritten neighbour metadata is
+not independently measured here (likely glibc's tcache fast path —
+[INFERENCE]); the measured facts are the RC rows, the ASan write and the gdb
+normal exit. No pointer redirect, command side effect or rung 5. Grade
+unchanged: rung 4 wire-reachable.
