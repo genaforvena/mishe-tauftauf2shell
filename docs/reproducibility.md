@@ -128,7 +128,7 @@ containers whose host ports bind only to loopback.
 | Uhttpd2Shell | [brief](../reports/frontier-uhttpd2shell.md) | GHSA-2mpg-6wp5-435p (GitHub CNA 2026-08-03, CVSS 3.1 7.5 `AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H`); affected through `f682ccabee9ed5f39dd3b0aaf96228975eeb478d` (shipped `7b1bec45` byte-identical), fixed `e76736e5676fb25536b27d45865eb4153c68aca3`, libubox `a396f38a8568a1d670c240465cd8d24fdfdf6463`; seven pinned blobs SHA-256 in `lab/frontier/uhttpd2shell/harness/pins/PIN_HASHES.txt`, claim URLs in `harness/PROVENANCE.md` | `harness/gen.py` extracts `uh_ubus_send_request()` verbatim from pinned `ubus.c` with only the function name changed; `harness/run.sh` builds gcc/clang, ASan/plain against pinned libubox `blob.c` / `blobmsg.c`, checks seven SHA-256 pins and opens no sockets | `cd lab/frontier/uhttpd2shell && bash harness/run.sh` — two full rounds, 30 PASS / 0 FAIL rc 0; expect REAL ASan `READ of size 1` 2 bytes after a 20-byte region in `strcmp`, fixed `ERROR=3 INVOKED=0`, MODEL `WRITE_LEN=4294967293` with 16 chosen `41…` / `5a…` bytes at `WRITE_OFF=20` (hash lines `dbe5197f…` / `56c26e93…`), and both determinism diffs empty. `round2-pass.txt` sha256 `c3b2b9d19d6950090c4efdbc2b5e483881f1d23b297beea41343c6dc5622fc66`, reproduced from a clean `git archive d6afa99` with no source clones or network. Raw per-case logs under gitignored `harness/build/` and `harness/evidence/raw-r1-*`; canonical normalized and raw-r2 files are tracked and regenerate with `run.sh`. No live daemon or wire; the ~4 GiB memcpy is not executed. |
 | Gdbserver2Shell | [brief](../reports/frontier-gdbserver2shell.md), [status](../reports/gdbserver2shell-status.md) | CVE-2026-121997 / GHSA-jq36-9pw3-8r4v (Red Hat 2026-11-05, HIGH 8.1, CWE-122); upstream HEAD `633ae02c4ea8f87c670f7192804349860cfa291d` still vulnerable, fix is a posted-but-unmerged gdb-patches hunk; vulnerable `tracepoint-633ae02.cc` SHA-256 `942306a5…`, derived fixed `c3aa8ac2…`, fix patch `5b8bc3cb…` in `lab/frontier/gdbserver2shell/PROVENANCE.md` | `harness/run.sh` re-extracts verbatim pinned `cmd_qtdpsrc()` slices and helpers, asserts eight SHA-256 pins and builds gcc/clang ASan plus plain-canary variants; opens no socket | `T=$(mktemp -d /tmp/gdb-replay.XXXXXX); cp -a lab/frontier/gdbserver2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `SUMMARY=60 PASS / 0 FAIL`, `NORMALIZED_HASH=0c9b837e…1c1db73`; attack packet `QTDPsrc:1:0:cond:0:1:<hex>` with N=8/32/64/128 gives ASan `WRITE of size 1` 0 bytes after a 2-byte region; full recipe in the lane section below |
 | Erlang2Shell | [brief](../reports/frontier-erlang2shell.md), [status](../reports/erlang2shell-status.md) | CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA 2026-07-27, MEDIUM 5.1 CVSS4 AV:L, CWE-195+CWE-787); affected OTP 25.0+ before 27.3.4.15 / 28.5.0.4 / 29.0.4, fix `c5210b42`; pinned `external.c` / `erl_term.h` blobs and the five-line patch SHA-256 in `lab/frontier/erlang2shell/PROVENANCE.md` | `harness/run.sh` re-extracts four verbatim pinned slices, asserts source/patch/slice/driver SHA-256 pins, builds gcc and clang ASan plus plain-canary variants; opens no socket, VM or BEAM build | `T=$(mktemp -d /tmp/erlang-replay.XXXXXX); cp -a lab/frontier/erlang2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `PASS=60 FAIL=0`, `TRACE_SHA256=8517d3e1…c88` |
-| MiniSnmpd2Shell | [brief](../reports/frontier-minisnmpd2shell.md) | CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed `5419bc38` / release `6894e33e`; pinned vulnerable `protocol.c` `b5322437` (`4bd06467…`), fixed `5419bc38` (`eeb05d95…`), patch `fac30b06…`; five blob/driver hashes in `lab/frontier/mini-snmpd/PROVENANCE.md`, URLs there and in `src/SHA256SUMS` | `harness/run.sh` re-extracts verbatim `decode_oid` (190–256) and `decode_str` (175–187) from both pinned files, asserts five source/patch/driver and four slice SHA-256 pins, builds gcc/clang ASan plus plain variants; opens no socket | `cd lab/frontier/mini-snmpd && bash harness/run.sh` → `PASS=43 FAIL=0`, normalized trace SHA-256 `0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`; ASan `READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`, fixed/safe clean. `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte GET with declared OID length 0xffff; `run_fixed_wire.sh` uses 16162 and `run_safe_wire.sh` the 35-byte control. Full staging recipe below |
+| MiniSnmpd2Shell | [brief](../reports/frontier-minisnmpd2shell.md), [status](../reports/minisnmpd2shell-status.md) | CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed `5419bc38` / release `6894e33e`; pinned vulnerable `protocol.c` `b5322437` (`4bd06467…`), fixed `5419bc38` (`eeb05d95…`), patch `fac30b06…`; five blob/driver hashes in `lab/frontier/mini-snmpd/PROVENANCE.md`, URLs there and in `src/SHA256SUMS` | `harness/run.sh` re-extracts verbatim `decode_oid` (190–256) and `decode_str` (175–187) from both pinned files, asserts five source/patch/driver and four slice SHA-256 pins, builds gcc/clang ASan plus plain variants; opens no socket | `cd lab/frontier/mini-snmpd && bash harness/run.sh` → `PASS=43 FAIL=0`, normalized trace SHA-256 `0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`; ASan `READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`, fixed/safe clean. `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte GET with declared OID length 0xffff; `run_fixed_wire.sh` uses 16162 and `run_safe_wire.sh` the 35-byte control. Full staging recipe below |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -2683,3 +2683,45 @@ are gitignored and rebuild with the configure/make commands above; the driver
 and runner are tracked and the four result lines are regenerated by
 `run-real.sh`. A docs replay observed both emulator modes, all four case
 lines and no ASan report.
+
+## Admitted frontier lane — 2026-11-23 02:4xZ minisnmpd2shell
+
+Frontier handed over W132 (DM #2079) with brief
+`reports/frontier-minisnmpd2shell.md`, site charter and seed wall, hash-pinned
+vulnerable/fixed `protocol.c` plus fix patch and loopback wire scripts in
+`lab/frontier/mini-snmpd/PROVENANCE.md`. Its two-pane inner tmux window
+already existed at index 100 (0..99 occupied), so admission created no second
+window and the registry stayed at 101 entries / 101 unique names.
+
+From the repository root, replay from an isolated copy so staged evidence is
+untouched:
+
+```sh
+T=$(mktemp -d /tmp/minisnmpd-replay.XXXXXX)
+cp -a lab/frontier/mini-snmpd/. "$T/"
+bash "$T/harness/run.sh"
+```
+
+`run.sh` re-extracts the verbatim pinned `decode_oid` and `decode_str`
+slices, asserts all source/patch/slice/driver SHA-256 pins before compiling
+gcc 13.3.0 and clang ASan plus plain-canary variants, and opens no socket.
+Expect rc 0, `PASS=43 FAIL=0` and
+`TRACE_SHA256=0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`.
+The operator observed exactly those values at admission on 2026-11-23 from a
+fresh `/tmp` copy, matching frontier's clean-archive replay. No witness
+verdict exists yet.
+
+Expected bytes: a declared OID BER length of 4000 against a 2048-byte packet
+wraps `*pos >= (size - len + 1)` to 18446744073709549665, so the walk reaches
+offset 4007 and fills 18 subids; the fixed pin returns `RC=-1` at
+`POS_AFTER=8`. Both compilers report `AddressSanitizer:
+heap-buffer-overflow`, `READ of size 1`, `0 bytes after 2048-byte region` in
+the verbatim `decode_oid`. Canary bytes at offset 2048 land byte-exact in
+`SUBID2_HEX` (0x5a and 0x3c across runs); fixed and in-bounds safe inputs are
+clean. The plant-started loopback ASan daemon on 127.0.0.1:16161 logs
+`overflow for OID byte` on the vulnerable pin, fixed 16162 rejects with
+`underflow for oid`, and a 35-byte GET is clean on both. Preserved negative:
+no wire-level ASan report because `client->packet` sits inside a larger
+global struct and the 20-subid cap stops the walk. Grade stays harness rungs
+1–4 plus daemon rung-2 reachability; no pointer, marker, command or rung 5.
+Status: `reports/minisnmpd2shell-status.md`.

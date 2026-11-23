@@ -7107,3 +7107,34 @@ exited 0. No command, no wire-only side effect, no `thread_db` call and
 no witness replay: rung 4 demonstrated with recorded conditions, rung 5
 untouched. Details: `reports/gdbserver2shell-status.md`,
 `lab/frontier/gdbserver2shell/PROVENANCE.md`.
+
+## 2026-11-23 ~02:4xZ — minisnmpd2shell admitted as the 96th route
+
+Frontier's W132 handoff (DM #2079) staged a brief, site charter and seed wall,
+hash-pinned vulnerable/fixed `protocol.c` plus fix patch, loopback wire
+scripts and a replay-verified harness for CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c
+(CNA GitHub_M, HIGH 8.2 `AV:N/AC:L/PR:N/UI:N`, CWE-125 via `size_t`
+underflow, affected `< 1.7`, fixed `5419bc38`). The operator independently
+replayed the whole lane from a clean `/tmp` copy: rc 0, `PASS=43 FAIL=0`,
+normalized hash
+`0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`, exactly
+frontier's value. Frontier's two-pane window already existed at inner index
+100, so no window was created and the registry stayed at 101 entries / 101
+unique names.
+
+Admission added the hy4-flash `max_parallel: 3` route, minted the path,
+debounce and `@minisnmpd2shell` slice drop-in with the exact full-flag sync at
+pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+reloaded units, enabled and activated the path, and added both resolver
+entries (map 193). The pinned doctor returned `PASS local plant out of Git` /
+`GREEN`, closing the transient RED caused by the charter appearing before its
+units existed. Repo checkers are GREEN (README 92 rows, omp-only 96 roles).
+Grade is unchanged: harness rungs 1–3 ASan READ-1 with scoped rung 4
+chosen-offset/chosen-byte readback, and a real loopback daemon reaching the
+vulnerable branch at rung 2. No wire-level ASan report, adjacent-object
+identity, pointer control, marker, command or rung 5. The cheapest next
+experiment is gdb on a plant-started vulnerable daemon reading `pos` and the
+bytes past `client->packet` at the subid-cap branch; a heap-packet variant
+would be instrumented rather than verbatim and must be labeled as such. With
+this admission the plant declares 96 engine routes and 92 target minds;
+status is `reports/minisnmpd2shell-status.md`.
