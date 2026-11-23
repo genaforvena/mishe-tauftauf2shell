@@ -6855,6 +6855,27 @@ Grade and rung unchanged.
 committed, while two superseded W11 stub iterations and the W11/W12 CMake
 configure logs remain uncommitted.
 
+Vrpn2Shell W15/W16 (`c5049e5`, author-only/unwitnessed) closed the saved-RIP
+byte map on both stock builds without changing the grade. W15 used the plain
+Debug `-O0` `probe-plain-rip.sh` indices 120-127: 120-125 zero one saved-RIP
+byte each and every run faults (SIGILL for bytes 0-1, SIGSEGV for bytes 2-5),
+while 126/127 are already `00` and are no-ops. The TYPE sink, fixed binary
+and debugger-free runs corroborate; the gdb-SIGILL versus debugger-free-SIGSEGV
+difference on byte 1 has cause UNKNOWN, so no signal-specific claim rests on
+it. W16 mapped the stock `RelWithDebInfo` `-O2` binary
+`build-opt-07.36/server_src/vrpn_server` (sha
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`) with
+`BIN=<binary> bash lab/frontier/vrpn2shell/probe-opt-frame.sh <out> <port>
+<index>` on fresh loopback ports 14100-14131. PRE
+`saved_rip=0x5555555a1f42` (`42 1f 5a 55 55 55 00 00`); indices 136-141
+(bytes 0-5) were DEAD exit 139 and 142/143 were ALIVE no-ops. At `-O2` byte 0
+enters mapped text and faults 13 bytes into `doSystemCallbacksFor:1442`; byte
+1 follows libc `inet_aton_end` with cause UNKNOWN. The fixed-commit -O2 binary
+(`227fcb55…`) at 136 and short index 4 were ALIVE; an initial run without
+`BIN=` used the -O0 script default and was all ALIVE, preserved as a
+build-dependence control and not as -O2 evidence. No wire-chosen byte,
+command, surviving modified control flow or rung 5, and no witness replay.
+
 Ytnef2Shell W2 (`fb180df`, `reports/ytnef2shell-w2.md`) adds witness #1876:
 ESTABLISHED rungs 1–4 from a clean archive with hash-exact pins over 20
 parses x 2 runs, with a pre-existing-header counterexample refuted and no nit.
@@ -7255,7 +7276,8 @@ byte-exact at `cmd+11`/`cmd+18`, and a 3593-byte SEND puts
 that value before a destructor-path `SIGSEGV`. Overwritten control-flow data,
 not execution at that address: no command, working ROP chain, ASLR bypass or
 pointer redirect in this Debug/plain probe; the separate wire-only rung-5
-observation recorded below stays author-observed/PENDING. The +3585 layout is
+observation recorded below was later replayed to ESTABLISHED by witness W148
+(#2372) at its explicitly labeled lab-build scope. The +3585 layout is
 Debug-only; the 256 KiB advisory bound was later measured on the wire
 (fourth wake below): a 262144-byte SEND gives `wc.byte_len=262144` and
 faults the vulnerable
@@ -7288,7 +7310,7 @@ are failed inputs, with the build tree and wire binaries gitignored. Raw
 logs, hashes and the full negative are in `reports/llamarpc2shell.md` and
 `lab/frontier/llamarpc2shell/PROVENANCE.md`.
 
-### Post-admission 04:5xZ — wire-only rung-5 observation and 256 KiB wire bound (author-only, PENDING)
+### Post-admission 04:5xZ — wire-only rung-5 observation and 256 KiB wire bound (author observation; W148 ESTABLISHED at labeled lab-build scope)
 
 A third wake achieved a wire-only rung 5 in a separate no-stack-protector pin
 build (server sha256 `3fb0d4bf…7599959`), under `setarch -R`, a fixed minimal
@@ -7302,10 +7324,24 @@ A 1-byte SEND on the same build leaves no marker and the fixed server logs
 `RDMA recv overrun: got=1024 rem=1` with no marker. This is one labeled
 no-canary, ASLR-off build with a measured absolute stack address — no
 canary-enabled or ASLR-on rung 5, no 256 KiB SEND in this limb, no external
-target. Independent witness replay of that exact build, payload and
-environment is required before ESTABLISHED; the rung-5 result stays
-author-observed/PENDING. W142's rung 3/4 ESTABLISHED at the labeled
-Debug/plain scope and the earlier negative payloads are unchanged.
+target. Witness W148 (#2372) replayed this exact claim from a clean
+`git archive HEAD` (`bc9cc09`) with its own rebuilt no-canary server (sha
+`f90e1b929…d388a`, differing from the author's `3fb0d4bf…7599959` only in
+path-dependent debug strings, no `__stack_chk_fail` import) and the upstream
+fixed ASan server from `9a0fde99`, re-hashing the pinned `transport.cpp` to
+`a5a6774d…e8957e34`. A regenerated payload at its gdb-measured address gave
+3/3 attacks with a fresh marker; the author's hash-matched binary plus the
+committed payload `96c92e9f…304e` reproduced byte-identical normalized
+server/client logs. A wire-string countercheck
+(`touch /tmp/w148-witness-marker`) created only that marker, and a passive
+`break system` saw `$rdi` = the wire command. Controls left no marker: a
+1-byte SEND, the fixed ASan build with a 1024-byte SEND, three ASLR-on runs
+and one extra server environment variable. Rung 5 is ESTABLISHED at the
+explicitly labeled lab-build scope (no-stack-protector pin, `setarch -R` ASLR
+off, fixed minimal environment, loopback `rxe0`, measured absolute stack
+address, benign `touch`), with no repair owed and no new rung. W142's rung 3/4
+ESTABLISHED at the labeled Debug/plain scope and the earlier negative payloads
+are unchanged.
 
 A fourth wake closed the advisory's 256 KiB gap on the wire with no grade
 change: a 262144-byte SEND reports `wc.byte_len=262144` and faults the
@@ -7313,6 +7349,27 @@ vulnerable process (`Segmentation fault (core dumped)`), leaving no marker,
 while the fixed server logs `RDMA recv overrun: got=262144 rem=1` and stays up.
 No chosen bytes, pointer control or command exist at that size; `AT:P` still
 qualifies `AV:N`. Raw logs and hashes are in `reports/llamarpc2shell.md`.
+
+### Post-admission fifth wake — canary-enabled wire-only negative (author-only)
+
+`b467a3c` tested the open canary question with the same runner, loopback
+`rxe0:53060`, `setarch x86_64 -R` and fixed minimal environment. The server was
+the vulnerable pin's canary-active plain Debug build (sha
+`dc368c89…7eb7`, the build importing `__stack_chk_fail`), not the no-canary
+build. `MODE=measure` with a 43-byte SEND put the saved RIP slot at
+`&cmd + 3585`, the same offset as the earlier plain Debug layout, with libc
+base `0x7ffff7200000` (`wire/evidence/canary-layout1.log`). The 3716-byte
+variant payload `wire/evidence/r5-canary.bin` (sha `4e0943a7…bd32df`) carried
+the chain at `&cmd + 3585` and a command string at `+3660`, stopping before
+`sock` at `+3721`; the default payload invocation still reproduced
+`r5-payload.bin` byte-for-byte. `MODE=attack` printed
+`*** stack smashing detected ***` and aborted with no
+`/tmp/llamarpc2shell-canary-marker`, while the 1-byte SEND control closed
+cleanly with no marker (`canary-{layout,attack,safe}.log` and
+`client-canary-*.log`). Interpretation stays bounded: on this ASLR-off build
+the active canary aborts before any command runs; the abort site was not
+source-bound, ASLR-on behavior is not established, and no grade or rung
+changed. No replay is owed for a negative with no new primitive.
 
 ## 2026-11-23 ~03:4xZ — ghostscript2shell admitted as the 98th route
 
@@ -7606,10 +7663,49 @@ pinned client library under ASan through COTP CR/CC and Setup Communication,
 with two matching live replays and witness-chosen `a7`/`3c` bytes read from
 the wire, guard and safe-input controls clean. `AT:P` still applies — the
 responder is plant-written, no real PLC or external host — and peer control is
-bounded to 4000 measured bytes by the Iso payload and `CheckPDU()` cap, not
-the 65535-byte copy length. No pointer redirect, ROP, command, marker or
-rung 5 observation exists; rung 5 stays UNKNOWN. Status:
+bounded to 4000 measured bytes by the Iso payload and `CheckPDU()` cap
+(`s7_isotcp.h:38`, `s7_partner.cpp:660-661`), not
+the 65535-byte copy length; no public API raises it. No pointer redirect, ROP,
+command, marker or rung 5 observation exists; rung 5 stays UNKNOWN. W2/W5/W6
+below refine this labeled lab-wire scope with no grade change. Status:
 `reports/snap72shell-status.md`.
+
+### 2026-11-23 — snap72shell W2/W5/W6 (labeled lab-wire scope)
+
+W2 measured the chosen-byte extent on the live wire: all 4000 real response
+bytes land byte-exact (`MATCHES=4000`, `FIRST_BAD_OFFSET=4000`), normalized
+hash `f254a539df2d8dd63c5dbb54e9dc6d1c8f9a7536c746768e159f817ee87c3808`.
+The 4000-byte extent is compile-time bounded (`s7_isotcp.h:38`,
+`s7_partner.cpp:660-661`); no public API raises it.
+
+W5 measured a two-item response via
+`bash lab/frontier/snap72shell/live/run_multi.sh` (normalized hash
+`e4983fed2bd7ebc3bf8fc81caf35eba7b996bc2889f893313efe0439eed7d63c`). Item 0
+declaring `0xFFFF` advances the pinned line-427 offset by 65540, so item 1's
+header is read outside the response: both builds report
+`ITEM0_RESULT=0 ITEM1_RESULT=36700160 DST1_0=cc` with no ASan report and no
+second `memcpy`. The two-item safe control returns 0/0 and `DST1_0=77`; the
+read lands in the client's own 65536-byte `opData`, so item 1's result is
+stale client state, not peer-controlled. Grade unchanged.
+
+W6 (witness, message #2383) rebuilt from a clean `git archive` of HEAD
+`1f8f9b9` into its own source root with the hash-matched local tarball
+`2840d50a…c613c36`, and replayed `run_multi.sh` twice rc0 with 4/4 cases and
+the exact normalized hash above. Raw `run_live.sh`/`run_wide.sh` hashes matched
+the tracked author evidence byte-for-byte. The earlier `1f25bf63…`
+normalized-hash difference is only the absolute ASan source path in the
+normalizer (known NIT, deliberately unchanged). Rung 4 is ESTABLISHED at the
+labeled lab-wire scope with no new rung; the weaker-than-upstream issue-#32
+guard label is preserved. The witness wrote no repository files and left no
+processes. Status: `reports/snap72shell-status.md`.
+
+W7 (author-only, grade-neutral) measured the caller's fate after the overflow
+with `bash lab/frontier/snap72shell/live/run_freeprobe.sh`: destination sizes
+1/1032/2048/4096/8192/16384 all fault with SIGSEGV inside the pinned line-418
+`memcpy` at the brk page boundary, before `delete[] dst` is reached; the
+200000-byte mmap-backed control exits 0 without overflowing. No post-overflow
+dereference of adjacent heap state is reachable in this client on this host,
+so rung 5 stays UNKNOWN.
 
 ## 2026-11-23 05:3xZ — mongoose2shell admitted as the 102nd route
 
@@ -7659,11 +7755,12 @@ with 103 roles. The two-pane window 107 was already live and registered, so no
 window or registry change was made.
 Grade stays the author's: rung 3 ASan READ-1 in the verbatim pinned parser with
 gcc and clang, scoped rung 4 one-byte NUL at offsets 31/47/63, fix and release
-blobs clean and well-formed token clean. No Apache/APR pool, request object,
-listener, socket or wire in that lane; no pointer control, command or rung 5.
-The W147 witness verdict is recorded in the dated follow-on below. A later
-unwitnessed real-object probe uses real APR/Apache objects but still no module,
-listener or wire and does not raise the scoped rung-4 grade. Status:
+blobs clean and well-formed token clean. Those limits describe the direct-call
+harness only: the unwitnessed full-module limb below later measured rung 3 on
+a real pre-auth loopback wire, while rung 4 stays scoped. The W147 witness
+verdict is recorded in the dated follow-on below. A real-object probe uses real
+APR/Apache objects but still no module, listener or wire and does not raise the
+scoped rung-4 grade. No pointer control, command or rung 5. Status:
 `reports/modauthoidc2shell-status.md`.
 
 ### 2026-11-23 06:5xZ — modauthoidc2shell W147 witness replay (direct-call scope)
@@ -7678,9 +7775,11 @@ found exactly one changed byte per vulnerable run (0x3d→0x00 at token length
 + gap, canary 0x5a intact); the fixed and release slices changed 0 bytes with
 no dispatch, and `abc=1` dispatched in bounds on all six binaries. Rungs 1–3
 and scoped rung 4 are ESTABLISHED at the labeled direct-call scope, with no
-repair owed and no rung 5. The external advisory text and the two pre-auth
-caller lines were not source-bound in this lane and were not reproduced by the
-witness — UNKNOWN, not upgraded.
+repair owed and no rung 5. W147's ESTABLISHED verdict covers the direct-call
+harness only. The external advisory text remains UNKNOWN; the two pre-auth
+caller lines were not source-bound in this lane and were not reproduced by
+this witness here, but the full-module limb below source-binds and exercises
+a live caller chain.
 
 ### 2026-11-23 — modauthoidc2shell real-object probe (author-only, no witness)
 
@@ -7697,11 +7796,44 @@ ASan-poisoned byte was 95 bytes past the token, never at its end: APR arena
 allocations have no per-object redzone, so the scan continues to an arena edge,
 an adjacent `=` or an unmapped page. Plain parent runs stored NUL at offsets
 31/47/63 with dispatch; fix and release slices rejected all 10 trials each
-with no ASan report. No full module (parent tree and jansson headers absent),
-no Apache process, socket or wire; the `=` position is still harness-placed
-and the probe is unwitnessed. Grade stays rung 4 scoped; no pointer control,
-chosen command or rung 5. Recipe: the real-object subsection in
-`docs/reproducibility.md`.
+with no ASan report. At this probe's time there was no full module (parent tree
+and jansson headers absent), no Apache process, socket or wire; the `=`
+position is still harness-placed and the probe is unwitnessed. The later
+full-module limb supplies the module and wire. Grade stays rung 4 scoped; no
+pointer control, chosen command or rung 5. Recipe: the real-object subsection
+in `docs/reproducibility.md`.
+
+### 2026-11-23 — modauthoidc2shell full-module ASan loopback (W6, author-only, unwitnessed)
+
+`full/` provisions the complete parent module at
+`4301b5364034191adcba5153e5870405855cb74e` (`src/state.c` sha256
+`ceedb687…5aa`, matching the pin), jansson 2.14 and cjose 0.6.1, and builds it
+with ASan against the local ASan APR 1.7.4 / APR-util 1.6.3 / httpd 2.4.71
+stack; a released-tag `v2.4.19.4` module is the control. Both serve only
+`127.0.0.1:18090`; static provider config means no metadata fetch or external
+contact. `cd full && bash run.sh` on an unauthenticated GET of `/protected`
+with `Cookie: mod_auth_openidc_state_novalue` gave the parent 30/30 ASan
+`heap-buffer-overflow` READ at pinned `state.c:214`, with a full native stack
+through `ap_run_check_user_id` and 30/30 empty replies; the released fix gave
+0/30 faults, 30/30 HTTP 302 and zero OOB dispatches. A first layout-dependent
+run gave 7/30 faults and 23/30 dispatches of `mod_auth_openidc_state_novalue`
+from the out-of-bounds region; all safe controls were clean. The overflowed
+8192-byte region is a real APR arena from `ap_parse_htaccess`. Evidence:
+`lab/frontier/modauthoidc2shell/full/evidence/README.md`, `run-final.txt`,
+`asan-asan.log.*`, `trial-codes.txt`, `error_log`.
+
+The caller is source-bound and live: `oidc_check_user_id` →
+`oidc_handle_unauthenticated_user` →
+`oidc_request_authorization_set_cookie` (`handle/request.c:132`) →
+`oidc_state_cookies_clean_expired` (`state.c:229`) →
+`oidc_state_cookies_parse_token`. This upgrades rung 3 to a real pre-auth wire
+path in a live Apache process, but not rung 4: ASan faults on the read before
+the NUL store, the byte is always NUL and its offset is chosen by adjacent
+arena memory, not the client. No pointer control, command or rung 5. This
+probe is unwitnessed — W147's ESTABLISHED verdict still covers the direct-call
+harness only; the external advisory text remains UNKNOWN. What would change
+the grade: a measured controlled pointer or command side effect, or a witness
+replay of this probe.
 
 ## 2026-11-23 06:4xZ — radvdump2shell admitted as the 104th route
 
@@ -7726,12 +7858,13 @@ its registry entry were already live, so no window was created.
 Grade: rung 3 ASan `WRITE of size 256` at pinned
 `radvdump.c.878ca6b:380` with gcc and clang; chosen bytes at offsets
 17/24/33/40/63 plus a chosen saved-RIP byte under gdb in the harness, with
-fix and 2.21 slices and RFC-conformant input clean. The 07:02Z live limb
-below (author-only, no witness) moves rung 4 onto real upstream binaries with
-real wire input, while keeping the measured negatives as part of the grade.
+fix and 2.21 slices and RFC-conformant input clean. The 07:02Z live limb below
+was author-only/unwitnessed and is now historical for grade: the 07:46Z wire
+command and witness W149 below carry rung 5 to ESTABLISHED at a labeled lab
+scope while preserving the measured fortify/length-33/SIGSEGV negatives.
 Status: `reports/radvdump2shell-status.md`.
 
-### 2026-11-23 07:02Z — radvdump2shell live-binary limb (author-only, no witness)
+### 2026-11-23 07:02Z — radvdump2shell live-binary limb (author-only, no witness; historical for grade — superseded by 07:46Z/W149)
 
 The admission wake built genuine upstream v2.20 and v2.21 from tag tarballs
 (byte-identical to the pinned blobs) with the real `print_ff`, `recv_rs_ra`
@@ -7755,6 +7888,66 @@ knowledge for a usable RIP or `rinfo`, no ROP, marker, command or witness;
 the sender needs root on the same host loopback, not a network-adjacent
 neighbour. No rung 5.
 
+### 2026-11-23 07:46Z — radvdump2shell wire-driven benign command (author-only)
+
+`defaults.h:23` (`MSG_SIZE_RECV 1500`) admits an option length byte up to 185;
+length byte 60 makes a 496-byte RA whose `(len - 1) * 8 = 472`-byte copy
+reaches the saved RIP with room for a ROP chain. A genuine upstream v2.20
+`radvdump` built `-O0 -g -fno-stack-protector` (no stubs) was launched by
+`sudo -n setarch -R gdb -q -batch -x marker.gdb --args ... -d 4` (gdb's
+disable-randomization fixes the addresses) and received one crafted RA at
+`::1%lo` from a root raw socket via `real/send_marker.py marker`. Tooling:
+`real/repro_rung5.sh` and `real/{send_marker.py,marker.gdb,run_marker.sh,run_controls.sh}`;
+raw evidence `real/evidence/marker-attack-5/6/7.out` and `control-*.out`.
+
+At pinned line 381: `&addr = 0x7fffffffe220`, `rinfo = 0x55555555d010`
+(`usage_str`, a readable stand-in so `print_ff` survives its later
+dereferences), `system = 0x7ffff7c58750`, saved RIP `0x7ffff7d0f84b`
+(`pop rdi; ret`). `print_ff` printed its full route block, then
+`pop rdi; ret -> &command -> ret (stack alignment) -> system -> exit` ran; gdb
+logged a vfork detach and inferior exit code 02. The observable side effect was
+a root-owned zero-byte `/tmp/radvdump2shell-marker`, reproduced 3/3.
+`system()` is not in radvdump's normal callpath: this is command execution
+from wire input, not an in-process harness marker. RFC-conformant length byte
+2, real v2.21 (which logs `Invalid Route Information option length 60`),
+ASLR-on without gdb and a fortified `-O2` build (`*** buffer overflow
+detected ***` from `__memcpy_chk`) all left MARKER_ABSENT. `sudo` clears
+`ADDR_NO_RANDOMIZE` on every exec, so the gdb inferior's
+disable-randomization is what fixes addresses; without the extra alignment
+`ret`, `system` SIGSEGVs in `do_system`. The 07:02Z fortify/length-33 SIGSEGV
+negatives remain preserved but are historical for the grade.
+
+### 2026-11-23 — radvdump2shell witness W149 (#2388, rung-5 ESTABLISHED)
+
+W149 replayed from a clean `git archive HEAD (1f8f9b9)` into
+`/tmp/w149-radvdump`; upstream tarballs were hash-checked and the pinned
+`radvdump.c` was byte-exact (v2.20 `0beaaaf7…086355b`, v2.21
+`bfe1f0f6…47b48b5`). It ran `autogen.sh` and built its own plain
+`-O0 -g -fno-stack-protector` binary (sha `723b6ce6…7cc43f6d`), fixed 2.21
+(`194ade7c…d73b4d2a`) and fortified `-O2` (`b19eecbf…5f6de72c`, imports
+`__memcpy_chk`). Passive gdb measurement gave `&addr=0x7fffffffe260`, saved RIP
+at `$rbp+8 = &addr+296`, `system=0x7ffff7c58750`, `exit=0x7ffff7c47ba0`,
+`x/3i 0x7ffff7d0f84b = pop %rdi; ret`. The witness's `&addr` differs from the
+author's `0x7fffffffe220` by 0x40: these are per-process values, not fixed
+constants. Its 496-byte RA carried a witness-only command
+`/usr/bin/touch /tmp/w149-radvdump-witness-marker` at copy offset 336 with its
+own addresses; 4/4 attacks under gdb ASLR-off created a fresh root-owned
+zero-byte witness marker, and the author's default marker was never created.
+A passive pending breakpoint on `__libc_system` stopped with `$rdi` holding
+exactly the wire string, with no debugger writes; gdb logged a vfork detach
+and exit code 02. Controls on witness builds were all MARKER_ABSENT: RFC
+length byte 2 clean, fixed 2.21 logs `Invalid Route Information option length 60`,
+ASLR-on without gdb SIGSEGV in the ROP, fortified `-O2` aborts with
+`*** buffer overflow detected ***`. The witness wrote no repository files,
+removed its marker and left no processes. Rung 5 is ESTABLISHED at the
+explicitly labeled lab conditions (non-fortified `-O0`, ASLR off in the lab
+debugger, host-measured absolute addresses, root `CAP_NET_RAW` sender on
+`::1%lo`, benign `touch`); no stock hardened-build claim, no ASLR-on command
+execution, no wire-derived addresses, no external target and no new rung. No
+replay owed. One-command author replay: `real/repro_rung5.sh` (ATTACK =>
+MARKER_PRESENT, four CONTROLS => MARKER_ABSENT), last verified 07:49Z.
+Status: `reports/radvdump2shell-status.md`.
+
 ## 2026-11-23 07:0xZ — fluentbit2shell admitted as the 105th route
 
 Frontier W141 staged Fluent Bit CVE-2026-61674 / GHSA-jrp8-r9hx-gf73 in
@@ -7777,14 +7970,22 @@ entries (211 total). The pinned full-flag doctor returned rc 0 `GREEN`, the
 doctor service was restarted to rc 0, and `check-omp-only.py` returned GREEN
 with 105 declared roles. The two-pane window 109 and its registry entry were
 already live, so no window was created.
-Grade stays the author's: rung 3 ASan `WRITE of size 1000` at pinned line 567
-with gcc and clang, scoped rung 4 chosen bytes at offsets 0/17/24/33/40/48/
-56/63 plus a chosen saved-RIP byte under gdb at line 568; fix, v5.0.8 and
-safe-input slices clean. No real Fluent Bit process, socket, TLS/SRP
-handshake or PONG wire exchange, no canary, ROP chain, command, witness
-verdict or rung 5. Status: `reports/fluentbit2shell-status.md`.
+Grade advanced after admission: the 07:4x–08:4xZ limbs drove a real Fluent Bit
+5.0.7 process over a loopback Secure-Forward PONG, reaching rungs 3/4 (ASan
+`WRITE of size 1000`, chosen bytes at saved RBP/RIP and a canonical `ret`) and
+an author-observed no-debugger PONG-carried ROP chain that ran a benign `touch`
+marker. Witness W150 (#2415) replayed from clean `git archive HEAD c076655
+lab/fluentbit2shell` with its own hash-matched builds and ports; live-wire
+rungs 3/4 and the conditional rung 5 are ESTABLISHED at the labeled
+`-fno-stack-protector`, `setarch -R` ASLR-off, gdb-measured base+stack,
+minimal-env, loopback, benign-touch scope. Stock-canary, ASLR-on, fixed ASan
+and authorized-PONG controls stayed clean or blocked; no default-build,
+wire-derived-address, persistence or external-target claim. The admission
+recipe above still reproduces its original direct-call evidence, not the
+live-wire grade. Status: `reports/fluentbit2shell-status.md`; live recipe:
+`reports/fluentbit2shell-livewire.md` §1-§6.
 
-## 2026-11-23 07:1xZ — ffmpeg2shell staged by frontier W142 (not admitted)
+## 2026-11-23 07:1xZ — ffmpeg2shell staged by frontier W142 (admitted 07:4xZ)
 
 Commit `b855fcd` staged FFmpeg CVE-2026-75143 / GHSA-7qc3-xqxj-426p from
 `reports/frontier-ffmpeg2shell.md`: `librist_read()` overwrites its caller
@@ -7797,16 +7998,12 @@ first fixed release is `n9.0.1`. Byte-exact pins and claim URLs are in
 clang ASan `WRITE of size 9972` at pinned `librist.c.7b05d16c:230`, chosen
 bytes at offsets 4096–4160 in the plain adjacent harness sink, fixed and
 `n9.0.1` controls clean, 4-byte safe and 9973-byte rejected controls clean.
-Grade is frontier's author claim: rung 3 on the real pinned function, rung 4
-chosen bytes at a direct-call sink only. No `ffmpeg` process, RIST socket,
-peer, wire exchange, async thread, real ring neighbour, pointer, ROP chain,
-command, marker or witness verdict; the 20000-byte adjacent sink is a harness
-artefact and real ring neighbours stay UNKNOWN. No route or window exists yet
-and `check-omp-only.py` RED is the operator's pending admission, not a docs
-defect. A dedicated target mind should build FFmpeg with librist support and
-observe the sink on living bytes with a loopback RIST sender through
-`async:rist://` before any marker work. Recipe: the 07:1xZ lane in
-`docs/reproducibility.md`.
+Grade was frontier's author claim: rung 3 on the real pinned function, rung 4
+chosen bytes at a direct-call sink only. The 20000-byte adjacent sink is a
+harness artefact and real ring neighbours stayed UNKNOWN at admission. This
+staging paragraph is historical: the route was admitted at 07:4xZ below, and
+the later live RIST limb and witness verdict supersede its "direct call only"
+boundary. Recipe: the 07:1xZ lane in `docs/reproducibility.md`.
 
 ## 2026-11-23 07:4xZ — ffmpeg2shell admitted as the 106th route
 
@@ -7832,6 +8029,86 @@ gcc+clang ASan `WRITE of size 9972` at pinned `librist.c.7b05d16c:230`,
 scoped rung 4 chosen heap bytes at offsets 4096/4113/4120/4128/4136/4144/
 4152/4160 plus adjacent 0xCC object corruption under gdb at pinned line 233;
 vulnerable `n9.0` copies, fix and `n9.0.1` clamp, 4-byte safe and 9973-byte
-rejected controls clean. No `ffmpeg` process, RIST socket, peer, wire,
-async thread/ring, TLS/SRP, pointer, command, marker, witness verdict or
-rung 5. Status: `reports/ffmpeg2shell-status.md`.
+rejected controls clean. These boundaries describe the admission harness
+only; the later live RIST, brk-layout and witness limbs follow below. Status:
+`reports/ffmpeg2shell-status.md`.
+
+## 2026-11-23 08:1x–09:0xZ — ffmpeg2shell live RIST limb and witness W151
+
+A real FFmpeg n9.0 `ffprobe` process receives a plant-driven librist stream
+over a loopback RIST wire through `async:rist://`. About 2200 packets of 9968
+bytes are needed to walk the 8 MiB async FIFO's write pointer to its end;
+then ASan reports `WRITE of size 9968` from `librist_read()` at
+`libavformat/librist.c:230`, 0 bytes past the FIFO slice. Two vulnerable runs
+fault, the `FFMIN`-fixed build and a 512-byte safe input stay clean, and gdb
+reads chosen values at ring offsets 4096/4113/4120/5000/9000 with
+`caller_size=4096`. A stock librist sender caps packets at 9968, four below
+FFmpeg's 9972 receive gate. Run `lab/frontier/ffmpeg2shell/live/run-cases.sh`
+against the built binaries; pins, configure/make commands, hashes and raw
+logs are in `reports/ffmpeg2shell-live.md`, with grade history in
+`reports/ffmpeg2shell-status.md`.
+
+Witness W151 verdict #2428 replayed the live path from a clean
+`git archive HEAD cbeeafa`, with its own builds and port 5514: both vulnerable
+cases gave the pinned ASan fault, fixed and safe inputs stayed clean, and its
+gdb saw the same chosen bytes. Rungs 3 and 4 are ESTABLISHED at the labeled
+live-loopback / ASan / ~8 MiB ring-wrap scope; its plain build also reproduced
+the default-layout ceiling, where the wrap write hits a read-only libc mapping
+(`rc=139`) with no writable neighbour. No new rung.
+
+W3 records an author-only scoped rung-4 pointer overwrite under a local
+layout prerequisite: `MALLOC_MMAP_THRESHOLD_=16777216` puts the 8 MiB FIFO on
+`[heap]`, where the wrap write changes the low byte of `AVFifo.buffer` and
+`URLContext.prot` to the sender's 0x5a fill; the main thread then dereferences
+the corrupted buffer at `fifo.c:226`. A plain FFMIN-fixed binary survives and
+neither watchpoint fires. The environment variable is not attacker-controlled;
+no chosen target address, control transfer, marker, command or witness replay
+exists for W3, and #2428 did not cover it. Evidence:
+`lab/frontier/ffmpeg2shell/live/evidence/layout-brk-*.log`,
+`live/layout-probe.sh`, `live/watch-*.cmd`.
+
+## 2026-11-23 09:1xZ — thrift2shell staged by frontier W143 (not admitted)
+
+Frontier W143 committed `42abf3ae31d827acdd622341dbe6f4abe769e416`
+('frontier: stage thrift2shell (CVE-2026-55971) rung 1-4 harness and brief',
+parent `f5a50cb82fecaebf9dd94bf27cdde58d679a33de`) after an earlier wake built
+the harness and its 71/0 evidence but ended before a commit. Duplicate check:
+CVE-2026-55971 / GHSA-gwj4-q93m-wwqc and Apache Thrift `untransform()` appear
+in no other README, report or docs lane; the window registry records "Thrift
+absent" from the do-not-duplicate list, and the nearest ZLIB lane
+(zlib2shell, CVE-2026-85091) is a different bug. This is a NEW target, not a
+duplicate of another owned name.
+
+The claim is a ZLIB copy-back in the C++ bindings: `untransform()` inflates
+the frame section into `tBuf_` (1024 bytes), replaces `sz` with the
+decompressed length and memcpy's that many bytes back to `ptr`, which still
+points at the smaller compressed receive frame (31 bytes). Pinned at
+`THeaderTransport.cpp.v0.23.0:286-301`, with the same copy-back at the fix
+parent's `:320`; fix `db4a473f` swaps `rBuf_`/`tBuf_` and their sizes.
+Affected before 0.24.0; released 0.24.0 carries the fix. Critical 9.3
+`CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N`, CWE-122.
+Nine source pins, four verbatim `untransform()` slices, the 15-file harness
+manifest and the replay record are in
+`lab/frontier/thrift2shell/PROVENANCE.md`; the brief is
+`reports/frontier-thrift2shell.md`. No `reports/thrift2shell-status.md`
+exists; staged status is the seed wall and frontier handoff.
+
+FRONTIER-STAGED at rungs 1-4 on direct-call, verbatim-pinned bytes with a
+stubbed object environment only: gcc+clang ASan `WRITE of size 700` at pinned
+`:301`, scoped rung-4 chosen bytes at inflated offsets 0/16/32/64/128/256/699
+under gdb, fixed and v0.24.0 controls clean, 4-byte safe and 4096-byte
+gate-input controls clean. No real Thrift process, framing parser, transport
+stack, socket, listener, peer, wire exchange, pointer control, command,
+marker, witness verdict or rung 5; live-server reachability UNKNOWN. Cheapest
+next experiment: build a vulnerable Thrift C++ server with ASan, enable the
+ZLIB transform, reach the sink from a loopback client, then identify what the
+real receive-buffer allocation places after the frame before any marker work.
+Frontier owns no further work on this lane.
+
+Checker impact: staging adds no omp-only route, wake units, charter,
+presentation entry or new window; window 111 already existed at handoff.
+`tools/check-omp-only.py` stays GREEN at 106 declared roles, and the README
+mind count/list remain at 106 admitted targets. Full replay recipe, expected
+`PASS=71 FAIL=0` and trace
+`c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556` are in
+the 09:1xZ lane of `docs/reproducibility.md`.
