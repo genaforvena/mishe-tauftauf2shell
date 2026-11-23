@@ -2611,10 +2611,46 @@ object+8; the wire bytes must be re-derived per build for both the gdb-fixed
 load base and the heap object offset. W4's `rsp/aslr_off_verify.sh` removes the
 debugger: under `setarch -R` with the recorded invocation a loopback-client
 forged `abort@plt` call fires with no gdb (3 PASS / 0 FAIL twice,
-`SERVER_RC=134`); short N=8 and well-formed N=16 exit 0. No lab-chosen command,
-no wire-only command side effect, no `thread_db` call (`qGetTLSAddr` stays
-`E01`) and no rung 5 — `abort()` is a marker, not a command. Author-only;
-details in `reports/gdbserver2shell-status.md`.
+`SERVER_RC=134`); short N=8 and well-formed N=16 exit 0. W137 measured a 0x30
+object shift from the parent environment alone, so re-derive the address per
+invocation. W5 replaced the marker slot with fixed-address libc `system` and
+reached rung 5 locally with a lab-chosen marker command (recipe below);
+witness replay is still owed, and `qGetTLSAddr` still answers `E01`. Details
+in `reports/gdbserver2shell-status.md`.
+
+### Admitted lane limb — 2026-11-23 03:3xZ gdbserver2shell W5 wire-only libc `system()`
+
+With the same plain 633ae02 binary at
+`lab/build/gdbserver-633ae02-plain/gdbserver/gdbserver` and the derived fixed
+control saved by `rsp/build-gdbserver.sh` in the ASan build tree, run:
+
+```sh
+bash lab/frontier/gdbserver2shell/rsp/r5_system_verify.sh \
+  lab/build/gdbserver-633ae02-plain/gdbserver/gdbserver \
+  lab/build/gdbserver-633ae02-asan/gdbserver/gdbserver-fixed
+```
+
+The script needs no debugger. Under `setarch -R` it reads libc's `system`
+offset with `nm -D` (here `0x58750` at base `0x00007ffff7800000` →
+`0x7ffff7858750`; the `endbr64` entry satisfies CET IBT), installs a lab
+executable named after the little-endian vptr bytes up to the first NUL
+(`8\xc4aUUU` for `0x55555561c438`) in a same-length lab PATH, and derives the
+live object address by sweeping `0x...c400`–`0x...c4c0` with `abort@plt`
+until one candidate returns 134. Expect `DERIVED obj=0x55555561c430` on the
+recorded invocation, then four cases at 4 PASS / 0 FAIL: vulnerable+system
+`SERVER_RC=0 MARKER=1` with marker content `R5_SYSTEM_MARKER=1`;
+vulnerable+abort `SERVER_RC=134 MARKER=0`; fixed+system `E01`, no marker;
+well-formed `SLEN=16`, no marker. Normalized hash of the four client
+transcripts and marker records:
+`9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`.
+Evidence: `rsp/evidence/r5-system-{vuln-system,vuln-abort,fixed-system,vuln-safe}.{log,client.out,marker}`
+and the `r5-system-sweep-*.log` address sweep. An `env -i` sweep SIGSEGVs at
+every candidate, so a minimal environment is not a portable substitute: the
+address and PATH length are conditions, not incidental defaults. Grade:
+locally rung 5 demonstrated with a live plant-started process on loopback and
+an observed benign side effect, but witness replay is required for
+ESTABLISHED; the earlier rung-4 ESTABLISHED scope is unchanged. Status:
+`reports/gdbserver2shell-status.md`.
 
 ## Admitted frontier lane — 2026-11-23 01:3xZ erlang2shell
 

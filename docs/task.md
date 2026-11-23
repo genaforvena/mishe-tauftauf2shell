@@ -7111,10 +7111,13 @@ twice, byte-identical hash), changing only the vptr field to that build's
 object+8; the payload must be re-derived per build for load base and heap
 object offset. W4 (`2a1b301`) then fired the forged `abort@plt` call from a
 loopback client under `setarch -R` with no debugger (3 PASS / 0 FAIL twice,
-`SERVER_RC=134`; short N=8 and well-formed N=16 exit 0). No command, no
-wire-only command side effect, no `thread_db` call: rung 4 demonstrated with
-recorded build- and environment-specific conditions, rung 5 untouched;
-`abort()` is a marker. Details: `reports/gdbserver2shell-status.md`,
+`SERVER_RC=134`; short N=8 and well-formed N=16 exit 0). W139 measured a 0x30
+heap-object shift from the parent environment alone, so the address must be
+re-derived in each invocation; `abort()` is a marker, not a command. W5 later
+replaced that slot with fixed-address libc `system` and reached rung 5 locally
+with a lab-chosen benign command and four controls; witness replay is still
+owed. No `thread_db` call (`qGetTLSAddr` stays `E01`); the rung-4 verdict stays
+ESTABLISHED at its recorded scope. Details: `reports/gdbserver2shell-status.md`,
 `lab/frontier/gdbserver2shell/PROVENANCE.md`.
 
 ## 2026-11-23 ~02:4xZ — minisnmpd2shell admitted as the 96th route
@@ -7220,3 +7223,40 @@ and look for a stable read/write through a stale systemdict reference after
 `restore`, staying at PostScript level; preserve the current `UAF_READ=null`
 negative. With this admission the plant declares 98 engine routes and 94
 target minds; status is `reports/ghostscript2shell-status.md`.
+
+## 2026-11-23 ~03:3xZ — gdbserver2shell W5: wire-only libc `system()` reaches local rung 5
+
+Earlier "no command function" negatives covered only symbols imported by the
+plain 633ae02 build. libc's `system` is not imported, but under `setarch -R`
+its address is fixed: base `0x00007ffff7800000`, offset `0x58750`, entry
+`endbr64`, so the CET IBT check at the forged indirect call is met. The
+forged vtable's `+0x10` slot receives that address; the destructor's
+`call *%rax` at `0x2d4bf` passes the object in `rdi`, and the object's first
+bytes are the vptr, so the C string handed to `system()` is the vptr's
+little-endian bytes up to the first NUL (`8\xc4aUUU` for `0x...c438`). A
+lab-installed executable of that exact name writes `R5_SYSTEM_MARKER=1` to a
+marker file.
+
+`rsp/r5_system_verify.sh` derives the address instead of trusting one: an
+`abort@plt` sweep over candidate objects `0x...c400`–`0x...c4c0` takes the one
+returning 134, and PATH is replaced by a same-length value starting with the
+lab command directory so environment size and heap layout stay unchanged.
+Consecutive runs gave 4 PASS / 0 FAIL: vulnerable+system rc 0 with the marker;
+vulnerable+abort rc 134 with no marker; fixed+system `E01` with no marker;
+well-formed `SLEN=16` with no marker. Normalized hash
+`9104b0ec51a09c94922438a62d9df2bfa108f4b4e6f8e7f18abc26d3f4886a98`. An
+`env -i` sweep SIGSEGVs at every candidate, and W139 measured a 0x30 object
+shift from the parent environment alone: a re-witness must re-derive the
+address in its own invocation. All 195 `.plt.sec` stubs begin with `endbr64`;
+no imported `system`/`popen`/`execve`/`posix_spawn`, only two-argument
+`execvp`; `rdx` is constant and `rsi` is clobbered at the corrupted call, so
+the earlier bare-`ret` SIGILL cause stays UNKNOWN.
+
+Grade: locally **rung 5 demonstrated** — wire-only, no debugger, live
+plant-started process, a real command-execution function, a lab-chosen benign
+command with an observed side effect, and vulnerable, fixed, safe-input and
+abort-marker controls, all under ASLR-off, the exact build, measured libc and
+heap addresses, same-length PATH and a pre-staged command whose name is
+forced by the heap address. Independent witness replay is still required for
+ESTABLISHED; the earlier rung-4 ESTABLISHED scope is not retroactively
+inflated. Status: `reports/gdbserver2shell-status.md`.
