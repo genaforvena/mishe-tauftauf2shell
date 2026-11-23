@@ -11,3 +11,5 @@ frag-*-asan
 frag-*-plain
 alphabet-*-asan
 alphabet-*-plain
+wire-vuln-*
+wire-fixed-*

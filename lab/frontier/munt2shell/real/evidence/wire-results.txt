@@ -1,0 +1,8 @@
+vuln-plain-attack rc=0
+vuln-plain-safe rc=0
+fixed-plain-attack rc=0
+vuln-asan-attack rc=1
+vuln-asan-safe rc=0
+fixed-asan-attack rc=0
+vuln-plain-safe-fit rc=0
+fixed-plain-safe-fit rc=0

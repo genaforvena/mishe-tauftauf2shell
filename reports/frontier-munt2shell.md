@@ -127,6 +127,11 @@ corrupted heap region is subsequently used before aborts; a rung-5 path would
 then need a network-facing host that forwards untrusted bulk SysEx dumps.
 Rung 5 is UNKNOWN, not established.
 
+W171 (§12) adds a SYNTHETIC loopback wire-input lane and a host-side
+live-victim overwrite: wire-derived bytes reach the same fault and overwrite
+a pointer-shaped field with a clean return. This is rung 3+4 mechanics, not
+a real host or rung 5; the real-consumer gap in this section is unchanged.
+
 ## 6. Real-library confirmation (munt2shell W160, 2026-11-23)
 
 The staged stubbed harness has been reproduced on the **real library**. The
@@ -352,3 +357,33 @@ static libraries and reproduced the same 12 rc cases; all seven plain
 `.out` files were sha256-identical and both vulnerable ASan cases again
 reported `WRITE of size 40001`. Details: `REPLAY.md`.
 
+## 12. Synthetic wire-input lane with live-victim readback (W171, 2026-11-23)
+
+W171 added one bounded lane over the existing pinned real-library static
+builds (no rebuild): a one-shot 127.0.0.1 TCP consumer (`real/wire_driver.cpp`)
+reads a block to EOF and forwards it in **one** `parseStream()` call — the
+single large call W168 found necessary. In the plain consumer only,
+`operator new[]` places the real 32768-byte `streamBuffer` at the start of a
+1 MiB mmap arena and constructs a live host-side `Victim` object immediately
+after it; an initial snapshot and the post-call object are both printed.
+ASan consumers keep the real allocator. Details, quotes and the preserved
+failed first shape (glibc abort on metadata corruption, rc 134) are in
+`lab/frontier/munt2shell/real/WIRE_INPUT.md`.
+
+Eight cases in `real/evidence/wire-results.txt`: the 40001-byte wire attack
+on the vulnerable plain build returns rc 0 with
+`initial_victim ... magic=0xcafebabe` becoming
+`after_victim prefix=6a6a ptr=0x6a6a6a6a6a6a6a6a6a magic=0x6a6a6a6a ...`;
+the matched 32768-byte exact-fit control leaves the victim byte-identical;
+short-input and fixed-pin controls are clean; the vulnerable ASan case again
+reports `WRITE of size 40001`, 0 bytes after the 32768-byte region, at
+`MidiStreamParser.cpp:250`. Two full replays had the same normalized digest
+`c84f0f98fe7570acfbdf8df38d8b9458390bd291e96ce879b960c1ca1e8c192a`
+(`real/normalize_wire.sh`; ports, ASLR addresses and PIDs normalized).
+
+Grade unchanged: wire-derived rung 3+4 mechanics. The consumer is synthetic,
+there is no real libmt32emu service or MIDI host, the overwritten object is a
+host-side sentinel rather than a library object consumed later, the new
+pointer value is not valid, no command or marker side effect was produced,
+and no witness has replayed this lane. A real consumer that supplies one
+>32768-byte SysEx in a single call remains the missing rung-5 prerequisite.
