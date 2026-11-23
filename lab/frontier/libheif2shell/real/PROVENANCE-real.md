@@ -398,3 +398,40 @@ Observations (raw output in `neighbour/evidence/wire-*.out`):
 `neighbour/check_wire.py` and `neighbour/check_wire_interpose.py` PASS against
 these logs. The consumer and victim are harness constructs; no real network
 service, valid pointer, command, marker or rung 5 is claimed.
+
+## W176 arbitrary-byte ceiling probes (negatives)
+
+Two bounded attempts to close the arbitrary-byte gap, both preserved as
+negatives. No new libheif build and no new input is committed for the JPEG
+calibration; the reproducibly committed artefact is `avif_lossless_probe.cc`.
+
+**AV1 lossless.** Built `avif_lossless_probe.cc` against the pinned plain
+Release tree with the exact command in that file's header. `make` writes a
+512x64 frame followed by a 64x65 frame into one visual sequence track with
+AOM AV1, `lossless=1`, timescale 30 and `heif_image_set_duration(img, 1)`
+(without the duration, libaom sees a zero framerate and reports
+`g_timebase.num out of range [1..cfg->g_timebase.den]`). Frame 0 encodes;
+frame 1 reports `frame1: rc=8 sub=5002 Encoder plugin generated an error:
+Encoding problem: Image size must match encoder init configuration size`.
+`heif-enc -A -L -S` likewise refuses mixed-size input. `Uncompressed NO NO`
+in the pinned configuration, so no lossless codec route to a mixed-size
+sequence was found in this build.
+
+**JPEG block calibration.** Pillow grayscale JPEG, quality 95,
+`subsampling=0` round-trips all 256 constant 8x8 block values exactly (probe:
+512x8 image, block value `x//2`, every decoded pixel equal to its source).
+But the SOF-patched OOB row does not expose those 64 constants directly:
+
+- With the 64x65 patch, source JPEG blocks `0x80+bx+8*by` gave the copied row
+  `a0*8, a2*16, a4*16, a6*16, a8*8` at `plane+32768` (gdb, plain Release
+  driver, output `/tmp/w176/gdb-probe4.out`).
+- With the W162 64x512 patch and eight chosen block values in block row 0,
+  the copied row was uniform `0x70` for seeds `60,73,86,99,112,125,138,151`
+  and uniform `0xac` for seeds `168..175` (`/tmp/w176/gdb-cal.out`,
+  `/tmp/w176/gdb-formula.out`). A block formula `base[bx]+7*by` across all
+  rows did not recover the eight targets either.
+
+Therefore arbitrary-byte control from the crafted file is UNKNOWN; the W162
+position-dependent 8-byte block runs remain the measured chosen-byte lane.
+W176 also replayed `real/run_wire.sh /tmp/w176-wire-replay`: six cases and
+both checkers PASS, no change to the W172 grade or evidence.

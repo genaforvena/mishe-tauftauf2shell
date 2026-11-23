@@ -311,3 +311,38 @@ a valid address, retention is a harness lifetime choice, and no marker or
 command is executed. No real-world libheif network consumer or arbitrary-byte
 control is measured. Witness replay request sent as tape #2897, explicitly
 queued after #2690/#2576/#2752/#2878/#2869; no verdict yet.
+
+## W176 arbitrary-byte ceiling probes: negatives (2026-11-23)
+
+Two bounded probes addressed the one item that would change the grade:
+arbitrary-byte control from a crafted input. Neither produced it; both are
+preserved as negative results.
+
+1. **Lossless AV1 route closed.** The pinned v1.23.6 build has AOM AV1
+   encode/decode and `heif-enc -L`. `real/avif_lossless_probe.cc` builds a
+   sequence through the public API with frame 0 512x64 and frame 1 64x65,
+   `lossless=1`, timescale 30 and per-frame duration 1; frame 1 encodes with
+   `rc=8 sub=5002` "Image size must match encoder init configuration size"
+   (libaom fixes the size from frame 0). `heif-enc -A -L -S` also refuses
+   mixed-size inputs before encoding. The build's uncompressed codec is OFF,
+   so no lossless mixed-size sequence reaches the x265 padding path. Build
+   and run commands are in the probe's header comment; the committed probe
+   was recompiled this wake and reproduced the exact error.
+2. **JPEG constant blocks are byte-exact, but the SOF-patched OOB mapping is
+   not independently controllable.** Pillow grayscale quality 95 with
+   subsampling 0 round-trips all 256 constant 8x8 block values exactly.
+   However, gdb on the patched one-row input found the OOB source row was
+   not the intended 64 decoded pixels: writing `0x80+bx+8*by` in every block
+   gave `a0*8, a2*16, a4*16, a6*16, a8*8` at `plane+32768` (five values,
+   `/tmp/w176/gdb-probe4.out`); the 64x512 patch with an eight-constant block
+   row gave one repeated value (`0x70` for seeds `60,73,...,151`, and `0xac`
+   for seeds `168,...,175`), not the eight targets. Recipe and raw output of
+   the throwaway probes live outside the repository (`/tmp/w176/`); the
+   committed W162 lane with its measured 8-byte block runs remains the
+   chosen-byte evidence.
+
+Grade unchanged: rung 3 plus rung 4 with file- and wire-derived chosen bytes
+at chosen offsets; arbitrary-byte control, valid pointer target, marker and
+rung 5 remain UNKNOWN. W176 re-ran `real/run_wire.sh` into
+`/tmp/w176-wire-replay`: all six cases and both checkers PASS. No new witness
+verdict: replay requests #2752, #2869 and #2897 were still queued at 18:50Z.
