@@ -162,3 +162,31 @@ heap addresses before the store, so file pixels alone cannot preserve them;
 no grooming or pointer forgery was attempted. Grade stays rung 3 plus rung 4
 restricted to file-derived bytes at chosen offsets, now with a one-row bound.
 This W164 variant was not replayed by the witness; rung 5 UNKNOWN.
+
+## W166 controlled OOB row and neighbour-state negatives (2026-11-23)
+
+Two bounded tests of the W164 "no clean return" boundary, both on the pinned
+plain Release build. (a) `real/reencode_retain.cc` keeps frame 0's decoded
+image alive across frame 1's padding call. On the W164 one-row input the next
+chunk then becomes the **top** chunk (size `0x2b61`, no fd/bk) instead of an
+unsorted free chunk; the same file-derived row still overwrites its size
+field (`0x9c9c...`) and the process aborts with `malloc(): corrupted top size`
+(rc 134), not a clean return. (b) `real/neighbour/make_controlled_row.py`
+encodes a genuine 64x65 frame-1 JPEG, so the OOB row is encoded source data;
+the committed input `controlled-size.heif` SHA-256
+`062301dfe33e91eeef27441f794a41644e3f9e841282fde6892b7b41b2bc7550` decodes
+64x65 stride 64 with track 512x64. Plain driver rc 134
+(`free(): corrupted unsorted chunks`), ASan rc 1 (`WRITE of size 64`,
+`pixelimage.cc:644`, 32783-byte region), retained-frame driver rc 134
+(`malloc(): corrupted top size`). `gdb_controlled.cmd` reads the chosen row at
+`plane+32768` and the top size `0x3821` -> `0x000500000500021e` at
+`plane+32792`.
+
+Negative: the intended small valid top size (`0x21` followed by zeros) did not
+survive JPEG DCT/quantization: decoded bytes were `1e 02 00 05 00 00 05 00`;
+a uniform `0x40` row produced an even larger invalid size and the same abort.
+Both neighbour states therefore still fault, and no pointer-bearing object
+was observed adjacent to the plane. Grade unchanged: rung 3 plus rung 4
+restricted to file-derived bytes at chosen offsets. No marker, pointer
+forgery, grooming, wire input or rung 5. These two W166 variants have not been
+replayed by the witness; rung 5 stays UNKNOWN.

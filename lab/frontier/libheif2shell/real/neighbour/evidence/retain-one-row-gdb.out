@@ -1,0 +1,74 @@
+Breakpoint 1 at 0x24fe0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+warning: 3699	./malloc/malloc.c: No such file or directory
+0x0000555555660a31 in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_component_datatype, int, int, heif_security_limits const*, MemoryHandle&) ()
+Value returned is $1 = (void *) 0x555555793490
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+[New Thread 0x7ffff61ff6c0 (LWP 3081789)]
+[New Thread 0x7ffff59fe6c0 (LWP 3081790)]
+[New Thread 0x7ffff51fd6c0 (LWP 3081791)]
+[New Thread 0x7ffff49fc6c0 (LWP 3081792)]
+[New Thread 0x7fffe7fff6c0 (LWP 3081793)]
+[New Thread 0x7fffe77fe6c0 (LWP 3081800)]
+[New Thread 0x7fffe6ffd6c0 (LWP 3081801)]
+[New Thread 0x7fffe67fc6c0 (LWP 3081803)]
+[New Thread 0x7fffe5ffb6c0 (LWP 3081804)]
+[New Thread 0x7fffe57fa6c0 (LWP 3081805)]
+[New Thread 0x7fffe4ff96c0 (LWP 3081812)]
+[New Thread 0x7fffc7fff6c0 (LWP 3081813)]
+[New Thread 0x7fffc77fe6c0 (LWP 3081814)]
+[New Thread 0x7fffc6ffd6c0 (LWP 3081815)]
+[New Thread 0x7fffc67fc6c0 (LWP 3081816)]
+[New Thread 0x7fffc5ffb6c0 (LWP 3081817)]
+[New Thread 0x7fffc57fa6c0 (LWP 3081818)]
+frame 0 encoded rc=0
+Corrupt JPEG data: 631 extraneous bytes before marker 0xd9
+frame 1 decoded: 64x65 stride=64
+
+Thread 1 "libheif2shell-r" hit Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+3699	in ./malloc/malloc.c
+0x0000555555660a31 in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_component_datatype, int, int, heif_security_limits const*, MemoryHandle&) ()
+Value returned is $2 = (void *) 0x5555558b1490
+PLANE=0x5555558b1490
+--- plane chunk header (plane-16) ---
+0x5555558b1480:	0x0000000000000000	0x0000000000008021
+--- offset 32768..32832 BEFORE ---
+0x5555558b9490:	0x0000000000000000	0x0000000000000000
+0x5555558b94a0:	0x0000000000000000	0x0000000000002b61
+0x5555558b94b0:	0x0000000000000000	0x0000000000000000
+0x5555558b94c0:	0x0000000000000000	0x0000000000000000
+Breakpoint 2 at 0x7ffff6388d80: file ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S, line 255.
+
+Thread 1 "libheif2shell-r" hit Breakpoint 2, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+OOB dest_off=32768 src=0x555555885890
+0x555555885890:	0x74	0x74	0x74	0x74	0x74	0x74	0x74	0x74
+0x555555885898:	0x82	0x82	0x82	0x82	0x82	0x82	0x82	0x82
+0x5555558858a0:	0x8e	0x8e	0x8e	0x8e	0x8e	0x8e	0x8e	0x8e
+0x5555558858a8:	0x9c	0x9c	0x9c	0x9c	0x9c	0x9c	0x9c	0x9c
+0x5555558858b0:	0xa8	0xa8	0xa8	0xa8	0xa8	0xa8	0xa8	0xa8
+0x5555558858b8:	0xb6	0xb6	0xb6	0xb6	0xb6	0xb6	0xb6	0xb6
+0x5555558858c0:	0xc2	0xc2	0xc2	0xc2	0xc2	0xc2	0xc2	0xc2
+0x5555558858c8:	0x1a	0x1a	0x1a	0x1a	0x1a	0x1a	0x1a	0x1a
+malloc(): corrupted top size
+
+Thread 1 "libheif2shell-r" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+--- offset 32768..32832 AFTER ---
+0x5555558b9490:	0x7474747474747474	0x8282828282828282
+0x5555558b94a0:	0x8e8e8e8e8e8e8e8e	0x9c9c9c9c9c9c9c9c
+0x5555558b94b0:	0xa8a8a8a8a8a8a8a8	0xb6b6b6b6b6b6b6b6
+0x5555558b94c0:	0xc2c2c2c2c2c2c2c2	0x1a1a1a1a1a1a1a1a
+--- right-edge fill source area 32832..33344 ---
+0x5555558b94d0:	0x1a1a1a1a1a1a1a1a	0x1a1a1a1a1a1a1a1a
+0x5555558b94e0:	0x1a1a1a1a1a1a1a1a	0x1a1a1a1a1a1a1a1a
+0x5555558b94f0:	0x1a1a1a1a1a1a1a1a	0x1a1a1a1a1a1a1a1a
+0x5555558b9500:	0x1a1a1a1a1a1a1a1a	0x1a1a1a1a1a1a1a1a
+/tmp/gdb_retain.cmd:24: Error in sourced command file:
+Couldn't get registers: No such process.
+[Thread 0x7ffff7fa1740 (LWP 3081502) exited]

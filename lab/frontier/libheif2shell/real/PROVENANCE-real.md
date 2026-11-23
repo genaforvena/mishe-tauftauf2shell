@@ -196,6 +196,49 @@ forgery was attempted. One row is therefore already enough to break malloc
 metadata: W162's large-copy SIGSEGV is not required for observable
 corruption.
 
+## W166 neighbour-state and controlled-row probes (negatives)
+
+Two bounded questions from W164: does the neighbour change with consumer
+image lifetime, and can a crafted file put exact chosen bytes there?
+
+**(a) Retained-frame driver.** `reencode_retain.cc` is the W161 driver with
+one change: frame 0's `heif_image*` stays alive through frame 1's encode and
+is released afterwards. Compiled against the same pinned plain Release
+`libheif.a`. On the W164 one-row input (`e028c5af...`) the frame-1
+replacement plane at `0x555555798490` (chunk `0x8021`) has a **top** chunk
+after it: `prev_size=0`, `size=0x2b61`, no fd/bk. The OOB row writes the same
+file-derived bytes `74*8 82*8 8e*8 9c*8 a8*8 b6*8 c2*8 1a*8` at
+`plane+32768` and changes the top size to `0x9c9c...`; the process aborts
+with `malloc(): corrupted top size` (rc 134), not a clean return. Evidence:
+`neighbour/evidence/retain-one-row.out` and `retain-one-row-gdb.out` (gdb
+script `/tmp/gdb_retain.cmd`, retained here only as evidence text).
+
+**(b) Controlled source row.** `neighbour/make_controlled_row.py` builds two
+64x65 grayscale JPEGs (quality 100, 4:4:4) with the pinned `heif-enc -S
+--jpeg`, then patches the ispe/tkhd/sample-entry track dimensions and frame
+0's SOF to 512x64. Frame 1 remains a genuine 64x65 image, so decoded row 64
+is real entropy-coded source data, not the W164 JPEG-padding row. The
+committed input `neighbour/controlled-size.heif` is 6004 bytes, SHA-256
+`062301dfe33e91eeef27441f794a41644e3f9e841282fde6892b7b41b2bc7550`; the
+generator reproduces it byte-exact from the pinned encoder. Columns 24..31 of
+that row (source values `0x21,0,...`) land on the next chunk's size field at
+`plane+32792`.
+
+Observed with `neighbour/gdb_controlled.cmd` on the retained-frame driver
+(`neighbour/evidence/controlled-*.out`): the OOB source row at `plane+32768`
+is `40*24 1e 02 00 05 00 00 05 00 40*32`; the top size at `plane+32792`
+changes `0x3821` -> `0x000500000500021e`. Plain driver: rc 134,
+`free(): corrupted unsorted chunks`; ASan driver: rc 1, `WRITE of size 64` at
+`pixelimage.cc:644`, 0 bytes after the 32783-byte region; retained-frame
+driver: rc 134, `malloc(): corrupted top size`.
+
+Negative: JPEG DCT/quantization turned the intended `0x21,0,...` into
+`1e 02 00 05 00 00 05 00`, which is not a valid malloc chunk size; a control
+row of uniform `0x40` wrote `0x4040404040404040` and produced the same abort.
+No clean-return primitive, pointer-bearing neighbour, grooming, marker or
+command was obtained. Both W166 variants are author observations, not
+witness-replayed.
+
 ## Scope and grade
 
 Observed here: rung 2 (fixed build rejects the same mixed-size file),

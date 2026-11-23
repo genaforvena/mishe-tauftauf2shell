@@ -1,0 +1,76 @@
+Breakpoint 1 at 0x24fe0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+warning: 3699	./malloc/malloc.c: No such file or directory
+0x0000555555660a31 in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_component_datatype, int, int, heif_security_limits const*, MemoryHandle&) ()
+Value returned is $1 = (void *) 0x5555557937c0
+Corrupt JPEG data: premature end of data segment
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+[New Thread 0x7ffff61ff6c0 (LWP 3052630)]
+[New Thread 0x7ffff59fe6c0 (LWP 3052631)]
+[New Thread 0x7ffff51fd6c0 (LWP 3052632)]
+[New Thread 0x7ffff49fc6c0 (LWP 3052633)]
+[New Thread 0x7fffe7fff6c0 (LWP 3052634)]
+[New Thread 0x7fffe77fe6c0 (LWP 3052635)]
+[New Thread 0x7fffe6ffd6c0 (LWP 3052636)]
+[New Thread 0x7fffe67fc6c0 (LWP 3052637)]
+[New Thread 0x7fffe5ffb6c0 (LWP 3052638)]
+[New Thread 0x7fffe57fa6c0 (LWP 3052639)]
+[New Thread 0x7fffe4ff96c0 (LWP 3052640)]
+[New Thread 0x7fffc7fff6c0 (LWP 3052641)]
+[New Thread 0x7fffc77fe6c0 (LWP 3052642)]
+[New Thread 0x7fffc6ffd6c0 (LWP 3052643)]
+[New Thread 0x7fffc67fc6c0 (LWP 3052645)]
+[New Thread 0x7fffc5ffb6c0 (LWP 3052646)]
+[New Thread 0x7fffc57fa6c0 (LWP 3052647)]
+frame 0 encoded rc=0
+frame 1 decoded: 64x65 stride=64
+
+Thread 1 "libheif2shell-r" hit Breakpoint 1.1, __libc_calloc (n=1, elem_size=32783) at ./malloc/malloc.c:3699
+3699	in ./malloc/malloc.c
+0x0000555555660a31 in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_component_datatype, int, int, heif_security_limits const*, MemoryHandle&) ()
+Value returned is $2 = (void *) 0x5555558b17d0
+PLANE=0x5555558b17d0
+--- plane chunk header ---
+0x5555558b17c0:	0x0000000000000000	0x0000000000008021
+--- offset 32768..32832 BEFORE ---
+0x5555558b97d0:	0x0000000000000000	0x0000000000000000
+0x5555558b97e0:	0x0000000000000000	0x0000000000003821
+0x5555558b97f0:	0x0000000000000000	0x0000000000000000
+0x5555558b9800:	0x0000000000000000	0x0000000000000000
+Breakpoint 2 at 0x7ffff6388d80: file ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S, line 255.
+
+Thread 1 "libheif2shell-r" hit Breakpoint 2, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+OOB dest_off=32768 src=0x555555885b30
+0x555555885b30:	0x4040404040404040	0x4040404040404040
+0x555555885b40:	0x4040404040404040	0x000500000500021e
+0x555555885b50:	0x4040404040404040	0x4040404040404040
+0x555555885b60:	0x4040404040404040	0x4040404040404040
+0x555555885b30:	0x40	0x40	0x40	0x40	0x40	0x40	0x40	0x40
+0x555555885b38:	0x40	0x40	0x40	0x40	0x40	0x40	0x40	0x40
+0x555555885b40:	0x40	0x40	0x40	0x40	0x40	0x40	0x40	0x40
+0x555555885b48:	0x1e	0x02	0x00	0x05	0x00	0x00	0x05	0x00
+0x555555885b50:	0x40	0x40	0x40	0x40	0x40	0x40	0x40	0x40
+0x555555885b58:	0x40	0x40	0x40	0x40	0x40	0x40	0x40	0x40
+0x555555885b60:	0x40	0x40	0x40	0x40	0x40	0x40	0x40	0x40
+0x555555885b68:	0x40	0x40	0x40	0x40	0x40	0x40	0x40	0x40
+malloc(): corrupted top size
+
+Thread 1 "libheif2shell-r" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+--- offset 32768..32832 AFTER ---
+0x5555558b97d0:	0x4040404040404040	0x4040404040404040
+0x5555558b97e0:	0x4040404040404040	0x000500000500021e
+0x5555558b97f0:	0x4040404040404040	0x4040404040404040
+0x5555558b9800:	0x4040404040404040	0x4040404040404040
+STOP rip=0x7ffff629ebec
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff624527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff62288ff in __GI_abort () at ./stdlib/abort.c:79

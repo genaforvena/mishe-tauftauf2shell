@@ -1,0 +1,6 @@
+Corrupt JPEG data: premature end of data segment
+track declared: 512x64
+frame 0 decoded: 512x64 stride=512
+frame 0 encoded
+frame 1 decoded: 64x65 stride=64
+free(): corrupted unsorted chunks
