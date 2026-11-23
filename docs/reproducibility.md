@@ -130,6 +130,7 @@ containers whose host ports bind only to loopback.
 | Erlang2Shell | [brief](../reports/frontier-erlang2shell.md), [status](../reports/erlang2shell-status.md) | CVE-2026-55737 / GHSA-446w-268v-9462 (EEF CNA 2026-07-27, MEDIUM 5.1 CVSS4 AV:L, CWE-195+CWE-787); affected OTP 25.0+ before 27.3.4.15 / 28.5.0.4 / 29.0.4, fix `c5210b42`; pinned `external.c` / `erl_term.h` blobs and the five-line patch SHA-256 in `lab/frontier/erlang2shell/PROVENANCE.md` | `harness/run.sh` re-extracts four verbatim pinned slices, asserts source/patch/slice/driver SHA-256 pins, builds gcc and clang ASan plus plain-canary variants; opens no socket, VM or BEAM build | `T=$(mktemp -d /tmp/erlang-replay.XXXXXX); cp -a lab/frontier/erlang2shell/. "$T/"; bash "$T/harness/run.sh"` → rc 0, `PASS=60 FAIL=0`, `TRACE_SHA256=8517d3e1…c88` |
 | MiniSnmpd2Shell | [brief](../reports/frontier-minisnmpd2shell.md), [status](../reports/minisnmpd2shell-status.md) | CVE-2026-59961 / GHSA-c9g2-5ghh-8g8c (CNA GitHub_M; CVE published 2026-11-18, GHSA displays 2026-07-10; HIGH 8.2 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H`, CWE-125 via `size_t` underflow), affected `< 1.7`, fixed `5419bc38` / release `6894e33e`; pinned vulnerable `protocol.c` `b5322437` (`4bd06467…`), fixed `5419bc38` (`eeb05d95…`), patch `fac30b06…`; five blob/driver hashes in `lab/frontier/mini-snmpd/PROVENANCE.md`, URLs there and in `src/SHA256SUMS` | `harness/run.sh` re-extracts verbatim `decode_oid` (190–256) and `decode_str` (175–187) from both pinned files, asserts five source/patch/driver and four slice SHA-256 pins, builds gcc/clang ASan plus plain variants; opens no socket | `cd lab/frontier/mini-snmpd && bash harness/run.sh` → `PASS=43 FAIL=0`, normalized trace SHA-256 `0146b9b59168bb92ad4d725d7b1f162aa6de47661674f0086a0bf02e838e9859`; ASan `READ of size 1` 0 bytes after a 2048-byte region in `decode_oid`, fixed/safe clean. `bash wire/run_wire.sh` starts a plant-owned ASan daemon on 127.0.0.1:16161 and sends one 2048-byte GET with declared OID length 0xffff; `run_fixed_wire.sh` uses 16162 and `run_safe_wire.sh` the 35-byte control. Full staging recipe below |
 | Ettercap2Shell | [brief](../reports/frontier-ettercap.md), [status](../reports/ettercap2shell-status.md), [live dissector](../reports/ettercap2shell-livedissector.md) | CVE-2026-125401 / GHSA-vrjv-f8gv-2h35 (GitHub CNA 2026-11-06, HIGH 8.1 `CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H`, CWE-131+CWE-787; OSV CVSS4 also AV:A), affected `<=0.8.4.1`, patched `0.8.5.1`, fix `1d8badb7`; pinned vulnerable `3548c10c` and PR-head fix `a8c1a50` (byte-identical to merged/released 0.8.5.1), six blobs in `lab/frontier/ettercap2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | `cd lab/frontier/ettercap2shell && bash harness/run.sh` re-extracts the verbatim pinned `gg_get_version()` slices, asserts source/patch/tag/slice/driver SHA-256 pins, builds plain plus gcc/clang ASan variants; opens no socket. Real dissector: build both pinned tags with clang ASan and drive a crafted TCP/8074 frame from a pcap and from `lo` (recipe below) | operator clean `/tmp` replay: rc 0, `PASS=58 FAIL=0`, normalized trace SHA-256 `d650b34e3bbc1ea336c60d2cb4b9c7743fdc4657b7d8e0d07c7e1bc1c1027b7a`; gcc/clang ASan `WRITE of size 13`, 0 bytes after a 30-byte region in `gg_get_version`; fixed and small-version controls clean. Real dissector gives the same `WRITE of size 13` at `gg_get_version:673` via `dissector_gg:360` offline and live; extent, safe, wrong-type, server-direction and fixed controls as recorded below. Full admission recipe below |
+| Libheif2Shell | [brief](../reports/frontier-libheif2shell.md), [status](../reports/libheif2shell-status.md) | GHSA-hpg4-g2gc-pq42, vulnerable tag `v1.23.6` (`f81f28ac…421a`), fix `9ec655f76b6fe298092aaeb063f821f53b8eb901`; five direct-call pins in `lab/frontier/libheif2shell/PINS.sha256`, real-file pins and URLs in `lab/frontier/libheif2shell/real/` and `PROVENANCE.md` | `cd lab/frontier/libheif2shell/harness && ./run.sh && ./check.sh` (stubbed direct call); real-file lane: `bash lab/frontier/libheif2shell/real/rebuild_and_run.sh SOURCE BUILD OUT [decode-only|mixed|safe|all]` (CMake/Ninja Debug, x265+JPEG plugins, ASan, driver rebuilt from pinned `reencode_sequence.cc`) | Direct-call clean archive at `366690f`: `PASS=101 FAIL=0`, trace `9468b510…e38b43`; W159/#2626 ESTABLISHED rungs 1-4 at labeled CODE/HARNESS scope. W161 real-build mixed-MJPEG file lane author-only: ASan `WRITE of size 64` past a 32783-byte plane, Release SIGSEGV on mixed input, fixed rc 2; no witness verdict there, 36,879-byte allocation untested, rung 5 UNKNOWN |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -4519,9 +4520,11 @@ and 6-byte buffers; `evidence/gdb-chosen.out` shows
 Ceiling: direct call with stubbed structs, a 48-byte capped copy, a bounded
 16-step UTF-8 iterator, NDEBUG and a 2 GiB reserved mapping; no jq build,
 JSON input, jq process, socket, wire, real allocator study, pointer control,
-marker, command, witness verdict or rung 5. Real-pipeline reachability and
-heap-neighbour overlap are UNKNOWN. The subsequent real-build and witness
-outcomes are recorded in the next section.
+marker, command, witness verdict or rung 5 at this 10:3xZ staging point.
+Real-pipeline reachability and heap-neighbour identity were UNKNOWN then; the
+13:4xZ live heapmap lane above maps the neighbour in a real plain jq process
+at its own author-only scope, with witness replay still pending. The
+subsequent real-build and witness outcomes are recorded in later sections.
 
 ## 2026-11-23 11:4xZ — jq2shell real-jq caller frames, memory-guard negative
 
@@ -4635,6 +4638,11 @@ before the first breakpoint while creating the 1 GiB string, with
 1 GiB repeat timed out at 40 s in that window. Those are preserved UNKNOWN
 guard/contention observations, not passes and not code failures.
 
+The neighbour identity above is an author-only gdb observation on hash-pinned
+plain builds; W1/#2556 and W160/#2651 stand at their own scopes, and no
+witness verdict has been returned for this heapmap lane. It adds no
+request/wire path, pointer control, command, side effect or rung 5.
+
 ## 2026-11-23 10:1xZ — vrpn2shell W17 caller-frame returns (author-only)
 
 W17 extends the `-O2` saved-RIP byte map two caller frames deeper on the
@@ -4647,10 +4655,39 @@ saved RIP at indices 136-143, live returns sit at +200 (outer
 indices 200-205 and 312-317 zero bytes 0-5, with gdb PRE→POST
 `0x5555555a200d`→`0x5555555a2000` and `0x5555555a4059`→`0x5555555a4000`
 and the modified frames entered before SIGSEGV. Bytes 6-7 are already `00`
-no-ops; stale-word indices 296/304/328/336/344/392/408 leave the process
-alive, and fixed and short-input controls are clean. No grade change:
-author-only, unwitnessed, no chosen byte, command or rung 5. Raw logs and
-frames: `lab/frontier/vrpn2shell/out-w17-*/` and `reports/vrpn2shell.md`.
+no-ops; in W17 the stale-word indices 296/304/328/336/344/392/408 leave the
+process alive, and W17's fixed and short-input controls are clean (W19 below
+re-examines stock `-O2` frames, where some fixed/short indices stay alive by
+design). No grade change: W17 was author-only, unwitnessed, with no chosen
+byte, command or rung 5. Raw logs and frames:
+`lab/frontier/vrpn2shell/out-w17-*/` and `reports/vrpn2shell.md`.
+
+## 2026-11-23 14:1xZ — vrpn2shell W19 stock -O2 dead-by-value frames (author-only)
+
+W19 (commit `cb1a8e5`) closes the saved-RIP line on the stock `-O2` build
+without changing the grade (rung 3 / lab-patched rung 4) or the existing
+W115/#1453 and W135/#1985 ESTABLISHED verdicts; no new row or mind count.
+With ASLR on, indices 144/168/176-183/240/320/328/376/384/392/400 remain
+alive after the message, as do fixed 176 and short 4. Under gdb the slot at
++176 changes from `0x5555556a7380` to `0x5555556a7300` while the live buffer
+argument stays `0x5555556a7380` in frames #1-#3; the callers
+(`:1446-1452`, `:4331-4339`, `:4239-4245`) never re-read `p.buffer`. These
+are dead by-value pointer copies: a negative closure, not new rung 4 or
+pointer control.
+
+```
+BIN=lab/frontier/vrpn2shell/build-opt-07.36/server_src/vrpn_server \
+  bash lab/frontier/vrpn2shell/probe-func-dos.sh <out> <port> <index>
+```
+
+Use fresh loopback ports 14410-14428. Vulnerable binary sha256
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`, fixed
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`;
+per-run `meta.txt` records `ALIVE_AFTER_MESSAGE` (there is no PASS tally).
+gdb.cmd evidence is in `out-w19-frame/` and `out-w19-gdb-176/`; raw logs in
+`lab/frontier/vrpn2shell/out-w19-*/`, provenance in `PROVENANCE.md` W19.
+Author-only and unwitnessed: no chosen byte, command, marker side effect or
+rung 5.
 
 ## 2026-11-23 10:5xZ — libfontenc2shell staged by frontier W154 (not admitted)
 
@@ -4703,8 +4740,10 @@ Boundaries: direct call with stubbed structs, a 48-byte capped executed copy,
 a 16-step UTF-8 iterator, `NDEBUG` for the second bug and a reserved 2 GiB
 mapping in plain builds. No jq build, JSON input, jq process, socket, wire,
 real allocator study, ASLR study, pointer control, command, marker side effect,
-witness verdict or rung 5. Real-pipeline reachability and heap-neighbour
-identity stay UNKNOWN.
+witness verdict or rung 5 at this 11:2xZ scope. Real-pipeline reachability
+and heap-neighbour identity were UNKNOWN then; the 13:4xZ heapmap lane above
+maps the neighbour in a real plain jq process at its own author-only scope,
+with witness replay still pending.
 
 ## 2026-11-23 11:3xZ — openexr2shell staged by frontier W155 (not admitted)
 
@@ -4712,8 +4751,10 @@ GHSA-98rx-qpfv-qcwv (High, no CVE or CWE stated): OpenEXR 3.5.0, 3.5.1, 3.5.2
 and `main` affected, fixed 3.5.3 by `7d7fbb1a` (grid-total bound in
 `internal_zstd.c`); vulnerable pin `v3.5.2`, fixed pin `v3.5.3`, exact digests
 in `lab/frontier/openexr2shell/PINS.sha256`, claim URL and preserved negatives
-in `lab/frontier/openexr2shell/PROVENANCE.md`. The advisory's 692-byte PoC,
-4032-byte overrun and OpenImageIO reproduction are claims, not lab results.
+in `lab/frontier/openexr2shell/PROVENANCE.md`. At this 11:3xZ staging point
+the advisory's 692-byte PoC and 4032-byte overrun were claims, not lab
+results; the 14:1xZ lane below records both at the labeled author-only scope.
+OpenImageIO reproduction is still untested.
 
 Replay from a fresh temporary directory:
 `git archive efba219 lab/frontier/openexr2shell | tar -x -C "$T"`, then
@@ -4731,11 +4772,14 @@ did not define `__SANITIZE_ADDRESS__`, buffered stdout hiding pre-abort lines,
 and a fixed-pin breakpoint at `:1393` that never fires because the earlier
 return at `:1391` fires first.
 
-Ceiling: direct call with a stubbed channel struct. No EXR header or chunk
-parsing, sample-count table, ZSTD frame, codec build, `exr_decoding_run()`
-ordering, image consumer, process, socket or wire input; chosen bytes are
-harness-supplied, not file-derived; no pointer control, command, marker side
-effect, witness verdict or rung 5. Window 116 is registered but there is no
+Ceiling at this 11:3xZ staging lane: direct call with a stubbed channel
+struct. No EXR header or chunk parsing, sample-count table, ZSTD frame, codec
+build, `exr_decoding_run()` ordering, image consumer, process, socket or wire
+input; chosen bytes are harness-supplied, not file-derived; no pointer
+control, command, marker side effect, witness verdict or rung 5 at that point.
+The 14:1xZ lane below supplies a real EXR file and codec build at its own
+author-only scope.
+Window 116 is registered but there is no
 charter, route or admission, so this staging adds no mind. Brief:
 `reports/frontier-openexr2shell.md`.
 
@@ -4766,9 +4810,53 @@ at pinned `internal_zstd.c.vuln:472`; the fixed guard returns 23
 chosen `0x5a` bytes at `b64` and `b4095` against a `0xa5` canary; gdb records
 `bitSize=4096 n_hi=1024` and the destination byte before and after the copy.
 The operator replay at 11:54Z used `/tmp/openexr-replay.592N1Q` and matched
-the trace exactly. This is direct-call CODE/HARNESS evidence only: no EXR
+the trace exactly. This 11:5xZ direct-call CODE/HARNESS replay had no EXR
 header or chunk parsing, ZSTD frame, codec build, process, socket or wire;
-the advisory's file-level reachability remains a claim, and rung 5 is UNKNOWN.
+file-level reachability remained a claim at that scope, and rung 5 is UNKNOWN.
+The W158 (#2602/#2603) ESTABLISHED verdict stays scoped to that direct-call
+work. The 14:1xZ lane below reaches a real EXR file in the pinned codec.
+
+## 2026-11-23 14:1xZ — openexr2shell real EXR file and C++ API lane (author-only)
+
+Commits `0d67933` and `5374791` add a file-level lane that supersedes the two
+direct-call lanes above at the file scope only; no new route, stage, row or
+mind count (111th route, window 116 unchanged). The author reports that the
+692-byte deep+ZSTD EXR file drives real pinned 3.5.2 `exr_decoding_run()`: ASan
+`memcpy-param-overlap` from a 4096-byte copy at `internal_zstd.c:472`, and a
+guarded allocator measures a completed 4032-byte overwrite of a 64-byte
+destination (4/4 PoC, 0/3 baseline). Pinned 3.5.3 rejects with rc 23
+`EXR_ERR_CORRUPT_CHUNK`. `cases/cpp_singlepass.cpp` uses
+`Imf::DeepScanLineInputFile::readPixels(0,0)` with no pre-pass: baseline prints
+`READPIXELS ok rv=0`, the PoC reaches the same fault via
+`ImfDeepScanLineInputFile.cpp:831/568/304`, and the fixed build throws
+`Unable to run decoder`.
+
+Pins: 3.5.2 tarball `85a291b9…51b15ae9`, 3.5.3 `ff1de95f…4a054f`;
+`internal_zstd.c` `736dad69…abcea` (vulnerable) / `0a2fe719…6db751` (fixed).
+`cases/baseline.exr` sha256 `07edcb58…eb8e` (545 B), `cases/poc.exr`
+`283cec0e…b37ce` (692 B).
+
+```
+cd lab/openexr2shell-real
+./harness/build.sh build-vuln-asan src/openexr-3.5.2 bin-vuln-asan asan
+./harness/build.sh build-fixed-asan src/openexr-3.5.3 bin-fixed-asan asan
+./harness/build.sh build-vuln-plain src/openexr-3.5.2 bin-vuln-plain plain
+./bin-vuln-asan/gen_baseline cases/baseline.exr
+python3 cases/make_poc.py cases/baseline.exr cases/poc.exr 1024 64
+```
+
+Expect `GRID_TOTAL=4096`, overflow 4032 and a 692-byte PoC. Then run the
+harness's flat, guarded and `cpp_singlepass` drivers against `baseline.exr`
+and `poc.exr` (exact arguments in `harness/`); the fixed build rejects the
+PoC. Raw `src/`, build outputs, binaries and generated `.exr` files are
+gitignored — re-fetch and rebuild; the full build record is `BUILDLOG.md` and
+evidence is `lab/openexr2shell-real/evidence/*.out`. The separate direct-call
+replay (`PASS=52 FAIL=0`, trace `27a2a815…c776`) is cited only as the old
+direct-call scope.
+
+Rung 5 is UNKNOWN: no consumer process, socket, wire, pointer target, command
+or marker; deep-tiled, OpenImageIO and aarch64 are untested. "W160" in the
+report is an author wake label, not a witness verdict.
 
 ## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
 
@@ -4804,16 +4892,19 @@ frontier). gcc and clang ASan classify the store as `heap-buffer-overflow`,
 and copies nothing. Plain builds and gdb read back four chosen `0x5a` bytes
 at offset 32768 against a `0xa5` canary.
 
-This is direct-call CODE/HARNESS evidence only: the method and public wrapper
-are pinned upstream bytes, but the surrounding types and allocator are stubs;
-the allocator omits the real `alloc()` alignment shift. No HEIF or Motion-JPEG
+At this 12:0xZ direct-call scope the method and public wrapper are pinned
+upstream bytes, but the surrounding types and allocator are stubs; the
+allocator omits the real `alloc()` alignment shift. No HEIF or Motion-JPEG
 file, decoder, x265/x264 encoder plugin, libheif build, image consumer,
 process, socket or wire input. The advisory's 1,155-byte sequence,
-36,879-byte allocation and release SIGSEGV are advisory claims not reproduced
-here. Preserved negatives (C-compiler link errors, LeakSanitizer noise, a
+36,879-byte allocation and release SIGSEGV were claims not reproduced here;
+the 14:1xZ real-build lane below reaches a mixed-MJPEG file and observes a
+Release SIGSEGV on this host, while the 36,879-byte allocation remains
+untested. Preserved negatives (C-compiler link errors, LeakSanitizer noise, a
 too-small canary tail that broke `free`, a wrong-frame gdb probe) are in
-`PROVENANCE.md`. Rung 5 is UNKNOWN; no pointer or control-flow corruption,
-command execution or witness verdict.
+`PROVENANCE.md`. Rung 5 is UNKNOWN; no pointer or control-flow corruption or
+command execution. W159/#2626 later returned a witness verdict: rungs 1-4
+ESTABLISHED at this labeled direct-call scope (14:1xZ below), no grade change.
 
 ## 2026-11-23 12:1xZ — thrift2shell W146 accepted forged-chunk `free()` replay
 
@@ -4849,15 +4940,47 @@ no-flush binaries copied in (winner `0x53f0`). The address-free output records
 pointer` control). The safe control's abort message is printed by the server
 and is not a failed replay.
 
-The vptr limb is a negative result: under the plain no-flush server the
-`THeaderTransport` object is 0x980 bytes before `rBuf_`, outside the 726-byte
-copy window, and no qword in the swept span points into an executable mapping;
-no indirect call was exercised. The accepted-free limb stays rung 4 on living
-bytes: the wire chooses the low 16 bits, ASLR supplies the high bits, and the
-written value is an allocator-chosen heap link, not attacker bytes. No vptr,
-code pointer, return address, ROP, command, marker side effect or witness
-verdict. The W145 ASLR-on replay request (#2547) remains unanswered; W146 is
-author-only and rung 5 stays UNKNOWN.
+In W146 the vptr limb is a negative result: under the plain no-flush server
+the `THeaderTransport` object is 0x980 bytes before `rBuf_`, outside the
+726-byte copy window, and no qword in the swept span points into an executable
+mapping; no indirect call was exercised. The accepted-free limb stays rung 4
+on living bytes: the wire chooses the low 16 bits, ASLR supplies the high
+bits, and the written value is an allocator-chosen heap link, not attacker
+bytes. No vptr, code pointer, return address, ROP, command, marker side effect
+or witness verdict. The W145 ASLR-on replay request (#2547) remains
+unanswered; W146 is author-only and rung 5 stays UNKNOWN. The older ASLR-off
+KV-header `free()`-pointer limb is witness-ESTABLISHED at its labeled scope;
+the W147 scans below are a separate author-only negative scope.
+
+## 2026-11-23 14:1xZ — thrift2shell W147 KV-header layout negatives (author-only)
+
+Commit `9579cc8` (with `d5852dd`) records W147, an author-only negative in the
+admitted 108th route (window 111): no new row, mind count, grade or witness
+verdict; grade stays rungs 1-4 with rung 5 UNKNOWN. Only the older ASLR-off
+KV-header `free()`-pointer limb is witness-ESTABLISHED. The author scanned
+five vulnerable layouts (0/2/4/8 KV headers, 32/64-byte strings): all reported
+`EXEC_QWORDS=0` with ASLR on after `process()`, while nonzero counts were
+115/128/128/128/128. The sole heap pointer sits at +1008, outside the
+726-byte copy window. The fixed control (`sz=160`) reported nonzero=98,
+exec=0, heap=11. A clean-archive replay at `9579cc8` reproduced the anchors
+(the first fixed attempt hit `ConnectionRefusedError`, preserved as a
+negative). Normalized window hash:
+`295b2ffbcba420af65f22a0d6fa13ecd52abcec10fa997a071f0ae210794c6bb`.
+
+```
+cd lab/frontier/thrift2shell/live
+python3 make-kv-frame.py kv-scan-kv0.bin --kv 0 --pad-compressed 160
+# likewise kv2/kv8/kv4x64
+NOFLUSH_SERVER=./live-noflush ./run-kv-noflush.sh "$f.bin" gdb-codescan.gdb PORT 1
+# fixed control: NOFLUSH_SERVER=./live-noflush-fixed ./run-kv-noflush.sh ...
+python3 normalize-codescan.py results/kv-noflush-live-noflush-…*.log > results/codescan-normalized.txt
+```
+
+Use a fresh loopback PORT per scan. This lane has no PASS tally; the base
+harness records `PASS=71 FAIL=0`, trace
+`c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556`. No
+vptr, code pointer, return address, ROP, command, marker side effect or
+witness verdict. Status: `reports/thrift2shell-status.md`.
 
 ## 2026-11-23 12:3xZ — libheif2shell admitted (112th route)
 
@@ -4883,13 +5006,16 @@ or canary-backed plane allocator. gcc and clang ASan report
 at pinned `pixelimage.cc.vuln:644`, called through `heif_image.cc.vuln:403`;
 the fixed pin rejects the 64x65 -> 512x64 request with rc 2 and copies
 nothing. Plain builds and gdb read back four chosen `0x5a` bytes at offset
-32768 against a `0xa5` canary. No HEIF/MJPEG file, decoder, x265/x264 encoder
-plugin, libheif build, image consumer, process, socket or wire input; the
-advisory's 1,155-byte Motion-JPEG sequence, 36,879-byte allocation and release
-SIGSEGV are claims not reproduced here. Preserved negatives (C-compiler link
-errors, LeakSanitizer noise, an undersized canary tail that broke `free`, a
-wrong-frame gdb probe) are in `lab/frontier/libheif2shell/PROVENANCE.md`.
-Grade is direct-call CODE/HARNESS rungs 1-4 only; rung 5 is UNKNOWN.
+32768 against a `0xa5` canary. At this 12:3xZ direct-call scope there was no
+HEIF/MJPEG file, decoder, x265/x264 encoder plugin, libheif build, image
+consumer, process, socket or wire input; the advisory's 1,155-byte
+Motion-JPEG sequence, 36,879-byte allocation and release SIGSEGV were claims
+not reproduced there. The 14:1xZ real-build file lane below reaches a crafted
+mixed-MJPEG HEIF file and observes a Release SIGSEGV on this host; the
+36,879-byte allocation is still untested. Preserved negatives (C-compiler
+link errors, LeakSanitizer noise, an undersized canary tail that broke `free`,
+a wrong-frame gdb probe) are in `lab/frontier/libheif2shell/PROVENANCE.md`.
+Grade for this lane stays direct-call CODE/HARNESS rungs 1-4; rung 5 is UNKNOWN.
 
 Admission added the hy4-flash `max_parallel: 3` route as the 112th role, minted
 the three units with the exact full-flag sync at pin
@@ -4898,6 +5024,50 @@ systemd, enabled and activated `m2shell-wake-libheif2shell.path`, and added
 both resolver entries (225 total). The pinned full-flag doctor returned rc 0
 `GREEN`; `python3 tools/check-omp-only.py .mishe-tauftauf .` returned
 `GREEN (112 declared roles)`. Status: `reports/libheif2shell-status.md`.
+
+## 2026-11-23 14:1xZ — libheif2shell W159 witness replay and W161 real-build file lane
+
+No new route, row or mind count (112th route, window 117). W159/#2626
+returned a witness verdict: rungs 1-4 ESTABLISHED at the labeled direct-call
+CODE/HARNESS scope, with no counterexample. The witness hash-matched all five
+pins and replayed a clean `git archive 366690f` extraction with `PASS=101
+FAIL=0` and trace
+`9468b5109099f1810c4cef5dbe6e1c064495b180c57f6e2844a20f2580e38b43` — the
+same result as the 12:0xZ/12:3xZ lanes above, whose scope is unchanged.
+
+W161 (commit `5f5ab1c`) is author-only and unwitnessed at a new real-build
+file scope. The author pinned v1.23.6 `f81f28ac…421a` with the x265 and JPEG
+plugins and crafted a mixed-MJPEG HEIF whose frame 2 SOF is patched to 64x512
+against a 512x64 track and first frame. Vulnerable ASan reported
+`heap-buffer-overflow`, `WRITE of size 64`, 0 bytes after a 32783-byte plane
+at `pixelimage.cc:644` via `heif_image.cc:403`, `encoder_x265.cc:1139`,
+`hevc_enc.cc:189` and `track_visual.cc:620`; decode-only and safe inputs
+returned rc 0 (with `detect_leaks=0`), and the patched `9ec655f` build
+returned rc 2 `All frames of a sequence must have the size of the first frame`.
+A third, non-sanitized Release build reproduced the advisory symptom locally:
+mixed input rc 139 SIGSEGV in `__memcpy_avx_unaligned_erms` via
+`extend_padding_to_size` (gdb backtrace), safe input rc 0. The advisory's
+36,879-byte allocation remains UNTESTED.
+
+```
+bash lab/frontier/libheif2shell/real/rebuild_and_run.sh SOURCE BUILD OUT [decode-only|mixed|safe|all]
+```
+
+The script configures CMake/Ninja Debug with `-DWITH_X265=ON
+-DWITH_JPEG_DECODER=ON -DWITH_JPEG_ENCODER=ON` and ASan flags, then rebuilds
+the driver (`g++ -std=c++17 -fsanitize=address reencode_sequence.cc libheif.a
+<codec libs> -ldl`) and runs under `ASAN_OPTIONS=detect_leaks=0 timeout 120`.
+Pins: fix `9ec655f76b6fe298092aaeb063f821f53b8eb901`, patch
+`4016424cf9b29bdfa929591095b33d48c1f07edec83a906c19fced15c75f83a4`,
+`reencode_sequence.cc` `c89dd64aa3fab4544a4d79e2e49f8f082c1b1c2cd402898850c81c911f056778`,
+`patch_second_sof.py` `a48be93623bcaad62ee9a40cf0277599e3e3bebad66f17dff55b93bc8a00d3a8`,
+`mixed-mjpeg.heif`
+`12b02138ef60d26bfa68ca72fa1fcb390eb574616138e9f7e545a6b8aee0274e` (4262 B).
+Evidence: `real/evidence/vuln-real-asan.out`, `plain-mixed-sigsegv.out`,
+`plain-gdb-backtrace.out`, `plain-safe.out`, …; commit `b9e9754` removed
+generated replay binaries from `real/evidence` (text/input only — rebuild the
+driver). Rung 5 is UNKNOWN on this new lane: no witness verdict, consumer
+process, socket, wire path, pointer control, command or side effect.
 
 ## 2026-11-23 12:4xZ — fqterm2shell staged by frontier W158 (admitted 13:1xZ)
 
@@ -4982,8 +5152,11 @@ records the author's clean-replay attempts as UNKNOWN under that contention,
 not a pass, with witness replay asked in #2629. At that time the gdb geometry
 hash `7a71a025…98a62` and `ALIAS-GEOM-PASS` were author observations, not a
 Docs-observed pass.
-No request/wire input, heap-neighbour map, pointer control, chosen bytes at
-chosen offsets in a live process, command or side effect; rung 5 unclaimed.
+At this 12:4xZ alias-geometry scope there was no request/wire input,
+heap-neighbour map, pointer control, chosen bytes at chosen offsets in a live
+process, command or side effect; rung 5 unclaimed. The 13:4xZ live heapmap
+lane above maps the adjacent object in a real plain jq process at its own
+author-only scope (witness replay still pending), adding no rung 5 here.
 Witness W160 (#2651) later replayed the alias script from a clean archive of
 `1b86ae5` with rc 0 `ALIAS-GEOM-PASS` in 65 s and byte-identical normalized
 logs, graded ESTABLISHED at the labeled geometry scope (no grade change);
@@ -5003,9 +5176,54 @@ lab/frontier/psqlodbc2shell/real/clang-o2-layout.sh` rebuilds
 `param_pos` (13 rows farther). A hardware watch sees `nqb.query_statement`
 change from a live heap pointer to parser integer `0x95` at `convert.c:5638`,
 while the saved-RIP watch never fires. Docs did not re-run this script; it
-requires the untracked provisioned trees. This is a rung-5 negative,
-author-only and unwitnessed: no chosen pointer, partial overwrite, gadget,
-ROP, marker or command. Grade stays rungs 1-4. Status:
+requires the untracked provisioned trees. This was a rung-5 negative at the
+12:4xZ W159 scope, author-only and unwitnessed: no chosen pointer, partial
+overwrite, gadget, ROP, marker or command. That scope had no fixed optimized
+tree; W160 below adds the `REL-18_00_0006` control. Grade stays rungs 1-4.
+Status: `reports/psqlodbc2shell-status.md`.
+
+## 2026-11-23 14:1xZ — psqlodbc2shell W160/W161/W162 real-path folds
+
+Commits `9634b31`, `6d3bb49` and `38e1ff7` stay in the admitted 107th route
+(window 112): no new row, mind count or grade change (rungs 1-4). The scripts
+run after `real/replay.sh` provisions the gitignored pinned trees; Docs did
+not re-run them. Pins: ASan vulnerable `.so` `3a206a87…d7f97`, ASan fixed
+`dc18d6a8…66f`, pinned `convert.c` `27fc049b…` (vulnerable) and `19253432…`
+(fixed).
+
+W160 (`real/clang-o2-layout.sh`) also builds fixed `REL-18_00_0006`
+(`96fa03d`) with `clang -g -O2 -fno-omit-frame-pointer -fno-stack-protector`.
+The author reports fixed probes n=16/74/80 returning rc=1 `RC=-1 ERRNUM=1
+ERRMSG=too many parameters in the escape function call`, vulnerable n=73
+rc=0 and n=74/80 rc=139, identical across three runs. Author-only.
+
+W161 (`real/date-replay.sh`) drives real loopback PostgreSQL 16.4 with
+`SELECT {d '<200 A>'}` through SQLDriverConnect/SQLExecDirect. Vulnerable
+ASan reported `stack-buffer-overflow`, `WRITE of size 1` at pinned
+`convert.c:5786` (F_ExtractOldTo NUL store `:2435`, macro `:2424`), offset 992
+one past `buf_small [864,992)`. Fixed returned rc=-1 with PG 42601, safe
+`{d '2000-01-01'}` rc=0, the boundary is exactly 126 A's, and the matrix ran
+four times. This observes rung 3 on the real-server path; the write is a
+single NUL only.
+
+```
+bash lab/frontier/psqlodbc2shell/real/replay.sh
+bash lab/frontier/psqlodbc2shell/real/clang-o2-layout.sh
+bash lab/frontier/psqlodbc2shell/real/date-replay.sh
+```
+
+W162: witness #2689 (2026-11-23T14:01Z) independently rebuilt all six pins
+and both ASan trees, used a private PostgreSQL port 59437 and reproduced the
+whole matrix rc=0. W162 is witness-ESTABLISHED at that labeled scope, with no
+counterexample and no grade change. Variation: 250-byte `{t}` faults `:5794`
+and `{ts}` `:5802`; fixed and safe inputs stay clean. The witness noted two
+NITs (`:2435` store vs `:2424` `#define`, and distinct 42601 messages). W147's
+verdict in #2576 is still pending and W156 stays scoped to the W146 fake
+handshake.
+
+Evidence `build/evidence/w161-run{1,2,3,4}.summary` and `build/evidence/w160-*.out`
+are gitignored and regenerate with those scripts. The base harness records
+`PASS=34 FAIL=0`, trace `d5145bdb…d424d63`. Status:
 `reports/psqlodbc2shell-status.md`.
 
 ## 2026-11-23 13:1xZ — fqterm2shell operator clean-archive replay
@@ -5028,3 +5246,40 @@ Admission added the 113th hy4-flash route, both resolver entries, three units
 from the exact full-flag sync at pin
 `0d686bbad55c849e88334da64efff9da88ad528a`, a pinned full-flag doctor rc 0
 GREEN, and `check-omp-only.py` GREEN (113 declared roles).
+
+## 2026-11-23 14:1xZ — munt2shell staged by frontier (not admitted)
+
+Commits `ed3c048` and `08e996f` stage a harness for munt issue #149, an
+incomplete oversized SysEx in libmt32emu's `MidiStreamParser`. Vulnerable tag
+`libmt32emu_2_8_3` (`008feb32227a16bad343573b33da2196656b8e93`), fix
+`1749f7fed5cdb3a9015acce076a1512b1615dc3b`; no CVE/GHSA/CVSS (UNKNOWN).
+There is no charter, route, wake units, admission, mind or witness verdict,
+and this lane adds none: the mind count stays 113 (README lists it as
+FRONTIER-STAGED).
+
+The author's harness records four bounded results. R1 uses a 102-byte SysEx
+baseline; R2 runs the fixed tree clean and, on the vulnerable plain build,
+places chosen `0x5a` at offsets 32768..32771; R3 reports gcc and clang ASan
+`WRITE of size 40001`, 0 bytes after a 32768-byte region at
+`MidiStreamParser.cpp.vuln:250`; R4 reads `g_last_size=32768` and sixteen
+`0x5a` bytes at `g_last_alloc+32768` under gdb. The attack input is `0xF0`
+followed by 40000 `0x5a` bytes with no terminating `F7`.
+
+```
+cd lab/frontier/munt2shell/harness && ./run.sh && ./check.sh
+for i in 1 2 3; do ./check.sh; done
+T=$(mktemp -d /tmp/docs-munt-replay.XXXXXX)
+git archive ed3c048 lab/frontier/munt2shell | tar -x -C "$T"
+cd "$T/lab/frontier/munt2shell/harness" && ./check.sh
+```
+
+Expect `129 PASS` / `0 FAIL`, trace
+`735c136e1c6740ca50ed5790f054cbd4331c16a1d48998b22926de8ac0d1146f`.
+Commit `08e996f` records three identical working-tree runs and a clean
+`git archive` replay at `ed3c048`, all 129/0 with the same trace;
+`lab/frontier/munt2shell/REPLAY.md` states this is deterministic replay, not
+a witness verdict or a real-library reproduction. Pins are in
+`lab/frontier/munt2shell/PINS.sha256`; raw evidence is in `harness/evidence/`
+(the top-level `evidence/` is empty despite brief line 105). Rung 5 is
+UNKNOWN: no live consumer process, request/wire path, pointer control,
+command, side effect or witness verdict.

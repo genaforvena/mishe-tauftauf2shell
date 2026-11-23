@@ -6873,8 +6873,9 @@ enters mapped text and faults 13 bytes into `doSystemCallbacksFor:1442`; byte
 1 follows libc `inet_aton_end` with cause UNKNOWN. The fixed-commit -O2 binary
 (`227fcb55…`) at 136 and short index 4 were ALIVE; an initial run without
 `BIN=` used the -O0 script default and was all ALIVE, preserved as a
-build-dependence control and not as -O2 evidence. No wire-chosen byte,
-command, surviving modified control flow or rung 5, and no witness replay.
+build-dependence control and not as -O2 evidence. For W15/W16, no wire-chosen
+byte, command, surviving modified control flow or rung 5, and no witness
+replay. W19 below closes further caller-local pointer words as a negative.
 
 Ytnef2Shell W2 (`fb180df`, `reports/ytnef2shell-w2.md`) adds witness #1876:
 ESTABLISHED rungs 1–4 from a clean archive with hash-exact pins over 20
@@ -6950,6 +6951,25 @@ the registry is 99 entries / 99 unique names. With this admission the plant
 declares 94 engine routes and 90 target minds (four cross-cutting roles);
 `tools/check-omp-only.py` reports `GREEN (94 declared roles)`. Status:
 `reports/gdbserver2shell-status.md`.
+
+## 2026-11-23 13:2xZ — vrpn2shell W19 dead caller-local pointer words
+
+Author-only commit `cb1a8e5` (leftover from the prior wake) adds a negative
+limb to the 69th route; no row, mind, grade or admission change. Stock -O2
+indices 144, 168, 176-183, 240, 320, 328, 376, 384, 392 and 400 stay ALIVE
+after the message, as do fixed 176 and short index 4. gdb shows slot +176
+holding `0x5555556a7380 -> 0x5555556a7300` while the live buffer argument stays
+`0x5555556a7380` in frames #1-#3, and caller sites `:1446-1452`, `:4331-4339`
+and `:4239-4245` never re-read `p.buffer`. These are dead by-value pointer
+copies: a negative closure, not a new rung 4 or pointer control. Grade stays
+rung 3 and lab-patched rung 4; W115/#1453 and W135/#1985 ESTABLISHED verdicts
+stand, and W19 is unwitnessed. Each run's `meta.txt` records
+`ALIVE_AFTER_MESSAGE` with no PASS tally; gdb logs are in `out-w19-frame/`
+and `out-w19-gdb-176/`, with PROVENANCE W19 in
+`lab/frontier/vrpn2shell/PROVENANCE.md`. Binary SHA-256s: vulnerable
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`, fixed
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`.
+Recipe and ports: `docs/reproducibility.md`.
 
 ## 2026-11-23 ~01:1xZ — gdbserver2shell W1: wire-fed pinned dispatcher, adjacent-object placement
 
@@ -8177,7 +8197,8 @@ the grade stays rungs 1-4 because the OOB values are parser integers and no
 control-flow datum is reached. AV:N and CWE-457 stay claim/source-only.
 Status: `reports/psqlodbc2shell-status.md`.
 W156's verdict concerns the W146 fake-handshake limb only; W147's real-server
-limb and the real-object limbs remain author-only.
+limb and the real-object limbs remained author-only at this point. Later
+W160/W161/W162 limbs are recorded in a 14:1xZ section below.
 
 ## 2026-11-23 09:5xZ — thrift2shell admitted as the 108th route
 
@@ -8283,9 +8304,10 @@ FRONTIER-STAGED at rungs 1-4 on direct-call verbatim-pinned `jv.c` slices:
 trace `8d537806…cef1e7`; gcc+clang ASan `WRITE of size 48` at pinned
 `jv.c.vuln:1191` and isolated `WRITE of size 3` at `:1126` in a 23-byte
 region, fixed runs clean; plain runs place 16 chosen `0x5a` bytes past
-32-byte and 6-byte buffers. No jq build, JSON parser, process, socket, wire,
-real allocator study, pointer control, marker, command, witness verdict or
-rung 5; real-pipeline reachability and heap-neighbour identity UNKNOWN.
+32-byte and 6-byte buffers. At staging time there was no jq build, JSON
+parser, process, socket, wire, real allocator study, pointer control, marker,
+command, witness verdict or rung 5; real-pipeline reachability and
+heap-neighbour identity were UNKNOWN here.
 Cheapest next experiment: build pinned 1.8.1/1.8.2, drive both advisory
 expressions under ASan, then measure real heap overlap before any pointer
 test. Staging adds no route, wake units, charter or new window; admission and
@@ -8347,7 +8369,8 @@ ASan builds (`lab/frontier/jq2shell/live/real-jq.sh`) confirmed the caller
 frames with small programs; the advisory's full PoCs remain guard-blocked
 (`memory.max=2147483648`, `memory.high=1610612736` against a 2 GiB operand;
 ASan rc=124 after 300 s, no guard bypass attempted). Heap-neighbour overlap,
-real-pipeline reachability and command execution stay UNKNOWN.
+real-pipeline reachability and command execution stayed UNKNOWN at this point;
+a later author-only heap-map limb below identifies the neighbour.
 Status: `reports/jq2shell-status.md`.
 
 ## 2026-11-23 11:3xZ — openexr2shell staged by frontier W155 (not admitted)
@@ -8394,10 +8417,33 @@ returned rc 0, `PASS=52 FAIL=0` and trace
 frontier's value. Grade stays the author's: rung 3 gcc+clang ASan
 `WRITE of size 4096` at pinned `internal_zstd.c.vuln:472` (4032 bytes past a
 64-byte region), fixed guard rejects with rc 23; scoped rung 4 places chosen
-`0x5a` bytes at `b64`/`b4095` under gdb. No EXR file, ZSTD frame, codec build,
-image consumer, process, socket, wire, pointer control, command, marker or
-witness verdict. Advisory file-level reachability and rung 5 stay UNKNOWN.
+`0x5a` bytes at `b64`/`b4095` under gdb. For that direct-call harness only: no
+EXR file, ZSTD frame, codec build, image consumer, process, socket, wire,
+pointer control, command or marker. W158 (#2602/#2603) ESTABLISHED rungs 1-4
+at that labeled scope, with no file-level verdict; reachability and rung 5
+stayed UNKNOWN here. A later author-only file-level lane is recorded below.
 Status: `reports/openexr2shell-status.md`.
+
+## 2026-11-23 13:3xZ — openexr2shell crafted EXR reaches the pinned ZSTD fault
+
+Author-only commits `0d67933` and `5374791` add a file-level lane to the 111th
+route with no row, stage, mind count, admission or grade change. A 692-byte
+deep+ZSTD EXR drives real pinned 3.5.2 `exr_decoding_run()`: ASan reports
+`memcpy-param-overlap` and a 4096-byte copy at `internal_zstd.c:472`, while a
+guarded allocator measures the completed 4032-byte overwrite of a 64-byte
+destination (4/4 PoC, 0/3 baseline). Pinned 3.5.3 rejects with rc 23
+`EXR_ERR_CORRUPT_CHUNK`. `5374791` adds `cases/cpp_singlepass.cpp`, calling
+`Imf::DeepScanLineInputFile::readPixels(0,0)` with no pre-pass: baseline
+`READPIXELS ok rv=0`, the PoC reaches the same fault via
+`ImfDeepScanLineInputFile.cpp:831/568/304`, and the fixed build throws
+`Unable to run decoder`. Baseline sha256 `07edcb58…eb8e` (545 B), PoC
+`283cec0e…b37ce` (692 B); 3.5.2/3.5.3 tarballs `85a291b9…51b15ae9` and
+`ff1de95f…4a054f`. Replay commands, `BUILDLOG.md` and gitignored raw EXR
+evidence are in `docs/reproducibility.md`; a separate direct-call replay
+(`PASS=52 FAIL=0`, trace `27a2a815…3c776`) covers only the old scope. Rung 5
+stays UNKNOWN: no consumer process, socket, wire, pointer target, command or
+marker; deep-tiled, OpenImageIO and aarch64 are untested. The report's "W160"
+is an author wake label, not a witness verdict.
 
 ## 2026-11-23 12:0xZ — libheif2shell staged by frontier W157 (not admitted)
 
@@ -8414,12 +8460,13 @@ at the new stride; a 64x65 -> 512x64 request writes chosen bytes from offset
 Duplicate screen: no libheif target in the plant's routes or charters; the
 tacplus brief only ranks this advisory below its own find as unprovisioned.
 A two-pane window 117 and seed wall exist, registered as STAGED; the operator
-has not admitted a route, charter or wake units, `check-omp-only.py` still
-reports 111 roles, and no witness verdict exists. Grade stays CODE/HARNESS
+had not admitted a route, charter or wake units, `check-omp-only.py` reported
+111 roles, and no witness verdict had returned. Grade stays CODE/HARNESS
 rungs 1-4; no libheif build, HEIF/MJPEG file, encoder plugin, consumer,
-process, socket, wire, pointer control, command or rung 5. The advisory's
-mixed-size Motion-JPEG file path stays a claim; a dedicated mind would need
-real v1.23.6/1.23.7 builds with x265 and a measured post-overwrite consumer.
+process, socket, wire, pointer control, command or rung 5. At staging time the
+advisory's mixed-size Motion-JPEG path stayed a claim and a dedicated mind
+would need real v1.23.6/1.23.7 builds with x265 and a measured post-overwrite
+consumer; a later author-only lane below builds those trees.
 
 Docs replay from `git archive 366690f lab/frontier/libheif2shell` in
 `/tmp/docs-libheif.7ISRoZ` returned rc 0 and
@@ -8445,11 +8492,30 @@ clean and the safe frame aborts in `free(): invalid pointer`.
 Docs replayed the committed script at `cd54f25` in the working tree with the
 gitignored lab binaries: rc 0, winner `0x13f0`, normalized SHA-256
 `bcde0050c441f08c0d920ad6365971b425d54ff3dd834bec84226647056bc3a1`, matching
-the report. Wire-chosen bits are 16, the written value is not chosen, and
-there is no vptr, code pointer, command, marker side effect or witness verdict.
-W145's ASLR-on replay request (#2547) is still unanswered; W146 is a separate
-author-only claim and rung 5 stays UNKNOWN. Writeup:
+the report. For W146, wire-chosen bits are 16, the written value is not chosen,
+and there is no vptr, code pointer, command, marker side effect or witness
+verdict. W145's ASLR-on replay request (#2547) is still unanswered; W146 is a
+separate author-only claim and rung 5 stays UNKNOWN at that scope. W147's
+wider layout scan below is another author-only negative. Writeup:
 `reports/thrift2shell-livewire.md`; status: `reports/thrift2shell-status.md`.
+
+## 2026-11-23 13:4xZ — thrift2shell W147 post-copy code-pointer sweep negative
+
+Author-only commits `9579cc8` and `d5852dd` (replay note) add a negative limb
+to the 108th route; no route, admission, mind or grade change. Five vulnerable
+layouts (0/2/4/8 KV headers, 32/64-byte strings) all report `EXEC_QWORDS=0`
+with ASLR on after `process()`; nonzero pointer words are 115/128/128/128/128
+and the sole heap pointer sits at +1008, outside the 726-byte copy. The fixed
+control has `sz=160`, nonzero 98, exec 0 and heap 11. A clean-archive replay at
+`9579cc8` reproduced the anchors (an initial fixed attempt hit
+`ConnectionRefusedError`, preserved as a negative); normalized window hash
+`295b2ffbcba420af65f22a0d6fa13ecd52abcec10fa997a071f0ae210794c6bb`. This lane
+has no PASS tally; the base harness remains `PASS=71 FAIL=0`, trace
+`c12ba2145cec292e618d2f50677887c61a56d577b012577cd50c304731bbe556`. Recipe
+and logs are in `docs/reproducibility.md` and
+`lab/frontier/thrift2shell/live/results/`. W147 is unwitnessed; only the older
+ASLR-off KV-header `free()`-pointer limb is witness-ESTABLISHED. Grade stays
+rungs 1-4 with rung 5 UNKNOWN. Status: `reports/thrift2shell-status.md`.
 
 ## 2026-11-23 12:3xZ — libheif2shell admitted as the 112th route
 
@@ -8477,11 +8543,38 @@ created no window (tmux's `*` is the active-window flag, not a name character).
 Grade stays the author's: rung 3 gcc+clang ASan `WRITE-64` at pinned
 `pixelimage.cc.vuln:644` through `heif_image.cc.vuln:403`, rung 4 four chosen
 `0x5a` bytes at offset 32768 against a `0xa5` canary with gdb readback; the
-fixed pin rejects with rc 2 and no copy. No HEIF or Motion-JPEG file, codec,
-libheif build, image consumer, process, socket, wire, real allocator study,
-pointer control, command, marker side effect, witness verdict or rung 5.
-Status: `reports/libheif2shell-status.md`; hand the replay to witness for an
-independent verdict.
+fixed pin rejects with rc 2 and no copy. For that direct-call CODE/HARNESS
+scope only: no HEIF or Motion-JPEG file, codec, libheif build, image consumer,
+process, socket, wire, real allocator study, pointer control, command or marker;
+file-level reachability and rung 5 stayed claim/UNKNOWN here. Witness W159
+(#2626) later returned rungs 1-4 ESTABLISHED at that labeled scope (five pins
+hash-matched, no counterexample); the replay handoff is closed. A real-build
+file lane below remains author-only. Status: `reports/libheif2shell-status.md`.
+
+## 2026-11-23 14:0xZ — libheif2shell W159 verdict and W161 real-build file lane
+
+Witness W159 (#2626), folded in `31f2ed9`, returned rungs 1-4 ESTABLISHED at the
+labeled direct-call CODE/HARNESS scope: five pins hash-matched, no
+counterexample, clean `366690f` archive replay `PASS=101 FAIL=0`, trace
+`9468b510…e38b43`. That verdict does not reach file level.
+
+Author-only commits `dc6002f`, `b9e9754` and `5f5ab1c` add a real-build lane
+with no row, mind or grade change. Pinned v1.23.6 `f81f28ac…421a` plus x265 and
+JPEG plugins decode a crafted mixed-MJPEG HEIF whose frame 2 SOF is patched to
+64x512 while track and frame 1 stay 512x64. Vulnerable ASan reports
+`WRITE of size 64` 0 bytes after a 32783-byte plane at `pixelimage.cc:644`, via
+`heif_image.cc:403`, `encoder_x265.cc:1139`, `hevc_enc.cc:189` and
+`track_visual.cc:620`; decode-only and safe inputs return rc 0 with
+`detect_leaks=0`, and patched `9ec655f` returns rc 2 with "All frames of a
+sequence must have the size of the first frame". A non-sanitized Release build
+SIGSEGVs on the mixed input (rc 139, `__memcpy_avx_unaligned_erms` via
+`extend_padding_to_size`, gdb backtrace) while safe returns 0, so the
+advisory's release SIGSEGV is observed locally. The 36,879-byte allocation
+stays UNTESTED. `b9e9754` dropped generated replay binaries from
+`real/evidence` (text and inputs only; rebuild the driver). Rung 5 and a
+witness verdict on this lane remain UNKNOWN. Recipe, pins and evidence:
+`docs/reproducibility.md` and `lab/frontier/libheif2shell/real/evidence/`.
+Status: `reports/libheif2shell-status.md`.
 
 ## 2026-11-23 12:4xZ — one staged lane and three author-only limbs
 
@@ -8516,16 +8609,61 @@ byte-identical, the same ASan `WRITE of size 1073741824` at `src/jv.c:1191`
 and gdb `currlen=len=1073741824, allocsz=0`, fixed rc 5 and a clean small input;
 in its archive only, ink `A` read `s->data[0]=0x41` and `length=1073741825`
 gave `WRITE of size 1073741825`. ESTABLISHED at the labeled real-process
-geometry scope, no grade change. Local expression, no request/wire input,
-heap-neighbour map, destination-offset or pointer control, command or side
-effect; rung 5 stays unclaimed and the literal PoCs are preserved negatives.
+geometry scope, no grade change. For that alias-geometry scope only: no
+request/wire input, heap-neighbour map, destination-offset or pointer control,
+command or side effect. The neighbour map is filled by the author-only limb
+below; rung 5 stays unclaimed and the literal PoCs are preserved negatives.
+
+Jq's heap-map limb (`ca620d0`, author-only, unwitnessed) closes that gap:
+plain hash-pinned 1.8.1/1.8.2 (`-g -O0`, no ASan) under gdb show the 208-byte
+`struct jv_parser` (jv_parse.c:711 <- main.c:652) as the chunk right after the
+undersized 49-byte string (64-byte glibc chunk; next size at data+40, user
+data at data+48). The ~1 GiB memcpy writes chosen `41 42 43 44` across the
+neighbour's first 64 bytes and faults in memcpy; fixed 1.8.2 returns rc 5
+"String too long" and a safe alias with `allocsz=4000` prints 2000.
+`heapmap.sh` gives `HEAPMAP-PASS` rc 0 and 14/14 pins OK; three later stalled
+attempts stay UNKNOWN, not passes. No rung 5, witness replay pending; W1/#2556
+and W160/#2651 stand. Recipe and hashes: `docs/reproducibility.md`.
 
 Psqlodbc W159 (`91b76e3`) rebuilt the pinned tag with `clang -O2` over real
 objects and found `n=73 rc=0`, `n=74 rc=139`: the parser's own `QueryBuild`
 pointer at row 74 faults first, 13 rows before the saved RIP. The watch sees
 a live heap pointer replaced by integer `0x95`, never a chosen pointer.
 Author-only rung-5 negative, no Docs replay (untracked provisioned trees),
-grade rungs 1-4. Status: `reports/psqlodbc2shell-status.md`.
+grade rungs 1-4 at that scope. W160 below adds a fixed-tag `-O2` control; W161
+and W162 extend the real-server path without changing W159's result. Status:
+`reports/psqlodbc2shell-status.md`.
+
+## 2026-11-23 14:1xZ — psqlodbc2shell W160/W161/W162: fixed control, real-PG overflow, witness verdict
+
+These limbs add no row, mind count or grade change to the 107th route; grade
+stays rungs 1-4.
+
+W160 (`9634b31`, author-only): `real/clang-o2-layout.sh` also builds fixed
+REL-18_00_0006 (`96fa03d`) with `clang -g -O2 -fno-omit-frame-pointer
+-fno-stack-protector`. In three identical runs the fixed tree returns `rc=1`
+with `RC=-1 ERRNUM=1 ERRMSG=too many parameters in the escape function call`
+at n=16/74/80, while the vulnerable tree is `rc=0` at n=73 and `rc=139` at
+n=74/80. No chosen pointer or control-flow datum follows.
+
+W161 (`6d3bb49`, author-only): `real/date-replay.sh` drives `SELECT {d '<200
+A>'}` through SQLDriverConnect/SQLExecDirect against real loopback PostgreSQL
+16.4. Vulnerable ASan reports `stack-buffer-overflow WRITE of size 1` at pinned
+`convert.c:5786` (F_ExtractOldTo NUL store `:2435`, macro `:2424`), offset 992
+one past `buf_small [864,992)`; the boundary is exactly 126 A's. Fixed returns
+`rc=-1` with PG 42601 and safe `{d '2000-01-01'}` returns 0; four runs. Rung 3
+is observed on the real-server path; the primitive writes only a NUL.
+
+W162 (witness #2689, 2026-11-23T14:01Z) independently rebuilt all six pins and
+both ASan trees on private PG port 59437 and replayed the whole matrix
+(replay rc=0): ESTABLISHED at that labeled scope, no counterexample, no grade
+change. Variations: a 250-byte `{t}` faults at `:5794`, `{ts}` at `:5802`,
+fixed and safe clean. NITs: the store is at `:2435` rather than the `:2424`
+`#define`, and the 42601 messages differ. W147 verdict #2576 is still pending;
+W156 stays scoped to W146's fake handshake. Base `PASS=34 FAIL=0`, trace
+`d5145bdb…d424d63`; pins and gitignored evidence
+(`build/evidence/w161-run{1,2,3,4}.summary`, `w160-*.out`) are in
+`docs/reproducibility.md`. Status: `reports/psqlodbc2shell-status.md`.
 
 ## 2026-11-23 13:1xZ — fqterm2shell admitted as the 113th route
 
@@ -8542,3 +8680,26 @@ daemon-reload, path enabled/active, pinned doctor rc 0 GREEN and
 CODE/HARNESS rungs 1-4 with no Qt or fqterm build, terminal, socket or wire
 input, pointer control, command, marker, witness verdict or rung 5.
 Status: `reports/fqterm2shell-status.md`; witness replay requested.
+
+## 2026-11-23 13:5xZ — munt2shell staged by frontier W159 (not admitted)
+
+Frontier W159 staged munt issue #149 in `ed3c048` (replay note `08e996f`): an
+incomplete oversized SysEx in libmt32emu's `MidiStreamParser` writes past a
+32768-byte heap region. Vulnerable tag `libmt32emu_2_8_3`
+(`008feb32227a16bad343573b33da2196656b8e93`), fix
+`1749f7fed5cdb3a9015acce076a1512b1615dc3b`; no CVE/GHSA/CVSS is claimed
+(UNKNOWN). R1 uses a 102-byte baseline SysEx; R2's fixed build is clean while
+the vulnerable plain build takes chosen `0x5a` at offsets 32768..32771; R3 gets
+gcc+clang ASan `WRITE of size 40001`, 0 bytes after a 32768-byte region at
+`MidiStreamParser.cpp.vuln:250`; R4's gdb readback shows `g_last_size=32768`
+and sixteen `0x5a` bytes at `g_last_alloc+32768`. The input is `0xF0` plus
+40000 `0x5a` bytes with no `F7`. `129 PASS/0 FAIL`, trace
+`735c136e1c6740ca50ed5790f054cbd4331c16a1d48998b22926de8ac0d1146f`;
+`08e996f` records three identical working-tree runs and a clean git-archive
+replay at `ed3c048` with the same trace. `REPLAY.md` calls this deterministic
+replay, not a witness verdict or a real-library reproduction. Rung 5 is
+UNKNOWN. This is STAGE-ONLY: no charter, route, wake units, admission, mind or
+witness verdict, so the count stays 113 and README adds only a FRONTIER-STAGED
+row. Commands, pins and evidence are in `docs/reproducibility.md`,
+`lab/frontier/munt2shell/PINS.sha256` and
+`lab/frontier/munt2shell/harness/evidence/`.
