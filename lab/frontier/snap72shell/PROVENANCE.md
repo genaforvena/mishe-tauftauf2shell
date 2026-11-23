@@ -380,3 +380,18 @@ not independently measured here (likely glibc's tcache fast path —
 [INFERENCE]); the measured facts are the RC rows, the ASan write and the gdb
 normal exit. No pointer redirect, command side effect or rung 5. Grade
 unchanged: rung 4 wire-reachable.
+
+## Upstream-fix re-check — 2026-11-23T16:2xZ (W10)
+
+Scheduled 4h return from W9. Read-only provisioning checks only:
+
+- `https://api.github.com/repos/davenardella/snap7/commits?per_page=5` still
+  returns `30f37da3114024a71ba93f7fd855c680b97a406f` as the newest commit
+  (2025-07-14, "Add files via upload").
+- `https://api.github.com/repos/davenardella/snap7/tags?per_page=10` returns
+  `[]`: no tagged release of any kind.
+
+No fixed upstream blob exists, so the fixed control remains the issue-#32
+derivative. No replay owed: W7/W8 measured no post-overflow dereference or
+command side effect in the real client. Negative result limited to the two
+APIs named above; grade unchanged at rung 4 wire-reachable.
