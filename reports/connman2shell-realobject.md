@@ -1,11 +1,12 @@
 # ConnMan `get_domains()` — real pinned object (CVE-2026-115863)
 
-Date 2026-11-23, W5. Earlier harnesses (frontier direct call, W1 callpath,
-W2 verbatim parser, W4 loopback socket) compile *extracted* pinned functions
-into a driver. This wake builds the whole pinned tag-2.0 tree, links a real
-`connmand`, and probes the overflow inside that binary. It overturns W2's
-measured build blocker and removes the "copied function" caveat. It does not
-add a daemon run or any rung-5 evidence.
+Date 2026-11-23, W5 (canary boundary added W6). Earlier harnesses (frontier
+direct call, W1 callpath, W2 verbatim parser, W4 loopback socket) compile
+*extracted* pinned functions into a driver. W5 builds the whole pinned tag-2.0
+tree, links a real `connmand`, and probes the overflow inside that binary. It
+overturns W2's measured build blocker and removes the "copied function"
+caveat. W6 adds a canary-boundary measurement. Neither adds a daemon run or
+any rung-5 evidence.
 
 ## Build
 
@@ -46,9 +47,9 @@ provisionable inside the lab; `configure` and `make` then succeed.
 
 The production object has a stack canary and still calls `strncpy` with the
 fixed 1025-byte copy, followed by the unbounded `movb $0x2e` label walk. The
-canary sits at `rsp+0x418`, the copy destination at `rsp+0x10`. Whether a given
-K corrupts the canary or steps past it is **not observed** here; the plain
-binary was disassembled, not run with a daemon.
+canary sits at `rsp+0x418`, the copy destination at `rsp+0x10`. W6 below
+measures where a given K lands relative to that canary; the store half of the
+read-modify-write is still unobserved in the production object.
 
 ## Real-object probe
 
@@ -69,15 +70,52 @@ from a live REPLY.
 - **Well-formed 8-byte DOMAIN_LIST**: no ASan report on either the vulnerable
   or the fixed binary.
 
+## W6 — canary boundary (2026-11-23T02:34Z)
+
+`bash lab/connman2shell/realobj/canary-boundary.sh` → `9 PASS / 0 FAIL`, with
+SHA assertions on all three binaries. `dns_name` starts at `rsp+0x10` and the
+compiler's canary is at `rsp+0x418`, i.e. `dns_name+1032`. For an all-`0xff`
+value the walk writes at `dns_name+0, 256, 512, 768, 1024` and then reads at
+`dns_name+1025+K`:
+
+- **K=7** makes that first read land on the canary slot: ASan reports
+  `READ of size 1` at frame offset **1080** (`dns_name` at 48, plus 1032).
+  In the production `-O2` object the canary's low byte is `0x00` (glibc
+  convention), so the loop reads zero and stops before writing there; the
+  injected call returns (`CALL_RETURNED`, no `stack smashing`).
+- **K=0x80** steps over that slot: ASan reads frame offset **1201**, 127 bytes
+  past `dns_name`, the same delta as every earlier harness.
+
+This is a structural negative for the W1 canary result. W1's "69 bytes changed
+from `0xEE` to `0x2E`" used a synthetic `0xEE`-filled caller canary; the real
+compiler canary's zero low byte terminates a walk that lands on it, so that
+byte-run count does not transfer to the production object. A larger K can
+still step over the canary into a caller-frame byte — that read is observed in
+the real object, the store is not. Hardware watchpoints do not fire during
+gdb's injected `call`, so a clean store readback there needs a natural caller,
+not a debugger-forced one.
+
+## Scope disposition — private-netns daemon
+
+Not run. A network namespace plus veth pair needs CAP_SYS_ADMIN and is a
+host-level network change, while `AGENTS.md` limits lab instances to
+loopback-only processes under `lab/`. A natural connmand would also need a
+private system D-Bus and would write filesystem service state. Even if all of
+that were provisioned, the primitive writes only `.` at a layout-dependent
+offset: it cannot place a pointer, a marker or a command, so no observation
+from that daemon could earn rung 5. The lane is at its honest ceiling; another
+harness variant would not change the grade.
+
 ## Grade
 
 Rung 3 plus scoped rung 4, unchanged. The new fact is that the real pinned
 `connmand` object, compiled with the project's own `-O2` and stack protector,
-contains the same unbounded walk and that an ASan build of the same tree traps
-the read at the same offset with mandatory fixed and safe controls clean. Still
+contains the same unbounded walk, that an ASan build of the same tree traps
+the read at the same offset with mandatory fixed and safe controls clean, and
+that a canary-aligned K is stopped by the real canary's zero low byte. Still
 absent: a running daemon, a natural DHCPv6 REPLY call chain, an observed store
 landing in the production object, pointer control, marker execution and any
 command side effect. Root-service impact remains an advisory claim. The only
-route to rung 5 still requires a plant-started daemon on an isolated network
+route to rung 5 would require a plant-started daemon on an isolated network
 plus an observed benign command; a fixed `.` byte and a layout-dependent K do
 not provide that.

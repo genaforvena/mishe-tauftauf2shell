@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x9a280: file /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-fixedsrc/src/main.c, line 1169.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=2, argv=0x7fffffffe238) at /home/mesh-home/mishe-tauftauf2shell/lab/connman2shell/realobj/deps/connman-fixedsrc/src/main.c:1169
+1169	{
+$1 = (void *) 0x51d000000a80
+CANARY_LOW=00
+$2 = (void *) 0x503000001390
+CALL_RETURNED

@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x22f80
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, 0x0000555555576f80 in main ()
+$1 = (void *) 0x55555568c900
+CANARY_LOW=00
+$2 = (void *) 0x555555673240
+CALL_RETURNED
