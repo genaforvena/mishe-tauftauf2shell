@@ -195,10 +195,11 @@ The pre-signature id_token path does supply an OCT JWK: `proto.c:1426-1434`
 creates it from `provider->client_secret` and calls `oidc_jwt_parse()` ->
 `oidc_jwe_decrypt()` -> `cjose_jwe_decrypt()`, but `mod_auth_openidc.c:2116-2118`
 requires a `state` cookie matched from an earlier authorization request.
-Both remain source claims about an unbuilt consumer: they support the
-advisory's pre-auth shape but do not replace a running deployment or witness
-replay. In a real deployment the KEK is secret, so only the write length is
-attacker-chosen; byte values are not.
+At W184 both were source claims about an unbuilt consumer: they supported the
+advisory's pre-auth shape but did not replace a running deployment or witness
+replay. W186 measured the id_token lane in the `w2/` build (below). In a real
+deployment the KEK is secret, so only the write length is attacker-chosen;
+byte values are not.
 
 ## W184 — real mod_auth_openidc consumer (2026-11-23 22:10-22:18Z)
 
@@ -242,9 +243,45 @@ logout key configuration. The attacker-supplied oversized length reaches the
 vulnerable helper, but no OCT KEK is configured on this path, so no overflow
 occurred. Unauthenticated reachability of the corruption in a real deployment
 stays UNKNOWN; the id_token path (proto.c:1426-1434) with an OCT JWK from
-client_secret is an unmeasured source-level follow-up. The witness
+client_secret was an unmeasured source-level follow-up at W184. The witness
 independently replayed this lane from a clean archive and ESTABLISHED the
 negative at the labeled real mod_auth_openidc / loopback scope (DM #3079).
+
+## W186 — id_token lane in the real consumer (2026-11-23 23:18-23:22Z)
+No new binaries: same `w2/` mod_auth_openidc 2.4.15.1 + vulnerable cjose
+v0.6.2.4 build as W184. `w2/apache-idtoken.conf` adds `OIDCClientSecret
+w2-loopback-secret-0123456789`, `OIDCResponseType id_token` and
+`OIDCResponseMode form_post`, plus a protected `/private` location; the
+client secret yields a 16-byte OCT JWK as the first 16 bytes of its SHA-256
+(derived KEK `e6e411c2390f0130d75a4fe5b28e6601`, recorded in
+`evidence/idtoken-state-*.txt`).
+
+`w2/probe-idtoken.py oversized|valid`: GET `/private` with
+`Accept: text/html` and User-Agent `w2-idtoken-probe` gets a 302 with `state`
+and an encrypted `mod_auth_openidc_state_*` cookie; POST `/redirect_uri` with
+`state`, `id_token` and `response_mode=form_post` and the same cookie and UA.
+Tokens reuse `probe.py`'s RFC 3394 wrap with `raw_len` 56 (48-byte plaintext)
+or 40 (32-byte CEK, control). The lab wrap KEK does not match the derived
+client KEK, so OpenSSL integrity check fails after the copy; only the write
+length is attacker-chosen, as in a deployment.
+
+Measured: oversized POST returned HTTP 400 and gdb logged
+`W2I_PARSE_IDTOKEN_REACHED`, `W2I_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3`,
+`W2I_AES_KW_DECRYPT_REACHED raw_len=56 cek_len=0 jwk_kty=3`,
+`W2I_AES_UNWRAP_KEY_REACHED` (`evidence/gdb-idtoken-run3.log`,
+`gdb-idtoken-crash-final.log`). The next loopback GET aborted Apache in
+glibc `free(): invalid next size (fast)`, backtrace
+`jsonp_free -> json_delete_string -> json_delete -> json_decref ->
+hashtable_do_clear -> json_delete_object -> oidc_proto_state_destroy
+(src/proto.c:797)`; raw message in `evidence/idtoken-apache_error.log`.
+The 40-byte control reached `W2I_AES_UNWRAP_KEY_REACHED` with `raw_len=40`
+and no abort (`evidence/gdb-idtoken-abort.log`). Two earlier failed setup
+attempts are preserved: a 401 from a GET without `Accept: text/html`, and a
+response-mode mismatch (`fragment` vs `form_post`) before `OIDCResponseMode`
+was added. `evidence/idtoken-SHA256SUMS` holds hashes of the final
+config/harness/evidence files. Listener was 127.0.0.1:18443 only; no
+listener remained after capture. Witness replay of this lane not requested.
+
 No pointer/IP control, rung 5 or module patch.
 
 ## Ceiling (after W181)
@@ -253,8 +290,12 @@ Direct call plus a loopback-only HTTP consumer with a real compact JWE token
 and a lab KEK. Attacker-controlled segment length is carried by a real HTTP
 request into the real import/decrypt path; ASan and plain glibc corruption
 are measured, including the exact object adjacent to the CEK. No deployed
-consumer was exercised; a real loopback mod_auth_openidc build reached the
-vulnerable helper but not the copy (W184). No credential, pointer/IP control,
+consumer was exercised at W184; a real loopback mod_auth_openidc build
+reached the vulnerable helper but not the copy (W184). W186 measured the
+id_token lane in that build with a lab OCT `client_secret` and state cookie:
+`AES_unwrap_key()` reached with `raw_len=56`, followed by a glibc
+`free(): invalid next size (fast)` abort; the 40-byte control reached unwrap
+without abort. No credential, pointer/IP control,
 shell command. The witness independently replayed the direct-call and wire
 lanes from a clean archive (verdicts #3019/#3020) and the W184
 real-consumer negative (DM #3079). The chosen bytes are the plaintext of a

@@ -1,0 +1,64 @@
+Function "oidc_proto_parse_idtoken" not defined.
+Breakpoint 1 (oidc_proto_parse_idtoken) pending.
+Function "oidc_jwe_decrypt_impl" not defined.
+Breakpoint 2 (oidc_jwe_decrypt_impl) pending.
+Function "cjose_jwe_decrypt" not defined.
+Breakpoint 3 (cjose_jwe_decrypt) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 4 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 5 (AES_unwrap_key) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W2I_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2I_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2I_PARSE_IDTOKEN_REACHED
+W2I_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2I_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2I_AES_KW_DECRYPT_REACHED raw_len=40 cek_len=0 jwk_kty=3
+W2I_AES_UNWRAP_KEY_REACHED
+
+Program received signal SIGTERM, Terminated.
+0x00007ffff7d2baf7 in accept4 (fd=3, addr=..., addr_len=0x7fffffffdca0, flags=524288) at ../sysdeps/unix/sysv/linux/accept4.c:31
+warning: 31	../sysdeps/unix/sysv/linux/accept4.c: No such file or directory
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W2I_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2I_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2I_PARSE_IDTOKEN_REACHED
+W2I_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2I_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2I_AES_KW_DECRYPT_REACHED raw_len=56 cek_len=0 jwk_kty=3
+W2I_AES_UNWRAP_KEY_REACHED
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+W2I_POST_RUN_REACHED
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff7c4527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff7c288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff7c297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff7dcf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x00007ffff7ca90b5 in malloc_printerr (str=str@entry=0x7ffff7dcd672 "free(): invalid pointer") at ./malloc/malloc.c:5775
+#7  0x00007ffff7cab44c in _int_free (av=<optimized out>, p=<optimized out>, have_lock=0) at ./malloc/malloc.c:4507
+#8  0x00007ffff7cade8e in __GI___libc_free (mem=0x5555556743f0) at ./malloc/malloc.c:3398
+#9  0x00007ffff7b9afa4 in jsonp_free (ptr=0x5555556743f0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/memory.c:34
+#10 0x00007ffff7b97df9 in hashtable_do_clear (hashtable=0x5555556701a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/hashtable.c:136
+#11 0x00007ffff7b9808b in hashtable_close (hashtable=0x5555556701a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/hashtable.c:194
+#12 0x00007ffff7b9ea7b in json_delete_object (object=0x555555670190) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:85
+#13 0x00007ffff7ba0d45 in json_delete (json=0x555555670190) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:1000
+#14 0x00007ffff7b3eba5 in json_decref (json=0x555555670190) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-prefix/include/jansson.h:133
+#15 0x00007ffff7b436b0 in oidc_proto_state_destroy (proto_state=0x555555670190) at src/proto.c:797
+#16 0x00007ffff7b1effc in oidc_authorization_response_error (r=0x7ffff7ae30a0, c=0x7ffff7af7640, proto_state=0x555555670190, error=0x7ffff7ba3810 "Error in handling response type.", error_description=0x0) at src/mod_auth_openidc.c:1806
+#17 0x00007ffff7b21841 in oidc_handle_authorization_response (r=0x7ffff7ae30a0, c=0x7ffff7af7640, session=0x7ffff7ae1838, params=0x7ffff7ae1e40, response_mode=0x7ffff7ae27e0 "form_post") at src/mod_auth_openidc.c:2167
+#18 0x00007ffff7b228f1 in oidc_handle_post_authorization_response (r=0x7ffff7ae30a0, c=0x7ffff7af7640, session=0x7ffff7ae1838) at src/mod_auth_openidc.c:2298
+#19 0x00007ffff7b2cc16 in oidc_handle_redirect_uri_request (r=0x7ffff7ae30a0, c=0x7ffff7af7640, session=0x7ffff7ae1838) at src/mod_auth_openidc.c:3975
+#20 0x00007ffff7b2d8b1 in oidc_check_userid_openidc (r=0x7ffff7ae30a0, c=0x7ffff7af7640) at src/mod_auth_openidc.c:4180
+#21 0x00007ffff7b2e1ec in oidc_check_user_id (r=0x7ffff7ae30a0) at src/mod_auth_openidc.c:4293
+#22 0x00005555555af8ea in ap_run_check_user_id ()
+#23 0x00005555555b9a68 in ap_process_request_internal ()
+#24 0x00005555555db645 in ap_process_async_request ()

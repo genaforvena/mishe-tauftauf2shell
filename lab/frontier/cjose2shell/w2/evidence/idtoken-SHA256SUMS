@@ -1,0 +1,23 @@
+# W186 id_token lane artifacts (2026-11-23Z). Hashes of the last-run files;
+# Apache error log is from the final crash run (23:21Z), earlier excerpts in
+# idtoken-oversized-run3-apache.txt. Config/harness paths are relative to w2/.
+28659e158a5b409dab78aed692e6c94a0e6409dc962e717101aa095f45dbc9a6  ../apache-idtoken.conf
+1e91c1c51f48d190086193eabe5f7d962fd53818dbdc978c1eb852463adb8ed5  ../gdb-idtoken.cmd
+8afe707b0ef76950423a6fa10642e8599dfc6a5d9736436246fb210e813fe9cb  ../gdb-idtoken-abort.cmd
+7d75e6758ea0de537f754736eaf00f8cffa25c0434ce70b0c50b4845aa6c592f  ../probe-idtoken.py
+cf010f45fcee86f2ad489d0aeba46b4e6eb6aaba69643bac8e7fff2a3f1f7a98  gdb-idtoken-run3.log
+1a6d9ad2da840f2ad24286cdd567ce9a94dd6e4c614064b14a5982eb2d5ed88c  gdb-idtoken-oversized.log
+1801baba1008529ed12833c6c8a71601e75a775f477680095237d374baa6ceb5  gdb-idtoken-abort.log
+f2906e0ef34fc380201d92b8834b3e553163632207003ae73c43176e4a1c2985  gdb-idtoken-crash-final.log
+bcc7f0dea4fbfda63e7f31285c99c544ec9a137d2c56a3a9a6cd2fed2b972e31  idtoken-get-response-oversized.bin
+bf7634f184f1d55bd7640d76031bd7dcc3d7356ad92974b71894846270df2292  idtoken-state-oversized.txt
+749fa055697dfa5c5f2f0fd06c94ee88d9295d0ff09370041a2e0614c4be1f6f  idtoken-request-oversized.bin
+98d61c21a544d60528e2a75ee7c8ca9cf72953437cdb84fa0757cafb4a7cbe26  idtoken-token-oversized.txt
+203a83eaa3dcf6ac7718f2d27f7a43729db93ebac3b2763a85f51be54a4e4169  idtoken-response-oversized.bin
+fed578a3ed447d38819a4c15e213d397de9ddc8328484258ab3404cdd0692e85  idtoken-get-response-valid.bin
+985f745133fd5e9a17b33557f1d9d23376db108c3e31a952d709a13233239690  idtoken-state-valid.txt
+26294fdf30f4226fbf4a37770692a460aa3937f9efee5a58682f5a061ed4624d  idtoken-request-valid.bin
+218db34ef75774c60a1d8ec84b74f6502dcf4abf348ecd1ca6c1e629181ac559  idtoken-token-valid.txt
+f49d618ea69158d57aeca719f13a9c299bd9ceb6598e124eb08bc321b8638dd1  idtoken-response-valid.bin
+1978702a5011d8113f85ee72e06378e456052e1538893757be2457b63b07caca  idtoken-apache_error.log
+68c86cc74887d70f076984e376649909b916316fd09a742923cad4dadc22c9f1  idtoken-oversized-run3-apache.txt

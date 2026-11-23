@@ -167,10 +167,10 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   calls `oidc_jwt_parse()` -> `oidc_jwe_decrypt()` -> `cjose_jwe_decrypt()`
   with no encrypted_key length check, but it needs a matching `state` cookie
   from an earlier authorization request (`mod_auth_openidc.c:2116-2118`),
-  so it is not a single unauthenticated POST. Both remain source claims about
-  an unbuilt consumer: no running deployment, witness replay or byte-value
-  claim; in a real deployment the KEK is secret, so only length is
-  attacker-chosen.
+  so it is not a single unauthenticated POST. At W184 both were source
+  claims; W186 measured the id_token lane with a lab OCT `client_secret` and
+  a matching state cookie (below). In a real deployment the KEK is secret,
+  so only length is attacker-chosen.
 - W184 measured negative for that real consumer (`lab/frontier/cjose2shell/w2/`):
   a real mod_auth_openidc 2.4.15.1 Apache module, built against pinned
   vulnerable cjose v0.6.2.4 and run on 127.0.0.1:18443, was sent an
@@ -188,8 +188,29 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   measured negative for AES-KW on the default backchannel key configuration;
   the witness independently replayed it from a clean archive and ESTABLISHED
   it at the labeled real-consumer / loopback scope (DM #3079). It is not a
-  rung-5 result; the id_token path with an OCT JWK from `client_secret`
-  remains an unmeasured source-level follow-up.
+  rung-5 result.
+- W186 measured the id_token lane in the same real mod_auth_openidc build
+  (`w2/`): `apache-idtoken.conf` adds `OIDCClientSecret` (OCT JWK derived as
+  SHA-256(secret)[:16]), `OIDCResponseType id_token` and
+  `OIDCResponseMode form_post`. `probe-idtoken.py` first GETs `/private` with
+  `Accept: text/html`, capturing the 302 `state` and encrypted state cookie,
+  then POSTs a compact JWE `id_token` with a 56-byte raw `encrypted_key` to
+  `/redirect_uri`. gdb logs `W2I_PARSE_IDTOKEN_REACHED`,
+  `W2I_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3` (OCT),
+  `W2I_AES_KW_DECRYPT_REACHED raw_len=56 cek_len=0 jwk_kty=3` and
+  `W2I_AES_UNWRAP_KEY_REACHED`; the 32-byte CEK receives 48 bytes. The
+  response was HTTP 400 (integrity failure), but a later loopback request
+  aborted the Apache process in glibc `free(): invalid next size (fast)` at
+  `jansson jsonp_free -> json_delete_string -> json_decref ->
+  oidc_proto_state_destroy` (full backtrace in
+  `w2/evidence/gdb-idtoken-crash-final.log`). A 40-byte correct-length
+  control reached `AES_unwrap_key()` in the same configuration with no abort
+  (`w2/evidence/gdb-idtoken-abort.log`). All listeners were on
+  127.0.0.1:18443 and stopped after capture; raw bytes, tokens, logs and
+  hashes are in `w2/evidence/` (`idtoken-SHA256SUMS`). This is measured
+  pre-signature reachability of the corruption in a real consumer with a
+  lab-configured KEK and a state cookie, not deployed reachability and not
+  r5. The witness has not replayed this lane.
 
 ## 6. Honest ceiling
 
@@ -205,8 +226,11 @@ encrypted_key reaches the vulnerable helper but the key-type precondition
 for the copy is absent in that path (section 5), so it is a measured
 negative, not deployed reachability of the corruption; the witness replayed
 that lane from a clean archive and ESTABLISHED the negative at the labeled
-real-consumer / loopback scope (DM #3079). No deployed server,
-credential, pointer/IP control or shell command. Advisory pre-authentication
+real-consumer / loopback scope (DM #3079). W186 used the same build with a
+lab OCT `client_secret` and a matching state cookie: the id_token lane
+reached `AES_unwrap_key()` and the process aborted in glibc `free()`;
+the 40-byte control reached unwrap without abort (section 5). No deployed
+server, real credential, pointer/IP control or shell command. Advisory
 reachability in a real deployment and any RCE claim remain **UNKNOWN**;
 rung 5 not attempted and not established. A pointer or control-flow target
 in a real consuming process is the prerequisite for any benign-marker

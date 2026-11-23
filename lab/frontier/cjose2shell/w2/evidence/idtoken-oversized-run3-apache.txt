@@ -1,0 +1,10 @@
+Excerpt from evidence/idtoken-apache_error.log, run 3 (2026-11-23T23:19:38Z),
+before that log was truncated by the next Apache launch. Exact lines:
+
+[Mon Nov 23 23:19:38.002260 2026] [auth_openidc:debug] [pid 2610585] [client 127.0.0.1:56626] src/proto.c(1420): [client 127.0.0.1:56626] oidc_proto_parse_idtoken: enter: id_token header={"alg":"A128KW","enc":"A128CBC-HS256"}
+[Mon Nov 23 23:19:38.002266 2026] [auth_openidc:debug] [pid 2610585] [client 127.0.0.1:56626] src/util.c(2601): [client 127.0.0.1:56626] oidc_util_create_symmetric_key: key_len=16
+[Mon Nov 23 23:19:38.005207 2026] [auth_openidc:error] [pid 2610585] [client 127.0.0.1:56626] oidc_proto_parse_idtoken: oidc_jwt_parse failed: [src/jose.c:753: oidc_jwe_decrypt_impl]: encrypted JWT could not be decrypted with any of the 2 keys: error for last tried key is: crypto error [file: jwe.c, function: _cjose_jwe_decrypt_ek_aes_kw, line: 599]
+
+The process then served the 400 response. A later GET /private at 23:19:57Z
+triggered glibc `free(): invalid next size (fast)` and SIGABRT (see
+evidence/gdb-idtoken-stdout-run3.log); no 18443 listener remained.

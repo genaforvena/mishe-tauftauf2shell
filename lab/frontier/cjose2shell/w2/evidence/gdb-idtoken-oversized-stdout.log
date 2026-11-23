@@ -1,0 +1,18 @@
+Function "oidc_proto_parse_idtoken" not defined.
+Breakpoint 1 (oidc_proto_parse_idtoken) pending.
+Function "oidc_jwe_decrypt_impl" not defined.
+Breakpoint 2 (oidc_jwe_decrypt_impl) pending.
+Function "cjose_jwe_decrypt" not defined.
+Breakpoint 3 (cjose_jwe_decrypt) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 4 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 5 (AES_unwrap_key) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+httpd (pid 2645474) already running
+[Inferior 1 (process 2647227) exited normally]
+W2I_POST_RUN_REACHED
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/gdb-idtoken-abort.cmd:40: Error in sourced command file:
+No stack.

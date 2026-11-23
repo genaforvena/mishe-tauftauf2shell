@@ -1,4 +1,4 @@
-# w2 — real mod_auth_openidc / cjose backchannel-logout measurement (2026-11-23, UTC)
+# w2 — real mod_auth_openidc / cjose loopback measurements (2026-11-23, UTC)
 
 ## Verdict (measured, negative for exploitability on this path)
 
@@ -146,3 +146,63 @@ POST.
 * Only loopback HTTP POSTs were sent; no TLS, no external network, no other
   listener, no system Apache service changes, no commits or tracked-file edits.
   The private instance was terminated after evidence capture.
+
+## W186 — id_token / OCT client_secret lane (23:18-23:22Z, measured)
+
+No new binaries: the W184 module and vulnerable cjose build were reused.
+`apache-idtoken.conf` adds `OIDCClientSecret w2-loopback-secret-0123456789`,
+`OIDCResponseType id_token`, `OIDCResponseMode form_post` and a protected
+`/private` location. The client secret yields a 16-byte OCT JWK (first 16
+bytes of its SHA-256: `e6e411c2390f0130d75a4fe5b28e6601`); the lab wrap KEK
+in `probe.py` does not match it, so OpenSSL rejects the unwrapped CEK after
+the copy. Only the attacker-chosen write length is under test, as in a
+deployment where the recipient KEK is secret.
+
+Replay (loopback only, no system Apache):
+
+```sh
+cd lab/frontier/cjose2shell/w2
+timeout 120 gdb -q -batch -x "$PWD/gdb-idtoken-abort.cmd" \
+  --args /usr/sbin/apache2 -f "$PWD/apache-idtoken.conf" -X \
+  > evidence/gdb-idtoken-oversized-stdout.log 2>&1   # separate shell
+./probe-idtoken.py valid                              # correct-length control
+./probe-idtoken.py oversized                          # 56-byte encrypted_key
+```
+
+Each probe first GETs `/private` with `Accept: text/html`, capturing the 302
+`state` parameter and the encrypted `mod_auth_openidc_state_*` cookie, then
+POSTs `state`, `id_token` and `response_mode=form_post` to `/redirect_uri`
+with the same cookie and User-Agent. Tokens are those from `probe.py` with
+raw encrypted_key length 56 or 40. After the oversized POST, a follow-up GET
+`/private` drives the allocator that exposes the corruption.
+
+Measured result: HTTP 400 for both POSTs (integrity failure after the wrap),
+but gdb logs `W2I_PARSE_IDTOKEN_REACHED`,
+`W2I_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3` (OCT),
+`W2I_AES_KW_DECRYPT_REACHED raw_len=56 cek_len=0 jwk_kty=3` and
+`W2I_AES_UNWRAP_KEY_REACHED` (`evidence/gdb-idtoken-run3.log` and
+`evidence/gdb-idtoken-crash-final.log`). The follow-up GET aborted the Apache
+process with glibc `free(): invalid next size (fast)` in
+`jsonp_free -> json_delete_string -> json_decref -> oidc_proto_state_destroy`
+(`src/proto.c:797`); the full backtrace is in
+`evidence/gdb-idtoken-crash-final.log`, raw message in
+`evidence/idtoken-apache_error.log`. The 40-byte control reached
+`W2I_AES_UNWRAP_KEY_REACHED` with `raw_len=40` and no abort
+(`evidence/gdb-idtoken-abort.log`, which is the valid-control log despite
+its filename). The first oversized run aborted a few seconds later on its
+own follow-up request (`evidence/gdb-idtoken-stdout-run3.log` plus
+`evidence/idtoken-oversized-run3-apache.txt`). Raw GET/POST bytes, tokens,
+state cookies and hashes are under `evidence/` (`idtoken-SHA256SUMS`).
+
+Two failed setup attempts are preserved, not erased: a GET without
+`Accept: text/html` returned 401 (`evidence/idtoken-get-response-oversized.bin`
+was overwritten by the successful run), and without `OIDCResponseMode
+form_post` the module rejected the response as `fragment` vs `form_post`
+before reaching `oidc_proto_parse_idtoken`.
+
+Verdict: measured pre-signature reachability of the overflow inside a real
+mod_auth_openidc consumer with a lab-configured OCT KEK and a matching state
+cookie from an earlier loopback authorization request. Not deployed
+reachability, no pointer/IP control, no benign marker, no r5. The witness
+has not replayed this lane. Listener was 127.0.0.1:18443 only and was stopped
+after capture; no 18443 listener or lab Apache remained.
