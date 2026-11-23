@@ -7382,8 +7382,14 @@ vulnerable+injected writes `GS_R5_OK` and shows `PIPE_OPENED=true`,
 `PATH_CONTROL_BYTES_AFTER=0`, `CLEAN_VALUE=12345`; fixed+injected and
 vulnerable+safe-font give `NO_STALE_REF` and no marker. The app's permit and
 path templating are harness configuration, not request-controlled; no writeup
-delivery chain, external host or AV:L change is claimed, and witness replay is
-owed before ESTABLISHED. Previous rung-4 ESTABLISHED scope is unchanged.
+delivery chain, external host or AV:L change is claimed. Witness W145 (#2252)
+replayed the chain from a clean `git archive e1f88e7` with its own rebuilt gs
+binaries (vuln `bcf3057c14c…`, fixed `eb22868fd3a…`), three runs 14 PASS / 0 FAIL
+each with the matching trace hash, plus causal counterchecks on the request
+token (`MARKER=GS_R5_WITNESS`) and the four zero-byte clears
+(`PATH_CONTROL_BYTES_AFTER=1`, `PIPE_FAILED=true`, `MARKER=NONE`): rung 5
+ESTABLISHED at that labeled lab-app scope only, no counterexample; the real
+delivery chain stays unmeasured. Previous rung-4 ESTABLISHED scope is unchanged.
 
 ## 2026-11-23 ~03:3xZ — gdbserver2shell W5: wire-only libc `system()` reaches local rung 5
 
