@@ -18,7 +18,8 @@ is ESTABLISHED on its own pinned builds and both benign commands reproduce at
 measurement shows the write still reaches the live gnutls cleanup loop but
 gives no chosen control and no address leak; a wake-14 ASLR-on inventory
 found no live libc/heap pointer in the reachable objects that a partial
-overwrite could retarget. ASLR-on/stock stays UNKNOWN.
+overwrite could retarget; a wake-17 static check found no direct
+command-execution import in the mapped libgnutls. ASLR-on/stock stays UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -685,6 +686,22 @@ This is a bounded negative result for these two object sets, not a proof for
 every grooming; a different reachable object with a libc pointer, or an
 information leak, is still needed for ASLR-on chosen control. Rung 5 stays
 author-observed at the labeled ASLR-off scope only.
+
+## Same-library PLT retarget check (wake 17, 2026-11-23 ~02:1xZ) — no direct command import
+
+One escape from the wake-14 negative would be a live libgnutls text pointer in
+the writable span whose low 16 bits could be patched to a libgnutls PLT stub:
+the library base would stay unknown but the pointer's high bytes would survive.
+The harness inferior maps `/usr/lib/x86_64-linux-gnu/libgnutls.so.30.37.1`
+(SHA-256 `ddbae2995750875c07bc218d12a062d73f8250678f54dedda7e9be5068781c98`,
+dpkg `libgnutls30t64 3.8.3-1.1ubuntu3.6`), confirmed in
+`harness/aslr-inventory.gdb.log`. On that exact file:
+
+- `readelf --dyn-syms -W LIB | grep ' UND ' | grep -E '(system|popen|exec[lvpe]*|posix_spawn|dlopen)'` → no matches: no direct command-execution import to retarget to.
+- `objdump -d LIB | grep p11_kit_module_load@plt` → `0x34da0`; a module-load stub exists, but wake 14 found no live libgnutls pointer anywhere in the 128 qwords at `slot1` or `priv`, so there is no high-byte-preserved pointer to patch to it. The staged `.so` idea therefore has no reachable pointer on this geometry.
+
+This is a static, deterministic negative for this library and the sampled
+geometry; it changes no grade. ASLR-on chosen control stays UNKNOWN.
 
 
 ## Boundaries
