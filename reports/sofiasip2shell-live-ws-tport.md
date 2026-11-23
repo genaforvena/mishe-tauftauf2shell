@@ -224,11 +224,34 @@ realloc probe, keeps `_size=63`, and makes only two in-bounds adds; both
 v1.13.18 full and short cases (rc 0) are identical to the short control.
 The port-shifted vulnerable replay reproduces every field structurally.
 
-This is a **new author-observed rung-4 observation, not rung 5 and not yet
-witness-backed**. The write value is a heap pointer to a timer object, not an
-attacker-chosen address or payload; it lands in the next chunk's `prev_size`,
-and glibc's abort is still driven by the header corrupted by the original
-frame write. No callback, callable field, marker or command was obtained.
-It requires a timer-heavy live application with the measured neighbour
-geometry, and it needs an independent witness replay before it can be called
-ESTABLISHED. It does not change the lane's overall grade.
+This is a **rung-4 observation, not rung 5 and now witness-backed at the
+labeled live plain v17 tport scope**. The write value is a heap pointer to a
+timer object, not an attacker-chosen address or payload; it lands in the next
+chunk's `prev_size`, and glibc's abort is still driven by the header corrupted
+by the original frame write. No callback, callable field, marker or command
+was obtained. It requires a timer-heavy live application with the measured
+neighbour geometry and does not change the lane's overall grade.
+
+Witness #2735 (W164) replayed commit `cbda94a` from a clean `git archive` into
+`/tmp/w164-sofia`: the three new sources hash-matched (`0fcae2b1` / `2271f532`
+/ `9781c174`) and both pinned `ws.c` matched the report (`v17plain`
+`90ef747f…`, `v18plain` `7c0b8b55…`). BUILD LIMIT: the pins are gitignored, so
+the witness rebuilt the shim and both drivers from committed sources with
+committed flags but linked the provisioned pinned static `.a` libraries;
+sofia-sip was not rebuilt from scratch. On fresh loopback ports 19101-19104
+the whole matrix reproduced: v17-full rc 134 with `TIMER_Q_PTR ==
+SHIM_NEIGHBOR`, `DELTA=0`, 528-byte neighbour, caller symbolized to pinned
+`timers_alloc su_timer.c:201`, `_size=99236347796094` (`0x5a4143425a7e`),
+`_used` 30 -> 65 over 35 adds, `heap+528` `0` -> live timer pointer,
+`heap+536` still `0x21`, glibc `corrupted size vs. prev_size`; the short and
+both v18 cases rc 0 with `_size=63` and two in-bounds adds. All six stderr
+logs (four author cases plus two port-shifted replays) were normalized-
+identical. As a causal variation the witness changed only `mask4[0]` `0x41` ->
+`0x51` and rebuilt: the full case still rc 134 with the same 35 adds and OOB
+write, while `_size` moved to `0x5a5143425a6e` — exactly the predicted XOR
+over the six reachable bytes. The corrupted capacity therefore tracks
+attacker wire bytes, not a harness constant. The witness also checked that
+the committed no-timer and W5 full evidence abort with the same `corrupted
+size vs. prev_size`, confirming the second-order write is real but is not the
+abort cause, as this report states. Verdict **ESTABLISHED at the labeled
+scope**: no counterexample, no grade change, rung 5 still UNKNOWN.

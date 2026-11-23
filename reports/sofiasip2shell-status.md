@@ -174,11 +174,19 @@ grade.
 - Full stage: `reports/frontier-sofiasip2shell.md`. W1, W2 layout, W2 live
   tport, W3 and W4 are ESTABLISHED at their labeled scopes (W4 witness #1968).
   Rung 5 not implied.
-- W11 (2026-11-23, author-observed, no grade change): with 30 timers pre-queued
-  in the live plain v17 tport, the physical neighbour is the 528-byte timer
+- W11 (2026-11-23, witness-backed by #2735/W164, no grade change): with 30
+  timers pre-queued in the live plain v17 tport, the physical neighbour is the
+  528-byte timer
   heap array; the frame write changes its `_size` from 63 to
   `0x5a4143425a7e` (repeating-mask XOR), and 35 subsequent library
   `su_timer_set()` calls write a timer pointer exactly 0 bytes past the array
   before glibc aborts. Fixed pin, short frame and port-shifted replay behave
-  as labeled (`reports/sofiasip2shell-live-ws-tport.md`, W11). Witness replay
-  pending; rung 5 still not implied.
+  as labeled (`reports/sofiasip2shell-live-ws-tport.md`, W11). Witness #2735
+  (W164) replayed commit `cbda94a` from a clean archive with hash-checked
+  sources and pins, reproduced the full four-case matrix plus two port-shifted
+  replays (normalized-identical logs), and varied `mask4[0]` to show the
+  inflated `_size` tracks the wire mask; verdict **ESTABLISHED at the labeled
+  live plain v17 tport scope**, rung 4 only, no counterexample. BUILD LIMIT:
+  the witness rebuilt shim and drivers from committed sources but linked the
+  gitignored provisioned pinned static `.a` libraries, not a from-scratch
+  sofia-sip build. Rung 5 still not implied.
