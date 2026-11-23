@@ -485,3 +485,28 @@ cause is UNKNOWN and no signal-specific claim is made. All ports 13970-13983
 were freed; no server left running. Grade unchanged: no surviving modified
 control flow, no chosen byte, no command side effect, no rung 5, no external
 host contacted. Author self-observation only.
+
+## W16 — saved-RIP byte map closed at -O2 (2026-11-23 ~07:54Z)
+
+No new build: vulnerable `build-opt-07.36/server_src/vrpn_server` (SHA-256
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`) and fixed
+`build-opt-fixed/server_src/vrpn_server` (SHA-256
+`227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`) reused.
+`probe-opt-frame.sh` on fresh loopback ports 14100-14107 and 14130 for indices
+136-143 (plus a 137 replay) records PRE `saved_rip=0x5555555a1f42` and the
+SIGSEGV landing on every run; no build change. Zeroing bytes 0-5 gives, in
+order, `0x...5a1f00` (mapped text, faults at `0x...5a1f0d`),
+`0x...5a0042` (libc `inet_aton_end (cp=0x0)` after an `open_socket` error;
+cause UNKNOWN, reproduced on replay), `0x...5001f42`, `0x00005555005a1f42`,
+`0x00005500555a1f42` and `0x00000055555a1f42`. Bytes 6-7 are already `00`,
+so 142/143 are no-ops with a normal connection drop.
+
+Debugger-free `probe-func-dos.sh` with explicit `BIN=` on ports 14120-14127:
+136-141 DEAD exit 139, 142/143 ALIVE; fixed 136 on port 14128 ALIVE; short
+index 4 on port 14129 ALIVE. An earlier sweep on ports 14108-14115 without
+`BIN=` used the -O0 default and was ALIVE at all eight indices — retained as a
+build-dependence/control record, not -O2 evidence. Each `meta.txt` carries the
+binary SHA, port, index and status; `out-w16-*/` holds raw gdb logs, client
+output and server stderr. All ports 14100-14131 were loopback and were freed;
+no server left running. Author self-observation only; grade unchanged, no
+chosen byte, no command side effect, no rung 5.

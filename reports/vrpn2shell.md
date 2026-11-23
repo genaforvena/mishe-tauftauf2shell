@@ -55,9 +55,9 @@ no command, no rung 5, no grade change.
   default address-randomization setting, and the absolute addresses they logged
   are identical across runs; offsets and low bytes are the invariant. W6's
   functional runs recorded exit status, not addresses.
-- All tests on 127.0.0.1 ports 13901-13967, 14001-14015 and 14231-14261
-  against processes started by this plant or the witness on its own loopback.
-  No external system was contacted with a probe.
+- All tests on 127.0.0.1 ports 13901-13967, 14001-14015, 14100-14131 and
+  14231-14261 against processes started by this plant or the witness on its
+  own loopback. No external system was contacted with a probe.
 
 ## The negative result that was a harness bug
 
@@ -767,6 +767,51 @@ consequence signature (W6: -8 SIGSEGV, 120 SIGILL; W14: 105/111 SIGABRT), the
 same canary mechanism W8/W10 measured at -O2. Author self-observation on this
 plant's builds, not a witness verdict; fixed NUL at a chosen offset, no chosen
 byte, no command side effect, no rung 5. No build change and no grade change.
+
+## Saved-RIP byte map closure at -O2 (W16, 2026-11-23 ~07:54Z)
+
+W15 closed the eight saved-RIP bytes on the plain Debug -O0 build; W16 closes
+them on the stock `RelWithDebInfo` (-O2) binary
+`build-opt-07.36/server_src/vrpn_server` (SHA-256
+`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`). W8
+measured its frame (canary 104-111, saved rbx 112, saved rbp 120, saved r12
+128, saved RIP 136-143), but only 136 and 139 had been sampled (W10: both
+DEAD 139). `probe-opt-frame.sh` at the write site, fresh loopback ports
+14100-14107, shows `rsp == rbp == &sender_name` and PRE
+`saved_rip=0x5555555a1f42` (bytes `42 1f 5a 55 55 55 00 00`) on every run:
+
+| index | byte | POST saved RIP | gdb outcome |
+| --- | --- | --- | --- |
+| 136 | 0 | `0x5555555a1f00` | entered mapped text; SIGSEGV at `0x5555555a1f0d in vrpn_TypeDispatcher::doSystemCallbacksFor :1442` |
+| 137 | 1 | `0x5555555a0042` | SIGSEGV in libc `inet_aton_end (cp=0x0)` after `open_socket: can't open socket -- Error 22`; replayed on fresh ports with the same path (cause UNKNOWN) |
+| 138 | 2 | `0x0000555555001f42` | SIGSEGV at redirected address |
+| 139 | 3 | `0x00005555005a1f42` | SIGSEGV at redirected address (matches W8) |
+| 140 | 4 | `0x00005500555a1f42` | SIGSEGV at redirected address |
+| 141 | 5 | `0x00000055555a1f42` | SIGSEGV at redirected address |
+| 142 | 6 | unchanged (byte already `00`) | no signal, normal connection drop |
+| 143 | 7 | unchanged (byte already `00`) | no signal, normal connection drop |
+
+The two no-op rows are honest controls, not effects. The 137 path also printed
+`vrpn_Generic_Server_Object::... Unexpected exception (out of memory?)` in the
+debugger-free server stderr; both the anomaly and the SIGSEGV reproduced on
+fresh ports 14130-14131, so no signal-specific claim rests on that row.
+
+Debugger-free `probe-func-dos.sh` with an explicit `BIN=` on ports 14120-14127
+gives DEAD exit 139 at 136-141 and ALIVE at 142/143, matching the gdb landing
+map. Fixed-commit -O2 binary (SHA `227fcb5503ecb9d3d619af2ac20fde4d48ce3ef518e000ffcf3d055aaebbbc48`)
+at 136 on port 14128 is ALIVE; short index 4 on port 14129 is ALIVE. An initial
+run of ports 14108-14115 omitted `BIN=` and therefore used the -O0 script
+default: all eight were ALIVE, as expected for -O0 where saved RIP is 120-127.
+Those rows are preserved as a build-dependence control and as the W10 label
+trap recurring; they are not -O2 evidence.
+
+Saved-RIP control flow is now byte-mapped on both stock builds: six changed
+bytes fault on each, the two unchanged bytes are no-ops. At -O0 byte 1 reaches
+an illegal instruction in mapped text; at -O2 byte 0 reaches mapped text and
+faults 13 bytes in; byte 1 follows the odd libc path above with an UNKNOWN
+cause. No surviving modified control flow, no chosen byte, no command side
+effect, no rung 5, no grade change. Ports 14100-14131 were loopback, all
+freed; no server left running. Raw evidence in `out-w16-*/`.
 
 ## Limits and next work
 

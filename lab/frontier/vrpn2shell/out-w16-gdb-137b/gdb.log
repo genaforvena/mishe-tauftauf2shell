@@ -1,0 +1,41 @@
+Breakpoint 1 at 0x50a32: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+HIT-REGS pc=0x5555555a4a32 rbp=0x7fffffffd990 rsp=0x7fffffffd990 rdi=0x7ffff7bbd010 rsi=0x7fffffffd990 rdx=0x3 rcx=0x20 rax=0x89 rbx=0x5555556a7220
+   0x5555555a4a1a <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+74>:	mov    rdi,rbp
+   0x5555555a4a1d <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+77>:	call   0x55555558fe20 <__strncpy_chk@plt>
+   0x5555555a4a22 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+82>:	mov    eax,DWORD PTR [r12]
+   0x5555555a4a26 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+86>:	mov    rdi,QWORD PTR [rbx+0xe0]
+   0x5555555a4a2d <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+93>:	mov    rsi,rbp
+   0x5555555a4a30 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+96>:	bswap  eax
+=> 0x5555555a4a32 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+98>:	cdqe
+   0x5555555a4a34 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+100>:	mov    BYTE PTR [rsp+rax*1],0x0
+   0x5555555a4a38 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+104>:	call   0x5555555a16a0 <_ZN19vrpn_TypeDispatcher11getSenderIDEPKc>
+   0x5555555a4a3d <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+109>:	mov    ecx,eax
+   0x5555555a4a3f <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+111>:	cmp    eax,0xffffffff
+   0x5555555a4a42 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+114>:	je     0x5555555a4a80 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+176>
+rax            0x89                137
+rbx            0x5555556a7220      93824993620512
+rcx            0x20                32
+rdx            0x3                 3
+rsi            0x7fffffffd990      140737488345488
+rdi            0x7ffff7bbd010      140737349668880
+rbp            0x7fffffffd990      0x7fffffffd990
+rsp            0x7fffffffd990      0x7fffffffd990
+r8             0x0                 0
+r9             0x8                 8
+r10            0x1                 1
+r11            0x246               582
+HIT-VAR i=137 &sender_name=0x7fffffffd990
+HIT-WORDS +104=0xc5be8b140c4f9400 +112=0xffffffff +120=0x5555556a7220 +128=(nil) +136=0x5555555a1f42
+#0  vrpn_Endpoint::handle_sender_message (userdata=0x5555556a7220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+#1  0x00005555555a1f42 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, p=..., userdata=userdata@entry=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x00005555555a200d in vrpn_TypeDispatcher::doSystemCallbacksFor (this=<optimized out>, type=-1, sender=0, time=..., len=8, buffer=0x5555556a7380 "", userdata=0x5555556a7220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x00005555555a4059 in vrpn_Endpoint::dispatch (this=0x5555556a7220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x5555556a7380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#4  0x00005555555a553a in vrpn_Endpoint_IP::getOneTCPMessage (this=this@entry=0x5555556a7220, fd=6, buf=0x5555556a7380 "", buflen=buflen@entry=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+open_socket: can't open socket.
+  -- Error 22 (Invalid argument).
+
+Program received signal SIGSEGV, Segmentation fault.
+inet_aton_end (cp=0x0, addr=addr@entry=0x7fffffffd9fc, endp=endp@entry=0x7fffffffda00) at ./resolv/inet_addr.c:122
+warning: 122	./resolv/inet_addr.c: No such file or directory
