@@ -1,0 +1,28 @@
+driver.c: OK
+fixed/find_opt.inc: OK
+fixed/ppp_handle_ipv6cp.inc: OK
+fixed/ppp_structs.inc: OK
+fixed/ppp_tx_frame.inc: OK
+../src/fix-751f1474.patch: OK
+../src/l2_ppp.c.751f14742dea: OK
+../src/l2_ppp.c.8bb65c64926d: OK
+vuln/find_opt.inc: OK
+vuln/ppp_handle_ipv6cp.inc: OK
+vuln/ppp_structs.inc: OK
+vuln/ppp_tx_frame.inc: OK
+VARIANT=vuln MODE=arith
+PEER_LEN=65535 IPV6CPSZ=4 OPTS_WALK_LEN=65531 TX_DATASZ=65535 TX_CAP=1024
+OVERFLOW_BYTES=64515 CHOSEN5A_SRC_OFF=1020 CHOSEN3C_SRC_OFF=1037
+VARIANT=vuln MODE=plain RX_CAP=65540 FRAME_LEN=2048 TX_CAP=1024 PEER_LEN=65535
+TX_CALLS=2 TX_PROTO=8057
+GWIFC_HEX=2222222222222222
+CANARY0=5a CANARY17=3c
+evidence/vuln-gcc-asan-read.out:==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+evidence/vuln-gcc-asan-read.out:READ of size 1 at 0xADDR thread T0
+evidence/vuln-gcc-asan-read.out:    #FRAME 0xADDR in find_opt lab/frontier/mongoose2shell/harness/l2_ppp.c.8bb65c64926d:281
+evidence/vuln-gcc-asan-write.out:==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xADDR at pc 0xADDR bp 0xADDR sp 0xADDR
+evidence/vuln-gcc-asan-write.out:WRITE of size 65535 at 0xADDR thread T0
+evidence/vuln-gcc-asan-write.out:    #FRAME 0xADDR in ppp_tx_frame lab/frontier/mongoose2shell/harness/l2_ppp.c.8bb65c64926d:234
+VARIANT=fixed MODE=plain RX_CAP=65540 FRAME_LEN=2048 TX_CAP=1024 PEER_LEN=65535
+TX_CALLS=0 TX_PROTO=0000
+CANARY0=cc CANARY17=cc

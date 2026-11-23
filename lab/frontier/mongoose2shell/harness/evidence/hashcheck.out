@@ -1,0 +1,12 @@
+driver.c: OK
+fixed/find_opt.inc: OK
+fixed/ppp_handle_ipv6cp.inc: OK
+fixed/ppp_structs.inc: OK
+fixed/ppp_tx_frame.inc: OK
+../src/fix-751f1474.patch: OK
+../src/l2_ppp.c.751f14742dea: OK
+../src/l2_ppp.c.8bb65c64926d: OK
+vuln/find_opt.inc: OK
+vuln/ppp_handle_ipv6cp.inc: OK
+vuln/ppp_structs.inc: OK
+vuln/ppp_tx_frame.inc: OK
