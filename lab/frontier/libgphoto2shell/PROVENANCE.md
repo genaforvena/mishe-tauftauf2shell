@@ -180,6 +180,45 @@ slice or stub gphoto API is involved in this lane.
 Only the device is synthetic. This is rung 3 on a real library build, not a
 wire-level trigger, pointer-control chain or rung 5.
 
+## Counterexample hunt on the virtual-port claim (W163)
+
+Two bounded sweeps on the same real ASan build, device still lab-patched
+vusb, no source or patch change. Raw outputs in `evidence/real-lib-count-*.out`,
+`evidence/real-lib-count-sweep.txt` and `evidence/real-lib-reply-*.out`.
+
+- Count sweep (full-length replies), predicted from the round-up arithmetic
+  `alloc_table_size = round_up_0x200(n*0x10 + 0x30)` and the read length
+  `alloc_table_size - 0x200`:
+  - `n=1021`: `alloc_table_size = 0x4000`, read `0x3E20` into `info+0x200`
+    ends exactly at the `info[0x4020]` boundary — `rc=0`, no ASan.
+  - `n=1022..1053`: `alloc_table_size = 0x4200`, read `16384` bytes, ASan
+    `WRITE of size 16384` at real `jl2005c.c:152`, `rc=1`. Sampled 1022,
+    1023, 1024, 1030, 1040, 1050, 1052, 1053 — all identical.
+  - `n=1054..1055`: `alloc_table_size = 0x4400`, `WRITE of size 16896`.
+  - `n=2000`: `WRITE of size 31744`; `n=65535`: `WRITE of size 1048576`
+    (1 MiB, matching the advisory's stated bound).
+  This is a clean threshold, no anomalous count in the overflow band: the
+  smallest overflowing count is 1022 and the write size is a monotone step
+  function of the rounded size. `n=1021` is the lower safe control.
+- Reply-length variation: `M2SHELL_JL2005_VUSB=s1` caps the vusb reply at
+  `0x3E20` while the camlib still requests the full length (`VUSB_READ
+  size=16384` at count 1022). The device write at `:152` disappears; default
+  ASan instead reports `stack-buffer-overflow`, `READ of size 16848` at real
+  `jl2005c.c:154` in `memmove` (`evidence/real-lib-reply-s1-1022.out`). At
+  count 65535 the truncated variant reports `READ of size 1049040` at the
+  same line. Full replies (`M2SHELL_JL2005_VUSB=1`) still fault at `:152`
+  (`WRITE of size 16384` / `1048576`). So the real-library stack write is
+  conditional on the device returning the full requested length; a truncated
+  reply leaves only the `:154` source over-read under default ASan. This
+  bounds the claim rather than refuting it: the lab device can supply full
+  replies, but a real device that truncates takes a different first fault.
+  The real-build heap destination under recover mode remains UNTESTED — this
+  library was built without `-fsanitize-recover=address`; that confirmation
+  stands only in the pinned harness.
+
+No witness verdict arrived during this wake (#2763, #2777, #2831 all still
+queued). Grade unchanged: rung 3 on a synthetic transport, rung 5 UNKNOWN.
+
 ## Ceiling
 
 Direct calls with stubbed gphoto plumbing and emulated device replies are the

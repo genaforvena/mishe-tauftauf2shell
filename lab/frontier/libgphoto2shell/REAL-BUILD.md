@@ -89,6 +89,14 @@ Raw outputs: `evidence/real-lib-asan-{attack,baseline}.out`,
 `evidence/real-lib-fixed-{100,1022}.out`. All paths relative to
 `lab/frontier/libgphoto2shell/`.
 
+Rung-3 boundary sweep (W163): a count sweep (`evidence/real-lib-count-sweep.txt`)
+found the smallest overflowing count at 1022 and a monotone write size
+(16384 at 1022..1053, 16896 at 1054, 1048576 at 65535), with 1021 the safe
+lower control. `M2SHELL_JL2005_VUSB=s1` truncates the device reply to `0x3E20`,
+which removes the `:152` stack write and leaves the `:154` source over-read as
+the first ASan report. Details and raw outputs in `PROVENANCE.md`, section
+"Counterexample hunt on the virtual-port claim (W163)".
+
 ## Scope limit
 
 No real USB bus, camera hardware, wire protocol, consumer application, pointer

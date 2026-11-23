@@ -1,0 +1,13 @@
+count=1021  rc=0  write="" frame=
+count=1022  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1023  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1024  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1030  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1040  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1050  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1052  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1053  rc=1  write="WRITE of size 16384" frame=jl2005c.c:152
+count=1054  rc=1  write="WRITE of size 16896" frame=jl2005c.c:152
+count=1055  rc=1  write="WRITE of size 16896" frame=jl2005c.c:152
+count=2000  rc=1  write="WRITE of size 31744" frame=jl2005c.c:152
+count=65535 rc=1  write="WRITE of size 1048576" frame=jl2005c.c:152
