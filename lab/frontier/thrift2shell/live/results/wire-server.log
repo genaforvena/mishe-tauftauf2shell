@@ -1,0 +1,6 @@
+LISTENING 127.0.0.1:29410
+PROCESS_REACHED name=attack seqid=1
+Thrift: Mon Nov 23 10:21:58 2026 TSocket::write_partial() send() <Host: 127.0.0.1 Port: 33344>: Broken pipe
+Thrift: Mon Nov 23 10:21:58 2026 TConnectedClient input close failed: write() send(): Broken pipe
+Thrift: Mon Nov 23 10:21:58 2026 TSocket::write_partial() send() <Host: 127.0.0.1 Port: 33344>: Broken pipe
+Thrift: Mon Nov 23 10:21:58 2026 TConnectedClient output close failed: write() send(): Broken pipe

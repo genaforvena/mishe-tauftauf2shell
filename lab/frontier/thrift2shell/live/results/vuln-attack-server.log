@@ -1,0 +1,88 @@
+LISTENING 127.0.0.1:29381
+=================================================================
+==1343308==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x507000000144 at pc 0x785b74efb303 bp 0x7ffefd79ab80 sp 0x7ffefd79a328
+WRITE of size 726 at 0x507000000144 thread T0
+    #0 0x785b74efb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x595528d6306e in apache::thrift::transport::THeaderTransport::untransform(unsigned char*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp:301
+    #2 0x595528d626dd in apache::thrift::transport::THeaderTransport::readHeaderFormat(unsigned short, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp:260
+    #3 0x595528d614c9 in apache::thrift::transport::THeaderTransport::readFrame() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp:162
+    #4 0x595528d8fb28 in apache::thrift::transport::TFramedTransport::readSlow(unsigned char*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/TBufferTransports.cpp:156
+    #5 0x595528d60618 in apache::thrift::transport::THeaderTransport::readSlow(unsigned char*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp:51
+    #6 0x595528d603b9 in apache::thrift::transport::TBufferBase::read(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TBufferTransports.h:71
+    #7 0x595528d603b9 in unsigned int apache::thrift::transport::readAll<apache::thrift::transport::THeaderTransport>(apache::thrift::transport::THeaderTransport&, unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TTransport.h:42
+    #8 0x595528d60562 in apache::thrift::transport::TVirtualTransport<apache::thrift::transport::THeaderTransport, apache::thrift::transport::TFramedTransport>::readAll(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TVirtualTransport.h:117
+    #9 0x595528d60562 in apache::thrift::transport::TVirtualTransport<apache::thrift::transport::THeaderTransport, apache::thrift::transport::TFramedTransport>::readAll_virt(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TVirtualTransport.h:92
+    #10 0x595528d5e2ef in apache::thrift::transport::TTransport::readAll(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TTransport.h:131
+    #11 0x595528d5e2ef in apache::thrift::protocol::TBinaryProtocolT<apache::thrift::transport::TTransport, apache::thrift::protocol::TNetworkBigEndian>::readI32(int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TBinaryProtocol.tcc:393
+    #12 0x595528d5e2ef in apache::thrift::protocol::TBinaryProtocolT<apache::thrift::transport::TTransport, apache::thrift::protocol::TNetworkBigEndian>::readMessageBegin(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, apache::thrift::protocol::TMessageType&, int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TBinaryProtocol.tcc:213
+    #13 0x595528d5eb02 in apache::thrift::protocol::TVirtualProtocol<apache::thrift::protocol::TBinaryProtocolT<apache::thrift::transport::TTransport, apache::thrift::protocol::TNetworkBigEndian>, apache::thrift::protocol::TProtocolDefaults>::readMessageBegin_virt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, apache::thrift::protocol::TMessageType&, int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TVirtualProtocol.h:407
+    #14 0x595528d4d261 in apache::thrift::protocol::TProtocol::readMessageBegin(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, apache::thrift::protocol::TMessageType&, int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TProtocol.h:445
+    #15 0x595528d4d261 in ReadOnceProcessor::process(std::shared_ptr<apache::thrift::protocol::TProtocol>, std::shared_ptr<apache::thrift::protocol::TProtocol>, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live.cpp:29
+    #16 0x595528da644c in apache::thrift::server::TConnectedClient::run() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TConnectedClient.cpp:61
+    #17 0x595528d9dd15 in apache::thrift::server::TSimpleServer::onClientConnected(std::shared_ptr<apache::thrift::server::TConnectedClient> const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TSimpleServer.cpp:89
+    #18 0x595528d97482 in apache::thrift::server::TServerFramework::newlyConnectedClient(std::shared_ptr<apache::thrift::server::TConnectedClient> const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TServerFramework.cpp:231
+    #19 0x595528d95cc6 in apache::thrift::server::TServerFramework::serve() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TServerFramework.cpp:158
+    #20 0x595528d45d05 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live.cpp:60
+    #21 0x785b7462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #22 0x785b7462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #23 0x595528d446c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-vuln+0x126c4) (BuildId: 1b439a7ffe2fab84bf6fc0369096579cdb3ab481)
+
+0x507000000144 is located 0 bytes after 68-byte region [0x507000000100,0x507000000144)
+allocated by thread T0 here:
+    #0 0x785b74efe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x595528d6078d in apache::thrift::transport::THeaderTransport::ensureReadBuffer(unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp:66
+    #2 0x595528d60e03 in apache::thrift::transport::THeaderTransport::readFrame() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp:123
+    #3 0x595528d8fb28 in apache::thrift::transport::TFramedTransport::readSlow(unsigned char*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/TBufferTransports.cpp:156
+    #4 0x595528d60618 in apache::thrift::transport::THeaderTransport::readSlow(unsigned char*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp:51
+    #5 0x595528d603b9 in apache::thrift::transport::TBufferBase::read(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TBufferTransports.h:71
+    #6 0x595528d603b9 in unsigned int apache::thrift::transport::readAll<apache::thrift::transport::THeaderTransport>(apache::thrift::transport::THeaderTransport&, unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TTransport.h:42
+    #7 0x595528d60562 in apache::thrift::transport::TVirtualTransport<apache::thrift::transport::THeaderTransport, apache::thrift::transport::TFramedTransport>::readAll(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TVirtualTransport.h:117
+    #8 0x595528d60562 in apache::thrift::transport::TVirtualTransport<apache::thrift::transport::THeaderTransport, apache::thrift::transport::TFramedTransport>::readAll_virt(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TVirtualTransport.h:92
+    #9 0x595528d5e2ef in apache::thrift::transport::TTransport::readAll(unsigned char*, unsigned int) thrift-0.23.0/lib/cpp/src/thrift/transport/TTransport.h:131
+    #10 0x595528d5e2ef in apache::thrift::protocol::TBinaryProtocolT<apache::thrift::transport::TTransport, apache::thrift::protocol::TNetworkBigEndian>::readI32(int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TBinaryProtocol.tcc:393
+    #11 0x595528d5e2ef in apache::thrift::protocol::TBinaryProtocolT<apache::thrift::transport::TTransport, apache::thrift::protocol::TNetworkBigEndian>::readMessageBegin(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, apache::thrift::protocol::TMessageType&, int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TBinaryProtocol.tcc:213
+    #12 0x595528d5eb02 in apache::thrift::protocol::TVirtualProtocol<apache::thrift::protocol::TBinaryProtocolT<apache::thrift::transport::TTransport, apache::thrift::protocol::TNetworkBigEndian>, apache::thrift::protocol::TProtocolDefaults>::readMessageBegin_virt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, apache::thrift::protocol::TMessageType&, int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TVirtualProtocol.h:407
+    #13 0x595528d4d261 in apache::thrift::protocol::TProtocol::readMessageBegin(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&, apache::thrift::protocol::TMessageType&, int&) thrift-0.23.0/lib/cpp/src/thrift/protocol/TProtocol.h:445
+    #14 0x595528d4d261 in ReadOnceProcessor::process(std::shared_ptr<apache::thrift::protocol::TProtocol>, std::shared_ptr<apache::thrift::protocol::TProtocol>, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live.cpp:29
+    #15 0x595528da644c in apache::thrift::server::TConnectedClient::run() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TConnectedClient.cpp:61
+    #16 0x595528d9dd15 in apache::thrift::server::TSimpleServer::onClientConnected(std::shared_ptr<apache::thrift::server::TConnectedClient> const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TSimpleServer.cpp:89
+    #17 0x595528d97482 in apache::thrift::server::TServerFramework::newlyConnectedClient(std::shared_ptr<apache::thrift::server::TConnectedClient> const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TServerFramework.cpp:231
+    #18 0x595528d95cc6 in apache::thrift::server::TServerFramework::serve() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/server/TServerFramework.cpp:158
+    #19 0x595528d45d05 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live.cpp:60
+    #20 0x785b7462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #21 0x785b7462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #22 0x595528d446c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/live-vuln+0x126c4) (BuildId: 1b439a7ffe2fab84bf6fc0369096579cdb3ab481)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x506ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x507000000000: fa fa fa fa 00 00 00 00 00 00 00 00 04 fa fa fa
+  0x507000000080: fa fa 00 00 00 00 00 00 00 00 00 00 fa fa fa fa
+=>0x507000000100: 00 00 00 00 00 00 00 00[04]fa fa fa fa fa fa fa
+  0x507000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1343308==ABORTING

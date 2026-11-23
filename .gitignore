@@ -297,3 +297,16 @@ lab/connman2shell/deps/
 lab/connman2shell/build*/
 lab/connman2shell/realobj/deps/
 lab/connman2shell/realobj/build-*/
+# Thrift2shell live-server lane: upstream trees, tarballs, ASan/plain builds
+# and local binaries stay local. Harness sources, runner, gdb script, raw
+# wire frame and small evidence logs stay tracked.
+lab/frontier/thrift2shell/live/thrift-0.*/
+lab/frontier/thrift2shell/live/build-*/
+lab/frontier/thrift2shell/live/*.tar.gz
+lab/frontier/thrift2shell/live/configure*.log
+lab/frontier/thrift2shell/live/build*.log
+lab/frontier/thrift2shell/live/live
+lab/frontier/thrift2shell/live/live-vuln
+lab/frontier/thrift2shell/live/live-fixed
+lab/frontier/thrift2shell/live/live-plain
+lab/frontier/thrift2shell/live/wire-safe.bin

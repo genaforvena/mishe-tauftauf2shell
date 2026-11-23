@@ -76,16 +76,16 @@ verifies the fix patch's git blob prefixes `cdf29cf3d53` / `891059b888e`.
 
 ## Ceiling and open work
 
-Direct call with a stubbed object environment and a 31-byte harness
-destination adjacent to a 0xCC sink. There is no real Thrift process,
-`THeaderTransport` framing parser, transport stack, socket, listener, peer,
-wire exchange, ASLR/grooming study, pointer control, ROP chain, command,
-marker side effect, witness verdict or rung 5. Whether a live C++ server
-reaches this path with attacker-supplied frames remains UNKNOWN; the
-advisory's AV:N vector is a claim, not a lab observation. The next bounded
-experiment is to build a vulnerable Thrift C++ server with ASan, enable the
-ZLIB transform, reach the sink from a loopback client on living bytes, and
-identify what the real receive-buffer allocation places after the frame
-before considering any benign marker. Hand any witness verdict to the
-witness before upgrading the row; do not relabel placed heap bytes as
-execution.
+The staged harness grade remains a direct call with stubbed object state,
+but the live-server lane is no longer a proposal.
+`reports/thrift2shell-livewire.md` records a real loopback `TSimpleServer`
++ `THeaderTransport` + ZLIB server on unmodified upstream v0.23.0 bytes:
+ASan `WRITE of size 726` at pinned `:301` from a 72-byte client frame, a
+plain-build glibc abort, chosen marker bytes in the adjacent tBuf chunk
+header, and clean v0.24.0 and safe-input controls. Rungs 1-3 are therefore
+also observed on living bytes; the byte placement is in heap metadata, not
+a code pointer. Still absent: ASLR/grooming study, pointer control, ROP,
+command, marker side effect, witness verdict and rung 5. Hand any
+live-server claim to the witness before upgrading the row; do not relabel
+placed heap bytes as execution.
+
