@@ -152,15 +152,23 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   25-byte jansson `jsonp_malloc` string at `cek+48`, preceded by its size
   field at `cek+40`. Further neighbors come from jansson, `_decode`,
   `_cjose_strndup` and `_oct_new` (symbolized in `PROVENANCE.md`).
-- Source-only check of an unbuilt mod_auth_openidc v2.4.15.1 finds an
-  unauthenticated backchannel-logout POST path
-  (`src/mod_auth_openidc.c:3960-3967` dispatch, `:3154-3182` handler;
-  `src/jose.c:930-936`, `:765-771`) that passes an
-  attacker-posted `logout_token` to `cjose_jwe_import()` and
-  `cjose_jwe_decrypt()` with configured symmetric keys before signature
-  validation and without an encrypted_key length check. This supports the
-  advisory's pre-auth shape but is not a running deployment, a witness
-  replay or a byte-value claim: the real KEK is secret.
+- Source-only check of an unbuilt mod_auth_openidc v2.4.15.1, corrected in
+  W184: the backchannel-logout POST path (`mod_auth_openidc.c:3960-3967`
+  dispatch, `:3154-3182` handler, `jose.c:930-936`, `:765-771`) does call
+  `oidc_jwt_parse()` before signature validation, but its key set is
+  `oidc_util_merge_symmetric_key(r->pool, cfg->private_keys, NULL)` and
+  `cfg->private_keys` is populated only from PEM RSA/EC keys
+  (`config.c:879-905`); cjose rejects non-OCT JWKs for AES-KW
+  (`jwe.c:574-579`). That path therefore does not supply an OCT KEK to the
+  vulnerable unwrap. A different pre-signature path does:
+  `proto.c:1426-1434` builds an OCT JWK from `provider->client_secret` and
+  calls `oidc_jwt_parse()` -> `oidc_jwe_decrypt()` -> `cjose_jwe_decrypt()`
+  with no encrypted_key length check, but it needs a matching `state` cookie
+  from an earlier authorization request (`mod_auth_openidc.c:2116-2118`),
+  so it is not a single unauthenticated POST. Both remain source claims about
+  an unbuilt consumer: no running deployment, witness replay or byte-value
+  claim; in a real deployment the KEK is secret, so only length is
+  attacker-chosen.
 
 ## 6. Honest ceiling
 

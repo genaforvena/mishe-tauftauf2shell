@@ -174,21 +174,31 @@ from `jsonp_malloc` (`deps/jansson-build/src/memory.c:28`, a jansson string);
 (`src/jwk.c:360`). The ring is 128 entries and may list one address twice
 after realloc.
 
-Real-consumer source inspection (provisioning only, not a deployed build):
+Real-consumer source inspection (provisioning only, not a deployed build;
+corrected in W184):
 `src/provisioning/mod_auth_openidc-2.4.15.1.tar.gz`, SHA-256
 `b50b12beaf1c210e3f98d900306a0a7ea252aa1e2b77147cb3b2cb34072f3444`.
 `src/mod_auth_openidc.c:3960-3967` dispatches a logout parameter before POST
 authorization-response handling; `:2939-2942` with `:238` selects
 `?logout=backchannel`; `:3154-3182` reads the attacker-posted `logout_token`
-and calls `oidc_jwt_parse(..., cfg->private_keys, ...)` before any signature
-check. `src/jose.c:930-936` calls `oidc_jwe_decrypt(..., FALSE)`;
-`:765-771` imports the token with `cjose_jwe_import()` and calls
-`oidc_jwe_decrypt_impl`; `:703-747` calls `cjose_jwe_decrypt()` over configured
-keys. None of these wrappers checks encrypted_key length. This is a source
-claim about an unbuilt consumer: it supports the advisory's pre-auth shape but
-does not replace a running deployment or witness replay. In a real deployment
-the server KEK is secret, so only the write length is attacker-chosen; byte
-values are not.
+and calls `oidc_jwt_parse(..., oidc_util_merge_symmetric_key(r->pool,
+cfg->private_keys, NULL), ...)` before any signature check. `src/jose.c:930-936`
+calls `oidc_jwe_decrypt(..., FALSE)`; `:765-771` imports with
+`cjose_jwe_import()` and calls `oidc_jwe_decrypt_impl`; `:703-747` calls
+`cjose_jwe_decrypt()` over the supplied keys. None of these wrappers checks
+encrypted_key length. The earlier claim that this path supplied "configured
+symmetric keys" was wrong: `cfg->private_keys` is populated only by
+`OIDCPrivateKeyFiles` with PEM RSA/EC keys (`config.c:879-905`), and cjose
+rejects non-OCT JWKs for AES-KW (`src/vulnerable/src/jwe.c:574-579`), so an
+AES-KW `logout_token` cannot reach the vulnerable unwrap through this key set.
+The pre-signature id_token path does supply an OCT JWK: `proto.c:1426-1434`
+creates it from `provider->client_secret` and calls `oidc_jwt_parse()` ->
+`oidc_jwe_decrypt()` -> `cjose_jwe_decrypt()`, but `mod_auth_openidc.c:2116-2118`
+requires a `state` cookie matched from an earlier authorization request.
+Both remain source claims about an unbuilt consumer: they support the
+advisory's pre-auth shape but do not replace a running deployment or witness
+replay. In a real deployment the KEK is secret, so only the write length is
+attacker-chosen; byte values are not.
 
 ## Ceiling (after W181)
 
