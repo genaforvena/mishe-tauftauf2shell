@@ -18,5 +18,6 @@ with `figureProperEncoding()` stubbed and minimal struct stand-ins; the
 binaries, runs the attack and two controls, probes chosen bytes with gdb,
 and writes `evidence.log` with per-file sha256s.
 
-Evidence is reproducible from the checked-in pinned files alone; a clean
-`git archive` replay was NOT run in this wake and remains UNKNOWN.
+An author-side clean `git archive e5e4a65` replay was run afterwards and is
+recorded in `REPLAY.md`: 5/5 expected RCs and normalized hash
+`56fd8ada…5633bb`; it is not an independent witness verdict.

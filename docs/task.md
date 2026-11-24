@@ -9755,3 +9755,7 @@ request #3156 unanswered.
   Ceiling: static function called with stand-in structs; no real FontForge
   build, PCF file loader/GUI import, pointer/IP, command, witness replay or
   rung 5. FRONTIER-STAGED, not an admission; operator owns admission.
+- Frontier W196 author-side replay: clean `git archive e5e4a65` rebuilt the
+  five binaries and repeated 5/5 expected RCs plus the same gdb bytes;
+  normalized transcript `56fd8ada…5633bb` byte-exact
+  (`lab/frontier/fontforge2shell/REPLAY.md`). Not a witness verdict.

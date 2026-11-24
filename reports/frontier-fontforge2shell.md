@@ -90,7 +90,9 @@ admitted target and not a rung 5.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study, real-process marker, witness replay or rung 5.
-- No clean-archive replay in this wake; the pinned source hashes and the
-  verbatim fix hunk above are the reproducibility anchor.
+- Author-side clean-archive replay from `e5e4a65` repeated 5/5 expected
+  RCs and the same chosen bytes; normalized hash `56fd8ada…5633bb`
+  (`lab/frontier/fontforge2shell/REPLAY.md`). This is not an independent
+  witness verdict.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.
