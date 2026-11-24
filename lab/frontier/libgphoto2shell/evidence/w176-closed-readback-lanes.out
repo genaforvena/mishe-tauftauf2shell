@@ -1,0 +1,49 @@
+W176 (2026-11-24, wake started 20:58:52Z; observations 21:27-21:33Z)
+Scope: source-bounded check of the remaining "device-observable readback
+channel" lane from the W175 canary leak. No new exploit mechanics claimed.
+All paths below are relative to the repository root.
+
+1. The allocation table cannot carry a library-derived pointer.
+   pins/jl2005c.h.vuln:29  typedef unsigned char Info;
+   pins/jl2005c.h.vuln:43  Info table[0x4000];
+   The only pointer field in the private struct is `data_cache` at
+   pins/jl2005c.h.vuln:40, which is BEFORE `table` (offset 0x28 vs 0x40).
+   The pinned overflow at pins/jl2005c.c.vuln:154 writes
+   `memmove(priv->table, info + 0x30, alloc_table_size - 0x30)`, i.e. from
+   the start of `table` forward. It cannot overwrite or expose `data_cache`.
+   Consequence: the W175 host-visible table bytes (canary at
+   table+0x3FF8) are bytes only; no heap pointer is available in that read.
+
+2. The file-read path cannot index before the table.
+   src/libgphoto2-2.5.34/camlibs/jl2005c/library.c:197
+       k = gp_filesystem_number (camera->fs, "/", filename, context);
+   library.c:198-213 uses `k` to read `table[16*k+4/5]` and copies exactly
+   16 bytes with `memcpy(pic_buffer, camera->pl->table + 16*k, 16)`.
+   libgphoto2/gphoto2-filesys.c:1365-1401 shows gp_filesystem_number walks
+   the folder list and returns `num` (0 and upward) for a listed filename,
+   else GP_ERROR_FILE_NOT_FOUND (-108) after the folder is clean; there is no
+   path that yields a negative index. library.c:162 populates the list as
+   `jl_%03i.ppm` with x+1, so the largest usable index is nb_entries-1
+   (1023 at COUNT=1022, as in W175's `jl_1024.ppm`). Negative-k reads of
+   pre-table struct bytes (including `data_cache`) are therefore unreachable
+   through this API.
+
+3. The camlib sends no table-derived bytes back to the device.
+   Every `gp_port_write` in pins/jl2005c.c.vuln (:66, :68, :71, :74, :77,
+   :81, :83, :88, :90, :92, :94, :96, :98, :100, :103, :109, :114, :116,
+   :129, :193, :266, :273, :275) passes a fixed string literal. Neither
+   `priv->table`, `data_cache`, nor any reply-derived byte is written to
+   the port. `jl2005c_open_data_reg` (library.c:191-198) issues the fixed
+   `\x0b\x00` command only. No host-to-device echo of the leaked canary
+   exists in this camlib.
+
+Disposition: all three candidate sub-lanes for a device-observable readback
+are closed at the pinned source level. W175's canary copy stays a host-side
+consumer-visible observation; the malicious USB device still cannot recover
+it. This is a structural ceiling for this camlib, not disproof of a
+different consumer or transport path. Grade unchanged: rung 4 author-side,
+rung 5 UNKNOWN. No witness ask, no pin or harness change.
+
+Regression check after these read-only observations:
+  cd lab/frontier/libgphoto2shell && sh harness/check.sh
+  PASS=146 FAIL=0 TRACE=e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98

@@ -340,3 +340,24 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   witness replay; rung 4 author-side, rung 5 UNKNOWN. Exact env, local
   throwaway patch and raw runs:
   `lab/frontier/libgphoto2shell/evidence/real-plain-canary-safe-init.out`.
+
+- Device-readback lanes closed at source level (W176, 2026-11-24): three
+  candidate ways to turn W175's host-visible canary copy into a
+  device-observable value were checked against pinned source and rejected.
+  (1) `Info` is `unsigned char` (`jl2005c.h.vuln:29`) and `table` is a
+  byte array (`:43`); the struct's only pointer field, `data_cache` (`:40`),
+  sits before `table` and is not touched by the forward `memmove` at
+  `jl2005c.c.vuln:154`. No library-derived heap pointer is in the read.
+  (2) `library.c:197` takes the file index from `gp_filesystem_number`, which
+  (`gphoto2-filesys.c:1365-1401`) returns only non-negative indices of listed
+  files or `GP_ERROR_FILE_NOT_FOUND` (-108); with `jl_%03i.ppm` names
+  (`library.c:162`) the maximum index is `nb_entries-1`, so negative-index
+  reads of pre-table struct bytes are unreachable.
+  (3) every `gp_port_write` in the pinned camlib passes a fixed string
+  literal (`:66-116`, `:129`, `:193`, `:266`, `:273-275`); no table byte is
+  echoed to the device. The canary therefore stays host-side only. This is a
+  structural ceiling for this camlib, not disproof of a separate consumer or
+  transport path. Grade unchanged: rung 4 author-side, rung 5 UNKNOWN.
+  Source citations, disposition and the unchanged harness check
+  (`PASS=146 FAIL=0`) are in
+  `lab/frontier/libgphoto2shell/evidence/w176-closed-readback-lanes.out`.
