@@ -8159,3 +8159,117 @@ reaches tcache `next`/`key`, and RFC 3394's 8-byte write granularity also
 rules out partial pointer overwrites on 16-byte-aligned glibc objects. No
 new rung, address leak, command or r5; reasoning in
 `lab/frontier/cjose2shell/PROVENANCE.md` § W196.
+
+## 2026-11-24 14:1x–14:3xZ — live allocator metadata, plain-heap bounds, two-field steering
+
+Five limbs extend already-admitted lanes: no new charter, window, rung cell
+or mind count. Four are author-side; the imgproxy limb has a witness verdict.
+
+### Imgproxy2Shell W201 — witness replay of the W8 wire-only tcache retarget
+
+The W8 recipe above is unchanged. Witness W201 (tape #3660) replayed
+`git archive 59d008f6 lab/frontier/imgproxy2shell` with only the two
+gitignored CLI binaries and the sibling libvips tree symlinked; both probe
+hashes (`f03dbc448c3ddffc61a5db7a1e1816f9b54a4d7df6c3a94d4967241992f0ca7f`,
+`2e69125a6742844b2a032b843e230bc87308375876e04ad64682b42c9dce6f26`,
+recomputed locally from `a9309b1c`) and all seven committed W8 log hashes
+matched. Expect `W8_RESULT PASS=4 FAIL=0 PARTIAL_NEXT=4 PLAIN_SURVIVAL=3`
+(the author run had `PARTIAL_NEXT=2 PLAIN_SURVIVAL=3`; layout is stochastic).
+Decisive `w8-gdb5.log`: size `0x35` before and after, `next`
+`0x00007ff86ffc8128` → `0x00007ff86ffc0000` with the high six bytes intact,
+key `pos>>12=0x7fff90058`, decoded `0x7fff90050058` matching the post-malloc
+tcache head at count 6; three runs with `LOW=0x1234` wrote exactly that
+halfword. No later allocation through the wire head, key derivation or r5.
+Verdict ESTABLISHED AS LABELED at that scope, not an upgrade.
+
+### Openexr2Shell W186 — live chunk-header write, no steering
+
+Same pinned 3.5.2/3.5.3 trees and binaries as the Openexr rows above. From
+`lab/openexr2shell-real`, `sh harness/chunk-header-check.sh` prints
+`RESULT PASS` (observed locally, rc 0). Expect the watchpoint log
+`evidence/w186-gdb-chunk.out` to contain
+`ENTRY own_size=0x111 next_prev=0x40000000010000 next_size=0x31` then
+`WATCH next_prev=0x5a5a5a5a5a5a5a5a next_size=0x41
+src8=5a5a5a5a5a5a5a5a4100000000000000`; the fixed guard prints
+`DECODE rv=23 EXR_ERR_CORRUPT_CHUNK` with `GUARD-TOTAL ... changed=0`.
+Nine normalized evidence hashes gave aggregate sha256
+`f878197c66c812f3fd9ae4d30c9c702441999be8ef3705f25d4f8ce1d1755e01`
+(recomputed locally from the evidence listing); the clean-archive receipt
+`c2321f17` replayed `git archive 5ebbfdf8` with gitignored source and build
+trees symlinked and matched all nine. Byte-identical PoCs under different
+filename lengths differ (rc 1 `bad` vs rc 134
+`munmap_chunk(): invalid pointer`), while eight chosen size words and a
+uniform control all match under one length: no chosen-word steering, pointer
+or command. Author replay only, no witness; file-level rungs 1-4.
+
+### AwsLc2Shell W206 — plain-process heap-metadata bound
+
+No new pinned trees: `lab/frontier/awslc2shell/build-plain` and
+`build-fixed-plain` are the non-ASan builds of the same v5.6.0 pins. From
+that directory, `sh build-plain.sh && sh run-metadata.sh` prints
+`RESULT: 10 PASS / 0 FAIL` (observed locally). Expect on host glibc
+`2.39-0ubuntu8.12` `usable=40 gap_to_obj=48`: vulnerable `byte31=0x48
+chosen=0x48` with `next_header_before=after=0x21` and
+`header_unchanged=1 neighbor_unchanged=1 decrypt_ok=1`; fixed `byte31=0xab`
+with the same controls. The OOB byte is 9 bytes short of the next chunk size
+and 17 short of the next object, so ASan redzones would hide the slack;
+`run-all.sh` 14 PASS / 0 FAIL and `run-consumer.sh` 31 PASS / 0 FAIL are
+unchanged. Bounded negative only for this glibc and lone documented-minimum
+buffer; stack layouts, embedded structs and other allocators are UNKNOWN,
+no witness replay.
+
+### LibRaw2Shell W10 — second DNG field reaches two exact halfwords
+
+Same pinned 0.22.3 `-O0` `dcraw_emu` build and reporter two-line fixed control
+as the LibRaw rows above. The two committed inputs were verified locally:
+`w10/targetdead.input` sha256
+`a1367d1e73606b183ef5175174c64d3a54070827e1184643c1a24a526772553c` and
+`w10/target2222.input` sha256
+`eb69f4e3ffd3f288f9244f0da73e12071a753c546a7accaac501d8eeeabf90c3`.
+They come from `python3 craft_whitelevel_poc.py evidence/nonzero-oob.input
+OUT <WL>` (script sha256
+`ab5ace42392c8558d4c939d1524a9ffb29a112acb021b8141ce9a0dd8b30d1cf`) followed
+by `python3 craft_blacklevel_poc.py OUT FINAL <BL>` (script sha256
+`cf7245af95b8636ea8a06acaabdbc6d3fd3f7c1aa9a674ce17078ad892869cac`),
+which rewrites unused IFD slot 2 as DNG BlackLevel tag `0xc61a`. From
+`lab/frontier/libraw2shell`, for each input run
+`gdb -q -batch -ex 'set $inp="w10/targetdead.input"' -x w10/probe.gdb
+o0/LibRaw-0.22.3/bin/dcraw_emu` (probe sha256
+`22e21cad8c35cf0cda8edce4b927949bed73f0f57d7ea9b7da3cfce49b1a66ef`).
+Both were observed locally: the first prints
+`W10 FIRST IDX=68644 ... black=6 white=3230` and
+`W10 VAL first OOB: dead 9479 c5ee 0`, the second `black=1 white=21084` and
+`2222 16c2 1e57 0`. ASan vulnerable with separate `-n 1` argv is
+`WRITE of size 2` at `xtrans_demosaic.cpp:427` (rc 1), fixed rc 0, vulnerable
+without `-n` rc 0. The initial grid that passed `"-n 1"` as one argv element
+is kept in `w10/grid-invalid-argv.txt` as an invalid negative candidate; the
+corrected 441-point WL/BL grid is `w10/grid-wide-results.txt`. Two exact
+values from two fields are not an arbitrary alphabet; author-side and
+unwitnessed, no pointer/IP, command or r5.
+
+### Libgphoto2Shell W172 — real `gp_file_save()` writes device-directed bytes
+
+Extends the W170/W171 plain real-library lane; no new upstream pins. From
+`lab/frontier/libgphoto2shell`, the plain no-ASan 2.5.34 tree carries the
+committed `live/vusb-jl2005.patch`, `evidence/replay-vusb-victim.patch` and
+`evidence/replay-vusb-normal-return.patch`, plus the committed lab-local
+`evidence/replay-vusb-guards.patch` (sha256
+`140478197b5ac984ea4e29822f433cca183cda32d51adc7c1f05eaa27f28d0cf`,
+recomputed locally). Rebuild with `CFLAGS='-O0 -g -fPIC
+-fno-omit-frame-pointer' make -j4 && make install` in
+`src/libgphoto2-2.5.34-plain`, relink `live/normal_return_probe`, then run the
+committed `evidence/replay-normal-return.gdb` with `CAMLIBS`, `IOLIBS`,
+`IOLIBS_PREFIX=vusb` and `LD_LIBRARY_PATH` from the plain prefix (exact
+environment in `evidence/real-plain-consumer-write.out`, sha256
+`11208a31c3a530de08951e1e91d00e50e504f40b20f5aefa304fd7b03ddc3ca2`).
+Expect attack mode `M2SHELL_JL2005_COUNT=1022`, `M2SHELL_VUSB_DRAIN=22`,
+`M2SHELL_VUSB_GUARDS=4`, restored caller canary to leave the top size intact:
+real `gp_file_save()` returns `rc=0` and writes a 29-byte file whose content
+is the device-chosen `M2SHELL_DEREF_MARKER_20261124`. The matched
+`M2SHELL_VUSB_GUARDS=0` run returns the same pointer but aborts at
+`malloc(): corrupted top size` and leaves a 0-byte file; count 100, zeroed
+`DATA`/`SIZE`, the fixed camlib and fix reversal produce no file. All six raw
+runs are in that evidence log. Still lab-assisted — the probe supplies the
+pointer, gdb reads the canary and saved registers, the lab hook places victim
+and guards, and device replies are synthetic — author-only, unwitnessed, no
+physical USB, wire, command or r5; grade unchanged.
