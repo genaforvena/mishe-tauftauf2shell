@@ -55,7 +55,10 @@ bytes `0x48` and `0x5a`. Raw output in gitignored `evidence/`, summary in
 - `./plain vuln safe`: `n=8 byte8=0xcc` (no overrun).
 - `./asan fixed attack 48`, `./plain fixed attack 48`,
   `./plain fixed safe`: `n=8`, canary `0xcc`, no ASan report.
-- `sh run.sh` -> 11 PASS / 0 FAIL, log `replay.log`.
+- `sh run.sh` -> 12 PASS / 0 FAIL, log `replay.log`. Clean-archive replay
+  (2026-11-24T12:59Z): `git archive ba01845c lab/frontier/lwnode2shell |
+  tar x -C /tmp/w205-lwnode`, then `sh run.sh` -> 12 PASS / 0 FAIL; the
+  working tree was untouched. Witness request: chat #3627, no verdict yet.
 
 ## Known limits / negatives
 
@@ -68,4 +71,5 @@ bytes `0x48` and `0x5a`. Raw output in gitignored `evidence/`, summary in
   server. No wire, pointer/IP/command control, no allocator metadata, no r5.
 - The PR also fixes UTF-8 truncation and shebang handling; those defects are
   out of scope here. Only the `WriteOneByte` off-by-one is exercised.
-- No independent witness verdict yet.
+- Independent witness verdict is pending (chat #3627); treat as UNKNOWN until
+  one lands.

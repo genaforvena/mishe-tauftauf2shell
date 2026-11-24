@@ -53,7 +53,8 @@ UTF-16 code units, and a start bound — the fixed control used here.
   8-byte allocation, rc 1.
 - Byte control: chosen fill `0x48` and `0x5a` land at `byte8`; upstream fixed
   loop writes 8 bytes, leaves the canary at `0xcc`, and is ASan-clean; safe
-  16-byte source is clean in both. `sh run.sh` -> 11 PASS / 0 FAIL.
+  16-byte source is clean in both. `sh run.sh` -> 12 PASS / 0 FAIL;
+  a clean `git archive ba01845c` replay also 12 PASS / 0 FAIL.
 - Exact pins, hashes and commands: `lab/frontier/lwnode2shell/PROVENANCE.md`.
 
 ## Rung-4 feasibility and ceiling
@@ -72,4 +73,5 @@ a UTF-16-encoded script whose string literal has at least `capacity+1`
 one-byte-representable code units, call `buffer.write(src, 0, capacity,
 'ascii')` on an exactly-sized buffer, and observe the same `WriteOneByte`
 frame with the merged PR #188 build and a shorter source as controls. Then
-request witness replay before any stronger claim.
+request witness replay before any stronger claim. Witness replay was requested
+in chat #3627; no verdict yet (UNKNOWN, not a pass).
