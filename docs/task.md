@@ -9953,3 +9953,24 @@ request #3156 unanswered.
   file still faults at `:490`, fixed plain controls are clean, and there is no
   pointer/IP, command or rung 5. Author-only negative extension of W195's
   ESTABLISHED direct-call scope; grade unchanged.
+
+### 2026-11-24 06:2xZ — cjose W190 negative and assimp W6 sites
+
+- `c8b00cf`/`dcbe8ee`/`0d4006b` checked a jansson length-corruption info-leak
+  hypothesis against the pinned `jansson_private.h` layout and W183's heap log
+  instead of running a new experiment. `value` sits at object offset 16 and
+  `length` at offset 24, so the contiguous AES-KW write must replace the
+  ASLR-randomized pointer before it reaches the length. No wire-visible
+  pointer source; with W188/W189 the primitive has no measured path to a live
+  pointer. No build, input, byte, witness, command or grade change. Evidence:
+  `lab/frontier/cjose2shell/PROVENANCE.md` § W190 and the report's ceiling.
+
+- `62466f7` enumerated unchecked TEXCOORD accessor sites on Assimp's real
+  glTF 1.0 importer path: MAT4/FLOAT TEXCOORD_0 reaches the `ExtractData` write
+  at `glTFImporter.cpp:289-290` (ASan WRITE-64 past a 12-byte `aiVector3D`,
+  plain rc 139, PR6860 rejects), while a TEXCOORD/POSITION count mismatch
+  reads 4 bytes past the array in the Y-flip loop at `:299-302` (plain glibc
+  abort) and stays unfixed in PR6860/PR7090. The mismatch is a separate
+  count-check defect, not the CVE's element-size write. `harness/run-w6.sh`
+  reports 18 PASS / 0 FAIL with matched counts clean; author-only, unwitnessed,
+  no chosen byte in a live `aiMesh`, no pointer/IP, command or grade change.

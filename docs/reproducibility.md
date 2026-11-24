@@ -7187,3 +7187,36 @@ advisory itself makes no remote claim.
   with no diagnostic; the full crafted file SIGSEGVs at `:490`, fixed plain
   controls exit 0. No pointer/IP, command or rung 5; the silent free is a
   negative result, not a new grade, and W195's verdict is unchanged.
+
+## 2026-11-24 06:2xZ — cjose W190 negative and assimp W6 sites
+
+- **Cjose W190, jansson length-corruption info-leak hypothesis closed**
+  (commits `c8b00cf`, `dcbe8ee`, `0d4006b`): no rebuild and no new input. Read
+  pinned `deps/jansson-build/src/jansson_private.h` (`json_t json; char
+  *value; size_t length;`) alongside W183's
+  `w1/evidence/wrappedN56-typed-refcount-w183.log`: `CEK_PTR=0x80f04b0`,
+  `ENC_OBJ=0x80f04e0` (enc at `cek+48`), object `value` at offset 16
+  (`VAL=0x80f0910`) and `length=13` at offset 24. The sequential AES-KW write
+  reaches `cek+64` (pointer) before `cek+72` (length); in the real consumer
+  that pointer is ASLR-randomized (W189), so no contiguous overflow can set
+  the length while preserving it. Structural negative only: no wire-visible
+  pointer source, no new build, byte, rung, command or witness. With W188/W189
+  the primitive has no measured path to a live pointer on the wire. Evidence:
+  `lab/frontier/cjose2shell/PROVENANCE.md` § W190 and the end matter of
+  `reports/frontier-cjose2shell.md`.
+
+- **Assimp W6, untested TEXCOORD accessor sites (`62466f7`)**: after
+  `bash lab/frontier/assimp2shell/harness/run-w5.sh` builds the libraries and
+  drivers, run `bash lab/frontier/assimp2shell/harness/run-w6.sh`: expect
+  18 PASS / 0 FAIL. `mat4tex-count1.gltf` (MAT4/FLOAT TEXCOORD_0 into a
+  12-byte `aiVector3D`) gives ASan `WRITE of size 64` at `0 bytes after` via
+  `ExtractData` ← `ImportMeshes` ← `ReadFileFromMemory`, plain rc 139, and
+  PR6860 rejection; `texcount-mismatch.gltf` (POSITION count 3, TEXCOORD_0
+  count 1) gives ASan `READ of size 4` in the Y-flip loop at
+  `glTFImporter.cpp:299-302` with plain `double free or corruption (out)`,
+  and that READ survives PR6860 while PR7090 adds only a NORMAL count check.
+  It is a separate count-check defect, not the CVE element-size write.
+  `texsafe-count1.gltf` is clean on both builds. Author-only, unwitnessed; no
+  chosen byte in a live `aiMesh`, pointer/IP, command or grade change.
+  Receipts: `lab/frontier/assimp2shell/w6/evidence/W6-SUMMARY.md` and
+  `w6.log`.

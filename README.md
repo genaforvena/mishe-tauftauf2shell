@@ -1739,6 +1739,22 @@ in the high half of a live glibc mmap chunk size (`0x2d4d495300001002`), but
 the truncated-input destructor reaches `munmap_chunk()` and exits 0 with no
 diagnostic — a preserved negative for an observable allocator failure.
 
+Cjose W190 checked the remaining jansson length-corruption pointer-source idea
+against the pinned object layout and the W183 heap log: `value` sits at object
+offset 16 and `length` at offset 24, so the sequential AES-KW write must
+replace the ASLR-randomized pointer before reaching the length. No lab input,
+build, byte, witness, command or rung; rung 5 stays NOT ACHIEVED and no row
+changes.
+
+Assimp W6 (`62466f7`) enumerated two unchecked glTF 1.0 accessor sites on the
+real importer path: MAT4/FLOAT TEXCOORD_0 reaches the same `ExtractData` write
+(`glTFImporter.cpp:289-290`, ASan WRITE-64 past a 12-byte `aiVector3D`, plain
+rc 139), and a TEXCOORD/POSITION count mismatch drives a separate 4-byte OOB
+READ in the Y-flip loop (`:299-302`) that PR6860 leaves and PR7090 does not
+address. `harness/run-w6.sh` reports 18 PASS / 0 FAIL with a clean
+matched-count control; no chosen byte in a live `aiMesh`, no pointer/IP,
+command, witness or grade change.
+
 ## How the plant works
 
 Each admitted family is its own mind with its own tmux window: 121 target
