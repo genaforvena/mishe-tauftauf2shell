@@ -392,4 +392,37 @@ still established only by source bytes and the harness lanes; a fixed
 real-process control remains missing. Details and screenshots are described
 in `lab/frontier/kicad2shell/realprocess/PROVENANCE-fixed-build.md`.
 
-Rungs 1-4 are unchanged; **rung 5 remains UNKNOWN**.
+This negative was superseded in W186 (section 16). Rungs 1-4 are unchanged;
+**rung 5 remains UNKNOWN**.
+
+## 16. Fixed-build real-process control reached (W186, 03:08Z wake)
+
+The fixed-build control missing since W184 was obtained. KiCad 10.0.8 (first
+stable release with the fix) was made to import an Altium `.SchLib` in a real
+`eeschema` Symbol Editor under Xvfb. The blocker was not the binary but three
+first-run wizard predicates: both `do_not_show_again` keys must be true, and
+all three global library tables must parse. Seeding those in
+`provisioned/kicad10-config/10.0/` removed the wizard; corrected menu
+coordinates put `Tools > Symbol Editor` at (267,11)/(320,112) and
+`File > Import > Symbols...` at (60,288)/(345,288), with the `local` target
+library selected first. `BROWSER=/bin/true` did not suppress the docs webview
+and is not a useful route.
+
+With the unmodified vendor `mounting_holes.SchLib`, and then with the hostile
+`SizeZ` fixture, the fixed process stayed alive, stderr was empty and the
+import chooser listed the same two symbols (`MH M2.5 Mounting hole`, `MH M3`).
+Under gdb the hostile run showed no signal or allocator-abort marker. This is
+the fixed counterpart to W182/W183, where the same fixture aborted the
+vulnerable 8.0.8 process in glibc. Evidence:
+`lab/frontier/kicad2shell/realprocess/evidence/w186-fixed-*.{rc,png,log}`,
+hashes in `fixtures/PINS-w186.sha256`, driver `provisioned/gui-import10b.sh`,
+full conditions and negatives in
+`realprocess/PROVENANCE-fixed-control.md`. Replay check:
+`realprocess/fixed-control-check.sh`.
+
+The fixed binary has no ASan, so the clean exit alone does not prove absence
+of corruption; it is paired with the verbatim fixed guard and harness fixed
+controls. No symbol was committed to the target library, no pointer or
+control-flow target was observed, no marker, wire delivery or witness replay
+of this lane. The corrupted word still lands in allocator metadata / ASan
+redzone. **Rung 5 remains UNKNOWN.**

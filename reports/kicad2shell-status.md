@@ -179,3 +179,15 @@ sequence, so `ParseLibHeader` was never reached in the fixed process. This is
 a failed control attempt, not a pass or a vulnerability negative; the fixed
 guard remains source/harness-only. See
 `lab/frontier/kicad2shell/realprocess/PROVENANCE-fixed-build.md`.
+
+W186 closed that gap: the official fixed 10.0.8 process now imports the same
+`.SchLib` through the real Symbol Editor. Seeding both privacy `do_not_show_again`
+keys and three parseable global library tables removes the first-run wizard;
+the hostile `SizeZ` fixture parses cleanly under gdb with no abort marker and
+shows the same two symbols as the unmodified file. This is a fixed-build
+real-process control, not a pass for rung 5: no ASan, no consumer read, no
+pointer/control-flow target, no marker or witness replay of this lane.
+Evidence and replay check (`PASS=10 FAIL=0`, trace
+`8229bcd8bfdda107783efd2e1fce5d30707c17811ea3dbc91ce299ecd5733386`) are in
+`realprocess/PROVENANCE-fixed-control.md` and
+`realprocess/fixed-control-check.sh`; report section 16 has the scope.
