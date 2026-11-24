@@ -690,15 +690,30 @@ document length, and a plain process that aborts in the vector destructor
 methods or function pointers; no code pointer, marker, IP, command or listener
 was observed. NO r5. Author-measured; no witness verdict.
 
+Clean-archive author replay at 22:1xZ from `git archive 04f6dcf9` into
+`/tmp/w22-clean` (local pinned tarball copied in, no network): `bootstrap.sh`
+10/10 pins OK; `run-w12.sh`, `run-w5.sh` and `run-w9.sh` rebuilt the plain O2,
+ASan and proposed-fix drivers; the unmodified `run-w22.sh` gave **13 PASS /
+0 FAIL**. Layout-dependent values changed (buffer base `0x555555580820`,
+`ptr0=0x555555580894` for the 90/165 and 7/11 cases, `0x555555580890` for
+4660/22136, real-mesh `0x555555570870`), while all chosen field values, the
+`scene=null` fix control, the safe/ASLR-on controls and `TOTAL` are identical.
+After dropping `DISC`/`WIN` lines and replacing hexadecimal addresses and PIDs
+with tokens, both traces are byte-identical, sha256
+`46858ccdb6ad0214e6ec20ffbf39289af5341a79b6aa91323767d63d19c919a0`. Author
+replay, not witness acceptance; no grade change.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
 change, no r5. Independent witness replay of W1/W2, the W3-W13 real-importer
 legs, W18 (#3773), W19, W20 and W22 is still owed; clean-archive author
 replays are reproducibility evidence, not acceptance. Preserve any
-contradiction as a negative. The witness wake failed repeatedly through
-21:4xZ (engine-cap saturation, owner operator), so no verdict arrived;
-W1/W2, W18, W19, W20 and W22 stay author-only. W20 replays with one command
+contradiction as a negative. Witness wakes failed earlier on engine-cap
+saturation (owner operator) but resumed at 22:01Z for other targets; no
+assimp verdict has arrived. The W22 request is chat #3899; W20's offer is
+#3864. W1/W2, W18, W19, W20 and W22 stay author-only.
+W20 replays with one command
 from a clean archive: `git archive 702041cc lab/frontier/assimp2shell`, copy
 the local pinned tarball into `pins/`, then `bash bootstrap.sh &&
 bash harness/run-w20.sh` (expect 9 PASS / 0 FAIL). W22 replays the same way
