@@ -1,0 +1,87 @@
+W4 plain-glibc placement NEGATIVE — 2026-11-24 04:30Z, author measurement only.
+Scope: pinned v6.0.6 glTF-only minimal plain build in build-min-plain (the
+build used by harness/run-placement.sh). Probe source: harness/placement_probe.cpp.
+No library, harness or tracked case file was changed by this probe.
+
+Compile (from lab/frontier/assimp2shell):
+g++ -O1 -g0 -I pins/assimp-6.0.6/include -I build-min-plain/include \
+    harness/placement_probe.cpp -L build-min-plain/bin -lassimp \
+    -Wl,-rpath,"$PWD/build-min-plain/bin" -o /tmp/assimp-w4/probe
+
+Case recipe (all VEC4 count=2 documents 509 bytes, same template, so the
+allocation sequence is not changed by JSON length):
+  buffer 32 bytes = float32 LE element0 (0,0,1.0,1.25) + element1 (0,0,1.0,wbits)
+  accessor componentType 5126, count 2, type VEC4; wbits varied below.
+Matched VEC3 baseline: same 32-byte buffer and same 509-byte JSON with
+"type":"VEC3" (only first 24 bytes consumed), so no overflow.
+
+=== matched VEC3 baseline, 24-byte vertex array, no overflow ===
+$ probe /tmp/assimp-w4/base32.gltf
+scene=ok err=
+vertices=2
+base=0x5a80d1087f10 usable=24
+p-16=0000000000000000
+p-8=0000000000000021
+p+0=0000000000000000
+p+8=3fa000003f800000
+p+16=0000000000000000
+p+24=0000000000000021
+p+32=0000000000000000
+p+40=00007e7face04b20
+rc=0
+Own chunk size 0x21, malloc_usable_size = 24 = logical array size. The NEXT
+chunk's size field is at p+24 and reads 0x21 in this matched baseline.
+
+=== count=3 baseline already tracked in placement/evidence/plain-safe.out ===
+logical=36 usable=40, nextsize=0000000000000021 at p+40.
+Again the next chunk's size field begins exactly at the logical array end.
+
+=== structural consequence ===
+ExtractData copies elemSize=16 into sizeof(aiVector3D)=12 per element. The
+last of count writes starts at p+12*(count-1) = logical_end-12 and ends at
+logical_end+4: the overrun is always FOUR bytes, the final element's 4th
+component, regardless of count. On this glibc the four bytes land on the next
+chunk's size field (low half), not on a live aiMesh field or heap-object
+payload. ASan has a redzone there instead (placement/evidence/asan-vuln.out).
+
+=== chosen next-chunk-size sweep, VEC4 count=2, wbits = low 4 bytes ===
+Each case keeps JSON length 509 and all bytes except the final float's bits.
+  sz11    rc=134  malloc(): invalid size (unsorted)
+  sz21    rc=134  malloc(): invalid next size (unsorted)
+  sz31    rc=134  malloc(): invalid next size (unsorted)
+  sz41    rc=134  malloc(): invalid next size (unsorted)
+  sz51    rc=134  malloc(): invalid next size (unsorted)
+  sz61    rc=134  malloc(): invalid next size (unsorted)
+  sz71    rc=134  malloc(): invalid next size (unsorted)
+  sz81    rc=134  malloc(): invalid next size (unsorted)
+  sz91    rc=134  malloc(): invalid next size (unsorted)
+  sza1    rc=134  malloc(): invalid next size (unsorted)
+  sz101   rc=134  malloc(): invalid next size (unsorted)
+  sz201   rc=134  malloc(): invalid next size (unsorted)
+  sz1001  rc=134  malloc(): invalid next size (unsorted)
+  sz10001 rc=134  malloc(): mismatching next->prev_size (unsorted)
+0x21 and 0x31 are the natural size values measured in the two matched
+baselines; neither yields a clean import in the VEC4 run, so the VEC4 run's
+allocator state at the write is not the same as either baseline and remains
+UNKNOWN. No chosen value produced scene=ok.
+
+=== gdb on sz21 (excerpt) ===
+Program received signal SIGABRT, Aborted.
+#5  __GI_abort () at abort.c:79
+#6  malloc_printerr (str=0x... "malloc(): invalid next size (unsorted)") at malloc/malloc.c:5775
+#7  _int_malloc (av=..., bytes=8) at malloc/malloc.c:4081
+#8  __GI___libc_malloc (bytes=<optimized out>) at malloc/malloc.c:3328
+#9  operator new(unsigned long) () from libstdc++.so.6
+#10 Assimp::glTFImporter::ImportMeshes(glTF::Asset&) () from build-min-plain/bin/libassimp.so.6
+The failing allocation is a later 8-byte operator new inside ImportMeshes,
+not a free of the vertex array; the damaged heap metadata is observed while
+the importer continues after the overflow.
+
+=== disposition ===
+NEGATIVE, preserved: no chosen value reaches a live aiMesh field, no clean
+import control was found, and no grooming was attempted. The VEC4 POSITION
+path is structurally limited to the next chunk's size field on this host's
+glibc. This does NOT downgrade the rung-4 ASan/placement findings (they are
+about the importer's own write); it closes this placement extension as a
+dead lane. Author measurement only; not part of witness replay #3277 or the
+pending W1/W2 replay #3290.

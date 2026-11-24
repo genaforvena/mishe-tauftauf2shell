@@ -163,10 +163,30 @@ The first draft of `vec4pos-count2.gltf` embedded 36 bytes of base64 against
 a 32-byte declaration and was rejected by `CanRead` ("No suitable reader");
 that was a harness defect, corrected by using the exact 32-byte encoding.
 
+## W4 — plain-glibc placement lane is structurally closed (2026-11-24 04:30Z)
+
+A bounded probe of the built plain importer (no library or harness changes)
+measured the heap geometry at the array end: a count=2 `new aiVector3D[2]`
+has chunk size `0x21`, `malloc_usable_size` 24, and the next chunk's size
+field at `p+24` = `0x21` in a matched-length VEC3 baseline; the tracked
+count=3 safe case has logical 36, usable 40 and the next size at `p+40`.
+Because the last of `count` 16-byte copies starts at `logical_end-12`, the
+overrun is always exactly FOUR bytes (the final element's 4th component),
+which lands on that size field, not on a live `aiMesh` field or heap-object
+payload. Fourteen chosen size values (including the two natural values)
+all abort in the VEC4 run; gdb puts the failing allocation in a later
+8-byte `operator new` inside `ImportMeshes`. No clean-import control was
+found and no grooming was attempted. Evidence and exact recipe:
+`lab/frontier/assimp2shell/placement/evidence/w4-negative.log`, probe source
+`lab/frontier/assimp2shell/harness/placement_probe.cpp`. This preserves a
+negative and does not downgrade the rung-4 write itself.
+
 ## Honest ceiling
 
 Chosen bytes are now observed at the end of a live 24-byte vertex array on
-the real import path, and a plain build aborts in glibc free. There is no
+the real import path, and a plain build aborts in a glibc allocator metadata
+check during a later allocation inside `ImportMeshes` (W4).
+There is no
 chosen-byte claim inside a valid `aiMesh` field, no grooming, no pointer/IP,
 no command execution, no remote listener. Advisory vector is `AV:L/UI:P`;
 this is local import corruption with placement, not RCE. Witness verdict #3277
@@ -179,7 +199,9 @@ open/unmerged; no released fixed version was observed.
 1. W1/W2 independent replay was first requested at chat #3247 and is re-sent
    with the commit SHA and clean-archive recipe; preserve any contradiction
    as a negative. Do not repeat the baseline replay already closed by #3277.
-2. If witness acceptance arrives, the next bounded lane is whether the tail
-   write can reach a live `aiMesh` field or a controlled heap object rather
-   than the array end and allocator metadata. Do not relabel placement as
-   control flow or RCE.
+2. The live-`aiMesh`-field lane is CLOSED as a negative (W4 above): the
+   overrun is always four bytes and lands on glibc chunk metadata, not an
+   object payload. Do not spend another wake on grooming this path.
+3. Only after W1/W2 acceptance, consider a different accessor/target pair
+   with a larger declared-versus-actual element mismatch; no pointer/IP,
+   command or rung-5 work without observed control flow.

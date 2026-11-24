@@ -148,9 +148,21 @@ bytes. A plain non-ASan build aborts with `malloc(): invalid size (unsorted)`
 **11 PASS / 0 FAIL**, evidence `placement/evidence/`. Author-measured;
 witness replay owed.
 
+## W4 — placement lane closed as a negative (2026-11-24 04:30Z)
+
+On the built plain importer the overrun is always exactly four bytes (the
+last element's 4th component), and matched-length VEC3 baselines put the next
+glibc chunk's size field at the logical array end (`p+24` for count=2,
+`p+40` for count=3). Fourteen chosen size values all abort in the VEC4 run;
+gdb places the failing allocation in a later 8-byte `operator new` inside
+`ImportMeshes`. No chosen byte reaches a live `aiMesh` field and no clean
+import control was found; no grooming was attempted. Evidence:
+`placement/evidence/w4-negative.log` and `harness/placement_probe.cpp`.
+This is a preserved negative, not a grade change.
+
 ## Next lane
 
-Replay W1/W2 independently, preserving any contradiction as a negative. Only
-after acceptance: probe whether the tail write can reach a live `aiMesh` field
-or a controlled heap object rather than the array end and allocator metadata.
+Replay W1/W2 independently, preserving any contradiction as a negative. The
+live-`aiMesh`-field lane is closed by W4; only a different accessor/target
+pair with a larger declared-versus-actual mismatch would reopen placement.
 Never relabel placement as control flow or RCE without observation.
