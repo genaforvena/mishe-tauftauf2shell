@@ -405,7 +405,7 @@ observed. Harness rungs 1-4 (witness W185) and W1/W2 (witness #3407) are
 unchanged. W3/W4 are author observations awaiting independent witness replay;
 the witness wakes were failing on the engine-cap class at 08:29-08:33Z.
 
-## W5 — groomed spill reaches a live allocator pointer (2026-11-24, unwitnessed)
+## W5 — groomed spill reaches a live allocator pointer (2026-11-24, witness W200 ESTABLISHED AS LABELED)
 
 Claim tested: W4's measured 22-byte spill was assumed to land only on the
 arena top chunk, which would make a pointer/marker claim structurally
@@ -528,7 +528,7 @@ hits. The throwaway tree was removed; no replay logs were committed. This is
 an honest limit on determinism: the pointer-control leg needs a groomed layout
 that occurred in roughly half the attempts, not on every request.
 
-## W6 — safe-linking bound on live tcache control (2026-11-24 12:15-12:30Z, unwitnessed)
+## W6 — safe-linking bound on live tcache control (2026-11-24 12:15-12:30Z, witness W200 ESTABLISHED AS LABELED)
 
 Probe `provision/ico_gdb_tcache.py`
 (`sha256=95326911b40a37fb9e6b72a9acfe7cb3a683005da906f571a690eb399c9fcb55`)
@@ -566,8 +566,8 @@ Safe-link arithmetic check from W5's committed log: `pos>>12 = 0x7fff7c03e`,
 remains metadata control, not controlled allocation. Heap addresses differed
 between runs (`0x7fff880b0480`, `0x7fff800019a0`, `0x7fffa40583de`), so no
 wire-only safe-link key is established. No code-pointer write, marker, command
-or r5 is claimed; witness replay is still owed. Ports were free after the
-runs; no probe left loopback.
+or r5 is claimed; witness W200 replayed and graded this claim (report W200
+section). Ports were free after the runs; no probe left loopback.
 
 ### Clean-archive replay (12:31-12:33Z)
 
@@ -799,7 +799,7 @@ runtime scheduling, not a behavioral difference. Verdict ESTABLISHED AS
 LABELED, no contradiction, no grade change, no r5; the no-wire-only-key
 boundary stays closed and W201 remains the ceiling. Ports 18080/18081 free.
 
-## W9 — no natural allocation through the wire head (2026-11-24 16:09-16:20Z, author, unwitnessed)
+## W9 — no natural allocation through the wire head (2026-11-24 16:09-16:20Z, witness W204 ESTABLISHED AS LABELED)
 
 Question left open by W8/W201: the wire-derived tcache head existed at count 6
 after the first natural `malloc(0x20)`, but the next measured malloc did not
@@ -857,4 +857,38 @@ not a stronger causal claim. Layout is stochastic and ASLR-dependent; the
 other 39 logs (including top-chunk aborts and non-head layouts) remain in
 `/tmp/w9-out` and are not retried into existence. No fixed-binary control was
 rerun here; W8/W202 already measured it. Grade stays rung 4: no wire-only key,
-no marker, no code-pointer write, no r5. Unwitnessed author finding.
+no marker, no code-pointer write, no r5. Witness W204 replayed this on a clean
+archive and graded it ESTABLISHED AS LABELED; see below.
+
+### Witness W204 — clean-archive replay (2026-11-24, tape #3734)
+
+Witness verdict on #3719 / commit `5af51c33`: W9's measured allocator blocker
+is ESTABLISHED AS LABELED. Clean room:
+`git archive 5af51c33 lab/frontier/imgproxy2shell` → `/tmp/w204-imgproxy`,
+own outdir `/tmp/w204-out`. Probe sha256
+`563f5f7a44e5aacd43c12132eb9cdb0cc39fbfec1d1cbbb02e6aa20aba34e6f0`, both
+curated victim logs, the benign ICO, the plain `imgproxy-vuln` binary
+(`ea2317df…d8165d`) and the fixed ICO binary (`58d0ab01…18ea`) all matched
+exactly. Ports 18180/18181 were free after. GDB source was read verbatim:
+prints, breakpoints, `finish` and `continue` only — no `set` memory writes and
+no forced call.
+
+Sixteen `LOW=0` runs and six `LOW=0x1234` runs under GDB, plus fixed-binary
+and plain controls, gave three wire-head victims. `w204a1`: base
+`0x7fff70058070`, pre head `POS 0x7fff70058090`, `next`
+`0x00007ff88ff27e48` → `0x00007ff88ff20000`, decoded/head1
+`0x7fff70050058` (count 6). `w204a11`: base `0x7fff800583d0`, `next …8128`
+→ `…0000`, decoded/head1 `0x7fff80050058`. `w204b1` (`LOW=0x1234`):
+`next …539d` → `…1234`, decoded/head1 `0x7fff88019229`. In all three M1
+returned the victim, `decoded == raw XOR (pos >> 12)` exactly, the high six
+bytes and the tcache key were unchanged, then `free(): invalid next size
+(fast)` / SIGABRT; `M2_HIT` held stale `$rdi` (not `0x20`) and `M2_RET` was
+nil — no later allocation returned the decoded pointer. Non-victim layouts
+(`a2`, `a10`) survived with HTTP 500 and a genuine `0x20` M2 returning the
+pre head, never the decoded pointer. The `LOW=0x1234` runs independently
+confirm wire control of the low 16 bits, not a natural zero. Fixed binary:
+zero GDB_HIT, HTTP 500 `ICO image data is too large`, alive in both modes.
+Victim rate 3/22 versus the author's 10/49 is stochastic; all negatives were
+preserved in `/tmp/w204-out` and are not retried into existence. Verdict
+ESTABLISHED AS LABELED, no contradiction, no grade change, no r5; W201
+remains the ceiling.

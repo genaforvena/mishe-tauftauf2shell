@@ -27,8 +27,12 @@ boundary stays closed.
 **Witness W202 (2026-11-24, tape #3685):** W7's no-wire-visible-heap-leak
 negative is ESTABLISHED AS LABELED on a clean archive, with fresh upstream
 source hashes independently checked; no contradiction, no grade change, no
-r5. All live-limb claims W3-W8 now have witness verdicts.
-**W9 (2026-11-24 16:20Z, author, unwitnessed):** 49 loopback GDB traces answer
+r5. At the time W9 was an author finding; W204 later replayed and graded it
+(below).
+**Witness W204 (2026-11-24, tape #3734):** W9's measured allocator blocker
+is ESTABLISHED AS LABELED on a clean-archive replay; no contradiction, no
+grade change, no r5. All live-limb claims W3-W9 now have witness verdicts.
+**W9 (2026-11-24 16:20Z, witness W204 ESTABLISHED AS LABELED):** 49 loopback GDB traces answer
 W8's open consumption question with a measured allocator blocker: on every
 layout where wire bytes put the poisoned 0x35 tcache chunk at the live head,
 the first natural `malloc(0x20)` returned that victim and left the wire-decoded
@@ -422,7 +426,7 @@ probe and log hashes and all live outcomes were exact. Verdict ESTABLISHED AS
 LABELED, no contradiction, no grade change, no r5; W7's no-wire-only-key
 boundary stays closed and W201 remains the ceiling.
 
-## W9 — no natural allocation through the wire head (2026-11-24, author, unwitnessed)
+## W9 — no natural allocation through the wire head (2026-11-24, witness W204 ESTABLISHED AS LABELED)
 
 W8 proved a wire-only low-16-bit retarget of a live safe-linked tcache `next`
 and left one limit open: the following `malloc(0x20)` did not return the
@@ -453,6 +457,36 @@ stochastic and ASLR-dependent; all negatives were kept in `/tmp/w9-out` and
 are not retried into existence. Grade stays rung 4; no wire-only key, marker,
 code-pointer write or r5. Commands, hashes and raw excerpts are in
 `lab/frontier/imgproxy2shell/PROVENANCE.md` (W9).
+
+## Witness W204 — clean-archive replay of W9 (2026-11-24, tape #3734)
+
+The witness replayed `git archive 5af51c33 lab/frontier/imgproxy2shell` into
+`/tmp/w204-imgproxy` with its own `/tmp/w204-out`. The probe
+(`563f5f7a…4e6f0`), both victim logs, the benign ICO, the plain vulnerable
+binary (`ea2317df…d8165d`) and the fixed ICO binary (`58d0ab01…18ea`) all
+matched the committed bytes; ports 18180/18181 were free after. Its GDB source
+was read verbatim: prints, breakpoints, `finish` and `continue` only, no
+`set` memory writes and no forced calls.
+
+Sixteen `LOW=0` plus six `LOW=0x1234` instrumented runs, with fixed-binary and
+plain controls, produced three wire-head victims: `w204a1` (base
+`0x7fff70058070`, pre head `POS 0x7fff70058090`, `next`
+`0x00007ff88ff27e48` → `0x00007ff88ff20000`, decoded/head1
+`0x7fff70050058`, count 6), `w204a11` (base `0x7fff800583d0`, `next …8128`
+→ `…0000`, decoded/head1 `0x7fff80050058`) and `w204b1` (`LOW=0x1234`,
+`next …539d` → `…1234`, decoded/head1 `0x7fff88019229`). In all three the
+first malloc returned the victim, `decoded == raw XOR (pos >> 12)` exactly,
+the high six bytes and the tcache key were unchanged, and
+`free(): invalid next size (fast)` / SIGABRT followed; `M2_HIT` held a stale
+`$rdi` (not `0x20`) and `M2_RET` was nil, so no later allocation returned the
+decoded pointer. Non-victim layouts (`a2`, `a10`) survived with HTTP 500 and a
+genuine `0x20` second malloc returning the pre head, not the decoded pointer.
+`LOW=0x1234` independently confirms wire control of the low 16 bits rather
+than a natural zero. The fixed binary showed zero GDB hits, HTTP 500 `ICO
+image data is too large` and stayed alive in both modes. Victim rate 3/22
+versus the author's 10/49 is stochastic; all negatives were preserved in
+`/tmp/w204-out`. Verdict ESTABLISHED AS LABELED, no contradiction, no grade
+change, no r5; W201 remains the ceiling.
 
 ## What would change my mind
 
