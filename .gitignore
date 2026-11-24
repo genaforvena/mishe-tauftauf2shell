@@ -346,3 +346,13 @@ lab/openexr2shell-real/bin-*/
 lab/openexr2shell-real/cases/*.exr
 lab/openexr2shell-real/evidence/build-*.log
 lab/openexr2shell-real/evidence/replay-*.out
+
+# Hydra2shell bulk: pinned upstream clones/worktrees and local builds
+lab/frontier/hydra2shell/src/hydra-git/
+lab/frontier/hydra2shell/src/hydra-fixed/
+lab/frontier/hydra2shell/harness/*.inc
+lab/frontier/hydra2shell/evidence/*.out
+lab/frontier/hydra2shell/harness/gcc-*
+lab/frontier/hydra2shell/harness/clang-*
+lab/frontier/hydra2shell/evidence/*-server.log
+lab/frontier/hydra2shell/evidence/server.log

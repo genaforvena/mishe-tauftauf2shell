@@ -1,0 +1,11 @@
+# Pinned inputs for hydra2shell (verified with sha256sum, 2026-11-24)
+# Vulnerable upstream tag v9.7: 6c11ce2dff19ce81630c12b001d821dcd4d1567c (2026-05-03)
+# Fixed commit (CVE patch): 6ab9ad860ff92a18196566172a197070b3977f6e (2026-11-07)
+# Full upstream history lives in the ignored src/hydra-git clone; the two
+# function blobs below are verbatim extractions used by the harness.
+6f5351962728f620f81cbf5dfccb42cf97c52f249ea24894bfda44d2146c8a63  src/analyze-v9.7.c
+2eb10bdf2384853142efa85efcd8f99c9e57c3d615fe5e1036d4eba1e38b6f8a  evidence/wire.log
+3dba0ce2cdf43ac638a7f5b1919a3b3998a5d2c27e151b92d469848512ec9a1d  src/analyze-fixed.c
+232e693ab469f4bac38b36a12a6b9910c5e8542bf83094e2a95181b07ea7c6bd  harness/harness.c
+e40f64bc7b7fe9a0b9f70ff374f5c979bb4a0b82dd2bf20832913f4aa061ba48  harness/loopback_server.py
+57e16bfd9467d8b5ee2a8364b3c1e2cd809fee44e80c3751579dc2d4d108567b  evidence/matrix.log

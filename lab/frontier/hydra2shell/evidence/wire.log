@@ -1,0 +1,27 @@
+# hydra2shell wire runs — normalized key lines (PID/timestamps/addresses stripped)
+# Server: harness/loopback_server.py bound to 127.0.0.1:18080 (attack) and
+# 127.0.0.1:18081 (safe). Client: hydra v9.7 http-post-form, -t 1 -f.
+
+[vulnerable v9.7 + ASan, attack headers from 127.0.0.1:18080]
+==PID==ERROR: AddressSanitizer: negative-size-param: (size=-1)
+    #1 in analyze_server_response hydra-http-form.c:802
+    #2 in start_http_form hydra-http-form.c:1062
+    #3 in service_http_form hydra-http-form.c:1354
+    #4 in service_http_post_form hydra-http-form.c:1391
+SUMMARY: AddressSanitizer: negative-size-param in strncpy
+process rc=0 (ASan abort inside worker child; parent exits 0)
+
+[fixed commit 6ab9ad86 + ASan, same attack headers]
+no AddressSanitizer error; 1 of 1 target completed; rc=0
+
+[vulnerable v9.7 + ASan, benign single Set-Cookie from 127.0.0.1:18081]
+no AddressSanitizer error; 1 of 1 target completed; rc=0
+
+[plain v9.7, attack headers]
+1 of 1 target completed, 0 valid password found; rc=0 (NO CRASH)
+
+[gdb in real forked worker, break at hydra-http-form.c:803]
+attached to child but breakpoint not hit within 90s; killed rc=124
+(no wire-process byte observation claimed)
+
+# Raw unnormalized traces are ignored evidence/*.out files.

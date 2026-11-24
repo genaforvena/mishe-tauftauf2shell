@@ -1,0 +1,24 @@
+gcc vuln attack rc=1
+  ==PID==ERROR: AddressSanitizer: negative-size-param: (size=-1)
+gcc vuln single rc=0
+MODE=single RC=0 COOKIE=aaa=1
+gcc vuln normal rc=0
+MODE=normal RC=0 COOKIE=aaa=2
+gcc fixed attack rc=0
+MODE=attack RC=0 COOKIE= aaa=2
+gcc fixed single rc=0
+MODE=single RC=0 COOKIE=aaa=1
+gcc fixed normal rc=0
+MODE=normal RC=0 COOKIE=aaa=2
+clang vuln attack rc=1
+  ==PID==ERROR: AddressSanitizer: negative-size-param: (size=-1)
+clang vuln single rc=0
+MODE=single RC=0 COOKIE=aaa=1
+clang vuln normal rc=0
+MODE=normal RC=0 COOKIE=aaa=2
+clang fixed attack rc=0
+MODE=attack RC=0 COOKIE= aaa=2
+clang fixed single rc=0
+MODE=single RC=0 COOKIE=aaa=1
+clang fixed normal rc=0
+MODE=normal RC=0 COOKIE=aaa=2
