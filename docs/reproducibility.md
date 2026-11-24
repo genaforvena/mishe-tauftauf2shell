@@ -7970,5 +7970,8 @@ in `reports/frontier-synchronet2shell.md` W9. Expect 9 PASS / 0 FAIL, zero
 locally) and one in `server-anyauth.log`: without `SSH_ANYAUTH` the state
 machine rejects channel establishment before the pre-auth TERM can reach the
 copy, while the none-auth positive control writes `MISH`/`E-OO`/`TAUFTAUF`
-bytes. Author-measured, unwitnessed; no grade or rung change. Other builds
-or configurations with valid credentials stay UNKNOWN.
+bytes. A clean `git archive 60df1168 lab/frontier/synchronet2shell` replay
+(gitignored `src-tree/` and `provision/` symlinked in) returned rc 0, 9 PASS /
+0 FAIL and the same two probe counts; author replay, not an independent
+verdict. No grade or rung change. Other builds or configurations with valid
+credentials stay UNKNOWN.
