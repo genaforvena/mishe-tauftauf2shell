@@ -1,0 +1,63 @@
+# Captured 2026-11-24 UTC in lab/frontier/sdlmixer2shell/harness/realwav/evidence
+# gdb -q -batch -x ../gdb-map.cmd --args ./realwav-driver-vuln-nossp alaw142.wav decode
+# python3 ../lut_maps_check.py lut-dump.txt gdb-map.out
+
+=== gdb info proc mappings ===
+Temporary breakpoint 1 at 0x4859: file lab/frontier/sdlmixer2shell/harness/realwav/realwav_driver.c, line 15.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, main (argc=3, argv=0x7fffffffe918) at lab/frontier/sdlmixer2shell/harness/realwav/realwav_driver.c:15
+15	    const char *path = (argc > 1) ? argv[1] : NULL;
+process 4044153
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555558000     0x4000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realwav/evidence/realwav-driver-vuln-nossp
+      0x555555558000     0x55555556c000    0x14000     0x4000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realwav/evidence/realwav-driver-vuln-nossp
+      0x55555556c000     0x555555571000     0x5000    0x18000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realwav/evidence/realwav-driver-vuln-nossp
+      0x555555571000     0x555555572000     0x1000    0x1d000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realwav/evidence/realwav-driver-vuln-nossp
+      0x555555572000     0x555555574000     0x2000    0x1e000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realwav/evidence/realwav-driver-vuln-nossp
+      0x555555574000     0x555555575000     0x1000        0x0  rw-p   
+      0x7ffff7a00000     0x7ffff7a28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7a28000     0x7ffff7bb1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7bb1000     0x7ffff7c00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c00000     0x7ffff7c04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c04000     0x7ffff7c06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c06000     0x7ffff7c13000     0xd000        0x0  rw-p   
+      0x7ffff7d00000     0x7ffff7d02000     0x2000        0x0  rw-p   
+      0x7ffff7d02000     0x7ffff7d12000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7d12000     0x7ffff7d91000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7d91000     0x7ffff7de9000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7de9000     0x7ffff7dea000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7dea000     0x7ffff7deb000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7e00000     0x7ffff7e25000    0x25000        0x0  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0.4.0
+      0x7ffff7e25000     0x7ffff7f4f000   0x12a000    0x25000  r-xp   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0.4.0
+      0x7ffff7f4f000     0x7ffff7fa9000    0x5a000   0x14f000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0.4.0
+      0x7ffff7fa9000     0x7ffff7fae000     0x5000   0x1a9000  r--p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0.4.0
+      0x7ffff7fae000     0x7ffff7fb8000     0xa000   0x1ae000  rw-p   /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0.4.0
+      0x7ffff7fb8000     0x7ffff7fbf000     0x7000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+A debugging session is active.
+
+	Inferior 1 [process 4044153] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]
+
+=== lut_maps_check.py ===
+mapped regions parsed: 33
+LUT words: 512 zero: 2 min nonzero: 0x39800100 max: 0xbf7c01f8
+words in non-PIE text window [0x400000,0x800000): 0
+ordered 64-bit pairs: 262144 canonical: 712
+canonical pairs hitting live mappings: 0
+partial pie (high 0x00005555) hits: 0
+partial nonpie (high 0x00000000) hits: 0
+RESULT: NO_MAPPED_LUT_TARGET

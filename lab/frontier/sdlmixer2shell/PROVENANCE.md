@@ -252,3 +252,22 @@ identical across three runs.
 - All four evidence files are checksummed in `evidence/PARTIAL.sha256`. Grade
   unchanged: rungs 1-4 author-observed, no chosen pointer/IP target, marker
   or command; rung 5 UNKNOWN.
+
+## LUT-derived addresses versus live mappings (W191, 2026-11-24)
+
+- Bounded extension of the W180/W184 negatives: they tested PIE/libc address
+  patterns, leaving a non-PIE or low-address code target implicit.
+  `harness/realwav/gdb-map.cmd` stops the committed no-SSP driver at `main`
+  with `./realwav-driver-vuln-nossp alaw142.wav decode` and prints
+  `info proc mappings`; `harness/realwav/lut_maps_check.py` parses those 33
+  live regions plus `evidence/lut-dump.txt` (512 pinned float bit patterns).
+- `evidence/LUT-MAPS.out`: 512 words (two zero, minimum nonzero `0x39800100`,
+  maximum `0xbf7c01f8`), zero in the typical non-PIE text window
+  `[0x400000, 0x800000)`; 712 canonical ordered word pairs (bits 63:47 all
+  equal), zero hitting a live mapping; zero hits for preserved-high `0x00005555`
+  partial values and for `0x00000000` non-PIE partial values. Result
+  `NO_MAPPED_LUT_TARGET`. Manifest `MAPS.sha256`, 5/5 OK.
+- Derived negative, not a witness verdict and not a rung change. The 33 regions
+  come from the PIE no-SSP build; the separate arithmetic check on the non-PIE
+  text window covers a hypothetical non-PIE build. No chosen pointer, marker,
+  command or request-facing consumer; rung 5 stays UNKNOWN.

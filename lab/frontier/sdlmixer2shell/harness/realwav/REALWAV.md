@@ -277,6 +277,23 @@ chosen pointer or instruction address: this is control-flow-corruption
 *prima facie* corrupted state, **not** demonstrated control of RIP or code
 execution.
 
+### LUT address feasibility against live mappings (W191)
+
+From `harness/realwav/evidence`, with the committed no-SSP driver:
+
+```sh
+gdb -q -batch -x ../gdb-map.cmd --args ./realwav-driver-vuln-nossp alaw142.wav decode
+python3 ../lut_maps_check.py lut-dump.txt gdb-map.out
+```
+
+`gdb-map.cmd` stops at `main` and prints `info proc mappings` (33 regions);
+the checker tests all ordered 64-bit pairs of the 512 pinned LUT words with
+canonical bits 63:47 equal, plus partial-overwrite values preserving either
+`0x00005555` (PIE) or `0x00000000` (non-PIE) high bits. No value is mapped;
+`evidence/LUT-MAPS.out` shows `RESULT: NO_MAPPED_LUT_TARGET`, and
+`MAPS.sha256` covers script, gdb script, dump and both transcripts (5/5).
+This closes the low-address/non-PIE target class; the grade is unchanged.
+
 ## Ceiling
 
 Demonstrated: real SDL_mixer 3.2.4 build, real on-disk RIFF/WAVE input, real
