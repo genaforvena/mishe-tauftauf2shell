@@ -75,14 +75,23 @@ The dispatch table's 256-byte alignment and the packed record are lab grooming
 and the marker runs in-process: **rung-4 pointer control in a synthetic
 consumer, not rung 5**. No real application, no allocator-metadata corruption,
 no command execution outside the marker. Witness verdict #3514 (2026-11-24)
-is ESTABLISHED AS LABELED: clean-room rebuild of all three pinned library
-variants, `run-all.sh` 14 PASS / 0 FAIL byte-identical to `replay.log`, and a
-throwaway `0x9e` steering rebuild confirmed the byte mechanism. The witness
-did not replay `run-consumer.sh`; that remains witness-UNKNOWN. The chosen
-byte is a compile-time `#define CHOSEN` in the minimal harness (a witness
-rebuild confirms mechanism-level choice, not runtime wire steering); the
-single-update mode's `CHOSEN_BYTE_PRESENT` string is legitimate because byte 31
-lies inside its 63-byte buffer and only ASan cleanliness is checked there.
+is ESTABLISHED AS LABELED for `run-all.sh`: clean-room rebuild of all three
+pinned library variants, 14 PASS / 0 FAIL byte-identical to `replay.log`, and
+a throwaway `0x9e` steering rebuild confirmed the byte mechanism.
+
+Witness W195 (#3550/#3551, 2026-11-24) closed the remaining consumer gap from
+a clean `git archive 07fb523`: it rebuilt both pinned libs itself, compiled
+`consumer.c` against its own libs, got `run-consumer.sh` 11 PASS / 0 FAIL, and
+by byte dump plus a 256-byte sweep showed the wire-borne `0x48` steers only the
+dispatch-pointer LSB into the benign marker on the vulnerable lib. Verdict:
+ESTABLISHED AS LABELED at the synthetic-consumer rung-4 scope, NO r5, no
+pointer/IP/command and no grade change. NITs: the table is hand-aligned with
+slots 0/9 only and the no-ASan PASS holds only for `0x48`. The chosen byte is a
+compile-time `#define CHOSEN` in the minimal harness (an exhaustive sweep
+confirms mechanism-level choice, not arbitrary runtime coercion in that
+harness); the single-update mode's `CHOSEN_BYTE_PRESENT` string is legitimate
+because byte 31 lies inside its 63-byte buffer and only ASan cleanliness is
+checked there.
 
 ## Cheapest next experiment
 

@@ -180,6 +180,18 @@ the no-pointer crash-mechanism negative, and the embedded Lottie-JPEG asset —
 ESTABLISHED AS LABELED, with vulnerable/fixed/safe controls and NO r5. No
 contradiction to either row grade.
 
+The 11:1xZ witness W195 verdict (#3550/#3551) closes the earlier awslc gap:
+from a clean `git archive 07fb523` the witness rebuilt both pinned AWS-LC
+libraries itself, compiled the synthetic consumer against its own libs and
+replayed `run-consumer.sh` 11 PASS / 0 FAIL. A byte dump and exhaustive
+256-byte sweep confirmed the wire-borne `0x48` steers the dispatch-pointer
+LSB into the benign marker only on the vulnerable library.
+**ESTABLISHED AS LABELED** — rung-4 pointer-LSB control in a synthetic
+loopback consumer, NO r5, no real app, no command. Scope NITs: hand-aligned
+256-slot table with only slots 0/9 populated; the no-ASan PASS is specific to
+`0x48`. This supersedes the "unwitnessed" wording in the AwsLc2Shell row and
+the "author-only / replay requested" sentence above; no rung cell changes.
+
 
 The 23:2xZ–01:1xZ edges deepen the admitted lanes without moving any rung 5
 cell. The following row sentences are superseded by this paragraph and the
