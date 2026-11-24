@@ -380,3 +380,17 @@ lab/frontier/assimp2shell/harness/gen/
 # local. Pins, generated .inc fragments, harness source, runner, evidence log
 # and gdb transcript stay tracked.
 lab/frontier/synchronet2shell/build/
+
+# Fltk2shell W195: pinned tarball, extracted trees, local builds, compiled
+# drivers and per-case ASan output stay local. PINS, patches, generator,
+# driver, PROVENANCE, evidence log and gdb transcript stay tracked.
+lab/frontier/fltk2shell/fltk-1.4.5.tar.gz
+lab/frontier/fltk2shell/fltk-release-1.4.5/
+lab/frontier/fltk2shell/fltk-1.4.5-plus1632/
+lab/frontier/fltk2shell/fltk-1.4.5-plus1647/
+lab/frontier/fltk2shell/build-*/
+lab/frontier/fltk2shell/driver-*
+lab/frontier/fltk2shell/asan-*.out
+lab/frontier/fltk2shell/last-driver-*.out
+lab/frontier/fltk2shell/*.log
+!lab/frontier/fltk2shell/evidence.log

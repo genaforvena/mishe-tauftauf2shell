@@ -1,0 +1,22 @@
+--- src/Fl_BMP_Image.cxx
++++ src/Fl_BMP_Image.cxx
+@@ -253,6 +253,10 @@
+   // Get colormap...
+   if (colors_used == 0 && depth <= 8)
+     colors_used = 1 << depth;
++  if (colors_used > 256) {
++    ld(ERR_FORMAT);
++    return;
++  }
+ 
+   for (int i = 0; i < colors_used; i++) {
+     // Read BGR color...
+@@ -282,7 +286,7 @@
+     ld(ERR_FORMAT);
+     return;
+   }
+-  array = new uchar[width * height * bDepth];
++  array = new uchar[(size_t)width * height * bDepth];
+   alloc_array = 1;
+ 
+   // Read the image data...

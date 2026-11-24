@@ -1,0 +1,14 @@
+Breakpoint 1 at 0x1cede: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx, line 510.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, Fl_BMP_Image::load_bmp_ (this=0x7fffffffe080, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:510
+510	    CHECK_ERROR
+$1 = (const uchar *) 0x7ffef75ff010 "EH"
+$2 = 715827882
+$3 = (uchar *) 0x7ffef75ff012 ""
+0x7ffef75ff008:	0x02	0x10	0x00	0x00	0x53	0x49	0x4d	0x2d
+0x7ffef75ff010:	0x45	0x48	0x00	0x00	0x00	0x00	0x00	0x00
+#0  Fl_BMP_Image::load_bmp_ (this=0x7fffffffe080, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:510
+#1  0x000055555556f803 in Fl_BMP_Image::Fl_BMP_Image (this=0x7fffffffe080, filename=0x7fffffffe68e "poc-chosen.bmp") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:64
+#2  0x000055555556f576 in main (argc=2, argv=0x7fffffffe228) at driver.cxx:9

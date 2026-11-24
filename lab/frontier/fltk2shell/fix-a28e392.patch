@@ -1,0 +1,32 @@
+From a28e3927faebaba7d33f740d13e88fa0e22fd64d Mon Sep 17 00:00:00 2001
+From: ManoloFLTK <41016272+ManoloFLTK@users.noreply.github.com>
+Date: Sat, 21 Nov 2026 13:57:33 +0100
+Subject: [PATCH] BMP image loader: fix potential issue with crafted image file
+ (#1647)
+
+---
+ src/Fl_BMP_Image.cxx | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/Fl_BMP_Image.cxx b/src/Fl_BMP_Image.cxx
+index 5a48bc0f84..6579f08847 100644
+--- a/src/Fl_BMP_Image.cxx
++++ b/src/Fl_BMP_Image.cxx
+@@ -341,7 +341,7 @@ void Fl_BMP_Image::load_bmp_(Fl_Image_Reader &rdr, int ico_height, int ico_width
+   }
+ 
+   for (y = start_y; y != end_y; y += row_order) {
+-    ptr = (uchar *)array + y * width * dstBDepth;
++    ptr = (uchar *)array + y * (size_t)width * dstBDepth;
+ 
+     switch (depth)
+     {
+@@ -557,7 +557,7 @@ void Fl_BMP_Image::load_bmp_(Fl_Image_Reader &rdr, int ico_height, int ico_width
+ 
+   if (havemask) {
+     for (y = height - 1; y >= 0; y --) {
+-      ptr = (uchar *)array + y * width * dstBDepth + 3;
++      ptr = (uchar *)array + y * (size_t)width * dstBDepth + 3;
+       for (x = width, bit = 128; x > 0; x --, ptr += dstBDepth) {
+         if (bit == 128) byte = rdr.read_byte();
+         if (byte & bit)
