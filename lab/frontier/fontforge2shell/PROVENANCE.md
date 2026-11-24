@@ -30,3 +30,10 @@ Debug builds (`build-plain/`, `build-fixed-plain/`) and all gdb runs were
 local and loopback-free. The only new input file is the already-pinned
 `truncated.pcf` driven through the real headless scripting `Import()`.
 W2 transcripts and their sha256s are recorded in `REACHABILITY.md`.
+
+W3 (2026-11-24 08:0xZ): no external reads or new source trees. The same
+plain Debug builds, pinned input files and `gdb` were used locally to
+inspect the malloc chunk header before/after the negative write and at
+`free(encs)`; see `CONSUMER.md` and the transcript sha256s there. No
+loopback service, GUI or external target was involved. This extension is
+author-side and awaits any independent witness verdict.

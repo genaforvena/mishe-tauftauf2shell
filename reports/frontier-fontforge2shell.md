@@ -99,8 +99,16 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   "MIS\0") inside the real process, and the vulnerable binary exits 134
   with glibc `double free or corruption (out)`, while the patched binary
   and the complete-table control exit 0. Three bytes are attacker-chosen;
-  the fourth is zero for these field values only. GUI `Import()` and
-  other consumers remain UNKNOWN.
+  the fourth is zero for these field values only. The GUI `Import()` menu
+  and other application consumers remain UNKNOWN.
+  W3 identified the consumer in the real plain build (`CONSUMER.md`): on
+  this host's 64-bit glibc the four bytes at `encs-4` are the high half of
+  the size word of `encs`'s own malloc chunk. That word changed from
+  `0x21` to `0x0053494d00000021`; `free(encs)` at `fvimportbdf.c:1770`
+  was caught reading the corrupted header immediately before the glibc
+  abort, while patched-build and complete-table controls held `0x21` and
+  exited normally. This is metadata corruption, not a pointer primitive;
+  a field set yielding a plausible size / silent overwrite is UNKNOWN.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study or real-process marker; no rung 5.
@@ -115,5 +123,7 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   real-build path, including W2's real-process chosen bytes, is author-side
   with no witness verdict. GUI `Import()`, pointer/IP, command and ASLR
   remain UNKNOWN.
+  The W3 allocator-consumer measurement is author-side as well; no claim
+  beyond rungs 1-4 is made from it.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.

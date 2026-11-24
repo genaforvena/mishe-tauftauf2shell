@@ -99,6 +99,23 @@ Two non-ASan Debug builds were configured from the same source trees with
   Configure/build logs: `configure-plain.log`, `build-plain.log`,
   `configure-fixed-plain.log`, `build-fixed-plain.log`.
 
+## W3 (2026-11-24 08:0xZ) — consumer of the overwritten slot
+
+`CONSUMER.md` records the answer for this host's 64-bit glibc: the four
+bytes at `encs-4` are the high half of the **size word of the same malloc
+chunk** (`malloc(16)` gives chunk size `0x21`, header at `encs-8`).
+`gdb-consumer-plain.out` (sha256
+`53630de80fc3ebc8d370095fe650b3550c4a2e19e38606e8e7add5f23d96f6b5`)
+measured `size=0x21` before the store, `size=0x0053494d00000021` after,
+then caught `__GI___libc_free(mem=encs)` from `fvimportbdf.c:1770` with the
+same corrupted header, followed by `double free or corruption (out)` and
+SIGABRT. Patched build / truncated file and vulnerable build / complete
+file controls both showed `size=0x21` at line 1770 and exited normally
+(`gdb-header-fixed.out`, `gdb-header-complete.out`). The consumer is the
+allocator's own metadata check, not an observed second application object.
+This does not widen the primitive; whether a crafted field set yields a
+plausible size and a silent plain-build overwrite remains UNKNOWN.
+
 ## Scope
 
 Headless CLI scripting `Import()` on this host. Chosen bytes at the fixed
