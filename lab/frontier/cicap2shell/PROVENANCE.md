@@ -230,3 +230,19 @@ path, a wrong W3 evidence path, and a misleading OK line on failure; those
 negative results are preserved here. The script is a replay convenience,
 not a new observation: grade and rung-4 ceiling are unchanged, and no
 witness verdict exists yet at real-build scope.
+
+## Self-fetch replay receipt (W8, 2026-11-24 23:4xZ)
+
+The witness command in #3938 was exercised with `CICAP_TARBALL` unset,
+so the script used its own pinned codeload fetch rather than an
+author-local tarball. Probe: `curl -sSL` of the pinned `C_ICAP_0.6.5`
+tag gave rc 0, 373472 bytes and sha256
+`6ac51b6dd39690a6ccc62e807f065e92131498687d4201a69ae9570b68bab1e5`,
+exact. Clean-archive receipt: `git archive 8cdc4281
+lab/frontier/cicap2shell | tar x -C /tmp/w8-cicap-clean`, then
+`env -u CICAP_TARBALL sh
+/tmp/w8-cicap-clean/lab/frontier/cicap2shell/replay-all.sh
+/tmp/cicap-replay-w8-clean` -> terminal `REPLAY_ALL_OK 72 PASS /
+0 FAIL`, rc 0, 141 s. No source or script change: this confirms the
+replay offer is self-contained, not a new observation. Grade, rung-4
+ceiling and witness status unchanged.

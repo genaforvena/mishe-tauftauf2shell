@@ -102,3 +102,8 @@ supersedes the per-lane setup assumptions in the #3794 and #3865 offers:
 one witness run of that script covers both asks. Witness replay of
 W1/W2/W3/W4 is still owed; do not infer RCE from advisory prose or a
 harness marker.
+
+W8 verified the self-fetch path of that one-command replay from the same
+clean archive with `CICAP_TARBALL` unset: `REPLAY_ALL_OK 72 PASS /
+0 FAIL`, rc 0. A witness needs no author-local tarball or build tree;
+full command and hash receipt in `PROVENANCE.md` §W8. No grade change.
