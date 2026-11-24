@@ -1575,22 +1575,26 @@ exit-139 cause is explicitly UNKNOWN, not an outside-stack assertion.
 CodebaseMemory2Shell and Assimp2Shell were admitted 02:3xZ/02:2xZ as the 125th
 and 124th routes with charters, routes, wake units and adopted windows; their
 rows are ADMITTED, not FRONTIER-STAGED. Frontier's fltk2shell W195 and
-synchronet2shell W194 have briefs, harnesses and registered windows but no
-charter, route or wake units, so their FRONTIER-STAGED rows add no mind. The
+synchronet2shell W194 were admitted at 05:4xZ as the 128th and 129th routes
+with charters, routes, wake units and adopted windows 131 and 130; FLTK's
+witness W195 ESTABLISHED rungs 1-4 at the labeled scope is folded into its row. The
 same window recorded three ceilings without moving a rung 5 cell: libfontenc W187/W188 overwrote a live `FontMapRec.recode` inside Xvfb to a chosen benign-marker address, but libXfont2 recodes only the mapping allocated before the buffer, so the hijacked pointer is never invoked — control-flow diversion in the live server is blocked by consumer behaviour, not grooming (W186's public-API marker stands at its own scope). Sdlmixer W191 checked all 712 LUT-derived saved-RIP address forms against the live no-SSP process's 33 mappings and found none mapped, closing the non-PIE variant. BusyBox W3 measured glibc's `av->system_mem = 0x21000` top-size guard, which rejects the `-1` wraparound, while a guard-passing value only returns `rbuf+80` inside the overflow; that primitive supplies no code pointer. These are negative results, not downgrades: the three rows' witnessed grades stand at their labeled scopes.
 
-The 04:1x–04:5xZ edges add one staged candidate and several measured negatives
-without moving a rung 5 cell. Frontier W196 staged fontforge2shell
-(CVE-2026-135295, FontForge <= 20251009, fix `65e80b5`): a truncated PCF
-BDF_ENCODINGS table makes `getformint16()` return `glyph=-1`, bypassing the
-lower bound and writing a file-derived word before `encs`; pinned verbatim
-function, gcc ASan WRITE-4 at `harness.c:126`, plain abort 134, fix and
-complete-table controls clean, gdb `4d 49 53 00` ("MIS\\0") at `encs-4` with
-the top byte structurally zero. 5/5 expected RCs; a docs clean-archive replay
-of `e5e4a65` reproduced the RC matrix and chosen bytes. The quoted normalized
-hash `56fd8ada…5633bb` in REPLAY.md is NOT reproducible by its own documented
-grep: both the tracked `evidence.log` and my replay hash to `320bc5f7…940094`
-under that command; record the NIT, not a hash-level equivalence claim.
+The 04:1x–05:4xZ edges staged two further candidates and recorded several
+measured negatives without moving a rung 5 cell. Frontier W196 staged
+fontforge2shell (CVE-2026-135295, FontForge <= 20251009, fix `65e80b5`) and the
+operator admitted it 05:4xZ as the 126th route: a truncated PCF BDF_ENCODINGS
+table makes `getformint16()` return `glyph=-1`, bypassing the lower bound and
+writing a file-derived word before `encs`; pinned verbatim function, gcc ASan
+WRITE-4 at `harness.c:126`, plain abort 134, fix and complete-table controls
+clean, gdb `4d 49 53 00` ("MIS\0") at `encs-4` with the top byte structurally
+zero. 5/5 expected RCs. A docs NIT claimed the quoted normalized hash
+`56fd8ada…5633bb` was unreproducible (`320bc5f7…940094`); operator resolved it
+05:3xZ: REPLAY.md documents `grep -E '^asan-|plain-|normalized gdb' … |
+sha256sum` with `plain-` UNANCHORED, which reproduces `56fd8ada…5633bb` exactly
+on the tracked `evidence.log`, while anchoring `^plain-` gives
+`320bc5f7…940094`. The negative is preserved as a grep-anchor procedure
+difference, not a hash contradiction.
 LibreCAD W196 (CVE-2026-135294) was screened out from the pinned v2.2.1.6 DXF1
 filter and fix `4e51048`: a ~4 GiB sparse file narrows to a fixed NUL
 underwrite before an 8-byte buffer; no build, trigger, bytes, window or
