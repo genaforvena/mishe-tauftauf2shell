@@ -582,6 +582,44 @@ but no natural allocation through the wire head was observed, and
 no wire-only key, marker, code-pointer write or r5. Commands, hashes and
 preserved negatives are in PROVENANCE (W12).
 
+## W13 — no code pointer in the attacker-reachable heap window (2026-11-24, author, unwitnessed)
+
+W5 showed chosen bytes can overwrite a live tcache `next`; W8/W9/W11/W12
+showed the poisoned head is never consumed by a natural allocation. The last
+open lane was whether the arbitrarily long attacker body could reach a live
+code or vtable pointer instead of allocator metadata.
+`provision/ico_codeptr_reach.py`
+(`sha256=f6242f7e8589fc64527c090c7b048d30807abcccec1b39ec6985ed3a25f7b367`)
+serves a crafted ICO whose body is N bytes of `0x41` on 127.0.0.1:18181,
+launches the pinned plain `imgproxy-vuln`
+(`sha256=ea2317df…d8165d`) under GDB on 127.0.0.1:18180, filters
+`vips_foreign_load_read_full` on `$rdx == 0xfffffff5` in a GDB Python
+breakpoint, dumps `/proc/<pid>/maps` via GDB Python and the window at the
+saved `$rsi-16` before and after `finish`, then continues. GDB writes no
+inferior memory and forces no call.
+
+Three configurations were run. `w13b1` (2 benign preloads, 1024-byte body,
+base `0x7fff8c0020e0`) filled 128 of 136 dumped qwords with the chosen marker
+and aborted in `malloc(): corrupted top size`; `w13b2` (6 preloads, 64-byte
+body, base `0x7fff980022b0`) filled 8 of 16 and aborted the same way; `w13b3`
+(2 preloads, 256-byte body, base `0x7fff7c0580b0`) filled 32 of 40 and aborted
+in `double free or corruption (out)`. All three were SIGABRT. Classifying
+each post-write qword against the 64 executable mappings from
+`/proc/<pid>/maps` found **zero** code pointers in all three windows; bytes
+outside the written span were zero. The only executable addresses in the GDB
+output were `bt 3` return addresses (`0x2da4ec2` in the harness text,
+`0x7ffff7a4217b` in libvips `foreign.c`, `0x7ffff7bb92f6` in libvips
+`object.c`), i.e. stack frames outside the reachable window; they were
+excluded from classification. The body length is bounded only by the source,
+so the write reach is large, but the sampled neighbourhood holds allocator
+metadata and zeros rather than a code pointer.
+
+This is a bounded negative over three layouts, not a proof for every possible
+heap layout: layout is stochastic and ASLR-dependent. No RIP-at-marker, no
+benign marker execution and no r5 were observed; grade stays rung 4. Commands,
+hashes, all three logs and the probe-development failures are in PROVENANCE
+(W13).
+
 ## What would change my mind
 
 A primary source showing the addition happens in 64-bit arithmetic, a replay

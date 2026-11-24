@@ -72,6 +72,10 @@
 | `w13/dead-gdb-1.txt` | W13 first of three byte-identical exact-index traces (`9000 beef dead 0`) | `d40f2de88afe353eb5fa7901ed81a7c587e75427d6f428e8e17f442798a542a3` |
 | `w13/dead-asan-vuln.out` | W13 ASan vulnerable -n 1, rc 1, WRITE of size 2 at xtrans_demosaic.cpp:427 | `45fee4b2324b4ab4c674f4efc1137b240e95f4b5bda4d1d122f66f4984acf6b1` |
 | `w13/results.txt` | W13 full method, calibration, negatives, controls and limits | `729d273bc41a954058cc53c70fc9dbed1045a5d88be0af1b9d35d112aef0f265` |
+| `w14/two-offset.json` | W14 spec: W13 triple plus curve[3]=0x1357 and raw rows 138..147 overridden to sample 3 | `9f09737465417c9dcbfb030c1a5339ad6c588942d9f33d308f8c19220b1a5929` |
+| `w14/two-offset.input` | W14 DNG: chosen 0x1357 channel at a second OOB offset 16,800 halfwords past index 68,644 | `4fb6e951e06db573f818b2377f71320578afaf61edf12c30ee5748b90618a8c2` |
+| `w14/oobmulti.gdb` | W14 multi-offset OOB store dump probe (unmodified -O0 build) | `b5be385159a6c354648c7936da8784bdba50e89ac9308b86359ef8ca415f8546` |
+| `w14/results.txt` | W14 two-offset result, reproducibility, controls and limits | `0eb32bea8a14c79e527cf91bbc96f51605cb308212fbe2a099bb97773e591192` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`

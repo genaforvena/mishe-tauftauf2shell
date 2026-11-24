@@ -1,0 +1,44 @@
+W14 results — two independently file-chosen values at two distinct OOB heap
+offsets (2026-11-24 21:1xZ, author-side)
+
+Question left open by W13: that result put three independently chosen halfwords
+at the first OOB index 68,644, but only at one offset. Prediction recorded
+before the run (wall, 21:1xZ): a spatially localized raw override in the
+uncompressed 12-bit DNG should steer a second chosen value into a later OOB
+store, because the store loop at xtrans_demosaic.cpp:427 walks the full-width
+stride while the scratch is sized from stale half dimensions.
+
+Method: craft_uncompressed_poc.py (sha256
+0d91b5a8324a814fb7097051a456949dac610ff9d21d8c22d717beedddf1749c) with
+w14/two-offset.json (9f097374...1a5929) — the W13 dead-target spec plus
+curve[3]=0x1357 and a `pixels` override setting every column of raw rows
+138..147 to sample 3 — produces w14/two-offset.input (4fb6e951...18a8c2).
+The real dcraw_emu consumer is unchanged; only image bytes change. Probe
+w14/oobmulti.gdb dumps the 4-halfword stores at OOB offsets 0, 4600, 10000 and
+16800 after the first-OOB breakpoint, on the unmodified -O0 build.
+
+Baseline w13/dead-target.input at OOB offset 16800 (index 85,444):
+  140e beef 9f09 0   (repeating, channel 1 = W13's 0xbeef)
+w14/two-offset.input at OOB offset 16800:
+  140e 1357 9f09 0   (repeating, channel 1 = newly chosen 0x1357)
+At OOB offset 10000 the override field also carries 0x1357 (`2765 1357 9f09 0`),
+where baseline has `140e beef 9f09 0`. At the first OOB offset 0 the override
+input reads `8fff beee dead 0` versus baseline `9000 beef dead 0` — the region
+138..147 overlaps the interpolation neighborhood of row 131, so W13's triple
+is perturbed by one count but remains a different value from 0x1357. No claim
+that the first triple is preserved bit-exact in the two-offset input.
+
+Three fresh plain -O0 gdb runs, byte-identical at both offsets:
+  off=0:    8fff beee dead 0 140e 0 3f92 0 ...
+  off=16800: 140e 1357 9f09 0 140e 1357 9f09 0 ...
+Controls on w14/two-offset.input: ASan vulnerable `pinned/... -n 1` rc 1 with
+`WRITE of size 2` at src/demosaic/xtrans_demosaic.cpp:427; fixed tree rc 0
+empty; vulnerable with no option rc 0 empty.
+
+Grade: two independently file-chosen 16-bit values (0x9000/0xbeef/0xdead at
+the first offset, 0x1357 at a second offset 16,800 halfwords later) written
+into the heap OOB region of the real dcraw_emu consumer. This extends W13 from
+one offset to two spatially independent offsets. NOT an arbitrary byte sequence
+across memory, no pointer/IP, marker, command, adjacent live object, GUI, wire
+path, merged upstream fix or r5. Author-side only; no witness replay yet. All
+experiments local and loopback-free.

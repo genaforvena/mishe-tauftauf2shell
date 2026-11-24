@@ -1062,3 +1062,79 @@ an attacker-influenced allocation. Grade stays rung 4; no wire-only key,
 marker, code-pointer write or r5. All non-gate and abort layouts are kept in
 `/tmp/w12-out` and are not retried into existence; W204's verdict on W9 is
 unchanged.
+
+## W13 — attacker-reachable window has no live code pointer (2026-11-24 21:17-21:20Z, author, unwitnessed)
+
+Question left by W5/W8/W9/W11/W12: the `data_size` wrap gives an unbounded
+write (the copied length is the source body, `data_size` only caps the read),
+so can the attacker body reach a live code/vtable pointer rather than glibc
+allocator metadata?
+
+Probe: `provision/ico_codeptr_reach.py`
+sha256 `f6242f7e8589fc64527c090c7b048d30807abcccec1b39ec6985ed3a25f7b367`.
+It serves a benign favicon plus a crafted ICO (`data_size=0xfffffff5`, body
+of N `0x41` bytes) on 127.0.0.1:18181, launches the pinned plain
+`provision/imgproxy-vuln` (sha256
+`ea2317df2a42d30e81f33e0cfd822b49b99996545ffc49026573212b03d8165d`)
+under `gdb -batch` bound to 127.0.0.1:18180 with `IMGPROXY_WORKERS=1`,
+`IMGPROXY_CONCURRENCY=1`, `LD_LIBRARY_PATH=../../libvips2shell/build-vuln-plain/libvips`.
+A GDB Python `gdb.Breakpoint` subclass stops only when `$rdx == 0xfffffff5`
+at `vips_foreign_load_read_full`. At the hit the script saves `$w13buf=$rsi`,
+prints `/proc/<pid>/maps` from GDB Python, dumps `x/Ngx $w13buf-16` before
+and after `finish`, prints `bt 3`, then `continue`s. No inferior memory
+write and no forced call; both endpoints are loopback-only. Ports
+18180/18181 were free before and after.
+
+Reproduction commands (from `provision/`):
+
+    python3 ico_codeptr_reach.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w13b1 2 1024 10
+    python3 ico_codeptr_reach.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w13b2 6 64 10
+    python3 ico_codeptr_reach.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w13b3 2 256 10
+
+Logs and classification (qwords strictly between `W13_POST` and `W13_BT`,
+compared to the 64 `x` mappings from `/proc/<pid>/maps`):
+
+* `http-ico-w13-w13b1.log` sha256
+  `ce4871c41ed02fae60fa4636b688a34ee24207e56fa7c200dfd1644f264d2120`,
+  preload 2, body 1024, base `0x7fff8c0020e0`, actual `0x7fff8c0020ee`:
+  136 qwords dumped, 128 `0x4141414141414141`, 0 code pointers; client saw
+  `RemoteDisconnected`, process aborted in `malloc(): corrupted top size`.
+* `http-ico-w13-w13b2.log` sha256
+  `a61e6007ba9940f9f867cf7b4a1576bfe5b12ee8baa163aaf7f3c3dd8143ace9`,
+  preload 6, body 64, base `0x7fff980022b0`, actual `0x7fff980022be`:
+  16 qwords dumped, 8 markers, 0 code pointers; `malloc(): corrupted top
+  size` abort.
+* `http-ico-w13-w13b3.log` sha256
+  `c6ba1e3c80d0e9ab5061a443892c0f523db25d799ac689b3f58887dc913b69ed`,
+  preload 2, body 256, base `0x7fff7c0580b0`, actual `0x7fff7c0580be`:
+  40 qwords dumped, 32 markers, 0 code pointers; `double free or corruption
+  (out)` abort.
+
+In `w13b2` the post dump is explicit: the two qwords before `actual` are zero,
+the next eight are the chosen marker, and the rest are zero. The only
+executable addresses in the whole GDB output were the three `bt 3` frames
+(`0x2da4ec2` in the harness text, `0x7ffff7a4217b` in libvips `foreign.c`,
+`0x7ffff7bb92f6` in libvips `object.c`) — stack frames, not heap-window
+values — and the first classification pass falsely counted them because it
+sliced everything after `W13_POST`; the corrected pass ends the slice at
+`W13_BT` and reports `code_ptr_qwords=0` for all three. That false positive
+is preserved here rather than erased.
+
+Probe-development negatives: a plain conditional breakpoint
+`break ... if $rdx == 0xfffffff5` fails with `No registers` before `run`
+(fixed with the GDB Python breakpoint); dumping `$rsi` after `finish` used
+the caller's register and showed zeros instead of the marker (fixed by
+saving `$w13buf` at the hit); `/proc/maps` addresses print without `0x` and
+need a bare-hex regex. The first failed run left
+`http-ico-w13-w13a1.log` (untracked, not committed).
+
+All three layouts aborted in glibc allocator metadata checks before any
+pointer was used as a call target. No RIP-at-marker, no code-pointer write
+to a live function pointer and no r5 were observed. This is a bounded
+negative over three stochastic layouts, not an exhaustive proof. Grade
+stays rung 4; W201 remains the ceiling and W204's verdict on W9 is
+unchanged.
+

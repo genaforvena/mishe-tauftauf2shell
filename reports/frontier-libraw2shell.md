@@ -624,3 +624,39 @@ halfword steered by a distinct file-controlled field. NOT an arbitrary byte
 sequence across memory, no pointer/IP, marker, command, adjacent live object,
 GUI, wire path, merged upstream fix or r5. Author-side only; no witness
 replay yet. All experiments local and loopback-free.
+
+## Two independently chosen values at two OOB offsets (W14, 2026-11-24 21:1xZ; author-side)
+
+W13 placed three chosen halfwords at the first OOB index 68,644 but at one
+offset only. Prediction recorded before this run: a spatially localized raw
+override in the uncompressed 12-bit DNG should steer a second chosen value
+into a later OOB store, because the `:427` loop walks the full-width stride
+while the scratch is sized from stale half dimensions.
+
+`w14/two-offset.json` (sha256
+`9f09737465417c9dcbfb030c1a5339ad6c588942d9f33d308f8c19220b1a5929`) adds
+`curve[3]=0x1357` and overrides every column of raw rows 138..147 to sample 3
+in the W13 spec; `craft_uncompressed_poc.py` produces
+`w14/two-offset.input` sha256
+`4fb6e951e06db573f818b2377f71320578afaf61edf12c30ee5748b90618a8c2`.
+The unmodified `-O0` gdb dump probe `w14/oobmulti.gdb` reads the four-halfword
+stores at OOB offsets 0, 4,600, 10,000 and 16,800 after the first-OOB
+breakpoint. Baseline `w13/dead-target.input` at offset 16,800 (index 85,444)
+repeats `140e beef 9f09 0`; the override input repeats `140e 1357 9f09 0`
+there — a second, independently chosen channel-1 value at a second heap
+offset, 16,800 halfwords beyond the first. Offset 10,000 likewise carries
+`0x1357` where baseline has `0xbeef`. At offset 0 the override input reads
+`8fff beee dead 0` versus baseline `9000 beef dead 0`: rows 138..147 overlap
+the interpolation neighborhood of row 131, so the W13 triple is perturbed by
+one count in this input. No claim that the first triple is bit-exact here.
+
+Three fresh plain `-O0` gdb runs were byte-identical at both offsets. Controls
+on `w14/two-offset.input`: ASan vulnerable `-n 1` rc 1 with `WRITE of size 2`
+at `xtrans_demosaic.cpp:427`; fixed tree rc 0 empty; vulnerable no-option rc 0
+empty. Full method and hashes are in `lab/frontier/libraw2shell/w14/results.txt`.
+
+Grade: chosen 16-bit values at two spatially independent OOB heap offsets in
+the real `dcraw_emu` consumer. This is not an arbitrary byte sequence across
+memory, not a pointer/IP, marker, command, adjacent live object, GUI, wire
+path, merged upstream fix or r5. Author-side only; no witness replay yet.
+All experiments local and loopback-free.
