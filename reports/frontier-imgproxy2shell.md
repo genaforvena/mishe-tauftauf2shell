@@ -269,7 +269,29 @@ retried into existence.
 A mapped attacker-chosen target address, the safe-link key
 `pos >> 12` for that live heap position, and a later attacker-influenced write
 to a live code pointer would all be needed; W6 measured the first two only
-under gdb, not from wire bytes. No external target is ever contacted.
+under gdb, not from wire bytes. W7 below shows this loader path supplies no
+wire-visible heap-byte reader to derive that key. No external target is ever
+contacted.
+
+## W7 — no wire-visible heap leak on this loader path (unwitnessed)
+
+The r5 gap is structural, not merely unmeasured. In the pinned vendored
+`vips/vips.c:1302-1315`, `vips_foreign_load_read_full` returns 1 only after
+consuming the entire requested length. With `data_size = 0xfffffff5` a short
+HTTP source makes it return 0, and vendored `vips/icoload.c:161-164` exits
+before the PNG test (`:169`) or BMP reconstruction (`:187-219`). Spill bytes
+and the adjacent tcache `next` (which carries the safe-link key) therefore
+have no consumer that could place them in response pixels, error text or
+headers; the allocator sees them on free. A source-only review of imgproxy's
+error path found fixed public messages and request/source-derived echoes, no
+heap-byte or pointer reflector. Four loopback probes with pattern, complete
+PNG, IHDR-only and lying-IDAT bodies all died in 13-17 ms with
+`malloc(): corrupted top size`, `rc=2` and no HTTP response, confirming that
+PNG decode is not reached. ASLR is 2 on this host, and W6 heap positions
+differed across processes, so no constant cross-process key exists either.
+Commands, digests and raw logs are in `lab/frontier/imgproxy2shell/PROVENANCE.md`
+(W7). Grade remains rung 4; wire-only controlled allocation and r5 are not
+established. This is an author finding, not a witness verdict.
 
 ## What would change my mind
 

@@ -584,3 +584,61 @@ The ICO-fixed binary returned HTTP 500 with zero breakpoint hits. The
 throwaway tree was removed; replay logs were not committed. Same honest
 stochasticity limit as W5: this is a debugger-assisted mechanic, not a
 wire-only controlled allocation.
+
+## W7 — no wire-visible heap leak on the ICO path (2026-11-24 12:51-12:54Z, unwitnessed)
+
+Source-bound negative, checked against the pinned bytes in this tree:
+`provision/imgproxy-4.0.0/vips/vips.c`
+(`sha256=a0e7720b87ce79c24d69c56ebde7aed41391430811cacea3b1335518eda48d3a`)
+`:1302-1315` loops `vips_source_read` until the whole `len` is consumed and
+returns 1 only then; on a short source it returns at the first `n <= 0`.
+`provision/imgproxy-4.0.0/vips/icoload.c`
+(`sha256=2eabd58d1e6c14439af7a7e22196df2ea4f4b2aa82efeb1ea0844962744051dc`,
+identical to the pinned v4.0.15 source) calls that function with the wrapped
+`data_size = 0xfffffff5` and returns at `:161-164` when it is short, before
+the PNG test at `:169` or the BMP reconstruction at `:187-219`. Therefore the
+spill bytes (and the neighbouring tcache `next` carrying the safe-link key)
+have no consumer that can turn them into response pixels, error text or
+headers: the only code that touches them is the allocator on free. This holds
+even for a PNG-magic body: `vips_pngload_buffer` is never reached unless the
+source supplies all 4,294,967,185 bytes, and writing that many bytes into the
+3-byte chunk cannot leave a process alive to answer the request.
+
+Response-path check (read-only source, exact sites):
+`server/middlewares.go:120-134` writes only the fixed `err.PublicMessage()` off
+dev mode (`server/config.go:34,77,109`); `vips/vips.go:132-136` converts a
+fixed vips error buffer; the dev-mode page (`server/error_page.go:78,150-180`)
+formats function/file:line only, with no `%p`; `server/router.go:206-231`
+reflects a validated request header; `handlers/processing/request_methods.go:166-231`
+returns decoded integers and URL options. No reflector of heap bytes exists.
+`/proc/sys/kernel/randomize_va_space` read as `2` this wake, so no constant
+cross-process safe-link key either (W6 heap positions already differed).
+
+Live bound (all four bodies ran against `imgproxy-vuln` with the pinned plain
+libvips tree on 127.0.0.1 only): pattern, complete 1x1 PNG, PNG IHDR-only and
+a PNG IDAT declaring 4096 bytes all died in 13-17 ms with `rc=2` and no HTTP
+response; no response bytes or heap-derived log text. Probe
+`provision/ico_readfull_bound.py`
+(`sha256=e422a59974088057b0f89a4629c5f3526f87dac04bc9aab7163298ef8de48140`),
+run from `provision/` as:
+
+    python3 ico_readfull_bound.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w7final-pattern \
+      rs:fill:16:16/plain/pattern.ico 8
+    python3 ico_readfull_bound.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w7final-pngvalid \
+      rs:fill:16:16/plain/pngvalid.ico 8
+    python3 ico_readfull_bound.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w7final-pnglie \
+      rs:fill:16:16/plain/pnglie.ico 8
+
+| Log | SHA-256 | Observation |
+| --- | --- | --- |
+| `http-ico-w7final-pattern.log` | `017b0b48b8d207cbbc0bb3d6e6e440ce0430932d63796999c7b2be09a1d8a380` | `rc=2`, no response, 0.014 s; `malloc(): corrupted top size`, `SIGABRT`, `signal arrived during cgo execution` in the Go stack |
+| `http-ico-w7final-pngvalid.log` | `a4c5193041fce665ee1fd6dd82dfd6c4d7dce0813b0ac2485a96e02599cbb52a` | identical outcome for a complete PNG body: PNG decode not reached |
+| `http-ico-w7final-pnglie.log` | `0f16c0989715a9f49a9f700fac4907c6931f2968b3a98ebc936cd41ebde09ed6` | identical outcome for an IDAT declaring 4096 bytes: no over-read into a response |
+
+Verdict: this closes the only plausible wire-only derivation of the safe-link
+key on this loader path. Grade stays rung 4; no marker, code-pointer write or
+r5 is claimed. Superseded /tmp logs and the throwaway first version of the
+probe are deleted; ports were free after the runs. Unwitnessed author finding.
