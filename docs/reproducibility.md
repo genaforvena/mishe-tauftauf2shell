@@ -147,6 +147,8 @@ containers whose host ports bind only to loopback.
 | Assimp2Shell | [brief](../reports/frontier-assimp2shell.md), [status](../reports/assimp2shell-status.md) | CVE-2026-134861 (VulnCheck 2026-11-22, CWE-787, CVSS4 AV:L/UI:P); pinned v6.0.6 tarball and both `glTFAsset.inl` blobs, PR 6860/7090 hunk hashes in `lab/frontier/assimp2shell/PINS.sha256` | `bash lab/frontier/assimp2shell/bootstrap.sh` then `bash lab/frontier/assimp2shell/harness/run-all.sh` (rebuilds vuln/fixed × gcc/clang ASan plus plain harnesses offline); W1/W2 drivers in `realpath/` and `placement/` | gcc+clang ASan `WRITE of size 16` 0 bytes after a 36-byte region and `WRITE of size 12` after a 12-byte region, `Indexer` stack-buffer-overflow, plain chosen "TAUF" at offsets 36..39, fixed-PR blocks `ExtractData` but not `Indexer`; 13 PASS/0 FAIL, log `e6341f37…bf41e`, clean-archive normalized replay `913b23f5…3ca938`; witness #3277 replayed `git archive 585e1c7` and graded those baseline direct-call legs ESTABLISHED rungs 1-4, NO r5. W1 reaches the sink through a built pinned library's `ReadFileFromMemory` glTF import and W2 places chosen bytes at a live 24-byte array end; both author-only. No pointer/IP, command or rung 5 |
 | Synchronet2Shell (frontier-staged) | [brief](../reports/frontier-synchronet2shell.md) | CVE-2026-133646 (INCIBE 2026-11-23, CWE-787, CVSS4 AV:N/PR:N/VA:H, availability-only); pinned answer.cpp parent `42f586d7` and fix `cb6d77dbca`, cryptlib `cryptapi.c`, `ssl.c`, `sbbs.h`, `telnet.h`, `sbbsdefs.h`, `gen_defs.h` hashed in `lab/frontier/synchronet2shell/PINS.sha256` | `cd lab/frontier/synchronet2shell && bash bootstrap.sh && bash harness/run-all.sh` (offline, 7 binaries, 9 cases) | gcc+clang ASan `stack-buffer-overflow WRITE of size 64` past the 41-byte TERM field; plain build places chosen "MISH"/"E-OO"/"TAUFTAUF" at session offsets 44/48/52 (gdb `gdb.txt`); fixed commit hunk and 40-byte TERM clean; 9 PASS/0 FAIL, log `9ed3b328…403a24e`, clean `git archive e5f43ad` replay normalized `66d20f8…414bdd8`; direct-call rungs 1-4 only, no SSH wire, no window/admission, unwitnessed, rung 5 UNKNOWN |
 | Fltk2Shell (frontier-staged) | [brief](../reports/frontier-fltk2shell.md) | CVE-2026-135433 (VulnCheck 2026-11-23, CWE-190, CVSS4 8.5 `AV:L/UI:P`, local file + UI, availability-only per advisory); pinned `release-1.4.5` `Fl_BMP_Image.cxx`, fix `a28e392` and predecessor `3a049d8` blobs hashed in `lab/frontier/fltk2shell/PINS.sha256` | `cd lab/frontier/fltk2shell && bash run-all.sh` (rebuilds pristine 1.4.5, `plus1632`, `plus1647` and plain trees offline, regenerates the 118-byte BMP fixtures and runs the matrix) | Real 1.4.5 ASan `WRITE of size 1` 2 bytes before a 2-byte allocation at `:486`; with `3a049d8` applied by hand the allocation is 4294967298 bytes and the row write is still 2 bytes before it at `:490`/`:503` (32-bit `:499`/`:503`); plain gdb shows chosen `53 49 4d 2d` ("SIM-") before the array; safe BMP and `a28e392` clean; 33 PASS/0 FAIL, normalized `7882e60c…3525e` from a clean `git archive 072dc75` (the `b214fbb` runner gives 33/0 but `aecb1055…` with unmasked paths); direct-call rungs 1-4 only, no real application consumer, ICO path, wire, witness verdict or rung 5 |
+| FontForge2Shell (frontier-staged) | [brief](../reports/frontier-fontforge2shell.md) | CVE-2026-135295 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.5 `AV:L/UI:P`, local PCF file + UI, no RCE claim), FontForge <= 20251009; pinned tag `20251009` `fvimportbdf.c` sha256 `df766f9c…f0eb30d` and fix `65e80b5` patch `f2745243…5e99175` in `lab/frontier/fontforge2shell/pinned/` and `PINS.md` | `cd lab/frontier/fontforge2shell && ./run-all.sh` (rebuilds five binaries offline from the verbatim pinned function and fix hunk; no network) | gcc ASan `WRITE of size 4` four bytes before a 16-byte region at `harness.c:126`, plain abort 134, fixed and complete-table controls clean, gdb `4d 49 53 00` at `encs-4` (top byte structurally zero); `evidence.log` 5/5 expected RCs. Clean `git archive e5e4a65` replay reproduced the matrix and bytes: the documented grep hashes to `320bc5f7…940094` on both the tracked log and the replay, NOT the receipt's `56fd8ada…5633bb` (NIT). Direct-call rungs 1-4 only, no real build/import path, witness or r5 |
+| LibreCAD2Shell (screened out) | [brief](../reports/frontier-librecad2shell.md) | CVE-2026-135294 (VulnCheck 2026-11-23, CWE-787, CVSS4 5.8 `AV:L/AC:H/AT:P/UI:P`, no RCE claim), LibreCAD <= 2.2.1.6, fix `4e51048…` (PR #3287); vulnerable v2.2.1.6 `rs_filterdxf1.cpp` `0cde2846…0a2097` and patch `9cdb82e6…7026` pinned in `lab/frontier/librecad2shell/pinned/` | none — source-bound screening only, no harness or trigger committed | `file.size()` (`qint64`) narrows into 32-bit `_bNum` near 4 GiB; `new char[_bNum+16]` then `fBuf[_bNum]='\0'` is a fixed one-byte underwrite before an 8-byte allocation, with `dos2unix()` as the in-function consumer. Real-file reachability, Qt build feasibility and post-corruption consumer behavior remain UNKNOWN; no bytes observed, no window, no witness, no admission row |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -6879,3 +6881,88 @@ FAIL and the same fault lines and chosen bytes, but its normalized hash is
 `aecb1055…` because absolute source paths remain. No application-level consumer, ICO
 container path, wire, pointer/IP, command, witness verdict or rung 5; the
 advisory itself makes no remote claim.
+
+## 2026-11-24 04:1x–04:5xZ — staged PCF lane, closed placements, replay NIT
+
+- **Assimp W4, live-aiMesh placement closed** (`425fcb5`):
+  `g++ -O1 -g0 -I pins/assimp-6.0.6/include -I build-min-plain/include
+  harness/placement_probe.cpp -L build-min-plain/bin -lassimp
+  -Wl,-rpath,"$PWD/build-min-plain/bin" -o /tmp/assimp-w4/probe` from
+  `lab/frontier/assimp2shell`, then `probe <case.gltf>` (509-byte VEC4 count=2
+  cases with varied `wbits`, plus a VEC3 matched baseline). The last of two
+  16-byte copies starts at `logical_end-12`, so exactly four bytes land on the
+  next chunk's size field (`p+24` for usable 24, `p+40` for usable 40), never
+  on a live `aiMesh` member; fourteen forged size values all abort and a later
+  8-byte `operator new` inside `ImportMeshes` faults. No clean-import control
+  or grooming was found. Raw matrix and source:
+  `lab/frontier/assimp2shell/placement/evidence/w4-negative.log`,
+  `harness/placement_probe.cpp`. Negative only; rung-4 write and witness #3277
+  unchanged.
+- **Munt W179, chosen-byte allocator metadata and watchpoint negative**
+  (`6badbb8`, replay `db81c42`): after `real/build_and_run.sh`, run
+  `cd lab/frontier/munt2shell/real && sh shape_probe.sh && sh watch_probe.sh`
+  (`watch_probe_multi.gdb` covers four 8-byte windows). Shaping eight bytes at
+  source offset 32776 to little-endian `0x10001` survives the real copy:
+  `mode=shape grows=1`, `delta=32784`, then harness `malloc(32)` returns
+  `buf+32784` and rewrites the forged size to `0x31`; unshaped attack aborts
+  `rc=134` (`malloc(): corrupted top size`), safe and all fixed legs are
+  `rc=0` with `grows=0`. Watchpoints recorded zero in-library reads before the
+  abort. Author clean-archive replay of `6badbb8` (pinned tarball the only
+  ignored input) matched all seven rc/header cases and both watchpoint runs;
+  not a witness verdict. No upstream object targeted, no pointer/IP, command,
+  host or wire; grade unchanged.
+- **Imgproxy W2, fine-geometry TIFF over HTTP** (`5d5b455`, replay `4a1977f`):
+  `python3 lab/frontier/imgproxy2shell/provision/http_probe.py <imgproxy-binary>
+  <libvips-libdir> <tag> [timeout]` starts a source server on 127.0.0.1:18081
+  and imgproxy on 127.0.0.1:18080; the `fine_tiff` case is
+  `rs:fill:16:16/f:tiff/plain/fine.tif` with the 154-byte
+  `fine.tif` (`sha256=c3e12050…157d44`, `ls=2^32-16`). Vulnerable 8.18.2:
+  `safe=200`, `manyband=500`, three crafted TIFFs time out (8.06–8.09 s);
+  fixed 8.18.2 + patch: `safe=200`, all crafted `500` in <2 ms, with
+  `image: dimension overflow` for `fine.tif`. Pinned v4.0.0 source gives no
+  TIFF thumbnail (`SupportsThumbnail: false`) and no shrink-on-load route, so
+  the ~8.59 GB full image stalls rather than reaching `vips_region_paint`.
+  Logs `provision/http-w2fine-{vuln,fixed}.log`. Author `git archive 5d5b455`
+  replay with a 6 s timeout reproduced the controls (fine_tiff 6.11 s); no
+  paint frame, chosen-byte write, pointer, ASan report or witness. Grade
+  unchanged: ICO rungs 1-4, TIFF limb rung 4 at header/entry only, r5 UNKNOWN.
+- **FontForge W196 staged; replay hash NIT** (`13a2a94`, `e5e4a65`, `024790a`):
+  `cd lab/frontier/fontforge2shell && ./run-all.sh`, or from a clean archive of
+  `e5e4a65` as in `REPLAY.md`. Expect `asan-attack 1`, `asan-fixed 0`,
+  `asan-safe 0`, `plain-attack 134`, `plain-fixed 0` and gdb bytes
+  `4d 49 53 00` at `encs-4`; the fourth byte is structurally zero because the
+  pinned expression is `(i+min2)*256 + min1` with 16-bit fields. A docs replay
+  at 04:51Z from `git archive e5e4a65` reproduced the matrix and those bytes.
+  The receipt's normalized hash `56fd8ada…5633bb` cannot be reproduced by its
+  own documented command: `grep -E '^asan-|^plain-|^normalized gdb' … |
+  sha256sum` gives `320bc5f773e5d25a1077a8676c6cd5acee05099f224049633287df1a89b90094`
+  on both the tracked `evidence.log` and the clean replay. Record the NIT;
+  the RC/byte equivalence is observed, the quoted hash is not. Direct-call
+  rungs 1-4 only, no real build/import path, witness or rung 5.
+- **LibreCAD W196 screened, no recipe** (`e7027c5`): pinned v2.2.1.6
+  `rs_filterdxf1.cpp` and fix `4e51048…` under `lab/frontier/librecad2shell/pinned/`;
+  no build or trigger was run. The claim is a fixed NUL underwrite from a
+  64-bit-to-32-bit size narrowing near 4 GiB; real-file reachability and the
+  `dos2unix()` consumer's behavior after the metadata corruption are UNKNOWN.
+  No window, witness or admission row.
+- **Cjose W189, no wire route to the groomed hole** (`bde3c72`): with the W184
+  mod_auth_openidc 2.4.15.1 + cjose v0.6.2.4 build under gdb, load
+  `lab/frontier/cjose2shell/w2/gdb-cek-provenance.cmd`, then
+  `python3 probe-idtoken-chosen.py preserve` (GET 302, POST 400). Raw log
+  `w2/evidence/gdb-cek-provenance.log`, hashes in `…-SHA256SUMS`: state-cookie
+  CEKs release at `0x555555674740`, the vulnerable id_token CEK is
+  `0x5555556992a0` (~150 KiB away, not a reused hole); forward words hold no
+  code or heap pointers, `enc` stays ~3968 bytes behind under the chosen-wrap
+  config. Full ASLR and a PIE module leave no wire-derived counterpart to
+  W188's absolute-address marker. Negative for wire grooming, no new rung.
+- **Modauthoidc W20, kernel-recorded harness PC** (`187d7c6`): no rebuild;
+  from `lab/frontier/modauthoidc2shell/realobj`, six trials of
+  `MO_TOKEN_LEN=65000 timeout 15 ./pl-vuln read 0` with `journalctl -k`
+  (`dmesg` is denied here) plus three each of `pl-fixed` and `pl-release`.
+  Four rc-139 trials logged distinct ASLR bases with IP low bits `0x563` and
+  `error 7`; the ELF text LOAD starts at vaddr `0x1000`, so IP `0x1563`
+  symbolizes to `oidc_state_cookies_parse_token` at pinned
+  `state.c.4301b536:219`, with `objdump`'s `movb $0x0,(%rax)` and byte-exact
+  `Code:` stream. Controls were 3/3 clean. Raw:
+  `realobj/evidence/kernel-pc/README.md`. Debugger-free attribution only;
+  live-wire PCs stay debugger-observed, the byte stays NUL, grade unchanged.

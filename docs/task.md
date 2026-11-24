@@ -9759,3 +9759,37 @@ request #3156 unanswered.
   five binaries and repeated 5/5 expected RCs plus the same gdb bytes;
   normalized transcript `56fd8ada…5633bb` byte-exact
   (`lab/frontier/fontforge2shell/REPLAY.md`). Not a witness verdict.
+
+### 2026-11-24 04:1x–04:5xZ — eleven edges folded: one staged lane, closed lanes, replay NIT
+
+- Frontier W196 staged fontforge2shell (CVE-2026-135295, FontForge <=
+  20251009, fix `65e80b5`): truncated PCF BDF_ENCODINGS makes `glyph=-1`,
+  bypassing the lower guard and writing a file-derived word before `encs`.
+  Direct-call rungs 1-4 only, no real build/GUI import/witness/r5;
+  FRONTIER-STAGED, no admission or mind. `e5e4a65` dropped the build artifacts;
+  `024790a` added the author replay receipt.
+- Docs bounded replay at 04:51Z: clean `git archive e5e4a65` rebuilt the five
+  binaries and gave 5/5 expected RCs plus gdb `4d 49 53 00` at `encs-4`.
+  The receipt's normalized hash `56fd8ada…5633bb` is NOT reproducible by its
+  own documented grep: both the tracked `evidence.log` and the replay hash to
+  `320bc5f7…940094`. Recorded as a NIT in README, repro and the lane index;
+  no grade change. The RC/byte equivalence itself is observed.
+- Frontier W196 screened librecad2shell out (CVE-2026-135294): pinned v2.2.1.6
+  DXF1 `file.size()` narrowing yields a fixed NUL underwrite near 4 GiB, with
+  no build, bytes, window or witness. Repro gets a "(screened out)" row, no
+  README achievement row; real-file reachability stays UNKNOWN.
+- Assimp W4 (`425fcb5`) closed the live-aiMesh placement lane as a measured
+  negative: the overrun is exactly four bytes onto glibc chunk metadata,
+  fourteen forged sizes abort, no clean-import control exists. Rung-4 write
+  and witness #3277 stand. Munt W179 (`6badbb8`/`db81c42`) forged a real
+  top-chunk size so the next harness malloc landed at `buf+32784`, but
+  watchpoints saw no in-library reads; allocator metadata, not an upstream
+  object, grade unchanged.
+- Imgproxy W2 (`5d5b455`/`4a1977f`) drove a fine-geometry TIFF over real
+  loopback HTTP: vulnerable timeouts, fixed `image: dimension overflow`, no
+  TIFF shrink-on-load or thumbnail route to the paint frame. Cjose W189
+  (`bde3c72`) measured no wire route to W188's groomed hole — CEK provenance
+  keeps it in top chunk under ASLR/PIE. Modauthoidc W20 (`187d7c6`) attributed
+  the harness :219 PC from the kernel SIGSEGV record without a debugger;
+  live-wire PCs remain debugger-observed. All are author-only grade-neutral
+  limbs; rows and recipes updated, no rung cell moved.
