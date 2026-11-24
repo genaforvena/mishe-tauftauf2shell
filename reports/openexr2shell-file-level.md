@@ -1661,3 +1661,67 @@ into `/tmp/w191-clean`, with the gitignored `src/`, `build-vuln-plain`,
 the live checkout. `sh harness/w191-abort-cause-check.sh` printed `RESULT PASS`
 rc 0 and all five evidence hashes matched the working tree byte-for-byte.
 Author replay, not a witness verdict; grade and rung-5 status unchanged.
+
+## W192: in-bounds COPY1 still puts file bytes in a live tcache `next` (2026-11-24)
+
+W191 left one open geometry: COPY1 in bounds *and* a live tcache head inside
+COPY2. Prediction: with `unpacked_size=U=4N` the 4N-byte COPY1 no longer
+damages the unpacked chunk's header, so a forged tcache entry can be
+consumed. Prediction PARTIALLY FAILED. The geometry exists and file bytes
+reach the live `next` word, but the process still aborts from COPY2's own
+out-of-bounds header damage and no malloc consumes the entry.
+
+Method: `cases/make_poc_mixed_full.py` at N=768, U=4N=3072, fill 0x5a
+(PoC sha256 `be6c5a10feea3c5a0198d79964692e7d7ca45aa5994d1eca92bc64be1417984f`).
+`harness/w192-u4n-head-sweep.py` swept 21 N values at fixed-length paths with
+`set disable-randomization on` and a sink-entry tcache enumeration; heads
+appeared for N=16..896 and fell inside COPY2 only at N=768 and N=896
+(`HITS=[768, 896]`, `evidence/w192-u4n-head-sweep.out` sha256
+`79ba9ea5c99292c0bd16c2c27c3e3a773d85da671c1d67688e640af8007cec86`).
+At N=768 the unmodified `exrcheck -c` under gdb gave
+`WINDOW_HEADS=[(7, 4304)]`, `COPY1 dst-out=+0 len=3072` (in bounds),
+`COPY2 dst-out=+3072 len=1536`, `NEXT-BEFORE-VAL=0x0000000555555828`
+(glibc safe-linked pointer) and `NEXT-AFTER-VAL=0x5a5a5a5a5a5a5a5a`:
+file-chosen bytes in a live tcache `next`, with no COPY1 header damage this
+time. The live prefix dumped before COPY2
+(`work-w192/pre-copy2-n0768.bin`) has a stable first 16 bytes (sha256
+`c9536f755e345a275a9a663061bf1571d92dfc55f0dce4f38a7e8826c70936d7`);
+bytes 24..31 (the tcache safe-link key) vary between processes, as in W191.
+The plain consumer still reports `double free or corruption (!prev)` (rc 134):
+COPY2 overwrites the next-chunk header at `dst+4N`, so the freed unpacked
+buffer's `nextinuse` bit is cleared.
+
+Second negative: `harness/w192-forge.py` tried to preserve the live prefix
+and change only the head's `next` word. The COPY2 source is 2-byte
+unshuffled (even/odd byte planes) before the sink, so an arbitrary desired
+byte string D must be written as `D[0::2] + D[1::2]`; a naive copy produced
+scrambled metadata. Six passes at a fixed path each measured the live dump,
+set 0x4141414141414141 at the currently observed head, inverse-shuffled and
+regenerated. The compressed frame length changes with content and moved the
+head between `dst+3904` and `dst+3920`, so the chosen word never landed on
+the head in the same run; the final plain consumer exits rc 139 (SIGSEGV).
+No malloc from a poisoned entry was observed; the iteration evidence's full
+hash is not byte-stable because the safe-link key varies, so the replay
+asserts its stable fields only.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w192-inbounds-check.sh` prints `RESULT PASS` rc 0, byte-identical in
+two consecutive runs. It pins the generator and script hashes, the N=768 PoC,
+the head/copy/next observations, a rc-0 valid-file control, a fixed 3.5.3 rc-1
+`bad` control and an ASan `READ of size 3072` at pinned `internal_zstd.c:472`.
+Stable evidence hashes: gdb
+`543258623ba1b4f8c58f86f6a1a24f4220cffaa1d2b4ea448de23309b7b4acb6`,
+plain `6e8bece91fef33004717c61c162acbdaa9b7031abfa73671822158947a9fe250`,
+valid `eed5e48b7ec1868c8f4b3679f01a048ac6b24dbfcbe27c3945a8e592333cc394`,
+fixed `e839f1a149328b30a39671fc215c8fadc84a5cdb0a5bdd75d0207c94fa16f944`,
+ASan `96c4207d200868a4d9c800cb06c4ad8e93121d19a282438b0fe94cec4108c3b0`,
+sweep `79ba9ea5c99292c0bd16c2c27c3e3a773d85da671c1d67688e640af8007cec86`,
+forge-final `2e0f9a1f9f9a6c6fc844109ce21223644f0747ac3fb6bc2db8170fe29a7f9684`.
+
+Disposition: keep as a causal negative for steering and a positive for
+rung 4 — file-chosen bytes in live tcache metadata with COPY1 in bounds in
+one pinned 3.5.2 build, ASLR off, one forged geometry, local file path only.
+No pointer consumed, no control-flow diversion, no command, marker, socket or
+wire; no witness verdict; rung 5 stays UNKNOWN. Would change my mind: an
+observed malloc from the forged entry, a chosen code pointer/IP, a wire-fed
+affected process, or a witness counterexample.
