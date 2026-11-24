@@ -23,37 +23,25 @@ Stock 2.3.1 has the immediate writeback at `engine-gpg.c:1501`.
 
 ## Build commands
 
-One command from a clean archive: `sh build-real.sh`. It fetches and
-hash-checks the four tarballs, applies the pinned fix to a copied tree,
-builds the three ASan libraries and links the three drivers. The manual
-steps below are what it automates (paths are absolute because the autotools
-prefix is recorded in generated scripts):
+From the repository root, one command provisions and builds everything;
+`build-real.sh` is the canonical route and needs only `curl`, `tar`,
+`clang`, autotools and Python 3. The prefix is absolute because the
+generated autotools scripts record it.
 
 ```
-HERE=$PWD
-PREFIX=$HERE/prefix
-FLAGS="CFLAGS=-fsanitize=address -fno-omit-frame-pointer -g -O0 LDFLAGS=-fsanitize=address"
-tar xjf src/libgpg-error-1.50.tar.bz2
-tar xjf src/libassuan-2.5.7.tar.bz2
-tar xjf src/gpgme-2.2.0.tar.bz2
-tar xjf src/gpgme-2.3.1.tar.bz2
-cp -a gpgme-2.2.0 gpgme-fixed
-(cd gpgme-fixed && patch -p1 --forward < ../pinned/fix.patch)
-for d in err-build assuan-build gpgme-asan-build gpgme-fixed-build gpgme-231-build; do mkdir -p $d; done
-(cd err-build && ../libgpg-error-1.50/configure --prefix=$PREFIX --enable-static --disable-shared CC=clang $FLAGS)
-(cd assuan-build && ../libassuan-2.5.7/configure --prefix=$PREFIX --enable-static --disable-shared --with-libgpg-error-prefix=$PREFIX CC=clang $FLAGS)
-(cd gpgme-asan-build && PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig ../gpgme-2.2.0/configure --prefix=$PREFIX --enable-static --disable-shared --with-libgpg-error-prefix=$PREFIX --with-libassuan-prefix=$PREFIX CC=clang $FLAGS)
-(cd gpgme-fixed-build && PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig ../gpgme-fixed/configure ...same flags...)
-(cd gpgme-231-build && PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig ../gpgme-2.3.1/configure ...same flags...)
-ASAN_OPTIONS=detect_leaks=0 make -C err-build -j2 && make -C err-build install
-ASAN_OPTIONS=detect_leaks=0 make -C assuan-build -j2 && make -C assuan-build install
-ASAN_OPTIONS=detect_leaks=0 make -C gpgme-asan-build -j2   # tests linkage fails; lib is complete
-... likewise for gpgme-fixed-build and gpgme-231-build
-clang -fsanitize=address -fno-omit-frame-pointer -g -O0 \
-  -I gpgme-asan-build/src -I prefix/include -o status-trigger status_trigger.c \
-  gpgme-asan-build/src/.libs/libgpgme.a prefix/lib/libassuan.a prefix/lib/libgpg-error.a -lpthread -ldl
-# substitute gpgme-fixed-build and gpgme-231-build for status-trigger-fixed/-231
+cd lab/frontier/gpgme2shell/realbuild
+sh build-real.sh
+sh run-real.sh
 ```
+
+`build-real.sh` fetches and sha256-checks the four tarballs into `src/`,
+extracts them, copies `gpgme-2.2.0` to `gpgme-fixed` and applies
+`../pinned/fix.patch`, then configures libgpg-error, libassuan and the three
+GPGME trees with `CC=clang CFLAGS='-fsanitize=address -fno-omit-frame-pointer
+-g -O0' LDFLAGS='-fsanitize=address'`, static only, prefix
+`realbuild/prefix`. It builds/installs the two dependencies and the three
+GPGME static libraries with `ASAN_OPTIONS=detect_leaks=0`, then links the
+three drivers against `libgpgme.a`, `libassuan.a` and `libgpg-error.a`.
 
 `ASAN_OPTIONS=detect_leaks=0` is needed only while building: libgpg-error's
 `yat2m` doc tool leaks under LeakSanitizer. Each GPGME `make` ends with a

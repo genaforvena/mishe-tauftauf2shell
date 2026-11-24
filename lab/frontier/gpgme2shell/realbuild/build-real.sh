@@ -43,7 +43,7 @@ if [ ! -f gpgme-fixed/src/engine-gpg.c ] ||
    [ "$(sha256sum gpgme-fixed/src/engine-gpg.c | cut -d' ' -f1)" != "$patched" ]; then
   rm -rf gpgme-fixed
   cp -a gpgme-2.2.0 gpgme-fixed
-  (cd gpgme-fixed && patch -p1 --forward < ../pinned/fix.patch)
+  (cd gpgme-fixed && patch -p1 --forward < "$HERE/../pinned/fix.patch")
 fi
 
 FLAGS="CFLAGS=-fsanitize=address -fno-omit-frame-pointer -g -O0"
