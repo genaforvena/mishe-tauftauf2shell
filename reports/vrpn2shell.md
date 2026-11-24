@@ -1316,6 +1316,56 @@ independently replayed. Ports 15361-15369 were loopback and freed; no
 `vrpn_server` was left running. Do not resweep the W26 sender set or the W27
 indices; the new scripts and digests are in `PROVENANCE.md` W29.
 
+## W30 — sender -3 aliases the live TCP input pointer (2026-11-24 ~20:2xZ)
+
+W29 mapped only the aligned `.name` slots before `d_senders.d_entry[0]`; the
+`+8/+12` words of those out-of-bounds records were not mapped. With
+`d_entry[0] = endpoint+65880` and `vrpn_Endpoint_IP::d_tcpInbuf` at +65840
+(W29's `ptype /o`), record k=-3 has its `.name` at +65832 — zero in W29's scan,
+so `addRemoteEntry()` allocates a fresh buffer — and its `remote_id`/`local_id`
+at +65840/+65844, i.e. the live `d_tcpInbuf` pointer. New
+`wire_xlation_followup.py` sends a cookie, a SENDER message with chosen sender
+-3, then a second benign SENDER message; `probe-xlation-tcpinbuf.sh` breaks at
+`:405`, `:4562`, `:427` and `:4228` to print the slot, the dispatcher's sender
+IDs, the post-store pointer and the body buffer of each TCP message.
+
+`out-w30-smoke/gdb.log` (port 15382, plain -O0 vulnerable
+`5cf49457...`) records PRE405 `slot=0x...3348 slotdata=(nil)
+plus8=0x5555556f3380`, POST427 `plus8=0x2fffffffd tcpinbuf=0x2fffffffd
+remote_id=-3 local_id=2`, then the second message's
+`GETBODY buf=0x2fffffffd ceil_len=104` followed by
+`Can't read body: Bad address` and `TCP handling failed, dropping connection`.
+The pointer's low 32 bits are the wire sender, its high 32 bits the
+server-assigned `local_id`. This is a two-packet pre-auth DoS on a build where
+W26's single message -3 survived; it writes through `d_tcpInbuf` only if the
+poisoned address is mapped, which it is not here.
+
+The dispatcher table is `SENDERID[0]=VRPN Control`,
+`SENDERID[1]=vrpn_Forwarder_Brain`; a first message naming `VRPN Control`
+gets `local_id=0`. `out-w30-lid0b/gdb.log` (port 15378, same build, name
+`VRPN Control`, NUL index 20) then shows POST427
+`plus8=0xfffffffd tcpinbuf=0xfffffffd` and the same `Bad address` on the
+follow-up. So the high half can be driven to zero by a wire name, but the
+alias fixes the low half at `-3`; no mapped destination is reachable.
+
+General barrier for this record shape: any OOB index must be negative (the
+upper-bound check rejects `>= 2000`), so the wire-written low 32 bits are
+either a value below 2000 or has the sign bit set (`>= 0x80000000`); with a
+high half of 0..2000 the combined address is never a mapped user-space
+address on this host. W27's alignment barrier and this low-half barrier are
+independent; together they close the chosen-destination lane for
+`addRemoteEntry()` on these builds.
+
+Controls: `out-w30-fixed/gdb.log` (port 15372, fixed plain
+`10e581e8...`) shows the same POST427 `tcpinbuf=0x2fffffffd` and the same
+connection drop — `addRemoteEntry()` is outside the CVE fix in both builds.
+`out-w30-safe/gdb.log` (port 15373, sender 4 + follow 4) shows both bodies at
+the normal `buf=0x5555556f3380`, no poisoned pointer and no drop. Grade
+unchanged: chosen offset into live state and a two-packet DoS, no chosen
+destination address, no command, no rung 5. Author self-observation, not
+independently replayed. Ports 15371-15382 were loopback and freed; no
+`vrpn_server` was left running. Do not resweep sender -3 on these binaries.
+
 ## Limits and next work
 
 - W25 closes the negative-index lane on stock `-O0`: indices -1 through -128
@@ -1350,6 +1400,14 @@ indices; the new scripts and digests are in `PROVENANCE.md` W29.
   bits are the server-assigned `local_id`. No full chosen address, no command,
   no rung 5. Both builds affected; author self-observation, not replayed. Do
   not resweep sender -2 on these binaries.
+- W30 maps the `+8/+12` words W29 did not: sender -3's OOB record lands on
+  the live `d_tcpInbuf` pointer and stores `remote_id`/`local_id` into it.
+  A second TCP message then uses the poisoned pointer as its `recv()`
+  destination and the connection is dropped (`Bad address`), on both builds;
+  a sender `VRPN Control` drives `local_id` to 0, but the alias fixes the low
+  half at -3, so the resulting address is still unmapped. No chosen
+  destination, no command, no rung 5. Author self-observation, not replayed.
+  Do not resweep sender -3 on these binaries.
 - W24 found a second source defect: `payload_len` 0-3 underflows the `strncpy`
   length at vulnerable `:4548`/`:4476` and fixed `:4552`/`:4480`. ASan reports
   `negative-size-param (size=-4)`; glibc 2.39 performs a zero-store, so a

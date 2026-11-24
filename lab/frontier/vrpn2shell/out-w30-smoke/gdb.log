@@ -1,0 +1,15 @@
+Breakpoint 1 at 0x40af9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 405.
+Breakpoint 2 at 0x49dd4: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4562.
+Breakpoint 3 at 0x40bb2: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 427.
+Breakpoint 4 at 0x49404: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4228.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+GETBODY buf=0x5555556f3380 ceil_len=104 fd=6
+DISPATCH sender_name=BBBB local_id=-1 numSenders=2
+SENDERID[0]=VRPN Control
+SENDERID[1]=vrpn_Forwarder_Brain
+PRE405 slot=0x555555703348 slotdata=(nil) plus8=0x5555556f3380 plus12=21845 this=0x555555703370
+POST427 slot=0x555555703348 slotdata=0x5555556f18d0 plus8=0x2fffffffd tcpinbuf=0x2fffffffd remote_id=-3 local_id=2
+GETBODY buf=0x2fffffffd ceil_len=104 fd=6
+vrpn: vrpn_Endpoint::getOneTCPMessage: Can't read body: Bad address
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)
