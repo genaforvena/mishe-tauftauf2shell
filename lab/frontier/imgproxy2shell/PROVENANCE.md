@@ -660,7 +660,7 @@ harness error is preserved here, and the corrected path replayed cleanly.
 Replay logs were not committed; the throwaway tree was removed. This is the
 author's replay, not witness acceptance.
 
-## W8 — wire-only partial tcache-next retarget (2026-11-24 13:49-14:01Z, unwitnessed)
+## W8 — wire-only partial tcache-next retarget (2026-11-24 13:49-14:01Z, witness W201 ESTABLISHED AS LABELED)
 
 W7 established that a short source makes `read_full` copy only the bytes the
 source has before `icoload.c:161-164` exits. W8 uses that to choose the
@@ -718,8 +718,9 @@ has HTTP 500 and `vips_foreign_load_ico_header: ICO image data is too large`;
 (`63d47ec5b346cb272ada6f59fb23e59d2b2ee0f0f52bf6b22d52f938788040b9`)
 has zero `GDB_HIT` and a live process. No wire-only absolute address, no
 key derivation, no code-pointer write, no marker execution and no r5.
-Author finding, unwitnessed; the surviving plain runs do not prove that the
-retargeted head was consumed by a later allocation in an unsanitized process.
+Author finding replayed by witness W201 and graded ESTABLISHED AS LABELED
+(section below). The surviving plain runs do not prove that the retargeted
+head was consumed by a later allocation in an unsanitized process.
 
 ### Clean-archive replay (14:03-14:05Z)
 
@@ -733,3 +734,37 @@ change and the matching tcache head (e.g. decoded/head `0x7fff80050058`),
 three plain runs survived with HTTP 500. The remaining runs kept their
 top-chunk/live-data negatives in that outdir. Logs were not committed; this
 is the author's clean-archive replay, not witness acceptance.
+
+### Witness W201 — clean-archive replay (14:01-14:13Z, tape #3660)
+
+The witness extracted `git archive 59d008f6 lab/frontier/imgproxy2shell` into
+`/tmp/w201-imgproxy`, symlinked only the two gitignored CLI binaries and the
+sibling `libvips2shell` tree, and found ports 18180/18181 free. Both probe
+hashes (`f03dbc44…2f0ca7f`, `2e69125a…9dce6f26`) and all seven committed W8
+log hashes matched exactly. Result: `W8_RESULT PASS=4 FAIL=0 PARTIAL_NEXT=4
+PLAIN_SURVIVAL=3` — four of six gdb runs had the 0x35 victim at the live head
+and three of six plain runs survived, against the author's 3/6 and 2/6;
+layout is stochastic and all negatives were kept in `/tmp/w201-out`.
+
+Decisive `w8-gdb5.log`: base `0x7fff900583d0`, actual `0x7fff900583de`, size
+`0x35` before and after; `next` at base+0x20 went from `0x00007ff86ffc8128`
+to `0x00007ff86ffc0000`, with the high six bytes intact. Key
+`pos>>12=0x7fff90058`; decoded `0x7fff90050058` equalled the `GDB_TCACHE_POST`
+head at count 6 after a natural `malloc(0x20)` returned the victim.
+`gdb1` repeated the transition at another base (decoded == head
+`0x7fffa00b00b0`). The gdb script used only `set $var` and `x/`, wrote no
+memory, and reached malloc by `continue`, not `call`.
+
+Counterexample hunt: three fresh runs with `LOW=0x1234` wrote exactly `0x1234`
+into the spill target's low 16 bits (e.g. `0x00007fff8c000400` →
+`0x00007fff8c001234`, high bytes preserved), showing the bits follow the
+wire rather than a natural zero; on those layouts the spill was not the live
+head, so no retarget occurred. gdb3 (malloc breakpoint hit `0x1f6efc`, no
+fields) and gdb6 (pre-size `0x25` → `0x35`) were correctly rejected and
+preserved. Fixed controls: plain hostile HTTP 500 with
+`ICO image data is too large`, gdb zero GDB_HIT, benign 200, process alive.
+Limit preserved: the following `malloc(0x20)` did NOT return the decoded
+head (`M2_RET` differs), so no consumption by a later allocation in an
+unsanitized process is proved. Verdict ESTABLISHED AS LABELED, no
+contradiction, no grade change, no r5; W7's no-wire-only-key boundary stays
+closed.

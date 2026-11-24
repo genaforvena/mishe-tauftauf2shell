@@ -19,10 +19,11 @@ ESTABLISHED AS LABELED on a clean-archive replay; the live HTTP consumer
 limb stays at rung 4 with no r5. W7 remains an author finding: W200 agrees
 its source-bound negative closes the wire-only key route but did not
 replay W7 itself.
-**W8 (2026-11-24 14:01Z, author-only, unwitnessed):** a 20-byte-body ICO
-changes only the low 16 bits of a live safe-linked tcache `next` from wire
-bytes, and the decoded value becomes the live allocation head; no key
-derivation, absolute address, code-pointer write or r5.
+**Witness W201 (2026-11-24 14:13Z, tape #3660):** W8 is ESTABLISHED AS LABELED
+on a clean-archive replay; no contradiction, no grade change, no r5. The
+wire-only low-16 relative tcache-`next` retarget holds, but no later
+allocation through the wire head was proved and W7's no-wire-only-key
+boundary stays closed.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -333,7 +334,7 @@ established. A clean `git archive 6f8581a7` replay reproduced the pattern and
 PNG legs (digests and the initial harness-path failure are in PROVENANCE W7).
 This is an author finding, not a witness verdict.
 
-## W8 — wire-only partial tcache-next retarget (author-only, unwitnessed)
+## W8 — wire-only partial tcache-next retarget (witness W201 ESTABLISHED AS LABELED)
 
 W7's short-source result implies the overflow length is attacker-chosen. A
 42-byte ICO with a 20-byte body writes a preserved victim size (`0x35`) and
@@ -351,7 +352,37 @@ unmeasured live key and heap base, no wire-only key is derived, and no later
 allocation through the wire head was proved in an unsanitized process.
 Grade stays rung 4; no marker, code-pointer write or r5. Commands, digests,
 curated logs and negatives are in `lab/frontier/imgproxy2shell/PROVENANCE.md`
-(W8). Author finding, not a witness verdict.
+(W8). Witness W201 replayed the claim from a clean archive and graded it
+ESTABLISHED AS LABELED, keeping both the relative-retarget and
+no-consumption limits below; not an upgrade to r5.
+
+## Witness W201 — clean-archive replay of W8 (2026-11-24 14:13Z, tape #3660)
+
+The witness replayed `git archive 59d008f6 lab/frontier/imgproxy2shell` with
+only the two gitignored CLI binaries and the sibling libvips tree symlinked.
+Both probe hashes (`f03dbc44…2f0ca7f`, `2e69125a…9dce6f26`) and all seven
+committed W8 log hashes matched. `W8_RESULT PASS=4 FAIL=0 PARTIAL_NEXT=4
+PLAIN_SURVIVAL=3` — four of six gdb runs put the 0x35 victim at the live head
+and three of six plain runs survived (author: 3/6 and 2/6; layout is
+stochastic and all negatives were kept in `/tmp/w201-out`). Decisive
+`w8-gdb5.log`: size 0x35 before/after, `next`
+`0x00007ff86ffc8128` → `0x00007ff86ffc0000` (high six bytes intact), key
+`pos>>12=0x7fff90058`, decoded `0x7fff90050058` equal to the post-malloc
+tcache head at count 6 after a natural `malloc(0x20)` returned the victim;
+`gdb1` repeated the transition at another base. The gdb script only used
+convenience variables and `x/`, with no memory writes, and malloc was
+reached by `continue`, not `call`.
+
+Counterexample hunt: three fresh runs with `LOW=0x1234` wrote exactly that
+value into the spill target's low 16 bits (for example
+`0x00007fff8c000400` → `0x00007fff8c001234`), so the bits follow the wire
+rather than a natural zero; those layouts did not put the spill at the live
+head. gdb3 (malloc breakpoint at `0x1f6efc`) and gdb6 (pre-size `0x25` →
+`0x35`) were rejected and preserved. Fixed control: HTTP 500 with
+`ICO image data is too large`, zero GDB_HIT, process alive. Limit kept: the
+following `malloc(0x20)` did not return the decoded head, so no later
+allocation in an unsanitized process is proved. Verdict ESTABLISHED AS
+LABELED, no grade change, no r5; W7's no-wire-only-key boundary stays closed.
 
 ## What would change my mind
 
