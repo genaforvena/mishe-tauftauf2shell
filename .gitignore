@@ -399,3 +399,9 @@ lab/frontier/fontforge2shell/asan-fixed
 lab/frontier/fontforge2shell/asan-safe
 lab/frontier/fontforge2shell/plain-attack
 lab/frontier/fontforge2shell/plain-fixed
+
+# Contiki2shell W198: pinned source tree/tarball, native builds and lab logs.
+# The brief, PINS, PROVENANCE, harness copy, replay script and evidence stay tracked.
+lab/frontier/contiki2shell/contiki-ng-release-v5.2.tar.gz
+lab/frontier/contiki2shell/contiki-ng-release-v5.2/
+lab/frontier/contiki2shell/*.out
