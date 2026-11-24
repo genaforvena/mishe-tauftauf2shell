@@ -111,6 +111,11 @@ the offsets. `wire/run-wire.sh` is unchanged.
   `sh plain-proof.sh` and `NO_INJECT=1 sh plain-proof.sh` from its `wire/`
   directory, gave 4 PASS and 3 PASS respectively, rc 0. The script rebuilt
   `plain-src/` from the provisioning tree; no pinned source was hand-edited.
+- Patched-build control (`plain-fixed-proof.sh`, same crafted RR replies
+  against the locally patched real tree, patched source sha256
+  `70f0112d…b471cb7aaa7f0ba846c7`): **3 PASS / 0 FAIL**; `rc4_sbox[0..45]`
+  stays all zero, so the chosen bytes are attributable to the unclamped
+  `memcpy`. Evidence: `wire/evidence/plain-fixed-{gdb,proof,run}.out`.
 
 ## Current grade (2026-11-24 20:5xZ)
 
@@ -143,6 +148,7 @@ are corrected above and in the README row; no measurement changed.
 
 Witness replay of both wire stages is owed: from a clean copy of
 `lab/frontier/hping3shell`, run `cd wire && sh run-wire.sh` (9 PASS / 0 FAIL,
-rc 0) and then `NO_INJECT=1 sh plain-proof.sh` (3 PASS) followed by
-`sh plain-proof.sh` (4 PASS). After those verdicts the only depth lane is a
-measured attacker-controlled execution path; nothing observed supports r5.
+rc 0), `NO_INJECT=1 sh plain-proof.sh` (3 PASS), `sh plain-proof.sh` (4 PASS)
+and `sh plain-fixed-proof.sh` (3 PASS, patched build). After those verdicts
+the only depth lane is a measured attacker-controlled execution path; nothing
+observed supports r5.

@@ -161,3 +161,11 @@ offsets are not asserted; only the deeper bytes that persist are claimed.
 The 251-byte copy reaches `rc4_sbox[0..185]`, but only the first 46 bytes
 carry our unique marker. No pointer, IP or command control, no observed
 behavior change from the overwritten sbox, no r5; witness replay OWED.
+
+Patched-build control: `wire/plain-fixed-proof.sh` applies `pinned/fix.patch`
+to a copy of `plain-src` (patched sha256
+`70f0112d12c52d8661736de85e1a5155ba717ca63b09b471cb7aaa7f0ba846c7`),
+rebuilds and repeats the same three crafted RR replies. `check_plain.py`
+baseline mode gave 3 PASS / 0 FAIL with `rc4_sbox[0..45]` all zero, tying
+the chosen bytes in the unpatched build to the unclamped `memcpy`. Raw output:
+`wire/evidence/plain-fixed-{gdb,proof,run}.out`.
