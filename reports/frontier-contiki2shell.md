@@ -64,7 +64,8 @@ forwarding path. The native platform reported "Failed to open tun device
   `AddressSanitizer: global-buffer-overflow`, `WRITE of size 1232`, first
   invalid byte `0 bytes after global variable 'uip_aligned_buf' ... of size
   1280`, 32 bytes before `uip_appdata`; top frame
-  `data_message_expiration` at `mpl.c:981`, called from
+  `data_message_expiration` at `mpl.c:979` in the pristine pinned tree
+  (the instrumented author build reported `:981`), called from
   `trickle-timer.c:275 fire` → ctimer → native platform main loop
   (`attack-asan.out`).
 - Fixed control: PR #3312 hunk applied to the same pristine tree; no ASan
@@ -72,14 +73,25 @@ forwarding path. The native platform reported "Failed to open tun device
 - Safe-input control: vulnerable build with a complete S=3 option
   (`len=18`, HBH total 24 bytes, full 16-byte seed present), no ASan report,
   harness completes (`safe-asan.out`).
-- Under gdb at `mpl.c:981` on a plain `-g -O0` build:
+- Under gdb at `mpl.c:979` in the pristine tree (`:981` in the instrumented
+  transcript `gdb-inspect.txt:34`) on a plain `-g -O0` build:
   `uip_aligned_buf` base `0x55555559b1c0`, extension-length byte 2,
   `size=1232`, copy destination `base+64` (`0x...b200`), copy end
   `base+1296` (`0x...b6d0`) — exactly 16 bytes past the buffer. The last
   16 source bytes are `4d 49 53 48 45 2d 4f 4f 2d 54 41 55 46 21 21 00`
-  (`MISHE-OO-TAUF!!\0`), so chosen bytes land at chosen offsets
-  `base+1280..+1295`. Transcript: `gdb-inspect.txt`.
+  (`MISHE-OO-TAUF!!\0`): 15 chosen ASCII bytes plus a NUL, not 16 arbitrary
+  bytes, so chosen bytes land at chosen offsets `base+1280..+1295`. In this
+  plain layout those 16 bytes land on the `uip_appdata` and `uip_sappdata`
+  globals (ASan inserts 32 bytes of redzone there), not allocator metadata
+  or a live function pointer. Transcript: `gdb-inspect.txt`.
 - `run-all.sh` from a clean bootstrap: **9 PASS / 0 FAIL**.
+- Independent witness replay (W190, 2026-11-24 08:12Z, chat #3443/#3444):
+  clean `git archive HEAD lab/frontier/contiki2shell`, tarball sha256
+  `78133c77…19c95` verified, unmodified `run-all.sh` 9 PASS / 0 FAIL,
+  independent ASan `WRITE of size 1232` at pristine `mpl.c:979` and an
+  independent plain-build gdb with the same 16 marker bytes at
+  `base+1280..+1295`. Verdict CLAIM ESTABLISHED AS LABELED at the in-process
+  scope; no wire, no pointer/IP/command, no r5.
 
 ## Rung assessment
 
@@ -91,9 +103,10 @@ forwarding path. The native platform reported "Failed to open tun device
 - Rung 3 (confirmed corruption): YES — ASan global-buffer-overflow WRITE in
   the real `mpl.c` in a real Contiki-NG native build, not a stand-in struct.
 - Rung 4 (demonstrated impact): PARTIAL — chosen marker bytes at chosen
-  offsets past `uip_aligned_buf` under gdb. No pointer, IP or instruction
-  pointer control; adjacent object is a global buffer, not allocator
-  metadata or a live function pointer.
+  offsets past `uip_aligned_buf` under gdb, landing on the `uip_appdata` /
+  `uip_sappdata` globals in the plain build. No pointer, IP or instruction
+  pointer control; those globals are not allocator metadata or a live
+  function pointer.
 - Rung 5 (remote command execution): NO. No live network process, no
   loopback wire replay, no command, no victim/fixed/safe wire controls.
 

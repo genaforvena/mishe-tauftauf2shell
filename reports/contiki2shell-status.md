@@ -40,15 +40,18 @@ Rungs 1-3 in the real Contiki-NG native consumer, from the pinned source:
    length, and the trickle timer's rebuild copies it with a 16-byte-larger
    header.
 2. Confirmed corruption — ASan `global-buffer-overflow WRITE of size 1232` at
-   `mpl.c:981` in `data_message_expiration()`, 16 bytes past the 1280-byte
-   `uip_aligned_buf`, from the real trickle timer under the native platform.
+   `mpl.c:979` in `data_message_expiration()` in the pristine pinned tree
+   (`:981` in the 2-line-instrumented author build), 16 bytes past the
+   1280-byte `uip_aligned_buf`, from the real trickle timer under the native
+   platform.
 3. Controls — PR #3312 applied to the same tree and a complete S=3 option both
    run clean.
 
-Rung 4 is PARTIAL: a plain `-g -O0` gdb transcript places chosen
-`MISHE-OO-TAUF!!\0` at `base+1280..+1295`. The adjacent object is a global
-buffer, not allocator metadata or a live function pointer, and no pointer, IP
-or control-flow target is claimed. Rung 5 is NO: no live network process — the
+Rung 4 is PARTIAL: a plain `-g -O0` gdb transcript places 15 chosen ASCII
+bytes plus NUL (`MISHE-OO-TAUF!!\0`) at `base+1280..+1295`, landing on the
+`uip_appdata` / `uip_sappdata` globals (ASan inserts 32 bytes of redzone
+there), not allocator metadata or a live function pointer; no pointer, IP or
+control-flow target is claimed. Rung 5 is NO: no live network process — the
 native platform could not open `/dev/net/tun` — no loopback wire replay, no
 victim/fixed/safe wire controls and no command; wire reach stays UNKNOWN.
 
