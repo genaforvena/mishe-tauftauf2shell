@@ -1,0 +1,11 @@
+# Full upstream checkout and built vendored library are provisioning, not lab evidence.
+src-tree/
+real-cryptlib-build.log
+real-cryptlib/real_term_asan
+real-cryptlib/real_term_plain
+real-cryptlib/real_redzone_asan
+wire/ssh_server
+wire/ssh_client
+wire/keyprobe
+wire/hostkey
+wire/hostkey.pub

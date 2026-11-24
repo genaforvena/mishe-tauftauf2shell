@@ -1,0 +1,9 @@
+cryptInit=0
+cryptCreateSession=0 handle=12788
+create channel status=0
+set TERM len=64 status=0
+query status=0 len=64
+copy status=0 len=64
+offsets: terminal=0 line_delay=44 console=48 wordwrap=52
+line_delay=0x56555453 console=0x5a595857 wordwrap[0..7]='ABCDEFGH'
+tail [40..63]: 00 50 51 52 53 54 55 56 57 58 59 5a 41 42 43 44 45 46 47 48 49 4a 4b 4c

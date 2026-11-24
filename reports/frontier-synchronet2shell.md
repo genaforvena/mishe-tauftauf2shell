@@ -73,14 +73,39 @@ ASan sees the field boundary; rung 4 uses the full layout from `sbbs.h:702-705`.
 Both run the same verbatim vulnerable statement. This distinction is part of the
 claim, not a hidden detail.
 
+## Real-cryptlib confirmation (2026-11-24 W1, not a stub)
+
+The full upstream tree at pinned parent `42f586d7` was provisioned from the
+GitHub mirror and its **vendored cryptlib built offline** (`lab/frontier/
+synchronet2shell/real-cryptlib-build.log`, rc=0). New probes in
+`lab/frontier/synchronet2shell/real-cryptlib/` call that real library:
+
+- `evidence/real-redzone-64.out`: ASan `heap-buffer-overflow`, `WRITE of size
+  64`, 0 bytes after an exact 41-byte heap destination. Stack:
+  `cryptGetAttributeString -> attributeCopyParams -> memcpy`. The 40-byte
+  control (`real-redzone-40.out`) is clean. This is rung 3 with the real
+  getter, replacing the earlier stub-contract model.
+- `evidence/real-plain-{64,40}.out`: with the pinned `sbbs.h:702-705` layout a
+  64-byte TERM set on a real SSH client session writes through offsets 44,
+  48 and 52 (`line_delay`, `console`, `wordwrap`); the 40-byte TERM leaves all
+  three zero. The query returns `len=64` and the one-call copy returns
+  `len=64`, i.e. the caller's 41-byte array size is never consulted.
+
+These are direct API measurements, not a wire result. A loopback SSH probe
+under `wire/` has so far failed to deliver an OpenSSH pty-req TERM to a
+cryptlib server (`TERM poll status=-43 len=-1`, client broken pipe; a PEM
+file keyset was rejected with `CRYPT_ERROR_BADDATA`). A cryptlib-to-cryptlib
+client reached the server with channel bytes but ended in protocol errors
+(`ACTIVE status=-16` client, `-41` server). Those negatives are preserved in
+`wire/evidence/`; no wire reach, DoS or rung 5 is claimed from them.
+
 ## Ceiling and cheapest next experiment
 
-Not measured: a real Synchronet build, a real `sbbs_t` object, a real SSH
-handshake or SSH channel-request TERM wire, the claimed thread-block/DoS, any
-pointer/IP control, command execution, witness replay, or rung 5. The TERM
-length cap of 64 and the exact cryptlib attribute semantics on the shipped
-build are advisory/source claims; the harness stub reproduces the documented
-no-size contract (`cryptapi.c:2685`) rather than linking cryptlib. No claim that
+Not measured: a real Synchronet `sbbs3` build, a real `sbbs_t` object, a
+successful SSH channel-request TERM wire, the claimed thread-block/DoS, any
+pointer/IP control, command execution, witness replay, or rung 5. The 64-byte
+TERM and the no-size copy are now measured at the real cryptlib API by direct
+set (see previous section), but not yet from a network pty-req. No claim that
 the adjacent-field overwrite yields code execution: the advisory's own impact
 vector is availability-only (`VC:N/VI:N`).
 
@@ -95,9 +120,10 @@ offsets 44..47, `45 2d 4f 4f` at 48..51 and `54 41 55 46` twice at 52..59.
 hashes differ only in PIDs, ASLR addresses, timestamps, checkout paths and
 build ids. Author replay is not witness acceptance.
 
-Cheapest rung-raising step: build `sbbs3` from the pinned parent tree against
-the platform cryptlib, instrument `answer()`'s TERM path with ASan, and drive a
-loopback SSH client with an oversized TERM; stop at the first measured layer and
-keep every negative. The 64-byte TERM and the fixed-commit control are already
-the differential. Admission and a dedicated target window belong to the
-operator; this brief and the lab are the handoff artifacts.
+Next rung-raising step: build `sbbs3` from the already provisioned pinned tree
+against its vendored cryptlib (missing host dev packages: libarchive-dev and
+libnspr4-dev) and drive a loopback SSH client with an oversized TERM; stop at
+the first measured layer and keep every negative. The simpler direct-API
+differential is already measured with the real library; the open gap is the
+network pty-req reaching `answer()`'s getter. Admission and the target window
+are done; witness replay is owed.

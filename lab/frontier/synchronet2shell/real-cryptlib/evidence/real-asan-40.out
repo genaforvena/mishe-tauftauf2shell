@@ -1,0 +1,9 @@
+cryptInit=0
+cryptCreateSession=0 handle=12788
+create channel status=0
+set TERM len=40 status=0
+query status=0 len=40
+copy status=0 len=40
+offsets: terminal=0 line_delay=44 console=48 wordwrap=52
+line_delay=0x00000000 console=0x00000000 wordwrap[0..7]=''
+tail [40..63]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
