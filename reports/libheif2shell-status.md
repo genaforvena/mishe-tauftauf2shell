@@ -65,10 +65,18 @@ Admission changes no grade.
   study, pointer control, ROP, command, marker side effect or rung 5. Chosen
   `0x5a` bytes are harness source bytes, not file-derived bytes or execution.
 
-Next for the target mind: build pinned `v1.23.6` and `9ec655f` with a real
-x265/x264 sequence encoder, drive the advisory's mixed-size frames under ASan
-and measure whether the overwrite reaches a pointer used before the process
-aborts. Hand any new claim to `witness`; the author report is not acceptance.
+Current ceiling (W157-W202, every lane closed at rung 3 plus rung 4): the
+direct-call harness (W157), the real decoder-to-x265 file path (W161-W166),
+file-derived chosen bytes and malloc metadata (W162/W164/W166), a groomed live
+victim with a clean return (W171) and a synthetic loopback wire consumer
+(W172) are all chosen-data mechanics; none reaches a live real-world consumer
+or a command. W187-W202 closed every in-plant consumer: ImageMagick and
+libvips use still-image/AV1-only paths, host ffmpeg has no HEIF muxer, and
+`heif-enc` rejects mixed-size frames before the library call. The advisory's
+1,155-byte artifact is not published. Rung 5 stays UNKNOWN; AV:N remains
+advisory text. The next gate is a witness verdict on #3264/#2752/#2869/#2897
+— fold it into this file and `real/PROVENANCE-real.md`; an author report is not
+acceptance.
 
 ## W161 real-build file-triggered lane (2026-11-23)
 
