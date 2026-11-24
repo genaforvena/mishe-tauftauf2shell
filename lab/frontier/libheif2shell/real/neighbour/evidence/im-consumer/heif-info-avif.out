@@ -1,0 +1,38 @@
+MIME type: image/avif
+main brand: avif
+compatible brands: mif1, avif, miaf
+
+image: 512x64 (id=1), primary
+  colorspace: YCbCr, 4:2:0
+  bit depth: 12
+  color profile: no
+  alpha channel: no 
+  depth channel: no
+metadata:
+  none
+transformations:
+  none
+region annotations:
+  none
+text items:
+  none
+properties:
+none
+
+image: 64x65 (id=2)
+  colorspace: monochrome
+  bit depth: 12
+  color profile: no
+  alpha channel: no 
+  depth channel: no
+metadata:
+  none
+transformations:
+  none
+region annotations:
+  none
+text items:
+  none
+properties:
+none
+MIME items:

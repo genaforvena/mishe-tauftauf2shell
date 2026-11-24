@@ -744,3 +744,38 @@ no chosen bytes, no command and no witness verdict. It narrows W186/W187's
 "no sequence-encoding consumer" implication: such consumers exist in source,
 but this lab has not compiled or exercised one. AV:N remains advisory text.
 Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5; rung 5 UNKNOWN.
+
+W189 below TESTED and REJECTED the W188 hypothesis with a real build: the
+sequence writer is AV1-only, so this consumer cannot supply the mismatch.
+
+## W189 real ImageMagick consumer: sequence path is AV1-only (2026-11-24)
+
+W188's source hypothesis was tested on a `/tmp`-only ImageMagick 7.1.2-34
+build linked to the pinned vulnerable libheif v1.23.6 static library (with
+x265) and its `libheif/api` headers. `configure` initially chose the host
+`-lheif` 1.17.6 despite the supplied variables, so the generated Makefile
+library variables were overridden; the final binary links no `libheif.so`
+and reports `HEIC rw+`.
+
+The two-frame input `mixed-frames.miff` (SHA-256
+`73590bbd...392d`) has frame 0 512x64 and frame 1 64x65. Both output forms
+returned rc 0: `.heic` produced two independent still images at their own
+sizes; `.avif` produced images 512x64 and 64x65 with byte-repeatable SHA-256
+`f55d29b7...827e`. No plain-build crash occurred; no ASan build of this
+consumer was made.
+
+The negative is structural. `heic.c:2516-2547` dispatches to
+`WriteHEICSequenceImage` only for AVIF output; `.heic` uses the still-image
+loop whose `:2726` call is `heif_context_encode_image`, so it never constructs
+a sequence-size mismatch. The sequence writer then selects
+`heif_compression_AV1` at `:2141-2142`, and pinned v1.23.6 calls
+`extend_padding_to_size` only in the x265, x264, kvazaar, svt, uvg266 and
+vvenc plugins plus the public API wrapper — not in the AOM/AV1 encoder. The
+gdb breakpoint log is NOT used as a clean negative because two copies of the
+static libheif archive were linked.
+
+Evidence and exact build commands:
+`lab/frontier/libheif2shell/real/neighbour/evidence/im-consumer/`;
+`check_im_consumer.py` PASS=7 FAIL=0. Grade UNCHANGED rung 3 plus rung 4,
+NOT rung 5; no wire request, chosen bytes at the overflow, pointer control,
+command or witness verdict.

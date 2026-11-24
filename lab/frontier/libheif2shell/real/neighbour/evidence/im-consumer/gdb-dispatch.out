@@ -1,0 +1,38 @@
+Breakpoint 1 at 0x1ecaa8: file coders/heic.c, line 2513.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+DISPATCH magick=AVIF adjoin=1 next=0x555555cea200
+#0  WriteHEICImage (image_info=image_info@entry=0x555555cf6fa0, image=image@entry=0x555555cbc2b0, exception=exception@entry=0x555555cb48d0) at coders/heic.c:2513
+#1  0x00005555557be7e0 in WriteImage (image_info=image_info@entry=0x555555cf3cb0, image=image@entry=0x555555cbc2b0, exception=exception@entry=0x555555cb48d0) at MagickCore/constitute.c:1496
+#2  0x00005555557bef04 in WriteImages (image_info=image_info@entry=0x555555cf09c0, images=images@entry=0x555555cbc2b0, filename=<optimized out>, exception=0x555555cb48d0) at MagickCore/constitute.c:1645
+[New Thread 0x7ffff37ff6c0 (LWP 569636)]
+[New Thread 0x7ffff2ffe6c0 (LWP 569637)]
+[New Thread 0x7ffff27fd6c0 (LWP 569638)]
+[New Thread 0x7ffff1ffc6c0 (LWP 569639)]
+[New Thread 0x7ffff17fb6c0 (LWP 569640)]
+[New Thread 0x7ffff0ffa6c0 (LWP 569641)]
+[New Thread 0x7ffff07f96c0 (LWP 569642)]
+[Thread 0x7ffff07f96c0 (LWP 569642) exited]
+[Thread 0x7ffff0ffa6c0 (LWP 569641) exited]
+[Thread 0x7ffff17fb6c0 (LWP 569640) exited]
+[Thread 0x7ffff1ffc6c0 (LWP 569639) exited]
+[Thread 0x7ffff27fd6c0 (LWP 569638) exited]
+[Thread 0x7ffff2ffe6c0 (LWP 569637) exited]
+[Thread 0x7ffff37ff6c0 (LWP 569636) exited]
+[New Thread 0x7ffff37ff6c0 (LWP 569643)]
+[New Thread 0x7ffff2ffe6c0 (LWP 569644)]
+[New Thread 0x7ffff27fd6c0 (LWP 569645)]
+[New Thread 0x7ffff1ffc6c0 (LWP 569646)]
+[New Thread 0x7ffff17fb6c0 (LWP 569647)]
+[New Thread 0x7ffff0ffa6c0 (LWP 569648)]
+[New Thread 0x7ffff07f96c0 (LWP 569649)]
+[New Thread 0x7fffefff86c0 (LWP 569650)]
+[Thread 0x7fffefff86c0 (LWP 569650) exited]
+[Thread 0x7ffff07f96c0 (LWP 569649) exited]
+[Thread 0x7ffff0ffa6c0 (LWP 569648) exited]
+[Thread 0x7ffff17fb6c0 (LWP 569647) exited]
+[Thread 0x7ffff1ffc6c0 (LWP 569646) exited]
+[Thread 0x7ffff27fd6c0 (LWP 569645) exited]
+[Thread 0x7ffff2ffe6c0 (LWP 569644) exited]
+[Thread 0x7ffff37ff6c0 (LWP 569643) exited]
+[Inferior 1 (process 569629) exited normally]

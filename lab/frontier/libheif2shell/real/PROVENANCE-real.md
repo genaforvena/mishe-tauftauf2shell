@@ -1115,3 +1115,51 @@ two-frame input (512x64 then 64x65) and check whether
 observed, that is a hypothesis, not a claim. No new witness incident filed:
 the queue already holds #2752/#2869/#2897/#3264 for this lane. Grade
 UNCHANGED rung 3+4, NOT rung 5.
+
+W189 below TESTED the W188 hypothesis with a real build and rejected it.
+
+## W189 ImageMagick built against pinned libheif — AV1-only sequence path
+
+All build output stayed in `/tmp`; the peer's `imagemagick2shell/vuln` source
+tree was read and copied, never edited. Copy to `/tmp/w197-im-heic`, then:
+
+    HEIF_CFLAGS=-I<libheif-v1.23.6>/libheif/api \
+    HEIF_LIBS='libheif.a heifio.a libheif.a -ldl -lx265 -lde265 -laom ...' \
+      ./configure --with-heic=yes --without-x --disable-shared --enable-static ...
+
+`configure` rc 0 but reported `HEIC yes` using system `-lheif` 1.17.6, so the
+write guard `LIBHEIF_NUMERIC_VERSION >= 1.20.0` was compiled out. Re-linking
+with command-line overrides `HEIF_CFLAGS`, `HEIF_LIBS`, `MAGICK_DEP_LIBS`,
+`MAGICK_LIBS` and `LIBS` (all without the system `-lheif`) made the final
+binary link zero `libheif.so` and register `HEIC rw+`. Logs: `configure.log`,
+`make-first.log`, `make.log` in `evidence/im-consumer/`.
+
+Input `mixed-frames.miff` SHA-256
+`73590bbd702820ebebba3c9e490f694fdbd5cfdcc1281f6ca92958eed71f392d`:
+`magick identify` sees `[0] 512x64` and `[1] 64x65`. With
+`MAGICK_HOME=/tmp/w197-im-heic` and
+`MAGICK_CONFIGURE_PATH=/tmp/w197-im-heic/config`:
+
+    magick mixed-frames.miff out.heic   # rc 0; two still images, own sizes
+    magick mixed-frames.miff out.avif   # rc 0; images 512x64 + 64x65
+
+The AVIF output is byte-repeatable with SHA-256
+`f55d29b73d4136567e9994f2f06e9ca20fbe54d92d8f4f028bd00bd64156827e`.
+`gdb-dispatch.out` prints `DISPATCH magick=AVIF adjoin=1 next!=0` at
+`heic.c:2513`; `heif-info-{heic,avif}.out` show the two images. rc files are
+`0`; stdout/stderr are empty. No ASan build of this consumer was made, so
+this is not an ASan negative.
+
+Source disposition: `heic.c:2513-2514` derives `encode_avif` from output
+format; `:2516-2547` is the only dispatch to `WriteHEICSequenceImage`, and
+it requires `encode_avif`. HEIC therefore takes `:2549-2750`, the still-image
+loop with `heif_context_encode_image` at `:2726`. `WriteHEICSequenceImage`
+selects `heif_compression_AV1` at `:2141-2142`. In pinned v1.23.6 the complete
+`extend_padding_to_size` call set is the public API wrapper and
+`plugins/encoder_{x265,x264,kvazaar,svt,uvg266,vvenc}.cc`; no AOM encoder
+call. `gdb-padding.out` is preserved as a caveat: two static libheif copies
+were linked (MagickCore and CLI), so a breakpoint non-hit is not evidence.
+
+`python3 evidence/im-consumer/check_im_consumer.py .` PASS=7 FAIL=0.
+Grade UNCHANGED rung 3+4, NOT rung 5. No new witness incident: the queue
+already holds #2752/#2869/#2897/#3264 for this lane.
