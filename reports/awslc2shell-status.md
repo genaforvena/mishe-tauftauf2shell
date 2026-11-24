@@ -180,3 +180,36 @@ This upgrades the rung-4 control-datum demonstration to a natural, ungroomed
 layout, but it is still a lab record with no real application, no pointer/IP,
 no command and no wire-to-command path. Grade unchanged: rungs 1-4, r5
 UNKNOWN; author-only, no witness replay of W208.
+
+## In-tree documented-minimum consumer (W209, 2026-11-24T17:5xZ)
+
+The "no real consumer" gap narrowed: AWS-LC's own PKCS#7 cipher BIO is an
+in-tree, streaming, multi-update caller that deliberately uses the documented
+minimum. Pinned `crypto/pkcs7/bio/cipher.c:93-101` (`enc_read`) sizes each read
+with `to_read = sizeof(ctx->buf) - cipher_block_size + 1` — 4096 - 16 + 1 =
+4081 for AES-CBC — and calls `EVP_DecryptUpdate(ctx->cipher, ctx->buf,
+&ctx->buf_len, read_buf, bytes_read)`. Its own comment at lines 93-94 names
+exactly the flaw's precondition: "`EVP_DecryptUpdate` may write up to
+cipher_block_size-1 more bytes than requested." `BIO_ENC_CTX.buf` is a 4096-byte
+array (line 19) allocated as the last field of a single `OPENSSL_zalloc` at
+line 26.
+
+This caller is immune by its own chunk arithmetic. In the vulnerable
+`EVP_DecryptUpdate` (`cipher.c:405-427`), a previously withheld block adds `b`
+bytes before the bulk `EVP_EncryptUpdate` store; for CBC decryption with
+padding that bulk output is `bytes_read` rounded down to a multiple of `b`.
+With `bytes_read <= 4081` and `b = 16`, the rounded value is at most 4080 =
+`sizeof(buf) - b`, so the largest possible store is `16 + 4080 = 4096` bytes —
+exactly `sizeof(ctx->buf)`, one byte short of an OOB. A throwaway memory-BIO
+probe against the pinned no-ASM ASan library (16-byte boundary first update,
+then 4081/4080/16/32-byte second update) reported no ASan error, but is only a
+partial exercise: `enc_read` reached EOF on the memory source and called
+`EVP_DecryptFinal_ex` after the first update, consuming the withheld block
+before a second update. The load-bearing argument is the source-bound bound
+above, not the probe. Even if the byte were written, it would land at struct
+offset 4120 (one past the 4120-byte `BIO_ENC_CTX`), inside allocator slack on
+this host — no control datum follows `buf` because it is the struct's last
+field.
+
+Grade unchanged: rungs 1-4, r5 UNKNOWN. Source-bound, author-only; no witness
+replay and no new lab artifact is claimed for this observation.

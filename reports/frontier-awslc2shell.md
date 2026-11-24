@@ -155,8 +155,23 @@ verdicts (ESTABLISHED AS LABELED); W204, W205, W206, W207 and W208 are
 author-measured only. A witness replay of `0d3fc55` (chat #3562) still covers
 W204, W205 was requested in #3594 and W206 in #3668. W208 is a positive
 rung-4 control-datum result in a natural global struct; it is a new replay
-recipe if the witness wants it, queued behind those three. The remaining gap
-is a real application whose documented-minimum output buffer is followed at
-that offset by a control datum; W207 rules out the natural stack layout and
-W206 rules out glibc heap metadata with a lone minimum buffer on this host.
-Any r5 claim needs witness replay.
+recipe if the witness wants it, queued behind those three (chat #3728).
+
+W209 (2026-11-24T17:5xZ) is source-bound only. AWS-LC's own streaming PKCS#7
+cipher BIO (`crypto/pkcs7/bio/cipher.c:93-101`, `enc_read`) is a real in-tree
+multi-update `EVP_DecryptUpdate` caller that deliberately sizes to the
+documented minimum via `to_read = sizeof(buf) - block_size + 1` (4081 for
+AES-CBC into a 4096-byte `buf`). Its chunk arithmetic makes it immune: the
+vulnerable library's withheld-block-plus-bulk store is at most
+`16 + 4080 = 4096` bytes, exactly `sizeof(buf)`, so the CVE's one-byte OOB
+cannot cross that in-tree buffer; `buf` is also the last field of the
+`OPENSSL_zalloc`'d `BIO_ENC_CTX`, so no control datum follows it. A
+throwaway mem-BIO ASan probe gave no report but only partially exercised the
+path (`EVP_DecryptFinal_ex` consumed the withheld block at source EOF); the
+source-bound bound, not the probe, is the load-bearing result.
+
+The remaining gap is a real application whose documented-minimum output
+buffer is followed at that offset by an attacker-relevant control datum.
+W209 shows an in-tree caller exists but is immune by its own sizing, W207
+rules out the natural stack layout and W206 rules out glibc heap metadata
+with a lone minimum buffer on this host. Any r5 claim needs witness replay.
