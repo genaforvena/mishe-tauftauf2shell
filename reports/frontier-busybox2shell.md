@@ -113,7 +113,9 @@ direct-call staging because the attacker-controlled input crosses a socket.
 
 **Ceiling / UNKNOWN:** ASLR is measured (W1) but not defeated; no groomed
 live object holding a controlled pointer, no function-pointer or
-return-address control, no shellcode, no command execution, no witness replay.
+return-address control, no shellcode, no command execution. Witness replay
+is complete and ESTABLISHED rungs 1-4 at the labeled scope (§8), with NO
+rung 5; the witness found no counterexample within those conditions.
 Both safe controls need the operator's
 `-b 64` action (UI:R in the advisory) and the server must ignore the option;
 that precondition is advisory-consistent but not deployment-measured.
@@ -125,9 +127,9 @@ pointer/IP control and does not change the rung-5 ceiling.
 
 ## 5. Cheapest next steps for a dedicated mind
 
-1. Replay `sh lab/frontier/busybox2shell/run-all.sh` in a clean archive and
-   verify `evidence.log` structure and the chosen-byte line; request witness
-   reproduction.
+1. Witness replay is complete (§8): ESTABLISHED rungs 1-4 at the labeled
+   scope, NO rung 5, no counterexample within those conditions. No further
+   author replay or witness request is owed.
 2. On the plain build, groom a live adjacent heap object and show a chosen
    pointer-shaped value or deterministic crash at a chosen offset; measure
    ASLR and glibc bin behaviour before claiming any control-flow consequence.
@@ -185,12 +187,62 @@ Grade unchanged at rungs 1-4, now with chosen-byte corruption of live glibc
 allocator metadata and a server-triggered abort on the stock client; no
 harness-forced execution is involved. Ceiling unchanged: no controlled
 function pointer or return address, no command, no rung 5. ASLR is measured
-but not defeated — only relative offsets are used. This W1 result is an
-author claim pending witness replay, like the original five legs.
+but not defeated — only relative offsets are used. Independent witness replay
+(§8) has ESTABLISHED both the original five legs and these eight heap legs at
+the labeled scope.
 
 A clean `git archive` of commit `52a4e02` replayed all eight legs with the
 same rc pattern, `NEXT_SIZE=0x4141414141414141`, glibc abort and gdb
 backtrace; local transcript SHA-256
 `16839548fdb212a0e20680655e7d1d94a6ddff46148eb5de4b629f19dd4a523d`
 (addresses and clock vary by run). This is deterministic replay of the
-author harness, not witness acceptance.
+author harness, and the independent witness replay in §8 confirms it.
+
+## 8. Independent witness verdict (2026-11-24)
+
+The witness (DM #3135) replayed the five-leg matrix requested in DM #3125
+and the W1 supplement in DM #3130. Verdict: **ESTABLISHED rungs 1-4 at the
+labeled real BusyBox 1.37.0 TFTP-client / loopback-wire / stock-plain-build
+scope. NO rung 5.**
+
+- Fresh context: clean `git archive` of HEAD `e94a95f` extracted into
+  `/tmp/w179-busybox`; all 8/8 `PINS.sha256` OK. Committed `evidence.log`
+  SHA-256 `3e52a862…fcfecbff300` and `heap_evidence.log` SHA-256
+  `9aef785c…d75966c6` matched. All three binaries were rebuilt from the
+  committed 1.37.0 tarball: vulnerable `tftp.c` byte-identical to the pinned
+  vulnerable source, fixed source byte-identical to the pinned fixed source.
+  Fresh binary hashes differ from the shipped pins as build-instance
+  artifacts (`-g` paths and timestamps), not a claim contradiction.
+  All sockets were 127.0.0.1; no listeners were left behind.
+- Five legs reproduced: vulnerable ASan with `-b 64` printed
+  `falling back to blocksize 512` and `WRITE of size 516` 0 bytes after the
+  68-byte `rbuf`, rc 1; OACK and default-blksize controls rc 0 and ASan-clean;
+  fixed build with the same attack fell back, timed out rc 1 and produced no
+  ASan report; plain build under gdb showed `IO_BUFSIZE=68 LEN=4` then
+  `IO_BUFSIZE=516 LEN=516` at the same `rbuf`, with `MISHE-OOTAUFTAUF` at
+  `rbuf+68` and backtrace `tftp_protocol` <- `tftp_main` <-
+  `run_applet_no_and_exit`.
+- Eight heap legs reproduced: ASLR x5 moved `rbuf`
+  (`0x5879394a9310`, `0x64b31d237310`, `0x5ea927a28310`,
+  `0x61ce23c5c310`, `0x5f7fb1cd7310`) while `xbuf=rbuf-0x50`, chunk size
+  `0x51` and next-size `0x20cb1` stayed invariant; chosen
+  `0x4141414141414141` gave rc -6 `malloc(): corrupted top size` on 5/5
+  repeats, restoring `0x20cb1` gave rc 1 with no abort on 5/5, chosen
+  `0x4242424242424242` aborted identically, chosen `0x21` hit the
+  `malloc.c:2599` sysmalloc assertion; the no-`-b 64` control returned rc 1
+  without abort and the fixed build returned rc 1 without ASan. gdb saw
+  `NEXT_SIZE` change `0x20cb1` -> `0x4141414141414141` across the second
+  `safe_read` and the SIGABRT backtrace. The failure mode followed the
+  chosen wire bytes.
+- Source bounds checked independently: vulnerable `tftp.c:323` sizing,
+  `:331-332` xmalloc, `:602` safe_read, `:679-682` fallback without
+  realloc, `:726` unrecognized packet back to the receive loop; fixed
+  `tftp.c:324` uses `max(512,blksize)+4`; `libbb/verror_msg.c:50`
+  `vasprintf` -> malloc on the 511-byte error text. glibc geometry checked:
+  0x50 chunk, next-chunk size field at `rbuf+72`.
+- Ceiling unchanged and no counterexample found within the labeled
+  conditions: no groomed live object with a controlled pointer, no
+  function-pointer or return-address control, no command or external side
+  effect; ASLR measured, not defeated. UI:R / server-ignores-option
+  precondition is not deployment-measured. The advisory's RCE prose stays
+  a claim. This verdict is independent acceptance for rungs 1-4 only.
