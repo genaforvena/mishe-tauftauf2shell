@@ -43,3 +43,25 @@ victim before `priv` and the consumer got `data=(nil)`. The criterion is
 victim at `priv+0x4050`, not the numeric drain. Full recipe and observations:
 `evidence/real-plain-clean-replay.out`. This is still the author's replay of
 lab-assisted rung 4, not a witness verdict.
+
+## W178 clean replay of W177's real-API stack-frame disclosure
+
+Same procedure against current HEAD (`efe96160`): 121 files, 4/4 pins OK,
+12 binaries, `PASS=146 FAIL=0` with the trace above. The real-library limb
+needs the provisioned 2.5.34 tarball and five patches in this order:
+`live/vusb-jl2005.patch`, `evidence/replay-vusb-victim.patch`,
+`evidence/replay-vusb-normal-return.patch`,
+`evidence/replay-vusb-guards.patch`, `evidence/replay-vusb-shortreply.patch`.
+Do not also apply `replay-vusb-local-modes.patch`: its mode-p cap is already
+in the victim patch. The last patch commits four W175 hunks that had existed
+only in a throwaway tree, so W175/W177 are now replayable from Git.
+
+From a clean archive the plain build compiled the committed
+`evidence/replay-stack-leak-probe.c`; three fresh processes returned the
+probe's own canary at table k=1023, three returned the saved rbp/RIP words
+at k=1024, and gdb in one process matched those words byte-for-byte.
+COUNT=100 returned rc=-108 with no entry; the full reply aborted with
+`*** stack smashing detected ***` before any file_get. Exact commands,
+hashes and output: `evidence/real-plain-stack-leak-clean-replay.out`.
+Author replay of an unwitnessed rung-4 scope; no device readback, wire path
+or rung 5.

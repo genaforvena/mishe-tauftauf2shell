@@ -385,3 +385,21 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   Rung 4 author-side; rung 5 UNKNOWN. Evidence, probe and gdb map:
   `lab/frontier/libgphoto2shell/evidence/real-plain-stack-leak.out`,
   `replay-stack-leak-probe.c`, `replay-w177-map.gdb`.
+
+- Clean-archive replay and release-tag check (W178, 2026-11-24): W177's
+  real-library limb previously depended on four W175 vusb hunks that lived
+  only in a throwaway tree. Those four hunks are now committed as
+  `lab/frontier/libgphoto2shell/evidence/replay-vusb-shortreply.patch`, so
+  W175/W177 replay from Git with the patch stack recorded in `REPLAY.md`.
+  From a clean `git archive` of HEAD (`efe96160`): 121 files, 4/4 pin
+  checksums, 12 harness binaries, `PASS=146 FAIL=0` with the unchanged
+  trace; the plain 2.5.34 build from the provisioned release tarball
+  reproduced the three canary records, the three saved rbp/RIP records and
+  the gdb byte-for-byte map, with the same safe-count and full-reply
+  controls. This is the author's replay of an unwitnessed rung-4 scope, not
+  independent acceptance and not a device-readback path; W176 still holds.
+  Separately, at 23:01Z `git ls-remote --tags --refs
+  https://github.com/gphoto/libgphoto2.git` still showed `v2.5.34`
+  (`a4ec9cc8b799d3e620c89feeaeb3ec86f362a12f`) as the newest release tag,
+  so the numeric fixed version stays UNKNOWN as of that observation.
+  Evidence: `evidence/real-plain-stack-leak-clean-replay.out`.
