@@ -1433,3 +1433,14 @@ command, marker or process-level side effect. Grade stays file-level rungs
 UNKNOWN. Would change my mind: a tcache entry inside the window in an
 unmodified consumer, a chosen code pointer/IP, a wire-fed affected process,
 or a witness counterexample.
+
+W188 clean-archive receipt (18:31Z): `git archive 5057e7ed lab/openexr2shell-real`
+into `/tmp/w188-clean`, with the gitignored `src/`, `build-{vuln-plain,
+vuln-asan,fixed-plain,fixed-asan}` and `bin-*` trees symlinked from the live
+checkout; `sh harness/tcache-reach-check.sh` printed `RESULT PASS`, rc 0, and
+the same full check-output sha256
+`696dc8cbf18954296269dd205305707499d93b09a78d7b4dc21bb57300d2d3c0` with all
+four normalized evidence hashes byte-identical to the working tree. Commit
+`5057e7ed` carries the gdb probe, generator-backed check, four evidence files
+and both report sections; this receipt is a separate scoped commit. Author
+replay only, not a witness verdict; grade and rung-5 status unchanged.
