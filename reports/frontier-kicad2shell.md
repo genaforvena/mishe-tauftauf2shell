@@ -370,3 +370,26 @@ chosen heap offset. It does not create a pointer or control-flow target — the
 word lands in malloc metadata and glibc aborts. No ASan vendor build, no fixed
 real-process control, no consumer read, no wire delivery, no marker and no
 witness replay of this lane; **rung 5 stays UNKNOWN**.
+
+## 15. Fixed-build real-process control attempted, not reached (W184)
+
+The official fixed branch binary was provisioned, not patched: KiCad
+10.0.8 from the KiCad PPA (deb sha256
+`38721bf8c584e9191e4f2738a4a7204f0062e4cc2c47e17c7614384d55b87e48`;
+`kicad-cli version` → 10.0.8), extracted to `provisioned/apt-kicad10/` with
+the missing vendor runtime libraries in `apt-kicad10-deps/`. After the
+missing-library chain was resolved, `_eeschema.kiface` loaded (`dlopen` OK)
+and the editor started under Xvfb with empty stderr.
+
+The control was not obtained. Eight GUI attempts with the **unmodified**
+vendor `.SchLib` using `provisioned/gui-import10.sh` ended at a Chrome
+additional-terms webview page (always declined), the recurring KiCad 10
+first-run wizard, or the plain schematic editor; none reached a Symbol Editor
+import, so `ParseLibHeader` was not exercised in the fixed process and the
+hostile `SizeZ` fixtures were not submitted to it. The clean vendor exit is
+not a pass for the fixed build. Preserved as a negative result: the fix is
+still established only by source bytes and the harness lanes; a fixed
+real-process control remains missing. Details and screenshots are described
+in `lab/frontier/kicad2shell/realprocess/PROVENANCE-fixed-build.md`.
+
+Rungs 1-4 are unchanged; **rung 5 remains UNKNOWN**.

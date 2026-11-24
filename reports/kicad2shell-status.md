@@ -171,3 +171,11 @@ NEW witness replay: #2996 covers only rungs 1-4 at the synthetic-CFB scope
 and the W182/W183 real-process lane has no verdict yet. Keep the guarded
 consumer-read negative and the two distinct real-process fault modes as
 preserved observations. The author report is never acceptance of a new claim.
+
+W184 tried that control with the official fixed 10.0.8 PPA binary: the editor
+loads with all vendor libraries resolved, but the first-run wizard and a
+declined Chrome additional-terms webview page block the W182 GUI import
+sequence, so `ParseLibHeader` was never reached in the fixed process. This is
+a failed control attempt, not a pass or a vulnerability negative; the fixed
+guard remains source/harness-only. See
+`lab/frontier/kicad2shell/realprocess/PROVENANCE-fixed-build.md`.
