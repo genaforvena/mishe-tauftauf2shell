@@ -1,0 +1,67 @@
+CBM_CACHE_DIR=/tmp/cbm-mcp-cache-fixed-asan
+BINARY=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/fixed-asan
+CHOSEN_LEN=68 CHOSEN=MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx
+CACHE=/tmp/cbm-mcp-cache-fixed-asan
+
+=== INDEX ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"project\":\"probe\",\"skipped_count\":0,\"nodes\":2,\"edges\":1,\"expected_nodes\":2,\"expected_edges\":1,\"adr_present\":false,\"adr_hint\":\"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.\",\"artifact_present\":false,\"status\":\"indexed\"}"}],"structuredContent":{"project":"probe","skipped_count":0,"nodes":2,"edges":1,"expected_nodes":2,"expected_edges":1,"adr_present":false,"adr_hint":"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.","artifact_present":false,"status":"indexed"},"isError":false}}
+STDERR_LINES=45
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=info msg=pipeline.discover files=0 elapsed_ms=0
+  level=info msg=pipeline.route path=full
+  level=info msg=pass.start pass=structure files=0
+  level=info msg=pass.done pass=structure nodes=2 edges=1
+  level=info msg=pass.timing pass=structure elapsed_ms=0
+  level=info msg=pipeline.mode mode=sequential files=0
+  level=info msg=pkgmap.scan_repo manifests=0
+  level=info msg=pkgmap.scan manifests_from_files=0 manifests_from_walk=0 entries=0
+  level=info msg=pass.start pass=definitions files=0
+
+=== QUERY_1_CONTROL ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\"],\"rows\":[],\"total\":0,\"hint\":\"Query returned no results. Use get_graph_schema() to see available labels and edge types.\"}"}],"structuredContent":{"columns":["f.name"],"rows":[],"total":0,"hint":"Query returned no results. Use get_graph_schema() to see available labels and edge types."},"isError":false}}
+STDERR_LINES=6
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=4
+  level=info msg=server.shutdown
+  level=info msg=watcher.stop
+
+WARNING: no rows; projection loop will not run
+=== QUERY_32 ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\"],\"rows\":[],\"total\":0,\"hint\":\"Query returned no results. Use get_graph_schema() to see available labels and edge types.\"}"}],"structuredContent":{"columns":["f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name"],"rows":[],"total":0,"hint":"Query returned no results. Use get_graph_schema() to see available labels and edge types."},"isError":false}}
+STDERR_LINES=6
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=3
+  level=info msg=server.shutdown
+  level=info msg=watcher.stop
+
+=== QUERY_33 ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"failed to parse query"}],"isError":true}}
+STDERR_LINES=6
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=warn msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=error duration_ms=2
+  level=info msg=server.shutdown
+  level=info msg=watcher.stop
+
+=== QUERY_48 ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"failed to parse query"}],"isError":true}}
+STDERR_LINES=6
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=warn msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=error duration_ms=2
+  level=info msg=server.shutdown
+  level=info msg=watcher.stop
+

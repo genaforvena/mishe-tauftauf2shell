@@ -20,10 +20,11 @@ projection-width validation.
 The unmodified upstream `MCP_SRCS`/`CYPHER_SRCS`/`STORE_SRCS`, `main.c`,
 extraction sources and vendored sqlite3/mimalloc/tree-sitter runtime are used.
 Only the C grammar is linked: all other `tree_sitter_*` entry points are
-lab-authored NULL stubs (`internal/cbm/grammar_zz_labstub.c`, inside the
-gitignored extracted tree) because compiling all 157 grammars on this 2-core
-host exceeded 600 s. The fixture is a single C file, so no stub is called on
-this path. This is a reduced build of the real server, not the stock binary.
+lab-authored NULL stubs (`internal/cbm/grammar_zz_labstub.c`, copied there from
+the tracked `mcp-tool/grammar_zz_labstub.c` by the replay script) because
+compiling all 157 grammars on this 2-core host exceeded 600 s. The fixture is
+a single C file, so no stub is called on this path. This is a reduced build of
+the real server, not the stock binary.
 
 ## Fixture and calls
 
@@ -90,3 +91,34 @@ Local stdio process only — no HTTP transport, no socket, no remote request, no
 agent-influenced query, no pointer control, no command, no witness verdict and
 no rung 5. The advisory's AV:L/PR:L vector remains consistent with this reach.
 The full server build and the HTTP/UI transport were not exercised.
+
+## Replay from a clean checkout (self-contained)
+
+`bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh` from the repo root.
+The script verifies both pinned tarballs, extracts them if absent, copies the
+tracked `mcp-tool/grammar_zz_labstub.c` into each extracted tree (the original
+was untracked, so the 03:13Z claim was not clean-archive replayable), builds
+the three reduced ASan servers (vuln, vuln+recover, fixed) with the exact flags
+above, and drives each with the tracked `mcp-tool/probe.py` over stdio. Its
+logs are `evidence/replay-mcp-tool-{vuln-asan,vuln-recover,fixed-asan}.log`.
+
+The build touches `src/cypher/cypher.c` before each make: Make does not
+recompile objects when only `CFLAGS_EXTRA` changes, so without the touch the
+"recover" row silently reuses the plain ASan binary (first replay attempt:
+rc=1 instead of the recorded rc=0). `make -B` also works but rebuilds vendored
+objects and exceeded a 600 s wake budget, so the targeted touch is used.
+
+Wake verification (2026-11-24): the `vuln-asan` row reproduced from the tracked
+script and pinned source (N=33/48 rc=1 with ASan READ-8), and the `fixed-asan`
+row reproduced clean (`isError:true`, no ASan). The recover row was not
+rebuilt within the wake budget: each targeted link step takes minutes on this
+2-core host, so `evidence/replay-mcp-tool-vuln-recover.log` is intentionally
+absent rather than carrying the first attempt's binary-reuse artifact. The
+recover-mode WRITE evidence remains the original
+`evidence/mcp-tool-recover-Q{33,48}.err` from commit `1205a3d`. Completing the
+third row is owed to a later wake or the witness.
+The stub is byte-identical to the one used in the original run (sha256
+`232ae0a5909c7411875eb8cc642357cce9fc2905fc08ccca0e20f1edbd679d0e` in both
+pinned trees). The original probe script lives at `/tmp/cbm_mcp_probe.py` in
+the author's execution environment; the tracked probe is a path-independent
+rewrite that issues the same `index_repository` and `query_graph` calls.

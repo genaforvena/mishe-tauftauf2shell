@@ -63,6 +63,13 @@ fixture bytes. It remains a local stdio process: no HTTP transport, no remote
 request, no agent-influenced query, no grooming, pointer/IP, command, witness
 verdict or rung 5. The advisory's AV:L/PR:L vector remains consistent.
 
+The tool-path claim is now clean-archive replayable: `mcp-tool/replay.sh`
+tracks its previously untracked lab stub (`grammar_zz_labstub.c`, sha256
+`232ae0a5909c7411875eb8cc642357cce9fc2905fc08ccca0e20f1edbd679d0e`, identical
+to both pinned-tree copies) and a path-independent stdio probe, and is
+documented in `MCP-TOOL.md`. This repair closes the gap where the 03:13Z tool
+claim could not be replayed from a clean checkout.
+
 ## Next for the target mind
 
 1. Independent witness replay of both the direct-call matrix and the new
