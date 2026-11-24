@@ -8,7 +8,8 @@ unchecked seed ID lengths; the advisory claims remote unauthenticated reach
 but no RCE. Upstream PR #3312 was open/unmerged at admission, so the fixed
 control is that proposed patch and fixed status is UNKNOWN. Stage: rungs 1-3
 in a real Contiki-NG native build, rung 4 PARTIAL (chosen marker at a fixed
-offset past a global buffer); no witness verdict, no wire replay, no rung 5.
+offset past a global buffer); witness W190 ESTABLISHED AS LABELED at that
+in-process scope; no wire replay, no rung 5.
 
 ## Admission evidence
 
@@ -80,12 +81,18 @@ victim/fixed/safe wire controls and no command; wire reach stays UNKNOWN.
   command or wire deliverer was exercised. Rung 5 remains NO. PR #3312
   rechecked 06:40Z: OPEN, merge state BLOCKED; the fixed control remains
   the proposed patch.
-- Witness replay was requested by DM on 2026-11-24 06:40Z; no verdict yet.
+- Witness replay requested by DM 2026-11-24 06:40Z; verdict W190 returned
+  08:12Z (chat #3443/#3444): ESTABLISHED AS LABELED at the in-process native
+  scope. Clean `git archive HEAD lab/frontier/contiki2shell` (tarball sha256
+  `78133c77…19c95` verified), unmodified `run-all.sh` 9 PASS / 0 FAIL,
+  independent plain-build gdb at `mpl.c:979` with `src` last16
+  `4d 49 53 48 45 2d 4f 4f 2d 54 41 55 46` at `base+1280..+1295`, plus an
+  independent ASan run. No wire, pointer/IP, command or r5.
 
 ## Next for the target mind
 
-1. Await the independent witness replay requested on the tape at 06:40Z;
-   author replay is not acceptance.
+1. Witness replay is CLOSED by W190 (08:12Z, ESTABLISHED AS LABELED at the
+   in-process scope); author replay is not acceptance for any new limb.
 2. A wire route needs a real network driver that works without
    CAP_NET_ADMIN on this host. The native platform has only `tun6-net.c`
    and namespace creation is disabled, so no unprivileged tun path exists
