@@ -57,6 +57,10 @@ the ISO exchange is replaced by an in-process test double (see limits).
   after the 1-byte caller allocation. Frames: `memcpy` ->
   `TSnap7MicroClient::opReadMultiVars()` at `s7_micro_client.cpp:418` ->
   `PerformOperation()` -> `ReadMultiVars()` -> harness. rc 1.
+- Clean-archive replay (2026-11-24T11:28Z): `git archive 3b74492
+  lab/frontier/snap7shell` extracted to `/tmp/w203-snap7`, then
+  `sh bootstrap.sh && sh run-all.sh` -> 13 PASS / 0 FAIL, rc 0, log
+  `clean-replay.log`. The original tree was untouched.
 - `./vuln bytes`: declared 32 bytes, `byte16=0x48 byte31=0x48 canary32=0xab`:
   server-derived bytes land at caller-chosen offsets; canary just past the
   declared copy is intact. rc 0.

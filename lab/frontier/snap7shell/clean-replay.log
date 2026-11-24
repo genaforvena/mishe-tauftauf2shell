@@ -1,0 +1,14 @@
+PASS vuln_asan_rc: 1
+PASS vuln_asan_write: 1
+PASS vuln_asan_site: 1
+PASS vuln_asan_offset: 1
+PASS vuln_chosen_bytes: 1
+PASS vuln_safe_rc: 0
+PASS vuln_safe_clean: 0
+PASS fixed_reject_rc: 0
+PASS fixed_reject_code: 1
+PASS fixed_asan_clean: 0
+PASS fixed_bytes_unchanged: 1
+PASS fixed_safe_rc: 0
+PASS pinned_tarball: 1
+RESULT: 13 PASS / 0 FAIL

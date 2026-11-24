@@ -1,5 +1,6 @@
 src-vuln/
 src-fixed/
-*.log
+build-*.log
+run-*.log
 vuln
 fixed

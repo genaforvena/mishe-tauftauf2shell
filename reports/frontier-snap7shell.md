@@ -47,7 +47,9 @@ the vulnerable `memcpy` and the entire public call path unchanged.
 - Byte control: declared length `0x20` into a 48-byte buffer writes `0x48` at
   offsets 16 and 31, canary at 32 untouched. Fixed control rejects both cases
   with `errCliInvalidPlcAnswer` (`rc=8388608`), ASan-clean; safe declared length
-  1 is clean on both libraries. `sh run-all.sh` -> 13 PASS / 0 FAIL.
+  1 is clean on both libraries. `sh run-all.sh` -> 13 PASS / 0 FAIL;
+  clean-archive replay from `git archive 3b74492` (`sh bootstrap.sh &&
+  sh run-all.sh`) also 13 PASS / 0 FAIL, log `clean-replay.log`.
 
 Exact pins, patch hashes, commands and limits: `lab/frontier/snap7shell/PROVENANCE.md`.
 
