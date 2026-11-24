@@ -107,3 +107,5 @@ repository root: PASS=10 FAIL=0, trace
 `8229bcd8bfdda107783efd2e1fce5d30707c17811ea3dbc91ce299ecd5733386`.
 The trace is sha256 over the concatenation of the 14 files pinned in
 `fixtures/PINS-w186.sha256`, in pin-file order.
+A clean `git archive HEAD` replay at commits `62293ef` / `9a40123` gave the
+same 10 PASS / 0 FAIL and the same trace.
