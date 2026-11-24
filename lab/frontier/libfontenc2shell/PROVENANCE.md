@@ -554,6 +554,14 @@ this encoding's buffer. The consumer limit is structural, not a layout
 accident; note W187 already recorded an unsuccessful reorder, this wake
 adds the causal evidence and a different, measured layout.
 
+
+A clean `git archive HEAD` replay at `df7918c` into `/tmp/lf2s-w189-clean`
+rebuilt all eight libraries (rc 0, W155/W156 matrix) and reproduced the
+negative in a third layout: `buffer=0x555555a53540`, first post-buffer map
+n7, `idx=65584`, marker written into n7->recode, `recode_targets` still the
+first map and `marker_calls=0` in all four cases. The target map moved from
+n5 to n7 with path-length-driven heap shift; the recoded map did not. This
+is an author replay, not a witness verdict.
 Receipt: `realpath/evidence/xfptr/reorder/REPLAY.md`. Grade unchanged:
 no invoked control flow in Xvfb, no command, no wire input, no privileged
 process. No Xvfb left running. The remaining blockers are unchanged:

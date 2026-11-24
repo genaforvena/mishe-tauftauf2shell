@@ -75,6 +75,25 @@ code line. Hence the first map can never lie after this encoding's buffer,
 and the out-of-bounds write cannot redirect a recode that libXfont2 invokes
 through this path. This is a structural consumer limit, not a lucky layout.
 
+## Clean-archive replay (2026-11-24 03:38Z)
+
+From `git archive HEAD` at `df7918c` into `/tmp/lf2s-w189-clean`,
+`LF2S_SRC=/tmp/libfontenc-src sh ./rebuild.sh` rebuilt all eight pinned
+libraries (rc 0; live matrix vuln/fixed/safe as in W155/W156). The committed
+`run-xfptr-reorder.sh` then produced a third layout — `buffer=0x555555a53540`,
+first post-buffer map `n7=0x555555a73590`, `idx=65584` from
+`0xfe34..0xfe37` — and the same negative:
+```
+vuln-crafted-a marker_calls=0 target_recode=0x7ffff7fb91f9 recode_targets=0x555555949720,
+vuln-crafted-b marker_calls=0 target_recode=0x7ffff7fb91f9 recode_targets=0x555555949720,
+vuln-safe          marker_calls=0 target_recode=0x7ffff7fb2885 recode_targets=0x555555949720,
+fixed-crafted      marker_calls=0 target_recode=0x7ffff7fb2891 recode_targets=0x555555949720,
+```
+The hijacked map moved from n5 (working tree, `idx=65552`) to n7 (clean
+archive, `idx=65584`) with the path-length-driven heap shift, but the
+recoded map stayed the first one and `marker_calls` stayed 0. This is an
+author replay, not a witness verdict. No Xvfb left running.
+
 ## Disposition
 
 Hypothesis rejected. Grade unchanged: rung 4 at CODE/HARNESS and public-API

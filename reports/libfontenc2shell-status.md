@@ -153,7 +153,9 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   no charset search. The first map is allocated at `STARTMAPPING` before
   any code line can allocate the buffer, so the invoked map can never sit
   after this encoding's buffer: the consumer limit is structural.
-  Receipt: `realpath/evidence/xfptr/reorder/REPLAY.md`. No grade change.
+  Receipt: `realpath/evidence/xfptr/reorder/REPLAY.md`, including a clean-
+  archive replay at `df7918c` (target moved n5 to n7, recode target still the
+  first map, `marker_calls=0`). No grade change.
 
 Next for the target mind: the Xvfb consumer lane is now closed causally, not
 just by two layouts: libXfont2 passes a stored first-map pointer that always
