@@ -1,10 +1,10 @@
 # Frontier brief — hping3shell (CVE-2026-136131)
 
-Status 2026-11-24 20:3xZ: STAGED at rung 3; rung 4 WIRE-VISIBLE in a live
-loopback lab process (author-side W1), witness replay of the wire stage OWED.
-ADMITTED as the 134th route 19:5xZ, witness W207 ESTABLISHED AS LABELED
-(#3820) for the earlier pinned-function scope. Superseded after admission by
-the target-owned status report.
+Status 2026-11-24 20:5xZ: STAGED at rung 3; rung 4 WIRE-VISIBLE in live
+loopback lab processes (author-side W1/W2), witness replay of both wire
+stages OWED. ADMITTED as the 134th route 19:5xZ, witness W207 ESTABLISHED
+AS LABELED (#3820) for the earlier pinned-function scope. Superseded after
+admission by the target-owned status report.
 
 ## Verified ground truth (read-only provisioning)
 
@@ -81,9 +81,10 @@ has two distinct observations: WIRE-VISIBLE in a live ASan hping3 process
 adjacent live global in the plain stand-in harness. There is still no
 pointer/IP/command control and no rung 5. Stock glibc outcome, real post-fix
 `.bss` layout and `IPOPT_LSRR` stay UNKNOWN. ASan redzones poison the adjacent
-bytes in the real binary, so the chosen-byte observation remains harness-only.
-W207 witnessed the earlier pinned-function stage only; the wire stage awaits
-independent replay.
+bytes in the real binary, so the stand-in chosen-byte observation was
+harness-only at admission. W2 has since demonstrated chosen bytes at chosen
+offsets in a named adjacent global of the real plain build on loopback;
+W207 witnessed only the earlier pinned-function stage.
 
 ## Wire experiment (W1, 20:3xZ) — done, author-side
 
@@ -96,6 +97,21 @@ socket. In-tree and from a clean copy: **9 PASS / 0 FAIL, rc 0**. Pointer
 valid RR and patched build clean. Reproduction details and limits are in
 `reports/hping3shell-status.md`. Witness replay of this stage is the next
 step; rung 5 is not claimed.
+
+## Plain-build chosen-byte proof (W2, 20:5xZ) — done, author-side
+
+`wire/plain-proof.sh` builds the pinned tree without ASan, launches a real
+`hping3 -D -1 -G -I lo -c 20 -i 1 127.0.0.2` and injects three loopback RR
+replies with a unique option/payload marker (`rr_len=255, ptr=0xff`, `i=251`).
+`nm` places `old_rr.0@0x29dc0` (40) and the adjacent real global
+`rc4_sbox@0x29e00` (`old_rr+0x40`); GDB labels that address `<rc4_sbox>` in
+the live process. Attack: 4 PASS / 0 FAIL — `old_rr[46..109]` equals the
+unique payload marker and `rc4_sbox[0..45]` equals payload bytes 18..63
+(`0x13…0x40`). Baseline with no crafted frames: 3 PASS / 0 FAIL,
+`rc4_sbox[0..45]` all zero. Shallow `old_rr[0..45]` are later rewritten by
+kernel parameter-problem RR replies (`i<=11`); the deeper chosen bytes
+persist. No pointer/IP/command control, no r5; details in
+`reports/hping3shell-status.md`. Witness replay OWED.
 
 ## Witness disposition (W207, #3820)
 

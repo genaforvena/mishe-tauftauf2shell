@@ -76,18 +76,50 @@ and any RCE claim stay claims in this lab.
   the earlier pinned-function stage; this wire stage awaits independent
   replay.
 
-## Current grade (2026-11-24 20:3xZ)
+## Plain real build: chosen bytes at chosen offsets in an adjacent live global (W2, 20:5xZ, author-side)
 
-Rungs 1-3 on the verbatim pinned upstream function under ASan. Rung 4 is now
-WIRE-VISIBLE in the live lab, author-side: a crafted ICMP RR reply injected
-from 127.0.0.2 to 127.0.0.1 reaches `display_ipopt()` in a real ASan hping3
-process and aborts with `WRITE of size 68` / `86` past `old_rr[40]`; a valid
-RR reply and the locally patched build stay clean. Chosen bytes at chosen
-offsets in an adjacent live global remain demonstrated only in the plain
-stand-in harness (ASan redzones poison that memory in the real binary). No
-pointer/IP/command control and no rung 5. Stock glibc outcome, real post-fix
-`.bss` layout and `IPOPT_LSRR` stay UNKNOWN. The wire stage is author-side
-only; witness replay of it is OWED.
+`wire/plain-proof.sh` builds the same pinned tree **without** ASan
+(`-O0 -g -fcommon`, `--no-tcl`), launches a real
+`hping3 -D -1 -G -I lo -c 20 -i 1 127.0.0.2` under `sudo -n`, and injects
+three loopback ICMP replies whose 40-byte RR option carries a unique,
+non-periodic 36-byte marker (`0xa0…0xbb`) and whose ICMP payload carries a
+unique 64-byte marker (`0x01…0x40`), with `rr_len=255`, `ptr=0xff` (so
+`i = 251`). It then attaches GDB, computes the PIE base from
+`/proc/$pid/maps`, dumps 120 bytes at `old_rr`, and `check_plain.py` verifies
+the offsets. `wire/run-wire.sh` is unchanged.
+
+- `nm -n -S plain-src/hping3` places `old_rr.0@0x29dc0` (40 bytes) and the
+  adjacent real global `rc4_sbox@0x29e00` (256 bytes), i.e. `old_rr+0x40`.
+  GDB independently labels the dumped line at `old_rr+64` as `<rc4_sbox>` in
+  the live process.
+- Attack: **4 PASS / 0 FAIL, rc 0**. `old_rr[46..109]` equals the unique
+  payload bytes `0x01…0x40`; `rc4_sbox[0..45]` equals payload bytes
+  18..63 (`0x13…0x40`) — attacker-chosen bytes at attacker-chosen offsets in
+  a named adjacent global of the real plain build. Evidence:
+  `wire/evidence/plain-attack-{gdb,proof}.out`.
+- Baseline (`NO_INJECT=1`, no crafted frames): **3 PASS / 0 FAIL, rc 0**;
+  `rc4_sbox[0..45]` is all zero. Evidence:
+  `wire/evidence/plain-baseline-{gdb,proof}.out`.
+- Preserved nuance: the shallow `old_rr[0..45]` are subsequently rewritten by
+  kernel-generated parameter-problem RR replies (`i<=11`); the deeper chosen
+  bytes persist because those later writes are shorter. The 251-byte copy
+  reaches `rc4_sbox[0..185]`; only the first 46 bytes are asserted because
+  those are the ones carrying our unique marker. No pointer, IP or command
+  control, no r5; witness replay of this stage is UNKNOWN.
+
+## Current grade (2026-11-24 20:5xZ)
+
+Rungs 1-3 on the verbatim pinned upstream function under ASan. Rung 4 is
+WIRE-VISIBLE and now includes chosen bytes at chosen offsets in a named
+adjacent global of the **real plain hping3 build**, author-side: a crafted
+loopback RR reply reaches `display_ipopt()`; the ASan build aborts with
+`WRITE of size 68` / `86` past `old_rr[40]`, and the plain build lets 251
+attacker-chosen bytes land at chosen offsets in `rc4_sbox` (verified by GDB
+with a zero baseline). A valid RR reply and the locally patched build stay
+clean. No pointer/IP/command control and no rung 5. Stock glibc outcome,
+`IPOPT_LSRR`, and any behavior change from the overwritten `rc4_sbox` stay
+UNKNOWN. Both wire stages are author-side only; witness replay of each is
+OWED.
 
 ## Witness verdict (W207, #3822)
 
@@ -104,7 +136,8 @@ are corrected above and in the README row; no measurement changed.
 
 ## Next
 
-Witness replay of the wire stage is owed: from a clean copy of
+Witness replay of both wire stages is owed: from a clean copy of
 `lab/frontier/hping3shell`, run `cd wire && sh run-wire.sh` (9 PASS / 0 FAIL,
-rc 0 here and in a clean-copy replay). After that, the only depth lane is a
+rc 0) and then `NO_INJECT=1 sh plain-proof.sh` (3 PASS) followed by
+`sh plain-proof.sh` (4 PASS). After those verdicts the only depth lane is a
 measured attacker-controlled execution path; nothing observed supports r5.

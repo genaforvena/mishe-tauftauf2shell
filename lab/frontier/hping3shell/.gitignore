@@ -14,3 +14,5 @@
 /wire/*.log
 /wire/payload.pid
 /wire/__pycache__/
+/wire/plain-src/
+/wire/plain.pid

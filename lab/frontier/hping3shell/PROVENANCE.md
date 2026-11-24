@@ -120,6 +120,44 @@ option, but pcap still delivers the original packet to the process.
 Preserved negatives: AF_PACKET injection on `lo` produced no frames captured
 by tcpdump; IP_HDRINCL works. Checksum replacement in the first injector
 dropped the ICMP id and produced id 0, which hping ignored. ASan redzones
-poison the bytes adjacent to `old_rr` in the real binary, so chosen-byte
-control remains observable only in the plain stand-in harness. No pointer,
-IP or command control and no r5; witness replay of this stage is UNKNOWN.
+poison the bytes adjacent to `old_rr` in the ASan binary; W2 below obtained
+chosen bytes in the adjacent global from a plain build of the same pinned
+tree. No pointer, IP or command control and no r5; witness replay of both
+wire stages is UNKNOWN.
+
+## W2 plain-build chosen-byte proof (2026-11-24 20:5xZ)
+
+`wire/plain-proof.sh` copies the same read-only pinned tree to
+`wire/plain-src` and builds it without ASan using
+`./configure --no-tcl` and
+`make CCOPT='-O0 -g -fcommon -Wall -Wno-unused -I../compat'`. It launches a
+real `hping3 -D -1 -G -I lo -c 20 -i 1 127.0.0.2` under `sudo -n` and
+`wire/inject_rr_plain.py` sends ICMP echo replies from 127.0.0.2 to
+127.0.0.1 through an IP_HDRINCL raw socket. The crafted RR option has type
+7, length 255, pointer 0xff, 36 unique bytes `0xa0…0xbb` and a pad; the ICMP
+payload has 64 unique bytes `0x01…0x40`. `i = 255-4 = 251`, so the copy
+spans `old_rr[0..250]`.
+
+`nm -n -S wire/plain-src/hping3` gives `old_rr.0@0x29dc0` (0x28 bytes) and
+the adjacent real global `rc4_sbox@0x29e00` (0x100 bytes), `old_rr+0x40`;
+two other `rc4_sbox` copies exist at `0x29f20` and later from other objects.
+The script reads the PIE base from the first offset-zero mapping in
+`/proc/$pid/maps`, dumps 120 bytes at `old_rr` with `gdb -batch -p`, and
+`wire/check_plain.py` asserts the offsets. GDB itself labels the dumped line
+at `old_rr+64` as `<rc4_sbox>` in the live process.
+
+Observed (repeated runs): attack 4 PASS / 0 FAIL — `old_rr[46..109]` equals
+the unique payload bytes `0x01…0x40` and `rc4_sbox[0..45]` equals payload
+bytes 18..63 (`0x13…0x40`); `NO_INJECT=1` baseline 3 PASS / 0 FAIL with
+`rc4_sbox[0..45]` all zero. Raw output:
+`wire/evidence/plain-{attack,baseline}-{gdb,proof,run}.out` and
+`wire/evidence/plain-layout.txt`.
+
+Preserved negatives: GDB cannot resolve the static `old_rr` by name here
+(`No symbol "old_rr"`), so the dump uses the runtime PIE base plus the link
+address from `nm`. `old_rr[0..45]` are subsequently rewritten by
+kernel-generated parameter-problem RR replies with `i<=11`, so the shallow
+offsets are not asserted; only the deeper bytes that persist are claimed.
+The 251-byte copy reaches `rc4_sbox[0..185]`, but only the first 46 bytes
+carry our unique marker. No pointer, IP or command control, no observed
+behavior change from the overwritten sbox, no r5; witness replay OWED.
