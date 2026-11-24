@@ -19,3 +19,9 @@ realbuild/status-trigger-fixed
 realbuild/status-trigger-231
 realbuild/*.log
 realbuild/evidence/*.log
+realbuild/status-trigger-realgpg
+realbuild/status-trigger-realgpg-fixed
+realbuild/status-trigger-realgpg-231
+realbuild/realgpg/
+realbuild/wireprobe/
+wireprobe/

@@ -61,17 +61,20 @@ not asserted, and left UNKNOWN. All raw evidence lives in `evidence/*.out` /
 
 ## Rung-4 feasibility and ceiling
 
-Rung 3 is confirmed on pinned upstream statements under ASan; rung 4 is
-PARTIAL: chosen status-derived byte is observed in the stale allocation at a
-chosen offset. There is no full GPGME build, no gpg process or pipe, no wire
-input, no pointer/IP/command control, no allocator-metadata claim and no rung
-5. Live reach and stock layout stay UNKNOWN. AV:N is the advisory's vector,
-not exercised here.
+Rung 3 is confirmed on pinned upstream statements. Rung 4 is demonstrated
+mechanics in real ASan builds: a chosen status-derived byte is observed at a
+chosen offset before the real second free, first with a loopback fake gpg and
+then with the host `/usr/bin/gpg` importing an armored key with a long UID
+(`realbuild/run-real.sh` 21 PASS / 0 FAIL; `realbuild/run-real-gpg.sh` 36 PASS
+/ 0 FAIL). Patched 2.2.0, stock 2.3.1 and short-line controls stay clean.
+There is still no wire consumer, no pointer/IP/command control, no
+allocator-metadata claim and no r5; live reach and stock layout stay UNKNOWN.
+`AV:N` is advisory prose, not exercised here. Both real paths are author-side;
+witness replay of the real-GPGME path is still UNKNOWN.
 
 ## Cheapest next experiment
 
-Build real GPGME 2.2.0 with ASan, drive a status pipe that forces a >1024-byte
-line plus a callback error, and compare with a 2.3.1 build and a short-line
-control. If it reproduces, put a loopback consumer in front of the pipe for
-a wire-visible rung 4. Operator admission and witness replay are still owed;
-do not duplicate this target.
+Obtain an independent replay of the real-GPGME paths, then put a loopback
+consumer in front of the status path to test whether attacker-controlled
+wire input can produce the long line. Rung 5 requires a measured path to a
+live target process and a benign side effect; neither is claimed here.

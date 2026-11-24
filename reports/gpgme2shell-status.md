@@ -87,3 +87,28 @@ clean-archive HEAD `1ff8884b`); no verdict has landed, so the real path stays
 author-side and an author transcript is not acceptance. A loopback consumer
 in front of the status pipe is the only route to a wire-visible rung 4, and
 rung 5 needs a measured attacker-controlled path; neither is claimed here.
+
+## W2 — real gpg binary, same corruption (2026-11-24 22:2xZ)
+
+The engine is now the host `/usr/bin/gpg`, not the loopback fake gpg.
+`realbuild/make-realkeys.sh` generates throwaway keys with a 1200-character
+UID placing a chosen byte at status-argument offset 1000; real gpg's
+`--status-fd` emits `[GNUPG:] IMPORTED <keyid> <uid>` of 1234 bytes for those
+keys. `realbuild/status_trigger_realgpg.c` uses only public APIs
+(`gpgme_set_engine_info` with a fresh GNUPGHOME, `gpgme_data_new_from_file`,
+`gpgme_set_ctx_flag("full-status","1")`, a status callback failing args
+>500 bytes, `gpgme_op_import`, `gpgme_release`).
+
+`cd lab/frontier/gpgme2shell/realbuild && sh make-realkeys.sh &&
+sh run-real-gpg.sh` gives `PASS=36 FAIL=0`. Raw evidence is
+`realgpg/evidence/realgpg-*.out` / `.rc`. The three vulnerable long-key cases
+show `status_cb call=2 keyword=IMPORTED arglen=1234 byte[1000]=0x48` /
+`0x5a` / `0x37`, `import err=General error`, then ASan `attempting
+double-free` with the second free in real `gpg_release engine-gpg.c:602` and
+the first by real `realloc read_status engine-gpg.c:1494`; rc 1. The
+upstream-fix-patched build, stock 2.3.1 and the short-UID key are rc 0 and
+sanitizer-clean, with the callback reached in every control.
+
+Grade stays rung 4 mechanics: no wire consumer, no allocator-metadata claim,
+no pointer/IP/command control and no r5. Witness replay #3808 of the W1 real
+path remains UNKNOWN; W2 is author-side as well.

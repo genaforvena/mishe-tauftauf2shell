@@ -85,4 +85,14 @@ link_driver() {
 link_driver status-trigger gpgme-asan-build
 link_driver status-trigger-fixed gpgme-fixed-build
 link_driver status-trigger-231 gpgme-231-build
+link_real_driver () {
+  out=$1; build=$2
+  clang -fsanitize=address -fno-omit-frame-pointer -g -O0 \
+    -I "$build/src" -I "$PREFIX/include" -o "$out" status_trigger_realgpg.c \
+    "$build/src/.libs/libgpgme.a" "$PREFIX/lib/libassuan.a" \
+    "$PREFIX/lib/libgpg-error.a" -lpthread -ldl
+}
+link_real_driver status-trigger-realgpg gpgme-asan-build
+link_real_driver status-trigger-realgpg-fixed gpgme-fixed-build
+link_real_driver status-trigger-realgpg-231 gpgme-231-build
 echo "BUILD OK"
