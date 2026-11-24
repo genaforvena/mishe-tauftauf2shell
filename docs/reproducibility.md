@@ -7782,3 +7782,127 @@ copied in and all six outputs sha256-identical (digests in `REPLAY.md`); it is
 an author replay, not the witness verdict. No held-state reuse, new consumer of
 the forged tail, pointer, marker, command or rung change; rungs 1-4 ESTABLISHED
 and r5 UNKNOWN stand.
+
+### Imgproxy2Shell W7 — no wire-visible heap-leak key (author-side negative)
+
+Same pinned imgproxy 4.0.15 / fixed 4.0.16 and plain libvips builds as the
+Imgproxy row above; host glibc 2.39, ASLR 2. The probe
+`lab/frontier/imgproxy2shell/provision/ico_readfull_bound.py` is sha256
+`e422a59974088057b0f89a4629c5f3526f87dac04bc9aab7163298ef8de48140`
+(recomputed here). From `provision/`, with `imgproxy-vuln` and
+`../../libvips2shell/build-vuln-plain/libvips` in place:
+
+    python3 ico_readfull_bound.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w7final-pattern \
+      rs:fill:16:16/plain/pattern.ico 8
+    python3 ico_readfull_bound.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w7final-pngvalid \
+      rs:fill:16:16/plain/pngvalid.ico 8
+    python3 ico_readfull_bound.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w7final-pnglie \
+      rs:fill:16:16/plain/pnglie.ico 8
+
+Only 127.0.0.1:18080/18081 are used. Expect each process to abort in 13-17 ms
+with `rc=2`, `malloc(): corrupted top size`, and no HTTP response; tracked log
+hashes, recomputed here, are `017b0b48b8d207cbbc0bb3d6e6e440ce0430932d63796999c7b2be09a1d8a380`
+(pattern), `a4c5193041fce665ee1fd6dd82dfd6c4d7dce0813b0ac2485a96e02599cbb52a`
+(complete 1x1 PNG) and `0f16c0989715a9f49a9f700fac4907c6931f2968b3a98ebc936cd41ebde09ed6`
+(IDAT declaring 4096 bytes). Pinned `vips/vips.c:1302-1315` consumes the full
+requested length before returning 1, so `icoload.c:161-164` exits before the
+PNG test and BMP reconstruction; no consumer turns spill bytes or the tcache
+`next` safe-link key into response bytes, and the error-path source review
+found only fixed messages and request-derived echoes. A clean
+`git archive 6f8581a7` replay reproduced the pattern and PNG legs (the
+initial harness-path failure is in PROVENANCE W7). Author replay, no witness;
+no rung change, r5 UNKNOWN.
+
+### Openexr2Shell W184 — fully file-chosen second-stage OOB copy
+
+Affected 3.5.0–3.5.2 / fixed 3.5.3 as in the row above; no new pins. From
+`lab/openexr2shell-real`, with the gitignored `src/`,
+`build-{vuln-plain,vuln-asan,fixed-asan}` and
+`bin-{vuln-plain,vuln-asan,fixed-asan}` trees present, run
+`sh harness/mixed-full-check.sh`. The generator
+`cases/make_poc_mixed_full.py` is sha256 `258cdc5ebb25aea374cb4748a186b91d7aec209498fd25ecd0522ca650910164`
+and the check script `harness/mixed-full-check.sh` is sha256
+`0fc148a167bf24be34233c8e0873e306c8c28a7d7acbc6c002b29d78bf1a1eb0`, both
+recomputed here. Expect `RESULT PASS` and the trace
+`SINKCOPY dst_off=0 src_off=128 n=256` followed by
+`SINKCOPY dst_off=256 src_off=0 n=128`, with
+`GUARD-CHANGE alloc=24 size=256 changed=128 first=+0`, actual `0x3c`/`0x5a`
+and all 128 bytes at `decode.unpacked_buffer+256` read back as that byte;
+fixed 3.5.3 rejects with `EXR_ERR_CORRUPT_CHUNK` and the baseline guard is
+unchanged. The nine `evidence/full-oob-*.out` hashes aggregate to
+`d04f151a539362d22d58ec4c4e8c06c4ee0689fd88aa29c5824ba2e7becf946f` via
+`sha256sum evidence/full-oob-*.out | sha256sum`, recomputed here. A clean
+`git archive aad2c431` replay with the gitignored trees symlinked returned
+`RESULT PASS` rc 0 with all nine hashes identical (receipt in `7288d1ce`).
+Caveat preserved: the unguarded ASan build aborts earlier on the first copy's
+OOB source READ at `internal_zstd.c:472`, so the WRITE is measured by guard and
+gdb, not ASan. Author replay only, no witness, no rung change; no wire,
+pointer, marker or command.
+
+### Libheif2Shell W188 — ImageMagick HEIC sequence consumer (source-only)
+
+Read-only source check, no build and no run. A gitignore-filtered search over
+`lab/frontier` omitted vendored consumer trees; a `gitignore:false` retry
+timed out at 30 s over 31 GB, so `find lab/frontier -type f -iname '*heif*'`
+narrowed the candidates. The real sequence writer is
+`lab/frontier/imagemagick2shell/vuln/coders/heic.c`:
+`WriteHEICSequenceImage` is guarded by `LIBHEIF_NUMERIC_VERSION >= 1.20.0`
+(`:2076`), `:2202-2205` creates the visual track from the FIRST frame's
+`(uint16_t) columns/rows`, and `:2230-2349` loops the image list, creating
+each frame at its own `:2292` size before `:2334`
+`heif_track_encode_sequence_image`, with no size equality check. Negative
+controls: `vuln/MagickCore/magick-baseconfig.h:1089 /* #undef HEIC_DELEGATE */`,
+no libheif in `ldd` of either magick binary, no HEIC in `magick -list format`,
+host `pkg-config --modversion libheif` 1.17.6 and no
+`/usr/include/libheif/heif.h`. No delegate-enabled build, multi-frame encode,
+ASan report, chosen bytes, witness verdict or rung change. A two-frame
+512x64 → 64x65 encode is a hypothesis for a future bounded wake, not a claim.
+Full notes: `lab/frontier/libheif2shell/real/PROVENANCE-real.md` W188 and
+`reports/libheif2shell-status.md` W188.
+
+### Lwnode2Shell (FRONTIER-STAGED) — WriteOneByte off-by-one
+
+CVE-2026-135746 / GHSA-mvm7-rjgq-6j36, published 2026-11-24, CWE-787,
+CVSS 3.1 6.8 `AV:L`; PR `Samsung/lwnode#188` base `b3de7be5c117…`, fixed by
+PR head `442b6ebf…` / merge `6571beaf…`. No numeric release pin: the advisory
+and `SECURITY.md` say the open-source branch is unmaintained. Claim URLs,
+patch and source pins are in `lab/frontier/lwnode2shell/PROVENANCE.md`; the
+tracked `src/api-data.cc` is sha256 `e4930859…5bf7b` and the verbatim loop
+`91051bee…0b4`, both rechecked by every run. From the repo root:
+
+    cd lab/frontier/lwnode2shell && sh run.sh
+
+The script hash-checks the loop, builds ASan and plain harnesses with
+`g++ -std=c++17 -O0 -g -fno-omit-frame-pointer -fsanitize=address harness.cpp -o asan`
+(and the plain build without ASan), then runs vuln/fixed × attack/safe ×
+asan/plain with fill bytes `0x48` and `0x5a`. Expect 12 PASS / 0 FAIL in
+`replay.log` (sha256 `7cbf085f9471c09a3105900c8f2ccc4d546c06d7e266cae2bd007718399b237a`,
+recomputed here): ASan `heap-buffer-overflow WRITE of size 1` 0 bytes past
+an 8-byte destination, plain `byte8=0x48` / `0x5a` at the chosen
+one-past-capacity offset, canary `0xcc` and no ASan report for the fixed and
+safe cases. A clean `git archive ba01845c lab/frontier/lwnode2shell` replay
+gave 12 PASS / 0 FAIL. Extracted loop with stand-in arrays only: no
+lwnode/Escargot build, JS script, real `Isolate`/V8 API call, pointer, command
+or r5. FRONTIER-STAGED — brief `reports/frontier-lwnode2shell.md`, no charter,
+route, wake unit or mind-count change. Witness #3627 has no verdict (UNKNOWN).
+
+### Fltk2Shell W199 — witness replay of four scoped extensions
+
+Witness #3612 replayed the shared-image, both plain-metadata waves and the
+GUI-consumer extension from a clean `git archive 27ef17b`: PINS 11/11 OK,
+`run-all.sh` 33 PASS / 0 FAIL, normalized evidence hash `7882e60c…3525e`
+byte-exact. From `lab/frontier/fltk2shell` the same legs are `bash run-all.sh`,
+then `sh build.sh && sh run.sh` in `shared-image/`, the two `plain-metadata`
+driver matrices in `plain-metadata/README.md`, and
+`sh build.sh && sh run.sh` in `gui-consumer/` (private Xvfb). Expect ASan
+`WRITE of size 1` 2 bytes before a 4294967298-byte region at
+`Fl_BMP_Image.cxx:490`, the ICO negative, the plain metadata word
+`0x2d4d495300001002`, and witness-varied `prev=0x2000` /
+`size=0x3939315700001002` with the fixed tree at rc=0. Verdict: ESTABLISHED
+AS LABELED for the four extensions, no contradiction, grade stays W195 rungs
+1-4, NO r5. Crafted-image draw (the fault is at load, before draw),
+cache-hit reload, wire, ASLR-independent target, pointer/IP and command stay
+UNKNOWN. Full replay record: `reports/frontier-fltk2shell.md` W199.
