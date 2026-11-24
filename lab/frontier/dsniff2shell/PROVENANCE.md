@@ -48,7 +48,7 @@ here — see limits.
   the sanitizer flags for `vuln-plain` and `fixed-plain`. Generated trees and
   binaries are gitignored.
 
-## Observed bytes (2026-11-24T12:00Z)
+## Observed bytes (2026-11-24T11:48Z)
 
 - `./vuln-asan`: AddressSanitizer `global-buffer-overflow`, `WRITE of size 1`
   at `base64.c:164` in `base64_pton`, called from `decode_sniffer.c:47`,
