@@ -141,7 +141,7 @@ containers whose host ports bind only to loopback.
 | Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh`; loopback wire lane `cd ../w1 && sh build.sh && bash run.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness verdicts recorded: rungs 1-4 direct-call, rungs 1-3 plus byte-control synthetic consumer, NOT rung 5; W181/W182 wire outcomes and 56-byte instability below; W183 jansson-object identity and hash-seed cause below |
 | Thorvg2Shell | [brief](../reports/frontier-thorvg2shell.md), [status](../reports/thorvg2shell-status.md) | CVE-2026-123367 / GHSA-mw4c-w54x-248r; v1.1.1/v1.1.2 tarballs, fix patch and `PINS.sha256` in `lab/frontier/thorvg2shell` | `python3 poc/make_poc.py && python3 poc/make_large.py && python3 poc/make_marker.py && sh harness/build.sh && sh harness/run_matrix.sh` | 88 cases; ASan WRITE-2 past the 128-byte coefficient region and chosen halfwords 0x58/0x68/0x78 at offsets 128/256/384; clean `git archive 4c4f8f8` replay exact; rungs 1-4 author-only, no witness or rung 5 |
 | BusyBox2Shell | [brief](../reports/frontier-busybox2shell.md) | CVE-2026-124737, pinned 1.37.0 tarball, vulnerable/fixed `tftp.c`, one-line fix and config hashed in `lab/frontier/busybox2shell/PINS.sha256` | `sh lab/frontier/busybox2shell/run-all.sh` (five legs, loopback UDP only) | ASan WRITE-516 at `rbuf+68`, clean OACK/default-blksize/fixed controls and "MISHE-OO" gdb bytes; rungs 1-4 on a real wire, unwitnessed, rung 5 UNKNOWN |
-| ImageMagick2Shell | [brief](../reports/frontier-imagemagick2shell.md), [status](../reports/imagemagick2shell-status.md) | CVE-2026-130664 / GHSA-3pf7-cjfr-3fpq, pinned 7.1.2-34/35 tarballs and both `MagickCore/stream.c` blobs hashed in `lab/frontier/imagemagick2shell/PINS.sha256` | `sh lab/frontier/imagemagick2shell/bootstrap.sh` from a clean archive (builds all three configurations, then `run-all.sh`; no network) | ASan heap WRITE past a 3-byte stream buffer in `StreamImagePixels`, same-size and fixed controls clean, chosen bytes 0x42..0x48 at offsets 3..23 under gdb; clean `git archive 7873caf` replay `REPLAY.log` `385bbe95…c01667a`; admitted 00:3xZ under standing #6 as the 123rd route; direct-call rungs 1-4, unwitnessed, CLI/file reachability and rung 5 UNKNOWN |
+| ImageMagick2Shell | [brief](../reports/frontier-imagemagick2shell.md), [status](../reports/imagemagick2shell-status.md) | CVE-2026-130664 / GHSA-3pf7-cjfr-3fpq, pinned 7.1.2-34/35 tarballs and both `MagickCore/stream.c` blobs hashed in `lab/frontier/imagemagick2shell/PINS.sha256` | `sh lab/frontier/imagemagick2shell/bootstrap.sh` from a clean archive (builds all three configurations, then `run-all.sh`; no network) | ASan heap WRITE past a 3-byte stream buffer in `StreamImagePixels`, same-size and fixed controls clean, chosen bytes 0x42..0x48 at offsets 3..23 under gdb; clean `git archive 7873caf` replay `REPLAY.log` `385bbe95…c01667a`; admitted 00:3xZ under standing #6 as the 123rd route. Witness #3204 (W181) replayed clean `git archive a073540`, 5/5 pins and the same `REPLAY.log` hash; witness `evidence.log` `5547d698…ce40d3`, normalized diff empty except build path and BuildId. verdict **ESTABLISHED rungs 1-4 at the labeled direct-call/in-process scope, NO r5**; file/coder reachability and the CLI `-extract` READ excluded and UNKNOWN, rung 5 UNKNOWN. NIT: the gdb bytes are the harness `0x41+(i%26)` pattern and geometry growth is harness-assigned, not attacker-chosen values. |
 | Hydra2Shell (screened out) | [brief](../reports/frontier-hydra2shell.md) | CVE-2026-133274, pinned `v9.7` `6c11ce2d` and fix commit `6ab9ad86`, function blobs and hashes in `lab/frontier/hydra2shell/harness/PINS.sha256` | `sh lab/frontier/hydra2shell/harness/run-all.sh`; loopback wire recipe in `lab/frontier/hydra2shell/PROVENANCE.md` | gcc+clang ASan `negative-size-param -1` direct call and in real v9.7 `http-post-form` over 127.0.0.1, fixed/safe controls clean, gdb NUL at `tmpcookie-1`; matrix `57e16bfd…b108567b`, clean `git archive bb33f71` replay exact; rung 3 only, plain build does not crash, no window |
 | CodebaseMemory2Shell | [brief](../reports/frontier-codebasememory2shell.md), [status](../reports/codebasememory2shell-status.md) | CVE-2026-114494 / GHSA-vpgh-g3jg-ggx9; pinned parent `5554f8a46abf` and fix `e69e0844dbc1` tarballs, both `src/cypher/cypher.c` blobs hashed in `lab/frontier/codebasememory2shell/PINS.sha256` | `bash lab/frontier/codebasememory2shell/bootstrap.sh` for the direct-call matrix; `bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh` for the real `query_graph` tool path (verifies pins, copies the tracked grammar stub, rebuilds vuln/recover/fixed with forced `-B`, drives tracked `probe.py` over stdio) | ASan OOB READ at `cypher.c:2568` and recover-mode `WRITE of size 70` at `project_item:3379` ← `execute_return_simple:4116` into `func_bufs[32]`, 32/fixed controls clean, plain 48-item stack-smash abort, gdb chosen "MISHE-OO…" bytes at `func_bufs+16384`; matrix `f8c81a5c…7a6d`; clean `git archive a073540` replay 24/24 rows. W1's real stdio `tools/call` to `query_graph` reaches READ-8 and recover-mode `WRITE of size 68` at the same array with fixed rejecting >32 (`MCP-TOOL.md`); reduced server build with only the C grammar linked and the other grammars stubbed, no HTTP/socket/remote wire; rungs 1-4 local-only, unwitnessed, no rung 5 |
 | Assimp2Shell | [brief](../reports/frontier-assimp2shell.md), [status](../reports/assimp2shell-status.md) | CVE-2026-134861 (VulnCheck 2026-11-22, CWE-787, CVSS4 AV:L/UI:P); pinned v6.0.6 tarball and both `glTFAsset.inl` blobs, PR 6860/7090 hunk hashes in `lab/frontier/assimp2shell/PINS.sha256` | `bash lab/frontier/assimp2shell/bootstrap.sh` then `bash lab/frontier/assimp2shell/harness/run-all.sh` (rebuilds vuln/fixed × gcc/clang ASan plus plain harnesses offline); W1/W2 drivers in `realpath/` and `placement/` | gcc+clang ASan `WRITE of size 16` 0 bytes after a 36-byte region and `WRITE of size 12` after a 12-byte region, `Indexer` stack-buffer-overflow, plain chosen "TAUF" at offsets 36..39, fixed-PR blocks `ExtractData` but not `Indexer`; 13 PASS/0 FAIL, log `e6341f37…bf41e`, clean-archive normalized replay `913b23f5…3ca938`; witness #3277 replayed `git archive 585e1c7` and graded those baseline direct-call legs ESTABLISHED rungs 1-4, NO r5. W1 reaches the sink through a built pinned library's `ReadFileFromMemory` glTF import and W2 places chosen bytes at a live 24-byte array end; both author-only. No pointer/IP, command or rung 5 |
@@ -6966,3 +6966,55 @@ advisory itself makes no remote claim.
   `Code:` stream. Controls were 3/3 clean. Raw:
   `realobj/evidence/kernel-pc/README.md`. Debugger-free attribution only;
   live-wire PCs stay debugger-observed, the byte stays NUL, grade unchanged.
+
+## 2026-11-24 04:5x–05:0xZ — witness verdict and shortest-frame underflow
+
+- **Imagemagick W181 independent witness** (commits `f6c923d`, `7a08745`,
+  DM #3204): from a clean `git archive a073540` (the
+  `lab/frontier/imagemagick2shell` tree byte-identical at HEAD `7091755`),
+  `sh run-all.sh` reproduced all legs in 3.5 s. Expect 5/5 `PINS.sha256`
+  entries OK, author `REPLAY.log` sha256
+  `385bbe95d648dd19981d0d42df483c9ebeb619bb078fd3a2a2c9789bac01667a`
+  (recomputed from the tracked file here) and witness `evidence.log` sha256
+  `5547d698cfac58e5934c7754304134ee5e5578c36634bcad0d29c53bd1ce40d3`;
+  normalized diff empty except build path and BuildId. Exact legs: vulnerable
+  ASan 1x1->8x4 rc 1 with `WRITE of size 1` at `stream.c:1576` via
+  `:1279`/`:2778`, same-size 2x2 control rc 0, fixed 7.1.2-35 ASan attack rc 0,
+  plain build rc 0, plain gdb `pixels[0]@24` =
+  `0x41,0x41,0x41,0x42..0x48` (three copies each). Verdict ESTABLISHED rungs
+  1-4 at the labeled direct-call/in-process scope, NO r5. NIT: the
+  `0x42..0x48` bytes are the harness pattern `0x41+(i%26)` and geometry growth
+  is harness-assigned; file/coder reachability and the CLI `-extract` READ
+  were excluded and stay UNKNOWN. Full legs: report §8 and
+  `reports/imagemagick2shell-status.md` § "Witness verdict".
+- **Vrpn W24, shortest wire message and `payload_len` underflow** (commit
+  `bf6058d`): from `lab/frontier/vrpn2shell`, a 24-byte VRPN header with
+  `header[0]=24` gives `payload_len=0`; an optional earlier 512-byte message
+  fills the reused `d_tcpInbuf`. Run
+  `bash probe-underflow.sh <outdir> <port> [groom_bytes]` with `BIN=`
+  selecting the ASan, plain or fixed server and `MSGTYPE=-1` (SENDER) or
+  `-2` (TYPE); gdb variants are `bash probe-underflow-gdb.sh <outdir> <port>
+  <line> [groom_bytes]` and `bash probe-underflow-after.sh <outdir> <port>
+  <line_after> [groom_bytes]`. All ports are loopback 15101-15113 only.
+  Expected: ASan v07.36
+  (`987603cf…c0ad6`) reports `negative-size-param (size=-4)` in `strncpy` at
+  pinned `vrpn-07.36/vrpn_Connection.C:4548` (SENDER, port 15101) or `:4476`
+  (TYPE, 15113), exit 1; plain v07.36 (`5cf49457…40bd74`) exits 135 SIGBUS on
+  SENDER (15102) and 139 on TYPE (15105), while fixed, safe-declared-28 and
+  vulnerable-with-zero-index-groom controls stay ALIVE. The fixed handler
+  reaches the same expression with `payload_len=0` but clamps the later index
+  write. gdb maps the plain fault to the stale huge index at `:4554`, not the
+  copy. Under glibc 2.39 the 512-byte groomed fixed run dumps 48 unchanged
+  destination bytes (zero-store), so no chosen byte; behavior on another
+  libc is UNKNOWN. `out-w24-plain-safe/` declared 28 bytes but sent no body,
+  so the handler was never reached — a malformed harness negative, not a
+  safety control. Author self-observation, no independent replay, no new
+  rung. Raw `out-w24-*/` evidence, scripts and hashes:
+  `lab/frontier/vrpn2shell/PROVENANCE.md` § "W24".
+- **Docs bounded check (05:0xZ)**: recomputed the ImageMagick `REPLAY.log`
+  hash above from the tracked file and grepped the committed W24 outputs:
+  both ASan `negative-size-param (size=-4)` frames, the `STRNCPY_SITE
+  payload_len=0` and `AFTER_STRNCPY` gdb lines, the unchanged 48-byte groom
+  dump, and the ALIVE/DEAD statuses in each `meta.txt`. This checks the
+  receipts, not a fresh build; builds remain gitignored and regenerate with
+  the target's own pinned scripts.

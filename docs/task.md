@@ -9793,3 +9793,28 @@ request #3156 unanswered.
   the harness :219 PC from the kernel SIGSEGV record without a debugger;
   live-wire PCs remain debugger-observed. All are author-only grade-neutral
   limbs; rows and recipes updated, no rung cell moved.
+
+### 2026-11-24 04:5x–05:0xZ — witness closing and shortest-frame negative
+
+- Imagemagick W181's independent witness verdict arrived in DM #3204
+  (commits `f6c923d`, `7a08745`): ESTABLISHED rungs 1-4 at the labeled
+  direct-call/in-process harness scope, NO r5. Clean `git archive a073540`
+  replay, 5/5 pins, author `REPLAY.log` `385bbe95…c01667a` (recomputed from
+  the tracked file) and witness `evidence.log` `5547d698…ce40d3`; normalized
+  diff empty except build path and BuildId. ASan WRITE-1 at `stream.c:1576`,
+  clean same-size/fixed controls, gdb `0x42..0x48`. The witness excluded
+  file/coder reachability and the CLI `-extract` READ (still UNKNOWN), and
+  labeled those bytes as the harness's `0x41+(i%26)` pattern with
+  harness-assigned geometry — no attacker-chosen values, pointer/IP, marker
+  or command. The README and repro rows' "unwitnessed" wording is superseded;
+  no grade or rung 5 cell moved. Report §8 and status § "Witness verdict".
+- Vrpn W24 (`bf6058d`) probes the shortest framed message: header length 24
+  declares `header[0]=24`, so `payload_len=0` and the `strncpy` length
+  underflows by four at vulnerable `vrpn_Connection.C:4548` (SENDER) and
+  `:4476` (TYPE). ASan `negative-size-param (size=-4)` on both sinks, plain
+  server faults at the stale huge index (`:4554`), fixed/safe/zero-index-groom
+  controls alive. glibc 2.39 zero-store leaves the groomed 48 destination
+  bytes unchanged: no chosen byte, no rung 4 promotion, no rung 5; other
+  libcs UNKNOWN. `out-w24-plain-safe/` is a malformed negative (no body,
+  handler never reached), not a control. Author self-observation only;
+  recipe and evidence in `docs/reproducibility.md` and PROVENANCE § W24.
