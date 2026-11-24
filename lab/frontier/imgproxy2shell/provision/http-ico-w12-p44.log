@@ -1,0 +1,59 @@
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 1301166)]
+[New Thread 0x7fffae39e6c0 (LWP 1301167)]
+[New Thread 0x7fffadb9d6c0 (LWP 1301168)]
+[New Thread 0x7fffad39c6c0 (LWP 1301169)]
+[New Thread 0x7fffacb9b6c0 (LWP 1301171)]
+[New Thread 0x7fff97fff6c0 (LWP 1301182)]
+[New Thread 0x7fff977fe6c0 (LWP 1301183)]
+[New Thread 0x7fff96ffd6c0 (LWP 1301184)]
+[New Thread 0x7fff967fc6c0 (LWP 1301187)]
+[New Thread 0x7fff95ffb6c0 (LWP 1301188)]
+[New Thread 0x7fff957fa6c0 (LWP 1301233)]
+[New Thread 0x7fff94ff96c0 (LWP 1301234)]
+[New Thread 0x7fff77fff6c0 (LWP 1301346)]
+[New Thread 0x7fff6ffff6c0 (LWP 1301347)]
+[New Thread 0x7fff777fe6c0 (LWP 1301348)]
+[Switching to Thread 0x7fffae39e6c0 (LWP 1301167)]
+
+Thread 3 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fffa006bb30, buf=buf@entry=0x7fffa005845e, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT rdx=0xfffffff5
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fffa0001020) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_WIRE_DECODED 0x7fffa0050058 RAW 0x7ff85fff0000 POS 0x7fffa0058470
+GDB_TCACHE_PRE head=0x7fffa0058470 count=7 thread=3 tcache=0x7fffa00008e0
+GDB_WIRE_NUM 0x7fffa0050058
+GDB_MALLOC_HIT thread=3 tcache=0x7fffa00008e0 head=0x7fffa0058470 count=7
+GDB_MALLOC_RET 0x7fffa0058470 WIRE=0 thread=3 tcache=0x7fffa00008e0 head=0x7fffa0050058 count=6
+GDB_POISON_HEAD_LIVE thread=3 head=0x7fffa0050058 count=6
+GDB_MALLOC_HIT thread=3 tcache=0x7fffa00008e0 head=0x7fffa0056280 count=7
+GDB_MALLOC_RET 0x7fffa0056280 WIRE=0 thread=3 tcache=0x7fffa00008e0 head=0x7fffa0050058 count=6
+GDB_MALLOC_HIT thread=3 tcache=0x7fffa00008e0 head=0x7fffa0056ff0 count=7
+GDB_MALLOC_RET 0x7fffa0056ff0 WIRE=0 thread=3 tcache=0x7fffa00008e0 head=0x7fffa0050058 count=6
+GDB_MALLOC_HIT thread=3 tcache=0x7fffa00008e0 head=0x7fffa005a6f0 count=7
+GDB_MALLOC_RET 0x7fffa005a6f0 WIRE=0 thread=3 tcache=0x7fffa00008e0 head=0x7fffa0050058 count=6
+GDB_MALLOC_HIT thread=3 tcache=0x7fffa00008e0 head=0x7fffa0056ff0 count=7
+GDB_MALLOC_RET 0x7fffa0056ff0 WIRE=0 thread=3 tcache=0x7fffa00008e0 head=0x7fffa0050058 count=6
+GDB_MALLOC_HIT thread=3 tcache=0x7fffa00008e0 head=0x7fffa005a6f0 count=7
+GDB_MALLOC_RET 0x7fffa005a6f0 WIRE=0 thread=3 tcache=0x7fffa00008e0 head=0x7fffa0050058 count=6
+time="2026-11-24 20:38:44" level="ERROR" msg="Completed in 105.538665ms /insecure/rs:fill:16:16/plain/hostile.ico" request_id="LBgCDZwUTBWI60KtIdh1u" method="GET" status=500 client_ip="127.0.0.1" error="vips_foreign_load_ico_header: unable to read ICO image data from the source" stack="/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:136 github.com/imgproxy/imgproxy/v3/vips.Error\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:298 github.com/imgproxy/imgproxy/v3/vips.(*Image).Load\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:161 github.com/imgproxy/imgproxy/v3/processing.(*Processor).initialLoadImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:79 github.com/imgproxy/imgproxy/v3/processing.(*Processor).ProcessImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request_methods.go:162 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).processImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request.go:118 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/handler.go:93 github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:88 github.com/imgproxy/imgproxy/v3/server.(*Router).WithPanic-fm.(*Router).WithPanic.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:103 github.com/imgproxy/imgproxy/v3/server.(*Router).WithReportError-fm.(*Router).WithReportError.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/router.go:142 github.com/imgproxy/imgproxy/v3/server.(*Router).ServeHTTP"
+malloc(): unaligned tcache chunk detected
+
+Thread 3 "imgproxy-vuln" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+GDB_AFTER_CONTINUE

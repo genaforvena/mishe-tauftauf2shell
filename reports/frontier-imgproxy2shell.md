@@ -559,6 +559,29 @@ exhausted and killed the process before the second request arrived. No
 consumption is inferred from either group; the probe and logs are preserved
 in PROVENANCE (W11b).
 
+## W12 — second GET gated on the live poisoned head (2026-11-24, author, unwitnessed)
+
+W11b left one question open: a fixed-delay second GET never arrived while the
+wire-decoded tcache head was live, because the observation script quit first.
+`provision/ico_second_get_gated_py.py` keeps the W9 probe and replaces its GDB
+script with observing Python breakpoints at `malloc(0x20)` and its return.
+When the decoded wire pointer is seen at the live head, GDB touches a marker
+file and the Python side sends a benign GET at once. GDB writes no inferior
+memory, forces no call, and reads state only; `W12_GOMAXPROCS=1` changes only
+the lab process's Go processor count.
+
+In 98 loopback runs the gate fired eight times. Four aborted in
+`malloc(): unaligned tcache chunk detected` before the second GET was served;
+four served HTTP 200 with 379 observed natural `malloc(0x20)` calls, all
+`WIRE=0`. In `http-ico-w12-p57.log` the victim thread was 11 with decoded head
+`0x7fff840b40b0` at count 6, while later hits ran on threads 11, 14, 3 and 7.
+The `GOMAXPROCS=1` sample `http-ico-w12-g97.log` likewise served the second
+GET mostly on another thread. The request now arrives at the right moment,
+but no natural allocation through the wire head was observed, and
+`GOMAXPROCS=1` did not pin HTTP work to the victim thread. Grade stays rung 4;
+no wire-only key, marker, code-pointer write or r5. Commands, hashes and
+preserved negatives are in PROVENANCE (W12).
+
 ## What would change my mind
 
 A primary source showing the addition happens in 64-bit arithmetic, a replay

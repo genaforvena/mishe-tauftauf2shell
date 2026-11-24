@@ -1,0 +1,793 @@
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 1429176)]
+[New Thread 0x7fffae39e6c0 (LWP 1429177)]
+[New Thread 0x7fffadb9d6c0 (LWP 1429178)]
+[New Thread 0x7fffad25c6c0 (LWP 1429182)]
+[New Thread 0x7fff9ffff6c0 (LWP 1429242)]
+[New Thread 0x7fff9f7fe6c0 (LWP 1429311)]
+[New Thread 0x7fff9effd6c0 (LWP 1429312)]
+[New Thread 0x7fff9e7fc6c0 (LWP 1429343)]
+[New Thread 0x7fff9dffb6c0 (LWP 1429344)]
+[Switching to Thread 0x7fff9ffff6c0 (LWP 1429242)]
+
+Thread 6 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fff9406b400, buf=buf@entry=0x7fff94057e7e, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT rdx=0xfffffff5
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff94064850) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_WIRE_DECODED 0x7fff94054057 RAW 0x7ff86bfc0000 POS 0x7fff94057e90
+GDB_TCACHE_PRE head=0x7fff94057e90 count=7 thread=6 tcache=0x7fff940008e0
+GDB_WIRE_NUM 0x7fff94054057
+GDB_MALLOC_HIT thread=6 tcache=0x7fff940008e0 head=0x7fff94057e90 count=7
+GDB_MALLOC_RET 0x7fff94057e90 WIRE=0 thread=6 tcache=0x7fff940008e0 head=0x7fff94054057 count=6
+GDB_POISON_HEAD_LIVE thread=6 head=0x7fff94054057 count=6
+GDB_MALLOC_HIT thread=6 tcache=0x7fff940008e0 head=0x7fff94055ca0 count=7
+GDB_MALLOC_RET 0x7fff94055ca0 WIRE=0 thread=6 tcache=0x7fff940008e0 head=0x7fff94054057 count=6
+GDB_MALLOC_HIT thread=6 tcache=0x7fff940008e0 head=0x7fff94056a10 count=7
+GDB_MALLOC_RET 0x7fff94056a10 WIRE=0 thread=6 tcache=0x7fff940008e0 head=0x7fff94054057 count=6
+GDB_MALLOC_HIT thread=6 tcache=0x7fff940008e0 head=0x7fff9405a110 count=7
+GDB_MALLOC_RET 0x7fff9405a110 WIRE=0 thread=6 tcache=0x7fff940008e0 head=0x7fff94054057 count=6
+GDB_MALLOC_HIT thread=6 tcache=0x7fff940008e0 head=0x7fff94056a10 count=7
+GDB_MALLOC_RET 0x7fff94056a10 WIRE=0 thread=6 tcache=0x7fff940008e0 head=0x7fff94054057 count=6
+GDB_MALLOC_HIT thread=6 tcache=0x7fff940008e0 head=0x7fff9405a110 count=7
+GDB_MALLOC_RET 0x7fff9405a110 WIRE=0 thread=6 tcache=0x7fff940008e0 head=0x7fff94054057 count=6
+time="2026-11-24 20:43:29" level="ERROR" msg="Completed in 94.275794ms /insecure/rs:fill:16:16/plain/hostile.ico" request_id="redjiFR3jMIotmN_ONgZ_" method="GET" status=500 client_ip="127.0.0.1" error="vips_foreign_load_ico_header: unable to read ICO image data from the source" stack="/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:136 github.com/imgproxy/imgproxy/v3/vips.Error\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:298 github.com/imgproxy/imgproxy/v3/vips.(*Image).Load\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:161 github.com/imgproxy/imgproxy/v3/processing.(*Processor).initialLoadImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:79 github.com/imgproxy/imgproxy/v3/processing.(*Processor).ProcessImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request_methods.go:162 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).processImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request.go:118 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/handler.go:93 github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:88 github.com/imgproxy/imgproxy/v3/server.(*Router).WithPanic-fm.(*Router).WithPanic.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:103 github.com/imgproxy/imgproxy/v3/server.(*Router).WithReportError-fm.(*Router).WithReportError.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/router.go:142 github.com/imgproxy/imgproxy/v3/server.(*Router).ServeHTTP"
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=5
+GDB_MALLOC_RET 0x7fff980eec30 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff88008a40 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff88008a40 count=4
+GDB_MALLOC_RET 0x7fff88008a40 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e6750 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=4
+GDB_MALLOC_RET 0x7fff980eec30 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e6750 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98082cc0 count=5
+GDB_MALLOC_RET 0x7fff98082cc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980ece70 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98082cc0 count=6
+GDB_MALLOC_RET 0x7fff98082cc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=6
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98082cc0 count=6
+GDB_MALLOC_RET 0x7fff98082cc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98086e20 count=6
+GDB_MALLOC_RET 0x7fff98086e20 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=5
+GDB_MALLOC_RET 0x7fff980eec30 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980ece70 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ece70 count=4
+GDB_MALLOC_RET 0x7fff980ece70 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e6750 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ece70 count=5
+GDB_MALLOC_RET 0x7fff980ece70 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=4
+GDB_MALLOC_RET 0x7fff980eec30 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e6750 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980eec30 count=5
+GDB_MALLOC_RET 0x7fff980eec30 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980ece70 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e6750 count=3
+GDB_MALLOC_RET 0x7fff980e6750 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff88020c00 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_RET 0x7fff980e4a00 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98083040 count=5
+GDB_MALLOC_RET 0x7fff98083040 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=4
+GDB_MALLOC_RET 0x7fff980b67f0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e5790 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=5
+GDB_MALLOC_RET 0x7fff980b67f0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff98083040 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e5790 count=3
+GDB_MALLOC_RET 0x7fff980e5790 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=3
+GDB_MALLOC_RET 0x7fff980b67f0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b2510 count=6
+GDB_MALLOC_RET 0x7fff980b2510 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=5
+GDB_MALLOC_RET 0x817bdc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e29b0 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=6
+GDB_MALLOC_RET 0x817bdc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980b2510 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e29b0 count=4
+GDB_MALLOC_RET 0x7fff980e29b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=4
+GDB_MALLOC_RET 0x817bdc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=3
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=5
+GDB_MALLOC_RET 0x7fff9808e980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x817c7e0 count=6
+GDB_MALLOC_RET 0x817c7e0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a90 count=7
+GDB_MALLOC_RET 0x7fff980e4a90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=6
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x817c7e0 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a90 count=6
+GDB_MALLOC_RET 0x7fff980e4a90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x817c7e0 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=4
+GDB_MALLOC_RET 0x7fff9808e980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=4
+GDB_MALLOC_RET 0x7fff9808e980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=3
+GDB_MALLOC_RET 0x817bdc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b56e0 count=5
+GDB_MALLOC_RET 0x7fff980b56e0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x817bdc0 count=4
+GDB_MALLOC_RET 0x817bdc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808b060 count=6
+GDB_MALLOC_RET 0x7fff9808b060 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980b56e0 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98087ec0 count=7
+GDB_MALLOC_RET 0x7fff98087ec0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=6
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808b060 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98087ec0 count=6
+GDB_MALLOC_RET 0x7fff98087ec0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808b060 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b56e0 count=4
+GDB_MALLOC_RET 0x7fff980b56e0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98087ec0 count=4
+GDB_MALLOC_RET 0x7fff98087ec0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=3
+GDB_MALLOC_RET 0x7fff9808e980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e3440 count=5
+GDB_MALLOC_RET 0x7fff980e3440 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=4
+GDB_MALLOC_RET 0x7fff9808e980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff98087ec0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e3440 count=4
+GDB_MALLOC_RET 0x7fff980e3440 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff98087ec0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b67f0 count=2
+GDB_MALLOC_RET 0x7fff980b67f0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e3440 count=2
+GDB_MALLOC_RET 0x7fff980e3440 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e77d0 count=3
+GDB_MALLOC_RET 0x7fff980e77d0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808c4a0 count=3
+GDB_MALLOC_RET 0x7fff9808c4a0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=5
+GDB_MALLOC_RET 0x7fff980ebdb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9808c4a0 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e77d0 count=3
+GDB_MALLOC_RET 0x7fff980e77d0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=3
+GDB_MALLOC_RET 0x7fff980ebdb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=2
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=2
+GDB_MALLOC_RET 0x7fff980ebdb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_RET 0x7fff980e4a00 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_RET 0x7fff980a9d50 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=2
+GDB_MALLOC_RET 0x7fff980e4a00 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=1
+GDB_MALLOC_RET 0x7fff980ebdb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2b80 count=3
+GDB_MALLOC_RET 0x7fff980c2b80 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=2
+GDB_MALLOC_RET 0x7fff980ebdb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c31a0 count=3
+GDB_MALLOC_RET 0x7fff980c31a0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c2b80 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e4a00 count=1
+GDB_MALLOC_RET 0x7fff980e4a00 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c31a0 count=1
+GDB_MALLOC_RET 0x7fff980c31a0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980c4020 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=2
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c31a0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980c43b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=3
+GDB_MALLOC_RET 0x7fff980c4bc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=2
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b3cf0 count=3
+GDB_MALLOC_RET 0x7fff980b3cf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=2
+GDB_MALLOC_RET 0x7fff980c4bc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ddfd0 count=4
+GDB_MALLOC_RET 0x7fff980ddfd0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=3
+GDB_MALLOC_RET 0x7fff980c4bc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980b3cf0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=4
+GDB_MALLOC_RET 0x7fff980c4bc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980ddfd0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b3cf0 count=2
+GDB_MALLOC_RET 0x7fff980b3cf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=2
+GDB_MALLOC_RET 0x7fff980c4bc0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=1
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980df550 count=3
+GDB_MALLOC_RET 0x7fff980df550 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=2
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980df550 count=2
+GDB_MALLOC_RET 0x7fff980df550 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bc0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980e0860 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980df550 count=1
+GDB_MALLOC_RET 0x7fff980df550 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980df550 count=2
+GDB_MALLOC_RET 0x7fff980df550 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980de840 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980e0df0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980df550 count=1
+GDB_MALLOC_RET 0x7fff980df550 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980df550 count=1
+GDB_MALLOC_RET 0x7fff980df550 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980e1190 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980df550 count=1
+GDB_MALLOC_RET 0x7fff980df550 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e2df0 count=1
+GDB_MALLOC_RET 0x7fff980e2df0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980e14c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b1f70 count=4
+GDB_MALLOC_RET 0x7fff980b1f70 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e1490 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e1490 count=3
+GDB_MALLOC_RET 0x7fff980e1490 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e14c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e1ce0 count=5
+GDB_MALLOC_RET 0x7fff980e1ce0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e1490 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980b1f70 count=3
+GDB_MALLOC_RET 0x7fff980b1f70 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e14c0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e2df0 count=1
+GDB_MALLOC_RET 0x7fff980e2df0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9809a580 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e21a0 count=4
+GDB_MALLOC_RET 0x7fff980e21a0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809a510 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809a510 count=3
+GDB_MALLOC_RET 0x7fff9809a510 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809a580 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809a510 count=4
+GDB_MALLOC_RET 0x7fff9809a510 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e21a0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809a580 count=2
+GDB_MALLOC_RET 0x7fff9809a580 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980e2df0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9809bb70 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9809bbd0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809ae00 count=4
+GDB_MALLOC_RET 0x7fff9809ae00 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809bba0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809bba0 count=3
+GDB_MALLOC_RET 0x7fff9809bba0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809bbd0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809bba0 count=4
+GDB_MALLOC_RET 0x7fff9809bba0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809ae00 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809bbd0 count=2
+GDB_MALLOC_RET 0x7fff9809bbd0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809bb70 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9809d1b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9809d210 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809c4a0 count=4
+GDB_MALLOC_RET 0x7fff9809c4a0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1e0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1e0 count=3
+GDB_MALLOC_RET 0x7fff9809d1e0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809d210 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1e0 count=4
+GDB_MALLOC_RET 0x7fff9809d1e0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809c4a0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809d210 count=2
+GDB_MALLOC_RET 0x7fff9809d210 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1b0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1b0 count=1
+GDB_MALLOC_RET 0x7fff9809d1b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980a0980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a0980 count=2
+GDB_MALLOC_RET 0x7fff980a0980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1b0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1b0 count=1
+GDB_MALLOC_RET 0x7fff9809d1b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809dae0 count=4
+GDB_MALLOC_RET 0x7fff9809dae0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980a0d20 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a0d20 count=3
+GDB_MALLOC_RET 0x7fff980a0d20 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1b0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a17f0 count=5
+GDB_MALLOC_RET 0x7fff980a17f0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980a0d20 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a0d20 count=4
+GDB_MALLOC_RET 0x7fff980a0d20 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809dae0 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a0d20 count=5
+GDB_MALLOC_RET 0x7fff980a0d20 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980a17f0 count=4
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9809dae0 count=3
+GDB_MALLOC_RET 0x7fff9809dae0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff9809d1b0 count=2
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a0980 count=1
+GDB_MALLOC_RET 0x7fff980a0980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f2da0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a0980 count=1
+GDB_MALLOC_RET 0x7fff980a0980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f3330 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a0980 count=1
+GDB_MALLOC_RET 0x7fff980a0980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f3b80 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b80 count=2
+GDB_MALLOC_RET 0x7fff980f3b80 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980a0980 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f4660 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f4900 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f4900 count=2
+GDB_MALLOC_RET 0x7fff980f4900 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980f3330 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3330 count=1
+GDB_MALLOC_RET 0x7fff980f3330 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3330 count=2
+GDB_MALLOC_RET 0x7fff980f3330 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980f4900 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f59b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f5af0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f5af0 count=2
+GDB_MALLOC_RET 0x7fff980f5af0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980a2060 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a2060 count=1
+GDB_MALLOC_RET 0x7fff980a2060 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a2060 count=2
+GDB_MALLOC_RET 0x7fff980a2060 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980f5af0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f5af0 count=1
+GDB_MALLOC_RET 0x7fff980f5af0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f5af0 count=2
+GDB_MALLOC_RET 0x7fff980f5af0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980a2060 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f6e00 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff980f6f40 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f6f40 count=2
+GDB_MALLOC_RET 0x7fff980f6f40 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980f50c0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f50c0 count=1
+GDB_MALLOC_RET 0x7fff980f50c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f50c0 count=2
+GDB_MALLOC_RET 0x7fff980f50c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980f6f40 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f6f40 count=1
+GDB_MALLOC_RET 0x7fff980f6f40 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff90000d30 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=2
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000d30 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000d30 count=1
+GDB_MALLOC_RET 0x7fff90000d30 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=2
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=2
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=2
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=2
+GDB_MALLOC_RET 0x7fff90000dd0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=1
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=3
+GDB_MALLOC_RET 0x7fff900013f0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=3
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_RET 0x7fff900013f0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=3
+GDB_MALLOC_RET 0x7fff900013f0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=3
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_RET 0x7fff900013f0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=3
+GDB_MALLOC_RET 0x7fff900013f0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=3
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_RET 0x7fff900013f0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=3
+GDB_MALLOC_RET 0x7fff900013f0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=2
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90000dd0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=3
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_RET 0x7fff980a9d50 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=4
+GDB_MALLOC_RET 0x7fff980a9d50 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=3
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff900013f0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=5
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=5
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=5
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=5
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=4
+GDB_MALLOC_RET 0x7fff90001230 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90012a30 count=6
+GDB_MALLOC_RET 0x7fff90012a30 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90001230 count=5
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff980e57c0 count=4
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff980a9d50 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff98088bb0 count=2
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_RET 0x7fff9808f2c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=2
+GDB_MALLOC_RET 0x7fff9808f2c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff98088bb0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff98088bb0 count=1
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff98088bb0 count=2
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_RET 0x7fff9808f2c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff98082cc0 count=4
+GDB_MALLOC_RET 0x7fff98082cc0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90017040 count=3
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90017040 count=3
+GDB_MALLOC_RET 0x7fff90017040 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90017f00 count=5
+GDB_MALLOC_RET 0x7fff90017f00 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90017040 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff98082cc0 count=3
+GDB_MALLOC_RET 0x7fff98082cc0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=2
+GDB_MALLOC_RET 0x7fff9808f2c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff98088bb0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff98088bb0 count=1
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_RET 0x7fff9808f2c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff90019040 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90019040 count=2
+GDB_MALLOC_RET 0x7fff90019040 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_RET 0x7fff9808f2c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff90019be0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90019b70 count=3
+GDB_MALLOC_RET 0x7fff90019b70 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90019be0 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90019be0 count=2
+GDB_MALLOC_RET 0x7fff90019be0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001a250 count=3
+GDB_MALLOC_RET 0x7fff9001a250 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90019b70 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9808f2c0 count=1
+GDB_MALLOC_RET 0x7fff9808f2c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9001aee0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9001b0c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9001b1d0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9001b370 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001b370 count=2
+GDB_MALLOC_RET 0x7fff9001b370 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9001aee0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9001b5d0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=1
+GDB_MALLOC_RET 0x7fff88020c00 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_RET 0x7fff9001bad0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001bad0 count=2
+GDB_MALLOC_RET 0x7fff9001bad0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=1
+GDB_MALLOC_RET 0x7fff88020c00 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=2
+GDB_MALLOC_RET 0x7fff88020c00 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9001bad0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001bad0 count=1
+GDB_MALLOC_RET 0x7fff9001bad0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001bad0 count=2
+GDB_MALLOC_RET 0x7fff9001bad0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=1
+GDB_MALLOC_RET 0x7fff88020c00 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x0 count=0
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=2
+GDB_MALLOC_RET 0x7fff88020c00 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9001bad0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=3
+GDB_MALLOC_RET 0x7fff88020c00 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90019040 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90019040 count=2
+GDB_MALLOC_RET 0x7fff90019040 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff9001bad0 count=1
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90019040 count=3
+GDB_MALLOC_RET 0x7fff90019040 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff88020c00 count=2
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=5
+GDB_MALLOC_RET 0x7fff90023660 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90019040 count=4
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff9001d420 count=7
+GDB_MALLOC_RET 0x7fff9001d420 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff90023690 count=7
+GDB_MALLOC_RET 0x7fff90023690 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=8 tcache=0x7fff900008e0 head=0x7fff900236c0 count=7
+GDB_MALLOC_RET 0x7fff900236c0 WIRE=0 thread=8 tcache=0x7fff900008e0 head=0x7fff90023660 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f6f40 count=2
+GDB_MALLOC_RET 0x7fff980f6f40 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980f50c0 count=1
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980fdd10 count=4
+GDB_MALLOC_RET 0x7fff980fdd10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980f6f40 count=3
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980fdd60 count=6
+GDB_MALLOC_RET 0x7fff980fdd60 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff980fdd10 count=5
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980fdd60 count=7
+GDB_MALLOC_RET 0x7fff980fdd60 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980fdd60 count=7
+GDB_MALLOC_RET 0x7fff980fdd60 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f5fa0 count=7
+GDB_MALLOC_RET 0x7fff980f5fa0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f5fa0 count=7
+GDB_MALLOC_RET 0x7fff980f5fa0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f2da0 count=7
+GDB_MALLOC_RET 0x7fff980f2da0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f2da0 count=7
+GDB_MALLOC_RET 0x7fff980f2da0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b10 count=7
+GDB_MALLOC_RET 0x7fff980f3b10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b10 count=7
+GDB_MALLOC_RET 0x7fff980f3b10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b10 count=7
+GDB_MALLOC_RET 0x7fff980f3b10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b10 count=7
+GDB_MALLOC_RET 0x7fff980f3b10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b10 count=7
+GDB_MALLOC_RET 0x7fff980f3b10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f7150 count=7
+GDB_MALLOC_RET 0x7fff980f7150 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b10 count=7
+GDB_MALLOC_RET 0x7fff980f3b10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980f3b10 count=7
+GDB_MALLOC_RET 0x7fff980f3b10 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980d47b0 count=7
+GDB_MALLOC_RET 0x7fff980d47b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980d47b0 count=7
+GDB_MALLOC_RET 0x7fff980d47b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980d47b0 count=7
+GDB_MALLOC_RET 0x7fff980d47b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980d47b0 count=7
+GDB_MALLOC_RET 0x7fff980d47b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980d47b0 count=7
+GDB_MALLOC_RET 0x7fff980d47b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e57c0 count=7
+GDB_MALLOC_RET 0x7fff980e57c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980d47b0 count=7
+GDB_MALLOC_RET 0x7fff980d47b0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98088bb0 count=7
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98088bb0 count=7
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98088bb0 count=7
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98088bb0 count=7
+GDB_MALLOC_RET 0x7fff98088bb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ee700 count=7
+GDB_MALLOC_RET 0x7fff980ee700 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ee700 count=7
+GDB_MALLOC_RET 0x7fff980ee700 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ee700 count=7
+GDB_MALLOC_RET 0x7fff980ee700 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98083990 count=7
+GDB_MALLOC_RET 0x7fff98083990 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e67c0 count=7
+GDB_MALLOC_RET 0x7fff980e67c0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff9808e980 count=7
+GDB_MALLOC_RET 0x7fff9808e980 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98087af0 count=7
+GDB_MALLOC_RET 0x7fff98087af0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980e77a0 count=7
+GDB_MALLOC_RET 0x7fff980e77a0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff98087af0 count=7
+GDB_MALLOC_RET 0x7fff98087af0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2ac0 count=7
+GDB_MALLOC_RET 0x7fff980c2ac0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=7
+GDB_MALLOC_RET 0x7fff980ebdb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2ac0 count=7
+GDB_MALLOC_RET 0x7fff980c2ac0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980ebdb0 count=7
+GDB_MALLOC_RET 0x7fff980ebdb0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2ac0 count=7
+GDB_MALLOC_RET 0x7fff980c2ac0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3ea0 count=7
+GDB_MALLOC_RET 0x7fff980c3ea0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2ac0 count=7
+GDB_MALLOC_RET 0x7fff980c2ac0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3ea0 count=7
+GDB_MALLOC_RET 0x7fff980c3ea0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2ac0 count=7
+GDB_MALLOC_RET 0x7fff980c2ac0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3ea0 count=7
+GDB_MALLOC_RET 0x7fff980c3ea0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2ac0 count=7
+GDB_MALLOC_RET 0x7fff980c2ac0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980a9a70 count=7
+GDB_MALLOC_RET 0x7fff980a9a70 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c2ac0 count=7
+GDB_MALLOC_RET 0x7fff980c2ac0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980dddf0 count=7
+GDB_MALLOC_RET 0x7fff980dddf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c3f90 count=7
+GDB_MALLOC_RET 0x7fff980c3f90 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6
+GDB_MALLOC_HIT thread=5 tcache=0x7fff980008e0 head=0x7fff980c4bf0 count=7
+GDB_MALLOC_RET 0x7fff980c4bf0 WIRE=0 thread=5 tcache=0x7fff980008e0 head=0x7fff90009330 count=6

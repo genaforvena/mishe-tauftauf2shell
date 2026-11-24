@@ -1017,3 +1017,48 @@ returned `RemoteDisconnected`: the twenty-malloc script had already reached
 So the second-request route is untested against a poisoned head, not
 negative evidence of consumption; all runs and failures are preserved in
 `/tmp/w11-out`. Grade stays rung 4; W204's verdict on W9 is unchanged.
+
+## W12 — gated second GET reaches a poisoned head; no wire-pointer allocation (2026-11-24 20:31-20:44Z, author, unwitnessed)
+
+W11b's fixed-delay second GET never reached a poisoned head and its
+twenty-malloc script quit before the request arrived. `provision/ico_second_get_gated_py.py`
+sha256
+`708b669ad1cc62b889ac979b73afe67b0dfe40703d43a392deb326cbe6edf581`
+keeps the W9 probe and replaces its GDB script with GDB Python breakpoints:
+an internal breakpoint at `malloc(0x20)` installs a `gdb.FinishBreakpoint`;
+both return False (never stop the inferior, never call a function), print
+`$rax` and tcache state, and touch a marker file when `head == wire` is seen
+after a malloc. Values are read through `p/x` text because this GDB's Python
+API rejects casts from pointer-typed registers. The Python side polls that
+marker at 2 ms and sends a benign GET to the same live imgproxy process.
+`W12_GOMAXPROCS=1` sets the Go processor count in the lab process only. No
+inferior memory write and no forced call; traffic stayed on
+127.0.0.1:18180/18181, free before and after.
+
+Ninety-eight runs (62 default, 36 with `GOMAXPROCS=1`) used the pinned plain
+`imgproxy-vuln` binary, `LOW=0`, 20-byte body and `SIZE=0x35`. The gate fired
+in eight: `p44`, `p48`, `p54`, `p57`, `p60`, `p63`, `p64` (default) and `g97`
+(`GOMAXPROCS=1`). In four (`p44`, `p48`, `p54`, `p63`) the allocator aborted
+with `malloc(): unaligned tcache chunk detected` before the second GET was
+served. In four (`p57`, `p60`, `p64`, `g97`) the second GET returned HTTP 200
+and 379 natural `malloc(0x20)` calls were observed; every `WIRE=0`.
+`http-ico-w12-p57.log` sha256
+`880ce71225ed520fefea0ee0efb6bf716bac8cdced3dcb903651132e1b77c428`:
+victim thread 11, pre head/`POS` `0x7fff840b0610` count 7, decoded head
+`0x7fff840b40b0` count 6 after M1; later hits ran on threads 11, 14, 3 and 7
+and no allocation returned the decoded pointer. `http-ico-w12-g97.log`
+sha256 `7d4f49d26a9807c613fa3aa17e1d07853dbc41ca0954f4782326b5fec4f88a93`
+with `GOMAXPROCS=1`: victim thread 6, decoded head `0x7fff94054057`, second
+GET mallocs mostly on thread 5 with `tcache=0x7fff980008e0`. `http-ico-w12-p44.log`
+sha256 `2f9baaef93bb6262869b7a4d0797b9878da3d7670f777b5b9549fee8e461db09`
+records the gate followed by the allocator abort in the victim thread.
+
+The second request now demonstrably arrives while the wire-derived pointer
+is the live bin-1 head, but HTTP work is distributed across threads and
+tcaches; no natural allocation returned the wire-decoded pointer.
+`GOMAXPROCS=1` did not pin the second GET to the victim thread. The abort
+runs show allocator detection of the wire-derived link, not consumption by
+an attacker-influenced allocation. Grade stays rung 4; no wire-only key,
+marker, code-pointer write or r5. All non-gate and abort layouts are kept in
+`/tmp/w12-out` and are not retried into existence; W204's verdict on W9 is
+unchanged.
