@@ -157,3 +157,26 @@ one-past address. `sh run-stack-layout.sh` -> 16 PASS / 0 FAIL
 stack-layout lane for these compilers and flags: pointer LSB control still
 requires the explicitly tagged struct record used in W204/W205. Grade
 unchanged: rungs 1-4, r5 UNKNOWN; author-only, no witness replay.
+
+## Natural global-struct control datum (W208, 2026-11-24T17:11Z)
+
+`global-datum.c`, `build-global-datum.sh` and `run-global-datum.sh` cover the
+one storage class the W204-W207 lanes missed: a static-duration record with
+ordinary C alignment, `struct { uint8_t buf[31]; uint8_t state;
+void (*handler)(void); }`. The compiler places `state` at struct offset 31
+and the 8-aligned handler at 32 with no `#pragma pack`, no tag byte and no
+dispatch table, so the CVE's one byte at `buf[31]` lands directly on `state`.
+The probe is linked against the W206 plain (non-ASan) pinned libraries; the
+library performs the write.
+
+Four modes: vulnerable `0x48` drives `state` `0xa5 -> 0x48`; fixed `0x48`
+leaves `0xa5`; safe-input `0x00` on a zeroed state leaves `0x00`; a second
+attacker value `0x01` drives `0xa5 -> 0x01`. All four keep the handler LSB at
+`0x29`, confirming the byte hits offset 31, not the pointer at 32.
+`sh run-global-datum.sh` -> 15 PASS / 0 FAIL (`global-datum-replay.log`);
+existing suites remain 14 / 31 / 10 / 16 PASS, 0 FAIL. Re-verified the
+documented minimum from pinned `cipher.h:155-158` (`in_len + block_len - 1`).
+This upgrades the rung-4 control-datum demonstration to a natural, ungroomed
+layout, but it is still a lab record with no real application, no pointer/IP,
+no command and no wire-to-command path. Grade unchanged: rungs 1-4, r5
+UNKNOWN; author-only, no witness replay of W208.

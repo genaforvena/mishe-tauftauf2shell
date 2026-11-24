@@ -1,0 +1,20 @@
+vuln: buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x48 state_before=0xa5 state_after=0x48 expected=0x48 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+fixed: buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x48 state_before=0xa5 state_after=0xa5 expected=0xa5 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+safe: buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x00 state_before=0x00 state_after=0x00 expected=0x00 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+steer: buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x01 state_before=0xa5 state_after=0x01 expected=0x01 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+PASS natural_layout: 1
+PASS vuln_state_hit: 1
+PASS vuln_rc: 0
+PASS fixed_state_clean: 1
+PASS fixed_rc: 0
+PASS safe_state_clean: 1
+PASS safe_rc: 0
+PASS steer_state_hit: 1
+PASS steer_rc: 0
+PASS handler_lsb_same_vuln: 1
+PASS handler_lsb_same_fixed: 1
+PASS handler_lsb_same_safe: 1
+PASS handler_lsb_same_steer: 1
+PASS vuln_decrypt_ok: 1
+PASS fixed_decrypt_ok: 1
+RESULT: 15 PASS / 0 FAIL

@@ -236,3 +236,38 @@ fixed/clang/O2 cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 
 datum on these compilers/flags, so the previously throwaway canary-gap
 observation is now a reproducible negative. Rung grade unchanged; no witness
 replay of W207.
+
+## Natural global-struct control datum (2026-11-24T17:11Z, W208)
+
+The output contract is pinned in `src/include/openssl/cipher.h:155-158`:
+"The number of output bytes may be up to |in_len| plus the block length minus
+one and |out| must have sufficient space." A 16-byte update with a 16-byte
+block therefore documents a 31-byte minimum; vulnerable `cipher.c:405-427`
+writes 32. The overflow is exactly one byte on every boundary-crossing update,
+never more.
+
+`global-datum.c` + `build-global-datum.sh` cover the storage class W204-W207
+did not: a static-duration, normally aligned record
+`struct { uint8_t buf[31]; uint8_t state; void (*handler)(void); }`. With no
+`#pragma pack`, no leading tag and no dispatch table, C layout puts `state` at
+offset 31 and the 8-aligned handler at 32, so the byte written at `buf[31]`
+is exactly `&g.state`. The probe is compiled against the W206 plain (non-ASan)
+pinned libraries; only the library writes the byte.
+
+Observed (`global-datum-replay.log`, four modes):
+
+```
+vuln:  buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x48 state_before=0xa5 state_after=0x48 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+fixed: buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x48 state_before=0xa5 state_after=0xa5 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+safe:  buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x00 state_before=0x00 state_after=0x00 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+steer: buf_off=0 state_off=31 handler_off=32 struct_size=40 chosen=0x01 state_before=0xa5 state_after=0x01 handler_lsb_before=0x29 handler_lsb_after=0x29 decrypt_ok=1
+```
+
+`sh run-global-datum.sh` -> 15 PASS / 0 FAIL; the four existing suites remain
+14 / 31 / 10 / 16 PASS, 0 FAIL. In every mode the handler LSB stays `0x29`:
+the OOB byte reaches the adjacent `uint8_t` state at offset 31, not the
+pointer at 32. This is rung-4 control-datum overwrite with an ungroomed,
+compiler-chosen layout: unlike W1's aligned table and W204/W205's leading
+tag, no packing or tag is needed for the byte to land on a control datum.
+Still no pointer/IP/command, no real application, no wire-to-command path.
+Grade unchanged, author-only, no witness replay of W208.

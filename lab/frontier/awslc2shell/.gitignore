@@ -17,3 +17,5 @@
 /stack-layout-vuln-*
 /stack-layout-fixed-*
 /metadata-fixed
+/global-datum-vuln
+/global-datum-fixed

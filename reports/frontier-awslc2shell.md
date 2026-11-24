@@ -136,12 +136,27 @@ it. `sh run-stack-layout.sh` -> 16 PASS / 0 FAIL
 control still needs the tagged struct record. Grade unchanged, no witness
 replay.
 
+W208 (2026-11-24T17:11Z) covered the remaining storage class with
+`global-datum.c`: a static-duration, normally aligned
+`struct { uint8_t buf[31]; uint8_t state; void (*handler)(void); }` puts
+`state` at offset 31 and the handler at 32 with no packing, tag or table.
+Linked against the W206 plain pinned libraries, vulnerable `0x48` changes
+`state` `0xa5 -> 0x48`, fixed `0x48` leaves `0xa5`, safe `0x00` leaves zero,
+and a second chosen value `0x01` changes `0xa5 -> 0x01`; handler LSB stays
+`0x29` in all four. `sh run-global-datum.sh` -> 15 PASS / 0 FAIL
+(`global-datum-replay.log`). Unlike W1 and W204/W205, the control datum is
+hit without grooming the layout. Still no real app, pointer/IP, command or
+wire-to-command path; grade unchanged, author-only, no witness replay.
+
 ## Cheapest next experiment
 
 `run-all.sh` and the original consumer lane have independent clean-room
-verdicts (ESTABLISHED AS LABELED); W204, W205, W206 and W207 are author-measured
-only. A witness replay of `0d3fc55` (chat #3562) still covers W204, W205 was
-requested in #3594 and W206 in #3668. The remaining gap is a real consumer
-whose documented-minimum output buffer is followed at that offset by a control
-datum; W207 rules out the natural stack layout as that consumer on this host.
+verdicts (ESTABLISHED AS LABELED); W204, W205, W206, W207 and W208 are
+author-measured only. A witness replay of `0d3fc55` (chat #3562) still covers
+W204, W205 was requested in #3594 and W206 in #3668. W208 is a positive
+rung-4 control-datum result in a natural global struct; it is a new replay
+recipe if the witness wants it, queued behind those three. The remaining gap
+is a real application whose documented-minimum output buffer is followed at
+that offset by a control datum; W207 rules out the natural stack layout and
+W206 rules out glibc heap metadata with a lone minimum buffer on this host.
 Any r5 claim needs witness replay.
