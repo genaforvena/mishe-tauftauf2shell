@@ -1119,8 +1119,50 @@ unchanged. Author self-observation, not independently replayed. All ports
 15101-15113 were loopback and were freed; `pgrep vrpn_server` and `ss -ltn`
 for that range were empty afterwards. Do not resweep these points.
 
+## W25 — negative-index lane closed on stock -O0 (2026-11-24 ~07:1xZ)
+
+W18 closed the negative-index lane at `-O2`; W3 had sampled only -8, -48 and
+-64 at `-O0`. This wake sweeps indices -1, -2, -4, -8, -12, -16, -20, -24,
+-32, -40, -48, -56, -64, -72, -80, -96, -112, -120 and -128 over real
+loopback TCP, one message per fresh stock plain `-O0` process, with the
+existing `probe-func-dos.sh` / `wire_inject.py` (ports 15200-15218). Raw rows
+in `lab/frontier/vrpn2shell/out-w25-neg-o0/idx-*/`.
+
+- Only two rows fault: **-4** and **-8**, both `DEAD_AFTER_MESSAGE exit=139`
+  (SIGSEGV). Every other negative index is `ALIVE_AFTER_MESSAGE`. Fixed-commit
+  controls at -8 and -16 (`out-w25-neg-o0/fixed-8`, `fixed-16`) and a safe
+  in-bounds index 4 (`safe-4`) all survive; the -4 fault also reproduces on
+  the TYPE sink (`out-w25-type-4`, exit 139) and is absent on the fixed build
+  (`out-w25-fixed-4`, ALIVE).
+- `out-w25-gdb-4/gdb.log` maps the **new** -4 row: `&sender_name =
+  0x7fffffffd910`, `&endpoint = 0x7fffffffd908` (`sender_name - 8`), so `i=-4`
+  is byte 4 of the live `endpoint` pointer. PRE `endpoint=0x5555556f3220`;
+  POST `endpoint=0x5500556f3220` (byte `0x55` -> `0x00`); saved_rip unchanged;
+  SIGSEGV at `:4560` on the next dereference. This is the same primitive as
+  W3's -8 (a wire-chosen NUL on a live object pointer) at a different byte,
+  not a new capability: the relocated address differs from the real heap
+  mapping and was not directed at controlled data.
+- `out-w25-gdb--1/gdb.log`, `out-w25-gdb--2/gdb.log`,
+  `out-w25-gdb--16/gdb.log`, `out-w25-gdb--32/gdb.log`,
+  `out-w25-gdb--64/gdb.log` and `out-w25-gdb--128/gdb.log` map ALIVE rows:
+  every PRE and POST dump is byte-identical (endpoint and saved_rip
+  unchanged), so those indices hit bytes already `0x00` in the frame. The
+  -128 gdb run was cut by the probe timeout after both breakpoints fired,
+  so its landing is recorded but its post-write continuation is UNKNOWN.
+  No ALIVE row changed live state.
+- Prediction before the sweep was "no new control"; observation confirms it.
+  No chosen byte, no new rung-4 boundary, no command side effect, no rung 5;
+  grade unchanged. Author self-observation, not independently replayed.
+  All ports were loopback; 15200-15221 were free afterwards. Do not resweep
+  this index set on the same `-O0` binary.
+
 ## Limits and next work
 
+- W25 closes the negative-index lane on stock `-O0`: indices -1 through -128
+  fault only at -4 and -8 (SIGSEGV through the live `endpoint` pointer,
+  mapped at byte 4 and byte 0); all others survive. Fixed-commit and
+  safe-input controls survive at the same indices. No chosen byte or new
+  rung-4 boundary; do not resweep these points on the same binary.
 
 - W24 found a second source defect: `payload_len` 0-3 underflows the `strncpy`
   length at vulnerable `:4548`/`:4476` and fixed `:4552`/`:4480`. ASan reports

@@ -742,3 +742,36 @@ freed; `pgrep vrpn_server` and `ss -ltn` for 151xx were empty afterwards.
   and the handler was never reached. It is preserved as a negative harness
   row and is not evidence of safety; `out-w24-safe28/` is the valid control.
 Do not resweep these points on this host/glibc.
+
+## W25 — negative-index lane closed on stock -O0 (2026-11-24 ~07:1xZ)
+
+Loopback-only sweep of negative SENDER_DESCRIPTION indices on the stock plain
+`-O0` build. Binaries: vulnerable
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`
+(`build-plain-07.36`), fixed-commit
+`10e581e895c25f39bea153b4d5ce1014796190fb9bd5f901693115d176ea2f45`
+(`build-plain-fixed`). Harness `probe-func-dos.sh` + `wire_inject.py`, one
+fresh server process per index, ports 15200-15221; `probe-frame-write.sh`
+for gdb maps on ports 15300-15306. All loopback, all freed afterwards.
+
+Indices swept (vulnerable plain): -1, -2, -4, -8, -12, -16, -20, -24, -32,
+-40, -48, -56, -64, -72, -80, -96, -112, -120, -128. Only `out-w25-neg-o0/idx-4`
+and `idx-8` are `DEAD_AFTER_MESSAGE exit=139`; all others are
+`ALIVE_AFTER_MESSAGE`. Controls: `fixed-8`, `fixed-16` (ALIVE), `safe-4`
+(index 4, ALIVE), plus `out-w25-type-4` (TYPE sink, exit 139) and
+`out-w25-fixed-4` (fixed build, index -4, ALIVE).
+
+`out-w25-gdb-4/gdb.log`: `&sender_name=0x7fffffffd910`,
+`&endpoint=0x7fffffffd908` (= `sender_name-8`). PRE `endpoint=0x5555556f3220`;
+POST `endpoint=0x5500556f3220` (byte 4, `0x55` -> `0x00`); saved_rip
+unchanged; SIGSEGV at `:4560`. `out-w25-gdb--1/gdb.log`,
+`out-w25-gdb--2/gdb.log`, `out-w25-gdb--16/gdb.log`,
+`out-w25-gdb--32/gdb.log`, `out-w25-gdb--64/gdb.log`,
+`out-w25-gdb--128/gdb.log`: PRE and POST dumps byte-identical (already-zero
+bytes, no live-state change). The -128 gdb run timed out after both
+breakpoints fired; its post-write continuation is UNKNOWN.
+
+Prediction before the sweep was "no new control"; observation confirms it.
+No chosen byte, no new rung-4 boundary, no command, no rung 5, grade
+unchanged. Author self-observation, not independently replayed. Do not
+resweep this index set on the same binary.
