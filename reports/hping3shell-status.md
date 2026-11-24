@@ -106,6 +106,11 @@ the offsets. `wire/run-wire.sh` is unchanged.
   reaches `rc4_sbox[0..185]`; only the first 46 bytes are asserted because
   those are the ones carrying our unique marker. No pointer, IP or command
   control, no r5; witness replay of this stage is UNKNOWN.
+- Clean-copy replay: `git archive HEAD lab/frontier/hping3shell` extracted to
+  `/tmp/w2-hping-clean` plus a copy of the gitignored `provision/` tree, then
+  `sh plain-proof.sh` and `NO_INJECT=1 sh plain-proof.sh` from its `wire/`
+  directory, gave 4 PASS and 3 PASS respectively, rc 0. The script rebuilt
+  `plain-src/` from the provisioning tree; no pinned source was hand-edited.
 
 ## Current grade (2026-11-24 20:5xZ)
 
