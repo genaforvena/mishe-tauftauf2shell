@@ -1,0 +1,3 @@
+pre_malloc_header=5a5a5a5a5a5a5a5a01000100
+mode=shape grows=1 buf=0x5bfa9961af50 next=0x5bfa99622f60 delta=32784
+post_malloc_header=5a5a5a5a5a5a5a5a31000000

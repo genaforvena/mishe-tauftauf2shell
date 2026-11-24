@@ -1,0 +1,3 @@
+pre_malloc_header=5a5a5a5a5a5a5a5a5a5a5a5a
+malloc(): corrupted top size
+Aborted (core dumped)

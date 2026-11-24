@@ -594,3 +594,53 @@ is scoped to this indexed set, not universal.
 Still no measured host making one >=32769-byte call, no PoC bytes and no byte
 >= 0x80 past the allocation. Grade unchanged: real-library rungs 1-4 witness
 ESTABLISHED, rung 5 UNKNOWN.
+
+## 18. Chosen-byte allocator shaping; no consumer reads forged bytes (W179, 2026-11-24)
+
+W178 left two questions open: the all-`0x5a` attack makes glibc abort before
+any allocator-level control can be observed, and the "no in-library consumer"
+claim rested on source plus a dispatch count. Both were measured this wake
+against the same pinned real library, real `Synth` and real
+`DefaultMidiStreamParser`, with the real glibc allocator (no padded `new[]`
+tail). Files: `real/shape_driver.cpp`, `real/shape_probe.sh`,
+`real/watch_probe.gdb`, `real/watch_probe_multi.gdb`, `real/watch_probe.sh`
+and raw outputs in `real/evidence/shape-*.out`, `watch*.out`.
+
+**Attacker-shaped top chunk, process survives, next malloc lands in the
+overwritten region.** The 40001-byte block still has all bytes `<= 0x7f`, but
+eight bytes at source offset 32776 are set to little-endian `0x10001`, which
+is a plausible glibc top-chunk size (`65537 | PREV_INUSE`) and lands on the
+next chunk's size field after the `memcpy` at `MidiStreamParser.cpp:250`.
+Observed with the vulnerable build:
+
+```
+shape-vuln-2_8_3-shape rc=0
+pre_malloc_header=5a5a5a5a5a5a5a5a01000100
+mode=shape grows=1 buf=0x5bfa9961af50 next=0x5bfa99622f60 delta=32784
+post_malloc_header=5a5a5a5a5a5a5a5a31000000
+```
+
+The subsequent real `malloc(32)` succeeds (`rc=0`) and returns exactly
+`buf+32784`, the same address W178's 64-byte neighbour occupied; malloc then
+rewrites the forged size field to `0x31` (the 32-byte request's chunk size).
+Controls: the unshaped 40001-byte attack still aborts `rc=134` with
+`malloc(): corrupted top size`; `safe` (102-byte terminated) allocates no
+32768-byte buffer; all three modes in the pinned-fixed build return `rc=0`
+with `grows=0`. This is chosen-byte control of **real allocator metadata** in
+a real library process, not merely a padded harness tail, but the consuming
+malloc is harness-created and no upstream object or function pointer is
+targeted: rung 4, not rung 5.
+
+**Watchpoint negative on in-library reads.** A hardware watchpoint placed
+after the oversized `memcpy` returns, first on the byte at `buf+32768` and
+then on eight-byte windows at offsets 32768, 35168, 37568 and 39968, recorded
+zero hits until the process aborted in glibc on corrupted top size. Every
+sampled byte still read back `0x5a`. Combined with the source check in §6,
+no library instruction consumed the forged tail in this driver before abort;
+the shaped run above shows the first consumer is the harness's `malloc`,
+which reads and rewrites allocator metadata, not SysEx data.
+
+No pointer or RIP control, marker, command, real host, network input or
+witness replay of these two new probes. The write alphabet remains `0x00-0x7f`
+(§11), so high-bit pointer bytes still cannot be written by this copy. Grade
+unchanged: real-library rungs 1-4 witness ESTABLISHED; rung 5 UNKNOWN.

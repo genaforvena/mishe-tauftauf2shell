@@ -1,0 +1,16 @@
+shape-vuln-2_8_3-shape rc=0
+pre_malloc_header=5a5a5a5a5a5a5a5a01000100
+mode=shape grows=1 buf=0x5bfa9961af50 next=0x5bfa99622f60 delta=32784
+post_malloc_header=5a5a5a5a5a5a5a5a31000000
+shape-vuln-2_8_3-attack rc=134
+pre_malloc_header=5a5a5a5a5a5a5a5a5a5a5a5a
+malloc(): corrupted top size
+Aborted (core dumped)
+shape-vuln-2_8_3-safe rc=0
+mode=safe grows=0 buf=(nil) next=0x5bfc4b4ce370 delta=-1
+shape-fixed-1749f7f-shape rc=0
+mode=shape grows=0 buf=(nil) next=0x64982a62ff50 delta=-1
+shape-fixed-1749f7f-attack rc=0
+mode=attack grows=0 buf=(nil) next=0x5dfecd0caf50 delta=-1
+shape-fixed-1749f7f-safe rc=0
+mode=safe grows=0 buf=(nil) next=0x5a5684c1b370 delta=-1
