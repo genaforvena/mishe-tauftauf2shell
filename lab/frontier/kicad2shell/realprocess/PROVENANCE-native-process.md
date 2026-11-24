@@ -108,3 +108,48 @@ socket/wire delivery, no pointer or control-flow target, no benign marker or
 command, no independent witness replay of this lane. This lane upgrades the
 real-process reachability gap to a deterministic crash; it does not establish
 rung 5, which stays UNKNOWN.
+
+## W183 (2026-11-24 00:19-00:25Z): chosen bytes in the real process
+
+The remaining real-process question was whether the four overwritten bytes
+are *file-controlled*, not merely a constant abort. Five imports were run
+through the same driver against a freshly reset 75-byte empty `local.kicad_sym`
+each time; all five used `MODE=gdb`. The three one-digit fixtures are the
+already-pinned vendor files; the two six-digit fixtures are new same-length
+in-place patches of `mounting_holes-sizez.SchLib` at file offset 0x2ae:
+`SizeZ=9|FontName2=Consolas|` → `SizeZ=<n>|FontName2=XXX|` (25 bytes before and
+after, CFB structure untouched, sha256 in `fixtures/PINS-w183.sha256`).
+
+The real KiCad 8.0.8 scale is `schIUScale.MilsToIU( wxAtoi(value) * 72.0 /
+10.0 )`: `MilsToIU` truncates the mils to an integer and multiplies by
+`IU_PER_MIL = 254`. The harness stub had only the truncated mils, which is why
+its gdb words are 0x40/0x32/0x07 rather than the real 0x3f80/0x319c/0x6f2.
+The OOB store sets the upper half of the freed chunk's size field (the lower
+half stays 0x20), so the glibc `size=` in the SIGABRT backtrace is exactly
+`(int(SizeZ * 72 / 10) * 254 << 32) | 0x20`:
+
+| fixture | SizeZ | predicted / observed chunk size |
+| --- | --- | --- |
+| `mounting_holes-sizez.SchLib` | 9 | `0x3f8000000020` / `69818988363808` |
+| `mounting_holes-sizez7.SchLib` | 7 | `0x319c00000020` / `54546084659232` |
+| `mounting_holes-sizez1.SchLib` | 1 | `0x6f200000020` / `7636451852320` |
+| `w183-sizez-138889.SchLib` | 138889 | `0xf23bb8000000020` / `1090921693184000032` |
+| `w183-sizez-200000.SchLib` | 200000 | `0x15cd0e0000000020` / `1570927238184960032` |
+
+All five were SIGABRT in glibc `_int_free_merge_chunk` with `double free or
+corruption (out)` and the same five unsymbolized `_eeschema.kiface` frames.
+The safe control (`w183-control.log`, empty; `.rc` `alive`) ran immediately
+after a reset with the unmodified vendor file. Full transcripts, rc files and
+the two new fixtures are in `evidence/` and `fixtures/`. The offline check
+`sh chosen-byte-check.sh` reports PASS=16 FAIL=0, trace
+`3b352f6ecf3cbdabf8987243460234e42626868df70dfee7a7de021ba427398a`; it
+verifies pins, the exact predicted word in each transcript and the control.
+It does not re-run the GUI and does not itself prove the crash.
+
+This upgrades chosen-byte rung-4 evidence from the stubbed harness lanes into
+a real KiCad 8.0.8 process: an ordinary file edit selects the exact four bytes
+at a chosen heap offset. It is still not a pointer or control-flow target:
+the word lands in the corrupted chunk's size field, and glibc aborts. No ASan
+in the vendor build, no fixed-build control in this process, no downstream
+consumer read, no wire delivery, no marker, no witness replay of this lane.
+Rung 5 stays UNKNOWN.

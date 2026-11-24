@@ -107,18 +107,14 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   `data()-4`; fixed builds clean on all three.
   Clean-archive replay at `de13eac` matched exactly (`REPLAY.md`).
   Provenance, hashes and offsets: `vendor/PROVENANCE-vendor-file.md`.
-- Ceiling: direct call, real property parser, real compound-file stream,
-  KiCad's own compound-file reader and a real vendor-produced `.SchLib` with
-  a one-key patch, all with a stubbed wx support layer and a lab wrapper
-  around that reader. The chosen bytes land in ASan's left redzone (plain
-  build: malloc metadata), not an adjacent live object. No real KiCad build,
-  wxWidgets, KiCad `ALTIUM_COMPOUND_FILE` class, `eeschema`, GUI import,
-  consumer process, socket, wire, pointer or IP control, benign marker or
-  command.
-  The witness verdict above is scoped to rungs 1-4, not rung 5. The fixed
-  release is mapped (10.0.7) but no KiCad
-  build at that release was exercised. End-to-end file reachability through
-  KiCad and the ZDI RCE claim stay UNKNOWN; rung 5 is UNKNOWN.
+- Ceiling on the committed harness lanes: direct call, real property parser,
+  real compound-file stream, KiCad's own compound-file reader and a real
+  vendor-produced `.SchLib` with a one-key patch, all with a stubbed wx support
+  layer and a lab wrapper around that reader. The chosen bytes land in ASan's
+  left redzone (plain build: malloc metadata), not an adjacent live object.
+  No consumer of the corrupted word was identified in the pinned source: all
+  four downstream `aFontSizes` reads are guarded `> 0 && <= size()`.
+  Rungs 1-4 only on those lanes; the witness verdict above is not rung 5.
 - Real prebuilt-process probe (W181, negative): a locally provisioned official
   KiCad 10.0.6 AppImage (tar sha256
   `8c789e36644856cff30a66801692881582b9ca7c7475699494e614ce1bcb1f9c`;
@@ -133,15 +129,45 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
   with an unrendered window; no GUI import or crash was observed. No ASan in
   the vendor binary, so clean exits are not passes. Evidence and ceiling:
   `lab/frontier/kicad2shell/realprocess/PROVENANCE-realprocess.md`.
+- Native KiCad 8.0.8 GUI import (W182): a locally extracted Ubuntu pool deb
+  (sha256 `ba875b23de8c4259c04f60906aa7a3c80dd0dd77abf2973ef16ac5b155b9c3bd`,
+  `kicad-cli version` → 8.0.8) with wx 3.2 / libpython3.13 deps, no root or
+  FUSE, ran the Symbol Editor under Xvfb with no window manager.
+  `provisioned/gui-import.sh` drives the same clicks each run. The unmodified
+  vendor file imported `MH M2.5 Mounting hole` (empty stderr, process alive):
+  `ParseLibHeader` really ran in a real KiCad process. The one-byte
+  `Size2`→`SizeZ` patch (offset 685, `ind=0`) exits 134 with
+  `double free or corruption (out)`; gdb shows SIGABRT in glibc
+  `_int_free_merge_chunk` and five unsymbolized `_eeschema.kiface` frames.
+  The offset-650 `Size1`→`Size0` patch exits 139 (`Segmentation fault`).
+  Both fault modes predicted by the harness were observed in a real process.
+  Hashes, environment and ceiling:
+  `realprocess/PROVENANCE-native-process.md`.
+- Chosen bytes in the real process (W183): five imports from freshly reset
+  empty target libraries, with `SizeZ` values 9, 7, 1 and two new same-length
+  six-digit file patches (138889, 200000), all SIGABRT in the same glibc path
+  with the immediate unmodified-file control alive and silent. The real
+  `schIUScale.MilsToIU` truncates `SizeZ * 7.2` mils and multiplies by 254;
+  the OOB store sets the upper half of the freed chunk's size field. Predicted
+  and observed sizes match for all five: `0x3f8000000020`,
+  `0x319c00000020`, `0x6f200000020`, `0xf23bb8000000020`,
+  `0x15cd0e0000000020`. The harness's 0x40/0x32/0x07 were stubbed mil values.
+  Transcripts, pinned fixtures and `realprocess/chosen-byte-check.sh`
+  (PASS=16 FAIL=0, trace
+  `3b352f6ecf3cbdabf8987243460234e42626868df70dfee7a7de021ba427398a`) are in
+  `realprocess/`. This is chosen-byte rung-4 evidence in a real process, not a
+  pointer or control-flow target. The real-process lane still has no ASan
+  build, no fixed-build control, no consumer read, no wire delivery, no marker
+  and no independent witness replay; rung 5 stays UNKNOWN.
 
-Next for the target mind: a working GUI Symbol Editor import (or a locally
-built `eeschema` with the Altium plugin) of the crafted vendor `.SchLib` is
-the remaining file-reachability unknown; the released 10.0.6 CLI does not
-select the SCHLIB importer and the FUSE/DwarFS GUI stalled here, so neither
-counts as a pass. The synthetic CFB lanes, the vendor-file patch lane through
-KiCad's own reader and the pinned-source consumer reads (all guarded) are
-exhausted; preserve those negatives.
-Only on an observed pointer or control-flow target,
-attempt a bounded benign marker with vulnerable, fixed and safe-input
-controls and a fresh witness replay: #2996 covers only the lanes above.
-The author report is never acceptance of a new claim.
+Next for the target mind: the file-reachability gap is closed — a real KiCad
+8.0.8 process reaches `ParseLibHeader` and crashes on hostile vendor bytes,
+and the four overwritten bytes are now file-selected in that process. The
+missing control is a **fixed-build real-process replay** (KiCad 10.0.7+ has
+the guard; the 10.0.6 AppImage GUI stalled in W181, so this is not a cheap
+win). Only an observed pointer or control-flow target would justify a bounded
+benign-marker attempt with vulnerable, fixed and safe-input controls and a
+NEW witness replay: #2996 covers only rungs 1-4 at the synthetic-CFB scope
+and the W182/W183 real-process lane has no verdict yet. Keep the guarded
+consumer-read negative and the two distinct real-process fault modes as
+preserved observations. The author report is never acceptance of a new claim.

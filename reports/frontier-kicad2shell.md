@@ -1,6 +1,6 @@
 # Frontier brief: KiCad Altium `ParseLibHeader` negative `SIZE` index (kicad2shell)
 
-**STAGED 2026-11-23 W162; UPDATED 2026-11-23 W182** — this brief, a
+**STAGED 2026-11-23 W162; UPDATED 2026-11-24 W183** — this brief, a
 direct-call rung-1..4 harness, a real-property-parser reachability harness, a
 real-compound-file reachability lane, a lane driven by KiCad's own
 `compoundfilereader` header and a live registered two-pane window (inner
@@ -336,3 +336,37 @@ in a real KiCad process. Still no ASan build, fixed-build control in this
 process, consumer read, wire delivery, pointer/control-flow target, marker or
 witness replay of this lane. Rungs 1-4 remain as previously established;
 **rung 5 stays UNKNOWN**.
+
+## 14. Chosen bytes in a real KiCad process (W183, 00:19-00:25Z)
+
+The four-byte underflow is not a fixed value in the real build. Five native
+KiCad 8.0.8 Symbol Editor imports under Xvfb, each from a freshly reset empty
+target library, used the three committed one-byte `SizeZ` fixtures (values 9,
+7, 1) and two new same-length in-place patches with six-digit values (138889
+and 200000). In every run gdb recorded SIGABRT in glibc
+`_int_free_merge_chunk` with `double free or corruption (out)` and the same
+five unsymbolized `_eeschema.kiface` frames. The immediate safe control (the
+unmodified vendor file, after a reset) produced empty stderr and left the
+process alive.
+
+The corrupted glibc chunk size tracks the file byte exactly. KiCad 8.0.8's
+`schIUScale.MilsToIU` truncates `SizeZ * 7.2` mils and multiplies by 254 IU/mil;
+the OOB store overwrites the upper half of the chunk's size field, leaving the
+lower half `0x20`. Predicted and observed sizes agree for all five values:
+`0x3f8000000020` (9), `0x319c00000020` (7), `0x6f200000020` (1),
+`0xf23bb8000000020` (138889) and `0x15cd0e0000000020` (200000). The harness's
+gdb words 0x40/0x32/0x07 were the *stubbed* truncated-mil scale, not the real
+IU value; that difference is now measured, not assumed.
+
+Evidence: `lab/frontier/kicad2shell/realprocess/evidence/w183-*.log`, the two
+pinned fixtures in `realprocess/fixtures/`, and
+`realprocess/chosen-byte-check.sh` (PASS=16 FAIL=0, trace
+`3b352f6ecf3cbdabf8987243460234e42626868df70dfee7a7de021ba427398a`). Details
+and the full environment are in `realprocess/PROVENANCE-native-process.md`.
+
+This extends chosen-byte rung-4 evidence from the stubbed harness lanes into a
+real KiCad process: an ordinary file edit selects the exact four bytes at a
+chosen heap offset. It does not create a pointer or control-flow target — the
+word lands in malloc metadata and glibc aborts. No ASan vendor build, no fixed
+real-process control, no consumer read, no wire delivery, no marker and no
+witness replay of this lane; **rung 5 stays UNKNOWN**.
