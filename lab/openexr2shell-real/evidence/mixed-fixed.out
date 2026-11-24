@@ -1,0 +1,6 @@
+work-mixed/poc_mixed.exr: (EXR_ERR_CORRUPT_CHUNK) Unable to decompress w 13 image data 52 -> 64, got 256
+work-mixed/poc_mixed.exr: (EXR_ERR_CORRUPT_CHUNK) Decode pipeline unable to decompress data
+DECODE rv=23 EXR_ERR_CORRUPT_CHUNK
+BUFFERS unpacked=ADDR alloc=24 size=64 scratch1=(nil) alloc=-1 size=0
+GUARDS post-decode nallocs=26
+GUARD-TOTAL post-decode changed=0

@@ -1,0 +1,7 @@
+work-mixed/poc_mixed.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample count table
+work-mixed/poc_mixed.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Decode pipeline unable to unpack deep sample table
+DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA
+BUFFERS unpacked=ADDR alloc=24 size=64 scratch1=ADDR alloc=26 size=64
+GUARDS post-decode nallocs=27
+GUARD-CHANGE alloc=24 size=64 changed=128 first=+0 expected=0x7c actual@first=0x32
+GUARD-TOTAL post-decode changed=128

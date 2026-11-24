@@ -1,0 +1,4 @@
+DECODE rv=0 EXR_ERR_SUCCESS
+BUFFERS unpacked=ADDR alloc=25 size=384 scratch1=ADDR alloc=29 size=384
+GUARDS post-decode nallocs=30
+GUARD-TOTAL post-decode changed=0

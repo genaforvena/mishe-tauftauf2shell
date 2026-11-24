@@ -1,0 +1,2 @@
+baseline y=0 samptab=112 packed=56 unpacked=384
+poc: N=32 byte=0x3c grid=128+64 split=64 unpacked=64 frame=52 wrote=710

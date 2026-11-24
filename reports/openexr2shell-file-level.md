@@ -190,10 +190,10 @@ input.
   OOB region differed solely in an 8-byte window that also varies on a
   same-input repeat.
   This holds for the all-FLOAT file-level cases exercised here; W178 below
-  falsifies it as a universal claim about the pinned sink: a mixed
-  FLOAT-before-HALF layout copies in-bounds source bytes far out of bounds in
-  a direct call. No mixed-channel file-level PoC exists, so the file-derived
-  OOB-byte path remains UNKNOWN at file level.
+  falsifies it as a universal claim: a mixed FLOAT-before-HALF layout was
+  driven through `exr_decoding_run()` from a crafted deep EXR and wrote 64
+  file-chosen bytes at destination offset 128. Those bytes are file-derived,
+  so the claim must be read as scoped to all-FLOAT parts only.
 - The advisory's OpenImageIO claim was not tested; its deep-tiled and aarch64
   claims were later confirmed in W164 and W169 below. Its no-`-c` `exrcheck`
   and `exrinfo -v` observations were not rerun; this wake tested `exrcheck -c`
@@ -729,14 +729,62 @@ three identical working-tree runs. Evidence
 
 Scope and disposition: this is a direct call over two pinned function slices
 with 65536-byte harness buffers; the OOB bytes are harness-supplied, not
-derived from a crafted file. No mixed-channel EXR was generated, no
-`exr_decoding_run()` ordering or real 64-byte scratch was exercised, and no
-wire input or witness verdict exists. File-level reachability of this
-layout is UNKNOWN; this is a rung-4 mechanic in the direct-call scope only,
-not rung 5. The earlier ceiling statement that OOB destination bytes always
-come from past the source is **not universal**: it holds for the all-FLOAT
-parts actually exercised at file level (W160/W163/W170/W172/W174) and fails in
-the pinned sink when a small 2-byte channel follows a large FLOAT channel.
-Would change mind: a mixed-channel EXR driven through `exr_decoding_run()`
-that writes file-chosen bytes at a chosen far OOB offset, or a counterexample
-to the measured copy records above.
+derived from a crafted file. No wire input or witness verdict exists at this
+scope. At this point file-level reachability
+was UNKNOWN; the following section supplies it. This direct-call measurement
+is a rung-4 mechanic in the direct-call scope only, not rung 5. The earlier
+ceiling statement that OOB destination bytes always come from past the source
+is **not universal**: it holds for the all-FLOAT parts exercised at file level
+(W160/W163/W170/W172/W174) and fails in the pinned sink when a small 2-byte
+channel follows a large FLOAT channel.
+
+## W178 file-level extension: file-chosen bytes at chosen OOB offsets (2026-11-24)
+
+The direct-call counterexample above is reachable from a crafted EXR. A new
+generator `cases/gen_baseline_deep_mixed.cpp` writes a valid deep+ZSTD part
+whose decode order is FLOAT "A" before HALF "Z". `cases/make_poc_mixed.py`
+replaces the sample table with 32 samples on the last pixel and forges the
+chunk leader: `split = 32*2 = 64` equals the declared `unpacked_size=64`, so
+the vulnerable `split > uncompressed_size` guard stays false, while the grid
+total `32*4 + 32*2 = 192` exceeds it. The inner stream supplies only the
+64-byte half block (all `0x3c`), compressed with `zstd -19` inside the
+24-byte ZSTD-EXR prefix (format 1, flags 0).
+
+At the pinned sink the FLOAT row copies 128 bytes from sorted offset 64 to
+packed offset 0 (its 64 OOB bytes are residue), then the HALF row copies 64
+bytes from sorted offset 0 — in bounds and file-derived — to packed offset
+128, i.e. 64 bytes past the 64-byte `decode.unpacked_buffer`. Under the
+guarded allocator the vulnerable v3.5.2 build reports `DECODE rv=31`,
+`GUARD-TOTAL post-decode changed=128`; gdb at `guarded_harness.c:137` shows
+`scratch_buffer_1[0..15] = 0x3c` and `unpacked_buffer[128..143] = 0x3c`.
+Regenerating the PoC with the inner byte `0x5a` puts `0x5a` at
+`unpacked_buffer+128`. The fixed v3.5.3 build rejects with
+`DECODE rv=23 EXR_ERR_CORRUPT_CHUNK` and zero guard changes; the unmodified
+baseline decodes `rv=0` with zero guard changes.
+
+Pinned files: baseline sha256
+`9aa2073dce40b893f648f0fb078b738538e65a569cb00079d4128612e7fa3d04`
+(384-byte unpacked chunk), PoC sha256
+`484b1c35f66e18db3e263346e100da44a199e4bdf08c0678afe113b042593a52`
+(710 bytes), file-chosen variant sha256
+`efb6bbd24d9b3c3165f75fe4c2da2f69f0de9ffabf8f3a6ccb6169f8a5af033b`.
+One-command replay from `lab/openexr2shell-real`:
+`sh harness/mixed-check.sh` -> `RESULT PASS`, three byte-stable runs.
+Normalized evidence hashes: `evidence/mixed-baseline.out`
+`4514650788621dc472aa077e2cc220c06b52c959a08026ee3d24390bdf4f2c5f`,
+`mixed-vuln.out` `4a5fcdf5cc79d5f675db6b118989c6512b6a0ad43a451780239782843174af79`,
+`mixed-fixed.out` `eaebb2d0369844bc48d5ba12d19fcd2f28b3427bb557cc446cba567ba4cc79a5`,
+`mixed-gdb-3c.out` `234c689e8a77033bd38e68b36a3385807a15e77e2fb81a2b69dec96f512bcc79`,
+`mixed-gdb-5a.out` `8997f403d13350f68d054a2f6b84a3cbe091489856e3755150164608ca4cc9a7`.
+
+Scope and disposition: the bytes are file-chosen and land at a file-determined
+offset through the real pinned `exr_decoding_run()` deep-scanline path, so
+rung 4 at the labeled file-level CODE/CONSUMER scope is stronger here than in
+W160/W163 (where OOB bytes were allocator-derived). Still no wire-fed live
+process, no pointer or control-flow target, no command or marker side effect;
+rung 5 remains UNKNOWN and this new claim is unwitnessed (W161 covered only
+the all-FLOAT file). The earlier ceiling statement that file control never
+reaches OOB contents is now falsified for mixed-channel parts; it stands only
+for the all-FLOAT parts of W160/W163/W170/W172/W174. Would change mind: an
+unmodified network-facing EXR consumer reaching this sink, or a witness
+counterexample to the normalized observations above.

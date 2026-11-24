@@ -314,11 +314,35 @@ three-row mixed grids show the same class. `RESULT PASS bad=0 cases=6`,
 `MIXED_RESULT PASS`, evidence sha256
 `5861bdd8847e9363f0acee2caf47e55f4e33a607f6fe34148fe29eff2dd929e9`,
 byte-stable in three runs. Scope: direct call over two pinned function slices,
-harness-supplied bytes, 65536-byte buffers; no mixed-channel EXR,
-`exr_decoding_run()`, real scratch size, wire input or witness verdict. File
-reachability of this layout is UNKNOWN; this is a rung-4 mechanic at direct-call
-scope only, not rung 5. All-FLOAT file-level results (W160/W163/W170/W172/W174)
-stand; the ceiling claim is now scoped to those parts. Grade unchanged:
+harness-supplied bytes, 65536-byte buffers; no wire input or witness verdict
+at that scope. File reachability was UNKNOWN at this point and is supplied by
+the next section. All-FLOAT file-level results (W160/W163/W170/W172/W174)
+stand; the ceiling claim is now scoped to those parts. Grade at that point:
 file-level rungs 1-4, W161 witness-ESTABLISHED at scanline CODE/CONSUMER scope,
 rung 5 UNKNOWN. Would change mind: a file-driven mixed-channel PoC with chosen
 OOB bytes, or a counterexample to the measured copy records.
+
+## W178 file-level extension: chosen bytes at chosen offsets (2026-11-24)
+
+The mixed-channel sink counterexample is reachable from a crafted EXR. A
+valid deep+ZSTD baseline with FLOAT "A" before HALF "Z"
+(`cases/gen_baseline_deep_mixed.cpp`) is forged by
+`cases/make_poc_mixed.py`: 32 samples per row give `split=64` and grid total
+192, while the chunk leader declares `unpacked_size=64`, so the vulnerable
+guard stays false. The inner stream carries 64 file-chosen bytes (`0x3c`)
+for the half block. Through the real pinned `exr_decoding_run()` the sink
+copies those 64 in-bounds bytes to destination offset 128 — 64 bytes past the
+64-byte `decode.unpacked_buffer`. The guarded allocator reports
+`DECODE rv=31` and `changed=128`; gdb shows `0x3c` at `unpacked+128..143`.
+Changing the inner byte to `0x5a` puts `0x5a` there; the fixed v3.5.3 build
+rejects with `rv=23` and zero changes; the unmodified baseline is clean.
+PoC sha256 `484b1c35f66e18db3e263346e100da44a199e4bdf08c0678afe113b042593a52`
+(710 bytes), variant `efb6bbd24d9b3c3165f75fe4c2da2f69f0de9ffabf8f3a6ccb6169f8a5af033b`.
+Replay `sh lab/openexr2shell-real/harness/mixed-check.sh` -> `RESULT PASS`
+with byte-stable normalized evidence (hashes in the file-level report).
+Grade: rung 4 at the labeled file-level CODE/CONSUMER scope now includes
+file-chosen bytes at chosen offsets; no wire-fed process, pointer/IP,
+command or marker. Rung 5 UNKNOWN; this claim unwitnessed — W161 established
+only the earlier all-FLOAT file. The prior "OOB bytes are allocator-derived"
+claim is now scoped to all-FLOAT parts. Would change mind: a witness
+counterexample or an unmodified network-facing consumer reaching this sink.
