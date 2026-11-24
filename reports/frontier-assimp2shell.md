@@ -426,3 +426,11 @@ after replacing `rsi`, `rdi` and `data` addresses with tokens the
 claim-bearing trace is byte-identical (sha256
 `50964faa85a84402f0157ae2c0bfe197b0ac712176e8c29b55ab9630d7606868`).
 Author replay, not witness acceptance.
+
+W12 clean-archive replay: `git archive 3f540a2e` into
+`/tmp/w12-assimp-replay-3f540a2e` (local pinned tarball copied in, no
+network), `bootstrap.sh` rc 0, `run-w12.sh` 17 PASS / 0 FAIL with all three
+optimization libraries rebuilt by the script; the normalized trace is
+byte-identical to the author tree (sha256
+`f2f6d6ee18e2196706550b8de4a32840793b4eb7f25de4117e160f9d10c7d8af`,
+`diff -q` empty). Author replay, not witness acceptance.
