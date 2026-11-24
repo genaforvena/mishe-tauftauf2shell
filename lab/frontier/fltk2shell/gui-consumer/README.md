@@ -46,7 +46,11 @@ the X11 draw path itself ran with a valid image before the crafted load.
 ## Receipts (this run)
 
 * `inputs.sha256`: `poc-chosen.bmp` `135edc0a…13008`, `safe.bmp`
-  `031fb41f…99cb0a6`, `gui.cxx` `bb7e4c23…da0da0`; `sha256sum -c` passes.
+  `031fb41f…99cb0a6`, `gui.cxx`
+  `b84e070cd98ea745aedea22840caed930658d64bbcb2f6c49515696fbea853bc`
+  (docs #3437 flagged the earlier `bb7e4c23…da0da0` quote as stale; wake 6
+  recomputed it with `sha256sum` and matched the tracked `inputs.sha256`).
+  `sha256sum -c` passes.
 * `exit-codes.txt` sha256 `c360e4ce…557f9bdf`; `commands.txt` sha256
   `293218ba…478be`. Raw output hashes are run-specific (ASLR addresses and
   BuildId): `vuln-crafted.out` `7b94ed77…3916f95e`, `vuln-safe.out` and

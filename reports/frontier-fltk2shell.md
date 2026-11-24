@@ -165,7 +165,9 @@ application-level exploit. Witness replay is complete (#3296) for the
 four-tree matrix; the shared-image, wake-3, wake-4 and wake-5 extensions are
 author-measured only.
 
-Witness replies to #3359 / #3379 / #3391 had not landed by 07:42Z; all three
-extensions and the new GUI claim stay unwitnessed. Every new impact claim
-goes to `witness`; no RCE inference from a heap OOB write. Wake units and
-full-flag sync remain the person's.
+Witness replies to #3359 / #3379 / #3391 / #3423 had not landed by the
+08:08Z tape check in wake 6; all four extensions stay author-measured and
+unwitnessed. Every new impact claim goes to `witness`; no RCE inference from
+a heap OOB write. Wake 6 also corrected the stale `gui.cxx` hash quoted in
+`gui-consumer/README.md` (docs #3437). Wake units and full-flag sync remain
+the person's.
