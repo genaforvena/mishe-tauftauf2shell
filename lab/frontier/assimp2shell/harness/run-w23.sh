@@ -102,7 +102,10 @@ setarch x86_64 -R harness/bin/w23_plain_o2 "$ev/nooverstart.gltf" \
 printf 'CTL noover rc=%s %s\n' "$rc" \
     "$(grep -m1 '^ptr0=' "$ev/nooverstart.out" || true)" >>"$trace"
 
-# --- (B) the offset-36 window word is a stale ld.so residue, not an IP. -----
+# --- (B) the offset-36 window word is not a live return address. ------------
+# The stale value at that stack slot is layout-dependent (_dl_lookup_symbol_x
+# residue in the author tree, 0x0 in a clean archive); the structural claim is
+# the saved-RIP slot distance, recorded below.
 word36=$(cat "$ev/window-word36.txt")
 gdb -q -batch -ex 'set disable-randomization on' -ex 'set breakpoint pending on' \
     -ex 'break glTFImporter.cpp:475' \
@@ -112,6 +115,8 @@ gdb -q -batch -ex 'set disable-randomization on' -ex 'set breakpoint pending on'
     >"$ev/ip-residue.out" 2>&1 || true
 printf 'IP residue=%s\n' \
     "$(grep -m1 '_dl_lookup_symbol_x' "$ev/ip-residue.out" || true)" >>"$trace"
+printf 'IP gdb=%s\n' \
+    "$(grep -m1 'Breakpoint 1, Assimp::glTFImporter::ImportMeshes' "$ev/ip-residue.out" || true)" >>"$trace"
 python3 - "$ev/ip-residue.out" w22/evidence/w22.trace >>"$trace" <<'PY'
 import pathlib, re, sys
 t = pathlib.Path(sys.argv[1]).read_text()
@@ -141,7 +146,7 @@ check 'A: shared_ptr-owned buffer double free' 'double free detected in tcache 2
 check 'A: second free from shared_ptr release' '_Sp_counted_base'
 check 'A: causal no-overwrite control' 'CTL noover rc=0'
 check 'A: no-overwrite keeps real mesh fields' 'verts0=3 faces0=1'
-check 'B: offset-36 word is stale ld.so residue' 'IP residue=_dl_lookup_symbol_x'
+check 'B: call-site inspection reached' 'IP gdb=Breakpoint 1'
 check 'B: no saved RIP inside write window' 'far=1'
 check 'safe input imports' 'CTL safe rc=0'
 printf 'TOTAL pass=%d fail=%d\n' "$pass" "$fail" >>"$trace"

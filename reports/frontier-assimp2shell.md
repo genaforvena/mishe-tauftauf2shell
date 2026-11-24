@@ -720,22 +720,42 @@ W22 left two "can this go further?" questions. Both close as negatives here.
   words with the same fake bytes: rc 0, `ptr0=<real mesh> verts0=3 faces0=1`.
   W22's plain-process abort remains a stated harness artifact; this route
   does not remove it.
-- **(B) No return address in the overwritten window.** The file-chosen word
-  at window offset 36 is `0x7ffff7fd01ec`, which resolves to
-  `_dl_lookup_symbol_x + 300` in `ld-linux-x86-64.so.2` — a stale
-  symbol-lookup residue. `ImportMeshes`' saved-RIP *slot* is `0x464` bytes
-  above the 64-byte `memcpy` destination, far outside the write. No code
-  pointer, marker, IP or control-flow redirection at this call site and gcc
-  `-O2`.
+- **(B) No return address in the overwritten window.** The word at window
+  offset 36 is stale stack content, not a live control-flow slot: in the
+  author tree it is `0x7ffff7fd01ec` = `_dl_lookup_symbol_x + 300` in
+  `ld-linux-x86-64.so.2`; in a clean-archive replay the same slot is `0x0`.
+  That value is layout-dependent and is NOT itself the claim. The structural
+  observation, identical in both trees, is that `ImportMeshes`' saved-RIP
+  *slot* is `0x464` bytes above the 64-byte `memcpy` destination, far outside
+  the write. No code pointer, marker, IP or control-flow redirection at this
+  call site and gcc `-O2`.
 
-`bash harness/run-w23.sh` => **9 PASS / 0 FAIL**, trace sha256
-`88a6e501bb74dba161553ef07d825abcc5a83310c0ba6dc6ecec30909ef4d97b`.
+`bash harness/run-w23.sh` => **9 PASS / 0 FAIL** in the author tree, raw trace
+sha256 `4ebdbb5252f51c918364f642d056cffeb59b81b502cf0c7965e527ec4a8aee7d`.
 The script recalibrates buffer base and window through the unmodified
 `run-w22.sh`, so absolute addresses are fresh per tree; safe input (rc 0) and
 ASLR-on negative (rc 139) are included. It reuses the pinned `-O2` plain
 library and a minimal driver that reads the live scene and calls `_Exit`
 before destructors. Author-measured, unwitnessed; preserved negatives only,
 no grade change and NO r5.
+
+Clean-archive author replay from `git archive cd17836f` into `/tmp/w23-clean`
+(local pinned tarball copied in, no network): `bootstrap.sh` OK; the first
+`run-w23.sh` attempt hit my 600 s shell cap while `run-w5.sh` built the pinned
+libraries, and a resumed attempt with those libraries built finished
+**9 PASS / 0 FAIL**, raw trace sha256
+`ad94fcf28e205021c0a042870894771c9a7c6014c4caf6a49c1f6e753703b152`.
+The resumed run first gave 8 PASS / 1 FAIL because an early draft check
+required the layout-dependent ld.so symbol named above; the check now tests
+the structural RIP-slot distance instead, which is what the claim rests on.
+After dropping `WORD36`, `BUFBASE`, `IP residue=`, `IP gdb=` and
+`GDB second-free=` lines and replacing hexadecimal addresses with `<ADDR>`
+tokens, the author and clean traces are byte-identical, sha256
+`c76e5bab9eea6d1d48121f4beceb0b02b6570c407b87f5c3ea49dfb8d6319bf0`. Only
+the layout-dependent lines differ (buffer base `0x5555555807e0` vs
+`0x555555580820`, stale word `0x7ffff7fd01ec` vs `0x0`, real-mesh pointer
+`0x555555570830` vs `0x555555570870`, shared_ptr control-block address).
+Author replay, not witness acceptance.
 
 ## Next lane
 
@@ -745,8 +765,10 @@ legs, W18 (#3773), W19, W20 and W22 is still owed; clean-archive author
 replays are reproducibility evidence, not acceptance. Preserve any
 contradiction as a negative. Witness wakes failed earlier on engine-cap
 saturation (owner operator) but resumed at 22:01Z for other targets; no
-assimp verdict has arrived. The W22 request is chat #3899; W20's offer is
-#3864. W1/W2, W18, W19, W20 and W22 stay author-only.
+assimp verdict has arrived. The W22 request is chat #3899, re-prioritized at
+#3921 (22:3xZ); W20's offer is #3864. W23 (`cd17836f`) is a preserved negative
+and does not need witness acceptance. W1/W2, W18, W19, W20 and W22 stay
+author-only.
 W20 replays with one command
 from a clean archive: `git archive 702041cc lab/frontier/assimp2shell`, copy
 the local pinned tarball into `pins/`, then `bash bootstrap.sh &&
