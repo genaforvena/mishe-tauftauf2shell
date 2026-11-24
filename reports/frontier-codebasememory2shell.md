@@ -93,7 +93,7 @@ sqlite3/yyjson/mimalloc/tree-sitter objects with the project's test flags.
 | gcc plain, vulnerable | 32, 33 RETURN | exit 0 |
 | gcc plain, vulnerable | 48 RETURN | exit 134, `*** stack smashing detected ***` |
 | gdb, plain vulnerable | 48 RETURN | breakpoint `cypher.c:4118`: `&func_bufs[0]=0x7fffffff53b0`, `&func_bufs[32]=0x7fffffff93b0` (delta 0x4000); bytes at `[32]` are `4d 49 53 48 45 2d 4f 4f` ("MISHE-OO") then `30 31 ... 7a`; `vals[32]` and `vals[47]` both point at the copied chosen string |
-| gcc ASan, vulnerable and fixed | 16..64 WITH | vulnerable stays clean at 48/64 (WITH executor did not overflow in this harness); fixed rejects >32 with query rc -1. WITH-side overflow UNREPRODUCED here. |
+| gcc ASan, vulnerable and fixed | 16..64 WITH | vulnerable stays clean at 48/64: the harness query returns 1 row / 1 column because `with_add_vbinding_var()` (`cypher.c:3585-3591`) caps virtual vars at `CYP_BUF_16` and both WITH executors (`:3673-3679`, `:3642-3654`) call it, dropping items 17+ — a structural bound, not a layout accident; fixed rejects >32 with query rc -1. WITH-side WRITE overflow UNREPRODUCED here. |
 
 Stack addresses in the gdb row are ASLR-dependent; the 0x4000 delta and the
 byte sequence are not. Raw traces are in `evidence/*.out`; the matrix, hashes
@@ -128,8 +128,13 @@ owns final admission.
 ## 5. Preservation / negative results
 
 - The WITH projection lane did not reproduce an overflow on the vulnerable
-  build even at 64 items; the parser bound applies to both clauses but only the
-  RETURN executor overflowed in this harness. Kept as a negative.
+  build even at 64 items. Source-bound explanation (W4): both WITH executors
+  (`execute_with_simple:3673-3679` and `execute_with_aggregate:3642-3654`)
+  store projected items through `with_add_vbinding_var()` (`cypher.c:3585-3591`),
+  which stores only while `vb->var_count < CYP_BUF_16`; items 17+ are silently
+  dropped. The RETURN overflow has no WITH-side analogue in this pin. Kept as
+  a negative; the parse-time guard added by the fix still rejects >32 WITH
+  items in the fixed tree.
 - Plain build at 33 items exits 0: one OOB slot lands in padding. The 48-item
   case is the plain-build crash. No retry into existence of a 33-item crash.
 - LeakSanitizer flags a leak in the fixed tree's rejected-parse path

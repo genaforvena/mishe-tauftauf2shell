@@ -53,7 +53,13 @@ with a local in-memory store and a 70-byte chosen graph property:
 Controls: 16/31/32-item queries stay clean, the fixed commit rejects >32 with
 query rc -1, and plain 32 survives. Preserved negatives: the WITH-side
 overflow is UNREPRODUCED in this harness, and the advisory's related
-uninitialized-column-read path was not isolated.
+uninitialized-column-read path was not isolated. W4 adds the causal reason for
+the WITH negative: pinned `cypher.c:3585-3591`, `with_add_vbinding_var()`
+stores projected items only while `vb->var_count < CYP_BUF_16` (16); both
+`execute_with_simple` (`:3673-3679`) and `execute_with_aggregate`
+(`:3642-3654`) funnel through it, so WITH items 17+ are silently dropped and
+the 48-item harness query returns 1 row / 1 column. The structural bound, not
+an unlucky stack layout, explains why only the RETURN executor overflowed.
 
 The MCP tool argument path is no longer UNKNOWN: a real pinned `query_graph`
 tool call reaches the same sink (see `lab/frontier/codebasememory2shell/MCP-TOOL.md`
