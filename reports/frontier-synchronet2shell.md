@@ -316,6 +316,13 @@ cap, not a lower bound. This bounds the availability-only characterization;
 it says nothing about other attribute sources or other Synchronet builds.
 No rung change; author evidence, not a witness verdict.
 
+Author clean `git archive b14dafc lab/frontier/synchronet2shell` replay, with
+the gitignored provisioned `src-tree/` symlinked in and the live tree
+untouched, reproduced rc 0, 5 PASS / 0 FAIL, and all 13 evidence files
+(getter transcripts, client logs, provenance and pass/fail counts)
+byte-identical to the committed evidence. That is an author replay, not an
+independent verdict.
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent

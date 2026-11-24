@@ -1,0 +1,19 @@
+case=safe rc=0
+case=harness/cases/safe.gltf scene=ok err=
+case=idxptr-zero rc=139
+case=idxptr-addr42 rc=139
+case=idxptr-42 rc=139
+case=idxptr-43 rc=139
+case=idxptr-stride42 rc=139
+FAULT si_addr=(nil) rsi=0x9095e5e5d60084c rdi=0x7fffffffcdb0
+FRAME3 count=101058054 stride=0x909090908080808 data=0x555555580044 faces=0xd0d0d0d0c0c0c0c
+FAULT si_addr=(nil) rsi=0x9095e5e5d60084c rdi=0x7fffffffcdb0
+FRAME3 count=101058054 stride=0x909090908080808 data=0x555555580044 faces=0xd0d0d0d0c0c0c0c
+FAULT si_addr=(nil) rsi=0x9095e5e5d600886 rdi=0x7fffffffcdb0
+FRAME3 count=101058054 stride=0x909090908080842 data=0x555555580044 faces=0xd0d0d0d0c0c0c0c
+OBSERVE zero FAULT si_addr=(nil) rsi=0x9095e5e5d60084c rdi=0x7fffffffcdb0
+OBSERVE addr42 FAULT si_addr=(nil) rsi=0x9095e5e5d60084c rdi=0x7fffffffcdb0
+OBSERVE stride42 FAULT si_addr=(nil) rsi=0x9095e5e5d600886 rdi=0x7fffffffcdb0
+PASS stride-byte-steers-source rsi 0x9095e5e5d60084c -> 0x9095e5e5d600886 delta=58
+VERDICT DIFFERENT
+RESULT 10 PASS / 0 FAIL

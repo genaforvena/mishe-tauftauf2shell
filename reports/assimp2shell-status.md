@@ -357,6 +357,40 @@ The ASan frame layout differs (the 64-byte write reaches only inlined
 No valid target object, no code pointer, no control-flow redirection, no
 marker execution, no command, no listener, no r5. Author-only, unwitnessed.
 
+## W11 — compiler dependence: clang corrupts caller locals and steers the memcpy source (2026-11-24 11:3xZ, author-measured)
+
+The W10 chosen-address dereference did not survive a second compiler. The
+same pinned v6.0.6 source was rebuilt with clang/clang++ at `-O1 -g
+-U_FORTIFY_SOURCE -fno-omit-frame-pointer` (111/111 build edges,
+`cmake -G Ninja -S pins/assimp-6.0.6 -B build-min-plain-nf-clang` with the
+same importer/exporter/tool/test flags as `run-w10.sh`) and the same
+`harness/placement_driver.cpp` was compiled with clang++. `bash
+harness/run-w11.sh` => **10 PASS / 0 FAIL**; evidence is in
+`lab/frontier/assimp2shell/w11/evidence/` (claim-bearing `w11.trace` sha256
+`a5bc765f3a3ccd28cc8b11a1c8c11cdfab9a19c8495d40e0bd0569a6461dffa0`).
+
+`idxptr-zero.gltf` and `idxptr-addr42.gltf` still return rc 139 and
+`safe.gltf` stays `scene=ok`, but gdb now faults inside
+`__memcpy_avx_unaligned_erms` with `si_addr=(nil)`, not in
+`CopyVector<aiMesh>` at a chosen address; both have the same source pointer
+`rsi=0x9095e5e5d60084c`. In the `ImportMeshes` frame
+(`glTFImporter.cpp:319`) the 64-byte write instead overwrote
+`count=0x06060606`, `data.stride=0x0909090908080808` and
+`faces=0x0d0d0d0d0c0c0c0c` — byte-exact document values from decoded buffer
+offsets 68, 76..83 and 92..99. The fault pointer equals `data + 1*stride`
+with `data=0x555555580044`.
+
+The new tracked case `harness/cases/idxptr-stride42.gltf` changes only
+decoded buffer byte 76 from `08` to `42`: `data.stride` becomes
+`0x0909090908080842` and `rsi` becomes `0x9095e5e5d600886`, a delta of 58
+(0x3a) exactly equal to the chosen-byte change. One crafted byte steers the
+address used by the importer's own memcpy under clang too, through a
+different local and a different frame. It is an invalid address, not a
+valid object; no code pointer, no control-flow redirection, no marker, no
+command and no r5. This is a measured negative for W10 portability, not a
+downgrade of the gcc claim and not witness acceptance.
+
+
 ## Honest ceiling
 
 Rungs 1-4 remain as labeled above; W10 extends rung 4 to a file-steered
@@ -365,12 +399,15 @@ overwrite the live `meshes` vector used at `glTFImporter.cpp:475`, and two
 one-byte variants make the importer fault at `0x41414141` and `0x42424242`.
 The target is a chosen address, not a valid object; no code pointer, no
 control-flow redirection, no marker execution, no command, no listener.
-No chosen byte survives in a valid `aiMesh` field (W8 negative), and W10 is
-plain-build-only because the ASan frame layout differs. Advisory vector is
-`AV:L/UI:P`; this is local import corruption with a chosen-address
-dereference, not RCE. Witness verdict #3277 covers only the baseline
-direct-call legs; W1, W2, W5, W6, W7, W8, W9 and W10 are author-measured,
-independent replay and acceptance are still owed. Both fix PRs remain
+No chosen byte survives in a valid `aiMesh` field (W8 negative). W10 is
+gcc-`-O1`-plain-only: the ASan frame layout differs, and W11's clang rebuild
+does not reproduce its chosen-address fault. W11 instead shows document
+bytes overwriting `count`, `stride` and `faces` in the caller frame and
+steering the memcpy source pointer; both are file-steered invalid addresses,
+not objects or code. Advisory vector is `AV:L/UI:P`; local import corruption,
+not RCE. Witness verdict #3277 covers only the baseline direct-call legs;
+W1, W2, W5, W6, W7, W8, W9, W10 and W11 are author-measured, independent
+replay and acceptance are still owed. Both fix PRs remain
 open/unmerged; no released fixed version was observed. W9 shows PR7090
 blocks the index legs but not the element-size overruns. The W6 TEXCOORD
 count mismatch remains a separate defect, not folded into this grade.
@@ -383,11 +420,16 @@ count mismatch remains a separate defect, not folded into this grade.
 2. The live-`aiMesh`-field lane stays closed: W4 measured metadata-only
    placement for the advisory pair, and W5/W6/W7's larger mismatches produced
    no chosen byte in a live mesh field. Do not groom either path.
-3. W5, W6, W7, W8, W9 and W10 are author-measured; include their recipes in
-   a future replay request if any becomes grade-relevant. W10's clean-archive
-   replay is recorded below; it is an author replay, not witness acceptance.
-   The TEXCOORD-count mismatch is a separate defect and needs its own claim
-   if pursued. No rung-5 work without observed control flow into code.
+3. W5, W6, W7, W8, W9, W10 and W11 are author-measured; include their recipes
+   in a future replay request if any becomes grade-relevant. W11's script
+   builds its own clang library when absent, so `bash harness/run-w11.sh` is
+   the whole recipe after `bootstrap.sh`. W10's clean-archive replay is
+   recorded below; it is an author replay, not
+   witness acceptance. W11 is a negative for W10 portability: replay it with
+   the exact clang build flags before treating either compiler-specific
+   frame layout as general. The TEXCOORD-count mismatch is a separate defect
+   and needs its own claim if pursued. No rung-5 work without observed
+   control flow into code.
 
 W9 clean-archive replay: `git archive f1769aa` into `/tmp/w9-assimp-replay`
 (local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w5.sh`

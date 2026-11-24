@@ -115,10 +115,13 @@ corrected in the rung-4 row above; no grade impact.
   a file-steered pointer dereference in the plain importer: one crafted byte
   changes the fault address from `0x41414141` to `0x42424242`, but the target
   is not a valid object and there is no code pointer, control-flow
-  redirection, marker, command or r5. W10 is plain-build-only (the ASan frame
-  layout differs) and unwitnessed. The W2 ASan callback unpoisons 16 redzone
-  bytes for observation only; it is instrumentation, not attacker control.
-  No grooming, no witness verdict for W1/W2 or W10. Advisory vector is
+  redirection, marker, command or r5. W10 is gcc-`-O1`-plain-only (the ASan
+  frame layout differs), and W11's clang rebuild does not reproduce the
+  chosen-address fault: it instead overwrites caller-frame `count`, `stride`
+  and `faces` and steers the memcpy source pointer by one chosen byte.
+  Neither is witness-backed. The W2 ASan callback unpoisons 16 redzone bytes
+  for observation only; it is instrumentation, not attacker control. No
+  grooming and no witness verdict for W1/W2 or W10/W11. Advisory vector is
   `AV:L/UI:P` (local file import), not a remote listening service.
 - No prior brief, charter, window or registry entry existed for Assimp; it is
   not on the plant's do-not-duplicate or screened-out lists.
@@ -336,17 +339,41 @@ slot take `0x41414141`. This is a chosen address, not a valid object or a
 code pointer; no control-flow redirection, marker, command, listener or r5.
 The ASan frame layout differs, so this is plain-build-only and unwitnessed.
 
+## W11 — compiler dependence of the W10 pointer layout (2026-11-24 11:3xZ, author-measured)
+
+`harness/run-w11.sh` rebuilds the pinned v6.0.6 glTF-only library with
+clang/clang++ `-O1 -g -U_FORTIFY_SOURCE -fno-omit-frame-pointer` and drives
+the same `placement_driver.cpp` and crafted cases. Result: **10 PASS / 0
+FAIL**; `lab/frontier/assimp2shell/w11/evidence/w11.trace` sha256
+`a5bc765f3a3ccd28cc8b11a1c8c11cdfab9a19c8495d40e0bd0569a6461dffa0`.
+The W10 chosen-address dereference does not reproduce: `idxptr-zero.gltf`
+and `idxptr-addr42.gltf` fault inside `__memcpy_avx_unaligned_erms` with
+`si_addr=(nil)` and the same `rsi=0x9095e5e5d60084c`. Instead, the 64-byte
+write corrupts `count=0x06060606`, `data.stride=0x0909090908080808` and
+`faces=0x0d0d0d0d0c0c0c0c` in the `ImportMeshes` frame at
+`glTFImporter.cpp:319`; those are document bytes from decoded offsets 68,
+76..83 and 92..99. The new tracked case `idxptr-stride42.gltf` changes only
+byte 76 from `08` to `42`: stride becomes `0x0909090908080842`, `rsi`
+becomes `0x9095e5e5d600886` (delta 58 = 0x3a). One file byte steers the
+address used by the importer's own memcpy under clang, through a different
+local; still an invalid address, no object, code pointer, control-flow
+redirection, marker, command or r5. W11 is a negative for W10 portability,
+not a grade upgrade or witness acceptance.
+
+
 ## Next lane
 
 Replay W1/W2 independently, preserving any contradiction as a negative. W5,
 W6, W7 and W8 measured larger and distinct-site overruns through the real
 importer but found no chosen byte in a live `aiMesh` field. W9 separated the
 two proposed fixes: PR7090 blocks the index legs but not the element-size
-overruns. W10 shows a chosen-address dereference in the plain importer, not
-control-flow placement; only observed control flow into code would reopen
-any further grade. The TEXCOORD count mismatch is a separate defect. Never
-relabel pointer corruption or placement as control flow or RCE without
-observation.
+overruns. W10 shows a chosen-address dereference in the gcc plain importer,
+not control-flow placement, and W11 shows that layout is compiler-specific:
+clang instead steers the memcpy source through corrupted `stride`. Only
+observed control flow into code would reopen any further grade. The TEXCOORD
+count mismatch is a separate defect. Never relabel pointer corruption or
+placement as control flow or RCE without observation.
+
 
 W9 clean-archive replay: `git archive f1769aa` into `/tmp/w9-assimp-replay`
 (local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w5.sh`

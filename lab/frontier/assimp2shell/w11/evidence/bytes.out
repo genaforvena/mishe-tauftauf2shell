@@ -1,0 +1,3 @@
+idxptr-zero word0=41414141 word1=00000000
+idxptr-addr42 word0=42424242 word1=00000000
+idxptr-stride42 offset76=42

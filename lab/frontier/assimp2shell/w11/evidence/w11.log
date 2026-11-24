@@ -1,0 +1,26 @@
+PASS safe-scene-ok
+PASS zero-crash
+PASS addr42-crash
+PASS ptr42-crash
+PASS ptr43-crash
+PASS stride42-crash
+PASS chosen-zero-bytes
+PASS chosen-addr42-bytes
+PASS chosen-stride42-byte
+OBSERVE zero FAULT si_addr=(nil) rsi=0x9095e5e5d60084c rdi=0x7fffffffcdb0
+OBSERVE addr42 FAULT si_addr=(nil) rsi=0x9095e5e5d60084c rdi=0x7fffffffcdb0
+OBSERVE stride42 FAULT si_addr=(nil) rsi=0x9095e5e5d600886 rdi=0x7fffffffcdb0
+PASS stride-byte-steers-source rsi 0x9095e5e5d60084c -> 0x9095e5e5d600886 delta=58
+VERDICT DIFFERENT
+RESULT 10 PASS / 0 FAIL
+00c136ff29537286b877eaee9f7bffe43cde4bb4ec036eca31f446d2883e9015  w11/evidence/bytes.out
+31e2be81294874c34484e612014537c4a7e8e756b9c537bf1fe3aea7b2280161  w11/evidence/gdb-addr42.out
+da5bd84eedbbc35cb56c3a1c123cabb6188e74a44a069855da6905e5aa4d24c6  w11/evidence/gdb-stride42.out
+31e2be81294874c34484e612014537c4a7e8e756b9c537bf1fe3aea7b2280161  w11/evidence/gdb-zero.out
+7360851f29e7c8a8c6bd7ae903fbf3716ad7f999ae2a3bcc7825d709cca7673c  w11/evidence/idxptr-42.out
+6d7abaeeb8294ef292e3ce4b9f8474ff583ac30743b5800f022fbcf08639d3da  w11/evidence/idxptr-43.out
+9cc75cbe6b29f1cab83dd34b14b0a61ab5a90e9a31ae01045a173f32bbdebc91  w11/evidence/idxptr-addr42.out
+4b9ef325b2937a69ba931ddadabd5e42618d5080a6a1b4c46a4cec6bf512c298  w11/evidence/idxptr-stride42.out
+998d08f4df47f8c69bfce14b2e1d3fb066405b639ae1aba0ed6e9781f73eb6b2  w11/evidence/idxptr-zero.out
+a962b78fe07e43706e7b41e22ad4da321d09e2f50a57c6740e132cc9f32aeb93  w11/evidence/safe.out
+a5bc765f3a3ccd28cc8b11a1c8c11cdfab9a19c8495d40e0bd0569a6461dffa0  w11/evidence/w11.trace
