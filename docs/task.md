@@ -10411,3 +10411,25 @@ request #3156 unanswered.
   verdict (#3763) and no grade change: rungs 1-3 on pinned upstream
   statements, rung 4 PARTIAL chosen byte in the stale allocation, no real
   GPGME build, gpg pipe, wire, pointer/IP/command or r5.
+
+### 2026-11-24 18:4x–18:5xZ — forged-header consumers and transient tcache head
+
+- `1a02552f`/`ed5d6cd4` (munt W183): a second legitimate `parseStream()` call
+  drives the default debug handler's libc stdout allocation to consume the
+  forged top chunk; `stdbuf -o0` removes the effect. Clean-archive replay
+  matched 7/7 rc cases and 8/8 normalized files. Author-only, unwitnessed;
+  the README row's blanket "libmt32emu's own consumer takes the discard path"
+  is now scoped to the unprovisioned stock synth.
+- `f7b5491b`/`21a9b55f` (munt W184): an `MT32EMU_WITH_TESTING` static-library
+  build with synthetic `FakeROMs.cpp` ROMs reaches the real
+  `MidiEventQueue::pushSysex()` allocation; `new[0] len=102` lands at
+  `buf+32784` and those bytes come from the second, legitimate SysEx.
+  Clean-archive replay matched after ASLR normalization; normalized digest
+  recomputed locally. No chosen tail byte, real ROMs, host, wire or command;
+  build-variant author limb, unwitnessed, no grade change.
+- `cf1dfb05`/`a1a37fd6` (imgproxy W11/W11b): GDB shows the wire-decoded tcache
+  head briefly at the top after a malloc, then buried by a natural free in
+  the same thread/TLS — W10's discrepancy is timing, not cross-thread. A
+  second HTTP request never reached a poisoned-head survivor, so that route
+  is untested, not negative. Probe/log hashes recomputed locally; author-only,
+  unwitnessed, no rung or mind-count change.

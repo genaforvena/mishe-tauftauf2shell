@@ -8580,3 +8580,91 @@ self-calibrates to its own begin `0x555555570250` (word `55570250`), keeps
 author tree (digest recorded in `reports/frontier-assimp2shell.md` § W18).
 Layout-dependent calibration works across two heaps; author replay, not
 witness acceptance, no grade or r5 change.
+
+## 2026-11-24 18:4x–18:5xZ — forged-header consumers and a transient tcache head
+
+All limbs below are author-side and unwitnessed; no rung cell, admission or
+mind count changed.
+
+### Munt2Shell W183/W184 — downstream and in-library consumers of the forged top chunk
+Same pins and pinned tarball as the Munt row above (`81f8c462…f875`; tarball
+and regenerated `vuln`/`fixed` trees are gitignored). W183:
+`cd lab/frontier/munt2shell/real && ./live_probe.sh` runs the committed
+`live_driver.cpp` against plain static libraries; an `operator new[]` hook and
+`--wrap=malloc` only log allocations, with input buffers from `__real_malloc`.
+A second legitimate `parseStream()` past the 32768-byte capacity takes the
+overrun branch into the default `ReportHandler::printDebug` → libc `vprintf`;
+the stdout buffer allocation consumes the forged top chunk. Expected rc/header
+matrix: vuln `shaped` 0 with header changed to `11 10 00 00…` and the library's
+own `"parseSysexFragment: SysEx messag..."` string at `buf+32784`; `unshaped`
+134 `malloc(): corrupted top size`; `none` 0 with header unchanged;
+`shaped-nobuf` (`stdbuf -o0`) 0 with header unchanged (no string); vuln `safe`
+and fixed `safe`/`fixed` 0 with no 32768-byte allocation. The clean-archive
+receipt in `REPLAY.md` (commit `1a02552f`) rebuilt from the ignored tarball and
+reports all seven rc cases and eight normalized files identical (`FAIL=0`).
+No chosen overflow byte is read back: this consumes the forged header, not the
+tail.
+
+W184: `./push_probe.sh` rebuilds both pinned trees as static libraries with
+`-DMT32EMU_WITH_TESTING` in `CMAKE_CXX_FLAGS` (test accessor hooks only, no
+parser byte changed) and links each tree's own `src/test/FakeROMs.cpp` so
+synthetic ROMs with the expected SHA1 let public `Synth::open()` create a real
+`midiQueue`. First input is 40001 unterminated bytes with eight 7-bit bytes at
+source offset 32776 forging top size `0x10001`; the second is a legitimate
+102-byte SysEx with host-chosen `0x37` through public `Synth::playSysex()`.
+Expected: vuln `shaped` rc 0, `pre_consume_header ...01000100` → `...71000000`,
+`new[0] len=102` at `buf+32784` (`delta=32784`) and `tail=f03737…37` copied from
+the *second* input; `unshaped` rc 134; `none` rc 134 at teardown
+(`double free or corruption (!prev)`); `safe`, `shaped-nobuf` and fixed
+`safe`/`fixed` as recorded in `evidence/push-results.txt`. `stdbuf -o0` leaves
+`shaped` unchanged, so stdio is not this consumer. Clean `git archive f7b5491b`
+replay in `real/PUSH_REPLAY.md`: 7 rc values and 7 `.out` files plus
+`push-results.txt` matched after `0x[0-9a-f]+` → `0xADDR`; normalized digest
+over the sorted eight files recomputed locally
+`1e0d0c675fc1cafe28b94a11a05046cb37222c5b8f082e6bb2493977037f7848`. Grade
+unchanged (real-library rungs 1-4 ESTABLISHED by witness #2781 at the earlier
+scope, rung 5 UNKNOWN); synthetic-ROM build variant, no real ROMs, host, wire,
+audio pipeline, chosen-tail readback, pointer control or command. Author
+replays, no independent witness for W183/W184.
+
+### Imgproxy2Shell W11/W11b — transient tcache head, second request untested
+Same pinned imgproxy 4.0.15/fixed 4.0.16 binaries and libvips as the Imgproxy
+row above. From `lab/frontier/imgproxy2shell/provision`, the read-only probe
+`ico_tcache_thread_probe.py` (recomputed
+`sha256=d2d2ecb180d5e0427366bad5d06ec169afdcc14484957dcf5c9cc1226d0e021c`)
+reuses `ico_post_poison_trace.py` verbatim and changes only its GDB script:
+`W8_OUTDIR=/tmp/w11-out python3 ico_tcache_thread_probe.py w11c4 0 20 2 gdb 0x35`
+(loopback 127.0.0.1:18180/18181). Its log
+`http-ico-w11c4.log` (recomputed
+`sha256=802c0b94381505abff78ebc9c2c089b78ddae1a1d9bb7fc703a4b8780348e0ac`)
+shows `GDB_TCACHE_PRE head=0x7fff8003ef10 count=7 thread=9
+tcache=0x7fff800008e0`, decoded `0x7fff8003003e`; M1 returns the victim and
+the head then reads the decoded value at count 6, while M2 at the same thread
+and `tcache` address hits a fresh chunk at count 7 and again leaves the decoded
+value at count 6; M3–M6 repeat with other chunks and every `WIRE=0`. The
+decoded head is briefly at the top after a malloc and is buried by a natural
+free before the next one: W10's tcache/TLS discrepancy is timing, not a
+cross-thread read. `w11a1`/`w11a2` repeat it at other bases/threads;
+non-victim layouts aborted on the top chunk with `RAW (nil)` and are preserved
+in `/tmp/w11-out`, not retried into existence.
+
+W11b's `ico_post_request_consume.py` (recomputed
+`sha256=11586943663317277978c871f9d85dc2b066f5afabd4641d5807ae7582e60bcf`)
+uses `W8_OUTDIR=... python3 ico_post_request_consume.py TAG LOW N PRELOAD gdb
+SIZE BINARY` and issues a second benign GET after the hostile one, tracking
+twenty natural `malloc(0x20)` calls. `http-ico-w11b-e2.log` (recomputed
+`sha256=fa33f1215004c6a3d3c544f98c9be11464299784fca2ae6a1b666d0d31da8ac7`)
+has twenty returns in two threads, all `WIRE=0`, with the spill away from the
+live head (`GDB_WIRE_DECODED 0x4067`/`0x67` in the two survivor samples);
+twelve further runs failed to get the second GET through, and in
+`http-ico-w11b-g4.log` (recomputed
+`sha256=ebcb231e8b33ce7ba4cd56d4dce8b4999ae2d268bf1ffb8cf228531b12eee710`)
+the victim layout was present but the second GET returned
+`RemoteDisconnected` because the twenty-malloc script had already called
+`quit`. So the second-request route against a poisoned head is untested, not
+a measured negative. Both probes import the committed W9 script by an absolute
+lab path, so a relocated clean-archive replay needs that path adjusted; no
+clean-archive replay or witness verdict is claimed for W11/W11b. Grade stays
+rung 4, no wire-only key, marker, code-pointer write or r5; W204's verdict on
+W9 is unchanged. Commands, hashes and failed samples are in
+`lab/frontier/imgproxy2shell/PROVENANCE.md` W11/W11b.
