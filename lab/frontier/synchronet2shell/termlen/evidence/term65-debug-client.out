@@ -1,0 +1,237 @@
+OpenSSH_9.6p1 Ubuntu-3ubuntu13.20, OpenSSL 3.0.13 30 Jan 2024
+debug1: Reading configuration data /home/mesh-home/.ssh/config
+debug1: Reading configuration data /etc/ssh/ssh_config
+debug1: /etc/ssh/ssh_config line 19: include /etc/ssh/ssh_config.d/*.conf matched no files
+debug1: /etc/ssh/ssh_config line 21: Applying options for *
+debug2: resolve_canonicalize: hostname 127.0.0.1 is address
+debug3: channel_clear_timeouts: clearing
+debug3: ssh_connect_direct: entering
+debug1: Connecting to 127.0.0.1 [127.0.0.1] port 22227.
+debug3: set_sock_tos: set socket 3 IP_TOS 0x10
+debug2: fd 3 setting O_NONBLOCK
+debug1: fd 3 clearing O_NONBLOCK
+debug1: Connection established.
+debug3: timeout: 5000 ms remain after connect
+debug1: identity file /home/mesh-home/.ssh/id_rsa type -1
+debug1: identity file /home/mesh-home/.ssh/id_rsa-cert type -1
+debug1: identity file /home/mesh-home/.ssh/id_ecdsa type -1
+debug1: identity file /home/mesh-home/.ssh/id_ecdsa-cert type -1
+debug1: identity file /home/mesh-home/.ssh/id_ecdsa_sk type -1
+debug1: identity file /home/mesh-home/.ssh/id_ecdsa_sk-cert type -1
+debug1: identity file /home/mesh-home/.ssh/id_ed25519 type 3
+debug1: identity file /home/mesh-home/.ssh/id_ed25519-cert type -1
+debug1: identity file /home/mesh-home/.ssh/id_ed25519_sk type -1
+debug1: identity file /home/mesh-home/.ssh/id_ed25519_sk-cert type -1
+debug1: identity file /home/mesh-home/.ssh/id_xmss type -1
+debug1: identity file /home/mesh-home/.ssh/id_xmss-cert type -1
+debug1: identity file /home/mesh-home/.ssh/id_dsa type -1
+debug1: identity file /home/mesh-home/.ssh/id_dsa-cert type -1
+debug1: Local version string SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.20
+debug1: Remote protocol version 2.0, remote software version cryptlib(SBBS)
+debug1: compat_banner: no match: cryptlib(SBBS)
+debug2: fd 3 setting O_NONBLOCK
+debug1: Authenticating to 127.0.0.1:22227 as 'lab'
+debug3: put_host_port: [127.0.0.1]:22227
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug3: order_hostkeyalgs: no algorithms matched; accept original
+debug3: send packet: type 20
+debug1: SSH2_MSG_KEXINIT sent
+debug3: receive packet: type 20
+debug1: SSH2_MSG_KEXINIT received
+debug2: local client KEXINIT proposal
+debug2: KEX algorithms: sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256,ext-info-c,kex-strict-c-v00@openssh.com
+debug2: host key algorithms: ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256,ssh-rsa
+debug2: ciphers ctos: chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+debug2: ciphers stoc: chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+debug2: MACs ctos: umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+debug2: MACs stoc: umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+debug2: compression ctos: none,zlib@openssh.com,zlib
+debug2: compression stoc: none,zlib@openssh.com,zlib
+debug2: languages ctos: 
+debug2: languages stoc: 
+debug2: first_kex_follows 0 
+debug2: reserved 0 
+debug2: peer server KEXINIT proposal
+debug2: KEX algorithms: diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha256,diffie-hellman-group14-sha1
+debug2: host key algorithms: rsa-sha2-256,ssh-rsa
+debug2: ciphers ctos: aes128-cbc,aes256-cbc,aes128-ctr,aes256-ctr,3des-cbc
+debug2: ciphers stoc: aes128-cbc,aes256-cbc,aes128-ctr,aes256-ctr,3des-cbc
+debug2: MACs ctos: hmac-sha2-256,hmac-sha1
+debug2: MACs stoc: hmac-sha2-256,hmac-sha1
+debug2: compression ctos: none
+debug2: compression stoc: none
+debug2: languages ctos: 
+debug2: languages stoc: 
+debug2: first_kex_follows 0 
+debug2: reserved 0 
+debug1: kex: algorithm: diffie-hellman-group-exchange-sha256
+debug1: kex: host key algorithm: rsa-sha2-256
+debug1: kex: server->client cipher: aes128-ctr MAC: hmac-sha2-256 compression: none
+debug1: kex: client->server cipher: aes128-ctr MAC: hmac-sha2-256 compression: none
+debug3: send packet: type 34
+debug1: SSH2_MSG_KEX_DH_GEX_REQUEST(2048<8192<8192) sent
+debug1: expecting SSH2_MSG_KEX_DH_GEX_GROUP
+debug3: receive packet: type 31
+debug1: SSH2_MSG_KEX_DH_GEX_GROUP received
+debug2: bits set: 1510/3072
+debug3: send packet: type 32
+debug1: SSH2_MSG_KEX_DH_GEX_INIT sent
+debug1: expecting SSH2_MSG_KEX_DH_GEX_REPLY
+debug3: receive packet: type 33
+debug1: SSH2_MSG_KEX_DH_GEX_REPLY received
+debug1: Server host key: ssh-rsa SHA256:+p5bEdoNdxv4FOO5JMRUE4dHIiUqnmIXSqTIOHYWIgk
+debug3: put_host_port: [127.0.0.1]:22227
+debug3: put_host_port: [127.0.0.1]:22227
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug1: checking without port identifier
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+Warning: Permanently added '[127.0.0.1]:22227' (RSA) to the list of known hosts.
+debug2: bits set: 1510/3072
+debug3: send packet: type 21
+debug2: ssh_set_newkeys: mode 1
+debug1: rekey out after 4294967296 blocks
+debug1: SSH2_MSG_NEWKEYS sent
+debug1: expecting SSH2_MSG_NEWKEYS
+debug3: receive packet: type 21
+debug1: SSH2_MSG_NEWKEYS received
+debug2: ssh_set_newkeys: mode 0
+debug1: rekey in after 4294967296 blocks
+debug3: send packet: type 5
+debug3: receive packet: type 7
+debug1: SSH2_MSG_EXT_INFO received
+debug3: kex_input_ext_info: extension server-sig-algs
+debug1: kex_ext_info_client_parse: server-sig-algs=<ecdsa-sha2-nistp256,rsa-sha2-256,ssh-rsa,ssh-dss>
+debug3: receive packet: type 6
+debug2: service_accept: ssh-userauth
+debug1: SSH2_MSG_SERVICE_ACCEPT received
+debug3: send packet: type 50
+debug3: receive packet: type 52
+Authenticated to 127.0.0.1 ([127.0.0.1]:22227) using "none".
+debug2: fd 4 setting O_NONBLOCK
+debug2: fd 5 setting O_NONBLOCK
+debug1: channel 0: new session [client-session] (inactive timeout: 0)
+debug3: ssh_session2_open: channel_new: 0
+debug2: channel 0: send open
+debug3: send packet: type 90
+debug1: Entering interactive session.
+debug1: pledge: network
+debug3: client_repledge: enter
+debug3: receive packet: type 91
+debug2: channel_input_open_confirmation: channel 0: callback start
+debug2: fd 3 setting TCP_NODELAY
+debug3: set_sock_tos: set socket 3 IP_TOS 0x10
+debug2: client_session2_setup: id 0
+debug2: channel 0: request pty-req confirm 1
+debug1: ssh_tty_make_modes: no fd or tio
+debug3: send packet: type 98
+debug1: Sending environment.
+debug3: Ignored env AGENT
+debug3: Ignored env AWS_PAGER
+debug3: Ignored env BAT_PAGER
+debug3: Ignored env CARGO_TERM_PROGRESS_WHEN
+debug3: Ignored env CI
+debug3: Ignored env CLAUDECODE
+debug3: Ignored env CLOUDSDK_CORE_DISABLE_PROMPTS
+debug3: Ignored env COMPOSER_NO_INTERACTION
+debug3: Ignored env DBUS_SESSION_BUS_ADDRESS
+debug3: Ignored env DEBIAN_FRONTEND
+debug3: Ignored env DELTA_PAGER
+debug3: Ignored env EDITOR
+debug3: Ignored env GH_PAGER
+debug3: Ignored env GH_PROMPT_DISABLED
+debug3: Ignored env GIT_EDITOR
+debug3: Ignored env GIT_PAGER
+debug3: Ignored env GIT_TERMINAL_PROMPT
+debug3: Ignored env GLAB_PAGER
+debug3: Ignored env GPG_TTY
+debug3: Ignored env GSM_SKIP_SSH_AGENT_WORKAROUND
+debug3: Ignored env GTK_MODULES
+debug3: Ignored env HOME
+debug3: Ignored env HOMEBREW_PAGER
+debug3: Ignored env INVOCATION_ID
+debug3: Ignored env JOURNAL_STREAM
+debug1: channel 0: setting env LANG = "en_US.UTF-8"
+debug2: channel 0: request env confirm 0
+debug3: send packet: type 98
+debug3: Ignored env LESS
+debug3: Ignored env LOGNAME
+debug3: Ignored env MANAGERPID
+debug3: Ignored env MANPAGER
+debug3: Ignored env MEMORY_PRESSURE_WATCH
+debug3: Ignored env MEMORY_PRESSURE_WRITE
+debug3: Ignored env MISHE_REPO
+debug3: Ignored env MISHE_ROLE
+debug3: Ignored env MISHE_SEED_HOME
+debug3: Ignored env MISHE_WAKE_KEY
+debug3: Ignored env MISHE_WORKLOAD_SLICE
+debug3: Ignored env MYSQL_PAGER
+debug3: Ignored env NO_COLOR
+debug3: Ignored env OLDPWD
+debug3: Ignored env OMPCODE
+debug3: Ignored env PAGER
+debug3: Ignored env PATH
+debug3: Ignored env PIP_DISABLE_PIP_VERSION_CHECK
+debug3: Ignored env PIP_NO_INPUT
+debug3: Ignored env PNPM_DISABLE_SELF_UPDATE_CHECK
+debug3: Ignored env PNPM_UPDATE_NOTIFIER
+debug3: Ignored env PSQL_PAGER
+debug3: Ignored env PWD
+debug3: Ignored env PYTHONPATH
+debug3: Ignored env PYTHONUNBUFFERED
+debug3: Ignored env QT_ACCESSIBILITY
+debug3: Ignored env RIPGREP_CONFIG_PATH
+debug3: Ignored env SHLVL
+debug3: Ignored env SSH_ASKPASS
+debug3: Ignored env SSH_AUTH_SOCK
+debug3: Ignored env SYSTEMD_EXEC_PID
+debug3: Ignored env SYSTEMD_PAGER
+debug3: Ignored env TERM
+debug3: Ignored env TF_INPUT
+debug3: Ignored env TF_IN_AUTOMATION
+debug3: Ignored env USER
+debug3: Ignored env VISUAL
+debug3: Ignored env XDG_DATA_DIRS
+debug3: Ignored env XDG_RUNTIME_DIR
+debug3: Ignored env YARN_ENABLE_PROGRESS_BARS
+debug3: Ignored env YARN_ENABLE_TELEMETRY
+debug3: Ignored env _
+debug3: Ignored env __PI_NATIVE_VARIANT_CACHE
+debug3: Ignored env npm_config_audit
+debug3: Ignored env npm_config_fund
+debug3: Ignored env npm_config_progress
+debug3: Ignored env npm_config_update_notifier
+debug3: Ignored env npm_config_yes
+debug1: Sending command: cat
+debug2: channel 0: request exec confirm 1
+debug3: send packet: type 98
+debug3: client_repledge: enter
+debug1: pledge: fork
+debug2: channel_input_open_confirmation: channel 0: callback done
+debug2: channel 0: open confirm rwindow 2146426879 rmax 16384
+debug2: channel 0: read<=0 rfd 4 len 0: closed
+debug2: channel 0: read failed
+debug2: chan_shutdown_read: channel 0: (i0 o0 sock -1 wfd 4 efd 6 [write])
+debug2: channel 0: input open -> drain
+debug2: channel 0: ibuf empty
+debug2: channel 0: send eof
+debug3: send packet: type 96
+debug2: channel 0: input drain -> closed
+debug3: receive packet: type 99
+debug2: channel_input_status_confirm: type 99 id 0
+debug2: PTY allocation request accepted on channel 0
+debug3: receive packet: type 99
+debug2: channel_input_status_confirm: type 99 id 0
+debug2: exec request accepted on channel 0
+debug3: send packet: type 1
+debug1: channel 0: free: client-session, nchannels 1
+debug3: channel 0: status: The following connections are open:
+  #0 client-session (t4 [session] r0 i3/0 o0/0 e[write]/0 fd -1/5/6 sock -1 cc -1 io 0x00/0x00)
+
+Connection to 127.0.0.1 closed by remote host.
+Connection to 127.0.0.1 closed.
+Transferred: sent 2384, received 2112 bytes, in 11.5 seconds
+Bytes per second: sent 207.1, received 183.5
+debug1: Exit status -1

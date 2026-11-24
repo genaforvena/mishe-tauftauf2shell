@@ -6,7 +6,7 @@ AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
 `sbbs_t::answer()` call scope and the advisory's node-exhaustion impact,
 author-measured in W5/W6 and replay still owed; W7 measures a
 default-config, no-credential negative at real `answer()`; NO r5.** Brief
-authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7 updates 2026-11-24.
+authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8 updates 2026-11-24.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -278,6 +278,44 @@ the same counts (1 control probe, 0 no-ANYAUTH probes, one
 `Permission denied (publickey,password)`).
 
 
+## W8 source-bounded 64-byte TERM cap (2026-11-24, author-measured)
+
+The charter called the 64-byte cap an advisory claim. It is now pinned in
+source and corroborated on the wire. In the vendored cryptlib built from
+pinned parent `42f586d7`, `session/ssh2_msgsvr.c:564` declares
+`BYTE stringBuffer[ CRYPT_MAX_TEXTSIZE + 8 ]`, and the `REQUEST_PTY` case at
+line 668 reads the pty-req TERM with
+`readString32( stream, stringBuffer, CRYPT_MAX_TEXTSIZE, &stringLength )`;
+`cryptlib.h:1821` sets `CRYPT_MAX_TEXTSIZE 64` (the separate
+`MAX_ATTRIBUTE_SIZE 4096` at `misc/consts.h:250` is the getter's declared
+return buffer, not this parser bound), and `enc_dec/misc_rw.c:332-334`
+rejects `length > dataMaxLength` with `CRYPT_ERROR_BADDATA`, setting
+`*dataLength = 0` — there is no truncation.
+The call at line 668 is guarded by `if (stringLength > 0)` before
+`setChannelAttributeS`, so an over-64-byte TERM never becomes a readable
+terminal attribute. The 64-byte cap is therefore a property of this pinned
+parser, not only of the advisory text.
+
+`bash lab/frontier/synchronet2shell/termlen/run-termlen.sh` measures the
+consequence on loopback port 22227 with the verbatim W3 server source changed
+only in port (22222->22227) and getter-probe buffer (128->4096) by recorded
+build-time `sed` (`evidence/provenance.txt`, including the witness-verified
+libcl.a sha256 `584494acfcd7c531…e952e3c2`). OpenSSH 9.6 clients configured
+with TERM lengths 40, 64, 65, 128 and 256 produced getter results
+`status=0 len=40`, `status=0 len=64`, and `status=-43 len=-1`
+(`CRYPT_ERROR_NOTFOUND`) for all three over-64 cases: **5 PASS / 0 FAIL**.
+A `-vvv` client transcript (`term65-debug-client.out`) confirms that the
+65-byte case still sent a pty-req (`channel 0: request pty-req confirm 1`,
+`PTY allocation request accepted`); the exact on-wire TERM byte count was
+not independently decoded, so client-side truncation cannot be excluded by
+this measurement alone. The source bound does not depend on that ambiguity.
+
+Consequence and limit: on this pinned pty-req path the no-size copy receives
+at most 64 bytes, so the measured 23-byte reach past the 41-byte field is a
+cap, not a lower bound. This bounds the availability-only characterization;
+it says nothing about other attribute sources or other Synchronet builds.
+No rung change; author evidence, not a witness verdict.
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent
@@ -287,10 +325,11 @@ thread-block/socket-exhaustion DoS is measured at real `answer()` scope in
 W6 with a fixed control. The 64-byte TERM and the no-size copy are measured
 at the real cryptlib API, from a network pty-req through the real vendored
 cryptlib getter, inside a real `sbbs3` build's `sbbs_t::answer()` on
-loopback. No claim that the adjacent-field overwrite yields code execution:
-the advisory's own impact vector is availability-only (`VC:N/VI:N`). W5 and
-W6 are author evidence with one-command replays, not yet independently
-replayed.
+loopback; W8 pins the 64-byte maximum to the vendored pty-req parser and
+corroborates it on the wire. No claim that the adjacent-field overwrite
+yields code execution: the advisory's own impact vector is availability-only
+(`VC:N/VI:N`). W5 and W6 are author evidence with one-command replays, not
+yet independently replayed.
 
 
 `gdb.txt` (sha256 `968fa2093607c70425343fe569fe91ee7bc467d7077dc52ff4914cd24691f128`)

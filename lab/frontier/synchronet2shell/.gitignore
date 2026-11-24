@@ -23,3 +23,7 @@ wire/ssh_server8_asan
 provision/debs/
 provision/local/
 provision/*.log
+
+# W8 TERM-cap probe: generated from wire/ssh_server6.c at build time.
+termlen/term_server
+termlen/term_server.c
