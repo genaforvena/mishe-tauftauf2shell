@@ -1,0 +1,13 @@
+--- a/src/demosaic/misc_demosaic.cpp
++++ b/src/demosaic/misc_demosaic.cpp
+@@ -74,8 +74,10 @@
+           img[row * width + col][c] =
+               image[(row >> 1) * iwidth + (col >> 1)][c];
+         }
+       free(image);
+       image = img;
++      iwidth = width;
++      iheight = height;
+       shrink = 0;
+     }
+   }

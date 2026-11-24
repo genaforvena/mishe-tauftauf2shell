@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+IDX=85640 row=164 top=3 col=133 left=3 avg={0,0,0,8} writes={0,0,0}
+delta=135968 target=0x5555557e2000
+0x5555557e2000:	Cannot access memory at address 0x5555557e2000

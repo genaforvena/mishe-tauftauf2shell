@@ -1,0 +1,13 @@
+No symbol "width" in current context.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+No symbol "width" in current context.
+No symbol "width" in current context.
+No symbol "width" in current context.
+#0  0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+#1  0x000055555557bf19 in LibRaw::dcraw_process (this=0x7ffffff422f0) at src/postprocessing/dcraw_process.cpp:184
+#2  0x0000555555568837 in main (argc=4, argv=0x7fffffffe238) at samples/dcraw_emu.cpp:598

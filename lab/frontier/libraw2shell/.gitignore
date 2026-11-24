@@ -1,0 +1,12 @@
+# Build trees are reproducible from pinned/LibRaw-0.22.3.tar.gz + pinned/fix-894.patch
+# via bootstrap.sh; never commit their objects, archives or binaries.
+/pinned/LibRaw-0.22.3/
+/fixed/LibRaw-0.22.3/
+/plain/LibRaw-0.22.3/
+/o0/LibRaw-0.22.3/
+*.o
+*.a
+*.ppm
+*.out.bin
+/trace.txt
+/run-output.txt

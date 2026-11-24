@@ -1,0 +1,46 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+v = 3
+hm = {36, 36, 36, 36, 36, 36, 36, 36}
+max = 32
+d = 8
+avg = {0, 0, 0, 8}
+col = 3
+row = 3
+mrow = 511
+mcol = 511
+c = 3
+color = {{0, 0, 0, 0, 0, 0, 134420, 0}, {0, 0, 0, 0, 1040187392, 1040187392, 584842240, 1620229952}, {0, 0, 0, 0, 0, 0, 66640, 0}}
+left = 3
+buffer = 0x7ffff5e71010 ""
+rgb = 0x7ffff5e71010
+rix = 0x7ffff6beafda
+lab = 0x7ffff6a71010
+lix = 0x7ffff6bea3d4
+drv = 0x7ffff6bf1010
+homo = 0x7ffff73f1010
+top = 3
+cstat = {8, 18, 10, 0}
+ndir = 8
+orth = {1, 0, 0, 1, -1, 0, 0, -1, 1, 0, 0, 1}
+patt = {{0, 1, 0, -1, 2, 0, -1, 0, 1, 1, 1, -1, 0, 0, 0, 0}, {0, 1, 0, -2, 1, 0, -2, 0, 1, 1, -2, -2, 1, -1, -1, 1}}
+dir = {1, 512, 513, 511}
+allhex = {{{{-512, 512, 2, -1, -511, 513, 0, 0}, {-512, 512, 2, -1, -511, 513, 0, 0}}, {{512, -512, -2, 1, 511, -513, 0, 0}, {512, -512, -2, 1, 511, -513, 0, 0}}, {{-1, 2, 512, -1024, -513, 513, 511, -1022}, {-1, 2, 512, -1024, -513, 513, 511, -1022}}}, {{{512, -512, -2, 1, 511, -513, 0, 0}, {512, -512, -2, 1, 511, -513, 0, 0}}, {{-1, 2, 512, -1024, -513, 513, 511, -1022}, {-1, 2, 512, -1024, -513, 513, 511, -1022}}, {{-512, 512, 2, -1, -511, 513, 0, 0}, {-512, 512, 2, -1, -511, 513, 0, 0}}}, {{{1, -2, -512, 1024, 513, -513, -511, 1022}, {1, -2, -512, 1024, 513, -513, -511, 1022}}, {{1, -1, 1024, -512, 513, 511, 0, 0}, {1, -1, 1024, -512, 513, 511, 0, 0}}, {{-1, 2, -512, 1024, -513, 1026, -511, 511}, {-1, 2, -512, 1024, -513, 1026, -511, 511}}}}
+sgrow = 1
+sgcol = 1
+minv = -2
+maxv = 2
+minh = -2
+maxh = 2
+retrycount = 21252
+buffer_count = 1
+buffer_size = 24641536
+buffers = 0x55555572a7a0
+allocate_sz = 549152
+destimage = 0x55555573abc0
+width=512 height=512 iwidth=256 iheight=256 filters=9
+0x5555557c0e50:	0x0000	0x0000	0x0000	0x0000	0x0000	0x0000	0x0000	0x0000

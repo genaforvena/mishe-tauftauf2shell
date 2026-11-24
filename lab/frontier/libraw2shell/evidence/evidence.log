@@ -1,0 +1,47 @@
+PASS asan-n1                    rc=1 expected=1
+PASS asan-C11                   rc=1 expected=1
+PASS asan-C111                  rc=1 expected=1
+PASS asan-safe-default          rc=0 expected=0
+PASS fixed-asan-n1              rc=0 expected=0
+PASS fixed-asan-C11             rc=0 expected=0
+PASS fixed-asan-C111            rc=0 expected=0
+PASS plain-attack               rc=139 expected=139
+PASS plain-safe                 rc=0 expected=0
+asan WRITE-2 at :427 in all three attacks: PASS
+first OOB gdb line: IDX=68644 avg={0,0,0,8} delta=0
+PASS=10 FAIL=0
+7edf96c5b70cff88980a02ab0fc8af125cb6a4a377985573c654439d9d02355c  ../pinned/LibRaw-0.22.3.tar.gz
+32fc61e5a52c0b393fd09175bf9b1283c29065767613d15a16e421dd1a2afc9c  ../pinned/fix-894.patch
+c7940268cfb817adc4d5d42e9327a93fd042d7cd4cda8bc4b4ed6f1c4435dae2  poc_xtrans_oob_write.input
+85015e910623f417e4e3a8c283c9a8acda4020ac83eacd1b9984eeb8a7188f23  ../pinned/LibRaw-0.22.3/bin/dcraw_emu
+3f9974a43e7836eefec4617e279502938e04701f4f9b5140fd7d4b8343eca324  ../fixed/LibRaw-0.22.3/bin/dcraw_emu
+0c822992a54ceb68555e493387430c5ae226f31174af1bccb5391330a34b199f  ../plain/LibRaw-0.22.3/bin/dcraw_emu
+ca941dae5fb86793d4235b8577136ce70c41d9f3c59e865d5590baa37b28fffd  ../o0/LibRaw-0.22.3/bin/dcraw_emu
+797272b92fcaa2fc11dd608f6818d6a7ca4d80e939861540a02416c171549e8c  asan-C11.out
+abef186b9f5243efef9899cd5c6e8cddfb0108ed08612d8a764855eb23d1ae56  asan-C111.out
+06408933dbc43c2cc94026a14ff13f97cfb78456b71abbf2d27b4fb7635f25f4  asan-crafted.out
+eb17260a45d16cde02766ea7f3ea9d4314a75621ea097dceb82e983137b9f3a3  asan-n1.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  asan-safe-default.out
+054784b034e5d65912e6cd0947560caab36816b33d9090f1d8c97e6b77a5c45e  asan-uncomp.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  fixed-asan-C11.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  fixed-asan-C111.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  fixed-asan-fixed-C11.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  fixed-asan-fixed-C111.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  fixed-asan-fixed-n1.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  fixed-asan-n1.out
+26d422b0a44e4f756144e1c3fde97aaeb3b0e308dc74279a303e17249c0bfa25  plain-attack.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  plain-crafted.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  plain-safe.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  var-A.out
+2e32a1eda8e3c6b892739d02225f0c1c4b146f9dd483904d4e549b4991f06d00  var-B.out
+9a0061714dd221f1969eaaebf23ab1c7e5f1af6784113b164496cff4889b616c  var-C.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  var-D.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  var-E.out
+87ae53f9f5d2e0d40bef6ee9099065821d672e60f91ec9b1c714793bbcc8bc36  gdb-crafted-oob.txt
+0dac47eb84277564d792b813e42d7242240e16cfeed81829ffb7f3a7b2bec635  gdb-crafted-values.txt
+a8e99fa886da5a37f47bb2b2cd261407ab37f51f15477dff40df580a11c6d3dd  gdb-crafted-values2.txt
+118d961ecc6583bc16571fd5bb1d600fb640fe7f6c4a2b93dbb2395735003878  gdb-first-oob.txt
+f60935e570db2b440cf206db3bc8d84624228d2f4702a335543ed60efbc9d38b  gdb-info.txt
+d1706f3bd8dd79b7e03238a65a528fea4a458fbb52f611a310708f91e4a95e80  gdb-o0-first-oob.txt
+cbcf5e308a72a7b63784374491732234b8110d90028de4da425ad24419095527  gdb-oob-nonzero.txt
+1b949bd1ef0b31fed0b37f5070f385d8e81e1a35da29d3f061e30c7f8fb5000a  gdb-oob-value.txt
