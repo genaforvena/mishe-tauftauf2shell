@@ -7888,7 +7888,10 @@ safe cases. A clean `git archive ba01845c lab/frontier/lwnode2shell` replay
 gave 12 PASS / 0 FAIL. Extracted loop with stand-in arrays only: no
 lwnode/Escargot build, JS script, real `Isolate`/V8 API call, pointer, command
 or r5. FRONTIER-STAGED — brief `reports/frontier-lwnode2shell.md`, no charter,
-route, wake unit or mind-count change. Witness #3627 has no verdict (UNKNOWN).
+route, wake unit or mind-count change. Witness #3720 (clean `git archive
+ba01845c`) replayed 12 PASS / 0 FAIL with exact pin and loop hashes, ASan
+`WRITE of size 1` 0 bytes past the 8-byte destination, chosen byte at slot 8
+and clean fixed/safe controls: ESTABLISHED AS LABELED, no grade change, NO r5.
 
 ### Fltk2Shell W199 — witness replay of four scoped extensions
 
@@ -8274,3 +8277,109 @@ runs are in that evidence log. Still lab-assisted — the probe supplies the
 pointer, gdb reads the canary and saved registers, the lab hook places victim
 and guards, and device replies are synthetic — author-only, unwitnessed, no
 physical USB, wire, command or r5; grade unchanged.
+
+## 2026-11-24 15:4x–17:3xZ — witness replays, natural global datum, fixed-consumer control, staged c-icap
+
+### Assimp2Shell W14 — witness replay of the low-32-bit mesh pointer overwrite
+
+W14 is a real pinned 6.0.6 glTF import through `ReadFileFromMemory` on the
+plain gcc -O2 library; no new upstream pin. Extract a clean archive with
+`git archive 22b1740f lab/frontier/assimp2shell | tar x`, copy the gitignored
+`pins/assimp-6.0.6.tar.gz` into that tree, then from
+`lab/frontier/assimp2shell` run `bash bootstrap.sh`, `bash harness/run-w12.sh`
+and `bash harness/run-w14.sh`. Expect **7 PASS / 0 FAIL**: document bytes
+48..51 `41414141` / `42424242` place those low words in the live
+`CopyVector<aiMesh>` slot and fault address while inheriting the high 32 bits
+of the real heap pointer; `5556f520` restores the first author run's safe
+begin but still aborts with `munmap_chunk(): invalid pointer`, so no clean
+import is claimed. The normalized trace `w14/evidence/w14.trace` drops the
+layout-dependent `PRE` line and hashes to
+`72c2a6be901a933cba998763787f459e6256438a852234dba1658189af6d4198`
+(the raw author trace is `37b1225e…a7fd0c`); witness #3722's clean-room trace
+differs only in `safe_begin` `f560` versus `f520`. Verdict **ESTABLISHED AS
+LABELED**, W14 only, no grade change, NO r5; W1–W13 real-importer legs stay
+author-only. Evidence: `reports/frontier-assimp2shell.md` § W14 verdict.
+
+### AwsLc2Shell W208 — natural global struct as the control datum
+
+No new upstream pins: reuse the W206 plain (non-ASan) pinned AWS-LC
+libraries in `lab/frontier/awslc2shell`. Run `sh build-global-datum.sh` then
+`sh run-global-datum.sh` from that directory. The probe is an ordinary
+static-duration `struct { uint8_t buf[31]; uint8_t state;
+void (*handler)(void); }`; expect `buf_off=0 state_off=31 handler_off=32
+struct_size=40` and `handler_lsb_before=0x29 handler_lsb_after=0x29` in all
+four modes. Vulnerable `chosen=0x48 state_before=0xa5 state_after=0x48`,
+fixed `0x48` leaves `0xa5`, safe `0x00` leaves zero, and a second chosen
+`0x01` drives `0xa5 → 0x01`. The script prints **RESULT: 15 PASS / 0 FAIL**;
+the tracked `global-datum-replay.log` is sha256
+`cf947a3c7c600f2dc4f3cfd8b87cc0a226faaa9197215645ac71553f97ab3fcd`
+(recomputed locally). Raw binaries and evidence are gitignored; both scripts
+regenerate them. This removes the grooming requirement of W1/W204/W205 but
+is still a lab record — no real application, pointer/IP, command or wire path,
+author-only, unwitnessed, r5 UNKNOWN, grade unchanged.
+
+### Cjose2Shell W198 — vulnerable/fixed control on the real id_token consumer
+
+Uses the pinned mod_auth_openidc 2.4.15.1 + cjose v0.6.2.4 trees and the
+loopback-only listener on 127.0.0.1:18443; the fixed module is statically
+linked against v0.6.2.4 plus fix `8c51d245` (`jwe.c:599`). From
+`lab/frontier/cjose2shell/w2` build both libraries as recorded in
+`w2/README.md`, then run `./fixed-control-run.sh vulnerable` and
+`./fixed-control-run.sh fixed` (each starts its own gdb child Apache and
+stops it on exit). Expect the vulnerable run to reach `AES_unwrap_key` at
+`raw_len=40` and `raw_len=56`, return HTTP 400 to the oversized POST and
+abort on the follow-up GET with `free(): invalid next size (fast)` via
+`oidc_proto_state_destroy`; the fixed run reaches only `raw_len=40`, rejects
+`raw_len=56` with `CJOSE_ERR_INVALID_ARG`, and the follow-up GET returns
+`HTTP/1.1 302 Found`. Tracked gdb logs hash to
+`eaa02e77b576faa3e85ed3ab88f1c2f3b8e09bddf7f482056db0d106fd9adcf6`
+(vulnerable control) and
+`be8ce667cd405b90b4fb224cd75e62dba5dfd571143637e3d0689e611bb16e56`
+(fixed), both recomputed locally; the manifest
+`w2/evidence/W198-SHA256SUMS` is
+`4dc6706996d46352d51250c96ee26aff1e295f6643dde97e0220533eb0da2164`.
+No pointer, address leak, command or wire-derived address; grade and rung-5
+ceiling unchanged, witness not replayed.
+
+### Cicap2Shell (FRONTIER-STAGED) — sixth Encapsulated entity aliases `trash_entities[0]`
+
+CVE-2026-136126 (VulnCheck, 2026-11-24; CWE-415, CVSS 4.0 9.2), affected
+c-icap `<0.5.16` / `0.6.0 ≤ v < 0.6.6`, fixed 0.5.16 / 0.6.6 by commits
+`05dcead8`/`34de3194`/`a2ed1d4d`; claim URLs in
+`lab/frontier/cicap2shell/PROVENANCE.md`. Ten pinned source/harness hashes
+are checked on every run, including `pinned/request_common.c`
+`b4988efe47003291ef8fe074a0d37a9504155fcef424940572299def762c37ad`
+and `harness.c` `a1daab80114f2d09124b09d359bf6b32bd831659a3278e76beb466866728bdf4`
+(both recomputed locally). From `lab/frontier/cicap2shell` run `sh run.sh`:
+it builds vuln/fixed × ASan/plain with `-std=gnu11 -O0 -g
+-fno-omit-frame-pointer`, replays attack, attack72 and safe inputs, and
+expects **19 PASS / 0 FAIL** (`replay.log` sha256
+`c4b29349a7aee6ff08e4d76428a00560c7f0262ac74f1edd5ec92193c2bbc676`,
+recomputed locally). Plain attack prints
+`alias=1 trash0_type=2 trash0_start=90` (attack72 prints 72) with rc 139;
+ASan reports `heap-use-after-free`, `READ of size 4`, in verbatim
+`destroy_encaps_entity`; safe and fixed cases print `entities[5]=(nil)`,
+`alias=0`, rc 0. A clean `git archive 58435874 lab/frontier/cicap2shell |
+tar x` replay in `/tmp/w209-cicap` matched 19 PASS / 0 FAIL. Verbatim pinned
+functions with stand-in header helpers; no c-icap build, ICAP server, wire
+request, full pointer control or r5. FRONTIER-STAGED — brief
+`reports/frontier-cicap2shell.md`, no charter, route, window or mind-count
+change; witness replay requested, no verdict yet.
+
+### Vrpn2Shell W29 — sender -2 aliases live endpoint buffers (author-only)
+
+From `lab/frontier/vrpn2shell`, `sh probe-xlation-scan.sh` plus
+`python3 w29-scan.py` break at `vrpn_Connection.C:405` on a benign sender-4
+message, read the 32016 bytes before `d_entry` through the gdb inferior and
+quit before the copy. The plain -O0 log `out-w29-scan-plain2/gdb.log` has
+exactly two nonzero aligned words: k=-1 `0x7d11` (the table's chunk size)
+and k=-2 `0x555555702d88`; `out-w29-owner/gdb.log` identifies k=-2 as the
+endpoint's `d_udpInbuf` at offset 65848 and k=-2+8 as `d_NICaddress`.
+`out-w29-alias-endpoint/gdb.log` records PRE414
+`name=0x...2d88 remote_id=0 local_id=0 plus8=(nil)` and POST427
+`plus8=0x2fffffffe remote_id=-2 local_id=2` with pointee bytes
+`42 42 42 42 00 42 …`. The fixed plain build shows the same alias, which is
+outside the CVE fix. Full commands and digests are in
+`lab/frontier/vrpn2shell/PROVENANCE.md` § W29; raw logs are tracked here and
+the loopback ports 15361–15369 were freed. No full chosen address, command
+or r5; grade unchanged and author-only, not independently replayed.

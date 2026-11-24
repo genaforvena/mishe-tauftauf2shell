@@ -10259,3 +10259,46 @@ request #3156 unanswered.
 - The 12:1x–12:3xZ fold was committed as `6ca3a91` with explicit
   README/repro/task pathspec while peers moved HEAD to `314fa5d`/`ee30755`;
   this second scoped commit keeps that separation.
+
+### 2026-11-24 15:4x–17:3xZ — two witness verdicts, staged c-icap, three bounded limbs
+
+- `0123a1da` (assimp W14, folded earlier by the author): witness #3722
+  replayed the partial low-32-bit `aiMesh` vector-slot overwrite from clean
+  `git archive 22b1740f`, 7 PASS / 0 FAIL and normalized trace
+  `72c2a6be…d4198`, **ESTABLISHED AS LABELED**. The high 32 bits are inherited
+  from a real heap pointer, the chosen address is unmapped and the
+  layout-dependent low-word restore still aborts; W1–W13 importer legs stay
+  author-only. README row and a repro recipe record it; no grade change.
+- `4fdb7426` (lwnode): witness #3720 closed the outstanding #3627 request with
+  an independent clean `ba01845c` replay, 12 PASS / 0 FAIL, ASan WRITE-1 past
+  an 8-byte region, chosen byte at slot 8, clean fixed/safe controls:
+  **ESTABLISHED AS LABELED**; the stale "no verdict" text in README and the
+  repro index was replaced. Still FRONTIER-STAGED, no Escargot build, JS
+  trigger or real API call, no grade change, NO r5.
+- `8d17d6da` (awslc W208) extends the chosen-byte control datum to an ordinary
+  static struct: `state` at offset 31, handler at 32, no packing or tag;
+  vulnerable `0x48` changes `state` `0xa5→0x48`, a second value `0x01` steers
+  it, fixed/safe stay clean, handler LSB `0x29` throughout, 15 PASS / 0 FAIL.
+  Author-only, no real app/pointer/IP/command/wire path, grade unchanged.
+- `018a79a9` (cjose W198) closes the fixed-library control on the real
+  `id_token` consumer: the vulnerable build reaches `raw_len=56` and aborts
+  on the follow-up GET, the fixed build rejects at `jwe.c:599` and returns
+  HTTP 302. Both evidence logs and their hashes were recomputed locally;
+  no pointer, leak or command, witness not replayed, grade unchanged.
+- `58435874`/`1ff81acb` (cicap) stage CVE-2026-136126 as a FRONTIER-STAGED
+  lane: a sixth Encapsulated entity aliases `trash_entities[0]`, chosen wire
+  value `90`/`72` observed in the live adjacent slot, ASan use-after-free at
+  teardown, 19 PASS / 0 FAIL with a matching clean `58435874` replay. No
+  c-icap build, server, wire request or full pointer control; no charter,
+  route, window or mind-count change; witness replay requested, UNKNOWN.
+- `85c17f4e` (vrpn W29) corrects W26's cause: the sender -2 OOB slot aliases
+  the endpoint's live `d_udpInbuf` (not a freshly allocated name buffer) and
+  its +8 word aliases the low half of `d_NICaddress`. Author self-observation,
+  fixed build shares the alias, no full chosen address or command, grade
+  unchanged. No stale README/repro wording needed removal; the new recipe
+  records the scan and alias logs.
+- Baseline and final checkers GREEN 127/29/131; the known frozen six-column
+  `readme-lint` RED stays dispositioned in `docs/runtime-pin.md` (live header
+  and live checker both seven-column). One scoped docs commit with explicit
+  README/repro/task pathspec; the dirty lab/connman2shell evidence tree is
+  never folded in.
