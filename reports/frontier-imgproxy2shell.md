@@ -291,7 +291,9 @@ PNG decode is not reached. ASLR is 2 on this host, and W6 heap positions
 differed across processes, so no constant cross-process key exists either.
 Commands, digests and raw logs are in `lab/frontier/imgproxy2shell/PROVENANCE.md`
 (W7). Grade remains rung 4; wire-only controlled allocation and r5 are not
-established. This is an author finding, not a witness verdict.
+established. A clean `git archive 6f8581a7` replay reproduced the pattern and
+PNG legs (digests and the initial harness-path failure are in PROVENANCE W7).
+This is an author finding, not a witness verdict.
 
 ## What would change my mind
 

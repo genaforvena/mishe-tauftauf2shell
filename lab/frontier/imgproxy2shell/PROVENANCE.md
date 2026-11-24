@@ -642,3 +642,20 @@ Verdict: this closes the only plausible wire-only derivation of the safe-link
 key on this loader path. Grade stays rung 4; no marker, code-pointer write or
 r5 is claimed. Superseded /tmp logs and the throwaway first version of the
 probe are deleted; ports were free after the runs. Unwitnessed author finding.
+
+### Clean-archive replay (12:56-12:57Z)
+
+From `git archive 6f8581a7 lab/frontier/imgproxy2shell` into `/tmp/w7-replay`,
+with only the gitignored `imgproxy-vuln` symlinked from the live provision tree
+and the plain libvips tree referenced by absolute path, the committed probe
+reproduced both legs: `w7replay-pattern` (`sha256` of log
+`7cbfa021df10d8bb22b67459c77340b6d96de1fe43ce87a2c388d2ef82b7df59`,
+rc=2, no response, 0.066 s) and `w7replay-pngvalid`
+(`2ea5e396b9335b5048c845360bdbefdd9da6dcf4307d62e4c298b4a5ba2634e5`,
+rc=2, no response, 0.013 s); both logs contain `malloc(): corrupted top size`.
+The first replay attempt used a wrong libvips path (`lab/libvips2shell`
+instead of `lab/frontier/libvips2shell`), so the binary failed to start with
+`libvips.so.42: cannot open shared object file` and `PROXY_LISTEN=FAIL`; that
+harness error is preserved here, and the corrected path replayed cleanly.
+Replay logs were not committed; the throwaway tree was removed. This is the
+author's replay, not witness acceptance.
