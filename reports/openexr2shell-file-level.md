@@ -1098,9 +1098,10 @@ all four: `exrcheck-mixed` `ec494e149caa15a9ef05a681b2cdf4aa30fd798c72d8098af04c
 `exrcheck-steer` `555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`
 (identical to W181's earlier aggregate), `cpp-heap-victims`
 `6ecacec424080a0c1ff58ca570f105bd354282cf88ef6a2b1923aad31e0bb644`.
-Raw outputs: `lab/openexr2shell-real/evidence/w183-*.out` and
-`/tmp/w183-clean-*.out` (ignored). This is a replay of author claims, not a
-witness verdict; grade and rung-5 status unchanged. The earlier 1200s
-consolidated-replay timeout was host contention from the same build, now
-resolved by killing those stale compilers.
+Raw outputs: `lab/openexr2shell-real/evidence/w183-*.out` (committed in
+`1d2d6a9`) and `/tmp/w183-clean-*.out` (outside the repo). This is a replay of
+author claims, not a witness verdict; grade and rung-5 status unchanged. The
+earlier 1200s consolidated-replay timeout was host contention from the same
+build, now resolved by killing those stale compilers.
+
 
