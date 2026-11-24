@@ -891,4 +891,81 @@ W181 and W183 need a 512x72 first frame to obtain the stated 36,879 bytes
 (512*72 + 15). Frame 1's patched SOF encodes 512 rows from a 72-row entropy
 stream, so libjpeg prints "Corrupt JPEG data: 251 extraneous bytes before
 marker 0xd9" before frame 1's decode; the decoder still returns 64x512.
-No pointer, marker, command, consumer, witness replay or rung 5.
+
+## W184 ~1.2 kB mixed-size MJPEG sequences (2026-11-24)
+
+Advisory re-read at 03:19Z: `GET https://api.github.com/repos/strukturag/libheif/security-advisories/GHSA-hpg4-g2gc-pq42` returned the published
+description (no PoC file, hash or byte dump). It repeats the 1,155-byte
+Motion-JPEG claim, the 36,879-byte allocation, the `WRITE of size 64` and a
+
+release-build SIGSEGV where "the same input corrupted a pointer later used by
+x265". It also states that `heif-enc -S` itself rejects mixed-size input,
+which is why every local reproducer patches a JPEG SOF after encoding.
+
+Size floor. A 512x64 uniform grayscale JPEG of 288 bytes
+(`uniform64.jpg`, SHA-256
+`4f0396f825c0ff492161c03509d2d184e742b48bd5720534dfbf8772cd7492dc`) fed to
+pinned plain `heif-enc -S --jpeg` yields the usual 4,262-byte reference HEIF
+(`template.heif`, `7d820881...`): each re-encoded sample is 1,138 bytes and
+the file has `ftyp` 40, `moov` 571 and two `mdat` boxes. `-q 1` through
+`-q 20` do not shrink the samples. A genuine 512x72 uniform JPEG is 304 bytes
+(`uniform72.jpg`, `a77f6098...`).
+
+`make_tiny_mjpeg_sequence.py SOURCE_DIR OUT_DIR` builds three files from the
+committed JPEGs and the encoder's `ftyp`+`moov`: patch `stsz.sample_size` to
+288 or 304, patch `stco` chunk offset, append one `mdat` with two unmodified
+JPEGs, and for the mixed files change only the second SOF0 from (H=64 or 72,
+W=512) to (H=512, W=64). Asserted outputs:
+
+| file | bytes | sha256 |
+|---|---|---|
+| `tiny64-ref.heif` | 1195 | `f2cb1ac007388ba234096ce22bbd8301fe98f6256616e1e338e51867461f2fcb` |
+| `tiny64-mixed.heif` | 1195 | `aa8e0600ada35537dd2f49314743571221719faaed3236371f10d031767e0c58` |
+| `tiny72-ref.heif` | 1227 | `a02b50a6094524b0f67e0639e473627c2d557fa6d7923054241c0ac1888d03c0` |
+| `tiny72-mixed.heif` | 1227 | `231bb209c008cd14e9d623c9a44975f7d3d7b171b847ca7a427da41ef1b94e89` |
+
+No rebuild: drivers are the pinned builds from W161/W181
+(`/tmp/libheif2shell-reencode-vuln` ASan 32,783 build,
+`/tmp/w181-size/driver` ASan 36,879 build,
+`/tmp/libheif2shell-reencode-plain` Release,
+`/tmp/w181-size/fixed-driver` patched pin). From
+`real/neighbour/evidence/tiny-mjpeg/`:
+
+```
+python3 real/neighbour/make_tiny_mjpeg_sequence.py EVIDENCE EVIDENCE
+ASAN_OPTIONS=detect_leaks=0 /tmp/libheif2shell-reencode-vuln \
+  tiny64-mixed.heif o1.heif > asan64-mixed.out 2>&1   # rc 1
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/driver \
+  tiny72-mixed.heif o2.heif > asan72-mixed.out 2>&1   # rc 1
+ASAN_OPTIONS=detect_leaks=0 /tmp/libheif2shell-reencode-vuln \
+  tiny64-ref.heif o3.heif > asan64-safe.out 2>&1      # rc 0
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/driver \
+  tiny72-ref.heif o4.heif > asan72-safe.out 2>&1      # rc 0
+/tmp/libheif2shell-reencode-plain tiny64-mixed.heif o5.heif > plain64-mixed.out 2>&1  # rc 139
+/tmp/libheif2shell-reencode-plain tiny72-mixed.heif o6.heif > plain72-mixed.out 2>&1  # rc 134
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/fixed-driver \
+  tiny64-mixed.heif o7.heif > fixed64-mixed.out 2>&1  # rc 0, encode rc 2
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/fixed-driver \
+  tiny72-mixed.heif o8.heif > fixed72-mixed.out 2>&1  # rc 0, encode rc 2
+python3 real/neighbour/check_tiny_mjpeg.py EVIDENCE   # PASS=71 FAIL=0
+```
+
+Observations: both attack logs print `frame 1 decoded: 64x512 stride=64`
+then `heap-buffer-overflow`, `WRITE of size 64`, 0 bytes after 32,783 bytes
+(64-row first frame) or **36,879 bytes** (72-row first frame) at pinned
+`pixelimage.cc:644` via `heif_image.cc:403` / `encoder_x265.cc:1139`. Both
+same-size controls encode both frames with no ASan. The plain 64-row case
+exits 139 immediately after frame 1's decode; the plain 72-row case logs
+`double free or corruption (out)` and exits 134. Both fixed runs decode the
+mismatch but reject it with encode rc 2 and no ASan.
+
+Preserved negatives: the advisory's 1,155-byte file remains untested; the
+smallest local triggering files are 40 and 72 bytes larger. Removing the
+40-byte `ftyp` does produce exactly 1,155 bytes, but the pinned decoder
+returns `read: rc=2 sub=102 ... No 'ftyp' box`; replacing the compatible-brand
+list with shorter valid subsets either loses sequence detection or fails
+JPEG decode, so the full 40-byte `ftyp` is required on this build. The
+304-byte genuine 512x72 JPEG triggers `Corrupt JPEG data: 11 extraneous
+bytes before marker 0xd9` but frame 0 still decodes 512x72. No pointer
+consumed later by x265, marker, command, consumer or witness replay. Rung 3
+plus rung 4 unchanged; rung 5 UNKNOWN.

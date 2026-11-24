@@ -615,3 +615,39 @@ frame. Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5. No pointer target,
 command, live consumer or witness verdict; author observation only. Evidence
 and exact commands are in `lab/frontier/libheif2shell/real/PROVENANCE-real.md`
 W183 and `real/neighbour/evidence/genuine-72/`.
+
+## W184 ~1.2 kB mixed-size MJPEG files (2026-11-24)
+
+The advisory's own 1,155-byte artifact is not published; re-reading the
+advisory through GitHub's API confirmed only the claim text (1,155 bytes,
+36,879-byte allocation, WRITE of size 64, and a release SIGSEGV said to
+corrupt a pointer later used by x265). To close the size gap as far as the
+lab can, measured the smallest local file that still reaches the overflow.
+Pinned `heif-enc -S --jpeg` re-encodes even a 288-byte uniform 512x64 source
+JPEG into a 1,138-byte sample, so its reference HEIF cannot go below 4,262
+bytes. `real/neighbour/make_tiny_mjpeg_sequence.py` keeps only the encoder's
+`ftyp`+`moov` boxes, puts the original small JPEGs in one `mdat` and fixes
+`stsz`/`stco`, then patches only the second sample's SOF0 to 64x512. Nothing
+else in the JPEG entropy data changes. The result is a container
+reconstruction, not a file the upstream encoder writes.
+
+Two inputs: `tiny64-mixed.heif` is 1,195 bytes (SHA-256 `aa8e0600...c58`)
+with a 512x64 first frame; `tiny72-mixed.heif` is 1,227 bytes
+(`231bb209...e89`) with a genuine 512x72 first frame. On pinned v1.23.6 ASan
+the first gives rc 1, `WRITE of size 64`, 0 bytes after a 32,783-byte region;
+the second gives rc 1, the same write at `pixelimage.cc:644` via
+`heif_image.cc:403` and `encoder_x265.cc:1139`, 0 bytes after a
+**36,879-byte region**. Same-size controls rc 0; plain Release rc 139
+(64-row first frame) and rc 134 with `double free or corruption (out)`
+(72-row first frame); fixed `9ec655f` rc 0 with encode rc 2 and no ASan.
+`check_tiny_mjpeg.py` PASS=71 FAIL=0. Hashes, rc files and all eight logs:
+`real/neighbour/evidence/tiny-mjpeg/`.
+
+Preserved negatives: 1,195 and 1,227 bytes are 40 and 72 bytes above the
+advisory's 1,155, so the exact artifact is still UNTESTED, not matched.
+Dropping `ftyp` gives 1,155 bytes but libheif rejects it ("No 'ftyp' box");
+short compatible-brand lists either lose sequence detection or fail to decode
+the JPEG samples. The 72-row source JPEG logs "Corrupt JPEG data: 11
+extraneous bytes before marker 0xd9" although frame 0 decodes 512x72.
+Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5; no pointer later used by
+x265, command, live consumer or witness verdict. Author observation only.
