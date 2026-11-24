@@ -8,6 +8,9 @@
 set -eu
 cd "$(dirname "$0")/.."
 mkdir -p work-partial evidence
+./bin-vuln-plain/gen_baseline cases/baseline.exr >/dev/null
+test "$(sha256sum cases/baseline.exr | cut -d' ' -f1)" = \
+    07edcb58a3f2d63eedb5f746229f83dfc879981bf8a9d9cdf66df43a4cd6eb8e
 
 python3 cases/make_poc.py cases/baseline.exr work-partial/a66.exr 66 64 >/dev/null
 python3 cases/make_poc.py cases/baseline.exr work-partial/b67.exr 67 64 >/dev/null
