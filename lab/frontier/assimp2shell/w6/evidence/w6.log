@@ -1,0 +1,37 @@
+# w5_real_vuln case=mat4tex-count1 mode=asan label=asan rc=1
+PASS mat4tex-write64
+PASS mat4tex-region12
+PASS mat4tex-extract-frame
+PASS mat4tex-import-frame
+PASS mat4tex-realpath-frame
+# w5_real_fixed case=mat4tex-count1 mode=fixed label=fixed rc=1
+PASS mat4tex-fixed-no-asan
+PASS mat4tex-fixed-message
+# w5_cb_vuln case=mat4tex-count1 mode=cb label=cb rc=0
+PASS mat4tex-cb-addr
+PASS mat4tex-cb-scene-ok
+PASS mat4tex-cb-dump
+# w5_plain case=mat4tex-count1 mode=plain label=plain rc=139
+PASS mat4tex-plain-fault
+# w5_real_vuln case=texcount-mismatch mode=asan label=asan rc=1
+PASS texcount-read4
+PASS texcount-import-frame
+# w5_real_fixed case=texcount-mismatch mode=asan label=fixed rc=1
+PASS texcount-fixed-still-read
+PASS texcount-fixed-frame
+# w5_plain case=texcount-mismatch mode=plain label=plain rc=134
+PASS texcount-plain-abort
+# w5_real_vuln case=texsafe-count1 mode=asan label=asan rc=0
+PASS texsafe-vuln-clean
+# w5_real_fixed case=texsafe-count1 mode=fixed label=fixed rc=0
+PASS texsafe-fixed-clean
+RESULT 18 PASS / 0 FAIL
+a701bd8a7941a833c09c7793cfec247a8ddedb8d205cbf01a27821782f59c439  w6/evidence/mat4tex-count1-asan.out
+fa17e4ba0c2ff2f104e54bc9d0da540d0e461d7e75571bdfe48e00f024f0cdbf  w6/evidence/mat4tex-count1-cb.out
+9a2acfd47671cad6b424014670c7ad22e7d30de662d293968b67e7b98f19730b  w6/evidence/mat4tex-count1-fixed.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  w6/evidence/mat4tex-count1-plain.out
+3daeeb312d45f6e9af2df01161dd430d6f7c9eb1b821b784db770a47edd863e8  w6/evidence/texcount-mismatch-asan.out
+ff759421a353c9f713b7196619569211a38dfb849c868c477563582f9b559b77  w6/evidence/texcount-mismatch-fixed.out
+ad7d25253d0821de30d58bc35ecdf0639ea0de6186822d2afb0780c325917dbe  w6/evidence/texcount-mismatch-plain.out
+ad6335521e05a23c24ae0fb79c8cabe0cf2acd069c164fa0fd19f1e35dc896a2  w6/evidence/texsafe-count1-asan.out
+ad6335521e05a23c24ae0fb79c8cabe0cf2acd069c164fa0fd19f1e35dc896a2  w6/evidence/texsafe-count1-fixed.out

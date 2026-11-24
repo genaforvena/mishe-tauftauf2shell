@@ -1,0 +1,60 @@
+=================================================================
+==3361977==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000540 at pc 0x7c7f3366e5fb bp 0x7ffc9a2be240 sp 0x7ffc9a2be230
+READ of size 4 at 0x502000000540 thread T0
+    #0 0x7c7f3366e5fa in Assimp::glTFImporter::ImportMeshes(glTF::Asset&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x46e5fa) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #1 0x7c7f336706de in Assimp::glTFImporter::InternReadFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, aiScene*, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x4706de) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #2 0x7c7f332e372a in Assimp::BaseImporter::ReadFile(Assimp::Importer*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0xe372a) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #3 0x7c7f333395ef in Assimp::Importer::ReadFile(char const*, unsigned int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x1395ef) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #4 0x7c7f3333eb56 in Assimp::Importer::ReadFileFromMemory(void const*, unsigned long, unsigned int, char const*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x13eb56) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #5 0x58dcd131871a in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/w5_real_fixed+0x271a) (BuildId: c6d285d0fd6c806f83d6680e6ca72db5c7e321c0)
+    #6 0x7c7f32a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7c7f32a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x58dcd1318364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/w5_real_fixed+0x2364) (BuildId: c6d285d0fd6c806f83d6680e6ca72db5c7e321c0)
+
+0x502000000540 is located 4 bytes after 12-byte region [0x502000000530,0x50200000053c)
+allocated by thread T0 here:
+    #0 0x7c7f33cfe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x7c7f336973aa in bool glTF::Accessor::ExtractData<aiVector3t<float> >(aiVector3t<float>*&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x4973aa) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #2 0x7c7f3366ad0a in Assimp::glTFImporter::ImportMeshes(glTF::Asset&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x46ad0a) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #3 0x7c7f336706de in Assimp::glTFImporter::InternReadFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, aiScene*, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x4706de) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #4 0x7c7f332e372a in Assimp::BaseImporter::ReadFile(Assimp::Importer*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0xe372a) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #5 0x7c7f333395ef in Assimp::Importer::ReadFile(char const*, unsigned int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x1395ef) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #6 0x7c7f3333eb56 in Assimp::Importer::ReadFileFromMemory(void const*, unsigned long, unsigned int, char const*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x13eb56) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd)
+    #7 0x58dcd131871a in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/w5_real_fixed+0x271a) (BuildId: c6d285d0fd6c806f83d6680e6ca72db5c7e321c0)
+    #8 0x7c7f32a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7c7f32a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x58dcd1318364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/w5_real_fixed+0x2364) (BuildId: c6d285d0fd6c806f83d6680e6ca72db5c7e321c0)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x46e5fa) (BuildId: 32ad376b8b800a25e4eeb0c37c2fbb1bac1eabdd) in Assimp::glTFImporter::ImportMeshes(glTF::Asset&)
+Shadow bytes around the buggy address:
+  0x502000000280: fa fa 00 00 fa fa fd fa fa fa fd fd fa fa fd fa
+  0x502000000300: fa fa fd fa fa fa 00 00 fa fa 00 00 fa fa 00 fa
+  0x502000000380: fa fa fd fa fa fa fd fa fa fa 00 00 fa fa 00 00
+  0x502000000400: fa fa 00 00 fa fa 00 fa fa fa 00 fa fa fa 00 00
+  0x502000000480: fa fa 00 fa fa fa 00 fa fa fa 00 00 fa fa 04 fa
+=>0x502000000500: fa fa 00 fa fa fa 00 04[fa]fa fa fa fa fa fa fa
+  0x502000000580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3361977==ABORTING

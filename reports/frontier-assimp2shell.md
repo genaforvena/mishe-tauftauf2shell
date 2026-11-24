@@ -204,10 +204,42 @@ reused the library from `run-realpath.sh`. Corrected in commit `4f3b254`
 (build the fixed library from the PR6860 overlay tree). This is a preserved
 harness/reproducibility negative, not a change to the vulnerability result.
 
+## W6 — untested accessor call sites (2026-11-24 06:2xZ, author-measured)
+
+A source enumeration of the pinned glTF 1.0 importer found two call sites not
+covered by W1/W2/W5. `ImportMeshes` applies TEXCOORD accessors through the
+same unchecked `ExtractData` primitive (`glTFImporter.cpp:289-290`) and then
+flips `values[i].y` for `i < aim->mNumVertices` (`:299-302`), where
+`mNumVertices` comes from POSITION (`:281`); NORMAL at `:285-287` is the other
+unchecked extraction site. glTF 2 is hard-guarded in the pinned bytes.
+
+- `mat4tex-count1.gltf` (safe VEC3 POSITION, MAT4/FLOAT TEXCOORD_0): ASan
+  `WRITE of size 64`, `0 bytes after 12-byte region`, frames
+  `memcpy` → `ExtractData<aiVector3t<float> >` → `ImportMeshes` →
+  `ReadFileFromMemory`; plain build SIGSEGV (rc 139). The PR6860 overlay
+  rejects it (`scene=null`, "failed to extract data for texcoord 0", no
+  ASan report). The ASan-callback run completes the import with `scene=ok`
+  but shows no chosen byte in a live `aiMesh` field.
+- `texcount-mismatch.gltf` (POSITION count=3, TEXCOORD_0 count=1, both VEC3):
+  the flip loop uses POSITION's count; ASan reports `READ of size 4`, `4 bytes
+  after 12-byte region` in `ImportMeshes`, and the plain build aborts
+  `double free or corruption (out)`. PR6860 does not fix it (same READ on
+  the fixed build); PR7090's local hunk adds only a NORMAL count check.
+  This is a DISTINCT missing-count-check defect, not the CVE's element-size
+  write; it is preserved as such, not folded into the CVE grade.
+- `texsafe-count1.gltf` (matched VEC3 counts): `scene=ok`, ASan-clean on both
+  vulnerable and PR6860 builds.
+
+`bash harness/run-w6.sh` => **18 PASS / 0 FAIL**; evidence and the exact
+scope note in `lab/frontier/assimp2shell/w6/evidence/`. W6 reuses the
+libraries and drivers built by `run-w5.sh` (run it once first). Author
+measurement only, unwitnessed; no pointer/IP, command or r5.
+
 ## Next lane
 
 Replay W1/W2 independently, preserving any contradiction as a negative. W5
-measured a 64-byte mismatch through the real importer but found no chosen
-byte in a live `aiMesh` field, so the placement lane stays closed. Only a
-different pair with observed control-flow placement would reopen it.
+and W6 measured larger and distinct-site overruns through the real importer
+but found no chosen byte in a live `aiMesh` field, so the placement lane stays
+closed. The TEXCOORD count mismatch is a separate defect and needs its own
+claim if pursued; only observed control-flow placement would reopen rung 4.
 Never relabel placement as control flow or RCE without observation.
