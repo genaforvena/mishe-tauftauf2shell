@@ -149,42 +149,89 @@ the vulnerable tree without `-n` rc 0 with empty output
 (`evidence/gdb-nonzero-oob.txt`). The crafted input therefore writes
 deterministic nonzero halfwords at the chosen offset.
 
-Limit: the value is a saturated constant `0xffff` because LibRaw scales the
-12-bit raw field against `maximum=255`; arbitrary byte values are not
-demonstrated. The variant overwrites the optional thumbnail region. No real
-camera file or consumer other than `dcraw_emu` was used, and this W2 result
-awaits witness replay.
+Limit of W2 itself: the value is a saturated constant `0xffff` because LibRaw
+scales the 12-bit raw field against `maximum=255`; arbitrary byte values were
+not demonstrated in that variant. The variant overwrites the optional
+thumbnail region. No real camera file or consumer other than `dcraw_emu` was
+used. The W2 claim was subsequently replayed and ESTABLISHED (W187, below).
+
+## Non-saturated value steering (W3, 2026-11-24 07:2xZ, author-side)
+
+The saturation is a metadata setting, not a fixed property of the store:
+DNG tag `0xc61d` (WhiteLevel) in the derived PoC is 255, so `maximum=255` and
+raw values above 255 clip to `0xffff`. `craft_whitelevel_poc.py` changes that
+one tag (little-endian `u32` at file offset `0x102` in this layout) and leaves
+the JPEG field and every other tag intact. From `evidence/nonzero-oob.input`
+(sha256 `b59f64e9837b06a8f0ca07a3776e961e7d0493794e0d6cb38fbcb80022069341`)
+the deterministic generator sha256
+`ab5ace42392c8558d4c939d1524a9ffb29a112acb021b8141ce9a0dd8b30d1cf` produced
+four variants. Plain `-O0` gdb at the first OOB store, conditional breakpoint
+at `xtrans_demosaic.cpp:427` with index >= 68,644, `IDX=68644 delta=0` in all
+four; the halfwords below are after the store at `&destimage[68644][0]`:
+
+| WhiteLevel | input sha256 | avg at :427 | stored halfwords | evidence |
+|---|---|---|---|---|
+| 2,048 | `d398d0e78077a07cb0fb4572fce16805de1d3d31bf5d0718355b2b80c52c35f5` | `{65535,60057,65535,1}` | `0xffff 0xea99 0xffff 0x0000` | `evidence/gdb-whitelevel2048.txt` |
+| 4,095 | `8d9b520418207522efb8450c2aa80dbbdb3eb6fbe6da97ffe484e2f86d7cb905` | `{45023,30020,40021,1}` | `0xafdf 0x7544 0x9c55 0x0000` | `evidence/gdb-whitelevel4095-post.txt` |
+| 8,191 | `50c91fbbdbd49baba44ab2eab51fe19d726245c1d8aca6fe056cd09e7c3ce42b` | `{22508,15007,20007,1}` | `0x57ec 0x3a9f 0x4e27 0x0000` | `evidence/gdb-whitelevel8191.txt` |
+| 16,383 | `2547a078ca25f315e957d30614a9c4370e0657262036487d0fcdda2390c78bc8` | `{11253,7503,10002,1}` | `0x2bf5 0x1d4f 0x2712 0x0000` | `evidence/gdb-whitelevel16383.txt` |
+
+So the OOB value is file-steerable: three distinct non-saturated 16-bit
+halfwords at the same chosen offset, changing monotonically with a single
+metadata field. Controls at WhiteLevel=4,095: ASan vulnerable `-n 1` rc 1,
+`heap-buffer-overflow WRITE of size 2` at `xtrans_demosaic.cpp:427`, 0 bytes
+after the 550,176-byte region (`evidence/whitelevel-asan-attack.out`); fixed
+tree `-n 1` rc 0 with empty output (`evidence/whitelevel-fixed-asan.out`);
+vulnerable tree without `-n` rc 0 with empty output
+(`evidence/whitelevel-asan-safe.out`). Reproduce:
+`python3 craft_whitelevel_poc.py evidence/nonzero-oob.input OUT 4095`, then the
+gdb breakpoint above. This W3 result is author-side and unwitnessed.
 
 ## Rung-4 assessment and rank
 
 Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
-file, and rung 4 is now demonstrated for a crafted nonzero input: the OOB
-store at index 68,644 writes `0xffff` halfwords chosen by the file, with
-fixed and no-option controls clean. Arbitrary byte values and pointer/IP
-control remain UNKNOWN. Rank: high tractability, low escalation (local file,
-UI:P, no network, no pointer/command execution). Admitted frontier target
-since 2026-11-24 05:4xZ; NO rung 5.
+file (W186 witness ESTABLISHED). Rung 4 is demonstrated for a crafted nonzero
+input and ESTABLISHED by the W187 witness replay: the OOB store at index
+68,644 writes chosen nonzero halfwords with clean fixed and no-option
+controls. W3 additionally shows author-side file steering of the value to
+distinct non-saturated halfwords (unwitnessed). Fully arbitrary byte values
+and pointer/IP control remain UNKNOWN. Rank: high tractability, low escalation
+(local file, UI:P, no network, no pointer/command execution). Admitted frontier
+target since 2026-11-24 05:4xZ; NO rung 5.
 
-## Witness verdict (W186, 2026-11-24)
+## Witness verdicts (W186 and W187, 2026-11-24)
 
-Independent clean-room replay from only the pinned tarball, patch, PoC, zip,
-bootstrap.sh and run-all.sh: every pinned hash matched, bootstrap rc0, run-all
-rc0 with 10 PASS / 0 FAIL. The first 13 `evidence.log` lines are byte-identical
-to the committed log; the tail differs only in negative-result artifacts and
-build-path-dependent binary/output hashes. Verdict: CLAIM ESTABLISHED AS
-LABELED — rungs 1-3 confirmed in the real consumer, chosen offset at index
-68,644, zero stored halfwords, rung 4 PARTIAL, NO r5.
+W186: independent clean-room replay from only the pinned tarball, patch, PoC,
+zip, bootstrap.sh and run-all.sh: every pinned hash matched, bootstrap rc0,
+run-all rc0 with 10 PASS / 0 FAIL. The first 13 `evidence.log` lines are
+byte-identical to the committed log; the tail differs only in negative-result
+artifacts and build-path-dependent binary/output hashes. Verdict: CLAIM
+ESTABLISHED AS LABELED — rungs 1-3 confirmed in the real consumer, chosen
+offset at index 68,644, zero stored halfwords, rung 4 PARTIAL, NO r5.
+
+W187 (DM 3405, 07:23Z): clean-room replay of the W2 nonzero refinement in the
+surviving `/tmp/w186-libraw` tree, live tree untouched; generator
+`004ff435...f862` and derived input `b59f64e9...9341` hashes matched PINS.md.
+ASan vulnerable `-n 1` rc 1 with `WRITE of size 2` at `:427`; fixed tree rc 0;
+vulnerable tree without `-n` rc 0; plain `-O0` gdb `IDX=68644
+avg={131070,131070,131070,2} delta=0` and stored `0xffff 0xffff 0xffff 0x0000`.
+Verdict: ESTABLISHED AS LABELED; rung 4 upgraded from PARTIAL to demonstrated
+chosen-nonzero-halfword write at the chosen offset; ceiling unchanged (constant
+`0xffff`, no arbitrary byte, no r5). The W3 steering result is newer and not
+covered by either verdict.
 
 ## Ceiling / UNKNOWNs preserved
 
 - No upstream fix release or merged patch; the fixed control is the
   reporter's proposed two lines. Upstream fix status remains UNKNOWN.
 - No real camera file, GUI consumer, network path, pointer/IP, command
-  execution, grooming/ASLR study or rung 5. Witness replay covers the
-  original zero-valued claim only; the W2 nonzero result awaits replay.
-- Arbitrary byte values are still UNKNOWN: the crafted field saturates to
-  `0xffff`. A file-derived non-saturated value and pointer/IP control remain
-  open prerequisites for any stronger claim.
+  execution, grooming/ASLR study or rung 5. Witness verdicts cover the
+  original zero-valued claim (W186) and the W2 nonzero claim (W187); W3
+  steering is author-side and awaits replay.
+- Fully arbitrary byte values remain UNKNOWN: W2 wrote a saturated constant
+  `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
+  metadata tag but did not demonstrate arbitrary 16-bit values. Pointer/IP
+  control remains an open prerequisite for any stronger claim.
 - Target admitted 05:4xZ as route #127. Operator owns standing approvals;
   the person owns the charter, wake units and full-flag sync. No external
   probing was done.
