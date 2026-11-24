@@ -1263,3 +1263,52 @@ Grade rung 4 DEMONSTRATED for this lane, honestly conditioned: local CLI+dom,
 non-ASan, USE_ZEND_ALLOC=0, empty replacement + normalizeDocument(), exact
 120-B occupant. Read-side pointer control to a chosen-address fault; no
 arbitrary write, no marker, no SAPI/HTTP/pre-auth. Do NOT repeat p1-p7 unchanged.
+
+## Wake 57 (2026-11-24) — rung-5 feasibility determination: NO credible bounded path; DOM-lane wire-consumer survey NEGATIVE
+
+Question: can php2shell open `docs/rce.md`'s rung-5 stage on any current lane?
+Answer: no — every wire-reachable lane has a measured structural blocker, and
+the only lane with pointer control (DOM reflected-attr, wake 56) fails the
+rung-5 acceptance contract's first gate. New measurements this wake, all
+author-only (no witness; a negative needs no replay):
+
+1. **Vulnerable surface source-bound (pinned 8.5.12 build tree).** The only
+   userland paths missing the unlink discipline are the reflected writes
+   `className` (`element.c:174`), `id` (`element.c:229`) and the DOMTokenList
+   class path (`token_list.c` — the two hunks of
+   `dom-reflected-attribute-fix.patch`). Every classic setter already unlinks
+   before replacing: `setAttribute` (`element.c:466`), `setAttributeNode`
+   (`:556/:980/:1039/:1067`), `setAttributeNS` (`:1215`) and
+   `setAttributeNodeNS`. So the bug is reachable only through the PHP >= 8.4
+   spec-compliant DOM API additions, not through any `setAttribute` idiom.
+2. **Consumer is read-side only; the destructor free path is guarded.**
+   `php_dom_object_get_data` (`php_dom.c:322-329`) is a chain of `_private`
+   dereferences — no indirect call exists anywhere in the reflected-attr
+   consume path. The free path `free_node` (`php_dom.c:1884-1888`) runs
+   `xmlFreeNode` only when `node->_private == NULL`; a `zend_string` occupant
+   has a nonzero gc header at chunk offset 0, so the p6 groom can never make
+   the destructor free chosen `children`/`content` pointers. No measured
+   primitive on this lane provides the arbitrary write rung 5 would need.
+3. **Real-app consumer survey (rung-5 gate 1, bounded).** Provisioned at
+   branch tips into gitignored `lab/src/php2shell-r5-survey/` (codeload
+   tarballs, 2026-11-24, no sha pins): WordPress master, Drupal 11.x,
+   Joomla 6.2-dev, HTMLPurifier master, symfony/dom-crawler 8.2. Result:
+   **zero** ext/dom reflected writes (`->className =`, `->classList`, `->id =`
+   on DOM nodes), **zero** modern `DOM\` namespace usage, and **zero**
+   `getAttributeNode` calls (the retained-wrapper precondition of the wake-55
+   vendor phpt). Every `classList`/`className` grep hit is an inline
+   JavaScript string, a JS-emitting template, or an unrelated PHP property;
+   the apps do consume request-derived DOM via `DOMDocument` (13/13/8/3
+   files) but write attributes only through `setAttribute`-class calls —
+   the already-unlinking fixed path. Joomla's `->id =` hits are stdClass/
+   table objects, not DOM nodes.
+
+Conclusion: rung 5 stays UNCLAIMED and not attemptable on current lanes. The
+Stage A mod_php/CGI wire lane's consumer blocker (wakes 19-21 either-or,
+preserved) and 129538/129496 rung-4 closures stand unchanged. Scope of the
+survey negative: five consumers at fetched tips, not a proof over all PHP
+software. What would reopen: a real app on the 8.4+ spec-compliant DOM API
+doing reflected class/id writes or classList mutations on request-derived DOM
+while retaining an attribute-child wrapper; a controlled 56-B occupant with a
+real pointer at +16 and mask=0 on any SAPI; or a new vendor payload class for
+618/619.
