@@ -1,0 +1,5 @@
+a9678094c367e10c6ef4213b645ef23d55986616ad4ffd0af96e021687fcf64d  provision/message-v2.8.0.c
+dd49438c0792b6746b3b7eddd2820f1b17d06db5c68ff8a656931556f39da092  provision/multipart_parser-v2.8.0.c
+edb354d9f4d9d0fbc5569bf2bddd9a2b6221d09026cf949a186eb6df8d08d165  provision/multipart_parser-v2.8.0.h
+a94237e1ba60c28b10347f18ca07164264e48b566c7c650ddb833a49e3c75ba3  provision/fix-6820c274.patch
+edb354d9f4d9d0fbc5569bf2bddd9a2b6221d09026cf949a186eb6df8d08d165  harness/multipart_parser.h

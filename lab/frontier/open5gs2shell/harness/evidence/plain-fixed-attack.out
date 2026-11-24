@@ -1,0 +1,2 @@
+ERROR=Empty multipart boundary
+MODE=attack BOUNDARY_LEN=0 RET=-1 CONSUMED=0

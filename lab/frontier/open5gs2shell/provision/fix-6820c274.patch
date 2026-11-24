@@ -1,0 +1,30 @@
+From 6820c2743b5b5e126e3755d2f92dae2b236732df Mon Sep 17 00:00:00 2001
+From: Sukchan Lee <acetcom@gmail.com>
+Date: Fri, 25 Sep 2026 23:05:01 +0900
+Subject: [PATCH] [SBI] Reject empty multipart boundaries
+
+Reject empty boundary strings before initializing the multipart parser
+to prevent out-of-bounds writes to its lookbehind buffer.
+
+Free the allocated boundary and return a parse error.
+---
+ lib/sbi/message.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/lib/sbi/message.c b/lib/sbi/message.c
+index ad74a30465..c8d8c5a4c5 100644
+--- a/lib/sbi/message.c
++++ b/lib/sbi/message.c
+@@ -3507,6 +3507,12 @@ static int parse_multipart(
+     boundary = ogs_strndup(http->content+preamble, i-preamble);
+     ogs_assert(boundary);
+ 
++    if (!boundary[0]) {
++        ogs_error("Empty multipart boundary");
++        ogs_free(boundary);
++        return OGS_ERROR;
++    }
++
+     parser = multipart_parser_init(boundary, &settings);
+     ogs_assert(parser);
+ 
