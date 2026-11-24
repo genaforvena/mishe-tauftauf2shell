@@ -13,8 +13,9 @@ the gap from pinned source:
     sequence frame whose size differs from the first frame before encoding it.
 
 Usage: check_av1_consumer_guards.py [LIBHEIF_SRC] [IM HEIC.C]
-Defaults are the pinned source trees in this plant. Source-level only: no
-build, no process, no wire input, no new rung.
+Defaults are the pinned source trees in this plant. Both trees are gitignored;
+a clean `git archive` replay must pass both paths as arguments. Source-level
+only: no build, no process, no wire input, no new rung.
 """
 import re
 import sys

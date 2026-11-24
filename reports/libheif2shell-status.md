@@ -802,8 +802,10 @@ encoder by name refuses mixed-size sequence frames.
   frame before any `heif_track_encode_sequence_image` call.
 - `check_av1_consumer_guards.py` (in `lab/frontier/libheif2shell/real/neighbour/`)
   asserts all of the above from the pinned trees: PASS=10 FAIL=0, in-tree and
-  from a clean `git archive` replay. This is a source-level check, not a build
-  or a live run; no new rung. Grade UNCHANGED rung 3 plus rung 4, NOT rung 5.
+  from a clean `git archive HEAD` replay with the two pinned source trees passed
+  as arguments (those trees are gitignored, so the archive contains only the
+  checker). This is a source-level check, not a build or a live run; no new
+  rung. Grade UNCHANGED rung 3 plus rung 4, NOT rung 5.
 
 Still open: a real consumer with a named HEVC/x264/x265/kvazaar/vvenc encoder
 and no size guard. No such consumer has been built or run. The advisory's
