@@ -39,9 +39,11 @@ mapping2's sm and newmap already exist when mappings 4-7 perform their stores.
 The four stores at indices 65548..65551 replace all four 16-bit halves of
 sm->map. In crafted.enc the replacement value is 0x000055555558257a, i.e.
 +26 past the buffer, a location holding the chosen word 0x5558 that was also
-written by one of those stores. The mapping-2 map pointer starts at
-0x555555582590 with map[0] = 0x1111; after the overwrite it is
-0x55555558257a and FontEncRecode(254, mapping2) returns 0x5558 (21848).
+written by one of those stores. Before the overwrite mapping2's compact map
+held the chosen `0x1111` (written at ENDMAPPING); its original address is
+inferred at `0x555555582590` from the 0x10 gdb-to-runner layout shift. After
+the overwrite it is `0x55555558257a` and `FontEncRecode(254, mapping2)`
+returns 0x5558 (21848).
 
 Inputs and controls
 -------------------
