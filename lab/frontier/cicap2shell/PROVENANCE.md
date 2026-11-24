@@ -64,7 +64,11 @@ recording raw output under gitignored `evidence/` and `.rc` files, summary in
   `alias=0`, `destroy done`, rc 0, no sanitizer report.
 - `./fixed-asan fixed attack`, `./fixed-plain fixed attack`: `entities[5]=(nil)`,
   `alias=0`, `destroy done`, rc 0, no sanitizer report; fixed safe also rc 0.
-- `sh run.sh` -> 19 PASS / 0 FAIL, rc 0.
+- `sh run.sh` -> 19 PASS / 0 FAIL, rc 0. Clean-archive replay
+  (2026-11-24T17:23Z): `git archive 58435874 lab/frontier/cicap2shell |
+  tar x -C /tmp/w209-cicap`, then `sh run.sh` -> 19 PASS / 0 FAIL, rc 0,
+  with the same ASan UAF and `alias=1 trash0_type=2 trash0_start=90`.
+  The working tree was untouched.
 
 ## Known limits / negatives
 
@@ -79,4 +83,4 @@ recording raw output under gitignored `evidence/` and `.rc` files, summary in
   report, so that negative is preserved here rather than claimed as a pass.
 - The advisory is `AV:N` but this lab exercises a parsed header string, not
   a network socket; wire reach stays UNKNOWN.
-- Witness replay has not been requested yet; no verdict is implied.
+- Witness replay requested in chat #3733; no verdict yet (UNKNOWN, not a pass).

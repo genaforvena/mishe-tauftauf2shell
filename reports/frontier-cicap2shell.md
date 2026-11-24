@@ -70,8 +70,11 @@ selects the patch-derived guard and teardown text.
 - Controls: four-entity safe input leaves `entities[5]=(nil)`, alias 0 and
   the fixed attack/safe builds are ASan-clean with `entities[5]=(nil)`.
 - `sh run.sh` -> 19 PASS / 0 FAIL, with raw output in the gitignored
-  `evidence/` directory and summary in `replay.log`. Exact commands and
-  hashes: `lab/frontier/cicap2shell/PROVENANCE.md`.
+  `evidence/` directory and summary in `replay.log`. A clean
+  `git archive 58435874 lab/frontier/cicap2shell | tar x` replay in
+  `/tmp/w209-cicap` also gave 19 PASS / 0 FAIL, rc 0, with the same ASan
+  UAF and chosen-slot bytes. Exact commands and hashes:
+  `lab/frontier/cicap2shell/PROVENANCE.md`.
 
 ## Rung-4 feasibility and ceiling
 
