@@ -455,7 +455,7 @@ destination's chunk using their size words, scans `decode` pointer fields in
 ASLR is pinned off so pointer-derived residue bytes stay byte-stable.
 
 Observed in `evidence/heap-victims.out` (three identical runs, sha256
-`94928edccc5785b82ff4ed3571ca027d86d61122c39e5614906998886035983c`):
+`f0b9a80b0da1167bcd7baf3529dfb9b671ee99c51f2c075f5d`):
 
 ```
 SINK n=4096 src_minus_dst=304
@@ -488,7 +488,8 @@ target.
 
 `sh lab/openexr2shell-real/harness/heap-victims-check.sh` regenerates the PoC,
 checks its sha256, reruns the map, asserts eight lines and prints `RESULT
-PASS`; it passed twice with the evidence hash above. No grade change:
-rung 4 file-level CODE/CONSUMER, W161 witness-ESTABLISHED at the scanline
+PASS`; it passed three times from two working directories with the evidence
+hash above. No grade change: rung 4 file-level CODE/CONSUMER, W161
+witness-ESTABLISHED at the scanline
 scope, tiled/aarch64 replay requested from witness on tape #3133, rung 5
 UNKNOWN. No chosen bytes, pointer target, command, marker or wire work.

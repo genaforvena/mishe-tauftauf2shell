@@ -11,7 +11,7 @@ test "$(sha256sum cases/poc.exr | cut -d' ' -f1)" = \
     283cec0e18532c500495e71496145832d36dbfc502e44f490e09114661ab37ce
 
 gdb -q -batch -x harness/heap-victims.cmd --args ./bin-vuln-plain/flat_harness \
-    > evidence/heap-victims.out 2>&1
+    2>&1 | grep -v '^sort2_4ByteChannels_tiled (' > evidence/heap-victims.out
 
 grep -Fqx 'SINK n=4096 src_minus_dst=304' evidence/heap-victims.out
 grep -Fqx 'CHUNK-COUNT total=20 first_off=64' evidence/heap-victims.out

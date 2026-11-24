@@ -15,7 +15,6 @@ LIVE-PTR-COUNT scanned=11 inside=3
 LIVE-PTR-INSIDE decode.unpacked_buffer off=+0
 LIVE-PTR-INSIDE decode.scratch_buffer_2 off=+272
 LIVE-PTR-INSIDE decode.scratch_buffer_1 off=+304
-sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=0x5555556e21d0, channels=channels@entry=0x7fffffffdfe8, channelsSize=channelsSize@entry=1, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=0x5555556e21d8) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:459
 459	        for (int i = 0; i < channelsSize; ++i)
 CHUNK off=-16 size=0x50 hdr_before=0x51 hdr_after=0x51 same
 CHUNK off=+64 size=0x30 hdr_before=0x31 hdr_after=0xb11 CHANGED
