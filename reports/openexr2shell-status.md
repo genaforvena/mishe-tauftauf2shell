@@ -555,3 +555,9 @@ W164/W169/W178/W179/W180/W181/W182/W184/W185/W186/W187/W188/W189 remain
 UNVERDICTED. Rung 5 stays UNKNOWN: no wire-fed affected process, no chosen
 code pointer/IP, no command or marker side effect. Full evidence and replay
 hashes: `reports/openexr2shell-file-level.md` W186-W189.
+
+W189 clean-archive receipt (19:39Z): both one-command replays printed
+`RESULT PASS`, rc 0, from `git archive 8b44da3d` with gitignored pinned
+source/build/bin trees symlinked; check-output and aggregate evidence hashes
+matched the working tree exactly. Author replay only, not a witness verdict;
+grade unchanged.

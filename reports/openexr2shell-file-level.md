@@ -1504,3 +1504,16 @@ these two knobs. No code pointer or IP, no command, marker, socket or wire,
 no witness verdict, no rung-5 claim. Would change my mind: a nonempty `hits`
 in an unmodified consumer, a chosen code pointer/IP, a wire-fed affected
 process, or a witness counterexample.
+
+W189 clean-archive receipt (19:39Z): `git archive 8b44da3d lab/openexr2shell-real`
+into `/tmp/w189-clean`, with the gitignored `src/`, `build-*` and `bin-*`
+trees symlinked from the live checkout. Both replays printed `RESULT PASS`,
+rc 0, with check-output sha256
+`3cd9b99f9ac5a5471d03c189a46dcd7d3db74a8d514f578e026612ef5ecd6ea8` and
+`659a6cba9d1842f0fb798ddbf685c6cba4a58ff566fb371ca0d3437bd1d9d774` and
+aggregate evidence
+`a743fea9b0b731c57c0a83dd00009c5dae9e9dd05aecc31f1f412e96b47ff418`,
+byte-identical to the working tree. Commit `8b44da3d` carries the two probes,
+both replay scripts, the path generator, 26 evidence files and both report
+sections; this receipt is a separate scoped commit. Author replay only, not
+a witness verdict; grade and rung-5 status unchanged.
