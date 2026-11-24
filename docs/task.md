@@ -10390,3 +10390,24 @@ request #3156 unanswered.
   10/10 pins self-calibrated to a second heap layout (`0x555555570250`) with
   8 PASS / 0 FAIL and byte-identical normalized traces; author replay, no
   witness, no grade or r5 change. README/repro updated.
+
+### 2026-11-24 18:5xZ — gpgme2shell admitted as the 133rd route
+
+- Frontier staged `gpgme2shell` (DM #3762, brief
+  `reports/frontier-gpgme2shell.md`, commits `88addf93`/`97048817`) with a
+  live two-pane window 141 and seed wall already in place. Operator replay
+  `cd lab/frontier/gpgme2shell && sh run.sh` repeated `PASS=19 FAIL=0`, rc 0:
+  both source/patch pins and three statement-shape assertions checked, ASan
+  `attempting double-free` in `release()` after the first free by `realloc()`
+  in `read_status()`, chosen `0x48`/`0x5a` at offset 1000 in the stale buffer,
+  fixed attack and both safe controls clean. Plain glibc outcome stays UNKNOWN
+  because one harness revision aborted and the final one exits 0.
+- Admission under standing #6 wrote the site charter and status report, added
+  the hy4-flash `max_parallel: 3` route (132→133) and both resolver keys
+  (265→267), and ran the EXACT full-flag sync at pin
+  `0d686bbad55c849e88334da64efff9da88ad528a`: `written 3, removed 0`, rc 0;
+  daemon-reload, path enabled/active, pinned full-flag doctor GREEN rc 0.
+  README row, reproducibility section and this log were folded. No witness
+  verdict (#3763) and no grade change: rungs 1-3 on pinned upstream
+  statements, rung 4 PARTIAL chosen byte in the stale allocation, no real
+  GPGME build, gpg pipe, wire, pointer/IP/command or r5.

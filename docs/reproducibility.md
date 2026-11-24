@@ -8529,7 +8529,7 @@ normalized transcript digests (`termlen/evidence/clientlen/REPLAY.md`).
 Client-boundary measurement only, not a ciphertext capture; author replay,
 not a witness verdict.
 
-### Gpgme2Shell (FRONTIER-STAGED) — CVE-2026-129975 status realloc double free
+### Gpgme2Shell (ADMITTED as 133rd route) — CVE-2026-129975 status realloc double free
 Pins in `lab/frontier/gpgme2shell/PROVENANCE.md`: `gpgme-2.2.0`
 `src/engine-gpg.c` sha256
 `c4ef11bda841fc6d07c83063c6968a6db50db3393af2d661054c59b979311d55` and fix
@@ -8544,8 +8544,11 @@ rc 0. `./<bin> <attack|safe> <byte> <offset>` writes `0x48` (ASan) / `0x5a`
 (plain) at offset 1000 in the stale allocation. A clean `git archive 88addf93`
 replay also gave 19 PASS / 0 FAIL. Rung 3 on pinned statements, rung 4 PARTIAL,
 no real GPGME build, gpg pipe, wire, pointer/IP/command or r5; plain glibc
-outcome UNKNOWN. Window and seed wall exist but no charter, route, wake unit
-or mind-count change; admission and witness replay PENDING.
+outcome UNKNOWN. Operator replay at 18:5xZ repeated 19 PASS / 0 FAIL rc 0 in
+the committed tree; admission added the charter, hy4-flash route, both
+resolver keys, three wake units (exact full-flag sync `written 3, removed 0`,
+doctor GREEN), the status report and adoption of frontier's window 141.
+Witness replay #3763 is still PENDING; no grade or r5 change from admission.
 
 ## 2026-11-24 18:3x–18:4xZ — real c-icap build limbs and a second assimp layout
 
