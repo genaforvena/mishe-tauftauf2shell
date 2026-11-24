@@ -15,6 +15,8 @@ LIBS="$B/src/lib/OpenEXRUtil/libOpenEXRUtil*.a $B/src/lib/OpenEXR/libOpenEXR-3_5
 IMATH_LIB=$(find "$B/_deps" -name 'libImath*.a' | sort | tr '\n' ' ')
 
 # shellcheck disable=SC2086
+g++ -g -O1 $INC "$G/gen_groom_large.cpp" $LIBS $IMATH_LIB -ldeflate -lzstd -lz -lpthread -lm -o "$W/gen_groom_large"
+# shellcheck disable=SC2086
 gcc -g -O1 $INC "$G/groom_harness_flat.c" $LIBS $IMATH_LIB -ldeflate -lzstd -lz -lpthread -lstdc++ -lm -o "$W/groom_harness"
 
 "$W/gen_groom_large" "$W/baseline41.exr" 0x41
