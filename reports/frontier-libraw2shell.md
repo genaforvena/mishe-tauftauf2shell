@@ -190,6 +190,43 @@ gdb breakpoint above. W3 was replayed in a clean room by the witness
 halfwords at the chosen offset, steered by one metadata field. It is NOT a
 demonstration of arbitrary 16-bit values.
 
+## Frame-size steering of the first OOB index (W5, 2026-11-24 08:2xZ; author-side)
+
+The first OOB *index* is also file-steerable, not only the stored value.
+`craft_dimension_poc.py` (sha256
+`2703d113236f4baf8b6a164b8198448d4b4b89d33d7e9c81f2831d91c27f3e55`) changes
+TIFF ImageWidth/ImageLength/RowsPerStrip, DNG ActiveArea, StripByteCounts and
+the embedded lossless-JPEG SOF3 frame dimensions of
+`evidence/nonzero-oob.input` together to D x D, with zero scan bytes scaled by
+frame area. Source-bound prediction from the pinned bytes, recorded before the
+run: `raw2image_start()` halves `iwidth`/`iheight` under `shrink==1`,
+`pre_interpolate()` leaves them stale at D/2, `:176` allocates `(D/2+6)^2`
+`ushort[4]` elements and `:427` stores with full D stride, so the first OOB
+index is `(D/2+6)^2`: 68,644 at D=512, 268,324 at D=1024.
+
+At D=1024, derived input `evidence/dim1024.input` sha256
+`a0e318197405aa5df29a3f5c1a0916487e0eb8c67c55ec00c03dd0308ff2da3a`,
+the ASan vulnerable `dcraw_emu -n 1` run rc 1 with `heap-buffer-overflow WRITE
+of size 2` at `xtrans_demosaic.cpp:427` (via `dcraw_process():184` ←
+`dcraw_emu.cpp:598`), 0 bytes after the 2,147,616-byte region allocated at
+`:177` (`evidence/dim1024-asan.out`). Fixed-tree `-n 1` rc 0 with empty output
+(`evidence/dim1024-fixed-asan.out`); vulnerable tree without `-n` rc 0 with
+empty output (`evidence/dim1024-asan-safe.out`). Plain `-O0` gdb with a
+conditional breakpoint at `:427` (index >= 268,324) measured
+`w=1024 h=1024 iw=512 ih=512 IDX=268324 avg={131070,131070,131070,2}
+delta=0`, zeros before the store and `0xffff 0xffff 0xffff 0x0000` after it
+(`evidence/gdb-dim1024.txt`, `evidence/gdb-dim1024-post.txt`). This is an
+author-side result; witness replay is requested and has not yet arrived.
+
+Negative result, preserved: D=256 and D=384 variants are rejected before the
+store at `xtrans_demosaic.cpp:40` because `width < LIBRAW_AHD_TILE` (512);
+the consumer cannot reach a smaller frame (`evidence/dim256-reject.out`,
+`evidence/dim384-reject.out`, `evidence/gdb-dim256-reject.txt`). Larger D is
+bounded here by the CFA pattern offset at 262,144 in the pinned file layout.
+Ceiling unchanged: the value is still the saturated constant `0xffff`, no
+arbitrary bytes, no pointer/IP, no consumer beyond `dcraw_emu`, NO r5.
+
+
 ## Rung-4 assessment and rank
 
 Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
@@ -197,8 +234,11 @@ file (W186 witness ESTABLISHED). Rung 4 is demonstrated for a crafted nonzero
 input and ESTABLISHED by the W187 witness replay: the OOB store at index
 68,644 writes chosen nonzero halfwords with clean fixed and no-option
 controls. W3 additionally shows witness-established (DM 3413) file steering
-of the value to distinct non-saturated halfwords. Fully arbitrary byte values
-and pointer/IP control remain UNKNOWN. Rank: high tractability, low escalation
+of the value to distinct non-saturated halfwords. W5 adds author-side,
+replay-pending steering of the first OOB index from 68,644 to 268,324 by
+changing the crafted frame size; it does not change the ceiling. Fully
+arbitrary byte values and pointer/IP control remain UNKNOWN. Rank: high
+tractability, low escalation
 (local file, UI:P, no network, no pointer/command execution). Admitted frontier
 target since 2026-11-24 05:4xZ; NO rung 5.
 
@@ -256,6 +296,8 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
   metadata tag but did not demonstrate arbitrary 16-bit values. Pointer/IP
   control remains an open prerequisite for any stronger claim.
+- The W5 frame-size/IDX steering result is author-side only; witness replay was
+  requested and has not arrived. Do not treat it as ESTABLISHED.
 - Target admitted 05:4xZ as route #127. Operator owns standing approvals;
   the person owns the charter, wake units and full-flag sync. No external
   probing was done.

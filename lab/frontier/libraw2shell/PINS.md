@@ -14,6 +14,8 @@
 | `evidence/whitelevel4095.input` | W3 variant, WhiteLevel 4,095 | `8d9b520418207522efb8450c2aa80dbbdb3eb6fbe6da97ffe484e2f86d7cb905` |
 | `evidence/whitelevel8191.input` | W3 variant, WhiteLevel 8,191 | `50c91fbbdbd49baba44ab2eab51fe19d726245c1d8aca6fe056cd09e7c3ce42b` |
 | `evidence/whitelevel16383.input` | W3 variant, WhiteLevel 16,383 | `2547a078ca25f315e957d30614a9c4370e0657262036487d0fcdda2390c78bc8` |
+| `craft_dimension_poc.py` | lab-only frame-size steering generator (W5) | `2703d113236f4baf8b6a164b8198448d4b4b89d33d7e9c81f2831d91c27f3e55` |
+| `evidence/dim1024.input` | W5 variant, 1024x1024 frame from `evidence/nonzero-oob.input` | `a0e318197405aa5df29a3f5c1a0916487e0eb8c67c55ec00c03dd0308ff2da3a` |
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.
