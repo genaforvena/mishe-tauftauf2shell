@@ -399,10 +399,14 @@ sweep and raw observations in `evidence/real-plain-clean-replay.out`.
 
 ## Canary-safe init and real-consumer canary leak (W175, 2026-11-24)
 
-In the W174 clean-archive tree, a local-only mode-`v` change caps the bulk
-reply at `M2SHELL_JL2005_LEN=0x3E28` BEFORE `vusb.c:183`'s full-size
+At W175 time those mode-`v` changes were local-only in the W174
+clean-archive tree: the bulk reply was capped by
+`M2SHELL_JL2005_LEN=0x3E28` BEFORE `vusb.c:183`'s full-size
 `memset(bytes,0x5a,size)`; a hardware watchpoint identified that memset as
 the canary clobber in the first attempt (W166's mode `p` capped before it).
+W178 committed those four hunks as `evidence/replay-vusb-shortreply.patch`;
+apply it after the W170/W171/W172 replay patches in the order given in
+`REPLAY.md`.
 With `M2SHELL_VUSB_GUARDS=4` and `DRAIN=28` (20..27 abort on corrupted top
 size), `gp_camera_init rc=0` is reached with no gdb script and no
 `m2s_hexenv`: the reply stops eight bytes before `info+0x4028 = rbp-8`, so
@@ -422,5 +426,7 @@ is required because NORMAL decompresses `pic_buffer` into a PPM
 Still rung 4 author-side: the leak is to a host consumer, not the device,
 and this camlib has no host-to-device table echo; victim/guards are
 lab-placed, replies synthetic, no pointer control, command or witness
-replay. No pin, harness or committed patch changed. Full recipe and raw
-output in `evidence/real-plain-canary-safe-init.out`.
+replay. No pin or harness changed; W178 added the replay patch and a
+clean-archive receipt. Full recipe and raw output in
+`evidence/real-plain-canary-safe-init.out` and
+`evidence/real-plain-stack-leak-clean-replay.out`.
