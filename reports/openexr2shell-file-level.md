@@ -1034,3 +1034,51 @@ lab/openexr2shell-real` into `/tmp/w182-openexr.e3yu9g`, with the gitignored
 live tree, reproduced `RESULT PASS` and all three normalized-output hashes
 identically to the working-tree runs. Receipt only, no new claim.
 
+
+## W183: plant-wide wire-consumer inventory — negative (2026-11-24)
+
+Question: since W162 dispositioned the host PATH, has any lab in this plant
+gained an unmodified process that accepts EXR bytes over loopback and reaches
+the pinned ZSTD sink? Answer: no. This is a read-only inventory from
+11:06-11:10Z — no new consumer, build or network probe was created by it.
+
+- Every lab caller of `exr_decoding_run()` on the pinned 3.5.2 library takes a
+  local file path: `lab/openexr2shell-real/harness/build.sh:16` links
+  `libOpenEXRCore-3_5*.a` from `build-vuln-*`; `harness/flat_harness.c:26,60`
+  and `oiiolab/oiio_flat_consumer.cpp:10-14` read `argv[1]`. The unmodified
+  `exrcheck -c` needs a readable path (`src/bin/exrcheck/main.cpp:156-166`,
+  W162).
+- `oiiolab` is configured against the pinned 3.5.2 install
+  (`CMakeCache.txt:576,579`; `configure4.log:33,305,310`;
+  `exr-install/lib/cmake/OpenEXR/OpenEXRConfigVersion.cmake:12`), but has
+  never linked: `build-oiio-target.log` ends in GCC-13's false-positive
+  `-Werror=maybe-uninitialized` from `std::regex` in `filesystem.cpp`, and no
+  `bin/oiiotool` or `libOpenImageIO_d.so` exists. No linked-OIIO replay has
+  occurred, so the advisory's flat-path claim stays a static negative (W173),
+  not a dynamic observation.
+- The plant's other loopback HTTP harnesses decode other formats:
+  `lab/frontier/libvips2shell/real/wire.c:43-56,88` binds 127.0.0.1 and feeds
+  the POST body to `vips_image_new_from_buffer()`, but its build
+  (`real/build.sh:18-21`) keeps TIFF as the only enabled loader; the
+  `imgproxy2shell` probes (`http_probe.py:18-27`, `ico_probe.py:27-30`) serve
+  TIFF/ICO fixtures. Neither links OpenEXR.
+
+Disposition: rung 5 still lacks a live affected application process fed by
+wire/request input; a purpose-built socket wrapper would be a synthetic
+consumer under `docs/rce.md:12-15` and remain rung-4 mechanics. No pointer or
+control-flow corruption, command, marker or new grade. Would change mind: an
+unmodified network-facing consumer with a deep ZSTD decode path, or a
+completed OIIO build reaching `internal_zstd.c:472`.
+
+
+Bounded build retry, same wake: `timeout 900 nice -n 10 ninja -C
+build-oiio-asan -j2` produced only `ninja: Entering directory ...` — not one
+of the 123 remaining edges completed in 900s, and no `bin/oiiotool` or
+`libOpenImageIO_d.so` appeared. Two `cc1plus` children were left in D state
+by the timeout and were killed. A subsequent `ninja -n` also exceeded 300s
+under host load ~11-14, so the tree stays UNBUILT and the OIIO replay is not
+claimed. The four-check consolidated replay launched at 11:11Z was cut by
+its 1200s deadline with the first ASan `exrcheck` still producing no output;
+no replay result is claimed from it either. Neither failure contradicts any
+earlier observation: they are host-capacity limits, not lab counterexamples.
+

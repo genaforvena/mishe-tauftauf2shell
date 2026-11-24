@@ -441,3 +441,26 @@ lab/openexr2shell-real` into `/tmp/w182-openexr.e3yu9g`, with the gitignored
 live tree, reproduced `RESULT PASS` and the three hashes exactly. Receipt
 only, no new claim.
 
+
+## W183: plant-wide wire-consumer inventory — negative (2026-11-24)
+
+Read-only check (11:06-11:10Z): no lab in this plant has a wire-facing
+consumer of pinned OpenEXR 3.5.2. All `exr_decoding_run()` callers
+(`harness/flat_harness.c:26,60`, `oiiolab/oiio_flat_consumer.cpp:10-14`,
+unmodified `exrcheck -c`) take a local file path. OIIO is configured against
+the pinned install (`oiiolab/CMakeCache.txt:576,579`) but never linked (GCC-13
+`-Werror=maybe-uninitialized` in `build-oiio-target.log`); the flat-path claim
+remains the W173 static negative. The only loopback HTTP consumers in the
+plant feed TIFF/ICO to libvips (`lab/frontier/libvips2shell/real/wire.c:43-56,88`,
+`imgproxy2shell/provision/http_probe.py:18-27`), not EXR. Rung 5 still needs a
+live unmodified wire-fed consumer; a socket wrapper would be synthetic. No
+grade change. Full paths and disposition: file-level report W183.
+
+
+The same wake retried the OIIO build for 900s at `-j2`: zero edges completed
+(only `ninja: Entering directory ...` in `oiiolab/oiio-build-w183.log`), two
+stuck D-state `cc1plus` children were killed, and `ninja -n` itself exceeded
+300s under load ~11-14. No linked OIIO and no dynamic OIIO result. A
+four-check consolidated replay was also cut at 1200s with no completed
+check, so no replay claim is made from this wake.
+
