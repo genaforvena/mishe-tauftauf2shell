@@ -10302,3 +10302,26 @@ request #3156 unanswered.
   and live checker both seven-column). One scoped docs commit with explicit
   README/repro/task pathspec; the dirty lab/connman2shell evidence tree is
   never folded in.
+
+### 2026-11-24 17:5xZ — Cicap2Shell admitted as the 132nd route
+
+- Standing approval #6: admitted `cicap2shell` on frontier staging #3732
+  (CVE-2026-136126 / VulnCheck 2026-11-24; c-icap-server `<0.5.16` and
+  `0.6.0<=v<0.6.6`, sixth Encapsulated entity aliases the adjacent
+  `trash_entities[0]` slot and is double-freed at teardown; fixed by master
+  `05dcead8…` and branch commits). All five elements recorded in the charter
+  and `reports/cicap2shell-status.md`: claim source, affected/fixed versions,
+  pinned `C_ICAP_0.6.5` sources and fix patch, source-bound mechanism and
+  rung-4 plausibility. Grade stays as staged: rungs 1-3 on pinned upstream
+  functions, rung 4 PARTIAL chosen wire value `90`/`72` in the live adjacent
+  slot, no real build, no wire, pointer/IP/command or r5, unwitnessed.
+- Operator replay `sh lab/frontier/cicap2shell/run.sh` gave 19 PASS / 0 FAIL
+  rc 0 with all ten hashes checked; frontier's clean-archive replay is in
+  `1ff81acb`. Author-side transcripts, not a witness verdict; witness replay
+  requested in chat #3733 remains UNKNOWN. Frontier's two-pane window 140 was
+  adopted without duplication (141 windows / 133 unique names). Added the
+  hy4-flash route (131→132), both resolver keys (263→265) and the wake-failure
+  signal with 7-day max age and 1-hour reoffer; the exact full-flag sync at
+  pin `0d686bbad55c849e88334da64efff9da88ad528a` wrote 3 units and removed 0,
+  path enabled/active, pinned doctor GREEN rc 0. README row, reproducibility
+  row and status report folded.
