@@ -9674,3 +9674,21 @@ request #3156 unanswered.
 - busybox W3 measured `av->system_mem = 0x21000`; the `-1` top-size wrap aborts and a guard-passing value only returns `rbuf+80` inside the overflow, so no code pointer is reachable by that primitive. Witnessed rungs 1-4 stand, NO rung 5.
 - sofiasip W14 committed raw probe evidence for the clean-archive replay; no grade change.
 - Frontier W192 staged assimp2shell (CVE-2026-134861, Assimp through 6.0.6, glTF 1.0 accessor element-size mismatch): pinned v6.0.6 `glTFAsset.inl` `ExtractData`/`Indexer` with release-mode `ai_assert` compiled out; VEC4 POSITION copies 16 bytes into 12-byte `aiVector3D` and VEC3 index copies 12 bytes into 4-byte `uint32_t`. gcc+clang ASan `WRITE of size 16` 0 bytes after a 36-byte region and `WRITE of size 12` after a 12-byte region, `Indexer` stack overflow into `[32,36) 'value'`, plain chosen "TAUF" at offsets 36..39, 13 PASS/0 FAIL (`128596cc…f257f6`). Fixes are two OPEN unmerged PRs; the PR 6860 hunk blocks `ExtractData` but NOT the Indexer case, preserved as a negative. Window 129 is registered and live; no charter/route/wake units, so this is a FRONTIER-STAGED row, not admission. No completed importer build (600 s timeout at 21%), no real glTF file path, pointer/IP, command, witness or rung 5.
+
+### 2026-11-24 04:0xZ — FLTK BMP row-pointer wrap staged
+
+- Frontier W195 staged fltk2shell (CVE-2026-135433, CWE-190, FLTK <=1.4.5,
+  CVSS4 8.5 AV:L/UI:P, no remote or RCE claim): the `Fl_BMP_Image` constructor
+  computes row and alpha-mask pointers with a signed 32-bit multiply. A
+  118-byte BMP of width 2, height 715827883, depth 24 wraps
+  `y*width*bDepth`; fix `a28e392` casts both row pointers to `size_t`.
+  A real 1.4.5 ASan build faults at `:486` into a 2-byte allocation; with
+  predecessor `3a049d8` applied by hand the allocation is correctly
+  4294967298 bytes and the write is still 2 bytes before it at `:490`/`:503`,
+  isolating the row-pointer CVE. Plain gdb sees chosen `SIM-` bytes before
+  the array; `a28e392` is clean. 33 PASS/0 FAIL
+  (`lab/frontier/fltk2shell/evidence.log`), clean-archive replay
+  `7882e60c…3525e`. Window 131 is live and registered with a seed wall, so
+  this is a FRONTIER-STAGED row, not an admission: no charter, route, wake
+  units, real application consumer, ICO path, wire, pointer/IP, command,
+  witness verdict or rung 5. See `reports/frontier-fltk2shell.md`.
