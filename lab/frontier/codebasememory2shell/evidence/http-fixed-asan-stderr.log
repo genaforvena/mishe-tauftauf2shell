@@ -1,0 +1,57 @@
+level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+level=info msg=server.start version=dev
+level=info msg=watcher.start interval_ms=multi-sec
+level=info msg=ui.serving url=http://127.0.0.1:19751 port=19751
+level=info msg=pipeline.discover files=1 elapsed_ms=0
+level=info msg=pipeline.route path=full
+level=info msg=pass.start pass=structure files=1
+level=info msg=pass.done pass=structure nodes=3 edges=2
+level=info msg=pass.timing pass=structure elapsed_ms=0
+level=info msg=pipeline.mode mode=sequential files=1
+level=info msg=pkgmap.scan_repo manifests=0
+level=info msg=pkgmap.scan manifests_from_files=0 manifests_from_walk=0 entries=0
+level=info msg=pass.start pass=definitions files=1
+level=info msg=pass.done pass=definitions defs=2 calls=0 imports=0 errors=0
+level=info msg=pass.timing pass=definitions elapsed_ms=1
+level=info msg=pass.start pass=k8s files=1
+level=info msg=pass.done pass=k8s kustomize=0 manifests=0
+level=info msg=pass.timing pass=k8s elapsed_ms=0
+level=info msg=pass.start pass=lsp_cross files=1
+level=info msg=pass.done pass=lsp_cross files_processed=1 files_skipped_no_lsp=0 files_skipped_no_source=0 defs_total=1 lsp_calls=1
+level=info msg=pass.timing pass=lsp_cross elapsed_ms=3
+level=info msg=pass.start pass=calls files=1
+level=info msg=pass.done pass=calls total=0 resolved=0 unresolved=0 errors=0
+level=info msg=pass.timing pass=calls elapsed_ms=0
+level=info msg=pass.start pass=usages files=1
+level=info msg=pass.done pass=usages usage=0 throws=0 rw=0 errors=0
+level=info msg=pass.timing pass=usages elapsed_ms=0
+level=info msg=pass.start pass=semantic files=1
+level=info msg=pass.done pass=semantic inherits=0 decorates=0 implements=0 errors=0
+level=info msg=pass.timing pass=semantic elapsed_ms=0
+level=info msg=pass.start pass=tests
+level=info msg=pass.done pass=tests tests=0 tests_file=0
+level=info msg=pass.timing pass=tests elapsed_ms=0
+level=info msg=pass.skip pass=githistory reason=fast_mode
+level=info msg=pass.done pass=githistory commits=0 edges=0
+level=info msg=pass.timing pass=decorator_tags elapsed_ms=0
+level=info msg=configlinker.skip reason=no_config_files
+level=info msg=pass.timing pass=configlink elapsed_ms=0
+level=info msg=pass.timing pass=route_match elapsed_ms=0
+level=info msg=pass.complexity functions=1
+level=info msg=pass.timing pass=complexity elapsed_ms=0
+level=info msg=gbuf.dump nodes=5 edges=4
+level=info msg=pass.timing pass=dump elapsed_ms=4
+level=info msg=pass.timing pass=persist_hashes files=1
+level=info msg=pipeline.done nodes=0 edges=4 elapsed_ms=73
+level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=index_repository status=ok duration_ms=76
+level=info msg=http.request component=graph_ui method=POST path=/rpc status=200 duration_ms=78 request_bytes=173 response_bytes=910
+level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=0
+level=info msg=http.request component=graph_ui method=POST path=/rpc status=200 duration_ms=0 request_bytes=167 response_bytes=348
+level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=0
+level=info msg=http.request component=graph_ui method=POST path=/rpc status=200 duration_ms=1 request_bytes=415 response_bytes=5432
+level=warn msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=error duration_ms=0
+level=info msg=http.request component=graph_ui method=POST path=/rpc status=200 duration_ms=1 request_bytes=423 response_bytes=109
+level=warn msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=error duration_ms=0
+level=info msg=http.request component=graph_ui method=POST path=/rpc status=200 duration_ms=0 request_bytes=543 response_bytes=109
+level=info msg=server.shutdown
+level=info msg=watcher.stop

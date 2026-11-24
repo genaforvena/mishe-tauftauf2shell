@@ -103,12 +103,56 @@ return valid JSON with chosen name; N=33 and N=48 return
 ASan report). The parse-time guard at fixed `cypher.c:1655-1663` therefore
 holds through the real tool argument path as well.
 
-## Ceiling
+## Ceiling of the stdio rows
 
-Local stdio process only — no HTTP transport, no socket, no remote request, no
-agent-influenced query, no pointer control, no command, no witness verdict and
-no rung 5. The advisory's AV:L/PR:L vector remains consistent with this reach.
-The full server build and the HTTP/UI transport were not exercised.
+The stdio rows above are a local process only — no HTTP transport, no socket,
+no remote request, no agent-influenced query, no pointer control, no command,
+no witness verdict and no rung 5. The W9 section that follows adds a loopback
+HTTP transport; it does not add a remote or off-host lane.
+
+## Loopback HTTP `/rpc` transport (W9, 2026-11-24)
+
+Source bound in the pinned tree: `src/ui/http_server.h:4` says the listener
+binds 127.0.0.1 only; `http_server.c:1595-1598` routes POST `/rpc` through
+`handle_rpc`, which calls `cbm_mcp_server_handle()` at `:1568`; `main.c:789-795`
+starts that listener in a background thread when the UI is enabled and assets
+are present. CORS reflects only `http://localhost:*` / `http://127.0.0.1:*`
+origins (`:77-91`), so a remote web page cannot drive it cross-origin.
+
+`http-tool/replay.sh` rebuilds both pins with the same C-grammar-only lab stub
+as the stdio rows, plus a one-file (~20-byte) embedded `index.html` generated
+by the upstream `scripts/embed-frontend.sh` so `main.c` actually starts the
+listener. No Node, frontend JS, or other UI asset is used; all four pins verify
+OK before the build. One server process per row is kept alive with stdin held
+open, and the calls are real HTTP POSTs to `http://127.0.0.1:PORT/rpc` carrying
+the same `tools/call` JSON as the stdio probe.
+
+Observed (canonical transcript `evidence/http-replay-all.log`; raw per-row
+stderr `evidence/http-{vuln-asan,vuln-recover,fixed-asan}-stderr.log`):
+
+- `vuln-asan`: `index_repository` HTTP 200, 5 nodes / 4 edges; `query_graph`
+  N=1/32 HTTP 200 with valid JSON and the chosen name; N=33 HTTP disconnect,
+  process rc=1, ASan `READ of size 8` at `cypher.c:2568` in `rb_set_columns`,
+  stack `#5 handle_query_graph:2082` ← `#7 cbm_mcp_server_handle:6095`.
+- `vuln-recover` (`halt_on_error=0`): N=1/32/33/48 all HTTP 200 with valid
+  JSON, process rc=0; stderr has `WRITE of size 68` via `memcpy` at
+  `project_item cypher.c:3379` ← `execute_return_simple:4116`, at frame offset
+  51840 with `func_bufs` `[35456,51840)`, i.e. `func_bufs[32]`, with the chosen
+  68-byte fixture name in the HTTP result. Adjacent OOB READ/WRITE reports at
+  `cypher.c:2581`, `:3380` and `:4115` are preserved.
+- `fixed-asan`: N=33/48 HTTP 200 with `{"content":["failed to parse query"],"
+  isError":true}` and zero ASan lines in stderr; N=1/32 carry the chosen name.
+
+Ceiling: this is a loopback HTTP request to a locally started server, not a
+remote or wire request; CORS blocks browser cross-origin calls, there is no
+agent-influenced query and no off-host client. No pointer/IP, command, witness
+verdict or rung 5. The advisory's AV:L/PR:L vector remains consistent.
+
+Replay: `bash lab/frontier/codebasememory2shell/http-tool/replay.sh all` from
+the repo root (or one row: `vuln-asan`, `vuln-recover`, `fixed-asan`). The
+script verifies all four pins, generates the UI asset, rebuilds the selected
+rows and writes the row probes; redirect its stdout to keep a transcript.
+This is an author replay on this host, not a witness verdict.
 
 ## Replay from a clean checkout (self-contained)
 

@@ -108,17 +108,19 @@ byte-level observation of chosen bytes at offsets selected by the projection
 item index, plus a default-build stack-smashing abort. This is stronger than a
 fixed-byte or fixed-offset write.
 
-**Not reached:** any remote request, HTTP transport, agent-influenced query,
-grooming into a live object, saved-RIP/pointer/IP control, command execution,
-ASLR bypass, witness replay or rung 5. The `query_graph` MCP tool layer and a
-local stdio JSON-RPC path have since been reached by the target mind on a reduced
-ASan server of the pinned tree (N=33/48 ASan READ at `cypher.c:2568`; recover-mode
-`WRITE of size 68` at `func_bufs[32]` with indexed-fixture bytes; fixed release
-rejects >32) — see `lab/frontier/codebasememory2shell/MCP-TOOL.md` and
-`reports/codebasememory2shell-status.md`. That is a local tool argument, not a
-wire request. The advisory's CVSS attack vector is LOCAL with PR:L, consistent
-with the missing remote lane; whether a deployed MCP server can carry a >32-item
-clause from an attacker-influenced agent remains UNKNOWN.
+**Not reached:** any remote/off-host request, agent-influenced query, grooming
+into a live object, saved-RIP/pointer/IP control, command execution, ASLR
+bypass, witness replay or rung 5. The `query_graph` MCP tool layer, a local
+stdio JSON-RPC path and (W9) the pinned server's 127.0.0.1-only HTTP `/rpc`
+transport have been reached by the target mind on a reduced ASan server of the
+pinned tree (N=33/48 ASan READ at `cypher.c:2568`; recover-mode `WRITE of size
+68` at `func_bufs[32]` with indexed-fixture bytes; fixed release rejects >32)
+— see `lab/frontier/codebasememory2shell/MCP-TOOL.md` and
+`reports/codebasememory2shell-status.md`. Both are local transports, not wire
+requests; the listener's CORS policy only reflects localhost origins. The
+advisory's CVSS attack vector is LOCAL with PR:L, consistent with the missing
+remote lane; whether a deployed MCP server can carry a >32-item clause from an
+attacker-influenced agent remains UNKNOWN.
 
 **Tool-path follow-through (done):** the target mind built the pinned vulnerable
 tree's ASan server, drove a real `query_graph` stdio tool call with 48 RETURN
