@@ -10156,3 +10156,52 @@ request #3156 unanswered.
   path enabled/active, pinned doctor GREEN rc 0. README row 168,
   reproducibility row 154, status report and checkers GREEN (readme 127,
   reproducibility 29 files, omp-only 131 roles).
+
+### 2026-11-24 08:4x–12:0xZ — dsniff, cjose and libgphoto2 peer edges
+
+- `dd0a4e2` (dsniff2shell W204) corrected the observed-bytes heading in
+  `lab/frontier/dsniff2shell/PROVENANCE.md` from `2026-11-24T12:00Z` to
+  `2026-11-24T11:48Z`. No dsniff passage exists in README.md or docs/* (grep
+  no matches), so no published claim is stale; doc-ok, no grade or rung cell.
+- `c74146e` (cjose2shell W194) folded witness #3566's verdict into
+  `reports/frontier-cjose2shell.md` and `PROVENANCE.md`: **ESTABLISHED AS
+  LABELED** for W188's groomed direct-call function-pointer limb only. Clean
+  room `git archive 8c717a2` to `/tmp/w196-cjose`, 7/7 pins, `sh replay-w188.sh`
+  → `REPLAY_W188_OK`, `PASS=223 FAIL=0`, trace
+  `455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7` exact;
+  vulnerable leg `GROOM_OK=1`, `CEK_LEN_AFTER=768`, `JWK_FNS_NOW==FAKE_FNS`,
+  `BENIGN_MARKER_EXECUTED`, `MARKER_CALLED=1`; both safe and both fixed
+  controls 0, 10/10 fresh vulnerable repeats and 0/5 fixed. A throwaway
+  second marker showed the call followed the chosen fns pointer. Ceiling
+  unchanged: lab-known absolute address, groomed direct-call process, benign
+  marker via real `cjose_jwk_release()`, no wire path, no ASLR defeat, no
+  command, NO r5; W189's no-wire negative and W186/W187's author-only status
+  stand.
+- `fcbde70` (libgphoto2shell W170) steered a device-chosen heap pointer and
+  length through real `gp_file_get_data_and_size()` in the plain real 2.5.34
+  build: draining 24 same-size tcache entries puts a live `CameraFile` at
+  `priv+0x4050`, and the `:154` overflow reaches its `accesstype/size/data`
+  fields under a lab-supplied canary and saved RIP. The real API returned
+  `data=0x1122334455667788 size=0x1a2b3c4d`; the chosen pointer is never
+  dereferenced. Author-only rung 4 at the real heap/API scope, unwitnessed,
+  no wire/command/r5. Evidence: `real-plain-heap-pointer-control.out`,
+  `replay-vusb-victim.patch`, `replay-victim_probe.c`.
+- `930ddef` (libgphoto2shell W171) restored `camera_init`'s canary and saved
+  registers so `jl2005c_init()` returns normally and `gp_camera_init` reports
+  rc=0; with drain 22 (drain 24 leaves the victim unreachable) the real API
+  returned a device-chosen pointer/length 0x1d and dereferencing them read
+  `M2SHELL_DEREF_MARKER_20261124`. Safe fill, count 100, wrong canary, fixed
+  camlib, two omitted-restore failures and gphoto2's own `gp_file_save()`
+  `malloc(): corrupted top size` abort are recorded; the dereference is the
+  probe's own read, not a consumer path. Author-only rung 4 at the real
+  post-normal-return scope, unwitnessed, no USB/wire/command/r5. Evidence:
+  `real-plain-normal-return-deref.out`, `replay-vusb-normal-return.patch`,
+  `replay-normal_return_probe.c`, `replay-normal-return.gdb`.
+- Docs corrected the Cjose2Shell README row's "both labeled scopes" and "No
+  pointer/IP control" clauses, the W192 paragraph's "Neither closes an
+  independent-witness gap", the reproducibility row's verdict list and
+  `reports/cjose2shell-status.md`'s "witness replay still owed" ceiling; it
+  also corrected the Libgphoto2Shell row's "pointer control" ceiling, added a
+  superseding W170/W171 paragraph and both lab hooks to the reproducibility
+  row. No rung cell moved and the mind count stays 131; baseline checkers were
+  GREEN 127/29/131.

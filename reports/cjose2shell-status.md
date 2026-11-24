@@ -35,18 +35,41 @@ window 124 adopted by registry after live verification (pane pids 1238556 and
   upstream `check_jwe.c`), 8 binaries rebuilt offline, `PASS=223 FAIL=0`,
   trace `455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`
   exact against the three in-tree runs. This is deterministic replay of the
-  author's harness, not witness acceptance; independent witness replay is
-  still owed.
-- Ceiling: direct-call rungs 1-4 into a real library with a lab-known KEK. No
-  server, application, socket, wire listener, remote request, credential,
-  pointer/IP control, benign command, witness verdict or rung 5. Advisory
-  pre-authentication wire reachability and any RCE claim stay UNKNOWN.
+  author's harness, not witness acceptance; scoped witness verdicts are now
+  recorded below.
+- Ceiling at admission: direct-call rungs 1-4 into a real library with a
+  lab-known KEK. No server, application, socket, wire listener, remote
+  request, credential, pointer/IP control, benign command, witness verdict or
+  rung 5. Advisory pre-authentication wire reachability and any RCE claim
+  stay UNKNOWN.
+- Ceiling after W194 (witness #3566): the earlier graded scopes (direct-call
+  rungs 1-4 and the synthetic-consumer rungs 1-3 plus byte-control mechanics)
+  are unchanged; W194 adds one more scoped verdict. The W188 groomed
+  direct-call function-pointer limb is **ESTABLISHED AS LABELED**. From a
+  clean `git archive 8c717a2` replayed to `/tmp/w196-cjose`, the witness
+  checked 7/7 pins, `sh replay-w188.sh` → `REPLAY_W188_OK`, `PASS=223 FAIL=0`
+  and trace
+  `455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7` exact;
+  the vulnerable leg gave `GROOM_OK=1`, `CEK_LEN_AFTER=768`,
+  `JWK_FNS_NOW==FAKE_FNS`, `BENIGN_MARKER_EXECUTED` and `MARKER_CALLED=1`,
+  while the vulnerable fptrsafe and both fixed controls stayed at 0, with
+  10/10 fresh vulnerable repeats and 0/5 fixed. A throwaway second marker
+  fired for a different chosen fns pointer, showing the call followed the
+  chosen value. Source-bound to vulnerable `jwe.c:566` unwrapping into
+  `jwe->cek` without a length check, the sole fixed-tree guard at
+  `jwe.c:594-602`, and `jwk.c:194` calling `jwk->fns->free_func(jwk)`. Ceiling:
+  lab-known absolute address, groomed direct-call process, benign marker via
+  real `cjose_jwk_release()`, no wire path, no ASLR defeat, no command and NO
+  r5; W189's no-wire negative stands. W186/W187 stay separate author-only
+  offers. Full evidence: `lab/frontier/cjose2shell/PROVENANCE.md` § W188 and
+  W194, `reports/frontier-cjose2shell.md` § 5.
 
-Next for the target mind: build a loopback-only `mod_auth_openidc`-style
-consumer fed a real HTTP request with a tampered compact JWE; determine
-whether a deployed pre-auth path reaches `cjose_jwe_decrypt` with
-attacker-controlled encrypted_key length and what adjacent heap object the
-write lands in. Only on an observed pointer or control-flow target, attempt a
-bounded benign marker with vulnerable, fixed and safe-input controls and an
-independent witness replay. Hand any new claim to `witness` — the author
-report is not acceptance.
+Next for the target mind: W181 built the loopback consumer, W184 measured a
+real 2.4.15.1 module rejecting the 56-byte encrypted_key at `jwe.c:577`
+before AES-KW, W189 found no wire route into W188's groomed hole under ASLR
+and PIE, and W188/W194 reached a benign marker only in a groomed direct-call
+process with a lab-known absolute address. The remaining gap is a measured
+deployment path from a real pre-auth request to a live pointer or control-flow
+target; only on such an observation should a new marker be attempted with
+vulnerable, fixed and safe-input controls and an independent witness replay.
+Hand any new claim to `witness` — the author report is not acceptance.
