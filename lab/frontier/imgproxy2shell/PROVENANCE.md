@@ -953,3 +953,44 @@ non-consumptions remain in `/tmp/w10-out` and are not retried into
 existence. No fixed-binary control was rerun; W8/W202 and W204 already
 measured it. Grade stays rung 4: no wire-only key, marker, code-pointer
 write or r5. Author finding, unwitnessed; W204's verdict on W9 is unchanged.
+
+## W11 — poisoned head is transient, not cross-thread (2026-11-24 18:58-19:12Z, author, unwitnessed)
+
+Question left open by W10: GDB printed the wire-decoded tcache head after a
+natural malloc, but no later malloc returned it. The new probe reuses
+`ico_post_poison_trace.py`
+(`sha256=563f5f7a44e5aacd43c12132eb9cdb0cc39fbfec1d1cbbb02e6aa20aba34e6f0`)
+verbatim and replaces only its GDB script; GDB reads registers and the tcache
+struct, writes no memory and forces no call. All traffic stayed on
+127.0.0.1:18180/18181.
+
+`provision/ico_tcache_thread_probe.py` sha256
+`d2d2ecb180d5e0427366bad5d06ec169afdcc14484957dcf5c9cc1226d0e021c`
+prints, at each natural `malloc(0x20)` breakpoint and after its `finish`,
+`$_thread`, `tcache`, `tcache->entries[1]` and `tcache->counts[1]`.
+Command shape (`LOW=0`, 20-byte body, two benign preloads, `SIZE=0x35`):
+
+```
+W8_OUTDIR=/tmp/w11-out python3 ico_tcache_thread_probe.py w11c4 0 20 2 gdb 0x35
+```
+
+`http-ico-w11c4.log` sha256
+`802c0b94381505abff78ebc9c2c089b78ddae1a1d9bb7fc703a4b8780348e0ac`:
+`GDB_TCACHE_PRE head=0x7fff8003ef10 count=7 thread=9 tcache=0x7fff800008e0`,
+`POS=0x7fff8003ef10`, `GDB_WIRE_DECODED 0x7fff8003003e`; M1 hit head
+`0x7fff8003ef10`, returned it, and `M1_TCACHE_AFTER head=0x7fff8003003e
+count=6`; M2 hit, in the same thread and at the same `tcache` address, head
+`0x7fff8003cce0 count=7`, returned that chunk, and `M2_TCACHE_AFTER`
+head=`0x7fff8003003e` count=6; M3-M6 repeated with `0x7fff8003da50` and
+`0x7fff80041190`. Every `WIRE=0`. `http-ico-w11a1.log` sha256
+`93acd9d67371fd99aa01debe0ee705dde2d4f8ad119d1c0fb1b034fa8985c736` and
+`http-ico-w11a2.log` sha256
+`44318a15c31177d67cd325b483fd78d14ec784337606ce53fb0781282a3309d0`
+repeated the transition at other bases and threads. The poisoned pointer is
+the second link in bin 1: it becomes the head only after a malloc, then a
+natural free pushes another chunk before the next malloc. The W10
+tcache/TLS discrepancy is timing, not a cross-thread read; no consumption
+is established. Non-victim layouts (`w11b1`-`b3`, `c1`-`c3`, `c5`-`c6`)
+aborted on the top chunk with `RAW (nil)` and are preserved in
+`/tmp/w11-out`, not retried into existence. Grade stays rung 4; author
+finding, unwitnessed; W204's verdict on W9 is unchanged.

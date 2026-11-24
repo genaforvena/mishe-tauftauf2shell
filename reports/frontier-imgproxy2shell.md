@@ -524,6 +524,33 @@ not retried into existence. Grade stays rung 4; no wire-only key, marker,
 code-pointer write or r5. Commands, digests and logs are in
 `lab/frontier/imgproxy2shell/PROVENANCE.md` (W10).
 
+## W11 — poisoned head is transient, not cross-thread (2026-11-24, author, unwitnessed)
+
+W10 left the tcache/TLS discrepancy open: a GDB `tcache` expression printed
+the wire-decoded head after a natural malloc, yet no later malloc returned
+it. `provision/ico_tcache_thread_probe.py`
+(`sha256=d2d2ecb180d5e0427366bad5d06ec169afdcc14484957dcf5c9cc1226d0e021c`)
+reads the *same* probe with `SIZE=0x35` and prints, at every natural
+`malloc(0x20)` hit and after its `finish`, the observing thread, the address
+of that thread's `tcache`, and bin-1 head/count. GDB still writes no memory
+and forces no call.
+
+In the victim run `w11c4` (log sha256
+`802c0b94381505abff78ebc9c2c089b78ddae1a1d9bb7fc703a4b8780348e0ac`) the
+pre head/`POS` was `0x7fff8003ef10` at count 7 in thread 9,
+`tcache=0x7fff800008e0`, decoded `0x7fff8003003e`. M1 hit with head equal to
+the victim and returned the victim; the head then read `0x7fff8003003e` at
+count 6. At the M2 hit the *same* thread and *same* tcache address showed
+head `0x7fff8003cce0` at count 7, and M2 returned that chunk; after M2 the
+head again read `0x7fff8003003e` at count 6. M3-M6 repeated the pattern with
+other fresh chunks. `w11a1` and `w11a2` showed the same sequence at other
+bases and threads. The decoded head is therefore briefly at the top after a
+malloc, then buried by a natural free before the next malloc; W10's
+discrepancy is timing, not a different thread's TLS. No natural allocation
+returned the wire-decoded pointer. Grade stays rung 4; no wire-only key,
+marker, code-pointer write or r5. Commands, hashes and negatives are in
+`lab/frontier/imgproxy2shell/PROVENANCE.md` (W11).
+
 ## What would change my mind
 
 A primary source showing the addition happens in 64-bit arithmetic, a replay
