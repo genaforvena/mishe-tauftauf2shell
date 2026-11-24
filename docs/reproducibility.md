@@ -8252,6 +8252,58 @@ corrected 441-point WL/BL grid is `w10/grid-wide-results.txt`. Two exact
 values from two fields are not an arbitrary alphabet; author-side and
 unwitnessed, no pointer/IP, command or r5.
 
+### LibRaw2Shell W11 — file-chosen arbitrary 16-bit halfword (author-side)
+
+Same pinned LibRaw 0.22.3 trees and reporter two-line fixed control as the
+LibRaw rows above; `cd lab/frontier/libraw2shell && ./bootstrap.sh` builds the
+gitignored `pinned/`, `fixed/`, `plain/` and `-O0` `o0/` trees from
+`pinned/LibRaw-0.22.3.tar.gz` (hashes in `lab/frontier/libraw2shell/PINS.md`).
+From `lab/frontier/libraw2shell`, with `evidence/nonzero-oob.input`:
+`python3 craft_linearization_poc.py evidence/nonzero-oob.input <lin> <V>`
+rewrites unused IFD slot 2 as DNG tag `0xc618` SHORT/1 (script
+`74ca3ee9…b213cc1c`); then
+`python3 craft_whitelevel_poc.py <lin> <out> 65535` (script
+`ab5ace42…8b30d1cf`) avoids the WL=255 saturation to `0xffff`. Committed
+outputs: `w11/targetbeef.input` `cf5030eb…bc33d33b`, `w11/target1337.input`
+`b1007287…bd23cd8f`, `w11/target00a5.input` `d01e8cba…b440d548`; full method
+and hashes in `w11/results.txt` `9ca25f6c…82f7c1dd`. On the unmodified `-O0`
+build, `gdb -q -batch -ex 'set $inp="w11/targetbeef.input"' -x w11/probe.gdb
+o0/LibRaw-0.22.3/bin/dcraw_emu` (probe `4fb4a4cb…ff18afaf`) prints
+`W11 FIRST IDX=68644 ... white=65535` and
+`W11 VAL first OOB: ffff beef fe93 0000`, repeated 3/3 byte-identical.
+`0x1337` gives `1cd1 1337 199e 0000`, `0x00a5` gives `00f6 00a5 00db 0000`,
+and edges `0x0001`/`0xffff` were run once each (`0000 0001 0001 0000` and all
+`ffff`). Each input also passed ASan vulnerable `-n 1` rc 1 `WRITE of size 2`
+at `xtrans_demosaic.cpp:427`, fixed rc 0, vulnerable without `-n` rc 0.
+Only the second halfword is arbitrary; the others are interpolation-derived,
+not an arbitrary byte sequence. Raw gdb/ASan traces and the five inputs are
+committed under `w11/`; the four build trees are gitignored and regenerate with
+`bootstrap.sh`. Author-side and unwitnessed; no pointer/IP, command or r5.
+
+### LibRaw2Shell W12 — BlackLevel cannot separate the OOB channels (negative)
+
+Same build and controls as W11. `python3 craft_dual_knob_poc.py
+w11/targetbeef.input <out> <BL>` (script `040d0726…4c908441`) puts BlackLevel
+(DNG `0xc61a` SHORT/1) in IFD1 slot 0; BL=0/1/10/100/1000 leaves `black=0` and
+the stored halfwords byte-identical `ffff beef fe93 0000` (e.g.
+`w12/dualbeef-bl1.input` `d8eb73ad…8fda101d`). The parseable IFD0 variant
+replaces slot 21's tag/type/count/value with five bytes at 0-based offsets 262
+(`8d`→`1a`), 264 (`04`→`03`), 266 (`04`→`01`), 270 (`d4`→`06`) and 271
+(`01`→`00`), turning `0xc68d` LONG/4 ActiveArea into `0xc61a` SHORT/1. The
+committed BL=6 input is `w12/ifd0beef-bl6.input` `caab59d6…7199fc9d`. With
+`gdb -q -batch -ex 'set $inp="w12/ifd0beef-bl6.input"' -x w12/ifd0.gdb
+o0/LibRaw-0.22.3/bin/dcraw_emu` (probe `af4020f4…5c912f01`), the exact
+first-OOB index 68,644 reads `c0=65535 c1=48877 c2=65169 den=2`
+(`w12/ifd0-bl6-exact.txt` `4d4764a0…72acad2f`); BL=0 and BL=1000 read
+`c1=48879 c2=65171` and `c1=48619 c2=64825`. All channels shift together
+(`c2 ~= 4/3 * c1`), so the `(V, BL)` pair cannot set two channels
+independently: a coupled fine shift, not a second alphabet. ASan vulnerable
+`-n 1` rc 1 `WRITE of size 2` at `:427`, fixed rc 0, vulnerable without `-n`
+rc 0. Method, both negatives and hashes in `w12/results.txt`
+`f57f1da2…5ab88ab1`; raw traces and inputs are committed, build trees
+gitignored and regenerate with `bootstrap.sh`. No grade change, no replay
+requested for a negative; author-side, no pointer/IP, command or r5.
+
 ### Libgphoto2Shell W172 — real `gp_file_save()` writes device-directed bytes
 
 Extends the W170/W171 plain real-library lane; no new upstream pins. From
