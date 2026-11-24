@@ -32,3 +32,7 @@ real/external-fixed
 real/memlimit
 real/wire-plain
 real/wire-fixed
+real/fine-vuln
+real/fine-fixed
+real/fine-hdr-vuln
+real/fine-hdr-fixed
