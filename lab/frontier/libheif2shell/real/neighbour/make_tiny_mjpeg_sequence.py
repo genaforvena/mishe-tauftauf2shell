@@ -30,6 +30,7 @@ HASHES = {
     "uniform72.jpg": "a77f60988fd3338bba97c0fac06c4d0f96aba3a1ff67d12b3f90130f94f6601e",
     "template.heif": "7d820881957402b629d0d627bee786566a1e0c7d13c455864807abad9492b9bc",
     "tiny64-ref.heif": "f2cb1ac007388ba234096ce22bbd8301fe98f6256616e1e338e51867461f2fcb",
+    "tiny64-mixed.heif": "aa8e0600ada35537dd2f49314743571221719faaed3236371f10d031767e0c58",
     "tiny72-ref.heif": "a02b50a6094524b0f67e0639e473627c2d557fa6d7923054241c0ac1888d03c0",
     "tiny72-mixed.heif": "231bb209c008cd14e9d623c9a44975f7d3d7b171b847ca7a427da41ef1b94e89",
 }
@@ -101,6 +102,7 @@ def main():
     sample72 = (src / "uniform72.jpg").read_bytes()
     products = {
         "tiny64-ref.heif": (sample64, False),
+        "tiny64-mixed.heif": (sample64, True),
         "tiny72-ref.heif": (sample72, False),
         "tiny72-mixed.heif": (sample72, True),
     }
