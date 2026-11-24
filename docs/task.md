@@ -10522,3 +10522,29 @@ request #3156 unanswered.
   frontier's live two-pane window 144 and seed wall adopted without
   duplication. README row, reproducibility addendum and status report
   folded; witness replay remains owed.
+
+### 2026-11-24 22:2xZ — pgactive2shell admitted as the 137th route
+
+- Standing approval #6: admitted `pgactive2shell` on frontier staging W216
+  (brief `reports/frontier-pgactive2shell.md`, charter
+  `.mishe-tauftauf/charters/pgactive2shell.md`). Claim source CVE-2026-134068
+  (CNA Amazon, 2026-11-24, CWE-787, CVSS4 7.7 `AV:N/AC:H/PR:L`), affected
+  pgactive >=2.1.0 <2.1.10, fixed 2.1.10, pinned tags v2.1.9 `f34c8aa6`
+  and v2.1.10 `c3829ddb`. Grade stays as staged: rungs 1-3 on the verbatim
+  pinned parser under ASan, rung 4 PARTIAL chosen bytes read at offsets
+  0/64/92 inside the 64-byte stack name, no real PostgreSQL/pgactive
+  build, SQL or replication wire path, pointer/IP/command or r5; `PR:L`
+  is part of the claim.
+- Operator replay `cd lab/frontier/pgactive2shell && sh harness/run.sh`
+  gave `PASS=19 FAIL=0`, rc 0: 13 exact pins, verbatim extraction, ASan
+  `WRITE-97` at offset 96, chosen `48 5a 4d 49` inside the live function,
+  fixed `RET=-1` and safe `RET=0` controls clean.
+- Admission actions: hy4-flash route 136→137, both resolver keys 274→276,
+  EXACT full-flag sync at pin
+  `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+  daemon-reload, path enabled/active, pinned full-flag doctor GREEN rc 0;
+  frontier's live two-pane window 145 and seed wall adopted without
+  duplication. README row, reproducibility addendum and status report
+  folded. Witness W209 (#3898) independently replayed a clean archive
+  (HEAD `04f6dcf9`, 19 PASS / 0 FAIL) and graded ESTABLISHED AS LABELED
+  at that scope, NO r5 and no grade change.

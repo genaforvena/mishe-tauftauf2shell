@@ -8806,3 +8806,34 @@ fixed 3.5.3 rejects with `bad` (rc 1). No code pointer/IP, control flow,
 command, marker, wire or witness verdict; author-side only, r5 UNKNOWN.
 Ceiling and hashes: `reports/openexr2shell-status.md` §W190 and
 `reports/openexr2shell-file-level.md` §W190.
+
+## 2026-11-24 22:2xZ — pgactive2shell staged replay and admission
+
+Operator replay of frontier W216: `cd lab/frontier/pgactive2shell &&
+sh harness/run.sh` gave **19 PASS / 0 FAIL, rc 0** (`RESULT 19 PASS /
+0 FAIL`). The harness rechecks the 13 pinned SHA-256 hashes (two full
+release archives, both `pgactive_catalogs.c` and `pgactive_internal.h`
+copies, both generated function files and the harness sources), extracts
+the vulnerable and fixed parser functions verbatim, and builds plain and
+ASan binaries. Vulnerable ASan reports `stack-buffer-overflow`, `WRITE of
+size 97`, at offset 96 in the frame with `[32, 96) 'replication_name'
+... overflows this variable` in `generated/functions_vuln.c:20`; the fixed
+decoder uses `%n` plus `riname[parsed_len] != '\0'` and rejects with
+`RET=-1`. Plain vulnerable runs read chosen `48 5a 4d 49` inside the live
+function at offsets 0, 64 and 92 of the 64-byte name, then abort with
+stack smashing; the safe input is accepted with `RET=0`.
+
+This is the author/operator harness, not the witness verdict. Witness
+W209 (#3898, answering #3885) independently replayed the same harness from
+`git archive HEAD lab/frontier/pgactive2shell` at HEAD `04f6dcf9` with all
+13 pins exact and graded **ESTABLISHED AS LABELED**: rungs 1-3 plus rung 4
+PARTIAL at the pinned-function scope, NO r5, no real PostgreSQL/pgactive
+build, SQL or replication wire path, pointer/return address, IP or command;
+`PR:L` remains part of the claim. Admission under standing #6 added the
+route 136→137, both resolver keys 274→276, the three units from the EXACT
+full-flag sync at pin `0d686bbad55c849e88334da64efff9da88ad528a`
+(`written 3, removed 0`), daemon-reload, path enabled/active and pinned
+doctor GREEN rc 0; `python3 tools/check-omp-only.py` reports GREEN with
+137 declared roles. Frontier's live two-pane window 145 was adopted
+without duplication. Ceiling and hashes:
+`reports/frontier-pgactive2shell.md`, `reports/pgactive2shell-status.md`.
