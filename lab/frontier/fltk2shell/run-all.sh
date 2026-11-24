@@ -108,12 +108,13 @@ done
   echo "fltk2shell W195 evidence $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   echo "pinned tarball sha256 $(sha256sum "$TARBALL" | cut -d' ' -f1)"
   for f in last-driver-*out; do
-    echo "--- $f rc/fault ---"
     grep -E 'ERROR: AddressSanitizer|WRITE of size|located .* before|SUMMARY|RESULT' "$f" \
+      | sed -E 's#/[A-Za-z0-9_.+/-]*Fl_BMP_Image\.cxx#PATH/Fl_BMP_Image.cxx#g' \
       | sed -E 's/0x[0-9a-f]+/ADDR/g; s/[0-9]{4,}/NUM/g' | sed -n '1,8p'
   done
   echo "--- gdb-chosen.txt ---"
   grep -E 'Breakpoint|\$1 =|\$2 =|\$3 =|0x7ff' gdb-chosen.txt \
+    | sed -E 's#/[A-Za-z0-9_.+/-]*Fl_BMP_Image\.cxx#PATH/Fl_BMP_Image.cxx#g' \
     | sed -E 's/0x[0-9a-f]{6,}/ADDR/g' | sed -n '1,12p'
 } > evidence.log
 

@@ -1,61 +1,47 @@
-fltk2shell W195 evidence 2026-11-24T03:57:25Z
+fltk2shell W195 evidence 2026-11-24T04:02:53Z
 pinned tarball sha256 7715e69ce081fa9ce6da48bb0dd3b07a4cf2cf937813814c04272f36fff593ea
---- last-driver-asan-poc-alloc.out rc/fault ---
 ==NUM==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
 WRITE of size 1 at ADDR thread T0
 ADDR is located 2 bytes before 2-byte region [ADDR,ADDR)
-SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-release-1.4.5/src/Fl_BMP_Image.cxx:486 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
---- last-driver-asan-poc-b.out rc/fault ---
+SUMMARY: AddressSanitizer: heap-buffer-overflow PATH/Fl_BMP_Image.cxx:486 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
 ==NUM==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
 WRITE of size 1 at ADDR thread T0
 ADDR is located 2 bytes before 14-byte region [ADDR,ADDR)
-SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-release-1.4.5/src/Fl_BMP_Image.cxx:486 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
---- last-driver-asan-poc-c.out rc/fault ---
+SUMMARY: AddressSanitizer: heap-buffer-overflow PATH/Fl_BMP_Image.cxx:486 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
 ==NUM==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
 WRITE of size 1 at ADDR thread T0
-SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-release-1.4.5/src/Fl_BMP_Image.cxx:499 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
---- last-driver-asan-safe.out rc/fault ---
+SUMMARY: AddressSanitizer: heap-buffer-overflow PATH/Fl_BMP_Image.cxx:499 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
 RESULT fail=0 w=2 h=8 d=3
---- last-driver-plus1632-poc-alloc.out rc/fault ---
 ==NUM==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
 WRITE of size 1 at ADDR thread T0
 ADDR is located 2 bytes before NUM-byte region [ADDR,ADDR)
-SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plusNUM/src/Fl_BMP_Image.cxx:490 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
---- last-driver-plus1632-poc-b.out rc/fault ---
+SUMMARY: AddressSanitizer: heap-buffer-overflow PATH/Fl_BMP_Image.cxx:490 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
 ==NUM==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
 WRITE of size 1 at ADDR thread T0
 ADDR is located 2 bytes before NUM-byte region [ADDR,ADDR)
-SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plusNUM/src/Fl_BMP_Image.cxx:490 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
---- last-driver-plus1632-poc-c.out rc/fault ---
+SUMMARY: AddressSanitizer: heap-buffer-overflow PATH/Fl_BMP_Image.cxx:490 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
 ==NUM==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
 WRITE of size 1 at ADDR thread T0
 ADDR is located 14 bytes before NUM-byte region [ADDR,ADDR)
-SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plusNUM/src/Fl_BMP_Image.cxx:503 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
---- last-driver-plus1632-poc-chosen.out rc/fault ---
+SUMMARY: AddressSanitizer: heap-buffer-overflow PATH/Fl_BMP_Image.cxx:503 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
 ==NUM==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
 WRITE of size 1 at ADDR thread T0
 ADDR is located 2 bytes before NUM-byte region [ADDR,ADDR)
-SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plusNUM/src/Fl_BMP_Image.cxx:490 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
---- last-driver-plus1632-safe.out rc/fault ---
+SUMMARY: AddressSanitizer: heap-buffer-overflow PATH/Fl_BMP_Image.cxx:490 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
 RESULT fail=0 w=2 h=8 d=3
---- last-driver-plus1647-poc-alloc.out rc/fault ---
 RESULT fail=-3 w=2 h=0 d=0
---- last-driver-plus1647-poc-b.out rc/fault ---
 RESULT fail=-3 w=6 h=0 d=0
---- last-driver-plus1647-poc-c.out rc/fault ---
 RESULT fail=-3 w=4 h=0 d=0
---- last-driver-plus1647-poc-chosen.out rc/fault ---
 RESULT fail=-3 w=2 h=0 d=0
---- last-driver-plus1647-safe.out rc/fault ---
 RESULT fail=0 w=2 h=8 d=3
 --- gdb-chosen.txt ---
-Breakpoint 1 at 0x1cede: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx, line 510.
-Breakpoint 1, Fl_BMP_Image::load_bmp_ (this=ADDR, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:510
+Breakpoint 1 at 0x1cede: file PATH/Fl_BMP_Image.cxx, line 510.
+Breakpoint 1, Fl_BMP_Image::load_bmp_ (this=ADDR, rdr=..., ico_height=0, ico_width=0) at PATH/Fl_BMP_Image.cxx:510
 $1 = (const uchar *) ADDR "EH"
 $2 = 715827882
 $3 = (uchar *) ADDR ""
 ADDR:	0x02	0x10	0x00	0x00	0x53	0x49	0x4d	0x2d
 ADDR:	0x45	0x48	0x00	0x00	0x00	0x00	0x00	0x00
-#0  Fl_BMP_Image::load_bmp_ (this=ADDR, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:510
-#1  ADDR in Fl_BMP_Image::Fl_BMP_Image (this=ADDR, filename=ADDR "poc-chosen.bmp") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:64
+#0  Fl_BMP_Image::load_bmp_ (this=ADDR, rdr=..., ico_height=0, ico_width=0) at PATH/Fl_BMP_Image.cxx:510
+#1  ADDR in Fl_BMP_Image::Fl_BMP_Image (this=ADDR, filename=ADDR "poc-chosen.bmp") at PATH/Fl_BMP_Image.cxx:64
 #2  ADDR in main (argc=2, argv=ADDR) at driver.cxx:9

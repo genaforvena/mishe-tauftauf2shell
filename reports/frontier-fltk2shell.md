@@ -80,7 +80,10 @@ no exploit framework or external target was contacted.
 
 `run-all.sh` rebuilds all four trees, regenerates the fixtures, runs the
 matrix and asserts **33 PASS / 0 FAIL**; normalized transcript `evidence.log`.
-A clean-archive replay is recorded in `REPLAY.md` when performed.
+Clean `git archive b214fbb` replay rebuilt all four trees and repeated
+33 PASS / 0 FAIL with a byte-exact normalized transcript
+(`7882e60c…3525e`); see `lab/frontier/fltk2shell/REPLAY.md`. Full
+`evidence.log` sha256 is `71b373d0…d4d8c6`.
 
 ## Ceiling and cheapest next experiment
 
