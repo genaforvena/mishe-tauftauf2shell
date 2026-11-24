@@ -69,26 +69,35 @@ roles)`, rc 0. Admission changes no grade.
   `SQLLEN` output offsets in a harness-adjacent sink, not attacker-chosen
   command or pointer bytes.
 
-## Ceiling and negatives
+## Ceiling and negatives — admission snapshot (superseded below)
 
-No real psqlODBC build, ODBC driver manager, DSN, application SQL path,
-process, socket, wire exchange, network, ASLR/grooming study, pointer control,
-return-address control, gadget, ROP chain, command, marker side effect or
-witness verdict. The advisory's uninitialized-array limb (CWE-457) is recorded
-from source but not separately exercised. Whether a real application forwards
-untrusted SQL text to this parser, and the real stack layout after
-`param_pos`, remain UNKNOWN. Rung 5 is UNKNOWN at this admission snapshot.
+At admission (09:4xZ) there was no real psqlODBC build, driver manager, DSN,
+application SQL path, process, socket, wire exchange, network, ASLR/grooming
+study, pointer control, return-address control, gadget, ROP chain, command,
+marker side effect or witness verdict; CWE-457 was source-only and the real
+stack layout after `param_pos` was UNKNOWN. That snapshot is kept for
+provenance only. W145-W166 below built both pinned tags, drove them through
+unixODBC to a real loopback PostgreSQL 16.4, mapped the gcc/clang layouts and
+exercised CWE-457; none supplied a chosen pointer-width store, control-flow
+datum, command, marker or rung 5. Material witness verdicts are #2572
+(W146 public ODBC) and #2689/W162 (W161 date escape), both at their labeled
+rung-3 scopes, not rung 5.
 
-## Next bounded work for the target mind
+## Next bounded work — admission plan (lanes retired)
 
-1. Build the pinned vulnerable and fixed tags with ASan and call
-   `SQLPrepare`/`SQLExecDirect` with a `{fn}` escape carrying more than
-   sixteen arguments; capture the ASan frame and the real stack layout after
-   `param_pos`.
-2. Repeat with a `{d}` body of 128 bytes or more; identify whether any saved
-   pointer or control-flow datum sits adjacent before considering a marker.
-3. Hand any live-wire rung-4 or rung-5 claim to the witness without upgrading
-   this row first.
+The admission plan was (1) build the pinned vulnerable and fixed tags with
+ASan and drive `SQLExecDirect` with a >16-argument `{fn}` escape, (2) repeat
+with a >=128-byte `{d}` body and look for an adjacent control-flow datum, and
+(3) hand live-wire claims to the witness without upgrading the row first.
+Items 1 and 2 are retired: W145/W147 and W161/W162 cover the real-server
+paths, W159/W166 map the clang -O2 layout, and W163 closes the store-value
+range at source. Item 3's discipline stays in force; the one outstanding
+hand-off is the #2576 W147 real-PG replay, queued with the witness as
+"Older ... (no rush)" on 2026-11-24, with #3202 (W168 de-risking DM) still
+open on the witness wall. No author experiment is owed: reopen only on a
+witness counterexample or a real layout showing both an adjacent control-flow
+datum and a store that writes a chosen pointer-width value. The store-value
+argument is recorded under "Why the primitive does not reach rung 5" below.
 
 ## Real-object build and layout (2026-11-23 W145, target mind)
 
