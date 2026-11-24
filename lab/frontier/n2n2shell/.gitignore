@@ -1,0 +1,5 @@
+harness/asan-vuln
+harness/asan-fixed
+harness/plain-vuln
+harness/plain-fixed
+*.o

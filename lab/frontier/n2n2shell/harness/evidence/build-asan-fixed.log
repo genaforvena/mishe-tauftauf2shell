@@ -1,0 +1,19 @@
+generated/handlers_fixed.c: In function ‘decode_buf’:
+generated/handlers_fixed.c:47:5: warning: implicit declaration of function ‘memcpy’ [-Wimplicit-function-declaration]
+   47 |     memcpy(out, (base + *idx), bufsize);
+      |     ^~~~~~
+generated/handlers_fixed.c:3:1: note: include ‘<string.h>’ or provide a declaration of ‘memcpy’
+    2 | #include "harness/types.h"
+  +++ |+#include <string.h>
+    3 | int decode_uint16 (uint16_t * out,
+generated/handlers_fixed.c:47:5: warning: incompatible implicit declaration of built-in function ‘memcpy’ [-Wbuiltin-declaration-mismatch]
+   47 |     memcpy(out, (base + *idx), bufsize);
+      |     ^~~~~~
+generated/handlers_fixed.c:47:5: note: include ‘<string.h>’ or provide a declaration of ‘memcpy’
+generated/handlers_fixed.c: In function ‘decode_REGISTER_SUPER_NAK’:
+generated/handlers_fixed.c:74:5: warning: implicit declaration of function ‘memset’ [-Wimplicit-function-declaration]
+   74 |     memset(nak, 0, sizeof(n2n_REGISTER_SUPER_NAK_t));
+      |     ^~~~~~
+generated/handlers_fixed.c:74:5: note: include ‘<string.h>’ or provide a declaration of ‘memset’
+generated/handlers_fixed.c:74:5: warning: incompatible implicit declaration of built-in function ‘memset’ [-Wbuiltin-declaration-mismatch]
+generated/handlers_fixed.c:74:5: note: include ‘<string.h>’ or provide a declaration of ‘memset’
