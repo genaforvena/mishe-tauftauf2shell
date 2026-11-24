@@ -1,0 +1,21 @@
+Breakpoint 1 at 0x163a6: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c, line 759.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+MODE=decode PATH=alaw142.wav AUDIO_DRIVER=dummy MIX_DECODERS=3
+SPEC freq=8000 format=33056 channels=1 framesize=4
+
+Breakpoint 1, FetchXLaw (tdata=0x555555583f10, buffer=0x7fffffffdb70 "UVWXYZ[\\]^_`abcd"..., buflen=568, lut=0x55555556e080 <MIX_alawToFloat>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:759
+759	        out[i] = lut[buffer[i]];
+AT_LAST i=141 length=142 buffer=0x7fffffffdb70 out=0x7fffffffdda4 dest=0x7fffffffdfd8 idx=98
+BEFORE_RIP_SLOT 0x7fffffffdfd8:	0x0000555555560a60
+LUT_VALUE $1 = 0xbd3c0178
+758	    for (int i = length - 1; i >= 0; i--) {
+AFTER_RIP_SLOT 0x7fffffffdfd8:	0x00005555bd3c0178
+AFTER_BYTES_1120_1135
+0x7fffffffdfd0:	0x10	0xe0	0xff	0xff	0xff	0x7f	0x00	0x00
+0x7fffffffdfd8:	0x78	0x01	0x3c	0xbd	0x55	0x55	0x00	0x00
+FRAME_NOW
+#0  FetchXLaw (tdata=0x555555583f10, buffer=0x7fffffffdb70 "UVWXYZ[\\]^_`abcd"..., buflen=568, lut=0x55555556e080 <MIX_alawToFloat>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:758
+#1  0x0000555555569afa in FetchALaw (tdata=0x555555583f10, buffer=0x7fffffffdb70 "UVWXYZ[\\]^_`abcd"..., buflen=568) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:771
+#2  0x00005555555681db in WAV_decode (track_userdata=0x555555583f10, stream=0x555555583f90) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_wav.c:1668
+#3  0x00005555bd3c0178 in ?? ()

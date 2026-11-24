@@ -1,0 +1,4 @@
+LUT words checked: 512
+window [0x55554000,0x55560000] hits: 0
+high-byte-0x55 words: 0
+RESULT: NO_MAPPED_PARTIAL_TARGET

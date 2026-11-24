@@ -241,15 +241,41 @@ file-path reachability from the lab driver to an unmodified upstream CLI
 program, but the grade stays rungs 1-4, author-observed and unwitnessed: no
 request-facing listener, pointer, marker or command.
 
+## 4g. Partial saved-RIP overwrite negative (W184, 2026-11-24)
+
+A shorter read closes the one control-flow case the full-pointer LUT
+enumeration did not explicitly test. With a 142-byte A-law data section,
+`buflen=568` and `FetchXLaw` gets `length=142`: `out=&buffer[564]` and the
+final store (`i=141`, index `buffer[141]=0x62`) lands at `buffer+1128`,
+exactly the low four bytes of `WAV_decode`'s saved RIP in the no-SSP frame,
+while the high four bytes stay the original `0x00005555`. Under gdb the slot
+changes `0x0000555555560a60` → `0x00005555bd3c0178`
+(`MIX_alawToFloat[98]` bits `0xbd3c0178`) and backtrace frame `#3` becomes
+`0x00005555bd3c0178 in ?? ()`, an unmapped address about 1.7 GB above PIE
+text. Enumerating all 512 `MIX_alawToFloat`/`MIX_ulawToFloat` bit patterns
+gives zero words with high byte `0x55` and zero in the PIE low-32 window
+`[0x55554000, 0x55560000]`, so no LUT value can turn a preserved-high-bytes
+partial overwrite into a mapped return address. Saved RBP (`buffer+1120`) is
+still intact at that store because length 142 reaches `buffer+1128` only at
+`i=141`. This is a derived negative on the real no-SSP build, not a rung
+change: no chosen pointer, mapped instruction-pointer target, marker or
+command. Generator, gdb script, transcript, LUT dump, manifest and check live
+in `lab/frontier/sdlmixer2shell/harness/realwav/` (`craft_partial_wav.py`,
+`gdb-partial.cmd`, `lut_partial_check.py`, `evidence/alaw142.wav`,
+`evidence/gdb-partial-142.out`, `evidence/lut-dump.txt`,
+`evidence/PARTIAL-LUT.out`, `evidence/PARTIAL.sha256`).
+
 ## 5. Next distinct rung move
 
 File-path reachability, loopback-wire byte input and the LUT pointer image are
 now measured. The LUT enumeration above closes the arbitrary-IP question for
 the overwritten saved-RIP slot: A-law yields no canonical pointer and mu-law
-only first-4-GiB addresses, so no chosen PIE/libc target. The remaining
-distinct move is a real request-facing consumer that loads an
-attacker-named WAV through this decoder on a live loopback instance, plus a
-benign command with an observed side effect.
+only first-4-GiB addresses, so no chosen PIE/libc target. Section 4g closes the
+partial-overwrite variant too: a length-142 read can replace only the low four
+saved-RIP bytes, but none of the 512 LUT bit patterns maps into the preserved
+`0x00005555` PIE window. The remaining distinct move is a real request-facing
+consumer that loads an attacker-named WAV through this decoder on a live
+loopback instance, plus a benign command with an observed side effect.
 
 
 ## 6. Honest ceiling
@@ -265,7 +291,10 @@ code, and the build uses SDL3 3.4.0 (the mixer's declared minimum) rather than
 the lab's older 3.2.4. Witness #2942 and #3000 graded the two earlier harness
 scopes ESTABLISHED at rungs 1-4, NOT rung 5; the W180 on-disk claim (#3053),
 the W181 wire claim, the W182 sample and W183 upstream-CLI claim are
-author-observed and unwitnessed (replay requests queued). There is no
+author-observed and unwitnessed (replay requests queued).
+Section 4g closes the partial-overwrite variant: a length-142 read replaces
+only the low four saved-RIP bytes, but no LUT bit pattern maps into the
+preserved `0x00005555` PIE window. There is no
 request-facing SDL_mixer listener, attacker-chosen pointer, instruction-pointer
 control, benign marker or command execution. Advisory RCE and network
 reachability beyond this loopback lab listener remain **UNKNOWN**. Rung 5 not

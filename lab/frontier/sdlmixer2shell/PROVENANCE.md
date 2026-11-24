@@ -224,3 +224,31 @@ identical across three runs.
   affects only video initialization; there is no wire input in this slice, no
   chosen pointer/IP, marker or command. Grade stays rungs 1-4,
   author-observed and unwitnessed; witness replay remains owed/queued.
+
+## Partial saved-RIP overwrite negative (W184, 2026-11-24)
+
+- New bounded experiment on the committed no-SSP real-mixer build answers the
+  control-flow case the W180 full-pointer LUT enumeration left implicit. A
+  142-byte A-law data section (`harness/realwav/evidence/alaw142.wav`, 186-byte
+  RIFF, SHA-256
+  `69b21063980f3f01a4e6ea549510dc44cc9912d688092a405125ab0def46b30c`)
+  makes real `WAV_decode` compute `buflen=568`, so `FetchXLaw` gets
+  `length=142`, `out=&buffer[564]` and its final store (`i=141`,
+  `buffer[141]=0x62`) targets `buffer+1128` — exactly the low four bytes of
+  the saved RIP in the no-SSP frame. The high four bytes are not reached.
+- `harness/realwav/gdb-partial.cmd` breaks at pinned `:759 if i == 141`.
+  Transcript `evidence/gdb-partial-142.out`: slot before
+  `0x0000555555560a60`, `MIX_alawToFloat[98]` bits `0xbd3c0178`, slot after
+  `0x00005555bd3c0178`, backtrace frame `#3 = 0x00005555bd3c0178 in ?? ()`
+  (unmapped, ~1.7 GB above PIE text). Saved RBP at `buffer+1120` is untouched
+  at that store. Requires a no-canary build; with SSP the canary would abort
+  before the RIP slot is reached.
+- `harness/realwav/lut_partial_check.py` parses `evidence/lut-dump.txt` (all
+  256 A-law + 256 mu-law float32 bit patterns dumped from the live LUT) and
+  prints `RESULT: NO_MAPPED_PARTIAL_TARGET`: zero words with high byte `0x55`
+  and zero in the PIE low-32 window `[0x55554000, 0x55560000]`. So no single
+  LUT word can turn a preserved-high-bytes partial overwrite into a mapped
+  return address. Derived negative, not a witness verdict.
+- All four evidence files are checksummed in `evidence/PARTIAL.sha256`. Grade
+  unchanged: rungs 1-4 author-observed, no chosen pointer/IP target, marker
+  or command; rung 5 UNKNOWN.
