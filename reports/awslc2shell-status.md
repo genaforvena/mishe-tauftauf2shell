@@ -137,6 +137,23 @@ written byte and the next chunk's header. On glibc `2.39-0ubuntu8.12`,
 short of the next object. `sh run-metadata.sh` -> 10 PASS / 0 FAIL
 (`metadata-replay.log`); `run-all.sh` 14 PASS / 0 FAIL, `run-consumer.sh` 31
 PASS / 0 FAIL. This is a bounded negative for glibc heap-metadata corruption
-with a lone documented-minimum buffer; it says nothing about stack layouts,
-embedded structs or other allocators. Grade unchanged: rungs 1-4, r5 UNKNOWN;
-W206 has no independent witness replay.
+with a lone documented-minimum buffer; it says nothing about other allocators.
+Grade unchanged: rungs 1-4, r5 UNKNOWN; W206 has no independent witness replay.
+
+## Natural stack layout bound (W207, 2026-11-24T15:42Z)
+
+`stack-layout.c` replaces the earlier throwaway stack probes with a
+reproducible one: ordinary locals around a 31-byte array, no struct packing,
+no alignment attribute. `run-stack-layout.sh` compiles it against both plain
+libraries with GCC and Clang at `-O0..-O3 -fno-omit-frame-pointer
+-fno-stack-protector`, with the one-past index seeded to `0xab`. The byte
+becomes `0x48` in all eight vulnerable configurations and stays `0xab` in all
+eight fixed configurations. In none of the sixteen does a natural control
+datum sit at `out+31`: the adjacent pointer deltas are 1, 9 or negative, the
+tail-array delta is negative, and the saved frame is 81..145 bytes above the
+one-past address. `sh run-stack-layout.sh` -> 16 PASS / 0 FAIL
+(`stack-layout-replay.log`); `run-all.sh` 14 PASS / 0 FAIL, `run-consumer.sh`
+31 PASS / 0 FAIL, `run-metadata.sh` 10 PASS / 0 FAIL. This closes the natural
+stack-layout lane for these compilers and flags: pointer LSB control still
+requires the explicitly tagged struct record used in W204/W205. Grade
+unchanged: rungs 1-4, r5 UNKNOWN; author-only, no witness replay.

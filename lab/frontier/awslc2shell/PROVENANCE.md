@@ -203,4 +203,36 @@ object. `sh run-metadata.sh` -> 10 PASS / 0 FAIL; `sh run-all.sh` -> 14 PASS /
 0 FAIL, `sh run-consumer.sh` -> 31 PASS / 0 FAIL. Bounded negative: on this
 host's glibc, a lone documented-minimum heap buffer cannot corrupt chunk
 metadata or a neighboring allocation with this one-byte write. This does not
-bound stack, embedded-struct or non-glibc allocators; no rung change.
+bound embedded structs or non-glibc allocators; W207 below bounds natural
+stack layouts on this host. No rung change.
+
+## Natural stack layout bound (2026-11-24T15:42Z, W207)
+
+`stack-layout.c` + `run-stack-layout.sh` extend the plain-build lane from heap
+metadata to ordinary stack locals. The probe declares `void (*cb_after)(void)`,
+`uint8_t out[31]`, `void (*cb_before)(void)` and `uint8_t tail[16]` in that
+order with no `#pragma pack` or alignment attribute, seeds `out[31] = 0xab`,
+captures `__builtin_frame_address(0)` before decryption, then drives the two
+boundary-crossing updates into `out` exactly as the vulnerable library does in
+the harness. `run-stack-layout.sh` compiles against `build-plain` and
+`build-fixed-plain` with GCC 13.3.0 and Clang 18.1.3 at `-O0..-O3`,
+`-fno-omit-frame-pointer -fno-stack-protector`, and checks the one-past byte:
+`0x48` for the vulnerable library, `0xab` for the fixed one, and no zero delta
+from `out+31` to either adjacent pointer, the tail array or the saved frame.
+
+Observed (`stack-layout-replay.log`, 16 runs):
+
+```
+vuln/gcc/O0  cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0x48
+vuln/gcc/O2  cb_after_delta=-71 cb_before_delta=-63 tail_delta=-47 frame_delta=145 oob_byte=0x48
+vuln/clang/O1 cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0x48
+fixed/gcc/O0 cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0xab
+fixed/clang/O2 cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0xab
+```
+
+`sh run-stack-layout.sh` -> 16 PASS / 0 FAIL; `sh run-all.sh` -> 14 PASS /
+0 FAIL, `sh run-consumer.sh` -> 31 PASS / 0 FAIL, `sh run-metadata.sh` ->
+10 PASS / 0 FAIL. The one-past address never coincides with a natural control
+datum on these compilers/flags, so the previously throwaway canary-gap
+observation is now a reproducible negative. Rung grade unchanged; no witness
+replay of W207.

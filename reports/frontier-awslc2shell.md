@@ -123,11 +123,25 @@ header and neighbor unchanged; fixed: byte31 stays `0xab`, same controls.
 (`metadata-replay.log`); grade unchanged, no allocator/IP control. ASan
 poisons the 9 slack bytes, which is why a plain build is needed here.
 
+W207 (2026-11-24T15:42Z) made the earlier stack-layout probe reproducible:
+`stack-layout.c` uses ordinary locals around `uint8_t out[31]` with no packing
+or alignment attribute, and `run-stack-layout.sh` builds it against both plain
+libraries with GCC and Clang at `-O0..-O3`. The one-past byte is `0x48` in all
+eight vulnerable runs and `0xab` in all eight fixed runs, but no natural
+control datum sits at `out+31`: adjacent-pointer deltas are 1, 9 or negative,
+the tail array is before the byte, and the saved frame is 81..145 bytes above
+it. `sh run-stack-layout.sh` -> 16 PASS / 0 FAIL
+(`stack-layout-replay.log`); the original suites remain 14 / 31 / 10 PASS with
+0 FAIL. This closes natural stack layouts for these compilers; pointer-LSB
+control still needs the tagged struct record. Grade unchanged, no witness
+replay.
+
 ## Cheapest next experiment
 
 `run-all.sh` and the original consumer lane have independent clean-room
-verdicts (ESTABLISHED AS LABELED); the W204/W205 alignment extensions are
-author-measured only. A witness replay of `0d3fc55` (requested, chat #3562)
-still covers W204; W205 needs its own replay request after commit. The
-remaining gap is a real consumer whose documented-minimum output buffer is
-followed at that offset by a control datum. Any r5 claim needs witness replay.
+verdicts (ESTABLISHED AS LABELED); W204, W205, W206 and W207 are author-measured
+only. A witness replay of `0d3fc55` (chat #3562) still covers W204, W205 was
+requested in #3594 and W206 in #3668. The remaining gap is a real consumer
+whose documented-minimum output buffer is followed at that offset by a control
+datum; W207 rules out the natural stack layout as that consumer on this host.
+Any r5 claim needs witness replay.

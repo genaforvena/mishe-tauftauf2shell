@@ -1,0 +1,17 @@
+vuln/gcc/O0 oob=0x7ffd8107ab7f cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0x48 PASS
+vuln/gcc/O1 oob=0x7ffff60e047f cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0x48 PASS
+vuln/gcc/O2 oob=0x7ffcc23988ff cb_after_delta=-71 cb_before_delta=-63 tail_delta=-47 frame_delta=145 oob_byte=0x48 PASS
+vuln/gcc/O3 oob=0x7ffca962d14f cb_after_delta=-71 cb_before_delta=-63 tail_delta=-47 frame_delta=145 oob_byte=0x48 PASS
+vuln/clang/O0 oob=0x7ffec20b4cef cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0x48 PASS
+vuln/clang/O1 oob=0x7ffc3889938f cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0x48 PASS
+vuln/clang/O2 oob=0x7ffe32a9b90f cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0x48 PASS
+vuln/clang/O3 oob=0x7ffd9788688f cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0x48 PASS
+fixed/gcc/O0 oob=0x7ffe3b72690f cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0xab PASS
+fixed/gcc/O1 oob=0x7ffd2965a37f cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0xab PASS
+fixed/gcc/O2 oob=0x7ffe13c5227f cb_after_delta=-71 cb_before_delta=-63 tail_delta=-47 frame_delta=145 oob_byte=0xab PASS
+fixed/gcc/O3 oob=0x7fff4723e27f cb_after_delta=-71 cb_before_delta=-63 tail_delta=-47 frame_delta=145 oob_byte=0xab PASS
+fixed/clang/O0 oob=0x7ffd01615dff cb_after_delta=1 cb_before_delta=-39 tail_delta=-63 frame_delta=145 oob_byte=0xab PASS
+fixed/clang/O1 oob=0x7ffd89cea00f cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0xab PASS
+fixed/clang/O2 oob=0x7ffd3361382f cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0xab PASS
+fixed/clang/O3 oob=0x7fff4ef1d94f cb_after_delta=1 cb_before_delta=9 tail_delta=-47 frame_delta=81 oob_byte=0xab PASS
+TOTAL 16 PASS / 0 FAIL
