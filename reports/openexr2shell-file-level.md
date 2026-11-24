@@ -1575,3 +1575,12 @@ wire, no witness verdict; rung 5 remains UNKNOWN. W188/W189 stand for their
 own geometries. Would change my mind: an observed malloc from the poisoned
 tcache, a chosen code pointer/IP, a wire-fed affected process, or a witness
 counterexample.
+
+W190 clean-archive receipt (21:54Z): `git archive ecf3f821 lab/openexr2shell-real`
+into `/tmp/w190-clean`, with the gitignored `src/`, `build-vuln-plain`,
+`build-vuln-asan`, `build-fixed-asan`, `bin-vuln-plain` and `bin-fixed-asan`
+trees symlinked from the live checkout. `sh harness/w190-tcache-check.sh`
+printed `RESULT PASS`, rc 0; the six core evidence hashes and check sha256
+`ba155b40d9fb04aea70cb7a00eda7fe72b1a593eaded0dcd2be1cae42de087ea`
+matched the working tree byte-for-byte. Author replay, not a witness verdict;
+grade and rung-5 status unchanged.

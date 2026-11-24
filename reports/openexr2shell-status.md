@@ -578,3 +578,8 @@ rejects with `bad` (rc 1); ASan reports `READ of size 4288` at the pinned sink.
 Grade: file-level rungs 1-4, rung 5 UNKNOWN — no code pointer/IP, control
 flow, command, marker, wire or witness verdict. Full method, hashes and
 ceiling in `reports/openexr2shell-file-level.md` W190.
+
+W190 clean-archive receipt (21:54Z): `git archive ecf3f821` with gitignored
+source/build/bin trees symlinked gave `RESULT PASS`, rc 0, all six core
+evidence hashes and the check hash byte-identical to the working tree. Author
+replay only; no witness verdict, no grade change.
