@@ -775,3 +775,52 @@ Prediction before the sweep was "no new control"; observation confirms it.
 No chosen byte, no new rung-4 boundary, no command, no rung 5, grade
 unchanged. Author self-observation, not independently replayed. Do not
 resweep this index set on the same binary.
+
+## W26 — translation-table OOB write from the wire sender field (2026-11-24 ~09:3xZ)
+
+New source finding in the pinned v07.36 tree:
+`vrpn_TranslationTable::addRemoteEntry()` at `vrpn_Connection.C:384-416` takes
+`remote_id` from the 20-byte TCP header's sender field (`header[3]`, :4186),
+checks only `useEntry >= 2000` at :392, and uses the value as a signed index:
+`d_entry[useEntry].name` read/store at :405-406, a 100-byte `memcpy` through
+that pointer at :414 and two int32 stores at :415-416. The fixed-commit tree
+has the same code; its only change in these paths is the `min(i, 99)` clamp on
+the description NUL write.
+
+Binaries (unchanged from W25): vulnerable ASan
+`987603cf4fff13dda35b752d3f9160a0a3a727a19a3013a3fc92e328fefc0ad6`
+(`build-asan-07.36`), vulnerable plain `-O0`
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`,
+fixed plain
+`10e581e895c25f39bea153b4d5ce1014796190fb9bd5f901693115d176ea2f45`.
+New harness SHA-256: `wire_xlation.py`
+`aeef7f9b861ecc97438408848cef617aef94381272d80c3d86042cad2d76f007`,
+`probe-xlation.sh`
+`c1d2adc365337c0d25e77050828d08b2b9a74f76502d1111e50c41eca0fa714a`,
+`probe-xlation-gdb.sh`
+`e6da5bf92ed47b9f3e78a9fe73ec2277718f74dfeb3bfd88ce610f9a46277b2b`.
+Every message used an in-bounds description NUL index (4) and 96 bytes of
+`0x42` name, isolating this bug from the exhausted NUL-index primitive.
+
+Ports: 15301-15341, all loopback, all plant-started servers killed and ports
+free afterwards. Rows: `out-w26-asan-s-1/` (ASan heap-buffer-overflow READ 8 at
+:405, full chain, 8 bytes before the 32008-byte endpoint allocation),
+`out-w26-asan-safe-4/` (ALIVE), `out-w26-gdb-s-1/` (dest = heap chunk size
+`0x7d11`, memcpy SIGSEGV), `out-w26-gdb-s-2/` (`d_entry=...3378`,
+`d_entry[-2].name` at `...3358` gets pointer `0x555555702d88`; POST bytes
+`42 42 42 42 00 42 ...` at the pointee, PRE all zero),
+`out-w26-plain-s-2/`, `out-w26-fixed-s-2/`, `out-w26-type-s-2/` (ALIVE),
+`out-w26-fixed-s-1/` (DEAD 139, unfixed), and
+`out-w26-sweep-plain/s*/` (18 senders; only -1 DEAD 139).
+
+Stock `-O2` NUL-target symbol check on
+`build-opt-07.36/server_src/vrpn_server`
+(`bfe63334d6735342cc971ebd8f1e2bae3922b3547dfa9623161268dbaa44bae2`):
+file offsets `0x1f00` (below `.text` 0x3c680), `0x4e000` (0x60 into
+`doSystemCallbacksFor` at 0x4dfa0), `0x50000` (0x60 into `dispatch` at
+0x4ffa0) — none are function entries, so W17's stock verdict stands.
+
+Grade unchanged: wire-chosen OOB pointer store at a chosen offset and chosen
+bytes in the pointee, but no chosen byte at a wire-chosen address, no command
+side effect, no rung 5. Author self-observation, not independently replayed.
+Do not resweep the sender set on this build.

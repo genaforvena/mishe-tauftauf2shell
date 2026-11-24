@@ -1,0 +1,11 @@
+Breakpoint 1 at 0x40af9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 405.
+Breakpoint 2 at 0x40b3b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 414.
+Breakpoint 3 at 0x40b67: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 415.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+AT405 this=0x555555703370 d_entry=0x555555703378 useEntry=-1 remote_id=-1 local_id=2 name=0x7fffffffd8f0
+0x555555703368:	0x0000000000007d11	0x0000000000000000
+0x555555703378:	0x0000000000000000	0xffffffffffffffff
+PRE414 useEntry=-1 dest=0x7d11 name=0x7fffffffd8f0
+0x7cf1:	lab/frontier/vrpn2shell/out-w26-gdb-s-1/gdb.cmd:27: Error in sourced command file:
+Cannot access memory at address 0x7cf1

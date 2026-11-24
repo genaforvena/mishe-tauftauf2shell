@@ -1,0 +1,2 @@
+cookie=b'vrpn: ver. 07.36  0\x00\x00\x00\x00\x00'
+sender=-1 index=4 msgtype=-1 name=b'BBBBBBBBBBBBBBBB' name_len=96 payload_len=100 msg_len=128

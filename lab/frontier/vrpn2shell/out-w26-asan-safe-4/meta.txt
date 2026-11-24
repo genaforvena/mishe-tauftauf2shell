@@ -1,0 +1,6 @@
+date_utc=2026-11-24T09:34:30Z
+bin=lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server
+bin_sha256=987603cf4fff13dda35b752d3f9160a0a3a727a19a3013a3fc92e328fefc0ad6  lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server
+port=15302 sender=4 index=4 msgtype=-1 hold=2.0
+name_sha256=170e657228b2cc5450abfef68cd48630f24ccc74aa82c62c777dd3f49a286412  -
+status=ALIVE_AFTER_MESSAGE

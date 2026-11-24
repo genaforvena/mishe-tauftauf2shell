@@ -1156,6 +1156,74 @@ in `lab/frontier/vrpn2shell/out-w25-neg-o0/idx-*/`.
   All ports were loopback; 15200-15221 were free afterwards. Do not resweep
   this index set on the same `-O0` binary.
 
+## W26 — wire sender indexes the translation table out of bounds (2026-11-24 ~09:3xZ)
+
+A second, **distinct** source defect was found by a source scan of the pinned
+handlers, not by the exhausted NUL-index sweeps. In
+`vrpn_TranslationTable::addRemoteEntry()` (v07.36
+`vrpn_Connection.C:384-416`), `useEntry = remote_id` is the wire header's
+sender field (`header[3]` at `:4186`) and the only bound is
+`useEntry >= vrpn_CONNECTION_MAX_XLATION_TABLE_SIZE` at `:392`. The lower bound
+checked by `mapToLocalID()` at `:364` is absent here, so any negative sender
+indexes *before* `d_entry[]`. `:405-406` reads/stores `d_entry[useEntry].name`,
+`:414` copies 100 bytes of the wire description name through that pointer, and
+`:415-416` store two int32 values at the same out-of-bounds record. The fixed
+commit adds `min(i, sizeof(name)-1)` only to the description NUL write; its
+`addRemoteEntry()` is unchanged. The call chain is a real loopback path:
+`getOneTCPMessage:4239` -> `dispatch:4331` ->
+`doSystemCallbacksFor:1446` -> `handle_sender_message:4574` (or
+`handle_type_message:4502`) -> `newRemoteSender:3229` /
+`newRemoteType:3222`, after the cookie exchange, with no authentication.
+
+New probes: `wire_xlation.py` sets the wire sender to a chosen signed value,
+keeps the description NUL index in bounds (default 4) so the known primitive
+is isolated, and fills 96 name bytes with `0x42`; `probe-xlation.sh` and
+`probe-xlation-gdb.sh` run them against plant-started loopback servers.
+
+- **ASan v07.36, sender -1** (`out-w26-asan-s-1/server.err`):
+  `heap-buffer-overflow`, `READ of size 8` at `:405`, full wire chain above,
+  address 8 bytes before the 32008-byte endpoint allocation from
+  `vrpn_Endpoint::init():2957`. The safe sender-4 control is clean
+  (`out-w26-asan-safe-4/`, ALIVE). The crash is on the OOB pointer *read*;
+  ASan stops before the chosen-byte copy at `:414`.
+- **gdb, plain -O0, sender -2** (`out-w26-gdb-s-2/gdb.log`):
+  `d_entry = 0x555555703378`, `useEntry = -2`. The OOB slot
+  `d_entry[-2].name` at `0x...3358` is NULL before the call (the 640 bytes
+  surveyed before `d_entry` are zero), so `:406` allocates a 100-byte buffer
+  and stores its pointer `0x0000555555702d88` into that out-of-bounds slot.
+  `:414` then copies the wire-chosen bytes to that buffer: PRE bytes are all
+  zero, POST bytes are `42 42 42 42 00 42 42 42 42 ...` (the `00` at offset 4
+  is the isolated in-bounds NUL index). This is a wire-chosen **offset** with
+  an out-of-bounds **pointer store** whose pointee holds wire-chosen bytes;
+  the 100-byte copy itself lands in the freshly allocated buffer, not at a
+  wire-chosen address. Process survives.
+- **Debugger-free controls**: plain vulnerable sender -2 ALIVE
+  (`out-w26-plain-s-2/`), fixed-commit sender -2 ALIVE
+  (`out-w26-fixed-s-2/`), TYPE sink sender -2 ALIVE
+  (`out-w26-type-s-2/`); sender -1 DEAD exit 139 on both vulnerable
+  (`out-w26-gdb-s-1/`: dest is heap chunk size `0x7d11`, glibc memcpy faults)
+  and fixed (`out-w26-fixed-s-1/`) builds. The fixed build survives sender -2
+  and crashes at -1 exactly like the vulnerable one: this bug is outside the
+  CVE fix, not a regression of it.
+
+- Debugger-free negative-sender sweep on plain `-O0` (`out-w26-sweep-plain/s*/`,
+  ports 15320-15337, HOLD 0.5): sender -1 DEAD exit 139; every other sampled
+  row (-2,-3,-4,-5,-6,-8,-10,-12,-16,-20,-24,-32,-40,-48,-64,-80,-100) ALIVE.
+  No sampled offset beyond the chunk-size slot changed control flow or
+  produced a command; do not resweep this set on the same binary.
+
+The stock `-O2` saved-RIP NUL targets from W17 were also mapped to symbols in
+`build-opt-07.36/server_src/vrpn_server`: file offsets `0x1f00` (before
+`.text` at `0x3c680`, unmapped), `0x4e000` (`0x60` into
+`doSystemCallbacksFor` at `0x4dfa0`) and `0x50000` (`0x60` into `dispatch` at
+`0x4ffa0`) are not function entries. No new stock control-flow target; KEEP
+the W17 verdict.
+
+Grade unchanged: no chosen byte at a wire-chosen address, no command side
+effect, no rung 5. This is a new rung-4 boundary (wire-indexed OOB heap
+pointer store) on a distinct unfixed bug, authored here and not independently
+replayed. Ports 15301-15341 were loopback and freed; no server left running.
+
 ## Limits and next work
 
 - W25 closes the negative-index lane on stock `-O0`: indices -1 through -128
@@ -1163,6 +1231,14 @@ in `lab/frontier/vrpn2shell/out-w25-neg-o0/idx-*/`.
   mapped at byte 4 and byte 0); all others survive. Fixed-commit and
   safe-input controls survive at the same indices. No chosen byte or new
   rung-4 boundary; do not resweep these points on the same binary.
+- W26 found a third source defect, distinct from the CVE fix: the wire header
+  sender indexes `d_entry[]` in `addRemoteEntry()` with no lower bound
+  (`:390-416`), both builds. Negative senders store a heap pointer and two
+  int32 values out of bounds and copy 100 wire-chosen bytes into the pointee.
+  Only sender -1 faults (heap chunk size used as destination); -2..-100 alive
+  on this build. This is a wire-chosen-offset OOB pointer store, not a
+  chosen-byte-at-chosen-address write; no command, no rung 5. Author
+  self-observation, not independently replayed. Do not resweep the sender set.
 
 - W24 found a second source defect: `payload_len` 0-3 underflows the `strncpy`
   length at vulnerable `:4548`/`:4476` and fixed `:4552`/`:4480`. ASan reports

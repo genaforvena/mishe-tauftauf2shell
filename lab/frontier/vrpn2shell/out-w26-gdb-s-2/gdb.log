@@ -1,0 +1,28 @@
+Breakpoint 1 at 0x40af9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 405.
+Breakpoint 2 at 0x40b3b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 414.
+Breakpoint 3 at 0x40b67: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 415.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+AT405 this=0x555555703370 d_entry=0x555555703378 useEntry=-2 remote_id=-2 local_id=2 name=0x7fffffffd8f0
+0x555555703358:	0x0000555555702d88	0x0000000000000000
+0x555555703368:	0x0000000000007d11	0x0000000000000000
+PRE414 useEntry=-2 dest=0x555555702d88 name=0x7fffffffd8f0
+0x555555702d68:	0x0000000000000000	0x0000000000000000
+0x555555702d78:	0x0000000000000000	0x0000000000000000
+0x555555702d88:	0x0000000000000000	0x0000000000000000
+0x555555702d98:	0x0000000000000000	0x0000000000000000
+0x555555702d88:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555702d90:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+POST415 useEntry=-2 dest=0x555555702d88
+0x555555702d68:	0x0000000000000000	0x0000000000000000
+0x555555702d78:	0x0000000000000000	0x0000000000000000
+0x555555702d88:	0x4242420042424242	0x4242424242424242
+0x555555702d98:	0x4242424242424242	0x4242424242424242
+0x555555702d88:	0x42	0x42	0x42	0x42	0x00	0x42	0x42	0x42
+0x555555702d90:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+#0  vrpn_TranslationTable::addRemoteEntry (this=0x555555703370, name=0x7fffffffd8f0 "BBBB", remote_id=-2, local_id=2) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:415
+#1  0x000055555559af39 in vrpn_Endpoint::newRemoteSender (this=0x5555556f3220, sender_name=0x7fffffffd8f0 "BBBB", remote_id=-2, local_id=2) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3229
+#2  0x000055555559de2f in vrpn_Endpoint::handle_sender_message (userdata=0x5555556f3220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4574
+#3  0x0000555555596d88 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, p=..., userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)
