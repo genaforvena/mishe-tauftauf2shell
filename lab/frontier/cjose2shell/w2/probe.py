@@ -20,12 +20,12 @@ def b64u(raw):
     return base64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
 
 
-def wrap(plaintext):
+def wrap(plaintext, kek=KEK):
     assert len(plaintext) % 8 == 0 and len(plaintext) >= 16
     n = len(plaintext) // 8
     a = A6
     r = [plaintext[i * 8:(i + 1) * 8] for i in range(n)]
-    cipher = Cipher(algorithms.AES(KEK), modes.ECB()).encryptor()
+    cipher = Cipher(algorithms.AES(kek), modes.ECB()).encryptor()
     for j in range(6):
         for i in range(1, n + 1):
             block = cipher.update(a + r[i - 1])
@@ -34,10 +34,13 @@ def wrap(plaintext):
     return a + b"".join(r)
 
 
-def token(ek_len, kid=None):
+def token(ek_len, kid=None, kek=KEK, plaintext=None):
     # ek_len is raw (decoded) encrypted_key length: 40 = correct A128KW, 56 = oversized.
     assert ek_len >= 16 and ek_len % 8 == 0
-    ek = wrap(b"\x5a" * (ek_len - 8))
+    if plaintext is None:
+        plaintext = b"\x5a" * (ek_len - 8)
+    assert len(plaintext) == ek_len - 8
+    ek = wrap(plaintext, kek)
     header = {"alg": "A128KW", "enc": "A128CBC-HS256"}
     if kid:
         header["kid"] = kid

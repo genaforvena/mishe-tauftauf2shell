@@ -284,6 +284,50 @@ listener remained after capture. Witness replay of this lane not requested.
 
 No pointer/IP control, rung 5 or module patch.
 
+
+## W187 — chosen-byte fault-site control in the real consumer (2026-11-24 00:10-00:15Z)
+
+New files only; no pinned bytes, build output or module patch changed.
+`w2/probe-idtoken-chosen.py` wraps a chosen 56-byte plaintext with the
+config-derived OCT KEK `e6e411c2390f0130d75a4fe5b28e6601`
+(`SHA256("w2-loopback-secret-0123456789")[:16]`), so the RFC 3394 integrity
+check passes; raw `encrypted_key` is 64 bytes. The plaintext blocks are
+offset-tagged, block 5 (`cek+40..47`) is the chosen next-chunk size field and
+block 6 (`cek+48..55`) carries either a valid JSON_STRING type/refcount
+(`02 00 00 00 01 00 00 00`, variants `valid`/`preserve`) or baseline `0x5a`
+(`invalid`). `preserve` writes top size `0x1bd41`; the other two write
+`0x0606060606060606`.
+
+`w2/gdb-idtoken-chosen.cmd` logs `W2C_*` breakpoints and dumps `cek-16..cek+80`
+before the unwrap and `cek+32..cek+55` at `_cjose_jwe_calc_auth_tag`.
+Replay (`apache-idtoken.conf`, 127.0.0.1:18443 only):
+
+```sh
+cd lab/frontier/cjose2shell/w2
+timeout 90 gdb -q -batch -x "$PWD/gdb-idtoken-chosen.cmd" \
+  --args /usr/sbin/apache2 -f "$PWD/apache-idtoken.conf" -X \
+  > evidence/gdb-idtoken-chosen-stdout-VARIANT.log 2>&1   # separate shell
+./probe-idtoken-chosen.py VARIANT                         # valid|invalid|preserve
+```
+
+Measured in all three: `W2C_AES_KW_DECRYPT_REACHED raw_len=64 cek_len=0
+jwk_kty=3`, `W2C_UNWRAP_ENTRY inlen=64`, `cek` chunk header `0x31`, top-chunk
+size at `cek+40..47` (`0x1bd41` in `valid`/`invalid`, `0x1be71` in
+`preserve`), post bytes at `cek+32..55` exactly the chosen pattern. `enc` was
+at `cek-0xF80`, `cek-672` and `cek-3968`: never at `cek+48`, so no live header
+object was overwritten. `valid`/`invalid`: POST aborted inside HMAC at
+`jwe.c:1158` with glibc `malloc(): corrupted top size`. `preserve`: POST HTTP
+400, follow GET aborted in `string_create -> jsonp_malloc(32)` with
+`malloc(): unaligned tcache chunk detected`. Empty `*-post.bin` /
+`*-follow.bin` are the aborts before a response. Raw bytes, tokens, cookies,
+gdb logs and hashes: `evidence/chosen64-*` and
+`evidence/chosen64-SHA256SUMS`. No listener or lab Apache remained. Witness
+replay of this lane not requested; author result is not acceptance.
+
+Grade unchanged: chosen-byte fault-site control in a real process (rung 4
+mechanics), no pointer/IP control, no code pointer in the write, no marker,
+no r5; deployed reachability stays UNKNOWN.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
@@ -295,8 +339,11 @@ reached the vulnerable helper but not the copy (W184). W186 measured the
 id_token lane in that build with a lab OCT `client_secret` and state cookie:
 `AES_unwrap_key()` reached with `raw_len=56`, followed by a glibc
 `free(): invalid next size (fast)` abort; the 40-byte control reached unwrap
-without abort. No credential, pointer/IP control,
-shell command. The witness independently replayed the direct-call and wire
+without abort. W187 used the derived client KEK so chosen bytes survived and
+selected either a `corrupted top size` abort inside HMAC or a later
+`unaligned tcache chunk` abort in jansson; `enc` was never adjacent to the
+CEK and no code pointer was in the write. No credential, pointer/IP control
+or shell command. The witness independently replayed the direct-call and wire
 lanes from a clean archive (verdicts #3019/#3020) and the W184
 real-consumer negative (DM #3079). The chosen bytes are the plaintext of a
 lab-generated RFC 3394 wrap under a lab-known key; in a real deployment the

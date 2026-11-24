@@ -206,3 +206,33 @@ cookie from an earlier loopback authorization request. Not deployed
 reachability, no pointer/IP control, no benign marker, no r5. The witness
 has not replayed this lane. Listener was 127.0.0.1:18443 only and was stopped
 after capture; no 18443 listener or lab Apache remained.
+
+## W187 — chosen-byte fault-site control (2026-11-24 00:10-00:15Z)
+
+New harness only: `probe-idtoken-chosen.py`, `gdb-idtoken-chosen.cmd` and
+`evidence/chosen64-*`. `probe.py:wrap/token` gained optional `kek`/`plaintext`
+arguments; the default 56-byte construction is unchanged. The new probe
+wraps a 56-byte offset-tagged plaintext with the config-derived OCT KEK
+(`SHA256("w2-loopback-secret-0123456789")[:16]`), so the RFC 3394 check passes;
+raw `encrypted_key` is 64 bytes and the unwrap writes 56 bytes into the
+32-byte CEK. Variants: `valid` (blocks 4/5 = `05..`/`06..`, block 6 = valid
+JSON_STRING type/refcount), `invalid` (block 6 = `0x5a`), `preserve` (block 5
+= observed top size `0x1bd41`, block 6 valid).
+
+Replay with `apache-idtoken.conf` on 127.0.0.1:18443 only; gdb launches Apache
+as its child (Yama ptrace_scope), and the probe does GET `/private`, POST
+`id_token` to `/redirect_uri`, then a follow GET. All three runs logged
+`W2C_AES_KW_DECRYPT_REACHED raw_len=64 cek_len=0 jwk_kty=3` and
+`W2C_UNWRAP_ENTRY inlen=64`; pre/post dumps show chosen bytes at
+`cek+32..55` and the CEK chunk header `0x31`. Top-chunk size at `cek+40..47`
+was `0x1bd41` in `valid`/`invalid`, `0x1be71` in `preserve`. With
+`0x0606060606060606` there the POST aborted inside HMAC (`jwe.c:1158`) with
+`malloc(): corrupted top size`; with `0x1bd41` over `0x1be71` the POST returned
+HTTP 400 and the follow GET aborted in `string_create -> jsonp_malloc(32)` with
+`malloc(): unaligned tcache chunk detected`. `enc` was far from the CEK in all
+three (-0xF80, -672, -3968), so no live header object was at `cek+48`. Empty
+`*-post.bin`/`*-follow.bin` files are the aborts before a response. Hashes in
+`evidence/chosen64-SHA256SUMS`. Grade unchanged: chosen-byte control of a
+fault site in a real process, no code pointer/pointer control, no marker, no
+r5; witness replay of this lane not yet done. No listener or lab Apache
+remained after capture.

@@ -1,0 +1,80 @@
+Function "oidc_proto_parse_idtoken" not defined.
+Breakpoint 1 (oidc_proto_parse_idtoken) pending.
+Function "oidc_jwe_decrypt_impl" not defined.
+Breakpoint 2 (oidc_jwe_decrypt_impl) pending.
+Function "cjose_jwe_decrypt" not defined.
+Breakpoint 3 (cjose_jwe_decrypt) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 4 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 5 (AES_unwrap_key) pending.
+Function "_cjose_jwe_calc_auth_tag" not defined.
+Breakpoint 6 (_cjose_jwe_calc_auth_tag) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W2C_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2C_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2C_PARSE_IDTOKEN_REACHED
+W2C_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2C_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2C_AES_KW_DECRYPT_REACHED raw_len=64 cek_len=0 jwk_kty=3
+W2C_UNWRAP_ENTRY cek=0x555555699170 inlen=64
+W2C_PRE_GX cek-16..
+0x555555699160:	0x0000000000000000	0x0000000000000031
+0x555555699170:	0x159fdaddebca7da7	0x6e6119504bed70e5
+0x555555699180:	0xb7a8a2c02bdb1b8a	0x5aed1a245c4cc751
+0x555555699190:	0x00007ffff7e048e0	0x000000000001be71
+0x5555556991a0:	0x0000000000000000	0x0000000000000001
+0x5555556991b0:	0x0000000000000001	0x000000000000001e
+W2C_PRE_BX cek..
+0x555555699170:	0xa7	0x7d	0xca	0xeb	0xdd	0xda	0x9f	0x15
+0x555555699178:	0xe5	0x70	0xed	0x4b	0x50	0x19	0x61	0x6e
+0x555555699180:	0x8a	0x1b	0xdb	0x2b	0xc0	0xa2	0xa8	0xb7
+0x555555699188:	0x51	0xc7	0x4c	0x5c	0x24	0x1a	0xed	0x5a
+0x555555699190:	0xe0	0x48	0xe0	0xf7	0xff	0x7f	0x00	0x00
+0x555555699198:	0x71	0xbe	0x01	0x00	0x00	0x00	0x00	0x00
+0x5555556991a0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x5555556991a8:	0x01	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x5555556991b0:	0x01	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x5555556991b8:	0x1e	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x5555556991c0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x5555556991c8:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+W2C_CALC_AUTH_TAG enc=0x555555698ed0 delta=-672
+W2C_POST_GX cek+32..
+0x555555699190:	0x0505050505050505	0x000000000001bd41
+0x5555556991a0:	0x0000000100000002
+W2C_POST_BX cek+32..
+0x555555699190:	0x05	0x05	0x05	0x05	0x05	0x05	0x05	0x05
+0x555555699198:	0x41	0xbd	0x01	0x00	0x00	0x00	0x00	0x00
+0x5555556991a0:	0x02	0x00	0x00	0x00	0x01	0x00	0x00	0x00
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+W2C_POST_RUN_REACHED
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff7c4527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff7c288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff7c297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff7dcf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x00007ffff7ca90b5 in malloc_printerr (str=str@entry=0x7ffff7dd2ed8 "malloc(): unaligned tcache chunk detected") at ./malloc/malloc.c:5775
+#7  0x00007ffff7cada2c in tcache_get_n (ep=<optimized out>, tc_idx=<optimized out>) at ./malloc/malloc.c:3183
+#8  tcache_get (tc_idx=<optimized out>) at ./malloc/malloc.c:3199
+#9  __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3320
+#10 0x00007ffff7b9af7b in jsonp_malloc (size=32) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/memory.c:27
+#11 0x00007ffff7ba0328 in string_create (value=0x7ffff6ae7ad8 "SjU75kkt7nd_PhtVu9PxLpTODoaWrDC0mtep1lhGHr4", len=43, own=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:724
+#12 0x00007ffff7ba03e4 in json_stringn_nocheck (value=0x7ffff6ae7ad8 "SjU75kkt7nd_PhtVu9PxLpTODoaWrDC0mtep1lhGHr4", len=43) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:744
+#13 0x00007ffff7ba049e in json_stringn (value=0x7ffff6ae7ad8 "SjU75kkt7nd_PhtVu9PxLpTODoaWrDC0mtep1lhGHr4", len=43) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:763
+#14 0x00007ffff7ba0450 in json_string (value=0x7ffff6ae7ad8 "SjU75kkt7nd_PhtVu9PxLpTODoaWrDC0mtep1lhGHr4") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:756
+#15 0x00007ffff7b4366c in oidc_proto_state_set_string_value (proto_state=0x55555561d430, name=0x7ffff7bb26e7 "n", value=0x7ffff6ae7ad8 "SjU75kkt7nd_PhtVu9PxLpTODoaWrDC0mtep1lhGHr4") at src/proto.c:789
+#16 0x00007ffff7b43c0b in oidc_proto_state_set_nonce (proto_state=0x55555561d430, nonce=0x7ffff6ae7ad8 "SjU75kkt7nd_PhtVu9PxLpTODoaWrDC0mtep1lhGHr4") at src/proto.c:901
+#17 0x00007ffff7b243bd in oidc_authenticate_user (r=0x7ffff7add0a0, c=0x7ffff7af7640, provider=0x7ffff7af7688, original_url=0x7ffff6ae7a08 "http://127.0.0.1:18443/private", login_hint=0x0, id_token_hint=0x0, prompt=0x0, auth_request_params=0x0, path_scope=0x0) at src/mod_auth_openidc.c:2519
+#18 0x00007ffff7b17612 in oidc_handle_unauthenticated_user (r=0x7ffff7add0a0, c=0x7ffff7af7640) at src/mod_auth_openidc.c:899
+#19 0x00007ffff7b2daef in oidc_check_userid_openidc (r=0x7ffff7add0a0, c=0x7ffff7af7640) at src/mod_auth_openidc.c:4230
+#20 0x00007ffff7b2e1ec in oidc_check_user_id (r=0x7ffff7add0a0) at src/mod_auth_openidc.c:4293
+#21 0x00005555555af8ea in ap_run_check_user_id ()
+#22 0x00005555555b9a68 in ap_process_request_internal ()
+#23 0x00005555555db645 in ap_process_async_request ()
+#24 0x00005555555db877 in ap_process_request ()

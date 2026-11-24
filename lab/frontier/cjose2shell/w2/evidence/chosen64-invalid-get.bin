@@ -1,0 +1,17 @@
+HTTP/1.1 302 Found
+Date: Tue, 24 Nov 2026 00:14:29 GMT
+Server: Apache/2.4.58 (Ubuntu)
+Set-Cookie: mod_auth_openidc_state_jzDTZnSXdb-rRiOzMNR4Xgsakr8=eyJhbGciOiAiZGlyIiwgImVuYyI6ICJBMjU2R0NNIn0..ZoTnkVOkVJaL3DwP.8oLngM4Vyp0CR__JB2PGLn346l8exXtruSKSlfl-jQPb_M5vr36e7IvwJSd0vAZ68u4VNtrRmHFP58FzTNtTzvaSkty-Mo3_CiOoxhCf6_vVNjpj9k8C3m9FK__UL7cBQzuZvKfH6WQyPV04r4psH6dgbBkl1GpXV41s4riuVbdBmLFeDJU4tGMHIdDzcEiOynN8YTsELxhEDH0.S3nKYHVlRn_7hC4W70V5wQ; Path=/; HttpOnly; SameSite=Lax
+Cache-Control: no-cache, no-store, max-age=0
+Location: https://127.0.0.1:18443/authorize?response_type=id_token&scope=openid&client_id=w2-loopback-rp&state=jzDTZnSXdb-rRiOzMNR4Xgsakr8&redirect_uri=http%3A%2F%2F127.0.0.1%3A18443%2Fredirect_uri&nonce=jjWpnc1kcVyTeqATqMAPfgtbBoM0hC0uz0a3pkKp4Dw&response_mode=form_post
+Content-Length: 469
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>302 Found</title>
+</head><body>
+<h1>Found</h1>
+<p>The document has moved <a href="https://127.0.0.1:18443/authorize?response_type=id_token&amp;scope=openid&amp;client_id=w2-loopback-rp&amp;state=jzDTZnSXdb-rRiOzMNR4Xgsakr8&amp;redirect_uri=http%3A%2F%2F127.0.0.1%3A18443%2Fredirect_uri&amp;nonce=jjWpnc1kcVyTeqATqMAPfgtbBoM0hC0uz0a3pkKp4Dw&amp;response_mode=form_post">here</a>.</p>
+</body></html>

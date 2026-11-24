@@ -212,6 +212,29 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   lab-configured KEK and a state cookie, not deployed reachability and not
   r5. The witness has not replayed this lane.
 
+- W187 moved chosen bytes into the same real consumer. `w2/probe-idtoken-chosen.py`
+  wraps a 56-byte chosen plaintext with the config-derived OCT KEK
+  (`SHA-256(client_secret)[:16]`), so RFC 3394 integrity passes and the chosen
+  bytes survive; the raw `encrypted_key` is 64 bytes. Three 127.0.0.1:18443
+  runs each logged `W2C_AES_KW_DECRYPT_REACHED raw_len=64 ... jwk_kty=3` and
+  `W2C_UNWRAP_ENTRY inlen=64`: 56 bytes copied into the 32-byte CEK. The
+  pre-unwrap dump shows the CEK chunk header (`cek-16`) size `0x31` and the
+  following top-chunk size at `cek+40..47` (`0x1bd41` twice, `0x1be71` once);
+  the post-unwrap dump confirms chosen bytes at `cek+32..55`. With
+  `0x0606060606060606` there (`valid`, `invalid`) the POST aborted inside
+  HMAC at `jwe.c:1158` with glibc `malloc(): corrupted top size`; with
+  `0x1bd41` written over an observed `0x1be71` (`preserve`), the POST returned
+  HTTP 400 and the follow-up GET aborted in jansson `string_create ->
+  jsonp_malloc(32)` with `malloc(): unaligned tcache chunk detected`. Chosen
+  bytes at chosen offsets therefore select the allocator check and fault site
+  in a real mod_auth_openidc process. `enc` was elsewhere in all three runs
+  (delta -0xF80, -672, -3968 from the CEK), so no live header string was
+  corrupted at `cek+48`: no code pointer in the write, no pointer/IP control,
+  no marker, no r5. Raw bytes, tokens, logs and hashes:
+  `w2/evidence/chosen64-*` and `w2/evidence/chosen64-SHA256SUMS`. The empty
+  `*-post.bin` / `*-follow.bin` files record aborts before a response. The
+  witness has not replayed this lane.
+
 ## 6. Honest ceiling
 
 Direct call plus a loopback-only synthetic consumer, with a real compact JWE
@@ -229,7 +252,12 @@ that lane from a clean archive and ESTABLISHED the negative at the labeled
 real-consumer / loopback scope (DM #3079). W186 used the same build with a
 lab OCT `client_secret` and a matching state cookie: the id_token lane
 reached `AES_unwrap_key()` and the process aborted in glibc `free()`;
-the 40-byte control reached unwrap without abort (section 5). No deployed
+the 40-byte control reached unwrap without abort (section 5). W187 used a
+config-derived KEK so the chosen wrap bytes survive the integrity check:
+64-byte raw keys reached unwrap in the real consumer and chosen bytes at
+`cek+40..47` selected between two glibc allocator aborts (section 5). That
+is chosen-byte control of a fault site in a real process, not control of a
+code pointer; `enc` was never adjacent to the CEK in those runs. No deployed
 server, real credential, pointer/IP control or shell command. Advisory
 reachability in a real deployment and any RCE claim remain **UNKNOWN**;
 rung 5 not attempted and not established. A pointer or control-flow target
