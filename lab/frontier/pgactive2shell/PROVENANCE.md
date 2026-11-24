@@ -56,3 +56,10 @@ probed. SHA-256 values of every pinned and generated artifact are in
   `*** stack smashing detected ***` after the write.
 - `harness/evidence/plain-vuln-safe.out`: `RET=0`, accepted.
 - `harness/evidence/plain-fixed-attack.out`: `RET=-1`, `CAPTURE=NONE`.
+
+## Clean-archive replay (2026-11-24 21:45Z)
+
+`git archive 6b17910b lab/frontier/pgactive2shell
+reports/frontier-pgactive2shell.md` extracted to `/tmp/pgactive-replay`;
+`sh harness/run.sh` from that clean directory reported `RESULT 19 PASS /
+0 FAIL`, rc 0. Pins and verbatim extraction were checked there as well.
