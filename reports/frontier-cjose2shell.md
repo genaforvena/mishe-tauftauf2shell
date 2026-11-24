@@ -239,9 +239,15 @@ replays, but the plain 56-byte outcome varies by build/run (below).
 - W188 tested the pointer-target question in two bounded lanes. In the real
   consumer, `w2/gdb-idtoken-scan.cmd` plus `w2/probe-idtoken-scan.py` dumped
   2 KiB after the CEK at unwrap entry and at auth-tag calculation with the
-  process mappings (`w2/evidence/gdb-idtoken-scan.log`): all 512 words were
-  outside every executable and heap mapping, so the default layout has no
-  live pointer-bearing object in the forward region. In a separate groomed
+  process mappings (`w2/evidence/gdb-idtoken-scan.log`): in that run all 512
+  words were outside every executable and heap mapping, so that default
+  layout had no live pointer-bearing object in the forward region. W195
+  extended the same lane to 8 KiB (`w2/gdb-idtoken-wide.cmd`,
+  `w2/probe-idtoken-wide.py`, `evidence/gdb-idtoken-wide.log`): 3 of 1024
+  words sat in libc mappings at `cek+32/+112/+136`, but the header at
+  `cek+40` is the `0x1bd41` top-chunk size, so they are stale FILE/vtable
+  remnants in free space, not live objects. Forward contents vary by run;
+  no run has shown a live pointer behind the CEK. In a separate groomed
   direct-call lab process, `fptr/{driver.c,run.sh}` placed the real OCT JWK
   720 bytes after the reused 32-byte CEK chunk; a 776-byte raw
   `encrypted_key` (768-byte RFC 3394-valid wrap) preserved every JWK field

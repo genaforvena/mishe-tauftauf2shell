@@ -527,6 +527,32 @@ process, benign marker via real `cjose_jwk_release()`, no wire path, no ASLR
 defeat, no command and NO r5; W189 no-wire negative stands. W186 (#3105) and
 W187 (#3141) are separate author-only offers, still unwitnessed.
 
+## W195 — wider real-consumer forward scan (2026-11-24 13:40Z)
+
+Prediction tested: W189's 2 KiB forward window might miss a pointer-bearing
+object further past the CEK that a longer, still wire-carried OOB write could
+reach. New lab-only files `w2/gdb-idtoken-wide.cmd` and
+`w2/probe-idtoken-wide.py` (tag `wide195-*`; wire bytes identical to W188's
+`probe-idtoken-scan.py`): `x/1024gx` from `cek+32` plus `info proc mappings`
+at `AES_unwrap_key` entry, with the same private `apache-idtoken.conf` on
+127.0.0.1:18443 launched under gdb as its child.
+
+Measured: `W2W_UNWRAP_ENTRY cek=0x5555556992a0 inlen=64`, GET 302, POST 400,
+gdb exits 0 and no listener remains. Of 1024 words spanning `cek+32` through
+`cek+0x2018`, exactly 3 lay inside any process mapping: `0x7ffff7e048e0` in
+libc rw-p at `cek+32`, `0x7ffff7c86a20` (`__GI__IO_fwrite`) at `cek+112` and
+`0x7ffff7c864e0` (`__GI__IO_fread`) at `cek+136`, both in libc r-xp. The
+header at `cek+40` is `0x1bd41`, the top-chunk size, and the dump reaches the
+heap mapping end; those words are therefore stale FILE/vtable remnants in
+free top-chunk space, not a live object or control-flow target. W189's run
+had zeros in the same slots, so the W188 wording "all 512 words outside every
+executable and heap mapping" is run-specific, not an invariant; the
+conclusion (no live pointer-bearing object behind the CEK) holds in both.
+Grade unchanged: no wire-derived address, no command, no r5. Evidence:
+`w2/evidence/gdb-idtoken-wide.log`, `gdb-idtoken-wide-stdout.log`,
+`probe-idtoken-wide.out`, `wide195-*`. No pinned byte, build output, config
+or previously tracked evidence was edited.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
@@ -559,3 +585,6 @@ W189 measured that this consumer's freed state-cookie CEK chunk is consumed
 before the vulnerable CEK is allocated, so the CEK stays in top chunk with
 no live pointer behind it; combined with full ASLR and a PIE module there is
 no measured wire route into the W188 groomed layout.
+W195 extended the forward scan to 8 KiB: the only mapping-resident words were
+three stale libc FILE/vtable remnants inside free top-chunk space (one data,
+two code pointers), with no live object; forward contents vary by run.
