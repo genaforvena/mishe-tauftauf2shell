@@ -32,9 +32,29 @@ static CRYPT_SESSION sess;
 
 static void *activate_thread(void *unused)
 {
-	int status = cryptSetAttribute(sess, CRYPT_SESSINFO_ACTIVE, TRUE);
-	printf("ACTIVE status=%d\n", status);
-	fflush(stdout);
+	int status, attempt;
+	for (attempt = 0; attempt < 3; attempt++) {
+		status = cryptSetAttribute(sess, CRYPT_SESSINFO_ACTIVE, TRUE);
+		printf("ACTIVE attempt=%d status=%d\n", attempt, status);
+		fflush(stdout);
+		if (cryptStatusOK(status))
+			break;
+		if (status != CRYPT_ENVELOPE_RESOURCE)
+			break;
+		/* answer.cpp:314-323: read presented credentials, then allow. */
+		{
+			char user[128];
+			int len = 0;
+			if (cryptStatusOK(cryptGetAttributeString(sess,
+					CRYPT_SESSINFO_USERNAME, user, &len)) && len > 0) {
+				user[len < (int)sizeof(user) ? len : sizeof(user) - 1] = 0;
+				printf("USERNAME='%s' len=%d\n", user, len);
+			}
+		}
+		status = cryptSetAttribute(sess, CRYPT_SESSINFO_AUTHRESPONSE, TRUE);
+		printf("AUTHRESPONSE status=%d\n", status);
+		fflush(stdout);
+	}
 	return NULL;
 }
 
@@ -83,23 +103,67 @@ int main(void)
 	status = cryptSetAttribute(sess, CRYPT_SESSINFO_SSH_OPTIONS,
 		CRYPT_SSHOPTION_NONE_AUTH);
 	printf("none-auth option=%d\n", status);
-	status = cryptSetAttribute(sess, CRYPT_SESSINFO_AUTHRESPONSE, TRUE);
-	printf("authresponse=%d\n", status);
+	/* AUTHRESPONSE is set by activate_thread after a resource request,
+	 * matching pinned answer.cpp:297-310. */
 	status = cryptSetAttribute(sess, CRYPT_OPTION_NET_READTIMEOUT, 5);
 	printf("read timeout=%d\n", status);
 
 	pthread_create(&tid, NULL, activate_thread, NULL);
-	pthread_create(&reader, NULL, reader_thread, NULL);
+	/* reader_thread is started after channel selection: cryptlib stores
+	 * pty-req attributes on the channel current at message-processing time. */
+	int cid = -1;
 	for (i = 0; i < 100; i++) {
 		usleep(100000);
-		len = 0;
-		status = cryptGetAttributeString(sess,
-			CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL, NULL, &len);
-		if (cryptStatusOK(status) && len > 0)
+		if (cryptStatusOK(cryptGetAttribute(sess, CRYPT_SESSINFO_SSH_CHANNEL, &cid)))
 			break;
 	}
-	printf("TERM poll i=%d status=%d len=%d\n", i, status, len);
-	fflush(stdout);
+	printf("CHANNEL poll i=%d status=%d cid=%d\n", i, status, cid);
+	if (cid >= 0) {
+		status = cryptSetAttribute(sess, CRYPT_SESSINFO_SSH_CHANNEL, cid);
+		printf("CHANNEL early select status=%d\n", status);
+		pthread_create(&reader, NULL, reader_thread, NULL);
+	}
+	if (cid >= 0) {
+		char ctype[64];
+		int ctype_len = 0, waits;
+		for (waits = 0; waits < 50; waits++) {
+			usleep(100000);
+			status = cryptSetAttribute(sess, CRYPT_SESSINFO_SSH_CHANNEL, cid);
+			if (cryptStatusError(status))
+				continue;
+			ctype_len = 0;
+			status = cryptGetAttributeString(sess,
+				CRYPT_SESSINFO_SSH_CHANNEL_TYPE, ctype, &ctype_len);
+			if (cryptStatusOK(status) && ctype_len > 0 && ctype_len < (int)sizeof(ctype)) {
+				ctype[ctype_len] = 0;
+				printf("CHANNEL TYPE '%s' len=%d\n", ctype, ctype_len);
+				fflush(stdout);
+				if (strncmp(ctype, "shell", 5) == 0)
+					break;
+			}
+		}
+		printf("CHANNEL TYPE final waits=%d status=%d\n", waits, status);
+		fflush(stdout);
+	}
+	int found = -1, found_len = 0, pass, cand;
+	for (pass = 0; pass < 20 && found < 0; pass++) {
+		usleep(100000);
+		for (cand = 0; cand < 8; cand++) {
+			int l2 = 0, st2;
+			if (cryptStatusError(cryptSetAttribute(sess,
+					CRYPT_SESSINFO_SSH_CHANNEL, cand)))
+				continue;
+			st2 = cryptGetAttributeString(sess,
+				CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL, NULL, &l2);
+			if (cryptStatusOK(st2) && l2 > 0) {
+				found = cand;
+				found_len = l2;
+				break;
+			}
+		}
+	}
+	printf("TERM sweep pass=%d cid=%d status=%d len=%d\n",
+		pass, found, status, found_len);
 
 	memset(&s, 0, sizeof(s));
 	len = 0;

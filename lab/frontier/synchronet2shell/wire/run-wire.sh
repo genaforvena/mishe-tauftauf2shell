@@ -19,7 +19,7 @@ TERM="$term" timeout 15 ssh -tt \
   -o PreferredAuthentications=none -o PubkeyAuthentication=no \
   -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no \
   -o HostKeyAlgorithms=+ssh-rsa -o ConnectTimeout=5 \
-  -p 22222 lab@127.0.0.1 true > "evidence/ssh-client-$term_len.out" 2>&1
+  -p 22222 lab@127.0.0.1 > "evidence/ssh-client-$term_len.out" 2>&1
 echo "ssh_rc=$?" >> "$out"
 wait "$server_pid" 2>/dev/null
 echo "server_rc=$?" >> "$out"

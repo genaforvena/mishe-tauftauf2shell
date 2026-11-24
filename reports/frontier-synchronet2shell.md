@@ -1,7 +1,8 @@
 # Frontier brief — Synchronet2Shell (CVE-2026-133646)
 
-Status: **locally staged, rungs 1–4 by direct call; candidate, not admitted.**
-Brief authored 2026-11-24 in wake W194. Lab: `lab/frontier/synchronet2shell/`.
+Status: **admitted 2026-11-24 as the 129th route; rungs 1–4 by direct call,
+unwitnessed.** Brief authored 2026-11-24 in wake W194; W2 update 2026-11-24.
+Lab: `lab/frontier/synchronet2shell/`.
 
 ## Claim ground truth (provisioning, never a probe)
 
@@ -91,13 +92,23 @@ synchronet2shell/real-cryptlib-build.log`, rc=0). New probes in
   three zero. The query returns `len=64` and the one-call copy returns
   `len=64`, i.e. the caller's 41-byte array size is never consulted.
 
-These are direct API measurements, not a wire result. A loopback SSH probe
-under `wire/` has so far failed to deliver an OpenSSH pty-req TERM to a
-cryptlib server (`TERM poll status=-43 len=-1`, client broken pipe; a PEM
-file keyset was rejected with `CRYPT_ERROR_BADDATA`). A cryptlib-to-cryptlib
-client reached the server with channel bytes but ended in protocol errors
-(`ACTIVE status=-16` client, `-41` server). Those negatives are preserved in
-`wire/evidence/`; no wire reach, DoS or rung 5 is claimed from them.
+These are direct API measurements, not a wire result. The loopback wire lane
+under `wire/` was advanced in W2 and remains a **negative**. A minimal cryptlib
+SSH server now performs the same steps as pinned `answer.cpp`: it sequences
+`ACTIVE`/`AUTHRESPONSE` (lines 297–310), selects the negotiated channel (lines
+399–406) and waits for channel type. OpenSSH 9.6 authenticates with `none`,
+opens channel 0 and sends pty-req plus shell; its verbose trace records
+`PTY allocation request accepted on channel 0` and `shell request accepted`.
+The server still reads `CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL` as `-43`
+(`CRYPT_ERROR_NOTFOUND`) for every selected channel ID 0–7, so the one-call
+getter copies nothing and all adjacent-field bytes stay zero. Moving the
+reader thread start after channel selection did not change that. Cause is
+unresolved inside the minimal probe: cryptlib's `REQUEST_PTY` handler calls
+`setChannelAttributeS` on the channel current at message-processing time and
+ignores its status. The 64-byte cap and chosen-byte offsets are therefore
+**not** measured from a network pty-req. Negatives are preserved in
+`wire/evidence/` (`wire-term-64*.out`, `wire-verbose-{client,server}.out`,
+`clclient-repaired-64.out`); no wire reach, DoS or rung 5 is claimed.
 
 ## Ceiling and cheapest next experiment
 
@@ -123,7 +134,9 @@ build ids. Author replay is not witness acceptance.
 Next rung-raising step: build `sbbs3` from the already provisioned pinned tree
 against its vendored cryptlib (missing host dev packages: libarchive-dev and
 libnspr4-dev) and drive a loopback SSH client with an oversized TERM; stop at
-the first measured layer and keep every negative. The simpler direct-API
-differential is already measured with the real library; the open gap is the
-network pty-req reaching `answer()`'s getter. Admission and the target window
-are done; witness replay is owed.
+the first measured layer and keep every negative. The direct-API differential
+is measured with the real library; the open gap is the network pty-req reaching
+`answer()`'s getter. W2 showed that a minimal cryptlib server accepts the
+pty-req but never exposes the TERM attribute, so the next experiment should use
+the real `sbbs3` SSH path rather than another standalone server. Witness replay
+is still owed; the stand-alone wire probe is not a substitute for it.
