@@ -7,10 +7,11 @@ AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
 author-measured in W5/W6 and replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
-authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10 updates
+authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
 2026-11-24. W10 source audit bounds this pinned build to one 64-byte remote
-TERM setter and finds no control-flow target in the overwritten span; no rung
-change.
+TERM setter and finds no control-flow target in the overwritten span; W11
+measures the exact client pty-req TERM length and closes W8's client-truncation
+residual. Neither changes the rung or the availability ceiling.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -419,6 +420,38 @@ inside this pinned build, "other attribute sources" is now a bounded negative
 rather than UNKNOWN, while other builds, versions and configurations remain
 UNKNOWN. No RCE inference.
 
+## W11 exact client TERM length: W8 truncation residual closed (2026-11-24, author-measured)
+
+W8 preserved one explicit residual: the OpenSSH `-vvv` transcript showed a
+pty-req for the 65-byte TERM but the exact on-wire TERM byte count was not
+decoded, so client-side truncation could not be excluded by that wire alone.
+W11 closes that residual with a client whose pty-req construction is visible.
+`termlen/term_client.py` uses paramiko 5.1.0 against the same W8 verbatim
+`wire/ssh_server6.c` server (port 22227; only the port and getter buffer
+changed by the recorded build-time `sed`). The provisioned
+`paramiko/channel.py:188-200` builds the request with `m.add_string(term)` and
+no length cap. A hook on `Transport._send_user_message` reads the message
+bytes at the exact point they are handed to transport encryption, parses the
+`pty-req` TERM string and logs its length; it does not alter the message.
+
+`bash lab/frontier/synchronet2shell/termlen/run-clientlen.sh` ran TERM=64,
+65 and 128 on loopback: **6 PASS / 0 FAIL** at 18:26Z. Client logs record
+`CLIENT WIRE_PTYREQ term_len=64`, `term_len=65` and `term_len=128` (each with
+`head=b'TTTTTTTT'`) followed by `PASS exact wire TERM length N`; the W8 server
+logged `READER TERM status=0 len=64 data=TTTT…` for 64 and only
+`READER TERM status=-43 len=-1` (`CRYPT_ERROR_NOTFOUND`, no attribute stored)
+for 65 and 128. Evidence: `termlen/evidence/clientlen/{term64,term65,term128}{.out,-client.log}`,
+`provenance.txt` and `results.txt`. The 64-byte client hits `Socket is closed`
+after the getter because that probe server exits once it has copied the TERM;
+the pty-req and getter result were already recorded.
+
+This excludes client-side truncation before encryption at the measured client
+boundary. It is not a decrypted ciphertext capture: the server's differential
+getter result (64 readable, 65/128 not stored) is the independent counterpart,
+and the parser cap remains pinned in `session/ssh2_msgsvr.c:661-670` and
+`enc_dec/misc_rw.c:332-334`. No new rung, no real `answer()` call here, no
+witness verdict; other builds and clients stay UNKNOWN.
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent
@@ -436,8 +469,9 @@ The advisory's claimed thread-block/socket-exhaustion DoS is measured at real
 copy are measured at the real cryptlib API, from a network pty-req through the
 real vendored cryptlib getter, inside a real `sbbs3` build's
 `sbbs_t::answer()` on loopback; W8 pins the 64-byte maximum to the vendored
-pty-req parser and corroborates it on the wire. No claim that the
-adjacent-field overwrite yields code execution: the advisory's own impact
+pty-req parser and corroborates it on the wire, and W11 measures the client's
+exact pty-req TERM length to close W8's client-truncation residual. No claim
+that the adjacent-field overwrite yields code execution: the advisory's own impact
 vector is availability-only (`VC:N/VI:N`). W5 and W6 are author evidence with
 one-command replays, not yet independently replayed.
 

@@ -1,0 +1,11 @@
+probe: W8 verbatim ../wire/ssh_server6.c via recorded build-time sed
+sed: -e s/#define PORT 22222/#define PORT 22227/ -e s/char probe[128]/char probe[4096]/
+client: term_client.py records paramiko pty-req TERM before encryption
+80fdfcb298310c206a712ab8b0513d5c970b580c0e41c9af11b29906e936cd0d  term_client.py
+9bdd5ca4a656b342330addf7376c901a809e19c8d5053440623d8d6abc032012  run-clientlen.sh
+3173be0b9762a72f10d12861f5c791f823cf88107eb2c4fff68220c3306143fa  ../provision/local-py/paramiko/channel.py
+e90ebb384a77e2b6973850286c8516281478d559d6f5ac23c39ad8e18927efc2  ../wire/ssh_server6.c
+584494acfcd7c531878fb951c848a97b8a9a84960f1ff477935303cae952e3c2  ../src-tree/3rdp/src/cl/libcl.a
+aa5b80b969da04d494161312edab9526a8c7581c26586c21eb0de5bf90885765  ../src-tree/3rdp/src/cl/session/ssh2_msgsvr.c
+0e51cc279405c37e1bda10432b3525fb9ea667035fa84a57c67b339847b8794c  ../src-tree/3rdp/src/cl/enc_dec/misc_rw.c
+e4334e3217531bdeed50e4aaa96caf4a0039b08862c9cb87412cb3f30262bd9c  ../src-tree/3rdp/src/cl/cryptlib.h
