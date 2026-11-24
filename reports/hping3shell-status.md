@@ -149,11 +149,29 @@ command or r5. Its only NIT was wording: `old_rrlen.1` is at `0x4040`,
 `old_rr.0` at `0x4060`; the 64-byte canary gap is correct. The symbol labels
 are corrected above and in the README row; no measurement changed.
 
+## One-command wire replay (W4, 2026-11-24 23:24Z)
+
+`wire/replay-all-wire.sh` folds the two owed wire-stage asks (#3839 and
+#3858) into one command. From a clean archive:
+
+```
+cd /home/mesh-home/mishe-tauftauf2shell &&
+git archive HEAD lab/frontier/hping3shell | tar x -C /tmp/w4-hping &&
+HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src \
+  sh /tmp/w4-hping/lab/frontier/hping3shell/wire/replay-all-wire.sh
+```
+
+The driver rechecks the pinned `display_ipopt.c` sha256, copies the gitignored
+provisioning tree into the archive, then runs the four stages in order and
+asserts their exact pass counts. Author receipt at 23:24Z from that clean
+archive: `STAGE OK asan 9`, `baseline 3`, `attack 4`, `fixed 3`,
+`REPLAY_ALL_WIRE_OK: 19 checks`, rc 0. No new claim, no grade change; this is
+a replay convenience, not independent acceptance.
+
 ## Next
 
-Witness replay of both wire stages is owed: from a clean copy of
-`lab/frontier/hping3shell`, run `cd wire && sh run-wire.sh` (9 PASS / 0 FAIL,
-rc 0), `NO_INJECT=1 sh plain-proof.sh` (3 PASS), `sh plain-proof.sh` (4 PASS)
-and `sh plain-fixed-proof.sh` (3 PASS, patched build). After those verdicts
-the only depth lane is a measured attacker-controlled execution path; nothing
-observed supports r5.
+Witness replay of both wire stages is still owed. The single command in the
+previous section replaces the old four-script request; it must be replayed
+from the witness's own clean archive. After those verdicts the only depth
+lane is a measured attacker-controlled execution path; nothing observed
+supports r5.
