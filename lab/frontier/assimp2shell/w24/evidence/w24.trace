@@ -1,0 +1,13 @@
+PIN glTFAsset.inl ok=True
+PIN glTFImporter.cpp ok=True
+CASE nsp-safe rc=0 marker=0 scene=ok
+CASE nsp-marker-rip rc=0 marker=1 scene=
+CASE nsp-marker-nonctl rc=139 marker=0 scene=
+CASE o0sp-marker-rip rc=134 marker=0 scene=
+CASE o1-marker-rip rc=139 marker=0 scene=
+CASE o2-marker-rip rc=139 marker=0 scene=
+CASE fixed7090-marker-rip rc=1 marker=0 scene=null
+CASE fixed6860-marker-rip rc=134 marker=0 scene=
+FRAME nsp-o0 hit=1 inwindow=12,44 nearest_above=12
+FRAME o1 hit=1 inwindow=- nearest_above=1124
+RESULT 12 PASS / 0 FAIL

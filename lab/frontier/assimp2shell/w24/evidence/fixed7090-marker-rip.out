@@ -1,0 +1,2 @@
+MARKER_ADDR=0x4013b6
+case=harness/cases/w24-marker-rip.gltf scene=null err=GLTF: indices of mesh "tri" are not scalars of unsigned integers

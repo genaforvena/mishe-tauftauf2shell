@@ -1,0 +1,24 @@
+PASS pin-asset
+PASS pin-importer
+PASS nsp-safe
+PASS nsp-marker
+PASS nsp-nonctl
+PASS o0sp-guard
+PASS o1-no-marker
+PASS o2-no-marker
+PASS fixed7090
+PASS fixed6860
+PASS frame-o0
+PASS frame-o1
+RESULT 12 PASS / 0 FAIL
+a5260fa97c2809f0cf93a91eaef111391736e66a9554a12a75875b5e42508a70  w24/evidence/fixed6860-marker-rip.out
+fe2021ff0587504cb72505fbf74e222642416fddb70590372d95113af2bbc040  w24/evidence/fixed7090-marker-rip.out
+c5196663d56e53e89a2173eb310ecf7364f4b69dcd24a2bfa1d224ea64ab27f5  w24/evidence/nsp-marker-nonctl.out
+9d22094e00bc2da2bb8e97e98725c3ed66b356a4143dcdfa3a415dc5919bd951  w24/evidence/nsp-marker-rip.out
+fa2a3cede4eee2f8bbd5297135a79d734f5d223de3a3e400015d3de39dd9cf83  w24/evidence/nsp-o0-frame.out
+4dde5ce8bae8adac5ac89487756b818b4befd46f0565973e5fe9dc90c187c0c4  w24/evidence/nsp-safe.out
+ee472713cabe6fe33d16073a4b57a1302abb2d4b6f9893ecf4818f0b4c69a31e  w24/evidence/o0sp-marker-rip.out
+df7619d36ab75a46aae4fabf876872e89e2062ed747681336fb034973287ffab  w24/evidence/o1-frame.out
+d857622a5501b2ca5c6b6ac9be1188c1c9f74692530bc932952568a22c2d0b8f  w24/evidence/o1-marker-rip.out
+d857622a5501b2ca5c6b6ac9be1188c1c9f74692530bc932952568a22c2d0b8f  w24/evidence/o2-marker-rip.out
+59e87c98410f948bf52752b00cbfbedbce5c451248e26f6facdd7fea35365094  w24/evidence/source-hashes.out

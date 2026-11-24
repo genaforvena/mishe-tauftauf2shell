@@ -8,6 +8,9 @@ no grade change and NO r5. The W1-W13 real-importer legs remain author-only;
 W14 is independently replayed; W18/W19/W20 are author-measured extensions
 (W18/W19 under a debugger, W20 in a plain debugger-free ASLR-off process),
 with no witness verdict and no grade change or r5.
+W24 (author-measured, unwitnessed) adds a document-chosen saved-RIP overwrite
+and benign marker execution in a -O0 / no-stack-protector lab build; that
+build condition is required, there is no r5 and no grade change.
 Brief + live two-pane window are both present.
 Target mind: `assimp2shell`. Evidence:
 `lab/frontier/assimp2shell/PROVENANCE.md`, `PINS.sha256`, `evidence.log`,
@@ -756,6 +759,60 @@ the layout-dependent lines differ (buffer base `0x5555555807e0` vs
 `0x555555580820`, stale word `0x7ffff7fd01ec` vs `0x0`, real-mesh pointer
 `0x555555570830` vs `0x555555570870`, shared_ptr control-block address).
 Author replay, not witness acceptance.
+
+## W24 — document-chosen saved RIP and benign marker (2026-11-24 23:2xZ, author-measured)
+
+W23 bounded the *heap* `POSITION` window: the saved RIP of `ImportMeshes` sat
+`0x464` bytes above the 12/16-byte destination. W24 checks the other leg: the
+MAT4/FLOAT index accessor makes `Accessor::Indexer::GetValue<uint32_t>()`
+copy **64 document-chosen bytes into a 4-byte stack local**, so the relative
+position of the saved return addresses matters. A gdb breakpoint on
+`memcpy@plt` conditional on `len == 64` and a stack destination, run on the
+tracked `mat4idx-count1.gltf`, measured:
+
+- at explicit gcc **-O1** (`build-min-plain-nf`), `GetValue` is inlined into
+  `ImportMeshes`: no saved-RIP slot lies in `[dest, dest+64)`; the nearest one
+  above is `dest+1124`;
+- at explicit gcc **-O0** with `-fno-stack-protector` (new
+  `build-min-plain-o0-nsp`), the saved RIP of `GetValue` is `dest+12` and that
+  of `GetUInt` is `dest+44` — both inside the 64-byte write. The frame
+  offsets are build-layout facts, not document-controlled values; the script
+  measures them again on each run.
+
+`harness/cases/w24-marker-rip.gltf` places a benign `-no-pie` driver marker
+address at decoded buffer offsets **48..55** and **80..87** (source write
+offsets 12 and 44). In a plain process with ASLR **on** and no debugger it
+prints `MARKER_ADDR=0x401396` and `TAUF_MARKER_CALLED` and exits rc 0: the
+crafted document chose the value of a live saved return address and control
+reached the marker. The marker only writes a line and calls `_Exit(0)`.
+
+Controls in the same one-command harness: the same address at a
+non-control-flow offset (decoded 56..63) gives rc 139 with no marker; the
+tracked `safe.gltf` gives `scene=ok`, no marker; the same -O0 library *with*
+the host's default stack protector gives rc 134 `*** stack smashing detected
+***`, no marker; -O1 and -O2 libraries give rc 139, no marker; the PR 7090
+hunk rejects the index accessor (`scene=null`, "indices of mesh ... are not
+scalars of unsigned integers"), no marker; the PR 6860 hunk still aborts with
+fortify's `*** buffer overflow detected ***`, no marker (preserved negative,
+that hunk does not fix the Indexer path). Both PRs remain open and unmerged.
+
+`bash harness/run-w24.sh` => **12 PASS / 0 FAIL**, trace
+`w24/evidence/w24.trace` sha256
+`3e54def233947ebee942114d4acc2c08b8409e0802b451fea26819b94ffe5deb`. The
+script compiles the -O0 no-stack-protector library when absent, rebuilds all
+six drivers, reads the marker address from the fresh `-no-pie` driver and
+regenerates both documents, then compares the six process outcomes and both
+frame measurements. The marker address is therefore not hard-coded in the
+check.
+
+Limits: this demonstration requires a lab build with the stack protector
+disabled and `-O0` (at -O1/-O2 no saved RIP is in the written window, and at
+-O0 with the default protector the canary fires first). It is a local file
+through `ReadFileFromMemory` (`AV:L/UI:P`), not a remote request path; there
+is no listener, shell command, pointer-to-code guess or system side effect.
+Rung 4 mechanics are now observed at this labeled scope, but the grade
+ceiling is unchanged and NO r5 exists. Author-measured; witness replay is
+owed and no prior verdict covers W24.
 
 ## Next lane
 

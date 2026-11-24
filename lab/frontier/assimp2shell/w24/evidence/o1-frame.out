@@ -1,0 +1,42 @@
+Temporary breakpoint 1 at 0x401417: file harness/w24_driver.cpp, line 22.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, main (argc=2, argv=0x7fffffffe238) at harness/w24_driver.cpp:22
+22	int main(int argc, char **argv) {
+Breakpoint 2 at 0x7ffff78a5260 (3 locations)
+MARKER_ADDR=0x4013b6
+
+Breakpoint 2.2, 0x00007ffff7c36250 in memcpy@plt () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-plain-nf/bin/libassimp.so.6
+W24_HIT dest=0x7fffffffbfc4 src=0x42d154 len=64
+W24_DEST 0x7fffffffbfc4
+W24_RIP frame=0 delta=-124 inwindow=0
+#1  0x00007ffff7d32e92 in glTF::Accessor::Indexer::GetValue<unsigned int> (i=0, this=<synthetic pointer>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl:474
+474	    memcpy(&value, data + i * stride, elemSize);
+W24_RIP frame=1 delta=-124 inwindow=0
+#2  glTF::Accessor::Indexer::GetUInt (i=0, this=<synthetic pointer>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.h:368
+368	            return GetValue<unsigned int>(i);
+W24_RIP frame=2 delta=-124 inwindow=0
+#3  Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:319
+319	                        SetFace(faces[i], data.GetUInt(i));
+W24_RIP frame=3 delta=1124 inwindow=0
+#4  0x00007ffff7d34552 in Assimp::glTFImporter::InternReadFile (this=0x41b060, pFile="$$$___magic___$$$.gltf", pScene=0x41cc20, pIOHandler=0x7fffffffcd70) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:738
+738	    ImportMeshes(asset);
+W24_RIP frame=4 delta=3236 inwindow=0
+#5  0x00007ffff7c5e466 in Assimp::BaseImporter::ReadFile (this=this@entry=0x41b060, pImp=pImp@entry=0x7fffffffdd40, pFile="$$$___magic___$$$.gltf", pIOHandler=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/Common/BaseImporter.cpp:127
+127	        InternReadFile(pFile, sc.get(), &filter);
+W24_RIP frame=5 delta=4820 inwindow=0
+#6  0x00007ffff7c75c34 in Assimp::Importer::ReadFile (this=this@entry=0x7fffffffdd40, _pFile=_pFile@entry=0x7fffffffdc00 "$$$___magic___$$$.gltf", pFlags=pFlags@entry=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/Common/Importer.cpp:711
+711	        pimpl->mScene = imp->ReadFile( this, pFile, pimpl->mIOHandler);
+W24_RIP frame=6 delta=7188 inwindow=0
+#7  0x00007ffff7c77e9a in Assimp::Importer::ReadFileFromMemory (this=0x7fffffffdd40, pBuffer=<optimized out>, pLength=925, pFlags=0, pHint=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/Common/Importer.cpp:507
+507	        ReadFile(fbuff,pFlags);
+W24_RIP frame=7 delta=7524 inwindow=0
+#8  0x000000000040154b in main (argc=2, argv=0x7fffffffe238) at harness/w24_driver.cpp:32
+32	    const aiScene *scene = importer.ReadFileFromMemory(json.data(), json.size(), 0, "gltf");
+W24_RIP frame=8 delta=8532 inwindow=0
+#0  0x00007ffff7c36250 in memcpy@plt () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-plain-nf/bin/libassimp.so.6
+#1  0x00007ffff7d32e92 in glTF::Accessor::Indexer::GetValue<unsigned int> (i=0, this=<synthetic pointer>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl:474
+#2  glTF::Accessor::Indexer::GetUInt (i=0, this=<synthetic pointer>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.h:368
+#3  Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:319
+#4  0x00007ffff7d34552 in Assimp::glTFImporter::InternReadFile (this=0x41b060, pFile="$$$___magic___$$$.gltf", pScene=0x41cc20, pIOHandler=0x7fffffffcd70) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:738
