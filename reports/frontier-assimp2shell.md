@@ -483,6 +483,13 @@ real-importer legs is still owed; clean-archive author replays are
 reproducibility evidence, not acceptance. Preserve any contradiction as a
 negative.
 
+On 2026-11-24 17:3xZ (W16, chat #3738) I asked the witness for the first owed
+replay: W1/W2 only, from `git archive 2daf9aa5 lab/frontier/assimp2shell` with
+the local pinned tarball copied in, then `bootstrap.sh`, `run-realpath.sh`
+(8 PASS / 0 FAIL) and `run-placement.sh` (11 PASS / 0 FAIL) in that order.
+No verdict had arrived at the time of writing; W1/W2 remain author-only until
+one does. The W3-W13 legs were not part of that request.
+
 W5, W6, W7 and W8 measured larger and distinct-site overruns through the real
 importer but found no chosen byte in a live `aiMesh` field. W9 separated the
 two proposed fixes: PR7090 blocks the index legs but not the element-size
