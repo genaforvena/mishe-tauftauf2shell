@@ -1,4 +1,4 @@
-# frontier brief — libraw2shell (candidate, FRONTIER-STAGED)
+# frontier brief — libraw2shell (admitted 2026-11-24; rung 4 nonzero bytes)
 
 ## Ground truth (provisioning only; no external probes)
 
@@ -99,16 +99,18 @@ Measured 2026-11-24 04:58-05:07Z:
   `width=512 height=512 iwidth=256 iheight=256 filters=9`, `allocate_sz=549152`.
 
 Reproduce: `cd lab/frontier/libraw2shell && ./bootstrap.sh && ./run-all.sh`.
-Hashes: `evidence/evidence.log` (10 PASS / 0 FAIL, sha256
-`8ad12e49ac28c2549b87c9707da47e632bcfbf99d5c7eb26716e950b9f874f57`)
-and `evidence/hashes.sha256`. Both source trees and all four binaries are
-derived from the pinned tarball and verbatim patch.
+The committed `evidence/evidence.log` has 10 PASS / 0 FAIL and sha256
+`8ad12e49ac28c2549b87c9707da47e632bcfbf99d5c7eb26716e950b9f874f57`, but a
+clean rebuild changes binary/output hashes: the reproducible target is the
+10-check matrix lines and the three pinned source hashes, not the whole-file
+hash. `evidence/hashes.sha256` records the derived artifacts. Both source
+trees and all four binaries derive from the pinned tarball and verbatim patch.
 
 ## Chosen-byte attempts — negative results preserved
 
-The OOB values are file-derived but the public PoC's raw strip decodes to an
-all-zero image, so `avg[c]/avg[3]` is zero at the first OOB store. I tried to
-make the written bytes attacker-chosen and did **not** succeed:
+The public PoC's 48-byte 1x1 lossless-JPEG strip decodes to a single pixel,
+leaving the raw field zero, so `avg[c]/avg[3]` was zero at the first OOB store.
+Earlier chosen-byte attempts did **not** succeed:
 
 - Replacing the embedded JPEG with a constant 0x4d JPEG (`craft_poc.py`)
   still produced an all-zero output PPM and zero OOB halfwords
@@ -119,29 +121,70 @@ make the written bytes attacker-chosen and did **not** succeed:
   relocated) was rejected by LibRaw with `Input/output error`, rc 2
   (`var-B`/`var-C`, `asan-uncomp.out`).
 
-Thus chosen *offsets* are demonstrated (one pixel past the allocation,
-deterministic from the TIFF geometry) but chosen *bytes* are NOT: the written
-value is zero in every reproduced case. The artifact `craft_poc.py` remains as
-the record of the failed lane; no claim of byte control is made.
+Thus chosen *offsets* were demonstrated for the public PoC; the W2
+refinement below supplies the nonzero bytes. `craft_poc.py` remains the
+record of the failed lane and is not superseded for the public PoC.
+
+## Nonzero-pixel refinement (W2, 2026-11-24 06:0xZ)
+
+`craft_nonzero_poc.py` deterministically changes three fields of the pinned
+PoC: the embedded JPEG SOF3 frame from 1x1 to 512x512 (big-endian height and
+width at 0x1eb/0x1ed), TIFF `BitsPerSample` 8 -> 12 to match the JPEG
+precision, and `StripByteCounts` 48 -> 20,048 with 20,000 zero scan bytes.
+LibRaw then decodes a full field of nonzero pixels: gdb counted 52,429
+nonzero pixels out of 52,429 sampled raw pixels, with values stepping down
+from 2047.
+
+Derived input `evidence/nonzero-oob.input` sha256
+`b59f64e9837b06a8f0ca07a3776e961e7d0493794e0d6cb38fbcb80022069341`;
+generator sha256
+`004ff4350d66000a0c941956bfc910ea16d561c0f9a7300477f448e1917cf862`.
+With `-n 1` on the ASan build: `heap-buffer-overflow WRITE of size 2` at
+`xtrans_demosaic.cpp:427`, rc 1 (`evidence/asan-nonzero.out`). The reporter's
+fixed tree rc 0 with empty ASan output (`evidence/fixed-asan-nonzero.out`);
+the vulnerable tree without `-n` rc 0 with empty output
+(`evidence/asan-nonzero-safe.out`). Plain `-O0` gdb at the first OOB store:
+`IDX=68644 avg={131070,131070,131070,2} delta=0`; after stepping the store,
+`&destimage[68644][0] = {0xffff, 0xffff, 0xffff, 0x0000}`
+(`evidence/gdb-nonzero-oob.txt`). The crafted input therefore writes
+deterministic nonzero halfwords at the chosen offset.
+
+Limit: the value is a saturated constant `0xffff` because LibRaw scales the
+12-bit raw field against `maximum=255`; arbitrary byte values are not
+demonstrated. The variant overwrites the optional thumbnail region. No real
+camera file or consumer other than `dcraw_emu` was used, and this W2 result
+awaits witness replay.
 
 ## Rung-4 assessment and rank
 
-Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with a real
-public file: deterministic trigger, ASan-confirmed heap corruption, fixed and
-valid-input controls. Rung 4 is partial: a deterministic chosen offset is
-written with a zero value, not attacker-chosen bytes. Rank: high tractability
-for the rung-3 reproduction (one-line conceptual fix, public PoC, quick
-build), low escalation (local file, UI:P, no network, no byte/pointer control
-demonstrated). Staged candidate, not admitted, not rung 5.
+Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
+file, and rung 4 is now demonstrated for a crafted nonzero input: the OOB
+store at index 68,644 writes `0xffff` halfwords chosen by the file, with
+fixed and no-option controls clean. Arbitrary byte values and pointer/IP
+control remain UNKNOWN. Rank: high tractability, low escalation (local file,
+UI:P, no network, no pointer/command execution). Admitted frontier target
+since 2026-11-24 05:4xZ; NO rung 5.
+
+## Witness verdict (W186, 2026-11-24)
+
+Independent clean-room replay from only the pinned tarball, patch, PoC, zip,
+bootstrap.sh and run-all.sh: every pinned hash matched, bootstrap rc0, run-all
+rc0 with 10 PASS / 0 FAIL. The first 13 `evidence.log` lines are byte-identical
+to the committed log; the tail differs only in negative-result artifacts and
+build-path-dependent binary/output hashes. Verdict: CLAIM ESTABLISHED AS
+LABELED — rungs 1-3 confirmed in the real consumer, chosen offset at index
+68,644, zero stored halfwords, rung 4 PARTIAL, NO r5.
 
 ## Ceiling / UNKNOWNs preserved
 
 - No upstream fix release or merged patch; the fixed control is the
-  reporter's proposed two lines.
+  reporter's proposed two lines. Upstream fix status remains UNKNOWN.
 - No real camera file, GUI consumer, network path, pointer/IP, command
-  execution, grooming/ASLR study, witness replay or rung 5.
-- The byte-control lane failed as recorded above; a valid nonzero-pixel
-  X-Trans DNG that LibRaw accepts is an open prerequisite for chosen-byte
-  rung 4.
-- Operator owns admission; the person owns charter, wake units and the
-  full-flag sync. Do not duplicate this lane; no external probing was done.
+  execution, grooming/ASLR study or rung 5. Witness replay covers the
+  original zero-valued claim only; the W2 nonzero result awaits replay.
+- Arbitrary byte values are still UNKNOWN: the crafted field saturates to
+  `0xffff`. A file-derived non-saturated value and pointer/IP control remain
+  open prerequisites for any stronger claim.
+- Target admitted 05:4xZ as route #127. Operator owns standing approvals;
+  the person owns the charter, wake units and full-flag sync. No external
+  probing was done.

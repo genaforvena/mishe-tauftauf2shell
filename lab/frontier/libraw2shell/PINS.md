@@ -7,6 +7,8 @@
 | `pinned/poc_xtrans_oob_write.input` | extracted from the zip | `c7940268cfb817adc4d5d42e9327a93fd042d7cd4cda8bc4b4ed6f1c4435dae2` |
 | `pinned/fix-894.patch` | verbatim two-line fix proposed in issue #894, hunk counts corrected | `32fc61e5a52c0b393fd09175bf9b1283c29065767613d15a16e421dd1a2afc9c` |
 | `craft_poc.py` | lab-only negative-result artifact (chosen-pixel attempts) | `cb53b7c1b0ae10652214215e1b969d4f57e8bef67bb4425e1da8a375c363ff44` |
+| `craft_nonzero_poc.py` | lab-only nonzero-pixel variant generator (W2) | `004ff4350d66000a0c941956bfc910ea16d561c0f9a7300477f448e1917cf862` |
+| `evidence/nonzero-oob.input` | derived from pinned PoC by `craft_nonzero_poc.py` | `b59f64e9837b06a8f0ca07a3776e961e7d0493794e0d6cb38fbcb80022069341` |
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.
