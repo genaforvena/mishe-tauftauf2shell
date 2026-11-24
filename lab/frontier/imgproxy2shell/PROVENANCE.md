@@ -1139,3 +1139,45 @@ to a live function pointer and no r5 were observed. This is a bounded
 negative over three stochastic layouts, not an exhaustive proof. Grade
 stays rung 4; W201 remains the ceiling and W204's verdict on W9 is
 unchanged.
+
+## W14 — span-restricted classification and clean-archive W13 replay (2026-11-24 23:12-23:18Z, author)
+
+First clean-archive replay of `6eb6790f`, using the W13 classifier, produced a
+false positive: config `rc3` (preload 2, body 256) printed
+`code_ptr_qwords=2 code_samples=['0x1410000','0x410000']`. Both values were
+dumped qwords at `actual+0x108` and `actual+0x128` — 8 and 40 bytes past the
+256-byte attacker-written span `[actual, actual+0x100)` with
+`actual=0x7fff7c067aee` — so no attacker byte reached either. They were
+pre-existing heap values whose low addresses fall inside imgproxy's
+`00404000-02da9000 r-xp` text mapping (a non-PIE Go binary with a ~46 MiB
+executable range). The old `classify()` counted every qword between
+`W13_POST` and `W13_BT`, including the eight qwords the probe deliberately
+dumps past the write. No call target, marker execution or r5 was observed.
+This false positive is preserved, not erased.
+
+Fix: `provision/ico_codeptr_reach.py` at commit `2e6b4d16`, sha256
+`9c2adf676855265822fa687fb7fa0b1fe9fcc944bd8f045e5b7f273b4b1046bb`, parses
+the dump addresses and counts only qwords whose address lies in
+`[actual, actual+bodylen)`; out-of-span code-shaped values are reported
+separately as `outside_span_code_values`. Reclassifying the archived `rc3`
+log offline gives `W13_CLASSIFY exec_ranges=64 qwords=32 marker_qwords=32
+code_ptr_qwords=0 code_samples=[] outside_span_code_values=['0x1410000',
+'0x410000']`.
+
+One-command replay (from the repo root), with only the two gitignored inputs
+supplied by the host:
+
+    sh lab/frontier/imgproxy2shell/provision/replay-w13.sh /tmp/w14-imgproxy-w13-corrected
+
+The script verifies the probe and pinned CLI SHA-256, extracts
+`git archive 2e6b4d16 lab/frontier/imgproxy2shell` into `/tmp`, symlinks the
+default `provision/imgproxy-vuln` and
+`../../libvips2shell/build-vuln-plain/libvips`, then runs the three W13
+configs (preload/body 2/1024, 6/64, 2/256), asserting `W13_HIT`, `W13_END`
+and `code_ptr_qwords=0` in each. Observed `REPLAY_W13_OK 3/3
+code_ptr_qwords=0`: rc1 128 markers of 128 qwords, `double free or
+corruption (out)`; rc2 8 of 8, `malloc(): corrupted top size`; rc3 32 of 32,
+SIGSEGV in `_int_malloc`. Ports 18180/18181 were free before and after; all
+HTTP and GDB traffic stayed on loopback. This is an author replay of a
+bounded negative, not independent witness acceptance. Grade stays rung 4;
+W201 remains the ceiling and W204's W9 verdict is unchanged.

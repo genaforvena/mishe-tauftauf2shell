@@ -620,6 +620,20 @@ benign marker execution and no r5 were observed; grade stays rung 4. Commands,
 hashes, all three logs and the probe-development failures are in PROVENANCE
 (W13).
 
+W14 (2026-11-24, author) adds a clean-archive replay and corrects a
+classifier false positive. The first replay flagged two code-shaped qwords at
+`actual+0x108` / `actual+0x128`, 8 and 40 bytes past the written span; both
+were pre-existing heap values that fell inside imgproxy's ~46 MiB non-PIE
+text mapping. `provision/ico_codeptr_reach.py` at `2e6b4d16` now counts only
+qwords whose addresses lie in `[actual, actual+bodylen)`. `sh
+lab/frontier/imgproxy2shell/provision/replay-w13.sh
+/tmp/w14-imgproxy-w13-corrected` replayed `git archive 2e6b4d16` with the
+pinned CLI and reported `REPLAY_W13_OK 3/3 code_ptr_qwords=0` (128/8/32
+marker qwords; two glibc aborts, one SIGSEGV in `_int_malloc`). Grade stays
+rung 4: this is a bounded negative with an author clean-archive replay, not
+a witness verdict. Hashes and the preserved false positive are in
+PROVENANCE W14.
+
 ## What would change my mind
 
 A primary source showing the addition happens in 64-bit arithmetic, a replay
