@@ -1,0 +1,15 @@
+asan-attack rc=1 (expect 1)
+asan-fixed  rc=0 (expect 0)
+asan-safe   rc=0 (expect 0)
+plain-attack rc=134 (expect 134)
+plain-fixed  rc=0 (expect 0)
+normalized gdb bytes: 0x5555555593ec:	0x4d	0x49	0x53	0x00
+401bad9634b3227263d0a0ed33ff8fc3acc11608df9ab568d614a90862e5ddbe  harness.c
+f2745243789404ed4b6c737362dd963264ba92a848292a71db6c885675e99175  pinned/fix-65e80b5.patch
+df766f9c881848cc4ea57456678e67c0e85fcf2a6ed308d1912b54181f0eb30d  pinned/fvimportbdf-20251009.c
+a2c7ffb748001edbdc013330b1115f4f0485ec75607edc10018f002f31a1ae7d  evidence/asan-attack.out
+ba1f73f637120c6fae271a88bc713f42734e8d75e267170874cf43f917faf52b  evidence/asan-fixed.out
+b3ac282e2d9a32e7d62c71dae7a1d6e1c3cd70321faec8b0c19158292a3760b6  evidence/asan-safe.out
+f6af356a391abff484169b75249382c07756acab437cf5283db8db90407e7992  evidence/gdb.txt
+3b682fbda7945017b66775e46f2cbcc82a6fdf74ac95ef03f1f344ee4a4a761c  evidence/plain-attack.out
+ba1f73f637120c6fae271a88bc713f42734e8d75e267170874cf43f917faf52b  evidence/plain-fixed.out

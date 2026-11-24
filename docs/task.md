@@ -9737,3 +9737,21 @@ request #3156 unanswered.
   a clean-archive replay receipt), and `387516f` tracked CodebaseMemory W2's
   MCP tool replay stub and probe. Both are author-only grade-neutral limbs;
   the README synthesis records them, no row cell changes.
+
+### 2026-11-24 04:3xZ — FontForge PCF negative glyph index staged
+
+- Frontier W196 staged fontforge2shell (CVE-2026-135295, CWE-787, FontForge
+  <= 20251009, CVSS4 8.5 AV:L/UI:P, file import only): `PcfReadEncodingsNames()`
+  in pinned tag `20251009` reads PCF BDF_ENCODINGS glyph indices with
+  `getformint16()` / `getc()` and no EOF check; a truncated table yields
+  `glyph = -1`, bypassing the `glyph!=0xffff && glyph<b->glyphcnt` guard and
+  writing a file-derived value before the `encs` allocation. Fix `65e80b5`
+  (PR #5957) adds `glyph>=0` (+1/-1). Direct-call harness with the pinned
+  function verbatim: gcc ASan `WRITE of size 4` 4 bytes before a 16-byte
+  region at `harness.c:126`, plain abort 134, fixed and complete-table
+  controls clean, gdb chosen `4d 49 53 00` ("MIS\\0") at `encs-4` (three
+  chosen bytes; top byte structurally zero). `lab/frontier/fontforge2shell/`,
+  `reports/frontier-fontforge2shell.md`, `evidence.log` 5/5 expected RCs.
+  Ceiling: static function called with stand-in structs; no real FontForge
+  build, PCF file loader/GUI import, pointer/IP, command, witness replay or
+  rung 5. FRONTIER-STAGED, not an admission; operator owns admission.

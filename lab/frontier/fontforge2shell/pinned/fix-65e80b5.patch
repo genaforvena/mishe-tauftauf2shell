@@ -1,0 +1,23 @@
+From 65e80b5dfb6691a1c8a532cfbb8ec905949e0c9a Mon Sep 17 00:00:00 2001
+From: Deus Rex <research@deusrex.ai>
+Date: Thu, 19 Nov 2026 16:45:34 +0200
+Subject: [PATCH] fvimportbdf: skip negative glyph indices in PCF encodings
+ (#5957)
+
+---
+ fontforge/fvimportbdf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fontforge/fvimportbdf.c b/fontforge/fvimportbdf.c
+index 17105c3d15..0e51bde55a 100644
+--- a/fontforge/fvimportbdf.c
++++ b/fontforge/fvimportbdf.c
+@@ -1760,7 +1760,7 @@ static void PcfReadEncodingsNames(FILE *file,struct toc *toc,SplineFont *sf,
+ 	tot = (max2-min2+1)*(max1-min1+1);
+ 	for ( i=0; i<tot; ++i ) {
+ 	    glyph = getformint16(file,format);
+-	    if ( glyph!=0xffff && glyph<b->glyphcnt ) {
++	    if ( glyph>=0 && glyph!=0xffff && glyph<b->glyphcnt ) {
+ 		encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+ 					(i%(max2-min2+1) + min1);
+ 	    }

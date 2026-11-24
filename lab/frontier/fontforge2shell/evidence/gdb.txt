@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x17c5: file harness.c, line 131.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x5555555592d0, toc=0x7fffffffe0b0, sf=0x0, map=0x0, b=0x7fffffffe0a0, encname=0x0) at harness.c:131
+131	    cnt = b->glyphcnt;
+$1 = 0x53494d
+0x5555555593ec:	0x4d	0x49	0x53	0x00
+$2 = 0x5555555593f0
