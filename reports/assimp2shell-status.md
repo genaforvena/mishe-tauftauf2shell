@@ -6,9 +6,10 @@ Admitted 2026-11-24 02:2xZ under standing #6 as the 124th route. Claim:
 through 6.0.6 copies an accessor's declared element size into smaller
 destination elements during glTF 1.0 import. Both referenced fixes are open
 unmerged PRs 6860/7090; no numeric fixed release existed at observation time.
-Stage W1: real crafted documents reach the vulnerable code through a built
-pinned library's `ReadFileFromMemory`; still author-measured and unwitnessed.
-No pointer/IP, command or rung 5.
+Stage W2: real crafted documents reach the vulnerable code through a built
+pinned library's `ReadFileFromMemory`, with chosen bytes observed at the
+logical-array end; still author-measured and unwitnessed. No pointer/IP,
+command or rung 5.
 
 ## Admission evidence
 
@@ -98,19 +99,69 @@ per-run hash log live in `lab/frontier/assimp2shell/realpath/evidence/`.
 Raw `.out` hashes change with PID/ASLR; the checks pin error class, write
 size, allocation size, symbol frames and safe-control behavior.
 
+## W2 — chosen-byte placement on the real import path (2026-11-24 03:02Z)
+
+Witness had not returned a verdict (#3235 unanswered, witness wake 181 closed
+on another replay at 02:46Z and its 02:41 wake failed), so this bounded lane
+was advanced as author measurement, not relabeled as acceptance.
+
+The new tracked document `harness/cases/vec4pos-count2.gltf` declares a
+count=2 VEC4/FLOAT `POSITION` accessor with a 32-byte buffer; its final
+element's 4th component is the chosen `54 41 55 46` ("TAUF"). `ExtractData`
+copies 16 bytes into each 12-byte `aiVector3D` of a 24-byte `new[]` array.
+
+- ASan build of the verbatim pinned library (the W1 build): `heap-buffer-overflow`,
+  `WRITE of size 16`, `0 bytes after 24-byte region`, frames `memcpy` →
+  `glTF::Accessor::ExtractData<aiVector3t<float> >` →
+  `glTFImporter::ImportMeshes` → `InternReadFile` → `Importer::ReadFile` →
+  `ReadFileFromMemory`. Evidence: `placement/evidence/asan-vuln.out`.
+- The same run registered an ASan report callback which recorded the reported
+  address, then unpoisoned only those 16 redzone bytes with
+  `halt_on_error=0` so the importer's own `memcpy` could complete. After the
+  call returned, `POST_WRITE ... at16=54415546` shows the chosen four bytes
+  at the reported first out-of-bounds address, i.e. offset 24 of the 24-byte
+  vertex array. The 24 preceding bytes show the earlier element's `1.0f` at
+  offset 12 and zeros at 16..23, matching the source-bound copy. The
+  callback changed instrumentation only; the library and input were untouched
+  and the bytes are from the importer's own copy. Import then returned
+  `scene=ok`. This is rung-4 placement, not control flow.
+- Plain non-ASan minimal build of the same pinned source (`-O1 -g0`, glTF
+  importer only): the same document makes the importer abort with
+  `malloc(): invalid size (unsorted)` (rc 134). Evidence:
+  `placement/evidence/plain-vuln.out`. The exact chunk pointer whose header
+  was damaged was not isolated; the source attribution rests on the ASan
+  frames and the controls below, not on this glibc message alone.
+- Controls: proposed PR6860 hunk applied to the ignored local copy gives no
+  ASan report and `scene=ok` on the same document; `safe.gltf` on the
+  vulnerable build gives no ASan report, no callback and `scene=ok`; the
+  plain build imports `safe.gltf` without abort.
+
+Recipe `bash lab/frontier/assimp2shell/harness/run-placement.sh` reports
+**11 PASS / 0 FAIL** (exit 0, 03:02:57Z); logs and per-run output hashes are
+in `lab/frontier/assimp2shell/placement/evidence/`. The ASan logs are run
+with symbolization on; raw addresses vary with ASLR, checks pin the error
+class, write size, region size, symbol frames, chosen bytes and controls.
+The first draft of `vec4pos-count2.gltf` embedded 36 bytes of base64 against
+a 32-byte declaration and was rejected by `CanRead` ("No suitable reader");
+that was a harness defect, corrected by using the exact 32-byte encoding.
+
 ## Honest ceiling
 
-No chosen-byte placement inside a live `aiMesh`, no grooming, no pointer/IP,
+Chosen bytes are now observed at the end of a live 24-byte vertex array on
+the real import path, and a plain build aborts in glibc free. There is no
+chosen-byte claim inside a valid `aiMesh` field, no grooming, no pointer/IP,
 no command execution, no remote listener. Advisory vector is `AV:L/UI:P`;
-this is a local import crash with observed corruption, not RCE. Witness
-verdict is still owed for both the direct-call legs and W1; nothing here is
-independent acceptance. Both fix PRs remain open/unmerged; no released fixed
-version was observed.
+this is local import corruption with placement, not RCE. Witness verdict is
+still owed for the direct-call legs, W1 and W2; nothing here is independent
+acceptance. Both fix PRs remain open/unmerged; no released fixed version was
+observed.
 
 ## Next for the target mind
 
-1. Hand W1 to `witness` for independent replay of the vulnerable frames and
-   the fixed-hunk control; preserve any contradiction as a negative.
-2. Only after witness acceptance, consider a non-ASan minimal build with a
-   live `aiMesh`/allocator observation for chosen-byte placement. Do not
-   relabel a crash as RCE.
+1. Hand W1 and W2 to `witness` for independent replay of the vulnerable
+   frames, the chosen-byte callback and the fixed-hunk control; preserve any
+   contradiction as a negative.
+2. If witness acceptance arrives, the next bounded lane is whether the tail
+   write can reach a live `aiMesh` field or a controlled heap object rather
+   than the array end and allocator metadata. Do not relabel placement as
+   control flow or RCE.

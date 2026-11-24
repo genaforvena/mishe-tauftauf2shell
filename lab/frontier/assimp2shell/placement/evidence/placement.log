@@ -1,0 +1,22 @@
+# placement_plain case=vec4pos-count2 rc=134
+# placement_plain case=safe rc=0
+# asan_report_vuln case=vec4pos-count2 rc=0
+# asan_report_vuln case=safe rc=0
+# asan_report_fixed case=vec4pos-count2 rc=0
+PASS plain-vuln-glibc-abort
+PASS plain-safe-clean
+PASS asan-vuln-oob-class
+PASS asan-vuln-oob-write
+PASS asan-vuln-oob-region
+PASS asan-vuln-frame
+PASS asan-vuln-chosen-bytes
+PASS asan-vuln-import-completed
+PASS asan-fixed-no-report
+PASS asan-safe-no-report
+PASS asan-safe-no-postwrite
+RESULT 11 PASS / 0 FAIL
+7f7dcfa9e29334f84e71ecf1e0f4645d4cac5f30bf3b5f85a06883bcb4860076  placement/evidence/asan-fixed.out
+b1f878421ccb7414494bee04e08e12983c6b44caf1e8e0eb14c9261eb5f21568  placement/evidence/asan-safe.out
+2d663dff8b11de74d4be5e7ba16c0467f6f7d5610e4325529b02814bd4fb6b51  placement/evidence/asan-vuln.out
+d5082cde48fd35588d13a9c88c2fdc3c626d138ea2f4b3da5e237126111869ab  placement/evidence/plain-safe.out
+e13d44a8b3bc3c664f35459ccaa6dcde655813806402e2556c2e5f361126b607  placement/evidence/plain-vuln.out

@@ -1,0 +1,64 @@
+=================================================================
+==178420==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x503000000928 at pc 0x74e0112fb303 bp 0x7ffd8aac0030 sp 0x7ffd8aabf7d8
+WRITE of size 16 at 0x503000000928 thread T0
+    #0 0x74e0112fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x74e010c97cd1 in bool glTF::Accessor::ExtractData<aiVector3t<float> >(aiVector3t<float>*&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x497cd1) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #2 0x74e010c6a2c6 in Assimp::glTFImporter::ImportMeshes(glTF::Asset&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x46a2c6) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #3 0x74e010c713be in Assimp::glTFImporter::InternReadFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, aiScene*, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x4713be) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #4 0x74e0108e362a in Assimp::BaseImporter::ReadFile(Assimp::Importer*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0xe362a) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #5 0x74e0109394ef in Assimp::Importer::ReadFile(char const*, unsigned int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x1394ef) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #6 0x74e01093ea56 in Assimp::Importer::ReadFileFromMemory(void const*, unsigned long, unsigned int, char const*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x13ea56) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #7 0x63a365d048ce in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/asan_report_vuln+0x28ce) (BuildId: 934accae46ebafab67ada5e5923c47659e4320e7)
+    #8 0x74e01002a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x74e01002a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x63a365d04484 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/asan_report_vuln+0x2484) (BuildId: 934accae46ebafab67ada5e5923c47659e4320e7)
+
+0x503000000928 is located 0 bytes after 24-byte region [0x503000000910,0x503000000928)
+allocated by thread T0 here:
+    #0 0x74e0112fe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x74e010c97a77 in bool glTF::Accessor::ExtractData<aiVector3t<float> >(aiVector3t<float>*&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x497a77) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #2 0x74e010c6a2c6 in Assimp::glTFImporter::ImportMeshes(glTF::Asset&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x46a2c6) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #3 0x74e010c713be in Assimp::glTFImporter::InternReadFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, aiScene*, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x4713be) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #4 0x74e0108e362a in Assimp::BaseImporter::ReadFile(Assimp::Importer*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0xe362a) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #5 0x74e0109394ef in Assimp::Importer::ReadFile(char const*, unsigned int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x1394ef) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #6 0x74e01093ea56 in Assimp::Importer::ReadFileFromMemory(void const*, unsigned long, unsigned int, char const*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x13ea56) (BuildId: f82addaee81c7a2b86cc976e59c5e982ce5420b8)
+    #7 0x63a365d048ce in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/asan_report_vuln+0x28ce) (BuildId: 934accae46ebafab67ada5e5923c47659e4320e7)
+    #8 0x74e01002a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x74e01002a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x63a365d04484 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/asan_report_vuln+0x2484) (BuildId: 934accae46ebafab67ada5e5923c47659e4320e7)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x503000000680: fd fa fa fa fd fd fd fa fa fa fd fd fd fd fa fa
+  0x503000000700: fd fd fd fa fa fa 00 00 00 00 fa fa 00 00 07 fa
+  0x503000000780: fa fa 00 00 00 07 fa fa fd fd fd fd fa fa fd fd
+  0x503000000800: fd fd fa fa fd fd fd fa fa fa fd fd fd fa fa fa
+  0x503000000880: fd fd fd fa fa fa 00 00 00 00 fa fa 00 00 00 fa
+=>0x503000000900: fa fa 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa
+  0x503000000980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x503000000b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+ASAN_CB addr=0x503000000928
+POST_WRITE addr=0x503000000928 before24=0000000000000000000000000000803f0000000000000000 at16=54415546000000000202000018000000
+case=harness/cases/vec4pos-count2.gltf scene=ok err=
