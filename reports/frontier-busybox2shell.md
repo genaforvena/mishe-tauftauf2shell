@@ -116,6 +116,7 @@ live object holding a controlled pointer, no function-pointer or
 return-address control, no shellcode, no command execution. Witness replay
 is complete and ESTABLISHED rungs 1-4 at the labeled scope (§8), with NO
 rung 5; the witness found no counterexample within those conditions.
+§9 measures why the obvious top-chunk primitive cannot supply that pointer.
 Both safe controls need the operator's
 `-b 64` action (UI:R in the advisory) and the server must ignore the option;
 that precondition is advisory-consistent but not deployment-measured.
@@ -130,9 +131,11 @@ pointer/IP control and does not change the rung-5 ceiling.
 1. Witness replay is complete (§8): ESTABLISHED rungs 1-4 at the labeled
    scope, NO rung 5, no counterexample within those conditions. No further
    author replay or witness request is owed.
-2. On the plain build, groom a live adjacent heap object and show a chosen
-   pointer-shaped value or deterministic crash at a chosen offset; measure
-   ASLR and glibc bin behaviour before claiming any control-flow consequence.
+2. The plain-build top-chunk path has now been measured (§9): glibc's
+   `size > av->system_mem` guard blocks the `-1` wraparound allocation, and a
+   guard-passing value only returns `rbuf+80`, inside the overflow. No live
+   code pointer is reachable by that primitive; a different primitive would be
+   needed for any control-flow claim.
 3. Build a stock `tftpd` control that acknowledges `blksize` and confirm the
    same RRQ cannot trigger fallback; then test a plain distribution BusyBox
    applet under the same loopback server. Do not infer RCE from a crash.
@@ -246,3 +249,46 @@ scope. NO rung 5.**
   effect; ASLR measured, not defeated. UI:R / server-ignores-option
   precondition is not deployment-measured. The advisory's RCE prose stays
   a claim. This verdict is independent acceptance for rungs 1-4 only.
+
+## 9. W2 structural ceiling on the corrupted-top-size primitive (2026-11-24, loopback)
+
+W1 showed that wire-controlled bytes at `rbuf+72` can drive
+`malloc(): corrupted top size` or a `sysmalloc` assertion. The open question
+was whether a *chosen* top-size value turns that into a controlled allocation
+onto a live object (house of force) — the missing step toward a code pointer.
+Answer: no, on this glibc build, for the measured reason below. This is a
+negative result; the witnessed grade (§8) is unchanged.
+
+`lab/frontier/busybox2shell/malloc_probe.py` and `run-malloc.sh` replay to
+`malloc_evidence.log` (SHA-256
+`98d1130912f849d815a2abe2df0733430814ef024ee463263414ec60b7003082`,
+2026-11-24T01:57:02Z–01:57:44Z). Same stock plain 1.37.0 client and the same
+fallback + 516-byte ERROR wire path as §7; gdb only observes.
+
+- **Guard sweep.** Values whose chunk size (`size & ~0x7`) exceeds `0x21000`
+  abort with `malloc(): corrupted top size`: `0x4141414141414141`,
+  `0xffffffffffffffff` (the classic house-of-force `-1`), `0x22000`, and
+  `0x21008`. Values `0x21007`, `0x21000`, `0x20000`, `0x10000`, and the
+  original `0x20cb1` exit rc 1 with no abort. `0x21` still hits the
+  `sysmalloc` assertion at `malloc.c:2599`. Therefore `av->system_mem` is
+  `0x21000` (132 KiB) here and glibc's `size > av->system_mem` guard rejects
+  an oversized or fake-negative top size before the top chunk can be used:
+  the wraparound allocation is structurally closed on this host. This is the
+  same class of dead end the plant recorded for zero-store memcpy consumers.
+- **Where a guard-passing value lands.** Under gdb, after the second
+  `safe_read(...,516,...)`, `__vasprintf_internal` (reached from
+  `bb_verror_msg`, `libbb/verror_msg.c:50`) requests 0x57/0x5a bytes and
+  `malloc` returns `rbuf+80` for `0x20000`, `0x10000` and `0x20cb1` alike.
+  `DELTA=80` is invariant while `rbuf` moves with ASLR across the three runs
+  (`0x61d3…a310`, `0x5f3d…9310`, `0x6400…1310`). `rbuf+80` lies *inside* the
+  server's own 516-byte overflow, already filled with server bytes; the
+  allocation reuses those bytes rather than touching a distinct live object.
+  The pre-existing heap objects sit behind it (`xbuf = rbuf-0x50`,
+  `peer_lsa = rbuf-0x70`) and hold no code pointer. Observed call chain:
+  `vasprintf` ← `bb_verror_msg` ← `bb_error_msg` ← `tftp_protocol` ←
+  `tftp_main` ← `run_applet_no_and_exit`.
+- **Consequence.** This primitive yields no chosen pointer in a live object,
+  no tcache/fastbin poisoning, no function-pointer or return-address control,
+  and no command. Other primitives remain untested, so this is a measured
+  ceiling for the top-chunk path only, not a universal proof. Rung 4 stands as
+  independently witnessed (§8); rung 5 is still unattempted and unmeasured.

