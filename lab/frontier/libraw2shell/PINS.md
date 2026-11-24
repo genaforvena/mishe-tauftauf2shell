@@ -63,6 +63,15 @@
 | `w12/dualbeef-bl1.input` | W12 IFD1 BlackLevel=1, byte-identical to W11 `ffff beef fe93 0` | `d8eb73adecdcbb09115d73855e7e9ae143edac4a398923aa6d06b5a58fda101d` |
 | `w12/ifd0beef-bl6.input` | W12 IFD0 BlackLevel=6, coupled shift `ffff beed fe91 0`, controls clean | `caab59d6c1a562ddd09aa9329d0b7e1368834e2f11413b435f33ab517199fc9d` |
 | `w12/ifd0-bl6-exact.txt` | W12 raw gdb trace at exact index 68,644, BlackLevel=6 | `4d4764a0fcf0704a1aacba75d23987cc599279caf747c902e5d85b1972acad2f` |
+| `craft_uncompressed_poc.py` | lab-only W13 generator: compression 1 + packed 12-bit samples + 4096-entry LinearizationTable | `0d91b5a8324a814fb7097051a456949dac610ff9d21d8c22d717beedddf1749c` |
+| `w13/colors1234.json` | W13 CFA-separated spec: red 0x1234, green 0xbeef, blue 0x5678 | `d0554dee56d3a7e8478be06c8d6ae40861161f9bf19a1edac0a0ec0996338a14` |
+| `w13/colors1234.input` | W13 separation result `8e74 beef 9c1c 0` at index 68,644 | `4f3834f74172df0c1014e3365e563b2246b089d509c7720edaa21d4a66cac9a4` |
+| `w13/dead-target.json` | W13 final spec for pre-chosen `9000 beef dead` | `b3e416486b13e0fb2994b1c194c9ed50dbea573febe15894ef9f0ff830eea43e` |
+| `w13/dead-target.input` | W13 final uncompressed DNG, three chosen halfwords, controls clean | `18b012c98809a9f4822a173ee591b046db3b6eb612326e30e259984467149e78` |
+| `w13/rgb.gdb` | W13 probe of the per-direction rgb inputs at the first OOB store | `20e39aebee889c35619f005939b49e9fa7f666953af5b13f5c6ced213ffa7a85` |
+| `w13/dead-gdb-1.txt` | W13 first of three byte-identical exact-index traces (`9000 beef dead 0`) | `d40f2de88afe353eb5fa7901ed81a7c587e75427d6f428e8e17f442798a542a3` |
+| `w13/dead-asan-vuln.out` | W13 ASan vulnerable -n 1, rc 1, WRITE of size 2 at xtrans_demosaic.cpp:427 | `45fee4b2324b4ab4c674f4efc1137b240e95f4b5bda4d1d122f66f4984acf6b1` |
+| `w13/results.txt` | W13 full method, calibration, negatives, controls and limits | `729d273bc41a954058cc53c70fc9dbed1045a5d88be0af1b9d35d112aef0f265` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`

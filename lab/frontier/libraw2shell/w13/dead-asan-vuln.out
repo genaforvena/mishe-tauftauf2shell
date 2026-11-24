@@ -1,0 +1,55 @@
+=================================================================
+==930754==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7bf4f03fed20 at pc 0x5bfca1734d02 bp 0x7ffd415a6c60 sp 0x7ffd415a6c50
+WRITE of size 2 at 0x7bf4f03fed20 thread T0
+    #0 0x5bfca1734d01 in LibRaw::xtrans_interpolate(int) src/demosaic/xtrans_demosaic.cpp:427
+    #1 0x5bfca1688de1 in LibRaw::dcraw_process() src/postprocessing/dcraw_process.cpp:184
+    #2 0x5bfca166bdb6 in main samples/dcraw_emu.cpp:598
+    #3 0x7bf4f0c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7bf4f0c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5bfca1669064 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libraw2shell/pinned/LibRaw-0.22.3/bin/dcraw_emu+0x51064) (BuildId: 29272c8d6aa91e5a29f209e90fede47201325b50)
+
+0x7bf4f03fed20 is located 0 bytes after 550176-byte region [0x7bf4f0378800,0x7bf4f03fed20)
+allocated by thread T0 here:
+    #0 0x7bf4f14fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x5bfca1672a6e in libraw_memmgr::calloc(unsigned long, unsigned long) libraw/libraw_alloc.h:58
+    #2 0x5bfca1672a6e in LibRaw::calloc(unsigned long, unsigned long) src/utils/utils_libraw.cpp:275
+    #3 0x5bfca1731873 in LibRaw::xtrans_interpolate(int) src/demosaic/xtrans_demosaic.cpp:177
+    #4 0x5bfca1688de1 in LibRaw::dcraw_process() src/postprocessing/dcraw_process.cpp:184
+    #5 0x5bfca166bdb6 in main samples/dcraw_emu.cpp:598
+    #6 0x7bf4f0c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7bf4f0c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5bfca1669064 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libraw2shell/pinned/LibRaw-0.22.3/bin/dcraw_emu+0x51064) (BuildId: 29272c8d6aa91e5a29f209e90fede47201325b50)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow src/demosaic/xtrans_demosaic.cpp:427 in LibRaw::xtrans_interpolate(int)
+Shadow bytes around the buggy address:
+  0x7bf4f03fea80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf4f03feb00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf4f03feb80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf4f03fec00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bf4f03fec80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7bf4f03fed00: 00 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa
+  0x7bf4f03fed80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bf4f03fee00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bf4f03fee80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bf4f03fef00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7bf4f03fef80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==930754==ABORTING

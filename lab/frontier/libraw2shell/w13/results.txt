@@ -1,0 +1,62 @@
+W13 results — three independently chosen halfwords at the OOB offset (2026-11-24 20:2xZ, author-side)
+
+Question left open by W11/W12: can the first and third halfwords at the chosen
+OOB index 68,644 be set independently of channel 1? W12 closed BlackLevel as a
+channel-separating knob. Prediction recorded before this experiment (wall,
+20:1xZ): a non-uniform raw field, not another scalar DNG tag, is required;
+LibRaw's packed_dng_load_raw() (src/decoders/dng.cpp:140-180) feeds every
+12-bit uncompressed sample through curve[] in adobe_copy_pixel() (:34-51), so
+per-pixel raw samples in a 6-entry LinearizationTable should decouple the CFA
+colors.
+
+Method: craft_uncompressed_poc.py (sha256
+0d91b5a8324a814fb7097051a456949dac610ff9d21d8c22d717beedddf1749c) rewrites
+the W11 input w11/targetbeef.input (sha256
+cf5030ebfa46f3badc4498e4ec4230c670ba010b70f5ace3a872d8fcbc33d33b,
+LinearizationTable=0xbeef, WhiteLevel=65535) as compression=1 with a 4096-entry
+SHORT LinearizationTable and 393,216 bytes of packed 12-bit raw samples. The
+real dcraw_emu -n 1 consumer is unchanged; only the image bytes change.
+
+Baseline control: w13/baseline.json (a5e847f2...185d3e) with all raw samples
+2048 and curve[1]=0x1234 reproduces W11 byte-for-byte under the unmodified
+-O0 gdb probe: IDX=68644 avg=131070,97758,130342,2,
+VAL `ffff beef fe93 0` (w13/uncompressed-baseline.input ec216208...70db20).
+
+Channel separation: w13/colors1234.json (d0554dee...6338a14) assigns raw 1 to
+every CFA-color-0 pixel (curve[1]=0x1234) and raw 2 to every color-2 pixel
+(curve[2]=0x5678); color-1 pixels stay raw 2048 -> 0xbeef. Result at index
+68,644: `8e74 beef 9c1c 0` (w13/colors1234.input 4f3834f7...66cac9a4).
+Neither c0 nor c2 is the interpolated value of channel 1; both moved.
+Calibration (unmodified -O0 gdb, exact first-OOB breakpoint, one run each):
+  red curve value Vred (blue fixed 0x5678) -> c0
+    0x0100 -> 0x801e ; 0x1234 -> 0x8e74 ; 0x2000 -> 0x99f3
+    low-range fit c0 ~= 32585 + 5/6*Vred (integer rounding)
+  blue curve value Vblue (red fixed 0x1234) -> c2
+    0x0100 -> 0x7f9f ; 0x3000 -> 0x8f4a ; 0x5678 -> 0x9c1c
+    low-range fit c2 ~= 32586 + Vblue/3; at higher values the slope becomes 1:
+    0x6289(25225) -> 0xa22d ; 0x6601(26113) -> 0xa5a4 ;
+    0x6602(26114) -> 0xa5a6 ; 0x7312(29458) -> 0xb2b6 ;
+    0x9f09(40713) -> 0xdead ; 0xbeef(48879) -> 0xfe93
+  Preserved negative: target 0xa5a5 was not hit by Vblue=26113/26114
+  (0xa5a4/0xa5a6, parity gap). Do not re-claim that value from this mapping.
+
+Final pre-chosen triple `9000 beef dead`: w13/dead-target.json (sha256
+b3e416486b13e0fb2994b1c194c9ed50dbea573febe15894ef9f0ff830eea43e),
+w13/dead-target.input (sha256
+18b012c98809a9f4822a173ee591b046db3b6eb612326e30e259984467149e78).
+Three fresh plain -O0 gdb runs, byte-identical:
+  IDX=68644 avg=73728,97758,114010,2 black=0 white=65535
+  VAL `9000 beef dead 0` (w13/dead-gdb-1.txt .. -3.txt).
+Controls on the same input: ASan vulnerable `pinned/.../dcraw_emu -n 1` rc 1
+with `WRITE of size 2` at src/demosaic/xtrans_demosaic.cpp:427
+(w13/dead-asan-vuln.out); fixed tree `fixed/.../dcraw_emu -n 1` rc 0 empty
+(w13/dead-asan-fixed.out); vulnerable with no option rc 0 empty
+(w13/dead-asan-safe.out).
+
+Grade: three distinct, independently file-chosen 16-bit halfwords (six chosen
+bytes) written at a chosen heap offset in the real dcraw_emu consumer. Each
+channel is steered by a separate DNG-controlled field: red samples via
+curve[1], green via curve_default, blue via curve[2]. This is NOT an arbitrary
+byte sequence across memory, not a pointer/IP, marker, command, adjacent live
+object, GUI, wire path, merged upstream fix or r5. Author-side only; no
+witness replay yet. All experiments local and loopback-free.

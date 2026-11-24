@@ -1,0 +1,7 @@
+{
+  "base_raw": 2048,
+  "curve_default": 48879,
+  "curve": {"1": 4660},
+  "pixels": [],
+  "whitelevel": 65535
+}

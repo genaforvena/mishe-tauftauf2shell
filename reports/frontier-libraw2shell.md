@@ -572,15 +572,55 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   second DNG integer field, BlackLevel (`0xdead` at WL=3,230/BL=6; `0x2222`
   at WL=21,084/BL=1). W11's DNG LinearizationTable with WL=65535 put seven
   pre-chosen 16-bit values, including both edges, into the second halfword at
-  index 68,644 (three confirmed 3/3), but the first and third halfwords are
-  interpolation-determined, so this is not an arbitrary byte sequence or a
-  fully arbitrary multi-halfword alphabet. Other targets remain unreachable
-  at the narrower methods' local granularity; the 441-point (WL,BL) grid did
-  not cover every halfword. Pointer/IP control remains an open prerequisite.
+  index 68,644 (three confirmed 3/3). W13 extended this to THREE independently
+  file-chosen halfwords at the same offset (`0x9000 0xbeef 0xdead`, 3/3) by
+  giving each CFA color its own raw sample and curve entry. That is six chosen
+  bytes at one chosen offset, not an arbitrary byte sequence across memory;
+  pointer/IP control remains an open prerequisite.
 - The W5 frame-size/IDX steering result, the W6/W7 exact-hit results, the
-  W10 two-field exact hits and the W11 linearization values are author-side
-  only; witness replay for W5 was requested and has not arrived. Do not treat
-  them as ESTABLISHED.
+  W10 two-field exact hits, the W11 linearization values and the W13
+  three-channel chosen triple are author-side only; witness replay for W5
+  (note 3451) and W11 (note 3717) has not arrived. Do not treat them as
+  ESTABLISHED.
 - Target admitted 05:4xZ as route #127. Operator owns standing approvals;
   the person owns the charter, wake units and full-flag sync. No external
   probing was done.
+
+## Three independently chosen halfwords (W13, 2026-11-24 20:2xZ; author-side)
+
+W12 closed BlackLevel as a channel-separating knob; the open prerequisite was
+a non-uniform raw field. `craft_uncompressed_poc.py` (sha256
+`0d91b5a8324a814fb7097051a456949dac610ff9d21d8c22d717beedddf1749c`) turns
+the W11 input into a compression=1 DNG: 512x512 packed 12-bit samples plus a
+4096-entry SHORT LinearizationTable at the formerly unused IFD slot 2.
+`packed_dng_load_raw()` (`src/decoders/dng.cpp:140-180`) feeds every sample
+through `curve[]` in `adobe_copy_pixel()` (`:34-51`), so each CFA color can be
+given a distinct file-chosen raw sample. The real `dcraw_emu` consumer and the
+vulnerable code path are unchanged.
+
+An all-2048 baseline reproduces W11 exactly under the unmodified `-O0` gdb
+probe: `IDX=68644 avg={131070,97758,130342,2}`, stored
+`0xffff 0xbeef 0xfe93 0x0000`. Giving color-0 pixels raw 1 -> `curve[1]=0x1234`
+and color-2 pixels raw 2 -> `curve[2]=0x5678` (green still `0xbeef`) stored
+`0x8e74 0xbeef 0x9c1c 0x0000` at the same index: c0 and c2 moved separately.
+Calibration sweeps (recorded in `lab/frontier/libraw2shell/w13/results.txt`)
+mapped each curve value to its halfword; target `0xa5a5` was NOT reachable
+(26113/26114 produced `0xa5a4`/`0xa5a6`), preserved as a negative.
+
+Final pre-chosen triple `0x9000 0xbeef 0xdead`: spec
+`w13/dead-target.json` sha256
+`b3e416486b13e0fb2994b1c194c9ed50dbea573febe15894ef9f0ff830eea43e`, input
+`w13/dead-target.input` sha256
+`18b012c98809a9f4822a173ee591b046db3b6eb612326e30e259984467149e78`.
+Three fresh plain `-O0` gdb runs, byte-identical: `IDX=68644
+avg={73728,97758,114010,2}` and `&destimage[68644][0] =
+{0x9000,0xbeef,0xdead,0x0000}`. Controls on the same input: ASan vulnerable
+`-n 1` rc 1 with `WRITE of size 2` at `xtrans_demosaic.cpp:427`; fixed tree
+rc 0 empty; vulnerable no-option rc 0 empty. Reproduce with the generator,
+spec and the pinned `-O0` tree or the `probe.gdb` breakpoint used in W11.
+
+Grade: six chosen bytes at a chosen heap offset in the real consumer, each
+halfword steered by a distinct file-controlled field. NOT an arbitrary byte
+sequence across memory, no pointer/IP, marker, command, adjacent live object,
+GUI, wire path, merged upstream fix or r5. Author-side only; no witness
+replay yet. All experiments local and loopback-free.
