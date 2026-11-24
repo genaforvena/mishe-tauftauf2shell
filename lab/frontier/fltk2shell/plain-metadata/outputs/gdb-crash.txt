@@ -1,0 +1,13 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000555555570da7 in Fl_BMP_Image::load_bmp_ (this=0x7fffffffe0d0, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:490
+490	          ptr[2] = rdr.read_byte();
+#0  0x0000555555570da7 in Fl_BMP_Image::load_bmp_ (this=0x7fffffffe0d0, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:490
+#1  0x000055555556f803 in Fl_BMP_Image::Fl_BMP_Image (this=0x7fffffffe0d0, filename=0x7fffffffe6d8 "poc-chosen.bmp") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:64
+#2  0x000055555556f576 in main (argc=2, argv=0x7fffffffe278) at driver.cxx:9
+rip            0x555555570da7      0x555555570da7 <Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)+5115>
+rax            0x4f                79
+rdi            0x555555690380      93824993526656
+rsi            0x100000002         4294967298

@@ -1,0 +1,10 @@
+# exit codes, plain builds, 2026-11-24 ~06:20Z
+# vulnerable = fltk-1.4.5-plus1632/build-plain, driver-plain
+# fixed      = fltk-1.4.5-plus1647/build-plain, driver-plain-fixed
+short-chosen  vulnerable rc=0   fixed rc=0
+full-chosen   vulnerable rc=139  fixed rc=0
+safe (../safe.bmp) vulnerable rc=0
+# gdb: vulnerable full-chosen SIGSEGV at Fl_BMP_Image.cxx:490,
+# y=715827879, ptr=array-22 (page before mmap region)
+# gdb: vulnerable short-chosen reaches munmap_chunk via Fl_RGB_Image::~Fl_RGB_Image
+# and exits 0, no glibc diagnostic

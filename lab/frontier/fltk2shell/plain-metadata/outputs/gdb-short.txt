@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x1cede: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx, line 510.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, Fl_BMP_Image::load_bmp_ (this=0x7fffffffe0b0, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:510
+510	    CHECK_ERROR
+$1 = (const uchar *) 0x7ffef75ff010 "EH"
+0x7ffef75ff000:	0x0000000000000000	0x2d4d495300001002
+$2 = 0x2d4d495300001002
+$3 = 1
+Breakpoint 2 at 0x7ffff76a94c0: munmap_chunk. (2 locations)
+[510] Fl_BMP_Image: short-chosen.bmp - unexpected EOF or read error at offset 60
+
+Breakpoint 2.1, munmap_chunk (p=0x7ffef75ff000) at ./malloc/malloc.c:3025
+warning: 3025	./malloc/malloc.c: No such file or directory
+#0  munmap_chunk (p=0x7ffef75ff000) at ./malloc/malloc.c:3025
+#1  0x00007ffff76adeda in __GI___libc_free (mem=0x7ffef75ff010) at ./malloc/malloc.c:3388
+#2  0x000055555557238a in Fl_RGB_Image::~Fl_RGB_Image (this=0x7fffffffe0b0, __in_chrg=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_Image.cxx:460
+#3  0x000055555556f720 in Fl_BMP_Image::~Fl_BMP_Image (this=0x7fffffffe0b0, __in_chrg=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/FL/Fl_BMP_Image.H:28
+#4  0x000055555556f5dd in main (argc=2, argv=0x7fffffffe258) at driver.cxx:12

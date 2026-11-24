@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x1cd8d: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx, line 490.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, Fl_BMP_Image::load_bmp_ (this=0x7fffffffe0d0, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:490
+490	          ptr[2] = rdr.read_byte();
+$1 = (const uchar *) 0x7ffef75ff010 ""
+$2 = 715827882
+$3 = (uchar *) 0x7ffef75ff00c "\001"
+0x7ffef75ff000:	0x0000000000000000	0x0000000100001002
+$4 = 0x100001002
+
+Breakpoint 1, Fl_BMP_Image::load_bmp_ (this=0x7fffffffe0d0, rdr=..., ico_height=0, ico_width=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:490
+490	          ptr[2] = rdr.read_byte();
+$5 = 715827882
+$6 = (uchar *) 0x7ffef75ff00f ""
+0x7ffef75ff000:	0x0000000000000000	0x004d495300001002
+$7 = 0x4d495300001002

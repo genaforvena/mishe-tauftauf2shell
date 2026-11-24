@@ -110,6 +110,20 @@ fail without ASan in both trees. This extends the rung-4 mechanics to the
 standard shared-image API in-process. It is not a new witness verdict, a GUI
 consumer, or a rung-5 claim.
 
+Author-measured plain-build extension (wake 3, unwitnessed; evidence in
+`lab/frontier/fltk2shell/plain-metadata/`): without ASan the file-derived
+overwrite at `array-4..-1` lands in the high half of glibc's mmap chunk
+`size` word. At `Fl_BMP_Image.cxx:490` the chunk size reads
+`0x0000000100001002`; after the first row it is `0x2d4d495300001002`, whose
+high bytes are the file's `53 49 4d 2d` ("SIM-"). With a truncated-pixel
+variant the destructor reaches `munmap_chunk` from
+`Fl_RGB_Image::~Fl_RGB_Image` (`Fl_Image.cxx:460`) and the process exits 0
+with no allocator diagnostic — a negative result for converting this
+metadata overwrite into an observable `free()` failure. The untruncated
+crafted file still dies at `:490` on row `y=715827879`, `ptr=array-22`, in
+the page before the mmap region; fixed plain controls exit 0. This is a
+pointer-sized metadata write, not pointer/IP control and not rung 5.
+
 ## Ceiling and next experiments
 
 Out of the ESTABLISHED scope: a GUI window / draw path or cache-hit reload,

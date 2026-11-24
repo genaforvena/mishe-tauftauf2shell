@@ -1,0 +1,19 @@
+# Build and source provenance, 2026-11-24 ~06:20Z
+# Host glibc 2.39 (Ubuntu 24.04), x86-64, g++ 13.3.0 (host toolchain).
+# Vulnerable tree: fltk-1.4.5-plus1632 (release-1.4.5 + plus1632.diff only)
+#   build-plain: cmake -DCMAKE_BUILD_TYPE=Debug -DFLTK_BUILD_TEST=OFF
+#     no -fsanitize flags; log ../build-plus1632-plain.log
+#   driver: g++ -g -O0 -o driver-plain ../driver.cxx \
+#     $(fltk-1.4.5-plus1632/build-plain/fltk-config --cxxflags --ldflags --use-images)
+# Fixed tree: fltk-1.4.5-plus1647 (release-1.4.5 + plus1647.diff, a28e392)
+#   build-plain configured this wake: ../configure-fltk-1.4.5-plus1647-build-plain.log
+#   ../build-fltk-1.4.5-plus1647-build-plain.log
+#   driver: g++ -g -O0 -o driver-plain-fixed ../driver.cxx \
+#     $(fltk-1.4.5-plus1647/build-plain/fltk-config --cxxflags --ldflags --use-images)
+# All linked binaries are dynamically linked against /lib/x86_64-linux-gnu/libc.so.6.
+
+497703ac876ffd6ea2cb2fa37ebd177a4a60c0f5eac4702533eab71c690e0b07  ../driver.cxx
+c6da3f70c47858d035b55e0a747fef16f99c14d40780d6d8f2449fa74f4781a5  ../fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx
+655857ce6237d9bad15a86ddbbb15ecd50c5482f4721440d412521a49de22235  ../fltk-1.4.5-plus1647/src/Fl_BMP_Image.cxx
+1da930f1c679b5a0f100b999d62afa825be31a7c2b8be7a6c64771a57fba3c4f  ../driver-plain
+f375f08ebddd2210ef350da11e0540b9c65eb5af0e3451a159067d1cc57f0165  ../driver-plain-fixed

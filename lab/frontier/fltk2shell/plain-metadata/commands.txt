@@ -1,0 +1,41 @@
+# All commands run 2026-11-24 ~06:20Z from lab/frontier/fltk2shell/
+python3 plain-metadata/gen_short.py ../poc-chosen.bmp plain-metadata/short-chosen.bmp
+cp ../poc-chosen.bmp plain-metadata/full-chosen.bmp
+sha256sum plain-metadata/short-chosen.bmp plain-metadata/full-chosen.bmp > plain-metadata/inputs.sha256
+
+for f in short-chosen full-chosen; do
+  timeout 30 ./driver-plain "plain-metadata/$f.bmp" > "plain-metadata/outputs/plain-$f.out" 2>&1
+done
+
+cmake -S fltk-1.4.5-plus1647 -B fltk-1.4.5-plus1647/build-plain \
+  -DCMAKE_BUILD_TYPE=Debug -DFLTK_BUILD_TEST=OFF -DFLTK_BUILD_EXAMPLES=OFF \
+  -DFLTK_BUILD_FLUID=OFF -DOPTION_USE_SYSTEM_LIBJPEG=OFF \
+  -DOPTION_USE_SYSTEM_LIBPNG=OFF -DOPTION_USE_SYSTEM_ZLIB=OFF \
+  -DCMAKE_CXX_FLAGS='' -DCMAKE_EXE_LINKER_FLAGS=''
+cmake --build fltk-1.4.5-plus1647/build-plain -j4 --target fltk fltk_images
+g++ -g -O0 -o driver-plain-fixed driver.cxx \
+  $(fltk-1.4.5-plus1647/build-plain/fltk-config --cxxflags --ldflags --use-images)
+
+cd plain-metadata
+for f in short-chosen full-chosen; do
+  timeout 30 ../driver-plain "$f.bmp" > "outputs/plain-$f.out" 2>&1
+  timeout 30 ../driver-plain-fixed "$f.bmp" > "outputs/plain-fixed-$f.out" 2>&1
+done
+
+gdb -q -batch -ex 'break Fl_BMP_Image.cxx:490' -ex 'run poc-chosen.bmp' \
+  -ex 'print array' -ex 'print y' -ex 'print ptr' -ex 'x/2gx array-16' \
+  -ex 'p/x *(unsigned long*)(array-8)' -ex 'continue' -ex 'print y' \
+  -ex 'print ptr' -ex 'x/2gx array-16' -ex 'p/x *(unsigned long*)(array-8)' \
+  ../driver-plain > outputs/gdb-header.txt 2>&1
+
+gdb -q -batch -ex 'break Fl_BMP_Image.cxx:510' -ex 'run short-chosen.bmp' \
+  -ex 'print array' -ex 'x/2gx array-16' -ex 'p/x *(unsigned long*)(array-8)' \
+  -ex 'print rdr.error()' -ex 'break munmap_chunk' -ex 'continue' -ex 'bt 5' \
+  ../driver-plain > outputs/gdb-short.txt 2>&1
+
+gdb -q -batch -ex 'run poc-chosen.bmp' -ex 'bt 12' \
+  -ex 'info registers rip rax rdi rsi' ../driver-plain > outputs/gdb-crash.txt 2>&1
+
+# Extra crash-pointer check (not saved as a separate transcript):
+gdb -q -batch -ex 'run poc-chosen.bmp' -ex 'frame 0' -ex 'print y' \
+  -ex 'print ptr' -ex 'print x' -ex 'print array' ../driver-plain
