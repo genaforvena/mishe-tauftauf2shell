@@ -1,0 +1,20 @@
+7536766857f7d29fec524557aa6e84c36a24132e7090fbfa8ee019ff92e75e15  pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl
+e5d97a5f3fdec437c7f125e8a411487853c93bb4c2b37e7da039298d9f7f1fb4  pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp
+PRE safe_begin=0x55555556f520 high32=0x00005555
+CASE safe rc=0
+case=harness/cases/safe.gltf scene=ok err=
+CASE idxptr-mat2-low rc=139
+FAULT idxptr-mat2-low observed=0x555541414141 predicted=0x555541414141
+MATCH idxptr-mat2-low
+FRAME idxptr-mat2-low copyvector
+SLOT idxptr-mat2-low start=0x555541414141
+SLOTMATCH idxptr-mat2-low
+CASE idxptr-mat2-low42 rc=139
+FAULT idxptr-mat2-low42 observed=0x555542424242 predicted=0x555542424242
+MATCH idxptr-mat2-low42
+FRAME idxptr-mat2-low42 copyvector
+SLOT idxptr-mat2-low42 start=0x555542424242
+SLOTMATCH idxptr-mat2-low42
+PRE real_matches_safe=1 low=5556f520
+NEG real abort=munmap_chunk
+TOTAL pass=7 fail=0

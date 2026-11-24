@@ -388,6 +388,48 @@ at the matching level, and feeds the tracked documents through
   Author-measured, unwitnessed; no valid object or code pointer, no marker,
   control-flow redirection, command or r5.
 
+## W14 — partial low-32-bit pointer overwrite with MAT2 index (2026-11-24 15:4xZ, author-measured, unwitnessed)
+
+A read-only source map first corrected the W13 summary: the `meshes` vector
+slot W10 overwrites IS dereferenced (`BaseImporter.h:334-345` via
+`glTFImporter.cpp:475`), but no function is called through it. With no witness
+verdict available (witness wake failed for a host engine reason), the next
+bounded experiment tested whether a *smaller* index element-size change gives
+a different primitive. A MAT2/FLOAT accessor has `elemSize=16`, so
+`Accessor::Indexer::GetValue<uint32_t>()` overwrites 16 bytes instead of MAT4's
+64. Three new tracked glTF 1.0 cases under `harness/cases/` differ only in the
+index accessor type (MAT4 -> MAT2) and the chosen word at document bytes
+48..51, which map to the low 32 bits of the live `meshes.begin()` pointer.
+
+Prediction, observation and disposition on the gcc -O2 plain library built by
+`run-w12.sh` (gdb disables ASLR), with the pre-corruption begin captured at
+`glTFImporter.cpp:475` from `safe.gltf` as `0x55555556f520`:
+
+- `idxptr-mat2-low.gltf`, chosen low word `41414141`: slot at the CopyVector
+  call = `0x555541414141`, SIGSEGV `si_addr=0x555541414141`, frame
+  `CopyVector<aiMesh>` (`BaseImporter.h:343`). High 32 bits `0x5555` are the
+  original heap pointer's, not chosen. Prediction matched.
+- `idxptr-mat2-low42.gltf`: only document bytes 48..51 change to `42424242`;
+  slot and fault address become `0x555542424242` in the same frame. Causal
+  one-field steering, not a second layout accident.
+- `idxptr-mat2-real.gltf`: chosen low word `5556f520` equals the safe begin's
+  low bits under ASLR-off, restoring the begin pointer exactly; the import
+  still aborts with `munmap_chunk(): invalid pointer` in glibc `free`, with
+  vector length 415 at the call. This is a PRESERVED NEGATIVE: restoring one
+  slot does not produce a clean import, and no clean-import control is claimed.
+
+`bash harness/run-w14.sh` => **7 PASS / 0 FAIL**, normalized trace
+`w14/evidence/w14.trace` sha256
+`37b1225e862d05ea622c755b9bdbbb7343315adef6b855831623d08a26a7fd0c`. The first
+three runs exposed only harness parsing bugs (shortened high-hex string, wrong
+`awk` field, leading-zero address formatting); they were fixed before the
+clean run, and the earlier raw observations above already matched. Source
+hashes match the pins and `safe.gltf` imports cleanly. Author-measured,
+unwitnessed; no valid target object, code pointer, marker, command, listener
+or r5. The chosen address is unmapped under ASLR and must inherit the original
+pointer's high bits, so this is a narrower primitive than full pointer
+replacement, not a step toward control flow.
+
 ## Next lane
 
 Independent witness replay of W1/W2 is still owed; the clean-archive author
@@ -451,6 +493,7 @@ five W2 `.out` traces to
 byte-identical to the author tree (`diff -q` empty) after replacing PIDs,
 addresses, checkout paths and build ids under the `REPLAY.md` rules. No claim
 content was normalized. Source-bound ceiling rechecked: pinned
-`BaseImporter.h:318-347` `CopyVector` copies raw mesh pointers and calls no
-function through the slot W10 overwrites, so that slot offers no observed
-path to control flow. Author replay, not witness acceptance; no grade change.
+`BaseImporter.h:318-347` `CopyVector` dereferences the overwritten slot to
+copy raw mesh pointers but calls no function through it, so that slot offers
+no observed path to control flow. Author replay, not witness acceptance; no
+grade change.
