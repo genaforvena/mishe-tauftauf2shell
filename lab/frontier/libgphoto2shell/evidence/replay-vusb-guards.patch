@@ -1,0 +1,27 @@
+# W172 local-only vusb diff, relative to the W170+W171 patched tree
+# Apply with `patch -p1` after live/vusb-jl2005.patch, evidence/replay-vusb-victim.patch
+# and evidence/replay-vusb-normal-return.patch. Adds env-gated guard chunks after
+# the live CameraFile victim so the :154 overflow cannot reach the top chunk.
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -232,6 +232,20 @@
+ 						*slot = f;
+ 						fprintf(stderr, "VUSB_VICTIM %p\n", f);
+ 					}
++					/* W172 lab-only: keep live chunks after the victim so the
++					 * :154 overflow cannot reach the top chunk size word. */
++					{
++						static void *guards[32];
++						const char *gs = getenv("M2SHELL_VUSB_GUARDS");
++						int ng = gs ? atoi(gs) : 0;
++						int g;
++						if (ng > 32) ng = 32;
++						for (g = 0; g < ng; g++)
++							guards[g] = malloc(0x180);
++						if (ng && getenv("M2SHELL_DEBUG"))
++							fprintf(stderr, "VUSB_GUARDS %d first=%p last=%p\n",
++								ng, guards[0], guards[ng-1]);
++					}
+ 				}
+ 				memset(bytes, fill, (size_t)n);
+ 				if (ks) {

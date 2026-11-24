@@ -343,3 +343,35 @@ consumer network path, and gphoto2's own `gp_file_save()` aborts at
 `replay-vusb-victim.patch`), `evidence/replay-normal_return_probe.c`,
 `evidence/replay-normal-return.gdb`, and
 `evidence/real-plain-normal-return-deref.out`.
+
+## Real consumer writes device-directed bytes (W172, 2026-11-24)
+
+W171 stopped at `gp_file_save()` aborting in `malloc(): corrupted top size`:
+the 464-byte `:154` overflow reached the top chunk immediately after the
+live `CameraFile` victim at `priv+0x4050`. W172 keeps live guard chunks
+**after** the victim from inside the same lab vusb bulk-read hook, so the
+overflow ends inside the guards and the top size word survives. With the W171
+normal-return setup (drain 22, caller canary and saved registers restored by
+gdb), the real `gp_file_save()` then returns `rc=0` and writes a 29-byte file
+whose content is the device-chosen marker `M2SHELL_DEREF_MARKER_20261124`
+(hex `4d 32 53 48 ... 32 36 31 31 32 34`). This is a real gphoto2 consumer
+dereferencing the device-directed `file->data` and producing a host-side side
+effect, not the probe's own `memcpy`.
+
+The matched control with `M2SHELL_VUSB_GUARDS=0` and otherwise identical env
+returns the same pointer from `gp_file_get_data_and_size()` but aborts in
+`gp_file_save()` with `malloc(): corrupted top size`, leaving a 0-byte file:
+guards are causal. Other controls: count 100 has no victim and no file;
+zeroed `DATA`/`SIZE` gives `data=(nil) size=0x0` and no dereference; the fixed
+camlib makes no bulk read, produces no victim and no file; reversing the fix
+restores the write. Vulnerable camlib hash `0ccb1dac24a837bc…` before and
+after the fixed-control cycle.
+
+Grade: rung 4 extended to a real gphoto2 consumer write with an observed file
+side effect. Still lab-assisted — the pointer value is supplied by the probe
+(a lab-known address), the canary and saved registers come from gdb, the
+victim and guards are placed by the lab hook, and the replies are synthetic.
+No physical USB, wire, remote request, device-only canary recovery, command
+or witness replay. Rung 5 stays UNKNOWN. Local-only diff
+`evidence/replay-vusb-guards.patch` (applies after the W170 and W171 patches),
+commands and all six raw runs in `evidence/real-plain-consumer-write.out`.

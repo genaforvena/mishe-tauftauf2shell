@@ -15,7 +15,10 @@ canary supplied by the target's own diagnostic output; rung 5 stays UNKNOWN.
 W170 then steered a live `CameraFile` pointer and size through a real
 libgphoto2 API with device-chosen bytes in the plain real build; that is
 lab-assisted rung 4 at the real heap/API scope, unwitnessed, with no command
-or wire, so rung 5 is still UNKNOWN.
+or wire, so rung 5 is still UNKNOWN. W172 kept guard chunks after the victim
+so the real `gp_file_save()` wrote the device-directed bytes to a host file;
+that is rung 4 extended to a real consumer side effect, still unwitnessed,
+lab-assisted and without a wire or command path.
 Byte-exact pins and hashes:
 `lab/frontier/libgphoto2shell/PINS.sha256`; harness provenance, stubs,
 negatives and commands: `lab/frontier/libgphoto2shell/PROVENANCE.md`. Frontier
@@ -289,3 +292,20 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   `lab/frontier/libgphoto2shell/evidence/real-plain-normal-return-deref.out`,
   `replay-vusb-normal-return.patch`, `replay-normal_return_probe.c`,
   `replay-normal-return.gdb`.
+
+- Real consumer writes device-directed bytes (W172, 2026-11-24): the W171
+  normal-return victim keeps live guard chunks after it inside the lab vusb
+  hook, so the 464-byte `:154` overflow stops inside the guards instead of
+  hitting the top chunk. The real `gp_file_save()` then returns `rc=0` and
+  writes a 29-byte file containing the device-chosen marker
+  `M2SHELL_DEREF_MARKER_20261124`. With `M2SHELL_VUSB_GUARDS=0` and otherwise
+  identical env the same pointer comes back from `gp_file_get_data_and_size()`
+  but `gp_file_save()` aborts at `malloc(): corrupted top size` and the file
+  stays 0 bytes, so the guards are causal. Count 100 (no victim), zeroed
+  `DATA`/`SIZE`, the fixed camlib (no bulk read) and fix reversal are recorded.
+  Rung 4 at a real gphoto2 consumer write with an observed file side effect;
+  still lab-assisted (probe-supplied pointer, gdb-read canary/registers, lab
+  heap placement, synthetic replies), no USB/wire/command and no witness
+  replay, so rung 5 stays UNKNOWN. Evidence, local patch and all six runs:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-consumer-write.out`,
+  `evidence/replay-vusb-guards.patch`.

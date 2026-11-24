@@ -41,9 +41,9 @@ Admission adds no grade.
   W162 added a real ASan libgphoto2 2.5.34 build reached through
   `gp_camera_init()` with a lab-patched `vusb` virtual USB device: count 1022
   produces ASan `WRITE of size 16384` at real `jl2005c/jl2005c.c:152`; the
-  fixed build makes no oversized device request. No real USB hardware, wire,
-  camera consumer, socket, pointer-control chain, command, marker side effect
-  or witness verdict. Rung 5 UNKNOWN.
+  fixed build makes no oversized device request. No real USB hardware, wire
+  or camera-consumer network path; no socket, pointer-control chain, command
+  or witness verdict on the graded claims. Rung 5 UNKNOWN.
 - W171 (author-observed, unwitnessed): the device reply restores the real
   caller frame (canary, saved rbx/rbp/RIP) so `jl2005c_init` returns normally
   into `camera_init` and `gp_camera_init` reports rc=0. The device-chosen
@@ -52,10 +52,26 @@ Admission adds no grade.
   yields a device-chosen 29-byte marker. Safe fill, count 100, wrong canary,
   fixed/reversed camlib and two omitted-restore failures are recorded.
   Canary and saved registers come from gdb reading the live process, victim
-  placement and drain=22 are lab hooks, gphoto2's own `gp_file_save()` aborts
-  at `malloc(): corrupted top size`, and no USB/wire/command path exists.
-  Rung 4 at the real post-normal-return scope; rung 5 UNKNOWN. Evidence:
+  placement and drain=22 are lab hooks. In W171 gphoto2's own
+  `gp_file_save()` aborted at `malloc(): corrupted top size`; W172 below
+  kept guard chunks after the victim so that consumer succeeds. No
+  USB/wire/command path exists. Rung 4 at the real post-normal-return
+  scope; rung 5 UNKNOWN. Evidence:
   `lab/frontier/libgphoto2shell/evidence/real-plain-normal-return-deref.out`.
+
+- W172 (author-observed, unwitnessed): live guard chunks after the victim,
+  placed from the lab vusb bulk-read hook, keep the top chunk size intact, so
+  the real `gp_file_save()` returns `rc=0` and writes 29 device-directed bytes
+  (`M2SHELL_DEREF_MARKER_20261124`) to a file. The matched `GUARDS=0` control
+  returns the same pointer but aborts in `gp_file_save()` at corrupted top
+  size and leaves a 0-byte file; count 100, zeroed `DATA`/`SIZE`, fixed camlib
+  and fix reversal are recorded. This is rung 4 extended to a real gphoto2
+  consumer write with an observed file side effect, still lab-assisted
+  (probe-supplied pointer, gdb-read canary/registers, lab heap placement,
+  synthetic replies) with no USB/wire/command path or witness replay. Rung 5
+  UNKNOWN. Evidence:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-consumer-write.out`,
+  `evidence/replay-vusb-guards.patch`.
 
 Next for the target mind: replay the virtual-port lane independently
 (`lab/frontier/libgphoto2shell/REAL-BUILD.md`) and hunt counterexamples to the
