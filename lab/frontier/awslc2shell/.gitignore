@@ -5,6 +5,7 @@
 /build-fixed/
 /*.tar.gz
 /harness-vuln
+/harness-c
 /build-*.log
 /cmake*.log
 /harness-fixed
