@@ -190,6 +190,33 @@ gdb breakpoint above. W3 was replayed in a clean room by the witness
 halfwords at the chosen offset, steered by one metadata field. It is NOT a
 demonstration of arbitrary 16-bit values.
 
+## Calibrated exact halfword at the chosen offset (W6, 2026-11-24 09:3xZ; author-side)
+
+One pre-chosen 16-bit value was hit exactly at index 68,644 by calibrating the
+same DNG WhiteLevel tag used in W3. The OOB value is `avg[c]/avg[3]` of
+interpolated ushort pixels; for the first channel the empirically calibrated
+relation is about `184,356,380 / WhiteLevel`. `craft_whitelevel_poc.py` with
+WhiteLevel 11,036 on `evidence/nonzero-oob.input` produced
+`evidence/wl-probe-11036.input` (sha256
+`b856c1c62d48a63f9c3d42a4d32be11033c0dc405fcbcc063f6b9ddaa6d61215`).
+The plain `-O0` crash frame at `xtrans_demosaic.cpp:427` reads
+`0x4141 0x2b82 0x3a00 0x0000` at `&destimage[68644][0]`
+(`evidence/gdb-wl11036.txt`); `0x4141` was the target chosen before the run.
+WL 11,035 gave `0x4142` and WL 11,037 gave `0x413f`
+(`evidence/gdb-wl11035.txt`, `evidence/gdb-wl4141.txt`), bracketing the
+calibration. ASan vulnerable `-n 1` on the exact-hit input: rc 1,
+`WRITE of size 2` at `:427`, 0 bytes after the 550,176-byte region; fixed tree
+rc 0; vulnerable no-option rc 0 (`evidence/wl4141-controls.txt`).
+
+Negative result preserved: a second target, `0xdead`, with WL 3,234 produced
+`0xdeb3` (`evidence/wl-dead.input`, `evidence/gdb-wl-dead.txt`); WL
+3,233/3,234/3,235/3,236 produced `0xdec5`/`0xdeb3`/`0xdea1`/`0xde8f`
+(`evidence/gdb-wl-dead.txt`), steps of about 18 at that magnitude. WhiteLevel
+alone therefore does not reach every halfword: this is ONE exact chosen value
+at the chosen offset, not an arbitrary 16-bit alphabet. Ceiling unchanged:
+no pointer/IP, no consumer beyond `dcraw_emu`, no wire path, NO r5.
+Author-side only; no witness replay was requested this wake.
+
 ## Frame-size steering of the first OOB index (W5, 2026-11-24 08:2xZ; author-side)
 
 The first OOB *index* is also file-steerable, not only the stored value.
@@ -234,9 +261,11 @@ file (W186 witness ESTABLISHED). Rung 4 is demonstrated for a crafted nonzero
 input and ESTABLISHED by the W187 witness replay: the OOB store at index
 68,644 writes chosen nonzero halfwords with clean fixed and no-option
 controls. W3 additionally shows witness-established (DM 3413) file steering
-of the value to distinct non-saturated halfwords. W5 adds author-side,
-replay-pending steering of the first OOB index from 68,644 to 268,324 by
-changing the crafted frame size; it does not change the ceiling. Fully
+of the value to distinct non-saturated halfwords. W6 adds an author-side exact
+hit on one pre-chosen halfword (`0x4141`) at index 68,644 via WhiteLevel
+calibration, with a preserved negative for a second target; it does not change
+the ceiling. W5 adds author-side, replay-pending steering of the first OOB
+index from 68,644 to 268,324 by changing the crafted frame size. Fully
 arbitrary byte values and pointer/IP control remain UNKNOWN. Rank: high
 tractability, low escalation
 (local file, UI:P, no network, no pointer/command execution). Admitted frontier
@@ -294,8 +323,10 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   WhiteLevel steering claim (DM 3413); all ESTABLISHED AS LABELED.
 - Fully arbitrary byte values remain UNKNOWN: W2 wrote a saturated constant
   `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
-  metadata tag but did not demonstrate arbitrary 16-bit values. Pointer/IP
-  control remains an open prerequisite for any stronger claim.
+  metadata tag; W6 hit one pre-chosen value `0x4141` exactly but a second
+  target (`0xdead`) was unreachable at that WhiteLevel granularity. None
+  demonstrates an arbitrary 16-bit alphabet. Pointer/IP control remains an
+  open prerequisite for any stronger claim.
 - The W5 frame-size/IDX steering result is author-side only; witness replay was
   requested and has not arrived. Do not treat it as ESTABLISHED.
 - Target admitted 05:4xZ as route #127. Operator owns standing approvals;

@@ -16,6 +16,9 @@
 | `evidence/whitelevel16383.input` | W3 variant, WhiteLevel 16,383 | `2547a078ca25f315e957d30614a9c4370e0657262036487d0fcdda2390c78bc8` |
 | `craft_dimension_poc.py` | lab-only frame-size steering generator (W5) | `2703d113236f4baf8b6a164b8198448d4b4b89d33d7e9c81f2831d91c27f3e55` |
 | `evidence/dim1024.input` | W5 variant, 1024x1024 frame from `evidence/nonzero-oob.input` | `a0e318197405aa5df29a3f5c1a0916487e0eb8c67c55ec00c03dd0308ff2da3a` |
+| `evidence/wl-probe-11036.input` | W6 variant, WhiteLevel 11,036, exact `0x4141` at index 68,644 | `b856c1c62d48a63f9c3d42a4d32be11033c0dc405fcbcc063f6b9ddaa6d61215` |
+| `evidence/wl-probe-11035.input` | W6 calibration neighbour, `0x4142` | `8d865153c01b4128e270fa1e5bcc9988865dae48829c94bca5eb955d1d1cce09` |
+| `evidence/wl-dead.input` | W6 negative target, WL 3,234 -> `0xdeb3`, not `0xdead` | `6ed079d8c97e89bdd3eff5367064ef32fffa4b4d66e5746cbc53a24f6c5192da` |
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.
