@@ -1,0 +1,1 @@
+  FLAGS = -fno-strict-aliasing -O0 -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer -std=gnu99 -fPIC

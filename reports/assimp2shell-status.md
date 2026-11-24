@@ -391,6 +391,29 @@ command and no r5. This is a measured negative for W10 portability, not a
 downgrade of the gcc claim and not witness acceptance.
 
 
+## W12 — optimization matrix: chosen-address fault survives gcc -O2/-O3 (2026-11-24 13:1xZ, author-measured)
+
+A flag audit found that W10/W11 configured CMake with
+`-DCMAKE_BUILD_TYPE=Release`, whose `-O3 -DNDEBUG` is appended after the
+requested `-O1`; their final optimizer flag is -O3. `harness/run-w12.sh`
+rebuilds the pinned library with an empty build type and explicit
+`-O{0,2,3} -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer` (verbatim
+flags in `w12/evidence/o*-flags.txt`) and compiles the same
+`placement_driver.cpp` at the matching level.
+
+At explicit -O3 and -O2 the tracked `idxptr-zero.gltf` and
+`idxptr-addr42.gltf` still fault at `si_addr=0x41414141` and `0x42424242`
+in `CopyVector<aiMesh>` from `glTFImporter.cpp:475` (`VERDICT PORTABLE` at
+both levels). At explicit -O0 both cases abort with
+`*** stack smashing detected ***` before the vector dereference
+(`VERDICT DIFFERENT`): the canary detects the 64-byte stack overwrite first.
+`safe.gltf` is `scene=ok` at all three levels; source hashes match the pins.
+`bash harness/run-w12.sh` => **17 PASS / 0 FAIL**, normalized trace sha256
+`f2f6d6ee18e2196706550b8de4a32840793b4eb7f25de4117e160f9d10c7d8af` in
+`lab/frontier/assimp2shell/w12/evidence/`. This strengthens the gcc build
+claim but leaves the clang negative (W11) intact. Author-only, unwitnessed;
+no valid object or code pointer, no marker, control flow, command or r5.
+
 ## Honest ceiling
 
 Rungs 1-4 remain as labeled above; W10 extends rung 4 to a file-steered
@@ -399,14 +422,16 @@ overwrite the live `meshes` vector used at `glTFImporter.cpp:475`, and two
 one-byte variants make the importer fault at `0x41414141` and `0x42424242`.
 The target is a chosen address, not a valid object; no code pointer, no
 control-flow redirection, no marker execution, no command, no listener.
-No chosen byte survives in a valid `aiMesh` field (W8 negative). W10 is
-gcc-`-O1`-plain-only: the ASan frame layout differs, and W11's clang rebuild
-does not reproduce its chosen-address fault. W11 instead shows document
+No chosen byte survives in a valid `aiMesh` field (W8 negative). The W10/W11
+"`-O1`" libraries actually ended at -O3; W12 reproduces both chosen fault
+addresses at explicit gcc -O2 and -O3, with -O0 aborting on a stack canary
+before the dereference. The ASan frame layout differs, and W11's clang rebuild
+does not reproduce the chosen-address fault. W11 instead shows document
 bytes overwriting `count`, `stride` and `faces` in the caller frame and
 steering the memcpy source pointer; both are file-steered invalid addresses,
 not objects or code. Advisory vector is `AV:L/UI:P`; local import corruption,
 not RCE. Witness verdict #3277 covers only the baseline direct-call legs;
-W1, W2, W5, W6, W7, W8, W9, W10 and W11 are author-measured, independent
+W1, W2, W5, W6, W7, W8, W9, W10, W11 and W12 are author-measured, independent
 replay and acceptance are still owed. Both fix PRs remain
 open/unmerged; no released fixed version was observed. W9 shows PR7090
 blocks the index legs but not the element-size overruns. The W6 TEXCOORD
@@ -420,14 +445,17 @@ count mismatch remains a separate defect, not folded into this grade.
 2. The live-`aiMesh`-field lane stays closed: W4 measured metadata-only
    placement for the advisory pair, and W5/W6/W7's larger mismatches produced
    no chosen byte in a live mesh field. Do not groom either path.
-3. W5, W6, W7, W8, W9, W10 and W11 are author-measured; include their recipes
-   in a future replay request if any becomes grade-relevant. W11's script
-   builds its own clang library when absent, so `bash harness/run-w11.sh` is
-   the whole recipe after `bootstrap.sh`. W10's clean-archive replay is
+3. W5, W6, W7, W8, W9, W10, W11 and W12 are author-measured; include their
+   recipes in a future replay request if any becomes grade-relevant. W11's
+   script builds its own clang library when absent, so `bash harness/run-w11.sh`
+   is the whole recipe after `bootstrap.sh`; W12's script builds its three
+   explicit-optimization libraries the same way, so `bash harness/run-w12.sh`
+   is likewise self-contained. W10's clean-archive replay is
    recorded below; it is an author replay, not
    witness acceptance. W11 is a negative for W10 portability: replay it with
    the exact clang build flags before treating either compiler-specific
-   frame layout as general. The TEXCOORD-count mismatch is a separate defect
+   frame layout as general. W12 shows the gcc layout is stable at -O2/-O3
+   but not -O0 (canary). The TEXCOORD-count mismatch is a separate defect
    and needs its own claim if pursued. No rung-5 work without observed
    control flow into code.
 

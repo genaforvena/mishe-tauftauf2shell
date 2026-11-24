@@ -1,0 +1,39 @@
+VERDICT o0 DIFFERENT
+VERDICT o2 PORTABLE
+VERDICT o3 PORTABLE
+PASS safe-o0
+PASS safe-o2
+PASS safe-o3
+PASS chosen-zero-bytes
+PASS chosen-addr42-bytes
+PASS o0-flags
+PASS o2-flags
+PASS o3-flags
+PASS observed-o0-idxptr-zero
+PASS observed-o0-idxptr-addr42
+PASS observed-o2-idxptr-zero
+PASS observed-o2-idxptr-addr42
+PASS observed-o3-idxptr-zero
+PASS observed-o3-idxptr-addr42
+PASS verdict-o0
+PASS verdict-o2
+PASS verdict-o3
+RESULT 17 PASS / 0 FAIL
+ba86adaea889036ed75d887b4902ab91270c3836d625a449f4a85d3a9b822bd3  w12/evidence/bytes.out
+ec295b91ccaec36af5b0976c615f2df95b27750e4956ac82baf153f309ea4080  w12/evidence/o0-idxptr-addr42-gdb.out
+236ccc8e8b7fb519a77b641c114904a337eba7de8fe64a41c6225677c5d13e02  w12/evidence/o0-idxptr-addr42.out
+ff47ac0353f53c9abae35a5f5a8ee3d1a08370ca8f586ba2091ec4aed08edb43  w12/evidence/o0-idxptr-zero-gdb.out
+236ccc8e8b7fb519a77b641c114904a337eba7de8fe64a41c6225677c5d13e02  w12/evidence/o0-idxptr-zero.out
+d5082cde48fd35588d13a9c88c2fdc3c626d138ea2f4b3da5e237126111869ab  w12/evidence/o0-safe.out
+981328b3ee265abdad0811df16bf46498bcc06bea2e7b3f5da00399a457eaa40  w12/evidence/o2-idxptr-addr42-gdb.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  w12/evidence/o2-idxptr-addr42.out
+fa883d92620344fd0d99fdf0d86fc5414646ee2a47f94fe15a984174b87110a6  w12/evidence/o2-idxptr-zero-gdb.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  w12/evidence/o2-idxptr-zero.out
+d5082cde48fd35588d13a9c88c2fdc3c626d138ea2f4b3da5e237126111869ab  w12/evidence/o2-safe.out
+672af9efa5b582b980c400a1ac9a82934eea162f06ae34dc1e22a7d347f98ceb  w12/evidence/o3-idxptr-addr42-gdb.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  w12/evidence/o3-idxptr-addr42.out
+53c6f8a0f1a5e5e4631dcd96dae3d0f9f51fbf576bef05409c39b37c8691fe76  w12/evidence/o3-idxptr-zero-gdb.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  w12/evidence/o3-idxptr-zero.out
+d5082cde48fd35588d13a9c88c2fdc3c626d138ea2f4b3da5e237126111869ab  w12/evidence/o3-safe.out
+59e87c98410f948bf52752b00cbfbedbce5c451248e26f6facdd7fea35365094  w12/evidence/source-hashes.out
+f2f6d6ee18e2196706550b8de4a32840793b4eb7f25de4117e160f9d10c7d8af  w12/evidence/w12.trace

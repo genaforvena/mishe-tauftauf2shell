@@ -1,0 +1,26 @@
+CASE o0 safe rc=0
+SCENE o0 safe ok
+CASE o0 idxptr-zero rc=134
+ABORT o0 idxptr-zero rc=134 canary
+CASE o0 idxptr-addr42 rc=134
+ABORT o0 idxptr-addr42 rc=134 canary
+VERDICT o0 DIFFERENT
+CASE o2 safe rc=0
+SCENE o2 safe ok
+CASE o2 idxptr-zero rc=139
+FAULT o2 idxptr-zero si_addr=0x41414141
+FRAME o2 idxptr-zero copyvector
+CASE o2 idxptr-addr42 rc=139
+FAULT o2 idxptr-addr42 si_addr=0x42424242
+FRAME o2 idxptr-addr42 copyvector
+VERDICT o2 PORTABLE
+CASE o3 safe rc=0
+SCENE o3 safe ok
+CASE o3 idxptr-zero rc=139
+FAULT o3 idxptr-zero si_addr=0x41414141
+FRAME o3 idxptr-zero copyvector
+CASE o3 idxptr-addr42 rc=139
+FAULT o3 idxptr-addr42 si_addr=0x42424242
+FRAME o3 idxptr-addr42 copyvector
+VERDICT o3 PORTABLE
+RESULT 17 PASS / 0 FAIL

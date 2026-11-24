@@ -115,13 +115,16 @@ corrected in the rung-4 row above; no grade impact.
   a file-steered pointer dereference in the plain importer: one crafted byte
   changes the fault address from `0x41414141` to `0x42424242`, but the target
   is not a valid object and there is no code pointer, control-flow
-  redirection, marker, command or r5. W10 is gcc-`-O1`-plain-only (the ASan
-  frame layout differs), and W11's clang rebuild does not reproduce the
+  redirection, marker, command or r5. The W10/W11 "`-O1`" plain libraries
+  actually ended with `-O3` (CMake's Release flags are appended after the
+  requested `-O1`); W12 reproduces both chosen fault addresses at explicit
+  gcc -O2 and -O3, while explicit -O0 aborts on a stack canary first. The ASan
+  frame layout differs, and W11's clang rebuild does not reproduce the
   chosen-address fault: it instead overwrites caller-frame `count`, `stride`
   and `faces` and steers the memcpy source pointer by one chosen byte.
-  Neither is witness-backed. The W2 ASan callback unpoisons 16 redzone bytes
+  None is witness-backed. The W2 ASan callback unpoisons 16 redzone bytes
   for observation only; it is instrumentation, not attacker control. No
-  grooming and no witness verdict for W1/W2 or W10/W11. Advisory vector is
+  grooming and no witness verdict for W1/W2 or W10/W11/W12. Advisory vector is
   `AV:L/UI:P` (local file import), not a remote listening service.
 - No prior brief, charter, window or registry entry existed for Assimp; it is
   not on the plant's do-not-duplicate or screened-out lists.
@@ -361,16 +364,40 @@ redirection, marker, command or r5. W11 is a negative for W10 portability,
 not a grade upgrade or witness acceptance.
 
 
+## W12 — optimization matrix: the chosen-address fault survives gcc -O2/-O3 (2026-11-24 13:1xZ, author-measured)
+
+A flag audit found that the W10/W11 libraries were configured with
+`-DCMAKE_BUILD_TYPE=Release`, whose `-O3 -DNDEBUG` is appended after the
+requested `-O1`; their final optimizer flag is `-O3`. `harness/run-w12.sh`
+therefore configures pinned v6.0.6 with an empty build type and explicit
+`-O{0,2,3} -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer` (verbatim
+flags in `w12/evidence/o*-flags.txt`), builds the same `placement_driver.cpp`
+at the matching level, and feeds the tracked documents through
+`ReadFileFromMemory`.
+
+- `-O3` and `-O2`: `idxptr-zero.gltf` faults at `si_addr=0x41414141` and
+  `idxptr-addr42.gltf` at `0x42424242`, both in `CopyVector<aiMesh>` from
+  `glTFImporter.cpp:475`; `VERDICT PORTABLE` for both.
+- `-O0`: both crafted cases abort with `*** stack smashing detected ***`
+  before the vector dereference; `VERDICT DIFFERENT`. A preserved
+  detection/layout negative, not a refutation of the higher levels.
+- `safe.gltf` is `scene=ok` at all three levels; source hashes match the pins.
+- `bash harness/run-w12.sh` => **17 PASS / 0 FAIL**; normalized trace sha256
+  `f2f6d6ee18e2196706550b8de4a32840793b4eb7f25de4117e160f9d10c7d8af`.
+  Author-measured, unwitnessed; no valid object or code pointer, no marker,
+  control-flow redirection, command or r5.
+
 ## Next lane
 
 Replay W1/W2 independently, preserving any contradiction as a negative. W5,
 W6, W7 and W8 measured larger and distinct-site overruns through the real
 importer but found no chosen byte in a live `aiMesh` field. W9 separated the
 two proposed fixes: PR7090 blocks the index legs but not the element-size
-overruns. W10 shows a chosen-address dereference in the gcc plain importer,
-not control-flow placement, and W11 shows that layout is compiler-specific:
-clang instead steers the memcpy source through corrupted `stride`. Only
-observed control flow into code would reopen any further grade. The TEXCOORD
+overruns. W10 shows a chosen-address dereference in the plain importer, not
+control-flow placement; W12 confirms it at explicit gcc -O2/-O3 (and that
+the earlier "`-O1`" libraries actually ended at -O3), while W11 shows a
+second compiler steering the memcpy source through corrupted `stride` instead.
+Only observed control flow into code would reopen any further grade. The TEXCOORD
 count mismatch is a separate defect. Never relabel pointer corruption or
 placement as control flow or RCE without observation.
 
