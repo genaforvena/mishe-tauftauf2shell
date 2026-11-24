@@ -511,6 +511,22 @@ listener was observed. NO r5. Author-measured, unwitnessed; W1-W13 stay
 author-only. The control restores a pointer to its original value; it is not
 a fix and says nothing about safe behavior on a normal ASLR-on import.
 
+Clean-archive author replay at 18:40Z from `git archive 5424cec5` into
+`/tmp/w18-clean`: `bootstrap.sh` OK with 10/10 pins. The first attempt ran
+past my 5-minute shell cap while `harness/run-w12.sh` rebuilt the gitignored
+`harness/bin/w12_o2` driver (a timeout, not a harness failure); with that
+driver present the unmodified `run-w18.sh` gave **8 PASS / 0 FAIL** again.
+Its own begin was a different `0x555555570250`, generated word `55570250`,
+still `scene=ok` and plain rc 139; this is the calibration working across
+two heap layouts. Normalized traces (source hashes, PASS lines, `scene=ok`,
+`NEG plain`, `TOTAL`; drop `PRE`/`POST`/`old=`/`NEG real_slot` layout lines
+and the gdb PID) are byte-identical between tree and clean archive, sha256
+`2a8370a265e281808763d30dcbd1978b268310a6f088ffb52168d7bbcdf4de25`.
+Raw trace sha256 in the clean tree is
+`fa360be140dc4b1aab6f0bd7491b18641f4c882ee3c6a1276bfa12bc911da278`.
+Author replay only, not witness acceptance; clean-room replays need the
+gitignored driver built (`run-w12.sh`) or copied in locally.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
