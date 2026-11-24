@@ -424,3 +424,34 @@ six prior sweeps found no new PoC, wire vector, range change or execution
 claim, and timestamp-only advisory watches are not work. Grades stand: W1,
 W160 and W175 rungs 1-4 ESTABLISHED at their labeled scopes; rung 5
 unclaimed. No build, no large run, no guard change and no replay this wake.
+
+## 2026-11-24 16:2xZ — second advisory on `jvp_string_append`, not a reopen
+
+The named "new claim" check found a distinct upstream advisory absent from
+this lane's records: GHSA-29gj-222p-j7vx / CVE-2026-54679, "potential integer
+overflow in jvp_string_append", published Jun 16 2026, Moderate, jq `<=1.8.1`
+fixed 1.8.2
+(https://github.com/jqlang/jq/security/advisories/GHSA-29gj-222p-j7vx).
+It claims a **32-bit `size_t`** path: `currlen + len = 2147483646` passes an
+`INT_MAX` check, `uint32_t allocsz = (currlen + len) * 2 = 4294967292`, and
+`sizeof(jvp_string) + size + 1 = 4294967309` wraps 32-bit `size_t` to 13,
+so a 13-byte allocation precedes a ~2 GiB copy. The advisory says
+"PoC: None developed" and makes no command-execution claim.
+
+Disposition — named negative, no reopen:
+
+- Distinct advisory and CVE; this charter admits GHSA-q3h9-m34w-h76f only.
+- The 13-byte allocation needs 32-bit `size_t`. This host reports `x86_64`
+  and `LONG_BIT=64`, and no jq2shell build script passes `-m32`. The pinned
+  vulnerable slice computes `uint32_t allocsz` at `jv.c.vuln:1187-1189`
+  without the advisory's `INT_MAX` check. With 64-bit `size_t` the request
+  is 4294967309 bytes (~4 GiB), which fails under the unchanged 2 GiB guard
+  before a copy; no guard change or bypass was attempted or made.
+- The general append bound (`71a6568`) already closes wrapped appends
+  independently: `allocsz < T` implies `T >= 2^31`, hence an operand of at
+  least 1 GiB.
+
+No new PoC, wire vector, changed range or execution claim; no build, no
+large run, no guard change, no grade change. Re-offer only with a measured
+32-bit build that reaches the 13-byte allocation under a lower-memory
+trigger, or a web-reachable vector, plus standing-#6 replay evidence.
