@@ -1,7 +1,10 @@
 # frontier brief — stbvorbis2shell (CVE-2026-89266)
 
-Status 2026-11-24: **STAGED for admission**, rung 4 partial in the real
-upstream library via its public API. No window yet at brief time.
+Status 2026-11-24 09:22Z: **STAGED and handed off**, rung 4 partial in the
+real upstream library via its public API. Brief, seed wall, pins and
+`lab/frontier/stbvorbis2shell/` evidence are committed at `e6ef1fc`;
+two-pane window 135 is live on the inner socket and registered (136/136
+unique). Operator owns final admission; person owns wake units.
 
 ## Verified ground truth
 
