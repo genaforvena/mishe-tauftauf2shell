@@ -235,6 +235,25 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   `*-post.bin` / `*-follow.bin` files record aborts before a response. The
   witness has not replayed this lane.
 
+- W188 tested the pointer-target question in two bounded lanes. In the real
+  consumer, `w2/gdb-idtoken-scan.cmd` plus `w2/probe-idtoken-scan.py` dumped
+  2 KiB after the CEK at unwrap entry and at auth-tag calculation with the
+  process mappings (`w2/evidence/gdb-idtoken-scan.log`): all 512 words were
+  outside every executable and heap mapping, so the default layout has no
+  live pointer-bearing object in the forward region. In a separate groomed
+  direct-call lab process, `fptr/{driver.c,run.sh}` placed the real OCT JWK
+  720 bytes after the reused 32-byte CEK chunk; a 776-byte raw
+  `encrypted_key` (768-byte RFC 3394-valid wrap) preserved every JWK field
+  except `fns`, which was set to a lab fake table with a benign marker as
+  `free_func`. The real `cjose_jwk_release()` invoked it:
+  `BENIGN_MARKER_EXECUTED` / `MARKER_CALLED=1` in the vulnerable build,
+  5/5 repeats; vulnerable safe input and both fixed controls stayed at 0
+  (3/3 fixed repeats). The wrap carries an absolute lab-chosen address, ASLR
+  is not defeated, decrypt returns `CJOSE_ERR_CRYPTO` and the corrupted JWE
+  teardown is skipped; there is no wire path to this layout, no command and
+  no r5. Evidence: `fptr/evidence/`, `PROVENANCE.md` W188. Not replayed by
+  the witness.
+
 ## 6. Honest ceiling
 
 Direct call plus a loopback-only synthetic consumer, with a real compact JWE
@@ -256,10 +275,11 @@ the 40-byte control reached unwrap without abort (section 5). W187 used a
 config-derived KEK so the chosen wrap bytes survive the integrity check:
 64-byte raw keys reached unwrap in the real consumer and chosen bytes at
 `cek+40..47` selected between two glibc allocator aborts (section 5). That
-is chosen-byte control of a fault site in a real process, not control of a
-code pointer; `enc` was never adjacent to the CEK in those runs. No deployed
-server, real credential, pointer/IP control or shell command. Advisory
-reachability in a real deployment and any RCE claim remain **UNKNOWN**;
-rung 5 not attempted and not established. A pointer or control-flow target
-in a real consuming process is the prerequisite for any benign-marker
-attempt.
+is chosen-byte control of a fault site in a real process; `enc` was never
+adjacent to the CEK in those runs. W188 found no pointer in the real
+consumer's forward 2 KiB, but in a groomed direct-call process the same
+overflow rewrote a live JWK `fns` pointer and a lab-chosen benign marker was
+called by the library; that needs an absolute lab-known address and has no
+wire path. No deployed server, real credential, address leak or shell
+command. Advisory reachability in a real deployment and any RCE claim remain
+**UNKNOWN**; rung 5 not attempted and not established.

@@ -329,6 +329,55 @@ Grade unchanged: chosen-byte fault-site control in a real process (rung 4
 mechanics), no pointer/IP control, no code pointer in the write, no marker,
 no r5; deployed reachability stays UNKNOWN.
 
+## W188 — forward-region negative and a groomed function-pointer target (2026-11-24 02:21-02:32Z)
+
+Two bounded lanes, both author-measured, neither witnessed.
+
+(a) **Real-consumer forward scan (negative).** New
+`w2/gdb-idtoken-scan.cmd` logs `info proc mappings` and 256 words (2 KiB)
+from `cek+32` at the `AES_unwrap_key` entry and again at
+`_cjose_jwe_calc_auth_tag`. New `w2/probe-idtoken-scan.py` drives the same
+64-byte chosen wrap under the config-derived OCT KEK over loopback
+127.0.0.1:18443 only (`GET` 302, `POST` HTTP 400). Log
+`w2/evidence/gdb-idtoken-scan.log`, stdout `gdb-idtoken-scan-stdout.log`:
+`cek=0x5555556992a0`, heap `[0x555555611000,0x5555556b5000)`. Of the 512
+dumped words, **zero** fell in any `r-xp` mapping or the heap `rw-p` mapping,
+before or after the write. `cek+40..47` is the top-chunk size `0x1bd41`;
+non-zero words from `cek+232` onward are small integers and stale
+UTF-16-like bytes, not pointers. In the default real-consumer layout the CEK
+is the last live allocation and its forward 2 KiB is unallocated top chunk:
+a longer `encrypted_key` does not reach a live pointer-bearing object.
+No listener or lab Apache remained.
+
+(b) **Groomed direct-call pointer target (positive, rung-4 mechanics).** New
+`fptr/driver.c` and `fptr/run.sh` build plain gcc vulnerable and fixed
+binaries against the same pinned libraries. The driver allocates a 32-byte
+hole, then the real OCT JWK, frees the hole immediately before
+`cjose_jwe_decrypt()`, and verifies `jwe->cek == hole` (`GROOM_OK=1`). The JWK
+lands 720 bytes after the CEK. A 768-byte RFC 3394-valid chosen plaintext
+(776-byte raw `encrypted_key`) carries bytes that preserve the JWK chunk
+header and every JWK field except `fns`, which is set to a lab fake table
+whose `free_func` is a benign marker. The library's own
+`cjose_jwk_release()` then calls that pointer: vulnerable `fptr` prints
+`BENIGN_MARKER_EXECUTED` and `MARKER_CALLED=1`; vulnerable `fptrsafe`
+(correct 40-byte wrap), fixed `fptr` (`ERRCODE=1`, no copy) and fixed
+`fptrsafe` all print `MARKER_CALLED=0`. Pre-release dump shows
+`free_func == marker` only in vulnerable `fptr`. Repeat batch
+`fptr/evidence/repeats-w188.log`: 5/5 vulnerable marker, 3/3 fixed absent.
+Raw outputs and hashes: `fptr/evidence/{vulnerable,fixed}-{fptr,fptrsafe}.out`,
+`fptr/evidence/SHA256SUMS`. Reproduce with `bash
+lab/frontier/cjose2shell/fptr/run.sh` (plain builds only: ASan aborts at the
+first OOB store before the pointer write completes).
+
+Limits, stated plainly: the wrap carries an **absolute lab-chosen address**
+(`&fake_fntable`); ASLR is not defeated and no address is recovered from the
+target. Decrypt itself still returns `CJOSE_ERR_CRYPTO` (no valid auth tag
+was computed), and the 768-byte write corrupts unrelated live JWE objects,
+so `cjose_jwe_release(jwe)` is deliberately skipped after the observation.
+This is a real function-pointer target reached by the real overflow in a
+direct-call lab process, not a path in the mod_auth_openidc consumer and not
+a wire-to-command chain. No shell command, no r5; witness replay not done.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
@@ -343,8 +392,12 @@ id_token lane in that build with a lab OCT `client_secret` and state cookie:
 without abort. W187 used the derived client KEK so chosen bytes survived and
 selected either a `corrupted top size` abort inside HMAC or a later
 `unaligned tcache chunk` abort in jansson; `enc` was never adjacent to the
-CEK and no code pointer was in the write. No credential, pointer/IP control
-or shell command. The witness independently replayed the direct-call and wire
+CEK and no code pointer was in the write. W188 found no code or heap pointer
+in the 2 KiB forward region of that consumer, but in a groomed direct-call
+process the overflow rewrote a live JWK `fns` pointer and a lab-chosen benign
+marker was invoked by `cjose_jwk_release()`; that needs an absolute lab-known
+address and has no wire path. No credential or shell command.
+The witness independently replayed the direct-call and wire
 lanes from a clean archive (verdicts #3019/#3020) and the W184
 real-consumer negative (DM #3079). The chosen bytes are the plaintext of a
 lab-generated RFC 3394 wrap under a lab-known key; in a real deployment the
