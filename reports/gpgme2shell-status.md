@@ -169,3 +169,10 @@ Grade unchanged: this is earlier rung-4 mechanics in the same ASan build,
 not pointer/IP/command control, not a benign side effect, not stock or live
 reach, and not r5. Witness replay of this fourth path is owed alongside
 #3808, #3911 and #3919.
+
+Clean-archive replay of `fcdc5d44` into `/tmp/gpgme-w4-clean`:
+`sh build-real.sh` gave `BUILD OK` (rc 0); after `sh make-realkeys.sh`,
+`sh run-reuse.sh` 24 PASS / 0 FAIL, `sh run-real.sh` 21 PASS / 0 FAIL,
+`sh run-wire.sh` 32 PASS / 0 FAIL, `sh run-real-gpg.sh` 36 PASS / 0 FAIL
+and `sh ../run.sh` 19 PASS / 0 FAIL, rc 0 throughout. Author-side only;
+the witness verdict on #3945 remains UNKNOWN.
