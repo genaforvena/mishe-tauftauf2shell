@@ -155,7 +155,7 @@ not demonstrated in that variant. The variant overwrites the optional
 thumbnail region. No real camera file or consumer other than `dcraw_emu` was
 used. The W2 claim was subsequently replayed and ESTABLISHED (W187, below).
 
-## Non-saturated value steering (W3, 2026-11-24 07:2xZ, author-side)
+## Non-saturated value steering (W3, 2026-11-24 07:2xZ; witness ESTABLISHED)
 
 The saturation is a metadata setting, not a fixed property of the store:
 DNG tag `0xc61d` (WhiteLevel) in the derived PoC is 255, so `maximum=255` and
@@ -185,7 +185,10 @@ tree `-n 1` rc 0 with empty output (`evidence/whitelevel-fixed-asan.out`);
 vulnerable tree without `-n` rc 0 with empty output
 (`evidence/whitelevel-asan-safe.out`). Reproduce:
 `python3 craft_whitelevel_poc.py evidence/nonzero-oob.input OUT 4095`, then the
-gdb breakpoint above. This W3 result is author-side and unwitnessed.
+gdb breakpoint above. W3 was replayed in a clean room by the witness
+(DM 3413, below) and is ESTABLISHED AS LABELED: three distinct non-saturated
+halfwords at the chosen offset, steered by one metadata field. It is NOT a
+demonstration of arbitrary 16-bit values.
 
 ## Rung-4 assessment and rank
 
@@ -193,13 +196,13 @@ Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
 file (W186 witness ESTABLISHED). Rung 4 is demonstrated for a crafted nonzero
 input and ESTABLISHED by the W187 witness replay: the OOB store at index
 68,644 writes chosen nonzero halfwords with clean fixed and no-option
-controls. W3 additionally shows author-side file steering of the value to
-distinct non-saturated halfwords (unwitnessed). Fully arbitrary byte values
+controls. W3 additionally shows witness-established (DM 3413) file steering
+of the value to distinct non-saturated halfwords. Fully arbitrary byte values
 and pointer/IP control remain UNKNOWN. Rank: high tractability, low escalation
 (local file, UI:P, no network, no pointer/command execution). Admitted frontier
 target since 2026-11-24 05:4xZ; NO rung 5.
 
-## Witness verdicts (W186 and W187, 2026-11-24)
+## Witness verdicts (W186, W187 and W3 steering, 2026-11-24)
 
 W186: independent clean-room replay from only the pinned tarball, patch, PoC,
 zip, bootstrap.sh and run-all.sh: every pinned hash matched, bootstrap rc0,
@@ -217,8 +220,29 @@ vulnerable tree without `-n` rc 0; plain `-O0` gdb `IDX=68644
 avg={131070,131070,131070,2} delta=0` and stored `0xffff 0xffff 0xffff 0x0000`.
 Verdict: ESTABLISHED AS LABELED; rung 4 upgraded from PARTIAL to demonstrated
 chosen-nonzero-halfword write at the chosen offset; ceiling unchanged (constant
-`0xffff`, no arbitrary byte, no r5). The W3 steering result is newer and not
-covered by either verdict.
+`0xffff`, no arbitrary byte, no r5). The W3 steering result is covered by the
+DM 3413 verdict below.
+
+W3 steering (DM 3413, 2026-11-24): the witness regenerated the generator
+`ab5ace42...b30d1cf`, source `b59f64e9...9341` and all four derived inputs
+(`d398d0e7...35f5`, `8d9b5204...b905`, `50c91fbb...e42b`, `2547a078...bc8`)
+in the surviving `/tmp/w186-libraw` clean room built only from the pinned
+artifacts; live tree untouched, all PINS.md hashes matched. `cmp` of
+WhiteLevel=4095 against the nonzero source showed exactly one differing byte:
+the `u32` at `0x102` (255 -> 4095); the 22-entry IFD and JPEG strip were
+unchanged. Plain `-O0` gdb at `xtrans_demosaic.cpp:427`: `IDX=68644 delta=0`,
+zeros before the store and, after it, WL2048 `avg={65535,60057,65535,1}`
+`0xffff 0xea99 0xffff 0x0000`; WL4095 `avg={45023,30020,40021,1}`
+`0xafdf 0x7544 0x9c55 0x0000`; WL8191 `avg={22508,15007,20007,1}`
+`0x57ec 0x3a9f 0x4e27 0x0000`; WL16383 `avg={11253,7503,10002,1}`
+`0x2bf5 0x1d4f 0x2712 0x0000` — all matching the committed
+`gdb-whitelevel*.txt`. WL4095 controls: ASan vulnerable `-n 1` rc 1,
+`WRITE of size 2` at `:427` 0 bytes after the 550,176-byte region; fixed
+tree rc 0 empty; vulnerable no-option rc 0 empty. Verdict: CLAIM ESTABLISHED
+AS LABELED — rung 4 refined to three distinct file-steered non-saturated
+16-bit halfwords at the chosen offset. Ceiling preserved: reporter-patch
+control only, optional thumbnail region, no real camera/GUI/network path, no
+arbitrary byte alphabet or pointer/IP/command, NO r5.
 
 ## Ceiling / UNKNOWNs preserved
 
@@ -226,8 +250,8 @@ covered by either verdict.
   reporter's proposed two lines. Upstream fix status remains UNKNOWN.
 - No real camera file, GUI consumer, network path, pointer/IP, command
   execution, grooming/ASLR study or rung 5. Witness verdicts cover the
-  original zero-valued claim (W186) and the W2 nonzero claim (W187); W3
-  steering is author-side and awaits replay.
+  original zero-valued claim (W186), the W2 nonzero claim (W187) and the W3
+  WhiteLevel steering claim (DM 3413); all ESTABLISHED AS LABELED.
 - Fully arbitrary byte values remain UNKNOWN: W2 wrote a saturated constant
   `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
   metadata tag but did not demonstrate arbitrary 16-bit values. Pointer/IP
