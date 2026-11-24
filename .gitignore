@@ -57,6 +57,15 @@ lab/frontier/imagemagick2shell/harness-fixed
 lab/frontier/imagemagick2shell/harness-plain
 lab/frontier/imagemagick2shell/.case.out
 
+# CodebaseMemory2Shell bulk: pinned tarballs/extractions, compiled harnesses
+# and raw traces. Harness sources, scripts, PINS and evidence.log stay tracked.
+lab/frontier/codebasememory2shell/pins/
+lab/frontier/codebasememory2shell/src/
+lab/frontier/codebasememory2shell/harness-*
+lab/frontier/codebasememory2shell/.mimalloc-*.o
+lab/frontier/codebasememory2shell/.tsruntime-*.o
+lab/frontier/codebasememory2shell/evidence/*.out
+
 # Freeradius2shell standalone harness build output (scripts stay tracked)
 lab/frontier/freeradius2shell/vuln
 lab/frontier/freeradius2shell/fixed

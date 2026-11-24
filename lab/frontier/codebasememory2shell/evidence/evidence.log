@@ -1,0 +1,48 @@
+codebasememory2shell direct-call matrix, generated 2026-11-24T01:27:55Z
+pins and harness hashes:
+9d91a12e3b03fbf6a04d2cb5827d0b13de0764b46f8b1f03e78daf5e2065e116  PINS.sha256
+f8743431ccd961204bae135c86f03da65a2b7b027b9b4e41dee76ba69e2e351e  harness.c
+5e3278ffd1cd3504b1711bbbe0a3bd4de44c27eea7e3340653dee00509a8628d  build.sh
+9d5d8b7f22ba2edb65c393174cf330afb4758a78149d139beeaf2de6689ebc40  run-all.sh
+
+harness-vuln-asan              N=16  RETURN exit=0   query_rc=0   clean
+harness-vuln-asan              N=31  RETURN exit=0   query_rc=0   clean
+harness-vuln-asan              N=32  RETURN exit=0   query_rc=0   clean
+harness-vuln-asan              N=33  RETURN exit=1   query_rc=n/a ==3935807==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x722c367004e0 at pc 0x64609ed8abba bp 0x7ffce5405cb0 sp 0x7ffce5405ca0
+harness-vuln-asan              N=48  RETURN exit=1   query_rc=n/a ==3935820==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x733e495004e0 at pc 0x64504d20fbba bp 0x7ffe03c41860 sp 0x7ffe03c41850
+harness-vuln-asan              N=64  RETURN exit=1   query_rc=n/a ==3935836==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7202c0b004e0 at pc 0x5e9f310acbba bp 0x7ffd9e751c10 sp 0x7ffd9e751c00
+harness-fixed-asan             N=32  RETURN exit=0   query_rc=0   clean
+harness-vuln-plain             N=32  RETURN exit=0   query_rc=0   clean
+harness-fixed-asan             N=33  RETURN exit=0   query_rc=-1  clean
+harness-vuln-plain             N=33  RETURN exit=0   query_rc=0   clean
+harness-fixed-asan             N=48  RETURN exit=0   query_rc=-1  clean
+harness-vuln-plain             N=48  RETURN exit=134 query_rc=n/a *** stack smashing detected ***: terminated
+harness-vuln-asan              N=16  WITH   exit=0   query_rc=0   clean
+harness-vuln-asan              N=31  WITH   exit=0   query_rc=0   clean
+harness-vuln-asan              N=32  WITH   exit=0   query_rc=0   clean
+harness-vuln-asan              N=33  WITH   exit=0   query_rc=0   clean
+harness-vuln-asan              N=48  WITH   exit=0   query_rc=0   clean
+harness-vuln-asan              N=64  WITH   exit=0   query_rc=0   clean
+harness-fixed-asan             N=32  WITH   exit=0   query_rc=0   clean
+harness-vuln-plain             N=32  WITH   exit=0   query_rc=0   clean
+harness-fixed-asan             N=33  WITH   exit=0   query_rc=-1  clean
+harness-vuln-plain             N=33  WITH   exit=0   query_rc=0   clean
+harness-fixed-asan             N=48  WITH   exit=0   query_rc=-1  clean
+harness-vuln-plain             N=48  WITH   exit=0   query_rc=0   clean
+
+recover-mode ASan (continues past the first error to reach the WRITE):
+WRITE of size 70 at 0x732060b0ca80 thread T0
+    #0 0x7320632fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5ce29e3c256e in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x5ce29e3c256e in project_item src/cypher/cypher.c:3379
+    #3 0x5ce29e3dc288 in execute_return_simple src/cypher/cypher.c:4116
+    #4 0x5ce29e3dc288 in execute_return_clause src/cypher/cypher.c:4386
+    #5 0x5ce29e3dc288 in execute_single src/cypher/cypher.c:4442
+    #6 0x5ce29e3efd6e in cbm_cypher_execute src/cypher/cypher.c:4473
+    #7 0x5ce29e3ad0bc in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/harness.c:54
+    #8 0x73206222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x73206222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5ce29e3ac6f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/harness-vuln-asan-recover+0xa6b6f4) (BuildId: f2782141aa4751177c7d42666f5c3d4bb72c3613)
+
+Address 0x732060b0ca80 is located in stack of thread T0 at offset 51840 in frame
+    #0 0x5ce29e3d0d2d in execute_single src/cypher/cypher.c:4398
