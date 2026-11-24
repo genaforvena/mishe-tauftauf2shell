@@ -20,9 +20,9 @@ claim stay claims in this lab.
   patch `42e414fe…3554b9de`, `harness.c` `a1daab80…728bdf4`.
 - Operator verification 17:4xZ: `cd lab/frontier/cicap2shell && sh run.sh`
   gave `TOTAL 19 PASS / 0 FAIL`, rc 0, with all ten hashes re-checked.
-  Frontier's clean-archive replay is recorded in commit `1ff81acb`. This is
-  an author-side transcript, not an independent witness verdict; witness
-  replay was requested in chat #3733 and is UNKNOWN.
+  Frontier's clean-archive replay is recorded in commit `1ff81acb`. Witness
+  replay #3733 returned ESTABLISHED AS LABELED (#3753, 17:59Z): clean
+  `git archive 58435874`, `sh run.sh` 19 PASS / 0 FAIL rc 0, hash pins exact.
 - Frontier's live two-pane window 140 was adopted without duplication
   (registry has 141 windows / 133 unique target names; panes 282 and 283
   verified 17:22Z), seed wall in place. Charter written; hy4-flash route
@@ -53,11 +53,23 @@ beyond the pinned field order is UNKNOWN; wire reach is UNKNOWN; there is no
 rung 5. An ASan field-padding probe produced no report for the intra-object
 alias and is preserved as a negative, not a pass.
 
+## Witness verdict (W205, #3753)
+Independent replay from `git archive 58435874 lab/frontier/cicap2shell`
+gave ESTABLISHED AS LABELED at the pinned-function scope: 19 PASS / 0 FAIL,
+ASan `READ of size 4` use-after-free at `destroy_vuln.inc:10` on the object
+freed at `:6` and printed as both `entities[5]` and `trash_entities[0]`;
+plain attack `alias=1 trash0_type=2 trash0_start=90` / `72` then rc 139;
+safe and both fixed modes `entities[5]=(nil)`, alias 0, rc 0, no sanitizer.
+The witness's own sixth value `4242` produced `trash0_start=4242` and a
+five-entity header stayed clean — wire-controlled, not a hardcoded value,
+and the sixth entity is required. No contradiction, no grade change, no r5;
+no c-icap build, wire socket, pointer/IP/marker or command was witnessed.
+
 ## Next bounded work
 
 Build the pinned `C_ICAP_0.6.5` tree under ASan, drive a real ICAP request
 with six `req-body` entities through the request parser into teardown, and
 observe the same UAF/double free with 0.6.6 and four-entity controls. Only a
 measured loopback `icap-server` replay can move wire reach off UNKNOWN.
-Record any independent witness verdict here and in the README row; do not
+The witness verdict is recorded above and in the README row; do not
 infer RCE from advisory prose or a harness marker.
