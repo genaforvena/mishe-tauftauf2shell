@@ -53,10 +53,13 @@ present. Target mind: `assimp2shell`. Evidence:
 `harness/build.sh` re-extracts the verbatim pinned functions on every run,
 builds vulnerable/fixed × gcc/clang ASan plus plain binaries;
 `harness/run-all.sh` runs the matrix and writes `evidence.log` and
-`evidence.sha256`. Latest run: **13 PASS / 0 FAIL**, log sha256
-`128596cc380813583f6f24c618fbfde12cead7879f2849f077d419efe5f257f6`.
-Clean `git archive 585e1c7` replay rebuilt all binaries and repeated 13 PASS /
-0 FAIL; normalized traces are byte-identical (`913b23f5…3ca938`, `REPLAY.md`).
+`evidence.sha256`. Latest run (log regenerated 02:17:01Z, operator re-verified
+02:2xZ): **13 PASS / 0 FAIL**, raw log sha256
+`e6341f37f5cf98b854c9bfb41d29ba2f38fced610c80c980c7c147ad380bf41e`
+(the earlier `128596cc…f257f6` was the pre-02:17 run). Clean `git archive
+585e1c7` replay rebuilt all binaries and repeated 13 PASS / 0 FAIL; after
+normalizing PIDs, addresses, paths, build ids, the pins header and per-build
+binary hashes, both traces are byte-identical (`913b23f5…3ca938`, `REPLAY.md`).
 
 | Rung | Observed | Evidence |
 |---|---|---|
