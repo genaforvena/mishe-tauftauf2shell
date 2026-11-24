@@ -824,3 +824,47 @@ Grade unchanged: wire-chosen OOB pointer store at a chosen offset and chosen
 bytes in the pointee, but no chosen byte at a wire-chosen address, no command
 side effect, no rung 5. Author self-observation, not independently replayed.
 Do not resweep the sender set on this build.
+
+## W27 — cross-table alias; why the copy destination is not wire-chosen (2026-11-24 ~12:0xZ)
+
+Bounded question from W26: can the 100-byte wire-copied name land at a
+**wire-chosen destination address**? Source fact: `cRemoteMapping` is 16 bytes
+(`char *name` at +0, `remote_id` at +8, `local_id` at +12), so `addRemoteEntry`
+can plant a wire int32 only at `d_entry + 16k + 8` / `+12`, never at the
+8-aligned `.name` slot that `:414` dereferences.
+
+New probes: `wire_xlation_two.py`
+`470b80b82d9f3a228695a307062b4ab00a910a6a51c5f5e9853a86a90e114833`,
+`probe-xlation-two.sh`
+`89c9561973f85420849d85d85ce0e0058b0c1d73a05efdeed6ada52833e461a2`,
+`probe-xlation-two-plain.sh`
+`1cc9855f585a68e8508485727a652b492deb31830da39fd36083b4d486a9dd74`.
+Both messages go out on one TCP connection so they reach the same endpoint.
+
+- `out-w27-gdb-alias/` and `out-w27-gdb-alias2/` (ports 15351, 15352) used the
+  wrong direction: a SENDER negative index cannot reach `d_types`, which is at
+  a *higher* address. Both allocated a fresh buffer and copied into it; keep
+  as the negative result that fixed the direction.
+- `out-w27-gdb-alias3/gdb.log` (port 15353, plain `-O0` vulnerable
+  `5cf49457...`, digest `2b621d26...`): first SENDER sender 2 seeded
+  `d_senders.d_entry[2]`, allocating `0x5555556f18d0` and writing `53` ("S")
+  bytes. Second TYPE sender -1999 had `this=0x55555570b080`,
+  `d_entry=0x...b088`, while `d_senders` was `d_entry=0x...3378`;
+  `&d_entry[-1999] = 0x555555703398`, exactly `&d_senders.d_entry[2]`.
+  PRE bytes at `0x...6f18d0` were `53 53 53 53 00 53 ...`; POST were
+  `54 54 54 54 00 54 ...` ("T"). The OOB slot holds the allocation pointer
+  `0x00005555556f18d0` at +0 and `0x0000000200000002` (remote_id, local_id)
+  at +8/+12: chosen int32s sit at +8/+12, **not** at the pointer slot.
+- Table bases differ by `0x7d10 = 32016 = 16*2001`; both are 16-aligned, so
+  every record in either table shares the same mod-16 layout. A chosen int32
+  write can never coincide with a `.name` pointer read, in either direction.
+  Destination stays an allocation pointer (or an unrelated stale pointer);
+  no wire-chosen address through this bug.
+- Controls: fixed plain `10e581e8...` with the same alias sequence ALIVE
+  (`out-w27-fixed-alias/`, 15354), safe in-bounds SENDER 2 / TYPE 4 ALIVE
+  (`out-w27-plain-safe/`, 15355). Both builds affected; not a CVE-fix
+  regression. Ports 15351-15355 loopback and freed; no `vrpn_server` running.
+
+Grade unchanged: no wire-chosen destination, no command side effect, no
+rung 5. Author self-observation, not independently replayed. Do not resweep
+the W26 sender set or these two index points on the same binaries.

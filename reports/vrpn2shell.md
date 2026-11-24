@@ -1224,6 +1224,48 @@ effect, no rung 5. This is a new rung-4 boundary (wire-indexed OOB heap
 pointer store) on a distinct unfixed bug, authored here and not independently
 replayed. Ports 15301-15341 were loopback and freed; no server left running.
 
+## W27 — cross-table alias, and the destination-alignment barrier (2026-11-24 ~12:0xZ)
+
+W26 left one grade-changing question: can the 100-byte wire-copied name be
+made to land at a **wire-chosen destination address**? The answer on these
+builds is no, for a structural reason. `cRemoteMapping` is 16 bytes: `name`
+pointer at +0, `remote_id` at +8, `local_id` at +12. `addRemoteEntry` plants
+wire-controlled int32s only at `d_entry + 16k + 8` and `+12`; the pointer that
+`:414` dereferences is read from `d_entry + 16k`, a different mod-16 class.
+The two translation tables are separately allocated 32008-byte objects whose
+bases differ by `0x7d10 = 32016 = 16*2001`, so the same alignment holds across
+table boundaries: a chosen int32 write can never become the copy destination.
+
+The cross-table reach itself is real and new. In the plain `-O0` vulnerable
+build (`5cf49457...`), `out-w27-gdb-alias3/gdb.log` (port 15353) shows a first
+SENDER message with wire sender 2 allocating `0x5555556f18d0` for
+`d_senders.d_entry[2]` and writing `53` ("S") bytes there. A second TYPE
+message on the same connection with wire sender **-1999** reported
+`this=0x55555570b080`, `d_entry=0x...b088` (the `d_types` table), and
+`&d_entry[-1999] = 0x555555703398` — exactly `&d_senders.d_entry[2]`. Its PRE
+bytes were `53 53 53 53 00 53 ...` and POST `54 54 54 54 00 54 ...` ("T"):
+the negative type index overwrote the sender's name buffer and the entry's
+`remote_id`/`local_id` fields. The aliased slot dumps as pointer
+`0x00005555556f18d0` at +0 and `0x0000000200000002` at +8 — chosen int32s at
++8/+12, never at the pointer slot.
+
+Direction matters: `d_types` is at a *higher* address than `d_senders`, so
+reaching it from a SENDER index needs +2001, rejected by the `>= 2000` check.
+The two earlier probes (`out-w27-gdb-alias/`, ports 15351 and 15352) sent a
+negative SENDER index and only reached zero memory, yielding a fresh buffer;
+they are kept as the failed-direction evidence that established this.
+
+Controls: the same alias sequence on the fixed plain build is ALIVE
+(`out-w27-fixed-alias/`, 15354), as is a safe in-bounds SENDER 2 / TYPE 4
+sequence (`out-w27-plain-safe/`, 15355). Both builds carry the bug; it is
+outside the CVE fix, not a regression. Ports 15351-15355 were loopback and
+freed; no `vrpn_server` left running.
+
+Grade unchanged: a cross-table chosen-offset OOB write with wire-chosen bytes
+into an allocation-owned buffer, but still no wire-chosen destination, no
+command side effect and no rung 5. Author self-observation, not independently
+replayed. Do not resweep these index points on the same binaries.
+
 ## Limits and next work
 
 - W25 closes the negative-index lane on stock `-O0`: indices -1 through -128
@@ -1239,6 +1281,16 @@ replayed. Ports 15301-15341 were loopback and freed; no server left running.
   on this build. This is a wire-chosen-offset OOB pointer store, not a
   chosen-byte-at-chosen-address write; no command, no rung 5. Author
   self-observation, not independently replayed. Do not resweep the sender set.
+- W27 closes the W26 "wire-chosen destination" question on these builds:
+  `cRemoteMapping` has its pointer at +0 and wire int32s at +8/+12 on a
+  16-byte stride, and the two tables' bases differ by `16*2001`, so no chosen
+  int32 can coincide with the `.name` pointer the copy dereferences. A TYPE
+  negative sender of -1999 does alias `d_senders.d_entry[2]` and overwrite
+  an existing sender-name buffer with wire-chosen type bytes, but the
+  destination remains an allocation-owned heap pointer. Chosen offset and
+  chosen bytes, not a chosen address; no command, no rung 5. Both builds
+  affected. Author self-observation, not replayed; do not resweep these two
+  index points or the W26 sender set on the same binaries.
 
 - W24 found a second source defect: `payload_len` 0-3 underflows the `strncpy`
   length at vulnerable `:4548`/`:4476` and fixed `:4552`/`:4480`. ASan reports
