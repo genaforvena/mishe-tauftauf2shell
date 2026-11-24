@@ -191,6 +191,9 @@ v6.0.6 glTF-only library:
 measured, unwitnessed; outside verdict #3277 and the pending W1/W2 replay.
 The larger mismatch extends the write but yields no chosen byte inside a
 valid `aiMesh` field, no pointer/IP, no command and no rung 5.
+Replay prerequisite: copy the gitignored pinned tarball
+`pins/assimp-6.0.6.tar.gz` into a clean archive as in `REPLAY.md`;
+`run-w5.sh` then builds its own minimal ASan, fixed-ASan and plain libraries.
 
 ## Next lane
 

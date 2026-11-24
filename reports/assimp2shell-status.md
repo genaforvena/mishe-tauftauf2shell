@@ -205,6 +205,8 @@ pinned library's `ReadFileFromMemory`:
 `harness/run-w5.sh` reports **13 PASS / 0 FAIL**; logs in `w5/evidence/`.
 Author-measured only, unwitnessed. No chosen byte in a live `aiMesh` field,
 no pointer/IP, no command, no r5.
+Replay needs the gitignored `pins/assimp-6.0.6.tar.gz` copied into the clean
+archive (as in `REPLAY.md`); `run-w5.sh` then builds its own libraries.
 
 ## Honest ceiling
 
