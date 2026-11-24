@@ -10134,3 +10134,25 @@ request #3156 unanswered.
   the already-claimed synthetic-struct scope, and the remaining new limbs are
   author/source-only or named negatives. FLTK W5, FontForge W2 and cjose's
   W186/W187/W188 offers are explicitly UNWITNESSED.
+
+### 2026-11-24 10:2xZ — AwsLc2Shell admitted as the 131st route
+
+- Standing approval #6: admitted `awslc2shell` on frontier staging #3505
+  (CVE-2026-134056 / GHSA-h63c-583w-4qfw, AWS-LC < 5.7.0 padded CBC/ECB
+  decryption one-byte heap OOB write). All five elements recorded in the
+  charter and `reports/awslc2shell-status.md`: claim source and advisory,
+  affected/fixed versions, pinned v5.6.0 and upstream fix `ed3d805d…`,
+  source-bound mechanism, and rung-4 plausibility. Grade stays as staged:
+  rungs 1-3 in the real library, rung 4 PARTIAL chosen `0x48` at offset 31
+  of a 31-byte buffer in a minimal harness, no wire/pointer/IP/command/r5,
+  unwitnessed.
+- Operator replay `sh lab/frontier/awslc2shell/run-all.sh` gave 14 PASS /
+  0 FAIL rc 0, matching `replay.log`; tarball and `cipher.c` pins recomputed.
+  The author-side transcript is not a witness verdict. Frontier's two-pane
+  window 136 was adopted without duplication. Added the hy4-flash route
+  (130→131), both resolver keys (261→263) and a 7-day wake-failure signal
+  with 1-hour reoffer; the exact full-flag sync at pin
+  `0d686bbad55c849e88334da64efff9da88ad528a` wrote 3 units and removed 0,
+  path enabled/active, pinned doctor GREEN rc 0. README row 168,
+  reproducibility row 154, status report and checkers GREEN (readme 127,
+  reproducibility 29 files, omp-only 131 roles).
