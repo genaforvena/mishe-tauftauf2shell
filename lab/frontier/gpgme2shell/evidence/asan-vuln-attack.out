@@ -1,0 +1,30 @@
+old=0x519000000080
+status code=42 byte[1000]=0x48
+read_status rc=-1 published=old
+=================================================================
+==1357912==ERROR: AddressSanitizer: attempting double-free on 0x519000000080 in thread T0:
+    #0 0x74321acfc4d8 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0x555d046608fc in release /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/harness.c:109
+    #2 0x555d04660d8d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/harness.c:143
+    #3 0x74321a82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x74321a82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x555d04660364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/vuln-asan+0x2364) (BuildId: ca384b06c1df9543d4d3eed2ad40d0454bbf3f9e)
+
+0x519000000080 is located 0 bytes inside of 1024-byte region [0x519000000080,0x519000000480)
+freed by thread T0 here:
+    #0 0x74321acfc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x555d046605e9 in read_status /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/harness.c:57
+    #2 0x555d04660ce8 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/harness.c:140
+    #3 0x74321a82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x74321a82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x555d04660364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/vuln-asan+0x2364) (BuildId: ca384b06c1df9543d4d3eed2ad40d0454bbf3f9e)
+
+previously allocated by thread T0 here:
+    #0 0x74321acfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x555d04660b2f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/harness.c:129
+    #2 0x74321a82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x74321a82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x555d04660364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/vuln-asan+0x2364) (BuildId: ca384b06c1df9543d4d3eed2ad40d0454bbf3f9e)
+
+SUMMARY: AddressSanitizer: double-free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52 in free
+==1357912==ABORTING
