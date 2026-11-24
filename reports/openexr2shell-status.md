@@ -275,9 +275,12 @@ A valid 16 KiB row 0 (256 samples/pixel, every sample set to the file pixel
 byte 0x41 or 0x5a) followed by the forged 64-byte row 1 still produced an OOB
 source window with zero file-tracking and zero variant-dependent offsets in
 five gdb runs. `sh lab/openexr2shell-real/groom/check-large.sh` gives
-`RESULT PASS` twice at HEAD `cd7d804`; the same wake re-ran all four earlier
-one-command checks with no change. This extends the W163/W170/W172 negative
-from a same-size to a 256x-larger preceding chunk. Full method, hashes and
-setup failures: `reports/openexr2shell-file-level.md` W174. No grade change:
+`RESULT PASS` twice in the working tree and once from a clean `git archive HEAD`
+`cabbfd6` (evidence sha256 `dbc4008e...`); the first archive attempt exposed a
+missing generator build line in the check script, repaired in `cabbfd6`. The
+same wake re-ran all four earlier one-command checks with no change. This
+extends the W163/W170/W172 negative from a same-size to a 256x-larger preceding
+chunk. Full method, hashes and setup failures:
+`reports/openexr2shell-file-level.md` W174. No grade change:
 file-level rungs 1-4, witness-ESTABLISHED at the scanline CODE/CONSUMER scope,
 rung 5 UNKNOWN.

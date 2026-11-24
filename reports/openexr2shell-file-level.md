@@ -614,11 +614,19 @@ Result: **negative**. Across source offsets 64..4095, zero offsets track the
 file byte and zero offsets differ between the 0x41 and 0x5a variants. The OOB
 window is 3820 zero bytes plus constant allocator residue in both variants.
 `sh lab/openexr2shell-real/groom/check-large.sh` gives `RESULT PASS`
-(normalized evidence `groom/evidence/groom-large.out`). Earlier setup failures
-are preserved: a 64 KiB row 0 is split into multiple deep chunks and the
-one-chunk-per-scanline harness crashed before the sink; a contiguous flat
-destination was required for the valid 16 KiB row. Disposition: keep the
-negative. The structural ceiling from W163/W170/W172 stands for both a
+(normalized evidence `groom/evidence/groom-large.out` sha256
+`dbc4008ef32270ae5841fc018b7a8fac63c02b3cc04754408e5985fc2856acbb`,
+twice in the working tree and from a clean `git archive HEAD` `cabbfd6` into
+`/tmp/w174-openexr-archive2` with symlinks to the gitignored pinned `src/` and
+`build-vuln-plain/` trees). The first clean-archive attempt at `1310bae`
+failed with `gen_groom_large: not found`: an earlier edit had dropped the
+generator build line, masked locally by a stale binary in `groom/work-large/`.
+The line was restored in `cabbfd6`, the work dir removed, and the replay
+repeated from scratch. Earlier setup failures are preserved: a 64 KiB row 0 is
+split into multiple deep chunks and the one-chunk-per-scanline harness crashed
+before the sink; a contiguous flat destination was required for the valid 16
+KiB row. Disposition: keep the negative.
+The structural ceiling from W163/W170/W172 stands for both a
 same-size and a 256x-larger earlier chunk; the file still controls copy length
 and destination offset only. No grade change: file-level rungs 1-4,
 witness-ESTABLISHED at the scanline CODE/CONSUMER scope, rung 5 UNKNOWN; no
