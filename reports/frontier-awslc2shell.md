@@ -170,6 +170,19 @@ throwaway mem-BIO ASan probe gave no report but only partially exercised the
 path (`EVP_DecryptFinal_ex` consumed the withheld block at source EOF); the
 source-bound bound, not the probe, is the load-bearing result.
 
+W210 generalizes W209: with `B = kb + r` and chunk `t = B - b + 1`, a
+carry-plus-bulk update writes `B - r` bytes for `r < b - 1` and `B + 1` only
+for `r = b - 1`. AWS-LC's block sizes are 8 (DES/RC2) and 16 (AES), both
+divisors of `B = 4096`; `b = 1` skips withholding. No supported cipher makes
+`BIO_f_cipher` overflow. W211 adds the first non-AES lab case
+(`des-oob.c` / `run-des.sh`, commit `3826ca48`): 3DES-EDE-CBC with `b = 8`,
+two 8-byte updates into `malloc(15)`, vulnerable ASan `WRITE of size 1` 0 bytes
+after the 15-byte region via `des.c:840` -> `e_des.c:93` ->
+`cipher.c:259` -> `cipher.c:411`; vulnerable-wide and both fixed controls
+clean. `run-des.sh` -> 11 PASS / 0 FAIL, also from a clean `git archive HEAD`
+with provisioned pinned source/libraries. The overflow is not AES-specific;
+still one byte per boundary-crossing update, author-only, no grade change.
+
 The remaining gap is a real application whose documented-minimum output
 buffer is followed at that offset by an attacker-relevant control datum.
 W209 shows an in-tree caller exists but is immune by its own sizing, W207
