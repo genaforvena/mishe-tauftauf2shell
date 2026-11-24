@@ -378,6 +378,41 @@ This is a real function-pointer target reached by the real overflow in a
 direct-call lab process, not a path in the mod_auth_openidc consumer and not
 a wire-to-command chain. No shell command, no r5; witness replay not done.
 
+## W189 — CEK provenance in the real consumer: no wire route to a groomed hole (2026-11-24 04:43-04:47Z)
+
+Bounded measurement of the only remaining r5 prerequisite: whether attacker-
+controlled wire input can steer the vulnerable id_token CEK into a heap hole
+whose forward neighbour is a live pointer-bearing object. No new build, no
+source or pin change; the same W184 `w2/` mod_auth_openidc 2.4.15.1 +
+vulnerable cjose v0.6.2.4 build under 127.0.0.1:18443 only.
+
+New `w2/gdb-cek-provenance.cmd` breaks `_cjose_release_cek`,
+`_cjose_jwe_set_cek_aes_cbc`, `AES_unwrap_key` and
+`_cjose_jwe_calc_auth_tag` in the unstripped module, logging each CEK
+release address/length, the final unwrap destination and 64 words after it.
+Replay: start Apache under gdb with that command file, then run
+`python3 probe-idtoken-chosen.py preserve` (GET 302, POST 400).
+
+Measured (`w2/evidence/gdb-cek-provenance.log`): the state-cookie decryptions
+release a 32-byte CEK copy at `0x555555674740` twice; the vulnerable id_token
+CEK is `0x5555556992a0` — roughly 150 KiB away, **not** a reuse of that hole.
+The chunk header at `cek+40..47` is still top-chunk size `0x1bd41`, and the
+forward words are zeroes, small integers and stale UTF-16-like bytes, no
+code or heap pointers, before or after the write. `_cjose_jwe_calc_auth_tag`
+delta is `-3968`, so the adjacent live `enc` string remains far behind the
+CEK. Mechanism: `cjose_jwe_import()` must allocate jansson strings for `alg`
+and `enc` from the same 0x30 tcache bin as the 32-byte CEK, consuming the
+freed state-cookie chunks before `_cjose_jwe_set_cek_aes_cbc()` runs; the CEK
+therefore comes from top chunk in this consumer. Full ASLR
+(`/proc/sys/kernel/randomize_va_space = 2`) and a PIE module mean the
+W188 absolute-address marker has no wire-derivable counterpart.
+
+Result: **negative** for a wire route into a groomed layout in the real
+consumer. Fix or alternative wire grooming would need a pointer value
+recovered from the live process, which no measured response provides.
+No new rung-4 claim, no r5, no command. No listener or lab Apache remained;
+hashes in `w2/evidence/gdb-cek-provenance-SHA256SUMS`.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
@@ -404,3 +439,7 @@ lab-generated RFC 3394 wrap under a lab-known key; in a real deployment the
 recipient KEK is secret, so only the write length is attacker-chosen. The
 advisory's deployed pre-auth reachability and code-execution claim remain
 UNKNOWN; rung 5 not attempted.
+W189 measured that this consumer's freed state-cookie CEK chunk is consumed
+before the vulnerable CEK is allocated, so the CEK stays in top chunk with
+no live pointer behind it; combined with full ASLR and a PIE module there is
+no measured wire route into the W188 groomed layout.
