@@ -90,6 +90,10 @@ after the copy: `&s.terminal=0x…dd20`, `&s.line_delay=…dd4c` (offset 44),
 `&s.console=…dd50` (48), `&s.wordwrap=…dd54` (52), with `4d 49 53 48` at
 offsets 44..47, `45 2d 4f 4f` at 48..51 and `54 41 55 46` twice at 52..59.
 
+`REPLAY.md` records an author clean `git archive e5f43ad` replay: 9 PASS /
+0 FAIL, normalized trace `66d20f8…414bdd8` identical to the author tree. Raw
+hashes differ only in PIDs, ASLR addresses, timestamps, checkout paths and
+build ids. Author replay is not witness acceptance.
 
 Cheapest rung-raising step: build `sbbs3` from the pinned parent tree against
 the platform cryptlib, instrument `answer()`'s TERM path with ASan, and drive a
