@@ -188,3 +188,11 @@ memory limits were not changed and no longer-timeout retry was attempted.
 Grade unchanged: ICO lane rungs 1-4; TIFF consumer limb rung 4 at header and
 processing entry only; rung 5 UNKNOWN. Preserved as a measured negative for
 this endpoint route.
+
+Clean `git archive HEAD` replay at commit `5d5b455` (throwaway
+`/tmp/imgproxy2shell-w2replay.JTgDOC/`, not committed) extracted only my lab
+path and symlinked in the two gitignored binaries. With a 6 s timeout the
+vulnerable leg again returned `safe=200`, `manyband=500`, and timeouts for
+all three crafted `f:tiff` cases (including `fine_tiff` at 6.11 s); the fixed
+leg again returned `safe=200` and `500` for all crafted cases. This confirms
+the committed harness reproduces the W2 controls.
