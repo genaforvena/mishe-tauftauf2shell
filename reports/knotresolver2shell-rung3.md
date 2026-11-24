@@ -21,7 +21,12 @@ found no live libc/heap pointer in the reachable objects that a partial
 overwrite could retarget; a wake-17 static check found no direct
 command-execution import in the mapped libgnutls; a wake-18 three-layout
 measurement found entropy in address bits 20–23, so even a 3-byte partial
-overwrite is not deterministic. ASLR-on/stock stays UNKNOWN.
+overwrite is not deterministic; a wake-19 pair of ASLR-on samples with recorded
+libgnutls mapping bases identifies the live cleanup call target at file offset
+`0x137e70`, finds no libgnutls text pointer in the 814-byte writable span, and
+shows the `0x34da0` module-load stub is outside any reachable same-library
+64 KiB region; the library-relative PLT route is negative for the sampled
+objects. ASLR-on/stock stays UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -738,6 +743,51 @@ pointer's bits 12+ are fixed relative to its mapping base, so a low-16-bit
 patch stays inside the same 64 KiB region. Whether the earlier sample's
 `priv+0x110` pointer designates a function whose region holds a useful
 same-library call target is UNKNOWN (base unrecorded); no grade changed.
+
+## Live libgnutls pointers with recorded mapping base (wake 19, 2026-11-24 ~03:2xZ) — library-relative PLT route negative
+
+Wake 17 left the pointer-reachability limb of the same-library PLT retarget
+UNKNOWN because wake 14's sample of `priv+0x110 = 0x7749cbd80490` had no
+recorded libgnutls base. Two fresh ASLR-on samples on the pinned 6.4.0
+jemalloc/debug build (`harness/run_aslr_inventory_w19.sh a|b`, logs
+`harness/aslr-inventory-w19-{a,b}.gdb.log`; gdb `disable-randomization off`,
+loopback port 8855, host `kernel.randomize_va_space` untouched) now record
+`info proc mappings` alongside the pre-F6 128-qword inventories:
+
+| sample | slot1 | priv | libgnutls base (r--p, file offset 0) | `system` |
+| --- | --- | --- | --- | --- |
+| a | `0x761e190aa000` | `0x761e1908e700` | `0x761e1a480000` | `0x761e19c58750` |
+| b | `0x7c0c15caa000` | `0x7c0c15c8ea00` | `0x7c0c17056000` | `0x7c0c16858750` |
+
+Mapping-relative classification of every sampled qword gives the same result
+in both layouts:
+
+- the live extension priv holds four libgnutls **text** pointers at
+  `+0xd0/+0xe0/+0xf0/+0x110` with invariant file offsets
+  `0x12e5d0` (`gnutls_srp_base64_decode2`), `0x1338e0` /
+  `0x137e70` (`gnutls_oid_to_sign` region) and `0x139780`
+  (`gnutls_oid_to_digest` region), confirmed with `addr2line` on the pinned
+  library `ddbae299…1c98`. The dispatch target at `priv+0x110` is therefore
+  identified: file offset `0x137e70`, not the earlier unlocated `0x…490`.
+- the 814-byte OOB span `slot1+0..+813` contains **no** libgnutls text pointer
+  in either sample (only one libgnutls read-only data pointer at file offset
+  `0x1e6e38`); `priv` itself sits `0x1b600`–`0x1b900` bytes before `slot1`,
+  outside the copy. A partial overwrite of the live dispatch pointer is not
+  reachable from this write in these layouts.
+- even if such a pointer were reachable, a 2-byte patch preserves bits 16+
+  and stays inside `base+0x120000..base+0x13ffff`; the only candidate
+  same-library command stub, `p11_kit_module_load@plt` at `0x34da0`, is in a
+  different 64 KiB region, and wake 17 found no command-execution import
+  anywhere in libgnutls. This closes the specific retarget proposed at wake 17
+  for the sampled objects. Indirect calls exist in the `0x12xxxx`/`0x13xxxx`
+  regions but no command-execution target does; a different useful gadget is
+  not claimed here.
+
+Grade unchanged: rung 3 ESTABLISHED, rung 4 witness-ESTABLISHED, rung 5
+author-observed ASLR-off / witness MIXED; ASLR-on chosen control UNKNOWN.
+Wake 14's earlier `0x…490` sample remains unidentifiable (base unrecorded) but
+no longer supports a claim: both fresh samples of the same object have the
+identified `0x137e70` target and no text pointer in the writable span.
 
 ## Boundaries
 
