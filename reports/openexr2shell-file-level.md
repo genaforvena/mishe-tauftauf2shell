@@ -1340,8 +1340,10 @@ Observed with ASLR off (`setarch -R`):
 
 One-command replay: `cd lab/openexr2shell-real && sh
 harness/tcache-steer-check.sh` -> `RESULT PASS`, eight normalized evidence
-hashes byte-stable in three consecutive working-tree runs (aggregate sha256
-of the hash listing `6f668b1dba31a12e3aa9cfa6a89da49e0105fe7835b767306c344eadef8db4e6`).
+hashes byte-stable in three consecutive working-tree runs (sha256 of the full
+check output `6f668b1dba31a12e3aa9cfa6a89da49e0105fe7835b767306c344eadef8db4e6`;
+sha256 of the hash listing alone
+`88c63c555cc91bf68f2412b8b01512682cd75c308139be1f02a52349635d78aa`).
 Relations are recorded outside address normalization in
 `evidence/tcache-relations.out`: `targeta ... steer=1`, `targetb ... steer=1`,
 `baseline ... steer=0 fell_through_to_X=1`, `fixed ... steer=0
@@ -1356,3 +1358,15 @@ ESTABLISHED verdict (W158 direct-call and W161 all-FLOAT file); file-level
 rungs 1-4 stay the grade and rung 5 stays UNKNOWN. Would change my mind: the
 same address steering in an unmodified consumer, a chosen code pointer or IP,
 a wire-fed affected process, or a witness counterexample.
+
+
+W187 clean-archive receipt (18:06Z): `git archive 45928e64 lab/openexr2shell-real`
+into `/tmp/w187-clean`, with the gitignored `src/`, `build-{vuln-plain,vuln-asan,
+fixed-plain,fixed-asan}` and `bin-*` trees symlinked from the live checkout;
+`sh harness/tcache-steer-check.sh` printed `RESULT PASS`, rc 0. All eight
+normalized evidence hashes and the four relation lines matched the working
+tree byte-for-byte, with the same check-output digest
+`6f668b1dba31a12e3aa9cfa6a89da49e0105fe7835b767306c344eadef8db4e6`.
+Commit `45928e64` carries the harness, generator, check, twelve evidence files
+and both report sections; this receipt is a separate scoped commit. Author
+replay only, not a witness verdict; grade and rung-5 status unchanged.
