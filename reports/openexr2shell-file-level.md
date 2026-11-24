@@ -856,3 +856,56 @@ Clean-archive replay at commit `ae72825`: `git archive HEAD lab/openexr2shell-re
 into `/tmp/w179-archive.k1mNbm`, with the gitignored pinned build trees and
 `work-mixed/` symlinked from the live tree, gave `RESULT PASS` and all six
 normalized evidence hashes above byte-for-byte.
+
+## W180: file-steered destination offset of the chosen-byte copy (2026-11-24)
+
+Prediction: in W178/W179 the mixed FLOAT-before-HALF part wrote 64
+file-chosen bytes at `decode.unpacked_buffer+128`. If the forged sample count
+N controls that offset, it should scale with N instead of being fixed.
+
+`cases/make_poc_mixed.py` now sizes both the chunk leader and the inner ZSTD
+frame to 2N bytes (N=32 is byte-for-byte the old case: regenerated PoCs still
+hash to `484b1c35...` and `efb6bbd2...`). For N=32/64/128 and fill bytes
+`0x3c`/`0x5a`, the six forged EXRs hash to:
+
+- N=32: `484b1c35f66e18db3e263346e100da44a199e4bdf08c0678afe113b042593a52`,
+  `efb6bbd24d9b3c3165f75fe4c2da2f69f0de9ffabf8f3a6ccb6169f8a5af033b`.
+- N=64: `41f840cbca092dd78c935e47e14b4149e3edac6c59f50de4ef186cd97aa106a6`,
+  `a0d8c88663031e50123af8fa6c814b4a13e7627f0ec5f318272d75bc955ce03b`.
+- N=128: `38767b7ec757ff6b1b648f359df30c79b0d8e061bb81a155668bc737e3d201bc`,
+  `9f716aec359be8fc9c0c1e48edea2b21c0532d786939f7f437f4659c4b33b8f0`.
+
+Under `bin-vuln-plain/guarded_harness` every variant returns
+`DECODE rv=31`, sizes destination and scratch as 2N bytes, and changes
+`4N` guard bytes (`128`, `256`, `512` for N=32/64/128); the valid baseline
+changes 0. Under `bin-fixed-asan/guarded_harness` the same files return
+`DECODE rv=23 EXR_ERR_CORRUPT_CHUNK` with 0 changed bytes. gdb at
+`guarded_harness.c:137` shows eight bytes of the chosen fill at
+`decode.unpacked_buffer+4N` for every N: `+128`, `+256` and `+512`. The
+allocation-derived FLOAT block is copied from scratch offset 2N to
+destination offset 0, while the file-derived HALF block is copied from
+scratch offset 0 to destination offset 4N. File control therefore extends
+to the landing offset as well as the byte values and length, within the
+tested 128..512 byte range.
+
+Replay: `cd lab/openexr2shell-real && sh harness/offset-steer-check.sh`
+-> `RESULT PASS`, byte-stable 3x in the tree (normalized hashes
+`offset-vuln-n32-3c 7393c9d4...`, `offset-vuln-n64-5a 762110cb...`,
+`offset-vuln-n128-5a 62e2a8fd...`, `offset-fixed-n64 f1ec8eda...`,
+`offset-gdb-3c 234c689e...`, `offset-gdb-5a 8997f403...`). The generator
+change left both earlier one-command checks passing
+(`mixed-check.sh`, `exrcheck-mixed-check.sh`: `RESULT PASS`).
+
+Preserved negative: keeping the original fixed 64-byte inner frame while
+changing only N produced `DECODE rv=23` and zero guard changes on the
+vulnerable build for N=16/64/128 (PoC sha256
+`a9b3d190ae58278c1343d32fa3f110c1b07f71156d6378cbada96e6dda88e8db`,
+`71e9fb7c321b5aab69b3bbcdbb812b58c33b668d923f2fac977b711e8ede2003`,
+`b6b341ffa8a6d8248c5549f27b44f4b9f86780732723ce151cad3e6338574953`).
+Offset steering requires the inner frame and leader to scale together;
+this is not a free-standing header-only knob.
+
+Scope and grade unchanged: local EXR path, purpose-built C harness, no wire,
+socket, pointer/control-flow target, command or marker. No witness verdict
+for this section; the W161 verdict covers only the older all-FLOAT file.
+Rung 5 stays UNKNOWN.

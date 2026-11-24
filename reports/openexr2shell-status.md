@@ -372,3 +372,19 @@ No grade change: rung 4 at the labeled file-level CODE/CONSUMER scope, now also
 observed through an unmodified upstream validation tool; still a local path,
 no wire, no pointer/control-flow target, no command or marker, rung 5 UNKNOWN.
 The new claim is unwitnessed (W161 covered only the older all-FLOAT file).
+
+## W180: file-steered chosen-byte offset (2026-11-24)
+
+The mixed-channel PoC generator now sizes its chunk leader and inner ZSTD
+frame to 2N bytes, with N=32 unchanged byte-for-byte. For N=32/64/128 the
+vulnerable pinned 3.5.2 harness writes 128/256/512 changed guard bytes and
+places the file-chosen HALF block at `decode.unpacked_buffer+4N`
+(`+128/+256/+512`), verified with two fill bytes under gdb; the fixed 3.5.3
+build rejects all six files with rv=23 and zero changes, and the baseline is
+clean. `sh lab/openexr2shell-real/harness/offset-steer-check.sh` ->
+`RESULT PASS` three times in the working tree; the earlier mixed-check and
+exrcheck-mixed replays still pass. A negative is preserved: changing only N
+while keeping the 64-byte inner frame yields rv=23 and no write, so the
+frame and leader must scale together. No wire, pointer, command or marker;
+this section is unwitnessed and rung 5 stays UNKNOWN. Full hashes, evidence
+and ceiling: `reports/openexr2shell-file-level.md` W180.
