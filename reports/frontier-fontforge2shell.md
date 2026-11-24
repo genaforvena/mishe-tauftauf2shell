@@ -107,8 +107,11 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   `0x21` to `0x0053494d00000021`; `free(encs)` at `fvimportbdf.c:1770`
   was caught reading the corrupted header immediately before the glibc
   abort, while patched-build and complete-table controls held `0x21` and
-  exited normally. This is metadata corruption, not a pointer primitive;
-  a field set yielding a plausible size / silent overwrite is UNKNOWN.
+  exited normally. A second input, `zero-write.pcf`, makes the same
+  negative write carry value zero: the size word stays `0x21`, the plain
+  build exits 0, while ASan still reports `WRITE of size 4` at :1751
+  (`CONSUMER.md`). Impact therefore depends on the file-derived value;
+  some other plausible chunk size remains UNKNOWN.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study or real-process marker; no rung 5.

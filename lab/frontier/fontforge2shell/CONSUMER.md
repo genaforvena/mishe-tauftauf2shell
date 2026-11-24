@@ -49,12 +49,40 @@ zero for these field values.
   vulnerable build, complete table, at line 1770: `size=0x21`, process
   exited normally.
 
+## Value dependence: a silent plain-build overwrite (measured)
+
+`zero-write.pcf` (290 bytes, sha256
+`f20ef994ccb09bfddb44a7544c57aabd7bcbb308a1216b29d9dac8d8abf08b5d`)
+keeps the four TOC tables but makes BDF_ENCODINGS an empty table: all five
+16-bit fields zero, TOC size 4 words, file ending after `def`, so the
+first glyph read is EOF. The vulnerable plain build on this file prints
+no allocator error and exits 0 (`plain-zero-write-import.out`, sha256
+`ce8173e7f6298283725788d3131e4335f1f72a07a004c87158a2c00cd364eaaf`),
+while the ASan build still reports `WRITE of size 4` at
+`fvimportbdf.c:1751` (`asan-zero-write-import.out`, sha256
+`ddb27848526a1d27ff8913d34820f3a270921a60e8f4fd8e61eb41173b2c41ed`).
+`gdb-zero-write-post.out` (sha256
+`db107e04f9841355a4aa18d9c82ef7c54d38ff7babf2adb60b8dfaa49cb6a2a8`)
+shows `glyph=-1, i=0, tot=1`, RHS `0x0`, after the store `encs[-1]=0`,
+bytes `00 00 00 00` at `encs-4`, chunk size still `0x21` both after the
+store and at `free(encs)`; the process exits normally. The same OOB write
+is therefore silent in the plain build when the file-derived value leaves
+the size word unchanged; ASan still detects the address violation.
+
+Failed hypothesis preserved: the first attempt (`zero-value.pcf`, sha256
+`5060aa5b4883b2e66b2b2aebb0e15548714d6ac60fafc331e711f3a608378a39`)
+set `min2=max2=0xfffd` expecting -3, but `getformint16()` does not
+sign-extend: gdb printed `min2=65533`, RHS `0x1000000`, and the plain
+build still aborted (`gdb-zero.out`). A second intermediate truncation to
+286 bytes cut `max1` and `def` off the end of the file, so gdb printed
+`max1=-1, tot=0` and the loop never ran; the final file uses 290 bytes.
+
 ## Honest limits
 
 This identifies the corruption target and the failing consumer; it does
 not widen the primitive. The write remains four bytes at a fixed offset
-with a file-derived value, the observed fourth byte is zero for these
-fields, and there is no pointer/IP or command control. Whether a crafted
-set of PCF fields yields a value that keeps the 64-bit size plausible
-(and thus a silent overwrite in the plain build) is UNKNOWN. ASLR and
-grooming were not studied; no witness verdict on this W3 extension.
+with a file-derived value, now measured with both a nonzero and a zero
+value, and there is no pointer/IP or command control. A value that yields
+some other plausible 64-bit chunk size (rather than the original `0x21`)
+remains UNKNOWN; ASLR and grooming were not studied; no witness verdict on
+this W3 extension.

@@ -113,8 +113,14 @@ SIGABRT. Patched build / truncated file and vulnerable build / complete
 file controls both showed `size=0x21` at line 1770 and exited normally
 (`gdb-header-fixed.out`, `gdb-header-complete.out`). The consumer is the
 allocator's own metadata check, not an observed second application object.
-This does not widen the primitive; whether a crafted field set yields a
-plausible size and a silent plain-build overwrite remains UNKNOWN.
+The value dependence was then measured: an empty-table `zero-write.pcf`
+(290 bytes, sha256 `f20ef994…8bf08b5d`) writes zero at `encs[-1]`, leaving
+the size word `0x21`; the vulnerable plain build exits 0 while ASan still
+reports `WRITE of size 4` at :1751. `gdb-zero-write-post.out` confirms RHS
+`0x0`, bytes `00 00 00 00` at `encs-4` and `size=0x21` at `free(encs)`.
+`CONSUMER.md` preserves the failed `0xfffd` attempt (no sign extension in
+`getformint16()`) and a too-short truncation. Some other plausible size
+value remains UNKNOWN; no pointer/IP or command control.
 
 ## Scope
 
