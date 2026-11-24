@@ -241,3 +241,64 @@ witness also ran tiff9999.tif alone in a fresh vulnerable process: one
 Started line and an 8.01 s timeout with no completion, so the many-band
 stall limb remains established. This author amendment is not a new verdict;
 the witness verifies the committed text at its next healthy wake.
+
+## W3 — crafted ICO over real imgproxy HTTP (2026-11-24 05:38-05:43Z)
+
+Previously the ICO lane's live consumer was UNKNOWN: stock libvips 8.18.2 has
+no ICO loader, so it was not obvious that the built imgproxy binaries carry
+the vulnerable code. They do. imgproxy vendors `vips/icoload.c` inside its Go
+CGO package; `provision/imgproxy-4.0.0/vips/icoload.c` is byte-identical to
+the pinned affected v4.0.15 source
+(`sha256=2eabd58d1e6c14439af7a7e22196df2ea4f4b2aa82efeb1ea0844962744051dc`)
+and `go tool nm provision/imgproxy-vuln` shows `icoload.c`,
+`vips_foreign_load_ico_header` and `vips_foreign_load_ico_load` in the real
+CLI. No new library or imgproxy build was needed for the vulnerable leg.
+
+`provision/ico_probe.py`
+(`sha256=50c7b3999909b90b989676a3cb9ece9c4aeaa6b54c684fd831914ad04c01de1c`)
+generates a 54-byte one-entry ICO
+(`sha256=c5de4be4d2489430cb8d1596e68299e835f64457cb403baa8e68d3c730bbe55a`):
+ICO magic, width=height=1, `data_size=0xfffffff5`, `data_offset=22`, and 32
+chosen body bytes `5a 5b 5c 5d` repeating. It serves that file and the
+unchanged libvips test fixture `ico_benign.ico`
+(`sha256=461350ef07af2b4376c277ba9cb62a98e535ef6a13760ebfacc82cf95d347acb`)
+on 127.0.0.1:18081 and sends exactly one unauthenticated GET to a fresh
+imgproxy on 127.0.0.1:18080. `IMGPROXY_ALLOW_LOOPBACK_SOURCE_ADDRESSES=true`
+is the same lab override as W1; no non-loopback address is contacted.
+
+### Observations (raw logs `provision/http-ico-*.log`)
+
+- Vulnerable binary (`sha256=ea2317df2a42d30e81f33e0cfd822b49b99996545ffc49026573212b03d8165d`),
+  `/insecure/rs:fill:16:16/plain/hostile.ico`: three independent fresh-process
+  runs (`vuln-hostile`, `-hostile2`, `-hostile3`) each lost the connection in
+  19-72 ms with process exit `rc=2`. Each log begins
+  `malloc(): corrupted top size`, `SIGABRT: abort`, `signal arrived during
+  cgo execution`; the Go frame chain is
+  `vips._Cfunc_vips_icoload_source_go` -> `vips.(*Image).Load` at
+  `vips/vips.go:293` -> `processing.(*Processor).initialLoadImage` at
+  `processing/processing.go:161` -> HTTP handler. The allocator detected
+  corrupted heap metadata in the live imgproxy process. No HTTP status was
+  produced because the worker died.
+- Benign control on the same vulnerable binary: the libvips favicon returned
+  HTTP 200 with a 16x16 JPEG in 6 ms (`http-ico-vuln-benign-real.log`).
+- ICO-fixed control: built from the same imgproxy 4.0.0 source with ONLY
+  `vips/icoload.c` replaced by the pinned v4.0.16 fixed loader
+  (`sha256=67b4a9c2667743ac757faa59e1f56dc09ed8046dc5efd8c74a24c0f41e795774`),
+  binary `sha256=58d0ab01bd48c429da3405ab2450e4439542b364d26591161c8e5cda0b5518ea`.
+  The hostile request returned HTTP 500 in 6 ms with process alive, error
+  `vips_foreign_load_ico_header: ICO image data is too large`.
+- The pre-existing `imgproxy-fixed` binary is fixed for the TIFF limb only;
+  it is byte-identical to `imgproxy-vuln` and still carries the v4.0.15 ICO
+  loader, so it is NOT an ICO control. Its hostile-ICO abort in the throwaway
+  probe was expected and is not a counterexample to the fix.
+
+### Scope and grade
+
+This is a real, loopback-only HTTP request reaching the vulnerable C loader
+in a real imgproxy process: rung 2 (reproducible crash) and rung 3 (allocator-
+detected heap corruption, with a symbolized Go/cgo path) are now observed
+outside the harness. It is not rung 5: no chosen-byte readback in the live
+process, no pointer/marker control, no remote command. The C write site at
+`icoload.c:161` is still established by the verbatim-statement harness, not
+by a C frame in this plain-build crash log. Grade: ICO rungs 1-4 unchanged;
+the consumer limb is newly ESTABLISHED at crash/corruption scope.

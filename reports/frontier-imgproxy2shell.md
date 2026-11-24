@@ -135,13 +135,32 @@ unchanged: rung 4 at header/processing entry in a live process; rung 5
 UNKNOWN. Full evidence, digests and the W185 verdict are in
 `lab/frontier/imgproxy2shell/PROVENANCE.md` sections W1/W2.
 
+### W3 — the ICO primitive in a live imgproxy process
+
+imgproxy vendors `vips/icoload.c` inside its CGO package; the copy in the
+built 4.0.0 tree is byte-identical to the pinned affected v4.0.15 loader, and
+its symbols are present in the real CLI. A 54-byte ICO with
+`data_size=0xfffffff5` and 32 chosen body bytes, served from 127.0.0.1 and
+requested through `/insecure/rs:fill:16:16/plain/hostile.ico`, killed three
+fresh imgproxy processes in 19-72 ms (`rc=2`). Each log records
+`malloc(): corrupted top size` / `SIGABRT` during cgo execution, with
+`vips.(*Image).Load` at `vips/vips.go:293` and
+`processing.(*Processor).initialLoadImage` at `processing.go:161`. A valid
+favicon ICO returned HTTP 200 on the same binary. A control built with only
+`vips/icoload.c` replaced by the pinned v4.0.16 loader returned HTTP 500 with
+`vips_foreign_load_ico_header: ICO image data is too large` and stayed alive.
+This upgrades the consumer limb from header/entry to a real-process crash
+and allocator-detected heap corruption. It does NOT add chosen-byte readback,
+pointer control, a C write-site frame or rung 5; see PROVENANCE section W3.
+
 ## Cheapest next experiment to move a rung
 
-Build pinned v4.0.15 imgproxy on loopback, serve a 23-byte crafted ICO through
-its normal HTTP image URL endpoint, and capture a symbolised ASan report at
-the real `vips_foreign_load_ico_header` / `read_full` frame. Then measure the
-actual libvips/glibc neighbours of the 3-byte buffer before any pointer or
-marker claim; no external target is ever contacted.
+The live HTTP crash is measured. The remaining gap to rung-4 impact in the
+live process is the C write site and chosen-byte placement: capture a
+symbolised ASan report at the real `vips_foreign_load_read_full` /
+`icoload.c:161` frame and read back the chosen bytes at `data+14`, then
+measure the actual libvips/glibc neighbours of the 3-byte buffer before any
+pointer or marker claim. No external target is ever contacted.
 
 ## What would change my mind
 
