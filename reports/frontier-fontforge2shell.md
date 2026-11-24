@@ -94,8 +94,13 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   `FVImportBDF()` -> `PcfParse()` path (`REACHABILITY.md`): ASan
   `WRITE of size 4` 4 bytes before `encs` at `fvimportbdf.c:1751`, with
   patched-build and complete-table controls clean (exit 0, no report).
-  GUI `Import()`, chosen bytes in the real process and other consumers
-  remain UNKNOWN.
+  W2 added a non-ASan real build: a gdb hardware watchpoint observed the
+  actual store (`0 -> 0x53494d` at `encs-4`, bytes `4d 49 53 00` /
+  "MIS\0") inside the real process, and the vulnerable binary exits 134
+  with glibc `double free or corruption (out)`, while the patched binary
+  and the complete-table control exit 0. Three bytes are attacker-chosen;
+  the fourth is zero for these field values only. GUI `Import()` and
+  other consumers remain UNKNOWN.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study or real-process marker; no rung 5.
@@ -107,7 +112,8 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
   gdb 15.1; pins and transcript matched; only pid/ASLR/path tokens
   differed. The witness replay covered the direct-call model only; the
-  real-build path is author-side with no witness verdict. GUI Import(),
-  pointer/IP, command and ASLR remain UNKNOWN.
+  real-build path, including W2's real-process chosen bytes, is author-side
+  with no witness verdict. GUI `Import()`, pointer/IP, command and ASLR
+  remain UNKNOWN.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.

@@ -60,9 +60,49 @@ Controls, both zero ASan reports and exit 0:
   source, complete table: `real-import-safe.out` (sha256
   `c1ac99c903a1e4e484f2ef236806c40c58c60da4381acf95bb53c04673a19fe5`).
 
+## W2 (2026-11-24 07:4xZ) — chosen bytes in the real process, plain abort
+
+Two non-ASan Debug builds were configured from the same source trees with
+`-DENABLE_SANITIZER=none` and all other flags as above: `build-plain/`
+(vulnerable tag `20251009`) and `build-fixed-plain/` (`fontforge-fixed`).
+
+- `gdb -batch -x gdb-real-plain.cmd ./build-plain/bin/fontforge` with a
+  conditional breakpoint at `fvimportbdf.c:1751 if glyph < 0` and a
+  hardware watchpoint on `*(int*)((char*)encs-4)`: at `glyph=-1, i=3,
+  encs=0x555555c48240`, the watchpoint reported `Old value = 0`,
+  `New value = 5458253` (`0x53494d`) at `encs-4 = 0x555555c4823c`, and
+  `x/4xb &encs[-1]` read `4d 49 53 00` ("MIS\0"). The next four slots
+  held `4d 46 53 00`, `4d 47 53 00`, `4d 48 53 00`, then
+  `ff ff ff ff` from the original `memset(encs,-1,...)`. Transcript
+  `gdb-real-plain.out` sha256
+  `8d704e5dc5863d4fcf8307ca58953cc9800829dd1af5b52346291c178c835431`.
+  Three bytes are attacker-chosen; the fourth is zero for these field
+  values only (the pinned expression can set it with a larger `min2`/
+  `tot`). This is the same offset and value as the direct-call gdb result,
+  now measured inside the real FontForge process.
+- Negative result preserved: the same conditional breakpoint on the ASan
+  binary (`gdb-real-asan.out`, sha256
+  `69a5d19112cba805417276b89d1f8507ed0ae0a0ec696d36db0511fa1a558e39`)
+  reached `glyph=-1, i=3` and computed the RHS `0x53494d`, but gdb line
+  stepping at the instrumented statement never exposed a post-write byte
+  value; the plain-build watchpoint was used instead. No inference from
+  that failed attempt beyond the values it printed.
+- Plain (non-ASan) impact: vulnerable build on `truncated.pcf` exits 134
+  with glibc `double free or corruption (out)` (`plain-real-import.out`,
+  sha256 `3021d38c691f907118df42d436b614d4d63765e39ce5d928a85b7f79c2aec53f`);
+  patched build on the same file exits 0
+  (`plain-fixed-import.out`, sha256
+  `60f02f9522adc006c7950b7770eb724d2a768c22cef2898eb44125bc18dae482`);
+  vulnerable build on `complete.pcf` exits 0
+  (`plain-complete-import.out`, sha256
+  `ce8173e7f6298283725788d3131e4335f1f72a07a004c87158a2c00cd364eaaf`).
+  Configure/build logs: `configure-plain.log`, `build-plain.log`,
+  `configure-fixed-plain.log`, `build-fixed-plain.log`.
+
 ## Scope
 
-Headless CLI scripting `Import()` on this host. The GUI `Import()` menu,
-other loaders, plain (non-ASan) real-build behavior, chosen-byte inspection
-in the real process, pointer/IP control, command execution, ASLR/grooming
-and independent witness replay of this real-build path are UNKNOWN.
+Headless CLI scripting `Import()` on this host. Chosen bytes at the fixed
+`encs[-1]` offset in the real process and plain-build abort are now
+measured (W2 above). The GUI `Import()` menu, other loaders, pointer/IP
+control, command execution, ASLR/grooming and independent witness replay
+of this real-build path remain UNKNOWN.

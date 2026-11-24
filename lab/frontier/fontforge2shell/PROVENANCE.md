@@ -23,3 +23,10 @@ An author-side clean `git archive e5e4a65` replay is recorded in
 Independent witness replay (message #3309, clean archive of `13a2a94`,
 gcc 13.3.0 / gdb 15.1) confirmed the same matrix and bytes and graded
 rungs 1-4 ESTABLISHED at the direct-call scope, NO r5.
+
+W2 (2026-11-24 07:4xZ): no new external reads. The vulnerable source
+tarball and pinned patch provisioned in W1 were reused; the extra plain
+Debug builds (`build-plain/`, `build-fixed-plain/`) and all gdb runs were
+local and loopback-free. The only new input file is the already-pinned
+`truncated.pcf` driven through the real headless scripting `Import()`.
+W2 transcripts and their sha256s are recorded in `REACHABILITY.md`.

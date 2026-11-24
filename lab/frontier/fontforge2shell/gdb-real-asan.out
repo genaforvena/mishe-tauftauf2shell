@@ -1,0 +1,24 @@
+Breakpoint 1 at 0x9cbada: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-asan
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 06:14 UTC-NoPython-D.
+ Based on source from git with hash: c73bc62e294ce7bc381c4be3edc1e40667634afe
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x515000001e80, toc=0x507000002710, sf=0x519000000f80, map=0x506000002000, b=0x50b000000eb0, encname=0x50b000000e00) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+HIT glyph=-1 i=3 encs=0x502000001ab0 b->glyphcnt=4
+fields min2=21318 max2=21318 min1=77 max1=80 tot=4
+$1 = 0x53494d
+1752						(i%(max2-min2+1) + min1);
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+AFTER second step: encs=0x502000001ab0
+$2 = 0x0
+0x502000001aa0:	0x02	0x11	0x00	0x00
+#0  PcfReadEncodingsNames (file=0x515000001e80, toc=0x507000002710, sf=0x519000000f80, map=0x506000002000, b=0x50b000000eb0, encname=0x50b000000e00) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+#1  0x0000555555f20e13 in PcfParse (file=0x515000001e80, toc=0x507000002710, sf=0x519000000f80, map=0x506000002000, b=0x50b000000eb0, encname=0x50b000000e00) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1831
+#2  0x0000555555f2493c in SFImportBDF (sf=0x519000000f80, filename=0x5070000026a0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/truncated.pcf", ispk=2, toback=0, map=0x506000002000) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2164
