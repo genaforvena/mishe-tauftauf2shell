@@ -1,0 +1,10 @@
+after-first alloc32768=1 tail_0x5a=7233/16384 tail_0x37=0/16384 first8=5a5a5a5a5a5a5a5a
+after-first sysex=0 lastlen=0 short=0 realtime=0 debug=0
+after-end1 alloc32768=1 tail_0x5a=7233/16384 tail_0x37=0/16384 first8=5a5a5a5a5a5a5a5a
+after-end1 sysex=0 lastlen=0 short=0 realtime=0 debug=1
+after-second alloc32768=1 tail_0x5a=7233/16384 tail_0x37=0/16384 first8=5a5a5a5a5a5a5a5a
+after-second sysex=0 lastlen=0 short=0 realtime=0 debug=1
+after-end2 alloc32768=1 tail_0x5a=7233/16384 tail_0x37=0/16384 first8=5a5a5a5a5a5a5a5a
+after-end2 sysex=0 lastlen=0 short=0 realtime=0 debug=2
+after-complete alloc32768=1 tail_0x5a=7233/16384 tail_0x37=0/16384 first8=5a5a5a5a5a5a5a5a
+after-complete sysex=1 lastlen=102 short=0 realtime=0 debug=2

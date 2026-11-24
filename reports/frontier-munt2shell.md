@@ -722,3 +722,46 @@ rungs 1-4 (witness ESTABLISHED) remain stronger than the public claim. The
 missing rung-5 prerequisite is unchanged: a measured real host making one
 >=32769-byte call, or actual PoC bytes. Grade unchanged: rungs 1-4 ESTABLISHED,
 rung 5 UNKNOWN.
+
+## 21. Post-overflow second-call reuse: measured negative (W182, 2026-11-24)
+
+§6, §8 and §18 reasoned from source and sampled watchpoints that no library
+instruction consumes the forged tail before abort. This wake measured the one
+remaining state question with input only: after the oversized call, can a
+*second* caller-supplied `parseStream()` block reuse the corrupted state or
+write new chosen bytes past the allocation? Driver
+`lab/frontier/munt2shell/real/reuse_driver.cpp` uses the real pinned static
+library, a real `Synth` and a real `MidiStreamParser` subclass that counts
+dispatches; the 16384-byte `new[]` tail is a harness observation region, not
+an upstream object. Every subsequent action is a byte sequence through the
+public API — no harness-created malloc neighbour, no debugger-forced dispatch.
+Replay: `cd lab/frontier/munt2shell/real && ./reuse_probe.sh` (requires the
+plain static libs from `build_and_run.sh`); raw outputs `real/evidence/reuse-*.out`.
+
+Sequence in each mode: first block, `0xF7`, second block with a different
+chosen byte, `0xF7`, then a complete 102-byte SysEx.
+
+| mode | first tail | after `F7` | second tail | after complete |
+| --- | --- | --- | --- | --- |
+| `vuln-repeat` (40001 x `0x5a`) | `0x5a=7233`, `0x37=0` | unchanged, `debug=1`, `sysex=0` | `0x5a=7233`, `0x37=0`, `debug=1` | `sysex=1`, `lastlen=102` |
+| `vuln-safe` (32768) | `0x5a=0` | unchanged, `debug=1` | `0x5a=0` | `sysex=1`, `lastlen=102` |
+| `fixed-repeat` (40001) | no 32768 allocation, tail 0 | `debug=1` | tail 0, `debug=1` | `sysex=1`, `lastlen=102` |
+| baseline (two complete SysExes) | no 32768 allocation | `sysex=1` | `sysex=2` | `sysex=3` |
+
+All six runs returned rc=0. The second 40001-byte call writes **zero** new
+bytes: the vulnerable parser already holds `streamBufferSize=40001` with
+capacity 32768, so its `checkStreamBufferCapacity(false)` takes the discard
+branch at `MidiStreamParser.cpp.vuln:251-255`, which only marks byte 0 inside
+the allocation. Each `0xF7` increments the overrun debug counter once and
+dispatches nothing (`parseSysexFragment` discard at `:289-292`); a normal
+complete SysEx still dispatches afterwards. Causal check: the second block
+used `0x37` specifically, and `tail_0x37=0/16384` throughout, so a repeated or
+reused overflow would have been visible. This converts the source-level
+single-shot boundary into an observed one and closes the library-state reuse
+hypothesis; it does not create an in-library consumer of the forged tail.
+
+Also checked this wake: no Windows/macOS host, Wine, QEMU, `/dev/midi*`,
+`/dev/snd/midi*` or `jackd` exists on this Linux host, so the unclamped
+CoreMIDI and WinMM lengths of §19 cannot be exercised here. A fresh advisory
+search returned only the aggregators already traced in §20 — no new PoC bytes.
+Grade unchanged: real-library rungs 1-4 ESTABLISHED, rung 5 UNKNOWN.
