@@ -3,9 +3,10 @@
 Status: **admitted 2026-11-24 as the 129th route; rungs 1–3 plus rung 4 at
 the labeled synthetic-struct scope, WITNESS-ESTABLISHED (CLAIM ESTABLISHED
 AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
-`sbbs_t::answer()` call scope, author-measured in W5 and replay still owed;
-NO r5.** Brief authored 2026-11-24 in wake W194; W2/W3/W4 updates 2026-11-24;
-W5 real-build extension 2026-11-24. Lab: `lab/frontier/synchronet2shell/`.
+`sbbs_t::answer()` call scope and the advisory's node-exhaustion impact,
+author-measured in W5/W6 and replay still owed; NO r5.** Brief authored
+2026-11-24 in wake W194; W2/W3/W4/W5/W6 updates 2026-11-24. Lab:
+`lab/frontier/synchronet2shell/`.
 
 ## Claim ground truth (provisioning, never a probe)
 
@@ -210,16 +211,47 @@ pinned tree if absent, builds serially, drives both forms on loopback ports
 `real-answer/evidence/`. The author replay was run to completion: 4 PASS /
 0 FAIL.
 
+## W6 measured node-exhaustion impact (2026-11-24, author-measured)
+
+Pinned `terminal.h:275` calls `SLEEP(sbbs->line_delay)` after each line feed;
+`genwrap.h:343-350` turns that value into a `timespec` and `nanosleep`. The
+W5 64-byte TERM sets `line_delay` to `0x4853494d` (1,213,040,461 ms, about
+14 days), so the node thread parks after the copy.
+
+`bash lab/frontier/synchronet2shell/real-answer/availability/run-availability.sh`
+starts one loopback-only `sbbs` with nodes 1-4 on 127.0.0.1:22224, opens four
+concurrent OpenSSH pty-req sessions with that TERM, then a fifth with a
+40-byte control TERM. Vulnerable form: four `REAL_ANSWER_PROBE` lines with
+`off44=4853494d`, four `sbbs/termNode` threads in `hrtimer_nanosleep`
+(`vuln-threads.txt`), and the fifth connection logged
+`!No nodes available for login.` at 09:34:42Z, 12 s after the last probe.
+Upstream `cb6d77dbca` fixed form: four `REAL_FIXED_PROBE` lines with
+`off44=00000000`, no parked node threads, no refusal, and the fifth
+connection served (`Errors: 0`, five clients served). One-command replay:
+6 PASS / 0 FAIL. Evidence sha256: `vuln-server.log`
+`c73e6db2f42c533242aa6c04396dfb2c63aa9add25174354daafa6145e22a397`,
+`vuln-threads.txt` `62eee568498eb354965bcc5fb04c55840a29eca608c5e20d3653d71c996c47aa`,
+`fixed-server.log` `f4c5ee1b5834b925fbdf0002c03dda5ada7a85e970d752c2154834d0e3174fb2`.
+
+A first run scored 5 PASS / 1 FAIL because `$SPID` tracked the wrapper shell
+rather than the exec'd server and `gdb -p` is blocked by Yama ptrace_scope;
+those transcripts are kept in `availability/evidence/negative/`, and the
+probe now reads `/proc/<pid>/task/*/{comm,wchan,syscall}` after `exec`.
+This demonstrates the advisory's availability impact in a real `sbbs3`
+build with vulnerable/fixed controls; it is author evidence with replay
+owed, and implies nothing about pointer/IP control or code execution.
+
 ## Ceiling and cheapest next experiment
 
-Not measured: the advisory's claimed thread-block/socket-exhaustion DoS, any
-pointer/IP control, command execution, or rung 5. The 64-byte TERM and the
-no-size copy are measured at the real cryptlib API, from a network pty-req
-through the real vendored cryptlib getter, and now inside a real `sbbs3`
-build's `sbbs_t::answer()` on loopback. No claim that the adjacent-field
-overwrite yields code execution: the advisory's own impact vector is
-availability-only (`VC:N/VI:N`). The real-call extension is author evidence
-with a one-command replay, but has not yet been independently replayed.
+Not measured: pointer/IP control, command execution, rung 5, and independent
+replay of W5/W6. The advisory's claimed thread-block/socket-exhaustion DoS
+is now measured at real `answer()` scope in W6 with a fixed control. The
+64-byte TERM and the no-size copy are measured at the real cryptlib API,
+from a network pty-req through the real vendored cryptlib getter, inside a
+real `sbbs3` build's `sbbs_t::answer()` on loopback. No claim that the
+adjacent-field overwrite yields code execution: the advisory's own impact
+vector is availability-only (`VC:N/VI:N`). W5 and W6 are author evidence
+with one-command replays, not yet independently replayed.
 
 `gdb.txt` (sha256 `968fa2093607c70425343fe569fe91ee7bc467d7077dc52ff4914cd24691f128`)
 is a batch gdb transcript of the same plain vulnerable binary at the statement
@@ -234,12 +266,12 @@ build ids. The verbatim-statement harness is covered by the witness verdict
 section above.
 
 The former next step — build `sbbs3` from the pinned tree and drive the
-oversized TERM through real `answer()` — is complete in W5 above, with
-locally provisioned headers rather than a host package change. The cheapest
-remaining evidence-producing step is an independent witness replay of
-`real-answer/run-real-answer.sh`; the stand-alone wire probe remains author
-evidence about a standalone probe (independently replayed in W4) and is not
-a real `answer()` call.
+oversized TERM through real `answer()` — is complete in W5, and W6 measures
+the resulting node exhaustion. The cheapest remaining evidence-producing
+step is independent witness replay of `real-answer/run-real-answer.sh` and
+`real-answer/availability/run-availability.sh`; the stand-alone wire probe
+remains author evidence about a standalone probe (independently replayed in
+W4) and is not a real `answer()` call.
 
 W4 bounded build-feasibility probe (negative, no source edit, no host package
 change): a direct `g++ -fsyntax-only` of `src/sbbs3/answer.cpp` at parent

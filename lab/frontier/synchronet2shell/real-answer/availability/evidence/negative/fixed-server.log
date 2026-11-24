@@ -1,0 +1,181 @@
+
+Synchronet Console for Linux-x64  Version 3.22a  Copyright 2026 Rob Swindell
+
+Reading /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl/sbbs.mesh-home.ini
+Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+!Started as non-root user (id 1000): May fail to bind TCP/UDP ports below 1024
+11/24 09:33:16 term Synchronet Terminal Server Version 3.22a Debug
+11/24 09:33:16 term Compiled HEAD/~42f586d7 Nov 24 2026 09:32 with GCC 13.3.0
+11/24 09:33:16 term sizeof: int=4, long=8, off_t=8, time_t=8
+11/24 09:33:16 term Initializing on Tue Nov 24 09:33:16 2026 with options: 20029a02
+11/24 09:33:16 term Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/24 09:33:16 term Verifying/creating data directories
+11/24 09:33:16 term Verifying/creating node directories
+11/24 09:33:16 term SSH Server listening on socket 127.0.0.1 port 22224
+11/24 09:33:16 term Terminal Server constructor using socket 3 (settings=0)
+11/24 09:33:16 term Terminal Server temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/temp/
+11/24 09:33:16 term Terminal Server output thread started
+11/24 09:33:16 term Terminal Server outbuf highwater mark tuned to 536 based on MSS
+11/24 09:33:16 term Node 1 local spy using socket localspy1.sock
+11/24 09:33:16 term Node 2 local spy using socket localspy2.sock
+11/24 09:33:16 term Node 3 local spy using socket localspy3.sock
+11/24 09:33:16 term Node 4 local spy using socket localspy4.sock
+11/24 09:33:16 term Terminal Server thread started for nodes 1 through 4
+11/24 09:33:16 term 0010 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22224 from port 40458
+11/24 09:33:16 term 0010 SSH Cryptlib Session: 9954 created
+11/24 09:33:16 term 0010 SSH [127.0.0.1] Attaching to Node 1
+11/24 09:33:16 term Node 1 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/24 09:33:16 term Node 1 constructor using socket 10 (settings=0)
+11/24 09:33:16 term Node 1 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node1/temp/
+11/24 09:33:16 term Node 1 End of preexisting log entry (possible crash on Tue Nov 24 2026 09:33 am)
+11/24 09:33:16 term Node 1 passthru listen socket 13 opened
+11/24 09:33:16 term Node 1 passthru socket listening on port 41775
+11/24 09:33:16 term Node 1 passthru connect socket 14 opened
+11/24 09:33:16 term Node 1 passthru thread started
+11/24 09:33:16 term Node 1 input thread started
+11/24 09:33:16 term Node 1 output thread started
+11/24 09:33:16 term Node 1 outbuf highwater mark tuned to 20000 based on MSS
+11/24 09:33:16 term Node 1 thread started
+11/24 09:33:16 term Node 1 09:33a  Tue Nov 24 2026            Node   1
+11/24 09:33:16 term Node 1 SSH  <no name> [127.0.0.1]
+11/24 09:33:16 term Node 1 0010 SSH Setting attribute: SESSINFO_ACTIVE
+11/24 09:33:16 term Node 1 0010 SSH SSH_ANYAUTH allowed with no credential
+11/24 09:33:16 term Node 1 0010 SSH [127.0.0.1] waiting for channel type.
+11/24 09:33:16 term Node 1 0010 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:16 term Node 1 0010 SSH REAL_FIXED_PROBE sizeof=41 len=64 off40=00 off44=00000000 off48=00000000 off52=
+11/24 09:33:17 term 0013 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22224 from port 40462
+11/24 09:33:17 term 0013 SSH Cryptlib Session: 13333 created
+11/24 09:33:17 term 0013 SSH [127.0.0.1] Attaching to Node 2
+11/24 09:33:17 term Node 2 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/24 09:33:17 term Node 2 LOAD ERROR: ERROR 2 (No such file or directory) opening /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node2/node.ini, falling back to Node 1
+11/24 09:33:17 term Node 2 constructor using socket 13 (settings=0)
+11/24 09:33:17 term Node 2 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node2/temp/
+11/24 09:33:17 term Node 2 End of preexisting log entry (possible crash on Tue Nov 24 2026 09:33 am)
+11/24 09:33:17 term Node 2 passthru listen socket 18 opened
+11/24 09:33:17 term Node 2 passthru socket listening on port 48021
+11/24 09:33:17 term Node 2 passthru connect socket 19 opened
+11/24 09:33:17 term Node 2 passthru thread started
+11/24 09:33:17 term Node 2 input thread started
+11/24 09:33:17 term Node 2 New active client highwater mark: 2
+11/24 09:33:17 term Node 2 output thread started
+11/24 09:33:17 term Node 2 thread started
+11/24 09:33:17 term Node 2 outbuf highwater mark tuned to 20000 based on MSS
+11/24 09:33:17 term Node 2 09:33a  Tue Nov 24 2026            Node   2
+11/24 09:33:17 term Node 2 SSH  <no name> [127.0.0.1]
+11/24 09:33:17 term Node 2 0013 SSH Setting attribute: SESSINFO_ACTIVE
+11/24 09:33:17 term Node 2 0013 SSH SSH_ANYAUTH allowed with no credential
+11/24 09:33:17 term Node 2 0013 SSH [127.0.0.1] waiting for channel type.
+11/24 09:33:17 term Node 2 0013 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:17 term Node 2 0013 SSH REAL_FIXED_PROBE sizeof=41 len=64 off40=00 off44=00000000 off48=00000000 off52=
+11/24 09:33:17 term Node 1 SSH Operation complete
+11/24 09:33:17 term Node 1 input thread terminated (received 4 bytes in 2 blocks)
+11/24 09:33:17 term Node 1 auto-detected terminal type: 80x24 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:17 term Node 1 passthru socket disconnected
+11/24 09:33:17 term Node 1 passthru thread terminated
+11/24 09:33:17 term 0010 SSH Cryptlib Session: 9954 destroyed from line 4207 (1 remain)
+11/24 09:33:17 term Node 1 output thread terminated (sent 164 bytes in 1 blocks, 164 average, 0 short)
+11/24 09:33:17 term Node 1 thread terminated (1 node threads remain, 2 clients served)
+11/24 09:33:17 term Node 1 destructor begin
+11/24 09:33:17 term Node 1 destructor end
+11/24 09:33:17 term 0010 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22224 from port 40478
+11/24 09:33:17 term 0010 SSH Cryptlib Session: 2288 created
+11/24 09:33:17 term 0010 SSH [127.0.0.1] Attaching to Node 1
+11/24 09:33:17 term Node 1 constructor using socket 10 (settings=0)
+11/24 09:33:17 term Node 1 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node1/temp/
+11/24 09:33:17 term Node 1 passthru listen socket 14 opened
+11/24 09:33:17 term Node 1 passthru socket listening on port 38203
+11/24 09:33:17 term Node 1 passthru connect socket 15 opened
+11/24 09:33:17 term Node 1 input thread started
+11/24 09:33:17 term Node 1 passthru thread started
+11/24 09:33:17 term Node 1 thread started
+11/24 09:33:17 term Node 1 output thread started
+11/24 09:33:17 term Node 1 outbuf highwater mark tuned to 20000 based on MSS
+11/24 09:33:17 term Node 1 09:33a  Tue Nov 24 2026            Node   1
+11/24 09:33:17 term Node 1 SSH  <no name> [127.0.0.1]
+11/24 09:33:17 term Node 1 0010 SSH Setting attribute: SESSINFO_ACTIVE
+11/24 09:33:17 term Node 1 0010 SSH SSH_ANYAUTH allowed with no credential
+11/24 09:33:17 term Node 1 0010 SSH [127.0.0.1] waiting for channel type.
+11/24 09:33:17 term Node 1 0010 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:17 term Node 1 0010 SSH REAL_FIXED_PROBE sizeof=41 len=64 off40=00 off44=00000000 off48=00000000 off52=
+11/24 09:33:17 term Node 2 SSH Operation complete
+11/24 09:33:17 term Node 2 input thread terminated (received 4 bytes in 2 blocks)
+11/24 09:33:17 term Node 2 auto-detected terminal type: 80x24 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:17 term Node 2 passthru socket disconnected
+11/24 09:33:17 term Node 2 passthru thread terminated
+11/24 09:33:17 term 0013 SSH Cryptlib Session: 13333 destroyed from line 4207 (1 remain)
+11/24 09:33:17 term Node 2 output thread terminated (sent 164 bytes in 1 blocks, 164 average, 0 short)
+11/24 09:33:17 term Node 2 thread terminated (1 node threads remain, 3 clients served)
+11/24 09:33:17 term Node 2 destructor begin
+11/24 09:33:17 term Node 2 destructor end
+11/24 09:33:17 term 0013 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22224 from port 40486
+11/24 09:33:17 term 0013 SSH Cryptlib Session: 13597 created
+11/24 09:33:17 term 0013 SSH [127.0.0.1] Attaching to Node 2
+11/24 09:33:17 term Node 2 constructor using socket 13 (settings=0)
+11/24 09:33:17 term Node 2 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node2/temp/
+11/24 09:33:17 term Node 2 passthru listen socket 17 opened
+11/24 09:33:17 term Node 2 passthru socket listening on port 46505
+11/24 09:33:17 term Node 2 passthru connect socket 19 opened
+11/24 09:33:17 term Node 2 passthru thread started
+11/24 09:33:17 term Node 2 thread started
+11/24 09:33:17 term Node 2 output thread started
+11/24 09:33:17 term Node 2 input thread started
+11/24 09:33:17 term Node 2 outbuf highwater mark tuned to 20000 based on MSS
+11/24 09:33:17 term Node 2 09:33a  Tue Nov 24 2026            Node   2
+11/24 09:33:17 term Node 2 SSH  <no name> [127.0.0.1]
+11/24 09:33:17 term Node 2 0013 SSH Setting attribute: SESSINFO_ACTIVE
+11/24 09:33:17 term Node 2 0013 SSH SSH_ANYAUTH allowed with no credential
+11/24 09:33:17 term Node 2 0013 SSH [127.0.0.1] waiting for channel type.
+11/24 09:33:18 term Node 2 0013 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:18 term Node 2 0013 SSH REAL_FIXED_PROBE sizeof=41 len=64 off40=00 off44=00000000 off48=00000000 off52=
+11/24 09:33:18 term Node 1 SSH Operation complete
+11/24 09:33:18 term Node 1 input thread terminated (received 4 bytes in 2 blocks)
+11/24 09:33:18 term Node 1 auto-detected terminal type: 80x24 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:18 term Node 1 passthru socket disconnected
+11/24 09:33:18 term 0010 SSH Cryptlib Session: 2288 destroyed from line 4207 (1 remain)
+11/24 09:33:18 term Node 1 output thread terminated (sent 164 bytes in 1 blocks, 164 average, 0 short)
+11/24 09:33:18 term Node 1 Waiting for output thread to terminate...
+11/24 09:33:18 term Node 1 passthru thread terminated
+11/24 09:33:18 term Node 1 thread terminated (1 node threads remain, 4 clients served)
+11/24 09:33:18 term Node 1 destructor begin
+11/24 09:33:18 term Node 1 destructor end
+11/24 09:33:18 term Node 2 SSH Operation complete
+11/24 09:33:18 term Node 2 input thread terminated (received 4 bytes in 2 blocks)
+11/24 09:33:18 term Node 2 auto-detected terminal type: 80x24 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:18 term Node 2 passthru socket disconnected
+11/24 09:33:18 term 0013 SSH Cryptlib Session: 13597 destroyed from line 4207 (0 remain)
+11/24 09:33:18 term Node 2 passthru thread terminated
+11/24 09:33:18 term Node 2 output thread terminated (sent 164 bytes in 1 blocks, 164 average, 0 short)
+11/24 09:33:18 term Node 2 thread terminated (0 node threads remain, 4 clients served)
+11/24 09:33:18 term Node 2 destructor begin
+11/24 09:33:18 term Node 2 destructor end
+11/24 09:33:20 term 0010 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22224 from port 40502
+11/24 09:33:20 term 0010 SSH Cryptlib Session: 92 created
+11/24 09:33:20 term 0010 SSH [127.0.0.1] Attaching to Node 1
+11/24 09:33:20 term Node 1 constructor using socket 10 (settings=0)
+11/24 09:33:20 term Node 1 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node1/temp/
+11/24 09:33:20 term Node 1 passthru listen socket 13 opened
+11/24 09:33:20 term Node 1 passthru socket listening on port 44643
+11/24 09:33:20 term Node 1 passthru connect socket 14 opened
+11/24 09:33:20 term Node 1 passthru thread started
+11/24 09:33:20 term Node 1 input thread started
+11/24 09:33:20 term Node 1 output thread started
+11/24 09:33:20 term Node 1 thread started
+11/24 09:33:20 term Node 1 outbuf highwater mark tuned to 20000 based on MSS
+11/24 09:33:20 term Node 1 09:33a  Tue Nov 24 2026            Node   1
+11/24 09:33:20 term Node 1 SSH  <no name> [127.0.0.1]
+11/24 09:33:20 term Node 1 0010 SSH Setting attribute: SESSINFO_ACTIVE
+11/24 09:33:20 term Node 1 0010 SSH SSH_ANYAUTH allowed with no credential
+11/24 09:33:20 term Node 1 0010 SSH [127.0.0.1] waiting for channel type.
+11/24 09:33:20 term Node 1 0010 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:20 term Node 1 0010 SSH REAL_FIXED_PROBE sizeof=41 len=40 off40=00 off44=00000000 off48=00000000 off52=
+11/24 09:33:21 term Node 1 SSH Operation complete
+11/24 09:33:21 term Node 1 input thread terminated (received 4 bytes in 2 blocks)
+11/24 09:33:21 term Node 1 auto-detected terminal type: 80x24 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/24 09:33:21 term Node 1 passthru socket disconnected
+11/24 09:33:21 term 0010 SSH Cryptlib Session: 92 destroyed from line 4207 (0 remain)
+11/24 09:33:21 term Node 1 passthru thread terminated
+11/24 09:33:21 term Node 1 output thread terminated (sent 164 bytes in 1 blocks, 164 average, 0 short)
+11/24 09:33:21 term Node 1 thread terminated (0 node threads remain, 5 clients served)
+11/24 09:33:21 term Node 1 destructor begin
+11/24 09:33:21 term Node 1 destructor end
+
