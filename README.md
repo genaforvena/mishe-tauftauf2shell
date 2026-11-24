@@ -1999,7 +1999,8 @@ but the encoding and target are computed under gdb, not from wire bytes;
 addresses varied between runs and the layout is stochastic. An unmapped target
 faulted in `tcache_get_n` (a target-selection error, not a bypass), and the
 fixed control answers HTTP 500 with zero breakpoint hits. No write through the
-chosen address, marker or command; W6 is author-only and unwitnessed, and the
+chosen address, marker or command; witness W200 later replayed W3–W6 from a
+clean archive and ESTABLISHED them AS LABELED; W7 stays author-only, and the
 row's rung-4 ceiling and r5 UNKNOWN stand. Munt W182 (`baa31e6`/`ee30755`)
 measured and clean-archive replayed the post-overflow second-call reuse
 negative: a second 40,001-byte `parseStream()` call writes zero new bytes
@@ -2060,6 +2061,39 @@ stays clean and the normalized trace `f2f6d6ee…c7d8af` was byte-identical in
 a clean `git archive 3f540a2e` replay. Author-only and unwitnessed; W11's
 clang negative stands, no valid object or code pointer, no marker, command
 or r5.
+
+The 13:2x–13:4xZ edges deepen five admitted lanes without moving a rung cell
+or the mind count. Witness W200 (tape #3635) replayed Imgproxy W3/W4/W5/W6
+from `git archive 314fa5d` with only the two gitignored CLI binaries
+symlinked: the live HTTP vulnerable process aborted at W3, W4's 32 chosen
+bytes and symbolised `read_full` write site matched, W5's PRE live pointer was
+overwritten with `0x4141414141414141`, and two of seven W6 attempts returned
+the encoded chosen tcache target. All four are now ESTABLISHED AS LABELED at
+their existing LIVE rung-4 scope; the key was gdb-derived, no write through the
+chosen address, marker or command, and r5 stays UNKNOWN. W7 itself was not
+replayed and remains author-only.
+Cjose W195 widened the real-consumer forward scan from 2 KiB to 8 KiB: of
+1024 words after the CEK only three sat in libc mappings at `cek+32/+112/+136`,
+with `cek+40` holding the top-chunk size `0x1bd41`, so they are stale
+FILE/vtable remnants in free space, not a live pointer; the run-specific W188
+"all 512 words outside mappings" wording is corrected, not the ceiling.
+Openexr W185 tested whether W184's 128 fully chosen bytes could replace a
+live pointer: the flat harness's `exr_decode_pipeline_t` is stack-resident,
+both scratch pointer fields lie outside the window and are unchanged, and
+unmodified `exrcheck -c` has `PTR-HITS total=0`, prints `bad` and exits rc 1
+while fixed 3.5.3 rejects earlier with `EXR_ERR_CORRUPT_CHUNK`; a clean
+`git archive 22a8eeec` replay matched, author-only and no grade change.
+LibRaw W9 found the plain-build heap reach is allocator-config dependent: at
+D=512 the default environment leaves ~135,968 bytes to the `[heap]` edge and
+faults at index 85,640, but `MALLOC_TOP_PAD_=0` makes `destimage` mmap-backed
+and moves the fault to index 172,038 (D=512, libgcc_s read-only page) or
+533,510 (D=1024, libc page). That knob is a lab environment setting, not a
+crafted-image field: no pointer, marker, wire or r5. CodebaseMemory W8's
+read-only gdb frame map shows `vals[]` immediately below `func_bufs` and the
+upward OOB write starting 16,408 bytes above the last row pointer, so a
+direct overwrite of the projection row pointers is structurally excluded for
+this pinned gcc `-O1` build; higher-stride placement stays UNKNOWN, and no
+source, pin or grade changed.
 
 ## How the plant works
 

@@ -7975,3 +7975,93 @@ bytes. A clean `git archive 60df1168 lab/frontier/synchronet2shell` replay
 0 FAIL and the same two probe counts; author replay, not an independent
 verdict. No grade or rung change. Other builds or configurations with valid
 credentials stay UNKNOWN.
+
+## 2026-11-24 13:2x–13:4xZ — witness W200, five bounded negatives
+
+### Openexr2Shell W185 — no live pointer in the fully-chosen window
+
+From `lab/openexr2shell-real`, with the gitignored `build-vuln-plain` and
+`bin-vuln-plain` trees built by the 14:1xZ recipe above, run
+`sh harness/heap-window-check.sh`. Expect `RESULT PASS` three times: in
+`flat_harness` both `scratch_buffer_1/2` fields report
+`stack=1 in_copy_window=0` and `AFTER ... unchanged=1` at the COPY2
+breakpoint; in unmodified `exrcheck -c` the 128-byte window at `dst+256`
+reports `PTR-HITS total=0` against code/rodata, prints `bad` and exits rc 1.
+The guarded fixed-build control reports `DECODE rv=23 EXR_ERR_CORRUPT_CHUNK`
+and clean baseline prints `OK`. Inputs are W184's pinned baseline and
+`work-mixed/poc_mixed_full_3c.exr`; the six byte-stable evidence hashes and
+their aggregate are in `reports/openexr2shell-file-level.md` § W185. A clean
+`git archive 22a8eeec lab/openexr2shell-real` replay (gitignored `src/`,
+`build-*`, `bin-*` symlinked in) returned `RESULT PASS`, rc 0, all six hashes
+byte-identical (`6c8c288c`). Author replay, not a witness verdict; no grade,
+pointer target or r5 change.
+
+### Imgproxy2Shell — witness W200 clean-archive replay of W3/W4/W5/W6
+
+Witness tape #3635 (2026-11-24 13:25Z) extracted `git archive 314fa5d` into
+`/tmp/w200-imgproxy`, symlinked only the two gitignored CLI binaries and
+pointed libvips at `build-vuln-plain/libvips` (the `.so` subdirectory, not
+the tree root). All four committed probe hashes and two curated W6 log
+hashes matched; the underlying invocations are the W3 `ico_probe.py`, W4
+`ico_gdb_readback.py`, W5 `ico_gdb_groom.py` and W6 entries above and in
+`reports/frontier-imgproxy2shell.md` § W200. Expected witness outputs:
+W3 vulnerable process rc 2 with `malloc(): corrupted top size`, ICO-fixed
+HTTP 500 with `ICO image data is too large`; W4 `GDB_HIT` at `read_full`
+with `rdx=0xfffffff5` and 32 chosen `5a5b5c5d` bytes at `actual_data`, zero
+fixed-control hits; W5 preload=3 PRE pointer `0x00007ff89ffbefd5` plus key
+at `0x7fffa0005580`, POST the same slot overwritten with
+`0x4141414141414141`; W6 two positives of seven attempts with live size
+`0x35` tcache victim, first `malloc(0x20)` returning the victim and the
+second returning the encoded chosen target, key independently derived from
+`pos>>12`. Counterexample preserved: both mallocs and the `next` patch were
+debugger-forced and the key is gdb-computed, not wire-derived, so verdict
+ESTABLISHED AS LABELED closes at rung 4 with no r5; W7 was not replayed and
+stays author-only.
+
+### Cjose2Shell W195 — 8 KiB real-consumer forward scan
+
+From `lab/frontier/cjose2shell/w2`, with the pinned build and the private
+`apache-idtoken.conf` listener on 127.0.0.1:18443 launched under gdb as in
+W188, `w2/gdb-idtoken-wide.cmd` and `w2/probe-idtoken-wide.py` (`x/1024gx`
+from `cek+32` plus `info proc mappings` at `AES_unwrap_key` entry) produce
+`w2/evidence/gdb-idtoken-wide.log` and `probe-idtoken-wide.out`. Expect
+`W2W_UNWRAP_ENTRY cek=... inlen=64`, GET 302, POST 400, gdb rc 0, no listener
+left; of 1024 words only three lie in libc mappings (`cek+32/+112/+136`)
+while `cek+40` holds top-chunk size `0x1bd41`. They are stale FILE/vtable
+remnants in free space, not live objects; forward contents vary by run, so
+W188's "all 512 words outside mappings" is a run-specific observation.
+Evidence and hashes: `w2/evidence/wide195-SHA256SUMS`,
+`lab/frontier/cjose2shell/PROVENANCE.md` § W195. No wire-derived address,
+pointer control or grade change.
+
+### LibRaw2Shell W9 — allocator-config dependence of the heap reach
+
+From `lab/frontier/libraw2shell` on the pinned `dcraw_emu` builds from
+`bootstrap.sh`, the gdb scripts in `w9/` (`extent512.gdb`, `toppad.gdb`,
+`toppad-nonzero-oob.gdb`, `toppad-dim1024-wl24601.gdb`, `toppad-map.gdb`,
+`walk512.gdb`) and the inputs recorded in `w9/hashes.sha256` reproduce the
+extent; every script hash is pinned in `lab/frontier/libraw2shell/PINS.md`.
+Expect at D=512 under the default environment `destimage` on the main
+`[heap]` with ~135,968 bytes to the mapping edge and the first OOB fault at
+`IDX=85,640` on the heap end; with `MALLOC_TOP_PAD_=0` `destimage` is
+mmap-backed and the fault moves to `IDX=172,038` at the libgcc_s read-only
+page (D=512) or `IDX=533,510` at libc's page (D=1024). The ~524 KB shrunk
+`image` did not raise glibc's mmap threshold under the default environment:
+that prediction was WRONG and is preserved as a negative. `MALLOC_TOP_PAD_`
+is a lab environment knob, not a crafted-image field: no pointer, marker,
+wire path or r5, and rung 4 is unchanged (`8b112b1f`).
+
+### CodebaseMemory2Shell W8 — read-only frame-layout bound
+
+No new harness. Inspect
+`lab/frontier/codebasememory2shell/evidence/frame-layout-plain.txt` and
+`evidence/frame-layout-asan.txt` from the pinned gcc `-O1`
+`-fno-omit-frame-pointer` build. Expect the ASan frame map to place `vals`
+(the row pointers) at offsets 1952–2208 and `func_bufs` at 35456–51840,
+with only char arrays above it; in the plain build at the `cypher.c:4118`
+breakpoint `&vals[31]=0x7fffffff5328` immediately precedes
+`&func_bufs[0]=0x7fffffff5330` and the canary slot is `$rbp-8`. The upward
+OOB write from `func_bufs[32]` cannot reach `vals[]`: direct row-pointer
+overwrite is structurally excluded for this build. Outer-frame chosen-byte
+garbage and higher-stride live-object placement remain UNKNOWN; no source,
+pin, matrix cell or rung changed (`f02a9953`).
