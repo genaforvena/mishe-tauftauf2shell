@@ -1,0 +1,51 @@
+W12 results — DNG BlackLevel is NOT an independent per-channel knob (2026-11-24 17:3xZ, author-side negative)
+
+Question: W11 gives an arbitrary 16-bit value in channel 1 of the OOB store at
+index 68,644 via LinearizationTable (tag 0xc618). Can a second DNG field set
+channels 0 and 2 independently at the same index? Candidate: BlackLevel
+(0xc61a), which pinned src/metadata/tiff.cpp:1275-1300 parses into the global
+`black`.
+
+Prediction recorded on SITE/walls/libraw2shell.md BEFORE reading results
+(17:31Z): a uniform LinearizationTable makes curve[] uniform, so an IFD1
+BlackLevel should have no effect at all; any change would mean black acts
+elsewhere (raw2image subtraction / identify scaling).
+
+Result 1 — IFD1 BlackLevel (craft_dual_knob_poc.py, sha256
+040d072625aa6e7394754232ede77585b2a3bed7502ecf4223487f134c908441).
+IFD1 slot 0 (tag 0x00fe, LONG/1 on the 8x8 thumbnail) rewritten as 0xc61a
+SHORT/1, on w11/targetbeef.input (WL=65535, LIN=0xbeef). gdb, unmodified -O0
+build, w11/probe.gdb: BL = 0, 1, 10, 100, 1000 ALL read
+  W11 FIRST IDX=68644 avg=131070,97758,130342,2 black=0 white=65535
+  W11 VAL first OOB: ffff beef fe93 0
+i.e. black stayed 0 and no stored value changed. Prediction confirmed.
+Inputs w12/dualbeef-bl{0,1,10,100,1000}.input.
+
+Result 2 — IFD0 BlackLevel (same 4-byte edit applied to IFD0 slot 21, tag
+0xc68d ActiveArea = (0,0,512,512), rebuilt as 0xc61a SHORT/1), generated from
+w11/targetbeef.input. This one IS parsed: gdb prints black=0/6/1000.
+Exact first-OOB index probe (w12/ifd0.gdb, sha256
+af4020f4e24052988cc8fda5ab0046545346ce1ae66a77aa9bc260f75c912f01):
+  BL=0    IDX=68644 c0=65535 c1=48879 (0xbeef) c2=65171 (0xfe93) den=2
+  BL=6    IDX=68644 c0=65535 c1=48877 (0xbeed) c2=65169 (0xfe91) den=2
+  BL=1000 IDX=68644 c0=65535 c1=48619 (0xbedb) c2=64825 (0xfd39) den=2
+Uniform-field probe (w11/fast.gdb, index 73365):
+  BL=0 c0=48874 c1=48879 c2=48879 ; BL=6 c0=48872 c1=48877 c2=48877 ;
+  BL=1000 c0=48615 c1=48619 c2=48619.
+So BlackLevel is a GLOBAL fine shift of the interpolation outputs: c0 stays
+saturated at the first-OOB index, c1 and c2 move monotonically together, and
+the uniform-field channels move together. The map stays essentially degenerate
+(c2 ~= 4/3 * c1 at every BL), so (V, BL) cannot set two channels independently.
+This is NOT a second arbitrary alphabet; no per-channel byte sequence.
+
+Controls for the representative BL=6 input w12/ifd0beef-bl6.input (sha256
+caab59d6c1a562ddd09aa9329d0b7e1368834e2f11413b435f33ab517199fc9d):
+ASan vulnerable `pinned/.../dcraw_emu -n 1` rc 1 with `WRITE of size 2` at
+xtrans_demosaic.cpp:427 (w12/bl6-asan-vuln.out); fixed tree rc 0
+(w12/bl6-asan-fixed.out); vulnerable with no option rc 0 (w12/bl6-safe.out).
+
+Ceiling unchanged from W11: one arbitrary 16-bit value at the chosen offset,
+the other two halfwords interpolation-determined. No pointer/IP, marker,
+command, adjacent live object, GUI, wire, merged upstream fix or r5.
+Upstream issue #894 rechecked 2026-11-24 17:30Z: still OPEN, last updated
+2026-11-17, no merged fix; fixed status UNKNOWN. All experiments local.

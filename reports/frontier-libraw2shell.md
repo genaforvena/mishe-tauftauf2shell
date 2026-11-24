@@ -447,6 +447,34 @@ the whole store. No pointer/IP, marker, command, adjacent live object, GUI
 consumer, wire path or r5. Author-side only; no witness replay.
 
 
+## BlackLevel cannot separate the OOB channels (W12, 2026-11-24 17:3xZ; author-side negative)
+
+Prediction recorded before the run: W11's LinearizationTable makes `curve[]`
+uniform, so BlackLevel should not independently steer the two interpolation-
+determined halfwords at index 68,644. Tested two placements of DNG tag 0xc61a
+on top of `w11/targetbeef.input` (WL=65535, LIN=0xbeef):
+
+- IFD1 slot 0, originally `0x00fe` LONG/1 on the 8x8 thumbnail, rewritten as
+  `0xc61a` SHORT/1 (`craft_dual_knob_poc.py`, sha256
+  `040d072625aa6e7394754232ede77585b2a3bed7502ecf4223487f134c908441`):
+  BL=0/1/10/100/1000 left `black=0` and the stored halfwords byte-identical
+  at `ffff beef fe93 0`. Prediction confirmed.
+- IFD0 slot 21, `0xc68d` ActiveArea=(0,0,512,512), rewritten as `0xc61a`
+  SHORT/1: this one parses (`black=0/6/1000`). Unmodified `-O0` gdb at the
+  exact first OOB index: BL=0 `c0=65535 c1=0xbeef c2=0xfe93`; BL=6
+  `c0=65535 c1=0xbeed c2=0xfe91`; BL=1000 `c0=65535 c1=0xbedb c2=0xfd39`.
+  In a uniform field all three channels shift together. The map is effectively
+  degenerate (`c2 ~= 4/3 * c1` at every BL), so the pair (LIN, BL) still cannot
+  set two channels independently. This is a coupled fine shift, not a second
+  arbitrary alphabet.
+
+Controls on `w12/ifd0beef-bl6.input`: ASan vulnerable `-n 1` rc 1 `WRITE of
+size 2` at `:427`, fixed rc 0, vulnerable without `-n` rc 0. Raw traces,
+hashes and both negatives are in `lab/frontier/libraw2shell/w12/results.txt`
+and PINS.md. Upstream issue #894 was rechecked 17:30Z: still open, last
+updated 2026-11-17, no merged fix; fixed status UNKNOWN. Ceiling unchanged
+from W11; author-side only, no replay requested for a negative.
+
 ## Rung-4 assessment and rank
 
 Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public

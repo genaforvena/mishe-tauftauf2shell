@@ -57,6 +57,12 @@
 | `w11/target0001.input` | W11 low edge, exact `0x0001` channel 1 at index 68,644 | `1ca11ebfa5fdcfbd02fe85f13c6690023c3c588e193dbb9c1d124121385a769d` |
 | `w11/targetffff.input` | W11 high edge, all three channels `0xffff` at index 68,644 | `93ad684af7b1fe11846711293cb0f998d27de67cfb96666df6570242ef8bf7d4` |
 | `w11/results.txt` | W11 full method, hashes, values, controls and limits | `9ca25f6c7421f81a14a1e620b52d8c206153c4f689e37aaca86ec19d82f7c1dd` |
+| `w12/results.txt` | W12 BlackLevel negative result: IFD1 no effect, IFD0 coupled global shift, controls | `f57f1da2e741f9950dbbe176467397672335c24f46766239ec9bad315ab88ab1` |
+| `craft_dual_knob_poc.py` | lab-only W12 generator: IFD1 slot 0 -> `0xc61a` SHORT/1 | `040d072625aa6e7394754232ede77585b2a3bed7502ecf4223487f134c908441` |
+| `w12/ifd0.gdb` | W12 exact-first-OOB-index probe (unmodified `-O0` build) | `af4020f4e24052988cc8fda5ab0046545346ce1ae66a77aa9bc260f75c912f01` |
+| `w12/dualbeef-bl1.input` | W12 IFD1 BlackLevel=1, byte-identical to W11 `ffff beef fe93 0` | `d8eb73adecdcbb09115d73855e7e9ae143edac4a398923aa6d06b5a58fda101d` |
+| `w12/ifd0beef-bl6.input` | W12 IFD0 BlackLevel=6, coupled shift `ffff beed fe91 0`, controls clean | `caab59d6c1a562ddd09aa9329d0b7e1368834e2f11413b435f33ab517199fc9d` |
+| `w12/ifd0-bl6-exact.txt` | W12 raw gdb trace at exact index 68,644, BlackLevel=6 | `4d4764a0fcf0704a1aacba75d23987cc599279caf747c902e5d85b1972acad2f` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
