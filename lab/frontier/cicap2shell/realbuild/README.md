@@ -47,3 +47,26 @@ Scope limit: the header string is passed directly to the exported
 `process_encapsulated()` on a real `ci_request_t`; this is NOT a socket, not
 `parse_header()`/`process_request()`, and not a running `icap-server`. No
 pointer/IP/command control and no r5.
+
+## W2 — socket-fed header bytes (2026-11-24 18:4xZ)
+
+`wire_api_harness.c` writes a complete `REQMOD ... ICAP/1.0` request (request
+line, `Host`, six-entity `Encapsulated:`, blank line) into an `AF_UNIX`
+socketpair, reads it back with the library's exported
+`ci_connection_read_nonblock()`, calls exported `ci_headers_unpack()` and then
+the exported `process_encapsulated()` on each `Encapsulated:` header, then
+`ci_request_destroy()`. The library's `ci_read_icap_header()` is not exported
+and `ci_wait_for_data()` rejects this synthetic fd, so those two calls are
+bypassed; the post-read loop follows `request.c:519-529` in shape.
+
+Observed (raw outputs `../evidence/real-wire-*.out`):
+
+- Vuln ASan, sixth value 90 and 4242: `wire_bytes=155/157 unpack=0 headers=4`,
+  `alias=1 trash0_type=2 trash0_start=<value>`, ASan `heap-use-after-free`
+  `READ of size 4` at `header.c:631` from `ci_request_destroy`; rc 1.
+- Vuln ASan four-entity safe: `alias=0`, `destroy done`, rc 0.
+- Upstream-patched fixed ASan, attack 90 and safe: `alias=0`, rc 0, clean.
+
+Scope: a local socketpair, not a network socket; no `parse_request()` /
+`process_request()` and no running `icap-server`. No wire reach off loopback,
+no pointer/IP/command control, no r5.

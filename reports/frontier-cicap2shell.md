@@ -110,3 +110,13 @@ Next: feed a complete ICAP request from a loopback socket through
 returned ESTABLISHED AS LABELED for the original pinned-function claim:
 clean-archive `58435874` replay 19 PASS / 0 FAIL, no contradiction, no grade
 change, no r5; the real-build lane is author-measured and unwitnessed.
+
+W2 extends this to socket-fed bytes: `realbuild/wire_api_harness.c` writes a
+complete `REQMOD ... ICAP/1.0` request into an `AF_UNIX` socketpair and reads
+it with the library's exported `ci_connection_read_nonblock()`, then uses
+exported `ci_headers_unpack()` and `process_encapsulated()` on the parsed
+header. Values 90/4242 again give `alias=1`, the chosen `trash0_start` and the
+`header.c:631` UAF; safe and patch-derived fixed controls are clean. The
+hidden `ci_read_icap_header()` and `ci_wait_for_data()` are bypassed, so this
+is neither the full `parse_header()` path nor a network socket: wire reach
+stays UNKNOWN and the W1/W2 lanes remain author-measured and unwitnessed.

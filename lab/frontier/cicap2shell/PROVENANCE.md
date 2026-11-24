@@ -112,3 +112,13 @@ the exported `ci_request_alloc`, `process_encapsulated` and
   limit in `realbuild/README.md`. The header string reaches the exported
   parser function directly, not through `parse_header()` or a socket: no
   wire, no ICAP server, no pointer/IP/command control, no r5.
+
+W2 (18:4xZ): `realbuild/wire_api_harness.c` feeds a complete ICAP request
+through an `AF_UNIX` socketpair into the same real build using exported
+`ci_connection_read_nonblock`, `ci_headers_unpack`, `process_encapsulated`
+and `ci_request_destroy`. Sixth values 90/4242 produce `unpack=0 headers=4`,
+`alias=1`, the chosen `trash0_start`, and the same `header.c:631` UAF;
+four-entity safe and the upstream-patched fixed control are clean (rc 0).
+The hidden `ci_read_icap_header()` and `ci_wait_for_data()` are bypassed, so
+this is not `parse_header()`/`process_request()` and not a network socket;
+raw outputs in gitignored `evidence/real-wire-*.out`.

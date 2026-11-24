@@ -67,13 +67,14 @@ no c-icap build, wire socket, pointer/IP/marker or command was witnessed.
 
 ## Next bounded work
 
-A real `C_ICAP_0.6.5` ASan build now reproduces the same alias, chosen value
-and `header.c:631` use-after-free from `ci_request_destroy` through exported
-library APIs on a real `ci_request_t`; four-entity and upstream-patched
-controls are clean. It does not yet pass through `parse_header()` or a socket.
-Next: feed a full ICAP request from a loopback socket through
-`process_request()`/`parse_header()` into that build, then put an
-`icap-server` in front; only that can move wire reach off UNKNOWN. GitHub has
-no 0.6.6 tag, so the fixed control is patch-derived, not a released binary.
+A real `C_ICAP_0.6.5` ASan build reproduces the same alias, chosen value and
+`header.c:631` use-after-free from `ci_request_destroy` through exported
+library APIs on a real `ci_request_t` (W1). W2 feeds a complete ICAP request
+through an `AF_UNIX` socketpair via the exported read/unpack/parser functions
+with the same outcome; four-entity and upstream-patched controls are clean.
+Neither lane reaches `parse_header()`/`process_request()` or a network socket.
+Next: drive those full paths into this build, then put an `icap-server` in
+front; only that can move wire reach off UNKNOWN. GitHub has no 0.6.6 tag, so
+the fixed control is patch-derived, not a released binary.
 The witness verdict is recorded above and in the README row; do not
 infer RCE from advisory prose or a harness marker.
