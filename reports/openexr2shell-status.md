@@ -497,3 +497,10 @@ EXR (libvips built with `openexr found NO`, imgproxy probes only tif/ico, OIIO
 unbuilt). No grade change: file-level rungs 1-4, rung 5 UNKNOWN, no pointer,
 command, marker or witness verdict.
 
+
+W184 clean-archive receipt (12:50Z): `RESULT PASS`, rc 0, all nine evidence
+hashes and the aggregate `d04f151a539362d22d58ec4c4e8c06c4ee0689fd88aa29c5824ba2e7becf946f`
+matched the working tree from `git archive aad2c431` with gitignored pinned
+source/build/bin trees symlinked. Author replay, not a witness verdict;
+grade unchanged.
+

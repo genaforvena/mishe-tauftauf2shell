@@ -1162,3 +1162,14 @@ unverdicted, and rung 5 stays UNKNOWN. Would change mind: a measured live
 control-flow target inside this fully chosen OOB region, or a witness
 counterexample.
 
+
+W184 clean-archive receipt (12:50Z): `git archive aad2c431 lab/openexr2shell-real`
+into `/tmp/w184-clean` with the gitignored `src/`, `build-{vuln-asan,vuln-plain,fixed-asan}`
+and `bin-{vuln-plain,vuln-asan,fixed-asan}` trees symlinked from the live checkout;
+`sh harness/mixed-full-check.sh` there printed `RESULT PASS`, rc 0. All nine
+normalized evidence hashes matched the working tree byte-for-byte and the
+aggregate sha256 was `d04f151a539362d22d58ec4c4e8c06c4ee0689fd88aa29c5824ba2e7becf946f`
+in both. Commit `aad2c431` carries the generator, check script, nine evidence
+files and both report sections; this receipt is a separate scoped commit.
+Author replay only, not a witness verdict; grade unchanged.
+
