@@ -413,6 +413,30 @@ recovered from the live process, which no measured response provides.
 No new rung-4 claim, no r5, no command. No listener or lab Apache remained;
 hashes in `w2/evidence/gdb-cek-provenance-SHA256SUMS`.
 
+## W190 — jansson length-corruption info-leak hypothesis: structural negative (2026-11-24 06:26-06:33Z)
+
+Queued hypothesis: if the overflow could enlarge the `length` of the adjacent
+jansson string without breaking it, a later serialization might read past the
+25-byte object and put heap bytes (possibly pointers) on the wire — the
+missing r5 pointer source. Checked against the pinned `deps/jansson-build/src/
+jansson_private.h` (`json_t json; char *value; size_t length;`) and the W183
+instrumented heap log `w1/evidence/wrappedN56-typed-refcount-w183.log`:
+
+- `CEK_PTR=0x80f04b0`, `ENC_OBJ=0x80f04e0` — the `enc` string is at `cek+48`,
+  16 bytes into the contiguous 56-byte overwrite.
+- The object dump has its `value` pointer at object `+16` (`0x080f0910`,
+  matching `VAL=0x80f0910`) and its length `13` at object `+24`. The AES-KW
+  write reaches `cek+64` (pointer) before `cek+72` (length).
+
+Therefore no contiguous overflow can set length while preserving the pointer:
+the pointer must be rewritten first, and its value is ASLR-randomized in the
+real consumer (W189). Even if a lab process supplied that address via gdb,
+the result would be W188-class rung-4 mechanics with a lab-known absolute
+address, not a wire-derived pointer. **Structural negative, not an executed
+experiment** — no new input, build, rung or command; no listener started.
+Combined with W188/W189 forward-scan negatives, the sequential-write
+primitive has no measured path to a wire-visible live pointer.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
