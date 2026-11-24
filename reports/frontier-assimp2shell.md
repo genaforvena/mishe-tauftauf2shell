@@ -2,9 +2,11 @@
 
 Status: **ADMITTED** by operator 2026-11-24 02:2xZ (124th route); witness
 verdict #3277 (03:51Z) ESTABLISHED rungs 1-4 at the direct-call /
-stub-Accessor / deterministic-arena scope, NO r5. The W1 real-importer and W2
-chosen-byte legs are author-measured and await independent replay. Brief +
-live two-pane window are both present. Target mind: `assimp2shell`. Evidence:
+stub-Accessor / deterministic-arena scope, NO r5; witness verdict #3722
+(16:27Z) ESTABLISHED W14 AS LABELED (partial low-32-bit pointer overwrite),
+no grade change and NO r5. The W1-W13 real-importer legs remain author-only;
+W14 is independently replayed. Brief + live two-pane window are both present.
+Target mind: `assimp2shell`. Evidence:
 `lab/frontier/assimp2shell/PROVENANCE.md`, `PINS.sha256`, `evidence.log`,
 `realpath/evidence/`, `placement/evidence/`.
 
@@ -388,7 +390,7 @@ at the matching level, and feeds the tracked documents through
   Author-measured, unwitnessed; no valid object or code pointer, no marker,
   control-flow redirection, command or r5.
 
-## W14 — partial low-32-bit pointer overwrite with MAT2 index (2026-11-24 15:4xZ, author-measured, unwitnessed)
+## W14 — partial low-32-bit pointer overwrite with MAT2 index (2026-11-24 15:4xZ, author-measured; independently replayed #3722 at 16:27Z)
 
 A read-only source map first corrected the W13 summary: the `meshes` vector
 slot W10 overwrites IS dereferenced (`BaseImporter.h:334-345` via
@@ -412,11 +414,15 @@ Prediction, observation and disposition on the gcc -O2 plain library built by
 - `idxptr-mat2-low42.gltf`: only document bytes 48..51 change to `42424242`;
   slot and fault address become `0x555542424242` in the same frame. Causal
   one-field steering, not a second layout accident.
-- `idxptr-mat2-real.gltf`: chosen low word `5556f520` equals the safe begin's
-  low bits under ASLR-off, restoring the begin pointer exactly; the import
-  still aborts with `munmap_chunk(): invalid pointer` in glibc `free`, with
-  vector length 415 at the call. This is a PRESERVED NEGATIVE: restoring one
-  slot does not produce a clean import, and no clean-import control is claimed.
+- `idxptr-mat2-real.gltf`: chosen low word `5556f520`; in the first author run
+  under ASLR-off that equals the captured safe begin's low bits
+  (`0x55555556f520`) and restores the begin pointer exactly, but the import
+  still aborts with `munmap_chunk(): invalid pointer` in glibc `free` with
+  vector length 415 at the call. This restoration is layout-dependent: in the
+  author's `75ff847f` clean replay and the witness's `22b1740f` clean room the
+  captured safe begin is `0x55555556f560`, so the same chosen low word does
+  NOT restore the begin there and is simply another corrupt-pointer abort.
+  PRESERVED NEGATIVE either way: no clean import and no clean-import control.
 
 `bash harness/run-w14.sh` => **7 PASS / 0 FAIL**, normalized trace
 `w14/evidence/w14.trace` sha256
@@ -424,8 +430,8 @@ Prediction, observation and disposition on the gcc -O2 plain library built by
 three runs exposed only harness parsing bugs (shortened high-hex string, wrong
 `awk` field, leading-zero address formatting); they were fixed before the
 clean run, and the earlier raw observations above already matched. Source
-hashes match the pins and `safe.gltf` imports cleanly. Author-measured,
-unwitnessed; no valid target object, code pointer, marker, command, listener
+hashes match the pins and `safe.gltf` imports cleanly. Author-measured and
+independently replayed (#3722 below); no valid target object, code pointer,
 or r5. The chosen address is unmapped under ASLR and must inherit the original
 pointer's high bits, so this is a narrower primitive than full pointer
 replacement, not a step toward control flow.
@@ -440,13 +446,42 @@ two lines the claim-bearing traces are byte-identical, sha256
 `72c2a6be901a933cba998763787f459e6256438a852234dba1658189af6d4198`. Chosen
 fault addresses, the high-32-bit inheritance, the CopyVector frame, the
 restored-low-word abort and every PASS/FAIL line compare verbatim. Author
-replay, not witness acceptance; no grade change.
+replay at the time; independently confirmed by witness verdict #3722 below.
+No grade change.
+
+## Witness verdict — W14 (#3722, 2026-11-24 16:27Z)
+
+Independent clean-room replay: `git archive 22b1740f lab/frontier/assimp2shell`
+into `/tmp/w203-assimp`, pinned tarball copied locally (sha `5f7ed412…7204c`),
+`bootstrap.sh` rc 0 with 10/10 pins OK, unmodified `harness/run-w14.sh`
+7 PASS / 0 FAIL rc 0 with its own plain gcc -O2 library rebuilt by
+`run-w12.sh`. Witness raw trace: safe_begin `0x55555556f560`,
+`idxptr-mat2-low` slot and `si_addr` `0x555541414141`, `low42`
+`0x555542424242`, both in `CopyVector<aiMesh>` with predicted == observed and
+slot == predicted; the `real` case aborts with `munmap_chunk(): invalid
+pointer`. Document bytes 48..51 are `41414141`/`42424242`/`5556f520`, and
+`(safe_begin & 0xffffffff00000000) | low` yields both fault addresses. Its
+normalized trace (drop the layout-dependent `PRE` line) sha256
+`72c2a6be901a933cba998763787f459e6256438a852234dba1658189af6d4198` matches
+the recorded replay digest; the raw trace differs from the committed
+`37b1225e…` only in the safe_begin `PRE` line (`f560` vs `f520`), as in the
+author's own `75ff847f` replay.
+
+Verdict **ESTABLISHED AS LABELED**, no grade change, NO r5: high 32 bits are
+inherited from the real heap pointer, the chosen address is unmapped, and no
+valid object, code pointer, IP, marker, command or listener was observed. The
+witness nuance (not a contradiction) is folded into the W14 negative bullet
+above: low word `5556f520` is the safe begin's low bits only in the first
+author run, not in the clean replays. Scope is W14 only; baseline #3277 and
+the other W1-W13 real-importer legs are unchanged and still author-only.
 
 ## Next lane
 
-Independent witness replay of W1/W2 is still owed; the clean-archive author
-replay below is reproducibility evidence, not acceptance. Preserve any
-contradiction as a negative.
+W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
+change, no r5. Independent witness replay of W1/W2 and the W3-W13
+real-importer legs is still owed; clean-archive author replays are
+reproducibility evidence, not acceptance. Preserve any contradiction as a
+negative.
 
 W5, W6, W7 and W8 measured larger and distinct-site overruns through the real
 importer but found no chosen byte in a live `aiMesh` field. W9 separated the
