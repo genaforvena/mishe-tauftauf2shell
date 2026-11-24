@@ -140,10 +140,36 @@ the failed one-byte-offset attempt and the limits are in `STEERING.md`.
 This steers the same four-byte write to chosen offsets before `encs`;
 no pointer/IP, command, ASLR/grooming or witness verdict, NO r5.
 
+## W5 (2026-11-24 14:0xZ) — low half of the chunk size word
+
+`SIZE.md` records a second measured consumer, distinct from W3's
+high-half metadata check. Crafting `min2=max2=0`, `min1=max1=0x91` makes
+`tot=1`, so the pinned RHS is exactly `0x91`; truncating the sole glyph
+index after low byte `0xfe` gives `glyph=-2`, writing `encs[-2]` =
+`encs-8`, the low half of `encs`'s own size word. In `gdb-size-word.out`
+the hardware watchpoint reported `Old value = 33`, `New value = 145`,
+`x/gx (char*)encs-8` read `0x91`, and that word was still `0x91` at
+`free(encs)` from `fvimportbdf.c:1770`. After the free,
+`tcache->entries[7] = encs`: glibc accepted the corrupted size and put
+the 16-byte-usable chunk in the bin for `0x90`-byte chunks. Vulnerable
+plain build exits 0 on this input, while the high-half (`glyph=-1`) and
+zero-value controls exit 134; patched build exits 0 on all four inputs;
+ASan reports `WRITE of size 4` at :1751 for all three negative inputs
+(`8 bytes before` for -2, `4 bytes before` for -1) and nothing for the
+complete-table control. A conditional `__libc_malloc` breakpoint for
+requests `0x71..0x88` after the free never hit, so no later consumer of
+the tcache entry was observed on this path. No pointer/IP, command, ASLR
+study, GUI `Import()` menu or witness verdict, NO r5. A GUI build was not
+attempted: `gtk+-3.0` is not installed on this host and the existing
+builds are `ENABLE_GUI=OFF`.
+
 ## Scope
 
 Headless CLI scripting `Import()` on this host. Chosen bytes at a
 file-chosen offset before `encs` are now measured (W2/W4), as are the
-plain-build abort and glibc metadata consumer (W2/W3). The GUI `Import()`
-menu, other loaders, pointer/IP control, command execution, ASLR/grooming,
-and independent witness replay of the real-build path remain UNKNOWN.
+plain-build abort, the high-half glibc metadata consumer (W2/W3) and a
+low-half chunk-size rewrite accepted by `free()` into tcache bin 7 (W5).
+No later consumer of that tcache entry was observed on this path. The GUI
+`Import()` menu (GTK-3 dev packages absent, `ENABLE_GUI=OFF` builds),
+other loaders, pointer/IP control, command execution, ASLR/grooming, and
+independent witness replay of the real-build path remain UNKNOWN.

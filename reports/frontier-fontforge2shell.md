@@ -121,6 +121,22 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   for -8 / -255, and all four inputs exit 0 patched, 134 vulnerable plain.
   This steers the rung-4 write but adds no pointer/IP, command, ASLR study
   or witness verdict; NO r5.
+  W5 wrote the LOW half of the same chunk size word (`SIZE.md`): setting
+  `min2=max2=0`, `min1=max1=0x91` gives a single iteration (`tot=1`)
+  whose pinned RHS is `0x91`, and ending the file after low byte `0xfe`
+  gives `glyph=-2`, i.e. `encs-8`. In the real plain process a hardware
+  watchpoint saw `0x21 -> 0x91` at `encs-8`; the corrupted word was still
+  `0x91` at `free(encs)` (`fvimportbdf.c:1770`), after which
+  `tcache->entries[7] = encs` — the 16-byte chunk was accepted into the
+  bin for `0x90`-byte chunks. Vulnerable plain exits 0 on that input,
+  while the high-half and zero-value controls exit 134; patched exits 0
+  on all four inputs and ASan reports `WRITE of size 4` at :1751 for all
+  three negative inputs. A conditional `__libc_malloc` probe for
+  `0x71..0x88` requests after the free never hit, so no later consumer
+  of that tcache entry was observed on the headless scripted path. This
+  is a size-confusion mechanic, not pointer/IP control; no r5. A GUI
+  build was not attempted: `gtk+-3.0` is absent and existing builds are
+  `ENABLE_GUI=OFF`.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study or real-process marker; no rung 5.

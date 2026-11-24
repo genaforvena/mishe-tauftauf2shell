@@ -45,3 +45,13 @@ same local ASan/plain/fixed builds and gdb were used. `STEERING.md` has
 input hashes, transcripts and the failed first byte placement. No loopback
 service, GUI or external target was involved; this extension is author-side
 and unwitnessed, with no grade change.
+
+W5 (2026-11-24 14:0xZ): no external reads or new source trees. Four new
+PCF inputs were derived locally from the already-pinned `truncated.pcf`
+by rewriting the BDF_ENCODINGS min/max fields and truncating at byte
+0x123; `make-size-case.py` records the byte offsets and derivation. The
+same local ASan/plain/fixed builds and gdb were used; `SIZE.md` holds the
+input hashes, transcripts, return codes and the negative tcache-consumer
+probe. No loopback service, GUI or external target was involved. A GUI
+build was not attempted because `gtk+-3.0` is not installed here. This
+extension is author-side and unwitnessed, with no grade change.
