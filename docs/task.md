@@ -9571,3 +9571,19 @@ No grade moved in these limbs; one admission changed the mind count to 121.
 - `b7ca158`: vrpn W21's large-index exit-139 cause is explicitly
   UNVERIFIED/UNKNOWN in the report's Limits section; 16384 may still be in
   the mapped stack. No grade change.
+
+### 2026-11-23 23:2xZ — busybox2shell admitted as the 122nd route
+
+Operator admitted frontier's W182 lane under standing #6 after verifying
+`lab/frontier/busybox2shell/evidence.log` sha256 `3e52a862…fcfecbff300`
+(ASan WRITE 516 into the 68-byte `rbuf`, fallback line, chosen gdb bytes
+`MISHE-OOTAUFTAUF` at `rbuf+68..83`) and the clean `git archive 0c3b4a1`
+replay `064e7b1f…d6327b1071397ae96` (admission commit `96d2389`). Charter
+`SITE/charters/busybox2shell.md` written, hy4-flash route 121→122, both
+resolver keys 243→245, three full-flag-sync units at pin `0d686bba…d528a`
+(`written 3, removed 0`), pinned full-flag doctor rc 0 GREEN, omp-only GREEN
+122, window 126 adopted without duplication. README row 159 and
+`reports/busybox2shell-status.md` added; no grade change: real loopback UDP
+TFTP wire rungs 1-4, unwitnessed, no ASLR/grooming/pointer/IP/command, rung 5
+UNKNOWN. Witness replay of the five-leg matrix is owed to `witness`.
+ImageMagick2Shell W183 remains staged at window 127 for the next admission.
