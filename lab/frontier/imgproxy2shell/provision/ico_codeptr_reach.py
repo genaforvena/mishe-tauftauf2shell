@@ -113,9 +113,11 @@ def get(path, timeout):
 
 
 def classify(out, bodylen):
-    """Report post-write qwords that land in an executable mapping."""
+    """Report code-shaped qwords strictly inside the attacker-written span."""
     exec_ranges = []
     in_map = False
+    hit = re.search(r"W13_HIT base=0x([0-9a-f]+) actual=0x([0-9a-f]+) ", out)
+    actual = int(hit.group(2), 16) if hit else None
     for line in out.splitlines():
         if line.startswith("W13_MAPS_BEGIN"):
             in_map = True
@@ -129,13 +131,28 @@ def classify(out, bodylen):
                 exec_ranges.append((int(m.group(1), 16), int(m.group(2), 16)))
     sections = out.split("W13_POST")
     post = sections[1].split("W13_BT")[0] if len(sections) > 1 else ""
-    vals = [int(m, 16) for m in re.findall(r"0x([0-9a-f]{16})", post)]
+    vals, outside = [], []
+    for line in post.splitlines():
+        m = re.match(r"\s*0x([0-9a-f]+):\s+(.*)", line)
+        if not m:
+            continue
+        addr = int(m.group(1), 16)
+        for i, text in enumerate(re.findall(r"0x([0-9a-f]{16})", m.group(2))):
+            v = int(text, 16)
+            at = addr + 8 * i
+            if actual is not None and actual <= at < actual + bodylen:
+                vals.append(v)
+            else:
+                outside.append(v)
     code = [(hex(v), v) for v in vals
             if any(lo <= v < hi for lo, hi in exec_ranges)]
+    outside_code = [hex(v) for v in outside
+                    if any(lo <= v < hi for lo, hi in exec_ranges)]
     marker = sum(1 for v in vals if v == 0x4141414141414141)
     print(f"W13_CLASSIFY exec_ranges={len(exec_ranges)} qwords={len(vals)} "
           f"marker_qwords={marker} code_ptr_qwords={len(code)} "
-          f"code_samples={[c[0] for c in code[:6]]}", flush=True)
+          f"code_samples={[c[0] for c in code[:6]]} "
+          f"outside_span_code_values={outside_code[:6]}", flush=True)
 
 
 def main():
