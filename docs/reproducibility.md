@@ -7496,6 +7496,17 @@ the lane-index row still carries an older ceiling, this section supersedes it.
   scope is the direct-call/in-memory-table/stand-in-struct matrix. GUI
   `Import()`, other loaders, pointer/IP, command, ASLR/grooming and r5
   UNKNOWN.
+- **FontForge W3, glibc chunk-size consumer (`88d6c5e`)**: from
+  `lab/frontier/fontforge2shell`, `CONSUMER.md` records the plain real-build
+  gdb run (`gdb -batch -x gdb-consumer-plain.cmd ./build-plain/bin/fontforge`):
+  the four bytes at `encs-4` are the high half of the size word of `encs`'s own
+  malloc chunk, changing from `0x21` to `0x0053494d00000021`; the breakpoint at
+  `fvimportbdf.c:1770` catches `free(encs)` reading that header immediately
+  before the glibc abort, while `gdb-header-fixed.out` and
+  `gdb-header-complete.out` keep `0x21` and exit normally. Metadata corruption,
+  not a pointer primitive; a field set yielding a plausible size or a silent
+  overwrite is UNKNOWN. Author-side and unwitnessed, no claim beyond the
+  witnessed direct-call rungs 1-4 and no rung 5.
 - **Jq adjacent advisory disposition (`2bcdde2`)**: operator DM #3419
   (07:37Z) screened GHSA-cfh2-vwfq-qfmm (`--rawfile` invalid-state reuse after
   a handled "String too long", High 7.1, affected `<=1.8.1`, fixed 1.8.2)

@@ -10036,7 +10036,7 @@ request #3156 unanswered.
   cannot reach the write. Source-only negative; the five unbuilt encoders
   stay unmeasured. No build, bytes, wire, pointer or grade change.
 
-### 2026-11-24 07:1x–07:4xZ — sixteen edges after `3ee5637`
+### 2026-11-24 07:1x–07:4xZ — seventeen edges after `3ee5637`
 
 - `e4430ca` (Munt W180) audited every non-test `parseStream()` caller in the
   pinned 2.8.3 tree: ALSA 5572 measured, OSS 1024, Win32 ring 32760 and
@@ -10108,6 +10108,12 @@ request #3156 unanswered.
   vulnerable rc 134 `double free or corruption (out)` against patched and
   complete-table rc 0, with the ASan-stepping attempt preserved as a negative.
   Author-only, UNWITNESSED, outside #3309's direct-call verdict.
+- `88d6c5e` (FontForge W3) identified the real-build consumer: in the plain
+  glibc process the four bytes at `encs-4` are the high half of `encs`'s own
+  chunk-size word (`0x21` → `0x0053494d00000021`), read by `free(encs)` at
+  `fvimportbdf.c:1770` just before the abort; patched and complete controls
+  keep `0x21`. Metadata corruption, not a pointer primitive; author-side,
+  unwitnessed, no grade or rung 5.
 - `2bcdde2` (jq) records operator DM #3419 screening adjacent
   GHSA-cfh2-vwfq-qfmm NOT admitted (file-facing `--rawfile`, no RCE claim,
   ~4.2 GB peak RSS against the 2 GiB guard): a named disposition, 14/14 pins
@@ -10116,7 +10122,7 @@ request #3156 unanswered.
   (#3105/#3141/#3232 as chat #3429) once after they vanished from the witness
   wall; no experiment, build, input, witness verdict or grade change. W184's
   negative alone is witness-ESTABLISHED (#3079).
-- All 16 edges keep the 130-role count and FRONTIER-STAGED set unchanged. The
+- All 17 edges keep the 130-role count and FRONTIER-STAGED set unchanged. The
   only rung cell moved is LibRaw R4; Synchronet's wire limb was accepted at
   the already-claimed synthetic-struct scope, and the remaining new limbs are
   author/source-only or named negatives. FLTK W5, FontForge W2 and cjose's

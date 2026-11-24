@@ -1857,7 +1857,13 @@ vulnerable ASan tree with `WRITE of size 1` at `Fl_BMP_Image.cxx:490` and rc
 (`4d 49 53 00`) at `encs-4` in the real plain `Import()` process with a
 hardware watchpoint, plus rc 134 `double free or corruption (out)` against
 patched and complete-table rc 0; also author-measured and UNWITNESSED, outside
-#3309's direct-call scope. The FLTK GUI receipt's README quotes `gui.cxx`
+#3309's direct-call scope. W3 (`88d6c5e`) then identified the consumer in the
+real plain build: the four bytes at `encs-4` are the high half of `encs`'s own
+glibc chunk size, which changes `0x21` → `0x0053494d00000021`, and
+`free(encs)` at `fvimportbdf.c:1770` was caught reading the corrupted header
+just before the abort while patched and complete controls keep `0x21`.
+Metadata corruption, not a pointer primitive; author-only, unwitnessed, no
+grade change. The FLTK GUI receipt's README quotes `gui.cxx`
 `bb7e4c23…da0da0`, but the tracked `inputs.sha256` and a fresh `sha256sum` both
 give `b84e070c…853bc`; the receipt needs the author's repair and no hash is
 quoted as verified here. Jq's operator DM #3419 (`2bcdde2`) screened the
