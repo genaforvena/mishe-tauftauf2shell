@@ -189,6 +189,11 @@ input.
   changing the file pixel byte changed only the in-bounds 64 bytes, while the
   OOB region differed solely in an 8-byte window that also varies on a
   same-input repeat.
+  This holds for the all-FLOAT file-level cases exercised here; W178 below
+  falsifies it as a universal claim about the pinned sink: a mixed
+  FLOAT-before-HALF layout copies in-bounds source bytes far out of bounds in
+  a direct call. No mixed-channel file-level PoC exists, so the file-derived
+  OOB-byte path remains UNKNOWN at file level.
 - The advisory's OpenImageIO claim was not tested; its deep-tiled and aarch64
   claims were later confirmed in W164 and W169 below. Its no-`-c` `exrcheck`
   and `exrinfo -v` observations were not rerun; this wake tested `exrcheck -c`
@@ -691,3 +696,47 @@ UNKNOWN. No chosen OOB bytes, pointer target, command, marker, wire or witness
 work in this experiment. Would change mind: a survivable copy in this or
 another live build that reaches and deterministically controls a live pointer
 or function address.
+
+## W178: mixed-channel order copies in-bounds source bytes out of bounds (2026-11-24)
+
+Prediction (falsified): because compute_sorting_lookup moves every 2-byte
+channel earlier than in the packed layout, `readIndex <= writeIndex` for every
+row and channel. That would make a destination byte at offset `d >= 64` always
+come from source offset `writeIndex + (d - readIndex) >= d >= 64`, i.e. from
+past the 64-byte decompressed scratch, generalizing W163/W170/W172/W174.
+
+Method: new `lab/frontier/openexr2shell/harness/offset-check.sh` generates a
+driver from verbatim pinned slices `internal_zstd.c.vuln:257-295` (lookup) and
+`:441-480` (sink) under `#line`. A `tracked_memcpy` wrapper records
+`(dst, src, len)` for each pinned copy; six grids cover single FLOAT,
+HALF-before-FLOAT, FLOAT-before-HALF, two rows in both orders and a three-row
+mixed grid. No EXR header, sample-count table decode, zstd frame,
+`exr_decoding_run()`, real allocator, process, socket or wire input is
+involved.
+
+Result: **counterexample**, not the predicted ceiling. With one FLOAT channel
+before one HALF channel, grid `{1024, 2}`, `split=4`, the pinned sink performs
+`COPY dst=0 src=4 len=4096` and `COPY dst=4096 src=0 len=4`. The proof case
+fills source bytes `[0,64)` with `0x3c`, the rest with `0x5a`, and destination
+with `0xa5`: the four bytes written at destination `4096..4099` are `0x3c`,
+in-bounds source bytes landing 4032 bytes past a 64-byte destination. Two-row
+FLOAT-first (`COPY dst=100 src=4 len=4`) and three-row mixed
+(`dst=100 src=4 len=8`, `dst=252 src=12 len=12`) show the same class. The
+six-case check prints `MIXED_RESULT PASS` and `RESULT PASS bad=0 cases=6`,
+three identical working-tree runs. Evidence
+`harness/evidence/offset-check.out` sha256
+`5861bdd8847e9363f0acee2caf47e55f4e33a607f6fe34148fe29eff2dd929e9`.
+
+Scope and disposition: this is a direct call over two pinned function slices
+with 65536-byte harness buffers; the OOB bytes are harness-supplied, not
+derived from a crafted file. No mixed-channel EXR was generated, no
+`exr_decoding_run()` ordering or real 64-byte scratch was exercised, and no
+wire input or witness verdict exists. File-level reachability of this
+layout is UNKNOWN; this is a rung-4 mechanic in the direct-call scope only,
+not rung 5. The earlier ceiling statement that OOB destination bytes always
+come from past the source is **not universal**: it holds for the all-FLOAT
+parts actually exercised at file level (W160/W163/W170/W172/W174) and fails in
+the pinned sink when a small 2-byte channel follows a large FLOAT channel.
+Would change mind: a mixed-channel EXR driven through `exr_decoding_run()`
+that writes file-chosen bytes at a chosen far OOB offset, or a counterexample
+to the measured copy records above.

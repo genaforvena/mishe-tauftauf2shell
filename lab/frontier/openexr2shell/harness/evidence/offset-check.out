@@ -1,0 +1,38 @@
+MIXED copy dst=0 src=4 len=4096 bytes=3c3c3c3c
+MIXED copy dst=4096 src=0 len=4 bytes=3c3c3c3c
+MIXED_RESULT PASS
+CASE float1 rows=1 nch=1 split=0 copies=1
+  COPY dst=0 src=0 len=4096
+  MIN_SRC_AT_DST64 float1 value=64 oob_copies=1
+CASE half1-float1 rows=1 nch=2 split=4 copies=2
+  COPY dst=0 src=0 len=4
+  COPY dst=4 src=4 len=4096
+  MIN_SRC_AT_DST64 half1-float1 value=64 oob_copies=1
+CASE float1-half1 rows=1 nch=2 split=4 copies=2
+  COPY dst=0 src=4 len=4096
+  COPY dst=4096 src=0 len=4
+  MIN_SRC_AT_DST64 float1-half1 value=0 oob_copies=2
+CASE 2row-half-first rows=2 nch=2 split=8 copies=4
+  COPY dst=0 src=0 len=4
+  COPY dst=4 src=8 len=48
+  COPY dst=52 src=4 len=4
+  COPY dst=56 src=56 len=48
+  MIN_SRC_AT_DST64 2row-half-first value=64 oob_copies=1
+CASE 2row-float-first rows=2 nch=2 split=8 copies=4
+  COPY dst=0 src=8 len=48
+  COPY dst=48 src=0 len=4
+  COPY dst=52 src=56 len=48
+  COPY dst=100 src=4 len=4
+  MIN_SRC_AT_DST64 2row-float-first value=4 oob_copies=2
+CASE 3row-half-float-float rows=3 nch=3 split=24 copies=9
+  COPY dst=0 src=0 len=4
+  COPY dst=4 src=24 len=32
+  COPY dst=36 src=56 len=64
+  COPY dst=100 src=4 len=8
+  COPY dst=108 src=120 len=48
+  COPY dst=156 src=168 len=96
+  COPY dst=252 src=12 len=12
+  COPY dst=264 src=264 len=40
+  COPY dst=304 src=304 len=80
+  MIN_SRC_AT_DST64 3row-half-float-float value=4 oob_copies=7
+RESULT PASS bad=0 cases=6

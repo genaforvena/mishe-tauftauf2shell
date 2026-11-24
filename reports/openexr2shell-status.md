@@ -301,3 +301,24 @@ glibc layout and is not a universal threshold. Replay:
 byte-stable evidence hashes in `reports/openexr2shell-file-level.md`
 W177. Grade unchanged: file-level rungs 1-4, witness-ESTABLISHED at the
 scanline CODE/CONSUMER scope, rung 5 UNKNOWN.
+
+## W178: mixed-channel sink counterexample to the universal OOB-source ceiling (2026-11-24)
+
+The predicted proof that every OOB destination byte comes from past the source
+failed in the pinned sink. `harness/offset-check.sh` over verbatim pinned
+slices records copy offsets for six channel/row layouts. FLOAT-before-HALF
+with grid `{1024, 2}` copies 4 bytes from source offset 0 to destination
+offset 4096; with the in-bounds source filled `0x3c` those bytes appear at
+`dst+4096`, 4032 bytes past a 64-byte destination. Two-row FLOAT-first and
+three-row mixed grids show the same class. `RESULT PASS bad=0 cases=6`,
+`MIXED_RESULT PASS`, evidence sha256
+`5861bdd8847e9363f0acee2caf47e55f4e33a607f6fe34148fe29eff2dd929e9`,
+byte-stable in three runs. Scope: direct call over two pinned function slices,
+harness-supplied bytes, 65536-byte buffers; no mixed-channel EXR,
+`exr_decoding_run()`, real scratch size, wire input or witness verdict. File
+reachability of this layout is UNKNOWN; this is a rung-4 mechanic at direct-call
+scope only, not rung 5. All-FLOAT file-level results (W160/W163/W170/W172/W174)
+stand; the ceiling claim is now scoped to those parts. Grade unchanged:
+file-level rungs 1-4, W161 witness-ESTABLISHED at scanline CODE/CONSUMER scope,
+rung 5 UNKNOWN. Would change mind: a file-driven mixed-channel PoC with chosen
+OOB bytes, or a counterexample to the measured copy records.
