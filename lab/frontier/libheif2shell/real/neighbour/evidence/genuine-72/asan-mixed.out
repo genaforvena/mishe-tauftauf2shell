@@ -1,0 +1,68 @@
+track declared: 512x72
+frame 0 decoded: 512x72 stride=512
+frame 0 encoded
+Corrupt JPEG data: 251 extraneous bytes before marker 0xd9
+frame 1 decoded: 64x512 stride=64
+=================================================================
+==3502047==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d0000d140f at pc 0x760adecfb303 bp 0x7ffcf96febd0 sp 0x7ffcf96fe378
+WRITE of size 64 at 0x52d0000d140f thread T0
+    #0 0x760adecfb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x6130774cea40 in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/image/pixelimage.cc:644
+    #2 0x6130771803e7 in heif_image_extend_padding_to_size /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_image.cc:403
+    #3 0x613077667130 in x265_encode_sequence_frame /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/plugins/encoder_x265.cc:1139
+    #4 0x6130776c10eb in Encoder_HEVC::encode_sequence_frame(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const&, heif_image_input_class, unsigned int, unsigned int, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/codecs/hevc_enc.cc:189
+    #5 0x61307734d942 in Track_Visual::encode_image(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const*, heif_image_input_class) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/sequences/track_visual.cc:620
+    #6 0x6130771af611 in heif_track_encode_sequence_image /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_sequences.cc:622
+    #7 0x61307717d926 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/real/reencode_sequence.cc:62
+    #8 0x760adce2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x760adce2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x61307717cd34 in _start (/tmp/libheif2shell-reencode-vuln+0x90d34) (BuildId: 3f390e9f688c193588cc6eabb2f2f69e0375c961)
+
+0x52d0000d140f is located 0 bytes after 36879-byte region [0x52d0000c8400,0x52d0000d140f)
+allocated by thread T0 here:
+    #0 0x760adecfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x6130774cd7af in HeifPixelImage::ComponentStorage::alloc(unsigned int, unsigned int, heif_component_datatype, int, int, heif_security_limits const*, MemoryHandle&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/image/pixelimage.cc:571
+    #2 0x6130774ce821 in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/image/pixelimage.cc:631
+    #3 0x6130771803e7 in heif_image_extend_padding_to_size /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_image.cc:403
+    #4 0x613077667130 in x265_encode_sequence_frame /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/plugins/encoder_x265.cc:1139
+    #5 0x6130776c10eb in Encoder_HEVC::encode_sequence_frame(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const&, heif_image_input_class, unsigned int, unsigned int, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/codecs/hevc_enc.cc:189
+    #6 0x61307734d942 in Track_Visual::encode_image(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const*, heif_image_input_class) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/sequences/track_visual.cc:620
+    #7 0x6130771af611 in heif_track_encode_sequence_image /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_sequences.cc:622
+    #8 0x61307717d926 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/real/reencode_sequence.cc:62
+    #9 0x760adce2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x760adce2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x61307717cd34 in _start (/tmp/libheif2shell-reencode-vuln+0x90d34) (BuildId: 3f390e9f688c193588cc6eabb2f2f69e0375c961)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x52d0000d1180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d0000d1200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d0000d1280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d0000d1300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d0000d1380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x52d0000d1400: 00[07]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d0000d1480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d0000d1500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d0000d1580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d0000d1600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d0000d1680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3502047==ABORTING

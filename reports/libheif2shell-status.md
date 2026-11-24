@@ -578,3 +578,40 @@ control flow. No valid pointer, command, real consumer, ASLR-independent
 address or witness verdict. Full commands, hashes and saved logs are in
 `lab/frontier/libheif2shell/real/PROVENANCE-real.md` W182 and
 `real/neighbour/evidence/advisory-size/`.
+
+## W183 genuine 512x72 first frame at the advisory allocation size (2026-11-24)
+
+W181 reproduced the advisory's 36,879-byte region from a file whose first frame
+was declared 512x72 by patching a 64-row JPEG's SOF0; rows 64..71 were libjpeg
+filler. W183 removes that caveat: two genuine 512x72 grayscale JPEGs (quality 5,
+593 bytes each, SHA-256
+`652723cd946477e810afb4c1b60d6cac05d6e65c25c3e6a95c6377506675969a`) were fed
+to the pinned v1.23.6 plain `heif-enc -S --jpeg`, producing the 8,102-byte
+`ref.heif` SHA-256
+`24c5906bd508988d3eafa3af73c4f86e0fa4157bb4a89d1bb1dd7e32e07da80e`.
+`make_genuine_72_sequence.py` patches only the second sample's SOF0 from
+(H=72,W=512) to (H=512,W=64); the 8,102-byte `mixed.heif` has SHA-256
+`5a39f4885b8ae4d67754e96a983af5237e1af6acc51d8092efb073cbc0586a53`.
+Re-running the generator against the committed sources reproduces both hashes.
+
+On the vulnerable ASan build the attack file returns rc 1 with
+`heap-buffer-overflow`, `WRITE of size 64`, 0 bytes after the **36,879-byte**
+region at pinned `pixelimage.cc:644` via `heif_image.cc:403` and
+`encoder_x265.cc:1139`. Decode-only output shows frame 0 as a real 512x72
+image, with no "premature end of data" warning before the fault; frame 1
+decodes 64x512. The same-size safe file returns rc 0 on both ASan and plain
+builds with both frames encoded. On the plain Release build the attack file
+returns rc 139 in one run; gdb places SIGSEGV in
+`__memcpy_avx_unaligned_erms` called directly from
+`HeifPixelImage::extend_padding_to_size`, not in a pointer consumed by x265.
+A freshly compiled fixed-pin driver returns rc 0 with encode rc 2 and "All
+frames of a sequence must have the size of the first frame". Checker
+`check_genuine_72.py` PASS=45 FAIL=0.
+
+The advisory's own 1,155-byte artifact is still untested: this reproducer is
+8,102 bytes, and the advisory says its first frame is 512x64 while both the
+W181 and W183 files that produce a 36,879-byte region declare a 512x72 first
+frame. Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5. No pointer target,
+command, live consumer or witness verdict; author observation only. Evidence
+and exact commands are in `lab/frontier/libheif2shell/real/PROVENANCE-real.md`
+W183 and `real/neighbour/evidence/genuine-72/`.

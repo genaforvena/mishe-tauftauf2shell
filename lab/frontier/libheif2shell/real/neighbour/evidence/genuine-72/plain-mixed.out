@@ -1,0 +1,5 @@
+track declared: 512x72
+frame 0 decoded: 512x72 stride=512
+frame 0 encoded
+Corrupt JPEG data: 251 extraneous bytes before marker 0xd9
+frame 1 decoded: 64x512 stride=64

