@@ -82,8 +82,10 @@ victim/fixed/safe wire controls and no command; wire reach stays UNKNOWN.
   non-default 1400-byte build, not merely padding bytes. The chosen ASCII
   values are not valid addresses; no dereference, control-flow diversion,
   command or wire deliverer was exercised. Rung 5 remains NO. PR #3312
-  rechecked 06:40Z: OPEN, merge state BLOCKED; the fixed control remains
-  the proposed patch.
+  rechecked 06:40Z and again 10:11Z: OPEN, draft false, review required,
+  merge state BLOCKED, last updated 2026-11-23; no upstream `mpl.c` commit
+  since 2026-11-23 and no release above 5.2. The fixed control remains the
+  proposed patch.
 - Witness replay requested by DM 2026-11-24 06:40Z; verdict W190 returned
   08:12Z (chat #3443/#3444): ESTABLISHED AS LABELED at the in-process native
   scope. Clean `git archive HEAD lab/frontier/contiki2shell` (tarball sha256

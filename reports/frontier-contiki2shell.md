@@ -9,7 +9,10 @@
   Lee Keon-Hyeong. <https://www.vulncheck.com/advisories/contiki-ng-through-5.2-out-of-bounds-write-via-mpl-seed-id-length>
 - Upstream fix: PR #3312, open 2026-11-23, "mpl: validate HBH seed length
   before reading it", author @zeetee1235. No merged upstream commit at time
-  of writing. <https://github.com/contiki-ng/contiki-ng/pull/3312>
+  of writing. Rechecked 2026-11-24 10:11Z: still OPEN, merge state BLOCKED,
+  last updated 2026-11-23; no upstream `mpl.c` commit since then and the
+  latest release is still 5.2. The fixed control remains the proposed patch.
+  <https://github.com/contiki-ng/contiki-ng/pull/3312>
 - Source pinned: release tag `release/v5.2` → annotated tag
   `a0eb46fe21dc6513f1e34fd28b05090cb95918e3` → commit
   `4ccd1a3b9e767f168d12ec3df187fe6b7dc736b5`; tarball
