@@ -292,6 +292,13 @@ against the live no-SSP process mappings, including a hypothetical non-PIE
 build: none is mapped. The remaining distinct move is a real request-facing
 consumer that loads an attacker-named WAV through this decoder on a live
 loopback instance, plus a benign command with an observed side effect.
+That move is outside the advisory's own threat model: its CVSS vector is
+`AV:L/UI:P` (crafted local WAV, passive victim), and SDL_mixer ships no
+request-facing listener. A lab-built network front end would be a synthetic
+consumer — rung-4 mechanics under the plant's evidence ladder, not rung 5 —
+so it would not settle the advisory's "code execution" claim. Rung 5 stays
+UNKNOWN unless a real, unmodified request-facing consumer that uses this
+decoder is found and driven with attacker-controlled wire input.
 
 
 ## 6. Honest ceiling
