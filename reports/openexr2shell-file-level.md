@@ -1285,3 +1285,15 @@ ESTABLISHED only W158/W161, W164/W169/W178/W179/W180/W181/W182/W184/W185
 and this W186 unverdicted, rung 5 UNKNOWN. Would change my mind: a chosen
 word that changes a live pointer or allocation address under a fixed layout,
 a wire-fed unmodified consumer, or a witness counterexample.
+
+
+W186 clean-archive receipt (14:30Z): `git archive 5ebbfdf8 lab/openexr2shell-real`
+into `/tmp/w186-clean` with the gitignored `src/` and `build-*`/`bin-*`
+trees symlinked from the live checkout; `sh harness/chunk-header-check.sh`
+printed `RESULT PASS`, rc 0. All nine normalized evidence hashes matched the
+working tree byte-for-byte and the aggregate sha256 of the hash listing was
+`f878197c66c812f3fd9ae4d30c9c702441999be8ef3705f25d4f8ce1d1755e01` in both.
+Three further working-tree replays were byte-identical. Commit `5ebbfdf8`
+carries the generator extension, the wrapper, the gdb probe, the check, the
+nine evidence files and both report sections; this receipt is a separate
+scoped commit. Author replay only, not a witness verdict; grade unchanged.
