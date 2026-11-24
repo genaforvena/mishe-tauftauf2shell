@@ -95,3 +95,9 @@ against the pinned header under ASan and drive `parse_multipart()` with the
 exact 394-byte body; then, if a loopback SBI NF is cheap to provision, replay
 the request over TCP with benign/well-formed controls. The second step is the
 only route to a live-process rung 4/rung 5 claim and is not attempted here.
+
+## Clean-archive replay (2026-11-24 23:07Z)
+
+`git archive 2eeee948 lab/frontier/open5gs2shell` extracted to
+`/tmp/open5gs-replay`; `sh harness/run.sh`: 21 PASS / 0 FAIL, rc 0. Trace
+SHA-256 `6c3c5ecf1f9e4ec7ef8d907d24e033e16fe4b87d62408ef1c499c95086164253`.

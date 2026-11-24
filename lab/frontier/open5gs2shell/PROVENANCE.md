@@ -43,3 +43,10 @@ about pinned bytes; SHA-256 pins are authoritative.
   `5a5a…` → `0a000d0a000d0a000d0a000d`; `RET=394 LEN=394`.
 - `harness/evidence/asan-vuln-safe.out`, `asan-fixed-attack.out`,
   `plain-vuln-safe.out`, `plain-fixed-attack.out`: clean; fixed returns -1.
+
+## Clean-archive replay (2026-11-24 23:07Z)
+
+`git archive 2eeee948 lab/frontier/open5gs2shell` extracted to
+`/tmp/open5gs-replay`; `sh harness/run.sh` from that clean directory printed
+`RESULT 21 PASS / 0 FAIL`, rc 0. Trace SHA-256
+`6c3c5ecf1f9e4ec7ef8d907d24e033e16fe4b87d62408ef1c499c95086164253`.
