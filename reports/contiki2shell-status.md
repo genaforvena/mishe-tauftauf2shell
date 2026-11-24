@@ -51,13 +51,46 @@ or control-flow target is claimed. Rung 5 is NO: no live network process — the
 native platform could not open `/dev/net/tun` — no loopback wire replay, no
 victim/fixed/safe wire controls and no command; wire reach stays UNKNOWN.
 
+## W199 measurements (2026-11-24 06:41Z)
+
+- Wire/tun route closed on this host: `/dev/net/tun` is `crw-rw-rw-` and
+  `open()` succeeds, but the native driver's `TUNSETIFF` ioctl returns
+  `EPERM` (`errno 1`; no CAP_NET_ADMIN in the host netns). `unshare -Urn`
+  fails writing `/proc/self/uid_map` with EPERM, so no unprivileged
+  namespace route. The pinned native platform has one network driver,
+  `arch/cpu/native/net/tun6-net.c`, and no socket-based alternative. Wire
+  reach stays UNKNOWN; nothing was sent to any network.
+- Rung 4 strengthened in a lab-only non-default build
+  (`UIP_CONF_BUFFER_SIZE=1400`, plain `-g -O0`, same truncated S=3 option):
+  gdb at `mpl.c:979` (the retransmission `memcpy`) reports stored size 1352;
+  before the copy `uip_appdata=uip_sappdata=0x55555559aafc`, after it
+  `uip_appdata=0x4847464544434241` and
+  `uip_sappdata=0x504f4e4d4c4b4a49` — chosen packet bytes "ABCDEFGHIJKLMNOP"
+  now occupy two adjacent global pointers. `x/16bx` confirms the bytes at
+  `uip_appdata` and `uip_sappdata`. A complete-S=3 control in the same
+  build (stored size 1336) leaves both pointers unchanged. Transcripts:
+  `lab/frontier/contiki2shell/large-buffer-attack-gdb.txt` and
+  `large-buffer-safe-gdb.txt`; harnesses `harness-large.c` and
+  `harness-large-safe.c`. The harness line "injected 0 bytes" is a cosmetic
+  read of `uip_len` after `uip_input()` cleared it; the 1400-byte injection
+  is proved by the breakpoint and stored size.
+- Grade: rung 3 unchanged; rung 4 is now a chosen-pointer overwrite in a
+  non-default 1400-byte build, not merely padding bytes. The chosen ASCII
+  values are not valid addresses; no dereference, control-flow diversion,
+  command or wire deliverer was exercised. Rung 5 remains NO. PR #3312
+  rechecked 06:40Z: OPEN, merge state BLOCKED; the fixed control remains
+  the proposed patch.
+- Witness replay was requested by DM on 2026-11-24 06:40Z; no verdict yet.
+
 ## Next for the target mind
 
-1. Independent witness replay of the staged transcript; operator will request
-   it on the tape. Author replay is not acceptance.
-2. Find a loopback-only route into `uip_input()` without tun privileges to
-   move the claim from in-process injection to a wire-triggered reproduce.
-3. Groom the adjacent globals and measure whether the 16-byte write reaches a
-   useful object before ASan redzones; never infer RCE from a global-buffer
-   overflow or from advisory reachability prose. Hand any new claim to
-   `witness`.
+1. Await the independent witness replay requested on the tape at 06:40Z;
+   author replay is not acceptance.
+2. A wire route needs a real network driver that works without
+   CAP_NET_ADMIN on this host. The native platform has only `tun6-net.c`
+   and namespace creation is disabled, so no unprivileged tun path exists
+   here. Do not substitute a synthetic socket driver and call it wire.
+3. Continue pointer-chain work from the overwritten globals without a
+   synthetic buffer-size change, and recheck PR #3312 for merge. Never
+   infer RCE from a global-buffer overflow, chosen ASCII pointer bytes or
+   advisory reachability prose; hand any new claim to `witness`.
