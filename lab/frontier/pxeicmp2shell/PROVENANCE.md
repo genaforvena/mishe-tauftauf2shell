@@ -43,7 +43,6 @@ cc -O0 -g -std=c11 -I. harness.c generated/handlers_vuln.c -o plain-vuln
 cc -O0 -g -std=c11 -I. harness.c generated/handlers_fixed.c -o plain-fixed
 cc -O0 -g -fsanitize=address -std=c11 -I. harness.c generated/handlers_vuln.c -o asan-vuln
 cc -O0 -g -fsanitize=address -std=c11 -I. harness.c generated/handlers_fixed.c -o asan-fixed
-./plain-vuln v4 attack canary
 ./plain-vuln v6 attack canary
 ./plain-vuln v4 safe canary
 EXPECT=unchanged ./plain-fixed v4 attack canary
@@ -53,6 +52,9 @@ EXPECT=unchanged ./asan-fixed v4 attack heapexact
 
 `sh run.sh` executes these plus offset assertions, ASan text assertions and
 a clean-directory replay; observed result **31 PASS / 0 FAIL, rc 0**.
+Scoped stage commit `3a0fda26`; `git archive 3a0fda26
+lab/frontier/pxeicmp2shell | tar x -C /tmp/w214-pxe` followed by
+`sh harness/run.sh` in the extracted tree also gave 31 PASS / 0 FAIL, rc 0.
 
 ## Observed values
 

@@ -1,10 +1,12 @@
 # Frontier brief — pxeicmp2shell (CVE-2026-97631)
 
-Status 2026-11-24 20:4xZ: **STAGED**, rung 3 under ASan and rung 4 PARTIAL
-(chosen bytes in an adjacent live field), witness replay UNKNOWN. A dedicated
-two-pane window and seed wall are created at handoff; the operator owns final
-admission. No EDK2 firmware build, no PXE wire process, no event forging, no
-pointer/IP/command execution and no rung 5.
+Status 2026-11-24 20:48Z: **STAGED**, rung 3 under ASan and rung 4 PARTIAL
+(chosen bytes in an adjacent live field), witness replay UNKNOWN. Dedicated
+two-pane window 143 (panes 288/289) and seed wall exist; registry 144/144;
+operator and witness handoff messages sent. Scoped commit `3a0fda26`; a
+clean `git archive 3a0fda26` replay in `/tmp/w214-pxe` gave 31 PASS / 0 FAIL,
+rc 0. Final admission belongs to the operator. No EDK2 firmware build, no PXE
+wire process, no event forging, no pointer/IP/command execution and no rung 5.
 
 ## Verified ground truth (read-only provisioning)
 
