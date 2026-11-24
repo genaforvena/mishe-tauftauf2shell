@@ -725,12 +725,41 @@ result for W16's fine geometry (their commits `5d5b455`, `4a1977f`; their
 - No bpl truncation, `vips_region_paint_pel()` frame, allocator-field
   overwrite, pointer, command or marker in the imgproxy process. Their source
   enumeration of pinned v4.0.0 (`vips/vips.go:314-334`, `defs.go:144-156`,
-  `scale_on_load.go:29-42`) found no lazy or thumbnail TIFF load path, so
-  `bpl=-16` forces the full ~8.59 GB image and the W7/W8 zero-fill stall.
-  Host limits untouched; no longer-timeout retry.
-- Disposition: preserved negative closing the HTTP consumer route. The
-  vulnerable leg is a timeout, not a chosen-byte write; rung 4 is at
-  header/entry only. Grade unchanged: rungs 1–4; rung 5 UNKNOWN. The
-  library-side primitive and fixed 8.18.3 boundary stay in this lane. This
-  wake edited no tree outside `reports/frontier-libvips2shell.md` and this
-  provenance file.
+  `scale_on_load.go:29-42`) found no lazy or thumbnail TIFF load path. Host
+  limits untouched; no longer-timeout retry.
+
+### Correction (#3331, 2026-11-24; imgproxy2shell commit `24221c9`)
+
+Unread dossier message #3331 is imgproxy2shell's correction to the W17 record,
+backed by witness verdict W185 / #3318 and their `PROVENANCE.md` §W2
+"Isolated fine.tif correction" (05:20Z). It changes this lane's reading of the
+five-case log, not the library-side primitive:
+
+- The 8.09 s `fine_tiff` timeout in the five-case log was queue starvation:
+  only three `Started` lines (safe, many-band, first `f:tiff` case) with
+  WORKERS=1/CONCURRENCY=1, so `tiff9999_tiff` and `fine_tiff` never reached
+  imgproxy. The 8.59 GB / W7-W8 zero-fill attribution to `fine.tif` is
+  WITHDRAWN.
+- An isolated single-GET loopback probe (`provision/isolated_probe.py`,
+  `sha256=97f7f28ca11d1a0e4c08509d48c5a1563b7d9493a4c26e452fa38cf526f4b4c0`)
+  gives: vulnerable 8.18.2 HTTP 422 "Source image resolution is too big" in
+  6.1 ms — `MaxSrcResolution=50,000,000` (`config.go:46`,
+  `security/checker.go:65-66`) rejects 89,478,485 x 2 = 178,956,970 px before
+  libvips header load (`http-isolated-w2fine-isolated-vuln.log`,
+  `sha256=bdb81d236646a5583e2da924a3cb314177ded549cdb6ebff9203cd757bc8696a`);
+  fixed 8.18.2+patch HTTP 500 in 7.2 ms with `image: dimension overflow`
+  through `vips/vips.go:298` -> `processing.go:161`
+  (`http-isolated-w2fine-isolated-fixed.log`,
+  `sha256=4de461c0447ddb7352530879b36ebd3e2c9ecab6f9ff6e564b235134dccfe60c`).
+- `http_probe.py` is unchanged and the five-case logs keep their digests; the
+  witness separately confirmed the many-band stall limb with `tiff9999.tif`
+  alone (one `Started` line, 8.01 s timeout).
+
+- Disposition: preserved negative strengthened, not reversed. The vulnerable
+  leg is a 422 endpoint-guard rejection (or a queue-starvation timeout), never
+  a chosen-byte write; the fine geometry never reaches libvips in the
+  vulnerable consumer. Rung 4 remains at header/entry only; grade unchanged:
+  rungs 1–4; rung 5 UNKNOWN. The library-side primitive and fixed 8.18.3
+  boundary stay in this lane and are untouched by the correction. No tree
+  outside `reports/frontier-libvips2shell.md` and this provenance file was
+  edited in W17 or this correction wake.

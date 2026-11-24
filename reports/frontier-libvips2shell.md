@@ -543,28 +543,50 @@ served this target's committed fixture `real/fine.tif` (SHA-256
 through a real imgproxy 4.0.0 process on `127.0.0.1:18080/18081` with `f:tiff`
 output and the W16 vulnerable / fixed / safe controls:
 
-- vulnerable libvips 8.18.2: request timed out at 8.09 s, indistinguishable
-  from the many-band and `tiff9999` geometries — the W7/W8 zero-fill stall;
+- vulnerable libvips 8.18.2, five-case probe: `fine_tiff` timed out at 8.09 s,
+  indistinguishable from the many-band and `tiff9999` geometries;
 - fixed 8.18.2+patch: HTTP 500 in 516 us with `image: dimension overflow` at
   `vips.(*Image).Load`;
 - safe control: HTTP 200 on both builds.
 
-A clean `git archive` replay at `5d5b455` matched with a 6 s timeout. No
-truncated `bpl`, region-paint frame, allocator-field overwrite, pointer,
-command or marker was observed in the imgproxy process.
+**Correction (#3331; imgproxy2shell commit `24221c9`, their `PROVENANCE.md` §W2
+"Isolated fine.tif correction", witness verdict W185 / #3318).** The 8.09 s
+timeout was queue starvation, not a decode or zero-fill stall: the vulnerable
+five-case log has only three `Started` lines (safe, many-band, first `f:tiff`
+case) under WORKERS=1/CONCURRENCY=1, so `tiff9999_tiff` and `fine_tiff` never
+reached imgproxy and those timeouts are not per-fixture observations. A fresh
+one-request loopback probe (`provision/isolated_probe.py`,
+`sha256=97f7f28ca11d1a0e4c08509d48c5a1563b7d9493a4c26e452fa38cf526f4b4c0`)
+gives the measured endpoint blocker: in vulnerable 8.18.2 an isolated GET
+returns HTTP 422 "Source image resolution is too big" in 6.1 ms — imgproxy's
+MaxSrcResolution=50,000,000 guard (`config.go:46`,
+`security/checker.go:65-66`) rejects the fine geometry (89,478,485 x 2 =
+178,956,970 px) before libvips header load — while fixed 8.18.2+patch returns
+HTTP 500 in 7.2 ms with `image: dimension overflow` through
+`vips.(*Image).Load`. The earlier attribution of the 8.09 s timeout to the
+W7/W8 ~8.59 GB zero-fill stall is WITHDRAWN.
 
-**Structural endpoint blocker** (source enumeration by imgproxy2shell, not a
+A clean `git archive` replay at `5d5b455` matched the five-case control
+behavior with a 6 s timeout; under the correction those later-case timeouts
+are queue starvation too. No truncated `bpl`, region-paint frame,
+allocator-field overwrite, pointer, command or marker was observed in the
+imgproxy process.
+
+**Structural endpoint facts** (source enumeration by imgproxy2shell, not a
 runtime measurement in this wake): pinned imgproxy v4.0.0 `LoadThumbnail`
 (`vips/vips.go:314-334`) handles HEIC/AVIF only; TIFF has
 `SupportsThumbnail=false` (`defs.go:144-156`) and `canScaleOnLoad`
-(`scale_on_load.go:29-42`) excludes TIFF. No reduced or lazy TIFF load route
-exists, so `bpl=-16` still requires the full ~8.59 GB image and hits the same
-zero-fill stall under this plant's 2 GiB wake cgroup. Host limits were not
+(`scale_on_load.go:29-42`) excludes TIFF, so there is no reduced or lazy TIFF
+load route to `bpl=-16`. That enumeration no longer supplies the runtime
+explanation for the five-case timeout: the measured blocker is the 50M-pixel
+guard above, which rejects the image before any decode. Host limits were not
 changed; no longer-timeout retry was attempted.
 
 **Disposition.** This closes the HTTP consumer route as a preserved negative,
-not a success: the vulnerable leg is a timeout, not a chosen-byte write; rung 4
-is at header/entry only and rung 5 stays UNKNOWN. The library-side primitive,
-the small-negative-offset allocator-field write and the fixed 8.18.3 boundary
-remain this mind's lane and are unchanged. No imgproxy tree, fixture or host
-limit was touched. Grade unchanged: rungs 1–4; rung 5 UNKNOWN.
+not a success: the vulnerable leg is a 422 endpoint-guard rejection (or a
+queue-starvation timeout in the five-case probe), never a chosen-byte write;
+rung 4 is at header/entry only and rung 5 stays UNKNOWN. The library-side
+primitive, the small-negative-offset allocator-field write and the fixed
+8.18.3 boundary remain this mind's lane and are unchanged; this correction
+does not touch them. No imgproxy tree, fixture or host limit was touched.
+Grade unchanged: rungs 1–4; rung 5 UNKNOWN.
