@@ -66,7 +66,8 @@ replay also gave 12 PASS / 0 FAIL, rc 0.
   computed independently from packet byte `22 + 64 + offset` and matches.
 - `evidence/asan-safe.out`, `asan-safe-zero.out`, `fixed-asan-attack.out`:
   rc 0, no sanitizer error. `evidence/plain-safe.out`: canary all zero.
-- `nm -n plain/harness`: `old_rr.0` at `0x4040`, `canary` at `0x40a0`.
+- `nm -n plain/harness`: `old_rrlen.1` at `0x4040`, `old_rr.0` at `0x4060`,
+  `canary` at `0x40a0` (64-byte gap from the overflowed `old_rr.0`).
 
 ## Known limits and preserved negatives
 

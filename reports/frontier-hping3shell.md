@@ -1,8 +1,8 @@
 # Frontier brief — hping3shell (CVE-2026-136131)
 
-Status at staging (2026-11-24 19:4xZ): STAGED at rung 3 / rung 4 PARTIAL,
-witness replay PENDING, operator admission PENDING. Superseded after
-admission by a target-owned status report, if one is written.
+Status 2026-11-24 20:0xZ: STAGED at rung 3 / rung 4 PARTIAL; ADMITTED as
+the 134th route 19:5xZ, witness W207 ESTABLISHED AS LABELED (#3820). Superseded
+after admission by a target-owned status report, if one is written.
 
 ## Verified ground truth (read-only provisioning)
 
@@ -59,8 +59,9 @@ lab/frontier/hping3shell | tar x -C /tmp/w212-hping` replay. Raw output in
   `old_rr` global, rc 1 (`evidence/asan-attack.out`).
 - `asan/harness attack2`: pointer `0x5a` → `i = 86`, `WRITE of size 86`,
   same frame, rc 1 (`evidence/asan-attack2.out`).
-- Plain build: `nm -n` measures `old_rr` at `0x4040`, adjacent canary at
-  `0x40a0`, gap 64. The overflow writes packet-derived bytes into the live
+- Plain build: `nm -n` measures `old_rrlen.1` at `0x4040`, the overflowed
+  `old_rr.0` at `0x4060` and the adjacent canary at `0x40a0`, gap 64 from
+  `old_rr.0`. The overflow writes packet-derived bytes into the live
   canary at chosen offsets: pointer `0x48` leaves `4f 4d 49 53` ("OMIS") at
   canary[0..3]; pointer `0x5a` leaves `4f 4d 49 53 48 45 2d 4f 4f` repeated
   ("OMISHE-OO" ×2 plus "OMIS") at canary[0..21]. Each observed value matches
@@ -87,5 +88,16 @@ Build the pinned hping tree under ASan with libpcap, run
 `hping3 -G` against a loopback target and inject a crafted RR reply from a
 second loopback socket; compare with a locally patched build and a valid RR
 control. If the loopback packet reaches `display_ipopt()`, that moves the
-claim to a wire-visible rung 4. Operator admission and witness replay are
-owed; do not duplicate this target.
+claim to a wire-visible rung 4. Target admitted 19:5xZ; witness replay closed
+ESTABLISHED AS LABELED; do not duplicate this target.
+
+## Witness disposition (W207, #3820)
+
+Independent clean-archive replay (`git archive 34c3c573`) gave 12 PASS / 0
+FAIL, rc 0, pin hashes exact, ASan `WRITE-68`/`WRITE-86` at pinned
+`display_ipopt.c:112`, clean fixed/safe/safe-zero controls, and chosen bytes
+in the plain canary confirmed with the witness's own non-periodic marker.
+ESTABLISHED AS LABELED: no grade change, no real hping build, libpcap,
+wire, pointer/IP/command or r5. Its NIT was a symbol label: `old_rrlen.1`
+is at `0x4040`, `old_rr.0` at `0x4060`; the 64-byte gap and byte offsets are
+correct. Labels corrected here, in the status report and in `run.sh`.

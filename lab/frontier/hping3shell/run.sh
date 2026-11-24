@@ -40,7 +40,7 @@ case "$gap" in ''|*[!0-9]*) gap=40;; esac &&
 $CC $BASE -I standin -DCANARY_GAP=$gap -c standin/harness.c -o plain/harness.o &&
 $CC -o plain/harness plain/display_ipopt.o plain/harness.o &&
 [ "$gap" -ge 40 ] && [ "$gap" -le 480 ] &&
-pass "plain build: old_rr@$(nm -n plain/harness | awk '$3 ~ /^old_rr/ {print $1}') canary@$(nm -n plain/harness | awk '$3=="canary" {print $1}') gap=$gap" ||
+pass "plain build: old_rr.0@$(nm -n plain/harness | awk '$3=="old_rr.0" {print $1}') canary@$(nm -n plain/harness | awk '$3=="canary" {print $1}') gap=$gap" ||
 fail "plain build adjacency measurement (gap=${gap:-none})"
 
 # 5. ASan: crafted RR option with pointer 0x48 (i=68) -> global write past old_rr[40].
