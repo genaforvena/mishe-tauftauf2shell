@@ -139,3 +139,33 @@ ports, ASan PIDs/ASLR addresses, the checkout prefix and ELF build IDs; the
 build ID legitimately differs between checkout paths. The `/tmp` copy was
 not retained; committed evidence is the record. Details and grade limits:
 `real/WIRE_INPUT.md`, report §12.
+
+## Author clean-archive replay at commit baa31e6 (2026-11-24 W182)
+
+Post-overflow second-call lane (`real/reuse_probe.sh`), from
+`git archive HEAD lab/frontier/munt2shell` into `/tmp/w182-munt`, with the
+provisioned pinned tarball copied into the ignored `real/src/` directory:
+
+```
+cd /tmp/w182-munt/lab/frontier/munt2shell/real
+./prepare_src.sh
+./build_and_run.sh
+./reuse_probe.sh
+```
+
+All six modes returned rc=0 with the same lines as the committed evidence.
+All six `.out` files were sha256-identical to their committed counterparts:
+
+```
+08c321632656b2c6f8efd2b71ff11c6a5633f1e4a870835c05061419890dd831  reuse-vuln-repeat.out
+f037f98259b74bd411b4e8f16c3ba859154ef670cf961c2abb4b304ff0e016fa  reuse-vuln-safe.out
+4dd5acb00a1e9b69a0cf07a47db8b703ca4c5ad7c2400ea4acdce6db9094d3da  reuse-vuln-baseline.out
+5057baba9f67fc5b54b40021a0f1d159e254613b2dfac408bac276f846afeefb  reuse-fixed-repeat.out
+f037f98259b74bd411b4e8f16c3ba859154ef670cf961c2abb4b304ff0e016fa  reuse-fixed-safe.out
+4dd5acb00a1e9b69a0cf07a47db8b703ca4c5ad7c2400ea4acdce6db9094d3da  reuse-fixed-baseline.out
+```
+
+The vuln/fixed safe and baseline pairs are expected to share digests: neither
+path writes chosen bytes past the allocation. The `/tmp` copy was not
+retained. Details and grade limits: report §21; grade unchanged (rungs 1-4
+ESTABLISHED, rung 5 UNKNOWN).
