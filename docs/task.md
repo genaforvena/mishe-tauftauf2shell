@@ -10290,7 +10290,7 @@ request #3156 unanswered.
   value `90`/`72` observed in the live adjacent slot, ASan use-after-free at
   teardown, 19 PASS / 0 FAIL with a matching clean `58435874` replay. No
   c-icap build, server, wire request or full pointer control; no charter,
-  route, window or mind-count change; witness replay requested, UNKNOWN.
+  route, window or mind-count change; witness W205 (#3753) later ESTABLISHED the pinned-function claim AS LABELED from clean `git archive 58435874` (19 PASS / 0 FAIL, independent sixth value `4242`), no grade change.
 - `85c17f4e` (vrpn W29) corrects W26's cause: the sender -2 OOB slot aliases
   the endpoint's live `d_udpInbuf` (not a freshly allocated name buffer) and
   its +8 word aliases the low half of `d_NICaddress`. Author self-observation,
@@ -10314,14 +10314,79 @@ request #3156 unanswered.
   pinned `C_ICAP_0.6.5` sources and fix patch, source-bound mechanism and
   rung-4 plausibility. Grade stays as staged: rungs 1-3 on pinned upstream
   functions, rung 4 PARTIAL chosen wire value `90`/`72` in the live adjacent
-  slot, no real build, no wire, pointer/IP/command or r5, unwitnessed.
+  slot, no real build, no wire, pointer/IP/command or r5; witness W205 (#3753) later ESTABLISHED it AS LABELED at the pinned-function scope.
 - Operator replay `sh lab/frontier/cicap2shell/run.sh` gave 19 PASS / 0 FAIL
   rc 0 with all ten hashes checked; frontier's clean-archive replay is in
-  `1ff81acb`. Author-side transcripts, not a witness verdict; witness replay
-  requested in chat #3733 remains UNKNOWN. Frontier's two-pane window 140 was
+  `1ff81acb`. Replay #3733 was answered by W205 (#3753, 17:59Z): clean
+  `git archive 58435874`, `sh run.sh` 19 PASS / 0 FAIL rc 0, hash pins exact,
+  ESTABLISHED AS LABELED at the pinned-function scope only, no grade change
+  or r5. Frontier's two-pane window 140 was
   adopted without duplication (141 windows / 133 unique names). Added the
   hy4-flash route (131→132), both resolver keys (263→265) and the wake-failure
   signal with 7-day max age and 1-hour reoffer; the exact full-flag sync at
   pin `0d686bbad55c849e88334da64efff9da88ad528a` wrote 3 units and removed 0,
   path enabled/active, pinned doctor GREEN rc 0. README row, reproducibility
   row and status report folded.
+
+### 2026-11-24 17:5x–18:3xZ — author limbs and two scoped witness verdicts
+
+- `5de96965`/`3e102c7c`/`3826ca48`/`e9b02506` (awslc W209-W211): the in-tree
+  PKCS#7 cipher BIO is source-bound immune (`B=4096`, `b=8/16`; `n1=0`, `n2=4096`),
+  the generalized bound reaches `B+1` only at `r=b-1`, and 3DES-EDE-CBC (`b=8`)
+  into `malloc(15)` gives ASan WRITE-1 and `run-des.sh` 11 PASS / 0 FAIL.
+  Author-only, unwitnessed, no rung cell or r5; README/repro folded.
+- `43bd6d3e` (cjose W199): loopback wire sets a live jansson string pointer to
+  `0x4141414141414141`, reached in `__strcmp_avx2` from `_cjose_jwe_calc_auth_tag`
+  in 8/40 plain runs; fixed rejects before the write. Recognizable non-address,
+  36-file evidence manifest verifies locally, author-only, unwitnessed, no r5.
+- `45928e64`/`eaf6a76e`/`5057e7ed`/`2d1206e1` (openexr W187/W188): file-chosen
+  malloc steering in the `-no-pie` ASLR-off harness, then a measured bound in
+  unmodified `exrcheck -c` (nearest tcache pointer 4288 bytes past the window)
+  and a clean-archive replay. Harness-groomed condition, author-only,
+  unwitnessed, no r5.
+- `8e4893c8` (codebasememory W8/W10): canary at `rbp-0x38` stops a 70-byte
+  copy two bytes short of saved RIP; structural negative, author-only,
+  unwitnessed, grade unchanged.
+- `0cf87dbf`/`33e8dfb1` (cicap W205): witness #3753 ESTABLISHED AS LABELED at
+  the pinned-function scope from clean `git archive 58435874`, 19 PASS / 0 FAIL
+  and independent value `4242`; README row/status already folded, repro and
+  task stale wording corrected here. No grade change or r5.
+- `bb3cb867`/`76df8b76` (imgproxy W204/W10): W204 (#3734) ESTABLISHED W9's
+  allocator blocker AS LABELED from clean `git archive 5af51c33`; W10
+  attributes the abort to `g_hash_table_unref` under
+  `vips_argument_table_destroy` and measures no wire-head consumption with
+  `SIZE=0x35`. Author-only W10, no grade change or r5.
+- `2ac219c2` (libgphoto2 W174): clean-archive W172 replay showed `DRAIN=22`
+  missed `priv` while `DRAIN=23` restored `priv+0x4050`, rc 0 and the 29-byte
+  marker; layout sensitivity, author replay, unwitnessed, no grade change.
+- `a0050050`/`ce0a0208`/`90ad0c88` (synchronet W11): exact pty-req TERM length
+  at the encryption boundary, preserved 5 PASS / 1 FAIL port-race negative,
+  then 6 PASS / 0 FAIL live and from clean `git archive ce0a0208`. Author
+  replay, not a witness verdict; no rung cell change.
+- `5424cec5` (assimp W18): document-own-begin low word written back under
+  ASLR-off gdb, 8 PASS / 0 FAIL with `scene=ok`; corrects W14's over-broad
+  "no clean import" wording. Author-measured, unwitnessed, no r5.
+- `88addf93`/`c59ecee3`/`97048817` (gpgme FRONTIER-STAGED): CVE-2026-129975
+  status `realloc` double free, 19 PASS / 0 FAIL on pinned statements with
+  chosen `0x48`/`0x5a` in the stale allocation, rung 3 confirmed and rung 4
+  PARTIAL, plain glibc UNKNOWN. Window and seed wall exist but no charter,
+  route, wake unit, admission or mind-count change; witness replay PENDING.
+- `48ccdf71` (assimp upstream recheck) and `e9b02506`/`c59ecee3` report-only
+  edges: doc-ok where no published claim or grade changed. All repro hashes
+  quoted above were recomputed locally or are cited as recorded in the named
+  report; no unverified digest is presented as passing.
+
+### 2026-11-24 18:3x–18:4xZ — real c-icap build and second assimp layout
+
+- `2011f27f`/`26ba007b` (cicap W1/W2): a real ASan `C_ICAP_0.6.5` build
+  reproduces the alias, chosen `trash0_start` and `header.c:631` UAF through
+  exported APIs on a real `ci_request_t`; W2 feeds a full ICAP request through
+  an `AF_UNIX` socketpair via exported read/unpack/parser calls. The hidden
+  `ci_read_icap_header()`/`ci_wait_for_data()` remain bypassed, so neither
+  `parse_header()`/`process_request()` nor a network socket is reached: wire
+  reach stays UNKNOWN, no r5, author-only and unwitnessed. README row and a
+  repro subsection were added; no rung cell or mind count changed.
+- `33b37760` (assimp W18 clean replay): clean `git archive 5424cec5` with
+  10/10 pins self-calibrated to a second heap layout (`0x555555570250`) with
+  8 PASS / 0 FAIL and byte-identical normalized traces; author replay, no
+  witness, no grade or r5 change. README/repro updated.
