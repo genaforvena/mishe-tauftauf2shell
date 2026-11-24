@@ -504,3 +504,19 @@ matched the working tree from `git archive aad2c431` with gitignored pinned
 source/build/bin trees symlinked. Author replay, not a witness verdict;
 grade unchanged.
 
+
+## W185: no steerable pointer in W184's fully-chosen window (2026-11-24)
+
+Tested whether W184's 128 file-chosen bytes at `dst+256` could replace a live
+pointer *field* and steer a later dereference. Negative: the flat harness's
+`exr_decode_pipeline_t` is stack-resident, so W171's `LIVE-PTR-INSIDE` lines
+are pointer values, not fields; both scratch pointer values are unchanged
+after COPY2. In unmodified `exrcheck -c` the same window has `PTR-HITS total=0`
+against code/rodata and the process exits cleanly with `bad` (rc 1); fixed
+3.5.3 rejects earlier with `DECODE rv=23 EXR_ERR_CORRUPT_CHUNK`. Replay:
+`cd lab/openexr2shell-real && sh harness/heap-window-check.sh` -> `RESULT PASS`
+3x, six byte-stable evidence hashes. Full method and caveats:
+`reports/openexr2shell-file-level.md` W185. No grade change: file-level rungs
+1-4, rung 5 UNKNOWN, no pointer/control-flow target, command, marker or
+witness verdict.
+

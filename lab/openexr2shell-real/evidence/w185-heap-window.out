@@ -1,0 +1,3 @@
+COPY2 dst_off=256 n=128
+PTR-HITS total=0
+HEAP-VALUES total=3

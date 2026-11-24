@@ -1173,3 +1173,52 @@ in both. Commit `aad2c431` carries the generator, check script, nine evidence
 files and both report sections; this receipt is a separate scoped commit.
 Author replay only, not a witness verdict; grade unchanged.
 
+
+## W185: the fully-chosen 128-byte window contains no steerable pointer (2026-11-24)
+
+Hypothesis tested: W171 reported live `decode.scratch_buffer_1/2` pointer
+*values* numerically inside the 4096-byte overwrite; W184's mixed-full file
+writes 128 fully file-chosen bytes at `dst+256..+384` and survives in the flat
+path. Could those bytes replace a live pointer *field* and steer a later
+dereference?
+
+Result: **negative, two measured reasons**.
+
+1. In `bin-vuln-plain/flat_harness` the `exr_decode_pipeline_t decode` is a
+   stack local (`harness/flat_harness.c:14`). At the 128-byte COPY2 breakpoint
+   the field addresses are on the stack, not in `[dst,dst+128)`:
+   `FIELD scratch_buffer_1 stack=1 in_copy_window=0` and the same for
+   `scratch_buffer_2`. Their values before and after the copy are unchanged
+   (`AFTER ... unchanged=1` for both). W171's `LIVE-PTR-INSIDE` lines are
+   pointer values that happen to lie in the heap range, not fields stored
+   there. This also explains W177's non-effect at the shorter copy.
+2. In the unmodified `build-vuln-plain/bin/exrcheck -c` on the same
+   mixed-full PoC, COPY2 still writes `dst_off=256 n=128`, but the window has
+   `PTR-HITS total=0` against executable and rodata mappings (W182's scan).
+   Three heap-valued qwords at `+16/+24/+32` are values, not demonstrated
+   live fields. The process prints `file ... bad` and exits rc 1 with no
+   chosen-address fault; the fixed 3.5.3 build rejects the chunk before the
+   sink (`DECODE rv=23 EXR_ERR_CORRUPT_CHUNK`, guard unchanged), and a clean
+   baseline prints `OK`.
+
+Inputs are W184's pinned baseline (sha256 `9aa2073d...`) and PoC
+`work-mixed/poc_mixed_full_3c.exr` (sha256
+`1fafb97255ad2178d8d68a1dec703f89b08aba2ac5f647658f3cd9187e6c8ba0`).
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/heap-window-check.sh` -> `RESULT PASS` 3x in the working tree, with
+six byte-stable evidence hashes: pointer fields
+`8951bd423a79e775df894ccb3a62153e2200fd1cb8e03557c9a7964da36dc6b5`, heap
+window `2e618a108217ed3b84f66372e7ba16d6bb45db4b72bb1dfe3cb0879966ea3fda`,
+baseline `9b27412362727eab7e32e8a92f13744f7230e3148c60ae3f75e945adf269a855`,
+plain PoC and plain fixed both `e4b0426763a7a024064804c9af1f85e124949f4721725d8f6a6fd2b95b0d7ad8`
+(both print `bad`, which is why the separate fixed guarded-harness control
+`6d6965fb57b39b4d803d2fbd5bc89dc3828b46474810a0e0d19d5d1dbe5dd98a` records
+the earlier `rv=23` rejection).
+
+Disposition: no grade change. File-level rungs 1-4 at the labeled CODE/
+CONSUMER scope, W161 witness-ESTABLISHED only for W158/W161, W164/W169/W178/
+W179/W180/W181/W182/W184 plus this W185 unverdicted, rung 5 UNKNOWN. No wire,
+pointer or control-flow target, command or marker. Would change mind: a live
+control-flow target inside a survivable chosen-byte window, a network-facing
+unmodified consumer, or a witness counterexample.
+

@@ -1,0 +1,5 @@
+COPY2 dst_off=256 n=128
+FIELD scratch_buffer_1 stack=1 in_copy_window=0
+FIELD scratch_buffer_2 stack=1 in_copy_window=0
+AFTER scratch_buffer_1 unchanged=1
+AFTER scratch_buffer_2 unchanged=1
