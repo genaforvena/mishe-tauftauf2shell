@@ -402,3 +402,9 @@ universal proof for all allocators or configurations.
 
 Grade unchanged: rungs 1-4 (witness verdict §8). No new rung, no rung 5.
 Author measurement, not witness acceptance.
+
+A clean `git archive` of commit `659b379` extracted into `/tmp/w5-busybox`
+replayed all three legs with a byte-identical transcript (SHA-256
+`8d22cfe3daf7a4cc9d9edab1b58260ebbd6b13b7d479a9db11e6267e22c7aa3c`,
+`/tmp/w5-distro-replay.log`). The harness binds ephemeral UDP ports and closes
+them. This is author replay of the committed harness, not witness acceptance.
