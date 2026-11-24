@@ -620,6 +620,22 @@ and selects the returned mesh count in a plain process. No chosen code
 address, marker, IP, command or listener; NO r5. Author-measured, no
 witness verdict.
 
+Clean-archive author replay at 21:0xZ from `git archive 702041cc` into
+`/tmp/w20-clean`: local pinned tarball copied in, `bootstrap.sh` 10/10 pins
+OK, then the unmodified `run-w20.sh` gave **9 PASS / 0 FAIL** with a different
+layout: own begin `0x555555570250`, destination `0x7fffffffc584`, window
+sha256 `97b1640b3e130d140307299c2f3e759fd48576580a1240efd338f2b2fba31725`.
+All four plain runs still exit rc 0 with `scene=ok` and `meshes=0/1/2/3`;
+the real document aborts (rc 134) and ASLR-on faults (rc 139). Clean trace
+sha256 `f17b2a504634c37d063c12b367a220272797003636a8e911f7e8789b1c033130`.
+Claim-bearing lines (`BASE`, `PLAIN`, `NEG`, `TOTAL`) are byte-identical
+between tree and clean archive, sha256
+`3da1d4067b369c43ec5bb5feb8a1d63f219cd540c22ca5732475ef59c3a602ca`; only
+the layout-dependent `CAL`/`DISC`/`WIN`/`DST` lines differ. The first replay
+attempt hit my 300s shell cap while `run-w12.sh` rebuilt the gitignored O2
+driver; rerunning the unmodified harness with that locally built driver gave
+the 9/9 above. Author replay, not witness acceptance.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
@@ -629,7 +645,7 @@ are reproducibility evidence, not acceptance. Preserve any contradiction as
 a negative. The witness wake failed repeatedly through 20:5xZ (engine-cap
 saturation, owner operator), so no verdict arrived; W1/W2, W18, W19 and W20
 stay author-only. W20 can be replayed with one command from a clean archive:
-`git archive <sha> lab/frontier/assimp2shell`, copy the local pinned tarball
+`git archive 702041cc lab/frontier/assimp2shell`, copy the local pinned tarball
 into `pins/`, then `bash bootstrap.sh && bash harness/run-w20.sh` (expect
 9 PASS / 0 FAIL). gdb is used only to measure the static file's window;
 the claim-bearing import runs are plain `setarch -R` executions.
