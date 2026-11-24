@@ -5,7 +5,9 @@ verdict #3277 (03:51Z) ESTABLISHED rungs 1-4 at the direct-call /
 stub-Accessor / deterministic-arena scope, NO r5; witness verdict #3722
 (16:27Z) ESTABLISHED W14 AS LABELED (partial low-32-bit pointer overwrite),
 no grade change and NO r5. The W1-W13 real-importer legs remain author-only;
-W14 is independently replayed. Brief + live two-pane window are both present.
+W14 is independently replayed; W18 adds an author-measured clean-import
+control under ASLR-off (no witness verdict), no grade change and no r5.
+Brief + live two-pane window are both present.
 Target mind: `assimp2shell`. Evidence:
 `lab/frontier/assimp2shell/PROVENANCE.md`, `PINS.sha256`, `evidence.log`,
 `realpath/evidence/`, `placement/evidence/`.
@@ -416,13 +418,16 @@ Prediction, observation and disposition on the gcc -O2 plain library built by
   one-field steering, not a second layout accident.
 - `idxptr-mat2-real.gltf`: chosen low word `5556f520`; in the first author run
   under ASLR-off that equals the captured safe begin's low bits
-  (`0x55555556f520`) and restores the begin pointer exactly, but the import
-  still aborts with `munmap_chunk(): invalid pointer` in glibc `free` with
-  vector length 415 at the call. This restoration is layout-dependent: in the
-  author's `75ff847f` clean replay and the witness's `22b1740f` clean room the
-  captured safe begin is `0x55555556f560`, so the same chosen low word does
+  (`0x55555556f520`) and writes that value into the crafted vector's begin
+  slot, but the import still aborts with `munmap_chunk(): invalid pointer` in
+  glibc `free` with vector length 415 at the call. This is layout-dependent: in
+  the author's `75ff847f` clean replay and the witness's `22b1740f` clean room
+  the captured safe begin is `0x55555556f560`, so the same chosen low word does
   NOT restore the begin there and is simply another corrupt-pointer abort.
-  PRESERVED NEGATIVE either way: no clean import and no clean-import control.
+  PRESERVED NEGATIVE for this document: no clean import. W18 below shows the
+  word came from `safe.gltf`, not from the crafted document's own vector, so
+  this case was never a true restoration; a genuine clean-import control is
+  measured there.
 
 `bash harness/run-w14.sh` => **7 PASS / 0 FAIL**, normalized trace
 `w14/evidence/w14.trace` sha256
@@ -474,6 +479,37 @@ witness nuance (not a contradiction) is folded into the W14 negative bullet
 above: low word `5556f520` is the safe begin's low bits only in the first
 author run, not in the clean replays. Scope is W14 only; baseline #3277 and
 the other W1-W13 real-importer legs are unchanged and still author-only.
+
+## W18 — clean-import control by writing back the document's own begin low word (2026-11-24 18:3xZ, author-measured)
+
+W14's preserved negative was read too broadly. At `glTFImporter.cpp:314`,
+before the index read, the tracked `idxptr-mat2-real.gltf` vector is
+start `0x555555570210`, finish/cap `0x555555570218`; its chosen low word
+`5556f520` was captured from `safe.gltf`, whose buffer and heap allocation
+differ. The crafted document therefore never restored its own pointer — the
+abort was another corrupt-pointer abort in every layout, including the first
+author run. This does not change W14's independently replayed measurements.
+
+New self-calibrating control, `bash harness/run-w18.sh` => **8 PASS / 0 FAIL**:
+under ASLR-off gdb the harness measures the crafted document's own live begin
+twice (stable `0x555555570210`), generates
+`w18/evidence/idxptr-mat2-ownbegin.gltf` by changing only document bytes
+48..51 from `20f55655` to `10025755` (little-endian `55570210`), and runs the
+same pinned importer. At CopyVector (`:475`) the live begin is
+`0x555555570210` and finish `0x555555570218`, byte-identical to the
+pre-corruption vector; stdout carries `case=... scene=ok` and gdb reports
+`exited normally`. Under the same breakpoints, tracked
+`idxptr-mat2-real.gltf` still reads `0x55555556f520` (not restored), and the
+plain ASLR-on run of the generated case is SIGSEGV rc 139. Trace sha256
+`006eaf6b04b6be5ebc8f74b5fcb155258b411e4684e9b59709b74f575c5d5189`.
+
+Scope and limits: this is a rung-4 clean-import control at the same
+real-importer / stub-scene-driver scope as W14; it requires ASLR-off and a
+gdb-measured pointer word, high 32 bits are inherited from the real heap
+pointer, and no chosen code address, controlled IP, marker, command or
+listener was observed. NO r5. Author-measured, unwitnessed; W1-W13 stay
+author-only. The control restores a pointer to its original value; it is not
+a fix and says nothing about safe behavior on a normal ASLR-on import.
 
 ## Next lane
 

@@ -1,0 +1,11 @@
+7536766857f7d29fec524557aa6e84c36a24132e7090fbfa8ee019ff92e75e15  pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl
+e5d97a5f3fdec437c7f125e8a411487853c93bb4c2b37e7da039298d9f7f1fb4  pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp
+PRE own_begin=0x555555570210 finish=0x555555570218 cap=0x555555570218 repeat=0x555555570210
+PRE own_begin_stable=1
+old=20f55655 word=55570210 bytes=10025755
+POST ownbegin_slot=0x555555570210 finish=0x555555570218
+case=w18/evidence/idxptr-mat2-ownbegin.gltf scene=ok err=
+[Inferior 1 (process 1889861) exited normally]
+NEG real_slot=0x55555556f520 own_begin=0x555555570210
+NEG plain rc=139
+TOTAL pass=8 fail=0

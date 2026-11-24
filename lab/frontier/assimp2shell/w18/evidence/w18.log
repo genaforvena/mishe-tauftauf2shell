@@ -1,0 +1,8 @@
+PASS source hashes pinned
+PASS own begin stable across two measurements
+PASS live begin restored to own begin
+PASS live finish unchanged
+PASS crafted import completes cleanly
+PASS gdb process exits normally
+PASS W14 real word does not restore own begin
+PASS ASLR-on plain run is a negative

@@ -1,0 +1,8 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:475) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:475
+475	    CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
+$1 = 0x55555556f520
