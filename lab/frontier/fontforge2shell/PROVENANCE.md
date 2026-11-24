@@ -67,3 +67,13 @@ bytes come from this host's locale path, not from any external source;
 no probe, scan or client contacted any external host and no loopback
 service was involved. This extension is author-side and unwitnessed,
 with no grade change.
+
+W7 (2026-11-24 20:0xZ): no external reads or new source trees. All PCF
+inputs were derived locally from the already-pinned `truncated.pcf`;
+`make-filechoice-case.py` records the byte offsets, including the one-byte
+`props[2].name_offset` variant. The same local plain, patched and ASan
+builds and gdb were used; `FILECHOICE.md` holds input, command, transcript
+and output hashes, the file-chosen byte comparison, return codes and the
+two superseded size-class attempts. No loopback service, GUI or external
+target was involved. This extension is author-side and unwitnessed, with
+no grade change.

@@ -1,0 +1,58 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+POISON ptr=0x555555c48240 glyph=-2 size=21
+Hardware watchpoint 2: *(long*)$encsp
+
+Hardware watchpoint 2: *(long*)$encsp
+
+Old value = -1
+New value = -4294967039
+PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1762
+1762		if ( encs[i]!=-1 ) {
+STOP1 at 0x555555c48240 val=ffffffff00000101
+#0  PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1762
+#1  0x00005555558dc631 in PcfParse (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1831
+#2  0x00005555558ddfd3 in SFImportBDF (sf=0x555555c337e0, filename=0x555555c36ab0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/size-71.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2164
+#3  0x00005555558de583 in _SFImportBDF (sf=0x555555c337e0, filename=0x555555c36ab0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/size-71.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2226
+
+Hardware watchpoint 2: *(long*)$encsp
+
+Old value = -4294967039
+New value = 1112396529921
+PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1762
+1762		if ( encs[i]!=-1 ) {
+STOP2 at 0x555555c48240 val=10300000101
+#0  PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1762
+#1  0x00005555558dc631 in PcfParse (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1831
+#2  0x00005555558ddfd3 in SFImportBDF (sf=0x555555c337e0, filename=0x555555c36ab0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/size-71.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2164
+#3  0x00005555558de583 in _SFImportBDF (sf=0x555555c337e0, filename=0x555555c36ab0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/size-71.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2226
+
+Hardware watchpoint 2: *(long*)$encsp
+
+Old value = 1112396529921
+New value = 93802095589272
+tcache_put (tc_idx=5, chunk=0x555555c48230) at ./malloc/malloc.c:3166
+warning: 3166	./malloc/malloc.c: No such file or directory
+STOP3 at 0x555555c48240 val=555000963798
+#0  tcache_put (tc_idx=5, chunk=0x555555c48230) at ./malloc/malloc.c:3166
+#1  _int_free (av=0x7ffff7404ac0 <main_arena>, p=0x555555c48230, have_lock=0) at ./malloc/malloc.c:4549
+#2  0x00007ffff72ade8e in __GI___libc_free (mem=0x555555c48240) at ./malloc/malloc.c:3398
+#3  0x00005555558dc1bd in PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1770
+
+Hardware watchpoint 2: *(long*)$encsp
+
+Old value = 93802095589272
+New value = 93802095589120
+__vsnprintf_internal (string=0x555555c48240 "", maxlen=97, format=0x555555a6de61 "Loading font from %.100s", args=0x7fffffffd190, mode_flags=2) at ./libio/vsnprintf.c:96
+warning: 96	./libio/vsnprintf.c: No such file or directory

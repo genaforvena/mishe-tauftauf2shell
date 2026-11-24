@@ -1,0 +1,62 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+POISON ptr=0x555555c48240 glyph=-2 size=21
+Hardware watchpoint 2: tcache->entries[5]
+
+Hardware watchpoint 2: tcache->entries[5]
+
+Old value = (tcache_entry *) 0x555555c36bd0
+New value = (tcache_entry *) 0x555555c48240
+tcache_put (tc_idx=5, chunk=0x555555c48230) at ./malloc/malloc.c:3167
+warning: 3167	./malloc/malloc.c: No such file or directory
+STOP1 entries5=0x555555c48240 encsp=0x555555c48240
+#0  tcache_put (tc_idx=5, chunk=0x555555c48230) at ./malloc/malloc.c:3167
+#1  _int_free (av=0x7ffff7404ac0 <main_arena>, p=0x555555c48230, have_lock=0) at ./malloc/malloc.c:4549
+#2  0x00007ffff72ade8e in __GI___libc_free (mem=0x555555c48240) at ./malloc/malloc.c:3398
+#3  0x00005555558dc1bd in PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1770
+
+Hardware watchpoint 2: tcache->entries[5]
+
+Old value = (tcache_entry *) 0x555555c48240
+New value = (tcache_entry *) 0x555555c36bd0
+tcache_get_n (ep=<optimized out>, tc_idx=<optimized out>) at ./malloc/malloc.c:3190
+3190	in ./malloc/malloc.c
+STOP2 entries5=0x555555c36bd0 encsp=0x555555c48240
+#0  tcache_get_n (ep=<optimized out>, tc_idx=<optimized out>) at ./malloc/malloc.c:3190
+#1  tcache_get (tc_idx=<optimized out>) at ./malloc/malloc.c:3199
+#2  __GI___libc_malloc (bytes=97) at ./malloc/malloc.c:3320
+#3  0x000055555584c67b in vsmprintf (fmt=0x555555a6de61 "Loading font from %.100s", args=0x7fffffffd190) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/Unicode/memory.c:85
+#4  0x000055555584c7a2 in smprintf (fmt=0x555555a6de61 "Loading font from %.100s") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/Unicode/memory.c:111
+#5  0x00005555558dec1c in FVImportBDF (fv=0x555555c35c30, filename=0x555555c36b70 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell", ispk=2, toback=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2326
+
+Hardware watchpoint 2: tcache->entries[5]
+
+Old value = (tcache_entry *) 0x555555c36bd0
+New value = (tcache_entry *) 0x555555c48240
+tcache_put (tc_idx=5, chunk=0x555555c48230) at ./malloc/malloc.c:3167
+3167	in ./malloc/malloc.c
+STOP3 entries5=0x555555c48240 encsp=0x555555c48240
+#0  tcache_put (tc_idx=5, chunk=0x555555c48230) at ./malloc/malloc.c:3167
+#1  _int_free (av=0x7ffff7404ac0 <main_arena>, p=0x555555c48230, have_lock=0) at ./malloc/malloc.c:4549
+#2  0x00007ffff72ade8e in __GI___libc_free (mem=0x555555c48240) at ./malloc/malloc.c:3398
+#3  0x00005555558dec43 in FVImportBDF (fv=0x555555c35c30, filename=0x555555c36b70 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell", ispk=2, toback=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2328
+#4  0x000055555567d420 in bImport (c=0x7fffffffd580) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:2306
+#5  0x0000555555699bb3 in docall (c=0x7fffffffddb0, name=0x7fffffffd820 "Import", val=0x7fffffffdc60) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9225
+
+Hardware watchpoint 2: tcache->entries[5]
+
+Old value = (tcache_entry *) 0x555555c48240
+New value = (tcache_entry *) 0x555555c36bd0
+tcache_get_n (ep=<optimized out>, tc_idx=<optimized out>) at ./malloc/malloc.c:3190
+3190	in ./malloc/malloc.c

@@ -1,0 +1,35 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+POISON ptr=0x555555c48240 glyph=-2 size=21
+Breakpoint 2 at 0x5555558da9d5: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1470.
+
+Breakpoint 2, pcf_properties (file=0x555555c21c00, toc=0x555555c49410, _as=0x7fffffffc2b0, _ds=0x7fffffffc2b4, _enc=0x7fffffffc2d0, family=0x7fffffffc3f0 "", mods=0x7fffffffc4d0 "", full=0x7fffffffc5a0 "", dummy=0x7fffffffc310, filename=0x555555c35e00 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/choice-4.pcf") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1470
+1470	    if ( cnt&3 )
+PROPS ptr=0x555555c48240 encsp=0x555555c48240 equal=1 cnt=3
+#0  pcf_properties (file=0x555555c21c00, toc=0x555555c49410, _as=0x7fffffffc2b0, _ds=0x7fffffffc2b4, _enc=0x7fffffffc2d0, family=0x7fffffffc3f0 "", mods=0x7fffffffc4d0 "", full=0x7fffffffc5a0 "", dummy=0x7fffffffc310, filename=0x555555c35e00 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/choice-4.pcf") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1470
+#1  0x00005555558dd7df in SFImportBDF (sf=0x555555c337e0, filename=0x555555c35e00 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/choice-4.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2074
+#2  0x00005555558de583 in _SFImportBDF (sf=0x555555c337e0, filename=0x555555c35e00 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/choice-4.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2226
+0x555555c48240:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555c48248:	0x08	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555c48250:	0x6d	0x20	0x2f	0x68	0x6f	0x6d	0x65	0x2f
+0x555555c48258:	0x6d	0x65	0x73	0x68	0x2d	0x68	0x6f	0x6d
+0x555555c48260:	0x0b	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555c48268:	0x08	0x00	0x00	0x00	0x74	0x61	0x75	0x66
+0x555555c48270:	0x32	0x73	0x68	0x65	0x6c	0x6c	0x2f	0x6c
+0x555555c48278:	0x61	0x62	0x2f	0x66	0x72	0x6f	0x6e	0x74
+0x555555c48280:	0x17	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555c48288:	0x00	0x00	0x00	0x00	0x65	0x32	0x73	0x68
+0x555555c48290:	0x65	0x6c	0x6c	0x2f	0x63	0x68	0x6f	0x69
+0x555555c48298:	0x63	0x65	0x2d	0x34	0x2e	0x70	0x63	0x66
+[Inferior 1 (process 331239) exited normally]

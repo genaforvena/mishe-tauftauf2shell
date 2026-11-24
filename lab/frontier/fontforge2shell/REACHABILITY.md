@@ -182,6 +182,23 @@ file-derived; the file controls the corrupted size value and hence the
 poisoned size class. No pointer/IP, command, ASLR study or witness
 verdict, NO r5. Negative lanes are preserved in `CONSUME.md`.
 
+## W7 (2026-11-24 20:0xZ) — file-chosen bytes in the overflow
+
+`FILECHOICE.md` closes W6's "overflow content is host-derived" gap at the
+labeled real-headless path. `size-71.pcf` writes `0x71` at `encs-8`, putting
+the physically 0x20 chunk into tcache bin 5. On the second `Import()` a
+notice `smprintf` briefly takes and frees the entry, then
+`pcf_properties:1464` takes it for `props = malloc(3*32) = 96` bytes and
+copies file-derived property integers into all 96 bytes, 72 past the 24
+usable bytes. `gdb-props-consumer.out` shows `props == encs` and word
+`0x17` at user offset `0x40`; `choice-4-var.pcf` changes one file byte
+(`props[2].name_offset` at file offset 0x62 from `0x17` to `0x1a`) and the
+same word in the overflow becomes `0x1a` (`gdb-props-var.out`). Vulnerable
+plain and patched plain both exit 0; vulnerable ASan reports `WRITE of
+size 4` at :1751, patched ASan and the in-bounds first-import control are
+clean. Superseded size-class attempts are preserved in `FILECHOICE.md`.
+No pointer/IP, command, ASLR study or witness verdict, NO r5.
+
 ## Scope
 
 Headless CLI scripting `Import()` on this host. Chosen bytes at a
@@ -189,8 +206,9 @@ file-chosen offset before `encs` are now measured (W2/W4), as are the
 plain-build abort, the high-half glibc metadata consumer (W2/W3), a
 low-half chunk-size rewrite accepted by `free()` into tcache bin 7 (W5),
 and a real gettext consumer of that poisoned entry that writes past the
-physical chunk on a second `Import()` (W6). The GUI `Import()` menu
+physical chunk on a second `Import()` (W6), plus FILE-BYTES chosen by a
+one-byte PCF variant written 40 bytes past that chunk's usable area by a
+real `pcf_properties` allocation (W7). The GUI `Import()` menu
 (GTK-3 dev packages absent, `ENABLE_GUI=OFF` builds), other loaders,
-pointer/IP control, command execution, ASLR/grooming, chosen bytes in
-the overflow, and independent witness replay of the real-build path
-remain UNKNOWN.
+pointer/IP control, command execution, ASLR/grooming, and independent
+witness replay of the real-build path remain UNKNOWN.
