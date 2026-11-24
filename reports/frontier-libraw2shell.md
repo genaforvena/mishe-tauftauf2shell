@@ -293,6 +293,41 @@ calibrated independently of the D=512 hit. It does not change the ceiling:
 no arbitrary alphabet at either offset, no pointer/IP, no consumer beyond
 `dcraw_emu`, no wire path, NO r5. Author-side only; no replay requested.
 
+## Plain-build heap extent of the OOB store (W8, 2026-11-24 12:1xZ; author-side)
+
+Prediction recorded before the run: the scratch buffer would be mmap'd and
+the first OOB store would fault on an unmapped guard page. That prediction
+was wrong — in the plain `-O0` build the buffer is a heap chunk. With the
+D=1024 exact-hit input `evidence/dim1024-wl24601.input`, the first OOB stop
+gives `destimage=0x55555573abc0`, requested `allocate_sz=2,146,592` bytes
+(`(512+6)^2*8`, requested end `0x555555946ce0`), `malloc_usable_size=2,147,624`
+and a chunk header of 2,147,632 bytes, so the chunk ends at `0x5555559470f0`.
+The `[heap]` mapping ends at `0x555555968000`; the chunk walk from
+`0x5555559470f0` finds exactly one chunk, size 134,944 bytes, ending at the
+heap boundary — the free top chunk. No live allocation lies between the
+scratch buffer and the mapping edge. `malloc_stats()` reports
+`Arena 0: system bytes=2,433,024, in use bytes=2,233,568`
+(`w8/mallocstat-dim1024.txt`, `w8/heapwalk2-dim1024.txt`).
+
+With the breakpoint deleted, stores continue 17,378 indices past the first
+OOB index before faulting in the store loop itself: `IDX=285,702`,
+`row=276 col=3 top=3 left=3`, `SIGADDR=0x555555968bf0`, backtrace `:427` ←
+`dcraw_process():184` ← `dcraw_emu.cpp:598` (`w8/segv-dim1024.txt`,
+`w8/heapwalk-dim1024.txt`). The fault is about 139 KB past the requested
+allocation and just past the `[heap]` mapping. Plain (no gdb) `-n 1` runs of
+`nonzero-oob.input`, `whitelevel4095.input` and `dim1024-wl24601.input` all
+exit 139 with empty stderr (`w8/plain-rc.txt`), so the terminal fault is not
+a gdb artifact. The overwrite first crosses the one free chunk's metadata and
+then faults on an unmapped page; no adjacent live object or pointer was
+observed on this host, and no post-corruption allocation is reached in this
+path. This is a structural negative result, not a new primitive: no
+pointer/IP, no marker, NO r5.
+
+Preserved measurement error: an initial plain-run rc loop printed rc 0
+because `$?` was read after a command substitution had reset it; re-running
+with `rc=$?` captured immediately gave 139 for all three inputs. The wrong
+value was never published in the report or the wall.
+
 ## Rung-4 assessment and rank
 
 Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
@@ -306,7 +341,10 @@ calibration, with a preserved negative for a second target. W5 adds
 author-side, replay-pending steering of the first OOB index from 68,644 to
 268,324. W7 combines them: a second pre-chosen halfword (`0x1234`) hit exactly
 at the steered index 268,324 with its own calibration, while the W6
-calibration does not transfer. Neither changes the ceiling. Fully
+calibration does not transfer. W8 adds a host-specific heap-layout result:
+the store crosses one free top chunk and faults at the heap edge, with no
+live neighbor to hijack in this path; it is a structural negative result,
+not a new primitive. Neither changes the ceiling. Fully
 arbitrary byte values and pointer/IP control remain UNKNOWN. Rank: high
 tractability, low escalation
 (local file, UI:P, no network, no pointer/command execution). Admitted frontier
@@ -362,6 +400,11 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   execution, grooming/ASLR study or rung 5. Witness verdicts cover the
   original zero-valued claim (W186), the W2 nonzero claim (W187) and the W3
   WhiteLevel steering claim (DM 3413); all ESTABLISHED AS LABELED.
+- W8 measured the plain-build heap extent on this host (one free top chunk,
+  then the unmapped heap edge; crafted inputs exit 139), but that is not a
+  grooming study or an adjacent-object exploit: no live object or pointer
+  was observed between the scratch buffer and the fault. No pointer/IP,
+  no marker, NO r5.
 - Fully arbitrary byte values remain UNKNOWN: W2 wrote a saturated constant
   `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
   metadata tag; W6 hit one pre-chosen value `0x4141` exactly at index 68,644

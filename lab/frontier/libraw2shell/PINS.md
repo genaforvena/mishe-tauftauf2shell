@@ -32,6 +32,11 @@
 | `evidence/dim1024-wl24608.input` | W7 sweep, `0x1233` | `f01be451f0051806b18aa820b759c231e11579fd9aca2e731e1d2a5ed7a99782` |
 | `evidence/dim1024-wl24609.input` | W7 sweep, `0x1233` | `37cebe51c26b055895d07d0cffa1d0ef7c0875fa8bca43f30a5f825bedaea5d9` |
 
+| `w8/segv.gdb` | lab-only W8 OOB-extent and SIGSEGV-site gdb probe | `fb47491baca20db3556968257de1e78d743084457390d977a312537e9eabe1ee` |
+| `w8/heapwalk.gdb` | lab-only W8 first (misaligned) heap-chunk walk | `fab6b78468798de7f5e9649f9b384bdf0b6798e3fa5d9dca475705f0ae64d599` |
+| `w8/heapwalk2.gdb` | lab-only W8 corrected heap-chunk walk | `b4793d59a87f2ebeb9252c15b0a41c52dc843b721fd0ad1f1d9a83cb29b6c451` |
+| `w8/mallocstat.gdb` | lab-only W8 `malloc_usable_size`/`malloc_stats` probe | `fffab9c35ab3f4368f3a687c490a04b8fa962c37ed32793d27e3d6d3ed5845cb` |
+
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.
 

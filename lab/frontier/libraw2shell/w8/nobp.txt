@@ -1,0 +1,7 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422e0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+W8 ENDSTATE pc=0x5555555dfc68

@@ -1,0 +1,17 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422e0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+W8 BASE=0x55555573abc0 END=0x555555946ce0 HEAPEND=0x555555968000 ALLOC=2146592
+W8 DESTHDR size=2147632 flags=1
+W8 CHUNK 00 ptr=0x555555946ce0 size=1311693393439560240 flags=4
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422e0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+W8 FAULT IDX=285702 row=276 col=3 top=3 left=3 addr=0x555555968bf0
+#0  0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422e0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+#1  0x000055555557bf19 in LibRaw::dcraw_process (this=0x7ffffff422e0) at src/postprocessing/dcraw_process.cpp:184
+#2  0x0000555555568837 in main (argc=4, argv=0x7fffffffe228) at samples/dcraw_emu.cpp:598

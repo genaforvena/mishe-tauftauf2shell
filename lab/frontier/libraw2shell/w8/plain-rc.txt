@@ -1,0 +1,19 @@
+W8 plain (no gdb) rc measurements, 2026-11-24 12:19-12:22Z.
+Binary: o0/LibRaw-0.22.3/bin/dcraw_emu (plain -O0 build from pinned tarball).
+Run from lab/frontier/libraw2shell/w8 with stdout -> /dev/null and stderr to
+the named empty file; rc captured into a variable immediately after the run.
+
+../o0/LibRaw-0.22.3/bin/dcraw_emu -n 1 ../evidence/nonzero-oob.input
+  rc=139, stderr 0 bytes (rc-nonzero-oob.input.txt)
+../o0/LibRaw-0.22.3/bin/dcraw_emu -n 1 ../evidence/whitelevel4095.input
+  rc=139, stderr 0 bytes (rc-whitelevel4095.input.txt)
+../o0/LibRaw-0.22.3/bin/dcraw_emu -n 1 ../evidence/dim1024-wl24601.input
+  rc=139, stderr 0 bytes (rc-dim1024-wl24601.input.txt)
+../o0/LibRaw-0.22.3/bin/dcraw_emu -n 1 ../evidence/dim1024-wl24601.input
+  with stdout -> plain-run.stdout: rc=139, stdout 0 bytes, stderr 0 bytes.
+
+Measurement error preserved: the first loop printed rc=0 for all three inputs
+because the shell expanded "$?" after a command substitution ($(basename ...))
+had already reset it. Re-running with "rc=$?" immediately after each command
+gave 139 in all three cases. The erroneous rc=0 was never published in the
+report or the wall.
