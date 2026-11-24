@@ -391,3 +391,21 @@ and ceiling: `reports/openexr2shell-file-level.md` W180.
 
 Clean-archive replay at `9f42ba6` reproduced `RESULT PASS` and all 16
 normalized evidence hashes exactly.
+
+## W181: unmodified exrcheck -c with a file-steered chosen-byte offset (2026-11-24)
+
+W179 (N=32, +128) and W180 (N=64/128, +256/+512 under guarded_harness) were
+combined: `lab/openexr2shell-real/harness/exrcheck-steer-check.sh` drives
+N=64/128 mixed-channel PoCs through the unmodified upstream `exrcheck -c` in
+the vulnerable ASan, vulnerable plain and fixed ASan builds. N=64 gives ASan
+`READ of size 256` at pinned `internal_zstd.c:472`, fixed rc=1 `bad`, clean
+baselines, plain rc=139, and gdb `COPY1 len=256 dst-out=0 src-in=128` /
+`COPY2 len=128 dst-out=256 src-in=0` with eight file-chosen bytes at
+`outPtr+256` for both fill bytes `0x3c` and `0x5a`. N=128 gives ASan
+`READ of size 512`, fixed `bad`, plain rc=134, but gdb aborts inside the sink
+before COPY2, so the +512 chosen-byte readback is only W180's guarded-harness
+observation. `RESULT PASS` three times byte-stably (aggregate sha256
+`555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`); a
+clean-archive replay receipt follows. No wire, pointer, command or marker;
+grade unchanged, this section unwitnessed, rung 5 UNKNOWN. Full hashes and
+ceiling: `reports/openexr2shell-file-level.md` W181.

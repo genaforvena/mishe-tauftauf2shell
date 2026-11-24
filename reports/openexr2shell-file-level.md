@@ -915,3 +915,54 @@ lab/openexr2shell-real` into `/tmp/w180-openexr`, with the gitignored pinned
 build trees and `src/` symlinked from the live tree,
 `sh harness/offset-steer-check.sh` -> `RESULT PASS` and all 16 normalized
 evidence hashes identical to the working-tree runs.
+
+## W181: file-steered chosen-byte offsets through unmodified exrcheck -c (2026-11-24)
+
+W179 established the 64 file-chosen bytes at `unpacked_buffer+128` for N=32
+through the unmodified upstream tool; W180 established offset steering in the
+purpose-built guarded harness for N=32/64/128. This wake checks the combination:
+the same unmodified binary, with a file-steered offset.
+
+Method: `harness/exrcheck-steer-check.sh` regenerates the valid mixed baseline
+(sha256 `9aa2073d...`), forges the mixed deep EXR with N=64/128 and inner fill
+`0x3c`/`0x5a` (the four PoC hashes match W180 exactly), and runs pristine
+`build-vuln-asan/bin/exrcheck -c`, `build-vuln-plain/bin/exrcheck -c` and
+`build-fixed-asan/bin/exrcheck -c` on each, normalizing addresses, PIDs, paths
+and BuildIds. `harness/gdb-exrcheck-steer.cmd` is the W179 two-copy probe with
+the break and `run -c FILE` supplied by the caller, so one file serves every
+forged path.
+
+Observed for N=64: ASan `heap-buffer-overflow`, `READ of size 256` (the 4N-byte
+FLOAT copy read past the 2N-byte scratch) at pinned `internal_zstd.c:472` via
+`exr_decoding_run decoding.c:602` -> `readCoreScanlinePart ImfCheckFile.cpp:1467`;
+fixed rc=1 `bad` with no ASan report; baseline rc=0 `OK` on both vulnerable
+builds; plain PoC rc=139. gdb at the sink shows `COPY1 ... len=256 dst-out=0
+src-in=128`, then `COPY2 ... len=128 dst-out=256 src-in=0`, an in-bounds
+file-derived source of `0x3c` (or `0x5a`) and eight chosen bytes now at
+`outPtr+256`. This is the W178/W180 chosen-byte result at a second,
+file-chosen destination offset reached by an unmodified upstream binary.
+
+Observed for N=128: ASan `READ of size 512` at `internal_zstd.c:472`, fixed
+rc=1 `bad`, baselines clean, plain rc=134 (`free(): invalid pointer`). Under
+gdb the 512-byte copy aborts the process inside the sink, so COPY2 and its
+chosen-byte readback are NOT observable in this build at N=128; the +512
+readback remains W180's guarded-harness observation, not an exrcheck
+observation. The boundary is preserved as a negative, not a pass.
+
+Replay: `cd lab/openexr2shell-real && sh harness/exrcheck-steer-check.sh`
+-> `RESULT PASS`, byte-stable 3x in the working tree (aggregate normalized
+output sha256
+`555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`, 15 named
+evidence hashes, including `exrcheck-steer-gdb-n64-3c`
+`168fca1a64fe1cc701bd21c8550493b9943008a55d3c20b959973f0163f1264b` and
+`exrcheck-steer-gdb-n64-5a`
+`11d5d65eddfd31c0df77ab67b7c5ad974af270bd37053a1f00f4a0deab084232`).
+Clean-archive replay receipt is recorded in a separate commit.
+
+Scope and disposition: local EXR path and an unmodified command-line validation
+tool, no wire or socket, no pointer or control-flow target, no command and no
+marker. No grade change: file-level rung 4 at the labeled CODE/CONSUMER scope;
+W161 witness-ESTABLISHED still covers only the older all-FLOAT file, so this
+section and W179 remain unwitnessed. Rung 5 stays UNKNOWN. Would change mind:
+an unmodified network-facing consumer reaching this sink, a witness
+counterexample, or chosen bytes reaching a live control-flow target.

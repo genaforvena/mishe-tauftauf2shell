@@ -1,0 +1,35 @@
+Breakpoint 1 at ADDR: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c, line 451.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file work-w181/poc_n64_5a.exr 
+Breakpoint 1, sort2_4ByteChannels_tiled (inPtr=ADDR 'Z' <repeats 128 times>, num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=ADDR "(XUU\005", sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:451
+451	{
+SINK-ENTER out=ADDR in=ADDR channels=2 height=1 in-out=-3968
+Breakpoint 2 at ADDR: file ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S, line 255.
+
+Breakpoint 2, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+COPY1 dst=ADDR src=ADDR len=256 dst-out=0 src-in=128
+ADDR:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+ADDR:	0x28	0x58	0x55	0x55	0x05	0x00	0x00	0x00
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+#1  ADDR in memcpy (__len=256, __src=<optimized out>, __dest=<optimized out>) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+#3  ADDR in exr_undo_zstd_v1 (uncompressed_size=<optimized out>, uncompressed_data=<optimized out>, comp_buf_size=<optimized out>, compressed_data=<optimized out>, decode=<optimized out>) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:459
+459	        for (int i = 0; i < channelsSize; ++i)
+ADDR:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+
+Breakpoint 2, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+COPY2 dst=ADDR src=ADDR len=128 dst-out=256 src-in=0
+ADDR:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+ADDR:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
+ADDR:	0x11	0x05	0x00	0x00	0x09	0x00	0x00	0x00
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+#1  ADDR in memcpy (__len=128, __src=<optimized out>, __dest=<optimized out>) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+#3  ADDR in exr_undo_zstd_v1 (uncompressed_size=<optimized out>, uncompressed_data=<optimized out>, comp_buf_size=<optimized out>, compressed_data=<optimized out>, decode=<optimized out>) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:459
+459	        for (int i = 0; i < channelsSize; ++i)
+ADDR:	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a	0x5a
