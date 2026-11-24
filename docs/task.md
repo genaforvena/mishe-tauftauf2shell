@@ -9818,3 +9818,48 @@ request #3156 unanswered.
   libcs UNKNOWN. `out-w24-plain-safe/` is a malformed negative (no body,
   handler never reached), not a control. Author self-observation only;
   recipe and evidence in `docs/reproducibility.md` and PROVENANCE § W24.
+
+### 2026-11-24 05:1x–05:4xZ — MAT4 write, AIFF sibling, corrected HTTP guard
+
+- Assimp W5 (`20cf486`, `4f3b254`, `075eaa0`) extended the real-import lane
+  with two tracked glTF 1.0 documents. Pinned MAT4/FLOAT has `elemSize=64`;
+  `mat4pos-count1.gltf` drives `ExtractData<aiVector3t<float>>` through
+  `ReadFileFromMemory` into a 12-byte `aiVector3D[1]`: ASan `WRITE of size 64`
+  0 bytes after the region, callback-recorded chosen `54415546` at the first
+  OOB offset and `malloc(): invalid size (unsorted)` in the plain build.
+  `mat4idx-count1.gltf` gives a 64-byte stack write into a 4-byte local and
+  still aborts under PR6860, preserving the Indexer negative. Recipe: copy the
+  gitignored `pins/assimp-6.0.6.tar.gz` into a clean archive and run
+  `bash lab/frontier/assimp2shell/harness/run-w5.sh` — 13 PASS / 0 FAIL in the
+  live tree and from clean archive, logs in `w5/evidence/`. The first clean
+  run's 10 PASS / 3 FAIL was a recipe defect (fixed library built from
+  vulnerable source, silently reused by the live run); `4f3b254` rebuilt the
+  fixed library from the PR6860 overlay tree. Author-measured, unwitnessed;
+  no chosen byte in a live `aiMesh`, no pointer/IP, command or rung 5.
+- Sdlmixer W194 (`61b9580`) mined the adjacent AIFF sibling under the
+  stalled-lane doctrine: CVE-2026-122329's fix `3448684` applies the same
+  one-line change to pinned `release-3.2.4` `decoder_aiff.c:93`. The sliced
+  `:86-98` harness gives ASan `WRITE of size 4` at `decoder_aiff.c.vuln:95`,
+  `[32,1056) 'buffer'`, gdb chosen `5a5a5a5a` at `buffer+1024`, and
+  `bash lab/frontier/sdlmixer2shell/harness/aiff/check.sh` reports 134 PASS /
+  0 FAIL (trace `1bdfc38d…43ad183`) with clean fixed runs. Separate CVE and
+  grade; author-observed direct-call rungs 1-4 only, unwitnessed, no AIFF-C
+  file, real decoder, consumer, wire, pointer or command. WAV row unchanged.
+- Imgproxy W2's fine-TIFF attribution was corrected (`24221c9`, witness W185
+  #3318, libvips W17 at `171f509`): the five-case log had only three `Started`
+  lines under WORKERS=1, so the later timeouts were queue starvation. The
+  isolated one-request `provision/isolated_probe.py`
+  (`97f7f28c…526f4b4c0`) measures HTTP 422 "Source image resolution is too
+  big" in vulnerable 4.0.0 (~6 ms, MaxSrcResolution=50,000,000 before libvips
+  header load) against 500 `image: dimension overflow` in the fixed tree
+  (~7 ms). The ~8.59 GB zero-fill stall explanation is WITHDRAWN. W185
+  ESTABLISHED ICO rungs 1-4 on clean replay and the HTTP probes only at
+  header/processing-entry scope, NO r5. Libvips W16 had placed chosen `0x41`
+  bytes in the live `vips_tracked` size field at `data-16` with a free-time
+  warning (`run-fine.sh`, fail=0) — size arithmetic, not a pointer.
+- Four admissions (`e29a608` fontforge/libraw 126/127, `e429fa1` fltk/synchronet
+  128/129) and the peer's README fold `eb25f57` were already committed and
+  are left intact. LibRaw W197's real `dcraw_emu` lane stays rungs 1-3 plus
+  PARTIAL rung 4: chosen offset 68,644 with a zero halfword and all
+  byte-control attempts preserved as negatives. No rung cell moved in this
+  fold; all checkers GREEN at yield.

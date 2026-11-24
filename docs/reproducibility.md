@@ -6753,7 +6753,19 @@ OpenEXR rows and adds the recipes absent from the index.
   (13/13 PASS) sends crafted TIFF bytes through a loopback wire consumer to
   `vips_object_sanity()` on 8.18.2; fixed rejects `image: dimension overflow`.
   W15 records the downstream version claim (imgproxy 4.0.0–4.0.5 bundles
-  libvips 8.18.2, >=4.0.6 bundles >=8.18.3); no imgproxy process was built.
+  libvips 8.18.2, >=4.0.6 bundles >=8.18.3); the old "no imgproxy process was
+  built" wording is obsolete — W1/W2 built pinned imgproxy binaries.
+- **Libvips W16/W17, allocator field and closed HTTP route**: `bash
+  lab/frontier/libvips2shell/real/run-fine.sh` (26 assertions, `RESULT fail=0`)
+  loads a real 154-byte fine TIFF header and writes chosen `0x41` bytes into
+  the live `vips_tracked` size field at `data-16`, with `vips_free: too much
+  free` at teardown; that field is size arithmetic, not a pointer, and the
+  write is still a direct pinned paint call on a programmatically created
+  image. Structurally imgproxy has no TIFF thumbnail or shrink-on-load route
+  (`SupportsThumbnail: false`); the measured endpoint blocker is imgproxy's
+  50M-pixel guard (HTTP 422 before libvips header load), not the W7/W8 ~8.59 GB
+  zero-fill stall, whose attribution is WITHDRAWN. No paint frame, chosen byte,
+  pointer or command in the imgproxy process; rung 5 UNKNOWN.
 - **Libfontenc W181/W183**: `realpath/evidence/ramp/README.txt` records the
   two-mapping identity ramp (195840 OOB 16-bit stores at `encparse.c:492`);
   `sh realpath/evidence/ptrctrl/run.sh` overwrites mapping2's live `sm->map`
@@ -6828,6 +6840,15 @@ OpenEXR rows and adds the recipes absent from the index.
 
 - **Libfontenc W187/W188**: `bash realpath/evidence/xlive/run-xfptr.sh` inside a loopback Xvfb, with the test-only `interpose.c` LD_PRELOAD, sets `m3->recode` to the chosen marker address twice on crafted input (client_rc=0, no crash); vulnerable safe leaves `0x7ffff7fb2885`, fixed `5920c6e` leaves `0x7ffff7fb2891`, and `FontEncRecode` is called only on m1, allocated before the buffer, so zero marker calls occur. W188 repaired the replay's Xvfb target selection; matrix and logs in `realpath/evidence/xfptr/replay-w188/`. Consumer behaviour blocks control-flow diversion in the live server; rung 5 stays UNKNOWN. Report §3.9.
 - **Sdlmixer W191**: `harness/realwav/gdb-map.cmd` plus `lut_maps_check.py` compare every saved-RIP value formable from the 512 pinned LUT words with the live no-SSP process's 33 mappings (`evidence/LUT-MAPS.out`, `MAPS.sha256`, 5/5 OK): zero of 712 ordered word pairs, zero preserved-high `0x00005555` values and zero `0x00000000` non-PIE partials are mapped, and no LUT word lies in `[0x400000,0x800000)`. Derived negative, not a rung change.
+- **Sdlmixer W194, adjacent AIFF lane**: `bash
+  lab/frontier/sdlmixer2shell/harness/aiff/check.sh` slices pinned
+  `release-3.2.4` `decoder_aiff.c:86-98` under `#line` into the same 12 binaries;
+  expect 134 PASS / 0 FAIL, trace `1bdfc38d…43ad183`, ASan `WRITE of size 4` at
+  `decoder_aiff.c.vuln:95` with `[32,1056) 'buffer'`, and gdb chosen `5a5a5a5a`
+  at `buffer+1024`, with clean fixed runs. CVE-2026-122329 has its own fix
+  `3448684` and grade; this is author-observed direct-call rungs 1-4 only,
+  unwitnessed, with no AIFF-C file, real decoder build, consumer, wire, pointer
+  or command. Full recipe: `harness/aiff/AIFF.md`. The WAV charter row stands.
 - **BusyBox W3**: `sh run-malloc.sh` (calling `malloc_probe.py`) writes `malloc_evidence.log` sha256 `98d1130912f849d815a2abe2df0733430814ef024ee463263414ec60b7003082`: chunk sizes above `av->system_mem = 0x21000` abort with `malloc(): corrupted top size`, so the `-1` house-of-force wrap is closed; a guard-passing value returns `rbuf+80` (inside the overflow) under gdb at `DELTA=80` across three ASLR-shifted runs. No chosen pointer in a live object; the witnessed rungs 1-4 grade is unchanged.
 - **SofiaSip W14**: raw probe evidence for the clean-archive replay committed under `libbuild/evidence/w14/`; no grade or claim change.
 
@@ -6900,6 +6921,20 @@ advisory itself makes no remote claim.
   `lab/frontier/assimp2shell/placement/evidence/w4-negative.log`,
   `harness/placement_probe.cpp`. Negative only; rung-4 write and witness #3277
   unchanged.
+- **Assimp W5, MAT4 mismatch and replay recipe defect** (`20cf486`, `4f3b254`,
+  `075eaa0`): copy the gitignored `pins/assimp-6.0.6.tar.gz` into a clean
+  archive, then `bash lab/frontier/assimp2shell/harness/run-w5.sh`; it builds
+  its own minimal vulnerable, PR6860-fixed and plain libraries and checks
+  `w5/evidence/w5.log` for 13 PASS / 0 FAIL. Pinned MAT4/FLOAT has
+  `elemSize=64`: `mat4pos-count1.gltf` gives ASan `WRITE of size 64` after a
+  12-byte `aiVector3D`, callback-recorded chosen `54415546` at the first OOB
+  offset and a glibc abort in the plain build, while the fixed hunk gives
+  `scene=ok`; `mat4idx-count1.gltf` gives a 64-byte stack write into a 4-byte
+  local and still aborts under the hunk, preserving the Indexer negative. The
+  first clean run's 10 PASS / 3 FAIL came from building the fixed library from
+  vulnerable source (the live run had reused W1's library); `4f3b254` corrected
+  the recipe. Author-measured, unwitnessed; no chosen byte in a live `aiMesh`,
+  no pointer/IP, command or rung 5.
 - **Munt W179, chosen-byte allocator metadata and watchpoint negative**
   (`6badbb8`, replay `db81c42`): after `real/build_and_run.sh`, run
   `cd lab/frontier/munt2shell/real && sh shape_probe.sh && sh watch_probe.sh`
@@ -6913,20 +6948,27 @@ advisory itself makes no remote claim.
   ignored input) matched all seven rc/header cases and both watchpoint runs;
   not a witness verdict. No upstream object targeted, no pointer/IP, command,
   host or wire; grade unchanged.
-- **Imgproxy W2, fine-geometry TIFF over HTTP** (`5d5b455`, replay `4a1977f`):
-  `python3 lab/frontier/imgproxy2shell/provision/http_probe.py <imgproxy-binary>
+- **Imgproxy W2, fine-geometry TIFF over HTTP** (`5d5b455`, replay `4a1977f`,
+  corrected by `24221c9`): `python3 lab/frontier/imgproxy2shell/provision/http_probe.py <imgproxy-binary>
   <libvips-libdir> <tag> [timeout]` starts a source server on 127.0.0.1:18081
   and imgproxy on 127.0.0.1:18080; the `fine_tiff` case is
   `rs:fill:16:16/f:tiff/plain/fine.tif` with the 154-byte
-  `fine.tif` (`sha256=c3e12050…157d44`, `ls=2^32-16`). Vulnerable 8.18.2:
-  `safe=200`, `manyband=500`, three crafted TIFFs time out (8.06–8.09 s);
-  fixed 8.18.2 + patch: `safe=200`, all crafted `500` in <2 ms, with
-  `image: dimension overflow` for `fine.tif`. Pinned v4.0.0 source gives no
-  TIFF thumbnail (`SupportsThumbnail: false`) and no shrink-on-load route, so
-  the ~8.59 GB full image stalls rather than reaching `vips_region_paint`.
-  Logs `provision/http-w2fine-{vuln,fixed}.log`. Author `git archive 5d5b455`
-  replay with a 6 s timeout reproduced the controls (fine_tiff 6.11 s); no
-  paint frame, chosen-byte write, pointer, ASan report or witness. Grade
+  `fine.tif` (`sha256=c3e12050…157d44`, `ls=2^32-16`). The vulnerable five-case
+  log has only three `Started` lines under WORKERS=1/CONCURRENCY=1, so the
+  later `fine_tiff`/`tiff9999_tiff` timeouts are queue starvation, not
+  per-fixture decode; fixed requests return 500 `image: dimension overflow`.
+  For the measured leg run `python3
+  lab/frontier/imgproxy2shell/provision/isolated_probe.py`
+  (`sha256=97f7f28c…526f4b4c0`): one fresh source server, one imgproxy process
+  and exactly one GET. Vulnerable 4.0.0 returns HTTP 422 "Source image
+  resolution is too big" in ~6 ms (50M-pixel guard, `config.go:46` /
+  `security/checker.go:65-66`), fixed returns 500 `image: dimension overflow`
+  in ~7 ms. The earlier ~8.59 GB decode/zero-fill stall attribution is
+  WITHDRAWN. Logs `provision/http-w2fine-{vuln,fixed}.log`; details in
+  `PROVENANCE.md` §W2 "Isolated fine.tif correction". Witness W185 (#3318)
+  replayed the ICO rungs 1-4 on a clean archive and graded the HTTP probes
+  ESTABLISHED only at header/processing-entry scope, NO r5. No TIFF paint
+  frame, chosen-byte write, pointer or ASan report in the endpoint. Grade
   unchanged: ICO rungs 1-4, TIFF limb rung 4 at header/entry only, r5 UNKNOWN.
 - **FontForge W196 staged; replay hash NIT** (`13a2a94`, `e5e4a65`, `024790a`):
   `cd lab/frontier/fontforge2shell && ./run-all.sh`, or from a clean archive of
