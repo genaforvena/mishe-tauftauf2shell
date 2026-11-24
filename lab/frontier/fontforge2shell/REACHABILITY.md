@@ -199,16 +199,37 @@ size 4` at :1751, patched ASan and the in-bounds first-import control are
 clean. Superseded size-class attempts are preserved in `FILECHOICE.md`.
 No pointer/IP, command, ASLR study or witness verdict, NO r5.
 
+## W8 (2026-11-24 21:0xZ) — the same overflow through real font OPEN
+
+`OPENPATH.md` closes the "Import() is the only real entry point" gap at the
+labeled headless scripting scope. `open-path.ff` calls `Open("truncated.pcf")`
+on the unchanged pinned file: `bOpen:1803` -> `LoadSplineFont:1420` ->
+`ReadSplineFont:1369` -> `_ReadSplineFont` (`:1233` for this file's `\1fcp`
+magic, `:1272` for a `.pcf` suffix) -> `SFFromBDF:2442` ->
+`SFImportBDF:2164` -> `PcfParse:1831` -> the same `WRITE of size 4` at
+`:1751`. `gdb-open-bt.out` proves the full backtrace. Vulnerable plain
+exits 134, vulnerable ASan exits 1 with `4 bytes before 16-byte region`,
+patched plain and patched ASan exit 0, and the complete-table `open-
+complete.ff` control exits 0 on both vulnerable builds. `gdb-open-path.out`
+measured `glyph=-1 i=3`, RHS `0x53494d` and bytes `4d 49 53 00`
+("MIS\0") at `encs-4` — the W2 chosen bytes now reached by file OPEN.
+Negative lane: `fontforge truncated.pcf` with no `-script` exits 0 on both
+builds and produces output byte-identical to the complete control, so bare
+command-line open is NOT claimed. No pointer/IP, command, ASLR study or
+witness verdict; NO r5.
+
 ## Scope
 
-Headless CLI scripting `Import()` on this host. Chosen bytes at a
-file-chosen offset before `encs` are now measured (W2/W4), as are the
-plain-build abort, the high-half glibc metadata consumer (W2/W3), a
-low-half chunk-size rewrite accepted by `free()` into tcache bin 7 (W5),
-and a real gettext consumer of that poisoned entry that writes past the
-physical chunk on a second `Import()` (W6), plus FILE-BYTES chosen by a
-one-byte PCF variant written 40 bytes past that chunk's usable area by a
-real `pcf_properties` allocation (W7). The GUI `Import()` menu
-(GTK-3 dev packages absent, `ENABLE_GUI=OFF` builds), other loaders,
+Headless CLI scripting on this host: both `Import()` (W1-W7) and, from W8,
+`Open()` of a `.pcf` file. Chosen bytes at a file-chosen offset before
+`encs` are measured (W2/W4), as are the plain-build abort, the high-half
+glibc metadata consumer (W2/W3), a low-half chunk-size rewrite accepted
+by `free()` into tcache bin 7 (W5), a real gettext consumer of that entry
+that writes past the physical chunk on a second `Import()` (W6), and
+FILE-BYTES chosen by a one-byte PCF variant written 40 bytes past that
+chunk's usable area by `pcf_properties` (W7). W8 reaches the same overflow
+and the same chosen bytes through file OPEN rather than import. The GUI
+`Import()`/File-Open menus (GTK-3 dev packages absent, `ENABLE_GUI=OFF`
+builds), bare command-line file open (W8 negative), other loaders,
 pointer/IP control, command execution, ASLR/grooming, and independent
 witness replay of the real-build path remain UNKNOWN.

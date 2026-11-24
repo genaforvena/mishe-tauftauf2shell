@@ -77,3 +77,13 @@ and output hashes, the file-chosen byte comparison, return codes and the
 two superseded size-class attempts. No loopback service, GUI or external
 target was involved. This extension is author-side and unwitnessed, with
 no grade change.
+
+W8 (2026-11-24 21:0xZ): no external reads, no new source and no new PCF
+bytes. Reused the pinned `truncated.pcf` / `complete.pcf` and the same
+local plain, patched and ASan builds. The two scripts (`open-path.ff`,
+`open-complete.ff`) and gdb command files are local text; all transcripts
+are in `OPENPATH.md` with input, command and output hashes. `fontforge
+truncated.pcf` without a script was also run locally as a negative lane;
+no loopback service, GUI or external target was involved. Author-side and
+unwitnessed, with no grade change.
+

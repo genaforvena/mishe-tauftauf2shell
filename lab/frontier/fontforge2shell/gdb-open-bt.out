@@ -1,0 +1,23 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c33eb0, toc=0x555555c36f10, sf=0x555555c360d0, map=0x555555c36ed0, b=0x555555c49010, encname=0x555555c48f90) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+#0  PcfReadEncodingsNames (file=0x555555c33eb0, toc=0x555555c36f10, sf=0x555555c360d0, map=0x555555c36ed0, b=0x555555c49010, encname=0x555555c48f90) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+#1  0x00005555558dc631 in PcfParse (file=0x555555c33eb0, toc=0x555555c36f10, sf=0x555555c360d0, map=0x555555c36ed0, b=0x555555c49010, encname=0x555555c48f90) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1831
+#2  0x00005555558ddfd3 in SFImportBDF (sf=0x555555c360d0, filename=0x555555c21ca0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/truncated.pcf", ispk=2, toback=0, map=0x555555c36ed0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2164
+#3  0x00005555558df417 in SFFromBDF (filename=0x555555c21ca0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/truncated.pcf", ispk=2, toback=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2442
+#4  0x000055555571a48f in _ReadSplineFont (file=0x555555c21d00, filename=0x555555c21be0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/truncated.pcf", openflags=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/splinefont.c:1233
+#5  0x000055555571b4e9 in ReadSplineFont (filename=0x555555c21be0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/truncated.pcf", openflags=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/splinefont.c:1369
+#6  0x000055555571b735 in LoadSplineFont (filename=0x555555c21b80 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/truncated.pcf", openflags=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/splinefont.c:1420
+#7  0x000055555567b422 in bOpen (c=0x7fffffffd590) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:1803
+#8  0x0000555555699bb3 in docall (c=0x7fffffffddc0, name=0x7fffffffd830 "Open", val=0x7fffffffdc70) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9225
+#9  0x000055555569a1db in handlename (c=0x7fffffffddc0, val=0x7fffffffdc70) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9338

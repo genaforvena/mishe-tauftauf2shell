@@ -1,4 +1,5 @@
-# fontforge2shell — rungs 1-4 ESTABLISHED (direct call + real Import())
+# fontforge2shell — rungs 1-4 ESTABLISHED (direct call + real Import()/Open())
+
 
 ## Ground truth (provisioning only; no external probes)
 
@@ -156,6 +157,17 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   poisoned-chunk offset `0x40` from `0x17` to `0x1a`. Chosen bytes now live
   in a real consumer's overflow; they are file integers, not an address.
   No pointer/IP, command, ASLR study or witness verdict; NO r5.
+  W8 (`OPENPATH.md`, author-side, no grade change): the unchanged pinned
+  truncated PCF reaches the same `:1751` `WRITE of size 4` through a
+  distinct real entry point, `Open("truncated.pcf")` (`bOpen:1803` ->
+  `LoadSplineFont:1420` -> `ReadSplineFont:1369` -> `SFFromBDF:2442` ->
+  `SFImportBDF:2164` -> `PcfParse:1831`), not only `Import()`. Vulnerable
+  plain rc 134, vulnerable ASan rc 1 (`4 bytes before 16-byte region`),
+  patched plain and patched ASan rc 0, complete-table control rc 0; gdb
+  measured the same `4d 49 53 00` ("MIS\0") at `encs-4`. Bare
+  `fontforge file.pcf` without a script is a negative lane (rc 0, no
+  parse). GUI open, pointer/IP, command and ASLR remain UNKNOWN; NO r5.
+
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study or real-process marker; no rung 5.
@@ -170,7 +182,7 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   real-build path, including W2's real-process chosen bytes, is author-side
   with no witness verdict. GUI `Import()`, pointer/IP, command and ASLR
   remain UNKNOWN.
-  The W3, W5, W6 and W7 allocator/consumer measurements are author-side as
-  well; no claim beyond rungs 1-4 is made from them.
+  The W3, W5, W6, W7 and W8 allocator/consumer and Open-path measurements
+  are author-side as well; no claim beyond rungs 1-4 is made from them.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.
