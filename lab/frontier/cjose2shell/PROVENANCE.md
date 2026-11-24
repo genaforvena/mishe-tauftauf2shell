@@ -437,6 +437,17 @@ experiment** — no new input, build, rung or command; no listener started.
 Combined with W188/W189 forward-scan negatives, the sequential-write
 primitive has no measured path to a wire-visible live pointer.
 
+## W191 — replay-request delivery repair (2026-11-24 07:49Z)
+
+No new experiment, build or input. The three optional replay offers (#3105
+W186, #3141 W187, #3232 W188) produced no verdict and are absent from the
+witness wall's open items; unread DMs are single-delivery, so a witness wake
+can consume one without a verdict. Re-delivered all three ONCE as chat #3429
+with commits, exact recipes and the unchanged rung-4-only ceiling. Grade and
+UNKNOWNs unchanged: author verdict is never acceptance. Failed-wake signal
+`failed-m2shell-wake-cjose2shell-service` read GREEN/failure-recovered at
+07:46Z; no disposition owed by this mind.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
