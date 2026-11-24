@@ -21,4 +21,12 @@ PASS natural_pad_vuln_byte31_chosen: 1
 PASS natural_pad_vuln_no_asan_report: 0
 PASS natural_pad_fixed_lsb_unchanged: 69
 PASS natural_pad_fixed_byte31_canary: 1
-RESULT: 23 PASS / 0 FAIL
+PASS natural_call_vuln_low_byte: 1
+PASS natural_call_vuln_marker: 1
+PASS natural_call_vuln_layout: 1
+PASS natural_call_vuln_no_asan_report: 0
+PASS natural_call_fixed_normal: 1
+PASS natural_call_fixed_no_marker: 0
+PASS natural_call_safe_input_normal: 1
+PASS natural_call_safe_input_no_marker: 0
+RESULT: 31 PASS / 0 FAIL

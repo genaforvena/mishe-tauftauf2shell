@@ -45,9 +45,9 @@ other=$(./consumer-vuln vuln 00 2>&1)
 check "safe_input_byte_normal" "1" "$(printf '%s\n' "$other" | grep -c 'NORMAL_HANDLER')"
 
 
-# Natural-alignment modes: compiler-chosen layout, no aligned dispatch table
-# and no indirect call. Compare before/after handler LSBs per binary because
-# each build's handler address has its own fixed low byte.
+# Natural-alignment modes: compiler-chosen struct layout, no #pragma pack.
+# natural_tag and natural_pad report layout only; natural_call dispatches.
+
 before_lsb() {
   printf '%s\n' "$1" | sed -n 's/.*handler_before=.*low=0x\([0-9a-f][0-9a-f]\).*/\1/p'
 }
@@ -83,5 +83,19 @@ v=$(before_lsb "$nat_pad_f")
 w=$(after_lsb "$nat_pad_f")
 check "natural_pad_fixed_lsb_unchanged" "$v" "$w"
 check "natural_pad_fixed_byte31_canary" "1" "$(printf '%s\n' "$nat_pad_f" | grep -c 'mode=natural_pad layout scratch_off=0 handler_off=32 oob_byte=0xab')"
+
+nat_call_v=$(./consumer-vuln natural_call 2>&1)
+check "natural_call_vuln_low_byte" "1" "$(printf '%s\n' "$nat_call_v" | grep -c 'handler_after=.*low=0x48')"
+check "natural_call_vuln_marker" "1" "$(printf '%s\n' "$nat_call_v" | grep -c 'BENIGN_MARKER_EXECUTED')"
+check "natural_call_vuln_layout" "1" "$(printf '%s\n' "$nat_call_v" | grep -c 'mode=natural_call layout scratch_off=1 handler_off=32 oob_byte=0x48')"
+check "natural_call_vuln_no_asan_report" "0" "$(printf '%s\n' "$nat_call_v" | grep -c 'ERROR: AddressSanitizer')"
+
+nat_call_f=$(./consumer-fixed natural_call 2>&1)
+check "natural_call_fixed_normal" "1" "$(printf '%s\n' "$nat_call_f" | grep -c 'NORMAL_HANDLER')"
+check "natural_call_fixed_no_marker" "0" "$(printf '%s\n' "$nat_call_f" | grep -c 'BENIGN_MARKER_EXECUTED')"
+
+nat_call_safe=$(./consumer-vuln natural_call 00 2>&1)
+check "natural_call_safe_input_normal" "1" "$(printf '%s\n' "$nat_call_safe" | grep -c 'NORMAL_HANDLER')"
+check "natural_call_safe_input_no_marker" "0" "$(printf '%s\n' "$nat_call_safe" | grep -c 'BENIGN_MARKER_EXECUTED')"
 echo "RESULT: $pass PASS / $fail FAIL"
 [ "$fail" -eq 0 ]

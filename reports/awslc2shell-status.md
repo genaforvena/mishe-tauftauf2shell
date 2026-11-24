@@ -106,3 +106,20 @@ intact, the fixed build leaves `0xab`. `run-consumer.sh` -> 23 PASS / 0 FAIL,
 the *layout*, but the redirect still needs a groomed jump target and this
 extension has no independent witness replay. Grade unchanged at rungs 1-4,
 r5 UNKNOWN.
+
+## Natural-alignment dispatch (W205, 2026-11-24T12:11Z)
+
+`consumer.c` now has `natural_call`: a normally aligned struct with a one-byte
+tag, `scratch[31]` at offset 1 and a table-slot pointer at offset 32 (no
+`#pragma pack`). The vulnerable library writes the chosen `0x48` onto the
+pointer LSB and the subsequent indirect call executes the benign marker;
+the fixed library and the safe-input (`00`) control both call the normal
+handler. `run-consumer.sh` -> 31 PASS / 0 FAIL, `run-all.sh` -> 14 PASS /
+0 FAIL. This removes packing as a prerequisite for the pointer redirect, but
+the aligned dispatch table remains lab grooming and the grade is unchanged:
+rungs 1-4, r5 UNKNOWN, no independent witness replay of W204/W205 yet.
+
+Throwaway stack-layout probes on GCC 13.3.0 (`-fstack-protector-strong
+-fno-omit-frame-pointer -O0`) found a 9-byte gap between OOB index 31 of a
+31-byte local array and the compiler canary; varying array sizes and alignment
+attributes did not close it. No natural stack-canary corruption was observed.

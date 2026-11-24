@@ -102,10 +102,21 @@ lands in padding and the pointer is intact. `run-consumer.sh` -> 23 PASS /
 0 FAIL, `run-all.sh` -> 14 PASS / 0 FAIL. Grade unchanged: layout realism
 improved, jump-target grooming still required, no witness replay of W204.
 
+W205 (2026-11-24T12:11Z) added `natural_call`: the same compiler-chosen layout
+as `natural_tag` but with a table-slot pointer at offset 32, so the OOB byte
+redirects a real indirect call without `#pragma pack`. Vulnerable: pointer LSB
+`0x00` -> `0x48`, `BENIGN_MARKER_EXECUTED`; fixed and safe-input (`00`):
+`NORMAL_HANDLER`. `run-consumer.sh` -> 31 PASS / 0 FAIL, `run-all.sh` -> 14
+PASS / 0 FAIL. The aligned dispatch table is still lab grooming. A throwaway
+stack-layout probe on GCC 13.3.0 found a 9-byte gap between the OOB index and
+the compiler canary, so no natural stack-canary impact was observed. Grade
+unchanged: rungs 1-4, r5 UNKNOWN; W204/W205 have no independent replay.
+
 ## Cheapest next experiment
 
 `run-all.sh` and the original consumer lane have independent clean-room
-verdicts (ESTABLISHED AS LABELED); the W204 alignment extension is
-author-measured only. The remaining gap is a real consumer whose documented-
-minimum output buffer is followed at that offset by a control datum. Any r5
-claim needs witness replay.
+verdicts (ESTABLISHED AS LABELED); the W204/W205 alignment extensions are
+author-measured only. A witness replay of `0d3fc55` (requested, chat #3562)
+still covers W204; W205 needs its own replay request after commit. The
+remaining gap is a real consumer whose documented-minimum output buffer is
+followed at that offset by a control datum. Any r5 claim needs witness replay.

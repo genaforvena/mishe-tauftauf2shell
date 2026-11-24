@@ -148,3 +148,32 @@ source-bound alignment inference for compiler layouts only: a one-byte leading
 field puts the OOB byte on a naturally aligned pointer's LSB; without it the
 byte hits padding. The redirect still needs a groomed jump target and stays
 rung 4, NO r5.
+
+### Natural-alignment dispatch and stack-frame bound (2026-11-24T12:11Z, W205)
+
+`consumer.c` gained `natural_call`: `struct { uint8_t tag; uint8_t scratch[31];
+void (**handler)(void); }` with NO `#pragma pack`. Compiler-chosen alignment
+puts scratch at offset 1 and handler at offset 32, so the OOB byte is the low
+byte of the 256-byte-aligned table-slot address stored in handler. Unlike
+W204's report-only modes, this one dispatches through the pointer after the
+update.
+
+- vuln `natural_call`: `handler_before low=0x00`, `handler_after low=0x48`,
+  `BENIGN_MARKER_EXECUTED`, layout `scratch_off=1 handler_off=32
+  oob_byte=0x48`; no ASan report (byte lands inside the enclosing allocation).
+- fixed `natural_call`: pointer low stays `0x00`, `NORMAL_HANDLER`, no marker.
+- vuln `natural_call 00`: pointer low stays `0x00`, `NORMAL_HANDLER`.
+
+`sh build-consumer.sh`, then `sh run-consumer.sh` -> 31 PASS / 0 FAIL
+(`consumer-replay.log`); `sh run-all.sh` -> 14 PASS / 0 FAIL (`replay.log`).
+Packing is not needed for the layout or the indirect call; the 256-byte-aligned
+dispatch table is still lab grooming.
+
+Stack-frame bound (throwaway layout probes on host GCC 13.3.0 with
+`-fstack-protector-strong -fno-omit-frame-pointer -O0`, not a committed
+harness): a 31-byte local array is at rbp-0x30, its OOB index 31 at rbp-0x11,
+and the compiler canary at rbp-8 — 9 bytes short. Preceding arrays of sizes
+1..31 and `aligned(1..8)` attributes did not change that delta; scalar locals
+and a trailing 8-byte array were placed below the scratch array. No natural
+stack-canary hit was observed. Positioning the stack pointer deliberately at
+the canary would be synthetic grooming, not a naturally occurring layout.
