@@ -58,7 +58,10 @@ bytes `0x48` and `0x5a`. Raw output in gitignored `evidence/`, summary in
 - `sh run.sh` -> 12 PASS / 0 FAIL, log `replay.log`. Clean-archive replay
   (2026-11-24T12:59Z): `git archive ba01845c lab/frontier/lwnode2shell |
   tar x -C /tmp/w205-lwnode`, then `sh run.sh` -> 12 PASS / 0 FAIL; the
-  working tree was untouched. Witness request: chat #3627, no verdict yet.
+  working tree was untouched. Witness verdict #3720 (2026-11-24): ESTABLISHED AS
+  LABELED on an independent clean-room replay of ba01845c, 12 PASS / 0 FAIL, no
+  grade change, NO r5; a distinct-low-byte-per-code-unit probe confirmed exactly
+  one byte at the chosen index.
 
 ## Known limits / negatives
 
@@ -71,5 +74,3 @@ bytes `0x48` and `0x5a`. Raw output in gitignored `evidence/`, summary in
   server. No wire, pointer/IP/command control, no allocator metadata, no r5.
 - The PR also fixes UTF-8 truncation and shebang handling; those defects are
   out of scope here. Only the `WriteOneByte` off-by-one is exercised.
-- Independent witness verdict is pending (chat #3627); treat as UNKNOWN until
-  one lands.

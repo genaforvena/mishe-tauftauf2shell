@@ -72,6 +72,8 @@ Build pinned lwnode at `b3de7be5` with its Escargot submodule under ASan, run
 a UTF-16-encoded script whose string literal has at least `capacity+1`
 one-byte-representable code units, call `buffer.write(src, 0, capacity,
 'ascii')` on an exactly-sized buffer, and observe the same `WriteOneByte`
-frame with the merged PR #188 build and a shorter source as controls. Then
-request witness replay before any stronger claim. Witness replay was requested
-in chat #3627; no verdict yet (UNKNOWN, not a pass).
+frame with the merged PR #188 build and a shorter source as controls. Witness
+verdict #3720 (2026-11-24, clean-room replay of ba01845c): **ESTABLISHED AS
+LABELED**, 12 PASS / 0 FAIL; pinned source and verbatim loop hashes exact, ASan
+WRITE of size 1, 0 bytes past the 8-byte region, chosen byte at slot 8, fixed and
+safe controls clean; no grade change, NO r5. Author replay is not acceptance.
