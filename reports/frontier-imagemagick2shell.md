@@ -1,9 +1,12 @@
 # Frontier brief: ImageMagick stream pixel-buffer reuse (imagemagick2shell)
 
-**STAGED 2026-11-23 W183.** This brief, a pinned vulnerable/fixed/plain lab
-with a replayable evidence matrix, and a registered two-pane target window
-exist. Claim sources, exact pins and the replay are below. No external system
-was probed; all inputs are local.
+**STAGED 2026-11-23 W183; WITNESS VERDICT 2026-11-24 W181 (DM #3204):
+ESTABLISHED rungs 1-4 at the labeled direct-call/in-process harness scope;
+NO r5; file/coder reachability UNKNOWN (§8).** This brief, a pinned
+vulnerable/fixed/plain lab with a replayable evidence matrix, and a
+registered two-pane target window exist. Claim sources, exact pins, the
+replay and the independent verdict are below. No external system was
+probed; all inputs are local.
 
 ## 1. Verified ground truth (claims, not acceptance)
 
@@ -111,16 +114,18 @@ the real ImageMagick stream cache handlers with real pixel-queue data.
 **Ceiling / UNKNOWN:** this is a direct-call/in-process harness against the
 real library, not the `magick stream` CLI: no crafted image file, no decoder
 path, no server, socket or wire, no allocator grooming into a live object, no
-pointer/IP control, no command, no witness replay, no rung 5. The advisory's
-"crafted set of images" reachability through a specific coder is not
-reproduced here and stays UNKNOWN. The vulnerability's CVSS is LOW and
+pointer/IP control, no command, no rung 5. The independent witness replay
+(§8) ESTABLISHED rungs 1-4 at exactly this labeled scope and explicitly
+excluded file/coder reachability and the CLI `-extract` READ from the verdict.
+The advisory's "crafted set of images" reachability through a specific coder
+is not reproduced here and stays UNKNOWN. The vulnerability's CVSS is LOW and
 availability-only; this brief ranks it by tractability, not by hype.
 
 ## 5. Cheapest next steps for a dedicated mind
 
-1. Replay `sh lab/frontier/imagemagick2shell/run-all.sh` in a clean archive
-   and request an independent witness reproduction of the ASan WRITE and the
-   chosen-byte line.
+1. DONE (W181): an independent witness replayed `sh
+   lab/frontier/imagemagick2shell/run-all.sh` from a clean archive and
+   reproduced the ASan WRITE and chosen-byte line; verdict in §8.
 2. Find the actual coder whose `QueueAuthenticPixels()` region can exceed the
    first image geometry under attacker control, and reproduce the same
    overflow through `magick stream` on a crafted image file. Until that
@@ -141,7 +146,8 @@ CLI reachability is still UNKNOWN. Operator owns admission.
 
 Verified at 00:34Z: all five `PINS.sha256` entries pass and `REPLAY.log` is
 `385bbe95d648dd19981d0d42df483c9ebeb619bb078fd3a2a2c9789bac01667a`.
-An independent witness replay was requested (DM #3156); no verdict yet.
+The independent witness replay requested in DM #3156 returned its verdict in
+DM #3204 (§8).
 
 A real `magick stream` CLI exists in the ASan build at
 `vuln/utilities/magick`. With a locally generated 1x1 MIFF and
@@ -169,7 +175,50 @@ change decode geometry. An empirical sweep of two-frame growing MIFF and PNM
 inputs without `-extract` was ASan-clean on both vulnerable and CVE-only
 builds. This is a bounded negative for **this build's compiled coder set**;
 other builds, delegates and external callers remain UNKNOWN. Grade unchanged:
-rungs 1-4 by direct calls, no crafted-file reproduction of this CVE, no
-witness verdict, no rung 5. Next: witness replay; only a crafted input that
-drives `stream_info->pixels` growth on a stable image pointer could raise
-file reachability above UNKNOWN.
+rungs 1-4 by direct calls, independently ESTABLISHED (§8); no crafted-file
+reproduction of this CVE, no rung 5. Only a crafted input that drives
+`stream_info->pixels` growth on a stable image pointer could raise file
+reachability above UNKNOWN.
+
+## 8. Independent witness verdict (W181, 2026-11-24; DM #3204)
+
+VERDICT: **ESTABLISHED rungs 1-4** at the labeled direct-call/in-process
+harness scope; **NO r5**. File/coder reachability and the CLI `-extract` READ
+remain UNKNOWN and were explicitly excluded per DM #3164. This is independent
+replay, not a claim that the advisory "crafted images" path is reachable.
+
+The witness replayed from a clean `git archive a073540` (its
+`lab/frontier/imagemagick2shell` tree byte-identical at HEAD `7091755`); the
+live tree was untouched. All 5/5 `PINS.sha256` entries passed and the author's
+`REPLAY.log` sha256
+`385bbe95d648dd19981d0d42df483c9ebeb619bb078fd3a2a2c9789bac01667a` was
+confirmed. Only the missing plain static core lib was rebuilt (46s); the
+vulnerable/fixed ASan libs left by the interrupted W180 were pin-hashed
+intact. `sh run-all.sh` reproduced every leg in 3.5s. Witness `evidence.log`
+sha256 `5547d698cfac58e5934c7754304134ee5e5578c36634bcad0d29c53bd1ce40d3`;
+normalized diff against `REPLAY.log` empty except build path and BuildId,
+both build-instance artifacts.
+
+Exact observed legs: vulnerable ASan attack 1x1->8x4 rc 1, "heap-buffer-
+overflow", "WRITE of size 1", frame #0 `StreamImagePixels` at
+`vuln/MagickCore/stream.c:1576`, #1 `WriteStreamImage:1279`, #2
+`SyncAuthenticPixelsStream:2778`; full report (sha256
+`9f9afa6b8b8acd72a8fb68b7b84c66795170f4010ad0b35397e173afa130ae58`) says
+`0x509000000283 is located 0 bytes after 3-byte region
+[0x509000000280,0x509000000283)`, allocation via
+`AcquireAlignedMemory_POSIX memory.c:278` / `AcquireAlignedMemory:357` <-
+`WriteStreamImage:1260` <- `QueueAuthenticPixelsStream:927` <- `harness.c:98`,
+shadow byte `[03]`. Same-size 2x2->2x2 control rc 0, 12 bytes
+`41 41 41 42 42 42 43 43 43 44 44 44`; fixed 7.1.2-35 ASan attack rc 0 with
+only the 3 bytes `41 41 41`; plain build both cases rc 0; plain gdb at
+`harness.c:154` gives `pixels[0]@24` = `0x41,0x41,0x41` then `0x42` through
+`0x48`, three copies each. Source-bound: vulnerable `:1251` guards only on
+`image != stream_info->image`, fixed `:1254` adds
+`|| (length > stream_info->length)`.
+
+Honest labeling NIT from the witness (a label, not a contradiction):
+`0x42..0x48` are the harness-defined `0x41+(i%26)` pixel pattern
+(`harness.c:135`), not independently chosen attacker bytes, and geometry
+growth is forced by `harness.c:124-125` assigning `image->columns/rows`.
+Rung 4 is write-content/destination control in-process only: no pointer, IP,
+marker or command. The advisory's code-execution prose stays a claim.
