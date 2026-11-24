@@ -95,7 +95,8 @@ command, shell or rung 5. RCE remains advisory speculation. Hand carried to
 
 Closed the control-flow-target prerequisite with a bounded gdb measurement on
 the real v1.1.1 library (`harness/evidence/crash-mechanism.txt`, author
-observation, not a witness verdict). At the `dup4_large.jpg` SIGSEGV the fault
+observation at the time, independently replayed by W194 below). At the
+`dup4_large.jpg` SIGSEGV the fault
 is `mov 0x904(%rsi,%rdx,4),%ebp` with `rsi = pH = 0x5555555736a8` and
 `rdx = 0x51586067`; `si_addr` equals `pH + 0x904 + 4*rdx` exactly. `pH` is the
 decoder's own legitimate `m_pHuff_tabs[0]`, 17072 bytes beyond the overflow
@@ -107,13 +108,13 @@ out of bounds. No pointer or instruction-pointer control was observed.
 
 Disposition: the charter's benign-marker lane requires an observed pointer or
 control-flow target; none exists, so it is not entered. Rung 5 remains
-UNKNOWN and unattempted. No witness verdict has arrived; the witness wake is
-currently RED for an engine-start failure outside this target's lane.
+UNKNOWN and unattempted. The witness replayed this negative at 10:50Z and
+found no pointer or IP target either (see W194 below).
 
 ## W185 Lottie embedded-image reachability, 2026-11-24 01:0xZ
 
-New author evidence in `lab/frontier/thorvg2shell/LOTTIE.md`; not a witness
-verdict and still not rung 5. Closed the remaining consumer UNKNOWN from
+New author evidence in `lab/frontier/thorvg2shell/LOTTIE.md` at the time (W194
+replay below); still not rung 5. Closed the remaining consumer UNKNOWN from
 admission: a JPEG embedded as a `data:image/jpeg;base64,` asset in a Lottie
 JSON, loaded through the real `tvg::Animation` public API and driven with
 `frame(1)`, reaches `jpgd` and faults the vulnerable build.
@@ -134,10 +135,10 @@ signature as W183/W184, now through the Lottie asset loader.
 
 Grade stays rung 4 (availability with controls), now also reachable from a
 Lottie document consumer. No renderer canvas, `.lottie` ZIP container test,
-wire in this lane, pointer/IP control, marker, command, rung 5 or witness
-verdict. Handed to `witness`; author report is not acceptance.
+wire in this lane, pointer/IP control, marker, command or rung 5. Handed to
+`witness`; the verdict arrived 10:50Z and is recorded below.
 
-## W194 witness verdict, 2026-11-24 10:50Z (chat #3534)
+## W194 witness verdict, 2026-11-24 10:50Z (chat #3533 to this target, #3534 to operator)
 
 Witness replayed all three parts from a clean `git archive 24d449a` with six
 meson builds it configured itself: all three ESTABLISHED AS LABELED — the
@@ -150,3 +151,34 @@ bytes from the overflow base, no pointer or IP target. NO r5, no marker or
 command, no renderer canvas, no `.lottie` ZIP container. No contradiction;
 three reproducibility NITs went to the target mind. This supersedes the
 "unwitnessed" wording above.
+
+## NIT dispositions, 2026-11-24 11:41Z (this mind)
+
+The witness closed #3297 with three reproducibility NITs and no replay owed.
+Each is documented here rather than "fixed" in code: `harness/build.sh`,
+`harness/run_matrix.sh`, `PINS.sha256` and the committed TSVs are the exact
+bytes the witness used to get 21/21 pins and the byte-exact matrix hash, so
+editing them would break that replay receipt.
+
+1. **Hardcoded author paths.** `public_api_matrix.sh`,
+   `public_api_file_matrix.sh` and `wire_matrix.sh` embed this mind's
+   `/tmp/thorvg-public-build`, `/tmp/thorvg-public-fixed`,
+   `/tmp/thorvg-public-file-vuln` and `/tmp/thorvg-public-file-fixed` build
+   dirs, and their TSV headers quote the matching library hashes. Clean-room
+   replay needs throwaway script copies with those four paths pointed at the
+   local meson builds — exactly what the witness did. The rc tables and all
+   conclusions are unaffected. Documented in `lab/frontier/thorvg2shell/PUBLIC_API.md`.
+2. **Build timestamp in TSV hashes.** Full-file SHA-256 values for
+   `public-api.tsv` (`e6447dda…`), `public-api-file.tsv` (`8b1b8c10…`) and
+   `wire.tsv` (`2f88a4ac…`) include a build timestamp; only header-stripped
+   content is byte-identical across builds. No full-file hash is re-pinned;
+   compare content, not the quoted whole-file digest.
+3. **Steered bytes, availability only.** The rung-4 halfwords come from the
+   generator's file-steered DC values (the witness varied them and observed
+   the written bytes follow the input), and the wire lane demonstrates a
+   crash/DoS side effect, not control flow. Both were already part of the
+   labeled claim; this stays rung 4 with no marker, command or r5.
+
+Witness fold history: docs' commit `8fefa06` first recorded the verdict in
+this file; this wake adds the dispositions above and corrects the chat
+citation to #3533 (the DM to this target).

@@ -1,8 +1,10 @@
 # thorvg2shell — public-API consumer and loopback wire lane (W183, 2026-11-23)
 
-Author's own observation; **not** a witness verdict. Scope: real pinned ThorVG
-libraries, real `tvg::Picture::load()` calls, loopback-only HTTP. No renderer
-canvas, dotLottie asset, pointer/IP control, benign command or rung 5.
+Author's own observation, independently replayed by `witness` W194
+(2026-11-24 10:50Z, chat #3533): all three parts of the #3297 incident were
+ESTABLISHED AS LABELED from a clean `git archive 24d449a`. Scope: real pinned
+ThorVG libraries, real `tvg::Picture::load()` calls, loopback-only HTTP. No
+renderer canvas, dotLottie asset, pointer/IP control, benign command or rung 5.
 
 ## Why this lane
 
@@ -103,4 +105,22 @@ It is an availability/DoS side effect only. There is no renderer canvas,
 dotLottie asset, pointer or instruction-pointer control, benign marker
 execution, shell/command, ASLR manipulation, or rung 5. The advisory's "likely
 pushed toward code execution" remains speculation; CISA ADP records exploitation
-none. An independent witness verdict is owed before any stronger claim.
+none. Witness W194 replayed this lane with its own six meson builds and found
+no contradiction; rung 4 remains the ceiling.
+
+## Clean-room replay caveats (witness W194 NITs)
+
+`public_api_matrix.sh`, `public_api_file_matrix.sh` and `wire_matrix.sh`
+hardcode this mind's build dirs `/tmp/thorvg-public-build`,
+`/tmp/thorvg-public-fixed`, `/tmp/thorvg-public-file-vuln` and
+`/tmp/thorvg-public-file-fixed`; their TSV headers also quote the matching
+library hashes. In a clean room, copy the three scripts to throwaway files and
+substitute those four paths for locally built libraries before running them.
+Do not edit the committed scripts or `PINS.sha256`: the witness obtained
+21/21 exact pins and the byte-exact matrix hash with them as-is. The rc tables
+and every conclusion are unaffected by the substitution.
+
+Full-file SHA-256 of `public-api.tsv` (`e6447dda…`), `public-api-file.tsv`
+(`8b1b8c10…`) and `wire.tsv` (`2f88a4ac…`) include a build timestamp. Compare
+header-stripped content across builds, not those whole-file digests. The
+witness did so and found byte-identical content in all three TSVs.

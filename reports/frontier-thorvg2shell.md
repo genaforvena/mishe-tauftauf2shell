@@ -1,8 +1,11 @@
 # frontier brief — thorvg2shell (candidate, rung 4 direct-call)
 
-Status 2026-11-23 21:42Z: locally reproduced up to rung 4 in a decoder-only
-harness. Not admitted, not witnessed, no wire/RCE claim. Target handoff window
-is created by this wake; the operator owns admission.
+Status 2026-11-24 11:41Z: admitted as the 121st route 2026-11-23 22:0xZ;
+`witness` W194 (10:50Z, chat #3533) replayed all three author claims from a
+clean archive and ESTABLISHED them AS LABELED: direct-call rungs 1-4, real
+public-API / loopback-wire reachability, and the no-pointer negative. No rung
+5. This brief records the staged candidate; `reports/thorvg2shell-status.md`
+is the live status and carries the NIT dispositions.
 
 ## Verified ground truth
 
@@ -126,23 +129,32 @@ trigger, clean fixed control, chosen-byte write already demonstrated. Ranking:
 above the screened-out candidates in the wall, comparable to the recently
 staged direct-call targets (cjose, sdlmixer).
 
-Ceiling of this wake: direct calls into the real decoder with lab-crafted JPEG
-bytes and a lab-known construction. No ThorVG application build, no renderer,
-no file/format consumer chain, no server, no socket, no wire/request, no
-pointer or IP control, no command execution, no witness. Advisory claims that
-plain `.jpg` or dotLottie input reaches this decoder are **UNKNOWN** here;
-RCE is advisory speculation and was not attempted. Rung 5 is not claimed.
+Ceiling of this staging brief: direct calls into the real decoder with
+lab-crafted JPEG bytes and a lab-known construction; no ThorVG application
+build, renderer, socket, pointer or command execution at that stage. The
+advisory's plain-`.jpg` and dotLottie reachability was UNKNOWN to this brief;
+both were later measured by the target mind and independently replayed by
+`witness` W194 (see status). RCE remains advisory speculation: no pointer or
+instruction-pointer target was observed, so rung 5 is neither reached nor
+claimed.
 
-## Cheapest next experiment
+## Lanes closed after admission (2026-11-24)
 
-Wire reachability: pick a loopback-only HTTP service that decodes uploaded
-JPEG through ThorVG (or a ThorVG-using dotLottie renderer), serve
-`dup4_large.jpg` as an actual request body, and observe whether the service
-process faults while the fixed build survives. That would move the claim from
-direct-call rung 4 toward rung 5 only with an observed side effect and controls;
-it belongs to the dedicated target mind after admission, not this brief.
+The suggested wire experiment was executed by the target mind (W183) and
+replayed by `witness` W194: a loopback-only `POST /decode` body drives
+`Picture::load()` into `jpgd`, faults v1.1.1 with safe-input and fixed-build
+controls, and leaves v1.1.2 alive. The embedded-JPEG-in-Lottie asset lane
+(W185) and the no-control-flow-target negative (W184) were replayed in the
+same verdict. All three parts are ESTABLISHED AS LABELED at rung 4
+availability; no renderer canvas, `.lottie` ZIP container, pointer/IP control,
+benign marker or command was observed. Rung 5 stays UNKNOWN and unattempted;
+live status and NIT dispositions are in `reports/thorvg2shell-status.md`.
 
 ## Replay
 
 See `lab/frontier/thorvg2shell/PROVENANCE.md` and `REPLAY.md`. Pinned hashes
 in `PINS.sha256`; per-case transcripts in `harness/evidence/`.
+
+Independent replay: witness W194, 2026-11-24 10:50Z (chat #3533), from a clean
+`git archive 24d449a` with six meson builds configured by the witness; all
+three parts ESTABLISHED AS LABELED, no contradiction.

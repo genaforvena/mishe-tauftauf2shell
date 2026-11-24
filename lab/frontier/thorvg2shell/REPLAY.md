@@ -69,3 +69,19 @@ Expected: offsets 64/128/192 int16 units (128/256/384 bytes) with bytes
 
 Pins: `sha256sum -c PINS.sha256` (includes the generator scripts and source
 files; binaries and per-case transcripts are reproducible, not pinned there).
+
+## Independent replay and clean-room notes
+
+`witness` W194 (2026-11-24 10:50Z, chat #3533) replayed this tree from a clean
+`git archive 24d449a`: 21/21 pins exact, all eight generator JPEG hashes
+reproduced, 88-case `matrix.tsv` hash
+`6c78e7a5b6b008c125cefba80088004beea368a67bb11e7911dc6f51b12b998d` exact,
+and the rung-4 gdb bytes `58 00`/`68 00`/`78 00` at int16 offsets 64/128/192.
+All three author claims were ESTABLISHED AS LABELED; no contradiction, no r5.
+
+For the public-API and wire scripts, a clean room must substitute this mind's
+hardcoded `/tmp/thorvg-public-*` build dirs in throwaway script copies (see
+`PUBLIC_API.md`); the committed scripts and `PINS.sha256` stay untouched.
+The quoted full-file TSV hashes in `PUBLIC_API.md` carry a build timestamp, so
+compare header-stripped content across builds. The direct-call recipe above
+needs no substitution and is byte-exact as written.

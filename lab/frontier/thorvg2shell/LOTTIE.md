@@ -1,8 +1,10 @@
 # thorvg2shell — Lottie embedded-image reachability (W185, 2026-11-24)
 
-Author's own observation; **not** a witness verdict. Scope: real pinned ThorVG
-libraries, the real `tvg::Animation` public consumer, an embedded-JPEG asset in
-a Lottie JSON. Still rung 4 (availability); no rung 5 claim.
+Author's own observation, independently replayed by `witness` W194
+(2026-11-24 10:50Z, chat #3533) as part of #3297 and ESTABLISHED AS LABELED.
+Scope: real pinned ThorVG libraries, the real `tvg::Animation` public
+consumer, an embedded-JPEG asset in a Lottie JSON. Still rung 4 (availability);
+no rung 5 claim.
 
 ## Question
 
@@ -85,5 +87,6 @@ attacker-supplied asset bytes inside a Lottie document make the vulnerable
 library fault through a real public consumer API, with fixed-build and
 safe-input controls. It is availability only. There is no renderer canvas,
 `.lottie` ZIP container test, wire/request in this lane, pointer or IP control,
-benign marker, command, shell, ASLR work or rung 5. An independent witness
-verdict is owed before any stronger claim.
+benign marker, command, shell or ASLR work. Witness W194 regenerated the three
+JSONs byte-identically, reproduced `lottie.tsv` hash `f88dd940…` exactly and
+found no contradiction; rung 4 remains the ceiling.
