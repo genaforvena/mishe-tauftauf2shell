@@ -37,6 +37,14 @@
 | `w8/heapwalk2.gdb` | lab-only W8 corrected heap-chunk walk | `b4793d59a87f2ebeb9252c15b0a41c52dc843b721fd0ad1f1d9a83cb29b6c451` |
 | `w8/mallocstat.gdb` | lab-only W8 `malloc_usable_size`/`malloc_stats` probe | `fffab9c35ab3f4368f3a687c490a04b8fa962c37ed32793d27e3d6d3ed5845cb` |
 
+| `w9/extent512.gdb` | lab-only W9 D=512 default-env heap-extent probe | `6db2b4d3ffe6b1e3335a8754ac373c5d1517c497afc870a5d2c948e23d98fafb` |
+| `w9/toppad.gdb` | lab-only W9 `MALLOC_TOP_PAD_=0` reach probe template | `eba879bd760eacf805bbfc0ed3731e5e073ebba7191f2f2290413a29fb72f6f3` |
+| `w9/toppad-nonzero-oob.gdb` | W9 D=512 top-pad=0 reach run | `9c8a681fa0f85922d13fbde1afec4ee6f2440c6c2f0c219bdbe5e93174242c50` |
+| `w9/toppad-dim1024-wl24601.gdb` | W9 D=1024 top-pad=0 reach run | `0751391a88fd73f546d034bf3e4f8d7211c809b89e4a8e90d6590a921ccd5e33` |
+| `w9/toppad-map.gdb` | W9 D=512 top-pad=0 mapping probe | `cdd0c0436d4743d42cf8ee02580153a3926399ce186ae579a7a86c5a9a065917` |
+| `w9/walk512.gdb` | W9 D=512 chunk-header walk (header read did not yield a usable size) | `5218f8861647e8c9674ab6eb1010bdf533f900d050cbdba033f3da21471b6bf6` |
+| `w9/hashes.sha256` | W9 input/script hash record | `2384a3b5ee4541c0fe31f90277cde3abdbc2e74de483ecffd138fef8fda84557` |
+
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.
 

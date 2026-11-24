@@ -293,6 +293,42 @@ calibrated independently of the D=512 hit. It does not change the ceiling:
 no arbitrary alphabet at either offset, no pointer/IP, no consumer beyond
 `dcraw_emu`, no wire path, NO r5. Author-side only; no replay requested.
 
+## Allocator-config dependence of the OOB reach (W9, 2026-11-24 13:4xZ; author-side)
+
+Prediction recorded before the run: at D=512 the ~524 KB shrunk `image`
+freed in `pre_interpolate()` would raise glibc's dynamic mmap threshold
+enough that `destimage` (549,152 bytes) would be mmap-backed and fault
+within a page or two of the region. The prediction was WRONG under the
+default environment: `destimage=0x55555573abc0` is on the main `[heap]`
+(0x555555716000-0x5555557e2000), requested end `0x5555557c0ce0`, gap to
+the mapping edge ~135,968 bytes. With the breakpoint deleted the first
+OOB index 68,644 advances to a fault at `IDX=85,640` (16,996 extra
+indices), address `0x5555557e2000`, exactly the `[heap]` end.
+`malloc_stats()` reports Arena 0 system bytes 835,584 / in use 636,128
+(`w9/extent512.txt`). D=512 and D=1024 (W8) are therefore nearly the same
+layout: one ~135 KB free top chunk, then the mapping edge.
+
+Testing the cause: the gap matches glibc's default 128 KB `top_pad`.
+With `MALLOC_TOP_PAD_=0` in the process environment, `destimage` becomes
+mmap-backed (`0x7ffff7a82010` at D=512, `0x7ffff73ee010` at D=1024) and
+the stores continue far past the region. D=512 faults at `IDX=172,038`
+(103,394 extra indices), address `0x7ffff7bd2040`, the start of
+libgcc_s.so.1's read-only page; D=1024 faults at `IDX=533,510` (265,186
+extra), address `0x7ffff7800040`, the start of libc's read-only page
+(`w9/toppad-nonzero-oob.input.txt`, `w9/toppad-dim1024-wl24601.input.txt`).
+At D=512 a contiguous anonymous rw mapping spans `0x7ffff7a82000` to
+`0x7ffff7bd2000` and is traversed before the fault; `/proc/maps` cannot
+show whether that is one object or several, and no live object, pointer
+or value was identified there (`w9/toppad-map.txt`).
+
+So W8's "one free chunk then the guard page" is the default glibc
+configuration in this consumer, not a fixed property of the bug: the OOB
+reach is allocator-state dependent and changes by roughly 6x (D=512) or
+15x (D=1024) when the environment changes. `MALLOC_TOP_PAD_` is a lab
+environment knob, not attacker-controlled through the crafted image;
+this is a config sensitivity, not a grooming exploit. No pointer/IP,
+marker, command or wire path. Rung 4 and rung 5 are unchanged: NO r5.
+
 ## Plain-build heap extent of the OOB store (W8, 2026-11-24 12:1xZ; author-side)
 
 Prediction recorded before the run: the scratch buffer would be mmap'd and
@@ -400,11 +436,13 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   execution, grooming/ASLR study or rung 5. Witness verdicts cover the
   original zero-valued claim (W186), the W2 nonzero claim (W187) and the W3
   WhiteLevel steering claim (DM 3413); all ESTABLISHED AS LABELED.
-- W8 measured the plain-build heap extent on this host (one free top chunk,
-  then the unmapped heap edge; crafted inputs exit 139), but that is not a
-  grooming study or an adjacent-object exploit: no live object or pointer
-  was observed between the scratch buffer and the fault. No pointer/IP,
-  no marker, NO r5.
+- W8 measured the plain-build heap extent on this host under the default
+  environment (one free top chunk, then the unmapped heap edge; crafted
+  inputs exit 139); W9 added D=512 and `MALLOC_TOP_PAD_=0` measurements
+  showing the reach is allocator-config dependent, not a fixed bug
+  property. Neither is a grooming study or an adjacent-object exploit:
+  no live object or pointer was identified between the scratch buffer
+  and the fault. No pointer/IP, no marker, NO r5.
 - Fully arbitrary byte values remain UNKNOWN: W2 wrote a saturated constant
   `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
   metadata tag; W6 hit one pre-chosen value `0x4141` exactly at index 68,644
