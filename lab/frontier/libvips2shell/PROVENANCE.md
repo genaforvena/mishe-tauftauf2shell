@@ -673,3 +673,12 @@ programmatically created memory image: no TIFF decode, no live consumer, no
 wire/request in this leg, no command, no marker, no witness verdict. Grade
 unchanged: rungs 1–4; rung 5 UNKNOWN. A compile-warning correction during this
 wake restored two omitted `printf` arguments; the final build is warning-free.
+
+Clean `git archive 359fc8c` replay (2026-11-24, 03:20Z): extracted
+`lab/frontier/libvips2shell` and `reports/frontier-libvips2shell.md` to a fresh
+temp directory, symlinked the four gitignored pinned source/plain-build trees
+in as at W14, and ran `real/run-fine.sh` from the extracted tree.
+`RESULT fail=0`, replay process rc 0, no compiler warnings — same 19/19 as
+the working tree. The replay directory `/tmp/libvips-w16-replay.wBWo9S` is a
+throwaway and is not committed. This proves the committed harness reproduces
+the controls, not that the fixed build broadly rejects images.
