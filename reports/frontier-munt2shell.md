@@ -503,3 +503,94 @@ advisory claim (§10), and the missing prerequisite for rung 5 is unchanged:
 a measured real host that makes the single >32768-byte call, or the write-up's
 actual bytes. Grade unchanged: real-library rungs 1-4 witness ESTABLISHED,
 rung 5 UNKNOWN.
+
+## 16. Real allocator neighbour and post-overflow consumer (W178, 2026-11-24)
+
+The earlier plain-build readback allocated 16 KiB of padding after the
+32768-byte `streamBuffer` (`real/driver.cpp:15-19`), so it did not answer what
+the *actual* allocator does with the 7233-byte overrun. W178 adds
+`real/neighbor_driver.cpp` and `real/neighbor_probe.sh`: an override of
+`operator new[]` that, on the library's own `new Bit8u[32768]`, makes an
+ordinary `malloc(64)` immediately afterwards, fills it with `0xA5`, and leaves
+it for inspection after `parseStream()` returns. The sentinel is still a
+harness-created neighbour, not an upstream object; it measures glibc's chunk
+layout and memcpy store direction on the real pinned static libraries from
+`build_and_run.sh` (no library source or build flags changed). Output uses
+`write(2)`, not stdio, so reporting itself cannot call `malloc` before the
+readback.
+
+`sh real/neighbor_probe.sh` (raw outputs `real/evidence/neighbor-*.out`, rc
+matrix `real/evidence/neighbor-results.txt`):
+
+- `vuln-2_8_3 / attack` (one 40001-byte unterminated SysEx): `grows=1`,
+  `delta=+32784` from the 32768-byte buffer to the sentinel,
+  `sentinel_0x5a=64/64`, `sentinel_0xa5=0/64`, first 16 bytes all `5a`, and
+  `tail_0x5a_from_32768=7232/7232`. The overrun stores forward in increasing
+  addresses; it reaches a real adjacent glibc chunk, not just the padded
+  observation region.
+- `vuln-2_8_3 / exact` (32768-byte unterminated SysEx): `sentinel_0x5a=0/64`,
+  `sentinel_0xa5=64/64`, `tail=0/7232` — the exact-cap control is clean.
+  (`grows=2` here: a second unrelated 32768 allocation occurs in this mode;
+  the sentinel tracks the first.)
+- `fixed-1749f7f / attack`: `grows=0`, no sentinel, clean — the pinned fix
+  discards the oversized message. `fixed / exact` allocates once and leaves
+  the sentinel intact. `safe` (102-byte terminated SysEx) allocates no
+  32768-byte buffer in either build.
+- Real allocator as consumer: mode `malloc` calls `malloc(32)` after the parse.
+  Vulnerable attack aborts `rc=134` with **"malloc(): corrupted top size"**;
+  the fixed build returns `rc=0` with `malloc_after_overflow=ok`. glibc itself
+  reads the corrupted heap metadata on the next allocation, before any
+  application-level consumer runs.
+
+This is stronger rung-4 mechanics (real heap metadata, measured store
+direction, allocator-detected corruption) but still not pointer control or
+rung 5: the sentinel is harness-created, the corrupted bytes are all `0x5a`
+from the fixed attack alphabet (§11), and glibc aborts rather than following
+an attacker-chosen pointer. The in-library consumer route is structurally
+closed: after the overlong copy, `parseSysex()` leaves
+`streamBufferSize=40001` with capacity 32768
+(`pins/MidiStreamParser.cpp.vuln:248-254`); a later `0xF7` enters
+`parseSysexFragment()` (`:260`) where `checkStreamBufferCapacity(true)` at
+`:283` returns false, so no `handleSysex()` consumes the corrupted buffer
+(`:289-292`). The fix tree's own regression test
+(`fixed-1749f7f/mt32emu/src/test/MidiStreamParserTest.cpp:273-295`) encodes
+the same boundary at 32768 and 32769. Grade unchanged.
+
+## 17. Real C-API hosts: one-byte callers (W178, 2026-11-24)
+
+W176's third-party search stopped at three hosts that bypass the parser. W178
+enumerated the public C-API callers directly through Sourcegraph (`context:global
+mt32emu_parse_stream` with library declarations excluded: 12 matches, no limit
+hit) and checked the live upstream files. Verbatim slices, URLs and sha256
+values are in `real/thirdparty/C_API_HOSTS.md`.
+
+Five real hosts reach the vulnerable function, but none can make the required
+single large call:
+
+- FS-UAE `midiemu.cpp:237-242` forwards `(midi, len)` to
+  `mt32emu_parse_stream`; its verified guest serial caller
+  `od-fs/parser_fs.cpp:519-521` passes `&b, 1` per byte. Other one-byte callers
+  (`od-unix/serial.cpp:356`, `od-win32/parser.cpp:1282`) are scout-reported.
+- WinUAE `midiemu.cpp:202-207` has the same wrapper; its serial callers pass
+  one byte (scout-reported).
+- Amiberry `src/osdep/amiberry_serial.cpp:897-899` passes `&b, 1`; its libretro
+  stub is a no-op.
+- dosemu2 `src/plugin/munt/munt.c:123-135` calls
+  `mt32emu_parse_stream_at(ctx, &val, 1, tstamp)` from the one-byte `write`
+  callback registered at `:233`.
+- libretro-uae `sources/src/midiemu.c:197-201` wraps the C API; no bulk caller
+  found (scout-reported).
+
+The input path for the UAE hosts is a guest serial/UART byte write, so a large
+SysEx necessarily arrives as separate one-byte `parseStream()` calls. W168's
+measured fragment negative (§9) applies: the buffer stops at 32768 and the
+remainder is discarded; the one-shot copy at `MidiStreamParser.cpp:250` is not
+reached. Other candidates searched without finding a host call: ScummVM,
+dospad, Boxer, DosWasmX, xcom12, OpenDUNE, a Di-111-synth VST wrapper, MAME and
+libretro. searchcode's legacy API is now HTTP 404 and GitHub code search is
+login-walled; Sourcegraph excludes forks and archived repos, so the negative
+is scoped to this indexed set, not universal.
+
+Still no measured host making one >=32769-byte call, no PoC bytes and no byte
+>= 0x80 past the allocation. Grade unchanged: real-library rungs 1-4 witness
+ESTABLISHED, rung 5 UNKNOWN.

@@ -1,0 +1,23 @@
+neighbor-vuln-2_8_3-attack rc=0
+  mode=attack len=40001 grows=1 buf=0x60306cedbfb0 sentinel=0x60306cee3fc0 delta=32784
+  sentinel_0x5a=64/64 sentinel_0xa5=0/64 first16=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  tail_0x5a_from_32768=7232/7232
+neighbor-vuln-2_8_3-exact rc=0
+  mode=exact len=32768 grows=2 buf=0x5562b60e42b0 sentinel=0x5562b60ec2c0 delta=32784
+  sentinel_0x5a=0/64 sentinel_0xa5=64/64 first16=a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5
+  tail_0x5a_from_32768=0/7232
+neighbor-vuln-2_8_3-safe rc=0
+  mode=safe len=102 grows=0 buf=(nil) sentinel=(nil) delta=-1
+neighbor-vuln-2_8_3-malloc rc=134
+  malloc(): corrupted top size
+  Aborted (core dumped)
+neighbor-fixed-1749f7f-attack rc=0
+  mode=attack len=40001 grows=0 buf=(nil) sentinel=(nil) delta=-1
+neighbor-fixed-1749f7f-exact rc=0
+  mode=exact len=32768 grows=1 buf=0x623a131012b0 sentinel=0x623a131092c0 delta=32784
+  sentinel_0x5a=0/64 sentinel_0xa5=64/64 first16=a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5
+  tail_0x5a_from_32768=0/7232
+neighbor-fixed-1749f7f-safe rc=0
+  mode=safe len=102 grows=0 buf=(nil) sentinel=(nil) delta=-1
+neighbor-fixed-1749f7f-malloc rc=0
+  malloc_after_overflow=ok next=0x56c080d12fb0

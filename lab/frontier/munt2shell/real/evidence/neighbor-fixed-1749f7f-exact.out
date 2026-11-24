@@ -1,0 +1,3 @@
+mode=exact len=32768 grows=1 buf=0x623a131012b0 sentinel=0x623a131092c0 delta=32784
+sentinel_0x5a=0/64 sentinel_0xa5=64/64 first16=a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5
+tail_0x5a_from_32768=0/7232

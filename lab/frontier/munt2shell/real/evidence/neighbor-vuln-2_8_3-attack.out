@@ -1,0 +1,3 @@
+mode=attack len=40001 grows=1 buf=0x60306cedbfb0 sentinel=0x60306cee3fc0 delta=32784
+sentinel_0x5a=64/64 sentinel_0xa5=0/64 first16=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+tail_0x5a_from_32768=7232/7232
