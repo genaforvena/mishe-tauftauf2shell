@@ -589,7 +589,7 @@ showed the poisoned head is never consumed by a natural allocation. The last
 open lane was whether the arbitrarily long attacker body could reach a live
 code or vtable pointer instead of allocator metadata.
 `provision/ico_codeptr_reach.py`
-(`sha256=f6242f7e8589fc64527c090c7b048d30807abcccec1b39ec6985ed3a25f7b367`)
+(`sha256=4c245cd2bc1468e10f2cf5911039441e07d2f1ca8b74740038ff5c9b31aac304`)
 serves a crafted ICO whose body is N bytes of `0x41` on 127.0.0.1:18181,
 launches the pinned plain `imgproxy-vuln`
 (`sha256=ea2317df…d8165d`) under GDB on 127.0.0.1:18180, filters
@@ -598,12 +598,12 @@ breakpoint, dumps `/proc/<pid>/maps` via GDB Python and the window at the
 saved `$rsi-16` before and after `finish`, then continues. GDB writes no
 inferior memory and forces no call.
 
-Three configurations were run. `w13b1` (2 benign preloads, 1024-byte body,
-base `0x7fff8c0020e0`) filled 128 of 136 dumped qwords with the chosen marker
-and aborted in `malloc(): corrupted top size`; `w13b2` (6 preloads, 64-byte
-body, base `0x7fff980022b0`) filled 8 of 16 and aborted the same way; `w13b3`
-(2 preloads, 256-byte body, base `0x7fff7c0580b0`) filled 32 of 40 and aborted
-in `double free or corruption (out)`. All three were SIGABRT. Classifying
+Three configurations were run. `w13c1` (2 benign preloads, 1024-byte body,
+base `0x7fff840580b0`) filled 128 of 136 dumped qwords with the chosen marker
+and aborted in `double free or corruption (out)`; `w13c2` (6 preloads, 64-byte
+body, base `0x7fff980844e0`) filled 8 of 16 and aborted in `malloc():
+corrupted top size`; `w13c3` (2 preloads, 256-byte body, base `0x7fff98002480`)
+filled 32 of 40 and aborted the same way. All three were SIGABRT. Classifying
 each post-write qword against the 64 executable mappings from
 `/proc/<pid>/maps` found **zero** code pointers in all three windows; bytes
 outside the written span were zero. The only executable addresses in the GDB

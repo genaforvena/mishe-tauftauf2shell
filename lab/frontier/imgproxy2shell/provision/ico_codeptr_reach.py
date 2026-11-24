@@ -184,7 +184,8 @@ def main():
             out, _ = gdb.communicate()
         with open(logpath, "w") as f:
             f.write(f"CLIENT tag={tag} preload={preload} bodylen={bodylen} " +
-                    " ".join(results) + "\n=== GDB OUTPUT ===\n" + out)
+                    " ".join(results) + "\n=== GDB OUTPUT ===\n")
+            f.write("\n".join(line.rstrip() for line in out.splitlines()) + "\n")
         for line in out.splitlines():
             if line.startswith(("W13_HIT", "W13_CLASSIFY", "W13_POST", "W13_END")):
                 print("W13_LOG " + line[:300], flush=True)

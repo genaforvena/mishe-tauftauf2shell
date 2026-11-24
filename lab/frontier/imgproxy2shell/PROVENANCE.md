@@ -1063,7 +1063,7 @@ marker, code-pointer write or r5. All non-gate and abort layouts are kept in
 `/tmp/w12-out` and are not retried into existence; W204's verdict on W9 is
 unchanged.
 
-## W13 — attacker-reachable window has no live code pointer (2026-11-24 21:17-21:20Z, author, unwitnessed)
+## W13 — attacker-reachable window has no live code pointer (2026-11-24 21:17-21:22Z, author, unwitnessed)
 
 Question left by W5/W8/W9/W11/W12: the `data_size` wrap gives an unbounded
 write (the copied length is the source body, `data_size` only caps the read),
@@ -1071,7 +1071,7 @@ so can the attacker body reach a live code/vtable pointer rather than glibc
 allocator metadata?
 
 Probe: `provision/ico_codeptr_reach.py`
-sha256 `f6242f7e8589fc64527c090c7b048d30807abcccec1b39ec6985ed3a25f7b367`.
+sha256 `4c245cd2bc1468e10f2cf5911039441e07d2f1ca8b74740038ff5c9b31aac304`.
 It serves a benign favicon plus a crafted ICO (`data_size=0xfffffff5`, body
 of N `0x41` bytes) on 127.0.0.1:18181, launches the pinned plain
 `provision/imgproxy-vuln` (sha256
@@ -1088,32 +1088,32 @@ write and no forced call; both endpoints are loopback-only. Ports
 Reproduction commands (from `provision/`):
 
     python3 ico_codeptr_reach.py ./imgproxy-vuln \
-      ../../libvips2shell/build-vuln-plain/libvips w13b1 2 1024 10
+      ../../libvips2shell/build-vuln-plain/libvips w13c1 2 1024 10
     python3 ico_codeptr_reach.py ./imgproxy-vuln \
-      ../../libvips2shell/build-vuln-plain/libvips w13b2 6 64 10
+      ../../libvips2shell/build-vuln-plain/libvips w13c2 6 64 10
     python3 ico_codeptr_reach.py ./imgproxy-vuln \
-      ../../libvips2shell/build-vuln-plain/libvips w13b3 2 256 10
+      ../../libvips2shell/build-vuln-plain/libvips w13c3 2 256 10
 
 Logs and classification (qwords strictly between `W13_POST` and `W13_BT`,
 compared to the 64 `x` mappings from `/proc/<pid>/maps`):
 
-* `http-ico-w13-w13b1.log` sha256
-  `ce4871c41ed02fae60fa4636b688a34ee24207e56fa7c200dfd1644f264d2120`,
-  preload 2, body 1024, base `0x7fff8c0020e0`, actual `0x7fff8c0020ee`:
+* `http-ico-w13-w13c1.log` sha256
+  `c4dfd2f87546be693f1b6c947cb035b804e756af32a81204bab6e12ce66d5bf1`,
+  preload 2, body 1024, base `0x7fff840580b0`, actual `0x7fff840580be`:
   136 qwords dumped, 128 `0x4141414141414141`, 0 code pointers; client saw
-  `RemoteDisconnected`, process aborted in `malloc(): corrupted top size`.
-* `http-ico-w13-w13b2.log` sha256
-  `a61e6007ba9940f9f867cf7b4a1576bfe5b12ee8baa163aaf7f3c3dd8143ace9`,
-  preload 6, body 64, base `0x7fff980022b0`, actual `0x7fff980022be`:
+  `RemoteDisconnected`, process aborted in `double free or corruption (out)`.
+* `http-ico-w13-w13c2.log` sha256
+  `2a4778950b2c6160c8a535e41c45674e4b3a2e1c1d0e903c1a75de64de4a9f4d`,
+  preload 6, body 64, base `0x7fff980844e0`, actual `0x7fff980844ee`:
   16 qwords dumped, 8 markers, 0 code pointers; `malloc(): corrupted top
   size` abort.
-* `http-ico-w13-w13b3.log` sha256
-  `c6ba1e3c80d0e9ab5061a443892c0f523db25d799ac689b3f58887dc913b69ed`,
-  preload 2, body 256, base `0x7fff7c0580b0`, actual `0x7fff7c0580be`:
-  40 qwords dumped, 32 markers, 0 code pointers; `double free or corruption
-  (out)` abort.
+* `http-ico-w13-w13c3.log` sha256
+  `c1105c8b9ff0fefd1903f90177924f15594a1611f826503aa6c80867308bba2a`,
+  preload 2, body 256, base `0x7fff98002480`, actual `0x7fff9800248e`:
+  40 qwords dumped, 32 markers, 0 code pointers; `malloc(): corrupted top
+  size` abort.
 
-In `w13b2` the post dump is explicit: the two qwords before `actual` are zero,
+In `w13c2` the post dump is explicit: the two qwords before `actual` are zero,
 the next eight are the chosen marker, and the rest are zero. The only
 executable addresses in the whole GDB output were the three `bt 3` frames
 (`0x2da4ec2` in the harness text, `0x7ffff7a4217b` in libvips `foreign.c`,
@@ -1128,8 +1128,10 @@ Probe-development negatives: a plain conditional breakpoint
 (fixed with the GDB Python breakpoint); dumping `$rsi` after `finish` used
 the caller's register and showed zeros instead of the marker (fixed by
 saving `$w13buf` at the hit); `/proc/maps` addresses print without `0x` and
-need a bare-hex regex. The first failed run left
-`http-ico-w13-w13a1.log` (untracked, not committed).
+need a bare-hex regex; raw GDB `/proc/maps` lines carry trailing spaces, so the
+probe now right-strips each line on write. The failed first run
+(`http-ico-w13-w13a1.log`) and the three unnormalized `w13b*` runs were
+superseded by the committed `w13c*` logs and are not committed.
 
 All three layouts aborted in glibc allocator metadata checks before any
 pointer was used as a call target. No RIP-at-marker, no code-pointer write
@@ -1137,4 +1139,3 @@ to a live function pointer and no r5 were observed. This is a bounded
 negative over three stochastic layouts, not an exhaustive proof. Grade
 stays rung 4; W201 remains the ceiling and W204's verdict on W9 is
 unchanged.
-
