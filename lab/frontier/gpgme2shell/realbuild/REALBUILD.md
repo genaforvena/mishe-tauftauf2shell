@@ -23,8 +23,11 @@ Stock 2.3.1 has the immediate writeback at `engine-gpg.c:1501`.
 
 ## Build commands
 
-From this directory (paths are absolute because the autotools prefix is
-recorded in generated scripts):
+One command from a clean archive: `sh build-real.sh`. It fetches and
+hash-checks the four tarballs, applies the pinned fix to a copied tree,
+builds the three ASan libraries and links the three drivers. The manual
+steps below are what it automates (paths are absolute because the autotools
+prefix is recorded in generated scripts):
 
 ```
 HERE=$PWD
