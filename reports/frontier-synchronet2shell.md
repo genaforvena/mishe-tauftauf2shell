@@ -272,6 +272,11 @@ advisory's unauthenticated claim for a custom client that sends pty-req
 earlier, nor for other authentication configurations. Default-config remote
 reach stays UNKNOWN; no rung change and no new witness replay request.
 
+Author clean `git archive a209194 lab/frontier/synchronet2shell` replay with
+the gitignored `src-tree/` and `provision/` symlinked in reproduced rc 0 and
+the same counts (1 control probe, 0 no-ANYAUTH probes, one
+`Permission denied (publickey,password)`).
+
 
 ## Ceiling and cheapest next experiment
 
