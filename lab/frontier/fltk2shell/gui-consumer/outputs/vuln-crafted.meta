@@ -1,0 +1,3 @@
+COMMAND: ./gui-vuln ../safe.bmp ../poc-chosen.bmp
+DISPLAY: :177
+EXIT: 134

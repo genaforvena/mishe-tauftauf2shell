@@ -1,0 +1,63 @@
+GUI RESULT shown draw_count=1 safe=2x8 depth=3
+=================================================================
+==3862217==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7fe137dfe7fe at pc 0x642b79240d01 bp 0x7ffc6afe6360 sp 0x7ffc6afe6350
+WRITE of size 1 at 0x7fe137dfe7fe thread T0
+    #0 0x642b79240d00 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:490
+    #1 0x642b792416d0 in Fl_BMP_Image::Fl_BMP_Image(char const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:64
+    #2 0x642b7923eb45 in fl_check_images /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/fl_images_core.cxx:99
+    #3 0x642b792a1381 in Fl_Shared_Image::reload() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_Shared_Image.cxx:304
+    #4 0x642b792a1823 in Fl_Shared_Image::Fl_Shared_Image(char const*, Fl_Image*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_Shared_Image.cxx:144
+    #5 0x642b792a2415 in Fl_Shared_Image::get(char const*, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_Shared_Image.cxx:594
+    #6 0x642b7923e462 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/gui-consumer/gui.cxx:46
+    #7 0x7fe23b42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7fe23b42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x642b7923dfc4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/gui-consumer/gui-vuln+0x4bfc4) (BuildId: a82ca2617d515f47196710693d4cabb405be022b)
+
+0x7fe137dfe7fe is located 2 bytes before 4294967298-byte region [0x7fe137dfe800,0x7fe237dfe802)
+allocated by thread T0 here:
+    #0 0x7fe23befe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x642b7923fbaa in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:289
+    #2 0x642b792416d0 in Fl_BMP_Image::Fl_BMP_Image(char const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:64
+    #3 0x642b7923eb45 in fl_check_images /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/fl_images_core.cxx:99
+    #4 0x642b792a1381 in Fl_Shared_Image::reload() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_Shared_Image.cxx:304
+    #5 0x642b792a1823 in Fl_Shared_Image::Fl_Shared_Image(char const*, Fl_Image*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_Shared_Image.cxx:144
+    #6 0x642b792a2415 in Fl_Shared_Image::get(char const*, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_Shared_Image.cxx:594
+    #7 0x642b7923e462 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/gui-consumer/gui.cxx:46
+    #8 0x7fe23b42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7fe23b42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x642b7923dfc4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/gui-consumer/gui-vuln+0x4bfc4) (BuildId: a82ca2617d515f47196710693d4cabb405be022b)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fltk2shell/fltk-1.4.5-plus1632/src/Fl_BMP_Image.cxx:490 in Fl_BMP_Image::load_bmp_(Fl_Image_Reader&, int, int)
+Shadow bytes around the buggy address:
+  0x7fe137dfe500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7fe137dfe580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7fe137dfe600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7fe137dfe680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7fe137dfe700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x7fe137dfe780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x7fe137dfe800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fe137dfe880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fe137dfe900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fe137dfe980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fe137dfea00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3862217==ABORTING
+Aborted (core dumped)

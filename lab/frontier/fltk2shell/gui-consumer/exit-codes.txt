@@ -1,0 +1,4 @@
+vuln-crafted rc=134
+vuln-safe rc=0
+fixed-crafted rc=0
+fixed-safe rc=0

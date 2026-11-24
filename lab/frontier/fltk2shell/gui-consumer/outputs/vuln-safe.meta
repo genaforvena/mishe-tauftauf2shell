@@ -1,0 +1,3 @@
+COMMAND: ./gui-vuln ../safe.bmp ../safe.bmp
+DISPLAY: :177
+EXIT: 0

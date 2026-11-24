@@ -1,0 +1,4 @@
+./gui-vuln ../safe.bmp ../poc-chosen.bmp
+./gui-vuln ../safe.bmp ../safe.bmp
+./gui-fixed ../safe.bmp ../poc-chosen.bmp
+./gui-fixed ../safe.bmp ../safe.bmp

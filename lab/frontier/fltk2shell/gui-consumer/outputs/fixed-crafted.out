@@ -1,0 +1,3 @@
+GUI RESULT shown draw_count=1 safe=2x8 depth=3
+[510] Fl_BMP_Image: ../poc-chosen.bmp - unexpected EOF or read error at offset 118
+GUI RESULT second file=../poc-chosen.bmp image=0x507000002ef0

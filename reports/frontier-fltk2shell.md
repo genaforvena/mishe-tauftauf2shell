@@ -95,8 +95,9 @@ Witness #3296 (W195) independently replayed the four-tree matrix from a clean
 `b214fbb` archive: all four trees rebuilt, `SUMMARY pass=33 fail=0`, and its
 normalized transcript matched byte-exactly. Verdict: **ESTABLISHED rungs 1–4**
 at the labeled direct-call / crafted-BMP-file / four-tree scope, NO rung 5.
-ICO container, real GUI consumer, network surface, pointer/IP control and
-command execution stay UNKNOWN.
+ICO container, network surface, pointer/IP control and command execution
+stay UNKNOWN at that verdict; a real GUI consumer was left UNKNOWN there and
+is measured only author-side in wake 5 below.
 
 Author-measured extension (wake 2, unwitnessed; evidence in
 `lab/frontier/fltk2shell/shared-image/`): a headless consumer using the normal
@@ -137,20 +138,34 @@ region and crashed at `:490` before `free()`: preserved negative. This is
 still pointer-sized metadata control in the lab build, **not** an arbitrary
 target address, pointer/IP control or rung 5; it has not been replayed.
 
+Author-measured GUI-consumer extension (wake 5, unwitnessed; evidence in
+`lab/frontier/fltk2shell/gui-consumer/`): a real FLTK 1.4.5 application on a
+private Xvfb display opens an `Fl_Double_Window`, draws a benign BMP through
+an instrumented `Fl_Box` (`draw_count=1` in all four cases), then loads the
+crafted BMP with `fl_register_images()` + `Fl_Shared_Image::get()` while the
+window is live. In the `plus1632` ASan tree this exits 134 with `WRITE of
+size 1` at `Fl_BMP_Image.cxx:490`, `2 bytes before 4294967298-byte region`,
+frames `:64` -> `fl_images_core.cxx:99` -> `Fl_Shared_Image.cxx:304` / `:594`
+-> `gui.cxx:46`. The fixed tree exits 0 with no ASan (only the intended EOF
+warning at `:510`); safe BMP exits 0 in both trees. The fault happens at
+load, before the crafted image can be attached or drawn, so this narrows the
+real-GUI unknown to a live-X11 application load path, not a draw-time
+exploit. Author-measured only; no new verdict and no rung 5.
+
 ## Ceiling and next experiments
 
-Out of the ESTABLISHED scope: a GUI window / draw path or cache-hit reload,
-a network-facing service, pointer/IP control, command execution, and rung 5.
-The ICO path is now a measured negative, not an open positive lead. The
-advisory's own impact is
-local/UI-only, so server-style X2Shell reach is UNKNOWN and must not be
-inferred. The chosen-byte result is a direct call into the real loader, not
-an application-level exploit. Witness replay is complete (#3296) for the
-four-tree matrix; the shared-image, wake-3 and wake-4 extensions are
+Out of the ESTABLISHED scope: drawing the crafted image itself, cache-hit
+reload, a network-facing service, pointer/IP control, command execution, and
+rung 5. The ICO path is a measured negative; the live-X11 GUI load path is
+now measured by the author but unwitnessed, and the crafted image still
+faults at load before draw. The advisory's own impact is local/UI-only, so
+server-style X2Shell reach is UNKNOWN and must not be inferred. The
+chosen-byte result is a direct call into the real loader, not an
+application-level exploit. Witness replay is complete (#3296) for the
+four-tree matrix; the shared-image, wake-3, wake-4 and wake-5 extensions are
 author-measured only.
 
-Next: disposition witness replies to #3359 / #3379 and to the wake-4 claim;
-the remaining operator-ordered lead is a real GUI consumer / draw path, not
-another allocator variant. Any new impact claim goes to `witness`; no RCE
-inference from a heap OOB write. Wake units and full-flag sync remain the
-person's.
+Witness replies to #3359 / #3379 / #3391 had not landed by 07:42Z; all three
+extensions and the new GUI claim stay unwitnessed. Every new impact claim
+goes to `witness`; no RCE inference from a heap OOB write. Wake units and
+full-flag sync remain the person's.

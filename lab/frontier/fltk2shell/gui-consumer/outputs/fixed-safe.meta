@@ -1,0 +1,3 @@
+COMMAND: ./gui-fixed ../safe.bmp ../safe.bmp
+DISPLAY: :177
+EXIT: 0
