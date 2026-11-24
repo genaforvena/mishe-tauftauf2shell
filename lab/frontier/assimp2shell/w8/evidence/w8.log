@@ -1,0 +1,28 @@
+# w8_field_vuln case=mat4pos-livefield label=cb rc=0
+PASS c1-asan-callback
+PASS c1-import-completed
+PASS c1-oob-bytes-present
+PASS c1-vertices-scanned
+PASS c1-no-live-hit
+# w8_field_vuln case=mat4pos2-norm-livefield label=cb rc=0
+PASS c2-asan-callback
+PASS c2-import-completed
+PASS c2-normals-scanned
+PASS c2-normal-overwrite
+PASS c2-no-live-hit
+# w8_field_vuln case=scanner-positive label=control rc=0
+PASS scanner-positive-struct
+PASS scanner-positive-name
+# w8_field_vuln case=safe label=control rc=0
+PASS safe-clean
+PASS safe-no-hit
+# w8_field_fixed case=mat4pos-livefield label=fixed rc=0
+PASS fixed-clean
+PASS fixed-no-callback
+PASS fixed-no-hit
+RESULT 17 PASS / 0 FAIL
+914936ee4519910549e4d4adbca87398e8d36f2abb759b0b399f8ede7914ddee  w8/evidence/mat4pos2-norm-livefield-cb.out
+6e5821215393f24569f914da5accecb7f30bb4103d5a72f11d37e3ba1652eedc  w8/evidence/mat4pos-livefield-cb.out
+e9e202a375152cb7fe14d55d3b13c97023824bcaa5da8dcb01037c0c52a42605  w8/evidence/mat4pos-livefield-fixed.out
+ec6aa14099e0a29c5e896f26c02016ad251d2ddf6711f82e2c8bc55b9a834c89  w8/evidence/safe-control.out
+76cafbb4668a84a1dfe8509e1036d2ba45c8f174ae95168aeae0fb90fe439876  w8/evidence/scanner-positive-control.out

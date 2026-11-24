@@ -282,6 +282,23 @@ byte-identical to the author tree (combined sha256
 `REPLAY.md` rules; raw hashes differ in PID/ASLR/path/build-id tokens). Author
 replay, not witness acceptance.
 
+## W8 — live aiMesh field scan is negative (2026-11-24 08:5xZ, author-measured)
+
+`harness/w8_field_driver.cpp` keeps the pinned library and documents
+untouched, registers the W5-style ASan report callback so the importer's own
+64-byte copy completes, then scans the returned mesh struct and all vertex,
+normal, tangent, color, UV, face and name arrays for a 16-byte marker placed
+only at OOB source offsets. Count=1 MAT4 POSITION leaves a marker prefix in a
+separate 8-byte heap region (`LOCATE dest+40 … size=8`), not a returned field.
+Count=2 with a NORMAL array has an overflow range covering `mNormals`, but the
+later NORMAL extraction overwrites those bytes (`0000803f` = 1.0f) and no
+marker survives. A `scanner-positive.gltf` control proves the scan finds the
+same marker in a live mesh name; safe and PR6860-overlay controls are clean.
+`bash harness/run-w8.sh` => **17 PASS / 0 FAIL**; summary and hashes in
+`lab/frontier/assimp2shell/w8/evidence/`. Negative for these two layouts
+under ASan shadow manipulation, not a proof for all counts or grooming. No
+grade change, no pointer/IP, no command, no r5; unwitnessed.
+
 ## Honest ceiling
 
 Chosen bytes are observed at the end of a live 24-byte vertex array on the
@@ -293,7 +310,7 @@ reads and writes past a correctly sized array. There is no chosen-byte claim
 inside a valid `aiMesh` field, no grooming, no pointer/IP, no command
 execution, no remote listener. Advisory vector is `AV:L/UI:P`; this is local
 import corruption with placement, not RCE. Witness verdict #3277 covers only
-the baseline direct-call legs; W1, W2, W5, W6 and W7 are author-measured, their
+the baseline direct-call legs; W1, W2, W5, W6, W7 and W8 are author-measured,
 independent replay and acceptance are still owed. Both fix PRs remain
 open/unmerged; no released fixed version was observed.
 

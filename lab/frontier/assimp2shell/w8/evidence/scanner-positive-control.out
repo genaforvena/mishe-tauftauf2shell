@@ -1,0 +1,8 @@
+case=harness/cases/scanner-positive.gltf scene=ok err=
+meshes=1
+mesh0 ptr=0x51a000000680 vertices=3 faces=1
+LIVE_HIT field=mesh0.struct ptr=0x51a000000680 off=240
+SCAN_CLEAN field=mesh0.mVertices ptr=0x504000000310 bytes=36
+SCAN_CLEAN field=mesh0.mFaces ptr=0x503000000a38 bytes=16
+LIVE_HIT field=mesh0.mName ptr=0x51a000000770 off=0
+SCAN_CLEAN field=scene.meshes ptr=0x5020000004b0 bytes=8

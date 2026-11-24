@@ -1,0 +1,6 @@
+case=harness/cases/mat4pos-livefield.gltf scene=ok err=
+meshes=1
+mesh0 ptr=0x51a000000680 vertices=1 faces=0
+SCAN_CLEAN field=mesh0.struct ptr=0x51a000000680 bytes=1320
+SCAN_CLEAN field=mesh0.mName ptr=0x51a000000770 bytes=3
+SCAN_CLEAN field=scene.meshes ptr=0x5020000004b0 bytes=8

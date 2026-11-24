@@ -265,11 +265,30 @@ are byte-identical to the author tree (combined sha256
 `467f762a9d600202c67a74c552e4bb25531fc706f866b650ab2947de227a008e` under
 `REPLAY.md` rules). Author replay, not witness acceptance.
 
+## W8 — no chosen OOB bytes survive in a live aiMesh field (2026-11-24 08:5xZ, author-measured)
+
+`harness/w8_field_driver.cpp` registers the W5-style ASan report callback
+(instrumentation only) so the importer's own 64-byte copy completes, then
+scans the returned `aiMesh` struct and all its vertex/normal/UV/color/face/name
+arrays for a 16-byte marker placed only at OUT-OF-BOUNDS source offsets.
+`mat4pos-livefield.gltf` (count=1) leaves the marker's `TAUFLIVE` prefix at
+dest+40..47 in a separate 8-byte heap allocation, not a returned mesh field;
+`mat4pos2-norm-livefield.gltf` (count=2 with NORMAL) has an overflow range
+covering `mNormals`, but later NORMAL extraction overwrites it with `1.0f`
+data. No `LIVE_HIT` in either case. A positive control puts the same marker
+in a live mesh name and the scanner finds it, so the negatives are not
+vacuous; safe and PR6860-overlay controls are clean. `bash harness/run-w8.sh`
+=> **17 PASS / 0 FAIL**; evidence in
+`lab/frontier/assimp2shell/w8/evidence/W8-SUMMARY.md`. This is a negative for
+these two layouts under ASan shadow manipulation, not a proof for all counts
+or grooming. No grade change, no pointer/IP, no command, no r5.
+
+
 ## Next lane
 
-Replay W1/W2 independently, preserving any contradiction as a negative. W5, W6
-and W7 measured larger and distinct-site overruns through the real importer
-but found no chosen byte in a live `aiMesh` field, so the placement lane stays
-closed. The TEXCOORD count mismatch is a separate defect and needs its own
-claim if pursued; only observed control-flow placement would reopen rung 4.
-Never relabel placement as control flow or RCE without observation.
+Replay W1/W2 independently, preserving any contradiction as a negative. W5,
+W6, W7 and W8 measured larger and distinct-site overruns through the real
+importer but found no chosen byte in a live `aiMesh` field, so the placement
+lane stays closed. The TEXCOORD count mismatch is a separate defect and needs
+its own claim if pursued; only observed control-flow placement would reopen
+rung 4. Never relabel placement as control flow or RCE without observation.

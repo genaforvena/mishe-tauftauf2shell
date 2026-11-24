@@ -1,0 +1,13 @@
+{
+  "asset": { "version": "1.0" },
+  "buffers": { "buf": { "byteLength": 152, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFRBVUZMSVZFOE1BUktYWVpUQVVGTElWRThNQVJLWFlaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAA=" } },
+  "bufferViews": { "viewpos": { "buffer": "buf", "byteOffset": 0, "byteLength": 128, "target": 34962 }, "viewnorm": { "buffer": "buf", "byteOffset": 128, "byteLength": 24, "target": 34962 } },
+  "accessors": {
+    "pos": { "bufferView": "viewpos", "byteOffset": 0, "componentType": 5126, "count": 2, "type": "MAT4" },
+    "norm": { "bufferView": "viewnorm", "byteOffset": 0, "componentType": 5126, "count": 2, "type": "VEC3" }
+  },
+  "meshes": { "tri": { "primitives": [ { "attributes": { "POSITION": "pos", "NORMAL": "norm" }, "mode": 4 } ] } },
+  "nodes": { "node": { "meshes": [ "tri" ] } },
+  "scenes": { "scene": { "nodes": [ "node" ] } },
+  "scene": "scene"
+}
