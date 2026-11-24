@@ -202,6 +202,37 @@ address, and the target is an absolute heap address that needs the fixed
 ASLR-off layout. No control-flow diversion, marker execution, command, X
 server process, wire delivery or privileged context was exercised.
 
+### 3.8 W186 chosen-address overwrite of a live function pointer
+
+`FontMapRec` (`fontenc.h:49-59`) carries `recode` at +0x10 and `name` at
++0x18, both function pointers set by `encparse.c:639-640`. In the non-PIE
+public-API runner with `MALLOC_MMAP_THRESHOLD_=262144` and ASLR disabled, the
+live `m3` mapping sits at `buffer_base + 0x20050`, so `m3->recode` is at
++0x20060; `setCode()` indices 65584..65587 are its four 16-bit halves,
+reachable with `from=0xfe34..0xfe37` at `row_size=258`. A probe defines a real
+benign function `benign_marker(unsigned, void *)` that writes
+`BENIGN_MARKER_EXECUTED` and returns `0xabcd1234`; `run.sh` reads its address
+with `nm` and bakes the four little-endian words into a seven-mapping `.enc`.
+
+Vulnerable crafted input gives `m3 recode=0x4011d6` (the marker address) and
+the public `FontEncRecode` call prints `BENIGN_MARKER_EXECUTED` and returns
+2882343476 (`0xabcd1234`); m1, m2 and m4..m7 keep the library's
+`FontEncSimpleRecode` address and normal values, rc=0. Vulnerable `SIZE 256 256`
+safe input and fixed `5920c6e` crafted input keep every `recode` field at the
+library address and print no marker (fixed mappings 2..7 recode to 0). Three
+consecutive `run.sh` runs matched. An earlier eight-mapping variant with a
+trailing `0xcafe` store corrupted `m6->next` and crashed `install_mapping()` at
+`encparse.c:435` (gdb backtrace); that mapping was removed, not the crash
+suppressed. Full input, calibration, outputs and scope:
+`realpath/evidence/fptr/`; reproduce with `bash .../fptr/run.sh`.
+
+This is a chosen **target address executed as a function pointer**, not a data
+pointer: a control-flow diversion at the real-library public API under a fixed
+ASLR-off, non-PIE layout. The target is a lab function in the probe binary;
+there is no command, saved return address, X server process or wire input, and
+the marker has not been reproduced inside Xvfb or witness-replayed. Rung 4,
+not rung 5.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery was exercised. A
@@ -227,20 +258,27 @@ server process, wire delivery or privileged context was exercised.
   buffer before the later stores, so the destination is no longer only
   wilderness.
 - The 16-bit `sm->first` truncates 65790 to 254, so only the chosen value,
-  not the chosen index, survives into the copied map. W183 adds pointer
-  control over one live object's data pointer, but no control-flow diversion,
-  marker side effect or command was observed. The independent witness replay
-  (#2867) confirmed the earlier scopes; it did not add live-object control or
-  a remote path, and W183 has not been witness-replayed. The row-1024 plain
-  crash is service loss, not execution. Rung 5 is UNKNOWN.
+  not the chosen index, survives into the copied map. W183 added control over
+  one live object's data pointer; W186 (§3.8) goes further and replaces a live
+  function pointer with a chosen address that `FontEncRecode` executes in the
+  harness. That is still a benign marker under an ASLR-off, fixed-layout,
+  non-PIE direct-call setup: no saved return address, command, X server
+  process or wire input. The witness replay (#2867) covered the earlier scopes
+  only; W183 and W186 have not been witness-replayed. The row-1024 plain crash
+  is service loss, not execution. A layout-independent redirect is blocked:
+  with ASLR on, heap low 12 bits are stable but bits 12-15 vary across runs,
+  while `setCode()` writes full 16-bit words from a static file. Rung 5 is
+  UNKNOWN.
 
 ## 5. Grade and handoff
 
 Grade at this wake: **rung 3 confirmed in a live X server process** under ASan
 with attacker-request-driven chosen bytes at a chosen offset; rung 4 includes
-both the local chosen-store demonstration and W183's chosen-byte overwrite of
-a live parser object's data pointer at the real-library public API, observed
-through a public `FontEncRecode` read, but only under a fixed ASLR-off layout;
+the local chosen-store demonstration, W183's chosen-byte overwrite of a live
+parser object's data pointer at the real-library public API, and W186's
+chosen-address overwrite of a live `FontMapRec.recode` function pointer that
+executes a benign marker through the public `FontEncRecode` call — the latter
+two only under a fixed ASLR-off layout (W186 additionally non-PIE);
 a **plain-build crash (availability impact) is demonstrated** in a live Xvfb
 at `SIZE 256 1024`; rung 5 UNKNOWN. Two independent verdicts are folded:
 #2867 established rungs 1-4 CODE/HARNESS and live rung 3 from a clean
@@ -255,14 +293,14 @@ counterexample survived either replay. The upstream regression input
 `SIZE 256 258` still survives in a plain build; the row-1024 crash is
 service loss, not execution.
 
-Next bounded experiment: W183 observed a live data pointer but no saved
-pointer or control-flow target, so the same boundary as before still applies:
-only on an observed saved pointer or control-flow target, consider a benign
-marker with vulnerable, fixed and safe-input controls. Alternative evidence:
-establish the OS-level unprivileged-to-privileged X display precondition on a
-real deployment (W180 established runtime X-protocol injection only), or
-remove the fixed-layout requirement for W183. Neither is assumed here. Both
-witness verdicts are folded; the witness owes no further evidence on the
-earlier scopes or the row-1024 matrix, and has not replayed W183. Full
-commands, negatives and the setup-error counterexample are in `PROVENANCE.md`
-W155/W156/W172/W180/W181/W183.
+Next bounded experiment: W186 found a control-flow target at the public API,
+so the remaining question is whether the same chosen-address overwrite can be
+observed inside the W155 Xvfb path with a loopback client, and whether a
+privileged X server reachable by an unprivileged OS user exists on a real
+deployment. On this host no setuid X server and no active display-manager unit
+were found, so the OS-level precondition is not demonstrable here. Layout-
+independent redirect is blocked by ASLR randomizing heap bits 12-15 against
+16-bit static-file stores. These are not assumed. Both witness verdicts are
+folded; the witness owes no evidence on earlier scopes and has not replayed
+W183 or W186. Full commands, negatives and counterexamples are in
+`PROVENANCE.md` W155/W156/W172/W180/W181/W183/W186.

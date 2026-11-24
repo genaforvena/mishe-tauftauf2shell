@@ -410,3 +410,47 @@ command, X server process, wire delivery, privileged context or witness
 replay was added. The earlier single-mapping heap-neighbour negative result
 is preserved, not erased: W183 needs seven mappings and a brk layout. Rung 5
 stays UNKNOWN.
+
+## W186 chosen-address function-pointer overwrite (2026-11-24 01:19Z)
+
+Following W183's live data-pointer control, I checked the reachable object
+layout for a control-flow target. `FontMapRec` (upstream
+`src/X11/fonts/fontenc.h:49-59`) holds `recode` at +0x10 and `name` at +0x18;
+`encparse.c:639-640` sets them at `ENDMAPPING`. In the non-PIE public-API
+runner with `MALLOC_MMAP_THRESHOLD_=262144` and `setarch x86_64 -R`, a safe
+layout dump gives `buffer_base = enc + 0x330` and live `m3` at
+`buffer_base + 0x20050`, so `m3->recode` is at `+0x20060`. With `row_size=258`,
+`from=0xfe34..0xfe37` produce indices 65584..65587, the four 16-bit halves of
+that pointer. `setCode()` writes each half from the mapping's `to` value.
+
+`realpath/evidence/fptr/marker.c` defines a real benign function
+`benign_marker(unsigned, void *)` that writes `BENIGN_MARKER_EXECUTED` to fd 1
+and returns `0xabcd1234`. `fptr/run.sh` compiles it `-no-pie`, reads its text
+address with `nm` (out/address.txt: `0x4011d6` in this build), splits it into
+four little-endian words and bakes them into a seven-mapping `SIZE 256 258`
+`.enc` as mappings 4..7's `to` values. A gdb dump at an earlier crashing
+variant confirmed `m3->recode = 0x00000000004011d6`, the marker address.
+
+Results in `fptr/out/`: vulnerable crafted `rc=0`,
+`m3 recode=0x4011d6 calling... BENIGN_MARKER_EXECUTED`,
+`recode=2882343476` (`0xabcd1234`), every other mapping keeping
+`FontEncSimpleRecode` and its normal value; vulnerable safe (`SIZE 256 256`)
+`rc=0` with no marker; fixed `5920c6e` crafted `rc=0` with every out-of-range
+mapping rejected and no marker. Three consecutive `run.sh` runs matched.
+
+Negative result preserved: an earlier eight-mapping input appended
+`0xff00 0xcafe`; that late store wrote the high half of `m6->next` and crashed
+`install_mapping()` at `encparse.c:435` (gdb backtrace recorded in the wall).
+The trailing mapping was removed, not the crash suppressed.
+
+Scope: this is rung 4 at the real-library public API — a chosen address
+executed as a function pointer through `FontEncRecode`. The target is a lab
+function in the non-PIE harness; it needs ASLR off and a fixed malloc
+threshold. There is no saved return address, command, X server process, wire
+input or privileged context, and the marker has not been reproduced inside
+Xvfb or witness-replayed. A layout-independent redirect is blocked: with ASLR
+on, heap bits 12-15 vary across runs (0x34b0/0x74b0/0xb4b0/0x24b0 observed)
+while `setCode()` writes full 16-bit words from a static file. On this host no
+setuid X server and no active display-manager unit were found, so the
+advisory's OS-level unprivileged-to-privileged precondition is not
+demonstrable here. Rung 5 stays UNKNOWN.

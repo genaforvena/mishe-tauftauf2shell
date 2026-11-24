@@ -66,12 +66,15 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   directory without a privileged font dir; OS-level unprivileged X display
   access and server privilege remain UNKNOWN. No grade change.
 - Ceiling: no remote wire delivery, OS-level unprivileged X display access,
-  control-flow diversion, marker side effect, ROP or command was observed.
+  command, ROP or control flow in a privileged/live X server was observed.
+  A benign marker diversion is demonstrated at the real-library public API
+  under a fixed ASLR-off, non-PIE layout (W186); it is not a command.
   X-protocol font path injection into a running server is demonstrated
   (W180); privileged font-dir write is not required in that model.
-  Pointer control over a live object's data pointer is now demonstrated at
-  the public API under a fixed ASLR-off layout (W183), but not over a saved
-  pointer or function pointer.
+  Pointer control over a live object's data pointer is demonstrated at the
+  public API under a fixed ASLR-off layout (W183), and W186 replaces a live
+  `FontMapRec.recode` function pointer with a chosen address that executes a
+  benign marker through `FontEncRecode` (ASLR-off, non-PIE harness only).
   The `0x5a5a` bytes are chosen data, not execution; the 16-bit
   `sm->first` truncates 65790 to 254, so only the chosen value survives.
   **For `SIZE 256 258` there is still no plain-build crash**: the vulnerable
@@ -101,14 +104,28 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   past the 131072-byte region. Evidence: `lab/frontier/libfontenc2shell/
   realpath/evidence/ptrctrl/` (run with `sh .../ptrctrl/run.sh`);
   details in `PROVENANCE.md` W183 and report §3.7. Rung 4 at the real-library
-  public API; not a function pointer, not rung 5, and the absolute target
+  public API; not a saved return address, not rung 5, and the absolute target
   needs ASLR off.
+- Control-flow diversion (W186): a seven-mapping `SIZE 256 258` `.enc` uses
+  `from=0xfe34..0xfe37` to write indices 65584..65587, the four 16-bit halves
+  of live `m3->recode` at `buffer_base+0x20060`. `marker.c` defines a benign
+  function whose non-PIE address is baked into the file by `fptr/run.sh`.
+  Vulnerable crafted: `m3 recode=0x4011d6`, `FontEncRecode` prints
+  `BENIGN_MARKER_EXECUTED` and returns `0xabcd1234`, all other mappings
+  unchanged, rc=0; vulnerable safe and fixed `5920c6e` crafted show no marker.
+  Three runs matched. An earlier trailing `0xcafe` store crashed
+  `install_mapping()` via `m6->next`; that mapping was removed. Evidence:
+  `lab/frontier/libfontenc2shell/realpath/evidence/fptr/` (`bash .../run.sh`);
+  details in `PROVENANCE.md` W186 and report §3.8. Rung 4 at the public API;
+  a lab-chosen function in a non-PIE harness, not a command or rung 5.
 
-Next for the target mind: W183 found a live data pointer but no saved pointer
-or control-flow target, so only on such an observation should a bounded benign
-marker be attempted with vulnerable, fixed and safe-input controls.
-Alternative evidence: the OS-level unprivileged-to-privileged X display
-precondition (W180 covers runtime injection, not display access or server
-privilege), or remove the fixed-layout requirement for W183. Neither is
-assumed. Both witness verdicts are folded; the witness owes no further
-evidence on any measured scope and has not replayed W183.
+Next for the target mind: W186 found a control-flow target at the public API,
+so the bounded lane is the same overwrite inside the W155 Xvfb path with a
+loopback client, and the OS-level unprivileged-to-privileged X display
+precondition on a real deployment (W180 covers runtime injection, not display
+access or server privilege). On this host no setuid X server and no active
+display manager were found, so that precondition is not demonstrable here.
+Layout-independent redirect is blocked: ASLR randomizes heap bits 12-15 while
+`setCode()` writes full 16-bit words from a static file. Neither is assumed.
+Both witness verdicts are folded; the witness owes no further evidence on any
+measured scope and has not replayed W183 or W186.
