@@ -26,6 +26,18 @@ extend to any SAPI or pre-auth path.
 See `reports/php2shell-status.md` for the full per-lane evidence record,
 including all negatives.
 
+**Amended 2026-11-24 (wake 58, owner/operator rung-5 push): the 126714
+unauth splice reaches rung 4 — demonstrated security impact on a REAL
+application.** Real Drupal 11.4.13 on loopback 8.4.27 FPM with the
+advisory's session ini: unauthenticated upload-progress producers, one
+interrupted session write, and the app's own `session_start()` promote the
+attacker's chosen session record; promoting Drupal's authenticated-session
+shape `_sf2_attributes|a:1:{s:3:"uid";s:1:"1";}` makes the application
+treat the anonymous request as **user 1** (302 → `/user/1`). Fixed 8.4.28
+and no-kill controls are clean. Shim-delivered worker death keeps this at
+rung-4 mechanics; rung 5 (command execution) remains UNCLAIMED — see the
+wake-58 section below.
+
 Amended 2026-11-20 (wakes 8–9): the 2026-11-19 vendor release named a
 new payload class and reopened one lane, CVE-2026-126714 "phpAfterShell"
 — see the dedicated section below. It grades rung 2 as a demonstrated
@@ -1473,3 +1485,85 @@ node, and an exact 120-B occupant (N=88). This is **read-side pointer control**
 leading to a fault at the chosen address; it is not an arbitrary write, no
 benign marker is executed, and there is still no SAPI/HTTP path or pre-auth
 demonstration. Do not generalize to other SAPIs. Do NOT repeat p1-p7 unchanged.
+
+### Wake 58 (2026-11-24) — `drupal-afterRCE`: unauth splice → real-app session takeover of user 1 (rung 4 impact on a live app)
+
+Named after wake 57's owner/operator push ("push php2shell to full rung-5;
+push earlier stages if needed"). Wake 57's negative had not assessed the
+plant's strongest wire primitive — the 126714 unauth rfc1867 splice
+(witness-ESTABLISHED on real FPM) — against a real-app session consumer.
+This wake closed that gap with a real third-party application.
+
+Target: real **Drupal 11.4.13** (composer `drupal/recommended-project`,
+guzzle 7.16.3, symfony 8.0.15, SQLite, minimal profile) on loopback
+FastCGI, run by release-like full-featured 8.4.27-app / 8.4.28-app builds
+(`lab/php2shell/build-app.sh`) with the advisory's session ini
+(`session.upload_progress.enabled=1`, `cleanup=0`, `use_strict_mode=0`,
+`use_only_cookies=0`, `serialize_handler=php`). No application code was
+modified; all instrumentation is engine-level (the committed kill shim's
+`AFTERSHELL_LOG_ONLY` pwrite dump plus the app's own HTTP responses).
+
+Chain (harness `lab/repro/php2shell-aftershell-splice-drupal.sh`, same
+carrier/replacement/kill geometry as the wake-10 FPM harness):
+
+1. Unauthenticated multipart POSTs with the session id in a `PHPSESSID`
+   form field and no cookie build the carrier (progress keys carr/objk/
+   tail); Drupal's lazy session never touches it (`hasSession()` false,
+   `isSessionObsolete()` skips the write).
+2. The armed replacement POST dies at the first FILE_START `pwrite` (shim
+   SIGKILL — rung-4 mechanics); FPM respawns the worker; the session file
+   holds `k1new || C[K:]` (splice on disk, splice-check byte-exact).
+3. The consumer GET carries `Cookie: SESS<sha256-32(host+base)>=<hex sid>`.
+   `StackMiddleware\Session:81` → `SessionManager::start()` → native
+   `session_start()` decodes the spliced file with the php handler, and the
+   promoted record becomes live session state in the real application.
+4. The promoted target is Drupal's own authenticated-session shape:
+   `_sf2_attributes|a:1:{s:3:"uid";s:1:"1";}` — 50 bytes, **NUL-free and
+   pipe-free**, riding the committed objk-filename geometry unchanged.
+   Drupal's `Cookie::authenticate` → `getUserFromSession` maps the bag
+   `uid` to the account (a default 11.4.13 install has no `{sessions}` DB
+   table — the mapping is bag-side), and the anonymous request is treated
+   as **user 1**: the app responds `302 → /user/1`, and its own session
+   write re-encodes the promoted record.
+
+Controls: identical input on the fixed 8.4.28-app build — `ftruncate(0)`
+runs first, carrier tail gone, no promotion, no takeover. Identical
+carrier + replacement without the kill — no promotion (the control check
+must discriminate record-boundary promotion `}_sf2_attributes|` from the
+same bytes riding inert inside the carrier's filename string; a raw grep
+falsely matches the inert copy). Evidence:
+`lab/build/evidence/aftershell-drupal-8.4.27-app-drupal.log` and
+`...-8.4.28-app-drupal.log` (regenerable by the committed harness; the
+Drupal tree itself is gitignored provisioning under
+`lab/src/php2shell-r5-app/`, built by `lab/php2shell/provision-drupal-app.sh`).
+
+Measured channel facts kept for future lanes: the multipart filename
+channel is NUL-free (raw `\0` truncates; rfc1867 `substring_conf` unescapes
+only `\\` and `\"`) so every private/protected-property gadget payload (all
+phpggc chains tested: 4–34 NULs) is dead on this channel; the progress-KEY
+channel carries NULs but any `|` in a session key aborts the whole
+php-handler encode (session.c:1101-1125); PHP 8.4 silently regenerates
+non-hex session ids and, with `use_cookies=0`, ignores incoming cookie ids
+entirely (the committed wake-10 harness had masked this by calling
+`session_id()` explicitly); an FPM `php_admin_value[session.name]` blocks
+Drupal's `ini_set('session.name', …)` and must be `php_value`. A NUL-free
+gadget hunt over the Drupal vendor tree (committed scanner
+`lab/php2shell/scan-nulfree-gadgets.php`) found Symfony 8 guard-throws
+(cache/process `__unserialize`) and only unlink-only sinks with private
+props — no NUL-free command gadget so far.
+
+Honest grade: **rung 4 DEMONSTRATED for this lane** — unauthenticated,
+wire-driven, attacker-chosen session content with direct application-level
+impact (super-user account takeover) on a live third-party app, fix-sensitive
+8.4.27 vs 8.4.28, controls clean. Conditions stated plainly: the worker
+death is still shim-delivered (rung-4 mechanics per `docs/rce.md` gate 1),
+the deployment ini is the advisory's vulnerable configuration, and this is
+not command execution — rung 5 remains UNCLAIMED. Author-only observation;
+witness replay requested. Rung-5 next steps, in order: (a) a real app
+where the same promoted-session takeover reaches designed admin code
+execution (Grav assessed — its session stores an `isValid()`-checked
+`UserInterface` object whose DataUser class uses protected props, so not a
+quick ride; Moodle's admin plugin-upload is the heavier alternative);
+(b) a NUL-free gadget beyond phpggc templates; (c) attacker-caused worker
+death (cgroup OOM or `request_terminate_timeout` mid-`pwrite`), which any
+full rung-5 claim on this lane requires regardless of gadget.

@@ -1312,3 +1312,101 @@ doing reflected class/id writes or classList mutations on request-derived DOM
 while retaining an attribute-child wrapper; a controlled 56-B occupant with a
 real pointer at +16 and mask=0 on any SAPI; or a new vendor payload class for
 618/619.
+
+## Wake 58 (2026-11-24) — OPENED and DEMONSTRATED: `drupal-afterRCE` lane, unauth splice -> REAL-APP user-1 takeover (rung 4 impact on a live app)
+
+Owner/operator push ("push php2shell to full rung-5; push earlier stages if
+needed") reopened the question wake 57 closed. Wake 57's negative did NOT
+assess the plant's strongest wire primitive — the 126714 unauth rfc1867
+splice (rung 2, witness-ESTABLISHED on real FPM, wakes 9-10) — against a
+REAL-APP session consumer. That gap was the lane.
+
+Named lane `drupal-afterRCE`: real Drupal 11.4.13 (composer
+`drupal/recommended-project`, guzzle 7.16.3, symfony 8.0.15, SQLite,
+minimal profile, provisioned by committed `lab/php2shell/provision-drupal-app.sh`)
+on loopback FastCGI with the advisory's session ini (upload_progress enabled,
+use_strict_mode=0, use_only_cookies=0, serialize_handler=php). Builds:
+committed `lab/php2shell/build-app.sh` produced release-like full-featured
+8.4.27-app and 8.4.28-app runtimes (dom/xml/mbstring/pdo_sqlite/gd/openssl;
+PHP 8.4 wants `--enable-gd`, NOT `--with-gd`). Harness: committed
+`lab/repro/php2shell-aftershell-splice-drupal.sh` — same carrier/replacement/
+kill geometry as the wake-10 FPM harness, but producer POSTs and the
+consumer GET are REAL Drupal requests (producer without cookie never touches
+the session: lazy start, `isSessionObsolete` skips; consumer with
+`Cookie: SESS<sha256(host+base)>=<hex-sid>` goes through
+`StackMiddleware\Session:81` -> `SessionManager::start` -> native
+`session_start`, php handler, files save path — no app code modified; the
+promotion is observed in the app's OWN session write via the shim's
+AFTERSHELL_LOG_ONLY pwrite dump, plus the app response itself).
+
+RESULT on 8.4.27-app: unauth producer -> killed replacement pwrite -> splice
+on disk -> respawned worker -> Drupal consumer request PROMOTES the attacker
+record and Drupal accepts it:
+- `evil|O:8:"stdClass"` promotion first proven (app re-encoded the promoted
+  record; no-kill control clean; boundary-discriminator check
+  `}evil|O:8:"stdClass"` — raw-grep false-positives on the inert carrier ride).
+- SWITCHED TARGET after measuring that Drupal 11.4.13's authenticated session
+  is exactly `_sf2_attributes|a:1:{s:3:"uid";s:1:"1";}` (Symfony AttributeBag
+  storage key; `Cookie::authenticate` -> `getUserFromSession` ->
+  `$session->get('uid')` -> loads the user entity; NO `{sessions}` DB table
+  exists in a default 11.4.13 install — the account mapping is bag-side).
+  That record is NUL-free AND pipe-free, so it rides the committed objk
+  filename geometry unchanged (50 bytes). The spliced promotion makes Drupal
+  treat the anonymous request as USER 1: consumer response = 302 to
+  `http://127.0.0.1/user/1`. VERDICT in
+  `lab/build/evidence/aftershell-drupal-8.4.27-app-drupal.log`:
+  splice on disk, promoted record in the app's session write, ACCOUNT
+  TAKEOVER redirect, control (no kill) clean.
+- FIXED control on 8.4.28-app (same harness, same input):
+  ftruncate(0) runs first, no splice, no promotion, no takeover
+  (`aftershell-drupal-8.4.28-app-drupal.log`). Differential clean.
+
+GRADE: rung 4 DEMONSTRATED (security impact) for this lane, honestly
+conditioned: unauthenticated, wire-driven, real third-party app, chosen
+session content (the takeover record), live loopback target, fix-sensitive
+8.4.27 vs 8.4.28; the interruption is still the shim SIGKILL (rung-4
+mechanics per docs/rce.md gate 1) and the deployment ini is the advisory's
+vulnerable configuration. NOT command execution; rung 5 UNCLAIMED.
+
+Measured channel facts (kept, negative and positive):
+- Multipart FILENAME channel is NUL-free: raw `\0` truncates the stored
+  name (rfc1867 `substring_conf` unescapes only `\\` and `\"`), so every
+  private/protected-property gadget payload (ALL phpggc chains tested:
+  4-34 NULs) is dead on this channel. The promoted record must be NUL-free.
+- rfc1867 progress KEY channel: NULs DO survive into the session record
+  (binary-safe capture), but a `|` ANYWHERE in a session key makes
+  `PS_SERIALIZER_ENCODE_FUNC(php)` abort the whole session write
+  (session.c:1101-1125) — so the splice-cut record `key|value` cannot be
+  pre-built through the key, and any key-poisoning is out for fix-sensitive
+  promotion anyway.
+- PHP 8.4 session-id facts: non-hex ids (e.g. "uprod") are silently
+  rejected by cookie-adoption validation and regenerated; `use_cookies=0`
+  makes session_start IGNORE the incoming cookie id entirely (measured on
+  8.4.27 CLI across all four use_cookies/use_only_cookies combos — the
+  committed harness masked this by calling session_id() explicitly); hex
+  sid + use_cookies default works.
+- FPM `php_admin_value[session.name]` blocks Drupal's
+  `ini_set('session.name', 'SESS...')` — must be `php_value` for the app's
+  own name to take effect while the producer's POST-field id channel keeps
+  the default name.
+- Control checks MUST discriminate record-boundary promotion
+  (`}record|`) from the same bytes riding inert inside the carrier's
+  filename string — a raw grep hits the inert copy and falsifies the
+  control.
+
+Rung-5 state after this wake: takeover does NOT give command execution in
+Drupal core (11.x removed the core module-upload installer; no PHP filter).
+Named next experiments (in order): (a) gadget-bearing real app where the
+same promoted-session takeover reaches DESIGNED admin code execution —
+Grav assessed this wake: session stores a UserInterface object validated
+with isValid() and Grav's DataUser\User uses protected props (NUL-mangled)
+=> not a quick ride, deeper Flex/format work needed; Moodle's admin plugin
+upload is the heavier alternative; (b) NUL-free gadget hunt beyond phpggc
+templates (committed scanner `lab/php2shell/scan-nulfree-gadgets.php`;
+__unserialize-array mappers and public-prop destructors only — Symfony 8
+cache/process guards throw on unserialize, all sink candidates so far are
+unlink-only with private props); (c) attacker-caused death to replace the
+shim kill (cgroup OOM or request_terminate_timeout mid-pwrite) — required
+for any full rung-5 claim on this lane regardless of gadget.
+Package installs recorded: `sudo apt-get install -y libgd-dev`
+(2.3.3, for the app runtime's Drupal platform requirement).
