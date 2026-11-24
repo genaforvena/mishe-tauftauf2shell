@@ -1,0 +1,16 @@
+START rv=0
+PRIME A=ADDR B=ADDR C=ADDR X=ADDR delta=272 anchor=ADDR
+work-mixed/tcache-target-b.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample count table
+work-mixed/tcache-target-b.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Decode pipeline unable to unpack deep sample table
+DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA buf=ADDR delta=0
+TCACHE stored_next=ADDR key=ADDR
+M1=ADDR
+M2=ADDR
+M3=ADDR
+M4=ADDR
+M5=ADDR
+M6=ADDR
+M7=ADDR
+M8=ADDR
+M9=ADDR
+M10=ADDR

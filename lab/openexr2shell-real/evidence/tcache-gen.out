@@ -1,0 +1,8 @@
+seg1[8:16]=cc4e00005a5a5a5a seg2[0:8]=5a5a5a5a5a5a5a5a
+baseline y=0 samptab=112 packed=56 unpacked=384
+poc: N=64 byte=0x5a U=256 grid=384 split=128 COPY1=256 COPY2=128 at dst+256 frame=69 wrote=727
+tcache: word=0x00000000004e6ecc seg1[8:12]=cc4e0000 seg1[72:76]=6e000000
+seg1[8:16]=dc4e00005a5a5a5a seg2[0:8]=5a5a5a5a5a5a5a5a
+baseline y=0 samptab=112 packed=56 unpacked=384
+poc: N=64 byte=0x5a U=256 grid=384 split=128 COPY1=256 COPY2=128 at dst+256 frame=69 wrote=727
+tcache: word=0x00000000004e6edc seg1[8:12]=dc4e0000 seg1[72:76]=6e000000

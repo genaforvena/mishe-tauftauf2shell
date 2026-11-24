@@ -1297,3 +1297,62 @@ Three further working-tree replays were byte-identical. Commit `5ebbfdf8`
 carries the generator extension, the wrapper, the gdb probe, the check, the
 nine evidence files and both report sections; this receipt is a separate
 scoped commit. Author replay only, not a witness verdict; grade unchanged.
+
+
+## W187: file-chosen tcache next steers a live malloc address (2026-11-24)
+
+Hypothesis: W186 measured the W184 fully-chosen 128-byte COPY2 window reaching
+a live malloc chunk header at `dst+256/264`; its named open question was
+whether a chosen word could change a live allocation address under a fixed
+layout. The untested step is the chunk's *user* data at `dst+272`. If that
+chunk is a freed glibc tcache entry, its first eight user bytes are the
+safe-linked `next` pointer and the fully chosen window can redirect a later
+allocation.
+
+Method: `harness/tcache_harness.c`, compiled `-no-pie` against the pinned
+plain 3.5.2 library, primes A (0x110, the destination), B (1000 bytes, 0x3f0)
+immediately after A, C (0x110, consumed first as the 256-byte sample-count
+table), a trailing 0x3f0 entry X, and five more 0x3f0 entries D0..D4; the
+frees leave `tcache[0x110] = [C,A]` and `tcache[0x3f0] = [D4..D0,B,X]`.
+`exr_decoding_run()` takes C then A, so COPY2's 128 file-chosen bytes at
+`A+256..+384` cover B's header and its user bytes 0..111. The eight bytes at
+source offsets 16..23 land at `A+272`, i.e. `B->next`;
+`cases/make_tcache_poc.py` encodes `(B >> 12) ^ target` there, exactly
+glibc 2.39's safe-link inverse. Seven `malloc(1000)` calls then walk
+D4..D0, B, and the pointer stored in B.
+
+Observed with ASLR off (`setarch -R`):
+
+- Crafted file for target `0x4e6b40` (a benign `-no-pie` global in the
+  harness): vulnerable 3.5.2 prints `DECODE rv=31`,
+  `TCACHE stored_next=0x00000000004e6ecc`, `M6=0x58c480` (B), and
+  `M7=0x4e6b40` exactly. A second file targeting `anchor+0x10` gives
+  `M7=0x4e6b50`. Two distinct file-chosen targets, two distinct returned
+  live allocation addresses.
+- Uniform `0x5a` control: `stored_next=0x5a5a5a5a5a5a5a5a`, `M6=B`, then
+  `malloc(): unaligned tcache chunk detected` and rc 134 — glibc follows the
+  chosen pointer and rejects it for alignment.
+- Valid baseline on the same vulnerable harness: `DECODE rv=0`, B's next is
+  its ordinary safe-linked link to X, and `M7=X`, not the target.
+- Fixed 3.5.3 on the same crafted file: `DECODE rv=23 EXR_ERR_CORRUPT_CHUNK`,
+  B's next stays its link to X, `M7=X`; the fixed guarded harness reports
+  `GUARD-TOTAL post-decode changed=0`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/tcache-steer-check.sh` -> `RESULT PASS`, eight normalized evidence
+hashes byte-stable in three consecutive working-tree runs (aggregate sha256
+of the hash listing `6f668b1dba31a12e3aa9cfa6a89da49e0105fe7835b767306c344eadef8db4e6`).
+Relations are recorded outside address normalization in
+`evidence/tcache-relations.out`: `targeta ... steer=1`, `targetb ... steer=1`,
+`baseline ... steer=0 fell_through_to_X=1`, `fixed ... steer=0
+fell_through_to_X=1`.
+
+Scope and ceiling: local crafted EXR, purpose-built C harness, harness-supplied
+tcache grooming, ASLR off and a fixed `-no-pie` target. File-chosen bytes steer
+a live heap allocation address under that measured layout — a rung-4 pointer/
+control-datum result, not control flow. No wire, no code pointer or IP, no
+command, no marker side effect and no witness verdict. W161 remains the only
+ESTABLISHED verdict (W158 direct-call and W161 all-FLOAT file); file-level
+rungs 1-4 stay the grade and rung 5 stays UNKNOWN. Would change my mind: the
+same address steering in an unmodified consumer, a chosen code pointer or IP,
+a wire-fed affected process, or a witness counterexample.

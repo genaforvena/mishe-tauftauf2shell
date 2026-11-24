@@ -1,0 +1,4 @@
+targeta next_field=anchor M7=0x4e6b40 want=0x4e6b40 steer=1 fell_through_to_X=0
+targetb next_field=anchor16 M7=0x4e6b50 want=0x4e6b50 steer=1 fell_through_to_X=0
+baseline next_field=X M7=0x58bf80 want=0x4e6b50 steer=0 fell_through_to_X=1
+fixed next_field=X M7=0x58cf80 want=0x4e7b50 steer=0 fell_through_to_X=1

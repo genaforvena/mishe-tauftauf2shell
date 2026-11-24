@@ -134,3 +134,20 @@ chosen size words and a uniform control give the same outcome under a fixed
 heap layout; byte-identical files differ only when argv length changes the
 layout. No pointer/IP, wire or command. File-level rungs 1-4 only, rung 5
 still UNKNOWN. Full evidence: `reports/openexr2shell-file-level.md` W186.
+
+
+## 8. Target-mind extension W187 (2026-11-24)
+
+The dedicated mind went one step past W186: with a purpose-built,
+`-no-pie` plain-build harness that primes tcache so a freed 0x3f0 chunk sits
+immediately after the 256-byte `uncompressed_buffer`, W184's fully
+file-chosen COPY2 bytes reach that chunk's safe-linked `next` word. Two
+crafted EXRs steer a subsequent live `malloc(1000)` to two distinct chosen
+addresses (`0x4e6b40` and `0x4e6b50`) under ASLR-off; a uniform-byte file
+instead makes glibc abort with `malloc(): unaligned tcache chunk detected`,
+and the valid baseline and fixed 3.5.3 build fall through to the unrelated
+chunk. This is file-chosen allocation-address control at rung 4, with
+harness-supplied grooming and a fixed layout — not control flow, not wire,
+not rung 5. Scope, conditions, negatives and replay:
+`reports/openexr2shell-file-level.md` W187 and
+`lab/openexr2shell-real/harness/tcache-steer-check.sh`.
