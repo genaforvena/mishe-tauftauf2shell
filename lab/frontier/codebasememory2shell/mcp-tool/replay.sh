@@ -17,7 +17,6 @@ for sha in "$VULN" "$FIX"; do
       -o "pins/$sha.tar.gz"
   fi
 done
-sha256sum -c PINS.sha256
 
 for sha in "$VULN" "$FIX"; do
   dir="src/codebase-memory-mcp-$sha"
@@ -27,6 +26,10 @@ for sha in "$VULN" "$FIX"; do
   fi
   cp "$HERE/grammar_zz_labstub.c" "$dir/internal/cbm/grammar_zz_labstub.c"
 done
+# Verify all four pins only after extraction: two hashes are cypher.c blobs
+# inside the tarballs, absent from a clean checkout until now. Checking them
+# earlier aborts a clean-tree replay at rc=1 before any row can run.
+sha256sum -c PINS.sha256
 
 mkdir -p "$HERE/bin" evidence
 SAN="-g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer"

@@ -69,7 +69,7 @@ fixture bytes. It remains a local stdio process: no HTTP transport, no remote
 request, no agent-influenced query, no grooming, pointer/IP, command, witness
 verdict or rung 5. The advisory's AV:L/PR:L vector remains consistent.
 
-The tool-path claim is now clean-archive replayable and fully replayed by the
+The tool-path claim is clean-archive replayable and fully replayed by the
 author: `mcp-tool/replay.sh` tracks its previously untracked lab stub
 (`grammar_zz_labstub.c`, sha256
 `232ae0a5909c7411875eb8cc642357cce9fc2905fc08ccca0e20f1edbd679d0e`, identical
@@ -79,8 +79,16 @@ showed the column READ and fixed-parse control but could not reach the WRITE;
 W3 fixed the fixture, added a zero-row failure guard and rebuilt all three
 rows. `evidence/replay-mcp-tool-vuln-recover-Q{33,48}.err` now reproduce the
 tool-path `WRITE of size 68` at `func_bufs[32]` with the chosen name; details
-and hashes are in `MCP-TOOL.md`. This closes the clean-checkout replay gap,
-not the independent-witness gap.
+and hashes are in `MCP-TOOL.md`. W5 then replayed from a literal `git archive
+HEAD` tree and found that the script verified the two pinned `cypher.c` blobs
+before extracting the tarballs, aborting at rc=1 on a clean tree; the working
+tree had masked this. `mcp-tool/replay.sh` now extracts before verifying all
+four pins. From HEAD `4c353c3` with only that corrected script substituted,
+all three rows rebuilt (4/4 pins, expected rc and ASan classes, chosen WRITE
+of 68) and the three row logs plus both recover `-Q33.err` / `-Q48.err` files
+matched the canonical hashes after normalizing only volatile tokens (root
+path, timing fields, ASan PIDs/addresses/BuildId and stack byte dumps).
+This closes the clean-checkout replay gap, not the independent-witness gap.
 
 ## Next for the target mind
 

@@ -144,3 +144,45 @@ The stub is byte-identical to the one used in the original run (sha256
 pinned trees). The original probe script lives at `/tmp/cbm_mcp_probe.py` in
 the author's execution environment; the tracked probe is a path-independent
 rewrite that issues the same `index_repository` and `query_graph` calls.
+
+## Clean-archive replay (W5, 2026-11-24 09:0xZ)
+
+W5 tested the claim literally from a pristine checkout and found a defect in
+`mcp-tool/replay.sh`: `sha256sum -c PINS.sha256` ran before extraction, so a
+tree with no `src/codebase-memory-mcp-*` directories aborted at rc=1 — both
+pinned `src/cypher/cypher.c` blobs read "No such file or directory" / FAILED.
+The working tree masked this because its extracted trees already existed.
+The check now runs after extraction and verifies all four pins. The W3 replay
+above was therefore a working-tree replay, not a clean-archive one.
+
+Reproduce: from the repo root, `git archive HEAD | tar -x -C /tmp/cbm-replay`,
+copy the two hash-verified tarballs from the author's `pins/` into the fresh
+tree's `pins/`, then `bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh`.
+This run used HEAD `4c353c3`; because the script fix was not yet committed,
+only the corrected `mcp-tool/replay.sh` was substituted from the working tree.
+
+- 4/4 pins OK (two tarballs, two `cypher.c` blobs).
+- `vuln-asan`: INDEX rc=0; N=1/32 rc=0; N=33/48 rc=1 with ASan `READ of size 8`
+  at `cypher.c:2568` in `rb_set_columns` ← `build_return_columns:4095` ←
+  `handle_query_graph:2082`.
+- `vuln-recover`: N=1/32 rc=0 clean; N=33/48 rc=0 with 681/682 stderr lines,
+  including `READ of size 8` at `cypher.c:2568` and `WRITE of size 68` at
+  `project_item:3379` ← `execute_return_simple:4116` ← `handle_query_graph:2082`,
+  with the chosen 68-byte `MISHE_OO…` name in the JSON result.
+- `fixed-asan`: N=33/48 rc=0, `isError:true`, no ASan report.
+- Normalized hashes match the canonical working-tree artifacts exactly for
+  all three row logs and both recover `-Q33.err` / `-Q48.err` files. Only
+  volatile tokens were normalized: absolute root path, `duration_ms` /
+  `elapsed_ms`, ASan PIDs, addresses and BuildId, and raw stack byte dumps.
+  `replay-mcp-tool-vuln-asan.log`
+  `fdb382e285524aa307a176faafe97a8425d2aaaf449df19faf625df9edd02d93`,
+  `replay-mcp-tool-vuln-recover.log`
+  `5799e525518368433cccb06519c46183ddfd2de43f51293da8e02c686bb1994f`,
+  `replay-mcp-tool-fixed-asan.log`
+  `a530d14ddae836dc91ca346ed9315152cc52057d5c8bdba12a82d49e33e4baef`,
+  recover `-Q33.err`
+  `a35dfa733d1a1c9b5d4149b612b20f2d872d628135ec55a3d3cc1595ebb9c7f9`,
+  `-Q48.err`
+  `2b6fdf31af5b884c90e0cfbe40df11acbb71ea9ebc0d7b5135234c204613d666`.
+
+This is an author clean-archive replay on the same host, not a witness verdict.
