@@ -1,0 +1,91 @@
+From 6bacf12f0a7e5d72d7e46e4efb721f64b50348ba Mon Sep 17 00:00:00 2001
+From: cjee21 <77721854+cjee21@users.noreply.github.com>
+Date: Sun, 17 May 2026 19:14:03 +0800
+Subject: [PATCH 1/3] Vorbis: Call BS_End_LE before early returns
+
+---
+ Source/MediaInfo/Audio/File_Vorbis.cpp | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/Source/MediaInfo/Audio/File_Vorbis.cpp b/Source/MediaInfo/Audio/File_Vorbis.cpp
+index 06c79484bd..8ebed75337 100644
+--- a/Source/MediaInfo/Audio/File_Vorbis.cpp
++++ b/Source/MediaInfo/Audio/File_Vorbis.cpp
+@@ -135,8 +135,10 @@ void File_Vorbis::Setup()
+     {
+         Element_Begin1("codebook");
+         Get_T4 (24, codebook,                                   "codebook");
+-        if (codebook!=0x564342)
++        if (codebook!=0x564342) {
++            BS_End_LE();
+             return;
++        }
+         Get_BT (16, codebook_dimensions,                        "codebook_dimensions");
+         Get_BT (24, codebook_entries,                           "codebook_entries");
+         Get_BT (1, ordered,                                     "ordered");
+@@ -172,8 +174,10 @@ void File_Vorbis::Setup()
+             }
+         }
+         Get_BT (4, codebook_lookup_type,                        "codebook_lookup_type");
+-        if (codebook_lookup_type>2)
++        if (codebook_lookup_type>2) {
++            BS_End_LE();
+             return; //Not decodable
++        }
+         if (codebook_lookup_type>0)
+         {
+             int8u codebook_value_bits;
+
+From cdcd890832a92b075a947cd45c4d0c897949e28f Mon Sep 17 00:00:00 2001
+From: cjee21 <77721854+cjee21@users.noreply.github.com>
+Date: Sun, 17 May 2026 19:27:31 +0800
+Subject: [PATCH 2/3] Handle display of sizes in range of Petabytes and
+ Exabytes
+
+---
+ Source/MediaInfo/File__Analyze_Streams.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Source/MediaInfo/File__Analyze_Streams.cpp b/Source/MediaInfo/File__Analyze_Streams.cpp
+index 112ad7c778..893743c453 100644
+--- a/Source/MediaInfo/File__Analyze_Streams.cpp
++++ b/Source/MediaInfo/File__Analyze_Streams.cpp
+@@ -3806,6 +3806,8 @@ void File__Analyze::FileSize_FileSize123(stream_t StreamKind, size_t StreamPos,
+         case  2 : Measure=__T(" MiB");  MeasureIsAlwaysSame=true;  break;
+         case  3 : Measure=__T(" GiB");  MeasureIsAlwaysSame=true;  break;
+         case  4 : Measure=__T(" TiB");  MeasureIsAlwaysSame=true;  break;
++        case  5 : Measure=__T(" PiB");  MeasureIsAlwaysSame=true;  break;
++        case  6 : Measure=__T(" EiB");  MeasureIsAlwaysSame=true;  break;
+         default : Measure=__T(" ?iB");  MeasureIsAlwaysSame=true;
+     }
+     Fill(StreamKind, StreamPos, Parameter+2, MediaInfoLib::Config.Language_Get(Ztring::ToZtring(F1,  0), Measure, MeasureIsAlwaysSame), true); // /String1
+
+From 2a13d1b98525bcf789472b4fd80562f8e1b0756b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?J=C3=A9r=C3=B4me=20Martinez?= <jerome@mediaarea.net>
+Date: Sun, 17 May 2026 21:57:36 +0200
+Subject: [PATCH 3/3] Clear BT the same way as BS
+
+---
+ Source/MediaInfo/File__Analyze.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Source/MediaInfo/File__Analyze.cpp b/Source/MediaInfo/File__Analyze.cpp
+index 2ece149c25..9c7ceb334b 100644
+--- a/Source/MediaInfo/File__Analyze.cpp
++++ b/Source/MediaInfo/File__Analyze.cpp
+@@ -1972,6 +1972,7 @@ void File__Analyze::Buffer_Clear()
+ {
+     //Buffer
+     BS->Attach(NULL, 0);
++    BT->Attach(NULL, 0);
+     delete[] Buffer_Temp; Buffer_Temp=NULL;
+     if (!Status[IsFinished])
+         File_Offset+=Buffer_Size;
+@@ -2857,6 +2858,7 @@ bool File__Analyze::Data_Manage()
+         //size_t Element_Level_Save=Element_Level;
+         Data_Parse();
+         BS->Attach(NULL, 0); //Clear it
++        BT->Attach(NULL, 0); //Clear it
+         //Element_Level=Element_Level_Save;
+ 
+         if (Buffer_Offset+(Element_WantNextLevel?Element_Offset:Element_Size)>=FrameInfo.Buffer_Offset_End)
