@@ -394,3 +394,8 @@ lab/frontier/fltk2shell/asan-*.out
 lab/frontier/fltk2shell/last-driver-*.out
 lab/frontier/fltk2shell/*.log
 !lab/frontier/fltk2shell/evidence.log
+lab/frontier/fontforge2shell/asan-attack
+lab/frontier/fontforge2shell/asan-fixed
+lab/frontier/fontforge2shell/asan-safe
+lab/frontier/fontforge2shell/plain-attack
+lab/frontier/fontforge2shell/plain-fixed
