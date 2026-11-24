@@ -203,13 +203,33 @@ grade (rungs 1-4, witness W185) is unchanged; W3/W4 await witness replay.
 Both legs reproduced from a clean `git archive HEAD` extraction with only the
 gitignored CLI binaries symlinked in (PROVENANCE W4 clean-replay note).
 
-## Cheapest next experiment to move a rung
+### W5 — groomed spill reaches a live allocator pointer (2026-11-24, unwitnessed)
 
-The live write site and chosen-byte placement are measured. A pointer or
-marker claim would need the 32-byte write to land on a live code pointer;
-the measured layout puts it on the next chunk's header/data, so that path is
-likely blocked and must be disproved before any r5 work. No external target
-is ever contacted.
+The W4 assumption that the spill always lands on the arena top was wrong under
+heap grooming. `provision/ico_gdb_groom.py` sends benign favicon GETs in the
+same imgproxy process before the hostile ICO. In three of six preload=1..6
+runs, the wrapped 3-byte allocation was followed by a free tcache chunk whose
+`next` pointer sat at `actual_data+18`; the pattern body overwrote it. Two
+`ptr`-mode runs then wrote a crafted 64-byte body that preserved the victim
+chunk's size (`0x35`) and set its `next` to the chosen value
+`0x4141414141414141`. In both, the first later `malloc(0x20)` consumed the
+victim chunk (returning its user pointer), so the bin head became the
+attacker-chosen value. That is pointer control over live allocator metadata,
+not just chosen bytes in padding. The ICO-fixed binary with the same grooming
+returned HTTP 500 and never hit the breakpoint.
+
+The chosen value is deliberately unmapped and no write through it to a code
+pointer, marker execution or command was observed, so this is still rung 4,
+not rung 5. Grooming is stochastic, not deterministic. The allocation geometry
+itself is invariant: only `data_size` 0xfffffff3..0xffffffff wraps, giving
+allocations of 1..13 bytes, all served from the same 0x20 glibc size class.
+Full logs, digests, negative runs and the fixed control are in PROVENANCE W5.
+
+## Remaining gap to a rung-5 attempt
+
+A mapped attacker-chosen target address plus a later attacker-influenced write
+to a live code pointer would be needed; neither was observed. No external
+target is ever contacted.
 
 ## What would change my mind
 

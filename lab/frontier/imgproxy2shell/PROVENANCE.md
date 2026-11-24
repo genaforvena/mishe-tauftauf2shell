@@ -404,3 +404,111 @@ pointer or return address, and no marker execution or remote command was
 observed. Harness rungs 1-4 (witness W185) and W1/W2 (witness #3407) are
 unchanged. W3/W4 are author observations awaiting independent witness replay;
 the witness wakes were failing on the engine-cap class at 08:29-08:33Z.
+
+## W5 — groomed spill reaches a live allocator pointer (2026-11-24, unwitnessed)
+
+Claim tested: W4's measured 22-byte spill was assumed to land only on the
+arena top chunk, which would make a pointer/marker claim structurally
+impossible. That assumption is **false under heap grooming** from ordinary
+loopback HTTP traffic: repeated benign loads before the hostile ICO leave a
+free 0x20/0x30 tcache chunk immediately after the wrapped 3-byte allocation,
+and the spill overwrites its live `next` pointer with attacker-chosen bytes.
+
+Invariant that bounds the search: `data_size + 14` wraps only for
+`data_size` in `0xfffffff3..0xffffffff`, i.e. allocation sizes 1..13. glibc
+serves all of those from the same 0x20 chunk size class (24 usable bytes), so
+the *geometry* of the overflow does not vary with the wrapped size. Only the
+body length/content and the allocator state at request time vary.
+
+Probe: `provision/ico_gdb_groom.py`
+(`sha256=571ae9496da846f6e29ff03dd2577cc99d7077ecd41b86f5738d8d4f9aa62a82`).
+It serves an unchanged libvips favicon plus the crafted ICO on
+127.0.0.1:18081, launches the unmodified CLI under gdb on 127.0.0.1:18080
+with `IMGPROXY_WORKERS=1`, `IMGPROXY_CONCURRENCY=1`, sends N benign GETs in the
+**same process** before one hostile GET, and dumps 12 quadwords at
+`data-16` before and after `vips_foreign_load_read_full` returns. `pattern`
+mode writes the W4 32-byte `5a5b5c5d` body; `ptr` mode writes 64 bytes whose
+offsets 10..17 preserve the following chunk's size (0x35) and offsets 18..25
+set its tcache `next` to a chosen `0x4141414141414141`.
+
+Reproduction commands (from `provision/`):
+
+    python3 ico_gdb_groom.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips \
+      w5final1 2 rs:fill:16:16/plain/hostile.ico 12 30 ptr
+    python3 ico_gdb_groom.py ./imgproxy-icofixed \
+      ../../libvips2shell/build-vuln-plain/libvips \
+      w5fixed1 2 rs:fill:16:16/plain/hostile.ico 12 30 ptr
+
+### Discovery and layout variance
+
+`http-ico-groom1.log`
+(`sha256=12bfb59b28408c19b7df2290c0181260535747681c305c3a7530145838d4a49c`),
+one benign preload, pattern body: before the write the chunk at `data+16` had
+size `0x35` and user data `next=0x00007ff87ffdaaaa`,
+`key=0x0a9dc6817ef4b45d` (glibc 2.39 tcache key). After the write that `next`
+slot read `0x5b5a5d5c5b5a5d5c` — chosen bytes over a live allocator pointer,
+not over zeroed top padding.
+
+A six-run preload sweep (preload=1..6, pattern body, logs `sweep1`..`sweep6`)
+quantified the stochasticity. Three runs (preload 2, 5, 6) had a live pointer
+at `data+32`: `0x00000007fff8c067` / `0x00007ff89ff351a7` /
+`0x00007ffff7c45f14` respectively, with a tcache-style key beside it. The
+other three runs had the arena top size (`0x1ed41`, `0x1ef11`, `0x1ed41`) at
+`data+24` and no pointer in the spill window — the W4-style negative. The
+layout difference comes from allocator state, not from the crafted size: the
+wrapped allocation is a 0x20 chunk in every run.
+
+Kept raw sweep logs: `http-ico-sweep5.log`
+(`sha256=5457cf3b80b014a91e44f96ff3787f6a77baddfd6133bd4ae4f3cbab3c4b58da`)
+and `http-ico-sweep6.log`
+(`sha256=33a0fbddd62b45cad1e09cbdc95523d64dec6dafe0f71978d6faddbab9d2008d`).
+
+### Chosen-pointer write
+
+`http-ico-w5final1.log`
+(`sha256=7654a62eb112b52eeaab7bd2ec3136f052a969085fbb66a19fdf8f2137ab63fc`),
+preload=2, `ptr` body, vulnerable binary:
+
+- Before: `data-8 = 0x25`; the following chunk at `data+16` has size
+  `0x35`, `next = 0x00007ff883f42c4e`, `key = 0xa8a1378c3399f0af`.
+- After `read_full`: size field still `0x35` (preserved by crafted body),
+  `next = 0x4141414141414141` exactly as chosen. The first malloc observed
+  after the write is `malloc(0x20)` on the same thread and returns
+  `0x7fff7c03ef10`, the user pointer of that victim chunk — i.e. the allocator
+  consumed the poisoned entry. By tcache_get semantics the bin head then holds
+  the attacker-chosen value; the next same-bin allocation would return it.
+  That last step is an inference from the observed tcache transition, not an
+  observed return of `0x4141414141414141`.
+
+`http-ico-w5final4.log`
+(`sha256=50c7b676c34660d0c122c95a248e2c94c897e20624717573c88c8c5f6d76c45c`),
+preload=6, reproduced the same transition: victim size `0x35` preserved,
+`next` overwritten with `0x4141414141414141`, `malloc(0x20)` returned the
+victim chunk `0x7fff8000c590`.
+
+Negative runs preserved: `w5final2.log` had the top chunk (`0x1ef11`) at
+`data+24` and no live pointer; writing `0x35` there produced a fatal
+`sysmalloc` assertion. `w5final3.log` had a 0x25 victim whose `next` slot held
+ASCII bytes (`0x0000006567616d69`) rather than a pointer — the overwritten
+slot is live heap data but not always a pointer. These are kept as raw logs.
+
+Fixed control: `http-ico-w5fixed1.log`
+(`sha256=9c6d5bdd61c4893cef058903fb603c5ef8f5e1ad780b8a6b22734ff2a264fa71`)
+and `http-ico-w5fixed2.log`
+(`sha256=01ac0e3e173e3754d91cdb14232976da5d5f863f676894c0e2f9f22490a6f982`):
+both benign preloads returned 200, the hostile GET returned HTTP 500, the
+conditional breakpoint was installed but hit **zero** times, and the ICO-fixed
+process stayed alive. The fixed loader rejects the size before allocating.
+
+### Grade and remaining gap
+
+Rung 4 is extended from chosen bytes over chosen offsets to **attacker-chosen
+pointer control over live allocator metadata** in a real imgproxy process over
+unauthenticated loopback HTTP, with a fixed control. It is still not rung 5:
+the chosen value `0x4141414141414141` is deliberately unmapped, no subsequent
+write through a chosen address to a code pointer was observed, and no marker
+execution or command ran. Grooming is stochastic (three of six sweep runs had
+a live pointer in the spill window); no claim of determinism is made. W3/W4
+and now W5 remain author observations until witness replay. No external
+address was contacted; ports 18080/18081 were free after the runs.

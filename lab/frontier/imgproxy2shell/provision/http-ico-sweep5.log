@@ -1,0 +1,89 @@
+CLIENT mode=pattern preload=5 benign[0]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[1]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[2]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[3]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[4]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' hostile=RemoteDisconnected:Remote end closed connection without response
+=== GDB OUTPUT ===
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 619722)]
+[New Thread 0x7fffae39e6c0 (LWP 619723)]
+[New Thread 0x7fffadb9d6c0 (LWP 619724)]
+[New Thread 0x7fffad39c6c0 (LWP 619725)]
+[New Thread 0x7fffacb9b6c0 (LWP 619726)]
+[New Thread 0x7fff97fff6c0 (LWP 619727)]
+[New Thread 0x7fff977fe6c0 (LWP 619728)]
+[New Thread 0x7fff96ffd6c0 (LWP 619729)]
+[New Thread 0x7fff967fc6c0 (LWP 619730)]
+[New Thread 0x7fff95ffb6c0 (LWP 619731)]
+[New Thread 0x7fff957fa6c0 (LWP 619732)]
+[New Thread 0x7fff94ff96c0 (LWP 619733)]
+[New Thread 0x7fff77fff6c0 (LWP 619742)]
+[New Thread 0x7fff777fe6c0 (LWP 619743)]
+[New Thread 0x7fff76ffd6c0 (LWP 619744)]
+[New Thread 0x7fff767fc6c0 (LWP 619745)]
+[New Thread 0x7fff75ffb6c0 (LWP 619746)]
+[Switching to Thread 0x7fff767fc6c0 (LWP 619745)]
+
+Thread 17 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fff60064900, buf=buf@entry=0x7fff60057eae, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT read_full rdi(source)=0x7fff60064900 rsi(buf)=0x7fff60057eae rdx(len)=0xfffffff5
+GDB base(data)=0x7fff60057ea0 actual_data=0x7fff60057eae
+GDB_PRE 12x8 at base-16:
+0x7fff60057e90:	0x0000001000000001	0x0000000000000025
+0x7fff60057ea0:	0x0000000000000000	0x0000000000000000
+0x7fff60057eb0:	0x0000000000000000	0x0000000000000025
+0x7fff60057ec0:	0x00007ff89ff351a7	0x0000000000010000
+0x7fff60057ed0:	0x0000000000000000	0x0000000000000025
+0x7fff60057ee0:	0x00007ff89ff61ff7	0x0000000000726564
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff60000ca0) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_POST 12x8 at base-16:
+0x7fff60057e90:	0x0000001000000001	0x0000000000000025
+0x7fff60057ea0:	0x0000000000000000	0x5b5a000000000000
+0x7fff60057eb0:	0x5b5a5d5c5b5a5d5c	0x5b5a5d5c5b5a5d5c
+0x7fff60057ec0:	0x5b5a5d5c5b5a5d5c	0x00005d5c5b5a5d5c
+0x7fff60057ed0:	0x0000000000000000	0x0000000000000025
+0x7fff60057ee0:	0x00007ff89ff61ff7	0x0000000000726564
+GDB_POST_BYTES 96 at actual_data:
+0x7fff60057eae:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fff60057eb6:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fff60057ebe:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fff60057ec6:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fff60057ece:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fff60057ed6:	0x00	0x00	0x25	0x00	0x00	0x00	0x00	0x00
+0x7fff60057ede:	0x00	0x00	0xf7	0x1f	0xf6	0x9f	0xf8	0x7f
+0x7fff60057ee6:	0x00	0x00	0x64	0x65	0x72	0x00	0x00	0x00
+0x7fff60057eee:	0x00	0x00	0xdc	0x00	0x00	0x00	0x00	0x00
+0x7fff60057ef6:	0x00	0x00	0x25	0x00	0x00	0x00	0x00	0x00
+0x7fff60057efe:	0x00	0x00	0xa7	0x6f	0xf3	0x9f	0xf8	0x7f
+0x7fff60057f06:	0x00	0x00	0x40	0x7f	0x05	0x60	0xff	0x7f
+GDB_BT
+#0  0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff60000ca0) at icoload.c:161
+#1  0x00007ffff7a4217b in vips_foreign_load_build (object=0x7fff60000ca0) at ../src/libvips-8.18.2/libvips/foreign/foreign.c:1154
+#2  0x00007ffff7bb92f6 in vips_object_build (object=0x7fff60000ca0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:372
+#3  0x00007ffff7bcec89 in vips_cache_operation_buildp (operation=0x7fff767fb8b0) at ../src/libvips-8.18.2/libvips/iofuncs/cache.c:1062
+GDB_MALLOCS
+Breakpoint 2 at 0x7ffff76ad730: malloc. (47 locations)
+
+Thread 17 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+GDB_MALLOC_HIT thread=17 size=0x20
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $2 = (void *) 0x7fff60057e50
+GDB_MALLOC_RET 0x7fff60057e50
+
+Thread 17 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_MALLOC_HIT2 thread=17 size=0x20
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $3 = (void *) 0x7fff60056c50
+GDB_MALLOC_RET2 0x7fff60056c50

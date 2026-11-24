@@ -1,0 +1,597 @@
+CLIENT mode=ptr preload=6 benign[0]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[1]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[2]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[3]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[4]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[5]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' hostile=RemoteDisconnected:Remote end closed connection without response
+=== GDB OUTPUT ===
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 626847)]
+[New Thread 0x7fffae39e6c0 (LWP 626848)]
+[New Thread 0x7fffadb9d6c0 (LWP 626849)]
+[New Thread 0x7fffad39c6c0 (LWP 626850)]
+[New Thread 0x7fffacb9b6c0 (LWP 626851)]
+[New Thread 0x7fff97fff6c0 (LWP 626852)]
+[New Thread 0x7fff977fe6c0 (LWP 626855)]
+[New Thread 0x7fff96ffd6c0 (LWP 626856)]
+[New Thread 0x7fff967fc6c0 (LWP 626857)]
+[New Thread 0x7fff95ffb6c0 (LWP 626858)]
+[New Thread 0x7fff957fa6c0 (LWP 626859)]
+[New Thread 0x7fff94ff96c0 (LWP 626860)]
+[New Thread 0x7fff77fff6c0 (LWP 626898)]
+[New Thread 0x7fff6f5ff6c0 (LWP 626899)]
+[New Thread 0x7fff777fe6c0 (LWP 626900)]
+[New Thread 0x7fff76ffd6c0 (LWP 626901)]
+[Switching to Thread 0x7fff94ff96c0 (LWP 626860)]
+
+Thread 13 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fff7c000b70, buf=buf@entry=0x7fff7c0020ee, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT read_full rdi(source)=0x7fff7c000b70 rsi(buf)=0x7fff7c0020ee rdx(len)=0xfffffff5
+GDB base(data)=0x7fff7c0020e0 actual_data=0x7fff7c0020ee
+GDB_PRE 12x8 at base-16:
+0x7fff7c0020d0:	0x0000000000000000	0x0000000000000025
+0x7fff7c0020e0:	0x0000000000000000	0x0000000000000000
+0x7fff7c0020f0:	0x0000000000000000	0x000000000001ef11
+0x7fff7c002100:	0x0000000000000000	0x0000000000000000
+0x7fff7c002110:	0x0000000000000000	0x0000000000000000
+0x7fff7c002120:	0x0000000000000000	0x0000000000000000
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff7c000ca0) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_POST 12x8 at base-16:
+0x7fff7c0020d0:	0x0000000000000000	0x0000000000000025
+0x7fff7c0020e0:	0x0000000000000000	0x5b5a000000000000
+0x7fff7c0020f0:	0x5b5a5d5c5b5a5d5c	0x0000000000000035
+0x7fff7c002100:	0x4141414141414141	0x5d5c5b5a5d5c5b5a
+0x7fff7c002110:	0x5d5c5b5a5d5c5b5a	0x5d5c5b5a5d5c5b5a
+0x7fff7c002120:	0x5d5c5b5a5d5c5b5a	0x0000005a5d5c5b5a
+GDB_POST_BYTES 96 at actual_data:
+0x7fff7c0020ee:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fff7c0020f6:	0x5a	0x5b	0x35	0x00	0x00	0x00	0x00	0x00
+0x7fff7c0020fe:	0x00	0x00	0x41	0x41	0x41	0x41	0x41	0x41
+0x7fff7c002106:	0x41	0x41	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b
+0x7fff7c00210e:	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b
+0x7fff7c002116:	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b
+0x7fff7c00211e:	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b
+0x7fff7c002126:	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d	0x5a	0x00
+0x7fff7c00212e:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fff7c002136:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fff7c00213e:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fff7c002146:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+GDB_BT
+#0  0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff7c000ca0) at icoload.c:161
+#1  0x00007ffff7a4217b in vips_foreign_load_build (object=0x7fff7c000ca0) at ../src/libvips-8.18.2/libvips/foreign/foreign.c:1154
+#2  0x00007ffff7bb92f6 in vips_object_build (object=0x7fff7c000ca0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:372
+#3  0x00007ffff7bcec89 in vips_cache_operation_buildp (operation=0x7fff94ff88b0) at ../src/libvips-8.18.2/libvips/iofuncs/cache.c:1062
+GDB_MALLOCS
+Breakpoint 2 at 0x7ffff76ad730: malloc. (47 locations)
+Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+
+Thread 13 "imgproxy-vuln" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+GDB_MALLOC_HIT thread=13 size=0x99061
+runtime.cgoSigtramp () at /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/sys_linux_amd64.s:400
+400		MOVQ	runtime·cgoTraceback(SB), AX
+GDB_MALLOC_RET (nil)
+SIGABRT: abort
+PC=0x7ffff769ebec m=13 sigcode=18446744073709551610
+signal arrived during cgo execution
+
+goroutine 104 gp=0x34f9d5700d20 m=13 mp=0x34f9d5490808 [syscall, locked to thread]:
+runtime.cgocall(0x2da1a00, 0x34f9d4ffb268)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/cgocall.go:167 +0x4b fp=0x34f9d4ffb240 sp=0x34f9d4ffb208 pc=0x48c7eb
+github.com/imgproxy/imgproxy/v3/vips._Cfunc_vips_icoload_source_go(0x7fff7c000b70, 0x34f9d51fe270, {0x3ff0000000000000, 0x0, 0x0, 0x1, 0x0, 0x0, {0x0, 0x0, ...}})
+	_cgo_gotypes.go:1101 +0x46 fp=0x34f9d4ffb268 sp=0x34f9d4ffb240 pc=0x2cc9526
+github.com/imgproxy/imgproxy/v3/vips.(*Image).Load.func11(...)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:293
+github.com/imgproxy/imgproxy/v3/vips.(*Image).Load(0x34f9d51fe260, {0x3afdfd0, 0x34f9d56ea870}, 0x3ff0000000000000, 0x0, 0x1)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:293 +0x345 fp=0x34f9d4ffb368 sp=0x34f9d4ffb268 pc=0x2ccd6a5
+github.com/imgproxy/imgproxy/v3/processing.(*Processor).initialLoadImage(0x34f9d4fac618?, 0x34f9d51fe260, {0x3afdfd0, 0x34f9d56ea870}, 0x8?)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:161 +0x136 fp=0x34f9d4ffb3d0 sp=0x34f9d4ffb368 pc=0x2d11bd6
+github.com/imgproxy/imgproxy/v3/processing.(*Processor).ProcessImage(0x34f9d570a330, {0x3ae96a8, 0x34f9d56e5830}, {0x3afdfd0, 0x34f9d56ea870}, 0x34f9d4fac618)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:78 +0x145 fp=0x34f9d4ffb570 sp=0x34f9d4ffb3d0 pc=0x2d113a5
+github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).processImage(0x34f9d5714900, {0x3afdfd0, 0x34f9d56ea870})
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request_methods.go:162 +0x245 fp=0x34f9d4ffb658 sp=0x34f9d4ffb570 pc=0x2d2c345
+github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).execute(0x34f9d5714900)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request.go:118 +0x5f2 fp=0x34f9d4ffb8b8 sp=0x34f9d4ffb658 pc=0x2d2b2f2
+github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute(0x34f9d527e0e0, {0x34f9d53368d0, 0x15}, 0x34f9d56ea730, 0x34f9d5555a40)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/handler.go:93 +0x1e5 fp=0x34f9d4ffb938 sp=0x34f9d4ffb8b8 pc=0x2d2a445
+github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute-fm({0x34f9d53368d0?, 0x2fe7540?}, 0xd69501?, 0x34f9d52659b8?)
+	<autogenerated>:1 +0x2b fp=0x34f9d4ffb970 sp=0x34f9d4ffb938 pc=0x2d336cb
+github.com/imgproxy/imgproxy/v3/server.(*Router).WithPanic-fm.(*Router).WithPanic.func1({0x34f9d53368d0?, 0x38cdb19?}, 0xa?, 0x2fe6f00?)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:88 +0x56 fp=0x34f9d4ffb9c8 sp=0x34f9d4ffb970 pc=0x2d339d6
+github.com/imgproxy/imgproxy/v3/server.(*Router).WithReportError-fm.(*Router).WithReportError.func1({0x34f9d53368d0, 0x15}, 0x34f9d56ea730, 0x34f9d5555900)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:102 +0xe2 fp=0x34f9d4ffba80 sp=0x34f9d4ffb9c8 pc=0x2d33da2
+github.com/imgproxy/imgproxy/v3/server.(*Router).ServeHTTP(0x34f9d5716000, {0x3adf800, 0x34f9d5428000}, 0x34f9d5265b68?)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/router.go:141 +0x52d fp=0x34f9d4ffbb60 sp=0x34f9d4ffba80 pc=0x215fccd
+net/http.serverHandler.ServeHTTP({0x34f9d56d0900?}, {0x3adf800?, 0x34f9d5428000?}, 0x1?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:3311 +0x8e fp=0x34f9d4ffbb90 sp=0x34f9d4ffbb60 pc=0x75340e
+net/http.(*conn).serve(0x34f9d52de3f0, {0x3ae96a8, 0x34f9d570a780})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:2073 +0x650 fp=0x34f9d4ffbfb8 sp=0x34f9d4ffbb90 pc=0x730e10
+net/http.(*Server).Serve.gowrap3()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:3464 +0x1f fp=0x34f9d4ffbfe0 sp=0x34f9d4ffbfb8 pc=0x7369ff
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4ffbfe8 sp=0x34f9d4ffbfe0 pc=0x497b81
+created by net/http.(*Server).Serve in goroutine 84
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:3464 +0x485
+
+goroutine 1 gp=0x34f9d4e681e0 m=nil [chan receive]:
+runtime.gopark(0x3ae9990?, 0x313b5e0?, 0xc0?, 0x40?, 0x34f9d53d5990?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4fe7900 sp=0x34f9d4fe78e0 pc=0x48fc6e
+runtime.chanrecv(0x34f9d572e0e0, 0x0, 0x1)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/chan.go:667 +0x4ae fp=0x34f9d4fe7978 sp=0x34f9d4fe7900 pc=0x4219ce
+runtime.chanrecv1(0x34f9d5712050?, 0x34f9d5716000?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/chan.go:509 +0x12 fp=0x34f9d4fe79a0 sp=0x34f9d4fe7978 pc=0x4214f2
+github.com/imgproxy/imgproxy/v3.(*Imgproxy).StartServer(0x34f9d570e320, {0x3ae9958, 0x34f9d56d0b00}, 0x0)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/imgproxy.go:218 +0x189 fp=0x34f9d4fe7a18 sp=0x34f9d4fe79a0 pc=0x2d32cc9
+main.run({0x3ae96a8, 0x34f9d56e4150}, 0x34f9d56e4150?)
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/cli/main.go:43 +0x127 fp=0x34f9d4fe7ab0 sp=0x34f9d4fe7a18 pc=0x2d34aa7
+github.com/urfave/cli/v3.(*Command).run(0x34f9d56cdb88, {0x3ae96a8, 0x34f9d56e4150}, {0x34f9d4ed80a0, 0x1, 0x1})
+	/home/mesh-home/go/pkg/mod/github.com/urfave/cli/v3@v3.8.0/command_run.go:364 +0x2e6c fp=0x34f9d4fe7ef8 sp=0x34f9d4fe7ab0 pc=0x217034c
+github.com/urfave/cli/v3.(*Command).Run(...)
+	/home/mesh-home/go/pkg/mod/github.com/urfave/cli/v3@v3.8.0/command_run.go:93
+main.main()
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/cli/main.go:69 +0x1a5 fp=0x34f9d4fe7f48 sp=0x34f9d4fe7ef8 pc=0x2d34dc5
+runtime.main()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:290 +0x2d5 fp=0x34f9d4fe7fe0 sp=0x34f9d4fe7f48 pc=0x45a135
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4fe7fe8 sp=0x34f9d4fe7fe0 pc=0x497b81
+
+goroutine 2 gp=0x34f9d4e68d20 m=nil [force gc (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3efa8 sp=0x34f9d4f3ef88 pc=0x48fc6e
+runtime.goparkunlock(...)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:468
+runtime.forcegchelper()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:375 +0xb3 fp=0x34f9d4f3efe0 sp=0x34f9d4f3efa8 pc=0x45a453
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3efe8 sp=0x34f9d4f3efe0 pc=0x497b81
+created by runtime.init.7 in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:363 +0x1a
+
+goroutine 3 gp=0x34f9d4e69680 m=nil [GC sweep wait]:
+runtime.gopark(0x1?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3f788 sp=0x34f9d4f3f768 pc=0x48fc6e
+runtime.goparkunlock(...)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:468
+runtime.bgsweep(0x34f9d4eee100)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgcsweep.go:324 +0x151 fp=0x34f9d4f3f7c8 sp=0x34f9d4f3f788 pc=0x442e51
+runtime.gcenable.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:214 +0x17 fp=0x34f9d4f3f7e0 sp=0x34f9d4f3f7c8 pc=0x434197
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3f7e8 sp=0x34f9d4f3f7e0 pc=0x497b81
+created by runtime.gcenable in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:214 +0x66
+
+goroutine 4 gp=0x34f9d4e69860 m=nil [GC scavenge wait]:
+runtime.gopark(0x10000?, 0x3a86098?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3ff78 sp=0x34f9d4f3ff58 pc=0x48fc6e
+runtime.goparkunlock(...)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:468
+runtime.(*scavengerState).park(0x60abb40)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgcscavenge.go:425 +0x49 fp=0x34f9d4f3ffa8 sp=0x34f9d4f3ff78 pc=0x4408a9
+runtime.bgscavenge(0x34f9d4eee100)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgcscavenge.go:658 +0x59 fp=0x34f9d4f3ffc8 sp=0x34f9d4f3ffa8 pc=0x440e39
+runtime.gcenable.gowrap2()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:215 +0x17 fp=0x34f9d4f3ffe0 sp=0x34f9d4f3ffc8 pc=0x434157
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3ffe8 sp=0x34f9d4f3ffe0 pc=0x497b81
+created by runtime.gcenable in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:215 +0xa5
+
+goroutine 5 gp=0x34f9d4e69a40 m=nil [GOMAXPROCS updater (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f40788 sp=0x34f9d4f40768 pc=0x48fc6e
+runtime.goparkunlock(...)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:468
+runtime.updateMaxProcsGoroutine()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:7095 +0xe7 fp=0x34f9d4f407e0 sp=0x34f9d4f40788 pc=0x4689c7
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f407e8 sp=0x34f9d4f407e0 pc=0x497b81
+created by runtime.defaultGOMAXPROCSUpdateEnable in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:7083 +0x37
+
+goroutine 6 gp=0x34f9d50001e0 m=nil [finalizer wait]:
+runtime.gopark(0x469a15?, 0x1c8?, 0x0?, 0x96?, 0x34f9d4f3e601?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3e620 sp=0x34f9d4f3e600 pc=0x48fc6e
+runtime.runFinalizers()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mfinal.go:210 +0x107 fp=0x34f9d4f3e7e0 sp=0x34f9d4f3e620 pc=0x433087
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3e7e8 sp=0x34f9d4f3e7e0 pc=0x497b81
+created by runtime.createfing in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mfinal.go:172 +0x3d
+
+goroutine 7 gp=0x34f9d5154d20 m=nil [cleanup wait]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f40f68 sp=0x34f9d4f40f48 pc=0x48fc6e
+runtime.goparkunlock(...)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:468
+runtime.(*cleanupQueue).dequeue(0x60ac120)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mcleanup.go:522 +0xd4 fp=0x34f9d4f40fa0 sp=0x34f9d4f40f68 pc=0x42f6f4
+runtime.runCleanups()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mcleanup.go:718 +0x45 fp=0x34f9d4f40fe0 sp=0x34f9d4f40fa0 pc=0x42fd65
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f40fe8 sp=0x34f9d4f40fe0 pc=0x497b81
+created by runtime.(*cleanupQueue).createGs in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mcleanup.go:672 +0xa5
+
+goroutine 8 gp=0x34f9d52bf2c0 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f41740 sp=0x34f9d4f41720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f417c8 sp=0x34f9d4f41740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f417e0 sp=0x34f9d4f417c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f417e8 sp=0x34f9d4f417e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 18 gp=0x34f9d530e000 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3a740 sp=0x34f9d4f3a720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f3a7c8 sp=0x34f9d4f3a740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f3a7e0 sp=0x34f9d4f3a7c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3a7e8 sp=0x34f9d4f3a7e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 34 gp=0x34f9d4f843c0 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f9a740 sp=0x34f9d4f9a720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f9a7c8 sp=0x34f9d4f9a740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f9a7e0 sp=0x34f9d4f9a7c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f9a7e8 sp=0x34f9d4f9a7e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 9 gp=0x34f9d52bf4a0 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f41f40 sp=0x34f9d4f41f20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f41fc8 sp=0x34f9d4f41f40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f41fe0 sp=0x34f9d4f41fc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f41fe8 sp=0x34f9d4f41fe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 10 gp=0x34f9d52bf680 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f96740 sp=0x34f9d4f96720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f967c8 sp=0x34f9d4f96740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f967e0 sp=0x34f9d4f967c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f967e8 sp=0x34f9d4f967e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 19 gp=0x34f9d530e1e0 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3af40 sp=0x34f9d4f3af20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f3afc8 sp=0x34f9d4f3af40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f3afe0 sp=0x34f9d4f3afc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3afe8 sp=0x34f9d4f3afe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 35 gp=0x34f9d4f845a0 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f9af40 sp=0x34f9d4f9af20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f9afc8 sp=0x34f9d4f9af40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f9afe0 sp=0x34f9d4f9afc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f9afe8 sp=0x34f9d4f9afe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 20 gp=0x34f9d530e3c0 m=nil [GC worker (idle)]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3b740 sp=0x34f9d4f3b720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f3b7c8 sp=0x34f9d4f3b740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f3b7e0 sp=0x34f9d4f3b7c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3b7e8 sp=0x34f9d4f3b7e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 21 gp=0x34f9d530e5a0 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7e7136d02?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f3bf40 sp=0x34f9d4f3bf20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f3bfc8 sp=0x34f9d4f3bf40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f3bfe0 sp=0x34f9d4f3bfc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f3bfe8 sp=0x34f9d4f3bfe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 11 gp=0x34f9d52bf860 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7e71383b4?, 0x1?, 0x8a?, 0x1a?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f96f40 sp=0x34f9d4f96f20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f96fc8 sp=0x34f9d4f96f40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f96fe0 sp=0x34f9d4f96fc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f96fe8 sp=0x34f9d4f96fe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 12 gp=0x34f9d52bfa40 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7e7136f3c?, 0x1?, 0x6d?, 0xdf?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f97740 sp=0x34f9d4f97720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f977c8 sp=0x34f9d4f97740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f977e0 sp=0x34f9d4f977c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f977e8 sp=0x34f9d4f977e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 13 gp=0x34f9d52bfc20 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7e71371f8?, 0x1?, 0x58?, 0xce?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f97f40 sp=0x34f9d4f97f20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f97fc8 sp=0x34f9d4f97f40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f97fe0 sp=0x34f9d4f97fc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f97fe8 sp=0x34f9d4f97fe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 14 gp=0x34f9d52fe000 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7e713a998?, 0x1?, 0xd7?, 0x98?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f98740 sp=0x34f9d4f98720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f987c8 sp=0x34f9d4f98740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f987e0 sp=0x34f9d4f987c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f987e8 sp=0x34f9d4f987e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 15 gp=0x34f9d52fe1e0 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7e7136d20?, 0x3?, 0x3e?, 0xe2?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f98f40 sp=0x34f9d4f98f20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f98fc8 sp=0x34f9d4f98f40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f98fe0 sp=0x34f9d4f98fc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f98fe8 sp=0x34f9d4f98fe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 16 gp=0x34f9d52fe3c0 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7cf5503e8?, 0x1?, 0xa4?, 0x82?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f99740 sp=0x34f9d4f99720 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f997c8 sp=0x34f9d4f99740 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f997e0 sp=0x34f9d4f997c8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f997e8 sp=0x34f9d4f997e0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 50 gp=0x34f9d52fe5a0 m=nil [GC worker (idle)]:
+runtime.gopark(0x128c7e71374dc?, 0x3?, 0x34?, 0x29?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f99f40 sp=0x34f9d4f99f20 pc=0x48fc6e
+runtime.gcBgMarkWorker(0x34f9d4ee6fc0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1791 +0xeb fp=0x34f9d4f99fc8 sp=0x34f9d4f99f40 pc=0x436c6b
+runtime.gcBgMarkStartWorkers.gowrap1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x17 fp=0x34f9d4f99fe0 sp=0x34f9d4f99fc8 pc=0x436b57
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f99fe8 sp=0x34f9d4f99fe0 pc=0x497b81
+created by runtime.gcBgMarkStartWorkers in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/mgc.go:1695 +0x105
+
+goroutine 68 gp=0x34f9d5410780 m=nil [chan receive]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f9b6c0 sp=0x34f9d4f9b6a0 pc=0x48fc6e
+runtime.chanrecv(0x34f9d5184ee0, 0x34f9d4f9b7c0, 0x1)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/chan.go:667 +0x4ae fp=0x34f9d4f9b738 sp=0x34f9d4f9b6c0 pc=0x4219ce
+runtime.chanrecv2(0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/chan.go:514 +0x12 fp=0x34f9d4f9b760 sp=0x34f9d4f9b738 pc=0x421512
+github.com/honeybadger-io/honeybadger-go.newBufferedWorker.func1()
+	/home/mesh-home/go/pkg/mod/github.com/honeybadger-io/honeybadger-go@v0.9.0/buffered_worker.go:12 +0x45 fp=0x34f9d4f9b7e0 sp=0x34f9d4f9b760 pc=0xd29e45
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f9b7e8 sp=0x34f9d4f9b7e0 pc=0x497b81
+created by github.com/honeybadger-io/honeybadger-go.newBufferedWorker in goroutine 1
+	/home/mesh-home/go/pkg/mod/github.com/honeybadger-io/honeybadger-go@v0.9.0/buffered_worker.go:11 +0xac
+
+goroutine 69 gp=0x34f9d5410960 m=nil [select]:
+runtime.gopark(0x34f9d4f4fee8?, 0x6?, 0x70?, 0x0?, 0x34f9d4f4fecc?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f4fd58 sp=0x34f9d4f4fd38 pc=0x48fc6e
+runtime.selectgo(0x34f9d4f4fee8, 0x34f9d4f4fec0, 0x0?, 0x0, 0x0?, 0x1)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/select.go:351 +0xaa5 fp=0x34f9d4f4fe88 sp=0x34f9d4f4fd58 pc=0x46d5c5
+github.com/honeybadger-io/honeybadger-go.(*EventsWorker).run(0x34f9d52c0ff0, {0x3ae9670, 0x60da660})
+	/home/mesh-home/go/pkg/mod/github.com/honeybadger-io/honeybadger-go@v0.9.0/events_worker.go:179 +0x24c fp=0x34f9d4f4ffb8 sp=0x34f9d4f4fe88 pc=0xd2dd6c
+github.com/honeybadger-io/honeybadger-go.NewEventsWorker.gowrap1()
+	/home/mesh-home/go/pkg/mod/github.com/honeybadger-io/honeybadger-go@v0.9.0/events_worker.go:66 +0x1f fp=0x34f9d4f4ffe0 sp=0x34f9d4f4ffb8 pc=0xd2cf5f
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f4ffe8 sp=0x34f9d4f4ffe0 pc=0x497b81
+created by github.com/honeybadger-io/honeybadger-go.NewEventsWorker in goroutine 1
+	/home/mesh-home/go/pkg/mod/github.com/honeybadger-io/honeybadger-go@v0.9.0/events_worker.go:66 +0x290
+
+goroutine 23 gp=0x34f9d557fa40 m=nil [select, locked to thread]:
+runtime.gopark(0x34f9d56f37a8?, 0x2?, 0x1?, 0xfa?, 0x34f9d56f3794?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d56f3628 sp=0x34f9d56f3608 pc=0x48fc6e
+runtime.selectgo(0x34f9d56f37a8, 0x34f9d56f3790, 0x0?, 0x0, 0x0?, 0x1)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/select.go:351 +0xaa5 fp=0x34f9d56f3758 sp=0x34f9d56f3628 pc=0x46d5c5
+runtime.ensureSigM.func1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/signal_unix.go:1091 +0x188 fp=0x34f9d56f37e0 sp=0x34f9d56f3758 pc=0x48a0c8
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d56f37e8 sp=0x34f9d56f37e0 pc=0x497b81
+created by runtime.ensureSigM in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/signal_unix.go:1074 +0xc5
+
+goroutine 51 gp=0x34f9d4f94000 m=3 mp=0x34f9d4f43008 [syscall]:
+runtime.notetsleepg(0x60dd0e0, 0xffffffffffffffff)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/lock_futex.go:123 +0x29 fp=0x34f9d56ef7a0 sp=0x34f9d56ef778 pc=0x427fc9
+os/signal.signal_recv()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/sigqueue.go:152 +0x98 fp=0x34f9d56ef7c0 sp=0x34f9d56ef7a0 pc=0x492178
+os/signal.loop()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/os/signal/signal_unix.go:23 +0x13 fp=0x34f9d56ef7e0 sp=0x34f9d56ef7c0 pc=0xd18573
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d56ef7e8 sp=0x34f9d56ef7e0 pc=0x497b81
+created by os/signal.Notify.func1.1 in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/os/signal/signal.go:152 +0x1f
+
+goroutine 82 gp=0x34f9d5700000 m=nil [select]:
+runtime.gopark(0x34f9d5709798?, 0x2?, 0xc0?, 0x17?, 0x34f9d570978c?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d5709628 sp=0x34f9d5709608 pc=0x48fc6e
+runtime.selectgo(0x34f9d5709798, 0x34f9d5709788, 0x0?, 0x0, 0x0?, 0x1)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/select.go:351 +0xaa5 fp=0x34f9d5709758 sp=0x34f9d5709628 pc=0x46d5c5
+os/signal.NotifyContext.func1()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/os/signal/signal.go:292 +0x7c fp=0x34f9d57097e0 sp=0x34f9d5709758 pc=0xd1805c
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d57097e8 sp=0x34f9d57097e0 pc=0x497b81
+created by os/signal.NotifyContext in goroutine 1
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/os/signal/signal.go:291 +0x158
+
+goroutine 83 gp=0x34f9d57005a0 m=nil [select]:
+runtime.gopark(0x34f9d5709f70?, 0x2?, 0x70?, 0x0?, 0x34f9d5709f64?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d4f4edf8 sp=0x34f9d4f4edd8 pc=0x48fc6e
+runtime.selectgo(0x34f9d4f4ef70, 0x34f9d5709f60, 0x0?, 0x0, 0x0?, 0x1)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/select.go:351 +0xaa5 fp=0x34f9d4f4ef28 sp=0x34f9d4f4edf8 pc=0x46d5c5
+github.com/imgproxy/imgproxy/v3.(*Imgproxy).startMemoryTicker(0x34f9d570e320, {0x3ae9958, 0x34f9d56d0b00})
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/imgproxy.go:287 +0xc7 fp=0x34f9d4f4efb8 sp=0x34f9d4f4ef28 pc=0x2d33147
+github.com/imgproxy/imgproxy/v3.(*Imgproxy).StartServer.gowrap1()
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/imgproxy.go:194 +0x1f fp=0x34f9d4f4efe0 sp=0x34f9d4f4efb8 pc=0x2d32ddf
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d4f4efe8 sp=0x34f9d4f4efe0 pc=0x497b81
+created by github.com/imgproxy/imgproxy/v3.(*Imgproxy).StartServer in goroutine 1
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/imgproxy.go:194 +0xa5
+
+goroutine 84 gp=0x34f9d5700780 m=nil [IO wait]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x0?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d5736af0 sp=0x34f9d5736ad0 pc=0x48fc6e
+runtime.netpollblock(0x34f9d5736b40?, 0x41e706?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/netpoll.go:575 +0xf7 fp=0x34f9d5736b28 sp=0x34f9d5736af0 pc=0x452b37
+internal/poll.runtime_pollWait(0x7ffff56b9c00, 0x72)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/netpoll.go:351 +0x85 fp=0x34f9d5736b48 sp=0x34f9d5736b28 pc=0x48ee45
+internal/poll.(*pollDesc).wait(0x34f9d5714100?, 0x900000036?, 0x0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/internal/poll/fd_poll_runtime.go:84 +0x27 fp=0x34f9d5736b70 sp=0x34f9d5736b48 pc=0x50cbc7
+internal/poll.(*pollDesc).waitRead(...)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Accept(0x34f9d5714100)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/internal/poll/fd_unix.go:613 +0x28c fp=0x34f9d5736c18 sp=0x34f9d5736b70 pc=0x511c4c
+net.(*netFD).accept(0x34f9d5714100)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/fd_unix.go:150 +0x29 fp=0x34f9d5736cd0 sp=0x34f9d5736c18 pc=0x5650e9
+net.(*TCPListener).accept(0x34f9d5716280)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/tcpsock_posix.go:159 +0x1b fp=0x34f9d5736d20 sp=0x34f9d5736cd0 pc=0x57ce5b
+net.(*TCPListener).Accept(0x34f9d5716280)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/tcpsock.go:387 +0x30 fp=0x34f9d5736d50 sp=0x34f9d5736d20 pc=0x57c0f0
+golang.org/x/net/netutil.(*limitListener).Accept(0x34f9d570a540)
+	/home/mesh-home/go/pkg/mod/golang.org/x/net@v0.52.0/netutil/listen.go:63 +0x87 fp=0x34f9d5736de0 sp=0x34f9d5736d50 pc=0x215a207
+net/http.(*onceCloseListener).Accept(0x34f9d52de3f0?)
+	<autogenerated>:1 +0x1b fp=0x34f9d5736df8 sp=0x34f9d5736de0 pc=0x75e13b
+net/http.(*Server).Serve(0x34f9d4e60500, {0x3adf8c0, 0x34f9d570a540})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:3434 +0x30c fp=0x34f9d5736f28 sp=0x34f9d5736df8 pc=0x73660c
+github.com/imgproxy/imgproxy/v3/server.Start.func1()
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/server.go:63 +0xd9 fp=0x34f9d5736fe0 sp=0x34f9d5736f28 pc=0x2160d19
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d5736fe8 sp=0x34f9d5736fe0 pc=0x497b81
+created by github.com/imgproxy/imgproxy/v3/server.Start in goroutine 1
+	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/server.go:60 +0x325
+
+goroutine 117 gp=0x34f9d5494b40 m=nil [IO wait]:
+runtime.gopark(0x0?, 0x0?, 0x0?, 0x12?, 0xb?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/proc.go:462 +0xce fp=0x34f9d56ee5a8 sp=0x34f9d56ee588 pc=0x48fc6e
+runtime.netpollblock(0x4b37f8?, 0x41e706?, 0x0?)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/netpoll.go:575 +0xf7 fp=0x34f9d56ee5e0 sp=0x34f9d56ee5a8 pc=0x452b37
+internal/poll.runtime_pollWait(0x7ffff56b9800, 0x72)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/netpoll.go:351 +0x85 fp=0x34f9d56ee600 sp=0x34f9d56ee5e0 pc=0x48ee45
+internal/poll.(*pollDesc).wait(0x34f9d51ecf80?, 0x34f9d56d0921?, 0x0)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/internal/poll/fd_poll_runtime.go:84 +0x27 fp=0x34f9d56ee628 sp=0x34f9d56ee600 pc=0x50cbc7
+internal/poll.(*pollDesc).waitRead(...)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/internal/poll/fd_poll_runtime.go:89
+internal/poll.(*FD).Read(0x34f9d51ecf80, {0x34f9d56d0921, 0x1, 0x1})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/internal/poll/fd_unix.go:165 +0x2ae fp=0x34f9d56ee6c0 sp=0x34f9d56ee628 pc=0x50ddee
+net.(*netFD).Read(0x34f9d51ecf80, {0x34f9d56d0921?, 0xf?, 0x34f9d5712500?})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/fd_posix.go:68 +0x25 fp=0x34f9d56ee708 sp=0x34f9d56ee6c0 pc=0x5633a5
+net.(*conn).Read(0x34f9d55006d8, {0x34f9d56d0921?, 0x34f9d56ee798?, 0x74eda0?})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/net.go:196 +0x45 fp=0x34f9d56ee750 sp=0x34f9d56ee708 pc=0x5739c5
+golang.org/x/net/netutil.(*limitListenerConn).Read(0x34f9d56ee7d0?, {0x34f9d56d0921?, 0x34f9d570c000?, 0x34f9d5712500?})
+	<autogenerated>:1 +0x22 fp=0x34f9d56ee780 sp=0x34f9d56ee750 pc=0x215a7a2
+net/http.(*connReader).backgroundRead(0x34f9d56d0900)
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:702 +0x33 fp=0x34f9d56ee7c8 sp=0x34f9d56ee780 pc=0x72a9f3
+net/http.(*connReader).startBackgroundRead.gowrap2()
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:698 +0x17 fp=0x34f9d56ee7e0 sp=0x34f9d56ee7c8 pc=0x72a957
+runtime.goexit({})
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:1771 +0x1 fp=0x34f9d56ee7e8 sp=0x34f9d56ee7e0 pc=0x497b81
+created by net/http.(*connReader).startBackgroundRead in goroutine 104
+	/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/net/http/server.go:698 +0xb6
+
+rax    0x0
+rbx    0x990ac
+rcx    0x7ffff769ebec
+rdx    0x6
+rdi    0x99061
+rsi    0x990ac
+rbp    0x7fff94ff8380
+rsp    0x7fff94ff8340
+r8     0xffffffff
+r9     0x0
+r10    0x8
+r11    0x246
+r12    0x6
+r13    0x7fff94ff8530
+r14    0x16
+r15    0x7fff94ff8530
+rip    0x7ffff769ebec
+rflags 0x246
+cs     0x33
+fs     0x0
+gs     0x0
+[Thread 0x7fff76ffd6c0 (LWP 626901) exited]
+[Thread 0x7fff777fe6c0 (LWP 626900) exited]
+[Thread 0x7fff6f5ff6c0 (LWP 626899) exited]
+[Thread 0x7fff77fff6c0 (LWP 626898) exited]
+[Thread 0x7fff94ff96c0 (LWP 626860) exited]
+[Thread 0x7fff95ffb6c0 (LWP 626858) exited]
+[Thread 0x7fff967fc6c0 (LWP 626857) exited]
+[Thread 0x7fff96ffd6c0 (LWP 626856) exited]
+[Thread 0x7fff977fe6c0 (LWP 626855) exited]
+[Thread 0x7fff97fff6c0 (LWP 626852) exited]
+[Thread 0x7fffacb9b6c0 (LWP 626851) exited]
+[Thread 0x7fffad39c6c0 (LWP 626850) exited]
+[Thread 0x7fffadb9d6c0 (LWP 626849) exited]
+[Thread 0x7fffae39e6c0 (LWP 626848) exited]
+[Thread 0x7fffaeb9f6c0 (LWP 626847) exited]
+[Thread 0x7ffff5f26a80 (LWP 626785) exited]
+[Thread 0x7fff957fa6c0 (LWP 626859) exited]
+[New process 626785]
+[Inferior 1 (process 626785) exited with code 02]
+/tmp/ico-groom-w5final2-qdfjkbyf.cmd:35: Error in sourced command file:
+No registers.
