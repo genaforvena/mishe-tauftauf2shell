@@ -1,0 +1,10 @@
+--- a/src/sbbs3/answer.cpp
++++ b/src/sbbs3/answer.cpp
+@@ -545,6 +545,7 @@ bool sbbs_t::answer()
+ 			else
+ 				terminal[sizeof(terminal) - 1] = 0;
+ 			lprintf(LOG_DEBUG, "%04d SSH [%s] term: %s", client_socket.load(), client.addr, terminal);
++			lprintf(LOG_DEBUG, "%04d SSH REAL_ANSWER_PROBE sizeof=%u l=%d off41=%02x off44=%08x off48=%08x off52=%.8s", client_socket.load(), (unsigned)sizeof(terminal), l, (unsigned)((unsigned char*)terminal)[41], (unsigned)line_delay, (unsigned)console, wordwrap);
+ 		}
+ 		pthread_mutex_unlock(&ssh_mutex);
+ 

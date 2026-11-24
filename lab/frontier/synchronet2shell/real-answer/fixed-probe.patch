@@ -1,0 +1,26 @@
+diff --git a/src/sbbs3/answer.cpp b/src/sbbs3/answer.cpp
+index b7b10def..e5562418 100644
+--- a/src/sbbs3/answer.cpp
++++ b/src/sbbs3/answer.cpp
+@@ -539,14 +539,15 @@ bool sbbs_t::answer()
+ 			term->rows = l;
+ 			lprintf(LOG_DEBUG, "%04d SSH [%s] height %d", client_socket.load(), client.addr, term->rows);
+ 		}
+-		l = 0;
+-		if (cryptStatusOK(cryptGetAttributeString(ssh_session, CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL, terminal, &l)) && l > 0) {
+-			if (l < (int)sizeof(terminal))
+-				terminal[l] = 0;
+-			else
+-				terminal[sizeof(terminal) - 1] = 0;
++		// cryptGetAttributeString() does not take a destination size.
++		size_t ssh_terminal_length = 0;
++		char* ssh_terminal = get_binary_crypt_attribute(ssh_session, CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL, &ssh_terminal_length);
++		if (ssh_terminal != nullptr && ssh_terminal_length > 0) {
++			SAFECOPY(terminal, ssh_terminal);
+ 			lprintf(LOG_DEBUG, "%04d SSH [%s] term: %s", client_socket.load(), client.addr, terminal);
+ 		}
++		free_crypt_attrstr(ssh_terminal);
++		lprintf(LOG_DEBUG, "%04d SSH REAL_FIXED_PROBE sizeof=%u len=%u off40=%02x off44=%08x off48=%08x off52=%.8s", client_socket.load(), (unsigned)sizeof(terminal), (unsigned)ssh_terminal_length, (unsigned char)terminal[40], (unsigned)line_delay, (unsigned)console, wordwrap);
+ 		pthread_mutex_unlock(&ssh_mutex);
+ 
+ 		/*

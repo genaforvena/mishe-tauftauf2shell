@@ -2,9 +2,10 @@
 
 Status: **admitted 2026-11-24 as the 129th route; rungs 1–3 plus rung 4 at
 the labeled synthetic-struct scope, WITNESS-ESTABLISHED (CLAIM ESTABLISHED
-AS LABELED, witness wake 189, 2026-11-24); NO r5.** Brief authored 2026-11-24
-in wake W194; W2/W3 updates 2026-11-24; W4 witness verdict folded 2026-11-24.
-Lab: `lab/frontier/synchronet2shell/`.
+AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
+`sbbs_t::answer()` call scope, author-measured in W5 and replay still owed;
+NO r5.** Brief authored 2026-11-24 in wake W194; W2/W3/W4 updates 2026-11-24;
+W5 real-build extension 2026-11-24. Lab: `lab/frontier/synchronet2shell/`.
 
 ## Claim ground truth (provisioning, never a probe)
 
@@ -171,16 +172,54 @@ copies remain inside a 1000-byte-padded struct, so it is not a clean whole
 binary. The witness ceiling matches this report's: no real `sbbs3`, no
 measured DoS, no pointer/IP or command, no r5.
 
+## W5 real `sbbs3` build and real `answer()` call (2026-11-24, author-measured)
+
+The W4 tooling negative was repaired locally, without host package changes:
+Ubuntu noble `.deb` packages `zip`, `libarchive-dev`, `libnspr4-dev` and
+`autoconf2.13` were fetched with `apt-get download` into
+`lab/frontier/synchronet2shell/provision/debs/` and extracted into
+`provision/local/`; the vendored mozjs build then succeeded and
+`make -C src/sbbs3 FILE_LIBS="... -larchive -lnettle -lacl -llzma -lzstd
+-llz4 -lbz2 -lz -lxml2"` linked the real `sbbs` binary from pinned parent
+`42f586d7` (rc 0, `gcc.linux.x64.exe.debug/sbbs`). Two earlier negatives were
+kept: `-j2` raced the mozjs header install (`jsversion.h: No such file or
+directory`) and a parallel link produced a corrupt `libsbbs.so`. The replay
+script builds jslib and sbbs3 serially.
+
+The real server was bound only to `127.0.0.1:22222` with `SSH_ANYAUTH` so an
+OpenSSH client could send pty-req without credentials. Without streamed client
+data the real `answer()` failed with `-43` channel-not-found or an `exec`
+channel, matching the W2/W3 probe negatives; with streamed stdin the loopback
+pty-req reached the verbatim one-call copy inside real `sbbs_t::answer()`.
+An instrumentation-only `lprintf` was added after that statement (the copy
+itself is unchanged; patches in `real-answer/`). Observed with a 64-byte TERM
+of 41×A + 3×B + `MISH` + `E-OO` + `TAUFTAUF` + 4×Z:
+`sizeof=41 l=64 off41=42 off44=4853494d off48=4f4f2d45 off52=TAUFTAUF`; a
+40-byte TERM gives `l=40 off41=00 off44=00000000 off48=00000000 off52=`.
+The upstream `cb6d77dbca` fixed-form copy plus the same probe gives
+`len=64 off40=00 off44=00000000 off48=00000000 off52=` for the 64-byte TERM.
+This is chosen bytes at chosen offsets inside a real `sbbs_t` object, called
+through a live loopback SSH server — rung 4 at the real-call scope. It is
+author evidence; witness replay is still owed. No measured thread-block/DoS,
+pointer/IP control, command execution or rung 5.
+
+One-command replay: `bash
+lab/frontier/synchronet2shell/real-answer/run-real-answer.sh`. It provisions a
+pinned tree if absent, builds serially, drives both forms on loopback ports
+22222/22223 and checks all three behavioral cases; transcripts are under
+`real-answer/evidence/`. The author replay was run to completion: 4 PASS /
+0 FAIL.
+
 ## Ceiling and cheapest next experiment
 
-Not measured: a real Synchronet `sbbs3` build, a real `sbbs_t` object, an
-instrumented call to real `answer()`, the claimed thread-block/DoS, any
-pointer/IP control, command execution, or rung 5. The 64-byte
-TERM and the no-size copy are now measured both at the real cryptlib API by
-direct set and from a network pty-req through the real vendored cryptlib
-getter (previous section). No claim that the adjacent-field overwrite yields
-code execution: the advisory's own impact vector is availability-only
-(`VC:N/VI:N`).
+Not measured: the advisory's claimed thread-block/socket-exhaustion DoS, any
+pointer/IP control, command execution, or rung 5. The 64-byte TERM and the
+no-size copy are measured at the real cryptlib API, from a network pty-req
+through the real vendored cryptlib getter, and now inside a real `sbbs3`
+build's `sbbs_t::answer()` on loopback. No claim that the adjacent-field
+overwrite yields code execution: the advisory's own impact vector is
+availability-only (`VC:N/VI:N`). The real-call extension is author evidence
+with a one-command replay, but has not yet been independently replayed.
 
 `gdb.txt` (sha256 `968fa2093607c70425343fe569fe91ee7bc467d7077dc52ff4914cd24691f128`)
 is a batch gdb transcript of the same plain vulnerable binary at the statement
@@ -194,13 +233,13 @@ hashes differ only in PIDs, ASLR addresses, timestamps, checkout paths and
 build ids. The verbatim-statement harness is covered by the witness verdict
 section above.
 
-Next rung-raising step (witness replay held): build `sbbs3` from the already
-provisioned pinned tree against its vendored cryptlib and drive the same
-oversized TERM through real `answer()`; the host lacks `libarchive-dev` and
-`libnspr4-dev` headers, so that build needs local provisioning rather than a
-host package change. Stop at the first measured layer and keep every negative.
-The stand-alone wire probe remains author evidence about a standalone probe,
-now independently replayed; it is not a real `answer()` call.
+The former next step — build `sbbs3` from the pinned tree and drive the
+oversized TERM through real `answer()` — is complete in W5 above, with
+locally provisioned headers rather than a host package change. The cheapest
+remaining evidence-producing step is an independent witness replay of
+`real-answer/run-real-answer.sh`; the stand-alone wire probe remains author
+evidence about a standalone probe (independently replayed in W4) and is not
+a real `answer()` call.
 
 W4 bounded build-feasibility probe (negative, no source edit, no host package
 change): a direct `g++ -fsyntax-only` of `src/sbbs3/answer.cpp` at parent
