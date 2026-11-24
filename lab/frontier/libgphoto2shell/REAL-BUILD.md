@@ -375,3 +375,24 @@ No physical USB, wire, remote request, device-only canary recovery, command
 or witness replay. Rung 5 stays UNKNOWN. Local-only diff
 `evidence/replay-vusb-guards.patch` (applies after the W170 and W171 patches),
 commands and all six raw runs in `evidence/real-plain-consumer-write.out`.
+
+## Clean-archive replay and DRAIN sensitivity (W174, 2026-11-24)
+
+W172 was replayed from `git archive 833729ad` (115 files, 4/4 pins OK,
+tarball `5df9e774…7f28`, vulnerable camlib `0ccb1dac…`) with the committed
+patches and probe source, rebuilt from scratch. The verbatim `DRAIN=22`
+failed to reproduce: `priv=0x555555563ff0`, victim `0x555555563cb0` (before
+`priv`), `CONSUMER_GET data=(nil) size=0x0` and a 0-byte save file. The
+author tree had `priv=0x555555564070` and victim `priv+0x4050`; a shifted
+startup heap leaves one more pre-existing 0x180 tcache chunk in the clean
+tree. A drain sweep found `DRAIN=23` puts the victim at `priv+0x4050` there;
+24 overshoots by one 0x190 chunk. `DRAIN` is a layout-tuning knob, not an
+exploit primitive: the observable requirement is victim at `priv+0x4050`.
+
+With `DRAIN=23` all six cases reproduced from clean bytes: attack
+`gp_file_save rc=0` with the 29-byte marker file, matched `GUARDS=0` abort at
+`malloc(): corrupted top size` with a 0-byte file, count 100 no victim,
+zeroed `DATA`/`SIZE` no dereference, fixed camlib no bulk read, and fix
+reversal restoring the write. Author replay, not independent acceptance;
+grade unchanged at rung 4, rung 5 UNKNOWN. Exact commands, hashes, layout
+sweep and raw observations in `evidence/real-plain-clean-replay.out`.

@@ -32,3 +32,14 @@ The trace normalizes PIDs, gdb memory addresses and absolute paths; it keeps
 pinned line numbers, exit statuses and chosen-byte values. This is a replay
 of the author's own harness, not independent witness acceptance; the witness
 mind still needs to re-run the claim.
+
+## W174 clean replay of the real-consumer write (commit `833729ad`)
+
+The W172 `gp_file_save()` claim was also rebuilt from a clean `git archive`
+(115 files, 4/4 pins OK, release tarball `5df9e774…7f28`). It reproduced all
+six cases only after re-tuning `M2SHELL_VUSB_DRAIN` from 22 to 23: the clean
+tree's heap has one more pre-existing 0x180 tcache chunk, so 22 put the lab
+victim before `priv` and the consumer got `data=(nil)`. The criterion is
+victim at `priv+0x4050`, not the numeric drain. Full recipe and observations:
+`evidence/real-plain-clean-replay.out`. This is still the author's replay of
+lab-assisted rung 4, not a witness verdict.

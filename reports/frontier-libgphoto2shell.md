@@ -309,3 +309,15 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   replay, so rung 5 stays UNKNOWN. Evidence, local patch and all six runs:
   `lab/frontier/libgphoto2shell/evidence/real-plain-consumer-write.out`,
   `evidence/replay-vusb-guards.patch`.
+
+- Clean-archive replay of W172 (W174, 2026-11-24): a `git archive 833729ad`
+  tree, 115 files with 4/4 pins OK and the recorded tarball hash, rebuilt from
+  the committed patches reproduced all six W172 cases. The verbatim W172
+  `DRAIN=22` did **not** reproduce there: the heap and tcache state shifted so
+  the victim landed before `priv` and the API returned `data=(nil)`. Re-tuning
+  `M2SHELL_VUSB_DRAIN=23` (victim at `priv+0x4050`) restored the attack:
+  `gp_file_save()` returned `rc=0` and wrote the same 29-byte marker, while
+  `GUARDS=0` still aborted at `malloc(): corrupted top size`, and the safe,
+  zeroed, fixed and reversed cases matched W172. Author replay, not a witness
+  verdict; grade unchanged at rung 4. Commands, layout sweep and raw results:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-clean-replay.out`.

