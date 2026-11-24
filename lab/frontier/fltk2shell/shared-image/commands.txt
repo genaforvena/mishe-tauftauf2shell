@@ -1,0 +1,14 @@
+./consumer-vuln shared ../poc-chosen.bmp
+./consumer-vuln shared ../safe.bmp
+./consumer-vuln shared crafted.ico
+./consumer-vuln ico crafted.ico
+./consumer-vuln ico safe.ico
+./consumer-vuln ico crafted-full.ico
+./consumer-vuln shared crafted-full.ico
+./consumer-vuln direct ../poc-chosen.bmp
+./consumer-fixed shared ../poc-chosen.bmp
+./consumer-fixed shared ../safe.bmp
+./consumer-fixed shared crafted.ico
+./consumer-fixed ico crafted.ico
+./consumer-fixed ico crafted-full.ico
+./consumer-fixed direct ../poc-chosen.bmp

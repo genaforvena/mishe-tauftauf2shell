@@ -1,0 +1,4 @@
+crafted.ico bytes=126 from=../poc-chosen.bmp dib_bytes=104 dir_w=2 dir_h_enc=0 full=False
+safe.ico bytes=126 from=../safe.bmp dib_bytes=104 dir_w=2 dir_h_enc=0 full=False
+crafted-full.ico bytes=2110 from=../poc-chosen.bmp dib_bytes=2088 dir_w=2 dir_h_enc=0 full=True
+run OK

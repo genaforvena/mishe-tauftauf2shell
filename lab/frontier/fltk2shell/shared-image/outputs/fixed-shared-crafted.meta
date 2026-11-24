@@ -1,0 +1,2 @@
+COMMAND: ./consumer-fixed shared ../poc-chosen.bmp
+EXIT: 0

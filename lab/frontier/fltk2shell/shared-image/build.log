@@ -1,0 +1,3 @@
++ g++ -fsanitize=address -fno-omit-frame-pointer -g -O1 -o consumer-vuln consumer.cxx $(../fltk-1.4.5-plus1632/build-fixed/fltk-config --cxxflags --ldflags --use-images)
++ g++ -fsanitize=address -fno-omit-frame-pointer -g -O1 -o consumer-fixed consumer.cxx $(../fltk-1.4.5-plus1647/build-fixed/fltk-config --cxxflags --ldflags --use-images)
+build OK

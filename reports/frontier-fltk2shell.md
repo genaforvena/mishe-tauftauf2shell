@@ -98,18 +98,31 @@ at the labeled direct-call / crafted-BMP-file / four-tree scope, NO rung 5.
 ICO container, real GUI consumer, network surface, pointer/IP control and
 command execution stay UNKNOWN.
 
+Author-measured extension (wake 2, unwitnessed; evidence in
+`lab/frontier/fltk2shell/shared-image/`): a headless consumer using the normal
+`fl_register_images()` + `Fl_Shared_Image::get()` startup sequence reproduces
+the identical isolated overwrite at `:490` through `fl_check_images` (exit
+134, ASan `2 bytes before 4294967298-byte region`); the fixed tree is clean.
+The ICO container is a clean negative under the tested geometry: its 8-bit
+IconDirEntry width/height override the crafted DIB at `Fl_BMP_Image.cxx:201-205`,
+so the row product never wraps; truncated and complete crafted ICOs load or
+fail without ASan in both trees. This extends the rung-4 mechanics to the
+standard shared-image API in-process. It is not a new witness verdict, a GUI
+consumer, or a rung-5 claim.
+
 ## Ceiling and next experiments
 
-Out of the ESTABLISHED scope: a real application consumer beyond the
-constructor, the ICO container path, a network-facing service, pointer/IP
-control, command execution, and rung 5. The advisory's own impact is
+Out of the ESTABLISHED scope: a GUI window / draw path or cache-hit reload,
+a network-facing service, pointer/IP control, command execution, and rung 5.
+The ICO path is now a measured negative, not an open positive lead. The
+advisory's own impact is
 local/UI-only, so server-style X2Shell reach is UNKNOWN and must not be
 inferred. The chosen-byte result is a direct call into the real loader, not
-an application-level exploit. Witness replay is complete (#3296).
+an application-level exploit. Witness replay is complete (#3296); the
+shared-image extension is author-measured only.
 
-The operator's ordered next step is to drive the same geometry through
-`Fl_Shared_Image`/ICO and a GUI-less application consumer to see whether the
-attacker bytes land in a heap object with a controllable consumer; only then
-a plain-build groom toward pointer-sized metadata. Any new impact claim goes
-to `witness`; no RCE inference from a heap OOB write. Wake units and full-flag
-sync remain the person's.
+Next, per the operator's order: hand the shared-image extension to `witness`
+if it is to become a claim, then consider a plain-build groom toward
+pointer-sized metadata. Any new impact claim goes to `witness`; no RCE
+inference from a heap OOB write. Wake units and full-flag sync remain the
+person's.

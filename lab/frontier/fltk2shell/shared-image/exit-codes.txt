@@ -1,0 +1,14 @@
+vuln-shared-crafted rc=134
+vuln-shared-safe rc=0
+vuln-shared-short-ico rc=0
+vuln-ico-short rc=0
+vuln-ico-safe rc=0
+vuln-ico-full rc=0
+vuln-shared-full-ico rc=0
+vuln-direct-crafted rc=134
+fixed-shared-crafted rc=0
+fixed-shared-safe rc=0
+fixed-shared-ico rc=0
+fixed-ico-crafted rc=0
+fixed-ico-full rc=0
+fixed-direct-crafted rc=0

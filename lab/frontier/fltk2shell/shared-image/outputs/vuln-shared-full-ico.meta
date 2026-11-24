@@ -1,0 +1,2 @@
+COMMAND: ./consumer-vuln shared crafted-full.ico
+EXIT: 0

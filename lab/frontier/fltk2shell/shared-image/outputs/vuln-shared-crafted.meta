@@ -1,0 +1,2 @@
+COMMAND: ./consumer-vuln shared ../poc-chosen.bmp
+EXIT: 134

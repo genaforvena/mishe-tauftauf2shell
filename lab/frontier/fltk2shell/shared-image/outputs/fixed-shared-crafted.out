@@ -1,0 +1,2 @@
+[510] Fl_BMP_Image: ../poc-chosen.bmp - unexpected EOF or read error at offset 118
+SHARED RESULT file=../poc-chosen.bmp w=2 h=0 d=0 image=0x508000000020

@@ -1,0 +1,2 @@
+COMMAND: ./consumer-fixed shared ../safe.bmp
+EXIT: 0
