@@ -1,0 +1,46 @@
+=== CLI isolate probe 2026-11-24T00:40:41Z ===
+Patch: cli-isolate.patch = CVE fix 6b833ce613bc hunks only (length field, guard, length=length); no extract clamping from e41876eb4ad4.
+63c24a90c4ded8f91899e89ec10db788bca5a1081d840749daff6735de8e468e  cli-isolate.patch
+903479d9bd4699416d658dd06e5123bc36404cc3042cad16744f3d8b16f42667  vuln/utilities/magick
+f28a757ac6bf68cb9a0656b5184d5b20cb55a885ca543a46ed4c27872ff27aa2  fixed-build/utilities/magick
+12b3d87c054d144ff893fc023fec2c4a73a33e7376faf5628c41d8cbf7f90fc5  /tmp/im-cveonly-build/utilities/magick
+Inputs: /tmp/im-cli-probe/tiny.miff is 1x1 xc:red written by vuln/utilities/magick.
+--- ./vuln/utilities/magick stream -map rgb -storage-type char -extract 8x4 tiny.miff out.bin ---
+rc=1
+==3794006==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x509000000403 at pc 0x7fb5baa7f05f bp 0x7ffc06aca110 sp 0x7ffc06ac98b8
+READ of size 24 at 0x509000000403 thread T0
+    #0 0x7fb5baa7f05e in fwrite ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1110
+    #1 0x616421fd3670 in WriteBlob MagickCore/blob.c:5938
+    #2 0x616421d72f78 in WriteStreamImage MagickCore/stream.c:1295
+    #3 0x616421d65000 in SyncAuthenticPixelsStream MagickCore/stream.c:2778
+    #4 0x616421ff10ae in SyncAuthenticPixels MagickCore/cache.c:5712
+    #5 0x616421e783ff in ReadMIFFImage coders/miff.c:1657
+0x509000000403 is located 0 bytes after 3-byte region [0x509000000400,0x509000000403)
+allocated by thread T0 here:
+    #0 0x7fb5baafcf1d in posix_memalign ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:145
+    #1 0x616421ce6d52 in AcquireAlignedMemory_POSIX MagickCore/memory.c:278
+    #2 0x616421ce6d52 in AcquireAlignedMemory MagickCore/memory.c:357
+    #3 0x616421d72bcf in WriteStreamImage MagickCore/stream.c:1260
+    #4 0x616421d65000 in SyncAuthenticPixelsStream MagickCore/stream.c:2778
+    #5 0x616421ff10ae in SyncAuthenticPixels MagickCore/cache.c:5712
+--- /tmp/im-cveonly-build/utilities/magick stream -map rgb -storage-type char -extract 8x4 tiny.miff out.bin ---
+rc=1
+==3794010==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x509000000403 at pc 0x7a6b8f87f05f bp 0x7ffcf8bcc500 sp 0x7ffcf8bcbca8
+READ of size 24 at 0x509000000403 thread T0
+    #0 0x7a6b8f87f05e in fwrite ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1110
+    #1 0x5ce2670106c0 in WriteBlob ../im-cveonly-src/MagickCore/blob.c:5938
+    #2 0x5ce266daffbb in WriteStreamImage ../im-cveonly-src/MagickCore/stream.c:1299
+    #3 0x5ce266da2000 in SyncAuthenticPixelsStream ../im-cveonly-src/MagickCore/stream.c:2782
+    #4 0x5ce26702e0fe in SyncAuthenticPixels ../im-cveonly-src/MagickCore/cache.c:5712
+    #5 0x5ce266eb544f in ReadMIFFImage ../im-cveonly-src/coders/miff.c:1657
+0x509000000403 is located 0 bytes after 3-byte region [0x509000000400,0x509000000403)
+allocated by thread T0 here:
+    #0 0x7a6b8f8fcf1d in posix_memalign ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:145
+    #1 0x5ce266d23d52 in AcquireAlignedMemory_POSIX ../im-cveonly-src/MagickCore/memory.c:278
+    #2 0x5ce266d23d52 in AcquireAlignedMemory ../im-cveonly-src/MagickCore/memory.c:357
+    #3 0x5ce266dafbcc in WriteStreamImage ../im-cveonly-src/MagickCore/stream.c:1263
+    #4 0x5ce266da2000 in SyncAuthenticPixelsStream ../im-cveonly-src/MagickCore/stream.c:2782
+    #5 0x5ce26702e0fe in SyncAuthenticPixels ../im-cveonly-src/MagickCore/cache.c:5712
+--- ./fixed-build/utilities/magick stream -map rgb -storage-type char -extract 8x4 tiny.miff out.bin ---
+rc=0
+=== end ===

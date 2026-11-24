@@ -136,3 +136,40 @@ file make the bug easy to isolate, and the harness needs no third-party
 image codec. Ranked below targets with a demonstrated wire or file-consumer
 path (e.g. busybox2shell) because the public advisory provides no PoC and the
 CLI reachability is still UNKNOWN. Operator owns admission.
+
+## 7. W189 update (2026-11-24): CLI isolation and bounded negative
+
+Verified at 00:34Z: all five `PINS.sha256` entries pass and `REPLAY.log` is
+`385bbe95d648dd19981d0d42df483c9ebeb619bb078fd3a2a2c9789bac01667a`.
+An independent witness replay was requested (DM #3156); no verdict yet.
+
+A real `magick stream` CLI exists in the ASan build at
+`vuln/utilities/magick`. With a locally generated 1x1 MIFF and
+`-extract 8x4`, ASan reports `READ of size 24` 0 bytes after the 3-byte
+allocation at `stream.c:1295` via `WriteBlob` ← `WriteStreamImage` ←
+`SyncAuthenticPixelsStream` ← `ReadMIFFImage:1657` (rc 1); PNM and BMP inputs
+do the same, a matching-size extract and a two-frame growing MIFF are clean.
+**This is not CVE-2026-130664.** A separate build with only this CVE's fix
+applied (`cli-isolate.patch`, the `length` field, the growth guard and
+`stream_info->length=length`) still reports the same READ; the 7.1.2-35 fixed
+tag is clean only because it also contains the later extract-clamping commit
+`e41876eb4ad4` (GHSA-4cmr-g39q-mh38). Exact commands, hashes and ASan lines:
+`lab/frontier/imagemagick2shell/CLI-ISOLATE.log`. No file reachability for
+this CVE follows from this probe.
+
+Static survey of this pinned build's compiled coders plus a CLI sweep found
+no coder that grows the cache geometry on the same `Image *` after a smaller
+allocation: MIFF (`coders/miff.c:1470` full-width row queue, `:1758-1764` new
+image per frame), DPX (`:1283`, `:1311-1313`), BMP (`:1289` etc.), PNM
+(`:522`, row queues), DDS (`:1533-1535` largest patch first, new image per
+face/mipmap) all keep the region constant or switch image pointer, which
+triggers the vulnerable reallocation guard. `MagickCore/constitute.c:902-903`
+skips extract cropping when `read_info->stream` is set, so `-extract` does not
+change decode geometry. An empirical sweep of two-frame growing MIFF and PNM
+inputs without `-extract` was ASan-clean on both vulnerable and CVE-only
+builds. This is a bounded negative for **this build's compiled coder set**;
+other builds, delegates and external callers remain UNKNOWN. Grade unchanged:
+rungs 1-4 by direct calls, no crafted-file reproduction of this CVE, no
+witness verdict, no rung 5. Next: witness replay; only a crafted input that
+drives `stream_info->pixels` growth on a stable image pointer could raise
+file reachability above UNKNOWN.
