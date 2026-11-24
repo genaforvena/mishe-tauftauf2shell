@@ -1755,6 +1755,56 @@ address. `harness/run-w6.sh` reports 18 PASS / 0 FAIL with a clean
 matched-count control; no chosen byte in a live `aiMesh`, no pointer/IP,
 command, witness or grade change.
 
+The 06:3x–07:0xZ edges add one real-file lane, three boundary measurements,
+two author clean-archive receipts and two screened candidates; no rung cell,
+verdict or mind count (130) moves. BusyBox W5 (`659b379`/`a27d4bc`) closed the
+last post-overflow allocation hedge on the stock 1.37.0 client: an 84-byte
+DATA TFTP block still overwrites the top-size word at `rbuf+72`, yet the DATA
+consumer never allocates after the overflow (rc 0, 80-byte file), while the
+ERROR consumer aborts rc -6. `python3 lab/frontier/busybox2shell/data_probe.py`
+logs `8d22cfe3…b11e6267e22c7aa3c` (three legs, two identical runs); a clean
+`git archive 659b379` replay is byte-identical. Assimp W6's clean
+`git archive 62466f7` replay (`7d8495b`) rebuilt all libraries, ran
+`run-w5.sh` 13/0 and `run-w6.sh` 18/0, and matched all nine normalized traces
+(`b4dd27d1…3054e0a`); still author-only and outside witness #3277's baseline
+scope. Contiki W199 measured `/dev/net/tun` opening successfully but
+`TUNSETIFF` returning EPERM, so the row's "no tun device" sentence is stale:
+the ioctl, not device absence, blocks the route. In a lab-only 1400-byte build
+the truncated option overwrites live `uip_appdata`/`uip_sappdata` globals with
+chosen ASCII words `0x4847464544434241`/`0x504f4e4d4c4b4a49` while the
+complete option leaves them intact; the bytes are not valid addresses, and
+there is no wire deliverer, witness verdict or rung 5.
+
+FLTK's wake-4 probe (`9cc8dd4`) reaches `array-16` with a 77-byte BMP
+(`faef54c9…fb506c`, geometry w=8, h=0x0aaaaaaab), writing chosen file bytes
+into both glibc mmap chunk-header words; plain rc 139 versus fixed rc 0, with
+a preserved unmapped-page negative from the first `array-24` attempt. The row's
+"ICO ... UNKNOWN" phrase is superseded: ICO is a measured negative at the
+tested geometry, and wake-3's silent `munmap_chunk()` plus wake-4's free-path
+variance stay author-only. Synchronet W2 (`78328ad`) drove a real loopback
+OpenSSH handshake with `none` auth, pty-req and shell accepted against a
+sequencing cryptlib server, but the TERM attribute reads -43
+(`CRYPT_ERROR_NOTFOUND`) for channel IDs 0–7, so the 64-byte cap and chosen
+offsets are not wire-measured; the row's "no SSH handshake or wire" is stale,
+and no real `sbbs3` path, DoS or rung 5 follows. Sdlmixer W195
+(`1292e08`/`11adba7`) fed real AIFF-C files through three new AIFF-enabled
+real SDL_mixer 3.2.4 builds: ASan `WRITE of size 4` at `decoder_aiff.c:95`
+through `MIX_DecodeAudio` and the playback thread, fixed build returns 1024
+bytes clean, gdb chosen LUT word `0xbae001c0`, `check-real.sh` 51 PASS/0 FAIL
+(trace `4d96b2b6…d101f9ffc8`), one-command `sh harness/aiff/run-real.sh`
+given provisioned `deps/`. This is author-only rungs 1-4 for the separate AIFF
+CVE, unwitnessed, with no wire listener, pointer/IP or command. Frontier
+screened out MediaInfoLib (CVE-2026-135440, a stale-read UAF; two ASan build
+attempts reached 32/293 objects in 420 s and 37/293 in 600 s, no report) and
+libgsf (CVE-2026-116124, a source-derived 16 GiB file-size floor; no build or
+trigger): both rung UNKNOWN with no charter, window, witness or mind-count
+change.
+
+Libheif W186 (`40ff079`) enumerated every `extend_padding_to_size` call site
+in pinned v1.23.6: one public wrapper and six encoder plugins, zero decoders,
+so a decode-only consumer cannot reach the write. Source-only negative, no
+new build, bytes or grade change.
+
 ## How the plant works
 
 Each admitted family is its own mind with its own tmux window: 121 target

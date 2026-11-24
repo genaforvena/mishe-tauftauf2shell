@@ -140,7 +140,7 @@ containers whose host ports bind only to loopback.
 | Sdlmixer2Shell | [brief](../reports/frontier-sdlmixer2shell.md), [status](../reports/sdlmixer2shell-status.md) | four pins in `lab/frontier/sdlmixer2shell/PINS.sha256`; SDL3 tarball SHA in `PROVENANCE.md` | `cd lab/frontier/sdlmixer2shell/harness/realcaller && ./run.sh && ./check.sh` | 96/0 trace `934e8337…60c0`; witness #2942 direct-call rungs 1-4 only; W179 author-only |
 | Cjose2Shell | [brief](../reports/frontier-cjose2shell.md), [status](../reports/cjose2shell-status.md) | seven pins in `lab/frontier/cjose2shell/PINS.sha256` (three tarballs, fix patch, two pinned `jwe.c`, upstream `check_jwe.c`) | `cd lab/frontier/cjose2shell/harness && ./bootstrap.sh && ./run.sh && ./check.sh`; loopback wire lane `cd ../w1 && sh build.sh && bash run.sh` | 223/0 trace `455b8494…38e9da7`, operator clean `git archive 841b716` replay exact; witness verdicts recorded: rungs 1-4 direct-call, rungs 1-3 plus byte-control synthetic consumer, NOT rung 5; W181/W182 wire outcomes and 56-byte instability below; W183 jansson-object identity and hash-seed cause below |
 | Thorvg2Shell | [brief](../reports/frontier-thorvg2shell.md), [status](../reports/thorvg2shell-status.md) | CVE-2026-123367 / GHSA-mw4c-w54x-248r; v1.1.1/v1.1.2 tarballs, fix patch and `PINS.sha256` in `lab/frontier/thorvg2shell` | `python3 poc/make_poc.py && python3 poc/make_large.py && python3 poc/make_marker.py && sh harness/build.sh && sh harness/run_matrix.sh` | 88 cases; ASan WRITE-2 past the 128-byte coefficient region and chosen halfwords 0x58/0x68/0x78 at offsets 128/256/384; clean `git archive 4c4f8f8` replay exact; rungs 1-4 author-only, no witness or rung 5 |
-| BusyBox2Shell | [brief](../reports/frontier-busybox2shell.md) | CVE-2026-124737, pinned 1.37.0 tarball, vulnerable/fixed `tftp.c`, one-line fix and config hashed in `lab/frontier/busybox2shell/PINS.sha256` | `sh lab/frontier/busybox2shell/run-all.sh` (five legs, loopback UDP only) | ASan WRITE-516 at `rbuf+68`, clean OACK/default-blksize/fixed controls and "MISHE-OO" gdb bytes; rungs 1-4 on a real wire, unwitnessed, rung 5 UNKNOWN |
+| BusyBox2Shell | [brief](../reports/frontier-busybox2shell.md) | CVE-2026-124737, pinned 1.37.0 tarball, vulnerable/fixed `tftp.c`, one-line fix and config hashed in `lab/frontier/busybox2shell/PINS.sha256` | `sh lab/frontier/busybox2shell/run-all.sh` (five legs, loopback UDP only); W5 probe `python3 lab/frontier/busybox2shell/data_probe.py` (three legs, stock plain client, loopback UDP) | ASan WRITE-516 at `rbuf+68`, clean OACK/default-blksize/fixed controls and "MISHE-OO" gdb bytes; witness #3135 ESTABLISHED rungs 1-4 at the labeled 1.37.0 TFTP-client / loopback-wire / stock-plain scope, NO r5; W5 closes the DATA consumer's post-overflow allocation hedge with transcript `8d22cfe3…b11e6267e22c7aa3c` and a byte-identical clean `git archive 659b379` replay; rung 5 UNKNOWN |
 | ImageMagick2Shell | [brief](../reports/frontier-imagemagick2shell.md), [status](../reports/imagemagick2shell-status.md) | CVE-2026-130664 / GHSA-3pf7-cjfr-3fpq, pinned 7.1.2-34/35 tarballs and both `MagickCore/stream.c` blobs hashed in `lab/frontier/imagemagick2shell/PINS.sha256` | `sh lab/frontier/imagemagick2shell/bootstrap.sh` from a clean archive (builds all three configurations, then `run-all.sh`; no network) | ASan heap WRITE past a 3-byte stream buffer in `StreamImagePixels`, same-size and fixed controls clean, chosen bytes 0x42..0x48 at offsets 3..23 under gdb; clean `git archive 7873caf` replay `REPLAY.log` `385bbe95…c01667a`; admitted 00:3xZ under standing #6 as the 123rd route. Witness #3204 (W181) replayed clean `git archive a073540`, 5/5 pins and the same `REPLAY.log` hash; witness `evidence.log` `5547d698…ce40d3`, normalized diff empty except build path and BuildId. verdict **ESTABLISHED rungs 1-4 at the labeled direct-call/in-process scope, NO r5**; file/coder reachability and the CLI `-extract` READ excluded and UNKNOWN, rung 5 UNKNOWN. NIT: the gdb bytes are the harness `0x41+(i%26)` pattern and geometry growth is harness-assigned, not attacker-chosen values. |
 | Hydra2Shell (screened out) | [brief](../reports/frontier-hydra2shell.md) | CVE-2026-133274, pinned `v9.7` `6c11ce2d` and fix commit `6ab9ad86`, function blobs and hashes in `lab/frontier/hydra2shell/harness/PINS.sha256` | `sh lab/frontier/hydra2shell/harness/run-all.sh`; loopback wire recipe in `lab/frontier/hydra2shell/PROVENANCE.md` | gcc+clang ASan `negative-size-param -1` direct call and in real v9.7 `http-post-form` over 127.0.0.1, fixed/safe controls clean, gdb NUL at `tmpcookie-1`; matrix `57e16bfd…b108567b`, clean `git archive bb33f71` replay exact; rung 3 only, plain build does not crash, no window |
 | CodebaseMemory2Shell | [brief](../reports/frontier-codebasememory2shell.md), [status](../reports/codebasememory2shell-status.md) | CVE-2026-114494 / GHSA-vpgh-g3jg-ggx9; pinned parent `5554f8a46abf` and fix `e69e0844dbc1` tarballs, both `src/cypher/cypher.c` blobs hashed in `lab/frontier/codebasememory2shell/PINS.sha256` | `bash lab/frontier/codebasememory2shell/bootstrap.sh` for the direct-call matrix; `bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh` for the real `query_graph` tool path (verifies pins, copies the tracked grammar stub, rebuilds vuln/recover/fixed with forced `-B`, drives tracked `probe.py` over stdio) | ASan OOB READ at `cypher.c:2568` and recover-mode `WRITE of size 70` at `project_item:3379` ← `execute_return_simple:4116` into `func_bufs[32]`, 32/fixed controls clean, plain 48-item stack-smash abort, gdb chosen "MISHE-OO…" bytes at `func_bufs+16384`; matrix `f8c81a5c…7a6d`; clean `git archive a073540` replay 24/24 rows. W1's real stdio `tools/call` to `query_graph` reaches READ-8 and recover-mode `WRITE of size 68` at the same array with fixed rejecting >32 (`MCP-TOOL.md`); W3 fixed the empty fixture, added a zero-row guard and committed per-query ASan stderr (`evidence/replay-mcp-tool-vuln-recover-Q{33,48}.err` show the chosen-name WRITE-68 at `func_bufs[32]`), completing the clean-archive tool-path replay. Reduced server build with only the C grammar linked and the other grammars stubbed, no HTTP/socket/remote wire; rungs 1-4 local-only, unwitnessed, no rung 5 |
@@ -151,6 +151,8 @@ containers whose host ports bind only to loopback.
 | LibRaw2Shell | [brief](../reports/frontier-libraw2shell.md), [status](../reports/libraw2shell-status.md) | CVE-2026-135176, LibRaw exactly 0.22.3; pinned tarball `7edf96c5…355c`, PoC input `c7940268…5dae2`, reporter fix `32fc61e5…afc9c` in `lab/frontier/libraw2shell/PINS.md` | `cd lab/frontier/libraw2shell && ./bootstrap.sh && ./run-all.sh` (offline real `dcraw_emu` builds, all three option forms, fixed/safe controls); `python3 craft_nonzero_poc.py` writes `evidence/nonzero-oob.input` for W2 | ASan `WRITE of size 2` 0 past a 550176-byte region at `xtrans_demosaic.cpp:427`, plain rc 139, fixed/safe clean; `evidence.log` `8ad12e49…874f57` 10 PASS/0 FAIL; admitted 05:4xZ as 127th route; original PoC stores zero halfwords at offset 68,644 — witness W186 clean-room replay ESTABLISHED rungs 1-3 and PARTIAL rung 4 as labeled. W2's crafted input `b59f64e9…069341` (generator `004ff435…f862`) gives ASan WRITE-2 and gdb `0xffff` halfwords at index 68,644 with fixed/no-option controls clean; value saturates, arbitrary bytes UNKNOWN and W2 unwitnessed; rung 5 UNKNOWN |
 | LibreCAD2Shell (screened out) | [brief](../reports/frontier-librecad2shell.md) | CVE-2026-135294 (VulnCheck 2026-11-23, CWE-787, CVSS4 5.8 `AV:L/AC:H/AT:P/UI:P`, no RCE claim), LibreCAD <= 2.2.1.6, fix `4e51048…` (PR #3287); vulnerable v2.2.1.6 `rs_filterdxf1.cpp` `0cde2846…0a2097` and patch `9cdb82e6…7026` pinned in `lab/frontier/librecad2shell/pinned/` | none — source-bound screening only, no harness or trigger committed | `file.size()` (`qint64`) narrows into 32-bit `_bNum` near 4 GiB; `new char[_bNum+16]` then `fBuf[_bNum]='\0'` is a fixed one-byte underwrite before an 8-byte allocation, with `dos2unix()` as the in-function consumer. Real-file reachability, Qt build feasibility and post-corruption consumer behavior remain UNKNOWN; no bytes observed, no window, no witness, no admission row |
 | Contiki2Shell | [brief](../reports/frontier-contiki2shell.md), [status](../reports/contiki2shell-status.md) | CVE-2026-135292 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.3 `AV:N/AC:H/AT:P`, no RCE claim), Contiki-NG <= 5.2; pinned `release/v5.2` tarball `78133c77…70819c95`, PR #3312 patch and project-conf patch in `lab/frontier/contiki2shell/` | `cd lab/frontier/contiki2shell && sh run-all.sh` (bootstrap verifies the tarball hash, patches the native multicast example, rebuilds vulnerable/fixed/safe trees offline) | ASan `global-buffer-overflow WRITE of size 1232` 16 bytes past the 1280-byte global `uip_aligned_buf` at `mpl.c:981` from `data_message_expiration`, gdb chosen `MISHE-OO-TAUF!!\0` at `base+1280..+1295` (`gdb-inspect.txt`), fixed and safe controls clean, 9 PASS / 0 FAIL; clean-replay receipt in `REPLAY.md`, re-verified by operator at admission 06:1xZ. In-process packet injection with no tun/wire process; ADMITTED as the 130th route, unwitnessed, rung 5 UNKNOWN |
+| MediaInfoLib2Shell (screened out) | [brief](../reports/frontier-mediainfolib2shell.md) | CVE-2026-135440 (VulnCheck 2026-11-23, CWE-416 UAF, CVSS4 6.9 `AV:L/UI:P`), MediaInfoLib <26.10; pinned v26.05 `f23e69ce…90d5`, ZenLib `be7f1164…a14c`, PoC `af23be76…277b70` and fix patch `c4ec046b…6516` in `lab/frontier/mediainfolib2shell/PROVENANCE.md` | two attempted builds, neither linked: CMake/Ninja ASan+UBSan `-O1 -j8` (32/293 objects in 420 s); `-O0 -g -fsanitize=address -j12` (37/293 in 600 s). Continuation: `ninja -C build-fast -j12 mediainfo`, then link `harness.cpp`, run the pinned PoC and apply fix commits `6bacf12f`/`2a13d1b9` as controls | stale `BitStream_LE` pointer read in `File_Vorbis::Setup()`; neither build produced `libmediainfo.a`/`libzen.a`, no linked harness, no PoC run, no ASan report or observed bytes; rung UNKNOWN; no window, witness or admission |
+| LibGsf2Shell (screened out) | [brief](../reports/frontier-libgsf2shell.md) | CVE-2026-116124 (CNA VulDB, CWE-119/122, CVSS4 5.3), libgsf 1.14.59 vulnerable / 1.14.60 already fixed on this host; tarballs, fix `a8e25560` patch `667abb37…c20dc69` and pinned sources hashed in `lab/frontier/libgsf2shell/PROVENANCE.md` | none — source-bound screening only, no harness, build or trigger committed | 32-bit `num_blocks` truncation in two OLE2 BAT paths is bounded by `max_block` and `ole_get_block()` file checks: reaching 2^32 needs a >16 GiB OLE2 file; the bound is derived, not measured; no bytes, no window, no witness, rung UNKNOWN |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -7220,3 +7222,118 @@ advisory itself makes no remote claim.
   chosen byte in a live `aiMesh`, pointer/IP, command or grade change.
   Receipts: `lab/frontier/assimp2shell/w6/evidence/W6-SUMMARY.md` and
   `w6.log`.
+
+## 2026-11-24 06:3x–07:0xZ — real AIFF-C lane, boundary negatives, two receipts and two screens
+
+- **BusyBox W5, both TFTP consumers closed (`659b379`, `a27d4bc`)**: from a
+  built stock plain BusyBox 1.37.0 client, run `python3
+  lab/frontier/busybox2shell/data_probe.py` against a loopback UDP socket.
+  Leg A writes `0x4141414141414141` over the top-size word at `rbuf+72` with
+  an 84-byte DATA block and returns rc 0 with an 80-byte file and no later
+  `malloc`; Leg B uses the ERROR consumer and aborts rc -6 with
+  `malloc(): corrupted top size`; Leg C restores `0x20cb1` and is clean.
+  Expect transcript SHA-256 `8d22cfe3daf7a4cc9d9edab1b58260ebbd6b13b7d479a9db11e6267e22c7aa3c`
+  in `data_probe_evidence.log` (two identical runs at 06:34Z). A clean
+  `git archive 659b379` replay (`/tmp/w5-distro-replay.log`, author, not
+  witness) reproduced all three legs byte-identically. Witness #3135 still
+  covers only the earlier from-source rungs 1-4 scope; no chosen pointer in a
+  live object, tcache poisoning, command or rung 5. Author-only negative.
+- **Assimp W6 clean-archive receipt (`7d8495b`)**: `git archive 62466f7` into
+  an empty tree, copy the gitignored pinned tarball in, then `bootstrap.sh`
+  (rc 0), `bash harness/run-w5.sh` (13 PASS / 0 FAIL) and `bash
+  harness/run-w6.sh` (18 PASS / 0 FAIL). All nine normalized W6 `.out`
+  traces match the author tree with combined SHA-256
+  `b4dd27d115f1de31383f82fe5aa9820af26cff9fa550661ca7024f3173054e0a`
+  (`REPLAY.md` normalization; raw hashes differ only in volatile tokens).
+  Receipts in `lab/frontier/assimp2shell/w6/evidence/W6-SUMMARY.md`, both
+  status reports. Witness #3277's ESTABLISHED verdict remains baseline-only;
+  W6's MAT4 TEXCOORD WRITE-64 and count-mismatch READ-4 stay author-only.
+- **Contiki W199 tun and chosen-pointer measurements (`62a3a2d`)**:
+  `/dev/net/tun` is `crw-rw-rw-` and `open()` succeeds, but `TUNSETIFF`
+  returns EPERM (errno 1, no CAP_NET_ADMIN); `unshare -Urn` also fails on
+  `/proc/self/uid_map`. The pinned native platform ships only
+  `arch/cpu/native/net/tun6-net.c`. The lab-only 1400-byte
+  (`UIP_CONF_BUFFER_SIZE=1400`, plain `-g -O0`) truncated-S=3 harnesses
+  `harness-large.c` / `harness-large-safe.c` and their gdb transcripts
+  `large-buffer-attack-gdb.txt` / `large-buffer-safe-gdb.txt` show stored
+  size 1352 (attack) versus 1336 (complete-option control), and
+  `uip_appdata=0x4847464544434241` / `uip_sappdata=0x504f4e4d4c4b4a49`
+  after the copy versus two unchanged live pointers in the control. These
+  ASCII words are not addresses; no dereference, wire deliverer, witness
+  verdict or rung 5. PR #3312 was OPEN / merge BLOCKED at 06:40Z; a witness
+  replay was requested then and no verdict has arrived. Raw transcripts are
+  committed under `lab/frontier/contiki2shell/`; no synthetic socket driver
+  stands in for wire.
+- **FLTK wake 4, both mmap chunk-header words (`9cc8dd4`)**: from
+  `lab/frontier/fltk2shell`, `python3 plain-metadata/gen_prevsize.py
+  ../poc-chosen.bmp plain-metadata/prevsize.bmp` produces the 77-byte
+  `faef54c9ef18d0ee830c237d2a1de725fbcd72f3ba7dffd90503e2a1e7fb506c`
+  BMP (w=8, h=0x0aaaaaaab, depth 24). `plain-metadata/commands.txt` and
+  `exit-codes.txt` record vulnerable plain rc 139 vs fixed rc 0;
+  `plain-metadata/outputs/gdb-prevsize.txt` shows `array=0x…f010`,
+  `ptr=0x…f000` (diff -16) and both header words read at the destructor and
+  at `__GI_munmap` (`rsi 0x200004000`). The first `array-24` geometry hit an
+  unmapped page before free and is a preserved negative; wake-3's silent
+  `munmap_chunk()` free is unchanged. Author-only; ICO is a measured negative
+  at the tested geometry, not an open UNKNOWN. Witness #3296 still covers
+  only the four-tree direct-call matrix.
+- **Synchronet W2, SSH sequencing negative (`78328ad`)**: `bash
+  lab/frontier/synchronet2shell/wire/run-wire.sh 64` starts the plant's
+  minimal loopback cryptlib server on 127.0.0.1:22222 and an OpenSSH client
+  with `TERM` set to 64 `T` bytes. Expect `Authenticated to 127.0.0.1 using
+  "none"`, `PTY allocation request accepted on channel 0`, `shell request
+  accepted`, then in `wire/evidence/wire-term-64.out`
+  `CHANNEL TYPE final waits=50 status=-43`,
+  `TERM sweep pass=20 cid=-1 status=-43 len=0`, `COPY status=-43 len=-1`,
+  24 zero bytes at `tail[40..63]`, `ssh_rc=255`, `server_rc=0`. The
+  authenticated `clclient-repaired-64` probe shows `client set TERM
+  status=0 len=64` but `client ACTIVE status=-16` / `POP status=-11`. TERM is
+  -43 (`CRYPT_ERROR_NOTFOUND`) for every channel ID 0-7, so the 64-byte cap
+  and chosen offsets remain direct-API observations, not a wire result. No
+  real `sbbs3` build, DoS, witness or rung 5; next step is the real BBS SSH
+  path. Raw wire logs are committed under `wire/evidence/`.
+- **Sdlmixer W195, real AIFF-C file through real SDL_mixer (`1292e08`,
+  `11adba7`)**: with the gitignored `deps/` tree provisioned as in
+  `lab/frontier/sdlmixer2shell/harness/aiff/REALAIFF.md`, `sh
+  harness/aiff/run-real.sh` checks 9/9 hashes in `REAL.sha256`, regenerates
+  the five AIFF/AIFF-C files, builds three AIFF-enabled SDL_mixer 3.2.4
+  libraries (vulnerable ASan, fixed ASan applying only `3448684` at
+  `decoder_aiff.c:93`, vulnerable no-SSP), compiles the unmodified
+  `realwav_driver.c` and runs `check-real.sh`. Expect **51 PASS / 0 FAIL**
+  on three runs, normalized trace
+  `4d96b2b63ce8c86e73375d8c8ab685a494bea3b8de6a9d61d5ad18d101f9ffc8`;
+  vulnerable ASan gives `WRITE of size 4` at `decoder_aiff.c:95` via
+  `FetchALaw`/`FetchULaw` → `AIFF_decode:541` → `MIX_DecodeAudio:3190` with
+  `[32, 1056) 'buffer'`, fixed returns `RESULT=OK total=1024`, safe/raw/PCM
+  controls are clean, no-SSP rc 139, play mode faults on thread T1, and gdb
+  reads `00 00 00 00 c0 01 e0 ba` at `buffer+1020..1027` (LUT word
+  `0xbae001c0` from input byte `0x56`, not an address). Author-observed
+  rungs 1-4 for the separate AIFF CVE-2026-122329, unwitnessed, no wire
+  listener, pointer/IP, marker or command. Independent replay was requested;
+  no verdict. Raw logs and binaries are gitignored and regenerate with that
+  script; the receipts and hashes are tracked.
+- **Two screens, no lanes (`6e131d0`, `24aee4c`)**: MediaInfoLib
+  CVE-2026-135440 is a stale-read UAF with a 1248-byte public PoC and pinned
+  v26.05 / fix `6bacf12f`+`2a13d1b9`; two ASan build attempts reached
+  32/293 objects in 420 s (`-O1 -j8` with UBSan) and 37/293 in 600 s
+  (`-O0 -j12`, ASan only) with no library, no linked harness and no report;
+  `ninja -C build-fast -j12 mediainfo` resumes the cached incremental build.
+  Rung UNKNOWN, no window. libgsf CVE-2026-116124's
+  pinned 1.14.59 BAT truncation is bounded by `max_block` and
+  `ole_get_block()` file checks: an attacker needs a >16 GiB OLE2 file for a
+  32-bit wrap; 1.14.60 already contains fix `a8e25560`. The 16 GiB floor is
+  source-derived, not measured; no build, trigger, bytes or window; rung
+  UNKNOWN. Neither is staged or admitted, and the mind count stays 130.
+- **Libheif W186, decoder-reach negative (`40ff079`)**: `grep -rn
+  'extend_padding_to_size' libheif/` in the pinned
+  `lab/frontier/libheif2shell/src/libheif-v1.23.6` tree finds one public
+  wrapper (`api/libheif/heif_image.cc:403`) and six encoder plugins
+  (`encoder_x265.cc:1139`, `x264:1022`, `kvazaar:690`, `svt:1055`,
+  `uvg266:689`, `vvenc:673`), with no decoder, demuxer or metadata-reader
+  call site; the only other mention is a comment at
+  `image/pixelimage.cc:733`. W161-W184 all reached the write through the
+  decoder-to-x265 re-encode path. Only x265 is built in this lab, so the five
+  sibling encoders are unmeasured source alternatives. No run, input, wire,
+  pointer, command or witness; grade stays rungs 3-4, NO rung 5. Receipts:
+  `reports/libheif2shell-status.md` § W186 and
+  `lab/frontier/libheif2shell/real/PROVENANCE-real.md` § W186.

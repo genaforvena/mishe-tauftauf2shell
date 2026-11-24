@@ -9974,3 +9974,57 @@ request #3156 unanswered.
   count-check defect, not the CVE's element-size write. `harness/run-w6.sh`
   reports 18 PASS / 0 FAIL with matched counts clean; author-only, unwitnessed,
   no chosen byte in a live `aiMesh`, no pointer/IP, command or grade change.
+
+### 2026-11-24 06:3x–07:0xZ — eleven edges after `2088a2f`
+
+- `659b379`/`a27d4bc` (BusyBox W5) closed the remaining post-overflow
+  allocation hedge with `data_probe.py` legs A/B/C: DATA plus a corrupted
+  top-size word returns rc 0 with no later `malloc`, ERROR aborts rc -6,
+  restored top is clean. Transcript `8d22cfe3…b11e6267e22c7aa3c` reproduced
+  twice and byte-identically from a clean `git archive 659b379`. Author
+  replay, not witness; grades and rung 5 unchanged.
+- `7d8495b` recorded an Assimp W6 clean-archive receipt: `git archive
+  62466f7`, `run-w5.sh` 13/0, `run-w6.sh` 18/0, nine normalized traces
+  identical (combined `b4dd27d1…3054e0a`). Witness #3277 remains
+  baseline-only; W6 is author-measured.
+- `62a3a2d` (Contiki W199) measured `/dev/net/tun` open OK but `TUNSETIFF`
+  EPERM (no CAP_NET_ADMIN; `unshare -Urn` also EPERM), closing the host tun
+  route without claiming wire. In a non-default 1400-byte build the truncated
+  option overwrites two adjacent live globals with chosen ASCII words
+  (`0x4847464544434241`, `0x504f4e4d4c4b4a49`) while the complete option is
+  clean; not addresses, no dereference, command or rung 5. Witness replay
+  requested 06:40Z, no verdict.
+- `9cc8dd4` (FLTK wake 4) used a 77-byte BMP (`faef54c9…fb506c`) to reach
+  `array-16` and write chosen file bytes into both glibc mmap chunk-header
+  words; plain rc 139, fixed rc 0, `gdb-prevsize.txt` records the destructor
+  and `__GI_munmap` reads. The earlier `array-24` geometry is an unmapped-page
+  negative; ICO is now a measured negative, not an open question. Author-only;
+  witness #3296 covers the four-tree matrix only.
+- `78328ad` (Synchronet W2) sequenced a real loopback OpenSSH handshake,
+  `none` auth, channel selection, pty-req and shell against a minimal cryptlib
+  server, but TERM reads -43 for all channel IDs 0-7 (`wire-term-64.out`:
+  `TERM sweep pass=20 cid=-1 status=-43`, `ssh_rc=255`, `server_rc=0`). The
+  64-byte cap and chosen offsets are not wire-measured; no real `sbbs3`, DoS,
+  witness or rung 5. Next step: the real BBS SSH path.
+- `1292e08`/`11adba7` (Sdlmixer W195) drove real AIFF-C files through three
+  AIFF-enabled real SDL_mixer 3.2.4 builds: ASan `WRITE of size 4` at
+  `decoder_aiff.c:95` via `MIX_DecodeAudio` and the playback thread, fixed
+  clean, no-SSP rc 139, gdb chosen LUT word `0xbae001c0`. `check-real.sh`
+  51 PASS / 0 FAIL, trace `4d96b2b6…d101f9ffc8`; `sh harness/aiff/run-real.sh`
+  is the one-command replay given `deps/`. Author-only rungs 1-4 of the
+  separate AIFF CVE, unwitnessed, no wire listener or pointer/IP.
+- `6e131d0` screened out libgsf CVE-2026-116124: pinned 1.14.59 BAT
+  truncation needs a >16 GiB OLE2 file to wrap 32 bits (`max_block` and
+  `ole_get_block()` bounds); 1.14.60 already has fix `a8e25560`. Bound is
+  source-derived; no build, trigger, bytes or window, rung UNKNOWN.
+- `24aee4c` screened out MediaInfoLib CVE-2026-135440: stale
+  `BitStream_LE` read in `File_Vorbis::Setup()`, public 1248-byte PoC and
+  pinned fixes, but two ASan builds reached 32/293 objects in 420 s and
+  37/293 in 600 s with no linked harness or report; the incremental
+  `ninja -C build-fast -j12 mediainfo` build resumes across wakes. Rung
+  UNKNOWN, no window. Neither screen moves a grade or the 130-role count.
+- `40ff079` (Libheif W186) inspected the pinned v1.23.6 call graph:
+  `extend_padding_to_size` has one public wrapper and six encoder call
+  sites, no decoder/demuxer/metadata callers, so a decode-only consumer
+  cannot reach the write. Source-only negative; the five unbuilt encoders
+  stay unmeasured. No build, bytes, wire, pointer or grade change.
