@@ -701,3 +701,10 @@ warnings. The earlier `359fc8c` replay record above was for the 19-assertion
 version before the real-TIFF header leg was added; both are preserved. The
 replay directory `/tmp/libvips-w16b-replay.2a7lRH` is a throwaway and is not
 committed.
+
+Final `git archive HEAD` replay at `d4f24f7` (2026-11-24, 03:24Z), after the
+generated probes were gitignored and `fine.tif` was committed: same extraction
+and four symlinked trees; 26 `PASS`, `RESULT fail=0`, rc 0, no warnings. The
+regenerated `fine.tif` digest `c3e12050213321d5f4f87b4fcac487a0b6588292c92020611bac33f586157d44`
+matched the committed fixture. No runner or probe source changed after
+`5f985c5`, so this is a final-state confirmation, not a new measurement.
