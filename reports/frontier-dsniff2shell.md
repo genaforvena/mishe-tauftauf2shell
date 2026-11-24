@@ -20,7 +20,7 @@
 
 ## Source-bound mechanism
 
-At pinned `decode_sniffer.c:32-40`: `snprintf(obuf, olen, "%s [", &buf[32])`
+At pinned `decode_sniffer.c:45`: `snprintf(obuf, olen, "%s [", &buf[32])`
 truncates at `olen-1` when the packet's base64 string is long enough; then
 `len = strlen(obuf)` saturates at 4095 and `olen - len - 3 == -2`. The signed
 expression converts to a near-`SIZE_MAX` `size_t targsize` at the
@@ -63,8 +63,13 @@ output buffer, in a minimal harness whose `obuf` stands in for `trigger.c`'s
 global. No live dsniff process, no UDP/2001 delivery, no libnet/libnids,
 no trigger dispatch, no dispatch-table or function-pointer overwrite, no
 pointer/IP/command control, no allocator metadata, no rung 5. The reporter's
-live-crash observation remains a claim to be replayed by the witness; it is
-UNKNOWN here, not a pass. libnet and libnids headers are absent on this host.
+live-crash observation stays UNKNOWN: libnet and libnids headers are absent
+on this host. Independent witness replay (2026-11-24, DM #3598) rebuilt from
+a clean archive of commit `5557139` and recorded 17 PASS / 0 FAIL, ASan
+WRITE-1 at `base64.c:164` via `decode_sniffer.c:47`, chosen marker at guard
+offsets 0 and 128, fixed and safe clean; its steering harness moved marker
+content and offsets (Z9KLMNOP@299, W198STR!@63). Verdict: ESTABLISHED AS
+LABELED; the live wire path remains UNKNOWN.
 
 ## Cheapest next experiment
 
@@ -73,4 +78,5 @@ same pinned tag; run it loopback-only, send the 4199-byte UDP/2001 datagram
 from a local generator and observe the ASan/plain crash with fixed and safe
 controls. Then inspect the real `.bss` layout after `obuf` for the counters
 the issue identifies before claiming any control-flow effect. Independent
-witness replay is required before strengthening any claim.
+witness replay of the harness is complete; only the live UDP/2001 path is
+still UNKNOWN.

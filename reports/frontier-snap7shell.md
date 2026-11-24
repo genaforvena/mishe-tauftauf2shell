@@ -58,9 +58,12 @@ Exact pins, patch hashes, commands and limits: `lab/frontier/snap7shell/PROVENAN
 Rung 3 is confirmed in the real pinned library through the public API. Rung 4
 is PARTIAL: server-derived bytes at chosen offsets in a minimal harness, with
 the response synthesized in-process. No wire replay, no COTP/S7 handshake, no
-real PLC, no pointer/IP/command control, no allocator-metadata corruption, no
-independent witness verdict, no rung 5. The wire position is plausible from
-the advisory but untested here — an honest UNKNOWN, not a pass.
+real PLC, no pointer/IP/command control, no allocator-metadata corruption,
+no rung 5. Independent witness replay (2026-11-24, DM #3582) rebuilt both
+variants from a clean archive of commit `3b74492` and got 13 PASS / 0 FAIL;
+its steering harness independently confirmed declared-length-driven byte and
+offset control. Verdict: ESTABLISHED AS LABELED. The wire position remains
+plausible from the advisory but untested — an honest UNKNOWN, not a pass.
 
 ## Cheapest next experiment
 

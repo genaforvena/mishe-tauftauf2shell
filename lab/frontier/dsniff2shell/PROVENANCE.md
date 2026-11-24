@@ -72,4 +72,11 @@ here — see limits.
   decoded content and its offset within the overflow, not an arbitrary address.
   The reporter's "write-what-where" phrase overstates the primitive.
 - No pointer/IP/command control, no allocator metadata, no rung 5.
-- No independent witness verdict yet.
+- Independent witness (2026-11-24, DM #3598): clean archive of commit
+  `5557139`, exact pins, `sh bootstrap.sh && sh run-all.sh` -> 17 PASS /
+  0 FAIL. Raw ASan WRITE-1 at `base64.c:164` <- `decode_sniffer.c:47`, 0 bytes
+  after `obuf[4096]`; guard0/guard128 = MISHE-OO; safe and fixed clean.
+  Steering harness against the rebuilt trees moved marker content and
+  offsets (Z9KLMNOP@guard299, W198STR!@guard63); fixed stayed unchanged.
+  Verdict ESTABLISHED AS LABELED: rung 3 real decoder, rung 4 PARTIAL;
+  live UDP/2001 crash remains UNKNOWN (libnet/libnids headers absent).

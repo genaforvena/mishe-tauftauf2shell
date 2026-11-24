@@ -80,4 +80,14 @@ the ISO exchange is replaced by an in-process test double (see limits).
   control; no rung 5.
 - No upstream patch or fixed release exists; the fixed control is the
   reporter's suggested bound patch, not a vendor release.
-- No independent witness verdict yet.
+- Independent witness (2026-11-24, DM #3582): clean archive of commit
+  `3b74492`, tarball/patch/harness hashes matched, `sh bootstrap.sh` then
+  `sh run-all.sh` -> 13 PASS / 0 FAIL. Raw ASan `WRITE of size 65535`,
+  0 bytes after the 1-byte region, frames `opReadMultiVars()`
+  `s7_micro_client.cpp:418` -> `PerformOperation()` -> `ReadMultiVars()` ->
+  harness; vuln bytes `byte16=0x48 byte31=0x48 canary32=0xab`; fixed rejected
+  both attack lengths with rc=8388608. Steering harness against the rebuilt
+  trees: declared 16 / fill 0x5a wrote bytes 0..15=0x5a, byte16=0xab;
+  declared 48 / fill 0x7e wrote bytes 0..47=0x7e, byte48=0xab. Verdict
+  ESTABLISHED AS LABELED: rung 3 real library, rung 4 PARTIAL; no wire,
+  pointer/IP/command or r5.
