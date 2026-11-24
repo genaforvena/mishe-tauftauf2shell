@@ -1,0 +1,6 @@
+Breakpoint 1 at 0x49db2: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+lab/frontier/vrpn2shell/out-w23-landing-65536/gdb.cmd:13: Error in sourced command file:
+Warning:
+Cannot insert breakpoint 1.
+Cannot access memory at address 0x49db2
+

@@ -1,0 +1,17 @@
+Breakpoint 1 at 0x49dad: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4554.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+STORE i=16384 rbp=0x7ffda7ed9810 name=0x7ffda7ed97a0 dest=0x7ffda7edd7a0
+=> 0x645c92b76dad <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+155>:	mov    -0x7c(%rbp),%eax
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000645c92b76db2 in vrpn_Endpoint::handle_sender_message (userdata=0x645caf888220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+4554	    sender_name[i] = '\0';
+STOP pc=0x645c92b76db2 si_addr=0x7ffda7edd7a0
+=> 0x645c92b76db2 <_ZN13vrpn_Endpoint21handle_sender_messageEPv17vrpn_HANDLERPARAM+160>:	movb   $0x0,-0x70(%rbp,%rax,1)
+#0  0x0000645c92b76db2 in vrpn_Endpoint::handle_sender_message (userdata=0x645caf888220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+#1  0x0000645c92b6fd88 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x71d2b65bd010, p=..., userdata=0x645caf888220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x0000645c92b6fc8f in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x71d2b65bd010, type=-1, sender=0, time=..., len=8, buffer=0x645caf888380 "", userdata=0x645caf888220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#3  0x0000645c92b76835 in vrpn_Endpoint::dispatch (this=0x645caf888220, type=-1, sender=0, time=..., payload_len=8, bufptr=0x645caf888380 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+#4  0x0000645c92b764f2 in vrpn_Endpoint_IP::getOneTCPMessage (this=0x645caf888220, fd=6, buf=0x645caf888380 "", buflen=64008) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+#5  0x0000645c92b74bd5 in vrpn_Endpoint_IP::handle_tcp_messages (this=0x645caf888220, timeout=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3561

@@ -987,9 +987,10 @@ on the stock plain `-O0` server (SHA-256 `5cf4945768615a55da3401c7608f4223...`,
 
 Coarse sweep: indices 320, 384, 448, 640, 768, 1024, 1280, 1536, 2048, 3072,
 4096, 6144 and 8192 are `ALIVE_AFTER_MESSAGE`; 16384, 32768 and 65536 are
-`DEAD_AFTER_MESSAGE exit=139` (no gdb landing was mapped for those three, so
-the fault cause is UNKNOWN; 16384 is close enough to the array that it may
-still be inside the mapped stack). Index 512
+`DEAD_AFTER_MESSAGE exit=139` (W23 maps the fault to the store instruction and
+an unwritable address `sender_name + index` in the ASLR layout, so the cause is
+no longer UNKNOWN; a gdb-fixed stack layout instead crosses a noncanonical
+boundary and gives SIGBUS at the same instruction). Index 512
 alone is `DEAD_AFTER_MESSAGE exit=134` with `*** stack smashing detected ***`
 in `server.err` (`out-w21-o0-512/`). The same index on the TYPE sink is also
 134 with the same stderr (`out-w21-o0--2-512/`); the fixed commit is ALIVE
@@ -1018,6 +1019,49 @@ one build. It is still a single fixed NUL at a chosen offset: no chosen byte,
 no control-flow redirect to a chosen target, no command side effect, no rung
 5, grade unchanged. Author self-observation, not independently replayed.
 Every port was loopback and was freed; no server was left running.
+
+## W23 — mapped cause of the large-index DEAD 139 rows (2026-11-24 ~02:4xZ)
+
+W21 left the three DEAD exit-139 rows at wire indices 16384, 32768 and 65536
+with an UNKNOWN cause. This wake maps them to the exact store instruction and
+fault address. No build change: stock plain `-O0`
+`build-plain-07.36/server_src/vrpn_server` (SHA-256 `5cf4945768615...`) and
+fixed plain `build-plain-fixed/server_src/vrpn_server` (SHA-256 `10e581e895...`).
+New committed probe `probe-w23-landing.sh` breaks at `vrpn_Connection.C:4554`,
+prints wire index, `rbp`, `sender_name` and `&sender_name[i]`, then records the
+stop signal, `$pc` and `$_siginfo._sifields._sigfault.si_addr`. Its optional
+fifth argument `on` sets `disable-randomization off`, so the inferior keeps
+the ASLR layout that also produces the debugger-free exit 139; `off` (default)
+is gdb's usual fixed stack layout.
+
+`out-w23-landing-16384/gdb.log` (gdb default layout, loopback port 15051):
+`rbp=0x7fffffffd980`, `sender_name=0x7fffffffd910`, computed destination
+`0x800000001910` — name + 16384 crosses the noncanonical `0x800000000000`
+boundary. The inferior stops with SIGBUS at `0x...ddb2`,
+`movb $0x0,-0x70(%rbp,%rax,1)` (the `sender_name[i] = '\0'` store), backtrace
+handler -> `doSystemCallbacksFor:1446` -> `:1424` -> `dispatch:4331` ->
+`getOneTCPMessage:4239`. `$_siginfo` prints nil in this layout, so the bus
+fault's own `si_addr` is UNKNOWN here; the computed destination is the only
+address observation.
+
+`out-w23-landing-aslr-16384/gdb.log` (port 15054) is the layout matching the
+debugger-free runs: `sender_name=0x7ffda7ed97a0`, destination
+`0x7ffda7edd7a0`, SIGSEGV at the same store instruction with
+`si_addr=0x7ffda7edd7a0` exactly equal to the destination. The same holds for
+`out-w23-landing-aslr-32768/gdb.log` (port 15057: dest and si_addr both
+`0x7ffc32f764b0`) and `out-w23-landing-aslr-65536/gdb.log` (port 15058: both
+`0x7ffcfafe0770`). So all three W21 DEAD-139 rows are the wire NUL landing on
+an unwritable address 16/32/64 KiB above the stack array, not on saved frame
+state; the noncanonical SIGBUS is a gdb-fixed-layout artifact, not a second
+impact claim. Controls: fixed index 16384 (`out-w23-fixed-16384/`, port 15055)
+and short index 4 on the vulnerable binary (`out-w23-short-4/`, port 15056)
+are both `ALIVE_AFTER_MESSAGE`.
+
+This closes an UNKNOWN cause without extending the rung-4 boundary: the byte
+is still a fixed NUL at a chosen offset, these three offsets land on unwritable
+addresses, and there is no chosen byte, pointer with downstream use, command or
+rung 5. Grade unchanged. Author self-observation, not independently replayed.
+All ports were loopback and freed; `pgrep vrpn_server` was empty afterwards.
 
 ## Limits and next work
 
@@ -1055,10 +1099,11 @@ Every port was loopback and was freed; no server was left running.
   TYPE `-O2` 136-143 / 200-207 / 312-319 on the same build.
 - W21 covers the large positive indices on the stock `-O0` build: 504-520
   (512-517 DEAD with canary abort, 518/519 already-zero no-ops, 520 DEAD)
-  and the coarse samples 320-8192 (ALIVE), 16384-65536 (DEAD exit 139; no gdb
-  landing was mapped for those three, so the fault cause is UNVERIFIED/UNKNOWN
-  and 16384 may still be inside the mapped stack, per e41b2da). Do not resweep
-  those points on the same `-O0` binary. The
+  and the coarse samples 320-8192 (ALIVE), 16384-65536 (DEAD exit 139). W23
+  maps those three rows to the store instruction with si_addr == `name + index`
+  in the ASLR layout (unwritable address above the stack); the gdb-fixed-layout
+  variant gives SIGBUS at a noncanonical address. Do not resweep those points
+  on the same `-O0` binary. The
   `-O2` samples 256/384/512 are ALIVE there as well. The claimed landing is
   one live saved-frame-pointer word at `sender_name+512`; the causal step
   from the corrupted rbp to `__stack_chk_fail` is UNKNOWN beyond the observed

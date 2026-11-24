@@ -657,3 +657,41 @@ causal step is UNKNOWN. Grade unchanged; fixed NUL at a chosen offset, no
 chosen byte, no command, no rung 5. All ports loopback and freed; no
 `vrpn_server` left running (`pgrep` and `ss -ltn` checked). Author
 self-observation, not independently replayed.
+
+## W23 — mapped cause of the large-index DEAD 139 rows (2026-11-24 ~02:4xZ)
+
+No build change. Reused vulnerable plain `-O0`
+`build-plain-07.36/server_src/vrpn_server` (SHA-256
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`) and fixed
+plain `build-plain-fixed/server_src/vrpn_server` (SHA-256
+`10e581e895c25f39bea153b4d5ce1014796190fb9bd5f901693115d176ea2f45`). Added
+one committed probe, `probe-w23-landing.sh`, with an optional ASLR argument:
+`on` inserts `set disable-randomization off` so gdb keeps the randomized stack
+layout that produces the debugger-free exit 139; `off` is gdb's fixed-stack
+default. The probe breaks at `vrpn_Connection.C:4554`, prints wire index,
+`rbp`, `sender_name` and `&sender_name[i]`, then records the stop signal,
+`$pc`, `$_siginfo._sifields._sigfault.si_addr` and a six-frame backtrace.
+
+`out-w23-landing-16384/gdb.log` (port 15051, default layout):
+`rbp=0x7fffffffd980`, `name=0x7fffffffd910`, `dest=0x800000001910` (name + 16384,
+crossing the noncanonical `0x800000000000` boundary); SIGBUS at
+`movb $0x0,-0x70(%rbp,%rax,1)`, caller chain handler -> :1446 -> :1424 ->
+dispatch:4331 -> getOneTCPMessage:4239. `$_siginfo` si_addr printed nil, so
+the fault address in this layout is UNKNOWN from the log. An earlier
+`probe-w21-large.sh` form of this probe (`out-w23-gdb-16384/gdb.log`) also
+fails `x/16gx` at `0x8000000018f0`, independently showing that region is not
+readable by the process.
+
+`out-w23-landing-aslr-16384/gdb.log` (port 15054): `name=0x7ffda7ed97a0`,
+`dest=0x7ffda7edd7a0`, SIGSEGV at the same store, `si_addr=dest`.
+`out-w23-landing-aslr-32768/gdb.log` (port 15057): dest / si_addr both
+`0x7ffc32f764b0`. `out-w23-landing-aslr-65536/gdb.log` (port 15058): dest /
+si_addr both `0x7ffcfafe0770`. Controls: `out-w23-fixed-16384` (port 15055,
+fixed binary) and `out-w23-short-4` (port 15056, vulnerable binary, index 4)
+are `ALIVE_AFTER_MESSAGE`; each `meta.txt` records SHA, port, index and status.
+
+All ports were loopback and were freed; `pgrep vrpn_server` was empty
+afterwards. The three W21 DEAD-139 rows now have a mapped cause (unwritable
+stack-gap address), the SIGBUS variant is a gdb-fixed-layout artifact. No
+chosen byte, no live-state landing at these offsets, no command, no rung 5,
+grade unchanged. Author self-observation, not independently replayed.
