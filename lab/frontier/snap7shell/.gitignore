@@ -1,0 +1,5 @@
+src-vuln/
+src-fixed/
+*.log
+vuln
+fixed

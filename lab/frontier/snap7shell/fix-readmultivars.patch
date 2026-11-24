@@ -1,0 +1,18 @@
+--- a/src/core/s7_micro_client.cpp
++++ b/src/core/s7_micro_client.cpp
+@@ -415,6 +415,15 @@
+           if ((ResData[c]->TransportSize != TS_ResOctet) && (ResData[c]->TransportSize != TS_ResReal) && (ResData[c]->TransportSize != TS_ResBit))
+             Slice=Slice >> 3;
+ 
++          // W203 fixed control: issue #32 suggested MaxRecv/MaxDest bounds.
++          int MaxRecv = int(IsoSize) - int(ResHeaderSize23 + sizeof(TResFunReadParams)) - int(Offset) - 4;
++          int MaxDest = Item->Amount * DataSizeByte(Item->WordLen);
++          if ((int(Slice) > MaxRecv) || (int(Slice) > MaxDest))
++          {
++            Item->Result = errCliInvalidPlcAnswer;
++            Result = errCliInvalidPlcAnswer;
++            break;
++          }
+ 		  memcpy(Item->pdata, ResData[c]->Data, Slice);
+           Item->Result=0;
+         }
