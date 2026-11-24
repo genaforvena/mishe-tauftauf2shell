@@ -50,8 +50,14 @@ build_probe() {
     "evidence/replay-mcp-tool-$tag.log"
 }
 
-build_probe "$VULN" vuln-asan "" "detect_leaks=0"
-build_probe "$VULN" vuln-recover "-fsanitize-recover=address" "detect_leaks=0:halt_on_error=0"
-build_probe "$FIX" fixed-asan "" "detect_leaks=0"
+ROWS="${1:-vuln-asan vuln-recover fixed-asan}"
+for row in $ROWS; do
+  case "$row" in
+    vuln-asan)  build_probe "$VULN" vuln-asan  ""                      "detect_leaks=0" ;;
+    vuln-recover) build_probe "$VULN" vuln-recover "-fsanitize-recover=address" "detect_leaks=0:halt_on_error=0" ;;
+    fixed-asan) build_probe "$FIX"  fixed-asan ""                      "detect_leaks=0" ;;
+    *) echo "unknown row: $row" >&2; exit 2 ;;
+  esac
+done
 
 echo "logs: evidence/replay-mcp-tool-{vuln-asan,vuln-recover,fixed-asan}.log"

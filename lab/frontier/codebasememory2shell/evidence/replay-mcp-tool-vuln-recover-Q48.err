@@ -1,0 +1,682 @@
+level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+level=info msg=server.start version=dev
+level=info msg=watcher.start interval_ms=multi-sec
+=================================================================
+==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f043004e0 at pc 0x57314347b2a5 bp 0x7ffc71d74590 sp 0x7ffc71d74580
+READ of size 8 at 0x763f043004e0 thread T0
+    #0 0x57314347b2a4 in rb_set_columns src/cypher/cypher.c:2568
+    #1 0x5731434a1e8f in build_return_columns src/cypher/cypher.c:4095
+    #2 0x5731434a1e8f in execute_return_clause src/cypher/cypher.c:4382
+    #3 0x5731434a1e8f in execute_single src/cypher/cypher.c:4442
+    #4 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+    #5 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+    #6 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+    #7 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+    #8 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+    #9 0x573143408eb3 in main src/main.c:802
+    #10 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+
+Address 0x763f043004e0 is located in stack of thread T0 at offset 1248 in frame
+    #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076) <== Memory access at offset 1248 overflows this variable
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112)
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113)
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/cypher/cypher.c:2568 in rb_set_columns
+Shadow bytes around the buggy address:
+  0x763f04300200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300280: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300380: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x763f04300400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x763f04300480: 00 00 00 00 00 00 00 00 00 00 00 00[f2]f2 f2 f2
+  0x763f04300500: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300600: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x763f04300680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300700: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+src/cypher/cypher.c:4115:17: runtime error: index 32 out of bounds for type 'char *[32]'
+=================================================================
+==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f0430ca80 at pc 0x763f06afb303 bp 0x7ffc71d74430 sp 0x7ffc71d73bd8
+WRITE of size 68 at 0x763f0430ca80 thread T0
+    #0 0x763f06afb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x57314348da9a in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x57314348da9a in project_item src/cypher/cypher.c:3379
+    #3 0x5731434a77b4 in execute_return_simple src/cypher/cypher.c:4116
+    #4 0x5731434a77b4 in execute_return_clause src/cypher/cypher.c:4386
+    #5 0x5731434a77b4 in execute_single src/cypher/cypher.c:4442
+    #6 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+    #7 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+    #8 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+    #9 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+    #10 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+    #11 0x573143408eb3 in main src/main.c:802
+    #12 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+
+Address 0x763f0430ca80 is located in stack of thread T0 at offset 51840 in frame
+    #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076)
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112)
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113) <== Memory access at offset 51840 overflows this variable
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x763f0430c800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430ca00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x763f0430ca80:[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb00: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430cc00: f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x763f0430cc80: f8 f8 f8 f8 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x763f0430cd00: 00 00 00 00 00 00 00 00 f2 f2 f2 f2 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f0430cac4 at pc 0x573143490ce5 bp 0x7ffc71d74430 sp 0x7ffc71d74420
+WRITE of size 1 at 0x763f0430cac4 thread T0
+    #0 0x573143490ce4 in project_item src/cypher/cypher.c:3380
+    #1 0x5731434a77b4 in execute_return_simple src/cypher/cypher.c:4116
+    #2 0x5731434a77b4 in execute_return_clause src/cypher/cypher.c:4386
+    #3 0x5731434a77b4 in execute_single src/cypher/cypher.c:4442
+    #4 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+    #5 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+    #6 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+    #7 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+    #8 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+    #9 0x573143408eb3 in main src/main.c:802
+    #10 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+
+Address 0x763f0430cac4 is located in stack of thread T0 at offset 51908 in frame
+    #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076)
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112)
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113) <== Memory access at offset 51908 overflows this variable
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/cypher/cypher.c:3380 in project_item
+Shadow bytes around the buggy address:
+  0x763f0430c800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430ca00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x763f0430ca80: f2 f2 f2 f2 f2 f2 f2 f2[f2]f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb00: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430cc00: f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x763f0430cc80: f8 f8 f8 f8 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x763f0430cd00: 00 00 00 00 00 00 00 00 f2 f2 f2 f2 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+src/cypher/cypher.c:4115:22: runtime error: store to address 0x763f043008a0 with insufficient space for an object of type 'const char *'
+0x763f043008a0: note: pointer points here
+ 3f 76 00 00  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  00 00 00 00
+              ^ 
+=================================================================
+==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f043008a0 at pc 0x5731434a7904 bp 0x7ffc71d745f0 sp 0x7ffc71d745e0
+WRITE of size 8 at 0x763f043008a0 thread T0
+    #0 0x5731434a7903 in execute_return_simple src/cypher/cypher.c:4115
+    #1 0x5731434a7903 in execute_return_clause src/cypher/cypher.c:4386
+    #2 0x5731434a7903 in execute_single src/cypher/cypher.c:4442
+    #3 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+    #4 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+    #5 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+    #6 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+    #7 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+    #8 0x573143408eb3 in main src/main.c:802
+    #9 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+
+Address 0x763f043008a0 is located in stack of thread T0 at offset 2208 in frame
+    #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076)
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112) <== Memory access at offset 2208 overflows this variable
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113)
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/cypher/cypher.c:4115 in execute_return_simple
+Shadow bytes around the buggy address:
+  0x763f04300600: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x763f04300680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300700: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+  0x763f04300780: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x763f04300880: 00 00 00 00[f2]f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x763f04300900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300a00: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+  0x763f04300a80: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+src/cypher/cypher.c:4116:71: runtime error: index 33 out of bounds for type 'char [32][512]'
+=================================================================
+==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f043008a0 at pc 0x5731434839e5 bp 0x7ffc71d74580 sp 0x7ffc71d74570
+READ of size 8 at 0x763f043008a0 thread T0
+    #0 0x5731434839e4 in rb_add_row src/cypher/cypher.c:2581
+    #1 0x5731434a795f in execute_return_simple src/cypher/cypher.c:4118
+    #2 0x5731434a795f in execute_return_clause src/cypher/cypher.c:4386
+    #3 0x5731434a795f in execute_single src/cypher/cypher.c:4442
+    #4 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+    #5 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+    #6 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+    #7 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+    #8 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+    #9 0x573143408eb3 in main src/main.c:802
+    #10 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+
+Address 0x763f043008a0 is located in stack of thread T0 at offset 2208 in frame
+    #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076)
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112) <== Memory access at offset 2208 overflows this variable
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113)
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/cypher/cypher.c:2581 in rb_add_row
+Shadow bytes around the buggy address:
+  0x763f04300600: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x763f04300680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300700: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+  0x763f04300780: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x763f04300880: 00 00 00 00[f2]f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x763f04300900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300a00: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+  0x763f04300a80: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f04300b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f0430ca80 at pc 0x763f06a7d96f bp 0x7ffc71d74550 sp 0x7ffc71d73cf8
+READ of size 69 at 0x763f0430ca80 thread T0
+    #0 0x763f06a7d96e in strlen ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:391
+    #1 0x573143479886 in heap_strdup src/cypher/cypher.c:51
+    #2 0x5731434839fe in rb_add_row src/cypher/cypher.c:2581
+    #3 0x5731434a795f in execute_return_simple src/cypher/cypher.c:4118
+    #4 0x5731434a795f in execute_return_clause src/cypher/cypher.c:4386
+    #5 0x5731434a795f in execute_single src/cypher/cypher.c:4442
+    #6 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+    #7 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+    #8 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+    #9 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+    #10 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+    #11 0x573143408eb3 in main src/main.c:802
+    #12 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+
+Address 0x763f0430ca80 is located in stack of thread T0 at offset 51840 in frame
+    #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076)
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112)
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113) <== Memory access at offset 51840 overflows this variable
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:391 in strlen
+Shadow bytes around the buggy address:
+  0x763f0430c800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430ca00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x763f0430ca80:[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb00: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430cc00: f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x763f0430cc80: f8 f8 f8 f8 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x763f0430cd00: 00 00 00 00 00 00 00 00 f2 f2 f2 f2 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f0430ca80 at pc 0x57314347996c bp 0x7ffc71d74550 sp 0x7ffc71d74540
+READ of size 69 at 0x763f0430ca80 thread T0
+    #0 0x57314347996b in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #1 0x57314347996b in heap_strdup src/cypher/cypher.c:54
+    #2 0x5731434839fe in rb_add_row src/cypher/cypher.c:2581
+    #3 0x5731434a795f in execute_return_simple src/cypher/cypher.c:4118
+    #4 0x5731434a795f in execute_return_clause src/cypher/cypher.c:4386
+    #5 0x5731434a795f in execute_single src/cypher/cypher.c:4442
+    #6 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+    #7 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+    #8 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+    #9 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+    #10 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+    #11 0x573143408eb3 in main src/main.c:802
+    #12 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+
+Address 0x763f0430ca80 is located in stack of thread T0 at offset 51840 in frame
+    #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076)
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112)
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113) <== Memory access at offset 51840 overflows this variable
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29 in memcpy
+Shadow bytes around the buggy address:
+  0x763f0430c800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430c980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430ca00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x763f0430ca80:[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb00: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x763f0430cb80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x763f0430cc00: f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x763f0430cc80: f8 f8 f8 f8 f2 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x763f0430cd00: 00 00 00 00 00 00 00 00 f2 f2 f2 f2 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=324
+level=info msg=server.shutdown
+level=info msg=watcher.stop

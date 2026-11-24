@@ -1,0 +1,6 @@
+level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+level=info msg=server.start version=dev
+level=info msg=watcher.start interval_ms=multi-sec
+level=warn msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=error duration_ms=2
+level=info msg=server.shutdown
+level=info msg=watcher.stop

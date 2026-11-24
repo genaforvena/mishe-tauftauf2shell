@@ -50,6 +50,8 @@ def main():
     os.makedirs(cache, exist_ok=True)
     shutil.rmtree(fixture, ignore_errors=True)
     os.makedirs(fixture, exist_ok=True)
+    pathlib.Path(fixture + "/probe.c").write_text("int %s(void){return 1;}\n" % CHOSEN)
+    evdir = pathlib.Path(__file__).resolve().parent.parent / "evidence"
     os.environ["CBM_CACHE_DIR"] = cache
     print("CBM_CACHE_DIR=" + cache)
     print("BINARY=" + binary)
@@ -65,10 +67,11 @@ def main():
     rc, out, err = query(binary, 1)
     show("QUERY_1_CONTROL", rc, out, err, maxerr=12)
     if '"total":0' in out.replace(" ", ""):
-        print("WARNING: no rows; projection loop will not run")
+        raise SystemExit("no rows: fixture not indexed; projection loop would not run")
 
     for n in (32, 33, 48):
         rc, out, err = query(binary, n)
+        (evdir / ("replay-mcp-tool-%s-Q%d.err" % (tag, n))).write_text(err)
         show("QUERY_%d" % n, rc, out, err)
 
 

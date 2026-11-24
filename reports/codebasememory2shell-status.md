@@ -63,12 +63,18 @@ fixture bytes. It remains a local stdio process: no HTTP transport, no remote
 request, no agent-influenced query, no grooming, pointer/IP, command, witness
 verdict or rung 5. The advisory's AV:L/PR:L vector remains consistent.
 
-The tool-path claim is now clean-archive replayable: `mcp-tool/replay.sh`
-tracks its previously untracked lab stub (`grammar_zz_labstub.c`, sha256
+The tool-path claim is now clean-archive replayable and fully replayed by the
+author: `mcp-tool/replay.sh` tracks its previously untracked lab stub
+(`grammar_zz_labstub.c`, sha256
 `232ae0a5909c7411875eb8cc642357cce9fc2905fc08ccca0e20f1edbd679d0e`, identical
-to both pinned-tree copies) and a path-independent stdio probe, and is
-documented in `MCP-TOOL.md`. This repair closes the gap where the 03:13Z tool
-claim could not be replayed from a clean checkout.
+to both pinned-tree copies), a path-independent stdio probe and full per-query
+ASan stderr files. W2's first replay attempt used an empty fixture, so it
+showed the column READ and fixed-parse control but could not reach the WRITE;
+W3 fixed the fixture, added a zero-row failure guard and rebuilt all three
+rows. `evidence/replay-mcp-tool-vuln-recover-Q{33,48}.err` now reproduce the
+tool-path `WRITE of size 68` at `func_bufs[32]` with the chosen name; details
+and hashes are in `MCP-TOOL.md`. This closes the clean-checkout replay gap,
+not the independent-witness gap.
 
 ## Next for the target mind
 

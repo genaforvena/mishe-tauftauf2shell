@@ -5,36 +5,35 @@ CACHE=/tmp/cbm-mcp-cache-vuln-asan
 
 === INDEX ===
 RC=0
-STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"project\":\"probe\",\"skipped_count\":0,\"nodes\":2,\"edges\":1,\"expected_nodes\":2,\"expected_edges\":1,\"adr_present\":false,\"adr_hint\":\"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.\",\"artifact_present\":false,\"status\":\"indexed\"}"}],"structuredContent":{"project":"probe","skipped_count":0,"nodes":2,"edges":1,"expected_nodes":2,"expected_edges":1,"adr_present":false,"adr_hint":"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.","artifact_present":false,"status":"indexed"},"isError":false}}
-STDERR_LINES=45
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"project\":\"probe\",\"skipped_count\":0,\"nodes\":5,\"edges\":4,\"expected_nodes\":5,\"expected_edges\":4,\"adr_present\":false,\"adr_hint\":\"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.\",\"artifact_present\":false,\"status\":\"indexed\"}"}],"structuredContent":{"project":"probe","skipped_count":0,"nodes":5,"edges":4,"expected_nodes":5,"expected_edges":4,"adr_present":false,"adr_hint":"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.","artifact_present":false,"status":"indexed"},"isError":false}}
+STDERR_LINES=47
   level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
   level=info msg=server.start version=dev
   level=info msg=watcher.start interval_ms=multi-sec
-  level=info msg=pipeline.discover files=0 elapsed_ms=0
+  level=info msg=pipeline.discover files=1 elapsed_ms=0
   level=info msg=pipeline.route path=full
-  level=info msg=pass.start pass=structure files=0
-  level=info msg=pass.done pass=structure nodes=2 edges=1
+  level=info msg=pass.start pass=structure files=1
+  level=info msg=pass.done pass=structure nodes=3 edges=2
   level=info msg=pass.timing pass=structure elapsed_ms=0
-  level=info msg=pipeline.mode mode=sequential files=0
+  level=info msg=pipeline.mode mode=sequential files=1
   level=info msg=pkgmap.scan_repo manifests=0
   level=info msg=pkgmap.scan manifests_from_files=0 manifests_from_walk=0 entries=0
-  level=info msg=pass.start pass=definitions files=0
+  level=info msg=pass.start pass=definitions files=1
 
 === QUERY_1_CONTROL ===
 RC=0
-STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\"],\"rows\":[],\"total\":0,\"hint\":\"Query returned no results. Use get_graph_schema() to see available labels and edge types.\"}"}],"structuredContent":{"columns":["f.name"],"rows":[],"total":0,"hint":"Query returned no results. Use get_graph_schema() to see available labels and edge types."},"isError":false}}
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\"],\"rows\":[[\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\"]],\"total\":1}"}],"structuredContent":{"columns":["f.name"],"rows":[["MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx"]],"total":1},"isError":false}}
 STDERR_LINES=6
   level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
   level=info msg=server.start version=dev
   level=info msg=watcher.start interval_ms=multi-sec
-  level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=6
+  level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=3
   level=info msg=server.shutdown
   level=info msg=watcher.stop
 
-WARNING: no rows; projection loop will not run
 === QUERY_32 ===
 RC=0
-STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\"],\"rows\":[],\"total\":0,\"hint\":\"Query returned no results. Use get_graph_schema() to see available labels and edge types.\"}"}],"structuredContent":{"columns":["f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name","f.name"],"rows":[],"total":0,"hint":"Query returned no results. Use get_graph_schema() to see available labels and edge types."},"isError":false}}
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\"],\"rows\":[[\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKL
 STDERR_LINES=6
   level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
   level=info msg=server.start version=dev
@@ -51,24 +50,24 @@ STDERR_LINES=99
   level=info msg=server.start version=dev
   level=info msg=watcher.start interval_ms=multi-sec
   =================================================================
-  ==1623335==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x728955f004e0 at pc 0x575b0242c425 bp 0x7fff5d111240 sp 0x7fff5d111230
-  READ of size 8 at 0x728955f004e0 thread T0
-      #0 0x575b0242c424 in rb_set_columns src/cypher/cypher.c:2568
-      #1 0x575b02452100 in build_return_columns src/cypher/cypher.c:4095
-      #2 0x575b02452100 in execute_return_clause src/cypher/cypher.c:4382
-      #3 0x575b02452100 in execute_single src/cypher/cypher.c:4442
-      #4 0x575b0246aa63 in cbm_cypher_execute src/cypher/cypher.c:4473
-      #5 0x575b0253796b in handle_query_graph src/mcp/mcp.c:2082
-      #6 0x575b0256776e in cbm_mcp_handle_tool src/mcp/mcp.c:5729
-      #7 0x575b0256f732 in cbm_mcp_server_handle src/mcp/mcp.c:6095
-      #8 0x575b02574a17 in cbm_mcp_server_run src/mcp/mcp.c:6317
-      #9 0x575b023bcd32 in main src/main.c:802
-      #10 0x72895762a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-      #11 0x72895762a28a in __libc_start_main_impl ../csu/libc-start.c:360
-      #12 0x575b023b8ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-asan+0xce0ee4) (BuildId: af2e35ee004071fb5ea8c8281603890d722e1195)
+  ==2719376==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7c3cda1004e0 at pc 0x5fdce1ea0425 bp 0x7ffc88566dc0 sp 0x7ffc88566db0
+  READ of size 8 at 0x7c3cda1004e0 thread T0
+      #0 0x5fdce1ea0424 in rb_set_columns src/cypher/cypher.c:2568
+      #1 0x5fdce1ec6100 in build_return_columns src/cypher/cypher.c:4095
+      #2 0x5fdce1ec6100 in execute_return_clause src/cypher/cypher.c:4382
+      #3 0x5fdce1ec6100 in execute_single src/cypher/cypher.c:4442
+      #4 0x5fdce1edea63 in cbm_cypher_execute src/cypher/cypher.c:4473
+      #5 0x5fdce1fab96b in handle_query_graph src/mcp/mcp.c:2082
+      #6 0x5fdce1fdb76e in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+      #7 0x5fdce1fe3732 in cbm_mcp_server_handle src/mcp/mcp.c:6095
+      #8 0x5fdce1fe8a17 in cbm_mcp_server_run src/mcp/mcp.c:6317
+      #9 0x5fdce1e30d32 in main src/main.c:802
+      #10 0x7c3cdb82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+      #11 0x7c3cdb82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+      #12 0x5fdce1e2cee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-asan+0xce0ee4) (BuildId: af2e35ee004071fb5ea8c8281603890d722e1195)
   
-  Address 0x728955f004e0 is located in stack of thread T0 at offset 1248 in frame
-      #0 0x575b0244c737 in execute_single src/cypher/cypher.c:4398
+  Address 0x7c3cda1004e0 is located in stack of thread T0 at offset 1248 in frame
+      #0 0x5fdce1ec0737 in execute_single src/cypher/cypher.c:4398
   
     This frame has 40 object(s):
       [48, 52) 'scan_count' (line 4403)
@@ -116,24 +115,24 @@ STDERR_LINES=99
   level=info msg=server.start version=dev
   level=info msg=watcher.start interval_ms=multi-sec
   =================================================================
-  ==1623548==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x753fe4b004e0 at pc 0x63ed2b98f425 bp 0x7ffdc7acf990 sp 0x7ffdc7acf980
-  READ of size 8 at 0x753fe4b004e0 thread T0
-      #0 0x63ed2b98f424 in rb_set_columns src/cypher/cypher.c:2568
-      #1 0x63ed2b9b5100 in build_return_columns src/cypher/cypher.c:4095
-      #2 0x63ed2b9b5100 in execute_return_clause src/cypher/cypher.c:4382
-      #3 0x63ed2b9b5100 in execute_single src/cypher/cypher.c:4442
-      #4 0x63ed2b9cda63 in cbm_cypher_execute src/cypher/cypher.c:4473
-      #5 0x63ed2ba9a96b in handle_query_graph src/mcp/mcp.c:2082
-      #6 0x63ed2baca76e in cbm_mcp_handle_tool src/mcp/mcp.c:5729
-      #7 0x63ed2bad2732 in cbm_mcp_server_handle src/mcp/mcp.c:6095
-      #8 0x63ed2bad7a17 in cbm_mcp_server_run src/mcp/mcp.c:6317
-      #9 0x63ed2b91fd32 in main src/main.c:802
-      #10 0x753fe622a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-      #11 0x753fe622a28a in __libc_start_main_impl ../csu/libc-start.c:360
-      #12 0x63ed2b91bee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-asan+0xce0ee4) (BuildId: af2e35ee004071fb5ea8c8281603890d722e1195)
+  ==2719387==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7959c23004e0 at pc 0x5f66c36d3425 bp 0x7ffc2b3b0120 sp 0x7ffc2b3b0110
+  READ of size 8 at 0x7959c23004e0 thread T0
+      #0 0x5f66c36d3424 in rb_set_columns src/cypher/cypher.c:2568
+      #1 0x5f66c36f9100 in build_return_columns src/cypher/cypher.c:4095
+      #2 0x5f66c36f9100 in execute_return_clause src/cypher/cypher.c:4382
+      #3 0x5f66c36f9100 in execute_single src/cypher/cypher.c:4442
+      #4 0x5f66c3711a63 in cbm_cypher_execute src/cypher/cypher.c:4473
+      #5 0x5f66c37de96b in handle_query_graph src/mcp/mcp.c:2082
+      #6 0x5f66c380e76e in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+      #7 0x5f66c3816732 in cbm_mcp_server_handle src/mcp/mcp.c:6095
+      #8 0x5f66c381ba17 in cbm_mcp_server_run src/mcp/mcp.c:6317
+      #9 0x5f66c3663d32 in main src/main.c:802
+      #10 0x7959c3a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+      #11 0x7959c3a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+      #12 0x5f66c365fee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-asan+0xce0ee4) (BuildId: af2e35ee004071fb5ea8c8281603890d722e1195)
   
-  Address 0x753fe4b004e0 is located in stack of thread T0 at offset 1248 in frame
-      #0 0x63ed2b9af737 in execute_single src/cypher/cypher.c:4398
+  Address 0x7959c23004e0 is located in stack of thread T0 at offset 1248 in frame
+      #0 0x5f66c36f3737 in execute_single src/cypher/cypher.c:4398
   
     This frame has 40 object(s):
       [48, 52) 'scan_count' (line 4403)

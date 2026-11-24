@@ -1,0 +1,174 @@
+CBM_CACHE_DIR=/tmp/cbm-mcp-cache-vuln-recover
+BINARY=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover
+CHOSEN_LEN=68 CHOSEN=MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx
+CACHE=/tmp/cbm-mcp-cache-vuln-recover
+
+=== INDEX ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"project\":\"probe\",\"skipped_count\":0,\"nodes\":5,\"edges\":4,\"expected_nodes\":5,\"expected_edges\":4,\"adr_present\":false,\"adr_hint\":\"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.\",\"artifact_present\":false,\"status\":\"indexed\"}"}],"structuredContent":{"project":"probe","skipped_count":0,"nodes":5,"edges":4,"expected_nodes":5,"expected_edges":4,"adr_present":false,"adr_hint":"Project indexed. Consider creating an Architecture Decision Record: explore the codebase with get_architecture(aspects=['all']), then use manage_adr(mode='update') to persist architectural insights across sessions.","artifact_present":false,"status":"indexed"},"isError":false}}
+STDERR_LINES=47
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=info msg=pipeline.discover files=1 elapsed_ms=0
+  level=info msg=pipeline.route path=full
+  level=info msg=pass.start pass=structure files=1
+  level=info msg=pass.done pass=structure nodes=3 edges=2
+  level=info msg=pass.timing pass=structure elapsed_ms=0
+  level=info msg=pipeline.mode mode=sequential files=1
+  level=info msg=pkgmap.scan_repo manifests=0
+  level=info msg=pkgmap.scan manifests_from_files=0 manifests_from_walk=0 entries=0
+  level=info msg=pass.start pass=definitions files=1
+
+=== QUERY_1_CONTROL ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\"],\"rows\":[[\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\"]],\"total\":1}"}],"structuredContent":{"columns":["f.name"],"rows":[["MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx"]],"total":1},"isError":false}}
+STDERR_LINES=6
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=3
+  level=info msg=server.shutdown
+  level=info msg=watcher.stop
+
+=== QUERY_32 ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\"],\"rows\":[[\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKL
+STDERR_LINES=6
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  level=info msg=mcp.request protocol=jsonrpc method=tools/call tool=query_graph status=ok duration_ms=4
+  level=info msg=server.shutdown
+  level=info msg=watcher.stop
+
+=== QUERY_33 ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\"],\"rows\":[[\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKL
+STDERR_LINES=681
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  =================================================================
+  ==2789908==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7a07f83004e0 at pc 0x594cf084e2a5 bp 0x7ffd2514d1c0 sp 0x7ffd2514d1b0
+  READ of size 8 at 0x7a07f83004e0 thread T0
+      #0 0x594cf084e2a4 in rb_set_columns src/cypher/cypher.c:2568
+      #1 0x594cf0874e8f in build_return_columns src/cypher/cypher.c:4095
+      #2 0x594cf0874e8f in execute_return_clause src/cypher/cypher.c:4382
+      #3 0x594cf0874e8f in execute_single src/cypher/cypher.c:4442
+      #4 0x594cf088e29a in cbm_cypher_execute src/cypher/cypher.c:4473
+      #5 0x594cf0960544 in handle_query_graph src/mcp/mcp.c:2082
+      #6 0x594cf099147d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+      #7 0x594cf099970e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+      #8 0x594cf099ecd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+      #9 0x594cf07dbeb3 in main src/main.c:802
+      #10 0x7a07f9a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+      #11 0x7a07f9a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+      #12 0x594cf07d7ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+  
+  Address 0x7a07f83004e0 is located in stack of thread T0 at offset 1248 in frame
+      #0 0x594cf086f259 in execute_single src/cypher/cypher.c:4398
+  
+    This frame has 40 object(s):
+      [48, 52) 'scan_count' (line 4403)
+      [64, 68) 'bind_cap' (line 4407)
+      [80, 84) 'bind_count' (line 4409)
+      [96, 100) 'extra_count' (line 4356)
+      [112, 116) 'edge_count' (line 4272)
+      [128, 132) 'tc' (line 4212)
+      [144, 148) 'tcap' (line 4213)
+      [160, 168) 'scanned' (line 4402)
+      [192, 200) 'bindings' (line 4408)
+      [224, 232) 'var_name' (line 4410)
+      [256, 264) 'extra_nodes' (line 4355)
+      [288, 296) 'tv' (line 4337)
+      [320, 328) 'edges' (line 4271)
+      [352, 360) 'tmp' (line 4210)
+      [384, 392) 'tv' (line 4214)
+      [416, 480) 'found' (line 4288)
+      [512, 640) 'vars' (line 4144)
+      [672, 928) 'vars' (line 3863)
+      [992, 1248) 'col_names' (line 4076) <== Memory access at offset 1248 overflows this variable
+      [1312, 1568) 'vals' (line 4046)
+      [1632, 1888) 'row' (line 4017)
+      [1952, 2208) 'vals' (line 4112)
+      [2272, 2656) 'vals' (line 4153)
+      [2720, 3104) 'col_names' (line 4125)
+      [3168, 4192) 'vals' (line 3867)
+      [4320, 5944) 'b' (line 4413)
+      [6080, 7704) 'nb' (line 4296)
+      [7840, 9464) 'nb' (line 4312)
+      [9600, 11224) 'nb' (line 4172)
+      [11360, 12984) 'nb' (line 4178)
+      [13120, 14744) 'nb' (line 4207)
+      [14880, 16504) 'nb' (line 4222)
+      [16640, 18688) 'bufs' (line 4018)
+      [18816, 35200) 'valbufs' (line 4047)
+      [35456, 51840) 'func_bufs' (line 4113)
+      [52096, 52224) 'buf' (line 4082)
+
+=== QUERY_48 ===
+RC=0
+STDOUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"columns\":[\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\",\"f.name\"],\"rows\":[[\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx\",\"MISHE_OO0123456789ABCDEFGHIJKL
+STDERR_LINES=682
+  level=info msg=mem.init budget_mb=11206 total_ram_mb=32019
+  level=info msg=server.start version=dev
+  level=info msg=watcher.start interval_ms=multi-sec
+  =================================================================
+  ==2790320==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x763f043004e0 at pc 0x57314347b2a5 bp 0x7ffc71d74590 sp 0x7ffc71d74580
+  READ of size 8 at 0x763f043004e0 thread T0
+      #0 0x57314347b2a4 in rb_set_columns src/cypher/cypher.c:2568
+      #1 0x5731434a1e8f in build_return_columns src/cypher/cypher.c:4095
+      #2 0x5731434a1e8f in execute_return_clause src/cypher/cypher.c:4382
+      #3 0x5731434a1e8f in execute_single src/cypher/cypher.c:4442
+      #4 0x5731434bb29a in cbm_cypher_execute src/cypher/cypher.c:4473
+      #5 0x57314358d544 in handle_query_graph src/mcp/mcp.c:2082
+      #6 0x5731435be47d in cbm_mcp_handle_tool src/mcp/mcp.c:5729
+      #7 0x5731435c670e in cbm_mcp_server_handle src/mcp/mcp.c:6095
+      #8 0x5731435cbcd8 in cbm_mcp_server_run src/mcp/mcp.c:6317
+      #9 0x573143408eb3 in main src/main.c:802
+      #10 0x763f05a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+      #11 0x763f05a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+      #12 0x573143404ee4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/mcp-tool/bin/vuln-recover+0xce0ee4) (BuildId: 0eedb81f5db24e35c1dcab754a8cb84263ff5dc5)
+  
+  Address 0x763f043004e0 is located in stack of thread T0 at offset 1248 in frame
+      #0 0x57314349c259 in execute_single src/cypher/cypher.c:4398
+  
+    This frame has 40 object(s):
+      [48, 52) 'scan_count' (line 4403)
+      [64, 68) 'bind_cap' (line 4407)
+      [80, 84) 'bind_count' (line 4409)
+      [96, 100) 'extra_count' (line 4356)
+      [112, 116) 'edge_count' (line 4272)
+      [128, 132) 'tc' (line 4212)
+      [144, 148) 'tcap' (line 4213)
+      [160, 168) 'scanned' (line 4402)
+      [192, 200) 'bindings' (line 4408)
+      [224, 232) 'var_name' (line 4410)
+      [256, 264) 'extra_nodes' (line 4355)
+      [288, 296) 'tv' (line 4337)
+      [320, 328) 'edges' (line 4271)
+      [352, 360) 'tmp' (line 4210)
+      [384, 392) 'tv' (line 4214)
+      [416, 480) 'found' (line 4288)
+      [512, 640) 'vars' (line 4144)
+      [672, 928) 'vars' (line 3863)
+      [992, 1248) 'col_names' (line 4076) <== Memory access at offset 1248 overflows this variable
+      [1312, 1568) 'vals' (line 4046)
+      [1632, 1888) 'row' (line 4017)
+      [1952, 2208) 'vals' (line 4112)
+      [2272, 2656) 'vals' (line 4153)
+      [2720, 3104) 'col_names' (line 4125)
+      [3168, 4192) 'vals' (line 3867)
+      [4320, 5944) 'b' (line 4413)
+      [6080, 7704) 'nb' (line 4296)
+      [7840, 9464) 'nb' (line 4312)
+      [9600, 11224) 'nb' (line 4172)
+      [11360, 12984) 'nb' (line 4178)
+      [13120, 14744) 'nb' (line 4207)
+      [14880, 16504) 'nb' (line 4222)
+      [16640, 18688) 'bufs' (line 4018)
+      [18816, 35200) 'valbufs' (line 4047)
+      [35456, 51840) 'func_bufs' (line 4113)
+      [52096, 52224) 'buf' (line 4082)
+

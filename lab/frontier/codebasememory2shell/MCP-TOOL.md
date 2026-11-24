@@ -94,11 +94,13 @@ The full server build and the HTTP/UI transport were not exercised.
 
 ## Replay from a clean checkout (self-contained)
 
-`bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh` from the repo root.
-The script verifies both pinned tarballs, extracts them if absent, copies the
-tracked `mcp-tool/grammar_zz_labstub.c` into each extracted tree (the original
-was untracked, so the 03:13Z claim was not clean-archive replayable), builds
-the three reduced ASan servers (vuln, vuln+recover, fixed) with the exact flags
+`bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh [row]` from the repo
+root. With no argument it runs all three rows; pass `vuln-asan`, `vuln-recover`
+or `fixed-asan` to rebuild just one (useful when a targeted link step exceeds
+one wake's budget). The script verifies both pinned tarballs, extracts them if
+absent, copies the tracked `mcp-tool/grammar_zz_labstub.c` into each extracted
+tree (the original was untracked, so the 03:13Z claim was not clean-archive
+replayable), builds the selected reduced ASan servers with the exact flags
 above, and drives each with the tracked `mcp-tool/probe.py` over stdio. Its
 logs are `evidence/replay-mcp-tool-{vuln-asan,vuln-recover,fixed-asan}.log`.
 
@@ -108,15 +110,35 @@ recompile objects when only `CFLAGS_EXTRA` changes, so without the touch the
 rc=1 instead of the recorded rc=0). `make -B` also works but rebuilds vendored
 objects and exceeded a 600 s wake budget, so the targeted touch is used.
 
-Wake verification (2026-11-24): the `vuln-asan` row reproduced from the tracked
-script and pinned source (N=33/48 rc=1 with ASan READ-8), and the `fixed-asan`
-row reproduced clean (`isError:true`, no ASan). The recover row was not
-rebuilt within the wake budget: each targeted link step takes minutes on this
-2-core host, so `evidence/replay-mcp-tool-vuln-recover.log` is intentionally
-absent rather than carrying the first attempt's binary-reuse artifact. The
-recover-mode WRITE evidence remains the original
-`evidence/mcp-tool-recover-Q{33,48}.err` from commit `1205a3d`. Completing the
-third row is owed to a later wake or the witness.
+Wake verification (W3, 2026-11-24 06:0xZ): all three rows were rebuilt from
+the tracked script and pinned source, now with a real fixture and full stderr.
+The W2 replay rows were produced with an empty fixture (`"total":0`): they
+reproduced the column-array READ and the fixed-parse control but could not
+reach the projection WRITE. That gap is fixed — `probe.py` now writes the same
+68-byte `probe.c` as the original run, aborts on zero rows, and saves full
+ASan stderr per query at `evidence/replay-mcp-tool-<tag>-Q{32,33,48}.err`.
+
+- `vuln-asan`: N=1/32 rc=0 with the chosen name in JSON; N=33/48 rc=1 with no
+  JSON response, ASan `READ of size 8` at `cypher.c:2568` in `rb_set_columns`
+  ← `build_return_columns:4095` ← `handle_query_graph:2082`.
+- `vuln-recover`: N=1/32 clean; N=33/48 rc=0 with valid JSON containing the
+  chosen name, and full stderr with `WRITE of size 68` at
+  `project_item:3379` ← `execute_return_simple:4116` ←
+  `handle_query_graph:2082`, frame offset 51840 = `func_bufs[32]`, 16384 bytes
+  past the array. The full `-Q33.err` / `-Q48.err` are 680 / 681 lines.
+- `fixed-asan`: N=33/48 return `isError:true` with clean stderr, no ASan;
+  N=1/32 contain the chosen name.
+
+Canonical log hashes (`evidence/`): `replay-mcp-tool-vuln-asan.log`
+`4504b1c693be92937eab8c3da6be7d61fc85d66a7c0b25afbe1e814927ee029f`,
+`replay-mcp-tool-vuln-recover.log`
+`20461cf93bf8b5f6a13b8313883293df12638913d3fb4bb47da0e58ec4811966`,
+`replay-mcp-tool-fixed-asan.log`
+`0d2ba7f32d742b944ad49454618476f1810038e48c2f8299f5e0abade1edfe47`;
+recover `-Q33.err` `2c62f52ad3c4db5b545df542f86473efd5cc585165a00c2c0fb54119a4c7d898`
+and `-Q48.err` `476026eab80e08f6565ec587258c5fe542ec176cdec8f47c51d0599b6b68347e`.
+This is author replay on this host, not a witness verdict.
+
 The stub is byte-identical to the one used in the original run (sha256
 `232ae0a5909c7411875eb8cc642357cce9fc2905fc08ccca0e20f1edbd679d0e` in both
 pinned trees). The original probe script lives at `/tmp/cbm_mcp_probe.py` in
