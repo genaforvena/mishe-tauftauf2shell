@@ -1,0 +1,18 @@
+PASS pinned_tarball: 1
+PASS pristine_decoder: 1
+PASS patched_decoder: 1
+PASS vuln_asan_rc: 1
+PASS vuln_asan_global_overflow: 2
+PASS vuln_asan_write: 1
+PASS vuln_asan_site: 2
+PASS vuln_asan_caller: 1
+PASS vuln_asan_offset: 1
+PASS chosen_at_offset_0: 1
+PASS chosen_at_offset_128: 1
+PASS vuln_safe_rc: 0
+PASS vuln_safe_clean: 0
+PASS fixed_attack_rc: 0
+PASS fixed_attack_clean: 0
+PASS fixed_guard_intact: 2
+PASS fixed_safe_rc: 0
+RESULT: 17 PASS / 0 FAIL

@@ -1,0 +1,18 @@
+--- a/decode_sniffer.c
++++ b/decode_sniffer.c
+@@ -32,7 +32,14 @@ decode_sniffer(u_char *buf, int len, u_char *obuf, int olen)
+ 	buf[len - 3]= '\0'; strtok(&buf[32], "\r\n");
+ 	snprintf(obuf, olen, "%s [", &buf[32]);
+ 	len = strlen(obuf);
+-	i = base64_pton(&buf[32], &obuf[len], olen - len - 3);
++	{
++		int remaining = olen - (int)len - 3;
++		if (remaining < 0)
++			remaining = 0;
++		i = base64_pton(&buf[32], &obuf[len], (size_t)remaining);
++		if ((int)i < 0)
++			i = 0;
++	}
+ 	obuf[len + i] = '\0';
+ 	strlcat(obuf, "]\n", olen);
+ 

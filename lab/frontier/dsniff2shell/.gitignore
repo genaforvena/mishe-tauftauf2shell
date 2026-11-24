@@ -1,0 +1,7 @@
+src/dsniff-2.5a2/
+src/dsniff-fixed/
+vuln-asan
+fixed-asan
+vuln-plain
+fixed-plain
+*.o
