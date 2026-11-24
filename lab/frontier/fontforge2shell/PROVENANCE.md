@@ -18,6 +18,8 @@ with `figureProperEncoding()` stubbed and minimal struct stand-ins; the
 binaries, runs the attack and two controls, probes chosen bytes with gdb,
 and writes `evidence.log` with per-file sha256s.
 
-An author-side clean `git archive e5e4a65` replay was run afterwards and is
-recorded in `REPLAY.md`: 5/5 expected RCs and normalized hash
-`56fd8ada…5633bb`; it is not an independent witness verdict.
+An author-side clean `git archive e5e4a65` replay is recorded in
+`REPLAY.md`: 5/5 expected RCs and normalized hash `56fd8ada…5633bb`.
+Independent witness replay (message #3309, clean archive of `13a2a94`,
+gcc 13.3.0 / gdb 15.1) confirmed the same matrix and bytes and graded
+rungs 1-4 ESTABLISHED at the direct-call scope, NO r5.

@@ -1,4 +1,4 @@
-# frontier brief — fontforge2shell (candidate, FRONTIER-STAGED)
+# fontforge2shell — rungs 1-4 ESTABLISHED (direct call + real Import())
 
 ## Ground truth (provisioning only; no external probes)
 
@@ -17,8 +17,9 @@
 - Vulnerable source: FontForge tag `20251009`, raw
   `fontforge/fvimportbdf.c`, 2530 lines,
   sha256 `df766f9c881848cc4ea57456678e67c0e85fcf2a6ed308d1912b54181f0eb30d`.
-  The advisory's line range 1719-1755 matches
-  `PcfReadEncodingsNames()`; the fix hunk applies at pinned line 1763.
+  `PcfReadEncodingsNames()` spans pinned lines 1719-1771; the changed
+  line is pinned :1750. A dry-run patch applies the hunk at :1747 with
+  offset -13 (not :1763, which is `int gid = map->map[encs[i]];`).
 
 ## Source-bound mechanism (from pinned bytes + fix hunk)
 
@@ -49,12 +50,13 @@ either byte order; `0xffff` is already excluded separately.
 `lab/frontier/fontforge2shell/harness.c` copies
 `PcfReadEncodingsNames()` and the PCF helper functions verbatim from the
 pinned source; only FontForge struct types are reduced to stand-ins and
-`figureProperEncoding()` is stubbed to `-1`. A crafted 18-byte in-memory
+`figureProperEncoding()` is stubbed to `-1`. A crafted 20-byte in-memory
 BDF_ENCODINGS table sets `min2=max2=0x5346`, `min1=0x4d`, `max1=0x50`
 (`tot=4`) and supplies glyph indices 0,1,2; the fourth read hits EOF.
 The fixed line is compiled only under `-DFIXED`, exactly as in the patch.
 
-Measured with gcc 14 `-g -O0` in this lab (2026-11-24 04:38Z):
+Measured with gcc 13.3.0 `-g -O0` in this lab (2026-11-24 04:38Z; gcc-14
+is absent on this host):
 
 - ASan attack: `heap-buffer-overflow`, `WRITE of size 4`, address 4 bytes
   before a 16-byte region, stack `PcfReadEncodingsNames harness.c:126` ←
@@ -66,9 +68,10 @@ Measured with gcc 14 `-g -O0` in this lab (2026-11-24 04:38Z):
   after the negative write hits heap metadata. `evidence/plain-attack.out`.
 - Plain gdb at the line after the loop: `encs[-1] = 0x53494d` and bytes
   `4d 49 53 00` ("MIS\\0") at `encs-4`, allocation at `encs`.
-  `evidence/gdb.txt`. Three bytes are attacker-chosen; the fourth is
-  structurally zero because the pin is `(i+min2)*256 + min1` with 16-bit
-  fields (an honest constraint, not a rung-5 pointer primitive).
+  `evidence/gdb.txt`. Three bytes are attacker-chosen here; the fourth is
+  zero for these field values only — the pinned expression
+  `(i+min2)*256 + min1` can produce a nonzero top byte when `min2` is
+  near 0xffff and `tot` is larger. No pointer primitive is demonstrated.
 
 Reproduce: `cd lab/frontier/fontforge2shell && ./run-all.sh`.
 
@@ -79,20 +82,32 @@ observed heap-accounting failure, ASan-confirmed corruption, chosen bytes
 at a chosen offset before the allocation, with fixed and valid-input
 controls. Rank: high tractability (one-line fix, small parser, tiny
 crafted table), low escalation (local file, UI:P, no network, no pointer
-control, no consumer path measured). This is a staged candidate, not an
-admitted target and not a rung 5.
+control; headless scripting consumer path measured, GUI not). Target admitted
+under standing #6;
+witness-established rungs 1-4 are direct-call only and this is not a rung 5.
 
 ## Ceiling / UNKNOWNs preserved
 
-- The function is static; this harness calls it directly with stand-in
-  structs. No real FontForge build, PCF file loader, GUI `Import()` path
-  or scripting consumer was exercised; real-file reachability is UNKNOWN.
+- The staged harness calls the static function directly with stand-in
+  structs. Separately, a real headless FontForge 20251009 ASan build was
+  driven by a crafted 296-byte PCF through the scripting `Import()` ->
+  `FVImportBDF()` -> `PcfParse()` path (`REACHABILITY.md`): ASan
+  `WRITE of size 4` 4 bytes before `encs` at `fvimportbdf.c:1751`, with
+  patched-build and complete-table controls clean (exit 0, no report).
+  GUI `Import()`, chosen bytes in the real process and other consumers
+  remain UNKNOWN.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
-  study, real-process marker, witness replay or rung 5.
+  study or real-process marker; no rung 5.
 - Author-side clean-archive replay from `e5e4a65` repeated 5/5 expected
   RCs and the same chosen bytes; normalized hash `56fd8ada…5633bb`
-  (`lab/frontier/fontforge2shell/REPLAY.md`). This is not an independent
-  witness verdict.
+  (`lab/frontier/fontforge2shell/REPLAY.md`).
+- Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
+  rungs 1-4 at the labeled direct-call / in-memory truncated-table /
+  stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
+  gdb 15.1; pins and transcript matched; only pid/ASLR/path tokens
+  differed. The witness replay covered the direct-call model only; the
+  real-build path is author-side with no witness verdict. GUI Import(),
+  pointer/IP, command and ASLR remain UNKNOWN.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.
