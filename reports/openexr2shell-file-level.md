@@ -1444,3 +1444,63 @@ four normalized evidence hashes byte-identical to the working tree. Commit
 `5057e7ed` carries the gdb probe, generator-backed check, four evidence files
 and both report sections; this receipt is a separate scoped commit. Author
 replay only, not a witness verdict; grade and rung-5 status unchanged.
+
+
+## W189: heap-layout knobs do not put tcache pointers in the W184 window (2026-11-24)
+
+Prediction and decision: W188 found one live 0x90 tcache head 4288 bytes past
+the destination in UNMODIFIED `exrcheck -c`. Two external layout knobs could
+plausibly move it into `dst+0..dst+384`: argv path length (the Core context
+copies the filename into a heap string, `context.c:169`
+`exr_attr_string_create`) and earlier valid files decoded in the same process
+(each decode allocates and frees chunks before the crafted one). Either could
+give W187's file-chosen COPY2 bytes a real tcache `next` to steer. Both
+predictions failed: no probe ever reported a window hit.
+
+Method: the same pinned W184 PoC (`cases/make_poc_mixed_full.py` with N=64,
+fill 0x5a, U=256, sha256
+`2ab3ea9751736720030d606cd3dd947dd000039da537a47bf822f1f18dd618f7`) was fed
+to `build-vuln-plain/bin/exrcheck -c` under `set disable-randomization on`.
+`harness/tcache-reach.cmd` enumerates glibc 2.39 tcache chains at the sink;
+`harness/tcache-reach2.cmd` is the same probe without `delete 1`, so a
+conditional breakpoint can select a later decode. Both normalize absolute
+addresses and keep offsets relative to `outPtr`.
+
+Path-length sweep: `harness/layout-sweep.py` creates symlinked paths of exact
+length 24, 32, 64, 96, 128, 160, 200, 248, 300, 512, 1024, 2048, 3072 and
+3900 bytes, all resolving to the identical PoC bytes. Every probe printed
+exactly `TCACHE idx=7 size=0x90 n=1 head_off=+4288 hits=[]`, byte-for-byte the
+W188 short-path control. Path length changed no tcache head offset at all in
+this build.
+
+Prior-decode sweep: N=0..8 valid deep-ZSTD baseline files were passed before
+the PoC in one `exrcheck -c` invocation; the breakpoint condition
+`inPtr[0] == 0x5a` selects the PoC's sink. N=0 reproduced W188
+(`head_off=+4288 hits=[]`). For N>=1 the chain layout is deterministic by
+parity: odd N gives `idx=1 +3488`, `idx=7 +3248`, `idx=23 n=3 +832`; even N
+gives `idx=1 -448`, `idx=7 +3248`, `idx=23 n=3 -928` (with stable `idx=2
+-1264` and `idx=6 -1392`). `hits=[]` in every one of the nine probes; the
+nearest live tcache pointer is +832, 448 bytes beyond the 384-byte
+file-chosen window. The full chain walk, not just the head, was checked.
+
+One-command replays: `cd lab/openexr2shell-real && sh
+harness/tcache-layout-sweep.sh` -> `RESULT PASS (no tcache next pointer in
+copy window, 14 path lengths)`, rc 0; `sh harness/tcache-prior-sweep.sh` ->
+`RESULT PASS (no tcache next pointer in copy window, 0..8 prior files)`, rc 0.
+Each runs two byte-stable passes with sha256 comparison; full check-output
+sha256 `3cd9b99f9ac5a5471d03c189a46dcd7d3db74a8d514f578e026612ef5ecd6ea8`
+(layout) and
+`659a6cba9d1842f0fb798ddbf685c6cba4a58ff566fb371ca0d3437bd1d9d774` (prior),
+aggregate evidence sha256
+`a743fea9b0b731c57c0a83dd00009c5dae9e9dd05aecc31f1f412e96b47ff418` over 26
+normalized probe files and two summaries. Both checks fail on any future
+window hit.
+
+Ceiling and disposition: one pinned build, one PoC fill byte, ASLR off, gdb
+observation only. Path length and prior-file count are lab knobs, not
+file-supplied bytes or wire input; other keep/recycle layouts, builds and
+consumers remain UNKNOWN. Keep W188's negative and extend its boundary to
+these two knobs. No code pointer or IP, no command, marker, socket or wire,
+no witness verdict, no rung-5 claim. Would change my mind: a nonempty `hits`
+in an unmodified consumer, a chosen code pointer/IP, a wire-fed affected
+process, or a witness counterexample.

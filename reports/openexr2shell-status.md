@@ -527,3 +527,31 @@ matched the working tree from `git archive 22a8eeec` with gitignored pinned
 source/build/bin trees symlinked. Author replay, not a witness verdict;
 grade unchanged.
 
+
+
+## W186-W189 (2026-11-24): preserved negatives, layout ceiling
+
+This section brings the status report current through W189; the earlier
+W186/W187/W188 sections were recorded only in
+`reports/openexr2shell-file-level.md`.
+
+- W186: in unmodified `exrcheck -c` the surviving file-chosen copy reaches a
+  live adjacent malloc chunk header, but eight tested size words all give the
+  same outcome; argv length, not the chosen word, decides between two aborts.
+- W187: a purpose-built `-no-pie` harness with explicit tcache grooming lets
+  file-chosen bytes replace a freed chunk's `next` and steer a later malloc
+  address exactly. Rung-4 allocation-address datum only; not control flow.
+- W188: in unmodified `exrcheck -c` no tcache user pointer lies in the
+  384-byte chosen-byte window; the only live tcache head is 4288 bytes past
+  the destination.
+- W189: 14 argv path lengths leave that head unmoved at +4288; 0..8 earlier
+  valid files decoded in the same process give only two deterministic
+  layouts (nearest tcache pointer +832), with no window hit. Both one-command
+  replays print `RESULT PASS` twice, byte-stably.
+
+Grade unchanged: file-level rungs 1-4 plus W158 direct-call and W187
+harness rung-4 mechanics. Witness ESTABLISHED covers W158 and W161 only;
+W164/W169/W178/W179/W180/W181/W182/W184/W185/W186/W187/W188/W189 remain
+UNVERDICTED. Rung 5 stays UNKNOWN: no wire-fed affected process, no chosen
+code pointer/IP, no command or marker side effect. Full evidence and replay
+hashes: `reports/openexr2shell-file-level.md` W186-W189.

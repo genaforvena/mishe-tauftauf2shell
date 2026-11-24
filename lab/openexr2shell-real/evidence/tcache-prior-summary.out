@@ -1,0 +1,50 @@
+=== N=0
+TCACHE idx=7 size=0x90 n=1 head_off=+4288 hits=[]
+=== N=1
+TCACHE idx=1 size=0x30 n=1 head_off=+3488 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=+832 hits=[]
+=== N=2
+TCACHE idx=1 size=0x30 n=1 head_off=-448 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=-928 hits=[]
+=== N=3
+TCACHE idx=1 size=0x30 n=1 head_off=+3488 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=+832 hits=[]
+=== N=4
+TCACHE idx=1 size=0x30 n=1 head_off=-448 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=-928 hits=[]
+=== N=5
+TCACHE idx=1 size=0x30 n=1 head_off=+3488 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=+832 hits=[]
+=== N=6
+TCACHE idx=1 size=0x30 n=1 head_off=-448 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=-928 hits=[]
+=== N=7
+TCACHE idx=1 size=0x30 n=1 head_off=+3488 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=+832 hits=[]
+=== N=8
+TCACHE idx=1 size=0x30 n=1 head_off=-448 hits=[]
+TCACHE idx=2 size=0x40 n=1 head_off=-1264 hits=[]
+TCACHE idx=6 size=0x80 n=1 head_off=-1392 hits=[]
+TCACHE idx=7 size=0x90 n=1 head_off=+3248 hits=[]
+TCACHE idx=23 size=0x190 n=3 head_off=-928 hits=[]
