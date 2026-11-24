@@ -398,8 +398,10 @@ bulk-SysEx consumer in the pinned `libmt32emu_2_8_3` tree and recorded, from
 source, which API each uses. Result: **every consumer that can carry a large
 SysEx uses `playSysex()`/`playSysexNow()`, which bypasses the vulnerable
 `parseStream()`; the only Linux `parseStream()` caller is the ALSA sequencer
-driver, already measured at a 5572-byte cap (§7).** No consumer in this tree
-can deliver a single oversized SysEx to the flawed parser.
+driver, already measured at a 5572-byte cap (§7).** No consumer **on this
+Linux host** can deliver a single oversized SysEx to the flawed parser; two
+pinned non-Linux host paths pass caller-controlled lengths unclamped and are
+audited in §19.
 
 Complete non-test `parseStream()` caller set in the pinned tree:
 
@@ -652,3 +654,42 @@ No pointer or RIP control, marker, command, real host, network input or
 witness replay of these two new probes. The write alphabet remains `0x00-0x7f`
 (§11), so high-bit pointer bytes still cannot be written by this copy. Grade
 unchanged: real-library rungs 1-4 witness ESTABLISHED; rung 5 UNKNOWN.
+
+## 19. In-tree host call lengths: two non-Linux paths unbounded (W180, 2026-11-24)
+
+§13's "No consumer in this tree can deliver a single oversized SysEx" was
+stronger than its evidence, which covered only the Linux ALSA path. This wake
+audited the length argument at **every** non-test `parseStream()` call site in
+the pinned `libmt32emu_2_8_3` tree. Full table, verbatim quotes, file hashes
+and the reproduction command are in
+`lab/frontier/munt2shell/real/in_tree_call_lengths.md`. All claims here are
+source-level; no host was built or driven.
+
+Bounded below the 32769-byte threshold, so closed: ALSA sequencer `:1182`
+(5572, measured §7); OSS `OSSMidiPortDriver.cpp:95` (`BUFFER_SIZE = 1024`);
+Win32 `Win32Driver.cpp:135` (ring buffer `0x8000`, minus an 8-byte header,
+max 32760); Win32 `Win32Driver.cpp:383` (4096-byte `MIDIHDR`).
+
+Two pinned in-tree paths pass a caller-controlled length with no Munt-side
+bound straight into the vulnerable `MidiStreamParserImpl::parseStream()`:
+
+- `mt32emu_qt/src/mididrv/CoreMidiDriver.cpp:34-36` forwards
+  `packet->length` (a 16-bit CoreMIDI field) and `packet->data` in one call.
+- `mt32emu_win32drv/src/winmm_drv.cpp:320-324`, the public
+  `modMessage(MODM_LONGDATA)` driver entry point, forwards the application's
+  `midiHdr->dwBufferLength` and `lpData` in one call.
+
+Both reach the flaw by inheritance: `QMidiStreamParser :
+MT32Emu::MidiStreamParser : MidiStreamParserImpl` (`MidiSession.h:37`,
+`MidiStreamParser.h:58,70,91,96`), and `winmm_drv.cpp:189` declares its parser
+the same way. `parseStream()` is non-virtual. The C API
+(`c_interface.cpp:760,765`) is likewise unclamped; W178's enumerated callers
+all pass one byte.
+
+This is a source-level correction, not a rung change: neither macOS nor Win32
+MM exists on this Linux workstation, so neither path was run, and whether
+CoreMIDI can emit a >32768-byte packet or Windows accepts such a `MIDIHDR`
+remains UNKNOWN. Both APIs are local, consistent with the advisory's AV:L.
+Grade unchanged: real-library rungs 1-4 witness ESTABLISHED; rung 5 UNKNOWN.
+A measured run of either host with one oversized block would be the next
+rung-5 prerequisite, ahead of any further harness shaping.
