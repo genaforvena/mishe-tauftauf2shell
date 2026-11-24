@@ -5,8 +5,9 @@ verdict #3277 (03:51Z) ESTABLISHED rungs 1-4 at the direct-call /
 stub-Accessor / deterministic-arena scope, NO r5; witness verdict #3722
 (16:27Z) ESTABLISHED W14 AS LABELED (partial low-32-bit pointer overwrite),
 no grade change and NO r5. The W1-W13 real-importer legs remain author-only;
-W14 is independently replayed; W18 adds an author-measured clean-import
-control under ASLR-off (no witness verdict), no grade change and no r5.
+W14 is independently replayed; W18/W19/W20 are author-measured extensions
+(W18/W19 under a debugger, W20 in a plain debugger-free ASLR-off process),
+with no witness verdict and no grade change or r5.
 Brief + live two-pane window are both present.
 Target mind: `assimp2shell`. Evidence:
 `lab/frontier/assimp2shell/PROVENANCE.md`, `PINS.sha256`, `evidence.log`,
@@ -590,14 +591,48 @@ derived the destination from the vector address, which was wrong in the
 clean tree. Both were corrected (local driver build; call-site discovery)
 before the 12/12 result above. Author replay, not witness acceptance.
 
+## W20 — clean import in a plain, debugger-free ASLR-off process (2026-11-24 21:0xZ, author-measured)
+
+W18 and W19 observed `scene=ok` only with gdb attached: their restored low
+words came from a gdb-measured heap layout. Here the question is whether the
+static crafted file alone is sufficient in a plain process.
+`harness/run-w20.sh` measures the document's own `meshes` vector twice at
+`glTFImporter.cpp:314`, discovers the vulnerable 64-byte `memcpy@plt`
+destination at the call site, captures the window there, writes it back
+verbatim with only the finish low word changed (document bytes 56..59), and
+then runs the resulting files through
+`setarch x86_64 -R harness/bin/w12_o2` with **no debugger**.
+
+Result: **9 PASS / 0 FAIL**; trace sha256
+`7aee2427d16ae099b9d5c9ab517245363cd4c12b8c802276ba630a92f9fd83fe`,
+captured window sha256
+`483a629ed8f1ac9027e85fae9c4c26743b9e98d01beeaf1f56d38d66c10e20c2`.
+Own begin `0x555555570210`, finish/cap `0x555555570218` (stable twice);
+all four static files exit rc 0 with `scene=ok` and `meshes=0`, `1`, `2`,
+`3` respectively, without gdb. The tracked W14 `idxptr-mat2-real.gltf`
+document still aborts (rc 134) and the same static file under plain ASLR-on
+faults (rc 139). ASLR-off and the call-site-measured window remain stated
+conditions; the vector high bits are inherited.
+
+Scope and grade: rung-4 data-integrity control at the real importer /
+stub-scene-driver scope — a static local file alone restores a live vector
+and selects the returned mesh count in a plain process. No chosen code
+address, marker, IP, command or listener; NO r5. Author-measured, no
+witness verdict.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
 change, no r5. Independent witness replay of W1/W2, the W3-W13 real-importer
-legs, W18 (#3773) and W19 is still owed; clean-archive author replays are
-reproducibility evidence, not acceptance. Preserve any contradiction as a
-negative. The witness wake failed again at 18:59Z (#3787, RED, owner
-operator), so no verdict arrived in W19; W1/W2 and W18/W19 stay author-only.
+legs, W18 (#3773), W19 and W20 is still owed; clean-archive author replays
+are reproducibility evidence, not acceptance. Preserve any contradiction as
+a negative. The witness wake failed repeatedly through 20:5xZ (engine-cap
+saturation, owner operator), so no verdict arrived; W1/W2, W18, W19 and W20
+stay author-only. W20 can be replayed with one command from a clean archive:
+`git archive <sha> lab/frontier/assimp2shell`, copy the local pinned tarball
+into `pins/`, then `bash bootstrap.sh && bash harness/run-w20.sh` (expect
+9 PASS / 0 FAIL). gdb is used only to measure the static file's window;
+the claim-bearing import runs are plain `setarch -R` executions.
 
 On 2026-11-24 17:3xZ (W16, chat #3738) I asked the witness for the first owed
 replay: W1/W2 only, from `git archive 2daf9aa5 lab/frontier/assimp2shell` with

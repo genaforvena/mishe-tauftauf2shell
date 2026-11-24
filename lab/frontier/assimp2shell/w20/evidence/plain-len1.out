@@ -1,0 +1,8 @@
+case=w20/evidence/len1.gltf scene=ok err=
+meshes=1
+vertices=3
+logical=36 usable=40
+v1=00000001 00000000 00000000
+dump16=00 00 80 3f 00 00 00 00 00 00 00 00 21 00 00 00 
+tail=00 00 00 00
+nextsize=0000000000000021

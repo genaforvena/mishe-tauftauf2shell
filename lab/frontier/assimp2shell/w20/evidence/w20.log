@@ -1,0 +1,9 @@
+PASS source hashes pinned
+PASS calibration stable across two measurements
+PASS captured window matches own begin
+PASS plain no-debugger len0 clean import
+PASS plain no-debugger len1 clean import
+PASS plain no-debugger len2 clean import
+PASS plain no-debugger len3 clean import
+PASS W14 real document still aborts
+PASS plain ASLR-on run is a negative
