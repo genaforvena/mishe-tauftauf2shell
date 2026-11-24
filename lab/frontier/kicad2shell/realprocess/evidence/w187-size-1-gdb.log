@@ -1,0 +1,123 @@
+Python Exception <class 'AttributeError'>: module '_thread' has no attribute 'start_joinable_thread'
+gdb: warning: 
+Could not load the Python gdb module from `/usr/share/gdb/python'.
+Limited Python support is available from the _gdb module.
+Suggest passing --data-directory=/path/to/gdb/data-directory.
+Python Exception <class 'AttributeError'>: module '_thread' has no attribute 'start_joinable_thread'
+Python Exception <class 'AttributeError'>: module '_thread' has no attribute 'start_joinable_thread'
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Python Exception <class 'AttributeError'>: module '_thread' has no attribute 'start_joinable_thread'
+[New Thread 0x7fffe4fff6c0 (LWP 727730)]
+[New Thread 0x7fffdc5ff6c0 (LWP 727731)]
+[New Thread 0x7fffdffff6c0 (LWP 727732)]
+[New Thread 0x7fffdd9ff6c0 (LWP 727911)]
+[New Thread 0x7fffdd1fe6c0 (LWP 727933)]
+[New Thread 0x7fffdbdfe6c0 (LWP 727934)]
+[New Thread 0x7fffdb5fd6c0 (LWP 727935)]
+[New Thread 0x7fffdadfc6c0 (LWP 727936)]
+[New Thread 0x7fffda5fb6c0 (LWP 727937)]
+[New Thread 0x7fffd9dfa6c0 (LWP 727938)]
+[New Thread 0x7fffd95f96c0 (LWP 727939)]
+[New Thread 0x7fffd8df86c0 (LWP 727940)]
+[New Thread 0x7fffb3fff6c0 (LWP 727941)]
+[New Thread 0x7fffb37fe6c0 (LWP 727942)]
+[New Thread 0x7fffb2ffd6c0 (LWP 727943)]
+[New Thread 0x7fffb27fc6c0 (LWP 727944)]
+[New Thread 0x7fffb1ffb6c0 (LWP 727945)]
+[New Thread 0x7fffb17fa6c0 (LWP 727946)]
+[New Thread 0x7fffb0ff96c0 (LWP 727947)]
+[New Thread 0x7fff8ffff6c0 (LWP 727948)]
+[New Thread 0x7fff8f7fe6c0 (LWP 727949)]
+[New Thread 0x7fff8effd6c0 (LWP 727950)]
+[New Thread 0x7fff8e7fc6c0 (LWP 727951)]
+[New Thread 0x7fff8dffb6c0 (LWP 727952)]
+[New Thread 0x7fff8d7fa6c0 (LWP 727953)]
+[New Thread 0x7fff8cff96c0 (LWP 727954)]
+[New Thread 0x7fff6bfff6c0 (LWP 727955)]
+[New Thread 0x7fff635ff6c0 (LWP 727956)]
+[New Thread 0x7fff6b7fe6c0 (LWP 727957)]
+[New Thread 0x7fff6affd6c0 (LWP 727958)]
+[New Thread 0x7fff6a7fc6c0 (LWP 727959)]
+[New Thread 0x7fff69ffb6c0 (LWP 727960)]
+[New Thread 0x7fff697fa6c0 (LWP 727961)]
+[New Thread 0x7fff68ff96c0 (LWP 727962)]
+[New Thread 0x7fff63fff6c0 (LWP 727963)]
+[New Thread 0x7fff62dfe6c0 (LWP 727964)]
+[New Thread 0x7fff625fd6c0 (LWP 727965)]
+[New Thread 0x7fff61dfc6c0 (LWP 727968)]
+[Detaching after vfork from child process 727976]
+[Detaching after vfork from child process 727978]
+[Detaching after vfork from child process 727980]
+[Detaching after vfork from child process 727982]
+[Detaching after vfork from child process 727984]
+[New Thread 0x7fff2b7ff6c0 (LWP 734927)]
+[New Thread 0x7fff23fff6c0 (LWP 734933)]
+[Thread 0x7fff23fff6c0 (LWP 734933) exited]
+[New Thread 0x7fff2affe6c0 (LWP 734934)]
+[Thread 0x7fff2b7ff6c0 (LWP 734927) exited]
+[Thread 0x7fff2affe6c0 (LWP 734934) exited]
+[New Thread 0x7fff2a7fd6c0 (LWP 734935)]
+[Thread 0x7fff2a7fd6c0 (LWP 734935) exited]
+[New Thread 0x7fff29ffc6c0 (LWP 734936)]
+[Thread 0x7fff29ffc6c0 (LWP 734936) exited]
+[New Thread 0x7fff297fb6c0 (LWP 734937)]
+[Thread 0x7fff297fb6c0 (LWP 734937) exited]
+[New Thread 0x7fff28ffa6c0 (LWP 734938)]
+[Thread 0x7fff28ffa6c0 (LWP 734938) exited]
+[New Thread 0x7fff237fe6c0 (LWP 734939)]
+[Thread 0x7fff237fe6c0 (LWP 734939) exited]
+[New Thread 0x7fff22ffd6c0 (LWP 734940)]
+[Thread 0x7fff22ffd6c0 (LWP 734940) exited]
+[New Thread 0x7fff227fc6c0 (LWP 734941)]
+[Thread 0x7fff227fc6c0 (LWP 734941) exited]
+[New Thread 0x7fff21ffb6c0 (LWP 734942)]
+[Thread 0x7fff21ffb6c0 (LWP 734942) exited]
+[New Thread 0x7fff217fa6c0 (LWP 734943)]
+[Thread 0x7fff217fa6c0 (LWP 734943) exited]
+[New Thread 0x7fff20ff96c0 (LWP 734944)]
+[Thread 0x7fff20ff96c0 (LWP 734944) exited]
+[New Thread 0x7fff1bfff6c0 (LWP 734945)]
+[Thread 0x7fff1bfff6c0 (LWP 734945) exited]
+[New Thread 0x7fff1b7fe6c0 (LWP 734946)]
+[Thread 0x7fff1b7fe6c0 (LWP 734946) exited]
+[New Thread 0x7fff1affd6c0 (LWP 734947)]
+[Thread 0x7fff1affd6c0 (LWP 734947) exited]
+[Thread 0x7fff61dfc6c0 (LWP 727968) exited]
+[New Thread 0x7fff61dfc6c0 (LWP 738973)]
+[New Thread 0x7fff1affd6c0 (LWP 738974)]
+[New Thread 0x7fff1b7fe6c0 (LWP 738975)]
+[New Thread 0x7fff1bfff6c0 (LWP 739022)]
+[New Thread 0x7fff297fe6c0 (LWP 739181)]
+[Thread 0x7fff1b7fe6c0 (LWP 738975) exited]
+[Thread 0x7fff61dfc6c0 (LWP 738973) exited]
+[Thread 0x7fff1affd6c0 (LWP 738974) exited]
+[New Thread 0x7fff1affd6c0 (LWP 741271)]
+[New Thread 0x7fff61dfc6c0 (LWP 741272)]
+[New Thread 0x7fff1b7fe6c0 (LWP 741273)]
+[Thread 0x7fff1affd6c0 (LWP 741271) exited]
+[Thread 0x7fff1b7fe6c0 (LWP 741273) exited]
+[Thread 0x7fff297fe6c0 (LWP 739181) exited]
+
+Thread 1 "eeschema" received signal SIGSEGV, Segmentation fault.
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+0x00007fffdf0ea3aa in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+Python Exception <class 'AttributeError'>: module '_thread' has no attribute 'start_joinable_thread'
+#0  0x00007fffdf0ea3aa in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+#1  0x00007fffde6f2145 in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+#2  0x00007fffde6f525c in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+#3  0x00007fffde6f63ef in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+#4  0x00007fffde6f65d9 in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+#5  0x00007fffdece6a1d in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+#6  0x00007fffdeeb5dfc in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+#7  0x00007fffdf2e98c1 in make_fcontext () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/kicad2shell/provisioned/apt-kicad8/usr/bin/_eeschema.kiface
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing
+#8  0x0000000000000000 in ?? ()
+Python Exception <class 'NameError'>: Installation error: gdb._execute_unwinders function is missing

@@ -426,3 +426,38 @@ controls. No symbol was committed to the target library, no pointer or
 control-flow target was observed, no marker, wire delivery or witness replay
 of this lane. The corrupted word still lands in allocator metadata / ASan
 redzone. **Rung 5 remains UNKNOWN.**
+
+## 17. A second file-reachable offset: `Size-1` in a real process (W187)
+
+The earlier `SizeZ` (`ind = 0`) store hits `data()-4`, the **upper** half of
+the 64-bit glibc chunk size word; the resulting size is a multiple of 2^32,
+far larger than the heap, so glibc always aborts with `double free or
+corruption (out)`. `Size-1` (`ind = -1`) instead writes at `data()-8`, the
+**low** half of that word. With the measured KiCad 8.0.8 scale
+(`trunc(7.2 * 9) * 254 = 0x3f80`), the size becomes a small, aligned, in-heap
+value and PREV_INUSE is cleared. Earlier lanes had observed this offset only
+with a stubbed scale (plain exits 0) or with an empty vector (SEGV).
+
+A new `lowindex/` lane rebuilds the shared verbatim pins with the measured
+scale. gcc and clang ASan report `WRITE of size 4`, `8 bytes before a 4-byte
+region`, pinned `:5919`; both vulnerable plain builds abort with `double free
+or corruption (!prev)`; both fixed builds skip the key and exit clean.
+`lowindex/check.sh`: **41 PASS / 0 FAIL**, trace
+`999e6733e903364be0f7bd8ded350c0ac979fff5d9b2fe837d27e05794264796`.
+
+The same key was made reachable in the real process: a 13-byte same-length
+patch of the vendor CFB `FileHeader` stream changes `SizeZ=138889|` to
+`Size-1=9|||||`. Native KiCad 8.0.8 under Xvfb receives `SIGSEGV` in a real
+`_eeschema.kiface` frame; a matched control changing only the key to
+`Size1=9` stays alive with no fault marker. Logs, fixtures, four hashes and
+`realprocess/real-check-w187.sh` (**9 PASS / 0 FAIL**) are in
+`lab/frontier/kicad2shell/lowindex/PROVENANCE-lowindex.md` and
+`realprocess/`.
+
+This is a second distinct real-process fault mode for a file-chosen negative
+index, not a survivable corruption. Every scale produced by the formula is
+even, so PREV_INUSE is always cleared; combining `ind=-3` with `ind=-1` would
+still meet glibc's safe-unlink checks on a normal heap, and no such
+combination was executed. No ASan vendor build, consumer read, pointer or
+control-flow target, marker, wire delivery or witness replay of this lane.
+**Rung 5 remains UNKNOWN.**

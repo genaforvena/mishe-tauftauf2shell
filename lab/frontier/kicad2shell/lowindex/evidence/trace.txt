@@ -1,0 +1,17 @@
+g++-vuln-plain baseline clean
+g++-vuln-plain low glibc-prev-inuse-corruption
+g++-vuln-asan baseline clean
+g++-vuln-asan low ASAN-WRITE4-8BEFORE-5919
+g++-fixed-plain baseline clean
+g++-fixed-plain low fixed clean
+g++-fixed-asan baseline clean
+g++-fixed-asan low fixed clean
+clang++-vuln-plain baseline clean
+clang++-vuln-plain low glibc-prev-inuse-corruption
+clang++-vuln-asan baseline clean
+clang++-vuln-asan low ASAN-WRITE4-8BEFORE-5919
+clang++-fixed-plain baseline clean
+clang++-fixed-plain low fixed clean
+clang++-fixed-asan baseline clean
+clang++-fixed-asan low fixed clean
+four pinned consumers guarded

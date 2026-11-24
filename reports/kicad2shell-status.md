@@ -163,14 +163,13 @@ adopted with no duplicate. Pinned full-flag doctor rc 0 GREEN;
 Next for the target mind: the file-reachability gap is closed — a real KiCad
 8.0.8 process reaches `ParseLibHeader` and crashes on hostile vendor bytes,
 and the four overwritten bytes are now file-selected in that process. The
-missing control is a **fixed-build real-process replay** (KiCad 10.0.7+ has
-the guard; the 10.0.6 AppImage GUI stalled in W181, so this is not a cheap
-win). Only an observed pointer or control-flow target would justify a bounded
-benign-marker attempt with vulnerable, fixed and safe-input controls and a
-NEW witness replay: #2996 covers only rungs 1-4 at the synthetic-CFB scope
-and the W182/W183 real-process lane has no verdict yet. Keep the guarded
-consumer-read negative and the two distinct real-process fault modes as
-preserved observations. The author report is never acceptance of a new claim.
+fixed-build control gap was closed in W186 (below). Only an observed pointer
+or control-flow target would justify a bounded benign-marker attempt with
+vulnerable, fixed and safe-input controls and a NEW witness replay: #2996
+covers only rungs 1-4 at the synthetic-CFB scope and the W182/W183/W187
+real-process lanes have no verdict yet. Keep the guarded consumer-read
+negative and the three distinct real-process fault modes as preserved
+observations. The author report is never acceptance of a new claim.
 
 W184 tried that control with the official fixed 10.0.8 PPA binary: the editor
 loads with all vendor libraries resolved, but the first-run wizard and a
@@ -191,3 +190,20 @@ Evidence and replay check (`PASS=10 FAIL=0`, trace
 `8229bcd8bfdda107783efd2e1fce5d30707c17811ea3dbc91ce299ecd5733386`) are in
 `realprocess/PROVENANCE-fixed-control.md` and
 `realprocess/fixed-control-check.sh`; report section 16 has the scope.
+
+W187 added a second file-reachable negative index. `Size-1=9` in the vendor
+CFB `FileHeader` (13-byte same-length patch at 0x2ae) writes the **low** half
+of the glibc chunk size word (`0x3f80` with the measured KiCad scale), unlike
+the `SizeZ` upper-half write with size >= 2^32. New `lowindex/` lane: gcc and
+clang ASan show `WRITE of size 4` 8 bytes before the region at pinned `:5919`,
+both vulnerable plain builds abort with `double free or corruption (!prev)`,
+both fixed builds are clean; `check.sh` PASS=41 FAIL=0, trace
+`999e6733e903364be0f7bd8ded350c0ac979fff5d9b2fe837d27e05794264796`. In a
+real KiCad 8.0.8 process the patched file gives SIGSEGV in `_eeschema.kiface`,
+while a matched `Size1=9` control stays alive with no fault marker; hashes and
+logs in `realprocess/PINS-w187.sha256`, `realprocess/evidence/w187-*`,
+`realprocess/real-check-w187.sh` PASS=9 FAIL=0. No ASan vendor build, consumer
+read, pointer/control-flow target, marker, wire delivery or witness replay;
+rung 5 UNKNOWN. Report section 17 and
+`lowindex/PROVENANCE-lowindex.md` carry the ceiling and the preserved negative
+results (the `SIZE+` parsing mistake and the scale-rounding artifact).
