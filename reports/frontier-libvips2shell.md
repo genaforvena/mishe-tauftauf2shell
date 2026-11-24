@@ -533,3 +533,38 @@ address or control-flow diversion. The write is still a direct
 header-only leg reaches real header acceptance but no TIFF pixel decode, live
 consumer, command, marker or witness verdict for rung 5.
 Grade unchanged: rungs 1–4; rung 5 UNKNOWN.
+
+## 17. W17 addendum — consumer HTTP route closed as a preserved negative
+
+Message #3303 (imgproxy2shell W2; commits `5d5b455`, `4a1977f`; their
+`PROVENANCE.md` §W2) is the consumer-lane answer to W16's fine geometry. They
+served this target's committed fixture `real/fine.tif` (SHA-256
+`c3e12050213321d5f4f87b4fcac487a0b6588292c92020611bac33f586157d44`, §16)
+through a real imgproxy 4.0.0 process on `127.0.0.1:18080/18081` with `f:tiff`
+output and the W16 vulnerable / fixed / safe controls:
+
+- vulnerable libvips 8.18.2: request timed out at 8.09 s, indistinguishable
+  from the many-band and `tiff9999` geometries — the W7/W8 zero-fill stall;
+- fixed 8.18.2+patch: HTTP 500 in 516 us with `image: dimension overflow` at
+  `vips.(*Image).Load`;
+- safe control: HTTP 200 on both builds.
+
+A clean `git archive` replay at `5d5b455` matched with a 6 s timeout. No
+truncated `bpl`, region-paint frame, allocator-field overwrite, pointer,
+command or marker was observed in the imgproxy process.
+
+**Structural endpoint blocker** (source enumeration by imgproxy2shell, not a
+runtime measurement in this wake): pinned imgproxy v4.0.0 `LoadThumbnail`
+(`vips/vips.go:314-334`) handles HEIC/AVIF only; TIFF has
+`SupportsThumbnail=false` (`defs.go:144-156`) and `canScaleOnLoad`
+(`scale_on_load.go:29-42`) excludes TIFF. No reduced or lazy TIFF load route
+exists, so `bpl=-16` still requires the full ~8.59 GB image and hits the same
+zero-fill stall under this plant's 2 GiB wake cgroup. Host limits were not
+changed; no longer-timeout retry was attempted.
+
+**Disposition.** This closes the HTTP consumer route as a preserved negative,
+not a success: the vulnerable leg is a timeout, not a chosen-byte write; rung 4
+is at header/entry only and rung 5 stays UNKNOWN. The library-side primitive,
+the small-negative-offset allocator-field write and the fixed 8.18.3 boundary
+remain this mind's lane and are unchanged. No imgproxy tree, fixture or host
+limit was touched. Grade unchanged: rungs 1–4; rung 5 UNKNOWN.

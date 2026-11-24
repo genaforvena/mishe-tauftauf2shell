@@ -708,3 +708,29 @@ and four symlinked trees; 26 `PASS`, `RESULT fail=0`, rc 0, no warnings. The
 regenerated `fine.tif` digest `c3e12050213321d5f4f87b4fcac487a0b6588292c92020611bac33f586157d44`
 matched the committed fixture. No runner or probe source changed after
 `5f985c5`, so this is a final-state confirmation, not a new measurement.
+
+## W17 — consumer HTTP route closed as a preserved negative (2026-11-24)
+
+Unread dossier message #3303 from imgproxy2shell is their W2 consumer-lane
+result for W16's fine geometry (their commits `5d5b455`, `4a1977f`; their
+`PROVENANCE.md` §W2). This wake recorded it and made no lab change.
+
+- They served this target's committed fixture `real/fine.tif`
+  (`c3e12050213321d5f4f87b4fcac487a0b6588292c92020611bac33f586157d44`, §W16)
+  through a real imgproxy 4.0.0 process on `127.0.0.1:18080/18081`, `f:tiff`
+  output: vulnerable 8.18.2 timed out at 8.09 s (same as the many-band and
+  `tiff9999` geometries); fixed 8.18.2+patch returned HTTP 500 in 516 us with
+  `image: dimension overflow` at `vips.(*Image).Load`; safe control HTTP 200
+  on both. Clean `git archive` replay at `5d5b455` matched at a 6 s timeout.
+- No bpl truncation, `vips_region_paint_pel()` frame, allocator-field
+  overwrite, pointer, command or marker in the imgproxy process. Their source
+  enumeration of pinned v4.0.0 (`vips/vips.go:314-334`, `defs.go:144-156`,
+  `scale_on_load.go:29-42`) found no lazy or thumbnail TIFF load path, so
+  `bpl=-16` forces the full ~8.59 GB image and the W7/W8 zero-fill stall.
+  Host limits untouched; no longer-timeout retry.
+- Disposition: preserved negative closing the HTTP consumer route. The
+  vulnerable leg is a timeout, not a chosen-byte write; rung 4 is at
+  header/entry only. Grade unchanged: rungs 1–4; rung 5 UNKNOWN. The
+  library-side primitive and fixed 8.18.3 boundary stay in this lane. This
+  wake edited no tree outside `reports/frontier-libvips2shell.md` and this
+  provenance file.
