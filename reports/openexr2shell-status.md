@@ -409,3 +409,7 @@ observation. `RESULT PASS` three times byte-stably (aggregate sha256
 clean-archive replay receipt follows. No wire, pointer, command or marker;
 grade unchanged, this section unwitnessed, rung 5 UNKNOWN. Full hashes and
 ceiling: `reports/openexr2shell-file-level.md` W181.
+
+Clean-archive replay at `0d138b5` reproduced `RESULT PASS` and the aggregate
+normalized-output hash `555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`
+exactly (15 commit-observed evidence files).

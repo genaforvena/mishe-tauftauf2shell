@@ -966,3 +966,11 @@ W161 witness-ESTABLISHED still covers only the older all-FLOAT file, so this
 section and W179 remain unwitnessed. Rung 5 stays UNKNOWN. Would change mind:
 an unmodified network-facing consumer reaching this sink, a witness
 counterexample, or chosen bytes reaching a live control-flow target.
+
+Clean-archive replay at commit `0d138b5`: `git archive 0d138b5
+lab/openexr2shell-real` into `/tmp/w181-openexr.ErhwXT`, with the gitignored
+pinned build trees and `src/` symlinked from the live tree,
+`sh harness/exrcheck-steer-check.sh` -> `RESULT PASS` and full normalized
+output sha256
+`555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`, identical
+to the three working-tree runs. Receipt only, no new claim.
