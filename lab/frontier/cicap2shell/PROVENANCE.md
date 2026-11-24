@@ -83,4 +83,6 @@ recording raw output under gitignored `evidence/` and `.rc` files, summary in
   report, so that negative is preserved here rather than claimed as a pass.
 - The advisory is `AV:N` but this lab exercises a parsed header string, not
   a network socket; wire reach stays UNKNOWN.
-- Witness replay requested in chat #3733; no verdict yet (UNKNOWN, not a pass).
+- Witness replay #3733 returned ESTABLISHED AS LABELED (#3753): clean archive
+  `58435874`, 19 PASS / 0 FAIL, hash pins and source-bound guard verified,
+  sixth-entity wire value steers the aliased slot; no grade change, no r5.

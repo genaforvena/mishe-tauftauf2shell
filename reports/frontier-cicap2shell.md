@@ -94,4 +94,5 @@ destroy the request; observe the same `process_encapsulated` ->
 `ci_request_destroy` UAF/double free, with a 0.6.6 build and a four-entity
 request as controls. If that reproduces, put a loopback `icap-server` in
 front of it and replay the header from a local client for a wire-visible
-rung 4. Request witness replay before claiming more.
+rung 4. Witness replay (#3753) returned ESTABLISHED AS LABELED: clean-archive
+`58435874` replay 19 PASS / 0 FAIL, no contradiction, no grade change, no r5.
