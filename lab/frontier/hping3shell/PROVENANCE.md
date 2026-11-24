@@ -51,7 +51,9 @@ gcc -o plain/harness plain/display_ipopt.o plain/harness.o
 
 Each case runs as `asan/harness <attack|attack2|safe|safe-zero>` or
 `plain/harness <attack|attack2|safe>`; stdout+stderr and rc are captured in
-`evidence/<case>.out`. Final in-tree run: 12 PASS / 0 FAIL, rc 0.
+`evidence/<case>.out`. Final in-tree run: 12 PASS / 0 FAIL, rc 0. A clean
+`git archive 7ec6a3bd lab/frontier/hping3shell | tar x -C /tmp/w212-hping`
+replay also gave 12 PASS / 0 FAIL, rc 0.
 
 ## Observed results (exact values)
 

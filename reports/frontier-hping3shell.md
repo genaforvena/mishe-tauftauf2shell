@@ -49,7 +49,9 @@ applies that hunk to the verbatim source without editing the vulnerable pin.
 
 `sh run.sh` rechecks the pin hashes, applies the fix patch, builds ASan and
 plain binaries from verbatim copies under `standin/`, and runs 12 checks:
-**12 PASS / 0 FAIL**, rc 0. Raw output in `evidence/*.out`.
+**12 PASS / 0 FAIL**, rc 0 in-tree and from a clean `git archive 7ec6a3bd
+lab/frontier/hping3shell | tar x -C /tmp/w212-hping` replay. Raw output in
+`evidence/*.out`.
 
 - `asan/harness attack`: crafted RR length 255, pointer `0x48` → `i = 68`;
   ASan `global-buffer-overflow`, `WRITE of size 68`, frame
