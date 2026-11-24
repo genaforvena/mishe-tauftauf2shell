@@ -527,13 +527,54 @@ Raw trace sha256 in the clean tree is
 Author replay only, not witness acceptance; clean-room replays need the
 gitignored driver built (`run-w12.sh`) or copied in locally.
 
+## W19 — chosen scene mesh count through the live vector length (2026-11-24 19:1xZ, author-measured)
+
+W18 restored only `begin` with a 16-byte MAT2 index write. With a MAT4 index
+the same overflow covers 64 destination bytes; in the pinned gcc -O2 plain
+frame those map, in order, to `meshes.begin()` (document bytes 48..55),
+`meshes.finish()` (56..63), `meshes.cap()` (64..71) and other locals
+`harness/run-w19.sh` captures the exact 64 bytes at the vulnerable
+`memcpy@plt` call (`rdi` = vector address minus 12, `rdx` = 64) before the
+overwrite, writes them back unchanged, and changes only the finish low word.
+Prediction: `CopyVector` (`BaseImporter.h:334-345`) uses `vec.size()` =
+`(finish-begin)/8`, so the document word selects the returned scene's mesh
+count.
+
+Result: **10 PASS / 0 FAIL**; trace sha256
+`e15719a8645a23abe076a9694556a90a640cc152d4c044b826aaed3570223c94`,
+captured window sha256
+`483a629ed8f1ac9027e85fae9c4c26743b9e98d01beeaf1f56d38d66c10e20c2`.
+Own begin `0x555555570210`, cap `0x555555570218` (stable twice). With finish
+low words for sizes 0..3, the live finish at `glTFImporter.cpp:475` is
+`0x555555570210`, `...218`, `...220`, `...228` respectively; begin and cap are
+unchanged; `scene=ok` with `meshes=0`, `1`, `2`, `3`; gdb reports `exited
+normally`. A separate gdb inspection after `ImportMeshes` on the size-3 case
+shows the two extra `mMeshes` slots are NULL, not attacker-chosen pointers.
+The plain ASLR-on run of the same document is SIGSEGV rc 139.
+
+Preserved negatives: a window captured earlier at `glTFImporter.cpp:314` is
+stale in two bytes and gives `free(): invalid pointer`; a window captured from
+a different input length (945 vs 1246 bytes) also aborts. Both were measured
+before the call-site capture fixed the calibration. The PR7090 hunk overlay
+rejects the crafted index accessor outright (`scene=null err=GLTF: indices of
+mesh "tri" are not scalars of unsigned integers`); PR6860 still does not
+block this leg (W5/W9).
+
+Scope and grade: rung-4 data-integrity control — a crafted local glTF document
+chooses the number of meshes the pinned importer reports — under ASLR-off and
+a gdb-measured full destination window at the real importer / stub-scene-driver
+scope. High bits are inherited, the extra pointers are NULL, and there is no
+chosen code address, controlled IP, marker, command or listener. NO r5.
+Author-measured and unwitnessed; clean-archive replay recorded below.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
-change, no r5. Independent witness replay of W1/W2 and the W3-W13
-real-importer legs is still owed; clean-archive author replays are
+change, no r5. Independent witness replay of W1/W2, the W3-W13 real-importer
+legs, W18 (#3773) and W19 is still owed; clean-archive author replays are
 reproducibility evidence, not acceptance. Preserve any contradiction as a
-negative.
+negative. The witness wake failed again at 18:59Z (#3787, RED, owner
+operator), so no verdict arrived in W19; W1/W2 and W18/W19 stay author-only.
 
 On 2026-11-24 17:3xZ (W16, chat #3738) I asked the witness for the first owed
 replay: W1/W2 only, from `git archive 2daf9aa5 lab/frontier/assimp2shell` with

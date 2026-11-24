@@ -1,0 +1,10 @@
+PASS source hashes pinned
+PASS input length fixed
+PASS calibration stable across two measurements
+PASS vulnerable 64-byte memcpy reached
+PASS all four lengths follow the document
+PASS size0 scene has zero meshes
+PASS size1 scene has one mesh
+PASS size2 scene has two meshes
+PASS size3 scene has three meshes
+PASS ASLR-on plain run is a negative

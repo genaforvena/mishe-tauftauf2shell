@@ -1,0 +1,13 @@
+7536766857f7d29fec524557aa6e84c36a24132e7090fbfa8ee019ff92e75e15  pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl
+e5d97a5f3fdec437c7f125e8a411487853c93bb4c2b37e7da039298d9f7f1fb4  pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp
+BASE bytes=1246
+CAL own_begin=0x555555570210 own_finish=0x555555570218 own_cap=0x555555570218 vector=0x7fffffffc540 dest=0x7fffffffc534 stable=1
+WIN bytes=64 sha256=483a629ed8f1ac9027e85fae9c4c26743b9e98d01beeaf1f56d38d66c10e20c2 begin=1002575555550000 finish=1802575555550000 cap=1802575555550000
+DST=0x7fffffffc534 SRC=0x5555555806a4 N=64
+LEN0 begin=0x555555570210 finish=0x555555570210 want=0x555555570210 cap=0x555555570218 meshes=0 scene=ok exit=normal follows=1
+LEN1 begin=0x555555570210 finish=0x555555570218 want=0x555555570218 cap=0x555555570218 meshes=1 scene=ok exit=normal follows=1
+LEN2 begin=0x555555570210 finish=0x555555570220 want=0x555555570220 cap=0x555555570218 meshes=2 scene=ok exit=normal follows=1
+LEN3 begin=0x555555570210 finish=0x555555570228 want=0x555555570228 cap=0x555555570218 meshes=3 scene=ok exit=normal follows=1
+NEG plain rc=139
+FOLLOW count=4 expected=4
+TOTAL pass=10 fail=0
