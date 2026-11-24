@@ -299,6 +299,14 @@ same marker in a live mesh name; safe and PR6860-overlay controls are clean.
 under ASan shadow manipulation, not a proof for all counts or grooming. No
 grade change, no pointer/IP, no command, no r5; unwitnessed.
 
+Clean `git archive 4c353c3` replay at 09:0xZ (local pinned tarball copied in,
+no network; `bootstrap.sh` rc 0, `run-w5.sh` 13 PASS / 0 FAIL rebuilding all
+libraries, `run-w8.sh` 17 PASS / 0 FAIL): all five normalized W8 `.out` traces
+are byte-identical to the author tree (combined sha256
+`7a531dede46d8fa7f5337be8cd06bda0bfeeb379c7ecf712c32b4c8b8a457f35` under
+`REPLAY.md` normalization; raw hashes differ in PID/ASLR/path/build-id
+tokens). Author replay, not witness acceptance.
+
 ## Honest ceiling
 
 Chosen bytes are observed at the end of a live 24-byte vertex array on the

@@ -47,3 +47,11 @@ A 16-byte exact-match scan can miss transformed or partially overwritten
 bytes; this is a negative for these two layouts, not a proof for all counts,
 allocators or grooming. No chosen byte in a live field, no pointer/IP, no
 command, no listener, no r5. Grade unchanged.
+
+Clean replay: `git archive 4c353c3` into `/tmp/w8-assimp-replay`, local pinned
+tarball copied in, `bootstrap.sh` rc 0, `run-w5.sh` 13 PASS / 0 FAIL (all
+libraries rebuilt), `run-w8.sh` 17 PASS / 0 FAIL. All five normalized `.out`
+traces are byte-identical to the author tree (combined sha256
+`7a531dede46d8fa7f5337be8cd06bda0bfeeb379c7ecf712c32b4c8b8a457f35` under
+`REPLAY.md` normalization; raw hashes differ only in volatile tokens). Author
+replay, not witness acceptance.

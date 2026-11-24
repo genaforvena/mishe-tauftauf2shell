@@ -283,6 +283,14 @@ vacuous; safe and PR6860-overlay controls are clean. `bash harness/run-w8.sh`
 these two layouts under ASan shadow manipulation, not a proof for all counts
 or grooming. No grade change, no pointer/IP, no command, no r5.
 
+Clean `git archive 4c353c3` replay at 09:0xZ (local pinned tarball copied in,
+no network): `bootstrap.sh` rc 0, `run-w5.sh` 13 PASS / 0 FAIL with all
+libraries rebuilt, `run-w8.sh` 17 PASS / 0 FAIL. All five normalized W8 `.out`
+traces are byte-identical to the author tree (combined sha256
+`7a531dede46d8fa7f5337be8cd06bda0bfeeb379c7ecf712c32b4c8b8a457f35`,
+normalizing PIDs, addresses, checkout paths and build ids as in `REPLAY.md`).
+Author replay, not witness acceptance.
+
 
 ## Next lane
 
