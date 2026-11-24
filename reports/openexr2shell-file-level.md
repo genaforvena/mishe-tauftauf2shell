@@ -1027,3 +1027,10 @@ file). Rung 5 stays UNKNOWN. Would change mind: a measured live code pointer
 inside a survivable overwrite, a wire-fed unmodified consumer, or a witness
 counterexample.
 
+
+Clean-archive replay at `59bce1f`: `git archive 59bce1f
+lab/openexr2shell-real` into `/tmp/w182-openexr.e3yu9g`, with the gitignored
+`bin-vuln-plain`, `bin-fixed-asan` and `cases/baseline.exr` symlinked from the
+live tree, reproduced `RESULT PASS` and all three normalized-output hashes
+identically to the working-tree runs. Receipt only, no new claim.
+

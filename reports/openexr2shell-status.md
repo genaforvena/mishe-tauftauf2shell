@@ -434,3 +434,10 @@ option stays closed locally. `RESULT PASS` three times byte-stably; clean
 archive replay receipt follows. No wire, chosen bytes, pointer write, command
 or marker. Unwitnessed, no grade change, rung 5 UNKNOWN.
 
+
+Clean-archive replay at `59bce1f`: `git archive 59bce1f
+lab/openexr2shell-real` into `/tmp/w182-openexr.e3yu9g`, with the gitignored
+`bin-vuln-plain`, `bin-fixed-asan` and `cases/baseline.exr` symlinked from the
+live tree, reproduced `RESULT PASS` and the three hashes exactly. Receipt
+only, no new claim.
+
