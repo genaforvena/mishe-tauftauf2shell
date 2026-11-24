@@ -810,3 +810,41 @@ encoder by name refuses mixed-size sequence frames.
 Still open: a real consumer with a named HEVC/x264/x265/kvazaar/vvenc encoder
 and no size guard. No such consumer has been built or run. The advisory's
 AV:N vector remains advisory text.
+
+## W202 named-encoder consumer lane closed from pinned source (2026-11-24)
+
+W201 left one research lane open: a real consumer that names an HEVC-family
+encoder for a sequence and has no same-size guard. Pinned v1.23.6 source
+closes it for every consumer present in this plant:
+
+- The trigger mechanism is confirmed in the encoder plugins, not just the
+  direct-call harness. `encoder_x265.cc:1139-1141` passes
+  `encoder->param->sourceWidth/sourceHeight` — dimensions fixed when the
+  encoder was opened — into `heif_image_extend_padding_to_size()` for EVERY
+  frame. `encoder_x264.cc:1022-1024` does the same with `param.i_width/i_height`.
+  `encoder_kvazaar.cc:689-694` has that call inside a `/* ... */` block, so it
+  is NOT a live padding caller in this pin. SVT/uvg266/vvenc also call the
+  public wrapper; AOM does not.
+- The library places no guard on frame size: `heif_sequences.cc:576-632`
+  (`heif_track_encode_sequence_image`) passes the image straight to
+  `visual_track->encode_image()`; there is no `get_width()`/`get_height()`
+  check in that function. The mixed-size rejection is application-level only,
+  in `examples/heif_enc.cc:2773-2778`, which is also the only in-tree CLI that
+  can select an encoder by name (`heif_enc.cc:2046`) and whose sequence path
+  calls the library API at `:2809`.
+- The remaining real consumers cannot supply the mismatch. ImageMagick's
+  sequence writer requests AV1 by format, not name (`heic.c:2141-2142`), so
+  AOM wins (W201). libvips calls only `heif_context_encode_image()`
+  (`heifsave.c:325`) and never a sequence-track API. Host `ffmpeg` in this lab
+  has no HEIF muxer (`Unknown format 'heif'`), so it is not a consumer here.
+- `check_named_encoder_lane.py` (in `lab/frontier/libheif2shell/real/neighbour/`)
+  asserts all ten pinned-source statements: PASS=10 FAIL=0 in-tree and from a
+  clean `git archive b08e992d` replay at `/tmp/w202-replay` with the three
+  gitignored source trees passed as arguments. Commit `b08e992d` (checker).
+
+Source-level check only: no build, consumer run, wire input, chosen bytes,
+command side effect or witness verdict. Grade UNCHANGED rung 3 plus rung 4,
+NOT rung 5. The advisory's AV:N vector remains advisory text. The exact
+1,155-byte advisory artifact and #3264/#2752/#2869/#2897 remain unwitnessed;
+a witness verdict on any of them still takes precedence over further lane
+search.
