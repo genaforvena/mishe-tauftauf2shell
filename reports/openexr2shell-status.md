@@ -561,3 +561,20 @@ W189 clean-archive receipt (19:39Z): both one-command replays printed
 source/build/bin trees symlinked; check-output and aggregate evidence hashes
 matched the working tree exactly. Author replay only, not a witness verdict;
 grade unchanged.
+
+## W190 (2026-11-24): file-chosen bytes overwrite a live tcache `next` in unmodified exrcheck
+
+W188/W189 found no tcache pointer in the 384-byte window at their fixed N;
+W190 scales the forged sample count to N=1072, which makes the second
+inverse-sort copy cover `dst+4288..+6432`. A live 0x90 tcache head sits at
+`dst+4304`; its safe-linked `next` word changes from a heap pointer to the
+file's fill byte (0x5a, 0x3c and 0x00 variants proved byte tracking) in the
+UNMODIFIED pinned `exrcheck -c`. This is rung 4 chosen bytes in live heap
+metadata, not steering: no malloc from the poisoned tcache was observed, and
+the consumer aborts with `double free or corruption (!prev)`. Fixed 3.5.3
+rejects with `bad` (rc 1); ASan reports `READ of size 4288` at the pinned sink.
+`sh harness/w190-tcache-check.sh` -> `RESULT PASS`, byte-stable 3x, check sha256
+`ba155b40d9fb04aea70cb7a00eda7fe72b1a593eaded0dcd2be1cae42de087ea`.
+Grade: file-level rungs 1-4, rung 5 UNKNOWN — no code pointer/IP, control
+flow, command, marker, wire or witness verdict. Full method, hashes and
+ceiling in `reports/openexr2shell-file-level.md` W190.

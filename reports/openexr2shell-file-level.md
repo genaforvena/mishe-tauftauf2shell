@@ -1517,3 +1517,61 @@ byte-identical to the working tree. Commit `8b44da3d` carries the two probes,
 both replay scripts, the path generator, 26 evidence files and both report
 sections; this receipt is a separate scoped commit. Author replay only, not
 a witness verdict; grade and rung-5 status unchanged.
+
+## W190: file-chosen bytes reach a live tcache `next` in unmodified exrcheck (2026-11-24)
+
+W188/W189 measured no tcache user pointer inside the 384-byte chosen-byte
+window at their fixed geometry and concluded that the file alone supplied no
+tcache grooming *there*. W180/W181 showed the forged sample count N scales
+the second inverse-sort copy's destination offset to 4N. The bounded question
+was whether a larger file-forged N moves that copy onto the live 0x90 tcache
+head W188 saw at `dst+4288`. Prediction: no — the layout or the process would
+break first. The prediction failed: the file alone places file-chosen bytes
+in a live tcache `next` word in the UNMODIFIED upstream `exrcheck -c` binary.
+
+Method: `cases/make_poc_mixed.py` with N=1072 and fill 0x5a/0x3c/0x00 (sha256
+`663d02672f973b5d0affd36364185729551157be1928f5c48ad3e7d365b45c16`,
+`3f969d0524e681840035a5642aa92a3f8ef7de7c1d6affc7fce1356e62d4034d`,
+`1c57f2570a366d765d38777dbc49ecbd1c59e5a11ce0e6c4e43890aeddec46f2`).
+The forged chunk declares `unpacked_size=2N=2144`, sample grid total `6N`,
+`split=2N`. Under `set disable-randomization on`, `build-vuln-plain/bin/exrcheck
+-c` reaches `sort2_4ByteChannels_tiled`; `harness/w190-tcache-overflow.cmd`
+enumerates tcache heads at sink entry, then reads the watched word at the
+first and second `__memcpy_avx_unaligned_erms` call.
+
+Observed at the sink (normalized `evidence/w190-gdb-n1072-5a.out`):
+`WINDOW_HEADS=[(7, 4304)]`, `TCACHE-WATCH idx=7 off=+4304`, `COPY1
+dst-out=+0 len=4288`, `COPY2 dst-out=+4288 len=2144`,
+`NEXT-BEFORE-VAL=0x0000000555555828` (glibc safe-linked pointer),
+`NEXT-AFTER-VAL=0x5a5a5a5a5a5a5a5a`. The 0x3c and 0x00 files give
+`0x3c3c3c3c3c3c3c3c` and `0x0000000000000000` at the same word: the bytes
+track the file fill, not debugger residue. All three probes then report
+`double free or corruption (!prev)` / SIGABRT. No allocation from the poisoned
+tcache is claimed; the abort's causal attribution to COPY1's adjacent-header
+damage versus the poisoned `next` is UNKNOWN.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w190-tcache-check.sh` prints `RESULT PASS` rc 0. It pins the generator
+and three PoC hashes, asserts the live head offset, both copy lengths/offsets,
+three distinct next-word values, a rc-0 valid-file control, an ASan control
+(`READ of size 4288`, `internal_zstd.c:472`, `exr_decoding_run` via
+`build-vuln-asan/bin/exrcheck`, rc 1) and the fixed 3.5.3 control (`bad`, rc 1,
+no ASan). Three in-tree runs are byte-identical, check-output sha256
+`ba155b40d9fb04aea70cb7a00eda7fe72b1a593eaded0dcd2be1cae42de087ea`; core
+evidence hashes: baseline `fb460d748a257b2975615fb56ea211f6faa075621cab9d0bbcaadcda086c2dba`,
+gdb 0x5a `0fc5606b3db9703728ceae54c3f63522f9d88cb0a00530bd91b63735ae97e29f`,
+0x3c `91023a9db8f8a5ababc0fd8d782bd65407c6492c62a1187f998783c4e73793a3`,
+0x00 `aef25de79a27a39d370cb34917e901f72ff88b92142cdd951c46660a603c1c93`,
+ASan `d05a7c5591e761ac7d65bb6aa13c35673c85a49effa745b356f1f178fd752e2d`,
+fixed `e63912b5f9fcaa53f61c023cc4366cbac5ebeb020ef2924cfe24490e1e00e76c`.
+
+Ceiling and disposition: one pinned 3.5.2 build, one forged geometry, equal-
+length paths, ASLR off, gdb observation; N and fill are file bytes but the
+genesis of the 0x90 tcache head is a layout fact of this consumer, not a
+file-steered allocation. This is rung 4 — file-chosen bytes at a known offset
+over a live heap metadata word in an unmodified consumer — not steering, no
+code pointer/IP, no control-flow diversion, no command, marker, socket or
+wire, no witness verdict; rung 5 remains UNKNOWN. W188/W189 stand for their
+own geometries. Would change my mind: an observed malloc from the poisoned
+tcache, a chosen code pointer/IP, a wire-fed affected process, or a witness
+counterexample.

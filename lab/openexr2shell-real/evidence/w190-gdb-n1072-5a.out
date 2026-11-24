@@ -1,0 +1,31 @@
+Breakpoint 1 at ADDR: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c, line 451.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file work-w190/poc_n1072_5a.exr 
+Breakpoint 1, sort2_4ByteChannels_tiled (inPtr=ADDR 'Z' <repeats 200 times>..., num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=ADDR "0Q\200\367\377\177", sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:451
+451	{
+WINDOW_HEADS=[(7, 4304)]
+NEXT-BEFORE-VAL=0x0000000555555828
+TCACHE-WATCH idx=7 off=+4304 ptr=ADDR
+NEXT-BEFORE ADDR:	ADDR
+Breakpoint 2 at ADDR: file ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S, line 255.
+
+Breakpoint 2, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+COPY1 dst-out=+0 len=4288
+sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:459
+459	        for (int i = 0; i < channelsSize; ++i)
+
+Breakpoint 2, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+COPY2 dst-out=+4288 len=2144
+sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=ADDR, channels=channels@entry=ADDR, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=ADDR) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:459
+459	        for (int i = 0; i < channelsSize; ++i)
+NEXT-AFTER ADDR:	ADDR
+NEXT-AFTER-VAL=0x5a5a5a5a5a5a5a5a
+double free or corruption (!prev)
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+FINISHED
