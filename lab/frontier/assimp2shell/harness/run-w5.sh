@@ -52,16 +52,16 @@ build_asan_driver() { # source tree, build dir, output driver
 }
 
 src=pins/assimp-6.0.6
-build_asan_driver "$src" build-min harness/bin/w5_real_vuln
-build_asan_driver "$src" build-min-fixed harness/bin/w5_real_fixed
-
-if [ ! -f pins/fixed-full-6.0.6/code/AssetLib/glTF/glTFAsset.inl ]; then
-    rm -rf pins/fixed-full-6.0.6
-    cp -a pins/assimp-6.0.6 pins/fixed-full-6.0.6
+fixed_src=pins/fixed-full-6.0.6
+if [ ! -f "$fixed_src/code/AssetLib/glTF/glTFAsset.inl" ]; then
+    rm -rf "$fixed_src"
+    cp -a "$src" "$fixed_src"
     cp pins/fixed-6.0.6/code/AssetLib/glTF/glTFAsset.inl \
-        pins/fixed-full-6.0.6/code/AssetLib/glTF/glTFAsset.inl
-    patch -d pins/fixed-full-6.0.6 -p0 < pins/pr6860-gltfAsset.h-decl.patch
+        "$fixed_src/code/AssetLib/glTF/glTFAsset.inl"
+    patch -d "$fixed_src" -p0 < pins/pr6860-gltfAsset.h-decl.patch
 fi
+build_asan_driver "$src" build-min harness/bin/w5_real_vuln
+build_asan_driver "$fixed_src" build-min-fixed harness/bin/w5_real_fixed
 
 for pair in vuln:build-min fixed:build-min-fixed; do
     label=${pair%%:*}
