@@ -9584,6 +9584,84 @@ resolver keys 243→245, three full-flag-sync units at pin `0d686bba…d528a`
 (`written 3, removed 0`), pinned full-flag doctor rc 0 GREEN, omp-only GREEN
 122, window 126 adopted without duplication. README row 159 and
 `reports/busybox2shell-status.md` added; no grade change: real loopback UDP
-TFTP wire rungs 1-4, unwitnessed, no ASLR/grooming/pointer/IP/command, rung 5
-UNKNOWN. Witness replay of the five-leg matrix is owed to `witness`.
-ImageMagick2Shell W183 remains staged at window 127 for the next admission.
+TFTP wire rungs 1-4, no pointer/IP/command. W1 then measured the stock plain
+build's heap metadata: chosen `0x4141414141414141` at `rbuf+72` gives rc -6
+`malloc(): corrupted top size` 5/5, restoring `0x20cb1` gives rc 1 5/5. W2
+(commit `d19e103`, witness DM #3135) replayed the five-leg wire matrix and
+the eight-leg heap supplement from a clean `git archive e94a95f` (8/8 pins,
+both binaries rebuilt) and returned **ESTABLISHED rungs 1-4 at the labeled
+BusyBox 1.37.0 TFTP-client / loopback-wire / stock-plain scope, NO rung 5**,
+with no counterexample; no chosen pointer, function-pointer or command.
+
+### 2026-11-24 00:3xZ — imagemagick2shell admitted as the 123rd route
+
+Operator admitted frontier's W183 lane under standing #6 after verifying
+`lab/frontier/imagemagick2shell/REPLAY.log` sha256
+`385bbe95d648dd19981d0d42df483c9ebeb619bb078fd3a2a2c9789bac01667a` from a
+clean `git archive 7873caf`: ASan `WRITE of size 1` 0 bytes past a 3-byte
+region at `stream.c:1576`, same-size and fixed-tag rc 0 clean, plain gdb chosen
+bytes `0x42..0x48` at offsets 3..23 (admission commit `3646faa`). Charter
+written, hy4-flash route 122→123, both resolver keys 245→247, three full-flag
+units at pin `0d686bb…` (`written 3, removed 0`), doctor GREEN, omp-only GREEN
+123, window 127 adopted. Grade: real-library direct-call rungs 1-4 into real
+`MagickCore` stream cache handlers, unwitnessed; no crafted file, coder path,
+CLI, wire, pointer/IP or command, file reachability and rung 5 UNKNOWN.
+CVE-2026-130664 / GHSA-3pf7-cjfr-3fpq; affected 7.x before 7.1.2-35 and 6.x
+before 6.9.13-60, fixed by one-line `MagickCore/stream.c` commit `6b833ce6`.
+W189 (commit `35e25c9`, `reports/frontier-imagemagick2shell.md` §7): the real
+`magick stream` CLI on a 1x1 MIFF with `-extract 8x4` gives ASan `READ of size
+24` at `stream.c:1295`, survives a CVE-only fix, and the fixed tag is clean
+only because it also carries `e41876eb4ad4`; a compiled-coder survey found no
+cache-geometry growth path on stable `Image *` for this build. Bounded
+negative for this build's coder set; other builds/delegates UNKNOWN, witness
+request #3156 unanswered.
+
+### 2026-11-23–24 — folded verdicts and scope closures
+
+- nDPI witnesses #2999/#3001 (`reports/frontier-ndpi2shell.md` §7): from clean
+  `git archive 44be53e`, both serializer pins hash-match and both clang ASan
+  libraries were rebuilt before `realbuild/run.sh` returned `PASS=9 FAIL=0`
+  twice; fresh `WRITE of size 1` at `ndpi_serializer.c:107:18`, top caller
+  `ndpi_serialize_start_of_block_binary:2340`, chosen `0x2f`, fixed rc 0.
+  **ESTABLISHED rungs 1-4 at the real-pinned-library / in-tree-caller ASan
+  scope, NOT rung 5**; no in-tree >128-byte key wire path. The admission
+  section's "no witness verdict" is superseded for this later edge.
+- Frontier W188 screened hydra2shell out (`bb33f71`): a real loopback HTTP
+  wire reaches only rung 3 (fixed `-1` offset, fixed NUL byte at
+  `tmpcookie[-1]`); plain v9.7 does not crash, no chosen bytes, no pointer or
+  command, no witness, no rung 5. No charter or window; operator owns reversal.
+- ThorVG W183/W184/W185 closed admission's consumer UNKNOWN in two stages:
+  real `Picture::load` and a loopback `POST /decode` reached `jpgd`, then a
+  Lottie-embedded JPEG through real `Animation::frame(1)` faulted v1.1.1 only
+  (Docs replay of `lottie_matrix.sh` matched the committed table byte-for-byte).
+  Still unwitnessed, no renderer canvas, `.lottie` ZIP, marker, command or rung
+  5. Sdlmixer W181–W184 added a loopback wire, unmodified upstream WAV and
+  upstream CLI lanes plus a partial saved-RIP negative; witness #3000 covers
+  only W179 and ask #3053 has no verdict. Libvips W14/W15 added a loopback
+  wire (13/13) and the imgproxy downstream version claim without running
+  imgproxy. Libfontenc W181/W183 moved the chosen store into a live `sm->map`
+  through seven mappings; OpenEXR W169–W173 closed the aarch64, source-byte,
+  heap-victim, tiled/groom and static-OIIO lanes (the OIIO claim is now a
+  static-source negative, no consumer linked). Libheif W179–W183 established a
+  marker, ASan classification, the advisory 36,879-byte allocation, plain
+  fault modes and a genuine first frame at the labeled build scopes. Cjose's
+  W184 negative was witness-ESTABLISHED (DM #3079), W186 reached the real
+  `id_token` OCT-KEK unwrap and W187 chose its fault site. Munt W178 measured
+  a real malloc neighbour and one-byte C-API hosts. All are rung 4 or negative
+  lanes; no rung 5 was claimed.
+
+### 2026-11-24 01:1xZ — two last edges before the docs fold
+
+- libfontenc W186 (`9246463`) replaces the live `FontMapRec.recode` function
+  pointer with a chosen non-PIE address through the seven-mapping `SIZE 256
+  258` `.enc` (`from=0xfe34..0xfe37`, `m3->recode=0x4011d6`). `FontEncRecode`
+  executes a benign marker and returns `0xabcd1234` in 3/3 vulnerable crafted
+  runs; safe and fixed `5920c6e` inputs show no marker. Chosen-address control
+  flow at the real-library public API, ASLR-off harness only, no command or
+  rung 5; the earlier "no control-flow target" limit is superseded.
+- kicad W184 (`1a76249`) provisioned the official fixed 10.0.8 PPA build, but
+  its first-run wizard and declined Chrome terms webview block the W182 GUI
+  import sequence, so `ParseLibHeader` was never reached in the fixed process.
+  Recorded as a failed control attempt, not a pass or a vulnerability negative;
+  the fixed guard remains source/harness-only
+  (`lab/frontier/kicad2shell/realprocess/PROVENANCE-fixed-build.md`).

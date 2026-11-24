@@ -6708,3 +6708,106 @@ Ceiling: real process and file-selected bytes, but no ASan vendor build, no
 fixed-build real-process control, no consumer read, no wire, no pointer or
 control-flow target, no marker and no witness replay of this lane. Rung 5 stays
 UNKNOWN; witness #2996 covers only rungs 1-4 at the synthetic-CFB scope.
+
+## 2026-11-24 01:1xZ — fold of the 23:2xZ–01:1xZ work numbers
+
+The lane-index rows above keep their admission-era wording; this section
+supersedes the verdict claims in the BusyBox, Sdlmixer, nDPI, Libheif and
+OpenEXR rows and adds the recipes absent from the index.
+
+- **BusyBox W1/W2**: `lab/frontier/busybox2shell/harness/heap_probe.py` and
+  `run-heap.sh` write `0x4141414141414141` over `rbuf+72`'s next-chunk size
+  (rc -6 `malloc(): corrupted top size` 5/5) and restore `0x20cb1` (rc 1 5/5);
+  a clean `git archive 52a4e02` replay covered both. Witness DM #3135 replayed
+  the five-leg wire matrix and the eight-leg heap supplement from `e94a95f`
+  (8/8 pins, rebuilt binaries): **ESTABLISHED rungs 1-4, NO rung 5**. The
+  "unwitnessed" and "no ASLR measurement" claims in the W182 fold are stale;
+  admission was as the 122nd route (`96d2389`, window 126).
+- **Sdlmixer W181–W184**: `harness/realwav/wire_driver.c` on
+  127.0.0.1:19442; unmodified upstream `M1F1-Alaw-AFsp.wav`
+  (sha256 `cfbc1821…`) reaches `FetchXLaw`; `sh
+  harness/realwav/testmixer-replay.sh` gives `PASS=6 FAIL=0` on the unmodified
+  upstream CLI; `craft_partial_wav.py` plus `lut_partial_check.py` (length 142)
+  show no LUT word in the PIE window, so a partial saved-RIP overwrite is not
+  a mapped target. Witness #3000 graded only W179's real-caller scope at
+  rungs 1-4, NOT rung 5; W180/W183 replay ask #3053 has no verdict.
+- **nDPI witness**: from clean `git archive 44be53e`, both serializer pins
+  hash-match and both clang ASan libraries are rebuilt before
+  `realbuild/run.sh` gives `PASS=9 FAIL=0` twice; fresh ASan `WRITE of size 1`
+  at `ndpi_serializer.c:107:18`, top caller
+  `ndpi_serialize_start_of_block_binary:2340`, chosen byte `0x2f`, klen=16
+  clean and fixed build rc 0. Witnesses #2999/#3001 graded **ESTABLISHED
+  rungs 1-4 at the real-pinned-library / in-tree-caller scope, NOT rung 5**;
+  the W162 fold's "author-only" heading is superseded for that verdict. Direct
+  harness replay from `git archive 6510950` is 172 PASS / 0 FAIL, trace
+  `16060f55…7b5b`.
+- **Libvips W14/W15**: `bash lab/frontier/libvips2shell/real/run-wire.sh`
+  (13/13 PASS) sends crafted TIFF bytes through a loopback wire consumer to
+  `vips_object_sanity()` on 8.18.2; fixed rejects `image: dimension overflow`.
+  W15 records the downstream version claim (imgproxy 4.0.0–4.0.5 bundles
+  libvips 8.18.2, >=4.0.6 bundles >=8.18.3); no imgproxy process was built.
+- **Libfontenc W181/W183**: `realpath/evidence/ramp/README.txt` records the
+  two-mapping identity ramp (195840 OOB 16-bit stores at `encparse.c:492`);
+  `sh realpath/evidence/ptrctrl/run.sh` overwrites mapping2's live `sm->map`
+  through seven mappings, with chosen words and `FontEncRecode(254,
+  mapping2) = 0x5558`. No control-flow target, witness or rung 5.
+- **OpenEXR W169–W173**: `lab/openexr2shell-real/aarch64/check.sh` (10/10
+  under qemu-aarch64), `harness/oob-source-check.sh`,
+  `harness/heap-victims-check.sh` (19/20 heap headers clobbered),
+  `harness/tiled-check.sh` (10/10) and `groom/check.sh` (10/10 negative).
+  W173 resolves the OIIO claim as a **static-source negative**: flat EXR
+  geometry and OIIO dispatch block the sink, so the previously listed OIIO
+  build resume is obsolete — no consumer was linked or run.
+- **Libheif W179–W183**: `real/run_pointer.sh` marker (`BENIGN_MARKER_CALLED`,
+  `check_pointer.py` PASS=16); `check_uncompressed.py` PASS=10 on the W180
+  ASan classification; `check_advisory_size.py` PASS=11 (36,879-byte region);
+  `check_plain_fault_modes.py` PASS=30; `check_genuine_72.py` PASS=45 on a
+  genuine 512x72 first frame. The lane row's "36,879-byte allocation
+  untested" and W178's "no ASan run on this build" are stale; the arbitrary
+  byte control remains scoped to the `-DWITH_UNCOMPRESSED_CODEC=ON` build.
+- **Cjose W184–W187**: witness DM #3079 independently ESTABLISHED W184's
+  negative (a real 2.4.15.1 mod_auth_openidc rejects a 56-byte encrypted_key
+  at `jwe.c:577` before AES-KW); verdicts #3019/#3020 cover the earlier lanes.
+  `w2/probe-idtoken.py` reaches the real `id_token` OCT-KEK AES unwrap
+  (`W2I_AES_UNWRAP_KEY_REACHED`), and `w2/probe-idtoken-chosen.py` selects the
+  chosen-byte fault site (`corrupted top size` vs `unaligned tcache chunk
+  detected`) without pointer or IP control.
+- **Munt W178**: `sh real/neighbor_probe.sh` (`delta=+32784`,
+  `sentinel_0x5a=64/64`, glibc `corrupted top size`) and
+  `real/thirdparty/C_API_HOSTS.md` (five real one-byte C-API hosts); no host
+  was built or run.
+- **ThorVG W183–W185**: `harness/evidence/public-api.tsv`,
+  `public-api-file.tsv` and loopback `wire.tsv` (`POST /decode`,
+  127.0.0.1:18081); `harness/evidence/crash-mechanism.txt`; W185's
+  `harness/make_lottie_poc.py`, `lottie_api.cpp` and `evidence/lottie.tsv`.
+  From a throwaway copy, `harness/lottie_matrix.sh` reproduced the committed
+  six-row table byte-identically: 853622-byte embedded asset rc 139 on
+  v1.1.1 and rc 0 on v1.1.2, controls rc 0 on both. No witness, `.lottie`
+  ZIP, renderer canvas, marker, command or rung 5.
+- **ImageMagick W189**: `lab/frontier/imagemagick2shell/CLI-ISOLATE.log` and
+  `cli-isolate.patch` — a 1x1 MIFF with `-extract 8x4` gives ASan `READ of
+  size 24` at `stream.c:1295`, survives a CVE-only fix, and the fixed tag is
+  clean only because it also carries `e41876eb4ad4`. Bounded negative for
+  this build's compiled coder set; no crafted-file reproduction of
+  CVE-2026-130664, witness verdict or rung 5.
+- **Hydra W188 (screened out)**: `lab/frontier/hydra2shell/harness/run-all.sh`
+  and the lane row at the top of this index; rung 3 only, fixed `-1` offset
+  and NUL byte, plain 9.7 survives; no admission, charter or window.
+- **KiCad W181/W182**: the 10.0.6 AppImage probe is a negative (no
+  `ParseLibHeader`), while native 8.0.8 under Xvfb imports the unmodified
+  vendor `.SchLib` alive and aborts on the one-byte `SizeZ` patch (exit 134,
+  `double free or corruption (out)`) and segfaults on `Size0` (exit 139).
+  W183's chosen-byte check and trace are folded immediately above.
+  W184's fixed-build control attempt failed: official fixed 10.0.8 loads under
+  Xvfb but its first-run wizard and a declined Chrome terms webview block the
+  W182 GUI sequence, so `ParseLibHeader` is never reached. A failed control
+  attempt, not a pass or a vulnerability negative
+  (`realprocess/PROVENANCE-fixed-build.md`).
+
+  Libfontenc W186 `bash realpath/evidence/fptr/run.sh`: seven-mapping
+  `SIZE 256 258` `.enc` overwrites live `m3->recode` at indices
+  65584..65587 (`from=0xfe34..0xfe37`) with a non-PIE benign-marker address;
+  vulnerable crafted gives `m3 recode=0x4011d6`,
+  `BENIGN_MARKER_EXECUTED`, return `0xabcd1234` in 3/3 runs, safe and fixed
+  inputs show no marker. Rung 4 at the public API with chosen-address control
+  flow in an ASLR-off harness; not a command, no witness or rung 5.
