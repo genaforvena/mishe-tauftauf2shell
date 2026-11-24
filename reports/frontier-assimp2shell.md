@@ -325,3 +325,10 @@ index legs but not the element-size overruns. The TEXCOORD count mismatch is
 a separate defect and needs its own claim if pursued; only observed
 control-flow placement would reopen rung 4. Never relabel placement as
 control flow or RCE without observation.
+
+W9 clean-archive replay: `git archive f1769aa` into `/tmp/w9-assimp-replay`
+(local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w5.sh`
+13 PASS / 0 FAIL with all libraries rebuilt, `run-w9.sh` 22 PASS / 0 FAIL;
+all 14 normalized W9 traces byte-identical to the author tree (combined
+sha256 `e6768c12445a97c64b094c41900b2702845d97db57bbf1af6341fd434791fb81`).
+Author replay, not witness acceptance.

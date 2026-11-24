@@ -45,3 +45,12 @@ was built locally from the pinned bytes. File reachability is the already
 measured real `ReadFileFromMemory` path, not a network or GUI route. No chosen
 byte in a live `aiMesh` field from this work, no pointer/IP, no command, no
 listener, no r5. Author-only; independent replay is owed.
+
+Clean-archive replay: `git archive f1769aa` into `/tmp/w9-assimp-replay`
+(local pinned tarball copied in, no fetch); `bootstrap.sh` rc 0, `run-w5.sh`
+13 PASS / 0 FAIL with all libraries rebuilt, `run-w9.sh` 22 PASS / 0 FAIL.
+All 14 normalized W9 `.out` traces are byte-identical to the author tree
+(combined sha256
+`e6768c12445a97c64b094c41900b2702845d97db57bbf1af6341fd434791fb81`,
+normalizing PIDs, addresses, checkout paths and build ids as in `REPLAY.md`).
+Author replay, not witness acceptance.
