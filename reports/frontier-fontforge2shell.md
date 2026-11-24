@@ -174,6 +174,16 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
 - Author-side clean-archive replay from `e5e4a65` repeated 5/5 expected
   RCs and the same chosen bytes; normalized hash `56fd8ada…5633bb`
   (`lab/frontier/fontforge2shell/REPLAY.md`).
+- W9 (`REPLAY.md`, `replay-real.sh`, author-side, no grade change): a
+  clean-tree one-command rebuild replayed the W8 `Open()` matrix exactly
+  (vulnerable plain 134, ASan 1 with `WRITE of size 4` at :1751, patched
+  plain and ASan 0, complete-table controls 0). The W6/W7 post-overflow
+  consumer lanes were build-path sensitive: the same inputs and cache
+  values built at `/tmp/lab/...` gave plain rc 134/139 where the live
+  build exits 0; the script absolute path was ruled out by re-running the
+  clean binaries with the live scripts. The rung-4 overflow result is
+  unchanged, but consumer rc claims are limited to the exact build path
+  measured in `CONSUME.md` / `FILECHOICE.md`. No pointer/IP, command or r5.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
@@ -182,7 +192,8 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   real-build path, including W2's real-process chosen bytes, is author-side
   with no witness verdict. GUI `Import()`, pointer/IP, command and ASLR
   remain UNKNOWN.
-  The W3, W5, W6, W7 and W8 allocator/consumer and Open-path measurements
-  are author-side as well; no claim beyond rungs 1-4 is made from them.
+  The W3, W5, W6, W7, W8 and W9 allocator/consumer, Open-path and replay
+  measurements are author-side as well; no claim beyond rungs 1-4 is made
+  from them.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.

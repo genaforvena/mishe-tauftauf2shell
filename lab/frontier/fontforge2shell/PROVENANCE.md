@@ -87,3 +87,15 @@ truncated.pcf` without a script was also run locally as a negative lane;
 no loopback service, GUI or external target was involved. Author-side and
 unwitnessed, with no grade change.
 
+
+W9 (2026-11-24 23:5xZ): no external reads, probes or new source. The
+already-provisioned local tarball `src/fontforge-20251009.tar.gz` and the
+tracked fix patch rebuilt four offline trees inside a clean `git archive`
+at `/tmp/lab/frontier/fontforge2shell`; `replay-real.sh` is the only new
+file and contains no network or loopback actions. Generated PCFs and
+scripts were regenerated from the local pinned inputs. The W8 Open-path
+rc matrix reproduced exactly; the W6/W7 post-overflow consumer lanes
+were build-path sensitive (plain rc 134/139 in the clean tree versus 0
+in the live tree) and are recorded as a negative result in `REPLAY.md`.
+No grade change, no witness verdict and no r5.
+

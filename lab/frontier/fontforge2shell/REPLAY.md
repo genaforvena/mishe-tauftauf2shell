@@ -25,4 +25,59 @@ in both trees: `401bad9634b3227263d0a0ed33ff8fc3acc11608df9ab568d614a90862e5ddbe
 
 This is an author-side replay, not an independent witness verdict. No
 real FontForge build, PCF GUI/Import path, pointer control, command or
-rung 5 is claimed.
+rung 5 is claimed by the W196 section above; W9 below adds real-build
+lanes at the labeled scope.
+
+## W9 — clean-tree one-command replay of the real-build lanes (2026-11-24 23:5xZ)
+
+`replay-real.sh` builds four trees from the pinned source and fix patch and
+replays the W2-W8 real-path lanes without network, loopback or a GUI. Run it
+from a clean archive of a commit containing the script (here `HEAD` before
+the W9 commit), with the local source tarball supplied by env:
+
+```sh
+git archive HEAD lab/frontier/fontforge2shell reports/frontier-fontforge2shell.md | tar -x -C "$TMP"
+cp lab/frontier/fontforge2shell/replay-real.sh "$TMP/lab/frontier/fontforge2shell/"
+cd "$TMP/lab/frontier/fontforge2shell"
+FF2S_TARBALL=/path/to/fontforge-20251009.tar.gz sh replay-real.sh
+```
+
+Inputs re-verified in the clean tree: `fontforge/fvimportbdf.c` sha256
+`df766f9c881848cc4ea57456678e67c0e85fcf2a6ed308d1912b54181f0eb30d`,
+tarball `613424039e0e1b6bb106f8f0df287e1d249ac285d854f4e1964d68e9b9ad7eb0`,
+`truncated.pcf` `0c8dc0fe…d528703`, `complete.pcf` `149f03de…8eaa1526`,
+`size-91.pcf` `e29a2e46…f93d40f27f3c9dd2`, `sponge-32.pcf`
+`129afa8d…14f62350f`. CMake cache values matched the live-tree build
+(same set of `ENABLE_*` and `CMAKE_BUILD_TYPE=Debug` values).
+
+Observed return codes (`/tmp/ff2s-replay.log`, 23:52-23:54Z):
+
+| lane | plain | fixed plain | ASan | fixed ASan |
+|---|---|---|---|---|
+| W8 `Open()` truncated PCF | 134 | 0 | 1 | 0 |
+| W8 `Open()` complete control | 0 | — | 0 | — |
+| W6 size-91 then 32-glyph import | 134 | 0 | 1 | 0 |
+| W7 size-71 then choice-4 import | 139 | 0 | 1 | 0 |
+
+The W8 RC matrix matched the authored one (rc 134/0/1/0 plus 0/0
+controls). ASan reported `WRITE of size 4` four bytes before a 16-byte
+region at `fvimportbdf.c:1751` on every vulnerable lane; all patched
+builds exited 0.
+
+Negative result, preserved: the W6 and W7 *post-overflow consumer* lanes
+are build-path sensitive on this host. The same generated PCFs and the
+same CMake values, built at `/tmp/lab/...` instead of the live lab path,
+gave plain rc 134 (`free(): invalid next size (normal)`) and rc 139 for
+W6/W7, where the live path build exited 0. Re-running the clean-tree
+binaries with the live-path scripts reproduced rc 134/139, so the script
+absolute path is not the cause; the two binaries' sha256 differ
+(`bac0beae…5af7` live, `f3741145…f030` clean) even though the source and
+cache values match. Embedded build paths reach the gettext locale path
+used by the notice consumer. This does NOT change the rung-4 overflow
+result (ASan WRITE at :1751 and the chosen `4d 49 53 00` at `encs-4` are
+unchanged); it limits the consumer-lane rc claims to the exact build
+path measured in `CONSUME.md` / `FILECHOICE.md`. No pointer/IP, command
+or rung-5 claim is made from either outcome. Author-side receipt, not an
+independent witness verdict.
+
+
