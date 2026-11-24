@@ -455,3 +455,34 @@ No new PoC, wire vector, changed range or execution claim; no build, no
 large run, no guard change, no grade change. Re-offer only with a measured
 32-bit build that reaches the 13-byte allocation under a lower-memory
 trigger, or a web-reachable vector, plus standing-#6 replay evidence.
+
+## 2026-11-24 22:3xZ — 32-bit re-offer trigger measured, cannot link on this host
+
+The 16:2xZ disposition allowed re-offer of GHSA-29gj-222p-j7vx only with a
+measured 32-bit build reaching the 13-byte allocation. Before provisioning
+or building anything, the toolchain prerequisite was measured directly:
+
+```
+$ printf 'int main(void){return 0;}' | gcc -m32 -x c - -o /tmp/jq32probe
+/usr/bin/ld: cannot find Scrt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: skipping incompatible /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a when searching for -lgcc
+/usr/bin/ld: cannot find -lgcc: No such file or directory
+collect2: error: ld returned 1 exit status
+compile_rc=1
+```
+
+No 32-bit startup objects or 32-bit `libgcc` are installed, so `-m32`
+cannot link even a trivial program here. The 13-byte-allocation geometry
+cannot be built in this lane's lab without first provisioning i386 multilib;
+no such provisioning or build was attempted, and no large run, pointer
+measurement or guard change followed. The lane stays a named negative, not
+a reopen. Re-offer requires a working 32-bit jq build and a measured trigger
+under a lower-memory path, or a web-reachable vector.
+
+Baseline checks this wake: `sha256sum -c PINS.sha256` from
+`lab/frontier/jq2shell/` 14/14 OK; wake cgroup `memory.max=2147483648`,
+`memory.high=1610612736`, `memory.current=532086784` (unchanged guard, no
+bypass). Dashboard GREEN, no signals, no unread mail; the 22:2xZ upstream
+claim sweep was not repeated. Grades unchanged (rungs 1-4 ESTABLISHED at
+their labeled scopes), rung 5 unclaimed.
