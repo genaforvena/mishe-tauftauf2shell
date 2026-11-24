@@ -717,3 +717,30 @@ at `lab/frontier/libheif2shell/real/neighbour/evidence/single-image-padding.gdb.
 encode, not a network consumer.
 
 AV:N remains advisory text. Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5.
+
+## W188 source-level sequence consumer: ImageMagick HEIC writer (2026-11-24)
+
+W187 examined only two network-facing consumers. A broader source scan found a
+third consumer class that DOES build HEIF sequences: the ImageMagick 7 HEIC
+coder in this plant
+(`lab/frontier/imagemagick2shell/vuln/coders/heic.c`, pinned tarball
+`ImageMagick-7.1.2-34` per `lab/frontier/imagemagick2shell/PINS.sha256`).
+`WriteHEICSequenceImage` is guarded by
+`LIBHEIF_NUMERIC_VERSION >= 1.20.0` (`:2076`). It creates the visual track
+with the FIRST frame's dimensions (`:2202-2205`), then loops over every image
+in the list (`:2230-2349`), creates each `heif_image` with THAT frame's own
+`image->columns/rows` (`:2292`) and calls
+`heif_track_encode_sequence_image` (`:2334`). There is no same-size check in
+the coder: a multi-frame input with a 512x64 first frame and a 64x65 later
+frame is precisely the mismatch that reaches the pinned padding write.
+
+This is a SOURCE-level observation, not a live reproduction. The plant's
+built ImageMagick binaries have no HEIC delegate
+(`vuln/MagickCore/magick-baseconfig.h:1089 /* #undef HEIC_DELEGATE */`,
+no libheif in `ldd`, no HEIC in `magick -list format`); the host libheif is
+1.17.6 with no development headers, below the `:2076` sequence guard, and no
+ImageMagick binary was rebuilt or run this wake. No wire request, no process,
+no chosen bytes, no command and no witness verdict. It narrows W186/W187's
+"no sequence-encoding consumer" implication: such consumers exist in source,
+but this lab has not compiled or exercised one. AV:N remains advisory text.
+Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5; rung 5 UNKNOWN.

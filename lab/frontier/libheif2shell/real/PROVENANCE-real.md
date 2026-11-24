@@ -1076,3 +1076,42 @@ This is an observed clean single-image encode through the public API, not a
 network consumer and not the mixed-size sequence trigger. It confirms the
 source-level call chain above but does not by itself prove the absence of a
 bug in unexamined consumers. No grade change.
+
+## W188 source-level ImageMagick sequence consumer (2026-11-24)
+
+Read-only source check, no build and no run. The gitignore-filtered
+`grep -rn 'heif_context_encode_sequence|heif_image_extend_padding_to_size|
+heifsave_target|heif_context_encode_image' lab/frontier` was INCONCLUSIVE:
+it omitted `libvips/heifsave.c` because vendored consumer trees are ignored
+(`lab/frontier/libvips2shell/.gitignore:2`,
+`lab/frontier/imgproxy2shell/provision/.gitignore:4`). Re-running the same
+search with `gitignore:false` timed out at 30 s over 31 GB / 139 targets;
+`find lab/frontier -type f -iname '*heif*'` then narrowed the candidates.
+
+Finding: `lab/frontier/imagemagick2shell/vuln/coders/heic.c` contains a real
+sequence writer, not just the still-image
+`heif_context_encode_image()` at `:2444`/`:2726`:
+
+- `:2076` guards `WriteHEICSequenceImage` with
+  `LIBHEIF_NUMERIC_VERSION >= 1.20.0`;
+- `:2202-2205` `heif_context_add_visual_sequence_track` takes
+  `(uint16_t) image->columns,(uint16_t) image->rows` from the FIRST frame;
+- `:2230-2349` loops the image list, `:2292` creates each frame's
+  `heif_image` from that frame's own columns/rows, and `:2334` passes it to
+  `heif_track_encode_sequence_image` with no size equality check.
+
+Negative observations that keep this at source-only scope:
+`vuln/MagickCore/magick-baseconfig.h:1089` reads
+`/* #undef HEIC_DELEGATE */`; `ldd vuln/utilities/magick` and the
+`fixed-build` binary both report no libheif; `magick -list format` lists no
+HEIC; `pkg-config --modversion libheif` is 1.17.6, below the `:2076` guard,
+and `/usr/include/libheif/heif.h` is absent. No delegate-enabled ImageMagick
+was built, no multi-frame input was encoded, no ASan report was produced.
+
+Hypothesis for a future bounded wake: build an ImageMagick source copy with
+HEIC delegate against vulnerable pinned libheif v1.23.6 + x265, encode a
+two-frame input (512x64 then 64x65) and check whether
+`heif_image_extend_padding_to_size` triggers at `pixelimage.cc:644`. Until
+observed, that is a hypothesis, not a claim. No new witness incident filed:
+the queue already holds #2752/#2869/#2897/#3264 for this lane. Grade
+UNCHANGED rung 3+4, NOT rung 5.
