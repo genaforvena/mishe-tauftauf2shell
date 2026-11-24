@@ -403,3 +403,69 @@ or control-flow datum, no command and no marker side effect. The service is
 in-process lab scaffolding, so it does not meet the rung-5 gate: a live
 network-facing libvips consumer still has to be admitted and replayed by an
 independent witness before any rung-5 claim is possible. Rung 5 UNKNOWN.
+
+
+## 15. W15 addendum — concrete downstream-consumer claim for standing #6
+
+W13's DM 3118 asked the operator to admit a live network-facing libvips
+consumer; DM 3152 replied that standing #6 needs "source/CVE/versions/
+primitive" evidence and that none had been supplied. This section supplies
+that claim from read-only provisioning (GitHub raw source and advisory pages;
+no probe, build or traffic to any non-loopback system). It is a **claim to be
+reproduced**, not a demonstrated downstream impact; rung 5 stays UNKNOWN.
+
+**Consumer: imgproxy** — an unauthenticated HTTP image-processing service that
+loads attacker-supplied image bytes into libvips on its normal request path.
+imgproxy is already an admitted target in this plant (Imgproxy2Shell,
+CVE-2026-123614), which independently evidences the reachability class: that
+advisory is a *libvips loader* bug reached over an unauthenticated HTTP request
+(`CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H`, GHSA-hff9-5pqw-6w9f).
+
+- **Claim source.** imgproxy's `docker/Dockerfile` at v4.0.0 sets
+  `ARG BASE_IMAGE_VERSION="v4.0.1"` and builds
+  `ghcr.io/imgproxy/imgproxy-base:v4.0.1`, which supplies the libvips shared
+  libraries in `/opt/imgproxy/lib` consumed by the `vips/` CGO wrapper
+  (`vips/vips.c`, `vips/source.c`). The base image is built from the separate
+  `imgproxy/imgproxy-docker-base` repository, whose `versions.sh` pins the
+  libvips version exactly. SHA-256 digests of every URL below are in
+  `lab/frontier/libvips2shell/PROVENANCE.md` §W15.
+- **CVE/GHSA.** CVE-2026-69242 / GHSA-9rwc-f68v-4482 (this target), libvips
+  `vips_image_sanity()` scanline check. Downstream reachability is evidenced
+  by imgproxy's own libvips-loader CVE-2026-123614 / GHSA-hff9-5pqw-6w9f.
+- **Affected / fixed versions (measured from pinned source, not inferred).**
+  `imgproxy-docker-base` `versions.sh`: tags v4.0.1 and v4.0.3 both read
+  `export VIPS_VERSION=8.18.2` (affected); tag v4.0.4 reads
+  `export VIPS_VERSION=8.18.3` (fixed). imgproxy release Dockerfiles map:
+  v4.0.0→base v4.0.1, v4.0.1–v4.0.5→base v4.0.2/v4.0.3, all libvips 8.18.2;
+  v4.0.6 and v4.0.7→base v4.0.4 (libvips 8.18.3); v4.0.15→base v4.0.8, whose
+  `versions.sh` reads `VIPS_VERSION=8.18.6`. Therefore **imgproxy 4.0.0–4.0.5
+  bundle vulnerable libvips 8.18.2; imgproxy >= 4.0.6 bundles fixed libvips
+  >= 8.18.3**. The 3.x line predates the `imgproxy-base` image scheme and is
+  UNVERIFIED. This boundary is distinct from the ICO CVE's 4.0.0–4.0.15 range.
+- **Claimed primitive.** A crafted many-band TIFF is supplied through
+  imgproxy's unauthenticated image-loading request path; libvips accepts a
+  scanline in `(INT_MAX, 2^32)` at `vips_image_sanity()`, `VipsRegion.bpl`
+  (plain `int`) truncates it, and `vips_region_paint_pel()` executes
+  `memcpy(q, to, ws)` at a chosen negative offset. W14 measured the first
+  step: crafted TIFF bytes over a loopback HTTP request reach header
+  acceptance and `vips_object_sanity()` on vulnerable 8.18.2 and are rejected
+  with `image: dimension overflow` on fixed 8.18.3.
+- **Rung-4 plausibility.** Rungs 1–4 for the underlying bug are already
+  ESTABLISHED at their labelled scopes (W2/W3/W4/W9; witness verdicts 2588 and
+  W172/DM 2882). The crafted TIFF is only 107374x2 pixels (~0.2 MP), so
+  imgproxy's source-resolution limit is unlikely to reject it on pixel count;
+  the ~4 GiB scanline allocation remains the measured constraint (W7/W8,
+  protected 2 GiB wake cap).
+
+**Scope limits and what an admitted target must resolve.** No imgproxy build,
+listener, request, TIFF pixel decode, `vips_region_*` call, negative-offset
+access, pointer, command or marker was observed in this wake. Specifically
+UNVERIFIED: (a) that imgproxy's request path feeds attacker bytes to the TIFF
+loader with the crafted many-band geometry; (b) that imgproxy's
+`IMGPROXY_MAX_SRC_RESOLUTION` and buffer handling admit a ~4 GiB scanline;
+(c) live reached bytes, control-flow datum and independent witness replay.
+imgproxy is already admitted as its own target, so the operator should route
+this either as a scope extension of Imgproxy2Shell or as a new dedicated
+libvips-sanity target; that routing decision is the operator's.
+
+Grade unchanged: rungs 1–4; rung 5 UNKNOWN.

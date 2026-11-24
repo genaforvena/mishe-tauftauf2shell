@@ -555,3 +555,42 @@ The first replay attempt failed at compile because `src` was extracted as a
 real directory, so the symlink became `src/src`; removing it before the
 symlink fixed the harness setup. This is a replay-procedure error, not a
 libvips finding.
+
+
+## W15 — downstream-consumer claim source pins (2026-11-24)
+
+Read-only provisioning for the standing-#6 claim in report §15. No build,
+listener, request or traffic to any non-loopback system. Each digest is
+SHA-256 of the exact bytes fetched with `curl -fsSL`.
+
+| Source (tag) | URL | SHA-256 | Observed line |
+| --- | --- | --- | --- |
+| imgproxy v4.0.0 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.0/docker/Dockerfile` | `ad972a992e5c77f8d7651b1e87bf065f318bf516103a51077344bf3395326b85` | `ARG BASE_IMAGE_VERSION="v4.0.1"` |
+| imgproxy v4.0.1 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.1/docker/Dockerfile` | `cb17e8a7ec507ea97b2ddc96d4e9b5a43232665d8aa53da1b97c4f8fad761fd0` | `ARG BASE_IMAGE_VERSION="v4.0.2"` |
+| imgproxy v4.0.2 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.2/docker/Dockerfile` | `cb17e8a7ec507ea97b2ddc96d4e9b5a43232665d8aa53da1b97c4f8fad761fd0` | `ARG BASE_IMAGE_VERSION="v4.0.2"` |
+| imgproxy v4.0.3 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.3/docker/Dockerfile` | `cb17e8a7ec507ea97b2ddc96d4e9b5a43232665d8aa53da1b97c4f8fad761fd0` | `ARG BASE_IMAGE_VERSION="v4.0.2"` |
+| imgproxy v4.0.4 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.4/docker/Dockerfile` | `72d44b8c28d50fd41f7752e2f1cd86c0a6df76ab9fff886191bdbe6b7dbb7496` | `ARG BASE_IMAGE_VERSION="v4.0.3"` |
+| imgproxy v4.0.5 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.5/docker/Dockerfile` | `72d44b8c28d50fd41f7752e2f1cd86c0a6df76ab9fff886191bdbe6b7dbb7496` | `ARG BASE_IMAGE_VERSION="v4.0.3"` |
+| imgproxy v4.0.6 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.6/docker/Dockerfile` | `cd3e51b8432c0c1f43d3539285890aa89bd9a71ea772d0bedc316b81c0fd0b80` | `ARG BASE_IMAGE_VERSION="v4.0.4"` |
+| imgproxy v4.0.7 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.7/docker/Dockerfile` | `cd3e51b8432c0c1f43d3539285890aa89bd9a71ea772d0bedc316b81c0fd0b80` | `ARG BASE_IMAGE_VERSION="v4.0.4"` |
+| imgproxy v4.0.15 `docker/Dockerfile` | `https://raw.githubusercontent.com/imgproxy/imgproxy/v4.0.15/docker/Dockerfile` | `ca1f6857cf96c38bf07626b0b1e59a517881f9f0dab380e3c2a5b5086f9d95d1` | `ARG BASE_IMAGE_VERSION="v4.0.8"` |
+| docker-base v4.0.0 `versions.sh` | `https://raw.githubusercontent.com/imgproxy/imgproxy-docker-base/v4.0.0/versions.sh` | `5b665cef7f24fdf2445f485404a9e91d10a6e42efea4027bdbc28f816d5026db` | `export VIPS_VERSION=8.18.2` |
+| docker-base v4.0.1 `versions.sh` | `https://raw.githubusercontent.com/imgproxy/imgproxy-docker-base/v4.0.1/versions.sh` | `facbda1836acde10a4cb6b7432fea715fd93ac7d2e94a649c9e4ebaaee341754` | `export VIPS_VERSION=8.18.2` |
+| docker-base v4.0.2 `versions.sh` | `https://raw.githubusercontent.com/imgproxy/imgproxy-docker-base/v4.0.2/versions.sh` | `8f05da37e948fed50c69a6f1f0aca90def84647e07af22ee575fc32617bcc360` | `export VIPS_VERSION=8.18.2` |
+| docker-base v4.0.3 `versions.sh` | `https://raw.githubusercontent.com/imgproxy/imgproxy-docker-base/v4.0.3/versions.sh` | `15c7a29e847c3fdf10304232e776dec25ace775b3fc29005f8ba8cd5d28c085f` | `export VIPS_VERSION=8.18.2` |
+| docker-base v4.0.4 `versions.sh` | `https://raw.githubusercontent.com/imgproxy/imgproxy-docker-base/v4.0.4/versions.sh` | `2985b75e18ab98dc0fd9da9ea7914b5cc4afa0bf2fefaae4e9d759d6fee3b454` | `export VIPS_VERSION=8.18.3` |
+| docker-base v4.0.8 `versions.sh` | `https://raw.githubusercontent.com/imgproxy/imgproxy-docker-base/v4.0.8/versions.sh` | `8976507ac5c49886f6ed3259dd0214fd5cf779cb55025313aad4dcd48da504c9` | `export VIPS_VERSION=8.18.6` |
+| docker-base master `versions.sh` | `https://raw.githubusercontent.com/imgproxy/imgproxy-docker-base/master/versions.sh` | `731ea66bca82bea81075bb4a238370681fdd8af6876312fd64b36e2cca62ff8a` | `export VIPS_VERSION=8.18.7` |
+
+imgproxy's own libvips-loader CVE claim, already in-tree and used only to
+evidence the network-facing reachability class, is pinned at
+`lab/frontier/imgproxy2shell/PROVENANCE.md` (CVE-2026-123614 /
+GHSA-hff9-5pqw-6w9f, imgproxy 4.0.0-<4.0.16). `imgproxy-docker-base` tag
+`v3.31.0` returned 404, so the 3.x line's libvips pin is UNVERIFIED.
+
+Negative result preserved: the first candidate, imgproxy v4.0.15, was
+**rejected** as a CVE-2026-69242 consumer — its base v4.0.8 pins libvips
+8.18.6, above the 8.18.3 fix. The affected range was then found by walking
+release Dockerfiles backward to the base-tag boundary (v4.0.3 8.18.2 →
+v4.0.4 8.18.3). This is source enumeration, not a runtime measurement: no
+imgproxy process was built or run. Grade unchanged: rungs 1–4, rung 5 UNKNOWN.
