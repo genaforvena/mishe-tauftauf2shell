@@ -193,3 +193,10 @@ destination is the first call's output.
   crafted reply because `local.sin_addr` was randomized; no marker was seen
   and the checker reported `NO_TAINT`. No pointer, attacker-chosen IP
   without hidden-state observation, command or r5; author-side only.
+
+Clean-archive replay from committed `35891e22` (`git archive 35891e22
+lab/frontier/hping3shell` plus the gitignored `provision/` copy) rebuilt
+`plain-src` itself and gave 4 PASS / 0 FAIL baseline and 6 PASS / 0 FAIL
+attack, rc 0. Observed `127.0.0.251` vs counterfactual `127.0.0.226` there:
+the concrete byte varies with `/dev/urandom` seeding, the causal difference
+does not. No pinned source edited; all probes stayed in 127/8 on `lo`.

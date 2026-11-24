@@ -200,6 +200,14 @@ destination chosen by `hp_rand()` from the overwritten `rc4_sbox`.
   which was randomized; no crafted frame reached `display_ipopt()` and the
   checker correctly reported `NO_TAINT`. The rand-dest mode fixed that.
 
+Clean-archive replay 23:59Z from committed `35891e22`
+(`git archive 35891e22 lab/frontier/hping3shell`, gitignored `provision/`
+copied in, scripts built their own `plain-src`): baseline 4 PASS / 0 FAIL and
+attack 6 PASS / 0 FAIL, rc 0 both. The concrete destination bytes differ
+(`127.0.0.251` observed vs `127.0.0.226` counterfactual) because
+`hp_rand_init()` seeds from `/dev/urandom`; the causal property and counts
+are stable. No pinned source edited; all probes stayed in 127/8 on `lo`.
+
 ## Next
 
 Witness replay of both wire stages is still owed. The single command in the
