@@ -190,7 +190,7 @@ grade.
   the witness rebuilt shim and drivers from committed sources but linked the
   gitignored provisioned pinned static `.a` libraries, not a from-scratch
   sofia-sip build. Rung 5 still not implied.
-- W14 (2026-11-23, author-observed pending witness replay, no grade change):
+- W14 (2026-11-23, witness-backed by #3280/W182, no grade change):
   extending W11's second-order timer-heap write with `SIA_DEEP_EXTRA=60`
   admitted 95 `su_timer_set()` adds and wrote 16 consecutive live timer
   pointers from timer-array offset +520 through +640, overwriting a 19-byte
@@ -201,3 +201,10 @@ grade.
   bytes/addresses; no callable field, marker or command; rung 4 only. Sources
   `live_ws_timers_deep.c`, `timer_probe_deep.c`, `run_deep_probe.sh`;
   evidence `lab/sofiasip2shell/libbuild/evidence/w14/`.
+  Witness #3280 (W182) replayed commit `4d508dc` from a clean git archive into
+  `/tmp/w182-sofia`: rc 134/0/0/0, the full measured timer-heap matrix, all
+  `.rc/.cmd/.out` and compile logs byte-identical after path normalization,
+  `.err` traces matching after pointer/path normalization. Verdict
+  **ESTABLISHED at the labeled rung-4 live plain v17 tport scope**, no
+  counterexample, no grade change, no rung 5. BUILD LIMIT: pinned static libs
+  reused from the live tree, not rebuilt from pinned source (same as W11/W164).

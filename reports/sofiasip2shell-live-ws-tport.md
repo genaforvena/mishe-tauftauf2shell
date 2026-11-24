@@ -290,11 +290,34 @@ the following object stay intact. A port-shifted replay (19311-19314) with
 the same sources reproduced every field structurally: 95 adds, the same
 16-pointer run, the same controls.
 
-**Grade unchanged: rung 4, author-observed pending witness replay.** This is
-a larger second-order write than W11 — the library writes live timer pointers
+**Grade unchanged: rung 4, now witness-backed at the labeled live plain v17
+tport scope (verdict #3280 / W182).** This is a larger second-order write than
+W11 — the library writes live timer pointers
 through a neighbouring 19-byte live object and several chunk headers, not
 just one boundary slot — but the values are heap pointers, not attacker-chosen
 bytes or addresses. The overwritten object was symbolized to a generic string
 allocation; no callback, callable field, marker or command was reached, and
 the glibc abort still follows from corrupted allocator headers. It does not
 support a rung-5 claim.
+
+Witness #3280 (W182) replayed the W14 target from a clean `git archive 4d508dc`
+into `/tmp/w182-sofia` with the live tree untouched. On fresh loopback ports
+19301-19304 `bash lab/sofiasip2shell/libbuild/live/run_deep_probe.sh` returned
+rc 134 / 0 / 0 / 0 as claimed: v17-full `TIMER_Q_BEFORE size=99236347796094`
+(`0x005a4143425a7e`), `used=30`, `boundary_off=528`,
+`TIMER_NEIGHBOR_ALLOC size=528`, `TIMER_AFTER_ALLOC delta=544 size=19`,
+`DEEP_MODE extra=60 target=125`, `TIMER_ADDS n=95 used=125`, and the same
+16-qword pointer run at +520..+640; the v17 short frame and both v18 cases
+were rc 0 with two in-bounds adds. All four `.rc/.cmd/.out` files and both
+compile logs matched the tracked `evidence/w14` byte-for-byte after path
+normalization. The four `.err` traces matched after normalizing ASLR pointers,
+decimal pointer deltas and build paths; the only residual difference was an
+inter-process stderr line-order race (`CLIENT_FRAME_SENT` vs `TIMER_SHIM`),
+not a content difference. Source-bound to mask4 `{41 5a 42 43}` at
+`live_ws_timers_deep.c:70`, applied by `build_frame` (:201-212), and to
+`SIA_DEEP_EXTRA` at :96-115; `timer_probe_deep.c` writes nothing. Verdict
+**ESTABLISHED at the labeled rung-4 live plain-v17 tport scope**: no
+counterexample, no grade change, no rung 5. BUILD LIMIT: both pinned static
+libraries were reused from the live tree (v17plain sha256 `a50c71bd…`,
+v18plain `5c5b35ba…`), not rebuilt from pinned source in this replay — the
+same reuse caveat as W11/W164.
