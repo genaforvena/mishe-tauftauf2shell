@@ -286,3 +286,29 @@ not a command. It closes the "no socket" observation gap but does not move
 the grade: rung 3 at the real heap destination, local rung-4 chosen-target
 execution conditional on canary knowledge, rung 5 UNKNOWN. Commands and raw
 output: `evidence/real-plain-socket-loopback.out`.
+
+## Device-chosen heap pointer at a real gphoto2 API (W170, 2026-11-24)
+
+W168's outside grooming never put a live object after `camera->pl`; W170
+allocates the victim from inside the lab vusb bulk-read hook, after
+`camera->pl` exists. Draining 24 same-size tcache entries makes the victim
+a real `CameraFile` at `priv+0x4050`, the first chunk after the private
+struct. The `:154` overflow starts at `priv+0x4040`, so device bulk offsets
+`0x3F90/0x3F98/0x3FA0` reach the object's `accesstype/size/data` fields.
+
+With the reply also carrying the probe's own canary and a chosen saved RIP
+(the local `finish()` function), `gp_file_get_data_and_size()` on that live
+object returned `data=0x1122334455667788` and `size=0x1a2b3c4d`, both chosen
+by the device. Controls: count 100 and the fixed camlib make no bulk read
+and produce no diversion; a wrong canary aborts at `__stack_chk_fail`; a
+zero-filled reply with no field overrides returns `data=(nil) size=0x0`;
+reversing the fix restores the chosen values.
+
+This is a controlled pointer and length at a real library API, not a
+command or control-flow chain: the pointer is never dereferenced, the
+canary/RIP and victim placement are lab-assisted, and there is no wire,
+physical USB, consumer network path or witness replay. Rung 4 at the real
+heap/API scope; rung 5 remains UNKNOWN. Local-only vusb diff
+`evidence/replay-vusb-victim.patch`, probe `evidence/replay-victim_probe.c`,
+commands and raw output `evidence/real-plain-heap-pointer-control.out`.
+

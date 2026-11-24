@@ -12,6 +12,10 @@ conditional on the device knowing the process canary; the witness verdict
 above remains scoped to what it actually replayed. W169 rebuilt W167 from a
 clean archive and fed the same reply over a 127.0.0.1 socket, still with the
 canary supplied by the target's own diagnostic output; rung 5 stays UNKNOWN.
+W170 then steered a live `CameraFile` pointer and size through a real
+libgphoto2 API with device-chosen bytes in the plain real build; that is
+lab-assisted rung 4 at the real heap/API scope, unwitnessed, with no command
+or wire, so rung 5 is still UNKNOWN.
 Byte-exact pins and hashes:
 `lab/frontier/libgphoto2shell/PINS.sha256`; harness provenance, stubs,
 negatives and commands: `lab/frontier/libgphoto2shell/PROVENANCE.md`. Frontier
@@ -123,11 +127,13 @@ plumbing. W162 adds a real ASan libgphoto2 2.5.34 build whose `jl2005c` camlib
 is reached through `gp_camera_init()` with libgphoto2's own `vusb` virtual USB
 port, patched in the lab to answer the JL2005 handshake with chosen bytes; see
 `lab/frontier/libgphoto2shell/REAL-BUILD.md`. No real USB hardware, physical
-camera enumeration, gvfs/digiKam consumer, network wire, pointer-control
-chain, marker execution outside the local driver, witness-verified impact or
-command execution. W169 fed the crafted table reply over a 127.0.0.1 socket,
-but that is a lab transport into a patched vusb port, not USB/IP or a remote
-host.
+camera enumeration, gvfs/digiKam consumer, network wire, witness-verified
+impact or command execution. W170 adds a device-chosen pointer and length at
+a real gphoto2 API under lab-assisted heap placement and canary/RIP control,
+not a dereference or command. W169 fed the crafted table reply over a
+127.0.0.1 socket, but that is a lab transport into a patched vusb port, not
+USB/IP or a remote host.
+
 The malicious-USB-device attacker model is a claim carried by a
 synthetic transport here. A rung-5 path would still need a network-facing host
 that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
@@ -243,3 +249,22 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   conditional on canary knowledge, rung 5 UNKNOWN. Raw output and replay
   artifacts: `lab/frontier/libgphoto2shell/evidence/real-plain-socket-loopback.out`,
   `replay-vusb-socket.patch`, `replay-socket_sender.py`.
+
+- Device-chosen heap pointer at a real API (W170, 2026-11-24): the plain
+  real build's vusb bulk-read hook allocates a live `CameraFile` after
+  `camera->pl` exists; draining 24 same-size tcache entries puts it at
+  `priv+0x4050`, the first chunk after the private struct. The `:154`
+  overflow starts at `priv+0x4040`, so device reply offsets
+  `0x3F90/0x3F98/0x3FA0` reach the object's `accesstype/size/data` fields.
+  With the probe's own canary and a chosen saved RIP in the reply,
+  `gp_file_get_data_and_size()` returned the device-chosen
+  `data=0x1122334455667788 size=0x1a2b3c4d`. Controls: count 100 and the
+  fixed camlib make no bulk read and no diversion, wrong canary
+  `*** stack smashing detected ***`, zero-filled reply with no overrides
+  `data=(nil) size=0x0`, fix reversal restores the chosen values. The
+  chosen pointer is never dereferenced; canary, saved RIP and victim
+  placement are lab-assisted, and there is no wire, command or witness
+  replay. Rung 4 at the real heap/API scope; rung 5 UNKNOWN. Raw output,
+  local-only diff and probe:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-heap-pointer-control.out`,
+  `replay-vusb-victim.patch`, `replay-victim_probe.c`.

