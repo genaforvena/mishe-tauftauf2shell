@@ -1,6 +1,6 @@
 # Frontier brief — n2n2shell (CVE-2026-136404)
 
-Status 2026-11-24 21:4xZ: STAGED and handed off, witness UNKNOWN, operator
+Status 2026-11-24 21:2xZ: STAGED and handed off, witness UNKNOWN, operator
 admission pending. This is a research artifact, not independent acceptance.
 
 ## Ground truth (claim, not verified remotely)
@@ -48,9 +48,8 @@ to the verbatim decoder, and checks a canary.
 - Vulnerable plain build, same input: chosen wire bytes `48 5a 4d 49`
   appear at `canary[0..3]` (token offset 50..53); safe 48-byte input leaves
   `ab ab ab ab`.
-- Fixed build, same oversized input: `RET=-1`, canary unchanged, ASan clean.
 - `sh harness/run.sh`: 15 PASS / 0 FAIL, rc 0, in-tree and from a clean
-  archive receipt (see below).
+  `git archive 2907b7e4` replay (receipt commit follows).
 
 ## Rung-4 feasibility and ceiling
 
