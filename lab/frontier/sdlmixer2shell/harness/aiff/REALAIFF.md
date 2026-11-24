@@ -29,7 +29,6 @@ The fixed source is committed as `lab/frontier/sdlmixer2shell/src/decoder_aiff.c
 vulnerable tree plus that file, so a clean archive can rebuild the lane.
 
 ## Inputs
-
 `craft_aiff.py` emits five minimal AIFF-C/AIFF files in `evidence/`:
 
 | file | compression | data | role |
@@ -48,6 +47,10 @@ gives `buflen=1024`, `length=256`, `out = &buffer[1020]`, and 1020 bytes of
 out-of-bounds stores. File SHA-256s are in `REAL.sha256`.
 
 ## Driver and commands
+
+Given the provisioned `deps/` tree, `sh run-real.sh` is the one-command replay:
+it checks `REAL.sha256`, regenerates the inputs, builds the three mixers,
+compiles the three drivers and runs `check-real.sh`.
 
 The driver is the committed `harness/realwav/realwav_driver.c` (unmodified):
 `MIX_CreateAudioDecoder(path)` + `MIX_GetAudioDecoderFormat` +
