@@ -290,6 +290,22 @@ line allocates the buffer, so it can never be reached by the forward OOB
 store: the consumer limit is structural, not a layout accident. Receipt:
 `realpath/evidence/xfptr/reorder/REPLAY.md`. No grade change.
 
+### 3.11 W192 installed-libXfont2 binary corroboration of the consumer limit
+
+The installed `/usr/lib/x86_64-linux-gnu/libXfont2.so.2.0.0`
+(sha256 `34df45302c6f25030ef0f0b523e3a76e60a14d75fab78c09b535d46212c24ef7`,
+dpkg `libxfont2 1:2.0.6-1+deb13u1build0.24.04.2`) imports only four fontenc
+symbols: `FontEncFind`, `FontEncFromXLFD`, `FontEncName`, `FontEncRecode`.
+There is no `FontEncMapFind`/`FontMapFind` import that could select a later
+mapping. Disassembly of the single callback wrapper at `+0xfcb0` shows
+`mov 0x18(%rsi),%rsi` at `+0xfcc7` (the `FontEncRec.mappings` list head),
+then `call FontEncName@plt` at `+0xfcd8` and `call FontEncRecode@plt` at
+`+0xfd00`, both with that list head. Both per-map callbacks therefore see
+the first map only, which is allocated at `STARTMAPPING` before any code
+line can allocate the encoding buffer. This is binary-level corroboration
+of §3.10's source and runtime conclusion, not a new experiment or grade
+change: no hijacked pointer is invoked on this host's X server path.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery was exercised. A

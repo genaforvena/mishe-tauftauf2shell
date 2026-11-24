@@ -567,3 +567,20 @@ no invoked control flow in Xvfb, no command, no wire input, no privileged
 process. No Xvfb left running. The remaining blockers are unchanged:
 no setuid X server or display manager on this host, and static 16-bit word
 writes cannot absorb ASLR's randomized heap bits 12-15.
+
+## W192: binary-level corroboration of the Xvfb consumer limit (2026-11-24)
+
+Checked the installed consumer, not the harness:
+`/usr/lib/x86_64-linux-gnu/libXfont2.so.2.0.0` sha256
+`34df45302c6f25030ef0f0b523e3a76e60a14d75fab78c09b535d46212c24ef7`,
+dpkg `libxfont2 1:2.0.6-1+deb13u1build0.24.04.2`. `nm -D` lists only
+`FontEncFind`, `FontEncFromXLFD`, `FontEncName`, `FontEncRecode` as fontenc
+imports — no `FontEncMapFind`/`FontMapFind` route to a later mapping.
+`objdump -d` at the one callback wrapper (`+0xfcb0`) reads
+`mov 0x18(%rsi),%rsi` at `+0xfcc7`, `call FontEncName@plt` at `+0xfcd8`
+and `call FontEncRecode@plt` at `+0xfd00`, both using the encoding's
+`mappings` list head. The invoked `FontMapRec` is therefore the first map,
+allocated at `STARTMAPPING` before any code line allocates the buffer; a
+forward OOB write cannot reach it. This corroborates W189's source and
+runtime result with installed bytes. No new experiment, no Xvfb started,
+no grade change, no witness verdict; rung 5 stays UNKNOWN.
