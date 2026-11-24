@@ -540,8 +540,8 @@ Prediction: `CopyVector` (`BaseImporter.h:334-345`) uses `vec.size()` =
 `(finish-begin)/8`, so the document word selects the returned scene's mesh
 count.
 
-Result: **10 PASS / 0 FAIL**; trace sha256
-`e15719a8645a23abe076a9694556a90a640cc152d4c044b826aaed3570223c94`,
+Result: **12 PASS / 0 FAIL**; trace sha256
+`0aaeafc178a3e433d98057dfd741d4fbacf18808d81142855cf06b71dbbe4a9e`,
 captured window sha256
 `483a629ed8f1ac9027e85fae9c4c26743b9e98d01beeaf1f56d38d66c10e20c2`.
 Own begin `0x555555570210`, cap `0x555555570218` (stable twice). With finish
@@ -550,7 +550,10 @@ low words for sizes 0..3, the live finish at `glTFImporter.cpp:475` is
 unchanged; `scene=ok` with `meshes=0`, `1`, `2`, `3`; gdb reports `exited
 normally`. A separate gdb inspection after `ImportMeshes` on the size-3 case
 shows the two extra `mMeshes` slots are NULL, not attacker-chosen pointers.
-The plain ASLR-on run of the same document is SIGSEGV rc 139.
+The plain ASLR-on run of the same document is SIGSEGV rc 139. The harness
+discovers the overflow destination as the last 64-byte `memcpy@plt` call before
+the fault rather than deriving it from the vector address: that offset is not
+stable across builds (see the clean replay below).
 
 Preserved negatives: a window captured earlier at `glTFImporter.cpp:314` is
 stale in two bytes and gives `free(): invalid pointer`; a window captured from
@@ -566,6 +569,26 @@ a gdb-measured full destination window at the real importer / stub-scene-driver
 scope. High bits are inherited, the extra pointers are NULL, and there is no
 chosen code address, controlled IP, marker, command or listener. NO r5.
 Author-measured and unwitnessed; clean-archive replay recorded below.
+
+Clean-archive author replay at 19:2xZ from `git archive 9d0b20eb` into
+`/tmp/w19-clean`: local pinned tarball copied in, `bootstrap.sh` 10/10 pins OK,
+`harness/bin/w12_o2` built locally by `run-w12.sh` (the gitignored driver),
+then the unmodified `run-w19.sh` gave **12 PASS / 0 FAIL** with a different
+layout: own begin `0x555555570250`, overflow destination `0x7fffffffc584`,
+window sha256
+`97b1640b3e130d140307299c2f3e759fd48576580a1240efd338f2b2fba31725`,
+sizes 0..3 still clean with `meshes=0/1/2/3`, plain rc 139. Raw clean trace
+sha256 `ddaf80bebb5c572dbba15cd8b1ed3d2546f64bbd164a4be87250c18c2df14acb`.
+Claim-bearing lines (`BASE`, `LEN*`, `NEG`, `FOLLOW`, `TOTAL`, with addresses
+normalized) are byte-identical between tree and clean archive, sha256
+`c9c34df461ef6949fa484d0a9dc2b09c78cae2979716ea67c02732a4f2312173`; only
+the layout-dependent `CAL`/`DISC`/`WIN`/`DST` lines differ. Preserved replay
+negatives: the first clean attempt copied the gitignored driver from the
+author tree, whose debug paths and rpath pointed at the original library, so
+the gdb live-field breakpoints did not fire; and the first harness revision
+derived the destination from the vector address, which was wrong in the
+clean tree. Both were corrected (local driver build; call-site discovery)
+before the 12/12 result above. Author replay, not witness acceptance.
 
 ## Next lane
 

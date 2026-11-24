@@ -16,4 +16,4 @@ v1=00000001 00000000 00000000
 dump16=00 00 80 3f 00 00 00 00 00 00 00 00 21 00 00 00 
 tail=00 00 00 00
 nextsize=0000000000000021
-[Inferior 1 (process 2967196) exited normally]
+[Inferior 1 (process 3270675) exited normally]

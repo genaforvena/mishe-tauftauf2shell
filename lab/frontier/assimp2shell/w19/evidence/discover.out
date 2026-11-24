@@ -1,0 +1,18 @@
+Temporary breakpoint 1 at 0x12b0: file harness/placement_driver.cpp, line 21.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, main (argc=2, argv=0x7fffffffe248) at harness/placement_driver.cpp:21
+21	int main(int argc, char **argv) {
+Breakpoint 2 at 0x7ffff78a5260 (3 locations)
+DST=0x555555570268 SRC=0x55555556d720 N=64
+DST=0x5555555703c8 SRC=0x55555556d720 N=64
+DST=0x555555570548 SRC=0x55555556d740 N=64
+DST=0x555555581158 SRC=0x55555556d720 N=64
+DST=0x5555555812b8 SRC=0x55555556d720 N=64
+DST=0x555555581438 SRC=0x55555556d740 N=64
+DST=0x7fffffffc534 SRC=0x5555555806a4 N=64
+
+Program received signal SIGSEGV, Segmentation fault.
+std::for_each<__gnu_cxx::__normal_iterator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >*, std::vector<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >, std::allocator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> > > > >, Assimp::BaseImporter::CopyVector<aiMesh>(std::vector<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >, std::allocator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> > > >&, aiMesh**&, unsigned int&)::{lambda(std::unique_ptr<aiMesh, std::default_delete<aiMesh> >&)#1}>(__gnu_cxx::__normal_iterator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >*, std::vector<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >, std::allocator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> > > > >, __gnu_cxx::__normal_iterator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >*, std::vector<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >, std::allocator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> > > > >, Assimp::BaseImporter::CopyVector<aiMesh>(std::vector<std::unique_ptr<aiMesh, std::default_delete<aiMesh> >, std::allocator<std::unique_ptr<aiMesh, std::default_delete<aiMesh> > > >&, aiMesh**&, unsigned int&)::{lambda(std::unique_ptr<aiMesh, std::default_delete<aiMesh> >&)#1}) (__f=..., __last=..., __first=<error reading variable: Cannot access memory at address 0x41414141>) at /usr/include/c++/13/bits/stl_algo.h:3833
+3833		__f(*__first);

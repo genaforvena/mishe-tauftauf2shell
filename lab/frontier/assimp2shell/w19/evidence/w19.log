@@ -1,3 +1,5 @@
+PASS vulnerable memcpy destination discovered
+PASS captured window matches own vector
 PASS source hashes pinned
 PASS input length fixed
 PASS calibration stable across two measurements

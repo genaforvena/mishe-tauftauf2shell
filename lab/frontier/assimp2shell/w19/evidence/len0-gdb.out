@@ -10,4 +10,4 @@ $2 = 0x555555570210
 $3 = 0x555555570218
 case=w19/evidence/len0.gltf scene=ok err=
 meshes=0
-[Inferior 1 (process 2966932) exited normally]
+[Inferior 1 (process 3270385) exited normally]
