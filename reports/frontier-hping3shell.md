@@ -113,6 +113,20 @@ kernel parameter-problem RR replies (`i<=11`); the deeper chosen bytes
 persist. No pointer/IP/command control, no r5; details in
 `reports/hping3shell-status.md`. Witness replay OWED.
 
+## RNG behavior change (W5, 23:56Z) — done, author-side
+
+`wire/rng-proof.sh` runs the real plain build with
+`--rand-dest 127.0.0.x` on `lo` (local address stays 127.0.0.1, so the
+crafted reply passes `waitpacket.c:94`) and GDB reads `i.1`, `j.0` and the
+live `rc4_sbox` at each random-destination selection. Baseline: 4 PASS /
+0 FAIL, all 15 probe destinations predicted from the unmodified live state.
+Attack: 6 PASS / 0 FAIL, the overwritten `sbox[0..45]=0x13…0x40` predicts
+the observed next probe destination `127.0.0.79`, while the unattacked
+counterfactual is `127.0.0.179`. This closes the previous UNKNOWN about
+overwritten-RNG behavior; grade unchanged (rung 4, no chosen IP without
+hidden-state observation, no pointer/command, no r5). Details and the
+negative `--rand-source` attempt are in `reports/hping3shell-status.md`.
+
 ## Witness disposition (W207, #3820)
 
 Independent clean-archive replay (`git archive 34c3c573`) gave 12 PASS / 0

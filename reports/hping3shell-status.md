@@ -132,9 +132,10 @@ loopback RR reply reaches `display_ipopt()`; the ASan build aborts with
 attacker-chosen bytes land at chosen offsets in `rc4_sbox` (verified by GDB
 with a zero baseline). A valid RR reply and the locally patched build stay
 clean. No pointer/IP/command control and no rung 5. Stock glibc outcome,
-`IPOPT_LSRR`, and any behavior change from the overwritten `rc4_sbox` stay
-UNKNOWN. Both wire stages are author-side only; witness replay of each is
-OWED.
+`IPOPT_LSRR` stay UNKNOWN; the behavior change from the overwritten
+`rc4_sbox` is now measured (W5 below). Both wire stages are author-side
+only; witness replay of each is OWED.
+
 
 ## Witness verdict (W207, #3822)
 
@@ -167,6 +168,37 @@ asserts their exact pass counts. Author receipt at 23:24Z from that clean
 archive: `STAGE OK asan 9`, `baseline 3`, `attack 4`, `fixed 3`,
 `REPLAY_ALL_WIRE_OK: 19 checks`, rc 0. No new claim, no grade change; this is
 a replay convenience, not independent acceptance.
+
+
+## RNG behavior change from the overflow (W5, 2026-11-24 23:56Z)
+
+`wire/rng-proof.sh` and `wire/check_rng.py` close the previous UNKNOWN: in a
+real plain hping3 on loopback the crafted RR reply changes the next probe
+destination chosen by `hp_rand()` from the overwritten `rc4_sbox`.
+
+- Run mode: `hping3 -D -1 -G --rand-dest -I lo -c 16 -i 1 127.0.0.x`. All
+  probes stay in 127.0.0.0/24 on `lo`; the local address stays 127.0.0.1 so
+  the crafted reply passes the `waitpacket.c:94` destination check.
+- GDB only reads state at `select_next_random_dest()` entry: static `i.1`,
+  `j.0` and the 256 bytes of `random.c`'s `rc4_sbox`. No process state is
+  written by the debugger. This build makes four `hp_rand()` calls per
+  packet; the low byte of the probe destination is the first call's output.
+- Baseline (`NO_INJECT=1`): **4 PASS / 0 FAIL**, 15 states / 16 destinations;
+  every destination is predicted from the logged live sbox/i/j and no RR
+  marker appears. Evidence `wire/evidence/rng-baseline-{gdb,run,proof}.out`.
+- Attack: **6 PASS / 0 FAIL**, 12 states / 13 destinations, every
+  destination predicted; state 4 carries `sbox[0..45]=0x13…0x40` from the
+  crafted RR; the observed probe destination `127.0.0.79` matches the
+  prediction from the overwritten sbox, while the unattacked counterfactual
+  from the prior state is `127.0.0.179`. Evidence
+  `wire/evidence/rng-attack-{gdb,run,proof}.out`.
+- Ceiling unchanged: no function pointer in the 251-byte span, no chosen-IP
+  control without observing hidden i/j, no command, no rung 5. Author-side
+  only; the witness replay of both wire stages is still owed.
+- Negative preserved: the first attempt used `--rand-source`, but
+  `waitpacket.c:94` checks the reply destination against `local.sin_addr`,
+  which was randomized; no crafted frame reached `display_ipopt()` and the
+  checker correctly reported `NO_TAINT`. The rand-dest mode fixed that.
 
 ## Next
 

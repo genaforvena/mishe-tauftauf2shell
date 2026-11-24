@@ -159,8 +159,9 @@ address from `nm`. `old_rr[0..45]` are subsequently rewritten by
 kernel-generated parameter-problem RR replies with `i<=11`, so the shallow
 offsets are not asserted; only the deeper bytes that persist are claimed.
 The 251-byte copy reaches `rc4_sbox[0..185]`, but only the first 46 bytes
-carry our unique marker. No pointer, IP or command control, no observed
-behavior change from the overwritten sbox, no r5; witness replay OWED.
+carry our unique marker. No pointer or command control, no r5; the behavior
+change from the overwritten sbox is now measured in W5 below; witness replay
+OWED.
 
 Patched-build control: `wire/plain-fixed-proof.sh` applies `pinned/fix.patch`
 to a copy of `plain-src` (patched sha256
@@ -169,3 +170,26 @@ rebuilds and repeats the same three crafted RR replies. `check_plain.py`
 baseline mode gave 3 PASS / 0 FAIL with `rc4_sbox[0..45]` all zero, tying
 the chosen bytes in the unpatched build to the unclamped `memcpy`. Raw output:
 `wire/evidence/plain-fixed-{gdb,proof,run}.out`.
+
+## W5 — live RNG behavior change (2026-11-24 23:56Z)
+
+`wire/rng-proof.sh` runs the same pinned plain build with
+`hping3 -D -1 -G --rand-dest -I lo -c 16 -i 1 127.0.0.x`: every probe stays
+in 127.0.0.0/24, local address 127.0.0.1, so the crafted RR reply passes the
+`waitpacket.c:94` destination check. `wire/check_rng.py` reads GDB logs taken
+at `select_next_random_dest()` entry (read-only: `i.1`, `j.0`, 256 bytes of
+`random.c`'s `rc4_sbox`) and predicts the next probe destination from the
+live RC4 state. Four `hp_rand()` calls occur per packet; the low byte of the
+destination is the first call's output.
+
+- Baseline (`NO_INJECT=1`) 4 PASS / 0 FAIL: 15 states / 16 destinations, all
+  predicted, no RR marker in `sbox[0..45]`.
+- Attack 6 PASS / 0 FAIL: 12 states / 13 destinations, all predicted; state 4
+  carries `sbox[0..45]=0x13…0x40`; observed `127.0.0.79` equals the
+  prediction from the overwritten sbox while the unattacked counterfactual
+  from the prior state is `127.0.0.179`.
+- Raw evidence: `wire/evidence/rng-{attack,baseline}-{gdb,run,proof}.out`.
+- Negative preserved: the earlier `--rand-source` variant never delivered a
+  crafted reply because `local.sin_addr` was randomized; no marker was seen
+  and the checker reported `NO_TAINT`. No pointer, attacker-chosen IP
+  without hidden-state observation, command or r5; author-side only.
