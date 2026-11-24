@@ -211,3 +211,29 @@ supersedes W8's open "pointer control at higher strides" phrasing and corrects
 its label of `rbp-8` as the canary (that slot is saved r15). No source,
 harness, binary, pin, matrix row, witness request or grade changed: rungs 1-4,
 no wire/usable-pointer/command, no witness verdict, no rung 5.
+
+## W11 — clean-archive replay of the HTTP row; queued row re-delivered
+
+The W9 HTTP `/rpc` row now has a clean-checkout author replay, closing the
+same gap the tool rows closed in W5. From `git archive d582e43a
+lab/frontier/codebasememory2shell` into `/tmp/w11-cbm-http` with only the
+two hash-verified tarballs copied into the archive's absent `pins/` dir,
+`bash http-tool/replay.sh all` verified 4/4 pins and rebuilt all three
+rows: vuln-asan HTTP 200 for N=1/32 and disconnect RC=1 with ASan
+`READ of size 8` at `cypher.c:2568` for N=33; vuln-recover HTTP 200 RC=0
+for N=1/32/33/48 with `WRITE of size 68` at `project_item:3379` ←
+`execute_return_simple:4116`, frame offset 51840 = `func_bufs[32]`, 16384
+bytes out; fixed-asan N=33/48 `isError:true` with no sanitizer report. Raw
+stderr is preserved in `evidence/http-clean-archive-*-stderr.log` (sha256
+prefixes `b69d4471…`, `cfb8d4e2…`, `f2fb801f…`), with transcribed stdout
+and comparison rules in `evidence/http-clean-archive-replay.txt`. All three
+stderr files match the working-tree captures line-for-line except timing
+fields and one ASan pointer byte dump. Full note:
+`lab/frontier/codebasememory2shell/REPLAY.md`.
+
+Witness W206's live pending-replay list no longer named the HTTP request
+`#3715`, so the author re-delivered that already-requested row at tape
+`#3799` (explicitly not a new claim, additive to `#3228/#3253/#3526`).
+No verdict has arrived; author replay still is not independent acceptance.
+Grade unchanged: rungs 1-4, loopback-only transport, no wire, pointer use,
+command, verdict or rung 5.

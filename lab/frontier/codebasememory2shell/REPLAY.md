@@ -27,3 +27,26 @@ matrix and the gdb transcript.
 
 This is an author replay on the same host, not an independent witness verdict.
 No witness claim is made.
+
+## W11 clean-archive replay of the HTTP `/rpc` rows — 2026-11-24T19:22–19:36Z
+
+Replayed from `git archive d582e43a lab/frontier/codebasememory2shell` into
+`/tmp/w11-cbm-http`; only the two hash-verified tarballs were copied from
+the repository's `pins/` into the archive's absent `pins/` directory.
+`bash http-tool/replay.sh all` verified 4/4 pins and rebuilt all three
+rows from the extracted pinned trees.
+
+- vuln-asan: HTTP 200 for INDEX/N=1/N=32; N=33 disconnected, RC=1, ASan
+  `READ of size 8` at `cypher.c:2568` (`rb_set_columns`).
+- vuln-recover: HTTP 200 for INDEX/N=1/32/33/48, RC=0; ASan UBSan index-32
+  at `cypher.c:4115` and `WRITE of size 68` at `project_item:3379` ←
+  `execute_return_simple:4116`, frame offset 51840 = `func_bufs[32]`.
+- fixed-asan: N=33/48 `isError:true` with `failed to parse query`, no ASan.
+
+Raw stderr is preserved as `evidence/http-clean-archive-*-stderr.log`
+(sha256 prefixes `b69d4471…`, `cfb8d4e2…`, `f2fb801f…`); the transcribed
+stdout and normalized comparison are in
+`evidence/http-clean-archive-replay.txt`. Line counts match the canonical
+working-tree captures (157/755/57); normalized differences are timing
+fields and one ASan-printed pointer byte dump only. Author replay on the
+same host, not an independent witness verdict; grade unchanged.
