@@ -1,0 +1,51 @@
+=================================================================
+==1448943==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x517000000350 at pc 0x7055362fb303 bp 0x7ffdee07b610 sp 0x7ffdee07adb8
+WRITE of size 96 at 0x517000000350 thread T0
+    #0 0x7055362fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5d3edef9b224 in PxeBcIcmp6ErrorDpcHandle generated/handlers_vuln.c:206
+    #2 0x5d3edef9a4df in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pxeicmp2shell/harness/harness.c:130
+    #3 0x705535e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x705535e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5d3edef99364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pxeicmp2shell/harness/asan-vuln+0x2364) (BuildId: 3bbf77306e53953064dbbe8c14d747b860c5cc4a)
+
+0x517000000350 is located 0 bytes after 720-byte region [0x517000000080,0x517000000350)
+allocated by thread T0 here:
+    #0 0x7055362fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5d3edef99a6f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pxeicmp2shell/harness/harness.c:71
+    #2 0x705535e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x705535e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x5d3edef99364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pxeicmp2shell/harness/asan-vuln+0x2364) (BuildId: 3bbf77306e53953064dbbe8c14d747b860c5cc4a)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x517000000080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517000000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517000000180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517000000200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x517000000280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x517000000300: 00 00 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa
+  0x517000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x517000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x517000000480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x517000000500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x517000000580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1448943==ABORTING

@@ -1,0 +1,8 @@
+FAMILY=v6 KIND=attack ALLOC=canary EXPECT=-
+sizeof_icmperror=504 sizeof_mode=668 sizeof_priv=720 icmp_off=36 tftp_off=540
+write_start_from_priv=636 write_start_from_tftp=96 past_priv_end=12
+signal_calls=1 token_status=3
+tftp_offset=96 bytes=48 5a 4d 49
+canary_offset=0 bytes=54 41 55 46
+CHOSEN_BYTES_MATCH=1
+RESULT=OK

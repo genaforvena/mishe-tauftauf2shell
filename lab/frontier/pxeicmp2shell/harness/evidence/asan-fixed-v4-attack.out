@@ -1,0 +1,5 @@
+FAMILY=v4 KIND=attack ALLOC=heapexact EXPECT=unchanged
+sizeof_icmperror=504 sizeof_mode=668 sizeof_priv=720 icmp_off=36 tftp_off=540
+write_start_from_priv=636 write_start_from_tftp=96 past_priv_end=12
+signal_calls=1 token_status=3
+RESULT=OK
