@@ -1654,3 +1654,10 @@ no new witness verdict; rung 5 stays UNKNOWN. Would change my mind: a
 geometry where COPY1 stays in bounds *and* a live tcache pointer lies in the
 COPY2 window, an observed malloc from a forged entry, or a witness
 counterexample.
+
+W191 clean-archive receipt (22:57Z): `git archive d6a23b9b lab/openexr2shell-real`
+into `/tmp/w191-clean`, with the gitignored `src/`, `build-vuln-plain`,
+`build-fixed-asan`, `bin-vuln-plain` and `bin-fixed-asan` trees symlinked from
+the live checkout. `sh harness/w191-abort-cause-check.sh` printed `RESULT PASS`
+rc 0 and all five evidence hashes matched the working tree byte-for-byte.
+Author replay, not a witness verdict; grade and rung-5 status unchanged.
