@@ -1,0 +1,5 @@
+memory: high-water mark 0 bytes
+IMAGE=ERR msg=image: dimension overflow
+
+
+RUN_RC=0

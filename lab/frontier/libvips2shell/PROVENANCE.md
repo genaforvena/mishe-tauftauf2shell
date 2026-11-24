@@ -594,3 +594,82 @@ Negative result preserved: the first candidate, imgproxy v4.0.15, was
 release Dockerfiles backward to the base-tag boundary (v4.0.3 8.18.2 →
 v4.0.4 8.18.3). This is source enumeration, not a runtime measurement: no
 imgproxy process was built or run. Grade unchanged: rungs 1–4, rung 5 UNKNOWN.
+
+## W16 — small negative bpl reaches the live vips tracked-size field (2026-11-24)
+
+Routing note from operator #3225: no new target; this CVE stays an adjacent
+same-target lane inside libvips2shell under standing #7. The imgproxy live
+listener and HTTP request are imgproxy2shell's scope extension. Their W1
+(#3250, commits e062321/12056b0) is preserved as the consumer-side negative
+result: real imgproxy 4.0.0 accepts the crafted TIFF into `Image.Load` on
+8.18.2, default JPEG output dies at `Flatten` (9999/9998 elements), `f:tiff`
+enters processing then stalls under the 2 GiB wake cgroup, and the fixed tree
+rejects at `Image.Load` with `image: dimension overflow`. No bpl truncation,
+region paint, write or marker there. No imgproxy tree was touched by this wake.
+
+### Geometry derivation (from pinned source, then measured)
+
+W14 considered but did not run a scanline tuned close to 2^32. Derivation:
+`VIPS_MAX_COORD` default is 100,000,000, so a scanline above 2^31 with width
+under the cap needs `ps = Bands * bytes_per_sample >= 43`. Choosing
+`Bands=12`, `BandFmt=VIPS_FORMAT_UINT` (4 bytes) gives `ps=48`, and
+`89478485 * 48 = 4294967280 = 2^32 - 16`. Casting that 64-bit line size into
+the pinned `int VipsRegion.bpl` (`region.c:637`) gives `bpl = -16`.
+
+`vips_tracked_malloc()` stores the allocation size in the 16 bytes before the
+returned pointer (`memory.c:312`, `:330-331`); `vips_tracked_free()` reads it
+from `data-16..data-9` (`memory.c:220-221`). Pinned
+`vips_region_paint_pel()` (`region.c:974-1008`) with `r={0,0,1,2}` computes
+`ws = 1 * ps = 48`, `ls = (int) VIPS_REGION_LSKIP = -16`, fills line 0 with
+`ink`, then executes `memcpy(to-16, to, 48)` at `:1004`. The first eight
+chosen ink bytes (`0x41`) therefore replace the live tracked size.
+
+### Artifacts (SHA-256)
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `real/fine.c` | `4b3fefc35327a0c70e71d660cfb245b90360440c058e9b91f25768ff6b02c8de` |
+| `real/run-fine.sh` | `1ddf4faa4b86393f59ce50078c3b77bd10930613d3e7310a2eb6fd6e83edc677` |
+| `real/fine-vuln-craft.out` | `60bed3f8b4dd1ccd468db3ff80f881cb64b00a7691cc7db78dc97fe616550669` |
+| `real/fine-fixed-craft.out` | `ead0996d8bf1cd5855bb382b903ed553ad8fe240445d2148cd763bba51853eec` |
+| `real/fine-vuln-safe.out` | `6f70427f4340ff77c808e32929754fdc8c273b2c19700e07a928fd2fb4510029` |
+
+### Observations
+
+Plain pinned builds (not ASan: a redzone would abort at the first poisoned
+byte and hide the allocator field). `real/run-fine.sh` builds both probes and
+runs three legs with a 90 s timeout each; 19 anchored assertions,
+`RESULT fail=0`, process rc 0, clean compile.
+
+- Vulnerable + craft: `IMAGE mode=craft Xsize=89478485 Ysize=2 Bands=12
+  BandFmt=4 sizeof_line=4294967280 sizeof_image=8589934560`,
+  `REGION bpl=-16 lskip=18446744073709551600 valid={0,0,1,2} ws=48`.
+  Before: `TRACKED_SIZE_BEFORE=0x1fffffff0`, prefix `-16: f0 ff ff ff 01 00 00 00`.
+  After: `PAINT_DONE`, `TRACKED_SIZE_AFTER=0x4141414141414141`, prefix
+  `-16: 41 41 41 41 41 41 41 41`, `-8: 5a 5a 5a 5a 5a 5a 5a 5a`,
+  `+0: 5a ...`, `+8: 5a ...`. The untouched `-24` glibc chunk bytes are
+  `02 10 00 00 02 00 00 00` in both dumps.
+- At teardown the corrupted size is consumed:
+  `VIPS-WARNING **: vips_free: too much free`,
+  `memory: 0 allocations, -4702111225885049169 bytes`, `RUN_RC=0`. No SIGSEGV,
+  no `MAP_FIXED_NOREPLACE` victim, no groomed neighbour — unlike W6's
+  `bpl=-7296` default layout (`RUN_RC=139`).
+- Fixed + craft: `IMAGE=ERR msg=image: dimension overflow`; no region line, no
+  `PAINT_DONE`, no `TRACKED_SIZE_AFTER`, no free warning, `RUN_RC=0`.
+- Vulnerable + safe (`Xsize=64`, same bands/format): `sizeof_line=3072
+  sizeof_image=6144`, `bpl=3072`, `TRACKED_SIZE_BEFORE` and
+  `TRACKED_SIZE_AFTER` both `0x1810`, prefix `-16` unchanged, no free warning,
+  `RUN_RC=0`.
+
+### Ceiling and preserved limits
+
+This refines W6 from "default layout is unmapped, availability only" to
+"a tunable small negative offset reaches a mapped, live allocator accounting
+field in the default layout, and chosen bytes there change free-time behaviour".
+The field is a `size_t` size used in arithmetic and a warning branch, not a
+pointer, vtable, saved return address or control-flow diversion; `0x41` bytes
+are not code. The sink is still a direct `vips_region_paint_pel()` call on a
+programmatically created memory image: no TIFF decode, no live consumer, no
+wire/request in this leg, no command, no marker, no witness verdict. Grade
+unchanged: rungs 1–4; rung 5 UNKNOWN. A compile-warning correction during this
+wake restored two omitted `printf` arguments; the final build is warning-free.

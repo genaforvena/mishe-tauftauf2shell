@@ -469,3 +469,59 @@ this either as a scope extension of Imgproxy2Shell or as a new dedicated
 libvips-sanity target; that routing decision is the operator's.
 
 Grade unchanged: rungs 1–4; rung 5 UNKNOWN.
+
+## 16. W16 addendum — small negative offset reaches a live allocator field
+
+**Routing closed (operator #3225).** No new target: this CVE remains an
+adjacent same-target lane inside libvips2shell under standing #7. The live
+listener belongs to imgproxy2shell, which received the imgproxy 4.0.0–4.0.5
+build and crafted-TIFF HTTP request as its own scope extension. This mind owns
+the library-side primitive and the fixed 8.18.3 boundary; the consumer test is
+theirs, not duplicated here.
+
+**Consumer-side outcome (imgproxy2shell W1, #3250; commits e062321/12056b0).**
+A real imgproxy 4.0.0 process over loopback accepts the crafted TIFF into
+`vips Image.Load` on pinned vulnerable 8.18.2; the default JPEG output dies at
+imgproxy `Flatten` (`linear: vector must have 1 or 9999 elements`, 9999 bands
+gives 9998). `f:tiff` skips flatten, enters processing and then stalls under
+this wake's 2 GiB cgroup, consistent with W7/W8's measured multi-GB tile-buffer
+zero-fill. On the fixed 8.18.2+fix tree imgproxy rejects at `Image.Load` with
+`image: dimension overflow`. No truncated `bpl`, region paint, negative-offset
+write, pointer or marker was reached there; rung 5 remains UNKNOWN.
+
+**New library-side measurement.** W6 found that the TIFF-accepted geometry
+(`bpl=-7296`) writes into unmapped memory by default (SIGSEGV) and needs an
+explicit groomed anonymous victim to land anywhere mapped. W16 shows the
+offset is tunable and that a *small* negative offset reaches a live libvips
+metadata field in the default allocator layout, with no grooming:
+
+- Geometry `Xsize=89478485, Ysize=2, Bands=12, BandFmt=UINT (32-bit)` gives
+  `ps=48`, `ls=4294967280 = 2^32-16`, `bpl=-16`; width is below the real
+  loader's `VIPS_MAX_COORD=100000000` cap. `vips_image_write_prepare()` on a
+  real memory image allocates the real 8,589,934,560-byte buffer.
+- Pinned `vips_region_paint_pel()` (`region.c:974-1008`) with a 1-pel,
+  two-line rect has `ws=48` and executes `memcpy(to-16, to, 48)`.
+  `vips_tracked_free()` reads its block size from `data-16..data-9`
+  (`memory.c:220-221`).
+- Vulnerable plain build: `TRACKED_SIZE_BEFORE=0x1fffffff0`,
+  `TRACKED_SIZE_AFTER=0x4141414141414141` — the eight chosen `0x41` bytes
+  occupy the tracked-size field; the next eight bytes at `data-8` are `0x5a`.
+  At teardown libvips prints `vips_free: too much free` and
+  `memory: 0 allocations, -4702111225885049169 bytes`; `RUN_RC=0`. There is no
+  SIGSEGV and no groomed neighbour.
+- Fixed tree: `IMAGE=ERR msg=image: dimension overflow`, no region, no paint,
+  no size-field write, `RUN_RC=0`. Safe control `Xsize=64, Bands=12`:
+  `bpl=3072`, `TRACKED_SIZE_BEFORE == TRACKED_SIZE_AFTER == 0x1810`, no
+  free-time warning, `RUN_RC=0`.
+- Runner `lab/frontier/libvips2shell/real/run-fine.sh` checks 19 assertions;
+  `RESULT fail=0`, rc 0 in-tree. Reproducibility from a clean `git archive` is
+  recorded in `PROVENANCE.md` §W16.
+
+**Ceiling.** This is a rung-4 refinement: chosen bytes in a live allocator
+*accounting field* with an observed free-time effect, on the default layout,
+versus W6's unmapped fault or anonymous victim. The field is a `size_t` used
+in arithmetic and a warning branch — not a pointer, vtable, saved return
+address or control-flow diversion. The write is still a direct
+`vips_region_paint_pel()` call on a programmatically created image; no TIFF
+pixel decode, live consumer, command, marker or witness verdict for rung 5.
+Grade unchanged: rungs 1–4; rung 5 UNKNOWN.

@@ -1,0 +1,25 @@
+IMAGE mode=craft Xsize=89478485 Ysize=2 Bands=12 BandFmt=4 sizeof_line=4294967280 sizeof_image=8589934560 data=0x7e28f1707020
+TRACKED_SIZE_BEFORE=0x1fffffff0
+PREFIX_BEFORE data=0x7e28f1707020
+   -32: 00 00 00 00 00 00 00 00
+   -24: 02 10 00 00 02 00 00 00
+   -16: f0 ff ff ff 01 00 00 00
+    -8: 00 00 00 00 00 00 00 00
+    +0: 00 00 00 00 00 00 00 00
+    +8: 00 00 00 00 00 00 00 00
+REGION bpl=-16 lskip=18446744073709551600 valid={0,0,1,2} ws=48
+PAINT_DONE
+TRACKED_SIZE_AFTER=0x4141414141414141
+PREFIX_AFTER data=0x7e28f1707020
+   -32: 00 00 00 00 00 00 00 00
+   -24: 02 10 00 00 02 00 00 00
+   -16: 41 41 41 41 41 41 41 41
+    -8: 5a 5a 5a 5a 5a 5a 5a 5a
+    +0: 5a 5a 5a 5a 5a 5a 5a 5a
+    +8: 5a 5a 5a 5a 5a 5a 5a 5a
+
+(process:235698): VIPS-WARNING **: 03:19:24.078: vips_free: too much free
+memory: 0 allocations, -4702111225885049169 bytes
+files: 0 open
+memory: high-water mark 8.00 GB
+RUN_RC=0
