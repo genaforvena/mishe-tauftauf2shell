@@ -236,3 +236,54 @@ three (-0xF80, -672, -3968), so no live header object was at `cek+48`. Empty
 fault site in a real process, no code pointer/pointer control, no marker, no
 r5; witness replay of this lane not yet done. No listener or lab Apache
 remained after capture.
+
+## W198 — vulnerable/fixed pair in the real id_token lane (2026-11-24 17:11-17:15Z)
+
+The W184 limitation about a missing fixed-cjose control is closed for the W186
+id_token lane. Only the statically linked cjose changes; Apache, the module,
+the config values and the raw GET/POST bytes come from the same probe scripts.
+
+Build (all outputs under `w2/`, no external target):
+
+```sh
+cd lab/frontier/cjose2shell/w2
+cp -a ../src/fixed cjose-fixed
+(cd cjose-fixed && CC=gcc ./configure \
+   --with-jansson=../../deps/jansson-prefix --disable-shared --enable-static \
+   CFLAGS='-g -O0 -fPIC -fno-omit-frame-pointer' && make -j4)
+cp -a ../src/provisioning/mod_auth_openidc-2.4.15.1 mod_auth_openidc-fixed
+(cd mod_auth_openidc-fixed && ./autogen.sh && \
+   PKG_CONFIG_PATH=../pkgconfig-fixed ./configure --with-apxs=/usr/bin/apxs \
+   CFLAGS='-g -O0 -fPIC -fno-omit-frame-pointer' && make -j4)
+./fixed-control-run.sh fixed       # 127.0.0.1:18443 only
+./fixed-control-run.sh vulnerable  # same port, sequential after cleanup
+```
+
+`apache-idtoken-fixed.conf` and `apache-idtoken-vulncontrol.conf` keep separate
+PID, error-log, cache and runtime paths so the two runs cannot overwrite each
+other's evidence; each gdb script writes its own log. `follow-idtoken.py` sends
+the follow-up GET that exposed the W186 abort. The runner always kills its gdb
+child and removes its PID file on exit; no 18443 listener remained.
+
+Measured, with identical 40-byte (`valid`) and 56-byte (`oversized`) wire tokens:
+
+| variant | unwrap hits (gdb) | oversized rejection | follow GET | abort |
+| --- | --- | --- | --- | --- |
+| vulnerable `mod_auth_openidc` + pinned v0.6.2.4 | 2 (40 and 56) | none; HTTP 400 after integrity failure | no response | `free(): invalid next size (fast)`, log line 448 |
+| same module + v0.6.2.4 plus `8c51d245` | 1 (40 only) | `CJOSE_ERR_INVALID_ARG` at `jwe.c:599`, HTTP 400 | `HTTP/1.1 302 Found` | none |
+
+The vulnerable abort backtrace is the W186 path again:
+`jsonp_free -> json_delete_string -> json_decref -> oidc_proto_state_destroy`
+(`src/proto.c:797`). The fixed log names `_cjose_jwe_decrypt_ek_aes_kw` line
+599, which in the pinned fixed source is the `raw_len != cek_len + 8` check.
+Evidence: `evidence/gdb-idtoken-{vulncontrol,fixed}.log`, the matching
+`*-control-stdout.log`, `idtoken-{vulncontrol,fixed}-apache_error.log`, the
+six `idtoken-*{vulnerablecontrol,fixedcontrol}-*-response.bin` files and
+`evidence/W198-SHA256SUMS`.
+
+Verdict: the 9-line length check prevents the real consumer from reaching
+`AES_unwrap_key` with an oversized segment and removes the observed abort.
+This is a vulnerable/fixed control for the existing rung-4 lane, not a new
+rung: no pointer, command, ASLR defeat or wire-derived address, and the
+state-cookie precondition still makes this non-deployed. The witness has not
+replayed this lane.

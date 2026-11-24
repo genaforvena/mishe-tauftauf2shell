@@ -1,0 +1,8 @@
+prefix=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-prefix
+libdir=${prefix}/lib
+includedir=${prefix}/include
+Name: jansson
+Description: Jansson JSON library (local harness prefix)
+Version: 2.14
+Libs: -L${libdir} -ljansson
+Cflags: -I${includedir}

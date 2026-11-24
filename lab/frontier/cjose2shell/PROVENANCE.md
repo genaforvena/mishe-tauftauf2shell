@@ -657,3 +657,44 @@ Conclusion: the missing length check generalizes to every cjose-supported
 wire-derived pointer. ASLR, RFC 3394's 8-byte write granularity (W196) and
 the absence of a read primitive (W190/W195) still block rung 5. No new rung,
 address leak, marker, command or r5.
+
+## W198 — vulnerable/fixed control in the real id_token consumer (2026-11-24 17:11-17:15Z)
+
+The W184 README's "no fixed-cjose control build" limitation was open for the
+real mod_auth_openidc id_token lane (W186). New lab-only files under `w2/`:
+`fixed-control-run.sh`, `follow-idtoken.py`, `apache-idtoken-fixed.conf`,
+`apache-idtoken-vulncontrol.conf`, `gdb-idtoken-fixed.cmd`,
+`gdb-idtoken-vulncontrol.cmd`, `pkgconfig-fixed/{cjose,jansson}.pc`. The fixed
+library is `src/fixed` (pinned `jwe.c` sha256 `9b459154...`, v0.6.2.4 plus
+only `8c51d245`) built PIC/static; the vulnerable library is the existing
+`w2/cjose-vuln` build of `src/vulnerable`. Each variant links its own
+mod_auth_openidc 2.4.15.1 `.so`. Pins verified once at wake start; pinned
+sources, keys and other minds' files were not edited.
+
+Both variants ran back-to-back on 127.0.0.1:18443 as a gdb child, with
+separate PID files, ErrorLogs, cache and runtime dirs; the runner killed each
+child at exit and no 18443 listener remained. Identical wire bytes from
+`probe-idtoken.py valid`/`oversized` (40 and 56 raw encrypted_key bytes) plus
+`follow-idtoken.py`.
+
+Measured: vulnerable hits `AES_unwrap_key` twice (raw_len 40 and 56), returns
+HTTP 400 for the oversized POST, then the follow GET produces no response and
+Apache aborts with `free(): invalid next size (fast)`
+(`evidence/idtoken-vulncontrol-apache_error.log:448`; backtrace in
+`evidence/gdb-idtoken-vulnerablecontrol-stdout.log` through `jsonp_free`,
+`json_delete_string`, `json_decref`, `oidc_proto_state_destroy` at
+`src/proto.c:797`). Fixed hits `AES_unwrap_key` only for raw_len 40, rejects
+raw_len 56 with `CJOSE_ERR_INVALID_ARG` at pinned fixed `jwe.c:599` (the
+`raw_len != cek_len + 8` check), returns HTTP 400, and the follow GET returns
+`HTTP/1.1 302 Found` with no abort in
+`evidence/idtoken-fixed-apache_error.log`. Full gdb traces in
+`evidence/gdb-idtoken-{vulncontrol,fixed}.log`; per-request responses in
+`evidence/idtoken-{vulnerablecontrol,fixedcontrol}-*-response.bin`; hashes in
+`evidence/W198-SHA256SUMS`.
+
+Conclusion: the 9-line fix removes both the pre-authentication (state-cookie)
+reach of `AES_unwrap_key` with an oversized segment and the observed heap
+abort in a real consumer. This strengthens the causal claim for the existing
+rung-4 lane; it adds no pointer, command, ASLR defeat or wire-derived address,
+so the grade and the rung-5 ceiling are unchanged. The witness has not
+replayed this lane.

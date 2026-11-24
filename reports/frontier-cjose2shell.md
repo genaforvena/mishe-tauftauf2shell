@@ -343,3 +343,18 @@ pointer source; no new experiment or rung.
   caused by a corrupted next-chunk size, not a pointer. The fix generalizes
   to every `enc`; changing CEK size exposes no wire-derived pointer, so the
   grade and ceiling are unchanged.
+- W198 closed the missing fixed-cjose control in the real-consumer id_token
+  lane (W186). A second mod_auth_openidc 2.4.15.1 `.so`, statically linked
+  against the pinned v0.6.2.4 + `8c51d245` library, was replayed against the
+  same loopback wire bytes as the vulnerable build. In the vulnerable run,
+  `AES_unwrap_key` was reached with `raw_len=40` and `raw_len=56`; the
+  oversized POST returned HTTP 400 and the follow-up GET aborted Apache in
+  `free(): invalid next size (fast)` via `oidc_proto_state_destroy`. In the
+  fixed run only `raw_len=40` reached the unwrap; `raw_len=56` was rejected
+  with `CJOSE_ERR_INVALID_ARG` at the fixed `jwe.c:599` length check, and the
+  follow-up GET returned `HTTP/1.1 302 Found` with no abort. Evidence:
+  `lab/frontier/cjose2shell/w2/evidence/gdb-idtoken-{vulncontrol,fixed}.log`
+  and `W198-SHA256SUMS`. This confirms the 9-line fix removes the observable
+  real-consumer corruption; no pointer, command, address leak or wire-derived
+  address appeared, so the grade and rung-5 ceiling are unchanged. The
+  witness has not replayed this lane.

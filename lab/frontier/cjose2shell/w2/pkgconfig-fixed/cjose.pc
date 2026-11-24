@@ -1,0 +1,8 @@
+prefix=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/cjose-fixed
+libdir=${prefix}/src/.libs
+includedir=${prefix}/include
+Name: cjose
+Description: pinned fixed cjose (v0.6.2.4 + 8c51d245 length check), PIC static build
+Version: 0.6.2.4-fixed
+Libs: -L${libdir} -lcjose -L/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-prefix/lib -ljansson -lcrypto -lm
+Cflags: -I${includedir} -I/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-prefix/include
