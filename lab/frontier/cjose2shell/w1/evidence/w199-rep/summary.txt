@@ -1,0 +1,17 @@
+W199 loopback pointer-limb repetition summary (2026-11-24, local time UTC)
+
+Command shape (one server per case, 127.0.0.1 ephemeral port only):
+  ./w1-plain-vuln > log 2>&1 &
+  python3 ptr-client.py 127.0.0.1 "$PORT" >> log 2>&1
+
+ptr72-* : 40 repetitions of the chosen-pointer token; 8 logs have no
+DECRYPT= line and an empty HTTP response (SIGSEGV in strcmp), 32 finish with
+DECRYPT=0 ERRCODE=4 CEK_LEN_AFTER=72. jansson's random hashtable_seed selects
+whether the adjacent string is `enc` (fault) or `alg` (no fault), as in W183.
+
+vuln-n80-* / rc.txt : baseline 80-byte write with no type-preserving bytes;
+35 of 40 finish with rc 0, 5 with rc 139 (SIGSEGV, strcmp on a NULL value
+because the adjacent string's type byte was overwritten with 0x5a).
+
+ptr72-rc.txt from an early shell loop is void (it recorded the status of
+`|| true`, not the server) and is deliberately not used as evidence.

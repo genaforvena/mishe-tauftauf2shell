@@ -698,3 +698,50 @@ abort in a real consumer. This strengthens the causal claim for the existing
 rung-4 lane; it adds no pointer, command, ASLR defeat or wire-derived address,
 so the grade and the rung-5 ceiling are unchanged. The witness has not
 replayed this lane.
+
+## W199 — wire-chosen pointer dereference in the loopback consumer (2026-11-24 17:45-17:52Z)
+
+New lab-only files: `w1/ptr-client.py` and `w1/evidence/w199-*/`. No pinned
+bytes, library build, Apache config or other mind's file was changed. All
+requests went to an ephemeral 127.0.0.1 port opened by one w1 server per case;
+no listener remained after the runs.
+
+Question: W183/W190 located a live jansson string at `cek+48` with its value
+pointer at `cek+64`, but the 56-byte write stopped at `cek+47`, and W189/W198
+found no live pointer object near the CEK in the real mod_auth_openidc lane.
+Test the loopback lane with a longer write: a 72-byte RFC 3394 plaintext
+(80-byte `encrypted_key`) that preserves the adjacent object's JSON_STRING
+type/refcount at `cek+48..55` and sets its value pointer at `cek+64..71` to
+`41` x 8. The KEK is the lab's, so unwrap integrity passes and the chosen
+bytes are those actually written by OpenSSL.
+
+Measured under gdb (`w1/evidence/w199-gdb/ptr72-3.log`): the process faults in
+`__strcmp_avx2` from `_cjose_jwe_calc_auth_tag` (`jwe.c:1098`) via
+`_cjose_jwe_decrypt_dat_aes_cbc` (`jwe.c:1400`); gdb prints
+`enc=0x4141414141414141` and `rdi=0x4141414141414141`, i.e. the pointer read
+from the wire-derived plaintext is the address passed to `strcmp`. The same
+token without the type-preserving bytes (`wrappedN80`) faults with `enc=0x0`
+instead (`w1/evidence/w199-gdb/n80-9.log`): the invalid type wins before the
+pointer is consulted. In 40 plain repetitions of the pointer token, 8 had no
+`DECRYPT=` line and an empty HTTP response; the others finished with
+`DECRYPT=0 ERRCODE=4 CEK_LEN_AFTER=72`. As in W183, the switch is jansson's
+random `hashtable_seed`: only when the adjacent string is `enc` is the chosen
+pointer dereferenced.
+
+Controls: fixed build with the same token rejects before the write
+(`DECRYPT=0 ERRCODE=1 CEK_LEN_AFTER=32`, `w1/evidence/w199-controls/
+w1-plain-fixed.ptr.log`); safe `valid` token on both builds keeps
+`CEK_LEN_AFTER=32`; vulnerable build with the attack token reports
+`CEK_LEN_AFTER=72`. PINS 7/7 OK; `w1/evidence/W199-SHA256SUMS` covers 36
+files (gdb captures, controls, sweep logs, tokens, repetition summary,
+client); `sha256sum -c` verifies all of them.
+
+Conclusion: chosen bytes from the request now reach a live pointer field and
+are dereferenced by a real decrypt path in the loopback consumer, without
+grooming or a baked-in lab address. The dereference value is a recognizable
+non-address; there is no valid code/data address, no ASLR defeat, no benign
+command and no wire-derived address, so this is a stronger author-only rung-4
+limb, not r5. Whether the live mod_auth_openidc id_token lane has the same
+adjacent-object geometry stays UNKNOWN: W189 found its CEK far from the
+state-cookie CEK and its next chunk was top chunk. Witness replay not yet
+requested.

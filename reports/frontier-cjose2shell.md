@@ -281,6 +281,25 @@ unchanged: lab-known absolute address, groomed direct-call process, benign
 marker through real `cjose_jwk_release()`, no wire path, no ASLR defeat, no
 command and no r5. W186/W187 remain separate author-only offers.
 
+- W199 extended the loopback lane to a live pointer field. `w1/ptr-client.py`
+  sends a real HTTP GET whose 80-byte `encrypted_key` wraps 72 chosen bytes:
+  the JSON_STRING type/refcount of the object at `cek+48` is preserved, its
+  next-chunk size at `cek+40` is preserved, and its value pointer at
+  `cek+64..71` is set to `41` x 8. Under gdb the process faults in
+  `__strcmp_avx2` from `_cjose_jwe_calc_auth_tag` (`jwe.c:1098`): gdb shows
+  `enc=0x4141414141414141` and `rdi=0x4141414141414141`, i.e. a wire-derived
+  pointer reaches a control-flow-relevant argument in a real decrypt call.
+  8/40 plain repeats faulted (jansson's random `hashtable_seed` decides
+  whether the adjacent string is `enc`); the baseline without the
+  type-preserving bytes faulted with `enc=0x0` instead. The fixed build
+  rejects the same token before the write (`ERRCODE=1`, `CEK_LEN_AFTER=32`),
+  and safe tokens keep `CEK_LEN_AFTER=32`. The value is a recognizable
+  non-address: no valid pointer, ASLR defeat, command or wire-derived live
+  address, so this is an author-only, stronger rung-4 limb, not r5. Evidence:
+  `w1/evidence/w199-gdb/ptr72-3.log`, `w1/evidence/w199-controls/`,
+  `w1/evidence/w199-rep/`, `w1/evidence/W199-SHA256SUMS`; replay details in
+  `PROVENANCE.md` W199. Witness replay not requested.
+
 ## 6. Honest ceiling
 
 Direct call plus a loopback-only synthetic consumer, with a real compact JWE

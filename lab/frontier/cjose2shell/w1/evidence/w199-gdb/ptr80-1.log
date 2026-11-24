@@ -1,0 +1,8 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=33873
+Traceback (most recent call last):
+  File "/tmp/w199_n80ptr_client.py", line 18, in <module>
+    assert len(plain) == 80
+           ^^^^^^^^^^^^^^^^
+AssertionError

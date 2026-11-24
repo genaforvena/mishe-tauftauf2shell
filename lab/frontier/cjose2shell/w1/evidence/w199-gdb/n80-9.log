@@ -1,0 +1,22 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=40579
+REQUEST_BYTES=422
+TOKEN_BYTES=302
+WIRE_SEG_B64=118 WIRE_DECODE=1 WIRE_EK_RAW_LEN=88
+IMPORT=1 ERRCODE=0
+JWE_CEK_LEN_BEFORE=0 JWE_EK_RAW_LEN=88
+
+Program received signal SIGSEGV, Segmentation fault.
+__strcmp_avx2 () at ../sysdeps/x86_64/multiarch/strcmp-avx2.S:283
+warning: 283	../sysdeps/x86_64/multiarch/strcmp-avx2.S: No such file or directory
+#0  __strcmp_avx2 () at ../sysdeps/x86_64/multiarch/strcmp-avx2.S:283
+#1  0x000055555556185d in _cjose_jwe_calc_auth_tag (enc=0x0, jwe=0x5555555765f0, md=0x7fffffff5f90 "\023", md_len=0x7fffffff5f64, err=0x7fffffff60d0) at jwe.c:1098
+#2  0x0000555555562877 in _cjose_jwe_decrypt_dat_aes_cbc (jwe=0x5555555765f0, err=0x7fffffff60d0) at jwe.c:1400
+#3  0x0000555555564d52 in cjose_jwe_decrypt (jwe=0x5555555765f0, jwk=0x5555555765b0, content_len=0x7fffffff6070, err=0x7fffffff60d0) at jwe.c:2157
+#4  0x0000555555558763 in main (argc=1, argv=0x7fffffffe278) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w1/server.c:139
+rip            0x7ffff778b32b      0x7ffff778b32b <__strcmp_avx2+27>
+rdi            0x0                 0
+rsi            0x55555556fd0e      93824992345358
+SCENARIO=wrappedN80 TOKEN_LEN=302
+RESPONSE=b''
