@@ -131,3 +131,17 @@ Ceiling unchanged: rung 4 for chosen bytes at chosen stack offsets; no
 measured consumed pointer, benign-marker execution, control-flow takeover
 or rung 5. Witness replay of the live datagram (#3909) is still owed and
 is required before this live experiment is ESTABLISHED.
+
+All nine message-type decoders in the pinned `wire.c`
+(`decode_REGISTER` :399, `decode_REGISTER_SUPER` :447,
+`decode_UNREGISTER_SUPER` :490, `decode_REGISTER_ACK` :531,
+`decode_REGISTER_SUPER_ACK` :585, `decode_REGISTER_SUPER_NAK` :637,
+`decode_PACKET` :732, `decode_PEER_INFO` :778, `decode_QUERY_PEER` :817)
+memset their destination struct before reading any wire field. So stale
+chosen bytes in a reused switch-case object cannot be consumed as a pointer
+on a later message: the next decoder clears that storage first.
+`decode_common` (:236) does not memset, but it writes `ttl`, `flags`, `pc`
+and `community` before reading none of them, so it does not consume stale
+fields either. This bounds the negative to reused decoder objects; other
+stack slots in the overflow span remain UNKNOWN, and no consumed pointer
+was observed for the two measured pointer-shaped slots.
