@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
-# Offline replay: extract the two pinned trees, rebuild every harness and
-# regenerate the evidence matrix. Requires only the tracked tarballs.
+# Replay from a clean checkout: fetch pinned tarballs if absent (provisioning),
+# verify their hashes, extract, rebuild every harness and regenerate evidence.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 cd "$HERE"
+
+for sha in 5554f8a46abf e69e0844dbc1c737ebd3d17e97007d0f5cf16beb; do
+  [ -f "pins/$sha.tar.gz" ] || { mkdir -p pins && curl -fsSL \
+    "https://codeload.github.com/DeusData/codebase-memory-mcp/tar.gz/$sha" \
+    -o "pins/$sha.tar.gz"; }
+done
 
 sha256sum -c PINS.sha256
 
