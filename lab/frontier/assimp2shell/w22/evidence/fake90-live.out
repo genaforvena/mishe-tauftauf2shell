@@ -1,0 +1,20 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:204) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, Assimp::glTFImporter::ImportMeshes (this=0x55555556e9c0, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:204
+204	void glTFImporter::ImportMeshes(Asset &r) {
+SCENE=0x55555556fd80
+Breakpoint 2 at 0x7ffff7d12f73: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp, line 475.
+
+Breakpoint 2, Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:475
+475	    CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
+PRE begin=0x555555580844 finish=0x55555558084c cap=0x55555558084c
+476	}
+LIVE nmesh=1 arr=0x55555556faf0 ptr0=0x555555580854 verts0=90 faces0=165
+A debugging session is active.
+
+	Inferior 1 [process 3503368] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

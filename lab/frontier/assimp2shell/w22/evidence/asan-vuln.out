@@ -1,0 +1,104 @@
+=================================================================
+==3505355==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x79938ce04060 at pc 0x79938f470d1d bp 0x7ffe96c08a90 sp 0x7ffe96c08a80
+WRITE of size 64 at 0x79938ce04060 thread T0
+    #0 0x79938f470d1c in Assimp::glTFImporter::ImportMeshes(glTF::Asset&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x470d1c) (BuildId: af55a19f839a36c6e8c0bbf28dfce0b54a55d225)
+    #1 0x79938f4713be in Assimp::glTFImporter::InternReadFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, aiScene*, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x4713be) (BuildId: af55a19f839a36c6e8c0bbf28dfce0b54a55d225)
+    #2 0x79938f0e362a in Assimp::BaseImporter::ReadFile(Assimp::Importer*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0xe362a) (BuildId: af55a19f839a36c6e8c0bbf28dfce0b54a55d225)
+    #3 0x79938f1394ef in Assimp::Importer::ReadFile(char const*, unsigned int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x1394ef) (BuildId: af55a19f839a36c6e8c0bbf28dfce0b54a55d225)
+    #4 0x79938f13ea56 in Assimp::Importer::ReadFileFromMemory(void const*, unsigned long, unsigned int, char const*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x13ea56) (BuildId: af55a19f839a36c6e8c0bbf28dfce0b54a55d225)
+    #5 0x5b9d0a24071a in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/w5_real_vuln+0x271a) (BuildId: 0d20ebb1ddd13135aac15102ca3cf8aa1ce1765b)
+    #6 0x79938e82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x79938e82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5b9d0a240364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/w5_real_vuln+0x2364) (BuildId: 0d20ebb1ddd13135aac15102ca3cf8aa1ce1765b)
+
+Address 0x79938ce04060 is located in stack of thread T0 at offset 96 in frame
+    #0 0x79938f46920f in Assimp::glTFImporter::ImportMeshes(glTF::Asset&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x46920f) (BuildId: af55a19f839a36c6e8c0bbf28dfce0b54a55d225)
+
+  This frame has 52 object(s):
+    [48, 49) '<unknown>'
+    [64, 65) '<unknown>'
+    [80, 84) 'k' (line 210)
+    [96, 100) 'value' <== Memory access at offset 96 partially overflows this variable
+    [112, 116) 'value' <== Memory access at offset 96 partially underflows this variable
+    [128, 132) 'value' <== Memory access at offset 96 partially underflows this variable
+    [144, 148) 'value' <== Memory access at offset 96 partially underflows this variable
+    [160, 164) 'value'
+    [176, 180) 'value'
+    [192, 196) 'value'
+    [208, 212) 'value'
+    [224, 228) 'value'
+    [240, 244) 'value'
+    [256, 260) 'value'
+    [272, 276) 'value'
+    [288, 292) 'value'
+    [304, 308) 'value'
+    [320, 324) 'value'
+    [336, 340) 'value'
+    [352, 356) 'value'
+    [368, 376) '__for_begin' (line 219)
+    [400, 408) '__for_end' (line 219)
+    [432, 440) 'aim' (line 250)
+    [464, 472) '<unknown>'
+    [496, 504) '<unknown>'
+    [528, 536) '__for_begin'
+    [560, 568) '__for_end'
+    [592, 600) '<unknown>'
+    [624, 632) '<unknown>'
+    [656, 664) '<unknown>'
+    [688, 696) '<unknown>'
+    [720, 728) '<unknown>'
+    [752, 760) '<unknown>'
+    [784, 792) '<unknown>'
+    [816, 824) '<unknown>'
+    [848, 856) '<unknown>'
+    [880, 888) '<unknown>'
+    [912, 920) '<unknown>'
+    [944, 960) 'buf' (line 232)
+    [976, 1000) 'meshes' (line 208)
+    [1040, 1072) 'data' (line 311)
+    [1104, 1136) '<unknown>'
+    [1168, 1200) '<unknown>'
+    [1232, 1264) 'err'
+    [1296, 1328) '<unknown>'
+    [1360, 1736) '<unknown>'
+    [1808, 2184) '<unknown>'
+    [2256, 2632) '<unknown>'
+    [2704, 3080) '<unknown>'
+    [3152, 3528) '<unknown>'
+    [3600, 3976) '<unknown>'
+    [4048, 4249) '__digits'
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min/bin/libassimp.so.6+0x470d1c) (BuildId: af55a19f839a36c6e8c0bbf28dfce0b54a55d225) in Assimp::glTFImporter::ImportMeshes(glTF::Asset&)
+Shadow bytes around the buggy address:
+  0x79938ce03d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79938ce03e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79938ce03e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79938ce03f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79938ce03f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x79938ce04000: f1 f1 f1 f1 f1 f1 01 f2 01 f2 04 f2[04]f2 04 f2
+  0x79938ce04080: 04 f2 04 f2 04 f2 04 f2 04 f2 04 f2 04 f2 04 f2
+  0x79938ce04100: 04 f2 04 f2 04 f2 04 f2 04 f2 04 f2 04 f2 00 f2
+  0x79938ce04180: f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 f2
+  0x79938ce04200: f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 f2 f2 f2 00 f2
+  0x79938ce04280: f2 f2 f8 f2 f2 f2 f8 f2 f2 f2 f8 f2 f2 f2 f8 f2
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3505355==ABORTING

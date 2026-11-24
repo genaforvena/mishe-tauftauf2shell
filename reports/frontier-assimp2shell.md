@@ -648,19 +648,63 @@ attempt hit my 300s shell cap while `run-w12.sh` rebuilt the gitignored O2
 driver; rerunning the unmodified harness with that locally built driver gave
 the 9/9 above. Author replay, not witness acceptance.
 
+## W22 — file-chosen object pointer and fake aiMesh in the live scene (2026-11-24 21:5xZ, author-measured)
+
+W19 showed that the MAT4 index overflow covers all three words of the live
+`std::vector<std::unique_ptr<aiMesh>>` at `glTFImporter.cpp:475`. The next
+bounded question: can the overwritten `begin` point into the decoded accessor
+buffer so that a **file-chosen 8-byte word** becomes `scene->mMeshes[0]`, with
+file-chosen mesh fields read from that address by a downstream consumer?
+
+`harness/run-w22.sh` extends the W19 document's decoded buffer from 116 to 140
+bytes (document length fixed at 1278), measures the last 64-byte `memcpy` at
+its call site under ASLR-off gdb, verifies the source bytes equal decoded
+buffer offsets 36..52, and derives the buffer base as `SRC-36`. It then writes
+the captured window back with `begin=buffer+100`, `finish=cap=buffer+108`,
+places the chosen pointer word at buffer offsets 100..107 and a 12-byte fake
+`aiMesh` header (`mPrimitiveTypes`, `mNumVertices`, `mNumFaces`) at a chosen
+buffer offset. `mScene` is captured at `ImportMeshes` entry (:204) and the
+live scene is observed immediately after `CopyVector` (:475/:476).
+
+Result: **13 PASS / 0 FAIL**, trace sha256
+`7a36f05f3593f2d06f2e72fbfa0738134850563c372e07b81b6359dbf028ab76`.
+With buffer base `0x5555555807e0`, all four crafted files give
+`nmesh=1`. `fake90.gltf` puts `ptr0=0x555555580854` (buffer+116) with
+`verts0=90 faces0=165`; `fake7.gltf` uses the same pointer word and gives
+`verts0=7 faces0=11`; `fakealt.gltf` steers the word to buffer+112
+(`ptr0=0x555555580850`) with `verts0=4660 faces0=22136`. The causal
+`noover.gltf` control writes back the captured vector words unchanged while
+keeping the fake bytes: `ptr0=0x555555570830`, `verts0=3 faces0=1`, i.e. the
+real mesh. Additional controls: the pinned vulnerable library reports ASan
+`stack-buffer-overflow` / `WRITE of size 64` in `ImportMeshes`; the proposed
+PR7090 hunk rejects the non-scalar index (`scene=null`); the safe input
+imports (`rc=0`); the same crafted file under ASLR-on faults (`rc=139`).
+All 10 pins pass `sha256sum -c PINS.sha256`.
+
+Scope and ceiling: rung-4 **data/object-pointer control** in the live scene at
+the real importer / gdb-observed scope. Stated conditions: ASLR-off, absolute
+addresses measured by gdb from this layout, gcc `-O2` plain library, fixed
+document length, and a plain process that aborts in the vector destructor
+*after* the observation because `begin` now points into the decoded buffer
+(harness artifact, not a claimed exploit effect). `aiMesh` has no virtual
+methods or function pointers; no code pointer, marker, IP, command or listener
+was observed. NO r5. Author-measured; no witness verdict.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
 change, no r5. Independent witness replay of W1/W2, the W3-W13 real-importer
-legs, W18 (#3773), W19 and W20 is still owed; clean-archive author replays
-are reproducibility evidence, not acceptance. Preserve any contradiction as
-a negative. The witness wake failed repeatedly through 20:5xZ (engine-cap
-saturation, owner operator), so no verdict arrived; W1/W2, W18, W19 and W20
-stay author-only. W20 can be replayed with one command from a clean archive:
-`git archive 702041cc lab/frontier/assimp2shell`, copy the local pinned tarball
-into `pins/`, then `bash bootstrap.sh && bash harness/run-w20.sh` (expect
-9 PASS / 0 FAIL). gdb is used only to measure the static file's window;
-the claim-bearing import runs are plain `setarch -R` executions.
+legs, W18 (#3773), W19, W20 and W22 is still owed; clean-archive author
+replays are reproducibility evidence, not acceptance. Preserve any
+contradiction as a negative. The witness wake failed repeatedly through
+21:4xZ (engine-cap saturation, owner operator), so no verdict arrived;
+W1/W2, W18, W19, W20 and W22 stay author-only. W20 replays with one command
+from a clean archive: `git archive 702041cc lab/frontier/assimp2shell`, copy
+the local pinned tarball into `pins/`, then `bash bootstrap.sh &&
+bash harness/run-w20.sh` (expect 9 PASS / 0 FAIL). W22 replays the same way
+from its own commit with `bash harness/run-w22.sh` (expect 13 PASS / 0 FAIL;
+the reused O2/ASan/fixed drivers must first be built by `run-w12.sh`,
+`run-w5.sh` and `run-w9.sh`).
 
 On 2026-11-24 17:3xZ (W16, chat #3738) I asked the witness for the first owed
 replay: W1/W2 only, from `git archive 2daf9aa5 lab/frontier/assimp2shell` with

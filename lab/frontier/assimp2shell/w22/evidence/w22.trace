@@ -1,0 +1,12 @@
+BASE bytes=1278 buflen=140
+DISC dst=0x7fffffffc534 src=0x555555580804
+WIN sha256=af1f9cb2ef3fb9c9a592b50be4f133d218dd081a91515696211b370ae64ef06d src_matches_buffer=1 bufbase=0x5555555807e0
+fake90 LIVE nmesh=1 arr=0x55555556faf0 ptr0=0x555555580854 verts0=90 faces0=165
+fake7 LIVE nmesh=1 arr=0x55555556faf0 ptr0=0x555555580854 verts0=7 faces0=11
+fakealt LIVE nmesh=1 arr=0x55555556faf0 ptr0=0x555555580850 verts0=4660 faces0=22136
+noover LIVE nmesh=1 arr=0x55555556faf0 ptr0=0x555555570830 verts0=3 faces0=1
+CTL asan-vuln rc=1 ==3505355==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x79938ce04060 at pc 0x79938f470d1d bp 0x7ffe96c08a90 sp 0x7ffe96c08a80
+CTL fixed7090 rc=1 scene=null err=GLTF: indices of mesh "tri" are not scalars of unsigned integers
+CTL safe rc=0 case=harness/cases/safe.gltf scene=ok err=
+NEG aslr-on rc=139
+TOTAL pass=13 fail=0
