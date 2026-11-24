@@ -640,6 +640,14 @@ no library instruction consumed the forged tail in this driver before abort;
 the shaped run above shows the first consumer is the harness's `malloc`,
 which reads and rewrites allocator metadata, not SysEx data.
 
+Clean-archive replay: `git archive HEAD` (commit `6badbb8`), pinned tarball
+copied as the only ignored input, then `prepare_src.sh`, `build_and_run.sh`,
+`shape_probe.sh` and `watch_probe.sh` in the archived tree. All seven shape
+rc cases and their header/mode lines matched the committed matrix (addresses
+aside), and both watchpoint runs again recorded zero hits before the glibc
+abort. This checks that the new probes are reproducible from committed bytes;
+it is not an independent witness verdict.
+
 No pointer or RIP control, marker, command, real host, network input or
 witness replay of these two new probes. The write alphabet remains `0x00-0x7f`
 (§11), so high-bit pointer bytes still cannot be written by this copy. Grade
