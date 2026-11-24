@@ -1,0 +1,6 @@
+MediaInfoLib/
+ZenLib/
+build-asan/
+build-fast/
+*.log
+*.o

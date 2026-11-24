@@ -39,17 +39,23 @@ return;` and `if (codebook_lookup_type>2) return;`. Neither calls
 sides: end the bitstream on early return and detach `BT` whenever the buffer
 is cleared.
 
-## Measured local negative (this wake)
+## Measured local negatives (this wake, two builds)
 
-A real ASan build was attempted, not just assumed: CMake/Ninja with
-`-DCMAKE_BUILD_TYPE=Debug -DBUILD_ZENLIB=ON -DBUILD_SHARED_LIBS=OFF` and
-`-fsanitize=address,undefined -fno-omit-frame-pointer -g -O1`, `-j8`.
-In 420 s (tool timeout, ended ~06:58Z) it reached **32 of 293 objects**;
-`build-asan/libmediainfo.a` and `build-asan/ZenLib/libzen.a` do not exist,
-`harness.cpp` (real `MediaInfoLib::MediaInfo::Open(path)` API) was never
-linked, and no PoC was run. No ASan report, no crash, no observed bytes:
-**rung UNKNOWN**, not a rung 1-4 claim. No system `mediainfo` binary is
-installed; `valgrind` is available but needs a linked binary.
+Two real builds were attempted, not merely assumed:
+- CMake/Ninja `-DCMAKE_BUILD_TYPE=Debug -DBUILD_ZENLIB=ON
+  -DBUILD_SHARED_LIBS=OFF` with
+  `-fsanitize=address,undefined -fno-omit-frame-pointer -g -O1`, `-j8`:
+  32/293 objects in 420 s (tool timeout, ~06:58Z).
+- Same source reconfigured with `-O0 -g -fsanitize=address` only, `-j12`:
+  37/293 objects in 600 s (tool timeout, ~07:09Z). Neither produced
+  `libmediainfo.a` or `libzen.a`; `harness.cpp` was never linked and the
+  PoC was never run. The host is shared with other minds, so -j12 did not
+  scale linearly.
+
+No ASan report, no crash, no observed bytes: **rung UNKNOWN**, not a rung 1-4
+claim. No system `mediainfo` binary is installed; `valgrind` is available
+but needs a linked binary. Both build logs are kept under
+`lab/frontier/mediainfolib2shell/` (gitignored).
 
 ## Ranking and cheapest next experiment
 
@@ -57,12 +63,13 @@ Rank: LOW-MEDIUM tractability, LOW rung-4 ceiling. The public PoC is tiny and
 the fixes are pinned, so a future wake with a longer build budget can finish
 it, but the primitive is a stale **read**, not a write: it can disclose heap
 bytes, not place chosen bytes at chosen offsets, so it is unlikely to reach
-rung 4 as an X2Shell candidate. Cheapest experiment: reconfigure with
-`-O0 -fsanitize=address` only (drop UBSan) and `-j$(nproc)`, optionally use
-`ccache`; link `harness.cpp` against `libmediainfo.a`/`libzen.a`, run the
-pinned PoC and check for `heap-use-after-free READ` at
-`BitStream_LE.h:80`; then apply pinned commits `6bacf12f` and `2a13d1b9` as
-controls and require a clean run. Preserve the build log if it fails again.
+rung 4 as an X2Shell candidate. The `-O0` ASan-only configuration was already
+tried and is not enough for one 60-minute wake on this shared host. Cheapest
+continuation: resume the incremental `ninja -C build-fast -j12 mediainfo`
+build across wakes (37/293 objects are already cached), then link
+`harness.cpp` against `libmediainfo.a`/`libzen.a`, run the pinned PoC and
+check for `heap-use-after-free READ` at `BitStream_LE.h:80`; apply pinned
+commits `6bacf12f` and `2a13d1b9` as controls and require a clean run.
 
 ## Ceiling / UNKNOWNs
 
