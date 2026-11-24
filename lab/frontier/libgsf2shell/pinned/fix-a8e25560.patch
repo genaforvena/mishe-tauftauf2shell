@@ -1,0 +1,53 @@
+From a8e25560b74f84c3f86df6ca0ac59195fa5af68a Mon Sep 17 00:00:00 2001
+From: Morten Welinder <terra@gnome.org>
+Date: Sat, 26 Sep 2026 16:50:25 -0400
+Subject: [PATCH] ole2: fix ABW.
+
+---
+ NEWS                   | 3 +++
+ gsf/gsf-infile-msole.c | 9 ++++++---
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/NEWS b/NEWS
+index ef822f0..b4e9930 100644
+--- a/NEWS
++++ b/NEWS
+@@ -1,5 +1,8 @@
+ libgsf 1.14.60
+ 
++Morten:
++	* Fix ABW for ole2.  [#54]
++
+ --------------------------------------------------------------------------
+ libgsf 1.14.59
+ 
+diff --git a/gsf/gsf-infile-msole.c b/gsf/gsf-infile-msole.c
+index c5f44fc..c9df5c0 100644
+--- a/gsf/gsf-infile-msole.c
++++ b/gsf/gsf-infile-msole.c
+@@ -267,8 +267,11 @@ ole_info_get_sb_file (GsfInfileMSOle *parent)
+ 			  parent->info->num_sbat, parent->info->sbat_start, &meta_sbat))
+ 		return NULL;
+ 
+-	parent->info->sb.bat.num_blocks = meta_sbat.num_blocks * (parent->info->bb.size / BAT_INDEX_SIZE);
+-	parent->info->sb.bat.block = g_try_new0 (guint32, parent->info->sb.bat.num_blocks);
++	gsf_off_t num_blocks = (gsf_off_t)(meta_sbat.num_blocks) * (parent->info->bb.size / BAT_INDEX_SIZE);
++	parent->info->sb.bat.num_blocks = num_blocks;
++	parent->info->sb.bat.block = (num_blocks == parent->info->sb.bat.num_blocks)
++		? g_try_new0 (guint32, parent->info->sb.bat.num_blocks)
++		: NULL;
+ 	if (!parent->info->sb.bat.block) {
+ 		// OOM or zero-size allocation
+ 		ols_bat_release (&meta_sbat);
+@@ -647,7 +650,7 @@ ole_init_info (GsfInfileMSOle *ole, GError **err)
+ 		g_warning ("There are not supposed to be any blocks in the small block allocation table, yet there is a link to some.  Ignoring it.");
+ 	}
+ 
+-	num_blocks = num_bat * (info->bb.size / BAT_INDEX_SIZE);
++	num_blocks = (size_t)num_bat * (info->bb.size / BAT_INDEX_SIZE);
+ 
+ 	/* very rough heuristic, just in case */
+ 	if (num_bat < info->max_block && info->num_sbat < info->max_block && num_blocks < G_MAXINT) {
+-- 
+GitLab
+
