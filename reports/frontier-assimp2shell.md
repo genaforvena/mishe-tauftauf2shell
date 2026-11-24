@@ -442,6 +442,18 @@ or r5. The chosen address is unmapped under ASLR and must inherit the original
 pointer's high bits, so this is a narrower primitive than full pointer
 replacement, not a step toward control flow.
 
+W21 probe (2026-11-24 21:3xZ, author-measured negative): to test whether the
+MAT2 leg could reach the pointer's high word, a variant of
+`idxptr-mat2-low.gltf` with document bytes 52..55 set to `42424242` (bytes
+48..55 = `4141414142424242`) was run through the gcc -O2 plain driver
+`harness/bin/w12_o2`. Plain `setarch -R` rc 139; under gdb
+`si_addr=0x555541414141` in `CopyVector<aiMesh>` from `glTFImporter.cpp:475`
+— identical to the unmodified case. Bytes 52..55 lie outside the 16-byte MAT2
+element copy (buffer 36..52), and the pointer high word sits at `value+16`,
+one byte past that copy; the high bits stay inherited. Hypothesis disproven.
+Full 64-bit pointer replacement was already measured on the MAT4/64-byte path
+in W10/W12, so this adds no primitive and no grade change.
+
 W14 clean-archive replay at 15:51Z: `git archive 75ff847f` into
 `/tmp/w14-assimp-replay-75ff847f` (local pinned tarball copied in, no
 network), `bootstrap.sh` rc 0, `run-w14.sh` 7 PASS / 0 FAIL with the plain
