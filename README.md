@@ -227,13 +227,19 @@ process — the unmodified vendor `.SchLib` imported `MH M2.5 Mounting hole`
 and the `Size0` patch segfaulted (exit 139). W183 showed the four OOB bytes are
 file-selected in that process: `SizeZ` values 9/7/1/138889/200000 give exactly
 `(int(SizeZ*7.2)*254 << 32)|0x20` as the corrupted chunk size, matching the
-prediction in all five fresh gdb imports with an alive safe control. The row's
-"no real KiCad build at any release" sentence is therefore stale; the
-real-process lane is chosen-byte rung 4, still unwitnessed, with no ASan build,
-no fixed-build real-process control, no consumer read, no wire, no pointer or
-control-flow target and no marker, so rung 5 remains UNKNOWN. Evidence:
-`reports/frontier-kicad2shell.md` §§13–14, `reports/kicad2shell-status.md`,
-`lab/frontier/kicad2shell/realprocess/PROVENANCE-native-process.md`.
+prediction in all five fresh gdb imports with an alive safe control. W186 then
+reached the fixed-build control: KiCad 10.0.8 imports the hostile fixture in
+the real Symbol Editor without an abort. W187 added a second file-reachable
+offset: `Size-1=9` writes the low half of the chunk size (`0x3f80` under the
+measured scale), faults the native 8.0.8 process with SIGSEGV while a matched
+`Size1=9` control stays alive, and gives ASan `WRITE of size 4` 8 bytes before
+the region with a clean fixed build (`lowindex/check.sh` 41 PASS / 0 FAIL,
+trace `999e6733…64796`). The row's "no real KiCad build at any release"
+sentence is stale; the real-process lanes stay chosen-byte rung 4, unwitnessed,
+with no ASan vendor build, consumer read, wire, pointer or control-flow target
+and no marker, so rung 5 remains UNKNOWN. Evidence:
+`reports/frontier-kicad2shell.md` §§13–17, `reports/kicad2shell-status.md`,
+`lab/frontier/kicad2shell/lowindex/PROVENANCE-lowindex.md`.
 
 The 13:2xZ openexr2shell edge lifts the Openexr2Shell row from direct-call
 CODE/HARNESS scope to **file-level rungs 1-4**: the advisory's 692-byte deep

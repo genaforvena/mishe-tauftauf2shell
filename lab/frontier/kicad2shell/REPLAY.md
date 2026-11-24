@@ -77,3 +77,19 @@ The earlier `56bc1f8` replay of the two-patch lane (13 assertions, trace
 `fcd8ca1bd4231c6fcc45d0008225e7979cabae97066a89da48179391b4352f43`) also
 matched. All earlier lane traces are unchanged. Provenance, upstream commit
 and license are in `vendor/PROVENANCE-vendor-file.md`.
+
+## Low-index `Size-1` replay (2026-11-24 W187)
+
+From `lab/frontier/kicad2shell/lowindex/`: `sh check.sh` rebuilds eight
+binaries from the shared verbatim pins with the measured KiCad mils-to-IU
+scale, then runs 16 invocations and 41 assertions. An in-tree run and a
+clean-archive replay at commit `197e70d` (`git archive` of
+`lab/frontier/kicad2shell`, `reports/frontier-kicad2shell.md` and
+`reports/kicad2shell-status.md`, 487 archived files) both printed
+`PASS=41 FAIL=0` with the same trace hash
+`999e6733e903364be0f7bd8ded350c0ac979fff5d9b2fe837d27e05794264796`.
+The pinned real-process artifacts replay with
+`sh ../realprocess/real-check-w187.sh` (`PASS=9 FAIL=0` in both trees);
+the GUI fault itself is not replayed by that check — its exact command,
+fixture patch and control are in `lowindex/PROVENANCE-lowindex.md`.
+All earlier lane trace hashes are unchanged.
