@@ -1,0 +1,73 @@
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 1801513)]
+[New Thread 0x7fffae39e6c0 (LWP 1801514)]
+[New Thread 0x7fffadb9d6c0 (LWP 1801515)]
+[New Thread 0x7fffad39c6c0 (LWP 1801516)]
+[New Thread 0x7fffacb9b6c0 (LWP 1801517)]
+[New Thread 0x7fff97fff6c0 (LWP 1801523)]
+[New Thread 0x7fff977fe6c0 (LWP 1801524)]
+[New Thread 0x7fff96ffd6c0 (LWP 1801525)]
+[New Thread 0x7fff967fc6c0 (LWP 1801528)]
+[New Thread 0x7fff95ffb6c0 (LWP 1801530)]
+[New Thread 0x7fff957fa6c0 (LWP 1801535)]
+[New Thread 0x7fff94ff96c0 (LWP 1801536)]
+[New Thread 0x7fff77fff6c0 (LWP 1801599)]
+[New Thread 0x7fff6f5ff6c0 (LWP 1801600)]
+[New Thread 0x7fff777fe6c0 (LWP 1801601)]
+[Switching to Thread 0x7fff97fff6c0 (LWP 1801523)]
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fff9006b760, buf=buf@entry=0x7fff900580be, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT rdx=0xfffffff5
+GDB_BASE 0x7fff900580b0 ACTUAL 0x7fff900580be
+GDB_PRE 12x8 at base-16:
+0x7fff900580a0:	0x0000000000000000	0x0000000000000025
+0x7fff900580b0:	0x0000000000000000	0x0000000000000000
+0x7fff900580c0:	0x0000000000000000	0x0000000000000035
+0x7fff900580d0:	0x00007ff86ffc7e08	0x169b53717380d8b9
+0x7fff900580e0:	0x0000000000000000	0x0000000000000000
+0x7fff900580f0:	0x0000000000000000	0x00000000000021e1
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff90000ca0) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_RET=(nil)
+GDB_POST 12x8 at base-16:
+0x7fff900580a0:	0x0000000000000000	0x0000000000000025
+0x7fff900580b0:	0x0000000000000000	0x5b5a000000000000
+0x7fff900580c0:	0x5b5a5d5c5b5a5d5c	0x0000000000000035
+0x7fff900580d0:	0x00007ff86ffc0000	0x169b53717380d8b9
+0x7fff900580e0:	0x0000000000000000	0x0000000000000000
+0x7fff900580f0:	0x0000000000000000	0x00000000000021e1
+GDB_TCACHE_PRE head=0x7fff900580d0 count=7
+Breakpoint 2 at 0x7ffff76ad730: malloc. (47 locations)
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+GDB_M1_HIT size=0x20
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $2 = (void *) 0x7fff900580d0
+GDB_M1_RET 0x7fff900580d0
+0x7fff900580c0:	0x5b5a5d5c5b5a5d5c	0x0000000000000035
+0x7fff900580d0:	0x00007ff86ffc0000	0x0000000000000000
+GDB_TCACHE_POST head=0x7fff90050058 count=6
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M2_HIT size=0x20
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $3 = (void *) 0x7fff90055ee0
+GDB_M2_RET 0x7fff90055ee0
+0x7fff90055ed0:	0x0000000000000000	0x0000000000000035
+0x7fff90055ee0:	0x00007ff86ffc000d	0x0000000000000000

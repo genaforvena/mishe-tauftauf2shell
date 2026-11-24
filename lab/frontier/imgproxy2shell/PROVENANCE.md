@@ -659,3 +659,64 @@ instead of `lab/frontier/libvips2shell`), so the binary failed to start with
 harness error is preserved here, and the corrected path replayed cleanly.
 Replay logs were not committed; the throwaway tree was removed. This is the
 author's replay, not witness acceptance.
+
+## W8 — wire-only partial tcache-next retarget (2026-11-24 13:49-14:01Z, unwitnessed)
+
+W7 established that a short source makes `read_full` copy only the bytes the
+source has before `icoload.c:161-164` exits. W8 uses that to choose the
+overflow length: a 42-byte ICO (22-byte directory + **20-byte** body) serves
+10 filler bytes, a preserved little-endian `0x35` victim size at
+`actual_data+10..17`, and the chosen low 16 bits `0x0000` of the live
+safe-linked `next` at `actual_data+18..25`. The high six bytes, the safe-link
+key and the victim size are untouched by the wire bytes: this is a relative
+retarget within the same 64 KiB, **not** a chosen absolute address and not a
+key derivation. No gdb write to memory is used; gdb only observes.
+
+Pins and commands (all on 127.0.0.1:18180/18181, distinct from the W7 replay's
+18080/18081):
+
+```
+cd lab/frontier/imgproxy2shell/provision
+python3 replay_partial_next.py /absolute/outdir
+```
+
+`ico_partial_next.py` sha256
+`f03dbc448c3ddffc61a5db7a1e1816f9b54a4d7df6c3a94d4967241992f0ca7f`;
+`replay_partial_next.py` sha256
+`2e69125a6742844b2a032b843e230bc87308375876e04ad64682b42c9dce6f26`.
+The runner uses the pinned `imgproxy-vuln` binary and the pinned plain libvips
+tree at `lab/frontier/libvips2shell/build-vuln-plain/libvips`, with
+`imgproxy-icofixed` as ICO control. Result in `/tmp/w8-replay-final2`:
+`W8_RESULT PASS=4 FAIL=0 PARTIAL_NEXT=3 PLAIN_SURVIVAL=2`. Layout is
+stochastic: 3/6 gdb runs had the 0x35 tcache victim, 3 hit a top/live-data
+layout; 2/6 plain runs survived with HTTP 500 and an alive process, 4 aborted
+on the top-chunk layout. All negatives are preserved in that outdir.
+
+Decisive observation (`http-ico-w8-gdb1.log`, sha256
+`1928d10b16cbff9ad69b277c5d811022ebf1ad1607e62e2eeda4f0b8a9d3dc45`):
+`base=0x7fff900580b0`, live victim `next` at `0x7fff900580d0` (tcache head,
+count 7) changed from `0x00007ff86ffc7e08` to `0x00007ff86ffc0000` — only the
+low 16 bits, exactly the wire value — while size stayed `0x35` before and
+after. With key `pos>>12 = 0x7fff90058`, the decoded wire pointer is
+`0x7fff90050058`, mapped in the same arena. The first `malloc(0x20)` returned
+the victim and `GDB_TCACHE_POST head=0x7fff90050058 count=6`: the wire bytes
+are now the live allocation head. `http-ico-w8-gdb3.log`
+(`c3754c5e8394ca9a31adcae0f55913153927b21bd265801db800b48458f04701`) and
+`http-ico-w8-gdb6.log`
+(`df46e65c12a0a2213aa7c4fad60ae70405a5bc98edda623731f287533e06b883`) repeat
+the same transition at different ASLR bases. Plain survivors
+`http-ico-w8-plain1.log`
+(`0072c82f13af4dcb00c9808e8e960d1731b4017cc6eb4db6ef4b605e9350b2a0`) and
+`http-ico-w8-plain6.log`
+(`4e76cdee074d144afe1ec15fc1fb0011385ebdcc8edbbf5c5b47790230e07dbe`) show
+`hostile=500`, `rc=None`, process alive with no debugger attached.
+
+Fixed controls: `http-ico-w8-fixedplain.log`
+(`9445b5d26f87d95b31e6b57e6cf0c7463a4051211f5393b95e3b4014d62817c0`)
+has HTTP 500 and `vips_foreign_load_ico_header: ICO image data is too large`;
+`http-ico-w8-fixedgdb.log`
+(`63d47ec5b346cb272ada6f59fb23e59d2b2ee0f0f52bf6b22d52f938788040b9`)
+has zero `GDB_HIT` and a live process. No wire-only absolute address, no
+key derivation, no code-pointer write, no marker execution and no r5.
+Author finding, unwitnessed; the surviving plain runs do not prove that the
+retargeted head was consumed by a later allocation in an unsanitized process.

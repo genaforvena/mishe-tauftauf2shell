@@ -19,6 +19,10 @@ ESTABLISHED AS LABELED on a clean-archive replay; the live HTTP consumer
 limb stays at rung 4 with no r5. W7 remains an author finding: W200 agrees
 its source-bound negative closes the wire-only key route but did not
 replay W7 itself.
+**W8 (2026-11-24 14:01Z, author-only, unwitnessed):** a 20-byte-body ICO
+changes only the low 16 bits of a live safe-linked tcache `next` from wire
+bytes, and the decoded value becomes the live allocation head; no key
+derivation, absolute address, code-pointer write or r5.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -328,6 +332,26 @@ Commands, digests and raw logs are in `lab/frontier/imgproxy2shell/PROVENANCE.md
 established. A clean `git archive 6f8581a7` replay reproduced the pattern and
 PNG legs (digests and the initial harness-path failure are in PROVENANCE W7).
 This is an author finding, not a witness verdict.
+
+## W8 — wire-only partial tcache-next retarget (author-only, unwitnessed)
+
+W7's short-source result implies the overflow length is attacker-chosen. A
+42-byte ICO with a 20-byte body writes a preserved victim size (`0x35`) and
+sets the low 16 bits of the live safe-linked `next` to a wire value, leaving
+the high six bytes and the key intact. In three of six gdb-instrumented runs
+the victim was a live tcache head (count 7): its size stayed `0x35`,
+`next` changed only in the low 16 bits, and after the first `malloc(0x20)`
+the allocation head held the decoded wire pointer with count 6 — for example
+`0x00007ff86ffc7e08` → `0x00007ff86ffc0000`, head `0x7fff90050058`, at
+`base=0x7fff900580b0`. Two of six plain runs survived with HTTP 500 and a
+live process; the other layouts aborted on the top chunk and are preserved.
+ICO-fixed returned `ICO image data is too large` with zero breakpoint hits.
+This is a **relative** retarget: the absolute destination depends on the
+unmeasured live key and heap base, no wire-only key is derived, and no later
+allocation through the wire head was proved in an unsanitized process.
+Grade stays rung 4; no marker, code-pointer write or r5. Commands, digests,
+curated logs and negatives are in `lab/frontier/imgproxy2shell/PROVENANCE.md`
+(W8). Author finding, not a witness verdict.
 
 ## What would change my mind
 

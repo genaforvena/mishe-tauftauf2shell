@@ -1,0 +1,35 @@
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da8760: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 1809018)]
+[New Thread 0x7fffae39e6c0 (LWP 1809019)]
+[New Thread 0x7fffadb9d6c0 (LWP 1809020)]
+[New Thread 0x7fffad39c6c0 (LWP 1809021)]
+[New Thread 0x7fffacb9b6c0 (LWP 1809022)]
+[New Thread 0x7fff97fff6c0 (LWP 1809023)]
+[New Thread 0x7fff977fe6c0 (LWP 1809024)]
+[New Thread 0x7fff967fc6c0 (LWP 1809026)]
+[New Thread 0x7fff96ffd6c0 (LWP 1809025)]
+[New Thread 0x7fff95ffb6c0 (LWP 1809027)]
+[New Thread 0x7fff957fa6c0 (LWP 1809028)]
+[New Thread 0x7fff949ff6c0 (LWP 1809038)]
+[New Thread 0x7fff77fff6c0 (LWP 1809039)]
+[New Thread 0x7fff777fe6c0 (LWP 1809148)]
+[New Thread 0x7fff76ffd6c0 (LWP 1809186)]
+[New Thread 0x7fff767fc6c0 (LWP 1809187)]
+time="2026-11-24 14:00:20" level="ERROR" msg="Completed in 848.437µs /insecure/rs:fill:16:16/plain/hostile.ico" request_id="hI05IeOp2b5FFrXn3wczU" method="GET" status=500 client_ip="127.0.0.1" error="vips_foreign_load_ico_header: ICO image data is too large" stack="/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/vips/vips.go:136 github.com/imgproxy/imgproxy/v3/vips.Error\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/vips/vips.go:298 github.com/imgproxy/imgproxy/v3/vips.(*Image).Load\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/processing/processing.go:161 github.com/imgproxy/imgproxy/v3/processing.(*Processor).initialLoadImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/processing/processing.go:79 github.com/imgproxy/imgproxy/v3/processing.(*Processor).ProcessImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/handlers/processing/request_methods.go:162 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).processImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/handlers/processing/request.go:118 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/handlers/processing/handler.go:93 github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/server/middlewares.go:88 github.com/imgproxy/imgproxy/v3/server.(*Router).WithPanic-fm.(*Router).WithPanic.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/server/middlewares.go:103 github.com/imgproxy/imgproxy/v3/server.(*Router).WithReportError-fm.(*Router).WithReportError.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/server/router.go:142 github.com/imgproxy/imgproxy/v3/server.(*Router).ServeHTTP"
+[Thread 0x7fff767fc6c0 (LWP 1809187) exited]
+[Thread 0x7fff76ffd6c0 (LWP 1809186) exited]
+[Thread 0x7fff777fe6c0 (LWP 1809148) exited]
+[New Thread 0x7fff767fc6c0 (LWP 1816610)]
+[New Thread 0x7fff777fe6c0 (LWP 1821714)]
