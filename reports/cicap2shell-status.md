@@ -58,6 +58,15 @@ demonstrated only in the lab, wider deployment reach stays UNKNOWN, and
 there is no rung 5. An ASan field-padding probe produced no report for the
 intra-object alias and is preserved as a negative, not a pass.
 
+W6 adds a measured negative at the rung-5 boundary: on a plain (non-ASan)
+real 0.6.5 library the second destroy of the aliased entity reads
+`type=21840 start=42031 entity=<free-list pointer>` for wire values 90,
+72 and 4242 alike, so the chosen `start` is gone and the second `free()`
+argument is glibc metadata, not wire input; no `malloc` occurs between the
+two destroys. A plain real loopback server returns 200 OK to the crafted
+OPTIONS request and then exits 139 at teardown. Other allocators/builds
+remain UNKNOWN; grade and rung-4 ceiling are unchanged.
+
 ## Witness verdict (W205, #3753)
 Independent replay from `git archive 58435874 lab/frontier/cicap2shell`
 gave ESTABLISHED AS LABELED at the pinned-function scope: 19 PASS / 0 FAIL,

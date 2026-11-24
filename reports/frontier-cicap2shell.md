@@ -82,10 +82,11 @@ Rung 3 is confirmed on pinned upstream functions, in a real ASan c-icap
 0.6.5 library (W1/W2) and now in a real ASan `c-icap` server (W3); rung 4 is
 PARTIAL: a wire-selected entity value (90, 72 or 4242) lands in the live
 adjacent `trash_entities[0].start` slot. No arbitrary byte stream or
-pointer-value control, no chosen IP/code execution, no allocator metadata
-and no r5. W3 drives the server's own `parse_header()`/`process_request()`
-from a loopback TCP request, so the earlier "no ICAP server / no network
-socket / no AV:N path" boundary is withdrawn for 127.0.0.1: an OPTIONS
+pointer-value control, no chosen IP/code execution, no wire-shaped allocator
+metadata (W6), and no r5. W3 drives the server's own
+`parse_header()`/`process_request()` from a loopback TCP request, so the
+earlier "no ICAP server / no network socket / no AV:N path" boundary is
+withdrawn for 127.0.0.1: an OPTIONS
 request with six entities and `Connection: close` returns 200 OK before the
 UAF fires at teardown. No traffic left loopback, no proxy or real client
 consumed it. W4's observing-only gdb breakpoint prints the wire-selected
@@ -162,5 +163,28 @@ also gives `e5=(nil) t0=(nil)` and no sanitizer. Raw outputs in gitignored
 `evidence/w4-*.out`. This closes the W3 measurement gap: rung 4's wire value
 is now seen in the live aliased slot of the real server, not just the pinned
 harness and socket-fed library. Still no pointer/IP/command control, no
-allocator metadata, no proxy or real client, no r5; author-measured and
+wire-controlled allocator metadata, no proxy or real client, no r5;
+author-measured and
 unwitnessed at this scope.
+
+## W6 — plain-build teardown consumer: no pointer steering (22:2xZ)
+
+The pinned 0.6.5 tree was rebuilt without ASan in
+`/tmp/cicap-real/build-plain`. `realbuild/consumer_probe.gdb` prints every
+`destroy_encaps_entity()` call on a real `ci_request_t`: for wire values
+90, 72 and 4242 the sixth call carries the chosen `start` and
+`entity=(nil)`, while the seventh (the aliased slot destroyed again) reads
+`type=21840 start=42031 entity=<varying pointer>` in all three runs. The
+wire-chosen `start` is gone; the pointer handed to the second `free()` is
+glibc free-list metadata written into the freed 16-byte entity, not wire
+input. `free(e->entity)` at `header.c:634` faults in `__GI___libc_free`
+(SIGSEGV, rc 139), matching the plain harness and a plain real server on
+loopback (200 OK OPTIONS, then `server_rc=139`,
+`MaxRequestsReallocateMem 0`). `realbuild/malloc_window.gdb` enables a
+`malloc` breakpoint between destroy calls 6 and 7 and sees zero hits; the
+pinned teardown loops (`destroy_vuln.inc:5-11`) are adjacent, so this
+build offers no window to reallocate the freed entity with attacker bytes.
+Four-entity safe input destroys four entities once and exits 0. This is a
+negative rung-5 result for the stock glibc consumer, not a capability
+claim; other allocators/builds stay UNKNOWN. Raw output in gitignored
+`evidence/w6-*.out`; author-measured and unwitnessed.

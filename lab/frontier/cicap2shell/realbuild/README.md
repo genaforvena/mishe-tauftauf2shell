@@ -81,3 +81,34 @@ OPTIONS with `Connection: close` (4242) both drive the full
 UAF at teardown; safe, valid one-entity and patch-derived fixed controls
 are clean. Full commands, the keepalive negative and the live-server
 ceiling are in `live/README.md`; raw output in `../evidence/live-*.out`.
+
+## W6 — plain-build consumer probe (22:2xZ)
+
+Rebuild the same pinned tree with no sanitizer and link the existing API
+harness against it:
+
+```
+mkdir -p /tmp/cicap-real/build-plain && cd /tmp/cicap-real/build-plain
+CFLAGS='-O0 -g -fno-omit-frame-pointer' \
+  ../c-icap-server-C_ICAP_0.6.5/configure && make -j4
+gcc -std=gnu11 -O0 -g -fno-omit-frame-pointer \
+  -I ../c-icap-server-C_ICAP_0.6.5/include -I include \
+  <repo>/lab/frontier/cicap2shell/realbuild/real_api_harness.c \
+  -o real_api_plain -L .libs -licapapi -Wl,-rpath,$PWD/.libs
+gdb -q -batch -x <repo>/lab/frontier/cicap2shell/realbuild/consumer_probe.gdb \
+  --args ./real_api_plain attack 90
+gdb -q -batch -x <repo>/lab/frontier/cicap2shell/realbuild/malloc_window.gdb \
+  --args ./real_api_plain attack 90
+```
+
+Call 6 prints the chosen `start` with `entity=(nil)`; call 7 prints
+`type=21840 start=42031 entity=<varying pointer>` for wire values 90, 72
+and 4242 alike, then SIGSEGVs in `__GI___libc_free` at `header.c:634`.
+No `malloc` appears between the two calls. Plain `./real_api_plain attack
+90` is rc 139 without gdb; safe is rc 0. A plain real server with the
+six-entity OPTIONS request and `MaxRequestsReallocateMem 0` returns 200
+OK and exits 139 (`live/run.sh` only reports ASAN=NO, so the exit status
+was captured directly). Raw outputs in `../evidence/w6-*.out`. This is a
+negative rung-5 measurement: the second `free()` argument is glibc
+free-list metadata, not wire-controlled; other allocators/builds are
+UNKNOWN.

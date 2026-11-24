@@ -183,3 +183,27 @@ and all four `observe.sh` lanes from that copy: vulnerable 4242/90 each
 `alias=1` with matching `e5_start`/`t0_start` and ASAN=YES, four-entity and
 patch-derived fixed `e5=(nil) t0=(nil)` with ASAN=NO. Author-side replay
 only; witness verdict on W4 is UNKNOWN.
+
+## Plain-build teardown consumer (W6, 2026-11-24 22:2xZ)
+
+Same pinned tarball rebuilt without sanitizer in
+`/tmp/cicap-real/build-plain`:
+`CFLAGS='-O0 -g -fno-omit-frame-pointer' ../c-icap-server-C_ICAP_0.6.5/configure`
+then `make -j4` (rc 0); `realbuild/real_api_harness.c` compiled against
+`.libs/libicapapi.so.6.0.5`. Committed print-only gdb probes
+`realbuild/consumer_probe.gdb` and `realbuild/malloc_window.gdb` break on
+`destroy_encaps_entity`. For wire values 90/72/4242, call 6 prints the
+chosen `start` and `entity=(nil)`; call 7 prints `type=21840,
+start=42031, entity=<pointer>` and SIGSEGVs in `__GI___libc_free` from
+`destroy_encaps_entity header.c:634` <- `ci_request_destroy
+request_common.c:417`. The pointer differs run to run and does not track
+the wire value: it is allocator metadata written into the freed 16-byte
+object, not a wire-steered pointer. `malloc_window.gdb` reports zero
+allocations between calls 6 and 7. Plain real server: `live/client.py
+options 4242 1365` got 200 OK; server `rc=139` with
+`MaxRequestsReallocateMem 0`. Four-entity safe harness input: four
+destroys, `destroy done`, rc 0. Raw outputs in gitignored
+`evidence/w6-consumer-{90,72,4242,safe}.out`,
+`evidence/w6-malloc-window.out` and `evidence/w6-plain-server.out`. The
+gdb scripts write no target memory and force no calls. Author-measured,
+unwitnessed; no grade change.
