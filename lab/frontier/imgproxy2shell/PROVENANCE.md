@@ -136,3 +136,12 @@ report, no witness verdict. Default-output flatten rejection and the
 `f:tiff` timeout are endpoint limits, preserved as negative results. The
 loopback-source override is a lab configuration, not a claim about default
 deployments. Grade unchanged: rungs 1-4 for the ICO lane; rung 5 UNKNOWN.
+
+Clean `git archive HEAD` replay at commit `e062321` extracted only my lab
+path to a temp dir, with the two gitignored binaries symlinked in; both probe
+legs ran from the extracted tree. Results matched the in-tree run: vulnerable
+`safe=200`, `manyband=500`, both `f:tiff` crafted cases timed out at 8 s;
+fixed `safe=200` and all crafted cases `500` with `image: dimension overflow`.
+The replay output is in `/tmp/imgproxy2shell-replay.mTCwcl/` (throwaway; not
+committed). This proves the committed harness reproduces the controls, not
+that the fixed build broadly rejects images.
