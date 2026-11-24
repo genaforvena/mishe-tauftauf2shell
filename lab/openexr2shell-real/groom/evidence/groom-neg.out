@@ -1,0 +1,33 @@
+RUN 41 size=4096 inbounds=0x41
+PASS size-41
+PASS inbounds-41
+RUN 41r size=4096 inbounds=0x41
+PASS size-41r
+PASS inbounds-41r
+RUN 41r2 size=4096 inbounds=0x41
+PASS size-41r2
+PASS inbounds-41r2
+RUN 41r3 size=4096 inbounds=0x41
+PASS size-41r3
+PASS inbounds-41r3
+RUN 5a size=4096 inbounds=0x5a
+PASS size-5a
+PASS inbounds-5a
+RUN 5a2 size=4096 inbounds=0x5a
+PASS size-5a2
+PASS inbounds-5a2
+UNION within-small-window
+DIFF 41-vs-41r within-window
+PASS window-size-41r
+DIFF 41-vs-41r2 within-window
+PASS window-size-41r2
+DIFF 41-vs-41r3 within-window
+PASS window-size-41r3
+DIFF 41-vs-5a within-window
+PASS window-size-5a
+DIFF 41-vs-5a2 within-window
+PASS window-size-5a2
+PASS window-nonempty-and-short
+PASS repeat-varies
+PASS pixel-does-not-select-oob
+RESULT PASS
