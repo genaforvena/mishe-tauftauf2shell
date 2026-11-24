@@ -1,0 +1,68 @@
+W15 results — third independently file-chosen value at a third non-adjacent OOB
+heap band (2026-11-24 22:1xZ, author-side)
+
+Question left open by W14: can a second spatially disjoint raw row band steer a
+THIRD distinct chosen value into still later OOB stores? Prediction recorded in
+the wall before the run (21:44Z): a second band like W14's rows 138..147 should
+put a distinct curve value at a non-overlapping OOB offset. Keep/revise/revert
+by observed gdb bytes, not by reasoning.
+
+Method: craft_uncompressed_poc.py (sha256
+0d91b5a8324a814fb7097051a456949dac610ff9d21d8c22d717beedddf1749c) reads the
+W11 input w11/targetbeef.input and rewrites the W14 spec with curve[5]=0x2468
+and every column of raw rows 150..159 set to sample 5. Spec
+w15/band150.json sha256
+08de8dd7d3bf8b9bdb9bac9c72868f3afebf174b55fc43c98f4aedc8ffb1308f;
+input w15/band150.input sha256
+86b5e7c7912437f16bc73b273d41e6ae15cfb6fcd976d7431bb02cb7f7441b1e.
+The real dcraw_emu consumer is unchanged; only image bytes change.
+
+Wide `-O0` gdb dump w15/oobwide.gdb (probe sha256
+ee1b3088b2ea35039584d27ce754ce3b81aae3e0af19b30c6eb0081d633cc452) samples
+four halfwords every 1,000 halfwords from OOB offset 0 to 40,000 after the
+first-OOB breakpoint and continues to the SIGSEGV at index 85,644 (offset
+68,000 halfwords), so every sampled offset is inside the written OOB region.
+- Baseline w13/dead-target.input (wide-baseline.txt cd2bab4d...): channel 1
+  stays 0xbeef/0xbeed across the whole sampled range.
+- W14 w14/two-offset.input (wide-w14.txt 98670f4b...): channel 1 becomes
+  0x1357 at offsets 9,000..28,000; 0xbeed/0xbeee elsewhere.
+- W15 w15/band150.input (wide-band150.txt d455894f...): channel 1 becomes
+  0x2468 at offsets 33,000..40,000 while the W14 0x1357 band at 9,000..28,000
+  is preserved. The two bands are disjoint at the sampled granularity; offsets
+  29,000..32,000 carry neither chosen value.
+
+Focused probe w15/exact.gdb (sha256
+d63183221d2cc2798f83bf38f0ed7c73fd3bbba8fd736082974d51b19114ef91) dumps eight
+halfwords at offsets 0, 16,800, 28,000, 33,000, 36,000 and 40,000. Three fresh
+plain -O0 gdb runs produced byte-identical EXACT lines (3/3 each; trace files
+differ only in ASLR addresses):
+  off=0:     8fff beee dead 0 140e 0 3f92 0
+  off=16800: 140e 1357 9f09 0 140e 1357 9f09 0
+  off=28000: ce4 1357 76ea 0 0 0 3783 0
+  off=33000: 3876 2468 9f09 0 3876 2468 9f09 0
+  off=36000: 140e 2468 9f09 0 140e 2468 9f09 0
+  off=40000: 1981 2468 824b 0 0 0 7da9 0
+The first-OOB triple remains perturbed (`8fff beee dead`) as in W14; W15 does
+not claim it bit-exact. An initial third run stopped at the breakpoint without
+reaching the dump and was rerun; the completed runs are 3/3.
+
+Controls on w15/band150.input: ASan vulnerable `pinned/.../dcraw_emu -n 1`
+rc 1, `WRITE of size 2` at src/demosaic/xtrans_demosaic.cpp:427
+(w15/asan-vuln.out b9775148...); fixed tree rc 0 empty; vulnerable with no
+option rc 0 empty.
+
+Preserved negatives (do not retry without a new mechanism):
+- w15/three-offset.json (raw rows 250..259 -> sample 0, curve[0]=0x2468)
+  added to the W14 spec produced a wide map byte-identical to W14
+  (w15/three-offset.input dc6c3eb6..., wide-three.txt 8226c8d4...): that
+  band's value is not observable in offsets 0..40,000.
+- w15/rows90.json (raw rows 90..99 -> sample 0, curve[0]=0x2468 on the W13
+  spec) perturbed channel 1 to 0xbeee across the map but never wrote 0x2468
+  (rows90.input d548fd7c..., wide-rows90.txt d033435a...).
+
+Grade: three independently file-chosen 16-bit values in the real dcraw_emu
+consumer at three disjoint OOB heap bands (0x9000/0xbeef/0xdead near the first
+offset, 0x1357 at 9,000..28,000, 0x2468 at 33,000..40,000). NOT an arbitrary
+byte sequence across memory, no pointer/IP, marker, command, adjacent live
+object, GUI, wire path, merged upstream fix or r5. Author-side only; no
+witness replay yet. All experiments local and loopback-free.

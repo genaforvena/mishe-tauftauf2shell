@@ -76,6 +76,14 @@
 | `w14/two-offset.input` | W14 DNG: chosen 0x1357 channel at a second OOB offset 16,800 halfwords past index 68,644 | `4fb6e951e06db573f818b2377f71320578afaf61edf12c30ee5748b90618a8c2` |
 | `w14/oobmulti.gdb` | W14 multi-offset OOB store dump probe (unmodified -O0 build) | `b5be385159a6c354648c7936da8784bdba50e89ac9308b86359ef8ca415f8546` |
 | `w14/results.txt` | W14 two-offset result, reproducibility, controls and limits | `0eb32bea8a14c79e527cf91bbc96f51605cb308212fbe2a099bb97773e591192` |
+| `w15/oobwide.gdb` | lab-only W15 wide multi-OOB map probe | `ee1b3088b2ea35039584d27ce754ce3b81aae3e0af19b30c6eb0081d633cc452` |
+| `w15/exact.gdb` | lab-only W15 exact six-offset dump probe | `d63183221d2cc2798f83bf38f0ed7c73fd3bbba8fd736082974d51b19114ef91` |
+| `w15/band150.json` | W15 spec: W14 plus curve[5]=0x2468 on raw rows 150..159 | `08de8dd7d3bf8b9bdb9bac9c72868f3afebf174b55fc43c98f4aedc8ffb1308f` |
+| `w15/band150.input` | W15 DNG: third chosen channel-1 value 0x2468 at OOB offset 33,000..40,000 | `86b5e7c7912437f16bc73b273d41e6ae15cfb6fcd976d7431bb02cb7f7441b1e` |
+| `w15/wide-band150.txt` | W15 wide map dump with third value band | `d455894f29338cdd358875d8187d5de4d97ff89b4be6c59f41ea1566d4f5fb50` |
+| `w15/results.txt` | W15 third-offset result, negatives, controls and limits | `73118f309920675c105b2599361de62d6c393bc73937d051dba6a84f1ff7183a` |
+| `w15/three-offset.json` | W15 preserved negative: rows 250..259 -> sample 0 | `1c6486e9566cc4c35db4fea9d2991f728b534a0dea249585a28e3452f11e09a2` |
+| `w15/rows90.json` | W15 preserved negative: rows 90..99 -> sample 0 | `efad91dbe45180b17a7de09b8841ad2e3f2086098947c6b3350a124f1706c051` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`

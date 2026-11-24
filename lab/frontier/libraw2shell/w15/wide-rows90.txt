@@ -1,0 +1,54 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+WIDE FAULT IDX=85644 addr=0x5555557d2000
+WIDE off=0: 8fff beee dead 0 
+WIDE off=1000: a07 beee 9f09 0 
+WIDE off=2000: 5207 beee bedb 0 
+WIDE off=3000: 0 beee 0 0 
+WIDE off=4000: 140e beed 9f09 0 
+WIDE off=5000: 140e beed 9f09 0 
+WIDE off=6000: 0 0 0 0 
+WIDE off=7000: 140e beed 9f09 0 
+WIDE off=8000: 140e beed 9f09 0 
+WIDE off=9000: 140e beee 9f09 0 
+WIDE off=10000: 53b2 beee 9f09 0 
+WIDE off=11000: 140e beee 9f09 0 
+WIDE off=12000: 140e beee 9f09 0 
+WIDE off=13000: a07 beee 9f09 0 
+WIDE off=14000: 8fff beee dead 0 
+WIDE off=15000: 0 beee 0 0 
+WIDE off=16000: 7f49 beee e94f 0 
+WIDE off=17000: 140e beee 9f09 0 
+WIDE off=18000: 140e beee 9f09 0 
+WIDE off=19000: 140e beee 9f09 0 
+WIDE off=20000: 140e beee 9f09 0 
+WIDE off=21000: 140e beee 9f09 0 
+WIDE off=22000: 53b2 beed 9f08 0 
+WIDE off=23000: 140e beed 9f09 0 
+WIDE off=24000: 140e beed 9f09 0 
+WIDE off=25000: a07 beee 9f09 0 
+WIDE off=26000: 8fff beee dead 0 
+WIDE off=27000: 0 beee 0 0 
+WIDE off=28000: 7f49 beee e94f 0 
+WIDE off=29000: 140e beee 9f09 0 
+WIDE off=30000: 140e beee 9f09 0 
+WIDE off=31000: 140e beee 9f09 0 
+WIDE off=32000: 140e beee 9f09 0 
+WIDE off=33000: 140e beee 9f09 0 
+WIDE off=34000: 53b2 beee 9f09 0 
+WIDE off=35000: 140e beee 9f09 0 
+WIDE off=36000: 140e beee 9f09 0 
+WIDE off=37000: a06 beed 9f09 0 
+WIDE off=38000: 8ffe beed dead 0 
+WIDE off=39000: 0 beed 0 0 
+WIDE off=40000: 7f48 beed e94e 0 
+Kill the program being debugged? (y or n) [answered Y; input not from terminal]
+[Inferior 1 (process 3162091) killed]

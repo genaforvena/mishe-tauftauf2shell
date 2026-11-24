@@ -660,3 +660,42 @@ the real `dcraw_emu` consumer. This is not an arbitrary byte sequence across
 memory, not a pointer/IP, marker, command, adjacent live object, GUI, wire
 path, merged upstream fix or r5. Author-side only; no witness replay yet.
 All experiments local and loopback-free.
+
+## Third chosen value at a third disjoint OOB band (W15, 2026-11-24 22:1xZ; author-side)
+
+W14 put `0x1357` into channel 1 at OOB offsets 9,000..28,000. Prediction
+recorded before the run: a second disjoint raw row band should steer a third
+distinct chosen value into a later, non-overlapping OOB band. The unmodified
+`dcraw_emu` consumer and all four builds are unchanged; only image bytes change.
+
+`w15/band150.json` (sha256
+`08de8dd7d3bf8b9bdb9bac9c72868f3afebf174b55fc43c98f4aedc8ffb1308f`) extends
+the W14 spec with `curve[5]=0x2468` and sets every column of raw rows 150..159
+to sample 5; `craft_uncompressed_poc.py` produces `w15/band150.input` sha256
+`86b5e7c7912437f16bc73b273d41e6ae15cfb6fcd976d7431bb02cb7f7441b1e`.
+The `-O0` dump probe `w15/oobwide.gdb` samples four halfwords every 1,000
+halfwords from OOB offset 0 to 40,000 after the first-OOB breakpoint and then
+continues to the SIGSEGV at index 85,644 (offset 68,000 halfwords), so every
+sampled offset lies inside the region the store loop actually writes.
+Baseline `w13/dead-target.input` keeps channel 1 at `0xbeef`/`0xbeed`;
+W14's input carries `0x1357` at 9,000..28,000; the W15 input carries `0x2468`
+at 33,000..40,000 while preserving W14's band. A focused probe
+`w15/exact.gdb` at offsets 0, 16,800, 28,000, 33,000, 36,000 and 40,000 gave
+byte-identical EXACT lines in three fresh plain `-O0` gdb runs:
+`8fff beee dead 0` at 0, `140e 1357 9f09 0` at 16,800, `3876 2468 9f09 0`
+at 33,000 and `140e 2468 9f09 0` at 36,000 (the whole trace files differ
+only in ASLR addresses). The first-OOB triple is perturbed as in W14 and is
+not claimed bit-exact here. Controls on the same input: ASan vulnerable
+`-n 1` rc 1 with `WRITE of size 2` at `xtrans_demosaic.cpp:427`; fixed tree
+rc 0 empty; vulnerable no-option rc 0 empty.
+
+Preserved negatives: rows 250..259 -> sample 0 with `curve[0]=0x2468`
+produced a wide map byte-identical to W14; rows 90..99 -> sample 0 on the
+W13 spec perturbed channel 1 to `0xbeee` but never wrote `0x2468`. The full
+method, hashes and limits are in `lab/frontier/libraw2shell/w15/results.txt`.
+
+Grade: three independently file-chosen 16-bit values in three disjoint OOB
+heap bands of the real consumer. Still not an arbitrary byte sequence across
+memory, no pointer/IP, marker, command, adjacent live object, GUI, wire path,
+merged upstream fix or r5. Author-side only; no witness replay yet. All
+experiments local and loopback-free.

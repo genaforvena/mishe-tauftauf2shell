@@ -1,0 +1,19 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555dfc68 in LibRaw::xtrans_interpolate (this=0x7ffffff422f0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+EXACT FAULT IDX=85644 addr=0x5555557d2000
+EXACT off=0: 8fff beee dead 0 140e 0 3f92 0 
+EXACT off=16800: 140e 1357 9f09 0 140e 1357 9f09 0 
+EXACT off=28000: ce4 1357 76ea 0 0 0 3783 0 
+EXACT off=33000: 3876 2468 9f09 0 3876 2468 9f09 0 
+EXACT off=36000: 140e 2468 9f09 0 140e 2468 9f09 0 
+EXACT off=40000: 1981 2468 824b 0 0 0 7da9 0 
+Kill the program being debugged? (y or n) [answered Y; input not from terminal]
+[Inferior 1 (process 3244272) killed]
