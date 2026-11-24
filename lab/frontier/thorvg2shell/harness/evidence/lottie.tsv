@@ -1,0 +1,7 @@
+build	json	jpegsize	rc	stdout
+vuln	lottie_control	853616	0	lottie_api: bytes=1138554 load=0 frame=0 total=60 size=64x64
+vuln	lottie_dup4_small	430	0	lottie_api: bytes=970 load=0 frame=0 total=60 size=64x64
+vuln	lottie_dup4_large	853622	139	
+fixed	lottie_control	853616	0	lottie_api: bytes=1138554 load=0 frame=0 total=60 size=64x64
+fixed	lottie_dup4_small	430	0	lottie_api: bytes=970 load=0 frame=0 total=60 size=64x64
+fixed	lottie_dup4_large	853622	0	lottie_api: bytes=1138562 load=0 frame=0 total=60 size=64x64

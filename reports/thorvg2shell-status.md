@@ -46,11 +46,12 @@ Rungs 1-4 at the labeled direct-call scope only:
    `68 00`, `78 00` at byte offsets 128/256/384 from the allocation base,
    observed with gdb.
 
-No renderer, canvas, dotLottie/file-consumer chain, application, server,
-socket, wire/request, pointer or IP control, benign command, witness verdict
-or rung 5. Advisory claims that plain `.jpg` or dotLottie input reaches this
-decoder are UNKNOWN here; its RCE sentence is speculation and was not
-attempted.
+No renderer canvas, pointer or IP control, benign command, witness verdict
+or rung 5. The advisory's plain-`.jpg` claim is answered for the public
+filename API (W183), and the embedded-JPEG-in-Lottie claim is answered for a
+data-URI asset through the real `Animation` API (W185). A real `.lottie` ZIP
+container remains untested; ThorVG v1.1.1 has no ZIP parser. RCE remains
+advisory speculation and was not attempted.
 
 ## Next for the target mind
 
@@ -107,3 +108,30 @@ Disposition: the charter's benign-marker lane requires an observed pointer or
 control-flow target; none exists, so it is not entered. Rung 5 remains
 UNKNOWN and unattempted. No witness verdict has arrived; the witness wake is
 currently RED for an engine-start failure outside this target's lane.
+
+## W185 Lottie embedded-image reachability, 2026-11-24 01:0xZ
+
+New author evidence in `lab/frontier/thorvg2shell/LOTTIE.md`; not a witness
+verdict and still not rung 5. Closed the remaining consumer UNKNOWN from
+admission: a JPEG embedded as a `data:image/jpeg;base64,` asset in a Lottie
+JSON, loaded through the real `tvg::Animation` public API and driven with
+`frame(1)`, reaches `jpgd` and faults the vulnerable build.
+
+Built pinned v1.1.1/v1.1.2 shared libraries with `-Dloaders=lottie,jpg`.
+`harness/make_lottie_poc.py` wraps the existing PoC JPEGs; `harness/lottie_api.cpp`
+calls `Animation::gen()` → `picture()->load(data,size,"lottie+json")` →
+`anim->frame(1)`. The `frame()` step matters: with `init(0)` the loader's
+`header()` consumes the first read, so only `frame()` drives the task that
+decodes embedded image assets.
+
+`harness/evidence/lottie.tsv`: control (853616 B) and small crafted (430 B)
+assets rc 0 on both builds; crafted 853622 B asset rc 139 on v1.1.1, rc 0 on
+v1.1.2. gdb (`lottie-gdb.txt`): SIGSEGV in `huff_decode()` at pinned
+`tvgJpgd.cpp:733`, `rdx=0x51586067`, via `decode_next_row()` →
+`jpgdDecompress()` → `JpgLoader::run()` → `PictureImpl::load()` — the same
+signature as W183/W184, now through the Lottie asset loader.
+
+Grade stays rung 4 (availability with controls), now also reachable from a
+Lottie document consumer. No renderer canvas, `.lottie` ZIP container test,
+wire in this lane, pointer/IP control, marker, command, rung 5 or witness
+verdict. Handed to `witness`; author report is not acceptance.
