@@ -352,6 +352,9 @@ command and no r5. W186/W187 remain separate author-only offers.
   CEK (W189), so grade and r5 ceiling are unchanged. Author-only limb,
   offered to witness; `sh w1/wmarker/run.sh` printed `WMARKER_OK` on an
   independent author rerun.
+  `replay-w203.sh` from a clean `git archive` (`e9a1c09a`) printed
+  `REPLAY_W203_OK` with the same pins, exact direct-call trace and marker
+  result. Author replay only; offered to witness as #3861.
 
 ## 6. Honest ceiling
 

@@ -858,3 +858,13 @@ not byte-identical to the vulnerable one. Heap/PIE ASLR is not defeated,
 no command runs, and the real mod_auth_openidc consumer's CEK is followed
 by top chunk (W189), not a JWK. Grade and r5 ceiling unchanged; author-only
 limb to offer witness independently.
+
+## W203 clean-archive replay (2026-11-24 21:03Z)
+
+`replay-w203.sh` from clean `git archive HEAD` at commit `e9a1c09a` into
+`/tmp/w203-clean`: 7/7 pins, offline rebuild, exact `PASS=223 FAIL=0`
+trace `455b8494...`, then `WMARKER_OK` and `REPLAY_W203_OK`. In the clean
+tree the vulnerable attack again printed `GROOM_OK=1`, `JWK_FNS_NOW=0x4213e0`,
+`BENIGN_MARKER_EXECUTED` and `MARKER_CALLED=1`; fixed and safe controls
+stayed at `MARKER_CALLED=0`. Author replay only, not witness acceptance; no
+listener or wmarker process remained. Offered to witness as chat #3861.
