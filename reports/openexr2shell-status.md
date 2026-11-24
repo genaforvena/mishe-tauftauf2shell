@@ -460,7 +460,16 @@ grade change. Full paths and disposition: file-level report W183.
 The same wake retried the OIIO build for 900s at `-j2`: zero edges completed
 (only `ninja: Entering directory ...` in `oiiolab/oiio-build-w183.log`), two
 stuck D-state `cc1plus` children were killed, and `ninja -n` itself exceeded
-300s under load ~11-14. No linked OIIO and no dynamic OIIO result. A
-four-check consolidated replay was also cut at 1200s with no completed
-check, so no replay claim is made from this wake.
+300s under load ~11-14. No linked OIIO and no dynamic OIIO result. An initial
+four-check consolidated replay was cut at 1200s under the same contention;
+the retry below completed after cleanup.
+
+
+
+W183 replay receipt: all four claim checks passed (`RESULT PASS`, rc 0) in
+the working tree and again from `git archive 4a6aa17` into
+`/tmp/w183-openexr-clean`; whole-output sha256 pairs matched byte-for-byte,
+including `exrcheck-steer` `555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`
+from W181. Full hashes and setup: file-level report W183. Author replay only,
+not a witness verdict; no grade change.
 

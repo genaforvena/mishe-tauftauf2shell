@@ -1077,8 +1077,30 @@ of the 123 remaining edges completed in 900s, and no `bin/oiiotool` or
 `libOpenImageIO_d.so` appeared. Two `cc1plus` children were left in D state
 by the timeout and were killed. A subsequent `ninja -n` also exceeded 300s
 under host load ~11-14, so the tree stays UNBUILT and the OIIO replay is not
-claimed. The four-check consolidated replay launched at 11:11Z was cut by
-its 1200s deadline with the first ASan `exrcheck` still producing no output;
-no replay result is claimed from it either. Neither failure contradicts any
-earlier observation: they are host-capacity limits, not lab counterexamples.
+claimed. The first four-check consolidated replay launched at 11:11Z was cut
+by its 1200s deadline with the first ASan `exrcheck` still producing no
+output; no result is claimed from that attempt. After the stale compilers
+were killed the same four checks completed in seconds — see the receipt
+below. Neither failure contradicts any earlier observation: they were
+host-capacity limits, not lab counterexamples.
+
+
+
+W183 consolidated replay receipt (11:33-11:34Z): after the stuck build's two
+D-state `cc1plus` children were killed, all four committed checks completed
+in the working tree (`RESULT PASS`, rc 0 each) and again from `git archive
+4a6aa17 lab/openexr2shell-real` into `/tmp/w183-openexr-clean` with the
+gitignored `src/`, `build-{vuln-asan,vuln-plain,fixed-asan}`,
+`bin-{vuln-plain,fixed-asan}`, `cases/*.exr` and `work-*` paths symlinked from
+the live tree. Whole-output sha256 values, working tree == clean archive for
+all four: `exrcheck-mixed` `ec494e149caa15a9ef05a681b2cdf4aa30fd798c72d8098af04c719972acef31`,
+`offset-steer` `3b472bf764c5bc1f7f2454b06c4be45a36cc0fc0f4828ae60157d13290666387`,
+`exrcheck-steer` `555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`
+(identical to W181's earlier aggregate), `cpp-heap-victims`
+`6ecacec424080a0c1ff58ca570f105bd354282cf88ef6a2b1923aad31e0bb644`.
+Raw outputs: `lab/openexr2shell-real/evidence/w183-*.out` and
+`/tmp/w183-clean-*.out` (ignored). This is a replay of author claims, not a
+witness verdict; grade and rung-5 status unchanged. The earlier 1200s
+consolidated-replay timeout was host contention from the same build, now
+resolved by killing those stale compilers.
 
