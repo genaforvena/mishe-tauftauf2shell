@@ -1,0 +1,23 @@
+render-vuln-2_8_3-render-attack rc=0
+  opened=1
+  alloc32768=1 buf=0x59a9fc224470 watch_byte=5a
+  sysexCount=1 buf=0x59a9fc224470 watch_byte=5a
+  rendered=4x64 buf=0x59a9fc224470 watch_byte=5a
+  parseSysexFragment: SysEx message lacks end-of-sysex (0xf7), ignored
+render-vuln-2_8_3-render-safe rc=0
+  opened=1
+  safe_input
+  sysexCount=2 buf=(nil) watch_byte=00
+  rendered=4x64 buf=(nil) watch_byte=00
+render-fixed-1749f7f-render-attack rc=0
+  opened=1
+  alloc32768=0 buf=(nil) watch_byte=00
+  sysexCount=1 buf=(nil) watch_byte=00
+  rendered=4x64 buf=(nil) watch_byte=00
+  parseSysexFragment: SysEx message lacks end-of-sysex (0xf7), ignored
+render-fixed-1749f7f-render-safe rc=0
+  opened=1
+  safe_input
+  sysexCount=2 buf=(nil) watch_byte=00
+  rendered=4x64 buf=(nil) watch_byte=00
+render-watch.out lines=18

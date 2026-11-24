@@ -850,3 +850,40 @@ UNKNOWN. The bytes read back at `buf+32784` come from the *second*, legitimate
 input, not from the 40001-byte overflow; the ROMs are synthetic test fixtures;
 and no real host, wire input, audio pipeline, pointer control or command is
 exercised. `MT32EMU_WITH_TESTING` is a build variant, not shipped config.
+
+## 24. No real-library readback of a chosen overflow byte (W185, 2026-11-24)
+
+W183/W184 found real consumers of the forged allocator header (libc stdio,
+then an in-library `pushSysex` copy), but in both cases the bytes seen
+afterwards were library-generated or came from a second legitimate input.
+This wake checks one bounded slice of the remaining gap: after the parser is
+reset, does any real library consumer read a byte chosen by the first,
+oversized input? Replay: `cd lab/frontier/munt2shell/real && ./render_probe.sh`;
+raw evidence in `real/evidence/render-results.txt`, the four
+`render-{vuln-2_8_3,fixed-1749f7f}-{render-attack,render-safe}.out` files and
+`render-watch.out`; method and limits in `real/RENDER_READBACK.md`.
+
+The new `render_driver.cpp` uses the same labelled W184 build variant
+(`MT32EMU_WITH_TESTING`, upstream synthetic `FakeROMs.cpp`, real opened
+`Synth`, real `DefaultMidiStreamParser`) and changes no parser source byte.
+It sends one shaped 40001-byte incomplete SysEx, then a legitimate 102-byte
+complete SysEx through the same parser, counted by a subclass that forwards to
+`DefaultMidiStreamParser::handleSysex`, then calls `Synth::render()` four
+times. GDB stops at the real `memcpy` with length 40001, arms a hardware
+watchpoint on the chosen `0x5a` byte at `dst+38000` (beyond the second input's
+102-byte copy at `dst+32784`), and only then releases the later input and
+render calls.
+
+Vulnerable `render-attack`: `rc=0`, one dispatched SysEx, watch byte `5a`
+unchanged after dispatch and render. Vulnerable `render-safe`: two dispatched
+SysExes and no buffer. Fixed `render-attack`/`render-safe`: no 32768-byte
+allocation, `rc=0`. `render-watch.out` shows `OBS armed_before_later_input`
+and no watchpoint hit before normal exit. The library's own
+`"parseSysexFragment: SysEx message lacks end-of-sysex"` debug text still
+appears, but it is library-generated, not a readback of the first input.
+
+Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
+UNKNOWN. One byte at one offset, one post-reset message sequence, four render
+calls, synthetic ROMs and a testing build variant: this does not rule out
+other offsets, message types, a real host or a different heap layout, and it
+adds no support to the claim that chosen overflow bytes reach a live consumer.

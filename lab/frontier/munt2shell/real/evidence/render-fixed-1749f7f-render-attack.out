@@ -1,0 +1,5 @@
+opened=1
+alloc32768=0 buf=(nil) watch_byte=00
+sysexCount=1 buf=(nil) watch_byte=00
+rendered=4x64 buf=(nil) watch_byte=00
+parseSysexFragment: SysEx message lacks end-of-sysex (0xf7), ignored

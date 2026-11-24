@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x73e0 (40 locations)
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+opened=1
+
+Breakpoint 1.42, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+OBS memcpy_dst=0x5555555e7470 src=0x5555555dd820 len=40001
+0x000055555555c80f in memcpy (__len=<optimized out>, __src=<optimized out>, __dest=<optimized out>) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:30
+30					 __glibc_objsize0 (__dest));
+OBS watch_addr=0x5555555f08e0 first_byte=5a
+Hardware watchpoint 2: -location *(unsigned char *)$oob
+OBS armed_before_later_input
+alloc32768=1 buf=0x5555555e7470 watch_byte=5a
+sysexCount=1 buf=0x5555555e7470 watch_byte=5a
+rendered=4x64 buf=0x5555555e7470 watch_byte=5a
+parseSysexFragment: SysEx message lacks end-of-sysex (0xf7), ignored
+[Inferior 1 (process 2771781) exited normally]

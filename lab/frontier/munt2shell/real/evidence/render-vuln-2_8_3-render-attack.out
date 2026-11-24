@@ -1,0 +1,5 @@
+opened=1
+alloc32768=1 buf=0x59a9fc224470 watch_byte=5a
+sysexCount=1 buf=0x59a9fc224470 watch_byte=5a
+rendered=4x64 buf=0x59a9fc224470 watch_byte=5a
+parseSysexFragment: SysEx message lacks end-of-sysex (0xf7), ignored
