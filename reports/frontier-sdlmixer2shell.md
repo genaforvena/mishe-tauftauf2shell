@@ -224,6 +224,23 @@ checksummed in `evidence/UPSTREAM.sha256`; commands and observed frames are in
 still author-observed rungs 1-4, unwitnessed: no request-facing consumer,
 pointer control or command.
 
+## 4f. Unmodified upstream CLI program (W183, 2026-11-24)
+
+The pinned tarball's own `test/testmixer.c` was compiled byte-unmodified in
+both trees; it takes a WAV filename on its command line and calls
+`MIX_LoadAudio` → `MIX_PlayTrack`. The only lab adaptation is a seven-line
+headless shim masking `SDL_INIT_VIDEO` (the lab SDL3 has no video backend).
+`sh lab/frontier/sdlmixer2shell/harness/realwav/testmixer-replay.sh`
+rebuilds and checks four cases, `PASS=6 FAIL=0` on two runs: vulnerable A-law
+and mu-law rc=1 with ASan `WRITE of size 4` at pinned `:759` via
+`FetchALaw:771`/`FetchULaw:766` → `WAV_decode:1668` → `DecodeMore:306` →
+`TrackGetCallback:381` on the audio thread, frame offset 1180 and
+`[32, 1056) 'buffer'`; vulnerable 8-byte A-law and fixed A-law rc=0, no ASan.
+Logs, rc files and `evidence/TESTMIXER.sha256` are in `REALWAV.md`. This moves
+file-path reachability from the lab driver to an unmodified upstream CLI
+program, but the grade stays rungs 1-4, author-observed and unwitnessed: no
+request-facing listener, pointer, marker or command.
+
 ## 5. Next distinct rung move
 
 File-path reachability, loopback-wire byte input and the LUT pointer image are
@@ -238,15 +255,17 @@ benign command with an observed side effect.
 ## 6. Honest ceiling
 
 Direct call, real-caller slice, a real SDL_mixer 3.2.4 build fed crafted WAVs,
-an unmodified third-party stereo A-law WAV (W182), and the W181 loopback-wire
-variant, all against the pinned vulnerable source with a 1024-byte stack
-buffer. The real-WAV lanes use real SDL_mixer public APIs, real `ParseFMT`, a
-real dummy audio device and real decoder/consumer callbacks; the crafted WAVs
-and the loopback listener are lab code, and the build uses SDL3 3.4.0 (the
-mixer's declared minimum) rather than the lab's older 3.2.4. Witness #2942
-and #3000 graded the two earlier harness scopes ESTABLISHED at rungs 1-4, NOT
-rung 5; the W180 on-disk claim (#3053), the W181 wire claim and the W182
-upstream-sample claim are author-observed and unwitnessed. There is no
+an unmodified third-party stereo A-law WAV (W182), an unmodified upstream CLI
+player taking the WAV path on its command line (W183), and the W181
+loopback-wire variant, all against the pinned vulnerable source with a
+1024-byte stack buffer. The real-WAV lanes use real SDL_mixer public APIs,
+real `ParseFMT`, a real dummy audio device and real decoder/consumer callbacks;
+the crafted WAVs, the loopback listener and the W183 headless shim are lab
+code, and the build uses SDL3 3.4.0 (the mixer's declared minimum) rather than
+the lab's older 3.2.4. Witness #2942 and #3000 graded the two earlier harness
+scopes ESTABLISHED at rungs 1-4, NOT rung 5; the W180 on-disk claim (#3053),
+the W181 wire claim, the W182 sample and W183 upstream-CLI claim are
+author-observed and unwitnessed (replay requests queued). There is no
 request-facing SDL_mixer listener, attacker-chosen pointer, instruction-pointer
 control, benign marker or command execution. Advisory RCE and network
 reachability beyond this loopback lab listener remain **UNKNOWN**. Rung 5 not

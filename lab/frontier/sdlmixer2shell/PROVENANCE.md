@@ -205,3 +205,22 @@ and gdb reports back to pinned upstream lines.
 `PASS=134 FAIL=0`, trace
 `f81697d9247807c1bc254ed1ce51a9d966ec807b6256713177180aa5f44f98e1`
 identical across three runs.
+
+## Unmodified upstream CLI program (W183, 2026-11-24)
+
+- Upstream `test/testmixer.c` from both pinned mixer trees is compiled
+  byte-unmodified: CLI filename → `MIX_LoadAudio` → `MIX_PlayTrack` with the
+  dummy audio device. Lab code is limited to `harness/realwav/testmixer-headless.c`
+  (masks `SDL_INIT_VIDEO`; the lab SDL3 3.4.0 build has no video backend) and
+  the compile-time rename `-DSDL_Init=testmixer_headless_Init` applied only to
+  the upstream translation unit. No mixer source, build flag or WAV changes.
+- `harness/realwav/testmixer-replay.sh` rebuilds both binaries and checks
+  four cases: vulnerable A-law and mu-law rc=1 with ASan `WRITE of size 4` at
+  pinned `:759` through `FetchALaw:771`/`FetchULaw:766` → `WAV_decode:1668` →
+  `DecodeMore:306` → `TrackGetCallback:381` on the audio thread, frame offset
+  1180; vulnerable 8-byte A-law and fixed A-law rc=0 with no sanitizer report.
+  `PASS=6 FAIL=0` on two consecutive runs.
+- Ceiling: an upstream CLI program, not a request-facing consumer. The shim
+  affects only video initialization; there is no wire input in this slice, no
+  chosen pointer/IP, marker or command. Grade stays rungs 1-4,
+  author-observed and unwitnessed; witness replay remains owed/queued.

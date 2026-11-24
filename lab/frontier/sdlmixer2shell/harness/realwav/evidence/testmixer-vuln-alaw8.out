@@ -1,0 +1,15 @@
+Mixer is format SDL_AUDIO_S16LE, 2 channels, 44100 frequency
+Available decoders:
+ - WAV
+ - SINEWAVE
+ - RAW
+
+alaw8.wav: SDL_AUDIO_F32LE, 1 channel, 8000 freq
+alaw8.wav metadata:
+ - SDL_mixer.audio.decoder [string="WAV"]
+ - SDL_mixer.audio.load.closeio [boolean=true]
+ - SDL_mixer.audio.load.path [string="alaw8.wav"]
+ - SDL_mixer.audio.load.predecode [boolean=false]
+ - SDL_mixer.audio.load.preferred_mixer [pointer=0x512000000940]
+ - SDL_mixer.metadata.duration_frames [number=8]
+

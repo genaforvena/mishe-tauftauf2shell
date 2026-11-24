@@ -375,3 +375,43 @@ same store on the audio thread via `DecodeMore:306`. Fixed decode reports
 not a lab-crafted WAV, but still no request-facing SDL_mixer consumer, pointer
 control or command: rungs 1-4 only, author-observed, unwitnessed. The sample
 and four logs are checksummed in `evidence/UPSTREAM.sha256`.
+
+## Unmodified upstream CLI program (W183, 2026-11-24)
+
+The pinned tarball's own `test/testmixer.c` is an upstream CLI player:
+`argv[1]` → `MIX_LoadAudio` → `MIX_PlayTrack`. Its source bytes are unchanged
+in both the vulnerable and fixed trees. The only lab adaptation is
+`testmixer-headless.c`, a seven-line shim that masks `SDL_INIT_VIDEO` because
+the committed SDL3 3.4.0 build has no video backend; the compile uses
+`-DSDL_Init=testmixer_headless_Init` on the upstream translation unit and
+links the separately compiled shim. SDL's own `SDL_MAIN_USE_CALLBACKS` header
+supplies the entry point. No SDL_mixer source, WAV or mixer build is changed.
+
+One-command replay from the checkout root:
+
+```sh
+sh lab/frontier/sdlmixer2shell/harness/realwav/testmixer-replay.sh
+cd lab/frontier/sdlmixer2shell/harness/realwav/evidence
+sha256sum -c TESTMIXER.sha256
+```
+
+The script rebuilds both binaries into `evidence/`, runs each case under
+`timeout 5s` with `SDL_AUDIO_DRIVER=dummy`, `MIX_DECODERS=3` and
+`ASAN_OPTIONS=detect_leaks=0:abort_on_error=0`, and checks return codes plus
+sanitizer markers. Observed twice: `PASS=6 FAIL=0` both times.
+
+| case | rc | observed |
+|---|---|---|
+| vulnerable ASan, `alaw256.wav` | 1 | `ERROR: AddressSanitizer: stack-buffer-overflow`, `WRITE of size 4` at pinned `:759` via `FetchALaw:771` → `WAV_decode:1668` → `DecodeMore:306` → `TrackGetCallback:381` on thread T1; frame offset 1180, `[32, 1056) 'buffer'` |
+| vulnerable ASan, `ulaw256.wav` | 1 | same store via `FetchULaw:766` |
+| vulnerable ASan, `alaw8.wav` | 0 | clean, `duration_frames=8` |
+| fixed ASan, `alaw256.wav` | 0 | clean, `duration_frames=256` |
+
+Logs and `.rc` files are `evidence/testmixer-{vuln-alaw256,vuln-ulaw256,vuln-alaw8,fixed-alaw256}.out|rc`;
+`evidence/TESTMIXER.sha256` covers the three WAV inputs and all eight logs/rc
+(11/11 OK). Raw ASan logs are unedited and carry ASan's own trailing
+whitespace. This extends file-path reachability from the lab driver to an
+unmodified upstream program taking a filename on its command line. It is
+still rungs 1-4, author-observed, unwitnessed: the shim only masks video
+initialization, and there is no request-facing SDL_mixer listener, chosen
+pointer, marker or command.
