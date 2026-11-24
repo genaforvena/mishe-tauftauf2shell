@@ -1,0 +1,7 @@
+  0.11 CLIENT kex done remote_version='SSH-2.0-cryptlib(SBBS)'
+  0.21 CLIENT service ssh-userauth accepted
+  0.21 CLIENT auth_none before channel -> accepted
+  0.21 CLIENT channel open chanid=0
+  0.21 CLIENT pty-req sent term_len=64
+  0.21 CLIENT shell request sent
+  8.22 CLIENT done

@@ -22,6 +22,7 @@ wire/ssh_server8_asan
 # Real-build provisioning: downloaded debs, extracted prefix and build logs.
 provision/debs/
 provision/local/
+provision/local-py/
 provision/*.log
 
 # W8 TERM-cap probe: generated from wire/ssh_server6.c at build time.

@@ -4,9 +4,10 @@ Status: **admitted 2026-11-24 as the 129th route; rungs 1–3 plus rung 4 at
 the labeled synthetic-struct scope, WITNESS-ESTABLISHED (CLAIM ESTABLISHED
 AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
 `sbbs_t::answer()` call scope and the advisory's node-exhaustion impact,
-author-measured in W5/W6 and replay still owed; W7 measures a
-default-config, no-credential negative at real `answer()`; NO r5.** Brief
-authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8 updates 2026-11-24.
+author-measured in W5/W6 and replay still owed; W7/W9 measure the
+no-credential negative at real `answer()` for stock and custom clients
+without `SSH_ANYAUTH`; NO r5.** Brief
+authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9 updates 2026-11-24.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -323,13 +324,61 @@ untouched, reproduced rc 0, 5 PASS / 0 FAIL, and all 13 evidence files
 byte-identical to the committed evidence. That is an author replay, not an
 independent verdict.
 
+## W9 custom-client pre-auth pty-req negative (2026-11-24, author-measured)
+
+W7 left one wording gap: a stock OpenSSH client sends pty-req only after
+authentication, so its no-`SSH_ANYAUTH` negative did not test a custom client
+that sends pty-req earlier. `bash
+lab/frontier/synchronet2shell/real-answer/noauth/run-preauth.sh` closes that
+gap on the same real `sbbs3` binary and verbatim `sbbs_t::answer()` copy
+probe. It drives a scripted paramiko 5.1.0 client (installed into the
+gitignored `provision/local-py`) over loopback only, with the pinned tree at
+parent `42f586d7` and the same 64-byte chosen TERM as W5/W6.
+
+The client sends `SSH_MSG_SERVICE_REQUEST` first, then `SSH_MSG_CHANNEL_OPEN`
+and a pty-req carrying the 64-byte TERM, with **no** authentication request.
+Two earlier client-side artefacts were observed and preserved rather than
+retried away: without a service request cryptlib answers `Invalid handshake
+packet SSH_MSG_CHANNEL_OPEN (90), expected SSH_MSG_SERVICE_REQUEST (5)`; with
+a service request but paramiko's RFC-shaped 24-byte channel-open it answers
+`Invalid length 24 for SSH_MSG_CHANNEL_OPEN (90) packet, should be
+26...16384`. The recorded run appends two bytes to that one channel-open
+packet so the parser reaches the state-machine check; the same accommodation
+is used in both configurations and is not part of the claim.
+
+On port 22228 without `SSH_ANYAUTH`, the server then logs `Invalid handshake
+packet SSH_MSG_CHANNEL_OPEN (90), expected SSH_MSG_USERAUTH_REQUEST (50)`
+while activating the session, the client reports `Unable to open channel`,
+and **zero** `REAL_ANSWER_PROBE` lines are logged: the pinned SSH auth-phase
+state machine refuses channel establishment until a userauth request arrives,
+so a pre-auth pty-req cannot set the terminal attribute on this build.
+Positive control on port 22229 with `SSH_ANYAUTH` and the ordinary none-auth
+request before channel-open reaches the copy with the same client and TERM:
+one `REAL_ANSWER_PROBE sizeof=41 l=64 off41=42 off44=4853494d
+off48=4f4f2d45 off52=TAUFTAUF`.
+
+This resolves W7's custom-client unknown as a **negative for this pinned
+build/config**: the only measured no-credential route to the copy remains
+the `none` authentication accepted under `SSH_ANYAUTH`. Other builds or
+configurations with valid credentials, and other attribute sources, stay
+UNKNOWN. No rung change and no rung 5 inference. Author evidence with a
+one-command replay, not a witness verdict.
+
+`run-preauth.sh` reports **9 PASS / 0 FAIL** with `PREAUTH_PROBE_COUNT=0`
+and `ANYAUTH_PROBE_COUNT=1`; transcripts are
+`real-answer/noauth/evidence-preauth/{server-noauth,server-anyauth,
+client-preauth,client-positive}.log`.
+
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent
-replay of W5/W6, and no-credential TERM reach at a config without
-`SSH_ANYAUTH` (W7 negative, not a refutation). The advisory's claimed
-thread-block/socket-exhaustion DoS is measured at real `answer()` scope in
-W6 with a fixed control. The 64-byte TERM and the no-size copy are measured
+replay of W5/W6/W8/W9. No-credential TERM reach at a config without
+`SSH_ANYAUTH` is now a measured negative for this pinned build (W7 stock
+client and W9 custom pre-auth client), not an open gap inside this build;
+other builds and configurations with valid credentials stay UNKNOWN.
+The advisory's claimed thread-block/socket-exhaustion DoS is measured at real
+`answer()` scope in W6 with a fixed control. The 64-byte TERM and the no-size copy are measured
 at the real cryptlib API, from a network pty-req through the real vendored
 cryptlib getter, inside a real `sbbs3` build's `sbbs_t::answer()` on
 loopback; W8 pins the 64-byte maximum to the vendored pty-req parser and

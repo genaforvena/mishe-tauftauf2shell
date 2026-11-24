@@ -1,0 +1,66 @@
+
+Synchronet Console for Linux-x64  Version 3.22a  Copyright 2026 Rob Swindell
+
+Reading /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl/sbbs.mesh-home.ini
+Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+!Started as non-root user (id 1000): May fail to bind TCP/UDP ports below 1024
+11/24 13:25:21 term Synchronet Terminal Server Version 3.22a Debug
+11/24 13:25:21 term Compiled HEAD/~42f586d7 Nov 24 2026 13:24 with GCC 13.3.0
+11/24 13:25:21 term sizeof: int=4, long=8, off_t=8, time_t=8
+11/24 13:25:21 term Initializing on Tue Nov 24 13:25:21 2026 with options: 20009a02
+11/24 13:25:21 term Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/24 13:25:21 term Verifying/creating data directories
+11/24 13:25:21 term Verifying/creating node directories
+11/24 13:25:21 term SSH Server listening on socket 127.0.0.1 port 22228
+11/24 13:25:21 term Terminal Server constructor using socket 3 (settings=0)
+11/24 13:25:21 term Terminal Server temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/temp/
+11/24 13:25:21 term Terminal Server output thread started
+11/24 13:25:21 term Terminal Server outbuf highwater mark tuned to 536 based on MSS
+11/24 13:25:21 term Node 1 local spy using socket localspy1.sock
+11/24 13:25:21 term Node 2 local spy using socket localspy2.sock
+11/24 13:25:21 term Node 3 local spy using socket localspy3.sock
+11/24 13:25:21 term Node 4 local spy using socket localspy4.sock
+11/24 13:25:21 term Terminal Server thread started for nodes 1 through 4
+11/24 13:25:21 term 0010 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22228 from port 39288
+11/24 13:25:21 term 0010 SSH Cryptlib Session: 6102 created
+11/24 13:25:21 term 0010 SSH [127.0.0.1] Attaching to Node 1
+11/24 13:25:21 term Node 1 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/24 13:25:21 term Node 1 constructor using socket 10 (settings=0)
+11/24 13:25:21 term Node 1 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node1/temp/
+11/24 13:25:21 term Node 1 End of preexisting log entry (possible crash on Tue Nov 24 2026 01:25 pm)
+11/24 13:25:21 term Node 1 passthru listen socket 13 opened
+11/24 13:25:21 term Node 1 passthru socket listening on port 35331
+11/24 13:25:21 term Node 1 passthru connect socket 14 opened
+11/24 13:25:21 term Node 1 passthru thread started
+11/24 13:25:21 term Node 1 input thread started
+11/24 13:25:21 term Node 1 output thread started
+11/24 13:25:21 term Node 1 outbuf highwater mark tuned to 20000 based on MSS
+11/24 13:25:21 term Node 1 thread started
+11/24 13:25:21 term Node 1 01:25p  Tue Nov 24 2026            Node   1
+11/24 13:25:21 term Node 1 SSH  <no name> [127.0.0.1]
+11/24 13:25:21 term Node 1 0010 SSH Setting attribute: SESSINFO_ACTIVE
+11/24 13:25:22 term Node 1 0010 SSH WARNING 'Invalid handshake packet SSH_MSG_CHANNEL_OPEN (90), expected SSH_MSG_USERAUTH_REQUEST (50)' (-32) setting session active
+11/24 13:25:22 term Node 1 0010 SSH [127.0.0.1] session establishment failed
+11/24 13:25:22 term Node 1 disconnecting client
+11/24 13:25:22 term Node 1 passthru socket disconnected
+11/24 13:25:22 term Node 1 output thread terminated
+11/24 13:25:22 term Node 1 passthru thread terminated
+11/24 13:25:22 term Node 1 Waiting for input thread to terminate...
+     Got signal (15)
+     Got quit signal (15)
+11/24 13:25:22 term BBS Server terminate
+[Threads: 6  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:22 term Node 1 input thread terminated (received 0 bytes in 0 blocks)
+[Threads: 6  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 5  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:22 term Node 1 thread terminated (0 node threads remain, 1 clients served)
+[Threads: 5  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:22 term Node 1 destructor begin
+[Threads: 5  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:22 term Node 1 destructor end
+[Threads: 5  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 4  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term Terminal Server output thread terminated
+[Threads: 4  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 3  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term 0003 SSH Server closing socket 127.0.0.1 port 22228
+[Threads: 3  Sockets: 1  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term 0006 Spy Socket closing socket localspy1.sock port 0
+[Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term 0007 Spy Socket closing socket localspy2.sock port 0
+[Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term 0008 Spy Socket closing socket localspy3.sock port 0
+[Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term 0009 Spy Socket closing socket localspy4.sock port 0
+[Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term Terminal Server destructor begin
+[Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term Terminal Server destructor end
+[Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term Terminal Server thread terminating
+[Threads: 3  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           [Threads: 2  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating...                                                                           11/24 13:25:23 term Terminal Server thread terminated (1 clients served)
+[Threads: 2  Sockets: 0  Clients: 0  Served: 1  Errors: 0] Terminating... 
