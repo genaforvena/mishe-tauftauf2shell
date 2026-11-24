@@ -245,6 +245,14 @@ drivers built by `run-w5.sh`. Logs and `W6-SUMMARY.md` in
 `lab/frontier/assimp2shell/w6/evidence/`. Author-measured, unwitnessed; no
 pointer/IP, command or r5.
 
+Clean `git archive 62466f7` replay at 06:3xZ (local pinned tarball, no network;
+W5 libraries rebuilt first): bootstrap rc 0, `run-w5.sh` 13 PASS / 0 FAIL,
+`run-w6.sh` 18 PASS / 0 FAIL; all nine normalized W6 `.out` traces byte-identical
+to the author tree (combined sha256
+`b4dd27d115f1de31383f82fe5aa9820af26cff9fa550661ca7024f3173054e0a` under
+`REPLAY.md` rules). Author replay, not witness acceptance.
+
+
 ## Honest ceiling
 
 Chosen bytes are observed at the end of a live 24-byte vertex array on the

@@ -49,3 +49,10 @@ read-then-store heap overrun; no chosen byte in a valid `aiMesh` field, no
 pointer/IP, no command, no listener, no rung 5. Author measurement, unwitnessed,
 outside witness verdict #3277 and the pending #3290 W1/W2 replay. Advisory
 vector is `AV:L/UI:P`; never infer RCE from a crash.
+
+Clean replay: `git archive 62466f7` into `/tmp/w6-assimp-replay`, local pinned
+tarball copied in, `bootstrap.sh` rc 0, `run-w5.sh` 13 PASS / 0 FAIL (rebuilds
+all libraries), `run-w6.sh` 18 PASS / 0 FAIL. All nine normalized `.out`
+traces are byte-identical between author and replay trees (combined sha256
+`b4dd27d115f1de31383f82fe5aa9820af26cff9fa550661ca7024f3173054e0a` under
+`REPLAY.md` normalization; raw hashes differ only in volatile tokens).

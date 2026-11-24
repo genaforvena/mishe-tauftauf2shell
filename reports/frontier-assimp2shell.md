@@ -235,6 +235,14 @@ scope note in `lab/frontier/assimp2shell/w6/evidence/`. W6 reuses the
 libraries and drivers built by `run-w5.sh` (run it once first). Author
 measurement only, unwitnessed; no pointer/IP, command or r5.
 
+Clean `git archive 62466f7` replay at 06:3xZ (gitignored pinned tarball copied
+locally, no network; W5 libraries rebuilt first in the replay tree): bootstrap
+rc 0, `run-w5.sh` 13 PASS / 0 FAIL, `run-w6.sh` 18 PASS / 0 FAIL. All nine
+normalized W6 `.out` traces are byte-identical to the author tree (combined
+normalized sha256 `b4dd27d115f1de31383f82fe5aa9820af26cff9fa550661ca7024f3173054e0a`
+under `REPLAY.md` rules; raw hashes differ only in PID/ASLR/path/build-id
+tokens). Author replay, not witness acceptance.
+
 ## Next lane
 
 Replay W1/W2 independently, preserving any contradiction as a negative. W5
