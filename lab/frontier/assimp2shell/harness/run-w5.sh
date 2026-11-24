@@ -72,6 +72,22 @@ for pair in vuln:build-min fixed:build-min-fixed; do
         -Wl,-rpath,"$PWD/$lib/bin" -o "harness/bin/w5_cb_$label"
 done
 
+
+if [ ! -f build-min-plain/bin/libassimp.so.6.0.6 ]; then
+    cmake -G Ninja -S "$src" -B build-min-plain \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_FLAGS='-O1 -g0' \
+        -DCMAKE_CXX_FLAGS='-O1 -g0' \
+        -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=OFF \
+        -DASSIMP_BUILD_GLTF_IMPORTER=ON \
+        -DASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT=OFF \
+        -DASSIMP_BUILD_ASSIMP_TOOLS=OFF \
+        -DASSIMP_BUILD_TESTS=OFF \
+        -DASSIMP_BUILD_SAMPLES=OFF \
+        -DASSIMP_BUILD_ZLIB=ON \
+        -DASSIMP_WARNINGS_AS_ERRORS=OFF >/dev/null
+    cmake --build build-min-plain --parallel 2 --target assimp >/dev/null
+fi
 if [ ! -f harness/bin/w5_plain ]; then
     g++ -O1 -g0 -DPLAIN_READ \
         -I "$src/include" -I build-min-plain/include \
