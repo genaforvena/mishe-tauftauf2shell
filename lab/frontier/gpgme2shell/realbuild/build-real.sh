@@ -52,10 +52,16 @@ BASE="--enable-static --disable-shared --with-libgpg-error-prefix=$PREFIX --with
 [ -d err-build ] || mkdir err-build
 [ -f err-build/Makefile ] || (cd err-build && CFLAGS="$CF" LDFLAGS="$LF" ../libgpg-error-1.50/configure \
   --prefix="$PREFIX" --enable-static --disable-shared CC=clang)
+ASAN_OPTIONS=detect_leaks=0 make -C err-build -j2 >/dev/null 2>&1
+ASAN_OPTIONS=detect_leaks=0 make -C err-build install >/dev/null 2>&1
+
 [ -d assuan-build ] || mkdir assuan-build
 [ -f assuan-build/Makefile ] || (cd assuan-build && CFLAGS="$CF" LDFLAGS="$LF" ../libassuan-2.5.7/configure \
   --prefix="$PREFIX" --enable-static --disable-shared --with-libgpg-error-prefix="$PREFIX" \
   CC=clang)
+ASAN_OPTIONS=detect_leaks=0 make -C assuan-build -j2 >/dev/null 2>&1
+ASAN_OPTIONS=detect_leaks=0 make -C assuan-build install >/dev/null 2>&1
+
 for pair in gpgme-asan-build:gpgme-2.2.0 gpgme-fixed-build:gpgme-fixed gpgme-231-build:gpgme-2.3.1; do
   build=${pair%%:*}; tree=${pair##*:}
   [ -d "$build" ] || mkdir "$build"
@@ -63,13 +69,6 @@ for pair in gpgme-asan-build:gpgme-2.2.0 gpgme-fixed-build:gpgme-fixed gpgme-231
     (cd "$build" && PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" CFLAGS="$CF" LDFLAGS="$LF" ../"$tree"/configure \
       --prefix="$PREFIX" $BASE CC=clang)
   fi
-done
-
-ASAN_OPTIONS=detect_leaks=0 make -C err-build -j2 >/dev/null 2>&1
-ASAN_OPTIONS=detect_leaks=0 make -C err-build install >/dev/null 2>&1
-ASAN_OPTIONS=detect_leaks=0 make -C assuan-build -j2 >/dev/null 2>&1
-ASAN_OPTIONS=detect_leaks=0 make -C assuan-build install >/dev/null 2>&1
-for build in gpgme-asan-build gpgme-fixed-build gpgme-231-build; do
   # The tests directory fails to link under this static ASan setup; the
   # static library is complete before that point.
   ASAN_OPTIONS=detect_leaks=0 make -C "$build" -j2 >"$build/build.log" 2>&1 || true
