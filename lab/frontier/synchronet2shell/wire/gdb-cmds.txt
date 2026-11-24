@@ -1,0 +1,10 @@
+set pagination off
+break getChannelAttributeS
+commands
+silent
+set $cbuf = (int *)malloc(4)
+call (int)getChannelAttribute($rdi, 6024, $cbuf)
+printf "GET attr=%d len=%d cid=%d readNo=%ld\n", $esi, $ecx, *$cbuf, (long)getCurrentChannelNo($rdi, 1)
+continue
+end
+run

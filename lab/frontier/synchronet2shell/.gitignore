@@ -9,3 +9,12 @@ wire/ssh_client
 wire/keyprobe
 wire/hostkey
 wire/hostkey.pub
+wire/ssh_server2
+wire/ssh_server3
+wire/ssh_server4
+wire/ssh_server5
+wire/ssh_server6
+wire/ssh_server7
+wire/ssh_server8
+wire/ssh_server7_asan
+wire/ssh_server8_asan

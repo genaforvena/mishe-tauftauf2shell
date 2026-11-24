@@ -1,0 +1,21 @@
+create key=0
+key label=0
+key size=0
+generate=0
+create server=0
+bind name=0
+bind port=0
+set key=0
+none-auth option=0
+read timeout=0
+ACTIVE attempt=0 status=0
+CHANNEL poll i=0 status=0 cid=1
+CHANNEL early select status=0
+POP status=-25 bytes=0
+READER TERM status=-43 len=-1 data=
+CHANNEL TYPE final waits=50 status=-43
+TERM sweep pass=20 cid=-1 status=-43 len=0
+COPY status=-43 len=-1
+offsets: terminal=0 line_delay=44 console=48 wordwrap=52
+line_delay=0x00000000 console=0x00000000 wordwrap[0..7]=''
+tail[40..63]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

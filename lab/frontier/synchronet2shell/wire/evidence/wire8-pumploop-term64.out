@@ -1,0 +1,37 @@
+create key=0
+key label=0
+key size=0
+generate=0
+create server=0
+bind name=0
+bind port=0
+set key=0
+none-auth option=0
+read timeout=0
+ACTIVE attempt=0 status=0
+CHANNEL poll i=0 status=0 cid=1
+CHANNEL early select status=0
+PUMP i=0 status=-25 bytes=0 term=-43 len=-1
+PUMP i=1 status=-25 bytes=0 term=-43 len=-1
+PUMP i=2 status=-25 bytes=0 term=-43 len=-1
+PUMP i=3 status=-25 bytes=0 term=-43 len=-1
+PUMP i=4 status=-25 bytes=0 term=-43 len=-1
+PUMP i=5 status=-25 bytes=0 term=-43 len=-1
+PUMP i=6 status=-25 bytes=0 term=-43 len=-1
+PUMP i=7 status=-25 bytes=0 term=-43 len=-1
+PUMP i=8 status=-25 bytes=0 term=-43 len=-1
+PUMP i=9 status=-25 bytes=0 term=-43 len=-1
+PUMP i=10 status=-25 bytes=0 term=-43 len=-1
+PUMP i=11 status=-25 bytes=0 term=-43 len=-1
+EARLY TERM status=-43 len=-1 data=
+TYPE sel=-43 waits=0
+TYPE sel=-43 waits=49
+CHANNEL TYPE final waits=50 status=0
+SWEEP cand=0 sel=-3
+SWEEP cand=1 sel=-43
+SWEEP cand=2 sel=-43
+TERM sweep pass=20 cid=-1 status=0 len=0
+COPY status=-43 len=-1
+offsets: terminal=0 line_delay=44 console=48 wordwrap=52
+line_delay=0x00000000 console=0x00000000 wordwrap[0..7]=''
+tail[40..63]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

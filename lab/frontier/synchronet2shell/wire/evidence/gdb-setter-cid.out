@@ -1,0 +1,35 @@
+Breakpoint 1 at 0x459f0
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff7bff6c0 (LWP 3752539)]
+[Thread 0x7ffff7bff6c0 (LWP 3752539) exited]
+[New Thread 0x7ffff73fe6c0 (LWP 3752543)]
+create key=0
+key label=0
+key size=0
+generate=0
+create server=0
+bind name=0
+bind port=0
+set key=0
+none-auth option=0
+read timeout=0
+ACTIVE attempt=0 status=0
+[Thread 0x7ffff73fe6c0 (LWP 3752543) exited]
+[New Thread 0x7ffff6bfd6c0 (LWP 3752701)]
+[Switching to Thread 0x7ffff6bfd6c0 (LWP 3752701)]
+$1 = 0
+SET attr=6038 len=64 cid=1 readNo=0 data=TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+$2 = 0
+SET attr=6025 len=5 cid=1 readNo=0 data=shell
+CHANNEL poll i=1 status=0 cid=1
+CHANNEL early select status=0
+POP status=-25 bytes=0
+[Thread 0x7ffff6bfd6c0 (LWP 3752701) exited]
+CHANNEL TYPE final waits=50 status=-43
+TERM sweep pass=20 cid=-1 status=-43 len=0
+COPY status=-43 len=-1
+offsets: terminal=0 line_delay=44 console=48 wordwrap=52
+line_delay=0x00000000 console=0x00000000 wordwrap[0..7]=''
+tail[40..63]: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+[Inferior 1 (process 3752535) exited normally]

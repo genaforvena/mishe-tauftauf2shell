@@ -1,0 +1,90 @@
+create key=0
+key label=0
+key size=0
+generate=0
+create server=0
+bind name=0
+bind port=0
+set key=0
+none-auth option=0
+read timeout=0
+ACTIVE attempt=0 status=0
+CHANNEL poll i=0 status=0 cid=1
+CHANNEL early select status=0
+POP status=0 bytes=2
+READER SWEEP cand=1 term=0 len=64 data=TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+READER TERM status=0 len=64 data=TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+READER COPY status=0 len=64
+offsets: terminal=0 line_delay=44 console=48 wordwrap=52
+line_delay=0x54545454 console=0x54545454 wordwrap[0..7]='TTTTTTTT'
+tail[40..63]: 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54 54
+=================================================================
+==3807670==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x70a995bfd099 at pc 0x70a99a6fb303 bp 0x70a9967fb840 sp 0x70a9967fafe8
+WRITE of size 64 at 0x70a995bfd099 thread T3
+    #0 0x70a99a6fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5b4826c36e0a in attributeCopyParams (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7_asan+0x1fe0a) (BuildId: 4ef94dd9a2408eb8e677f411027f0be25776b75e)
+    #2 0x5b4826c5a34b in getAttributeFunction (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7_asan+0x4334b) (BuildId: 4ef94dd9a2408eb8e677f411027f0be25776b75e)
+    #3 0x5b4826c35542 in sessionMessageFunction (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7_asan+0x1e542) (BuildId: 4ef94dd9a2408eb8e677f411027f0be25776b75e)
+    #4 0x5b4826cad14f in dispatchMessage (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7_asan+0x9614f) (BuildId: 4ef94dd9a2408eb8e677f411027f0be25776b75e)
+    #5 0x5b4826cae5d4 in krnlSendMessage (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7_asan+0x975d4) (BuildId: 4ef94dd9a2408eb8e677f411027f0be25776b75e)
+    #6 0x5b4826c31ffb in cryptGetAttributeString (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7_asan+0x1affb) (BuildId: 4ef94dd9a2408eb8e677f411027f0be25776b75e)
+    #7 0x5b4826c2fe99 in reader_thread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7.c:124
+    #8 0x70a99a65ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #9 0x70a99a29cb63 in start_thread nptl/pthread_create.c:447
+    #10 0x70a99a329e8b in clone3 ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Address 0x70a995bfd099 is located in stack of thread T3 at offset 153 in frame
+    #0 0x5b4826c2f6ac in reader_thread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7.c:63
+
+  This frame has 9 object(s):
+    [32, 36) 'bytes' (line 65)
+    [48, 52) 'cl' (line 74)
+    [64, 68) 'plen' (line 89)
+    [80, 84) 'clen' (line 96)
+    [96, 100) 'rl' (line 122)
+    [112, 153) 'redzone' (line 121)
+    [192, 320) 'cb' (line 73) <== Memory access at offset 153 partially underflows this variable
+    [352, 480) 'probe' (line 88)
+    [512, 4608) 'buf' (line 64)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+Thread T3 created by T0 here:
+    #0 0x70a99a6f51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x5b4826c306d9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7.c:189
+    #2 0x70a99a22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x70a99a22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x5b4826c2f204 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/wire/ssh_server7_asan+0x18204) (BuildId: 4ef94dd9a2408eb8e677f411027f0be25776b75e)
+
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x70a995bfce00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70a995bfce80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70a995bfcf00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70a995bfcf80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70a995bfd000: f1 f1 f1 f1 04 f2 f8 f2 04 f2 04 f2 04 f2 00 00
+=>0x70a995bfd080: 00 00 00[01]f2 f2 f2 f2 f8 f8 f8 f8 f8 f8 f8 f8
+  0x70a995bfd100: f8 f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 00 00 00 00
+  0x70a995bfd180: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+  0x70a995bfd200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70a995bfd280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x70a995bfd300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3807670==ABORTING

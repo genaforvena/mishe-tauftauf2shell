@@ -92,33 +92,55 @@ synchronet2shell/real-cryptlib-build.log`, rc=0). New probes in
   three zero. The query returns `len=64` and the one-call copy returns
   `len=64`, i.e. the caller's 41-byte array size is never consulted.
 
-These are direct API measurements, not a wire result. The loopback wire lane
-under `wire/` was advanced in W2 and remains a **negative**. A minimal cryptlib
-SSH server now performs the same steps as pinned `answer.cpp`: it sequences
-`ACTIVE`/`AUTHRESPONSE` (lines 297–310), selects the negotiated channel (lines
-399–406) and waits for channel type. OpenSSH 9.6 authenticates with `none`,
-opens channel 0 and sends pty-req plus shell; its verbose trace records
-`PTY allocation request accepted on channel 0` and `shell request accepted`.
-The server still reads `CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL` as `-43`
-(`CRYPT_ERROR_NOTFOUND`) for every selected channel ID 0–7, so the one-call
-getter copies nothing and all adjacent-field bytes stay zero. Moving the
-reader thread start after channel selection did not change that. Cause is
-unresolved inside the minimal probe: cryptlib's `REQUEST_PTY` handler calls
-`setChannelAttributeS` on the channel current at message-processing time and
-ignores its status. The 64-byte cap and chosen-byte offsets are therefore
-**not** measured from a network pty-req. Negatives are preserved in
+These are direct API measurements, not a wire result. The first W2 wire
+probe (9 PASS harness plus a minimal cryptlib server) accepted the pty-req
+but read `CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL` as `-43`
+(`CRYPT_ERROR_NOTFOUND`); those negatives are preserved in
 `wire/evidence/` (`wire-term-64*.out`, `wire-verbose-{client,server}.out`,
-`clclient-repaired-64.out`); no wire reach, DoS or rung 5 is claimed.
+`clclient-repaired-64.out`). W3 found and repaired the cause of that negative;
+the next section supersedes it. No W2 negative was erased.
+
+## Real wire path (2026-11-24 W3, author-measured, unwitnessed)
+
+The W2 failure was a probe artefact, not a property of the wire. Under gdb,
+the pty-req handler does store the network TERM on channel 1:
+`SET attr=6038 len=64 cid=1 data=TTTT…` (`gdb-setter-cid.out`). The probe's
+reader thread blocked in `cryptPopData`; a read timeout left the current read
+channel deselected (`GET attr=6038 cid=0 readNo=-1`, `gdb-getter-cid.out`)
+and the main thread's channel selects then failed `-25 TIMEOUT` followed by
+`-43 NOTFOUND`. Holding the channel open (`wire-held-term64.out`) did not
+help; feeding live client data so `cryptPopData` returns bytes instead of
+timing out does. With that one change, a loopback OpenSSH 9.6 client's
+64-byte TERM is read back by the vendored cryptlib getter with
+`status=0 len=64`, and the pinned one-call copy into the 41-byte field
+places chosen `0x54` bytes at `line_delay` (offset 44), `console` (48) and
+`wordwrap[0..7]` (52): `wire13-datastream-term64.out`.
+
+The same wire path compiled with ASan reports
+`stack-buffer-overflow ... WRITE of size 64` in `memcpy` reached through
+`attributeCopyParams -> getAttributeFunction -> sessionMessageFunction` from
+the network-serving reader thread (`wire15-asan-term64.out`). A 40-byte TERM
+leaves offsets 44..63 zero (`wire14-datastream-term40.out`), and the
+`cb6d77dbca` fixed-form copy (length query then bounded copy) leaves byte 40
+zero with no ASan report (`wire16-asan-fixed-term64.out`). One-command replay
+`bash lab/frontier/synchronet2shell/wire/run-wire-proof.sh` gives
+10 PASS / 0 FAIL; raw transcripts are `wire/evidence/proof-*.out`.
+
+This closes the network pty-req gap at the real cryptlib API and the pinned
+field layout. It is still not a real `sbbs3` build or a call into real
+`sbbs_t::answer()`: the probe copies the pinned one-call statement itself.
+No measured DoS, pointer/IP control, command, witness verdict or rung 5.
 
 ## Ceiling and cheapest next experiment
 
-Not measured: a real Synchronet `sbbs3` build, a real `sbbs_t` object, a
-successful SSH channel-request TERM wire, the claimed thread-block/DoS, any
+Not measured: a real Synchronet `sbbs3` build, a real `sbbs_t` object, an
+instrumented call to real `answer()`, the claimed thread-block/DoS, any
 pointer/IP control, command execution, witness replay, or rung 5. The 64-byte
-TERM and the no-size copy are now measured at the real cryptlib API by direct
-set (see previous section), but not yet from a network pty-req. No claim that
-the adjacent-field overwrite yields code execution: the advisory's own impact
-vector is availability-only (`VC:N/VI:N`).
+TERM and the no-size copy are now measured both at the real cryptlib API by
+direct set and from a network pty-req through the real vendored cryptlib
+getter (previous section). No claim that the adjacent-field overwrite yields
+code execution: the advisory's own impact vector is availability-only
+(`VC:N/VI:N`).
 
 `gdb.txt` (sha256 `968fa2093607c70425343fe569fe91ee7bc467d7077dc52ff4914cd24691f128`)
 is a batch gdb transcript of the same plain vulnerable binary at the statement
@@ -131,12 +153,10 @@ offsets 44..47, `45 2d 4f 4f` at 48..51 and `54 41 55 46` twice at 52..59.
 hashes differ only in PIDs, ASLR addresses, timestamps, checkout paths and
 build ids. Author replay is not witness acceptance.
 
-Next rung-raising step: build `sbbs3` from the already provisioned pinned tree
-against its vendored cryptlib (missing host dev packages: libarchive-dev and
-libnspr4-dev) and drive a loopback SSH client with an oversized TERM; stop at
-the first measured layer and keep every negative. The direct-API differential
-is measured with the real library; the open gap is the network pty-req reaching
-`answer()`'s getter. W2 showed that a minimal cryptlib server accepts the
-pty-req but never exposes the TERM attribute, so the next experiment should use
-the real `sbbs3` SSH path rather than another standalone server. Witness replay
-is still owed; the stand-alone wire probe is not a substitute for it.
+Next rung-raising step: replay the wire proof independently (witness replay
+is still owed), then, only if that holds, build `sbbs3` from the already
+provisioned pinned tree against its vendored cryptlib and drive the same
+oversized TERM through real `answer()`; the host lacks `libarchive-dev` and
+`libnspr4-dev` headers, so that build needs local provisioning rather than a
+host package change. Stop at the first measured layer and keep every negative.
+The stand-alone wire probe is author evidence, not witness acceptance.
