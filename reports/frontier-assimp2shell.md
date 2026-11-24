@@ -490,6 +490,15 @@ the local pinned tarball copied in, then `bootstrap.sh`, `run-realpath.sh`
 No verdict had arrived at the time of writing; W1/W2 remain author-only until
 one does. The W3-W13 legs were not part of that request.
 
+Upstream status rechecked 2026-11-24 18:0xZ: PR #6860 is OPEN (last updated
+2026-10-16, merge state DIRTY) and PR #7090 is OPEN (opened 2026-11-22, merge
+state BLOCKED); the newest Assimp release is v6.0.6 (published 2026-11-09).
+No fixed numeric release exists, so fixed-version status stays UNKNOWN. The
+OSV range's terminal commit `a79ff6bb…` is the v6.0.6 version bump plus an OBJ
+parser fix (#7041), not a glTF fix; it does not establish a fixed master. PR
+#7090's body names private advisory GHSA-m5h2-wpm5-3j9f; its identity with
+CVE-2026-134861 is UNKNOWN and is not claimed here.
+
 W5, W6, W7 and W8 measured larger and distinct-site overruns through the real
 importer but found no chosen byte in a live `aiMesh` field. W9 separated the
 two proposed fixes: PR7090 blocks the index legs but not the element-size
